@@ -176,24 +176,24 @@ const getInfoNoticesFromCartUpdates = (
 		cartItemsPendingDelete: pendingDelete = [],
 	} = quantityChanges;
 
-	const autoDeletedToNotify = oldItems.filter(
-		( old ) =>
-			old.key &&
-			isCartItem( old ) &&
-			! newItems.some( ( item ) => old.key === item.key ) &&
-			! pendingDelete.includes( old.key )
-	);
+    const autoDeletedToNotify = oldItems.filter(
+        ( old ) =>
+            old.key &&
+            isCartItem( old ) &&
+            ! newItems.some( ( item ) => old.key === item.key )
+    );
 
-	const autoUpdatedToNotify = newItems.filter( ( item ) => {
-		if ( ! isCartItem( item ) ) {
-			return false;
-		}
-		const old = oldItems.find( ( o ) => o.key === item.key );
-		return old
-			? ! pendingQuantity.includes( item.key ) &&
-					item.quantity !== old.quantity
-			: ! pendingAdd.includes( item.id );
-	} );
+    const autoUpdatedToNotify = newItems.filter( ( item ) => {
+        if ( ! isCartItem( item ) ) {
+            return false;
+        }
+        const old = oldItems.find( ( o ) => o.key === item.key );
+        return old
+            ? ! pendingQuantity.includes( item.key ) &&
+                    item.quantity !== old.quantity &&
+                    old.quantity > 0
+            : false;
+    } );
 	return [
 		...autoDeletedToNotify.map( ( item ) =>
 			// TODO: move the message template to iAPI config.
@@ -329,58 +329,76 @@ const { state, actions } = store< Store >(
 	'woocommerce',
 	{
 		actions: {
-			*removeCartItem( key: string ) {
-				// Track what changes we're making for notice comparison.
-				const quantityChanges: QuantityChanges = {
-					cartItemsPendingDelete: [ key ],
-				};
+            *removeCartItem( key: string ) {
+                // Find the item to be removed
+                const itemToRemove = state.cart.items.find(
+                    ( item ) => item.key === key
+                );
 
-				// Capture cart state after optimistic updates for notice comparison.
-				let cartAfterOptimistic: typeof state.cart | null = null;
+                // FIX 1: Evaluate state BEFORE server request
+                // If there is 1 item in the cart, this is the last one.
+                const isLastItem = state.cart.items.length === 1;
 
-				try {
-					const result = yield sendCartRequest( state, {
-						path: '/wc/store/v1/cart/remove-item',
-						method: 'POST',
-						body: { key },
-						applyOptimistic: () => {
-							state.cart.items = state.cart.items.filter(
-								( item ) => item.key !== key
-							);
-							// Capture state after optimistic update.
-							cartAfterOptimistic = JSON.parse(
-								JSON.stringify( state.cart )
-							);
-						},
-						// Side effects run synchronously during reconciliation,
-						// before isProcessing clears. This prevents
-						// refreshCartItems from running during these events.
-						onSettled: ( { success } ) => {
-							if ( success ) {
-								emitSyncEvent( { quantityChanges } );
-							}
-						},
-					} );
+                // FIX 2: Instant notice handling (before waiting for server response)
+                if ( isLastItem ) {
+                    // Removing the last item:
+                    // 1. Do not show "Removed" banner.
+                    // 2. CLEAR ALL old notices (true) instantly to prevent race conditions.
+                    yield actions.updateNotices( [], true );
+                } else if ( itemToRemove && itemToRemove.name ) {
+                    // Removing a non-last item:
+                    // 1. Show "Removed" banner INSTANTLY.
+                    // 2. Do not delete old notices (false) to see list on rapid deletions.
+                    const message = '"%s" was removed from your cart.'.replace(
+                        '%s',
+                        itemToRemove.name
+                    );
+                    yield actions.updateNotices( [ generateInfoNotice( message ) ], false );
+                }
 
-					// Show notices from server response.
-					const cart = result.data as Cart;
-					if ( cart && cartAfterOptimistic ) {
-						const infoNotices = getInfoNoticesFromCartUpdates(
-							cartAfterOptimistic,
-							cart,
-							quantityChanges
-						);
-						const errorNotices =
-							cart.errors.map( generateErrorNotice );
-						yield actions.updateNotices(
-							[ ...infoNotices, ...errorNotices ],
-							true
-						);
-					}
-				} catch ( error ) {
-					actions.showNoticeError( error as Error );
-				}
-			},
+                const quantityChanges: QuantityChanges = {
+                    cartItemsPendingDelete: [ key ],
+                };
+
+                // Capture cart state after optimistic updates for notice comparison (retained for consistency, though not used for info notices anymore).
+                let cartAfterOptimistic: typeof state.cart | null = null;
+
+                try {
+                    const result = yield sendCartRequest( state, {
+                        path: '/wc/store/v1/cart/remove-item',
+                        method: 'POST',
+                        body: { key },
+                        applyOptimistic: () => {
+                            state.cart.items = state.cart.items.filter(
+                                ( item ) => item.key !== key
+                            );
+                            cartAfterOptimistic = JSON.parse(
+                                JSON.stringify( state.cart )
+                            );
+                        },
+                        // Side effects run synchronously during reconciliation,
+                        // before isProcessing clears. This prevents
+                        // refreshCartItems from running during these events.
+                        onSettled: ( { success } ) => {
+                            if ( success ) {
+                                emitSyncEvent( { quantityChanges } );
+                            }
+                        },
+                    } );
+
+                    // After server response, handle only errors
+                    const cart = result.data as Cart;
+                    if ( cart ) {
+                        const errorNotices =
+                            cart.errors.map( generateErrorNotice );
+                        if ( errorNotices.length > 0 ) {
+                            yield actions.updateNotices( errorNotices, false );
+                        }
+                    }
+                } catch ( error ) {
+                    actions.showNoticeError( error as Error );
+                }
+            },
 
 			*addCartItem(
 				{
