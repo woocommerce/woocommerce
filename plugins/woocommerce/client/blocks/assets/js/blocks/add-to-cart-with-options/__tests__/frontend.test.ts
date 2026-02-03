@@ -9,8 +9,14 @@ import type { ProductsStoreState } from '@woocommerce/stores/woocommerce/product
 import type { NormalizedProductData } from '../types';
 
 let mockProductsState: {
-	products: Record< number, Partial< ProductsStoreState[ 'products' ][ number ] > >;
-	productVariations: Record< number, Partial< ProductsStoreState[ 'productVariations' ][ number ] > >;
+	products: Record<
+		number,
+		Partial< ProductsStoreState[ 'products' ][ number ] >
+	>;
+	productVariations: Record<
+		number,
+		Partial< ProductsStoreState[ 'productVariations' ][ number ] >
+	>;
 };
 
 jest.mock(
@@ -48,6 +54,7 @@ describe( 'getProductData', () => {
 		};
 
 		jest.isolateModules( () => {
+			//eslint-disable-next-line @typescript-eslint/no-var-requires
 			const frontend = require( '../frontend' );
 			getProductData = frontend.getProductData;
 		} );
