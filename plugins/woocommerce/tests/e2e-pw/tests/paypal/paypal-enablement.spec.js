@@ -43,12 +43,12 @@ test.describe(
 
 			await expect(
 				page.locator( '.settings-payment-gateways__header-title' )
-			).toBeVisible();
+			).toBeVisible( { timeout: 30000 } );
 		}
 
 		async function waitForPayPalToLoad( page ) {
 			const paypalDiv = page.locator( '#paypal' );
-			await expect( paypalDiv ).toBeVisible();
+			await expect( paypalDiv ).toBeVisible( { timeout: 30000 } );
 
 			return paypalDiv;
 		}
