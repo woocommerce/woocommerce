@@ -43,5 +43,5 @@ export type {
 // Utilities
 export { generateCommandId } from './types';
 
-// Implementation will be added in the next task
-// export { createCommandQueue } from './create-command-queue';
+// Implementation
+export { createCommandQueue } from './create-command-queue';
