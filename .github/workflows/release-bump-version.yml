@@ -48,6 +48,9 @@ jobs:
       - name: Get current version
         id: get-current-version
         run: |
+          # Log inputs to console.
+          echo "Bumping version: branch=${{ inputs.branch }}, bump-type=${{ inputs.bump-type }}"
+
           version=$( cat plugins/woocommerce/woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1 )
           echo "Current version: $version"
           echo "version=$version" >> $GITHUB_OUTPUT
@@ -61,8 +64,27 @@ jobs:
             const bumpType = `${{ inputs.bump-type }}`;
             const currentVersion = '${{ steps.get-current-version.outputs.version }}';
 
+            // Helper to write summary.
+            const writeSummary = async (nextVersion = null) => {
+              const versionTransition = nextVersion
+                ? `from \`${currentVersion}\` to \`${nextVersion}\``
+                : `from \`${currentVersion}\``;
+              await core.summary
+                .addRaw(`🚀 Bumping version on \`${branch}\` ${versionTransition} (${bumpType} bump).\n`)
+                .write();
+            };
+
+            // Helper to write error to summary.
+            const writeSummaryError = async (errorMsg) => {
+              await core.summary
+                .addRaw(`\n❌ **Error:** ${errorMsg}\n`)
+                .write();
+            };
+
             const m = currentVersion.match( /(?<base>\d+\.\d+)\.(?<patch>\d+)(-(?<prerelease>rc|beta|dev)(\.(?<prerelease_number>\d+))?)?/ );
             if ( ! m ) {
+              await writeSummary();
+              await writeSummaryError(`Current version (${currentVersion}) does not have the expected format.`);
               core.setFailed( `Current version (${ currentVersion }) does not have the expected format.` );
               return;
             }
@@ -81,11 +103,15 @@ jobs:
                 ( 'rc' === prerelease && ! [ 'rc', 'stable' ].includes( bumpType ) );
 
             if ( invalidBump ) {
+              await writeSummary();
+              await writeSummaryError(`Cannot perform a ${bumpType} bump on version ${currentVersion}.`);
               core.setFailed( `Bump type (${ bumpType }) does not apply to current version (${ currentVersion }).` );
               return;
             }
 
             if ( ( 'trunk' === branch && 'dev' !== bumpType ) || ( 'trunk' !== branch && 'dev' === bumpType ) ) {
+              await writeSummary();
+              await writeSummaryError(`Cannot perform a ${bumpType} bump on branch ${branch}.`);
               core.setFailed( `Bump type (${ bumpType }) does not apply to source branch (${ branch }).` );
               return;
             }
@@ -108,9 +134,14 @@ jobs:
                 break;
 
               default:
+                await writeSummary();
+                await writeSummaryError(`Invalid bump type: ${bumpType}.`);
                 core.setFailed(`Invalid bump type.`);
                 return;
             }
+
+            // Write success summary header.
+            await writeSummary(newVersion);
 
             core.setOutput( 'nextVersion', newVersion );
             core.setOutput( 'nextStable', newVersion.replace( /-(dev|(beta|rc)\.\d+)/, '' ) );
@@ -146,6 +177,8 @@ jobs:
           sed -i -E "s/public \\\$version = '[0-9]+\.[0-9]+\.[0-9]+.*';/public \\\$version = '$NEXT_VERSION'\;/" includes/class-woocommerce.php
 
           if git diff --quiet; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "❌ **Error:** No file changes were detected. The version may already be set to ${NEXT_VERSION}." >> $GITHUB_STEP_SUMMARY
             echo "::error::No changes to commit."
             exit 1
           fi
@@ -192,14 +225,18 @@ jobs:
             fi
           fi
 
-          # Create PR.
-          gh pr create \
+          # Create PR and capture URL.
+          pr_url=$(gh pr create \
             --title 'Bump WooCommerce version to `${{ steps.compute-new-version.outputs.nextVersion }}` on `${{ inputs.branch }}`' \
             --body 'This PR updates the versions in ${{ inputs.branch }} to ${{ steps.compute-new-version.outputs.nextVersion }}.'$'\n\n''<!-- [x] This Pull Request does not require a changelog -->' \
             --base ${{ inputs.branch }} \
             --head ${branch_name} \
             --label Release \
             ${reviewer_arg} \
-            ${milestone_arg}
+            ${milestone_arg})
+
+          # Write success to summary.
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "⏭️ **Next step:** Review and merge [the pull request](${pr_url})." >> $GITHUB_STEP_SUMMARY
 
 

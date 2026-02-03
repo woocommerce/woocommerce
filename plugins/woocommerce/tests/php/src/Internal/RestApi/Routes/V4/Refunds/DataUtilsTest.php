@@ -244,6 +244,114 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that tax extraction is skipped for items with zero tax amounts.
+	 *
+	 * This tests the scenario where a line item (e.g., shipping) has tax rate IDs
+	 * in its taxes array but the actual tax amounts are zero. The API should NOT
+	 * attempt to extract taxes from refund_total in this case.
+	 */
+	public function test_convert_line_items_skips_tax_extraction_for_zero_tax_items() {
+		// Create a tax rate (applied to products but not shipping in this test).
+		$tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '0', // Tax does NOT apply to shipping.
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		// Create an order with shipping that has zero tax.
+		$order = $this->create_order_with_zero_tax_shipping( $tax_rate_id );
+
+		$shipping_items = $order->get_items( 'shipping' );
+		$shipping_item  = reset( $shipping_items );
+
+		// Verify the shipping item has tax IDs but zero amounts (the bug scenario).
+		$shipping_taxes = $shipping_item->get_taxes();
+		$this->assertArrayHasKey( 'total', $shipping_taxes );
+		$this->assertArrayHasKey( $tax_rate_id, $shipping_taxes['total'] );
+		$this->assertEquals( 0, (float) $shipping_taxes['total'][ $tax_rate_id ] );
+
+		// Line items WITHOUT explicit refund_tax for shipping.
+		$line_items = array(
+			array(
+				'line_item_id' => $shipping_item->get_id(),
+				'quantity'     => 1,
+				'refund_total' => 10.00, // Shipping cost to refund (no tax included).
+			),
+		);
+
+		// Convert line items.
+		$result = $this->data_utils->convert_line_items_to_internal_format( $line_items, $order );
+
+		// Assertions.
+		$this->assertIsArray( $result );
+		$this->assertArrayHasKey( $shipping_item->get_id(), $result );
+
+		// refund_total should remain unchanged (10.00) since there's no tax to extract.
+		$this->assertEquals( 10.00, $result[ $shipping_item->get_id() ]['refund_total'] );
+
+		// refund_tax should be empty since the item has zero taxes.
+		$this->assertEmpty( $result[ $shipping_item->get_id() ]['refund_tax'] );
+	}
+
+	/**
+	 * Helper: Create an order with shipping that has tax rate IDs but zero tax amounts.
+	 *
+	 * This simulates the scenario where a tax rate exists but doesn't apply to shipping.
+	 *
+	 * @param int $tax_rate_id Tax rate ID.
+	 * @return WC_Order Order with zero-tax shipping.
+	 */
+	private function create_order_with_zero_tax_shipping( int $tax_rate_id ): WC_Order {
+		// Enable tax calculations.
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', 'no' );
+
+		// Create an order.
+		$order = wc_create_order();
+
+		// Add a shipping item with zero taxes but tax rate IDs present.
+		$shipping_item = new \WC_Order_Item_Shipping();
+		$shipping_item->set_method_title( 'Flat Rate' );
+		$shipping_item->set_method_id( 'flat_rate' );
+		$shipping_item->set_total( 10.00 );
+		// Set taxes with the tax rate ID but zero amount (this is the bug scenario).
+		$shipping_item->set_taxes(
+			array(
+				'total' => array( $tax_rate_id => '0' ),
+			)
+		);
+		$shipping_item->save();
+		$order->add_item( $shipping_item );
+
+		// Add a tax item to the order (for the tax rate to be recognized).
+		$tax_item = new \WC_Order_Item_Tax();
+		$tax_item->set_rate( $tax_rate_id );
+		$tax_item->set_order_id( $order->get_id() );
+		$tax_item->set_tax_total( 0 ); // Product tax would be here, but we're focusing on shipping.
+		$tax_item->set_shipping_tax_total( 0 );
+		$tax_item->save();
+		$order->add_item( $tax_item );
+
+		// Set billing address.
+		$order->set_billing_country( 'US' );
+		$order->set_billing_state( '' );
+
+		// Save order.
+		$order->calculate_totals( false );
+		$order->save();
+
+		return $order;
+	}
+
+	/**
 	 * Helper: Create an order with taxes applied.
 	 *
 	 * @param array $tax_rate_ids Tax rate IDs to apply.

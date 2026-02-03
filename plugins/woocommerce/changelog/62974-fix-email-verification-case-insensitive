@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixed case-sensitive email verification issue that prevented guests from accessing order payment pages when entering their email address in a different case than stored in the order.
