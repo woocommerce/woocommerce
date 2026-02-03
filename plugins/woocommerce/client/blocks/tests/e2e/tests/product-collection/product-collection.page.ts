@@ -412,6 +412,7 @@ class ProductCollectionPage {
 			| 'Keyword'
 			| 'Show product categories'
 			| 'Show product tags'
+			| 'Show Brands'
 			| 'Show Product Attributes'
 			| 'Featured'
 			| 'Created'
@@ -671,6 +672,38 @@ class ProductCollectionPage {
 
 		// Now, check the value.
 		await productAttributesContainer.getByLabel( value ).check();
+		await this.refreshLocators( 'editor' );
+	}
+
+	/**
+	 * Check a taxonomy term checkbox (categories, tags, brands).
+	 */
+	async checkTaxonomyTerm(
+		taxonomy: 'categories' | 'tags' | 'brands',
+		term: string
+	) {
+		const sidebarSettings = this.locateSidebarSettings();
+		const taxonomyContainer = sidebarSettings.locator(
+			`.woocommerce-product-${ taxonomy }`
+		);
+		await taxonomyContainer.waitFor();
+		await taxonomyContainer.getByText( term, { exact: true } ).check();
+		await this.refreshLocators( 'editor' );
+	}
+
+	/**
+	 * Uncheck a taxonomy term checkbox (categories, tags, brands).
+	 */
+	async uncheckTaxonomyTerm(
+		taxonomy: 'categories' | 'tags' | 'brands',
+		term: string
+	) {
+		const sidebarSettings = this.locateSidebarSettings();
+		const taxonomyContainer = sidebarSettings.locator(
+			`.woocommerce-product-${ taxonomy }`
+		);
+		await taxonomyContainer.waitFor();
+		await taxonomyContainer.getByText( term, { exact: true } ).uncheck();
 		await this.refreshLocators( 'editor' );
 	}
 
