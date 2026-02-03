@@ -56,8 +56,8 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 	/**
 	 * Helper method to collect data and retrieve event from session.
 	 *
-	 * Events now only contain: event_type, timestamp, order, event_data.
-	 * For full data (session, customer, addresses), use get_collected_data().
+	 * Events only contain: event_type, timestamp, event_data.
+	 * For full data (session, customer, order, addresses), use get_collected_data().
 	 *
 	 * @param string|null $event_type Optional event type.
 	 * @param array       $event_data Optional event data.
@@ -84,7 +84,7 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that collect() stores properly structured event with 4 top-level keys.
+	 * @testdox collect() stores properly structured event with 3 top-level keys.
 	 */
 	public function test_collect_stores_properly_structured_event(): void {
 		$event = $this->collect_and_get_event();
@@ -92,13 +92,12 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 		$this->assertIsArray( $event );
 		$this->assertArrayHasKey( 'event_type', $event );
 		$this->assertArrayHasKey( 'timestamp', $event );
-		$this->assertArrayHasKey( 'order', $event );
 		$this->assertArrayHasKey( 'event_data', $event );
-		$this->assertCount( 4, $event );
+		$this->assertCount( 3, $event );
 	}
 
 	/**
-	 * Test that get_collected_data() returns properly structured response with 6 top-level keys.
+	 * @testdox get_collected_data() returns properly structured response with 7 top-level keys.
 	 */
 	public function test_get_collected_data_returns_properly_structured_response(): void {
 		$result = $this->collect_and_get_data();
@@ -107,10 +106,11 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'wc_version', $result );
 		$this->assertArrayHasKey( 'session', $result );
 		$this->assertArrayHasKey( 'customer', $result );
+		$this->assertArrayHasKey( 'order', $result );
 		$this->assertArrayHasKey( 'shipping_address', $result );
 		$this->assertArrayHasKey( 'billing_address', $result );
 		$this->assertArrayHasKey( 'collected_events', $result );
-		$this->assertCount( 6, $result );
+		$this->assertCount( 7, $result );
 	}
 
 	/**
@@ -130,7 +130,7 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test graceful degradation when session is unavailable.
+	 * @testdox collect() degrades gracefully when session is unavailable.
 	 */
 	public function test_graceful_degradation_when_session_unavailable(): void {
 		// This test verifies that collect() doesn't throw exceptions even if session is unavailable.
@@ -139,9 +139,7 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 		$event = $this->collect_and_get_event();
 
 		$this->assertIsArray( $event );
-		$this->assertCount( 4, $event );
-		// Order section should be initialized even if session unavailable.
-		$this->assertIsArray( $event['order'] );
+		$this->assertCount( 3, $event );
 	}
 
 	/**
@@ -184,20 +182,19 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that nested sections are initialized as arrays.
+	 * @testdox Nested sections are initialized as arrays.
 	 */
 	public function test_nested_sections_initialized_as_arrays(): void {
 		$result = $this->collect_and_get_data();
 
 		$this->assertIsArray( $result['session'] );
 		$this->assertIsArray( $result['customer'] );
+		$this->assertIsArray( $result['order'] );
 		$this->assertIsArray( $result['shipping_address'] );
 		$this->assertIsArray( $result['billing_address'] );
 		$this->assertIsArray( $result['collected_events'] );
 
-		// Event order data should also be an array.
 		$this->assertCount( 1, $result['collected_events'] );
-		$this->assertIsArray( $result['collected_events'][0]['order'] );
 	}
 
 	/**
@@ -401,38 +398,39 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test order data includes all required fields with proper structure.
+	 * @testdox Order data includes all required fields with proper structure when order_id is provided.
 	 */
 	public function test_order_data_includes_all_required_fields(): void {
-		// Add a product to cart.
 		$product = \WC_Helper_Product::create_simple_product();
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
-		$event = $this->collect_and_get_event();
+		$order = wc_create_order();
+		$order->save();
 
-		$this->assertIsArray( $event['order'] );
-		$this->assertArrayHasKey( 'order_id', $event['order'] );
-		$this->assertArrayHasKey( 'customer_id', $event['order'] );
-		$this->assertArrayHasKey( 'total', $event['order'] );
-		$this->assertArrayHasKey( 'items_total', $event['order'] );
-		$this->assertArrayHasKey( 'shipping_total', $event['order'] );
-		$this->assertArrayHasKey( 'tax_total', $event['order'] );
-		$this->assertArrayHasKey( 'shipping_tax_rate', $event['order'] );
-		$this->assertArrayHasKey( 'discount_total', $event['order'] );
-		$this->assertArrayHasKey( 'currency', $event['order'] );
-		$this->assertArrayHasKey( 'cart_hash', $event['order'] );
-		$this->assertArrayHasKey( 'items', $event['order'] );
-		$this->assertIsArray( $event['order']['items'] );
+		$this->sut->collect();
+		$result = $this->sut->get_collected_data( $order->get_id() );
+
+		$this->assertIsArray( $result['order'] );
+		$this->assertArrayHasKey( 'order_id', $result['order'] );
+		$this->assertArrayHasKey( 'customer_id', $result['order'] );
+		$this->assertArrayHasKey( 'total', $result['order'] );
+		$this->assertArrayHasKey( 'items_total', $result['order'] );
+		$this->assertArrayHasKey( 'shipping_total', $result['order'] );
+		$this->assertArrayHasKey( 'tax_total', $result['order'] );
+		$this->assertArrayHasKey( 'shipping_tax_rate', $result['order'] );
+		$this->assertArrayHasKey( 'discount_total', $result['order'] );
+		$this->assertArrayHasKey( 'currency', $result['order'] );
+		$this->assertArrayHasKey( 'cart_hash', $result['order'] );
+		$this->assertArrayHasKey( 'items', $result['order'] );
+		$this->assertIsArray( $result['order']['items'] );
 	}
 
 	/**
-	 * Test order totals are collected from cart.
+	 * @testdox Order totals are collected from cart when order_id is provided.
 	 */
 	public function test_order_totals_collected_from_cart(): void {
-		// Empty cart first to ensure clean state.
 		WC()->cart->empty_cart();
 
-		// Add a product to cart.
 		$product = \WC_Helper_Product::create_simple_product();
 		$product->set_regular_price( 50.00 );
 		$product->save();
@@ -440,39 +438,42 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 		WC()->cart->add_to_cart( $product->get_id(), 2 );
 		WC()->cart->calculate_totals();
 
-		$event = $this->collect_and_get_event();
+		$order = wc_create_order();
+		$order->save();
 
-		$this->assertArrayHasKey( 'items_total', $event['order'] );
-		$this->assertArrayHasKey( 'total', $event['order'] );
-		// Verify items_total matches expected value.
-		$this->assertEquals( 100.00, $event['order']['items_total'] );
+		$this->sut->collect();
+		$result = $this->sut->get_collected_data( $order->get_id() );
+
+		$this->assertArrayHasKey( 'items_total', $result['order'] );
+		$this->assertArrayHasKey( 'total', $result['order'] );
+		$this->assertEquals( 100.00, $result['order']['items_total'] );
 	}
 
 	/**
-	 * Test shipping_tax_rate calculation.
+	 * @testdox Shipping tax rate is calculated correctly when order_id is provided.
 	 */
 	public function test_shipping_tax_rate_calculation(): void {
-		// Add a product to cart.
 		$product = \WC_Helper_Product::create_simple_product();
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
-		$event = $this->collect_and_get_event();
+		$order = wc_create_order();
+		$order->save();
 
-		$this->assertArrayHasKey( 'shipping_tax_rate', $event['order'] );
-		// When shipping total is zero, shipping_tax_rate should be null.
-		if ( 0 === (float) $event['order']['shipping_total'] ) {
-			$this->assertNull( $event['order']['shipping_tax_rate'] );
+		$this->sut->collect();
+		$result = $this->sut->get_collected_data( $order->get_id() );
+
+		$this->assertArrayHasKey( 'shipping_tax_rate', $result['order'] );
+		if ( 0 === (float) $result['order']['shipping_total'] ) {
+			$this->assertNull( $result['order']['shipping_tax_rate'] );
 		}
 	}
 
 	/**
-	 * Test cart item data includes all 12 required fields.
+	 * @testdox Cart item data includes all 12 required fields when order_id is provided.
 	 */
 	public function test_cart_item_includes_all_required_fields(): void {
-		// Empty cart first to ensure clean state.
 		WC()->cart->empty_cart();
 
-		// Add a product to cart.
 		$product = \WC_Helper_Product::create_simple_product();
 		$product->set_name( 'Test Product' );
 		$product->set_description( 'Test product description' );
@@ -482,13 +483,17 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 
 		WC()->cart->add_to_cart( $product->get_id(), 2 );
 
-		$event = $this->collect_and_get_event();
+		$order = wc_create_order();
+		$order->save();
 
-		$this->assertArrayHasKey( 'items', $event['order'] );
-		$this->assertIsArray( $event['order']['items'] );
-		$this->assertCount( 1, $event['order']['items'] );
+		$this->sut->collect();
+		$result = $this->sut->get_collected_data( $order->get_id() );
 
-		$item = $event['order']['items'][0];
+		$this->assertArrayHasKey( 'items', $result['order'] );
+		$this->assertIsArray( $result['order']['items'] );
+		$this->assertCount( 1, $result['order']['items'] );
+
+		$item = $result['order']['items'][0];
 		$this->assertArrayHasKey( 'name', $item );
 		$this->assertArrayHasKey( 'description', $item );
 		$this->assertArrayHasKey( 'category', $item );
@@ -502,7 +507,6 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'is_downloadable', $item );
 		$this->assertArrayHasKey( 'attributes', $item );
 
-		// Verify values match product data.
 		$this->assertEquals( 'Test Product', $item['name'] );
 		$this->assertEquals( 'Test product description', $item['description'] );
 		$this->assertEquals( 'TEST-SKU-123', $item['sku'] );
@@ -583,50 +587,51 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test graceful degradation when cart is empty.
+	 * @testdox Order data degrades gracefully when cart is empty and order_id is provided.
 	 */
 	public function test_graceful_degradation_when_cart_is_empty(): void {
-		// Ensure cart is empty.
 		WC()->cart->empty_cart();
 
-		$event = $this->collect_and_get_event();
+		$order = wc_create_order();
+		$order->save();
 
-		// Order section should still exist even with empty cart.
-		$this->assertIsArray( $event['order'] );
-		$this->assertArrayHasKey( 'items', $event['order'] );
-		$this->assertIsArray( $event['order']['items'] );
-		$this->assertEmpty( $event['order']['items'] );
+		$this->sut->collect();
+		$result = $this->sut->get_collected_data( $order->get_id() );
 
-		// Totals should be zero or null.
-		$this->assertEquals( 0, $event['order']['items_total'] );
-		$this->assertEquals( 0, $event['order']['total'] );
+		$this->assertIsArray( $result['order'] );
+		$this->assertArrayHasKey( 'items', $result['order'] );
+		$this->assertIsArray( $result['order']['items'] );
+		$this->assertEmpty( $result['order']['items'] );
+
+		$this->assertEquals( 0, $result['order']['items_total'] );
+		$this->assertEquals( 0, $result['order']['total'] );
 	}
 
 	/**
-	 * Test customer_id for guest users.
+	 * @testdox customer_id is set to 'guest' for guest users when order_id is provided.
 	 */
 	public function test_customer_id_for_guest_users(): void {
-		// Ensure no user is logged in.
 		wp_set_current_user( 0 );
 
-		// Reinitialize customer as guest (ID will be 0).
 		WC()->customer = new \WC_Customer( 0, true );
 
-		// Add a product to cart.
 		$product = \WC_Helper_Product::create_simple_product();
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
-		$event = $this->collect_and_get_event();
+		$order = wc_create_order();
+		$order->save();
 
-		$this->assertArrayHasKey( 'customer_id', $event['order'] );
-		$this->assertEquals( 'guest', $event['order']['customer_id'] );
+		$this->sut->collect();
+		$result = $this->sut->get_collected_data( $order->get_id() );
+
+		$this->assertArrayHasKey( 'customer_id', $result['order'] );
+		$this->assertEquals( 'guest', $result['order']['customer_id'] );
 	}
 
 	/**
-	 * Test customer_id for logged-in users.
+	 * @testdox customer_id is set to user ID for logged-in users when order_id is provided.
 	 */
 	public function test_customer_id_for_logged_in_users(): void {
-		// Create a test user and log them in.
 		$user_id = $this->factory->user->create(
 			array(
 				'user_email' => 'logged-in-user@example.com',
@@ -634,24 +639,25 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 		);
 		wp_set_current_user( $user_id );
 
-		// Reinitialize customer with logged-in user.
 		WC()->customer = new \WC_Customer( $user_id, true );
 
-		// Add a product to cart.
 		$product = \WC_Helper_Product::create_simple_product();
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
-		$event = $this->collect_and_get_event();
+		$order = wc_create_order();
+		$order->save();
 
-		$this->assertArrayHasKey( 'customer_id', $event['order'] );
-		$this->assertEquals( $user_id, $event['order']['customer_id'] );
+		$this->sut->collect();
+		$result = $this->sut->get_collected_data( $order->get_id() );
+
+		$this->assertArrayHasKey( 'customer_id', $result['order'] );
+		$this->assertEquals( $user_id, $result['order']['customer_id'] );
 	}
 
 	/**
-	 * Test complete get_collected_data() output includes all 6 top-level sections with data.
+	 * @testdox get_collected_data() output includes all 7 top-level sections with data.
 	 */
 	public function test_complete_collect_output_includes_all_sections(): void {
-		// Create a logged-in user.
 		$user_id = $this->factory->user->create(
 			array(
 				'user_email' => 'complete-test@example.com',
@@ -659,7 +665,6 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 		);
 		wp_set_current_user( $user_id );
 
-		// Set customer data.
 		if ( isset( WC()->customer ) ) {
 			WC()->customer->set_billing_first_name( 'Test' );
 			WC()->customer->set_billing_last_name( 'User' );
@@ -669,46 +674,44 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 			WC()->customer->set_billing_country( 'US' );
 		}
 
-		// Add a product to cart.
 		$product = \WC_Helper_Product::create_simple_product();
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
-		$this->sut->collect( 'checkout_started', array( 'test' => 'data' ) );
-		$result = $this->sut->get_collected_data();
+		$order = wc_create_order();
+		$order->save();
 
-		// Verify all 6 top-level sections exist in get_collected_data response.
+		$this->sut->collect( 'checkout_started', array( 'test' => 'data' ) );
+		$result = $this->sut->get_collected_data( $order->get_id() );
+
 		$this->assertArrayHasKey( 'wc_version', $result );
 		$this->assertArrayHasKey( 'session', $result );
 		$this->assertArrayHasKey( 'customer', $result );
+		$this->assertArrayHasKey( 'order', $result );
 		$this->assertArrayHasKey( 'shipping_address', $result );
 		$this->assertArrayHasKey( 'billing_address', $result );
 		$this->assertArrayHasKey( 'collected_events', $result );
 
-		// Verify sections contain expected data types.
 		$this->assertIsString( $result['wc_version'] );
 		$this->assertIsArray( $result['session'] );
 		$this->assertIsArray( $result['customer'] );
+		$this->assertIsArray( $result['order'] );
 		$this->assertIsArray( $result['shipping_address'] );
 		$this->assertIsArray( $result['billing_address'] );
 		$this->assertIsArray( $result['collected_events'] );
 
-		// Verify collected_events contains the event.
 		$this->assertCount( 1, $result['collected_events'] );
 		$event = $result['collected_events'][0];
 		$this->assertEquals( 'checkout_started', $event['event_type'] );
 		$this->assertIsString( $event['timestamp'] );
-		$this->assertIsArray( $event['order'] );
 		$this->assertEquals( array( 'test' => 'data' ), $event['event_data'] );
 	}
 
 	/**
-	 * Test end-to-end data collection with full cart scenario.
+	 * @testdox End-to-end data collection with full cart scenario works correctly.
 	 */
 	public function test_end_to_end_data_collection_with_full_cart(): void {
-		// Empty cart first.
 		WC()->cart->empty_cart();
 
-		// Create logged-in user.
 		$user_id = $this->factory->user->create(
 			array(
 				'user_email' => 'e2e-test@example.com',
@@ -716,13 +719,11 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 		);
 		wp_set_current_user( $user_id );
 
-		// Create completed order for lifetime count.
-		$order = wc_create_order();
-		$order->set_customer_id( $user_id );
-		$order->set_status( 'completed' );
-		$order->save();
+		$existing_order = wc_create_order();
+		$existing_order->set_customer_id( $user_id );
+		$existing_order->set_status( 'completed' );
+		$existing_order->save();
 
-		// Set customer data.
 		if ( isset( WC()->customer ) ) {
 			WC()->customer = new \WC_Customer( $user_id, true );
 			WC()->customer->set_billing_first_name( 'John' );
@@ -741,7 +742,6 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 			WC()->customer->set_shipping_postcode( '10001' );
 		}
 
-		// Add products to cart.
 		$product1 = \WC_Helper_Product::create_simple_product();
 		$product1->set_name( 'Product 1' );
 		$product1->set_regular_price( 100.00 );
@@ -756,111 +756,99 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 		WC()->cart->add_to_cart( $product2->get_id(), 1 );
 		WC()->cart->calculate_totals();
 
-		// Collect data.
-		$this->sut->collect( 'payment_attempt', array( 'gateway' => 'stripe' ) );
-		$result = $this->sut->get_collected_data();
+		$new_order = wc_create_order();
+		$new_order->save();
 
-		// Verify get_collected_data response structure.
+		$this->sut->collect( 'payment_attempt', array( 'gateway' => 'stripe' ) );
+		$result = $this->sut->get_collected_data( $new_order->get_id() );
+
 		$this->assertArrayHasKey( 'wc_version', $result );
 		$this->assertArrayHasKey( 'collected_events', $result );
 		$this->assertCount( 1, $result['collected_events'] );
 
 		$event = $result['collected_events'][0];
 
-		// Verify event data.
 		$this->assertEquals( 'payment_attempt', $event['event_type'] );
 		$this->assertNotEmpty( $event['timestamp'] );
 
-		// Session data (from get_collected_data).
 		$this->assertNotEmpty( $result['session']['session_id'] );
 		$this->assertEquals( 'e2e-test@example.com', $result['session']['email'] );
 
-		// Customer data (from get_collected_data).
 		$this->assertEquals( 'John', $result['customer']['first_name'] );
 		$this->assertEquals( 'Doe', $result['customer']['last_name'] );
-		// Lifetime order count will be >= 0 (depends on WC_Customer::get_order_count() availability).
 		$this->assertIsInt( $result['customer']['lifetime_order_count'] );
 		$this->assertGreaterThanOrEqual( 0, $result['customer']['lifetime_order_count'] );
 
-		// Order data (from event).
-		$this->assertGreaterThan( 0, $event['order']['total'] );
-		$this->assertCount( 2, $event['order']['items'] );
+		$this->assertGreaterThan( 0, $result['order']['total'] );
+		$this->assertCount( 2, $result['order']['items'] );
 
-		// Billing address (from get_collected_data).
 		$this->assertEquals( '123 Test St', $result['billing_address']['address_1'] );
 		$this->assertEquals( 'Test City', $result['billing_address']['city'] );
 
-		// Shipping address (from get_collected_data).
 		$this->assertEquals( '456 Ship St', $result['shipping_address']['address_1'] );
 		$this->assertEquals( 'Ship City', $result['shipping_address']['city'] );
 
-		// Event data (from event).
 		$this->assertEquals( array( 'gateway' => 'stripe' ), $event['event_data'] );
 	}
 
 	/**
-	 * Test graceful degradation across all sections.
+	 * @testdox Graceful degradation across all sections when data is minimal.
 	 */
 	public function test_graceful_degradation_across_all_sections(): void {
-		// Ensure no user logged in.
 		wp_set_current_user( 0 );
 
-		// Reinitialize customer as guest (ID will be 0).
 		WC()->customer = new \WC_Customer( 0, true );
 
-		// Empty cart.
 		WC()->cart->empty_cart();
 
-		// Clear customer data.
 		if ( isset( WC()->customer ) ) {
 			WC()->customer->set_billing_first_name( '' );
 			WC()->customer->set_billing_last_name( '' );
 			WC()->customer->set_billing_email( '' );
 		}
 
-		// Collect should still succeed and store valid structure.
+		$order = wc_create_order();
+		$order->save();
+
 		$this->sut->collect();
-		$result = $this->sut->get_collected_data();
+		$result = $this->sut->get_collected_data( $order->get_id() );
 
-		// Verify get_collected_data structure is intact even with minimal data.
 		$this->assertIsArray( $result );
-		$this->assertCount( 6, $result );
+		$this->assertCount( 7, $result );
 
-		// All sections should be arrays.
 		$this->assertIsArray( $result['session'] );
 		$this->assertIsArray( $result['customer'] );
+		$this->assertIsArray( $result['order'] );
 		$this->assertIsArray( $result['shipping_address'] );
 		$this->assertIsArray( $result['billing_address'] );
 		$this->assertIsArray( $result['collected_events'] );
 
-		// Verify event structure.
 		$this->assertCount( 1, $result['collected_events'] );
-		$event = $result['collected_events'][0];
-		$this->assertIsArray( $event['order'] );
 
-		// Key fields should have appropriate defaults.
-		$this->assertEquals( 'guest', $event['order']['customer_id'] );
+		$this->assertEquals( 'guest', $result['order']['customer_id'] );
 		$this->assertEquals( 0, $result['customer']['lifetime_order_count'] );
-		$this->assertEmpty( $event['order']['items'] );
+		$this->assertEmpty( $result['order']['items'] );
 	}
 
 	/**
-	 * Test manual triggering only (no automatic hooks).
+	 * @testdox Data collection requires manual triggering (no automatic hooks).
 	 */
 	public function test_manual_triggering_only(): void {
 		// This test verifies that SessionDataCollector doesn't automatically
 		// hook into WooCommerce events. It should only collect data when
 		// collect() is explicitly called.
 
-		// Add a product to cart (should not trigger automatic collection).
 		$product = \WC_Helper_Product::create_simple_product();
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
-		// Verify collect() must be called manually.
-		$event = $this->collect_and_get_event();
+		$order = wc_create_order();
+		$order->save();
 
-		$this->assertIsArray( $event );
-		$this->assertCount( 1, $event['order']['items'] );
+		$this->sut->collect();
+		$result = $this->sut->get_collected_data( $order->get_id() );
+
+		$this->assertIsArray( $result );
+		$this->assertCount( 1, $result['order']['items'] );
 
 		// No automatic data collection should have occurred.
 		// This is a design verification test - the class should not register hooks.
@@ -946,8 +934,21 @@ class SessionDataCollectorTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test get_collected_data returns collected events after collect is called.
-	 *
+	 * @testdox get_collected_data() returns empty order array when no order_id is provided.
+	 */
+	public function test_get_collected_data_returns_empty_order_when_no_order_id(): void {
+		$product = \WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$this->sut->collect();
+		$result = $this->sut->get_collected_data();
+
+		$this->assertArrayHasKey( 'order', $result );
+		$this->assertIsArray( $result['order'] );
+		$this->assertEmpty( $result['order'] );
+	}
+
+	/**
 	 * @testdox get_collected_data() returns collected_events array after collect() is called.
 	 */
 	public function test_get_collected_data_returns_data_after_collect(): void {

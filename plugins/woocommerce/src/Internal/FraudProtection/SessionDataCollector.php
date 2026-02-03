@@ -51,20 +51,15 @@ class SessionDataCollector {
 	 * @since 10.5.0
 	 *
 	 * @param string|null $event_type Optional event type identifier (e.g., 'checkout_started', 'payment_attempt').
-	 * @param array       $event_data Optional event-specific additional context data (may include 'order_id').
+	 * @param array       $event_data Optional event-specific additional context data.
 	 */
 	public function collect( ?string $event_type = null, array $event_data = array() ): void {
 		// Ensure cart and session are loaded.
 		$this->session_clearance_manager->ensure_cart_loaded();
 
-		// Extract order ID from event_data if provided.
-		// There seem to be no universal way to get order id from session data, so we may start with passing it as a parameter when calling this method.
-		$order_id_from_event = $event_data['order_id'] ?? null;
-
 		$data = array(
 			'event_type' => $event_type,
 			'timestamp'  => gmdate( 'Y-m-d H:i:s' ),
-			'order'      => $this->get_order_data( $order_id_from_event ),
 			'event_data' => $event_data,
 		);
 
@@ -99,17 +94,23 @@ class SessionDataCollector {
 	 *
 	 * @since 10.5.0
 	 *
+	 * @param int|null $order_id Optional order ID to include order data in the response.
 	 * @return array Array of collected fraud protection event data.
 	 */
-	public function get_collected_data(): array {
+	public function get_collected_data( $order_id = null ): array {
 		$data = array(
 			'wc_version'       => WC()->version,
 			'session'          => $this->get_session_data(),
 			'customer'         => $this->get_customer_data(),
+			'order'            => array(),
 			'shipping_address' => $this->get_shipping_address(),
 			'billing_address'  => $this->get_billing_address(),
 			'collected_events' => array(),
 		);
+
+		if ( $order_id ) {
+			$data['order'] = $this->get_order_data( $order_id );
+		}
 
 		// Calculate base data size to ensure total response stays under limit.
 		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize -- Used for size calculation only.
