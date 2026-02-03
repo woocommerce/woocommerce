@@ -8,6 +8,7 @@ import {
 	PanelRow,
 	TextControl,
 	ToggleControl,
+	__experimentalText as Text,
 } from '@wordpress/components';
 import { addFilter } from '@wordpress/hooks';
 import { __ } from '@wordpress/i18n';
@@ -81,6 +82,24 @@ const SidebarSettings = ( {
 	};
 
 	const previewTextLength = woocommerce_email_data?.preheader?.length ?? 0;
+
+	if (
+		woocommerce_email_data.email_type ===
+		'customer_partially_refunded_order'
+	) {
+		return (
+			<>
+				<br />
+				<Text>
+					{ __(
+						'Update this email configuration in the "Order refunded" email.',
+						'woocommerce'
+					) }
+				</Text>
+				<br />
+			</>
+		);
+	}
 
 	return (
 		<>

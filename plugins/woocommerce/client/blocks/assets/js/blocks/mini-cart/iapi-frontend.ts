@@ -45,7 +45,6 @@ const {
 	increaseQuantityLabel,
 	quantityDescriptionLabel,
 	removeFromCartLabel,
-	lowInStockLabel,
 } = getConfig( 'woocommerce/mini-cart-products-table-block' );
 const { itemsInCartTextTemplate } = getConfig(
 	'woocommerce/mini-cart-title-items-counter-block'
@@ -410,45 +409,6 @@ const { state: cartItemState } = store(
 				);
 			},
 
-			get cartItemDiscount(): string {
-				const { extensions } = cartItemState.cartItem;
-
-				const discountPrice =
-					cartItemState.regularAmountSingle -
-					cartItemState.purchaseAmountSingle;
-
-				const price = formatPriceWithCurrency(
-					discountPrice,
-					cartItemState.currency
-				);
-
-				// TODO: Add deprecation notice urging to replace with a
-				// `data-wp-text` directive or an alternative solution.
-				if (
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					( window.wc as any )?.blocksCheckout?.applyCheckoutFilter
-				) {
-					const priceText =
-						// eslint-disable-next-line @typescript-eslint/no-explicit-any
-						( window.wc as any ).blocksCheckout.applyCheckoutFilter(
-							{
-								filterName: 'saleBadgePriceFormat',
-								defaultValue: '<price/>',
-								extensions,
-								arg: {
-									context: 'cart',
-									cartItem: cartItemState.cartItem,
-									cart: woocommerceState.cart,
-								},
-							}
-						);
-
-					return priceText.replace( '<price/>', price );
-				}
-
-				return price;
-			},
-
 			get lineItemDiscount(): string {
 				const { quantity, extensions } = cartItemState.cartItem;
 
@@ -717,13 +677,6 @@ const { state: cartItemState } = store(
 				return price;
 			},
 
-			get isLineItemTotalDiscountVisible(): boolean {
-				return (
-					cartItemState.cartItemHasDiscount &&
-					cartItemState.cartItem.quantity > 1
-				);
-			},
-
 			get isProductHiddenFromCatalog(): boolean {
 				const context = getContext< { isImageHidden: boolean } >();
 				const { catalog_visibility: catalogVisibility } =
@@ -732,20 +685,6 @@ const { state: cartItemState } = store(
 					( catalogVisibility === 'hidden' ||
 						catalogVisibility === 'search' ) &&
 					! context.isImageHidden
-				);
-			},
-
-			get isLowInStockVisible(): boolean {
-				return (
-					! cartItemState.cartItem.show_backorder_badge &&
-					!! cartItemState.cartItem.low_stock_remaining
-				);
-			},
-
-			get lowInStockLabel(): string {
-				return lowInStockLabel.replace(
-					'%d',
-					cartItemState.cartItem.low_stock_remaining
 				);
 			},
 
