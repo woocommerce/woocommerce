@@ -198,6 +198,7 @@ The `cartItemScreenReaderPrice` filter allows to format the order summary item p
 
 ```tsx
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
+const { _n } = window.wp.i18n;
 
 const modifyCartItemScreenReaderPrice = ( defaultValue, extensions, args, validation ) => {
 	const isOrderSummaryContext = args?.context === 'summary';
@@ -206,7 +207,12 @@ const modifyCartItemScreenReaderPrice = ( defaultValue, extensions, args, valida
 		return defaultValue;
 	}
 
-	return '<quantity/> <productName/> will cost <price/>';
+	return _n(
+		'<quantity/> <productName/> item will cost <price/>',
+		'<quantity/> <productName/> items will cost <price/>',
+		args?.cartItem.quantity ?? 1,
+		'example-extension'
+	);
 };
 
 registerCheckoutFilters( 'example-extension', {
@@ -218,6 +224,7 @@ registerCheckoutFilters( 'example-extension', {
 
 ```tsx
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
+const { _n } = window.wp.i18n;
 
 const modifyCartItemScreenReaderPrice = ( defaultValue, extensions, args, validation ) => {
 	const isOrderSummaryContext = args?.context === 'summary';
@@ -227,11 +234,21 @@ const modifyCartItemScreenReaderPrice = ( defaultValue, extensions, args, valida
 	}
 
 	if ( args?.cartItem?.name === 'Beanie with Logo' ) {
-		return 'Total price for <quantity/> <productName/> item: <price/> to keep you warm';
+		return _n(
+			'Total price for <quantity/> <productName/> item: <price/> to keep you warm',
+			'Total price for <quantity/> <productName/> items: <price/> to keep you warm',
+			args?.cartItem.quantity ?? 1,
+			'example-extension'
+		);
 	}
 
 	if ( args?.cartItem?.name === 'Sunglasses' ) {
-		return 'Total price for <quantity/> <productName/> item: <price/> to keep you cool';
+		return _n(
+			'Total price for <quantity/> <productName/> item: <price/> to keep you cool',
+			'Total price for <quantity/> <productName/> items: <price/> to keep you cool',
+			args?.cartItem.quantity ?? 1,
+			'example-extension'
+		);
 	}
 
 	return defaultValue;
