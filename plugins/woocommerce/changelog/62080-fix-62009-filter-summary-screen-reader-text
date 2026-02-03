@@ -1,4 +1,4 @@
-Significance: patch
+Significance: minor
 Type: enhancement
 
 Introduce `cartItemScreenReaderPrice` checkout filter.
