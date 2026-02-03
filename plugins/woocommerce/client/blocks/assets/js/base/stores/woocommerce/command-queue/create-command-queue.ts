@@ -344,8 +344,11 @@ export function createCommandQueue< TState >(
 
 		// Create abort controller with timeout
 		abortController = new AbortController();
+		let isTimeoutAbort = false;
+
 		const timeoutId = setTimeout( () => {
 			if ( abortController ) {
+				isTimeoutAbort = true;
 				abortController.abort( new Error( 'Request timeout' ) );
 			}
 		}, resolvedConfig.timeout );
@@ -367,10 +370,19 @@ export function createCommandQueue< TState >(
 				( error.name === 'AbortError' ||
 					( error instanceof DOMException &&
 						error.message === 'Aborted' ) );
-			const isTimeout =
-				error instanceof Error && error.message === 'Request timeout';
 
-			if ( isTimeout ) {
+			// Determine the error to use for results
+			// If timeout triggered the abort, use the timeout error
+			let effectiveError: Error;
+			if ( isTimeoutAbort ) {
+				effectiveError = new Error( 'Request timeout' );
+			} else if ( error instanceof Error ) {
+				effectiveError = error;
+			} else {
+				effectiveError = new Error( String( error ) );
+			}
+
+			if ( isTimeoutAbort ) {
 				emit( 'timeout', {
 					commands: executingCommands.map( ( pc ) => pc.command ),
 				} );
@@ -387,20 +399,13 @@ export function createCommandQueue< TState >(
 						pc.command.id,
 						{
 							success: false as const,
-							error:
-								error instanceof Error
-									? error
-									: new Error( String( error ) ),
+							error: effectiveError,
 						},
 					] )
 				),
 				finalState: null,
 				hasErrors: true,
-				errors: [
-					error instanceof Error
-						? error
-						: new Error( String( error ) ),
-				],
+				errors: [ effectiveError ],
 			};
 		} finally {
 			clearTimeout( timeoutId );

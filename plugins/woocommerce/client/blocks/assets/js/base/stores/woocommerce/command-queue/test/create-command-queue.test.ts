@@ -472,6 +472,146 @@ describe( 'createCommandQueue', () => {
 		} );
 	} );
 
+	describe( 'timeout', () => {
+		beforeEach( () => {
+			jest.useFakeTimers();
+		} );
+
+		afterEach( () => {
+			jest.useRealTimers();
+		} );
+
+		it( 'should emit timeout event when request exceeds timeout', async () => {
+			const stateHandler = createMockStateHandler();
+			// Create a fetch that never resolves (until aborted)
+			const mockFetch = jest.fn(
+				( _url: RequestInfo | URL, init?: RequestInit ) =>
+					new Promise< Response >( ( _, reject ) => {
+						// Listen to abort signal
+						if ( init?.signal ) {
+							init.signal.addEventListener( 'abort', () => {
+								reject(
+									new DOMException( 'Aborted', 'AbortError' )
+								);
+							} );
+						}
+						// Never resolve - will be aborted by timeout
+					} )
+			);
+			const queue = createCommandQueue( stateHandler, {
+				fetch: mockFetch,
+				timeout: 5000, // 5 second timeout
+			} );
+
+			const timeoutHandler = jest.fn();
+			queue.on( 'timeout', timeoutHandler );
+
+			const command = createAddItemCommand( 1, 2 );
+			const { promise } = queue.enqueue( command );
+
+			// Start execution
+			await jest.advanceTimersByTimeAsync( 0 );
+
+			// Advance time past the timeout
+			await jest.advanceTimersByTimeAsync( 5000 );
+
+			// Wait for all promises to settle
+			const result = await promise;
+
+			expect( timeoutHandler ).toHaveBeenCalled();
+			expect( result.success ).toBe( false );
+			expect( result.success === false && result.error.message ).toBe(
+				'Request timeout'
+			);
+		} );
+
+		it( 'should rollback to snapshot on timeout', async () => {
+			const initialState: TestState = {
+				items: [ { id: 99, quantity: 5 } ],
+				total: 50,
+			};
+			const expectedRollbackState: TestState = {
+				items: [ { id: 99, quantity: 5 } ],
+				total: 50,
+			};
+			const stateHandler = createMockStateHandler( initialState );
+			// Create a fetch that never resolves
+			const mockFetch = jest.fn(
+				( _url: RequestInfo | URL, init?: RequestInit ) =>
+					new Promise< Response >( ( _, reject ) => {
+						if ( init?.signal ) {
+							init.signal.addEventListener( 'abort', () => {
+								reject(
+									new DOMException( 'Aborted', 'AbortError' )
+								);
+							} );
+						}
+					} )
+			);
+			const queue = createCommandQueue( stateHandler, {
+				fetch: mockFetch,
+				timeout: 1000,
+			} );
+
+			const command = createAddItemCommand( 1, 2 );
+			const { promise } = queue.enqueue( command );
+
+			// Optimistic update should be applied
+			expect( stateHandler.currentState.items ).toHaveLength( 2 );
+
+			// Start execution and trigger timeout
+			await jest.advanceTimersByTimeAsync( 0 );
+			await jest.advanceTimersByTimeAsync( 1000 );
+
+			await promise;
+
+			// Should rollback to initial state
+			expect( stateHandler.currentState ).toEqual(
+				expectedRollbackState
+			);
+		} );
+
+		it( 'should respect custom timeout configuration', async () => {
+			const stateHandler = createMockStateHandler();
+			const mockFetch = jest.fn(
+				( _url: RequestInfo | URL, init?: RequestInit ) =>
+					new Promise< Response >( ( _, reject ) => {
+						if ( init?.signal ) {
+							init.signal.addEventListener( 'abort', () => {
+								reject(
+									new DOMException( 'Aborted', 'AbortError' )
+								);
+							} );
+						}
+					} )
+			);
+			const queue = createCommandQueue( stateHandler, {
+				fetch: mockFetch,
+				timeout: 100, // Very short timeout
+			} );
+
+			const timeoutHandler = jest.fn();
+			queue.on( 'timeout', timeoutHandler );
+
+			const command = createAddItemCommand( 1, 2 );
+			const { promise } = queue.enqueue( command );
+
+			// Start execution
+			await jest.advanceTimersByTimeAsync( 0 );
+
+			// Timeout should not have fired yet
+			expect( timeoutHandler ).not.toHaveBeenCalled();
+
+			// Advance past timeout
+			await jest.advanceTimersByTimeAsync( 100 );
+
+			await promise;
+
+			// Timeout should have fired
+			expect( timeoutHandler ).toHaveBeenCalled();
+		} );
+	} );
+
 	describe( 'abort', () => {
 		it( 'should abort all pending commands', async () => {
 			const stateHandler = createMockStateHandler();
