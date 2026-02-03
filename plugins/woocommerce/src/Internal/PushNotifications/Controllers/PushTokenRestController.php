@@ -289,13 +289,13 @@ class PushTokenRestController extends RestApiControllerBase {
 	 *
 	 * @since 10.6.0
 	 *
-	 * @param string          $value The value being validated.
+	 * @param mixed           $value The value being validated.
 	 * @param WP_REST_Request $request The request object.
 	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
 	 * @param string          $param The name of the parameter being validated.
 	 * @return bool|WP_Error
 	 */
-	public function validate_argument( string $value, WP_REST_Request $request, string $param ) {
+	public function validate_argument( $value, WP_REST_Request $request, string $param ) {
 		$method = "set_$param";
 
 		if ( method_exists( PushToken::class, $method ) ) {
