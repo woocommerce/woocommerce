@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Re-add the AccessiblePrivateMethods trait

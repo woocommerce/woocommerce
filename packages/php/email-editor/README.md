@@ -80,11 +80,13 @@ We may add, update and delete any of them.
 
 ### Actions
 
-| Name                                            | Argument         | Description                                                                                                      |
-|-------------------------------------------------|------------------|------------------------------------------------------------------------------------------------------------------|
-| `woocommerce_email_editor_initialized`          | `null`           | Called when the Email Editor is initialized                                                                      |
-| `woocommerce_email_blocks_renderer_initialized` | `BlocksRegistry` | Called when the block content renderer is initialized. You may use this to add a new BlockRenderer               |
-| `woocommerce_email_editor_register_templates`   |                  | Called when the basic blank email template is registered. You can add more templates via register_block_template |
+| Name                                                         | Argument                                                        | Description                                                                                                                                                        |
+|--------------------------------------------------------------|-----------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `woocommerce_email_editor_initialized`                       | `null`                                                          | Called when the Email Editor is initialized                                                                                                                        |
+| `woocommerce_email_blocks_renderer_initialized`              | `BlocksRegistry`                                                | Called when the block content renderer is initialized. You may use this to add a new BlockRenderer                                                                 |
+| `woocommerce_email_editor_register_templates`                |                                                                 | Called when the basic blank email template is registered. You can add more templates via register_block_template                                                   |
+| `woocommerce_email_editor_send_preview_email_before_wp_mail` | `string` $to, `string` $subject, `string` $body                 | Called before sending the preview email via wp_mail. Use this to modify email headers (e.g., from address, from name) or perform pre-send actions.                 |
+| `woocommerce_email_editor_send_preview_email_after_wp_mail`  | `string` $to, `string` $subject, `string` $body, `bool` $result | Called after sending the preview email via wp_mail. Use this to clean up filters, log results, or perform post-send actions. The `$result` indicates success.      |
 
 ### Filters
 
