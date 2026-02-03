@@ -64,3 +64,14 @@ export type {
 	RemoveItemPayload,
 	UpdateQuantityPayload,
 } from './cart-commands';
+
+// Cart State Handler
+export {
+	createCartStateHandler,
+	trackQuantityChange,
+} from './cart-state-handler';
+
+export type {
+	CartStateHandlerConfig,
+	QuantityChanges,
+} from './cart-state-handler';
