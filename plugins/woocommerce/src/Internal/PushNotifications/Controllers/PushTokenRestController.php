@@ -295,7 +295,7 @@ class PushTokenRestController extends RestApiControllerBase {
 	 * @param string          $param The name of the parameter being validated.
 	 * @return bool|WP_Error
 	 */
-	public function validate_argument( $value, WP_REST_Request $request, string $param ) {
+	public function validate_argument( string $value, WP_REST_Request $request, string $param ) {
 		$method = "set_$param";
 
 		if ( method_exists( PushToken::class, $method ) ) {
@@ -392,12 +392,6 @@ class PushTokenRestController extends RestApiControllerBase {
 	 * @return WP_Error
 	 */
 	private function convert_exception_to_wp_error( Exception $e ): WP_Error {
-		$logger = wc_get_container()->get( LegacyProxy::class )->call_function( 'wc_get_logger' );
-
-		if ( $logger instanceof WC_Logger ) {
-			$logger->error( (string) $e->getMessage() );
-		}
-
 		/**
 		 * If the exception is `WC_Data_Exception`, and doesn't represent an
 		 * internal server error (which may contain internal details that should
@@ -412,6 +406,12 @@ class PushTokenRestController extends RestApiControllerBase {
 				$e->getMessage(),
 				$e->getErrorData()
 			);
+		}
+
+		$logger = wc_get_container()->get( LegacyProxy::class )->call_function( 'wc_get_logger' );
+
+		if ( $logger instanceof WC_Logger ) {
+			$logger->error( (string) $e->getMessage(), array( 'source' => 'wc-push-notifications' ) );
 		}
 
 		return new WP_Error(
