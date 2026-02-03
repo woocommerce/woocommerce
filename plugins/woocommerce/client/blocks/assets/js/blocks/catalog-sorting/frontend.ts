@@ -60,4 +60,6 @@ const catalogSortingStore = {
 	},
 };
 
-store( BLOCK_NAME, catalogSortingStore );
+store( BLOCK_NAME, catalogSortingStore, {
+	lock: true,
+} );
