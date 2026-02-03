@@ -33193,24 +33193,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-payment-gateways-controller.php
 
 		-
-			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:get_order_key\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-paypal-buttons-controller.php
-
-		-
-			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:set_payment_method\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-paypal-buttons-controller.php
-
-		-
-			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:update_status\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-paypal-buttons-controller.php
-
-		-
 			message: '#^Method WC_REST_Paypal_Buttons_Controller\:\:cancel_payment\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
 			count: 1
@@ -33255,18 +33237,6 @@ parameters:
 		-
 			message: '#^PHPDoc tag @extends has invalid value \(WC_REST_Controller\)\: Unexpected token "\\n ", expected ''\<'' at offset 114 on line 5$#'
 			identifier: phpDoc.parseError
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-paypal-buttons-controller.php
-
-		-
-			message: '#^Parameter \#1 \$order of method WC_Gateway_Paypal_Request\:\:create_paypal_order\(\) expects WC_Order, WC_Order\|WC_Order_Refund given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-paypal-buttons-controller.php
-
-		-
-			message: '#^Parameter \#1 \$order of method WC_Payment_Gateway\:\:get_return_url\(\) expects WC_Order\|null, WC_Order\|WC_Order_Refund given\.$#'
-			identifier: argument.type
 			count: 1
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-paypal-buttons-controller.php
 

@@ -4,8 +4,6 @@
 import { InspectorControls } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
 import { useMemo } from '@wordpress/element';
-import { EditorBlock } from '@woocommerce/types';
-import { addFilter } from '@wordpress/hooks';
 import { useIsEmailEditor } from '@woocommerce/email-editor';
 import { recordEvent } from '@woocommerce/tracks';
 import { CesFeedbackButton } from '@woocommerce/editor-components/ces-feedback-button';
@@ -21,7 +19,6 @@ import {
 import metadata from '../../block.json';
 import { useTracksLocation } from '../../tracks-utils';
 import {
-	ProductCollectionEditComponentProps,
 	ProductCollectionContentProps,
 	CoreFilterNames,
 	FilterName,
@@ -150,6 +147,39 @@ const ProductCollectionInspectorControls = (
 		query,
 	};
 
+	/**
+	 * Renders the collection-specific control based on the collection type.
+	 * These controls are placed at the top for easy access when editing.
+	 */
+	const renderCollectionSpecificControl = () => {
+		switch ( collection ) {
+			case CoreCollectionNames.HAND_PICKED:
+				return (
+					<PanelBody>
+						<HandPickedProductsControlField
+							{ ...queryControlProps }
+						/>
+					</PanelBody>
+				);
+			case CoreCollectionNames.BY_CATEGORY:
+			case CoreCollectionNames.BY_TAG:
+			case CoreCollectionNames.BY_BRAND:
+				return (
+					<PanelBody>
+						<TaxonomyControls
+							{ ...queryControlProps }
+							collection={ collection }
+							renderMode="standalone"
+						/>
+					</PanelBody>
+				);
+			case CoreCollectionNames.RELATED:
+				return <RelatedByControl { ...queryControlProps } />;
+			default:
+				return null;
+		}
+	};
+
 	return (
 		<InspectorControls>
 			<LinkedProductControl
@@ -159,20 +189,7 @@ const ProductCollectionInspectorControls = (
 				location={ props.location }
 			/>
 
-			{
-				/**
-				 * "Hand-Picked" collection-specific control.
-				 * Placed at the top for easy access when editing product selection.
-				 * Only rendered when ProductCollectionContent is shown (not during picker).
-				 */
-				collection === CoreCollectionNames.HAND_PICKED && (
-					<PanelBody>
-						<HandPickedProductsControlField
-							{ ...queryControlProps }
-						/>
-					</PanelBody>
-				)
-			}
+			{ renderCollectionSpecificControl() }
 
 			<ToolsPanel
 				label={ __( 'Settings', 'woocommerce' ) }
@@ -273,83 +290,3 @@ const ProductCollectionInspectorControls = (
 };
 
 export default ProductCollectionInspectorControls;
-
-const isProductCollection = ( blockName: string ) =>
-	blockName === metadata.name;
-
-const CollectionSpecificControls = (
-	props: ProductCollectionEditComponentProps
-) => {
-	const { attributes, context } = props;
-	const { collection } = attributes;
-
-	const setQueryAttributeBind = useMemo(
-		() => setQueryAttribute.bind( null, props ),
-		[ props ]
-	);
-	const tracksLocation = useTracksLocation( context.templateSlug );
-	const trackInteraction = ( filter: FilterName ) => {
-		return recordEvent(
-			'blocks_product_collection_inspector_control_clicked',
-			{
-				collection,
-				location: tracksLocation,
-				filter,
-			}
-		);
-	};
-	const queryControlProps = {
-		setQueryAttribute: setQueryAttributeBind,
-		trackInteraction,
-		query: attributes.query,
-	};
-
-	const isByTaxonomy =
-		collection === CoreCollectionNames.BY_CATEGORY ||
-		collection === CoreCollectionNames.BY_TAG ||
-		collection === CoreCollectionNames.BY_BRAND;
-
-	return (
-		<InspectorControls>
-			{
-				/**
-				 * "Related Products" collection-specific controls.
-				 */
-				collection === CoreCollectionNames.RELATED && (
-					<RelatedByControl { ...queryControlProps } />
-				)
-			}
-			{
-				/**
-				 * "By Taxonomy" collection-specific controls.
-				 */
-				isByTaxonomy && (
-					<PanelBody>
-						<TaxonomyControls
-							{ ...queryControlProps }
-							collection={ collection }
-							renderMode="standalone"
-						/>
-					</PanelBody>
-				)
-			}
-		</InspectorControls>
-	);
-};
-
-const withCollectionSpecificControls =
-	< T extends EditorBlock< T > >( BlockEdit: ElementType ) =>
-	( props: ProductCollectionEditComponentProps ) => {
-		if ( ! isProductCollection( props.name ) ) {
-			return <BlockEdit { ...props } />;
-		}
-
-		return (
-			<>
-				<CollectionSpecificControls { ...props } />
-				<BlockEdit { ...props } />
-			</>
-		);
-	};
-
-addFilter( 'editor.BlockEdit', metadata.name, withCollectionSpecificControls );
