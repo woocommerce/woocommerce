@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { getContext, store } from '@wordpress/interactivity';
+import { store } from '@wordpress/interactivity';
 import type { ProductResponseItem } from '@woocommerce/types';
 
 /**
@@ -24,36 +24,21 @@ const productsStore = store< ProductsStore >(
 );
 
 /**
- * The per-block context shape for the product context store.
- * This is provided via data-wp-context attribute on the block wrapper.
+ * The state shape for the product context store.
+ * State is hydrated server-side via wp_interactivity_state() in ProductContextStore::load_context().
  *
- * Note: selectedAttributes is intentionally NOT part of this context.
+ * Note: selectedAttributes is intentionally NOT part of this state.
  * It is managed by the add-to-cart-with-options form context because it's
  * form-specific state. The product-context store only tracks which
  * product/variation is being viewed, not form state like attribute selections.
  */
-export type ProductContextContext = {
-	/**
-	 * The main product ID.
-	 */
-	productId: number;
-	/**
-	 * The selected variation ID, or null if no variation is selected.
-	 */
-	variationId: number | null;
-};
-
-/**
- * The state shape for the product context store.
- * All properties are getters that read from the per-block context.
- */
 export type ProductContextStoreState = {
 	/**
-	 * The main product ID (reads from block context).
+	 * The main product ID (hydrated from server).
 	 */
 	productId: number;
 	/**
-	 * The selected variation ID, or null if no variation is selected (reads from block context).
+	 * The selected variation ID, or null if no variation is selected (hydrated from server).
 	 */
 	variationId: number | null;
 };
@@ -107,13 +92,12 @@ export type ProductContextStore = {
  * The woocommerce/product-context store.
  *
  * This store manages the context of which product (and optionally variation)
- * is currently being viewed or interacted with. It uses per-block context
- * via getContext() to support multiple Add to Cart blocks on the same page.
+ * is currently being viewed or interacted with. State is hydrated server-side
+ * via wp_interactivity_state() in ProductContextStore::load_context().
  *
- * Context is provided server-side via data-wp-context attribute.
  * Product data is accessed via the woocommerce/products store.
  *
- * Context structure (per-block via data-wp-context):
+ * State structure (hydrated from server):
  * - productId: The main product ID
  * - variationId: The selected variation ID (or null)
  *
@@ -130,19 +114,10 @@ const productContextStore = store< ProductContextStore >(
 	'woocommerce/product-context',
 	{
 		state: {
-			get productId(): number {
-				const context = getContext< ProductContextContext >(
-					'woocommerce/product-context'
-				);
-				return context?.productId ?? 0;
-			},
-
-			get variationId(): number | null {
-				const context = getContext< ProductContextContext >(
-					'woocommerce/product-context'
-				);
-				return context?.variationId ?? null;
-			},
+			// These values are hydrated server-side via wp_interactivity_state()
+			// in ProductContextStore::load_context().
+			productId: 0,
+			variationId: null,
 
 			get product(): ProductResponseItem | undefined {
 				const { productId } = productContextStore.state;
@@ -180,21 +155,11 @@ const productContextStore = store< ProductContextStore >(
 		},
 		actions: {
 			setProductId( id: number ): void {
-				const context = getContext< ProductContextContext >(
-					'woocommerce/product-context'
-				);
-				if ( context ) {
-					context.productId = id;
-				}
+				productContextStore.state.productId = id;
 			},
 
 			setVariationId( id: number | null ): void {
-				const context = getContext< ProductContextContext >(
-					'woocommerce/product-context'
-				);
-				if ( context ) {
-					context.variationId = id;
-				}
+				productContextStore.state.variationId = id;
 			},
 		},
 	},
