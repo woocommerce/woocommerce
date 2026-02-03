@@ -327,8 +327,8 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	public function test_it_throws_exception_when_deleting_push_token_with_invalid_id() {
 		$data_store = new PushTokensDataStore();
 
-		$this->expectException( PushTokenInvalidDataException::class );
-		$this->expectExceptionMessage( 'ID must be a positive integer.' );
+		$this->expectException( PushTokenNotFoundException::class );
+		$this->expectExceptionMessage( 'Push token could not be found.' );
 
 		$data_store->delete( 0 );
 	}

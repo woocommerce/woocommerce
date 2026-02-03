@@ -91,14 +91,7 @@ class PushTokensDataStore {
 	 */
 	public function read( int $id ): PushToken {
 		$push_token = PushToken::get_new_instance( $id );
-
-		if ( ! $push_token->can_be_read() ) {
-			throw new PushTokenInvalidDataException(
-				'Can\'t read push token because the push token data provided is invalid.'
-			);
-		}
-
-		$post = get_post( $push_token->get_id() );
+		$post       = get_post( $push_token->get_id() );
 
 		if ( ! $post || PushToken::POST_TYPE !== $post->post_type ) {
 			throw new PushTokenNotFoundException();
@@ -200,21 +193,13 @@ class PushTokensDataStore {
 	 * @return bool True on success.
 	 */
 	public function delete( int $id ): bool {
-		$push_token = PushToken::get_new_instance( $id );
-
-		if ( ! $push_token->can_be_deleted() ) {
-			throw new PushTokenInvalidDataException(
-				'Can\'t delete push token because the push token data provided is invalid.'
-			);
-		}
-
-		$post = get_post( $push_token->get_id() );
+		$post = get_post( $id );
 
 		if ( ! $post || PushToken::POST_TYPE !== $post->post_type ) {
 			throw new PushTokenNotFoundException();
 		}
 
-		return (bool) wp_delete_post( (int) $push_token->get_id(), true );
+		return (bool) wp_delete_post( (int) $id, true );
 	}
 
 	/**
