@@ -33,6 +33,10 @@ jest.mock( '@woocommerce/settings', () => {
 					},
 				];
 			}
+			if ( key === 'sortableTaxonomies' ) {
+				// Only product_cat supports custom ordering by default
+				return [ 'product_cat' ];
+			}
 			// Use the original getSetting for other keys
 			return originalModule.getSetting( key, defaultValue );
 		} ),
@@ -261,6 +265,59 @@ describe( 'Taxonomy Filter block', () => {
 			expect( block.queryAllByText( /\(\d+\)/ ).length ).toBeGreaterThan(
 				0
 			);
+		} );
+	} );
+
+	describe( 'Menu order option visibility', () => {
+		test( 'should show Menu order option for sortable taxonomies (product_cat)', async () => {
+			await setup( { taxonomy: 'product_cat' } );
+			await selectBlock( /Block: Category Filter/i );
+
+			enableControl( 'Sort Order' );
+
+			const sortOrderSelect = screen.getByRole( 'combobox', {
+				name: /Sort Order/i,
+			} );
+
+			// Menu order option should be available for product_cat
+			const options = within( sortOrderSelect ).getAllByRole( 'option' );
+			const optionValues = options.map( ( opt ) => opt.textContent );
+
+			expect( optionValues ).toContain( 'Menu order' );
+		} );
+
+		test( 'should not show Menu order option for non-sortable taxonomies (product_tag)', async () => {
+			await setup( { taxonomy: 'product_tag' } );
+			await selectBlock( /Block: Tag Filter/i );
+
+			enableControl( 'Sort Order' );
+
+			const sortOrderSelect = screen.getByRole( 'combobox', {
+				name: /Sort Order/i,
+			} );
+
+			// Menu order option should NOT be available for product_tag
+			const options = within( sortOrderSelect ).getAllByRole( 'option' );
+			const optionValues = options.map( ( opt ) => opt.textContent );
+
+			expect( optionValues ).not.toContain( 'Menu order' );
+		} );
+
+		test( 'should allow selecting Menu order for sortable taxonomies', async () => {
+			await setup( { taxonomy: 'product_cat' } );
+			await selectBlock( /Block: Category Filter/i );
+
+			enableControl( 'Sort Order' );
+
+			const sortOrderSelect = screen.getByRole( 'combobox', {
+				name: /Sort Order/i,
+			} );
+
+			fireEvent.change( sortOrderSelect, {
+				target: { value: 'menu_order-asc' },
+			} );
+
+			expect( sortOrderSelect ).toHaveValue( 'menu_order-asc' );
 		} );
 	} );
 } );
