@@ -900,21 +900,20 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 			)
 		);
 
-		$received_price = null;
-		$received_rates = null;
+		$received_args = null;
 
-		add_filter( 'woocommerce_shipping_prices_include_tax', function( $include_tax, $price, $rates ) use ( &$received_price, &$received_rates ) {
-			$received_price = $price;
-			$received_rates = $rates;
+		add_filter( 'woocommerce_shipping_prices_include_tax', function( $include_tax ) use ( &$received_args ) {
+			$received_args = func_get_args();
 			return true;
-		}, 10, 3 );
+		}, 10, 1 );
 
-		WC_Tax::calc_shipping_tax( 15.00, $tax_rates );
+		$taxes_with_filter = WC_Tax::calc_shipping_tax( 15.00, $tax_rates );
 
-		$this->assertEquals( 15.00, $received_price, 'Filter should receive correct price parameter' );
-		$this->assertIsArray( $received_rates, 'Filter should receive rates array' );
-		$this->assertNotEmpty( $received_rates, 'Filter should receive tax rates' );
-		$this->assertArrayHasKey( $tax_rate_id, $received_rates, 'Filter should receive correct tax rates' );
+		$this->assertIsArray( $received_args, 'Filter should be called' );
+		$this->assertCount( 1, $received_args, 'Filter should only receive the include_tax parameter' );
+
+		$expected_tax = 15.00 - ( 15.00 / 1.10 );
+		$this->assertEqualsWithDelta( $expected_tax, array_sum( $taxes_with_filter ), 0.01, 'Filter return value should be used for inclusive calculation' );
 
 		remove_all_filters( 'woocommerce_shipping_prices_include_tax' );
 	}
