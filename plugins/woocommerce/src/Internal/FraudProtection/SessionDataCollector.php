@@ -668,7 +668,7 @@ class SessionDataCollector {
 	 * @return array Trimmed array that fits within the size limit.
 	 */
 	private function trim_to_max_size( array $data, int $base_size = 0 ): array {
-		$max_size_bytes = 3 * 1024 * 1024 - $base_size; // 3 MB minus base data size.
+		$max_size_bytes = 1 * 1024 * 1024 - $base_size; // 1 MB minus base data size.
 		$data_count     = count( $data );
 		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize -- Used for size calculation only.
 		$data_size = strlen( serialize( $data ) );
