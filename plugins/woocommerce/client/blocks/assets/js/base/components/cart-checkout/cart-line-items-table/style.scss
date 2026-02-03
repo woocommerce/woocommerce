@@ -93,6 +93,8 @@ table.wc-block-cart-items {
 			display: block;
 			max-width: max-content;
 			line-height: 1.4;
+			margin-bottom: 5px;
+
 			&[hidden] {
 				display: none;
 			}
