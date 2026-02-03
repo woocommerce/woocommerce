@@ -3,24 +3,25 @@
  */
 import { getContext, store, getElement } from '@wordpress/interactivity';
 
+type DropdownItem = {
+	label: string;
+	value: string;
+	type: string;
+};
+
 export type DropdownContext = {
 	defaultPlaceholder: string;
-	item: {
-		label: string;
-		value: string;
-		type: string;
-	};
-	selectedItems: {
-		label: string | null;
-		value: string | null;
-		type: string | null;
-	}[];
+	item: DropdownItem;
+	selectedItems: DropdownItem[];
 	isOpen: boolean;
+	searchQuery: string;
+	items: DropdownItem[];
 };
 
 type DropdownStore = {
 	state: {
 		placeholderText: string;
+		isItemFiltered: boolean;
 	};
 
 	actions: {
@@ -28,6 +29,8 @@ type DropdownStore = {
 		selectDropdownItem: ( event: MouseEvent ) => void;
 		unselectDropdownItem: ( event: MouseEvent ) => void;
 		handleClickOutside: ( event: MouseEvent ) => void;
+		handleSearchInput: ( event: Event ) => void;
+		handleSearchInputClick: ( event: MouseEvent ) => void;
 	};
 };
 
@@ -43,11 +46,29 @@ store< DropdownStore >( 'woocommerce/product-filters', {
 
 			return '';
 		},
+		get isItemFiltered(): boolean {
+			const context = getContext< DropdownContext >();
+			const { searchQuery, item } = context;
+
+			if ( ! searchQuery || searchQuery.trim() === '' ) {
+				return false;
+			}
+
+			const query = searchQuery.toLowerCase();
+			const label = item?.label?.toLowerCase() || '';
+
+			return ! label.includes( query );
+		},
 	},
 	actions: {
 		toggleIsOpen: () => {
 			const context = getContext< DropdownContext >();
 			context.isOpen = ! context.isOpen;
+
+			// Reset search query when closing
+			if ( ! context.isOpen ) {
+				context.searchQuery = '';
+			}
 		},
 		unselectDropdownItem: ( event: MouseEvent ) => {
 			const context = getContext< DropdownContext >();
@@ -113,7 +134,16 @@ store< DropdownStore >( 'woocommerce/product-filters', {
 				! dropdownElement.contains( target )
 			) {
 				context.isOpen = false;
+				context.searchQuery = '';
 			}
+		},
+		handleSearchInput( event: Event ) {
+			const context = getContext< DropdownContext >();
+			const input = event.target as HTMLInputElement;
+			context.searchQuery = input.value;
+		},
+		handleSearchInputClick( event: MouseEvent ) {
+			event.stopPropagation();
 		},
 	},
 } );

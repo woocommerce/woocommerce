@@ -45,17 +45,24 @@ final class ProductFilterDropdown extends AbstractBlock {
 
 		$selected_items = [];
 		foreach ( $items as $item ) {
-			if ( ! empty( $item['selected'] ) ) {
-				$selected_items[] = [
-					'label' => $item['label'],
-					'value' => $item['value'],
-					'type'  => $item['type'],
-				];
+			if ( ! is_array( $item ) || empty( $item['selected'] ) ) {
+				continue;
 			}
+
+			$selected_items[] = [
+				'label' => $item['label'],
+				'value' => $item['value'],
+				'type'  => $item['type'],
+			];
 		}
 
+		$group_label = $block->context['filterData']['groupLabel'] ?? '';
+
 		/* translators: %s: filter group label. */
-		$placeholder = sprintf( __( 'Select %s', 'woocommerce' ), $block->context['filterData']['groupLabel'] ?? '' );
+		$placeholder = sprintf( __( 'Select %s', 'woocommerce' ), $group_label );
+
+		/* translators: %s: filter group label. */
+		$search_placeholder = sprintf( __( 'Search %s', 'woocommerce' ), $group_label );
 
 		// Generate a unique ID for this dropdown instance to avoid duplicate IDs.
 		$dropdown_id = wp_unique_prefixed_id( 'options-dropdown-' );
@@ -68,6 +75,8 @@ final class ProductFilterDropdown extends AbstractBlock {
 					'selectedItems'      => $selected_items,
 					'isOpen'             => false,
 					'defaultPlaceholder' => $placeholder,
+					'searchQuery'        => '',
+					'items'              => $items,
 				],
 				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 			),
@@ -88,7 +97,7 @@ final class ProductFilterDropdown extends AbstractBlock {
 						class="wc-block-product-filter-dropdown__dropdown-selection"
 						id="<?php echo esc_attr( $dropdown_id ); ?>"
 						tabindex="0"
-						role="button"
+						role="combobox"
 						aria-haspopup="listbox"
 						aria-expanded="false"
 						data-wp-bind--aria-expanded="context.isOpen"
@@ -153,6 +162,17 @@ final class ProductFilterDropdown extends AbstractBlock {
 						data-wp-bind--hidden="!context.isOpen"
 						hidden
 					>
+						<div class="wc-block-product-filter-dropdown__search-wrapper">
+							<input
+								type="text"
+								class="wc-block-product-filter-dropdown__search-input"
+								placeholder="<?php echo esc_attr( $search_placeholder ); ?>"
+								data-wp-on--input="actions.handleSearchInput"
+								data-wp-on--click="actions.handleSearchInputClick"
+								data-wp-bind--value="context.searchQuery"
+								aria-label="<?php echo esc_attr( $search_placeholder ); ?>"
+							/>
+						</div>
 						<?php foreach ( $items as $item ) { ?>
 							<?php $item_id = $item['type'] . '-' . $item['value']; ?>
 							<div
@@ -163,6 +183,7 @@ final class ProductFilterDropdown extends AbstractBlock {
 								data-wp-on--click---select-item="actions.selectDropdownItem"
 								data-wp-on--click---parent-action="actions.toggleFilter"
 								data-wp-class--is-selected="state.isFilterSelected"
+								data-wp-class--is-hidden="state.isItemFiltered"
 								data-wp-bind--aria-selected="state.isFilterSelected"
 								data-wp-key="<?php echo esc_attr( $item_id ); ?>"
 								<?php echo wp_interactivity_data_wp_context( array( 'item' => $item ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
@@ -193,20 +214,24 @@ final class ProductFilterDropdown extends AbstractBlock {
 	 * @return string Aria label.
 	 */
 	private function get_aria_label( array $item, bool $show_counts ): string {
+		$count      = isset( $item['count'] ) ? (int) $item['count'] : 0;
+		$label      = $item['label'] ?? '';
+		$aria_label = $item['ariaLabel'] ?? $label;
+
 		if ( $show_counts ) {
 			return sprintf(
 				/* translators: %1$s: Product filter name, %2$d: Number of products */
 				_n(
 					'%1$s (%2$d product)',
 					'%1$s (%2$d products)',
-					(int) $item['count'],
+					$count,
 					'woocommerce'
 				),
-				$item['ariaLabel'] ?? $item['label'],
-				(int) $item['count']
+				$aria_label,
+				$count
 			);
 		}
 
-		return $item['ariaLabel'] ?? $item['label'];
+		return $aria_label;
 	}
 }

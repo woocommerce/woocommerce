@@ -94,6 +94,36 @@
 	z-index: 1000;
 	margin-top: $gap-smaller;
 	box-sizing: border-box;
+	max-height: 400px;
+	overflow: hidden scroll;
+}
+
+.wc-block-product-filter-dropdown__search-wrapper {
+	padding: $gap-small;
+	border-bottom: 1px solid $gray-400;
+	position: sticky;
+	top: 0;
+	background: $white;
+	z-index: 1;
+}
+
+.wc-block-product-filter-dropdown__search-input {
+	width: 100%;
+	padding: $gap-small;
+	border: 1px solid $gray-700;
+	border-radius: em(4px);
+	@include font-size(small);
+	box-sizing: border-box;
+	outline: none;
+
+	&:focus {
+		border-color: $gray-900;
+		box-shadow: 0 0 0 1px $gray-900;
+	}
+
+	&::placeholder {
+		color: $gray-600;
+	}
 }
 
 .wc-block-product-filter-dropdown__dropdown-option {
@@ -107,5 +137,9 @@
 	&:focus,
 	&.is-selected {
 		background-color: $gray-100;
+	}
+
+	&.is-hidden {
+		display: none;
 	}
 }
