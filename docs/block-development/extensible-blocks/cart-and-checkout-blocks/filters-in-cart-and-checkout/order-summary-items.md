@@ -176,7 +176,7 @@ registerCheckoutFilters( 'example-extension', {
 
 ### Description
 
-The `cartItemScreenReaderPrice` filter allows to format the order summary item price announced to screen reader and assistive technology users. There are no visual changes on the screen, the code changes can be seen in the `<span class="screen-reader-text">` included for each item in the cart.
+The `cartItemScreenReaderPrice` filter allows for formatting the order summary item price announced to screen reader and assistive technology users. There are no visual changes on the screen. The code changes can be seen in the `<span class="screen-reader-text">` included for each item in the cart.
 
 ### Parameters
 
