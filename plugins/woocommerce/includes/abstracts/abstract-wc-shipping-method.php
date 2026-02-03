@@ -393,7 +393,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 				$cart_item_data = $cart[ $cost_key ]['data'];
 				$tax_class      = ( $cart_item_data && is_callable( array( $cart_item_data, 'get_tax_class' ) ) )
 					? $cart_item_data->get_tax_class()
-					: '';
+					: null;
 				$item_tax_rates = WC_Tax::get_shipping_tax_rates( $tax_class );
 				$item_taxes     = WC_Tax::calc_shipping_tax( $amount, $item_tax_rates );
 
