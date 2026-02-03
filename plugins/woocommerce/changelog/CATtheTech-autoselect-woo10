@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Modified the Add to Cart + Options block to auto-select attribute fields, and display attributes in conflict

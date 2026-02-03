@@ -1102,6 +1102,16 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			);
 		}
 
+		// Filter by visibility in POS.
+		if ( true === $request['pos_products_only'] ) {
+			$args['tax_query'][] = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+				'taxonomy' => 'pos_product_visibility',
+				'field'    => 'slug',
+				'terms'    => 'pos-hidden',
+				'operator' => 'NOT IN',
+			);
+		}
+
 		$args['post_parent'] = $request['product_id'];
 
 		return $args;
@@ -1220,6 +1230,13 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 				'enum' => array_merge( array( 'future', 'trash' ), array_keys( get_post_statuses() ) ),
 			),
 			'sanitize_callback' => 'wp_parse_list',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
+		$params['pos_products_only'] = array(
+			'description'       => __( 'Limit result set to variations visible in Point of Sale.', 'woocommerce' ),
+			'type'              => 'boolean',
+			'sanitize_callback' => 'wc_string_to_bool',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 

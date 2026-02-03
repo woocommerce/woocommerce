@@ -109,9 +109,7 @@ export function ImportStatusBar(): JSX.Element | null {
 		}
 	};
 
-	// Disable button when an import is already scheduled/running or currently triggering
-	const isButtonDisabled =
-		status?.import_in_progress_or_due || isTriggeringImport;
+	const isBusy = status?.import_in_progress_or_due || isTriggeringImport;
 
 	return (
 		<div className="woocommerce-analytics-import-status-bar-wrapper">
@@ -157,15 +155,27 @@ export function ImportStatusBar(): JSX.Element | null {
 					<Button
 						variant="tertiary"
 						onClick={ handleTriggerImport }
-						disabled={ isButtonDisabled || isLoading }
-						isBusy={ isTriggeringImport }
+						disabled={ isLoading || isBusy }
+						aria-disabled={ isLoading || isBusy }
+						aria-busy={ isBusy }
 						className="woocommerce-analytics-import-status-bar__trigger"
-						aria-label={ __(
-							'Manually trigger analytics data import',
-							'woocommerce'
-						) }
+						aria-label={
+							isBusy
+								? __(
+										'Analytics data import in progress',
+										'woocommerce'
+								  )
+								: __(
+										'Manually trigger analytics data import',
+										'woocommerce'
+								  )
+						}
 					>
-						{ __( 'Update now', 'woocommerce' ) }
+						{ isBusy ? (
+							<Spinner />
+						) : (
+							__( 'Update now', 'woocommerce' )
+						) }
 					</Button>
 				</div>
 			</div>

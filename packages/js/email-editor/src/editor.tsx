@@ -6,7 +6,6 @@ import {
 	StrictMode,
 	createRoot,
 	useEffect,
-	useLayoutEffect,
 	useState,
 	useMemo,
 } from '@wordpress/element';
@@ -29,6 +28,7 @@ import {
 	initDomTracking,
 } from './events';
 import { initContentValidationMiddleware } from './middleware/content-validation';
+import { initHacks } from './hacks';
 import {
 	useContentValidation,
 	useRemoveSavingFailedNotices,
@@ -101,9 +101,10 @@ function onInit() {
 	initDomTracking();
 	createStore();
 	initContentValidationMiddleware();
-	initializeLayout();
 	initBlocks();
+	initHacks();
 	initTextHooks();
+	initializeLayout();
 }
 
 export function initialize( elementId: string ) {
@@ -157,7 +158,7 @@ export function ExperimentalEmailEditor( {
 } ) {
 	const [ isInitialized, setIsInitialized ] = useState( false );
 
-	useLayoutEffect( () => {
+	useEffect( () => {
 		const backupEditorSettings = select( editorStore ).getEditorSettings();
 		// Set configuration to store from window object for backward compatibility
 		const editorConfig = config || getEditorConfigFromWindow();

@@ -113,6 +113,7 @@ changes.json
 
 # Claude related files
 **/.claude/**/*.local.*
+CLAUDE.local.md
 
 # Cursor related files
 .cursorignore

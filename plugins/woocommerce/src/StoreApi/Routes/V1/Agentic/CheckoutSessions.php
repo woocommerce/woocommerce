@@ -107,23 +107,22 @@ class CheckoutSessions extends AbstractCartRoute {
 	/**
 	 * Check if the request is authorized.
 	 *
-	 * Delegates to the AgenticCheckoutUtils helper.
+	 * Validates that the request is signed with Jetpack blog token.
 	 *
-	 * @param \WP_REST_Request $request Request object.
 	 * @return bool|\WP_Error True if authorized, WP_Error otherwise.
 	 */
-	public function is_authorized( \WP_REST_Request $request ) {
-		return AgenticCheckoutUtils::is_authorized( $request );
+	public function is_authorized() {
+		return AgenticCheckoutUtils::validate_jetpack_request();
 	}
 
 	/**
 	 * Check if a nonce is required for the route.
 	 *
 	 * @param \WP_REST_Request $request Request object.
-	 * @return bool False, Bearer token auth used instead.
+	 * @return bool False, Jetpack blog token auth used instead.
 	 */
 	protected function requires_nonce( \WP_REST_Request $request ) {
-		// Should use `is_authorized` to validate Bearer token authentication.
+		// Uses Jetpack blog token authentication via is_authorized().
 		return false;
 	}
 
