@@ -657,7 +657,7 @@ class SessionDataCollector {
 	}
 
 	/**
-	 * Trim collected data array to ensure it stays within 3 MB size limit.
+	 * Trim collected data array to ensure it stays within 1 MB size limit.
 	 *
 	 * Removes oldest entries from the array until the serialized size is under the limit.
 	 * Always keeps at least one entry (the most recent).
