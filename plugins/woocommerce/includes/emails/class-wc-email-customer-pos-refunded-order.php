@@ -508,6 +508,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 		 * @return array Modified array of valid template class names.
 		 *
 		 * @since 10.6.0
+		 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
 		 */
 		public function add_to_valid_template_classes( $valid_template_classes, $order ) {
 			if ( ! PointOfSaleOrderUtil::is_pos_order( $order ) || ! $this->order_has_refunds( $order ) ) {
