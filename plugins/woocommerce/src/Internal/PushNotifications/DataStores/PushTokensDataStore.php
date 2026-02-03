@@ -59,7 +59,7 @@ class PushTokensDataStore {
 		if ( is_wp_error( $id ) ) {
 			// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			throw new WC_Data_Exception(
-				'woocommerce_rest_internal_error',
+				(string) $id->get_error_code(),
 				$id->get_error_message(),
 				WP_Http::INTERNAL_SERVER_ERROR
 			);
@@ -151,7 +151,7 @@ class PushTokensDataStore {
 		if ( is_wp_error( $result ) ) {
 			// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			throw new WC_Data_Exception(
-				'woocommerce_rest_internal_error',
+				(string) $result->get_error_code(),
 				$result->get_error_message(),
 				WP_Http::INTERNAL_SERVER_ERROR
 			);

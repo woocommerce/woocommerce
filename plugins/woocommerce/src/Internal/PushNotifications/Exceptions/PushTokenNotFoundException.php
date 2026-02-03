@@ -25,7 +25,7 @@ class PushTokenNotFoundException extends WC_Data_Exception {
 	 */
 	public function __construct() {
 		parent::__construct(
-			'woocommerce_rest_invalid_push_token',
+			'woocommerce_invalid_push_token',
 			'Push token could not be found.',
 			WP_Http::NOT_FOUND
 		);

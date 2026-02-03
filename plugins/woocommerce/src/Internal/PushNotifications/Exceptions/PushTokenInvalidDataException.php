@@ -26,7 +26,7 @@ class PushTokenInvalidDataException extends WC_Data_Exception {
 	 */
 	public function __construct( string $message ) {
 		parent::__construct(
-			'woocommerce_rest_invalid_argument',
+			'woocommerce_invalid_data',
 			$message,
 			WP_Http::BAD_REQUEST
 		);
