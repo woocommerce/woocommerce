@@ -10,6 +10,7 @@ The following Order Summary Items filters are available:
 
 -   `cartItemClass`
 -   `cartItemPrice`
+-   `cartItemScreenReaderPrice`
 -   `itemName`
 -   `subtotalPriceFormat`
 
@@ -166,6 +167,78 @@ const modifyCartItemPrice = ( defaultValue, extensions, args, validation ) => {
 
 registerCheckoutFilters( 'example-extension', {
 	cartItemPrice: modifyCartItemPrice,
+} );
+```
+
+> Filters can be also combined. See [Combined filters](/docs/block-development/extensible-blocks/cart-and-checkout-blocks/filters-in-cart-and-checkout/) for an example.
+
+## `cartItemScreenReaderPrice`
+
+### Description
+
+The `cartItemScreenReaderPrice` filter allows to format the order summary item price announced to screen reader and assistive technology users. There are no visual changes on the screen, the code changes can be seen in the `<span class="screen-reader-text">` included for each item in the cart.
+
+### Parameters
+
+-   _defaultValue_ `string` (default: `Total price for <quantity/> <productName/> item: <price/>` for purchases of a single item; `Total price for <quantity/> <productName/> items: <price/>` for purchases of multiple items) - The default order summary screen reader text.
+-   _extensions_ `object` (default: `{}`) - The extensions object.
+-   _args_ `object` - The arguments object with the following keys:
+    -   _cart_ `object` - The cart object from `wc/store/cart`, see [Cart object](#cart-object).
+    -   _cartItem_ `object` - The order summary item object from `wc/store/cart`, see [order summary item object](#cart-item-object).
+    -   _context_ `string` (`summary`) - The context of the item, fixed to match the context of other filters in the mini-cart summary.
+-   _validation_ `boolean` - Checks if the return value contains the substrings `<quantity/>`, `<productName/>` and `<price/>`.
+
+### Returns
+
+-   `string` - The modified format of the order summary item price, which must contain the substrings `<quantity/>`, `<productName/>` and `<price/>`.
+
+### Code examples
+
+#### Basic example
+
+```tsx
+const { registerCheckoutFilters } = window.wc.blocksCheckout;
+
+const modifyCartItemScreenReaderPrice = ( defaultValue, extensions, args, validation ) => {
+	const isOrderSummaryContext = args?.context === 'summary';
+
+	if ( ! isOrderSummaryContext ) {
+		return defaultValue;
+	}
+
+	return '<quantity/> <productName/> will cost <price/>';
+};
+
+registerCheckoutFilters( 'example-extension', {
+	cartItemScreenReaderPrice: modifyCartItemScreenReaderPrice,
+} );
+```
+
+#### Advanced example
+
+```tsx
+const { registerCheckoutFilters } = window.wc.blocksCheckout;
+
+const modifyCartItemScreenReaderPrice = ( defaultValue, extensions, args, validation ) => {
+	const isOrderSummaryContext = args?.context === 'summary';
+
+	if ( ! isOrderSummaryContext ) {
+		return defaultValue;
+	}
+
+	if ( args?.cartItem?.name === 'Beanie with Logo' ) {
+		return 'Total price for <quantity/> <productName/> item: <price/> to keep you warm';
+	}
+
+	if ( args?.cartItem?.name === 'Sunglasses' ) {
+		return 'Total price for <quantity/> <productName/> item: <price/> to keep you cool';
+	}
+
+	return defaultValue;
+};
+
+registerCheckoutFilters( 'example-extension', {
+	cartItemScreenReaderPrice: modifyCartItemScreenReaderPrice,
 } );
 ```
 
