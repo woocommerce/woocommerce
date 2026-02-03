@@ -88,15 +88,13 @@ class ApiClient {
 	 * @return string Decision: "allow" or "block".
 	 */
 	public function verify( array $event_data ): string {
-		$payload = array_filter( $event_data, fn( $value ) => null !== $value );
-
 		FraudProtectionController::log(
 			'info',
 			'Verifying session with Blackbox API',
-			array( 'payload' => $payload )
+			array( 'payload' => $event_data )
 		);
 
-		$response = $this->make_request( 'POST', self::VERIFY_ENDPOINT, $payload );
+		$response = $this->make_request( 'POST', self::VERIFY_ENDPOINT, $event_data );
 
 		return $this->process_decision_response( $response, $event_data );
 	}
