@@ -7,7 +7,6 @@ import type { ProductResponseItem } from '@woocommerce/types';
 /**
  * Internal dependencies
  */
-import type { SelectedAttributes } from './cart';
 import type { ProductsStore } from './products';
 import './products'; // Ensure store is registered (side effect)
 
@@ -27,6 +26,11 @@ const productsStore = store< ProductsStore >(
 /**
  * The per-block context shape for the product context store.
  * This is provided via data-wp-context attribute on the block wrapper.
+ *
+ * Note: selectedAttributes is intentionally NOT part of this context.
+ * It is managed by the add-to-cart-with-options form context because it's
+ * form-specific state. The product-context store only tracks which
+ * product/variation is being viewed, not form state like attribute selections.
  */
 export type ProductContextContext = {
 	/**
@@ -37,11 +41,6 @@ export type ProductContextContext = {
 	 * The selected variation ID, or null if no variation is selected.
 	 */
 	variationId: number | null;
-	/**
-	 * Internal mutable state for selected attributes.
-	 * Underscore prefix indicates private/internal state.
-	 */
-	selectedAttributes: SelectedAttributes[];
 };
 
 /**
@@ -57,11 +56,6 @@ export type ProductContextStoreState = {
 	 * The selected variation ID, or null if no variation is selected (reads from block context).
 	 */
 	variationId: number | null;
-	/**
-	 * Internal mutable state for selected attributes (reads from block context).
-	 * Underscore prefix indicates private/internal state.
-	 */
-	selectedAttributes: SelectedAttributes[];
 };
 
 /**
@@ -99,10 +93,6 @@ export type ProductContextStoreActions = {
 	 * Set the selected variation ID.
 	 */
 	setVariationId: ( id: number | null ) => void;
-	/**
-	 * Update an attribute in the selected attributes.
-	 */
-	setAttribute: ( attribute: string, value: string ) => void;
 };
 
 /**
@@ -126,7 +116,9 @@ export type ProductContextStore = {
  * Context structure (per-block via data-wp-context):
  * - productId: The main product ID
  * - variationId: The selected variation ID (or null)
- * - selectedAttributes: Internal array of selected attribute values
+ *
+ * Note: selectedAttributes is NOT part of this store. It's managed by the
+ * add-to-cart-with-options form context since it's form-specific state.
  *
  * Computed getters:
  * - product: The main product from products store
@@ -150,13 +142,6 @@ const productContextStore = store< ProductContextStore >(
 					'woocommerce/product-context'
 				);
 				return context?.variationId ?? null;
-			},
-
-			get selectedAttributes(): SelectedAttributes[] {
-				const context = getContext< ProductContextContext >(
-					'woocommerce/product-context'
-				);
-				return context?.selectedAttributes ?? [];
 			},
 
 			get product(): ProductResponseItem | undefined {
@@ -211,45 +196,7 @@ const productContextStore = store< ProductContextStore >(
 					context.variationId = id;
 				}
 			},
-
-			setAttribute( attribute: string, value: string ): void {
-				const context = getContext< ProductContextContext >(
-					'woocommerce/product-context'
-				);
-				if ( ! context ) {
-					return;
-				}
-
-				const attrs = context.selectedAttributes;
-				const existingIndex = attrs.findIndex(
-					( attr ) => attr.attribute === attribute
-				);
-
-				// Handle empty value = remove attribute
-				if ( value === '' ) {
-					if ( existingIndex >= 0 ) {
-						attrs.splice( existingIndex, 1 );
-					}
-					return;
-				}
-
-				if ( existingIndex >= 0 ) {
-					// Update existing attribute
-					attrs[ existingIndex ] = {
-						attribute,
-						value,
-					};
-				} else {
-					// Add new attribute
-					attrs.push( {
-						attribute,
-						value,
-					} );
-				}
-			},
 		},
 	},
 	{ lock: universalLock }
 );
-
-export type { SelectedAttributes };

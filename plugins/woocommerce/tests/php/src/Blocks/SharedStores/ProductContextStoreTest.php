@@ -19,77 +19,58 @@ class ProductContextStoreTest extends WP_UnitTestCase {
 	private string $consent = 'I acknowledge that using experimental APIs means my theme or plugin will inevitably break in the next version of WooCommerce';
 
 	/**
-	 * @testdox Attribute formatting converts key-value pairs to object format.
+	 * @testdox get_context_data returns productId and variationId.
 	 */
-	public function test_formats_key_value_attributes_to_objects(): void {
+	public function test_get_context_data_returns_product_and_variation_ids(): void {
 		$result = ProductContextStore::get_context_data(
 			$this->consent,
 			123,
-			null,
-			array(
-				'pa_color' => 'red',
-				'pa_size'  => 'large',
-			)
+			456
 		);
 
-		$expected = array(
-			array(
-				'attribute' => 'pa_color',
-				'value'     => 'red',
-			),
-			array(
-				'attribute' => 'pa_size',
-				'value'     => 'large',
-			),
-		);
-
-		$this->assertSame( $expected, $result['_selectedAttributes'] );
+		$this->assertArrayHasKey( 'productId', $result );
+		$this->assertSame( 123, $result['productId'] );
+		$this->assertArrayHasKey( 'variationId', $result );
+		$this->assertSame( 456, $result['variationId'] );
 	}
 
 	/**
-	 * @testdox Attribute formatting passes through already-formatted attributes unchanged.
+	 * @testdox get_context_data returns null variationId when not provided.
 	 */
-	public function test_passes_through_formatted_attributes(): void {
-		$attributes = array(
-			array(
-				'attribute' => 'pa_color',
-				'value'     => 'red',
-			),
+	public function test_get_context_data_returns_null_variation_id_when_not_provided(): void {
+		$result = ProductContextStore::get_context_data(
+			$this->consent,
+			123
 		);
 
-		$result = ProductContextStore::get_context_data( $this->consent, 123, null, $attributes );
-
-		$this->assertSame( $attributes, $result['_selectedAttributes'] );
+		$this->assertArrayHasKey( 'productId', $result );
+		$this->assertSame( 123, $result['productId'] );
+		$this->assertArrayHasKey( 'variationId', $result );
+		$this->assertNull( $result['variationId'] );
 	}
 
 	/**
-	 * @testdox Attribute formatting handles mixed format attributes.
+	 * @testdox get_context_data does not include selectedAttributes.
 	 */
-	public function test_handles_mixed_attribute_formats(): void {
+	public function test_get_context_data_does_not_include_selected_attributes(): void {
 		$result = ProductContextStore::get_context_data(
 			$this->consent,
 			123,
-			null,
-			array(
-				'pa_color' => 'red',
-				array(
-					'attribute' => 'pa_size',
-					'value'     => 'large',
-				),
-			)
+			456
 		);
 
-		$expected = array(
-			array(
-				'attribute' => 'pa_color',
-				'value'     => 'red',
-			),
-			array(
-				'attribute' => 'pa_size',
-				'value'     => 'large',
-			),
-		);
+		$this->assertArrayNotHasKey( 'selectedAttributes', $result );
+	}
 
-		$this->assertSame( $expected, $result['_selectedAttributes'] );
+	/**
+	 * @testdox get_context_data throws exception without consent.
+	 */
+	public function test_get_context_data_throws_without_consent(): void {
+		$this->expectException( \InvalidArgumentException::class );
+
+		ProductContextStore::get_context_data(
+			'wrong consent',
+			123
+		);
 	}
 }

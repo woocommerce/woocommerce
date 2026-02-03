@@ -41,9 +41,8 @@ class ProductContextStore {
 	 * @var array
 	 */
 	private static array $context_state = array(
-		'productId'           => 0,
-		'variationId'         => null,
-		'selectedAttributes' => array(),
+		'productId'   => 0,
+		'variationId' => null,
 	);
 
 	/**
@@ -80,18 +79,19 @@ class ProductContextStore {
 	 * This sets up the product context and ensures the product data is also
 	 * loaded via ProductsStore.
 	 *
-	 * @param string     $consent_statement    The consent statement string.
-	 * @param int        $product_id           The product ID.
-	 * @param int|null   $variation_id         The variation ID (optional).
-	 * @param array      $selected_attributes  The selected attributes (optional).
+	 * Note: selectedAttributes is NOT loaded here because it's form-specific
+	 * state managed by the add-to-cart-with-options context.
+	 *
+	 * @param string   $consent_statement The consent statement string.
+	 * @param int      $product_id        The product ID.
+	 * @param int|null $variation_id      The variation ID (optional).
 	 * @return void
 	 * @throws InvalidArgumentException If consent statement doesn't match.
 	 */
 	public static function load_context(
 		string $consent_statement,
 		int $product_id,
-		?int $variation_id = null,
-		array $selected_attributes = array()
+		?int $variation_id = null
 	): void {
 		self::check_consent( $consent_statement );
 
@@ -104,9 +104,8 @@ class ProductContextStore {
 		}
 
 		// Update the context state.
-		self::$context_state['productId']           = $product_id;
-		self::$context_state['variationId']         = $variation_id;
-		self::$context_state['selectedAttributes'] = self::format_selected_attributes( $selected_attributes );
+		self::$context_state['productId']   = $product_id;
+		self::$context_state['variationId'] = $variation_id;
 
 		self::$context_loaded = true;
 		self::register_state();
@@ -118,52 +117,27 @@ class ProductContextStore {
 	 * This provides the per-block context data that enables multiple
 	 * Add to Cart blocks on the same page to operate independently.
 	 *
-	 * @param string     $consent_statement    The consent statement string.
-	 * @param int        $product_id           The product ID.
-	 * @param int|null   $variation_id         The variation ID if pre-selected.
-	 * @param array      $selected_attributes  The pre-selected attributes.
+	 * Note: selectedAttributes is intentionally NOT included here because it's
+	 * managed by the add-to-cart-with-options form context. The product-context
+	 * store only tracks which product/variation is being viewed, not form state.
+	 *
+	 * @param string   $consent_statement The consent statement string.
+	 * @param int      $product_id        The product ID.
+	 * @param int|null $variation_id      The variation ID if pre-selected.
 	 * @return array The context data for data-wp-context.
 	 * @throws InvalidArgumentException If consent statement doesn't match.
 	 */
 	public static function get_context_data(
 		string $consent_statement,
 		int $product_id,
-		?int $variation_id = null,
-		array $selected_attributes = array()
+		?int $variation_id = null
 	): array {
 		self::check_consent( $consent_statement );
 
 		return array(
-			'productId'           => $product_id,
-			'variationId'         => $variation_id,
-			'selectedAttributes' => self::format_selected_attributes( $selected_attributes ),
+			'productId'   => $product_id,
+			'variationId' => $variation_id,
 		);
 	}
 
-	/**
-	 * Format selected attributes array for the store.
-	 *
-	 * Converts various input formats to the standard { attribute, value } format.
-	 *
-	 * @param array $attributes The attributes to format.
-	 * @return array Formatted attributes array.
-	 */
-	private static function format_selected_attributes( array $attributes ): array {
-		$formatted = array();
-
-		foreach ( $attributes as $key => $value ) {
-			// If already in the correct format, use as-is.
-			if ( is_array( $value ) && isset( $value['attribute'] ) && isset( $value['value'] ) ) {
-				$formatted[] = $value;
-			} else {
-				// Convert key-value pair to object format.
-				$formatted[] = array(
-					'attribute' => (string) $key,
-					'value'     => (string) $value,
-				);
-			}
-		}
-
-		return $formatted;
-	}
 }
