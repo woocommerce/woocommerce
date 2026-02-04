@@ -75,6 +75,8 @@ class OrdersVersionStringInvalidator {
 		add_action( 'woocommerce_refund_deleted', array( $this, 'handle_woocommerce_refund_deleted' ), 10, 2 );
 	}
 
+	// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+
 	/**
 	 * Handle the woocommerce_before_order_object_save hook.
 	 *
@@ -111,7 +113,7 @@ class OrdersVersionStringInvalidator {
 	 *
 	 * @internal
 	 */
-	public function handle_woocommerce_new_order( $order_id, $_order ): void {
+	public function handle_woocommerce_new_order( $order_id, $order ): void {
 		$this->invalidate( (int) $order_id );
 		$this->invalidate_orders_list();
 	}
@@ -170,7 +172,7 @@ class OrdersVersionStringInvalidator {
 	 *
 	 * @internal
 	 */
-	public function handle_woocommerce_before_delete_order( $order_id, $_order ): void {
+	public function handle_woocommerce_before_delete_order( $order_id, $order ): void {
 		$this->invalidate( (int) $order_id );
 		$this->invalidate_orders_list();
 	}
@@ -203,7 +205,7 @@ class OrdersVersionStringInvalidator {
 	 *
 	 * @internal
 	 */
-	public function handle_woocommerce_untrash_order( $order_id, $_previous_status ): void {
+	public function handle_woocommerce_untrash_order( $order_id, $previous_status ): void {
 		$this->invalidate( (int) $order_id );
 		$this->invalidate_orders_list();
 	}
@@ -225,7 +227,7 @@ class OrdersVersionStringInvalidator {
 	 *
 	 * @internal
 	 */
-	public function handle_woocommerce_order_status_changed( $order_id, $_from_status, $_to_status, $_order ): void {
+	public function handle_woocommerce_order_status_changed( $order_id, $from_status, $to_status, $order ): void {
 		$this->invalidate( (int) $order_id );
 		$this->invalidate_orders_list();
 	}
@@ -273,6 +275,8 @@ class OrdersVersionStringInvalidator {
 		$this->invalidate_order_refunds_list( $order_id );
 		$this->invalidate_refunds_list();
 	}
+
+	// phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 
 	/**
 	 * Invalidate an order version string.
