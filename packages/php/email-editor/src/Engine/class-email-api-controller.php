@@ -140,7 +140,6 @@ class Email_Api_Controller {
 			 * Fires before retrieving personalization tags, allowing extensions
 			 * to register or modify tags based on the post context.
 			 *
-			 * @since 9.8.0
 			 * @param int $post_id The post ID for context-aware tag handling.
 			 */
 			do_action( 'woocommerce_email_editor_personalization_tags_for_post', $post_id );
