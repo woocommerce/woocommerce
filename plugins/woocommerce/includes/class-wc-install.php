@@ -700,7 +700,8 @@ class WC_Install {
 		// Delete the transient BEFORE the option to avoid races that might result in an active lock with an empty transient.
 		delete_transient( 'wc_installing' );
 
-		delete_option( 'wc_installing' );
+		global $wpdb;
+		$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name = 'wc_installing'" );
 	}
 
 	/**
