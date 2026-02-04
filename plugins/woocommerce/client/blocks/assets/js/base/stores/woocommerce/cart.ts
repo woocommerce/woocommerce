@@ -407,6 +407,9 @@ const { state, actions } = store< Store >(
 
                     // DEGRADATION CHECK: If server returns fewer items than client has, 
                     // keep client state to prevent UI jumps/glitches.
+                    // NOTE: This is a "Client Wins" strategy. We intentionally ignore server state
+                    // here to preserve UX during rapid clicks. Real discrepancies (e.g. stock depletion)
+                    // will be resolved by the next scheduled refresh or page reload.
                     const serverCount = getCount( json );
                     if ( serverCount < clientCount ) {
                         if ( json.errors && json.errors.length > 0 ) {
@@ -550,7 +553,6 @@ const { state, actions } = store< Store >(
                     
                     // DEGRADATION CHECK
                     if ( lastSuccessBody && getCount( lastSuccessBody ) < clientCount ) {
-                        if ( json.errors ) yield actions.updateNotices( json.errors.map( generateErrorNotice ), true );
                         return;
                     }
 
