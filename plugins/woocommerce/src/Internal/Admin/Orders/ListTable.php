@@ -868,18 +868,14 @@ class ListTable extends WP_List_Table {
 	protected function get_months_filter_options(): array {
 		global $wpdb;
 
-		// Optimization note: We improved SQL performance by selecting the first and last order rows instead of scanning all orders
-		// for minimum and maximum dates. This approach assumes that orders and table entries are chronologically aligned. If the
-		// initial assumptions are not met, such as when the store is customized or order dates are in disarray, the worst-case scenario
-		// is that the month filter values will be inaccurate. In this case, additional customization will be required on the store side.
 		$table_name     = OrdersTableDataStore::get_orders_table_name();
 		$min_max_months = $wpdb->get_row(
 			$wpdb->prepare(
 				"SELECT MIN(date_created_gmt) as min_date_gmt, MAX(date_created_gmt) as max_date_gmt
 				 FROM (
-					( SELECT date_created_gmt FROM %i WHERE type = %s AND status != 'trash' ORDER BY id DESC LIMIT 1 )
+					( SELECT date_created_gmt FROM %i WHERE type = %s AND status != 'trash' ORDER BY date_created_gmt DESC LIMIT 1 )
 					UNION ALL
-					( SELECT date_created_gmt FROM %i WHERE type = %s AND status != 'trash' ORDER BY id ASC LIMIT 1 )
+					( SELECT date_created_gmt FROM %i WHERE type = %s AND status != 'trash' ORDER BY date_created_gmt ASC LIMIT 1 )
 				 ) d",
 				$table_name,
 				$this->order_type,
