@@ -616,93 +616,55 @@ class Cart extends ControllerTestCase {
 	}
 
 	/**
-	 * Test Store API uses SessionHandler when Cart-Token is present before cart load.
+	 * Test Store API uses SessionHandler when Cart-Token is present via REQUEST_URI.
 	 */
 	public function test_store_api_uses_session_handler_for_cart_token() {
 		$customer_id = (string) wc()->session->get_customer_id();
 		$token       = CartTokenUtils::get_cart_token( $customer_id );
 
-		// Persist the current session to storage.
-		WC()->session->set_customer_session_cookie( true );
-		WC()->session->save_data();
-
-		$original_rest_route = $GLOBALS['wp']->query_vars['rest_route'] ?? null;
-		$original_cart_token = isset( $_SERVER['HTTP_CART_TOKEN'] )
-			? wp_unslash( $_SERVER['HTTP_CART_TOKEN'] ) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- test cleanup only.
-			: null;
+		// Preserve globals.
+		$old_server = $_SERVER;
 
 		try {
-			// Simulate a Store API request with Cart-Token before session/cart init.
-			$GLOBALS['wp']->query_vars['rest_route'] = '/wc/store/v1/cart';
-			$_SERVER['HTTP_CART_TOKEN']              = $token;
+			// Simulate a Store API request with valid Cart-Token.
+			$_SERVER['REQUEST_URI']     = '/' . rest_get_url_prefix() . '/wc/store/v1/cart';
+			$_SERVER['HTTP_CART_TOKEN'] = $token;
 
-			// Fires parse_request so Store API context is captured before session selection.
-			// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment
-			/** This action is documented in wp-include/parse.php */
-			do_action( 'parse_request', $GLOBALS['wp'] );
-			// phpcs:enable WooCommerce.Commenting.CommentHooks.MissingSinceComment
+			$authentication = new Authentication();
+			$result         = $authentication->maybe_use_store_api_session_handler( 'WC_Session_Handler' );
 
-			WC()->session = null;
-			WC()->cart    = null;
-
-			WC()->initialize_session();
-			WC()->initialize_cart();
-
-			WC()->cart->get_cart_from_session();
-
-			$this->assertInstanceOf( SessionHandler::class, WC()->session );
-			$this->assertEquals( 3, WC()->cart->get_cart_contents_count() );
+			$this->assertSame( SessionHandler::class, $result );
 		} finally {
-			if ( null === $original_rest_route ) {
-				unset( $GLOBALS['wp']->query_vars['rest_route'] );
-			} else {
-				$GLOBALS['wp']->query_vars['rest_route'] = $original_rest_route;
-			}
-
-			if ( null === $original_cart_token ) {
-				unset( $_SERVER['HTTP_CART_TOKEN'] );
-			} else {
-				$_SERVER['HTTP_CART_TOKEN'] = $original_cart_token;
-			}
+			// Restore globals.
+			$_SERVER = $old_server;
 		}
 	}
 
 	/**
-	 * Test Store API context is set via parse_request for rest_route requests.
+	 * Test Store API uses SessionHandler when rest_route GET parameter is present.
 	 */
-	public function test_rest_route_parse_request_sets_store_api_context() {
+	public function test_rest_route_get_parameter_uses_store_api_session_handler() {
 		$customer_id = (string) wc()->session->get_customer_id();
 		$token       = CartTokenUtils::get_cart_token( $customer_id );
-
-		// Persist the current session to storage.
-		WC()->session->set_customer_session_cookie( true );
-		WC()->session->save_data();
 
 		// Preserve globals.
 		$old_get    = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Test context.
 		$old_server = $_SERVER;
 
-		$_GET['rest_route']         = '/wc/store/v1/cart';
-		$_SERVER['REQUEST_URI']     = '/?rest_route=/wc/store/v1/cart';
-		$_SERVER['QUERY_STRING']    = 'rest_route=/wc/store/v1/cart';
-		$_SERVER['HTTP_CART_TOKEN'] = $token;
+		try {
+			// Simulate a Store API request via GET parameter with valid Cart-Token.
+			$_GET['rest_route']         = '/wc/store/v1/cart';
+			$_SERVER['HTTP_CART_TOKEN'] = $token;
 
-		$GLOBALS['wp']->parse_request();
+			$authentication = new Authentication();
+			$result         = $authentication->maybe_use_store_api_session_handler( 'WC_Session_Handler' );
 
-		WC()->session = null;
-		WC()->cart    = null;
-
-		WC()->initialize_session();
-		WC()->initialize_cart();
-
-		WC()->cart->get_cart_from_session();
-
-		$this->assertInstanceOf( SessionHandler::class, WC()->session );
-		$this->assertEquals( 3, WC()->cart->get_cart_contents_count() );
-
-		// Restore globals.
-		$_GET    = $old_get;
-		$_SERVER = $old_server;
+			$this->assertSame( SessionHandler::class, $result );
+		} finally {
+			// Restore globals.
+			$_GET    = $old_get;
+			$_SERVER = $old_server;
+		}
 	}
 
 	/**
@@ -713,26 +675,22 @@ class Cart extends ControllerTestCase {
 		$token       = CartTokenUtils::get_cart_token( $customer_id );
 
 		// Preserve globals.
-		$old_get    = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Test context.
 		$old_server = $_SERVER;
 
-		$_GET['rest_route']         = '/wp/v2/posts';
-		$_SERVER['REQUEST_URI']     = '/?rest_route=/wp/v2/posts';
-		$_SERVER['QUERY_STRING']    = 'rest_route=/wp/v2/posts';
-		$_SERVER['HTTP_CART_TOKEN'] = $token;
+		try {
+			// Simulate a non-Store API request (even with valid Cart-Token).
+			$_SERVER['REQUEST_URI']     = '/' . rest_get_url_prefix() . '/wp/v2/posts';
+			$_SERVER['HTTP_CART_TOKEN'] = $token;
 
-		$GLOBALS['wp']->parse_request();
+			$authentication = new Authentication();
+			$result         = $authentication->maybe_use_store_api_session_handler( 'WC_Session_Handler' );
 
-		WC()->session = null;
-		WC()->cart    = null;
-
-		WC()->initialize_session();
-
-		$this->assertInstanceOf( \WC_Session_Handler::class, WC()->session );
-
-		// Restore globals.
-		$_GET    = $old_get;
-		$_SERVER = $old_server;
+			// Should return the default handler for non-Store API routes.
+			$this->assertSame( 'WC_Session_Handler', $result );
+		} finally {
+			// Restore globals.
+			$_SERVER = $old_server;
+		}
 	}
 
 	/**

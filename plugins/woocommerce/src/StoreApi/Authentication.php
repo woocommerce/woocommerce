@@ -11,13 +11,6 @@ use Automattic\WooCommerce\Utilities\FeaturesUtil;
  */
 class Authentication {
 	/**
-	 * Track whether current request targets the Store API.
-	 *
-	 * @since 10.6.0
-	 * @var bool|null
-	 */
-	private $is_store_api_request = null;
-	/**
 	 * Hook into WP lifecycle events. This is hooked by the StoreAPI class on `rest_api_init`.
 	 */
 	public function init() {
@@ -48,20 +41,6 @@ class Authentication {
 	}
 
 	/**
-	 * Capture Store API request context early in the request lifecycle.
-	 *
-	 * @since 10.6.0
-	 * @param \WP $wp WP instance.
-	 */
-	public function capture_store_api_request_context( $wp ): void {
-		if ( is_object( $wp ) && isset( $wp->query_vars['rest_route'] ) ) {
-			$this->is_store_api_request = 0 === strpos( (string) $wp->query_vars['rest_route'], '/wc/store/' );
-			return;
-		}
-		$this->is_store_api_request = false;
-	}
-
-	/**
 	 * Use the Store API session handler when a valid Cart-Token is present.
 	 *
 	 * @since 10.6.0
@@ -69,26 +48,7 @@ class Authentication {
 	 * @return string
 	 */
 	public function maybe_use_store_api_session_handler( $handler ): string {
-		if ( null === $this->is_store_api_request ) {
-			$rest_route = null;
-			if ( isset( $_GET['rest_route'] ) && is_string( $_GET['rest_route'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Store API context check.
-				$rest_route = esc_url_raw( wp_unslash( $_GET['rest_route'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Store API context check.
-			}
-
-			$rest_route  = is_string( $rest_route ) ? rawurldecode( $rest_route ) : '';
-			$request_uri = isset( $_SERVER['REQUEST_URI'] ) && is_string( $_SERVER['REQUEST_URI'] )
-				? esc_url_raw( wp_unslash( $_SERVER['REQUEST_URI'] ) )
-				: '';
-			$rest_prefix = rest_get_url_prefix();
-			$rest_path   = $rest_prefix ? '/' . $rest_prefix . '/wc/store/' : '';
-
-			$this->is_store_api_request = (
-				( '' !== $rest_route && 0 === strpos( $rest_route, '/wc/store/' ) ) ||
-				( '' !== $rest_path && '' !== $request_uri && false !== strpos( $request_uri, $rest_path ) )
-			);
-		}
-
-		if ( false === $this->is_store_api_request ) {
+		if ( ! WC()->is_store_api_request() && ! $this->has_store_api_route_as_get_parameter() ) {
 			return $handler;
 		}
 
@@ -154,6 +114,22 @@ class Authentication {
 		}
 
 		return $served;
+	}
+
+	/**
+	 * Checks if the request has a store API route as a GET `rest_route` parameter.
+	 *
+	 * @return bool
+	 */
+	protected function has_store_api_route_as_get_parameter(): bool {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Store API
+		if ( ! isset( $_GET['rest_route'] ) || ! is_string( $_GET['rest_route'] ) ) {
+			return false;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Store API context check.
+		$rest_route = rawurldecode( esc_url_raw( wp_unslash( $_GET['rest_route'] ) ) );
+		return 0 === strpos( $rest_route, '/wc/store/' );
 	}
 
 	/**
