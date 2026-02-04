@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix POS catalog cleanup job to schedule deletion for each generated file instead of only the first one.
