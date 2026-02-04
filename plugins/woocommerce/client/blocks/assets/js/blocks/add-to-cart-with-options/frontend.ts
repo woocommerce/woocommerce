@@ -1,7 +1,12 @@
 /**
  * External dependencies
  */
-import { store, getContext, getConfig } from '@wordpress/interactivity';
+import {
+	store,
+	getContext,
+	getConfig,
+	withSyncEvent,
+} from '@wordpress/interactivity';
 import type {
 	Store as WooCommerce,
 	SelectedAttributes,
@@ -330,7 +335,7 @@ const { actions, state } = store<
 					validationErrors.length = 0;
 				}
 			},
-			*addToCart( event: SubmitEvent ) {
+			addToCart: withSyncEvent( function* ( event: SubmitEvent ) {
 				event.preventDefault();
 
 				const { isFormValid } = state;
@@ -416,7 +421,7 @@ const { actions, state } = store<
 						showCartUpdatesNotices: false,
 					}
 				);
-			},
+			} ),
 		},
 	},
 	{ lock: universalLock }
