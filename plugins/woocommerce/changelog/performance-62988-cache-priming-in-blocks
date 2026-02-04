@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Products: reduced the number of SQL queries required to display upsell and related products on the product page.
