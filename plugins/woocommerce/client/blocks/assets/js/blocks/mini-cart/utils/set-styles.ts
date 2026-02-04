@@ -17,39 +17,6 @@ function getClosestColor(
 	return getClosestColor( element.parentElement, colorType );
 }
 
-let miniCartStyleSheet: CSSStyleSheet | null = null;
-
-let storedBodyBackgroundColor: string | null = null;
-let storedBadgeTextColor: string | null = null;
-let storedBadgeBackgroundColor: string | null = null;
-
-/**
- * Generates the CSS rules for mini-cart styles.
- */
-function generateStyleRules(): string {
-	return `
-		div:where(.wp-block-woocommerce-mini-cart-contents) {
-			background-color: ${ storedBodyBackgroundColor };
-		}
-		span:where(.wc-block-mini-cart__badge) {
-			background-color: ${ storedBadgeBackgroundColor };
-			color: ${ storedBadgeTextColor };
-		}
-	`;
-}
-
-/**
- * Re-applies mini-cart styles. This is needed because after iAPI navigation,
- * stylesheet rules may stop being applied correctly.
- */
-export function reapplyStyles(): void {
-	if ( ! miniCartStyleSheet || ! storedBadgeTextColor ) {
-		return;
-	}
-
-	miniCartStyleSheet.replaceSync( generateStyleRules() );
-}
-
 function setStyles() {
 	/**
 	 * Get the background color of the body then set it as the background color
@@ -58,26 +25,33 @@ function setStyles() {
 	 * We only set the background color, instead of the whole background. As
 	 * we only provide the option to customize the background color.
 	 */
-	storedBodyBackgroundColor = getComputedStyle(
-		document.body
-	).backgroundColor;
-
+	const style = document.createElement( 'style' );
+	const backgroundColor = getComputedStyle( document.body ).backgroundColor;
 	// For simplicity, we only consider the background color of the first Mini-Cart button.
 	const firstMiniCartButton = document.querySelector(
 		'.wc-block-mini-cart__button'
 	);
-	storedBadgeTextColor =
+	const badgeTextColor =
 		getClosestColor( firstMiniCartButton, 'backgroundColor' ) || '#fff';
-	storedBadgeBackgroundColor =
+	const badgeBackgroundColor =
 		getClosestColor( firstMiniCartButton, 'color' ) || '#000';
 
-	miniCartStyleSheet = new CSSStyleSheet();
-	miniCartStyleSheet.replaceSync( generateStyleRules() );
+	// We use :where here to reduce specificity so customized colors and theme
+	// CSS take priority.
+	// We need to set `div` and `span` in the selector so it has more specificity than the CSS.
+	style.appendChild(
+		document.createTextNode(
+			`div:where(.wp-block-woocommerce-mini-cart-contents) {
+				background-color: ${ backgroundColor };
+			}
+			span:where(.wc-block-mini-cart__badge) {
+				background-color: ${ badgeBackgroundColor };
+				color: ${ badgeTextColor };
+			}`
+		)
+	);
 
-	document.adoptedStyleSheets = [
-		...document.adoptedStyleSheets,
-		miniCartStyleSheet,
-	];
+	document.head.appendChild( style );
 }
 
 export default setStyles;

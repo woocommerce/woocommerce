@@ -605,11 +605,11 @@ class MiniCart extends AbstractBlock {
 				data-wp-on-document--wc-blocks_added_to_cart---open-drawer="actions.openDrawer"
 				<?php endif; ?>
 				data-wp-watch="callbacks.disableScrollingOnBody"
-				data-wp-watch--badge-styles="callbacks.reapplyBadgeStyles"
+				data-wp-init--mark-as-hydrated="callbacks.markAsHydrated"
 				class="<?php echo esc_attr( $wrapper_classes ); ?>"
 				style="<?php echo esc_attr( $wrapper_styles ); ?>"
 			>
-				<button 
+				<button
 					data-wp-on--click="actions.openDrawer"
 					data-wp-bind--aria-label="state.buttonAriaLabel"
 					class="wc-block-mini-cart__button"
@@ -620,8 +620,15 @@ class MiniCart extends AbstractBlock {
 							// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 							echo $icon;
 						?>
-						<?php if ( 'never' !== $product_count_visibility ) : ?>
-							<span data-wp-bind--hidden="!state.badgeIsVisible" data-wp-text="state.totalItemsInCart" class="wc-block-mini-cart__badge" style="<?php echo esc_attr( $styles ); ?>">
+							<?php if ( 'never' !== $product_count_visibility ) : ?>
+								<span
+									data-wp-style--background-color="state.badgeBackgroundColor"
+									data-wp-style--color="state.badgeTextColor"
+									data-wp-bind--hidden="!state.badgeIsVisible"
+									data-wp-text="state.totalItemsInCart"
+									class="wc-block-mini-cart__badge"
+									style="<?php echo esc_attr( $styles ); ?>"
+								>
 							</span>
 						<?php endif; ?>
 					</span>
