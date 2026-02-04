@@ -55,7 +55,7 @@ class BlackboxScriptHandlerTest extends WC_Unit_Test_Case {
 		global $wp, $post;
 		unset( $wp->query_vars['order-pay'] );
 		unset( $wp->query_vars['add-payment-method'] );
-		$post = null;
+		$post = null; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Test teardown cleanup.
 	}
 
 	/**
@@ -203,7 +203,7 @@ class BlackboxScriptHandlerTest extends WC_Unit_Test_Case {
 	 */
 	private function mock_post_with_checkout_block(): void {
 		global $post;
-		$post = $this->factory()->post->create_and_get(
+		$post = $this->factory()->post->create_and_get( // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Test needs to simulate a page with checkout block.
 			array( 'post_content' => '<!-- wp:woocommerce/checkout --><div class="wp-block-woocommerce-checkout"></div><!-- /wp:woocommerce/checkout -->' )
 		);
 	}
