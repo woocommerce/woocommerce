@@ -673,6 +673,8 @@ class WC_Install {
 			)
 		);
 		if ( $inserted ) {
+			// Set the transient for backward compatibility in case others are relying on it to signal an ongoing install.
+			set_transient( 'wc_installing', 'yes', MINUTE_IN_SECONDS * 10 );
 			return true;
 		}
 
@@ -696,7 +698,10 @@ class WC_Install {
 	 * @return bool True if the lock was released, false otherwise. (False could also mean the lock was not present).
 	 */
 	private static function release_lock() {
-		return delete_option( 'wc_installing' );
+		// Delete the transient BEFORE the option to avoid races that might result in an active lock with an empty transient.
+		delete_transient( 'wc_installing' );
+
+		delete_option( 'wc_installing' );
 	}
 
 	/**
