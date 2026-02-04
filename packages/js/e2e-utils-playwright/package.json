@@ -66,7 +66,6 @@
 		}
 	},
 	"devDependencies": {
-		"@playwright/test": "1.50.x",
 		"@types/jest": "29.5.x",
 		"@types/node": "20.x.x",
 		"@woocommerce/eslint-plugin": "workspace:*",
@@ -77,9 +76,6 @@
 		"ts-jest": "29.1.x",
 		"typescript": "5.7.x",
 		"wireit": "0.14.12"
-	},
-	"peerDependencies": {
-		"@playwright/test": ">=1.40.0"
 	},
 	"dependencies": {
 		"axios": "^1.6.0",
