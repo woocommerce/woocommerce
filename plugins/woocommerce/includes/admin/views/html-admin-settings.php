@@ -46,30 +46,32 @@ if ( array_key_exists( 'advanced', $tabs ) ) {
 	$tabs['advanced'] = $advanced;
 }
 
-/**
- * Generates opening and closing link tags for marketplace links.
- *
- * @param string $url         The URL for the link.
- * @param bool   $is_external Whether the link is external (opens in new tab).
- * @return array Array with 'open' and 'close' keys for link tags.
- */
-$get_marketplace_link_tags = function ( $url, $is_external = true ) {
-	if ( $is_external ) {
-		$icon_url      = WC()->plugin_url() . '/assets/images/icons/external-link.svg';
-		$external_icon = '<img src="' . esc_url( $icon_url ) . '" alt="" />';
-		$screen_reader = '<span class="screen-reader-text">' . esc_html__( '(opens in a new tab)', 'woocommerce' ) . '</span>';
+if ( ! function_exists( 'wc_settings_get_marketplace_link_tags' ) ) {
+	/**
+	 * Generates opening and closing link tags for marketplace links.
+	 *
+	 * @param string $url         The URL for the link.
+	 * @param bool   $is_external Whether the link is external (opens in new tab).
+	 * @return array Array with 'open' and 'close' keys for link tags.
+	 */
+	function wc_settings_get_marketplace_link_tags( string $url, bool $is_external = true ): array {
+		if ( $is_external ) {
+			$icon_url      = WC()->plugin_url() . '/assets/images/icons/external-link.svg';
+			$external_icon = '<img src="' . esc_url( $icon_url ) . '" alt="" />';
+			$screen_reader = '<span class="screen-reader-text">' . esc_html__( '(opens in a new tab)', 'woocommerce' ) . '</span>';
+
+			return array(
+				'open'  => '<a href="' . esc_url( $url ) . '" target="_blank" rel="noopener noreferrer">' . $external_icon,
+				'close' => $screen_reader . '</a>',
+			);
+		}
 
 		return array(
-			'open'  => '<a href="' . esc_url( $url ) . '" target="_blank" rel="noopener noreferrer">' . $external_icon,
-			'close' => $screen_reader . '</a>',
+			'open'  => '<a href="' . esc_url( $url ) . '">',
+			'close' => '</a>',
 		);
 	}
-
-	return array(
-		'open'  => '<a href="' . esc_url( $url ) . '">',
-		'close' => '</a>',
-	);
-};
+}
 
 $marketplace_base_url = 'https://woocommerce.com/product-category/woocommerce-extensions/';
 $marketplace_links    = array(
@@ -155,7 +157,7 @@ $marketplace_link_messages = array(
 			<?php if ( isset( $marketplace_link_messages[ $current_tab ] ) && isset( $marketplace_links[ $current_tab ] ) ) : ?>
 				<?php
 				$link_config = $marketplace_links[ $current_tab ];
-				$link_tags   = $get_marketplace_link_tags( $link_config['url'], $link_config['is_external'] );
+				$link_tags   = wc_settings_get_marketplace_link_tags( $link_config['url'], $link_config['is_external'] );
 				?>
 			<p class="wc-settings-marketplace-link" data-settings-tab="<?php echo esc_attr( $current_tab ); ?>"<?php echo $current_section ? ' data-settings-section="' . esc_attr( $current_section ) . '"' : ''; ?>>
 				<?php
