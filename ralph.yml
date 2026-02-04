@@ -1,0 +1,112 @@
+# Specification-First Development
+# Pattern: Contract-First Pipeline
+# The spec is the contract. Implementation follows.
+#
+# Usage:
+#   ralph run --config presets/spec-driven.yml --prompt "Build a rate limiter"
+
+event_loop:
+  starting_event: "spec.start"  # Ralph publishes this after coordination
+
+hats:
+  spec_writer:
+    name: "📋 Spec Writer"
+    description: "Creates precise, unambiguous specifications with examples."
+    triggers: ["spec.start", "spec.rejected"]
+    publishes: ["spec.ready"]
+    instructions: |
+      Create a precise, unambiguous specification.
+
+      Include:
+      - Summary: One sentence describing what this does
+      - Given-When-Then acceptance criteria (be exhaustive)
+      - Input/output examples with concrete values
+      - Edge cases and error conditions
+      - Non-functional requirements (performance, security)
+      - Out of scope (what this does NOT do)
+
+      Write the spec so that someone who hasn't seen the original
+      task could implement it correctly from the spec alone.
+
+      Publish spec.ready when complete.
+
+  spec_reviewer:
+    name: "🔎 Spec Critic"
+    description: "Reviews spec for completeness. Could someone implement from this?"
+    triggers: ["spec.ready"]
+    publishes: ["spec.approved", "spec.rejected"]
+    instructions: |
+      Review the spec for completeness and clarity.
+
+      Checklist:
+      - [ ] Could a new team member implement this from the spec alone?
+      - [ ] Are all acceptance criteria testable?
+      - [ ] Are edge cases covered?
+      - [ ] Are error conditions specified?
+      - [ ] Are there ambiguous terms that need definition?
+      - [ ] Are there missing scenarios?
+
+      NOTE: Be pragmatic. Don't reject specs for minor issues that
+      can be clarified during implementation. Only reject for:
+      - Fundamental ambiguity that would lead to wrong implementation
+      - Missing critical requirements
+
+      After 1 rejection, approve with notes rather than rejecting again.
+
+      If issues found: publish spec.rejected with specific feedback
+      If solid (or already revised once): publish spec.approved
+
+  implementer:
+    name: "⚙️ Implementer"
+    description: "Implements EXACTLY what the spec says. No creative interpretation."
+    triggers: ["spec.approved", "spec.violated"]
+    publishes: ["implementation.done"]
+    instructions: |
+      Implement EXACTLY what the spec says.
+
+      ### Process: Stubs → Explore → Plan → Implement → Verify
+
+      0. **GENERATE TEST STUBS** — Start with the test-driven-development skill (Mode A: From Spec)
+         - Use the `test-driven-development` skill to extract all Given/When/Then criteria
+         - Generate one test stub per criterion (stubs use `todo!()` to fail)
+         - Verify stubs compile: `cargo test --no-run`
+         - This is your red phase — all stubs should fail
+
+      1. **EXPLORE** — Understand before implementing
+         - Read the spec thoroughly
+         - Search codebase for similar implementations
+         - Identify existing patterns to follow
+         - Note integration points and dependencies
+
+      2. **PLAN** — Think before coding
+         - Map each acceptance criterion to implementation steps
+         - Identify files to create/modify
+         - Each test stub from step 0 tells you what to implement
+
+      3. **IMPLEMENT** — Execute the plan (green phase)
+         - Follow the spec literally — no creative interpretation
+         - Satisfy ALL acceptance criteria
+         - Handle ALL specified edge cases
+         - Replace `todo!()` in each test stub with real assertions
+         - Don't add features not in the spec
+
+      4. **VERIFY** — Confirm implementation
+         - Run all tests: every stub from step 0 must pass
+         - Publish implementation.done when complete
+
+  verifier:
+    name: "✅ Spec Verifier"
+    description: "Verifies implementation matches spec exactly."
+    triggers: ["implementation.done"]
+    publishes: ["task.complete", "spec.violated"]
+    default_publishes: "task.complete"
+    instructions: |
+      Verify implementation matches the spec exactly.
+
+      Go through each acceptance criterion:
+      1. Run the test for that criterion
+      2. Manually verify with the examples from the spec
+      3. Check edge case handling
+
+      If all pass: output LOOP_COMPLETE
+      If violations: publish spec.violated with details
