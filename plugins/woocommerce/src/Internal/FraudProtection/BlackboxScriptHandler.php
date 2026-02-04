@@ -69,7 +69,7 @@ class BlackboxScriptHandler {
 		 *
 		 * @param bool $should_enqueue Whether to enqueue Blackbox scripts on the current page.
 		 */
-		$should_enqueue = apply_filters( 'woocommerce_fraud_protection_enqueue_blackbox_scripts', $should_enqueue );
+		$should_enqueue = (bool) apply_filters( 'woocommerce_fraud_protection_enqueue_blackbox_scripts', $should_enqueue );
 
 		if ( ! $should_enqueue ) {
 			return;
