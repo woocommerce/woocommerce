@@ -11,7 +11,6 @@ import '@woocommerce/stores/woocommerce/products';
 import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
 import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
 import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
-import type { ProductResponseItem } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -35,38 +34,6 @@ export type AddToCartError = {
 	code: string;
 	group: string;
 	message: string;
-};
-
-/**
- * Quantity constraints normalized from the Store API format.
- */
-type QuantityConstraints = {
-	min: number;
-	max: number;
-	step: number;
-};
-
-/**
- * Extract quantity constraints from a product in Store API format.
- *
- * @param product The product in Store API format.
- * @return Normalized quantity constraints.
- */
-const getQuantityConstraints = (
-	product: ProductResponseItem | null
-): QuantityConstraints => {
-	if ( ! product ) {
-		return { min: 1, max: Number.MAX_SAFE_INTEGER, step: 1 };
-	}
-
-	const addToCart = product.add_to_cart;
-	const maximum = addToCart?.maximum ?? 0;
-
-	return {
-		min: addToCart?.minimum ?? 1,
-		max: maximum > 0 ? maximum : Number.MAX_SAFE_INTEGER,
-		step: addToCart?.multiple_of ?? 1,
-	};
 };
 
 /**
@@ -108,26 +75,6 @@ const { state: productsState } = store< ProductsStore >(
 	{ lock: universalLock }
 );
 
-/**
- * Normalize a Store API product into the format expected by consumers.
- *
- * @param product The product in Store API format.
- * @return Normalized product data.
- */
-const normalizeProductFromStore = (
-	product: ProductResponseItem
-): NormalizedProductData | NormalizedVariationData => {
-	const constraints = getQuantityConstraints( product );
-
-	return {
-		id: product.id,
-		type: product.type,
-		is_in_stock: product.is_purchasable && product.is_in_stock,
-		sold_individually: product.sold_individually,
-		...constraints,
-	};
-};
-
 export const getProductData = (
 	id: number,
 	selectedAttributes: SelectedAttributes[]
@@ -137,6 +84,9 @@ export const getProductData = (
 	if ( ! productFromStore ) {
 		return null;
 	}
+
+	// Determine which product to use for the response.
+	let product = productFromStore;
 
 	// For variable products with selected attributes, find the matching variation.
 	if (
@@ -151,16 +101,27 @@ export const getProductData = (
 		if ( matchedVariation ) {
 			const variation =
 				productsState.productVariations[ matchedVariation.id ];
-			if ( variation ) {
-				return normalizeProductFromStore( variation );
+			if ( ! variation ) {
+				// Variation was matched but its data isn't in the store.
+				// Return null to prevent using stale parent product data.
+				return null;
 			}
-			// Variation was matched but its data isn't in the store.
-			// Return null to prevent using stale parent product data.
-			return null;
+			product = variation;
 		}
 	}
 
-	return normalizeProductFromStore( productFromStore );
+	const { add_to_cart: addToCart } = product;
+	const maximum = addToCart?.maximum ?? 0;
+
+	return {
+		id: product.id,
+		type: product.type,
+		is_in_stock: product.is_purchasable && product.is_in_stock,
+		sold_individually: product.sold_individually,
+		min: addToCart?.minimum ?? 1,
+		max: maximum > 0 ? maximum : Number.MAX_SAFE_INTEGER,
+		step: addToCart?.multiple_of ?? 1,
+	};
 };
 
 export const getNewQuantity = (
