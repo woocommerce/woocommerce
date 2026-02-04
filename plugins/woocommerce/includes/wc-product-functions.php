@@ -321,6 +321,17 @@ function wc_product_post_type_link( $permalink, $post ) {
 					: get_ancestors( $category_object->term_id, 'product_cat' );
 				foreach ( $ancestors as $ancestor ) {
 					$ancestor_object = get_term( $ancestor, 'product_cat' );
+
+					/**
+					 * Filter whether to use only the top-level parent category in the product permalink.
+					 *
+					 * When true, only the top-level ancestor category slug is used instead of
+					 * the full category hierarchy path (e.g., 'parent' instead of 'parent/child/grandchild').
+					 *
+					 * @since 2.6.5
+					 *
+					 * @param bool $use_parent_only Whether to use only the top-level parent category. Default false.
+					 */
 					if ( apply_filters( 'woocommerce_product_post_type_link_parent_category_only', false ) ) {
 						$product_cat = $ancestor_object->slug;
 					} else {
