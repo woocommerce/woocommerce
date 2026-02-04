@@ -24,7 +24,7 @@ Invoke this skill when:
 pnpm --filter=@woocommerce/plugin-woocommerce -- wp-env start
 ```
 
-Site runs at <http://localhost:8888>
+Site runs at `http://localhost:8888` by default. If port 8888 is unavailable, wp-env assigns a different port. Check the startup output or run `wp-env info` to see your actual URL.
 
 ### 2. Start the watcher
 
