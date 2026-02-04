@@ -154,7 +154,7 @@ $marketplace_link_messages = array(
 				<?php endif; ?>
 				<?php wp_nonce_field( 'woocommerce-settings' ); ?>
 			</p>
-			<?php if ( isset( $marketplace_link_messages[ $current_tab ] ) && isset( $marketplace_links[ $current_tab ] ) ) : ?>
+			<?php if ( isset( $marketplace_link_messages[ $current_tab ] ) ) : ?>
 				<?php
 				$link_config = $marketplace_links[ $current_tab ];
 				$link_tags   = wc_settings_get_marketplace_link_tags( $link_config['url'], $link_config['is_external'] );
