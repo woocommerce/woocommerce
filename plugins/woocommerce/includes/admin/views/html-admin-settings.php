@@ -46,6 +46,74 @@ if ( array_key_exists( 'advanced', $tabs ) ) {
 	$tabs['advanced'] = $advanced;
 }
 
+/**
+ * Generates opening and closing link tags for marketplace links.
+ *
+ * @param string $url         The URL for the link.
+ * @param bool   $is_external Whether the link is external (opens in new tab).
+ * @return array Array with 'open' and 'close' keys for link tags.
+ */
+$get_marketplace_link_tags = function ( $url, $is_external = true ) {
+	if ( $is_external ) {
+		$icon_url      = WC()->plugin_url() . '/assets/images/icons/external-link.svg';
+		$external_icon = '<img src="' . esc_url( $icon_url ) . '" alt="" />';
+		$screen_reader = '<span class="screen-reader-text">' . esc_html__( '(opens in a new tab)', 'woocommerce' ) . '</span>';
+
+		return array(
+			'open'  => '<a href="' . esc_url( $url ) . '" target="_blank" rel="noopener noreferrer">' . $external_icon,
+			'close' => $screen_reader . '</a>',
+		);
+	}
+
+	return array(
+		'open'  => '<a href="' . esc_url( $url ) . '">',
+		'close' => '</a>',
+	);
+};
+
+$marketplace_base_url = 'https://woocommerce.com/product-category/woocommerce-extensions/';
+$marketplace_links    = array(
+	'products' => array(
+		'url'         => $marketplace_base_url . 'merchandising/',
+		'is_external' => true,
+	),
+	'tax'      => array(
+		'url'         => $marketplace_base_url . 'operations/sales-tax-and-duties/',
+		'is_external' => true,
+	),
+	'shipping' => array(
+		'url'         => $marketplace_base_url . 'shipping-delivery-and-fulfillment/',
+		'is_external' => true,
+	),
+	'account'  => array(
+		'url'         => $marketplace_base_url . 'store-content-and-customizations/cart-and-checkout-features/',
+		'is_external' => true,
+	),
+	'email'    => array(
+		'url'         => $marketplace_base_url . 'marketing-extensions/email-marketing-extensions/',
+		'is_external' => true,
+	),
+	'general'  => array(
+		'url'         => admin_url( 'admin.php?page=wc-admin&path=%2Fextensions' ),
+		'is_external' => false,
+	),
+);
+
+$marketplace_link_messages = array(
+	/* translators: %1$s: opening link tag, %2$s: closing link tag */
+	'products' => __( '%1$sExplore solutions%2$s that help highlight products and drive more sales.', 'woocommerce' ),
+	/* translators: %1$s: opening link tag, %2$s: closing link tag */
+	'tax'      => __( '%1$sExplore solutions%2$s that help with tax calculations, compliance, and regional requirements.', 'woocommerce' ),
+	/* translators: %1$s: opening link tag, %2$s: closing link tag */
+	'shipping' => __( '%1$sExplore solutions%2$s that enhance shipping, delivery, and fulfillment workflows.', 'woocommerce' ),
+	/* translators: %1$s: opening link tag, %2$s: closing link tag */
+	'account'  => __( '%1$sExplore solutions%2$s that help customize cart and checkout flows.', 'woocommerce' ),
+	/* translators: %1$s: opening link tag, %2$s: closing link tag */
+	'email'    => __( '%1$sExplore solutions%2$s that help automate and improve customer email communication.', 'woocommerce' ),
+	/* translators: %1$s: opening link tag, %2$s: closing link tag */
+	'general'  => __( '%1$sDiscover additional solutions%2$s to boost your business and expand what your store can do.', 'woocommerce' ),
+);
+
 ?>
 
 <div class="wrap woocommerce">
@@ -84,6 +152,33 @@ if ( array_key_exists( 'advanced', $tabs ) ) {
 				<?php endif; ?>
 				<?php wp_nonce_field( 'woocommerce-settings' ); ?>
 			</p>
+			<?php if ( isset( $marketplace_link_messages[ $current_tab ] ) && isset( $marketplace_links[ $current_tab ] ) ) : ?>
+				<?php
+				$link_config = $marketplace_links[ $current_tab ];
+				$link_tags   = $get_marketplace_link_tags( $link_config['url'], $link_config['is_external'] );
+				?>
+			<p class="wc-settings-marketplace-link" data-settings-tab="<?php echo esc_attr( $current_tab ); ?>"<?php echo $current_section ? ' data-settings-section="' . esc_attr( $current_section ) . '"' : ''; ?>>
+				<?php
+				echo wp_kses(
+					sprintf( $marketplace_link_messages[ $current_tab ], $link_tags['open'], $link_tags['close'] ),
+					array(
+						'a'    => array(
+							'href'   => array(),
+							'target' => array(),
+							'rel'    => array(),
+						),
+						'img'  => array(
+							'src' => array(),
+							'alt' => array(),
+						),
+						'span' => array(
+							'class' => array(),
+						),
+					)
+				);
+				?>
+			</p>
+			<?php endif; ?>
 	</form>
 	<?php do_action( 'woocommerce_after_settings_' . $current_tab ); ?>
 </div>
