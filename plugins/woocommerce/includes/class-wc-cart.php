@@ -752,7 +752,9 @@ class WC_Cart extends WC_Legacy_Cart {
 		$result = $this->check_cart_item_sold_individually();
 
 		if ( is_wp_error( $result ) ) {
-			wc_add_notice( $result->get_error_message(), 'error' );
+			foreach ( $result->get_error_messages() as $message ) {
+				wc_add_notice( $message, 'error' );
+			}
 			$return = false;
 		}
 
@@ -803,10 +805,11 @@ class WC_Cart extends WC_Legacy_Cart {
 	/**
 	 * Looks through cart items and ensures sold individually products have quantity of 1.
 	 *
+	 * @since 10.7.0
 	 * @return bool|WP_Error
 	 */
 	public function check_cart_item_sold_individually() {
-		$return = true;
+		$errors = new WP_Error();
 
 		foreach ( $this->get_cart() as $cart_item_key => $values ) {
 			$product = $values['data'];
@@ -815,22 +818,22 @@ class WC_Cart extends WC_Legacy_Cart {
 				continue;
 			}
 
-			$product_id = $values['variation_id'] ? $values['variation_id'] : $values['product_id'];
-			$fresh_product = wc_get_product( $product_id );
+			$product_id       = $values['variation_id'] ? $values['variation_id'] : $values['product_id'];
+			$product_to_check = wc_get_product( $product_id );
 
-			if ( ! $fresh_product || ! $fresh_product->exists() ) {
+			if ( ! $product_to_check || ! $product_to_check->exists() ) {
 				continue;
 			}
 
-			if ( $fresh_product->is_sold_individually() && $values['quantity'] > 1 ) {
-				$this->cart_contents[ $cart_item_key ]['data'] = $fresh_product;
+			if ( $product_to_check->is_sold_individually() && $values['quantity'] > 1 ) {
+				$this->cart_contents[ $cart_item_key ]['data'] = $product_to_check;
 				$this->set_quantity( $cart_item_key, 1, false );
 				/* translators: %s: product name */
-				$return = new WP_Error( 'sold-individually', sprintf( __( 'You can only have 1 %s in your cart.', 'woocommerce' ), $fresh_product->get_name() ) );
+				$errors->add( 'sold-individually', sprintf( __( 'You can only have 1 %s in your cart.', 'woocommerce' ), $product_to_check->get_name() ) );
 			}
 		}
 
-		return $return;
+		return $errors->has_errors() ? $errors : true;
 	}
 
 	/**
