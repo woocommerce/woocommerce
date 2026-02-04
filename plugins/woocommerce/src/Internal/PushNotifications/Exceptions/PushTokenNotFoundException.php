@@ -17,4 +17,11 @@ use WP_Http;
  *
  * @since 10.5.0
  */
-class PushTokenNotFoundException extends Exception {}
+class PushTokenNotFoundException extends Exception {
+	/**
+	 * Default exception message.
+	 *
+	 * @var string
+	 */
+	protected $message = 'Push token could not be found.';
+}
