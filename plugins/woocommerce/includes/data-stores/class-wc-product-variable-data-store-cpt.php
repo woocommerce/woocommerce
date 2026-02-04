@@ -59,20 +59,22 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 				if ( $meta_value['is_variation'] && strstr( $meta_value['name'], '/' ) && sanitize_title( $meta_value['name'] ) !== $meta_attribute_key ) {
 					global $wpdb;
 
-					$products_to_migrate = implode( ', ', array( $product_id, ...$product->get_children() ) );
-					$old_slug            = 'attribute_' . $meta_attribute_key;
-					$old_meta_rows       = $wpdb->get_results(
-						$wpdb->prepare(
-							// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-							"SELECT post_id, meta_value FROM {$wpdb->postmeta} WHERE meta_key = %s AND post_id IN ( $products_to_migrate )",
-							$old_slug
-						)
-					);
-
-					if ( $old_meta_rows ) {
-						$new_slug = 'attribute_' . sanitize_title( $meta_value['name'] );
-						foreach ( $old_meta_rows as $old_meta_row ) {
-							update_post_meta( $old_meta_row->post_id, $new_slug, $old_meta_row->meta_value );
+					$child_ids = $product->get_children();
+					if ( ! empty( $child_ids ) ) {
+						$products_to_migrate = implode( ', ', $child_ids );
+						$old_slug            = 'attribute_' . $meta_attribute_key;
+						$old_meta_rows       = $wpdb->get_results(
+							$wpdb->prepare(
+								// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+								"SELECT post_id, meta_value FROM {$wpdb->postmeta} WHERE meta_key = %s AND post_id IN ( $products_to_migrate )",
+								$old_slug
+							)
+						);
+						if ( $old_meta_rows ) {
+							$new_slug = 'attribute_' . sanitize_title( $meta_value['name'] );
+							foreach ( $old_meta_rows as $old_meta_row ) {
+								update_post_meta( $old_meta_row->post_id, $new_slug, $old_meta_row->meta_value );
+							}
 						}
 					}
 
