@@ -662,31 +662,32 @@ class WC_Install {
 	 *
 	 * @return bool True if a lock was acquired, otherwise false.
 	 */
-	private static function create_lock() {
+	private static function create_lock(): bool {
 		global $wpdb;
 
 		// Insert will fail if it already exists so this functions as a mutex.
-		$inserted = $wpdb->query(
+		$created_lock = $wpdb->query(
 			$wpdb->prepare(
 				"INSERT INTO {$wpdb->options} (option_name, option_value, autoload) VALUES ('wc_installing', %d, 'no')",
 				time()
 			)
 		);
-		if ( $inserted ) {
+
+		// Take over the lock if it's stale (older than 10 minutes).
+		if ( ! $created_lock ) {
+			$created_lock = $wpdb->query(
+				$wpdb->prepare(
+					"UPDATE {$wpdb->options} SET option_value = %d WHERE option_name = 'wc_installing' AND option_value < %d",
+					time(),
+					time() - ( MINUTE_IN_SECONDS * 10 )
+				)
+			);
+		}
+
+		if ( $created_lock ) {
 			// Set the transient for backward compatibility in case others are relying on it to signal an ongoing install.
 			set_transient( 'wc_installing', 'yes', MINUTE_IN_SECONDS * 10 );
 			return true;
-		}
-
-		// Atomically delete the lock and try again if it is stale.
-		$deleted = $wpdb->query(
-			$wpdb->prepare(
-				"DELETE FROM {$wpdb->options} WHERE option_name = 'wc_installing' AND option_value < %d",
-				time() - ( MINUTE_IN_SECONDS * 10 )
-			)
-		);
-		if ( $deleted ) {
-			return self::create_lock();
 		}
 
 		return false;
@@ -694,10 +695,8 @@ class WC_Install {
 
 	/**
 	 * Releases the installation lock.
-	 *
-	 * @return bool True if the lock was released, false otherwise. (False could also mean the lock was not present).
 	 */
-	private static function release_lock() {
+	private static function release_lock(): void {
 		// Delete the transient BEFORE the option to avoid races that might result in an active lock with an empty transient.
 		delete_transient( 'wc_installing' );
 
