@@ -504,7 +504,7 @@ function wc_delete_shop_order_transients( $order = 0 ) {
 		$order = wc_get_order( $order );
 	}
 
-	// TODO: delegate to \WC_Admin_Reports to
+	// TODO: try delegating to \WC_Admin_Reports handling this async.
 	$reports             = WC_Admin_Reports::get_reports();
 	$transients_to_clear = array(
 		'wc_admin_report',
@@ -517,7 +517,7 @@ function wc_delete_shop_order_transients( $order = 0 ) {
 	foreach ( $transients_to_clear as $transient ) {
 		delete_transient( $transient );
 	}
-	// TODO: end of the block for delegation
+	// TODO: end of the block for delegation.
 
 	// Clear customer's order related caches.
 	$order_id = 0;
