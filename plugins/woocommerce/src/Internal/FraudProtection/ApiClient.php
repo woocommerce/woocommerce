@@ -84,19 +84,23 @@ class ApiClient {
 	 *
 	 * @since 10.5.0
 	 *
-	 * @param array<string, mixed> $event_data Event data to send to the endpoint.
+	 * @param string               $session_id Session ID to verify.
+	 * @param array<string, mixed> $payload    Event data to send to the endpoint.
 	 * @return string Decision: "allow" or "block".
 	 */
-	public function verify( array $event_data ): string {
+	public function verify( string $session_id, array $payload ): string {
 		FraudProtectionController::log(
 			'info',
 			'Verifying session with Blackbox API',
-			array( 'payload' => $event_data )
+			array(
+				'session_id' => $session_id,
+				'payload'    => $payload,
+			)
 		);
 
-		$response = $this->make_request( 'POST', self::VERIFY_ENDPOINT, $event_data );
+		$response = $this->make_request( 'POST', self::VERIFY_ENDPOINT, $session_id, $payload );
 
-		return $this->process_decision_response( $response, $event_data );
+		return $this->process_decision_response( $response, $payload );
 	}
 
 	/**
@@ -108,19 +112,18 @@ class ApiClient {
 	 *
 	 * @since 10.5.0
 	 *
-	 * @param array<string, mixed> $event_data Event data to send to the endpoint.
+	 * @param string               $session_id Session ID to report.
+	 * @param array<string, mixed> $payload    Event data to send to the endpoint.
 	 * @return bool True if report was sent successfully, false otherwise.
 	 */
-	public function report( array $event_data ): bool {
-		$payload = array_filter( $event_data, fn( $value ) => null !== $value );
-
+	public function report( string $session_id, array $payload ): bool {
 		FraudProtectionController::log(
 			'info',
 			'Reporting event to Blackbox API',
 			array( 'payload' => $payload )
 		);
 
-		$response = $this->make_request( 'POST', self::REPORT_ENDPOINT, $payload );
+		$response = $this->make_request( 'POST', self::REPORT_ENDPOINT, $session_id, $payload );
 
 		if ( is_wp_error( $response ) ) {
 			FraudProtectionController::log(
@@ -211,12 +214,13 @@ class ApiClient {
 	 * Uses Jetpack's signed request mechanism which authenticates with the
 	 * blog token scoped to the blog_id.
 	 *
-	 * @param string               $method  HTTP method (GET, POST, etc.).
-	 * @param string               $path    Endpoint path (relative to Blackbox API base URL).
-	 * @param array<string, mixed> $payload Request payload.
+	 * @param string               $method     HTTP method (GET, POST, etc.).
+	 * @param string               $path       Endpoint path (relative to Blackbox API base URL).
+	 * @param string               $session_id Session ID for the request.
+	 * @param array<string, mixed> $payload    Request payload.
 	 * @return array<string, mixed>|\WP_Error Parsed JSON response or WP_Error on failure.
 	 */
-	private function make_request( string $method, string $path, array $payload ) {
+	private function make_request( string $method, string $path, string $session_id, array $payload ) {
 		if ( ! class_exists( Jetpack_Connection_Client::class ) ) {
 			return new \WP_Error(
 				'jetpack_not_available',
@@ -232,10 +236,15 @@ class ApiClient {
 			);
 		}
 
-		// Include blog_id in the payload for authentication context.
 		$payload['blog_id'] = $blog_id;
 
-		$body = \wp_json_encode( $payload );
+		$body = \wp_json_encode(
+			array(
+				'session_id'  => $session_id,
+				'private_key' => '', // Woo will not use private keys for now.
+				'extra'       => $payload,
+			)
+		);
 
 		if ( false === $body ) {
 			return new \WP_Error(
