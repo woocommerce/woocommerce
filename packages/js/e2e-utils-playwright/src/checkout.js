@@ -1,27 +1,52 @@
 /**
+ * External dependencies
+ */
+import type { Page, Locator } from '@playwright/test';
+
+/**
+ * Internal dependencies
+ */
+import type { CheckoutDetails, AddressType } from './types';
+
+// Re-export types for consumers
+export type { CheckoutDetails } from './types';
+
+const addressLabels: Record< AddressType, string > = {
+	shipping: 'Shipping address',
+	billing: 'Billing address',
+};
+
+/**
+ * Sets a field value based on its element type (select or input).
+ *
+ * @param field - The field locator
+ * @param value - The value to set
+ */
+async function setDynamicFieldType(
+	field: Locator,
+	value: string
+): Promise< void > {
+	const tagName = await field.evaluate( ( el ) => el.tagName.toLowerCase() );
+
+	if ( tagName === 'select' ) {
+		await field.selectOption( value );
+	} else {
+		await field.fill( value );
+	}
+}
+
+/**
  * Util helper made to fill the Checkout details in the block-based checkout.
  *
- * @param {Object}  page
- * @param {Object}  [details={}]                     - The shipping details object.
- * @param {string}  [details.country='US']           - The first name.
- * @param {string}  [details.firstName='Mister']     - The first name.
- * @param {string}  [details.lastName='Burns']       - The last name.
- * @param {string}  [details.address='156th Street'] - The address.
- * @param {string}  [details.zip='']                 - The ZIP code.
- * @param {string}  [details.city='']                - The city.
- * @param {string}  [details.state='']               - The State.
- * @param {string}  [details.suburb='']              - The Suburb.
- * @param {string}  [details.province='']            - The Province.
- * @param {string}  [details.district='']            - The District.
- * @param {string}  [details.department='']          - The Department.
- * @param {string}  [details.region='']              - The Region.
- * @param {string}  [details.parish='']              - The Parish.
- * @param {string}  [details.county='']              - The Country.
- * @param {string}  [details.prefecture='']          - The Prefecture.
- * @param {string}  [details.municipality='']        - The Municipality.
- * @param {boolean} [details.isPostalCode=false]     - If true, search by 'Postal code' instead of 'Zip Code'.
+ * @param page    - Playwright page object
+ * @param details - The checkout details object
+ * @param type    - The address type ('shipping' or 'billing')
  */
-async function fillCheckoutBlocks( page, details = {}, type = 'shipping' ) {
+async function fillCheckoutBlocks(
+	page: Page,
+	details: CheckoutDetails = {},
+	type: AddressType = 'shipping'
+): Promise< void > {
 	const {
 		country = '',
 		firstName = '',
@@ -43,77 +68,62 @@ async function fillCheckoutBlocks( page, details = {}, type = 'shipping' ) {
 		isPostalCode = false,
 	} = details;
 
-	const label = {
-		shipping: 'Shipping address',
-		billing: 'Billing address',
-	};
-
-	async function setDynamicFieldType( field, addressElement ) {
-		const tagName = await field.evaluate( ( el ) =>
-			el.tagName.toLowerCase()
-		);
-
-		if ( tagName === 'select' ) {
-			await field.selectOption( addressElement );
-		} else {
-			await field.fill( addressElement );
-		}
-	}
+	const label = addressLabels[ type ];
 
 	await page
-		.getByRole( 'group', { name: label[ type ] } )
+		.getByRole( 'group', { name: label } )
 		.getByLabel( 'First name' )
 		.fill( firstName );
 
 	await page
-		.getByRole( 'group', { name: label[ type ] } )
+		.getByRole( 'group', { name: label } )
 		.getByLabel( 'Last name' )
 		.fill( lastName );
 
 	await page
-		.getByRole( 'group', { name: label[ type ] } )
+		.getByRole( 'group', { name: label } )
 		.getByLabel( 'Address', { exact: true } )
 		.fill( address );
 
 	if ( country ) {
 		await page
-			.getByRole( 'group', { name: label[ type ] } )
+			.getByRole( 'group', { name: label } )
 			.getByLabel( 'Country' )
 			.selectOption( country );
 	}
 
 	if ( city ) {
 		await page
-			.getByRole( 'group', { name: label[ type ] } )
+			.getByRole( 'group', { name: label } )
 			.getByLabel( 'City' )
 			.fill( city );
 	}
 
 	if ( suburb ) {
 		await page
-			.getByRole( 'group', { name: label[ type ] } )
+			.getByRole( 'group', { name: label } )
 			.getByLabel( 'Suburb' )
 			.fill( suburb );
 	}
 
 	if ( province ) {
 		await page
-			.getByRole( 'group', { name: label[ type ] } )
+			.getByRole( 'group', { name: label } )
 			.getByLabel( 'Province' )
 			.selectOption( province );
 	}
 
 	if ( district ) {
 		await page
-			.getByRole( 'group', { name: label[ type ] } )
+			.getByRole( 'group', { name: label } )
 			.getByLabel( 'District' )
 			.selectOption( district );
 	}
 
 	if ( department ) {
 		await setDynamicFieldType(
-			await page
-				.getByRole( 'group', { name: label[ type ] } )
+			page
+				.getByRole( 'group', { name: label } )
 				.getByLabel( 'Department' ),
 			department
 		);
@@ -121,15 +131,15 @@ async function fillCheckoutBlocks( page, details = {}, type = 'shipping' ) {
 
 	if ( region ) {
 		await page
-			.getByRole( 'group', { name: label[ type ] } )
+			.getByRole( 'group', { name: label } )
 			.getByLabel( 'Region', { exact: true } )
 			.selectOption( region );
 	}
 
 	if ( parish ) {
 		await setDynamicFieldType(
-			await page
-				.getByRole( 'group', { name: label[ type ] } )
+			page
+				.getByRole( 'group', { name: label } )
 				.getByLabel( 'Parish', { exact: false } ),
 			parish
 		);
@@ -137,35 +147,31 @@ async function fillCheckoutBlocks( page, details = {}, type = 'shipping' ) {
 
 	if ( county ) {
 		await setDynamicFieldType(
-			await page
-				.getByRole( 'group', { name: label[ type ] } )
-				.getByLabel( 'County' ),
+			page.getByRole( 'group', { name: label } ).getByLabel( 'County' ),
 			county
 		);
 	}
 
 	if ( prefecture ) {
 		await page
-			.getByRole( 'group', { name: label[ type ] } )
+			.getByRole( 'group', { name: label } )
 			.getByLabel( 'Prefecture' )
 			.selectOption( prefecture );
 	}
 
 	if ( municipality ) {
 		await page
-			.getByRole( 'group', { name: label[ type ] } )
+			.getByRole( 'group', { name: label } )
 			.getByLabel( 'Municipality' )
 			.fill( municipality );
 	}
 
 	if ( state ) {
-		const stateField = await page
-			.getByRole( 'group', { name: label[ type ] } )
+		const stateField = page
+			.getByRole( 'group', { name: label } )
 			.getByLabel( 'State/County', { exact: false } )
 			.or(
-				await page
-					.getByRole( 'group', { name: label[ type ] } )
-					.getByLabel( 'State' )
+				page.getByRole( 'group', { name: label } ).getByLabel( 'State' )
 			);
 
 		await setDynamicFieldType( stateField, state );
@@ -173,14 +179,14 @@ async function fillCheckoutBlocks( page, details = {}, type = 'shipping' ) {
 
 	if ( zip ) {
 		await page
-			.getByRole( 'group', { name: label[ type ] } )
+			.getByRole( 'group', { name: label } )
 			.getByLabel( isPostalCode ? 'Postal code' : 'ZIP Code' )
 			.fill( zip );
 	}
 
 	if ( phone ) {
 		await page
-			.getByRole( 'group', { name: label[ type ] } )
+			.getByRole( 'group', { name: label } )
 			.getByRole( 'textbox', { name: 'Phone' } )
 			.fill( phone );
 	}
@@ -189,19 +195,25 @@ async function fillCheckoutBlocks( page, details = {}, type = 'shipping' ) {
 /**
  * Convenience function to fill Shipping Address fields.
  *
- * @param {Object} page
- * @param {*}      shippingDetails See arguments description for `fillCheckoutBlocks`.
+ * @param page            - Playwright page object
+ * @param shippingDetails - See CheckoutDetails type for available fields
  */
-export async function fillShippingCheckoutBlocks( page, shippingDetails = {} ) {
+export async function fillShippingCheckoutBlocks(
+	page: Page,
+	shippingDetails: CheckoutDetails = {}
+): Promise< void > {
 	await fillCheckoutBlocks( page, shippingDetails, 'shipping' );
 }
 
 /**
  * Convenience function to fill Billing Address fields.
  *
- * @param {Object} page
- * @param {*}      billingDetails See arguments description for `fillCheckoutBlocks`.
+ * @param page           - Playwright page object
+ * @param billingDetails - See CheckoutDetails type for available fields
  */
-export async function fillBillingCheckoutBlocks( page, billingDetails = {} ) {
+export async function fillBillingCheckoutBlocks(
+	page: Page,
+	billingDetails: CheckoutDetails = {}
+): Promise< void > {
 	await fillCheckoutBlocks( page, billingDetails, 'billing' );
 }

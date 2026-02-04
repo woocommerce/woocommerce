@@ -1,4 +1,37 @@
-export const closeChoosePatternModal = async ( { page } ) => {
+/**
+ * External dependencies
+ */
+import type { Page } from '@playwright/test';
+
+/**
+ * Internal dependencies
+ */
+import type { PageContext, EditorCanvas } from './types';
+
+// Re-export types for consumers
+export type { PageContext, EditorCanvas } from './types';
+
+/**
+ * WordPress data store interface for type checking.
+ */
+interface WpData {
+	select: ( store: string ) => {
+		isFeatureActive: ( feature: string ) => boolean;
+	};
+	dispatch: ( store: string ) => {
+		toggleFeature: ( feature: string ) => void;
+	};
+}
+
+/**
+ * Closes the "Choose a pattern" modal if present.
+ *
+ * @param context      - Object containing the Playwright page
+ * @param context.page - The Playwright page object
+ */
+export const closeChoosePatternModal = async ( {
+	page,
+}: PageContext ): Promise< void > => {
 	const closeModal = page
 		.locator( 'div' )
 		.filter( { hasText: 'Choose a pattern' } )
@@ -8,26 +41,42 @@ export const closeChoosePatternModal = async ( { page } ) => {
 	} );
 };
 
-export const disableWelcomeModal = async ( { page } ) => {
+/**
+ * Disables the Gutenberg welcome modal.
+ *
+ * @param context      - Object containing the Playwright page
+ * @param context.page - The Playwright page object
+ */
+export const disableWelcomeModal = async ( {
+	page,
+}: PageContext ): Promise< void > => {
 	// Further info: https://github.com/woocommerce/woocommerce/pull/45856/
 	await page.waitForLoadState( 'domcontentloaded' );
 
 	const isWelcomeGuideActive = await page.evaluate( () =>
-		window.wp.data
-			.select( 'core/edit-post' )
-			.isFeatureActive( 'welcomeGuide' )
+		( window as unknown as { wp?: { data?: WpData } } ).wp?.data
+			?.select( 'core/edit-post' )
+			?.isFeatureActive( 'welcomeGuide' )
 	);
 
 	if ( isWelcomeGuideActive ) {
 		await page.evaluate( () =>
-			window.wp.data
-				.dispatch( 'core/edit-post' )
-				.toggleFeature( 'welcomeGuide' )
+			( window as unknown as { wp?: { data?: WpData } } ).wp?.data
+				?.dispatch( 'core/edit-post' )
+				?.toggleFeature( 'welcomeGuide' )
 		);
 	}
 };
 
-export const openEditorSettings = async ( { page } ) => {
+/**
+ * Opens the editor settings sidebar if closed.
+ *
+ * @param context      - Object containing the Playwright page
+ * @param context.page - The Playwright page object
+ */
+export const openEditorSettings = async ( {
+	page,
+}: PageContext ): Promise< void > => {
 	// Open Settings sidebar if closed
 	if ( await page.getByLabel( 'Editor Settings' ).isVisible() ) {
 		console.log( 'Editor Settings is open, skipping action.' );
@@ -43,30 +92,56 @@ export const openEditorSettings = async ( { page } ) => {
  * This helper function returns the content frame of the editor canvas iframe if it exists,
  * or falls back to the main page if the iframe isn't present.
  *
- * @param {import('@playwright/test').Page} page - The Playwright page object
- * @return {Promise<import('@playwright/test').FrameLocator|import('@playwright/test').Page>} The editor canvas frame or the original page
+ * @param page - The Playwright page object
+ * @return The editor canvas frame or the original page
  */
-export const getCanvas = async ( page ) => {
+export const getCanvas = async ( page: Page ): Promise< EditorCanvas > => {
 	return (
 		page.locator( 'iframe[name="editor-canvas"]' ).contentFrame() || page
 	);
 };
 
-export const goToPageEditor = async ( { page } ) => {
+/**
+ * Navigates to the WordPress page editor.
+ *
+ * @param context      - Object containing the Playwright page
+ * @param context.page - The Playwright page object
+ */
+export const goToPageEditor = async ( {
+	page,
+}: PageContext ): Promise< void > => {
 	await page.goto( 'wp-admin/post-new.php?post_type=page' );
 	await disableWelcomeModal( { page } );
 	await closeChoosePatternModal( { page } );
 };
 
-export const goToPostEditor = async ( { page } ) => {
+/**
+ * Navigates to the WordPress post editor.
+ *
+ * @param context      - Object containing the Playwright page
+ * @param context.page - The Playwright page object
+ */
+export const goToPostEditor = async ( {
+	page,
+}: PageContext ): Promise< void > => {
 	await page.goto( 'wp-admin/post-new.php' );
 	await disableWelcomeModal( { page } );
 };
 
-export const insertBlock = async ( page, blockName ) => {
+/**
+ * Inserts a block using the block inserter.
+ *
+ * @param page      - The Playwright page object
+ * @param blockName - The name of the block to insert
+ */
+export const insertBlock = async (
+	page: Page,
+	blockName: string
+): Promise< void > => {
 	// Focus on "Empty block" element before inserting a new block.
 	// Otherwise, Gutenberg nightly (v19.9-nightly) would display "{Block name} can't be inserted."
-	const emptyBlock = ( await getCanvas( page ) ).getByLabel( 'Empty block' );
+	const canvas = await getCanvas( page );
+	const emptyBlock = canvas.getByLabel( 'Empty block' );
 	if ( await emptyBlock.isVisible() ) {
 		await emptyBlock.click();
 	}
@@ -89,7 +164,16 @@ export const insertBlock = async ( page, blockName ) => {
 		.click();
 };
 
-export const insertBlockByShortcut = async ( page, blockName ) => {
+/**
+ * Inserts a block using the slash command shortcut.
+ *
+ * @param page      - The Playwright page object
+ * @param blockName - The name of the block to insert
+ */
+export const insertBlockByShortcut = async (
+	page: Page,
+	blockName: string
+): Promise< void > => {
 	const canvas = await getCanvas( page );
 	const emptyBlockField = canvas.getByText( 'Type / to choose a block' ).or(
 		canvas.getByRole( 'document', {
@@ -101,7 +185,12 @@ export const insertBlockByShortcut = async ( page, blockName ) => {
 	await page.getByRole( 'option', { name: blockName, exact: true } ).click();
 };
 
-export const transformIntoBlocks = async ( page ) => {
+/**
+ * Transforms classic content into blocks.
+ *
+ * @param page - The Playwright page object
+ */
+export const transformIntoBlocks = async ( page: Page ): Promise< void > => {
 	const canvas = await getCanvas( page );
 
 	await canvas
@@ -110,7 +199,28 @@ export const transformIntoBlocks = async ( page ) => {
 		.click();
 };
 
-export const publishPage = async ( page, pageTitle, isPost = false ) => {
+/**
+ * Response JSON structure for published pages/posts.
+ */
+interface PublishResponse {
+	title: {
+		rendered: string;
+	};
+	status: string;
+}
+
+/**
+ * Publishes a page or post.
+ *
+ * @param page      - The Playwright page object
+ * @param pageTitle - The title of the page/post being published
+ * @param isPost    - Whether this is a post (true) or page (false)
+ */
+export const publishPage = async (
+	page: Page,
+	pageTitle: string,
+	isPost = false
+): Promise< void > => {
 	await page
 		.getByRole( 'button', { name: 'Publish', exact: true } )
 		.dispatchEvent( 'click' );
@@ -123,7 +233,7 @@ export const publishPage = async ( page, pageTitle, isPost = false ) => {
 			response
 				.json()
 				.then(
-					( json ) =>
+					( json: PublishResponse ) =>
 						json.title.rendered === pageTitle &&
 						json.status === 'publish'
 				)
