@@ -56,7 +56,13 @@ class BlackboxScriptHandler {
 	 * @return void
 	 */
 	public function maybe_enqueue_scripts(): void {
-		$should_enqueue = is_checkout() || has_block( 'woocommerce/checkout' ) || is_wc_endpoint_url( 'order-pay' ) || is_wc_endpoint_url( 'add-payment-method' );
+		global $wp;
+
+		$should_enqueue = is_checkout() ||
+			has_block( 'woocommerce/checkout' ) ||
+			is_checkout_pay_page() ||
+			// Check add-payment-method query_var to avoid loading on regular payment methods page.
+			( is_add_payment_method_page() && isset( $wp->query_vars['add-payment-method'] ) );
 
 		/**
 		 * Filter whether to enqueue Blackbox fraud protection scripts on the current page.
