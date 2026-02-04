@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add post_id parameter and action hook for context-aware personalization tags
