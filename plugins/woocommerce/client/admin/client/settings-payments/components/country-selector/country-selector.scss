@@ -19,7 +19,9 @@
 		padding-left: 48px;
 
 		&.is-highlighted {
-			background: #3858e90a;
+			background: rgba(var(--wp-admin-theme-color-rgb, 0, 124, 186), 0.08);
+			outline: 2px solid var(--wp-admin-theme-color, #007cba);
+			outline-offset: -2px;
 		}
 
 		svg {
@@ -131,6 +133,8 @@
 
 			&:focus {
 				background-color: #fff;
+				outline: 2px solid var(--wp-admin-theme-color, #007cba);
+				outline-offset: -2px;
 			}
 		}
 
@@ -146,7 +150,19 @@
 
 .components-button.components-country-select-control__button {
 	&:focus {
-		box-shadow: none;
+		box-shadow: none !important;
+		outline: 2px solid var(--wp-admin-theme-color, #007cba) !important;
+		outline-offset: -2px;
+	}
+
+	&:focus:not(:focus-visible) {
+		outline: none !important;
+	}
+
+	&:focus-visible {
+		box-shadow: none !important;
+		outline: 2px solid var(--wp-admin-theme-color, #007cba) !important;
+		outline-offset: -2px;
 	}
 }
 

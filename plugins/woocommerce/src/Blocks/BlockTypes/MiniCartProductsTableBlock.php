@@ -59,13 +59,12 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 		// translators: %s is the name of the product in cart.
 		$remove_from_cart_label = __( 'Remove %s from cart', 'woocommerce' );
 
-		// translators: Save as in "Save $x".
-		$save_label = __( 'Save', 'woocommerce' );
+		/* translators: %s is the discount amount. */
+		$save_format             = __( 'Save %s', 'woocommerce' );
+		$line_item_discount_span = '<span data-wp-text="state.lineItemDiscount" class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount"></span>';
+		$line_item_save_badge    = sprintf( $save_format, $line_item_discount_span );
 
 		$available_on_backorder_label = __( 'Available on backorder', 'woocommerce' );
-
-		/* translators: %d stock amount (number of items in stock for product) */
-		$low_in_stock_label = __( '%d left in stock', 'woocommerce' );
 
 		wp_interactivity_config(
 			$this->get_full_block_name(),
@@ -74,7 +73,6 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 				'increaseQuantityLabel'    => $increase_quantity_label,
 				'quantityDescriptionLabel' => $quantity_description_label,
 				'removeFromCartLabel'      => $remove_from_cart_label,
-				'lowInStockLabel'          => $low_in_stock_label,
 			)
 		);
 
@@ -141,12 +139,6 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 									<div data-wp-bind--hidden="!state.cartItem.show_backorder_badge" class="wc-block-components-product-badge wc-block-components-product-backorder-badge">
 										<?php echo esc_html( $available_on_backorder_label ); ?>
 									</div>
-									<div 
-										class="wc-block-components-product-badge wc-block-components-product-low-stock-badge"
-										data-wp-bind--hidden="!state.isLowInStockVisible"
-										data-wp-text="state.lowInStockLabel"
-									>
-									</div>
 									<div class="wc-block-cart-item__prices">
 										<span data-wp-bind--hidden="!state.cartItemHasDiscount" class="price wc-block-components-product-price">
 											<span data-wp-text="state.beforeItemPrice"></span>
@@ -165,17 +157,6 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 											<span data-wp-text="state.itemPrice" class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-product-price__value">
 											</span>
 											<span data-wp-text="state.afterItemPrice"></span>
-										</span>
-									</div>
-									<div 
-										data-wp-bind--hidden="!state.cartItemHasDiscount" 
-										class="wc-block-components-product-badge wc-block-components-sale-badge"
-									>
-										<?php echo $save_label; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-										<span
-											data-wp-text="state.cartItemDiscount" 
-											class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount"
-										>
 										</span>
 									</div>
 									<div class="wc-block-components-product-metadata">
@@ -224,7 +205,9 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 											data-wp-bind--aria-label="state.removeFromCartLabel"
 											class="wc-block-cart-item__remove-link"
 										>
-											<?php echo esc_html( $remove_item_label ); ?>
+											<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">
+												<path fill-rule="evenodd" clip-rule="evenodd" d="M12 5.5A2.25 2.25 0 0 0 9.878 7h4.244A2.251 2.251 0 0 0 12 5.5ZM12 4a3.751 3.751 0 0 0-3.675 3H5v1.5h1.27l.818 8.997a2.75 2.75 0 0 0 2.739 2.501h4.347a2.75 2.75 0 0 0 2.738-2.5L17.73 8.5H19V7h-3.325A3.751 3.751 0 0 0 12 4Zm4.224 4.5H7.776l.806 8.861a1.25 1.25 0 0 0 1.245 1.137h4.347a1.25 1.25 0 0 0 1.245-1.137l.805-8.861Z"/>
+											</svg>
 										</button>
 									</div>
 								</div>
@@ -236,16 +219,20 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 										</span>											
 									</span>
 									<div 
-										data-wp-bind--hidden="!state.isLineItemTotalDiscountVisible" 
+										data-wp-bind--hidden="!state.cartItemHasDiscount" 
 										class="wc-block-components-product-badge wc-block-components-sale-badge"
 									>
-										<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-										<?php echo $save_label; ?>
-										<span
-											data-wp-text="state.lineItemDiscount" 
-											class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount"
-										>
-										</span>
+									<?php
+										echo wp_kses(
+											$line_item_save_badge,
+											array(
+												'span' => array(
+													'data-wp-text' => true,
+													'class'        => true,
+												),
+											)
+										);
+									?>
 									</div>
 								</div>
 							</td>
@@ -275,22 +262,15 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 		<div
 			<?php echo wp_interactivity_data_wp_context( $context ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			class="wc-block-components-product-details"
-			data-wp-bind--hidden="state.shouldHideSingleProductDetails"
-		>
-			<?php echo $this->render_product_details_item_markup( 'div', $is_item_data ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-		</div>
-		<ul
-			<?php echo wp_interactivity_data_wp_context( $context ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-			class="wc-block-components-product-details"
-			data-wp-bind--hidden="state.shouldHideMultipleProductDetails"
+			data-wp-bind--hidden="state.shouldHideProductDetails"
 		>
 			<template
 				data-wp-each--item-data="state.cartItem.<?php echo esc_attr( $property ); ?>"
 				data-wp-each-key="state.cartItemDataKey"
 			>
-				<?php echo $this->render_product_details_item_markup( 'li', $is_item_data ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<?php echo $this->render_product_details_item_markup( $is_item_data ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			</template>
-		</ul>
+		</div>
 		<?php
 		return ob_get_clean();
 	}
@@ -298,25 +278,25 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 	/**
 	 * Render markup for a single product detail item.
 	 *
-	 * @param string $tag_name   The HTML tag to use for the item.
-	 * @param bool   $is_item_data Whether the item is of item_data type.
+	 * @param bool $is_item_data Whether the item is of item_data type.
 	 * @return string Rendered product detail item output based on item type.
 	 */
-	private function render_product_details_item_markup( $tag_name, $is_item_data = false ) {
+	private function render_product_details_item_markup( $is_item_data = false ) {
 		ob_start();
 		?>
-	<<?php echo tag_escape( $tag_name ); ?>
-		data-wp-bind--hidden="state.cartItemDataAttrHidden"
-		data-wp-bind--class="state.cartItemDataAttr.className"
-	>
+		<span
+			data-wp-bind--hidden="state.cartItemDataAttrHidden"
+			data-wp-bind--class="state.cartItemDataAttr.className"
+		>
 		<?php if ( $is_item_data ) : ?>
 			<span class="wc-block-components-product-details__name" data-wp-watch="callbacks.itemDataNameInnerHTML"></span>
 			<span class="wc-block-components-product-details__value" data-wp-watch="callbacks.itemDataValueInnerHTML"></span>
 		<?php else : ?>
-			<span class="wc-block-components-product-details__name"  data-wp-text="state.cartItemDataAttr.name"></span>
+			<span class="wc-block-components-product-details__name" data-wp-text="state.cartItemDataAttr.name"></span>
 			<span class="wc-block-components-product-details__value" data-wp-text="state.cartItemDataAttr.value"></span>
 		<?php endif; ?>
-		</<?php echo tag_escape( $tag_name ); ?>>
+			<span aria-hidden="true" data-wp-bind--hidden="state.isLastCartItemDataAttr"> / </span>
+		</span>
 		<?php
 		return ob_get_clean();
 	}

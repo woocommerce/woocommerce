@@ -578,7 +578,6 @@ class MiniCart extends AbstractBlock {
 				$this->get_full_block_name(),
 				array(
 					'displayCartPriceIncludingTax' => $display_cart_price_including_tax,
-					'addToCartBehaviour'           => $attributes['addToCartBehaviour'],
 					'onCartClickBehaviour'         => $on_cart_click_behaviour,
 					'checkoutUrl'                  => wc_get_checkout_url(),
 					'buttonAriaLabelTemplate'      => $button_aria_label_template,
@@ -601,8 +600,13 @@ class MiniCart extends AbstractBlock {
 		
 			<div
 				data-wp-interactive="woocommerce/mini-cart"
-				data-wp-init="callbacks.setupEventListeners"
+				data-wp-init="callbacks.setupJQueryEventBridge"
 				data-wp-init--refresh-cart-items="woocommerce::actions.refreshCartItems"
+				data-wp-on-document--wc-blocks_added_to_cart="woocommerce::actions.refreshCartItems"
+				data-wp-on-document--wc-blocks_removed_from_cart="woocommerce::actions.refreshCartItems"
+				<?php if ( 'open_drawer' === $attributes['addToCartBehaviour'] ) : ?>
+				data-wp-on-document--wc-blocks_added_to_cart---open-drawer="actions.openDrawer"
+				<?php endif; ?>
 				data-wp-watch="callbacks.disableScrollingOnBody"
 				<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				<?php echo wp_interactivity_data_wp_context( $context ); ?>

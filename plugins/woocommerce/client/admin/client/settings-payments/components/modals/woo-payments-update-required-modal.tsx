@@ -80,7 +80,11 @@ export const WooPaymentsUpdateRequiredModal = ( {
 							disabled={ isUpdating }
 							onClick={ handleUpdateWooPayments }
 						>
-							{ __( 'Update WooPayments', 'woocommerce' ) }
+							{ sprintf(
+								/* translators: %s: Provider name */
+								__( 'Update %s', 'woocommerce' ),
+								'WooPayments'
+							) }
 						</Button>
 						<Button
 							variant="secondary"

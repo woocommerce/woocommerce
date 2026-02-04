@@ -2265,11 +2265,21 @@ if ( ! function_exists( 'woocommerce_related_products' ) ) {
 
 		$args = wp_parse_args( $args, $defaults );
 
-		// Get visible related products then sort them at random.
-		$args['related_products'] = array_filter( array_map( 'wc_get_product', wc_get_related_products( $product->get_id(), $args['posts_per_page'], $product->get_upsell_ids() ) ), 'wc_products_array_filter_visible' );
+		$related_products    = array();
+		$related_product_ids = wc_get_related_products( $product->get_id(), $args['posts_per_page'], $product->get_upsell_ids() );
+		if ( ! empty( $related_product_ids ) ) {
+			// Optimization: reduce the number of SQLs needed to populate product objects.
+			_prime_post_caches( $related_product_ids );
 
-		// Handle orderby.
-		$args['related_products'] = wc_products_array_orderby( $args['related_products'], $args['orderby'], $args['order'] );
+			// Get visible related products then sort them at random, then handle orderby.
+			$related_products = array_filter( array_map( 'wc_get_product', $related_product_ids ), 'wc_products_array_filter_visible' );
+			$related_products = wc_products_array_orderby( $related_products, $args['orderby'], $args['order'] );
+			/** @var WC_Product[] $related_products */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
+
+			// Optimization: reduce the number of SQLs needed to fetch images when rendering.
+			_prime_post_caches( array_filter( array_map( fn( $product ) => (int) $product->get_image_id(), $related_products ) ) );
+		}
+		$args['related_products'] = $related_products;
 
 		// Set global loop values.
 		wc_set_loop_prop( 'name', 'related' );
@@ -2319,9 +2329,20 @@ if ( ! function_exists( 'woocommerce_upsell_display' ) ) {
 		 */
 		$limit = intval( apply_filters( 'woocommerce_upsells_total', $args['posts_per_page'] ?? $limit ) );
 
-		// Get visible upsells then sort them at random, then limit result set.
-		$upsells = wc_products_array_orderby( array_filter( array_map( 'wc_get_product', $product->get_upsell_ids() ), 'wc_products_array_filter_visible' ), $orderby, $order );
-		$upsells = $limit > 0 ? array_slice( $upsells, 0, $limit ) : $upsells;
+		$upsells    = array();
+		$upsell_ids = $product->get_upsell_ids();
+		if ( ! empty( $upsell_ids ) ) {
+			// Optimization: reduce the number of SQLs needed to populate product objects.
+			_prime_post_caches( $upsell_ids );
+
+			// Get visible upsells then sort them at random, then limit result set.
+			$upsells = wc_products_array_orderby( array_filter( array_map( 'wc_get_product', $upsell_ids ), 'wc_products_array_filter_visible' ), $orderby, $order );
+			$upsells = $limit > 0 ? array_slice( $upsells, 0, $limit ) : $upsells;
+			/** @var WC_Product[] $upsells */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
+
+			// Optimization: reduce the number of SQLs needed to fetch images when rendering.
+			_prime_post_caches( array_filter( array_map( fn( $product ) => (int) $product->get_image_id(), $upsells ) ) );
+		}
 
 		wc_get_template(
 			'single-product/up-sells.php',
@@ -3082,16 +3103,19 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 		$label_id        = $args['id'];
 		$sort            = $args['priority'] ? $args['priority'] : '';
 		$field_container = '<p class="form-row %1$s" id="%2$s" data-priority="' . esc_attr( $sort ) . '">%3$s</p>';
+		$is_hidden_field = false;
 
 		switch ( $args['type'] ) {
 			case 'country':
 				$countries = 'shipping_country' === $key ? WC()->countries->get_shipping_countries() : WC()->countries->get_allowed_countries();
 
 				if ( 1 === count( $countries ) ) {
+					$country_code = current( array_keys( $countries ) );
+					$country_name = current( array_values( $countries ) );
 
-					$field .= '<strong>' . current( array_values( $countries ) ) . '</strong>';
-
-					$field .= '<input type="hidden" name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" value="' . current( array_keys( $countries ) ) . '" ' . implode( ' ', $custom_attributes ) . ' class="country_to_state" readonly="readonly" />';
+					$field .= '<select name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" ' . implode( ' ', $custom_attributes ) . ' class="country_to_state country_to_state--single ' . esc_attr( implode( ' ', $args['input_class'] ) ) . '">';
+					$field .= '<option value="' . esc_attr( $country_code ) . '" selected>' . esc_html( $country_name ) . '</option>';
+					$field .= '</select>';
 
 				} else {
 					$data_label = ! empty( $args['label'] ) ? 'data-label="' . esc_attr( $args['label'] ) . '"' : '';
@@ -3181,7 +3205,8 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 
 				break;
 			case 'hidden':
-				$field .= '<input type="' . esc_attr( $args['type'] ) . '" class="input-hidden ' . esc_attr( implode( ' ', $args['input_class'] ) ) . '" name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" value="' . esc_attr( $value ) . '" ' . implode( ' ', $custom_attributes ) . ' />';
+				$field          .= '<input type="' . esc_attr( $args['type'] ) . '" class="input-hidden ' . esc_attr( implode( ' ', $args['input_class'] ) ) . '" name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" value="' . esc_attr( $value ) . '" ' . implode( ' ', $custom_attributes ) . ' />';
+				$is_hidden_field = true;
 
 				break;
 			case 'select':
@@ -3222,7 +3247,8 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 			$field_html = '';
 
 			if ( $args['label'] && 'checkbox' !== $args['type'] ) {
-				$field_html .= '<label for="' . esc_attr( $label_id ) . '" class="' . esc_attr( implode( ' ', $args['label_class'] ) ) . '">' . wp_kses_post( $args['label'] ) . $required_indicator . '</label>';
+				$maybe_for_attr = $is_hidden_field ? '' : ' for="' . esc_attr( $label_id ) . '"';
+				$field_html    .= '<label' . $maybe_for_attr . ' class="' . esc_attr( implode( ' ', $args['label_class'] ) ) . '">' . wp_kses_post( $args['label'] ) . $required_indicator . '</label>';
 			}
 
 			$field_html .= '<span class="woocommerce-input-wrapper">' . $field;

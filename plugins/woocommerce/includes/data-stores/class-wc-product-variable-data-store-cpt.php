@@ -34,7 +34,8 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * @param WC_Product $product Product object.
 	 */
 	protected function read_attributes( &$product ) {
-		$meta_attributes = get_post_meta( $product->get_id(), '_product_attributes', true );
+		$product_id      = $product->get_id();
+		$meta_attributes = get_post_meta( $product_id, '_product_attributes', true );
 
 		if ( ! empty( $meta_attributes ) && is_array( $meta_attributes ) ) {
 			$attributes   = array();
@@ -52,17 +53,28 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 					(array) $meta_attribute_value
 				);
 
-				// Maintain data integrity. 4.9 changed sanitization functions - update the values here so variations function correctly.
+				// Maintain data integrity: WordPress 4.9 changed sanitization functions, and we update the values here so variations function correctly.
+				// As per 2026, we are refactoring the updates into product-level: BC-focused (not all-in on-spot migration), optimized for performance.
+				// Use-case: `_product_attributes` has data populated on WordPress pre-4.8 and containing symbols affected by the breaking changes.
 				if ( $meta_value['is_variation'] && strstr( $meta_value['name'], '/' ) && sanitize_title( $meta_value['name'] ) !== $meta_attribute_key ) {
 					global $wpdb;
 
-					$old_slug      = 'attribute_' . $meta_attribute_key;
-					$new_slug      = 'attribute_' . sanitize_title( $meta_value['name'] );
-					$old_meta_rows = $wpdb->get_results( $wpdb->prepare( "SELECT post_id, meta_value FROM {$wpdb->postmeta} WHERE meta_key = %s;", $old_slug ) ); // WPCS: db call ok, cache ok.
-
-					if ( $old_meta_rows ) {
-						foreach ( $old_meta_rows as $old_meta_row ) {
-							update_post_meta( $old_meta_row->post_id, $new_slug, $old_meta_row->meta_value );
+					$child_ids = $product->get_children();
+					if ( ! empty( $child_ids ) ) {
+						$products_to_migrate = implode( ', ', $child_ids );
+						$old_slug            = 'attribute_' . $meta_attribute_key;
+						$old_meta_rows       = $wpdb->get_results(
+							$wpdb->prepare(
+								// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+								"SELECT post_id, meta_value FROM {$wpdb->postmeta} WHERE meta_key = %s AND post_id IN ( $products_to_migrate )",
+								$old_slug
+							)
+						);
+						if ( $old_meta_rows ) {
+							$new_slug = 'attribute_' . sanitize_title( $meta_value['name'] );
+							foreach ( $old_meta_rows as $old_meta_row ) {
+								update_post_meta( $old_meta_row->post_id, $new_slug, $old_meta_row->meta_value );
+							}
 						}
 					}
 
@@ -75,7 +87,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 						continue;
 					}
 					$id      = wc_attribute_taxonomy_id_by_name( $meta_value['name'] );
-					$options = wc_get_object_terms( $product->get_id(), $meta_value['name'], 'term_id' );
+					$options = wc_get_object_terms( $product_id, $meta_value['name'], 'term_id' );
 				} else {
 					$id      = 0;
 					$options = wc_get_text_attributes( $meta_value['value'] );
@@ -88,7 +100,17 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 				$attribute->set_position( $meta_value['position'] );
 				$attribute->set_visible( $meta_value['is_visible'] );
 				$attribute->set_variation( $meta_value['is_variation'] );
-				$attributes[] = $attribute;
+
+				/**
+				 * Filter product attribute after initialization.
+				 *
+				 * @since 10.6.0
+				 *
+				 * @param WC_Product_Attribute $attribute  The attribute object.
+				 * @param array                $meta_value The meta value.
+				 * @param WC_Product           $product    The product object.
+				 */
+				$attributes[] = apply_filters( 'woocommerce_product_read_attribute', $attribute, $meta_value, $product );
 			}
 			$product->set_attributes( $attributes );
 
@@ -315,12 +337,12 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 
 				$variation_ids = $product->get_visible_children();
 
-				if ( is_callable( '_prime_post_caches' ) ) {
+				if ( ! empty( $variation_ids ) ) {
 					_prime_post_caches( $variation_ids );
 				}
 
 				$tax_display_mode = $for_display ? get_option( 'woocommerce_tax_display_shop' ) : null;
-
+				$price_decimals   = wc_get_price_decimals();
 				foreach ( $variation_ids as $variation_id ) {
 					$variation = wc_get_product( $variation_id );
 
@@ -359,6 +381,11 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 						 */
 						$price = apply_filters( 'woocommerce_variation_prices_price', $variation->get_price( 'edit' ), $variation, $product );
 
+						// Skip empty prices.
+						if ( '' === $price ) {
+							continue;
+						}
+
 						/**
 						 * Filters the regular price for a product variation before it is used in price calculations and caching.
 						 *
@@ -384,11 +411,6 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 						 * @param WC_Product    $product    The parent variable product object.
 						 */
 						$sale_price = apply_filters( 'woocommerce_variation_prices_sale_price', $variation->get_sale_price( 'edit' ), $variation, $product );
-
-						// Skip empty prices.
-						if ( '' === $price ) {
-							continue;
-						}
 
 						// If sale price does not equal price, the product is not yet on sale.
 						if ( $sale_price === $regular_price || $sale_price !== $price ) {
@@ -444,9 +466,9 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 							}
 						}
 
-						$prices_array['price'][ $variation_id ]         = wc_format_decimal( $price, wc_get_price_decimals() );
-						$prices_array['regular_price'][ $variation_id ] = wc_format_decimal( $regular_price, wc_get_price_decimals() );
-						$prices_array['sale_price'][ $variation_id ]    = wc_format_decimal( $sale_price, wc_get_price_decimals() );
+						$prices_array['price'][ $variation_id ]         = wc_format_decimal( $price, $price_decimals );
+						$prices_array['regular_price'][ $variation_id ] = wc_format_decimal( $regular_price, $price_decimals );
+						$prices_array['sale_price'][ $variation_id ]    = wc_format_decimal( $sale_price, $price_decimals );
 
 						if ( has_filter( 'woocommerce_variation_prices_array' ) ) {
 							$original_prices_array = $prices_array;

@@ -1,0 +1,6 @@
+Significance: minor
+Type: enhancement
+
+Add lazy loading attribute to product image block.
+
+Introduce a new filter `woocommerce_product_image_loading_attr` to modify the loading attribute.
