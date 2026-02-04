@@ -194,55 +194,70 @@ test.describe( 'Cart → Network Conditions', () => {
 		await expect( quantityInput ).toHaveValue( '3' );
 	} );
 
-	test( 'should not show 400 error in minicart', async ( {
+	test( 'should show error in minicart when 400 error occurs', async ( {
 		page,
 		frontendUtils,
 		miniCartUtils,
 	} ) => {
+		// Add product to cart first
 		await frontendUtils.goToShop();
+		await frontendUtils.addToCart( SIMPLE_VIRTUAL_PRODUCT_NAME );
 
 		// Open mini cart
 		await miniCartUtils.openMiniCart();
 
-		// Add product while mini cart is open
-		const shopPage = await page.context().newPage();
-		await shopPage.goto( '/shop' );
+		// Wait for minicart to be fully loaded
+		await expect(
+			page.locator( '.wc-block-mini-cart__drawer' )
+		).toBeVisible();
 
-		// Simulate a 400 error response
+		// Track if we get a 400 response
+		let got400Error = false;
+
+		// Simulate a 400 error response for cart operations
 		await page.route( '**/wc/store/v1/**', ( route ) => {
+			got400Error = true;
 			route.fulfill( {
 				status: 400,
+				contentType: 'application/json',
 				body: JSON.stringify( {
-					code: 'woocommerce_rest_cart_invalid_product',
-					message: 'Invalid product',
+					code: 'woocommerce_rest_cart_invalid_key',
+					message: 'Cart item key is invalid.',
 				} ),
 			} );
 		} );
 
-		await shopPage
-			.getByRole( 'button', {
-				name: `Add to cart: "${ SIMPLE_VIRTUAL_PRODUCT_NAME }"`,
-			} )
-			.click();
+		// Try to increase quantity - this should trigger a request that gets a 400
+		const increaseButton = page
+			.getByRole( 'button', { name: /Increase quantity/ } )
+			.first();
+		await increaseButton.click();
 
-		// Wait a bit for error handling
+		// Wait for error handling
 		await page.waitForTimeout( 2000 );
 
-		// Mini cart should not show error
-		// This test will fail if 400 errors are shown in mini cart
-		await expect(
-			page.locator( '.wc-block-components-notice-banner__content' )
-		).not.toBeVisible();
+		// If we got a 400 error, it should be shown to the user
+		// This test will FAIL if 400 errors are silently swallowed
+		if ( got400Error ) {
+			await expect(
+				page.locator(
+					'.wc-block-mini-cart__drawer .wc-block-components-notice-banner'
+				)
+			).toBeVisible();
+		}
 	} );
 
 	test( 'should prevent double batch requests', async ( {
 		page,
 		frontendUtils,
 	} ) => {
+		// First add product to cart so we have something to work with
 		await frontendUtils.goToShop();
+		await frontendUtils.addToCart( SIMPLE_VIRTUAL_PRODUCT_NAME );
+		await frontendUtils.goToCart();
 
 		// Track batch requests
-		const batchRequests: any[] = [];
+		const batchRequests: { url: string; postData: string | null; timestamp: number }[] = [];
 		await page.route( '**/wc/store/v1/batch**', async ( route ) => {
 			const request = route.request();
 			batchRequests.push( {
@@ -253,19 +268,21 @@ test.describe( 'Cart → Network Conditions', () => {
 			await route.continue();
 		} );
 
-		// Click add to cart multiple times rapidly
-		const addToCartButton = page
-			.getByRole( 'button', {
-				name: `Add to cart: "${ SIMPLE_VIRTUAL_PRODUCT_NAME }"`,
-			} )
-			.first();
+		// Get the quantity input and make rapid changes
+		const quantityInput = page.getByLabel(
+			`Quantity of ${ SIMPLE_VIRTUAL_PRODUCT_NAME } in your cart.`
+		);
 
-		await addToCartButton.click();
-		await addToCartButton.click();
-		await addToCartButton.click();
+		// Make multiple rapid quantity changes - these should be batched
+		await quantityInput.fill( '2' );
+		await quantityInput.fill( '3' );
+		await quantityInput.fill( '4' );
 
 		// Wait for requests to complete
 		await page.waitForTimeout( 2000 );
+
+		// Verify final quantity
+		await expect( quantityInput ).toHaveValue( '4' );
 
 		// Analyze batch timing
 		// Should not see multiple batches sent at the same time

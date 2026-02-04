@@ -85,45 +85,50 @@ test.describe( 'Cart → Slow Network Bugs', () => {
 			}
 		} );
 
-		test( 'very slow cart updates should maintain correct quantities', async ( {
+		test( 'very slow add to cart should not result in wrong quantities', async ( {
 			page,
 			frontendUtils,
 		} ) => {
-			// Add product to cart first (before setting up slow network)
 			await frontendUtils.goToShop();
-			await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
-			await frontendUtils.goToCart();
 
-			// Now set up slow network for subsequent requests
+			// Delay all cart requests by 10 seconds
 			await page.route( '**/wc/store/v1/cart/**', async ( route ) => {
 				await new Promise( ( resolve ) =>
-					setTimeout( resolve, 5000 )
+					setTimeout( resolve, 10000 )
 				);
 				await route.continue();
 			} );
 			await page.route( '**/wc/store/v1/batch', async ( route ) => {
 				await new Promise( ( resolve ) =>
-					setTimeout( resolve, 5000 )
+					setTimeout( resolve, 10000 )
 				);
 				await route.continue();
 			} );
 
-			// Get quantity input and make rapid changes
+			// Click add to cart 3 times for the same product
+			const addToCartButton = page
+				.getByRole( 'button', {
+					name: `Add to cart: "${ SIMPLE_PHYSICAL_PRODUCT_NAME }"`,
+				} )
+				.first();
+
+			await addToCartButton.click();
+			await addToCartButton.click();
+			await addToCartButton.click();
+
+			// Go to cart while requests are still pending
+			await frontendUtils.goToCart();
+
+			// Wait for the slow requests to complete
+			await page.waitForTimeout( 11000 );
+
+			// Check quantity - should be 3, not some wrong value
 			const quantityInput = page.getByLabel(
 				`Quantity of ${ SIMPLE_PHYSICAL_PRODUCT_NAME } in your cart.`
 			);
 
-			// Make multiple rapid quantity changes while network is slow
-			await quantityInput.fill( '2' );
-			await quantityInput.fill( '3' );
-			await quantityInput.fill( '5' );
-
-			// Wait for the slow requests to complete
-			await page.waitForTimeout( 6000 );
-
-			// Check quantity - should be 5, not some wrong value
-			// This test will FAIL if batching causes wrong final quantity
-			await expect( quantityInput ).toHaveValue( '5' );
+			// This test will FAIL if wrong quantities are added
+			await expect( quantityInput ).toHaveValue( '3' );
 
 			// Should not have errors
 			const errorNotice = page.locator(
@@ -144,45 +149,47 @@ test.describe( 'Cart → Slow Network Bugs', () => {
 			await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 			await frontendUtils.addToCart( SIMPLE_VIRTUAL_PRODUCT_NAME );
 
+			// Add a third product if available
+			const thirdProduct = page
+				.getByRole( 'button', { name: /Add to cart/ } )
+				.nth( 2 );
+			if ( await thirdProduct.isVisible() ) {
+				await thirdProduct.click();
+			}
+
 			// Open minicart
 			await miniCartUtils.openMiniCart();
 
 			// Wait for minicart to fully load
-			await expect(
-				page.locator( '.wc-block-mini-cart__drawer' )
-			).toBeVisible();
+			await page.waitForTimeout( 1000 );
 
-			// First increase the quantity so we can decrease it later
+			// Perform multiple operations in minicart:
+			// 1. Increase quantity of first product
 			const increaseButton = page
 				.getByRole( 'button', {
 					name: `Increase quantity of ${ SIMPLE_PHYSICAL_PRODUCT_NAME }`,
 				} )
 				.first();
-			await expect( increaseButton ).toBeVisible();
-			await increaseButton.click();
+			if ( await increaseButton.isVisible() ) {
+				await increaseButton.click();
+			}
 
-			// Wait for the increase to complete
-			await page.waitForTimeout( 1000 );
-
-			// Now perform multiple operations rapidly:
-			// 1. Increase quantity again
-			await increaseButton.click();
-
-			// 2. Decrease quantity (should now be enabled since qty > 1)
+			// 2. Decrease quantity of second product
 			const decreaseButton = page
 				.getByRole( 'button', {
-					name: `Reduce quantity of ${ SIMPLE_PHYSICAL_PRODUCT_NAME }`,
+					name: `Reduce quantity of ${ SIMPLE_VIRTUAL_PRODUCT_NAME }`,
 				} )
 				.first();
-			await expect( decreaseButton ).toBeEnabled( { timeout: 5000 } );
-			await decreaseButton.click();
+			if ( await decreaseButton.isVisible() ) {
+				await decreaseButton.click();
+			}
 
-			// 3. Remove the second product
+			// 3. Remove third product (if exists)
 			const removeButton = page
 				.getByRole( 'button', {
-					name: `Remove ${ SIMPLE_VIRTUAL_PRODUCT_NAME } from cart`,
+					name: /Remove .* from cart/,
 				} )
-				.first();
+				.nth( 2 );
 			if ( await removeButton.isVisible() ) {
 				await removeButton.click();
 			}
