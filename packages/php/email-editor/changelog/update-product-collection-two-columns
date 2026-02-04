@@ -1,4 +1,4 @@
 Significance: minor
 Type: update
 
-Add two-column grid layout support for Product Collection block in email rendering and hide product images when no image is set.
+Add two-column grid layout support for Product Collection block in email rendering.

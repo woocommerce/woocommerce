@@ -38,7 +38,7 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 		foreach ( $parsed_block['innerBlocks'] as $inner_block ) {
 			switch ( $inner_block['blockName'] ) {
 				case 'woocommerce/product-template':
-					$content .= $this->render_product_template( $inner_block, $query, $collection_type, $columns );
+					$content .= $this->render_product_template( $inner_block, $query, $collection_type, $columns, $rendering_context );
 					break;
 				default:
 					$content .= render_block( $inner_block );
@@ -54,13 +54,14 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 	/**
 	 * Render the product template block.
 	 *
-	 * @param array     $inner_block Inner block data.
-	 * @param \WP_Query $query WP_Query object.
-	 * @param string    $collection_type Collection type identifier.
-	 * @param int       $columns Number of columns for the grid layout.
+	 * @param array             $inner_block Inner block data.
+	 * @param \WP_Query         $query WP_Query object.
+	 * @param string            $collection_type Collection type identifier.
+	 * @param int               $columns Number of columns for the grid layout.
+	 * @param Rendering_Context $rendering_context Rendering context.
 	 * @return string
 	 */
-	private function render_product_template( array $inner_block, \WP_Query $query, string $collection_type, int $columns = 1 ): string {
+	private function render_product_template( array $inner_block, \WP_Query $query, string $collection_type, int $columns, Rendering_Context $rendering_context ): string {
 		if ( ! $query->have_posts() ) {
 			return $this->render_no_results_message();
 		}
@@ -80,19 +81,20 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 				$posts
 			)
 		);
-		return $this->render_product_grid( $products, $inner_block, $collection_type, $columns );
+		return $this->render_product_grid( $products, $inner_block, $collection_type, $columns, $rendering_context );
 	}
 
 	/**
 	 * Render product grid using HTML table structure for email compatibility.
 	 *
-	 * @param array  $products Array of WC_Product objects.
-	 * @param array  $inner_block Inner block data.
-	 * @param string $collection_type Collection type identifier.
-	 * @param int    $columns Number of columns for the grid layout.
+	 * @param array             $products Array of WC_Product objects.
+	 * @param array             $inner_block Inner block data.
+	 * @param string            $collection_type Collection type identifier.
+	 * @param int               $columns Number of columns for the grid layout.
+	 * @param Rendering_Context $rendering_context Rendering context.
 	 * @return string
 	 */
-	private function render_product_grid( array $products, array $inner_block, string $collection_type, int $columns = 1 ): string {
+	private function render_product_grid( array $products, array $inner_block, string $collection_type, int $columns, Rendering_Context $rendering_context ): string {
 		// Limit columns to max 2 for email compatibility.
 		$columns = min( max( $columns, 1 ), 2 );
 
@@ -109,23 +111,27 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 		}
 
 		// Two-column layout using HTML tables for email compatibility.
-		return $this->render_two_column_grid( $products, $inner_block, $collection_type );
+		return $this->render_two_column_grid( $products, $inner_block, $collection_type, $rendering_context );
 	}
 
 	/**
 	 * Render products in a two-column grid layout using HTML tables.
 	 *
-	 * @param array  $products Array of WC_Product objects.
-	 * @param array  $inner_block Inner block data.
-	 * @param string $collection_type Collection type identifier.
+	 * @param array             $products Array of WC_Product objects.
+	 * @param array             $inner_block Inner block data.
+	 * @param string            $collection_type Collection type identifier.
+	 * @param Rendering_Context $rendering_context Rendering context.
 	 * @return string
 	 */
-	private function render_two_column_grid( array $products, array $inner_block, string $collection_type ): string {
+	private function render_two_column_grid( array $products, array $inner_block, string $collection_type, Rendering_Context $rendering_context ): string {
 		$content = '';
 
-		// Calculate the cell width (approximately half the layout width minus gap).
-		// Default email layout is 600px, so each cell is ~290px (accounting for 10px gap on each side).
-		$cell_width = 290;
+		// Calculate the cell width from the actual layout width.
+		// Subtract 20px total gap (10px padding on each side of the gap between columns),
+		// then divide by 2 for two columns.
+		$layout_width = (int) $rendering_context->get_layout_width_without_padding();
+		$gap          = 20;
+		$cell_width   = (int) ( ( $layout_width - $gap ) / 2 );
 
 		// Start the table wrapper with MSO conditional comments for Outlook.
 		$content .= '<!--[if mso | IE]><table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%"><tr><td><![endif]-->';

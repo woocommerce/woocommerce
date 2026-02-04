@@ -308,9 +308,14 @@ class Product_Image extends Abstract_Product_Block_Renderer {
 		$image_size = 'single' === $attributes['imageSizing'] ? 'woocommerce_single' : 'woocommerce_thumbnail';
 		$image_id   = (int) $product->get_image_id();
 
-		// Return null if no image is set - this will hide the image block in emails.
 		if ( ! $image_id ) {
-			return null;
+			$placeholder = wc_placeholder_img_src( $image_size );
+			return array(
+				'url'    => $placeholder,
+				'alt'    => $product->get_name(),
+				'width'  => 300,
+				'height' => 300,
+			);
 		}
 
 		$image_url = wp_get_attachment_image_url( $image_id, $image_size );
