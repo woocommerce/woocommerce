@@ -97,7 +97,7 @@ class SessionDataCollector {
 	 * @param int|null $order_id Optional order ID to include order data in the response.
 	 * @return array Array of collected fraud protection event data.
 	 */
-	public function get_collected_data( $order_id = null ): array {
+	public function get_collected_data( ?int $order_id = null ): array {
 		$data = array(
 			'wc_version'       => WC()->version,
 			'session'          => $this->get_session_data(),
