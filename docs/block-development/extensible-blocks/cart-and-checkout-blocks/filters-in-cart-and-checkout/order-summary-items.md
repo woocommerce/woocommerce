@@ -216,7 +216,7 @@ const modifyCartItemScreenReaderPrice = ( defaultValue, extensions, args, valida
 	return _n(
 		'<quantity/> <productName/> item will cost <price/>',
 		'<quantity/> <productName/> items will cost <price/>',
-		args?.cartItem.quantity ?? 1,
+		args?.cartItem?.quantity ?? 1,
 		'example-extension'
 	);
 };
@@ -243,7 +243,7 @@ const modifyCartItemScreenReaderPrice = ( defaultValue, extensions, args, valida
 		return _n(
 			'Total price for <quantity/> <productName/> item: <price/> to keep you warm',
 			'Total price for <quantity/> <productName/> items: <price/> to keep you warm',
-			args?.cartItem.quantity ?? 1,
+			args?.cartItem?.quantity ?? 1,
 			'example-extension'
 		);
 	}
@@ -252,7 +252,7 @@ const modifyCartItemScreenReaderPrice = ( defaultValue, extensions, args, valida
 		return _n(
 			'Total price for <quantity/> <productName/> item: <price/> to keep you cool',
 			'Total price for <quantity/> <productName/> items: <price/> to keep you cool',
-			args?.cartItem.quantity ?? 1,
+			args?.cartItem?.quantity ?? 1,
 			'example-extension'
 		);
 	}
