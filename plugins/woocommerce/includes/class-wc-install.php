@@ -692,7 +692,7 @@ class WC_Install {
 
 	/**
 	 * Releases the installation lock.
-	 * 
+	 *
 	 * @return bool True if the lock was released, false otherwise. (False could also mean the lock was not present).
 	 */
 	private static function release_lock() {
