@@ -248,7 +248,17 @@ jobs:
 
           # Attempt cherry-pick with explicit conflict handling
           if git cherry-pick -m1 "$MERGE_COMMIT_SHA"; then
-            # Success case
+            # Check if only changelog files were changed (code already exists in target branch)
+            CHANGED_FILES=$(git diff --name-only HEAD~1)
+            NON_CHANGELOG_FILES=$(echo "$CHANGED_FILES" | grep -vE "^(plugins|packages)/.*/changelog/" || true)
+
+            if [[ -z "$NON_CHANGELOG_FILES" ]]; then
+              echo "status=skipped" >> $GITHUB_OUTPUT
+              echo "error_message=Cherry-pick skipped: only changelog files changed, code already exists in '$TARGET_BRANCH'." >> $GITHUB_OUTPUT
+              exit 0
+            fi
+
+            # Success case with real changes
             echo "has_conflicts=false" >> $GITHUB_OUTPUT
             echo "Cherry-pick completed successfully"
           else
