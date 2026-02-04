@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add post_id context support and cache invalidation for personalization tags
