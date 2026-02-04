@@ -40,14 +40,7 @@ class PushTokensDataStore {
 	 * @return PushToken The created push token with ID set.
 	 */
 	public function create( array $data ): PushToken {
-		$push_token = PushToken::get_new_instance(
-			null,
-			$data['user_id'] ?? null,
-			$data['token'] ?? null,
-			$data['device_uuid'] ?? null,
-			$data['platform'] ?? null,
-			$data['origin'] ?? null
-		);
+		$push_token = new PushToken( $data );
 
 		if ( ! $push_token->can_be_created() ) {
 			throw new PushTokenInvalidDataException(
@@ -90,7 +83,7 @@ class PushTokensDataStore {
 	 * @return PushToken The populated push token.
 	 */
 	public function read( int $id ): PushToken {
-		$push_token = PushToken::get_new_instance( $id );
+		$push_token = new PushToken( array( 'id' => $id ) );
 		$post       = get_post( $push_token->get_id() );
 
 		if ( ! $post || PushToken::POST_TYPE !== $post->post_type ) {
@@ -295,13 +288,15 @@ class PushTokensDataStore {
 					|| ( $device_uuid && $device_uuid === $meta['device_uuid'] )
 				)
 			) {
-				return PushToken::get_new_instance(
-					$post_id,
-					$user_id,
-					$meta['token'],
-					$meta['device_uuid'] ?? null,
-					$meta['platform'],
-					$meta['origin']
+				return new PushToken(
+					array(
+						'id'          => $post_id,
+						'user_id'     => $user_id,
+						'token'       => $meta['token'],
+						'device_uuid' => $meta['device_uuid'] ?? null,
+						'platform'    => $meta['platform'],
+						'origin'      => $meta['origin'],
+					)
 				);
 			}
 		}

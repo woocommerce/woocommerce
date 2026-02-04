@@ -811,17 +811,19 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		add_filter( 'pre_delete_post', '__return_false' );
 
-		$request  = new WP_REST_Request( 'DELETE', '/wc-push-notifications/push-tokens/' . $token_id );
-		$response = $this->server->dispatch( $request );
+		try {
+			$request  = new WP_REST_Request( 'DELETE', '/wc-push-notifications/push-tokens/' . $token_id );
+			$response = $this->server->dispatch( $request );
 
-		$this->assertEquals( WP_Http::INTERNAL_SERVER_ERROR, $response->get_status() );
+			$this->assertEquals( WP_Http::INTERNAL_SERVER_ERROR, $response->get_status() );
 
-		$data = $response->get_data();
+			$data = $response->get_data();
 
-		$this->assertEquals( 'woocommerce_internal_error', $data['code'] );
-		$this->assertEquals( 'Internal server error', $data['message'] );
-
-		remove_filter( 'pre_delete_post', '__return_false' );
+			$this->assertEquals( 'woocommerce_internal_error', $data['code'] );
+			$this->assertEquals( 'Internal server error', $data['message'] );
+		} finally {
+			remove_filter( 'pre_delete_post', '__return_false' );
+		}
 	}
 
 	/**
