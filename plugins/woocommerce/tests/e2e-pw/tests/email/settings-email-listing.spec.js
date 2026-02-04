@@ -67,17 +67,19 @@ test.describe( 'WooCommerce Email Settings List View', () => {
 		// Check that first row shows Active status
 		const firstRow = listViewLocator.locator( 'tr' ).nth( 1 ); // nth(1) because nth(0) is header row
 		await expect( firstRow.locator( 'td' ).nth( 2 ) ).toHaveText(
-			'Enabled'
+			'Active'
 		);
 
 		// Open the first row more actions menu
 		await firstRow.locator( '.dataviews-all-actions-button' ).click();
 
-		// Check that the "Disable email" option is present and clickable
+		// Check that the "Deactivate email" option is present and clickable
 		await expect(
-			page.getByRole( 'menuitem', { name: 'Disable email' } )
+			page.getByRole( 'menuitem', { name: 'Deactivate email' } )
 		).toBeVisible();
-		await page.getByRole( 'menuitem', { name: 'Disable email' } ).click();
+		await page
+			.getByRole( 'menuitem', { name: 'Deactivate email' } )
+			.click();
 
 		// Check that the email status is now Draft
 		await expect( firstRow.locator( 'td' ).nth( 2 ) ).toHaveText(
@@ -87,15 +89,15 @@ test.describe( 'WooCommerce Email Settings List View', () => {
 		// Open the first row more actions menu again
 		await firstRow.locator( '.dataviews-all-actions-button' ).click();
 
-		// Check that the "Enable email" option is present and clickable
+		// Check that the "Activate email" option is present and clickable
 		await expect(
-			page.getByRole( 'menuitem', { name: 'Enable email' } )
+			page.getByRole( 'menuitem', { name: 'Activate email' } )
 		).toBeVisible();
-		await page.getByRole( 'menuitem', { name: 'Enable email' } ).click();
+		await page.getByRole( 'menuitem', { name: 'Activate email' } ).click();
 
 		// Check that the email status is now Active again
 		await expect( firstRow.locator( 'td' ).nth( 2 ) ).toHaveText(
-			'Enabled'
+			'Active'
 		);
 
 		// I want to check that search works

@@ -60,19 +60,31 @@ export function InnerEditor( {
 
 	const { post, template } = useSelect(
 		( select ) => {
-			const { getEntityRecord } = select( coreStore );
-			const { getEditedPostTemplate } = select( storeName );
-			const postObject = getEntityRecord(
+			const { getEditedEntityRecord } = select( coreStore );
+			const editedPost = getEditedEntityRecord(
 				'postType',
 				currentPost.postType,
 				currentPost.postId
-			) as Post | null;
+			);
+
+			// getEditedEntityRecord can return false/undefined if not found
+			if ( ! editedPost || typeof editedPost === 'boolean' ) {
+				return { post: null, template: null };
+			}
+
+			const postData = editedPost as unknown as Post;
+
+			// Get template for non-template post types
+			if ( currentPost.postType === 'wp_template' ) {
+				return { post: postData, template: null };
+			}
+
+			const { getEditedPostTemplate } = select( storeName );
+			const templateData = getEditedPostTemplate( postData.template );
+
 			return {
-				template:
-					postObject && currentPost.postType !== 'wp_template'
-						? getEditedPostTemplate( postObject.template )
-						: null,
-				post: postObject,
+				post: postData,
+				template: templateData,
 			};
 		},
 		[ currentPost.postType, currentPost.postId ]

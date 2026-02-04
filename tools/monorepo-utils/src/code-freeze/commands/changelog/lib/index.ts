@@ -558,20 +558,23 @@ function getTargetBranches(
  * @param {Object} releaseBranchChanges                    update data from updateReleaseBranchChangelogs
  * @param {Object} releaseBranchChanges.deletionCommitHash commit from the changelog deletions in updateReleaseBranchChangelogs
  * @param {Object} releaseBranchChanges.prNumber           pr number created in updateReleaseBranchChangelogs
+ * @return {Promise<Array<{ branch: string; number: number }>>} Array of created PRs with branch and number
  */
 export const updateIntermediateBranches = async (
 	options: Options,
 	tmpRepoPath: string,
 	releaseBranchChanges: { deletionCommitHash: string; prNumber: number }
-): Promise< void > => {
+): Promise< Array< { branch: string; number: number } > > => {
 	Logger.notice(
 		`Starting intermediate branches update for version ${ options.version }`
 	);
 
+	const createdPRs: Array< { branch: string; number: number } > = [];
+
 	const trunkVersion = await getTrunkWooCommerceVersion( tmpRepoPath );
 	if ( ! trunkVersion ) {
 		Logger.error( 'Could not determine WooCommerce trunk version.' );
-		return;
+		return createdPRs;
 	}
 
 	const targetBranches = getTargetBranches( options.version, trunkVersion );
@@ -581,16 +584,21 @@ export const updateIntermediateBranches = async (
 
 	for ( const targetBranch of targetBranches ) {
 		try {
-			await updateBranchChangelog(
+			const prNumber = await updateBranchChangelog(
 				options,
 				tmpRepoPath,
 				targetBranch,
 				releaseBranchChanges
 			);
+			if ( prNumber && prNumber > 0 ) {
+				createdPRs.push( { branch: targetBranch, number: prNumber } );
+			}
 		} catch ( error ) {
 			Logger.error(
 				`Failed to update ${ targetBranch }: ${ error.message }`
 			);
 		}
 	}
+
+	return createdPRs;
 };
