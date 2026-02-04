@@ -170,7 +170,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 10.5.0-rc.3 2026-XX-XX =
+= 10.5.0-rc.3 2026-02-04 =
 
 **WooCommerce**
 
@@ -294,6 +294,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Update - Remove database option fetch for legacy coupon menu display preference. [#62053](https://github.com/woocommerce/woocommerce/pull/62053)
 * Update - Update hooks alternatives documentation [#62263](https://github.com/woocommerce/woocommerce/pull/62263)
 * Update - Update WordPress Abilities API to v0.4.0 [#62027](https://github.com/woocommerce/woocommerce/pull/62027)
+* Update - Re-add the AccessiblePrivateMethods trait [#63088](https://github.com/woocommerce/woocommerce/pull/63088)
 * Dev - Add @template annotations to DI container for better PHPStan type inference. [#62301](https://github.com/woocommerce/woocommerce/pull/62301)
 * Dev - Add a checkbox for automatic milestone assignment on pull requests [#62063](https://github.com/woocommerce/woocommerce/pull/62063)
 * Dev - Add cache invalidation interface and product invalidator [#61613](https://github.com/woocommerce/woocommerce/pull/61613)
