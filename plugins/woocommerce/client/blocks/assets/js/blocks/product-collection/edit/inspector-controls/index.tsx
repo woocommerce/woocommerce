@@ -227,8 +227,15 @@ const ProductCollectionInspectorControls = (
 						carouselVariant={ isCarouselLayout }
 					/>
 				) }
-				{ ! isEmailEditor && showColumnsControl && (
+				{ showColumnsControl && ! isEmailEditor && (
 					<ColumnsControl { ...displayControlProps } />
+				) }
+				{ showColumnsControl && isEmailEditor && (
+					<ColumnsControl
+						{ ...displayControlProps }
+						maxColumns={ 2 }
+						hideResponsiveToggle
+					/>
 				) }
 				{ ! isEmailEditor && showOffsetControl && (
 					<OffsetControl { ...queryControlProps } />

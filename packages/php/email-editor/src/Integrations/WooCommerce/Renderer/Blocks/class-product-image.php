@@ -271,7 +271,9 @@ class Product_Image extends Abstract_Product_Block_Renderer {
 			return $parsed_block;
 		}
 
-		$parsed_block['attrs']['width'] = $rendering_context->get_layout_width_without_padding();
+		// Use the email_attrs width if set (e.g., for multi-column layouts),
+		// otherwise fall back to the rendering context layout width.
+		$parsed_block['attrs']['width'] = $parsed_block['email_attrs']['width'];
 
 		return $parsed_block;
 	}
@@ -306,14 +308,9 @@ class Product_Image extends Abstract_Product_Block_Renderer {
 		$image_size = 'single' === $attributes['imageSizing'] ? 'woocommerce_single' : 'woocommerce_thumbnail';
 		$image_id   = (int) $product->get_image_id();
 
+		// Return null if no image is set - this will hide the image block in emails.
 		if ( ! $image_id ) {
-			$placeholder = wc_placeholder_img_src( $image_size );
-			return array(
-				'url'    => $placeholder,
-				'alt'    => $product->get_name(),
-				'width'  => 300,
-				'height' => 300,
-			);
+			return null;
 		}
 
 		$image_url = wp_get_attachment_image_url( $image_id, $image_size );

@@ -30,12 +30,15 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 		// Get collection type to pass to child blocks.
 		$collection_type = $parsed_block['attrs']['collection'] ?? '';
 
+		// Get column count from display layout attributes.
+		$columns = (int) ( $parsed_block['attrs']['displayLayout']['columns'] ?? 1 );
+
 		$content = '';
 
 		foreach ( $parsed_block['innerBlocks'] as $inner_block ) {
 			switch ( $inner_block['blockName'] ) {
 				case 'woocommerce/product-template':
-					$content .= $this->render_product_template( $inner_block, $query, $collection_type );
+					$content .= $this->render_product_template( $inner_block, $query, $collection_type, $columns );
 					break;
 				default:
 					$content .= render_block( $inner_block );
@@ -54,9 +57,10 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 	 * @param array     $inner_block Inner block data.
 	 * @param \WP_Query $query WP_Query object.
 	 * @param string    $collection_type Collection type identifier.
+	 * @param int       $columns Number of columns for the grid layout.
 	 * @return string
 	 */
-	private function render_product_template( array $inner_block, \WP_Query $query, string $collection_type ): string {
+	private function render_product_template( array $inner_block, \WP_Query $query, string $collection_type, int $columns = 1 ): string {
 		if ( ! $query->have_posts() ) {
 			return $this->render_no_results_message();
 		}
@@ -76,7 +80,7 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 				$posts
 			)
 		);
-		return $this->render_product_grid( $products, $inner_block, $collection_type );
+		return $this->render_product_grid( $products, $inner_block, $collection_type, $columns );
 	}
 
 	/**
@@ -85,17 +89,79 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 	 * @param array  $products Array of WC_Product objects.
 	 * @param array  $inner_block Inner block data.
 	 * @param string $collection_type Collection type identifier.
+	 * @param int    $columns Number of columns for the grid layout.
 	 * @return string
 	 */
-	private function render_product_grid( array $products, array $inner_block, string $collection_type ): string {
-		// We start with supporting 1 product per row.
-		$content = '';
-		foreach ( $products as $product ) {
-			$content .= $this->add_spacer(
-				$this->render_product_content( $product, $inner_block, $collection_type ),
-				$inner_block['email_attrs'] ?? array()
-			);
+	private function render_product_grid( array $products, array $inner_block, string $collection_type, int $columns = 1 ): string {
+		// Limit columns to max 2 for email compatibility.
+		$columns = min( max( $columns, 1 ), 2 );
+
+		if ( 1 === $columns ) {
+			// Single column layout - render products vertically.
+			$content = '';
+			foreach ( $products as $product ) {
+				$content .= $this->add_spacer(
+					$this->render_product_content( $product, $inner_block, $collection_type ),
+					$inner_block['email_attrs'] ?? array()
+				);
+			}
+			return $content;
 		}
+
+		// Two-column layout using HTML tables for email compatibility.
+		return $this->render_two_column_grid( $products, $inner_block, $collection_type );
+	}
+
+	/**
+	 * Render products in a two-column grid layout using HTML tables.
+	 *
+	 * @param array  $products Array of WC_Product objects.
+	 * @param array  $inner_block Inner block data.
+	 * @param string $collection_type Collection type identifier.
+	 * @return string
+	 */
+	private function render_two_column_grid( array $products, array $inner_block, string $collection_type ): string {
+		$content = '';
+
+		// Calculate the cell width (approximately half the layout width minus gap).
+		// Default email layout is 600px, so each cell is ~290px (accounting for 10px gap on each side).
+		$cell_width = 290;
+
+		// Start the table wrapper with MSO conditional comments for Outlook.
+		$content .= '<!--[if mso | IE]><table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%"><tr><td><![endif]-->';
+		$content .= '<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="width: 100%; border-collapse: collapse;">';
+
+		$product_chunks = array_chunk( $products, 2 );
+
+		foreach ( $product_chunks as $row_index => $row_products ) {
+			$content .= '<tr>';
+
+			foreach ( $row_products as $col_index => $product ) {
+				$cell_style  = 'width: 50%; vertical-align: top; padding: 0;';
+				$cell_style .= 0 === $col_index ? ' padding-right: 10px;' : ' padding-left: 10px;';
+
+				$content .= sprintf(
+					'<td style="%s">%s</td>',
+					esc_attr( $cell_style ),
+					$this->render_product_content( $product, $inner_block, $collection_type, $cell_width )
+				);
+			}
+
+			// If odd number of products, add empty cell to complete the row.
+			if ( 1 === count( $row_products ) ) {
+				$content .= '<td style="width: 50%; vertical-align: top; padding: 0; padding-left: 10px;"></td>';
+			}
+
+			$content .= '</tr>';
+
+			// Add spacing between rows (except after the last row).
+			if ( $row_index < count( $product_chunks ) - 1 ) {
+				$content .= '<tr><td colspan="2" style="height: 20px;"></td></tr>';
+			}
+		}
+
+		$content .= '</table>';
+		$content .= '<!--[if mso | IE]></td></tr></table><![endif]-->';
 
 		return $content;
 	}
@@ -106,9 +172,10 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 	 * @param \WC_Product|null $product Product object.
 	 * @param array            $template_block Inner block data.
 	 * @param string           $collection_type Collection type identifier.
+	 * @param int|null         $cell_width Optional cell width for multi-column layouts.
 	 * @return string
 	 */
-	private function render_product_content( ?\WC_Product $product, array $template_block, string $collection_type ): string {
+	private function render_product_content( ?\WC_Product $product, array $template_block, string $collection_type, ?int $cell_width = null ): string {
 		$content = '';
 
 		if ( ! $product ) {
@@ -116,6 +183,12 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 		}
 
 		foreach ( $template_block['innerBlocks'] as $inner_block ) {
+			// Set cell width context for multi-column layouts.
+			if ( null !== $cell_width ) {
+				$inner_block['email_attrs']          = $inner_block['email_attrs'] ?? array();
+				$inner_block['email_attrs']['width'] = $cell_width . 'px';
+			}
+
 			switch ( $inner_block['blockName'] ) {
 				case 'woocommerce/product-price':
 				case 'woocommerce/product-button':
