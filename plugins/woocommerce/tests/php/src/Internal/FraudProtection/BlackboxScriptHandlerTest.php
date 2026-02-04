@@ -51,10 +51,11 @@ class BlackboxScriptHandlerTest extends WC_Unit_Test_Case {
 		wp_deregister_script( 'wc-fraud-protection-blackbox' );
 		wp_deregister_script( 'wc-fraud-protection-blackbox-init' );
 
-		// Clean up global query vars.
-		global $wp;
+		// Clean up global query vars and post.
+		global $wp, $post;
 		unset( $wp->query_vars['order-pay'] );
 		unset( $wp->query_vars['add-payment-method'] );
+		$post = null;
 	}
 
 	/**
@@ -94,6 +95,19 @@ class BlackboxScriptHandlerTest extends WC_Unit_Test_Case {
 
 		$this->assertTrue( wp_script_is( 'wc-fraud-protection-blackbox', 'enqueued' ), 'Blackbox SDK should be enqueued on add-payment-method' );
 		$this->assertTrue( wp_script_is( 'wc-fraud-protection-blackbox-init', 'enqueued' ), 'Blackbox init script should be enqueued on add-payment-method' );
+	}
+
+	/**
+	 * @testdox Should enqueue Blackbox scripts on a custom page with the checkout block.
+	 */
+	public function test_enqueues_scripts_on_custom_checkout_block_page(): void {
+		$this->mock_jetpack_blog_id( 12345 );
+		$this->mock_post_with_checkout_block();
+
+		do_action( 'wp_enqueue_scripts' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+
+		$this->assertTrue( wp_script_is( 'wc-fraud-protection-blackbox', 'enqueued' ), 'Blackbox SDK should be enqueued on custom checkout block page' );
+		$this->assertTrue( wp_script_is( 'wc-fraud-protection-blackbox-init', 'enqueued' ), 'Blackbox init script should be enqueued on custom checkout block page' );
 	}
 
 	/**
@@ -182,5 +196,15 @@ class BlackboxScriptHandlerTest extends WC_Unit_Test_Case {
 		global $wp;
 		$wp->query_vars[ $endpoint ] = 'test';
 		add_filter( 'woocommerce_is_checkout', '__return_true' );
+	}
+
+	/**
+	 * Mock a post containing the woocommerce/checkout block.
+	 */
+	private function mock_post_with_checkout_block(): void {
+		global $post;
+		$post = $this->factory()->post->create_and_get(
+			array( 'post_content' => '<!-- wp:woocommerce/checkout --><div class="wp-block-woocommerce-checkout"></div><!-- /wp:woocommerce/checkout -->' )
+		);
 	}
 }

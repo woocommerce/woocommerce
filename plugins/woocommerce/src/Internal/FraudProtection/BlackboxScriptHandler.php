@@ -48,14 +48,15 @@ class BlackboxScriptHandler {
 	/**
 	 * Conditionally enqueue Blackbox scripts on payment method pages.
 	 *
-	 * Loads scripts on checkout, pay-for-order, and add-payment-method pages.
+	 * Loads scripts on checkout (including custom pages with the checkout block),
+	 * pay-for-order, and add-payment-method pages.
 	 * Extensions can use the `woocommerce_fraud_protection_enqueue_blackbox_scripts`
 	 * filter to load scripts on additional pages (e.g., product pages for express payments).
 	 *
 	 * @return void
 	 */
 	public function maybe_enqueue_scripts(): void {
-		$should_enqueue = is_checkout() || is_wc_endpoint_url( 'order-pay' ) || is_wc_endpoint_url( 'add-payment-method' );
+		$should_enqueue = is_checkout() || has_block( 'woocommerce/checkout' ) || is_wc_endpoint_url( 'order-pay' ) || is_wc_endpoint_url( 'add-payment-method' );
 
 		/**
 		 * Filter whether to enqueue Blackbox fraud protection scripts on the current page.
