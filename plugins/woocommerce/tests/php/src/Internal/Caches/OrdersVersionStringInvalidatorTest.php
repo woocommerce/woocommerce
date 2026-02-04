@@ -186,8 +186,7 @@ class OrdersVersionStringInvalidatorTest extends WC_Unit_Test_Case {
 	public function test_order_customer_change_invalidates_list(): void {
 		$this->get_invalidator_with_hooks_enabled();
 
-		$order    = \WC_Helper_Order::create_order( 1 );
-		$order_id = $order->get_id();
+		$order = \WC_Helper_Order::create_order( 1 );
 
 		$this->version_generator->generate_version( 'list_orders' );
 		$list_version_before = $this->version_generator->get_version( 'list_orders', false );
@@ -206,8 +205,7 @@ class OrdersVersionStringInvalidatorTest extends WC_Unit_Test_Case {
 	public function test_order_update_without_customer_change_does_not_invalidate_list(): void {
 		$this->get_invalidator_with_hooks_enabled();
 
-		$order    = \WC_Helper_Order::create_order( 1 );
-		$order_id = $order->get_id();
+		$order = \WC_Helper_Order::create_order( 1 );
 
 		$this->version_generator->generate_version( 'list_orders' );
 		$list_version_before = $this->version_generator->get_version( 'list_orders', false );
