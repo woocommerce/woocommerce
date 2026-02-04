@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Trigger term recounts for products after visibility terms change instead of after product saving.

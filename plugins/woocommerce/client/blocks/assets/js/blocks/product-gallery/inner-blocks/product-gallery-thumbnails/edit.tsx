@@ -45,7 +45,7 @@ export const Edit = ( {
 		postId?: string;
 	};
 } ) => {
-	const { thumbnailSize, aspectRatio } = attributes;
+	const { thumbnailSize, aspectRatio, activeThumbnailStyle } = attributes;
 
 	const { product } = useProduct( context.postId );
 
@@ -89,12 +89,16 @@ export const Edit = ( {
 	}, [ thumbnailSize ] );
 
 	const thumbnailSizeValue = Number( thumbnailSize.replace( '%', '' ) );
-	const className = clsx( 'wc-block-product-gallery-thumbnails', {
-		'wc-block-product-gallery-thumbnails--overflow-right':
-			overflowState.right,
-		'wc-block-product-gallery-thumbnails--overflow-bottom':
-			overflowState.bottom,
-	} );
+	const className = clsx(
+		'wc-block-product-gallery-thumbnails',
+		`wc-block-product-gallery-thumbnails--active-${ activeThumbnailStyle }`,
+		{
+			'wc-block-product-gallery-thumbnails--overflow-right':
+				overflowState.right,
+			'wc-block-product-gallery-thumbnails--overflow-bottom':
+				overflowState.bottom,
+		}
+	);
 	const blockProps = useBlockProps( {
 		className,
 		style: {

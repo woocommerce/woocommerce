@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-dev: Update sharding arguments for e2e tests to improve distribution

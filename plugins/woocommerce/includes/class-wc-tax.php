@@ -585,6 +585,28 @@ class WC_Tax {
 		}
 
 		$location = self::get_tax_location( $tax_class, $customer );
+		$cart     = WC()->cart ?? null;
+
+		/**
+		 * Filters the shipping tax class before calculating tax rates.
+		 *
+		 * This filter allows plugins to modify or replace the shipping tax class
+		 * that will be used to calculate shipping tax rates. It fires after core
+		 * logic determines the tax class but before rates are looked up.
+		 *
+		 * @since 10.5.0
+		 *
+		 * @param string|null      $tax_class The tax class determined by core logic. Can be null, empty string (standard), or a tax class slug.
+		 * @param WC_Cart|null     $cart      The cart object containing all cart items, or null if not available.
+		 * @param WC_Customer|null $customer  The customer object, or null if not available.
+		 * @param array            $location  The tax location array [country, state, postcode, city].
+		 */
+		$tax_class = apply_filters( 'woocommerce_shipping_tax_class', $tax_class, $cart, $customer, $location );
+
+		// If filter returned null, treat as no taxable items.
+		if ( is_null( $tax_class ) ) {
+			return array();
+		}
 
 		// Check for a valid location.
 		if ( 4 !== count( $location ) ) {

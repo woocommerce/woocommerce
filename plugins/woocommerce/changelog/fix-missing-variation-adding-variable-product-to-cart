@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Remove link to product page when already viewing the product in missing variation ID error message

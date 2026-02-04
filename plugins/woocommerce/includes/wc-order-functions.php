@@ -84,7 +84,7 @@ function wc_get_orders( $args ) {
  *
  * @param mixed $the_order       Post object or post ID of the order.
  *
- * @return bool|WC_Order|WC_Order_Refund
+ * @return false|WC_Order|WC_Order_Refund
  */
 function wc_get_order( $the_order = false ) {
 	if ( ! did_action( 'woocommerce_after_register_post_type' ) ) {
@@ -1118,7 +1118,26 @@ function wc_cancel_unpaid_orders() {
 		foreach ( $unpaid_orders as $unpaid_order ) {
 			$order = wc_get_order( $unpaid_order );
 
-			if ( apply_filters( 'woocommerce_cancel_unpaid_order', 'checkout' === $order->get_created_via(), $order ) ) {
+			if ( ! $order instanceof WC_Order ) {
+				continue;
+			}
+
+			/**
+			 * Filters whether an unpaid order should be automatically cancelled.
+			 *
+			 * By default, only orders created via customer-facing checkout (classic checkout
+			 * or checkout block) are automatically cancelled. Orders created through other
+			 * means (admin, REST API, plugins) are not cancelled.
+			 *
+			 * @since 2.0.3
+			 * @since 10.6.0 Added 'store-api' to the list of order sources that are automatically cancelled.
+			 *
+			 * @param bool     $should_cancel Whether the unpaid order should be cancelled.
+			 *                                 Default is true for orders created via 'checkout'
+			 *                                 or 'store-api', false otherwise.
+			 * @param WC_Order $order          The unpaid order object.
+			 */
+			if ( apply_filters( 'woocommerce_cancel_unpaid_order', in_array( $order->get_created_via(), array( 'checkout', 'store-api' ), true ), $order ) ) {
 				$order->update_status( OrderStatus::CANCELLED, __( 'Unpaid order cancelled - time limit reached.', 'woocommerce' ) );
 			}
 		}

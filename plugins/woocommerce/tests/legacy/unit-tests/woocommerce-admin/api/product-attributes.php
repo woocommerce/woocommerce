@@ -70,7 +70,7 @@ class WC_Admin_Tests_API_Product_Attributes extends WC_REST_Unit_Test_Case {
 		$product_2->set_props(
 			array(
 				'name' => 'Dummy Variable Product 2',
-				'sku'  => 'DUMMY VARIABLE SKU 2',
+				'sku'  => 'DUMMY VARIABLE SKU 2' . microtime(),
 			)
 		);
 

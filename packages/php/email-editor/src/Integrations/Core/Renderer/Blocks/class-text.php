@@ -30,20 +30,32 @@ class Text extends Abstract_Block_Renderer {
 			return '';
 		}
 
-		$block_content    = $this->adjustStyleAttribute( $block_content );
-		$block_attributes = wp_parse_args(
+		$block_content        = $this->adjustStyleAttribute( $block_content );
+		$block_attributes     = wp_parse_args(
 			$parsed_block['attrs'] ?? array(),
 			array(
 				'textAlign' => 'left',
 				'style'     => array(),
 			)
 		);
-		$html             = new \WP_HTML_Tag_Processor( $block_content );
-		$classes          = 'email-text-block';
+		$html                 = new \WP_HTML_Tag_Processor( $block_content );
+		$classes              = 'email-text-block';
+		$alignment_from_class = null;
 		if ( $html->next_tag() ) {
 			/** @var string $block_classes */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort -- used for phpstan
 			$block_classes = $html->get_attribute( 'class' ) ?? '';
 			$classes      .= ' ' . $block_classes;
+
+			// Extract text alignment from has-text-align-* classes before they're potentially modified.
+			$class_attr = (string) $block_classes;
+			if ( false !== strpos( $class_attr, 'has-text-align-center' ) ) {
+				$alignment_from_class = 'center';
+			} elseif ( false !== strpos( $class_attr, 'has-text-align-right' ) ) {
+				$alignment_from_class = 'right';
+			} elseif ( false !== strpos( $class_attr, 'has-text-align-left' ) ) {
+				$alignment_from_class = 'left';
+			}
+
 			// remove has-background to prevent double padding applied for wrapper and inner element.
 			$block_classes = str_replace( 'has-background', '', $block_classes );
 			// remove border related classes because we handle border on wrapping table cell.
@@ -69,6 +81,8 @@ class Text extends Abstract_Block_Renderer {
 			$additional_styles['text-align'] = $parsed_block['attrs']['textAlign'];
 		} elseif ( in_array( $parsed_block['attrs']['align'] ?? null, array( 'left', 'center', 'right' ), true ) ) {
 			$additional_styles['text-align'] = $parsed_block['attrs']['align'];
+		} elseif ( null !== $alignment_from_class ) {
+			$additional_styles['text-align'] = $alignment_from_class;
 		}
 
 		$block_styles = Styles_Helper::extend_block_styles( $block_styles, $additional_styles );
@@ -102,15 +116,18 @@ class Text extends Abstract_Block_Renderer {
 			$element_style_value = $html->get_attribute( 'style' );
 			$element_style       = isset( $element_style_value ) ? strval( $element_style_value ) : '';
 			// Padding may contain value like 10px or variable like var(--spacing-10).
-			$element_style = preg_replace( '/padding[^:]*:.?[0-9a-z-()]+;?/', '', $element_style );
+			$element_style = (string) preg_replace( '/padding[^:]*:.?[0-9a-z-()]+;?/', '', $element_style );
+
+			// Margin is not supported in email renderer, so we need to remove it.
+			$element_style = (string) preg_replace( '/margin[^:]*:.?[0-9a-z-()]+;?/', '', $element_style );
 
 			// Remove border styles. We apply border styles on the wrapping table cell.
-			$element_style = preg_replace( '/border[^:]*:.?[0-9a-z-()#]+;?/', '', strval( $element_style ) );
+			$element_style = (string) preg_replace( '/border[^:]*:.?[0-9a-z-()#]+;?/', '', $element_style );
 
 			// We define the font-size on the wrapper element, but we need to keep font-size definition here
 			// to prevent CSS Inliner from adding a default value and overriding the value set by user, which is on the wrapper element.
 			// The value provided by WP uses clamp() function which is not supported in many email clients.
-			$element_style = preg_replace( '/font-size:[^;]+;?/', 'font-size: inherit;', strval( $element_style ) );
+			$element_style = (string) preg_replace( '/font-size:[^;]+;?/', 'font-size: inherit;', $element_style );
 			/** @var string $element_style */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort -- used for phpstan
 			$html->set_attribute( 'style', esc_attr( $element_style ) );
 			$block_content = $html->get_updated_html();

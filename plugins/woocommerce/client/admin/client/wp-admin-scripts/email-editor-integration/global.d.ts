@@ -1,3 +1,8 @@
+declare module '*.json' {
+	const value: any;
+	export default value;
+}
+
 interface Window {
 	WooCommerceEmailEditor: {
 		current_post_type: string;

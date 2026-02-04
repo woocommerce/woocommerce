@@ -24,6 +24,14 @@ As discussed in the team conversation:
 
 ## Change Log
 
+### 2025-11-07 - Make the GET `/wc/v4/products/<id>` endpoint available to users with `edit_posts` capabilities
+
+**Summary**: The GET `/wc/v4/products/<id>` REST endpoint has been updated so that users who have the `edit_posts` capability (for example Authors) can retrieve published, non-password-protected products. Access remains restricted for users without either the `edit_posts` or `read_private_products` capabilities.
+
+**PR**: [#61718](https://github.com/woocommerce/woocommerce/pull/61718)
+
+**Breaking Changes**: None
+
 ### 2025-09-08 - Add Add to Cart Field
 
 **Summary**: Added new `add_to_cart` field to product responses providing comprehensive add-to-cart information. The field includes an object with `url`, `description`, `text`, and `single_text` properties that correspond to the product's add-to-cart methods. This enhancement improves frontend integration by providing all necessary add-to-cart data in a single API call, particularly beneficial for block-based implementations and external product types.

@@ -2,7 +2,7 @@
 	"name": "woocommerce/woocommerce",
 	"description": "An eCommerce toolkit that helps you sell anything. Beautifully.",
 	"homepage": "https://woocommerce.com/",
-	"version": "10.4.0",
+	"version": "10.6.0",
 	"type": "wordpress-plugin",
 	"license": "GPL-2.0-or-later",
 	"prefer-stable": true,
@@ -56,8 +56,8 @@
 		"woocommerce/action-scheduler": "3.9.3",
 		"woocommerce/blueprint": "*",
 		"woocommerce/email-editor": "*",
-		"wordpress/abilities-api": "^0.3.0",
-		"wordpress/mcp-adapter": "dev-trunk#7a2d22cff92328bc94f5b1648a66ae4273e949c5"
+		"wordpress/abilities-api": "^0.4.0",
+		"wordpress/mcp-adapter": "^0.3.0"
 	},
 	"require-dev": {
 		"automattic/jetpack-changelogger": "^3.3.0",
@@ -65,9 +65,12 @@
 		"dms/phpunit-arraysubset-asserts": "^0.4.0",
 		"johnkary/phpunit-speedtrap": "*",
 		"mockery/mockery": "1.6.6",
+		"php-stubs/wordpress-stubs": "^6.8",
+		"phpstan/phpstan": "^2.1",
 		"phpunit/phpunit": "^9.6",
 		"sebastian/comparator": "^4.0",
 		"spatie/phpunit-watcher": "^1.23",
+		"szepeviktor/phpstan-wordpress": "^2.0",
 		"woocommerce/monorepo-plugin": "*",
 		"yoast/phpunit-polyfills": "^2.0"
 	},
@@ -153,6 +156,12 @@
 		],
 		"build-lib": [
 			"sh ./bin/build-lib.sh"
+		],
+		"phpstan": [
+			"vendor/bin/phpstan analyse --configuration=phpstan.neon --memory-limit=4G"
+		],
+		"phpstan:baseline": [
+			"vendor/bin/phpstan analyse --configuration=phpstan.neon --memory-limit=4G --generate-baseline=phpstan-baseline.neon"
 		]
 	},
 	"extra": {
@@ -167,6 +176,8 @@
 			"test": "Run unit tests",
 			"phpcs": "Analyze code against the WordPress coding standards with PHP_CodeSniffer",
 			"phpcbf": "Fix coding standards warnings/errors automatically with PHP Code Beautifier",
+			"phpstan": "Run PHPStan static analysis on the WooCommerce plugin",
+			"phpstan:baseline": "Generate a PHPStan baseline file to ignore existing errors",
 			"makepot-audit": "Generate i18n/languages/woocommerce.pot file and run audit",
 			"makepot": "Generate i18n/languages/woocommerce.pot file"
 		},

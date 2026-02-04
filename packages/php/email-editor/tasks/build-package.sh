@@ -43,6 +43,7 @@ mkdir -p "$BUILD_DIR/woocommerce/email-editor/vendor-prefixed"
 rsync -avhW --quiet \
     "$PACKAGE_DIR/vendor-prefixed/classes" \
     "$PACKAGE_DIR/vendor-prefixed/packages" \
+    "$PACKAGE_DIR/vendor-prefixed/LICENSE" \
     "$BUILD_DIR/woocommerce/email-editor/vendor-prefixed/"
 
 # Copy mirror-readme.md as README.md

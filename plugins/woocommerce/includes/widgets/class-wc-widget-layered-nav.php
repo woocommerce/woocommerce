@@ -296,37 +296,41 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			echo wc_query_string_form_fields( null, array( 'filter_' . $taxonomy_filter_name, 'query_type_' . $taxonomy_filter_name ), '', true ); // @codingStandardsIgnoreLine
 			echo '</form>';
 
-			wc_enqueue_js(
+			$handle = 'wc-widget-dropdown-layered-nav-' . $taxonomy_filter_name;
+			wp_register_script( $handle, '', array( 'jquery' ), WC_VERSION, array( 'in_footer' => true ) );
+			wp_enqueue_script( $handle );
+			wp_add_inline_script(
+				$handle,
 				"
-				// Update value on change.
-				jQuery( '.dropdown_layered_nav_" . esc_js( $taxonomy_filter_name ) . "' ).on( 'change', function() {
-					var slug = jQuery( this ).val();
-					jQuery( ':input[name=\"filter_" . esc_js( $taxonomy_filter_name ) . "\"]' ).val( slug );
-
-					// Submit form on change if standard dropdown.
-					if ( ! jQuery( this ).attr( 'multiple' ) ) {
-						jQuery( this ).closest( 'form' ).trigger( 'submit' );
-					}
-				});
-
-				// Use Select2 enhancement if possible
-				if ( jQuery().selectWoo ) {
-					var wc_layered_nav_select = function() {
-						jQuery( '.dropdown_layered_nav_" . esc_js( $taxonomy_filter_name ) . "' ).selectWoo( {
-							placeholder: decodeURIComponent('" . rawurlencode( (string) wp_specialchars_decode( $any_label ) ) . "'),
-							minimumResultsForSearch: 5,
-							width: '100%',
-							allowClear: " . ( $multiple ? 'false' : 'true' ) . ",
-							language: {
-								noResults: function() {
-									return '" . esc_js( _x( 'No matches found', 'enhanced select', 'woocommerce' ) ) . "';
+					// Update value on change.
+					jQuery( '.dropdown_layered_nav_" . esc_js( $taxonomy_filter_name ) . "' ).on( 'change', function() {
+						var slug = jQuery( this ).val();
+						jQuery( ':input[name=\"filter_" . esc_js( $taxonomy_filter_name ) . "\"]' ).val( slug );
+	
+						// Submit form on change if standard dropdown.
+						if ( ! jQuery( this ).attr( 'multiple' ) ) {
+							jQuery( this ).closest( 'form' ).trigger( 'submit' );
+						}
+					});
+	
+					// Use Select2 enhancement if possible
+					if ( jQuery().selectWoo ) {
+						var wc_layered_nav_select = function() {
+							jQuery( '.dropdown_layered_nav_" . esc_js( $taxonomy_filter_name ) . "' ).selectWoo( {
+								placeholder: decodeURIComponent('" . rawurlencode( (string) wp_specialchars_decode( $any_label ) ) . "'),
+								minimumResultsForSearch: 5,
+								width: '100%',
+								allowClear: " . ( $multiple ? 'false' : 'true' ) . ",
+								language: {
+									noResults: function() {
+										return '" . esc_js( _x( 'No matches found', 'enhanced select', 'woocommerce' ) ) . "';
+									}
 								}
-							}
-						} );
-					};
-					wc_layered_nav_select();
-				}
-			"
+							} );
+						};
+						wc_layered_nav_select();
+					}
+				"
 			);
 		}
 

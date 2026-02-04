@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Move HPOS Datastore Caching out of experimental phase.

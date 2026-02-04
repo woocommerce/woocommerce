@@ -23,7 +23,7 @@ To view the actual schedule for current and upcoming releases, see our [release 
 
 ### Feature Freeze & `-dev` release (day 1)
 
-As a result of the code freeze automation, a few things happen:
+As a result of the feature freeze automation, a few things happen:
 
 - A dedicated release branch is created (`release/x.y`), where the future release undergoes testing and stabilization. No new features are included on this branch, only bug fixes.
 - A `-dev` release is built and made available on GitHub.

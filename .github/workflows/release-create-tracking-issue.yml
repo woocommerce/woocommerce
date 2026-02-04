@@ -1,0 +1,311 @@
+name: 'Release: Create Tracking Issue'
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version (e.g., 9.5.0-beta.1, 9.5.0-rc.1, 9.5.0)'
+        required: true
+        type: string
+      release-date:
+        description: 'Release date (YYYY-MM-DD), defaults to today'
+        required: false
+        type: string
+
+  workflow_call:
+    inputs:
+      version:
+        description: 'Version (e.g., 9.5.0-beta.1, 9.5.0-rc.1, 9.5.0)'
+        required: true
+        type: string
+      release-date:
+        description: 'Release date (YYYY-MM-DD), defaults to today'
+        required: false
+        type: string
+      skip-branch-validation:
+        description: 'Skip release branch validation'
+        required: false
+        type: boolean
+        default: false
+    secrets:
+      LINEAR_OAUTH_TOKEN:
+        required: true
+      LINEAR_TEAM_ID:
+        required: true
+
+permissions:
+  contents: read
+  issues: read
+
+jobs:
+  create-tracking-issue:
+    name: Create Release Tracking Issue
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    steps:
+      - name: Parse version and determine template
+        id: parse-version
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const version = '${{ inputs.version }}';
+
+            // Match X.Y.Z with optional pre-release suffix (beta.N or rc.N).
+            const match = version.match( /^(\d+\.\d+)\.(\d+)(?:-(beta|rc)\.(\d+))?$/ );
+
+            // Pre-release versions must have patch version 0.
+            if ( ! match || ( match[ 3 ] && match[ 2 ] !== '0' ) ) {
+              core.setFailed( `Invalid version format: ${ version }. Expected: X.Y.Z (stable) or X.Y.0-beta.N / X.Y.0-rc.N (pre-release)` );
+              return;
+            }
+
+            const mainVersion = match[ 1 ];
+            const releaseType = match[ 3 ] || 'patch';
+            const templateFile = `.linear/release-kickoff-${ releaseType }.md`;
+            const monitoringTime = releaseType === 'rc' ? '4' : ( releaseType === 'patch' ? '2' : '' );
+
+            const milestone = `${ mainVersion }.0`;
+            const branch = `release/${ mainVersion }`;
+
+            console.log( `Version: ${ version }` );
+            console.log( `Main version: ${ mainVersion }` );
+            console.log( `Release type: ${ releaseType }` );
+            console.log( `Milestone: ${ milestone }` );
+            console.log( `Branch: ${ branch }` );
+            console.log( `Template: ${ templateFile }` );
+
+            core.setOutput( 'main-version', mainVersion );
+            core.setOutput( 'release-type', releaseType );
+            core.setOutput( 'template-file', templateFile );
+            core.setOutput( 'milestone', milestone );
+            core.setOutput( 'branch', branch );
+            core.setOutput( 'monitoring-time', monitoringTime );
+
+      - name: Validate release branch exists
+        if: ${{ !inputs.skip-branch-validation }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const branchName = '${{ steps.parse-version.outputs.branch }}';
+
+            try {
+              await github.rest.repos.getBranch( {
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                branch: branchName
+              } );
+              console.log( `Branch '${ branchName }' exists` );
+            } catch ( error ) {
+              if ( error.status === 404 ) {
+                core.setFailed( `Release branch '${ branchName }' does not exist` );
+              } else {
+                throw error;
+              }
+            }
+
+      - name: Install linear-sdk
+        run: npm install @linear/sdk@71.0.0
+
+      - name: Check if tracking issue already exists
+        id: check-existing
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { LinearClient } = require( '@linear/sdk' );
+            const linearClient = new LinearClient( {
+              apiKey: '${{ secrets.LINEAR_OAUTH_TOKEN }}'
+            } );
+
+            const mainVersion = '${{ steps.parse-version.outputs.main-version }}';
+            const version = '${{ inputs.version }}';
+            const specificTitle = `[${ mainVersion }] Release \`${ version }\``;
+
+            console.log( `Checking for existing issue: "${ specificTitle }"` );
+
+            const existingIssues = await linearClient.issues( {
+              filter: {
+                team: { id: { eq: '${{ secrets.LINEAR_TEAM_ID }}' } },
+                title: { eq: specificTitle }
+              }
+            } );
+
+            if ( existingIssues.nodes.length > 0 ) {
+              const existingUrl = existingIssues.nodes[ 0 ].url;
+              console.log( 'Tracking issue already exists' );
+              core.setOutput( 'issue-exists', 'true' );
+              core.setOutput( 'existing-url', existingUrl );
+
+              // Write to GitHub job summary.
+              await core.summary
+                .addRaw( `Linear tracking issue already exists: [${ specificTitle }](${ existingUrl })` )
+                .write();
+              return;
+            }
+
+            console.log( 'No existing tracking issue found, proceeding with creation' );
+            core.setOutput( 'issue-exists', 'false' );
+
+      - name: Checkout repository (sparse)
+        if: ${{ steps.check-existing.outputs.issue-exists != 'true' }}
+        uses: actions/checkout@v4
+        with:
+          path: repo
+          sparse-checkout: |
+            .linear
+          sparse-checkout-cone-mode: false
+
+      - name: Get Linear data
+        if: ${{ steps.check-existing.outputs.issue-exists != 'true' }}
+        id: get-linear-data
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { LinearClient } = require( '@linear/sdk' );
+            const linearClient = new LinearClient( {
+              apiKey: '${{ secrets.LINEAR_OAUTH_TOKEN }}'
+            } );
+
+            const labels = await linearClient.issueLabels( {
+              filter: {
+                name: { eq: 'Release' }
+              }
+            } );
+
+            const releaseLabelId = labels.nodes.length > 0 ? labels.nodes[ 0 ].id : null;
+
+            console.log( releaseLabelId ? 'Found Release label' : 'Release label not found' );
+
+            core.setOutput( 'release-label-id', releaseLabelId || '' );
+
+      - name: Get parent tracking issue and extract assignee
+        if: ${{ steps.check-existing.outputs.issue-exists != 'true' }}
+        id: get-parent-issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { LinearClient } = require( '@linear/sdk' );
+            const linearClient = new LinearClient( {
+              apiKey: '${{ secrets.LINEAR_OAUTH_TOKEN }}'
+            } );
+
+            const mainVersion = '${{ steps.parse-version.outputs.main-version }}';
+            const parentTitle = `[${ mainVersion }] Release tracking`;
+
+            console.log( `Looking for parent issue: "${ parentTitle }"` );
+
+            const parentIssues = await linearClient.issues( {
+              filter: {
+                team: { id: { eq: '${{ secrets.LINEAR_TEAM_ID }}' } },
+                title: { eq: parentTitle }
+              }
+            } );
+
+            if ( parentIssues.nodes.length === 0 ) {
+              core.setFailed( `Parent tracking issue '${ parentTitle }' does not exist in Linear` );
+              return;
+            }
+
+            const parentIssue = parentIssues.nodes[ 0 ];
+            console.log( 'Found parent issue' );
+
+            core.setOutput( 'parent-id', parentIssue.id );
+
+            const assignee = await parentIssue.assignee;
+            if ( assignee ) {
+              console.log( 'Parent issue has an assignee' );
+              core.setOutput( 'assignee-id', assignee.id );
+            } else {
+              console.log( 'Parent issue has no assignee' );
+              core.setOutput( 'assignee-id', '' );
+            }
+
+      - name: Process template and create Linear issue
+        if: ${{ steps.check-existing.outputs.issue-exists != 'true' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { LinearClient } = require( '@linear/sdk' );
+            const fs = require( 'fs' );
+
+            const linearClient = new LinearClient( {
+              apiKey: '${{ secrets.LINEAR_OAUTH_TOKEN }}'
+            } );
+
+            // Read template file.
+            const templateFile = 'repo/${{ steps.parse-version.outputs.template-file }}';
+            let templateContent;
+            try {
+              templateContent = fs.readFileSync( templateFile, 'utf8' );
+            } catch ( error ) {
+              core.setFailed( `Failed to read template file: ${ error.message }` );
+              return;
+            }
+
+            // Parse template (first line is title with # prefix).
+            const lines = templateContent.split( '\n' );
+            const title = lines[ 0 ].slice( 2 ).trim();
+            const body = lines.slice( 1 ).join( '\n' ).trim();
+
+            // Prepare placeholder values.
+            const version = '${{ inputs.version }}';
+            const mainVersion = '${{ steps.parse-version.outputs.main-version }}';
+            const milestone = '${{ steps.parse-version.outputs.milestone }}';
+            const branch = '${{ steps.parse-version.outputs.branch }}';
+            const releaseType = '${{ steps.parse-version.outputs.release-type }}';
+            const monitoringTime = '${{ steps.parse-version.outputs.monitoring-time }}';
+            const repositoryUrl = `https://github.com/${ context.repo.owner }/${ context.repo.repo }`;
+
+            // Release date: use input or default to today.
+            let releaseDate = '${{ inputs.release-date }}';
+            if ( ! releaseDate ) {
+              releaseDate = new Date().toISOString().split( 'T' )[ 0 ];
+            }
+
+            const replacements = {
+              '{repository_url}': repositoryUrl,
+              '{release_main_version}': mainVersion,
+              '{release_milestone}': milestone,
+              '{release_branch}': branch,
+              '{release_version}': version,
+              '{release_date}': releaseDate,
+              '{release_type}': releaseType,
+              '{release_monitoring_time}': monitoringTime
+            };
+
+            // Apply replacements.
+            let processedTitle = title;
+            let processedBody = body;
+
+            for ( const [ placeholder, value ] of Object.entries( replacements ) ) {
+              processedTitle = processedTitle.replaceAll( placeholder, value );
+              processedBody = processedBody.replaceAll( placeholder, value );
+            }
+
+            console.log( `Creating issue with title: "${ processedTitle }"` );
+
+            // Create the Linear issue.
+            const parentId = '${{ steps.get-parent-issue.outputs.parent-id }}' || '';
+            const labelId = '${{ steps.get-linear-data.outputs.release-label-id }}';
+            const assigneeId = '${{ steps.get-parent-issue.outputs.assignee-id }}' || '';
+
+            try {
+              const result = await linearClient.createIssue( {
+                teamId: '${{ secrets.LINEAR_TEAM_ID }}',
+                title: processedTitle,
+                description: processedBody,
+                priority: 2,
+                ...( parentId && { parentId } ),
+                ...( labelId && { labelIds: [ labelId ] } ),
+                ...( assigneeId && { assigneeId } )
+              } );
+
+              const issue = await result.issue;
+              console.log( 'Successfully created tracking issue' );
+
+              // Write to GitHub job summary.
+              await core.summary
+                .addRaw( `Linear tracking issue created: [${ processedTitle }](${ issue.url })` )
+                .write();
+            } catch ( error ) {
+              core.setFailed( `Failed to create Linear issue: ${ error.message }` );
+              return;
+            }

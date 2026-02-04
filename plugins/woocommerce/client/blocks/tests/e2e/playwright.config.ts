@@ -23,7 +23,6 @@ const config: PlaywrightTestConfig = {
 	reporter: process.env.CI
 		? [
 				[ 'list' ],
-				[ './flaky-tests-reporter.ts' ],
 				[
 					'allure-playwright',
 					{
@@ -37,6 +36,17 @@ const config: PlaywrightTestConfig = {
 						outputFile: `${ __dirname }/artifacts/test-results/results.xml`,
 						stripANSIControlSequences: true,
 						includeProjectInTestName: true,
+					},
+				],
+				[
+					'playwright-ctrf-json-reporter',
+					{
+						outputDir: `${ __dirname }/artifacts/test-results`,
+						outputFile: `ctrf-report-${ Date.now() }.json`,
+						branchName: process.env.GITHUB_REF_NAME || '',
+						commit: process.env.GITHUB_SHA || '',
+						appName: 'woocommerce-blocks',
+						repositoryName: process.env.GITHUB_REPOSITORY || '',
 					},
 				],
 		  ]

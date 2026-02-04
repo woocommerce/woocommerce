@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Change the "discount" colour in Cart/Checkout block totals to be more accessible (now uses the same colour as the theme)

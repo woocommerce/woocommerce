@@ -16,7 +16,7 @@ import {
  * Internal dependencies
  */
 import { getAdminSetting } from '~/utils/admin-settings';
-import ResizableFrame from '~/customize-store/assembler-hub/resizable-frame';
+import ResizableFrame from '../components/resizable-frame';
 import type { MainContentComponentProps } from '../xstate';
 import './site-preview.scss';
 

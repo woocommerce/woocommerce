@@ -48,6 +48,9 @@ jobs:
       - name: Get current version
         id: get-current-version
         run: |
+          # Log inputs to console.
+          echo "Bumping version: branch=${{ inputs.branch }}, bump-type=${{ inputs.bump-type }}"
+
           version=$( cat plugins/woocommerce/woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1 )
           echo "Current version: $version"
           echo "version=$version" >> $GITHUB_OUTPUT
@@ -61,8 +64,27 @@ jobs:
             const bumpType = `${{ inputs.bump-type }}`;
             const currentVersion = '${{ steps.get-current-version.outputs.version }}';
 
+            // Helper to write summary.
+            const writeSummary = async (nextVersion = null) => {
+              const versionTransition = nextVersion
+                ? `from \`${currentVersion}\` to \`${nextVersion}\``
+                : `from \`${currentVersion}\``;
+              await core.summary
+                .addRaw(`🚀 Bumping version on \`${branch}\` ${versionTransition} (${bumpType} bump).\n`)
+                .write();
+            };
+
+            // Helper to write error to summary.
+            const writeSummaryError = async (errorMsg) => {
+              await core.summary
+                .addRaw(`\n❌ **Error:** ${errorMsg}\n`)
+                .write();
+            };
+
             const m = currentVersion.match( /(?<base>\d+\.\d+)\.(?<patch>\d+)(-(?<prerelease>rc|beta|dev)(\.(?<prerelease_number>\d+))?)?/ );
             if ( ! m ) {
+              await writeSummary();
+              await writeSummaryError(`Current version (${currentVersion}) does not have the expected format.`);
               core.setFailed( `Current version (${ currentVersion }) does not have the expected format.` );
               return;
             }
@@ -81,11 +103,15 @@ jobs:
                 ( 'rc' === prerelease && ! [ 'rc', 'stable' ].includes( bumpType ) );
 
             if ( invalidBump ) {
+              await writeSummary();
+              await writeSummaryError(`Cannot perform a ${bumpType} bump on version ${currentVersion}.`);
               core.setFailed( `Bump type (${ bumpType }) does not apply to current version (${ currentVersion }).` );
               return;
             }
 
             if ( ( 'trunk' === branch && 'dev' !== bumpType ) || ( 'trunk' !== branch && 'dev' === bumpType ) ) {
+              await writeSummary();
+              await writeSummaryError(`Cannot perform a ${bumpType} bump on branch ${branch}.`);
               core.setFailed( `Bump type (${ bumpType }) does not apply to source branch (${ branch }).` );
               return;
             }
@@ -108,13 +134,19 @@ jobs:
                 break;
 
               default:
+                await writeSummary();
+                await writeSummaryError(`Invalid bump type: ${bumpType}.`);
                 core.setFailed(`Invalid bump type.`);
                 return;
             }
 
+            // Write success summary header.
+            await writeSummary(newVersion);
+
             core.setOutput( 'nextVersion', newVersion );
             core.setOutput( 'nextStable', newVersion.replace( /-(dev|(beta|rc)\.\d+)/, '' ) );
             core.setOutput( 'clearChangelog', '' === prerelease );
+            core.setOutput( 'prMilestone', `${ baseVersion }.0` );
 
       - name: Bump version in files
         env:
@@ -127,8 +159,9 @@ jobs:
           # Update version header in woocommerce.php.
           sed -i -E "s/Version: [0-9]+\.[0-9]+\.[0-9]+.*$/Version: $NEXT_VERSION/" woocommerce.php
 
+
           # Update changelog in readme.txt.
-          sed -i -E "s/^= [0-9]+\.[0-9]+\.[0-9]+(\-[a-z]+(\.[0-9]+)*)? (.*) =/= $NEXT_VERSION \3 =/" readme.txt
+          sed -i -E "s/^= [0-9]+\.[0-9]+\.[0-9]+(\-[a-z]+(\.[0-9]+)*)? (.*) =/= $NEXT_VERSION $(date +%Y)-XX-XX =/" readme.txt
 
           if [[ "$CLEAR_CHANGELOG" == "true" ]]; then
             perl -i -p0e 's/(== Changelog ==.*= \d+\.\d+\.\d+.*=\n)(.*)(\n\[See changelog for all versions\].*)/$1$3/igs' readme.txt
@@ -144,6 +177,8 @@ jobs:
           sed -i -E "s/public \\\$version = '[0-9]+\.[0-9]+\.[0-9]+.*';/public \\\$version = '$NEXT_VERSION'\;/" includes/class-woocommerce.php
 
           if git diff --quiet; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "❌ **Error:** No file changes were detected. The version may already be set to ${NEXT_VERSION}." >> $GITHUB_STEP_SUMMARY
             echo "::error::No changes to commit."
             exit 1
           fi
@@ -165,31 +200,43 @@ jobs:
             --message 'Bump version to ${{ steps.compute-new-version.outputs.nextVersion }}.'
           git push origin ${branch_name}
 
-          # Open PR.
-          gh pr create \
-            --title 'Bump WooCommerce version to ${{ steps.compute-new-version.outputs.nextVersion }}' \
-            --body 'This PR updates the versions in ${{ inputs.branch }} to ${{ steps.compute-new-version.outputs.nextVersion }}.' \
+          # Determine reviewer (when running as a standalone workflow).
+          reviewer_arg=""
+          if [ "${{ contains( github.workflow_ref, 'release-bump-version.yml' ) }}" = "true" ]; then
+            reviewer_arg="--reviewer ${{ github.actor }}"
+          fi
+
+          # Check milestone exists.
+          milestone="${{ steps.compute-new-version.outputs.prMilestone }}"
+          milestone_arg=""
+          if [[ -n "$milestone" ]]; then
+            milestone_info=$(gh api repos/${{ github.repository }}/milestones --jq ".[] | select(.title==\"$milestone\")")
+
+            if [[ -n "$milestone_info" ]]; then
+              is_closed=$(echo "$milestone_info" | jq -r '.state=="closed"')
+              milestone_number=$(echo "$milestone_info" | jq -r '.number')
+
+              if [[ "$is_closed" == "true" ]]; then
+                echo "Milestone '$milestone' is closed, reopening it..."
+                gh api --method PATCH repos/${{ github.repository }}/milestones/"$milestone_number" -f state=open
+              fi
+
+              milestone_arg="--milestone $milestone"
+            fi
+          fi
+
+          # Create PR and capture URL.
+          pr_url=$(gh pr create \
+            --title 'Bump WooCommerce version to `${{ steps.compute-new-version.outputs.nextVersion }}` on `${{ inputs.branch }}`' \
+            --body 'This PR updates the versions in ${{ inputs.branch }} to ${{ steps.compute-new-version.outputs.nextVersion }}.'$'\n\n''<!-- [x] This Pull Request does not require a changelog -->' \
             --base ${{ inputs.branch }} \
             --head ${branch_name} \
-            --label Release
+            --label Release \
+            ${reviewer_arg} \
+            ${milestone_arg})
 
-      - name: Ensure milestone for dev version exists
-        if: ${{ inputs.bump-type == 'dev' }}
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const milestone = '${{ steps.compute-new-version.outputs.nextStable }}';
+          # Write success to summary.
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "⏭️ **Next step:** Review and merge [the pull request](${pr_url})." >> $GITHUB_STEP_SUMMARY
 
-            try {
-              await github.rest.issues.createMilestone({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                title: milestone,
-              });
-            } catch ( e ) {
-              if ( e.response.data.errors?.some( (err) => 'already_exists' === err.code ) ) {
-                console.log( `Milestone ${ milestone } already exists.` );
-              } else {
-                throw e;
-              }
-            }
+

@@ -358,13 +358,25 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 				$link = $this->get_page_base_url( $taxonomy );
 				echo '</select>';
 
-				wc_enqueue_js(
+				$handle = 'wc-brand-widget-dropdown-layered-nav-' . $taxonomy;
+				wp_register_script( $handle, '', array(), WC_VERSION, array( 'in_footer' => true ) );
+				wp_enqueue_script( $handle );
+				$redirect_url = add_query_arg( 'filtering', '1', preg_replace( '%\/page\/[0-9]+%', '', esc_url_raw( $link ) ) );
+
+				wp_add_inline_script(
+					$handle,
 					"
-					jQuery( '.wc-brand-dropdown-layered-nav-" . esc_js( $taxonomy ) . "' ).change( function() {
-						var slug = jQuery( this ).val();
-						location.href = '" . preg_replace( '%\/page\/[0-9]+%', '', str_replace( array( '&amp;', '%2C' ), array( '&', ',' ), esc_js( add_query_arg( 'filtering', '1', esc_url_raw( $link ) ) ) ) ) . '&filter_' . esc_js( $taxonomy ) . "=' + jQuery( this ).val();
-					});
-				"
+                    (function() {
+                        'use strict';
+                        const dropdown = document.querySelector( '.wc-brand-dropdown-layered-nav-" . esc_js( $taxonomy ) . "' );
+                        if ( dropdown ) {
+                            dropdown.addEventListener( 'change', function() {
+                                const slug = this.value;
+                                location.href = '" . esc_js( $redirect_url ) . '&filter_' . esc_js( $taxonomy ) . "=' + slug;
+                            } );
+                        }
+                    })();
+                    "
 				);
 			}
 		}

@@ -79,6 +79,7 @@ const Edit = ( {
 					initialOpen
 				>
 					<UnitControl
+						__next40pxDefaultSize
 						onChange={ ( value ) => {
 							setAttributes( { width: value } );
 						} }

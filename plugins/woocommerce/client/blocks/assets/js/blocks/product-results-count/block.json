@@ -16,7 +16,6 @@
 			"fontSize": true
 		}
 	},
-	"attributes": {},
 	"usesContext": [ "queryId" ],
 	"textdomain": "woocommerce",
 	"apiVersion": 3,

@@ -16,6 +16,15 @@ use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
  * @package WooCommerce\Tests\CRUD
  */
 class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
+	/**
+	 * Tear down the test class.
+	 */
+	public function tearDown(): void {
+		parent::tearDown();
+
+		remove_all_filters( 'wc_get_price_thousand_separator' );
+		remove_all_filters( 'wc_get_price_decimal_separator' );
+	}
 
 	/**
 	 * Test: get_type
@@ -207,6 +216,28 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object = new WC_Order();
 		$object->set_total( '' );
 		$this->assertEquals( 0, $object->get_total() );
+	}
+
+	/**
+	 * Test: get_total_pre_formatted_standard_value
+	 */
+	public function test_get_total_pre_formatted_standard_value() {
+		$object = new WC_Order();
+		$object->set_total( '2,000.00' );
+		$this->assertEquals( 2000, $object->get_total() );
+	}
+
+	/**
+	 * Test: get_total_pre_formatted_eu_value
+	 */
+	public function test_get_total_pre_formatted_eu_value() {
+		// Simulate a price format like 3.567,89.
+		add_filter( 'wc_get_price_thousand_separator', fn() => '.' );
+		add_filter( 'wc_get_price_decimal_separator', fn() => ',' );
+
+		$object = new WC_Order();
+		$object->set_total( '2.000,00' );
+		$this->assertEquals( 2000, $object->get_total() );
 	}
 
 	/**
@@ -908,6 +939,11 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object->save();
 
 		$this->assertTrue( $object->needs_shipping() );
+
+		$physical_product->delete( true );
+		// Reload the order to ensure fresh data.
+		$object = wc_get_order( $object->get_id() );
+		$this->assertFalse( $object->needs_shipping() );
 	}
 
 	/**
@@ -2063,5 +2099,46 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		}
 
 		$this->assertEquals( 110.06, $order->get_total_fees() );
+	}
+
+	/**
+	 * Test that WC_Order::get_total_fees() returns negative values for discount fees.
+	 */
+	public function test_get_total_fees_should_return_negative_fees() {
+		$order = WC_Helper_Order::create_order();
+
+		$fee = new WC_Order_Item_Fee();
+		$fee->set_props(
+			array(
+				'name'       => 'Discount Fee',
+				'tax_status' => ProductTaxStatus::NONE,
+				'total'      => -10,
+			)
+		);
+		$order->add_item( $fee );
+
+		$this->assertEquals( -10, $order->get_total_fees() );
+	}
+
+	/**
+	 * Test that WC_Order::get_total_fees() correctly sums mixed positive and negative fees.
+	 */
+	public function test_get_total_fees_should_sum_mixed_positive_and_negative_fees() {
+		$order      = WC_Helper_Order::create_order();
+		$fee_totals = array( 25, -10, 5.50 ); // Net: 20.50.
+
+		foreach ( $fee_totals as $total ) {
+			$fee = new WC_Order_Item_Fee();
+			$fee->set_props(
+				array(
+					'name'       => $total < 0 ? 'Discount Fee' : 'Regular Fee',
+					'tax_status' => ProductTaxStatus::NONE,
+					'total'      => $total,
+				)
+			);
+			$order->add_item( $fee );
+		}
+
+		$this->assertEquals( 20.50, $order->get_total_fees() );
 	}
 }

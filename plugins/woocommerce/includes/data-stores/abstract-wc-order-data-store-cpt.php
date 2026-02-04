@@ -176,8 +176,8 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	/**
 	 * Set the properties of an object and log the first error found while doing so.
 	 *
-	 * @param $order WC_Order $order Order object.
-	 * @param array $props The properties to set.
+	 * @param \WC_Order $order Order object.
+	 * @param array     $props The properties to set.
 	 */
 	private function set_order_props( &$order, array $props ) {
 		$errors = $order->set_props( $props );
@@ -187,7 +187,8 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		}
 
 		$order_id = $order->get_id();
-		$logger   = WC()->call_function( 'wc_get_logger' );
+		/** @var WC_Logger_Interface $logger */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
+		$logger = WC()->call_function( 'wc_get_logger' );
 
 		foreach ( $errors->get_error_codes() as $error_code ) {
 			$property_name = $errors->get_error_data( $error_code )['property_name'] ?? '';
@@ -790,6 +791,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 					array( '%d', '%s', '%s' )
 				);
 				wp_cache_delete( $order->get_id(), 'post_meta' );
+				/** @var WC_Logger_Interface $logger */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 				$logger = wc_get_container()->get( LegacyProxy::class )->call_function( 'wc_get_logger' );
 				$logger->warning( sprintf( 'encountered an order meta value of type __PHP_Incomplete_Class during `update_order_meta_from_object` in order with ID %d: "%s"', $order->get_id(), var_export( $meta_value, true ) ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_export
 			} else {

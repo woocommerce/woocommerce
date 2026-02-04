@@ -38,30 +38,6 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			add_action( 'admin_enqueue_scripts', array( $this, 'admin_styles' ) );
 			add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
 			add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
-			add_action( 'shutdown', array( $this, 'add_legacy_script_warnings' ) );
-		}
-
-		/**
-		 * Add warnings for deprecated script handles.
-		 */
-		public function add_legacy_script_warnings() {
-			$scripts = $this->get_scripts();
-			foreach ( $scripts as $script ) {
-				if ( ! isset( $script['legacy_handle'] ) ) {
-					continue;
-				}
-
-				$exists = wp_script_is( $script['legacy_handle'] );
-
-				if ( $exists ) {
-					wc_deprecated_argument(
-						'wp_enqueue_script',
-						'10.3.0',
-						/* translators: %1$s: new script handle, %2$s: previous script handle */
-						sprintf( __( 'Please use the new handle %1$s in place of the previous handle %2$s.', 'woocommerce' ), $script['handle'], $script['legacy_handle'] )
-					);
-				}
-			}
 		}
 
 		/**

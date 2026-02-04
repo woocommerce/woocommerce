@@ -5,6 +5,7 @@ import { ErrorObject } from '@woocommerce/editor-components/error-placeholder';
 import type {
 	ProductResponseItem,
 	ProductCategoryResponseItem,
+	ProductBrandResponseItem,
 } from '@woocommerce/types';
 
 export interface WithInjectedProductVariations {
@@ -15,6 +16,8 @@ export interface WithInjectedProductVariations {
 	expandedProduct: number | null;
 	variations: Record< number, ProductResponseItem[] >;
 	variationsLoading: boolean;
+	onLoadMoreVariations?: () => void;
+	totalVariations?: Record< number, number | null >;
 }
 
 export interface WithInjectedSearchedProducts {
@@ -29,6 +32,13 @@ export interface WithInjectedSearchedCategories {
 	error: ErrorObject | null;
 	isLoading: boolean;
 	categories: ProductCategoryResponseItem[];
+	selected: number[];
+}
+
+export interface WithInjectedSearchedBrands {
+	error: ErrorObject | null;
+	isLoading: boolean;
+	brands: ProductBrandResponseItem[];
 	selected: number[];
 }
 

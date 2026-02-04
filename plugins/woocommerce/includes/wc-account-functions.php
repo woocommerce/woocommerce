@@ -107,7 +107,7 @@ function wc_get_account_menu_items() {
 		'dashboard'       => __( 'Dashboard', 'woocommerce' ),
 		'orders'          => __( 'Orders', 'woocommerce' ),
 		'downloads'       => __( 'Downloads', 'woocommerce' ),
-		'edit-address'    => _n( 'Address', 'Addresses', ( 1 + (int) wc_shipping_enabled() ), 'woocommerce' ),
+		'edit-address'    => _n( 'Address', 'Addresses', ( ! wc_ship_to_billing_address_only() && wc_shipping_enabled() ) ? 2 : 1, 'woocommerce' ),
 		'payment-methods' => __( 'Payment methods', 'woocommerce' ),
 		'edit-account'    => __( 'Account details', 'woocommerce' ),
 		'customer-logout' => __( 'Log out', 'woocommerce' ),

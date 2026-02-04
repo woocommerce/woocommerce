@@ -16,6 +16,7 @@
 	<exclude-pattern>*/node_modules/*</exclude-pattern>
 	<exclude-pattern>*/vendor/*</exclude-pattern>
 	<exclude-pattern>lib/</exclude-pattern>
+	<exclude-pattern>php-stubs/</exclude-pattern>
 
 	<!-- Only check PHP files. -->
 	<arg name="extensions" value="php" />

@@ -90,24 +90,20 @@ const FrontendBlock = ( {
 				) }
 			>
 				{ checkbox ? (
-					<>
-						<CheckboxControl
-							id="terms-and-conditions"
-							checked={ checked }
-							onChange={ () =>
-								setChecked( ( value ) => ! value )
-							}
-							hasError={ hasError }
-							disabled={ isDisabled }
-						>
-							<span
-								className="wc-block-components-checkbox__label"
-								dangerouslySetInnerHTML={ {
-									__html: text || termsCheckboxDefaultText,
-								} }
-							/>
-						</CheckboxControl>
-					</>
+					<CheckboxControl
+						id="terms-and-conditions"
+						checked={ checked }
+						onChange={ () => setChecked( ( value ) => ! value ) }
+						hasError={ hasError }
+						disabled={ isDisabled }
+					>
+						<span
+							className="wc-block-components-checkbox__label"
+							dangerouslySetInnerHTML={ {
+								__html: text || termsCheckboxDefaultText,
+							} }
+						/>
+					</CheckboxControl>
 				) : (
 					<span
 						className="wc-block-components-checkbox__label"

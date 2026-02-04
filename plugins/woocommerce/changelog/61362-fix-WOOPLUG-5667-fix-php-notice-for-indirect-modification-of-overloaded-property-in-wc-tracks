@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix PHP notice for indirect modification of overloaded property in WC_Tracks

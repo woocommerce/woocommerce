@@ -1,7 +1,8 @@
-const { test, expect, Page, Locator } = require( '@playwright/test' );
+const { test, expect, request, Page, Locator } = require( '@playwright/test' );
 const { admin } = require( '../../test-data/data' );
 const { tags } = require( '../../fixtures/fixtures' );
 const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
+const { setOption } = require( '../../utils/options' );
 
 const EXPECTED_SECTION_HEADERS = [ 'Performance', 'Charts', 'Leaderboards' ];
 
@@ -46,7 +47,7 @@ const headers = {
 const hidePerformanceSection = async () => {
 	const response =
 		await test.step( `Send POST request to hide Performance section`, async () => {
-			const request = page.request;
+			const pageRequest = page.request;
 			const url = `./wp-json/wp/v2/users/${ userId }`;
 			const params = { _locale: 'user' };
 			const dashboard_sections = JSON.stringify( [
@@ -59,7 +60,7 @@ const hidePerformanceSection = async () => {
 				},
 			};
 
-			return await request.post( url, {
+			return await pageRequest.post( url, {
 				data,
 				params,
 				headers,
@@ -84,7 +85,7 @@ const hidePerformanceSection = async () => {
 const resetSections = async () => {
 	const response =
 		await test.step( `Send POST request to reset all sections`, async () => {
-			const request = page.request;
+			const pageRequest = page.request;
 			const url = `./wp-json/wp/v2/users/${ userId }`;
 			const params = { _locale: 'user' };
 			const data = {
@@ -94,7 +95,7 @@ const resetSections = async () => {
 				},
 			};
 
-			return await request.post( url, {
+			return await pageRequest.post( url, {
 				data,
 				params,
 				headers,
@@ -123,11 +124,11 @@ test.describe(
 			page = await browser.newPage();
 
 			await test.step( `Send GET request to get the current user id`, async () => {
-				const request = page.request;
+				const pageRequest = page.request;
 				const data = {
 					_fields: 'id',
 				};
-				const response = await request.get(
+				const response = await pageRequest.get(
 					'./wp-json/wp/v2/users/me',
 					{
 						data,
@@ -226,6 +227,11 @@ test.describe(
 					await test.step( `Move first section down`, async () => {
 						await buttons_ellipsis.first().click();
 						await menuitem_moveDown.click();
+						await page.waitForResponse(
+							( response ) =>
+								response.url().includes( '/users' ) &&
+								response.ok()
+						);
 					} );
 
 					await test.step( `Expect the second section to become first, and first becomes second.`, async () => {
@@ -250,6 +256,11 @@ test.describe(
 					await test.step( `Move second section up`, async () => {
 						await buttons_ellipsis.nth( 1 ).click();
 						await menuitem_moveUp.click();
+						await page.waitForResponse(
+							( response ) =>
+								response.url().includes( '/users' ) &&
+								response.ok()
+						);
 					} );
 
 					await test.step( `Expect second section becomes first section, first becomes second`, async () => {
@@ -293,11 +304,101 @@ test.describe(
 			await test.step( `Add the Performance section back in.`, async () => {
 				await page.getByTitle( 'Add more sections' ).click();
 				await page.getByTitle( 'Add Performance section' ).click();
+				await page.waitForResponse(
+					( response ) =>
+						response.url().includes( '/users' ) && response.ok()
+				);
 			} );
 
 			await test.step( `Expect the Performance section to be added back.`, async () => {
 				await expect( heading_performance ).toBeVisible();
 			} );
+		} );
+	}
+);
+
+test.describe(
+	'Analytics Overview - Manual Import Trigger',
+	{ tag: [ tags.PAYMENTS, tags.SERVICES ] },
+	() => {
+		test.use( { storageState: ADMIN_STATE_PATH } );
+
+		test.beforeAll( async ( { browser } ) => {
+			page = await browser.newPage();
+		} );
+
+		test.beforeEach( async () => {
+			await test.step( `Go to Analytics > Overview`, async () => {
+				await page.goto(
+					'wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Foverview'
+				);
+			} );
+		} );
+
+		test.afterAll( async () => {
+			await page.close();
+		} );
+
+		test( 'should show manual update trigger in scheduled mode', async ( {
+			baseURL,
+		} ) => {
+			// Set to scheduled mode
+			await setOption(
+				request,
+				baseURL,
+				'woocommerce_analytics_scheduled_import',
+				'yes'
+			);
+
+			// Reload the page
+			await page.reload();
+
+			// Verify import status bar is visible
+			await expect( page.getByText( 'Data status:' ) ).toBeVisible();
+			// Verify "Update now" button is visible
+			const updateButton = page.getByRole( 'button', {
+				name: 'Manually trigger analytics data import',
+			} );
+			await expect( updateButton ).toBeVisible();
+
+			// Click "Update now" button
+			const responsePromise = page.waitForResponse(
+				( response ) =>
+					response
+						.url()
+						.includes( '/wc-analytics/imports/trigger' ) &&
+					response.ok()
+			);
+
+			await updateButton.click();
+
+			// Verify button shows loading state (isBusy)
+			// After clicking, the aria-label changes to "Analytics data import in progress"
+			const busyButton = page.getByRole( 'button', {
+				name: 'Analytics data import in progress',
+			} );
+			await expect( busyButton ).toBeDisabled();
+
+			// Wait for API response
+			await responsePromise;
+		} );
+
+		test( 'should hide manual update trigger in immediate mode', async ( {
+			baseURL,
+		} ) => {
+			// Set to immediate mode
+			await setOption(
+				request,
+				baseURL,
+				'woocommerce_analytics_scheduled_import',
+				'no'
+			);
+
+			// Reload the page
+			await page.reload();
+
+			// Verify import status bar wrapper is NOT rendered
+			await expect( page.getByText( 'Data status:' ) ).toBeHidden();
 		} );
 	}
 );
