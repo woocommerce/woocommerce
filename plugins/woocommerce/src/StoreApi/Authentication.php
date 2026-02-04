@@ -119,6 +119,7 @@ class Authentication {
 	/**
 	 * Checks if the request has a store API route as a GET `rest_route` parameter.
 	 *
+	 * @since 10.6.0
 	 * @return bool
 	 */
 	protected function has_store_api_route_as_get_parameter(): bool {
