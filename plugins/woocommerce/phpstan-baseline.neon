@@ -77575,6 +77575,12 @@ parameters:
 			path: src/Internal/StockNotifications/StockSyncController.php
 
 		-
+			message: '#^Trait Automattic\\WooCommerce\\Internal\\Traits\\AccessiblePrivateMethods is used zero times and is not analysed\.$#'
+			identifier: trait.unused
+			count: 1
+			path: src/Internal/Traits/AccessiblePrivateMethods.php
+
+		-
 			message: '#^Cannot call method format\(\) on DateTime\|false\.$#'
 			identifier: method.nonObject
 			count: 4

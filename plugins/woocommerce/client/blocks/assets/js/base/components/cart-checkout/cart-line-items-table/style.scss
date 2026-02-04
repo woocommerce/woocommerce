@@ -45,6 +45,24 @@ table.wc-block-cart-items {
 		}
 		.wc-block-cart-item__prices {
 			@include font-small-locked;
+			display: flex;
+			flex-direction: row;
+			flex-wrap: nowrap;
+			gap: $gap-smaller;
+			align-items: center;
+
+			@include cart-checkout-mobile-container {
+				flex-wrap: wrap;
+			}
+
+			.price {
+				display: flex;
+				align-items: center;
+
+				&[hidden] {
+					display: none;
+				}
+			}
 		}
 
 		.wc-block-cart-item__quantity {
@@ -64,6 +82,10 @@ table.wc-block-cart-items {
 				&[hidden] {
 					display: none;
 				}
+
+				svg {
+					fill: currentColor;
+				}
 			}
 		}
 		.wc-block-components-product-name {
@@ -71,6 +93,8 @@ table.wc-block-cart-items {
 			display: block;
 			max-width: max-content;
 			line-height: 1.4;
+			margin-bottom: 5px;
+
 			&[hidden] {
 				display: none;
 			}
