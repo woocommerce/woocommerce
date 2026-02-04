@@ -81,7 +81,7 @@ class PushTokensDataStore {
 		$post = get_post( $push_token->get_id() );
 
 		if ( ! $post || PushToken::POST_TYPE !== $post->post_type ) {
-			throw new PushTokenNotFoundException( 'Push token could not be found.' );
+			throw new PushTokenNotFoundException();
 		}
 
 		$meta = $this->build_meta_array_from_database( $push_token );
@@ -127,8 +127,7 @@ class PushTokensDataStore {
 		$post = get_post( $push_token->get_id() );
 
 		if ( ! $post || PushToken::POST_TYPE !== $post->post_type ) {
-			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
-			throw new PushTokenNotFoundException( 'Push token could not be found.' );
+			throw new PushTokenNotFoundException();
 		}
 
 		$result = wp_update_post(
@@ -171,7 +170,7 @@ class PushTokensDataStore {
 		$post = get_post( $push_token->get_id() );
 
 		if ( ! $post || PushToken::POST_TYPE !== $post->post_type ) {
-			throw new PushTokenNotFoundException( 'Push token could not be found.' );
+			throw new PushTokenNotFoundException();
 		}
 
 		wp_delete_post( (int) $push_token->get_id(), true );
