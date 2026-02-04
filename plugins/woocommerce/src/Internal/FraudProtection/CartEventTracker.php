@@ -13,8 +13,8 @@ defined( 'ABSPATH' ) || exit;
  * Tracks cart events for fraud protection analysis.
  *
  * This class provides methods to track cart events (add, update, remove, restore)
- * for fraud protection event dispatching. Event-specific data is passed
- * to the dispatcher which handles session data collection internally.
+ * for fraud protection. Event-specific data is passed
+ * to the SessionDataCollector which handles session data storage internally.
  *
  * @since 10.5.0
  * @internal This class is part of the internal API and is subject to change without notice.
@@ -22,41 +22,40 @@ defined( 'ABSPATH' ) || exit;
 class CartEventTracker {
 
 	/**
-	 * Fraud protection dispatcher instance.
+	 * Session data collector instance.
 	 *
-	 * @var FraudProtectionDispatcher
+	 * @var SessionDataCollector
 	 */
-	private FraudProtectionDispatcher $dispatcher;
+	private SessionDataCollector $session_data_collector;
 
 	/**
 	 * Initialize with dependencies.
 	 *
 	 * @internal
 	 *
-	 * @param FraudProtectionDispatcher $dispatcher The fraud protection dispatcher instance.
+	 * @param SessionDataCollector $session_data_collector The session data collector instance.
 	 */
-	final public function init( FraudProtectionDispatcher $dispatcher ): void {
-		$this->dispatcher = $dispatcher;
+	final public function init( SessionDataCollector $session_data_collector ): void {
+		$this->session_data_collector = $session_data_collector;
 	}
 
 	/**
 	 * Track cart page loaded event.
 	 *
-	 * Triggers fraud protection event dispatching when the cart page is initially loaded.
+	 * Collects session data when the cart page is initially loaded.
 	 * This captures the initial session state before any user interactions.
 	 *
 	 * @internal
 	 * @return void
 	 */
 	public function track_cart_page_loaded(): void {
-		// Track the page load event. Session data will be collected by the dispatcher.
-		$this->dispatcher->dispatch_event( 'cart_page_loaded', array() );
+		$this->session_data_collector->collect( 'cart_page_loaded', array() );
 	}
 
 	/**
 	 * Track cart item added event.
 	 *
-	 * Triggers fraud protection event dispatching when an item is added to the cart.
+	 * Collects session data when an item is added to the cart.
 	 *
 	 * @internal
 	 *
@@ -74,14 +73,13 @@ class CartEventTracker {
 			$variation_id
 		);
 
-		// Trigger event dispatching.
-		$this->dispatcher->dispatch_event( 'cart_item_added', $event_data );
+		$this->session_data_collector->collect( 'cart_item_added', $event_data );
 	}
 
 	/**
 	 * Track cart item quantity updated event.
 	 *
-	 * Triggers fraud protection event dispatching when cart item quantity is updated.
+	 * Collects session data when cart item quantity is updated.
 	 *
 	 * @internal
 	 *
@@ -108,17 +106,15 @@ class CartEventTracker {
 			$variation_id
 		);
 
-		// Add old quantity for context.
 		$event_data['old_quantity'] = (int) $old_quantity;
 
-		// Trigger event dispatching.
-		$this->dispatcher->dispatch_event( 'cart_item_updated', $event_data );
+		$this->session_data_collector->collect( 'cart_item_updated', $event_data );
 	}
 
 	/**
 	 * Track cart item removed event.
 	 *
-	 * Triggers fraud protection event dispatching when an item is removed from the cart.
+	 * Collects session data when an item is removed from the cart.
 	 *
 	 * @internal
 	 *
@@ -144,14 +140,13 @@ class CartEventTracker {
 			$variation_id
 		);
 
-		// Trigger event dispatching.
-		$this->dispatcher->dispatch_event( 'cart_item_removed', $event_data );
+		$this->session_data_collector->collect( 'cart_item_removed', $event_data );
 	}
 
 	/**
 	 * Track cart item restored event.
 	 *
-	 * Triggers fraud protection event dispatching when a removed item is restored to the cart.
+	 * Collects session data when a removed item is restored to the cart.
 	 *
 	 * @internal
 	 *
@@ -177,8 +172,7 @@ class CartEventTracker {
 			$variation_id
 		);
 
-		// Trigger event dispatching.
-		$this->dispatcher->dispatch_event( 'cart_item_restored', $event_data );
+		$this->session_data_collector->collect( 'cart_item_restored', $event_data );
 	}
 
 	/**
