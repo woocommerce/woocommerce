@@ -522,8 +522,8 @@ function wc_delete_shop_order_transients( $order = 0 ) {
 	// Clear customer's order related caches.
 	$order_id = 0;
 	if ( is_a( $order, 'WC_Order' ) ) {
-		$customer_id = $order->get_customer_id();
 		$order_id    = $order->get_id();
+		$customer_id = $order->get_customer_id();
 		Users::delete_site_user_meta( $customer_id, 'wc_money_spent' );
 		Users::delete_site_user_meta( $customer_id, 'wc_order_count' );
 		Users::delete_site_user_meta( $customer_id, 'wc_last_order' );
