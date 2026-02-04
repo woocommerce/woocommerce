@@ -586,19 +586,16 @@ class WC_Install {
 			return;
 		}
 
-		// Check if we are not already running this routine.
-		if ( self::is_installing() ) {
+		// Create a lock to prevent multiple installs from running simultaneously.
+		if ( ! self::create_lock() ) {
 			return;
 		}
 
-		// If we made it till here nothing is running yet, lets set the transient now.
-		set_transient( 'wc_installing', 'yes', MINUTE_IN_SECONDS * 10 );
-		wc_maybe_define_constant( 'WC_INSTALLING', true );
-
 		try {
+			wc_maybe_define_constant( 'WC_INSTALLING', true );
 			self::install_core();
 		} finally {
-			delete_transient( 'wc_installing' );
+			self::release_lock();
 		}
 
 		// Use add_option() here to avoid overwriting this value with each
@@ -661,12 +658,43 @@ class WC_Install {
 	}
 
 	/**
-	 * Returns true if we're installing.
+	 * Attempts to acquire an installation lock.
 	 *
-	 * @return bool
+	 * @return bool True if a lock was acquired, otherwise false.
 	 */
-	private static function is_installing() {
-		return 'yes' === get_transient( 'wc_installing' );
+	private static function create_lock() {
+		global $wpdb;
+
+		// Insert will fail if it already exists so this functions as a mutex.
+		$inserted = $wpdb->query(
+			$wpdb->prepare(
+				"INSERT INTO {$wpdb->options} (option_name, option_value, autoload) VALUES ('wc_installing', %d, 'no')",
+				time()
+			)
+		);
+		if ( $inserted ) {
+			return true;
+		}
+
+		// Atomically delete the lock and try again if it is stale.
+		$deleted = $wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->options} WHERE option_name = 'wc_installing' AND option_value < %d",
+				time() - ( MINUTE_IN_SECONDS * 10 )
+			)
+		);
+		if ( $deleted ) {
+			return self::create_lock();
+		}
+
+		return false;
+	}
+
+	/**
+	 * Releases the installation lock.
+	 */
+	private static function release_lock() {
+		return delete_option( 'wc_installing' );
 	}
 
 	/**
