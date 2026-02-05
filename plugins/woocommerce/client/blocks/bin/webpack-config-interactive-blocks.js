@@ -47,6 +47,10 @@ const entries = {
 		'./assets/js/base/stores/woocommerce/product-data.ts',
 	'@woocommerce/stores/woocommerce/products':
 		'./assets/js/base/stores/woocommerce/products.ts',
+
+	// Demo: Batching demonstration block (for reviewer testing only)
+	'woocommerce/batching-demo':
+		'./assets/js/blocks/batching-demo/frontend.ts',
 };
 
 module.exports = {

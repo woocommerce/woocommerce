@@ -55,6 +55,7 @@ const blocks = {
 		customDir: 'reviews/all-reviews',
 	},
 	'attribute-filter': {},
+	'batching-demo': {},
 	breadcrumbs: {},
 	'catalog-sorting': {},
 	'category-description': {},

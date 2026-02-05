@@ -436,6 +436,7 @@ final class BlockTypesController {
 			'AddToCartForm',
 			'AllProducts',
 			'AllReviews',
+			'BatchingDemo',
 			'AttributeFilter',
 			'Breadcrumbs',
 			'CartLink',

@@ -1,0 +1,17 @@
+{
+	"name": "woocommerce/batching-demo",
+	"title": "Batching Demo",
+	"description": "Demo block to demonstrate the mutation batcher. For development/review only.",
+	"category": "woocommerce",
+	"keywords": [ "demo", "batching", "test" ],
+	"textdomain": "woocommerce",
+	"attributes": {},
+	"supports": {
+		"interactivity": true,
+		"html": false,
+		"inserter": true
+	},
+	"apiVersion": 3,
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"viewScriptModule": "woocommerce/batching-demo"
+}
