@@ -23,6 +23,7 @@ interface Context {
 	isRunning: boolean;
 	lastDemo: string;
 	log: string[];
+	productIds: number[];
 }
 
 // Helper to get the cart store actions
@@ -36,11 +37,29 @@ const getCartActions = async () => {
 	return actions;
 };
 
+// Helper to get product IDs from context, with validation
+const getProductIds = ( context: Context, count: number ): number[] => {
+	const ids = context.productIds || [];
+	if ( ids.length < count ) {
+		// Not enough products - return what we have
+		return ids.slice( 0, Math.min( ids.length, count ) );
+	}
+	return ids.slice( 0, count );
+};
+
 const batchingDemoStore = {
 	state: {
 		get logText(): string {
 			const { log } = getContext< Context >();
 			return log.join( '\n' );
+		},
+		get hasProducts(): boolean {
+			const { productIds } = getContext< Context >();
+			return productIds && productIds.length > 0;
+		},
+		get productCount(): number {
+			const { productIds } = getContext< Context >();
+			return productIds?.length || 0;
 		},
 	},
 	actions: {
@@ -49,6 +68,16 @@ const batchingDemoStore = {
 		 */
 		*syncCallsDemo(): Generator< unknown, void > {
 			const context = getContext< Context >();
+			const ids = getProductIds( context, 3 );
+
+			if ( ids.length < 3 ) {
+				context.log = [
+					'❌ ERROR: Need at least 3 products for this demo.',
+					`   Found only ${ ids.length } products in the store.`,
+				];
+				return;
+			}
+
 			context.isRunning = true;
 			context.lastDemo = 'Sync Calls';
 			context.log = [
@@ -61,17 +90,17 @@ const batchingDemoStore = {
 
 			context.log = [
 				...context.log,
-				'→ Call 1: addCartItem({ id: 15 })',
-				'→ Call 2: addCartItem({ id: 16 })',
-				'→ Call 3: addCartItem({ id: 17 })',
+				`→ Call 1: addCartItem({ id: ${ ids[ 0 ] } })`,
+				`→ Call 2: addCartItem({ id: ${ ids[ 1 ] } })`,
+				`→ Call 3: addCartItem({ id: ${ ids[ 2 ] } })`,
 				'',
 				'⏳ All calls queued in same microtask...',
 			];
 
 			// All three calls happen synchronously - no await between them
-			const p1 = actions.addCartItem( { id: 15, quantity: 1 } );
-			const p2 = actions.addCartItem( { id: 16, quantity: 1 } );
-			const p3 = actions.addCartItem( { id: 17, quantity: 1 } );
+			const p1 = actions.addCartItem( { id: ids[ 0 ], quantity: 1 } );
+			const p2 = actions.addCartItem( { id: ids[ 1 ], quantity: 1 } );
+			const p3 = actions.addCartItem( { id: ids[ 2 ], quantity: 1 } );
 
 			yield Promise.all( [ p1, p2, p3 ] );
 
@@ -89,6 +118,16 @@ const batchingDemoStore = {
 		 */
 		*asyncCallsDemo(): Generator< unknown, void > {
 			const context = getContext< Context >();
+			const ids = getProductIds( context, 3 );
+
+			if ( ids.length < 3 ) {
+				context.log = [
+					'❌ ERROR: Need at least 3 products for this demo.',
+					`   Found only ${ ids.length } products in the store.`,
+				];
+				return;
+			}
+
 			context.isRunning = true;
 			context.lastDemo = 'Async Calls';
 			context.log = [
@@ -99,16 +138,25 @@ const batchingDemoStore = {
 
 			const actions = yield getCartActions();
 
-			context.log = [ ...context.log, '→ Call 1: addCartItem({ id: 18 })' ];
-			yield actions.addCartItem( { id: 18, quantity: 1 } );
+			context.log = [
+				...context.log,
+				`→ Call 1: addCartItem({ id: ${ ids[ 0 ] } })`,
+			];
+			yield actions.addCartItem( { id: ids[ 0 ], quantity: 1 } );
 			context.log = [ ...context.log, '  ✓ Batch 1 complete' ];
 
-			context.log = [ ...context.log, '→ Call 2: addCartItem({ id: 19 })' ];
-			yield actions.addCartItem( { id: 19, quantity: 1 } );
+			context.log = [
+				...context.log,
+				`→ Call 2: addCartItem({ id: ${ ids[ 1 ] } })`,
+			];
+			yield actions.addCartItem( { id: ids[ 1 ], quantity: 1 } );
 			context.log = [ ...context.log, '  ✓ Batch 2 complete' ];
 
-			context.log = [ ...context.log, '→ Call 3: addCartItem({ id: 20 })' ];
-			yield actions.addCartItem( { id: 20, quantity: 1 } );
+			context.log = [
+				...context.log,
+				`→ Call 3: addCartItem({ id: ${ ids[ 2 ] } })`,
+			];
+			yield actions.addCartItem( { id: ids[ 2 ], quantity: 1 } );
 			context.log = [ ...context.log, '  ✓ Batch 3 complete' ];
 
 			context.log = [
@@ -125,6 +173,16 @@ const batchingDemoStore = {
 		 */
 		*mixedCallsDemo(): Generator< unknown, void > {
 			const context = getContext< Context >();
+			const ids = getProductIds( context, 6 );
+
+			if ( ids.length < 6 ) {
+				context.log = [
+					'❌ ERROR: Need at least 6 products for this demo.',
+					`   Found only ${ ids.length } products in the store.`,
+				];
+				return;
+			}
+
 			context.isRunning = true;
 			context.lastDemo = 'Mixed Calls';
 			context.log = [
@@ -139,11 +197,11 @@ const batchingDemoStore = {
 			context.log = [
 				...context.log,
 				'BATCH 1: Two synchronous calls',
-				'  → addCartItem({ id: 21 })',
-				'  → addCartItem({ id: 22 })',
+				`  → addCartItem({ id: ${ ids[ 0 ] } })`,
+				`  → addCartItem({ id: ${ ids[ 1 ] } })`,
 			];
-			const p1 = actions.addCartItem( { id: 21, quantity: 1 } );
-			const p2 = actions.addCartItem( { id: 22, quantity: 1 } );
+			const p1 = actions.addCartItem( { id: ids[ 0 ], quantity: 1 } );
+			const p2 = actions.addCartItem( { id: ids[ 1 ], quantity: 1 } );
 			yield Promise.all( [ p1, p2 ] );
 			context.log = [ ...context.log, '  ✓ Batch 1: 2 operations' ];
 
@@ -152,9 +210,9 @@ const batchingDemoStore = {
 				...context.log,
 				'',
 				'BATCH 2: Single call after await',
-				'  → addCartItem({ id: 23 })',
+				`  → addCartItem({ id: ${ ids[ 2 ] } })`,
 			];
-			yield actions.addCartItem( { id: 23, quantity: 1 } );
+			yield actions.addCartItem( { id: ids[ 2 ], quantity: 1 } );
 			context.log = [ ...context.log, '  ✓ Batch 2: 1 operation' ];
 
 			// Batch 3: Three sync calls
@@ -162,13 +220,13 @@ const batchingDemoStore = {
 				...context.log,
 				'',
 				'BATCH 3: Three synchronous calls',
-				'  → addCartItem({ id: 24 })',
-				'  → addCartItem({ id: 25 })',
-				'  → addCartItem({ id: 26 })',
+				`  → addCartItem({ id: ${ ids[ 3 ] } })`,
+				`  → addCartItem({ id: ${ ids[ 4 ] } })`,
+				`  → addCartItem({ id: ${ ids[ 5 ] } })`,
 			];
-			const p3 = actions.addCartItem( { id: 24, quantity: 1 } );
-			const p4 = actions.addCartItem( { id: 25, quantity: 1 } );
-			const p5 = actions.addCartItem( { id: 26, quantity: 1 } );
+			const p3 = actions.addCartItem( { id: ids[ 3 ], quantity: 1 } );
+			const p4 = actions.addCartItem( { id: ids[ 4 ], quantity: 1 } );
+			const p5 = actions.addCartItem( { id: ids[ 5 ], quantity: 1 } );
 			yield Promise.all( [ p3, p4, p5 ] );
 			context.log = [ ...context.log, '  ✓ Batch 3: 3 operations' ];
 
@@ -185,6 +243,16 @@ const batchingDemoStore = {
 		 */
 		*wishlistDemo(): Generator< unknown, void > {
 			const context = getContext< Context >();
+			const ids = getProductIds( context, 5 );
+
+			if ( ids.length < 5 ) {
+				context.log = [
+					'❌ ERROR: Need at least 5 products for this demo.',
+					`   Found only ${ ids.length } products in the store.`,
+				];
+				return;
+			}
+
 			context.isRunning = true;
 			context.lastDemo = 'Wishlist Add All';
 			context.log = [
@@ -196,17 +264,19 @@ const batchingDemoStore = {
 			const actions = yield getCartActions();
 
 			const wishlistItems = [
-				{ id: 15, name: 'T-Shirt' },
-				{ id: 16, name: 'Hoodie' },
-				{ id: 17, name: 'Cap' },
-				{ id: 18, name: 'Belt' },
-				{ id: 19, name: 'Sunglasses' },
+				{ id: ids[ 0 ], name: 'Product A' },
+				{ id: ids[ 1 ], name: 'Product B' },
+				{ id: ids[ 2 ], name: 'Product C' },
+				{ id: ids[ 3 ], name: 'Product D' },
+				{ id: ids[ 4 ], name: 'Product E' },
 			];
 
 			context.log = [
 				...context.log,
 				'📋 Wishlist contains:',
-				...wishlistItems.map( ( item ) => `   • ${ item.name }` ),
+				...wishlistItems.map(
+					( item ) => `   • ${ item.name } (ID: ${ item.id })`
+				),
 				'',
 				'🛒 Adding all items synchronously...',
 			];
@@ -232,6 +302,16 @@ const batchingDemoStore = {
 		 */
 		*extensionsDemo(): Generator< unknown, void > {
 			const context = getContext< Context >();
+			const ids = getProductIds( context, 3 );
+
+			if ( ids.length < 3 ) {
+				context.log = [
+					'❌ ERROR: Need at least 3 products for this demo.',
+					`   Found only ${ ids.length } products in the store.`,
+				];
+				return;
+			}
+
 			context.isRunning = true;
 			context.lastDemo = 'Multiple Extensions';
 			context.log = [
@@ -245,17 +325,23 @@ const batchingDemoStore = {
 
 			context.log = [
 				...context.log,
-				'📦 Core Block: Adding laptop',
-				'🔌 Accessories Extension: Auto-adding laptop bag',
-				'🛡️ Warranty Extension: Auto-adding 2-year warranty',
+				`📦 Core Block: Adding main product (ID: ${ ids[ 0 ] })`,
+				`🔌 Accessories Extension: Auto-adding accessory (ID: ${ ids[ 1 ] })`,
+				`🛡️ Warranty Extension: Auto-adding warranty (ID: ${ ids[ 2 ] })`,
 				'',
 				'⏳ All extensions fired synchronously...',
 			];
 
 			// Simulate multiple extensions responding to the same add-to-cart event
-			const coreAdd = actions.addCartItem( { id: 15, quantity: 1 } );
-			const accessoryAdd = actions.addCartItem( { id: 16, quantity: 1 } );
-			const warrantyAdd = actions.addCartItem( { id: 17, quantity: 1 } );
+			const coreAdd = actions.addCartItem( { id: ids[ 0 ], quantity: 1 } );
+			const accessoryAdd = actions.addCartItem( {
+				id: ids[ 1 ],
+				quantity: 1,
+			} );
+			const warrantyAdd = actions.addCartItem( {
+				id: ids[ 2 ],
+				quantity: 1,
+			} );
 
 			yield Promise.all( [ coreAdd, accessoryAdd, warrantyAdd ] );
 

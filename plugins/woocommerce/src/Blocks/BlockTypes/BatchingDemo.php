@@ -47,11 +47,25 @@ class BatchingDemo extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
+		// Get some real product IDs from the store.
+		$products = wc_get_products(
+			array(
+				'status' => 'publish',
+				'limit'  => 10,
+				'type'   => 'simple', // Simple products are easiest to add to cart.
+				'return' => 'ids',
+			)
+		);
+
+		// Fall back to empty array if no products found.
+		$product_ids = ! empty( $products ) ? array_values( $products ) : array();
+
 		$context = array(
-			'isRunning' => false,
-			'lastDemo'  => '',
-			'log'       => array(),
-			'notices'   => array(),
+			'isRunning'  => false,
+			'lastDemo'   => '',
+			'log'        => array(),
+			'notices'    => array(),
+			'productIds' => $product_ids,
 		);
 
 		$context_json = wp_interactivity_data_wp_context( $context );
