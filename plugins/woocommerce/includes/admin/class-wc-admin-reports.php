@@ -40,7 +40,7 @@ class WC_Admin_Reports {
 	 */
 	public static function delete_legacy_report_transients( int $order_id, bool $defer ): void {
 		if ( $defer ) {
-			// Schedule the deletion, but don't bind to a specific order so the single action is scheduled at any given moment.
+			// Schedule the deletion, cap the execution to single pending event at any given time.
 			$scheduled = as_has_scheduled_action( 'woocommerce_delete_legacy_report_transients' );
 			if ( ! $scheduled ) {
 				as_schedule_single_action( time() + MINUTE_IN_SECONDS, 'woocommerce_delete_legacy_report_transients', array( $order_id, false ), 'woocommerce' );
