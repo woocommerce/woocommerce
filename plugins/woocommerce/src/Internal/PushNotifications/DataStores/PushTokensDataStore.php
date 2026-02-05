@@ -10,9 +10,11 @@ namespace Automattic\WooCommerce\Internal\PushNotifications\DataStores;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
+use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenInvalidDataException;
 use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenNotFoundException;
 use Exception;
-use InvalidArgumentException;
+use WC_Data_Exception;
+use WP_Http;
 use WP_Query;
 
 /**
@@ -33,13 +35,13 @@ class PushTokensDataStore {
 	 *
 	 * @since 10.5.0
 	 * @param PushToken $push_token An instance of PushToken.
-	 * @throws InvalidArgumentException If the token can't be created.
-	 * @throws Exception If the token creation fails.
+	 * @throws PushTokenInvalidDataException If the token can't be created.
+	 * @throws WC_Data_Exception If the token creation fails.
 	 * @return void
 	 */
 	public function create( PushToken &$push_token ): void {
 		if ( ! $push_token->can_be_created() ) {
-			throw new InvalidArgumentException(
+			throw new PushTokenInvalidDataException(
 				'Can\'t create push token because the push token data provided is invalid.'
 			);
 		}
@@ -55,8 +57,13 @@ class PushTokensDataStore {
 		);
 
 		if ( is_wp_error( $id ) ) {
-			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
-			throw new Exception( $id->get_error_message() );
+			// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped
+			throw new WC_Data_Exception(
+				(string) $id->get_error_code(),
+				$id->get_error_message(),
+				WP_Http::INTERNAL_SERVER_ERROR
+			);
+			// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 
 		$push_token->set_id( $id );
@@ -67,13 +74,13 @@ class PushTokensDataStore {
 	 *
 	 * @since 10.5.0
 	 * @param PushToken $push_token An instance of PushToken.
-	 * @throws InvalidArgumentException If the token can't be read.
+	 * @throws PushTokenInvalidDataException If the token can't be read.
 	 * @throws PushTokenNotFoundException If the token can't be found.
 	 * @return void
 	 */
 	public function read( PushToken &$push_token ): void {
 		if ( ! $push_token->can_be_read() ) {
-			throw new InvalidArgumentException(
+			throw new PushTokenInvalidDataException(
 				'Can\'t read push token because the push token data provided is invalid.'
 			);
 		}
@@ -81,7 +88,7 @@ class PushTokensDataStore {
 		$post = get_post( $push_token->get_id() );
 
 		if ( ! $post || PushToken::POST_TYPE !== $post->post_type ) {
-			throw new PushTokenNotFoundException( 'Push token could not be found.' );
+			throw new PushTokenNotFoundException();
 		}
 
 		$meta = $this->build_meta_array_from_database( $push_token );
@@ -95,7 +102,7 @@ class PushTokensDataStore {
 				&& PushToken::PLATFORM_BROWSER !== $meta['platform']
 			)
 		) {
-			throw new InvalidArgumentException(
+			throw new PushTokenInvalidDataException(
 				'Can\'t read push token because the push token record is malformed.'
 			);
 		}
@@ -112,14 +119,14 @@ class PushTokensDataStore {
 	 *
 	 * @since 10.5.0
 	 * @param PushToken $push_token An instance of PushToken.
-	 * @throws InvalidArgumentException If the token can't be updated.
+	 * @throws PushTokenInvalidDataException If the token can't be updated.
 	 * @throws PushTokenNotFoundException If the token can't be found.
-	 * @throws Exception If the token update fails.
+	 * @throws WC_Data_Exception If the token update fails.
 	 * @return void
 	 */
 	public function update( PushToken &$push_token ): void {
 		if ( ! $push_token->can_be_updated() ) {
-			throw new InvalidArgumentException(
+			throw new PushTokenInvalidDataException(
 				'Can\'t update push token because the push token data provided is invalid.'
 			);
 		}
@@ -127,8 +134,7 @@ class PushTokensDataStore {
 		$post = get_post( $push_token->get_id() );
 
 		if ( ! $post || PushToken::POST_TYPE !== $post->post_type ) {
-			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
-			throw new PushTokenNotFoundException( 'Push token could not be found.' );
+			throw new PushTokenNotFoundException();
 		}
 
 		$result = wp_update_post(
@@ -143,8 +149,13 @@ class PushTokensDataStore {
 		);
 
 		if ( is_wp_error( $result ) ) {
-			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
-			throw new Exception( $result->get_error_message() );
+			// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped
+			throw new WC_Data_Exception(
+				(string) $result->get_error_code(),
+				$result->get_error_message(),
+				WP_Http::INTERNAL_SERVER_ERROR
+			);
+			// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 
 		if ( null === $push_token->get_device_uuid() ) {
@@ -157,13 +168,13 @@ class PushTokensDataStore {
 	 *
 	 * @since 10.5.0
 	 * @param PushToken $push_token An instance of PushToken.
-	 * @throws InvalidArgumentException If the token can't be deleted.
+	 * @throws PushTokenInvalidDataException If the token can't be deleted.
 	 * @throws PushTokenNotFoundException If the token can't be found.
 	 * @return void
 	 */
 	public function delete( PushToken &$push_token ): void {
 		if ( ! $push_token->can_be_deleted() ) {
-			throw new InvalidArgumentException(
+			throw new PushTokenInvalidDataException(
 				'Can\'t delete push token because the push token data provided is invalid.'
 			);
 		}
@@ -171,7 +182,7 @@ class PushTokensDataStore {
 		$post = get_post( $push_token->get_id() );
 
 		if ( ! $post || PushToken::POST_TYPE !== $post->post_type ) {
-			throw new PushTokenNotFoundException( 'Push token could not be found.' );
+			throw new PushTokenNotFoundException();
 		}
 
 		wp_delete_post( (int) $push_token->get_id(), true );
@@ -187,7 +198,7 @@ class PushTokensDataStore {
 	 * @since 10.5.0
 	 * @param PushToken $push_token An instance of PushToken.
 	 * @return null|PushToken
-	 * @throws InvalidArgumentException If push token is missing data.
+	 * @throws PushTokenInvalidDataException If push token is missing data.
 	 */
 	public function get_by_token_or_device_id( PushToken &$push_token ): ?PushToken {
 		if (
@@ -210,7 +221,7 @@ class PushTokensDataStore {
 				&& ! $push_token->get_token()
 			)
 		) {
-			throw new InvalidArgumentException(
+			throw new PushTokenInvalidDataException(
 				'Can\'t retrieve push token because the push token data provided is invalid.'
 			);
 		}
@@ -278,11 +289,11 @@ class PushTokensDataStore {
 	 * @since 10.5.0
 	 * @param PushToken $push_token An instance of PushToken.
 	 * @return array
-	 * @throws InvalidArgumentException If the token can't be read.
+	 * @throws PushTokenInvalidDataException If the token can't be read.
 	 */
 	private function build_meta_array_from_database( PushToken &$push_token ) {
 		if ( ! $push_token->can_be_read() ) {
-			throw new InvalidArgumentException(
+			throw new PushTokenInvalidDataException(
 				'Can\'t read meta for push token because the push token data provided is invalid.'
 			);
 		}
@@ -310,7 +321,6 @@ class PushTokensDataStore {
 	 * @since 10.5.0
 	 * @param PushToken $push_token An instance of PushToken.
 	 * @return array
-	 * @throws InvalidArgumentException If the token can't be read.
 	 */
 	private function build_meta_array_from_token( PushToken &$push_token ) {
 		return array_filter(

@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Update PayPal REST API controllers to use new namespaced classes instead of deprecated WC_Gateway_Paypal_* classes.

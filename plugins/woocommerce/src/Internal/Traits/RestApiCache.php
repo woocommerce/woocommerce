@@ -188,6 +188,13 @@ trait RestApiCache {
 	 * @since 10.5.0
 	 */
 	protected function initialize_rest_api_cache(): void {
+		// Guard against early instantiation before WooCommerce is fully initialized.
+		// Some third-party plugins instantiate REST controllers during plugin loading,
+		// before the WooCommerce container is available.
+		if ( ! function_exists( 'wc_get_container' ) ) {
+			return;
+		}
+
 		$features_controller = wc_get_container()->get( FeaturesController::class );
 
 		$this->rest_api_caching_feature_enabled = $features_controller->feature_is_enabled( 'rest_api_caching' );
