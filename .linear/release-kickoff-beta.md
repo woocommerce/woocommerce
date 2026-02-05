@@ -38,4 +38,4 @@ Keep the _[Release Troubleshooting & Recovery](https://developer.woocommerce.com
 
 ### 4. Publish the release
 
-- [ ] Publish the `{release_version}` [release draft]({repository_url}/releases) that was previously created.
+- [ ] Publish the `{release_version}` [release draft]({repository_url}/releases) that was previously created. **Do not** check "Set as the latest release".

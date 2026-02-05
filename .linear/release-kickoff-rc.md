@@ -39,6 +39,7 @@ Keep the _[Release Troubleshooting & Recovery](https://developer.woocommerce.com
 ### 4. Deploy to the staging environment
 
 - [ ] Follow the [guide to deploy to the staging environment](https://wp.me/PCYsg-18BQ) and monitor for at least {release_monitoring_time} hours after deploy.
+- [ ] Create a thread in the releases Slack channel for monitoring and discussion of this release.
 
 **If a critical issue was detected while monitoring...**
 
