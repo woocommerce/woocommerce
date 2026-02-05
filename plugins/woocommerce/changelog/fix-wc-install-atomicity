@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Use atomic locking to prevent WC_Install::install() from running concurrently.
