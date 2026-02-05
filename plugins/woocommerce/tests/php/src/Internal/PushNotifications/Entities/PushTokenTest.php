@@ -5,7 +5,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Entities;
 
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
-use InvalidArgumentException;
+use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenInvalidDataException;
 use WC_Unit_Test_Case;
 
 /**
@@ -388,7 +388,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	public function test_it_throws_exception_when_setting_invalid_platform() {
 		$push_token = new PushToken();
 
-		$this->expectException( InvalidArgumentException::class );
+		$this->expectException( PushTokenInvalidDataException::class );
 		$this->expectExceptionMessage( 'Platform for PushToken is invalid.' );
 
 		$push_token->set_platform( 'invalid' );
@@ -400,7 +400,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	public function test_it_throws_exception_when_setting_invalid_origin() {
 		$push_token = new PushToken();
 
-		$this->expectException( InvalidArgumentException::class );
+		$this->expectException( PushTokenInvalidDataException::class );
 		$this->expectExceptionMessage( 'Origin for PushToken is invalid.' );
 
 		$push_token->set_origin( 'com.invalid.app' );
@@ -431,7 +431,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	public function test_it_throws_exception_when_setting_user_id_to_zero() {
 		$push_token = new PushToken();
 
-		$this->expectException( InvalidArgumentException::class );
+		$this->expectException( PushTokenInvalidDataException::class );
 		$this->expectExceptionMessage( 'User ID must be a positive integer.' );
 
 		$push_token->set_user_id( 0 );
@@ -443,7 +443,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	public function test_it_throws_exception_when_setting_negative_user_id() {
 		$push_token = new PushToken();
 
-		$this->expectException( InvalidArgumentException::class );
+		$this->expectException( PushTokenInvalidDataException::class );
 		$this->expectExceptionMessage( 'User ID must be a positive integer.' );
 
 		$push_token->set_user_id( -1 );
@@ -455,7 +455,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	public function test_it_throws_exception_when_setting_empty_token() {
 		$push_token = new PushToken();
 
-		$this->expectException( InvalidArgumentException::class );
+		$this->expectException( PushTokenInvalidDataException::class );
 		$this->expectExceptionMessage( 'Token cannot be empty.' );
 
 		$push_token->set_token( '' );
@@ -467,7 +467,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	public function test_it_throws_exception_when_setting_whitespace_only_token() {
 		$push_token = new PushToken();
 
-		$this->expectException( InvalidArgumentException::class );
+		$this->expectException( PushTokenInvalidDataException::class );
 		$this->expectExceptionMessage( 'Token cannot be empty.' );
 
 		$push_token->set_token( '   ' );
@@ -480,7 +480,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 		$push_token = new PushToken();
 		$long_token = str_repeat( 'A', PushToken::MAX_TOKEN_LENGTH + 1 );
 
-		$this->expectException( InvalidArgumentException::class );
+		$this->expectException( PushTokenInvalidDataException::class );
 		$this->expectExceptionMessage( 'Token exceeds maximum length of 4096.' );
 
 		$push_token->set_token( $long_token );
@@ -573,7 +573,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	 * @testdox Tests get_new_instance throws exception for invalid values.
 	 */
 	public function test_get_new_instance_throws_exception_for_invalid_platform() {
-		$this->expectException( InvalidArgumentException::class );
+		$this->expectException( PushTokenInvalidDataException::class );
 		$this->expectExceptionMessage( 'Platform for PushToken is invalid.' );
 
 		PushToken::get_new_instance(
