@@ -1,0 +1,4 @@
+Significance: patch
+Type: changed
+
+Update tracking classes to work without WooCommerce dependency.

@@ -2,23 +2,22 @@
 /**
  * WooCommerce Analytics Tracking for tracking frontend events
  *
+ * This class is designed to work without WooCommerce dependencies,
+ * enabling it to run at the MU-plugin stage without loading WooCommerce to optimize performance.
+ *
  * @package automattic/woocommerce-analytics
  */
 
 namespace Automattic\Woocommerce_Analytics;
 
-use Automattic\Jetpack\Connection\Manager as Jetpack_Connection;
+use Automattic\Jetpack\Device_Detection;
 use Automattic\Jetpack\Device_Detection\User_Agent_Info;
-use WC_Site_Tracking;
-use WC_Tracks;
-use WC_Tracks_Client;
-use WC_Tracks_Event;
 use WP_Error;
 
 /**
  * WooCommerce Analytics Tracking class
  */
-class WC_Analytics_Tracking extends WC_Tracks {
+class WC_Analytics_Tracking {
 	/**
 	 * Event prefix.
 	 *
@@ -147,12 +146,13 @@ class WC_Analytics_Tracking extends WC_Tracks {
 	 * @return bool|WP_Error True for success or WP_Error if the event pixel could not be fired.
 	 */
 	private static function record_tracks_event( $properties = array() ) {
-		$event_obj = new WC_Tracks_Event( $properties );
-		if ( is_wp_error( $event_obj->error ) ) {
-			return $event_obj->error;
+		$pixel_url = Pixel_Builder::build_tracks_url( $properties );
+
+		if ( is_wp_error( $pixel_url ) ) {
+			return $pixel_url;
 		}
 
-		return self::record_event_pixel( $event_obj );
+		return self::record_pixel_url( $pixel_url );
 	}
 
 	/**
@@ -162,24 +162,23 @@ class WC_Analytics_Tracking extends WC_Tracks {
 	 * @return bool|WP_Error True for success or WP_Error if the event pixel could not be fired.
 	 */
 	private static function record_ch_event( $properties ) {
-		$event_obj = new WC_Analytics_Ch_Event( $properties );
-		if ( is_wp_error( $event_obj->error ) ) {
-			return $event_obj->error;
+		$pixel_url = Pixel_Builder::build_ch_url( $properties );
+
+		if ( is_wp_error( $pixel_url ) ) {
+			return $pixel_url;
 		}
 
-		return self::record_event_pixel( $event_obj );
+		return self::record_pixel_url( $pixel_url );
 	}
 
 	/**
-	 * Record an event pixel using batching.
+	 * Record a pixel URL using batching.
 	 *
-	 * @param WC_Tracks_Event|WC_Analytics_Ch_Event $event The event object.
+	 * @param string $pixel_url The pixel URL to record.
 	 * @return bool|WP_Error True for success or WP_Error if the event pixel could not be fired.
 	 */
-	private static function record_event_pixel( $event ) {
-		$pixel = $event->build_pixel_url();
-
-		if ( ! $pixel ) {
+	private static function record_pixel_url( $pixel_url ) {
+		if ( empty( $pixel_url ) ) {
 			return new WP_Error( 'invalid_pixel', 'cannot generate tracks pixel for given input', 400 );
 		}
 
@@ -189,12 +188,10 @@ class WC_Analytics_Tracking extends WC_Tracks {
 
 		if ( $can_batch ) {
 			// Queue the pixel and send on shutdown.
-			self::queue_pixel_for_batch( $pixel );
+			self::queue_pixel_for_batch( $pixel_url );
 		} else {
 			// Send immediately as batching is not supported.
-			// phpcs:ignore WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid
-			// @phan-suppress-next-line PhanTypeMismatchArgument
-			return WC_Tracks_Client::record_event( $event );
+			Pixel_Builder::send_pixel( $pixel_url );
 		}
 
 		return true;
@@ -219,80 +216,29 @@ class WC_Analytics_Tracking extends WC_Tracks {
 	 * Send all queued pixels using batched non-blocking requests.
 	 * This runs on the shutdown hook to batch all requests together.
 	 *
-	 * Uses Requests library's request_multiple() for true parallel batching via curl_multi.
+	 * Uses Pixel_Builder for the actual sending via Requests library.
 	 */
 	public static function send_batched_pixels() {
 		if ( empty( self::$pixel_batch_queue ) ) {
 			return;
 		}
 
-		// Add request timestamp and nocache to all pixels.
-		$pixels_to_send = array();
-		foreach ( self::$pixel_batch_queue as $pixel ) {
-			// Check if the method exists for backwards compatibility with older WooCommerce versions.
-			if ( method_exists( WC_Tracks_Client::class, 'add_request_timestamp_and_nocache' ) ) {
-				// @phan-suppress-current-line UnusedPluginSuppression @phan-suppress-next-line PhanUndeclaredStaticMethod -- We verify the method exists before using it. See also: https://github.com/phan/phan/issues/1204
-				$pixels_to_send[] = WC_Tracks_Client::add_request_timestamp_and_nocache( $pixel );
-			} else {
-				// Fallback for older versions - add timestamp and nocache parameters manually.
-				// Remove this fallback when WooCommerce minimum version is 9.7.0+.
-				$pixels_to_send[] = $pixel . '&_rt=' . WC_Tracks_Client::build_timestamp() . '&_=_';
-			}
-		}
-
-		// Send with Requests library for true parallel batching.
-		self::send_with_requests_multiple( $pixels_to_send );
+		// Delegate to Pixel_Builder for batched sending.
+		Pixel_Builder::send_pixels_batched( self::$pixel_batch_queue );
 
 		// Clear the queue.
 		self::$pixel_batch_queue = array();
 	}
 
 	/**
-	 * Send pixels using Requests::request_multiple() for parallel non-blocking execution.
-	 * Uses blocking => false for true non-blocking behavior via curl_multi.
+	 * Get the common properties for the event.
 	 *
-	 * @param array $pixels Array of pixel URLs to send.
+	 * @return array The common properties.
 	 */
-	private static function send_with_requests_multiple( $pixels ) {
-		$requests = array();
-		$options  = array(
-			'blocking' => false, // Non-blocking mode - returns immediately.
-			'timeout'  => 1,
-		);
-
-		foreach ( $pixels as $pixel ) {
-			$requests[] = array(
-				'url'     => $pixel,
-				'headers' => array(),
-				'data'    => array(),
-				'type'    => 'GET',
-			);
-		}
-
-		try {
-			// Try modern namespaced version first.
-			if ( class_exists( 'WpOrg\Requests\Requests' ) ) {
-				\WpOrg\Requests\Requests::request_multiple( $requests, $options );
-			} elseif ( class_exists( 'Requests' ) ) {
-				\Requests::request_multiple( $requests, $options ); // phpcs:ignore PHPCompatibility.FunctionUse.RemovedFunctions.requestsDeprecated
-			}
-		} catch ( \Exception $e ) {
-			// Log error but don't break the site - tracking pixels should fail gracefully.
-			wc_get_logger()->error( 'WooCommerce Analytics: Batch pixel request failed - ' . $e->getMessage(), array( 'source' => 'woocommerce-analytics' ) );
-		}
-	}
-
-	/**
-	 * Get all properties for the event including filtered and identity properties.
-	 *
-	 * @param string $event_name Event name.
-	 * @param array  $event_properties Event specific properties.
-	 * @return array
-	 */
-	public static function get_properties( $event_name, $event_properties ) {
+	public static function get_common_properties() {
 		$blog_user_id    = self::get_blog_user_id();
 		$server_details  = self::get_server_details();
-		$blog_details    = self::get_blog_details( 0 );
+		$blog_details    = self::get_blog_details();
 		$session_details = self::get_session_details();
 
 		$common_properties = array_merge(
@@ -307,13 +253,26 @@ class WC_Analytics_Tracking extends WC_Tracks {
 				'woo_version'    => $blog_details['wc_version'] ?? null,
 				'wp_version'     => get_bloginfo( 'version' ),
 				'store_admin'    => count( array_intersect( array( 'administrator', 'shop_manager' ), wp_get_current_user()->roles ) ) > 0 ? 1 : 0,
-				'device'         => wp_is_mobile() ? 'mobile' : 'desktop',
-				'store_currency' => get_woocommerce_currency(),
+				'device'         => self::get_device_type(),
+				'store_currency' => $blog_details['store_currency'] ?? null,
 				'timezone'       => wp_timezone_string(),
-				'is_guest'       => ( $blog_user_id === null ) ? 1 : 0,
+				'is_guest'       => ( $blog_user_id === null || $blog_user_id === 0 ) ? 1 : 0,
 			),
 			$server_details
 		);
+
+		return is_array( $common_properties ) ? $common_properties : array();
+	}
+
+	/**
+	 * Get all properties for the event including filtered and identity properties.
+	 *
+	 * @param string $event_name Event name.
+	 * @param array  $event_properties Event specific properties.
+	 * @return array
+	 */
+	public static function get_properties( $event_name, $event_properties ) {
+		$common_properties = self::get_common_properties();
 
 		/**
 		 * Allow defining custom event properties in WooCommerce Analytics.
@@ -329,7 +288,7 @@ class WC_Analytics_Tracking extends WC_Tracks {
 		$required_properties = $event_name
 			? array(
 				'_en' => $event_name,
-				'_ts' => WC_Tracks_Client::build_timestamp(),
+				'_ts' => Pixel_Builder::build_timestamp(),
 				'_ut' => 'anon',
 				'_ui' => self::get_visitor_id(),
 			)
@@ -363,60 +322,116 @@ class WC_Analytics_Tracking extends WC_Tracks {
 	}
 
 	/**
-	 * Get the current user id. Returned as a string in the format "blog_id:user_id".
+	 * Get the current user id.
 	 *
-	 * @return string|null
+	 * @return int The user ID, or 0 if not logged in.
 	 */
 	private static function get_blog_user_id() {
-		if ( is_user_logged_in() ) {
-			$blogid = Jetpack_Connection::get_site_id();
-			$userid = get_current_user_id();
-			return $blogid . ':' . $userid;
+		// Ensure cookie constants are defined.
+		if ( ! defined( 'LOGGED_IN_COOKIE' ) ) {
+			if ( function_exists( 'wp_cookie_constants' ) ) {
+				wp_cookie_constants();
+			} else {
+				require_once ABSPATH . WPINC . '/default-constants.php';
+				wp_cookie_constants();
+			}
 		}
-		return null;
+
+		if ( function_exists( 'get_current_user_id' ) && get_current_user_id() ) {
+			return get_current_user_id();
+		}
+
+		// Manually validate the logged_in cookie
+		if ( ! function_exists( 'wp_validate_auth_cookie' ) ) {
+			require_once ABSPATH . WPINC . '/pluggable.php';
+		}
+
+		$user_id = wp_validate_auth_cookie( '', 'logged_in' );
+
+		return $user_id ? (int) $user_id : 0;
 	}
 
 	/**
 	 * Gather details from the request to the server.
 	 *
+	 * This method is now standalone and doesn't rely on WC_Tracks parent class.
+	 *
 	 * @return array Server details.
 	 */
 	public static function get_server_details() {
-		$data = array();
+		// Sanitization helper - use wc_clean if available, otherwise sanitize_text_field.
+		$clean = function_exists( 'wc_clean' ) ? 'wc_clean' : 'sanitize_text_field';
 
-		if ( method_exists( parent::class, 'get_server_details' ) ) {
-			$data = parent::get_server_details();
-		} elseif ( method_exists( WC_Site_Tracking::class, 'get_server_details' ) ) {
-			// WC < 6.8
-			$data = WC_Site_Tracking::get_server_details(); // @phan-suppress-current-line PhanUndeclaredStaticMethod -- method is available in WC < 6.8. See also: https://github.com/phan/phan/issues/1204
-		}
-
-		return array_merge(
-			$data,
-			array(
-				 // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-				'_via_ref' => isset( $_SERVER['HTTP_REFERER'] ) ? wc_clean( wp_unslash( $_SERVER['HTTP_REFERER'] ) ) : '',
-				'_via_ip'  => self::get_user_ip_address(),
-				// Get the first language defined from the request headers.
-				'_lg'      => isset( $_SERVER['HTTP_ACCEPT_LANGUAGE'] ) ? substr( sanitize_text_field( wp_unslash( $_SERVER['HTTP_ACCEPT_LANGUAGE'] ) ), 0, 5 ) : '',
-			)
+		$data = array(
+			'_via_ua' => isset( $_SERVER['HTTP_USER_AGENT'] ) ? $clean( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) : '', // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			'_via_ip' => self::get_user_ip_address(),
+			'_lg'     => isset( $_SERVER['HTTP_ACCEPT_LANGUAGE'] ) ? substr( sanitize_text_field( wp_unslash( $_SERVER['HTTP_ACCEPT_LANGUAGE'] ) ), 0, 5 ) : '',
+			'_dr'     => isset( $_SERVER['HTTP_REFERER'] ) ? $clean( wp_unslash( $_SERVER['HTTP_REFERER'] ) ) : '', // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		);
+
+		// Build the document location URL.
+		$uri         = isset( $_SERVER['REQUEST_URI'] ) ? $clean( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$host        = isset( $_SERVER['HTTP_HOST'] ) ? $clean( wp_unslash( $_SERVER['HTTP_HOST'] ) ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$data['_dl'] = isset( $_SERVER['REQUEST_SCHEME'] ) ? $clean( wp_unslash( $_SERVER['REQUEST_SCHEME'] ) ) . '://' . $host . $uri : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+		// Add _via_ref (referrer) for backward compatibility.
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$data['_via_ref'] = isset( $_SERVER['HTTP_REFERER'] ) ? $clean( wp_unslash( $_SERVER['HTTP_REFERER'] ) ) : '';
+
+		return $data;
 	}
 
 	/**
 	 * Get the blog details.
 	 *
-	 * @param int $blog_id The blog ID.
+	 * This method is now standalone and doesn't rely on WC_Tracks parent class.
+	 * It still works with WooCommerce when available for additional details.
+	 *
 	 * @return array The blog details.
 	 */
-	public static function get_blog_details( $blog_id ) {
-		if ( method_exists( parent::class, 'get_blog_details' ) ) {
-			return parent::get_blog_details( $blog_id );
-		} elseif ( method_exists( WC_Site_Tracking::class, 'get_blog_details' ) ) {
-			// WC < 6.8
-			return WC_Site_Tracking::get_blog_details( $blog_id ); // @phan-suppress-current-line PhanUndeclaredStaticMethod -- method is available in WC < 6.8. See also: https://github.com/phan/phan/issues/1204
+	public static function get_blog_details() {
+		// Try to get cached blog details.
+		$blog_details = get_transient( 'wc_analytics_blog_details' );
+
+		if ( false !== $blog_details ) {
+			return $blog_details;
 		}
-		return array();
+
+		// Get Jetpack blog ID if available.
+		$jetpack_blog_id = null;
+		if ( class_exists( 'Jetpack_Options' ) ) {
+			$jetpack_blog_id = \Jetpack_Options::get_option( 'id' );
+		}
+
+		// Get WooCommerce version if available.
+		// Check WC_VERSION constant first (most reliable), then fall back to option.
+		if ( defined( 'WC_VERSION' ) ) {
+			$wc_version = WC_VERSION;
+		} else {
+			$wc_version = get_option( 'woocommerce_version', '' );
+		}
+
+		// Get store ID from known option name.
+		$store_id = get_option( 'woocommerce_store_id', null );
+
+		// Get store currency - use WC function if available, otherwise fall back to option.
+		$store_currency = function_exists( 'get_woocommerce_currency' )
+		? get_woocommerce_currency()
+		: get_option( 'woocommerce_currency', 'USD' );
+
+		$blog_details = array(
+			'url'            => home_url(),
+			'blog_lang'      => get_locale(),
+			'blog_id'        => $jetpack_blog_id,
+			'store_id'       => $store_id,
+			'wc_version'     => $wc_version,
+			'store_currency' => $store_currency,
+		);
+
+		// Cache for 1 day.
+		set_transient( 'wc_analytics_blog_details', $blog_details, DAY_IN_SECONDS );
+
+		return $blog_details;
 	}
 
 	/**
@@ -584,5 +599,24 @@ class WC_Analytics_Tracking extends WC_Tracks {
 
 		update_option( self::DAILY_SALT_OPTION, $salt_data );
 		return $new_salt;
+	}
+
+	/**
+	 * Get the device type for the current request.
+	 *
+	 * Uses Jetpack Device Detection to distinguish between mobile phones, tablets, and desktop devices.
+	 *
+	 * @return string 'mobile' for phones, 'tablet' for tablets, 'desktop' otherwise.
+	 */
+	private static function get_device_type() {
+		if ( Device_Detection::is_phone() ) {
+			return 'mobile';
+		}
+
+		if ( Device_Detection::is_tablet() ) {
+			return 'tablet';
+		}
+
+		return 'desktop';
 	}
 }
