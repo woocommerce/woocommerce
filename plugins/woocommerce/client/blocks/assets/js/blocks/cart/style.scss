@@ -105,12 +105,6 @@
 }
 
 @include cart-checkout-below-large-container {
-	.wc-block-cart-item__total {
-		.wc-block-components-sale-badge {
-			display: none;
-		}
-	}
-
 	.wc-block-cart {
 		.wc-block-components-sidebar {
 			.wc-block-cart__totals-title {
