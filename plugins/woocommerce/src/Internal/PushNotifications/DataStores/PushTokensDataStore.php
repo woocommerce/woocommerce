@@ -119,29 +119,12 @@ class PushTokensDataStore {
 	 * Updates a post representing the push token.
 	 *
 	 * @since 10.5.0
-	 * @param int   $id   The push token ID.
-	 * @param array $data Token data to update (only provided keys will be updated).
+	 * @param PushToken $push_token The push token to update.
 	 * @throws PushTokenInvalidDataException If the token can't be updated.
-	 * @throws PushTokenNotFoundException If the token can't be found.
 	 * @throws WC_Data_Exception If the token update fails.
 	 * @return bool True on success.
 	 */
-	public function update( int $id, array $data ): bool {
-		$push_token = $this->read( $id );
-
-		$push_token->set_user_id( (int) ( $data['user_id'] ?? $push_token->get_user_id() ) );
-		$push_token->set_token( $data['token'] ?? $push_token->get_token() );
-		$push_token->set_platform( $data['platform'] ?? $push_token->get_platform() );
-		$push_token->set_origin( $data['origin'] ?? $push_token->get_origin() );
-
-		/**
-		 * Allow null as a value for `device_uuid` as browser tokens don't have
-		 * device UUIDs.
-		 */
-		$push_token->set_device_uuid(
-			array_key_exists( 'device_uuid', $data ) ? $data['device_uuid'] : $push_token->get_device_uuid()
-		);
-
+	public function update( PushToken $push_token ): bool {
 		if ( ! $push_token->can_be_updated() ) {
 			throw new PushTokenInvalidDataException(
 				'Can\'t update push token because the push token data provided is invalid.'

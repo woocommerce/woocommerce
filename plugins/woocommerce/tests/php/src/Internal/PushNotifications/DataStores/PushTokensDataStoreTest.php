@@ -88,13 +88,9 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$data_store = new PushTokensDataStore();
 		$push_token = $this->create_test_push_token();
 
-		$data_store->update(
-			$push_token->get_id(),
-			array(
-				'token'       => 'updated_token',
-				'device_uuid' => 'updated-device-uuid',
-			)
-		);
+		$push_token->set_token( 'updated_token' );
+		$push_token->set_device_uuid( 'updated-device-uuid' );
+		$data_store->update( $push_token );
 
 		$updated_token = $data_store->read( $push_token->get_id() );
 
@@ -117,40 +113,12 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$device_uuid = get_post_meta( $push_token->get_id(), 'device_uuid', true );
 		$this->assertNotEmpty( $device_uuid );
 
-		$data_store->update(
-			$push_token->get_id(),
-			array(
-				'platform'    => PushToken::PLATFORM_BROWSER,
-				'device_uuid' => null,
-			)
-		);
+		$push_token->set_platform( PushToken::PLATFORM_BROWSER );
+		$push_token->set_device_uuid( null );
+		$data_store->update( $push_token );
 
 		$device_uuid = get_post_meta( $push_token->get_id(), 'device_uuid', true );
 		$this->assertEmpty( $device_uuid );
-	}
-
-	/**
-	 * @testdox Tests the update method preserves device_uuid when not provided
-	 * in the data array.
-	 */
-	public function test_it_preserves_device_uuid_when_not_provided_in_update() {
-		$data_store = new PushTokensDataStore();
-		$push_token = $this->create_test_push_token();
-
-		$original_device_uuid = $push_token->get_device_uuid();
-		$this->assertNotNull( $original_device_uuid );
-
-		$data_store->update(
-			$push_token->get_id(),
-			array(
-				'token' => 'updated_token_only',
-			)
-		);
-
-		$updated_token = $data_store->read( $push_token->get_id() );
-
-		$this->assertEquals( 'updated_token_only', $updated_token->get_token() );
-		$this->assertEquals( $original_device_uuid, $updated_token->get_device_uuid() );
 	}
 
 	/**
@@ -267,57 +235,9 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$this->expectException( PushTokenInvalidDataException::class );
 		$this->expectExceptionMessage( 'Can\'t update push token because the push token data provided is invalid.' );
 
-		$data_store->update(
-			$push_token->get_id(),
-			array(
-				'platform'    => PushToken::PLATFORM_APPLE,
-				'device_uuid' => null,
-			)
-		);
-	}
-
-	/**
-	 * @testdox Tests the update method throws exception when push token does
-	 * not exist.
-	 */
-	public function test_it_throws_exception_when_updating_push_token_that_does_not_exist() {
-		$data_store = new PushTokensDataStore();
-
-		$this->expectException( PushTokenNotFoundException::class );
-		$this->expectExceptionMessage( 'Push token could not be found.' );
-
-		$data_store->update(
-			999999,
-			array(
-				'token' => 'test_token',
-			)
-		);
-	}
-
-	/**
-	 * @testdox Tests the update method throws exception when the post exists
-	 * but is not the correct post type.
-	 */
-	public function test_it_throws_exception_when_updating_push_token_with_wrong_post_type() {
-		$data_store = new PushTokensDataStore();
-
-		$post_id = wp_insert_post(
-			array(
-				'post_title'  => 'Test Post',
-				'post_type'   => 'post',
-				'post_status' => 'private',
-			)
-		);
-
-		$this->expectException( PushTokenNotFoundException::class );
-		$this->expectExceptionMessage( 'Push token could not be found.' );
-
-		$data_store->update(
-			$post_id,
-			array(
-				'token' => 'test_token',
-			)
-		);
+		$push_token->set_platform( PushToken::PLATFORM_APPLE );
+		$push_token->set_device_uuid( null );
+		$data_store->update( $push_token );
 	}
 
 	/**
