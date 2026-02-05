@@ -66,6 +66,6 @@ WooCommerce contains internal infrastructure code that's **not intended for use 
 - **`Automattic\WooCommerce\Internal\*`**: All classes in this namespace are internal. Backwards compatibility is not guaranteed: these classes may change, be renamed, or be removed in future releases of WooCommerce.
 - **Classes with `@internal` annotations**: Equivalently, any class, method or hook marked with `@internal` in its docblock should not be used by extensions.
 
-Using internal code may cause your extension to break when WooCommerce is updated. Any code that's not internal per the above definition is public and safe to use.
+Using internal code may cause your extension to break when WooCommerce is updated. Any code that's not internal per the above definition is public and generally safe to use.
 
 For more details, see the [Internal namespace documentation](../../../plugins/woocommerce/src/Internal/README.md).
