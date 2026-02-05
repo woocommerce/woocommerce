@@ -237,6 +237,7 @@ const getInfoNoticesFromCartUpdates = (
 /**
  * Normalizes a product variation object to ensure consistent key generation.
  * Handles both array and object inputs, preserving attribute names.
+ * Filters out invalid entries and normalizes casing to prevent collisions.
  *
  * @param {VariationInput} variation - The variation object or array.
  * @returns {string} The normalized stringified variation.
@@ -249,14 +250,15 @@ function normalizeVariation(variation: VariationInput): string {
         const pairs = Array.isArray(variation)
             ? variation.map((attr) => {
                   const a = attr as { attribute?: unknown; raw_attribute?: unknown; value?: unknown };
-                  return [String(a.attribute ?? a.raw_attribute ?? ''), a.value];
+                  const attrName = String(a.attribute ?? a.raw_attribute ?? '');
+                  return [attrName, a.value];
               })
             : Object.entries(variation);
 
         const normalized = pairs
-            .filter(([, value]) => value != null)
+            .filter(([attribute, value]) => attribute != null && attribute.trim() !== '' && value != null)
             .map(([attribute, value]) => ({
-                attribute: String(attribute ?? ''),
+                attribute: String(attribute).toLowerCase().trim(),
                 value: value == null ? '' : String(value).toLowerCase(),
             }))
             .sort((a, b) => a.attribute.localeCompare(b.attribute));
