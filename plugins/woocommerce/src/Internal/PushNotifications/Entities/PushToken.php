@@ -136,27 +136,27 @@ class PushToken {
 	 */
 	public function __construct( array $data = array() ) {
 		if ( array_key_exists( 'id', $data ) ) {
-			$this->set_id( $data['id'] );
+			$this->set_id( (int) $data['id'] );
 		}
 
 		if ( array_key_exists( 'user_id', $data ) ) {
-			$this->set_user_id( $data['user_id'] );
+			$this->set_user_id( (int) $data['user_id'] );
 		}
 
 		if ( array_key_exists( 'token', $data ) ) {
-			$this->set_token( $data['token'] );
+			$this->set_token( (string) $data['token'] );
 		}
 
 		if ( array_key_exists( 'device_uuid', $data ) ) {
-			$this->set_device_uuid( $data['device_uuid'] );
+			$this->set_device_uuid( (string) $data['device_uuid'] );
 		}
 
 		if ( array_key_exists( 'platform', $data ) ) {
-			$this->set_platform( $data['platform'] );
+			$this->set_platform( (string) $data['platform'] );
 		}
 
 		if ( array_key_exists( 'origin', $data ) ) {
-			$this->set_origin( $data['origin'] );
+			$this->set_origin( (string) $data['origin'] );
 		}
 	}
 
