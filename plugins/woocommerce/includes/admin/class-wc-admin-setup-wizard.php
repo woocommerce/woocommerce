@@ -969,7 +969,7 @@ class WC_Admin_Setup_Wizard {
 	 * Render a product weight unit dropdown.
 	 *
 	 * @deprecated 4.6.0
-	 * @return string
+	 * @return string|false
 	 */
 	protected function get_product_weight_selection() {
 		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.6.0', 'Onboarding is maintained in WooCommerce Admin.' );
@@ -993,7 +993,7 @@ class WC_Admin_Setup_Wizard {
 	 * Render a product dimension unit dropdown.
 	 *
 	 * @deprecated 4.6.0
-	 * @return string
+	 * @return string|false
 	 */
 	protected function get_product_dimension_selection() {
 		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.6.0', 'Onboarding is maintained in WooCommerce Admin.' );

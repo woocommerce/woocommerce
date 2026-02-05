@@ -67,14 +67,14 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Stores if user is VAT exempt for this session.
 	 *
-	 * @var string
+	 * @var bool
 	 */
 	protected $is_vat_exempt = false;
 
 	/**
 	 * Stores if user has calculated shipping in this session.
 	 *
-	 * @var string
+	 * @var bool
 	 */
 	protected $calculated_shipping = false;
 
@@ -171,7 +171,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * Return this customer's avatar.
 	 *
 	 * @since 3.0.0
-	 * @return string
+	 * @return string|false
 	 */
 	public function get_avatar_url() {
 		return get_avatar_url( $this->get_email() );

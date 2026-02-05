@@ -1023,7 +1023,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * (tax is shown after coupons).
 	 *
 	 * @since 2.6.0
-	 * @return string
+	 * @return float
 	 */
 	public function get_displayed_subtotal() {
 		return $this->display_prices_including_tax() ? $this->get_subtotal() + $this->get_subtotal_tax() : $this->get_subtotal();

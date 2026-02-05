@@ -3439,18 +3439,6 @@ parameters:
 			path: includes/admin/class-wc-admin-setup-wizard.php
 
 		-
-			message: '#^Method WC_Admin_Setup_Wizard\:\:get_product_dimension_selection\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: includes/admin/class-wc-admin-setup-wizard.php
-
-		-
-			message: '#^Method WC_Admin_Setup_Wizard\:\:get_product_weight_selection\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: includes/admin/class-wc-admin-setup-wizard.php
-
-		-
 			message: '#^Parameter \#1 \$json of function wc_esc_json expects string, string\|false given\.$#'
 			identifier: argument.type
 			count: 4
@@ -11893,12 +11881,6 @@ parameters:
 			path: includes/class-wc-cart.php
 
 		-
-			message: '#^Method WC_Cart\:\:get_displayed_subtotal\(\) should return string but returns float\.$#'
-			identifier: return.type
-			count: 1
-			path: includes/class-wc-cart.php
-
-		-
 			message: '#^Parameter \#1 \$price of function wc_price expects float, float\|string given\.$#'
 			identifier: argument.type
 			count: 3
@@ -12829,51 +12811,9 @@ parameters:
 			path: includes/class-wc-customer.php
 
 		-
-			message: '#^Method WC_Customer\:\:get_avatar_url\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: includes/class-wc-customer.php
-
-		-
-			message: '#^Method WC_Customer\:\:get_calculated_shipping\(\) should return bool but returns string\.$#'
-			identifier: return.type
-			count: 1
-			path: includes/class-wc-customer.php
-
-		-
-			message: '#^Method WC_Customer\:\:get_is_vat_exempt\(\) should return bool but returns string\.$#'
-			identifier: return.type
-			count: 1
-			path: includes/class-wc-customer.php
-
-		-
 			message: '#^Parameter \#2 \$value of method WC_Data\:\:set_date_prop\(\) expects int\|string, int\|string\|null given\.$#'
 			identifier: argument.type
 			count: 2
-			path: includes/class-wc-customer.php
-
-		-
-			message: '#^Property WC_Customer\:\:\$calculated_shipping \(string\) does not accept bool\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: includes/class-wc-customer.php
-
-		-
-			message: '#^Property WC_Customer\:\:\$calculated_shipping \(string\) does not accept default value of type false\.$#'
-			identifier: property.defaultValue
-			count: 1
-			path: includes/class-wc-customer.php
-
-		-
-			message: '#^Property WC_Customer\:\:\$is_vat_exempt \(string\) does not accept bool\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: includes/class-wc-customer.php
-
-		-
-			message: '#^Property WC_Customer\:\:\$is_vat_exempt \(string\) does not accept default value of type false\.$#'
-			identifier: property.defaultValue
-			count: 1
 			path: includes/class-wc-customer.php
 
 		-
@@ -34126,12 +34066,6 @@ parameters:
 			path: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php
 
 		-
-			message: '#^Binary operation "\-" between string and float results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php
-
-		-
 			message: '#^Method WC_Shipping_Free_Shipping\:\:calculate_shipping\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -34261,12 +34195,6 @@ parameters:
 			message: '#^Action callback returns bool but should not return anything\.$#'
 			identifier: return.void
 			count: 1
-			path: includes/shipping/legacy-free-shipping/class-wc-shipping-legacy-free-shipping.php
-
-		-
-			message: '#^Binary operation "\-" between string and float results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 2
 			path: includes/shipping/legacy-free-shipping/class-wc-shipping-legacy-free-shipping.php
 
 		-
@@ -56555,12 +56483,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$html of function wp_interactivity_process_directives expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCart.php
-
-		-
-			message: '#^Parameter \#1 \$price of function wc_price expects float, string given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/MiniCart.php
