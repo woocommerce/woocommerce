@@ -322,9 +322,15 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 				$taxes = $this->get_taxes_per_item( $args['cost'] );
 			} else {
 				$shipping_tax_rates = WC_Tax::get_shipping_tax_rates();
-				$taxes = WC_Tax::calc_shipping_tax( $total_cost, $shipping_tax_rates );
+				$taxes              = WC_Tax::calc_shipping_tax( $total_cost, $shipping_tax_rates );
 			}
 
+			/**
+			 * Filter whether shipping prices include tax.
+			 *
+			 * @since 10.6.0
+			 * @param bool $shipping_prices_include_tax Whether shipping cost includes tax. Default false.
+			 */
 			$shipping_prices_include_tax = wc_string_to_bool( apply_filters( 'woocommerce_shipping_prices_include_tax', false ) );
 
 			// If prices include tax, convert gross to net.
@@ -391,9 +397,11 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 				}
 
 				$cart_item_data = $cart[ $cost_key ]['data'];
-				$tax_class      = ( $cart_item_data && is_callable( array( $cart_item_data, 'get_tax_class' ) ) )
-					? $cart_item_data->get_tax_class()
-					: null;
+				if ( is_object( $cart_item_data ) && is_callable( array( $cart_item_data, 'get_tax_class' ) ) ) {
+					$tax_class = $cart_item_data->get_tax_class();
+				} else {
+					$tax_class = null;
+				}
 				$item_tax_rates = WC_Tax::get_shipping_tax_rates( $tax_class );
 				$item_taxes     = WC_Tax::calc_shipping_tax( $amount, $item_tax_rates );
 

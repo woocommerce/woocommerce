@@ -767,7 +767,7 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 		);
 
 		// With filter: shipping cost is gross, tax is calculated from inclusive price.
-		// 10.00 gross, tax = 10.00 - (10.00 / 1.20) ≈ 1.67
+		// 10.00 gross, tax = 10.00 - (10.00 / 1.20) ≈ 1.67.
 		add_filter( 'woocommerce_shipping_prices_include_tax', '__return_true' );
 		$taxes = WC_Tax::calc_shipping_tax( 10.00, $tax_rates );
 		remove_filter( 'woocommerce_shipping_prices_include_tax', '__return_true' );
@@ -804,17 +804,17 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 			)
 		);
 
-		// Without filter: 10.00 * 20% = 2.00
+		// Without filter: 10.00 * 20% = 2.00.
 		$taxes_exclusive = WC_Tax::calc_shipping_tax( 10.00, $tax_rates );
 		$this->assertEquals( 2.00, array_sum( $taxes_exclusive ), 'Without filter: tax should be 2.00' );
 
-		// With filter: 10.00 is gross, tax = 10.00 - (10.00 / 1.20) ≈ 1.67
+		// With filter: 10.00 is gross, tax = 10.00 - (10.00 / 1.20) ≈ 1.67.
 		add_filter( 'woocommerce_shipping_prices_include_tax', '__return_true' );
 		$taxes_inclusive = WC_Tax::calc_shipping_tax( 10.00, $tax_rates );
-		$expected_tax = 10.00 - ( 10.00 / 1.20 );
+		$expected_tax    = 10.00 - ( 10.00 / 1.20 );
 		$this->assertEqualsWithDelta( $expected_tax, array_sum( $taxes_inclusive ), 0.01, 'With filter: tax should be calculated from gross' );
 
-		// Verify total is 10.00
+		// Verify total is 10.00.
 		$net = 10.00 - array_sum( $taxes_inclusive );
 		$this->assertEqualsWithDelta( 10.00, $net + array_sum( $taxes_inclusive ), 0.01, 'Total should be 10.00' );
 
@@ -902,10 +902,16 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 
 		$received_args = null;
 
-		add_filter( 'woocommerce_shipping_prices_include_tax', function( $include_tax ) use ( &$received_args ) {
-			$received_args = func_get_args();
-			return true;
-		}, 10, 1 );
+		add_filter(
+			'woocommerce_shipping_prices_include_tax',
+			// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- Parameter is captured via func_get_args() for the assertion.
+			function ( $include_tax ) use ( &$received_args ) {
+				$received_args = func_get_args();
+				return true;
+			},
+			10,
+			1
+		);
 
 		$taxes_with_filter = WC_Tax::calc_shipping_tax( 15.00, $tax_rates );
 

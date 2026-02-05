@@ -359,7 +359,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		);
 
 		// Default behavior: shipping cost is net, tax is added on top.
-		// 10.00 * 20% = 2.00
+		// 10.00 * 20% = 2.00.
 		$calced_tax = WC_Tax::calc_shipping_tax( '10', $tax_rates );
 
 		$this->assertEquals( $calced_tax, array( $tax_rate_id => '2' ) );
@@ -394,7 +394,7 @@ class WC_Tests_Tax extends WC_Unit_Test_Case {
 		);
 
 		// With filter: shipping cost is gross, tax is calculated from inclusive price.
-		// 10.00 gross, tax = 10.00 - (10.00 / 1.20) ≈ 1.67
+		// 10.00 gross, tax = 10.00 - (10.00 / 1.20) ≈ 1.67.
 		add_filter( 'woocommerce_shipping_prices_include_tax', '__return_true' );
 		$calced_tax = WC_Tax::calc_shipping_tax( '10', $tax_rates );
 		remove_filter( 'woocommerce_shipping_prices_include_tax', '__return_true' );
