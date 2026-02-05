@@ -2361,6 +2361,7 @@ function wc_update_500_db_version() {
 	WC_Install::update_db_version( '5.0.0' );
 }
 
+// phpcs:disable Squiz.Commenting.FunctionComment.InvalidReturnVoid -- return statement is in a nested function, not this one.
 /**
  * Creates the refund and returns policy page.
  *
@@ -2369,10 +2370,12 @@ function wc_update_500_db_version() {
  * @return void
  */
 function wc_update_560_create_refund_returns_page() {
+// phpcs:enable Squiz.Commenting.FunctionComment.InvalidReturnVoid
 	/**
 	 * Filter on the pages created to return what we expect.
 	 *
 	 * @param array $pages The default WC pages.
+	 * @return array
 	 */
 	function filter_created_pages( $pages ) {
 		$page_to_create = array( 'refund_returns' );
