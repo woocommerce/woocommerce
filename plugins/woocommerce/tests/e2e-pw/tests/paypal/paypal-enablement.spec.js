@@ -63,11 +63,11 @@ test.describe(
 			const paypalDiv = await waitForPayPalToLoad( page );
 
 			await test.step( 'Enable PayPal Standard', async () => {
-				await paypalDiv
-					.getByRole( 'link', {
-						name: 'Enable',
-					} )
-					.click();
+				const enableLink = paypalDiv.getByRole( 'link', {
+					name: 'Enable',
+				} );
+				await expect( enableLink ).toBeVisible( visibilityOptions );
+				await enableLink.click();
 			} );
 
 			const labelActive = paypalDiv.getByText( 'Active' );
