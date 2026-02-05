@@ -44712,13 +44712,7 @@ parameters:
 		-
 			message: '#^Call to method get_param\(\) on an unknown class Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request\.$#'
 			identifier: class.notFound
-			count: 15
-			path: src/Admin/API/Notes.php
-
-		-
-			message: '#^Cannot call method get_name\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|true\.$#'
-			identifier: method.nonObject
-			count: 1
+			count: 13
 			path: src/Admin/API/Notes.php
 
 		-
