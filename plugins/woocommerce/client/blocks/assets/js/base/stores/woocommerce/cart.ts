@@ -366,7 +366,11 @@ let addQueue: Map<string, OptimisticCartItem> = new Map();
 
 let collectiveTimer: ReturnType<typeof setTimeout> | null = null;
 let isProcessing = false;
+
+// --- GLOBAL REQUEST COUNTER ---
+// Used to prevent race conditions by ignoring outdated server responses.
 let _requestCounter = 0;
+// -------------------------------
 
 /**
  * Applies the server cart state to the local state, filtering out items marked for deletion.
@@ -426,11 +430,6 @@ const scheduleCollectiveSync = (immediate = false) => {
 
 let pendingRefresh = false;
 let refreshTimeout = 3000;
-
-// --- GLOBAL REQUEST COUNTER ---
-// Used to prevent race conditions by ignoring outdated server responses.
-let _requestCounter = 0;
-// -------------------------------
 
 /**
  * Emits a custom event to trigger store synchronization.
@@ -509,7 +508,7 @@ const { state, actions } = store< Store >(
                 } );
                 
                 let actionType = item ? "update-item" : "add-item";
-                let payload = item ? { ...item, quantity } : { id, quantity, ...(variation && { variation }) };
+                let payload = item ? { ...item, quantity } : { id, quantity, type: variation ? 'variation' : 'simple', ...(variation && { variation }) };
                 let queueKey = makeQueueKey(payload);
 
                 // Optimistic UI Update
@@ -546,11 +545,12 @@ const { state, actions } = store< Store >(
                         existingItem.quantity = itemData.quantity;
                         updateQueue.set(queueKey, existingItem);
                     } else {
-                        const newItem = {
-                            id: itemData.id,
-                            quantity: itemData.quantity,
-                            ...(itemData.variation && { variation: itemData.variation }),
-                        };
+						const newItem = {
+							id: itemData.id,
+							quantity: itemData.quantity,
+							type: itemData.variation ? 'variation' : 'simple',
+							...(itemData.variation && { variation: itemData.variation }),
+						};
                         state.cart.items.push(newItem);
                         addQueue.set(queueKey, newItem);
                     }
@@ -650,7 +650,7 @@ const { state, actions } = store< Store >(
 
                     const data = yield batchResponse.json();
 
-                    if (d(batchResponse)) throw l(data);
+                    if (isApiErrorResponse(batchResponse, data)) throw generateError(data);
 
                     // RACE CONDITION PROTECTION
                     if (_currentId !== _requestCounter) {
