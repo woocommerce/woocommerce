@@ -473,7 +473,6 @@ function wc_downloadable_product_permissions( $order_id, $force = false ) {
 		return;
 	}
 
-	// TODO: test for excessive SQLs - wc_get_product is involved and bulk-priming might necessary.
 	if ( count( $order->get_items() ) > 0 ) {
 		foreach ( $order->get_items() as $item ) {
 			$product = $item->get_product();
