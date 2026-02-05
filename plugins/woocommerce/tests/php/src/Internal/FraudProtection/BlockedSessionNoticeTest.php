@@ -59,6 +59,8 @@ class BlockedSessionNoticeTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test blocked purchase notice added on checkout.
+	 *
 	 * @testdox maybe_add_blocked_purchase_notice should add notice when session is blocked and on checkout page.
 	 */
 	public function test_blocked_purchase_notice_added_on_checkout(): void {
@@ -75,6 +77,8 @@ class BlockedSessionNoticeTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test blocked purchase notice added on cart.
+	 *
 	 * @testdox maybe_add_blocked_purchase_notice should add notice when session is blocked and on cart page.
 	 */
 	public function test_blocked_purchase_notice_added_on_cart(): void {
@@ -91,6 +95,8 @@ class BlockedSessionNoticeTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test blocked purchase notice not added when session allowed.
+	 *
 	 * @testdox maybe_add_blocked_purchase_notice should not add notice when session is not blocked.
 	 */
 	public function test_blocked_purchase_notice_not_added_when_session_allowed(): void {
@@ -107,6 +113,8 @@ class BlockedSessionNoticeTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test blocked purchase notice prevents duplicates.
+	 *
 	 * @testdox maybe_add_blocked_purchase_notice should not add duplicate notices.
 	 */
 	public function test_blocked_purchase_notice_prevents_duplicates(): void {
@@ -134,6 +142,8 @@ class BlockedSessionNoticeTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test add payment method action displays blocked message.
+	 *
 	 * @testdox Should display generic error notice when before_woocommerce_add_payment_method action fires for blocked sessions.
 	 */
 	public function test_add_payment_method_action_displays_blocked_message(): void {
@@ -150,6 +160,8 @@ class BlockedSessionNoticeTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test add payment method action no message for non blocked session.
+	 *
 	 * @testdox Should not display message when add payment method action fires for non-blocked sessions.
 	 */
 	public function test_add_payment_method_action_no_message_for_non_blocked_session(): void {
@@ -163,6 +175,8 @@ class BlockedSessionNoticeTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test get message html purchase context.
+	 *
 	 * @testdox get_message_html should return purchase-specific message when context is 'purchase'.
 	 */
 	public function test_get_message_html_purchase_context(): void {
@@ -175,6 +189,8 @@ class BlockedSessionNoticeTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test get message html generic context.
+	 *
 	 * @testdox get_message_html should return generic message when context is 'generic' or not specified.
 	 */
 	public function test_get_message_html_generic_context(): void {
@@ -188,6 +204,8 @@ class BlockedSessionNoticeTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test get message plaintext purchase context.
+	 *
 	 * @testdox get_message_plaintext should return purchase-specific message when context is 'purchase'.
 	 */
 	public function test_get_message_plaintext_purchase_context(): void {
@@ -200,6 +218,8 @@ class BlockedSessionNoticeTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test get message plaintext generic context.
+	 *
 	 * @testdox get_message_plaintext should return generic message when context is 'generic' or not specified.
 	 */
 	public function test_get_message_plaintext_generic_context(): void {
