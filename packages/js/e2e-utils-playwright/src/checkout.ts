@@ -25,7 +25,7 @@ const addressLabels: Record< AddressType, string > = {
 async function setDynamicFieldType(
 	field: Locator,
 	value: string
-): Promise< void > {
+) {
 	const tagName = await field.evaluate( ( el ) => el.tagName.toLowerCase() );
 
 	if ( tagName === 'select' ) {
@@ -46,7 +46,7 @@ async function fillCheckoutBlocks(
 	page: Page,
 	details: CheckoutDetails = {},
 	type: AddressType = 'shipping'
-): Promise< void > {
+) {
 	const {
 		country = '',
 		firstName = '',

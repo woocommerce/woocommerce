@@ -1,14 +1,14 @@
 /**
  * External dependencies
  */
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
 import OAuth from 'oauth-1.0a';
 import { createHmac } from 'crypto';
 
 /**
  * Internal dependencies
  */
-import type { Auth, ApiClient, ApiResponse } from './types';
+import type { Auth, ApiClient } from './types';
 
 // Re-export types for consumers
 export type { BasicAuth, OAuth1Auth, Auth } from './types';
@@ -94,7 +94,7 @@ export function createClient( baseURL: string, auth: Auth ): ApiClient {
 		} );
 	}
 
-	const axiosInstance: AxiosInstance = axios.create( axiosConfig );
+	const axiosInstance = axios.create( axiosConfig );
 
 	/**
 	 * Utility to redact sensitive fields from logs.
@@ -139,7 +139,7 @@ export function createClient( baseURL: string, auth: Auth ): ApiClient {
 	function logRequest(
 		label: string,
 		details: Record< string, unknown >
-	): void {
+	) {
 		const redacted = Object.fromEntries(
 			Object.entries( details ).map( ( [ k, v ] ) => [
 				k,
@@ -233,12 +233,12 @@ export function createClient( baseURL: string, auth: Auth ): ApiClient {
 			path: string,
 			params: Record< string, unknown > = {},
 			debug = false
-		): Promise< ApiResponse< T > > {
+		): Promise< AxiosResponse< T > > {
 			if ( auth.type === 'oauth1' ) {
 				return oauthRequest( 'GET', path, {
 					params,
 					debug,
-				} ) as Promise< ApiResponse< T > >;
+				} );
 			}
 			const response = await axiosInstance.get< T >( path, { params } );
 			if ( debug ) {
@@ -249,7 +249,7 @@ export function createClient( baseURL: string, auth: Auth ): ApiClient {
 					data: response?.data,
 				} );
 			}
-			return response as ApiResponse< T >;
+			return response;
 		},
 
 		/**
@@ -264,12 +264,12 @@ export function createClient( baseURL: string, auth: Auth ): ApiClient {
 			path: string,
 			data: Record< string, unknown > = {},
 			debug = false
-		): Promise< ApiResponse< T > > {
+		): Promise< AxiosResponse< T > > {
 			if ( auth.type === 'oauth1' ) {
 				return oauthRequest( 'POST', path, {
 					data,
 					debug,
-				} ) as Promise< ApiResponse< T > >;
+				} );
 			}
 			const response = await axiosInstance.post< T >( path, data );
 			if ( debug ) {
@@ -280,7 +280,7 @@ export function createClient( baseURL: string, auth: Auth ): ApiClient {
 					response: response?.data,
 				} );
 			}
-			return response as ApiResponse< T >;
+			return response;
 		},
 
 		/**
@@ -295,12 +295,12 @@ export function createClient( baseURL: string, auth: Auth ): ApiClient {
 			path: string,
 			data: Record< string, unknown > = {},
 			debug = false
-		): Promise< ApiResponse< T > > {
+		): Promise< AxiosResponse< T > > {
 			if ( auth.type === 'oauth1' ) {
 				return oauthRequest( 'PUT', path, {
 					data,
 					debug,
-				} ) as Promise< ApiResponse< T > >;
+				} );
 			}
 			const response = await axiosInstance.put< T >( path, data );
 			if ( debug ) {
@@ -311,7 +311,7 @@ export function createClient( baseURL: string, auth: Auth ): ApiClient {
 					response: response?.data,
 				} );
 			}
-			return response as ApiResponse< T >;
+			return response;
 		},
 
 		/**
@@ -326,12 +326,12 @@ export function createClient( baseURL: string, auth: Auth ): ApiClient {
 			path: string,
 			params: Record< string, unknown > = {},
 			debug = false
-		): Promise< ApiResponse< T > > {
+		): Promise< AxiosResponse< T > > {
 			if ( auth.type === 'oauth1' ) {
 				return oauthRequest( 'DELETE', path, {
 					data: params,
 					debug,
-				} ) as Promise< ApiResponse< T > >;
+				} );
 			}
 			const response = await axiosInstance.delete< T >( path, {
 				data: params,
@@ -344,7 +344,7 @@ export function createClient( baseURL: string, auth: Auth ): ApiClient {
 					response: response?.data,
 				} );
 			}
-			return response as ApiResponse< T >;
+			return response;
 		},
 	};
 }

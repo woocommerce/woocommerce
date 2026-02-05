@@ -2,6 +2,7 @@
  * External dependencies
  */
 import type { Page, FrameLocator } from '@playwright/test';
+import type { AxiosResponse } from 'axios';
 
 /**
  * Authentication configuration for Basic Auth.
@@ -35,18 +36,6 @@ export interface OAuth1Auth {
 export type Auth = BasicAuth | OAuth1Auth;
 
 /**
- * API Response interface (based on Axios response).
- *
- * @template T - The type of the response data
- */
-export interface ApiResponse< T = unknown > {
-	data: T;
-	status: number;
-	statusText: string;
-	headers: Record< string, string >;
-}
-
-/**
  * API Client interface returned by createClient.
  */
 export interface ApiClient {
@@ -63,7 +52,7 @@ export interface ApiClient {
 		path: string,
 		params?: Record< string, unknown >,
 		debug?: boolean
-	): Promise< ApiResponse< T > >;
+	): Promise< AxiosResponse< T > >;
 
 	/**
 	 * Make a POST request.
@@ -78,7 +67,7 @@ export interface ApiClient {
 		path: string,
 		data?: Record< string, unknown >,
 		debug?: boolean
-	): Promise< ApiResponse< T > >;
+	): Promise< AxiosResponse< T > >;
 
 	/**
 	 * Make a PUT request.
@@ -93,7 +82,7 @@ export interface ApiClient {
 		path: string,
 		data?: Record< string, unknown >,
 		debug?: boolean
-	): Promise< ApiResponse< T > >;
+	): Promise< AxiosResponse< T > >;
 
 	/**
 	 * Make a DELETE request.
@@ -108,7 +97,7 @@ export interface ApiClient {
 		path: string,
 		params?: Record< string, unknown >,
 		debug?: boolean
-	): Promise< ApiResponse< T > >;
+	): Promise< AxiosResponse< T > >;
 }
 
 /**
