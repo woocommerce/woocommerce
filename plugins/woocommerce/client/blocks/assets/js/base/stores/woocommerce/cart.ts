@@ -119,11 +119,23 @@ type BatchResponse = {
     responses: ApiResponse< Cart >[];
 };
 
-// Guard to distinguish between optimistic and cart items.
+/**
+ * Type guard to check if an item is a full CartItem or an OptimisticCartItem.
+ * 
+ * @param {OptimisticCartItem | CartItem} item - The item to check.
+ * @return {boolean} True if the item is a CartItem.
+ */
 function isCartItem( item: OptimisticCartItem | CartItem ): item is CartItem {
     return 'name' in item;
 }
 
+/**
+ * Checks if the API response indicates an error.
+ * 
+ * @param {Response} res - The fetch response object.
+ * @param {unknown} json - The parsed JSON from the response.
+ * @return {boolean} True if the response is an error.
+ */
 function isApiErrorResponse(
     res: Response,
     json: unknown
@@ -131,29 +143,61 @@ function isApiErrorResponse(
     return ! res.ok;
 }
 
+/**
+ * Generates an Error object from an API error response.
+ * 
+ * @param {ApiErrorResponse} error - The API error response.
+ * @return {Error} The generated Error object with code and message.
+ */
 function generateError( error: ApiErrorResponse ): Error {
     return Object.assign( new Error( error.message || 'Unknown error.' ), {
         code: error.code || 'unknown_error',
     } );
 }
 
+/**
+ * Helper function to get the total count of items in the cart.
+ * 
+ * @param {{ items: (OptimisticCartItem | CartItem)[] }} cart - The cart object.
+ * @return {number} The total quantity of items in the cart.
+ */
 // --- HELPER: Get Total Items Count ---
 const getCount = ( cart: { items: ( OptimisticCartItem | CartItem )[] } ) => 
     ( cart.items ? cart.items.reduce( ( sum, item ) => sum + item.quantity, 0 ) : 0 );
 // -------------------------------------
 
+/**
+ * Generates an error notice from an error object.
+ * 
+ * @param {Error | ApiErrorResponse} error - The error to generate a notice for.
+ * @return {Notice} The generated error notice.
+ */
 const generateErrorNotice = ( error: Error | ApiErrorResponse ): Notice => ( {
     notice: error.message,
     type: 'error',
     dismissible: true,
 } );
 
+/**
+ * Generates an info notice with a given message.
+ * 
+ * @param {string} message - The message for the notice.
+ * @return {Notice} The generated info notice.
+ */
 const generateInfoNotice = ( message: string ): Notice => ( {
     notice: message,
     type: 'notice',
     dismissible: true,
 } );
 
+/**
+ * Generates info notices based on cart updates.
+ * 
+ * @param {Store['state']['cart']} oldCart - The previous cart state.
+ * @param {Cart} newCart - The updated cart state.
+ * @param {QuantityChanges} quantityChanges - Pending quantity changes.
+ * @return {Notice[]} Array of generated notices for cart changes.
+ */
 const getInfoNoticesFromCartUpdates = (
     oldCart: Store[ 'state' ][ 'cart' ],
     newCart: Cart,
@@ -207,6 +251,13 @@ const getInfoNoticesFromCartUpdates = (
 };
 
 // Same as the one in /assets/js/base/utils/variations/does-cart-item-match-attributes.ts.
+/**
+ * Checks if a cart item's variation attributes match the selected attributes.
+ * 
+ * @param {OptimisticCartItem} cartItem - The cart item to check.
+ * @param {SelectedAttributes[]} selectedAttributes - The selected attributes.
+ * @return {boolean} True if the attributes match.
+ */
 const doesCartItemMatchAttributes = (
     cartItem: OptimisticCartItem,
     selectedAttributes: SelectedAttributes[]
@@ -249,6 +300,11 @@ let refreshTimeout = 3000;
 let _requestCounter = 0;
 // -------------------------------
 
+/**
+ * Emits a custom event to trigger store synchronization.
+ * 
+ * @param {{ quantityChanges: QuantityChanges }} options - The quantity changes to include in the event detail.
+ */
 function emitSyncEvent( {
     quantityChanges,
 }: {
@@ -270,6 +326,12 @@ const { state, actions } = store< Store >(
     {
         actions: {
             *removeCartItem( key: string ) {
+				/**
+				 * Removes an item from the cart.
+				 * 
+				 * @param {string} key - The key of the item to remove.
+				 * @yield {Generator} Handles the removal process asynchronously.
+				 */
                 const _currentId = ++_requestCounter;
                 const previousCart = JSON.stringify( state.cart );
 
@@ -323,7 +385,13 @@ const { state, actions } = store< Store >(
                     }
                 }
             },
-
+			/**
+			 * Adds an item to the cart or updates an existing one.
+			 * 
+			 * @param {ClientCartItem} itemData - The item data to add or update.
+			 * @param {CartUpdateOptions} options - Options for updating notices.
+			 * @yield {Generator} Handles the addition process asynchronously.
+			 */
             *addCartItem(
                 { id, key, quantity, variation }: ClientCartItem,
                 { showCartUpdatesNotices = true }: CartUpdateOptions = {}
@@ -458,7 +526,13 @@ const { state, actions } = store< Store >(
                     }
                 }
             },
-
+			/**
+			 * Batch adds multiple items to the cart.
+			 * 
+			 * @param {ClientCartItem[]} items - Array of items to add.
+			 * @param {CartUpdateOptions} options - Options for updating notices.
+			 * @yield {Generator} Handles the batch addition asynchronously.
+			 */
             *batchAddCartItems(
                 items: ClientCartItem[],
                 { showCartUpdatesNotices = true }: CartUpdateOptions = {}
@@ -642,7 +716,11 @@ const { state, actions } = store< Store >(
                     }
                 }
             },
-
+			/**
+			 * Refreshes the cart items from the server.
+			 * 
+			 * @yield {Generator} Handles the refresh process asynchronously.
+			 */
             *refreshCartItems() {
                 if ( pendingRefresh ) return;
                 pendingRefresh = true;
@@ -687,7 +765,12 @@ const { state, actions } = store< Store >(
                     pendingRefresh = false;
                 }
             },
-
+			/**
+			 * Shows an error notice based on the provided error.
+			 * 
+			 * @param {Error | ApiErrorResponse} error - The error to display.
+			 * @yield {Generator} Handles notice addition asynchronously.
+			 */
             *showNoticeError( error: Error | ApiErrorResponse ) {
                 // Todo: Use the module exports instead of `store()` once the store-notices
                 // store is public.
@@ -716,7 +799,13 @@ const { state, actions } = store< Store >(
                 // eslint-disable-next-line no-console
                 console.error( error );
             },
-
+			/**
+			 * Updates notices in the store-notices.
+			 * 
+			 * @param {Notice[]} newNotices - Array of new notices to add.
+			 * @param {boolean} removeOthers - Whether to remove existing notices.
+			 * @yield {Generator} Handles notice updates asynchronously.
+			 */
             *updateNotices( newNotices: Notice[] = [], removeOthers = false ) {
                 // Todo: Use the module exports instead of `store()` once the store-notices
                 // store is public.
