@@ -54,6 +54,8 @@ class DecisionHandlerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test apply allow decision.
+	 *
 	 * @testdox Should apply allow decision and update session to allowed when session is not blocked.
 	 */
 	public function test_apply_allow_decision(): void {
@@ -71,6 +73,8 @@ class DecisionHandlerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test allow decision does not overwrite blocked session.
+	 *
 	 * @testdox Should preserve blocked session status when allow decision is received.
 	 *
 	 * This prevents race conditions where emptying the cart during block_session
@@ -91,6 +95,8 @@ class DecisionHandlerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test apply block decision.
+	 *
 	 * @testdox Should apply block decision and update session to blocked.
 	 */
 	public function test_apply_block_decision(): void {
@@ -104,6 +110,8 @@ class DecisionHandlerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test invalid decision defaults to allow.
+	 *
 	 * @testdox Should default to allow for invalid decision and log warning.
 	 */
 	public function test_invalid_decision_defaults_to_allow(): void {
@@ -122,6 +130,8 @@ class DecisionHandlerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test filter can override block to allow.
+	 *
 	 * @testdox Should allow filter to override decision from block to allow.
 	 */
 	public function test_filter_can_override_block_to_allow(): void {
@@ -147,6 +157,8 @@ class DecisionHandlerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test filter can override allow to block.
+	 *
 	 * @testdox Should allow filter to override decision from allow to block.
 	 */
 	public function test_filter_can_override_allow_to_block(): void {
@@ -168,6 +180,8 @@ class DecisionHandlerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test filter invalid return uses original decision.
+	 *
 	 * @testdox Should reject invalid filter return value and use original decision.
 	 */
 	public function test_filter_invalid_return_uses_original_decision(): void {
