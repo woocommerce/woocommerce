@@ -121,7 +121,7 @@ type BatchResponse = {
 
 /**
  * Type guard to check if an item is a full CartItem or an OptimisticCartItem.
- * 
+ *
  * @param {OptimisticCartItem | CartItem} item - The item to check.
  * @return {boolean} True if the item is a CartItem.
  */
@@ -131,7 +131,7 @@ function isCartItem( item: OptimisticCartItem | CartItem ): item is CartItem {
 
 /**
  * Checks if the API response indicates an error.
- * 
+ *
  * @param {Response} res - The fetch response object.
  * @param {unknown} json - The parsed JSON from the response.
  * @return {boolean} True if the response is an error.
@@ -145,7 +145,7 @@ function isApiErrorResponse(
 
 /**
  * Generates an Error object from an API error response.
- * 
+ *
  * @param {ApiErrorResponse} error - The API error response.
  * @return {Error} The generated Error object with code and message.
  */
@@ -156,19 +156,8 @@ function generateError( error: ApiErrorResponse ): Error {
 }
 
 /**
- * Helper function to get the total count of items in the cart.
- * 
- * @param {{ items: (OptimisticCartItem | CartItem)[] }} cart - The cart object.
- * @return {number} The total quantity of items in the cart.
- */
-// --- HELPER: Get Total Items Count ---
-const getCount = ( cart: { items: ( OptimisticCartItem | CartItem )[] } ) => 
-    ( cart.items ? cart.items.reduce( ( sum, item ) => sum + item.quantity, 0 ) : 0 );
-// -------------------------------------
-
-/**
  * Generates an error notice from an error object.
- * 
+ *
  * @param {Error | ApiErrorResponse} error - The error to generate a notice for.
  * @return {Notice} The generated error notice.
  */
@@ -180,7 +169,7 @@ const generateErrorNotice = ( error: Error | ApiErrorResponse ): Notice => ( {
 
 /**
  * Generates an info notice with a given message.
- * 
+ *
  * @param {string} message - The message for the notice.
  * @return {Notice} The generated info notice.
  */
@@ -192,7 +181,7 @@ const generateInfoNotice = ( message: string ): Notice => ( {
 
 /**
  * Generates info notices based on cart updates.
- * 
+ *
  * @param {Store['state']['cart']} oldCart - The previous cart state.
  * @param {Cart} newCart - The updated cart state.
  * @param {QuantityChanges} quantityChanges - Pending quantity changes.
@@ -212,7 +201,6 @@ const getInfoNoticesFromCartUpdates = (
         cartItemsPendingDelete: pendingDelete = [],
     } = quantityChanges;
 
-    // FIX from PR #63078: Removed `! pendingDelete.includes( old.key )` check
     const autoDeletedToNotify = oldItems.filter(
         ( old ) =>
             old.key &&
@@ -220,7 +208,6 @@ const getInfoNoticesFromCartUpdates = (
             ! newItems.some( ( item ) => old.key === item.key )
     );
 
-    // FIX from PR #63078: Added `old.quantity > 0` and removed `! pendingAdd.includes`
     const autoUpdatedToNotify = newItems.filter( ( item ) => {
         if ( ! isCartItem( item ) ) {
             return false;
@@ -232,6 +219,7 @@ const getInfoNoticesFromCartUpdates = (
                     old.quantity > 0
             : false;
     } );
+
     return [
         ...autoDeletedToNotify.map( ( item ) =>
             generateInfoNotice(
@@ -248,10 +236,9 @@ const getInfoNoticesFromCartUpdates = (
 
 /**
  * Normalizes a product variation object to ensure consistent key generation.
- * Handles nulls, sorts attributes alphabetically, and normalizes values to lowercase
- * to prevent duplicates due to case sensitivity (e.g., "Red" vs "red").
- * 
- * @param {Array|Object} variation - The variation object.
+ * Handles both array and object inputs, preserving attribute names.
+ *
+ * @param {VariationInput} variation - The variation object or array.
  * @returns {string} The normalized stringified variation.
  */
 type VariationInput = CartVariationItem[] | Record<string, unknown> | null | undefined;
@@ -281,7 +268,7 @@ function normalizeVariation(variation: VariationInput): string {
 
 /**
  * Generates a deterministic key for queue operations.
- * 
+ *
  * @param {OptimisticCartItem} item - The cart item.
  * @returns {string} The unique key for the item.
  */
@@ -294,19 +281,19 @@ const makeQueueKey = (item: OptimisticCartItem): string => {
 
 /**
  * The delay (in ms) to wait for additional actions before sending a batch request.
- * Balances between collecting rapid clicks and providing timely feedback.
+ * Optimized for faster response in slow networks.
  */
-const COLLECTIVE_DELAY = 600;
+const COLLECTIVE_DELAY = 100;
 
 /**
  * The threshold of queued items that triggers an immediate batch send.
- * If the queue reaches this size, the COLLECTIVE_DELAY is ignored to prevent UI lag.
+ * Lowered for better burst handling.
  */
-const IMMEDIATE_TRIGGER_SIZE = 5;
+const IMMEDIATE_TRIGGER_SIZE = 2;
 
 /**
  * The maximum number of items allowed in a single batch request payload.
- * Prevents excessively large request bodies that could cause server timeouts.
+ * Enforced as total across all queues.
  */
 const MAX_BATCH_SIZE = 50;
 
@@ -328,14 +315,14 @@ let addQueue: Map<string, OptimisticCartItem> = new Map();
 let collectiveTimer: ReturnType<typeof setTimeout> | null = null;
 let isProcessing = false;
 
-// --- GLOBAL REQUEST COUNTER ---
-// Used to prevent race conditions by ignoring outdated server responses.
+/**
+ * Global request counter to prevent race conditions by ignoring outdated responses.
+ */
 let _requestCounter = 0;
-// -------------------------------
 
 /**
  * Applies the server cart state to the local state, filtering out items marked for deletion.
- * 
+ *
  * @param {Cart} serverCart - The cart object returned by the server.
  */
 const applyServerState = (serverCart: Cart) => {
@@ -351,32 +338,25 @@ const applyServerState = (serverCart: Cart) => {
 const reapplyOptimisticState = () => {
     if (!state.cart.items) return;
 
-    // Helper to find matching item
     const findMatching = (item: OptimisticCartItem) => {
         const queueKey = makeQueueKey(item);
         return state.cart.items.find(i => i.key === queueKey || (i.id === item.id && normalizeVariation(i.variation) === normalizeVariation(item.variation)));
     };
 
-    // Apply Pending Updates
     updateQueue.forEach((item) => {
         const existing = findMatching(item);
-        if (existing) {
-            existing.quantity = item.quantity;
-        }
+        if (existing) existing.quantity = item.quantity;
     });
 
-    // Apply Pending Adds
     addQueue.forEach((item) => {
         const exists = findMatching(item);
-        if (!exists) {
-            state.cart.items.push(item);
-        }
+        if (!exists) state.cart.items.push(item);
     });
 };
 
 /**
- * Schedules a collective sync operation. Uses an adaptive delay strategy.
- * 
+ * Schedules a collective sync operation with optimized debounce for fast response.
+ *
  * @param {boolean} immediate - Whether to force an immediate send (ignoring delay).
  */
 const scheduleCollectiveSync = (immediate = false) => {
@@ -397,7 +377,7 @@ let refreshTimeout = 3000;
 
 /**
  * Emits a custom event to trigger store synchronization.
- * 
+ *
  * @param {{ quantityChanges: QuantityChanges }} options - The quantity changes to include in the event detail.
  */
 function emitSyncEvent( {
@@ -422,7 +402,8 @@ const { state, actions } = store< Store >(
         actions: {
             /**
              * Optimistically removes an item from the cart and queues the removal request.
-             * 
+             * Cancels any pending add/update for the same item to prevent ghosts.
+             *
              * @param {string} key - The cart item key to remove.
              */
             *removeCartItem(key: string) {
@@ -446,7 +427,8 @@ const { state, actions } = store< Store >(
             /**
              * Adds an item to the cart or updates an existing one.
              * Handles variation matching and optimistic updates.
-             * 
+             * Only queues update-item if the item has a server key.
+             *
              * @param {ClientCartItem} itemData - The item data to add or update.
              */
             *addCartItem(
@@ -473,9 +455,9 @@ const { state, actions } = store< Store >(
                 } );
                 
                 const hasServerKey = Boolean(item?.key);
-                let actionType = item && hasServerKey ? "update-item" : "add-item";
-                let payload = item ? { ...item, quantity } : { id, quantity, type: variation ? 'variation' : 'simple', ...(variation && { variation }) };
-                let queueKey = makeQueueKey(payload);
+                const actionType = item && hasServerKey ? "update-item" : "add-item";
+                const payload = item ? { ...item, quantity } : { id, quantity, type: variation ? 'variation' : 'simple', ...(variation && { variation }) };
+                const queueKey = makeQueueKey(payload);
 
                 if (item) {
                     item.quantity = quantity;
@@ -495,7 +477,8 @@ const { state, actions } = store< Store >(
             },
             /**
              * Batch adds multiple items to the cart in a single batch operation.
-             * 
+             * Applies the same server-key logic as addCartItem.
+             *
              * @param {ClientCartItem[]} items - Array of items to add.
              */
             *batchAddCartItems(
@@ -542,8 +525,7 @@ const { state, actions } = store< Store >(
             },
             /**
              * Processes the current queues (add, update, remove) into a single batch request.
-             * Handles snapshotting to allow new clicks during network latency.
-             * Includes logic for splitting large batches (Chunking) and re-queuing remainder.
+             * Optimized for fast response and slow networks: reduced debounce, immediate remainder processing, stronger backoff.
              */
             *processCollectiveActions() {
                 if (isProcessing) return;
@@ -554,12 +536,10 @@ const { state, actions } = store< Store >(
 
                 const _currentId = ++_requestCounter;
 
-                // SNAPSHOT & QUEUE MANAGEMENT
                 const currentDeletes = Array.from(deleteQueue);
                 const currentUpdates = Array.from(updateQueue.entries());
                 const currentAdds = Array.from(addQueue.entries());
 
-                // Clear main queues to allow new interactions during processing
                 deleteQueue.clear();
                 updateQueue.clear();
                 addQueue.clear();
@@ -569,6 +549,7 @@ const { state, actions } = store< Store >(
 
                 let remainingSlots = MAX_BATCH_SIZE;
 
+                // Priority: deletes first for instant remove feel
                 const processDeletes = currentDeletes.slice(0, remainingSlots);
                 remainingSlots -= processDeletes.length;
                 const remainderDeletes = currentDeletes.slice(processDeletes.length);
@@ -680,7 +661,6 @@ const { state, actions } = store< Store >(
                     if (hasErrors) {
                         actions.showNoticeError(new Error(__('Some items failed to update. Please refresh or try again.', 'woocommerce')));
                     }
-
                 } catch (err) {
                     if (_currentId === _requestCounter) {
                         actions.showNoticeError(err as Error);
@@ -697,11 +677,15 @@ const { state, actions } = store< Store >(
                     }
                 } finally {
                     isProcessing = false;
+                    // Immediate next batch if remainder (better for 3G chunking)
                     if (deleteQueue.size > 0 || updateQueue.size > 0 || addQueue.size > 0) {
-                        setTimeout(() => actions.processCollectiveActions(), 50);
+                        setTimeout(() => actions.processCollectiveActions(), 0);
                     }
                 }
             },
+            /**
+             * Refreshes the cart items from the server with stronger backoff for slow networks.
+             */
             *refreshCartItems() {
                 if (pendingRefresh) return;
                 pendingRefresh = true;
@@ -733,12 +717,17 @@ const { state, actions } = store< Store >(
                 } catch ( error ) {
                     if ( _refreshId === _requestCounter ) {
                         setTimeout( actions.refreshCartItems, refreshTimeout );
-                        refreshTimeout *= 2;
+                        refreshTimeout *= 3; // Stronger backoff for poor networks
                     }
                 } finally {
                     pendingRefresh = false;
                 }
             },
+            /**
+             * Shows an error notice based on the provided error.
+             *
+             * @param {Error | ApiErrorResponse} error - The error to display.
+             */
             *showNoticeError( error: Error | ApiErrorResponse ) {
                 yield import( '@woocommerce/stores/store-notices' );
                 const { actions: noticeActions } = store< StoreNotices >(
@@ -762,6 +751,12 @@ const { state, actions } = store< Store >(
 
                 console.error( error );
             },
+            /**
+             * Updates notices in the store-notices.
+             *
+             * @param {Notice[]} newNotices - Array of new notices to add.
+             * @param {boolean} removeOthers - Whether to remove existing notices.
+             */
             *updateNotices( newNotices: Notice[] = [], removeOthers = false ) {
                 yield import( '@woocommerce/stores/store-notices' );
                 const { state: noticeState, actions: noticeActions } =
