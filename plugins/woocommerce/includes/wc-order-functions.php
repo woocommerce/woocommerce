@@ -521,7 +521,7 @@ function wc_delete_shop_order_transients( $order = 0 ) {
 
 	do_action( 'woocommerce_delete_shop_order_transients', $order_id );
 	/**
-	 * Execute legacy orders transient deletion (sync or async depending on the context).
+	 * Execute legacy reports transient deletion (sync or async depending on the context).
 	 *
 	 * @since 10.6.0
 	 * @param int  $order_id Order ID (unused, future placeholder).

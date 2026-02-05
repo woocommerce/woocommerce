@@ -32,7 +32,7 @@ class WC_Admin_Reports {
 	}
 
 	/**
-	 * Execute the transient deletion (sync or async depending on the context).
+	 * Execute legacy reports transient deletion (sync or async depending on the context)
 	 *
 	 * @param int  $order_id Order ID (unused, future placeholder).
 	 * @param bool $defer    Whether to defer the deletion or execute.
