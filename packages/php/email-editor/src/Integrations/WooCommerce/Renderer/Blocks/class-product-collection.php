@@ -111,7 +111,11 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 		}
 
 		// Two-column layout using HTML tables for email compatibility.
-		return $this->render_two_column_grid( $products, $inner_block, $collection_type, $rendering_context );
+		// Wrap with add_spacer to match single-column spacing behavior.
+		return $this->add_spacer(
+			$this->render_two_column_grid( $products, $inner_block, $collection_type, $rendering_context ),
+			$inner_block['email_attrs'] ?? array()
+		);
 	}
 
 	/**
@@ -131,10 +135,14 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 		// then divide by 2 for two columns.
 		$layout_width = (int) $rendering_context->get_layout_width_without_padding();
 		$gap          = 20;
-		$cell_width   = (int) ( ( $layout_width - $gap ) / 2 );
 
-		// Start the table wrapper with MSO conditional comments for Outlook.
-		$content .= '<!--[if mso | IE]><table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%"><tr><td><![endif]-->';
+		// Guard against zero or very small layout width to ensure $cell_width is always positive.
+		if ( $layout_width <= $gap ) {
+			$layout_width = $gap + 2;
+		}
+
+		$cell_width = (int) ( ( $layout_width - $gap ) / 2 );
+
 		$content .= '<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="width: 100%; border-collapse: collapse;">';
 
 		$product_chunks = array_chunk( $products, 2 );
@@ -167,7 +175,6 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 		}
 
 		$content .= '</table>';
-		$content .= '<!--[if mso | IE]></td></tr></table><![endif]-->';
 
 		return $content;
 	}
