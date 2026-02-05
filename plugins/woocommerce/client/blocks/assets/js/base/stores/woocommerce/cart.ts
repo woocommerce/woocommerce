@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { getConfig, store } from '@wordpress/interactivity';
+import { doesCartItemMatchAttributes } from '../../utils/variations/does-cart-item-match-attributes';
 import type {
     Cart,
     CartItem,
@@ -95,14 +96,11 @@ export type Store = {
     actions: {
         removeCartItem: ( key: string ) => void;
         addCartItem: (
-            args: ClientCartItem,
-            options?: CartUpdateOptions
+            args: ClientCartItem
         ) => void;
         batchAddCartItems: (
-            items: ClientCartItem[],
-            options?: CartUpdateOptions
+            items: ClientCartItem[]
         ) => void;
-        // Todo: Check why if I switch to an async function here the types of the store stop working.
         refreshCartItems: () => void;
         showNoticeError: ( error: Error | ApiErrorResponse ) => void;
         updateNotices: ( notices: Notice[], removeOthers?: boolean ) => void;
@@ -251,48 +249,6 @@ const getInfoNoticesFromCartUpdates = (
     ];
 };
 
-// Same as the one in /assets/js/base/utils/variations/does-cart-item-match-attributes.ts.
-/**
- * Checks if a cart item's variation attributes match the selected attributes.
- * 
- * @param {OptimisticCartItem} cartItem - The cart item to check.
- * @param {SelectedAttributes[]} selectedAttributes - The selected attributes.
- * @return {boolean} True if the attributes match.
- */
-const doesCartItemMatchAttributes = (
-    cartItem: OptimisticCartItem,
-    selectedAttributes: SelectedAttributes[]
-) => {
-    if (
-        ! Array.isArray( cartItem.variation ) ||
-        ! Array.isArray( selectedAttributes )
-    ) {
-        return false;
-    }
-
-    if ( cartItem.variation.length !== selectedAttributes.length ) {
-        return false;
-    }
-
-    return cartItem.variation.every(
-        ( {
-            // eslint-disable-next-line
-            raw_attribute,
-            value,
-        }: {
-            raw_attribute: string;
-            value: string;
-        } ) =>
-            selectedAttributes.some( ( item: SelectedAttributes ) => {
-                return (
-                    item.attribute === raw_attribute &&
-                    ( item.value.toLowerCase() === value.toLowerCase() ||
-                        ( item.value && value === '' ) ) // Handle "any" attribute type
-                );
-            } )
-    );
-};
-
 /**
  * Normalizes a product variation object to ensure consistent key generation.
  * Handles nulls, sorts attributes alphabetically, and normalizes values to lowercase
@@ -301,16 +257,21 @@ const doesCartItemMatchAttributes = (
  * @param {Array|Object} variation - The variation object.
  * @returns {string} The normalized stringified variation.
  */
-function normalizeVariation(variation: any): string {
+type VariationInput = CartVariationItem[] | Record<string, unknown> | null | undefined;
+
+function normalizeVariation(variation: VariationInput): string {
     if (!variation) return "";
     try {
-        const arr = Array.isArray(variation) ? variation.slice() : Object.values(variation);
+        const arr: unknown[] = Array.isArray(variation) ? variation.slice() : Object.values(variation);
         const normalized = arr
             .filter(Boolean)
-            .map((attr: any) => ({
-                attribute: (attr.attribute || "").toString(),
-                value: attr.value == null ? "" : attr.value.toString().toLowerCase(),
-            }))
+            .map((attr) => {
+                const a = attr as { attribute?: unknown; value?: unknown };
+                return {
+                    attribute: (a.attribute || "").toString(),
+                    value: a.value == null ? "" : String(a.value).toLowerCase(),
+                };
+            })
             .sort((a, b) => a.attribute.localeCompare(b.attribute));
         return JSON.stringify(normalized);
     } catch (err) {
@@ -389,21 +350,24 @@ const applyServerState = (serverCart: Cart) => {
  */
 const reapplyOptimisticState = () => {
     if (!state.cart.items) return;
+
+    // Helper to find matching item
+    const findMatching = (item: OptimisticCartItem) => {
+        const queueKey = makeQueueKey(item);
+        return state.cart.items.find(i => i.key === queueKey || (i.id === item.id && normalizeVariation(i.variation) === normalizeVariation(item.variation)));
+    };
+
     // Apply Pending Updates
     updateQueue.forEach((item) => {
-        const queueKey = makeQueueKey(item);
-        const existing = state.cart.items.find((i) => i.key === queueKey);
+        const existing = findMatching(item);
         if (existing) {
             existing.quantity = item.quantity;
-        } else {
-            const exists = state.cart.items.find((i) => i.id === item.id && normalizeVariation(i.variation) === normalizeVariation(item.variation));
-            if (exists) exists.quantity = item.quantity;
         }
     });
+
     // Apply Pending Adds
     addQueue.forEach((item) => {
-        const queueKey = makeQueueKey(item);
-        const exists = state.cart.items.find((i) => i.key === queueKey || (i.id === item.id && normalizeVariation(i.variation) === normalizeVariation(item.variation)));
+        const exists = findMatching(item);
         if (!exists) {
             state.cart.items.push(item);
         }
@@ -478,16 +442,12 @@ const { state, actions } = store< Store >(
              * Handles variation matching and optimistic updates.
              * 
              * @param {ClientCartItem} itemData - The item data to add or update.
-             * @param {CartUpdateOptions} options - Options for updating notices.
              */
             *addCartItem(
-                { id, key, quantity, variation }: ClientCartItem,
-                { showCartUpdatesNotices = true }: CartUpdateOptions = {}
+                { id, key, quantity, variation }: ClientCartItem
             ) {
                 // Cancel deletion if re-adding the same item
                 if (key && deleteQueue.has(key)) deleteQueue.delete(key);
-
-                const a11yModulePromise = import( '@wordpress/a11y' );
 
                 let item = state.cart.items.find( ( cartItem ) => {
                     if ( cartItem.type === 'variation' ) {
@@ -531,11 +491,9 @@ const { state, actions } = store< Store >(
              * Batch adds multiple items to the cart in a single batch operation.
              * 
              * @param {ClientCartItem[]} items - Array of items to add.
-             * @param {CartUpdateOptions} options - Options for updating notices.
              */
             *batchAddCartItems(
-                items: ClientCartItem[],
-                { showCartUpdatesNotices = true }: CartUpdateOptions = {}
+                items: ClientCartItem[]
             ) {
                 items.forEach((itemData) => {
                     const existingItem = state.cart.items.find(({ id }) => itemData.id === id);
@@ -545,12 +503,12 @@ const { state, actions } = store< Store >(
                         existingItem.quantity = itemData.quantity;
                         updateQueue.set(queueKey, existingItem);
                     } else {
-						const newItem = {
-							id: itemData.id,
-							quantity: itemData.quantity,
-							type: itemData.variation ? 'variation' : 'simple',
-							...(itemData.variation && { variation: itemData.variation }),
-						};
+                        const newItem = {
+                            id: itemData.id,
+                            quantity: itemData.quantity,
+                            type: itemData.variation ? 'variation' : 'simple',
+                            ...(itemData.variation && { variation: itemData.variation }),
+                        };
                         state.cart.items.push(newItem);
                         addQueue.set(queueKey, newItem);
                     }
@@ -591,11 +549,11 @@ const { state, actions } = store< Store >(
                     const remainder = arr.slice(MAX_BATCH_SIZE);
                     
                     if (queueType === 'delete') {
-                        remainder.forEach(item => deleteQueue.add(item));
+                        remainder.forEach(item => { deleteQueue.add(item); });
                     } else if (queueType === 'add') {
-                        remainder.forEach(([key, item]) => addQueue.set(key, item));
+                        remainder.forEach(([key, item]) => { addQueue.set(key, item); });
                     } else if (queueType === 'update') {
-                        remainder.forEach(([key, item]) => updateQueue.set(key, item));
+                        remainder.forEach(([key, item]) => { updateQueue.set(key, item); });
                     }
                     return slice;
                 };
@@ -655,9 +613,9 @@ const { state, actions } = store< Store >(
                     // RACE CONDITION PROTECTION
                     if (_currentId !== _requestCounter) {
                         // Stale response: Re-queue everything to prevent data loss
-                        processDeletes.forEach(k => deleteQueue.add(k));
-                        processUpdates.forEach(([k, i]) => updateQueue.set(k, i));
-                        processAdds.forEach(([k, i]) => addQueue.set(k, i));
+                        processDeletes.forEach(k => { deleteQueue.add(k); });
+                        processUpdates.forEach(([k, i]) => { updateQueue.set(k, i); });
+                        processAdds.forEach(([k, i]) => { addQueue.set(k, i); });
                         return;
                     }
 
@@ -695,7 +653,7 @@ const { state, actions } = store< Store >(
                     reapplyOptimisticState();
 
                     if (hasErrors) {
-                        actions.showNoticeError({ message: "Some items failed to update. Please refresh or try again." });
+                        actions.showNoticeError(new Error("Some items failed to update. Please refresh or try again."));
                     }
 
                 } catch (err) {
@@ -703,9 +661,9 @@ const { state, actions } = store< Store >(
                     if (_currentId === _requestCounter) {
                         actions.showNoticeError(err as Error);
                         // Re-queue everything as network state is uncertain
-                        processDeletes.forEach(k => deleteQueue.add(k));
-                        processUpdates.forEach(([k, i]) => updateQueue.set(k, i));
-                        processAdds.forEach(([k, i]) => addQueue.set(k, i));
+                        processDeletes.forEach(k => { deleteQueue.add(k); });
+                        processUpdates.forEach(([k, i]) => { updateQueue.set(k, i); });
+                        processAdds.forEach(([k, i]) => { addQueue.set(k, i); });
                         yield actions.refreshCartItems();
                     }
                 } finally {
@@ -814,7 +772,7 @@ const { state, actions } = store< Store >(
                     notices
                         .map( ( { id } ) => id )
                         .filter( ( id ) => ! noticeIds.includes( id ) )
-                        .forEach( ( id ) => noticeActions.removeNotice( id ) );
+                        .forEach( ( id ) => { noticeActions.removeNotice( id ); } );
                 }
             },
         },
