@@ -68,4 +68,4 @@ WooCommerce contains internal infrastructure code that's **not intended for use 
 
 Using internal code may cause your extension to break when WooCommerce is updated. Any code that's not internal per the above definition is public and generally safe to use.
 
-For more details, see the [Internal namespace documentation](../../../plugins/woocommerce/src/Internal/README.md).
+For more details, see the [Internal namespace documentation](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/README.md).

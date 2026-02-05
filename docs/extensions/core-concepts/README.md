@@ -15,7 +15,7 @@ WooCommerce contains both public APIs intended for extension use and internal in
 - **Internal namespace**: All classes under `Automattic\WooCommerce\Internal` are internal infrastructure.
 - **@internal annotations**: Code entities (classes, methods, hooks) marked with `@internal` in their docblocks.
 
-Using internal code may cause your extension to break when merchants update WooCommerce. See the [extension development best practices](../best-practices-extensions/extension-development-best-practices.md) and the [Internal namespace documentation](../../../plugins/woocommerce/src/Internal/README.md) for details.
+Using internal code may cause your extension to break when merchants update WooCommerce. See the [extension development best practices](../best-practices-extensions/extension-development-best-practices.md) and the [Internal namespace documentation](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/README.md) for details.
 
 ## Development patterns
 
