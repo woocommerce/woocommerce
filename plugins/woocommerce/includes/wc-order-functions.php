@@ -529,7 +529,7 @@ function wc_delete_shop_order_transients( $order = 0 ) {
 	 */
 	do_action( 'woocommerce_delete_legacy_report_transients', $order_id, true );
 }
-add_action( 'woocommerce_delete_legacy_report_transients', array( WC_Admin_Reports::class, 'delete_legacy_reports_transients'), 10, 2 );
+add_action( 'woocommerce_delete_legacy_report_transients', array( WC_Admin_Reports::class, 'delete_legacy_reports_transients' ), 10, 2 );
 
 /**
  * See if we only ship to billing addresses.
