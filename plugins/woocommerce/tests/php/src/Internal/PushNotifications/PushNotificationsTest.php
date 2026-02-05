@@ -46,6 +46,11 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 		global $wp_rest_server;
 		$wp_rest_server = null;
 
+		// Unregister the push token post type if it was registered.
+		if ( post_type_exists( PushToken::POST_TYPE ) ) {
+			unregister_post_type( PushToken::POST_TYPE );
+		}
+
 		$this->reset_container_replacements();
 		wc_get_container()->reset_all_resolved();
 
@@ -166,9 +171,22 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests that register() hooks register_post_types to init when enabled.
+	 * @testdox Tests that register() hooks on_init to init action.
 	 */
-	public function test_it_hooks_register_post_types_when_enabled() {
+	public function test_it_hooks_on_init_to_init_action() {
+		$push_notifications = new PushNotifications();
+		$push_notifications->register();
+
+		$callback_priority = has_action( 'init', array( $push_notifications, 'on_init' ) );
+
+		$this->assertTrue( (bool) $callback_priority, 'on_init should be hooked to init' );
+		$this->assertEquals( 10, $callback_priority, 'on_init should have priority 10' );
+	}
+
+	/**
+	 * @testdox Tests that on_init registers post types when enabled.
+	 */
+	public function test_on_init_registers_post_types_when_enabled() {
 		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
 
 		$this->jetpack_connection_manager_mock
@@ -177,12 +195,9 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 			->willReturn( true );
 
 		$push_notifications = new PushNotifications();
-		$push_notifications->register();
+		$push_notifications->on_init();
 
-		$callback_priority = has_action( 'init', array( $push_notifications, 'register_post_types' ) );
-
-		$this->assertTrue( (bool) $callback_priority, 'register_post_types should be hooked to init' );
-		$this->assertEquals( 10, $callback_priority, 'register_post_types should have priority 10' );
+		$this->assertTrue( post_type_exists( PushToken::POST_TYPE ), 'Push token post type should be registered' );
 	}
 
 	/**
@@ -203,18 +218,17 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests that push_token post type is not registered when disabled.
+	 * @testdox Tests that on_init does not register post types when disabled.
 	 */
-	public function test_it_does_not_register_push_token_post_type_when_disabled() {
+	public function test_on_init_does_not_register_post_types_when_disabled() {
 		$this->set_up_features_controller_mock( false );
-		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
 
 		$push_notifications = new PushNotifications();
-		$push_notifications->register();
+		$push_notifications->on_init();
 
 		$this->assertFalse(
-			has_action( 'init', array( $push_notifications, 'register_post_types' ) ),
-			'register_post_types should not be hooked to init when disabled'
+			post_type_exists( PushToken::POST_TYPE ),
+			'Push token post type should not be registered when disabled'
 		);
 	}
 

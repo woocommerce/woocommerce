@@ -110,6 +110,31 @@ class Heading_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test it removes inline margin styles (not supported in email renderer).
+	 */
+	public function testItRemovesInlineMarginStyles(): void {
+		$content                        = '<h1 style="margin-top:10px;margin-bottom:12px;">This is Heading 1</h1>';
+		$parsed_heading                 = $this->parsed_heading;
+		$parsed_heading['innerHTML']    = $content;
+		$parsed_heading['innerContent'] = array( $content );
+
+		$rendered = $this->heading_renderer->render( $content, $parsed_heading, $this->rendering_context );
+		$html     = new \WP_HTML_Tag_Processor( $rendered );
+		$html->next_tag( array( 'tag_name' => 'h1' ) );
+
+		$heading_style = $html->get_attribute( 'style' );
+		$this->assertIsString( $heading_style );
+		$this->assertStringNotContainsString( 'margin', $heading_style );
+
+		// Margin styles should also not leak to the wrapper table cell.
+		$html = new \WP_HTML_Tag_Processor( $rendered );
+		$html->next_tag( array( 'tag_name' => 'td' ) );
+		$table_cell_style = $html->get_attribute( 'style' );
+		$this->assertIsString( $table_cell_style );
+		$this->assertStringNotContainsString( 'margin', $table_cell_style );
+	}
+
+	/**
 	 * Test it uses inherited color from email_attrs when no color is specified
 	 */
 	public function testItUsesInheritedColorFromEmailAttrs(): void {

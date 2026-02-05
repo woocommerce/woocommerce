@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Products: reduce the number of SQL queries needed to construct product objects.

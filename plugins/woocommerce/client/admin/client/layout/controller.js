@@ -175,24 +175,22 @@ export const getPages = ( reports = [] ) => {
 		} );
 	}
 
-	if ( isFeatureEnabled( 'marketplace' ) ) {
-		pages.push( {
-			container: Marketplace,
-			layout: {
-				header: false,
-			},
-			path: '/extensions',
-			breadcrumbs: [
-				[ '/extensions', __( 'Extensions', 'woocommerce' ) ],
-				__( 'Extensions', 'woocommerce' ),
-			],
-			wpOpenMenu: 'toplevel_page_woocommerce',
-			capability: 'manage_woocommerce',
-			navArgs: {
-				id: 'woocommerce-marketplace',
-			},
-		} );
-	}
+	pages.push( {
+		container: Marketplace,
+		layout: {
+			header: false,
+		},
+		path: '/extensions',
+		breadcrumbs: [
+			[ '/extensions', __( 'Extensions', 'woocommerce' ) ],
+			__( 'Extensions', 'woocommerce' ),
+		],
+		wpOpenMenu: 'toplevel_page_woocommerce',
+		capability: 'manage_woocommerce',
+		navArgs: {
+			id: 'woocommerce-marketplace',
+		},
+	} );
 
 	if ( isFeatureEnabled( 'product_block_editor' ) ) {
 		const productPage = {

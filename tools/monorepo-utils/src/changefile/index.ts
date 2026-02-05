@@ -10,7 +10,6 @@ import { existsSync, readFileSync, rmSync, writeFileSync } from 'fs';
  * Internal dependencies
  */
 import { Logger } from '../core/logger';
-import { isGithubCI } from '../core/environment';
 import { cloneAuthenticatedRepo, checkoutRemoteBranch } from '../core/git';
 import {
 	getPullRequestData,
@@ -215,21 +214,6 @@ const program = new Command( 'changefile' )
 				baseDir: tmpRepoPath,
 				config: [ 'core.hooksPath=/dev/null' ],
 			} );
-
-			if ( isGithubCI() ) {
-				await git.raw(
-					'config',
-					'--global',
-					'user.email',
-					'github-actions@github.com'
-				);
-				await git.raw(
-					'config',
-					'--global',
-					'user.name',
-					'github-actions'
-				);
-			}
 
 			const shortStatus = await git.raw( [ 'status', '--short' ] );
 

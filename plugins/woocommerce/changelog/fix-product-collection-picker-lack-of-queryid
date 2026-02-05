@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Product Collection: prevent warnings if block is saved in a picker state

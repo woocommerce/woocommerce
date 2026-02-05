@@ -33,9 +33,9 @@ test.describe( 'WooCommerce Email Editor Settings Sidebar Integration', () => {
 		await ensureEmailEditorSettingsPanelIsOpened( page );
 		await expect(
 			page.locator( '.editor-post-status__toggle' )
-		).toContainText( 'Enabled' );
+		).toContainText( 'Active' );
 		await page.locator( '.editor-post-status__toggle' ).click();
-		await page.getByLabel( 'Inactive' ).click();
+		await page.getByRole( 'radio', { name: 'Inactive' } ).click();
 		await page.getByRole( 'button', { name: 'Save', exact: true } ).click();
 		await expect(
 			page.locator( '.editor-post-status__toggle' )
@@ -48,11 +48,13 @@ test.describe( 'WooCommerce Email Editor Settings Sidebar Integration', () => {
 		).toContainText( 'Inactive' );
 		// reset the email status.
 		await page.locator( '.editor-post-status__toggle' ).click();
-		await page.getByLabel( 'Enabled' ).click();
+		await page
+			.getByRole( 'radio', { name: 'Active', exact: true } )
+			.click();
 		await page.getByRole( 'button', { name: 'Save', exact: true } ).click();
 		await expect(
 			page.locator( '.editor-post-status__toggle' )
-		).toContainText( 'Enabled' );
+		).toContainText( 'Active' );
 	} );
 
 	test( 'Can update email subject and preview text', async ( { page } ) => {
