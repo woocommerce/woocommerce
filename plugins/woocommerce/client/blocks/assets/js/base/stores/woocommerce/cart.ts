@@ -259,15 +259,18 @@ type VariationInput = CartVariationItem[] | Record<string, unknown> | null | und
 function normalizeVariation(variation: VariationInput): string {
     if (!variation) return "";
     try {
-        const entries = Array.isArray(variation)
-            ? variation.map((attr, index) => [String(index), attr]) // fallback for array
+        const pairs = Array.isArray(variation)
+            ? variation.map((attr) => {
+                  const a = attr as { attribute?: unknown; raw_attribute?: unknown; value?: unknown };
+                  return [String(a.attribute ?? a.raw_attribute ?? ''), a.value];
+              })
             : Object.entries(variation);
 
-        const normalized = entries
+        const normalized = pairs
             .filter(([, value]) => value != null)
             .map(([attribute, value]) => ({
-                attribute: attribute.toString(),
-                value: String(value).toLowerCase(),
+                attribute: String(attribute ?? ''),
+                value: value == null ? '' : String(value).toLowerCase(),
             }))
             .sort((a, b) => a.attribute.localeCompare(b.attribute));
         return JSON.stringify(normalized);
@@ -423,22 +426,17 @@ const { state, actions } = store< Store >(
              * @param {string} key - The cart item key to remove.
              */
             *removeCartItem(key: string) {
-                // Find the item being removed (by key)
                 const removedItem = state.cart.items.find(i => i.key === key);
 
-                // 1. Optimistic UI Update
+                // Optimistic UI Update
                 state.cart.items = state.cart.items.filter((t) => t.key !== key);
 
-                // Cancel pending adds/updates for the same item (including optimistic ones without key)
                 if (removedItem) {
                     const queueKey = makeQueueKey(removedItem);
-
-                    // Cancel from addQueue and updateQueue
                     addQueue.delete(queueKey);
                     updateQueue.delete(queueKey);
                 }
 
-                // Enqueue delete only if it had a key (real server item)
                 if (key) {
                     deleteQueue.add(key);
                 }
@@ -454,7 +452,6 @@ const { state, actions } = store< Store >(
             *addCartItem(
                 { id, key, quantity, variation }: ClientCartItem
             ) {
-                // Cancel deletion if re-adding the same item
                 if (key && deleteQueue.has(key)) deleteQueue.delete(key);
 
                 let item = state.cart.items.find( ( cartItem ) => {
@@ -475,21 +472,22 @@ const { state, actions } = store< Store >(
                     return key ? key === cartItem.key : id === cartItem.id;
                 } );
                 
-                let actionType = item ? "update-item" : "add-item";
+                const hasServerKey = Boolean(item?.key);
+                let actionType = item && hasServerKey ? "update-item" : "add-item";
                 let payload = item ? { ...item, quantity } : { id, quantity, type: variation ? 'variation' : 'simple', ...(variation && { variation }) };
                 let queueKey = makeQueueKey(payload);
 
-                // Optimistic UI Update
                 if (item) {
                     item.quantity = quantity;
                 } else {
                     state.cart.items.push(payload);
                 }
 
-                // Queue Management
                 if (actionType === "update-item") {
+                    addQueue.delete(queueKey);
                     updateQueue.set(queueKey, payload);
                 } else {
+                    updateQueue.delete(queueKey);
                     addQueue.set(queueKey, payload);
                 }
 
@@ -519,8 +517,10 @@ const { state, actions } = store< Store >(
                     });
                     const queueKey = existingItem?.key ?? makeQueueKey(itemData);
                     
-                    if (existingItem) {
+                    const hasServerKey = Boolean(existingItem?.key);
+                    if (existingItem && hasServerKey) {
                         existingItem.quantity = itemData.quantity;
+                        addQueue.delete(queueKey);
                         updateQueue.set(queueKey, existingItem);
                     } else {
                         const newItem = {
@@ -529,8 +529,13 @@ const { state, actions } = store< Store >(
                             type: itemData.variation ? 'variation' : 'simple',
                             ...(itemData.variation && { variation: itemData.variation }),
                         };
-                        state.cart.items.push(newItem);
-                        addQueue.set(queueKey, newItem);
+                        if (existingItem) {
+                            existingItem.quantity = itemData.quantity;
+                            updateQueue.delete(queueKey);
+                        } else {
+                            state.cart.items.push(newItem);
+                        }
+                        addQueue.set(queueKey, existingItem ?? newItem);
                     }
                 });
                 scheduleCollectiveSync();
@@ -564,20 +569,25 @@ const { state, actions } = store< Store >(
 
                 let remainingSlots = MAX_BATCH_SIZE;
 
-                // Combined slicing: take items until total MAX_BATCH_SIZE
                 const processDeletes = currentDeletes.slice(0, remainingSlots);
                 remainingSlots -= processDeletes.length;
                 const remainderDeletes = currentDeletes.slice(processDeletes.length);
-                remainderDeletes.forEach(item => deleteQueue.add(item));
+                remainderDeletes.forEach((item) => {
+                    deleteQueue.add(item);
+                });
 
                 const processUpdates = currentUpdates.slice(0, remainingSlots);
                 remainingSlots -= processUpdates.length;
                 const remainderUpdates = currentUpdates.slice(processUpdates.length);
-                remainderUpdates.forEach(([key, item]) => updateQueue.set(key, item));
+                remainderUpdates.forEach(([key, item]) => {
+                    updateQueue.set(key, item);
+                });
 
                 const processAdds = currentAdds.slice(0, remainingSlots);
                 const remainderAdds = currentAdds.slice(processAdds.length);
-                remainderAdds.forEach(([key, item]) => addQueue.set(key, item));
+                remainderAdds.forEach(([key, item]) => {
+                    addQueue.set(key, item);
+                });
 
                 // BUILDING REQUESTS
                 processDeletes.forEach(key => {
@@ -611,7 +621,6 @@ const { state, actions } = store< Store >(
                 });
 
                 try {
-                    // Determine intent for URL naming (DevTools clarity)
                     let intent = "mixedCart";
                     if (processDeletes.length > 0 && processUpdates.length === 0 && processAdds.length === 0) intent = "removeCart";
                     else if (processDeletes.length === 0 && processUpdates.length > 0 && processAdds.length === 0) intent = "updateCart";
@@ -627,21 +636,23 @@ const { state, actions } = store< Store >(
 
                     if (isApiErrorResponse(batchResponse, data)) throw generateError(data);
 
-                    // RACE CONDITION PROTECTION
                     if (_currentId !== _requestCounter) {
-                        // Stale response: Re-queue everything to prevent data loss
-                        processDeletes.forEach(k => { deleteQueue.add(k); });
-                        processUpdates.forEach(([k, i]) => { updateQueue.set(k, i); });
-                        processAdds.forEach(([k, i]) => { addQueue.set(k, i); });
+                        processDeletes.forEach((k) => {
+                            deleteQueue.add(k);
+                        });
+                        processUpdates.forEach(([k, i]) => {
+                            updateQueue.set(k, i);
+                        });
+                        processAdds.forEach(([k, i]) => {
+                            addQueue.set(k, i);
+                        });
                         return;
                     }
 
-                    // RESPONSE HANDLING & ERROR RECOVERY
                     const responses = Array.isArray(data.responses) ? data.responses : [];
                     let hasErrors = false;
                     let finalCartState = state.cart; 
 
-                    // Find the last successful body to update the cart state
                     for (let i = responses.length - 1; i >= 0; i--) {
                         if (responses[i].status >= 200 && responses[i].status < 300 && responses[i].body) {
                             finalCartState = responses[i].body;
@@ -649,13 +660,11 @@ const { state, actions } = store< Store >(
                         }
                     }
 
-                    // Analyze individual responses to handle partial failures
                     responses.forEach((res, index) => {
                         const meta = requestMap.get(index);
                         if (!meta) return;
                         if (res.status >= 400) {
                             hasErrors = true;
-                            // Re-queue failed operation to the correct queue
                             if (meta.type === 'remove') {
                                 deleteQueue.add(meta.key);
                             } else if (meta.type === 'update' || meta.type === 'add') {
@@ -665,7 +674,6 @@ const { state, actions } = store< Store >(
                         }
                     });
 
-                    // Update State
                     applyServerState(finalCartState);
                     reapplyOptimisticState();
 
@@ -674,28 +682,26 @@ const { state, actions } = store< Store >(
                     }
 
                 } catch (err) {
-                    // NETWORK ERROR HANDLING
                     if (_currentId === _requestCounter) {
                         actions.showNoticeError(err as Error);
-                        // Re-queue everything as network state is uncertain
-                        processDeletes.forEach(k => { deleteQueue.add(k); });
-                        processUpdates.forEach(([k, i]) => { updateQueue.set(k, i); });
-                        processAdds.forEach(([k, i]) => { addQueue.set(k, i); });
+                        processDeletes.forEach((k) => {
+                            deleteQueue.add(k);
+                        });
+                        processUpdates.forEach(([k, i]) => {
+                            updateQueue.set(k, i);
+                        });
+                        processAdds.forEach(([k, i]) => {
+                            addQueue.set(k, i);
+                        });
                         yield actions.refreshCartItems();
                     }
                 } finally {
                     isProcessing = false;
-                    // If new clicks accumulated while processing (or re-queued items exist), trigger next cycle
                     if (deleteQueue.size > 0 || updateQueue.size > 0 || addQueue.size > 0) {
                         setTimeout(() => actions.processCollectiveActions(), 50);
                     }
                 }
             },
-            /**
-             * Refreshes the cart items from the server.
-             * 
-             * @yield {Generator} Handles the refresh process asynchronously.
-             */
             *refreshCartItems() {
                 if (pendingRefresh) return;
                 pendingRefresh = true;
@@ -733,12 +739,6 @@ const { state, actions } = store< Store >(
                     pendingRefresh = false;
                 }
             },
-            /**
-             * Shows an error notice based on the provided error.
-             * 
-             * @param {Error | ApiErrorResponse} error - The error to display.
-             * @yield {Generator} Handles notice addition asynchronously.
-             */
             *showNoticeError( error: Error | ApiErrorResponse ) {
                 yield import( '@woocommerce/stores/store-notices' );
                 const { actions: noticeActions } = store< StoreNotices >(
@@ -762,13 +762,6 @@ const { state, actions } = store< Store >(
 
                 console.error( error );
             },
-            /**
-             * Updates notices in the store-notices.
-             * 
-             * @param {Notice[]} newNotices - Array of new notices to add.
-             * @param {boolean} removeOthers - Whether to remove existing notices.
-             * @yield {Generator} Handles notice updates asynchronously.
-             */
             *updateNotices( newNotices: Notice[] = [], removeOthers = false ) {
                 yield import( '@woocommerce/stores/store-notices' );
                 const { state: noticeState, actions: noticeActions } =
