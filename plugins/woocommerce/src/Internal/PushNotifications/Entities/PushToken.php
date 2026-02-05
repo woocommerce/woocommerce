@@ -132,7 +132,7 @@ class PushToken {
 	 * @param array $data Optional array with keys: id, user_id, token, device_uuid, platform, origin.
 	 * @throws PushTokenInvalidDataException If any of the provided values fail validation.
 	 *
-	 * @since 10.4.0
+	 * @since 10.6.0
 	 */
 	public function __construct( array $data = array() ) {
 		if ( array_key_exists( 'id', $data ) ) {
