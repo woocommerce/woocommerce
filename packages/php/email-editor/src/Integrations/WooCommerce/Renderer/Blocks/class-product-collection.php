@@ -137,7 +137,7 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 		$gap          = 20;
 
 		// Guard against zero or very small layout width to ensure $cell_width is always positive.
-		if ( $layout_width <= $gap ) {
+		if ( $layout_width < $gap + 2 ) {
 			$layout_width = $gap + 2;
 		}
 
