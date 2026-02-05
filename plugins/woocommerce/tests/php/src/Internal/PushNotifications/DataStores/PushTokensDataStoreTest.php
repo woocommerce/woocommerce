@@ -6,8 +6,8 @@ namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\DataStores;
 
 use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataStore;
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
-use Exception;
-use InvalidArgumentException;
+use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenInvalidDataException;
+use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenNotFoundException;
 use WC_Unit_Test_Case;
 
 /**
@@ -142,7 +142,7 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$push_token->set_user_id( 1 );
 		$push_token->set_token( 'test_token' );
 
-		$this->expectException( InvalidArgumentException::class );
+		$this->expectException( PushTokenInvalidDataException::class );
 		$this->expectExceptionMessage( 'Can\'t create push token because the push token data provided is invalid.' );
 
 		$data_store->create( $push_token );
@@ -157,7 +157,7 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 
 		$push_token = new PushToken();
 
-		$this->expectException( InvalidArgumentException::class );
+		$this->expectException( PushTokenInvalidDataException::class );
 		$this->expectExceptionMessage( 'Can\'t read push token because the push token data provided is invalid.' );
 
 		$data_store->read( $push_token );
@@ -173,7 +173,7 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$push_token = new PushToken();
 		$push_token->set_id( 999999 );
 
-		$this->expectException( Exception::class );
+		$this->expectException( PushTokenNotFoundException::class );
 		$this->expectExceptionMessage( 'Push token could not be found.' );
 
 		$data_store->read( $push_token );
@@ -197,7 +197,7 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$push_token = new PushToken();
 		$push_token->set_id( $post_id );
 
-		$this->expectException( Exception::class );
+		$this->expectException( PushTokenNotFoundException::class );
 		$this->expectExceptionMessage( 'Push token could not be found.' );
 
 		$data_store->read( $push_token );
@@ -226,7 +226,7 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$push_token = new PushToken();
 		$push_token->set_id( $post_id );
 
-		$this->expectException( InvalidArgumentException::class );
+		$this->expectException( PushTokenInvalidDataException::class );
 		$this->expectExceptionMessage( 'Can\'t read push token because the push token record is malformed.' );
 
 		$data_store->read( $push_token );
@@ -243,7 +243,7 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$push_token->set_id( 1 );
 		$push_token->set_user_id( 1 );
 
-		$this->expectException( InvalidArgumentException::class );
+		$this->expectException( PushTokenInvalidDataException::class );
 		$this->expectExceptionMessage( 'Can\'t update push token because the push token data provided is invalid.' );
 
 		$data_store->update( $push_token );
@@ -264,7 +264,7 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$push_token->set_device_uuid( 'device-uuid' );
 		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
 
-		$this->expectException( Exception::class );
+		$this->expectException( PushTokenNotFoundException::class );
 		$this->expectExceptionMessage( 'Push token could not be found.' );
 
 		$data_store->update( $push_token );
@@ -293,7 +293,7 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$push_token->set_device_uuid( 'device-uuid' );
 		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
 
-		$this->expectException( Exception::class );
+		$this->expectException( PushTokenNotFoundException::class );
 		$this->expectExceptionMessage( 'Push token could not be found.' );
 
 		$data_store->update( $push_token );
@@ -307,7 +307,7 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$data_store = new PushTokensDataStore();
 		$push_token = new PushToken();
 
-		$this->expectException( InvalidArgumentException::class );
+		$this->expectException( PushTokenInvalidDataException::class );
 		$this->expectExceptionMessage( 'Can\'t delete push token because the push token data provided is invalid.' );
 
 		$data_store->delete( $push_token );
@@ -331,7 +331,7 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$push_token = new PushToken();
 		$push_token->set_id( $post_id );
 
-		$this->expectException( Exception::class );
+		$this->expectException( PushTokenNotFoundException::class );
 		$this->expectExceptionMessage( 'Push token could not be found.' );
 
 		$data_store->delete( $push_token );
@@ -551,7 +551,7 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$push_token->set_token( 'test_token' );
 		$push_token->set_device_uuid( 'test_device' );
 
-		$this->expectException( InvalidArgumentException::class );
+		$this->expectException( PushTokenInvalidDataException::class );
 		$this->expectExceptionMessage( 'Can\'t retrieve push token because the push token data provided is invalid.' );
 
 		$data_store->get_by_token_or_device_id( $push_token );
@@ -570,7 +570,7 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$push_token->set_token( 'test_token' );
 		$push_token->set_device_uuid( 'test_device' );
 
-		$this->expectException( InvalidArgumentException::class );
+		$this->expectException( PushTokenInvalidDataException::class );
 		$this->expectExceptionMessage( 'Can\'t retrieve push token because the push token data provided is invalid.' );
 
 		$data_store->get_by_token_or_device_id( $push_token );
@@ -589,7 +589,7 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$push_token->set_token( 'test_token' );
 		$push_token->set_device_uuid( 'test_device' );
 
-		$this->expectException( InvalidArgumentException::class );
+		$this->expectException( PushTokenInvalidDataException::class );
 		$this->expectExceptionMessage( 'Can\'t retrieve push token because the push token data provided is invalid.' );
 
 		$data_store->get_by_token_or_device_id( $push_token );
@@ -607,7 +607,7 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$push_token->set_platform( PushToken::PLATFORM_APPLE );
 		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
 
-		$this->expectException( InvalidArgumentException::class );
+		$this->expectException( PushTokenInvalidDataException::class );
 		$this->expectExceptionMessage( 'Can\'t retrieve push token because the push token data provided is invalid.' );
 
 		$data_store->get_by_token_or_device_id( $push_token );

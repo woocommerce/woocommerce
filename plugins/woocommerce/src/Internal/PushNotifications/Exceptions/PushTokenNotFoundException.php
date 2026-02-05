@@ -9,7 +9,7 @@ namespace Automattic\WooCommerce\Internal\PushNotifications\Exceptions;
 
 defined( 'ABSPATH' ) || exit;
 
-use Exception;
+use WC_Data_Exception;
 use WP_Http;
 
 /**
@@ -17,11 +17,17 @@ use WP_Http;
  *
  * @since 10.5.0
  */
-class PushTokenNotFoundException extends Exception {
+class PushTokenNotFoundException extends WC_Data_Exception {
 	/**
-	 * Default exception message.
+	 * Constructor.
 	 *
-	 * @var string
+	 * @since 10.6.0
 	 */
-	protected $message = 'Push token could not be found.';
+	public function __construct() {
+		parent::__construct(
+			'woocommerce_invalid_push_token',
+			'Push token could not be found.',
+			WP_Http::NOT_FOUND
+		);
+	}
 }

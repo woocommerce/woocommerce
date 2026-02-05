@@ -10,14 +10,14 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Internal\FraudProtection;
 
 use Automattic\WooCommerce\Internal\FraudProtection\PaymentMethodEventTracker;
-use Automattic\WooCommerce\RestApi\UnitTests\LoggerSpyTrait;
+use Automattic\WooCommerce\Internal\FraudProtection\SessionDataCollector;
 
 /**
  * Tests for the PaymentMethodEventTracker class.
+ *
+ * @covers \Automattic\WooCommerce\Internal\FraudProtection\PaymentMethodEventTracker
  */
 class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
-
-	use LoggerSpyTrait;
 
 	/**
 	 * The System Under Test.
@@ -27,11 +27,11 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 	private $sut;
 
 	/**
-	 * Mock fraud protection dispatcher.
+	 * Mock session data collector.
 	 *
-	 * @var \Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionDispatcher|\PHPUnit\Framework\MockObject\MockObject
+	 * @var SessionDataCollector|\PHPUnit\Framework\MockObject\MockObject
 	 */
-	private $mock_dispatcher;
+	private $mock_collector;
 
 	/**
 	 * Setup test.
@@ -39,52 +39,37 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		// Set jetpack_activation_source option to prevent "Cannot use bool as array" error
-		// in Jetpack Connection Manager's apply_activation_source_to_args method.
-		update_option( 'jetpack_activation_source', array( '', '' ) );
+		// Create mock.
+		$this->mock_collector = $this->createMock( SessionDataCollector::class );
 
-		// Enable the fraud protection feature.
-		update_option( 'woocommerce_feature_fraud_protection_enabled', 'yes' );
-
-		$container = wc_get_container();
-		$container->reset_all_resolved();
-
-		$this->sut = $container->get( PaymentMethodEventTracker::class );
+		// Create system under test with mock.
+		$this->sut = new PaymentMethodEventTracker();
+		$this->sut->init( $this->mock_collector );
 	}
 
 	/**
-	 * Test add payment method page loaded event tracking.
+	 * Test add payment method page loaded collects data.
 	 *
-	 * @testdox Should track add payment method page loaded event.
+	 * @testdox track_add_payment_method_page_loaded() collects session data with empty event data.
 	 */
-	public function test_track_add_payment_method_page_loaded_dispatches_event(): void {
-		// Create mock dispatcher.
-		$this->mock_dispatcher = $this->createMock( \Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionDispatcher::class );
-
-		// Create system under test with mock dispatcher.
-		$sut = new PaymentMethodEventTracker();
-		$sut->init( $this->mock_dispatcher );
-
-		// Mock dispatcher to verify event is dispatched with empty event data.
-		$this->mock_dispatcher
+	public function test_track_add_payment_method_page_loaded_collects_data(): void {
+		$this->mock_collector
 			->expects( $this->once() )
-			->method( 'dispatch_event' )
+			->method( 'collect' )
 			->with(
 				$this->equalTo( 'add_payment_method_page_loaded' ),
 				$this->equalTo( array() )
 			);
 
-		// Call the method.
-		$sut->track_add_payment_method_page_loaded();
+		$this->sut->track_add_payment_method_page_loaded();
 	}
 
 	/**
-	 * Test payment method added event tracking.
+	 * Test payment method added collects data.
 	 *
-	 * @testdox Should track payment method added event.
+	 * @testdox track_payment_method_added() collects session data with token details.
 	 */
-	public function test_handle_payment_method_added(): void {
-
+	public function test_track_payment_method_added_collects_data(): void {
 		$user_id = $this->factory->user->create();
 
 		$token = new \WC_Payment_Token_CC();
@@ -97,37 +82,70 @@ class PaymentMethodEventTrackerTest extends \WC_Unit_Test_Case {
 		$token->set_user_id( $user_id );
 		$token->save();
 
-		// Verify that the event was sent to the API with correct payload.
-		$this->assertLogged(
-			'info',
-			'Sending fraud protection event: payment_method_added',
-			array(
-				'source'  => 'woo-fraud-protection',
-				'payload' => array(
-					'event_type' => 'payment_method_added',
-					'event_data' => array(
-						'action'     => 'added',
-						'token_id'   => $token->get_id(),
-						'gateway_id' => 'stripe',
-						'card_type'  => 'visa',
-						'card_last4' => '4242',
-					),
-				),
-			)
-		);
+		$this->mock_collector
+			->expects( $this->once() )
+			->method( 'collect' )
+			->with(
+				$this->equalTo( 'payment_method_added' ),
+				$this->callback(
+					function ( $event_data ) use ( $token ) {
+						$this->assertArrayHasKey( 'action', $event_data );
+						$this->assertEquals( 'added', $event_data['action'] );
+						$this->assertArrayHasKey( 'token_id', $event_data );
+						$this->assertEquals( $token->get_id(), $event_data['token_id'] );
+						$this->assertArrayHasKey( 'token_type', $event_data );
+						$this->assertArrayHasKey( 'gateway_id', $event_data );
+						$this->assertEquals( 'stripe', $event_data['gateway_id'] );
+						$this->assertArrayHasKey( 'card_type', $event_data );
+						$this->assertEquals( 'visa', $event_data['card_type'] );
+						$this->assertArrayHasKey( 'card_last4', $event_data );
+						$this->assertEquals( '4242', $event_data['card_last4'] );
+						return true;
+					}
+				)
+			);
+
+		$this->sut->track_payment_method_added( $token->get_id(), $token );
+
+		$token->delete();
 	}
 
 	/**
-	 * Cleanup after test.
+	 * Test payment method added includes expiry for CC tokens.
+	 *
+	 * @testdox track_payment_method_added() includes expiry info for CC tokens.
 	 */
-	public function tearDown(): void {
-		parent::tearDown();
+	public function test_track_payment_method_added_includes_expiry_for_cc_tokens(): void {
+		$user_id = $this->factory->user->create();
 
-		// Clean up options.
-		delete_option( 'woocommerce_feature_fraud_protection_enabled' );
-		delete_option( 'jetpack_activation_source' );
+		$token = new \WC_Payment_Token_CC();
+		$token->set_token( 'test_token_456' );
+		$token->set_gateway_id( 'stripe' );
+		$token->set_card_type( 'mastercard' );
+		$token->set_last4( '5555' );
+		$token->set_expiry_month( '06' );
+		$token->set_expiry_year( '2028' );
+		$token->set_user_id( $user_id );
+		$token->save();
 
-		// Reset container.
-		wc_get_container()->reset_all_resolved();
+		$this->mock_collector
+			->expects( $this->once() )
+			->method( 'collect' )
+			->with(
+				$this->equalTo( 'payment_method_added' ),
+				$this->callback(
+					function ( $event_data ) {
+						$this->assertArrayHasKey( 'expiry_month', $event_data );
+						$this->assertEquals( '06', $event_data['expiry_month'] );
+						$this->assertArrayHasKey( 'expiry_year', $event_data );
+						$this->assertEquals( '2028', $event_data['expiry_year'] );
+						return true;
+					}
+				)
+			);
+
+		$this->sut->track_payment_method_added( $token->get_id(), $token );
+
+		$token->delete();
 	}
 }
