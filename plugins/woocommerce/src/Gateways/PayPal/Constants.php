@@ -206,4 +206,13 @@ class Constants {
 	 * @since 10.5.0
 	 */
 	public const PAYPAL_ORDER_META_PAYMENT_SOURCE = '_paypal_payment_source';
+
+	/**
+	 * Meta key for storing PayPal shipping callback token in order meta.
+	 *
+	 * @var string
+	 *
+	 * @since 10.5.0
+	 */
+	public const PAYPAL_ORDER_META_SHIPPING_CALLBACK_TOKEN = '_paypal_shipping_callback_token';
 }

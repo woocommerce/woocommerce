@@ -185,7 +185,7 @@ if ( ! class_exists( 'WC_Email_Customer_Cancelled_Order', false ) ) :
 					'title'   => __( 'Enable/Disable', 'woocommerce' ),
 					'type'    => 'checkbox',
 					'label'   => __( 'Enable this email notification', 'woocommerce' ),
-					'default' => 'no',
+					'default' => $this->block_email_editor_enabled ? 'yes' : 'no',
 				),
 				'subject'            => array(
 					'title'       => __( 'Subject', 'woocommerce' ),

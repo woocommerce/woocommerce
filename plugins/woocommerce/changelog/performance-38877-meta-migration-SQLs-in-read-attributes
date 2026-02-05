@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Performance: optimize attribute meta migration for variable products, addressing edge cases found in older setups.

@@ -51,28 +51,79 @@ class SessionDataCollector {
 	 * @since 10.5.0
 	 *
 	 * @param string|null $event_type Optional event type identifier (e.g., 'checkout_started', 'payment_attempt').
-	 * @param array       $event_data Optional event-specific additional context data (may include 'order_id').
-	 * @return array Nested array containing all collected fraud protection data.
+	 * @param array       $event_data Optional event-specific additional context data.
 	 */
-	public function collect( ?string $event_type = null, array $event_data = array() ): array {
+	public function collect( ?string $event_type = null, array $event_data = array() ): void {
 		// Ensure cart and session are loaded.
 		$this->session_clearance_manager->ensure_cart_loaded();
 
-		// Extract order ID from event_data if provided.
-		// There seem to be no universal way to get order id from session data, so we may start with passing it as a parameter when calling this method.
-		$order_id_from_event = $event_data['order_id'] ?? null;
+		$data = array(
+			'event_type' => $event_type,
+			'timestamp'  => gmdate( 'Y-m-d H:i:s' ),
+			'event_data' => $event_data,
+		);
 
-		return array(
-			'event_type'       => $event_type,
-			'timestamp'        => gmdate( 'Y-m-d H:i:s' ),
+		// Save the collected data in the session for fraud analysis tracking, preserving multiple calls.
+		if ( WC()->session instanceof \WC_Session ) {
+			// Retrieve existing data array or initialize if not present.
+			$collected_data = WC()->session->get( 'fraud_protection_collected_data' );
+			if ( ! is_array( $collected_data ) ) {
+				$collected_data = array();
+			}
+			$collected_data[] = $data;
+			$collected_data   = $this->trim_to_max_size( $collected_data );
+			WC()->session->set( 'fraud_protection_collected_data', $collected_data );
+		} else {
+			FraudProtectionController::log(
+				'error',
+				'Attempted to save fraud protection data, but no valid WooCommerce session exists.',
+				array(
+					'context'    => 'SessionDataCollector::collect',
+					'event_type' => $event_type,
+					'event_data' => $event_data,
+				)
+			);
+		}
+	}
+
+	/**
+	 * Get all collected fraud protection data from the session.
+	 *
+	 * Retrieves the array of collected event data stored during this session.
+	 * Returns an empty array if no data has been collected or session is unavailable.
+	 *
+	 * @since 10.5.0
+	 *
+	 * @param int|null $order_id Optional order ID to include order data in the response.
+	 * @return array Array of collected fraud protection event data.
+	 */
+	public function get_collected_data( ?int $order_id = null ): array {
+		$data = array(
 			'wc_version'       => WC()->version,
 			'session'          => $this->get_session_data(),
 			'customer'         => $this->get_customer_data(),
-			'order'            => $this->get_order_data( $order_id_from_event ),
+			'order'            => array(),
 			'shipping_address' => $this->get_shipping_address(),
 			'billing_address'  => $this->get_billing_address(),
-			'event_data'       => $event_data,
+			'collected_events' => array(),
 		);
+
+		if ( $order_id ) {
+			$data['order'] = $this->get_order_data( $order_id );
+		}
+
+		// Calculate base data size to ensure total response stays under limit.
+		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize -- Used for size calculation only.
+		$base_size = strlen( serialize( $data ) );
+
+		if ( WC()->session instanceof \WC_Session ) {
+			$collected_data = WC()->session->get( 'fraud_protection_collected_data' );
+			if ( is_array( $collected_data ) ) {
+				$data['collected_events'] = $this->trim_to_max_size( $collected_data, $base_size );
+			}
+		}
+
+		return $data;
 	}
 
 	/**
@@ -603,5 +654,33 @@ class SessionDataCollector {
 			$terms
 		);
 		return implode( ', ', $category_names );
+	}
+
+	/**
+	 * Trim collected data array to ensure it stays within 1 MB size limit.
+	 *
+	 * Removes oldest entries from the array until the serialized size is under the limit.
+	 * Always keeps at least one entry (the most recent).
+	 *
+	 * @since 10.5.0
+	 *
+	 * @param array $data      Array of collected event data.
+	 * @param int   $base_size Size in bytes of additional data that will be combined with this array.
+	 * @return array Trimmed array that fits within the size limit.
+	 */
+	private function trim_to_max_size( array $data, int $base_size = 0 ): array {
+		$max_size_bytes = 1 * 1024 * 1024 - $base_size; // 1 MB minus base data size.
+		$data_count     = count( $data );
+		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize -- Used for size calculation only.
+		$data_size = strlen( serialize( $data ) );
+
+		while ( $data_count > 1 && $data_size > $max_size_bytes ) {
+			array_shift( $data );
+			$data_count = count( $data );
+			// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize -- Used for size calculation only.
+			$data_size = strlen( serialize( $data ) );
+		}
+
+		return $data;
 	}
 }

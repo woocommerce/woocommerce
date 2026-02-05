@@ -19173,7 +19173,7 @@ parameters:
 		-
 			message: '#^Call to an undefined method WC_Product\:\:get_variation_prices\(\)\.$#'
 			identifier: method.notFound
-			count: 1
+			count: 2
 			path: includes/class-wc-structured-data.php
 
 		-
@@ -44712,13 +44712,7 @@ parameters:
 		-
 			message: '#^Call to method get_param\(\) on an unknown class Automattic\\WooCommerce\\Admin\\API\\WP_REST_Request\.$#'
 			identifier: class.notFound
-			count: 15
-			path: src/Admin/API/Notes.php
-
-		-
-			message: '#^Cannot call method get_name\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|true\.$#'
-			identifier: method.nonObject
-			count: 1
+			count: 13
 			path: src/Admin/API/Notes.php
 
 		-
@@ -58648,12 +58642,6 @@ parameters:
 			path: src/Blocks/BlockTypes/OrderConfirmation/Downloads.php
 
 		-
-			message: '#^Function get_transient invoked with 2 parameters, 1 required\.$#'
-			identifier: arguments.count
-			count: 1
-			path: src/Blocks/BlockTypes/OrderConfirmation/DownloadsWrapper.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\OrderConfirmation\\DownloadsWrapper\:\:enqueue_data\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -61020,12 +61008,6 @@ parameters:
 		-
 			message: '#^Callback expects 1 parameter, \$accepted_args is set to 2\.$#'
 			identifier: arguments.count
-			count: 1
-			path: src/Blocks/BlockTypesController.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypesController\:\:delete_product_transients\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: src/Blocks/BlockTypesController.php
 
@@ -77573,6 +77555,12 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Internal/StockNotifications/StockSyncController.php
+
+		-
+			message: '#^Trait Automattic\\WooCommerce\\Internal\\Traits\\AccessiblePrivateMethods is used zero times and is not analysed\.$#'
+			identifier: trait.unused
+			count: 1
+			path: src/Internal/Traits/AccessiblePrivateMethods.php
 
 		-
 			message: '#^Cannot call method format\(\) on DateTime\|false\.$#'

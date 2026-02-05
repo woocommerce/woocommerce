@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Add additional validation in the PayPal Standard shipping callback method.

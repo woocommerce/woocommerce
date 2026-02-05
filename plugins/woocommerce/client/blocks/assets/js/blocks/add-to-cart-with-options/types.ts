@@ -6,8 +6,6 @@ import {
 	VariationData,
 } from '@woocommerce/stores/woocommerce/cart';
 
-export type QuantitySelectorStyleProps = 'input' | 'stepper';
-
 export interface Attributes {
 	className?: string;
 }
