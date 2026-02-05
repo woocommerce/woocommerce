@@ -136,10 +136,7 @@ export function createClient( baseURL: string, auth: Auth ): ApiClient {
 	 * @param label   - Log label
 	 * @param details - Details to log
 	 */
-	function logRequest(
-		label: string,
-		details: Record< string, unknown >
-	) {
+	function logRequest( label: string, details: Record< string, unknown > ) {
 		const redacted = Object.fromEntries(
 			Object.entries( details ).map( ( [ k, v ] ) => [
 				k,
