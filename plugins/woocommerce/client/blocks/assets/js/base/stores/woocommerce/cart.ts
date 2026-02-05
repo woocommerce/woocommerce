@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { __ } from '@wordpress/i18n';
 import { getConfig, store } from '@wordpress/interactivity';
 import { doesCartItemMatchAttributes } from '../../utils/variations/does-cart-item-match-attributes';
 import type {
@@ -652,9 +653,9 @@ const { state, actions } = store< Store >(
                     applyServerState(finalCartState);
                     reapplyOptimisticState();
 
-                    if (hasErrors) {
-                        actions.showNoticeError(new Error("Some items failed to update. Please refresh or try again."));
-                    }
+					if (hasErrors) {
+					    actions.showNoticeError(new Error(__('Some items failed to update. Please refresh or try again.', 'woocommerce')));
+					}
 
                 } catch (err) {
                     // NETWORK ERROR HANDLING
