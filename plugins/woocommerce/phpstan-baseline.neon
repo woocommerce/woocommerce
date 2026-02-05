@@ -19173,7 +19173,7 @@ parameters:
 		-
 			message: '#^Call to an undefined method WC_Product\:\:get_variation_prices\(\)\.$#'
 			identifier: method.notFound
-			count: 1
+			count: 2
 			path: includes/class-wc-structured-data.php
 
 		-
