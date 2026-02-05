@@ -43,7 +43,7 @@ class WC_Admin_Reports {
 			// Schedule the deletion, but don't bind to a specific order so the single action is scheduled at any given moment.
 			$scheduled = as_has_scheduled_action( 'woocommerce_delete_legacy_report_transients' );
 			if ( ! $scheduled ) {
-				as_schedule_single_action( time() + 5, 'woocommerce_delete_legacy_report_transients', array( $order_id, false ), 'woocommerce' );
+				as_schedule_single_action( time() + MINUTE_IN_SECONDS, 'woocommerce_delete_legacy_report_transients', array( $order_id, false ), 'woocommerce' );
 			}
 			return;
 		}
