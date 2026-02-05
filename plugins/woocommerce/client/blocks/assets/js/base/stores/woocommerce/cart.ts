@@ -150,7 +150,7 @@ function isApiErrorResponse(
  * @return {Error} The generated Error object with code and message.
  */
 function generateError( error: ApiErrorResponse ): Error {
-    return Object.assign( new Error( error.message || 'Unknown error.' ), {
+    return Object.assign( new Error( error.message || __( 'Unknown error.', 'woocommerce' ) ), {
         code: error.code || 'unknown_error',
     } );
 }
@@ -259,16 +259,16 @@ type VariationInput = CartVariationItem[] | Record<string, unknown> | null | und
 function normalizeVariation(variation: VariationInput): string {
     if (!variation) return "";
     try {
-        const arr: unknown[] = Array.isArray(variation) ? variation.slice() : Object.values(variation);
-        const normalized = arr
-            .filter(Boolean)
-            .map((attr) => {
-                const a = attr as { attribute?: unknown; value?: unknown };
-                return {
-                    attribute: (a.attribute || "").toString(),
-                    value: a.value == null ? "" : String(a.value).toLowerCase(),
-                };
-            })
+        const entries = Array.isArray(variation)
+            ? variation.map((attr, index) => [String(index), attr]) // fallback for array
+            : Object.entries(variation);
+
+        const normalized = entries
+            .filter(([, value]) => value != null)
+            .map(([attribute, value]) => ({
+                attribute: attribute.toString(),
+                value: String(value).toLowerCase(),
+            }))
             .sort((a, b) => a.attribute.localeCompare(b.attribute));
         return JSON.stringify(normalized);
     } catch (err) {
@@ -423,15 +423,26 @@ const { state, actions } = store< Store >(
              * @param {string} key - The cart item key to remove.
              */
             *removeCartItem(key: string) {
+                // Find the item being removed (by key)
+                const removedItem = state.cart.items.find(i => i.key === key);
+
                 // 1. Optimistic UI Update
                 state.cart.items = state.cart.items.filter((t) => t.key !== key);
-                
-                // 2. Queue Management
-                deleteQueue.add(key);
-                // Remove from other queues if present (Cancel update/add)
-                if (updateQueue.has(key)) updateQueue.delete(key);
-                if (addQueue.has(key)) addQueue.delete(key);
-                
+
+                // Cancel pending adds/updates for the same item (including optimistic ones without key)
+                if (removedItem) {
+                    const queueKey = makeQueueKey(removedItem);
+
+                    // Cancel from addQueue and updateQueue
+                    addQueue.delete(queueKey);
+                    updateQueue.delete(queueKey);
+                }
+
+                // Enqueue delete only if it had a key (real server item)
+                if (key) {
+                    deleteQueue.add(key);
+                }
+
                 scheduleCollectiveSync();
             },
             /**
@@ -506,7 +517,7 @@ const { state, actions } = store< Store >(
                         }
                         return itemData.id === cartItem.id;
                     });
-                    const queueKey = existingItem ? existingItem.key : makeQueueKey(itemData);
+                    const queueKey = existingItem?.key ?? makeQueueKey(itemData);
                     
                     if (existingItem) {
                         existingItem.quantity = itemData.quantity;
@@ -551,25 +562,22 @@ const { state, actions } = store< Store >(
                 const requestMap = new Map<number, { type: 'remove' | 'update' | 'add'; key: string; item?: OptimisticCartItem }>();
                 const batchRequests: any[] = [];
 
-                // HELPER: takeSlice with explicit queue type
-                const takeSlice = (arr: any[], queueType: 'delete' | 'update' | 'add') => {
-                    if (arr.length <= MAX_BATCH_SIZE) return arr;
-                    const slice = arr.slice(0, MAX_BATCH_SIZE);
-                    const remainder = arr.slice(MAX_BATCH_SIZE);
-                    
-                    if (queueType === 'delete') {
-                        remainder.forEach(item => { deleteQueue.add(item); });
-                    } else if (queueType === 'add') {
-                        remainder.forEach(([key, item]) => { addQueue.set(key, item); });
-                    } else if (queueType === 'update') {
-                        remainder.forEach(([key, item]) => { updateQueue.set(key, item); });
-                    }
-                    return slice;
-                };
+                let remainingSlots = MAX_BATCH_SIZE;
 
-                const processDeletes = takeSlice(currentDeletes, 'delete');
-                const processUpdates = takeSlice(currentUpdates, 'update');
-                const processAdds = takeSlice(currentAdds, 'add');
+                // Combined slicing: take items until total MAX_BATCH_SIZE
+                const processDeletes = currentDeletes.slice(0, remainingSlots);
+                remainingSlots -= processDeletes.length;
+                const remainderDeletes = currentDeletes.slice(processDeletes.length);
+                remainderDeletes.forEach(item => deleteQueue.add(item));
+
+                const processUpdates = currentUpdates.slice(0, remainingSlots);
+                remainingSlots -= processUpdates.length;
+                const remainderUpdates = currentUpdates.slice(processUpdates.length);
+                remainderUpdates.forEach(([key, item]) => updateQueue.set(key, item));
+
+                const processAdds = currentAdds.slice(0, remainingSlots);
+                const remainderAdds = currentAdds.slice(processAdds.length);
+                remainderAdds.forEach(([key, item]) => addQueue.set(key, item));
 
                 // BUILDING REQUESTS
                 processDeletes.forEach(key => {
