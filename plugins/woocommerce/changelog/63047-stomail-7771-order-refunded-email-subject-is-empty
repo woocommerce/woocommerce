@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix empty email subject for "Partially refunded order" email in the block email editor by properly retrieving the subject_partial option.

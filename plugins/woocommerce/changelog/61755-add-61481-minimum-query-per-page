@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+Limit `/products` and `/products/reviews` StoreAPI endpoints to 100 results per page.

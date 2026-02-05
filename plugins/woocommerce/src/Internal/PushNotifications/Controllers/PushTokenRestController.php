@@ -9,12 +9,16 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataStore;
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenNotFoundException;
+use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenInvalidDataException;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Internal\RestApiControllerBase;
-use InvalidArgumentException;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Exception;
+use WC_Data_Exception;
+use WC_Logger;
 use WP_REST_Server;
 use WP_REST_Request;
+use WP_REST_Response;
 use WP_Error;
 use WP_Http;
 
@@ -73,6 +77,20 @@ class PushTokenRestController extends RestApiControllerBase {
 				),
 			)
 		);
+
+		register_rest_route(
+			$this->get_rest_api_namespace(),
+			$this->rest_base . '/(?P<id>[\d]+)',
+			array(
+				array(
+					'methods'             => WP_REST_Server::DELETABLE,
+					'callback'            => fn ( WP_REST_Request $request ) => $this->run( $request, 'delete' ),
+					'args'                => $this->get_args( 'delete' ),
+					'permission_callback' => array( $this, 'authorize' ),
+					'schema'              => array( $this, 'get_schema' ),
+				),
+			)
+		);
 	}
 
 	/**
@@ -80,23 +98,84 @@ class PushTokenRestController extends RestApiControllerBase {
 	 *
 	 * @since 10.6.0
 	 *
-	 * @return void
+	 * @param WP_REST_Request $request The request object.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 * @return WP_REST_Response|WP_Error
 	 */
-	public function create(): void {
-		// Functionality to be added later.
+	public function create( WP_REST_Request $request ) {
+		try {
+			$push_token = new PushToken();
+			$push_token->set_user_id( get_current_user_id() );
+			$push_token->set_token( $request->get_param( 'token' ) );
+			$push_token->set_platform( $request->get_param( 'platform' ) );
+			$push_token->set_device_uuid( $request->get_param( 'device_uuid' ) );
+			$push_token->set_origin( $request->get_param( 'origin' ) );
+
+			$data_store = wc_get_container()->get( PushTokensDataStore::class );
+
+			$existing_token = clone $push_token;
+			$existing_token = $data_store->get_by_token_or_device_id( $existing_token );
+
+			if ( $existing_token ) {
+				$push_token->set_id( (int) $existing_token->get_id() );
+				$data_store->update( $push_token );
+			} else {
+				$data_store->create( $push_token );
+			}
+		} catch ( Exception $e ) {
+			return $this->convert_exception_to_wp_error( $e );
+		}
+
+		return new WP_REST_Response(
+			array( 'id' => $push_token->get_id() ),
+			WP_Http::CREATED
+		);
 	}
 
 	/**
-	 * Validates the token.
+	 * Deletes a push token record.
+	 *
+	 * @since 10.6.0
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 * @throws PushTokenNotFoundException If token does not belong to authenticated user.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function delete( WP_REST_Request $request ) {
+		try {
+			$push_token = new PushToken();
+			$push_token->set_id( (int) $request->get_param( 'id' ) );
+
+			$data_store = wc_get_container()->get( PushTokensDataStore::class );
+			$data_store->read( $push_token );
+
+			if ( $push_token->get_user_id() !== get_current_user_id() ) {
+				throw new PushTokenNotFoundException();
+			}
+
+			$data_store->delete( $push_token );
+		} catch ( Exception $e ) {
+			return $this->convert_exception_to_wp_error( $e );
+		}
+
+		return new WP_REST_Response( null, WP_Http::NO_CONTENT );
+	}
+
+	/**
+	 * Validates the token. This is done here as some of the validation rules
+	 * depend on other parameters. Calls `validate_argument` after to check the
+	 * PushToken validation rules which don't depend on other parameters.
 	 *
 	 * @since 10.6.0
 	 *
 	 * @param string          $token The token string.
 	 * @param WP_REST_Request $request The request object.
 	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 * @param string          $param The name of the parameter being validated.
 	 * @return bool|WP_Error
 	 */
-	public function validate_token( string $token, WP_REST_Request $request ) {
+	public function validate_token( string $token, WP_REST_Request $request, string $param ) {
 		if (
 			$request->get_param( 'platform' ) === PushToken::PLATFORM_APPLE
 			&& ! preg_match( '/^[A-Fa-f0-9]{64}$/', $token )
@@ -152,21 +231,24 @@ class PushTokenRestController extends RestApiControllerBase {
 			}
 		}
 
-		return true;
+		return $this->validate_argument( $token, $request, $param );
 	}
 
 	/**
 	 * Validates the device UUID, which is required unless the token is for
-	 * a browser.
+	 * a browser. This is done here as some of the validation rules depend on
+	 * other parameters. Calls `validate_argument` after to check the PushToken
+	 * validation rules which don't depend on other parameters.
 	 *
 	 * @since 10.6.0
 	 *
-	 * @param string          $device_uuid The device UUID string.
+	 * @param null|string     $device_uuid The device UUID string.
 	 * @param WP_REST_Request $request The request object.
 	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 * @param string          $param The name of the parameter being validated.
 	 * @return bool|WP_Error
 	 */
-	public function validate_device_uuid( ?string $device_uuid, WP_REST_Request $request ) {
+	public function validate_device_uuid( ?string $device_uuid, WP_REST_Request $request, string $param ) {
 		if (
 			! $device_uuid
 			&& $request->get_param( 'platform' ) !== PushToken::PLATFORM_BROWSER
@@ -196,6 +278,41 @@ class PushTokenRestController extends RestApiControllerBase {
 					'param'  => 'device_uuid',
 				)
 			);
+		}
+
+		return $this->validate_argument( $device_uuid, $request, $param );
+	}
+
+	/**
+	 * Validates the other arguments from the request, if validation exists in
+	 * the PushToken entity.
+	 *
+	 * @since 10.6.0
+	 *
+	 * @param mixed           $value The value being validated.
+	 * @param WP_REST_Request $request The request object.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 * @param string          $param The name of the parameter being validated.
+	 * @return bool|WP_Error
+	 */
+	public function validate_argument( $value, WP_REST_Request $request, string $param ) {
+		$method = "set_$param";
+
+		if ( method_exists( PushToken::class, $method ) ) {
+			try {
+				$value     = rest_sanitize_request_arg( $value, $request, $param );
+				$validator = new PushToken();
+				$validator->{ "set_$param" }( $value );
+			} catch ( PushTokenInvalidDataException $e ) {
+				return new WP_Error(
+					$e->getErrorCode(),
+					$e->getMessage(),
+					array(
+						'status' => $e->getCode(),
+						'param'  => $param,
+					)
+				);
+			}
 		}
 
 		return true;
@@ -263,25 +380,6 @@ class PushTokenRestController extends RestApiControllerBase {
 			return false;
 		}
 
-		if ( $request->has_param( 'id' ) ) {
-			$push_token = new PushToken();
-			$push_token->set_id( (int) $request->get_param( 'id' ) );
-
-			try {
-				wc_get_container()->get( PushTokensDataStore::class )->read( $push_token );
-			} catch ( Exception $e ) {
-				return $this->convert_exception_to_wp_error( $e );
-			}
-
-			if ( $push_token->get_user_id() !== get_current_user_id() ) {
-				return new WP_Error(
-					'rest_invalid_push_token',
-					'Push token could not be found.',
-					array( 'status' => WP_Http::NOT_FOUND )
-				);
-			}
-		}
-
 		return true;
 	}
 
@@ -294,23 +392,32 @@ class PushTokenRestController extends RestApiControllerBase {
 	 * @return WP_Error
 	 */
 	private function convert_exception_to_wp_error( Exception $e ): WP_Error {
-		$exception_class = get_class( $e );
+		/**
+		 * If the exception is `WC_Data_Exception`, and doesn't represent an
+		 * internal server error (which may contain internal details that should
+		 * be obscured) then format it as a `WP_Error`.
+		 */
+		if (
+			$e instanceof WC_Data_Exception
+			&& $e->getCode() !== WP_Http::INTERNAL_SERVER_ERROR
+		) {
+			return new WP_Error(
+				$e->getErrorCode(),
+				$e->getMessage(),
+				$e->getErrorData()
+			);
+		}
 
-		$slugs = array(
-			PushTokenNotFoundException::class => 'rest_invalid_push_token',
-			InvalidArgumentException::class   => 'rest_invalid_argument',
+		wc_get_container()
+			->get( LegacyProxy::class )
+			->call_function( 'wc_get_logger' )
+			->error( (string) $e->getMessage(), array( 'source' => PushNotifications::FEATURE_NAME ) );
+
+		return new WP_Error(
+			'woocommerce_internal_error',
+			'Internal server error',
+			array( 'status' => WP_Http::INTERNAL_SERVER_ERROR )
 		);
-
-		$statuses = array(
-			PushTokenNotFoundException::class => WP_Http::NOT_FOUND,
-			InvalidArgumentException::class   => WP_Http::BAD_REQUEST,
-		);
-
-		$slug    = $slugs[ $exception_class ] ?? 'rest_internal_error';
-		$status  = $statuses[ $exception_class ] ?? WP_Http::INTERNAL_SERVER_ERROR;
-		$message = ! isset( $slugs[ $exception_class ] ) ? 'Internal server error' : $e->getMessage();
-
-		return new WP_Error( $slug, $message, array( 'status' => $status ) );
 	}
 
 	/**
@@ -330,13 +437,15 @@ class PushTokenRestController extends RestApiControllerBase {
 				'context'           => array( 'delete' ),
 				'minimum'           => 1,
 				'sanitize_callback' => 'absint',
+				'validate_callback' => array( $this, 'validate_argument' ),
 			),
 			'origin'      => array(
-				'description' => __( 'Origin', 'woocommerce' ),
-				'type'        => 'string',
-				'required'    => true,
-				'context'     => array( 'create' ),
-				'enum'        => PushToken::ORIGINS,
+				'description'       => __( 'Origin', 'woocommerce' ),
+				'type'              => 'string',
+				'required'          => true,
+				'context'           => array( 'create' ),
+				'enum'              => PushToken::ORIGINS,
+				'validate_callback' => array( $this, 'validate_argument' ),
 			),
 			'device_uuid' => array(
 				'description'       => __( 'Device UUID', 'woocommerce' ),
@@ -347,11 +456,12 @@ class PushTokenRestController extends RestApiControllerBase {
 				'sanitize_callback' => 'sanitize_text_field',
 			),
 			'platform'    => array(
-				'description' => __( 'Platform', 'woocommerce' ),
-				'type'        => 'string',
-				'required'    => true,
-				'context'     => array( 'create' ),
-				'enum'        => PushToken::PLATFORMS,
+				'description'       => __( 'Platform', 'woocommerce' ),
+				'type'              => 'string',
+				'required'          => true,
+				'context'           => array( 'create' ),
+				'enum'              => PushToken::PLATFORMS,
+				'validate_callback' => array( $this, 'validate_argument' ),
 			),
 			'token'       => array(
 				'description'       => __( 'Push Token', 'woocommerce' ),

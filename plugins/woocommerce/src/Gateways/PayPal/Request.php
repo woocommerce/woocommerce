@@ -605,8 +605,8 @@ class Request {
 						'shipping_preference'   => $shipping_preference,
 						// Customer redirected here on approval.
 						'return_url'            => $this->normalize_url_for_paypal( add_query_arg( 'utm_nooverride', '1', $this->gateway->get_return_url( $order ) ) ),
-						// Customer redirected here on cancellation.
-						'cancel_url'            => $this->normalize_url_for_paypal( $order->get_cancel_order_url_raw() ),
+						// Customer redirected back to checkout if they cancel the PayPal flow.
+						'cancel_url'            => $this->normalize_url_for_paypal( wc_get_checkout_url() ),
 						// Convert WordPress locale format (e.g., 'en_US') to PayPal's expected format (e.g., 'en-US').
 						'locale'                => str_replace( '_', '-', $src_locale ),
 						'app_switch_preference' => array(

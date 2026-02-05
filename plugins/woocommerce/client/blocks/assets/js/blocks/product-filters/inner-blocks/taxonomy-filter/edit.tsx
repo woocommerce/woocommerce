@@ -183,6 +183,7 @@ const Edit = ( props: EditProps ) => {
 					count,
 					id: term.id,
 					parent: term.parent || 0,
+					menuOrder: term.menu_order ?? 0,
 				} );
 
 				return acc;
