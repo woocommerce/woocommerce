@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { getConfig, store } from '@wordpress/interactivity';
 import { doesCartItemMatchAttributes } from '../../utils/variations/does-cart-item-match-attributes';
 import type {
@@ -234,17 +234,13 @@ const getInfoNoticesFromCartUpdates = (
     } );
     return [
         ...autoDeletedToNotify.map( ( item ) =>
-            // TODO: move the message template to iAPI config.
             generateInfoNotice(
-                '"%s" was removed from your cart.'.replace( '%s', item.name )
+                sprintf( __( '"%s" was removed from your cart.', 'woocommerce' ), item.name )
             )
         ),
         ...autoUpdatedToNotify.map( ( item ) =>
-            // TODO: move the message template to iAPI config.
             generateInfoNotice(
-                'The quantity of "%1$s" was changed to %2$d.'
-                    .replace( '%1$s', item.name )
-                    .replace( '%2$d', item.quantity.toString() )
+                sprintf( __( 'The quantity of "%1$s" was changed to %2$d.', 'woocommerce' ), item.name, item.quantity )
             )
         ),
     ];
@@ -497,7 +493,19 @@ const { state, actions } = store< Store >(
                 items: ClientCartItem[]
             ) {
                 items.forEach((itemData) => {
-                    const existingItem = state.cart.items.find(({ id }) => itemData.id === id);
+                    const existingItem = state.cart.items.find((cartItem) => {
+                        if (cartItem.type === 'variation' && itemData.variation) {
+                            if (
+                                itemData.id !== cartItem.id ||
+                                !cartItem.variation ||
+                                cartItem.variation.length !== itemData.variation.length
+                            ) {
+                                return false;
+                            }
+                            return doesCartItemMatchAttributes(cartItem, itemData.variation);
+                        }
+                        return itemData.id === cartItem.id;
+                    });
                     const queueKey = existingItem ? existingItem.key : makeQueueKey(itemData);
                     
                     if (existingItem) {
@@ -653,9 +661,9 @@ const { state, actions } = store< Store >(
                     applyServerState(finalCartState);
                     reapplyOptimisticState();
 
-					if (hasErrors) {
-					    actions.showNoticeError(new Error(__('Some items failed to update. Please refresh or try again.', 'woocommerce')));
-					}
+                    if (hasErrors) {
+                        actions.showNoticeError(new Error(__('Some items failed to update. Please refresh or try again.', 'woocommerce')));
+                    }
 
                 } catch (err) {
                     // NETWORK ERROR HANDLING
