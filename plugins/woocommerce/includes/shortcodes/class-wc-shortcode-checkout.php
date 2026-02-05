@@ -131,7 +131,8 @@ class WC_Shortcode_Checkout {
 				if ( ! $order->has_status( wc_get_is_pending_statuses() ) ) {
 					$quantities = array();
 
-					foreach ( $order->get_items() as $item_key => $item ) {
+					$line_items = $order->get_items();
+					foreach ( $line_items as $item_key => $item ) {
 						if ( $item && is_callable( array( $item, 'get_product' ) ) ) {
 							$product = $item->get_product();
 
@@ -145,7 +146,7 @@ class WC_Shortcode_Checkout {
 
 					// Stock levels may already have been adjusted for this order (in which case we don't need to worry about checking for low stock).
 					if ( ! $order->get_data_store()->get_stock_reduced( $order->get_id() ) ) {
-						foreach ( $order->get_items() as $item_key => $item ) {
+						foreach ( $line_items as $item_key => $item ) {
 							if ( $item && is_callable( array( $item, 'get_product' ) ) ) {
 								$product = $item->get_product();
 

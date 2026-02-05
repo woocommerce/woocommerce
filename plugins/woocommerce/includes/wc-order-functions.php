@@ -473,8 +473,9 @@ function wc_downloadable_product_permissions( $order_id, $force = false ) {
 		return;
 	}
 
-	if ( count( $order->get_items() ) > 0 ) {
-		foreach ( $order->get_items() as $item ) {
+	$line_items = $order->get_items();
+	if ( count( $line_items ) > 0 ) {
+		foreach ( $line_items as $item ) {
 			$product = $item->get_product();
 
 			if ( $product && $product->exists() && $product->is_downloadable() ) {
@@ -964,12 +965,12 @@ function wc_update_total_sales_counts( $order_id ) {
 
 	$operation = $recorded_sales && $reflected_order ? 'decrease' : 'increase';
 
-	if ( count( $order->get_items() ) > 0 ) {
-		foreach ( $order->get_items() as $item ) {
+	$line_items = $order->get_items();
+	if ( count( $line_items ) > 0 ) {
+		$data_store = WC_Data_Store::load( 'product' );
+		foreach ( $line_items as $item ) {
 			$product_id = $item->get_product_id();
-
 			if ( $product_id ) {
-				$data_store = WC_Data_Store::load( 'product' );
 				$data_store->update_product_sales( $product_id, absint( $item->get_quantity() ), $operation );
 			}
 		}
