@@ -504,21 +504,6 @@ function wc_delete_shop_order_transients( $order = 0 ) {
 		$order = wc_get_order( $order );
 	}
 
-	// TODO: try delegating to \WC_Admin_Reports handling this async.
-	$reports             = WC_Admin_Reports::get_reports();
-	$transients_to_clear = array(
-		'wc_admin_report',
-	);
-	foreach ( $reports as $report_group ) {
-		foreach ( $report_group['reports'] as $report_key => $report ) {
-			$transients_to_clear[] = 'wc_report_' . $report_key;
-		}
-	}
-	foreach ( $transients_to_clear as $transient ) {
-		delete_transient( $transient );
-	}
-	// TODO: end of the block for delegation.
-
 	// Clear customer's order related caches.
 	$order_id = 0;
 	if ( is_a( $order, 'WC_Order' ) ) {
@@ -536,7 +521,9 @@ function wc_delete_shop_order_transients( $order = 0 ) {
 	WC_Cache_Helper::invalidate_cache_group( 'orders' );
 
 	do_action( 'woocommerce_delete_shop_order_transients', $order_id );
+	do_action( 'woocommerce_delete_legacy_report_transients', $order_id, true );
 }
+add_action( 'woocommerce_delete_legacy_report_transients', array( WC_Admin_Reports::class, 'delete_legacy_report_transients' ), 10, 2 );
 
 /**
  * See if we only ship to billing addresses.

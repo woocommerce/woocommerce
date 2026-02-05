@@ -32,6 +32,29 @@ class WC_Admin_Reports {
 	}
 
 	/**
+	 * @param int  $order_id Order ID (unused, future placeholder).
+	 * @param bool $defer    Whether to defer the deletion or execute.
+	 * @return void
+	 */
+	public static function delete_legacy_report_transients( int $order_id, bool $defer ): void {
+		if ( $defer ) {
+			// Schedule the deletion, but don't bind to a specific order so the single action is scheduled at any given moment.
+			$scheduled = as_has_scheduled_action( 'woocommerce_delete_legacy_report_transients', array(), 'woocommerce' );
+			if ( ! $scheduled ) {
+				as_schedule_single_action( time() + 5, 'woocommerce_delete_legacy_report_transients', array( $order_id, false ), 'woocommerce' );
+			}
+			return;
+		}
+
+		delete_transient( 'wc_admin_report' );
+		foreach ( self::get_reports() as $report_group ) {
+			foreach ( $report_group['reports'] as $report_key => $report ) {
+				delete_transient( 'wc_report_' . $report_key );
+			}
+		}
+	}
+
+	/**
 	 * Get an instance of WC_Admin_Report.
 	 *
 	 * @return WC_Admin_Report
