@@ -4,7 +4,6 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Utilities;
 
 use Automattic\WooCommerce\Utilities\RestApiUtil;
-use WC_Order_Item_Coupon;
 
 /**
  * A collection of tests for the RestApiUtil lazy_load_namespace method.
@@ -174,91 +173,5 @@ class RestApiUtilTest extends \WC_Unit_Test_Case {
 
 		// Verify that rest_pre_dispatch filter was added.
 		$this->assertTrue( has_filter( 'rest_pre_dispatch' ) );
-	}
-
-	/**
-	 * @testdox `get_coupon_data_for_response` returns correct data from coupon_info meta.
-	 */
-	public function test_get_coupon_data_for_response_with_coupon_info(): void {
-		$order_item = $this->createMock( WC_Order_Item_Coupon::class );
-		$order_item->method( 'get_meta' )
-			->willReturnCallback(
-				function ( $key, $single = true, $context = 'view' ) { //phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter
-					if ( 'coupon_info' === $key ) {
-						return wp_json_encode( array( 123, 'TESTCODE', 'percent', 25.5, true ) );
-					}
-					return '';
-				}
-			);
-
-		$result = RestApiUtil::get_coupon_data_for_response( $order_item );
-
-		$this->assertSame( 'percent', $result['discount_type'] );
-		$this->assertSame( 25.5, $result['nominal_amount'] );
-		$this->assertTrue( $result['free_shipping'] );
-	}
-
-	/**
-	 * @testdox `get_coupon_data_for_response` returns correct data from legacy coupon_data meta.
-	 */
-	public function test_get_coupon_data_for_response_with_legacy_coupon_data(): void {
-		$order_item = $this->createMock( WC_Order_Item_Coupon::class );
-		$order_item->method( 'get_meta' )
-			->willReturnCallback(
-				function ( $key, $single = true, $context = 'view' ) { //phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter
-					if ( 'coupon_info' === $key ) {
-						return '';
-					}
-					if ( 'coupon_data' === $key ) {
-						return (object) array(
-							'discount_type' => 'fixed_cart',
-							'amount'        => 10.0,
-							'free_shipping' => false,
-						);
-					}
-					return '';
-				}
-			);
-
-		$result = RestApiUtil::get_coupon_data_for_response( $order_item );
-
-		$this->assertSame( 'fixed_cart', $result['discount_type'] );
-		$this->assertSame( 10.0, $result['nominal_amount'] );
-		$this->assertFalse( $result['free_shipping'] );
-	}
-
-	/**
-	 * @testdox `get_coupon_data_for_response` returns defaults when no coupon meta exists.
-	 */
-	public function test_get_coupon_data_for_response_with_no_meta(): void {
-		$order_item = $this->createMock( WC_Order_Item_Coupon::class );
-		$order_item->method( 'get_meta' )->willReturn( '' );
-
-		$result = RestApiUtil::get_coupon_data_for_response( $order_item );
-
-		$this->assertSame( 'fixed_cart', $result['discount_type'] );
-		$this->assertSame( 0.0, $result['nominal_amount'] );
-		$this->assertFalse( $result['free_shipping'] );
-	}
-
-	/**
-	 * @testdox `get_coupon_data_for_response` does not validate amount values, allowing invalid percentages.
-	 */
-	public function test_get_coupon_data_for_response_allows_invalid_amounts(): void {
-		$order_item = $this->createMock( WC_Order_Item_Coupon::class );
-		$order_item->method( 'get_meta' )
-			->willReturnCallback(
-				function ( $key, $single = true, $context = 'view' ) {
-					unset( $single, $context ); // Avoid parameter not used PHPCS errors.
-					if ( 'coupon_info' === $key ) {
-						return wp_json_encode( array( 1, 'CODE', 'percent', 150.0 ) );
-					}
-					return '';
-				}
-			);
-
-		$result = RestApiUtil::get_coupon_data_for_response( $order_item );
-
-		$this->assertSame( 150.0, $result['nominal_amount'], 'Should return stored amount without validation' );
 	}
 }

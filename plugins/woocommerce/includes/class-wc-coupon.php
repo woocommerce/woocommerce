@@ -1297,9 +1297,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 *
 	 * @since 10.6.0
 	 *
-	 * @param string $info                   JSON string as returned by 'get_short_info'.
-	 * @param bool   $return_defaults_on_error If true (default), return default values when JSON is malformed.
-	 *                                         If false, throw an exception.
+	 * @param string $info JSON string as returned by 'get_short_info'.
 	 * @return array {
 	 *     Parsed coupon properties.
 	 *
@@ -1309,17 +1307,12 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 *     @type float  $amount        Discount amount.
 	 *     @type bool   $free_shipping Whether free shipping is enabled.
 	 * }
-	 * @throws \InvalidArgumentException If JSON is malformed and $return_defaults_on_error is false.
 	 */
-	public static function parse_short_info( string $info, bool $return_defaults_on_error = true ): array {
+	private static function parse_short_info( string $info ): array {
 		$data = json_decode( $info, true );
 
 		if ( ! is_array( $data ) ) {
-			if ( $return_defaults_on_error ) {
-				$data = array();
-			} else {
-				throw new \InvalidArgumentException( esc_html__( 'Invalid coupon short info JSON.', 'woocommerce' ) );
-			}
+			$data = array();
 		}
 
 		return array(
@@ -1344,6 +1337,46 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		$this->set_discount_type_core( $data['discount_type'], false );
 		$this->set_amount( $data['amount'] );
 		$this->set_free_shipping( $data['free_shipping'] );
+	}
+
+	/**
+	 * Create a WC_Coupon instance from an order's coupon line item without validation.
+	 *
+	 * This is useful for read-only contexts (e.g., REST API responses) where the stored
+	 * data should be returned even if it contains invalid values.
+	 *
+	 * @since 10.6.0
+	 *
+	 * @param \WC_Order_Item_Coupon $order_item The coupon line item from an order.
+	 * @return self A WC_Coupon instance populated with the stored data.
+	 */
+	public static function from_order_item( \WC_Order_Item_Coupon $order_item ): self {
+		$coupon_info = $order_item->get_meta( 'coupon_info', true );
+		if ( is_string( $coupon_info ) && '' !== $coupon_info ) {
+			$data = self::parse_short_info( $coupon_info );
+		} else {
+			$coupon_meta = $order_item->get_meta( 'coupon_data', true );
+			if ( is_object( $coupon_meta ) || is_array( $coupon_meta ) ) {
+				$coupon_meta = (array) $coupon_meta;
+				$data        = array(
+					'id'            => 0,
+					'code'          => '',
+					'discount_type' => $coupon_meta['discount_type'] ?? 'fixed_cart',
+					'amount'        => (float) ( $coupon_meta['amount'] ?? 0 ),
+					'free_shipping' => (bool) ( $coupon_meta['free_shipping'] ?? false ),
+				);
+			} else {
+				return new self();
+			}
+		}
+
+		$coupon = new self();
+		$coupon->set_id( $data['id'] );
+		$coupon->set_code( $data['code'] );
+		$coupon->set_discount_type_core( $data['discount_type'], false );
+		$coupon->set_prop( 'amount', $data['amount'] );
+		$coupon->set_free_shipping( $data['free_shipping'] );
+		return $coupon;
 	}
 
 	/**

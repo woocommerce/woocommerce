@@ -11,7 +11,7 @@ namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Utilities\RestApiUtil;
+use WC_Coupon;
 use WC_Order_Item_Coupon;
 use WP_REST_Request;
 
@@ -94,17 +94,17 @@ class OrderCouponSchema extends AbstractLineItemSchema {
 	 * @return array
 	 */
 	public function get_item_response( $order_item, WP_REST_Request $request, array $include_fields = array() ): array {
-		$dp          = is_null( $request['num_decimals'] ) ? wc_get_price_decimals() : absint( $request['num_decimals'] );
-		$coupon_data = RestApiUtil::get_coupon_data_for_response( $order_item );
+		$dp     = is_null( $request['num_decimals'] ) ? wc_get_price_decimals() : absint( $request['num_decimals'] );
+		$coupon = WC_Coupon::from_order_item( $order_item );
 
 		return array(
 			'id'             => $order_item->get_id(),
 			'code'           => $order_item->get_code(),
 			'discount'       => wc_format_decimal( $order_item->get_discount(), $dp ),
 			'discount_tax'   => wc_format_decimal( $order_item->get_discount_tax(), $dp ),
-			'discount_type'  => $coupon_data['discount_type'],
-			'nominal_amount' => $coupon_data['nominal_amount'],
-			'free_shipping'  => $coupon_data['free_shipping'],
+			'discount_type'  => $coupon->get_discount_type(),
+			'nominal_amount' => (float) $coupon->get_amount(),
+			'free_shipping'  => $coupon->get_free_shipping(),
 			'meta_data'      => $this->prepare_meta_data( $order_item ),
 		);
 	}
