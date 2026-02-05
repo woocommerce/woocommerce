@@ -18,7 +18,6 @@
 defined( 'ABSPATH' ) || exit;
 
 $totals     = $order->get_order_item_totals(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-$line_items = $order->get_items();
 ?>
 <form id="order_review" method="post">
 
@@ -31,8 +30,8 @@ $line_items = $order->get_items();
 			</tr>
 		</thead>
 		<tbody>
-			<?php if ( count( $line_items ) > 0 ) : ?>
-				<?php foreach ( $line_items as $item_id => $item ) : ?>
+			<?php if ( count( $order->get_items() ) > 0 ) : ?>
+				<?php foreach ( $order->get_items() as $item_id => $item ) : ?>
 					<?php
 					if ( ! apply_filters( 'woocommerce_order_item_visible', true, $item ) ) {
 						continue;
