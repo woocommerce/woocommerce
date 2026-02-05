@@ -23,6 +23,8 @@ interface WpData {
 	};
 }
 
+type WindowWithWp = Window & { wp?: { data?: WpData } };
+
 /**
  * Closes the "Choose a pattern" modal if present.
  *
@@ -54,14 +56,14 @@ export const disableWelcomeModal = async ( {
 	await page.waitForLoadState( 'domcontentloaded' );
 
 	const isWelcomeGuideActive = await page.evaluate( () =>
-		( window as unknown as { wp?: { data?: WpData } } ).wp?.data
+		( window as unknown as WindowWithWp ).wp?.data
 			?.select( 'core/edit-post' )
 			?.isFeatureActive( 'welcomeGuide' )
 	);
 
 	if ( isWelcomeGuideActive ) {
 		await page.evaluate( () =>
-			( window as unknown as { wp?: { data?: WpData } } ).wp?.data
+			( window as unknown as WindowWithWp ).wp?.data
 				?.dispatch( 'core/edit-post' )
 				?.toggleFeature( 'welcomeGuide' )
 		);
