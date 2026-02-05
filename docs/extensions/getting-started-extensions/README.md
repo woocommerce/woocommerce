@@ -2,7 +2,7 @@
 
 This section provides guides and resources for building, testing, and distributing WooCommerce extensions.
 
-### Important: Internal vs public code
+**Important: Internal vs public code**
 
 Not all WooCommerce code is intended for use by extensions. Classes in the `Automattic\WooCommerce\Internal` namespace and code marked with `@internal` are for WooCommerce core use only: backwards compatibility between WooCommerce releases is not guaranteed and your extension may break if you use them. See the [extension development best practices](../best-practices-extensions/extension-development-best-practices.md) and the [Internal namespace documentation](../../../plugins/woocommerce/src/Internal/README.md).
 
