@@ -164,7 +164,6 @@ class PushTokensDataStore {
 	 *
 	 * @since 10.5.0
 	 * @param int $id The push token ID.
-	 * @throws PushTokenInvalidDataException If the ID is invalid.
 	 * @throws PushTokenNotFoundException If the token can't be found.
 	 * @return bool True on success.
 	 */
