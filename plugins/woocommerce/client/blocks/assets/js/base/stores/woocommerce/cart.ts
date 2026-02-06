@@ -23,14 +23,21 @@ import type {
  */
 
 /**
- * Compatibility fallback for AbortSignal.timeout (not supported in older browsers).
+ * Compatibility fallback for AbortSignal.timeout with full guards and leak prevention.
  */
-const createTimeoutSignal = (ms: number): AbortSignal => {
-    if ('timeout' in AbortSignal && typeof (AbortSignal as any).timeout === 'function') {
+const createTimeoutSignal = (ms: number): AbortSignal | undefined => {
+    if (
+        typeof AbortSignal !== 'undefined' &&
+        typeof (AbortSignal as any).timeout === 'function'
+    ) {
         return (AbortSignal as any).timeout(ms);
     }
+    if (typeof AbortController === 'undefined') {
+        return undefined;
+    }
     const controller = new AbortController();
-    setTimeout(() => controller.abort(), ms);
+    const timeoutId = setTimeout(() => controller.abort(), ms);
+    controller.signal.addEventListener('abort', () => clearTimeout(timeoutId));
     return controller.signal;
 };
 
