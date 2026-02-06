@@ -90,7 +90,7 @@ class PushTokensDataStore {
 			throw new PushTokenNotFoundException();
 		}
 
-		$meta = $this->build_meta_array_from_database( $push_token->get_id() );
+		$meta = $this->build_meta_array_from_database( (int) $push_token->get_id() );
 
 		if (
 			empty( $meta['token'] )
