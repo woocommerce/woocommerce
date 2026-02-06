@@ -87,6 +87,7 @@ export function createMutationQueue< TState >(
 	let idleResolvers: Array< () => void > = [];
 	let nextId = 0;
 
+	// reconcile - Commits server state (or rolls back on total failure), notifies callers, resets the cycle
 	function reconcile() {
 		if ( lastServerState !== null ) {
 			commit( lastServerState );
@@ -134,6 +135,7 @@ export function createMutationQueue< TState >(
 		trackedRequests.clear();
 	}
 
+	// onBatchComplete - If more requests queued during flight, sends them. Otherwise, reconciles.
 	function onBatchComplete() {
 		inFlightIds = null;
 
@@ -150,6 +152,7 @@ export function createMutationQueue< TState >(
 		reconcile();
 	}
 
+	// handleBatchFailure - Marks all items in the batch as failed (network error or bad status).
 	function handleBatchFailure( requestIds: string[], error: Error ) {
 		for ( const id of requestIds ) {
 			errors.set( id, error );
@@ -157,6 +160,7 @@ export function createMutationQueue< TState >(
 		onBatchComplete();
 	}
 
+	// handleBatchResponse - Records per-item success/failure from the server response.
 	function handleBatchResponse(
 		requestIds: string[],
 		responses: BatchItemResponse[]
@@ -188,6 +192,7 @@ export function createMutationQueue< TState >(
 		onBatchComplete();
 	}
 
+	// processRequests - Drains the pending queue into one batch and sends it
 	async function processRequests() {
 		microtaskScheduled = false;
 
@@ -246,6 +251,7 @@ export function createMutationQueue< TState >(
 		}
 	}
 
+	// submit - Queues a request. First call in a cycle takes a snapshot.
 	function submit(
 		request: MutationRequest< TState >
 	): Promise< MutationResult< TState > > {
@@ -258,7 +264,10 @@ export function createMutationQueue< TState >(
 				isProcessing = true;
 			}
 
-			// Clone body to isolate from future optimistic mutations.
+			// When you submit three requests synchronously, each one's applyOptimistic mutates state.cart.items -
+			// the same array that the request body might reference. Without cloning, the body sent to the server
+			// would contain whatever the state looks like after all three optimistic updates,
+			// not what it looked like when that specific request was submitted.
 			const clonedBody = request.body
 				? JSON.parse( JSON.stringify( request.body ) )
 				: undefined;
@@ -290,6 +299,7 @@ export function createMutationQueue< TState >(
 		};
 	}
 
+	// Returns a promise that resolves when the current cycle completes. Resolves immediately if idle.
 	function waitForIdle(): Promise< void > {
 		if ( ! isProcessing ) {
 			return Promise.resolve();
