@@ -116,6 +116,13 @@ type BatchResponse = {
     responses: ApiResponse< Cart >[];
 };
 
+type BatchRequest = {
+    method: string;
+    path: string;
+    headers: Record<string, string>;
+    body: Record<string, unknown>;
+};
+
 /**
  * Type guard to check if an item is a full CartItem or an OptimisticCartItem.
  *
@@ -310,14 +317,24 @@ const IMMEDIATE_TRIGGER_SIZE = 2;
 const MAX_BATCH_SIZE = 50;
 
 /**
- * Maximum retry attempts for failed operations to prevent infinite loops.
+ * Maximum retry attempts for failed operations (per-item).
  */
 const MAX_RETRIES = 3;
 
 /**
- * Tracks retry attempts per queue key to enforce MAX_RETRIES across batches.
+ * Maximum batch-level retries for full failures (network/server error).
+ */
+const MAX_BATCH_RETRIES = 3;
+
+/**
+ * Tracks retry attempts per queue key (per-item failures).
  */
 const retryCount = new Map<string, number>();
+
+/**
+ * Tracks whole-batch retry attempts (network failures).
+ */
+let batchRetryCount = 0;
 
 /**
  * Queue for item keys pending removal.
@@ -348,7 +365,7 @@ let _requestCounter = 0;
  * @param {Cart} serverCart - The cart object returned by the server.
  */
 const applyServerState = (serverCart: Cart) => {
-    let items = serverCart.items || [];
+    const items = serverCart.items || [];
     const filteredItems = items.filter(item => !deleteQueue.has(item.key));
     state.cart = { ...serverCart, items: filteredItems };
 };
@@ -522,7 +539,7 @@ const { state, actions } = store< Store >(
                 addQueue.clear();
 
                 const requestMap = new Map<number, { type: 'remove' | 'update' | 'add'; key: string; item?: OptimisticCartItem }>();
-                const batchRequests: any[] = [];
+                const batchRequests: BatchRequest[] = [];
 
                 let remainingSlots = MAX_BATCH_SIZE;
 
@@ -582,12 +599,7 @@ const { state, actions } = store< Store >(
                 });
 
                 try {
-                    let intent = "mixedCart";
-                    if (processDeletes.length > 0 && processUpdates.length === 0 && processAdds.length === 0) intent = "removeCart";
-                    else if (processDeletes.length === 0 && processUpdates.length > 0 && processAdds.length === 0) intent = "updateCart";
-                    else if (processDeletes.length === 0 && processUpdates.length === 0 && processAdds.length > 0) intent = "addCart";
-
-                    const batchResponse = yield fetch(`${state.restUrl}wc/store/v1/batch?intent=${intent}`, {
+                    const batchResponse = yield fetch(`${state.restUrl}wc/store/v1/batch`, {
                         method: "POST",
                         headers: { Nonce: state.nonce, "Content-Type": "application/json" },
                         body: JSON.stringify({ requests: batchRequests }),
@@ -651,10 +663,30 @@ const { state, actions } = store< Store >(
                     if (hasErrors) {
                         actions.showNoticeError(new Error(__('Some items failed to update. Please refresh or try again.', 'woocommerce')));
                     }
+
+                    batchRetryCount = 0; // success reset
                 } catch (err) {
                     if (_currentId === _requestCounter) {
                         actions.showNoticeError(err as Error);
-                        yield actions.refreshCartItems();
+
+                        if (batchRetryCount < MAX_BATCH_RETRIES) {
+                            batchRetryCount++;
+
+                            currentDeletes.forEach((k) => {
+                                deleteQueue.add(k);
+                            });
+                            currentUpdates.forEach(([k, i]) => {
+                                updateQueue.set(k, i);
+                            });
+                            currentAdds.forEach(([k, i]) => {
+                                addQueue.set(k, i);
+                            });
+
+                            setTimeout(() => actions.processCollectiveActions(), 500); // retry delay
+                        } else {
+                            batchRetryCount = 0;
+                            yield actions.refreshCartItems();
+                        }
                     }
                 } finally {
                     isProcessing = false;
