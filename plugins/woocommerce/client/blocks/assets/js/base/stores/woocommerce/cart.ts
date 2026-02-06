@@ -465,7 +465,21 @@ const { state, actions } = store< Store >(
                 
                 const hasServerKey = Boolean(item?.key);
                 const actionType = item && hasServerKey ? "update-item" : "add-item";
-                const payload = item ? { ...item, quantity } : { id, quantity, type: variation ? 'variation' : 'simple', ...(variation && { variation }) };
+
+                const payload = item 
+                    ? { ...item, quantity } 
+                    : {
+                        id,
+                        quantity,
+                        type: variation ? 'variation' : 'simple',
+                        ...(variation && {
+                            variation: variation.map((v) => ({
+                                ...v,
+                                raw_attribute: v.attribute,
+                            })),
+                        }),
+                    };
+
                 const queueKey = makeQueueKey(payload);
 
                 if (item) {
@@ -513,7 +527,12 @@ const { state, actions } = store< Store >(
                             id: itemData.id,
                             quantity: itemData.quantity,
                             type: itemData.variation ? 'variation' : 'simple',
-                            ...(itemData.variation && { variation: itemData.variation }),
+                            ...(itemData.variation && {
+                                variation: itemData.variation.map((v) => ({
+                                    ...v,
+                                    raw_attribute: v.attribute,
+                                })),
+                            }),
                         };
                         if (existingItem) {
                             existingItem.quantity = itemData.quantity;
