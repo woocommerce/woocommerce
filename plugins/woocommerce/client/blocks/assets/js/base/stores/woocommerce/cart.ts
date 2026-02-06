@@ -620,10 +620,14 @@ const { state, actions } = store< Store >(
                             deleteQueue.add(k);
                         });
                         currentUpdates.forEach(([k, i]) => {
-                            updateQueue.set(k, i);
+                            if (!updateQueue.has(k)) {
+                                updateQueue.set(k, i);
+                            }
                         });
                         currentAdds.forEach(([k, i]) => {
-                            addQueue.set(k, i);
+                            if (!addQueue.has(k)) {
+                                addQueue.set(k, i);
+                            }
                         });
                         return;
                     }
@@ -689,10 +693,14 @@ const { state, actions } = store< Store >(
                                 deleteQueue.add(k);
                             });
                             currentUpdates.forEach(([k, i]) => {
-                                updateQueue.set(k, i);
+                                if (!updateQueue.has(k)) {
+                                    updateQueue.set(k, i);
+                                }
                             });
                             currentAdds.forEach(([k, i]) => {
-                                addQueue.set(k, i);
+                                if (!addQueue.has(k)) {
+                                    addQueue.set(k, i);
+                                }
                             });
 
                             setTimeout(() => {
