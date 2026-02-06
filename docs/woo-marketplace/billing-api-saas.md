@@ -58,7 +58,7 @@ Please note that all paths in the reference documentation are relative to the ba
 
 Each vendor application is issued a set of credentials (API key and secret) during onboarding. To authenticate API requests, you need to use the [Basic](https://tools.ietf.org/html/rfc7617) authentication method and pass the following HTTP header with your request:
 
-`Authentication: Basic base64encode(api_key:api_secret)`
+`Authorization: Basic base64encode(api_key:api_secret)`
 
 Here's an example of a POST request to the /subscriptions endpoint to initiate a plan purchase (please replace ENCODED_KEY_SECRET_STRING with your own secret key):
 
