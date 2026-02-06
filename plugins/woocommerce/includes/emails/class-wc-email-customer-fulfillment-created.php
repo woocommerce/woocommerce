@@ -5,7 +5,7 @@
  * @package WooCommerce\Emails
  */
 
-use Automattic\WooCommerce\Internal\Fulfillments\Fulfillment;
+use Automattic\WooCommerce\Fulfillments\Fulfillment;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.

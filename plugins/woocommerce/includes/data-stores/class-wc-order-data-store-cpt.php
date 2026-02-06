@@ -8,7 +8,7 @@
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Utilities\OrderUtil;
-use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentUtils;
+use Automattic\WooCommerce\Fulfillments\FulfillmentUtils;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 
 if ( ! defined( 'ABSPATH' ) ) {

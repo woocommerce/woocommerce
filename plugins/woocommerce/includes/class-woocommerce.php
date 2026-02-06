@@ -383,7 +383,7 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Utilities\LegacyRestApiStub::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Email\EmailStyleSync::class )->register();
-		$container->get( Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsController::class )->register();
+		$container->get( Automattic\WooCommerce\Fulfillments\FulfillmentsController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Admin\Agentic\AgenticController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ProductFeed\ProductFeed::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\PushNotifications\PushNotifications::class )->register();
