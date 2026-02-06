@@ -597,7 +597,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 
 		$this->assertEquals( 'rest_invalid_param', $data['code'] );
-		$this->assertStringContainsString( 'device_uuid', $data['message'] );
+		$this->assertStringContainsString( 'Invalid parameter(s): device_uuid', $data['message'] );
 	}
 
 	/**
@@ -915,7 +915,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 
 		$this->assertEquals( 'rest_invalid_param', $data['code'] );
-		$this->assertStringContainsString( 'device_uuid', $data['message'] );
+		$this->assertStringContainsString( 'Invalid parameter(s): device_uuid', $data['message'] );
 	}
 
 	/**
@@ -940,7 +940,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 
 		$this->assertEquals( 'rest_invalid_param', $data['code'] );
-		$this->assertStringContainsString( 'device_uuid', $data['message'] );
+		$this->assertStringContainsString( 'Invalid parameter(s): device_uuid', $data['message'] );
 	}
 
 	/**
