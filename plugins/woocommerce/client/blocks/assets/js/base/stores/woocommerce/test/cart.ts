@@ -76,8 +76,12 @@ describe( 'WooCommerce Cart Interactivity API Store Helpers', () => {
         });
 
         it( 'falls back to JSON.stringify on error', () => {
-            const badVariation = { Color: 123 }; // non-string value triggers .toLowerCase()
-            expect(normalizeVariation(badVariation as any)).toBe(JSON.stringify(badVariation));
+            const variation = { Color: 'Red' };
+            const spy = jest.spyOn(Object, 'entries').mockImplementationOnce(() => {
+                throw new Error('test error');
+            });
+            expect(normalizeVariation(variation as any)).toBe(JSON.stringify(variation));
+            spy.mockRestore();
         });
     });
 
