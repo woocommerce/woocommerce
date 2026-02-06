@@ -39,16 +39,20 @@ On every page of the Developer Docs, you'll see a Clipboard icon in the upper-ri
 
 ## AI Development Tools
 
+### Agent Skills for Contributors
+
+The WooCommerce monorepo includes agent skills that provide AI assistants with procedural guidance for common development tasks. These skills are located in the `.ai/skills/` directory at the root of the repository.
+
+Each skill contains a `SKILL.md` file with step-by-step instructions for tasks like:
+
+- Backend PHP development and testing conventions
+- Code review standards and best practices
+- Git workflows and commit conventions
+- Build and linting processes
+- UI copy and documentation guidelines
+
+Skills are designed to be tool-agnostic and can be used with various AI coding assistants. To explore available skills, browse the [`.ai/skills/` directory](https://github.com/woocommerce/woocommerce/tree/trunk/.ai/skills) in the repository.
+
 ### Cursor Rules files for contributors
 
-The `.cursor/rules/` directory contains configuration files that provide AI assistants with specific guidance for working with the WooCommerce codebase. These files help ensure consistent development practices and workflows:
-
--   **`generate-pr-description.mdc`** - Provides guidelines for creating pull request descriptions using the repository's PR template. It ensures proper markdown structure, changelog formatting, and automation compatibility.
-
--   **`git.mdc`** - Defines branching conventions and commit message standards for the WooCommerce repository, including naming patterns for different types of changes (fixes, features, refactors, etc.).
-
--   **`woo-build.mdc`** - Contains instructions for building the WooCommerce plugin, including dependency installation commands and development build processes using pnpm and nvm.
-
--   **`woo-phpunit.mdc`** - Provides guidance for running PHPUnit tests in the WooCommerce codebase, including the specific command structure and directory requirements.
-
-These rules files help AI assistants understand the project's development workflow and maintain consistency with WooCommerce's coding standards and practices.
+The `.cursor/rules/` directory contains configuration files that provide AI assistants with specific guidance for working with the WooCommerce codebase. These files help ensure consistent development practices and workflows.
