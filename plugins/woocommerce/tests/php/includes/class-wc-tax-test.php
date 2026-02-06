@@ -923,4 +923,92 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 
 		remove_all_filters( 'woocommerce_shipping_prices_include_tax' );
 	}
+
+	/**
+	 * Test per-item shipping tax when prices do not include tax.
+	 */
+	public function test_calc_shipping_tax_per_item_flow_exclusive() {
+		$tax_rate = array(
+			'tax_rate_country'  => 'GB',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '20.0000',
+			'tax_rate_name'     => 'VAT',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => '',
+		);
+
+		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
+
+		$tax_rates = WC_Tax::find_rates(
+			array(
+				'country'   => 'GB',
+				'state'     => 'Cambs',
+				'postcode'  => 'PE14 1XX',
+				'city'      => 'Somewhere',
+				'tax_class' => '',
+			)
+		);
+
+		// Two items at 5 each. Tax is added on top.
+		$cost_item1 = 5.00;
+		$cost_item2 = 5.00;
+		$taxes1     = WC_Tax::calc_shipping_tax( $cost_item1, $tax_rates );
+		$taxes2     = WC_Tax::calc_shipping_tax( $cost_item2, $tax_rates );
+
+		$total_tax   = array_sum( $taxes1 ) + array_sum( $taxes2 );
+		$total_cost  = $cost_item1 + $cost_item2;
+
+		$this->assertEquals( 2.00, $total_tax, 'Tax should be 2.00' );
+		$this->assertEquals( 10.00, $total_cost, 'Cost should stay 10.00' );
+	}
+
+	/**
+	 * Test per-item shipping tax when prices include tax.
+	 */
+	public function test_calc_shipping_tax_per_item_flow_inclusive() {
+		$tax_rate = array(
+			'tax_rate_country'  => 'GB',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '20.0000',
+			'tax_rate_name'     => 'VAT',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => '',
+		);
+
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		$tax_rates = WC_Tax::find_rates(
+			array(
+				'country'   => 'GB',
+				'state'     => 'Cambs',
+				'postcode'  => 'PE14 1XX',
+				'city'      => 'Somewhere',
+				'tax_class' => '',
+			)
+		);
+
+		add_filter( 'woocommerce_shipping_prices_include_tax', '__return_true' );
+
+		// Two items at 6 each. Price includes tax.
+		$cost_item1 = 6.00;
+		$cost_item2 = 6.00;
+		$taxes1     = WC_Tax::calc_shipping_tax( $cost_item1, $tax_rates );
+		$taxes2     = WC_Tax::calc_shipping_tax( $cost_item2, $tax_rates );
+
+		$total_tax   = array_sum( $taxes1 ) + array_sum( $taxes2 );
+		$total_gross = $cost_item1 + $cost_item2;
+		$net_cost    = $total_gross - $total_tax;
+
+		$this->assertEqualsWithDelta( 2.00, $total_tax, 0.02, 'Tax taken from 12.00 should be about 2.00' );
+		$this->assertEqualsWithDelta( 10.00, $net_cost, 0.02, 'Net cost should be 10.00' );
+		$this->assertEqualsWithDelta( $total_gross, $net_cost + $total_tax, 0.02, 'Gross equals net plus tax' );
+
+		remove_filter( 'woocommerce_shipping_prices_include_tax', '__return_true' );
+	}
 }
