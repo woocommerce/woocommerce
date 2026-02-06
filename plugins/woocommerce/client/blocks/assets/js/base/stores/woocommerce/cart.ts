@@ -187,13 +187,13 @@ const generateInfoNotice = ( message: string ): Notice => ( {
  * Generates info notices based on cart updates.
  *
  * @param {Store['state']['cart']} oldCart - The previous cart state.
- * @param {Cart} newCart - The updated cart state.
+ * @param {Store['state']['cart']} newCart - The updated cart state.
  * @param {QuantityChanges} quantityChanges - Pending quantity changes.
  * @return {Notice[]} Array of generated notices for cart changes.
  */
-const getInfoNoticesFromCartUpdates = (
+export const getInfoNoticesFromCartUpdates = (
     oldCart: Store[ 'state' ][ 'cart' ],
-    newCart: Cart,
+    newCart: Store[ 'state' ][ 'cart' ],
     quantityChanges: QuantityChanges = {}
 ): Notice[] => {
     const oldItems = oldCart.items;
@@ -261,7 +261,7 @@ const getInfoNoticesFromCartUpdates = (
  */
 type VariationInput = CartVariationItem[] | SelectedAttributes[] | Record<string, unknown> | null | undefined;
 
-function normalizeVariation(variation: VariationInput): string {
+export const normalizeVariation = (variation: VariationInput): string => {
     if (!variation) return "";
     try {
         const pairs = Array.isArray(variation)
@@ -291,7 +291,7 @@ function normalizeVariation(variation: VariationInput): string {
  * @param {OptimisticCartItem | ClientCartItem} item - The cart item.
  * @returns {string} The unique key for the item.
  */
-const makeQueueKey = (item: OptimisticCartItem | ClientCartItem): string => {
+export const makeQueueKey = (item: OptimisticCartItem | ClientCartItem): string => {
     if ('key' in item && item.key) return item.key;
     const idPart = item.id != null ? String(item.id) : "noid";
     const variationPart = normalizeVariation(item.variation);
