@@ -26,13 +26,6 @@ class PushTokenValidator {
 	const ERROR_CODE = 'woocommerce_invalid_data';
 
 	/**
-	 * The regex to use when validating device locale format.
-	 *
-	 * @since 10.6.0
-	 */
-	const DEVICE_LOCALE_FORMAT = '/^[a-z]{2,3}_[A-Z]{2}$/';
-
-	/**
 	 * The regex to use when validating device UUID format.
 	 *
 	 * @since 10.6.0
@@ -65,7 +58,7 @@ class PushTokenValidator {
 	 *
 	 * @since 10.6.0
 	 */
-	const TOKEN_FORMAT_ANDROID = '/^[A-Za-z0-9=:\_\-\+\/]+$/';
+	const TOKEN_FORMAT_ANDROID = '/^[A-Za-z0-9=:_\-+\/]+$/';
 
 	/**
 	 * Validates ID.

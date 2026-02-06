@@ -658,37 +658,6 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Data provider for valid locale formats.
-	 *
-	 * @return array
-	 */
-	public function valid_locales_provider(): array {
-		return array(
-			'English US'   => array( 'en_US' ),
-			'French'       => array( 'fr_FR' ),
-			'Chinese'      => array( 'zh_CN' ),
-			'Portuguese'   => array( 'pt_BR' ),
-			'Three-letter' => array( 'ast_ES' ),
-		);
-	}
-
-	/**
-	 * Data provider for invalid locale formats.
-	 *
-	 * @return array
-	 */
-	public function invalid_locales_provider(): array {
-		return array(
-			'no underscore'    => array( 'enUS' ),
-			'lowercase region' => array( 'en_gb' ),
-			'uppercase lang'   => array( 'EN_US' ),
-			'just language'    => array( 'en' ),
-			'with hyphen'      => array( 'en-US' ),
-			'too long lang'    => array( 'engl_US' ),
-		);
-	}
-
-	/**
 	 * Data provider for valid platforms.
 	 *
 	 * @return array
