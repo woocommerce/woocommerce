@@ -259,7 +259,7 @@ const getInfoNoticesFromCartUpdates = (
  * @param {VariationInput} variation - The variation object or array.
  * @returns {string} The normalized stringified variation.
  */
-type VariationInput = CartVariationItem[] | Record<string, unknown> | null | undefined;
+type VariationInput = CartVariationItem[] | SelectedAttributes[] | Record<string, unknown> | null | undefined;
 
 function normalizeVariation(variation: VariationInput): string {
     if (!variation) return "";
@@ -294,7 +294,7 @@ function normalizeVariation(variation: VariationInput): string {
 const makeQueueKey = (item: OptimisticCartItem | ClientCartItem): string => {
     if ('key' in item && item.key) return item.key;
     const idPart = item.id != null ? String(item.id) : "noid";
-    const variationPart = normalizeVariation(item.variation as VariationInput);
+    const variationPart = normalizeVariation(item.variation);
     return `${idPart}::${variationPart}`;
 };
 
@@ -335,6 +335,11 @@ const retryCount = new Map<string, number>();
  * Tracks whole-batch retry attempts (network failures).
  */
 let batchRetryCount = 0;
+
+/**
+ * Flag to prevent finally 200ms overriding catch 500ms retry.
+ */
+let batchRetryScheduled = false;
 
 /**
  * Queue for item keys pending removal.
@@ -603,6 +608,7 @@ const { state, actions } = store< Store >(
                         method: "POST",
                         headers: { Nonce: state.nonce, "Content-Type": "application/json" },
                         body: JSON.stringify({ requests: batchRequests }),
+                        signal: AbortSignal.timeout(30000),
                     });
 
                     const data = yield batchResponse.json();
@@ -664,13 +670,14 @@ const { state, actions } = store< Store >(
                         actions.showNoticeError(new Error(__('Some items failed to update. Please refresh or try again.', 'woocommerce')));
                     }
 
-                    batchRetryCount = 0; // success reset
+                    batchRetryCount = 0;
                 } catch (err) {
                     if (_currentId === _requestCounter) {
                         actions.showNoticeError(err as Error);
 
                         if (batchRetryCount < MAX_BATCH_RETRIES) {
                             batchRetryCount++;
+                            batchRetryScheduled = true;
 
                             currentDeletes.forEach((k) => {
                                 deleteQueue.add(k);
@@ -682,7 +689,10 @@ const { state, actions } = store< Store >(
                                 addQueue.set(k, i);
                             });
 
-                            setTimeout(() => actions.processCollectiveActions(), 500); // retry delay
+                            setTimeout(() => {
+                                batchRetryScheduled = false;
+                                actions.processCollectiveActions();
+                            }, 500);
                         } else {
                             batchRetryCount = 0;
                             yield actions.refreshCartItems();
@@ -690,7 +700,7 @@ const { state, actions } = store< Store >(
                     }
                 } finally {
                     isProcessing = false;
-                    if (deleteQueue.size > 0 || updateQueue.size > 0 || addQueue.size > 0) {
+                    if (!batchRetryScheduled && (deleteQueue.size > 0 || updateQueue.size > 0 || addQueue.size > 0)) {
                         setTimeout(() => actions.processCollectiveActions(), 200);
                     }
                 }
@@ -708,6 +718,7 @@ const { state, actions } = store< Store >(
                             method: 'GET',
                             cache: 'no-store',
                             headers: { 'Content-Type': 'application/json' },
+                            signal: AbortSignal.timeout(30000),
                         }
                     );
                     const json: unknown = yield res.json();
