@@ -2,8 +2,13 @@
  * External dependencies
  */
 import { defineConfig, devices } from '@playwright/test';
+import dotenv from 'dotenv';
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
 
-require( 'dotenv' ).config( { path: __dirname + '/.env' } );
+const __dirname = dirname( fileURLToPath( import.meta.url ) );
+
+dotenv.config( { path: __dirname + '/.env' } );
 
 if ( ! process.env.BASE_URL ) {
 	process.env.BASE_URL =
