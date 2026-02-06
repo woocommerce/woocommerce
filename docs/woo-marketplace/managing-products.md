@@ -26,7 +26,7 @@ To maintain a high-quality and competitive Marketplace, we encourage all vendors
 
 ### Adding or editing documentation
 
-To review, edit ,or add documentation, navigate to _Documentation_ in your vendor dashboard. [Review our guidelines for creating effective documentation](https://woocommerce.com/document/writing-documentation/).
+To review, edit, or add documentation, navigate to _Documentation_ in your vendor dashboard. [Review our guidelines for creating effective documentation](https://woocommerce.com/document/writing-documentation/).
 
 ![Documentation management interface](./_media/manage-products-documentation.png)
 
