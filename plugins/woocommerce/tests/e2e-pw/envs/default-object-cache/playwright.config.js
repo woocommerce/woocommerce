@@ -1,5 +1,5 @@
-const config = require( '../../playwright.config.js' );
+import config from '../../playwright.config.mjs';
 
 process.env.USE_WP_ENV = 'true';
 
-module.exports = config;
+export default config;

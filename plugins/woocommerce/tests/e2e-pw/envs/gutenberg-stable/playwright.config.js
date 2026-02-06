@@ -1,12 +1,12 @@
-let config = require( '../../playwright.config.js' );
-const { tags } = require( '../../fixtures/fixtures' );
+import config, { setupProjects } from '../../playwright.config.mjs';
+import { tags } from '../../fixtures/fixtures';
 
 process.env.USE_WP_ENV = 'true';
 
-config = {
-	...config.default,
+export default {
+	...config,
 	projects: [
-		...config.setupProjects,
+		...setupProjects,
 		{
 			name: 'Gutenberg',
 			grep: new RegExp( tags.GUTENBERG ),
@@ -14,5 +14,3 @@ config = {
 		},
 	],
 };
-
-module.exports = config;

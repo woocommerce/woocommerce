@@ -1,3 +1,3 @@
-const config = require( '../gutenberg-stable/playwright.config.js' );
+import config from '../gutenberg-stable/playwright.config.mjs';
 
-module.exports = config;
+export default config;

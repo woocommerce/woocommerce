@@ -1,5 +1,5 @@
-let config = require( '../../playwright.config.js' );
-const { tags } = require( '../../fixtures/fixtures' );
+import config, { setupProjects, TESTS_ROOT_PATH } from '../../playwright.config.mjs';
+import { tags } from '../../fixtures/fixtures';
 
 process.env.IS_WPCOM = 'true';
 process.env.INSTALL_WC = 'true';
@@ -8,13 +8,13 @@ const grepInvert = new RegExp(
 	`${ tags.SKIP_ON_WPCOM }|${ tags.SKIP_ON_EXTERNAL_ENV }|${ tags.COULD_BE_LOWER_LEVEL_TEST }|${ tags.NON_CRITICAL }|${ tags.TO_BE_REMOVED }`
 );
 
-config = {
-	...config.default,
+export default {
+	...config,
 	projects: [
-		...config.setupProjects,
+		...setupProjects,
 		{
 			name: 'reset',
-			testDir: `${ config.TESTS_ROOT_PATH }/fixtures`,
+			testDir: `${ TESTS_ROOT_PATH }/fixtures`,
 			testMatch: 'reset.setup.js',
 		},
 		{
@@ -31,5 +31,3 @@ config = {
 		},
 	],
 };
-
-module.exports = config;
