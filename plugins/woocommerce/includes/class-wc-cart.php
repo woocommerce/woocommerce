@@ -768,8 +768,6 @@ class WC_Cart extends WC_Legacy_Cart {
 
 	/**
 	 * Check all cart items for errors.
-	 *
-	 * @return bool
 	 */
 	public function check_cart_items() {
 		$return = true;
