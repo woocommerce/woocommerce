@@ -106,8 +106,7 @@ The results from the automated tests will be in the **Submission Tests** table, 
 
 ### Programmatically uploading new versions
 
-To deploy an extension programmatically, it must be a extension update and **not** a new submission. This method serves as an alternative to logging into the vendor dashboard and using the user interface (UI) to perform the same action.
-
+To deploy an extension programmatically, it must be an extension update and **not** a new submission. This method serves as an alternative to logging into the vendor dashboard and using the user interface (UI) to perform the same action.
 #### Generating an application password
 
 1. Ensure that you are logged into your WooCommerce vendor dashboard.
