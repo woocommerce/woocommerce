@@ -153,11 +153,11 @@ The Billing API supports subscription upgrades, downgrades, and crossgrades. Use
 
 The Billing API automatically adjusts the next payment date and charges any prorated fee by looking at the cost per day of the old and new subscriptions.
 
-**Downgrade**
+#### Downgrade
 
 The system compensates the merchant for the prepaid amount by pushing the next payment date into the future. It multiplies the price per day of the old subscription with the number of days left in the current billing cycle. It uses this amount to cover as many days as possible at the new subscription price per day. The merchant doesn't pay a prorated fee when they downgrade their subscription.
 
-**Example**
+#### Example
 
 A merchant purchased a $100/year subscription on the 1st of January. They downgrade to a $6/month subscription two months into the billing cycle. As a result, the system pushes the next payment date to the 19th of April of the following year.
 
@@ -169,21 +169,21 @@ A merchant purchased a $100/year subscription on the 1st of January. They downgr
 - The number of days the credit can cover for the new plan → 414 days ( $82.62 / $0.2 = 413,1 rounded up to 414 )
 - Next payment date → April 19th, 2023 ( March 1st + 414 days )
 
-**Crossgrade**
+#### Crossgrade
 
 It's the simplest type of switch to understand. The price per day doesn't change in this case. The system doesn't change the next payment date or charge a prorated fee.
 
-**Example**
+#### Example
 
 A merchant switches from a $10/month subscription to a $120/year one (or vice versa). The price per day is the same, $0.33. The subscription will renew after the prepaid month is up at $120 for the following year.
 
 ### Upgrade
 
-**Upgrading to a subscription with a shorter billing cycle**
+#### Upgrading to a subscription with a shorter billing cycle
 
 The system doesn't charge the merchant a prorated fee when they upgrade to a subscription with a shorter billing cycle. It brings the next payment date closer to the upgrade date, depending on the nr. of days spent in the old billing cycle. The next payment date can be as early as the upgrade date.
 
-**Example**
+#### Example
 
 A merchant subscribes to a $10/month subscription. Twelve days into the billing cycle, they upgrade to a $7/week subscription. Notice the billing cycle of the new subscription is shorter, so no prorated fee is charged.
 
@@ -191,11 +191,11 @@ The system adjusts the next payment date. It multiplies the days spent in the ol
 
 When the amount is lower, it compensates for the difference by extending the renewal date with the number of days covered by the resulting amount, counting from the upgrade date.
 
-**Upgrading to a subscription with an equal or longer billing cycle**
+#### Upgrading to a subscription with an equal or longer billing cycle
 
 The system charges a prorated fee when the merchant upgrades to a subscription with a billing cycle equal to or longer than the old one. It calculates the prorated fee by multiplying the nr. of days remaining in the current subscription's billing cycle with the price per day difference between the two subscriptions. The next payment date doesn't change in this case.
 
-**Example**
+#### Example
 
 The merchant subscribes to a $10/month subscription. Fifteen days into the billing cycle, they upgrade to a $150/year subscription. Note that the billing cycle is longer in this case, so a prorated fee is due. The cost per day for the old and new subscriptions is approximately $0.33 and $0.41, respectively. The price difference between the two is $0.08 per day. There are 15 days left in the current billing cycle, so the system charges a proration fee of $0.08 x 15 days, resulting in a $1.2 upgrade cost. The subscription will renew after those 15 days at $150/year.
 
