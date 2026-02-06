@@ -311,7 +311,6 @@ function sendCartRequest(
 					stateRef.cart = serverState;
 				},
 			},
-			extractServerState: ( body ) => body as Cart,
 		} );
 	}
 
