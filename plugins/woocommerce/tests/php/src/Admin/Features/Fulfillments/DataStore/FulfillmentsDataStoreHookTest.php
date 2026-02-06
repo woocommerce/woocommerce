@@ -1,9 +1,9 @@
 <?php
 declare( strict_types = 1 );
 
-namespace Automattic\WooCommerce\Tests\Internal\DataStores\Fulfillments;
+namespace Automattic\WooCommerce\Tests\Admin\Features\Fulfillments\DataStore;
 
-use Automattic\WooCommerce\Internal\DataStores\Fulfillments\FulfillmentsDataStore;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDataStore;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
 use WC_Helper_Order;
 use WC_Order;

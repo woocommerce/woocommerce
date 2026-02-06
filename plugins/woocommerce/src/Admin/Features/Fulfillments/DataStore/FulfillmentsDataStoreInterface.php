@@ -5,14 +5,14 @@
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\Internal\DataStores\Fulfillments;
+namespace Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore;
 
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
 
 /**
  * Interface FulfillmentsDataStoreInterface
  *
- * @package Automattic\WooCommerce\Internal\DataStores\Fulfillments
+ * @package Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore
  */
 interface FulfillmentsDataStoreInterface {
 	/**

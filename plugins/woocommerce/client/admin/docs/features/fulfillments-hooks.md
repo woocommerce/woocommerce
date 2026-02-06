@@ -12,7 +12,7 @@ Action hooks allow you to execute custom code at specific points in the fulfillm
 
 Fired after a fulfillment is successfully created in the database.
 
-**File:** `src/Internal/DataStores/Fulfillments/FulfillmentsDataStore.php:122`
+**File:** `src/Admin/Features/Fulfillments/DataStore/FulfillmentsDataStore.php:122`
 
 **Parameters:**
 
@@ -32,7 +32,7 @@ function log_fulfillment_creation( $fulfillment ) {
 
 Fired after a fulfillment is marked as fulfilled (both during create and update operations).
 
-**File:** `src/Internal/DataStores/Fulfillments/FulfillmentsDataStore.php:131` and `273`
+**File:** `src/Admin/Features/Fulfillments/DataStore/FulfillmentsDataStore.php:131` and `273`
 
 **Parameters:**
 
@@ -53,7 +53,7 @@ function update_inventory_system( $fulfillment ) {
 
 Fired after a fulfillment is successfully updated in the database.
 
-**File:** `src/Internal/DataStores/Fulfillments/FulfillmentsDataStore.php:262`
+**File:** `src/Admin/Features/Fulfillments/DataStore/FulfillmentsDataStore.php:262`
 
 **Parameters:**
 
@@ -73,7 +73,7 @@ function sync_fulfillment_changes( $fulfillment ) {
 
 Fired after a fulfillment is soft-deleted from the database.
 
-**File:** `src/Internal/DataStores/Fulfillments/FulfillmentsDataStore.php:331`
+**File:** `src/Admin/Features/Fulfillments/DataStore/FulfillmentsDataStore.php:331`
 
 **Parameters:**
 
@@ -341,7 +341,7 @@ function custom_fulfillment_table( $html, $order, $fulfillment ) {
 
 Allows modification of fulfillment data before it's created in the database. If you want to cancel the creation, you can throw a `FulfillmentException` exception, which will cancel the process , and show the error message on the user’s form.
 
-**File:** `src/Internal/DataStores/Fulfillments/FulfillmentsDataStore.php:59`
+**File:** `src/Admin/Features/Fulfillments/DataStore/FulfillmentsDataStore.php:59`
 
 **Parameters:**
 
@@ -373,7 +373,7 @@ function validate_fulfillment_data( $fulfillment ) {
 
 Allows modification of fulfillment data before it's updated in the database.
 
-**File:** `src/Internal/DataStores/Fulfillments/FulfillmentsDataStore.php:197`
+**File:** `src/Admin/Features/Fulfillments/DataStore/FulfillmentsDataStore.php:197`
 
 **Parameters:**
 
@@ -402,7 +402,7 @@ function log_fulfillment_changes( $fulfillment ) {
 
 Allows modification of fulfillment data before it's marked as fulfilled. If you want to cancel the fulfillment, you can throw a `FulfillmentException` exception, which will cancel the process, and show the error message on the user’s form.
 
-**File:** `src/Internal/DataStores/Fulfillments/FulfillmentsDataStore.php:72` and `213`
+**File:** `src/Admin/Features/Fulfillments/DataStore/FulfillmentsDataStore.php:72` and `213`
 
 **Parameters:**
 
@@ -430,7 +430,7 @@ function set_fulfillment_timestamp( $fulfillment ) {
 
 Allows modification of fulfillment data before it's deleted. If you want to cancel the deletion, you can throw a `FulfillmentException` exception, which will cancel the process, and show the error message on the user’s form.
 
-**File:** `src/Internal/DataStores/Fulfillments/FulfillmentsDataStore.php:298`
+**File:** `src/Admin/Features/Fulfillments/DataStore/FulfillmentsDataStore.php:298`
 
 **Parameters:**
 

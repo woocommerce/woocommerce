@@ -4,7 +4,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Admin\Features\Fulfillments;
 
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
-use Automattic\WooCommerce\Internal\DataStores\Fulfillments\FulfillmentsDataStore;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDataStore;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsManager;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\Tests\Admin\Features\Fulfillments\Helpers\FulfillmentsHelper;

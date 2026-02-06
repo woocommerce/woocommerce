@@ -7,7 +7,7 @@
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\Internal\DataStores\Fulfillments;
+namespace Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore;
 
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentUtils;

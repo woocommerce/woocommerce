@@ -2,7 +2,7 @@
 
 namespace Automattic\WooCommerce\Tests\Admin\Features\Fulfillments;
 
-use Automattic\WooCommerce\Internal\DataStores\Fulfillments\FulfillmentsDataStore;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDataStore;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsSettings;
 use WC_Order;
 use WC_Order_Item_Product;
