@@ -1295,17 +1295,15 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	/**
 	 * Parse short info JSON into an array of coupon properties without validation.
 	 *
-	 * @since 10.6.0
-	 *
-	 * @param string $info JSON string as returned by 'get_short_info'.
-	 * @return array {
+	 * `@param` string $info JSON string as returned by 'get_short_info'.
+	 * `@return` array {
 	 *     Parsed coupon properties.
 	 *
-	 *     @type int    $id            Coupon ID.
-	 *     @type string $code          Coupon code.
-	 *     @type string $discount_type Discount type ('fixed_cart', 'percent', etc.).
-	 *     @type float  $amount        Discount amount.
-	 *     @type bool   $free_shipping Whether free shipping is enabled.
+	 *     `@type` int    $id            Coupon ID.
+	 *     `@type` string $code          Coupon code.
+	 *     `@type` string $discount_type Discount type ('fixed_cart', 'percent', etc.).
+	 *     `@type` float  $amount        Discount amount.
+	 *     `@type` bool   $free_shipping Whether free shipping is enabled.
 	 * }
 	 */
 	private static function parse_short_info( string $info ): array {
