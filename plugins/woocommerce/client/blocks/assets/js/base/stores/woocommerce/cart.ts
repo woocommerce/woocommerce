@@ -21,7 +21,7 @@ import type {
 /**
  * Internal dependencies
  */
-// Removed unused triggerAddedToCartEvent import
+// Removed unused triggerAddedToCartEvent
 
 export type WooCommerceConfig = {
     products?: {
@@ -205,7 +205,8 @@ const getInfoNoticesFromCartUpdates = (
         ( old ) =>
             old.key &&
             isCartItem( old ) &&
-            ! newItems.some( ( item ) => old.key === item.key )
+            ! newItems.some( ( item ) => old.key === item.key ) &&
+            ! pendingDelete.includes( old.key )
     );
 
     const autoUpdatedToNotify = newItems.filter( ( item ) => {
@@ -213,11 +214,12 @@ const getInfoNoticesFromCartUpdates = (
             return false;
         }
         const old = oldItems.find( ( o ) => o.key === item.key );
-        return old
-            ? ! pendingQuantity.includes( item.key ) &&
-                    item.quantity !== old.quantity &&
-                    old.quantity > 0
-            : false;
+        if ( old ) {
+            return ! pendingQuantity.includes( item.key ) &&
+                item.quantity !== old.quantity &&
+                old.quantity > 0;
+        }
+        return ! pendingAdd.includes( item.id );
     } );
 
     return [
@@ -305,6 +307,11 @@ const MAX_BATCH_SIZE = 50;
 const MAX_RETRIES = 3;
 
 /**
+ * Tracks retry attempts per queue key to enforce MAX_RETRIES across batches.
+ */
+const retryCount = new Map<string, number>();
+
+/**
  * Queue for item keys pending removal.
  */
 let deleteQueue: Set<string> = new Set();
@@ -382,41 +389,13 @@ const scheduleCollectiveSync = (immediate = false) => {
 let pendingRefresh = false;
 let refreshTimeout = 3000;
 
-/**
- * Emits a custom event to trigger store synchronization.
- *
- * @param {{ quantityChanges: QuantityChanges }} options - The quantity changes to include in the event detail.
- */
-function emitSyncEvent( {
-    quantityChanges,
-}: {
-    quantityChanges: QuantityChanges;
-} ) {
-    window.dispatchEvent(
-        new CustomEvent( 'wc-blocks_store_sync_required', {
-            detail: {
-                type: 'from_iAPI',
-                quantityChanges,
-            },
-        } )
-    );
-}
-
-// Todo: export this store once the store is public.
 const { state, actions } = store< Store >(
     'woocommerce',
     {
         actions: {
-            /**
-             * Optimistically removes an item from the cart and queues the removal request.
-             * Cancels any pending add/update for the same item to prevent ghosts.
-             *
-             * @param {string} key - The cart item key to remove.
-             */
             *removeCartItem(key: string) {
                 const removedItem = state.cart.items.find(i => i.key === key);
 
-                // Optimistic UI Update
                 state.cart.items = state.cart.items.filter((t) => t.key !== key);
 
                 if (removedItem) {
@@ -431,13 +410,6 @@ const { state, actions } = store< Store >(
 
                 scheduleCollectiveSync();
             },
-            /**
-             * Adds an item to the cart or updates an existing one.
-             * Handles variation matching and optimistic updates.
-             * Only queues update-item if the item has a server key.
-             *
-             * @param {ClientCartItem} itemData - The item data to add or update.
-             */
             *addCartItem(
                 { id, key, quantity, variation }: ClientCartItem
             ) {
@@ -482,12 +454,6 @@ const { state, actions } = store< Store >(
 
                 scheduleCollectiveSync();
             },
-            /**
-             * Batch adds multiple items to the cart in a single batch operation.
-             * Applies the same server-key logic as addCartItem.
-             *
-             * @param {ClientCartItem[]} items - Array of items to add.
-             */
             *batchAddCartItems(
                 items: ClientCartItem[]
             ) {
@@ -530,10 +496,6 @@ const { state, actions } = store< Store >(
                 });
                 scheduleCollectiveSync();
             },
-            /**
-             * Processes the current queues (add, update, remove) into a single batch request.
-             * Optimized for fast response and slow networks: reduced debounce, immediate remainder processing, stronger backoff.
-             */
             *processCollectiveActions() {
                 if (isProcessing) return;
                 if (deleteQueue.size === 0 && updateQueue.size === 0 && addQueue.size === 0) return;
@@ -556,7 +518,6 @@ const { state, actions } = store< Store >(
 
                 let remainingSlots = MAX_BATCH_SIZE;
 
-                // Priority: deletes first for instant remove feel
                 const processDeletes = currentDeletes.slice(0, remainingSlots);
                 remainingSlots -= processDeletes.length;
                 const remainderDeletes = currentDeletes.slice(processDeletes.length);
@@ -577,7 +538,6 @@ const { state, actions } = store< Store >(
                     addQueue.set(key, item);
                 });
 
-                // BUILDING REQUESTS (minimal body)
                 processDeletes.forEach(key => {
                     batchRequests.push({
                         method: "POST",
@@ -593,7 +553,7 @@ const { state, actions } = store< Store >(
                         method: "POST",
                         path: "/wc/store/v1/cart/update-item",
                         headers: { Nonce: state.nonce, "Content-Type": "application/json" },
-                        body: { key, quantity: item.quantity } // Minimal body
+                        body: { key, quantity: item.quantity }
                     });
                     requestMap.set(batchRequests.length - 1, { type: 'update', key, item });
                 });
@@ -608,7 +568,7 @@ const { state, actions } = store< Store >(
                         method: "POST",
                         path: "/wc/store/v1/cart/add-item",
                         headers: { Nonce: state.nonce, "Content-Type": "application/json" },
-                        body: addBody // No type/key
+                        body: addBody
                     });
                     requestMap.set(batchRequests.length - 1, { type: 'add', key, item });
                 });
@@ -630,15 +590,9 @@ const { state, actions } = store< Store >(
                     if (isApiErrorResponse(batchResponse, data)) throw generateError(data);
 
                     if (_currentId !== _requestCounter) {
-                        processDeletes.forEach((k) => {
-                            deleteQueue.add(k);
-                        });
-                        processUpdates.forEach(([k, i]) => {
-                            updateQueue.set(k, i);
-                        });
-                        processAdds.forEach(([k, i]) => {
-                            addQueue.set(k, i);
-                        });
+                        currentDeletes.forEach((k) => deleteQueue.add(k));
+                        currentUpdates.forEach(([k, i]) => updateQueue.set(k, i));
+                        currentAdds.forEach(([k, i]) => addQueue.set(k, i));
                         return;
                     }
 
@@ -646,7 +600,6 @@ const { state, actions } = store< Store >(
                     let hasErrors = false;
                     let finalCartState: Cart | null = null;
 
-                    // Find last successful response
                     for (let i = responses.length - 1; i >= 0; i--) {
                         if (responses[i].status >= 200 && responses[i].status < 300 && responses[i].body) {
                             finalCartState = responses[i].body;
@@ -654,8 +607,6 @@ const { state, actions } = store< Store >(
                         }
                     }
 
-                    // Retry with limit
-                    const retryCount = new Map<string, number>();
                     responses.forEach((res, index) => {
                         const meta = requestMap.get(index);
                         if (!meta) return;
@@ -670,7 +621,11 @@ const { state, actions } = store< Store >(
                                     const targetQueue = meta.type === 'update' ? updateQueue : addQueue;
                                     targetQueue.set(meta.key, meta.item!);
                                 }
-                            } // Else drop after MAX_RETRIES
+                            } else {
+                                retryCount.delete(meta.key); // drop
+                            }
+                        } else {
+                            retryCount.delete(meta.key); // success clear
                         }
                     });
 
@@ -685,29 +640,15 @@ const { state, actions } = store< Store >(
                 } catch (err) {
                     if (_currentId === _requestCounter) {
                         actions.showNoticeError(err as Error);
-                        // Re-queue all on network error
-                        processDeletes.forEach((k) => {
-                            deleteQueue.add(k);
-                        });
-                        processUpdates.forEach(([k, i]) => {
-                            updateQueue.set(k, i);
-                        });
-                        processAdds.forEach(([k, i]) => {
-                            addQueue.set(k, i);
-                        });
                         yield actions.refreshCartItems();
                     }
                 } finally {
                     isProcessing = false;
-                    // Immediate next batch if remainder
                     if (deleteQueue.size > 0 || updateQueue.size > 0 || addQueue.size > 0) {
-                        setTimeout(() => actions.processCollectiveActions(), 0);
+                        setTimeout(() => actions.processCollectiveActions(), 200); // short delay after error
                     }
                 }
             },
-            /**
-             * Refreshes the cart items from the server with capped backoff for slow networks.
-             */
             *refreshCartItems() {
                 if (pendingRefresh) return;
                 pendingRefresh = true;
@@ -723,33 +664,29 @@ const { state, actions } = store< Store >(
                             headers: { 'Content-Type': 'application/json' },
                         }
                     );
-                    const json: Cart = yield res.json();
+                    const json: unknown = yield res.json();
 
-                    if ( isApiErrorResponse( res, json ) )
-                        throw generateError( json );
+                    if ( isApiErrorResponse( res, json ) ) {
+                        throw generateError( json as ApiErrorResponse );
+                    }
 
                     if ( _refreshId !== _requestCounter ) {
                         return;
                     }
 
-                    applyServerState(json);
+                    applyServerState(json as Cart);
                     reapplyOptimisticState();
 
                     refreshTimeout = 3000;
                 } catch ( error ) {
                     if ( _refreshId === _requestCounter ) {
                         setTimeout( actions.refreshCartItems, refreshTimeout );
-                        refreshTimeout = Math.min(refreshTimeout * 3, 30000); // Cap at 30s
+                        refreshTimeout = Math.min(refreshTimeout * 3, 30000);
                     }
                 } finally {
                     pendingRefresh = false;
                 }
             },
-            /**
-             * Shows an error notice based on the provided error.
-             *
-             * @param {Error | ApiErrorResponse} error - The error to display.
-             */
             *showNoticeError( error: Error | ApiErrorResponse ) {
                 yield import( '@woocommerce/stores/store-notices' );
                 const { actions: noticeActions } = store< StoreNotices >(
@@ -773,12 +710,6 @@ const { state, actions } = store< Store >(
 
                 console.error( error );
             },
-            /**
-             * Updates notices in the store-notices.
-             *
-             * @param {Notice[]} newNotices - Array of new notices to add.
-             * @param {boolean} removeOthers - Whether to remove existing notices.
-             */
             *updateNotices( newNotices: Notice[] = [], removeOthers = false ) {
                 yield import( '@woocommerce/stores/store-notices' );
                 const { state: noticeState, actions: noticeActions } =
@@ -810,11 +741,8 @@ const { state, actions } = store< Store >(
 window.addEventListener(
     'wc-blocks_store_sync_required',
     async ( event: Event ) => {
-        const customEvent = event as CustomEvent< {
-            type: string;
-            id: number;
-        } >;
-        if ( customEvent.detail.type === 'from_@wordpress/data' ) {
+        const customEvent = event as CustomEvent<{ type?: string }>;
+        if ( customEvent.detail?.type === 'from_@wordpress/data' ) {
             actions.refreshCartItems();
         }
     }
