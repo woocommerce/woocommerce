@@ -1295,8 +1295,8 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	/**
 	 * Parse short info JSON into an array of coupon properties without validation.
 	 *
-	 * `@param` string $info JSON string as returned by 'get_short_info'.
-	 * `@return` array {
+	 * @param string $info JSON string as returned by 'get_short_info'.
+	 * @return array {
 	 *     Parsed coupon properties.
 	 *
 	 *     `@type` int    $id            Coupon ID.
