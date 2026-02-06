@@ -25,6 +25,14 @@ If you are using an IDE like Cursor or Windsurf, we recommend adding these links
 
 **Note** that these do not include the contents of the [WC REST API documentation](https://woocommerce.github.io/woocommerce-rest-api-docs/#introduction) or the [WooCommerce Code Reference](https://woocommerce.github.io/code-reference/).
 
+### Serve as Markdown
+
+If you want to view the documentation as Markdown files, you can use append `.md` to the end of any documentation URL. For example, to view this page as Markdown, you can visit:   
+
+```plain
+https://developer.woocommerce.com/docs/getting-started/ai.md
+``` 
+
 ### Copy to Markdown
 
 On every page of the Developer Docs, you'll see a Clipboard icon in the upper-right hand corner. Selecting this icon will copy the current doc in Markdown formatting, which you can paste into your LLM's chat interface.
