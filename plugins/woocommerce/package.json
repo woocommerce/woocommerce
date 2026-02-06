@@ -959,6 +959,9 @@
 				"node_modules/@woocommerce/admin-library/build",
 				"node_modules/@woocommerce/block-library/build",
 				"node_modules/@woocommerce/classic-assets/build",
+				"node_modules/@woocommerce/e2e-utils-playwright/build",
+				"node_modules/@woocommerce/e2e-utils-playwright/build-module",
+				"node_modules/@woocommerce/e2e-utils-playwright/build-types",
 				"node_modules/@woocommerce/eslint-plugin/configs",
 				"node_modules/@woocommerce/eslint-plugin/rules",
 				"node_modules/@woocommerce/eslint-plugin/index.js"

@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Admin: optimized SQL fetching dates for month filter on orders page

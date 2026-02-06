@@ -586,7 +586,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @param WC_Product $product Product object.
 	 */
 	protected function read_attributes( &$product ) {
-		$meta_attributes = get_post_meta( $product->get_id(), '_product_attributes', true );
+		$product_id      = $product->get_id();
+		$meta_attributes = get_post_meta( $product_id, '_product_attributes', true );
 
 		if ( ! empty( $meta_attributes ) && is_array( $meta_attributes ) ) {
 			$attributes = array();
@@ -609,7 +610,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 						continue;
 					}
 					$id      = wc_attribute_taxonomy_id_by_name( $meta_value['name'] );
-					$options = wc_get_object_terms( $product->get_id(), $meta_value['name'], 'term_id' );
+					$options = wc_get_object_terms( $product_id, $meta_value['name'], 'term_id' );
 				} else {
 					$id      = 0;
 					$options = wc_get_text_attributes( $meta_value['value'] );

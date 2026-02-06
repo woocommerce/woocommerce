@@ -84,6 +84,8 @@ class CartBlockingTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test add to cart blocked when session blocked.
+	 *
 	 * @testdox add_to_cart returns false and adds notice when session is blocked.
 	 */
 	public function test_add_to_cart_blocked_when_session_blocked(): void {
@@ -99,6 +101,8 @@ class CartBlockingTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test add to cart allowed when session allowed.
+	 *
 	 * @testdox add_to_cart succeeds when session is allowed.
 	 */
 	public function test_add_to_cart_allowed_when_session_allowed(): void {
@@ -112,6 +116,8 @@ class CartBlockingTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test add to cart allowed when feature disabled.
+	 *
 	 * @testdox add_to_cart succeeds when fraud protection is disabled.
 	 */
 	public function test_add_to_cart_allowed_when_feature_disabled(): void {
@@ -125,6 +131,8 @@ class CartBlockingTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test remove cart item blocked when session blocked.
+	 *
 	 * @testdox remove_cart_item returns false when session is blocked.
 	 */
 	public function test_remove_cart_item_blocked_when_session_blocked(): void {
@@ -142,6 +150,8 @@ class CartBlockingTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test remove cart item allowed when session allowed.
+	 *
 	 * @testdox remove_cart_item succeeds when session is allowed.
 	 */
 	public function test_remove_cart_item_allowed_when_session_allowed(): void {
@@ -156,6 +166,8 @@ class CartBlockingTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test remove cart item allowed when feature disabled.
+	 *
 	 * @testdox remove_cart_item succeeds when fraud protection is disabled.
 	 */
 	public function test_remove_cart_item_allowed_when_feature_disabled(): void {
@@ -169,6 +181,8 @@ class CartBlockingTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test set quantity blocked when session blocked.
+	 *
 	 * @testdox set_quantity returns false when session is blocked.
 	 */
 	public function test_set_quantity_blocked_when_session_blocked(): void {
@@ -186,6 +200,8 @@ class CartBlockingTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test set quantity allowed when session allowed.
+	 *
 	 * @testdox set_quantity succeeds when session is allowed.
 	 */
 	public function test_set_quantity_allowed_when_session_allowed(): void {
@@ -200,6 +216,8 @@ class CartBlockingTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test set quantity allowed when feature disabled.
+	 *
 	 * @testdox set_quantity succeeds when fraud protection is disabled.
 	 */
 	public function test_set_quantity_allowed_when_feature_disabled(): void {

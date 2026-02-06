@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix: get order(s) REST API endpoints failing when invalid coupon metadata is stored
