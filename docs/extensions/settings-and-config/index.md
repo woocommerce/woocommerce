@@ -1,0 +1,11 @@
+---
+title: Settings and config
+sidebar_position: 0
+sidebar_class_name: category-index
+---
+
+import DocCardList from '@theme/DocCardList';
+
+# Settings and config
+
+<DocCardList />

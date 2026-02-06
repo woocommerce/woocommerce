@@ -9,6 +9,12 @@
   src: url('/fonts/Inter-VariableFont_slnt,wght.woff2');
 }
 
+@font-face {
+  font-family: 'Proxima Vara';
+  src: url('/fonts/ProximaVara.woff2') format('woff2');
+  font-display: swap;
+}
+
 /* You can override the default Infima variables here. */
 :root {
   --ifm-color-primary: #720eec; /* WooCommerce Purple 50 */
@@ -22,6 +28,7 @@
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
   --ifm-font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif,
     'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+  --ifm-heading-font-family: 'Proxima Vara', var(--ifm-font-family-base);
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
@@ -77,4 +84,263 @@ html[class*=docs-doc-id-getting-started] .pagination-nav {
 /* Hide next pagination nav at end of Getting Started */
 html.docs-doc-id-getting-started\/version-control-deployment .pagination-nav .pagination-nav__link--next {
   display: none;
+}
+
+
+/* ===== Image Lightbox ===== */
+.markdown img {
+  cursor: zoom-in;
+  transition: transform 0.2s ease;
+}
+
+.markdown img:hover {
+  opacity: 0.9;
+}
+
+/* Lightbox overlay */
+.lightbox-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.9);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  cursor: zoom-out;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.lightbox-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.lightbox-overlay img {
+  max-width: 90%;
+  max-height: 90%;
+  object-fit: contain;
+  border-radius: 4px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  color: white;
+  font-size: 40px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  line-height: 1;
+}
+
+.lightbox-close:hover {
+  color: #ccc;
+}
+
+
+/* ===== FAQ Details/Summary Styling ===== */
+.markdown details {
+  --docusaurus-details-decoration-color: transparent;
+  background-color: var(--ifm-color-emphasis-100);
+  border: none !important;
+  box-shadow: none;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  padding: 0;
+}
+
+.markdown details summary {
+  font-weight: 700;
+  padding: 1rem 1rem 1rem 2.5rem;
+  cursor: pointer;
+  list-style: none;
+  border: none !important;
+  border-bottom: none !important;
+  position: relative;
+}
+
+.markdown details summary::marker,
+.markdown details summary::-webkit-details-marker {
+  display: none;
+  content: '';
+}
+
+.markdown details summary::before {
+  content: '›';
+  font-size: 1.2rem;
+  font-weight: 300;
+  transition: transform 0.2s ease;
+  display: inline-block;
+  position: absolute;
+  left: 1rem;
+  top: calc(1rem - 3px);
+  transform-origin: center center;
+  line-height: 1;
+}
+
+.markdown details[open] summary::before {
+  transform: rotate(90deg) translateX(-0.05rem);
+}
+
+.markdown details[open] summary {
+  border-bottom: none !important;
+  padding-bottom: 0;
+  margin-bottom: 0;
+}
+
+.markdown details > *:not(summary) {
+  padding: 0 1rem 1rem 2.5rem;
+  border: none !important;
+  margin-top: 0 !important;
+}
+
+.markdown details > p:first-of-type,
+.markdown details > div > p:first-child {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  margin-bottom: 0;
+}
+
+.markdown details > div:first-of-type {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+.markdown details [class*='collapsibleContent'] {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+.markdown details p:last-child {
+  margin-bottom: 0;
+}
+
+.markdown details a {
+  color: var(--ifm-color-primary);
+  text-decoration: none;
+}
+
+.markdown details a:hover {
+  color: var(--ifm-color-primary-dark);
+  text-decoration: underline;
+}
+
+.markdown details strong {
+  font-weight: inherit;
+}
+
+.markdown details ul,
+.markdown details ol {
+  color: inherit;
+}
+
+.markdown details li {
+  color: inherit;
+}
+
+/* Hide the self-referencing Woo Marketplace card on the category index page */
+article .col:has(> a[href="/docs/woo-marketplace/"]) {
+  display: none !important;
+}
+
+/* Apply Proxima Vara to all headings */
+h1, h2, h3, h4, h5, h6,
+.markdown h1, .markdown h2, .markdown h3, .markdown h4, .markdown h5, .markdown h6 {
+  font-family: var(--ifm-heading-font-family);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+/* Fix table of contents to the right side of the screen */
+.theme-doc-toc-desktop {
+  position: sticky;
+  top: calc(var(--ifm-navbar-height) + 1rem);
+  max-height: calc(100vh - var(--ifm-navbar-height) - 2rem);
+  overflow-y: auto;
+}
+
+/* Remove container width restrictions to use full available space */
+.container {
+  max-width: none !important;
+}
+
+.main-wrapper {
+  max-width: none !important;
+}
+
+/* Center the document column with flexbox */
+.docItemCol_VOVn {
+  display: flex;
+  justify-content: center;
+  min-width: 0;
+}
+
+/* Set width constraints for document container */
+.docItemContainer_Djhp {
+  min-width: 0;
+  max-width: 46rem;
+}
+
+/* Ensure category cards are left-aligned (not centered when odd number) */
+article .row,
+[class*="cardContainer"] {
+  justify-content: flex-start !important;
+}
+
+/* Hide self-referencing Settings and config card on its own index page */
+article .col:has(> a[href="/docs/category/settings-and-config/"]),
+article .col:has(> a[href="/docs/extensions/settings-and-config/"]) {
+  display: none !important;
+}
+
+/* Set max-width for footer links and center on screen */
+.footer__links {
+  max-width: 1320px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* GitHub-style ordered list with circled numbers */
+.markdown ol {
+  list-style: none;
+  counter-reset: item;
+  padding-left: 0;
+}
+
+.markdown ol > li {
+  counter-increment: item;
+  position: relative;
+  padding-left: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.markdown ol > li::before {
+  content: counter(item);
+  position: absolute;
+  left: 0;
+  top: 0.125rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #eaeef2;
+  color: #1f2328;
+  border-radius: 50%;
+  font-weight: 600;
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
+/* Dark mode colors for ordered list circles */
+html[data-theme='dark'] .markdown ol > li::before {
+  background-color: #343942;
+  color: #e6edf3;
 }
