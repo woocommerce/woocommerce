@@ -101,11 +101,19 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 		if ( 1 === $columns ) {
 			// Single column layout - render products vertically.
 			$content = '';
+			$index   = 0;
 			foreach ( $products as $product ) {
+				// For the first product, use the original email_attrs.
+				// For subsequent products, add margin-top for spacing between items.
+				$email_attrs = $inner_block['email_attrs'] ?? array();
+				if ( $index > 0 && ! isset( $email_attrs['margin-top'] ) ) {
+					$email_attrs['margin-top'] = '32px';
+				}
 				$content .= $this->add_spacer(
 					$this->render_product_content( $product, $inner_block, $collection_type ),
-					$inner_block['email_attrs'] ?? array()
+					$email_attrs
 				);
+				++$index;
 			}
 			return $content;
 		}
@@ -189,7 +197,8 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 	 * @return string
 	 */
 	private function render_product_content( ?\WC_Product $product, array $template_block, string $collection_type, ?int $cell_width = null ): string {
-		$content = '';
+		$content             = '';
+		$previous_block_name = null;
 
 		if ( ! $product ) {
 			return $content;
@@ -200,6 +209,12 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 			if ( null !== $cell_width ) {
 				$inner_block['email_attrs']          = $inner_block['email_attrs'] ?? array();
 				$inner_block['email_attrs']['width'] = $cell_width . 'px';
+			}
+
+			// Adjust spacing between image and title for better visual hierarchy.
+			if ( 'core/post-title' === $inner_block['blockName'] && 'woocommerce/product-image' === $previous_block_name ) {
+				$inner_block['email_attrs']               = $inner_block['email_attrs'] ?? array();
+				$inner_block['email_attrs']['margin-top'] = '32px';
 			}
 
 			switch ( $inner_block['blockName'] ) {
@@ -233,6 +248,8 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 				default:
 					break;
 			}
+
+			$previous_block_name = $inner_block['blockName'];
 		}
 
 		return $content;
