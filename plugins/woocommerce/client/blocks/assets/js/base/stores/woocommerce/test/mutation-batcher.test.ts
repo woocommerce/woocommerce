@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { createMutationQueue, type StateHandler } from '../mutation-batcher';
+import { createMutationQueue } from '../mutation-batcher';
 
 // Test state type
 type TestState = { value: number };
@@ -39,7 +39,11 @@ describe( 'createMutationQueue', () => {
 	let originalFetch: typeof global.fetch;
 	let mockState: TestState;
 	let snapshot: TestState | null;
-	let stateHandler: StateHandler< TestState >;
+	let stateHandler: {
+		takeSnapshot: () => TestState;
+		rollback: ( snap: TestState ) => void;
+		commit: ( serverState: TestState ) => void;
+	};
 
 	beforeEach( () => {
 		originalFetch = global.fetch;
@@ -54,7 +58,7 @@ describe( 'createMutationQueue', () => {
 			rollback: ( snap ) => {
 				mockState = { ...snap };
 			},
-			applyServerState: ( serverState ) => {
+			commit: ( serverState ) => {
 				mockState = { ...serverState };
 			},
 		};
@@ -76,7 +80,7 @@ describe( 'createMutationQueue', () => {
 			const queue = createMutationQueue( {
 				endpoint: '/batch',
 				getHeaders: () => ( {} ),
-				stateHandler,
+				...stateHandler,
 			} );
 
 			// Submit 3 requests synchronously
@@ -109,7 +113,7 @@ describe( 'createMutationQueue', () => {
 			const queue = createMutationQueue( {
 				endpoint: '/batch',
 				getHeaders: () => ( {} ),
-				stateHandler,
+				...stateHandler,
 			} );
 
 			// First request applies optimistic update
@@ -151,7 +155,7 @@ describe( 'createMutationQueue', () => {
 			const queue = createMutationQueue( {
 				endpoint: '/batch',
 				getHeaders: () => ( {} ),
-				stateHandler,
+				...stateHandler,
 			} );
 
 			await Promise.all( [
@@ -176,7 +180,7 @@ describe( 'createMutationQueue', () => {
 			const queue = createMutationQueue( {
 				endpoint: '/batch',
 				getHeaders: () => ( {} ),
-				stateHandler,
+				...stateHandler,
 			} );
 
 			const p1 = queue.submit( { id: '1', path: '/a', method: 'POST' } );
@@ -202,7 +206,7 @@ describe( 'createMutationQueue', () => {
 			const queue = createMutationQueue( {
 				endpoint: '/batch',
 				getHeaders: () => ( {} ),
-				stateHandler,
+				...stateHandler,
 			} );
 
 			// Apply optimistic updates
@@ -238,7 +242,7 @@ describe( 'createMutationQueue', () => {
 			const queue = createMutationQueue( {
 				endpoint: '/batch',
 				getHeaders: () => ( {} ),
-				stateHandler,
+				...stateHandler,
 			} );
 
 			const p1 = queue.submit( {
@@ -262,7 +266,7 @@ describe( 'createMutationQueue', () => {
 			const queue = createMutationQueue( {
 				endpoint: '/batch',
 				getHeaders: () => ( {} ),
-				stateHandler,
+				...stateHandler,
 			} );
 
 			const p1 = queue.submit( {
@@ -289,7 +293,7 @@ describe( 'createMutationQueue', () => {
 			const queue = createMutationQueue( {
 				endpoint: '/batch',
 				getHeaders: () => ( {} ),
-				stateHandler,
+				...stateHandler,
 			} );
 
 			let isProcessingDuringOnSettled: boolean | undefined;
@@ -321,7 +325,7 @@ describe( 'createMutationQueue', () => {
 			const queue = createMutationQueue( {
 				endpoint: '/batch',
 				getHeaders: () => ( {} ),
-				stateHandler,
+				...stateHandler,
 			} );
 
 			let settledResult:
@@ -358,7 +362,7 @@ describe( 'createMutationQueue', () => {
 			const queue = createMutationQueue( {
 				endpoint: '/batch',
 				getHeaders: () => ( {} ),
-				stateHandler,
+				...stateHandler,
 			} );
 
 			let settledResult: { success: boolean; error?: Error } | undefined;
@@ -402,7 +406,7 @@ describe( 'createMutationQueue', () => {
 			const queue = createMutationQueue( {
 				endpoint: '/batch',
 				getHeaders: () => ( {} ),
-				stateHandler,
+				...stateHandler,
 			} );
 
 			// First batch - submit and let microtask fire
@@ -463,7 +467,7 @@ describe( 'createMutationQueue', () => {
 			const queue = createMutationQueue( {
 				endpoint: '/batch',
 				getHeaders: () => ( {} ),
-				stateHandler,
+				...stateHandler,
 			} );
 
 			// First request - starts the cycle
@@ -525,7 +529,7 @@ describe( 'createMutationQueue', () => {
 			const queue = createMutationQueue( {
 				endpoint: '/batch',
 				getHeaders: () => ( {} ),
-				stateHandler,
+				...stateHandler,
 			} );
 
 			// Initially idle
@@ -587,7 +591,7 @@ describe( 'createMutationQueue', () => {
 			const queue = createMutationQueue( {
 				endpoint: '/batch',
 				getHeaders: () => ( {} ),
-				stateHandler,
+				...stateHandler,
 			} );
 
 			// Create a mutable body object
@@ -625,7 +629,7 @@ describe( 'createMutationQueue', () => {
 			const queue = createMutationQueue( {
 				endpoint: '/batch',
 				getHeaders: () => ( {} ),
-				stateHandler,
+				...stateHandler,
 			} );
 
 			// Should resolve immediately — nothing in progress.
@@ -644,7 +648,7 @@ describe( 'createMutationQueue', () => {
 			const queue = createMutationQueue( {
 				endpoint: '/batch',
 				getHeaders: () => ( {} ),
-				stateHandler,
+				...stateHandler,
 			} );
 
 			queue.submit( { id: '1', path: '/a', method: 'POST' } );
@@ -686,7 +690,7 @@ describe( 'createMutationQueue', () => {
 			const queue = createMutationQueue( {
 				endpoint: '/batch',
 				getHeaders: () => ( {} ),
-				stateHandler,
+				...stateHandler,
 			} );
 
 			queue.submit( { id: '1', path: '/a', method: 'POST' } );

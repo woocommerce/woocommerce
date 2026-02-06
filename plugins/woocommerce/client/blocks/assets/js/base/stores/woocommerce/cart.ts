@@ -302,15 +302,12 @@ function sendCartRequest(
 			getHeaders: () => ( {
 				Nonce: stateRef.nonce,
 			} ),
-			stateHandler: {
-				takeSnapshot: () =>
-					JSON.parse( JSON.stringify( stateRef.cart ) ),
-				rollback: ( snapshot ) => {
-					stateRef.cart = snapshot;
-				},
-				applyServerState: ( serverState ) => {
-					stateRef.cart = serverState;
-				},
+			takeSnapshot: () => JSON.parse( JSON.stringify( stateRef.cart ) ),
+			rollback: ( snapshot ) => {
+				stateRef.cart = snapshot;
+			},
+			commit: ( serverState ) => {
+				stateRef.cart = serverState;
 			},
 		} );
 	}

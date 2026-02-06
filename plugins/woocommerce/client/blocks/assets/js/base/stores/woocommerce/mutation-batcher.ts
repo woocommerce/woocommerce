@@ -6,18 +6,12 @@
  * arrive while a batch is in-flight are queued for the next batch.
  *
  * Reconciliation after all batches complete:
- * - If ANY request succeeded → apply the last successful server state
+ * - If ANY request succeeded → commit the last successful server state
  * - If ALL requests failed → rollback to the pre-cycle snapshot
  *
  * Each submit() returns a promise that resolves/rejects based on that
  * individual request's success or failure within the batch.
  */
-
-export type StateHandler< TState = unknown > = {
-	takeSnapshot: () => TState;
-	rollback: ( snapshot: TState ) => void;
-	applyServerState: ( serverState: TState ) => void;
-};
 
 export type SettledResult< TState = unknown > = {
 	success: boolean;
@@ -55,7 +49,9 @@ type BatchItemResponse = {
 export type MutationQueueConfig< TState = unknown > = {
 	endpoint: string;
 	getHeaders: () => Record< string, string >;
-	stateHandler: StateHandler< TState >;
+	takeSnapshot: () => TState;
+	rollback: ( snapshot: TState ) => void;
+	commit: ( serverState: TState ) => void;
 };
 
 type TrackedRequest< TState = unknown > = {
@@ -68,7 +64,7 @@ type TrackedRequest< TState = unknown > = {
 export function createMutationQueue< TState >(
 	config: MutationQueueConfig< TState >
 ) {
-	const { endpoint, getHeaders, stateHandler } = config;
+	const { endpoint, getHeaders, takeSnapshot, rollback, commit } = config;
 
 	// Snapshot taken once at the start of each processing cycle.
 	let snapshot: TState | null = null;
@@ -94,9 +90,9 @@ export function createMutationQueue< TState >(
 
 	function reconcile() {
 		if ( lastServerState !== null ) {
-			stateHandler.applyServerState( lastServerState );
+			commit( lastServerState );
 		} else if ( snapshot !== null ) {
-			stateHandler.rollback( snapshot );
+			rollback( snapshot );
 		}
 
 		// Run onSettled callbacks while isProcessing is still true.
@@ -258,7 +254,7 @@ export function createMutationQueue< TState >(
 		return new Promise( ( resolve, reject ) => {
 			// First request in a cycle: snapshot and start processing.
 			if ( ! isProcessing ) {
-				snapshot = stateHandler.takeSnapshot();
+				snapshot = takeSnapshot();
 				isProcessing = true;
 			}
 
