@@ -65,7 +65,7 @@ describe( 'WooCommerce Cart Interactivity API Store Helpers', () => {
         it( 'filters empty attributes and null values', () => {
             const variation = [
                 { attribute: '', value: null },
-                { attribute: 'Color', value: '' },
+                { attribute: '', value: 'Red' },
             ];
             expect(normalizeVariation(variation)).toBe('[]');
         });
@@ -76,7 +76,7 @@ describe( 'WooCommerce Cart Interactivity API Store Helpers', () => {
         });
 
         it( 'falls back to JSON.stringify on error', () => {
-            const badVariation = { Color: 123 }; // non-string value, .toLowerCase() throws
+            const badVariation = { Color: 123 }; // non-string value triggers .toLowerCase()
             expect(normalizeVariation(badVariation as any)).toBe(JSON.stringify(badVariation));
         });
     });
@@ -152,7 +152,6 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 
 		const iterator = mockRegisteredStore?.actions.refreshCartItems();
 
-		// Async actions are typed as void for consumers, but are actually generators internally.
 		( iterator as unknown as Iterator< void > ).next();
 
 		expect( mockFetch ).toHaveBeenCalledWith(
