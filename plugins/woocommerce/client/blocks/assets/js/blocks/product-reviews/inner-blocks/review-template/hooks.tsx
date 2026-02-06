@@ -168,9 +168,8 @@ export const useCommentTree = (
 	} >,
 	commentOrder: string
 ) => {
-	console.log( 'topLevelComments', topLevelComments );
 	const commentTree = useMemo( () => {
-		let comms = topLevelComments?.map(
+		const comments = topLevelComments?.map(
 			( {
 				id,
 				children,
@@ -189,9 +188,9 @@ export const useCommentTree = (
 			}
 		);
 		if ( commentOrder === 'desc' ) {
-			comms = comms?.reverse();
+			return comments.reverse();
 		}
-		return comms;
+		return comments;
 	}, [ topLevelComments, commentOrder ] );
 
 	return commentTree;

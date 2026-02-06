@@ -4,6 +4,8 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes\Reviews;
 use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
 use WP_Comment_Query;
 use WP_Block;
+use WP_Comment;
+
 /**
  * ProductReviewTemplate class.
  */
@@ -31,16 +33,20 @@ class ProductReviewTemplate extends AbstractBlock {
 	 *
 	 * @since 6.3.0 Changed render_block_context priority to `1`.
 	 *
-	 * @param WP_Comment[] $comments        The array of comments.
-	 * @param WP_Block     $block           Block instance.
-	 * @param int          $current_depth   Current depth of comments, defaults to 1.
+	 * @param WP_Comment[] $comments      The array of comments.
+	 * @param WP_Block     $block         Block instance.
+	 * @param int          $current_depth Current depth of comments, defaults to 1.
 	 *
 	 * @return string
 	 */
-	protected function block_product_review_template_render_comments( $comments, $block, $current_depth = 1 ) {
+	protected function block_product_review_template_render_comments( array $comments, WP_Block $block, int $current_depth = 1 ): string {
 		$content = '';
 
 		foreach ( $comments as $comment ) {
+			if ( ! $comment instanceof WP_Comment ) {
+				continue;
+			}
+
 			$comment_id           = $comment->comment_ID;
 			$filter_block_context = static function ( $context ) use ( $comment_id ) {
 				$context['commentId'] = $comment_id;
@@ -68,18 +74,22 @@ class ProductReviewTemplate extends AbstractBlock {
 			$children = $comment->get_children();
 
 			/*
-			 * We need to create the CSS classes BEFORE recursing into the children.
-			 * This is because comment_class() uses globals like `$comment_alt`
-			 * and `$comment_thread_alt` which are order-sensitive.
-			 *
-			 * The `false` parameter at the end means that we do NOT want the function
-			 * to `echo` the output but to return a string.
-			 * See https://developer.wordpress.org/reference/functions/comment_class/#parameters.
-			 */
-			$comment_classes = comment_class( '', $comment->comment_ID, $comment->comment_post_ID, false );
+			* We need to create the CSS classes BEFORE recursing into the children.
+			* This is because comment_class() uses globals like `$comment_alt`
+			* and `$comment_thread_alt` which are order-sensitive.
+			*
+			* The `false` parameter at the end means that we do NOT want the function
+			* to `echo` the output but to return a string.
+			* See https://developer.wordpress.org/reference/functions/comment_class/#parameters.
+			*/
+			$comment_classes = comment_class(
+				'',
+				(int) $comment->comment_ID,
+				(int) $comment->comment_post_ID,
+				false
+			);
 
-			// If the comment has children, recurse to create the HTML for the nested
-			// comments, respecting the configured thread depth.
+			// If the comment has children, recurse to create the HTML for the nested comments.
 			if ( ! empty( $children ) ) {
 				$inner_content  = $this->block_product_review_template_render_comments(
 					$children,
