@@ -18,7 +18,7 @@
  */
 
 use Automattic\WooCommerce\Internal\DataStores\Fulfillments\FulfillmentsDataStore;
-use Automattic\WooCommerce\Fulfillments\FulfillmentUtils;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentUtils;
 
  // phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
 

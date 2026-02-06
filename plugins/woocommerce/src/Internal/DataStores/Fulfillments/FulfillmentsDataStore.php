@@ -9,8 +9,8 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\DataStores\Fulfillments;
 
-use Automattic\WooCommerce\Fulfillments\Fulfillment;
-use Automattic\WooCommerce\Fulfillments\FulfillmentUtils;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentUtils;
 use WC_Meta_Data;
 
 if ( ! defined( 'ABSPATH' ) ) {
