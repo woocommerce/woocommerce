@@ -70915,6 +70915,12 @@ parameters:
 			path: src/Internal/ProductImage/MatchImageBySKU.php
 
 		-
+			message: '#^Parameter \#1 \$id of method Automattic\\WooCommerce\\Internal\\PushNotifications\\DataStores\\PushTokensDataStore\:\:build_meta_array_from_database\(\) expects int, int\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Internal/PushNotifications/DataStores/PushTokensDataStore.php
+
+		-
 			message: '#^@param string \$css does not accept actual type of parameter\: string\|false\.$#'
 			identifier: parameter.phpDocType
 			count: 1

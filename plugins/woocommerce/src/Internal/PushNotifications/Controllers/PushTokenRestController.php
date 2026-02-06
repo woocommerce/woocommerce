@@ -113,13 +113,12 @@ class PushTokenRestController extends RestApiControllerBase {
 			);
 
 			$data_store     = wc_get_container()->get( PushTokensDataStore::class );
-			$existing_token = $data_store->get_by_token_or_device_id( $data );
+			$push_token = $data_store->get_by_token_or_device_id( $data );
 
-			if ( $existing_token ) {
-				$existing_token->set_token( $data['token'] );
-				$existing_token->set_device_uuid( $data['device_uuid'] );
-				$data_store->update( $existing_token );
-				$push_token = $existing_token;
+			if ( $push_token ) {
+				$push_token->set_token( $data['token'] );
+				$push_token->set_device_uuid( $data['device_uuid'] );
+				$data_store->update( $push_token );
 			} else {
 				$push_token = $data_store->create( $data );
 			}
