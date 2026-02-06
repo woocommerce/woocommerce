@@ -505,6 +505,14 @@ class EmailsSettingsSchema extends AbstractSchema {
 			return $validated;
 		}
 
+		if ( ! is_array( $validated ) ) {
+			return new WP_Error(
+				'rest_invalid_filter_result',
+				__( 'Invalid result from filter.', 'woocommerce' ),
+				array( 'status' => 500 )
+			);
+		}
+
 		return $validated;
 	}
 

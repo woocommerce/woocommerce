@@ -213,6 +213,28 @@ class Controller extends AbstractController {
 			$reply_to_enabled = wc_bool_to_string( $values_to_update['woocommerce_email_reply_to_enabled'] );
 		}
 
+		/**
+		 * Filters the values to update before validation and sanitization.
+		 *
+		 * @param array $values_to_update Values to update.
+		 * @param array $settings_by_id Settings by ID.
+		 * @return array Values to update.
+		 * @since 10.6.0
+		 */
+		$values_to_update = apply_filters( 'woocommerce_emails_api_settings_schema_validate_and_sanitize_settings', $values_to_update, $settings_by_id );
+
+		if ( is_wp_error( $values_to_update ) ) {
+			return $values_to_update;
+		}
+
+		if ( ! is_array( $values_to_update ) ) {
+			return new WP_Error(
+				'rest_invalid_filter_result',
+				__( 'Invalid result from filter.', 'woocommerce' ),
+				array( 'status' => 500 )
+			);
+		}
+
 		// Process each setting in the payload.
 		foreach ( $values_to_update as $setting_id => $setting_value ) {
 			// Sanitize the setting ID.
@@ -236,20 +258,6 @@ class Controller extends AbstractController {
 
 			// Store validated values first.
 			$validated_settings[ $setting_id ] = $sanitized_value;
-		}
-
-		/**
-		 * Filters the validated settings before updating.
-		 *
-		 * @param array $validated_settings Validated settings.
-		 * @param array $settings_by_id Settings by ID.
-		 * @param array $values_to_update Values to update.
-		 * @return array Validated settings.
-		 * @since 10.6.0
-		 */
-		$validated_settings = apply_filters( 'woocommerce_emails_api_settings_schema_validate_and_sanitize_settings', $validated_settings, $settings_by_id, $values_to_update );
-		if ( is_wp_error( $validated_settings ) ) {
-			return $validated_settings;
 		}
 
 		// After validation loop, update all settings.
