@@ -104,23 +104,23 @@ class PushTokenRestController extends RestApiControllerBase {
 	 */
 	public function create( WP_REST_Request $request ) {
 		try {
-			$push_token = new PushToken();
-			$push_token->set_user_id( get_current_user_id() );
-			$push_token->set_token( $request->get_param( 'token' ) );
-			$push_token->set_platform( $request->get_param( 'platform' ) );
-			$push_token->set_device_uuid( $request->get_param( 'device_uuid' ) );
-			$push_token->set_origin( $request->get_param( 'origin' ) );
+			$data = array(
+				'user_id'     => get_current_user_id(),
+				'token'       => $request->get_param( 'token' ),
+				'platform'    => $request->get_param( 'platform' ),
+				'device_uuid' => $request->get_param( 'device_uuid' ),
+				'origin'      => $request->get_param( 'origin' ),
+			);
 
 			$data_store = wc_get_container()->get( PushTokensDataStore::class );
+			$push_token = $data_store->get_by_token_or_device_id( $data );
 
-			$existing_token = clone $push_token;
-			$existing_token = $data_store->get_by_token_or_device_id( $existing_token );
-
-			if ( $existing_token ) {
-				$push_token->set_id( (int) $existing_token->get_id() );
+			if ( $push_token ) {
+				$push_token->set_token( $data['token'] );
+				$push_token->set_device_uuid( $data['device_uuid'] );
 				$data_store->update( $push_token );
 			} else {
-				$data_store->create( $push_token );
+				$push_token = $data_store->create( $data );
 			}
 		} catch ( Exception $e ) {
 			return $this->convert_exception_to_wp_error( $e );
@@ -140,21 +140,28 @@ class PushTokenRestController extends RestApiControllerBase {
 	 * @param WP_REST_Request $request The request object.
 	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
 	 * @throws PushTokenNotFoundException If token does not belong to authenticated user.
+	 * @throws WC_Data_Exception If token wasn't deleted.
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function delete( WP_REST_Request $request ) {
 		try {
-			$push_token = new PushToken();
-			$push_token->set_id( (int) $request->get_param( 'id' ) );
-
+			$id         = (int) $request->get_param( 'id' );
 			$data_store = wc_get_container()->get( PushTokensDataStore::class );
-			$data_store->read( $push_token );
+			$push_token = $data_store->read( $id );
 
 			if ( $push_token->get_user_id() !== get_current_user_id() ) {
 				throw new PushTokenNotFoundException();
 			}
 
-			$data_store->delete( $push_token );
+			$deleted = $data_store->delete( $id );
+
+			if ( ! $deleted ) {
+				throw new WC_Data_Exception(
+					'woocommerce_push_token_not_deleted',
+					'The push token could not be deleted.',
+					WP_Http::INTERNAL_SERVER_ERROR
+				);
+			}
 		} catch ( Exception $e ) {
 			return $this->convert_exception_to_wp_error( $e );
 		}
