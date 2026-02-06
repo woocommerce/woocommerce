@@ -194,7 +194,7 @@ const generateInfoNotice = ( message: string ): Notice => ( {
 const getInfoNoticesFromCartUpdates = (
     oldCart: Store[ 'state' ][ 'cart' ],
     newCart: Cart,
-    quantityChanges: QuantityChanges
+    quantityChanges: QuantityChanges = {}
 ): Notice[] => {
     const oldItems = oldCart.items;
     const newItems = newCart.items;
@@ -662,8 +662,14 @@ const { state, actions } = store< Store >(
                     });
 
                     if (finalCartState) {
+                        const oldCart = { ...state.cart, items: state.cart.items.map(i => ({ ...i })) };
                         applyServerState(finalCartState);
                         reapplyOptimisticState();
+
+                        const infoNotices = getInfoNoticesFromCartUpdates(oldCart, state.cart);
+                        if (infoNotices.length > 0) {
+                            yield actions.updateNotices(infoNotices);
+                        }
                     }
 
                     if (hasErrors) {
@@ -731,8 +737,14 @@ const { state, actions } = store< Store >(
                         return;
                     }
 
+                    const oldCart = { ...state.cart, items: state.cart.items.map(i => ({ ...i })) };
                     applyServerState(json as Cart);
                     reapplyOptimisticState();
+
+                    const infoNotices = getInfoNoticesFromCartUpdates(oldCart, state.cart);
+                    if (infoNotices.length > 0) {
+                        yield actions.updateNotices(infoNotices);
+                    }
 
                     refreshTimeout = 3000;
                 } catch ( error ) {
