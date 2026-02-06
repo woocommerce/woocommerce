@@ -106,6 +106,9 @@ export default function AttributeOptionsEdit(
 					<ToolsPanelItem
 						hasValue={ () => optionStyle !== 'pills' }
 						label={ __( 'Style', 'woocommerce' ) }
+						onDeselect={ () =>
+							setAttributes( { optionStyle: 'pills' } )
+						}
 						isShownByDefault
 					>
 						<ToggleGroupControl
@@ -138,7 +141,12 @@ export default function AttributeOptionsEdit(
 				</ToolsPanel>
 				<ToolsPanel
 					label={ __( 'Auto-select', 'woocommerce' ) }
-					resetAll={ () => setAttributes( { autoselect: false } ) }
+					resetAll={ () =>
+						setAttributes( {
+							autoselect: false,
+							disabledAttributesAction: 'disable',
+						} )
+					}
 				>
 					<ToolsPanelItem
 						label={ __(
@@ -146,6 +154,9 @@ export default function AttributeOptionsEdit(
 							'woocommerce'
 						) }
 						hasValue={ () => autoselect }
+						onDeselect={ () =>
+							setAttributes( { autoselect: false } )
+						}
 						isShownByDefault
 					>
 						<ToggleControl
@@ -163,6 +174,19 @@ export default function AttributeOptionsEdit(
 							}
 							__nextHasNoMarginBottom
 						/>
+					</ToolsPanelItem>
+					<ToolsPanelItem
+						label={ __( 'Invalid options', 'woocommerce' ) }
+						hasValue={ () =>
+							disabledAttributesAction !== 'disable'
+						}
+						onDeselect={ () =>
+							setAttributes( {
+								disabledAttributesAction: 'disable',
+							} )
+						}
+						isShownByDefault
+					>
 						<ToggleGroupControl
 							label={ __( 'Invalid options', 'woocommerce' ) }
 							help={ __(
