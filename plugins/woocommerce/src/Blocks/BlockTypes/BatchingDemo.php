@@ -174,6 +174,22 @@ class BatchingDemo extends AbstractBlock {
 		</button>
 
 		<button
+			data-wp-on--click="actions.failureDemo"
+			data-wp-bind--disabled="context.isRunning"
+			style="
+				background: #c62828;
+				color: white;
+				border: none;
+				padding: 10px 16px;
+				border-radius: 4px;
+				cursor: pointer;
+				font-size: 14px;
+			"
+		>
+			Failure Handling (invalid ID in batch)
+		</button>
+
+		<button
 			data-wp-on--click="actions.clearLog"
 			style="
 				background: #666;
