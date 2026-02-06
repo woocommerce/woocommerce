@@ -21,7 +21,6 @@ import type {
 /**
  * Internal dependencies
  */
-// Removed unused triggerAddedToCartEvent
 
 export type WooCommerceConfig = {
     products?: {
@@ -79,8 +78,6 @@ export type ProductData = {
     step?: number;
     variations?: Record< number, VariationData >;
 };
-
-type CartUpdateOptions = { showCartUpdatesNotices?: boolean };
 
 export type Store = {
     state: {
@@ -209,23 +206,34 @@ const getInfoNoticesFromCartUpdates = (
             ! pendingDelete.includes( old.key )
     );
 
+    const autoAddedToNotify = newItems.filter(
+        ( item ) =>
+            isCartItem( item ) &&
+            ! oldItems.some( ( old ) => old.key === item.key ) &&
+            ! pendingAdd.includes( item.id )
+    );
+
     const autoUpdatedToNotify = newItems.filter( ( item ) => {
         if ( ! isCartItem( item ) ) {
             return false;
         }
         const old = oldItems.find( ( o ) => o.key === item.key );
-        if ( old ) {
-            return ! pendingQuantity.includes( item.key ) &&
+        return old
+            ? ! pendingQuantity.includes( item.key ) &&
                 item.quantity !== old.quantity &&
-                old.quantity > 0;
-        }
-        return ! pendingAdd.includes( item.id );
+                old.quantity > 0
+            : false;
     } );
 
     return [
         ...autoDeletedToNotify.map( ( item ) =>
             generateInfoNotice(
                 sprintf( __( '"%s" was removed from your cart.', 'woocommerce' ), item.name )
+            )
+        ),
+        ...autoAddedToNotify.map( ( item ) =>
+            generateInfoNotice(
+                sprintf( __( '"%s" was added to your cart.', 'woocommerce' ), item.name )
             )
         ),
         ...autoUpdatedToNotify.map( ( item ) =>
@@ -590,9 +598,15 @@ const { state, actions } = store< Store >(
                     if (isApiErrorResponse(batchResponse, data)) throw generateError(data);
 
                     if (_currentId !== _requestCounter) {
-                        currentDeletes.forEach((k) => deleteQueue.add(k));
-                        currentUpdates.forEach(([k, i]) => updateQueue.set(k, i));
-                        currentAdds.forEach(([k, i]) => addQueue.set(k, i));
+                        currentDeletes.forEach((k) => {
+                            deleteQueue.add(k);
+                        });
+                        currentUpdates.forEach(([k, i]) => {
+                            updateQueue.set(k, i);
+                        });
+                        currentAdds.forEach(([k, i]) => {
+                            addQueue.set(k, i);
+                        });
                         return;
                     }
 
@@ -622,10 +636,10 @@ const { state, actions } = store< Store >(
                                     targetQueue.set(meta.key, meta.item!);
                                 }
                             } else {
-                                retryCount.delete(meta.key); // drop
+                                retryCount.delete(meta.key);
                             }
                         } else {
-                            retryCount.delete(meta.key); // success clear
+                            retryCount.delete(meta.key);
                         }
                     });
 
@@ -645,7 +659,7 @@ const { state, actions } = store< Store >(
                 } finally {
                     isProcessing = false;
                     if (deleteQueue.size > 0 || updateQueue.size > 0 || addQueue.size > 0) {
-                        setTimeout(() => actions.processCollectiveActions(), 200); // short delay after error
+                        setTimeout(() => actions.processCollectiveActions(), 200);
                     }
                 }
             },
