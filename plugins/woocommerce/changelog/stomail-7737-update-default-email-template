@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Update default email template footer styling and center-align footer text across all block email templates.

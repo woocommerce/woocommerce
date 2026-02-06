@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix missing order attribution elements when checkout page is pre-rendered.

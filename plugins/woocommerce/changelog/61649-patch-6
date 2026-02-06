@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Updated offerCount product schema value to only count purchasable product variations, excluding those without price or stock.

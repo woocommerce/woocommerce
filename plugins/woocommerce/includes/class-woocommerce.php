@@ -35,6 +35,8 @@ use Automattic\WooCommerce\Utilities\{LoggingUtil, TimeUtil};
 use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
 use Automattic\WooCommerce\Caches\OrderCountCacheService;
 use Automattic\WooCommerce\Internal\Caches\ProductVersionStringInvalidator;
+use Automattic\WooCommerce\Internal\Caches\OrdersVersionStringInvalidator;
+use Automattic\WooCommerce\Internal\Caches\TaxRateVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
 use Automattic\Jetpack\Constants;
 
@@ -360,6 +362,8 @@ final class WooCommerce {
 		$container->get( AbilitiesRegistry::class );
 		$container->get( MCPAdapterProvider::class );
 		$container->get( ProductVersionStringInvalidator::class );
+		$container->get( OrdersVersionStringInvalidator::class );
+		$container->get( TaxRateVersionStringInvalidator::class );
 
 		// Feature flags.
 		if ( Constants::is_true( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) ) {
@@ -382,6 +386,7 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Admin\Agentic\AgenticController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ProductFeed\ProductFeed::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\PushNotifications\PushNotifications::class )->register();
 
 		// Classes inheriting from RestApiControllerBase.
 		$container->get( Automattic\WooCommerce\Internal\ReceiptRendering\ReceiptRenderingRestController::class )->register();
@@ -471,6 +476,9 @@ final class WooCommerce {
 
 	/**
 	 * Define WC Constants.
+	 *
+	 * IMPORTANT: When adding new constants here, also add them to
+	 * php-stubs/wc-constants.php for PHPStan static analysis.
 	 */
 	private function define_constants() {
 		$this->define( 'WC_ABSPATH', dirname( WC_PLUGIN_FILE ) . '/' );
@@ -529,8 +537,10 @@ final class WooCommerce {
 		);
 
 		foreach ( $tables as $name => $table ) {
-			$wpdb->$name    = $wpdb->prefix . $table;
-			$wpdb->tables[] = $table;
+			$wpdb->$name = $wpdb->prefix . $table;
+			if ( ! in_array( $table, $wpdb->tables, true ) ) {
+				$wpdb->tables[] = $table;
+			}
 		}
 	}
 
@@ -1541,6 +1551,9 @@ final class WooCommerce {
 
 		// Schedule daily sales event at midnight tomorrow.
 		$scheduled_sales_time = strtotime( '00:00 tomorrow ' . $offset_hours );
+		if ( false === $scheduled_sales_time ) {
+			$scheduled_sales_time = strtotime( '00:00 tomorrow' );
+		}
 
 		as_schedule_recurring_action( $scheduled_sales_time, DAY_IN_SECONDS, 'woocommerce_scheduled_sales', array(), 'woocommerce', true );
 
@@ -1559,7 +1572,13 @@ final class WooCommerce {
 		}
 
 		$tomorrow_3am = strtotime( 'tomorrow 03:00 am ' . $offset_hours );
+		if ( false === $tomorrow_3am ) {
+			$tomorrow_3am = strtotime( 'tomorrow 03:00 am' );
+		}
 		$tomorrow_6am = strtotime( 'tomorrow 06:00 am ' . $offset_hours );
+		if ( false === $tomorrow_6am ) {
+			$tomorrow_6am = strtotime( 'tomorrow 06:00 am' );
+		}
 
 		// Delay the first run of `woocommerce_cleanup_personal_data` by 10 seconds
 		// so it doesn't occur in the same request. WooCommerce Admin also schedules

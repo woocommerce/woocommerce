@@ -7,7 +7,9 @@ namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
 
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\ValidateSchema;
+use Automattic\WooCommerce\StoreApi\Authentication;
 use Automattic\WooCommerce\StoreApi\SessionHandler;
+use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
 use Automattic\WooCommerce\StoreApi\Utilities\JsonWebToken;
 use Spy_REST_Server;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
@@ -611,6 +613,84 @@ class Cart extends ControllerTestCase {
 				'@' . wp_salt()
 			)
 		);
+	}
+
+	/**
+	 * Test Store API uses SessionHandler when Cart-Token is present via REQUEST_URI.
+	 */
+	public function test_store_api_uses_session_handler_for_cart_token() {
+		$customer_id = (string) wc()->session->get_customer_id();
+		$token       = CartTokenUtils::get_cart_token( $customer_id );
+
+		// Preserve globals.
+		$old_server = $_SERVER;
+
+		try {
+			// Simulate a Store API request with valid Cart-Token.
+			$_SERVER['REQUEST_URI']     = '/' . rest_get_url_prefix() . '/wc/store/v1/cart';
+			$_SERVER['HTTP_CART_TOKEN'] = $token;
+
+			$authentication = new Authentication();
+			$result         = $authentication->maybe_use_store_api_session_handler( 'WC_Session_Handler' );
+
+			$this->assertSame( SessionHandler::class, $result );
+		} finally {
+			// Restore globals.
+			$_SERVER = $old_server;
+		}
+	}
+
+	/**
+	 * Test Store API uses SessionHandler when rest_route GET parameter is present.
+	 */
+	public function test_rest_route_get_parameter_uses_store_api_session_handler() {
+		$customer_id = (string) wc()->session->get_customer_id();
+		$token       = CartTokenUtils::get_cart_token( $customer_id );
+
+		// Preserve globals.
+		$old_get    = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Test context.
+		$old_server = $_SERVER;
+
+		try {
+			// Simulate a Store API request via GET parameter with valid Cart-Token.
+			$_GET['rest_route']         = '/wc/store/v1/cart';
+			$_SERVER['HTTP_CART_TOKEN'] = $token;
+
+			$authentication = new Authentication();
+			$result         = $authentication->maybe_use_store_api_session_handler( 'WC_Session_Handler' );
+
+			$this->assertSame( SessionHandler::class, $result );
+		} finally {
+			// Restore globals.
+			$_GET    = $old_get;
+			$_SERVER = $old_server;
+		}
+	}
+
+	/**
+	 * Test non-Store API routes do not switch to Store API session handler.
+	 */
+	public function test_non_store_api_route_does_not_use_store_api_session_handler() {
+		$customer_id = (string) wc()->session->get_customer_id();
+		$token       = CartTokenUtils::get_cart_token( $customer_id );
+
+		// Preserve globals.
+		$old_server = $_SERVER;
+
+		try {
+			// Simulate a non-Store API request (even with valid Cart-Token).
+			$_SERVER['REQUEST_URI']     = '/' . rest_get_url_prefix() . '/wp/v2/posts';
+			$_SERVER['HTTP_CART_TOKEN'] = $token;
+
+			$authentication = new Authentication();
+			$result         = $authentication->maybe_use_store_api_session_handler( 'WC_Session_Handler' );
+
+			// Should return the default handler for non-Store API routes.
+			$this->assertSame( 'WC_Session_Handler', $result );
+		} finally {
+			// Restore globals.
+			$_SERVER = $old_server;
+		}
 	}
 
 	/**

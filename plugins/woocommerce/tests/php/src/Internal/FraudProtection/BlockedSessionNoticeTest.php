@@ -52,41 +52,98 @@ class BlockedSessionNoticeTest extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		parent::tearDown();
-		remove_all_actions( 'woocommerce_before_checkout_form' );
 		remove_all_actions( 'before_woocommerce_add_payment_method' );
+		remove_all_actions( 'wp' );
 		delete_option( 'woocommerce_email_from_address' );
+		wc_clear_notices();
 	}
 
 	/**
-	 * @testdox Should display checkout-specific error notice when woocommerce_before_checkout_form action fires for blocked sessions.
+	 * Test blocked purchase notice added on checkout.
+	 *
+	 * @testdox maybe_add_blocked_purchase_notice should add notice when session is blocked and on checkout page.
 	 */
-	public function test_checkout_action_displays_blocked_message(): void {
+	public function test_blocked_purchase_notice_added_on_checkout(): void {
 		$this->mock_session_manager->method( 'is_session_blocked' )->willReturn( true );
 
-		ob_start();
-		do_action( 'woocommerce_before_checkout_form' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-		$output = ob_get_clean();
+		// Mock being on checkout page.
+		add_filter( 'woocommerce_is_checkout', '__return_true' );
 
-		$this->assertStringContainsString( 'unable to process this request online', $output, 'Should display blocked message on checkout' );
-		$this->assertStringContainsString( 'to complete your purchase', $output, 'Should display checkout-specific message' );
-		$this->assertStringContainsString( 'support@example.com', $output, 'Should include support email in message' );
-		$this->assertStringContainsString( 'mailto:support@example.com', $output, 'Should include mailto link' );
+		do_action( 'wp' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+
+		remove_filter( 'woocommerce_is_checkout', '__return_true' );
+
+		$this->assertTrue( wc_has_notice( $this->sut->get_message_html( 'purchase' ), 'error' ), 'Should add purchase notice on checkout' );
 	}
 
 	/**
-	 * @testdox Should not display message when checkout action fires for non-blocked sessions.
+	 * Test blocked purchase notice added on cart.
+	 *
+	 * @testdox maybe_add_blocked_purchase_notice should add notice when session is blocked and on cart page.
 	 */
-	public function test_checkout_action_no_message_for_non_blocked_session(): void {
+	public function test_blocked_purchase_notice_added_on_cart(): void {
+		$this->mock_session_manager->method( 'is_session_blocked' )->willReturn( true );
+
+		// Mock being on cart page.
+		add_filter( 'woocommerce_is_cart', '__return_true' );
+
+		do_action( 'wp' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+
+		remove_filter( 'woocommerce_is_cart', '__return_true' );
+
+		$this->assertTrue( wc_has_notice( $this->sut->get_message_html( 'purchase' ), 'error' ), 'Should add purchase notice on cart' );
+	}
+
+	/**
+	 * Test blocked purchase notice not added when session allowed.
+	 *
+	 * @testdox maybe_add_blocked_purchase_notice should not add notice when session is not blocked.
+	 */
+	public function test_blocked_purchase_notice_not_added_when_session_allowed(): void {
 		$this->mock_session_manager->method( 'is_session_blocked' )->willReturn( false );
 
-		ob_start();
-		do_action( 'woocommerce_before_checkout_form' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-		$output = ob_get_clean();
+		// Mock being on checkout page.
+		add_filter( 'woocommerce_is_checkout', '__return_true' );
 
-		$this->assertEmpty( $output, 'Non-blocked sessions should not display any message' );
+		do_action( 'wp' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+
+		remove_filter( 'woocommerce_is_checkout', '__return_true' );
+
+		$this->assertFalse( wc_has_notice( $this->sut->get_message_html( 'purchase' ), 'error' ), 'Should not add notice when session is allowed' );
 	}
 
 	/**
+	 * Test blocked purchase notice prevents duplicates.
+	 *
+	 * @testdox maybe_add_blocked_purchase_notice should not add duplicate notices.
+	 */
+	public function test_blocked_purchase_notice_prevents_duplicates(): void {
+		$this->mock_session_manager->method( 'is_session_blocked' )->willReturn( true );
+
+		// Mock being on checkout page.
+		add_filter( 'woocommerce_is_checkout', '__return_true' );
+
+		do_action( 'wp' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( 'wp' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+
+		remove_filter( 'woocommerce_is_checkout', '__return_true' );
+
+		// Count error notices.
+		$notices      = wc_get_notices( 'error' );
+		$message      = $this->sut->get_message_html( 'purchase' );
+		$notice_count = 0;
+		foreach ( $notices as $notice ) {
+			if ( $notice['notice'] === $message ) {
+				++$notice_count;
+			}
+		}
+
+		$this->assertEquals( 1, $notice_count, 'Should only have one notice even after calling twice' );
+	}
+
+	/**
+	 * Test add payment method action displays blocked message.
+	 *
 	 * @testdox Should display generic error notice when before_woocommerce_add_payment_method action fires for blocked sessions.
 	 */
 	public function test_add_payment_method_action_displays_blocked_message(): void {
@@ -103,6 +160,8 @@ class BlockedSessionNoticeTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test add payment method action no message for non blocked session.
+	 *
 	 * @testdox Should not display message when add payment method action fires for non-blocked sessions.
 	 */
 	public function test_add_payment_method_action_no_message_for_non_blocked_session(): void {
@@ -116,10 +175,12 @@ class BlockedSessionNoticeTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox get_message_html should return checkout-specific message when context is 'checkout'.
+	 * Test get message html purchase context.
+	 *
+	 * @testdox get_message_html should return purchase-specific message when context is 'purchase'.
 	 */
-	public function test_get_message_html_checkout_context(): void {
-		$message = $this->sut->get_message_html( 'checkout' );
+	public function test_get_message_html_purchase_context(): void {
+		$message = $this->sut->get_message_html( 'purchase' );
 
 		$this->assertEquals(
 			'We are unable to process this request online. Please <a href="mailto:support@example.com">contact support (support@example.com)</a> to complete your purchase.',
@@ -128,6 +189,8 @@ class BlockedSessionNoticeTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test get message html generic context.
+	 *
 	 * @testdox get_message_html should return generic message when context is 'generic' or not specified.
 	 */
 	public function test_get_message_html_generic_context(): void {
@@ -141,10 +204,12 @@ class BlockedSessionNoticeTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox get_message_plaintext should return checkout-specific message when context is 'checkout'.
+	 * Test get message plaintext purchase context.
+	 *
+	 * @testdox get_message_plaintext should return purchase-specific message when context is 'purchase'.
 	 */
-	public function test_get_message_plaintext_checkout_context(): void {
-		$message = $this->sut->get_message_plaintext( 'checkout' );
+	public function test_get_message_plaintext_purchase_context(): void {
+		$message = $this->sut->get_message_plaintext( 'purchase' );
 
 		$this->assertEquals(
 			'We are unable to process this request online. Please contact support (support@example.com) to complete your purchase.',
@@ -153,6 +218,8 @@ class BlockedSessionNoticeTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test get message plaintext generic context.
+	 *
 	 * @testdox get_message_plaintext should return generic message when context is 'generic' or not specified.
 	 */
 	public function test_get_message_plaintext_generic_context(): void {

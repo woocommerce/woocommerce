@@ -190,5 +190,6 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 
 		include dirname( dirname( dirname( dirname( __DIR__ ) ) ) ) . '/uninstall.php';
 		delete_transient( 'wc_installing' );
+		delete_option( 'wc_installing' );
 	}
 }

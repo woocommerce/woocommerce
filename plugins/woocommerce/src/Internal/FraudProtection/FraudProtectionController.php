@@ -39,6 +39,13 @@ class FraudProtectionController implements RegisterHooksInterface {
 	private BlockedSessionNotice $blocked_session_notice;
 
 	/**
+	 * Blackbox script handler instance.
+	 *
+	 * @var BlackboxScriptHandler
+	 */
+	private BlackboxScriptHandler $blackbox_script_handler;
+
+	/**
 	 * Register hooks.
 	 */
 	public function register(): void {
@@ -52,15 +59,18 @@ class FraudProtectionController implements RegisterHooksInterface {
 	 *
 	 * @internal
 	 *
-	 * @param FeaturesController   $features_controller      The instance of FeaturesController to use.
-	 * @param BlockedSessionNotice $blocked_session_notice   The instance of BlockedSessionNotice to use.
+	 * @param FeaturesController    $features_controller      The instance of FeaturesController to use.
+	 * @param BlockedSessionNotice  $blocked_session_notice   The instance of BlockedSessionNotice to use.
+	 * @param BlackboxScriptHandler $blackbox_script_handler  The instance of BlackboxScriptHandler to use.
 	 */
 	final public function init(
 		FeaturesController $features_controller,
-		BlockedSessionNotice $blocked_session_notice
+		BlockedSessionNotice $blocked_session_notice,
+		BlackboxScriptHandler $blackbox_script_handler
 	): void {
-		$this->features_controller    = $features_controller;
-		$this->blocked_session_notice = $blocked_session_notice;
+		$this->features_controller     = $features_controller;
+		$this->blocked_session_notice  = $blocked_session_notice;
+		$this->blackbox_script_handler = $blackbox_script_handler;
 	}
 
 	/**
@@ -75,6 +85,7 @@ class FraudProtectionController implements RegisterHooksInterface {
 		}
 
 		$this->blocked_session_notice->register();
+		$this->blackbox_script_handler->register();
 	}
 
 	/**

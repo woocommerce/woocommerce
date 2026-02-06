@@ -295,7 +295,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			isOnlyCurrentEntityDirty: true,
 		} );
 
-		await page.goto( '/logo-collection' );
+		await page.goto( '/product/logo-collection' );
 
 		const addToCartButton = page
 			.getByRole( 'button', { name: 'Add to cart' } )
@@ -1442,5 +1442,66 @@ test.describe( 'Add to Cart + Options Block', () => {
 				}
 			} );
 		}
+
+		test( `Pills: "X in cart" text displays correctly after auto-selection`, async ( {
+			page,
+			pageObject,
+			editor,
+		} ) => {
+			await pageObject.updateSingleProductTemplate();
+			await setAddToCartWithOptionsBlockAttributes( pageObject, editor, {
+				optionStyle: 'Pills',
+				autoselect: true,
+			} );
+
+			await test.step( 'Add the Blue/XL variation to cart', async () => {
+				await page.goto( productPermalink );
+
+				// Select Blue and XL to match the T-shirt, Blue, XL variation
+				await pageObject.selectVariationSelectorOptionsBlockAttribute(
+					'Color',
+					'Blue',
+					'Pills'
+				);
+
+				// Type and Size should auto-select to T-shirt and XL
+				await pageObject.expectSelectedAttributes(
+					productAttributes,
+					{ Type: 'T-shirt', Color: 'Blue', Size: 'XL' },
+					'Pills'
+				);
+
+				// Add to cart
+				const addToCartButton = page
+					.locator( '.wp-block-add-to-cart-with-options' )
+					.getByRole( 'button', { name: 'Add to cart' } );
+				await addToCartButton.click();
+
+				// Wait for the item to be added
+				await expect( page.getByText( '1 in cart' ) ).toBeVisible();
+			} );
+
+			await test.step( 'Verify "X in cart" displays after auto-selection on fresh page load', async () => {
+				// Reload the page to start fresh
+				await page.goto( productPermalink );
+
+				// Initially, only Type should be auto-selected (it's the only single option)
+				// The "1 in cart" text should NOT be visible yet because we haven't
+				// selected the Blue/XL variation
+				await expect( page.getByText( '1 in cart' ) ).toBeHidden();
+
+				// Now select Blue - this should auto-select Size to XL
+				// (since Blue only has one valid size: XL)
+				await pageObject.selectVariationSelectorOptionsBlockAttribute(
+					'Color',
+					'Blue',
+					'Pills'
+				);
+
+				// After auto-selection completes, the button should show "1 in cart"
+				// because we now have the same variation (T-shirt, Blue, XL) selected
+				await expect( page.getByText( '1 in cart' ) ).toBeVisible();
+			} );
+		} );
 	} );
 } );
