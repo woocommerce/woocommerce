@@ -616,4 +616,108 @@ describe( 'createMutationQueue', () => {
 			expect( capturedBody ).toEqual( { id: 1, quantity: 1 } );
 		} );
 	} );
+
+	describe( 'waitForIdle', () => {
+		it( 'resolves immediately when not processing', async () => {
+			const mockFetch = createMockFetch( [] );
+			global.fetch = mockFetch;
+
+			const queue = createMutationQueue( {
+				endpoint: '/batch',
+				getHeaders: () => ( {} ),
+				stateHandler,
+			} );
+
+			// Should resolve immediately — nothing in progress.
+			await queue.waitForIdle();
+		} );
+
+		it( 'resolves after the processing cycle completes', async () => {
+			const fetchPromise: { resolve?: ( value: Response ) => void } = {};
+			global.fetch = jest.fn(
+				() =>
+					new Promise< Response >( ( resolve ) => {
+						fetchPromise.resolve = resolve;
+					} )
+			);
+
+			const queue = createMutationQueue( {
+				endpoint: '/batch',
+				getHeaders: () => ( {} ),
+				stateHandler,
+			} );
+
+			queue.submit( { id: '1', path: '/a', method: 'POST' } );
+
+			let idleResolved = false;
+			queue.waitForIdle().then( () => {
+				idleResolved = true;
+			} );
+
+			// Let the microtask fire (sends the batch), but fetch is still pending.
+			await flushMicrotasks();
+			expect( idleResolved ).toBe( false );
+
+			// Resolve the fetch — completes the cycle.
+			fetchPromise.resolve!( {
+				ok: true,
+				json: () =>
+					Promise.resolve( {
+						responses: [ { status: 200, body: { value: 42 } } ],
+					} ),
+			} as Response );
+
+			await flushMicrotasks();
+			await flushMicrotasks();
+
+			expect( idleResolved ).toBe( true );
+			expect( queue.getStatus().isProcessing ).toBe( false );
+		} );
+
+		it( 'resolves multiple waiters when cycle completes', async () => {
+			const fetchPromise: { resolve?: ( value: Response ) => void } = {};
+			global.fetch = jest.fn(
+				() =>
+					new Promise< Response >( ( resolve ) => {
+						fetchPromise.resolve = resolve;
+					} )
+			);
+
+			const queue = createMutationQueue( {
+				endpoint: '/batch',
+				getHeaders: () => ( {} ),
+				stateHandler,
+			} );
+
+			queue.submit( { id: '1', path: '/a', method: 'POST' } );
+
+			let waiter1Resolved = false;
+			let waiter2Resolved = false;
+
+			queue.waitForIdle().then( () => {
+				waiter1Resolved = true;
+			} );
+			queue.waitForIdle().then( () => {
+				waiter2Resolved = true;
+			} );
+
+			await flushMicrotasks();
+			expect( waiter1Resolved ).toBe( false );
+			expect( waiter2Resolved ).toBe( false );
+
+			fetchPromise.resolve!( {
+				ok: true,
+				json: () =>
+					Promise.resolve( {
+						responses: [ { status: 200, body: { value: 1 } } ],
+					} ),
+			} as Response );
+
+			await flushMicrotasks();
+			await flushMicrotasks();
+
+			expect( waiter1Resolved ).toBe( true );
+			expect( waiter2Resolved ).toBe( true );
+		} );
+	} );
 } );

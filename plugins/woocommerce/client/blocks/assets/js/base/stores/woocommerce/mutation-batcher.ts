@@ -90,6 +90,7 @@ export function createMutationQueue< TState >(
 
 	let microtaskScheduled = false;
 	let isProcessing = false;
+	let idleResolvers: Array< () => void > = [];
 
 	function reconcile() {
 		if ( lastServerState !== null ) {
@@ -110,6 +111,11 @@ export function createMutationQueue< TState >(
 		} );
 
 		isProcessing = false;
+
+		// Notify idle waiters.
+		const resolvers = idleResolvers;
+		idleResolvers = [];
+		resolvers.forEach( ( r ) => r() );
 
 		// Resolve/reject individual promises.
 		trackedRequests.forEach( ( tracked ) => {
@@ -288,7 +294,16 @@ export function createMutationQueue< TState >(
 		};
 	}
 
-	return { submit, getStatus };
+	function waitForIdle(): Promise< void > {
+		if ( ! isProcessing ) {
+			return Promise.resolve();
+		}
+		return new Promise( ( resolve ) => {
+			idleResolvers.push( resolve );
+		} );
+	}
+
+	return { submit, getStatus, waitForIdle };
 }
 
 export type MutationQueue< TState = unknown > = ReturnType<

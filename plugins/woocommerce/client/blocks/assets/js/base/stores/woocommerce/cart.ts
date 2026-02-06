@@ -117,6 +117,7 @@ export type Store = {
 		) => void;
 		// Todo: Check why if I switch to an async function here the types of the store stop working.
 		refreshCartItems: () => void;
+		waitForIdle: () => void;
 		showNoticeError: ( error: Error | ApiErrorResponse ) => void;
 		updateNotices: ( notices: Notice[], removeOthers?: boolean ) => void;
 	};
@@ -736,6 +737,12 @@ const { state, actions } = store< Store >(
 					if ( isApiErrorResponse( res, json ) )
 						throw generateError( json );
 
+					// If the batcher started a cycle while we were fetching,
+					// discard this response — the batcher will reconcile.
+					if ( cartQueue?.getStatus().isProcessing ) {
+						return;
+					}
+
 					// Updates the local cart.
 					state.cart = json;
 
@@ -749,6 +756,12 @@ const { state, actions } = store< Store >(
 					refreshTimeout *= 2;
 				} finally {
 					pendingRefresh = false;
+				}
+			},
+
+			*waitForIdle() {
+				if ( cartQueue ) {
+					yield cartQueue.waitForIdle();
 				}
 			},
 
