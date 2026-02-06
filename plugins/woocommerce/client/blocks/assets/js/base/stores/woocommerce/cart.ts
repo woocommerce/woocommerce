@@ -428,10 +428,15 @@ const { state, actions } = store< Store >(
     {
         actions: {
             *removeCartItem(key: string) {
-                const removedItem = state.cart.items.find(i => i.key === key);
+                if (!key) return;
 
-                // Always apply optimistic remove (in case of race/stale key)
-                state.cart.items = state.cart.items.filter((t) => t.key !== key);
+                const removedItem = state.cart.items.find(
+                    (i) => i.key === key || makeQueueKey(i) === key
+                );
+
+                state.cart.items = state.cart.items.filter(
+                    (t) => t.key !== key && makeQueueKey(t) !== key
+                );
 
                 if (removedItem) {
                     const queueKey = makeQueueKey(removedItem);
@@ -444,7 +449,6 @@ const { state, actions } = store< Store >(
 
                     scheduleCollectiveSync();
                 }
-                // If key not found, no server delete needed — skip enqueue & sync
             },
             *addCartItem(
                 { id, key, quantity, variation }: ClientCartItem
@@ -481,7 +485,7 @@ const { state, actions } = store< Store >(
                         ...(variation && {
                             variation: variation.map((v) => ({
                                 ...v,
-                                raw_attribute: v.attribute,
+                                raw_attribute: String(v.attribute ?? ''),
                             })),
                         }),
                     };
@@ -536,7 +540,7 @@ const { state, actions } = store< Store >(
                             ...(itemData.variation && {
                                 variation: itemData.variation.map((v) => ({
                                     ...v,
-                                    raw_attribute: v.attribute,
+                                    raw_attribute: String(v.attribute ?? ''),
                                 })),
                             }),
                         };
@@ -676,7 +680,9 @@ const { state, actions } = store< Store >(
                                     deleteQueue.add(meta.key);
                                 } else if (meta.type === 'update' || meta.type === 'add') {
                                     const targetQueue = meta.type === 'update' ? updateQueue : addQueue;
-                                    targetQueue.set(meta.key, meta.item!);
+                                    if (!targetQueue.has(meta.key)) {
+                                        targetQueue.set(meta.key, meta.item!);
+                                    }
                                 }
                             } else {
                                 retryCount.delete(meta.key);
