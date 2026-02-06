@@ -65,9 +65,9 @@ If you need to log in to a merchant's store in order to successfully assist them
 
 - **Only ask for login credentials once you have exhausted all other options.** This includes asking for screenshots and reproducing the problem on your own test site(s).
 - **When asking for login credentials:**
-  - Inform the customer that, under GDPR regulations, they must mention that they may need give access to third-party support services in their store's terms and conditions.
-  - Always ask the customer to create a temporary administrator account for you. (You will need to tweak the instructions in the document linked above as you do not have access to woologin@woocommerce.com.)
-  - At the end of the support interaction, ask the merchant to remove this temporary account.
+    - Inform the customer that, under GDPR regulations, they must mention that they may need give access to third-party support services in their store's terms and conditions.
+    - Always ask the customer to create a temporary administrator account for you. (You will need to tweak the instructions in the document linked above as you do not have access to `woologin@woocommerce.com`.)
+    - At the end of the support interaction, ask the merchant to remove this temporary account.
 - **If the customer shares their details before you are able to provide the instructions above**, always point out that they ideally don't do this and that you strongly advise them to reset their password.
 - **Never ask for plain-text passwords.** Instead, use a password-sharing service like [QuickForget.com](https://quickforget.com/) to create a unique, expiring link.
 
