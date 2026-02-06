@@ -1,4 +1,10 @@
-import config, { setupProjects, TESTS_ROOT_PATH } from '../../playwright.config.mjs';
+/**
+ * Internal dependencies
+ */
+import config, {
+	setupProjects,
+	TESTS_ROOT_PATH,
+} from '../../playwright.config.mjs';
 import { tags } from '../../fixtures/fixtures';
 
 process.env.IS_PRESSABLE = 'true';

@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import config, { setupProjects } from '../../playwright.config.mjs';
 import { tags } from '../../fixtures/fixtures';
 
