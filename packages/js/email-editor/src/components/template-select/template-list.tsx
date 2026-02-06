@@ -26,20 +26,26 @@ type Props = {
 	selectedCategory?: TemplateCategory;
 };
 
-function TemplateNoResults() {
+function TemplateNoResults( { isRecent = false }: { isRecent?: boolean } ) {
 	return (
 		<div className="block-editor-inserter__no-results">
 			<Icon
 				className="block-editor-inserter__no-results-icon"
 				icon={ blockDefault }
 			/>
-			<p>{ __( 'No recent templates.', 'woocommerce' ) }</p>
 			<p>
-				{ __(
-					'Your recent creations will appear here as soon as you begin.',
-					'woocommerce'
-				) }
+				{ isRecent
+					? __( 'No recent templates.', 'woocommerce' )
+					: __( 'No templates found.', 'woocommerce' ) }
 			</p>
+			{ isRecent && (
+				<p>
+					{ __(
+						'Your recent creations will appear here as soon as you begin.',
+						'woocommerce'
+					) }
+				</p>
+			) }
 		</div>
 	);
 }
@@ -60,16 +66,19 @@ function TemplateListBox( {
 	} );
 
 	const [ styles ] = useEmailCss();
-	const css =
-		styles.reduce( ( acc, style ) => {
-			return acc + ( style.css ?? '' );
-		}, '' ) +
-		`.is-root-container { width: ${
-			layout?.contentSize || '660px'
-		}; margin: 0 auto; }`;
+	const css = useMemo(
+		() =>
+			styles.reduce( ( acc, style ) => {
+				return acc + ( style.css ?? '' );
+			}, '' ) +
+			`.is-root-container { width: ${
+				layout?.contentSize || '660px'
+			}; margin: 0 auto; }`,
+		[ styles, layout?.contentSize ]
+	);
 
-	if ( selectedCategory === 'recent' && templates.length === 0 ) {
-		return <TemplateNoResults />;
+	if ( templates.length === 0 ) {
+		return <TemplateNoResults isRecent={ selectedCategory === 'recent' } />;
 	}
 
 	return (
@@ -86,8 +95,9 @@ function TemplateListBox( {
 						onClick={ () => {
 							onTemplateSelection( template );
 						} }
-						onKeyPress={ ( event ) => {
+						onKeyDown={ ( event ) => {
 							if ( event.key === 'Enter' || event.key === ' ' ) {
+								event.preventDefault();
 								onTemplateSelection( template );
 							}
 						} }
@@ -126,24 +136,25 @@ function TemplateListBox( {
 	);
 }
 
-const compareProps = ( prev, next ) =>
+const compareProps = ( prev: Props, next: Props ): boolean =>
 	prev.templates.length === next.templates.length &&
 	prev.selectedCategory === next.selectedCategory;
 
-const MemorizedTemplateListBox = memo( TemplateListBox, compareProps );
+const MemoizedTemplateListBox = memo( TemplateListBox, compareProps );
 
 export function TemplateList( {
 	templates,
 	onTemplateSelection,
 	selectedCategory,
 }: Props ) {
-	const filteredTemplates = useMemo(
-		() =>
-			templates.filter(
-				( template ) => template.category === selectedCategory
-			),
-		[ selectedCategory, templates ]
-	);
+	const filteredTemplates = useMemo( () => {
+		if ( selectedCategory === 'all' ) {
+			return templates;
+		}
+		return templates.filter(
+			( template ) => template.category === selectedCategory
+		);
+	}, [ selectedCategory, templates ] );
 
 	return (
 		<div className="block-editor-block-patterns-explorer__list">
@@ -161,7 +172,7 @@ export function TemplateList( {
 				</div>
 			) }
 
-			<MemorizedTemplateListBox
+			<MemoizedTemplateListBox
 				templates={ filteredTemplates }
 				onTemplateSelection={ onTemplateSelection }
 				selectedCategory={ selectedCategory }

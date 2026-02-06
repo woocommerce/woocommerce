@@ -464,6 +464,15 @@
 			"isIgnored": true
 		},
 		{
+			"dependencies": [
+				"@wordpress/ui"
+			],
+			"packages": [
+				"**"
+			],
+			"isIgnored": true
+		},
+		{
 			"label": "@wordpress/* runtime-dependencies",
 			"dependencies": [
 				"@wordpress/**"
