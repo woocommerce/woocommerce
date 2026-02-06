@@ -197,8 +197,7 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 	 * @return string
 	 */
 	private function render_product_content( ?\WC_Product $product, array $template_block, string $collection_type, ?int $cell_width = null ): string {
-		$content             = '';
-		$previous_block_name = null;
+		$content = '';
 
 		if ( ! $product ) {
 			return $content;
@@ -209,12 +208,6 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 			if ( null !== $cell_width ) {
 				$inner_block['email_attrs']          = $inner_block['email_attrs'] ?? array();
 				$inner_block['email_attrs']['width'] = $cell_width . 'px';
-			}
-
-			// Adjust spacing between image and title for better visual hierarchy.
-			if ( 'core/post-title' === $inner_block['blockName'] && 'woocommerce/product-image' === $previous_block_name ) {
-				$inner_block['email_attrs']               = $inner_block['email_attrs'] ?? array();
-				$inner_block['email_attrs']['margin-top'] = '32px';
 			}
 
 			switch ( $inner_block['blockName'] ) {
@@ -248,8 +241,6 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 				default:
 					break;
 			}
-
-			$previous_block_name = $inner_block['blockName'];
 		}
 
 		return $content;
