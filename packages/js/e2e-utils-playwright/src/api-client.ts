@@ -70,7 +70,7 @@ export function createClient( baseURL: string, auth: Auth ): ApiClient {
 		};
 
 		// Warn if Basic Auth is used over HTTP, except for localhost
-		const isHttp = normalizedBaseURL.startsWith( 'http' );
+		const isHttp = normalizedBaseURL.startsWith( 'http://' );
 		const isLocalhost =
 			normalizedBaseURL.startsWith( 'http://localhost' ) ||
 			normalizedBaseURL.startsWith( 'http://127.0.0.1' );
