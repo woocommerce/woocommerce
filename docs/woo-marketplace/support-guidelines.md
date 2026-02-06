@@ -37,7 +37,7 @@ Marketplace vendors provide support exclusively via email. WooCommerce handles l
 
 ### Ticket routing
 
-Customers submit tickets through the support request form and are automatically routed to your designated support email addess. Each support email includes:
+Customers submit tickets through the support request form and are automatically routed to your designated support email address. Each support email includes:
 
 - Product name
 - Subscription dates
