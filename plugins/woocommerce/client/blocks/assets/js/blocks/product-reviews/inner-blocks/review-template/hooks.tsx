@@ -7,6 +7,11 @@ import { store as blockEditorStore } from '@wordpress/block-editor';
 import { addQueryArgs } from '@wordpress/url';
 import apiFetch from '@wordpress/api-fetch';
 
+/**
+ * Internal dependencies
+ */
+import type { Comment } from './edit';
+
 // This is limited by WP REST API
 const MAX_COMMENTS_PER_PAGE = 100;
 
@@ -23,6 +28,8 @@ export const useCommentQueryArgs = ( { postId }: { postId: number } ) => {
 			context: 'embed',
 			parent: 0,
 			type: 'review',
+			// Request embedded children so we can show direct replies.
+			_embed: 'children',
 		} ),
 		[]
 	);
@@ -152,23 +159,40 @@ export const useCommentQueryArgs = ( { postId }: { postId: number } ) => {
 };
 
 /**
- * Generate a list of IDs from a list of review entities.
+ * Generate a tree structure of comment IDs from a list of review entities.
  */
-export const useCommentList = (
-	// eslint-disable-next-line @typescript-eslint/naming-convention
+export const useCommentTree = (
 	topLevelComments: Array< {
 		id: number;
-	} >
+		children?: Array< { id: number } >;
+	} >,
+	commentOrder: string
 ) => {
-	const commentList = useMemo(
-		() =>
-			topLevelComments?.map( ( { id }: { id: number } ) => {
+	console.log( 'topLevelComments', topLevelComments );
+	const commentTree = useMemo( () => {
+		let comms = topLevelComments?.map(
+			( {
+				id,
+				children,
+			}: {
+				id: number;
+				children?: Array< { id: number } >;
+			} ) => {
 				return {
 					commentId: id,
-				};
-			} ),
-		[ topLevelComments ]
-	);
+					children: Array.isArray( children )
+						? children.map( ( child: { id: number } ) => ( {
+								commentId: child.id,
+						  } ) )
+						: [],
+				} as Comment;
+			}
+		);
+		if ( commentOrder === 'desc' ) {
+			comms = comms?.reverse();
+		}
+		return comms;
+	}, [ topLevelComments, commentOrder ] );
 
-	return commentList;
+	return commentTree;
 };

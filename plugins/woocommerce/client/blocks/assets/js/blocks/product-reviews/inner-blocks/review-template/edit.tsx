@@ -7,6 +7,7 @@ import { __ } from '@wordpress/i18n';
 import { BlockInstance, BlockEditProps } from '@wordpress/blocks';
 import { Spinner } from '@wordpress/components';
 import { store as coreStore } from '@wordpress/core-data';
+import type { Comment as WPComment } from '@wordpress/core-data';
 import {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet.
@@ -23,10 +24,11 @@ import {
 /**
  * Internal dependencies
  */
-import { useCommentQueryArgs, useCommentList } from './hooks';
+import { useCommentQueryArgs, useCommentTree } from './hooks';
 
-interface Comment {
+export interface Comment {
 	commentId: number;
+	children?: Comment[];
 }
 
 interface ReviewTemplateInnerBlocksProps {
@@ -63,7 +65,7 @@ interface ReviewSettings {
 const getCommentsPlaceholder = ( {
 	perPage,
 	pageComments,
-}: ReviewSettings ) => {
+}: ReviewSettings ): Comment[] => {
 	const numberOfComments = pageComments ? Math.min( perPage, 3 ) : 3;
 
 	return Array.from( { length: numberOfComments }, ( _, i ) => ( {
@@ -129,6 +131,31 @@ const ReviewTemplateInnerBlocks = memo( function ReviewTemplateInnerBlocks( {
 					comment.commentId === ( activeCommentId || firstCommentId )
 				}
 			/>
+			{ comment.children && comment.children.length > 0 ? (
+				<ol>
+					{ comment.children.map(
+						(
+							{ commentId, ...childComment }: Comment,
+							index: number
+						) => (
+							<BlockContextProvider
+								key={ commentId || index }
+								value={ {
+									commentId: commentId < 0 ? null : commentId,
+								} }
+							>
+								<ReviewTemplateInnerBlocks
+									comment={ { commentId, ...childComment } }
+									activeCommentId={ activeCommentId }
+									setActiveCommentId={ setActiveCommentId }
+									blocks={ blocks }
+									firstCommentId={ firstCommentId }
+								/>
+							</BlockContextProvider>
+						)
+					) }
+				</ol>
+			) : null }
 		</li>
 	);
 } );
@@ -171,7 +198,14 @@ export default function ReviewTemplateEdit( {
 			};
 			return {
 				topLevelComments: commentQuery
-					? getEntityRecords( 'root', 'comment', commentQuery )
+					? ( getEntityRecords(
+							'root',
+							'comment',
+							commentQuery
+					  ) as ( WPComment & {
+							// eslint-disable-next-line @typescript-eslint/naming-convention
+							_embedded?: { children?: WPComment[] };
+					  } )[] )
 					: null,
 				blocks: getBlocks( clientId ),
 			};
@@ -179,17 +213,30 @@ export default function ReviewTemplateEdit( {
 		[ clientId, commentQuery ]
 	);
 
-	let commentTree = useCommentList(
-		// Reverse the order of top comments if needed.
-		commentOrder === 'desc' && topLevelComments
-			? [
-					...( topLevelComments as Array< {
-						id: number;
-					} > ),
-			  ].reverse()
-			: ( topLevelComments as Array< {
-					id: number;
-			  } > )
+	let commentTree = useCommentTree(
+		Array.isArray( topLevelComments )
+			? topLevelComments.map( ( comment ) => {
+					const children = comment._embedded?.children;
+
+					if (
+						Array.isArray( children ) &&
+						children.length >= 1 &&
+						Array.isArray( children[ 0 ] )
+					) {
+						return {
+							id: comment.id,
+							children: children[ 0 ].map( ( child ) => ( {
+								id: child.id,
+							} ) ),
+						};
+					}
+
+					return {
+						id: comment.id,
+					};
+			  } )
+			: [],
+		commentOrder
 	);
 
 	if ( ! topLevelComments ) {
@@ -220,11 +267,7 @@ export default function ReviewTemplateEdit( {
 			{ commentTree &&
 				commentTree.map(
 					(
-						{
-							commentId,
-						}: {
-							commentId: number;
-						},
+						{ commentId, ...commentData }: Comment,
 						index: number
 					) => (
 						<BlockContextProvider
@@ -234,7 +277,7 @@ export default function ReviewTemplateEdit( {
 							} }
 						>
 							<ReviewTemplateInnerBlocks
-								comment={ { commentId } }
+								comment={ { commentId, ...commentData } }
 								activeCommentId={ activeCommentId }
 								setActiveCommentId={ setActiveCommentId }
 								blocks={ blocks }
