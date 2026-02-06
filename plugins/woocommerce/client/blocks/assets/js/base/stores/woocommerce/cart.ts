@@ -21,7 +21,7 @@ import type {
 /**
  * Internal dependencies
  */
-import { triggerAddedToCartEvent } from './legacy-events';
+// Removed unused triggerAddedToCartEvent import
 
 export type WooCommerceConfig = {
     products?: {
@@ -250,15 +250,15 @@ function normalizeVariation(variation: VariationInput): string {
         const pairs = Array.isArray(variation)
             ? variation.map((attr) => {
                   const a = attr as { attribute?: unknown; raw_attribute?: unknown; value?: unknown };
-                  const attrName = String(a.attribute ?? a.raw_attribute ?? '');
+                  const attrName = String(a.attribute ?? a.raw_attribute ?? '').trim();
                   return [attrName, a.value];
               })
             : Object.entries(variation);
 
         const normalized = pairs
-            .filter(([attribute, value]) => attribute != null && attribute.trim() !== '' && value != null)
+            .filter(([attribute, value]) => attribute !== '' && value != null)
             .map(([attribute, value]) => ({
-                attribute: String(attribute).toLowerCase().trim(),
+                attribute: attribute.toLowerCase(),
                 value: value == null ? '' : String(value).toLowerCase(),
             }))
             .sort((a, b) => a.attribute.localeCompare(b.attribute));
@@ -271,13 +271,13 @@ function normalizeVariation(variation: VariationInput): string {
 /**
  * Generates a deterministic key for queue operations.
  *
- * @param {OptimisticCartItem} item - The cart item.
+ * @param {OptimisticCartItem | ClientCartItem} item - The cart item.
  * @returns {string} The unique key for the item.
  */
-const makeQueueKey = (item: OptimisticCartItem): string => {
-    if (item.key) return item.key;
+const makeQueueKey = (item: OptimisticCartItem | ClientCartItem): string => {
+    if ('key' in item && item.key) return item.key;
     const idPart = item.id != null ? String(item.id) : "noid";
-    const variationPart = normalizeVariation(item.variation);
+    const variationPart = normalizeVariation(item.variation as VariationInput);
     return `${idPart}::${variationPart}`;
 };
 
@@ -298,6 +298,11 @@ const IMMEDIATE_TRIGGER_SIZE = 2;
  * Enforced as total across all queues.
  */
 const MAX_BATCH_SIZE = 50;
+
+/**
+ * Maximum retry attempts for failed operations to prevent infinite loops.
+ */
+const MAX_RETRIES = 3;
 
 /**
  * Queue for item keys pending removal.
@@ -572,7 +577,7 @@ const { state, actions } = store< Store >(
                     addQueue.set(key, item);
                 });
 
-                // BUILDING REQUESTS
+                // BUILDING REQUESTS (minimal body)
                 processDeletes.forEach(key => {
                     batchRequests.push({
                         method: "POST",
@@ -588,17 +593,22 @@ const { state, actions } = store< Store >(
                         method: "POST",
                         path: "/wc/store/v1/cart/update-item",
                         headers: { Nonce: state.nonce, "Content-Type": "application/json" },
-                        body: item
+                        body: { key, quantity: item.quantity } // Minimal body
                     });
                     requestMap.set(batchRequests.length - 1, { type: 'update', key, item });
                 });
 
                 processAdds.forEach(([key, item]) => {
+                    const addBody = {
+                        id: item.id,
+                        quantity: item.quantity,
+                        ...(item.variation && { variation: item.variation })
+                    };
                     batchRequests.push({
                         method: "POST",
                         path: "/wc/store/v1/cart/add-item",
                         headers: { Nonce: state.nonce, "Content-Type": "application/json" },
-                        body: item
+                        body: addBody // No type/key
                     });
                     requestMap.set(batchRequests.length - 1, { type: 'add', key, item });
                 });
@@ -634,8 +644,9 @@ const { state, actions } = store< Store >(
 
                     const responses = Array.isArray(data.responses) ? data.responses : [];
                     let hasErrors = false;
-                    let finalCartState = state.cart; 
+                    let finalCartState: Cart | null = null;
 
+                    // Find last successful response
                     for (let i = responses.length - 1; i >= 0; i--) {
                         if (responses[i].status >= 200 && responses[i].status < 300 && responses[i].body) {
                             finalCartState = responses[i].body;
@@ -643,22 +654,30 @@ const { state, actions } = store< Store >(
                         }
                     }
 
+                    // Retry with limit
+                    const retryCount = new Map<string, number>();
                     responses.forEach((res, index) => {
                         const meta = requestMap.get(index);
                         if (!meta) return;
                         if (res.status >= 400) {
                             hasErrors = true;
-                            if (meta.type === 'remove') {
-                                deleteQueue.add(meta.key);
-                            } else if (meta.type === 'update' || meta.type === 'add') {
-                                const targetQueue = meta.type === 'update' ? updateQueue : addQueue;
-                                targetQueue.set(meta.key, meta.item!);
-                            }
+                            const count = (retryCount.get(meta.key) ?? 0) + 1;
+                            if (count <= MAX_RETRIES) {
+                                retryCount.set(meta.key, count);
+                                if (meta.type === 'remove') {
+                                    deleteQueue.add(meta.key);
+                                } else if (meta.type === 'update' || meta.type === 'add') {
+                                    const targetQueue = meta.type === 'update' ? updateQueue : addQueue;
+                                    targetQueue.set(meta.key, meta.item!);
+                                }
+                            } // Else drop after MAX_RETRIES
                         }
                     });
 
-                    applyServerState(finalCartState);
-                    reapplyOptimisticState();
+                    if (finalCartState) {
+                        applyServerState(finalCartState);
+                        reapplyOptimisticState();
+                    }
 
                     if (hasErrors) {
                         actions.showNoticeError(new Error(__('Some items failed to update. Please refresh or try again.', 'woocommerce')));
@@ -666,6 +685,7 @@ const { state, actions } = store< Store >(
                 } catch (err) {
                     if (_currentId === _requestCounter) {
                         actions.showNoticeError(err as Error);
+                        // Re-queue all on network error
                         processDeletes.forEach((k) => {
                             deleteQueue.add(k);
                         });
@@ -679,14 +699,14 @@ const { state, actions } = store< Store >(
                     }
                 } finally {
                     isProcessing = false;
-                    // Immediate next batch if remainder (better for 3G chunking)
+                    // Immediate next batch if remainder
                     if (deleteQueue.size > 0 || updateQueue.size > 0 || addQueue.size > 0) {
                         setTimeout(() => actions.processCollectiveActions(), 0);
                     }
                 }
             },
             /**
-             * Refreshes the cart items from the server with stronger backoff for slow networks.
+             * Refreshes the cart items from the server with capped backoff for slow networks.
              */
             *refreshCartItems() {
                 if (pendingRefresh) return;
@@ -719,7 +739,7 @@ const { state, actions } = store< Store >(
                 } catch ( error ) {
                     if ( _refreshId === _requestCounter ) {
                         setTimeout( actions.refreshCartItems, refreshTimeout );
-                        refreshTimeout *= 3; // Stronger backoff for poor networks
+                        refreshTimeout = Math.min(refreshTimeout * 3, 30000); // Cap at 30s
                     }
                 } finally {
                     pendingRefresh = false;
