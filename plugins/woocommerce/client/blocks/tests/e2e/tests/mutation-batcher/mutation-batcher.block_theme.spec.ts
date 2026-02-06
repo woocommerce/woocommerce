@@ -163,9 +163,7 @@ test.describe( 'Mutation Batcher', () => {
 			await Promise.all( [ p1, p2, p3 ] );
 
 			// Return the product IDs now in the cart.
-			return state.cart.items.map(
-				( item: { id: number } ) => item.id
-			);
+			return state.cart.items.map( ( item: { id: number } ) => item.id );
 		} );
 
 		// All 3 products should be in the cart.
