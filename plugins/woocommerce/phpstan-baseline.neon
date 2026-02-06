@@ -10147,607 +10147,7 @@ parameters:
 			path: includes/class-wc-ajax.php
 
 		-
-			message: '#^Method WC_AJAX\:\:add_ajax_events\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:add_attribute\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:add_attributes_and_variations\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:add_coupon_discount\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:add_new_attribute\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:add_order_fee\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:add_order_item\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:add_order_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:add_order_shipping\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:add_order_tax\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:add_to_cart\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:add_variation\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:apply_coupon\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:bulk_edit_variations\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:calc_line_taxes\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:checkout\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
 			message: '#^Method WC_AJAX\:\:create_all_product_variations\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:define_ajax\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:delete_order_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:delete_refund\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:do_wc_ajax\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:feature_product\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:get_cart_totals\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:get_customer_details\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:get_customer_location\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:get_order_details\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:get_refreshed_fragments\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:get_variation\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:grant_access_to_download\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:init\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:json_search_categories\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:json_search_categories_tree\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:json_search_customers\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:json_search_downloadable_products_and_variations\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:json_search_pages\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:json_search_product_attributes\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:json_search_products\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:json_search_products_and_variations\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:json_search_taxonomy_terms\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:link_all_variations\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:load_order_items\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:load_status_widget\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:load_variations\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:mark_order_status\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:order_add_meta\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:product_ordering\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:rated\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:refund_line_items\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:remove_coupon\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:remove_from_cart\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:remove_order_coupon\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:remove_order_item\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:remove_order_tax\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:remove_variations\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:render_variation_html\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:revoke_access_to_download\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:save_attributes\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:save_order_items\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:save_variations\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:set_wc_ajax_argument_in_query\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:shipping_classes_save_changes\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:shipping_zone_add_method\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:shipping_zone_methods_save_changes\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:shipping_zone_methods_save_settings\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:shipping_zone_remove_method\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:shipping_zones_save_changes\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:tax_rates_save_changes\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:term_ordering\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:toggle_gateway_enabled\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:update_api_key\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:update_order_review\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:update_order_review_expired\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:update_shipping_method\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:variation_bulk_action_delete_all\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:variation_bulk_action_toggle_downloadable\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:variation_bulk_action_toggle_enabled\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:variation_bulk_action_toggle_manage_stock\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:variation_bulk_action_toggle_virtual\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:variation_bulk_action_variable_download_expiry\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:variation_bulk_action_variable_download_limit\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:variation_bulk_action_variable_height\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:variation_bulk_action_variable_length\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:variation_bulk_action_variable_low_stock_amount\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:variation_bulk_action_variable_regular_price\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:variation_bulk_action_variable_regular_price_decrease\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:variation_bulk_action_variable_regular_price_increase\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:variation_bulk_action_variable_sale_price\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:variation_bulk_action_variable_sale_price_decrease\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:variation_bulk_action_variable_sale_price_increase\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:variation_bulk_action_variable_sale_schedule\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:variation_bulk_action_variable_stock\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:variation_bulk_action_variable_stock_status_instock\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:variation_bulk_action_variable_stock_status_onbackorder\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:variation_bulk_action_variable_stock_status_outofstock\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:variation_bulk_action_variable_unset_cogs_value\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:variation_bulk_action_variable_weight\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:variation_bulk_action_variable_width\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:variation_bulk_adjust_price\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:variation_bulk_set\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:variation_bulk_toggle\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Method WC_AJAX\:\:wc_ajax_headers\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: includes/class-wc-ajax.php
@@ -38140,18 +37540,6 @@ parameters:
 			path: includes/wc-deprecated-functions.php
 
 		-
-			message: '#^Function _wc_save_product_price\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function _woocommerce_term_recount\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
 			message: '#^Function _woocommerce_term_recount\(\) has parameter \$callback with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -38182,12 +37570,6 @@ parameters:
 			path: includes/wc-deprecated-functions.php
 
 		-
-			message: '#^Function get_product\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
 			message: '#^Function get_product\(\) has parameter \$args with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -38206,44 +37588,8 @@ parameters:
 			path: includes/wc-deprecated-functions.php
 
 		-
-			message: '#^Function wc_caught_exception\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function wc_deprecated_argument\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
 			message: '#^Function wc_deprecated_argument\(\) has parameter \$message with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function wc_deprecated_function\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function wc_deprecated_hook\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function wc_do_deprecated_action\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function wc_doing_it_wrong\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: includes/wc-deprecated-functions.php
 
@@ -38254,38 +37600,8 @@ parameters:
 			path: includes/wc-deprecated-functions.php
 
 		-
-			message: '#^Function wc_load_persistent_cart\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
 			message: '#^Function wc_product_dropdown_categories invoked with 4 parameters, 0\-1 required\.$#'
 			identifier: arguments.count
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function wc_products_rss_feed\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function wc_taxonomy_metadata_update_content_for_split_terms\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function wc_taxonomy_metadata_wpdbfix\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_add_order_item\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: includes/wc-deprecated-functions.php
 
@@ -38298,12 +37614,6 @@ parameters:
 		-
 			message: '#^Function woocommerce_add_order_item\(\) has parameter \$order_id with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_add_order_item_meta\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: includes/wc-deprecated-functions.php
 
@@ -38332,26 +37642,8 @@ parameters:
 			path: includes/wc-deprecated-functions.php
 
 		-
-			message: '#^Function woocommerce_add_to_cart_message\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
 			message: '#^Function woocommerce_add_to_cart_message\(\) has parameter \$product_id with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_admin_scripts\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_array_overlay\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: includes/wc-deprecated-functions.php
 
@@ -38374,26 +37666,8 @@ parameters:
 			path: includes/wc-deprecated-functions.php
 
 		-
-			message: '#^Function woocommerce_cancel_unpaid_orders\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_cart_totals_coupon_html\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
 			message: '#^Function woocommerce_cart_totals_coupon_html\(\) has parameter \$coupon with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_cart_totals_fee_html\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: includes/wc-deprecated-functions.php
 
@@ -38404,38 +37678,8 @@ parameters:
 			path: includes/wc-deprecated-functions.php
 
 		-
-			message: '#^Function woocommerce_cart_totals_order_total_html\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_cart_totals_shipping_html\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_cart_totals_shipping_method_label\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
 			message: '#^Function woocommerce_cart_totals_shipping_method_label\(\) has parameter \$method with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_cart_totals_subtotal_html\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_change_term_counts\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: includes/wc-deprecated-functions.php
 
@@ -38458,32 +37702,8 @@ parameters:
 			path: includes/wc-deprecated-functions.php
 
 		-
-			message: '#^Function woocommerce_clean\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
 			message: '#^Function woocommerce_clean\(\) has parameter \$var with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_clear_cart_after_payment\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_compile_less_styles\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_create_new_customer\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: includes/wc-deprecated-functions.php
 
@@ -38502,12 +37722,6 @@ parameters:
 		-
 			message: '#^Function woocommerce_create_new_customer\(\) has parameter \$username with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_create_page\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: includes/wc-deprecated-functions.php
 
@@ -38542,12 +37756,6 @@ parameters:
 			path: includes/wc-deprecated-functions.php
 
 		-
-			message: '#^Function woocommerce_customer_bought_product\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
 			message: '#^Function woocommerce_customer_bought_product\(\) has parameter \$customer_email with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -38562,18 +37770,6 @@ parameters:
 		-
 			message: '#^Function woocommerce_customer_bought_product\(\) has parameter \$user_id with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_customer_edit_account_url\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_customer_has_capability\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: includes/wc-deprecated-functions.php
 
@@ -38596,32 +37792,8 @@ parameters:
 			path: includes/wc-deprecated-functions.php
 
 		-
-			message: '#^Function woocommerce_date_format\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_datepicker_js\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_delete_order_item\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
 			message: '#^Function woocommerce_delete_order_item\(\) has parameter \$item_id with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_delete_order_item_meta\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: includes/wc-deprecated-functions.php
 
@@ -38650,20 +37822,8 @@ parameters:
 			path: includes/wc-deprecated-functions.php
 
 		-
-			message: '#^Function woocommerce_disable_admin_bar\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
 			message: '#^Function woocommerce_disable_admin_bar\(\) has parameter \$show_admin_bar with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_downloadable_file_permission\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: includes/wc-deprecated-functions.php
 
@@ -38686,26 +37846,8 @@ parameters:
 			path: includes/wc-deprecated-functions.php
 
 		-
-			message: '#^Function woocommerce_downloadable_product_permissions\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
 			message: '#^Function woocommerce_downloadable_product_permissions\(\) has parameter \$order_id with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_empty_cart\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_format_decimal\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: includes/wc-deprecated-functions.php
 
@@ -38728,32 +37870,14 @@ parameters:
 			path: includes/wc-deprecated-functions.php
 
 		-
-			message: '#^Function woocommerce_format_hex\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
 			message: '#^Function woocommerce_format_hex\(\) has parameter \$hex with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
 			path: includes/wc-deprecated-functions.php
 
 		-
-			message: '#^Function woocommerce_get_attachment_image_attributes\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
 			message: '#^Function woocommerce_get_attachment_image_attributes\(\) has parameter \$attr with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_get_dimension\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: includes/wc-deprecated-functions.php
 
@@ -38766,12 +37890,6 @@ parameters:
 		-
 			message: '#^Function woocommerce_get_dimension\(\) has parameter \$to_unit with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_get_endpoint_url\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: includes/wc-deprecated-functions.php
 
@@ -38794,26 +37912,8 @@ parameters:
 			path: includes/wc-deprecated-functions.php
 
 		-
-			message: '#^Function woocommerce_get_featured_product_ids\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_get_filename_from_url\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
 			message: '#^Function woocommerce_get_filename_from_url\(\) has parameter \$file_url with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_get_formatted_variation\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: includes/wc-deprecated-functions.php
 
@@ -38830,20 +37930,8 @@ parameters:
 			path: includes/wc-deprecated-functions.php
 
 		-
-			message: '#^Function woocommerce_get_order_id_by_order_key\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
 			message: '#^Function woocommerce_get_order_id_by_order_key\(\) has parameter \$order_key with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_get_order_item_meta\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: includes/wc-deprecated-functions.php
 
@@ -38866,26 +37954,8 @@ parameters:
 			path: includes/wc-deprecated-functions.php
 
 		-
-			message: '#^Function woocommerce_get_page_id\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
 			message: '#^Function woocommerce_get_page_id\(\) has parameter \$page with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_get_product_ids_on_sale\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_get_product_terms\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: includes/wc-deprecated-functions.php
 
@@ -38904,12 +37974,6 @@ parameters:
 		-
 			message: '#^Function woocommerce_get_product_terms\(\) has parameter \$taxonomy with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_get_template\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: includes/wc-deprecated-functions.php
 
@@ -38938,12 +38002,6 @@ parameters:
 			path: includes/wc-deprecated-functions.php
 
 		-
-			message: '#^Function woocommerce_get_template_part\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
 			message: '#^Function woocommerce_get_template_part\(\) has parameter \$name with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -38952,12 +38010,6 @@ parameters:
 		-
 			message: '#^Function woocommerce_get_template_part\(\) has parameter \$slug with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_get_weight\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: includes/wc-deprecated-functions.php
 
@@ -38974,12 +38026,6 @@ parameters:
 			path: includes/wc-deprecated-functions.php
 
 		-
-			message: '#^Function woocommerce_hex_darker\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
 			message: '#^Function woocommerce_hex_darker\(\) has parameter \$color with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -38988,12 +38034,6 @@ parameters:
 		-
 			message: '#^Function woocommerce_hex_darker\(\) has parameter \$factor with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_hex_lighter\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: includes/wc-deprecated-functions.php
 
@@ -39010,26 +38050,8 @@ parameters:
 			path: includes/wc-deprecated-functions.php
 
 		-
-			message: '#^Function woocommerce_legacy_paypal_ipn\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_let_to_num\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
 			message: '#^Function woocommerce_let_to_num\(\) has parameter \$size with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_light_or_dark\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: includes/wc-deprecated-functions.php
 
@@ -39052,20 +38074,8 @@ parameters:
 			path: includes/wc-deprecated-functions.php
 
 		-
-			message: '#^Function woocommerce_list_pages\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
 			message: '#^Function woocommerce_list_pages\(\) has parameter \$pages with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_load_persistent_cart\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: includes/wc-deprecated-functions.php
 
@@ -39078,12 +38088,6 @@ parameters:
 		-
 			message: '#^Function woocommerce_load_persistent_cart\(\) has parameter \$user_login with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_locate_template\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: includes/wc-deprecated-functions.php
 
@@ -39106,20 +38110,8 @@ parameters:
 			path: includes/wc-deprecated-functions.php
 
 		-
-			message: '#^Function woocommerce_lostpassword_url\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
 			message: '#^Function woocommerce_lostpassword_url\(\) has parameter \$url with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_mail\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: includes/wc-deprecated-functions.php
 
@@ -39154,12 +38146,6 @@ parameters:
 			path: includes/wc-deprecated-functions.php
 
 		-
-			message: '#^Function woocommerce_nav_menu_item_classes\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
 			message: '#^Function woocommerce_nav_menu_item_classes\(\) has parameter \$args with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -39172,12 +38158,6 @@ parameters:
 			path: includes/wc-deprecated-functions.php
 
 		-
-			message: '#^Function woocommerce_nav_menu_items\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
 			message: '#^Function woocommerce_nav_menu_items\(\) has parameter \$args with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -39186,12 +38166,6 @@ parameters:
 		-
 			message: '#^Function woocommerce_nav_menu_items\(\) has parameter \$items with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_order_terms\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: includes/wc-deprecated-functions.php
 
@@ -39226,20 +38200,8 @@ parameters:
 			path: includes/wc-deprecated-functions.php
 
 		-
-			message: '#^Function woocommerce_paying_customer\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
 			message: '#^Function woocommerce_paying_customer\(\) has parameter \$order_id with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_placeholder_img\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: includes/wc-deprecated-functions.php
 
@@ -39250,26 +38212,8 @@ parameters:
 			path: includes/wc-deprecated-functions.php
 
 		-
-			message: '#^Function woocommerce_placeholder_img_src\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_prepare_attachment_for_js\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
 			message: '#^Function woocommerce_prepare_attachment_for_js\(\) has parameter \$response with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_price\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: includes/wc-deprecated-functions.php
 
@@ -39282,18 +38226,6 @@ parameters:
 		-
 			message: '#^Function woocommerce_price\(\) has parameter \$price with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_processing_order_count\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_product_dropdown_categories\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: includes/wc-deprecated-functions.php
 
@@ -39322,12 +38254,6 @@ parameters:
 			path: includes/wc-deprecated-functions.php
 
 		-
-			message: '#^Function woocommerce_product_post_type_link\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
 			message: '#^Function woocommerce_product_post_type_link\(\) has parameter \$permalink with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -39340,20 +38266,8 @@ parameters:
 			path: includes/wc-deprecated-functions.php
 
 		-
-			message: '#^Function woocommerce_product_reviews_tab\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
 			message: '#^Function woocommerce_product_subcategories\(\) never returns null so it can be removed from the return type\.$#'
 			identifier: return.unusedType
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_protected_product_add_to_cart\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: includes/wc-deprecated-functions.php
 
@@ -39370,12 +38284,6 @@ parameters:
 			path: includes/wc-deprecated-functions.php
 
 		-
-			message: '#^Function woocommerce_readfile_chunked\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
 			message: '#^Function woocommerce_readfile_chunked\(\) has parameter \$file with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -39388,26 +38296,8 @@ parameters:
 			path: includes/wc-deprecated-functions.php
 
 		-
-			message: '#^Function woocommerce_recount_after_stock_change\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
 			message: '#^Function woocommerce_recount_after_stock_change\(\) has parameter \$product_id with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_reset_loop\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_rgb_from_hex\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: includes/wc-deprecated-functions.php
 
@@ -39418,20 +38308,8 @@ parameters:
 			path: includes/wc-deprecated-functions.php
 
 		-
-			message: '#^Function woocommerce_round_tax_total\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
 			message: '#^Function woocommerce_round_tax_total\(\) has parameter \$tax with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_sanitize_taxonomy_name\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: includes/wc-deprecated-functions.php
 
@@ -39442,26 +38320,8 @@ parameters:
 			path: includes/wc-deprecated-functions.php
 
 		-
-			message: '#^Function woocommerce_scheduled_sales\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_set_customer_auth_cookie\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
 			message: '#^Function woocommerce_set_customer_auth_cookie\(\) has parameter \$customer_id with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_set_term_order\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: includes/wc-deprecated-functions.php
 
@@ -39490,24 +38350,6 @@ parameters:
 			path: includes/wc-deprecated-functions.php
 
 		-
-			message: '#^Function woocommerce_show_messages\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_taxonomy_metadata_wpdbfix\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_terms_clauses\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
 			message: '#^Function woocommerce_terms_clauses\(\) has parameter \$args with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -39526,56 +38368,14 @@ parameters:
 			path: includes/wc-deprecated-functions.php
 
 		-
-			message: '#^Function woocommerce_time_format\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_timezone_string\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_tooltip_js\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_track_product_view\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_trim_zeros\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
 			message: '#^Function woocommerce_trim_zeros\(\) has parameter \$price with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
 			path: includes/wc-deprecated-functions.php
 
 		-
-			message: '#^Function woocommerce_update_new_customer_past_orders\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
 			message: '#^Function woocommerce_update_new_customer_past_orders\(\) has parameter \$customer_id with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_update_order_item_meta\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: includes/wc-deprecated-functions.php
 
@@ -39604,12 +38404,6 @@ parameters:
 			path: includes/wc-deprecated-functions.php
 
 		-
-			message: '#^Function woocommerce_walk_category_dropdown_tree\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
 			message: '#^Function woocommerce_walk_category_dropdown_tree\(\) has parameter \$a1 with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -39624,12 +38418,6 @@ parameters:
 		-
 			message: '#^Function woocommerce_walk_category_dropdown_tree\(\) has parameter \$a3 with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: includes/wc-deprecated-functions.php
-
-		-
-			message: '#^Function woocommerce_weekend_area_js\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: includes/wc-deprecated-functions.php
 
@@ -41092,140 +39880,14 @@ parameters:
 			path: includes/wc-template-functions.php
 
 		-
-			message: '#^Function wc_checkout_privacy_policy_text\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function wc_display_product_attributes\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function wc_dropdown_variation_attribute_options\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function wc_empty_cart_message\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function wc_gallery_noscript\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
 			message: '#^Function wc_get_formatted_cart_item_data\(\) should return string but returns string\|false\.$#'
 			identifier: return.type
 			count: 1
 			path: includes/wc-template-functions.php
 
 		-
-			message: '#^Function wc_get_pay_buttons\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function wc_no_js\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function wc_no_products_found\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function wc_page_noindex\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function wc_prevent_adjacent_posts_rel_link_wp_head\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function wc_prevent_endpoint_indexing\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function wc_privacy_policy_text\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function wc_product_cat_class\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function wc_product_class\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
 			message: '#^Function wc_query_string_form_fields\(\) should return string but return statement is missing\.$#'
 			identifier: return.missing
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function wc_registration_privacy_policy_text\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function wc_reset_loop\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function wc_reset_product_grid_settings\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function wc_send_frame_options_header\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function wc_set_loop_product_visibility\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function wc_set_loop_prop\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function wc_setup_loop\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: includes/wc-template-functions.php
 
@@ -41242,278 +39904,14 @@ parameters:
 			path: includes/wc-template-functions.php
 
 		-
-			message: '#^Function wc_template_redirect\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function wc_terms_and_conditions_checkbox_text\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function wc_terms_and_conditions_page_content\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_account_add_payment_method\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_account_content\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_account_downloads\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_account_edit_account\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_account_edit_address\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_account_navigation\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_account_orders\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_account_payment_methods\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_account_view_order\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_breadcrumb\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_button_proceed_to_checkout\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_cart_totals\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_catalog_ordering\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_checkout_coupon_form\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_checkout_login_form\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_checkout_payment\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_comments\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_content\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_cross_sell_display\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_demo_store\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_external_add_to_cart\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
 			message: '#^Function woocommerce_form_field\(\) should return string but return statement is missing\.$#'
 			identifier: return.missing
 			count: 1
 			path: includes/wc-template-functions.php
 
 		-
-			message: '#^Function woocommerce_get_sidebar\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_grouped_add_to_cart\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_login_form\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_mini_cart\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_order_again_button\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_order_details_table\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_order_downloads_table\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_order_review\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_output_all_notices\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_output_auth_footer\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_output_auth_header\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_output_content_wrapper\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_output_content_wrapper_end\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_output_product_data_tabs\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_output_related_products\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
 			message: '#^Function woocommerce_page_title\(\) should return string but return statement is missing\.$#'
 			identifier: return.missing
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_pagination\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_photoswipe\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_product_additional_information_tab\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_product_archive_description\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_product_description_tab\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: includes/wc-template-functions.php
 
@@ -41530,12 +39928,6 @@ parameters:
 			path: includes/wc-template-functions.php
 
 		-
-			message: '#^Function woocommerce_product_taxonomy_archive_header\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
 			message: '#^Function woocommerce_quantity_input\(\) should return string but return statement is missing\.$#'
 			identifier: return.missing
 			count: 1
@@ -41544,216 +39936,6 @@ parameters:
 		-
 			message: '#^Function woocommerce_quantity_input\(\) should return string but returns string\|false\.$#'
 			identifier: return.type
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_related_products\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_result_count\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_review_display_comment_text\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_shipping_calculator\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_show_product_images\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_show_product_loop_sale_flash\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_show_product_sale_flash\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_show_product_thumbnails\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_simple_add_to_cart\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_single_variation\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_single_variation_add_to_cart_button\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_subcategory_thumbnail\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_taxonomy_archive_description\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_template_loop_add_to_cart\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_template_loop_category_link_close\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_template_loop_category_link_open\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_template_loop_category_title\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_template_loop_price\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_template_loop_product_link_close\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_template_loop_product_link_open\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_template_loop_product_thumbnail\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_template_loop_product_title\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_template_loop_rating\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_template_single_add_to_cart\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_template_single_excerpt\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_template_single_meta\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_template_single_price\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_template_single_rating\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_template_single_sharing\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_template_single_title\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_upsell_display\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_variable_add_to_cart\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_widget_shopping_cart_button_view_cart\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_widget_shopping_cart_proceed_to_checkout\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Function woocommerce_widget_shopping_cart_subtotal\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: includes/wc-template-functions.php
 
@@ -42102,450 +40284,6 @@ parameters:
 		-
 			message: '#^Cannot call method remove_cap\(\) on WP_Role\|null\.$#'
 			identifier: method.nonObject
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function filter_created_pages\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_1020_add_old_refunded_order_items_to_product_lookup_table\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_1050_migrate_brand_permalink_setting\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_300_comment_type_index\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_300_db_version\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_300_product_visibility\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_310_db_version\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_310_downloadable_products\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_310_old_comments\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_312_db_version\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_312_shop_manager_capabilities\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_320_db_version\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_320_mexican_states\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_330_clear_transients\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_330_db_version\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_330_image_options\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_330_product_stock_status\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_330_set_default_product_cat\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_330_set_paypal_sandbox_credentials\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_330_webhooks\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_340_db_version\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_340_last_active\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_340_states\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_350_db_version\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_350_reviews_comment_type\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_354_db_version\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_354_modify_shop_manager_caps\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_360_db_version\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_360_product_lookup_tables\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_360_term_meta\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_370_db_version\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_390_change_geolocation_database_update_cron\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_390_db_version\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_390_move_maxmind_database\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_400_db_version\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_400_increase_size_of_column\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_400_reset_action_scheduler_migration_status\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_440_db_version\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_450_db_version\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_500_db_version\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_500_fix_product_review_count\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_560_create_refund_returns_page\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_560_db_version\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_600_db_version\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_600_migrate_rate_limit_options\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_630_db_version\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_640_db_version\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_650_approved_download_directories\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_651_approved_download_directories\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_670_purge_comments_count_cache\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_700_remove_recommended_marketing_plugins_transient\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_721_adjust_new_zealand_states\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_721_adjust_ukraine_states\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_722_adjust_new_zealand_states\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_722_adjust_ukraine_states\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_750_add_columns_to_order_stats_table\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_770_remove_multichannel_marketing_feature_options\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_790_blockified_product_grid_block\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_830_rename_cart_template\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_830_rename_checkout_template\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_860_remove_recommended_marketing_plugins_transient\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_870_prevent_listing_of_transient_files_directory\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_890_update_connect_to_woocommerce_note\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_890_update_paypal_standard_load_eligibility\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_891_create_plugin_autoinstall_history_option\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_910_add_launch_your_store_tour_option\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_920_add_wc_hooked_blocks_version_option\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_930_add_woocommerce_coming_soon_option\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_930_migrate_user_meta_for_launch_your_store_tour\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_950_tracking_option_autoload\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_961_migrate_default_email_base_color\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_980_remove_order_attribution_install_banner_dismissed_option\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_985_enable_new_payments_settings_page_feature\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/wc-update-functions.php
-
-		-
-			message: '#^Function wc_update_990_remove_wc_count_comments_transient\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: includes/wc-update-functions.php
 

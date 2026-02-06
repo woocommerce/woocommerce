@@ -1,11 +1,20 @@
 /**
+ * External dependencies
+ */
+import type { Page } from '@playwright/test';
+
+/**
  * Adds a specified quantity of a product by ID to the WooCommerce cart.
  *
- * @param {import('playwright').Page} page
- * @param {string}                    productId
- * @param {number}                    [quantity=1]
+ * @param page      - Playwright page object
+ * @param productId - The product ID to add
+ * @param quantity  - Number of items to add (default: 1)
  */
-export const addAProductToCart = async ( page, productId, quantity = 1 ) => {
+export const addAProductToCart = async (
+	page: Page,
+	productId: string,
+	quantity = 1
+): Promise< void > => {
 	for ( let i = 0; i < quantity; i++ ) {
 		const responsePromise = page.waitForResponse(
 			'**/wp-json/wc/store/v1/cart**'
@@ -17,17 +26,17 @@ export const addAProductToCart = async ( page, productId, quantity = 1 ) => {
 };
 
 /**
- * Util helper made for adding multiple same products to cart
+ * Util helper made for adding multiple same products to cart.
  *
- * @param {import('playwright').Page} page
- * @param {string}                    productName
- * @param {number}                    quantityCount
+ * @param page          - Playwright page object
+ * @param productName   - Name of the product to add
+ * @param quantityCount - Number of items to add (default: 1)
  */
 export async function addOneOrMoreProductToCart(
-	page,
-	productName,
+	page: Page,
+	productName: string,
 	quantityCount = 1
-) {
+): Promise< void > {
 	await page.goto(
 		`product/${ productName.replace( / /gi, '-' ).toLowerCase() }`
 	);
