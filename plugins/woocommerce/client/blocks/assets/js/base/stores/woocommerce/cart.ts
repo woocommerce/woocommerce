@@ -22,6 +22,18 @@ import type {
  * Internal dependencies
  */
 
+/**
+ * Compatibility fallback for AbortSignal.timeout (not supported in older browsers).
+ */
+const createTimeoutSignal = (ms: number): AbortSignal => {
+    if ('timeout' in AbortSignal && typeof (AbortSignal as any).timeout === 'function') {
+        return (AbortSignal as any).timeout(ms);
+    }
+    const controller = new AbortController();
+    setTimeout(() => controller.abort(), ms);
+    return controller.signal;
+};
+
 export type WooCommerceConfig = {
     products?: {
         [ productId: number ]: ProductData;
@@ -637,7 +649,7 @@ const { state, actions } = store< Store >(
                         method: "POST",
                         headers: { Nonce: state.nonce, "Content-Type": "application/json" },
                         body: JSON.stringify({ requests: batchRequests }),
-                        signal: AbortSignal.timeout(30000),
+                        signal: createTimeoutSignal(30000),
                     });
 
                     const data = yield batchResponse.json();
@@ -761,7 +773,7 @@ const { state, actions } = store< Store >(
                             method: 'GET',
                             cache: 'no-store',
                             headers: { 'Content-Type': 'application/json' },
-                            signal: AbortSignal.timeout(30000),
+                            signal: createTimeoutSignal(30000),
                         }
                     );
                     const json: unknown = yield res.json();
