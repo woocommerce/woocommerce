@@ -281,7 +281,11 @@ export const normalizeVariation = (variation: VariationInput): string => {
             .sort((a, b) => a.attribute.localeCompare(b.attribute));
         return JSON.stringify(normalized);
     } catch (err) {
-        return JSON.stringify(variation);
+        try {
+            return JSON.stringify(variation);
+        } catch {
+            return '';
+        }
     }
 }
 
@@ -426,19 +430,21 @@ const { state, actions } = store< Store >(
             *removeCartItem(key: string) {
                 const removedItem = state.cart.items.find(i => i.key === key);
 
+                // Always apply optimistic remove (in case of race/stale key)
                 state.cart.items = state.cart.items.filter((t) => t.key !== key);
 
                 if (removedItem) {
                     const queueKey = makeQueueKey(removedItem);
                     addQueue.delete(queueKey);
                     updateQueue.delete(queueKey);
-                }
 
-                if (key) {
-                    deleteQueue.add(key);
-                }
+                    if (removedItem.key) {
+                        deleteQueue.add(removedItem.key);
+                    }
 
-                scheduleCollectiveSync();
+                    scheduleCollectiveSync();
+                }
+                // If key not found, no server delete needed — skip enqueue & sync
             },
             *addCartItem(
                 { id, key, quantity, variation }: ClientCartItem
