@@ -620,14 +620,10 @@ const { state, actions } = store< Store >(
                             deleteQueue.add(k);
                         });
                         currentUpdates.forEach(([k, i]) => {
-                            if (!updateQueue.has(k)) {
-                                updateQueue.set(k, i);
-                            }
+                            if (!updateQueue.has(k)) updateQueue.set(k, i);
                         });
                         currentAdds.forEach(([k, i]) => {
-                            if (!addQueue.has(k)) {
-                                addQueue.set(k, i);
-                            }
+                            if (!addQueue.has(k)) addQueue.set(k, i);
                         });
                         return;
                     }
@@ -666,11 +662,17 @@ const { state, actions } = store< Store >(
                     });
 
                     if (finalCartState) {
+                        const quantityChanges: QuantityChanges = {
+                            cartItemsPendingDelete: currentDeletes,
+                            productsPendingAdd: currentAdds.map(([, item]) => item.id),
+                            cartItemsPendingQuantity: currentUpdates.map(([key]) => key),
+                        };
+
                         const oldCart = { ...state.cart, items: state.cart.items.map(i => ({ ...i })) };
                         applyServerState(finalCartState);
                         reapplyOptimisticState();
 
-                        const infoNotices = getInfoNoticesFromCartUpdates(oldCart, state.cart);
+                        const infoNotices = getInfoNoticesFromCartUpdates(oldCart, state.cart, quantityChanges);
                         if (infoNotices.length > 0) {
                             yield actions.updateNotices(infoNotices);
                         }
@@ -693,14 +695,10 @@ const { state, actions } = store< Store >(
                                 deleteQueue.add(k);
                             });
                             currentUpdates.forEach(([k, i]) => {
-                                if (!updateQueue.has(k)) {
-                                    updateQueue.set(k, i);
-                                }
+                                if (!updateQueue.has(k)) updateQueue.set(k, i);
                             });
                             currentAdds.forEach(([k, i]) => {
-                                if (!addQueue.has(k)) {
-                                    addQueue.set(k, i);
-                                }
+                                if (!addQueue.has(k)) addQueue.set(k, i);
                             });
 
                             setTimeout(() => {
@@ -745,11 +743,17 @@ const { state, actions } = store< Store >(
                         return;
                     }
 
+                    const quantityChanges: QuantityChanges = {
+                        cartItemsPendingDelete: Array.from(deleteQueue),
+                        productsPendingAdd: Array.from(addQueue.values()).map(item => item.id),
+                        cartItemsPendingQuantity: Array.from(updateQueue.keys()),
+                    };
+
                     const oldCart = { ...state.cart, items: state.cart.items.map(i => ({ ...i })) };
                     applyServerState(json as Cart);
                     reapplyOptimisticState();
 
-                    const infoNotices = getInfoNoticesFromCartUpdates(oldCart, state.cart);
+                    const infoNotices = getInfoNoticesFromCartUpdates(oldCart, state.cart, quantityChanges);
                     if (infoNotices.length > 0) {
                         yield actions.updateNotices(infoNotices);
                     }
