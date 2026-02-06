@@ -48,8 +48,10 @@ jobs:
     steps:
       - name: Normalize branch input
         id: normalize-branch
+        env:
+          INPUT_BRANCH: ${{ inputs.branch }}
         run: |
-          branch="${{ inputs.branch }}"
+          branch="$INPUT_BRANCH"
           if [[ "$branch" =~ ^[0-9]+\.[0-9]+$ ]]; then
             branch="release/$branch"
           fi
@@ -69,7 +71,7 @@ jobs:
 
       - name: Workflow checks
         env:
-          BRANCH: ${{ steps.normalize-branch.outputs.branch || github.ref }}
+          BRANCH: ${{ steps.normalize-branch.outputs.branch }}
         run: |
           # No special checks when running as a reusable workflow.
           if [ "${{ ! contains( github.workflow_ref, 'release-build-zip-file.yml' ) }}" = "true" ]; then
@@ -108,7 +110,7 @@ jobs:
         # Checkout branch.
       - uses: actions/checkout@v4
         with:
-          ref: ${{ steps.normalize-branch.outputs.branch || github.ref }}
+          ref: ${{ steps.normalize-branch.outputs.branch }}
           path: checkout-branch
           sparse-checkout: |
             /plugins/woocommerce/woocommerce.php
@@ -120,7 +122,7 @@ jobs:
         id: pre-build-verification
         if: ${{ ! inputs.skip_verify }}
         env:
-          BRANCH: ${{ steps.normalize-branch.outputs.branch || github.ref }}
+          BRANCH: ${{ steps.normalize-branch.outputs.branch }}
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |

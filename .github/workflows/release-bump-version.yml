@@ -42,8 +42,10 @@ jobs:
     steps:
       - name: Normalize branch input
         id: normalize-branch
+        env:
+          INPUT_BRANCH: ${{ inputs.branch }}
         run: |
-          branch="${{ inputs.branch }}"
+          branch="$INPUT_BRANCH"
           if [[ "$branch" =~ ^[0-9]+\.[0-9]+$ ]]; then
             branch="release/$branch"
           fi
@@ -56,7 +58,7 @@ jobs:
         env:
           BRANCH: ${{ steps.normalize-branch.outputs.branch }}
         run: |
-          if ! git ls-remote --exit-code --heads https://github.com/${GITHUB_REPOSITORY} ${{ steps.normalize-branch.outputs.branch }} > /dev/null; then
+          if ! git ls-remote --exit-code --heads https://github.com/${GITHUB_REPOSITORY} "$BRANCH" > /dev/null; then
             echo "::error::Source branch '$BRANCH' does not exist."
             exit 1
           fi
