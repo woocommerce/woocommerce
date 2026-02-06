@@ -238,6 +238,20 @@ class Controller extends AbstractController {
 			$validated_settings[ $setting_id ] = $sanitized_value;
 		}
 
+		/**
+		 * Filters the validated settings before updating.
+		 *
+		 * @param array $validated_settings Validated settings.
+		 * @param array $settings_by_id Settings by ID.
+		 * @param array $values_to_update Values to update.
+		 * @return array Validated settings.
+		 * @since 10.6.0
+		 */
+		$validated_settings = apply_filters( 'woocommerce_emails_api_settings_schema_validate_and_sanitize_settings', $validated_settings, $settings_by_id, $values_to_update );
+		if ( is_wp_error( $validated_settings ) ) {
+			return $validated_settings;
+		}
+
 		// After validation loop, update all settings.
 		$updated_settings = array();
 		foreach ( $validated_settings as $setting_id => $value ) {
