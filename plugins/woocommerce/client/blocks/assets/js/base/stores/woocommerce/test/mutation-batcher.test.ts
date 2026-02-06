@@ -84,9 +84,9 @@ describe( 'createMutationQueue', () => {
 			} );
 
 			// Submit 3 requests synchronously
-			const p1 = queue.submit( { id: '1', path: '/a', method: 'POST' } );
-			const p2 = queue.submit( { id: '2', path: '/b', method: 'POST' } );
-			const p3 = queue.submit( { id: '3', path: '/c', method: 'POST' } );
+			const p1 = queue.submit( { path: '/a', method: 'POST' } );
+			const p2 = queue.submit( { path: '/b', method: 'POST' } );
+			const p3 = queue.submit( { path: '/c', method: 'POST' } );
 
 			await Promise.all( [ p1, p2, p3 ] );
 
@@ -159,8 +159,8 @@ describe( 'createMutationQueue', () => {
 			} );
 
 			await Promise.all( [
-				queue.submit( { id: '1', path: '/a', method: 'POST' } ),
-				queue.submit( { id: '2', path: '/b', method: 'POST' } ),
+				queue.submit( { path: '/a', method: 'POST' } ),
+				queue.submit( { path: '/b', method: 'POST' } ),
 			] );
 
 			// State should be from the last successful response
@@ -183,8 +183,8 @@ describe( 'createMutationQueue', () => {
 				...stateHandler,
 			} );
 
-			const p1 = queue.submit( { id: '1', path: '/a', method: 'POST' } );
-			const p2 = queue.submit( { id: '2', path: '/b', method: 'POST' } );
+			const p1 = queue.submit( { path: '/a', method: 'POST' } );
+			const p2 = queue.submit( { path: '/b', method: 'POST' } );
 
 			// First should reject, second should resolve
 			await expect( p1 ).rejects.toThrow( 'Bad request' );
@@ -410,12 +410,12 @@ describe( 'createMutationQueue', () => {
 			} );
 
 			// First batch - submit and let microtask fire
-			const p1 = queue.submit( { id: '1', path: '/a', method: 'POST' } );
+			const p1 = queue.submit( { path: '/a', method: 'POST' } );
 			await flushMicrotasks();
 			expect( fetchCallCount ).toBe( 1 );
 
 			// Second request - submit while first is in-flight
-			const p2 = queue.submit( { id: '2', path: '/b', method: 'POST' } );
+			const p2 = queue.submit( { path: '/b', method: 'POST' } );
 			await flushMicrotasks();
 
 			// Should NOT have sent a second batch yet - only one in-flight allowed
@@ -539,7 +539,7 @@ describe( 'createMutationQueue', () => {
 			} );
 
 			// Submit request
-			const p1 = queue.submit( { id: '1', path: '/a', method: 'POST' } );
+			const p1 = queue.submit( { path: '/a', method: 'POST' } );
 
 			// Now processing with 1 pending
 			expect( queue.getStatus().isProcessing ).toBe( true );
@@ -651,7 +651,7 @@ describe( 'createMutationQueue', () => {
 				...stateHandler,
 			} );
 
-			queue.submit( { id: '1', path: '/a', method: 'POST' } );
+			queue.submit( { path: '/a', method: 'POST' } );
 
 			let idleResolved = false;
 			queue.waitForIdle().then( () => {
@@ -693,7 +693,7 @@ describe( 'createMutationQueue', () => {
 				...stateHandler,
 			} );
 
-			queue.submit( { id: '1', path: '/a', method: 'POST' } );
+			queue.submit( { path: '/a', method: 'POST' } );
 
 			let waiter1Resolved = false;
 			let waiter2Resolved = false;

@@ -273,7 +273,6 @@ function emitSyncEvent( {
  * Queues cart requests and handles optimistic updates and reconciliation.
  */
 let cartQueue: MutationQueue< Cart > | null = null;
-let requestIdCounter = 0;
 
 /**
  * Request options for sendCartRequest
@@ -312,13 +311,7 @@ function sendCartRequest(
 		} );
 	}
 
-	// Auto-generate request ID.
-	const requestId = `cart-${ ++requestIdCounter }`;
-
-	return cartQueue.submit( {
-		id: requestId,
-		...options,
-	} );
+	return cartQueue.submit( options );
 }
 
 // Todo: export this store once the store is public.

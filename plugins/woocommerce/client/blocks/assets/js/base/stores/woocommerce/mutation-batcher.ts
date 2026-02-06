@@ -20,7 +20,6 @@ export type SettledResult< TState = unknown > = {
 };
 
 export type MutationRequest< TState = unknown > = {
-	id: string;
 	path: string;
 	method: 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 	body?: unknown;
@@ -37,7 +36,6 @@ export type MutationResult< TState = unknown > = {
 	success: boolean;
 	data?: TState;
 	error?: Error;
-	requestId: string;
 };
 
 type BatchItemResponse = {
@@ -87,6 +85,7 @@ export function createMutationQueue< TState >(
 	let microtaskScheduled = false;
 	let isProcessing = false;
 	let idleResolvers: Array< () => void > = [];
+	let nextId = 0;
 
 	function reconcile() {
 		if ( lastServerState !== null ) {
@@ -124,7 +123,6 @@ export function createMutationQueue< TState >(
 					...( lastServerState !== null && {
 						data: lastServerState,
 					} ),
-					requestId: tracked.id,
 				} );
 			}
 		} );
@@ -252,6 +250,8 @@ export function createMutationQueue< TState >(
 		request: MutationRequest< TState >
 	): Promise< MutationResult< TState > > {
 		return new Promise( ( resolve, reject ) => {
+			const id = String( nextId++ );
+
 			// First request in a cycle: snapshot and start processing.
 			if ( ! isProcessing ) {
 				snapshot = takeSnapshot();
@@ -267,14 +267,14 @@ export function createMutationQueue< TState >(
 				request.applyOptimistic();
 			}
 
-			trackedRequests.set( request.id, {
-				id: request.id,
+			trackedRequests.set( id, {
+				id,
 				request: { ...request, body: clonedBody },
 				resolve: resolve as ( result: MutationResult ) => void,
 				reject,
 			} );
 
-			pendingIds.push( request.id );
+			pendingIds.push( id );
 
 			if ( ! microtaskScheduled ) {
 				microtaskScheduled = true;
