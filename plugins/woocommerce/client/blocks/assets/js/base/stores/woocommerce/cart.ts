@@ -475,6 +475,8 @@ const { state, actions } = store< Store >(
                 if (key && deleteQueue.has(key)) deleteQueue.delete(key);
 
                 let item = state.cart.items.find( ( cartItem ) => {
+                    if (key && cartItem.key === key) return true;
+
                     if ( cartItem.type === 'variation' ) {
                         if (
                             id !== cartItem.id ||
@@ -532,6 +534,8 @@ const { state, actions } = store< Store >(
             ) {
                 items.forEach((itemData) => {
                     const existingItem = state.cart.items.find((cartItem) => {
+                        if (itemData.key && cartItem.key === itemData.key) return true;
+
                         if (cartItem.type === 'variation' && itemData.variation) {
                             if (
                                 itemData.id !== cartItem.id ||
