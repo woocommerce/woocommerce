@@ -7,7 +7,6 @@ import {
     makeQueueKey,
     getInfoNoticesFromCartUpdates,
 } from '../cart';
-import { __ } from '@wordpress/i18n';
 
 type MockStore = { state: Store[ 'state' ]; actions: Store[ 'actions' ] };
 
@@ -77,7 +76,7 @@ describe( 'WooCommerce Cart Interactivity API Store Helpers', () => {
         });
 
         it( 'falls back to JSON.stringify on error', () => {
-            const badVariation = { [Symbol()]: 'bad' }; // Causes JSON.stringify error in try
+            const badVariation = { Color: 123 }; // non-string value, .toLowerCase() throws
             expect(normalizeVariation(badVariation as any)).toBe(JSON.stringify(badVariation));
         });
     });
@@ -103,15 +102,15 @@ describe( 'WooCommerce Cart Interactivity API Store Helpers', () => {
     describe( 'getInfoNoticesFromCartUpdates', () => {
         const oldCart = {
             items: [
-                { key: 'key1', name: 'Product 1', quantity: 2 },
-                { key: 'key2', name: 'Product 2', quantity: 1 },
+                { key: 'key1', id: 1, name: 'Product 1', quantity: 2 },
+                { key: 'key2', id: 2, name: 'Product 2', quantity: 1 },
             ],
         } as any;
 
         const newCart = {
             items: [
-                { key: 'key1', name: 'Product 1', quantity: 3 }, // updated
-                { key: 'key3', name: 'Product 3', quantity: 1 }, // added
+                { key: 'key1', id: 1, name: 'Product 1', quantity: 3 }, // updated
+                { key: 'key3', id: 3, name: 'Product 3', quantity: 1 }, // added
             ],
         } as any;
 
