@@ -40,11 +40,15 @@ class WC_Admin_Reports {
 	 */
 	public static function delete_legacy_reports_transients( int $order_id, bool $defer ): void {
 		if ( $defer ) {
+			static $skip_consequent;
+
 			// Schedule the deletion, cap the execution to single pending event at any given time.
-			$scheduled = as_has_scheduled_action( 'woocommerce_delete_legacy_report_transients' );
+			$scheduled = $skip_consequent || as_has_scheduled_action( 'woocommerce_delete_legacy_report_transients', null, 'woocommerce' );
 			if ( ! $scheduled ) {
 				as_schedule_single_action( time() + MINUTE_IN_SECONDS, 'woocommerce_delete_legacy_report_transients', array( $order_id, false ), 'woocommerce' );
 			}
+			$skip_consequent = true;
+
 			return;
 		}
 
