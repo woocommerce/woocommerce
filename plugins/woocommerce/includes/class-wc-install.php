@@ -347,6 +347,8 @@ class WC_Install {
 
 	/**
 	 * Hook in tabs.
+	 *
+	 * @return void
 	 */
 	public static function init() {
 		if ( ! empty( $GLOBALS['wc_uninstalling_plugin'] ) ) {
@@ -383,6 +385,8 @@ class WC_Install {
 	 * @since 8.0.0
 	 *
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 *
+	 * @return void
 	 */
 	public static function newly_installed() {
 		if ( 'yes' === get_option( self::NEWLY_INSTALLED_OPTION, false ) ) {
@@ -409,6 +413,8 @@ class WC_Install {
 	 * Check WooCommerce version and run the updater is required.
 	 *
 	 * This check is done on all requests and runs if the versions do not match.
+	 *
+	 * @return void
 	 */
 	public static function check_version() {
 		$wc_version      = get_option( 'woocommerce_version' );
@@ -430,6 +436,8 @@ class WC_Install {
 	 * Performan manual database update when triggered by WooCommerce System Tools.
 	 *
 	 * @since 3.6.5
+	 *
+	 * @return void
 	 */
 	public static function manual_database_update() {
 		$blog_id = get_current_blog_id();
@@ -442,6 +450,8 @@ class WC_Install {
 	 *
 	 * @since 4.0.0
 	 * @deprecated 10.3.0
+	 *
+	 * @return void
 	 */
 	public static function wc_admin_db_update_notice() {
 		if (
@@ -456,6 +466,8 @@ class WC_Install {
 	 * Adds the db update notice.
 	 *
 	 * @since 10.3.0
+	 *
+	 * @return void
 	 */
 	private static function add_update_db_notice() {
 		if ( ! \WC_Admin_Notices::has_notice( 'update' ) ) {
@@ -475,6 +487,8 @@ class WC_Install {
 	 * Removes the db update notice.
 	 *
 	 * @since 10.3.0
+	 *
+	 * @return void
 	 */
 	public static function remove_update_db_notice() {
 		if ( \WC_Admin_Notices::has_notice( 'update' ) ) {
@@ -492,6 +506,8 @@ class WC_Install {
 
 	/**
 	 * Run manual database update.
+	 *
+	 * @return void
 	 */
 	public static function run_manual_database_update() {
 		self::update();
@@ -503,6 +519,8 @@ class WC_Install {
 	 * @param string $update_callback Callback name.
 	 *
 	 * @since 3.6.0
+	 *
+	 * @return void
 	 */
 	public static function run_update_callback( $update_callback ) {
 		include_once __DIR__ . '/wc-update-functions.php';
@@ -519,6 +537,8 @@ class WC_Install {
 	 *
 	 * @since 3.6.0
 	 * @param string $callback Callback name.
+	 *
+	 * @return void
 	 */
 	protected static function run_update_callback_start( $callback ) {
 		wc_maybe_define_constant( 'WC_UPDATING', true );
@@ -530,6 +550,8 @@ class WC_Install {
 	 * @since 3.6.0
 	 * @param string $callback Callback name.
 	 * @param bool   $result Return value from callback. Non-false need to run again.
+	 *
+	 * @return void
 	 */
 	protected static function run_update_callback_end( $callback, $result ) {
 		if ( $result ) {
@@ -547,6 +569,8 @@ class WC_Install {
 	 * Install actions when a update button is clicked within the admin area.
 	 *
 	 * This function is hooked into admin_init to affect admin only.
+	 *
+	 * @return void
 	 */
 	public static function install_actions() {
 		if ( ! empty( $_GET['do_update_woocommerce'] ) ) { // WPCS: input var ok.
@@ -580,6 +604,8 @@ class WC_Install {
 
 	/**
 	 * Install WC.
+	 *
+	 * @return void
 	 */
 	public static function install() {
 		if ( ! is_blog_installed() ) {
@@ -629,6 +655,8 @@ class WC_Install {
 
 	/**
 	 * Core function that performs the WooCommerce install.
+	 *
+	 * @return void
 	 */
 	private static function install_core() {
 		if ( self::is_new_install() && ! get_option( self::NEWLY_INSTALLED_OPTION, false ) ) {
@@ -758,6 +786,8 @@ class WC_Install {
 	 * Reset any notices added to admin.
 	 *
 	 * @since 3.2.0
+	 *
+	 * @return void
 	 */
 	private static function remove_admin_notices() {
 		include_once __DIR__ . '/admin/class-wc-admin-notices.php';
@@ -770,6 +800,8 @@ class WC_Install {
 	 * Setup WC environment - post types, taxonomies, endpoints.
 	 *
 	 * @since 3.2.0
+	 *
+	 * @return void
 	 */
 	private static function setup_environment() {
 		WC_Post_types::register_post_types();
@@ -829,6 +861,8 @@ class WC_Install {
 	 * See if we need to set redirect transients for activation or not.
 	 *
 	 * @since 4.6.0
+	 *
+	 * @return void
 	 */
 	private static function maybe_set_activation_transients() {
 		if ( self::is_new_install() ) {
@@ -840,6 +874,8 @@ class WC_Install {
 	 * See if we need to show or run database updates during install.
 	 *
 	 * @since 3.2.0
+	 *
+	 * @return void
 	 */
 	private static function maybe_update_db_version() {
 		if ( self::needs_db_update() ) {
@@ -863,6 +899,8 @@ class WC_Install {
 	 * Set the Store ID if not already present.
 	 *
 	 * @since 8.4.0
+	 *
+	 * @return void
 	 */
 	public static function maybe_set_store_id() {
 		if ( ! get_option( self::STORE_ID_OPTION, false ) ) {
@@ -872,6 +910,8 @@ class WC_Install {
 
 	/**
 	 * Update WC version to current.
+	 *
+	 * @return void
 	 */
 	private static function update_wc_version() {
 		update_option( 'woocommerce_version', WC()->version );
@@ -889,6 +929,8 @@ class WC_Install {
 
 	/**
 	 * Push all needed DB updates to the queue for processing.
+	 *
+	 * @return void
 	 */
 	private static function update() {
 		$current_db_version = get_option( 'woocommerce_db_version' );
@@ -979,6 +1021,8 @@ class WC_Install {
 	 * Update DB version to current.
 	 *
 	 * @param string|null $version New WooCommerce DB version or null.
+	 *
+	 * @return void
 	 */
 	public static function update_db_version( $version = null ) {
 		if ( is_null( $version ) ) {
@@ -1010,6 +1054,8 @@ class WC_Install {
 
 	/**
 	 * Removes old cron jobs now that we moved to Action Scheduler.
+	 *
+	 * @return void
 	 */
 	private static function clear_cron_jobs() {
 		wp_clear_scheduled_hook( 'woocommerce_scheduled_sales' );
@@ -1024,6 +1070,8 @@ class WC_Install {
 
 	/**
 	 * Create pages on installation.
+	 *
+	 * @return void
 	 */
 	public static function maybe_create_pages() {
 		if ( empty( get_option( 'woocommerce_db_version' ) ) ) {
@@ -1033,6 +1081,8 @@ class WC_Install {
 
 	/**
 	 * Create pages that the plugin relies on, storing page IDs in variables.
+	 *
+	 * @return void
 	 */
 	public static function create_pages() {
 		// WordPress sets fresh_site to 0 after a page gets published.
@@ -1127,6 +1177,8 @@ class WC_Install {
 	 * Default options.
 	 *
 	 * Sets up the default options used on the settings page.
+	 *
+	 * @return void
 	 */
 	private static function create_options() {
 		// Include settings so that we can run through defaults.
@@ -1178,6 +1230,8 @@ class WC_Install {
 	 * Enable HPOS by default for new shops.
 	 *
 	 * @since 8.2.0
+	 *
+	 * @return void
 	 */
 	public static function maybe_enable_hpos() {
 		if ( self::should_enable_hpos_for_new_shop() ) {
@@ -1192,6 +1246,8 @@ class WC_Install {
 	 * Ensure that the options are set for all shops for performance even if core profiler is disabled on the host.
 	 *
 	 * @since 9.3.0
+	 *
+	 * @return void
 	 */
 	public static function add_coming_soon_option() {
 		add_option( 'woocommerce_coming_soon', 'yes' );
@@ -1202,6 +1258,8 @@ class WC_Install {
 	 * Enable email improvements by default for new shops.
 	 *
 	 * @since 9.8.0
+	 *
+	 * @return void
 	 */
 	public static function enable_email_improvements_for_newly_installed() {
 		$feature_controller = wc_get_container()->get( FeaturesController::class );
@@ -1217,6 +1275,8 @@ class WC_Install {
 	 * Enable customer stock notifications signups by default for new shops.
 	 *
 	 * @since 0.0.0
+	 *
+	 * @return void
 	 */
 	public static function enable_customer_stock_notifications_signups() {
 		update_option( 'woocommerce_back_in_stock_allow_signups', 'yes' );
@@ -1241,6 +1301,8 @@ class WC_Install {
 	 * Enable email improvements by default for existing shops if conditions are met.
 	 *
 	 * @since 9.9.0
+	 *
+	 * @return void
 	 */
 	public static function enable_email_improvements_for_existing_merchants() {
 		if ( ! EmailImprovements::should_enable_email_improvements_for_existing_stores() ) {
@@ -1342,6 +1404,8 @@ class WC_Install {
 
 	/**
 	 * Delete obsolete notes.
+	 *
+	 * @return void
 	 */
 	public static function delete_obsolete_notes() {
 		global $wpdb;
@@ -1436,6 +1500,8 @@ class WC_Install {
 
 	/**
 	 * Migrate option values to their new keys/names.
+	 *
+	 * @return void
 	 */
 	public static function migrate_options() {
 
@@ -1478,6 +1544,8 @@ class WC_Install {
 	}
 	/**
 	 * Add the default terms for WC taxonomies - product types and order statuses. Modify this at your own risk.
+	 *
+	 * @return void
 	 */
 	public static function create_terms() {
 		$taxonomies = array(
@@ -1543,6 +1611,8 @@ class WC_Install {
 	 * In this case we check if the plugin was autoinstalled in such a way, and if so we activate it if the conditions are fulfilled.
 	 *
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 *
+	 * @return void
 	 */
 	public static function maybe_install_legacy_api_plugin() {
 		if ( self::is_new_install() ) {
@@ -1691,6 +1761,8 @@ class WC_Install {
 	 * If in a previous version of WooCommerce the Legacy REST API plugin was installed manually but the core Legacy REST API was kept disabled,
 	 * now the Legacy API is still disabled and can't be manually enabled from settings UI (the plugin, which is now in control, won't allow that),
 	 * which is weird and confusing. So we detect this case and explicitly enable it.
+	 *
+	 * @return void
 	 */
 	private static function maybe_activate_legacy_api_enabled_option() {
 		if ( ! self::is_new_install() && is_plugin_active( 'woocommerce-legacy-rest-api/woocommerce-legacy-rest-api.php' ) && 'yes' !== get_option( 'woocommerce_api_enabled' ) ) {
@@ -2262,6 +2334,8 @@ $stock_notifications_table_schema;
 
 	/**
 	 * Create roles and capabilities.
+	 *
+	 * @return void
 	 */
 	public static function create_roles() {
 		global $wp_roles;
@@ -2393,6 +2467,8 @@ $stock_notifications_table_schema;
 
 	/**
 	 * Remove WooCommerce roles.
+	 *
+	 * @return void
 	 */
 	public static function remove_roles() {
 		global $wp_roles;
@@ -2420,6 +2496,8 @@ $stock_notifications_table_schema;
 
 	/**
 	 * Create files/directories.
+	 *
+	 * @return void
 	 */
 	private static function create_files() {
 		/**
@@ -2466,6 +2544,8 @@ $stock_notifications_table_schema;
 	 * Create a placeholder image in the media library.
 	 *
 	 * @since 3.5.0
+	 *
+	 * @return void
 	 */
 	private static function create_placeholder_image() {
 		$placeholder_image = get_option( 'woocommerce_placeholder_image', 0 );
@@ -2591,6 +2671,8 @@ $stock_notifications_table_schema;
 	 *
 	 * @param array  $plugins Associative array of plugin files to paths.
 	 * @param string $key Plugin relative path. Example: woocommerce/woocommerce.php.
+	 *
+	 * @return array
 	 */
 	private static function associate_plugin_file( $plugins, $key ) {
 		$path                 = explode( '/', $key );
@@ -2608,6 +2690,8 @@ $stock_notifications_table_schema;
 	 *
 	 * @throws Exception If unable to proceed with plugin installation.
 	 * @since  2.6.0
+	 *
+	 * @return void
 	 */
 	public static function background_installer( $plugin_to_install_id, $plugin_to_install ) {
 		// Explicitly clear the event.
@@ -2751,6 +2835,8 @@ $stock_notifications_table_schema;
 	 *
 	 * @param string $option Option name.
 	 * @param string $value  Option value.
+	 *
+	 * @return void
 	 */
 	public static function remove_mailchimps_redirect( $option, $value ) {
 		// Remove this action to prevent infinite looping.
@@ -2767,6 +2853,8 @@ $stock_notifications_table_schema;
 	 *
 	 * @throws Exception If unable to proceed with theme installation.
 	 * @since  3.1.0
+	 *
+	 * @return void
 	 */
 	public static function theme_background_installer( $theme_slug ) {
 		// Explicitly clear the event.
@@ -2829,6 +2917,8 @@ $stock_notifications_table_schema;
 	 * Sets whether PayPal Standard will be loaded on install.
 	 *
 	 * @since 5.5.0
+	 *
+	 * @return void
 	 */
 	private static function set_paypal_standard_load_eligibility() {
 		// Initiating the payment gateways sets the flag.
