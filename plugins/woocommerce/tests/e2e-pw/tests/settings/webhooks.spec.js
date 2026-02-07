@@ -7,7 +7,7 @@ import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
  * Internal dependencies
  */
 import { tags, test, expect } from '../../fixtures/fixtures.js';
-import { ADMIN_STATE_PATH } from '../../playwright.config.js';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
 
 test.describe( 'Manage webhooks', () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );
