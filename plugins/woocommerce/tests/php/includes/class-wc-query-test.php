@@ -124,4 +124,104 @@ class WC_Query_Test extends \WC_Unit_Test_Case {
 		update_option( 'page_on_front', $default_page_on_front );
 		wp_delete_post( $shop_page_id, true );
 	}
+
+	/**
+	 * @testdox Products with 'catalog' visibility are excluded from search results.
+	 */
+	public function test_search_excludes_products_with_catalog_visibility() {
+		// Create a product that should appear in search.
+		$visible_product = WC_Helper_Product::create_simple_product();
+		$visible_product->set_name( 'Search Visible Product' );
+		$visible_product->set_catalog_visibility( 'visible' );
+		$visible_product->save();
+
+		// Create a product that should be excluded from search.
+		$hidden_product = WC_Helper_Product::create_simple_product();
+		$hidden_product->set_name( 'Search Hidden Product' );
+		$hidden_product->set_catalog_visibility( 'catalog' ); // Visible in catalog but excluded from search.
+		$hidden_product->save();
+
+		// Save the previous main query and prepare for a new one.
+		global $wp_the_query, $wp_query;
+		$previous_wp_the_query = $wp_the_query;
+		$previous_wp_query     = $wp_query;
+
+		// Create a product search query.
+		$query = new WP_Query();
+		$query->init();
+		$query->query_vars = array(
+			's' => 'Search',
+		);
+		$query->is_search  = true;
+
+		// Set it as the main query so pre_get_posts will run.
+		$wp_the_query = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$wp_query     = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		// Now execute the query which will trigger pre_get_posts.
+		$query->get_posts();
+		$found_ids = wp_list_pluck( $query->posts, 'ID' );
+
+		// Assert that the visible product is in the results.
+		$this->assertContains( $visible_product->get_id(), $found_ids, 'Visible product should appear in search results' );
+
+		// Assert that the hidden product is NOT in the results.
+		$this->assertNotContains( $hidden_product->get_id(), $found_ids, 'Product with exclude-from-search should not appear in search results' );
+
+		// Cleanup.
+		$wp_the_query = $previous_wp_the_query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$wp_query     = $previous_wp_query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$visible_product->delete( true );
+		$hidden_product->delete( true );
+	}
+
+	/**
+	 * @testdox Products with 'hidden' visibility are excluded from search results.
+	 */
+	public function test_search_excludes_products_with_hidden_visibility() {
+		// Create a product that should appear in search.
+		$visible_product = WC_Helper_Product::create_simple_product();
+		$visible_product->set_name( 'Search Visible Product' );
+		$visible_product->set_catalog_visibility( 'visible' );
+		$visible_product->save();
+
+		// Create a product that should be completely hidden.
+		$hidden_product = WC_Helper_Product::create_simple_product();
+		$hidden_product->set_name( 'Search Hidden Product' );
+		$hidden_product->set_catalog_visibility( 'hidden' ); // Excluded from both catalog and search.
+		$hidden_product->save();
+
+		// Save the previous main query and prepare for a new one.
+		global $wp_the_query, $wp_query;
+		$previous_wp_the_query = $wp_the_query;
+		$previous_wp_query     = $wp_query;
+
+		// Create a product search query.
+		$query = new WP_Query();
+		$query->init();
+		$query->query_vars = array(
+			's' => 'Search',
+		);
+		$query->is_search  = true;
+
+		// Set it as the main query so pre_get_posts will run.
+		$wp_the_query = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$wp_query     = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		// Now execute the query which will trigger pre_get_posts.
+		$query->get_posts();
+		$found_ids = wp_list_pluck( $query->posts, 'ID' );
+
+		// Assert that the visible product is in the results.
+		$this->assertContains( $visible_product->get_id(), $found_ids, 'Visible product should appear in search results' );
+
+		// Assert that the hidden product is NOT in the results.
+		$this->assertNotContains( $hidden_product->get_id(), $found_ids, 'Product with hidden visibility should not appear in search results' );
+
+		// Cleanup.
+		$wp_the_query = $previous_wp_the_query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$wp_query     = $previous_wp_query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$visible_product->delete( true );
+		$hidden_product->delete( true );
+	}
 }
