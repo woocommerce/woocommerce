@@ -22,10 +22,7 @@ const addressLabels: Record< AddressType, string > = {
  * @param field - The field locator
  * @param value - The value to set
  */
-async function setDynamicFieldType(
-	field: Locator,
-	value: string
-) {
+async function setDynamicFieldType( field: Locator, value: string ) {
 	const tagName = await field.evaluate( ( el ) => el.tagName.toLowerCase() );
 
 	if ( tagName === 'select' ) {

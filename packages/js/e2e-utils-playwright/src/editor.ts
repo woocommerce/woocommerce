@@ -98,9 +98,11 @@ export const openEditorSettings = async ( {
  * @return The editor canvas frame or the original page
  */
 export const getCanvas = async ( page: Page ): Promise< EditorCanvas > => {
-	return (
-		page.locator( 'iframe[name="editor-canvas"]' ).contentFrame() || page
-	);
+	const iframeLocator = page.locator( 'iframe[name="editor-canvas"]' );
+	if ( ( await iframeLocator.count() ) > 0 ) {
+		return iframeLocator.contentFrame();
+	}
+	return page;
 };
 
 /**
