@@ -89,7 +89,7 @@ test( 'Merchant can add brands', async ( { page } ) => {
 	 * After a brand is edited, you will be redirected to the Brands page.
 	 */
 	const editBrand = async ( currentName: string, brand: Brand ) => {
-		await page.getByLabel( `"${ currentName }" (Edit)` ).click();
+		await page.getByLabel( `“${ currentName }” (Edit)` ).click();
 		await page.getByLabel( 'Name' ).fill( brand.name );
 		await page.getByLabel( 'Slug' ).fill( brand.slug );
 		await page
