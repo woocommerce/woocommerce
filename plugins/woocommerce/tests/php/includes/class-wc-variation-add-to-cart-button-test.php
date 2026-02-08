@@ -40,13 +40,12 @@ class WC_Variation_Add_To_Cart_Button_Test extends \WC_Unit_Test_Case {
 	/**
 	 * Renders the variation add-to-cart button template and returns HTML.
 	 *
-	 * @param array $args Optional template arguments (e.g. add_to_cart_button_disabled).
 	 * @return string
 	 */
-	private function render_template( array $args = array() ): string {
+	private function render_template(): string {
 		global $product;
 		$product = $this->product;
-		return wc_get_template_html( 'single-product/add-to-cart/variation-add-to-cart-button.php', $args );
+		return wc_get_template_html( 'single-product/add-to-cart/variation-add-to-cart-button.php' );
 	}
 
 	/**
@@ -86,35 +85,19 @@ class WC_Variation_Add_To_Cart_Button_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox When add_to_cart_button_disabled is true, the button is disabled.
+	 * @testdox When wc-add-to-cart-variation is not enqueued, the button is enabled.
 	 */
-	public function test_override_disabled_true_renders_disabled_button(): void {
-		$html = $this->render_template( array( 'add_to_cart_button_disabled' => true ) );
-		$this->assert_button_is_disabled( $html );
-	}
-
-	/**
-	 * @testdox When add_to_cart_button_disabled is false, the button is enabled.
-	 */
-	public function test_override_disabled_false_renders_enabled_button(): void {
-		$html = $this->render_template( array( 'add_to_cart_button_disabled' => false ) );
+	public function test_when_script_not_enqueued_renders_enabled_button(): void {
+		$html = $this->render_template();
 		$this->assert_button_is_enabled( $html );
 	}
 
 	/**
-	 * @testdox When no override is passed and wc-add-to-cart-variation is not enqueued, the button is enabled.
+	 * @testdox When wc-add-to-cart-variation is enqueued, the button is disabled.
 	 */
-	public function test_fallback_when_script_not_enqueued_renders_enabled_button(): void {
-		$html = $this->render_template( array() );
-		$this->assert_button_is_enabled( $html );
-	}
-
-	/**
-	 * @testdox When no override is passed and wc-add-to-cart-variation is enqueued, the button is disabled.
-	 */
-	public function test_fallback_when_script_enqueued_renders_disabled_button(): void {
+	public function test_when_script_enqueued_renders_disabled_button(): void {
 		$this->register_and_enqueue_variation_script();
-		$html = $this->render_template( array() );
+		$html = $this->render_template();
 		$this->assert_button_is_disabled( $html );
 	}
 }
