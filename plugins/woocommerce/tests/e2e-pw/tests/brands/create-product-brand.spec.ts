@@ -8,6 +8,14 @@ import { test, expect } from '@playwright/test';
  */
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 
+interface Brand {
+	name: string;
+	slug: string;
+	parentBrand: string;
+	description: string;
+	thumbnailFileName: string;
+}
+
 test.use( { storageState: ADMIN_STATE_PATH } );
 
 test( 'Merchant can add brands', async ( { page } ) => {
@@ -27,13 +35,13 @@ test( 'Merchant can add brands', async ( { page } ) => {
 		await page.waitForSelector( '.wp-list-table' );
 	};
 
-	const createBrandIfNotExist = async (
-		name: string,
-		slug: string,
-		parentBrand: string,
-		description: string,
-		thumbnailFileName: string
-	) => {
+	const createBrandIfNotExist = async ( {
+		name,
+		slug,
+		parentBrand,
+		description,
+		thumbnailFileName,
+	}: Brand ) => {
 		// Create "WooCommerce" brand if it does not exist.
 		const cellVisible = await page
 			.locator( '#posts-filter' )
@@ -86,19 +94,7 @@ test( 'Merchant can add brands', async ( { page } ) => {
 	 */
 	const editBrand = async (
 		currentName: string,
-		{
-			name,
-			slug,
-			parentBrand,
-			description,
-			thumbnailFileName,
-		}: {
-			name: string;
-			slug: string;
-			parentBrand: string;
-			description: string;
-			thumbnailFileName: string;
-		}
+		{ name, slug, parentBrand, description, thumbnailFileName }: Brand
 	) => {
 		await page.getByLabel( `“${ currentName }” (Edit)` ).click();
 		await page.getByLabel( 'Name' ).fill( name );
@@ -161,31 +157,31 @@ test( 'Merchant can add brands', async ( { page } ) => {
 	};
 
 	await goToBrandsPage();
-	await createBrandIfNotExist(
-		'WooCommerce',
-		'woocommerce',
-		'None',
-		'All things WooCommerce!',
-		'image-01'
-	);
+	await createBrandIfNotExist( {
+		name: 'WooCommerce',
+		slug: 'woocommerce',
+		parentBrand: 'None',
+		description: 'All things WooCommerce!',
+		thumbnailFileName: 'image-01',
+	} );
 
 	// Create child brand under the "WooCommerce" parent brand.
-	await createBrandIfNotExist(
-		'WooCommerce Apparels',
-		'woocommerce-apparels',
-		'WooCommerce',
-		'Cool WooCommerce clothings!',
-		'image-02'
-	);
+	await createBrandIfNotExist( {
+		name: 'WooCommerce Apparels',
+		slug: 'woocommerce-apparels',
+		parentBrand: 'WooCommerce',
+		description: 'Cool WooCommerce clothings!',
+		thumbnailFileName: 'image-02',
+	} );
 
 	// Create a dummy child brand called "WooCommerce Dummy" under the "WooCommerce" parent brand.
-	await createBrandIfNotExist(
-		'WooCommerce Dummy',
-		'woocommerce-dummy',
-		'WooCommerce',
-		'Dummy WooCommerce brand!',
-		'image-02'
-	);
+	await createBrandIfNotExist( {
+		name: 'WooCommerce Dummy',
+		slug: 'woocommerce-dummy',
+		parentBrand: 'WooCommerce',
+		description: 'Dummy WooCommerce brand!',
+		thumbnailFileName: 'image-02',
+	} );
 
 	// Edit the dummy child brand from "WooCommerce Dummy" to "WooCommerce Dummy Edited".
 	await editBrand( 'WooCommerce Dummy', {
