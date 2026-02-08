@@ -43,15 +43,15 @@ const reporter = [
 		{
 			outputDir: `${ TESTS_ROOT_PATH }/test-results`,
 			outputFile: `ctrf-report-${ Date.now() }.json`,
+			branchName: process.env.GITHUB_REF_NAME || '',
+			commit: process.env.GITHUB_SHA || '',
+			appName: 'woocommerce-core',
+			repositoryName: process.env.GITHUB_REPOSITORY || '',
 		},
 	],
 	[
 		`${ TESTS_ROOT_PATH }/reporters/environment-reporter.js`,
 		{ outputFolder: `${ TESTS_ROOT_PATH }/test-results/allure-results` },
-	],
-	[
-		`${ TESTS_ROOT_PATH }/reporters/flaky-tests-reporter.js`,
-		{ outputFolder: `${ TESTS_ROOT_PATH }/test-results/flaky-tests` },
 	],
 ];
 

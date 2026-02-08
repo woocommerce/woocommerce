@@ -59,7 +59,7 @@ const scrollImageIntoView = ( imageId: number ) => {
 		return;
 	}
 
-	// Find the scrollable container for the large image gallery
+	// Find the scrollable container for the viewer gallery
 	const scrollableContainer = galleryContainer.querySelector(
 		'.wc-block-product-gallery-large-image__container'
 	);
@@ -244,7 +244,7 @@ const productGallery = {
 
 			actions.selectImage( newImageIndex );
 		},
-		onSelectedLargeImageKeyDown: ( event: KeyboardEvent ) => {
+		onViewerImageKeyDown: ( event: KeyboardEvent ) => {
 			if ( event.key === 'Enter' || event.key === ' ' ) {
 				if ( event.key === ' ' ) {
 					event.preventDefault();
@@ -522,11 +522,17 @@ const productGallery = {
 					`[data-image-id="${ selectedImageId }"]`
 				);
 
-				if ( selectedImage instanceof HTMLElement ) {
-					selectedImage.scrollIntoView( {
-						behavior: 'auto',
-						block: 'center',
-					} );
+				if (
+					selectedImage instanceof HTMLElement &&
+					selectedImage.parentNode instanceof HTMLElement
+				) {
+					// We're doing this manually because scrollIntoView caused layout shifts resulting in buggy
+					// dialog layout.
+					selectedImage.parentNode.scrollTop =
+						selectedImage.offsetTop +
+						selectedImage.offsetHeight / 2 -
+						dialogRef.offsetHeight / 2 -
+						32; // Arbitrary value for the header height.
 				}
 			}
 		},

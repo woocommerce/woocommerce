@@ -102,7 +102,12 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 */
 	public function set_variation_id( $value ) {
 		if ( $value > 0 && 'product_variation' !== get_post_type( $value ) ) {
-			$this->error( 'order_item_product_invalid_variation_id', __( 'Invalid variation ID', 'woocommerce' ) );
+			$this->error(
+				'order_item_product_invalid_variation_id',
+				__( 'Invalid variation ID', 'woocommerce' ),
+				400,
+				array( 'variation_id' => $value )
+			);
 		}
 		$this->set_prop( 'variation_id', absint( $value ) );
 	}
@@ -163,7 +168,11 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Set line taxes and totals for passed in taxes.
 	 *
-	 * @param array $raw_tax_data Raw tax data.
+	 * @since 10.5.0 Handles legacy scalar tax values by converting to arrays.
+	 * When legacy data is detected, attempts to infer tax rate ID from order context.
+	 *
+	 * @param array $raw_tax_data Raw tax data. 'total' and 'subtotal' should be arrays keyed by tax rate ID,
+	 * but scalar values (floats/strings) are accepted for legacy compatibility.
 	 */
 	public function set_taxes( $raw_tax_data ) {
 		$raw_tax_data = maybe_unserialize( $raw_tax_data );
@@ -172,8 +181,38 @@ class WC_Order_Item_Product extends WC_Order_Item {
 			'subtotal' => array(),
 		);
 		if ( ! empty( $raw_tax_data['total'] ) && ! empty( $raw_tax_data['subtotal'] ) ) {
-			$tax_data['subtotal'] = array_map( 'wc_format_decimal', $raw_tax_data['subtotal'] );
-			$tax_data['total']    = array_map( 'wc_format_decimal', $raw_tax_data['total'] );
+			$subtotal = $raw_tax_data['subtotal'];
+			$total    = $raw_tax_data['total'];
+
+			// Handle legacy data where total/subtotal might be floats/strings instead of arrays.
+			// Convert scalar values to array format to preserve the tax amount.
+			$has_legacy_data = ! is_array( $subtotal ) || ! is_array( $total );
+
+			if ( $has_legacy_data ) {
+				$order = $this->get_order();
+				if ( ! is_array( $subtotal ) ) {
+					$subtotal = $this->convert_legacy_tax_value_to_array( $subtotal, $order );
+				}
+				if ( ! is_array( $total ) ) {
+					$total = $this->convert_legacy_tax_value_to_array( $total, $order );
+				}
+				// Log legacy data format for debugging purposes.
+				wc_get_logger()->warning(
+					sprintf(
+						/* translators: %d: order item ID */
+						__( 'Order item #%d contains legacy tax data format. Tax rate ID information is unavailable.', 'woocommerce' ),
+						$this->get_id()
+					),
+					array(
+						'source'        => 'woocommerce-order-item-product',
+						'order_item_id' => $this->get_id(),
+						'order_id'      => $order ? $order->get_id() : 0,
+					)
+				);
+			}
+
+			$tax_data['subtotal'] = array_map( 'wc_format_decimal', $subtotal );
+			$tax_data['total']    = array_map( 'wc_format_decimal', $total );
 
 			// Subtotal cannot be less than total!
 			if ( NumberUtil::array_sum( $tax_data['subtotal'] ) < NumberUtil::array_sum( $tax_data['total'] ) ) {
@@ -428,7 +467,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 			 * @since 2.7.0
 			 *
 			 * @param array                 $files Array of downloadable file data.
-			 * @param WC_Order_Item_Product $this  The order item product object.
+			 * @param WC_Order_Item_Product $item  The order item product object.
 			 * @param WC_Order              $order The order object.
 			 */
 			return apply_filters( 'woocommerce_get_item_downloads', $files, $this, $order );

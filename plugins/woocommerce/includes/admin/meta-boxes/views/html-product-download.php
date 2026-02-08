@@ -20,7 +20,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<input type="hidden" name="_wc_file_hashes[]" value="<?php echo esc_attr( $key ); ?>" />
 	</td>
 	<td class="file_url">
-		<input type="text" class="input_text" placeholder="<?php esc_attr_e( 'http://', 'woocommerce' ); ?>" name="_wc_file_urls[]" value="<?php echo esc_attr( $file['file'] ); ?>" />
+		<input type="text" class="input_text" placeholder="<?php esc_attr_e( 'https://', 'woocommerce' ); ?>" name="_wc_file_urls[]" value="<?php echo esc_attr( $file['file'] ); ?>" />
 		<?php if ( $disabled_download ) : ?>
 			<span class="disabled">*</span>
 		<?php endif; ?>

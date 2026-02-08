@@ -30,6 +30,7 @@ class WCTransactionalEmails {
 		'customer_on_hold_order',
 		'customer_processing_order',
 		'customer_refunded_order',
+		'customer_partially_refunded_order',
 		'customer_reset_password',
 		'failed_order',
 		'new_order',
@@ -71,6 +72,15 @@ class WCTransactionalEmails {
 		if ( FeaturesUtil::feature_is_enabled( 'point_of_sale' ) ) {
 			$emails[] = 'customer_pos_completed_order';
 			$emails[] = 'customer_pos_refunded_order';
+		}
+
+		if ( FeaturesUtil::feature_is_enabled( 'fulfillments' ) ) {
+			$fulfillment_emails = array(
+				'customer_fulfillment_created',
+				'customer_fulfillment_updated',
+				'customer_fulfillment_deleted',
+			);
+			$emails             = array_merge( $emails, $fulfillment_emails );
 		}
 
 		/**

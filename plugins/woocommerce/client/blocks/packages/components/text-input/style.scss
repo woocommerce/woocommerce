@@ -42,7 +42,7 @@
 	input[type="password"],
 	input[type="email"] {
 		@include reset-typography();
-		@include font-regular-locked;
+		@include font-for-inputs-locked();
 		padding: $gap $gap-small;
 		width: 100%;
 		border-radius: $universal-border-radius;
@@ -54,13 +54,7 @@
 		background-color: $input-background-light;
 		color: $input-text-light;
 
-		// We are hardcoding the height to reserve space for a wider border that
-		// we apply for focused state. Without it, when focusing the input its
-		// height will increase by 1px, causing the rest of the form to shift.
-		// height = font line-height + vertical padding + focused top/bottom border
-		// Don't worry, this calculation won't be performed at runtime, SCSS
-		// is transforming it into a singular value during build time.
-		height: calc(15px + 16px * 2 + 1.5px * 2);
+		height: 50px;
 
 		&:focus {
 			background-color: $input-background-light;

@@ -187,13 +187,28 @@ class PTKPatternsStore {
 	/**
 	 * Reset the cached patterns to fetch them again from the PTK.
 	 *
+	 * @since 10.4.1 Unscheduling is deferred if Action Scheduler hasn't initialized yet.
 	 * @return void
 	 */
 	public function flush_cached_patterns() {
 		delete_option( self::OPTION_NAME );
 
+		if ( ! function_exists( 'as_unschedule_all_actions' ) ) {
+			return;
+		}
+
 		// Unschedule any existing fetch_patterns actions.
-		as_unschedule_all_actions( self::FETCH_PATTERNS_ACTION, array(), 'woocommerce' );
+		// Defer unscheduling until Action Scheduler is ready to avoid errors during early initialization.
+		if ( did_action( 'action_scheduler_init' ) ) {
+			as_unschedule_all_actions( self::FETCH_PATTERNS_ACTION, array(), 'woocommerce' );
+		} else {
+			add_action(
+				'action_scheduler_init',
+				function () {
+					as_unschedule_all_actions( self::FETCH_PATTERNS_ACTION, array(), 'woocommerce' );
+				}
+			);
+		}
 	}
 
 	/**

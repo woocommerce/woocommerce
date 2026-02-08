@@ -6,7 +6,6 @@ import { store as coreDataStore } from '@wordpress/core-data';
 import { store as editorStore } from '@wordpress/editor';
 import { store as preferencesStore } from '@wordpress/preferences';
 import { serialize, parse, BlockInstance } from '@wordpress/blocks';
-import { Post } from '@wordpress/core-data/build-types/entity-types/post';
 
 /**
  * Internal dependencies
@@ -18,6 +17,7 @@ import {
 	EmailEditorPostType,
 	Feature,
 	PersonalizationTag,
+	GlobalEmailStylesPost,
 } from './types';
 
 function getContentFromEntity( entity ): string {
@@ -304,7 +304,7 @@ export const getGlobalEmailStylesPost = createRegistrySelector(
 					'root',
 					'globalStyles',
 					postId
-				) as unknown as Post;
+				) as GlobalEmailStylesPost;
 			}
 			return regularizedGetEntityRecord(
 				select( coreDataStore ).getEntityRecord(
@@ -313,7 +313,7 @@ export const getGlobalEmailStylesPost = createRegistrySelector(
 					postId,
 					{ context: 'view' }
 				)
-			) as unknown as Post;
+			) as GlobalEmailStylesPost;
 		}
 		return null;
 	}
@@ -367,13 +367,21 @@ export function getPreviewState( state: State ): State[ 'preview' ] {
 
 export const getPersonalizationTagsList = createRegistrySelector(
 	( select ) => () => {
+		const postId = select( storeName ).getEmailPostId();
+		const queryParams: Record< string, unknown > = {
+			context: 'view',
+			per_page: -1,
+		};
+
+		// Include post_id for context-aware tag filtering (e.g., automation emails)
+		if ( postId ) {
+			queryParams.post_id = postId;
+		}
+
 		const tags = ( select( coreDataStore ).getEntityRecords(
 			PERSONALIZATION_TAG_ENTITY.kind,
 			PERSONALIZATION_TAG_ENTITY.name,
-			{
-				context: 'view',
-				per_page: -1,
-			}
+			queryParams
 		) || [] ) as PersonalizationTag[];
 
 		const postType = select( storeName ).getEmailPostType();

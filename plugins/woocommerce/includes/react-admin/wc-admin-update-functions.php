@@ -55,8 +55,8 @@ function wc_admin_update_0230_rename_gross_total() {
  * Remove the note unsnoozing scheduled action.
  */
 function wc_admin_update_0251_remove_unsnooze_action() {
-	as_unschedule_action( Notes::UNSNOOZE_HOOK, null, 'wc-admin-data' );
-	as_unschedule_action( Notes::UNSNOOZE_HOOK, null, 'wc-admin-notes' );
+	as_unschedule_action( Notes::UNSNOOZE_HOOK, null, 'wc-admin-data' ); // @phpstan-ignore-line argument.type We want to use null. With null we clean any action with the given hook. Passing array would only clean actions with the given args.
+	as_unschedule_action( Notes::UNSNOOZE_HOOK, null, 'wc-admin-notes' ); // @phpstan-ignore-line argument.type
 }
 
 /**
@@ -293,5 +293,17 @@ function wc_update_1040_add_idx_date_paid_status_parent() {
 
 	if ( is_null( $index_exists ) ) {
 		$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_order_stats ADD INDEX idx_date_paid_status_parent (date_paid, status, parent_id)" );
+	}
+}
+
+/**
+ * Add an index to the woocommerce_downloadable_product_permissions table for (user_email) to improve anonymization/deletion performance.
+ */
+function wc_update_1050_add_idx_user_email() {
+	global $wpdb;
+	$index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->prefix}woocommerce_downloadable_product_permissions WHERE key_name = 'idx_user_email'" );
+
+	if ( is_null( $index_exists ) ) {
+		$wpdb->query( "ALTER TABLE {$wpdb->prefix}woocommerce_downloadable_product_permissions ADD INDEX idx_user_email (user_email(100))" );
 	}
 }

@@ -25,24 +25,10 @@ const { unlock } = __dangerousOptInToUnstableAPIsOnlyForCoreModules(
 const { ColorPanel: StylesColorPanel } = unlock( blockEditorPrivateApis );
 
 /**
- * The useGlobalStylesOutputWithConfig is used to generate the CSS for the email editor content from the style settings.
- */
-const {
-	useGlobalStylesOutputWithConfig: useGlobalStylesOutputWithConfigOriginal,
-} = unlock( blockEditorPrivateApis );
-
-/**
  * The Editor is the main component for the email editor.
  */
 const { Editor, FullscreenMode, ViewMoreMenuGroup, BackButton } =
 	unlock( editorPrivateApis );
-
-/**
- * Feature detection whether the active version of Gutenberg supports external styles being passed to Editor component.
- * useGlobalStylesOutputWithConfig function was removed with this change.
- */
-const areExternalStylesSupported =
-	useGlobalStylesOutputWithConfigOriginal !== undefined;
 
 /**
  * The registerEntityAction and unregisterEntityAction are used to register and unregister entity actions.
@@ -53,18 +39,12 @@ const { registerEntityAction, unregisterEntityAction } = unlock(
 	dispatch( editorStore )
 );
 
-const useGlobalStylesOutputWithConfig = useGlobalStylesOutputWithConfigOriginal
-	? useGlobalStylesOutputWithConfigOriginal
-	: () => [ [], {} ];
-
 export {
 	StylesColorPanel,
-	useGlobalStylesOutputWithConfig,
 	Editor,
 	FullscreenMode,
 	ViewMoreMenuGroup,
 	BackButton,
 	registerEntityAction,
 	unregisterEntityAction,
-	areExternalStylesSupported,
 };

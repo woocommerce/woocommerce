@@ -2,6 +2,35 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.6.0](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.6.0) - 2026-02-04 
+
+-   Minor - Ensure reset template action for email templates [#62984]
+-   Minor - Add post_id context support and cache invalidation for personalization tags [#63103]
+
+## [1.5.2](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.5.2) - 2026-01-29 
+
+-   Patch - Fix infinite loop when selecting a template in the email design selector modal [#63000]
+
+## [1.5.1](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.5.1) - 2026-01-16 
+
+-   Patch - Fix buttons block layout controls initialization [#62708]
+-   Patch - Unify loading indicator with the site editor [#62729]
+
+## [1.5.0](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.5.0) - 2025-12-15 
+
+-   Patch - Handle missing layout settings in the editor settings [#61471]
+-   Patch - Add optional createCoupon URL to EmailEditorUrls type for coupon creation integration
+-   Patch - Improve UX for tax-inclusive pricing configuration by adding validation notice and clearer setting description when base tax rate is not configured. [#61471]
+-   Minor - Add category tabs navigation to email template selection modal. The TemplateCategory type is now a string to support dynamic categories loaded from block patterns. [#62441]
+
+## [1.4.3](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.4.3) - 2025-12-11 
+
+-   Patch - Compatibility update for Gutenberg 22.0. useEmailCss now returns styles correctly with Gutenberg 22.0+. [#61964]
+
+## [1.4.2](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.4.2) - 2025-12-04 
+
+-   Patch - Handle missing layout settings in the editor settings [#62237]
+
 ## [1.4.1](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.4.1) - 2025-11-25 
 
 -   Patch - Remove unnecessary hook for media library [#62127]
@@ -9,7 +38,6 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ## [1.4.0](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.4.0) - 2025-11-12 
 
 -   Patch - Prevent crashes with Gutenberg 22.0 [#61925]
--   Minor [ **BREAKING CHANGE** ] - Updated all PHP dependencies. [#61753]
 
 ## [1.3.0](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.3.0) - 2025-11-05 
 

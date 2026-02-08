@@ -2,7 +2,8 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
-use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
+use Automattic\WooCommerce\Internal\FraudProtection\CartEventTracker;
+use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
 
 /**
  * Cart class.
@@ -165,6 +166,12 @@ class Cart extends AbstractBlock {
 		// Dequeue the core scripts when rendering this block.
 		add_action( 'wp_enqueue_scripts', array( $this, 'dequeue_woocommerce_core_scripts' ), 20 );
 
+		// Track cart page loaded for fraud protection.
+		if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
+			wc_get_container()->get( CartEventTracker::class )
+				->track_cart_page_loaded();
+		}
+
 		/**
 		 * We need to check if $content has any templates from prior iterations of the block, in order to update to the latest iteration.
 		 * We test the iteration version by searching for new blocks brought in by it.
@@ -243,34 +250,7 @@ class Cart extends AbstractBlock {
 		$this->asset_data_registry->add( 'hasDarkEditorStyleSupport', current_theme_supports( 'dark-editor-style' ) );
 		$this->asset_data_registry->register_page_id( isset( $attributes['checkoutPageId'] ) ? $attributes['checkoutPageId'] : 0 );
 		$this->asset_data_registry->add( 'isBlockTheme', wp_is_block_theme() );
-
-		$pickup_location_settings = LocalPickupUtils::get_local_pickup_settings();
-		$local_pickup_method_ids  = LocalPickupUtils::get_local_pickup_method_ids();
-
-		$this->asset_data_registry->add( 'localPickupEnabled', $pickup_location_settings['enabled'] );
-		$this->asset_data_registry->add( 'collectableMethodIds', $local_pickup_method_ids );
 		$this->asset_data_registry->add( 'shippingMethodsExist', CartCheckoutUtils::shipping_methods_exist() > 0 );
-
-		$is_block_editor = $this->is_block_editor();
-
-		if ( $is_block_editor && ! $this->asset_data_registry->exists( 'localPickupLocations' ) ) {
-			// Locations are passed to the client in admin to show a realistic preview in the editor.
-			$this->asset_data_registry->add(
-				'localPickupLocations',
-				array_filter(
-					array_map(
-						function ( $location ) {
-							if ( ! $location['enabled'] ) {
-								return null;
-							}
-							$location['formatted_address'] = wc()->countries->get_formatted_address( $location['address'], ', ' );
-							return $location;
-						},
-						get_option( 'pickup_location_pickup_locations', array() )
-					)
-				)
-			);
-		}
 
 		// Hydrate the following data depending on admin or frontend context.
 		if ( ! is_admin() && ! WC()->is_rest_api_request() ) {

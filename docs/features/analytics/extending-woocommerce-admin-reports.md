@@ -1,7 +1,7 @@
 ---
 post_title: How to extend WooCommerce analytics reports
 sidebar_label: Extend analytics reports
-
+sidebar_position: 1
 ---
 
 # How to extend WooCommerce analytics reports
@@ -10,33 +10,30 @@ sidebar_label: Extend analytics reports
 
 This document serves as a guide to extending WC-Admin Reports with a basic UI dropdown, added query parameters, and modification of SQL queries and resulting report data. This example will create a currency selector for viewing the Orders Report based on a specific currency.
 
-Code from this guide can be viewed in the [woocommerce code repository](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/client/admin/docs/examples/extensions/sql-modification).
-
 ## Getting started
 
-We'll be using a local installation of WordPress with WooCommerce and the development version of WC-Admin to take advantage of `create-wc-extension` as a way to easily scaffold a modern WordPress JavaScript environment for plugins.
+We'll be using `@woocommerce/create-woo-extension` to scaffold a modern WordPress JavaScript environment for plugins. This tool creates a fully functional development environment for integrating with WooCommerce.
 
-In your local install, clone and start WC-Admin if you haven't already.
+In this example, we'll be using the `sql-modification` variant to create a basic report extension that we can build upon.
+
+In your `wp-content/plugins` directory, run the following command to create your extension:
 
 ```sh
-cd wp-content/plugins
-git clone git@github.com:woocommerce/woocommerce.git
-cd plugins/woocommerce/client/admin
-npm run build
+npx @wordpress/create-block -t @woocommerce/create-woo-extension --variant=sql-modification my-extension-name
 ```
 
-Once that's working, we can setup the extension folder ready for JavaScript development.
+Navigate to the newly created folder and start development:
 
 ```sh
-npm run create-wc-extension
+cd my-extension-name
+npm run start
 ```
 
-After choosing a name, move into that folder and start webpack to watch and build files.
+Optionally, you can use `wp-env` for a local WordPress environment:
 
 ```sh
-cd ../<my-plugin-name>
-npm install
-npm start
+npm -g i @wordpress/env
+wp-env start
 ```
 
 Don't forget to head over to `/wp-admin/plugins.php` and activate your plugin.
@@ -177,13 +174,22 @@ Next, add a WHERE clause
 
 ```php
 function add_where_subquery( $clauses ) {
+  global $wpdb;
+
 	$currency = 'USD';
 
 	if ( isset( $_GET['currency'] ) ) {
 		$currency = sanitize_text_field( wp_unslash( $_GET['currency'] ) );
 	}
 
-	$clauses[] = "AND currency_postmeta.meta_key = '_order_currency' AND currency_postmeta.meta_value = '{$currency}'";
+  // Use $wpdb->prepare to safely escape the currency value for SQL.
+  $prepared_clause = $wpdb->prepare(
+      'AND currency_postmeta.meta_key = %s AND currency_postmeta.meta_value = %s',
+      '_order_currency',
+      $currency
+  );
+  
+  $clauses[] = $prepared_clause;
 
 	return $clauses;
 }

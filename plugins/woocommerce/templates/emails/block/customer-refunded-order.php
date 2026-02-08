@@ -1,6 +1,6 @@
 <?php
 /**
- * Customer refunded order email (inital block version)
+ * Customer refunded order email (initial block version)
  *
  * This template can be overridden by editing it in the WooCommerce email editor.
  *
@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails\Block
- * @version 10.2.0
+ * @version 10.6.0
  */
 
 use Automattic\WooCommerce\Internal\EmailEditor\BlockEmailRenderer;
@@ -52,8 +52,8 @@ printf( esc_html__( 'Your order from %s has been refunded.', 'woocommerce' ), '<
 <div class="wp-block-woocommerce-email-content"> <?php echo esc_html( BlockEmailRenderer::WOO_EMAIL_CONTENT_PLACEHOLDER ); ?> </div>
 <!-- /wp:woocommerce/email-content -->
 
-<!-- wp:paragraph -->
-<p><?php
+<!-- wp:paragraph {"align":"center"} -->
+<p class="has-text-align-center"><?php
 /* translators: %s: Store admin email */
 printf( esc_html__( 'If you need any help with your order, please contact us at %s', 'woocommerce' ), '<!--[woocommerce/store-email]-->' );
 ?></p>

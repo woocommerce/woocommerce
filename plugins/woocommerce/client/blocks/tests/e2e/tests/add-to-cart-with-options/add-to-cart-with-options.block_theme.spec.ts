@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { test as base, expect, wpCLI } from '@woocommerce/e2e-utils';
+import { test as base, expect, wpCLI, Editor } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -59,14 +59,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 		page,
 		pageObject,
 		editor,
-		wpCoreVersion,
 	} ) => {
-		// eslint-disable-next-line playwright/no-skipped-test
-		test.skip(
-			wpCoreVersion <= 6.7,
-			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
-		);
-
 		await pageObject.updateSingleProductTemplate();
 
 		await editor.saveSiteEditorEntities( {
@@ -100,12 +93,6 @@ test.describe( 'Add to Cart + Options Block', () => {
 		editor,
 		wpCoreVersion,
 	} ) => {
-		// eslint-disable-next-line playwright/no-skipped-test
-		test.skip(
-			wpCoreVersion <= 6.7,
-			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
-		);
-
 		const variationDescription =
 			'This is the output of the variation description';
 		// Set a variable product as having 100 in stock and one of its variations as being out of stock.
@@ -183,6 +170,16 @@ test.describe( 'Add to Cart + Options Block', () => {
 			.first();
 		const quantitySelector = page.getByLabel( 'Product quantity' );
 
+		const additionalInfoPanel =
+			wpCoreVersion >= 6.9
+				? page
+						.getByRole( 'button', {
+							name: 'Additional Information',
+						} )
+						.locator( '../..' )
+						.locator( '.wp-block-accordion-panel' )
+				: page.getByLabel( 'Additional Information', { exact: true } );
+
 		await test.step( 'displays an error when attributes are not selected', async () => {
 			await addToCartButton.click();
 
@@ -204,13 +201,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await expect( quantitySelector ).toBeVisible();
 			await expect( page.getByText( 'SKU: woo-hoodie' ) ).toBeVisible();
 			await expect(
-				page
-					.getByLabel( 'Additional Information', { exact: true } )
-					.getByText( '1.5 lbs' )
+				additionalInfoPanel.getByText( '1.5 lbs' )
 			).toBeVisible();
 			await expect( page.getByText( variationDescription ) ).toBeHidden();
 			const visibleImage =
-				await productGalleryPageObject.getVisibleLargeImageId();
+				await productGalleryPageObject.getViewerImageId();
 			expect( visibleImage ).toBe( '34' );
 
 			await colorBlueOption.click();
@@ -224,18 +219,16 @@ test.describe( 'Add to Cart + Options Block', () => {
 				page.getByText( 'SKU: woo-hoodie-blue' )
 			).toBeVisible();
 			await expect(
-				page
-					.getByLabel( 'Additional Information', { exact: true } )
-					.getByText( '2 lbs' )
+				additionalInfoPanel.getByText( '2 lbs' )
 			).toBeVisible();
 			await expect(
 				page.getByText( variationDescription )
 			).toBeVisible();
 			await expect( async () => {
-				const newVisibleLargeImageId =
-					await productGalleryPageObject.getVisibleLargeImageId();
+				const newViewerImageId =
+					await productGalleryPageObject.getViewerImageId();
 
-				expect( newVisibleLargeImageId ).toBe( '35' );
+				expect( newViewerImageId ).toBe( '35' );
 			} ).toPass( { timeout: 1_000 } );
 		} );
 
@@ -247,16 +240,14 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await expect( page.getByText( 'SKU: woo-hoodie' ) ).toBeVisible();
 			await expect( addToCartButton ).toHaveClass( /\bdisabled\b/ );
 			await expect(
-				page
-					.getByLabel( 'Additional Information', { exact: true } )
-					.getByText( '1.5 lbs' )
+				additionalInfoPanel.getByText( '1.5 lbs' )
 			).toBeVisible();
 			await expect( page.getByText( variationDescription ) ).toBeHidden();
 			await expect( async () => {
-				const newVisibleLargeImageId =
-					await productGalleryPageObject.getVisibleLargeImageId();
+				const newViewerImageId =
+					await productGalleryPageObject.getViewerImageId();
 
-				expect( newVisibleLargeImageId ).toBe( '34' );
+				expect( newViewerImageId ).toBe( '34' );
 			} ).toPass( { timeout: 1_000 } );
 		} );
 
@@ -288,14 +279,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 		page,
 		pageObject,
 		editor,
-		wpCoreVersion,
 	} ) => {
-		// eslint-disable-next-line playwright/no-skipped-test
-		test.skip(
-			wpCoreVersion <= 6.7,
-			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
-		);
-
 		// Make Hoodie with Logo to be sold individually.
 		const cliOutput = await wpCLI(
 			`post list --post_type=product --field=ID --name="Hoodie with Logo" --format=ids`
@@ -311,7 +295,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			isOnlyCurrentEntityDirty: true,
 		} );
 
-		await page.goto( '/logo-collection' );
+		await page.goto( '/product/logo-collection' );
 
 		const addToCartButton = page
 			.getByRole( 'button', { name: 'Add to cart' } )
@@ -825,14 +809,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 		page,
 		pageObject,
 		editor,
-		wpCoreVersion,
 	} ) => {
-		// eslint-disable-next-line playwright/no-skipped-test
-		test.skip(
-			wpCoreVersion <= 6.7,
-			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
-		);
-
 		await wpCLI( `option set woocommerce_enable_ajax_add_to_cart no` );
 
 		await pageObject.updateSingleProductTemplate();
@@ -944,14 +921,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 	test( 'allows adding simple products to cart when inside the Product block', async ( {
 		page,
 		pageObject,
-		wpCoreVersion,
 	} ) => {
-		// eslint-disable-next-line playwright/no-skipped-test
-		test.skip(
-			wpCoreVersion <= 6.7,
-			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
-		);
-
 		await pageObject.createPostWithProductBlock( 't-shirt' );
 
 		const addToCartButton = page.getByRole( 'button', {
@@ -966,14 +936,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 	test( 'allows adding variable products to cart when inside the Product block', async ( {
 		page,
 		pageObject,
-		wpCoreVersion,
 	} ) => {
-		// eslint-disable-next-line playwright/no-skipped-test
-		test.skip(
-			wpCoreVersion <= 6.7,
-			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
-		);
-
 		await pageObject.createPostWithProductBlock( 'hoodie' );
 
 		const colorBlueOption = page.locator( 'label:has-text("Blue")' );
@@ -997,14 +960,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 	test( 'allows adding variations to cart when inside the Product block', async ( {
 		page,
 		pageObject,
-		wpCoreVersion,
 	} ) => {
-		// eslint-disable-next-line playwright/no-skipped-test
-		test.skip(
-			wpCoreVersion <= 6.7,
-			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
-		);
-
 		await pageObject.createPostWithProductBlock(
 			'hoodie',
 			'hoodie-blue-yes'
@@ -1024,14 +980,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 	test( 'allows adding grouped products to cart when inside the Product block', async ( {
 		page,
 		pageObject,
-		wpCoreVersion,
 	} ) => {
-		// eslint-disable-next-line playwright/no-skipped-test
-		test.skip(
-			wpCoreVersion <= 6.7,
-			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
-		);
-
 		await pageObject.createPostWithProductBlock( 'logo-collection' );
 
 		const increaseQuantityButton = page.getByLabel(
@@ -1064,7 +1013,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 		await editor.selectBlocks( addToCartFormBlock );
 
 		await expect(
-			editor.canvas.getByLabel( 'Block: Product Gallery (Beta)' )
+			editor.canvas.getByLabel( 'Block: Product Gallery' )
 		).toBeHidden();
 
 		await page
@@ -1074,7 +1023,485 @@ test.describe( 'Add to Cart + Options Block', () => {
 			.click();
 
 		await expect(
-			editor.canvas.getByLabel( 'Block: Product Gallery (Beta)' )
+			editor.canvas.getByLabel( 'Block: Product Gallery' )
 		).toBeVisible();
+	} );
+
+	test.describe( 'autoselect behavior', () => {
+		const productSlug = 'autoselect-t-shirt';
+		const productName = 'Autoselect T-shirt';
+		const productPermalink = '/product/' + productSlug;
+		const productPrice = '13.99';
+		const productAttributes: {
+			name: string;
+			options: string[];
+			variation: boolean;
+			visible: boolean;
+		}[] = [
+			{
+				name: 'Type',
+				options: [ 'T-shirt' ],
+				variation: true,
+				visible: true,
+			},
+			{
+				name: 'Color',
+				options: [ 'Red', 'Blue', 'Green' ],
+				variation: true,
+				visible: true,
+			},
+			{
+				name: 'Size',
+				options: [ 'S', 'L', 'XL' ],
+				variation: true,
+				visible: true,
+			},
+		];
+		const productVariations: {
+			attributes: {
+				name: string;
+				option: string;
+			}[];
+		}[] = [
+			{
+				attributes: [
+					{
+						name: 'Type',
+						option: 'T-shirt',
+					},
+					{
+						name: 'Color',
+						option: 'Green',
+					},
+					{
+						name: 'Size',
+						option: 'S',
+					},
+				],
+			},
+			{
+				attributes: [
+					{
+						name: 'Type',
+						option: 'T-shirt',
+					},
+					{
+						name: 'Color',
+						option: 'Red',
+					},
+					{
+						name: 'Size',
+						option: 'L',
+					},
+				],
+			},
+			{
+				attributes: [
+					{
+						name: 'Type',
+						option: 'T-shirt',
+					},
+					{
+						name: 'Color',
+						option: 'Red',
+					},
+					{
+						name: 'Size',
+						option: 'XL',
+					},
+				],
+			},
+			{
+				attributes: [
+					{
+						name: 'Type',
+						option: 'T-shirt',
+					},
+					{
+						name: 'Color',
+						option: 'Blue',
+					},
+					{
+						name: 'Size',
+						option: 'XL',
+					},
+				],
+			},
+		];
+
+		async function setAddToCartWithOptionsBlockAttributes(
+			pageObject: AddToCartWithOptionsPage,
+			editor: Editor,
+			{
+				optionStyle = 'Pills',
+				autoselect = false,
+				disabledAttributesAction = 'disable',
+			}: {
+				optionStyle?: 'Pills' | 'Dropdown';
+				autoselect?: boolean;
+				disabledAttributesAction?: 'disable' | 'hide';
+			} = {}
+		) {
+			const page = editor.page;
+			let isOnlyCurrentEntityDirty = true;
+
+			await pageObject.switchProductType( 'Variable product' );
+			await page.getByRole( 'tab', { name: 'Block' } ).click();
+			const addToCartWithOptionsBlock = editor.canvas.getByLabel(
+				'Block: Add to Cart + Options'
+			);
+			await addToCartWithOptionsBlock.click();
+			await addToCartWithOptionsBlock
+				.getByLabel( 'Block: Variation Selector: Attribute Options' )
+				.first()
+				.click();
+
+			const optionStyleInput = page.getByRole( 'radio', {
+				name: optionStyle,
+				exact: true,
+			} );
+			if ( ! ( await optionStyleInput.isChecked() ) ) {
+				isOnlyCurrentEntityDirty = false;
+				await optionStyleInput.click();
+			}
+
+			const autoselectInput = page.getByRole( 'checkbox', {
+				name: 'Auto-select when only one attribute is compatible',
+			} );
+			const disabledAttributesActionInput =
+				page.getByLabel( 'Values in conflict' );
+			if (
+				( await autoselectInput.isChecked() ) !== autoselect ||
+				( await disabledAttributesActionInput.inputValue() ) !==
+					disabledAttributesAction
+			) {
+				isOnlyCurrentEntityDirty = false;
+			}
+			await autoselectInput.setChecked( autoselect );
+			await disabledAttributesActionInput.selectOption( {
+				value: disabledAttributesAction,
+			} );
+			if (
+				await page
+					.getByRole( 'region', {
+						name: 'Editor top bar',
+					} )
+					.getByRole( 'button', {
+						name: 'Save',
+						exact: true,
+					} )
+					.isEnabled()
+			) {
+				await editor.saveSiteEditorEntities( {
+					isOnlyCurrentEntityDirty,
+				} );
+			}
+		}
+
+		test.beforeEach( async () => {
+			const cliOutput = await wpCLI(
+				`wc product create --user=1 --slug="${ productSlug }" --name="${ productName }" --type="variable" --attributes='${ JSON.stringify(
+					productAttributes
+				) }'`
+			);
+			const match: RegExpMatchArray | null = cliOutput.stdout.match(
+				/Success:\s+Created\s+product\s+(\d+)\.\n?$/
+			);
+			const productId: string | null = match ? match[ 1 ] : null;
+			if ( ! productId ) {
+				throw new Error(
+					`No productId found, cliOutput: ${ JSON.stringify(
+						cliOutput,
+						null,
+						2
+					) }`
+				);
+			}
+
+			for ( const productVariation of productVariations ) {
+				await wpCLI(
+					`wc product_variation create --user=1 "${ productId }" --regular_price="${ productPrice }" --attributes='${ JSON.stringify(
+						productVariation.attributes
+					) }'`
+				);
+			}
+		} );
+
+		for ( const optionStyle of [ 'Pills', 'Dropdown' ] as (
+			| 'Pills'
+			| 'Dropdown'
+		 )[] ) {
+			// eslint-disable-next-line playwright/expect-expect
+			test( `${ optionStyle }: Test the autoselect block attribute`, async ( {
+				page,
+				pageObject,
+				editor,
+			} ) => {
+				await pageObject.updateSingleProductTemplate();
+				await setAddToCartWithOptionsBlockAttributes(
+					pageObject,
+					editor,
+					{ optionStyle }
+				);
+
+				await test.step( `${ optionStyle }: Expect NOTHING to be auto-selected (on page load)`, async () => {
+					await page.goto( productPermalink );
+
+					await pageObject.expectSelectedAttributes(
+						productAttributes,
+						{ Type: '', Color: '', Size: '' },
+						optionStyle
+					);
+				} );
+
+				await test.step( `${ optionStyle }: Expect attributes to NOT auto-select when user selects something`, async () => {
+					await page.goto( productPermalink );
+
+					await pageObject.selectVariationSelectorOptionsBlockAttribute(
+						'Color',
+						'Blue',
+						optionStyle
+					);
+
+					// Expect nothing to be auto-selected
+					await pageObject.expectSelectedAttributes(
+						productAttributes,
+						{ Type: '', Color: 'Blue', Size: '' },
+						optionStyle
+					);
+				} );
+
+				await test.step( `${ optionStyle }: Set the autoselect setting to true`, async () => {
+					await pageObject.updateSingleProductTemplate();
+					await setAddToCartWithOptionsBlockAttributes(
+						pageObject,
+						editor,
+						{ optionStyle, autoselect: true }
+					);
+				} );
+
+				await test.step( `${ optionStyle }: Expect only the Type attribute to be auto-selected (on page load)`, async () => {
+					await page.goto( productPermalink );
+
+					// Expect the Type attribute to be auto-selected (on page load) to "T-shirt", the rest of the attributes should not be selected.
+					await pageObject.expectSelectedAttributes(
+						productAttributes,
+						{ Type: 'T-shirt', Color: '', Size: '' },
+						optionStyle
+					);
+				} );
+
+				await test.step( `${ optionStyle }: Expect attributes to auto-select when user selects something`, async () => {
+					await page.goto( productPermalink );
+
+					// By setting the Color to "Blue", we expect the Type attribute to be auto-selected to "T-shirt", and the Size to "XL".
+					await pageObject.selectVariationSelectorOptionsBlockAttribute(
+						'Color',
+						'Blue',
+						optionStyle
+					);
+
+					await pageObject.expectSelectedAttributes(
+						productAttributes,
+						{ Type: 'T-shirt', Color: 'Blue', Size: 'XL' },
+						optionStyle
+					);
+				} );
+			} );
+			test( `${ optionStyle }: Test the disabledAttributesAction block attribute`, async ( {
+				page,
+				pageObject,
+				editor,
+			} ) => {
+				await test.step( `${ optionStyle }: Set the disabledAttributesAction block attribute to "disable"`, async () => {
+					await pageObject.updateSingleProductTemplate();
+					await setAddToCartWithOptionsBlockAttributes(
+						pageObject,
+						editor,
+						{
+							optionStyle,
+							disabledAttributesAction: 'disable',
+						}
+					);
+				} );
+				await test.step( `${ optionStyle }: Expect invalid options to be disabled (by prop) and visible`, async () => {
+					await page.goto( productPermalink );
+
+					// By setting the Color to "Blue", the only possible Size remaining is "XL".
+					await pageObject.selectVariationSelectorOptionsBlockAttribute(
+						'Color',
+						'Blue',
+						optionStyle
+					);
+
+					await expect(
+						page
+							.getByLabel( 'Size' )
+							.getByText( 'L', { exact: true } )
+					).toBeDisabled();
+					await expect(
+						page
+							.getByLabel( 'Size' )
+							.getByText( 'L', { exact: true } )
+					).not.toHaveAttribute( 'hidden' );
+				} );
+
+				await test.step( `${ optionStyle }: Set the disabledAttributesAction block attribute to "hide"`, async () => {
+					await pageObject.updateSingleProductTemplate();
+					await setAddToCartWithOptionsBlockAttributes(
+						pageObject,
+						editor,
+						{
+							optionStyle,
+							disabledAttributesAction: 'hide',
+						}
+					);
+				} );
+				await test.step( `${ optionStyle }: Expect invalid options to be isabled (by prop) and hidden`, async () => {
+					await page.goto( productPermalink );
+
+					// By setting the Color to "Blue", the only possible Size remaining is "XL".
+					await pageObject.selectVariationSelectorOptionsBlockAttribute(
+						'Color',
+						'Blue',
+						optionStyle
+					);
+
+					await expect(
+						page
+							.getByLabel( 'Size' )
+							.getByText( 'L', { exact: true } )
+					).toBeDisabled();
+					await expect(
+						page
+							.getByLabel( 'Size' )
+							.getByText( 'L', { exact: true } )
+					).toBeHidden();
+				} );
+			} );
+			// eslint-disable-next-line playwright/expect-expect
+			test( `${ optionStyle }: Combining autoselect and disabledAttributesAction block attributes should work`, async ( {
+				page,
+				pageObject,
+				editor,
+			} ) => {
+				for ( const disabledAttributesAction of [
+					'disable',
+					'hide',
+				] as ( 'disable' | 'hide' )[] ) {
+					await pageObject.updateSingleProductTemplate();
+
+					await test.step( `${ optionStyle }: Set the disabledAttributesAction block attribute to "${ disabledAttributesAction }"`, async () => {
+						await setAddToCartWithOptionsBlockAttributes(
+							pageObject,
+							editor,
+							{
+								autoselect: true,
+								optionStyle,
+								disabledAttributesAction,
+							}
+						);
+					} );
+					await test.step( `disabledAttributesAction === ${ disabledAttributesAction }: Expect options to be properly auto-selected`, async () => {
+						await page.goto( productPermalink );
+
+						// By selecting the Color to "Blue", the only possible Size remaining is "XL".
+						await pageObject.selectVariationSelectorOptionsBlockAttribute(
+							'Color',
+							'Blue',
+							optionStyle
+						);
+						// Now, we deselect the Color.
+						await pageObject.selectVariationSelectorOptionsBlockAttribute(
+							'Color',
+							'',
+							optionStyle
+						);
+						// Now, the attributes should look like this:
+						// Type: T-shirt
+						// Color: ''
+						// Size: XL
+						// Because the Size is XL, the only Colors possible are Red and Blue.
+						// Now if we select Size: S, the Color should auto-select to Green.
+						await pageObject.selectVariationSelectorOptionsBlockAttribute(
+							'Size',
+							'S',
+							optionStyle
+						);
+						// Now, the options should look like this:
+						// Type: T-shirt
+						// Color: Green
+						// Size: S
+
+						await pageObject.expectSelectedAttributes(
+							productAttributes,
+							{ Type: 'T-shirt', Color: 'Green', Size: 'S' },
+							optionStyle
+						);
+					} );
+				}
+			} );
+		}
+
+		test( `Pills: "X in cart" text displays correctly after auto-selection`, async ( {
+			page,
+			pageObject,
+			editor,
+		} ) => {
+			await pageObject.updateSingleProductTemplate();
+			await setAddToCartWithOptionsBlockAttributes( pageObject, editor, {
+				optionStyle: 'Pills',
+				autoselect: true,
+			} );
+
+			await test.step( 'Add the Blue/XL variation to cart', async () => {
+				await page.goto( productPermalink );
+
+				// Select Blue and XL to match the T-shirt, Blue, XL variation
+				await pageObject.selectVariationSelectorOptionsBlockAttribute(
+					'Color',
+					'Blue',
+					'Pills'
+				);
+
+				// Type and Size should auto-select to T-shirt and XL
+				await pageObject.expectSelectedAttributes(
+					productAttributes,
+					{ Type: 'T-shirt', Color: 'Blue', Size: 'XL' },
+					'Pills'
+				);
+
+				// Add to cart
+				const addToCartButton = page
+					.locator( '.wp-block-add-to-cart-with-options' )
+					.getByRole( 'button', { name: 'Add to cart' } );
+				await addToCartButton.click();
+
+				// Wait for the item to be added
+				await expect( page.getByText( '1 in cart' ) ).toBeVisible();
+			} );
+
+			await test.step( 'Verify "X in cart" displays after auto-selection on fresh page load', async () => {
+				// Reload the page to start fresh
+				await page.goto( productPermalink );
+
+				// Initially, only Type should be auto-selected (it's the only single option)
+				// The "1 in cart" text should NOT be visible yet because we haven't
+				// selected the Blue/XL variation
+				await expect( page.getByText( '1 in cart' ) ).toBeHidden();
+
+				// Now select Blue - this should auto-select Size to XL
+				// (since Blue only has one valid size: XL)
+				await pageObject.selectVariationSelectorOptionsBlockAttribute(
+					'Color',
+					'Blue',
+					'Pills'
+				);
+
+				// After auto-selection completes, the button should show "1 in cart"
+				// because we now have the same variation (T-shirt, Blue, XL) selected
+				await expect( page.getByText( '1 in cart' ) ).toBeVisible();
+			} );
+		} );
 	} );
 } );

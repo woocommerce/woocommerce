@@ -154,6 +154,10 @@ h2.wc-block-mini-cart__title {
 			padding-top: $gap-smaller;
 			padding-bottom: $gap-smaller;
 
+			&[hidden] {
+				display: none;
+			}
+
 			&:last-child::after {
 				content: none;
 			}
@@ -170,8 +174,8 @@ h2.wc-block-mini-cart__title {
 		margin-bottom: $gap;
 
 		.wc-block-components-totals-item__description {
+			@include font-x-small-locked;
 			display: none;
-			font-size: 0.75em;
 			font-weight: 400;
 
 			@media only screen and (min-width: 480px) {

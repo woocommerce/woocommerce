@@ -73,7 +73,6 @@
 		"access": "public"
 	},
 	"devDependencies": {
-		"@automattic/data-stores": "^2.0.1",
 		"@babel/core": "7.25.7",
 		"@babel/runtime": "7.25.7",
 		"@testing-library/react": "^16.x.x",

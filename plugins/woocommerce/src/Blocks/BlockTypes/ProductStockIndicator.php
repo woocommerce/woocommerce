@@ -3,7 +3,6 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Blocks\Utils\ProductAvailabilityUtils;
-use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 use Automattic\WooCommerce\Enums\ProductType;
 
 /**
@@ -12,7 +11,6 @@ use Automattic\WooCommerce\Enums\ProductType;
 class ProductStockIndicator extends AbstractBlock {
 
 	use EnableBlockJsonAssetsTrait;
-	use BlocksSharedState;
 
 	/**
 	 * Block name.

@@ -11,7 +11,6 @@ import {
  */
 import { tags, test, expect } from '../../fixtures/fixtures';
 import { checkCartContentInBlocksCart } from '../../utils/cart';
-import { getInstalledWordPressVersion } from '../../utils/wordpress';
 
 const productName = `Cart product test ${ Date.now() }`;
 const productPrice = '13.99';
@@ -97,13 +96,6 @@ test.describe(
 			'should be able to navigate and remove item from mini cart using keyboard',
 			{ tag: [ tags.COULD_BE_LOWER_LEVEL_TEST ] },
 			async ( { page } ) => {
-				const wordPressVersion = await getInstalledWordPressVersion();
-				// eslint-disable-next-line playwright/no-skipped-test
-				test.skip(
-					wordPressVersion <= 6.7,
-					'Skipping test as withSyncEvent is available starting from WordPress 6.8'
-				);
-
 				await test.step( 'Add product to cart and open mini cart', async () => {
 					await addAProductToCart( page, productId );
 					const miniCartButton = page.locator(

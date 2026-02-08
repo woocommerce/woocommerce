@@ -8,11 +8,8 @@
 namespace Automattic\WooCommerce\Admin\API;
 
 defined( 'ABSPATH' ) || exit;
-
-use ActionScheduler;
-use Automattic\Jetpack\Connection\Manager;
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PluginsHelper;
+use Automattic\WooCommerce\Internal\Jetpack\JetpackConnection;
 use WC_REST_Data_Controller;
 use WP_Error;
 use WP_REST_Request;
@@ -221,7 +218,6 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 		return $response;
 	}
 
-
 	/**
 	 * Return Jetpack authorization URL.
 	 *
@@ -230,83 +226,10 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 	 * @return array
 	 */
 	public function get_jetpack_authorization_url( WP_REST_Request $request ) {
-		$manager = new Manager( 'woocommerce' );
-		$errors  = new WP_Error();
-
-		// Register the site to wp.com.
-		if ( ! $manager->is_connected() ) {
-			$result = $manager->try_registration();
-			if ( is_wp_error( $result ) ) {
-				$errors->add( $result->get_error_code(), $result->get_error_message() );
-			}
-		}
-
-		$redirect_url = $request->get_param( 'redirect_url' );
-		$calypso_env  = defined( 'WOOCOMMERCE_CALYPSO_ENVIRONMENT' ) && in_array( WOOCOMMERCE_CALYPSO_ENVIRONMENT, array( 'development', 'wpcalypso', 'horizon', 'stage' ), true ) ? WOOCOMMERCE_CALYPSO_ENVIRONMENT : 'production';
-
-		$authorization_url = $manager->get_authorization_url( null, $redirect_url );
-		$authorization_url = add_query_arg( 'locale', $this->get_wpcom_locale(), $authorization_url );
-
-		if ( Features::is_enabled( 'use-wp-horizon' ) ) {
-			$calypso_env = 'horizon';
-		}
-
-		$color_scheme = get_user_option( 'admin_color', get_current_user_id() );
-		if ( ! $color_scheme ) {
-			// The default Core color schema is 'fresh'.
-			$color_scheme = 'fresh';
-		}
-
-		return array(
-			'success'      => ! $errors->has_errors(),
-			'errors'       => $errors->get_error_messages(),
-			'color_scheme' => $color_scheme,
-			'url'          => add_query_arg(
-				array(
-					'from'        => $request->get_param( 'from' ),
-					'calypso_env' => $calypso_env,
-				),
-				$authorization_url,
-			),
+		return JetpackConnection::get_authorization_url(
+			$request->get_param( 'redirect_url' ),
+			$request->get_param( 'from' )
 		);
-	}
-
-	/**
-	 * Return a locale string for wpcom.
-	 *
-	 * @return string
-	 */
-	private function get_wpcom_locale() {
-		// List of locales that should be used with region code.
-		$locale_to_lang = array(
-			'bre'   => 'br',
-			'de_AT' => 'de-at',
-			'de_CH' => 'de-ch',
-			'de'    => 'de_formal',
-			'el'    => 'el-po',
-			'en_GB' => 'en-gb',
-			'es_CL' => 'es-cl',
-			'es_MX' => 'es-mx',
-			'fr_BE' => 'fr-be',
-			'fr_CA' => 'fr-ca',
-			'nl_BE' => 'nl-be',
-			'nl'    => 'nl_formal',
-			'pt_BR' => 'pt-br',
-			'sr'    => 'sr_latin',
-			'zh_CN' => 'zh-cn',
-			'zh_HK' => 'zh-hk',
-			'zh_SG' => 'zh-sg',
-			'zh_TW' => 'zh-tw',
-		);
-
-		$system_locale = get_locale();
-		if ( isset( $locale_to_lang[ $system_locale ] ) ) {
-			// Return the locale with region code if it's in the list.
-			return $locale_to_lang[ $system_locale ];
-		}
-
-		// If the locale is not in the list, return the language code only.
-		return explode( '_', $system_locale )[0];
 	}
 
 	/**

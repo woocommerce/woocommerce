@@ -14,6 +14,7 @@ import { Logger } from '../../../../core/logger';
 import { checkoutRemoteBranch } from '../../../../core/git';
 import {
 	addLabelsToIssue,
+	addMilestoneToIssue,
 	createPullRequest,
 } from '../../../../core/github/repo';
 import { Options } from '../types';
@@ -170,7 +171,7 @@ export const updateReleaseBranchChangelogs = async (
 	tmpRepoPath: string,
 	releaseBranch: string
 ): Promise< { deletionCommitHash: string; prNumber: number } > => {
-	const { owner, name, version, commitDirectToBase } = options;
+	const { owner, name, version, commitDirectToBase, githubActor } = options;
 	const mainVersion = version.replace( /\.\d+(-.*)?$/, '' ); // For compatibility with Jetpack changelogger which expects X.Y as version.
 
 	try {
@@ -273,7 +274,7 @@ export const updateReleaseBranchChangelogs = async (
 		}
 		Logger.notice( `Creating PR for ${ branch }` );
 		const warningMessage = noEntriesWritten
-			? '> [!WARNING]\n> No entries were written to the changelog. Consider adding a generic changelog entry before releasing.\n\n'
+			? '> [!CAUTION]\n> No entries were written to the changelog. You will be required to manually add a changelog entry before releasing.\n\n'
 			: '';
 		const pullRequest = await createPullRequest( {
 			owner,
@@ -282,6 +283,7 @@ export const updateReleaseBranchChangelogs = async (
 			body: `${ warningMessage }This pull request was automatically generated to prepare the changelog for ${ version }`,
 			head: branch,
 			base: releaseBranch,
+			reviewers: [ githubActor ],
 		} );
 		Logger.notice( `Pull request created: ${ pullRequest.html_url }` );
 
@@ -292,6 +294,18 @@ export const updateReleaseBranchChangelogs = async (
 		} catch {
 			Logger.warn(
 				`Could not add label "Release" to PR ${ pullRequest.number }`
+			);
+		}
+
+		try {
+			await addMilestoneToIssue(
+				options,
+				pullRequest.number,
+				`${ mainVersion }.0`
+			);
+		} catch {
+			Logger.warn(
+				`Could not add milestone "${ mainVersion }.0" to PR ${ pullRequest.number }`
 			);
 		}
 
@@ -321,7 +335,7 @@ export const updateBranchChangelog = async (
 	releaseBranch: string,
 	releaseBranchChanges: { deletionCommitHash: string; prNumber: number }
 ): Promise< number > => {
-	const { owner, name, version } = options;
+	const { owner, name, version, githubActor } = options;
 	const { deletionCommitHash, prNumber } = releaseBranchChanges;
 
 	// Skip if there were no changelog files to delete
@@ -349,6 +363,18 @@ export const updateBranchChangelog = async (
 			[ branch ]: null,
 		} );
 
+		// Read plugin file version in branch to determine milestone.
+		let milestone = '';
+		const pluginFile = readFileSync(
+			path.join( tmpRepoPath, 'plugins/woocommerce/woocommerce.php' ),
+			'utf8'
+		);
+		const m = pluginFile.match( /\*\s+Version:\s+(\d+\.\d+)\.\d+/ );
+
+		if ( m ) {
+			milestone = `${ m[ 1 ] }.0`;
+		}
+
 		try {
 			await git.raw( [ 'cherry-pick', deletionCommitHash ] );
 		} catch ( e ) {
@@ -375,6 +401,7 @@ export const updateBranchChangelog = async (
 			}`,
 			head: branch,
 			base: releaseBranch,
+			reviewers: [ githubActor ],
 		} );
 		Logger.notice( `Pull request created: ${ pullRequest.html_url }` );
 
@@ -385,6 +412,14 @@ export const updateBranchChangelog = async (
 		} catch {
 			Logger.warn(
 				`Could not add label "Release" to PR ${ pullRequest.number }`
+			);
+		}
+
+		try {
+			await addMilestoneToIssue( options, pullRequest.number, milestone );
+		} catch {
+			Logger.warn(
+				`Could not add milestone "${ milestone }" to PR ${ pullRequest.number }`
 			);
 		}
 
@@ -523,20 +558,23 @@ function getTargetBranches(
  * @param {Object} releaseBranchChanges                    update data from updateReleaseBranchChangelogs
  * @param {Object} releaseBranchChanges.deletionCommitHash commit from the changelog deletions in updateReleaseBranchChangelogs
  * @param {Object} releaseBranchChanges.prNumber           pr number created in updateReleaseBranchChangelogs
+ * @return {Promise<Array<{ branch: string; number: number }>>} Array of created PRs with branch and number
  */
 export const updateIntermediateBranches = async (
 	options: Options,
 	tmpRepoPath: string,
 	releaseBranchChanges: { deletionCommitHash: string; prNumber: number }
-): Promise< void > => {
+): Promise< Array< { branch: string; number: number } > > => {
 	Logger.notice(
 		`Starting intermediate branches update for version ${ options.version }`
 	);
 
+	const createdPRs: Array< { branch: string; number: number } > = [];
+
 	const trunkVersion = await getTrunkWooCommerceVersion( tmpRepoPath );
 	if ( ! trunkVersion ) {
 		Logger.error( 'Could not determine WooCommerce trunk version.' );
-		return;
+		return createdPRs;
 	}
 
 	const targetBranches = getTargetBranches( options.version, trunkVersion );
@@ -546,16 +584,21 @@ export const updateIntermediateBranches = async (
 
 	for ( const targetBranch of targetBranches ) {
 		try {
-			await updateBranchChangelog(
+			const prNumber = await updateBranchChangelog(
 				options,
 				tmpRepoPath,
 				targetBranch,
 				releaseBranchChanges
 			);
+			if ( prNumber && prNumber > 0 ) {
+				createdPRs.push( { branch: targetBranch, number: prNumber } );
+			}
 		} catch ( error ) {
 			Logger.error(
 				`Failed to update ${ targetBranch }: ${ error.message }`
 			);
 		}
 	}
+
+	return createdPRs;
 };

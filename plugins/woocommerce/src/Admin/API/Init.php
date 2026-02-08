@@ -186,6 +186,10 @@ class Init {
 				'Automattic\WooCommerce\Admin\API\Reports\Customers\Stats\Controller',
 			);
 
+			if ( Features::is_enabled( 'analytics-scheduled-import' ) ) {
+				$analytics_controllers[] = 'Automattic\WooCommerce\Admin\API\AnalyticsImports';
+			}
+
 			// The performance indicators controllerq must be registered last, after other /stats endpoints have been registered.
 			$analytics_controllers[] = 'Automattic\WooCommerce\Admin\API\Reports\PerformanceIndicators\Controller';
 		}
