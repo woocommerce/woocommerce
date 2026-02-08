@@ -35,17 +35,11 @@ test( 'Merchant can add brands', async ( { page } ) => {
 		await page.waitForSelector( '.wp-list-table' );
 	};
 
-	const createBrandIfNotExist = async ( {
-		name,
-		slug,
-		parentBrand,
-		description,
-		thumbnailFileName,
-	}: Brand ) => {
+	const createBrandIfNotExist = async ( brand: Brand ) => {
 		// Create "WooCommerce" brand if it does not exist.
 		const cellVisible = await page
 			.locator( '#posts-filter' )
-			.getByRole( 'cell', { name: slug, exact: true } )
+			.getByRole( 'cell', { name: brand.slug, exact: true } )
 			.isVisible();
 
 		if ( cellVisible ) {
@@ -53,21 +47,23 @@ test( 'Merchant can add brands', async ( { page } ) => {
 		}
 
 		await page.getByRole( 'textbox', { name: 'Name' } ).click();
-		await page.getByRole( 'textbox', { name: 'Name' } ).fill( name );
+		await page.getByRole( 'textbox', { name: 'Name' } ).fill( brand.name );
 		await page.getByRole( 'textbox', { name: 'Slug' } ).click();
-		await page.getByRole( 'textbox', { name: 'Slug' } ).fill( slug );
+		await page.getByRole( 'textbox', { name: 'Slug' } ).fill( brand.slug );
 
 		await page
 			.getByRole( 'combobox', { name: 'Parent Brand' } )
-			.selectOption( { label: parentBrand } );
+			.selectOption( { label: brand.parentBrand } );
 
 		await page.getByRole( 'textbox', { name: 'Description' } ).click();
 		await page
 			.getByRole( 'textbox', { name: 'Description' } )
-			.fill( description );
+			.fill( brand.description );
 		await page.getByRole( 'button', { name: 'Upload/Add image' } ).click();
 		await page.getByRole( 'tab', { name: 'Media Library' } ).click();
-		await page.getByRole( 'checkbox', { name: thumbnailFileName } ).click();
+		await page
+			.getByRole( 'checkbox', { name: brand.thumbnailFileName } )
+			.click();
 		await page.getByRole( 'button', { name: 'Use image' } ).click();
 		await page.getByRole( 'button', { name: 'Add New Brand' } ).click();
 
@@ -80,7 +76,7 @@ test( 'Merchant can add brands', async ( { page } ) => {
 		await expect(
 			page
 				.locator( '#posts-filter' )
-				.getByRole( 'cell', { name: slug, exact: true } )
+				.getByRole( 'cell', { name: brand.slug, exact: true } )
 		).toHaveCount( 1 );
 	};
 
@@ -92,21 +88,18 @@ test( 'Merchant can add brands', async ( { page } ) => {
 	 *
 	 * After a brand is edited, you will be redirected to the Brands page.
 	 */
-	const editBrand = async (
-		currentName: string,
-		{ name, slug, parentBrand, description, thumbnailFileName }: Brand
-	) => {
-		await page.getByLabel( `“${ currentName }” (Edit)` ).click();
-		await page.getByLabel( 'Name' ).fill( name );
-		await page.getByLabel( 'Slug' ).fill( slug );
+	const editBrand = async ( currentName: string, brand: Brand ) => {
+		await page.getByLabel( `"${ currentName }" (Edit)` ).click();
+		await page.getByLabel( 'Name' ).fill( brand.name );
+		await page.getByLabel( 'Slug' ).fill( brand.slug );
 		await page
 			.getByLabel( 'Parent Brand' )
-			.selectOption( { label: parentBrand } );
-		await page.getByLabel( 'Description' ).fill( description );
+			.selectOption( { label: brand.parentBrand } );
+		await page.getByLabel( 'Description' ).fill( brand.description );
 
 		await page.getByRole( 'button', { name: 'Upload/Add image' } ).click();
 		await page.getByRole( 'tab', { name: 'Media Library' } ).click();
-		await page.getByLabel( thumbnailFileName ).click();
+		await page.getByLabel( brand.thumbnailFileName ).click();
 		await page.getByRole( 'button', { name: 'Use image' } ).click();
 
 		await page.getByRole( 'button', { name: 'Update' } ).click();
@@ -123,7 +116,7 @@ test( 'Merchant can add brands', async ( { page } ) => {
 		await expect(
 			page
 				.locator( '#posts-filter' )
-				.getByRole( 'cell', { name: slug, exact: true } )
+				.getByRole( 'cell', { name: brand.slug, exact: true } )
 		).toHaveCount( 1 );
 	};
 
