@@ -245,7 +245,7 @@ class WC_Structured_Data {
 								'@type'                 => 'UnitPriceSpecification',
 								'price'                 => wc_format_decimal( $lowest, wc_get_price_decimals() ),
 								'priceCurrency'         => $currency,
-								'valueAddedTaxIncluded' => wc_prices_include_tax(),
+								'valueAddedTaxIncluded' => 'incl' === get_option( 'woocommerce_tax_display_shop' ),
 								'validThrough'          => $price_valid_until,
 							),
 						),
@@ -259,7 +259,7 @@ class WC_Structured_Data {
 					);
 
 					if ( $product->is_on_sale() ) {
-						$lowest_child_sale_price = $product->get_variation_sale_price( 'min', false );
+						$lowest_child_sale_price = $product->get_variation_sale_price( 'min', true );
 						foreach ( $product->get_variation_prices()['sale_price'] as $variation_id => $variation_price ) {
 							if ( $variation_price === $lowest_child_sale_price ) {
 								break;
@@ -278,7 +278,7 @@ class WC_Structured_Data {
 								'priceType'             => 'https://schema.org/SalePrice',
 								'price'                 => wc_format_decimal( $lowest_child_sale_price, wc_get_price_decimals() ),
 								'priceCurrency'         => $currency,
-								'valueAddedTaxIncluded' => wc_prices_include_tax(),
+								'valueAddedTaxIncluded' => 'incl' === get_option( 'woocommerce_tax_display_shop' ),
 								'validThrough'          => $sale_price_valid_until ?? $price_valid_until,
 							),
 						);
@@ -312,7 +312,7 @@ class WC_Structured_Data {
 					'@type'                 => 'UnitPriceSpecification',
 					'price'                 => wc_format_decimal( $min_price, wc_get_price_decimals() ),
 					'priceCurrency'         => $currency,
-					'valueAddedTaxIncluded' => wc_prices_include_tax(),
+					'valueAddedTaxIncluded' => 'incl' === get_option( 'woocommerce_tax_display_shop' ),
 					'validThrough'          => $price_valid_until,
 				);
 				if ( $product->is_on_sale() && $min_price !== $min_sale_price ) {
@@ -340,17 +340,21 @@ class WC_Structured_Data {
 							'@type'                 => 'UnitPriceSpecification',
 							'price'                 => wc_format_decimal( $min_sale_price, wc_get_price_decimals() ),
 							'priceCurrency'         => $currency,
-							'valueAddedTaxIncluded' => wc_prices_include_tax(),
+							'valueAddedTaxIncluded' => 'incl' === get_option( 'woocommerce_tax_display_shop' ),
 							'validThrough'          => $sale_price_valid_until ?? $price_valid_until,
 						)
 					);
 				}
 			} else {
+				$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
+				$regular_price    = 'incl' === $tax_display_mode
+					? wc_get_price_including_tax( $product, array( 'price' => $product->get_regular_price() ) )
+					: wc_get_price_excluding_tax( $product, array( 'price' => $product->get_regular_price() ) );
 				$unit_price_specification = array(
 					'@type'                 => 'UnitPriceSpecification',
-					'price'                 => wc_format_decimal( $product->get_regular_price(), wc_get_price_decimals() ),
+					'price'                 => wc_format_decimal( $regular_price, wc_get_price_decimals() ),
 					'priceCurrency'         => $currency,
-					'valueAddedTaxIncluded' => wc_prices_include_tax(),
+					'valueAddedTaxIncluded' => 'incl' === get_option( 'woocommerce_tax_display_shop' ),
 					'validThrough'          => $price_valid_until,
 				);
 				if ( $product->is_on_sale() ) {
@@ -366,6 +370,9 @@ class WC_Structured_Data {
 				);
 
 				if ( $product->is_on_sale() ) {
+					$sale_price = 'incl' === $tax_display_mode
+						? wc_get_price_including_tax( $product, array( 'price' => $product->get_sale_price() ) )
+						: wc_get_price_excluding_tax( $product, array( 'price' => $product->get_sale_price() ) );
 					if ( $product->get_date_on_sale_to() ) {
 						$sale_price_valid_until = gmdate( 'Y-m-d', $product->get_date_on_sale_to()->getTimestamp() );
 					}
@@ -376,9 +383,9 @@ class WC_Structured_Data {
 						$markup_offer['priceSpecification'],
 						array(
 							'@type'                 => 'UnitPriceSpecification',
-							'price'                 => wc_format_decimal( $product->get_sale_price(), wc_get_price_decimals() ),
+							'price'                 => wc_format_decimal( $sale_price, wc_get_price_decimals() ),
 							'priceCurrency'         => $currency,
-							'valueAddedTaxIncluded' => wc_prices_include_tax(),
+							'valueAddedTaxIncluded' => 'incl' === get_option( 'woocommerce_tax_display_shop' ),
 							'validThrough'          => $sale_price_valid_until ?? $price_valid_until,
 						)
 					);
