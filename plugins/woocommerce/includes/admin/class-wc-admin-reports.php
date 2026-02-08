@@ -39,12 +39,13 @@ class WC_Admin_Reports {
 	 * @return void
 	 */
 	public static function delete_legacy_reports_transients( int $order_id, bool $defer ): void {
-		if ( $defer ) {
+		// Deferring is only making sense on sites without object cache enabled (if enabled, no SQLs being executed).
+		if ( $defer && ! wp_using_ext_object_cache() ) {
 			static $skip_consequent;
 
 			// Schedule the deletion, cap the execution to single pending event at any given time.
-			$scheduled = $skip_consequent || as_has_scheduled_action( 'woocommerce_delete_legacy_report_transients', null, 'woocommerce' );
-			if ( ! $scheduled ) {
+			$schedule = ! $skip_consequent && ! as_has_scheduled_action( 'woocommerce_delete_legacy_report_transients', null, 'woocommerce' );
+			if ( $schedule ) {
 				as_schedule_single_action( time() + MINUTE_IN_SECONDS, 'woocommerce_delete_legacy_report_transients', array( $order_id, false ), 'woocommerce' );
 			}
 			$skip_consequent = true;
