@@ -185,8 +185,8 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		self::$log_enabled                  = $this->debug;
 
 		if ( $this->testmode ) {
-			/* translators: %s: Link to PayPal sandbox testing guide page */
-			$this->description .= '<br>' . sprintf( __( '<strong>Sandbox mode enabled</strong>. Only sandbox test accounts can be used. See the <a href="%s">PayPal Sandbox Testing Guide</a> for more details.', 'woocommerce' ), 'https://developer.paypal.com/tools/sandbox/' );
+			/* translators: 1: Link to PayPal sandbox testing guide page, 2: Link to PayPal info page */
+			$this->description .= '<br>' . sprintf( __( '<strong>Sandbox mode enabled</strong>. Only sandbox test accounts can be used. See the <a href="%1$s">PayPal Sandbox Testing Guide</a> for more details. <a href="%2$s">What is PayPal?</a>', 'woocommerce' ), 'https://developer.paypal.com/tools/sandbox/', esc_url( 'https://www.paypal.com/digital-wallet/how-paypal-works' ) );
 			$this->description  = trim( $this->description );
 		}
 
@@ -425,8 +425,6 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		foreach ( $icon as $i ) {
 			$icon_html .= '<img src="' . esc_attr( $i ) . '" alt="' . esc_attr__( 'PayPal acceptance mark', 'woocommerce' ) . '" />';
 		}
-
-		$icon_html .= sprintf( '<a href="%1$s" class="about_paypal" onclick="javascript:window.open(\'%1$s\',\'WIPaypal\',\'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=yes, resizable=yes, width=1060, height=700\'); return false;">' . esc_attr__( 'What is PayPal?', 'woocommerce' ) . '</a>', esc_url( $this->get_icon_url( $base_country ) ) );
 
 		return apply_filters( 'woocommerce_gateway_icon', $icon_html, $this->id );
 	}
