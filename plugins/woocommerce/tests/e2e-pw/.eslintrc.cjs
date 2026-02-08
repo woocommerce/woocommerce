@@ -24,6 +24,11 @@ module.exports = {
 		],
 	},
 	overrides: [
+		/*
+		 * The default ESLint parser will not handle TypeScript syntax.
+		 * This override switches to the TypeScript parser for .ts and .tsx
+		 * files so that ESLint can lint them without reporting parse errors.
+		 */
 		{
 			files: [ '**/*.ts', '**/*.tsx' ],
 			parser: '@typescript-eslint/parser',
