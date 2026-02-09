@@ -37,7 +37,7 @@
 		"@wordpress/browserslist-config": "6.39.0",
 		"jest": "30.2.0",
 		"typescript": "5.9.3",
-		"webpack": "5.101.3",
+		"webpack": "5.104.1",
 		"webpack-cli": "6.0.1"
 	}
 }
