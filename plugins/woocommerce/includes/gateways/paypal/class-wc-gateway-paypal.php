@@ -414,17 +414,8 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @return string
 	 */
 	public function get_icon() {
-		// We need a base country for the link to work, bail if in the unlikely event no country is set.
-		$base_country = WC()->countries->get_base_country();
-		if ( empty( $base_country ) ) {
-			return '';
-		}
-		$icon_html = '';
-		$icon      = (array) $this->get_icon_image( $base_country );
-
-		foreach ( $icon as $i ) {
-			$icon_html .= '<img src="' . esc_attr( $i ) . '" alt="' . esc_attr__( 'PayPal acceptance mark', 'woocommerce' ) . '" />';
-		}
+		$icon      = $this->get_paypal_icon_image();
+		$icon_html = '<img src="' . esc_attr( $icon ) . '" alt="' . esc_attr__( 'PayPal acceptance mark', 'woocommerce' ) . '" />';
 
 		return apply_filters( 'woocommerce_gateway_icon', $icon_html, $this->id );
 	}
@@ -447,6 +438,17 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		} else {
 			return $url . '/cgi-bin/webscr?cmd=xpt/Marketing/general/WIPaypal-outside';
 		}
+	}
+
+	/**
+	 * Get PayPal icon image.
+	 *
+	 * @return string
+	 */
+	protected function get_paypal_icon_image() {
+		$icon = WC_HTTPS::force_https_url( WC()->plugin_url() . '/assets/images/paypal.png' );
+		
+		return apply_filters( 'woocommerce_paypal_icon', $icon );
 	}
 
 	/**
