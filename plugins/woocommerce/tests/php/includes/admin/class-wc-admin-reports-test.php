@@ -28,16 +28,8 @@ final class WC_Admin_Reports_Test extends WC_Unit_Test_Case {
 		);
 
 		// Verify the purge-workflow.
+		set_transient( 'wc_admin_report', 'Verify deletion' );
 		do_action( 'woocommerce_delete_legacy_report_transients', 0, false ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.HookCommentWrongStyle
-		$this->assertCount(
-			(int) ( ! wp_using_ext_object_cache() ),
-			as_get_scheduled_actions(
-				array(
-					'hook'  => 'woocommerce_delete_legacy_report_transients',
-					'group' => 'woocommerce',
-				),
-				'ids'
-			)
-		);
+		$this->assertFalse( get_transient( 'wc_admin_report' ) );
 	}
 }
