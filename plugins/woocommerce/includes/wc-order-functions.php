@@ -520,16 +520,7 @@ function wc_delete_shop_order_transients( $order = 0 ) {
 	WC_Cache_Helper::invalidate_cache_group( 'orders' );
 
 	do_action( 'woocommerce_delete_shop_order_transients', $order_id );
-	/**
-	 * Execute legacy reports transient deletion (sync or async depending on the context).
-	 *
-	 * @since 10.6.0
-	 * @param int  $order_id Order ID (unused, future placeholder).
-	 * @param bool $defer    Whether to defer the deletion or execute.
-	 */
-	do_action( 'woocommerce_delete_legacy_report_transients', $order_id, true );
 }
-add_action( 'woocommerce_delete_legacy_report_transients', array( WC_Admin_Reports::class, 'delete_legacy_reports_transients' ), 10, 2 );
 
 /**
  * See if we only ship to billing addresses.

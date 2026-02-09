@@ -24,11 +24,19 @@ if ( class_exists( 'WC_Admin_Reports', false ) ) {
 class WC_Admin_Reports {
 
 	/**
-	 * Register the proper hook handlers.
+	 * Register the hook handlers for integrating with admin.
 	 */
 	public static function register_hook_handlers() {
 		add_filter( 'woocommerce_after_dashboard_status_widget_parameter', array( __CLASS__, 'get_report_instance' ) );
 		add_filter( 'woocommerce_dashboard_status_widget_reports', array( __CLASS__, 'replace_dashboard_status_widget_reports' ) );
+	}
+
+	/**
+	 * Register the hook handlers for integrating with orders.
+	 */
+	public static function register_orders_hook_handlers(): void {
+		add_action( 'woocommerce_delete_shop_order_transients', array( __CLASS__, 'delete_legacy_reports_transients' ), 10, 1 );
+		add_action( 'woocommerce_delete_legacy_report_transients', array( __CLASS__, 'delete_legacy_reports_transients' ), 10, 2 );
 	}
 
 	/**
@@ -38,7 +46,7 @@ class WC_Admin_Reports {
 	 * @param bool $defer    Whether to defer the deletion or execute.
 	 * @return void
 	 */
-	public static function delete_legacy_reports_transients( int $order_id, bool $defer ): void {
+	public static function delete_legacy_reports_transients( int $order_id, bool $defer = true ): void {
 		// Deferring is only making sense on sites without object cache enabled (if enabled, no SQLs being executed).
 		if ( $defer && ! wp_using_ext_object_cache() ) {
 			static $skip_consequent;
