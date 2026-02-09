@@ -432,11 +432,15 @@ class WC_Query {
 				add_filter( 'wpseo_metadesc', array( $this, 'wpseo_metadesc' ) );
 				add_filter( 'wpseo_metakey', array( $this, 'wpseo_metakey' ) );
 			}
-		} elseif ( ! $q->is_post_type_archive( 'product' ) && ! $q->is_tax( get_object_taxonomies( 'product' ) ) && ! $q->is_search() ) {
-			// Only apply to product categories, the product post archive, the shop page, product tags, and product attribute taxonomies and search queries.
+		} elseif ( ! $q->is_post_type_archive( 'product' ) && ! $q->is_tax( get_object_taxonomies( 'product' ) ) ) {
+			// Only apply to product categories, the product post archive, the shop page, product tags, and product attribute taxonomies.
+			if ( $q->is_search() ) {
+				// For search queries, apply only the visibility tax query to exclude hidden products.
+				$existing_tax_query = $q->get( 'tax_query' );
+				$q->set( 'tax_query', $this->get_tax_query( $existing_tax_query ? $existing_tax_query : array(), true ) );
+			}
 			return;
 		}
-
 		$this->product_query( $q );
 	}
 
