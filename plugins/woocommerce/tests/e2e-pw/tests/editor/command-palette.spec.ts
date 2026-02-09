@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { Page } from '@playwright/test';
 import {
 	disableWelcomeModal,
 	WC_API_PATH,
@@ -16,7 +17,13 @@ import { expect, test as baseTest } from '../../fixtures/fixtures';
 const macOS = process.platform === 'darwin';
 const cmdKeyCombo = macOS ? 'Meta+k' : 'Control+k';
 
-const clickOnCommandPaletteOption = async ( { page, optionName } ) => {
+const clickOnCommandPaletteOption = async ( {
+	page,
+	optionName,
+}: {
+	page: Page;
+	optionName: string;
+} ) => {
 	// Press `Ctrl` + `K` to open the command palette.
 	await page.keyboard.press( cmdKeyCombo );
 

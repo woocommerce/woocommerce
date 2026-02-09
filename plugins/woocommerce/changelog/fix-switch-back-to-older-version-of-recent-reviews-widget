@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Admin: revert to the previous version of the recent reviews widget, as errors have been reported in some setups.
