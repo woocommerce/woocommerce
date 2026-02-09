@@ -456,8 +456,10 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 *
 	 * @param string $country Country code.
 	 * @return array of image URLs
+	 * @deprecated 10.6.0 Use get_paypal_icon_image() instead.
 	 */
 	protected function get_icon_image( $country ) {
+		wc_deprecated_function( __METHOD__, '10.6.0', 'get_paypal_icon_image()' );
 		switch ( $country ) {
 			case 'US':
 			case 'NZ':
