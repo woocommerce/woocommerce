@@ -680,16 +680,17 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		/**
 		 * Create a token first.
 		 */
-		$push_token = new PushToken();
-		$push_token->set_user_id( $this->user_id );
-		$push_token->set_token( str_repeat( 'a', 64 ) );
-		$push_token->set_platform( PushToken::PLATFORM_APPLE );
-		$push_token->set_device_uuid( 'device-to-delete' );
-		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
+		$data = array(
+			'user_id'     => $this->user_id,
+			'token'       => str_repeat( 'a', 64 ),
+			'platform'    => PushToken::PLATFORM_APPLE,
+			'device_uuid' => 'device-to-delete',
+			'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+		);
 
 		$data_store = wc_get_container()->get( PushTokensDataStore::class );
-		$data_store->create( $push_token );
-		$token_id = $push_token->get_id();
+		$push_token = $data_store->create( $data );
+		$token_id   = $push_token->get_id();
 
 		/**
 		 * Delete the token.
@@ -738,16 +739,17 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		/**
 		 * Create a token for another shop manager.
 		 */
-		$push_token = new PushToken();
-		$push_token->set_user_id( $this->other_shop_manager_id );
-		$push_token->set_token( str_repeat( 'a', 64 ) );
-		$push_token->set_platform( PushToken::PLATFORM_APPLE );
-		$push_token->set_device_uuid( 'device-other-user' );
-		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
+		$data = array(
+			'user_id'     => $this->other_shop_manager_id,
+			'token'       => str_repeat( 'a', 64 ),
+			'platform'    => PushToken::PLATFORM_APPLE,
+			'device_uuid' => 'device-other-user',
+			'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+		);
 
 		$data_store = wc_get_container()->get( PushTokensDataStore::class );
-		$data_store->create( $push_token );
-		$token_id = $push_token->get_id();
+		$push_token = $data_store->create( $data );
+		$token_id   = $push_token->get_id();
 
 		/**
 		 * Try to delete as a different user.
@@ -785,6 +787,43 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 'woocommerce_invalid_push_token', $data['code'] );
 		$this->assertEquals( 'Push token could not be found.', $data['message'] );
+	}
+
+	/**
+	 * @testdox Test it returns 500 when wp_delete_post fails.
+	 */
+	public function test_it_returns_500_when_wp_delete_post_fails() {
+		$data = array(
+			'user_id'     => $this->user_id,
+			'token'       => str_repeat( 'a', 64 ),
+			'platform'    => PushToken::PLATFORM_APPLE,
+			'device_uuid' => 'device-delete-fail',
+			'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+		);
+
+		$data_store = wc_get_container()->get( PushTokensDataStore::class );
+		$push_token = $data_store->create( $data );
+		$token_id   = $push_token->get_id();
+
+		wp_set_current_user( $this->user_id );
+
+		$this->mock_jetpack_connection_manager_is_connected( true );
+
+		add_filter( 'pre_delete_post', '__return_false' );
+
+		try {
+			$request  = new WP_REST_Request( 'DELETE', '/wc-push-notifications/push-tokens/' . $token_id );
+			$response = $this->server->dispatch( $request );
+
+			$this->assertEquals( WP_Http::INTERNAL_SERVER_ERROR, $response->get_status() );
+
+			$data = $response->get_data();
+
+			$this->assertEquals( 'woocommerce_internal_error', $data['code'] );
+			$this->assertEquals( 'Internal server error', $data['message'] );
+		} finally {
+			remove_filter( 'pre_delete_post', '__return_false' );
+		}
 	}
 
 	/**
