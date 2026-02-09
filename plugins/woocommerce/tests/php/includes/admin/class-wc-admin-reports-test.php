@@ -26,7 +26,7 @@ final class WC_Admin_Reports_Test extends WC_Unit_Test_Case {
 		as_unschedule_action( 'woocommerce_delete_legacy_report_transients', null, 'woocommerce' );
 
 		// Verify the purge-workflow.
-		do_action( 'woocommerce_delete_legacy_report_transients', 0, true );
+		do_action( 'woocommerce_delete_legacy_report_transients', 0, true ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.HookCommentWrongStyle
 		$this->assertFalse( as_has_scheduled_action( 'woocommerce_delete_legacy_report_transients', null, 'woocommerce' ) );
 	}
 }
