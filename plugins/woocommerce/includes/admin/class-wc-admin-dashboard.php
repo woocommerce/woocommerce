@@ -477,55 +477,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		 * Recent reviews widget.
 		 */
 		public function recent_reviews() {
-			// Backward compatibility mode: if any of the checked below hooks are in use, use the legacy implementation.
-			$has_legacy_query_filter         = has_filter( 'woocommerce_report_recent_reviews_query_from' );
-			$has_legacy_product_title_filter = has_filter( 'woocommerce_admin_dashboard_recent_reviews' );
-			$use_legacy_implementation       = $has_legacy_query_filter || $has_legacy_product_title_filter;
-			if ( $use_legacy_implementation ) {
-				if ( $has_legacy_query_filter ) {
-					wc_deprecated_hook( 'woocommerce_report_recent_reviews_query_from', '10.5.0' );
-				}
-				if ( $has_legacy_product_title_filter ) {
-					wc_deprecated_hook( 'woocommerce_admin_dashboard_recent_reviews', '10.5.0', 'dashboard-widget-reviews.php template' );
-				}
-				$this->legacy_recent_reviews();
-
-				return;
-			}
-
-			// Optimized version of the widget: faster SQL queries and templates-based rendering for customization.
-			/** @var \WP_Comment[] $comments */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
-			$comments = get_comments(
-				array(
-					'type'   => 'review',
-					'status' => 'approve',
-					'number' => 5,
-				)
-			);
-			_prime_post_caches(
-				array_map( static fn( \WP_Comment $comment ) => (int) $comment->comment_post_ID, $comments ),
-				false,
-				false
-			);
-			$comments = array_filter(
-				$comments,
-				static fn( \WP_Comment $comment ) => current_user_can( 'read_product', $comment->comment_post_ID )
-			);
-			if ( $comments ) {
-				echo '<ul>';
-				foreach ( $comments as $comment ) {
-					wc_get_template(
-						'dashboard-widget-reviews.php',
-						array(
-							'product' => wc_get_product( $comment->comment_post_ID ),
-							'comment' => $comment,
-						)
-					);
-				}
-				echo '</ul>';
-			} else {
-				echo '<p>' . esc_html__( 'There are no product reviews yet.', 'woocommerce' ) . '</p>';
-			}
+			$this->legacy_recent_reviews();
 		}
 
 		/**
