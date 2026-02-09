@@ -62,6 +62,14 @@ class MiniCart extends AbstractBlock {
 	protected $display_cart_prices_including_tax = false;
 
 	/**
+	 * Whether we're currently rendering the Mini Cart overlay.
+	 * Used to scope the render_block_context filter.
+	 *
+	 * @var bool
+	 */
+	private $is_rendering_overlay = false;
+
+	/**
 	 * Block Hook API placements.
 	 *
 	 * @var array
@@ -122,6 +130,9 @@ class MiniCart extends AbstractBlock {
 		// Priority 20 ensures this runs after WooCommerce block registration (priority 10)
 		// allowing us to modify the block supports in the registry after registration is complete.
 		add_action( 'init', array( $this, 'enable_interactivity_support' ), 20 );
+
+		// Provide Mini Cart context to inner blocks (Product Collection can use this for auto-detection).
+		add_filter( 'render_block_context', array( $this, 'provide_mini_cart_context' ), 10, 1 );
 	}
 
 	/**
@@ -659,7 +670,11 @@ class MiniCart extends AbstractBlock {
 	 */
 	public function render_experimental_iapi_mini_cart_overlay() {
 		$template_part_contents = $this->get_template_part_contents( false );
-		$template_part_contents = do_blocks( $this->process_template_contents( $template_part_contents ) );
+
+		// Set flag to enable context provision, then render blocks.
+		$this->is_rendering_overlay = true;
+		$template_part_contents     = do_blocks( $this->process_template_contents( $template_part_contents ) );
+		$this->is_rendering_overlay = false;
 		ob_start();
 		?>
 		<div
@@ -953,5 +968,23 @@ class MiniCart extends AbstractBlock {
 	 */
 	public function should_not_render_mini_cart( array $attributes ) {
 		return isset( $attributes['cartAndCheckoutRenderStyle'] ) && 'hidden' !== $attributes['cartAndCheckoutRenderStyle'];
+	}
+
+	/**
+	 * Provide Mini Cart context to inner blocks during overlay rendering.
+	 *
+	 * This allows inner blocks (like Product Collection) to detect they're inside a Mini Cart
+	 * and adjust their behavior accordingly (e.g., use cart products for cross-sells).
+	 *
+	 * @param array $context The block context.
+	 * @return array The block context with Mini Cart flag added when rendering overlay.
+	 */
+	public function provide_mini_cart_context( $context ) {
+		if ( ! $this->is_rendering_overlay ) {
+			return $context;
+		}
+
+		$context['woocommerce/miniCart'] = true;
+		return $context;
 	}
 }

@@ -13,6 +13,15 @@ use WP_HTML_Tag_Processor;
 class Renderer {
 
 	/**
+	 * Product reference type constant for cart-based products.
+	 */
+	const REFERENCE_TYPE_CART = 'cart';
+	/**
+	 * Product reference type constant for product-based products.
+	 */
+	const REFERENCE_TYPE_PRODUCT = 'product';
+
+	/**
 	 * The render state of the product collection block.
 	 *
 	 * @var array
@@ -21,6 +30,13 @@ class Renderer {
 		'has_results'          => false,
 		'has_no_results_block' => false,
 	);
+
+	/**
+	 * Whether the current Product Collection is inside a Mini Cart.
+	 *
+	 * @var bool
+	 */
+	private $is_in_mini_cart = false;
 
 	/**
 	 * The Block with its attributes before it gets rendered
@@ -58,7 +74,7 @@ class Renderer {
 			1
 		);
 		add_filter( 'render_block_core/query-pagination', array( $this, 'add_navigation_link_directives' ), 10, 3 );
-		add_filter( 'render_block_context', array( $this, 'extend_context_for_inner_blocks' ), 11, 1 );
+		add_filter( 'render_block_context', array( $this, 'extend_context_for_inner_blocks' ), 11, 2 );
 	}
 
 	/**
@@ -81,7 +97,7 @@ class Renderer {
 	public function handle_rendering( $block_content, $block ) {
 		$query                  = $block['attrs']['query'] ?? array();
 		$product_reference_type = $query['productReferenceType'] ?? null;
-		$is_cart_reference      = 'cart' === $product_reference_type;
+		$is_cart_reference      = self::REFERENCE_TYPE_CART === $product_reference_type || $this->is_in_mini_cart;
 
 		if ( $this->should_prevent_render() ) {
 			// For cart-referencing collections (e.g., cross-sells in Mini Cart),
@@ -143,10 +159,11 @@ class Renderer {
 	 * Reset the render state.
 	 */
 	private function reset_render_state() {
-		$this->render_state = array(
+		$this->render_state    = array(
 			'has_results'          => false,
 			'has_no_results_block' => false,
 		);
+		$this->is_in_mini_cart = false;
 	}
 
 	/**
@@ -198,9 +215,10 @@ class Renderer {
 				// For cart-referencing collections, add callback to refresh on drawer open.
 				$query                  = $block['attrs']['query'] ?? array();
 				$product_reference_type = $query['productReferenceType'] ?? null;
-				if ( 'cart' === $product_reference_type ) {
+				$is_cart_reference      = self::REFERENCE_TYPE_CART === $product_reference_type || $this->is_in_mini_cart;
+				if ( $is_cart_reference ) {
 					wp_enqueue_script_module( 'woocommerce/product-collection-cross-sells' );
-					$p->set_attribute( 'data-product-reference-type', 'cart' );
+					$p->set_attribute( 'data-product-reference-type', self::REFERENCE_TYPE_CART );
 					$p->set_attribute( 'data-wp-watch--mini-cart', 'callbacks.onMiniCartOpen' );
 				}
 			}
@@ -383,7 +401,7 @@ class Renderer {
 	 *     }
 	 * }
 	 */
-	public function extend_context_for_inner_blocks( $context ) {
+	public function extend_context_for_inner_blocks( $context, $parsed_block = array() ) {
 		// Run only on frontend.
 		// This is needed to avoid SSR renders while in editor. @see https://github.com/woocommerce/woocommerce/issues/45181.
 		if ( is_admin() || \WC()->is_rest_api_request() ) {
@@ -393,18 +411,37 @@ class Renderer {
 		// Add iapi/provider to inner blocks so they can run this store's Interactivity API actions.
 		$context['iapi/provider'] = 'woocommerce/product-collection';
 
+		$block_name      = $parsed_block['blockName'] ?? '';
+		$is_in_mini_cart = ! empty( $context['woocommerce/miniCart'] );
+
+		if ( 'woocommerce/product-collection' === $block_name ) {
+			$this->is_in_mini_cart = $is_in_mini_cart;
+
+			// Set productCollectionLocation for the Product Collection block itself.
+			// Pass the block context so it can detect Mini Cart context.
+			$context['productCollectionLocation'] = ProductCollectionUtils::parse_frontend_location_context( $context );
+			return $context;
+		}
+
 		// Target only product collection's inner blocks that use the 'query' context.
 		if ( ! isset( $context['query'] ) || ! isset( $context['query']['isProductCollectionBlock'] ) || ! $context['query']['isProductCollectionBlock'] ) {
 			return $context;
 		}
 
-		$is_in_single_product                 = isset( $context['singleProduct'] ) && ! empty( $context['postId'] );
-		$context['productCollectionLocation'] = $is_in_single_product ? array(
-			'type'       => 'product',
-			'sourceData' => array(
-				'productId' => absint( $context['postId'] ),
-			),
-		) : $this->get_location_context();
+		// Check parent block contexts (in order of specificity).
+		$is_in_single_product = isset( $context['singleProduct'] ) && ! empty( $context['postId'] );
+
+		if ( $is_in_single_product ) {
+			$context['productCollectionLocation'] = array(
+				'type'       => self::REFERENCE_TYPE_PRODUCT,
+				'sourceData' => array(
+					'productId' => absint( $context['postId'] ),
+				),
+			);
+		} else {
+			// Pass block context for Mini Cart detection.
+			$context['productCollectionLocation'] = ProductCollectionUtils::parse_frontend_location_context( $context );
+		}
 
 		return $context;
 	}

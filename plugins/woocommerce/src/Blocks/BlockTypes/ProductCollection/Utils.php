@@ -92,12 +92,13 @@ class Utils {
 	 * - archive: [ 'taxonomy'   => string, 'termId' => int ]
 	 * - product: [ 'productId'  => int ]
 	 *
+	 * @param array $block_context Optional block context for detecting parent block contexts (e.g., Mini Cart).
 	 * @return array $context {
 	 *     @type string  $type        The context type. Possible values are 'site', 'order', 'cart', 'archive', 'product'.
 	 *     @type array   $sourceData  The context source data. Can be the product ID of the viewed product, the order ID of the current order, etc.
 	 * }
 	 */
-	public static function parse_frontend_location_context() {
+	public static function parse_frontend_location_context( $block_context = array() ) {
 		global $wp_query;
 
 		// Default context.
@@ -126,9 +127,10 @@ class Utils {
 			$current_page       = $wp_query->get_queried_object();
 			$has_cart_block     = $current_page && \WC_Blocks_Utils::has_block_in_page( $current_page, 'woocommerce/cart' );
 			$has_checkout_block = $current_page && \WC_Blocks_Utils::has_block_in_page( $current_page, 'woocommerce/checkout' );
+			$is_in_mini_cart    = ! empty( $block_context['woocommerce/miniCart'] );
 			$is_cart_available  = isset( WC()->cart ) && is_a( WC()->cart, 'WC_Cart' );
 
-			if ( ( $has_cart_block || $has_checkout_block || is_cart() || is_checkout() ) && $is_cart_available ) {
+			if ( ( $has_cart_block || $has_checkout_block || is_cart() || is_checkout() || $is_in_mini_cart ) && $is_cart_available ) {
 				$type  = 'cart';
 				$items = array();
 				foreach ( WC()->cart->get_cart() as $cart_item ) {

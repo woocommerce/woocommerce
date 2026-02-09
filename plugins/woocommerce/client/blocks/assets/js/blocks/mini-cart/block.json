@@ -7,6 +7,9 @@
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
 	"textdomain": "woocommerce",
+	"providesContext": {
+		"woocommerce/miniCart": "miniCart"
+	},
 	"supports": {
 		"html": false,
 		"multiple": false,
@@ -70,6 +73,10 @@
 		"productCountVisibility": {
 			"type": "string",
 			"default": "greater_than_zero"
+		},
+		"miniCart": {
+			"type": "boolean",
+			"default": true
 		}
 	},
 	"apiVersion": 3,
