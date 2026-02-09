@@ -77,6 +77,6 @@ Test your `changelog.txt` file to ensure that it meets [Woo Marketplace standard
 <summary>How can I add someone to help me manage my products?</summary>
 
 - We can add additional Vendor Admins to your profile at your request. Vendor Admins can assist with updating products and documentation as well as view sales reports, reviews, and feature requests.
-- To request another admin, [contact us via the link in your dashboard](https://woocommerce.com/wp-admin/admin.php?page=wcpv-vendor-support) or email partners@woocommerce.com using your current partner account email. Please first ensure that they have [created a WooCommerce.com account](https://woocommerce.com/sso?new=1&next=%2Fwoocommerce%2F) with [two-step authentication enabled](https://wordpress.com/support/security/two-step-authentication/).
+- To request another admin, [contact us via the link in your dashboard](https://woocommerce.com/wp-admin/admin.php?page=wcpv-vendor-support) or email [partners@woocommerce.com](mailto:partners@woocommerce.com) using your current partner account email. Please first ensure that they have [created a WooCommerce.com account](https://woocommerce.com/sso?new=1&next=%2Fwoocommerce%2F) with [two-step authentication enabled](https://wordpress.com/support/security/two-step-authentication/).
 
 </details>

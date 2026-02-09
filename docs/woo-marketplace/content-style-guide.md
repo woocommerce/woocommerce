@@ -162,7 +162,7 @@ Use the box shortcode to highlight important information. Available styles:
 
 For general tips and helpful information:
 
-```
+```plain
 [box]This extension requires WooCommerce 8.0 or higher.[/box]
 ```
 
@@ -172,7 +172,7 @@ Can be used with or without `style="info"`.
 
 For warnings or important notices:
 
-```
+```plain
 [box style="alert"]Backup your site before updating to the latest version.[/box]
 ```
 
@@ -180,7 +180,7 @@ For warnings or important notices:
 
 For critical warnings or known limitations:
 
-```
+```plain
 [box style="error"]This extension is not compatible with multisite installations.[/box]
 ```
 
@@ -188,7 +188,7 @@ For critical warnings or known limitations:
 
 For positive confirmations or best practices:
 
-```
+```plain
 [box style="success"]Your API credentials are securely encrypted and stored.[/box]
 ```
 

@@ -34,13 +34,13 @@ PHP 7.4 reached [End of Life](https://www.php.net/supported-versions.php) (EOL) 
 - Products must adhere to foundational guidelines outlined in our [developer hub](https://developer.woocommerce.com/).
 - If your pricing model is based on a standard, tiered monthly subscription, we require you to implement the [SaaS Billing API](https://woocommerce.com/document/billing-api-for-saas-products/). API keys and sandbox access are granted manually after products are submitted for Marketplace consideration.
 - Products must be able to pass the following [Quality Insights Toolkit](https://qit.woo.com/docs/) (QIT) tests:
-  - [API](https://qit.woo.com/docs/managed-tests/woo-api)
-  - [End-to-end](https://qit.woo.com/docs/managed-tests/woo-e2e) (E2E)
-  - [Activation](https://qit.woo.com/docs/managed-tests/activation)
-  - [Security](https://qit.woo.com/docs/managed-tests/security)
-  - [PHPCompatibility](https://qit.woo.com/docs/managed-tests/phpcompatibility)
-  - [Malware](https://qit.woo.com/docs/managed-tests/malware)
-  - [Validation](https://qit.woo.com/docs/managed-tests/validation)
+    - [API](https://qit.woo.com/docs/managed-tests/woo-api)
+    - [End-to-end](https://qit.woo.com/docs/managed-tests/woo-e2e) (E2E)
+    - [Activation](https://qit.woo.com/docs/managed-tests/activation)
+    - [Security](https://qit.woo.com/docs/managed-tests/security)
+    - [PHPCompatibility](https://qit.woo.com/docs/managed-tests/phpcompatibility)
+    - [Malware](https://qit.woo.com/docs/managed-tests/malware)
+    - [Validation](https://qit.woo.com/docs/managed-tests/validation)
 
 </details>
 
