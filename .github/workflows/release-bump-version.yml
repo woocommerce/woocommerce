@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       branch:
-        description: 'Release branch'
+        description: 'Release branch (e.g. "release/9.8" or just "9.8")'
         type: string
         required: true
         default: ''
@@ -20,7 +20,7 @@ on:
   workflow_call:
     inputs:
       branch:
-        description: Release branch
+        description: 'Release branch (e.g. "release/9.8" or just "9.8")'
         type: string
         required: true
       bump-type:
@@ -40,17 +40,37 @@ jobs:
     name: Bump WooCommerce Version
     runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     steps:
+      - name: Normalize branch input
+        id: normalize-branch
+        env:
+          INPUT_BRANCH: ${{ inputs.branch }}
+        run: |
+          branch="$INPUT_BRANCH"
+          if [[ "$branch" =~ ^[0-9]+\.[0-9]+$ ]]; then
+            branch="release/$branch"
+          fi
+          echo "branch=$branch" >> $GITHUB_OUTPUT
+
+          # Log inputs to console.
+          echo "Bumping version: branch=${branch}, bump-type=${{ inputs.bump-type }}"
+
+      - name: Verify branch exists
+        env:
+          BRANCH: ${{ steps.normalize-branch.outputs.branch }}
+        run: |
+          if ! git ls-remote --exit-code --heads https://github.com/${GITHUB_REPOSITORY} "$BRANCH" > /dev/null; then
+            echo "::error::Source branch '$BRANCH' does not exist."
+            exit 1
+          fi
+
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.branch }}
+          ref: ${{ steps.normalize-branch.outputs.branch }}
 
       - name: Get current version
         id: get-current-version
         run: |
-          # Log inputs to console.
-          echo "Bumping version: branch=${{ inputs.branch }}, bump-type=${{ inputs.bump-type }}"
-
           version=$( cat plugins/woocommerce/woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1 )
           echo "Current version: $version"
           echo "version=$version" >> $GITHUB_OUTPUT
@@ -60,7 +80,7 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const branch = `${{ inputs.branch }}`;
+            const branch = `${{ steps.normalize-branch.outputs.branch }}`;
             const bumpType = `${{ inputs.bump-type }}`;
             const currentVersion = '${{ steps.get-current-version.outputs.version }}';
 
@@ -227,9 +247,9 @@ jobs:
 
           # Create PR and capture URL.
           pr_url=$(gh pr create \
-            --title 'Bump WooCommerce version to `${{ steps.compute-new-version.outputs.nextVersion }}` on `${{ inputs.branch }}`' \
-            --body 'This PR updates the versions in ${{ inputs.branch }} to ${{ steps.compute-new-version.outputs.nextVersion }}.'$'\n\n''<!-- [x] This Pull Request does not require a changelog -->' \
-            --base ${{ inputs.branch }} \
+            --title 'Bump WooCommerce version to `${{ steps.compute-new-version.outputs.nextVersion }}` on `${{ steps.normalize-branch.outputs.branch }}`' \
+            --body 'This PR updates the versions in ${{ steps.normalize-branch.outputs.branch }} to ${{ steps.compute-new-version.outputs.nextVersion }}.'$'\n\n''<!-- [x] This Pull Request does not require a changelog -->' \
+            --base ${{ steps.normalize-branch.outputs.branch }} \
             --head ${branch_name} \
             --label Release \
             ${reviewer_arg} \
