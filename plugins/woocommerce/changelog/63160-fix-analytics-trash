@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixes a bug with analytics stock totals that included trashed products
