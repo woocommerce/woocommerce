@@ -23,8 +23,8 @@ To get started, please [submit your product](https://woocommerce.com/document/su
 
 The integration with the SaaS Billing API should be implemented and tested inside the sandbox, before being opened up for production usage. The differences between production and sandbox are the domain (sandbox.woocommerce.com) and the API credentials. Switching from sandbox to production should just be a matter of changing the domain name, API key and secret.
 
-**Sandbox domain:** <https://sandbox.woocommerce.com/>
-**Base URL for API on the sandbox:** <https://sandbox.woocommerce.com/wp-json/wccom/billing/1.0/>
+**Sandbox domain:** `https://sandbox.woocommerce.com/`
+**Base URL for API on the sandbox:** `https://sandbox.woocommerce.com/wp-json/wccom/billing/1.0/`
 
 ### Local Development
 
