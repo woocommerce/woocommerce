@@ -12,6 +12,16 @@ test.describe(
 
 		const visibilityOptions = { timeout: 30000 };
 
+		async function checkIfPayPalIsEnabled( paypalDiv ) {
+			const labelActive = paypalDiv.getByText( 'Active' );
+			const labelTestAccount = paypalDiv.getByText( 'Test account' );
+
+			// Confirm the status label is present with any of the expected texts.
+			await expect( labelActive.or( labelTestAccount ) ).toBeVisible(
+				visibilityOptions
+			);
+		}
+
 		async function openWCSettings( page ) {
 			await page.goto( '/wp-admin/index.php', {
 				// networkidle is needed to ensure all JS files are loaded and avoid race conditions
@@ -62,6 +72,12 @@ test.describe(
 
 			const paypalDiv = await waitForPayPalToLoad( page );
 
+			if ( await checkIfPayPalIsEnabled( paypalDiv ) ) {
+				test.skip(
+					'PayPal Standard is already enabled, skipping enablement test.'
+				);
+			}
+
 			await test.step( 'Enable PayPal Standard', async () => {
 				const enableLink = paypalDiv.getByRole( 'link', {
 					name: 'Enable',
@@ -70,13 +86,7 @@ test.describe(
 				await enableLink.click();
 			} );
 
-			const labelActive = paypalDiv.getByText( 'Active' );
-			const labelTestAccount = paypalDiv.getByText( 'Test account' );
-
-			// Confirm the status label is present with any of the expected texts.
-			await expect( labelActive.or( labelTestAccount ) ).toBeVisible(
-				visibilityOptions
-			);
+			await checkIfPayPalIsEnabled( paypalDiv );
 
 			// Clean up by disabling PayPal again.
 			await test.step( 'Disable PayPal Standard', async () => {
