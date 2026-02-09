@@ -237,6 +237,8 @@ class WC_Structured_Data {
 				$lowest  = $product->get_variation_price( 'min', true );
 				$highest = $product->get_variation_price( 'max', true );
 
+				$variation_prices = $product->get_variation_prices( true );
+
 				if ( $lowest === $highest ) {
 					$markup_offer = array(
 						'@type'              => 'Offer',
@@ -255,12 +257,12 @@ class WC_Structured_Data {
 						'@type'      => 'AggregateOffer',
 						'lowPrice'   => wc_format_decimal( $lowest, wc_get_price_decimals() ),
 						'highPrice'  => wc_format_decimal( $highest, wc_get_price_decimals() ),
-						'offerCount' => count( $product->get_variation_prices()['price'] ),
+						'offerCount' => count( $variation_prices['price'] ),
 					);
 
 					if ( $product->is_on_sale() ) {
 						$lowest_child_sale_price = $product->get_variation_sale_price( 'min', true );
-						foreach ( $product->get_variation_prices()['sale_price'] as $variation_id => $variation_price ) {
+						foreach ( $variation_prices['sale_price'] as $variation_id => $variation_price ) {
 							if ( $variation_price === $lowest_child_sale_price ) {
 								break;
 							}
