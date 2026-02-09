@@ -1293,18 +1293,88 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	}
 
 	/**
+	 * Parse short info JSON into an array of coupon properties without validation.
+	 *
+	 * @param string $info JSON string as returned by 'get_short_info'.
+	 * @return array {
+	 *     Parsed coupon properties.
+	 *
+	 *     `@type` int    $id            Coupon ID.
+	 *     `@type` string $code          Coupon code.
+	 *     `@type` string $discount_type Discount type ('fixed_cart', 'percent', etc.).
+	 *     `@type` float  $amount        Discount amount.
+	 *     `@type` bool   $free_shipping Whether free shipping is enabled.
+	 * }
+	 */
+	private static function parse_short_info( string $info ): array {
+		$data = json_decode( $info, true );
+
+		if ( ! is_array( $data ) ) {
+			$data = array();
+		}
+
+		return array(
+			'id'            => $data[0] ?? 0,
+			'code'          => $data[1] ?? '',
+			'discount_type' => $data[2] ?? 'fixed_cart',
+			'amount'        => (float) ( $data[3] ?? 0 ),
+			'free_shipping' => (bool) ( $data[4] ?? false ),
+		);
+	}
+
+	/**
 	 * Sets the coupon parameters from a reapply information set generated with 'get_short_info'.
 	 *
 	 * @param string $info JSON string with reapply information as returned by 'get_short_info'.
 	 */
 	public function set_short_info( string $info ) {
-		$info = json_decode( $info, true );
+		$data = self::parse_short_info( $info );
 
-		$this->set_id( $info[0] ?? 0 );
-		$this->set_code( $info[1] ?? '' );
-		$this->set_discount_type_core( $info[2] ?? 'fixed_cart', false );
-		$this->set_amount( $info[3] ?? 0 );
-		$this->set_free_shipping( $info[4] ?? false );
+		$this->set_id( $data['id'] );
+		$this->set_code( $data['code'] );
+		$this->set_discount_type_core( $data['discount_type'], false );
+		$this->set_amount( $data['amount'] );
+		$this->set_free_shipping( $data['free_shipping'] );
+	}
+
+	/**
+	 * Create a WC_Coupon instance from an order's coupon line item without validation.
+	 *
+	 * This is useful for read-only contexts (e.g., REST API responses) where the stored
+	 * data should be returned even if it contains invalid values.
+	 *
+	 * @since 10.6.0
+	 *
+	 * @param \WC_Order_Item_Coupon $order_item The coupon line item from an order.
+	 * @return self A WC_Coupon instance populated with the stored data.
+	 */
+	public static function from_order_item( \WC_Order_Item_Coupon $order_item ): self {
+		$coupon_info = $order_item->get_meta( 'coupon_info', true );
+		if ( is_string( $coupon_info ) && '' !== $coupon_info ) {
+			$data = self::parse_short_info( $coupon_info );
+		} else {
+			$coupon_meta = $order_item->get_meta( 'coupon_data', true );
+			if ( is_object( $coupon_meta ) || is_array( $coupon_meta ) ) {
+				$coupon_meta = (array) $coupon_meta;
+				$data        = array(
+					'id'            => 0,
+					'code'          => '',
+					'discount_type' => $coupon_meta['discount_type'] ?? 'fixed_cart',
+					'amount'        => (float) ( $coupon_meta['amount'] ?? 0 ),
+					'free_shipping' => (bool) ( $coupon_meta['free_shipping'] ?? false ),
+				);
+			} else {
+				return new self();
+			}
+		}
+
+		$coupon = new self();
+		$coupon->set_id( $data['id'] );
+		$coupon->set_code( $data['code'] );
+		$coupon->set_discount_type_core( $data['discount_type'], false );
+		$coupon->set_prop( 'amount', $data['amount'] );
+		$coupon->set_free_shipping( $data['free_shipping'] );
+		return $coupon;
 	}
 
 	/**
