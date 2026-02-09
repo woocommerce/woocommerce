@@ -11,7 +11,7 @@ final class WC_Admin_Reports_Test extends WC_Unit_Test_Case {
 	 */
 	public function test_delete_legacy_reports_transients(): void {
 		// Verify the integration point invocation.
-		$this->assertTrue( has_action( 'woocommerce_delete_shop_order_transients', array( \WC_Admin_Reports::class, 'delete_legacy_reports_transients' ), 10 ) );
+		$this->assertSame( 10, has_action( 'woocommerce_delete_shop_order_transients', array( \WC_Admin_Reports::class, 'delete_legacy_reports_transients' ) ) );
 		$this->assertTrue( has_action( 'woocommerce_delete_legacy_report_transients' ) );
 
 		// Cleanup.
