@@ -407,12 +407,13 @@ function wc_clean( $var ) {
         return array_map( 'wc_clean', $var );
     }
 
-    if ( is_object( $var ) || is_bool( $var ) || is_null( $var ) ) {
+    if ( ! is_scalar( $var ) ) {
         return '';
     }
 
-    return is_scalar( $var ) ? sanitize_text_field( $var ) : $var;
+    return sanitize_text_field( $var );
 }
+
 
 /**
  * Function wp_check_invalid_utf8 with recursive array support.
