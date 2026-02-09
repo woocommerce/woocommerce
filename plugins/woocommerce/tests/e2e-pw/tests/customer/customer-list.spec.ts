@@ -71,11 +71,18 @@ const test = baseTest.extend( {
 			},
 		};
 
-		const customers = [];
+		interface Customer {
+			id: number;
+			first_name: string;
+			last_name: string;
+			email: string;
+		}
+
+		const customers: Customer[] = [];
 
 		for ( const customer of Object.values( customerData ) ) {
 			await restApi
-				.post( `${ WC_API_PATH }/customers`, customer )
+				.post< Customer >( `${ WC_API_PATH }/customers`, customer )
 				.then( ( response ) => {
 					customers.push( response.data );
 				} );
