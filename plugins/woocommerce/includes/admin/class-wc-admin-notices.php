@@ -56,6 +56,8 @@ class WC_Admin_Notices {
 
 	/**
 	 * Initializes the class.
+	 *
+	 * @return void
 	 */
 	public static function init() {
 		self::$is_multisite = is_multisite();
@@ -94,6 +96,8 @@ class WC_Admin_Notices {
 
 	/**
 	 * Store the locally cached notices to DB.
+	 *
+	 * @return void
 	 */
 	public static function store_notices() {
 		$current_notices = self::get_notices();
@@ -136,6 +140,7 @@ class WC_Admin_Notices {
 	 * Set the locally cached notices array for the current site.
 	 *
 	 * @param array $notices New value for the locally cached notices array.
+	 * @return void
 	 */
 	private static function set_notices( array $notices ) {
 		if ( self::$is_multisite ) {
@@ -147,6 +152,8 @@ class WC_Admin_Notices {
 
 	/**
 	 * Remove all notices from the locally cached notices array.
+	 *
+	 * @return void
 	 */
 	public static function remove_all_notices() {
 		self::set_notices( array() );
@@ -154,6 +161,8 @@ class WC_Admin_Notices {
 
 	/**
 	 * Reset notices for themes when switched or a new version of WC is installed.
+	 *
+	 * @return void
 	 */
 	public static function reset_admin_notices() {
 		if ( ! self::is_ssl() ) {
@@ -171,6 +180,8 @@ class WC_Admin_Notices {
 	/**
 	 * Add an admin notice about unsupported webhooks with Legacy API payload if at least one of these exist
 	 * and the Legacy REST API plugin is not installed.
+	 *
+	 * @return void
 	 */
 	private static function maybe_add_legacy_api_removal_notice() {
 		if ( wc_get_container()->get( WebhookUtil::class )->get_legacy_webhooks_count() > 0 && ! WC()->legacy_rest_api_is_available() ) {
@@ -198,6 +209,7 @@ class WC_Admin_Notices {
 	 * Remove the admin notice about the unsupported webhooks if the Legacy REST API plugin is installed.
 	 *
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 * @return void
 	 */
 	public static function maybe_remove_legacy_api_removal_notice() {
 		if ( self::has_notice( 'legacy_webhooks_unsupported_in_woo_90' ) && ( WC()->legacy_rest_api_is_available() || 0 === wc_get_container()->get( WebhookUtil::class )->get_legacy_webhooks_count() ) ) {
@@ -210,6 +222,7 @@ class WC_Admin_Notices {
 	 *
 	 * @param string $name Notice name.
 	 * @param bool   $force_save Force saving inside this method instead of at the 'shutdown'.
+	 * @return void
 	 */
 	public static function add_notice( $name, $force_save = false ) {
 		self::set_notices( array_unique( array_merge( self::get_notices(), array( $name ) ) ) );
@@ -225,6 +238,7 @@ class WC_Admin_Notices {
 	 *
 	 * @param string $name Notice name.
 	 * @param bool   $force_save Force saving inside this method instead of at the 'shutdown'.
+	 * @return void
 	 */
 	public static function remove_notice( $name, $force_save = false ) {
 		if ( self::has_notice( $name ) ) {
@@ -272,6 +286,8 @@ class WC_Admin_Notices {
 
 	/**
 	 * Hide a notice if the GET variable is set.
+	 *
+	 * @return void
 	 */
 	public static function hide_notices() {
 		if ( isset( $_GET['wc-hide-notice'] ) && isset( $_GET['_wc_notice_nonce'] ) ) {
@@ -303,6 +319,7 @@ class WC_Admin_Notices {
 	 * Hide a single notice.
 	 *
 	 * @param string $name Notice name.
+	 * @return void
 	 */
 	private static function hide_notice( $name ) {
 		self::remove_notice( $name );
@@ -327,6 +344,8 @@ class WC_Admin_Notices {
 
 	/**
 	 * Add notices + styles if needed.
+	 *
+	 * @return void
 	 */
 	public static function add_notices() {
 		$notices = self::get_notices();
@@ -368,6 +387,7 @@ class WC_Admin_Notices {
 	 *
 	 * @param string $name        Notice name.
 	 * @param string $notice_html Notice HTML.
+	 * @return void
 	 */
 	public static function add_custom_notice( $name, $notice_html ) {
 		self::add_notice( $name );
@@ -376,6 +396,8 @@ class WC_Admin_Notices {
 
 	/**
 	 * Output any stored custom notices.
+	 *
+	 * @return void
 	 */
 	public static function output_custom_notices() {
 		$notices = self::get_notices();
@@ -395,6 +417,8 @@ class WC_Admin_Notices {
 
 	/**
 	 * If we need to update the database, include a message with the DB update button.
+	 *
+	 * @return void
 	 */
 	public static function update_notice() {
 		$screen    = get_current_screen();
@@ -421,6 +445,7 @@ class WC_Admin_Notices {
 	 * If we have just installed, show a message with the install pages button.
 	 *
 	 * @deprecated 4.6.0
+	 * @return void
 	 */
 	public static function install_notice() {
 		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.6.0', esc_html__( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
@@ -428,6 +453,8 @@ class WC_Admin_Notices {
 
 	/**
 	 * Show a notice highlighting bad template files.
+	 *
+	 * @return void
 	 */
 	public static function template_file_check_notice() {
 		$core_templates = WC_Admin_Status::scan_template_files( WC()->plugin_path() . '/templates' );
@@ -468,6 +495,7 @@ class WC_Admin_Notices {
 	 * Show a notice asking users to convert to shipping zones.
 	 *
 	 * @todo remove in 4.0.0
+	 * @return void
 	 */
 	public static function legacy_shipping_notice() {
 		$maybe_load_legacy_methods = array( 'flat_rate', 'free_shipping', 'international_delivery', 'local_delivery', 'local_pickup' );
@@ -489,6 +517,8 @@ class WC_Admin_Notices {
 
 	/**
 	 * No shipping methods.
+	 *
+	 * @return void
 	 */
 	public static function no_shipping_methods_notice() {
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -508,6 +538,8 @@ class WC_Admin_Notices {
 
 	/**
 	 * Notice shown when regenerating thumbnails background process is running.
+	 *
+	 * @return void
 	 */
 	public static function regenerating_thumbnails_notice() {
 		include __DIR__ . '/views/html-notice-regenerating-thumbnails.php';
@@ -515,6 +547,8 @@ class WC_Admin_Notices {
 
 	/**
 	 * Notice about secure connection.
+	 *
+	 * @return void
 	 */
 	public static function secure_connection_notice() {
 		if ( self::is_ssl() || get_user_meta( get_current_user_id(), 'dismissed_no_secure_connection_notice', true ) ) {
@@ -528,6 +562,7 @@ class WC_Admin_Notices {
 	 * Notice shown when regenerating thumbnails background process is running.
 	 *
 	 * @since 3.6.0
+	 * @return void
 	 */
 	public static function regenerating_lookup_table_notice() {
 		// See if this is still relevant.
@@ -543,6 +578,7 @@ class WC_Admin_Notices {
 	 * Add notice about minimum PHP and WordPress requirement.
 	 *
 	 * @since 3.6.5
+	 * @return void
 	 */
 	public static function add_min_version_notice() {
 		if ( version_compare( phpversion(), WC_NOTICE_MIN_PHP_VERSION, '<' ) || version_compare( get_bloginfo( 'version' ), WC_NOTICE_MIN_WP_VERSION, '<' ) ) {
@@ -565,6 +601,7 @@ class WC_Admin_Notices {
 	 * Add MaxMind missing license key notice.
 	 *
 	 * @since 3.9.0
+	 * @return void
 	 */
 	public static function add_maxmind_missing_license_key_notice() {
 		$default_address = get_option( 'woocommerce_default_customer_address' );
@@ -582,6 +619,8 @@ class WC_Admin_Notices {
 
 	/**
 	 *  Add notice about Redirect-only download method, nudging user to switch to a different method instead.
+	 *
+	 * @return void
 	 */
 	public static function add_redirect_download_method_notice() {
 		if ( 'redirect' === get_option( 'woocommerce_file_download_method' ) ) {
@@ -593,6 +632,8 @@ class WC_Admin_Notices {
 
 	/**
 	 * Notice about the completion of the product downloads sync, with further advice for the site operator.
+	 *
+	 * @return void
 	 */
 	public static function download_directories_sync_complete() {
 		$notice_dismissed = apply_filters(
@@ -613,6 +654,7 @@ class WC_Admin_Notices {
 	 * Display MaxMind missing license key notice.
 	 *
 	 * @since 3.9.0
+	 * @return void
 	 */
 	public static function maxmind_missing_license_key_notice() {
 		$user_dismissed_notice   = get_user_meta( get_current_user_id(), 'dismissed_maxmind_license_key_notice', true );
@@ -630,6 +672,7 @@ class WC_Admin_Notices {
 	 * Notice about Redirect-Only download method.
 	 *
 	 * @since 4.0
+	 * @return void
 	 */
 	public static function redirect_download_method_notice() {
 		if ( apply_filters( 'woocommerce_hide_redirect_method_nag', get_user_meta( get_current_user_id(), 'dismissed_redirect_download_method_notice', true ) ) ) {
@@ -644,6 +687,7 @@ class WC_Admin_Notices {
 	 * Notice about uploads directory begin unprotected.
 	 *
 	 * @since 4.2.0
+	 * @return void
 	 */
 	public static function uploads_directory_is_unprotected_notice() {
 		if ( get_user_meta( get_current_user_id(), 'dismissed_uploads_directory_is_unprotected_notice', true ) || self::is_uploads_directory_protected() ) {
@@ -656,6 +700,8 @@ class WC_Admin_Notices {
 
 	/**
 	 * Notice about base tables missing.
+	 *
+	 * @return void
 	 */
 	public static function base_tables_missing_notice() {
 		$notice_dismissed = apply_filters(
@@ -698,6 +744,7 @@ class WC_Admin_Notices {
 	 * Simplify Commerce is no longer in core.
 	 *
 	 * @deprecated 3.6.0 No longer shown.
+	 * @return void
 	 */
 	public static function simplify_commerce_notice() {
 		wc_deprecated_function( 'WC_Admin_Notices::simplify_commerce_notice', '3.6.0' );
@@ -707,6 +754,7 @@ class WC_Admin_Notices {
 	 * Show the Theme Check notice.
 	 *
 	 * @deprecated 3.3.0 No longer shown.
+	 * @return void
 	 */
 	public static function theme_check_notice() {
 		wc_deprecated_function( 'WC_Admin_Notices::theme_check_notice', '3.3.0' );

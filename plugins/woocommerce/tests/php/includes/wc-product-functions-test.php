@@ -556,4 +556,39 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		wp_delete_term( $root2_term['term_id'], 'product_cat' );
 		wp_delete_term( $root1_term['term_id'], 'product_cat' );
 	}
+
+	/**
+	 * @testdox Product permalink skips category processing when permalink structure has no category placeholders.
+	 */
+	public function test_wc_product_post_type_link_skips_category_when_not_in_permalink() {
+		// Create a category to ensure it's not fetched unnecessarily.
+		$category_term = wp_insert_term( 'Test Category', 'product_cat' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		wp_set_object_terms( $product->get_id(), array( $category_term['term_id'] ), 'product_cat' );
+
+		$product_post = get_post( $product->get_id() );
+
+		// Test with %post_id% placeholder but no category placeholder.
+		$permalink = wc_product_post_type_link( '/product/%post_id%/' . $product_post->post_name . '/', $product_post );
+
+		$this->assertStringContainsString(
+			'/product/' . $product->get_id() . '/',
+			$permalink,
+			'Permalink should have the post ID replaced'
+		);
+		$this->assertStringNotContainsString(
+			'%post_id%',
+			$permalink,
+			'Permalink should not contain unreplaced %post_id% placeholder'
+		);
+		$this->assertStringNotContainsString(
+			'%category%',
+			$permalink,
+			'Permalink should not contain %category% placeholder'
+		);
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+		wp_delete_term( $category_term['term_id'], 'product_cat' );
+	}
 }
