@@ -33,6 +33,9 @@ class WC_Admin_Reports {
 
 	/**
 	 * Register the hook handlers for integrating with orders.
+	 *
+	 * @internal
+	 * @since 10.6.0
 	 */
 	public static function register_orders_hook_handlers(): void {
 		add_action( 'woocommerce_delete_shop_order_transients', array( __CLASS__, 'delete_legacy_reports_transients' ), 10, 1 );
@@ -42,7 +45,10 @@ class WC_Admin_Reports {
 	/**
 	 * Execute legacy reports transient deletion (sync or async depending on the context)
 	 *
-	 * @param int  $order_id Order ID (unused, future placeholder).
+	 * @internal
+	 * @since 10.6.0
+	 *
+	 * @param int  $order_id Order ID (unused, exists for compatibility between the hooks we are integrating with).
 	 * @param bool $defer    Whether to defer the deletion or execute.
 	 * @return void
 	 */
