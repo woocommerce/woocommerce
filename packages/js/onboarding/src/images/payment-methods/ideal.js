@@ -6,10 +6,10 @@ import { createElement } from '@wordpress/element';
 export default () => (
 	<svg
 		xmlns="http://www.w3.org/2000/svg"
-		width="40"
-		height="18"
+		width="38"
+		height="24"
 		fill="none"
-		viewBox="0 0 480 182"
+		viewBox="0 -61 480 304"
 	>
 		<defs>
 			<linearGradient
@@ -37,7 +37,7 @@ export default () => (
 				<stop offset=".68" stopColor="#1d1c1c" />
 			</linearGradient>
 		</defs>
-		<rect fill="#fff48d" x="0" width="480" height="182" rx="13" ry="13" />
+		<rect fill="#fff48d" x="0" y="-61" width="480" height="304" rx="13" ry="13" />
 		<g>
 			<path
 				fill="#fff"
