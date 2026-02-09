@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\CLIRunner as Cus
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\CLIRunner as ProductAttributesLookupCLIRunner;
 use Automattic\WooCommerce\Internal\Integrations\WPPostsImporter;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
+use Automattic\WooCommerce\Internal\CLI\FileManifestCommand;
 use Automattic\WooCommerce\Internal\CLI\Migrator\Runner;
 
 defined( 'ABSPATH' ) || exit;
@@ -73,6 +74,8 @@ class WC_CLI {
 		WP_CLI::add_hook( 'after_wp_load', array( $cli_runner, 'register_commands' ) );
 		$cli_runner = wc_get_container()->get( ProductAttributesLookupCLIRunner::class );
 		WP_CLI::add_hook( 'after_wp_load', fn() => \WP_CLI::add_command( 'wc palt', $cli_runner ) );
+		$cli_runner = wc_get_container()->get( FileManifestCommand::class );
+		WP_CLI::add_hook( 'after_wp_load', array( $cli_runner, 'register_commands' ) );		
 	}
 
 	/**
