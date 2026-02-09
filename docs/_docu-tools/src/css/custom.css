@@ -11,7 +11,7 @@
 
 @font-face {
   font-family: 'Proxima Vara';
-  src: url('/fonts/ProximaVara.woff2') format('woff2');
+  src: url('https://developer.woocommerce.com/wp-content/uploads/sites/2/fonts/Proxima-Nova-Bold.otf') format('opentype');
   font-display: swap;
 }
 
