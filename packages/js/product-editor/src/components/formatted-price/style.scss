@@ -1,0 +1,10 @@
+.woocommerce-product-formatted-price {
+	display: flex;
+	align-items: center;
+	gap: 1ch;
+
+	&--on-sale {
+		color: $gray-600;
+		text-decoration: line-through;
+	}
+}

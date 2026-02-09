@@ -1,0 +1,12 @@
+{
+	"compilerOptions": {
+		"rootDir": "src",
+		"outDir": "dist",
+		"target": "esnext",
+		"module": "commonjs",
+		"esModuleInterop": true,
+		"moduleResolution": "node",
+		"skipLibCheck": true,
+		"typeRoots": [ "./node_modules/@types", "./node_modules/@commander-js" ]
+	}
+}

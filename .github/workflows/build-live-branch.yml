@@ -1,0 +1,96 @@
+name: Build live branch when trunk updated
+on:
+    push:
+        branches:
+            - trunk
+        paths-ignore:
+            - 'docs/**'
+            - 'packages/php/**'
+            - 'tools/**'
+            - '**/changelog/**'
+            - '**/changelog.txt'
+            - '**/readme.txt'
+            - '.gitignore'
+            - '.coderabbit.yml'
+            - 'CODEOWNERS'
+            - '**/tests/**'
+            - '**/*.md'
+            - '.husky/**'
+            - '.cursor/**'
+            - '.github/**'
+            - '!.github/workflows/build-live-branch.yml'
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+    build:
+        if: github.repository_owner == 'woocommerce' && github.actor != 'github-actions[bot]'
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Get current version
+              id: version
+              run: |
+                  current_version=$( cat plugins/woocommerce/woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1 )
+                  echo "Detected version: $current_version"
+                  echo "version=$current_version" >> $GITHUB_OUTPUT
+
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                pull-package-deps: '@woocommerce/plugin-woocommerce'
+
+            - name: Prepare plugin zips
+              id: prepare
+              env:
+                  CURRENT_VERSION: ${{ steps.version.outputs.version }}
+              run: |
+
+                  # Current version must compare greater than any previously used current version for this PR.
+                  # Assume GH run IDs are monotonic.
+                  VERSUFFIX="${GITHUB_RUN_ID}-g$(git rev-parse --short HEAD)"
+
+                  CURRENT_VERSION="$CURRENT_VERSION-$VERSUFFIX"
+
+                  sed -i -e 's/Version: .*$/Version: '"$CURRENT_VERSION"'/' "$GITHUB_WORKSPACE/plugins/woocommerce/woocommerce.php"
+                  echo "$CURRENT_VERSION" > "$GITHUB_WORKSPACE/plugins/woocommerce/version.txt"
+
+                  cd "$GITHUB_WORKSPACE/plugins/woocommerce"
+                  PLUGIN_SLUG='woocommerce-dev' bash bin/build-zip.sh
+
+                  mkdir "$GITHUB_WORKSPACE/zips"
+                  mv "$GITHUB_WORKSPACE/plugins/woocommerce/woocommerce-dev.zip" "$GITHUB_WORKSPACE/zips/woocommerce-dev.zip"
+
+                  # Plugin data is passed as a JSON object.
+                  PLUGIN_DATA="{}"          
+                  PLUGIN_DATA=$( jq -c --arg slug "woocommerce" --arg ver "$CURRENT_VERSION" '.[ $slug ] = { version: $ver }' <<<"$PLUGIN_DATA" )
+                  echo "plugin-data=$PLUGIN_DATA" >> $GITHUB_OUTPUT
+
+            - name: Create plugins artifact
+              uses: actions/upload-artifact@v4
+              if: steps.prepare.outputs.plugin-data != '{}'
+              with:
+                  name: plugins
+                  path: zips
+                  # Only need to retain for a day since the beta builder slurps it up to distribute.
+                  retention-days: 1
+
+            - name: Inform Beta Download webhook
+              if: steps.prepare.outputs.plugin-data != '{}'
+              env:
+                  SECRET: ${{ secrets.WOOBETA_SECRET }}
+                  PLUGIN_DATA: ${{ steps.prepare.outputs.plugin-data }}
+              run: |
+                  curl -v --fail -L \
+                    --url "https://betadownload.jetpack.me/gh-action.php?run_id=$GITHUB_RUN_ID&commit=$GITHUB_SHA" \
+                    --form-string "repo=$GITHUB_REPOSITORY" \
+                    --form-string "branch=${GITHUB_REF#refs/heads/}" \
+                    --form-string "plugins=$PLUGIN_DATA" \
+                    --form-string "secret=$SECRET"

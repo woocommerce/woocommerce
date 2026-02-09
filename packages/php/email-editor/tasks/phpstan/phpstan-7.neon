@@ -1,0 +1,14 @@
+# Use the main phpstan config
+includes:
+	- phpstan.neon
+
+# Rewrite tested PHP version
+parameters:
+	phpVersion: 70400
+
+	# Ignore specific errors
+	ignoreErrors:
+		- # str_starts_with is not available in PHP 7.4. but polyfilled in core.
+			message: '#^Function str_starts_with not found\.$#'
+		- # str_ends_with is not available in PHP 7.4. but polyfilled in core.
+			message: '#^Function str_ends_with not found\.$#'

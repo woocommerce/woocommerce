@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix crash when switching between product variations

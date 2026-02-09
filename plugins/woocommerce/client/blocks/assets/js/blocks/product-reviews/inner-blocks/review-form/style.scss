@@ -1,0 +1,119 @@
+// Allow these default styles to be overridden by global styles.
+:where(.wp-block-woocommerce-product-review-form) {
+	textarea,
+	input:not([type="submit"]) {
+		border: 1px solid $gray-600;
+		font-size: 1em;
+		font-family: inherit;
+	}
+
+	textarea,
+	input:where(:not([type="submit"]):not([type="checkbox"])) {
+		padding: calc(
+			0.667em + 2px
+		); // The extra 2px is added to match outline buttons.
+	}
+
+	:where(.comment-form-rating button.is-hovered path),
+	:where(.comment-form-rating button.is-selected path) {
+		fill: currentColor;
+	}
+}
+
+.wp-block-woocommerce-product-review-form {
+	// This block has customizable padding, border-box makes that more predictable.
+	box-sizing: border-box;
+
+	&[style*="font-weight"].comment-respond :where(.comment-reply-title) {
+		font-weight: inherit;
+	}
+	&[style*="font-family"].comment-respond :where(.comment-reply-title) {
+		font-family: inherit;
+	}
+	&[class*="-font-size"].comment-respond :where(.comment-reply-title),
+	&[style*="font-size"].comment-respond :where(.comment-reply-title) {
+		font-size: inherit;
+	}
+	&[style*="line-height"].comment-respond :where(.comment-reply-title) {
+		line-height: inherit;
+	}
+	&[style*="font-style"].comment-respond :where(.comment-reply-title) {
+		font-style: inherit;
+	}
+	&[style*="letter-spacing"].comment-respond :where(.comment-reply-title) {
+		letter-spacing: inherit;
+	}
+
+	// Styles copied from button block styles.
+	:where(input[type="submit"]) {
+		box-shadow: none;
+		cursor: pointer;
+		display: inline-block;
+		text-align: center;
+		overflow-wrap: break-word;
+	}
+
+	.review-form {
+		textarea,
+		// Make sure to not set display block on hidden input fields, to prevent
+		// the Safari bug experienced in https://github.com/WordPress/gutenberg/issues/50830
+		input:not([type="submit"]):not([type="checkbox"]):not([type="hidden"]) {
+			display: block;
+			box-sizing: border-box;
+			width: 100%;
+		}
+	}
+
+	textarea[name="comment"]:focus {
+		outline-offset: -2px;
+	}
+
+	.comment-form-author,
+	.comment-form-email,
+	.comment-form-url {
+		label {
+			display: block;
+			margin-bottom: 0.25em;
+		}
+	}
+
+	.comment-form-cookies-consent {
+		display: flex;
+		gap: 0.25em;
+
+		#wp-comment-cookies-consent {
+			margin-top: 0.35em;
+		}
+	}
+
+	.comment-reply-title {
+		font-size: var(--wp--preset--font-size--medium);
+		font-weight: 700;
+		margin-bottom: 0;
+	}
+
+	.comment-form-rating {
+		select {
+			margin-left: 0.5em;
+		}
+		button {
+			appearance: none;
+			border: none;
+			background: transparent;
+			padding: 0 1px;
+			cursor: pointer;
+		}
+		.stars-wrapper:not([hidden]) {
+			display: flex;
+			align-items: center;
+			gap: $gap;
+		}
+		.stars {
+			display: flex;
+			align-items: center;
+			svg {
+				display: block;
+			}
+		}
+	}
+}

@@ -1,0 +1,153 @@
+*** WooCommerce Beta Tester Changelog ***
+
+2025-02-20 - version 3.0.0
+* Patch - Fix warnings on the Plugins page when a plugin requires another plugin
+* Patch - Add tab navigation with URL state management in WooCommerce Admin Test Helper
+* Patch - Change remote logging event level from critical to info
+* Patch - Enhance live branches API with permission checks to allow install desired WC version without WC exists
+* Patch - Update links to download WooCommerce Beta Tester
+* Minor - Bump @wordpress/env to 10.14.0 and remove patch for 10.10.0
+* Patch - Bump @wordpress/env to 10.17.0
+* Minor - Fix TS errors and re-enable type checking
+* Minor - Monorepo: bump pnpm version to 9.15.0
+* Major [ **BREAKING CHANGE** ] - Updated declared dependencies to React 18 and Wordpress 6.6
+* Patch - Update import of OPTIONS_STORE_NAME to optionsStore
+* Patch - Update orders store import to use ordersStore from @woocommerce/data
+* Patch - Update wireit to 0.14.10
+* Minor - Upgraded Typescript in the monorepo to 5.7.2
+* Minor - Split JS into multiple chunks to avoid loading on every admin page.
+
+2024-11-26 - version 2.5.1
+* Patch - Fix wc plugin file path
+* Patch - Add coming soon newsletter feature flag
+* Patch - Update WC Admin Test Helper's Reset Onboarding Wizard tool
+* Patch - Monorepo: bump and patch wp-env to reduce amount of crashes in CI.
+* Patch - Stabilize JS dependency updates
+
+2024-10-21 - version 2.5.0
+* Patch - Flush cache after deleting option and resetting PHP rate limit
+* Minor - Add a tool to simulate server problems with woocommerce.com
+* Minor - Add fake WooPayments completion tool
+* Minor - Add set woocom base url tool
+* Minor - Add tool to reset "Launch your store" and coming soon mode changes
+* Patch - Add WCPay test order meta data
+* Patch - Deprecate unsupported Inbox note banner layout
+* Patch - Remove "banner" layout option from inbox note
+* Patch - Update Fake_WCPayments is_account_partially_onboarded to return false
+* Patch - Update remote logger tool to toggle remote logging feature properly
+* Minor - CYS - Move the "ai/patterns" endpoint to woocommerce admin API.
+* Patch - Fix pnpm version to 9.1.3 to avoid dependency installation issues.
+* Patch - Monorepo: consolidate syncpack config around React 17/18 usage.
+* Patch - Set remote-logging context to true in log remote event method
+* Patch - Improve remote logging tool to simulate core error early in the request lifecycle before wp fully loaded
+
+2024-08-08 - version 2.4.0
+* Patch - Changed from using React.render to React.createRoot for wc beta tester as it has been deprecated since React 18
+* Minor - Fix "Creation of dynamic property WC_Beta_Tester::$wporg_data is deprecated" on PHP 8.2
+* Patch - Add reactify-classic-payments-settings feature flag
+* Minor - Add remote logging tool
+* Minor - Add tool to force the coming soon landing pages to display on the front-end
+* Minor - Product Editor Dev Tools: Improve expression evaluation tooling support.
+* Patch - Minor tooling tweaks (zip compression level, composer invocation)
+* Patch - Monorepo: minor tweaks in zip building script (use frozen lock file when installing dependecies).
+* Patch - Monorepo: tweak Webpack loaders paths filtering for better build perfromance.
+* Patch - Whitelist line with maybe_unserialize() function call from QIT security tests.
+
+2024-06-25 - version 2.3.2
+* Minor - Adds a new tool to the WCA Test Helper that helps import remote inbox notifications from staging or production for testing purposes #48735
+* Minor - Remove the new old experience #47814
+* Patch - Fix "Live Branches" item not shown in the WooCommerce menu #47691
+* Patch - Fix lint errors from the remote spec test endpoint. #47520
+
+2024-05-13 - version 2.3.1
+* Minor - Add Remote Spec Validator to WooCommerce Admin Tester
+* Minor - Remove the patterns_ai_data post from DB when resetting the CYS.
+* Patch - Comment: Fix Gutenberg links in the docs pointing to incorrect branch.
+* Patch - Add missing live-branches/install.php require to API.php
+* Minor - Add feature flag options to wc-live-branches user script
+* Patch - Update WooCommerce import path in WC Admin Tester Helper
+* Minor - Fix option search that accidentally had its wildcards removed
+* Patch - Fix beta test plugin deprecated creation dynamic property
+* Patch - add composer install to changelog script
+* Patch - [Woo Beta Tester]: add User Preference dev tool panel
+* Patch - Update @wordpress-env package to version 9.0.7
+* Patch - Update pnpm to 9.1.0
+
+2023-11-16 - version 2.3.0
+* Minor - Add ability to update block templates logging threshold.
+* Minor - Add Product Editor Developer Tools
+* Patch - update references to woocommerce.com to now reference woo.com
+* Minor - WooCommerce Beta Tester - CYS: implement removing patterns_ai_data post type
+
+2023-10-30 - version 2.2.5
+* Tweak - Add support for logging array property in track logger
+* Add - Add rest customize your store tool
+
+2023-08-23 - version 2.2.4
+* Patch - check for WC_ADMIN_APP constant before using it
+* Patch - Fix a bug where between WC installs the beta tester would crash trying to log.
+* Patch - Fix a bug where WC_ABSPATH is used when the WooCommerce instance might not have defined it yet.
+* Patch - Fix rest api filter to allow any strings in replacement
+* Minor - Add a basic UI screen for installing from live branches (disabled in prod)
+* Minor - Add a userscript that allows creation of JN sites from Github branches.
+* Minor - Add a wp cli command for activating live branches.
+* Minor - Add feature to install and activate live branches.
+* Minor - Add SlotFill Examples feature
+* Minor - Add trunk as installable branch to live branches feature.
+* Minor - Add userscript option to install wc smooth generator.
+* Minor - Enable the live branches feature.
+* Minor - Fixing mismatched dependencies between @types/react-dom and react-dom
+* Minor - Update the live branches UI to improve finding and installing branches.
+* Minor - Declare compatibility for custom order table and product block editor features.
+* Minor - Update README to separate WooCommerce Admin Tester
+* Minor - Add support for installing WC trunk via live branches.
+* Patch - Bump required PHP version to 7.4
+* Patch - Consolidate wp-prettier version with rest of monorepo.
+* Minor - Release woocommerce-beta-tester with bugfixes from #39441
+* Minor - Sync @wordpress package versions via syncpack.
+* Patch - Update eslint to 8.32.0 across the monorepo.
+* Minor - Update pnpm monorepo-wide to 8.6.5
+* Minor - Update pnpm to 8.6.7
+* Minor - Update pnpm to version 8.
+* Minor - Update pnpm version constraint to 7.13.3 to avoid auto-install-peers issues
+* Patch - Update `wp-env` to version 8.2.0.
+* Minor - Upgrade TypeScript to 5.1.6
+* Patch - Correct spelling errors
+* Patch - Remove api code folder that was duplicated
+* Minor - Adjust option modal so that longer option names are fully shown.
+* Minor - Alphabetize the features list, and use toggle controls instead of buttons.
+* Minor - Reload page when toggling new-product-management-experience and product-block-editor
+
+2022-10-11 - version 2.1.0
+* Dev - Add WooCommerce Admin Helper Tester functionality to Beta Tester
+
+2021-12-17 - version 2.0.5
+* Fix - make WC version comparison case insensitive
+
+2021-09-29 - version 2.0.4
+* Dev - Bump tested to version
+* Fix - enqueue logic for css/js assets
+
+2021-09-22 - version 2.0.3
+* Fix - Bump version to release version including admin.css.
+
+2020-11-26 - version 2.0.2
+* Fix - notice for undefined `item`
+* Fix - auto_update_plugin filter reference
+* Fix - including SSR in bug report
+* Fix - style in version modal header
+* Add - check for WooCommerce installed in default location
+
+2019-03-14 - version 2.0.1
+* Enhancement - Changes to make this plugin compatible with the upcoming WooCommerce 3.6
+
+2018-07-12 - version 2.0.0
+* Enhancement - Re-built to pull updates from the WordPress.org repository rather than GitHub.
+* Enhancement - Channel selection; choose to receive RC or beta versions.
+* Enhancement - Admin bar item shows version information, and offers shortcuts to functionality.
+* Enhancement - Shortcut to log GitHub issues.
+* Enhancement - Version switcher; choose which release or prerelease to switch to.
+* Enhancement - Setting to enable auto-updates.
+
+2017-06-19 - version 1.0.3
+* Fix - repo URLs and directory renaming.

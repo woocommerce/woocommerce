@@ -1,0 +1,71 @@
+'package: @woocommerce/e2e-utils-playwright':
+  - packages/js/e2e-utils-playwright/**/*
+
+'package: @woocommerce/components':
+  - packages/js/components/**/*
+
+'package: @woocommerce/csv-export':
+  - packages/js/csv-export/**/*
+
+'package: @woocommerce/currency':
+  - packages/js/currency/**/*
+
+'package: @woocommerce/customer-effort-score':
+  - packages/js/customer-effort-score/**/*
+
+'package: @woocommerce/data':
+  - packages/js/data/**/*
+
+'package: @woocommerce/date':
+  - packages/js/date/**/*
+
+'package: dependency-extraction-webpack-plugin':
+  - packages/js/dependency-extraction-webpack-plugin/**/*
+
+'package: @woocommerce/eslint-plugin':
+  - packages/js/eslint-plugin/**/*
+
+'package: @woocommerce/experimental':
+  - packages/js/experimental/**/*
+
+'package: @woocommerce/explat':
+  - packages/js/explat/**/*
+
+'package: @woocommerce/navigation':
+  - packages/js/navigation/**/*
+
+'package: @woocommerce/number':
+  - packages/js/number/**/*
+
+'package: @woocommerce/onboarding':
+  - packages/js/onboarding/**/*
+
+'package: @woocommerce/tracks':
+  - packages/js/tracks/**/*
+
+'plugin: woocommerce':
+  - plugins/woocommerce/**/*
+
+'plugin: woocommerce beta tester':
+  - plugins/woocommerce-beta-tester/**/*
+
+'focus: performance tests':
+  - plugins/woocommerce/tests/performance/**/*
+  - plugins/woocommerce/tests/metrics/**/*
+
+'focus: api tests':
+  - plugins/woocommerce/tests/e2e-pw/tests/api-tests/**/*
+
+'focus: e2e tests':
+  - plugins/woocommerce/tests/e2e-pw/**/*
+  - plugins/woocommerce/client/blocks/tests/e2e/**/*
+
+'Documentation':
+  - docs/**/*
+
+'focus: monorepo infrastructure':
+  - .github/**/*
+  - bin/**/*
+  - tools/**/*
+  - '**/composer.json'
+  - '**/package.json'

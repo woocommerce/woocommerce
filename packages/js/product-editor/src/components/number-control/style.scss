@@ -1,0 +1,14 @@
+.woocommerce-number-control {
+	.components-input-control {
+		&__suffix {
+			user-select: none;
+			margin-right: $gap-smaller;
+		}
+		&__input::placeholder {
+			color: $gray-700;
+		}
+		&__prefix {
+			margin-left: $gap-smaller;
+		}
+	}
+}

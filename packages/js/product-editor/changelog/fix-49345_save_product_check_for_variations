@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Always count variations without price #50129

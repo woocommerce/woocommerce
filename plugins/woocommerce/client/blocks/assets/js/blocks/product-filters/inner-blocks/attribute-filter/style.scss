@@ -1,0 +1,13 @@
+.wp-block-woocommerce-product-filter-attribute {
+	.style-dropdown {
+		position: relative;
+
+		> svg {
+			position: absolute;
+			right: 8px;
+			top: 50%;
+			transform: translateY(-50%);
+			pointer-events: none;
+		}
+	}
+}

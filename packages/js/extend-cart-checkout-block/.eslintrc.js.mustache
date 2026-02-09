@@ -1,0 +1,16 @@
+module.exports = {
+	extends: [ 'plugin:@woocommerce/eslint-plugin/recommended' ],
+	rules: {
+		'react/react-in-jsx-scope': 'off',
+		'import/no-unresolved': 'off',
+		'import/no-extraneous-dependencies': 'off',
+		'import/named': 'off',
+		'import/default': 'off',
+		'@wordpress/i18n-text-domain': [
+			'error',
+			{
+				allowedTextDomain: [ '{{slug}}' ],
+			},
+		],
+	},
+};

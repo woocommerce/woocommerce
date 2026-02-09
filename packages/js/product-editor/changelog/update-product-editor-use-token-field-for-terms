@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Product Block Editor: use FormTokenField component for the attribute terms

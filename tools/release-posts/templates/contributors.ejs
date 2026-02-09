@@ -1,0 +1,35 @@
+<% const NUMBER_COLUMNS_TO_DISPLAY = 6 %>
+<% for ( const packageName in contributors ) { %>  
+  <% const packageContributors = contributors[packageName].contributors %>
+
+  <% if (packageContributors) { %> 
+    <% if (packageContributors.length) { %>
+      <h2><%= packageName.replace('-', ' ') %></h2>
+    <% } %>
+    <% const lastContributor = packageContributors[packageContributors.length - 1] %>
+    <% let column = 1 %>
+    <% for ( const contributor of packageContributors ) { %>
+      <% if (column % NUMBER_COLUMNS_TO_DISPLAY === 1) { %>
+        <!-- wp:columns -->
+        <div class="wp-block-columns">
+          <%- include('contributor', { contributor: contributor }) %>        
+      <% } else { %>
+        <%- include('contributor', { contributor: contributor }) %>
+      <% } %>      
+      
+      <% if ( contributor.login === lastContributor.login &&  packageContributors.length  % NUMBER_COLUMNS_TO_DISPLAY !== 0 ) { %>
+        <% const columnsToAdd = NUMBER_COLUMNS_TO_DISPLAY - ( packageContributors.length % NUMBER_COLUMNS_TO_DISPLAY ) %>
+        <% for ( let i = 0; i < columnsToAdd; i++ ) { %>
+          <!-- wp:column -->
+          <div class="wp-block-column"></div>
+          <!-- /wp:column -->
+        <% } %>
+      <% } %>
+      <% column ++ %>
+      <% if ( ( column % NUMBER_COLUMNS_TO_DISPLAY === 1 ) || contributor.login === lastContributor.login ) { %>
+        </div>
+        <!-- /wp:columns -->
+      <% } %>
+    <% } %>  
+  <% } %>  
+<% } %> 

@@ -1,0 +1,31 @@
+.wc-block-checkout__sidebar {
+	.wc-block-components-product-name {
+		color: inherit;
+		display: block;
+		flex-grow: 1;
+		font-family: inherit;
+		font-weight: inherit;
+		line-height: inherit;
+		margin: 0;
+	}
+	.wc-block-components-totals-footer-item {
+		margin: 0;
+		padding: 0;
+	}
+}
+@include cart-checkout-below-large-container {
+	.wc-block-checkout__sidebar {
+		margin-bottom: $gap-large;
+		order: 0;
+	}
+}
+
+@include cart-checkout-large-container {
+	.wc-block-checkout__sidebar {
+		align-self: flex-start;
+		top: $gap-large;
+		&.is-sticky {
+			position: sticky;
+		}
+	}
+}

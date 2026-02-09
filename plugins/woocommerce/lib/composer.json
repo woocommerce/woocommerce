@@ -1,0 +1,57 @@
+{
+	"name": "woocommerce/woocommerce-lib",
+	"description": "A package for hiding re-namespaced dependencies and executing them",
+	"prefer-stable": true,
+	"minimum-stability": "dev",
+	"require": {
+		"php": ">=7.4"
+	},
+	"require-dev": {
+		"mobiledetect/mobiledetectlib": "^3.74",
+		"psr/container": "^1.1",
+		"pelago/emogrifier": "7.3.0",
+		"league/iso3166": "^4.3.3"
+	},
+	"config": {
+		"platform": {
+			"php": "7.4"
+		}
+	},
+	"scripts": {
+		"post-install-cmd": [
+			"\"../vendor/bin/mozart\" compose"
+		],
+		"post-update-cmd": [
+			"\"../vendor/bin/mozart\" compose"
+		]
+	},
+	"extra": {
+		"mozart": {
+			"dep_namespace": "Automattic\\WooCommerce\\Vendor\\",
+			"dep_directory": "/packages/",
+			"packages": [
+				"psr/container",
+				"mobiledetect/mobiledetectlib",
+				"pelago/emogrifier",
+				"league/iso3166"
+			],
+			"excluded_packages": [
+			],
+			"override_autoload": {
+				"mobiledetect/mobiledetectlib": {
+					"psr-4": {
+						"Detection\\": "src/"
+					}
+				},
+				"thecodingmachine/safe": {
+					"psr-4": {
+						"Safe\\": ""
+					}
+				}
+			},
+			"classmap_directory": "/classes/",
+			"classmap_prefix": "WC_Vendor_",
+			"delete_vendor_directories": true
+		} 
+	}
+}

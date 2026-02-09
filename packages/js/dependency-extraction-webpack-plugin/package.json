@@ -1,0 +1,67 @@
+{
+	"name": "@woocommerce/dependency-extraction-webpack-plugin",
+	"version": "4.0.0",
+	"description": "WooCommerce Dependency Extraction Webpack Plugin",
+	"author": "Automattic",
+	"license": "GPL-2.0-or-later",
+	"keywords": [
+		"wordpress",
+		"woocommerce"
+	],
+	"engines": {
+		"node": "^20.11.1"
+	},
+	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/dependency-extraction-webpack-plugin/README.md",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/woocommerce/woocommerce.git"
+	},
+	"bugs": {
+		"url": "https://github.com/woocommerce/woocommerce/issues"
+	},
+	"main": "src/index.js",
+	"files": [
+		"src/",
+		"assets/"
+	],
+	"dependencies": {
+		"@wordpress/dependency-extraction-webpack-plugin": "next"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"devDependencies": {
+		"@babel/core": "7.25.7",
+		"@woocommerce/eslint-plugin": "workspace:*",
+		"eslint": "^8.55.0",
+		"jest": "29.5.x",
+		"jest-cli": "29.5.x",
+		"rimraf": "5.0.5",
+		"ts-jest": "29.1.x",
+		"typescript": "5.7.x",
+		"webpack": "5.97.x",
+		"webpack-cli": "5.1.x",
+		"wireit": "0.14.12"
+	},
+	"scripts": {
+		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
+		"update:php": "XDEBUG_MODE=off composer update --quiet",
+		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
+		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
+		"lint:fix:lang:js": "eslint src --fix",
+		"lint:lang:js": "eslint --output-file eslint_report.json --format json src"
+	},
+	"lint-staged": {
+		"*.(t|j)s?(x)": [
+			"eslint --fix"
+		]
+	},
+	"config": {
+		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": "src/**/*.js"
+			}
+		}
+	}
+}

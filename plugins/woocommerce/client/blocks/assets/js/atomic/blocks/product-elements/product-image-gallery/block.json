@@ -1,0 +1,19 @@
+{
+	"name": "woocommerce/product-image-gallery",
+	"title": "Product Image Gallery",
+	"icon": "gallery",
+	"description": "Display a product's images.",
+	"category": "woocommerce-product-elements",
+	"supports": {
+		"interactivity": {
+			"clientNavigation": true
+		},
+		"align": true,
+		"multiple": false
+	},
+	"keywords": [ "WooCommerce" ],
+	"usesContext": [ "postId", "postType", "queryId" ],
+	"textdomain": "woocommerce",
+	"apiVersion": 3,
+	"$schema": "https://schemas.wp.org/trunk/block.json"
+}

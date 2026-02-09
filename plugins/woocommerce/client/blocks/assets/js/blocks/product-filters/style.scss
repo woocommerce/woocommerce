@@ -1,0 +1,180 @@
+:where(.wc-block-product-filters) {
+	--top-padding: var(--wp-admin--admin-bar--height);
+	@include breakpoint("<782px") {
+		--top-padding: var(--adminbar-mobile-padding, 0);
+	}
+
+	display: inline-flex;
+
+	.wc-block-product-filters__open-overlay,
+	.wc-block-product-filters__close-overlay {
+		color: inherit;
+		background: transparent;
+		border: transparent;
+		display: flex;
+		align-items: center;
+		font-size: 0.875em;
+		padding: 0;
+		svg {
+			fill: currentColor;
+		}
+		span {
+			padding: 0 5px;
+		}
+	}
+
+	.wc-block-product-filters__open-overlay {
+		svg {
+			width: var(--wc-product-filters-overlay-icon-size, 1.5em);
+			height: var(--wc-product-filters-overlay-icon-size, 1.5em);
+		}
+	}
+
+	.wc-block-product-filters__overlay {
+		position: fixed;
+		inset: 0;
+		pointer-events: none;
+		top: var(--top-padding);
+		background-color: transparent;
+		transition: background-color 500ms;
+	}
+
+	.wc-block-product-filters__overlay-wrapper {
+		position: relative;
+		width: 100%;
+		height: 100%;
+	}
+
+	.wc-block-product-filters__overlay-dialog {
+		position: absolute;
+		inset: 0;
+		transform: translateY(100vh);
+		transition: none;
+		background-color: var(
+			--wc-product-filters-overlay-background-color,
+			var(
+				--wc-product-filters-background-color,
+				var(--wp--preset--color--base, #fff)
+			)
+		);
+		color: var(
+			--wc-product-filters-overlay-text-color,
+			var(
+				--wc-product-filters-text-color,
+				var(--wp--preset--color--base, #111)
+			)
+		);
+		display: flex !important;
+		flex-direction: column;
+		max-height: 100%;
+		gap: var(--wp--preset--spacing--40);
+	}
+
+	.wc-block-product-filters__overlay-header {
+		padding: var(--wp--preset--spacing--30) var(--wp--preset--spacing--40) 0;
+		display: flex;
+		flex-flow: row-reverse;
+	}
+
+	.wc-block-product-filters__overlay-content {
+		display: flex;
+		padding: 0 var(--wp--preset--spacing--40);
+		overflow-y: scroll;
+		flex-grow: 1;
+		flex-direction: column;
+		gap: var(
+			--wc-product-filter-block-spacing,
+			var(--wp--style--block-gap, 1.2rem)
+		);
+
+		> *:first-child {
+			margin-top: 0;
+		}
+	}
+
+	.wc-block-product-filters__overlay-footer {
+		padding: var(--wp--preset--spacing--30) var(--wp--preset--spacing--40);
+		box-shadow: 0 -4px 8px 0 #0000001a;
+	}
+
+	.wc-block-product-filters__apply {
+		width: 100%;
+	}
+
+	&.is-overlay-opened {
+		.wc-block-product-filters__overlay {
+			z-index: 9999;
+			pointer-events: auto;
+			background-color: rgba(95, 95, 95, 0.35);
+		}
+
+		.wc-block-product-filters__overlay-dialog {
+			transform: translateY(0);
+			color: var(--wc-product-filters-overlay-color, inherit);
+			transition: transform 500ms;
+		}
+	}
+
+	@include breakpoint(">600px") {
+		// If we add "Always show" option in the future, we can support that behavior
+		// by adding a class to the wrapper and refer it here, like this:
+		// &:not(.always-show) {
+		&,
+		&.is-overlay-opened {
+			display: flex;
+
+			.wc-block-product-filters__overlay-header,
+			.wc-block-product-filters__overlay-footer,
+			.wc-block-product-filters__open-overlay {
+				display: none;
+			}
+
+			.wc-block-product-filters__overlay {
+				position: relative;
+				pointer-events: auto;
+				inset: 0;
+				background: inherit;
+				color: inherit;
+				transition: none;
+			}
+			.wc-block-product-filters__overlay-wrapper {
+				width: auto;
+				height: auto;
+				background: inherit;
+				color: inherit;
+			}
+
+			.wc-block-product-filters__overlay-dialog {
+				position: relative;
+				transform: none;
+				background: inherit;
+				color: inherit;
+			}
+
+			.wc-block-product-filters__overlay-content {
+				padding: 0;
+				overflow: visible;
+				flex-grow: 1;
+				background: inherit;
+				color: inherit;
+			}
+		}
+	}
+
+	@include breakpoint("<600px") {
+		.wc-block-product-filters__overlay-content {
+			.wp-block-group {
+				display: block;
+
+				> div {
+					margin: 20px 0;
+				}
+			}
+		}
+	}
+}
+
+// We don't want zero specificity for this style.
+.wc-block-product-filter--hidden {
+	display: none;
+}

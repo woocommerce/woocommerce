@@ -1,0 +1,40 @@
+codecov:
+    notify:
+        require_ci_to_pass: yes
+
+ignore:
+    - '**/tests'
+    - '**/test'
+    - 'tools/**'
+    - 'packages/js/create-woo-extension'
+    - 'packages/js/eslint-plugin'
+    - 'packages/js/internal-js-tests'
+    - 'packages/js/internal-style-build'
+    - '**/*.test.*'
+
+coverage:
+    precision: 1
+    round: nearest
+    range: '50...80'
+
+    status:
+        project:
+            default:
+                target: auto
+        patch:
+            default:
+                target: auto
+parsers:
+    gcov:
+        branch_detection:
+            conditional: yes
+            loop: yes
+            method: no
+            macro: no
+
+comment:
+    layout: 'reach, diff, flags, files'
+    behavior: default
+    require_changes: false
+    require_base: no
+    require_head: yes

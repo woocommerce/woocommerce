@@ -1,0 +1,12 @@
+/*
+ * We only want to apply these styles to the legacy template block, as other
+ * blocks have their own styles for this.
+ */
+.woocommerce :where(div[data-block-name="woocommerce/legacy-template"]) div.product form.cart div.quantity {
+	display: inline-block;
+	vertical-align: middle;
+
+	.input-text {
+		padding: 0.9rem 1.1rem;
+	}
+}

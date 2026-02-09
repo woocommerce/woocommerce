@@ -1,0 +1,17 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"name": "woocommerce/product-filter-price",
+	"title": "Price Filter",
+	"description": "Let shoppers filter products by choosing a price range.",
+	"category": "woocommerce",
+	"keywords": [ "WooCommerce" ],
+	"textdomain": "woocommerce",
+	"apiVersion": 3,
+	"ancestor": [ "woocommerce/product-filters" ],
+	"supports": {
+		"interactivity": true,
+		"html": false
+	},
+	"usesContext": [ "query", "filterParams" ],
+	"viewScriptModule": "woocommerce/product-filter-price"
+}

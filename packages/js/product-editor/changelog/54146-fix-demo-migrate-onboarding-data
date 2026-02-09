@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Patch \@wordpress/data types to add types for metadata selectors, actions, and resolveSelect. Migrate onboarding store and usages to the new register(storeDescriptor) API

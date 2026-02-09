@@ -1,0 +1,44 @@
+/**
+ * External dependencies
+ */
+
+/**
+ * Internal dependencies
+ */
+import { CrudActions, CrudSelectors } from '../crud/types';
+import { BaseQueryParams, DispatchFromMap } from '../types';
+
+export type ProductShippingClass = {
+	id: number;
+	slug: string;
+	name: string;
+	description: string;
+	count: number;
+};
+
+type Query = BaseQueryParams< keyof ProductShippingClass > & {
+	context?: string;
+	hide_empty?: boolean;
+	slug?: string;
+	product?: number;
+};
+
+type ReadOnlyProperties = 'id';
+
+type MutableProperties = Omit< ProductShippingClass, ReadOnlyProperties >;
+
+export type ProductShippingClassActions = CrudActions<
+	'ProductShippingClass',
+	ProductShippingClass,
+	MutableProperties
+>;
+
+export type ProductShippingClassSelectors = CrudSelectors<
+	'ProductShippingClass',
+	'ProductShippingClasses',
+	ProductShippingClass,
+	Query,
+	MutableProperties
+>;
+
+export type ActionDispatchers = DispatchFromMap< ProductShippingClassActions >;

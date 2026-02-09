@@ -1,0 +1,22 @@
+.components-notice.woocommerce-email-editor-validation-errors {
+	margin: 0;
+
+	ul {
+		list-style: disc outside;
+		margin: 0 0 0 20px;
+	}
+
+	li {
+		margin: 8px 0;
+		padding: 0;
+	}
+
+	li:last-child {
+		margin-bottom: 0;
+	}
+
+	button.components-button.is-link {
+		color: #1e1e1e;
+		margin: 0 4px;
+	}
+}

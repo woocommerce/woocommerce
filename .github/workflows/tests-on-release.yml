@@ -1,0 +1,28 @@
+name: 'Release checks run'
+run-name: ${{ github.event_name == 'schedule' && 'scheduled' || github.event_name == 'release' && 'release' || '' }} checks ${{ github.ref_name != 'trunk' && github.ref_name || '' }}
+
+on:
+  schedule:
+    - cron: '0 3 * * *' # Runs at 3 AM UTC.
+  release:
+    types: [ published, edited ]
+
+jobs:
+  run-nightly-checks:
+    name: 'Run nightly checks'
+    if: github.repository == 'woocommerce/woocommerce' && github.event_name == 'schedule'
+    uses: ./.github/workflows/ci.yml
+    with:
+      trigger: 'nightly-checks'
+      refName: 'nightly'
+      artifactName: 'woocommerce-trunk-nightly.zip'
+    secrets: inherit
+
+  run-release-checks:
+    name: 'Run release checks'
+    if: github.repository == 'woocommerce/woocommerce' && github.event_name == 'release'
+    uses: ./.github/workflows/ci.yml
+    with:
+      trigger: 'release-checks'
+      artifactName: 'woocommerce.zip'
+    secrets: inherit

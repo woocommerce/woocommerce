@@ -1,0 +1,116 @@
+# See https://github.com/shufo/auto-assign-reviewer-by-files/blob/main/README.md for configuration format
+
+"*":
+  - team: flux
+
+".github/**/*":
+  - team: flux
+
+"bin/*":
+  - team: flux
+
+"docs/**/*":
+  - team: developer-advocacy
+
+"packages/js/api/**/*":
+  - team: flux
+
+"packages/js/components/**/*":
+  - team: woo-fse
+
+"packages/js/csv-export/**/*":
+  - team: somewherewarm
+
+"packages/js/currency/**/*":
+  - team: rubik
+
+"packages/js/customer-effort-score/**/*":
+  - team: woo-fse
+
+"packages/js/data/**/*":
+  - team: ventures
+
+"packages/js/date/**/*":
+  - team: rubik
+
+"packages/js/dependency-extraction-webpack-plugin/**/*":
+  - team: flux
+
+"packages/js/eslint-plugin/**/*":
+  - team: flux
+
+"packages/js/experimental/**/*":
+  - team: woo-fse
+
+"packages/js/explat/**/*":
+  - team: woo-fse
+
+"packages/js/navigation/**/*":
+  - team: somewherewarm
+
+"packages/js/number/**/*":
+  - team: rubik
+
+"packages/js/onboarding/**/*":
+  - team: rubik
+
+"packages/js/product-editor/**/*":
+  - team: woo-fse
+
+"packages/js/tracks/**/*":
+  - team: flux
+
+"packages/js/email-editor/**/*":
+  - team: ballade
+
+"packages/php/email-editor/**/*":
+  - team: ballade
+
+"plugins/woocommerce/**/*":
+  - team: flux
+
+"plugins/woocommerce/templates/**/*":
+  - team: rubik
+  - team: woo-fse
+
+"plugins/woocommerce/templates/emails/**/*":
+  - team: ballade
+
+"plugins/woocommerce/src/Admin/**/*":
+  - team: woo-fse
+
+"plugins/woocommerce/src/Blocks/**/*":
+  - team: rubik
+  - team: woo-fse
+
+"plugins/woocommerce/src/Internal/Admin/**/*":
+  - team: woo-fse
+
+"plugins/woocommerce/src/StoreApi/**/*":
+  - team: rubik
+  - team: woo-fse
+
+"plugins/woocommerce/client/admin/**/*":
+  - team: woo-fse
+
+"plugins/woocommerce/client/blocks/**/*":
+  - team: rubik
+  - team: woo-fse
+
+"plugins/woocommerce-beta-tester/**/*":
+  - team: flux
+
+"plugins/woocommerce/src/Internal/EmailEditor/**/*":
+  - team: ballade
+
+"plugins/woocommerce/client/admin/client/wp-admin-scripts/email-editor-integration/**/*":
+  - team: ballade
+
+"tools/**/*":
+  - team: flux
+
+'**/composer.json':
+  - team: flux
+
+'**/package.json':
+  - team: flux

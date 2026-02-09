@@ -1,0 +1,84 @@
+.wc-block-components-button:not(.is-link) {
+	align-items: center;
+	display: inline-flex;
+	height: auto;
+	justify-content: center;
+	text-align: center;
+	position: relative;
+	transition: box-shadow 0.1s linear;
+
+	&:focus {
+		box-shadow: 0 0 0 2px $studio-blue;
+		box-shadow: inset 0 0 0 1px $white, 0 0 0 2px $studio-blue;
+		outline: 3px solid transparent;
+	}
+
+	.wc-block-components-button__text {
+		display: block;
+
+		// Prevent runts/widows. Overwrite `balance` with `pretty`, as `pretty` is not supported in all browsers.
+		text-wrap: balance;
+		text-wrap: pretty;
+
+		> svg {
+			fill: currentColor;
+		}
+	}
+
+	&.text {
+		color: $gray-900;
+
+		&:hover {
+			opacity: 0.9;
+		}
+	}
+
+	&:disabled {
+		.wc-block-components-button__text {
+			opacity: 0.5;
+		}
+	}
+
+	&.outlined,
+	&.is-style-outline {
+		background: transparent;
+		color: currentColor;
+
+		&:not(:focus) {
+			box-shadow: inset 0 0 0 1px currentColor;
+		}
+
+		&:disabled,
+		&:hover,
+		&:focus,
+		&:active {
+			background-color: $gray-900;
+			color: $white;
+		}
+
+		&:hover {
+			background-color: $gray-900;
+			color: $white;
+			opacity: 1;
+		}
+	}
+}
+
+body:not(.woocommerce-block-theme-has-button-styles)
+	.wc-block-components-button:not(.is-link) {
+	min-height: 3em;
+
+	&:focus {
+		box-shadow: 0 0 0 2px $studio-blue;
+		box-shadow: inset 0 0 0 1px $white, 0 0 0 2px $studio-blue;
+		outline: 3px solid transparent;
+	}
+
+	&.text {
+		color: $gray-900;
+
+		&:hover {
+			opacity: 0.9;
+		}
+	}
+}

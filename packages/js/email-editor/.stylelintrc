@@ -1,0 +1,20 @@
+{
+	"extends": "@wordpress/stylelint-config",
+	"customSyntax": "postcss-scss",
+	"rules": {
+		"selector-class-pattern": null,
+		"at-rule-empty-line-before": null,
+		"at-rule-no-unknown": null,
+		"comment-empty-line-before": null,
+		"declaration-colon-newline-after": null,
+		"font-weight-notation": null,
+		"function-parentheses-space-inside": null,
+		"function-comma-space-after": null,
+		"indentation": null,
+		"max-line-length": null,
+		"no-descending-specificity": null,
+		"no-duplicate-selectors": null,
+		"rule-empty-line-before": null,
+		"value-keyword-case": null
+	}
+}

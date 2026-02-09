@@ -1,0 +1,16 @@
+{
+	"type": "object",
+	"required": ["type", "plugins"],
+	"properties": {
+		"type": {
+			"type": "string",
+			"enum": ["plugins_activated"]
+		},
+		"plugins": {
+			"type": "array",
+			"items": {
+				"type": "string"
+			}
+		}
+	}
+}

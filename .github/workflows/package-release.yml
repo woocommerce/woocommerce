@@ -1,0 +1,38 @@
+name: Package release
+on:
+  workflow_dispatch:
+    inputs:
+      packages:
+        description: 'Enter a specific package to release, or releases separated by commas, ie @woocommerce/components,@woocommerce/number. Leaving this input blank will release all eligible packages.'
+        required: false
+        default: '-a'
+      dry_run:
+        description: 'Perform a dry run. Complete all steps but dont actually make the release.'
+        type: boolean
+        required: false
+
+permissions:
+  id-token: write  # Required for OIDC
+  contents: read
+
+jobs:
+  release:
+    name: Run packages release script
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup WooCommerce Monorepo
+        uses: ./.github/actions/setup-woocommerce-monorepo
+        with:
+          install: true
+          build: './tools/package-release'
+          pull-package-deps: 'tools/package-release'
+
+      - name: Clean working directory
+        run: git checkout pnpm-lock.yaml # in case for whatever reason the lockfile is out of sync, there won't be interference with npm publish.
+
+      - name: Execute script
+        run: |
+          npm install -g npm@latest # Need NPM 11.5.1+ for OIDC support. pnpm publish passes through to npm.
+          ./tools/package-release/bin/dev publish ${{ github.event.inputs.packages }} --branch=${{ github.ref_name }} ${{ ( github.event.inputs.dry_run == 'true' && '--dry-run' ) || '' }} --skip-install

@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+bump php version in packages/js/*/composer.json

@@ -1,0 +1,61 @@
+.wcpay-component-phone-number-input {
+	display: inline-block;
+	position: relative;
+
+	&__button {
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		display: flex;
+		align-items: center;
+		padding-left: $gap-smaller;
+		padding-right: $gap-smallest;
+		background: none;
+		border: none;
+
+		&-arrow {
+			margin-top: 2px;
+
+			&.invert {
+				margin-top: 0;
+				transform: rotate(180deg);
+			}
+		}
+	}
+
+	&__input {
+		font-size: inherit;
+	}
+
+	&__menu {
+		position: absolute;
+		max-height: 200px;
+		min-width: 100%;
+		background-color: #fff;
+		border-radius: 2px;
+		border: 1px solid $gray-700;
+		margin: 1px 0;
+		z-index: 10000;
+		overflow-y: auto;
+
+		&[aria-hidden="true"] {
+			display: none;
+		}
+
+		&-item {
+			padding: $gap-smallest $gap-smaller;
+			margin: 0;
+			display: flex;
+			align-items: center;
+
+			&.highlighted {
+				background: #dcdcde; // $gray-5
+			}
+		}
+	}
+
+	&__flag {
+		width: 18px;
+		margin-right: $gap-smallest;
+	}
+}

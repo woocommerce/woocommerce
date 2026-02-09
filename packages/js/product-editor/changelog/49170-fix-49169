@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent product editor styles loading on non wc-admin pages

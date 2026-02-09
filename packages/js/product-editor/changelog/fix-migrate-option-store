@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Replace OPTIONS_STORE_NAME with optionsStore

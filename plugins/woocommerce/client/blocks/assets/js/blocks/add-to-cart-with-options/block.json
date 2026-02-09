@@ -1,0 +1,24 @@
+{
+	"name": "woocommerce/add-to-cart-with-options",
+	"title": "Add to Cart + Options (Beta)",
+	"description": "Use blocks to create an \"Add to cart\" area that's customized for different product types, such as variable and grouped. ",
+	"category": "woocommerce-product-elements",
+	"attributes": {
+		"isDescendantOfAddToCartWithOptions": {
+			"type": "boolean",
+			"default": true
+		}
+	},
+	"usesContext": [ "postId" ],
+	"providesContext": {
+		"woocommerce/isDescendantOfAddToCartWithOptions": "isDescendantOfAddToCartWithOptions"
+	},
+	"textdomain": "woocommerce",
+	"supports": {
+		"interactivity": true
+	},
+	"apiVersion": 3,
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"style": "file:../woocommerce/add-to-cart-with-options-style.css",
+	"editorStyle": "file:../woocommerce/add-to-cart-with-options-editor.css"
+}

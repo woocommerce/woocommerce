@@ -1,0 +1,104 @@
+.wc-blocks-components-select {
+	width: 100%;
+	// override the max-width set in the editor
+	max-width: none;
+
+	.wc-blocks-components-select__container {
+		border-radius: $universal-border-radius;
+		box-sizing: border-box;
+		background: $input-background-light;
+		width: 100%;
+		position: relative;
+		// Resetting line-height to avoid any unnecessary space around the input
+		line-height: 0;
+
+		.has-dark-controls & {
+			background-color: $input-background-dark;
+			color: $input-text-dark;
+
+			&:focus {
+				background-color: $input-background-dark;
+				color: $input-text-dark;
+			}
+		}
+
+		.has-error & {
+			border-color: $alert-red;
+		}
+	}
+
+	.wc-blocks-components-select__select {
+		@include reset-typography();
+		@include font-for-inputs-locked;
+		border-radius: $universal-border-radius;
+		width: 100%;
+		appearance: none;
+		background: none;
+		color: $input-text-light;
+		border: 1px solid $universal-border-strong;
+		box-sizing: border-box;
+
+		padding: $gap $gap-smaller + 1px 0;
+		height: 50px;
+
+		&:focus {
+			border-color: currentColor;
+			border-width: 1.5px;
+
+			padding: $gap $gap-smaller + .5px 0;
+		}
+
+		.has-dark-controls & {
+			border-color: $input-border-dark;
+			color: $input-text-dark;
+			&:focus {
+				border-color: currentColor;
+			}
+		}
+
+		.has-error & {
+			color: $alert-red;
+		}
+	}
+
+	.wc-blocks-components-select__label {
+		@include reset-typography();
+		font-size: 13px;
+		line-height: 1.4;
+		position: absolute;
+		top: $gap-smallest * 1.5;
+		left: $gap-smaller * 1.25;
+
+		z-index: 1;
+		margin: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		max-width: calc(100% - #{2 * $gap-small});
+		white-space: nowrap;
+
+		.has-dark-controls & {
+			color: $input-placeholder-dark;
+		}
+
+		.has-error & {
+			color: $alert-red;
+		}
+	}
+
+	.wc-blocks-components-select__expand {
+		position: absolute;
+		transform: translate(0%, -50%);
+		top: 50%;
+		right: $gap-small;
+		pointer-events: none;
+		fill: $input-text-light;
+
+		.has-dark-controls & {
+			fill: $input-text-dark;
+		}
+
+		.has-error & {
+			fill: $alert-red;
+		}
+	}
+}

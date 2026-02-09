@@ -1,0 +1,13 @@
+{
+	"extends": "../tsconfig-cjs",
+	"compilerOptions": {
+		"outDir": "build",
+	},
+	"include": [
+		"typings/**/*",
+		"src/**/*",
+	],
+	"exclude": [
+		"**/test/**",
+	]
+}

@@ -1,0 +1,45 @@
+@import "@wordpress/base-styles/breakpoints";
+
+.editor-styles-wrapper .wc-block-order-confirmation-summary,
+.wc-block-order-confirmation-summary {
+	margin-top: $gap-largest;
+	margin-bottom: $gap-largest;
+	border-radius: $universal-border-radius;
+}
+.wc-block-order-confirmation-summary {
+	ul {
+		list-style: none outside;
+		display: flex;
+		flex-direction: row;
+		margin: 0;
+		padding: 0;
+		gap: $gap;
+		flex-wrap: wrap;
+		justify-content: space-between;
+
+		li {
+			> .wc-block-order-confirmation-summary-list-item__key {
+				font-weight: bold;
+			}
+			> .wc-block-order-confirmation-summary-list-item__value {
+				font-weight: inherit;
+				display: block;
+			}
+		}
+
+		@media (max-width: #{$break-small}) {
+			li {
+				width: 100%;
+
+				> .wc-block-order-confirmation-summary-list-item__key,
+				> .wc-block-order-confirmation-summary-list-item__value {
+					display: inline;
+				}
+			}
+		}
+	}
+
+	&.has-background {
+		padding: $gap;
+	}
+}

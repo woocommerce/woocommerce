@@ -1,0 +1,239 @@
+/**
+ * We don't convert react-dates styles to RTL because react-dates uses an isRTL flag instead.
+ *
+ * We have to include the RTL-ignore directives via imports because of the ordering of how
+ * @imports are included in the output (see https://github.com/MohammadYounes/rtlcss/issues/113).
+ **/
+@import './calendar/begin-rtl-ignore.css';
+@import '../node_modules/react-dates/lib/css/_datepicker.css';
+@import './calendar/end-rtl-ignore.css';
+
+
+.woocommerce-calendar {
+	width: 100%;
+	background-color: $gray-100;
+	border-top: 1px solid $gray-400;
+	height: 396px;
+
+	&.is-mobile {
+		height: 100%;
+	}
+}
+
+.woocommerce-calendar__react-dates {
+	width: 100%;
+	overflow-x: hidden;
+
+	.DayPicker {
+		margin: 0 auto;
+	}
+
+	.CalendarMonth_table {
+		margin-top: 10px;
+	}
+
+	.CalendarDay__selected_span {
+		background: var(--wp-admin-theme-color);
+		border: 1px solid $gray-400;
+
+		&:hover {
+			background: var(--wp-admin-theme-color-darker-10);
+			border: 1px solid $gray-100;
+		}
+	}
+
+	.CalendarDay__selected {
+		background: var(--wp-admin-theme-color-darker-20);
+		border: 1px solid $gray-400;
+
+		&:hover {
+			background: var(--wp-admin-theme-color-darker-10);
+			border: 1px solid $gray-100;
+		}
+	}
+
+	.CalendarDay__hovered_span {
+		background: var(--wp-admin-theme-color-darker-10);
+		border: 1px solid $gray-100;
+		color: $studio-white;
+
+		&:hover {
+			color: $studio-white;
+			background: var(--wp-admin-theme-color);
+		}
+	}
+
+	.CalendarDay__blocked_out_of_range {
+		color: $gray-400;
+	}
+
+	.DayPicker_transitionContainer,
+	.CalendarMonthGrid,
+	.CalendarMonth,
+	.DayPicker {
+		background-color: $gray-100;
+	}
+
+	.DayPicker_weekHeader_li {
+		color: $gray-700;
+	}
+
+	.DayPickerNavigation_button {
+		&:focus {
+			outline: 2px solid #bfe7f3;
+		}
+	}
+
+	// Make exceptions for wp Core DatePicker.
+	&.is-core-datepicker {
+		.components-datetime__date {
+			padding-left: 0;
+		}
+
+		.CalendarDay__default {
+			background-color: transparent;
+		}
+
+		.CalendarDay__selected {
+			background: $studio-woocommerce-purple-70;
+			border: none;
+		}
+	}
+}
+
+.woocommerce-calendar__inputs {
+	padding: 1em;
+	width: 100%;
+	max-width: 500px;
+	display: grid;
+	grid-template-columns: 43% 14% 43%;
+	margin: 0 auto;
+
+	.components-base-control {
+		margin: 0;
+	}
+}
+
+.woocommerce-calendar__inputs-to {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	grid-column-start: 2;
+}
+
+.woocommerce-calendar__input {
+	position: relative;
+
+	.calendar-icon {
+		position: absolute;
+		top: 50%;
+		transform: translateY(-50%);
+		left: 7px;
+
+		path {
+			fill: $gray-700;
+		}
+	}
+
+	&:first-child {
+		grid-column-start: 1;
+	}
+
+	&:last-child {
+		grid-column-start: 3;
+	}
+
+	&.is-empty {
+		.calendar-icon path {
+			fill: $gray-700;
+		}
+	}
+
+	&.is-error {
+		.calendar-icon path {
+			fill: $error-red;
+		}
+
+		.woocommerce-calendar__input-text {
+			border: 1px solid $error-red;
+			box-shadow: inset 0 0 8px $error-red;
+
+			&:focus {
+				box-shadow: inset 0 0 8px $error-red,
+					0 0 6px rgba(30, 140, 190, 0.8);
+			}
+		}
+	}
+
+	.woocommerce-calendar__input-text {
+		color: $gray-700;
+		border-radius: 3px;
+		padding: 10px 10px 10px 30px;
+		width: 100%;
+		@include font-size( 13 );
+
+		&::placeholder {
+			color: $gray-700;
+		}
+	}
+}
+
+.woocommerce-filters-date__content {
+	&.is-mobile
+	.woocommerce-calendar__input-error
+	.components-popover__content {
+		height: initial;
+	}
+}
+
+.woocommerce-calendar__input-error {
+	display: none;
+
+	.is-error .woocommerce-calendar__input-text:focus + span & {
+		/* rtl:begin:ignore */
+		display: block;
+		left: 50% !important;
+		position: absolute;
+		top: auto !important;
+		/* rtl:end:ignore */
+	}
+
+	.components-popover__content {
+		background-color: $gray-700;
+		color: $studio-white;
+		padding: 0.5em;
+		border: none;
+	}
+
+	&.components-popover {
+		.components-popover__content {
+			min-width: 100px;
+			width: 100px;
+			text-align: center;
+		}
+
+		&:not(.no-arrow):not(.is-mobile).is-bottom::before {
+			border-bottom-color: $gray-700;
+			z-index: 1;
+			top: -6px;
+		}
+
+		&:not(.no-arrow):not(.is-mobile).is-top::after {
+			border-top-color: $gray-700;
+			z-index: 1;
+			top: 0;
+		}
+	}
+}
+
+.woocommerce-calendar__date-picker-title {
+	@include font-size( 12 );
+	font-weight: 100;
+	text-transform: uppercase;
+	text-align: center;
+	color: $gray-700;
+	width: 100%;
+	margin: 0;
+	padding: 1em;
+	background-color: $studio-white;
+}

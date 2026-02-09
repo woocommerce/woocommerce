@@ -1,0 +1,49 @@
+{
+	"name": "woocommerce/mini-cart-cart-button-block",
+	"version": "1.0.0",
+	"title": "Mini-Cart View Cart Button",
+	"description": "Block that displays the cart button when the Mini-Cart has products.",
+	"category": "woocommerce",
+	"supports": {
+		"align": false,
+		"html": false,
+		"multiple": false,
+		"reusable": false,
+		"inserter": true,
+		"color": {
+			"text": true,
+			"background": true
+		},
+		"interactivity": {
+			"clientNavigation": true
+		}
+	},
+	"attributes": {
+		"lock": {
+			"type": "object",
+			"default": {
+				"remove": false,
+				"move": false
+			}
+		},
+		"cartButtonLabel": {
+			"type": "string",
+			"default": ""
+		}
+	},
+	"styles": [
+		{
+			"name": "fill",
+			"label": "Fill"
+		},
+		{
+			"name": "outline",
+			"label": "Outline",
+			"isDefault": true
+		}
+	],
+	"parent": [ "woocommerce/mini-cart-footer-block" ],
+	"textdomain": "woocommerce",
+	"apiVersion": 3,
+	"$schema": "https://schemas.wp.org/trunk/block.json"
+}

@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+. "$(dirname "$0")/_/husky.sh"
+
+# The hook documentation: https://git-scm.com/docs/githooks.html#_post_merge
+
+# Auto-switch pnpm versions when pulled changes include pnpm version change.
+currentPnpmVersion=$( ( command -v pnpm > /dev/null && pnpm --version 2>/dev/null ) || echo 'n/a' )
+targetPnpmVersion=$( grep packageManager package.json | sed -nr 's/.+packageManager.+pnpm@([[:digit:].]+).+/\1/p' )
+if [ "$currentPnpmVersion" != "$targetPnpmVersion" ]; then
+	printf "${orangeColoured}pnpm versions mismatch: in use '$currentPnpmVersion', needed '$targetPnpmVersion'. Enabling corepack for automatic pnpm version switching (see https://nodejs.org/api/corepack.html#corepack for more details).\n"
+	command -v corepack > /dev/null && corepack enable pnpm
+fi
+
+# Refresh dependencies when pulled changes might change the deps.
+changedManifests=$( ( git diff --name-only HEAD ORIG_HEAD  | grep -E '(pnpm-lock.yaml|composer.lock)$' ) || echo '' )
+if [ -n "$changedManifests" ]; then
+	printf "It was a change in the following file(s) - refreshing dependencies:\n"
+	printf "    %s\n" $changedManifests
+
+	pnpm install --frozen-lockfile
+fi
+
+# Cleanup .wireit cache that is older than 2 weeks (14 days); otherwise, the repository directory size keeps growing and growing.
+staleWireitDirectories=$(( \
+	$( find plugins/*/.wireit/*/cache/* -maxdepth 0 -type d -ctime +14 -print 2>/dev/null | wc -l ) + \
+	$( find packages/js/*/.wireit/*/cache/* -maxdepth 0 -type d -ctime +14 -print 2>/dev/null | wc -l ) + \
+	$( find plugins/woocommerce/client/*/.wireit/*/cache/* -maxdepth 0 -type d -ctime +14 -print 2>/dev/null | wc -l ) \
+))
+if [ $staleWireitDirectories -gt 0 ]; then
+	echo "Cleaning up stale wireit-cache ($staleWireitDirectories directories)"
+	# Main cleanup step - disk space usage reduction
+	find plugins/*/.wireit/*/cache/* -maxdepth 0 -type d -ctime +14 -exec rm -rf {} \; 2>/dev/null
+	find packages/js/*/.wireit/*/cache/* -maxdepth 0 -type d -ctime +14 -exec rm -rf {} \; 2>/dev/null
+	find plugins/woocommerce/client/*/.wireit/*/cache/* -maxdepth 0 -type d -ctime +14 -exec rm -rf {} \; 2>/dev/null
+	# Extra cleanup step - housekeeping `.wireit` directories
+	find plugins/*/.wireit/* -maxdepth 0 -type d -ctime +14 -exec rm -rf {} \; 2>/dev/null
+	find packages/js/*/.wireit/* -maxdepth 0 -type d -ctime +14 -exec rm -rf {} \; 2>/dev/null
+	find plugins/woocommerce/client/*/.wireit/* -maxdepth 0 -type d -ctime +14 -exec rm -rf {} \; 2>/dev/null
+fi

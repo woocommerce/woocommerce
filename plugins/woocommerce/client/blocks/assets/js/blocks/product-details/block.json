@@ -1,0 +1,26 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "woocommerce/product-details",
+	"title": "Product Details",
+	"description": "Display a product's description, attributes, and reviews",
+	"category": "woocommerce",
+	"textdomain": "woocommerce",
+	"supports": {
+		"interactivity": {
+			"clientNavigation": true
+		},
+		"align": [ "wide", "full" ]
+	},
+	"attributes": {
+		"align": {
+			"type": "string",
+			"default": "wide"
+		},
+		"hideTabTitle": {
+			"type": "boolean",
+			"default": false
+		}
+	},
+	"usesContext": [ "query", "queryId", "postId", "postType" ]
+}

@@ -1,0 +1,10 @@
+export {
+	init,
+	log,
+	captureException,
+	REMOTE_LOGGING_SHOULD_SEND_ERROR_FILTER,
+	REMOTE_LOGGING_ERROR_DATA_FILTER,
+	REMOTE_LOGGING_LOG_ENDPOINT_FILTER,
+	REMOTE_LOGGING_JS_ERROR_ENDPOINT_FILTER,
+} from './remote-logger';
+export * from './types';

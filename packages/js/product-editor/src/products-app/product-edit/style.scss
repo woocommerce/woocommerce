@@ -1,0 +1,24 @@
+.edit-product-page {
+    padding: $grid-unit-30;
+    background: #fff;
+    color: #2f2f2f;
+    container: edit-site-page/inline-size;
+    height: 100%;
+    transition: width .2s ease-out;
+
+    .edit-product-content {
+        display: flex;
+        flex-flow: column;
+        height: 100%;
+        position: relative;
+        z-index: 1;
+    }
+
+    &.is-empty .edit-product-content {
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+}

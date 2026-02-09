@@ -1,0 +1,116 @@
+{
+	"name": "woocommerce/featured-category",
+	"title": "Featured Category",
+	"category": "woocommerce",
+	"keywords": [ "WooCommerce" ],
+	"description": "Visually highlight a product category and encourage prompt action.",
+	"supports": {
+		"interactivity": {
+			"clientNavigation": true
+		},
+		"align": [ "wide", "full" ],
+		"ariaLabel": true,
+		"color": {
+			"background": true,
+			"text": true
+		},
+		"html": false,
+		"filter": {
+			"duotone": true
+		},
+		"spacing": {
+			"padding": true,
+			"__experimentalDefaultControls": {
+				"padding": true
+			},
+			"__experimentalSkipSerialization": true
+		},
+		"__experimentalBorder": {
+			"color": true,
+			"radius": true,
+			"width": true,
+			"__experimentalDefaultControls": {
+				"color": true,
+				"radius": true,
+				"width": true
+			},
+			"__experimentalSkipSerialization": true
+		}
+	},
+	"attributes": {
+		"alt": {
+			"type": "string",
+			"default": ""
+		},
+		"contentAlign": {
+			"type": "string",
+			"default": "center"
+		},
+		"dimRatio": {
+			"type": "number",
+			"default": 50
+		},
+		"focalPoint": {
+			"type": "object",
+			"default": {
+				"x": 0.5,
+				"y": 0.5
+			}
+		},
+		"imageFit": {
+			"type": "string",
+			"default": "none"
+		},
+		"hasParallax": {
+			"type": "boolean",
+			"default": false
+		},
+		"isRepeated": {
+			"type": "boolean",
+			"default": false
+		},
+		"mediaId": {
+			"type": "number",
+			"default": 0
+		},
+		"mediaSrc": {
+			"type": "string",
+			"default": ""
+		},
+		"minHeight": {
+			"type": "number",
+			"default": 500
+		},
+		"linkText": {
+			"default": "Shop now",
+			"type": "string"
+		},
+		"categoryId": {
+			"type": "number"
+		},
+		"overlayColor": {
+			"type": "string",
+			"default": "#000000"
+		},
+		"overlayGradient": {
+			"type": "string"
+		},
+		"previewCategory": {
+			"type": "object",
+			"default": null
+		}
+	},
+	"selectors": {
+		"filter": {
+			"duotone": ".wp-block-woocommerce-featured-category .wc-block-featured-category__background-image"
+		}
+	},
+	"textdomain": "woocommerce",
+	"apiVersion": 3,
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"usesContext": [ "termId", "termTaxonomy" ],
+	"providesContext": {
+		"termId": "categoryId",
+		"termTaxonomy": "termTaxonomy"
+	}
+}

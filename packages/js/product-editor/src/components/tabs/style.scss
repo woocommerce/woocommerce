@@ -1,0 +1,24 @@
+.woocommerce-product-tabs {
+    display: flex;
+    justify-content: safe center;
+	@media only screen and (max-width: 500px) {
+		overflow: auto;
+	}
+
+    .components-button {
+        padding: $gap-smaller 0 20px 0;
+        margin-left: $gap-small;
+        margin-right: $gap-small;
+        border-bottom: 3.5px solid transparent;
+        border-radius: 0;
+        height: auto;
+
+		@media only screen and (max-width: 500px) {
+			margin-top: 2px;
+		}
+
+        &.is-selected {
+            border-color: var(--wp-admin-theme-color);
+        }
+    }
+}

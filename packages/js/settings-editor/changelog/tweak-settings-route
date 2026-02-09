@@ -1,0 +1,5 @@
+Significance: patch
+Type: enhancement
+Comment: Enhance route handling by preventing updates on first render
+
+

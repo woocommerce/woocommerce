@@ -1,0 +1,128 @@
+name: Build Live Branch
+on:
+    pull_request:
+        types:
+            - opened
+            - reopened
+            - synchronize
+            - ready_for_review
+        paths-ignore:
+            - 'docs/**'
+            - 'packages/php/**'
+            - '!packages/php/blueprint/**'
+            - 'tools/**'
+            - '**/changelog/**'
+            - '**/changelog.txt'
+            - '**/readme.txt'
+            - '.gitignore'
+            - '.coderabbit.yml'
+            - 'CODEOWNERS'
+            - '**/tests/**'
+            - '**/*.md'
+            - '.husky/**'
+            - '.cursor/**'
+            - '.github/**'
+            - '!.github/workflows/pr-build-live-branch.yml'
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+    cancel-in-progress: true
+
+env:
+  FORCE_COLOR: 1
+
+permissions: {}
+
+jobs:
+    build:
+        if: github.repository_owner == 'woocommerce' && github.event.pull_request.draft == false && github.event.pull_request.user.login != 'github-actions[bot]'
+        runs-on: ubuntu-latest
+        permissions:
+            contents: write
+            pull-requests: write
+            repository-projects: write
+            id-token: write
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Get current version
+              id: version
+              run: |
+                  current_version=$( cat plugins/woocommerce/woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1 )
+                  echo "Detected version: $current_version"
+                  echo "version=$current_version" >> $GITHUB_OUTPUT
+
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
+              with:
+                pull-package-deps: '@woocommerce/plugin-woocommerce'
+
+            - name: Prepare plugin zips
+              id: prepare
+              env:
+                  CURRENT_VERSION: ${{ steps.version.outputs.version }}
+              run: |
+
+                  # Current version must compare greater than any previously used current version for this PR.
+                  # Assume GH run IDs are monotonic.
+                  VERSUFFIX="${GITHUB_RUN_ID}-g$(git rev-parse --short HEAD)"
+
+                  CURRENT_VERSION="$CURRENT_VERSION-$VERSUFFIX"
+
+                  sed -i -e 's/Version: .*$/Version: '"$CURRENT_VERSION"'/' "$GITHUB_WORKSPACE/plugins/woocommerce/woocommerce.php"
+                  echo "$CURRENT_VERSION" > "$GITHUB_WORKSPACE/plugins/woocommerce/version.txt"
+
+                  cd "$GITHUB_WORKSPACE/plugins/woocommerce"
+                  PLUGIN_SLUG='woocommerce-dev' bash bin/build-zip.sh
+
+                  mkdir "$GITHUB_WORKSPACE/zips"
+                  mv "$GITHUB_WORKSPACE/plugins/woocommerce/woocommerce-dev.zip" "$GITHUB_WORKSPACE/zips/woocommerce-dev.zip"
+                
+                  mkdir -p "$GITHUB_WORKSPACE/unzips/woocommerce"
+                  cd "$GITHUB_WORKSPACE/zips"
+                  unzip -qq woocommerce-dev.zip
+                  mv "$GITHUB_WORKSPACE/zips/woocommerce-dev" "$GITHUB_WORKSPACE/unzips/woocommerce/woocommerce"
+                
+                  # Plugin data is passed as a JSON object.
+                  PLUGIN_DATA="{}"          
+                  PLUGIN_DATA=$( jq -c --arg slug "woocommerce" --arg ver "$CURRENT_VERSION" '.[ $slug ] = { version: $ver }' <<<"$PLUGIN_DATA" )
+                  echo "plugin-data=$PLUGIN_DATA" >> $GITHUB_OUTPUT
+
+            - name: Create plugins artifact
+              uses: actions/upload-artifact@v4
+              if: steps.prepare.outputs.plugin-data != '{}'
+              with:
+                  name: plugins
+                  path: zips
+                  # Only need to retain for a day since the beta builder slurps it up to distribute.
+                  retention-days: 1
+
+            - name: Create playground artifact
+              uses: actions/upload-artifact@v4
+              if: steps.prepare.outputs.plugin-data != '{}'
+              with:
+                  name: plugins-${{ github.run_id }}
+                  path: unzips/woocommerce
+                  retention-days: 30
+
+            - name: Inform Beta Download webhook if this is an internal PR
+              if: steps.prepare.outputs.plugin-data != '{}' && ! github.event.pull_request.head.repo.fork
+              env:
+                  SECRET: ${{ secrets.WOOBETA_SECRET }}
+                  PLUGIN_DATA: ${{ steps.prepare.outputs.plugin-data }}
+                  PR: ${{ github.event.number }}
+              run: |
+                  curl -v --fail -L \
+                    --url "https://betadownload.jetpack.me/gh-action.php?run_id=$GITHUB_RUN_ID&pr=$PR&commit=$GITHUB_SHA" \
+                    --form-string "repo=$GITHUB_REPOSITORY" \
+                    --form-string "branch=${GITHUB_REF#refs/heads/}" \
+                    --form-string "plugins=$PLUGIN_DATA" \
+                    --form-string "secret=$SECRET"
+
+            - name: Comment on PR with WordPress Playground details
+              uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+              if: steps.prepare.outputs.plugin-data != '{}' && ! github.event.pull_request.head.repo.fork
+              with:
+                  script: |
+                      const { run } = require('./.github/workflows/scripts/generate-playground-blueprint');
+                      run({ github, context, core });

@@ -1,0 +1,66 @@
+name: 'Pull request post-merge processing'
+on:
+    pull_request_target:
+        types: [closed]
+        paths:
+            - 'packages/**'
+            - 'plugins/woocommerce/**'
+            - '.github/workflows/pull-request-post-merge-processing.yml'
+
+permissions: {}
+
+jobs:
+    process-pull-request-after-merge:
+        name: "Process a pull request after it's merged"
+        if: github.event.pull_request.merged == true
+        runs-on: ubuntu-latest
+        permissions:
+            pull-requests: write
+        steps:
+            - name: 'Get the action scripts'
+              run: |
+                  scripts="add-post-merge-comment.php post-request-shared.php"
+                  for script in $scripts
+                  do
+                    curl \
+                    --silent \
+                    --fail \
+                    --header 'Authorization: bearer ${{ secrets.GITHUB_TOKEN }}' \
+                    --header 'User-Agent: GitHub action for post-merge pull request processing' \
+                    --header 'Accept: application/vnd.github.v3.raw' \
+                    --output $script \
+                    --location "$GITHUB_API_URL/repos/${{ github.repository }}/contents/.github/workflows/scripts/$script?ref=${{ github.event.pull_request.base.ref }}"
+                  done
+              env:
+                  GITHUB_API_URL: ${{ env.GITHUB_API_URL }}
+            - name: 'Install PHP'
+              uses: shivammathur/setup-php@8e2ac35f639d3e794c1da1f28999385ab6fdf0fc
+              with:
+                  php-version: '7.4'
+
+    process-feature-freeze-exception:
+        name: Log the merge of a Feature Freeze exception
+        if: ${{ github.event.pull_request.merged && startsWith( github.event.pull_request.base.ref, 'release/' ) && ! contains( github.event.pull_request.labels.*.name, 'Release' ) }}
+        runs-on: ubuntu-latest
+        permissions:
+            pull-requests: write
+        steps:
+            - env:
+                  GH_TOKEN: ${{ github.token }}
+              run: |
+                  gh pr edit ${{ github.event.pull_request.number }} \
+                      --add-label "metric: feature freeze exception" \
+                      --repo ${{ github.repository }}
+
+    process-pull-request-after-close:
+        name: "Process a pull request after it's been closed"
+        runs-on: ubuntu-latest
+        steps:
+            - name: 'Cleanup: GitHub caches associated with the merged branch'
+              run: |
+                  for cacheKey in $( gh cache list --ref refs/pull/${{ github.event.pull_request.number }}/merge --limit 100 --sort size_in_bytes --json id --jq '.[].id' ); do
+                      gh cache delete $cacheKey && echo "Dropped cache entry $cacheKey"
+                  done
+              env:
+                  GH_TOKEN: ${{ secrets.PR_ASSIGN_TOKEN }}
+                  GH_REPO: ${{ github.repository }}

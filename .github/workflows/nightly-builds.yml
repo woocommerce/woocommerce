@@ -1,0 +1,64 @@
+name: 'Nightly builds'
+on:
+  schedule:
+    - cron: '0 0 * * *' # Run at 12 AM UTC.
+  workflow_dispatch:
+
+env:
+  SOURCE_REF: trunk
+  TARGET_REF: nightly
+  RELEASE_ID: 25945111
+
+permissions: { }
+
+jobs:
+  build:
+    if: github.repository_owner == 'woocommerce'
+    name: 'Nightly builds'
+
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: 'Update nightly tag commit ref'
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const sourceRef = process.env.SOURCE_REF;
+            const targetRef = process.env.TARGET_REF;
+            const branchData = await github.rest.repos.getBranch({
+              ...context.repo,
+              branch: sourceRef,
+            });
+
+            await github.rest.git.updateRef({
+              ...context.repo,
+              ref: `tags/${ targetRef }`,
+              sha: branchData.data.commit.sha,
+            });
+
+      - name: 'Checkout ref'
+        uses: 'actions/checkout@v4'
+        with:
+          ref: ${{ env.TARGET_REF }}
+
+      - name: 'Setup WooCommerce Monorepo'
+        uses: './.github/actions/setup-woocommerce-monorepo'
+        with:
+          pull-package-deps: '@woocommerce/plugin-woocommerce'
+
+      - name: 'Build zip'
+        working-directory: plugins/woocommerce
+        run: bash bin/build-zip.sh
+
+      - name: 'Upload nightly build'
+        uses: 'WebFreak001/deploy-nightly@46ecbabd7fad70d3e7d2c97fe8cd54e7a52e215b' #v3.2.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          upload_url: https://uploads.github.com/repos/${{ github.repository }}/releases/${{ env.RELEASE_ID }}/assets{?name,label}
+          release_id: ${{ env.RELEASE_ID }}
+          asset_path: plugins/woocommerce/woocommerce.zip
+          asset_name: woocommerce-${{ env.SOURCE_REF }}-nightly.zip
+          asset_content_type: application/zip
+          max_releases: 1

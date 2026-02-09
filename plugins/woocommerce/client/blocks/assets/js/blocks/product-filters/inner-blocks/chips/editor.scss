@@ -1,0 +1,6 @@
+.wc-block-product-filter-chips.is-loading {
+	.wc-block-product-filter-chips__item {
+		@include placeholder();
+		margin: 5px 0;
+	}
+}

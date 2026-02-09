@@ -1,0 +1,9 @@
+.variations-actions-menu {
+	&__toggle {
+		flex-direction: row-reverse;
+
+		> span {
+			margin: 0 6px;
+		}
+	}
+}

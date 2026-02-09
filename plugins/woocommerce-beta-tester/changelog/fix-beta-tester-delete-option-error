@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix TypeError when deleting the simulate WooCommerce JS error option

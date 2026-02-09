@@ -1,0 +1,24 @@
+.wp-block-woocommerce-cart-cross-sells-products-block {
+	.cross-sells-product {
+		display: inline-block;
+		margin-bottom: 2em;
+		padding-right: 5%;
+		text-align: center;
+		vertical-align: top;
+		width: 30%;
+
+		&:nth-child(3n + 3) {
+			padding-right: 0;
+		}
+
+		div {
+			.wc-block-components-product-name {
+				font-weight: 400;
+			}
+
+			.wc-block-components-product-price {
+				display: block;
+			}
+		}
+	}
+}

@@ -1,0 +1,26 @@
+.wc-block-editor-mini-cart__render-in-cart-and-checkout-toggle {
+	width: 100%;
+}
+
+.wc-block-editor-mini-cart__drawer-image {
+	margin-bottom: 6px;
+}
+
+.wc-block-editor-mini-cart__drawer-link {
+	margin-bottom: 24px;
+}
+
+.wc-block-editor-mini-cart__icon {
+	html[dir="rtl"] & {
+		transform: scaleX(-1);
+	}
+}
+
+.wc-block-mini-cart__product-count-radiocontrol {
+	.components-base-control__field > .components-v-stack {
+		gap: 6px;
+		.components-radio-control__option {
+			align-items: flex-start;
+		}
+	}
+}

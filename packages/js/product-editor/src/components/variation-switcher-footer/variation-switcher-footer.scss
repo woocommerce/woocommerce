@@ -1,0 +1,46 @@
+.woocommerce-product-variation-switcher-footer {
+	max-width: 650px;
+	padding: 16px 0;
+	margin: 0 auto;
+
+	display: flex;
+	justify-content: space-between;
+
+	&__button {
+		height: 32px;
+		gap: $gap-small;
+
+		&.is-placeholder {
+			.woocommerce-product-variation-switcher-footer__arrow {
+				@include placeholder();
+				background-color: transparent;
+				color: inherit;
+			}
+
+			.woocommerce-product-variation-switcher-footer__item-label {
+				@include placeholder();
+				background-color: $gray-200;
+				width: $gap-largest;
+			}
+
+			.woocommerce-product-variation-switcher-footer__product-image {
+				@include placeholder();
+				background-color: $gray-200;
+				width: 32px;
+				height: 32px;
+			}
+		}
+	}
+
+	&__button-next {
+		margin-left: auto;
+	}
+	&__button-previous {
+		margin-right: auto;
+	}
+
+	&__product-image {
+		max-height: 32px;
+		max-width: 32px;
+	}
+}

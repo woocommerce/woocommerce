@@ -1,0 +1,29 @@
+{
+	"compilerOptions": {
+		"target": "esnext",
+		"module": "esnext",
+		"moduleResolution": "node",
+		"allowJs": true,
+		"strict": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"jsx": "react",
+		"jsxFactory": "createElement",
+		"jsxFragmentFactory": "Fragment",
+		"typeRoots": [ "./typings" ]
+	},
+	"exclude": [
+		"node_modules",
+		"**/stories",
+		"**/build",
+		"**/build-module",
+		"**/build-types",
+		"**/build-style",
+		"**/jest.config.js",
+		"**/jest-preset.js",
+		"**/webpack.*.js",
+		"**/babel.config.js"
+	],
+
+	"include": [ "typings/**/*", "src/**/*" ]
+}

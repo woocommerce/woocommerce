@@ -1,0 +1,108 @@
+@import "~@wordpress/base-styles/colors";
+
+.woocommerce-personalization-tags-modal {
+	p:first-child {
+		margin-top: 0;
+	}
+
+	.woocommerce-personalization-tags-modal-category {
+		display: inline-block;
+		font-size: 11px;
+		line-height: 16px;
+		padding-bottom: 8px;
+		padding-top: 16px;
+		text-transform: uppercase;
+	}
+
+	.woocommerce-personalization-tags-modal-category-group {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+
+		.woocommerce-personalization-tags-modal-category-group-item {
+			align-items: stretch;
+			border-bottom: 1px solid var(--wp-components-color-gray-300, #ddd);
+			display: flex;
+			padding: 16px 0;
+
+			.woocommerce-personalization-tags-modal-item-text {
+				display: flex;
+				flex: 1;
+				flex-direction: column;
+				font-size: 12px;
+				gap: 5px;
+				justify-content: center;
+				line-height: 18px;
+			}
+
+			button.is-link {
+				flex: 0 0 auto;
+				font-size: 14px;
+				height: auto;
+				line-height: 2;
+			}
+		}
+	}
+
+	.woocommerce-personalization-tags-modal-menu {
+		div[role="group"] {
+			display: flex;
+		}
+
+		.woocommerce-personalization-tags-modal-menu-item-active {
+			color: #000;
+			font-weight: 700;
+		}
+
+		button {
+			align-items: center;
+			color: #0a7aff;
+			display: flex;
+			gap: 8px;
+			padding: 6px;
+			width: auto;
+
+			span {
+				min-width: auto;
+			}
+		}
+
+		.woocommerce-personalization-tags-modal-menu-separator {
+			background-color: var(--wp-components-color-gray-700, #757575);
+			height: 16px;
+			margin: 10px 4px;
+			width: 1px;
+		}
+	}
+}
+
+.woocommerce-personalization-tag-popover {
+	align-items: center;
+	display: flex;
+	justify-content: center;
+
+	.woocommerce-personalization-tag-popover-content {
+		max-width: 350px;
+		min-width: auto;
+		width: 90vw;
+
+		.components-base-control {
+			margin: 16px;
+		}
+	}
+
+	.woocommerce-personalization-tag-popover-content-buttons {
+		margin: 16px;
+		text-align: right;
+
+		.components-button {
+			margin-left: 8px;
+		}
+	}
+}
+
+a.woocommerce-email-editor-personalization-tags-link {
+	color: linktext;
+	cursor: pointer;
+	text-decoration: underline;
+}

@@ -1,0 +1,71 @@
+name: 'Highlight Template Changes'
+on:
+  pull_request:
+    paths:
+      - 'plugins/woocommerce/**/templates/**/*.php'
+      - '!plugins/woocommerce/tests/**'
+      - '.github/workflows/pr-highlight-changes.yml'
+    branches:
+      - 'trunk'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    name: 'Analyze Branch Changes'
+    runs-on: ubuntu-latest
+    outputs:
+      results: ${{ steps.results.outputs.results }}
+    steps:
+      - uses: 'actions/checkout@v4'
+        name: 'Checkout'
+      - uses: './.github/actions/setup-woocommerce-monorepo'
+        name: 'Setup WooCommerce Monorepo'
+        with:
+          install: 'code-analyzer...'
+          build: 'code-analyzer'
+          pull-package-deps: 'code-analyzer'
+
+      - name: 'Analyze'
+        id: 'analyze'
+        working-directory: 'tools/code-analyzer'
+        env:
+          GIT_CLONE_PROTECTION_ACTIVE: false
+        run: |
+          exclude="plugins/woocommerce/tests"
+          version=$(pnpm analyzer major-minor "${{ github.event.pull_request.head.sha }}" "plugins/woocommerce/woocommerce.php" | tail -n 1)
+          pnpm analyzer "${{ github.event.pull_request.head.sha }}" $version --base "${{ github.event.pull_request.base.sha }}" --outputStyle "github" --exclude $exclude
+      - uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        name: 'Validate'
+        with:
+          script: |
+            const template = '${{ steps.analyze.outputs.templates }}';
+
+            if ( template === '' ) {
+              return;
+            }
+
+            const templateArr = template.split( '\n' );
+            const modTemplateArr = [];
+            let needsVersionBump = false;
+
+            templateArr.forEach( ( el ) => {
+              if ( el.match( /NOTICE/ ) ) {
+                modTemplateArr.pop();
+                return;
+              }
+
+              if ( el.match( /WARNING/ ) ) {
+                needsVersionBump = true;
+              }
+
+              modTemplateArr.push( el );
+            } );
+
+            const templateResult = modTemplateArr.join( '\n' );
+
+            if ( needsVersionBump ) {
+              core.setFailed( `Templates have changed but template versions were not bumped:\n${ templateResult }` );
+            }

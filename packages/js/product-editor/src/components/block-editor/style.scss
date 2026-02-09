@@ -1,0 +1,237 @@
+.woocommerce-product-block-editor {
+	padding-top: 108px; // required space to locate the dashboard just below the admin bar. @todo: find a better way to do this.
+
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6,
+	p,
+	button,
+	span,
+	label,
+	div,
+	input {
+		font-family: var(--wp--preset--font-family--system-font);
+	}
+
+	h4 {
+		font-size: 16px;
+	}
+
+	label {
+		color: $gray-900;
+	}
+
+	a {
+		text-decoration: none;
+	}
+
+	/*
+	 * Override default block margins and layout applied for themes without a theme.json file.
+	 *
+	 * If we no longer call `is_block_editor( true )` in the future for the product editor,
+	 * we can remove this.
+	 *
+	 * See: `wp_add_editor_classic_theme_styles()`
+	 */
+	:where(.wp-block) {
+		margin-bottom: 0;
+		margin-top: 0;
+		max-width: unset;
+	}
+
+	.components-base-control {
+		&.has-error {
+			.components-input-control__backdrop {
+				border-color: $studio-red-50;
+			}
+
+			.components-base-control__help {
+				color: $studio-red-50;
+			}
+		}
+
+		.components-input-control__container .components-input-control__input {
+			min-height: $grid-unit-40 + $grid-unit-05;
+		}
+	}
+
+	// This is wrong for @wordpress/components/InputControl since it is
+	// wrapped within the BaseControl by default. So it does not need
+	// to be wrapped again.
+	.has-error {
+		.components-base-control {
+			margin-bottom: 0;
+
+			.components-input-control__backdrop {
+				border-color: $studio-red-50;
+			}
+		}
+
+		.components-base-control__help {
+			color: $studio-red-50;
+		}
+	}
+
+	.components-base-control {
+		.components-base-control__field {
+			margin-bottom: 0;
+		}
+
+		.components-base-control__help {
+			margin-bottom: 0;
+		}
+	}
+
+	.components-toggle-control {
+		margin-bottom: 0;
+
+		.components-form-toggle {
+			display: flex;
+			align-items: center;
+		}
+
+		.components-toggle-control__label {
+			display: flex;
+			align-items: center;
+		}
+	}
+
+	.woocommerce-collapsible-content .woocommerce-collapsible-content__content {
+		margin-top: calc(2 * $gap);
+	}
+
+	.components-input-control {
+		&__input::placeholder {
+			color: $gray-700;
+		}
+
+		&__prefix {
+			margin-left: $gap-smaller;
+		}
+
+		&__suffix {
+			margin-right: $gap-smaller;
+		}
+	}
+
+	.woocommerce-product-form {
+		&__custom-label-input {
+			display: flex;
+			flex-direction: column;
+
+			label {
+				display: block;
+				margin-bottom: $gap-smaller;
+			}
+		}
+
+		&__optional-input {
+			color: $gray-700;
+		}
+	}
+
+	.wp-block-columns {
+		gap: $gap-large;
+		margin-bottom: 0;
+	}
+
+	.wp-block-column {
+		word-break: normal;
+	}
+
+	.woocommerce-experimental-select-control__label {
+		text-transform: uppercase;
+		font-size: 11px;
+		color: $gray-900;
+		font-weight: 500;
+	}
+
+	.block-editor-block-list__layout {
+		&.is-root-container {
+			padding-left: 0;
+			padding-right: 0;
+			padding-bottom: 128px;
+			margin-left: calc(2 * $gap);
+			margin-right: calc(2 * $gap);
+
+			@include breakpoint(">782px") {
+				max-width: 650px;
+				margin-left: auto;
+				margin-right: auto;
+			}
+		}
+
+		.block-editor-block-list__block {
+			/* Remove the outline for the block when it is focused */
+			&:not([contenteditable]):focus {
+				&::after {
+					display: none;
+				}
+			}
+
+			/* Address overflow issue */
+			fieldset {
+				min-width: 0;
+			}
+
+			/* Remove the outline for the block when it is editable */
+			&.has-editable-outline {
+				&::after {
+					display: none;
+				}
+			}
+		}
+	}
+}
+
+.woocommerce-product-block-editor {
+	.block-editor-block-list__layout.is-root-container.is-loading {
+		.wp-block-woocommerce-product-section__heading-title {
+			@include placeholder();
+			background-color: $gray-200;
+			border-radius: $grid-unit-05;
+			width: 300px;
+			height: 28px;
+			margin-bottom: $gap-smaller;
+		}
+
+		.woocommerce-product-form-label__label {
+			@include placeholder();
+			background-color: $gray-200;
+			border-radius: $grid-unit-05;
+			width: $grid-unit-80;
+			height: 28px;
+			margin-bottom: $gap-smaller;
+		}
+
+		.woocommerce-product-form-input {
+			@include placeholder();
+			background-color: $gray-200;
+			border-radius: $grid-unit-05;
+			width: 100%;
+			height: 36px;
+		}
+
+		.woocommerce-product-form-textarea {
+			@include placeholder();
+			background-color: $gray-200;
+			border-radius: $grid-unit-05;
+			width: 100%;
+			height: 108px;
+		}
+	}
+}
+
+.wp-admin.woocommerce-feature-enabled-product-block-editor {
+	.components-modal {
+		&__frame {
+			border-radius: $gap-smaller;
+		}
+		&__header {
+			border: none;
+		}
+	}
+}

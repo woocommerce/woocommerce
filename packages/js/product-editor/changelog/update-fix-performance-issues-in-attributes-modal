@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Product Block Editor: fix perfomance issue when rendering thousands of attributes in the attributes modal

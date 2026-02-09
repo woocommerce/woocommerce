@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Remove WooCommerce Navigation client side feature and deprecate PHP classes.

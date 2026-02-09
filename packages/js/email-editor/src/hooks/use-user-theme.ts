@@ -1,0 +1,46 @@
+/**
+ * External dependencies
+ */
+import { useCallback } from '@wordpress/element';
+import { useSelect, dispatch } from '@wordpress/data';
+import { store as coreStore } from '@wordpress/core-data';
+
+/**
+ * Internal dependencies
+ */
+import { EmailTheme, storeName } from '../store';
+
+export function useUserTheme() {
+	const { globalStylePost } = useSelect( ( select ) => {
+		const post = select( storeName ).getGlobalEmailStylesPost() || null;
+		return {
+			globalStylePost: post,
+		};
+	}, [] );
+
+	const updateGlobalStylesPost = useCallback(
+		( newTheme: EmailTheme ) => {
+			if ( ! globalStylePost ) {
+				return;
+			}
+			void dispatch( coreStore ).editEntityRecord(
+				'root',
+				'globalStyles',
+				globalStylePost.id,
+				{
+					styles: newTheme.styles,
+					settings: newTheme.settings,
+				}
+			);
+		},
+		[ globalStylePost ]
+	);
+
+	return {
+		userTheme: {
+			settings: globalStylePost?.settings,
+			styles: globalStylePost?.styles,
+		},
+		updateUserTheme: updateGlobalStylesPost,
+	};
+}

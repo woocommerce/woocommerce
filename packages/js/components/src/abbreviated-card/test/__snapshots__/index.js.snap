@@ -1,0 +1,55 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AbbreviatedCard it renders correctly 1`] = `
+<div>
+  <div
+    class="components-surface components-card woocommerce-abbreviated-card css-1lc0qq8-PolymorphicDiv-Surface-getBorders-primary-Card-rounded e19lxcc00"
+    data-wp-c16t="true"
+    data-wp-component="Card"
+  >
+    <div
+      class="css-76dw7d-PolymorphicDiv-Content e19lxcc00"
+    >
+      <div
+        class="components-card__body components-card-body css-dze2sy-PolymorphicDiv-Body-borderRadius e19lxcc00"
+        data-wp-c16t="true"
+        data-wp-component="CardBody"
+      >
+        <a
+          data-link-type="wc-admin"
+          href="#"
+        >
+          <div
+            class="woocommerce-abbreviated-card__icon"
+          >
+            <div
+              size="24"
+            >
+              icon
+            </div>
+          </div>
+          <div
+            class="woocommerce-abbreviated-card__content"
+          >
+            <p>
+              Abbreviated card content
+            </p>
+          </div>
+        </a>
+      </div>
+    </div>
+    <div
+      aria-hidden="true"
+      class="components-elevation css-1jg41yu-PolymorphicDiv-Elevation-sx-Base-sx-Base-elevationClassName e19lxcc00"
+      data-wp-c16t="true"
+      data-wp-component="Elevation"
+    />
+    <div
+      aria-hidden="true"
+      class="components-elevation css-1jg41yu-PolymorphicDiv-Elevation-sx-Base-sx-Base-elevationClassName e19lxcc00"
+      data-wp-c16t="true"
+      data-wp-component="Elevation"
+    />
+  </div>
+</div>
+`;

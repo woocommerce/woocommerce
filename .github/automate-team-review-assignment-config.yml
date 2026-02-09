@@ -1,0 +1,33 @@
+when:
+  - author:
+      teamIs:
+        - rubik
+      ignore:
+        nameIs:
+    assign:
+      teams:
+        - rubik
+  - author:
+      teamIs:
+        - woo-fse
+      ignore:
+        nameIs:
+    assign:
+      teams:
+        - woo-fse
+  - author:
+      teamIs:
+        - flux
+      ignore:
+        nameIs:
+    assign:
+      teams:
+        - flux
+  - author:
+      teamIs:
+        - ballade
+      ignore:
+        nameIs:
+    assign:
+      teams:
+        - ballade

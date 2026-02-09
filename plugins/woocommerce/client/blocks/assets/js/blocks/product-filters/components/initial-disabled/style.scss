@@ -1,0 +1,17 @@
+.wc-block-product-filter-components-initial-disabled {
+	position: relative;
+
+	.wc-block-product-filter-components-initial-disabled-overlay {
+		position: absolute;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		z-index: 1;
+
+		.is-selected > &,
+		.has-child-selected > & {
+			z-index: -1;
+		}
+	}
+}

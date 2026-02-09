@@ -1,0 +1,68 @@
+name: 🔧 Performance issue report
+description: Report a performance issue if something isn't performing well in WooCommerce Core.
+title: "[Performance]: "
+labels: [ "Enhancement", "Performance", "team: Flux"]
+projects: ["woocommerce/220"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### Thanks for contributing!
+
+        Please provide us with the information requested in this report. 
+        Without these details, we won't be able to evaluate this issue fully.
+        Reports lacking detail or for any other reason than to report a performance issue may be closed without action.
+
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: Prerequisites
+      description: Please confirm these before submitting the issue.
+      options:
+        - label: I have carried out troubleshooting steps and I believe I have identified a performance issue.
+        - label: I have searched for similar bugs in both open and closed issues and cannot find a duplicate.
+    validations:
+      required: true
+
+  - type: textarea
+    id: details
+    attributes:
+      label: Performance Details
+      description: Please describe how store functionality is affected and share low-performing URLs and their average execution time.
+      placeholder: |
+        Describe the user role, what they are trying to accomplish and on which store pages.
+
+        Request URL (without domain): 
+        Average Time: xx.xx seconds
+    validations:
+      required: true
+
+  - type: textarea
+    id: merchant
+    attributes:
+      label: Affected Sites
+      description: Please describe the rough number of completed orders and products in the affected store.
+      placeholder: |
+        Some examples are ~50, ~100, ~500, ~1K, ~10K, etc.
+        
+        Completed orders: 
+        Products in store:
+    validations:
+      required: true
+
+  - type: textarea
+    id: suspicions
+    attributes:
+      label: Suspected causes
+      description: If you have identified the root cause, please share details here (optional).
+    validations:
+      required: false
+
+  - type: textarea
+    id: other
+    attributes:
+      label: Other context
+      description: Please describe anything else that might be helpful around the issue (optional).
+    validations:
+      required: false
+
