@@ -14,13 +14,9 @@ final class WC_Admin_Reports_Test extends WC_Unit_Test_Case {
 		$this->assertSame( 10, has_action( 'woocommerce_delete_shop_order_transients', array( \WC_Admin_Reports::class, 'delete_legacy_reports_transients' ) ) );
 		$this->assertTrue( has_action( 'woocommerce_delete_legacy_report_transients' ) );
 
-		// Cleanup.
-		as_unschedule_action( 'woocommerce_delete_legacy_report_transients', null, 'woocommerce' );
-
 		// Verify the defer-workflow.
-		$this->assertFalse( as_has_scheduled_action( 'woocommerce_delete_legacy_report_transients', null, 'woocommerce' ) );
 		\WC_Admin_Reports::delete_legacy_reports_transients( 0 );
-		$this->assertTrue( as_has_scheduled_action( 'woocommerce_delete_legacy_report_transients', null, 'woocommerce' ) );
+		$this->assertCount( 1, as_get_scheduled_actions( array( 'hook' => 'woocommerce_delete_legacy_report_transients', 'group' => 'woocommerce' ), 'ids' ) );
 
 		// Cleanup.
 		as_unschedule_action( 'woocommerce_delete_legacy_report_transients', null, 'woocommerce' );
