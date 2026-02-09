@@ -14,19 +14,11 @@ final class WC_Admin_Reports_Test extends WC_Unit_Test_Case {
 		$this->assertSame( 10, has_action( 'woocommerce_delete_shop_order_transients', array( \WC_Admin_Reports::class, 'delete_legacy_reports_transients' ) ) );
 		$this->assertTrue( has_action( 'woocommerce_delete_legacy_report_transients' ) );
 
-		// Verify the defer-workflow.
-		\WC_Admin_Reports::delete_legacy_reports_transients( 0 );
-		$this->assertCount(
-			(int) ( ! wp_using_ext_object_cache() ),
-			as_get_scheduled_actions(
-				array(
-					'hook'   => 'woocommerce_delete_legacy_report_transients',
-					'group'  => 'woocommerce',
-					'status' => array( 'complete', 'pending' ),
-				),
-				'ids'
-			)
-		);
+		// Verify the defer-workflow: nov verifying for pending AS action as other tests already triggered the deferred workflow.
+		// Accordingly, we can only verify that we entered into defer-workflow + rely on manual testing for this PR.
+		set_transient( 'wc_admin_report', 'Verify defer' );
+		\WC_Admin_Reports::delete_legacy_reports_transients( 0, true );
+		$this->assertSame( 'Verify defer', get_transient( 'wc_admin_report' ) );
 
 		// Verify the purge-workflow.
 		set_transient( 'wc_admin_report', 'Verify deletion' );
