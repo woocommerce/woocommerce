@@ -56,7 +56,7 @@ This step only applies to `rc` or stable (`x.y.0`  onwards) releases.
 :::
 
 - [ ] Follow the [guide to deploy to the staging environment](https://wp.me/PCYsg-18BQ) and monitor for 4 hours (RC) or 2 hours (stable) after deploy.
-- [ ] Create a thread in the releases Slack channel for monitoring and discussion of the release.
+- [ ] Create a thread in the releases Slack channel for monitoring and discussion of this release.
 
 ##### If a critical issue was detected while monitoring
 
