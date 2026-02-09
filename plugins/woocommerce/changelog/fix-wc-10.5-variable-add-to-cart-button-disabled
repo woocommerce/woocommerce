@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Only disable add-to-cart button in variable products when wc-add-to-cart-variation is enqueued
