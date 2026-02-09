@@ -464,7 +464,7 @@ class Request {
 			$response_data = json_decode( $body, true );
 
 			if ( 200 !== $http_code && 204 !== $http_code ) {
-				throw new Exception( 'PayPal patch invoice_id failed. Response status: ' . $http_code . '. Response body: ' . $body );
+				throw new Exception( 'Failed to patch PayPal order invoice_id. Response status: ' . $http_code . '. Response body: ' . $body );
 			}
 
 			\WC_Gateway_Paypal::log( 'Successfully patched PayPal order invoice_id. PayPal Order ID: ' . $paypal_order_id . '. New invoice_id: ' . $new_invoice_id . '. Order ID: ' . $order->get_id() );
@@ -472,7 +472,7 @@ class Request {
 			$order->add_order_note(
 				sprintf(
 					/* translators: %1$s: New invoice ID */
-					__( 'PayPal order invoice_id updated to %1$s due to duplicate invoice_id error.', 'woocommerce' ),
+					__( 'PayPal order Invoice ID updated to %1$s due to duplicate Invoice ID error.', 'woocommerce' ),
 					esc_html( $new_invoice_id )
 				)
 			);
@@ -481,13 +481,7 @@ class Request {
 			// Retry authorizing or capturing the payment after patching the invoice_id.
 			$this->authorize_or_capture_payment( $order, $action_url, $action );
 		} catch ( Exception $e ) {
-			$log_message = 'Failed to patch PayPal order invoice_id. Error: ' . $e->getMessage() . '. Order ID: ' . $order->get_id();
-			// Try to get debug_id from response_data if available.
-			if ( is_array( $response_data ) && isset( $response_data['debug_id'] ) ) {
-				$log_message .= '. PayPal debug ID: ' . $response_data['debug_id'];
-			}
-			
-			\WC_Gateway_Paypal::log( $log_message );
+			\WC_Gateway_Paypal::log( $e->getMessage() );
 			throw new Exception( $e->getMessage() );
 		}
 	}
