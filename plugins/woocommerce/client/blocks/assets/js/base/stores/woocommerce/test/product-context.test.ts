@@ -132,7 +132,7 @@ describe( 'woocommerce/product-context store', () => {
 	} );
 
 	describe( 'selectedVariation', () => {
-		it( 'returns null when variationId is null (simple product)', () => {
+		it( 'returns null when variationId is null', () => {
 			expect( mockRegisteredStore ).not.toBeNull();
 
 			mockRegisteredStore!.state.productId = 42;

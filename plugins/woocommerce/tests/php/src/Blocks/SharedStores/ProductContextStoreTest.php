@@ -42,10 +42,11 @@ class ProductContextStoreTest extends WC_Unit_Test_Case {
 
 		$state = wp_interactivity_state( 'woocommerce/product-context' );
 
-		$this->assertArrayHasKey( 'productId', $state, 'State should contain productId' );
-		$this->assertSame( 42, $state['productId'], 'productId should match the provided value' );
-		$this->assertArrayHasKey( 'variationId', $state, 'State should contain variationId' );
-		$this->assertNull( $state['variationId'], 'variationId should default to null' );
+		$this->assertArrayHasKey( 'templateState', $state, 'State should contain templateState' );
+		$this->assertArrayHasKey( 'productId', $state['templateState'], 'templateState should contain productId' );
+		$this->assertSame( 42, $state['templateState']['productId'], 'productId should match the provided value' );
+		$this->assertArrayHasKey( 'variationId', $state['templateState'], 'templateState should contain variationId' );
+		$this->assertNull( $state['templateState']['variationId'], 'variationId should default to null' );
 	}
 
 	/**
@@ -60,10 +61,11 @@ class ProductContextStoreTest extends WC_Unit_Test_Case {
 
 		$state = wp_interactivity_state( 'woocommerce/product-context' );
 
-		$this->assertArrayHasKey( 'productId', $state, 'State should contain productId' );
-		$this->assertSame( 42, $state['productId'], 'productId should match the provided value' );
-		$this->assertArrayHasKey( 'variationId', $state, 'State should contain variationId' );
-		$this->assertSame( 99, $state['variationId'], 'variationId should match the provided value' );
+		$this->assertArrayHasKey( 'templateState', $state, 'State should contain templateState' );
+		$this->assertArrayHasKey( 'productId', $state['templateState'], 'templateState should contain productId' );
+		$this->assertSame( 42, $state['templateState']['productId'], 'productId should match the provided value' );
+		$this->assertArrayHasKey( 'variationId', $state['templateState'], 'templateState should contain variationId' );
+		$this->assertSame( 99, $state['templateState']['variationId'], 'variationId should match the provided value' );
 	}
 
 	/**
