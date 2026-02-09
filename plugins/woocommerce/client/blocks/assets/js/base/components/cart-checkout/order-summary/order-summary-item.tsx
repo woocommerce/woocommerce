@@ -12,11 +12,12 @@ import {
 } from '@woocommerce/price-format';
 import {
 	applyCheckoutFilter,
+	productPriceScreenReaderValidation,
 	productPriceValidation,
 } from '@woocommerce/blocks-checkout';
 import Dinero from 'dinero.js';
 import { getSetting } from '@woocommerce/settings';
-import { useMemo } from '@wordpress/element';
+import { createInterpolateElement, useMemo } from '@wordpress/element';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
 import { CartItem, isString } from '@woocommerce/types';
 import { calculateSaleAmount } from '@woocommerce/base-utils';
@@ -133,6 +134,30 @@ const OrderSummaryItem = ( {
 		validation: productPriceValidation,
 	} );
 
+	/* translators: <quantity/>, <productName/> and <price/> are placeholders and should not be translated. */
+	const productPriceScreenReaderDefault = _n(
+		'Total price for <quantity/> <productName/> item: <price/>',
+		'Total price for <quantity/> <productName/> items: <price/>',
+		quantity,
+		'woocommerce'
+	);
+
+	const productPriceScreenReaderFormat = applyCheckoutFilter( {
+		filterName: 'cartItemScreenReaderPrice',
+		defaultValue: productPriceScreenReaderDefault,
+		extensions,
+		arg,
+		validation: productPriceScreenReaderValidation,
+	} );
+
+	const ProductPriceScreenReaderOutput = () => {
+		return createInterpolateElement( productPriceScreenReaderFormat, {
+			quantity: <>{ quantity }</>,
+			productName: <>{ name }</>,
+			price: <>{ formatPrice( subtotalPrice, totalsCurrency ) }</>,
+		} );
+	};
+
 	const cartItemClassNameFilter = applyCheckoutFilter( {
 		filterName: 'cartItemClass',
 		defaultValue: '',
@@ -204,18 +229,7 @@ const OrderSummaryItem = ( {
 				<ProductMetadata { ...productMetaProps } />
 			</div>
 			<span className="screen-reader-text">
-				{ sprintf(
-					/* translators: %1$d is the number of items, %2$s is the item name and %3$s is the total price including the currency symbol. */
-					_n(
-						'Total price for %1$d %2$s item: %3$s',
-						'Total price for %1$d %2$s items: %3$s',
-						quantity,
-						'woocommerce'
-					),
-					quantity,
-					name,
-					formatPrice( subtotalPrice, totalsCurrency )
-				) }
+				<ProductPriceScreenReaderOutput />
 			</span>
 			<div
 				className="wc-block-components-order-summary-item__total-price"
