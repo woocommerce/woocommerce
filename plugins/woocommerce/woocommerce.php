@@ -23,8 +23,21 @@ if ( ! defined( 'WC_PLUGIN_FILE' ) ) {
 // Load core packages and the autoloader.
 require __DIR__ . '/src/Autoloader.php';
 require __DIR__ . '/src/Packages.php';
+require __DIR__ . '/src/Internal/FileManifest.php';
+
+// phpcs:disable WordPress.NamingConventions.ValidFunctionName.FunctionNameInvalid, Squiz.Commenting.FunctionComment.Missing
+
+if ( ! \Automattic\WooCommerce\Internal\FileManifest::verify_installation( __FILE__ ) ) {
+	function WC() {
+		return null;
+	}
+	return;
+}
 
 if ( ! \Automattic\WooCommerce\Autoloader::init() ) {
+	function WC() {
+		return null;
+	}
 	return;
 }
 \Automattic\WooCommerce\Packages::init();
@@ -32,6 +45,15 @@ if ( ! \Automattic\WooCommerce\Autoloader::init() ) {
 // Include the main WooCommerce class.
 if ( ! class_exists( 'WooCommerce', false ) ) {
 	include_once dirname( WC_PLUGIN_FILE ) . '/includes/class-woocommerce.php';
+}
+
+// If the class still doesn't exist the file failed to compile, treat it as an incomplete installation.
+if ( ! class_exists( 'WooCommerce', false ) ) {
+	\Automattic\WooCommerce\Internal\FileManifest::incomplete_installation( __FILE__ );
+	function WC() {
+		return null;
+	}
+	return;
 }
 
 // Initialize dependency injection.
@@ -43,9 +65,13 @@ $GLOBALS['wc_container'] = new Automattic\WooCommerce\Container();
  * @since  2.1
  * @return WooCommerce
  */
-function WC() { // phpcs:ignore WordPress.NamingConventions.ValidFunctionName.FunctionNameInvalid
-	return WooCommerce::instance();
+if ( ! function_exists( 'WC' ) ) {
+	function WC() {
+		return WooCommerce::instance();
+	}
 }
+
+// phpcs:enable WordPress.NamingConventions.ValidFunctionName.FunctionNameInvalid, Squiz.Commenting.FunctionComment.Missing
 
 /**
  * Returns the WooCommerce object container.
