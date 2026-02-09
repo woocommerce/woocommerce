@@ -354,7 +354,7 @@ class WC_Structured_Data {
 					'@type'                 => 'UnitPriceSpecification',
 					'price'                 => wc_format_decimal( $regular_price, wc_get_price_decimals() ),
 					'priceCurrency'         => $currency,
-					'valueAddedTaxIncluded' => 'incl' === get_option( 'woocommerce_tax_display_shop' ),
+					'valueAddedTaxIncluded' => 'incl' === $tax_display_mode,
 					'validThrough'          => $price_valid_until,
 				);
 				if ( $product->is_on_sale() ) {
@@ -385,7 +385,7 @@ class WC_Structured_Data {
 							'@type'                 => 'UnitPriceSpecification',
 							'price'                 => wc_format_decimal( $sale_price, wc_get_price_decimals() ),
 							'priceCurrency'         => $currency,
-							'valueAddedTaxIncluded' => 'incl' === get_option( 'woocommerce_tax_display_shop' ),
+							'valueAddedTaxIncluded' => 'incl' === $tax_display_mode,
 							'validThrough'          => $sale_price_valid_until ?? $price_valid_until,
 						)
 					);
