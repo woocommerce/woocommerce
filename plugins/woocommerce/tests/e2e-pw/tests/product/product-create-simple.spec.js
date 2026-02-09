@@ -242,7 +242,7 @@ for ( const productType of Object.keys( productData ) ) {
 						.getByPlaceholder( 'File name' )
 						.fill( productData[ productType ].fileName );
 					await page
-						.getByPlaceholder( 'http://' )
+						.getByPlaceholder( 'https://' )
 						.fill(
 							`https://example.com/${ productData[ productType ].fileName }`
 						);
