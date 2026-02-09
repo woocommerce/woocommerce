@@ -9,7 +9,7 @@ import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 import { tags, expect, test } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 
-let productId, couponId, orderId;
+let productId: number, couponId: number, orderId: number;
 
 const productPrice = '9.99';
 const productName = 'Apply Coupon Product';
@@ -31,7 +31,7 @@ test.describe(
 					type: 'simple',
 					regular_price: productPrice,
 				} )
-				.then( ( response ) => {
+				.then( ( response: { data: { id: number } } ) => {
 					productId = response.data.id;
 				} );
 			// create a $5 off coupon
@@ -41,7 +41,7 @@ test.describe(
 					discount_type: 'fixed_product',
 					amount: couponAmount,
 				} )
-				.then( ( response ) => {
+				.then( ( response: { data: { id: number } } ) => {
 					couponId = response.data.id;
 				} );
 			// create order
@@ -59,7 +59,7 @@ test.describe(
 						},
 					],
 				} )
-				.then( ( response ) => {
+				.then( ( response: { data: { id: number } } ) => {
 					orderId = response.data.id;
 				} );
 		} );

@@ -9,7 +9,7 @@ import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 import { tags, expect, test } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 
-const orderBatchId = [];
+const orderBatchId: number[] = [];
 const statusColumnTextSelector = 'mark.order-status > span';
 
 // Define order statuses to filter against
@@ -41,7 +41,7 @@ test.describe(
 			} );
 			await restApi
 				.post( `${ WC_API_PATH }/orders/batch`, { create: orders } )
-				.then( ( response ) => {
+				.then( ( response: { data: { create: { id: number }[] } } ) => {
 					for ( let i = 0; i < response.data.create.length; i++ ) {
 						orderBatchId.push( response.data.create[ i ].id );
 					}

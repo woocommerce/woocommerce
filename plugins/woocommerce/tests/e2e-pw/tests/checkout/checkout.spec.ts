@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { Page } from '@playwright/test';
 import {
 	addAProductToCart,
 	fillBillingCheckoutBlocks,
@@ -29,11 +30,11 @@ const checkoutPages = [
 ];
 
 /* region helpers */
-function isClassicCheckout( page ) {
+function isClassicCheckout( page: Page ) {
 	return page.url().includes( CLASSIC_CHECKOUT_PAGE.slug );
 }
 
-async function checkOrderDetails( page, product, qty, tax ) {
+async function checkOrderDetails( page: Page, product, qty: number, tax ) {
 	const expectedTotalPrice = (
 		parseFloat( product.price ) *
 		qty *
@@ -68,10 +69,10 @@ async function checkOrderDetails( page, product, qty, tax ) {
 }
 
 async function addProductToCartAndProceedToCheckout(
-	pageSlug,
-	page,
+	pageSlug: string,
+	page: Page,
 	product,
-	qty,
+	qty: number,
 	tax
 ) {
 	await addAProductToCart( page, product.id, qty );
@@ -79,7 +80,7 @@ async function addProductToCartAndProceedToCheckout(
 	await checkOrderDetails( page, product, qty, tax );
 }
 
-async function placeOrder( page ) {
+async function placeOrder( page: Page ) {
 	if ( ! isClassicCheckout( page ) ) {
 		await page.getByLabel( 'Add a note to your order' ).check();
 		// this helps with flakiness on clicking the Place order button
@@ -95,7 +96,7 @@ async function placeOrder( page ) {
 	).toBeVisible();
 }
 
-async function fillBillingDetails( page, data, createAccount ) {
+async function fillBillingDetails( page: Page, data, createAccount: boolean ) {
 	if ( isClassicCheckout( page ) ) {
 		await page
 			.getByRole( 'textbox', { name: 'First name' } )
@@ -268,12 +269,12 @@ const test = baseTest.extend( {
 			} );
 
 		// add a shipping zone and method for the customer
-		let shippingZoneId;
+		let shippingZoneId: number;
 		await restApi
 			.post( `${ WC_API_PATH }/shipping/zones`, {
 				name: `Free Shipping ${ customerData.shipping.city }`,
 			} )
-			.then( ( response ) => {
+			.then( ( response: { data: { id: number } } ) => {
 				shippingZoneId = response.data.id;
 			} );
 		await restApi.put(

@@ -19,7 +19,7 @@ test.describe(
 	'Add to Cart behavior',
 	{ tag: [ tags.PAYMENTS, tags.SERVICES ] },
 	() => {
-		let productId;
+		let productId: number;
 
 		test.beforeAll( async ( { restApi } ) => {
 			await restApi
@@ -28,7 +28,7 @@ test.describe(
 					type: 'simple',
 					regular_price: productPrice,
 				} )
-				.then( ( response ) => {
+				.then( ( response: { data: { id: number } } ) => {
 					productId = response.data.id;
 				} );
 		} );

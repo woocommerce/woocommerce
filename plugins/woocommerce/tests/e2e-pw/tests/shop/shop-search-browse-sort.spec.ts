@@ -32,7 +32,7 @@ test.describe(
 						console.log( JSON.stringify( response.data ) );
 					}
 				} )
-				.catch( ( error ) => {
+				.catch( ( error: { response: unknown } ) => {
 					console.error( error.response );
 				} );
 
@@ -56,7 +56,7 @@ test.describe(
 				.then( ( response ) => {
 					products = response.data.create;
 				} )
-				.catch( ( error ) => {
+				.catch( ( error: { response: unknown } ) => {
 					console.error( error.response );
 				} );
 		} );
