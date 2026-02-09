@@ -12,12 +12,14 @@ test.describe(
 
 		const visibilityOptions = { timeout: 30000 };
 
-		async function checkIfPayPalIsEnabled( paypalDiv ) {
+		function validStatusLabel( paypalDiv ) {
 			const labelActive = paypalDiv.getByText( 'Active' );
 			const labelTestAccount = paypalDiv.getByText( 'Test account' );
+			return labelActive.or( labelTestAccount );
+		}
 
-			// Confirm the status label is present with any of the expected texts.
-			await expect( labelActive.or( labelTestAccount ) ).toBeVisible(
+		async function isPayPalEnabled( paypalDiv ) {
+			return await validStatusLabel( paypalDiv ).isVisible(
 				visibilityOptions
 			);
 		}
@@ -72,7 +74,7 @@ test.describe(
 
 			const paypalDiv = await waitForPayPalToLoad( page );
 
-			if ( await checkIfPayPalIsEnabled( paypalDiv ) ) {
+			if ( await isPayPalEnabled( paypalDiv ) ) {
 				test.skip(
 					'PayPal Standard is already enabled, skipping enablement test.'
 				);
@@ -86,7 +88,9 @@ test.describe(
 				await enableLink.click();
 			} );
 
-			await checkIfPayPalIsEnabled( paypalDiv );
+			await expect( validStatusLabel( paypalDiv ) ).toBeVisible(
+				visibilityOptions
+			);
 
 			// Clean up by disabling PayPal again.
 			await test.step( 'Disable PayPal Standard', async () => {
