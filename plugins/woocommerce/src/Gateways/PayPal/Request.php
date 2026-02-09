@@ -266,6 +266,14 @@ class Request {
 			$http_code     = wp_remote_retrieve_response_code( $response );
 			$body          = wp_remote_retrieve_body( $response );
 			$response_data = json_decode( $body, true );
+			
+			$issue                 = isset( $response_data['details'][0]['issue'] ) ? $response_data['details'][0]['issue'] : '';
+			$duplicate_invoice_id  = 422 === $http_code && PayPalConstants::PAYPAL_ISSUE_DUPLICATE_INVOICE_ID === $issue;
+
+			if ( $duplicate_invoice_id ) {
+				$this->handle_duplicate_invoice_id( $order, $paypal_order_id, $action_url, $action );
+				return;
+			}
 
 			if ( 200 !== $http_code && 201 !== $http_code ) {
 				$paypal_debug_id = isset( $response_data['debug_id'] ) ? $response_data['debug_id'] : null;
@@ -414,6 +422,90 @@ class Request {
 			$order->add_order_note( $note_message );
 			$order->save();
 		}
+	}
+
+	/**
+	 * Handle duplicate invoice ID.
+	 * This is a workaround to handle the duplicate invoice ID error that occurs when the invoice ID is not unique.
+	 * We generate a new invoice ID and patch the invoice ID in the PayPal order.
+	 * Then we retry capturing the payment.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @param string   $paypal_order_id The PayPal order ID.
+	 * @param string   $action_url The action URL.
+	 * @param string   $action The action.
+	 * @return void
+	 */
+	public function handle_duplicate_invoice_id( WC_Order $order, string $paypal_order_id, string $action_url, string $action ): void {
+		$new_invoice_id = $this->generate_paypal_invoice_id( $order );
+
+		\WC_Gateway_Paypal::log( 'Attempting to patch PayPal order invoice_id. PayPal Order ID: ' . $paypal_order_id . '. New invoice_id: ' . $new_invoice_id . '. Order ID: ' . $order->get_id() );
+
+		try {
+			$request_body = array(
+				'test_mode' => $this->gateway->testmode,
+				'order'     => array(
+					array(
+						'op'    => 'replace',
+						'path' => "/purchase_units/@reference_id=='default'/invoice_id",
+						'value' => $new_invoice_id,
+					),
+				),
+			);
+
+			$response = $this->send_wpcom_proxy_request( 'POST', self::WPCOM_PROXY_ORDER_ENDPOINT . '/' . $paypal_order_id, $request_body );
+
+			if ( is_wp_error( $response ) ) {
+				throw new Exception( 'PayPal patch invoice_id request failed. Response error: ' . $response->get_error_message() );
+			}
+
+			$http_code     = wp_remote_retrieve_response_code( $response );
+			$body          = wp_remote_retrieve_body( $response );
+			$response_data = json_decode( $body, true );
+
+			if ( 200 !== $http_code && 204 !== $http_code ) {
+				throw new Exception( 'PayPal patch invoice_id failed. Response status: ' . $http_code . '. Response body: ' . $body );
+			}
+
+			\WC_Gateway_Paypal::log( 'Successfully patched PayPal order invoice_id. PayPal Order ID: ' . $paypal_order_id . '. New invoice_id: ' . $new_invoice_id . '. Order ID: ' . $order->get_id() );
+
+			$order->add_order_note(
+				sprintf(
+					/* translators: %1$s: New invoice ID */
+					__( 'PayPal order invoice_id updated to %1$s due to duplicate invoice_id error.', 'woocommerce' ),
+					esc_html( $new_invoice_id )
+				)
+			);
+			$order->save();
+		} catch ( Exception $e ) {
+			$log_message = 'Failed to patch PayPal order invoice_id. Error: ' . $e->getMessage() . '. Order ID: ' . $order->get_id();
+			// Try to get debug_id from response_data if available.
+			if ( is_array( $response_data ) && isset( $response_data['debug_id'] ) ) {
+				$log_message .= '. PayPal debug ID: ' . $response_data['debug_id'];
+			}
+			
+			\WC_Gateway_Paypal::log( $log_message );
+			throw new Exception( $e->getMessage() );
+		}
+	}
+
+	/**
+	 * Generate a unique invoice ID for the order.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return string
+	 */
+	private function generate_paypal_invoice_id( WC_Order $order ): string {
+		$prefix          = $this->gateway->get_option( 'invoice_prefix' );
+		$order_number    = $order->get_order_number();
+		$base_invoice_id = $prefix . $order_number;
+
+		// generate a unique ID for the site.
+		$site_id = class_exists( '\Jetpack_Options' ) ? (string) \Jetpack_Options::get_option( 'id' ) : '';
+		$unique_id = substr( md5( $site_id ), 0, 8 );
+
+		$invoice_id = $this->limit_length( $base_invoice_id . '-' . $unique_id, PayPalConstants::PAYPAL_INVOICE_ID_MAX_LENGTH );
+		return $invoice_id;
 	}
 
 	/**
@@ -619,7 +711,7 @@ class Request {
 				array(
 					'custom_id'  => $this->get_paypal_order_custom_id( $order ),
 					'amount'     => $purchase_unit_amount,
-					'invoice_id' => $this->limit_length( $this->gateway->get_option( 'invoice_prefix' ) . $order->get_order_number(), PayPalConstants::PAYPAL_INVOICE_ID_MAX_LENGTH ),
+					'invoice_id' => 'TEST-101', //$this->limit_length( $this->gateway->get_option( 'invoice_prefix' ) . $order->get_order_number(), PayPalConstants::PAYPAL_INVOICE_ID_MAX_LENGTH ),
 					'items'      => $order_items,
 					'payee'      => array(
 						'email_address' => $payee_email,
