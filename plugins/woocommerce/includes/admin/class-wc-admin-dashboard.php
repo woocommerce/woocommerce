@@ -477,6 +477,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		 * Recent reviews widget.
 		 */
 		public function recent_reviews() {
+<<<<<<< HEAD
 			// Backward compatibility mode: if any of the checked below hooks are in use, use the legacy implementation.
 			$has_legacy_query_filter         = has_filter( 'woocommerce_report_recent_reviews_query_from' );
 			$has_legacy_product_title_filter = has_filter( 'woocommerce_admin_dashboard_recent_reviews' );
@@ -526,6 +527,9 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			} else {
 				echo '<p>' . esc_html__( 'There are no product reviews yet.', 'woocommerce' ) . '</p>';
 			}
+=======
+			$this->legacy_recent_reviews();
+>>>>>>> ef169d0503 ([Fix] Admin: switch back to older version of recent reviews widget (#63168))
 		}
 
 		/**
