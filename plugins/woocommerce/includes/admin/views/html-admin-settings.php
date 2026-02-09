@@ -132,10 +132,12 @@ $marketplace_links = array(
 				$link_config = $marketplace_links[ $current_tab ];
 
 				if ( $link_config['is_external'] ) {
+					$utm_source    = 'settings_' . $current_tab . ( $current_section ? '_' . $current_section : '' );
+					$link_url      = add_query_arg( 'utm_source', $utm_source, $link_config['url'] );
 					$icon_url      = WC()->plugin_url() . '/assets/images/icons/external-link.svg';
 					$external_icon = '<img src="' . esc_url( $icon_url ) . '" alt="" />';
 					$screen_reader = '<span class="screen-reader-text">' . esc_html__( '(opens in a new tab)', 'woocommerce' ) . '</span>';
-					$link_open     = '<a href="' . esc_url( $link_config['url'] ) . '" target="_blank" rel="noopener noreferrer">' . $external_icon;
+					$link_open     = '<a href="' . esc_url( $link_url ) . '" target="_blank" rel="noopener noreferrer">' . $external_icon;
 					$link_close    = $screen_reader . '</a>';
 				} else {
 					$link_open  = '<a href="' . esc_url( $link_config['url'] ) . '">';
