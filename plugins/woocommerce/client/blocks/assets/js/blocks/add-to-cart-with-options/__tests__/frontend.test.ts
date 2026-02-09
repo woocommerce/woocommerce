@@ -33,7 +33,7 @@ jest.mock(
 	{ virtual: true }
 );
 
-jest.mock( '@woocommerce/stores/woocommerce/product-data', () => ( {} ), {
+jest.mock( '@woocommerce/stores/woocommerce/product-context', () => ( {} ), {
 	virtual: true,
 } );
 

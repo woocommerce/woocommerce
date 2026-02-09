@@ -9,7 +9,7 @@ import {
 } from '@wordpress/interactivity';
 import { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
 import type { ChangeEvent } from 'react';
-import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
+import type { ProductContextStore } from '@woocommerce/stores/woocommerce/product-context';
 import '@woocommerce/stores/woocommerce/products';
 import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 import type { ProductResponseItem } from '@woocommerce/types';
@@ -51,8 +51,8 @@ setStyles();
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-const { state: productDataState } = store< ProductDataStore >(
-	'woocommerce/product-data',
+const { state: productContextState } = store< ProductContextStore >(
+	'woocommerce/product-context',
 	{},
 	{ lock: universalLock }
 );
@@ -101,7 +101,7 @@ const isAttributeValueValid = ( {
 		? selectedAttributes.length - 1
 		: selectedAttributes.length;
 
-	const product = productsState.products[ productDataState.productId ];
+	const product = productsState.products[ productContextState.productId ];
 
 	if ( ! product?.variations?.length ) {
 		return false;
@@ -341,7 +341,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				}
 
 				const product =
-					productsState.products[ productDataState.productId ];
+					productsState.products[ productContextState.productId ];
 				if ( ! product ) {
 					return;
 				}
@@ -409,7 +409,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 			},
 			setSelectedVariationId: () => {
 				const product =
-					productsState.products[ productDataState.productId ];
+					productsState.products[ productContextState.productId ];
 
 				if ( ! product?.variations?.length ) {
 					return;
@@ -421,13 +421,13 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					selectedAttributes
 				);
 
-				const { actions: productDataActions } =
-					store< ProductDataStore >(
-						'woocommerce/product-data',
+				const { actions: productContextActions } =
+					store< ProductContextStore >(
+						'woocommerce/product-context',
 						{},
 						{ lock: universalLock }
 					);
-				productDataActions.setVariationId(
+				productContextActions.setVariationId(
 					matchedVariation?.id ?? null
 				);
 			},
@@ -435,7 +435,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				actions.clearErrors( 'variable-product' );
 
 				const product =
-					productsState.products[ productDataState.productId ];
+					productsState.products[ productContextState.productId ];
 
 				if ( ! product?.variations?.length ) {
 					return;
@@ -496,7 +496,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				const { selectedAttributes } = getContext< Context >();
 
 				const productObject = getProductData(
-					productDataState.productId,
+					productContextState.productId,
 					selectedAttributes
 				);
 
@@ -517,7 +517,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 						newValue !== currentValue
 					) {
 						actions.setQuantity(
-							productDataState.productId,
+							productContextState.productId,
 							newValue
 						);
 					}

@@ -134,7 +134,6 @@ const coreModules = [
 	'@woocommerce/stores/store-notices',
 	'@woocommerce/stores/woocommerce/cart',
 	'@woocommerce/stores/woocommerce/product-context',
-	'@woocommerce/stores/woocommerce/product-data',
 	'@woocommerce/tracks',
 	'@woocommerce/data',
 	'@woocommerce/customer-effort-score',
