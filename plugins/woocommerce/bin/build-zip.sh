@@ -38,6 +38,9 @@ composer dump-autoload --no-dev --quiet --optimize || exit "$?"
 # Remove composer files from the build.
 rm composer.*
 
+echo "Generating file manifest for installation integrity checks..."
+php "$PROJECT_PATH/bin/generate-file-manifest.php" "$DEST_PATH" || exit "$?"
+
 echo "Generating zip file..."
 cd "$BUILD_PATH" || exit
 zip -q -r -9 "${PLUGIN_SLUG}.zip" "$PLUGIN_SLUG/"

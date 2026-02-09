@@ -30,5 +30,8 @@ tests/cli/vendor
 # Language files
 i18n/languages/woocommerce.pot
 
+# File manifest (generated at build time)
+/file-manifest.php
+
 # Environment files
 .wp-env.override.json
