@@ -1,8 +1,12 @@
 /**
+ * External dependencies
+ */
+import { test, expect } from '@playwright/test';
+
+/**
  * Internal dependencies
  */
-const { test, expect } = require( '@playwright/test' );
-const { CUSTOMER_STATE_PATH } = require( '../../playwright.config' );
+import { CUSTOMER_STATE_PATH } from '../../playwright.config';
 
 test.describe( 'Customer-role users are blocked from accessing the WP Dashboard.', () => {
 	test.use( { storageState: CUSTOMER_STATE_PATH } );

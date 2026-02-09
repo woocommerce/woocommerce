@@ -1,6 +1,13 @@
-const { test, expect } = require( '@playwright/test' );
-const { logIn } = require( '../../utils/login' );
-const { admin, customer } = require( '../../test-data/data' );
+/**
+ * External dependencies
+ */
+import { test, expect } from '@playwright/test';
+
+/**
+ * Internal dependencies
+ */
+import { logIn } from '../../utils/login';
+import { admin, customer } from '../../test-data/data';
 
 test( 'Load the home page', async ( { page } ) => {
 	await page.goto( './' );
