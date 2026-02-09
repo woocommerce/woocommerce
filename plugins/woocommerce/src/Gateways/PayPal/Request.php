@@ -477,6 +477,9 @@ class Request {
 				)
 			);
 			$order->save();
+
+			// Retry authorizing or capturing the payment after patching the invoice_id.
+			$this->authorize_or_capture_payment( $order, $action_url, $action );
 		} catch ( Exception $e ) {
 			$log_message = 'Failed to patch PayPal order invoice_id. Error: ' . $e->getMessage() . '. Order ID: ' . $order->get_id();
 			// Try to get debug_id from response_data if available.
