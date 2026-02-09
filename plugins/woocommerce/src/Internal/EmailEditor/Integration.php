@@ -52,6 +52,13 @@ class Integration {
 	private EmailApiController $email_api_controller;
 
 	/**
+	 * The WC_Email instance.
+	 *
+	 * @var \WC_Email
+	 */
+	private \WC_Email $wc_email_instance;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -108,6 +115,15 @@ class Integration {
 		$this->editor_page_renderer    = $container->get( PageRenderer::class );
 		$this->template_api_controller = $container->get( TemplateApiController::class );
 		$this->email_api_controller    = $container->get( EmailApiController::class );
+
+		// Using any email class to get the instance.
+		$registered_emails = \WC_Emails::instance()->get_emails();
+		if ( isset( $registered_emails['WC_Email_New_Order'] ) ) {
+			$this->wc_email_instance = $registered_emails['WC_Email_New_Order'];
+		} else {
+			$first_email_key         = array_key_first( $registered_emails );
+			$this->wc_email_instance = $registered_emails[ $first_email_key ];
+		}
 	}
 
 	/**
@@ -121,6 +137,8 @@ class Integration {
 		add_filter( 'woocommerce_email_editor_send_preview_email_rendered_data', array( $this, 'update_send_preview_email_rendered_data' ), 10, 2 );
 		add_filter( 'woocommerce_email_editor_send_preview_email_personalizer_context', array( $this, 'update_send_preview_email_personalizer_context' ) );
 		add_filter( 'woocommerce_email_editor_preview_post_template_html', array( $this, 'update_preview_post_template_html_data' ), 100, 1 );
+		add_action( 'woocommerce_email_editor_send_preview_email_before_wp_mail', array( $this, 'send_preview_email_before_wp_mail' ), 10 );
+		add_action( 'woocommerce_email_editor_send_preview_email_after_wp_mail', array( $this, 'send_preview_email_after_wp_mail' ), 10 );
 	}
 
 	/**
@@ -374,5 +392,27 @@ class Integration {
 				'schema'          => $this->email_api_controller->get_email_data_schema(),
 			)
 		);
+	}
+
+	/**
+	 * Action hook callback before sending the preview email via wp_mail
+	 *
+	 * @since 10.6.0
+	 * @return void
+	 */
+	public function send_preview_email_before_wp_mail() {
+		add_filter( 'wp_mail_from', array( $this->wc_email_instance, 'get_from_address' ) );
+		add_filter( 'wp_mail_from_name', array( $this->wc_email_instance, 'get_from_name' ) );
+	}
+
+	/**
+	 * Action hook callback after sending the preview email via wp_mail.
+	 *
+	 * @since 10.6.0
+	 * @return void
+	 */
+	public function send_preview_email_after_wp_mail() {
+		remove_filter( 'wp_mail_from', array( $this->wc_email_instance, 'get_from_address' ) );
+		remove_filter( 'wp_mail_from_name', array( $this->wc_email_instance, 'get_from_name' ) );
 	}
 }

@@ -54,9 +54,15 @@ class DecisionHandlerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should apply allow decision and update session to allowed.
+	 * Test apply allow decision.
+	 *
+	 * @testdox Should apply allow decision and update session to allowed when session is not blocked.
 	 */
 	public function test_apply_allow_decision(): void {
+		$this->session_manager
+			->method( 'is_session_blocked' )
+			->willReturn( false );
+
 		$this->session_manager
 			->expects( $this->once() )
 			->method( 'allow_session' );
@@ -67,6 +73,30 @@ class DecisionHandlerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test allow decision does not overwrite blocked session.
+	 *
+	 * @testdox Should preserve blocked session status when allow decision is received.
+	 *
+	 * This prevents race conditions where emptying the cart during block_session
+	 * causes subsequent fraud checks to return "allow" (due to lower cart value).
+	 */
+	public function test_allow_decision_does_not_overwrite_blocked_session(): void {
+		$this->session_manager
+			->method( 'is_session_blocked' )
+			->willReturn( true );
+
+		$this->session_manager
+			->expects( $this->never() )
+			->method( 'allow_session' );
+
+		$result = $this->sut->apply_decision( ApiClient::DECISION_ALLOW, array( 'session_id' => 'test' ) );
+
+		$this->assertLogged( 'info', 'Preserving blocked session status' );
+	}
+
+	/**
+	 * Test apply block decision.
+	 *
 	 * @testdox Should apply block decision and update session to blocked.
 	 */
 	public function test_apply_block_decision(): void {
@@ -80,9 +110,15 @@ class DecisionHandlerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test invalid decision defaults to allow.
+	 *
 	 * @testdox Should default to allow for invalid decision and log warning.
 	 */
 	public function test_invalid_decision_defaults_to_allow(): void {
+		$this->session_manager
+			->method( 'is_session_blocked' )
+			->willReturn( false );
+
 		$this->session_manager
 			->expects( $this->once() )
 			->method( 'allow_session' );
@@ -94,6 +130,8 @@ class DecisionHandlerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test filter can override block to allow.
+	 *
 	 * @testdox Should allow filter to override decision from block to allow.
 	 */
 	public function test_filter_can_override_block_to_allow(): void {
@@ -103,6 +141,10 @@ class DecisionHandlerTest extends WC_Unit_Test_Case {
 				return ApiClient::DECISION_ALLOW;
 			}
 		);
+
+		$this->session_manager
+			->method( 'is_session_blocked' )
+			->willReturn( false );
 
 		$this->session_manager
 			->expects( $this->once() )
@@ -115,6 +157,8 @@ class DecisionHandlerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test filter can override allow to block.
+	 *
 	 * @testdox Should allow filter to override decision from allow to block.
 	 */
 	public function test_filter_can_override_allow_to_block(): void {
@@ -136,6 +180,8 @@ class DecisionHandlerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test filter invalid return uses original decision.
+	 *
 	 * @testdox Should reject invalid filter return value and use original decision.
 	 */
 	public function test_filter_invalid_return_uses_original_decision(): void {

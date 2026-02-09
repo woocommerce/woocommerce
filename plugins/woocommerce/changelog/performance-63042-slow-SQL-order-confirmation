@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Orders: optimized a slow SQL query executed on the order confirmation page, checking for the existence of downloadable products.

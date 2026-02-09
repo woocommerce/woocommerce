@@ -28,12 +28,11 @@ class SessionClearanceManagerTest extends \WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->sut = new SessionClearanceManager();
 
-		// Ensure WooCommerce cart and session are available.
-		if ( ! did_action( 'woocommerce_load_cart_from_session' ) && function_exists( 'wc_load_cart' ) ) {
-			wc_load_cart();
-		}
+		WC()->session = new \WC_Session_Handler();
+		WC()->session->init();
+
+		$this->sut = new SessionClearanceManager();
 	}
 
 	/**

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Compatibility with WP 6.9: improve the way WooCommerce block theme styles are enqueued

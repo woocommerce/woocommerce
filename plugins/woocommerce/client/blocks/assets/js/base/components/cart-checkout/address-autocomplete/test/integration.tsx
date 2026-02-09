@@ -12,6 +12,13 @@ import type { StoreDescriptor } from '@wordpress/data';
  * Internal dependencies
  */
 import { AddressAutocomplete } from '../address-autocomplete';
+
+const mockUseCheckoutAddress = jest.fn();
+jest.mock( '@woocommerce/base-context', () => ( {
+	...jest.requireActual( '@woocommerce/base-context' ),
+	useCheckoutAddress: () => mockUseCheckoutAddress(),
+} ) );
+
 jest.mock( '@wordpress/data', () => ( {
 	__esModule: true,
 	...jest.requireActual( '@wordpress/data' ),
@@ -78,6 +85,11 @@ jest.mock( '@woocommerce/settings', () => ( {
 } ) );
 describe( 'Suggestions - when rendered in AddressAutocomplete component', () => {
 	beforeAll( () => {
+		mockUseCheckoutAddress.mockReturnValue( {
+			useShippingAsBilling: false,
+			useBillingAsShipping: false,
+		} );
+
 		const genericProvider = {
 			id: 'generic-provider',
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -124,6 +136,14 @@ describe( 'Suggestions - when rendered in AddressAutocomplete component', () => 
 			},
 		};
 	} );
+
+	afterEach( () => {
+		mockUseCheckoutAddress.mockReturnValue( {
+			useShippingAsBilling: false,
+			useBillingAsShipping: false,
+		} );
+	} );
+
 	it( 'Shows suggestions when provider returns results', async () => {
 		const Component = () => {
 			const [ value, setValue ] = useState( '' );
@@ -1221,5 +1241,237 @@ describe( 'Suggestions - when rendered in AddressAutocomplete component', () => 
 			// Still no suggestions should appear
 			expect( screen.queryByRole( 'listbox' ) ).not.toBeInTheDocument();
 		} );
+	} );
+
+	describe( 'Address sync behavior', () => {
+		beforeEach( () => {
+			const genericProvider = {
+				id: 'generic-provider',
+				canSearch: () => true,
+				search: async () => [
+					{
+						label: '123 Example St, Berlin, Germany',
+						id: '1',
+						matchedSubstrings: [ { length: 3, offset: 0 } ],
+					},
+					{
+						label: '456 Sample Rd, Munich, Germany',
+						id: '2',
+						matchedSubstrings: [ { length: 3, offset: 0 } ],
+					},
+				],
+				select: async () => ( {
+					address_1: '123 Example St',
+					address_2: 'Address 2',
+					city: 'Berlin',
+					state: 'BE',
+					postcode: '10115',
+					country: 'DE',
+				} ),
+			};
+
+			window.wc.addressAutocomplete.providers[ 'generic-provider' ] =
+				genericProvider;
+			window.wc.addressAutocomplete.activeProvider.shipping =
+				genericProvider;
+			window.wc.addressAutocomplete.activeProvider.billing =
+				genericProvider;
+		} );
+
+		it.each( [ 'Enter key', 'click' ] )(
+			'Shipping autocomplete syncs to billing when useShippingAsBilling is true (%s)',
+			async ( interactionMethod ) => {
+				const mockSetBillingAddress = jest.fn();
+				const mockSetShippingAddress = jest.fn();
+
+				mockUseCheckoutAddress.mockReturnValue( {
+					useShippingAsBilling: true,
+					useBillingAsShipping: false,
+				} );
+
+				wpData.useDispatch.mockImplementation(
+					( store: StoreDescriptor | string ) => {
+						if (
+							store === cartStore ||
+							store === 'wc/store/cart'
+						) {
+							return {
+								...jest
+									.requireActual( '@wordpress/data' )
+									.useDispatch( store ),
+								setShippingAddress: mockSetShippingAddress,
+								setBillingAddress: mockSetBillingAddress,
+							};
+						}
+						return jest
+							.requireActual( '@wordpress/data' )
+							.useDispatch( store );
+					}
+				);
+
+				const Component = () => {
+					const [ value, setValue ] = useState( '' );
+					return (
+						<AddressAutocomplete
+							addressType="shipping"
+							id="shipping-test"
+							label="Address 1"
+							onChange={ setValue }
+							value={ value }
+						/>
+					);
+				};
+				render( <Component /> );
+				const input = screen.getByLabelText( 'Address 1' );
+
+				await act( async () => {
+					await userEvent.type( input, '1234' );
+				} );
+
+				await waitFor(
+					() => {
+						expect(
+							screen.getByRole( 'listbox' )
+						).toBeInTheDocument();
+					},
+					{ timeout: 3000 }
+				);
+
+				if ( interactionMethod === 'Enter key' ) {
+					await act( async () => {
+						await userEvent.type( input, '{arrowdown}' );
+					} );
+					await act( async () => {
+						await userEvent.type( input, '{Enter}' );
+					} );
+				} else {
+					const options = screen.getAllByRole( 'option' );
+					await act( async () => {
+						await userEvent.click( options[ 0 ] );
+					} );
+				}
+
+				await waitFor(
+					() => {
+						expect( mockSetShippingAddress ).toHaveBeenCalled();
+					},
+					{ timeout: 3000 }
+				);
+
+				const expectedAddress = {
+					address_1: '123 Example St',
+					address_2: 'Address 2',
+					city: 'Berlin',
+					state: 'BE',
+					postcode: '10115',
+					country: 'DE',
+				};
+
+				expect( mockSetShippingAddress ).toHaveBeenCalledWith(
+					expectedAddress
+				);
+				expect( mockSetBillingAddress ).toHaveBeenCalledWith(
+					expectedAddress
+				);
+			}
+		);
+
+		it.each( [ 'Enter key', 'click' ] )(
+			'Billing autocomplete syncs to shipping when useBillingAsShipping is true (%s)',
+			async ( interactionMethod ) => {
+				const mockSetBillingAddress = jest.fn();
+				const mockSetShippingAddress = jest.fn();
+
+				mockUseCheckoutAddress.mockReturnValue( {
+					useShippingAsBilling: false,
+					useBillingAsShipping: true,
+				} );
+
+				wpData.useDispatch.mockImplementation(
+					( store: StoreDescriptor | string ) => {
+						if (
+							store === cartStore ||
+							store === 'wc/store/cart'
+						) {
+							return {
+								...jest
+									.requireActual( '@wordpress/data' )
+									.useDispatch( store ),
+								setShippingAddress: mockSetShippingAddress,
+								setBillingAddress: mockSetBillingAddress,
+							};
+						}
+						return jest
+							.requireActual( '@wordpress/data' )
+							.useDispatch( store );
+					}
+				);
+
+				const Component = () => {
+					const [ value, setValue ] = useState( '' );
+					return (
+						<AddressAutocomplete
+							addressType="billing"
+							id="billing-test"
+							label="Address 1"
+							onChange={ setValue }
+							value={ value }
+						/>
+					);
+				};
+				render( <Component /> );
+				const input = screen.getByLabelText( 'Address 1' );
+
+				await act( async () => {
+					await userEvent.type( input, '1234' );
+				} );
+
+				await waitFor(
+					() => {
+						expect(
+							screen.getByRole( 'listbox' )
+						).toBeInTheDocument();
+					},
+					{ timeout: 3000 }
+				);
+
+				if ( interactionMethod === 'Enter key' ) {
+					await act( async () => {
+						await userEvent.type( input, '{arrowdown}' );
+					} );
+					await act( async () => {
+						await userEvent.type( input, '{Enter}' );
+					} );
+				} else {
+					const options = screen.getAllByRole( 'option' );
+					await act( async () => {
+						await userEvent.click( options[ 0 ] );
+					} );
+				}
+
+				await waitFor(
+					() => {
+						expect( mockSetBillingAddress ).toHaveBeenCalled();
+					},
+					{ timeout: 3000 }
+				);
+
+				const expectedAddress = {
+					address_1: '123 Example St',
+					address_2: 'Address 2',
+					city: 'Berlin',
+					state: 'BE',
+					postcode: '10115',
+					country: 'DE',
+				};
+
+				expect( mockSetBillingAddress ).toHaveBeenCalledWith(
+					expectedAddress
+				);
+				expect( mockSetShippingAddress ).toHaveBeenCalledWith(
+					expectedAddress
+				);
+			}
+		);
 	} );
 } );

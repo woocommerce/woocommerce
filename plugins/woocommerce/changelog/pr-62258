@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Add caching and cache control headers for product REST API responses

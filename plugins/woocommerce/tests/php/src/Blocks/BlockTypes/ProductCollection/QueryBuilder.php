@@ -919,4 +919,316 @@ class QueryBuilder extends \WP_UnitTestCase {
 		wp_delete_term( $featured_tag_id, 'product_tag' );
 		wp_delete_term( $sale_tag_id, 'product_tag' );
 	}
+
+	/**
+	 * Tests that the by-brand collection handler works as expected.
+	 */
+	public function test_collection_by_brand() {
+		// Create test brands.
+		$nike_brand    = wp_create_term( 'Nike', 'product_brand' );
+		$nike_brand_id = $nike_brand['term_id'];
+
+		$adidas_brand    = wp_create_term( 'Adidas', 'product_brand' );
+		$adidas_brand_id = $adidas_brand['term_id'];
+
+		// Create test products.
+		$nike_shoes = WC_Helper_Product::create_simple_product();
+		$nike_shoes->set_name( 'Nike Shoes' );
+		$nike_shoes->save();
+
+		$nike_shirt = WC_Helper_Product::create_simple_product();
+		$nike_shirt->set_name( 'Nike Shirt' );
+		$nike_shirt->save();
+
+		$adidas_shoes = WC_Helper_Product::create_simple_product();
+		$adidas_shoes->set_name( 'Adidas Shoes' );
+		$adidas_shoes->save();
+
+		$unbranded_product = WC_Helper_Product::create_simple_product();
+		$unbranded_product->set_name( 'Unbranded Product' );
+		$unbranded_product->save();
+
+		// Assign products to brands.
+		wp_set_object_terms( $nike_shoes->get_id(), $nike_brand_id, 'product_brand' );
+		wp_set_object_terms( $nike_shirt->get_id(), $nike_brand_id, 'product_brand' );
+		wp_set_object_terms( $adidas_shoes->get_id(), $adidas_brand_id, 'product_brand' );
+		// unbranded_product has no brand.
+
+		// Test filtering by Nike brand - Frontend.
+		$merged_query = Utils::initialize_merged_query(
+			$this->block_instance,
+			null,
+			array(
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+				'tax_query' => array(
+					array(
+						'taxonomy'         => 'product_brand',
+						'terms'            => array( $nike_brand_id ),
+						'include_children' => false,
+					),
+				),
+			)
+		);
+
+		$query             = new WP_Query( $merged_query );
+		$found_product_ids = wp_list_pluck( $query->posts, 'ID' );
+
+		// Should return Nike shoes and Nike shirt.
+		$this->assertContains( $nike_shoes->get_id(), $found_product_ids );
+		$this->assertContains( $nike_shirt->get_id(), $found_product_ids );
+		$this->assertNotContains( $adidas_shoes->get_id(), $found_product_ids );
+		$this->assertNotContains( $unbranded_product->get_id(), $found_product_ids );
+
+		// Test filtering by Nike brand - Editor.
+		$args    = array(
+			'posts_per_page' => 10,
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+			'tax_query'      => array(
+				array(
+					'taxonomy'         => 'product_brand',
+					'terms'            => array( $nike_brand_id ),
+					'include_children' => false,
+				),
+			),
+		);
+		$request = Utils::build_request();
+
+		$updated_query    = $this->block_instance->update_rest_query_in_editor( $args, $request );
+		$editor_query     = new WP_Query( $updated_query );
+		$editor_found_ids = wp_list_pluck( $editor_query->posts, 'ID' );
+
+		// Should return Nike shoes and Nike shirt in editor as well.
+		$this->assertContains( $nike_shoes->get_id(), $editor_found_ids );
+		$this->assertContains( $nike_shirt->get_id(), $editor_found_ids );
+		$this->assertNotContains( $adidas_shoes->get_id(), $editor_found_ids );
+		$this->assertNotContains( $unbranded_product->get_id(), $editor_found_ids );
+
+		// Test filtering by Adidas brand - Frontend.
+		$merged_query_adidas = Utils::initialize_merged_query(
+			$this->block_instance,
+			null,
+			array(
+				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+				'tax_query' => array(
+					array(
+						'taxonomy'         => 'product_brand',
+						'terms'            => array( $adidas_brand_id ),
+						'include_children' => false,
+					),
+				),
+			)
+		);
+
+		$query_adidas     = new WP_Query( $merged_query_adidas );
+		$found_adidas_ids = wp_list_pluck( $query_adidas->posts, 'ID' );
+
+		// Should return only Adidas shoes.
+		$this->assertNotContains( $nike_shoes->get_id(), $found_adidas_ids );
+		$this->assertNotContains( $nike_shirt->get_id(), $found_adidas_ids );
+		$this->assertContains( $adidas_shoes->get_id(), $found_adidas_ids );
+		$this->assertNotContains( $unbranded_product->get_id(), $found_adidas_ids );
+
+		// Test filtering by Adidas brand - Editor.
+		$args_adidas    = array(
+			'posts_per_page' => 10,
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+			'tax_query'      => array(
+				array(
+					'taxonomy'         => 'product_brand',
+					'terms'            => array( $adidas_brand_id ),
+					'include_children' => false,
+				),
+			),
+		);
+		$request_adidas = Utils::build_request();
+
+		$updated_query_adidas = $this->block_instance->update_rest_query_in_editor( $args_adidas, $request_adidas );
+		$editor_query_adidas  = new WP_Query( $updated_query_adidas );
+		$editor_adidas_ids    = wp_list_pluck( $editor_query_adidas->posts, 'ID' );
+
+		// Should return only Adidas shoes in editor as well.
+		$this->assertNotContains( $nike_shoes->get_id(), $editor_adidas_ids );
+		$this->assertNotContains( $nike_shirt->get_id(), $editor_adidas_ids );
+		$this->assertContains( $adidas_shoes->get_id(), $editor_adidas_ids );
+		$this->assertNotContains( $unbranded_product->get_id(), $editor_adidas_ids );
+
+		$nike_shoes->delete();
+		$nike_shirt->delete();
+		$adidas_shoes->delete();
+		$unbranded_product->delete();
+		wp_delete_term( $nike_brand_id, 'product_brand' );
+		wp_delete_term( $adidas_brand_id, 'product_brand' );
+	}
+
+	/**
+	 * Test merging filter queries by Category Slug (e.g. ?categories=accessories).
+	 */
+	public function test_merging_filter_by_category_slug() {
+		// Set the URL query variables.
+		set_query_var( 'categories', 'accessories' );
+
+		// Execute the query builder.
+		$merged_query   = Utils::initialize_merged_query( $this->block_instance );
+		$filter_clauses = $this->extract_filter_clauses( $merged_query['tax_query'] );
+
+		// Assertions.
+		$this->assertContainsEquals(
+			array(
+				'taxonomy' => 'product_cat',
+				'field'    => 'slug',
+				'terms'    => array( 'accessories' ),
+				'operator' => 'IN',
+			),
+			$filter_clauses,
+			'Should contain correct product_cat tax query using slug.'
+		);
+
+		// Clean up.
+		set_query_var( 'categories', '' );
+	}
+
+	/**
+	 * Test merging filter queries specifically for Tags.
+	 * Scenario: ?tags=tag-new (Slug)
+	 */
+	public function test_merging_filter_by_tags() {
+		// Set the URL query variables.
+		set_query_var( 'tags', 'tag-new' );
+
+		// Execute the query builder.
+		$merged_query   = Utils::initialize_merged_query( $this->block_instance );
+		$filter_clauses = $this->extract_filter_clauses( $merged_query['tax_query'] );
+
+		// Assertions.
+		$this->assertContainsEquals(
+			array(
+				'taxonomy' => 'product_tag',
+				'field'    => 'slug',
+				'terms'    => array( 'tag-new' ),
+				'operator' => 'IN',
+			),
+			$filter_clauses,
+			'Should contain correct product_tag tax query with IN operator.'
+		);
+
+		// Clean up.
+		set_query_var( 'tags', '' );
+	}
+
+	/**
+	 * Test merging filter queries for Categories, Tags, and Brands simultaneously.
+	 * Scenario: ?categories=accessories&tags=tag-new&brands=nike
+	 */
+	public function test_merging_filter_by_all_taxonomies_together() {
+		// Set the URL query variables.
+		set_query_var( 'categories', 'accessories' );
+		set_query_var( 'tags', 'tag-new' );
+		set_query_var( 'brands', 'nike' );
+
+		// Execute the query builder.
+		$merged_query   = Utils::initialize_merged_query( $this->block_instance );
+		$filter_clauses = $this->extract_filter_clauses( $merged_query['tax_query'] );
+
+		// Assertions.
+		// Verify Category.
+		$this->assertContainsEquals(
+			array(
+				'taxonomy' => 'product_cat',
+				'field'    => 'slug',
+				'terms'    => array( 'accessories' ),
+				'operator' => 'IN',
+			),
+			$filter_clauses,
+			'Should contain correct product_cat tax query.'
+		);
+
+		// Verify Tag.
+		$this->assertContainsEquals(
+			array(
+				'taxonomy' => 'product_tag',
+				'field'    => 'slug',
+				'terms'    => array( 'tag-new' ),
+				'operator' => 'IN',
+			),
+			$filter_clauses,
+			'Should contain correct product_tag tax query.'
+		);
+
+		// Verify Brand.
+		$this->assertContainsEquals(
+			array(
+				'taxonomy' => 'product_brand',
+				'field'    => 'slug',
+				'terms'    => array( 'nike' ),
+				'operator' => 'IN',
+			),
+			$filter_clauses,
+			'Should contain correct product_brand tax query.'
+		);
+
+		// Clean up global state.
+		set_query_var( 'categories', '' );
+		set_query_var( 'tags', '' );
+		set_query_var( 'brands', '' );
+	}
+
+	/**
+	 * Test that the strictly string-based filter logic works and SAFELY ignores arrays.
+	 * Matches logic: if ( ! is_string($param_value) ) continue;
+	 */
+	public function test_filter_strict_string_handling() {
+		// Scenario: Array Input (Should be IGNORED).
+		// ?categories[]=hats.
+		set_query_var( 'categories', array( 'hats' ) );
+
+		// Execute.
+		$merged_query   = Utils::initialize_merged_query( $this->block_instance );
+		$tax_queries    = $merged_query['tax_query'] ?? array();
+		$filter_clauses = $this->extract_filter_clauses( $tax_queries );
+
+		// Assertion: The array input should have been ignored.
+		$this->assertNotContainsEquals(
+			array(
+				'taxonomy' => 'product_cat',
+				'field'    => 'slug',
+				'terms'    => array( 'hats' ),
+				'operator' => 'IN',
+			),
+			$filter_clauses,
+			'Should not contain product_cat tax query because array input should be ignored.'
+		);
+
+		// Clean up.
+		set_query_var( 'categories', '' );
+	}
+
+	/**
+	 * Helper to extract filter clauses from the tax_query array.
+	 *
+	 * @param array $tax_queries The tax_query array from the merged query.
+	 * @return array The extracted filter clauses.
+	 */
+	private function extract_filter_clauses( array $tax_queries ) {
+
+		$and_query = array();
+
+		// Find the 'AND' relation group where filters are stored.
+		foreach ( $tax_queries as $tax_query ) {
+			if ( isset( $tax_query['relation'] ) && 'AND' === $tax_query['relation'] ) {
+				$and_query = $tax_query;
+				break;
+			}
+		}
+
+		$clauses = array();
+		if ( ! empty( $and_query ) ) {
+			foreach ( $and_query as $item ) {
+				if ( is_array( $item ) ) {
+					$clauses[] = $item;
+				}
+			}
+		}
+
+		return $clauses;
+	}
 }
