@@ -96,9 +96,9 @@ registerCheckoutFilters( 'example-extension', {
 
 ### Screenshots
 
-| Before                                                                 | After                                                                 |
-|:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
-|![Before applying the Cart Item Class filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/ff555a84-8d07-4889-97e1-8f7d50d47350) |![After applying the Cart Item Class filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/183809d8-03dc-466d-a415-d8d2062d880f) |
+| Before                                                                                                                                               | After                                                                                                                                               |
+|:----------------------------------------------------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------------------------------------------------:|
+| ![Before applying the Cart Item Class filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/ff555a84-8d07-4889-97e1-8f7d50d47350) | ![After applying the Cart Item Class filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/183809d8-03dc-466d-a415-d8d2062d880f) |
 
 ## `cartItemPrice`
 
@@ -174,9 +174,9 @@ registerCheckoutFilters( 'example-extension', {
 
 ### Screenshots
 
-| Before                                                                 | After                                                                 |
-|:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
-|![Before applying the Cart Item Price filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/58137fc4-884d-4783-9275-5f78abec1473) |![After applying the Cart Item Price filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/fb502b74-6447-49a8-8d35-241e738f089d) |
+| Before                                                                                                                                               | After                                                                                                                                               |
+|:----------------------------------------------------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------------------------------------------------:|
+| ![Before applying the Cart Item Price filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/58137fc4-884d-4783-9275-5f78abec1473) | ![After applying the Cart Item Price filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/fb502b74-6447-49a8-8d35-241e738f089d) |
 
 ## `cartItemScreenReaderPrice`
 
@@ -340,9 +340,9 @@ registerCheckoutFilters( 'example-extension', {
 
 ### Screenshots
 
-| Before                                                                 | After                                                                 |
-|:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
-|![Before applying the Item Name filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/3dc0bda7-fccf-4f35-a2e2-aa04e616563a) |![After applying the Item Name filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/c96b8394-03a7-45f6-813b-5335f4bf83b5) |
+| Before                                                                                                                                         | After                                                                                                                                         |
+|:----------------------------------------------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------------------------------------------:|
+| ![Before applying the Item Name filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/3dc0bda7-fccf-4f35-a2e2-aa04e616563a) | ![After applying the Item Name filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/c96b8394-03a7-45f6-813b-5335f4bf83b5) |
 
 ## `subtotalPriceFormat`
 
@@ -428,9 +428,9 @@ registerCheckoutFilters( 'example-extension', {
 
 ### Screenshots
 
-| Before                                                                 | After                                                                 |
-|:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
-|![Before applying the Subtotal Price Format filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/3574e7ae-9857-4651-ac9e-e6b597e3a589) |![After applying the Subtotal Price Format filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/94e18439-6d6b-44a4-ade1-8302c5984641) |
+| Before                                                                                                                                                     | After                                                                                                                                                     |
+|:----------------------------------------------------------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------------------------------------------------------:|
+| ![Before applying the Subtotal Price Format filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/3574e7ae-9857-4651-ac9e-e6b597e3a589) | ![After applying the Subtotal Price Format filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/94e18439-6d6b-44a4-ade1-8302c5984641) |
 
 ## Cart object
 
