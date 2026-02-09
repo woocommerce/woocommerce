@@ -20,8 +20,9 @@ final class WC_Admin_Reports_Test extends WC_Unit_Test_Case {
 			(int) ( ! wp_using_ext_object_cache() ),
 			as_get_scheduled_actions(
 				array(
-					'hook'  => 'woocommerce_delete_legacy_report_transients',
-					'group' => 'woocommerce',
+					'hook'   => 'woocommerce_delete_legacy_report_transients',
+					'group'  => 'woocommerce',
+					'status' => array( 'complete', 'pending' ),
 				),
 				'ids'
 			)
