@@ -37,7 +37,7 @@ class EmailsSettingsSchema extends AbstractSchema {
 	 *
 	 * @var array
 	 */
-	const FIELDS_SUPPORTING_PERSONALIZATION_TAGS = array( 'subject', 'preheader' );
+	const FIELDS_SUPPORTING_PERSONALIZATION_TAGS = array( 'subject', 'preheader', 'subject_full', 'subject_partial' );
 
 	/**
 	 * Personalization tags registry.
@@ -291,6 +291,19 @@ class EmailsSettingsSchema extends AbstractSchema {
 			}
 
 			$values[ $id ] = $value;
+
+			// Handle customer_refunded_order email type because it has two different subjects.
+			if ( 'customer_refunded_order' === $email->id && 'subject_full' === $id ) {
+				if ( ! isset( $values['subject'] ) ) {
+					$values['subject'] = $value;
+				}
+			}
+
+			if ( 'customer_partially_refunded_order' === $email->id && 'subject_partial' === $id ) {
+				if ( ! isset( $values['subject'] ) ) {
+					$values['subject'] = $value;
+				}
+			}
 		}
 
 		return $values;

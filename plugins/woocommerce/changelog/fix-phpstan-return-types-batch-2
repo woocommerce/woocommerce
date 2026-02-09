@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add missing @return PHPDoc annotations to 6 files, reducing PHPStan baseline by 278 errors (batch 2).

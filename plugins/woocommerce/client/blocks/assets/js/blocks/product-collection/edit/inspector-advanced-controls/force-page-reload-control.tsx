@@ -56,6 +56,7 @@ const ForcePageReloadControl = ( props: ForcePageReloadControlProps ) => {
 
 	return (
 		<ToggleControl
+			__nextHasNoMarginBottom
 			label={ __( 'Reload full page', 'woocommerce' ) }
 			help={ helpText }
 			checked={ forcePageReload }

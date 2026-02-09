@@ -107,7 +107,10 @@ class Controller extends WC_REST_Products_V2_Controller {
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => $this->with_cache(
 						array( $this, 'get_suggested_products' ),
-						array( 'endpoint_id' => 'get_suggested_products' )
+						array(
+							'endpoint_id'              => 'get_suggested_products',
+							'relevant_version_strings' => array( 'list_products' ),
+						)
 					),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => $this->get_suggested_products_collection_params(),

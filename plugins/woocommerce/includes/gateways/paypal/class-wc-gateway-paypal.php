@@ -24,6 +24,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+// Require the deprecated classes for backward compatibility.
+// This will be removed in 11.0.0.
+if ( ! class_exists( 'WC_Gateway_Paypal_Constants' ) ) {
+	require_once __DIR__ . '/includes/class-wc-gateway-paypal-constants.php';
+}
+
+if ( ! class_exists( 'WC_Gateway_Paypal_Helper' ) ) {
+	require_once __DIR__ . '/includes/class-wc-gateway-paypal-helper.php';
+}
+
+if ( ! class_exists( 'WC_Gateway_Paypal_Notices' ) ) {
+	require_once __DIR__ . '/includes/class-wc-gateway-paypal-notices.php';
+}
+
 if ( ! class_exists( 'WC_Gateway_Paypal_Buttons' ) ) {
 	require_once __DIR__ . '/class-wc-gateway-paypal-buttons.php';
 }
@@ -381,7 +395,9 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			if ( empty( self::$log ) ) {
 				self::$log = wc_get_logger();
 			}
-			self::$log->clear( self::ID );
+			if ( self::$log instanceof WC_Logger ) {
+				self::$log->clear( self::ID );
+			}
 		}
 
 		// Trigger Transact onboarding when settings are saved.

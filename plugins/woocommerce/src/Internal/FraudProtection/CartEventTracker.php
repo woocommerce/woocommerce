@@ -7,77 +7,55 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\FraudProtection;
 
-use Automattic\WooCommerce\Internal\RegisterHooksInterface;
-
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Tracks cart events for fraud protection analysis.
  *
- * This class hooks into WooCommerce cart events (add, update, remove, restore)
- * and triggers comprehensive event tracking with full session context. It orchestrates
- * the event tracking by collecting session data and preparing it for the fraud
- * protection service.
+ * This class provides methods to track cart events (add, update, remove, restore)
+ * for fraud protection. Event-specific data is passed
+ * to the SessionDataCollector which handles session data storage internally.
  *
  * @since 10.5.0
  * @internal This class is part of the internal API and is subject to change without notice.
  */
-class CartEventTracker implements RegisterHooksInterface {
+class CartEventTracker {
 
 	/**
 	 * Session data collector instance.
 	 *
 	 * @var SessionDataCollector
 	 */
-	private SessionDataCollector $data_collector;
-
-	/**
-	 * Fraud protection controller instance.
-	 *
-	 * @var FraudProtectionController
-	 */
-	private FraudProtectionController $fraud_protection_controller;
+	private SessionDataCollector $session_data_collector;
 
 	/**
 	 * Initialize with dependencies.
 	 *
 	 * @internal
 	 *
-	 * @param SessionDataCollector      $data_collector              The session data collector instance.
-	 * @param FraudProtectionController $fraud_protection_controller The fraud protection controller instance.
+	 * @param SessionDataCollector $session_data_collector The session data collector instance.
 	 */
-	final public function init(
-		SessionDataCollector $data_collector,
-		FraudProtectionController $fraud_protection_controller
-	): void {
-		$this->data_collector              = $data_collector;
-		$this->fraud_protection_controller = $fraud_protection_controller;
+	final public function init( SessionDataCollector $session_data_collector ): void {
+		$this->session_data_collector = $session_data_collector;
 	}
 
 	/**
-	 * Register cart event hooks.
+	 * Track cart page loaded event.
 	 *
-	 * Hooks into WooCommerce cart actions to track fraud protection events.
-	 * Only registers hooks if the fraud protection feature is enabled.
+	 * Collects session data when the cart page is initially loaded.
+	 * This captures the initial session state before any user interactions.
 	 *
+	 * @internal
 	 * @return void
 	 */
-	public function register(): void {
-		// Only register hooks if fraud protection is enabled.
-		if ( ! $this->fraud_protection_controller->feature_is_enabled() ) {
-			return;
-		}
-
-		add_action( 'woocommerce_add_to_cart', array( $this, 'handle_track_cart_item_added' ), 10, 6 );
-		add_action( 'woocommerce_after_cart_item_quantity_update', array( $this, 'handle_track_cart_item_updated' ), 10, 4 );
-		add_action( 'woocommerce_remove_cart_item', array( $this, 'handle_track_cart_item_removed' ), 10, 2 );
-		add_action( 'woocommerce_restore_cart_item', array( $this, 'handle_track_cart_item_restored' ), 10, 2 );
+	public function track_cart_page_loaded(): void {
+		$this->session_data_collector->collect( 'cart_page_loaded', array() );
 	}
 
 	/**
-	 * Handle cart item added event.
+	 * Track cart item added event.
 	 *
-	 * Triggers fraud protection event tracking when an item is added to the cart.
+	 * Collects session data when an item is added to the cart.
 	 *
 	 * @internal
 	 *
@@ -85,11 +63,9 @@ class CartEventTracker implements RegisterHooksInterface {
 	 * @param int    $product_id     Product ID.
 	 * @param int    $quantity       Quantity added.
 	 * @param int    $variation_id   Variation ID.
-	 * @param array  $variation      Variation data.
-	 * @param array  $cart_item_data Cart item data.
 	 * @return void
 	 */
-	public function handle_track_cart_item_added( $cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data ): void {
+	public function track_cart_item_added( $cart_item_key, $product_id, $quantity, $variation_id ): void {
 		$event_data = $this->build_cart_event_data(
 			'item_added',
 			$product_id,
@@ -97,13 +73,13 @@ class CartEventTracker implements RegisterHooksInterface {
 			$variation_id
 		);
 
-		$this->track_event( 'cart_item_added', $event_data );
+		$this->session_data_collector->collect( 'cart_item_added', $event_data );
 	}
 
 	/**
-	 * Handle cart item quantity updated event.
+	 * Track cart item quantity updated event.
 	 *
-	 * Triggers fraud protection event tracking when cart item quantity is updated.
+	 * Collects session data when cart item quantity is updated.
 	 *
 	 * @internal
 	 *
@@ -113,7 +89,7 @@ class CartEventTracker implements RegisterHooksInterface {
 	 * @param object $cart          Cart object.
 	 * @return void
 	 */
-	public function handle_track_cart_item_updated( $cart_item_key, $quantity, $old_quantity, $cart ): void {
+	public function track_cart_item_updated( $cart_item_key, $quantity, $old_quantity, $cart ): void {
 		$cart_item = $cart->cart_contents[ $cart_item_key ] ?? null;
 
 		if ( (int) $quantity === (int) $old_quantity || ! $cart_item ) {
@@ -130,16 +106,15 @@ class CartEventTracker implements RegisterHooksInterface {
 			$variation_id
 		);
 
-		// Add old quantity for context.
 		$event_data['old_quantity'] = (int) $old_quantity;
 
-		$this->track_event( 'cart_item_updated', $event_data );
+		$this->session_data_collector->collect( 'cart_item_updated', $event_data );
 	}
 
 	/**
-	 * Handle cart item removed event.
+	 * Track cart item removed event.
 	 *
-	 * Triggers fraud protection event tracking when an item is removed from the cart.
+	 * Collects session data when an item is removed from the cart.
 	 *
 	 * @internal
 	 *
@@ -147,7 +122,7 @@ class CartEventTracker implements RegisterHooksInterface {
 	 * @param object $cart          Cart object.
 	 * @return void
 	 */
-	public function handle_track_cart_item_removed( $cart_item_key, $cart ): void {
+	public function track_cart_item_removed( $cart_item_key, $cart ): void {
 		$cart_item = $cart->removed_cart_contents[ $cart_item_key ] ?? null;
 
 		if ( ! $cart_item ) {
@@ -165,13 +140,13 @@ class CartEventTracker implements RegisterHooksInterface {
 			$variation_id
 		);
 
-		$this->track_event( 'cart_item_removed', $event_data );
+		$this->session_data_collector->collect( 'cart_item_removed', $event_data );
 	}
 
 	/**
-	 * Handle cart item restored event.
+	 * Track cart item restored event.
 	 *
-	 * Triggers fraud protection event tracking when a removed item is restored to the cart.
+	 * Collects session data when a removed item is restored to the cart.
 	 *
 	 * @internal
 	 *
@@ -179,7 +154,7 @@ class CartEventTracker implements RegisterHooksInterface {
 	 * @param object $cart          Cart object.
 	 * @return void
 	 */
-	public function handle_track_cart_item_restored( $cart_item_key, $cart ): void {
+	public function track_cart_item_restored( $cart_item_key, $cart ): void {
 		$cart_item = $cart->cart_contents[ $cart_item_key ] ?? null;
 
 		if ( ! $cart_item ) {
@@ -197,7 +172,7 @@ class CartEventTracker implements RegisterHooksInterface {
 			$variation_id
 		);
 
-		$this->track_event( 'cart_item_restored', $event_data );
+		$this->session_data_collector->collect( 'cart_item_restored', $event_data );
 	}
 
 	/**
@@ -205,7 +180,7 @@ class CartEventTracker implements RegisterHooksInterface {
 	 *
 	 * Prepares the cart event data including action type, product details,
 	 * and current cart state. This data will be merged with comprehensive
-	 * session data during event tracking.
+	 * session data during event dispatching.
 	 *
 	 * @param string $action       Action type (item_added, item_updated, item_removed, item_restored).
 	 * @param int    $product_id   Product ID.
@@ -228,62 +203,5 @@ class CartEventTracker implements RegisterHooksInterface {
 			'variation_id'    => $variation_id,
 			'cart_item_count' => $cart_item_count,
 		);
-	}
-
-	/**
-	 * Track fraud protection event with comprehensive session context.
-	 *
-	 * This method orchestrates the event tracking by:
-	 * 1. Collecting comprehensive session data via SessionDataCollector
-	 * 2. Merging with event-specific data
-	 * 3. Logging the event (will call EventTracker/API client once available)
-	 *
-	 * The method implements graceful degradation - any errors during tracking
-	 * will be logged but will not break the cart functionality.
-	 *
-	 * @param string $event_type          Event type identifier (e.g., 'cart_item_added').
-	 * @param array  $event_specific_data Event-specific data to merge with session context.
-	 * @return void
-	 */
-	private function track_event( string $event_type, array $event_specific_data ): void {
-		try {
-			// Collect comprehensive session data.
-			$session_data = $this->data_collector->collect( $event_type, $event_specific_data );
-
-			// Once EventTracker/API client is implemented (WOOSUBS-1249), call it here:
-			// $event_tracker = wc_get_container()->get( EventTracker::class );
-			// $event_tracker->track( $event_type, $session_data );
-			//
-			// For now, log the event for debugging and verification.
-			FraudProtectionController::log(
-				'info',
-				sprintf(
-					'Fraud protection event tracked: %s | Product ID: %s | Quantity: %s | Session ID: %s',
-					$event_type,
-					$event_specific_data['product_id'] ?? 'N/A',
-					$event_specific_data['quantity'] ?? 'N/A',
-					$session_data['session']['session_id'] ?? 'N/A'
-				),
-				array(
-					'event_type'   => $event_type,
-					'event_data'   => $event_specific_data,
-					'session_data' => $session_data,
-				)
-			);
-		} catch ( \Exception $e ) {
-			// Gracefully handle errors - fraud protection should never break the cart.
-			FraudProtectionController::log(
-				'error',
-				sprintf(
-					'Failed to track fraud protection event: %s | Error: %s',
-					$event_type,
-					$e->getMessage()
-				),
-				array(
-					'event_type' => $event_type,
-					'exception'  => $e,
-				)
-			);
-		}
 	}
 }

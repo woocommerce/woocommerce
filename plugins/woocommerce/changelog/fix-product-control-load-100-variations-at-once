@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Limit ProductControl component to loading a maximum of 25 variations at once
