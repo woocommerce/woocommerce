@@ -7,7 +7,7 @@ sidebar_label: 'Content Style Guide'
 
 This guide provides formatting and writing standards for creating product pages and documentation on the WooCommerce Marketplace. Following these guidelines ensures consistency across the Marketplace and creates a professional experience for merchants browsing and purchasing extensions.
 
-For product page structure, required elements, and asset specifications, refer to [Product Page Content and Assets](./product-page-content-and-assets.md).
+For product page structure, required elements, and asset specifications, refer to [Product Page Content and Assets](/docs/woo-marketplace/product-page-content-and-assets/).
 
 ## Writing Standards
 
