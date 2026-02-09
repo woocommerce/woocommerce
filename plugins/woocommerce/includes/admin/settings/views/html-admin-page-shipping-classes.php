@@ -99,7 +99,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 								</div>
 								<?php
 								// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-								do_action( 'woocommerce_shipping_classes_column_edit_' . $class );
+								do_action( 'woocommerce_shipping_classes_column_' . $class, 'edit' );
 								break;
 						}
 						echo '</div>';
@@ -151,7 +151,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					break;
 				default:
 					// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-					do_action( 'woocommerce_shipping_classes_column_view_' . $class );
+					do_action( 'woocommerce_shipping_classes_column_' . $class, 'view' );
 					break;
 			}
 			echo '</td>';
