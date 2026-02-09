@@ -120,7 +120,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				SELECT count( DISTINCT posts.ID ) FROM {$wpdb->posts} posts
 				LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON posts.ID = wc_product_meta_lookup.product_id
 				WHERE posts.post_type IN ( 'product', 'product_variation' )
-				AND posts.post_status = 'publish'
+				AND posts.post_status IN ( 'publish', 'private' )
 				AND wc_product_meta_lookup.stock_status = %s
 				",
 				$status
