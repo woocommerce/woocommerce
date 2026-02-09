@@ -18,9 +18,6 @@ final class WC_Admin_Reports_Test extends WC_Unit_Test_Case {
 		\WC_Admin_Reports::delete_legacy_reports_transients( 0 );
 		$this->assertCount( 1, as_get_scheduled_actions( array( 'hook' => 'woocommerce_delete_legacy_report_transients', 'group' => 'woocommerce' ), 'ids' ) );
 
-		// Cleanup.
-		as_unschedule_action( 'woocommerce_delete_legacy_report_transients', null, 'woocommerce' );
-
 		// Verify the purge-workflow.
 		do_action( 'woocommerce_delete_legacy_report_transients', 0, true ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.HookCommentWrongStyle
 		$this->assertFalse( as_has_scheduled_action( 'woocommerce_delete_legacy_report_transients', null, 'woocommerce' ) );
