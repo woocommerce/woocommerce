@@ -39,46 +39,16 @@ class FileManifest {
 	private const MAX_MISSING_FILES_SHOWN = 20;
 
 	/**
-	 * Directory prefixes excluded from the manifest because they are
-	 * stripped from production builds.
+	 * Enumerate all PHP files in a directory for the manifest.
 	 *
-	 * IMPORTANT: This list and the wildcard patterns in is_excluded_path()
-	 * must be kept in sync with .distignore. See the test
-	 * test_enumerate_excludes_all_distignore_directories in FileManifestTest
-	 * which verifies this automatically.
-	 *
-	 * @var string[]
-	 */
-	private const EXCLUDED_PREFIXES = array(
-		'bin/',
-		'build/',
-		'changelog/',
-		'client/admin/',
-		'client/blocks/',
-		'client/legacy/',
-		'e2e/',
-		'node_modules/',
-		'packages/email-editor/tasks/',
-		'packages/woocommerce-admin/docs/',
-		'packages/woocommerce-blocks/docs/',
-		'patches/',
-		'php-stubs/',
-		'playwright-report/',
-		'storybook/',
-		'test-results/',
-		'tests/',
-	);
-
-	/**
-	 * Enumerate all PHP files in a plugin directory for the manifest.
-	 *
-	 * Returns a sorted array of relative paths, excluding the manifest file
-	 * itself and directories that are stripped from production builds.
+	 * Returns a sorted array of relative paths, excluding only the manifest
+	 * file itself. The directory should contain only production files (e.g.
+	 * a pre-built plugin directory filtered by .distignore).
 	 *
 	 * This method has no WordPress dependencies so it can be used by both
 	 * the WP-CLI command and the standalone build script.
 	 *
-	 * @param string $plugin_dir Absolute path to the plugin root directory.
+	 * @param string $plugin_dir Absolute path to the directory to scan.
 	 * @return string[] Sorted list of relative PHP file paths.
 	 */
 	public static function enumerate_php_files( $plugin_dir ) {
@@ -94,7 +64,7 @@ class FileManifest {
 
 			$relative = substr( $file->getPathname(), strlen( $plugin_dir ) + 1 );
 
-			if ( 'file-manifest.php' === $relative || self::is_excluded_path( $relative ) ) {
+			if ( 'file-manifest.php' === $relative ) {
 				continue;
 			}
 
@@ -104,36 +74,6 @@ class FileManifest {
 		sort( $files );
 
 		return $files;
-	}
-
-	/**
-	 * Check whether a relative file path falls within a directory that is
-	 * excluded from production builds.
-	 *
-	 * IMPORTANT: The patterns here must be kept in sync with .distignore
-	 * (see also the EXCLUDED_PREFIXES constant).
-	 *
-	 * @param string $relative_path Relative path from the plugin root.
-	 * @return bool True if the path should be excluded from the manifest.
-	 */
-	private static function is_excluded_path( $relative_path ) {
-		foreach ( self::EXCLUDED_PREFIXES as $prefix ) {
-			if ( 0 === strpos( $relative_path, $prefix ) ) {
-				return true;
-			}
-		}
-
-		// packages/*/vendor/, packages/*/tests/, packages/*/changelog/, packages/*/node_modules/.
-		if ( preg_match( '#^packages/[^/]+/(vendor|tests|changelog|node_modules)(/|$)#', $relative_path ) ) {
-			return true;
-		}
-
-		// vendor/*/*/tests/.
-		if ( preg_match( '#^vendor/[^/]+/[^/]+/tests(/|$)#', $relative_path ) ) {
-			return true;
-		}
-
-		return false;
 	}
 
 	/**

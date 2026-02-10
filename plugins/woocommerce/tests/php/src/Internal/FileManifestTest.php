@@ -152,63 +152,22 @@ class FileManifestTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox enumerate_php_files excludes every directory listed in .distignore.
+	 * @testdox enumerate_php_files includes all PHP files in the directory except the manifest itself.
 	 */
-	public function test_enumerate_excludes_all_distignore_directories(): void {
-		$distignore_path = dirname( WC_PLUGIN_FILE ) . '/.distignore';
-		$this->assertFileExists( $distignore_path, '.distignore must exist for this test.' );
-
-		// Parse .distignore for directory exclusion patterns.
-		$lines         = file( $distignore_path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES );
-		$excluded_dirs = array();
-
-		foreach ( $lines as $line ) {
-			$line = trim( $line );
-
-			if ( '' === $line || '#' === $line[0] ) {
-				continue;
-			}
-
-			// Skip generic dotfile/dotdir globs and file-level patterns (no path separator).
-			if ( '.*' === $line || '.*/' === $line || false === strpos( $line, '/' ) ) {
-				continue;
-			}
-
-			$dir = trim( $line, '/' );
-
-			// Replace wildcards with concrete names so we can create real directories.
-			$dir             = str_replace( '*', 'test-pkg', $dir );
-			$excluded_dirs[] = $dir;
-		}
-
-		$this->assertNotEmpty( $excluded_dirs, '.distignore should contain directory patterns.' );
-
-		// Create a production file that must be included.
+	public function test_enumerate_includes_all_php_files(): void {
 		mkdir( $this->temp_dir . '/src', 0755, true );
-		file_put_contents( $this->temp_dir . '/src/Example.php', '<?php // production' );
-
-		// Create a PHP file inside each excluded directory.
-		$excluded_files = array();
-		foreach ( $excluded_dirs as $dir ) {
-			$full_dir = $this->temp_dir . '/' . $dir;
-			if ( ! is_dir( $full_dir ) ) {
-				mkdir( $full_dir, 0755, true );
-			}
-			file_put_contents( $full_dir . '/stub.php', '<?php // dev' );
-			$excluded_files[] = $dir . '/stub.php';
-		}
+		mkdir( $this->temp_dir . '/vendor/acme/lib', 0755, true );
+		file_put_contents( $this->temp_dir . '/src/Example.php', '<?php // src' );
+		file_put_contents( $this->temp_dir . '/vendor/acme/lib/Helper.php', '<?php // vendor' );
+		file_put_contents( $this->temp_dir . '/file-manifest.php', '<?php // manifest' );
+		file_put_contents( $this->temp_dir . '/readme.txt', 'not php' );
 
 		$result = FileManifest::enumerate_php_files( $this->temp_dir );
 
-		$this->assertContains( 'src/Example.php', $result, 'Production file should be included.' );
-
-		foreach ( $excluded_files as $excluded_file ) {
-			$this->assertNotContains(
-				$excluded_file,
-				$result,
-				sprintf( 'File "%s" should be excluded per .distignore but was found in the manifest.', $excluded_file )
-			);
-		}
+		$this->assertContains( 'src/Example.php', $result );
+		$this->assertContains( 'vendor/acme/lib/Helper.php', $result );
+		$this->assertNotContains( 'file-manifest.php', $result, 'The manifest file itself should be excluded.' );
+		$this->assertNotContains( 'readme.txt', $result, 'Non-PHP files should be excluded.' );
 	}
 
 	/**
