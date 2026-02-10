@@ -3902,7 +3902,7 @@ class WC_AJAX {
 	}
 
 	/**
-	 * AJAX handler for asynchronously loading the status widget content.
+	 * AJAX handler for asynchronously loading the recent reviews widget content.
 	 *
 	 * @return void
 	 */
