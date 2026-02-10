@@ -59,6 +59,10 @@ class ExtendStore extends Task {
 	 * @return bool
 	 */
 	public function is_complete() {
+		if ( $this->has_previously_completed() ) {
+			return true;
+		}
+
 		return $this->is_visited();
 	}
 
