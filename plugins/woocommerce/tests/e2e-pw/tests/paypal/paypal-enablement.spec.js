@@ -1,7 +1,8 @@
 /**
  * Internal dependencies
  */
-import { expect, tags, test } from '../../fixtures/fixtures';
+import { expect, tags } from '../../fixtures/fixtures';
+import { test } from '../../fixtures/paypal-fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 
 test.describe(
