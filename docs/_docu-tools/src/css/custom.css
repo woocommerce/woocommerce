@@ -31,6 +31,12 @@
   --ifm-heading-font-family: 'Proxima Vara', var(--ifm-font-family-base);
 }
 
+.alert--info, :root details{
+  --ifm-alert-border-color: var(--ifm-color-emphasis-100);
+  --ifm-alert-background-color: var(--ifm-color-emphasis-100);
+  --docusaurus-details-decoration-color: var(--ifm-color-primary-darkest);
+}
+
 /* For readability concerns, you should choose a lighter palette in dark mode. */
 [data-theme='dark'] {
   --ifm-color-primary: #a77eff; /* WooCommerce Purple 30 */
@@ -146,107 +152,18 @@ html.docs-doc-id-getting-started\/version-control-deployment .pagination-nav .pa
 
 
 /* ===== FAQ Details/Summary Styling ===== */
-.markdown details {
-  --docusaurus-details-decoration-color: transparent;
-  background-color: var(--ifm-color-emphasis-100);
-  border: none !important;
-  box-shadow: none;
-  border-radius: 6px;
-  margin-bottom: 1rem;
-  padding: 0;
-}
-
 .markdown details summary {
   font-weight: 700;
-  padding: 1rem 1rem 1rem 2.5rem;
-  cursor: pointer;
-  list-style: none;
-  border: none !important;
-  border-bottom: none !important;
-  position: relative;
-}
-
-.markdown details summary::marker,
-.markdown details summary::-webkit-details-marker {
-  display: none;
-  content: '';
-}
-
-.markdown details summary::before {
-  content: '›';
-  font-size: 1.2rem;
-  font-weight: 300;
-  transition: transform 0.2s ease;
-  display: inline-block;
-  position: absolute;
-  left: 1rem;
-  top: calc(1rem - 3px);
-  transform-origin: center center;
-  line-height: 1;
-}
-
-.markdown details[open] summary::before {
-  transform: rotate(90deg) translateX(-0.05rem);
-}
-
-.markdown details[open] summary {
-  border-bottom: none !important;
-  padding-bottom: 0;
-  margin-bottom: 0;
-}
-
-.markdown details > *:not(summary) {
-  padding: 0 1rem 1rem 2.5rem;
-  border: none !important;
-  margin-top: 0 !important;
-}
-
-.markdown details > p:first-of-type,
-.markdown details > div > p:first-child {
-  margin-top: 0 !important;
-  padding-top: 0 !important;
-  margin-bottom: 0;
-}
-
-.markdown details > div:first-of-type {
-  margin-top: 0 !important;
-  padding-top: 0 !important;
-}
-
-.markdown details [class*='collapsibleContent'] {
-  margin-top: 0 !important;
-  padding-top: 0 !important;
-}
-
-.markdown details p:last-child {
-  margin-bottom: 0;
-}
-
-.markdown details a {
-  color: var(--ifm-color-primary);
-  text-decoration: none;
-}
-
-.markdown details a:hover {
-  color: var(--ifm-color-primary-dark);
-  text-decoration: underline;
-}
-
-.markdown details strong {
-  font-weight: inherit;
-}
-
-.markdown details ul,
-.markdown details ol {
-  color: inherit;
-}
-
-.markdown details li {
-  color: inherit;
 }
 
 /* Hide the self-referencing Woo Marketplace card on the category index page */
 article .col:has(> a[href="/docs/woo-marketplace/"]) {
+  display: none !important;
+}
+
+/* Hide self-referencing Settings and config card on its own index page */
+article .col:has(> a[href="/docs/category/settings-and-config/"]),
+article .col:has(> a[href="/docs/extensions/settings-and-config/"]) {
   display: none !important;
 }
 
@@ -256,55 +173,6 @@ h1, h2, h3, h4, h5, h6,
   font-family: var(--ifm-heading-font-family);
   font-weight: 600;
   letter-spacing: -0.025em;
-}
-
-/* Fix table of contents to the right side of the screen */
-.theme-doc-toc-desktop {
-  position: sticky;
-  top: calc(var(--ifm-navbar-height) + 1rem);
-  max-height: calc(100vh - var(--ifm-navbar-height) - 2rem);
-  overflow-y: auto;
-}
-
-/* Remove container width restrictions to use full available space */
-.container {
-  max-width: none !important;
-}
-
-.main-wrapper {
-  max-width: none !important;
-}
-
-/* Center the document column with flexbox */
-.docItemCol_VOVn {
-  display: flex;
-  justify-content: center;
-  min-width: 0;
-}
-
-/* Set width constraints for document container */
-.docItemContainer_Djhp {
-  min-width: 0;
-  max-width: 46rem;
-}
-
-/* Ensure category cards are left-aligned (not centered when odd number) */
-article .row,
-[class*="cardContainer"] {
-  justify-content: flex-start !important;
-}
-
-/* Hide self-referencing Settings and config card on its own index page */
-article .col:has(> a[href="/docs/category/settings-and-config/"]),
-article .col:has(> a[href="/docs/extensions/settings-and-config/"]) {
-  display: none !important;
-}
-
-/* Set max-width for footer links and center on screen */
-.footer__links {
-  max-width: 1320px;
-  margin-left: auto;
-  margin-right: auto;
 }
 
 /* GitHub-style ordered list with circled numbers */
