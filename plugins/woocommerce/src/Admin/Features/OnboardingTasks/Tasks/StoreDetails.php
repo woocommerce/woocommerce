@@ -69,6 +69,10 @@ class StoreDetails extends Task {
 	 * @return bool
 	 */
 	public function is_complete() {
+		if ( $this->has_previously_completed() ) {
+			return true;
+		}
+
 		$country        = WC()->countries->get_base_country();
 		$country_locale = WC()->countries->get_country_locale();
 		$locale         = $country_locale[ $country ] ?? array();
