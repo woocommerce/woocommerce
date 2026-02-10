@@ -429,7 +429,7 @@ test.describe(
 						],
 					} )
 					.then( ( response: { data: { id: number } } ) => {
-						orderIds.push = response.data.id;
+						orderIds.push( response.data.id );
 					} );
 			}
 
