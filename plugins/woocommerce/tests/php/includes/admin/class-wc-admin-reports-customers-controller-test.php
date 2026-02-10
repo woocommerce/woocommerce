@@ -639,4 +639,163 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_REST_Unit_Test_Case 
 			$this->assertNotEquals( 'CA', $report['state'], 'No customers should be from CA state' );
 		}
 	}
+
+	/**
+	 * Test email_includes filters by email column.
+	 */
+	public function test_email_includes() {
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'email_includes' => 'customer1@example.com',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 1, $reports, 'Should return 1 customer matching the email' );
+		$this->assertEquals( 'customer1@example.com', $reports[0]['email'], 'Returned customer should have the matching email' );
+	}
+
+	/**
+	 * Test email_excludes filters by email column.
+	 */
+	public function test_email_excludes() {
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'email_excludes' => 'customer1@example.com,customer2@example.com,customer3@example.com',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 2, $reports, 'Should return 2 guest customers after excluding all registered customer emails' );
+		$emails = array_column( $reports, 'email' );
+		$this->assertNotContains( 'customer1@example.com', $emails, 'Excluded email should not appear' );
+		$this->assertNotContains( 'customer2@example.com', $emails, 'Excluded email should not appear' );
+		$this->assertNotContains( 'customer3@example.com', $emails, 'Excluded email should not appear' );
+	}
+
+	/**
+	 * Test username_includes filters by username column.
+	 */
+	public function test_username_includes() {
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'username_includes' => 'customer1',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 1, $reports, 'Should return 1 customer matching the username' );
+		$this->assertEquals( 'customer1', $reports[0]['username'], 'Returned customer should have the matching username' );
+	}
+
+	/**
+	 * Test username_excludes filters by username column.
+	 */
+	public function test_username_excludes() {
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'username_excludes' => 'customer1,customer2',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$usernames = array_column( $reports, 'username' );
+		$this->assertNotContains( 'customer1', $usernames, 'Excluded username should not appear' );
+		$this->assertNotContains( 'customer2', $usernames, 'Excluded username should not appear' );
+		$this->assertGreaterThanOrEqual( 3, count( $reports ), 'Should return at least 3 customers (customer3 + 2 guests)' );
+	}
+
+	/**
+	 * Test name_includes filters by name column.
+	 */
+	public function test_name_includes() {
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'name_includes' => 'John Doe',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 1, $reports, 'Should return 1 customer matching the name' );
+		$this->assertEquals( 'John Doe', $reports[0]['name'], 'Returned customer should have the matching name' );
+	}
+
+	/**
+	 * Test name_excludes filters by name column.
+	 */
+	public function test_name_excludes() {
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'name_excludes' => 'John Doe,Jane Smith',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$names = array_column( $reports, 'name' );
+		$this->assertNotContains( 'John Doe', $names, 'Excluded name should not appear' );
+		$this->assertNotContains( 'Jane Smith', $names, 'Excluded name should not appear' );
+		$this->assertGreaterThanOrEqual( 3, count( $reports ), 'Should return at least 3 customers (Bob Johnson + 2 guests)' );
+	}
+
+	/**
+	 * Test country_includes filters by country column.
+	 */
+	public function test_country_includes() {
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'country_includes' => 'CA',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 1, $reports, 'Should return 1 customer from CA' );
+		$this->assertEquals( 'CA', $reports[0]['country'], 'Returned customer should be from CA' );
+	}
+
+	/**
+	 * Test country_excludes filters by country column.
+	 */
+	public function test_country_excludes() {
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'country_excludes' => 'US',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 1, $reports, 'Should return 1 customer not from US' );
+		$this->assertEquals( 'CA', $reports[0]['country'], 'Returned customer should be from CA' );
+	}
 }
