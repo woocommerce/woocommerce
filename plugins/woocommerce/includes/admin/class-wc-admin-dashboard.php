@@ -148,6 +148,8 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 				)
 			);
 
+			// Where to copy from
+
 			// Display loading placeholder.
 			echo '<div id="wc-status-widget-loading" class="wc-status-widget-loading">';
 			echo '<p>' . esc_html__( 'Loading status data...', 'woocommerce' ) . ' <span class="spinner is-active"></span></p>';
@@ -474,9 +476,33 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		}
 
 		/**
-		 * Recent reviews widget.
+		 * Recent reviews widget: placeholder.
 		 */
 		public function recent_reviews() {
+			$suffix  = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
+			$version = Constants::get_constant( 'WC_VERSION' );
+
+			wp_enqueue_script( 'wc-recent-reviews-widget-async', WC()->plugin_url() . '/assets/js/admin/wc-recent-reviews-widget-async' . $suffix . '.js', array( 'jquery' ), $version, true );
+			wp_localize_script(
+				'wc-recent-reviews-widget-async',
+				'wc_recent_reviews_widget_params',
+				array(
+					'ajax_url' => admin_url( 'admin-ajax.php' ),
+					'security' => wp_create_nonce( 'wc-recent-reviews-widget' ),
+				)
+			);
+
+			// Display loading placeholder.
+			echo '<div id="wc-recent-reviews-widget-loading" class="wc-recent-reviews-widget-loading">';
+			echo '<p>' . esc_html__( 'Loading reviews data...', 'woocommerce' ) . ' <span class="spinner is-active"></span></p>';
+			echo '</div>';
+			echo '<div id="wc-recent-reviews-widget-content" style="display:none;"></div>';
+		}
+
+		/**
+		 * Recent reviews widget: content.
+		 */
+		public function recent_reviews_content() {
 			$this->legacy_recent_reviews();
 		}
 
