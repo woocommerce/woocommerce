@@ -31,7 +31,7 @@
   --ifm-heading-font-family: 'Proxima Vara', var(--ifm-font-family-base);
 }
 
-.alert--info, :root details{
+:root details{
   --ifm-alert-border-color: var(--ifm-color-emphasis-100);
   --ifm-alert-background-color: var(--ifm-color-emphasis-100);
   --docusaurus-details-decoration-color: var(--ifm-color-primary-darkest);
