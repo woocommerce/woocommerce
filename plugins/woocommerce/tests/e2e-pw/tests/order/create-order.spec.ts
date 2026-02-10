@@ -315,7 +315,7 @@ test.describe(
 								// do nothing, probably the tax class was not created due to a failing test
 							} else {
 								// Something else went wrong.
-								throw new Error( error.response.data );
+								throw new Error( error.response.data.code );
 							}
 						}
 					);
