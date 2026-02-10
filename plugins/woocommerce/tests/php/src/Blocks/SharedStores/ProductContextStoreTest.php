@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Blocks\SharedStores;
 
 use Automattic\WooCommerce\Blocks\SharedStores\ProductContextStore;
+use Automattic\WooCommerce\Blocks\SharedStores\ProductsStore;
 use InvalidArgumentException;
 use WC_Unit_Test_Case;
 
@@ -11,6 +12,25 @@ use WC_Unit_Test_Case;
  * Tests for the ProductContextStore class.
  */
 class ProductContextStoreTest extends WC_Unit_Test_Case {
+
+	/**
+	 * Reset static state between tests.
+	 *
+	 * @return void
+	 */
+	public function tearDown(): void {
+		$reflection = new \ReflectionClass( ProductsStore::class );
+
+		$products = $reflection->getProperty( 'products' );
+		$products->setAccessible( true );
+		$products->setValue( null, array() );
+
+		$variations = $reflection->getProperty( 'product_variations' );
+		$variations->setAccessible( true );
+		$variations->setValue( null, array() );
+
+		parent::tearDown();
+	}
 
 	/**
 	 * @testdox load_context should throw when consent statement is incorrect.
