@@ -410,26 +410,11 @@ class WC_Query {
 
 			// Explicitly set the queried object to the shop page post.
 			// Without this, WordPress returns the product post type object (WP_Post_Type)
+			// when get_queried_object() is called, which lacks essential properties
+			// like post_content, post_excerpt, post_parent that themes expect.
 			// See: https://github.com/woocommerce/woocommerce/issues/61676
 			$q->queried_object    = $shop_page;
 			$q->queried_object_id = $shop_page->ID;
-
-			/**
-			 * Filters the queried object for the shop page when it's set as the homepage.
-			 *
-			 * This allows themes and plugins to override the queried object if needed
-			 * for custom shop page handling scenarios.
-			 *
-			 * @since 10.6.0
-			 *
-			 * @param WP_Post|null $queried_object The shop page post object.
-			 * @param WP_Query     $q              The WP_Query instance.
-			 * @param WP_Post      $shop_page      The original shop page post.
-			 */
-			$q->queried_object = apply_filters( 'woocommerce_shop_page_queried_object', $q->queried_object, $q, $shop_page );
-			if ( $q->queried_object && isset( $q->queried_object->ID ) ) {
-				$q->queried_object_id = $q->queried_object->ID;
-			}
 
 			// Fix conditional functions like is_front_page.
 			$q->is_singular          = false;
