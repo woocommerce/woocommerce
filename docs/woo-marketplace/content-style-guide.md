@@ -203,7 +203,7 @@ When creating documentation for your product, follow these additional guidelines
 ### Structure
 
 - Begin with a clear introduction explaining what the extension does
-- Please use the synced pattern titled "Docs – Installation" This explains how our mutual customers should install purchases from WooCommerce.com
+- Please use the synced pattern titled "Docs – Installation." This explains how our mutual customers should install purchases from WooCommerce.com.
 - Document all your product's features and settings
 - Provide troubleshooting guidance for common issues
 
