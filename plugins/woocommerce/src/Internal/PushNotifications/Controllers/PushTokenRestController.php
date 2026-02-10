@@ -105,11 +105,13 @@ class PushTokenRestController extends RestApiControllerBase {
 	public function create( WP_REST_Request $request ) {
 		try {
 			$data = array(
-				'user_id'     => get_current_user_id(),
-				'token'       => $request->get_param( 'token' ),
-				'platform'    => $request->get_param( 'platform' ),
-				'device_uuid' => $request->get_param( 'device_uuid' ),
-				'origin'      => $request->get_param( 'origin' ),
+				'user_id'       => get_current_user_id(),
+				'token'         => $request->get_param( 'token' ),
+				'platform'      => $request->get_param( 'platform' ),
+				'device_uuid'   => $request->get_param( 'device_uuid' ),
+				'origin'        => $request->get_param( 'origin' ),
+				'device_locale' => $request->get_param( 'device_locale' ),
+				'metadata'      => $request->get_param( 'metadata' ),
 			);
 
 			$data_store = wc_get_container()->get( PushTokensDataStore::class );
@@ -118,6 +120,8 @@ class PushTokenRestController extends RestApiControllerBase {
 			if ( $push_token ) {
 				$push_token->set_token( $data['token'] );
 				$push_token->set_device_uuid( $data['device_uuid'] );
+				$push_token->set_device_locale( $data['device_locale'] );
+				$push_token->set_metadata( $data['metadata'] );
 				$data_store->update( $push_token );
 			} else {
 				$push_token = $data_store->create( $data );
@@ -321,6 +325,14 @@ class PushTokenRestController extends RestApiControllerBase {
 				'validate_callback' => array( $this, 'validate_argument' ),
 				'sanitize_callback' => 'sanitize_text_field',
 			),
+			'device_locale' => array(
+				'description'       => __( 'Device Locale', 'woocommerce' ),
+				'type'              => 'string',
+				'required'          => true,
+				'context'           => array( 'create' ),
+				'validate_callback' => array( $this, 'validate_argument' ),
+				'sanitize_callback' => 'sanitize_text_field',
+			),
 			'platform'    => array(
 				'description'       => __( 'Platform', 'woocommerce' ),
 				'type'              => 'string',
@@ -331,6 +343,14 @@ class PushTokenRestController extends RestApiControllerBase {
 			),
 			'token'       => array(
 				'description'       => __( 'Push Token', 'woocommerce' ),
+				'type'              => 'string',
+				'required'          => true,
+				'context'           => array( 'create' ),
+				'validate_callback' => array( $this, 'validate_argument' ),
+				'sanitize_callback' => 'wp_unslash',
+			),
+			'metadata'       => array(
+				'description'       => __( 'Metadata', 'woocommerce' ),
 				'type'              => 'string',
 				'required'          => true,
 				'context'           => array( 'create' ),

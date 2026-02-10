@@ -23,8 +23,10 @@ class PushTokenValidator {
 		'user_id',
 		'origin',
 		'device_uuid',
+		'device_locale',
 		'platform',
 		'token',
+		'metadata',
 	);
 
 	/**
@@ -33,6 +35,13 @@ class PushTokenValidator {
 	 * @since 10.6.0
 	 */
 	const ERROR_CODE = 'woocommerce_invalid_data';
+
+	/**
+	 * The regex to use when validating device locale format.
+	 *
+	 * @since 10.6.0
+	 */
+	const DEVICE_LOCALE_FORMAT = '/^[a-z]{2,3}_[A-Z]{2}$/';
 
 	/**
 	 * The regex to use when validating device UUID format.
@@ -267,6 +276,37 @@ class PushTokenValidator {
 	}
 
 	/**
+	 * Validates device locale.
+	 *
+	 * @since 10.6.0
+	 *
+	 * @param mixed $value The value to validate.
+	 * @param array $context An array of other values included as context for the validation.
+	 * @return bool|WP_Error
+	 */
+	private static function validate_device_locale( $value, array $context ) {
+		if ( ! isset( $value ) ) {
+			return new WP_Error( self::ERROR_CODE, 'Device locale is required.' );
+		}
+
+		if ( ! is_string( $value ) ) {
+			return new WP_Error( self::ERROR_CODE, 'Device locale must be a string.' );
+		}
+
+		$value = trim( $value );
+
+		if ( '' === $value ) {
+			return new WP_Error( self::ERROR_CODE, 'Device locale cannot be empty.' );
+		}
+
+		if ( ! preg_match( self::DEVICE_LOCALE_FORMAT, $value ) ) {
+			return new WP_Error( self::ERROR_CODE, 'Device locale is an invalid format.' );
+		}
+
+		return true;
+	}
+
+	/**
 	 * Validates platform.
 	 *
 	 * @since 10.6.0
@@ -374,6 +414,39 @@ class PushTokenValidator {
 			) {
 				return new WP_Error( self::ERROR_CODE, 'Token is an invalid format.' );
 			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Validates metadata.
+	 *
+	 * @since 10.6.0
+	 *
+	 * @param mixed $value The value to validate.
+	 * @param array $context An array of other values included as context for the validation.
+	 * @return bool|WP_Error
+	 */
+	private static function validate_metadata( $value, array $context ) {
+		if ( ! isset( $value ) ) {
+			return new WP_Error( self::ERROR_CODE, 'Metadata is required.' );
+		}
+
+		if ( ! is_string( $value ) ) {
+			return new WP_Error( self::ERROR_CODE, 'Metadata must be a string.' );
+		}
+
+		$value = trim( $value );
+
+		if ( '' === $value ) {
+			return new WP_Error( self::ERROR_CODE, 'Metadata cannot be empty.' );
+		}
+
+		$value = json_decode( $value, true );
+
+		if ( is_null( $value ) || json_last_error() ) {
+			return new WP_Error( self::ERROR_CODE, 'Metadata must be valid JSON.' );
 		}
 
 		return true;
