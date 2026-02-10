@@ -1,11 +1,6 @@
 // Extra class added for specificity so styles are applied in the editor.
 .wc-block-components-product-details.wc-block-components-product-details {
 	@include font-x-small-locked;
-	margin: 0.5em 0;
-
-	&:last-of-type {
-		margin-bottom: 0;
-	}
 }
 
 .wc-block-components-product-details__name,
