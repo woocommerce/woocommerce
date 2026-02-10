@@ -4,6 +4,8 @@
 import { faker } from '@faker-js/faker';
 import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
+import type { Page } from '@playwright/test';
+
 /**
  * Internal dependencies
  */
@@ -11,7 +13,7 @@ import { test as baseTest, expect, tags } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { getFakeProduct } from '../../utils/data';
 
-async function saveProductChanges( page ) {
+async function saveProductChanges( page: Page ) {
 	await page
 		.locator( '#publishing-action' )
 		.getByRole( 'button', { name: 'Update' } )
@@ -23,7 +25,7 @@ async function saveProductChanges( page ) {
 	).toBeVisible();
 }
 
-async function saveBulkProductChanges( page ) {
+async function saveBulkProductChanges( page: Page ) {
 	await page.getByRole( 'button', { name: 'Update' } ).click();
 	await expect(
 		page
@@ -32,7 +34,7 @@ async function saveBulkProductChanges( page ) {
 	).toBeVisible();
 }
 
-async function selectProduct( page, product ) {
+async function selectProduct( page: Page, product ) {
 	await page
 		.getByLabel( `Select ${ product.name }` )
 		.and(
@@ -41,7 +43,7 @@ async function selectProduct( page, product ) {
 		.click();
 }
 
-async function selectAllProducts( page, products ) {
+async function selectAllProducts( page: Page, products ) {
 	for ( const product of products ) {
 		await selectProduct( page, product );
 	}

@@ -45,7 +45,7 @@ const productData = {
 	},
 };
 
-function removeHtmlTags( str ) {
+function removeHtmlTags( str: string ) {
 	return str.replace( /<\/?[^>]+(>|$)/g, '' );
 }
 

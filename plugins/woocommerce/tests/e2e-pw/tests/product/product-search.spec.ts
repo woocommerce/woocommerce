@@ -6,10 +6,10 @@ import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 /**
  * Internal dependencies
  */
-import { test, expect } from '../../fixtures/fixtures.js';
+import { test, expect } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 
-let productId;
+let productId: number;
 const productName = `Unique thing that we sell ${ new Date()
 	.getTime()
 	.toString() }`;

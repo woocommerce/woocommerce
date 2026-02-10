@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { test, expect } from '../../fixtures/fixtures.js';
+import { test, expect } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 
 // Suppress unused variable warnings

@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import type { Page } from '@playwright/test';
 import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
@@ -139,10 +140,10 @@ const variations2 = [
 ];
 
 async function selectVariation(
-	page,
-	variations,
-	price,
-	productName,
+	page: Page,
+	variations: { locatorId: string; value: string }[],
+	price: number | string,
+	productName: string,
 	addToCart = true
 ) {
 	for ( const v of variations ) {
@@ -154,7 +155,7 @@ async function selectVariation(
 	}
 
 	await expect(
-		page.getByRole( 'alert' ).filter( { hasText: price } )
+		page.getByRole( 'alert' ).filter( { hasText: String( price ) } )
 	).toBeVisible();
 
 	if ( addToCart ) {
@@ -173,7 +174,7 @@ test.describe(
 	() => {
 		const variableProductName = `Variable single product ${ Date.now() }`;
 		const slug = variableProductName.replace( / /gi, '-' ).toLowerCase();
-		let variableProductId;
+		let variableProductId: number;
 		let calcTaxesState;
 
 		test.beforeAll( async ( { restApi } ) => {
@@ -308,7 +309,7 @@ test.describe(
 	() => {
 		const variableProductName = `Variable single product ${ Date.now() }`;
 		const slug = variableProductName.replace( / /gi, '-' ).toLowerCase();
-		let variableProductId;
+		let variableProductId: number;
 		let calcTaxesState;
 
 		test.beforeAll( async ( { restApi } ) => {

@@ -1,12 +1,20 @@
-const { test, expect } = require( '@playwright/test' );
-const { variableProducts: utils, api } = require( '../../utils' );
-const { tags } = require( '../../fixtures/fixtures' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
+/**
+ * External dependencies
+ */
+import { test, expect } from '@playwright/test';
+
+/**
+ * Internal dependencies
+ */
+import { variableProducts as utils, api } from '../../utils';
+import { tags } from '../../fixtures/fixtures';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
+
 const { showVariableProductTour } = utils;
 const productPageURL = 'wp-admin/post-new.php?post_type=product';
 const variableProductName = 'Variable Product with Three Variations';
 
-let productId;
+let productId: number;
 
 test.describe( 'Add variable product', { tag: tags.GUTENBERG }, () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );
@@ -99,7 +107,9 @@ test.describe( 'Add variable product', { tag: tags.GUTENBERG }, () => {
 		} );
 
 		await test.step( 'Save product ID for clean up.', async () => {
-			productId = page.url().match( /(?<=post=)\d+/ );
+			const match = page.url().match( /(?<=post=)\d+/ );
+			expect( match ).not.toBeNull();
+			productId = Number( match![ 0 ] );
 		} );
 	} );
 } );

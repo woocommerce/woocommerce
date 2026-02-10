@@ -31,13 +31,13 @@ const productAttributeTerm = 'red';
 
 const simpleProductName = 'Single Product With Tags';
 
-let product1Id,
-	product2Id,
-	product3Id,
-	productTag1Id,
-	productTag2Id,
-	productTag3Id,
-	attributeId;
+let product1Id: number,
+	product2Id: number,
+	product3Id: number,
+	productTag1Id: number,
+	productTag2Id: number,
+	productTag3Id: number,
+	attributeId: number;
 
 test.describe(
 	'Browse product tags and attributes from the product page',

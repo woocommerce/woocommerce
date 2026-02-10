@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import type { Page } from '@playwright/test';
+
+/**
  * Internal dependencies
  */
 import { variableProducts as utils } from '../../utils';
@@ -23,14 +28,14 @@ const productHeight = '15';
 const stockAmount = '100';
 const lowStockAmount = '10';
 
-let productId_indivEdit,
-	productId_bulkEdit,
-	productId_deleteAll,
-	productId_manageStock,
-	productId_variationDefaults,
-	productId_removeVariation,
+let productId_indivEdit: number,
+	productId_bulkEdit: number,
+	productId_deleteAll: number,
+	productId_manageStock: number,
+	productId_variationDefaults: number,
+	productId_removeVariation: number,
 	defaultVariation,
-	variationIds_indivEdit;
+	variationIds_indivEdit: number[];
 
 test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );
@@ -106,7 +111,7 @@ test.describe( 'Update variations', { tag: tags.GUTENBERG }, () => {
 		await deleteProductsAddedByTests();
 	} );
 
-	async function gotToVariationsTab( page ) {
+	async function gotToVariationsTab( page: Page ) {
 		await test.step( 'Click on the "Variations" tab.', async () => {
 			await expect( async () => {
 				await page
