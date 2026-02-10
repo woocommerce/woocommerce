@@ -369,6 +369,65 @@ class OrderActionsRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox POS completed order email template is available for non-POS completed orders.
+	 */
+	public function test_pos_completed_template_available_for_non_pos_completed_order() {
+		$bootstrap = \WC_Unit_Tests_Bootstrap::instance();
+		require_once $bootstrap->plugin_dir . '/includes/emails/class-wc-email-customer-pos-completed-order.php';
+
+		// Manually load the POS email class into WC_Emails.
+		$pos_email = new \WC_Email_Customer_POS_Completed_Order();
+		WC()->mailer()->emails['WC_Email_Customer_POS_Completed_Order'] = $pos_email;
+
+		$order = wc_create_order();
+		$order->set_billing_email( 'customer@example.org' );
+		$order->set_status( 'completed' );
+		$order->save();
+
+		wp_set_current_user( $this->user['shop_manager'] );
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order->get_id() . '/actions/email_templates' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$item_ids = wp_list_pluck( $response->get_data(), 'id' );
+		$this->assertContains( 'customer_pos_completed_order', $item_ids );
+
+		unset( WC()->mailer()->emails['WC_Email_Customer_POS_Completed_Order'] );
+	}
+
+	/**
+	 * @testdox POS refunded order email template is available for non-POS orders with refunds.
+	 */
+	public function test_pos_refunded_template_available_for_non_pos_order_with_refunds() {
+		$bootstrap = \WC_Unit_Tests_Bootstrap::instance();
+		require_once $bootstrap->plugin_dir . '/includes/emails/class-wc-email-customer-pos-refunded-order.php';
+
+		$pos_email = new \WC_Email_Customer_POS_Refunded_Order();
+		WC()->mailer()->emails['WC_Email_Customer_POS_Refunded_Order'] = $pos_email;
+
+		$order = \WC_Helper_Order::create_order();
+		$order->set_billing_email( 'customer@example.org' );
+		$order->set_status( 'completed' );
+		$order->save();
+
+		$this->do_partial_refund( $order );
+
+		wp_set_current_user( $this->user['shop_manager'] );
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order->get_id() . '/actions/email_templates' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$item_ids = wp_list_pluck( $response->get_data(), 'id' );
+		$this->assertContains( 'customer_pos_refunded_order', $item_ids );
+
+		unset( WC()->mailer()->emails['WC_Email_Customer_POS_Refunded_Order'] );
+	}
+
+	/**
 	 * Test sending order details email.
 	 */
 	public function test_send_order_details() {

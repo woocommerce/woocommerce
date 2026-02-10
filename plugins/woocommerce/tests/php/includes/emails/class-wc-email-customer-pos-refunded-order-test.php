@@ -422,4 +422,68 @@ class WC_Email_Customer_POS_Refunded_Order_Test extends \WC_Unit_Test_Case {
 		// And plain text email should not include refund & returns policy.
 		$this->assertStringNotContainsString( esc_html__( 'Refund & Returns Policy', 'woocommerce' ), $plain_text_content );
 	}
+
+	/**
+	 * @testdox add_to_valid_template_classes adds template for orders with refunds regardless of created_via.
+	 */
+	public function test_add_to_valid_template_classes_adds_template_for_any_order_with_refunds() {
+		// Given an order with a refund, not created via POS.
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( 'completed' );
+		$order->save();
+		wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => '5.00',
+				'reason'   => 'Test refund',
+			)
+		);
+		$email = new WC_Email_Customer_POS_Refunded_Order();
+
+		// When filtering valid template classes.
+		$result = $email->add_to_valid_template_classes( array(), $order );
+
+		// Then the template class is added.
+		$this->assertContains( 'WC_Email_Customer_POS_Refunded_Order', $result );
+	}
+
+	/**
+	 * @testdox add_to_valid_template_classes does not add template for orders without refunds.
+	 */
+	public function test_add_to_valid_template_classes_does_not_add_template_for_order_without_refunds() {
+		// Given an order without refunds.
+		$order = OrderHelper::create_order();
+		$order->save();
+		$email = new WC_Email_Customer_POS_Refunded_Order();
+
+		// When filtering valid template classes.
+		$result = $email->add_to_valid_template_classes( array(), $order );
+
+		// Then the template class is not added.
+		$this->assertNotContains( 'WC_Email_Customer_POS_Refunded_Order', $result );
+	}
+
+	/**
+	 * @testdox POS refunded order email is set as manual.
+	 */
+	public function test_pos_refunded_order_email_is_manual() {
+		$email = new WC_Email_Customer_POS_Refunded_Order();
+		$this->assertTrue( $email->manual );
+	}
+
+	/**
+	 * @testdox Default refund emails are not disabled for POS orders after making POS refund email manual.
+	 */
+	public function test_default_refund_emails_are_not_disabled_for_pos_orders() {
+		// Given a POS refunded email is instantiated.
+		new WC_Email_Customer_POS_Refunded_Order();
+
+		// Then the default refund email filters should not be registered.
+		$this->assertFalse(
+			has_filter( 'woocommerce_email_enabled_customer_partially_refunded_order' )
+		);
+		$this->assertFalse(
+			has_filter( 'woocommerce_email_enabled_customer_refunded_order' )
+		);
+	}
 }

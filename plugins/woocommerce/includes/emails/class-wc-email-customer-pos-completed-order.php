@@ -10,7 +10,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 use Automattic\WooCommerce\Internal\Email\OrderPriceFormatter;
-use Automattic\WooCommerce\Internal\Orders\PointOfSaleOrderUtil;
 use Automattic\WooCommerce\Internal\Settings\PointOfSaleDefaultSettings;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
@@ -43,7 +42,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 				'{order_number}' => '',
 			);
 
-			$this->enable_order_email_actions_for_pos_orders();
+			$this->enable_order_email_actions();
 
 			// Call parent constructor.
 			parent::__construct();
@@ -191,11 +190,12 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 		}
 
 		/**
-		 * Enable order email actions for POS orders.
+		 * Enable order email actions for completed orders via REST API.
+		 *
+		 * @since 10.6.0
 		 */
-		private function enable_order_email_actions_for_pos_orders() {
-			$this->enable_email_template_for_pos_orders();
-			// Enable send email when requested.
+		private function enable_order_email_actions() {
+			$this->enable_email_template_for_completed_orders();
 			add_action( 'woocommerce_rest_order_actions_email_send', array( $this, 'trigger' ), 10, 2 );
 		}
 
@@ -354,21 +354,26 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 		}
 
 		/**
-		 * Enable email template for REST API order valid templates for POS orders.
+		 * Enable email template for REST API order valid templates for completed orders.
+		 *
+		 * @since 10.6.0
 		 */
-		private function enable_email_template_for_pos_orders() {
+		private function enable_email_template_for_completed_orders() {
 			add_filter( 'woocommerce_rest_order_actions_email_valid_template_classes', array( $this, 'add_to_valid_template_classes' ), 10, 2 );
 		}
 
 		/**
-		 * Add this email template to the list of valid templates for POS orders.
+		 * Add this email template to the list of valid templates for completed orders.
 		 *
 		 * @param array    $valid_template_classes Array of valid template class names.
 		 * @param WC_Order $order                  The order.
 		 * @return array Modified array of valid template class names.
+		 *
+		 * @since 10.6.0
+		 * @internal
 		 */
 		public function add_to_valid_template_classes( $valid_template_classes, $order ) {
-			if ( ! PointOfSaleOrderUtil::is_pos_order( $order ) ) {
+			if ( 'completed' !== $order->get_status( 'edit' ) ) {
 				return $valid_template_classes;
 			}
 			$valid_template_classes[] = get_class( $this );

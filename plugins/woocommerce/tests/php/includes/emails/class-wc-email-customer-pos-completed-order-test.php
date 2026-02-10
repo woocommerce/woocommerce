@@ -444,4 +444,46 @@ class WC_Email_Customer_POS_Completed_Order_Test extends \WC_Unit_Test_Case {
 		// And plain text email should not include refund & returns policy.
 		$this->assertStringNotContainsString( esc_html__( 'Refund & Returns Policy', 'woocommerce' ), $plain_text_content );
 	}
+
+	/**
+	 * @testdox add_to_valid_template_classes adds template for completed orders regardless of created_via.
+	 */
+	public function test_add_to_valid_template_classes_adds_template_for_any_completed_order() {
+		// Given a completed order not created via POS.
+		$order = OrderHelper::create_order();
+		$order->set_status( 'completed' );
+		$order->save();
+		$email = new WC_Email_Customer_POS_Completed_Order();
+
+		// When filtering valid template classes.
+		$result = $email->add_to_valid_template_classes( array(), $order );
+
+		// Then the template class is added.
+		$this->assertContains( 'WC_Email_Customer_POS_Completed_Order', $result );
+	}
+
+	/**
+	 * @testdox add_to_valid_template_classes does not add template for non-completed orders.
+	 */
+	public function test_add_to_valid_template_classes_does_not_add_template_for_non_completed_order() {
+		// Given a processing order.
+		$order = OrderHelper::create_order();
+		$order->set_status( 'processing' );
+		$order->save();
+		$email = new WC_Email_Customer_POS_Completed_Order();
+
+		// When filtering valid template classes.
+		$result = $email->add_to_valid_template_classes( array(), $order );
+
+		// Then the template class is not added.
+		$this->assertNotContains( 'WC_Email_Customer_POS_Completed_Order', $result );
+	}
+
+	/**
+	 * @testdox POS completed order email is set as manual.
+	 */
+	public function test_pos_completed_order_email_is_manual() {
+		$email = new WC_Email_Customer_POS_Completed_Order();
+		$this->assertTrue( $email->manual );
+	}
 }
