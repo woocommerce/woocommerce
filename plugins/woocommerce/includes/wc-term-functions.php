@@ -671,8 +671,7 @@ function wc_get_product_visibility_term_ids() {
 
 	$blog_id = get_current_blog_id();
 
-	// Skip cache in unit tests.
-	if ( isset( $term_ids_by_blog[ $blog_id ] ) && ! class_exists( 'WC_Unit_Tests_Bootstrap' ) ) {
+	if ( isset( $term_ids_by_blog[ $blog_id ] ) ) {
 		return $term_ids_by_blog[ $blog_id ];
 	}
 

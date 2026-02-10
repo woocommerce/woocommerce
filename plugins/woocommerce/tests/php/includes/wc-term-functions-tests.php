@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 
 /**
- * Class WC_Stock_Functions_Tests.
+ * Class WC_Term_Functions_Tests.
  */
 class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 	/**
