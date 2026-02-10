@@ -155,7 +155,7 @@ async function selectVariation(
 	}
 
 	await expect(
-		page.getByRole( 'alert' ).filter( { hasText: price } )
+		page.getByRole( 'alert' ).filter( { hasText: String( price ) } )
 	).toBeVisible();
 
 	if ( addToCart ) {
