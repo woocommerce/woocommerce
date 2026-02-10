@@ -1,7 +1,14 @@
-const { test, expect } = require( '@playwright/test' );
-const { tags } = require( '../../fixtures/fixtures' );
-const { variableProducts: utils } = require( '../../utils' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
+/**
+ * External dependencies
+ */
+import { test, expect } from '@playwright/test';
+
+/**
+ * Internal dependencies
+ */
+import { tags } from '../../fixtures/fixtures';
+import { variableProducts as utils } from '../../utils';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
 const {
 	createVariableProduct,
 	showVariableProductTour,
@@ -10,10 +17,10 @@ const {
 	productAttributes,
 } = utils;
 
-let expectedGeneratedVariations,
-	productId_addManually,
-	productId_generateVariations,
-	variationsToManuallyCreate;
+let expectedGeneratedVariations: string[][],
+	productId_addManually: number,
+	productId_generateVariations: number,
+	variationsToManuallyCreate: string[][];
 
 test.describe( 'Add variations', { tag: tags.GUTENBERG }, () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );

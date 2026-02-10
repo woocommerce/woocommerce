@@ -35,7 +35,7 @@ const test = baseTest.extend( {
 	},
 } );
 
-let categoryIds, productIds, orderIds, setupPage;
+let categoryIds: number[], productIds: number[], orderIds: number[], setupPage;
 
 test.beforeAll( async ( { browser, restApi } ) => {
 	// create a couple of product categories

@@ -1,39 +1,26 @@
-const { test, expect, request, Page, Locator } = require( '@playwright/test' );
-const { admin } = require( '../../test-data/data' );
-const { tags } = require( '../../fixtures/fixtures' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
-const { setOption } = require( '../../utils/options' );
+/**
+ * External dependencies
+ */
+import { test, expect, request } from '@playwright/test';
+import type { Page, Locator } from '@playwright/test';
+
+/**
+ * Internal dependencies
+ */
+import { admin } from '../../test-data/data';
+import { tags } from '../../fixtures/fixtures';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
+import { setOption } from '../../utils/options';
 
 const EXPECTED_SECTION_HEADERS = [ 'Performance', 'Charts', 'Leaderboards' ];
 
-/**
- * @type {number}
- */
-let userId;
-/**
- * @type {Locator}
- */
-let headings_sections;
-/**
- * @type {Locator}
- */
-let heading_performance;
-/**
- * @type {Locator}
- */
-let buttons_ellipsis;
-/**
- * @type {Locator}
- */
-let menuitem_moveUp;
-/**
- * @type {Locator}
- */
-let menuitem_moveDown;
-/**
- * @type {Page}
- */
-let page;
+let userId: number;
+let headings_sections: Locator;
+let heading_performance: Locator;
+let buttons_ellipsis: Locator;
+let menuitem_moveUp: Locator;
+let menuitem_moveDown: Locator;
+let page: Page;
 
 const base64String = Buffer.from(
 	`${ admin.username }:${ admin.password }`

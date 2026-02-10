@@ -13,7 +13,7 @@ const productPrice = '18.16';
 const simpleProductName = 'Simple single product';
 const groupedProductName = 'Grouped single product';
 
-let simpleProductId, simpleProduct2Id, groupedProductId;
+let simpleProductId: number, simpleProduct2Id: number, groupedProductId: number;
 
 test.describe(
 	'Grouped Product Page',

@@ -15,9 +15,9 @@ const filePathOverride = path.resolve(
 	'tests/e2e-pw/test-data/sample_products_override.csv'
 );
 
-const productIds = [];
-const categoryIds = [];
-const attributeIds = [];
+const productIds: number[] = [];
+const categoryIds: number[] = [];
+const attributeIds: number[] = [];
 
 const productNames = [
 	'Imported V-Neck T-Shirt',

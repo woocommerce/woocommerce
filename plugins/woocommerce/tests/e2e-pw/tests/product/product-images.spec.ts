@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
+import type { Page } from '@playwright/test';
 
 /**
  * Internal dependencies
@@ -9,7 +10,11 @@ import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 import { test as baseTest, expect } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 
-async function addImageFromLibrary( page, imageName, actionButtonName ) {
+async function addImageFromLibrary(
+	page: Page,
+	imageName: string,
+	actionButtonName: string
+) {
 	await page.getByRole( 'tab', { name: 'Media Library' } ).click();
 	await page.getByRole( 'searchbox', { name: 'Search' } ).fill( imageName );
 	const imageLocator = page.getByLabel( imageName ).nth( 0 );

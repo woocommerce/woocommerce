@@ -1,12 +1,17 @@
-const { test, expect, request, Page } = require( '@playwright/test' );
-const { tags } = require( '../../fixtures/fixtures' );
-const { setOption, deleteOption } = require( '../../utils/options' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
+/**
+ * External dependencies
+ */
+import { test, expect, request } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
 /**
- * @type {Page}
+ * Internal dependencies
  */
-let page;
+import { tags } from '../../fixtures/fixtures';
+import { setOption, deleteOption } from '../../utils/options';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
+
+let page: Page;
 
 test.describe(
 	'Analytics Settings - Scheduled Import',

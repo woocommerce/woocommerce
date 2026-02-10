@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
+import type { Page } from '@playwright/test';
 
 /**
  * Internal dependencies
@@ -42,7 +43,7 @@ test.describe(
 	'Products > Related products',
 	{ tag: [ tags.GUTENBERG ] },
 	() => {
-		async function navigate( page, productId ) {
+		async function navigate( page: Page, productId: number ) {
 			await test.step( 'Navigate to product edit page', async () => {
 				await page.goto(
 					`wp-admin/post.php?post=${ productId }&action=edit`
@@ -67,7 +68,7 @@ test.describe(
 			} );
 		}
 
-		async function updateProduct( page ) {
+		async function updateProduct( page: Page ) {
 			await test.step( 'update the product', async () => {
 				// extra click somewhere in the page as a workaround for update button click not always working
 				await page

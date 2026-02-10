@@ -5,6 +5,7 @@ import {
 	WC_API_PATH,
 	WC_ADMIN_API_PATH,
 } from '@woocommerce/e2e-utils-playwright';
+import type { Page } from '@playwright/test';
 
 /**
  * Internal dependencies
@@ -61,11 +62,7 @@ const test = baseTest.extend( {
 	},
 } );
 
-/**
- *
- * @param {import('@playwright/test').Page} page
- */
-async function goToAttributesTab( page ) {
+async function goToAttributesTab( page: Page ) {
 	// There is the chance we might click on the 'Attributes' tab too early. To
 	// prevent that, we wait until the 'Variations' tab is hidden, which means
 	// the tabs have been updated.
@@ -85,10 +82,10 @@ async function goToAttributesTab( page ) {
 	} );
 }
 async function addAttribute(
-	page,
-	attributeName,
-	attributeValues,
-	firstAttribute
+	page: Page,
+	attributeName: string,
+	attributeValues: string,
+	firstAttribute: boolean
 ) {
 	if ( ! firstAttribute ) {
 		await test.step( "Click 'Add new'.", async () => {
