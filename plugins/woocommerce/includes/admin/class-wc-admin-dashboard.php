@@ -148,8 +148,6 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 				)
 			);
 
-			// Where to copy from
-
 			// Display loading placeholder.
 			echo '<div id="wc-status-widget-loading" class="wc-status-widget-loading">';
 			echo '<p>' . esc_html__( 'Loading status data...', 'woocommerce' ) . ' <span class="spinner is-active"></span></p>';
