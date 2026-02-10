@@ -1,5 +1,12 @@
-const { test, expect } = require( '@playwright/test' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
+/**
+ * External dependencies
+ */
+import { test, expect } from '@playwright/test';
+
+/**
+ * Internal dependencies
+ */
+import { ADMIN_STATE_PATH } from '../../playwright.config';
 
 const pageGroups = [
 	{

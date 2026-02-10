@@ -187,7 +187,7 @@ const wcPages = [
 ];
 
 const product = getFakeProduct();
-let orderId;
+let orderId: number;
 
 test.use( { storageState: ADMIN_STATE_PATH } );
 
