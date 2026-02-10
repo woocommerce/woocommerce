@@ -20,7 +20,7 @@ trait ProductLinksTrait {
 	 *
 	 * @since 10.6.0
 	 */
-	protected function prepare_links( $item, $request ): array {
+	protected function prepare_links( $item, $request ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		$links = array(
 			'self'       => array(
 				'href' => rest_url( $this->get_namespace() . '/products/' . $item->get_id() ),

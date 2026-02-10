@@ -423,7 +423,7 @@ class Products extends ControllerTestCase {
 	 * @testdox Product variation should include up link to parent product.
 	 */
 	public function test_product_variation_has_up_link() {
-		$fixtures = new FixtureData();
+		$fixtures  = new FixtureData();
 		$attribute = FixtureData::get_product_attribute( 'color', array( 'red', 'blue' ) );
 
 		$variable_product = $fixtures->get_variable_product(
