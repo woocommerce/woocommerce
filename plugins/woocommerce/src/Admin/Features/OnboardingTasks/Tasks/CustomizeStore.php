@@ -40,6 +40,7 @@ class CustomizeStore extends Task {
 
 			if ( $is_cys_complete ) {
 				update_option( 'woocommerce_admin_customize_store_completed', 'yes' );
+				$this->possibly_track_completion();
 			}
 		}
 	}
@@ -51,6 +52,7 @@ class CustomizeStore extends Task {
 	 */
 	public function mark_task_as_complete_classic_theme() {
 		update_option( 'woocommerce_admin_customize_store_completed', 'yes' );
+		$this->possibly_track_completion();
 	}
 
 	/**
@@ -95,6 +97,10 @@ class CustomizeStore extends Task {
 	 * @return bool
 	 */
 	public function is_complete() {
+		if ( $this->has_previously_completed() ) {
+			return true;
+		}
+
 		return get_option( 'woocommerce_admin_customize_store_completed' ) === 'yes';
 	}
 
