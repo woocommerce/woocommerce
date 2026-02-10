@@ -529,7 +529,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			);
 			$comments = array_filter(
 				$comments,
-				static fn( \WP_Comment $comment ) => current_user_can( 'read_product', $comment->comment_post_ID ) && ! post_password_required( $comment->comment_post_ID )
+				static fn( \WP_Comment $comment ) => current_user_can( 'read_product', $comment->comment_post_ID ) && ! post_password_required( (int) $comment->comment_post_ID )
 			);
 			if ( $comments ) {
 				echo '<ul>';
