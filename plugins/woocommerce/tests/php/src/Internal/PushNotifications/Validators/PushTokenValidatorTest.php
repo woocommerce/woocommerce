@@ -14,9 +14,10 @@ use WP_Error;
  */
 class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	/**
-	 * @testdox Should return true when validating all keys with valid data.
+	 * @testdox Should return a WP_Error when validating all keys where the last
+	 * value is invalid.
 	 */
-	public function test_validate_all_keys_with_valid_data(): void {
+	public function test_it_validates_all_keys(): void {
 		$result = PushTokenValidator::validate(
 			array(
 				'id'          => 1,
@@ -30,6 +31,24 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 
 		$this->assertInstanceOf( WP_Error::class, $result );
 		$this->assertSame( 'Token is required.', $result->get_error_message() );
+	}
+
+	/**
+	 * @testdox Should return true when validating all keys with valid data.
+	 */
+	public function test_it_validates_all_keys_with_valid_data(): void {
+		$result = PushTokenValidator::validate(
+			array(
+				'id'          => 1,
+				'user_id'     => 42,
+				'origin'      => PushToken::ORIGINS[0],
+				'platform'    => PushToken::PLATFORM_APPLE,
+				'device_uuid' => 'valid-uuid-123',
+				'token'       => str_repeat( 'a', 64 ),
+			)
+		);
+
+		$this->assertTrue( $result );
 	}
 
 	/**

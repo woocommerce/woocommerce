@@ -18,6 +18,15 @@ use WP_Error;
  * @since 10.6.0
  */
 class PushTokenValidator {
+	const VALIDATABLE_FIELDS = array(
+		'id',
+		'user_id',
+		'origin',
+		'device_uuid',
+		'platform',
+		'token',
+	);
+
 	/**
 	 * The error code to return in WP_Errors.
 	 *
@@ -61,29 +70,29 @@ class PushTokenValidator {
 	const TOKEN_FORMAT_ANDROID = '/^[A-Za-z0-9=:_\-+\/]+$/';
 
 	/**
-	 * Validates the fields defined in `$keys`, or all fields if `$keys` is
+	 * Validates the fields defined in `$fields`, or all fields if `$fields` is
 	 * empty.
 	 *
 	 * @since 10.6.0
 	 *
 	 * @param array $data The data to be validated.
-	 * @param array $keys The keys to validate.
+	 * @param array $fields The fields to validate.
 	 * @return bool|WP_Error
 	 */
-	public static function validate( array $data, ?array $keys = array() ) {
-		$keys = empty( $keys ) ? array_keys( $data ) : $keys;
+	public static function validate( array $data, ?array $fields = array() ) {
+		$fields = empty( $fields ) ? self::VALIDATABLE_FIELDS : $fields;
 
-		foreach ( $keys as $key ) {
-			$method = 'validate_' . $key;
+		foreach ( $fields as $field ) {
+			$method = 'validate_' . $field;
 
 			if ( ! method_exists( self::class, $method ) ) {
 				return new WP_Error(
 					'woocommerce_invalid_data',
-					sprintf( 'Can\'t validate param \'%s\' as a validator does not exist for it.', $key )
+					sprintf( 'Can\'t validate param \'%s\' as a validator does not exist for it.', $field )
 				);
 			}
 
-			$result = self::$method( $data[ $key ] ?? null, $data );
+			$result = self::$method( $data[ $field ] ?? null, $data );
 
 			if ( is_wp_error( $result ) ) {
 				return $result;
