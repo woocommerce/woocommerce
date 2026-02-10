@@ -399,6 +399,9 @@ final class WooCommerce {
 
 		$container->get( Automattic\WooCommerce\Internal\ProductFilters\MainQueryController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ProductFilters\CacheController::class )->register();
+
+		// Integration point between legacy reports and orders APIs (the reports caches invalidation focused).
+		\WC_Admin_Reports::register_orders_hook_handlers();
 	}
 
 	/**
