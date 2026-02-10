@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { request } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
 /**
  * Internal dependencies
@@ -11,7 +12,7 @@ import { setOption } from '../../utils/options';
 import { setComingSoon } from '../../utils/coming-soon';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 
-const getPluginLocator = ( page, slug ) => {
+const getPluginLocator = ( page: Page, slug: string ) => {
 	return page.locator(
 		`.woocommerce-profiler-plugins-plugin-card[data-slug="${ slug }"]`
 	);

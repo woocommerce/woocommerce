@@ -1,18 +1,25 @@
-const { test, expect } = require( '@playwright/test' );
-const {
+/**
+ * External dependencies
+ */
+import { test, expect, type Page } from '@playwright/test';
+
+/**
+ * Internal dependencies
+ */
+import {
 	clickAddNewMenuItem,
 	expectBlockProductEditor,
 	expectOldProductEditor,
-} = require( '../../../utils/simple-products' );
-const { toggleBlockProductTour } = require( '../../../utils/tours' );
-const { tags } = require( '../../../fixtures/fixtures' );
-const { ADMIN_STATE_PATH } = require( '../../../playwright.config' );
-const { wpCLI } = require( '../../../utils/cli' );
-const { skipTestsForDeprecatedFeature } = require( './helpers/skip-tests' );
+} from '../../../utils/simple-products';
+import { toggleBlockProductTour } from '../../../utils/tours';
+import { tags } from '../../../fixtures/fixtures';
+import { ADMIN_STATE_PATH } from '../../../playwright.config';
+import { wpCLI } from '../../../utils/cli';
+import { skipTestsForDeprecatedFeature } from './helpers/skip-tests';
 
 skipTestsForDeprecatedFeature();
 
-async function dismissFeedbackModalIfShown( page ) {
+async function dismissFeedbackModalIfShown( page: Page ) {
 	try {
 		await page
 			.getByRole( 'button', { name: 'Skip' } )

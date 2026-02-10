@@ -24,7 +24,8 @@ const productData = {
 	summary: 'This is a product summary',
 };
 
-const groupedProducts = [];
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const groupedProducts: any[] = [];
 
 test.describe( 'General tab', { tag: tags.GUTENBERG }, () => {
 	test.describe( 'Grouped product', () => {

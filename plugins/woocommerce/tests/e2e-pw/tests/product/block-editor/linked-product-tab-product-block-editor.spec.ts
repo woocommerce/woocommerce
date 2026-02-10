@@ -28,8 +28,9 @@ const productData = {
 	summary: 'This is a product summary',
 };
 
-const linkedProductsData = [],
-	productIds = [];
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const linkedProductsData: any[] = [],
+	productIds: number[] = [];
 let productId = 0;
 
 test.describe( 'General tab', { tag: tags.GUTENBERG }, () => {

@@ -12,7 +12,8 @@ import {
 import { expect, test } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 
-const hide_task_list = async ( restApi, task_list_name ) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const hide_task_list = async ( restApi: any, task_list_name: string ) => {
 	const {
 		status,
 		data: { isHidden },
@@ -25,7 +26,8 @@ const hide_task_list = async ( restApi, task_list_name ) => {
 	return isHidden === true;
 };
 
-const show_task_list = async ( restApi, task_list_name ) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const show_task_list = async ( restApi: any, task_list_name: string ) => {
 	const {
 		status,
 		data: { isHidden },

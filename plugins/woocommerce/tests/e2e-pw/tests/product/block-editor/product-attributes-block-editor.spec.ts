@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
+import type { Page } from '@playwright/test';
 
 /**
  * Internal dependencies
@@ -16,7 +17,7 @@ import { skipTestsForDeprecatedFeature } from './helpers/skip-tests';
 
 skipTestsForDeprecatedFeature();
 
-async function waitForAttributeList( page ) {
+async function waitForAttributeList( page: Page ) {
 	// The list child is different in case there are no results versus when there already are some attributes, so we need to wait for either one to be visible.
 	await Promise.race( [
 		// in case there's at least one attribute

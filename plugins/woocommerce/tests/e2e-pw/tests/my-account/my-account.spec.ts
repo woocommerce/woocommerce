@@ -1,9 +1,14 @@
 /**
+ * External dependencies
+ */
+import { test, expect } from '@playwright/test';
+
+/**
  * Internal dependencies
  */
-const { test, expect } = require( '@playwright/test' );
-const { customer } = require( '../../test-data/data' );
-const { CUSTOMER_STATE_PATH } = require( '../../playwright.config' );
+import { customer } from '../../test-data/data';
+import { CUSTOMER_STATE_PATH } from '../../playwright.config';
+
 const pages = [ 'Orders', 'Downloads', 'Addresses', 'Account details' ];
 
 test.describe( 'My account page', () => {
