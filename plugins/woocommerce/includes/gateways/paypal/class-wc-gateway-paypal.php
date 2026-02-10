@@ -443,11 +443,18 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	/**
 	 * Get PayPal icon image.
 	 *
-	 * @return string
+	 * @return string The PayPal icon image.
 	 */
 	protected function get_paypal_icon_image() {
 		$icon = WC_HTTPS::force_https_url( WC()->plugin_url() . '/assets/images/paypal.png' );
-		
+
+		/**
+		 * Filters the PayPal icon image.
+		 *
+		 * @param string $icon The PayPal icon image.
+		 * @return string The PayPal icon image.
+		 * @since 10.6.0
+		 */
 		return apply_filters( 'woocommerce_paypal_icon', $icon );
 	}
 
