@@ -163,7 +163,7 @@ class WC_Post_Data {
 	 * @param int     $post_id Post ID.
 	 * @param WP_Post $post    Post object.
 	 */
-	public static function invalidate_products_last_modified( $post_id, $post ) {
+	public static function invalidate_products_last_modified( $post_id, $post ): void {
 		if ( $post instanceof WP_Post && in_array( $post->post_type, array( 'product', 'product_variation' ), true ) ) {
 			wp_cache_delete( 'last_modified', 'wc_products' );
 		}

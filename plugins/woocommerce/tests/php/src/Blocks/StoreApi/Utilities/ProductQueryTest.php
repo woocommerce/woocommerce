@@ -5,12 +5,11 @@ namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Utilities;
 
 use Automattic\WooCommerce\StoreApi\Utilities\ProductQuery;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
-use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
 /**
  * Unit tests for the ProductQuery::get_last_modified() caching behavior.
  */
-class ProductQueryTest extends TestCase {
+class ProductQueryTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * @var ProductQuery
@@ -20,7 +19,7 @@ class ProductQueryTest extends TestCase {
 	/**
 	 * Setup test data. Called before every test.
 	 */
-	protected function setUp(): void {
+	public function setUp(): void {
 		parent::setUp();
 		$this->product_query = new ProductQuery();
 		wp_cache_delete( 'last_modified', 'wc_products' );
@@ -29,7 +28,7 @@ class ProductQueryTest extends TestCase {
 	/**
 	 * @testdox get_last_modified returns null when no products exist.
 	 */
-	public function test_get_last_modified_returns_null_when_no_products() {
+	public function test_get_last_modified_returns_null_when_no_products(): void {
 		global $wpdb;
 
 		// Temporarily remove all product posts to test the null case.
@@ -58,9 +57,14 @@ class ProductQueryTest extends TestCase {
 	/**
 	 * @testdox get_last_modified returns an HTTP-date formatted string.
 	 */
-	public function test_get_last_modified_returns_http_date_format() {
+	public function test_get_last_modified_returns_http_date_format(): void {
 		$fixtures = new FixtureData();
-		$fixtures->get_simple_product( array( 'name' => 'Test Product', 'regular_price' => 10 ) );
+		$fixtures->get_simple_product(
+			array(
+				'name'          => 'Test Product',
+				'regular_price' => 10,
+			)
+		);
 
 		$result = $this->product_query->get_last_modified();
 
@@ -73,9 +77,14 @@ class ProductQueryTest extends TestCase {
 	/**
 	 * @testdox get_last_modified caches the result in the object cache.
 	 */
-	public function test_get_last_modified_caches_result() {
+	public function test_get_last_modified_caches_result(): void {
 		$fixtures = new FixtureData();
-		$fixtures->get_simple_product( array( 'name' => 'Test Product', 'regular_price' => 10 ) );
+		$fixtures->get_simple_product(
+			array(
+				'name'          => 'Test Product',
+				'regular_price' => 10,
+			)
+		);
 
 		// First call seeds the cache.
 		$result = $this->product_query->get_last_modified();
@@ -89,7 +98,7 @@ class ProductQueryTest extends TestCase {
 	/**
 	 * @testdox get_last_modified returns cached value without querying the database.
 	 */
-	public function test_get_last_modified_uses_cached_value() {
+	public function test_get_last_modified_uses_cached_value(): void {
 		$sentinel = 'Thu, 01 Jan 2099 00:00:00 GMT';
 		wp_cache_set( 'last_modified', $sentinel, 'wc_products' );
 
@@ -101,9 +110,14 @@ class ProductQueryTest extends TestCase {
 	/**
 	 * @testdox Cache is invalidated when a product post cache is cleaned.
 	 */
-	public function test_cache_invalidated_on_product_change() {
+	public function test_cache_invalidated_on_product_change(): void {
 		$fixtures = new FixtureData();
-		$product  = $fixtures->get_simple_product( array( 'name' => 'Test Product', 'regular_price' => 10 ) );
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Test Product',
+				'regular_price' => 10,
+			)
+		);
 
 		// Seed the cache.
 		$this->product_query->get_last_modified();
@@ -118,9 +132,14 @@ class ProductQueryTest extends TestCase {
 	/**
 	 * @testdox Cache is invalidated when a product variation post cache is cleaned.
 	 */
-	public function test_cache_invalidated_on_variation_change() {
+	public function test_cache_invalidated_on_variation_change(): void {
 		$fixtures = new FixtureData();
-		$product  = $fixtures->get_simple_product( array( 'name' => 'Test Product', 'regular_price' => 10 ) );
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Test Product',
+				'regular_price' => 10,
+			)
+		);
 
 		// Create a variation post directly to avoid complex variable product setup.
 		$variation_id = wp_insert_post(
@@ -144,9 +163,14 @@ class ProductQueryTest extends TestCase {
 	/**
 	 * @testdox Cache is NOT invalidated when a non-product post cache is cleaned.
 	 */
-	public function test_cache_not_invalidated_on_non_product_change() {
+	public function test_cache_not_invalidated_on_non_product_change(): void {
 		$fixtures = new FixtureData();
-		$fixtures->get_simple_product( array( 'name' => 'Test Product', 'regular_price' => 10 ) );
+		$fixtures->get_simple_product(
+			array(
+				'name'          => 'Test Product',
+				'regular_price' => 10,
+			)
+		);
 
 		// Seed the cache.
 		$this->product_query->get_last_modified();
@@ -154,7 +178,13 @@ class ProductQueryTest extends TestCase {
 		$this->assertNotFalse( $cached_value );
 
 		// Create and clean a regular post.
-		$post_id = wp_insert_post( array( 'post_title' => 'Regular Post', 'post_type' => 'post', 'post_status' => 'publish' ) );
+		$post_id = wp_insert_post(
+			array(
+				'post_title'  => 'Regular Post',
+				'post_type'   => 'post',
+				'post_status' => 'publish',
+			)
+		);
 		clean_post_cache( $post_id );
 
 		$this->assertSame( $cached_value, wp_cache_get( 'last_modified', 'wc_products' ) );
@@ -163,9 +193,14 @@ class ProductQueryTest extends TestCase {
 	/**
 	 * @testdox get_last_modified re-seeds cache from DB after invalidation.
 	 */
-	public function test_get_last_modified_reseeds_after_invalidation() {
+	public function test_get_last_modified_reseeds_after_invalidation(): void {
 		$fixtures = new FixtureData();
-		$product  = $fixtures->get_simple_product( array( 'name' => 'Test Product', 'regular_price' => 10 ) );
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Test Product',
+				'regular_price' => 10,
+			)
+		);
 
 		// Seed the cache.
 		$first_result = $this->product_query->get_last_modified();

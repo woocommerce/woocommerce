@@ -75817,12 +75817,6 @@ parameters:
 			path: src/StoreApi/Routes/V1/Products.php
 
 		-
-			message: '#^Parameter \#2 \$value of method WP_HTTP_Response\:\:header\(\) expects string, int\<min, \-1\>\|int\<1, max\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/StoreApi/Routes/V1/Products.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\ProductsById\:\:get_route_response\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
 			count: 1
@@ -77409,12 +77403,6 @@ parameters:
 		-
 			message: '#^Call to function is_callable\(\) with ''_prime_post_caches'' will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/StoreApi/Utilities/ProductQuery.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Utilities\\ProductQuery\:\:get_last_modified\(\) should return int but returns int\|false\|null\.$#'
-			identifier: return.type
 			count: 1
 			path: src/StoreApi/Utilities/ProductQuery.php
 
