@@ -17,7 +17,7 @@ import { accessTheEmailEditor } from '../../utils/email';
 /**
  * Helper function to switch from email editor to template editing mode.
  *
- * @param {import('@playwright/test').Page} page The Playwright page.
+ * @param page The Playwright page.
  */
 async function switchToTemplateEditingMode( page: Page ) {
 	// Open the Settings panel if not already open

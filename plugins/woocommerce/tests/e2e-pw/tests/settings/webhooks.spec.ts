@@ -50,6 +50,7 @@ test.describe( 'Manage webhooks', () => {
 			const editHref = await page
 				.getByRole( 'link', { name: 'Webhook 1', exact: true } )
 				.getAttribute( 'href' );
+			expect( editHref ).toBeTruthy();
 			const editURL = new URL( editHref! );
 			const webhookID = editURL.searchParams.get( 'edit-webhook' );
 
