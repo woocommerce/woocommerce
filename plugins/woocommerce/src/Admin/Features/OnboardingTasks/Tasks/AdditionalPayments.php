@@ -72,6 +72,10 @@ class AdditionalPayments extends Payments {
 	 * @return bool
 	 */
 	public function is_complete() {
+		if ( $this->has_previously_completed() ) {
+			return true;
+		}
+
 		if ( null === $this->is_complete_result ) {
 			$this->is_complete_result = $this->has_enabled_non_psp_payment_suggestion();
 		}
