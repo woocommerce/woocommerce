@@ -9345,7 +9345,7 @@ parameters:
 		-
 			message: '#^Unreachable statement \- code above always terminates\.$#'
 			identifier: deadCode.unreachable
-			count: 29
+			count: 28
 			path: includes/class-wc-ajax.php
 
 		-

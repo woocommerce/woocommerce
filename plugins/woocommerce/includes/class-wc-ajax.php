@@ -3911,7 +3911,6 @@ class WC_AJAX {
 
 		if ( ! current_user_can( 'publish_shop_orders' ) || ! post_type_supports( 'product', 'comments' ) ) {
 			wp_send_json_error( 'missing_permissions' );
-			wp_die();
 		}
 
 		include_once __DIR__ . '/admin/class-wc-admin-dashboard.php';
