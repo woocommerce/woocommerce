@@ -15,7 +15,7 @@ For product page structure, required elements, and asset specifications, refer t
 
 Use the format "Product Name for WooCommerce" rather than "WooCommerce Product Name" throughout the product copy.
 
-This format ensures your product name complies to [trademark rules](https://automattic.com/trademark-policy/) and leads with its unique identifier, improving discoverability and clarity.
+This format ensures your product name complies with [trademark rules](https://automattic.com/trademark-policy/) and leads with its unique identifier, improving discoverability and clarity.
 
 ### Grammar and Punctuation
 
