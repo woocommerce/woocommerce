@@ -107,7 +107,9 @@ test.describe( 'Add variable product', { tag: tags.GUTENBERG }, () => {
 		} );
 
 		await test.step( 'Save product ID for clean up.', async () => {
-			productId = page.url().match( /(?<=post=)\d+/ );
+			const match = page.url().match( /(?<=post=)\d+/ );
+			expect( match ).not.toBeNull();
+			productId = Number( match![ 0 ] );
 		} );
 	} );
 } );
