@@ -500,7 +500,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		/**
 		 * Recent reviews widget: content.
 		 */
-		public function recent_reviews_content() {
+		public function recent_reviews_content(): void {
 			// Backward compatibility mode: if any of the checked below hooks are in use, use the legacy implementation.
 			$has_legacy_query_filter         = has_filter( 'woocommerce_report_recent_reviews_query_from' );
 			$has_legacy_product_title_filter = has_filter( 'woocommerce_admin_dashboard_recent_reviews' );
