@@ -15,42 +15,46 @@ test.describe(
 	() => {
 		test.use( { storageState: ADMIN_STATE_PATH } );
 
-		let orderId1, orderId2, orderId3, orderId4, orderId5;
+		let orderId1: number,
+			orderId2: number,
+			orderId3: number,
+			orderId4: number,
+			orderId5: number;
 
 		test.beforeAll( async ( { restApi } ) => {
 			await restApi
 				.post( `${ WC_API_PATH }/orders`, {
 					status: 'processing',
 				} )
-				.then( ( response ) => {
+				.then( ( response: { data: { id: number } } ) => {
 					orderId1 = response.data.id;
 				} );
 			await restApi
 				.post( `${ WC_API_PATH }/orders`, {
 					status: 'processing',
 				} )
-				.then( ( response ) => {
+				.then( ( response: { data: { id: number } } ) => {
 					orderId2 = response.data.id;
 				} );
 			await restApi
 				.post( `${ WC_API_PATH }/orders`, {
 					status: 'processing',
 				} )
-				.then( ( response ) => {
+				.then( ( response: { data: { id: number } } ) => {
 					orderId3 = response.data.id;
 				} );
 			await restApi
 				.post( `${ WC_API_PATH }/orders`, {
 					status: 'processing',
 				} )
-				.then( ( response ) => {
+				.then( ( response: { data: { id: number } } ) => {
 					orderId4 = response.data.id;
 				} );
 			await restApi
 				.post( `${ WC_API_PATH }/orders`, {
 					status: 'processing',
 				} )
-				.then( ( response ) => {
+				.then( ( response: { data: { id: number } } ) => {
 					orderId5 = response.data.id;
 				} );
 		} );

@@ -9,7 +9,7 @@ import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 import { tags, expect, test } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 
-let productId, orderId;
+let productId: number, orderId: number;
 const productName = 'Simple Product Name';
 const productPrice = '15.99';
 
@@ -27,7 +27,7 @@ test.describe(
 					type: 'simple',
 					regular_price: productPrice,
 				} )
-				.then( ( response ) => {
+				.then( ( response: { data: { id: number } } ) => {
 					productId = response.data.id;
 				} );
 			// create an order
@@ -40,7 +40,7 @@ test.describe(
 						},
 					],
 				} )
-				.then( ( response ) => {
+				.then( ( response: { data: { id: number } } ) => {
 					orderId = response.data.id;
 				} );
 			// enable bank transfer as a payment option

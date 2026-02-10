@@ -15,7 +15,7 @@ test.describe(
 		tag: [ tags.PAYMENTS, tags.NOT_E2E, tags.COULD_BE_LOWER_LEVEL_TEST ],
 	},
 	() => {
-		let productId;
+		let productId: number;
 		const productName = 'A redirect product test';
 
 		test.beforeAll( async ( { restApi } ) => {
@@ -26,7 +26,7 @@ test.describe(
 					type: 'simple',
 					regular_price: '17.99',
 				} )
-				.then( ( response ) => {
+				.then( ( response: { data: { id: number } } ) => {
 					productId = response.data.id;
 				} );
 			await restApi.put(

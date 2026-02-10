@@ -15,7 +15,7 @@ test.describe.serial(
 	'WooCommerce Orders > Refund an order',
 	{ tag: [ tags.PAYMENTS, tags.HPOS ] },
 	() => {
-		let productId, orderId, currencySymbol;
+		let productId: number, orderId: number, currencySymbol: string | null;
 
 		test.beforeAll( async ( { restApi } ) => {
 			// create a simple product
@@ -25,7 +25,7 @@ test.describe.serial(
 					type: 'simple',
 					regular_price: '9.99',
 				} )
-				.then( ( response ) => {
+				.then( ( response: { data: { id: number } } ) => {
 					productId = response.data.id;
 				} );
 			// create order
@@ -39,7 +39,7 @@ test.describe.serial(
 					],
 					status: 'completed',
 				} )
-				.then( ( response ) => {
+				.then( ( response: { data: { id: number } } ) => {
 					orderId = response.data.id;
 				} );
 		} );
@@ -145,7 +145,9 @@ test.describe(
 	'WooCommerce Orders > Refund and restock an order item',
 	{ tag: [ tags.PAYMENTS, tags.SERVICES, tags.HPOS ] },
 	() => {
-		let productWithStockId, productWithNoStockId, orderId;
+		let productWithStockId: number,
+			productWithNoStockId: number,
+			orderId: number;
 
 		test.beforeAll( async ( { restApi } ) => {
 			// create a simple product with managed stock
@@ -157,7 +159,7 @@ test.describe(
 					manage_stock: true,
 					stock_quantity: 10,
 				} )
-				.then( ( response ) => {
+				.then( ( response: { data: { id: number } } ) => {
 					productWithStockId = response.data.id;
 				} );
 			// create a simple product with NO managed stock
@@ -167,7 +169,7 @@ test.describe(
 					type: 'simple',
 					regular_price: '5.99',
 				} )
-				.then( ( response ) => {
+				.then( ( response: { data: { id: number } } ) => {
 					productWithNoStockId = response.data.id;
 				} );
 			// create order
@@ -185,7 +187,7 @@ test.describe(
 					],
 					status: 'completed',
 				} )
-				.then( ( response ) => {
+				.then( ( response: { data: { id: number } } ) => {
 					orderId = response.data.id;
 				} );
 		} );

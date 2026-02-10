@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { Page } from '@playwright/test';
 import {
 	addAProductToCart,
 	WC_API_PATH,
@@ -17,7 +18,7 @@ import { updateIfNeeded, resetValue } from '../../utils/settings';
 
 const cartPages = [ { name: 'blocks cart', slug: 'cart' }, CLASSIC_CART_PAGE ];
 
-function isClassicCart( page ) {
+function isClassicCart( page: Page ) {
 	return page.url().includes( CLASSIC_CART_PAGE.slug );
 }
 

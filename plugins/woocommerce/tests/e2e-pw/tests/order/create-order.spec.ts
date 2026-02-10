@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { Page } from '@playwright/test';
 import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
@@ -43,7 +44,7 @@ const taxRates = [
 ];
 const taxTotals = [ '10.00', '20.00', '240.00' ];
 
-async function getOrderIdFromPage( page ) {
+async function getOrderIdFromPage( page: Page ) {
 	// get order ID from the page
 	const orderText = await page
 		.locator( 'h2.woocommerce-order-data__heading' )
@@ -52,7 +53,7 @@ async function getOrderIdFromPage( page ) {
 	return parts[ 0 ];
 }
 
-async function addProductToOrder( page, product, quantity ) {
+async function addProductToOrder( page: Page, product, quantity: number ) {
 	await page.getByRole( 'button', { name: 'Add item(s)' } ).click();
 	await page.getByRole( 'button', { name: 'Add product(s)' } ).click();
 	await page.getByText( 'Search for a product…' ).click();
@@ -234,15 +235,15 @@ const test = baseTest.extend( {
 
 	groupedProduct: async ( { restApi }, use ) => {
 		let product = {};
-		let subProductAId;
-		let subProductBId;
+		let subProductAId: number;
+		let subProductBId: number;
 
 		await restApi
 			.post( `${ WC_API_PATH }/products`, {
 				name: 'Add-on A',
 				regular_price: '11.95',
 			} )
-			.then( ( response ) => {
+			.then( ( response: { data: { id: number } } ) => {
 				subProductAId = response.data.id;
 			} );
 		await restApi
@@ -250,7 +251,7 @@ const test = baseTest.extend( {
 				name: 'Add-on B',
 				regular_price: '18.97',
 			} )
-			.then( ( response ) => {
+			.then( ( response: { data: { id: number } } ) => {
 				subProductBId = response.data.id;
 			} );
 		await restApi
@@ -305,17 +306,19 @@ test.describe(
 					.delete( `${ WC_API_PATH }/taxes/classes/${ slug }`, {
 						force: true,
 					} )
-					.catch( ( error ) => {
-						if (
-							error.response.data.code ===
-							'woocommerce_rest_invalid_tax_class'
-						) {
-							// do nothing, probably the tax class was not created due to a failing test
-						} else {
-							// Something else went wrong.
-							throw new Error( error.response.data );
+					.catch(
+						( error: { response: { data: { code: string } } } ) => {
+							if (
+								error.response.data.code ===
+								'woocommerce_rest_invalid_tax_class'
+							) {
+								// do nothing, probably the tax class was not created due to a failing test
+							} else {
+								// Something else went wrong.
+								throw new Error( error.response.data.code );
+							}
 						}
-					} );
+					);
 			}
 			// turn off taxes
 			await restApi.put(
