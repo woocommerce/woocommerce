@@ -38,6 +38,32 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test: recent reviews widget placeholder.
+	 */
+	public function test_recent_reviews_widget_placeholder() {
+		wp_set_current_user( $this->user );
+		( new WC_Admin_Dashboard() )->recent_reviews();
+		$this->expectOutputRegex( '/Loading reviews data.../' );
+		$this->expectOutputRegex( '/wc-recent-reviews-widget-loading/' );
+		$this->expectOutputRegex( '/wc-recent-reviews-widget-content/' );
+	}
+
+	/**
+	 * Test: recent reviews widget placeholder.
+	 */
+	public function test_recent_reviews_widget_content() {
+		$product    = WC_Helper_Product::create_simple_product();
+		$comment_id = WC_Helper_Product::create_product_review( $product->get_id());
+
+		wp_set_current_user( $this->user );
+		( new WC_Admin_Dashboard() )->recent_reviews_content();
+		$this->expectOutputRegex( "/#comment-{$comment_id}/" );
+		$this->expectOutputRegex( '/reviewed by/' );
+
+		$product->delete();
+	}
+
+	/**
 	 * Test: status_widget placeholder
 	 */
 	public function test_status_widget_placeholder() {
