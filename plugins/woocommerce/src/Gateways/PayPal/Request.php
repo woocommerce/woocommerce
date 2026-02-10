@@ -708,7 +708,7 @@ class Request {
 				array(
 					'custom_id'  => $this->get_paypal_order_custom_id( $order ),
 					'amount'     => $purchase_unit_amount,
-					'invoice_id' => 'TEST-101', //$this->limit_length( $this->gateway->get_option( 'invoice_prefix' ) . $order->get_order_number(), PayPalConstants::PAYPAL_INVOICE_ID_MAX_LENGTH ),
+					'invoice_id' => $this->limit_length( $this->gateway->get_option( 'invoice_prefix' ) . $order->get_order_number(), PayPalConstants::PAYPAL_INVOICE_ID_MAX_LENGTH ),
 					'items'      => $order_items,
 					'payee'      => array(
 						'email_address' => $payee_email,
