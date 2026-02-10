@@ -56,62 +56,68 @@ describe( 'Window load event handler', () => {
 		window.addEventListener = originalAddEventListener;
 	} );
 
-	it( 'should skip API request when no cart session and not adding to cart with /?add-to-cart=', () => {
-		mockHasCartSession.mockReturnValue( false );
+	it( 'should skip API request when no cart session and not adding to cart with /?add-to-cart=', async () => {
+		mockHasCartSession.mockResolvedValue( false );
 		mockIsAddingToCart.mockReturnValue( false );
-		mockPersistenceLayerGet.mockReturnValue( null );
+		mockPersistenceLayerGet.mockResolvedValue( null );
 
 		loadHandler( new Event( 'load' ) );
+		await new Promise( process.nextTick );
 
 		expect( mockFinishResolution ).toHaveBeenCalledWith( 'getCartData' );
 	} );
 
-	it( 'should skip API request when cached cart has items and not adding to cart with /?add-to-cart=', () => {
-		mockHasCartSession.mockReturnValue( true );
+	it( 'should skip API request when cached cart has items and not adding to cart with /?add-to-cart=', async () => {
+		mockHasCartSession.mockResolvedValue( true );
 		mockIsAddingToCart.mockReturnValue( false );
-		mockPersistenceLayerGet.mockReturnValue( { itemsCount: 2 } );
+		mockPersistenceLayerGet.mockResolvedValue( { itemsCount: 2 } );
 
 		loadHandler( new Event( 'load' ) );
+		await new Promise( process.nextTick );
 
 		expect( mockFinishResolution ).toHaveBeenCalledWith( 'getCartData' );
 	} );
 
-	it( 'should make API request when has cart session but cached cart is empty', () => {
-		mockHasCartSession.mockReturnValue( true );
+	it( 'should make API request when has cart session but cached cart is empty', async () => {
+		mockHasCartSession.mockResolvedValue( true );
 		mockIsAddingToCart.mockReturnValue( false );
-		mockPersistenceLayerGet.mockReturnValue( { itemsCount: 0 } );
+		mockPersistenceLayerGet.mockResolvedValue( { itemsCount: 0 } );
 
 		loadHandler( new Event( 'load' ) );
+		await new Promise( process.nextTick );
 
 		expect( mockFinishResolution ).not.toHaveBeenCalled();
 	} );
 
-	it( 'should make API request when has cart session but cached cart is null', () => {
-		mockHasCartSession.mockReturnValue( true );
+	it( 'should make API request when has cart session but cached cart is null', async () => {
+		mockHasCartSession.mockResolvedValue( true );
 		mockIsAddingToCart.mockReturnValue( false );
-		mockPersistenceLayerGet.mockReturnValue( null );
+		mockPersistenceLayerGet.mockResolvedValue( null );
 
 		loadHandler( new Event( 'load' ) );
+		await new Promise( process.nextTick );
 
 		expect( mockFinishResolution ).not.toHaveBeenCalled();
 	} );
 
-	it( 'should make API request when currently adding to cart with /?add-to-cart=', () => {
-		mockHasCartSession.mockReturnValue( false );
+	it( 'should make API request when currently adding to cart with /?add-to-cart=', async () => {
+		mockHasCartSession.mockResolvedValue( false );
 		mockIsAddingToCart.mockReturnValue( true );
-		mockPersistenceLayerGet.mockReturnValue( null );
+		mockPersistenceLayerGet.mockResolvedValue( null );
 
 		loadHandler( new Event( 'load' ) );
+		await new Promise( process.nextTick );
 
 		expect( mockFinishResolution ).not.toHaveBeenCalled();
 	} );
 
-	it( 'should make API request when has cart session, cached cart has items, but adding to cart with /?add-to-cart=', () => {
-		mockHasCartSession.mockReturnValue( true );
+	it( 'should make API request when has cart session, cached cart has items, but adding to cart with /?add-to-cart=', async () => {
+		mockHasCartSession.mockResolvedValue( true );
 		mockIsAddingToCart.mockReturnValue( true );
-		mockPersistenceLayerGet.mockReturnValue( { itemsCount: 2 } );
+		mockPersistenceLayerGet.mockResolvedValue( { itemsCount: 2 } );
 
 		loadHandler( new Event( 'load' ) );
+		await new Promise( process.nextTick );
 
 		expect( mockFinishResolution ).not.toHaveBeenCalled();
 	} );

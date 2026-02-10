@@ -19,6 +19,7 @@ import {
 	hasValidationError,
 	validateAdditionalFields,
 } from './utils';
+import { hasCartSession } from '../cart/persistence-layer';
 
 // This is used to track and cache the local state of push changes.
 const localState = {
@@ -37,10 +38,12 @@ const localState = {
 
 const isCheckoutBlock = getSetting< boolean >( 'isCheckoutBlock', false );
 
+let initializePromise: Promise< void > | null = null;
+
 /**
  * Initializes the checkout & payment data cache on the first run.
  */
-const initialize = () => {
+const initialize = async () => {
 	const store = select( CHECKOUT_STORE_KEY );
 	const paymentStore = select( PAYMENT_STORE_KEY );
 	localState.checkoutData = {
@@ -48,7 +51,7 @@ const initialize = () => {
 		additionalFields: store.getAdditionalFields(),
 		activePaymentMethod: paymentStore.getActivePaymentMethod(),
 	};
-	localState.hasSession = document.cookie.includes( 'woocommerce_cart_hash' );
+	localState.hasSession = await hasCartSession();
 	localState.isInitialized = true;
 };
 
@@ -194,7 +197,9 @@ const debouncedUpdateCheckoutData = debounce( () => {
  */
 export const pushChanges = ( debounced = true ): void => {
 	if ( ! localState.isInitialized ) {
-		initialize();
+		if ( ! initializePromise ) {
+			initializePromise = initialize();
+		}
 		return;
 	}
 

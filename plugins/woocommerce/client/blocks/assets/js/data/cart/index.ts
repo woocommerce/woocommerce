@@ -40,13 +40,7 @@ export const config = {
 	controls: dataControls,
 	selectors,
 	resolvers,
-	initialState: {
-		...defaultCartState,
-		cartData: {
-			...defaultCartState.cartData,
-			...( persistenceLayer.get() || {} ),
-		},
-	},
+	initialState: defaultCartState,
 };
 
 export const store = createReduxStore( STORE_KEY, config );
@@ -55,17 +49,26 @@ export type CartStoreDescriptor = typeof store;
 
 register( store );
 
+// Hydrate the store with cached cart data from localStorage (async because
+// cookie reads go through the CookieStore API when available).
+( async () => {
+	const cachedCart = await persistenceLayer.get();
+	if ( cachedCart ) {
+		wpDispatch( store ).setCartData( cachedCart );
+	}
+} )();
+
 // The resolver for getCartData fires off an API request. But if we know the cart is empty, we can skip the request.
 // Likewise, if we have a valid persistent cart, we can skip the request.
 // The only reliable way to check if the cart is empty is to check the cookies.
-window.addEventListener( 'load', () => {
-	const cachedCart = persistenceLayer.get();
+window.addEventListener( 'load', async () => {
+	const cachedCart = await persistenceLayer.get();
 	// On login, if a customer had a cart session, the cached cart is equal to the default cart data, with no items.
 	// We need to check if the cached cart has items, otherwise we will wrongly skip the API request.
 	const hasItemsInCachedCart = cachedCart?.itemsCount > 0;
 
 	if (
-		( ! hasCartSession() || hasItemsInCachedCart ) &&
+		( ! ( await hasCartSession() ) || hasItemsInCachedCart ) &&
 		! isAddingToCart() &&
 		! isEditor() // Don't finish resolution in editor,but only for real carts
 	) {

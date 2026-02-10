@@ -3,29 +3,48 @@
  */
 import type { Cart } from '@woocommerce/types';
 
-const getCookie = ( name: string ): string | Record< string, string > => {
-	const cookies = document.cookie
-		.split( ';' )
-		.reduce< Record< string, string > >( ( acc, cookieString ) => {
-			const [ key, value ] = cookieString
-				.split( '=' )
-				.map( ( s ) => s.trim() );
-			if ( key && value ) {
-				acc[ key ] = decodeURIComponent( value );
+/**
+ * Reads a single cookie value by name.
+ *
+ * Uses the CookieStore API when available (Chrome 87+, Edge 87+, Safari 18.4+,
+ * Firefox 140+). Falls back to parsing document.cookie with safe decoding for
+ * older browsers. The fallback only decodes the requested cookie and wraps
+ * decodeURIComponent in a try/catch to avoid URIError from malformed cookies
+ * set by other plugins.
+ */
+const getCookieValue = async ( name: string ): Promise< string > => {
+	if ( typeof cookieStore !== 'undefined' ) {
+		const cookie = await cookieStore.get( name );
+		return cookie?.value ?? '';
+	}
+
+	const entries = document.cookie.split( ';' );
+	for ( const entry of entries ) {
+		const eqIndex = entry.indexOf( '=' );
+		if ( eqIndex === -1 ) {
+			continue;
+		}
+		const key = entry.slice( 0, eqIndex ).trim();
+		if ( key === name ) {
+			const raw = entry.slice( eqIndex + 1 ).trim();
+			try {
+				return decodeURIComponent( raw );
+			} catch {
+				return raw;
 			}
-			return acc;
-		}, {} );
-	return name ? cookies[ name ] || '' : cookies;
+		}
+	}
+	return '';
 };
 
-const hasValidHash = () => {
-	const sessionHash = getCookie( 'woocommerce_cart_hash' );
+const hasValidHash = async () => {
+	const sessionHash = await getCookieValue( 'woocommerce_cart_hash' );
 	const cachedHash = window.localStorage?.getItem( 'storeApiCartHash' ) || '';
 	return cachedHash === sessionHash;
 };
 
-export const hasCartSession = () => {
-	return !! getCookie( 'woocommerce_items_in_cart' );
+export const hasCartSession = async () => {
+	return !! ( await getCookieValue( 'woocommerce_items_in_cart' ) );
 };
 
 export const isAddingToCart = () => {
@@ -33,8 +52,8 @@ export const isAddingToCart = () => {
 };
 
 export const persistenceLayer = {
-	get: () => {
-		if ( ! hasCartSession() || ! hasValidHash() ) {
+	get: async (): Promise< Cart | null > => {
+		if ( ! ( await hasCartSession() ) || ! ( await hasValidHash() ) ) {
 			return null;
 		}
 
