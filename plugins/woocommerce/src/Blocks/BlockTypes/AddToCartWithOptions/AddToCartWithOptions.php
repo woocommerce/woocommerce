@@ -539,7 +539,7 @@ class AddToCartWithOptions extends AbstractBlock {
 			} else {
 				// Otherwise, we use the Interactivity API.
 				$form_attributes = array(
-					'data-wp-on--submit' => 'actions.handleSubmit',
+					'data-wp-on--submit' => 'actions.addToCart',
 				);
 			}
 
