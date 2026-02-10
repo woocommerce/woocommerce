@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
+import { ApiClient, WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
  * Internal dependencies
@@ -13,7 +13,10 @@ import { random } from '../../utils/helpers';
 test.use( { storageState: ADMIN_STATE_PATH } );
 
 test.describe( 'Edit order', { tag: [ tags.SERVICES, tags.HPOS ] }, () => {
-	let orderId, secondOrderId, orderToCancel, customerId;
+	let orderId: number,
+		secondOrderId: number,
+		orderToCancel: number,
+		customerId: number;
 	const username = `big.archie.${ Date.now() }`;
 
 	test.beforeAll( async ( { restApi } ) => {
@@ -21,21 +24,21 @@ test.describe( 'Edit order', { tag: [ tags.SERVICES, tags.HPOS ] }, () => {
 			.post( `${ WC_API_PATH }/orders`, {
 				status: 'processing',
 			} )
-			.then( ( response ) => {
+			.then( ( response: { data: { id: number } } ) => {
 				orderId = response.data.id;
 			} );
 		await restApi
 			.post( `${ WC_API_PATH }/orders`, {
 				status: 'processing',
 			} )
-			.then( ( response ) => {
+			.then( ( response: { data: { id: number } } ) => {
 				secondOrderId = response.data.id;
 			} );
 		await restApi
 			.post( `${ WC_API_PATH }/orders`, {
 				status: 'processing',
 			} )
-			.then( ( response ) => {
+			.then( ( response: { data: { id: number } } ) => {
 				orderToCancel = response.data.id;
 			} );
 
@@ -70,7 +73,7 @@ test.describe( 'Edit order', { tag: [ tags.SERVICES, tags.HPOS ] }, () => {
 					postcode: '94107',
 				},
 			} )
-			.then( ( response ) => {
+			.then( ( response: { data: { id: number } } ) => {
 				customerId = response.data.id;
 			} );
 	} );
@@ -383,16 +386,18 @@ test.describe(
 			email: 'john.doe@example.com',
 		};
 
-		let orderId,
-			productId,
-			product2Id,
-			noProductOrderId,
-			initialGrantAccessAfterPaymentSetting;
+		let orderId: number,
+			productId: number,
+			product2Id: number,
+			noProductOrderId: number,
+			initialGrantAccessAfterPaymentSetting: string;
 
 		/**
 		 * Enable the "Grant access to downloadable products after payment" setting in WooCommerce > Settings > Products > Downloadable products.
 		 */
-		const enableGrantAccessAfterPaymentSetting = async ( restApi ) => {
+		const enableGrantAccessAfterPaymentSetting = async (
+			restApi: ApiClient
+		) => {
 			const endpoint = `${ WC_API_PATH }/settings/products/woocommerce_downloads_grant_access_after_payment`;
 
 			// Get current value
@@ -407,7 +412,9 @@ test.describe(
 			}
 		};
 
-		const revertGrantAccessAfterPaymentSetting = async ( restApi ) => {
+		const revertGrantAccessAfterPaymentSetting = async (
+			restApi: ApiClient
+		) => {
 			const endpoint = `${ WC_API_PATH }/settings/products/woocommerce_downloads_grant_access_after_payment`;
 
 			await restApi.put( endpoint, {
@@ -429,7 +436,7 @@ test.describe(
 						},
 					],
 				} )
-				.then( ( response ) => {
+				.then( ( response: { data: { id: number } } ) => {
 					productId = response.data.id;
 				} );
 
@@ -448,7 +455,7 @@ test.describe(
 						},
 					],
 				} )
-				.then( ( response ) => {
+				.then( ( response: { data: { id: number } } ) => {
 					product2Id = response.data.id;
 				} );
 			await restApi
@@ -462,7 +469,7 @@ test.describe(
 					],
 					billing: customerBilling,
 				} )
-				.then( ( response ) => {
+				.then( ( response: { data: { id: number } } ) => {
 					orderId = response.data.id;
 				} );
 			await restApi
@@ -470,7 +477,7 @@ test.describe(
 					status: 'processing',
 					billing: customerBilling,
 				} )
-				.then( ( response ) => {
+				.then( ( response: { data: { id: number } } ) => {
 					noProductOrderId = response.data.id;
 				} );
 		} );

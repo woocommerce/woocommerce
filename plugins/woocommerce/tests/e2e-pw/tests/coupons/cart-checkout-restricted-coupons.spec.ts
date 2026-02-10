@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { Page } from '@playwright/test';
 import {
 	addAProductToCart,
 	getOrderIdFromUrl,
@@ -23,7 +24,7 @@ const includedCategoryName = 'Included Category';
 const excludedCategoryName = 'Excluded Category';
 
 // This applies a coupon and waits for the result to prevent flakiness.
-const applyCoupon = async ( page, couponCode ) => {
+const applyCoupon = async ( page: Page, couponCode: string ) => {
 	const responsePromise = page.waitForResponse(
 		( response ) =>
 			response.url().includes( '?wc-ajax=apply_coupon' ) &&
@@ -34,7 +35,7 @@ const applyCoupon = async ( page, couponCode ) => {
 	await responsePromise;
 };
 
-const expandCouponForm = async ( page ) => {
+const expandCouponForm = async ( page: Page ) => {
 	await page
 		.getByRole( 'button', {
 			name: 'Enter your coupon code',
@@ -57,12 +58,12 @@ test.describe(
 		],
 	},
 	() => {
-		let firstProductId,
-			secondProductId,
-			firstCategoryId,
-			secondCategoryId,
-			shippingZoneId;
-		const couponBatchId = [];
+		let firstProductId: number,
+			secondProductId: number,
+			firstCategoryId: number,
+			secondCategoryId: number,
+			shippingZoneId: number;
+		const couponBatchId: number[] = [];
 
 		test.beforeAll( async ( { restApi } ) => {
 			// Make sure the classic cart and checkout pages exist
@@ -106,7 +107,7 @@ test.describe(
 				.post( `${ WC_API_PATH }/shipping/zones`, {
 					name: 'Free Shipping',
 				} )
-				.then( ( response ) => {
+				.then( ( response: { data: { id: number } } ) => {
 					shippingZoneId = response.data.id;
 				} );
 			await restApi.post(
@@ -120,14 +121,14 @@ test.describe(
 				.post( `${ WC_API_PATH }/products/categories`, {
 					name: includedCategoryName,
 				} )
-				.then( ( response ) => {
+				.then( ( response: { data: { id: number } } ) => {
 					firstCategoryId = response.data.id;
 				} );
 			await restApi
 				.post( `${ WC_API_PATH }/products/categories`, {
 					name: excludedCategoryName,
 				} )
-				.then( ( response ) => {
+				.then( ( response: { data: { id: number } } ) => {
 					secondCategoryId = response.data.id;
 				} );
 			// add product
@@ -138,7 +139,7 @@ test.describe(
 					regular_price: '20.00',
 					categories: [ { id: firstCategoryId } ],
 				} )
-				.then( ( response ) => {
+				.then( ( response: { data: { id: number } } ) => {
 					firstProductId = response.data.id;
 				} );
 			await restApi
@@ -149,7 +150,7 @@ test.describe(
 					sale_price: '15.00',
 					categories: [ { id: secondCategoryId } ],
 				} )
-				.then( ( response ) => {
+				.then( ( response: { data: { id: number } } ) => {
 					secondProductId = response.data.id;
 				} );
 
@@ -215,7 +216,7 @@ test.describe(
 				.post( `${ WC_API_PATH }/coupons/batch`, {
 					create: restrictedCoupons,
 				} )
-				.then( ( response ) => {
+				.then( ( response: { data: { create: { id: number }[] } } ) => {
 					for ( let i = 0; i < response.data.create.length; i++ ) {
 						couponBatchId.push( response.data.create[ i ].id );
 					}
@@ -403,7 +404,7 @@ test.describe(
 			context,
 			restApi,
 		} ) => {
-			const orderIds = [];
+			const orderIds: number[] = [];
 
 			// create 2 orders using the limited coupon
 			for ( let i = 0; i < 2; i++ ) {
@@ -427,8 +428,8 @@ test.describe(
 							},
 						],
 					} )
-					.then( ( response ) => {
-						orderIds.push = response.data.id;
+					.then( ( response: { data: { id: number } } ) => {
+						orderIds.push( response.data.id );
 					} );
 			}
 
