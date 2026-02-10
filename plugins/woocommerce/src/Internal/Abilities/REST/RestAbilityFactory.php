@@ -177,7 +177,15 @@ class RestAbilityFactory {
 
 			// Copy valid JSON Schema fields.
 			if ( isset( $arg['type'] ) ) {
-				$property['type'] = $arg['type'];
+				// Convert 'date-time' type to proper JSON Schema format.
+				// WordPress REST API uses 'type' => 'date-time' but JSON Schema
+				// requires 'type' => 'string' with 'format' => 'date-time'.
+				if ( 'date-time' === $arg['type'] ) {
+					$property['type']   = 'string';
+					$property['format'] = 'date-time';
+				} else {
+					$property['type'] = $arg['type'];
+				}
 			}
 			if ( isset( $arg['description'] ) ) {
 				$property['description'] = $arg['description'];
@@ -186,7 +194,7 @@ class RestAbilityFactory {
 				$property['default'] = $arg['default'];
 			}
 			if ( isset( $arg['enum'] ) ) {
-				$property['enum'] = array_values( $arg['enum'] );
+				$property['enum'] = array_values( array_unique( $arg['enum'] ) );
 			}
 			if ( isset( $arg['items'] ) ) {
 				$property['items'] = $arg['items'];
