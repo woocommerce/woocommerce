@@ -15,7 +15,10 @@ import { setOption, deleteOption } from '../../../utils/options';
  * @param {string} value   The value to set ('yes' or 'no').
  * @return {Promise<void>}
  */
-export const setFeatureEmailImprovementsFlag = async ( baseURL, value ) => {
+export const setFeatureEmailImprovementsFlag = async (
+	baseURL: string,
+	value: string
+) => {
 	await setOption(
 		request,
 		baseURL,

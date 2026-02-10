@@ -75,7 +75,9 @@ test.beforeEach( async ( { baseURL } ) => {
 		order,
 	} ) => {
 		// Inject the order id into the expected subject and make it a regex
-		subject = new RegExp( subject.replace( 'ORDER_ID', `${ order.id }` ) );
+		const subjectRegex = new RegExp(
+			subject.replace( 'ORDER_ID', `${ order.id }` )
+		);
 
 		await restApi
 			.put( `${ WC_API_PATH }/orders/${ order.id }`, {
@@ -99,7 +101,7 @@ test.beforeEach( async ( { baseURL } ) => {
 			emailRow = await expectEmail(
 				page,
 				role === 'customer' ? order.billing.email : admin.email,
-				subject
+				subjectRegex
 			);
 		} );
 
@@ -109,7 +111,7 @@ test.beforeEach( async ( { baseURL } ) => {
 			await expectEmailContent(
 				page,
 				role === 'customer' ? order.billing.email : admin.email,
-				subject,
+				subjectRegex,
 				content
 			);
 		} );

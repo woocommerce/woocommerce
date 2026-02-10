@@ -1,9 +1,16 @@
-const { test, expect, request } = require( '@playwright/test' );
-const { setOption } = require( '../../utils/options' );
-const { getWooEmails } = require( '../../utils/email' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
+/**
+ * External dependencies
+ */
+import { test, expect, request } from '@playwright/test';
 
-const setFeatureFlag = async ( baseURL, value ) =>
+/**
+ * Internal dependencies
+ */
+import { setOption } from '../../utils/options';
+import { getWooEmails } from '../../utils/email';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
+
+const setFeatureFlag = async ( baseURL: string, value: string ) =>
 	await setOption(
 		request,
 		baseURL,

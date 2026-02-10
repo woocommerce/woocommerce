@@ -17,7 +17,10 @@ import { admin } from '../../../test-data/data';
  * @param {string} value   The value to set ('yes' or 'no').
  * @return {Promise<void>}
  */
-export const setEmailEditorFeatureFlag = async ( baseURL, value ) => {
+export const setEmailEditorFeatureFlag = async (
+	baseURL: string,
+	value: string
+) => {
 	await setOption(
 		request,
 		baseURL,
@@ -32,7 +35,7 @@ export const setEmailEditorFeatureFlag = async ( baseURL, value ) => {
  * @param {string} baseURL The base URL.
  * @return {Promise<void>}
  */
-export const enableEmailEditor = async ( baseURL ) =>
+export const enableEmailEditor = async ( baseURL: string ) =>
 	setEmailEditorFeatureFlag( baseURL, 'yes' );
 
 /**
@@ -41,7 +44,7 @@ export const enableEmailEditor = async ( baseURL ) =>
  * @param {string} baseURL The base URL.
  * @return {Promise<void>}
  */
-export const disableEmailEditor = async ( baseURL ) =>
+export const disableEmailEditor = async ( baseURL: string ) =>
 	setEmailEditorFeatureFlag( baseURL, 'no' );
 
 /**
@@ -51,7 +54,7 @@ export const disableEmailEditor = async ( baseURL ) =>
  * @param {string} pageId  The page ID.
  * @return {Promise<void>}
  */
-export const deleteEmailPost = async ( baseURL, pageId ) => {
+export const deleteEmailPost = async ( baseURL: string, pageId: string ) => {
 	console.log( 'Deleting email post', { pageId } );
 
 	const apiClient = createClient( baseURL, {
@@ -80,5 +83,7 @@ export const deleteEmailPost = async ( baseURL, pageId ) => {
  * @param {string} emailId The transactional email ID.
  * @return {Promise<void>}
  */
-export const resetWCTransactionalEmail = async ( baseURL, emailId ) =>
-	deleteOption( request, baseURL, `woocommerce_${ emailId }_settings` );
+export const resetWCTransactionalEmail = async (
+	baseURL: string,
+	emailId: string
+) => deleteOption( request, baseURL, `woocommerce_${ emailId }_settings` );

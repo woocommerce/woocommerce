@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import type { Page } from '@playwright/test';
 import { WP_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
@@ -60,7 +61,7 @@ const test = baseTest.extend( {
 	},
 } );
 
-async function userDeletionTest( page, username ) {
+async function userDeletionTest( page: Page, username: string ) {
 	await page.goto( `wp-admin/users.php?s=${ username }` );
 
 	await test.step( 'hover the username and delete', async () => {

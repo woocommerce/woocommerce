@@ -1,14 +1,21 @@
-const { test, expect } = require( '@playwright/test' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
-const {
+/**
+ * External dependencies
+ */
+import { test, expect } from '@playwright/test';
+
+/**
+ * Internal dependencies
+ */
+import { ADMIN_STATE_PATH } from '../../playwright.config';
+import {
 	enableEmailEditor,
 	disableEmailEditor,
 	resetWCTransactionalEmail,
-} = require( './helpers/enable-email-editor-feature' );
-const {
+} from './helpers/enable-email-editor-feature';
+import {
 	accessTheEmailEditor,
 	ensureEmailEditorSettingsPanelIsOpened,
-} = require( '../../utils/email' );
+} from '../../utils/email';
 
 test.describe( 'WooCommerce Email Editor Settings Sidebar Integration', () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );

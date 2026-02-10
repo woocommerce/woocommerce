@@ -1,4 +1,11 @@
+/**
+ * External dependencies
+ */
 import { test, expect, type Page } from '@playwright/test';
+
+/**
+ * Internal dependencies
+ */
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 import {
 	enableEmailEditor,

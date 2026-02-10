@@ -6,8 +6,8 @@ import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 /**
  * Internal dependencies
  */
-import { tags, test, expect } from '../../fixtures/fixtures.js';
-import { ADMIN_STATE_PATH } from '../../playwright.config.js';
+import { tags, test, expect } from '../../fixtures/fixtures';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
 
 test.describe(
 	'WooCommerce woo.com Settings',

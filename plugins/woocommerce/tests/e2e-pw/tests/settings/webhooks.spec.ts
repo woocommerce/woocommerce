@@ -6,8 +6,8 @@ import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 /**
  * Internal dependencies
  */
-import { tags, test, expect } from '../../fixtures/fixtures.js';
-import { ADMIN_STATE_PATH } from '../../playwright.config.js';
+import { tags, test, expect } from '../../fixtures/fixtures';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
 
 test.describe( 'Manage webhooks', () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );
@@ -47,10 +47,10 @@ test.describe( 'Manage webhooks', () => {
 				page.getByRole( 'row', { name: 'Webhook 1' } )
 			).toBeVisible();
 
-			let editURL = await page
+			const editHref = await page
 				.getByRole( 'link', { name: 'Webhook 1', exact: true } )
 				.getAttribute( 'href' );
-			editURL = new URL( editURL );
+			const editURL = new URL( editHref! );
 			const webhookID = editURL.searchParams.get( 'edit-webhook' );
 
 			await page.goto(

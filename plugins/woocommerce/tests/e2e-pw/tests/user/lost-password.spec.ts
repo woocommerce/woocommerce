@@ -1,6 +1,13 @@
-const { test, expect } = require( '@playwright/test' );
-const { admin } = require( '../../test-data/data' );
-const { tags } = require( '../../fixtures/fixtures' );
+/**
+ * External dependencies
+ */
+import { test, expect } from '@playwright/test';
+
+/**
+ * Internal dependencies
+ */
+import { admin } from '../../test-data/data';
+import { tags } from '../../fixtures/fixtures';
 
 test.describe( 'Can go to lost password page and submit the form', () => {
 	test(

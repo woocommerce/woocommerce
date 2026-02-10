@@ -1,11 +1,21 @@
-const { test, expect, request } = require( '@playwright/test' );
-const { setOption } = require( '../../utils/options' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
+/**
+ * External dependencies
+ */
+import { test, expect, request } from '@playwright/test';
 
-const setFeatureFlag = async ( baseURL, name, value ) =>
+/**
+ * Internal dependencies
+ */
+import { setOption } from '../../utils/options';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
+
+const setFeatureFlag = async ( baseURL: string, name: string, value: string ) =>
 	await setOption( request, baseURL, name, value );
 
-const setBlockEmailEditorFeatureFlag = async ( baseURL, value ) =>
+const setBlockEmailEditorFeatureFlag = async (
+	baseURL: string,
+	value: string
+) =>
 	await setFeatureFlag(
 		baseURL,
 		'woocommerce_feature_block_email_editor_enabled',

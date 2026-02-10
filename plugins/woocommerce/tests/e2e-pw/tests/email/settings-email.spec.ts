@@ -1,13 +1,16 @@
 /**
+ * External dependencies
+ */
+import { test, expect, type Page } from '@playwright/test';
+
+/**
  * Internal dependencies
  */
 import { setFeatureEmailImprovementsFlag } from './helpers/set-email-improvements-feature-flag';
+import { tags } from '../../fixtures/fixtures';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
 
-const { test, expect } = require( '@playwright/test' );
-const { tags } = require( '../../fixtures/fixtures' );
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
-
-const pickImageFromLibrary = async ( page, imageName ) => {
+const pickImageFromLibrary = async ( page: Page, imageName: string ) => {
 	await page.getByRole( 'tab', { name: 'Media Library' } ).click();
 	await page.getByLabel( imageName ).first().click();
 	await page.getByRole( 'button', { name: 'Select', exact: true } ).click();
@@ -30,7 +33,7 @@ test.describe( 'WooCommerce Email Settings', () => {
 		const hasIframe = async () => {
 			return ( await page.locator( emailPreviewElement ).count() ) > 0;
 		};
-		const iframeContains = async ( text ) => {
+		const iframeContains = async ( text: string ) => {
 			const iframe = page.frameLocator( emailPreviewElement );
 			return iframe.getByText( text );
 		};
@@ -118,7 +121,7 @@ test.describe( 'WooCommerce Email Settings', () => {
 			// Wait for the iframe content to load
 			const iframeSelector = '#wc_settings_email_preview_slotfill iframe';
 
-			const iframeContainsHtml = async ( code ) => {
+			const iframeContainsHtml = async ( code: string ) => {
 				const iframe = page.frameLocator( iframeSelector );
 				const content = await iframe.locator( 'html' ).innerHTML();
 				return content.includes( code );
@@ -218,7 +221,7 @@ test.describe( 'WooCommerce Email Settings', () => {
 					( await page.locator( emailPreviewElement ).count() ) > 0
 				);
 			};
-			const iframeContains = async ( text ) => {
+			const iframeContains = async ( text: string ) => {
 				const iframe = page.frameLocator( emailPreviewElement );
 				return iframe.getByText( text );
 			};

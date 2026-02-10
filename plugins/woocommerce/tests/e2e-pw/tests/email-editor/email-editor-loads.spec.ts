@@ -2,11 +2,9 @@
  * Internal dependencies
  */
 import { expect, test } from '../../fixtures/fixtures';
-const { ADMIN_STATE_PATH } = require( '../../playwright.config' );
-const {
-	disableEmailEditor,
-} = require( './helpers/enable-email-editor-feature' );
-const { accessTheEmailEditor } = require( '../../utils/email' );
+import { ADMIN_STATE_PATH } from '../../playwright.config';
+import { disableEmailEditor } from './helpers/enable-email-editor-feature';
+import { accessTheEmailEditor } from '../../utils/email';
 
 test.describe( 'WooCommerce Email Editor Core', () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );
