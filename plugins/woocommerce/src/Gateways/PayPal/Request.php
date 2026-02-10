@@ -502,7 +502,7 @@ class Request {
 
 		// generate a unique ID for the site.
 		$site_id = class_exists( '\Jetpack_Options' ) ? (string) \Jetpack_Options::get_option( 'id' ) : '';
-		$unique_id = substr( md5( $site_id ), 0, 8 );
+		$unique_id = substr( md5( $site_id . wp_rand( 1, 99 ) ), 0, 8 );
 
 		$invoice_id = $this->limit_length( $base_invoice_id . '-' . $unique_id, PayPalConstants::PAYPAL_INVOICE_ID_MAX_LENGTH );
 		return $invoice_id;
