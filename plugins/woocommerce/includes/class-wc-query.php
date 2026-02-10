@@ -333,7 +333,11 @@ class WC_Query {
 		if ( $this->is_showing_page_on_front( $q ) ) {
 
 			// Fix for endpoints on the homepage.
-			if ( ! $this->page_on_front_is( $q->get( 'page_id' ) ) ) {
+			$current_page_id = absint( $q->get( 'page_id' ) );
+			if ( ! $current_page_id ) {
+				$current_page_id = get_queried_object_id();
+			}
+			if ( ! $this->page_on_front_is( $current_page_id ) ) {
 				$_query = wp_parse_args( $q->query );
 				if ( ! empty( $_query ) && array_intersect( array_keys( $_query ), array_keys( $this->get_query_vars() ) ) ) {
 					$q->is_page     = true;
@@ -374,8 +378,26 @@ class WC_Query {
 		}
 
 		// Special check for shops with the PRODUCT POST TYPE ARCHIVE on front.
-		if ( wc_current_theme_supports_woocommerce_or_fse() && $q->is_page() && 'page' === get_option( 'show_on_front' ) && absint( $q->get( 'page_id' ) ) === wc_get_page_id( 'shop' ) ) {
+		$shop_id = wc_get_page_id( 'shop' );
+		$page_id = absint( $q->get( 'page_id' ) );
+
+		// Fallback 1: Check queried object ID if page_id not set.
+		if ( ! $page_id ) {
+			$page_id = get_queried_object_id();
+		}
+
+		// Fallback 2: Slug comparison when page_id still not resolved.
+		if ( ! $page_id && $q->get( 'pagename' ) ) {
+			$shop_page = get_post( $shop_id );
+			if ( $shop_page && $shop_page->post_name === $q->get( 'pagename' ) ) {
+				$page_id = $shop_id;
+			}
+		}
+
+		if ( wc_current_theme_supports_woocommerce_or_fse() && $q->is_page() && 'page' === get_option( 'show_on_front' ) && $page_id === $shop_id ) {
 			// This is a front-page shop.
+			$shop_page = get_post( wc_get_page_id( 'shop' ) );
+
 			$q->set( 'post_type', 'product' );
 			$q->set( 'page_id', '' );
 
@@ -386,19 +408,30 @@ class WC_Query {
 			// Define a variable so we know this is the front page shop later on.
 			wc_maybe_define_constant( 'SHOP_IS_ON_FRONT', true );
 
-			// Get the actual WP page to avoid errors and let us use is_front_page().
-			// This is hacky but works. Awaiting https://core.trac.wordpress.org/ticket/21096.
-			global $wp_post_types;
+			// Explicitly set the queried object to the shop page post.
+			// Without this, WordPress returns the product post type object (WP_Post_Type)
+			// See: https://github.com/woocommerce/woocommerce/issues/61676
+			$q->queried_object    = $shop_page;
+			$q->queried_object_id = $shop_page->ID;
 
-			$shop_page = get_post( wc_get_page_id( 'shop' ) );
+			/**
+			 * Filters the queried object for the shop page when it's set as the homepage.
+			 *
+			 * This allows themes and plugins to override the queried object if needed
+			 * for custom shop page handling scenarios.
+			 *
+			 * @since 10.6.0
+			 *
+			 * @param WP_Post|null $queried_object The shop page post object.
+			 * @param WP_Query     $q              The WP_Query instance.
+			 * @param WP_Post      $shop_page      The original shop page post.
+			 */
+			$q->queried_object = apply_filters( 'woocommerce_shop_page_queried_object', $q->queried_object, $q, $shop_page );
+			if ( $q->queried_object && isset( $q->queried_object->ID ) ) {
+				$q->queried_object_id = $q->queried_object->ID;
+			}
 
-			$wp_post_types['product']->ID         = $shop_page->ID;
-			$wp_post_types['product']->post_title = $shop_page->post_title;
-			$wp_post_types['product']->post_name  = $shop_page->post_name;
-			$wp_post_types['product']->post_type  = $shop_page->post_type;
-			$wp_post_types['product']->ancestors  = get_ancestors( $shop_page->ID, $shop_page->post_type );
-
-			// Fix conditional Functions like is_front_page.
+			// Fix conditional functions like is_front_page.
 			$q->is_singular          = false;
 			$q->is_post_type_archive = true;
 			$q->is_archive           = true;
