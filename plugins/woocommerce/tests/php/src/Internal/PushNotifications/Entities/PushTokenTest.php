@@ -68,13 +68,14 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	 * @testdox Tests can_be_created returns true when all fields are set except ID.
 	 */
 	public function test_it_can_be_created_when_all_fields_are_set_except_id() {
-		$push_token = PushToken::get_new_instance(
-			null,
-			1,
-			'test_token',
-			'test-device-uuid',
-			PushToken::PLATFORM_APPLE,
-			PushToken::ORIGIN_WOOCOMMERCE_IOS
+		$push_token = new PushToken(
+			array(
+				'user_id'     => 1,
+				'token'       => 'test_token',
+				'device_uuid' => 'test-device-uuid',
+				'platform'    => PushToken::PLATFORM_APPLE,
+				'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+			)
 		);
 
 		$this->assertTrue( $push_token->can_be_created() );
@@ -84,13 +85,15 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	 * @testdox Tests can_be_created returns false when ID is already set.
 	 */
 	public function test_it_cannot_be_created_when_id_is_set() {
-		$push_token = PushToken::get_new_instance(
-			1,
-			1,
-			'test_token',
-			'test-device-uuid',
-			PushToken::PLATFORM_APPLE,
-			PushToken::ORIGIN_WOOCOMMERCE_IOS
+		$push_token = new PushToken(
+			array(
+				'id'          => 1,
+				'user_id'     => 1,
+				'token'       => 'test_token',
+				'device_uuid' => 'test-device-uuid',
+				'platform'    => PushToken::PLATFORM_APPLE,
+				'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+			)
 		);
 
 		$this->assertFalse( $push_token->can_be_created() );
@@ -100,13 +103,13 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	 * @testdox Tests can_be_created returns false when user ID is missing.
 	 */
 	public function test_it_cannot_be_created_when_user_id_is_missing() {
-		$push_token = PushToken::get_new_instance(
-			null,
-			null,
-			'test_token',
-			'test-device-uuid',
-			PushToken::PLATFORM_APPLE,
-			PushToken::ORIGIN_WOOCOMMERCE_IOS
+		$push_token = new PushToken(
+			array(
+				'token'       => 'test_token',
+				'device_uuid' => 'test-device-uuid',
+				'platform'    => PushToken::PLATFORM_APPLE,
+				'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+			)
 		);
 
 		$this->assertFalse( $push_token->can_be_created() );
@@ -116,13 +119,13 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	 * @testdox Tests can_be_created returns false when platform is missing.
 	 */
 	public function test_it_cannot_be_created_when_platform_is_missing() {
-		$push_token = PushToken::get_new_instance(
-			null,
-			1,
-			'test_token',
-			'test-device-uuid',
-			null,
-			PushToken::ORIGIN_WOOCOMMERCE_IOS
+		$push_token = new PushToken(
+			array(
+				'user_id'     => 1,
+				'token'       => 'test_token',
+				'device_uuid' => 'test-device-uuid',
+				'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+			)
 		);
 
 		$this->assertFalse( $push_token->can_be_created() );
@@ -132,13 +135,13 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	 * @testdox Tests can_be_created returns false when token is missing.
 	 */
 	public function test_it_cannot_be_created_when_token_is_missing() {
-		$push_token = PushToken::get_new_instance(
-			null,
-			1,
-			null,
-			'test-device-uuid',
-			PushToken::PLATFORM_APPLE,
-			PushToken::ORIGIN_WOOCOMMERCE_IOS
+		$push_token = new PushToken(
+			array(
+				'user_id'     => 1,
+				'device_uuid' => 'test-device-uuid',
+				'platform'    => PushToken::PLATFORM_APPLE,
+				'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+			)
 		);
 
 		$this->assertFalse( $push_token->can_be_created() );
@@ -148,13 +151,13 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	 * @testdox Tests can_be_created returns false when device UUID is missing.
 	 */
 	public function test_it_cannot_be_created_when_device_uuid_is_missing() {
-		$push_token = PushToken::get_new_instance(
-			null,
-			1,
-			'test_token',
-			null,
-			PushToken::PLATFORM_APPLE,
-			PushToken::ORIGIN_WOOCOMMERCE_IOS
+		$push_token = new PushToken(
+			array(
+				'user_id'  => 1,
+				'token'    => 'test_token',
+				'platform' => PushToken::PLATFORM_APPLE,
+				'origin'   => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+			)
 		);
 
 		$this->assertFalse( $push_token->can_be_created() );
@@ -165,13 +168,15 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	 * set.
 	 */
 	public function test_it_can_be_updated_when_all_fields_are_set() {
-		$push_token = PushToken::get_new_instance(
-			1,
-			1,
-			'test_token',
-			'test-device-uuid',
-			PushToken::PLATFORM_APPLE,
-			PushToken::ORIGIN_WOOCOMMERCE_IOS
+		$push_token = new PushToken(
+			array(
+				'id'          => 1,
+				'user_id'     => 1,
+				'token'       => 'test_token',
+				'device_uuid' => 'test-device-uuid',
+				'platform'    => PushToken::PLATFORM_APPLE,
+				'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+			)
 		);
 
 		$this->assertTrue( $push_token->can_be_updated() );
@@ -181,13 +186,14 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	 * @testdox Tests can_be_updated returns false when ID is not set.
 	 */
 	public function test_it_cannot_be_updated_when_id_is_not_set() {
-		$push_token = PushToken::get_new_instance(
-			null,
-			1,
-			'test_token',
-			'test-device-uuid',
-			PushToken::PLATFORM_APPLE,
-			PushToken::ORIGIN_WOOCOMMERCE_IOS
+		$push_token = new PushToken(
+			array(
+				'user_id'     => 1,
+				'token'       => 'test_token',
+				'device_uuid' => 'test-device-uuid',
+				'platform'    => PushToken::PLATFORM_APPLE,
+				'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+			)
 		);
 
 		$this->assertFalse( $push_token->can_be_updated() );
@@ -197,13 +203,14 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	 * @testdox Tests can_be_updated returns false when user ID is not set.
 	 */
 	public function test_it_cannot_be_updated_when_user_id_is_not_set() {
-		$push_token = PushToken::get_new_instance(
-			1,
-			null,
-			'test_token',
-			'test-device-uuid',
-			PushToken::PLATFORM_APPLE,
-			PushToken::ORIGIN_WOOCOMMERCE_IOS
+		$push_token = new PushToken(
+			array(
+				'id'          => 1,
+				'token'       => 'test_token',
+				'device_uuid' => 'test-device-uuid',
+				'platform'    => PushToken::PLATFORM_APPLE,
+				'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+			)
 		);
 
 		$this->assertFalse( $push_token->can_be_updated() );
@@ -213,13 +220,14 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	 * @testdox Tests can_be_updated returns false when platform is not set.
 	 */
 	public function test_it_cannot_be_updated_when_platform_is_not_set() {
-		$push_token = PushToken::get_new_instance(
-			1,
-			1,
-			'test_token',
-			'test-device-uuid',
-			null,
-			PushToken::ORIGIN_WOOCOMMERCE_IOS
+		$push_token = new PushToken(
+			array(
+				'id'          => 1,
+				'user_id'     => 1,
+				'token'       => 'test_token',
+				'device_uuid' => 'test-device-uuid',
+				'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+			)
 		);
 
 		$this->assertFalse( $push_token->can_be_updated() );
@@ -229,13 +237,14 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	 * @testdox Tests can_be_updated returns false when device UUID is not set.
 	 */
 	public function test_it_cannot_be_updated_when_device_uuid_is_not_set() {
-		$push_token = PushToken::get_new_instance(
-			1,
-			1,
-			'test_token',
-			null,
-			PushToken::PLATFORM_APPLE,
-			PushToken::ORIGIN_WOOCOMMERCE_IOS
+		$push_token = new PushToken(
+			array(
+				'id'       => 1,
+				'user_id'  => 1,
+				'token'    => 'test_token',
+				'platform' => PushToken::PLATFORM_APPLE,
+				'origin'   => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+			)
 		);
 
 		$this->assertFalse( $push_token->can_be_updated() );
@@ -245,13 +254,14 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	 * @testdox Tests can_be_updated returns false when token is not set.
 	 */
 	public function test_it_cannot_be_updated_when_token_is_not_set() {
-		$push_token = PushToken::get_new_instance(
-			1,
-			1,
-			null,
-			'test-device-uuid',
-			PushToken::PLATFORM_APPLE,
-			PushToken::ORIGIN_WOOCOMMERCE_IOS
+		$push_token = new PushToken(
+			array(
+				'id'          => 1,
+				'user_id'     => 1,
+				'device_uuid' => 'test-device-uuid',
+				'platform'    => PushToken::PLATFORM_APPLE,
+				'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+			)
 		);
 
 		$this->assertFalse( $push_token->can_be_updated() );
@@ -321,13 +331,13 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	 * device UUID.
 	 */
 	public function test_it_can_be_created_for_browser_without_device_uuid() {
-		$push_token = PushToken::get_new_instance(
-			null,
-			1,
-			'test_token',
-			null,
-			PushToken::PLATFORM_BROWSER,
-			PushToken::ORIGIN_WOOCOMMERCE_IOS
+		$push_token = new PushToken(
+			array(
+				'user_id'  => 1,
+				'token'    => 'test_token',
+				'platform' => PushToken::PLATFORM_BROWSER,
+				'origin'   => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+			)
 		);
 
 		$this->assertTrue( $push_token->can_be_created() );
@@ -338,13 +348,14 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	 * device UUID.
 	 */
 	public function test_it_can_be_updated_for_browser_without_device_uuid() {
-		$push_token = PushToken::get_new_instance(
-			1,
-			1,
-			'test_token',
-			null,
-			PushToken::PLATFORM_BROWSER,
-			PushToken::ORIGIN_WOOCOMMERCE_IOS
+		$push_token = new PushToken(
+			array(
+				'id'       => 1,
+				'user_id'  => 1,
+				'token'    => 'test_token',
+				'platform' => PushToken::PLATFORM_BROWSER,
+				'origin'   => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+			)
 		);
 
 		$this->assertTrue( $push_token->can_be_updated() );
@@ -354,13 +365,13 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	 * @testdox Tests can_be_created returns false when origin is missing.
 	 */
 	public function test_it_cannot_be_created_when_origin_is_missing() {
-		$push_token = PushToken::get_new_instance(
-			null,
-			1,
-			'test_token',
-			'test-device-uuid',
-			PushToken::PLATFORM_APPLE,
-			null
+		$push_token = new PushToken(
+			array(
+				'user_id'     => 1,
+				'token'       => 'test_token',
+				'device_uuid' => 'test-device-uuid',
+				'platform'    => PushToken::PLATFORM_APPLE,
+			)
 		);
 
 		$this->assertFalse( $push_token->can_be_created() );
@@ -370,13 +381,14 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	 * @testdox Tests can_be_updated returns false when origin is missing.
 	 */
 	public function test_it_cannot_be_updated_when_origin_is_missing() {
-		$push_token = PushToken::get_new_instance(
-			1,
-			1,
-			'test_token',
-			'test-device-uuid',
-			PushToken::PLATFORM_APPLE,
-			null
+		$push_token = new PushToken(
+			array(
+				'id'          => 1,
+				'user_id'     => 1,
+				'token'       => 'test_token',
+				'device_uuid' => 'test-device-uuid',
+				'platform'    => PushToken::PLATFORM_APPLE,
+			)
 		);
 
 		$this->assertFalse( $push_token->can_be_updated() );
@@ -529,16 +541,18 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests get_new_instance creates a PushToken with all specified properties.
+	 * @testdox Tests constructor creates a PushToken with all specified properties.
 	 */
-	public function test_get_new_instance_creates_token_with_all_properties() {
-		$push_token = PushToken::get_new_instance(
-			123,
-			456,
-			'test_token_value',
-			'device-uuid-123',
-			PushToken::PLATFORM_APPLE,
-			PushToken::ORIGIN_WOOCOMMERCE_IOS
+	public function test_constructor_creates_token_with_all_properties() {
+		$push_token = new PushToken(
+			array(
+				'id'          => 123,
+				'user_id'     => 456,
+				'token'       => 'test_token_value',
+				'device_uuid' => 'device-uuid-123',
+				'platform'    => PushToken::PLATFORM_APPLE,
+				'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+			)
 		);
 
 		$this->assertSame( 123, $push_token->get_id() );
@@ -550,15 +564,15 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests get_new_instance creates a PushToken with only some properties.
+	 * @testdox Tests constructor creates a PushToken with only some properties.
 	 */
-	public function test_get_new_instance_creates_token_with_partial_properties() {
-		$push_token = PushToken::get_new_instance(
-			null,
-			789,
-			'partial_token',
-			null,
-			PushToken::PLATFORM_ANDROID
+	public function test_constructor_creates_token_with_partial_properties() {
+		$push_token = new PushToken(
+			array(
+				'user_id'  => 789,
+				'token'    => 'partial_token',
+				'platform' => PushToken::PLATFORM_ANDROID,
+			)
 		);
 
 		$this->assertNull( $push_token->get_id() );
@@ -570,18 +584,16 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests get_new_instance throws exception for invalid values.
+	 * @testdox Tests constructor throws exception for invalid values.
 	 */
-	public function test_get_new_instance_throws_exception_for_invalid_platform() {
+	public function test_constructor_throws_exception_for_invalid_platform() {
 		$this->expectException( PushTokenInvalidDataException::class );
 		$this->expectExceptionMessage( 'Platform for PushToken is invalid.' );
 
-		PushToken::get_new_instance(
-			null,
-			null,
-			null,
-			null,
-			'invalid_platform'
+		new PushToken(
+			array(
+				'platform' => 'invalid_platform',
+			)
 		);
 	}
 }
