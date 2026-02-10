@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Remove created_via requirement from POS email templates and make all POS emails manual-only via REST API.
