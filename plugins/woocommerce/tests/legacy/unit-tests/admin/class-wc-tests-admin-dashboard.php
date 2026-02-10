@@ -55,9 +55,9 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 		$product     = WC_Helper_Product::create_simple_product();
 		$product_id  = $product->get_id();
 		$comment_id1 = WC_Helper_Product::create_product_review( $product_id );
-		$comment_id2 = WC_Helper_Product::create_product_review( $product_id );
-		$comment_id3 = WC_Helper_Product::create_product_review( $product_id );
-		$comment_id4 = WC_Helper_Product::create_product_review( $product_id );
+		WC_Helper_Product::create_product_review( $product_id );
+		WC_Helper_Product::create_product_review( $product_id );
+		WC_Helper_Product::create_product_review( $product_id );
 		$comment_id5 = WC_Helper_Product::create_product_review( $product_id );
 
 		wp_set_current_user( $this->user );
@@ -79,9 +79,9 @@ class WC_Tests_Admin_Dashboard extends WC_Unit_Test_Case {
 		$product     = WC_Helper_Product::create_simple_product();
 		$product_id  = $product->get_id();
 		$comment_id1 = WC_Helper_Product::create_product_review( $product_id );
-		$comment_id2 = WC_Helper_Product::create_product_review( $product_id );
-		$comment_id3 = WC_Helper_Product::create_product_review( $product_id );
-		$comment_id4 = WC_Helper_Product::create_product_review( $product_id );
+		WC_Helper_Product::create_product_review( $product_id );
+		WC_Helper_Product::create_product_review( $product_id );
+		WC_Helper_Product::create_product_review( $product_id );
 		$comment_id5 = WC_Helper_Product::create_product_review( $product_id );
 
 		wp_set_current_user( $this->user );
