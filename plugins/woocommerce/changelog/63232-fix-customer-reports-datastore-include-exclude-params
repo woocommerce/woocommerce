@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix Customers Reports DataStore includes/excludes params (email, username, name) to filter by their respective columns instead of incorrectly defaulting to customer_id.
