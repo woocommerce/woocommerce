@@ -31,7 +31,7 @@ const productData = {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const linkedProductsData: any[] = [],
 	productIds: number[] = [];
-let productId = 0;
+let productId: string | null = null;
 
 test.describe( 'General tab', { tag: tags.GUTENBERG }, () => {
 	test.describe( 'Linked product', () => {

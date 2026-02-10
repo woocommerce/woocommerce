@@ -27,7 +27,9 @@ async function selectImagesInLibrary( page: Page, imagesNames: string[] ) {
 		await imageLocator.click();
 		await expect( imageLocator ).toBeChecked();
 		const dataId = await imageLocator.getAttribute( 'data-id' );
-		dataIds.push( dataId );
+		if ( dataId !== null ) {
+			dataIds.push( dataId );
+		}
 	}
 
 	await page.getByRole( 'button', { name: 'Select', exact: true } ).click();
