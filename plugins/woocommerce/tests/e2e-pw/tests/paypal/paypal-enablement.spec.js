@@ -24,6 +24,27 @@ test.describe(
 			);
 		}
 
+		async function disablePayPalIfEnabled( page, paypalDiv ) {
+			if ( await isPayPalEnabled( paypalDiv ) ) {
+				await paypalDiv
+					.getByRole( 'button', {
+						name: 'Payment provider options',
+					} )
+					.click();
+
+				await page
+					.getByRole( 'button', {
+						name: 'Disable',
+					} )
+					.click();
+
+				// Confirm the Enable button is present again.
+				await expect(
+					paypalDiv.getByRole( 'link', { name: 'Enable' } )
+				).toBeVisible( visibilityOptions );
+			}
+		}
+
 		async function openWCSettings( page ) {
 			await page.goto( '/wp-admin/index.php', {
 				// networkidle is needed to ensure all JS files are loaded and avoid race conditions
@@ -74,11 +95,9 @@ test.describe(
 
 			const paypalDiv = await waitForPayPalToLoad( page );
 
-			if ( await isPayPalEnabled( paypalDiv ) ) {
-				test.skip(
-					'PayPal Standard is already enabled, skipping enablement test.'
-				);
-			}
+			await test.step( 'Reset PayPal Standard state if needed', async () => {
+				await disablePayPalIfEnabled( page, paypalDiv );
+			} );
 
 			await test.step( 'Enable PayPal Standard', async () => {
 				const enableLink = paypalDiv.getByRole( 'link', {
@@ -92,24 +111,9 @@ test.describe(
 				visibilityOptions
 			);
 
-			// Clean up by disabling PayPal again.
-			await test.step( 'Disable PayPal Standard', async () => {
-				await paypalDiv
-					.getByRole( 'button', {
-						name: 'Payment provider options',
-					} )
-					.click();
-
-				await page
-					.getByRole( 'button', {
-						name: 'Disable',
-					} )
-					.click();
-
-				// Confirm the Enable button is present again.
-				await expect(
-					paypalDiv.getByRole( 'link', { name: 'Enable' } )
-				).toBeVisible( visibilityOptions );
+			// Clean up.
+			await test.step( 'Disable PayPal Standard if needed', async () => {
+				await disablePayPalIfEnabled( page, paypalDiv );
 			} );
 		} );
 	}
