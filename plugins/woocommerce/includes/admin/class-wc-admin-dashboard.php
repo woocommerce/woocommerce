@@ -525,24 +525,31 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 				array(
 					'type'                      => 'review',
 					'status'                    => 'approve',
-					'number'                    => 5,
+					'number'                    => 25,
 					'update_comment_post_cache' => true,
 				)
 			);
 			$comments = array_filter(
 				$comments,
-				static fn( \WP_Comment $comment ) => current_user_can( 'read_product', $comment->comment_post_ID ) && ! post_password_required( $comment->comment_post_ID )
+				static fn( \WP_Comment $comment ) => current_user_can( 'read_product', $comment->comment_post_ID )
 			);
 			if ( $comments ) {
 				echo '<ul>';
+				$count_rendered = 0;
 				foreach ( $comments as $comment ) {
-					wc_get_template(
-						'dashboard-widget-reviews.php',
-						array(
-							'product' => wc_get_product( $comment->comment_post_ID ),
-							'comment' => $comment,
-						)
-					);
+					$product = wc_get_product( $comment->comment_post_ID );
+					if ( $product ) {
+						wc_get_template(
+							'dashboard-widget-reviews.php',
+							array(
+								'product' => $product,
+								'comment' => $comment,
+							)
+						);
+						if ( 5 === ++$count_rendered ) {
+							break;
+						}
+					}
 				}
 				echo '</ul>';
 			} else {
