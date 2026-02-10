@@ -213,10 +213,11 @@ class Request {
 	 * @param WC_Order|null $order Order object.
 	 * @param string|null   $action_url The URL to authorize or capture the payment.
 	 * @param string        $action The action to perform. Either 'authorize' or 'capture'.
+	 * @param bool          $is_retry Whether the payment is being retried.
 	 * @return void
 	 * @throws Exception If the PayPal payment authorization or capture fails.
 	 */
-	public function authorize_or_capture_payment( ?WC_Order $order, ?string $action_url, string $action = PayPalConstants::PAYMENT_ACTION_CAPTURE ): void {
+	public function authorize_or_capture_payment( ?WC_Order $order, ?string $action_url, string $action = PayPalConstants::PAYMENT_ACTION_CAPTURE, bool $is_retry = false ): void {
 		if ( ! $order ) {
 			\WC_Gateway_Paypal::log( 'Order not found to authorize or capture payment.' );
 			return;
@@ -270,7 +271,9 @@ class Request {
 			$issue                 = isset( $response_data['details'][0]['issue'] ) ? $response_data['details'][0]['issue'] : '';
 			$duplicate_invoice_id  = 422 === $http_code && PayPalConstants::PAYPAL_ISSUE_DUPLICATE_INVOICE_ID === $issue;
 
-			if ( $duplicate_invoice_id ) {
+			// If the payment failed with a duplicate invoice ID error and it's not a retry, handle it.
+			// If it's a retry, don't handle it again.
+			if ( $duplicate_invoice_id && ! $is_retry ) {
 				$this->handle_duplicate_invoice_id( $order, $paypal_order_id, $action_url, $action );
 				return;
 			}
@@ -479,7 +482,7 @@ class Request {
 			$order->save();
 
 			// Retry authorizing or capturing the payment after patching the invoice_id.
-			$this->authorize_or_capture_payment( $order, $action_url, $action );
+			$this->authorize_or_capture_payment( $order, $action_url, $action, true );
 		} catch ( Exception $e ) {
 			\WC_Gateway_Paypal::log( $e->getMessage() );
 			throw new Exception( $e->getMessage() );
