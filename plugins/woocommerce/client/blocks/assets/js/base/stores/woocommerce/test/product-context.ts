@@ -1,8 +1,12 @@
 /**
+ * External dependencies
+ */
+import type { ProductResponseItem } from '@woocommerce/types';
+
+/**
  * Internal dependencies
  */
 import type { ProductContextStore } from '../product-context';
-import type { ProductResponseItem } from '@woocommerce/types';
 
 type MockStore = {
 	state: ProductContextStore[ 'state' ];

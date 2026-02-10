@@ -46,10 +46,11 @@ class ProductContextStore {
 	}
 
 	/**
-	 * Load the product context into interactivity state.
+	 * Load product context into interactivity state.
 	 *
-	 * Hydrates the woocommerce/product-context store with the given product ID
-	 * and variation ID.
+	 * Sets up the product context and ensures the product data is also loaded
+	 * into the woocommerce/products store via ProductsStore. If a variation ID
+	 * is provided, all variations for the product are loaded as well.
 	 *
 	 * @since 10.6.0
 	 *
@@ -61,6 +62,14 @@ class ProductContextStore {
 	 */
 	public static function load_context( string $consent_statement, int $product_id, ?int $variation_id = null ): void {
 		self::check_consent( $consent_statement );
+
+		// Ensure the product is loaded into the products store.
+		ProductsStore::load_product( $consent_statement, $product_id );
+
+		// If a variation is specified, load its parent's variations.
+		if ( null !== $variation_id ) {
+			ProductsStore::load_variations( $consent_statement, $product_id );
+		}
 
 		wp_interactivity_state(
 			self::$store_namespace,

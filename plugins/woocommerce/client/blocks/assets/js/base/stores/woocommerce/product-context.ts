@@ -3,10 +3,6 @@
  */
 import { store } from '@wordpress/interactivity';
 import type { ProductResponseItem } from '@woocommerce/types';
-
-/**
- * Internal dependencies
- */
 import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 
 // Stores are locked to prevent 3PD usage until the API is stable.
@@ -25,7 +21,7 @@ export type ProductContextState = {
 	variationId: number | null;
 };
 
-const productContextStore = store<{
+const productContextStore = store< {
 	state: ProductContextState & {
 		product: ProductResponseItem | undefined;
 		variation: ProductResponseItem | undefined;
@@ -35,7 +31,7 @@ const productContextStore = store<{
 		setProductId: ( productId: number ) => void;
 		setVariationId: ( variationId: number | null ) => void;
 	};
-}>(
+} >(
 	'woocommerce/product-context',
 	{
 		state: {
