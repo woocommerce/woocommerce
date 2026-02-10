@@ -111,6 +111,10 @@ class WooCommercePayments extends Task {
 	 * @return bool
 	 */
 	public function is_complete() {
+		if ( $this->has_previously_completed() ) {
+			return true;
+		}
+
 		if ( null === $this->is_complete_result ) {
 			// This task is complete if there are other ecommerce gateways enabled (offline payment methods are excluded),
 			// or if WooPayments is active and has a connected, fully onboarded account.
