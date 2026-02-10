@@ -70,8 +70,8 @@ class PushTokenValidator {
 	const TOKEN_FORMAT_ANDROID = '/^[A-Za-z0-9=:_\-+\/]+$/';
 
 	/**
-	 * Validates the fields defined in `$fields`, or all fields if `$fields` is
-	 * empty.
+	 * Validates the fields defined in `$fields`, or all the list of known
+	 * fields if `$fields` is empty.
 	 *
 	 * @since 10.6.0
 	 *
