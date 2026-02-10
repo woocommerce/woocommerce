@@ -355,7 +355,8 @@ class PushTokenValidator {
 			$endpoint     = $token_object['endpoint'] ?? null;
 
 			if (
-				json_last_error()
+				is_null( $token_object )
+				|| json_last_error()
 				|| ! isset( $token_object['keys']['auth'] )
 				|| ! isset( $token_object['keys']['p256dh'] )
 				|| ! $endpoint

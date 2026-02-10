@@ -646,6 +646,22 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return WP_Error for browser token that is valid JSON null.
+	 */
+	public function test_validate_token_rejects_browser_token_with_json_null(): void {
+		$result = PushTokenValidator::validate(
+			array(
+				'token'    => 'null',
+				'platform' => PushToken::PLATFORM_BROWSER,
+			),
+			array( 'token' )
+		);
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertSame( 'Token is an invalid format.', $result->get_error_message() );
+	}
+
+	/**
 	 * @testdox Should return WP_Error for browser token missing required keys.
 	 */
 	public function test_validate_token_rejects_browser_token_missing_keys(): void {
