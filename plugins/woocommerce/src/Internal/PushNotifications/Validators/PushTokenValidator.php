@@ -61,23 +61,63 @@ class PushTokenValidator {
 	const TOKEN_FORMAT_ANDROID = '/^[A-Za-z0-9=:_\-+\/]+$/';
 
 	/**
+	 * Validates the fields defined in `$keys`, or all fields if `$keys` is
+	 * empty.
+	 *
+	 * @since 10.6.0
+	 *
+	 * @param array $data The data to be validated.
+	 * @param array $keys The keys to validate.
+	 * @return bool|WP_Error
+	 */
+	public static function validate( array $data, ?array $keys = array() ) {
+		$keys = empty( $keys ) ? array_keys( $data ) : $keys;
+
+		foreach ( $keys as $key ) {
+			$method = 'validate_' . $key;
+
+			if ( ! method_exists( self::class, $method ) ) {
+				return new WP_Error(
+					'woocommerce_invalid_data',
+					sprintf( 'Can\'t validate param \'%s\' as a validator does not exist for it.', $key )
+				);
+			}
+
+			$result = self::$method( $data[ $key ] ?? null, $data );
+
+			if ( is_wp_error( $result ) ) {
+				return $result;
+			}
+		}
+
+		return true;
+	}
+
+	/**
 	 * Validates ID.
 	 *
 	 * @since 10.6.0
 	 *
-	 * @param array $data An array of data to use for validation.
+	 * @param mixed $value The value to validate.
+	 * @param array $context An array of other values included as context for the validation.
 	 * @return bool|WP_Error
 	 */
-	public static function validate_id( array $data ) {
-		if ( ! isset( $data['id'] ) ) {
+	private static function validate_id( $value, array $context ) {
+		/**
+		 * Context is unused in this specific method, but required by the
+		 * validate() dispatch signature.
+		 */
+		unset( $context );
+
+		if ( is_null( $value ) ) {
 			return new WP_Error( self::ERROR_CODE, 'ID is required.' );
 		}
 
-		if ( ! is_numeric( $data['id'] ) ) {
+		if ( ! is_numeric( $value ) ) {
 			return new WP_Error( self::ERROR_CODE, 'ID must be numeric.' );
 		}
 
-		if ( $data['id'] <= 0 ) {
+		if ( $value <= 0 ) {
 			return new WP_Error( self::ERROR_CODE, 'ID must be a positive integer.' );
 		}
 
@@ -89,19 +129,26 @@ class PushTokenValidator {
 	 *
 	 * @since 10.6.0
 	 *
-	 * @param array $data An array of data to use for validation.
+	 * @param mixed $value The value to validate.
+	 * @param array $context An array of other values included as context for the validation.
 	 * @return bool|WP_Error
 	 */
-	public static function validate_user_id( array $data ) {
-		if ( ! isset( $data['user_id'] ) ) {
+	private static function validate_user_id( $value, array $context ) {
+		/**
+		 * Context is unused in this specific method, but required by the
+		 * validate() dispatch signature.
+		 */
+		unset( $context );
+
+		if ( is_null( $value ) ) {
 			return new WP_Error( self::ERROR_CODE, 'User ID is required.' );
 		}
 
-		if ( ! is_numeric( $data['user_id'] ) ) {
+		if ( ! is_numeric( $value ) ) {
 			return new WP_Error( self::ERROR_CODE, 'User ID must be numeric.' );
 		}
 
-		if ( $data['user_id'] <= 0 ) {
+		if ( $value <= 0 ) {
 			return new WP_Error( self::ERROR_CODE, 'User ID must be a positive integer.' );
 		}
 
@@ -113,25 +160,32 @@ class PushTokenValidator {
 	 *
 	 * @since 10.6.0
 	 *
-	 * @param array $data An array of data to use for validation.
+	 * @param mixed $value The value to validate.
+	 * @param array $context An array of other values included as context for the validation.
 	 * @return bool|WP_Error
 	 */
-	public static function validate_origin( array $data ) {
-		if ( ! isset( $data['origin'] ) ) {
+	private static function validate_origin( $value, array $context ) {
+		/**
+		 * Context is unused in this specific method, but required by the
+		 * validate() dispatch signature.
+		 */
+		unset( $context );
+
+		if ( is_null( $value ) ) {
 			return new WP_Error( self::ERROR_CODE, 'Origin is required.' );
 		}
 
-		if ( ! is_string( $data['origin'] ) ) {
+		if ( ! is_string( $value ) ) {
 			return new WP_Error( self::ERROR_CODE, 'Origin must be a string.' );
 		}
 
-		$origin = trim( $data['origin'] );
+		$value = trim( $value );
 
-		if ( '' === $origin ) {
+		if ( '' === $value ) {
 			return new WP_Error( self::ERROR_CODE, 'Origin cannot be empty.' );
 		}
 
-		if ( ! in_array( $origin, PushToken::ORIGINS, true ) ) {
+		if ( ! in_array( $value, PushToken::ORIGINS, true ) ) {
 			return new WP_Error(
 				self::ERROR_CODE,
 				sprintf( 'Origin must be one of: %s.', implode( ', ', PushToken::ORIGINS ) )
@@ -146,16 +200,17 @@ class PushTokenValidator {
 	 *
 	 * @since 10.6.0
 	 *
-	 * @param array $data An array of data to use for validation.
+	 * @param mixed $value The value to validate.
+	 * @param array $context An array of other values included as context for the validation.
 	 * @return bool|WP_Error
 	 */
-	public static function validate_device_uuid( array $data ) {
+	private static function validate_device_uuid( $value, array $context ) {
 		/**
 		 * We may or may not have platform; if we don't have it, we can skip the
 		 * platform-specific checks and allow the platform validation to trigger
 		 * the failure.
 		 */
-		$maybe_platform = $data['platform'] ?? null;
+		$maybe_platform = $context['platform'] ?? null;
 
 		if (
 			PushToken::PLATFORM_APPLE === $maybe_platform
@@ -165,32 +220,33 @@ class PushTokenValidator {
 			 * The browser platform doesn't use a device UUID, so we don't need
 			 * to check truthiness or format unless the platform is not browser.
 			 */
-			if ( ! isset( $data['device_uuid'] ) ) {
+			if ( is_null( $value ) ) {
 				return new WP_Error( self::ERROR_CODE, 'Device UUID is required.' );
 			}
 
-			if ( ! is_string( $data['device_uuid'] ) ) {
+			if ( ! is_string( $value ) ) {
 				return new WP_Error( self::ERROR_CODE, 'Device UUID must be a string.' );
 			}
 
-			$device_uuid = trim( $data['device_uuid'] );
+			$value = trim( $value );
 
-			if ( '' === $device_uuid ) {
+			if ( '' === $value ) {
 				return new WP_Error( self::ERROR_CODE, 'Device UUID cannot be empty.' );
 			}
 
-			if ( ! preg_match( self::DEVICE_UUID_FORMAT, $device_uuid ) ) {
+			if ( ! preg_match( self::DEVICE_UUID_FORMAT, $value ) ) {
 				return new WP_Error( self::ERROR_CODE, 'Device UUID is an invalid format.' );
 			}
 		}
 
 		if (
-			isset( $data['device_uuid'] )
-			&& strlen( $data['device_uuid'] ) > self::DEVICE_UUID_MAXIMUM_LENGTH
-		) {
+			is_string( $value )
+			&& strlen( $value ) > self::DEVICE_UUID_MAXIMUM_LENGTH ) {
 			/**
 			 * Check maximum length for all device UUIDs sent, regardless of
-			 * platform.
+			 * platform. We don't know for sure the value is a string as the
+			 * check above isn't guaranteed to have run, so ensure it is a
+			 * string before evaluating this validation rule.
 			 */
 			return new WP_Error(
 				self::ERROR_CODE,
@@ -206,25 +262,32 @@ class PushTokenValidator {
 	 *
 	 * @since 10.6.0
 	 *
-	 * @param array $data An array of data to use for validation.
+	 * @param mixed $value The value to validate.
+	 * @param array $context An array of other values included as context for the validation.
 	 * @return bool|WP_Error
 	 */
-	public static function validate_platform( array $data ) {
-		if ( ! isset( $data['platform'] ) ) {
+	private static function validate_platform( $value, array $context ) {
+		/**
+		 * Context is unused in this specific method, but required by the
+		 * validate() dispatch signature.
+		 */
+		unset( $context );
+
+		if ( is_null( $value ) ) {
 			return new WP_Error( self::ERROR_CODE, 'Platform is required.' );
 		}
 
-		if ( ! is_string( $data['platform'] ) ) {
+		if ( ! is_string( $value ) ) {
 			return new WP_Error( self::ERROR_CODE, 'Platform must be a string.' );
 		}
 
-		$platform = trim( $data['platform'] );
+		$value = trim( $value );
 
-		if ( '' === $platform ) {
+		if ( '' === $value ) {
 			return new WP_Error( self::ERROR_CODE, 'Platform cannot be empty.' );
 		}
 
-		if ( ! in_array( $platform, PushToken::PLATFORMS, true ) ) {
+		if ( ! in_array( $value, PushToken::PLATFORMS, true ) ) {
 			return new WP_Error(
 				self::ERROR_CODE,
 				sprintf( 'Platform must be one of: %s.', implode( ', ', PushToken::PLATFORMS ) )
@@ -239,32 +302,33 @@ class PushTokenValidator {
 	 *
 	 * @since 10.6.0
 	 *
-	 * @param array $data An array of data to use for validation.
+	 * @param mixed $value The value to validate.
+	 * @param array $context An array of other values included as context for the validation.
 	 * @return bool|WP_Error
 	 */
-	public static function validate_token( array $data ) {
-		if ( ! isset( $data['token'] ) ) {
+	private static function validate_token( $value, array $context ) {
+		if ( is_null( $value ) ) {
 			return new WP_Error( self::ERROR_CODE, 'Token is required.' );
 		}
 
-		if ( ! is_string( $data['token'] ) ) {
+		if ( ! is_string( $value ) ) {
 			return new WP_Error( self::ERROR_CODE, 'Token must be a string.' );
 		}
 
-		$token = trim( $data['token'] );
+		$value = trim( $value );
 
-		if ( '' === $token ) {
+		if ( '' === $value ) {
 			return new WP_Error( self::ERROR_CODE, 'Token cannot be empty.' );
 		}
 
-		if ( strlen( $token ) > self::TOKEN_MAXIMUM_LENGTH ) {
+		if ( strlen( $value ) > self::TOKEN_MAXIMUM_LENGTH ) {
 			return new WP_Error(
 				self::ERROR_CODE,
 				sprintf( 'Token exceeds maximum length of %s.', self::TOKEN_MAXIMUM_LENGTH )
 			);
 		}
 
-		if ( ! isset( $data['platform'] ) ) {
+		if ( ! isset( $context['platform'] ) ) {
 			/**
 			 * We don't know how to validate the format as we don't know the
 			 * platform, so let the platform validation handle the failure.
@@ -273,21 +337,21 @@ class PushTokenValidator {
 		}
 
 		if (
-			PushToken::PLATFORM_APPLE === $data['platform']
-			&& ! preg_match( self::TOKEN_FORMAT_APPLE, $token )
+			PushToken::PLATFORM_APPLE === $context['platform']
+			&& ! preg_match( self::TOKEN_FORMAT_APPLE, $value )
 		) {
 			return new WP_Error( self::ERROR_CODE, 'Token is an invalid format.' );
 		}
 
 		if (
-			PushToken::PLATFORM_ANDROID === $data['platform']
-			&& ! preg_match( self::TOKEN_FORMAT_ANDROID, $token )
+			PushToken::PLATFORM_ANDROID === $context['platform']
+			&& ! preg_match( self::TOKEN_FORMAT_ANDROID, $value )
 		) {
 			return new WP_Error( self::ERROR_CODE, 'Token is an invalid format.' );
 		}
 
-		if ( PushToken::PLATFORM_BROWSER === $data['platform'] ) {
-			$token_object = json_decode( $token, true );
+		if ( PushToken::PLATFORM_BROWSER === $context['platform'] ) {
+			$token_object = json_decode( $value, true );
 			$endpoint     = $token_object['endpoint'] ?? null;
 
 			if (

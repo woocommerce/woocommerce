@@ -166,7 +166,7 @@ class PushToken {
 	 * @since 10.4.0
 	 */
 	public function set_id( int $id ): void {
-		$result = PushTokenValidator::validate_id( compact( 'id' ) );
+		$result = PushTokenValidator::validate( compact( 'id' ), array( 'id' ) );
 
 		if ( is_wp_error( $result ) ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
@@ -186,7 +186,7 @@ class PushToken {
 	 * @since 10.4.0
 	 */
 	public function set_user_id( int $user_id ): void {
-		$result = PushTokenValidator::validate_user_id( compact( 'user_id' ) );
+		$result = PushTokenValidator::validate( compact( 'user_id' ), array( 'user_id' ) );
 
 		if ( is_wp_error( $result ) ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
@@ -206,7 +206,7 @@ class PushToken {
 	 * @since 10.4.0
 	 */
 	public function set_token( string $token ): void {
-		$result = PushTokenValidator::validate_token( compact( 'token' ) );
+		$result = PushTokenValidator::validate( compact( 'token' ), array( 'token' ) );
 
 		if ( is_wp_error( $result ) ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
@@ -226,7 +226,7 @@ class PushToken {
 	 * @since 10.4.0
 	 */
 	public function set_device_uuid( ?string $device_uuid ): void {
-		$result = PushTokenValidator::validate_device_uuid( compact( 'device_uuid' ) );
+		$result = PushTokenValidator::validate( compact( 'device_uuid' ), array( 'device_uuid' ) );
 
 		if ( is_wp_error( $result ) ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
@@ -250,7 +250,7 @@ class PushToken {
 	 * @since 10.4.0
 	 */
 	public function set_platform( string $platform ): void {
-		$result = PushTokenValidator::validate_platform( compact( 'platform' ) );
+		$result = PushTokenValidator::validate( compact( 'platform' ), array( 'platform' ) );
 
 		if ( is_wp_error( $result ) ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
@@ -270,7 +270,7 @@ class PushToken {
 	 * @since 10.4.0
 	 */
 	public function set_origin( string $origin ): void {
-		$result = PushTokenValidator::validate_origin( compact( 'origin' ) );
+		$result = PushTokenValidator::validate( compact( 'origin' ), array( 'origin' ) );
 
 		if ( is_wp_error( $result ) ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped

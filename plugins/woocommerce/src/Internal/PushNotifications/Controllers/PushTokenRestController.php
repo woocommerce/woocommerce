@@ -181,17 +181,7 @@ class PushTokenRestController extends RestApiControllerBase {
 	 * @return bool|WP_Error
 	 */
 	public function validate_argument( $value, WP_REST_Request $request, string $param ) {
-		$data   = $request->get_params();
-		$method = 'validate_' . $param;
-
-		if ( ! method_exists( PushTokenValidator::class, $method ) ) {
-			return new WP_Error(
-				'woocommerce_invalid_data',
-				sprintf( 'Can\'t validate param \'%s\' as a validator does not exist for it.', $param )
-			);
-		}
-
-		return PushTokenValidator::$method( $data );
+		return PushTokenValidator::validate( $request->get_params(), array( $param ) );
 	}
 
 	/**

@@ -14,17 +14,64 @@ use WP_Error;
  */
 class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	/**
+	 * @testdox Should return true when validating all keys with valid data.
+	 */
+	public function test_validate_all_keys_with_valid_data(): void {
+		$result = PushTokenValidator::validate(
+			array(
+				'id'          => 1,
+				'user_id'     => 42,
+				'origin'      => PushToken::ORIGINS[0],
+				'platform'    => PushToken::PLATFORM_APPLE,
+				'device_uuid' => 'valid-uuid-123',
+				'token'       => null,
+			)
+		);
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertSame( 'Token is required.', $result->get_error_message() );
+	}
+
+	/**
+	 * @testdox Should return WP_Error when validating an unknown key.
+	 */
+	public function test_validate_rejects_unknown_key(): void {
+		$result = PushTokenValidator::validate(
+			array( 'unknown_field' => 'value' ),
+			array( 'unknown_field' )
+		);
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertStringContainsString( 'unknown_field', $result->get_error_message() );
+	}
+
+	/**
+	 * @testdox Should return true when validating a subset of keys.
+	 */
+	public function test_validate_accepts_subset_of_keys(): void {
+		$result = PushTokenValidator::validate(
+			array(
+				'id'      => 1,
+				'user_id' => 'hello',
+			),
+			array( 'id' )
+		);
+
+		$this->assertTrue( $result );
+	}
+
+	/**
 	 * @testdox Should return true for a valid positive ID.
 	 */
 	public function test_validate_id_accepts_positive_integer(): void {
-		$this->assertTrue( PushTokenValidator::validate_id( array( 'id' => 1 ) ) );
+		$this->assertTrue( PushTokenValidator::validate( array( 'id' => 1 ), array( 'id' ) ) );
 	}
 
 	/**
 	 * @testdox Should return WP_Error when ID is missing.
 	 */
 	public function test_validate_id_rejects_missing_id(): void {
-		$result = PushTokenValidator::validate_id( array() );
+		$result = PushTokenValidator::validate( array(), array( 'id' ) );
 
 		$this->assertInstanceOf( WP_Error::class, $result );
 		$this->assertSame( 'ID is required.', $result->get_error_message() );
@@ -34,7 +81,7 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 * @testdox Should return WP_Error when ID is not numeric.
 	 */
 	public function test_validate_id_rejects_non_numeric(): void {
-		$result = PushTokenValidator::validate_id( array( 'id' => 'abc' ) );
+		$result = PushTokenValidator::validate( array( 'id' => 'abc' ), array( 'id' ) );
 
 		$this->assertInstanceOf( WP_Error::class, $result );
 		$this->assertSame( 'ID must be numeric.', $result->get_error_message() );
@@ -44,7 +91,7 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 * @testdox Should return WP_Error when ID is zero.
 	 */
 	public function test_validate_id_rejects_zero(): void {
-		$result = PushTokenValidator::validate_id( array( 'id' => 0 ) );
+		$result = PushTokenValidator::validate( array( 'id' => 0 ), array( 'id' ) );
 
 		$this->assertInstanceOf( WP_Error::class, $result );
 		$this->assertSame( 'ID must be a positive integer.', $result->get_error_message() );
@@ -54,7 +101,7 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 * @testdox Should return WP_Error when ID is negative.
 	 */
 	public function test_validate_id_rejects_negative(): void {
-		$result = PushTokenValidator::validate_id( array( 'id' => -5 ) );
+		$result = PushTokenValidator::validate( array( 'id' => -5 ), array( 'id' ) );
 
 		$this->assertInstanceOf( WP_Error::class, $result );
 		$this->assertSame( 'ID must be a positive integer.', $result->get_error_message() );
@@ -64,14 +111,14 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 * @testdox Should return true for a valid positive user ID.
 	 */
 	public function test_validate_user_id_accepts_positive_integer(): void {
-		$this->assertTrue( PushTokenValidator::validate_user_id( array( 'user_id' => 42 ) ) );
+		$this->assertTrue( PushTokenValidator::validate( array( 'user_id' => 42 ), array( 'user_id' ) ) );
 	}
 
 	/**
 	 * @testdox Should return WP_Error when user ID is missing.
 	 */
 	public function test_validate_user_id_rejects_missing(): void {
-		$result = PushTokenValidator::validate_user_id( array() );
+		$result = PushTokenValidator::validate( array(), array( 'user_id' ) );
 
 		$this->assertInstanceOf( WP_Error::class, $result );
 		$this->assertSame( 'User ID is required.', $result->get_error_message() );
@@ -81,7 +128,7 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 * @testdox Should return WP_Error when user ID is not numeric.
 	 */
 	public function test_validate_user_id_rejects_non_numeric(): void {
-		$result = PushTokenValidator::validate_user_id( array( 'user_id' => 'xyz' ) );
+		$result = PushTokenValidator::validate( array( 'user_id' => 'xyz' ), array( 'user_id' ) );
 
 		$this->assertInstanceOf( WP_Error::class, $result );
 		$this->assertSame( 'User ID must be numeric.', $result->get_error_message() );
@@ -91,7 +138,7 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 * @testdox Should return WP_Error when user ID is zero.
 	 */
 	public function test_validate_user_id_rejects_zero(): void {
-		$result = PushTokenValidator::validate_user_id( array( 'user_id' => 0 ) );
+		$result = PushTokenValidator::validate( array( 'user_id' => 0 ), array( 'user_id' ) );
 
 		$this->assertInstanceOf( WP_Error::class, $result );
 		$this->assertSame( 'User ID must be a positive integer.', $result->get_error_message() );
@@ -104,7 +151,7 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 */
 	public function test_validate_origin_accepts_valid_origins( string $origin ): void {
 		$this->assertTrue(
-			PushTokenValidator::validate_origin( array( 'origin' => $origin ) )
+			PushTokenValidator::validate( array( 'origin' => $origin ), array( 'origin' ) )
 		);
 	}
 
@@ -112,7 +159,7 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 * @testdox Should return WP_Error when origin is missing.
 	 */
 	public function test_validate_origin_rejects_missing(): void {
-		$result = PushTokenValidator::validate_origin( array() );
+		$result = PushTokenValidator::validate( array(), array( 'origin' ) );
 
 		$this->assertInstanceOf( WP_Error::class, $result );
 		$this->assertSame( 'Origin is required.', $result->get_error_message() );
@@ -122,7 +169,7 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 * @testdox Should return WP_Error when origin is not a string.
 	 */
 	public function test_validate_origin_rejects_non_string(): void {
-		$result = PushTokenValidator::validate_origin( array( 'origin' => 123 ) );
+		$result = PushTokenValidator::validate( array( 'origin' => 123 ), array( 'origin' ) );
 
 		$this->assertInstanceOf( WP_Error::class, $result );
 		$this->assertSame( 'Origin must be a string.', $result->get_error_message() );
@@ -132,7 +179,7 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 * @testdox Should return WP_Error when origin is empty.
 	 */
 	public function test_validate_origin_rejects_empty_string(): void {
-		$result = PushTokenValidator::validate_origin( array( 'origin' => '' ) );
+		$result = PushTokenValidator::validate( array( 'origin' => '' ), array( 'origin' ) );
 
 		$this->assertInstanceOf( WP_Error::class, $result );
 		$this->assertSame( 'Origin cannot be empty.', $result->get_error_message() );
@@ -142,7 +189,7 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 * @testdox Should return WP_Error when origin is whitespace only.
 	 */
 	public function test_validate_origin_rejects_whitespace_only(): void {
-		$result = PushTokenValidator::validate_origin( array( 'origin' => '   ' ) );
+		$result = PushTokenValidator::validate( array( 'origin' => '   ' ), array( 'origin' ) );
 
 		$this->assertInstanceOf( WP_Error::class, $result );
 		$this->assertSame( 'Origin cannot be empty.', $result->get_error_message() );
@@ -152,7 +199,7 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 * @testdox Should return WP_Error when origin is not in the allowed list.
 	 */
 	public function test_validate_origin_rejects_invalid_value(): void {
-		$result = PushTokenValidator::validate_origin( array( 'origin' => 'com.invalid.app' ) );
+		$result = PushTokenValidator::validate( array( 'origin' => 'com.invalid.app' ), array( 'origin' ) );
 
 		$this->assertInstanceOf( WP_Error::class, $result );
 		$this->assertStringContainsString( 'Origin must be one of:', $result->get_error_message() );
@@ -165,7 +212,7 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 */
 	public function test_validate_platform_accepts_valid_platforms( string $platform ): void {
 		$this->assertTrue(
-			PushTokenValidator::validate_platform( array( 'platform' => $platform ) )
+			PushTokenValidator::validate( array( 'platform' => $platform ), array( 'platform' ) )
 		);
 	}
 
@@ -173,7 +220,7 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 * @testdox Should return WP_Error when platform is missing.
 	 */
 	public function test_validate_platform_rejects_missing(): void {
-		$result = PushTokenValidator::validate_platform( array() );
+		$result = PushTokenValidator::validate( array(), array( 'platform' ) );
 
 		$this->assertInstanceOf( WP_Error::class, $result );
 		$this->assertSame( 'Platform is required.', $result->get_error_message() );
@@ -183,7 +230,7 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 * @testdox Should return WP_Error when platform is not a string.
 	 */
 	public function test_validate_platform_rejects_non_string(): void {
-		$result = PushTokenValidator::validate_platform( array( 'platform' => 42 ) );
+		$result = PushTokenValidator::validate( array( 'platform' => 42 ), array( 'platform' ) );
 
 		$this->assertInstanceOf( WP_Error::class, $result );
 		$this->assertSame( 'Platform must be a string.', $result->get_error_message() );
@@ -193,7 +240,7 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 * @testdox Should return WP_Error when platform is empty.
 	 */
 	public function test_validate_platform_rejects_empty(): void {
-		$result = PushTokenValidator::validate_platform( array( 'platform' => '' ) );
+		$result = PushTokenValidator::validate( array( 'platform' => '' ), array( 'platform' ) );
 
 		$this->assertInstanceOf( WP_Error::class, $result );
 		$this->assertSame( 'Platform cannot be empty.', $result->get_error_message() );
@@ -203,7 +250,7 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 * @testdox Should return WP_Error when platform is not in the allowed list.
 	 */
 	public function test_validate_platform_rejects_invalid_value(): void {
-		$result = PushTokenValidator::validate_platform( array( 'platform' => 'windows' ) );
+		$result = PushTokenValidator::validate( array( 'platform' => 'windows' ), array( 'platform' ) );
 
 		$this->assertInstanceOf( WP_Error::class, $result );
 		$this->assertStringContainsString( 'Platform must be one of:', $result->get_error_message() );
@@ -214,11 +261,12 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 */
 	public function test_validate_device_uuid_accepts_valid_uuid_for_apple(): void {
 		$this->assertTrue(
-			PushTokenValidator::validate_device_uuid(
+			PushTokenValidator::validate(
 				array(
 					'device_uuid' => 'ABC-123.def_456:789',
 					'platform'    => PushToken::PLATFORM_APPLE,
-				)
+				),
+				array( 'device_uuid' )
 			)
 		);
 	}
@@ -228,11 +276,12 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 */
 	public function test_validate_device_uuid_accepts_valid_uuid_for_android(): void {
 		$this->assertTrue(
-			PushTokenValidator::validate_device_uuid(
+			PushTokenValidator::validate(
 				array(
 					'device_uuid' => 'device-uuid-123',
 					'platform'    => PushToken::PLATFORM_ANDROID,
-				)
+				),
+				array( 'device_uuid' )
 			)
 		);
 	}
@@ -242,8 +291,9 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 */
 	public function test_validate_device_uuid_accepts_missing_uuid_for_browser(): void {
 		$this->assertTrue(
-			PushTokenValidator::validate_device_uuid(
-				array( 'platform' => PushToken::PLATFORM_BROWSER )
+			PushTokenValidator::validate(
+				array( 'platform' => PushToken::PLATFORM_BROWSER ),
+				array( 'device_uuid' )
 			)
 		);
 	}
@@ -252,15 +302,18 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 * @testdox Should return true when both device UUID and platform are missing.
 	 */
 	public function test_validate_device_uuid_accepts_when_both_missing(): void {
-		$this->assertTrue( PushTokenValidator::validate_device_uuid( array() ) );
+		$this->assertTrue(
+			PushTokenValidator::validate( array(), array( 'device_uuid' ) )
+		);
 	}
 
 	/**
 	 * @testdox Should return WP_Error when device UUID is missing for Apple platform.
 	 */
 	public function test_validate_device_uuid_rejects_missing_uuid_for_apple(): void {
-		$result = PushTokenValidator::validate_device_uuid(
-			array( 'platform' => PushToken::PLATFORM_APPLE )
+		$result = PushTokenValidator::validate(
+			array( 'platform' => PushToken::PLATFORM_APPLE ),
+			array( 'device_uuid' )
 		);
 
 		$this->assertInstanceOf( WP_Error::class, $result );
@@ -271,8 +324,9 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 * @testdox Should return WP_Error when device UUID is missing for Android platform.
 	 */
 	public function test_validate_device_uuid_rejects_missing_uuid_for_android(): void {
-		$result = PushTokenValidator::validate_device_uuid(
-			array( 'platform' => PushToken::PLATFORM_ANDROID )
+		$result = PushTokenValidator::validate(
+			array( 'platform' => PushToken::PLATFORM_ANDROID ),
+			array( 'device_uuid' )
 		);
 
 		$this->assertInstanceOf( WP_Error::class, $result );
@@ -283,11 +337,12 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 * @testdox Should return WP_Error when device UUID is empty for Apple platform.
 	 */
 	public function test_validate_device_uuid_rejects_empty_for_apple(): void {
-		$result = PushTokenValidator::validate_device_uuid(
+		$result = PushTokenValidator::validate(
 			array(
 				'device_uuid' => '',
 				'platform'    => PushToken::PLATFORM_APPLE,
-			)
+			),
+			array( 'device_uuid' )
 		);
 
 		$this->assertInstanceOf( WP_Error::class, $result );
@@ -298,11 +353,12 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 * @testdox Should return WP_Error when device UUID is whitespace only for Apple platform.
 	 */
 	public function test_validate_device_uuid_rejects_whitespace_only_for_apple(): void {
-		$result = PushTokenValidator::validate_device_uuid(
+		$result = PushTokenValidator::validate(
 			array(
 				'device_uuid' => '   ',
 				'platform'    => PushToken::PLATFORM_APPLE,
-			)
+			),
+			array( 'device_uuid' )
 		);
 
 		$this->assertInstanceOf( WP_Error::class, $result );
@@ -313,11 +369,12 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 * @testdox Should return WP_Error when device UUID contains invalid characters.
 	 */
 	public function test_validate_device_uuid_rejects_invalid_characters(): void {
-		$result = PushTokenValidator::validate_device_uuid(
+		$result = PushTokenValidator::validate(
 			array(
 				'device_uuid' => 'invalid uuid with spaces',
 				'platform'    => PushToken::PLATFORM_APPLE,
-			)
+			),
+			array( 'device_uuid' )
 		);
 
 		$this->assertInstanceOf( WP_Error::class, $result );
@@ -328,11 +385,12 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 * @testdox Should return WP_Error when device UUID exceeds maximum length.
 	 */
 	public function test_validate_device_uuid_rejects_exceeding_max_length(): void {
-		$result = PushTokenValidator::validate_device_uuid(
+		$result = PushTokenValidator::validate(
 			array(
 				'device_uuid' => str_repeat( 'a', PushTokenValidator::DEVICE_UUID_MAXIMUM_LENGTH + 1 ),
 				'platform'    => PushToken::PLATFORM_APPLE,
-			)
+			),
+			array( 'device_uuid' )
 		);
 
 		$this->assertInstanceOf( WP_Error::class, $result );
@@ -343,11 +401,12 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 * @testdox Should return WP_Error when device UUID exceeds max length even for browser platform.
 	 */
 	public function test_validate_device_uuid_rejects_exceeding_max_length_for_browser(): void {
-		$result = PushTokenValidator::validate_device_uuid(
+		$result = PushTokenValidator::validate(
 			array(
 				'device_uuid' => str_repeat( 'a', PushTokenValidator::DEVICE_UUID_MAXIMUM_LENGTH + 1 ),
 				'platform'    => PushToken::PLATFORM_BROWSER,
-			)
+			),
+			array( 'device_uuid' )
 		);
 
 		$this->assertInstanceOf( WP_Error::class, $result );
@@ -359,11 +418,12 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 */
 	public function test_validate_device_uuid_accepts_at_max_length(): void {
 		$this->assertTrue(
-			PushTokenValidator::validate_device_uuid(
+			PushTokenValidator::validate(
 				array(
 					'device_uuid' => str_repeat( 'a', PushTokenValidator::DEVICE_UUID_MAXIMUM_LENGTH ),
 					'platform'    => PushToken::PLATFORM_APPLE,
-				)
+				),
+				array( 'device_uuid' )
 			)
 		);
 	}
@@ -372,11 +432,12 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 * @testdox Should return WP_Error when device UUID is not a string for Apple platform.
 	 */
 	public function test_validate_device_uuid_rejects_non_string_for_apple(): void {
-		$result = PushTokenValidator::validate_device_uuid(
+		$result = PushTokenValidator::validate(
 			array(
 				'device_uuid' => 12345,
 				'platform'    => PushToken::PLATFORM_APPLE,
-			)
+			),
+			array( 'device_uuid' )
 		);
 
 		$this->assertInstanceOf( WP_Error::class, $result );
@@ -388,11 +449,12 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 */
 	public function test_validate_device_uuid_skips_format_check_for_browser(): void {
 		$this->assertTrue(
-			PushTokenValidator::validate_device_uuid(
+			PushTokenValidator::validate(
 				array(
 					'device_uuid' => 'any-value',
 					'platform'    => PushToken::PLATFORM_BROWSER,
-				)
+				),
+				array( 'device_uuid' )
 			)
 		);
 	}
@@ -402,11 +464,12 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 */
 	public function test_validate_token_accepts_valid_apple_token(): void {
 		$this->assertTrue(
-			PushTokenValidator::validate_token(
+			PushTokenValidator::validate(
 				array(
 					'token'    => str_repeat( 'a', 64 ),
 					'platform' => PushToken::PLATFORM_APPLE,
-				)
+				),
+				array( 'token' )
 			)
 		);
 	}
@@ -416,11 +479,12 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 */
 	public function test_validate_token_accepts_valid_android_token(): void {
 		$this->assertTrue(
-			PushTokenValidator::validate_token(
+			PushTokenValidator::validate(
 				array(
 					'token'    => 'dGVzdF90b2tlbl92YWx1ZQ==:APA91b',
 					'platform' => PushToken::PLATFORM_ANDROID,
-				)
+				),
+				array( 'token' )
 			)
 		);
 	}
@@ -440,11 +504,12 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 		);
 
 		$this->assertTrue(
-			PushTokenValidator::validate_token(
+			PushTokenValidator::validate(
 				array(
 					'token'    => $token,
 					'platform' => PushToken::PLATFORM_BROWSER,
-				)
+				),
+				array( 'token' )
 			)
 		);
 	}
@@ -453,7 +518,7 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 * @testdox Should return WP_Error when token is missing.
 	 */
 	public function test_validate_token_rejects_missing(): void {
-		$result = PushTokenValidator::validate_token( array() );
+		$result = PushTokenValidator::validate( array(), array( 'token' ) );
 
 		$this->assertInstanceOf( WP_Error::class, $result );
 		$this->assertSame( 'Token is required.', $result->get_error_message() );
@@ -463,7 +528,7 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 * @testdox Should return WP_Error when token is not a string.
 	 */
 	public function test_validate_token_rejects_non_string(): void {
-		$result = PushTokenValidator::validate_token( array( 'token' => 123 ) );
+		$result = PushTokenValidator::validate( array( 'token' => 123 ), array( 'token' ) );
 
 		$this->assertInstanceOf( WP_Error::class, $result );
 		$this->assertSame( 'Token must be a string.', $result->get_error_message() );
@@ -473,7 +538,7 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 * @testdox Should return WP_Error when token is empty.
 	 */
 	public function test_validate_token_rejects_empty(): void {
-		$result = PushTokenValidator::validate_token( array( 'token' => '' ) );
+		$result = PushTokenValidator::validate( array( 'token' => '' ), array( 'token' ) );
 
 		$this->assertInstanceOf( WP_Error::class, $result );
 		$this->assertSame( 'Token cannot be empty.', $result->get_error_message() );
@@ -483,8 +548,9 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 * @testdox Should return WP_Error when token exceeds maximum length.
 	 */
 	public function test_validate_token_rejects_exceeding_max_length(): void {
-		$result = PushTokenValidator::validate_token(
-			array( 'token' => str_repeat( 'A', PushTokenValidator::TOKEN_MAXIMUM_LENGTH + 1 ) )
+		$result = PushTokenValidator::validate(
+			array( 'token' => str_repeat( 'A', PushTokenValidator::TOKEN_MAXIMUM_LENGTH + 1 ) ),
+			array( 'token' )
 		);
 
 		$this->assertInstanceOf( WP_Error::class, $result );
@@ -496,8 +562,9 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 */
 	public function test_validate_token_accepts_at_max_length(): void {
 		$this->assertTrue(
-			PushTokenValidator::validate_token(
-				array( 'token' => str_repeat( 'A', PushTokenValidator::TOKEN_MAXIMUM_LENGTH ) )
+			PushTokenValidator::validate(
+				array( 'token' => str_repeat( 'A', PushTokenValidator::TOKEN_MAXIMUM_LENGTH ) ),
+				array( 'token' )
 			)
 		);
 	}
@@ -507,7 +574,10 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 */
 	public function test_validate_token_skips_format_check_without_platform(): void {
 		$this->assertTrue(
-			PushTokenValidator::validate_token( array( 'token' => 'any-valid-string' ) )
+			PushTokenValidator::validate(
+				array( 'token' => 'any-valid-string' ),
+				array( 'token' )
+			)
 		);
 	}
 
@@ -515,11 +585,12 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 * @testdox Should return WP_Error for Apple token with non-hex characters.
 	 */
 	public function test_validate_token_rejects_apple_token_with_non_hex(): void {
-		$result = PushTokenValidator::validate_token(
+		$result = PushTokenValidator::validate(
 			array(
 				'token'    => str_repeat( 'g', 64 ),
 				'platform' => PushToken::PLATFORM_APPLE,
-			)
+			),
+			array( 'token' )
 		);
 
 		$this->assertInstanceOf( WP_Error::class, $result );
@@ -530,11 +601,12 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 * @testdox Should return WP_Error for Apple token with wrong length.
 	 */
 	public function test_validate_token_rejects_apple_token_with_wrong_length(): void {
-		$result = PushTokenValidator::validate_token(
+		$result = PushTokenValidator::validate(
 			array(
 				'token'    => str_repeat( 'a', 32 ),
 				'platform' => PushToken::PLATFORM_APPLE,
-			)
+			),
+			array( 'token' )
 		);
 
 		$this->assertInstanceOf( WP_Error::class, $result );
@@ -545,11 +617,12 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 * @testdox Should return WP_Error for Android token with spaces.
 	 */
 	public function test_validate_token_rejects_android_token_with_spaces(): void {
-		$result = PushTokenValidator::validate_token(
+		$result = PushTokenValidator::validate(
 			array(
 				'token'    => 'invalid token with spaces',
 				'platform' => PushToken::PLATFORM_ANDROID,
-			)
+			),
+			array( 'token' )
 		);
 
 		$this->assertInstanceOf( WP_Error::class, $result );
@@ -560,11 +633,12 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 * @testdox Should return WP_Error for browser token with invalid JSON.
 	 */
 	public function test_validate_token_rejects_browser_token_with_invalid_json(): void {
-		$result = PushTokenValidator::validate_token(
+		$result = PushTokenValidator::validate(
 			array(
 				'token'    => 'not-valid-json',
 				'platform' => PushToken::PLATFORM_BROWSER,
-			)
+			),
+			array( 'token' )
 		);
 
 		$this->assertInstanceOf( WP_Error::class, $result );
@@ -579,11 +653,12 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 			array( 'endpoint' => 'https://example.com/push' )
 		);
 
-		$result = PushTokenValidator::validate_token(
+		$result = PushTokenValidator::validate(
 			array(
 				'token'    => $token,
 				'platform' => PushToken::PLATFORM_BROWSER,
-			)
+			),
+			array( 'token' )
 		);
 
 		$this->assertInstanceOf( WP_Error::class, $result );
@@ -604,11 +679,12 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$result = PushTokenValidator::validate_token(
+		$result = PushTokenValidator::validate(
 			array(
 				'token'    => $token,
 				'platform' => PushToken::PLATFORM_BROWSER,
-			)
+			),
+			array( 'token' )
 		);
 
 		$this->assertInstanceOf( WP_Error::class, $result );
@@ -628,11 +704,12 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$result = PushTokenValidator::validate_token(
+		$result = PushTokenValidator::validate(
 			array(
 				'token'    => $token,
 				'platform' => PushToken::PLATFORM_BROWSER,
-			)
+			),
+			array( 'token' )
 		);
 
 		$this->assertInstanceOf( WP_Error::class, $result );
@@ -644,11 +721,11 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 */
 	public function test_all_errors_use_standard_error_code(): void {
 		$errors = array(
-			PushTokenValidator::validate_id( array() ),
-			PushTokenValidator::validate_user_id( array() ),
-			PushTokenValidator::validate_origin( array() ),
-			PushTokenValidator::validate_platform( array() ),
-			PushTokenValidator::validate_token( array() ),
+			PushTokenValidator::validate( array(), array( 'id' ) ),
+			PushTokenValidator::validate( array(), array( 'user_id' ) ),
+			PushTokenValidator::validate( array(), array( 'origin' ) ),
+			PushTokenValidator::validate( array(), array( 'platform' ) ),
+			PushTokenValidator::validate( array(), array( 'token' ) ),
 		);
 
 		foreach ( $errors as $error ) {
