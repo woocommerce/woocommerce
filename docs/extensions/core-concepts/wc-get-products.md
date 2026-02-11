@@ -162,7 +162,9 @@ $page_2_products = wc_get_products( $args );
 $results = wc_get_products( array( 'paginate' => true ) );
 echo $results->total . " products found\n";
 echo 'Page 1 of ' . $results->max_num_pages . "\n";
-echo 'First product id is: ' . $results->products[0]->get_id() . "\n";
+if ( count( $results->products ) > 0 ) {
+    echo 'First product id is: ' . $results->products[0]->get_id() . "\n";
+}
 ```
 
 ```php
