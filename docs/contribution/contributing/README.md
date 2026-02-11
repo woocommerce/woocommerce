@@ -23,7 +23,7 @@ We also have [more in-depth documentation](https://github.com/woocommerce/woocom
 
 ## Code of Conduct
 
-Contributing to an open source project requires cooperation amongst individuals and organizations all working to make our project a stable and safe place to build and ask questions. Please thoroughly read our [Code of Conduct](https://github.com/woocommerce/woocommerce/blob/trunk/SECURITY.md) to get familiar with our standards and processes.
+Contributing to an open source project requires cooperation amongst individuals and organizations all working to make our project a stable and safe place to build and ask questions. Please thoroughly read our [Code of Conduct](https://github.com/woocommerce/woocommerce/blob/trunk/CODE_OF_CONDUCT.md) to get familiar with our standards and processes.
 
 ## Contributor Guidelines
 
