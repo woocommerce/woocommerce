@@ -500,7 +500,7 @@ add_action( 'woocommerce_order_status_processing', 'wc_downloadable_product_perm
  * @param int|WC_Order $order Order instance or ID.
  */
 function wc_delete_shop_order_transients( $order = 0 ) {
-	if ( is_numeric( $order ) ) {
+	if ( $order && is_numeric( $order ) ) {
 		$order = wc_get_order( $order );
 	}
 	$reports             = WC_Admin_Reports::get_reports();
@@ -521,11 +521,16 @@ function wc_delete_shop_order_transients( $order = 0 ) {
 	// Clear customer's order related caches.
 	if ( is_a( $order, 'WC_Order' ) ) {
 		$order_id = $order->get_id();
-		Users::delete_site_user_meta( $order->get_customer_id(), 'wc_money_spent' );
-		Users::delete_site_user_meta( $order->get_customer_id(), 'wc_order_count' );
-		Users::delete_site_user_meta( $order->get_customer_id(), 'wc_last_order' );
-	} else {
-		$order_id = 0;
+
+		// Delete the memorized data only if accessible, so we do not invalidate metas-cache (triggered by deleting the metas).
+		$customer_id        = $order->get_customer_id();
+		$memorized_order_id = Users::get_site_user_meta( $customer_id, 'wc_last_order' );
+		$delete_memorized   = '' !== $memorized_order_id && $order_id !== $memorized_order_id;
+		if ( $delete_memorized ) {
+			Users::delete_site_user_meta( $customer_id, 'wc_money_spent' );
+			Users::delete_site_user_meta( $customer_id, 'wc_order_count' );
+			Users::delete_site_user_meta( $customer_id, 'wc_last_order' );
+		}
 	}
 
 	// Increments the transient version to invalidate cache.
