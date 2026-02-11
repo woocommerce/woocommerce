@@ -79,7 +79,7 @@ $products = wc_get_products( array( 'status' => 'draft' ) );
 
 ```php
 // Using constant class for status.
-$products = wc_get_products( array( 'status' => ProductStatus::DRAFT ) );
+$products = wc_get_products( array( 'status' => \Automattic\WooCommerce\Enums\ProductStatus::DRAFT ) );
 ```
 
 ```php
@@ -291,7 +291,7 @@ $products = wc_get_products( array( 'visibility' => 'catalog' ) );
 
 ```php
 // Using constant class for visibility.
-$products = wc_get_products( array( 'visibility' => CatalogVisibility::CATALOG ) );
+$products = wc_get_products( array( 'visibility' => \Automattic\WooCommerce\Enums\CatalogVisibility::CATALOG ) );
 ```
 
 ```php
@@ -320,7 +320,7 @@ $products = wc_get_products( array( 'stock_status' => 'outofstock' ) );
 
 ```php
 // Using constant class for stock status.
-$products = wc_get_products( array( 'stock_status' => ProductStockStatus::OUT_OF_STOCK ) );
+$products = wc_get_products( array( 'stock_status' => \Automattic\WooCommerce\Enums\ProductStockStatus::OUT_OF_STOCK ) );
 ```
 
 ### Tax & shipping
@@ -340,7 +340,7 @@ $products = wc_get_products( array( 'tax_status' => 'taxable' ) );
 
 ```php
 // Using constant class for tax status.
-$products = wc_get_products( array( 'tax_status' => ProductTaxStatus::TAXABLE ) );
+$products = wc_get_products( array( 'tax_status' => \Automattic\WooCommerce\Enums\ProductTaxStatus::TAXABLE ) );
 ```
 
 ```php
