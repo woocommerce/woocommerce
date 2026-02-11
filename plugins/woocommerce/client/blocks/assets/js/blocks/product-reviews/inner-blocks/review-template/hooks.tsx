@@ -169,7 +169,7 @@ export const useCommentTree = (
 	commentOrder: string
 ) => {
 	const commentTree = useMemo( () => {
-		const comments = topLevelComments?.map(
+		const comments = topLevelComments.map(
 			( {
 				id,
 				children,
