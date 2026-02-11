@@ -27,7 +27,7 @@ defined( 'ABSPATH' ) || exit;
  * This function should be used for product retrieval so that we have a data agnostic
  * way to get a list of products.
  *
- * Args and usage: https://github.com/woocommerce/woocommerce/wiki/wc_get_products-and-WC_Product_Query
+ * Args and usage: https://developer.woocommerce.com/docs/extensions/core-concepts/wc-get-products/
  *
  * @since  3.0.0
  * @param  array $args Array of args (above).
