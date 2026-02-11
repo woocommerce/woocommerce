@@ -427,7 +427,7 @@ class Product_Image extends Abstract_Product_Block_Renderer {
 
 		// Map block alignment to valid HTML/CSS alignment values.
 		// "full" is not a valid text-align or table align value.
-		$css_align = $is_full ? 'center' : ( $align ?: 'left' );
+		$css_align = $is_full ? 'center' : ( $align ? $align : 'left' );
 
 		$wrapper_styles = array(
 			'border-collapse' => 'separate',
