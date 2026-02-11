@@ -1,4 +1,6 @@
 <?php
+// phpcs:disable WordPress.WP.AlternativeFunctions
+// phpcs:disable WordPress.PHP.DevelopmentFunctions.error_log_var_export
 
 declare( strict_types=1 );
 

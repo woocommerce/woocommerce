@@ -75,7 +75,7 @@ class WC_CLI {
 		$cli_runner = wc_get_container()->get( ProductAttributesLookupCLIRunner::class );
 		WP_CLI::add_hook( 'after_wp_load', fn() => \WP_CLI::add_command( 'wc palt', $cli_runner ) );
 		$cli_runner = wc_get_container()->get( FileManifestCommand::class );
-		WP_CLI::add_hook( 'after_wp_load', array( $cli_runner, 'register_commands' ) );		
+		WP_CLI::add_hook( 'after_wp_load', array( $cli_runner, 'register_commands' ) );
 	}
 
 	/**

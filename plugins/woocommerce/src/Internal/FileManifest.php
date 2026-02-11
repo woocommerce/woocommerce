@@ -1,4 +1,7 @@
 <?php
+
+declare( strict_types=1 );
+
 /**
  * Boot-time installation integrity check using a build-time file manifest.
  */
@@ -216,7 +219,7 @@ class FileManifest {
 	 * hide WooCommerce from the active plugins list for the current request.
 	 *
 	 * @since 10.6.0
-	 * 
+	 *
 	 * @param string   $plugin_file    Absolute path to the main plugin file (woocommerce.php).
 	 * @param string[] $details         Optional list of detail lines (e.g. missing file paths) to show in an expandable section.
 	 * @param string   $details_heading Optional heading displayed above the details list (already translated).

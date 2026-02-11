@@ -25,7 +25,7 @@ class FileManifestCommand {
 		WP_CLI::add_command( 'wc file-manifest delete', array( $this, 'delete' ) );
 		WP_CLI::add_command( 'wc file-manifest recheck', array( $this, 'recheck' ) );
 	}
-	
+
 	/**
 	 * Generate the file manifest from a plugin directory.
 	 *
