@@ -348,8 +348,8 @@ class WC_Structured_Data {
 					);
 				}
 			} else {
-				$tax_display_mode 			= get_option( 'woocommerce_tax_display_shop' );
-					$regular_price			= 'incl' === $tax_display_mode
+				$tax_display_mode           = get_option( 'woocommerce_tax_display_shop' );
+				$regular_price              = 'incl' === $tax_display_mode
 					? wc_get_price_including_tax( $product, array( 'price' => $product->get_regular_price() ) )
 					: wc_get_price_excluding_tax( $product, array( 'price' => $product->get_regular_price() ) );
 				$unit_price_specification = array(
