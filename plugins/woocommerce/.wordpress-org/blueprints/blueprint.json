@@ -1,18 +1,15 @@
 {
 	"$schema": "https://playground.wordpress.net/blueprint-schema.json",
-	"landingPage": "/wp-admin/index.php",
+	"landingPage": "/wp-admin/admin.php?page=wc-admin",
 	"login": true,
-	"plugins": [
-		"blaze-ads",
-		"gravatar-enhanced",
-		"gutenberg",
-		"woocommerce",
-		"woocommerce-payments",
-		"woocommerce-services"
-	],
+	"plugins": [ "woocommerce", "woocommerce-payments" ],
 	"preferredVersions": {
 		"php": "8.3",
 		"wp": "latest"
+	},
+	"features": {
+		"networking": true,
+		"intl": true
 	},
 	"steps": [
 		{
@@ -21,146 +18,38 @@
 				"woocommerce_onboarding_profile": {
 					"skipped": true
 				},
+				"blogname": "WooCommerce",
+				"woocommerce_store_city": "Los Angeles",
+				"woocommerce_store_address": "123 Main St",
+				"woocommerce_store_postcode": "90038",
+				"woocommerce_default_country": "United States",
+				"woocommerce_currency": "USD",
+				"woocommerce_weight_unit": "lbs",
+				"woocommerce_dimension_unit": "in",
+				"woocommerce_cheque_settings": {
+					"enabled": "yes"
+				},
 				"woocommerce_allow_tracking": "no",
 				"woocommerce_coming_soon": "no"
 			}
 		},
 		{
-			"step": "installPlugin",
-			"options": {
-				"activate": false,
-				"targetFolderName": "wc-smooth-generator"
-			},
-			"pluginData": {
-				"resource": "git:directory",
-				"url": "https://github.com/woocommerce/wc-smooth-generator.git",
-				"ref": "HEAD",
-				"path": "/"
-			}
-		},
-		{
-			"step": "installPlugin",
-			"pluginData": {
-				"resource": "wordpress.org/plugins",
-				"slug": "akismet"
-			},
-			"options": {
-				"activate": false
-			}
-		},
-		{
-			"step": "installPlugin",
-			"pluginData": {
-				"resource": "wordpress.org/plugins",
-				"slug": "classic-editor"
-			},
-			"options": {
-				"activate": false
-			}
-		},
-		{
-			"step": "installPlugin",
-			"pluginData": {
-				"resource": "wordpress.org/plugins",
-				"slug": "crowdsignal-forms"
-			},
-			"options": {
-				"activate": false
-			}
-		},
-		{
-			"step": "installPlugin",
-			"pluginData": {
-				"resource": "wordpress.org/plugins",
-				"slug": "polldaddy"
-			},
-			"options": {
-				"activate": false
-			}
-		},
-		{
-			"step": "installPlugin",
-			"pluginData": {
-				"resource": "wordpress.org/plugins",
-				"slug": "facebook-for-woocommerce"
-			},
-			"options": {
-				"activate": false
-			}
-		},
-		{
-			"step": "installPlugin",
-			"pluginData": {
-				"resource": "wordpress.org/plugins",
-				"slug": "google-listings-and-ads"
-			},
-			"options": {
-				"activate": false
-			}
-		},
-		{
-			"step": "installPlugin",
-			"pluginData": {
-				"resource": "wordpress.org/plugins",
-				"slug": "jetpack"
-			},
-			"options": {
-				"activate": false
-			}
-		},
-		{
-			"step": "installPlugin",
-			"pluginData": {
-				"resource": "wordpress.org/plugins",
-				"slug": "layout-grid"
-			},
-			"options": {
-				"activate": false
-			}
-		},
-		{
-			"step": "installPlugin",
-			"pluginData": {
-				"resource": "wordpress.org/plugins",
-				"slug": "mailpoet"
-			},
-			"options": {
-				"activate": false
-			}
-		},
-		{
-			"step": "installPlugin",
-			"pluginData": {
-				"resource": "wordpress.org/plugins",
-				"slug": "page-optimize"
-			},
-			"options": {
-				"activate": false
-			}
-		},
-		{
-			"step": "installPlugin",
-			"pluginData": {
-				"resource": "wordpress.org/plugins",
-				"slug": "pinterest-for-woocommerce"
-			},
-			"options": {
-				"activate": false
-			}
-		},
-		{
-			"step": "installPlugin",
-			"pluginData": {
-				"resource": "wordpress.org/plugins",
-				"slug": "taxjar-simplified-taxes-for-woocommerce"
-			},
-			"options": {
-				"activate": false
-			}
-		},
-		{
 			"step": "runPHP",
-			"code": "\u003C?php require_once '/wordpress/wp-load.php'; $wp_rewrite-\u003Eset_permalink_structure( '/%postname%/' ); include_once( ABSPATH . 'wp-admin/includes/plugin.php' ); deactivate_plugins( 'hello.php', 'hello-dolly' ); include_once( ABSPATH . 'wp-admin/includes/file.php' ); delete_plugins( [ 'hello.php', 'hello-dolly' ] );"
+			"code": "<?php require_once '/wordpress/wp-load.php'; $wp_rewrite->set_permalink_structure( '/%postname%/' ); include_once( ABSPATH . 'wp-admin/includes/plugin.php' ); deactivate_plugins( 'hello.php', 'hello-dolly' ); include_once( ABSPATH . 'wp-admin/includes/file.php' ); delete_plugins( [ 'hello.php', 'hello-dolly' ] );"
+		},
+		{
+			"step": "installTheme",
+			"themeData": {
+				"resource": "url",
+				"url": "https://github-proxy.com/proxy/?repo=woocommerce/woo-themes&branch=trunk&directory=purple"
+			}
+		},
+		{
+			"step": "importWxr",
+			"file": {
+				"resource": "url",
+				"url": "https://raw.githubusercontent.com/woocommerce/woocommerce/refs/heads/trunk/plugins/woocommerce/sample-data/sample_products.xml"
+			}
 		},
 		{
 			"step": "updateUserMeta",
