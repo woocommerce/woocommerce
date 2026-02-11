@@ -274,8 +274,6 @@ class PushToken {
 	 * @param string $device_locale The locale of the device the token belongs to.
 	 * @throws PushTokenInvalidDataException If device locale is not valid.
 	 * @return void
-	 *
-	 * @since 10.6.0
 	 */
 	public function set_device_locale( string $device_locale ): void {
 		$result = PushTokenValidator::validate( compact( 'device_locale' ), array( 'device_locale' ) );
@@ -334,8 +332,6 @@ class PushToken {
 	 * @param string $metadata A JSON encoded array of metadata for the token, e.g. the app version, device OS etc.
 	 * @throws PushTokenInvalidDataException If metadata is not valid.
 	 * @return void
-	 *
-	 * @since 10.6.0
 	 */
 	public function set_metadata( string $metadata ): void {
 		$result = PushTokenValidator::validate( compact( 'metadata' ), array( 'metadata' ) );
@@ -418,8 +414,6 @@ class PushToken {
 	 * Gets the device locale.
 	 *
 	 * @return string|null
-	 *
-	 * @since 10.6.0
 	 */
 	public function get_device_locale(): ?string {
 		return $this->device_locale;
@@ -429,8 +423,6 @@ class PushToken {
 	 * Gets the metadata.
 	 *
 	 * @return string|null
-	 *
-	 * @since 10.6.0
 	 */
 	public function get_metadata(): ?string {
 		return $this->metadata;

@@ -41,8 +41,6 @@ class PushTokenValidator {
 	 * - language code (2–3 lowercase letters)
 	 * - underscore
 	 * - region code (2 uppercase letters).
-	 *
-	 * @since 10.6.0
 	 */
 	const DEVICE_LOCALE_FORMAT = '/^(?<language>[a-z]{2,3})_(?<region>[A-Z]{2})$/';
 
@@ -281,8 +279,6 @@ class PushTokenValidator {
 	/**
 	 * Validates device locale.
 	 *
-	 * @since 10.6.0
-	 *
 	 * @param mixed $value The value to validate.
 	 * @param array $context An array of other values included as context for the validation.
 	 * @return bool|WP_Error
@@ -430,8 +426,6 @@ class PushTokenValidator {
 
 	/**
 	 * Validates metadata.
-	 *
-	 * @since 10.6.0
 	 *
 	 * @param mixed $value The value to validate.
 	 * @param array $context An array of other values included as context for the validation.
