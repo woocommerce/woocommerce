@@ -5,7 +5,7 @@ sidebar_label: Product Querying
 
 # `wc_get_products` and product queries
 
-`wc_get_products` and `WC_Product_Query` provide a standard way of retrieving products that is safe to use and will not break due to database changes in future WooCommerce versions. Building custom WP_Queries or database queries is likely to break your code in future versions of WooCommerce as data moves towards custom tables for better performance. This is the best-practices way for plugin and theme developers to retrieve multiple products. `wc_get_products` and `WC_Product_Query` are similar to WordPress [`get_posts` and `WP_Query`](https://codex.wordpress.org/Class_Reference/WP_Query). Just like those, you pass in an array of arguments defining the criteria for the search.
+`wc_get_products` and `WC_Product_Query` provide a standard way of retrieving products that is safe to use and will not break due to database changes in future WooCommerce versions. Building custom WP_Queries or database queries is likely to break your code in future versions of WooCommerce as data moves towards custom tables for better performance. This is the best-practices way for plugin and theme developers to retrieve multiple products. `wc_get_products` and `WC_Product_Query` are similar to WordPress [`get_posts` and `WP_Query`](https://developer.wordpress.org/reference/classes/wp_query/). Just like those, you pass in an array of arguments defining the criteria for the search.
 
 ## Basic usage
 
@@ -45,7 +45,7 @@ Note that `wc_get_products()` is mostly a shortcut to `WC_Product_Query::get_pro
 ## API reference
 
 | Method | Description |
-|--------|-------------|
+| ------ | ----------- |
 | `wc_get_products( $args )` | Retrieve products matching query `$args`. |
 | `WC_Product_Query::get_query_vars()` | Get an array of all of the current query variables set on the query object. |
 | `WC_Product_Query::get( string $key, mixed $default = '' )` | Get the value of a query variable or the default if the query variable is not set. |
@@ -59,7 +59,7 @@ Query parameters/arguments that can be used with these functions are described b
 ### General
 
 | Parameter | Description |
-|-----------|-------------|
+| --------- | ----------- |
 | **status** | Accepts a string or array of strings: one or more of `'draft'`, `'pending'`, `'private'`, `'publish'`, or a custom status. See [ProductStatus constant class](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Enums/ProductStatus.php). |
 | **type** | Accepts a string or array of strings: one or more of `'external'`, `'grouped'`, `'simple'`, `'variable'`, or a custom type. See [ProductType constant class](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Enums/ProductType.php). |
 | **include** | Accepts an array of integers: only includes products with IDs in the array. |
@@ -128,7 +128,7 @@ $products = wc_get_products( array( 'return' => 'ids' ) );
 ### Pagination
 
 | Parameter | Description |
-|-----------|-------------|
+| --------- | ----------- |
 | **limit** | Accepts an integer: maximum number of results to retrieve or `-1` for unlimited. Default: site `posts_per_page` setting. |
 | **page** | Accepts an integer: page of results to retrieve. Does nothing if `'offset'` is used. |
 | **offset** | Accepts an integer: amount to offset product results. |
@@ -177,7 +177,7 @@ $products = wc_get_products( $args );
 ### Product lookup
 
 | Parameter | Description |
-|-----------|-------------|
+| --------- | ----------- |
 | **sku** | Accepts a string: product SKU to match on. Does partial matching on the SKU. |
 | **name** | Accepts a string: the product name (title) to match on. Case sensitivity depends on the collation of the WordPress posts table. |
 | **tag** | Accepts an array: limit results to products assigned to specific tags by slug. |
@@ -220,7 +220,7 @@ $products = wc_get_products( array( 'product_category_id' => array( 17, 23 ) ) )
 ### Dimensions & pricing
 
 | Parameter | Description |
-|-----------|-------------|
+| --------- | ----------- |
 | **weight** | Accepts a float: the weight measurement to match on. |
 | **length** | Accepts a float: the length measurement to match on. |
 | **width** | Accepts a float: the width measurement to match on. |
@@ -254,7 +254,7 @@ $products = wc_get_products( array( 'total_sales' => 0 ) );
 ### Product settings
 
 | Parameter | Description |
-|-----------|-------------|
+| --------- | ----------- |
 | **virtual** | Accepts a boolean: limit to virtual products. |
 | **downloadable** | Accepts a boolean: limit to downloadable products. |
 | **featured** | Accepts a boolean: limit to featured products. |
@@ -300,7 +300,7 @@ $products = wc_get_products( array( 'download_limit' => -1 ) );
 ### Stock & inventory
 
 | Parameter | Description |
-|-----------|-------------|
+| --------- | ----------- |
 | **stock_quantity** | Accepts an integer: the quantity of a product in stock. |
 | **stock_status** | Accepts a string: `'outofstock'`, `'instock'`, or `'onbackorder'`. See [ProductStockStatus constant class](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Enums/ProductStockStatus.php). |
 
@@ -324,7 +324,7 @@ $products = wc_get_products( array( 'stock_status' => ProductStockStatus::OUT_OF
 ### Tax & shipping
 
 | Parameter | Description |
-|-----------|-------------|
+| --------- | ----------- |
 | **tax_status** | Accepts a string: `'taxable'`, `'shipping'`, or `'none'`. See [ProductTaxStatus constant class](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Enums/ProductTaxStatus.php). |
 | **tax_class** | Accepts a string: a tax class slug. |
 | **shipping_class** | Accepts a string or array of strings: one or more shipping class slugs. |
@@ -354,7 +354,7 @@ $products = wc_get_products( array( 'shipping_class' => 'bulky' ) );
 ### Reviews & ratings
 
 | Parameter | Description |
-|-----------|-------------|
+| --------- | ----------- |
 | **average_rating** | Accepts a float: the average rating. |
 | **review_count** | Accepts an integer: the number of reviews. |
 
@@ -375,7 +375,7 @@ $products = wc_get_products( array( 'review_count' => 1 ) );
 Date arguments receive values following the standard format described below, allowing for more flexible queries.
 
 | Parameter | Description |
-|-----------|-------------|
+| --------- | ----------- |
 | **date_created** | Matches product creation date. Accepts a string in standard format. |
 | **date_modified** | Matches product modification date. Accepts a string in standard format. |
 | **date_on_sale_from** | Matches sale start date. Accepts a string in standard format. |
