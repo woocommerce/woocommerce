@@ -13,14 +13,15 @@ const defaultDevDependencies = [
 ];
 
 module.exports = {
-	templatesPath: join( __dirname, 'variants/default' ),
+	pluginTemplatesPath: join( __dirname, 'variants', 'default' ),
+	blockTemplatesPath: join( __dirname, 'variants', 'default', 'src' ),
 	defaultValues: {
 		npmDependencies: defaultDependencies,
 		npmDevDependencies: defaultDevDependencies,
 		namespace: 'extension',
 		license: 'GPL-3.0+',
 		customScripts: {
-			postinstall: 'rm -f block.json && composer install',
+			postinstall: 'rm -f src/block.json && composer install',
 		},
 		transformer: ( view ) => {
 			return {
@@ -34,12 +35,22 @@ module.exports = {
 	},
 	variants: {
 		'add-report': {
-			pluginTemplatesPath: join( __dirname, 'variants/add-report' ),
-			blockTemplatesPath: null,
+			pluginTemplatesPath: join( __dirname, 'variants', 'add-report' ),
+			blockTemplatesPath: join(
+				__dirname,
+				'variants',
+				'add-report',
+				'src'
+			),
 		},
 		'add-task': {
-			pluginTemplatesPath: join( __dirname, 'variants/add-task' ),
-			blockTemplatesPath: null,
+			pluginTemplatesPath: join( __dirname, 'variants', 'add-task' ),
+			blockTemplatesPath: join(
+				__dirname,
+				'variants',
+				'add-task',
+				'src'
+			),
 			npmDependencies: [
 				...defaultDependencies,
 				'@woocommerce/onboarding',
@@ -48,17 +59,37 @@ module.exports = {
 		'dashboard-section': {
 			pluginTemplatesPath: join(
 				__dirname,
-				'variants/dashboard-section'
+				'variants',
+				'dashboard-section'
 			),
-			blockTemplatesPath: null,
+			blockTemplatesPath: join(
+				__dirname,
+				'variants',
+				'dashboard-section',
+				'src'
+			),
 		},
 		'table-column': {
-			pluginTemplatesPath: join( __dirname, 'variants/table-column' ),
-			blockTemplatesPath: null,
+			pluginTemplatesPath: join( __dirname, 'variants', 'table-column' ),
+			blockTemplatesPath: join(
+				__dirname,
+				'variants',
+				'table-column',
+				'src'
+			),
 		},
 		'sql-modification': {
-			pluginTemplatesPath: join( __dirname, 'variants/sql-modification' ),
-			blockTemplatesPath: null,
+			pluginTemplatesPath: join(
+				__dirname,
+				'variants',
+				'sql-modification'
+			),
+			blockTemplatesPath: join(
+				__dirname,
+				'variants',
+				'sql-modification',
+				'src'
+			),
 		},
 	},
 };

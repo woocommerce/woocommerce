@@ -20,7 +20,7 @@ import { useDispatch, useSelect } from '@wordpress/data';
 import { useEffect, useState } from '@wordpress/element';
 import { store as noticesStore } from '@wordpress/notices';
 import { useEntityRecord } from '@wordpress/core-data';
-import { store as editorStore } from '@wordpress/editor';
+import { CORE_EDITOR_STORE } from '@woocommerce/utils';
 
 /**
  * Internal dependencies
@@ -184,7 +184,7 @@ const Edit = ( {
 	const { currentPostId } = useSelect( ( sel ) => {
 		return {
 			// @ts-expect-error getCurrentPostId is not typed
-			currentPostId: sel( editorStore ).getCurrentPostId(),
+			currentPostId: sel( CORE_EDITOR_STORE )?.getCurrentPostId?.() ?? 0,
 		};
 	}, [] );
 

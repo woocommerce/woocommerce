@@ -299,6 +299,7 @@ $dialog-padding: 20px;
 	bottom: 0;
 	z-index: 1000;
 	overflow: hidden;
+	background-color: var(--wp--preset--color--base, #fff);
 
 	:where(.admin-bar) & {
 		// Subtract the admin bar height.
@@ -307,52 +308,43 @@ $dialog-padding: 20px;
 	}
 }
 
+:where(.wc-block-product-gallery-dialog__header) {
+	margin: 0 auto;
+	padding: 14px;
+	display: flex;
+	justify-content: flex-end;
+}
+
 :where(.wc-block-product-gallery-dialog__close-button) {
-	padding: 5px;
-	position: absolute;
-	right: 25px;
-	top: 25px;
+	padding: 4px;
 	background: none;
 	border: none;
 	cursor: pointer;
+	fill: var(--wp--preset--color--contrast, #000);
 }
 
-:where(.wc-block-product-gallery-dialog__content) {
-	// Subtract the top and bottom padding.
-	height: calc(100vh - ($dialog-padding * 2));
-	overflow: hidden;
-	padding: 20px 0;
-
-	@media (min-width: 765px) {
-		padding: 20px 0;
-	}
-
-	:where(.admin-bar) & {
-		// Subtract the admin bar height.
-		height: calc(100vh - ($dialog-padding * 2) - $admin-bar-height);
-	}
-}
-
-:where(.wc-block-product-gallery-dialog__images-container) {
-	height: 100%;
-	overflow-y: auto;
-	box-sizing: border-box;
-	padding: 3px 0;
-}
-
-:where(.wc-block-product-gallery-dialog__images) {
+.wc-block-product-gallery-dialog .wc-block-product-gallery-dialog__content {
+	height: calc(100vh - 64px);
+	overflow: auto;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
+	gap: 8px;
+	padding: 0 8px;
 
-	:where(img) {
-		max-width: 100%;
-		height: auto;
-		margin-bottom: 20px;
+	:where(.admin-bar) & {
+		// Subtract the admin bar height.
+		height: calc(100vh - 64px - $admin-bar-height);
 	}
 
-	:where(img:last-child) {
-		margin-bottom: 0;
+	img {
+		max-width: 1600px;
+		width: 100%;
+		height: auto;
+
+		&:last-child {
+			margin-bottom: 50px;
+		}
 	}
 }
 

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Add the CallbackUtil class and fix get_price_hash for variations

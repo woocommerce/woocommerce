@@ -2,6 +2,13 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.1](https://www.npmjs.com/package/@woocommerce/extend-cart-checkout-block/v/1.5.1) - 2026-01-26 
+
+-   Patch - Ensure correct files are included when building a zip using build-zip [#62910]
+-   Patch - Bump wireit dependency version to latest. [#57299]
+-   Patch - Monorepo: consolidate packages licenses to `GPL-2.0-or-later`. [#58941]
+-   Patch - Update wireit to 0.14.10 [#54996]
+
 ## [1.5.0](https://www.npmjs.com/package/@woocommerce/extend-cart-checkout-block/v/1.5.0) - 2025-01-21 
 
 -   Patch - Fix some linting issues, update .nvmrc and .eslintrc [#54414]

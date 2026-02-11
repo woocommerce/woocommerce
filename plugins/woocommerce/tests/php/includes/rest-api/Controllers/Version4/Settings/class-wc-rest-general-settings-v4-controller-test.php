@@ -223,6 +223,80 @@ class WC_REST_General_Settings_V4_Controller_Test extends WC_REST_Unit_Test_Case
 	}
 
 	/**
+	 * Test updating country with state code (e.g., DE:DE-BY).
+	 * State codes in WooCommerce include the country prefix (e.g., "DE-BY" for Bavaria).
+	 */
+	public function test_update_country_with_state() {
+		wp_set_current_user( $this->user_id );
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/settings/general' );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'values' => array(
+						'woocommerce_default_country' => 'DE:DE-BY', // Bavaria, Germany.
+					),
+				)
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 'DE:DE-BY', get_option( 'woocommerce_default_country' ) );
+		$this->assertArrayHasKey( 'values', $data );
+		$this->assertEquals( 'DE:DE-BY', $data['values']['woocommerce_default_country'] );
+	}
+
+	/**
+	 * Test updating country with invalid state code returns error.
+	 */
+	public function test_update_country_with_invalid_state() {
+		wp_set_current_user( $this->user_id );
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/settings/general' );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'values' => array(
+						'woocommerce_default_country' => 'DE:INVALID', // Invalid state code.
+					),
+				)
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 'rest_invalid_param', $data['code'] );
+	}
+
+	/**
+	 * Test updating country without state (country only).
+	 */
+	public function test_update_country_only() {
+		wp_set_current_user( $this->user_id );
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/settings/general' );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'values' => array(
+						'woocommerce_default_country' => 'DE', // Germany without state.
+					),
+				)
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 'DE', get_option( 'woocommerce_default_country' ) );
+		$this->assertArrayHasKey( 'values', $data );
+		$this->assertEquals( 'DE', $data['values']['woocommerce_default_country'] );
+	}
+
+	/**
 	 * Test update_item method does not update \'title\' and \'sectionend\' settings and other non-updatable fields.
 	 */
 	public function test_update_item_ignores_non_updatable_settings() {

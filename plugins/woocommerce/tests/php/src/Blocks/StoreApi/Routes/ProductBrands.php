@@ -29,6 +29,13 @@ class ProductBrands extends ControllerTestCase {
 			)
 		);
 
+		$this->child_brand = $fixtures->get_product_brand(
+			array(
+				'name'   => 'Child Brand',
+				'parent' => $this->product_brand['term_id'],
+			)
+		);
+
 		$this->products = array(
 			$fixtures->get_simple_product(
 				array(
@@ -43,6 +50,13 @@ class ProductBrands extends ControllerTestCase {
 					'brand_ids'     => array( $this->product_brand['term_id'] ),
 				)
 			),
+			$fixtures->get_simple_product(
+				array(
+					'name'          => 'Test Product 3',
+					'regular_price' => 50,
+					'brand_ids'     => array( $this->child_brand['term_id'] ),
+				)
+			),
 		);
 	}
 
@@ -55,7 +69,7 @@ class ProductBrands extends ControllerTestCase {
 
 		// Assert correct response format.
 		$this->assertSame( 200, $response->get_status(), 'Unexpected status code.' );
-		$this->assertSame( 1, count( $data ), 'Unexpected item count.' );
+		$this->assertSame( 2, count( $data ), 'Unexpected item count.' );
 
 		// Assert response items contain the correct properties.
 		$this->assertArrayHasKey( 'id', $data[0] );
@@ -66,6 +80,61 @@ class ProductBrands extends ControllerTestCase {
 		$this->assertArrayHasKey( 'count', $data[0] );
 	}
 
+	/**
+	 * Test getting only top-level brands using parent=0 parameter.
+	 */
+	public function test_get_items_with_parent_zero() {
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/brands' );
+		$request->set_param( 'parent', 0 );
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status(), 'Unexpected status code.' );
+		$this->assertSame( 1, count( $data ), 'Expected only top-level brands.' );
+		$this->assertSame( 'Test Brand 1', $data[0]['name'] );
+		$this->assertSame( 0, $data[0]['parent'] );
+	}
+
+	/**
+	 * Test getting child brands using parent parameter with parent brand ID.
+	 */
+	public function test_get_items_with_parent_id() {
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/brands' );
+		$request->set_param( 'parent', $this->product_brand['term_id'] );
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status(), 'Unexpected status code.' );
+		$this->assertSame( 1, count( $data ), 'Expected only child brands of specified parent.' );
+		$this->assertSame( 'Child Brand', $data[0]['name'] );
+		$this->assertSame( $this->product_brand['term_id'], $data[0]['parent'] );
+	}
+
+	/**
+	 * Test that parent parameter with non-existent ID returns empty results.
+	 */
+	public function test_get_items_with_parent_nonexistent() {
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/brands' );
+		$request->set_param( 'parent', 9 );
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status(), 'Unexpected status code.' );
+		$this->assertSame( 0, count( $data ), 'Expected no brands for non-existent parent.' );
+	}
+
+	/**
+	 * Test that parent parameter is registered in collection params.
+	 */
+	public function test_collection_params_include_parent() {
+		$request  = new \WP_REST_Request( 'OPTIONS', '/wc/store/v1/products/brands' );
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+		$params   = $data['endpoints'][0]['args'];
+
+		$this->assertArrayHasKey( 'parent', $params );
+		$this->assertSame( 'integer', $params['parent']['type'] );
+	}
 
 	/**
 	 * Test getting brands from a specific product.

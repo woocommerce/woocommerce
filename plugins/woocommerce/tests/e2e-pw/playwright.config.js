@@ -53,10 +53,6 @@ const reporter = [
 		`${ TESTS_ROOT_PATH }/reporters/environment-reporter.js`,
 		{ outputFolder: `${ TESTS_ROOT_PATH }/test-results/allure-results` },
 	],
-	[
-		`${ TESTS_ROOT_PATH }/reporters/flaky-tests-reporter.js`,
-		{ outputFolder: `${ TESTS_ROOT_PATH }/test-results/flaky-tests` },
-	],
 ];
 
 if ( process.env.CI ) {

@@ -257,6 +257,16 @@ jQuery( function ( $ ) {
 		}
 
 		$( '.hide_if_' + product_type, context ).hide();
+
+		// POS visibility - requires combination of type AND downloadable status.
+		var is_pos_supported = ( product_type === 'simple' || product_type === 'variable' ) && ! is_downloadable;
+		if ( is_pos_supported ) {
+			$( '#pos_visibility_supported', context ).show();
+			$( '#pos_visibility_unsupported', context ).hide();
+		} else {
+			$( '#pos_visibility_supported', context ).hide();
+			$( '#pos_visibility_unsupported', context ).show();
+		}
 	}
 
 	function show_and_hide_panels() {

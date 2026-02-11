@@ -123,14 +123,15 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				),
 
 				array(
-					'title'    => __( '"From" name', 'woocommerce' ),
-					'desc'     => '',
-					'id'       => 'woocommerce_email_from_name',
-					'type'     => 'text',
-					'css'      => 'min-width:400px;',
-					'default'  => esc_attr( get_bloginfo( 'name', 'display' ) ),
-					'autoload' => false,
-					'desc_tip' => true,
+					'title'             => __( '"From" name', 'woocommerce' ),
+					'desc'              => '',
+					'id'                => 'woocommerce_email_from_name',
+					'type'              => 'text',
+					'css'               => 'min-width:400px;',
+					'default'           => esc_attr( get_bloginfo( 'name', 'display' ) ),
+					'autoload'          => false,
+					'desc_tip'          => true,
+					'skip_initial_save' => true,
 				),
 
 				array(
@@ -371,6 +372,13 @@ class WC_Settings_Emails extends WC_Settings_Page {
 		// Remove empty elements that depend on the email_improvements feature flag.
 		$settings = array_filter( $settings );
 
+		/**
+		 * Filters the email settings array.
+		 *
+		 * @since 2.1.0
+		 *
+		 * @param array $settings Array of email settings.
+		 */
 		return apply_filters( 'woocommerce_email_settings', $settings );
 	}
 
@@ -466,6 +474,13 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				<thead>
 					<tr>
 						<?php
+						/**
+						 * Filters the columns displayed in the email settings table.
+						 *
+						 * @since 2.1.0
+						 *
+						 * @param array $columns Array of column keys and labels.
+						 */
 						$columns = apply_filters(
 							'woocommerce_email_setting_columns',
 							array(
@@ -548,6 +563,13 @@ class WC_Settings_Emails extends WC_Settings_Page {
 										</td>';
 										break;
 									default:
+										/**
+										 * Fires when rendering a custom column in the email settings table.
+										 *
+										 * @since 2.1.0
+										 *
+										 * @param WC_Email $email The email object.
+										 */
 										do_action( 'woocommerce_email_setting_column_' . $key, $email );
 										break;
 								}

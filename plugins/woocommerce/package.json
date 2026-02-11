@@ -2,7 +2,7 @@
 	"name": "@woocommerce/plugin-woocommerce",
 	"private": true,
 	"title": "WooCommerce",
-	"version": "10.5.0",
+	"version": "10.6.0",
 	"homepage": "https://woocommerce.com/",
 	"repository": {
 		"type": "git",
@@ -120,7 +120,7 @@
 			},
 			"tests": [
 				{
-					"name": "PHP: 8.4 WP: latest",
+					"name": "PHP: 8.5 WP: latest",
 					"testType": "unit:php",
 					"command": "test:php:env",
 					"shardingArguments": [
@@ -139,18 +139,18 @@
 					"testEnv": {
 						"start": "env:test",
 						"config": {
-							"phpVersion": "8.4",
+							"phpVersion": "8.5",
 							"wpVersion": "latest"
 						}
 					},
 					"events": [
 						"pull_request",
 						"push",
-						"php-unit-php-8.4-wp-latest"
+						"php-unit-php-8.5-wp-latest"
 					]
 				},
 				{
-					"name": "PHP: 8.4 WP: latest - Legacy MiniCart",
+					"name": "PHP: 8.5 WP: latest - Legacy MiniCart",
 					"testType": "unit:php",
 					"command": "test:php:legacy-mini-cart",
 					"shardingArguments": [
@@ -169,7 +169,7 @@
 					"testEnv": {
 						"start": "env:test",
 						"config": {
-							"phpVersion": "8.4",
+							"phpVersion": "8.5",
 							"wpVersion": "latest"
 						}
 					},
@@ -407,7 +407,7 @@
 					}
 				},
 				{
-					"name": "Core e2e tests - PHP 8.4",
+					"name": "Core e2e tests - PHP 8.5",
 					"testType": "e2e",
 					"command": "test:e2e",
 					"shardingArguments": [
@@ -426,17 +426,17 @@
 					"testEnv": {
 						"start": "env:test",
 						"config": {
-							"phpVersion": "8.4"
+							"phpVersion": "8.5"
 						}
 					},
 					"events": [
 						"pull_request",
 						"nightly-checks",
 						"release-checks",
-						"core-e2e-php-8.4"
+						"core-e2e-php-8.5"
 					],
 					"report": {
-						"resultsBlobName": "core-e2e-report-php-8.4",
+						"resultsBlobName": "core-e2e-report-php-8.5",
 						"resultsPath": "tests/e2e-pw/test-results",
 						"allure": true
 					}
@@ -580,7 +580,7 @@
 					}
 				},
 				{
-					"name": "PHP: 8.4 WP: latest (HPOS:off)",
+					"name": "PHP: 8.5 WP: latest (HPOS:off)",
 					"testType": "unit:php",
 					"command": "test:php:env:hpos-off",
 					"shardingArguments": [
@@ -599,14 +599,14 @@
 					"testEnv": {
 						"start": "env:test",
 						"config": {
-							"phpVersion": "8.4",
+							"phpVersion": "8.5",
 							"wpVersion": "latest"
 						}
 					},
 					"events": [
 						"pull_request",
 						"push",
-						"php-unit-php-8.4-wp-latest-hpos-off"
+						"php-unit-php-8.5-wp-latest-hpos-off"
 					]
 				},
 				{
@@ -890,7 +890,7 @@
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@wordpress/browserslist-config": "next",
 		"@wordpress/e2e-test-utils-playwright": "wp-6.8",
-		"@wordpress/env": "10.32.0",
+		"@wordpress/env": "11.0.1-next.v.20260206T143.0",
 		"@wordpress/scripts": "30.6.0",
 		"@wordpress/stylelint-config": "^21.36.0",
 		"allure-commandline": "^2.32.2",
@@ -959,6 +959,9 @@
 				"node_modules/@woocommerce/admin-library/build",
 				"node_modules/@woocommerce/block-library/build",
 				"node_modules/@woocommerce/classic-assets/build",
+				"node_modules/@woocommerce/e2e-utils-playwright/build",
+				"node_modules/@woocommerce/e2e-utils-playwright/build-module",
+				"node_modules/@woocommerce/e2e-utils-playwright/build-types",
 				"node_modules/@woocommerce/eslint-plugin/configs",
 				"node_modules/@woocommerce/eslint-plugin/rules",
 				"node_modules/@woocommerce/eslint-plugin/index.js"

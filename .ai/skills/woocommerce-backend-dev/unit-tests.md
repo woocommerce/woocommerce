@@ -2,6 +2,7 @@
 
 ## Table of Contents
 
+- [Complete Test File Template](#complete-test-file-template)
 - [Test File Naming and Location](#test-file-naming-and-location)
 - [System Under Test Variable](#system-under-test-variable)
 - [Test Method Documentation](#test-method-documentation)
@@ -10,6 +11,80 @@
 - [Example: Payment Extension Suggestions Tests](#example-payment-extension-suggestions-tests)
 - [Mocking the WooCommerce Logger](#mocking-the-woocommerce-logger)
 - [General Testing Best Practices](#general-testing-best-practices)
+
+## Complete Test File Template
+
+Use this template when creating new test files. It shows all conventions applied together:
+
+```php
+<?php
+declare( strict_types = 1 );
+
+namespace Automattic\WooCommerce\Tests\Internal\Admin;
+
+use Automattic\WooCommerce\Internal\Admin\OrderProcessor;
+use WC_Unit_Test_Case;
+
+/**
+ * Tests for the OrderProcessor class.
+ */
+class OrderProcessorTest extends WC_Unit_Test_Case {
+
+	/**
+	 * The System Under Test.
+	 *
+	 * @var OrderProcessor
+	 */
+	private $sut;
+
+	/**
+	 * Set up test fixtures.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		$this->sut = new OrderProcessor();
+	}
+
+	/**
+	 * Tear down test fixtures.
+	 */
+	public function tearDown(): void {
+		parent::tearDown();
+	}
+
+	/**
+	 * @testdox Should return true when order is valid.
+	 */
+	public function test_returns_true_for_valid_order(): void {
+		$order = wc_create_order();
+
+		$result = $this->sut->is_valid( $order );
+
+		$this->assertTrue( $result, 'Valid orders should return true' );
+	}
+
+	/**
+	 * @testdox Should throw exception when order ID is negative.
+	 */
+	public function test_throws_exception_for_negative_order_id(): void {
+		$this->expectException( \InvalidArgumentException::class );
+
+		$this->sut->process( -1 );
+	}
+}
+```
+
+### Key Elements
+
+| Element | Requirement |
+| ------- | ----------- |
+| `declare( strict_types = 1 )` | Required at file start |
+| Namespace | Match source location: `Automattic\WooCommerce\Tests\{path}` |
+| Base class | Extend `WC_Unit_Test_Case` |
+| SUT variable | Use `$sut` with docblock "The System Under Test." |
+| Test docblock | Use `@testdox` with sentence ending in `.` |
+| Return type | Use `void` for test methods |
+| Assertion messages | Include helpful context for failures |
 
 ## Test File Naming and Location
 

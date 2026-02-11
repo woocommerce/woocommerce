@@ -5,6 +5,8 @@
  * @package WooCommerce\Tests\Functions\Stock
  */
 
+declare( strict_types = 1 );
+
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
 
@@ -239,6 +241,73 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		wc_scheduled_sales();
 
 		$this->assertEquals( 100, wc_get_product( $product->get_id() )->get_price() );
+	}
+
+	/**
+	 * @testDox Action Scheduler events are scheduled when product with sale dates is saved.
+	 */
+	public function test_wc_schedule_product_sale_events_on_save() {
+		$future_start = time() + 3600;  // 1 hour from now.
+		$future_end   = time() + 86400; // 24 hours from now.
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_price( 100 );
+		$product->set_regular_price( 100 );
+		$product->set_sale_price( 50 );
+		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', $future_start ) );
+		$product->set_date_on_sale_to( gmdate( 'Y-m-d H:i:s', $future_end ) );
+		$product->save();
+
+		// Check that AS actions were scheduled.
+		$start_action = as_next_scheduled_action(
+			'wc_product_start_scheduled_sale',
+			array( 'product_id' => $product->get_id() ),
+			'woocommerce-sales'
+		);
+		$end_action   = as_next_scheduled_action(
+			'wc_product_end_scheduled_sale',
+			array( 'product_id' => $product->get_id() ),
+			'woocommerce-sales'
+		);
+
+		$this->assertNotFalse( $start_action, 'Start sale action should be scheduled' );
+		$this->assertNotFalse( $end_action, 'End sale action should be scheduled' );
+	}
+
+	/**
+	 * @testDox Existing AS events are cleared when product sale dates change.
+	 */
+	public function test_wc_schedule_product_sale_events_clears_existing() {
+		$future_start = time() + 3600;
+		$future_end   = time() + 86400;
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_price( 100 );
+		$product->set_regular_price( 100 );
+		$product->set_sale_price( 50 );
+		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', $future_start ) );
+		$product->set_date_on_sale_to( gmdate( 'Y-m-d H:i:s', $future_end ) );
+		$product->save();
+
+		$original_start = as_next_scheduled_action(
+			'wc_product_start_scheduled_sale',
+			array( 'product_id' => $product->get_id() ),
+			'woocommerce-sales'
+		);
+
+		// Update the sale dates.
+		$new_start = time() + 7200; // 2 hours from now.
+		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', $new_start ) );
+		$product->save();
+
+		$new_start_action = as_next_scheduled_action(
+			'wc_product_start_scheduled_sale',
+			array( 'product_id' => $product->get_id() ),
+			'woocommerce-sales'
+		);
+
+		// The timestamp should have changed.
+		$this->assertNotEquals( $original_start, $new_start_action, 'Start action should be rescheduled with new time' );
 	}
 
 	/**
@@ -486,5 +555,40 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		wp_delete_term( $root3_term['term_id'], 'product_cat' );
 		wp_delete_term( $root2_term['term_id'], 'product_cat' );
 		wp_delete_term( $root1_term['term_id'], 'product_cat' );
+	}
+
+	/**
+	 * @testdox Product permalink skips category processing when permalink structure has no category placeholders.
+	 */
+	public function test_wc_product_post_type_link_skips_category_when_not_in_permalink() {
+		// Create a category to ensure it's not fetched unnecessarily.
+		$category_term = wp_insert_term( 'Test Category', 'product_cat' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		wp_set_object_terms( $product->get_id(), array( $category_term['term_id'] ), 'product_cat' );
+
+		$product_post = get_post( $product->get_id() );
+
+		// Test with %post_id% placeholder but no category placeholder.
+		$permalink = wc_product_post_type_link( '/product/%post_id%/' . $product_post->post_name . '/', $product_post );
+
+		$this->assertStringContainsString(
+			'/product/' . $product->get_id() . '/',
+			$permalink,
+			'Permalink should have the post ID replaced'
+		);
+		$this->assertStringNotContainsString(
+			'%post_id%',
+			$permalink,
+			'Permalink should not contain unreplaced %post_id% placeholder'
+		);
+		$this->assertStringNotContainsString(
+			'%category%',
+			$permalink,
+			'Permalink should not contain %category% placeholder'
+		);
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+		wp_delete_term( $category_term['term_id'], 'product_cat' );
 	}
 }

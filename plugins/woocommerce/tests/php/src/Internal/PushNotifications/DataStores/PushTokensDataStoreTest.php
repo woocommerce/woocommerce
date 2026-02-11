@@ -6,8 +6,8 @@ namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\DataStores;
 
 use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataStore;
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
-use Exception;
-use InvalidArgumentException;
+use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenInvalidDataException;
+use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenNotFoundException;
 use WC_Unit_Test_Case;
 
 /**
@@ -47,14 +47,15 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	public function test_it_can_create_push_token() {
 		$data_store = new PushTokensDataStore();
 
-		$push_token = new PushToken();
-		$push_token->set_user_id( 1 );
-		$push_token->set_token( 'test_token_12345' );
-		$push_token->set_platform( PushToken::PLATFORM_IOS );
-		$push_token->set_device_uuid( 'device-uuid-123' );
-		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
+		$data = array(
+			'user_id'     => 1,
+			'token'       => 'test_token_12345',
+			'platform'    => PushToken::PLATFORM_APPLE,
+			'device_uuid' => 'device-uuid-123',
+			'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+		);
 
-		$data_store->create( $push_token );
+		$push_token = $data_store->create( $data );
 
 		$this->assertNotNull( $push_token->get_id() );
 		$this->assert_push_token_in_db( $push_token );
@@ -70,17 +71,14 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$data_store = new PushTokensDataStore();
 
 		$original_push_token = $this->create_test_push_token();
-		$new_push_token      = new PushToken();
-		$new_push_token->set_id( $original_push_token->get_id() );
+		$read_push_token     = $data_store->read( $original_push_token->get_id() );
 
-		$data_store->read( $new_push_token );
-
-		$this->assertEquals( $original_push_token->get_id(), $new_push_token->get_id() );
-		$this->assertEquals( $original_push_token->get_user_id(), $new_push_token->get_user_id() );
-		$this->assertEquals( $original_push_token->get_platform(), $new_push_token->get_platform() );
-		$this->assertEquals( $original_push_token->get_token(), $new_push_token->get_token() );
-		$this->assertEquals( $original_push_token->get_device_uuid(), $new_push_token->get_device_uuid() );
-		$this->assertEquals( $original_push_token->get_origin(), $new_push_token->get_origin() );
+		$this->assertEquals( $original_push_token->get_id(), $read_push_token->get_id() );
+		$this->assertEquals( $original_push_token->get_user_id(), $read_push_token->get_user_id() );
+		$this->assertEquals( $original_push_token->get_platform(), $read_push_token->get_platform() );
+		$this->assertEquals( $original_push_token->get_token(), $read_push_token->get_token() );
+		$this->assertEquals( $original_push_token->get_device_uuid(), $read_push_token->get_device_uuid() );
+		$this->assertEquals( $original_push_token->get_origin(), $read_push_token->get_origin() );
 	}
 
 	/**
@@ -89,12 +87,15 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	public function test_it_can_update_push_token() {
 		$data_store = new PushTokensDataStore();
 		$push_token = $this->create_test_push_token();
+
 		$push_token->set_token( 'updated_token' );
 		$push_token->set_device_uuid( 'updated-device-uuid' );
-
 		$data_store->update( $push_token );
 
-		$this->assert_push_token_in_db( $push_token );
+		$updated_token = $data_store->read( $push_token->get_id() );
+
+		$this->assertEquals( 'updated_token', $updated_token->get_token() );
+		$this->assertEquals( 'updated-device-uuid', $updated_token->get_device_uuid() );
 
 		$post = get_post( $push_token->get_id() );
 		$this->assertEquals( 'private', $post->post_status );
@@ -108,19 +109,27 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$data_store = new PushTokensDataStore();
 		$push_token = $this->create_test_push_token();
 
-		// Verify device_uuid exists initially.
 		$this->assertNotNull( $push_token->get_device_uuid() );
 		$device_uuid = get_post_meta( $push_token->get_id(), 'device_uuid', true );
 		$this->assertNotEmpty( $device_uuid );
 
-		// Convert to browser token (device_uuid becomes null).
 		$push_token->set_platform( PushToken::PLATFORM_BROWSER );
 		$push_token->set_device_uuid( null );
 		$data_store->update( $push_token );
 
-		// Verify device_uuid meta is removed from database.
 		$device_uuid = get_post_meta( $push_token->get_id(), 'device_uuid', true );
 		$this->assertEmpty( $device_uuid );
+	}
+
+	/**
+	 * @testdox Tests the delete method of the push tokens data store.
+	 */
+	public function test_it_can_delete_push_token() {
+		$data_store = new PushTokensDataStore();
+		$push_token = $this->create_test_push_token();
+		$data_store->delete( $push_token->get_id() );
+
+		$this->assertNull( get_post( $push_token->get_id() ) );
 	}
 
 	/**
@@ -130,31 +139,28 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	public function test_it_throws_exception_when_creating_push_token_with_incomplete_data() {
 		$data_store = new PushTokensDataStore();
 
-		$push_token = new PushToken();
-		$push_token->set_user_id( 1 );
-		$push_token->set_token( 'test_token' );
+		$data = array(
+			'user_id' => 1,
+			'token'   => 'test_token',
+		);
 
-		$this->expectException( InvalidArgumentException::class );
+		$this->expectException( PushTokenInvalidDataException::class );
 		$this->expectExceptionMessage( 'Can\'t create push token because the push token data provided is invalid.' );
-		$this->expectExceptionCode( 400 );
 
-		$data_store->create( $push_token );
+		$data_store->create( $data );
 	}
 
 	/**
-	 * @testdox Tests the read method throws exception when push token has no
-	 * ID.
+	 * @testdox Tests the read method throws exception when push token ID is
+	 * invalid.
 	 */
-	public function test_it_throws_exception_when_reading_push_token_without_id() {
+	public function test_it_throws_exception_when_reading_push_token_with_invalid_id() {
 		$data_store = new PushTokensDataStore();
 
-		$push_token = new PushToken();
+		$this->expectException( PushTokenInvalidDataException::class );
+		$this->expectExceptionMessage( 'ID must be a positive integer.' );
 
-		$this->expectException( InvalidArgumentException::class );
-		$this->expectExceptionMessage( 'Can\'t read push token because the push token data provided is invalid.' );
-		$this->expectExceptionCode( 400 );
-
-		$data_store->read( $push_token );
+		$data_store->read( 0 );
 	}
 
 	/**
@@ -164,14 +170,10 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	public function test_it_throws_exception_when_reading_push_token_that_does_not_exist() {
 		$data_store = new PushTokensDataStore();
 
-		$push_token = new PushToken();
-		$push_token->set_id( 999999 );
-
-		$this->expectException( Exception::class );
+		$this->expectException( PushTokenNotFoundException::class );
 		$this->expectExceptionMessage( 'Push token could not be found.' );
-		$this->expectExceptionCode( 404 );
 
-		$data_store->read( $push_token );
+		$data_store->read( 999999 );
 	}
 
 	/**
@@ -181,7 +183,6 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	public function test_it_throws_exception_when_reading_push_token_with_wrong_post_type() {
 		$data_store = new PushTokensDataStore();
 
-		// Create a regular post instead of a push_token.
 		$post_id = wp_insert_post(
 			array(
 				'post_title'  => 'Test Post',
@@ -190,107 +191,376 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$push_token = new PushToken();
-		$push_token->set_id( $post_id );
-
-		$this->expectException( Exception::class );
+		$this->expectException( PushTokenNotFoundException::class );
 		$this->expectExceptionMessage( 'Push token could not be found.' );
-		$this->expectExceptionCode( 404 );
 
-		$data_store->read( $push_token );
+		$data_store->read( $post_id );
 	}
 
 	/**
-	 * @testdox Tests the update method throws exception when push token data is
-	 * incomplete.
+	 * @testdox Tests the read method throws exception when push token metadata
+	 * is malformed/missing.
 	 */
-	public function test_it_throws_exception_when_updating_push_token_with_incomplete_data() {
+	public function test_it_throws_exception_when_reading_push_token_with_malformed_metadata() {
 		$data_store = new PushTokensDataStore();
 
-		$push_token = new PushToken();
-		$push_token->set_id( 1 );
-		$push_token->set_user_id( 1 );
-
-		$this->expectException( InvalidArgumentException::class );
-		$this->expectExceptionMessage( 'Can\'t update push token because the push token data provided is invalid.' );
-		$this->expectExceptionCode( 400 );
-
-		$data_store->update( $push_token );
-	}
-
-	/**
-	 * @testdox Tests the update method throws exception when push token does
-	 * not exist.
-	 */
-	public function test_it_throws_exception_when_updating_push_token_that_does_not_exist() {
-		$data_store = new PushTokensDataStore();
-
-		$push_token = new PushToken();
-		$push_token->set_id( 999999 );
-		$push_token->set_user_id( 1 );
-		$push_token->set_token( 'test_token' );
-		$push_token->set_platform( PushToken::PLATFORM_IOS );
-		$push_token->set_device_uuid( 'device-uuid' );
-		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
-
-		$this->expectException( Exception::class );
-		$this->expectExceptionMessage( 'Push token could not be found.' );
-		$this->expectExceptionCode( 404 );
-
-		$data_store->update( $push_token );
-	}
-
-	/**
-	 * @testdox Tests the update method throws exception when the post exists
-	 * but is not the correct post type.
-	 */
-	public function test_it_throws_exception_when_updating_push_token_with_wrong_post_type() {
-		$data_store = new PushTokensDataStore();
-
-		// Create a regular post instead of a push_token.
 		$post_id = wp_insert_post(
 			array(
-				'post_title'  => 'Test Post',
-				'post_type'   => 'post',
+				'post_author' => 1,
+				'post_type'   => PushToken::POST_TYPE,
 				'post_status' => 'private',
+				'meta_input'  => array(
+					'platform' => PushToken::PLATFORM_APPLE,
+					'token'    => 'test_token',
+					// Missing device_uuid and origin.
+				),
 			)
 		);
 
-		$push_token = new PushToken();
-		$push_token->set_id( $post_id );
-		$push_token->set_user_id( 1 );
-		$push_token->set_token( 'test_token' );
-		$push_token->set_platform( PushToken::PLATFORM_IOS );
-		$push_token->set_device_uuid( 'device-uuid' );
-		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
+		$this->expectException( PushTokenInvalidDataException::class );
+		$this->expectExceptionMessage( 'Can\'t read push token because the push token record is malformed.' );
 
-		$this->expectException( Exception::class );
-		$this->expectExceptionMessage( 'Push token could not be found.' );
-		$this->expectExceptionCode( 404 );
-
-		$data_store->update( $push_token );
+		$data_store->read( $post_id );
 	}
 
 	/**
-	 * @testdox Tests the read_meta method of the push tokens data store.
+	 * @testdox Tests the update method throws exception when push token data
+	 * would result in invalid state.
 	 */
-	public function test_it_can_read_meta() {
+	public function test_it_throws_exception_when_updating_push_token_with_invalid_data() {
 		$data_store = new PushTokensDataStore();
 		$push_token = $this->create_test_push_token();
 
-		$meta = $data_store->read_meta( $push_token );
+		$this->expectException( PushTokenInvalidDataException::class );
+		$this->expectExceptionMessage( 'Can\'t update push token because the push token data provided is invalid.' );
 
-		$this->assertIsArray( $meta );
+		$push_token->set_platform( PushToken::PLATFORM_APPLE );
+		$push_token->set_device_uuid( null );
+		$data_store->update( $push_token );
+	}
 
-		$this->assertEquals(
+	/**
+	 * @testdox Tests the delete method throws exception when push token ID is
+	 * invalid.
+	 */
+	public function test_it_throws_exception_when_deleting_push_token_with_invalid_id() {
+		$data_store = new PushTokensDataStore();
+
+		$this->expectException( PushTokenNotFoundException::class );
+		$this->expectExceptionMessage( 'Push token could not be found.' );
+
+		$data_store->delete( 0 );
+	}
+
+	/**
+	 * @testdox Tests the delete method throws exception when the post exists but
+	 * is not the correct post type.
+	 */
+	public function test_it_throws_exception_when_deleting_push_token_with_wrong_post_type() {
+		$data_store = new PushTokensDataStore();
+
+		$post_id = wp_insert_post(
 			array(
-				'platform'    => $push_token->get_platform(),
-				'token'       => $push_token->get_token(),
-				'device_uuid' => $push_token->get_device_uuid(),
-				'origin'      => $push_token->get_origin(),
-			),
-			$meta
+				'post_title'  => 'Test Post',
+				'post_type'   => 'post',
+				'post_status' => 'private',
+			)
 		);
+
+		$this->expectException( PushTokenNotFoundException::class );
+		$this->expectExceptionMessage( 'Push token could not be found.' );
+
+		$data_store->delete( $post_id );
+	}
+
+	/**
+	 * @testdox Tests the get_by_token_or_device_id method finds push token by
+	 * token when user ID, platform, and origin match.
+	 */
+	public function test_it_can_get_by_token_if_platform_and_user_id_matches() {
+		$data_store = new PushTokensDataStore();
+
+		$original_push_token = $this->create_test_push_token();
+
+		$data = array(
+			'user_id'     => $original_push_token->get_user_id(),
+			'token'       => $original_push_token->get_token(),
+			'platform'    => $original_push_token->get_platform(),
+			'origin'      => $original_push_token->get_origin(),
+			'device_uuid' => 'different-device',
+		);
+
+		$found_token = $data_store->get_by_token_or_device_id( $data );
+
+		$this->assertNotNull( $found_token );
+		$this->assertEquals( $original_push_token->get_id(), $found_token->get_id() );
+		$this->assertEquals( $original_push_token->get_token(), $found_token->get_token() );
+	}
+
+	/**
+	 * @testdox Tests the get_by_token_or_device_id method finds push token by
+	 * device UUID when user ID, platform, and origin match.
+	 */
+	public function test_it_can_get_by_device_uuid_if_platform_and_user_id_matches() {
+		$data_store = new PushTokensDataStore();
+
+		$original_push_token = $this->create_test_push_token();
+
+		$data = array(
+			'user_id'     => $original_push_token->get_user_id(),
+			'platform'    => $original_push_token->get_platform(),
+			'origin'      => $original_push_token->get_origin(),
+			'device_uuid' => $original_push_token->get_device_uuid(),
+			'token'       => 'different_token',
+		);
+
+		$found_token = $data_store->get_by_token_or_device_id( $data );
+
+		$this->assertNotNull( $found_token );
+		$this->assertEquals( $original_push_token->get_id(), $found_token->get_id() );
+		$this->assertEquals( $original_push_token->get_device_uuid(), $found_token->get_device_uuid() );
+	}
+
+	/**
+	 * @testdox Tests the get_by_token_or_device_id method returns null when
+	 * user ID, platform, and origin match but token and device UUID don't.
+	 */
+	public function test_it_cannot_get_by_token_or_device_id_if_token_and_device_do_not_match() {
+		$data_store = new PushTokensDataStore();
+
+		$original_push_token = $this->create_test_push_token();
+
+		$data = array(
+			'user_id'     => $original_push_token->get_user_id(),
+			'platform'    => $original_push_token->get_platform(),
+			'origin'      => $original_push_token->get_origin(),
+			'device_uuid' => 'different-device',
+			'token'       => 'different_token',
+		);
+
+		$found_token = $data_store->get_by_token_or_device_id( $data );
+
+		$this->assertNull( $found_token );
+	}
+
+	/**
+	 * @testdox Tests the get_by_token_or_device_id method returns null when
+	 * user ID does not match.
+	 */
+	public function test_it_cannot_get_by_token_or_device_id_if_user_id_does_not_match() {
+		$data_store = new PushTokensDataStore();
+
+		$original_push_token = $this->create_test_push_token();
+
+		$data = array(
+			'user_id'     => 999,
+			'platform'    => $original_push_token->get_platform(),
+			'origin'      => $original_push_token->get_origin(),
+			'device_uuid' => $original_push_token->get_device_uuid(),
+			'token'       => $original_push_token->get_token(),
+		);
+
+		$found_token = $data_store->get_by_token_or_device_id( $data );
+
+		$this->assertNull( $found_token );
+	}
+
+	/**
+	 * @testdox Tests the get_by_token_or_device_id method returns null when
+	 * platform does not match.
+	 */
+	public function test_it_cannot_get_by_token_or_device_id_if_platform_does_not_match() {
+		$data_store = new PushTokensDataStore();
+
+		$original_push_token = $this->create_test_push_token();
+
+		$data = array(
+			'user_id'     => $original_push_token->get_user_id(),
+			'platform'    => PushToken::PLATFORM_ANDROID,
+			'origin'      => $original_push_token->get_origin(),
+			'device_uuid' => $original_push_token->get_device_uuid(),
+			'token'       => $original_push_token->get_token(),
+		);
+
+		$found_token = $data_store->get_by_token_or_device_id( $data );
+
+		$this->assertNull( $found_token );
+	}
+
+	/**
+	 * @testdox Tests the get_by_token_or_device_id method returns null when
+	 * origin does not match.
+	 */
+	public function test_it_cannot_get_by_token_or_device_id_if_origin_does_not_match() {
+		$data_store = new PushTokensDataStore();
+
+		$original_push_token = $this->create_test_push_token();
+
+		$data = array(
+			'user_id'     => $original_push_token->get_user_id(),
+			'platform'    => $original_push_token->get_platform(),
+			'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS_DEV,
+			'device_uuid' => $original_push_token->get_device_uuid(),
+			'token'       => $original_push_token->get_token(),
+		);
+
+		$found_token = $data_store->get_by_token_or_device_id( $data );
+
+		$this->assertNull( $found_token );
+	}
+
+	/**
+	 * @testdox Tests that browser tokens with null device_uuid don't
+	 * incorrectly match each other by empty device_uuid.
+	 */
+	public function test_it_does_not_match_browser_tokens_by_empty_device_uuid() {
+		$data_store = new PushTokensDataStore();
+
+		/**
+		 * Create first browser token for user.
+		 */
+		$browser_token_1 = $data_store->create(
+			array(
+				'user_id'     => 1,
+				'token'       => 'browser_token_1_' . wp_rand(),
+				'platform'    => PushToken::PLATFORM_BROWSER,
+				'device_uuid' => null,
+				'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+			)
+		);
+
+		/**
+		 * Create second browser token for same user (different browser/tab).
+		 */
+		$browser_token_2 = $data_store->create(
+			array(
+				'user_id'     => 1,
+				'token'       => 'browser_token_2_' . wp_rand(),
+				'platform'    => PushToken::PLATFORM_BROWSER,
+				'device_uuid' => null,
+				'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+			)
+		);
+
+		/**
+		 * Try to find browser_token_1 by its token - should only match itself,
+		 * not browser_token_2.
+		 */
+		$data = array(
+			'user_id'     => 1,
+			'token'       => $browser_token_1->get_token(),
+			'platform'    => PushToken::PLATFORM_BROWSER,
+			'device_uuid' => null,
+			'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+		);
+
+		$found_token = $data_store->get_by_token_or_device_id( $data );
+
+		$this->assertNotNull( $found_token, 'Should find browser_token_1 by its token value' );
+		$this->assertEquals( $browser_token_1->get_id(), $found_token->get_id(), 'Should match browser_token_1 ID' );
+		$this->assertEquals( $browser_token_1->get_token(), $found_token->get_token(), 'Should match browser_token_1 token' );
+		$this->assertNotEquals( $browser_token_2->get_id(), $found_token->get_id(), 'Should not match browser_token_2 ID' );
+
+		/**
+		 * Now search with a DIFFERENT token - should return null, not match by
+		 * empty device_uuid.
+		 */
+		$different_data = array(
+			'user_id'  => 1,
+			'platform' => PushToken::PLATFORM_BROWSER,
+			'origin'   => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+			'token'    => wp_json_encode(
+				array(
+					'endpoint' => 'https://example.com/push/subscription3',
+					'keys'     => array(
+						'auth'   => 'a3',
+						'p256dh' => 'p3',
+					),
+				)
+			),
+		);
+
+		$found = $data_store->get_by_token_or_device_id( $different_data );
+		$this->assertNull( $found, 'Should not match existing tokens by empty device_uuid' );
+	}
+
+	/**
+	 * @testdox Tests the get_by_token_or_device_id method throws exception when
+	 * user ID is missing.
+	 */
+	public function test_it_throws_exception_when_getting_by_token_or_device_id_without_user_id() {
+		$data_store = new PushTokensDataStore();
+
+		$data = array(
+			'platform'    => PushToken::PLATFORM_APPLE,
+			'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+			'token'       => 'test_token',
+			'device_uuid' => 'test_device',
+		);
+
+		$this->expectException( PushTokenInvalidDataException::class );
+		$this->expectExceptionMessage( 'Can\'t retrieve push token because the push token data provided is invalid.' );
+
+		$data_store->get_by_token_or_device_id( $data );
+	}
+
+	/**
+	 * @testdox Tests the get_by_token_or_device_id method throws exception when
+	 * platform is missing.
+	 */
+	public function test_it_throws_exception_when_getting_by_token_or_device_id_without_platform() {
+		$data_store = new PushTokensDataStore();
+
+		$data = array(
+			'user_id'     => 1,
+			'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+			'token'       => 'test_token',
+			'device_uuid' => 'test_device',
+		);
+
+		$this->expectException( PushTokenInvalidDataException::class );
+		$this->expectExceptionMessage( 'Can\'t retrieve push token because the push token data provided is invalid.' );
+
+		$data_store->get_by_token_or_device_id( $data );
+	}
+
+	/**
+	 * @testdox Tests the get_by_token_or_device_id method throws exception when
+	 * origin is missing.
+	 */
+	public function test_it_throws_exception_when_getting_by_token_or_device_id_without_origin() {
+		$data_store = new PushTokensDataStore();
+
+		$data = array(
+			'user_id'     => 1,
+			'platform'    => PushToken::PLATFORM_APPLE,
+			'token'       => 'test_token',
+			'device_uuid' => 'test_device',
+		);
+
+		$this->expectException( PushTokenInvalidDataException::class );
+		$this->expectExceptionMessage( 'Can\'t retrieve push token because the push token data provided is invalid.' );
+
+		$data_store->get_by_token_or_device_id( $data );
+	}
+
+	/**
+	 * @testdox Tests the get_by_token_or_device_id method throws exception when
+	 * both token and device_uuid are missing.
+	 */
+	public function test_it_throws_exception_when_getting_by_token_or_device_id_without_token_and_device_uuid() {
+		$data_store = new PushTokensDataStore();
+
+		$data = array(
+			'user_id'  => 1,
+			'platform' => PushToken::PLATFORM_APPLE,
+			'origin'   => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+		);
+
+		$this->expectException( PushTokenInvalidDataException::class );
+		$this->expectExceptionMessage( 'Can\'t retrieve push token because the push token data provided is invalid.' );
+
+		$data_store->get_by_token_or_device_id( $data );
 	}
 
 	/**
@@ -300,22 +570,18 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	public function test_it_can_create_and_read_browser_token_without_device_uuid() {
 		$data_store = new PushTokensDataStore();
 
-		// Create a browser token without device_uuid.
-		$push_token = new PushToken();
-		$push_token->set_user_id( 1 );
-		$push_token->set_token( '{"endpoint":"https://example.com/push","keys":{"auth":"test","p256dh":"test"}}' );
-		$push_token->set_platform( PushToken::PLATFORM_BROWSER );
-		$push_token->set_origin( PushToken::ORIGIN_BROWSER );
+		$data = array(
+			'user_id'  => 1,
+			'token'    => '{"endpoint":"https://example.com/push","keys":{"auth":"test","p256dh":"test"}}',
+			'platform' => PushToken::PLATFORM_BROWSER,
+			'origin'   => PushToken::ORIGIN_BROWSER,
+		);
 
-		$data_store->create( $push_token );
+		$push_token = $data_store->create( $data );
 
 		$this->assertNotNull( $push_token->get_id() );
 
-		// Now try to read it back.
-		$read_token = new PushToken();
-		$read_token->set_id( $push_token->get_id() );
-
-		$data_store->read( $read_token );
+		$read_token = $data_store->read( $push_token->get_id() );
 
 		$this->assertEquals( $push_token->get_id(), $read_token->get_id() );
 		$this->assertEquals( $push_token->get_user_id(), $read_token->get_user_id() );
@@ -333,16 +599,15 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	private function create_test_push_token(): PushToken {
 		$data_store = new PushTokensDataStore();
 
-		$push_token = new PushToken();
-		$push_token->set_user_id( 1 );
-		$push_token->set_token( 'test_token_' . wp_rand() );
-		$push_token->set_platform( PushToken::PLATFORM_IOS );
-		$push_token->set_device_uuid( 'test-device-uuid-' . wp_rand() );
-		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
+		$data = array(
+			'user_id'     => 1,
+			'token'       => 'test_token_' . wp_rand(),
+			'platform'    => PushToken::PLATFORM_APPLE,
+			'device_uuid' => 'test-device-uuid-' . wp_rand(),
+			'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+		);
 
-		$data_store->create( $push_token );
-
-		return $push_token;
+		return $data_store->create( $data );
 	}
 
 	/**

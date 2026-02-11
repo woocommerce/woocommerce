@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Use variation objects instead of arrays in ProductPrice block to avoid unnecessary data processing

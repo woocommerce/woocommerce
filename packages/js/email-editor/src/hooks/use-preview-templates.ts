@@ -156,7 +156,7 @@ export function usePreviewTemplates(
 						previewContentParsed: parsedTemplate,
 						emailParsed: contentPattern.blocks,
 						template,
-						category: 'basic', // TODO: This will be updated once template category is implemented
+						category: contentPattern.categories?.[ 0 ],
 						type: template.type,
 						displayName: contentPattern.title
 							? `${ template.title.rendered } - ${ contentPattern.title }`

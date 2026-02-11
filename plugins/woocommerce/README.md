@@ -89,7 +89,7 @@ composer phpstan
 composer phpstan:baseline
 ```
 
-PHPStan configuration is stored in `phpstan.neon` at the root of the plugin directory. The analysis runs at level 9 (the strictest level) and includes WordPress-specific stubs via the `szepeviktor/phpstan-wordpress` extension.
+PHPStan configuration is stored in `phpstan.neon` at the root of the plugin directory. The analysis runs at level 8 (the second-strictest level) and includes WordPress-specific stubs via the `szepeviktor/phpstan-wordpress` extension.
 
 ## Documentation
 
@@ -97,6 +97,10 @@ PHPStan configuration is stored in `phpstan.neon` at the root of the plugin dire
 -   [WooCommerce Developer Documentation](https://github.com/woocommerce/woocommerce/wiki)
 -   [WooCommerce Code Reference](https://woocommerce.com/wc-apidocs/)
 -   [WooCommerce REST API Docs](https://woocommerce.github.io/woocommerce-rest-api-docs/)
+
+## A Note for Extension Developers
+
+If you're building a WooCommerce extension, be aware that not all code in this plugin is intended for external use. Classes in the `Automattic\WooCommerce\Internal` namespace and code marked with `@internal` annotations are internal infrastructure: backwards compatibility between WooCommerce releases is not guaranteed. See [src/Internal/README.md](src/Internal/README.md) for details.
 
 ## Reporting Security Issues
 

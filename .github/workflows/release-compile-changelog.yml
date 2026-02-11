@@ -5,6 +5,10 @@ on:
       version:
         description: 'Version (in X.Y or X.Y.Z format). Branch "release/{x.y.z}" or "release/{x.y}" should already exist.'
         required: true
+      release_date:
+        description: 'Release date in YYYY-MM-DD format. If not provided, the current date will be used.'
+        required: false
+        default: ''        
       append_changelog:
         description: 'Append or replace entries in changelog?'
         type: choice
@@ -14,10 +18,6 @@ on:
           - append
         required: false
         default: auto
-      release_date:
-        description: 'Release date in YYYY-MM-DD format. If not provided, the current date will be used.'
-        required: false
-        default: ''
 
 concurrency:
   group: release-compile-changelog-${{ inputs.version }}
@@ -172,8 +172,13 @@ jobs:
           SELECTED_BRANCH: ${{ steps.check-branch.outputs.selected_branch }}
           GITHUB_TOKEN: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
-          echo "Using branch: $SELECTED_BRANCH"
-          echo "Generating changelog for version: $VERSION"
+          set -o pipefail
+
+          # Log inputs to console.
+          echo "Compiling changelog: version=$VERSION, branch=$SELECTED_BRANCH, append_changelog=${{ github.event.inputs.append_changelog }}, release_date=${{ github.event.inputs.release_date }}"
+
+          # Write summary header.
+          echo "📝 Compiling changelog for \`$VERSION\` on \`$SELECTED_BRANCH\`." >> $GITHUB_STEP_SUMMARY
 
           # Determine whether to replace or append.
           APPEND_CHANGELOG=""
@@ -196,4 +201,18 @@ jobs:
             OVERRIDE_DATE="--override ${{ github.event.inputs.release_date }}"
           fi
 
-          pnpm utils code-freeze changelog -o ${{ github.repository_owner }} -v $VERSION -b $SELECTED_BRANCH $APPEND_CHANGELOG $OVERRIDE_DATE -ga ${{ github.actor }}
+          # Run changelog tool and capture output.
+          output=$(pnpm utils code-freeze changelog -o ${{ github.repository_owner }} -v $VERSION -b $SELECTED_BRANCH $APPEND_CHANGELOG $OVERRIDE_DATE -ga ${{ github.actor }} 2>&1 | tee /dev/stderr)
+
+          # Parse PR output (tab-separated: URL, branch, type) and write to summary.
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "$output" | grep "^https://github.com/" | while IFS=$'\t' read -r url branch type; do
+            if [[ "$type" == "changelog" ]]; then
+              echo "✅ Changelog PR targeting \`$branch\` [created]($url)." >> $GITHUB_STEP_SUMMARY
+            else
+              echo "✅ Changefile deletion PR targeting \`$branch\` [created]($url)." >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "⏭️ **Next step:** Review and merge the PRs listed above." >> $GITHUB_STEP_SUMMARY

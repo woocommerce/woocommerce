@@ -1,0 +1,5 @@
+Significance: patch
+Type: tweak
+Comment: Update stylelint settings to allow units in 0 values when used inside calc()
+
+
