@@ -28,7 +28,7 @@ class Products extends Task {
 		add_action( 'untrashed_post', array( $this, 'maybe_set_has_product_transient_on_untrashed_post' ) );
 		add_action( 'current_screen', array( $this, 'maybe_redirect_to_add_product_tasklist' ), 30, 0 );
 
-		add_action( 'trashed_post', array( $this, 'on_product_removed' ) );
+		add_action( 'trashed_post', array( $this, 'on_product_trashed' ) );
 		add_action( 'deleted_post_product', array( $this, 'on_product_deleted' ) );
 	}
 
@@ -188,7 +188,7 @@ class Products extends Task {
 	 * @param int $post_id Post ID.
 	 * @return void
 	 */
-	public function on_product_removed( $post_id ) {
+	public function on_product_trashed( $post_id ) {
 		if ( get_post_type( $post_id ) !== 'product' ) {
 			return;
 		}
