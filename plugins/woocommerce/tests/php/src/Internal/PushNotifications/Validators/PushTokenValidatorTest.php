@@ -487,7 +487,7 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 * @dataProvider valid_locales_provider
 	 * @param string $locale The locale to test.
 	 */
-	public function test_validate_device_locale_accepts_valid_formats( string $locale ): void {
+	public function test_validate_accepts_valid_device_locale_formats( string $locale ): void {
 		$this->assertTrue(
 			PushTokenValidator::validate(
 				array( 'device_locale' => $locale ),
@@ -499,7 +499,7 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Should return WP_Error when device locale is missing.
 	 */
-	public function test_validate_device_locale_rejects_missing(): void {
+	public function test_validate_rejects_missing_device_locale(): void {
 		$result = PushTokenValidator::validate(
 			array(),
 			array( 'device_locale' )
@@ -512,7 +512,7 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Should return WP_Error when device locale is not a string.
 	 */
-	public function test_validate_device_locale_rejects_non_string(): void {
+	public function test_validate_rejects_non_string_for_device_locale(): void {
 		$result = PushTokenValidator::validate(
 			array( 'device_locale' => 123 ),
 			array( 'device_locale' )
@@ -525,7 +525,7 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Should return WP_Error when device locale is empty.
 	 */
-	public function test_validate_device_locale_rejects_empty(): void {
+	public function test_validate_rejects_empty_device_locale(): void {
 		$result = PushTokenValidator::validate(
 			array( 'device_locale' => '' ),
 			array( 'device_locale' )
@@ -540,7 +540,7 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 * @dataProvider invalid_locales_provider
 	 * @param string $locale The locale to test.
 	 */
-	public function test_validate_device_locale_rejects_invalid_formats( string $locale ): void {
+	public function test_validate_rejects_invalid_formats_for_device_locale( string $locale ): void {
 		$result = PushTokenValidator::validate(
 			array( 'device_locale' => $locale ),
 			array( 'device_locale' )
@@ -826,7 +826,7 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Should return true for valid JSON metadata.
 	 */
-	public function test_validate_metadata_accepts_valid_json(): void {
+	public function test_validate_accepts_valid_json_for_metadata(): void {
 		$this->assertTrue(
 			PushTokenValidator::validate(
 				array( 'metadata' => '{"app_version":"1.0.0"}' ),
@@ -838,7 +838,7 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Should return true for empty JSON object metadata.
 	 */
-	public function test_validate_metadata_accepts_empty_json_object(): void {
+	public function test_validate_accepts_empty_json_object_for_metadata(): void {
 		$this->assertTrue(
 			PushTokenValidator::validate(
 				array( 'metadata' => '{}' ),
@@ -850,7 +850,7 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Should return WP_Error when metadata is missing.
 	 */
-	public function test_validate_metadata_rejects_missing(): void {
+	public function test_validate_rejects_missing_metadata(): void {
 		$result = PushTokenValidator::validate( array(), array( 'metadata' ) );
 
 		$this->assertInstanceOf( WP_Error::class, $result );
@@ -860,7 +860,7 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Should return WP_Error when metadata is not a string.
 	 */
-	public function test_validate_metadata_rejects_non_string(): void {
+	public function test_validate_rejects_non_string(): void {
 		$result = PushTokenValidator::validate(
 			array( 'metadata' => 123 ),
 			array( 'metadata' )
@@ -873,7 +873,7 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Should return WP_Error when metadata is empty.
 	 */
-	public function test_validate_metadata_rejects_empty(): void {
+	public function test_validate_rejects_empty_metadata(): void {
 		$result = PushTokenValidator::validate(
 			array( 'metadata' => '' ),
 			array( 'metadata' )
@@ -886,7 +886,7 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Should return WP_Error when metadata is invalid JSON.
 	 */
-	public function test_validate_metadata_rejects_invalid_json(): void {
+	public function test_validate_rejects_invalid_json_for_metadata(): void {
 		$result = PushTokenValidator::validate(
 			array( 'metadata' => 'not valid json' ),
 			array( 'metadata' )
@@ -899,7 +899,7 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Should return WP_Error when metadata is valid JSON null.
 	 */
-	public function test_validate_metadata_rejects_json_null(): void {
+	public function test_validate_rejects_null_for_metadata(): void {
 		$result = PushTokenValidator::validate(
 			array( 'metadata' => 'null' ),
 			array( 'metadata' )
@@ -912,7 +912,7 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Should return WP_Error when metadata is whitespace only.
 	 */
-	public function test_validate_metadata_rejects_whitespace_only(): void {
+	public function test_validate_rejects_whitespace_only_for_metadata(): void {
 		$result = PushTokenValidator::validate(
 			array( 'metadata' => '   ' ),
 			array( 'metadata' )
