@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useEffect, useRef } from '@wordpress/element';
-import { useSelect, useDispatch, dispatch } from '@wordpress/data';
+import { useSelect, useDispatch, dispatch, select } from '@wordpress/data';
 import { store as editorStore } from '@wordpress/editor';
 import { registerPlugin, PluginArea } from '@wordpress/plugins';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -32,6 +32,7 @@ import {
 import { FullscreenMode } from './private-apis';
 import { BackButtonInnerButton } from './components/header/back-button-content';
 import { getEditorConfigFromWindow } from './store/settings';
+import { cleanupConfigurationChanges } from './config-tools';
 import { TemplateSelection } from './components/template-select';
 import { StylesSidebar } from './components/styles-sidebar';
 import { SendPreview } from './components/preview';
@@ -71,6 +72,22 @@ export function ExperimentEmailEditorPlugin() {
 		},
 		[]
 	);
+
+	// Snapshot editor settings on mount; restore and clean up on unmount
+	useEffect( () => {
+		const backupEditorSettings =
+			select( editorStore ).getEditorSettings();
+		return () => {
+			try {
+				cleanupConfigurationChanges();
+			} finally {
+				dispatch( editorStore ).updateEditorSettings(
+					backupEditorSettings
+				);
+			}
+		};
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [] );
 
 	// Push email CSS styles to the WordPress editor settings
 	const [ styles ] = useEmailCss();
