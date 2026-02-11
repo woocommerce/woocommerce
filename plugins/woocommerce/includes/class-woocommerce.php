@@ -171,6 +171,8 @@ final class WooCommerce {
 	 * Cloning is forbidden.
 	 *
 	 * @since 2.1
+	 *
+	 * @return void
 	 */
 	public function __clone() {
 		wc_doing_it_wrong( __FUNCTION__, __( 'Cloning is forbidden.', 'woocommerce' ), '2.1' );
@@ -180,6 +182,8 @@ final class WooCommerce {
 	 * Unserializing instances of this class is forbidden.
 	 *
 	 * @since 2.1
+	 *
+	 * @return void
 	 */
 	public function __wakeup() {
 		wc_doing_it_wrong( __FUNCTION__, __( 'Unserializing instances of this class is forbidden.', 'woocommerce' ), '2.1' );
@@ -217,6 +221,8 @@ final class WooCommerce {
 	 * @param string $key Property name.
 	 * @param mixed  $value Property value.
 	 * @throws Exception Attempt to access a property that's private or protected.
+	 *
+	 * @return void
 	 */
 	public function __set( string $key, $value ) {
 		if ( 'api' === $key ) {
@@ -266,6 +272,8 @@ final class WooCommerce {
 	 * the load order. See #21524 for details.
 	 *
 	 * @since 3.6.0
+	 *
+	 * @return void
 	 */
 	public function on_plugins_loaded() {
 		/**
@@ -298,6 +306,8 @@ final class WooCommerce {
 	 * Hook into actions and filters.
 	 *
 	 * @since 2.3
+	 *
+	 * @return void
 	 */
 	private function init_hooks() {
 		register_activation_hook( WC_PLUGIN_FILE, array( 'WC_Install', 'install' ) );
@@ -411,6 +421,8 @@ final class WooCommerce {
 	 *
 	 * This will no longer be used. The more flexible add_woocommerce_remote_variant
 	 * below will be used instead.
+	 *
+	 * @return void
 	 */
 	public function add_woocommerce_inbox_variant() {
 		$config_name = 'woocommerce_inbox_variant_assignment';
@@ -422,6 +434,8 @@ final class WooCommerce {
 	/**
 	 * Add woocommerce_remote_variant_assignment used to determine cohort
 	 * or group assignment for Remote Spec Engines.
+	 *
+	 * @return void
 	 */
 	public function add_woocommerce_remote_variant() {
 		$config_name = 'woocommerce_remote_variant_assignment';
@@ -434,6 +448,8 @@ final class WooCommerce {
 	 * Ensures fatal errors are logged so they can be picked up in the status report.
 	 *
 	 * @since 3.2.0
+	 *
+	 * @return void
 	 */
 	public function log_errors() {
 		$error = error_get_last();
@@ -482,6 +498,8 @@ final class WooCommerce {
 	 *
 	 * IMPORTANT: When adding new constants here, also add them to
 	 * php-stubs/wc-constants.php for PHPStan static analysis.
+	 *
+	 * @return void
 	 */
 	private function define_constants() {
 		$this->define( 'WC_ABSPATH', dirname( WC_PLUGIN_FILE ) . '/' );
@@ -526,6 +544,8 @@ final class WooCommerce {
 
 	/**
 	 * Register custom tables within $wpdb object.
+	 *
+	 * @return void
 	 */
 	private function define_tables() {
 		global $wpdb;
@@ -552,6 +572,8 @@ final class WooCommerce {
 	 *
 	 * @param string      $name  Constant name.
 	 * @param string|bool $value Constant value.
+	 *
+	 * @return void
 	 */
 	private function define( $name, $value ) {
 		if ( ! defined( $name ) ) {
@@ -599,6 +621,8 @@ final class WooCommerce {
 
 	/**
 	 * Load REST API.
+	 *
+	 * @return void
 	 */
 	public function load_rest_api() {
 		\Automattic\WooCommerce\RestApi\Server::instance()->init();
@@ -620,11 +644,15 @@ final class WooCommerce {
 				return defined( 'DOING_CRON' );
 			case 'frontend':
 				return ( ! is_admin() || defined( 'DOING_AJAX' ) ) && ! defined( 'DOING_CRON' ) && ! $this->is_rest_api_request();
+			default:
+				return false;
 		}
 	}
 
 	/**
 	 * Include required core files used in admin and on the frontend.
+	 *
+	 * @return void
 	 */
 	public function includes() {
 		/**
@@ -809,6 +837,8 @@ final class WooCommerce {
 	 * Include classes for theme support.
 	 *
 	 * @since 3.3.0
+	 *
+	 * @return void
 	 */
 	private function theme_support_includes() {
 		if ( wc_is_wp_default_theme_active() ) {
@@ -858,6 +888,8 @@ final class WooCommerce {
 
 	/**
 	 * Include required frontend files.
+	 *
+	 * @return void
 	 */
 	public function frontend_includes() {
 		include_once WC_ABSPATH . 'includes/wc-cart-functions.php';
@@ -876,6 +908,8 @@ final class WooCommerce {
 
 	/**
 	 * Function used to Init WooCommerce Template Functions - This makes them pluggable by plugins and themes.
+	 *
+	 * @return void
 	 */
 	public function include_template_functions() {
 		include_once WC_ABSPATH . 'includes/wc-template-functions.php';
@@ -883,6 +917,8 @@ final class WooCommerce {
 
 	/**
 	 * Init WooCommerce when WordPress Initialises.
+	 *
+	 * @return void
 	 */
 	public function init() {
 		// See the comment inside FeaturesController::__construct.
@@ -926,6 +962,8 @@ final class WooCommerce {
 	 * Locales found in:
 	 *      - WP_LANG_DIR/woocommerce/woocommerce-LOCALE.mo
 	 *      - WP_LANG_DIR/plugins/woocommerce-LOCALE.mo
+	 *
+	 * @return void
 	 */
 	public function load_plugin_textdomain() {
 		/**
@@ -947,6 +985,8 @@ final class WooCommerce {
 
 	/**
 	 * Ensure theme and server variable compatibility and setup image sizes.
+	 *
+	 * @return void
 	 */
 	public function setup_environment() {
 		/**
@@ -961,6 +1001,8 @@ final class WooCommerce {
 
 	/**
 	 * Ensure post thumbnail support is turned on.
+	 *
+	 * @return void
 	 */
 	private function add_thumbnail_support() {
 		if ( ! current_theme_supports( 'post-thumbnails' ) ) {
@@ -982,6 +1024,8 @@ final class WooCommerce {
 	 * woocommerce_single - Used on single product pages for the main image.
 	 *
 	 * @since 2.3
+	 *
+	 * @return void
 	 */
 	public function add_image_sizes() {
 		$thumbnail         = wc_get_image_size( 'thumbnail' );
@@ -1066,6 +1110,8 @@ final class WooCommerce {
 	 * Load & enqueue active webhooks.
 	 *
 	 * @since 2.2
+	 *
+	 * @return void
 	 */
 	private function load_webhooks() {
 
@@ -1163,6 +1209,8 @@ final class WooCommerce {
 
 	/**
 	 * Set tablenames inside WPDB object.
+	 *
+	 * @return void
 	 */
 	public function wpdb_table_fix() {
 		$this->define_tables();
@@ -1173,6 +1221,8 @@ final class WooCommerce {
 	 *
 	 * @since 3.6.0
 	 * @param string $filename The filename of the activated plugin.
+	 *
+	 * @return void
 	 */
 	public function activated_plugin( $filename ) {
 		include_once __DIR__ . '/admin/helper/class-wc-helper.php';
@@ -1189,6 +1239,8 @@ final class WooCommerce {
 	 *
 	 * @since 3.6.0
 	 * @param string $filename The filename of the deactivated plugin.
+	 *
+	 * @return void
 	 */
 	public function deactivated_plugin( $filename ) {
 		include_once __DIR__ . '/admin/helper/class-wc-helper.php';
@@ -1364,6 +1416,8 @@ final class WooCommerce {
 	 * @since 9.0.0
 	 *
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 *
+	 * @return void
 	 */
 	public function register_wp_admin_settings() {
 		$pages = WC_Admin_Settings::get_settings_pages();
@@ -1539,6 +1593,8 @@ final class WooCommerce {
 
 	/**
 	 * Register recurring actions.
+	 *
+	 * @return void
 	 */
 	public function register_recurring_actions() {
 		// Remove any unwrapped actions that may have been scheduled before scheduling the new wrapped ones.
@@ -1658,6 +1714,8 @@ final class WooCommerce {
 	 *
 	 * @internal
 	 * @see https://github.com/woocommerce/woocommerce/issues/58364
+	 *
+	 * @return void
 	 */
 	public function init_customizer() {
 		global $pagenow;
