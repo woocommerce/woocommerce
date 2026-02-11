@@ -382,6 +382,12 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$where_clauses[]    = "{$customer_lookup_table}.customer_id IN ({$included_customers})";
 		}
 
+		// Allow a list of customer IDs to be excluded.
+		if ( ! empty( $query_args['customers_exclude'] ) ) {
+			$excluded_customers = $this->get_filtered_ids( $query_args, 'customers_exclude' );
+			$where_clauses[]    = "{$customer_lookup_table}.customer_id NOT IN ({$excluded_customers})";
+		}
+
 		// Allow a list of user IDs to be specified.
 		if ( ! empty( $query_args['users'] ) ) {
 			$included_users  = $this->get_filtered_ids( $query_args, 'users' );

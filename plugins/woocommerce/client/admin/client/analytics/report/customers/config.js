@@ -5,12 +5,15 @@ import { __, _x } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
 import { applyFilters } from '@wordpress/hooks';
 import { resolveSelect } from '@wordpress/data';
-import { COUNTRIES_STORE_NAME } from '@woocommerce/data';
+import { NAMESPACE, COUNTRIES_STORE_NAME } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
-import { getCustomerLabels } from '../../../lib/async-requests';
+import {
+	getCustomerLabels,
+	getRequestByIdString,
+} from '../../../lib/async-requests';
 
 const CUSTOMERS_REPORT_FILTERS_FILTER =
 	'woocommerce_admin_customers_report_filters';
@@ -125,16 +128,13 @@ export const advancedFilters = applyFilters(
 				input: {
 					component: 'Search',
 					type: 'customers',
-					getLabels: async ( value ) => {
-						return value
-							.split( ',' )
-							.map( ( v ) => v.trim() )
-							.filter( Boolean )
-							.map( ( name ) => ( {
-								key: name,
-								label: name,
-							} ) );
-					},
+					getLabels: getRequestByIdString(
+						NAMESPACE + '/customers',
+						( customer ) => ( {
+							id: customer.id,
+							label: customer.name,
+						} )
+					),
 				},
 			},
 			country: {
@@ -233,16 +233,7 @@ export const advancedFilters = applyFilters(
 				input: {
 					component: 'Search',
 					type: 'usernames',
-					getLabels: async ( value ) => {
-						return value
-							.split( ',' )
-							.map( ( v ) => v.trim() )
-							.filter( Boolean )
-							.map( ( username ) => ( {
-								key: username,
-								label: username,
-							} ) );
-					},
+					getLabels: getCustomerLabels,
 				},
 			},
 			email: {
@@ -284,16 +275,13 @@ export const advancedFilters = applyFilters(
 				input: {
 					component: 'Search',
 					type: 'emails',
-					getLabels: async ( value ) => {
-						return value
-							.split( ',' )
-							.map( ( v ) => v.trim() )
-							.filter( Boolean )
-							.map( ( email ) => ( {
-								key: email,
-								label: email,
-							} ) );
-					},
+					getLabels: getRequestByIdString(
+						NAMESPACE + '/customers',
+						( customer ) => ( {
+							id: customer.id,
+							label: customer.email,
+						} )
+					),
 				},
 			},
 			orders_count: {

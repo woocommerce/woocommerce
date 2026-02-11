@@ -53,7 +53,7 @@ const completer: AutoCompleter = {
 	// of replace/insertion, so we can just return the value.
 	getOptionCompletion( customer ) {
 		return {
-			key: customer.email,
+			key: customer.id,
 			label: customer.email,
 		};
 	},
