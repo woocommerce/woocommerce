@@ -35,11 +35,10 @@ class ProductReviewTemplate extends AbstractBlock {
 	 *
 	 * @param WP_Comment[] $comments      The array of comments.
 	 * @param WP_Block     $block         Block instance.
-	 * @param int          $current_depth Current depth of comments, defaults to 1.
 	 *
 	 * @return string
 	 */
-	protected function block_product_review_template_render_comments( array $comments, WP_Block $block, int $current_depth = 1 ): string {
+	protected function block_product_review_template_render_comments( array $comments, WP_Block $block ): string {
 		$content = '';
 
 		foreach ( $comments as $comment ) {
@@ -94,7 +93,6 @@ class ProductReviewTemplate extends AbstractBlock {
 				$inner_content  = $this->block_product_review_template_render_comments(
 					$children,
 					$block,
-					$current_depth + 1
 				);
 				$block_content .= sprintf( '<ol>%1$s</ol>', $inner_content );
 			}
