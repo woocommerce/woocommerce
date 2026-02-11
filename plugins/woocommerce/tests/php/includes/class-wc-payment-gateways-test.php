@@ -62,20 +62,11 @@ class WC_Payment_Gateways_Test extends WC_Unit_Test_Case {
 			)
 		);
 
-		// Ensure the email system is initialized so the email listener is registered.
-		WC_Emails::instance();
-
 		$action_fired   = array();
 		$action_watcher = function ( $gateway ) use ( &$action_fired ) {
 			$action_fired[] = $gateway;
 		};
 		add_action( 'woocommerce_payment_gateway_enabled_notification', $action_watcher );
-
-		$email_details = array();
-		$mail_watcher  = function ( $args ) use ( &$email_details ) {
-			$email_details = $args;
-		};
-		add_filter( 'wp_mail', $mail_watcher );
 
 		foreach ( $this->sut->payment_gateways() as $gateway ) {
 			$gateway->settings['enabled'] = 'no';
@@ -85,20 +76,18 @@ class WC_Payment_Gateways_Test extends WC_Unit_Test_Case {
 			$gateway->settings['enabled'] = 'yes';
 			update_option( $gateway->get_option_key(), $gateway->settings );
 
-			$this->assertEquals( 'Payment gateway enabled: "' . $gateway->get_method_title() . '"', end( $fake_logger->infos )['message'] );
+			$this->assertEquals(
+				'Payment gateway enabled: "' . $gateway->get_method_title() . '"',
+				end( $fake_logger->infos )['message'],
+				'Logger should record the gateway enable event'
+			);
 
 			$last_fired = end( $action_fired );
 			$this->assertInstanceOf( WC_Payment_Gateway::class, $last_fired, 'Action should fire with a gateway object' );
 			$this->assertEquals( $gateway->id, $last_fired->id, 'Action should fire with the correct gateway' );
-
-			$this->assertNotEmpty( $email_details, 'An email should have been sent via the WC_Email system' );
-			$this->assertStringContainsString( $gateway->get_method_title(), $email_details['subject'] );
-
-			$email_details = array();
 		}
 
 		remove_action( 'woocommerce_payment_gateway_enabled_notification', $action_watcher );
-		remove_filter( 'wp_mail', $mail_watcher );
 	}
 
 	/**

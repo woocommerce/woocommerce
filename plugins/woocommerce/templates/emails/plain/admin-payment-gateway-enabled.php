@@ -24,8 +24,8 @@ echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 /* translators: %s: Username */
 echo sprintf( esc_html__( 'Howdy %s,', 'woocommerce' ), esc_html( $username ) ) . "\n\n";
 
-/* translators: 1: gateway title, 2: site URL */
 echo sprintf(
+	/* translators: 1: gateway title, 2: site URL */
 	esc_html__( 'The payment gateway "%1$s" was just enabled on this site: %2$s', 'woocommerce' ),
 	esc_html( $gateway_title ),
 	esc_html( home_url() )
@@ -47,4 +47,9 @@ if ( $additional_content ) {
 	echo "\n\n----------------------------------------\n\n";
 }
 
+/**
+ * Filter the email footer text.
+ *
+ * @since 3.7.0
+ */
 echo wp_kses_post( apply_filters( 'woocommerce_email_footer_text', get_option( 'woocommerce_email_footer_text' ) ) );
