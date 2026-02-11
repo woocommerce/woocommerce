@@ -99,8 +99,10 @@ class PageRenderer {
 
 		$localized_data['email_types'] = $email_types;
 		// Modify email editor settings.
-		$localized_data['editor_settings']['isFullScreenForced']     = true;
-		$localized_data['editor_settings']['displaySendEmailButton'] = false;
+		$localized_data['editor_settings']['isFullScreenForced']       = true;
+		$localized_data['editor_settings']['displaySendEmailButton']   = false;
+		$localized_data['editor_settings']['supportsTemplateMode']     = true;
+		$localized_data['editor_settings']['defaultRenderingMode']     = 'template-locked';
 
 		return $localized_data;
 	}
