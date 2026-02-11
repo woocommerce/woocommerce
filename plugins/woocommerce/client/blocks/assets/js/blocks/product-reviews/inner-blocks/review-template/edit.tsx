@@ -204,7 +204,7 @@ export default function ReviewTemplateEdit( {
 							commentQuery
 					  ) as ( WPComment & {
 							// eslint-disable-next-line @typescript-eslint/naming-convention
-							_embedded?: { children?: WPComment[] };
+							_embedded?: { children?: WPComment[][] };
 					  } )[] )
 					: null,
 				blocks: getBlocks( clientId ),
