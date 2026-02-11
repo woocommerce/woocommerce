@@ -2,16 +2,15 @@
  * External dependencies
  */
 import fs from 'fs';
-import path from 'path';
 
 /**
  * Internal dependencies
  */
 import { test as baseTest } from './fixtures';
-import { ADMIN_STATE_PATH } from '../playwright.config';
+import { ADMIN_STATE_PATH, STORAGE_DIR_PATH } from '../playwright.config';
 import { wpCLI } from '../utils/cli';
 
-const LOCK_FILE = path.join( __dirname, '../../.state/paypal.lock' );
+const LOCK_FILE = `${ STORAGE_DIR_PATH }/paypal.lock`;
 
 export const test = baseTest.extend( {
 	page: async ( { page }, use ) => {
