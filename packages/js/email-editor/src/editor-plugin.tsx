@@ -4,7 +4,7 @@
 import { useEffect, useRef } from '@wordpress/element';
 import { useSelect, useDispatch, dispatch } from '@wordpress/data';
 import { store as editorStore } from '@wordpress/editor';
-import { registerPlugin } from '@wordpress/plugins';
+import { registerPlugin, PluginArea } from '@wordpress/plugins';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore -- fast-deep-equal has no type declarations
 import deepEqual from 'fast-deep-equal';
@@ -32,6 +32,15 @@ import {
 import { FullscreenMode } from './private-apis';
 import { BackButtonInnerButton } from './components/header/back-button-content';
 import { getEditorConfigFromWindow } from './store/settings';
+import { TemplateSelection } from './components/template-select';
+import { StylesSidebar } from './components/styles-sidebar';
+import { SendPreview } from './components/preview';
+import { PreviewSaveGuard } from './components/preview/preview-save-guard';
+import { SettingsPanel } from './components/sidebar/settings-panel';
+import { TemplateSettingsPanel } from './components/sidebar/template-settings-panel';
+import { PublishSave } from './hacks/publish-save';
+import { EditorNotices } from './components/notices';
+import { BlockCompatibilityWarnings } from './components/sidebar';
 
 // @ts-expect-error __experimentalMainDashboardButton is not in types.
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -50,12 +59,16 @@ export function EditorPlugin() {
  * Pushes email CSS to editor settings, restricts blocks, and renders email-specific UI.
  */
 export function ExperimentEmailEditorPlugin() {
-	const { isFullScreenForced } = useSelect(
-		( sel ) => ( {
-			isFullScreenForced:
-				sel( storeName ).getInitialEditorSettings()
-					?.isFullScreenForced ?? false,
-		} ),
+	const { isFullScreenForced, displaySendEmailButton, postType } = useSelect(
+		( sel ) => {
+			const settings = sel( storeName ).getInitialEditorSettings();
+			return {
+				isFullScreenForced: settings?.isFullScreenForced ?? false,
+				displaySendEmailButton:
+					settings?.displaySendEmailButton ?? true,
+				postType: sel( storeName ).getEmailPostType(),
+			};
+		},
 		[]
 	);
 
@@ -95,6 +108,19 @@ export function ExperimentEmailEditorPlugin() {
 					<BackButtonInnerButton />
 				</MainDashboardButton>
 			) }
+			<TemplateSelection />
+			<StylesSidebar />
+			<SendPreview />
+			<PreviewSaveGuard />
+			{ postType === 'wp_template' ? (
+				<TemplateSettingsPanel />
+			) : (
+				<SettingsPanel />
+			) }
+			{ displaySendEmailButton && <PublishSave /> }
+			<EditorNotices />
+			<BlockCompatibilityWarnings />
+			<PluginArea scope="woocommerce-email-editor" />
 		</>
 	);
 }
