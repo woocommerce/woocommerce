@@ -69,10 +69,6 @@ test.describe(
 
 			const paypalDiv = await waitForPayPalToLoad( page );
 
-			await test.step( 'Reset PayPal Standard state if needed', async () => {
-				await disablePayPalIfEnabled( page, paypalDiv );
-			} );
-
 			await test.step( 'Enable PayPal Standard', async () => {
 				const enableLink = paypalDiv.getByRole( 'link', {
 					name: 'Enable',
