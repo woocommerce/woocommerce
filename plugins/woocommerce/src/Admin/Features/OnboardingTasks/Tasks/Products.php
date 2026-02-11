@@ -186,6 +186,7 @@ class Products extends Task {
 	 * Handle product trashing via the trashed_post hook.
 	 *
 	 * @param int $post_id Post ID.
+	 * @return void
 	 */
 	public function on_product_removed( $post_id ) {
 		if ( get_post_type( $post_id ) !== 'product' ) {
@@ -197,6 +198,8 @@ class Products extends Task {
 
 	/**
 	 * Handle permanent product deletion via the deleted_post_product hook.
+	 *
+	 * @return void
 	 */
 	public function on_product_deleted() {
 		$this->revert_task_completion();
@@ -204,6 +207,8 @@ class Products extends Task {
 
 	/**
 	 * Re-check whether valid products still exist and revert task completion if none remain.
+	 *
+	 * @return void
 	 */
 	private function revert_task_completion() {
 		delete_transient( self::HAS_PRODUCT_TRANSIENT );
