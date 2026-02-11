@@ -7,6 +7,7 @@ interface Window {
 	WooCommerceEmailEditor: {
 		current_post_type: string;
 		current_post_id: string;
+		editor_settings: Record< string, unknown >;
 		email_types: {
 			value: string;
 			label: string;

@@ -5,7 +5,10 @@
  */
 import { addFilter } from '@wordpress/hooks';
 import { __ } from '@wordpress/i18n';
-import { initializeEditor } from '@woocommerce/email-editor';
+import { experimentInitEmailEditorPlugin } from '@woocommerce/email-editor';
+// @ts-expect-error initializeEditor is not in types for @wordpress/edit-post.
+// eslint-disable-next-line @woocommerce/dependency-group
+import { initializeEditor } from '@wordpress/edit-post';
 
 /**
  * Internal dependencies
@@ -68,4 +71,21 @@ addFilter( 'woocommerce_email_editor_create_coupon_handler', NAME_SPACE, () => {
 modifySidebar();
 modifyTemplateSidebar();
 registerEmailValidationRules();
-initializeEditor( 'woocommerce-email-editor' );
+
+// Register the email editor plugin (initializes store, blocks, events, etc.)
+experimentInitEmailEditorPlugin();
+
+// Bootstrap the WordPress post editor (integrator's responsibility)
+window.addEventListener(
+	'DOMContentLoaded',
+	() => {
+		initializeEditor(
+			'woocommerce-email-editor',
+			window.WooCommerceEmailEditor.current_post_type,
+			window.WooCommerceEmailEditor.current_post_id,
+			window.WooCommerceEmailEditor.editor_settings,
+			[]
+		);
+	},
+	{ once: true }
+);
