@@ -39,9 +39,10 @@ const siteIconVariants = {
 };
 
 /**
- * Back button content component with animation effects.
+ * Inner button component with animation effects for the back button.
+ * Exported separately for use in plugin mode where BackButton wrapper is not needed.
  */
-const DefaultBackButtonContent = () => {
+export const BackButtonInnerButton = () => {
 	const { urls } = useSelect(
 		( select ) => ( {
 			urls: select( storeName ).getUrls(),
@@ -98,6 +99,8 @@ const DefaultBackButtonContent = () => {
 		</motion.div>
 	);
 };
+
+const DefaultBackButtonContent = BackButtonInnerButton;
 
 export const BackButtonContent = () => {
 	const BackButtonUsedContent = applyFilters(

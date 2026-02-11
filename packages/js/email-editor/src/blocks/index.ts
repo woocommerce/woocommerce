@@ -31,12 +31,7 @@ import { enhanceSiteLogoBlock } from './core/site-logo';
 
 export { getAllowedBlockNames } from './utils';
 
-export function initBlocks() {
-	// Check if core blocks are already registered by looking for a fundamental core block
-	// 'core/paragraph' is always included in core blocks
-	if ( ! getBlockType( 'core/paragraph' ) ) {
-		registerCoreBlocks();
-	}
+function applyEmailBlockEnhancements() {
 	filterSetUrlAttribute();
 	deactivateStackOnMobile();
 	hideExpandOnClick();
@@ -53,4 +48,17 @@ export function initBlocks() {
 	enhanceSocialLinksBlock();
 	enhanceSiteLogoBlock();
 	removeBlockStylesFromAllBlocks();
+}
+
+export function initBlocks() {
+	// Check if core blocks are already registered by looking for a fundamental core block
+	// 'core/paragraph' is always included in core blocks
+	if ( ! getBlockType( 'core/paragraph' ) ) {
+		registerCoreBlocks();
+	}
+	applyEmailBlockEnhancements();
+}
+
+export function initBlocksForPlugin() {
+	applyEmailBlockEnhancements();
 }

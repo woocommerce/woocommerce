@@ -41,6 +41,8 @@ export type EmailEditorSettings = EditorSettings &
 		isPreviewMode: boolean;
 		allowedIframeStyleHandles?: string[];
 		styles?: EmailBuiltStyles[];
+		isFullScreenForced?: boolean;
+		displaySendEmailButton?: boolean;
 	};
 
 export type EmailTheme = Omit< GlobalStylesConfig, 'styles' > & {

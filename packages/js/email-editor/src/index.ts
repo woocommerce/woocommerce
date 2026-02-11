@@ -199,6 +199,13 @@ export type {
  */
 export { SendPreviewEmail } from './components/preview';
 
+export { EditorPlugin as ExperimentalEditorPlugin } from './editor-plugin';
+
+export {
+	ExperimentEmailEditorPlugin,
+	experimentInitEmailEditorPlugin,
+} from './editor-plugin';
+
 /**
  * A rich text input component with personalization tags support.
  *
