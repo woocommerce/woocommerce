@@ -270,8 +270,8 @@ if ( ! class_exists( 'WC_Email_Admin_Payment_Gateway_Enabled', false ) ) :
 				return;
 			}
 
-			$gateway_title        = $this->gateway_title ?: 'Dummy Gateway';
-			$gateway_settings_url = $this->gateway_settings_url ?: 'Dummy Settings URL';
+			$gateway_title        = ! empty( $this->gateway_title ) ? $this->gateway_title : __( 'Dummy Gateway', 'woocommerce' );
+			$gateway_settings_url = ! empty( $this->gateway_settings_url ) ? $this->gateway_settings_url : __( 'Dummy Settings URL', 'woocommerce' );
 
 			// phpcs:disable Squiz.PHP.EmbeddedPhp.ContentBeforeOpen -- Template-like output.
 			// phpcs:disable Squiz.PHP.EmbeddedPhp.ContentAfterEnd -- Template-like output.
