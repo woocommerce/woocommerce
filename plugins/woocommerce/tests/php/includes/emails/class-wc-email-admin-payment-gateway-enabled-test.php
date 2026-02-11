@@ -200,7 +200,7 @@ class WC_Email_Admin_Payment_Gateway_Enabled_Test extends WC_Unit_Test_Case {
 	 * @testdox get_recipient merges addresses from backward-compat filter.
 	 */
 	public function test_get_recipient_merges_backward_compat_filter_addresses(): void {
-		$gateway = new WC_Gateway_BACS();
+		$gateway           = new WC_Gateway_BACS();
 		$this->sut->object = $gateway;
 
 		$extra_watcher = function () {
@@ -220,12 +220,12 @@ class WC_Email_Admin_Payment_Gateway_Enabled_Test extends WC_Unit_Test_Case {
 	 * @testdox HTML content includes gateway title and settings URL.
 	 */
 	public function test_html_content_includes_gateway_details(): void {
-		$gateway                    = new WC_Gateway_BACS();
-		$this->sut->object          = $gateway;
-		$this->sut->gateway_title   = $gateway->get_method_title();
+		$gateway                         = new WC_Gateway_BACS();
+		$this->sut->object               = $gateway;
+		$this->sut->gateway_title        = $gateway->get_method_title();
 		$this->sut->gateway_settings_url = 'http://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&section=bacs';
-		$this->sut->username        = 'admin';
-		$this->sut->admin_email     = 'admin@example.com';
+		$this->sut->username             = 'admin';
+		$this->sut->admin_email          = 'admin@example.com';
 
 		$content = $this->sut->get_content_html();
 
@@ -238,12 +238,12 @@ class WC_Email_Admin_Payment_Gateway_Enabled_Test extends WC_Unit_Test_Case {
 	 * @testdox Plain text content includes gateway title and settings URL.
 	 */
 	public function test_plain_text_content_includes_gateway_details(): void {
-		$gateway                    = new WC_Gateway_BACS();
-		$this->sut->object          = $gateway;
-		$this->sut->gateway_title   = $gateway->get_method_title();
+		$gateway                         = new WC_Gateway_BACS();
+		$this->sut->object               = $gateway;
+		$this->sut->gateway_title        = $gateway->get_method_title();
 		$this->sut->gateway_settings_url = 'http://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&section=bacs';
-		$this->sut->username        = 'admin';
-		$this->sut->admin_email     = 'admin@example.com';
+		$this->sut->username             = 'admin';
+		$this->sut->admin_email          = 'admin@example.com';
 
 		$this->sut->update_option( 'email_type', 'plain' );
 
@@ -287,5 +287,37 @@ class WC_Email_Admin_Payment_Gateway_Enabled_Test extends WC_Unit_Test_Case {
 		$content = $this->sut->get_default_additional_content();
 
 		$this->assertNotEmpty( $content );
+	}
+
+	/**
+	 * @testdox block_content outputs gateway title and settings URL for this email.
+	 */
+	public function test_block_content_outputs_gateway_details(): void {
+		$gateway                         = new WC_Gateway_BACS();
+		$this->sut->object               = $gateway;
+		$this->sut->gateway_title        = $gateway->get_method_title();
+		$this->sut->gateway_settings_url = 'http://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&section=bacs';
+
+		ob_start();
+		$this->sut->block_content( true, false, $this->sut );
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( $gateway->get_method_title(), $output, 'Block content should include gateway title' );
+		$this->assertStringContainsString( 'wc-settings', $output, 'Block content should include gateway settings URL' );
+		$this->assertStringContainsString( 'If you did not enable this payment gateway', $output, 'Block content should include security notice' );
+	}
+
+	/**
+	 * @testdox block_content does not output for other email types.
+	 */
+	public function test_block_content_skips_other_email_ids(): void {
+		$other_email     = new WC_Email();
+		$other_email->id = 'customer_new_order';
+
+		ob_start();
+		$this->sut->block_content( true, false, $other_email );
+		$output = ob_get_clean();
+
+		$this->assertEmpty( $output, 'Block content should not output anything for other email types' );
 	}
 }

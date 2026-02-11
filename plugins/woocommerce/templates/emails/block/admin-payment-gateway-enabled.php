@@ -28,6 +28,10 @@ defined( 'ABSPATH' ) || exit;
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
+<p><?php echo esc_html__( 'Hello,', 'woocommerce' ); ?></p>
+<!-- /wp:paragraph -->
+
+<!-- wp:paragraph -->
 <p><?php
 	/* translators: %s: Site title */
 	printf( esc_html__( 'A payment gateway was just enabled on %s.', 'woocommerce' ), '<!--[woocommerce/site-title]-->' );

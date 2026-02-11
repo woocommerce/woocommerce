@@ -69,6 +69,10 @@ if ( ! class_exists( 'WC_Email_Admin_Payment_Gateway_Enabled', false ) ) :
 			// Trigger for this email.
 			add_action( 'woocommerce_payment_gateway_enabled_notification', array( $this, 'trigger' ), 10, 1 );
 
+			// Block email editor hooks.
+			add_action( 'woocommerce_email_general_block_content', array( $this, 'block_content' ), 10, 3 );
+			add_filter( 'woocommerce_emails_general_block_content_emails_without_order_details', array( $this, 'exclude_from_order_details' ) );
+
 			// Call parent constructor.
 			parent::__construct();
 
@@ -247,6 +251,52 @@ if ( ! class_exists( 'WC_Email_Admin_Payment_Gateway_Enabled', false ) ) :
 					'email'                => $this,
 				)
 			);
+		}
+
+		/**
+		 * Output dynamic block content for this email.
+		 *
+		 * Hooked into `woocommerce_email_general_block_content` to render the gateway
+		 * title, security notice, and gateway settings URL inside the ##WOO_CONTENT## area.
+		 *
+		 * @since 10.6.0
+		 * @param bool     $sent_to_admin Whether the email is being sent to admin.
+		 * @param bool     $plain_text    Whether the email is being sent as plain text.
+		 * @param WC_Email $email         The email object.
+		 * @return void
+		 */
+		public function block_content( $sent_to_admin, $plain_text, $email ): void {
+			if ( $this->id !== $email->id ) {
+				return;
+			}
+
+			$gateway_title        = $this->gateway_title ?: 'Dummy Gateway';
+			$gateway_settings_url = $this->gateway_settings_url ?: 'Dummy Settings URL';
+
+			// phpcs:disable Squiz.PHP.EmbeddedPhp.ContentBeforeOpen -- Template-like output.
+			// phpcs:disable Squiz.PHP.EmbeddedPhp.ContentAfterEnd -- Template-like output.
+			?>
+			<p><?php
+				/* translators: %s: gateway title */
+				printf( esc_html__( 'The payment gateway "%s" has been enabled.', 'woocommerce' ), esc_html( $gateway_title ) );
+			?></p>
+			<p><?php esc_html_e( 'If you did not enable this payment gateway, please log in to your site and consider disabling it here:', 'woocommerce' ); ?></p>
+			<p><a href="<?php echo esc_url( $gateway_settings_url ); ?>"><?php echo esc_url( $gateway_settings_url ); ?></a></p>
+			<?php
+			// phpcs:enable Squiz.PHP.EmbeddedPhp.ContentBeforeOpen
+			// phpcs:enable Squiz.PHP.EmbeddedPhp.ContentAfterEnd
+		}
+
+		/**
+		 * Add this email to the list of emails without order details.
+		 *
+		 * @since 10.6.0
+		 * @param array $emails_without_order_details Array of email IDs.
+		 * @return array
+		 */
+		public function exclude_from_order_details( $emails_without_order_details ) {
+			$emails_without_order_details[] = 'admin_payment_gateway_enabled';
+			return $emails_without_order_details;
 		}
 
 		/**
