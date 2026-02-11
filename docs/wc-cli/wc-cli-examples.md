@@ -181,4 +181,4 @@ To update the database, use the following CLI command:
 
 `$ wp wc update`
 
-There are no extra arguments needed, and only the pending upgrades will be ran. Once the updates have been ran, the new version will be shown.
+There are no extra arguments needed, and only the pending upgrades will be run. Once the updates have been run, the new version will be shown.
