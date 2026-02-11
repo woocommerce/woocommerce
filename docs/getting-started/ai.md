@@ -35,7 +35,7 @@ https://developer.woocommerce.com/docs/getting-started/ai.md
 
 ### Copy to Markdown
 
-On every page of the Developer Docs, you'll see a Clipboard icon in the upper-right hand corner. Selecting this icon will copy the current doc in Markdown formatting, which you can paste into your LLM's chat interface.
+On every page of the Developer Docs, you'll see a Clipboard icon in the upper-right-hand corner. Selecting this icon will copy the current doc in Markdown formatting, which you can paste into your LLM's chat interface.
 
 ## AI Development Tools
 
