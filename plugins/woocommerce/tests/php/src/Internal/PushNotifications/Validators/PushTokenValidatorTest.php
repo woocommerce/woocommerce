@@ -485,6 +485,7 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Should return true for valid locale formats.
 	 * @dataProvider valid_locales_provider
+	 * @param string $locale The locale to test.
 	 */
 	public function test_validate_device_locale_accepts_valid_formats( string $locale ): void {
 		$this->assertTrue(
@@ -537,6 +538,7 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Should return WP_Error for invalid locale formats.
 	 * @dataProvider invalid_locales_provider
+	 * @param string $locale The locale to test.
 	 */
 	public function test_validate_device_locale_rejects_invalid_formats( string $locale ): void {
 		$result = PushTokenValidator::validate(
@@ -923,6 +925,7 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Should use the standard error code for all validation errors.
 	 * @dataProvider validatable_fields_provider
+	 * @param string $field The field to validate.
 	 */
 	public function test_all_errors_use_standard_error_code( string $field ): void {
 		/**

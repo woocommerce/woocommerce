@@ -300,7 +300,7 @@ class PushTokenRestController extends RestApiControllerBase {
 	 */
 	private function get_args( ?string $context = null ): array {
 		$args = array(
-			'id'          => array(
+			'id'            => array(
 				'description'       => __( 'Push Token ID', 'woocommerce' ),
 				'type'              => 'integer',
 				'required'          => true,
@@ -309,7 +309,7 @@ class PushTokenRestController extends RestApiControllerBase {
 				'sanitize_callback' => 'absint',
 				'validate_callback' => array( $this, 'validate_argument' ),
 			),
-			'origin'      => array(
+			'origin'        => array(
 				'description'       => __( 'Origin', 'woocommerce' ),
 				'type'              => 'string',
 				'required'          => true,
@@ -317,7 +317,7 @@ class PushTokenRestController extends RestApiControllerBase {
 				'enum'              => PushToken::ORIGINS,
 				'validate_callback' => array( $this, 'validate_argument' ),
 			),
-			'device_uuid' => array(
+			'device_uuid'   => array(
 				'description'       => __( 'Device UUID', 'woocommerce' ),
 				'default'           => '',
 				'type'              => 'string',
@@ -333,7 +333,7 @@ class PushTokenRestController extends RestApiControllerBase {
 				'validate_callback' => array( $this, 'validate_argument' ),
 				'sanitize_callback' => 'sanitize_text_field',
 			),
-			'platform'    => array(
+			'platform'      => array(
 				'description'       => __( 'Platform', 'woocommerce' ),
 				'type'              => 'string',
 				'required'          => true,
@@ -341,7 +341,7 @@ class PushTokenRestController extends RestApiControllerBase {
 				'enum'              => PushToken::PLATFORMS,
 				'validate_callback' => array( $this, 'validate_argument' ),
 			),
-			'token'       => array(
+			'token'         => array(
 				'description'       => __( 'Push Token', 'woocommerce' ),
 				'type'              => 'string',
 				'required'          => true,
@@ -349,7 +349,7 @@ class PushTokenRestController extends RestApiControllerBase {
 				'validate_callback' => array( $this, 'validate_argument' ),
 				'sanitize_callback' => 'wp_unslash',
 			),
-			'metadata'       => array(
+			'metadata'      => array(
 				'description'       => __( 'Metadata', 'woocommerce' ),
 				'type'              => 'string',
 				'required'          => true,

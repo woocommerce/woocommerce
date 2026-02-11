@@ -285,6 +285,12 @@ class PushTokenValidator {
 	 * @return bool|WP_Error
 	 */
 	private static function validate_device_locale( $value, array $context ) {
+		/**
+		 * Context is unused in this specific method, but required by the
+		 * validate() dispatch signature.
+		 */
+		unset( $context );
+
 		if ( ! isset( $value ) ) {
 			return new WP_Error( self::ERROR_CODE, 'Device locale is required.' );
 		}
@@ -429,6 +435,12 @@ class PushTokenValidator {
 	 * @return bool|WP_Error
 	 */
 	private static function validate_metadata( $value, array $context ) {
+		/**
+		 * Context is unused in this specific method, but required by the
+		 * validate() dispatch signature.
+		 */
+		unset( $context );
+
 		if ( ! isset( $value ) ) {
 			return new WP_Error( self::ERROR_CODE, 'Metadata is required.' );
 		}

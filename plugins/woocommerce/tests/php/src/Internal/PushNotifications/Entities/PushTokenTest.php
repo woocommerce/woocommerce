@@ -451,13 +451,13 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	public function test_it_cannot_be_updated_when_device_locale_is_missing() {
 		$push_token = new PushToken(
 			array(
-				'id'       => 1,
-				'user_id'  => 1,
-				'token'    => 'test_token',
+				'id'          => 1,
+				'user_id'     => 1,
+				'token'       => 'test_token',
 				'device_uuid' => 'test-device-uuid',
-				'platform' => PushToken::PLATFORM_APPLE,
-				'origin'   => PushToken::ORIGIN_WOOCOMMERCE_IOS,
-				'metadata' => '{"app_version":"1.0"}',
+				'platform'    => PushToken::PLATFORM_APPLE,
+				'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'metadata'    => '{"app_version":"1.0"}',
 			)
 		);
 
