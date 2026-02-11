@@ -221,7 +221,7 @@ class FileManifest {
 	 * @param string[] $details         Optional list of detail lines (e.g. missing file paths) to show in an expandable section.
 	 * @param string   $details_heading Optional heading displayed above the details list (already translated).
 	 */
-	public static function incomplete_installation( $plugin_file, $details = array(), $details_heading = '' ) {
+	public static function incomplete_installation( $plugin_file, $details = array(), $details_heading = '' ): void {
 		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 			error_log(  // phpcs:ignore
 				'WooCommerce installation appears to be incomplete or corrupted. '
@@ -292,7 +292,7 @@ class FileManifest {
 	 *
 	 * @param string $plugin_file Absolute path to the main plugin file (woocommerce.php).
 	 */
-	private static function hide_from_active_plugins( $plugin_file ) {
+	private static function hide_from_active_plugins( $plugin_file ): void {
 		$wc_basename = plugin_basename( $plugin_file );
 
 		// Single-site (or per-site in multisite): flat array of plugin basenames.
@@ -326,7 +326,7 @@ class FileManifest {
 	 * WooCommerce still loads normally, but the admin is informed that the
 	 * integrity check could not run.
 	 */
-	private static function missing_manifest_warning() {
+	private static function missing_manifest_warning(): void {
 		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 			error_log( 'WooCommerce file manifest (file-manifest.php) is missing. Installation integrity cannot be verified.' );  // phpcs:ignore
 		}
@@ -353,7 +353,7 @@ class FileManifest {
 	 * Register the manifest CLI commands even when WooCommerce is disabled,
 	 * so the user can run "wp wc manifest verify" to diagnose the issue.
 	 */
-	private static function register_cli_diagnostics() {
+	private static function register_cli_diagnostics(): void {
 		if ( ! defined( 'WP_CLI' ) || ! WP_CLI ) {
 			return;
 		}

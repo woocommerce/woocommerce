@@ -28,6 +28,7 @@ require __DIR__ . '/src/Internal/FileManifest.php';
 // phpcs:disable WordPress.NamingConventions.ValidFunctionName.FunctionNameInvalid, Squiz.Commenting.FunctionComment.Missing
 
 if ( ! \Automattic\WooCommerce\Internal\FileManifest::verify_installation( __FILE__ ) ) {
+	/** @return null */
 	function WC() {
 		return null;
 	}
@@ -35,6 +36,7 @@ if ( ! \Automattic\WooCommerce\Internal\FileManifest::verify_installation( __FIL
 }
 
 if ( ! \Automattic\WooCommerce\Autoloader::init() ) {
+	/** @return null */
 	function WC() {
 		return null;
 	}
@@ -50,6 +52,7 @@ if ( ! class_exists( 'WooCommerce', false ) ) {
 // If the class still doesn't exist the file failed to compile, treat it as an incomplete installation.
 if ( ! class_exists( 'WooCommerce', false ) ) {
 	\Automattic\WooCommerce\Internal\FileManifest::incomplete_installation( __FILE__ );
+	/** @return null */
 	function WC() {
 		return null;
 	}
@@ -59,13 +62,13 @@ if ( ! class_exists( 'WooCommerce', false ) ) {
 // Initialize dependency injection.
 $GLOBALS['wc_container'] = new Automattic\WooCommerce\Container();
 
-/**
- * Returns the main instance of WC.
- *
- * @since  2.1
- * @return WooCommerce
- */
 if ( ! function_exists( 'WC' ) ) {
+	/**
+	 * Returns the main instance of WC.
+	 *
+	 * @since  2.1
+	 * @return WooCommerce
+	 */
 	function WC() {
 		return WooCommerce::instance();
 	}
