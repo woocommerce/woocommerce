@@ -98,6 +98,10 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 		// Limit columns to max 2 for email compatibility.
 		$columns = min( max( $columns, 1 ), 2 );
 
+		// Get the block gap from theme styles to match the editor spacing.
+		$theme_styles = $rendering_context->get_theme_styles();
+		$block_gap    = $theme_styles['spacing']['blockGap'] ?? '16px';
+
 		if ( 1 === $columns ) {
 			// Single column layout - render products vertically.
 			$content = '';
@@ -107,7 +111,7 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 				// For subsequent products, add margin-top for spacing between items.
 				$email_attrs = $inner_block['email_attrs'] ?? array();
 				if ( $index > 0 && ! isset( $email_attrs['margin-top'] ) ) {
-					$email_attrs['margin-top'] = '32px';
+					$email_attrs['margin-top'] = $block_gap;
 				}
 				$content .= $this->add_spacer(
 					$this->render_product_content( $product, $inner_block, $collection_type ),
@@ -121,7 +125,7 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 		// Two-column layout using HTML tables for email compatibility.
 		// Wrap with add_spacer to match single-column spacing behavior.
 		return $this->add_spacer(
-			$this->render_two_column_grid( $products, $inner_block, $collection_type, $rendering_context ),
+			$this->render_two_column_grid( $products, $inner_block, $collection_type, $rendering_context, $block_gap ),
 			$inner_block['email_attrs'] ?? array()
 		);
 	}
@@ -133,9 +137,10 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 	 * @param array             $inner_block Inner block data.
 	 * @param string            $collection_type Collection type identifier.
 	 * @param Rendering_Context $rendering_context Rendering context.
+	 * @param string            $block_gap Block gap value from theme styles.
 	 * @return string
 	 */
-	private function render_two_column_grid( array $products, array $inner_block, string $collection_type, Rendering_Context $rendering_context ): string {
+	private function render_two_column_grid( array $products, array $inner_block, string $collection_type, Rendering_Context $rendering_context, string $block_gap = '16px' ): string {
 		$content = '';
 
 		// Calculate the cell width from the actual layout width.
@@ -178,7 +183,7 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 
 			// Add spacing between rows (except after the last row).
 			if ( $row_index < count( $product_chunks ) - 1 ) {
-				$content .= '<tr><td colspan="2" style="height: 20px;"></td></tr>';
+				$content .= sprintf( '<tr><td colspan="2" style="height: %s;"></td></tr>', esc_attr( $block_gap ) );
 			}
 		}
 
