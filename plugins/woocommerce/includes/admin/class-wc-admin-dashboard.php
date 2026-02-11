@@ -143,8 +143,9 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 				'wc-status-widget-async',
 				'wc_status_widget_params',
 				array(
-					'ajax_url' => admin_url( 'admin-ajax.php' ),
-					'security' => wp_create_nonce( 'wc-status-widget' ),
+					'ajax_url'      => admin_url( 'admin-ajax.php' ),
+					'security'      => wp_create_nonce( 'wc-status-widget' ),
+					'error_message' => esc_html__( 'Error loading widget', 'woocommerce' ),
 				)
 			);
 
@@ -485,8 +486,9 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 				'wc-recent-reviews-widget-async',
 				'wc_recent_reviews_widget_params',
 				array(
-					'ajax_url' => admin_url( 'admin-ajax.php' ),
-					'security' => wp_create_nonce( 'wc-recent-reviews-widget' ),
+					'ajax_url'      => admin_url( 'admin-ajax.php' ),
+					'security'      => wp_create_nonce( 'wc-recent-reviews-widget' ),
+					'error_message' => esc_html__( 'Error loading widget', 'woocommerce' ),
 				)
 			);
 
@@ -523,6 +525,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 				array(
 					'type'                      => 'review',
 					'status'                    => 'approve',
+					'parent'                    => 0,
 					'number'                    => 25,
 					'update_comment_post_cache' => true,
 				)

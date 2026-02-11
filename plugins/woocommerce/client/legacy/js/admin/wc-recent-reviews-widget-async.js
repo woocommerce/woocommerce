@@ -34,7 +34,8 @@ jQuery(function($) {
     }
 
     function showErrorMessage() {
-        $( '#wc-recent-reviews-widget-loading' ).html( '<p>' + 'Error loading widget' + '</p>' );
+		const message = wc_recent_reviews_widget_params.error_message || 'Error loading widget';
+        $( '#wc-recent-reviews-widget-loading' ).html( '<p>' + message + '</p>' );
     }
 
     // Start loading the widget after a very short delay
