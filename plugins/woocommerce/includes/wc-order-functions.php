@@ -503,24 +503,11 @@ function wc_delete_shop_order_transients( $order = 0 ) {
 	if ( $order && is_numeric( $order ) ) {
 		$order = wc_get_order( $order );
 	}
-	$reports             = WC_Admin_Reports::get_reports();
-	$transients_to_clear = array(
-		'wc_admin_report',
-	);
-
-	foreach ( $reports as $report_group ) {
-		foreach ( $report_group['reports'] as $report_key => $report ) {
-			$transients_to_clear[] = 'wc_report_' . $report_key;
-		}
-	}
-
-	foreach ( $transients_to_clear as $transient ) {
-		delete_transient( $transient );
-	}
 
 	// Clear customer's order related caches.
+	$order_id = 0;
 	if ( is_a( $order, 'WC_Order' ) ) {
-		$order_id = $order->get_id();
+		$order_id    = $order->get_id();
 
 		// Delete the memorized data only if accessible, so we do not invalidate metas-cache (triggered by deleting the metas).
 		$customer_id        = $order->get_customer_id();

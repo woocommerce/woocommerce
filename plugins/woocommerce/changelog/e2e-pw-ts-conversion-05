@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Convert fourth set of e2e-pw test file to TypeScript.
