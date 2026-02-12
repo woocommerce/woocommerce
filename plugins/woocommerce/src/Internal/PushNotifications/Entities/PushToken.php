@@ -346,8 +346,8 @@ class PushToken {
 		}
 
 		if ( ! empty( $metadata ) ) {
-			$keys     = array_map( 'sanitize_key', array_keys( $metadata ) );
-			$values   = array_map( 'sanitize_text_field', array_values( $metadata ) );
+			$keys   = array_map( 'sanitize_key', array_keys( $metadata ) );
+			$values = array_map( 'sanitize_text_field', array_values( $metadata ) );
 
 			/**
 			 * Typehint for PHPStan, as it can't infer the $keys and $values are
