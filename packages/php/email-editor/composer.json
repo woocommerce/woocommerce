@@ -5,7 +5,11 @@
 	"license": "GPL-2.0-or-later",
 	"prefer-stable": true,
 	"minimum-stability": "dev",
+<<<<<<< HEAD
 	"version": "2.3.0",
+=======
+	"version": "2.7.0",
+>>>>>>> a1b371e525 (Prepare Packages for Release (#63271))
 	"autoload": {
 		"classmap": [
 			"src/",

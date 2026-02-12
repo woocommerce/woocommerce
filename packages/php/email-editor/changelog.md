@@ -2,6 +2,35 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+<<<<<<< HEAD
+=======
+## [2.7.0](https://github.com/woocommerce/email-editor/releases/tag/2.7.0) - 2026-02-12 
+
+-   Patch - Fix YouTube URL truncation in subscription emails when video IDs contain underscores. [#63252]
+-   Minor - Add two-column grid layout support for Product Collection block in email rendering. [#63122]
+
+## [2.6.0](https://github.com/woocommerce/email-editor/releases/tag/2.6.0) - 2026-02-04 
+
+-   Minor - Add post_id parameter and action hook for context-aware personalization tags [#63103]
+
+## [2.5.0](https://github.com/woocommerce/email-editor/releases/tag/2.5.0) - 2026-01-29 
+
+-   Minor - Fix image alignment by adding alignment to the inner cell when rendered.  Fix image border alignment by adding a border wrapper. [#62899]
+-   Minor - Add action hooks for customizing preview email sending: woocommerce_email_editor_send_preview_email_before_wp_mail and woocommerce_email_editor_send_preview_email_after_wp_mail. [#62936]
+-   Minor - Add support for VideoPress embeds in the Email Editor package. [#62870]
+-   Patch - Improved extraction of style values from site theme [#62911]
+
+## [2.4.0](https://github.com/woocommerce/email-editor/releases/tag/2.4.0) - 2026-01-21 
+
+-   Minor - Add woocommerce_email_editor_site_theme filter to allow overriding the site theme used when syncing global styles for the email editor. [#62889]
+-   Minor - Email editor: Add support for horizontal blockGap settings on columns. [#62838]
+-   Minor - Prevent rendering of CSS margins in email HTML output [#62794]
+
+## [2.3.1](https://github.com/woocommerce/email-editor/releases/tag/2.3.1) - 2026-01-16 
+
+-   Patch - Fix personalization tag attributes not being processed in email links [#62822]
+
+>>>>>>> a1b371e525 (Prepare Packages for Release (#63271))
 ## [2.3.0](https://github.com/woocommerce/email-editor/releases/tag/2.3.0) - 2026-01-05 
 
 -   Patch - Email Editor: prevent fatal type errors in Blocks_Width_Preprocessor [#62524]
