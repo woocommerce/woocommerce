@@ -130,10 +130,22 @@ class Controller extends GenericController implements ExportableInterface {
 			}
 		}
 		if ( ! empty( $include_sets ) ) {
-			$ids               = 'all' === $match
-				? call_user_func_array( 'array_intersect', $include_sets )
-				: array_unique( array_merge( ...$include_sets ) );
-			$args['customers'] = array_values( $ids );
+			$consolidated = count( $include_sets ) > 1
+				? ( 'all' === $match
+					? call_user_func_array( 'array_intersect', $include_sets )
+					: array_unique( array_merge( ...$include_sets ) ) )
+				: $include_sets[0];
+
+			// Merge with any pre-existing customers filter.
+			if ( ! empty( $args['customers'] ) ) {
+				$existing     = wp_parse_id_list( $args['customers'] );
+				$consolidated = 'all' === $match
+					? array_intersect( $consolidated, $existing )
+					: array_unique( array_merge( $consolidated, $existing ) );
+			}
+
+			// When match=all and intersection is empty, force no-results.
+			$args['customers'] = empty( $consolidated ) ? array( 0 ) : array_values( $consolidated );
 		}
 
 		$exclude_sets = array();
@@ -144,10 +156,19 @@ class Controller extends GenericController implements ExportableInterface {
 			}
 		}
 		if ( ! empty( $exclude_sets ) ) {
-			$ids                       = 'all' === $match
-				? array_unique( array_merge( ...$exclude_sets ) )
-				: call_user_func_array( 'array_intersect', $exclude_sets );
-			$args['customers_exclude'] = array_values( $ids );
+			$consolidated = count( $exclude_sets ) > 1
+				? ( 'all' === $match
+					? array_unique( array_merge( ...$exclude_sets ) )
+					: call_user_func_array( 'array_intersect', $exclude_sets ) )
+				: $exclude_sets[0];
+
+			// Merge with any pre-existing customers_exclude filter.
+			if ( ! empty( $args['customers_exclude'] ) ) {
+				$existing     = wp_parse_id_list( $args['customers_exclude'] );
+				$consolidated = array_unique( array_merge( $consolidated, $existing ) );
+			}
+
+			$args['customers_exclude'] = array_values( $consolidated );
 		}
 
 		return $args;
