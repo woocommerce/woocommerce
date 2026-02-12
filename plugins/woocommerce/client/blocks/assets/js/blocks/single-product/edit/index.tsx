@@ -14,6 +14,7 @@ import ErrorPlaceholder, {
 import { PRODUCTS_STORE_NAME, Product } from '@woocommerce/data';
 import { useSelect } from '@wordpress/data';
 import { Icon, info } from '@wordpress/icons';
+import { usePreviewMode } from '@woocommerce/base-hooks';
 import {
 	Placeholder,
 	// @ts-expect-error Using experimental features
@@ -60,7 +61,8 @@ const Editor = ( {
 	isLoading,
 	clientId,
 }: EditorProps ) => {
-	const { productId, isPreview } = attributes;
+	const { productId } = attributes;
+	const isPreviewMode = usePreviewMode();
 	const [ isEditing, setIsEditing ] = useState( ! productId );
 	const blockProps = useBlockProps();
 
@@ -70,7 +72,7 @@ const Editor = ( {
 	);
 
 	const productPreview = useSelect( ( select ) => {
-		if ( ! isPreview ) {
+		if ( ! isPreviewMode ) {
 			return null;
 		}
 		return select( PRODUCTS_STORE_NAME ).getProducts< Array< Product > >( {
