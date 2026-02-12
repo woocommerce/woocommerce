@@ -436,12 +436,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 			await expect( addToCartButton ).not.toHaveClass( /\bdisabled\b/ );
 
-			// iAPI cart uses batch requests, legacy cart uses individual endpoints.
-			// Set up waitForResponse BEFORE the click to avoid race condition.
-			const useBatch = config.features[ 'experimental-iapi-mini-cart' ];
-			const batchPromise = useBatch
-				? page.waitForResponse( '**/wc/store/v1/batch**' )
-				: null;
+			// Set up waitForResponse BEFORE the click to avoid race condition
+			// where page.reload() executes before the cart is updated.
+			const batchPromise = page.waitForResponse(
+				'**/wc/store/v1/batch**'
+			);
 			await addToCartButton.click();
 
 			await expect(
@@ -451,12 +450,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 				} )
 			).toBeVisible();
 
-			// Wait for the batch API response to ensure the DB has been updated.
-			// This prevents a race condition where the subsequent page.reload()
-			// could execute before the product is fully added to the cart.
-			if ( batchPromise ) {
-				await batchPromise;
-			}
+			await batchPromise;
 
 			await expect(
 				page.getByLabel(
@@ -503,6 +497,93 @@ test.describe( 'Add to Cart + Options Block', () => {
 			).toBeVisible();
 			// Verify optimistic updates were applied, so the product that was
 			// successfully added to cart is counted.
+			await expect(
+				page.getByLabel(
+					config.features[ 'experimental-iapi-mini-cart' ]
+						? 'Number of items in the cart: 4'
+						: '4 items in cart'
+				)
+			).toBeVisible();
+		} );
+	} );
+
+	test( 'correctly reconciles cart state when adding grouped products multiple times', async ( {
+		page,
+		pageObject,
+		editor,
+	} ) => {
+		await pageObject.updateSingleProductTemplate();
+
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
+
+		await page.goto( '/product/logo-collection' );
+
+		const addToCartButton = page
+			.getByRole( 'button', { name: 'Add to cart' } )
+			.first();
+
+		const increaseBeanie = page
+			.locator(
+				'[data-block-name="woocommerce/add-to-cart-with-options"]'
+			)
+			.getByLabel( 'Increase quantity of Beanie' );
+
+		const increaseTShirt = page
+			.locator(
+				'[data-block-name="woocommerce/add-to-cart-with-options"]'
+			)
+			.getByLabel( 'Increase quantity of T-Shirt' );
+
+		await test.step( 'add two child products to cart', async () => {
+			await increaseBeanie.click();
+			await increaseTShirt.click();
+
+			await addToCartButton.click();
+
+			await expect(
+				page.getByRole( 'button', {
+					name: 'Added to cart',
+					exact: true,
+				} )
+			).toBeVisible();
+
+			await expect(
+				page.getByLabel(
+					config.features[ 'experimental-iapi-mini-cart' ]
+						? 'Number of items in the cart: 2'
+						: '2 items in cart'
+				)
+			).toBeVisible();
+		} );
+
+		await test.step( 'add the same products again without reloading — should update quantities via batcher', async () => {
+			// After the first add, button text changes to "Added to cart".
+			// Quantities still show 1 for each. Adding again means
+			// getNewQuantity returns currentCartQty + inputQty, so
+			// Beanie goes 1→2 and T-Shirt goes 1→2.
+			const addedToCartButton = page
+				.getByRole( 'button', {
+					name: 'Added to cart',
+					exact: true,
+				} )
+				.first();
+
+			await addedToCartButton.click();
+
+			await expect(
+				page.getByLabel(
+					config.features[ 'experimental-iapi-mini-cart' ]
+						? 'Number of items in the cart: 4'
+						: '4 items in cart'
+				)
+			).toBeVisible();
+		} );
+
+		await test.step( 'verify cart state persists after reload', async () => {
+			await page.reload();
+
 			await expect(
 				page.getByLabel(
 					config.features[ 'experimental-iapi-mini-cart' ]

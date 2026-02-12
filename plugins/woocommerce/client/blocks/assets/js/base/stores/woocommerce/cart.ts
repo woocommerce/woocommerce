@@ -7,7 +7,6 @@ import type {
 	CartItem,
 	CartVariationItem,
 	ApiErrorResponse,
-	ApiResponse,
 	CartResponseTotals,
 	Currency,
 } from '@woocommerce/types';
@@ -127,10 +126,6 @@ type QuantityChanges = {
 	cartItemsPendingQuantity?: string[];
 	cartItemsPendingDelete?: string[];
 	productsPendingAdd?: number[];
-};
-
-type BatchResponse = {
-	responses: ApiResponse< Cart >[];
 };
 
 // Guard to distinguish between optimistic and cart items.
@@ -535,137 +530,119 @@ const { state, actions } = store< Store >(
 				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
 			) {
 				const a11yModulePromise = import( '@wordpress/a11y' );
-				const previousCart = JSON.stringify( state.cart );
 				const quantityChanges: QuantityChanges = {};
 
-				// Updates the database.
 				try {
-					const requests = items.map( ( item ) => {
+					// Submit each item through the batcher. They'll be
+					// collected into a single batch request automatically.
+					const promises = items.map( ( item, index ) => {
 						const existingItem = state.cart.items.find(
 							( { id: productId } ) => item.id === productId
 						);
 
-						// Updates existing cart item.
-						if ( existingItem ) {
-							// Optimistically updates the number of items in the cart.
-							existingItem.quantity = item.quantity;
-							if ( existingItem.key ) {
-								quantityChanges.cartItemsPendingQuantity = [
-									...( quantityChanges.cartItemsPendingQuantity ??
-										[] ),
-									existingItem.key,
-								];
-							}
+						const quantity = item.quantity ?? 1;
+						const isUpdate = !! existingItem?.key;
+						const endpoint = isUpdate ? 'update-item' : 'add-item';
 
-							return {
-								method: 'POST',
-								path: `/wc/store/v1/cart/update-item`,
-								headers: {
-									Nonce: state.nonce,
-									'Content-Type': 'application/json',
-								},
-								body: existingItem,
-							};
+						let itemToSend: OptimisticCartItem;
+						if ( isUpdate && existingItem ) {
+							itemToSend = {
+								key: existingItem.key,
+								id: existingItem.id,
+								quantity,
+							} as OptimisticCartItem;
+							quantityChanges.cartItemsPendingQuantity = [
+								...( quantityChanges.cartItemsPendingQuantity ??
+									[] ),
+								existingItem.key as string,
+							];
+						} else {
+							const quantityToSend = existingItem
+								? quantity - existingItem.quantity
+								: quantity;
+							itemToSend = {
+								id: item.id,
+								quantity: quantityToSend,
+								...( item.variation && {
+									variation: item.variation,
+								} ),
+							} as OptimisticCartItem;
+							quantityChanges.productsPendingAdd = [
+								...( quantityChanges.productsPendingAdd ?? [] ),
+								item.id,
+							];
 						}
 
-						// Adds new cart item.
-						item = {
-							id: item.id,
-							quantity: item.quantity,
-							...( item.variation && {
-								variation: item.variation,
-							} ),
-						} as OptimisticCartItem;
-						state.cart.items.push( item );
-						quantityChanges.productsPendingAdd =
-							quantityChanges.productsPendingAdd
-								? [
-										...quantityChanges.productsPendingAdd,
-										item.id,
-								  ]
-								: [ item.id ];
+						const isLastItem = index === items.length - 1;
 
-						return {
+						return sendCartRequest( state, {
+							path: `/wc/store/v1/cart/${ endpoint }`,
 							method: 'POST',
-							path: `/wc/store/v1/cart/add-item`,
-							headers: {
-								Nonce: state.nonce,
-								'Content-Type': 'application/json',
+							body: itemToSend,
+							applyOptimistic: () => {
+								if ( existingItem ) {
+									existingItem.quantity = quantity;
+								} else {
+									state.cart.items.push( itemToSend );
+								}
 							},
-							body: item,
-						};
+							// Only fire events on the last item to avoid
+							// duplicate notifications mid-batch.
+							// Fire events when ANY item in the batch
+							// succeeded (data is set from the last
+							// successful server state). Only the last
+							// item's callback fires to avoid duplicates.
+							onSettled: isLastItem
+								? ( { data } ) => {
+										if ( data ) {
+											triggerAddedToCartEvent( {
+												preserveCartData: true,
+											} );
+											emitSyncEvent( {
+												quantityChanges,
+											} );
+										}
+								  }
+								: undefined,
+						} );
 					} );
 
-					const res: Response = yield fetch(
-						`${ state.restUrl }wc/store/v1/batch`,
-						{
-							method: 'POST',
-							headers: {
-								Nonce: state.nonce,
-								'Content-Type': 'application/json',
-							},
-							body: JSON.stringify( { requests } ),
-						}
+					// Capture cart state after optimistic updates for notices.
+					const cartAfterOptimistic = JSON.parse(
+						JSON.stringify( state.cart )
 					);
 
-					const json: BatchResponse = yield res.json();
+					const results: PromiseSettledResult<
+						MutationResult< Cart >
+					>[] = yield Promise.allSettled( promises );
 
-					// Checks if the response contains an error.
-					if ( isApiErrorResponse( res, json ) )
-						throw generateError( json );
-
-					const errorResponses = Array.isArray( json.responses )
-						? json.responses.filter(
-								( response ) =>
-									response.status < 200 ||
-									response.status >= 300
-						  )
-						: [];
-
-					const successfulResponses = Array.isArray( json.responses )
-						? json.responses.filter(
-								( response ) =>
-									response.status >= 200 &&
-									response.status < 300
-						  )
-						: [];
-
-					// Only update the cart and trigger events if there is at least one successful response.
-					if ( successfulResponses.length > 0 ) {
-						const lastSuccessfulCartResponse = successfulResponses[
-							successfulResponses.length - 1
-						]?.body as Cart;
-
-						const infoNotices = showCartUpdatesNotices
-							? getInfoNoticesFromCartUpdates(
-									state.cart,
-									lastSuccessfulCartResponse,
-									quantityChanges
-							  )
-							: [];
-
-						// Generate notices for any error that successful
-						// responses may contain.
-						const errorNotices = successfulResponses.flatMap(
-							( response ) => {
-								const errors = ( response.body.errors ??
-									[] ) as ApiErrorResponse[];
-								return errors.map( generateErrorNotice );
-							}
+					// Find the last successful result for notices/a11y.
+					const lastSuccess = [ ...results ]
+						.reverse()
+						.find(
+							(
+								r
+							): r is PromiseFulfilledResult<
+								MutationResult< Cart >
+							> => r.status === 'fulfilled' && r.value.success
 						);
 
-						yield actions.updateNotices(
-							[ ...infoNotices, ...errorNotices ],
-							true
-						);
+					if ( lastSuccess ) {
+						const cart = lastSuccess.value.data as Cart;
 
-						// Use the last successful response to update the local cart.
-						state.cart = lastSuccessfulCartResponse;
-
-						// Dispatches a legacy event.
-						triggerAddedToCartEvent( {
-							preserveCartData: true,
-						} );
+						if ( showCartUpdatesNotices ) {
+							const infoNotices = getInfoNoticesFromCartUpdates(
+								cartAfterOptimistic,
+								cart,
+								quantityChanges
+							);
+							const errorNotices =
+								cart.errors.map( generateErrorNotice );
+							yield actions.updateNotices(
+								[ ...infoNotices, ...errorNotices ],
+								true
+							);
+						}
 
 						const { messages } = getConfig(
 							'woocommerce'
@@ -674,29 +651,21 @@ const { state, actions } = store< Store >(
 							const { speak } = yield a11yModulePromise;
 							speak( messages.addedToCartText, 'polite' );
 						}
-
-						// Dispatches the event to sync the @wordpress/data store.
-						emitSyncEvent( { quantityChanges } );
 					}
 
-					// Show error notices for all failed responses.
-					yield actions.updateNotices(
-						errorResponses
-							.filter(
-								( response ) =>
-									response.body &&
-									typeof response.body === 'object'
-							)
-							.map( ( { body } ) =>
-								generateErrorNotice( body as ApiErrorResponse )
-							)
-					);
+					// Show error notices for failed items.
+					const errorNotices = results
+						.filter(
+							( r ): r is PromiseRejectedResult =>
+								r.status === 'rejected'
+						)
+						.map( ( r ) =>
+							generateErrorNotice( r.reason as ApiErrorResponse )
+						);
+					if ( errorNotices.length > 0 ) {
+						yield actions.updateNotices( errorNotices );
+					}
 				} catch ( error ) {
-					// Reverts the optimistic update.
-					// Todo: Prevent racing conditions with multiple addToCart calls for the same item.
-					state.cart = JSON.parse( previousCart );
-
-					// Shows the error notice.
 					actions.showNoticeError( error as Error );
 				}
 			},
