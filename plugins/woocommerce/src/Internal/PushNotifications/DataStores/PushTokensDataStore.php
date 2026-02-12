@@ -344,7 +344,8 @@ class PushTokensDataStore {
 				'origin'        => $push_token->get_origin(),
 				'device_locale' => $push_token->get_device_locale(),
 				'metadata'      => $push_token->get_metadata(),
-			)
+			),
+			fn ( $value ) => null !== $value && '' !== $value
 		);
 	}
 }

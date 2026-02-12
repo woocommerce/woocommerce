@@ -275,7 +275,7 @@ class PushToken {
 	 * @throws PushTokenInvalidDataException If device locale is not valid.
 	 * @return void
 	 *
-	 * @internal
+	 * @since 10.6.0
 	 */
 	public function set_device_locale( string $device_locale ): void {
 		$result = PushTokenValidator::validate( compact( 'device_locale' ), array( 'device_locale' ) );
@@ -335,7 +335,7 @@ class PushToken {
 	 * @throws PushTokenInvalidDataException If metadata is not valid.
 	 * @return void
 	 *
-	 * @internal
+	 * @since 10.6.0
 	 */
 	public function set_metadata( array $metadata ): void {
 		$result = PushTokenValidator::validate( compact( 'metadata' ), array( 'metadata' ) );
@@ -345,10 +345,20 @@ class PushToken {
 			throw new PushTokenInvalidDataException( $result->get_error_message() );
 		}
 
-		$keys = array_map( 'sanitize_key', array_keys( $metadata ) );
-		$values = array_map( 'sanitize_text_field', array_values( $metadata ) );
+		if ( ! empty( $metadata ) ) {
+			$keys     = array_map( 'sanitize_key', array_keys( $metadata ) );
+			$values   = array_map( 'sanitize_text_field', array_values( $metadata ) );
 
-		$this->metadata = array_combine( $keys, $values );
+			/**
+			 * Typehint for PHPStan, as it can't infer the $keys and $values are
+			 * the same length therefore array_combine won't return false.
+			 *
+			 * @var array<string, string> $metadata
+			 */
+			$metadata = array_combine( $keys, $values );
+		}
+
+		$this->metadata = $metadata;
 	}
 
 	/**
@@ -422,7 +432,7 @@ class PushToken {
 	 *
 	 * @return string|null
 	 *
-	 * @internal
+	 * @since 10.6.0
 	 */
 	public function get_device_locale(): ?string {
 		return $this->device_locale;
@@ -433,7 +443,7 @@ class PushToken {
 	 *
 	 * @return array|null
 	 *
-	 * @internal
+	 * @since 10.6.0
 	 */
 	public function get_metadata(): ?array {
 		return $this->metadata;

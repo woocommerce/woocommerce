@@ -465,9 +465,9 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests can_be_created returns false when metadata is missing.
+	 * @testdox Tests can_be_created returns true when metadata is missing.
 	 */
-	public function test_it_cannot_be_created_when_metadata_is_missing() {
+	public function test_it_can_be_created_when_metadata_is_missing() {
 		$push_token = new PushToken(
 			array(
 				'user_id'       => 1,
@@ -479,13 +479,13 @@ class PushTokenTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertFalse( $push_token->can_be_created() );
+		$this->assertTrue( $push_token->can_be_created() );
 	}
 
 	/**
-	 * @testdox Tests can_be_updated returns false when metadata is missing.
+	 * @testdox Tests can_be_updated returns true when metadata is missing.
 	 */
-	public function test_it_cannot_be_updated_when_metadata_is_missing() {
+	public function test_it_can_be_updated_when_metadata_is_missing() {
 		$push_token = new PushToken(
 			array(
 				'id'            => 1,
@@ -498,7 +498,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertFalse( $push_token->can_be_updated() );
+		$this->assertTrue( $push_token->can_be_updated() );
 	}
 
 	/**

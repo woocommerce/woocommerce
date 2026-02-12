@@ -267,7 +267,7 @@ class PushTokenValidator {
 	 * @param array|null $context An array of other values included as context for the validation.
 	 * @return bool|WP_Error
 	 *
-	 * @internal
+	 * @since 10.6.0
 	 */
 	private static function validate_device_locale( $value, ?array $context = array() ) {
 		if ( ! isset( $value ) ) {
@@ -405,7 +405,7 @@ class PushTokenValidator {
 	 * @param array|null $context An array of other values included as context for the validation.
 	 * @return bool|WP_Error
 	 *
-	 * @internal
+	 * @since 10.6.0
 	 */
 	private static function validate_metadata( $value, ?array $context = array() ) {
 		if ( ! isset( $value ) ) {
