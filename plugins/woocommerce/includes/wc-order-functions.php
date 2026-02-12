@@ -507,7 +507,7 @@ function wc_delete_shop_order_transients( $order = 0 ) {
 	// Clear customer's order related caches.
 	$order_id = 0;
 	if ( $order && is_a( $order, 'WC_Order' ) ) {
-		$order_id    = $order->get_id();
+		$order_id = $order->get_id();
 
 		// Delete the memorized data only if accessible, so we do not invalidate metas-cache (triggered by deleting the metas).
 		$customer_id        = $order->get_customer_id();
