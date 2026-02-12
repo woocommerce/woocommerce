@@ -27,6 +27,9 @@ class Products extends Task {
 		add_action( 'woocommerce_new_product', array( $this, 'maybe_set_has_product_transient' ), 10, 2 );
 		add_action( 'untrashed_post', array( $this, 'maybe_set_has_product_transient_on_untrashed_post' ) );
 		add_action( 'current_screen', array( $this, 'maybe_redirect_to_add_product_tasklist' ), 30, 0 );
+
+		add_action( 'trashed_post', array( $this, 'on_product_trashed' ) );
+		add_action( 'deleted_post_product', array( $this, 'on_product_deleted' ) );
 	}
 
 	/**
@@ -176,6 +179,50 @@ class Products extends Task {
 		if ( ! $this->has_previously_completed() && $this->is_valid_product( $product ) ) {
 			set_transient( self::HAS_PRODUCT_TRANSIENT, 'yes' );
 			$this->possibly_track_completion();
+		}
+	}
+
+	/**
+	 * Handle product trashing via the trashed_post hook.
+	 *
+	 * @param int $post_id Post ID.
+	 * @return void
+	 */
+	public function on_product_trashed( $post_id ) {
+		if ( get_post_type( $post_id ) !== 'product' ) {
+			return;
+		}
+
+		$this->revert_task_completion();
+	}
+
+	/**
+	 * Handle permanent product deletion via the deleted_post_product hook.
+	 *
+	 * @return void
+	 */
+	public function on_product_deleted() {
+		$this->revert_task_completion();
+	}
+
+	/**
+	 * Re-check whether valid products still exist and revert task completion if none remain.
+	 *
+	 * @return void
+	 */
+	private function revert_task_completion() {
+		delete_transient( self::HAS_PRODUCT_TRANSIENT );
+
+		if ( self::has_products() ) {
+			return;
+		}
+
+		$completed_tasks = get_option( self::COMPLETED_OPTION, array() );
+		$task_id         = $this->get_id();
+
+		if ( in_array( $task_id, $completed_tasks, true ) ) {
+			$completed_tasks = array_values( array_diff( $completed_tasks, array( $task_id ) ) );
+			update_option( self::COMPLETED_OPTION, $completed_tasks );
 		}
 	}
 
