@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Remove woocommerce/product-data iAPI store and replace with woocommerce/product-context store
