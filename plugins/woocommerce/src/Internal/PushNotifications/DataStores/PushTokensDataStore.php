@@ -315,6 +315,7 @@ class PushTokensDataStore {
 	 */
 	private function build_meta_array_from_database( int $id ): array {
 		update_meta_cache( 'post', array( $id ) );
+		/** @var array<string, mixed> $meta_by_key */
 		$meta_by_key = array_combine( static::SUPPORTED_META, static::SUPPORTED_META );
 
 		foreach ( static::SUPPORTED_META as $key ) {
