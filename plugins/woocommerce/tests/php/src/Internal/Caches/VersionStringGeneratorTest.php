@@ -305,13 +305,13 @@ class VersionStringGeneratorTest extends WC_Unit_Test_Case {
 		try {
 			$mock_cache = $this->createMock( \WP_Object_Cache::class );
 			$mock_cache->method( 'delete' )->willReturn( null );
-			$wp_object_cache = $mock_cache;
+			$wp_object_cache = $mock_cache; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
 			$result = $this->sut->delete_version( 'some-id' );
 
 			$this->assertTrue( $result, 'delete_version should return true when wp_cache_delete returns non-boolean' );
 		} finally {
-			$wp_object_cache = $original_cache;
+			$wp_object_cache = $original_cache; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		}
 	}
 
@@ -337,13 +337,13 @@ class VersionStringGeneratorTest extends WC_Unit_Test_Case {
 					return $original_cache->get( $key, $group, $force, $found );
 				}
 			);
-			$wp_object_cache = $mock_cache;
+			$wp_object_cache = $mock_cache; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
 			$version = $this->sut->generate_version( 'test-store-ok' );
 
 			$this->assertNotEmpty( $version, 'generate_version should return a version even when wp_cache_set returns non-boolean' );
 		} finally {
-			$wp_object_cache = $original_cache;
+			$wp_object_cache = $original_cache; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		}
 	}
 
@@ -373,14 +373,14 @@ class VersionStringGeneratorTest extends WC_Unit_Test_Case {
 					return $original_cache->delete( $key, $group );
 				}
 			);
-			$wp_object_cache = $mock_cache;
+			$wp_object_cache = $mock_cache; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
 			$version = $this->sut->generate_version( 'test-store-fail' );
 
 			// generate_version still returns a UUID string, but the store failed silently.
 			$this->assertNotEmpty( $version );
 		} finally {
-			$wp_object_cache = $original_cache;
+			$wp_object_cache = $original_cache; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		}
 
 		// The corrupted value should have been cleaned up.
