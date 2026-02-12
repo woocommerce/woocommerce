@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
 import { useMemo } from '@wordpress/element';
+import { createSlotFill } from '@wordpress/components';
 // eslint-disable-next-line @woocommerce/dependency-group
 import {
 	ErrorBoundary,
@@ -27,6 +28,17 @@ const tracking = {
 	recordEventOnce,
 	debouncedRecordEvent,
 };
+
+/**
+ * A slot fill for the email actions section of the email editor.
+ *
+ * This component is used to render the email actions section of the email editor.
+ */
+const { Fill: EmailActionsFill, Slot } = createSlotFill(
+	'WooCommerceEmailEditorPostSummarySection'
+);
+
+export { EmailActionsFill };
 
 export function SettingsPanel() {
 	const SidebarExtensionComponent = useMemo(
@@ -56,6 +68,7 @@ export function SettingsPanel() {
 			className="woocommerce-email-editor__settings-panel"
 		>
 			{ <EmailStatusComponent /> }
+			<Slot />
 			{ <TemplateSelection /> }
 			{ /* @ts-expect-error canCopyContent is missing in @types/wordpress__editor */ }
 			<ErrorBoundary canCopyContent>
