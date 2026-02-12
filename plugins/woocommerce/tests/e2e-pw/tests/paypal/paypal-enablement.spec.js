@@ -13,12 +13,6 @@ test.describe(
 
 		const visibilityOptions = { timeout: 30000 };
 
-		function validStatusLabel( paypalDiv ) {
-			const labelActive = paypalDiv.getByText( 'Active' );
-			const labelTestAccount = paypalDiv.getByText( 'Test account' );
-			return labelActive.or( labelTestAccount );
-		}
-
 		async function openWCSettings( page ) {
 			await page.goto( '/wp-admin/index.php', {
 				// networkidle is needed to ensure all JS files are loaded and avoid race conditions
