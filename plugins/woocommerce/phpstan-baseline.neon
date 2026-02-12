@@ -72607,12 +72607,6 @@ parameters:
 			path: src/StoreApi/Routes/V1/AbstractCartRoute.php
 
 		-
-			message: '#^Call to an undefined method WP_Error\|WP_REST_Response\:\:add_links\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/StoreApi/Routes/V1/AbstractRoute.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\AbstractRoute\:\:get_response\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
 			count: 1
@@ -72675,12 +72669,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\AbstractRoute\:\:prepare_item_for_response\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
-			count: 1
-			path: src/StoreApi/Routes/V1/AbstractRoute.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\AbstractRoute\:\:prepare_item_for_response\(\) should return WP_REST_Response but returns WP_Error\|WP_REST_Response\.$#'
-			identifier: return.type
 			count: 1
 			path: src/StoreApi/Routes/V1/AbstractRoute.php
 
@@ -73999,8 +73987,8 @@ parameters:
 			path: src/StoreApi/Routes/V1/ProductsById.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\ProductsById\:\:get_route_response\(\) should return WP_REST_Response but returns WP_Error\|WP_REST_Response\.$#'
-			identifier: return.type
+			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\ProductsById\:\:prepare_links\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
+			identifier: missingType.generics
 			count: 1
 			path: src/StoreApi/Routes/V1/ProductsById.php
 
@@ -74023,8 +74011,8 @@ parameters:
 			path: src/StoreApi/Routes/V1/ProductsBySlug.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\ProductsBySlug\:\:get_route_response\(\) should return WP_REST_Response but returns WP_Error\|WP_REST_Response\.$#'
-			identifier: return.type
+			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\ProductsBySlug\:\:prepare_links\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
+			identifier: missingType.generics
 			count: 1
 			path: src/StoreApi/Routes/V1/ProductsBySlug.php
 
