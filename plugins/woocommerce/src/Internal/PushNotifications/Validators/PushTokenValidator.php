@@ -12,6 +12,8 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use WP_Error;
 
+// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+
 /**
  * Validator class for push tokens.
  *
@@ -114,7 +116,6 @@ class PushTokenValidator {
 
 	/**
 	 * Validates ID.
-	// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 	 *
 	 * @since 10.6.0
 	 *
@@ -123,7 +124,6 @@ class PushTokenValidator {
 	 * @return bool|WP_Error
 	 */
 	private static function validate_id( $value, ?array $context = array() ) {
-		// phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		if ( is_null( $value ) ) {
 			return new WP_Error( self::ERROR_CODE, 'ID is required.' );
 		}
@@ -141,7 +141,6 @@ class PushTokenValidator {
 
 	/**
 	 * Validates user ID.
-	// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 	 *
 	 * @since 10.6.0
 	 *
@@ -150,7 +149,6 @@ class PushTokenValidator {
 	 * @return bool|WP_Error
 	 */
 	private static function validate_user_id( $value, ?array $context = array() ) {
-		// phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		if ( is_null( $value ) ) {
 			return new WP_Error( self::ERROR_CODE, 'User ID is required.' );
 		}
@@ -168,7 +166,6 @@ class PushTokenValidator {
 
 	/**
 	 * Validates origin.
-	// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 	 *
 	 * @since 10.6.0
 	 *
@@ -177,7 +174,6 @@ class PushTokenValidator {
 	 * @return bool|WP_Error
 	 */
 	private static function validate_origin( $value, ?array $context = array() ) {
-		// phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		if ( is_null( $value ) ) {
 			return new WP_Error( self::ERROR_CODE, 'Origin is required.' );
 		}
@@ -264,7 +260,6 @@ class PushTokenValidator {
 		return true;
 	}
 
-	// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 	/**
 	 * Validates device locale.
 	 *
@@ -275,7 +270,6 @@ class PushTokenValidator {
 	 * @internal
 	 */
 	private static function validate_device_locale( $value, ?array $context = array() ) {
-		// phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		if ( ! isset( $value ) ) {
 			return new WP_Error( self::ERROR_CODE, 'Device locale is required.' );
 		}
@@ -299,7 +293,6 @@ class PushTokenValidator {
 
 	/**
 	 * Validates platform.
-	// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 	 *
 	 * @since 10.6.0
 	 *
@@ -308,7 +301,6 @@ class PushTokenValidator {
 	 * @return bool|WP_Error
 	 */
 	private static function validate_platform( $value, ?array $context = array() ) {
-		// phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		if ( is_null( $value ) ) {
 			return new WP_Error( self::ERROR_CODE, 'Platform is required.' );
 		}
@@ -406,7 +398,6 @@ class PushTokenValidator {
 		return true;
 	}
 
-	// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 	/**
 	 * Validates metadata.
 	 *
@@ -417,7 +408,6 @@ class PushTokenValidator {
 	 * @internal
 	 */
 	private static function validate_metadata( $value, ?array $context = array() ) {
-		// phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		if ( ! isset( $value ) ) {
 			return new WP_Error( self::ERROR_CODE, 'Metadata is required.' );
 		}
@@ -435,3 +425,5 @@ class PushTokenValidator {
 		return true;
 	}
 }
+
+// phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed

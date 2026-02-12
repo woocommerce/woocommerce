@@ -345,10 +345,10 @@ class PushToken {
 			throw new PushTokenInvalidDataException( $result->get_error_message() );
 		}
 
-		$this->metadata = array_map(
-			fn ( $item ) => is_string( $item ) ? trim( $item ) : $item,
-			$metadata
-		);
+		$keys = array_map( 'sanitize_key', array_keys( $metadata ) );
+		$values = array_map( 'sanitize_text_field', array_values( $metadata ) );
+
+		$this->metadata = array_combine( $keys, $values );
 	}
 
 	/**
@@ -496,7 +496,6 @@ class PushToken {
 			&& $this->get_platform()
 			&& $this->get_origin()
 			&& $this->get_device_locale()
-			&& $this->get_metadata()
 			&& (
 				$this->get_device_uuid()
 				|| $this->get_platform() === self::PLATFORM_BROWSER
