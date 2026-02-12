@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix YouTube URL truncation in subscription emails when video IDs contain underscores.
