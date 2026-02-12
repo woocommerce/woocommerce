@@ -14,6 +14,13 @@ class Products extends Task {
 	const HAS_PRODUCT_TRANSIENT = 'woocommerce_product_task_has_product_transient';
 
 	/**
+	 * Whether a deferred revert check has already been scheduled for this request.
+	 *
+	 * @var bool
+	 */
+	private static $revert_scheduled = false;
+
+	/**
 	 * Constructor
 	 *
 	 * @param TaskList $task_list Parent task list.
@@ -206,12 +213,33 @@ class Products extends Task {
 	}
 
 	/**
-	 * Re-check whether valid products still exist and revert task completion if none remain.
+	 * Schedule a deferred check to revert task completion if no products remain.
+	 *
+	 * Uses the shutdown hook so that bulk operations (e.g. trashing many products
+	 * at once) only trigger a single has_products() query instead of one per product.
 	 *
 	 * @return void
 	 */
-	private function revert_task_completion() {
+	private function revert_task_completion(): void {
 		delete_transient( self::HAS_PRODUCT_TRANSIENT );
+
+		if ( self::$revert_scheduled ) {
+			return;
+		}
+
+		self::$revert_scheduled = true;
+		add_action( 'shutdown', array( $this, 'maybe_revert_on_shutdown' ) );
+	}
+
+	/**
+	 * Re-check whether valid products still exist and revert task completion if none remain.
+	 *
+	 * Runs once at the end of the request via the shutdown hook.
+	 *
+	 * @return void
+	 */
+	public function maybe_revert_on_shutdown(): void {
+		self::$revert_scheduled = false;
 
 		if ( self::has_products() ) {
 			return;
