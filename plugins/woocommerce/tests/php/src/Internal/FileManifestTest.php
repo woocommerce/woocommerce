@@ -407,14 +407,14 @@ class FileManifestTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The recheck tool is not added to the debug tools list when the stored result is a pass.
+	 * @testdox The recheck tool is added to the debug tools list even when the stored result is a pass.
 	 */
-	public function test_recheck_tool_not_added_on_pass(): void {
+	public function test_recheck_tool_added_on_pass(): void {
 		$this->store_check_result( '10.5.0', 'pass' );
 
 		$tools = FileManifest::handle_woocommerce_debug_tools( array() );
 
-		$this->assertArrayNotHasKey( 'recheck_file_manifest', $tools );
+		$this->assertArrayHasKey( 'recheck_file_manifest', $tools );
 	}
 
 	/**

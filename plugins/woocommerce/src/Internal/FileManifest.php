@@ -503,7 +503,6 @@ class FileManifest {
 					?>
 				</tr>
 				<?php endif; ?>
-				<?php if ( 'pass' !== $result['status'] ) : ?>
 				<tr>
 					<td>&nbsp;</td>
 					<td class="help">&nbsp;</td>
@@ -519,7 +518,6 @@ class FileManifest {
 						?>
 					</td>
 				</tr>
-				<?php endif; ?>
 			<?php endif; ?>
 			</tbody>
 		</table>
@@ -539,12 +537,6 @@ class FileManifest {
 	 * @return array The modified tools array.
 	 */
 	public static function handle_woocommerce_debug_tools( $tools ) {
-		$result = get_option( self::CHECK_RESULT_OPTION );
-
-		if ( ! is_array( $result ) || 'pass' === $result['status'] ) {
-			return $tools;
-		}
-
 		$tools['recheck_file_manifest'] = array(
 			'name'     => __( 'Installation integrity check', 'woocommerce' ),
 			'button'   => __( 'Recheck', 'woocommerce' ),
