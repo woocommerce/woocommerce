@@ -22,8 +22,8 @@ class FileManifestCommand {
 	public function register_commands(): void {
 		WP_CLI::add_command( 'wc file-manifest generate', array( $this, 'generate' ) );
 		WP_CLI::add_command( 'wc file-manifest verify', array( $this, 'verify' ) );
+		WP_CLI::add_command( 'wc file-manifest reset', array( $this, 'reset' ) );
 		WP_CLI::add_command( 'wc file-manifest delete', array( $this, 'delete' ) );
-		WP_CLI::add_command( 'wc file-manifest recheck', array( $this, 'recheck' ) );
 	}
 
 	/**
@@ -156,6 +156,11 @@ class FileManifestCommand {
 	 * that every file listed in the manifest exists on disk. Reports
 	 * any mismatches or missing files.
 	 *
+	 * ## OPTIONS
+	 *
+	 * [--store-result]
+	 * : Store the verification result in the database, replacing any previously cached result.
+	 *
 	 * ## EXAMPLES
 	 *
 	 *     $ wp wc file-manifest verify
@@ -164,78 +169,90 @@ class FileManifestCommand {
 	 *     Checking 8232 files...
 	 *     Success: All files present. Installation is consistent.
 	 *
+	 *     $ wp wc file-manifest verify --store-result
+	 *     Plugin version: 10.6.0-dev
+	 *     Manifest version: 10.6.0-dev
+	 *     Checking 8232 files...
+	 *     Result stored in database.
+	 *     Success: All files present. Installation is consistent.
+	 *
 	 * @param array $args       Positional arguments (unused).
-	 * @param array $assoc_args Associative arguments (unused).
+	 * @param array $assoc_args Associative arguments.
 	 */
 	public function verify( array $args, array $assoc_args ): void {
-		unset( $args, $assoc_args );
+		unset( $args );
 
-		$plugin_dir    = dirname( WC_PLUGIN_FILE );
-		$manifest_file = $plugin_dir . '/file-manifest.php';
+		$store_result = \WP_CLI\Utils\get_flag_value( $assoc_args, 'store-result', false );
 
-		if ( ! is_readable( $manifest_file ) ) {
+		$result = FileManifest::run_fresh_verification( WC_PLUGIN_FILE );
+
+		WP_CLI::log( sprintf( 'Plugin version: %s', $result['version'] ) );
+
+		if ( 'no_manifest' === $result['status'] ) {
 			WP_CLI::error( 'No file-manifest.php found. Run "wp wc file-manifest generate" first.' );
 		}
 
-		$plugin_data    = get_file_data( WC_PLUGIN_FILE, array( 'Version' => 'Version' ) );
-		$plugin_version = $plugin_data['Version'] ?? '';
-
-		// Load the manifest in an isolated scope.
-		$manifest = ( static function ( $file ) {
-			return require $file;
-		} )( $manifest_file );
-
-		if ( ! is_array( $manifest ) || ! isset( $manifest['version'], $manifest['files'] ) ) {
-			WP_CLI::error( 'Manifest file has an invalid structure.' );
+		if ( 'skipped' === $result['status'] ) {
+			WP_CLI::error( implode( ' ', $result['details'] ) );
 		}
 
-		WP_CLI::log( sprintf( 'Plugin version:   %s', $plugin_version ) );
-		WP_CLI::log( sprintf( 'Manifest version: %s', $manifest['version'] ) );
+		if ( isset( $result['manifest_version'] ) ) {
+			WP_CLI::log( sprintf( 'Manifest version: %s', $result['manifest_version'] ) );
+		}
 
-		$strip_suffix = static function ( $version ) {
-			return preg_replace( '/-.*$/', '', $version );
-		};
+		if ( $store_result ) {
+			FileManifest::store_fresh_result( $result );
+			WP_CLI::log( 'Result stored in database.' );
+		}
 
-		if ( 0 !== version_compare( $strip_suffix( $manifest['version'] ), $strip_suffix( $plugin_version ) ) ) {
+		if ( 'version_mismatch' === $result['status'] ) {
 			WP_CLI::error( 'Version mismatch: manifest version does not match the plugin version.' );
 		}
 
-		$file_count    = count( $manifest['files'] );
-		$missing_files = array();
-
-		WP_CLI::log( sprintf( 'Checking %d files...', $file_count ) );
-
-		foreach ( $manifest['files'] as $relative_path ) {
-			if ( ! file_exists( $plugin_dir . '/' . $relative_path ) ) {
-				$missing_files[] = $relative_path;
-			}
-		}
-
-		if ( ! empty( $missing_files ) ) {
-			WP_CLI::warning( sprintf( '%d missing file(s):', count( $missing_files ) ) );
-			foreach ( $missing_files as $missing ) {
-				WP_CLI::log( '  - ' . $missing );
+		if ( 'missing_files' === $result['status'] ) {
+			$missing = $result['details'];
+			WP_CLI::warning( sprintf( '%d missing file(s):', count( $missing ) ) );
+			foreach ( $missing as $file ) {
+				WP_CLI::log( '  - ' . $file );
 			}
 			WP_CLI::error( 'Installation is inconsistent. Missing files detected.' );
 		}
 
-		$verified_version = get_option( 'woocommerce_verified_installation_version' );
-		WP_CLI::log( sprintf( 'Cached verified version: %s', $verified_version ? $verified_version : '(none)' ) );
-
 		WP_CLI::success( 'All files present. Installation is consistent.' );
+	}
+
+	/**
+	 * Reset the cached integrity check result.
+	 *
+	 * Clears the stored check result so that WooCommerce re-verifies
+	 * the plugin files on the next page load.
+	 *
+	 * ## EXAMPLES
+	 *
+	 *     $ wp wc file-manifest reset
+	 *     Success: Integrity check will run on the next page load.
+	 *
+	 * @param array $args       Positional arguments (unused).
+	 * @param array $assoc_args Associative arguments (unused).
+	 */
+	public function reset( array $args, array $assoc_args ): void {
+		unset( $args, $assoc_args );
+
+		delete_option( 'woocommerce_file_manifest_check_result' );
+		WP_CLI::success( 'Integrity check will run on the next page load.' );
 	}
 
 	/**
 	 * Delete the file manifest.
 	 *
 	 * Removes the file-manifest.php file and clears the cached
-	 * verified version option, so the next request will skip
+	 * check result option, so the next request will skip
 	 * the integrity check (as if running in a development environment).
 	 *
 	 * ## EXAMPLES
 	 *
 	 *     $ wp wc file-manifest delete
-	 *     Success: file-manifest.php deleted and verified version cache cleared.
+	 *     Success: file-manifest.php deleted and check result cache cleared.
 	 *
 	 * @param array $args       Positional arguments (unused).
 	 * @param array $assoc_args Associative arguments (unused).
@@ -255,28 +272,7 @@ class FileManifestCommand {
 			WP_CLI::log( 'No file-manifest.php found (already absent).' );
 		}
 
-		delete_option( 'woocommerce_verified_installation_version' );
-		WP_CLI::success( 'Verified version cache cleared.' );
-	}
-
-	/**
-	 * Force the integrity check to run again on the next page load.
-	 *
-	 * Clears the cached verified version so the boot-time check
-	 * re-validates the manifest on the next request.
-	 *
-	 * ## EXAMPLES
-	 *
-	 *     $ wp wc file-manifest recheck
-	 *     Success: Integrity check will run on the next page load.
-	 *
-	 * @param array $args       Positional arguments (unused).
-	 * @param array $assoc_args Associative arguments (unused).
-	 */
-	public function recheck( array $args, array $assoc_args ): void {
-		unset( $args, $assoc_args );
-
-		delete_option( 'woocommerce_verified_installation_version' );
-		WP_CLI::success( 'Integrity check will run on the next page load.' );
+		delete_option( 'woocommerce_file_manifest_check_result' );
+		WP_CLI::success( 'Check result cache cleared.' );
 	}
 }

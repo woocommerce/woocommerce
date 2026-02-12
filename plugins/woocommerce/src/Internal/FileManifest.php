@@ -1,10 +1,9 @@
 <?php
-
-declare( strict_types=1 );
-
 /**
  * Boot-time installation integrity check using a build-time file manifest.
  */
+
+declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal;
 
@@ -28,11 +27,15 @@ class FileManifest {
 	private function __construct() {}
 
 	/**
-	 * The name of the option used to store the last verified WooCommerce version.
+	 * The name of the option used to store the file manifest check result.
+	 *
+	 * Holds a structured array with version, date, status, and details.
+	 * Used as the single skip guard (replaces the former separate verified-version option)
+	 * and as the data source for the WooCommerce status report section.
 	 *
 	 * @var string
 	 */
-	private const VERIFIED_VERSION_OPTION = 'woocommerce_verified_installation_version';
+	private const CHECK_RESULT_OPTION = 'woocommerce_file_manifest_check_result';
 
 	/**
 	 * Maximum number of missing files to list in the admin notice details.
@@ -40,6 +43,52 @@ class FileManifest {
 	 * @var int
 	 */
 	private const MAX_MISSING_FILES_SHOWN = 20;
+
+	/**
+	 * Return the stored file manifest check result.
+	 *
+	 * Encapsulates the option name so callers (e.g. the REST system status
+	 * controller) don't need to know the internal storage key.
+	 *
+	 * @since 10.6.0
+	 *
+	 * @return array|null The stored result array, or null if not available.
+	 */
+	public static function get_check_result(): ?array {
+		$result = get_option( self::CHECK_RESULT_OPTION );
+		return is_array( $result ) ? $result : null;
+	}
+
+	/**
+	 * Run a fresh file manifest verification without storing the result.
+	 *
+	 * Thin public wrapper around the private run_verification() method,
+	 * intended for on-demand checks via the REST API or WP-CLI.
+	 *
+	 * @since 10.6.0
+	 *
+	 * @param string $plugin_file Absolute path to the main plugin file (woocommerce.php).
+	 * @return array{status: string, details: string[], version: string, manifest_version?: string}
+	 */
+	public static function run_fresh_verification( string $plugin_file ): array {
+		return self::run_verification( $plugin_file );
+	}
+
+	/**
+	 * Store a fresh verification result in the database.
+	 *
+	 * Replaces any previously cached check result. Intended for use
+	 * alongside run_fresh_verification() when the caller wants to
+	 * persist the result (e.g. the --store-result CLI flag).
+	 *
+	 * @since 10.6.0
+	 *
+	 * @param array $result The result array from run_fresh_verification().
+	 */
+	public static function store_fresh_result( array $result ): void {
+		delete_option( self::CHECK_RESULT_OPTION );
+		self::store_result( $result );
+	}
 
 	/**
 	 * Enumerate all PHP files in a directory for the manifest.
@@ -107,54 +156,39 @@ class FileManifest {
 	}
 
 	/**
-	 * Verify that the WooCommerce installation is complete and consistent.
+	 * Run the core file manifest verification logic.
 	 *
-	 * The full file check runs only once after each version change and caches the result
-	 * in a WordPress option to avoid repeated filesystem scans.
+	 * Reads the manifest file, compares versions, and checks that all listed
+	 * files exist on disk. Does not interact with WordPress options or admin notices.
 	 *
 	 * @param string $plugin_file Absolute path to the main plugin file (woocommerce.php).
-	 * @return boolean True if the installation is verified (or if verification is not possible), false if corrupt.
+	 * @return array{status: string, details: string[], version: string, manifest_version?: string}
+	 *   - status: 'pass', 'version_mismatch', 'missing_files', 'no_manifest', 'skipped'
+	 *   - details: array of detail strings (e.g. missing file paths)
+	 *   - version: the plugin version checked
+	 *   - manifest_version: (version_mismatch only) the version found in the manifest
 	 */
-	public static function verify_installation( $plugin_file ) {
-		/**
-		 * Filters whether the boot-time file manifest verification is enabled.
-		 *
-		 * Returning false skips the integrity check entirely, allowing WooCommerce
-		 * to load even if the installation appears incomplete.
-		 *
-		 * @since 10.6.0
-		 *
-		 * @param bool $enabled Whether verification is enabled. Default true.
-		 */
-		if ( ! apply_filters( 'woocommerce_file_manifest_verification_enabled', true ) ) {
-			return true;
-		}
-
+	private static function run_verification( $plugin_file ): array {
 		$plugin_dir    = dirname( $plugin_file );
 		$manifest_file = $plugin_dir . '/file-manifest.php';
-
-		if ( ! is_readable( $manifest_file ) ) {
-			// No manifest is expected in development environments. In production
-			// or staging it likely means the build artifact was stripped or the
-			// update was incomplete — warn but don't block WooCommerce.
-			$env = function_exists( 'wp_get_environment_type' ) ? wp_get_environment_type() : 'production';
-			if ( ! in_array( $env, array( 'local', 'development' ), true ) ) {
-				self::missing_manifest_warning();
-			}
-			return true;
-		}
 
 		$plugin_data    = get_file_data( $plugin_file, array( 'Version' => 'Version' ) );
 		$plugin_version = $plugin_data['Version'] ?? '';
 
-		if ( empty( $plugin_version ) ) {
-			return true;
+		if ( ! is_readable( $manifest_file ) ) {
+			return array(
+				'status'  => 'no_manifest',
+				'details' => array(),
+				'version' => $plugin_version,
+			);
 		}
 
-		// Skip the full file check if this version was already verified.
-		$verified_version = get_option( self::VERIFIED_VERSION_OPTION );
-		if ( $plugin_version === $verified_version ) {
-			return true;
+		if ( empty( $plugin_version ) ) {
+			return array(
+				'status'  => 'skipped',
+				'details' => array( 'Could not read plugin version.' ),
+				'version' => '',
+			);
 		}
 
 		// Load the manifest in an isolated scope so that any variables defined
@@ -164,7 +198,11 @@ class FileManifest {
 		} )( $manifest_file );
 
 		if ( ! is_array( $manifest ) || ! isset( $manifest['version'], $manifest['files'] ) ) {
-			return true;
+			return array(
+				'status'  => 'skipped',
+				'details' => array( 'Manifest file has an invalid structure.' ),
+				'version' => $plugin_version,
+			);
 		}
 
 		// Compare versions: strip pre-release suffixes so that version_compare
@@ -176,15 +214,15 @@ class FileManifest {
 		$expected_version = $strip_suffix( $plugin_version );
 
 		if ( 0 !== version_compare( $manifest_version, $expected_version ) ) {
-			self::incomplete_installation(
-				$plugin_file,
-				array(
+			return array(
+				'status'           => 'version_mismatch',
+				'details'          => array(
 					sprintf( 'Expected version: %s', $plugin_version ),
 					sprintf( 'Manifest version: %s', $manifest['version'] ),
 				),
-				__( 'Version mismatch detected:', 'woocommerce' )
+				'version'          => $plugin_version,
+				'manifest_version' => $manifest['version'],
 			);
-			return false;
 		}
 
 		// Verify that every file listed in the manifest actually exists on disk.
@@ -196,9 +234,134 @@ class FileManifest {
 		}
 
 		if ( ! empty( $missing_files ) ) {
-			$details = array_slice( $missing_files, 0, self::MAX_MISSING_FILES_SHOWN );
-			if ( count( $missing_files ) > self::MAX_MISSING_FILES_SHOWN ) {
-				$details[] = sprintf( '...and %d more', count( $missing_files ) - self::MAX_MISSING_FILES_SHOWN );
+			return array(
+				'status'  => 'missing_files',
+				'details' => $missing_files,
+				'version' => $plugin_version,
+			);
+		}
+
+		return array(
+			'status'  => 'pass',
+			'details' => array(),
+			'version' => $plugin_version,
+		);
+	}
+
+	/**
+	 * Read the stored check result and return it if the version matches.
+	 *
+	 * @param string $plugin_version The current plugin version to match against.
+	 * @return array|null The stored result array, or null if not found or version differs.
+	 */
+	private static function get_stored_result_for_version( $plugin_version ): ?array {
+		$stored = get_option( self::CHECK_RESULT_OPTION );
+
+		return is_array( $stored ) && ( $stored['version'] ?? '' ) === $plugin_version ? $stored : null;
+	}
+
+	/**
+	 * Store the verification result as a WordPress option.
+	 *
+	 * @param array $result The result from run_verification().
+	 */
+	private static function store_result( $result ): void {
+		$stored_result = array(
+			'version' => $result['version'],
+			'date'    => gmdate( 'Y-m-d H:i:s' ),
+			'status'  => $result['status'],
+			'details' => $result['details'],
+		);
+
+		if ( isset( $result['manifest_version'] ) ) {
+			$stored_result['manifest_version'] = $result['manifest_version'];
+		}
+
+		update_option( self::CHECK_RESULT_OPTION, $stored_result, true );
+	}
+
+	/**
+	 * Verify that the WooCommerce installation is complete and consistent.
+	 *
+	 * The behavior depends on the `woocommerce_disable_on_file_manifest_verification_failed` filter:
+	 *
+	 * - When false (default): runs verification once per version change, stores the result
+	 *   in a WordPress option for display in the status report, and always returns true.
+	 * - When true: runs verification on every request until it passes. On failure, disables
+	 *   WooCommerce and shows an admin notice. On success, caches the result.
+	 *
+	 * @param string $plugin_file Absolute path to the main plugin file (woocommerce.php).
+	 * @return boolean True if the installation is verified (or if verification is not possible), false if corrupt.
+	 */
+	public static function verify_installation( $plugin_file ) {
+		/**
+		 * Filters whether WooCommerce should be disabled when the file manifest
+		 * verification fails (missing or mismatched files).
+		 *
+		 * When true, a failed integrity check will prevent WooCommerce from
+		 * loading and display an admin notice. When false (the default),
+		 * WooCommerce loads normally regardless of the check result, but
+		 * the result is stored for display in the status report.
+		 *
+		 * @since 10.6.0
+		 *
+		 * @param bool $disable Whether to disable WooCommerce on verification failure. Default false.
+		 */
+		$disabling_mode = apply_filters( 'woocommerce_disable_on_file_manifest_verification_failed', false );
+
+		return $disabling_mode
+			? self::verify_disabling_mode( $plugin_file )
+			: self::verify_non_disabling_mode( $plugin_file );
+	}
+
+	/**
+	 * Disabling mode: run verification on every request until it passes.
+	 *
+	 * On failure, disables WooCommerce and shows an admin notice.
+	 * On success, caches the result to skip future checks.
+	 *
+	 * @param string $plugin_file Absolute path to the main plugin file (woocommerce.php).
+	 * @return boolean True if verification passes, false if the installation is corrupt.
+	 */
+	private static function verify_disabling_mode( $plugin_file ): bool {
+		$plugin_data    = get_file_data( $plugin_file, array( 'Version' => 'Version' ) );
+		$plugin_version = $plugin_data['Version'] ?? '';
+
+		// Skip the full file check if this version already passed.
+		if ( ! empty( $plugin_version ) ) {
+			$stored = self::get_stored_result_for_version( $plugin_version );
+			if ( ! is_null( $stored ) && 'pass' === $stored['status'] ) {
+				return true;
+			}
+		}
+
+		$result = self::run_verification( $plugin_file );
+
+		if ( 'no_manifest' === $result['status'] ) {
+			$env = function_exists( 'wp_get_environment_type' ) ? wp_get_environment_type() : 'production';
+			if ( ! in_array( $env, array( 'local', 'development' ), true ) ) {
+				self::missing_manifest_warning();
+			}
+			return true;
+		}
+
+		if ( 'skipped' === $result['status'] ) {
+			return true;
+		}
+
+		if ( 'version_mismatch' === $result['status'] ) {
+			self::incomplete_installation(
+				$plugin_file,
+				$result['details'],
+				__( 'Version mismatch detected:', 'woocommerce' )
+			);
+			return false;
+		}
+
+		if ( 'missing_files' === $result['status'] ) {
+			$details = array_slice( $result['details'], 0, self::MAX_MISSING_FILES_SHOWN );
+			if ( count( $result['details'] ) > self::MAX_MISSING_FILES_SHOWN ) {
+				$details[] = sprintf( '...and %d more', count( $result['details'] ) - self::MAX_MISSING_FILES_SHOWN );
 			}
 			self::incomplete_installation(
 				$plugin_file,
@@ -208,10 +371,203 @@ class FileManifest {
 			return false;
 		}
 
-		// All checks passed — record the verified version.
-		update_option( self::VERIFIED_VERSION_OPTION, $plugin_version, true );
+		// All checks passed — cache the result.
+		self::store_result( $result );
 
 		return true;
+	}
+
+	/**
+	 * Non-disabling mode: run verification once per version change and store the result.
+	 *
+	 * Always returns true so WooCommerce loads normally. The result is stored
+	 * in a WordPress option for display in the status report.
+	 *
+	 * @param string $plugin_file Absolute path to the main plugin file (woocommerce.php).
+	 * @return boolean Always true.
+	 */
+	private static function verify_non_disabling_mode( $plugin_file ): bool {
+		$plugin_data    = get_file_data( $plugin_file, array( 'Version' => 'Version' ) );
+		$plugin_version = $plugin_data['Version'] ?? '';
+
+		// Skip if we already have a stored result for this version.
+		// Changes to the manifest file (appearing or disappearing) require
+		// a manual recheck via WP-CLI or the admin tools page.
+		if ( ! empty( $plugin_version ) ) {
+			$stored = self::get_stored_result_for_version( $plugin_version );
+			if ( ! is_null( $stored ) ) {
+				add_action( 'woocommerce_system_status_report', array( static::class, 'handle_woocommerce_system_status_report' ) );
+				add_filter( 'woocommerce_debug_tools', array( static::class, 'handle_woocommerce_debug_tools' ) );
+				return true;
+			}
+		}
+
+		$result = self::run_verification( $plugin_file );
+
+		// Store the structured result for the status report.
+		if ( 'skipped' !== $result['status'] ) {
+			self::store_result( $result );
+		}
+
+		add_action( 'woocommerce_system_status_report', array( static::class, 'handle_woocommerce_system_status_report' ) );
+		add_filter( 'woocommerce_debug_tools', array( static::class, 'handle_woocommerce_debug_tools' ) );
+
+		return true;
+	}
+
+	/**
+	 * Render the installation integrity section in the WooCommerce status report.
+	 *
+	 * Reads the stored check result from the database and displays it in a
+	 * status table following the existing WooCommerce status report pattern.
+	 *
+	 * @internal For exclusive use of WooCommerce, backwards compatibility not guaranteed.
+	 * @since 10.6.0
+	 */
+	public static function handle_woocommerce_system_status_report(): void {
+		$result = get_option( self::CHECK_RESULT_OPTION );
+		?>
+		<table class="wc_status_table widefat" cellspacing="0">
+			<thead>
+			<tr>
+				<th colspan="3" data-export-label="Installation integrity">
+					<h2>
+						<?php esc_html_e( 'Installation integrity', 'woocommerce' ); ?>
+						<?php echo wc_help_tip( esc_html__( 'Verifies that the WooCommerce plugin files match the expected version and are complete.', 'woocommerce' ) ); ?>
+					</h2>
+				</th>
+			</tr>
+			</thead>
+			<tbody>
+			<?php if ( ! is_array( $result ) ) : ?>
+				<tr>
+					<td data-export-label="Status"><?php esc_html_e( 'Status:', 'woocommerce' ); ?></td>
+					<td class="help">&nbsp;</td>
+					<td><?php esc_html_e( 'Not yet verified', 'woocommerce' ); ?></td>
+				</tr>
+			<?php else : ?>
+				<tr>
+					<td data-export-label="Status"><?php esc_html_e( 'Status:', 'woocommerce' ); ?></td>
+					<td class="help">&nbsp;</td>
+					<td>
+						<?php if ( 'pass' === $result['status'] ) : ?>
+							<mark class="yes"><span class="dashicons dashicons-yes"></span> <?php esc_html_e( 'Pass', 'woocommerce' ); ?></mark>
+						<?php elseif ( 'no_manifest' === $result['status'] ) : ?>
+							<mark class="no"><?php esc_html_e( 'No manifest available', 'woocommerce' ); ?></mark>
+						<?php else : ?>
+							<mark class="error"><span class="dashicons dashicons-warning"></span>
+							<?php
+							if ( 'version_mismatch' === $result['status'] ) {
+								esc_html_e( 'Fail - version mismatch', 'woocommerce' );
+							} else {
+								esc_html_e( 'Fail - missing files', 'woocommerce' );
+							}
+							?>
+							</mark>
+						<?php endif; ?>
+					</td>
+				</tr>
+				<tr>
+					<td data-export-label="Verified version"><?php esc_html_e( 'Verified version:', 'woocommerce' ); ?></td>
+					<td class="help">&nbsp;</td>
+					<td><?php echo esc_html( $result['version'] ); ?></td>
+				</tr>
+				<tr>
+					<td data-export-label="Check date"><?php esc_html_e( 'Check date:', 'woocommerce' ); ?></td>
+					<td class="help">&nbsp;</td>
+					<td><?php echo esc_html( $result['date'] ); ?></td>
+				</tr>
+				<?php if ( ! empty( $result['details'] ) ) : ?>
+				<tr>
+					<td data-export-label="Details"><?php esc_html_e( 'Details:', 'woocommerce' ); ?></td>
+					<td class="help">&nbsp;</td>
+					<?php
+					// The value cell is built with echo to control whitespace:
+					// jQuery .text() is used by the "copy for support" feature,
+					// and template indentation would leak into the copied text.
+					$heading = 'version_mismatch' === $result['status']
+						? __( 'Version mismatch:', 'woocommerce' )
+						: __( 'Missing files:', 'woocommerce' );
+
+					$max_shown = array_slice( $result['details'], 0, self::MAX_MISSING_FILES_SHOWN );
+					$overflow  = count( $result['details'] ) > self::MAX_MISSING_FILES_SHOWN;
+
+					echo '<td>' . esc_html( $heading );
+					foreach ( $max_shown as $detail ) {
+						echo "\n<p style=\"margin:2px 0;\">" . esc_html( $detail ) . '</p>';
+					}
+					if ( $overflow ) {
+						echo "\n<p style=\"margin:2px 0;\">" . esc_html( sprintf( '...and %d more', count( $result['details'] ) - self::MAX_MISSING_FILES_SHOWN ) ) . '</p>';
+					}
+					echo '</td>';
+					?>
+				</tr>
+				<?php endif; ?>
+				<?php if ( 'pass' !== $result['status'] ) : ?>
+				<tr>
+					<td>&nbsp;</td>
+					<td class="help">&nbsp;</td>
+					<td>
+						<span class="dashicons dashicons-info"></span>
+						<?php
+						printf(
+							/* translators: %1$s: opening link tag, %2$s: closing link tag */
+							esc_html__( 'You can trigger a new integrity check from %1$sthe Tools page%2$s.', 'woocommerce' ),
+							'<a href="' . esc_url( admin_url( 'admin.php?page=wc-status&tab=tools' ) ) . '">',
+							'</a>'
+						);
+						?>
+					</td>
+				</tr>
+				<?php endif; ?>
+			<?php endif; ?>
+			</tbody>
+		</table>
+		<?php
+	}
+
+	/**
+	 * Add the recheck tool to the WooCommerce debug tools list.
+	 *
+	 * Only adds the tool when the stored check result is not a pass,
+	 * so that users can trigger a fresh integrity check from the admin UI.
+	 *
+	 * @internal For exclusive use of WooCommerce, backwards compatibility not guaranteed.
+	 * @since 10.6.0
+	 *
+	 * @param array $tools The existing debug tools array.
+	 * @return array The modified tools array.
+	 */
+	public static function handle_woocommerce_debug_tools( $tools ) {
+		$result = get_option( self::CHECK_RESULT_OPTION );
+
+		if ( ! is_array( $result ) || 'pass' === $result['status'] ) {
+			return $tools;
+		}
+
+		$tools['recheck_file_manifest'] = array(
+			'name'     => __( 'Installation integrity check', 'woocommerce' ),
+			'button'   => __( 'Recheck', 'woocommerce' ),
+			'desc'     => __( 'Clears the cached integrity check result so that WooCommerce repeats it on the next page load.', 'woocommerce' ),
+			'callback' => array( static::class, 'recheck_tool_callback' ),
+		);
+
+		return $tools;
+	}
+
+	/**
+	 * Callback for the recheck debug tool.
+	 *
+	 * Deletes the stored check result so that the next page load
+	 * triggers a fresh integrity verification.
+	 *
+	 * @since 10.6.0
+	 *
+	 * @return string Success message displayed on the tools page.
+	 */
+	public static function recheck_tool_callback() {
+		delete_option( self::CHECK_RESULT_OPTION );
+		return __( 'Integrity check will run on the next page load.', 'woocommerce' );
 	}
 
 	/**
