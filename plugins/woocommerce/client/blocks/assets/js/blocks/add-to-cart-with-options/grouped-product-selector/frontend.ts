@@ -2,10 +2,7 @@
  * External dependencies
  */
 import { store, getContext, getConfig } from '@wordpress/interactivity';
-import type {
-	ClientCartItem,
-	Store as WooCommerce,
-} from '@woocommerce/stores/woocommerce/cart';
+import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
 
 /**
  * Internal dependencies
@@ -92,8 +89,16 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 				const { quantity, selectedAttributes, groupedProductIds } =
 					getContext< AddToCartWithOptionsStoreContext >();
 
-				const addedItems: ClientCartItem[] = [];
+				const { actions: wooActions } = store< WooCommerce >(
+					'woocommerce',
+					{},
+					{ lock: universalLock }
+				);
 
+				// Call addCartItem for each product in the same synchronous
+				// tick. The batching system will automatically combine them
+				// into a single batch request.
+				const promises: unknown[] = [];
 				for ( const childProductId of groupedProductIds ) {
 					if ( quantity[ childProductId ] === 0 ) {
 						continue;
@@ -113,23 +118,20 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 						continue;
 					}
 
-					addedItems.push( {
-						id: Number( childProductId ),
-						quantity: newQuantity,
-						variation: selectedAttributes,
-						type: productObject.type,
-					} );
+					promises.push(
+						wooActions.addCartItem(
+							{
+								id: Number( childProductId ),
+								quantity: newQuantity,
+								variation: selectedAttributes,
+								type: productObject.type,
+							},
+							{ showCartUpdatesNotices: false }
+						)
+					);
 				}
 
-				const { actions: wooActions } = store< WooCommerce >(
-					'woocommerce',
-					{},
-					{ lock: universalLock }
-				);
-
-				yield wooActions.batchAddCartItems( addedItems, {
-					showCartUpdatesNotices: false,
-				} );
+				yield Promise.all( promises );
 			},
 		},
 		callbacks: {
