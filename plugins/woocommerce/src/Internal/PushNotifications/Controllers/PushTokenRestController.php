@@ -9,8 +9,8 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataStore;
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenNotFoundException;
-use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenInvalidDataException;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
+use Automattic\WooCommerce\Internal\PushNotifications\Validators\PushTokenValidator;
 use Automattic\WooCommerce\Internal\RestApiControllerBase;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Exception;
@@ -170,129 +170,7 @@ class PushTokenRestController extends RestApiControllerBase {
 	}
 
 	/**
-	 * Validates the token. This is done here as some of the validation rules
-	 * depend on other parameters. Calls `validate_argument` after to check the
-	 * PushToken validation rules which don't depend on other parameters.
-	 *
-	 * @since 10.6.0
-	 *
-	 * @param string          $token The token string.
-	 * @param WP_REST_Request $request The request object.
-	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
-	 * @param string          $param The name of the parameter being validated.
-	 * @return bool|WP_Error
-	 */
-	public function validate_token( string $token, WP_REST_Request $request, string $param ) {
-		if (
-			$request->get_param( 'platform' ) === PushToken::PLATFORM_APPLE
-			&& ! preg_match( '/^[A-Fa-f0-9]{64}$/', $token )
-		) {
-			return new WP_Error(
-				'rest_invalid_param',
-				'Invalid push token format.',
-				array(
-					'status' => WP_Http::BAD_REQUEST,
-					'param'  => 'token',
-				)
-			);
-		}
-
-		if (
-			$request->get_param( 'platform' ) === PushToken::PLATFORM_ANDROID
-			&& (
-				! preg_match( '/^[A-Za-z0-9=:\_\-\+\/]+$/', $token )
-				|| strlen( $token ) > PushToken::MAX_TOKEN_LENGTH
-			)
-		) {
-			return new WP_Error(
-				'rest_invalid_param',
-				'Invalid push token format.',
-				array(
-					'status' => WP_Http::BAD_REQUEST,
-					'param'  => 'token',
-				)
-			);
-		}
-
-		if ( $request->get_param( 'platform' ) === PushToken::PLATFORM_BROWSER ) {
-			$token_object = json_decode( $token, true );
-			$endpoint     = $token_object['endpoint'] ?? null;
-
-			if (
-				json_last_error()
-				|| ! $endpoint
-				|| ! isset( $token_object['keys']['auth'] )
-				|| ! isset( $token_object['keys']['p256dh'] )
-				|| ! wp_http_validate_url( (string) $endpoint )
-				|| ( wp_parse_url( (string) $endpoint, PHP_URL_SCHEME ) !== 'https' )
-				|| strlen( $token ) > PushToken::MAX_TOKEN_LENGTH
-			) {
-				return new WP_Error(
-					'rest_invalid_param',
-					'Invalid push token format.',
-					array(
-						'status' => WP_Http::BAD_REQUEST,
-						'param'  => 'token',
-					)
-				);
-			}
-		}
-
-		return $this->validate_argument( $token, $request, $param );
-	}
-
-	/**
-	 * Validates the device UUID, which is required unless the token is for
-	 * a browser. This is done here as some of the validation rules depend on
-	 * other parameters. Calls `validate_argument` after to check the PushToken
-	 * validation rules which don't depend on other parameters.
-	 *
-	 * @since 10.6.0
-	 *
-	 * @param null|string     $device_uuid The device UUID string.
-	 * @param WP_REST_Request $request The request object.
-	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
-	 * @param string          $param The name of the parameter being validated.
-	 * @return bool|WP_Error
-	 */
-	public function validate_device_uuid( ?string $device_uuid, WP_REST_Request $request, string $param ) {
-		if (
-			! $device_uuid
-			&& $request->get_param( 'platform' ) !== PushToken::PLATFORM_BROWSER
-		) {
-			return new WP_Error(
-				'rest_missing_callback_param',
-				'Missing parameter(s): device_uuid.',
-				array(
-					'status' => WP_Http::BAD_REQUEST,
-					'param'  => 'device_uuid',
-				)
-			);
-		}
-
-		if (
-			$device_uuid
-			&& (
-				strlen( $device_uuid ) > 255
-				|| ! preg_match( '/^[A-Za-z0-9._:-]+$/', $device_uuid )
-			)
-		) {
-			return new WP_Error(
-				'rest_invalid_param',
-				'Invalid device_uuid format.',
-				array(
-					'status' => WP_Http::BAD_REQUEST,
-					'param'  => 'device_uuid',
-				)
-			);
-		}
-
-		return $this->validate_argument( $device_uuid, $request, $param );
-	}
-
-	/**
-	 * Validates the other arguments from the request, if validation exists in
-	 * the PushToken entity.
+	 * Validates the arguments from the request via PushTokenValidator.
 	 *
 	 * @since 10.6.0
 	 *
@@ -303,26 +181,7 @@ class PushTokenRestController extends RestApiControllerBase {
 	 * @return bool|WP_Error
 	 */
 	public function validate_argument( $value, WP_REST_Request $request, string $param ) {
-		$method = "set_$param";
-
-		if ( method_exists( PushToken::class, $method ) ) {
-			try {
-				$value     = rest_sanitize_request_arg( $value, $request, $param );
-				$validator = new PushToken();
-				$validator->{ "set_$param" }( $value );
-			} catch ( PushTokenInvalidDataException $e ) {
-				return new WP_Error(
-					$e->getErrorCode(),
-					$e->getMessage(),
-					array(
-						'status' => $e->getCode(),
-						'param'  => $param,
-					)
-				);
-			}
-		}
-
-		return true;
+		return PushTokenValidator::validate( $request->get_params(), array( $param ) );
 	}
 
 	/**
@@ -459,7 +318,7 @@ class PushTokenRestController extends RestApiControllerBase {
 				'default'           => '',
 				'type'              => 'string',
 				'context'           => array( 'create' ),
-				'validate_callback' => array( $this, 'validate_device_uuid' ),
+				'validate_callback' => array( $this, 'validate_argument' ),
 				'sanitize_callback' => 'sanitize_text_field',
 			),
 			'platform'    => array(
@@ -475,7 +334,7 @@ class PushTokenRestController extends RestApiControllerBase {
 				'type'              => 'string',
 				'required'          => true,
 				'context'           => array( 'create' ),
-				'validate_callback' => array( $this, 'validate_token' ),
+				'validate_callback' => array( $this, 'validate_argument' ),
 				'sanitize_callback' => 'wp_unslash',
 			),
 		);

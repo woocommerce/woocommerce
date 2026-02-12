@@ -276,7 +276,10 @@ function wc_product_post_type_link( $permalink, $post ) {
 		// Get the custom taxonomy terms in use by this post.
 		$terms = get_the_terms( $post->ID, 'product_cat' );
 
-		if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
+		if ( ! empty( $terms ) && ! is_wp_error( $terms ) && is_array( $terms ) ) {
+			// Re-index array to ensure sequential keys starting from 0 since filters may remove some keys.
+			$terms = array_values( $terms );
+
 			// Find the deepest category (most ancestors) for the permalink.
 			$deepest_term      = $terms[0];
 			$deepest_ancestors = $deepest_term->parent ? get_ancestors( $deepest_term->term_id, 'product_cat' ) : array();

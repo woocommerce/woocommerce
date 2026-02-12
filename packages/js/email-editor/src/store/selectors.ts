@@ -322,21 +322,34 @@ export const getGlobalEmailStylesPost = createRegistrySelector(
 /**
  * Retrieves the email templates.
  */
-export const getEmailTemplates = createRegistrySelector( ( select ) => () => {
+export const getEmailTemplates = createRegistrySelector( ( select ) => {
 	const postType = select( storeName ).getEmailPostType();
-	return (
-		select( coreDataStore )
-			.getEntityRecords( 'postType', 'wp_template', {
-				per_page: -1,
-				post_type: postType,
-				context: 'view',
-			} )
-			// We still need to filter the templates because, in some cases, the API also returns custom templates
-			// ignoring the post_type filter in the query
-			?.filter( ( template ) =>
-				// @ts-expect-error Missing property in type
-				template.post_types.includes( postType )
-			)
+
+	return createSelector(
+		() =>
+			select( coreDataStore )
+				.getEntityRecords( 'postType', 'wp_template', {
+					per_page: -1,
+					post_type: postType,
+					context: 'view',
+				} )
+				// We still need to filter the templates because, in some cases, the API also returns custom templates
+				// ignoring the post_type filter in the query
+				?.filter( ( template ) =>
+					// @ts-expect-error Missing property in type
+					template.post_types.includes( postType )
+				),
+		() => [
+			select( coreDataStore ).getEntityRecords(
+				'postType',
+				'wp_template',
+				{
+					per_page: -1,
+					post_type: postType,
+					context: 'view',
+				}
+			),
+		]
 	);
 } );
 
