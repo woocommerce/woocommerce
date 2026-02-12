@@ -152,10 +152,10 @@ const productButtonStore = {
 			const { productId } = getContext< Context >();
 
 			const isDescendantOfAddToCartWithOptions =
-				productId === productContextState?.productId;
+				productId === productContextState?.currentProductId;
 
 			return isDescendantOfAddToCartWithOptions
-				? productContextState?.variationId || productId
+				? productContextState?.currentVariationId || productId
 				: productId;
 		},
 	},

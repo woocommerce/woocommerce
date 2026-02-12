@@ -427,7 +427,7 @@ const productGallery = {
 	},
 	callbacks: {
 		listenToProductDataChanges: () => {
-			const productId = productContextState?.productId;
+			const productId = productContextState?.currentProductId;
 			if ( ! productId ) {
 				return;
 			}
@@ -438,7 +438,7 @@ const productGallery = {
 
 			const productData =
 				products?.[ productId ]?.variations?.[
-					productContextState?.variationId || 0
+					productContextState?.currentVariationId || 0
 				] || products?.[ productId ];
 
 			const imageId = productData?.image_id;
