@@ -15,13 +15,13 @@ use WP_Http;
 /**
  * Exception thrown when a push token cannot be found.
  *
- * @since 10.5.0
+ * @internal
  */
 class PushTokenNotFoundException extends WC_Data_Exception {
 	/**
 	 * Constructor.
 	 *
-	 * @since 10.6.0
+	 * @internal
 	 */
 	public function __construct() {
 		parent::__construct(

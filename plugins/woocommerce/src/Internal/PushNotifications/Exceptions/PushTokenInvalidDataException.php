@@ -15,13 +15,13 @@ use WP_Http;
 /**
  * Exception thrown when push token data is invalid.
  *
- * @since 10.6.0
+ * @internal
  */
 class PushTokenInvalidDataException extends WC_Data_Exception {
 	/**
 	 * Constructor.
 	 *
-	 * @since 10.6.0
+	 * @internal
 	 * @param string $message The validation error message.
 	 */
 	public function __construct( string $message ) {

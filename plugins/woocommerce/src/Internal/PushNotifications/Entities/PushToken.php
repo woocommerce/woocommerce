@@ -12,7 +12,7 @@ use Automattic\WooCommerce\Internal\PushNotifications\Validators\PushTokenValida
 /**
  * Object representation of a push token.
  *
- * @since 10.4.0
+ * @internal
  */
 class PushToken {
 	/**
@@ -128,7 +128,7 @@ class PushToken {
 	 * @param array $data Optional array with keys: id, user_id, token, device_uuid, platform, origin.
 	 * @throws PushTokenInvalidDataException If any of the provided values fail validation.
 	 *
-	 * @since 10.6.0
+	 * @internal
 	 */
 	public function __construct( array $data = array() ) {
 		if ( array_key_exists( 'id', $data ) ) {
@@ -163,7 +163,7 @@ class PushToken {
 	 * @throws PushTokenInvalidDataException If ID is not valid.
 	 * @return void
 	 *
-	 * @since 10.4.0
+	 * @internal
 	 */
 	public function set_id( int $id ): void {
 		$result = PushTokenValidator::validate( compact( 'id' ), array( 'id' ) );
@@ -183,7 +183,7 @@ class PushToken {
 	 * @throws PushTokenInvalidDataException If user ID is not valid.
 	 * @return void
 	 *
-	 * @since 10.4.0
+	 * @internal
 	 */
 	public function set_user_id( int $user_id ): void {
 		$result = PushTokenValidator::validate( compact( 'user_id' ), array( 'user_id' ) );
@@ -203,7 +203,7 @@ class PushToken {
 	 * @throws PushTokenInvalidDataException If token is not valid.
 	 * @return void
 	 *
-	 * @since 10.4.0
+	 * @internal
 	 */
 	public function set_token( string $token ): void {
 		$result = PushTokenValidator::validate( compact( 'token' ), array( 'token' ) );
@@ -223,7 +223,7 @@ class PushToken {
 	 * @throws PushTokenInvalidDataException If device UUID is not valid.
 	 * @return void
 	 *
-	 * @since 10.4.0
+	 * @internal
 	 */
 	public function set_device_uuid( ?string $device_uuid ): void {
 		$result = PushTokenValidator::validate( compact( 'device_uuid' ), array( 'device_uuid' ) );
@@ -247,7 +247,7 @@ class PushToken {
 	 * @throws PushTokenInvalidDataException If platform is not valid.
 	 * @return void
 	 *
-	 * @since 10.4.0
+	 * @internal
 	 */
 	public function set_platform( string $platform ): void {
 		$result = PushTokenValidator::validate( compact( 'platform' ), array( 'platform' ) );
@@ -267,7 +267,7 @@ class PushToken {
 	 * @throws PushTokenInvalidDataException If origin is not valid.
 	 * @return void
 	 *
-	 * @since 10.4.0
+	 * @internal
 	 */
 	public function set_origin( string $origin ): void {
 		$result = PushTokenValidator::validate( compact( 'origin' ), array( 'origin' ) );
@@ -285,7 +285,7 @@ class PushToken {
 	 *
 	 * @return int|null
 	 *
-	 * @since 10.4.0
+	 * @internal
 	 */
 	public function get_id(): ?int {
 		return $this->id;
@@ -296,7 +296,7 @@ class PushToken {
 	 *
 	 * @return int|null
 	 *
-	 * @since 10.4.0
+	 * @internal
 	 */
 	public function get_user_id(): ?int {
 		return $this->user_id;
@@ -307,7 +307,7 @@ class PushToken {
 	 *
 	 * @return string|null
 	 *
-	 * @since 10.4.0
+	 * @internal
 	 */
 	public function get_token(): ?string {
 		return $this->token;
@@ -318,7 +318,7 @@ class PushToken {
 	 *
 	 * @return string|null
 	 *
-	 * @since 10.4.0
+	 * @internal
 	 */
 	public function get_device_uuid(): ?string {
 		return $this->device_uuid;
@@ -329,7 +329,7 @@ class PushToken {
 	 *
 	 * @return string|null
 	 *
-	 * @since 10.4.0
+	 * @internal
 	 */
 	public function get_platform(): ?string {
 		return $this->platform;
@@ -340,7 +340,7 @@ class PushToken {
 	 *
 	 * @return string|null
 	 *
-	 * @since 10.4.0
+	 * @internal
 	 */
 	public function get_origin(): ?string {
 		return $this->origin;
@@ -351,7 +351,7 @@ class PushToken {
 	 *
 	 * @return bool
 	 *
-	 * @since 10.4.0
+	 * @internal
 	 */
 	public function can_be_created(): bool {
 		return ! $this->get_id() && $this->has_required_parameters();
@@ -362,7 +362,7 @@ class PushToken {
 	 *
 	 * @return bool
 	 *
-	 * @since 10.4.0
+	 * @internal
 	 */
 	public function can_be_updated(): bool {
 		return $this->get_id() && $this->has_required_parameters();
@@ -373,7 +373,7 @@ class PushToken {
 	 *
 	 * @return bool
 	 *
-	 * @since 10.4.0
+	 * @internal
 	 */
 	public function can_be_read(): bool {
 		return (bool) $this->get_id();
@@ -384,7 +384,7 @@ class PushToken {
 	 *
 	 * @return bool
 	 *
-	 * @since 10.4.0
+	 * @internal
 	 */
 	public function can_be_deleted(): bool {
 		return (bool) $this->get_id();
@@ -395,7 +395,7 @@ class PushToken {
 	 *
 	 * @return bool
 	 *
-	 * @since 10.4.0
+	 * @internal
 	 */
 	private function has_required_parameters(): bool {
 		return $this->get_user_id()

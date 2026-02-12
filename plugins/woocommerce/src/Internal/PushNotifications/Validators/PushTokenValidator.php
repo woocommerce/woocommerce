@@ -15,7 +15,7 @@ use WP_Error;
 /**
  * Validator class for push tokens.
  *
- * @since 10.6.0
+ * @internal
  */
 class PushTokenValidator {
 	const VALIDATABLE_FIELDS = array(
@@ -30,42 +30,42 @@ class PushTokenValidator {
 	/**
 	 * The error code to return in WP_Errors.
 	 *
-	 * @since 10.6.0
+	 * @internal
 	 */
 	const ERROR_CODE = 'woocommerce_invalid_data';
 
 	/**
 	 * The regex to use when validating device UUID format.
 	 *
-	 * @since 10.6.0
+	 * @internal
 	 */
 	const DEVICE_UUID_FORMAT = '/^[A-Za-z0-9._:-]+$/';
 
 	/**
 	 * The length to validate the device UUID against.
 	 *
-	 * @since 10.6.0
+	 * @internal
 	 */
 	const DEVICE_UUID_MAXIMUM_LENGTH = 255;
 
 	/**
 	 * The length to validate the token against.
 	 *
-	 * @since 10.6.0
+	 * @internal
 	 */
 	const TOKEN_MAXIMUM_LENGTH = 4096;
 
 	/**
 	 * The regex to use when validating Apple token format.
 	 *
-	 * @since 10.6.0
+	 * @internal
 	 */
 	const TOKEN_FORMAT_APPLE = '/^[A-Fa-f0-9]{64}$/';
 
 	/**
 	 * The regex to use when validating Android token format.
 	 *
-	 * @since 10.6.0
+	 * @internal
 	 */
 	const TOKEN_FORMAT_ANDROID = '/^[A-Za-z0-9=:_\-+\/]+$/';
 
@@ -73,7 +73,7 @@ class PushTokenValidator {
 	 * Validates the fields defined in `$fields`, or all the list of known
 	 * fields if `$fields` is empty.
 	 *
-	 * @since 10.6.0
+	 * @internal
 	 *
 	 * @param array $data The data to be validated.
 	 * @param array $fields The fields to validate.
@@ -105,7 +105,7 @@ class PushTokenValidator {
 	/**
 	 * Validates ID.
 	 *
-	 * @since 10.6.0
+	 * @internal
 	 *
 	 * @param mixed $value The value to validate.
 	 * @param array $context An array of other values included as context for the validation.
@@ -136,7 +136,7 @@ class PushTokenValidator {
 	/**
 	 * Validates user ID.
 	 *
-	 * @since 10.6.0
+	 * @internal
 	 *
 	 * @param mixed $value The value to validate.
 	 * @param array $context An array of other values included as context for the validation.
@@ -167,7 +167,7 @@ class PushTokenValidator {
 	/**
 	 * Validates origin.
 	 *
-	 * @since 10.6.0
+	 * @internal
 	 *
 	 * @param mixed $value The value to validate.
 	 * @param array $context An array of other values included as context for the validation.
@@ -207,7 +207,7 @@ class PushTokenValidator {
 	/**
 	 * Validates device UUID.
 	 *
-	 * @since 10.6.0
+	 * @internal
 	 *
 	 * @param mixed $value The value to validate.
 	 * @param array $context An array of other values included as context for the validation.
@@ -269,7 +269,7 @@ class PushTokenValidator {
 	/**
 	 * Validates platform.
 	 *
-	 * @since 10.6.0
+	 * @internal
 	 *
 	 * @param mixed $value The value to validate.
 	 * @param array $context An array of other values included as context for the validation.
@@ -309,7 +309,7 @@ class PushTokenValidator {
 	/**
 	 * Validates token value.
 	 *
-	 * @since 10.6.0
+	 * @internal
 	 *
 	 * @param mixed $value The value to validate.
 	 * @param array $context An array of other values included as context for the validation.

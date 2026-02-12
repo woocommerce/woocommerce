@@ -20,7 +20,7 @@ use WP_Query;
 /**
  * Data store class for push tokens.
  *
- * @since 10.5.0
+ * @internal
  */
 class PushTokensDataStore {
 	const SUPPORTED_META = array(
@@ -33,7 +33,7 @@ class PushTokensDataStore {
 	/**
 	 * Creates a post representing the push token.
 	 *
-	 * @since 10.5.0
+	 * @internal
 	 * @param array $data Token data with keys: user_id, token, platform, device_uuid (optional), origin.
 	 * @throws PushTokenInvalidDataException If the token data is invalid.
 	 * @throws WC_Data_Exception If the token creation fails.
@@ -76,7 +76,7 @@ class PushTokensDataStore {
 	/**
 	 * Gets post representing a push token.
 	 *
-	 * @since 10.5.0
+	 * @internal
 	 * @param int $id The push token ID.
 	 * @throws PushTokenInvalidDataException If the ID is invalid.
 	 * @throws PushTokenNotFoundException If the token can't be found.
@@ -118,7 +118,7 @@ class PushTokensDataStore {
 	/**
 	 * Updates a post representing the push token.
 	 *
-	 * @since 10.5.0
+	 * @internal
 	 * @param PushToken $push_token The push token to update.
 	 * @throws PushTokenInvalidDataException If the token can't be updated.
 	 * @throws WC_Data_Exception If the token update fails.
@@ -162,7 +162,7 @@ class PushTokensDataStore {
 	/**
 	 * Deletes a push token.
 	 *
-	 * @since 10.5.0
+	 * @internal
 	 * @param int $id The push token ID.
 	 * @throws PushTokenNotFoundException If the token can't be found.
 	 * @return bool True on success.
@@ -184,7 +184,7 @@ class PushTokensDataStore {
 	 * per device, therefore if we already have one then we can update it to
 	 * avoid creating a duplicate.
 	 *
-	 * @since 10.5.0
+	 * @internal
 	 * @param array $data Token data with keys: user_id, platform, origin, token (optional), device_uuid (optional).
 	 * @return null|PushToken
 	 * @throws PushTokenInvalidDataException If push token is missing data.
@@ -290,7 +290,7 @@ class PushTokensDataStore {
 	 * Returns an associative array of post meta as key => value pairs for the
 	 * keys defined in SUPPORTED_META; missing keys return null.
 	 *
-	 * @since 10.5.0
+	 * @internal
 	 * @param int $id The push token ID.
 	 * @return array
 	 */
@@ -315,7 +315,7 @@ class PushTokensDataStore {
 	 * Returns an associative array of post meta as key => value pairs, built
 	 * using push token properties.
 	 *
-	 * @since 10.5.0
+	 * @internal
 	 * @param PushToken $push_token An instance of PushToken.
 	 * @return array
 	 */

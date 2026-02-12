@@ -19,7 +19,7 @@ use Exception;
  *
  * Class for setting up the WooCommerce-driven push notifications.
  *
- * @since 10.4.0
+ * @internal
  */
 class PushNotifications {
 	/**
@@ -49,7 +49,7 @@ class PushNotifications {
 	 *
 	 * @return void
 	 *
-	 * @since 10.4.0
+	 * @internal
 	 */
 	public function register(): void {
 		add_action( 'init', array( $this, 'on_init' ) );
@@ -60,7 +60,7 @@ class PushNotifications {
 	 *
 	 * @return void
 	 *
-	 * @since 10.6.0
+	 * @internal
 	 */
 	public function on_init(): void {
 		if ( ! $this->should_be_enabled() ) {
@@ -77,7 +77,7 @@ class PushNotifications {
 	/**
 	 * Registers the push token custom post type.
 	 *
-	 * @since 10.5.0
+	 * @internal
 	 * @return void
 	 */
 	public function register_post_types(): void {
@@ -112,7 +112,7 @@ class PushNotifications {
 	 *
 	 * @return bool
 	 *
-	 * @since 10.4.0
+	 * @internal
 	 */
 	public function should_be_enabled(): bool {
 		if ( null !== $this->enabled ) {
