@@ -271,6 +271,8 @@ class PushTokenValidator {
 	 * @param mixed      $value The value to validate.
 	 * @param array|null $context An array of other values included as context for the validation.
 	 * @return bool|WP_Error
+	 *
+	 * @internal
 	 */
 	private static function validate_device_locale( $value, ?array $context = array() ) {
 		// phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
@@ -411,6 +413,8 @@ class PushTokenValidator {
 	 * @param mixed      $value The value to validate.
 	 * @param array|null $context An array of other values included as context for the validation.
 	 * @return bool|WP_Error
+	 *
+	 * @internal
 	 */
 	private static function validate_metadata( $value, ?array $context = array() ) {
 		// phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
