@@ -3,8 +3,6 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\StoreApi\Utilities;
 
-defined( 'ABSPATH' ) || exit;
-
 /**
  * ProductLinksTrait
  *
