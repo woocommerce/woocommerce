@@ -453,14 +453,7 @@ const { state, actions } = store< Store >(
 									Nonce: state.nonce,
 									'Content-Type': 'application/json',
 								},
-								// Explicitly construct the body because
-								// Preact's reactive proxy filters `key`
-								// from enumeration (reserved prop), so
-								// JSON.stringify on the proxy omits it.
-								body: {
-									key: existingItem.key,
-									quantity: item.quantity,
-								},
+								body: existingItem,
 							};
 						}
 
