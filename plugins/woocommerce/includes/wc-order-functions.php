@@ -509,11 +509,8 @@ function wc_delete_shop_order_transients( $order = 0 ) {
 	if ( $order && is_a( $order, 'WC_Order' ) ) {
 		$order_id = $order->get_id();
 
-		// Delete the memorized data only if accessible, so we do not invalidate metas-cache (triggered by deleting the metas).
-		$customer_id        = $order->get_customer_id();
-		$memorized_order_id = Users::get_site_user_meta( $customer_id, 'wc_last_order' );
-		$delete_memorized   = '' !== $memorized_order_id && $order_id !== $memorized_order_id;
-		if ( $delete_memorized ) {
+		if ( OrderStatus::CHECKOUT_DRAFT !== $order->get_status() ) {
+			$customer_id = $order->get_customer_id();
 			Users::delete_site_user_meta( $customer_id, 'wc_money_spent' );
 			Users::delete_site_user_meta( $customer_id, 'wc_order_count' );
 			Users::delete_site_user_meta( $customer_id, 'wc_last_order' );
