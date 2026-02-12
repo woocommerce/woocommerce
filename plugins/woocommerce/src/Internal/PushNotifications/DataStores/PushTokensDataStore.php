@@ -315,7 +315,14 @@ class PushTokensDataStore {
 	 */
 	private function build_meta_array_from_database( int $id ): array {
 		update_meta_cache( 'post', array( $id ) );
-		/** @var array<string, mixed> $meta_by_key */
+
+		/**
+		 * Typehint for PHPStan, specifies that this is an array as
+		 * array_combine can return `false` in PHP < 8.0 if arrays provided are
+		 * not of equal length.
+		 *
+		 * @var array<string, mixed> $meta_by_key
+		 */
 		$meta_by_key = array_combine( static::SUPPORTED_META, static::SUPPORTED_META );
 
 		foreach ( static::SUPPORTED_META as $key ) {
