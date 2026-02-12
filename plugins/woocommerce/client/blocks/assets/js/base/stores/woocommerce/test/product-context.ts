@@ -90,17 +90,21 @@ describe( 'woocommerce/product-context store', () => {
 	} );
 
 	describe( 'computed getters', () => {
-		it( 'product returns selected variation when set, otherwise parent product', () => {
+		it( 'currentProduct returns selectedVariation when set, otherwise parentProduct', () => {
 			expect( mockRegisteredStore ).not.toBeNull();
 
 			mockRegisteredStore!.state.productId = 42;
 			mockRegisteredStore!.state.variationId = 99;
 
-			expect( mockRegisteredStore!.state.product ).toBe( mockVariation );
+			expect( mockRegisteredStore!.state.currentProduct ).toBe(
+				mockVariation
+			);
 
 			mockRegisteredStore!.actions.setVariationId( null );
 
-			expect( mockRegisteredStore!.state.product ).toBe( mockProduct );
+			expect( mockRegisteredStore!.state.currentProduct ).toBe(
+				mockProduct
+			);
 		} );
 	} );
 } );

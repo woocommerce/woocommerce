@@ -25,7 +25,7 @@ const productContextStore = store< {
 	state: ProductContextState & {
 		parentProduct: ProductResponseItem | undefined;
 		selectedVariation: ProductResponseItem | undefined;
-		product: ProductResponseItem | undefined;
+		currentProduct: ProductResponseItem | undefined;
 	};
 	actions: {
 		setProductId: ( productId: number ) => void;
@@ -47,7 +47,7 @@ const productContextStore = store< {
 				}
 				return productsStore.state.productVariations[ variationId ];
 			},
-			get product(): ProductResponseItem | undefined {
+			get currentProduct(): ProductResponseItem | undefined {
 				return (
 					productContextStore.state.selectedVariation ??
 					productContextStore.state.parentProduct
