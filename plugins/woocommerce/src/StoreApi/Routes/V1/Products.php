@@ -81,8 +81,7 @@ class Products extends AbstractRoute {
 			$response_objects = [];
 
 			foreach ( $query_results['objects'] as $object ) {
-				$data = rest_ensure_response( $this->schema->get_item_response( $object ) );
-				$data->add_links( $this->prepare_links( $object, $request ) );
+				$data               = $this->prepare_item_for_response( $object, $request );
 				$response_objects[] = $this->prepare_response_for_collection( $data );
 			}
 
