@@ -119,7 +119,7 @@ class PushTokensDataStore {
 		 * not be available for older tokens. Use sensible defaults.
 		 */
 		$push_token->set_device_locale( $meta['device_locale'] ?? PushToken::DEFAULT_DEVICE_LOCALE );
-		$push_token->set_metadata( $meta['metadata'] ?? '{}' );
+		$push_token->set_metadata( $meta['metadata'] ?? array() );
 
 		return $push_token;
 	}
@@ -293,7 +293,7 @@ class PushTokensDataStore {
 						 * sensible defaults.
 						 */
 						'device_locale' => $meta['device_locale'] ?? PushToken::DEFAULT_DEVICE_LOCALE,
-						'metadata'      => $meta['metadata'] ?? '{}',
+						'metadata'      => $meta['metadata'] ?? array(),
 					)
 				);
 			}
@@ -304,24 +304,22 @@ class PushTokensDataStore {
 
 	/**
 	 * Returns an associative array of post meta as key => value pairs for the
-	 * keys defined in SUPPORTED_META; missing keys return null.
+	 * keys defined in SUPPORTED_META; missing keys return null. Use
+	 * `update_meta_cache` with `get_post_meta` to allow reading the meta as
+	 * single values which automatically unserialize when requires,
+	 * rather than nested arrays that don't.
 	 *
 	 * @since 10.5.0
 	 * @param int $id The push token ID.
 	 * @return array
 	 */
 	private function build_meta_array_from_database( int $id ): array {
-		$meta        = (array) get_post_meta( $id );
-		$meta_by_key = (array) array_combine( static::SUPPORTED_META, static::SUPPORTED_META );
+		update_meta_cache( 'post', array( $id ) );
+		$meta_by_key = array_combine( static::SUPPORTED_META, static::SUPPORTED_META );
 
 		foreach ( static::SUPPORTED_META as $key ) {
-			if ( ! isset( $meta[ $key ] ) ) {
-				$meta_by_key[ $key ] = null;
-			} elseif ( is_array( $meta[ $key ] ) ) {
-				$meta_by_key[ $key ] = $meta[ $key ][0];
-			} else {
-				$meta_by_key[ $key ] = $meta[ $key ];
-			}
+			$meta                = get_post_meta( $id, $key, true );
+			$meta_by_key[ $key ] = '' === $meta ? null : $meta;
 		}
 
 		return $meta_by_key;

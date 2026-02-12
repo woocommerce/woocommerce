@@ -114,20 +114,16 @@ class PushTokenValidator {
 
 	/**
 	 * Validates ID.
+	// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 	 *
 	 * @since 10.6.0
 	 *
-	 * @param mixed $value The value to validate.
-	 * @param array $context An array of other values included as context for the validation.
+	 * @param mixed      $value The value to validate.
+	 * @param array|null $context An array of other values included as context for the validation.
 	 * @return bool|WP_Error
 	 */
-	private static function validate_id( $value, array $context ) {
-		/**
-		 * Context is unused in this specific method, but required by the
-		 * validate() dispatch signature.
-		 */
-		unset( $context );
-
+	private static function validate_id( $value, ?array $context = array() ) {
+		// phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		if ( is_null( $value ) ) {
 			return new WP_Error( self::ERROR_CODE, 'ID is required.' );
 		}
@@ -145,20 +141,16 @@ class PushTokenValidator {
 
 	/**
 	 * Validates user ID.
+	// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 	 *
 	 * @since 10.6.0
 	 *
-	 * @param mixed $value The value to validate.
-	 * @param array $context An array of other values included as context for the validation.
+	 * @param mixed      $value The value to validate.
+	 * @param array|null $context An array of other values included as context for the validation.
 	 * @return bool|WP_Error
 	 */
-	private static function validate_user_id( $value, array $context ) {
-		/**
-		 * Context is unused in this specific method, but required by the
-		 * validate() dispatch signature.
-		 */
-		unset( $context );
-
+	private static function validate_user_id( $value, ?array $context = array() ) {
+		// phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		if ( is_null( $value ) ) {
 			return new WP_Error( self::ERROR_CODE, 'User ID is required.' );
 		}
@@ -176,20 +168,16 @@ class PushTokenValidator {
 
 	/**
 	 * Validates origin.
+	// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 	 *
 	 * @since 10.6.0
 	 *
-	 * @param mixed $value The value to validate.
-	 * @param array $context An array of other values included as context for the validation.
+	 * @param mixed      $value The value to validate.
+	 * @param array|null $context An array of other values included as context for the validation.
 	 * @return bool|WP_Error
 	 */
-	private static function validate_origin( $value, array $context ) {
-		/**
-		 * Context is unused in this specific method, but required by the
-		 * validate() dispatch signature.
-		 */
-		unset( $context );
-
+	private static function validate_origin( $value, ?array $context = array() ) {
+		// phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		if ( is_null( $value ) ) {
 			return new WP_Error( self::ERROR_CODE, 'Origin is required.' );
 		}
@@ -219,11 +207,11 @@ class PushTokenValidator {
 	 *
 	 * @since 10.6.0
 	 *
-	 * @param mixed $value The value to validate.
-	 * @param array $context An array of other values included as context for the validation.
+	 * @param mixed      $value The value to validate.
+	 * @param array|null $context An array of other values included as context for the validation.
 	 * @return bool|WP_Error
 	 */
-	private static function validate_device_uuid( $value, array $context ) {
+	private static function validate_device_uuid( $value, ?array $context = array() ) {
 		/**
 		 * We may or may not have platform; if we don't have it, we can skip the
 		 * platform-specific checks and allow the platform validation to trigger
@@ -276,20 +264,16 @@ class PushTokenValidator {
 		return true;
 	}
 
+	// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 	/**
 	 * Validates device locale.
 	 *
-	 * @param mixed $value The value to validate.
-	 * @param array $context An array of other values included as context for the validation.
+	 * @param mixed      $value The value to validate.
+	 * @param array|null $context An array of other values included as context for the validation.
 	 * @return bool|WP_Error
 	 */
-	private static function validate_device_locale( $value, array $context ) {
-		/**
-		 * Context is unused in this specific method, but required by the
-		 * validate() dispatch signature.
-		 */
-		unset( $context );
-
+	private static function validate_device_locale( $value, ?array $context = array() ) {
+		// phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		if ( ! isset( $value ) ) {
 			return new WP_Error( self::ERROR_CODE, 'Device locale is required.' );
 		}
@@ -313,20 +297,16 @@ class PushTokenValidator {
 
 	/**
 	 * Validates platform.
+	// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 	 *
 	 * @since 10.6.0
 	 *
-	 * @param mixed $value The value to validate.
-	 * @param array $context An array of other values included as context for the validation.
+	 * @param mixed      $value The value to validate.
+	 * @param array|null $context An array of other values included as context for the validation.
 	 * @return bool|WP_Error
 	 */
-	private static function validate_platform( $value, array $context ) {
-		/**
-		 * Context is unused in this specific method, but required by the
-		 * validate() dispatch signature.
-		 */
-		unset( $context );
-
+	private static function validate_platform( $value, ?array $context = array() ) {
+		// phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		if ( is_null( $value ) ) {
 			return new WP_Error( self::ERROR_CODE, 'Platform is required.' );
 		}
@@ -356,11 +336,11 @@ class PushTokenValidator {
 	 *
 	 * @since 10.6.0
 	 *
-	 * @param mixed $value The value to validate.
-	 * @param array $context An array of other values included as context for the validation.
+	 * @param mixed      $value The value to validate.
+	 * @param array|null $context An array of other values included as context for the validation.
 	 * @return bool|WP_Error
 	 */
-	private static function validate_token( $value, array $context ) {
+	private static function validate_token( $value, ?array $context = array() ) {
 		if ( is_null( $value ) ) {
 			return new WP_Error( self::ERROR_CODE, 'Token is required.' );
 		}
@@ -424,38 +404,28 @@ class PushTokenValidator {
 		return true;
 	}
 
+	// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 	/**
 	 * Validates metadata.
 	 *
-	 * @param mixed $value The value to validate.
-	 * @param array $context An array of other values included as context for the validation.
+	 * @param mixed      $value The value to validate.
+	 * @param array|null $context An array of other values included as context for the validation.
 	 * @return bool|WP_Error
 	 */
-	private static function validate_metadata( $value, array $context ) {
-		/**
-		 * Context is unused in this specific method, but required by the
-		 * validate() dispatch signature.
-		 */
-		unset( $context );
-
+	private static function validate_metadata( $value, ?array $context = array() ) {
+		// phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		if ( ! isset( $value ) ) {
 			return new WP_Error( self::ERROR_CODE, 'Metadata is required.' );
 		}
 
-		if ( ! is_string( $value ) ) {
-			return new WP_Error( self::ERROR_CODE, 'Metadata must be a string.' );
+		if ( ! is_array( $value ) ) {
+			return new WP_Error( self::ERROR_CODE, 'Metadata must be an array.' );
 		}
 
-		$value = trim( $value );
-
-		if ( '' === $value ) {
-			return new WP_Error( self::ERROR_CODE, 'Metadata cannot be empty.' );
-		}
-
-		$value = json_decode( $value, true );
-
-		if ( is_null( $value ) || json_last_error() ) {
-			return new WP_Error( self::ERROR_CODE, 'Metadata must be valid JSON.' );
+		foreach ( $value as $key => $item ) {
+			if ( ! is_scalar( $item ) ) {
+				return new WP_Error( self::ERROR_CODE, 'Metadata items must be scalar values.' );
+			}
 		}
 
 		return true;

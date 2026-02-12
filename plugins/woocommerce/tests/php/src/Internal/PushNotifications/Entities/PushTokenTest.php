@@ -77,7 +77,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 				'platform'      => PushToken::PLATFORM_APPLE,
 				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
 				'device_locale' => 'en_US',
-				'metadata'      => '{"app_version":"1.0"}',
+				'metadata'      => array( 'app_version' => '1.0' ),
 			)
 		);
 
@@ -97,7 +97,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 				'platform'      => PushToken::PLATFORM_APPLE,
 				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
 				'device_locale' => 'en_US',
-				'metadata'      => '{"app_version":"1.0"}',
+				'metadata'      => array( 'app_version' => '1.0' ),
 			)
 		);
 
@@ -115,7 +115,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 				'platform'      => PushToken::PLATFORM_APPLE,
 				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
 				'device_locale' => 'en_US',
-				'metadata'      => '{"app_version":"1.0"}',
+				'metadata'      => array( 'app_version' => '1.0' ),
 			)
 		);
 
@@ -133,7 +133,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 				'device_uuid'   => 'test-device-uuid',
 				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
 				'device_locale' => 'en_US',
-				'metadata'      => '{"app_version":"1.0"}',
+				'metadata'      => array( 'app_version' => '1.0' ),
 			)
 		);
 
@@ -151,7 +151,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 				'platform'      => PushToken::PLATFORM_APPLE,
 				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
 				'device_locale' => 'en_US',
-				'metadata'      => '{"app_version":"1.0"}',
+				'metadata'      => array( 'app_version' => '1.0' ),
 			)
 		);
 
@@ -169,7 +169,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 				'platform'      => PushToken::PLATFORM_APPLE,
 				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
 				'device_locale' => 'en_US',
-				'metadata'      => '{"app_version":"1.0"}',
+				'metadata'      => array( 'app_version' => '1.0' ),
 			)
 		);
 
@@ -190,7 +190,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 				'platform'      => PushToken::PLATFORM_APPLE,
 				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
 				'device_locale' => 'en_US',
-				'metadata'      => '{"app_version":"1.0"}',
+				'metadata'      => array( 'app_version' => '1.0' ),
 			)
 		);
 
@@ -209,7 +209,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 				'platform'      => PushToken::PLATFORM_APPLE,
 				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
 				'device_locale' => 'en_US',
-				'metadata'      => '{"app_version":"1.0"}',
+				'metadata'      => array( 'app_version' => '1.0' ),
 			)
 		);
 
@@ -228,7 +228,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 				'platform'      => PushToken::PLATFORM_APPLE,
 				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
 				'device_locale' => 'en_US',
-				'metadata'      => '{"app_version":"1.0"}',
+				'metadata'      => array( 'app_version' => '1.0' ),
 			)
 		);
 
@@ -247,7 +247,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 				'device_uuid'   => 'test-device-uuid',
 				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
 				'device_locale' => 'en_US',
-				'metadata'      => '{"app_version":"1.0"}',
+				'metadata'      => array( 'app_version' => '1.0' ),
 			)
 		);
 
@@ -266,7 +266,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 				'platform'      => PushToken::PLATFORM_APPLE,
 				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
 				'device_locale' => 'en_US',
-				'metadata'      => '{"app_version":"1.0"}',
+				'metadata'      => array( 'app_version' => '1.0' ),
 			)
 		);
 
@@ -285,7 +285,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 				'platform'      => PushToken::PLATFORM_APPLE,
 				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
 				'device_locale' => 'en_US',
-				'metadata'      => '{"app_version":"1.0"}',
+				'metadata'      => array( 'app_version' => '1.0' ),
 			)
 		);
 
@@ -363,7 +363,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 				'platform'      => PushToken::PLATFORM_BROWSER,
 				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
 				'device_locale' => 'en_US',
-				'metadata'      => '{"app_version":"1.0"}',
+				'metadata'      => array( 'app_version' => '1.0' ),
 			)
 		);
 
@@ -383,7 +383,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 				'platform'      => PushToken::PLATFORM_BROWSER,
 				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
 				'device_locale' => 'en_US',
-				'metadata'      => '{"app_version":"1.0"}',
+				'metadata'      => array( 'app_version' => '1.0' ),
 			)
 		);
 
@@ -401,7 +401,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 				'device_uuid'   => 'test-device-uuid',
 				'platform'      => PushToken::PLATFORM_APPLE,
 				'device_locale' => 'en_US',
-				'metadata'      => '{"app_version":"1.0"}',
+				'metadata'      => array( 'app_version' => '1.0' ),
 			)
 		);
 
@@ -420,7 +420,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 				'device_uuid'   => 'test-device-uuid',
 				'platform'      => PushToken::PLATFORM_APPLE,
 				'device_locale' => 'en_US',
-				'metadata'      => '{"app_version":"1.0"}',
+				'metadata'      => array( 'app_version' => '1.0' ),
 			)
 		);
 
@@ -438,7 +438,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 				'device_uuid' => 'test-device-uuid',
 				'platform'    => PushToken::PLATFORM_APPLE,
 				'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
-				'metadata'    => '{"app_version":"1.0"}',
+				'metadata'    => array( 'app_version' => '1.0' ),
 			)
 		);
 
@@ -457,7 +457,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 				'device_uuid' => 'test-device-uuid',
 				'platform'    => PushToken::PLATFORM_APPLE,
 				'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
-				'metadata'    => '{"app_version":"1.0"}',
+				'metadata'    => array( 'app_version' => '1.0' ),
 			)
 		);
 
@@ -608,27 +608,15 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests set_metadata throws exception with empty string.
+	 * @testdox Tests set_metadata throws exception with non-scalar values.
 	 */
-	public function test_it_throws_exception_when_setting_empty_metadata() {
+	public function test_it_throws_exception_when_setting_non_scalar_metadata() {
 		$push_token = new PushToken();
 
 		$this->expectException( PushTokenInvalidDataException::class );
-		$this->expectExceptionMessage( 'Metadata cannot be empty.' );
+		$this->expectExceptionMessage( 'Metadata items must be scalar values.' );
 
-		$push_token->set_metadata( '' );
-	}
-
-	/**
-	 * @testdox Tests set_metadata throws exception with invalid JSON.
-	 */
-	public function test_it_throws_exception_when_setting_invalid_metadata_json() {
-		$push_token = new PushToken();
-
-		$this->expectException( PushTokenInvalidDataException::class );
-		$this->expectExceptionMessage( 'Metadata must be valid JSON.' );
-
-		$push_token->set_metadata( 'not valid json' );
+		$push_token->set_metadata( array( 'nested' => array( 'a' => 'b' ) ) );
 	}
 
 	/**
@@ -723,7 +711,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 				'platform'      => PushToken::PLATFORM_APPLE,
 				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
 				'device_locale' => 'en_US',
-				'metadata'      => '{"app_version":"1.0"}',
+				'metadata'      => array( 'app_version' => '1.0' ),
 			)
 		);
 
@@ -734,7 +722,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 		$this->assertSame( PushToken::PLATFORM_APPLE, $push_token->get_platform() );
 		$this->assertSame( PushToken::ORIGIN_WOOCOMMERCE_IOS, $push_token->get_origin() );
 		$this->assertSame( 'en_US', $push_token->get_device_locale() );
-		$this->assertSame( '{"app_version":"1.0"}', $push_token->get_metadata() );
+		$this->assertSame( array( 'app_version' => '1.0' ), $push_token->get_metadata() );
 	}
 
 	/**

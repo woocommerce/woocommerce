@@ -136,11 +136,11 @@ class PushToken {
 	private ?string $device_locale = null;
 
 	/**
-	 * A JSON encoded array of metadata for the token.
+	 * An array of metadata for the token.
 	 *
-	 * @var string|null
+	 * @var array|null
 	 */
-	private ?string $metadata = null;
+	private ?array $metadata = null;
 
 	/**
 	 * Creates a new PushToken instance with the given data.
@@ -180,7 +180,7 @@ class PushToken {
 		}
 
 		if ( array_key_exists( 'metadata', $data ) ) {
-			$this->set_metadata( (string) $data['metadata'] );
+			$this->set_metadata( (array) $data['metadata'] );
 		}
 	}
 
@@ -329,11 +329,11 @@ class PushToken {
 	/**
 	 * Validates and sets the metadata.
 	 *
-	 * @param string $metadata A JSON encoded array of metadata for the token, e.g. the app version, device OS etc.
+	 * @param array $metadata An array of metadata for the token, e.g. the app version, device OS etc.
 	 * @throws PushTokenInvalidDataException If metadata is not valid.
 	 * @return void
 	 */
-	public function set_metadata( string $metadata ): void {
+	public function set_metadata( array $metadata ): void {
 		$result = PushTokenValidator::validate( compact( 'metadata' ), array( 'metadata' ) );
 
 		if ( is_wp_error( $result ) ) {
@@ -341,7 +341,10 @@ class PushToken {
 			throw new PushTokenInvalidDataException( $result->get_error_message() );
 		}
 
-		$this->metadata = trim( $metadata );
+		$this->metadata = array_map(
+			fn ( $item ) => is_string( $item ) ? trim( $item ) : $item,
+			$metadata
+		);
 	}
 
 	/**
@@ -422,9 +425,9 @@ class PushToken {
 	/**
 	 * Gets the metadata.
 	 *
-	 * @return string|null
+	 * @return array|null
 	 */
-	public function get_metadata(): ?string {
+	public function get_metadata(): ?array {
 		return $this->metadata;
 	}
 

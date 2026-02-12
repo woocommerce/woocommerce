@@ -351,7 +351,7 @@ class PushTokenRestController extends RestApiControllerBase {
 			),
 			'metadata'      => array(
 				'description'       => __( 'Metadata', 'woocommerce' ),
-				'type'              => 'string',
+				'type'              => 'object',
 				'required'          => true,
 				'context'           => array( 'create' ),
 				'validate_callback' => array( $this, 'validate_argument' ),

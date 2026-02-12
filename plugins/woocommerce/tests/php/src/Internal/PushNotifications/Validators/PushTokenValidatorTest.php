@@ -27,7 +27,7 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 				'device_uuid'   => 'valid-uuid-123',
 				'device_locale' => 'en_US',
 				'token'         => null,
-				'metadata'      => '{}',
+				'metadata'      => array(),
 			)
 		);
 
@@ -48,7 +48,7 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 				'device_uuid'   => 'valid-uuid-123',
 				'device_locale' => 'en_US',
 				'token'         => str_repeat( 'a', 64 ),
-				'metadata'      => '{}',
+				'metadata'      => array(),
 			)
 		);
 
@@ -824,24 +824,24 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should return true for valid JSON metadata.
+	 * @testdox Should return true for a valid metadata array with values.
 	 */
-	public function test_validate_accepts_valid_json_for_metadata(): void {
+	public function test_validate_accepts_valid_array_for_metadata(): void {
 		$this->assertTrue(
 			PushTokenValidator::validate(
-				array( 'metadata' => '{"app_version":"1.0.0"}' ),
+				array( 'metadata' => array( 'app_version' => '1.0.0' ) ),
 				array( 'metadata' )
 			)
 		);
 	}
 
 	/**
-	 * @testdox Should return true for empty JSON object metadata.
+	 * @testdox Should return true for an empty metadata array.
 	 */
-	public function test_validate_accepts_empty_json_object_for_metadata(): void {
+	public function test_validate_accepts_empty_array_for_metadata(): void {
 		$this->assertTrue(
 			PushTokenValidator::validate(
-				array( 'metadata' => '{}' ),
+				array( 'metadata' => array() ),
 				array( 'metadata' )
 			)
 		);
@@ -858,68 +858,29 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should return WP_Error when metadata is not a string.
+	 * @testdox Should return WP_Error when metadata is not an array.
 	 */
-	public function test_validate_rejects_non_string(): void {
+	public function test_validate_rejects_non_array_for_metadata(): void {
 		$result = PushTokenValidator::validate(
-			array( 'metadata' => 123 ),
+			array( 'metadata' => 'not an array' ),
 			array( 'metadata' )
 		);
 
 		$this->assertInstanceOf( WP_Error::class, $result );
-		$this->assertSame( 'Metadata must be a string.', $result->get_error_message() );
+		$this->assertSame( 'Metadata must be an array.', $result->get_error_message() );
 	}
 
 	/**
-	 * @testdox Should return WP_Error when metadata is empty.
+	 * @testdox Should return WP_Error when metadata contains non-scalar values.
 	 */
-	public function test_validate_rejects_empty_metadata(): void {
+	public function test_validate_rejects_non_scalar_metadata_items(): void {
 		$result = PushTokenValidator::validate(
-			array( 'metadata' => '' ),
+			array( 'metadata' => array( 'nested' => array( 'a' => 'b' ) ) ),
 			array( 'metadata' )
 		);
 
 		$this->assertInstanceOf( WP_Error::class, $result );
-		$this->assertSame( 'Metadata cannot be empty.', $result->get_error_message() );
-	}
-
-	/**
-	 * @testdox Should return WP_Error when metadata is invalid JSON.
-	 */
-	public function test_validate_rejects_invalid_json_for_metadata(): void {
-		$result = PushTokenValidator::validate(
-			array( 'metadata' => 'not valid json' ),
-			array( 'metadata' )
-		);
-
-		$this->assertInstanceOf( WP_Error::class, $result );
-		$this->assertSame( 'Metadata must be valid JSON.', $result->get_error_message() );
-	}
-
-	/**
-	 * @testdox Should return WP_Error when metadata is valid JSON null.
-	 */
-	public function test_validate_rejects_null_for_metadata(): void {
-		$result = PushTokenValidator::validate(
-			array( 'metadata' => 'null' ),
-			array( 'metadata' )
-		);
-
-		$this->assertInstanceOf( WP_Error::class, $result );
-		$this->assertSame( 'Metadata must be valid JSON.', $result->get_error_message() );
-	}
-
-	/**
-	 * @testdox Should return WP_Error when metadata is whitespace only.
-	 */
-	public function test_validate_rejects_whitespace_only_for_metadata(): void {
-		$result = PushTokenValidator::validate(
-			array( 'metadata' => '   ' ),
-			array( 'metadata' )
-		);
-
-		$this->assertInstanceOf( WP_Error::class, $result );
-		$this->assertSame( 'Metadata cannot be empty.', $result->get_error_message() );
+		$this->assertSame( 'Metadata items must be scalar values.', $result->get_error_message() );
 	}
 
 	/**

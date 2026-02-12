@@ -54,7 +54,7 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 			'device_uuid'   => 'device-uuid-123',
 			'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
 			'device_locale' => 'en_US',
-			'metadata'      => '{"app_version":"1.0"}',
+			'metadata'      => array( 'app_version' => '1.0' ),
 		);
 
 		$push_token = $data_store->create( $data );
@@ -431,7 +431,7 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 				'device_uuid'   => null,
 				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
 				'device_locale' => 'en_US',
-				'metadata'      => '{"app_version":"1.0"}',
+				'metadata'      => array( 'app_version' => '1.0' ),
 			)
 		);
 
@@ -446,7 +446,7 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 				'device_uuid'   => null,
 				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
 				'device_locale' => 'en_US',
-				'metadata'      => '{"app_version":"1.0"}',
+				'metadata'      => array( 'app_version' => '1.0' ),
 			)
 		);
 
@@ -584,7 +584,7 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 			'platform'      => PushToken::PLATFORM_BROWSER,
 			'origin'        => PushToken::ORIGIN_BROWSER,
 			'device_locale' => 'en_US',
-			'metadata'      => '{"app_version":"1.0"}',
+			'metadata'      => array( 'app_version' => '1.0' ),
 		);
 
 		$push_token = $data_store->create( $data );
@@ -627,7 +627,7 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$this->assertEquals( $post_id, $push_token->get_id() );
 		$this->assertEquals( 'legacy_token_value', $push_token->get_token() );
 		$this->assertEquals( PushToken::DEFAULT_DEVICE_LOCALE, $push_token->get_device_locale() );
-		$this->assertEquals( '{}', $push_token->get_metadata() );
+		$this->assertEquals( array(), $push_token->get_metadata() );
 	}
 
 	/**
@@ -664,7 +664,7 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$this->assertNotNull( $found_token );
 		$this->assertEquals( $post_id, $found_token->get_id() );
 		$this->assertEquals( PushToken::DEFAULT_DEVICE_LOCALE, $found_token->get_device_locale() );
-		$this->assertEquals( '{}', $found_token->get_metadata() );
+		$this->assertEquals( array(), $found_token->get_metadata() );
 	}
 
 	/**
@@ -691,16 +691,16 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$push_token = $data_store->read( $post_id );
 
 		$this->assertEquals( PushToken::DEFAULT_DEVICE_LOCALE, $push_token->get_device_locale() );
-		$this->assertEquals( '{}', $push_token->get_metadata() );
+		$this->assertEquals( array(), $push_token->get_metadata() );
 
 		$push_token->set_device_locale( 'fr_FR' );
-		$push_token->set_metadata( '{"app_version":"2.0"}' );
+		$push_token->set_metadata( array( 'app_version' => '2.0' ) );
 		$data_store->update( $push_token );
 
 		$updated_token = $data_store->read( $post_id );
 
 		$this->assertEquals( 'fr_FR', $updated_token->get_device_locale() );
-		$this->assertEquals( '{"app_version":"2.0"}', $updated_token->get_metadata() );
+		$this->assertEquals( array( 'app_version' => '2.0' ), $updated_token->get_metadata() );
 	}
 
 	/**
@@ -718,7 +718,7 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 			'device_uuid'   => 'test-device-uuid-' . wp_rand(),
 			'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
 			'device_locale' => 'en_US',
-			'metadata'      => '{"app_version":"1.0"}',
+			'metadata'      => array( 'app_version' => '1.0' ),
 		);
 
 		return $data_store->create( $data );
