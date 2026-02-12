@@ -29,8 +29,8 @@
 	},
 	"devDependencies": {
 		"@automattic/jetpack-webpack-config": "workspace:*",
-		"@babel/core": "7.28.4",
-		"@babel/preset-react": "7.27.1",
+		"@babel/core": "7.29.0",
+		"@babel/preset-react": "7.28.5",
 		"@jest/globals": "30.2.0",
 		"@types/jest": "30.0.0",
 		"@types/jquery": "3.5.33",
