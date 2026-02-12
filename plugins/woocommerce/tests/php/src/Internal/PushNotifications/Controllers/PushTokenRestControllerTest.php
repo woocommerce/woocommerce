@@ -826,28 +826,33 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Test it cannot create a push token without required metadata
+	 * @testdox Test it can create a push token without required metadata
 	 * parameter.
 	 */
-	public function test_it_cannot_create_push_token_with_a_missing_metadata() {
+	public function test_it_can_create_push_token_with_a_missing_metadata() {
 		wp_set_current_user( $this->user_id );
 
 		$this->mock_jetpack_connection_manager_is_connected( true );
 
+		$token_value = str_repeat( 'a', 64 );
+		$device_uuid = 'test-device-uuid';
+
 		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
-		$request->set_param( 'token', str_repeat( 'a', 64 ) );
+		$request->set_param( 'token', $token_value );
 		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
-		$request->set_param( 'device_uuid', 'test-device-uuid' );
+		$request->set_param( 'device_uuid', $device_uuid );
 		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
 		$request->set_param( 'device_locale', 'en_US' );
 
 		$response = $this->server->dispatch( $request );
 
-		$this->assertEquals( WP_Http::BAD_REQUEST, $response->get_status() );
+		$this->assertEquals( WP_Http::CREATED, $response->get_status() );
 
 		$data = $response->get_data();
 
-		$this->assertEquals( 'rest_missing_callback_param', $data['code'] );
+		$this->assertArrayHasKey( 'id', $data );
+		$this->assertIsInt( $data['id'] );
+		$this->assertGreaterThan( 0, $data['id'] );
 	}
 
 	/**
