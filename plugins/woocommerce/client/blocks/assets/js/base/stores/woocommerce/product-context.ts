@@ -23,9 +23,9 @@ export type ProductContextState = {
 
 const productContextStore = store< {
 	state: ProductContextState & {
+		parentProduct: ProductResponseItem | undefined;
+		selectedVariation: ProductResponseItem | undefined;
 		product: ProductResponseItem | undefined;
-		variation: ProductResponseItem | undefined;
-		selectedProduct: ProductResponseItem | undefined;
 	};
 	actions: {
 		setProductId: ( productId: number ) => void;
@@ -35,22 +35,22 @@ const productContextStore = store< {
 	'woocommerce/product-context',
 	{
 		state: {
-			get product(): ProductResponseItem | undefined {
+			get parentProduct(): ProductResponseItem | undefined {
 				return productsStore.state.products[
 					productContextStore.state.productId
 				];
 			},
-			get variation(): ProductResponseItem | undefined {
+			get selectedVariation(): ProductResponseItem | undefined {
 				const { variationId } = productContextStore.state;
 				if ( variationId === null ) {
 					return undefined;
 				}
 				return productsStore.state.productVariations[ variationId ];
 			},
-			get selectedProduct(): ProductResponseItem | undefined {
+			get product(): ProductResponseItem | undefined {
 				return (
-					productContextStore.state.variation ??
-					productContextStore.state.product
+					productContextStore.state.selectedVariation ??
+					productContextStore.state.parentProduct
 				);
 			},
 		},
