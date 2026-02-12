@@ -277,6 +277,10 @@ function wc_product_post_type_link( $permalink, $post ) {
 		$terms = get_the_terms( $post->ID, 'product_cat' );
 
 		if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
+			// Normalize terms to an array in case filters return a single term object or other non-array value.
+			if ( ! is_array( $terms ) ) {
+				$terms = array( $terms );
+			}
 			// Re-index array to ensure sequential keys starting from 0 since filters may remove some keys.
 			$terms = array_values( $terms );
 
