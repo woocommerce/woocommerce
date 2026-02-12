@@ -186,7 +186,7 @@ class SingleProduct extends AbstractBlock {
 		$html = new \WP_HTML_Tag_Processor( $content );
 
 		if ( $html->next_tag( array( 'tag_name' => 'div' ) ) ) {
-			$html->set_attribute( 'data-wp-interactive', $this->get_full_block_name() );
+			$html->set_attribute( 'data-wp-interactive', 'woocommerce/product-context' );
 			$html->set_attribute( 'data-wp-context', wp_json_encode( $interactivity_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
 		}
 
