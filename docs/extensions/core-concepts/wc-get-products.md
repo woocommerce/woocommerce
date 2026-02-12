@@ -421,9 +421,12 @@ It is possible to add support for custom parameters in `wc_get_products()` or `W
  */
 function handle_custom_query_var( $query, $query_vars ) {
 	if ( ! empty( $query_vars['customvar'] ) ) {
+		if ( ! isset( $query['meta_query'] ) ) {
+			$query['meta_query'] = array();
+		}
 		$query['meta_query'][] = array(
-			'key' => 'customvar',
-			'value' => esc_attr( $query_vars['customvar'] ),
+			'key'   => 'customvar',
+			'value' => sanitize_text_field( $query_vars['customvar'] ),
 		);
 	}
 
