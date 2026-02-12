@@ -62,7 +62,7 @@ const productElementStore = store(
 	{
 		state: {
 			get productData(): ProductData | undefined {
-				if ( ! productContextState?.productId ) {
+				if ( ! productContextState?.currentProductId ) {
 					return undefined;
 				}
 
@@ -75,9 +75,10 @@ const productElementStore = store(
 				}
 
 				return (
-					products?.[ productContextState.productId ]?.variations?.[
-						productContextState?.variationId || 0
-					] || products?.[ productContextState.productId ]
+					products?.[ productContextState.currentProductId ]
+						?.variations?.[
+						productContextState?.currentVariationId || 0
+					] || products?.[ productContextState.currentProductId ]
 				);
 			},
 		},
@@ -85,7 +86,10 @@ const productElementStore = store(
 			updateValue: () => {
 				const element = getElement();
 
-				if ( ! element.ref || ! productContextState?.productId ) {
+				if (
+					! element.ref ||
+					! productContextState?.currentProductId
+				) {
 					return;
 				}
 

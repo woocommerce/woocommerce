@@ -186,7 +186,7 @@ const { actions, state } = store<
 				const { selectedAttributes } = getContext< Context >();
 
 				return getProductData(
-					productContextState.productId,
+					productContextState.currentProductId,
 					selectedAttributes
 				);
 			},

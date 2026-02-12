@@ -493,7 +493,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				const { selectedAttributes } = getContext< Context >();
 
 				const productObject = getProductData(
-					productContextState.parentProductId,
+					productContextState.currentProductId,
 					selectedAttributes
 				);
 
@@ -514,7 +514,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 						newValue !== currentValue
 					) {
 						actions.setQuantity(
-							productContextState.parentProductId,
+							productContextState.currentProductId,
 							newValue
 						);
 					}

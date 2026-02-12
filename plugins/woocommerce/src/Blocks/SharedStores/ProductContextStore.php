@@ -74,10 +74,8 @@ class ProductContextStore {
 		wp_interactivity_state(
 			self::$store_namespace,
 			array(
-				'templateState' => array(
-					'productId'   => $product_id,
-					'variationId' => $variation_id,
-				),
+				'productId'   => $product_id,
+				'variationId' => $variation_id,
 			)
 		);
 	}
