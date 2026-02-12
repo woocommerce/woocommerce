@@ -136,7 +136,25 @@ class VersionStringGenerator {
 		$ttl = apply_filters( 'woocommerce_version_string_generator_ttl', DAY_IN_SECONDS, $id );
 		$ttl = max( 0, (int) $ttl );
 
-		return wp_cache_set( $cache_key, $version, self::CACHE_GROUP, $ttl );
+		$result = wp_cache_set( $cache_key, $version, self::CACHE_GROUP, $ttl );
+
+		if ( is_bool( $result ) ) {
+			return $result;
+		}
+
+		// Some object cache implementations may return non-boolean values.
+		// Verify the store by reading the value back.
+		$found        = false;
+		$stored_value = wp_cache_get( $cache_key, self::CACHE_GROUP, false, $found );
+		if ( $found && $stored_value === $version ) {
+			return true;
+		}
+
+		// The stored value doesn't match; clean up and report failure.
+		if ( $found ) {
+			wp_cache_delete( $cache_key, self::CACHE_GROUP );
+		}
+		return false;
 	}
 
 	/**
@@ -152,7 +170,10 @@ class VersionStringGenerator {
 		$this->validate_input( $id );
 
 		$cache_key = $this->get_cache_key( $id );
-		return wp_cache_delete( $cache_key, self::CACHE_GROUP );
+		$result    = wp_cache_delete( $cache_key, self::CACHE_GROUP );
+
+		// Some object cache implementations may return non-boolean values.
+		return ! is_bool( $result ) || $result;
 	}
 
 	/**

@@ -1107,8 +1107,9 @@ trait RestApiCache {
 		// Try to get cached file check results to avoid filesystem calls on every request.
 		if ( $check_interval > 0 ) {
 			$file_check_cache_key = $this->get_file_check_cache_key( $file_paths, $allowed_directories );
-			$files_data           = wp_cache_get( $file_check_cache_key, self::$cache_group );
-			if ( false === $files_data ) {
+			$found                = false;
+			$files_data           = wp_cache_get( $file_check_cache_key, self::$cache_group, false, $found );
+			if ( ! $found ) {
 				$files_data = null;
 			}
 		}
@@ -1283,7 +1284,9 @@ trait RestApiCache {
 		if ( $suppression_ttl > 0 ) {
 			$warning_key = 'wc_rest_file_warning_' . md5( $file_path . '|' . $reason );
 
-			if ( false !== wp_cache_get( $warning_key, self::$warning_cache_group ) ) {
+			$found = false;
+			wp_cache_get( $warning_key, self::$warning_cache_group, false, $found );
+			if ( $found ) {
 				return;
 			}
 
