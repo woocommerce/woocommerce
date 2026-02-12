@@ -35550,7 +35550,7 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$object_or_string of function is_a expects object, WC_Order\|WC_Order_Refund\|false given\.$#'
 			identifier: argument.type
-			count: 2
+			count: 1
 			path: includes/wc-order-functions.php
 
 		-
