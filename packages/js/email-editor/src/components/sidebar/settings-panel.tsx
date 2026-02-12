@@ -51,23 +51,12 @@ export function SettingsPanel() {
 		[]
 	);
 
-	const EmailStatusComponent = useMemo(
-		() =>
-			applyFilters(
-				'woocommerce_email_editor_setting_sidebar_email_status_component',
-				() => null,
-				tracking
-			) as () => JSX.Element,
-		[]
-	);
-
 	return (
 		<PluginDocumentSettingPanel
 			name="email-settings-panel"
 			title={ __( 'Settings', 'woocommerce' ) }
 			className="woocommerce-email-editor__settings-panel"
 		>
-			{ <EmailStatusComponent /> }
 			<Slot />
 			{ <TemplateSelection /> }
 			{ /* @ts-expect-error canCopyContent is missing in @types/wordpress__editor */ }
