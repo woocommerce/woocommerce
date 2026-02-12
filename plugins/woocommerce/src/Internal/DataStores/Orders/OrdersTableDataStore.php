@@ -1765,6 +1765,9 @@ WHERE
 				if ( ! isset( $prop_details['name'] ) ) {
 					continue;
 				}
+				if ( ! property_exists( $order_data, $prop_details['name'] ) ) {
+					continue;
+				}
 				$prop_value = $order_data->{$prop_details['name']};
 				if ( is_null( $prop_value ) ) {
 					continue;
