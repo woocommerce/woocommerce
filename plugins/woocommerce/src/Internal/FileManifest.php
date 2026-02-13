@@ -217,7 +217,6 @@ class FileManifest {
 			return array(
 				'status'           => 'version_mismatch',
 				'details'          => array(
-					sprintf( 'Expected version: %s', $plugin_version ),
 					sprintf( 'Manifest version: %s', $manifest['version'] ),
 				),
 				'version'          => $plugin_version,
@@ -493,6 +492,9 @@ class FileManifest {
 					$overflow  = count( $result['details'] ) > self::MAX_MISSING_FILES_SHOWN;
 
 					echo '<td>' . esc_html( $heading );
+					if ( 'version_mismatch' === $result['status'] ) {
+						echo "\n<p style=\"margin:2px 0;\">" . esc_html( sprintf( 'Expected version: %s', $result['version'] ) ) . '</p>';
+					}
 					foreach ( $max_shown as $detail ) {
 						echo "\n<p style=\"margin:2px 0;\">" . esc_html( $detail ) . '</p>';
 					}

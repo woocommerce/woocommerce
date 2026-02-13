@@ -221,7 +221,6 @@ class WC_REST_System_Status_Controller extends WC_REST_System_Status_V2_Controll
 			}
 
 			return array(
-				'expected_version' => $result['version'] ?? '',
 				'manifest_version' => $manifest_version,
 			);
 		}
