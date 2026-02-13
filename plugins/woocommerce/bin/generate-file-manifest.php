@@ -126,6 +126,9 @@ echo "Generated file-manifest.php: version=$version, files=$count\n";
 
 // In local dev mode, copy the manifest back to the source tree.
 if ( ! is_null( $cleanup ) ) {
-	copy( $manifest_path, $source_dir . '/file-manifest.php' );
+	if ( ! copy( $manifest_path, $source_dir . '/file-manifest.php' ) ) {
+		fwrite( STDERR, "Error: Failed to copy file-manifest.php to plugin root.\n" );
+		exit( 1 );
+	}
 	echo "Copied file-manifest.php to plugin root.\n";
 }
