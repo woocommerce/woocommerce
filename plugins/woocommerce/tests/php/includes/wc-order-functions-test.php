@@ -565,7 +565,7 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 		$order->set_status( OrderStatus::CHECKOUT_DRAFT );
 		$order->save();
 
-		// Verify the metas getting only purged for order checkout draft state.
+		// Verify the metas getting only partially purged for order checkout draft state.
 		Users::update_site_user_meta( $customer_id, 'wc_order_count', 123 );
 		Users::update_site_user_meta( $customer_id, 'wc_last_order', 456 );
 		Users::update_site_user_meta( $customer_id, 'wc_money_spent', 789 );
