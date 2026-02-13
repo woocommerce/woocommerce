@@ -393,6 +393,7 @@ class WC_Query {
 				$page_id = $shop_id;
 			}
 		}
+		$shop_page = null;
 
 		if ( wc_current_theme_supports_woocommerce_or_fse() && $q->is_page() && 'page' === get_option( 'show_on_front' ) && $page_id === $shop_id ) {
 			// This is a front-page shop.
@@ -408,14 +409,6 @@ class WC_Query {
 			// Define a variable so we know this is the front page shop later on.
 			wc_maybe_define_constant( 'SHOP_IS_ON_FRONT', true );
 
-			// Explicitly set the queried object to the shop page post.
-			// Without this, WordPress returns the product post type object (WP_Post_Type)
-			// when get_queried_object() is called, which lacks essential properties
-			// like post_content, post_excerpt, post_parent that themes expect.
-			// See: https://github.com/woocommerce/woocommerce/issues/61676
-			$q->queried_object    = $shop_page;
-			$q->queried_object_id = $shop_page->ID;
-
 			// Fix conditional functions like is_front_page.
 			$q->is_singular          = false;
 			$q->is_post_type_archive = true;
@@ -430,9 +423,18 @@ class WC_Query {
 				add_filter( 'wpseo_metadesc', array( $this, 'wpseo_metadesc' ) );
 				add_filter( 'wpseo_metakey', array( $this, 'wpseo_metakey' ) );
 			}
+	} elseif ( $q->is_post_type_archive( 'product' ) && ! $q->is_tax() && wc_get_page_id( 'shop' ) ) {
+		// This is a regular shop page
+		$shop_page = get_post( wc_get_page_id( 'shop' ) );
 		} elseif ( ! $q->is_post_type_archive( 'product' ) && ! $q->is_tax( get_object_taxonomies( 'product' ) ) ) {
 			// Only apply to product categories, the product post archive, the shop page, product tags, and product attribute taxonomies.
 			return;
+		}
+
+		// Set queried object for any shop page scenario.
+		if ( $shop_page ) {
+			$q->queried_object    = $shop_page;
+			$q->queried_object_id = $shop_page->ID;
 		}
 
 		$this->product_query( $q );
