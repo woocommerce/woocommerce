@@ -21,7 +21,7 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 	 * of the site theme's blockGap, because the editor does not apply blockGap
 	 * between inner product elements.
 	 */
-	private const INNER_BLOCK_SPACING = '16px';
+	private const INNER_BLOCK_SPACING = '8px';
 
 	/**
 	 * Render the product collection block content for email.
