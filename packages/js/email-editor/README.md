@@ -39,6 +39,152 @@ The `initializeEditor` function accepts a single parameter:
 
 Make sure to set up the required data on `window.WooCommerceEmailEditor` before calling `initializeEditor`.
 
+## Exports
+
+### Components
+
+#### `ExperimentalEmailEditor`
+
+A React component alternative to `initializeEditor`. Renders the email editor inline instead of mounting it to a DOM element by ID. Accepts a `config` prop directly, removing the need for `window.WooCommerceEmailEditor`. Cleans up global editor settings on unmount.
+
+> **Note:** This component is experimental and its API is subject to change.
+
+```jsx
+import { ExperimentalEmailEditor } from '@woocommerce/email-editor';
+
+<ExperimentalEmailEditor
+    postId="123"
+    postType="email"
+    config={ {
+        editorSettings: { /* ... */ },
+        theme: { /* ... */ },
+        urls: { listings: '/emails', back: '/' },
+        userEmail: 'user@example.com',
+        globalStylesPostId: 456,
+    } }
+/>
+```
+
+#### `SendPreviewEmail`
+
+A modal component for sending test emails. Provides email validation, sending status feedback, error handling, and success confirmation. Integrates with the email editor store to manage modal state.
+
+> Requires the store to be initialized via `createStore()`, `initializeEditor`, or `ExperimentalEmailEditor`.
+
+```jsx
+import { createStore, SendPreviewEmail } from '@woocommerce/email-editor';
+
+createStore();
+// ...
+<SendPreviewEmail />
+```
+
+#### `RichTextWithButton`
+
+A WordPress `RichText` input enhanced with a button for inserting personalization tags (e.g., customer name, order details) into email content.
+
+> Requires the store to be initialized via `createStore()`, `initializeEditor`, or `ExperimentalEmailEditor`.
+
+```jsx
+import { createStore, RichTextWithButton } from '@woocommerce/email-editor';
+
+createStore();
+// ...
+<RichTextWithButton
+    label="Email Subject"
+    placeholder="Enter email subject..."
+    attributeName="subject"
+    attributeValue={ currentSubject }
+    updateProperty={ ( name, value ) => setEmailProperty( name, value ) }
+/>
+```
+
+### Hooks
+
+#### `useIsEmailEditor`
+
+Returns `true` when the current context is the email editor. Checks the email editor store and compares the current post ID/type against the editor's configuration. Returns `false` if the store is not initialized.
+
+> Requires the store to be initialized for meaningful results.
+
+```js
+import { createStore, useIsEmailEditor } from '@woocommerce/email-editor';
+
+createStore();
+// ...
+const isEmailEditor = useIsEmailEditor();
+```
+
+#### `usePreviewTemplates`
+
+Generates preview data for email templates by merging template layouts with content. Optionally includes recent email posts.
+
+> Requires the store to be initialized.
+
+```js
+import { createStore, usePreviewTemplates } from '@woocommerce/email-editor';
+
+createStore();
+// ...
+const [ templates, recentPosts, hasRecentPosts ] = usePreviewTemplates();
+```
+
+#### `useEmailCss`
+
+Generates complete CSS styles for the email editor by merging editor theme settings, user customizations, and layout configurations.
+
+> Requires the store to be initialized.
+
+```js
+import { createStore, useEmailCss } from '@woocommerce/email-editor';
+
+createStore();
+// ...
+const [ styles ] = useEmailCss();
+```
+
+### Store
+
+#### `storeName`
+
+The store identifier: `'email-editor/editor'`. Use with `@wordpress/data` `select()` and `dispatch()` calls.
+
+#### `createStore`
+
+Registers the email editor Redux store with `@wordpress/data`. Safe to call multiple times; returns the existing store if already registered.
+
+```js
+import { createStore } from '@woocommerce/email-editor';
+
+createStore();
+```
+
+### Event tracking
+
+#### `recordEvent`, `recordEventOnce`, `debouncedRecordEvent`
+
+Analytics tracking utilities. Events are prefixed with `email_editor_events_` and only recorded when tracking is enabled. `recordEventOnce` deduplicates per session. `debouncedRecordEvent` waits 700ms to batch rapid actions.
+
+```js
+import { recordEvent, recordEventOnce, debouncedRecordEvent } from '@woocommerce/email-editor';
+
+recordEvent( 'button_clicked', { buttonType: 'save' } );
+recordEventOnce( 'editor_loaded' );
+debouncedRecordEvent( 'content_typed', { length: 42 } );
+```
+
+#### `isEventTrackingEnabled`
+
+Returns whether event tracking is currently enabled.
+
+```js
+import { isEventTrackingEnabled } from '@woocommerce/email-editor';
+
+if ( isEventTrackingEnabled() ) {
+    // perform tracking work
+}
+```
+
 ## Workflow Commands
 
 We use `pnpm` run scripts to run the commands. You can run them using `pnpm run <command>`.
