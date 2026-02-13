@@ -16,6 +16,14 @@ use WP_Query;
  */
 class Product_Collection extends Abstract_Product_Block_Renderer {
 	/**
+	 * Default spacing between inner product elements (image, title, price).
+	 * This is a fixed value from the email editor's base theme.json, independent
+	 * of the site theme's blockGap, because the editor does not apply blockGap
+	 * between inner product elements.
+	 */
+	private const INNER_BLOCK_SPACING = '16px';
+
+	/**
 	 * Render the product collection block content for email.
 	 *
 	 * @param string            $block_content Block content.
@@ -208,13 +216,25 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 			return $content;
 		}
 
+		$inner_index = 0;
 		foreach ( $template_block['innerBlocks'] as $inner_block ) {
+			// Override the preprocessor-applied blockGap margin-top for inner blocks.
+			// The editor does not vary spacing between inner product elements
+			// (image, title, price) when blockGap changes, so we use a fixed value
+			// to keep editor and preview consistent.
+			$inner_block['email_attrs'] = $inner_block['email_attrs'] ?? array();
+			if ( 0 === $inner_index ) {
+				unset( $inner_block['email_attrs']['margin-top'] );
+			} else {
+				$inner_block['email_attrs']['margin-top'] = self::INNER_BLOCK_SPACING;
+			}
+
 			// Set cell width context for multi-column layouts.
 			if ( null !== $cell_width ) {
-				$inner_block['email_attrs']          = $inner_block['email_attrs'] ?? array();
 				$inner_block['email_attrs']['width'] = $cell_width . 'px';
 			}
 
+			++$inner_index;
 			switch ( $inner_block['blockName'] ) {
 				case 'woocommerce/product-price':
 				case 'woocommerce/product-button':
