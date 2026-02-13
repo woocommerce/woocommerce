@@ -355,15 +355,15 @@ const { state, actions } = store< Store >(
 			},
 
 			*addCartItem(
-				{
-					id,
-					key,
-					quantity: initialQuantity,
-					quantityToAdd,
-					variation,
-				}: ClientCartItem,
+				{ id, key, quantity, quantityToAdd, variation }: ClientCartItem,
 				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
 			) {
+				if ( quantity !== undefined && quantityToAdd !== undefined ) {
+					throw new Error(
+						'addCartItem: pass either quantity or quantityToAdd, not both.'
+					);
+				}
+
 				const a11yModulePromise = import( '@wordpress/a11y' );
 
 				// Find existing item
@@ -389,15 +389,15 @@ const { state, actions } = store< Store >(
 				// If quantityToAdd is provided, calculate target based on current
 				// cart state (which includes optimistic updates from previous clicks).
 				// This ensures rapid clicks compound correctly.
-				let quantity: number;
+				let targetQuantity: number;
 				if ( typeof quantityToAdd === 'number' ) {
 					const currentQuantity = existingItem?.quantity ?? 0;
-					quantity = currentQuantity + quantityToAdd;
-				} else if ( typeof initialQuantity === 'number' ) {
-					quantity = initialQuantity;
+					targetQuantity = currentQuantity + quantityToAdd;
+				} else if ( typeof quantity === 'number' ) {
+					targetQuantity = quantity;
 				} else {
 					// Neither provided - default to 1
-					quantity = 1;
+					targetQuantity = 1;
 				}
 
 				// Only treat as update if the item has a key (server-confirmed item).
@@ -418,14 +418,14 @@ const { state, actions } = store< Store >(
 				let itemToSend: OptimisticCartItem;
 				if ( isUpdate && existingItem ) {
 					// Server-confirmed item: include the key for update-item endpoint.
-					itemToSend = { ...existingItem, quantity };
+					itemToSend = { ...existingItem, quantity: targetQuantity };
 				} else {
 					// New item or optimistic item: build fresh for add-item endpoint.
 					// For optimistic items (existingItem without key), calculate delta
 					// since add-item adds to existing quantity, not sets it.
 					const quantityToSend = existingItem
-						? quantity - existingItem.quantity
-						: quantity;
+						? targetQuantity - existingItem.quantity
+						: targetQuantity;
 
 					itemToSend = {
 						id,
@@ -441,7 +441,7 @@ const { state, actions } = store< Store >(
 						isCartItem( existingItem ) &&
 						existingItem.sold_individually;
 					if ( ! isSoldIndividually ) {
-						existingItem.quantity = quantity;
+						existingItem.quantity = targetQuantity;
 					}
 				} else {
 					// No existing item: push new optimistic item.
@@ -521,7 +521,13 @@ const { state, actions } = store< Store >(
 							( { id: productId } ) => item.id === productId
 						);
 
-						const quantity = item.quantity ?? 1;
+						let quantity: number;
+						if ( typeof item.quantityToAdd === 'number' ) {
+							const currentQuantity = existingItem?.quantity ?? 0;
+							quantity = currentQuantity + item.quantityToAdd;
+						} else {
+							quantity = item.quantity ?? 1;
+						}
 						const isUpdate = !! existingItem?.key;
 						const endpoint = isUpdate ? 'update-item' : 'add-item';
 
