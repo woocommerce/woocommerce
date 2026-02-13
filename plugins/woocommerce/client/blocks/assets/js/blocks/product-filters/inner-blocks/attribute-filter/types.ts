@@ -16,7 +16,6 @@ export type BlockAttributes = {
 	queryType: 'or' | 'and';
 	displayStyle: string;
 	selectType: string;
-	isPreview: boolean;
 	sortOrder: keyof typeof sortOrders;
 	hideEmpty: boolean;
 };

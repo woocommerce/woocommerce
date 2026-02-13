@@ -7,7 +7,6 @@ export type BlockAttributes = {
 	taxonomy: string;
 	showCounts: boolean;
 	displayStyle: string;
-	isPreview: boolean;
 	sortOrder: string;
 	hideEmpty: boolean;
 };

@@ -8,6 +8,7 @@ import { Icon, close } from '@wordpress/icons';
 import { useState } from '@wordpress/element';
 import { filterThreeLines } from '@woocommerce/icons';
 import clsx from 'clsx';
+import { usePreviewMode } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
@@ -38,7 +39,7 @@ const TEMPLATE: InnerBlockTemplate[] = [
 
 export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 	const { attributes } = props;
-	const { isPreview } = attributes;
+	const isPreviewMode = usePreviewMode();
 	const [ isOpen, setIsOpen ] = useState( false );
 	const blockProps = useBlockProps( {
 		className: clsx( 'wc-block-product-filters', {
@@ -49,7 +50,7 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 
 	return (
 		<div { ...blockProps }>
-			{ isPreview ? (
+			{ isPreviewMode ? (
 				<div className="wc-block-product-filters__overlay-content">
 					<InnerBlocks templateLock={ false } template={ TEMPLATE } />
 				</div>

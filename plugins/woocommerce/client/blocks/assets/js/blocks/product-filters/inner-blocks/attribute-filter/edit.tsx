@@ -19,6 +19,7 @@ import { withSpokenMessages } from '@wordpress/components';
 import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { getSetting } from '@woocommerce/settings';
+import { usePreviewMode } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
@@ -39,11 +40,11 @@ const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
 
 const Edit = ( props: EditProps ) => {
 	const { attributes: blockAttributes } = props;
+	const isPreviewMode = usePreviewMode();
 
 	const {
 		attributeId,
 		queryType,
-		isPreview,
 		displayStyle,
 		showCounts,
 		sortOrder,
@@ -202,7 +203,7 @@ const Edit = ( props: EditProps ) => {
 					value={ {
 						filterData: {
 							items:
-								attributeOptions.length === 0 && isPreview
+								attributeOptions.length === 0 && isPreviewMode
 									? attributeOptionsPreview
 									: attributeOptions,
 							isLoading,

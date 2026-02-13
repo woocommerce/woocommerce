@@ -6,7 +6,6 @@ import type { ReactNode } from 'react';
 
 export type BlockAttributes = {
 	productId?: string;
-	isPreview: boolean;
 };
 
 export type EditProps = BlockEditProps< BlockAttributes >;

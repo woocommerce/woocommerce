@@ -36,17 +36,8 @@
 	},
 	"textdomain": "woocommerce",
 	"usesContext": [ "postId", "query", "queryId" ],
-	"attributes": {
-		"isPreview": {
-			"type": "boolean",
-			"default": false
-		}
-	},
-	"example": {
-		"attributes": {
-			"isPreview": true
-		}
-	},
+	"attributes": {},
+	"example": {},
 	"viewScriptModule": "woocommerce/product-filters",
 	"style": "file:../woocommerce/product-filters-style.css",
 	"editorStyle": "file:../woocommerce/product-filters-editor.css"
