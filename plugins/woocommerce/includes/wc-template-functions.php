@@ -3868,17 +3868,15 @@ function wc_display_product_attributes( $product ) {
 
 	if ( $display_dimensions && $product->has_weight() ) {
 		$product_attributes['weight'] = array(
-			'label'       => __( 'Weight', 'woocommerce' ),
-			'value'       => wc_format_weight( $product->get_weight() ),
-			'css_classes' => 'woocommerce-product-attributes-item--weight',
+			'label' => __( 'Weight', 'woocommerce' ),
+			'value' => wc_format_weight( $product->get_weight() ),
 		);
 	}
 
 	if ( $display_dimensions && $product->has_dimensions() ) {
 		$product_attributes['dimensions'] = array(
-			'label'       => __( 'Dimensions', 'woocommerce' ),
-			'value'       => wc_format_dimensions( $product->get_dimensions( false ) ),
-			'css_classes' => 'woocommerce-product-attributes-item--dimensions',
+			'label' => __( 'Dimensions', 'woocommerce' ),
+			'value' => wc_format_dimensions( $product->get_dimensions( false ) ),
 		);
 	}
 
@@ -3909,21 +3907,8 @@ function wc_display_product_attributes( $product ) {
 			}
 		}
 
-		$attribute_key        = sanitize_html_class( sanitize_title( $attribute->get_name() ) );
-		$legacy_attribute_key = sanitize_title_with_dashes( $attribute->get_name() );
-		$css_classes          = "woocommerce-product-attributes-item--$attribute_key";
-
-		/**
-		 * Add legacy class for backwards compatibility if it differs from the current class.
-		 *
-		 * See details in https://github.com/woocommerce/woocommerce/issues/31086.
-		 */
-		if ( $legacy_attribute_key !== $attribute_key ) {
-			$css_classes .= " woocommerce-product-attributes-item--$legacy_attribute_key";
-		}
-
-		$product_attributes[ 'attribute_' . $attribute_key ] = array(
-			'label'       => wc_attribute_label( $attribute->get_name() ),
+		$product_attributes[ 'attribute_' . sanitize_title_with_dashes( $attribute->get_name() ) ] = array(
+			'label' => wc_attribute_label( $attribute->get_name() ),
 			/**
 			 * Filters the product attribute value for display.
 			 *
@@ -3933,8 +3918,7 @@ function wc_display_product_attributes( $product ) {
 			 * @param array  $attribute An array of product attribute data.
 			 * @param array  $values    An array of attribute values.
 			 */
-			'value'       => apply_filters( 'woocommerce_attribute', wpautop( wptexturize( implode( ', ', $values ) ) ), $attribute, $values ),
-			'css_classes' => $css_classes,
+			'value' => apply_filters( 'woocommerce_attribute', wpautop( wptexturize( implode( ', ', $values ) ) ), $attribute, $values ),
 		);
 	}
 
