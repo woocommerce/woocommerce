@@ -1340,10 +1340,9 @@ trait RestApiCache {
 		$cache_ttl      = $cached_config['cache_ttl'];
 		$relevant_hooks = $cached_config['relevant_hooks'];
 
-		$found  = false;
-		$cached = wp_cache_get( $cache_key, self::$cache_group, false, $found );
+		$cached = wp_cache_get( $cache_key, self::$cache_group );
 
-		if ( ! $found || ! is_array( $cached ) || ! array_key_exists( 'data', $cached ) || ! isset( $cached['entity_versions'], $cached['created_at'] ) ) {
+		if ( ! is_array( $cached ) || ! array_key_exists( 'data', $cached ) || ! isset( $cached['entity_versions'], $cached['created_at'] ) ) {
 			return null;
 		}
 
