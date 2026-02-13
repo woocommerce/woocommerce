@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Performance: separate the transient deletion of legacy reports from the order cache refresh and execute these operations asynchronously.

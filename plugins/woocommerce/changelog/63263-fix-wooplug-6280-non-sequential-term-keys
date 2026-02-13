@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix PHP warnings when product categories have non-sequential array keys due to plugin filters.

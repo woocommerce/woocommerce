@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix variable products add-to-cart button appearing disabled in some stores

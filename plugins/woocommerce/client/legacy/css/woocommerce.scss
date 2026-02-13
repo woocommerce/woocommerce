@@ -2329,3 +2329,13 @@ body:not(.search-results) .twentysixteen .entry-summary {
 	background: inherit;
 	color: inherit;
 }
+
+/**
+ * Hides default button when a gateway with custom "place order" button is selected.
+ * This applies to checkout, order-pay, and add-payment-method pages.
+ *
+ * @since 10.6.0
+ */
+form.has-custom-place-order-button #place_order {
+	display: none !important;
+}

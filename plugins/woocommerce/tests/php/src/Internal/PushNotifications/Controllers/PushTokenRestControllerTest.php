@@ -9,14 +9,15 @@ use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushTokenRestController;
 use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataStore;
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
+use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenInvalidDataException;
 use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenNotFoundException;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Exception;
-use InvalidArgumentException;
 use RuntimeException;
 use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
+use WC_Data_Exception;
 use WC_REST_Unit_Test_Case;
 use WP_Error;
 use WP_Http;
@@ -596,7 +597,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 
 		$this->assertEquals( 'rest_invalid_param', $data['code'] );
-		$this->assertStringContainsString( 'device_uuid', $data['message'] );
+		$this->assertStringContainsString( 'Invalid parameter(s): device_uuid', $data['message'] );
 	}
 
 	/**
@@ -679,16 +680,17 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		/**
 		 * Create a token first.
 		 */
-		$push_token = new PushToken();
-		$push_token->set_user_id( $this->user_id );
-		$push_token->set_token( str_repeat( 'a', 64 ) );
-		$push_token->set_platform( PushToken::PLATFORM_APPLE );
-		$push_token->set_device_uuid( 'device-to-delete' );
-		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
+		$data = array(
+			'user_id'     => $this->user_id,
+			'token'       => str_repeat( 'a', 64 ),
+			'platform'    => PushToken::PLATFORM_APPLE,
+			'device_uuid' => 'device-to-delete',
+			'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+		);
 
 		$data_store = wc_get_container()->get( PushTokensDataStore::class );
-		$data_store->create( $push_token );
-		$token_id = $push_token->get_id();
+		$push_token = $data_store->create( $data );
+		$token_id   = $push_token->get_id();
 
 		/**
 		 * Delete the token.
@@ -737,16 +739,17 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		/**
 		 * Create a token for another shop manager.
 		 */
-		$push_token = new PushToken();
-		$push_token->set_user_id( $this->other_shop_manager_id );
-		$push_token->set_token( str_repeat( 'a', 64 ) );
-		$push_token->set_platform( PushToken::PLATFORM_APPLE );
-		$push_token->set_device_uuid( 'device-other-user' );
-		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
+		$data = array(
+			'user_id'     => $this->other_shop_manager_id,
+			'token'       => str_repeat( 'a', 64 ),
+			'platform'    => PushToken::PLATFORM_APPLE,
+			'device_uuid' => 'device-other-user',
+			'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+		);
 
 		$data_store = wc_get_container()->get( PushTokensDataStore::class );
-		$data_store->create( $push_token );
-		$token_id = $push_token->get_id();
+		$push_token = $data_store->create( $data );
+		$token_id   = $push_token->get_id();
 
 		/**
 		 * Try to delete as a different user.
@@ -762,7 +765,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		$data = $response->get_data();
 
-		$this->assertEquals( 'woocommerce_rest_invalid_push_token', $data['code'] );
+		$this->assertEquals( 'woocommerce_invalid_push_token', $data['code'] );
 		$this->assertEquals( 'Push token could not be found.', $data['message'] );
 	}
 
@@ -782,8 +785,45 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		$data = $response->get_data();
 
-		$this->assertEquals( 'woocommerce_rest_invalid_push_token', $data['code'] );
+		$this->assertEquals( 'woocommerce_invalid_push_token', $data['code'] );
 		$this->assertEquals( 'Push token could not be found.', $data['message'] );
+	}
+
+	/**
+	 * @testdox Test it returns 500 when wp_delete_post fails.
+	 */
+	public function test_it_returns_500_when_wp_delete_post_fails() {
+		$data = array(
+			'user_id'     => $this->user_id,
+			'token'       => str_repeat( 'a', 64 ),
+			'platform'    => PushToken::PLATFORM_APPLE,
+			'device_uuid' => 'device-delete-fail',
+			'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+		);
+
+		$data_store = wc_get_container()->get( PushTokensDataStore::class );
+		$push_token = $data_store->create( $data );
+		$token_id   = $push_token->get_id();
+
+		wp_set_current_user( $this->user_id );
+
+		$this->mock_jetpack_connection_manager_is_connected( true );
+
+		add_filter( 'pre_delete_post', '__return_false' );
+
+		try {
+			$request  = new WP_REST_Request( 'DELETE', '/wc-push-notifications/push-tokens/' . $token_id );
+			$response = $this->server->dispatch( $request );
+
+			$this->assertEquals( WP_Http::INTERNAL_SERVER_ERROR, $response->get_status() );
+
+			$data = $response->get_data();
+
+			$this->assertEquals( 'woocommerce_internal_error', $data['code'] );
+			$this->assertEquals( 'Internal server error', $data['message'] );
+		} finally {
+			remove_filter( 'pre_delete_post', '__return_false' );
+		}
 	}
 
 	/**
@@ -875,7 +915,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 
 		$this->assertEquals( 'rest_invalid_param', $data['code'] );
-		$this->assertStringContainsString( 'device_uuid', $data['message'] );
+		$this->assertStringContainsString( 'Invalid parameter(s): device_uuid', $data['message'] );
 	}
 
 	/**
@@ -900,7 +940,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 
 		$this->assertEquals( 'rest_invalid_param', $data['code'] );
-		$this->assertStringContainsString( 'device_uuid', $data['message'] );
+		$this->assertStringContainsString( 'Invalid parameter(s): device_uuid', $data['message'] );
 	}
 
 	/**
@@ -957,7 +997,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$result = $method->invoke( $controller, $exception );
 
 		$this->assertInstanceOf( WP_Error::class, $result );
-		$this->assertEquals( 'woocommerce_rest_internal_error', $result->get_error_code() );
+		$this->assertEquals( 'woocommerce_internal_error', $result->get_error_code() );
 		$this->assertEquals( 'Internal server error', $result->get_error_message() );
 		$this->assertEquals( WP_Http::INTERNAL_SERVER_ERROR, $result->get_error_data()['status'] );
 	}
@@ -977,18 +1017,18 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$result = $method->invoke( $controller, $exception );
 
 		$this->assertInstanceOf( WP_Error::class, $result );
-		$this->assertEquals( 'woocommerce_rest_invalid_push_token', $result->get_error_code() );
+		$this->assertEquals( 'woocommerce_invalid_push_token', $result->get_error_code() );
 		$this->assertEquals( 'Push token could not be found.', $result->get_error_message() );
 		$this->assertEquals( WP_Http::NOT_FOUND, $result->get_error_data()['status'] );
 	}
 
 	/**
 	 * @testdox Test convert_exception_to_wp_error exposes message for
-	 * InvalidArgumentException.
+	 * PushTokenInvalidDataException.
 	 */
-	public function test_it_exposes_message_for_invalid_argument_exception() {
+	public function test_it_exposes_message_for_push_token_invalid_data_exception() {
 		$controller = new PushTokenRestController();
-		$exception  = new InvalidArgumentException( 'Invalid argument provided.' );
+		$exception  = new PushTokenInvalidDataException( 'Invalid argument provided.' );
 
 		$reflection = new ReflectionClass( $controller );
 		$method     = $reflection->getMethod( 'convert_exception_to_wp_error' );
@@ -997,19 +1037,22 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$result = $method->invoke( $controller, $exception );
 
 		$this->assertInstanceOf( WP_Error::class, $result );
-		$this->assertEquals( 'woocommerce_rest_invalid_argument', $result->get_error_code() );
+		$this->assertEquals( 'woocommerce_invalid_data', $result->get_error_code() );
 		$this->assertEquals( 'Invalid argument provided.', $result->get_error_message() );
 		$this->assertEquals( WP_Http::BAD_REQUEST, $result->get_error_data()['status'] );
 	}
 
 	/**
-	 * @testdox Test convert_exception_to_wp_error hides message for unknown
-	 * exception subclasses.
+	 * @testdox Test convert_exception_to_wp_error correctly handles any non-500
+	 * WC_Data_Exception.
 	 */
-	public function test_it_hides_internal_error_message_for_unknown_exception_subclass() {
+	public function test_it_handles_any_non_500_wc_data_exception() {
 		$controller = new PushTokenRestController();
-		// RuntimeException is a subclass of Exception but not in our mapping.
-		$exception = new RuntimeException( 'Sensitive runtime error details' );
+		$exception  = new WC_Data_Exception(
+			'custom_error_code',
+			'Custom error message.',
+			WP_Http::FORBIDDEN
+		);
 
 		$reflection = new ReflectionClass( $controller );
 		$method     = $reflection->getMethod( 'convert_exception_to_wp_error' );
@@ -1018,7 +1061,31 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$result = $method->invoke( $controller, $exception );
 
 		$this->assertInstanceOf( WP_Error::class, $result );
-		$this->assertEquals( 'woocommerce_rest_internal_error', $result->get_error_code() );
+		$this->assertEquals( 'custom_error_code', $result->get_error_code() );
+		$this->assertEquals( 'Custom error message.', $result->get_error_message() );
+		$this->assertEquals( WP_Http::FORBIDDEN, $result->get_error_data()['status'] );
+	}
+
+	/**
+	 * @testdox Test convert_exception_to_wp_error correctly handles a 500
+	 * WC_Data_Exception.
+	 */
+	public function test_it_handles_a_500_wc_data_exception() {
+		$controller = new PushTokenRestController();
+		$exception  = new WC_Data_Exception(
+			'custom_error_code',
+			'Custom error message.',
+			WP_Http::INTERNAL_SERVER_ERROR
+		);
+
+		$reflection = new ReflectionClass( $controller );
+		$method     = $reflection->getMethod( 'convert_exception_to_wp_error' );
+		$method->setAccessible( true );
+
+		$result = $method->invoke( $controller, $exception );
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertEquals( 'woocommerce_internal_error', $result->get_error_code() );
 		$this->assertEquals( 'Internal server error', $result->get_error_message() );
 		$this->assertEquals( WP_Http::INTERNAL_SERVER_ERROR, $result->get_error_data()['status'] );
 	}

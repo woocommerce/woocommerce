@@ -2,6 +2,15 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.0](https://github.com/woocommerce/email-editor/releases/tag/2.7.0) - 2026-02-12 
+
+-   Patch - Fix YouTube URL truncation in subscription emails when video IDs contain underscores. [#63252]
+-   Minor - Add two-column grid layout support for Product Collection block in email rendering. [#63122]
+
+## [2.6.0](https://github.com/woocommerce/email-editor/releases/tag/2.6.0) - 2026-02-04 
+
+-   Minor - Add post_id parameter and action hook for context-aware personalization tags [#63103]
+
 ## [2.5.0](https://github.com/woocommerce/email-editor/releases/tag/2.5.0) - 2026-01-29 
 
 -   Minor - Fix image alignment by adding alignment to the inner cell when rendered.  Fix image border alignment by adding a border wrapper. [#62899]
