@@ -6,12 +6,10 @@ import { createElement } from '@wordpress/element';
 export default () => (
 	<svg
 		xmlns="http://www.w3.org/2000/svg"
-		width="38"
-		height="24"
 		fill="none"
-		viewBox="0 0 38 24"
+		viewBox="3 1.895 32 20.21"
 	>
-		<rect width="38" height="24" rx="2" fill="#FFF48D" />
+		<rect x="3" y="1.895" width="32" height="20.21" fill="#FFF48D" />
 		<g clipPath="url(#clip0_13222_20674)">
 			<path
 				d="M34.1333 6H3.86667C3.38802 6 3 6.38376 3 6.85714V17.1429C3 17.6162 3.38802 18 3.86667 18H34.1333C34.612 18 35 17.6162 35 17.1429V6.85714C35 6.38376 34.612 6 34.1333 6Z"
