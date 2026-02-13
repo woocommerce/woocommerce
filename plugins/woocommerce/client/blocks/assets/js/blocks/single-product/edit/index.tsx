@@ -42,7 +42,6 @@ interface EditorProps {
 	className: string;
 	attributes: {
 		productId: number;
-		isPreview: boolean;
 	};
 	setAttributes: ( attributes: Attributes ) => void;
 	error: string | ErrorObject;
