@@ -423,9 +423,9 @@ class WC_Query {
 				add_filter( 'wpseo_metadesc', array( $this, 'wpseo_metadesc' ) );
 				add_filter( 'wpseo_metakey', array( $this, 'wpseo_metakey' ) );
 			}
-	} elseif ( $q->is_post_type_archive( 'product' ) && ! $q->is_tax() && wc_get_page_id( 'shop' ) ) {
-		// This is a regular shop page
-		$shop_page = get_post( wc_get_page_id( 'shop' ) );
+		} elseif ( $q->is_post_type_archive( 'product' ) && ! $q->is_tax() && wc_get_page_id( 'shop' ) ) {
+			// This is a regular shop page.
+			$shop_page = get_post( wc_get_page_id( 'shop' ) );
 		} elseif ( ! $q->is_post_type_archive( 'product' ) && ! $q->is_tax( get_object_taxonomies( 'product' ) ) ) {
 			// Only apply to product categories, the product post archive, the shop page, product tags, and product attribute taxonomies.
 			return;
