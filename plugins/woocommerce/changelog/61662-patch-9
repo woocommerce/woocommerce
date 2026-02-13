@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show variable product price in schema based on woocommerce_tax_display_shop setting so the visual prices matches the schema price

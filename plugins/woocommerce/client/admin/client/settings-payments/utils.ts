@@ -118,14 +118,6 @@ export const isWooPayEligible = ( provider: PaymentsProvider ) => {
 	);
 };
 
-export const getWooPaymentsTestDriveAccountLink = () => {
-	return getAdminLink(
-		'admin.php?wcpay-connect=1&_wpnonce=' +
-			getAdminSetting( 'wcpay_welcome_page_connect_nonce' ) +
-			'&test_drive=true&auto_start_test_drive_onboarding=true&redirect_to_settings_page=true'
-	);
-};
-
 export const getWooPaymentsSetupLiveAccountLink = () => {
 	return getAdminLink(
 		'admin.php?wcpay-connect=1&_wpnonce=' +

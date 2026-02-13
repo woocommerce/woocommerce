@@ -62,7 +62,9 @@ class WC_Product_Grouped extends WC_Product {
 	 * @return bool
 	 */
 	public function is_on_sale( $context = 'view' ) {
-		$children = array_filter( array_map( 'wc_get_product', $this->get_children( $context ) ), 'wc_products_array_filter_visible_grouped' );
+		$child_ids = $this->get_children( $context );
+		_prime_post_caches( $child_ids );
+		$children = array_filter( array_map( 'wc_get_product', $child_ids ), 'wc_products_array_filter_visible_grouped' );
 		$on_sale  = false;
 
 		foreach ( $children as $child ) {

@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Entities;
 
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenInvalidDataException;
+use Automattic\WooCommerce\Internal\PushNotifications\Validators\PushTokenValidator;
 use WC_Unit_Test_Case;
 
 /**
@@ -401,7 +402,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 		$push_token = new PushToken();
 
 		$this->expectException( PushTokenInvalidDataException::class );
-		$this->expectExceptionMessage( 'Platform for PushToken is invalid.' );
+		$this->expectExceptionMessage( 'Platform must be one of: apple, android, browser.' );
 
 		$push_token->set_platform( 'invalid' );
 	}
@@ -413,7 +414,10 @@ class PushTokenTest extends WC_Unit_Test_Case {
 		$push_token = new PushToken();
 
 		$this->expectException( PushTokenInvalidDataException::class );
-		$this->expectExceptionMessage( 'Origin for PushToken is invalid.' );
+
+		$this->expectExceptionMessage(
+			'Origin must be one of: browser, com.woocommerce.android, com.woocommerce.android:dev, com.automattic.woocommerce, com.automattic.woocommerce:dev'
+		);
 
 		$push_token->set_origin( 'com.invalid.app' );
 	}
@@ -490,7 +494,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	 */
 	public function test_it_throws_exception_when_token_exceeds_max_length() {
 		$push_token = new PushToken();
-		$long_token = str_repeat( 'A', PushToken::MAX_TOKEN_LENGTH + 1 );
+		$long_token = str_repeat( 'A', PushTokenValidator::TOKEN_MAXIMUM_LENGTH + 1 );
 
 		$this->expectException( PushTokenInvalidDataException::class );
 		$this->expectExceptionMessage( 'Token exceeds maximum length of 4096.' );
@@ -533,7 +537,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	 */
 	public function test_it_accepts_token_at_max_length() {
 		$push_token       = new PushToken();
-		$max_length_token = str_repeat( 'A', PushToken::MAX_TOKEN_LENGTH );
+		$max_length_token = str_repeat( 'A', PushTokenValidator::TOKEN_MAXIMUM_LENGTH );
 
 		$push_token->set_token( $max_length_token );
 
@@ -588,7 +592,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	 */
 	public function test_constructor_throws_exception_for_invalid_platform() {
 		$this->expectException( PushTokenInvalidDataException::class );
-		$this->expectExceptionMessage( 'Platform for PushToken is invalid.' );
+		$this->expectExceptionMessage( 'Platform must be one of: apple, android, browser.' );
 
 		new PushToken(
 			array(
