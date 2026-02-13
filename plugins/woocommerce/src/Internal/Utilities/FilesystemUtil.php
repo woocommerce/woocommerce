@@ -21,12 +21,10 @@ class FilesystemUtil {
 	public static function get_wp_filesystem(): WP_Filesystem_Base {
 		global $wp_filesystem;
 
-		if ( ! $wp_filesystem instanceof WP_Filesystem_Base ) {
-			$initialized = self::initialize_wp_filesystem();
+		$initialized = ( $wp_filesystem instanceof WP_Filesystem_Base ) || self::initialize_wp_filesystem();
 
-			if ( false === $initialized ) {
-				throw new Exception( 'The WordPress filesystem could not be initialized.' );
-			}
+		if ( ! $initialized || ! self::is_usable_ftp_filesystem( $wp_filesystem ) ) {
+			throw new Exception( 'The WordPress filesystem could not be initialized.' );
 		}
 
 		return $wp_filesystem;
@@ -123,6 +121,23 @@ class FilesystemUtil {
 		}
 
 		return is_null( $initialized ) ? false : $initialized;
+	}
+
+	/**
+	 * Check if an FTP-based filesystem instance is usable.
+	 *
+	 * @since 10.7.0
+	 *
+	 * @param WP_Filesystem_Base $wp_filesystem The filesystem instance to check.
+	 * @return bool False if FTP-based and has connection errors, true otherwise.
+	 */
+	private static function is_usable_ftp_filesystem( WP_Filesystem_Base $wp_filesystem ): bool {
+		if ( in_array( $wp_filesystem->method, array( 'ftpext', 'ftpsockets' ), true )
+			&& is_wp_error( $wp_filesystem->errors ) && $wp_filesystem->errors->has_errors() ) {
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
