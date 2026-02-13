@@ -525,6 +525,12 @@ class ProductSchema extends AbstractSchema {
 	 * @return array
 	 */
 	public function get_item_response( $product ) {
+
+		// Check if the product is password protected and return a redacted response if so.
+		if ( post_password_required( $product->get_id() ) ) {
+			return $this->get_protected_product_response( $product );
+		}
+
 		$availability = ProductAvailabilityUtils::get_product_availability( $product );
 		return [
 			'id'                  => $product->get_id(),
@@ -571,6 +577,82 @@ class ProductSchema extends AbstractSchema {
 			self::EXTENDING_KEY   => $this->get_extended_data( self::IDENTIFIER, $product ),
 
 		];
+	}
+
+	/**
+	 * Get redacted response for password-protected products.
+	 * Maintains response structure while hiding sensitive data.
+	 *
+	 * @param \WC_Product $product Product instance.
+	 * @return array Redacted product data.
+	 */
+	protected function get_protected_product_response( $product ) {
+		return [
+			'id'                  => $product->get_id(),
+			'name'                => $this->prepare_html_response( $product->get_title() ),
+			'slug'                => $product->get_slug(),
+			'parent'              => $product->get_parent_id(),
+			'type'                => $product->get_type(),
+			'variation'           => '',
+			'permalink'           => $product->get_permalink(),
+			'sku'                 => '',
+			'short_description'   => '',
+			'description'         => '',
+			'on_sale'             => false,
+			'prices'              => (object) $this->get_empty_price_response(),
+			'price_html'          => '',
+			'average_rating'      => '0',
+			'review_count'        => 0,
+			'images'              => [],
+			'categories'          => [],
+			'tags'                => [],
+			'brands'              => [],
+			'attributes'          => [],
+			'variations'          => [],
+			'grouped_products'    => [],
+			'has_options'         => false,
+			'is_purchasable'      => false,
+			'is_in_stock'         => false,
+			'is_on_backorder'     => false,
+			'low_stock_remaining' => null,
+			'stock_availability'  => (object) [
+				'text'  => '',
+				'class' => '',
+			],
+			'sold_individually'   => false,
+			'add_to_cart'         => (object) [
+				'text'        => '',
+				'description' => '',
+				'url'         => '',
+				'single_text' => '',
+				'minimum'     => 1,
+				'maximum'     => 1,
+				'multiple_of' => 1,
+			],
+			'password_protected'  => true,
+			self::EXTENDING_KEY   => $this->get_extended_data( self::IDENTIFIER, $product ),
+		];
+	}
+
+	/**
+	 * Get empty price response for password-protected products.
+	 * Returns proper price structure with currency info but no actual prices.
+	 *
+	 * @return array Empty price data with currency information.
+	 */
+	protected function get_empty_price_response() {
+
+		$empty_money = $this->prepare_money_response( '', wc_get_price_decimals() );
+		
+		$prices = [
+			'price'         => $empty_money,
+			'regular_price' => $empty_money,
+			'sale_price'    => $empty_money,
+			'price_range'   => null,
+		];
+		
+		// Add currency data using the existing method
+		return $this->prepare_currency_response( $prices );
 	}
 
 	/**
