@@ -158,7 +158,7 @@ class WC_REST_System_Status_Controller extends WC_REST_System_Status_V2_Controll
 			'status'  => $result['status'],
 			'version' => $result['version'],
 			'date'    => gmdate( 'Y-m-d H:i:s' ),
-			'details' => $this->format_integrity_details( $result ),
+			'details' => $this->format_verification_details( $result ),
 		);
 
 		return rest_ensure_response( $response );
@@ -194,8 +194,36 @@ class WC_REST_System_Status_Controller extends WC_REST_System_Status_V2_Controll
 	}
 
 	/**
+	 * Format details for the POST verify endpoint (full list, no truncation).
+	 *
+	 * @since 10.6.0
+	 *
+	 * @param array $result The check result from FileManifest::run_fresh_verification().
+	 * @return \stdClass|array Structured details varying by status.
+	 */
+	private function format_verification_details( $result ) {
+		$status  = $result['status'] ?? '';
+		$details = $result['details'] ?? array();
+
+		if ( 'version_mismatch' === $status ) {
+			return array(
+				'manifest_version' => $result['manifest_version'] ?? '',
+			);
+		}
+
+		if ( 'missing_files' === $status && ! empty( $details ) ) {
+			return array(
+				'missing_files_count' => count( $details ),
+				'missing_files'       => $details,
+			);
+		}
+
+		return new \stdClass();
+	}
+
+	/**
 	 * Format the integrity check details into a structured object
-	 * appropriate for the REST API response.
+	 * appropriate for the REST API response (truncated to 20 files).
 	 *
 	 * @since 10.6.0
 	 * @param array $result The check result from FileManifest.
