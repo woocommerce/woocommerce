@@ -754,7 +754,7 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 			'tax_rate_class'    => '',
 		);
 
-		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
+		WC_Tax::_insert_tax_rate( $tax_rate );
 
 		$tax_rates = WC_Tax::find_rates(
 			array(
