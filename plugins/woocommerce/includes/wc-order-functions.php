@@ -509,11 +509,10 @@ function wc_delete_shop_order_transients( $order = 0 ) {
 	if ( $order && is_a( $order, 'WC_Order' ) ) {
 		$order_id = $order->get_id();
 
-		// Optimization note: in vanilla core the checkout draft is not considered by the SQLs populating those metas so
-		// we skip the purge and underlying SQLs. For backward compatibility we additionally validate if extensions
-		// altering the states via `wc_order_statuses` and adding the status in there - if so, the purge is necessary.
-		$purge_usermeta = OrderStatus::CHECKOUT_DRAFT !== $order->get_status() ||
-						  array_key_exists( OrderStatus::CHECKOUT_DRAFT !== $order->get_status(), wc_get_order_statuses() );
+		// Optimization note: in the vanilla core the checkout draft is not considered by the SQLs populating those metas so
+		// we skip the purge and underlying SQLs. For backward compatibility we additionally validate if extensions are
+		// altering the states via `wc_order_statuses` hook and adding the status in there - if so, the purge is necessary.
+		$purge_usermeta = OrderStatus::CHECKOUT_DRAFT !== $order->get_status() || array_key_exists( OrderStatus::CHECKOUT_DRAFT, wc_get_order_statuses() );
 		if ( $purge_usermeta ) {
 			$customer_id = $order->get_customer_id();
 			Users::delete_site_user_meta( $customer_id, 'wc_money_spent' );
