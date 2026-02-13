@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Prevent fatal error when FTP filesystem connection fails during logging operations.
