@@ -21,6 +21,7 @@ import type {
 import { triggerAddedToCartEvent } from './legacy-events';
 import {
 	createMutationQueue,
+	MutationRequest,
 	type MutationQueue,
 	type MutationResult,
 	type SettledResult,
@@ -270,24 +271,13 @@ function emitSyncEvent( {
 let cartQueue: MutationQueue< Cart > | null = null;
 
 /**
- * Request options for sendCartRequest
- */
-type CartRequestOptions = {
-	path: string;
-	method: 'POST' | 'PUT' | 'DELETE' | 'PATCH';
-	body?: unknown;
-	applyOptimistic?: () => void;
-	onSettled?: ( result: SettledResult< Cart > ) => void;
-};
-
-/**
  * Send a cart request through the queue.
  *
  * Handles optimistic updates, request queuing, and state reconciliation.
  */
 function sendCartRequest(
 	stateRef: Store[ 'state' ],
-	options: CartRequestOptions
+	options: MutationRequest< Cart >
 ): Promise< MutationResult< Cart > > {
 	// Lazily initialize queue on first use.
 	if ( ! cartQueue ) {
