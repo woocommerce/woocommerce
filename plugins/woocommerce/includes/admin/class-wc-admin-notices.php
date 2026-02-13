@@ -45,6 +45,7 @@ class WC_Admin_Notices {
 		'uploads_directory_is_unprotected'   => 'uploads_directory_is_unprotected_notice',
 		'base_tables_missing'                => 'base_tables_missing_notice',
 		'download_directories_sync_complete' => 'download_directories_sync_complete',
+		'hpos_sync_on_read_disabled'         => 'sync_on_read_disabled_notice',
 	);
 
 	/**
@@ -713,6 +714,26 @@ class WC_Admin_Notices {
 		}
 
 		include __DIR__ . '/views/html-notice-base-table-missing.php';
+	}
+
+	/**
+	 * Notice about HPOS sync-on-read being disabled by default.
+	 *
+	 * @since 10.7.0
+	 * @return void
+	 */
+	public static function sync_on_read_disabled_notice() {
+		$dismiss =
+			! \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled()
+			|| ! wc_get_container()->get( \Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer::class )->data_sync_is_enabled()
+			|| get_user_meta( get_current_user_id(), 'dismissed_hpos_sync_on_read_disabled_notice', true );
+
+		if ( $dismiss ) {
+			self::remove_notice( 'hpos_sync_on_read_disabled' );
+			return;
+		}
+
+		include __DIR__ . '/views/html-notice-sync-on-read-disabled.php';
 	}
 
 	/**
