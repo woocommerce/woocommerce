@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Remove orphaned email tracker REST endpoint and deprecate track_opened_email method (follow-up to #55660)

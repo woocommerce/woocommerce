@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Improve Product Collection block in email editor: rename "Products per page" to "Number of products" and add support for two-column layout.
