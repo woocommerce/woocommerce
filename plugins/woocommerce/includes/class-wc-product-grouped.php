@@ -201,7 +201,9 @@ class WC_Product_Grouped extends WC_Product {
 	private function get_primed_visible_children( $context = 'view' ) {
 		$child_ids = $this->get_children( $context );
 		_prime_post_caches( $child_ids );
-		return array_filter( array_map( 'wc_get_product', $child_ids ), 'wc_products_array_filter_visible_grouped' );
+		$children = array_filter( array_map( 'wc_get_product', $child_ids ), 'wc_products_array_filter_visible_grouped' );
+		/** @var WC_Product[] $children */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
+		return $children;
 	}
 
 	/*

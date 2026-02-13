@@ -14065,30 +14065,6 @@ parameters:
 			path: includes/class-wc-product-grouped.php
 
 		-
-			message: '#^Cannot call method get_price\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-product-grouped.php
-
-		-
-			message: '#^Cannot call method has_child\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-product-grouped.php
-
-		-
-			message: '#^Cannot call method is_on_sale\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-product-grouped.php
-
-		-
-			message: '#^Cannot call method is_purchasable\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-product-grouped.php
-
-		-
 			message: '#^Method WC_Product_Grouped\:\:set_children\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -14098,12 +14074,6 @@ parameters:
 			message: '#^Method WC_Product_Grouped\:\:sync\(\) should return WC_Product but returns WC_Product\|false\|null\.$#'
 			identifier: return.type
 			count: 1
-			path: includes/class-wc-product-grouped.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(WC_Product\|false\|null\)\: mixed\)\|null, ''wc_get_price_to…'' given\.$#'
-			identifier: argument.type
-			count: 2
 			path: includes/class-wc-product-grouped.php
 
 		-
@@ -14131,21 +14101,9 @@ parameters:
 			path: includes/class-wc-product-grouped.php
 
 		-
-			message: '#^Parameter \#1 \$product of function wc_get_price_excluding_tax expects WC_Product, WC_Product\|false\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-product-grouped.php
-
-		-
-			message: '#^Parameter \#1 \$product of function wc_get_price_including_tax expects WC_Product, WC_Product\|false\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-product-grouped.php
-
-		-
 			message: '#^Parameter \#2 \$callback of function array_filter expects \(callable\(WC_Product\|false\|null\)\: bool\)\|null, ''wc_products_array…'' given\.$#'
 			identifier: argument.type
-			count: 5
+			count: 1
 			path: includes/class-wc-product-grouped.php
 
 		-
