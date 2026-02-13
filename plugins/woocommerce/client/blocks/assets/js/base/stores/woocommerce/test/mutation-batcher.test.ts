@@ -116,25 +116,19 @@ describe( 'createMutationQueue', () => {
 				...stateHandler,
 			} );
 
-			// First request applies optimistic update
+			// First request with inline optimistic update
 			queue.submit( {
-				id: '1',
 				path: '/a',
 				method: 'POST',
-				applyOptimistic: () => {
-					mockState.value = 50;
-				},
 			} );
+			mockState.value = 50;
 
 			// Second request in same tick
 			queue.submit( {
-				id: '2',
 				path: '/b',
 				method: 'POST',
-				applyOptimistic: () => {
-					mockState.value = 75;
-				},
 			} );
+			mockState.value = 75;
 
 			await flushMicrotasks();
 
@@ -209,23 +203,18 @@ describe( 'createMutationQueue', () => {
 				...stateHandler,
 			} );
 
-			// Apply optimistic updates
+			// Apply optimistic updates inline
 			const p1 = queue.submit( {
-				id: '1',
 				path: '/a',
 				method: 'POST',
-				applyOptimistic: () => {
-					mockState.value = 200;
-				},
 			} );
+			mockState.value = 200;
+
 			const p2 = queue.submit( {
-				id: '2',
 				path: '/b',
 				method: 'POST',
-				applyOptimistic: () => {
-					mockState.value = 300;
-				},
 			} );
+			mockState.value = 300;
 
 			await expect( p1 ).rejects.toThrow();
 			await expect( p2 ).rejects.toThrow();
@@ -246,13 +235,10 @@ describe( 'createMutationQueue', () => {
 			} );
 
 			const p1 = queue.submit( {
-				id: '1',
 				path: '/a',
 				method: 'POST',
-				applyOptimistic: () => {
-					mockState.value = 999;
-				},
 			} );
+			mockState.value = 999;
 
 			await expect( p1 ).rejects.toThrow( 'Network error' );
 			expect( mockState.value ).toBe( 50 );
@@ -270,13 +256,10 @@ describe( 'createMutationQueue', () => {
 			} );
 
 			const p1 = queue.submit( {
-				id: '1',
 				path: '/a',
 				method: 'POST',
-				applyOptimistic: () => {
-					mockState.value = 888;
-				},
 			} );
+			mockState.value = 888;
 
 			await expect( p1 ).rejects.toThrow( 'Request failed: 503' );
 			expect( mockState.value ).toBe( 25 );
@@ -599,15 +582,9 @@ describe( 'createMutationQueue', () => {
 
 			// Submit the request
 			const promise = queue.submit( {
-				id: '1',
 				path: '/a',
 				method: 'POST',
 				body,
-				applyOptimistic: () => {
-					// Simulate what happens in cart.ts: push to state, then
-					// a subsequent operation mutates it
-					mockState.value = 100;
-				},
 			} );
 
 			// Mutate the body AFTER submission (simulating another click's
@@ -618,6 +595,64 @@ describe( 'createMutationQueue', () => {
 
 			// The sent body should have the ORIGINAL value, not the mutated one
 			expect( capturedBody ).toEqual( { id: 1, quantity: 1 } );
+		} );
+
+		it( 'isolates bodies when rapid submits share a reference to the same object', async () => {
+			// Simulates rapid add-to-cart clicks on the same product.
+			// Both submits reference the same `item` object from state.
+			// The optimistic update between them mutates item.quantity,
+			// which would corrupt the first request's body without cloning.
+			const capturedBodies: unknown[] = [];
+
+			global.fetch = jest.fn( ( _url, options ) => {
+				const parsed = JSON.parse( options.body as string );
+				for ( const req of parsed.requests ) {
+					capturedBodies.push( req.body );
+				}
+				return Promise.resolve( {
+					ok: true,
+					json: () =>
+						Promise.resolve( {
+							responses: parsed.requests.map( () => ( {
+								status: 200,
+								body: { value: 1 },
+							} ) ),
+						} ),
+				} );
+			} ) as jest.Mock;
+
+			const queue = createMutationQueue( {
+				endpoint: '/batch',
+				getHeaders: () => ( {} ),
+				...stateHandler,
+			} );
+
+			// Shared mutable object — like an item reference in state.cart.items
+			const item = { id: 1, quantity: 1 };
+
+			// First click: submit with quantity 1, then optimistically set to 2
+			queue.submit( {
+				path: '/update-item',
+				method: 'POST',
+				body: item,
+			} );
+			item.quantity = 2; // optimistic update
+
+			// Second click: submit with quantity 2, then optimistically set to 3
+			queue.submit( {
+				path: '/update-item',
+				method: 'POST',
+				body: item,
+			} );
+			item.quantity = 3; // optimistic update
+
+			await flushMicrotasks();
+
+			// Each request should have the quantity at the time it was submitted
+			expect( capturedBodies ).toEqual( [
+				{ id: 1, quantity: 1 },
+				{ id: 1, quantity: 2 },
+			] );
 		} );
 	} );
 

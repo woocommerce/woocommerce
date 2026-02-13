@@ -17,7 +17,6 @@ export type MutationRequest< TState = unknown > = {
 	path: string;
 	method: 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 	body?: unknown;
-	applyOptimistic?: () => void;
 	/**
 	 * Called synchronously after reconciliation, before isProcessing clears.
 	 * Use for side effects that must complete before external code
@@ -257,17 +256,12 @@ export function createMutationQueue< TState >(
 				isProcessing = true;
 			}
 
-			// When you submit three requests synchronously, each one's applyOptimistic mutates state.cart.items -
-			// the same array that the request body might reference. Without cloning, the body sent to the server
-			// would contain whatever the state looks like after all three optimistic updates,
-			// not what it looked like when that specific request was submitted.
+			// Deep-clone the body at submission time so that later mutations
+			// (e.g. optimistic updates from subsequent calls) cannot alter
+			// the payload that will be sent to the server.
 			const clonedBody = request.body
 				? JSON.parse( JSON.stringify( request.body ) )
 				: undefined;
-
-			if ( request.applyOptimistic ) {
-				request.applyOptimistic();
-			}
 
 			trackedRequests.set( id, {
 				id,
