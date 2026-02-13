@@ -562,8 +562,8 @@ class FileManifest {
 	/**
 	 * Add the recheck tool to the WooCommerce debug tools list.
 	 *
-	 * Only adds the tool when the stored check result is not a pass,
-	 * so that users can trigger a fresh integrity check from the admin UI.
+ 	 * Adds the tool unconditionally so that users can always trigger a
+ 	 * fresh integrity check from the admin UI.
 	 *
 	 * @internal For exclusive use of WooCommerce, backwards compatibility not guaranteed.
 	 * @since 10.6.0
