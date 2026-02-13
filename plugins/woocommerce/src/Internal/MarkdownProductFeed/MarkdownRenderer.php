@@ -519,20 +519,14 @@ class MarkdownRenderer {
 	/**
 	 * Convert the product full description HTML to markdown.
 	 *
-	 * Applies the_content filter before converting so that shortcodes and
-	 * embeds are expanded.
-	 *
 	 * @param WC_Product $product The product.
 	 * @return string The converted description markdown, or empty string.
 	 */
 	private function convert_description( WC_Product $product ): string {
-		$raw = $product->get_description();
-		if ( '' === $raw ) {
+		$html = $product->get_description();
+		if ( '' === $html ) {
 			return '';
 		}
-
-		/** This filter is documented in wp-includes/post-template.php */
-		$html = apply_filters( 'the_content', $raw );
 
 		return $this->html_to_markdown->convert( $html );
 	}
@@ -540,19 +534,14 @@ class MarkdownRenderer {
 	/**
 	 * Convert the product short description HTML to markdown.
 	 *
-	 * Applies the woocommerce_short_description filter before converting.
-	 *
 	 * @param WC_Product $product The product.
 	 * @return string The converted short description markdown, or empty string.
 	 */
 	private function convert_short_description( WC_Product $product ): string {
-		$raw = $product->get_short_description();
-		if ( '' === $raw ) {
+		$html = $product->get_short_description();
+		if ( '' === $html ) {
 			return '';
 		}
-
-		/** This filter is documented in includes/wc-formatting-functions.php */
-		$html = apply_filters( 'woocommerce_short_description', $raw );
 
 		return $this->html_to_markdown->convert( $html );
 	}

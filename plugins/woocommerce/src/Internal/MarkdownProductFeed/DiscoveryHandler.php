@@ -11,6 +11,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\MarkdownProductFeed;
 
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
@@ -49,6 +50,7 @@ class DiscoveryHandler implements RegisterHooksInterface {
 		add_action( 'init', array( $this, 'handle_init' ) );
 		add_action( 'template_redirect', array( $this, 'handle_template_redirect' ) );
 		add_filter( 'query_vars', array( $this, 'handle_query_vars' ) );
+		add_action( FeaturesController::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'handle_feature_toggle' ), 10, 2 );
 	}
 
 	/**
@@ -103,14 +105,27 @@ class DiscoveryHandler implements RegisterHooksInterface {
 	 * @return void
 	 */
 	public function handle_init(): void {
-		$regex = '^llms\.txt/?$';
+		add_rewrite_rule( '^llms\.txt/?$', 'index.php?wc_llms_txt=1', 'top' );
+	}
 
-		add_rewrite_rule( $regex, 'index.php?wc_llms_txt=1', 'top' );
-
-		if ( false === get_transient( 'wc_markdown_feed_rules_flushed' ) ) {
-			flush_rewrite_rules();
-			set_transient( 'wc_markdown_feed_rules_flushed', 1, DAY_IN_SECONDS );
+	/**
+	 * Flush rewrite rules when the markdown_product_feed feature is toggled.
+	 *
+	 * @internal
+	 *
+	 * @since 10.6.0
+	 *
+	 * @param string $feature_id The feature that was toggled.
+	 * @param bool   $is_enabled Whether the feature is now enabled.
+	 * @return void
+	 */
+	public function handle_feature_toggle( string $feature_id, bool $is_enabled ): void {
+		unset( $is_enabled );
+		if ( 'markdown_product_feed' !== $feature_id ) {
+			return;
 		}
+
+		flush_rewrite_rules();
 	}
 
 	/**
