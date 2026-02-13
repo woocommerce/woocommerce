@@ -25,7 +25,7 @@ require __DIR__ . '/src/Autoloader.php';
 require __DIR__ . '/src/Packages.php';
 require __DIR__ . '/src/Internal/FileManifest.php';
 
-// phpcs:disable WordPress.NamingConventions.ValidFunctionName.FunctionNameInvalid, Squiz.Commenting.FunctionComment.Missing
+// phpcs:disable WordPress.NamingConventions.ValidFunctionName.FunctionNameInvalid, Squiz.Commenting.FunctionComment.Missing, Generic.Commenting.DocComment.MissingShort
 
 if ( ! \Automattic\WooCommerce\Internal\FileManifest::verify_installation( __FILE__ ) ) {
 	/** @return null */

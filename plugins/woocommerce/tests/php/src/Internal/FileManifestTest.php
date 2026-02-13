@@ -580,7 +580,7 @@ PHP;
 	 * @param string[] $files   The list of relative file paths.
 	 */
 	private function create_manifest( string $version, array $files ): void {
-		$files_export = var_export( $files, true );
+		$files_export = var_export( $files, true ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_export
 		$content      = <<<PHP
 <?php
 return array(

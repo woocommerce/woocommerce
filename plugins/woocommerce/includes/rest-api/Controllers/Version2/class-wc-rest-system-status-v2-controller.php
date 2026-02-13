@@ -101,7 +101,6 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 	 * @return WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
-		return true; //!!!
 		if ( ! wc_rest_check_manager_permissions( 'system_status', 'read' ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
