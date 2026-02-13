@@ -13,12 +13,6 @@
  * individual request's success or failure within the batch.
  */
 
-export type SettledResult< TState = unknown > = {
-	success: boolean;
-	data?: TState;
-	error?: Error;
-};
-
 export type MutationRequest< TState = unknown > = {
 	path: string;
 	method: 'POST' | 'PUT' | 'DELETE' | 'PATCH';
@@ -29,7 +23,7 @@ export type MutationRequest< TState = unknown > = {
 	 * Use for side effects that must complete before external code
 	 * (like refreshCartItems) is allowed to run.
 	 */
-	onSettled?: ( result: SettledResult< TState > ) => void;
+	onSettled?: ( result: MutationResult< TState > ) => void;
 };
 
 export type MutationResult< TState = unknown > = {

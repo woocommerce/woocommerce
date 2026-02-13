@@ -24,7 +24,6 @@ import {
 	MutationRequest,
 	type MutationQueue,
 	type MutationResult,
-	type SettledResult,
 } from './mutation-batcher';
 
 export type WooCommerceConfig = {
