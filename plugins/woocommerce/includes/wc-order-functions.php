@@ -513,22 +513,17 @@ function wc_delete_shop_order_transients( $order = 0 ) {
 		if ( $customer_id ) {
 			// Optimization note: the function is fired multiple times during order persistence lifecycle, and by
 			// verifying that metas carry non-empty values we ensure no repetitive attempts dropping the metas.
-			// Also, we perform all read-operation first, before potential metas cache invalidate/re-read happening below.
-			$has_spent_meta = (bool) Users::get_site_user_meta( $customer_id, 'wc_money_spent' );
 			$metas_to_purge = array_filter(
 				array(
-					Users::get_site_user_meta( $customer_id, 'wc_order_count' ) ? 'wc_order_count' : '',
-					Users::get_site_user_meta( $customer_id, 'wc_last_order' ) ? 'wc_last_order' : '',
+					is_numeric( Users::get_site_user_meta( $customer_id, 'wc_order_count' ) ) ? 'wc_order_count' : '',
+					is_numeric( Users::get_site_user_meta( $customer_id, 'wc_last_order' ) ) ? 'wc_last_order' : '',
+					is_numeric( Users::get_site_user_meta( $customer_id, 'wc_money_spent' ) ) ? 'wc_money_spent' : '',
 				)
 			);
 			if ( ! empty( $metas_to_purge ) ) {
 				foreach ( $metas_to_purge as $meta ) {
 					Users::delete_site_user_meta( $customer_id, $meta );
 				}
-			}
-			// Optimisation note: total spent is calculated for orders with a paid status, which checkout drafts are not.
-			if ( $has_spent_meta && OrderStatus::CHECKOUT_DRAFT !== $order->get_status() ) {
-				Users::delete_site_user_meta( $customer_id, 'wc_money_spent' );
 			}
 		}
 	}

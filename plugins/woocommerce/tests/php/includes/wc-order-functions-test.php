@@ -561,19 +561,6 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( '', Users::get_site_user_meta( $customer_id, 'wc_last_order' ) );
 		$this->assertSame( '', Users::get_site_user_meta( $customer_id, 'wc_money_spent' ) );
 
-		// Switch the order into checkout-draft state for further testing.
-		$order->set_status( OrderStatus::CHECKOUT_DRAFT );
-		$order->save();
-
-		// Verify the metas getting only partially purged for order checkout draft state.
-		Users::update_site_user_meta( $customer_id, 'wc_order_count', 123 );
-		Users::update_site_user_meta( $customer_id, 'wc_last_order', 456 );
-		Users::update_site_user_meta( $customer_id, 'wc_money_spent', 789 );
-		wc_delete_shop_order_transients( $order_id );
-		$this->assertSame( '', Users::get_site_user_meta( $customer_id, 'wc_order_count' ) );
-		$this->assertSame( '', Users::get_site_user_meta( $customer_id, 'wc_last_order' ) );
-		$this->assertSame( '789', Users::get_site_user_meta( $customer_id, 'wc_money_spent' ) );
-
 		// Cleanup.
 		$order->delete();
 		$customer->delete();
