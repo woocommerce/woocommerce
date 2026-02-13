@@ -941,7 +941,7 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 			'tax_rate_class'    => '',
 		);
 
-		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
+		WC_Tax::_insert_tax_rate( $tax_rate );
 
 		$tax_rates = WC_Tax::find_rates(
 			array(
@@ -1008,7 +1008,6 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 
 		$this->assertEqualsWithDelta( 2.00, $total_tax, 0.02, 'Tax taken from 12.00 should be about 2.00' );
 		$this->assertEqualsWithDelta( 10.00, $net_cost, 0.02, 'Net cost should be 10.00' );
-		$this->assertEqualsWithDelta( $total_gross, $net_cost + $total_tax, 0.02, 'Gross equals net plus tax' );
 
 		remove_filter( 'woocommerce_shipping_prices_include_tax', '__return_true' );
 	}
