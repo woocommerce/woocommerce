@@ -271,7 +271,9 @@ class Product_Image extends Abstract_Product_Block_Renderer {
 			return $parsed_block;
 		}
 
-		$parsed_block['attrs']['width'] = $rendering_context->get_layout_width_without_padding();
+		// Use the email_attrs width if set (e.g., for multi-column layouts),
+		// otherwise fall back to the rendering context layout width.
+		$parsed_block['attrs']['width'] = $parsed_block['email_attrs']['width'];
 
 		return $parsed_block;
 	}

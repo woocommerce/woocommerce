@@ -37,7 +37,7 @@ Closes # .
 
 <!-- Include detailed instructions on how these changes can be tested. Review and follow the guide for how to write high-quality testing instructions. -->
 
-Using the [WooCommerce Testing Instructions Guide](https://github.com/woocommerce/woocommerce/wiki/Writing-high-quality-testing-instructions), include your detailed testing instructions:
+Using the [WooCommerce Testing Instructions Guide](https://developer.woocommerce.com/docs/contribution/testing/writing-high-quality-testing-instructions/), include your detailed testing instructions:
 
 1.
 2.

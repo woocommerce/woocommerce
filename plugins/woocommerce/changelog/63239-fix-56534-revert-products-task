@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Allow the Products onboarding task to revert to incomplete when all products are removed
