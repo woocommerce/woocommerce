@@ -170,6 +170,11 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 10.5.2 2026-XX-XX =
+= 10.5.2 2026-02-13 =
+
+**WooCommerce**
+
+* Fix - Fix variable products add-to-cart button appearing disabled in some stores [#63262](https://github.com/woocommerce/woocommerce/pull/63262)
+
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
