@@ -38,7 +38,6 @@ const {
 	checkoutUrl,
 	displayCartPriceIncludingTax,
 	buttonAriaLabelTemplate,
-	productCountVisibility,
 } = getConfig( 'woocommerce/mini-cart' );
 const {
 	reduceQuantityLabel,
@@ -122,6 +121,10 @@ type MiniCart = {
 		disableScrollingOnBody: () => void;
 		focusFirstElement: () => void;
 	};
+};
+
+type MiniCartContext = {
+	productCountVisibility: 'never' | 'always' | 'greater_than_zero';
 };
 
 type CartItemContext = {
@@ -241,6 +244,8 @@ store< MiniCart >(
 
 			get badgeIsVisible(): boolean {
 				const cartHasItems = miniCartState.totalItemsInCart > 0;
+				const { productCountVisibility } =
+					getContext< MiniCartContext >();
 
 				return (
 					productCountVisibility === 'always' ||

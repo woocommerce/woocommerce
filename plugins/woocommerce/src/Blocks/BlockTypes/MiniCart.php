@@ -570,6 +570,10 @@ class MiniCart extends AbstractBlock {
 				)
 			);
 
+			$context = array(
+				'productCountVisibility' => $product_count_visibility,
+			);
+
 			wp_interactivity_config(
 				$this->get_full_block_name(),
 				array(
@@ -577,7 +581,6 @@ class MiniCart extends AbstractBlock {
 					'onCartClickBehaviour'         => $on_cart_click_behaviour,
 					'checkoutUrl'                  => wc_get_checkout_url(),
 					'buttonAriaLabelTemplate'      => $button_aria_label_template,
-					'productCountVisibility'       => $product_count_visibility,
 				)
 			);
 
@@ -606,6 +609,8 @@ class MiniCart extends AbstractBlock {
 				<?php endif; ?>
 				data-wp-watch="callbacks.disableScrollingOnBody"
 				data-wp-init--mark-as-hydrated="callbacks.markAsHydrated"
+				<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<?php echo wp_interactivity_data_wp_context( $context ); ?>
 				class="<?php echo esc_attr( $wrapper_classes ); ?>"
 				style="<?php echo esc_attr( $wrapper_styles ); ?>"
 			>
