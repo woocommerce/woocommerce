@@ -591,4 +591,63 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		WC_Helper_Product::delete_product( $product->get_id() );
 		wp_delete_term( $category_term['term_id'], 'product_cat' );
 	}
+
+	/**
+	 * @testdox Product permalink handles non-sequential array keys from get_the_terms filters.
+	 */
+	public function test_wc_product_post_type_link_handles_non_sequential_term_array_keys() {
+		// Create categories.
+		$category1_term = wp_insert_term( 'Category One', 'product_cat' );
+		$category2_term = wp_insert_term( 'Category Two', 'product_cat' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		wp_set_object_terms(
+			$product->get_id(),
+			array( $category1_term['term_id'], $category2_term['term_id'] ),
+			'product_cat'
+		);
+
+		$original_permalinks = get_option( 'woocommerce_permalinks' );
+		$filter_callback     = null;
+
+		try {
+			update_option( 'woocommerce_permalinks', array( 'product_base' => '/shop/%product_cat%' ) );
+			$product_post = get_post( $product->get_id() );
+
+			// Simulate a plugin filter that removes a term without re-indexing the array.
+			// This creates non-sequential keys (e.g., key 0 is removed, leaving only key 1).
+			$filter_callback = function ( $terms, $post_id, $taxonomy ) use ( $category1_term, $product ) {
+				if ( 'product_cat' !== $taxonomy || ! is_array( $terms ) || $post_id !== $product->get_id() ) {
+					return $terms;
+				}
+				foreach ( $terms as $key => $term ) {
+					if ( $term->term_id === $category1_term['term_id'] ) {
+						unset( $terms[ $key ] ); // Intentionally don't re-index.
+						break;
+					}
+				}
+				return $terms; // Returns array with non-sequential keys.
+			};
+			add_filter( 'get_the_terms', $filter_callback, 10, 3 );
+
+			// This should not trigger PHP warnings about undefined array key 0.
+			$permalink = wc_product_post_type_link( '/shop/%product_cat%/' . $product_post->post_name . '/', $product_post );
+
+			// Should use the remaining category (Category Two).
+			$category2_slug = get_term( $category2_term['term_id'], 'product_cat' )->slug;
+			$this->assertStringContainsString(
+				'/' . $category2_slug . '/',
+				$permalink,
+				'Permalink should contain the remaining category slug after filter removes one'
+			);
+		} finally {
+			if ( null !== $filter_callback ) {
+				remove_filter( 'get_the_terms', $filter_callback, 10 );
+			}
+			update_option( 'woocommerce_permalinks', $original_permalinks );
+			WC_Helper_Product::delete_product( $product->get_id() );
+			wp_delete_term( $category2_term['term_id'], 'product_cat' );
+			wp_delete_term( $category1_term['term_id'], 'product_cat' );
+		}
+	}
 }
