@@ -1,6 +1,5 @@
 <?php
 // phpcs:disable WordPress.WP.AlternativeFunctions
-// phpcs:disable WordPress.PHP.DevelopmentFunctions.error_log_var_export
 
 declare( strict_types=1 );
 
@@ -43,8 +42,19 @@ class FileManifestTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		$this->recursive_rmdir( $this->temp_dir );
 		delete_option( 'woocommerce_file_manifest_check_result' );
-		remove_all_filters( 'woocommerce_disable_on_file_manifest_verification_failed' );
+		$this->set_disabling_mode( null );
 		parent::tearDown();
+	}
+
+	/**
+	 * Set the disabling mode override via reflection.
+	 *
+	 * @param bool|null $value True to force disabling mode, false to force non-disabling, null to reset.
+	 */
+	private function set_disabling_mode( ?bool $value ): void {
+		$property = new \ReflectionProperty( FileManifest::class, 'disabling_mode_override' );
+		$property->setAccessible( true );
+		$property->setValue( null, $value );
 	}
 
 	// ---- Disabling mode tests (filter=true) ----
@@ -53,7 +63,7 @@ class FileManifestTest extends WC_Unit_Test_Case {
 	 * @testdox [Disabling mode] Verification passes and caches the result when all manifest files exist and the version matches.
 	 */
 	public function test_disabling_mode_passes_when_all_files_exist(): void {
-		add_filter( 'woocommerce_disable_on_file_manifest_verification_failed', '__return_true' );
+		$this->set_disabling_mode( true );
 
 		$this->create_plugin_file( '10.5.0' );
 		mkdir( $this->temp_dir . '/src', 0755, true );
@@ -73,7 +83,7 @@ class FileManifestTest extends WC_Unit_Test_Case {
 	 * @testdox [Disabling mode] Verification fails when a file listed in the manifest is missing from disk.
 	 */
 	public function test_disabling_mode_fails_when_file_missing(): void {
-		add_filter( 'woocommerce_disable_on_file_manifest_verification_failed', '__return_true' );
+		$this->set_disabling_mode( true );
 
 		$this->create_plugin_file( '10.5.0' );
 		$this->create_manifest( '10.5.0', array( 'woocommerce.php', 'src/MissingFile.php' ) );
@@ -87,7 +97,7 @@ class FileManifestTest extends WC_Unit_Test_Case {
 	 * @testdox [Disabling mode] Verification fails when the manifest version does not match the plugin header version.
 	 */
 	public function test_disabling_mode_fails_on_version_mismatch(): void {
-		add_filter( 'woocommerce_disable_on_file_manifest_verification_failed', '__return_true' );
+		$this->set_disabling_mode( true );
 
 		$this->create_plugin_file( '10.5.0' );
 		$this->create_manifest( '10.4.0', array( 'woocommerce.php' ) );
@@ -101,7 +111,7 @@ class FileManifestTest extends WC_Unit_Test_Case {
 	 * @testdox [Disabling mode] Verification passes when no manifest file exists (development environment).
 	 */
 	public function test_disabling_mode_passes_when_no_manifest(): void {
-		add_filter( 'woocommerce_disable_on_file_manifest_verification_failed', '__return_true' );
+		$this->set_disabling_mode( true );
 
 		$this->create_plugin_file( '10.5.0' );
 
@@ -114,7 +124,7 @@ class FileManifestTest extends WC_Unit_Test_Case {
 	 * @testdox [Disabling mode] Verification skips the file check when the stored result shows a pass for the current version.
 	 */
 	public function test_disabling_mode_skips_check_when_already_verified(): void {
-		add_filter( 'woocommerce_disable_on_file_manifest_verification_failed', '__return_true' );
+		$this->set_disabling_mode( true );
 
 		$this->create_plugin_file( '10.5.0' );
 		$this->store_check_result( '10.5.0', 'pass' );
@@ -132,7 +142,7 @@ class FileManifestTest extends WC_Unit_Test_Case {
 	 * @testdox [Disabling mode] A version change triggers a fresh verification even if the previous version was cached as passed.
 	 */
 	public function test_disabling_mode_rechecks_on_version_change(): void {
-		add_filter( 'woocommerce_disable_on_file_manifest_verification_failed', '__return_true' );
+		$this->set_disabling_mode( true );
 
 		$this->create_plugin_file( '10.6.0' );
 		$this->store_check_result( '10.5.0', 'pass' );
@@ -147,7 +157,7 @@ class FileManifestTest extends WC_Unit_Test_Case {
 	 * @testdox [Disabling mode] Pre-release suffixes are stripped before comparing the manifest and plugin versions.
 	 */
 	public function test_disabling_mode_handles_prerelease_versions(): void {
-		add_filter( 'woocommerce_disable_on_file_manifest_verification_failed', '__return_true' );
+		$this->set_disabling_mode( true );
 
 		$this->create_plugin_file( '10.5.0-beta1' );
 		$this->create_manifest( '10.5.0-beta1', array( 'woocommerce.php' ) );
@@ -161,7 +171,7 @@ class FileManifestTest extends WC_Unit_Test_Case {
 	 * @testdox [Disabling mode] Verification passes when the manifest file has an invalid structure.
 	 */
 	public function test_disabling_mode_passes_with_invalid_manifest(): void {
-		add_filter( 'woocommerce_disable_on_file_manifest_verification_failed', '__return_true' );
+		$this->set_disabling_mode( true );
 
 		$this->create_plugin_file( '10.5.0' );
 		file_put_contents(
@@ -178,7 +188,7 @@ class FileManifestTest extends WC_Unit_Test_Case {
 	 * @testdox [Disabling mode] A stored pass is still trusted when the manifest file has been deleted (requires manual recheck).
 	 */
 	public function test_disabling_mode_skips_check_when_manifest_deleted_after_pass(): void {
-		add_filter( 'woocommerce_disable_on_file_manifest_verification_failed', '__return_true' );
+		$this->set_disabling_mode( true );
 
 		$this->create_plugin_file( '10.5.0' );
 		$this->store_check_result( '10.5.0', 'pass' );
@@ -191,14 +201,29 @@ class FileManifestTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox [Disabling mode] A stored failure result does not skip the check (re-checks every request until pass).
+	 * @testdox [Disabling mode] A stored failure result is trusted (no re-check until option is deleted).
 	 */
-	public function test_disabling_mode_rechecks_on_stored_failure(): void {
-		add_filter( 'woocommerce_disable_on_file_manifest_verification_failed', '__return_true' );
+	public function test_disabling_mode_trusts_stored_failure(): void {
+		$this->set_disabling_mode( true );
 
 		$this->create_plugin_file( '10.5.0' );
 		$this->store_check_result( '10.5.0', 'missing_files' );
 		$this->create_manifest( '10.5.0', array( 'woocommerce.php', 'src/StillMissing.php' ) );
+
+		$result = FileManifest::verify_installation( $this->temp_dir . '/woocommerce.php' );
+
+		$this->assertTrue( $result );
+	}
+
+	/**
+	 * @testdox [Disabling mode] When the stored result is deleted, a fresh check runs and fails on missing files.
+	 */
+	public function test_disabling_mode_fails_after_recheck_with_missing_files(): void {
+		$this->set_disabling_mode( true );
+
+		$this->create_plugin_file( '10.5.0' );
+		$this->create_manifest( '10.5.0', array( 'woocommerce.php', 'src/StillMissing.php' ) );
+		// No stored result — simulates option deleted by recheck tool.
 
 		$result = FileManifest::verify_installation( $this->temp_dir . '/woocommerce.php' );
 

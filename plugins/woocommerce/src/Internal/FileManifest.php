@@ -282,42 +282,52 @@ class FileManifest {
 	/**
 	 * Verify that the WooCommerce installation is complete and consistent.
 	 *
-	 * The behavior depends on the `woocommerce_disable_on_file_manifest_verification_failed` filter:
+	 * The behavior depends on the WC_DISABLE_ON_INTEGRITY_CHECK_FAILURE constant:
 	 *
-	 * - When false (default): runs verification once per version change, stores the result
-	 *   in a WordPress option for display in the status report, and always returns true.
+	 * - When undefined or false (default): runs verification once per version change, stores
+	 *   the result in a WordPress option for display in the status report, and always returns true.
 	 * - When true: runs verification on every request until it passes. On failure, disables
 	 *   WooCommerce and shows an admin notice. On success, caches the result.
+	 *
+	 * The constant must be defined before WooCommerce loads (e.g. in wp-config.php).
 	 *
 	 * @param string $plugin_file Absolute path to the main plugin file (woocommerce.php).
 	 * @return boolean True if the installation is verified (or if verification is not possible), false if corrupt.
 	 */
 	public static function verify_installation( $plugin_file ) {
-		/**
-		 * Filters whether WooCommerce should be disabled when the file manifest
-		 * verification fails (missing or mismatched files).
-		 *
-		 * When true, a failed integrity check will prevent WooCommerce from
-		 * loading and display an admin notice. When false (the default),
-		 * WooCommerce loads normally regardless of the check result, but
-		 * the result is stored for display in the status report.
-		 *
-		 * @since 10.6.0
-		 *
-		 * @param bool $disable Whether to disable WooCommerce on verification failure. Default false.
-		 */
-		$disabling_mode = apply_filters( 'woocommerce_disable_on_file_manifest_verification_failed', false );
-
-		return $disabling_mode
+		return self::is_disabling_mode()
 			? self::verify_disabling_mode( $plugin_file )
 			: self::verify_non_disabling_mode( $plugin_file );
 	}
 
 	/**
-	 * Disabling mode: run verification on every request until it passes.
+	 * Override for disabling mode, used by unit tests via reflection.
+	 * When non-null, takes precedence over the constant.
 	 *
-	 * On failure, disables WooCommerce and shows an admin notice.
-	 * On success, caches the result to skip future checks.
+	 * @var bool|null
+	 */
+	private static $disabling_mode_override = null;
+
+	/**
+	 * Check whether disabling mode is active.
+	 *
+	 * Disabling mode is enabled by defining the WC_DISABLE_ON_INTEGRITY_CHECK_FAILURE
+	 * constant as true (e.g. in wp-config.php) before WooCommerce loads.
+	 *
+	 * @return bool
+	 */
+	private static function is_disabling_mode(): bool {
+		if ( null !== self::$disabling_mode_override ) {
+			return self::$disabling_mode_override;
+		}
+		return defined( 'WC_DISABLE_ON_INTEGRITY_CHECK_FAILURE' ) && WC_DISABLE_ON_INTEGRITY_CHECK_FAILURE;
+	}
+
+	/**
+	 * Disabling mode: trust any stored result; run fresh only when the
+	 * option has been deleted (recheck tool, CLI, REST) or the version
+	 * changes. On failure, disables WooCommerce without storing, so
+	 * the next request re-checks. On success, caches the result.
 	 *
 	 * @param string $plugin_file Absolute path to the main plugin file (woocommerce.php).
 	 * @return boolean True if verification passes, false if the installation is corrupt.
@@ -326,10 +336,19 @@ class FileManifest {
 		$plugin_data    = get_file_data( $plugin_file, array( 'Version' => 'Version' ) );
 		$plugin_version = $plugin_data['Version'] ?? '';
 
-		// Skip the full file check if this version already passed.
+		// Trust any stored result for this version. Disabling mode only
+		// runs a fresh check when the option has been deleted (recheck
+		// tool, CLI reset, or REST endpoint) or when the version changes.
+		// Failures are never stored, so a missing option after a failed
+		// check causes re-verification on the next request.
 		if ( ! empty( $plugin_version ) ) {
 			$stored = self::get_stored_result_for_version( $plugin_version );
-			if ( ! is_null( $stored ) && 'pass' === $stored['status'] ) {
+			if ( ! is_null( $stored ) ) {
+				if ( 'no_manifest' === $stored['status'] ) {
+					self::maybe_show_missing_manifest_warning();
+				}
+				add_action( 'woocommerce_system_status_report', array( static::class, 'handle_woocommerce_system_status_report' ) );
+				add_filter( 'woocommerce_debug_tools', array( static::class, 'handle_woocommerce_debug_tools' ) );
 				return true;
 			}
 		}
@@ -337,21 +356,25 @@ class FileManifest {
 		$result = self::run_verification( $plugin_file );
 
 		if ( 'no_manifest' === $result['status'] ) {
-			$env = function_exists( 'wp_get_environment_type' ) ? wp_get_environment_type() : 'production';
-			if ( ! in_array( $env, array( 'local', 'development' ), true ) ) {
-				self::missing_manifest_warning();
-			}
+			self::maybe_show_missing_manifest_warning();
+			self::store_result( $result );
+			add_action( 'woocommerce_system_status_report', array( static::class, 'handle_woocommerce_system_status_report' ) );
+			add_filter( 'woocommerce_debug_tools', array( static::class, 'handle_woocommerce_debug_tools' ) );
 			return true;
 		}
 
 		if ( 'skipped' === $result['status'] ) {
+			add_action( 'woocommerce_system_status_report', array( static::class, 'handle_woocommerce_system_status_report' ) );
+			add_filter( 'woocommerce_debug_tools', array( static::class, 'handle_woocommerce_debug_tools' ) );
 			return true;
 		}
 
 		if ( 'version_mismatch' === $result['status'] ) {
+			$details   = $result['details'];
+			$details[] = sprintf( 'Expected version: %s', $result['version'] );
 			self::incomplete_installation(
 				$plugin_file,
-				$result['details'],
+				$details,
 				__( 'Version mismatch detected:', 'woocommerce' )
 			);
 			return false;
@@ -372,6 +395,9 @@ class FileManifest {
 
 		// All checks passed — cache the result.
 		self::store_result( $result );
+
+		add_action( 'woocommerce_system_status_report', array( static::class, 'handle_woocommerce_system_status_report' ) );
+		add_filter( 'woocommerce_debug_tools', array( static::class, 'handle_woocommerce_debug_tools' ) );
 
 		return true;
 	}
@@ -395,6 +421,9 @@ class FileManifest {
 		if ( ! empty( $plugin_version ) ) {
 			$stored = self::get_stored_result_for_version( $plugin_version );
 			if ( ! is_null( $stored ) ) {
+				if ( 'no_manifest' === $stored['status'] ) {
+					self::maybe_show_missing_manifest_warning();
+				}
 				add_action( 'woocommerce_system_status_report', array( static::class, 'handle_woocommerce_system_status_report' ) );
 				add_filter( 'woocommerce_debug_tools', array( static::class, 'handle_woocommerce_debug_tools' ) );
 				return true;
@@ -406,6 +435,10 @@ class FileManifest {
 		// Store the structured result for the status report.
 		if ( 'skipped' !== $result['status'] ) {
 			self::store_result( $result );
+		}
+
+		if ( 'no_manifest' === $result['status'] ) {
+			self::maybe_show_missing_manifest_warning();
 		}
 
 		add_action( 'woocommerce_system_status_report', array( static::class, 'handle_woocommerce_system_status_report' ) );
@@ -671,6 +704,19 @@ class FileManifest {
 				return $plugins;
 			}
 		);
+	}
+
+	/**
+	 * Show the missing-manifest warning if the environment warrants it.
+	 *
+	 * Checks the WordPress environment type and calls missing_manifest_warning()
+	 * when the site is not local or development.
+	 */
+	private static function maybe_show_missing_manifest_warning(): void {
+		$env = function_exists( 'wp_get_environment_type' ) ? wp_get_environment_type() : 'production';
+		if ( ! in_array( $env, array( 'local', 'development' ), true ) ) {
+			self::missing_manifest_warning();
+		}
 	}
 
 	/**
