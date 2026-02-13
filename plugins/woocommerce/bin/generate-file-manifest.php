@@ -28,7 +28,12 @@ $source_dir = rtrim( realpath( dirname( __DIR__ ) ), '/' );
 
 if ( isset( $argv[1] ) ) {
 	// Direct mode: generate in the given (already clean) directory.
-	$target_dir = rtrim( realpath( $argv[1] ), '/' );
+	$resolved = realpath( $argv[1] );
+	if ( false === $resolved ) {
+		fwrite( STDERR, "Error: Path does not exist: $argv[1]\n" );
+		exit( 1 );
+	}
+	$target_dir = rtrim( $resolved, '/' );
 	$cleanup    = null;
 } else {
 	// Local dev mode: rsync to a temp directory using .distignore.
@@ -111,7 +116,10 @@ $files  = FileManifest::enumerate_php_files( $target_dir );
 $output = FileManifest::generate_manifest_content( $version, $files );
 
 $manifest_path = $target_dir . '/file-manifest.php';
-file_put_contents( $manifest_path, $output );
+if ( false === file_put_contents( $manifest_path, $output ) ) {
+	fwrite( STDERR, "Error: Failed to write file-manifest.php to: $manifest_path\n" );
+	exit( 1 );
+}
 
 $count = count( $files );
 echo "Generated file-manifest.php: version=$version, files=$count\n";
