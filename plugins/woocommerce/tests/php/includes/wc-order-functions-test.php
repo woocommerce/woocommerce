@@ -7,6 +7,7 @@
 
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\Utilities\Users;
 
 /**
  * Class WC_Order_Functions_Test
@@ -540,5 +541,36 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 			// All URLs should preserve their double hyphens.
 			$this->assertStringContainsString( '--', $result, "Edge case should preserve double hyphens: {$content}" );
 		}
+	}
+
+	public function test_wc_delete_shop_order_transients_usermeta_purge(): void {
+		$customer    = WC_Helper_Customer::create_customer();
+		$customer_id = $customer->get_id();
+		$order       = WC_Helper_Order::create_order( $customer_id, null, array( 'status' => OrderStatus::COMPLETED ) );
+		$order_id    = $order->get_id();
+
+		global $wp_filter;
+		var_dump( $wp_filter[ 'wc_order_statuses' ] );
+		exit;
+
+
+		// Scenario one: intended purge.
+		Users::update_site_user_meta( $customer_id, 'wc_order_count', 123 );
+		wc_delete_shop_order_transients( $order_id );
+		$this->assertSame( 1, $customer->get_order_count() );
+
+		// Order setup to test BC-friendly checkout-draft handling in `wc_delete_shop_order_transients`
+		$order->set_status( OrderStatus::CHECKOUT_DRAFT );
+		$order->save();
+
+		Users::update_site_user_meta( $customer_id, 'wc_order_count', 456 );
+		wc_delete_shop_order_transients( $order_id );
+		$this->assertSame( 456, $customer->get_order_count() );
+
+		// seed one of metas and setup hook
+		// delete_shop_order_transients( $order->get_id() ) => purges
+
+		$order->delete();
+		$customer->delete();
 	}
 }
