@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Introduce registry system registerCartItemAction for rendering components on the cart item level.
