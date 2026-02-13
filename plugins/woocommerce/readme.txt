@@ -170,14 +170,6 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 10.5.1 2026-02-10 =
-
-**WooCommerce**
-
-* Fix - Admin: revert to the previous version of the recent reviews widget, as errors have been reported in some setups. [#63195](https://github.com/woocommerce/woocommerce/pull/63195)
-* Fix - Fix issue that caused the shop page not to show up in Divi under certain circumstances [#63205](https://github.com/woocommerce/woocommerce/pull/63205)
-* Fix - Only disable add-to-cart button in variable products when wc-add-to-cart-variation is enqueued [#63194](https://github.com/woocommerce/woocommerce/pull/63194)
-* Enhancement - Add additional validation in the PayPal Standard shipping callback method. [#63193](https://github.com/woocommerce/woocommerce/pull/63193)
-
+= 10.5.2 2026-XX-XX =
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
