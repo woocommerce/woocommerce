@@ -272,7 +272,7 @@ export function createMutationQueue< TState >(
 
 			pendingIds.push( id );
 
-			if ( ! microtaskScheduled ) {
+			if ( ! microtaskScheduled && inFlightIds === null ) {
 				microtaskScheduled = true;
 				queueMicrotask( () => processRequests() );
 			}
