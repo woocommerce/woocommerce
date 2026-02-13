@@ -12,6 +12,21 @@ use WP_Filesystem_Base;
  * FilesystemUtil class.
  */
 class FilesystemUtil {
+
+	/**
+	 * Transient key for tracking FTP filesystem initialization failures.
+	 *
+	 * @since 10.7.0
+	 */
+	private const FTP_INIT_FAILURE_TRANSIENT = 'wc_ftp_filesystem_init_failed';
+
+	/**
+	 * Cooldown period in minutes before retrying a failed FTP connection.
+	 *
+	 * @since 10.7.0
+	 */
+	private const FTP_INIT_COOLDOWN_MINUTES = 5;
+
 	/**
 	 * Wrapper to retrieve the class instance contained in the $wp_filesystem global, after initializing if necessary.
 	 *
@@ -112,12 +127,23 @@ class FilesystemUtil {
 		if ( 'direct' === $method ) {
 			$initialized = WP_Filesystem();
 		} elseif ( false !== $method ) {
+			if ( get_transient( self::FTP_INIT_FAILURE_TRANSIENT ) ) {
+				return false;
+			}
+
 			// See https://core.trac.wordpress.org/changeset/56341.
 			ob_start();
 			$credentials = request_filesystem_credentials( '' );
 			ob_end_clean();
 
 			$initialized = $credentials && WP_Filesystem( $credentials );
+
+			if ( ! $initialized ) {
+				set_transient( self::FTP_INIT_FAILURE_TRANSIENT, true, self::FTP_INIT_COOLDOWN_MINUTES * MINUTE_IN_SECONDS );
+				error_log( sprintf( 'WooCommerce: FTP filesystem connection failed. Please check your FTP credentials. Retrying in %d minutes.', self::FTP_INIT_COOLDOWN_MINUTES ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			} else {
+				delete_transient( self::FTP_INIT_FAILURE_TRANSIENT );
+			}
 		}
 
 		return is_null( $initialized ) ? false : $initialized;
