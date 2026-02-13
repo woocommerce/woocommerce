@@ -14760,29 +14760,6 @@ parameters:
 			count: 2
 			path: includes/class-wc-query.php
 
-		-
-			message: '#^Cannot access property \$ID on WP_Post\|null\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: includes/class-wc-query.php
-
-		-
-			message: '#^Cannot access property \$post_name on WP_Post\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: includes/class-wc-query.php
-
-		-
-			message: '#^Cannot access property \$post_title on WP_Post\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: includes/class-wc-query.php
-
-		-
-			message: '#^Cannot access property \$post_type on WP_Post\|null\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: includes/class-wc-query.php
 
 		-
 			message: '#^Function remove_filter invoked with 4 parameters, 2\-3 required\.$#'
