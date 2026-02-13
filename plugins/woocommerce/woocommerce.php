@@ -62,16 +62,14 @@ if ( ! class_exists( 'WooCommerce', false ) ) {
 // Initialize dependency injection.
 $GLOBALS['wc_container'] = new Automattic\WooCommerce\Container();
 
-if ( ! function_exists( 'WC' ) ) {
-	/**
-	 * Returns the main instance of WC.
-	 *
-	 * @since  2.1
-	 * @return WooCommerce
-	 */
-	function WC() {
-		return WooCommerce::instance();
-	}
+/**
+ * Returns the main instance of WC.
+ *
+ * @since  2.1
+ * @return WooCommerce
+ */
+function WC() {
+	return WooCommerce::instance();
 }
 
 // phpcs:enable WordPress.NamingConventions.ValidFunctionName.FunctionNameInvalid, Squiz.Commenting.FunctionComment.Missing
