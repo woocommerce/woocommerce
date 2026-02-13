@@ -226,7 +226,6 @@ export function createMutationQueue< TState >(
 
 			const response = await fetch( endpoint, {
 				method: 'POST',
-				cache: 'no-store',
 				headers: {
 					'Content-Type': 'application/json',
 					...requestHeaders,
