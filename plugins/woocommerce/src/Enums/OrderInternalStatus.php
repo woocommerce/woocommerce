@@ -57,11 +57,4 @@ final class OrderInternalStatus {
 	 * @var string
 	 */
 	public const FAILED = 'wc-failed';
-
-	/**
-	 * The order is checkout draft.
-	 *
-	 * @var string
-	 */
-	public const CHECKOUT_DRAFT = 'wc-checkout-draft';
 }
