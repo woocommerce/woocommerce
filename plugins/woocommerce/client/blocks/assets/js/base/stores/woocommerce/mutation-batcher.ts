@@ -17,6 +17,7 @@ export type MutationRequest< TState = unknown > = {
 	path: string;
 	method: 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 	body?: unknown;
+	applyOptimistic?: () => void;
 	/**
 	 * Called synchronously after reconciliation, before isProcessing clears.
 	 * Use for side effects that must complete before external code
@@ -256,12 +257,16 @@ export function createMutationQueue< TState >(
 				isProcessing = true;
 			}
 
-			// Deep-clone the body at submission time so that later mutations
-			// (e.g. optimistic updates from subsequent calls) cannot alter
-			// the payload that will be sent to the server.
+			// Deep-clone the body at submission time so that later optimistic
+			// updates from subsequent calls cannot alter the payload that
+			// will be sent to the server.
 			const clonedBody = request.body
 				? JSON.parse( JSON.stringify( request.body ) )
 				: undefined;
+
+			if ( request.applyOptimistic ) {
+				request.applyOptimistic();
+			}
 
 			trackedRequests.set( id, {
 				id,

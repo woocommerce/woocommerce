@@ -309,21 +309,23 @@ const { state, actions } = store< Store >(
 					cartItemsPendingDelete: [ key ],
 				};
 
-				// Optimistically remove the item.
-				state.cart.items = state.cart.items.filter(
-					( item ) => item.key !== key
-				);
-
-				// Capture cart state after optimistic update for notice comparison.
-				const cartAfterOptimistic = JSON.parse(
-					JSON.stringify( state.cart )
-				);
+				// Capture cart state after optimistic updates for notice comparison.
+				let cartAfterOptimistic: typeof state.cart | null = null;
 
 				try {
 					const result = yield sendCartRequest( state, {
 						path: '/wc/store/v1/cart/remove-item',
 						method: 'POST',
 						body: { key },
+						applyOptimistic: () => {
+							state.cart.items = state.cart.items.filter(
+								( item ) => item.key !== key
+							);
+							// Capture state after optimistic update.
+							cartAfterOptimistic = JSON.parse(
+								JSON.stringify( state.cart )
+							);
+						},
 						// Side effects run synchronously during reconciliation,
 						// before isProcessing clears. This prevents
 						// refreshCartItems from running during these events.
@@ -336,7 +338,7 @@ const { state, actions } = store< Store >(
 
 					// Show notices from server response.
 					const cart = result.data as Cart;
-					if ( cart ) {
+					if ( cart && cartAfterOptimistic ) {
 						const infoNotices = getInfoNoticesFromCartUpdates(
 							cartAfterOptimistic,
 							cart,
@@ -434,30 +436,32 @@ const { state, actions } = store< Store >(
 					} as OptimisticCartItem;
 				}
 
-				// Optimistically update the cart.
-				if ( existingItem ) {
-					// Update existing item's quantity (whether server-confirmed or optimistic).
-					const isSoldIndividually =
-						isCartItem( existingItem ) &&
-						existingItem.sold_individually;
-					if ( ! isSoldIndividually ) {
-						existingItem.quantity = targetQuantity;
-					}
-				} else {
-					// No existing item: push new optimistic item.
-					state.cart.items.push( itemToSend );
-				}
-
-				// Capture cart state after optimistic update for notice comparison.
-				const cartAfterOptimistic = JSON.parse(
-					JSON.stringify( state.cart )
-				);
+				// Capture cart state after optimistic updates for notice comparison.
+				let cartAfterOptimistic: typeof state.cart | null = null;
 
 				try {
 					const result = yield sendCartRequest( state, {
 						path: `/wc/store/v1/cart/${ endpoint }`,
 						method: 'POST',
 						body: itemToSend,
+						applyOptimistic: () => {
+							if ( existingItem ) {
+								// Update existing item's quantity (whether server-confirmed or optimistic).
+								const isSoldIndividually =
+									isCartItem( existingItem ) &&
+									existingItem.sold_individually;
+								if ( ! isSoldIndividually ) {
+									existingItem.quantity = targetQuantity;
+								}
+							} else {
+								// No existing item: push new optimistic item.
+								state.cart.items.push( itemToSend );
+							}
+							// Capture state after optimistic update.
+							cartAfterOptimistic = JSON.parse(
+								JSON.stringify( state.cart )
+							);
+						},
 						// Side effects run synchronously during reconciliation,
 						// before isProcessing clears. This prevents
 						// refreshCartItems from running during these events.
@@ -478,7 +482,11 @@ const { state, actions } = store< Store >(
 					const cart = result.data as Cart;
 
 					// Show notices if enabled
-					if ( showCartUpdatesNotices && cart ) {
+					if (
+						showCartUpdatesNotices &&
+						cart &&
+						cartAfterOptimistic
+					) {
 						const infoNotices = getInfoNoticesFromCartUpdates(
 							cartAfterOptimistic,
 							cart,
@@ -560,19 +568,19 @@ const { state, actions } = store< Store >(
 							];
 						}
 
-						// Optimistically update the cart.
-						if ( existingItem ) {
-							existingItem.quantity = quantity;
-						} else {
-							state.cart.items.push( itemToSend );
-						}
-
 						const isLastItem = index === items.length - 1;
 
 						return sendCartRequest( state, {
 							path: `/wc/store/v1/cart/${ endpoint }`,
 							method: 'POST',
 							body: itemToSend,
+							applyOptimistic: () => {
+								if ( existingItem ) {
+									existingItem.quantity = quantity;
+								} else {
+									state.cart.items.push( itemToSend );
+								}
+							},
 							// Only fire events on the last item to avoid
 							// duplicate notifications mid-batch.
 							// Fire events when ANY item in the batch
