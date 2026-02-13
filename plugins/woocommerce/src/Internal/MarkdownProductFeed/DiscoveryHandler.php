@@ -67,7 +67,7 @@ class DiscoveryHandler implements RegisterHooksInterface {
 
 		$url = esc_url( add_query_arg( 'feed', 'markdown' ) );
 
-		echo '<link rel="alternate" type="text/markdown" href="' . $url . '" />' . "\n";
+		echo '<link rel="alternate" type="text/markdown" href="' . $url . '" />' . "\n"; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $url is escaped via esc_url() above.
 	}
 
 	/**

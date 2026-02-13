@@ -185,6 +185,7 @@ class HtmlToMarkdownTest extends WC_Unit_Test_Case {
 		add_filter(
 			'woocommerce_markdown_feed_html_convert',
 			function ( $result, $html ) use ( &$filter_called ) {
+				unset( $html ); // Avoid parameter not used PHPCS errors.
 				$filter_called = true;
 				return $result . ' [filtered]';
 			},

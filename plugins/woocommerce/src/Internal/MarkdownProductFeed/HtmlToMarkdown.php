@@ -151,12 +151,12 @@ class HtmlToMarkdown {
 	 * @return void
 	 */
 	private function reset_state(): void {
-		$this->list_stack         = array();
-		$this->link_href          = null;
-		$this->in_blockquote      = false;
-		$this->blockquote_depth   = 0;
-		$this->table_buffer = null;
-		$this->output       = '';
+		$this->list_stack       = array();
+		$this->link_href        = null;
+		$this->in_blockquote    = false;
+		$this->blockquote_depth = 0;
+		$this->table_buffer     = null;
+		$this->output           = '';
 	}
 
 	/**

@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add experimental Markdown Product Feed feature: append ?feed=markdown to any product or archive URL for AI-agent-friendly structured markdown output with checkout links.

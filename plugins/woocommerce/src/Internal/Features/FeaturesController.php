@@ -603,7 +603,7 @@ class FeaturesController {
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
-			'markdown_product_feed'          => array(
+			'markdown_product_feed'              => array(
 				'name'                         => __( 'Markdown Product Feed', 'woocommerce' ),
 				'description'                  => __(
 					'Enable structured markdown output for product pages. Append ?feed=markdown to any product or product archive URL to get AI-agent-friendly markdown instead of HTML.',

@@ -531,6 +531,7 @@ class MarkdownRenderer {
 			return '';
 		}
 
+		/** This filter is documented in wp-includes/post-template.php */
 		$html = apply_filters( 'the_content', $raw );
 
 		return $this->html_to_markdown->convert( $html );
@@ -550,6 +551,7 @@ class MarkdownRenderer {
 			return '';
 		}
 
+		/** This filter is documented in includes/wc-formatting-functions.php */
 		$html = apply_filters( 'woocommerce_short_description', $raw );
 
 		return $this->html_to_markdown->convert( $html );

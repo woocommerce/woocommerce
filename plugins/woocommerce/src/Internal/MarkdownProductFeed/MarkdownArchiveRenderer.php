@@ -95,7 +95,7 @@ class MarkdownArchiveRenderer {
 
 		// Navigation (only if more than one page).
 		if ( $total_pages > 1 ) {
-			$nav = $this->render_navigation( $page, $total_pages, $base_url );
+			$nav = $this->render_navigation( $page, $total_pages );
 			if ( '' !== $nav ) {
 				$sections[] = $nav;
 			}
@@ -176,12 +176,11 @@ class MarkdownArchiveRenderer {
 	/**
 	 * Render the navigation section with previous/next page links.
 	 *
-	 * @param int    $page        Current page number.
-	 * @param int    $total_pages Total number of pages.
-	 * @param string $base_url    Base URL for pagination.
+	 * @param int $page        Current page number.
+	 * @param int $total_pages Total number of pages.
 	 * @return string The navigation section markdown.
 	 */
-	private function render_navigation( int $page, int $total_pages, string $base_url ): string {
+	private function render_navigation( int $page, int $total_pages ): string {
 		$lines   = array();
 		$lines[] = '## Navigation';
 		$lines[] = '';
