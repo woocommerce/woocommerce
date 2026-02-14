@@ -5,12 +5,13 @@
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce", "My Account" ],
 	"supports": {
-		"interactivity": {
-			"clientNavigation": true
-		},
 		"align": true,
 		"color": {
 			"text": true
+		},
+		"interactivity": {
+			"clientNavigation": true,
+			"interactive": true
 		},
 		"typography": {
 			"fontSize": true,
@@ -26,6 +27,10 @@
 			"type": "string",
 			"default": "icon_and_text"
 		},
+		"hasDropdownNavigation": {
+			"type": "boolean",
+			"default": false
+		},
 		"iconStyle": {
 			"type": "string",
 			"default": "default"
@@ -35,6 +40,9 @@
 			"default": "icon"
 		}
 	},
+	"viewScriptModule": "woocommerce/customer-account",
+	"style": "file:../woocommerce/customer-account-style.css",
+	"editorStyle": "file:../woocommerce/customer-account-editor.css",
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"
