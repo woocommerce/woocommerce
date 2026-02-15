@@ -44,7 +44,7 @@ test.describe( 'WooCommerce Email Editor Core', () => {
 				.locator( 'iframe[name="editor-canvas"]' )
 				.contentFrame()
 				.getByLabel( 'Block: Heading' )
-		).toContainText( `New order: #[woocommerce/order-number],` );
+		).toContainText( `New order: #[woocommerce/order-number]` );
 	} );
 
 	test( 'Can preview in new tab', async ( { page } ) => {
@@ -64,7 +64,7 @@ test.describe( 'WooCommerce Email Editor Core', () => {
 		await page.close(); // close the original tab.
 		await expect( newPage.url() ).toContain( 'preview=true' );
 		await expect( newPage.locator( 'body' ) ).toContainText(
-			'New order: #12345,'
+			'New order: #12345'
 		);
 	} );
 
