@@ -56,7 +56,7 @@ do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plai
 		echo wp_kses_post( __( 'Order summary', 'woocommerce' ) );
 	}
 	if ( $sent_to_admin ) {
-		$before = '<a class="link" href="' . esc_url( $order->get_edit_order_url() ) . '">';
+		$before = '<a class="link" href="' . esc_url( $order->get_edit_order_url() ) . '"' . ( $email_improvements_enabled ? ' style="text-decoration: none;"' : '' ) . '>';
 		$after  = '</a>';
 	} else {
 		$before = '';
@@ -80,6 +80,7 @@ do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plai
 
 <div style="margin-bottom: <?php echo $email_improvements_enabled ? '24px' : '40px'; ?>;">
 	<table class="td font-family <?php echo esc_attr( $order_table_class ); ?>" cellspacing="0" cellpadding="6" style="width: 100%;" border="1">
+		<?php if ( ! $email_improvements_enabled ) : ?>
 		<thead>
 			<tr>
 				<th class="td" scope="col" style="text-align:<?php echo esc_attr( $text_align ); ?>;"><?php esc_html_e( 'Product', 'woocommerce' ); ?></th>
@@ -87,6 +88,7 @@ do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plai
 				<th class="td" scope="col" style="text-align:<?php echo esc_attr( $order_total_text_align ); ?>;"><?php esc_html_e( 'Price', 'woocommerce' ); ?></th>
 			</tr>
 		</thead>
+		<?php endif; ?>
 		<tbody>
 			<?php
 			$image_size = $email_improvements_enabled ? 48 : 32;
