@@ -290,10 +290,11 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 			$query_result->last_order_date = null;
 		}
 
-		$product_type = \WC_Product_Factory::get_product_type( $query_result->ID );
+		$product_id = (int) $query_result->ID;
+		$product_type = \WC_Product_Factory::get_product_type( $product_id );
 
 		return array(
-			'id'               => (int) $query_result->ID,
+			'id'               => $product_id,
 			'images'           => $query_result->images,
 			'attributes'       => $query_result->attributes,
 			'low_stock_amount' => $low_stock_amount,
