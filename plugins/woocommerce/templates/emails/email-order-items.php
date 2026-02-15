@@ -56,7 +56,7 @@ foreach ( $items as $item_id => $item ) :
 							 * @param WC_Order_Item_Product $item  The item being displayed.
 							 * @since 2.1.0
 							 */
-							echo '<td style="vertical-align: top">' . wp_kses_post( apply_filters( 'woocommerce_order_item_thumbnail', $image, $item ) ) . '</td>';
+							echo '<td style="vertical-align: top;">' . wp_kses_post( apply_filters( 'woocommerce_order_item_thumbnail', $image, $item ) ) . '</td>';
 						}
 						?>
 						<td>
