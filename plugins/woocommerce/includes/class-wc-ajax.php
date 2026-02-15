@@ -215,6 +215,7 @@ class WC_AJAX {
 			'shipping_classes_save_changes',
 			'toggle_gateway_enabled',
 			'load_status_widget',
+			'load_recent_reviews_widget',
 		);
 
 		foreach ( $ajax_events as $ajax_event ) {
@@ -3896,6 +3897,26 @@ class WC_AJAX {
 		ob_start();
 		$wc_admin_dashboard = new WC_Admin_Dashboard();
 		$wc_admin_dashboard->status_widget_content();
+		$content = ob_get_clean();
+		wp_send_json_success( array( 'content' => $content ) );
+	}
+
+	/**
+	 * AJAX handler for asynchronously loading the recent reviews widget content.
+	 *
+	 * @return void
+	 */
+	public static function load_recent_reviews_widget() {
+		check_ajax_referer( 'wc-recent-reviews-widget', 'security' );
+
+		if ( ! current_user_can( 'publish_shop_orders' ) || ! post_type_supports( 'product', 'comments' ) ) {
+			wp_send_json_error( 'missing_permissions' );
+		}
+
+		include_once __DIR__ . '/admin/class-wc-admin-dashboard.php';
+		ob_start();
+		$wc_admin_dashboard = new WC_Admin_Dashboard();
+		$wc_admin_dashboard->recent_reviews_content();
 		$content = ob_get_clean();
 		wp_send_json_success( array( 'content' => $content ) );
 	}
