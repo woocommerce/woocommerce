@@ -18,7 +18,17 @@ use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
  */
 class Group extends Abstract_Block_Renderer {
 	/**
-	 * Renders the block content
+	 * Grid layout renderer instance.
+	 *
+	 * @var Grid|null
+	 */
+	private ?Grid $grid_renderer = null;
+
+	/**
+	 * Renders the block content.
+	 *
+	 * Detects grid layout type and delegates to the Grid renderer,
+	 * otherwise uses the default group table wrapper.
 	 *
 	 * @param string            $block_content Block content.
 	 * @param array             $parsed_block Parsed block.
@@ -26,11 +36,29 @@ class Group extends Abstract_Block_Renderer {
 	 * @return string
 	 */
 	protected function render_content( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
+		$layout_type = $parsed_block['attrs']['layout']['type'] ?? '';
+
+		if ( 'grid' === $layout_type ) {
+			return $this->get_grid_renderer()->render_grid_content( $block_content, $parsed_block, $rendering_context );
+		}
+
 		return str_replace(
 			'{group_content}',
 			$this->get_inner_content( $block_content ),
 			$this->get_block_wrapper( $block_content, $parsed_block, $rendering_context )
 		);
+	}
+
+	/**
+	 * Returns the Grid renderer instance.
+	 *
+	 * @return Grid
+	 */
+	private function get_grid_renderer(): Grid {
+		if ( null === $this->grid_renderer ) {
+			$this->grid_renderer = new Grid();
+		}
+		return $this->grid_renderer;
 	}
 
 	/**
