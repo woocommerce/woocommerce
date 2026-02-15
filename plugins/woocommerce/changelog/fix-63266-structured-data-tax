@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Only add valueAddedTaxIncluded to structured data when taxes are enabled (#63266)
