@@ -32,7 +32,7 @@ printf( esc_html__( 'New order: #%s', 'woocommerce' ), '<!--[woocommerce/order-n
 
 <!-- wp:paragraph -->
 <p><?php
-/* translators: %s: Customer full name */
+/* translators: %s: Customer full name. "Woo!" prefix and trailing colon are intentional changes from the previous string "You've received a new order from %s". */
 printf( esc_html__( 'Woo! You\'ve received a new order from %s:', 'woocommerce' ), '<!--[woocommerce/customer-full-name]-->' );
 ?></p>
 <!-- /wp:paragraph -->
