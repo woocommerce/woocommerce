@@ -96,13 +96,13 @@ test.describe( 'WooCommerce Email Editor Core', () => {
 			page
 				.locator( 'iframe[name="editor-canvas"]' )
 				.contentFrame()
-				.getByText( 'You’ve received a new' )
+				.getByText( 'Woo!' )
 		).toBeVisible();
 
 		await page
 			.locator( 'iframe[name="editor-canvas"]' )
 			.contentFrame()
-			.getByText( 'You’ve received a new' )
+			.getByText( 'Woo!' )
 			.fill(
 				'Hello world from Woo plugin\nYou’ve received a new order from [woocommerce/customer-full-name]'
 			);
