@@ -9,10 +9,7 @@
 		"color": {
 			"text": true
 		},
-		"interactivity": {
-			"clientNavigation": true,
-			"interactive": true
-		},
+		"interactivity":  true
 		"typography": {
 			"fontSize": true,
 			"__experimentalFontFamily": true
