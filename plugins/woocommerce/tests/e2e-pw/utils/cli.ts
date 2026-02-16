@@ -1,8 +1,12 @@
-const { promisify } = require( 'util' );
+/**
+ * External dependencies
+ */
+import { promisify } from 'util';
+import { exec } from 'child_process';
 
-const execAsync = promisify( require( 'child_process' ).exec );
+const execAsync = promisify( exec );
 
-const wpCLI = async ( command ) => {
+const wpCLI = async ( command: string ) => {
 	const { stdout, stderr } = await execAsync(
 		`pnpm exec wp-env run tests-cli -- ${ command }`
 	);
@@ -10,6 +14,4 @@ const wpCLI = async ( command ) => {
 	return { stdout, stderr };
 };
 
-module.exports = {
-	wpCLI,
-};
+export { wpCLI };

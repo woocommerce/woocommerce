@@ -1,7 +1,22 @@
-const { promisify } = require( 'util' );
-const execAsync = promisify( require( 'child_process' ).exec );
+/**
+ * External dependencies
+ */
+import { promisify } from 'util';
+import { exec } from 'child_process';
 
-const getVersionWPLatestMinusOne = async ( { core, github } ) => {
+const execAsync = promisify( exec );
+
+const getVersionWPLatestMinusOne = async ( {
+	core,
+	github,
+}: {
+	core: { setOutput: ( name: string, value: string ) => void };
+	github: {
+		request: (
+			url: string
+		) => Promise< { data: Record< string, string > } >;
+	};
+} ) => {
 	const URL_WP_STABLE_VERSION_CHECK =
 		'https://api.wordpress.org/core/stable-check/1.0/';
 
@@ -38,4 +53,4 @@ const getInstalledWordPressVersion = async () => {
 	}
 };
 
-module.exports = { getVersionWPLatestMinusOne, getInstalledWordPressVersion };
+export { getVersionWPLatestMinusOne, getInstalledWordPressVersion };

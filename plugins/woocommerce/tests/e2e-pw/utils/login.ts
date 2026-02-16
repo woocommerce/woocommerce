@@ -1,5 +1,19 @@
-const { expect } = require( '../fixtures/fixtures' );
-const logIn = async ( page, username, password, assertSuccess = true ) => {
+/**
+ * External dependencies
+ */
+import type { Page } from '@playwright/test';
+
+/**
+ * Internal dependencies
+ */
+import { expect } from '../fixtures/fixtures';
+
+const logIn = async (
+	page: Page,
+	username: string,
+	password: string,
+	assertSuccess = true
+) => {
 	await page
 		.getByLabel( 'Username or Email Address' )
 		.click( { delay: 100 } );
@@ -16,9 +30,9 @@ const logIn = async ( page, username, password, assertSuccess = true ) => {
 };
 
 const logInFromMyAccount = async (
-	page,
-	username,
-	password,
+	page: Page,
+	username: string,
+	password: string,
 	assertSuccess = true
 ) => {
 	await page.locator( '#username' ).fill( username );
@@ -37,4 +51,4 @@ const logInFromMyAccount = async (
 	}
 };
 
-module.exports = { logIn, logInFromMyAccount };
+export { logIn, logInFromMyAccount };

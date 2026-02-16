@@ -1,4 +1,15 @@
-const updateProduct = async ( { page, expect } ) => {
+/**
+ * External dependencies
+ */
+import type { Expect, Page } from '@playwright/test';
+
+const updateProduct = async ( {
+	page,
+	expect,
+}: {
+	page: Page;
+	expect: Expect;
+} ) => {
 	await page.getByRole( 'button', { name: 'Update' } ).click();
 	// Verify product was updated
 	await expect( page.getByLabel( 'Dismiss this notice' ) ).toContainText(
@@ -6,7 +17,7 @@ const updateProduct = async ( { page, expect } ) => {
 	);
 };
 
-const disableVariableProductBlockTour = async ( { page } ) => {
+const disableVariableProductBlockTour = async ( { page }: { page: Page } ) => {
 	// Further info: https://github.com/woocommerce/woocommerce/pull/45856/
 	await page.waitForLoadState( 'domcontentloaded' );
 
@@ -36,7 +47,4 @@ const disableVariableProductBlockTour = async ( { page } ) => {
 	await page.reload();
 };
 
-module.exports = {
-	updateProduct,
-	disableVariableProductBlockTour,
-};
+export { updateProduct, disableVariableProductBlockTour };

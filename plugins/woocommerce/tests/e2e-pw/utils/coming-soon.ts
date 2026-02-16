@@ -1,7 +1,20 @@
-const { request } = require( '@playwright/test' );
-const { setOption } = require( './options' );
+/**
+ * External dependencies
+ */
+import { request } from '@playwright/test';
 
-const setComingSoon = async ( { baseURL, enabled } ) => {
+/**
+ * Internal dependencies
+ */
+import { setOption } from './options';
+
+const setComingSoon = async ( {
+	baseURL,
+	enabled,
+}: {
+	baseURL: string;
+	enabled: string;
+} ) => {
 	try {
 		await setOption( request, baseURL, 'woocommerce_coming_soon', enabled );
 	} catch ( error ) {
@@ -9,6 +22,4 @@ const setComingSoon = async ( { baseURL, enabled } ) => {
 	}
 };
 
-module.exports = {
-	setComingSoon,
-};
+export { setComingSoon };

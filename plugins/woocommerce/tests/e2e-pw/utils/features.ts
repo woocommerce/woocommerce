@@ -1,7 +1,15 @@
-const { encodeCredentials } = require( './plugin-utils' );
-const { admin } = require( '../test-data/data' );
+/**
+ * Internal dependencies
+ */
+import { encodeCredentials } from './plugin-utils';
+import { admin } from '../test-data/data';
 
-const setFeatureFlag = async ( request, baseURL, flagName, enable ) => {
+const setFeatureFlag = async (
+	request,
+	baseURL: string,
+	flagName: string,
+	enable: boolean
+) => {
 	const apiContext = await request.newContext( {
 		baseURL,
 		extraHTTPHeaders: {
@@ -19,7 +27,7 @@ const setFeatureFlag = async ( request, baseURL, flagName, enable ) => {
 	} );
 };
 
-const resetFeatureFlags = async ( request, baseURL ) => {
+const resetFeatureFlags = async ( request, baseURL: string ) => {
 	const apiContext = await request.newContext( {
 		baseURL,
 		extraHTTPHeaders: {
@@ -36,7 +44,4 @@ const resetFeatureFlags = async ( request, baseURL ) => {
 	} );
 };
 
-module.exports = {
-	setFeatureFlag,
-	resetFeatureFlags,
-};
+export { setFeatureFlag, resetFeatureFlags };

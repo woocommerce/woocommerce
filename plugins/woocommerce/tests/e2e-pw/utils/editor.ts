@@ -1,6 +1,10 @@
-const { getCanvas } = require( '@woocommerce/e2e-utils-playwright' );
+/**
+ * External dependencies
+ */
+import type { Page } from '@playwright/test';
+import { getCanvas } from '@woocommerce/e2e-utils-playwright';
 
-const fillPageTitle = async ( page, title ) => {
+const fillPageTitle = async ( page: Page, title: string ) => {
 	// Close the Block Inserter if it's open.
 	// Since Gutenberg 19.9 it is expanded by default.
 	if (
@@ -21,6 +25,4 @@ const fillPageTitle = async ( page, title ) => {
 	await block_title.fill( title );
 };
 
-module.exports = {
-	fillPageTitle,
-};
+export { fillPageTitle };

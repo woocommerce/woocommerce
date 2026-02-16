@@ -1,4 +1,12 @@
-const { admin } = require( '../test-data/data' );
+/**
+ * External dependencies
+ */
+import type { Page, APIRequestContext } from '@playwright/test';
+
+/**
+ * Internal dependencies
+ */
+import { admin } from '../test-data/data';
 
 const base64String = Buffer.from(
 	`${ admin.username }:${ admin.password }`
@@ -14,7 +22,10 @@ const headers = {
  * @param {import('@playwright/test').APIRequestContext} request Request context from calling function.
  * @param {boolean}                                      enable  Set to `true` if you want to enable the block product tour. `false` if otherwise.
  */
-const toggleBlockProductTour = async ( request, enable ) => {
+const toggleBlockProductTour = async (
+	request: APIRequestContext,
+	enable: boolean
+) => {
 	const url = './wp-json/wc-admin/options';
 	const params = { _locale: 'user' };
 	const toggleValue = enable ? 'no' : 'yes';
@@ -27,7 +38,7 @@ const toggleBlockProductTour = async ( request, enable ) => {
 	} );
 };
 
-const toggleVariableProductTour = async ( page, enable ) => {
+const toggleVariableProductTour = async ( page: Page, enable: boolean ) => {
 	await page.waitForLoadState( 'domcontentloaded' );
 
 	// Get the current user data
@@ -56,4 +67,4 @@ const toggleVariableProductTour = async ( page, enable ) => {
 	await page.reload();
 };
 
-module.exports = { toggleBlockProductTour, toggleVariableProductTour };
+export { toggleBlockProductTour, toggleVariableProductTour };

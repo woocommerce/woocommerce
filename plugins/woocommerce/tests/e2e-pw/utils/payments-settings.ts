@@ -1,7 +1,14 @@
-const { request } = require( '@playwright/test' );
-const { deleteOption } = require( './options' );
+/**
+ * External dependencies
+ */
+import { request } from '@playwright/test';
 
-const resetGatewayOrder = async ( baseURL ) => {
+/**
+ * Internal dependencies
+ */
+import { deleteOption } from './options';
+
+const resetGatewayOrder = async ( baseURL: string ) => {
 	try {
 		await deleteOption( request, baseURL, 'woocommerce_gateway_order' );
 	} catch ( error ) {
@@ -9,6 +16,4 @@ const resetGatewayOrder = async ( baseURL ) => {
 	}
 };
 
-module.exports = {
-	resetGatewayOrder,
-};
+export { resetGatewayOrder };

@@ -1,14 +1,17 @@
-const api = require( './api' );
-const variableProducts = require( './variable-products' );
-const features = require( './features' );
-const tours = require( './tours' );
-const login = require( './login' );
-const editor = require( './editor' );
-const helpers = require( './helpers' );
-const comingSoon = require( './coming-soon' );
-const cli = require( './cli' );
+/**
+ * Internal dependencies
+ */
+import * as api from './api';
+import * as variableProducts from './variable-products';
+import * as features from './features';
+import * as tours from './tours';
+import * as login from './login';
+import * as editor from './editor';
+import * as helpers from './helpers';
+import * as comingSoon from './coming-soon';
+import * as cli from './cli';
 
-module.exports = {
+export {
 	api,
 	variableProducts,
 	features,
