@@ -1,8 +1,8 @@
-const base = require( '@playwright/test' );
-const { admin } = require( '../test-data/data' );
-const { tags } = require( './fixtures' );
+import { test as base, expect, request } from '@playwright/test';
+import { admin } from '../test-data/data';
+import { tags } from './fixtures';
 
-exports.test = base.test.extend( {
+export const test = base.extend( {
 	extraHTTPHeaders: {
 		// Add authorization token to all requests.
 		Authorization: `Basic ${ btoa(
@@ -11,6 +11,4 @@ exports.test = base.test.extend( {
 	},
 } );
 
-exports.expect = base.expect;
-exports.tags = tags;
-exports.request = base.request;
+export { expect, tags, request };
