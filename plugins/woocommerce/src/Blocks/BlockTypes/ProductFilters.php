@@ -41,12 +41,12 @@ class ProductFilters extends AbstractBlock {
 
 		BlocksSharedState::load_store_config( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
 
-		wp_interactivity_config(
-			$this->get_full_block_name(),
-			[
-				'isProductArchive' => is_shop() || is_product_taxonomy() || ( is_search() && 'product' === get_post_type() ),
-			]
-		);
+		// Classic themes do not support client-side navigation on product
+		// archive pages, so disable it globally for the Interactivity Router.
+		$is_product_archive = is_shop() || is_product_taxonomy() || ( is_search() && 'product' === get_post_type() );
+		if ( ! wp_is_block_theme() && $is_product_archive ) {
+			wp_interactivity_config( 'core/router', array( 'clientNavigationDisabled' => true ) );
+		}
 	}
 
 	/**
