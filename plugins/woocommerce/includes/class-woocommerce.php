@@ -277,6 +277,7 @@ final class WooCommerce {
 	 */
 	public function on_plugins_loaded() {
 		// TODO: bypass cron during the checkout to avoid redirects and better page performance.
+		// TODO: pages to consider are cart, checkout and order confirmation pages.
 		if ( ! defined( 'DISABLE_WP_CRON' ) ) {
 			//define('DISABLE_WP_CRON', true);
 		} else {
