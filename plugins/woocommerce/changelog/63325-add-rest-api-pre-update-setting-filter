@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add woocommerce_rest_pre_update_setting filter to the V4 General Settings REST API controller, allowing plugins to validate or block setting updates before they are persisted.
