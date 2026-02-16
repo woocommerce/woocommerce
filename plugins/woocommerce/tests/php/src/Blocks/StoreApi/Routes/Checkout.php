@@ -34,10 +34,6 @@ class Checkout extends MockeryTestCase {
 	protected function setUp(): void {
 		parent::setUp();
 
-		// Set jetpack_activation_source option to prevent "Cannot use bool as array" error
-		// in Jetpack Connection Manager's apply_activation_source_to_args method.
-		update_option( 'jetpack_activation_source', array( '', '' ) );
-
 		add_filter( 'woocommerce_set_cookie_enabled', array( $this, 'filter_woocommerce_set_cookie_enabled' ), 10, 4 );
 
 		update_option( 'woocommerce_enable_guest_checkout', 'yes' );
@@ -129,8 +125,6 @@ class Checkout extends MockeryTestCase {
 		remove_all_actions( 'woocommerce_checkout_validate_order_before_payment' );
 		remove_all_actions( 'woocommerce_store_api_checkout_order_processed' );
 		remove_all_actions( 'woocommerce_valid_order_statuses_for_payment' );
-
-		delete_option( 'jetpack_activation_source' );
 
 		update_option( 'woocommerce_ship_to_countries', 'all' );
 		update_option( 'woocommerce_allowed_countries', 'all' );
