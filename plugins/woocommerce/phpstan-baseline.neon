@@ -55078,18 +55078,6 @@ parameters:
 			path: src/Blocks/BlockTypes/Reviews/ProductReviewRating.php
 
 		-
-			message: '#^Access to property \$comment_ID on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\Reviews\\WP_Comment\.$#'
-			identifier: class.notFound
-			count: 3
-			path: src/Blocks/BlockTypes/Reviews/ProductReviewTemplate.php
-
-		-
-			message: '#^Access to property \$comment_post_ID on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\Reviews\\WP_Comment\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/Reviews/ProductReviewTemplate.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\Reviews\\ProductReviewTemplate\:\:render\(\) should return string but empty return statement found\.$#'
 			identifier: return.empty
 			count: 1
@@ -55104,12 +55092,6 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$var of function count expects array\|Countable, array\<int\|WP_Comment\>\|int given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/Reviews/ProductReviewTemplate.php
-
-		-
-			message: '#^Parameter \$comments of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\Reviews\\ProductReviewTemplate\:\:block_product_review_template_render_comments\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\Reviews\\WP_Comment\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/Reviews/ProductReviewTemplate.php
 
