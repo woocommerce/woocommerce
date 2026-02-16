@@ -199,7 +199,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 		 * @internal
 		 * @since 10.6.0
 		 */
-		public function auto_trigger( $order_id, $order = false ) {
+		public function auto_trigger( $order_id, $order = false ): void {
 			if ( ! $order instanceof WC_Order ) {
 				$order = wc_get_order( $order_id );
 			}

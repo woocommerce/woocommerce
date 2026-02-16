@@ -31,7 +31,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 		/**
 		 * Refund order.
 		 *
-		 * @var WC_Order|bool
+		 * @var WC_Order_Refund|false
 		 */
 		public $refund;
 
@@ -173,7 +173,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 		 * @internal
 		 * @since 10.6.0
 		 */
-		public function auto_trigger( $order_id, $refund_id = null ) {
+		public function auto_trigger( $order_id, $refund_id = null ): void {
 			$order = wc_get_order( $order_id );
 			if ( ! $order instanceof WC_Order || ! PointOfSaleOrderUtil::is_order_paid_at_pos( $order ) ) {
 				return;
@@ -190,7 +190,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 		 * @internal
 		 * @since 10.6.0
 		 */
-		public function trigger( $order_id, $template_id ) {
+		public function trigger( $order_id, $template_id ): void {
 			if ( $this->id !== $template_id ) {
 				return;
 			}
@@ -444,7 +444,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 		/**
 		 * Enable order email actions for POS refunded orders.
 		 */
-		private function enable_order_email_actions() {
+		private function enable_order_email_actions(): void {
 			add_action( 'woocommerce_order_fully_refunded_notification', array( $this, 'auto_trigger' ), 10, 2 );
 			add_action( 'woocommerce_order_partially_refunded_notification', array( $this, 'auto_trigger' ), 10, 2 );
 			add_filter( 'woocommerce_rest_order_actions_email_valid_template_classes', array( $this, 'add_to_valid_template_classes' ), 10, 2 );

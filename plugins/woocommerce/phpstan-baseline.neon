@@ -19045,12 +19045,6 @@ parameters:
 			path: includes/emails/class-wc-email-customer-pos-completed-order.php
 
 		-
-			message: '#^Method WC_Email_Customer_POS_Completed_Order\:\:auto_trigger\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/emails/class-wc-email-customer-pos-completed-order.php
-
-		-
 			message: '#^Method WC_Email_Customer_POS_Completed_Order\:\:add_pos_customizations\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -19159,18 +19153,6 @@ parameters:
 			path: includes/emails/class-wc-email-customer-pos-refunded-order.php
 
 		-
-			message: '#^Method WC_Email_Customer_POS_Refunded_Order\:\:auto_trigger\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/emails/class-wc-email-customer-pos-refunded-order.php
-
-		-
-			message: '#^Method WC_Email_Customer_POS_Refunded_Order\:\:enable_order_email_actions\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/emails/class-wc-email-customer-pos-refunded-order.php
-
-		-
 			message: '#^Method WC_Email_Customer_POS_Refunded_Order\:\:email_footer\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -19201,12 +19183,6 @@ parameters:
 			path: includes/emails/class-wc-email-customer-pos-refunded-order.php
 
 		-
-			message: '#^Method WC_Email_Customer_POS_Refunded_Order\:\:trigger\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/emails/class-wc-email-customer-pos-refunded-order.php
-
-		-
 			message: '#^PHPDoc tag @extends has invalid value \(WC_Email\)\: Unexpected token "\\n\\t ", expected ''\<'' at offset 267 on line 9$#'
 			identifier: phpDoc.parseError
 			count: 1
@@ -19224,11 +19200,6 @@ parameters:
 			count: 1
 			path: includes/emails/class-wc-email-customer-pos-refunded-order.php
 
-		-
-			message: '#^Property WC_Email_Customer_POS_Refunded_Order\:\:\$refund \(bool\|WC_Order\) does not accept WC_Order_Refund\|false\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: includes/emails/class-wc-email-customer-pos-refunded-order.php
 
 		-
 			message: '#^Method WC_Email_Customer_Processing_Order\:\:trigger\(\) has no return type specified\.$#'
