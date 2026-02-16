@@ -276,6 +276,14 @@ final class WooCommerce {
 	 * @return void
 	 */
 	public function on_plugins_loaded() {
+		// TODO: bypass cron during the checkout to avoid redirects and better page performance.
+		if ( ! defined( 'DISABLE_WP_CRON' ) ) {
+			//define('DISABLE_WP_CRON', true);
+		} else {
+			//remove_action('init', 'wp_cron');
+			//remove_action('wp_loaded', '_wp_cron');
+		}
+
 		/**
 		 * Action to signal that WooCommerce has finished loading.
 		 *
