@@ -277,7 +277,7 @@ final class WooCommerce {
 	 */
 	public function on_plugins_loaded() {
 		// TODO: installation case, permalink case - verify for errors and correctness.
-		// Optimization note: ensures wp_cron doesn't interfere with timing-sensitive pages (cart, checkout, and etc.).
+		// Optimization note: ensures wp_cron doesn't interfere with timing-sensitive WooCommerce pages.
 		$page_id         = (int) ( $_REQUEST['page_id'] ?? null );
 		$disable_wp_cron = ( $page_id && ( $page_id === wc_get_page_id( 'checkout' ) || $page_id === wc_get_page_id( 'cart' ) ) );
 		if ( $disable_wp_cron ) {
