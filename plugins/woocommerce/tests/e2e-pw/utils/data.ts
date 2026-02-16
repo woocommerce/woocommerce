@@ -1,3 +1,6 @@
+/**
+ * External dependencies
+ */
 import { faker } from '@faker-js/faker';
 
 export function getFakeUser( role: string ) {

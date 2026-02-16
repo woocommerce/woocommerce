@@ -36,7 +36,11 @@ export const setOption = async (
 		} );
 };
 
-export const deleteOption = async ( request: APIRequest, baseURL: string, optionName: string ) => {
+export const deleteOption = async (
+	request: APIRequest,
+	baseURL: string,
+	optionName: string
+) => {
 	const apiContext = await request.newContext( {
 		baseURL,
 		extraHTTPHeaders: {

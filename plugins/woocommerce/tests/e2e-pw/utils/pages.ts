@@ -54,7 +54,11 @@ export async function pageExists( slug: string ) {
 	return pages.data.length > 0;
 }
 
-async function createShortcodePage( slug: string, title: string, shortcode: string ) {
+async function createShortcodePage(
+	slug: string,
+	title: string,
+	shortcode: string
+) {
 	if ( ! ( await pageExists( slug ) ) ) {
 		console.log( `Creating ${ title } page` );
 		const apiClient = createClient( playwrightConfig.use.baseURL, {
@@ -97,7 +101,12 @@ export async function createClassicCartPage() {
 	);
 }
 
-async function createBlocksPage( browser: Browser, slug: string, title: string, blockName: string ) {
+async function createBlocksPage(
+	browser: Browser,
+	slug: string,
+	title: string,
+	blockName: string
+) {
 	if ( ! ( await pageExists( slug ) ) ) {
 		console.log( 'Creating Checkout Blocks page' );
 		const context = await browser.newContext( {

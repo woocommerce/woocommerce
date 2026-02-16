@@ -1,6 +1,13 @@
+/**
+ * External dependencies
+ */
 import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
+
+/**
+ * Internal dependencies
+ */
 import { wpCLI } from './cli';
 
 /**

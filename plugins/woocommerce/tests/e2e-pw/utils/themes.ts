@@ -1,4 +1,11 @@
+/**
+ * External dependencies
+ */
 import { request } from '@playwright/test';
+
+/**
+ * Internal dependencies
+ */
 import { encodeCredentials } from '../utils/plugin-utils';
 import { admin } from '../test-data/data';
 

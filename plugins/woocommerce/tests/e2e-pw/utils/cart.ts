@@ -88,7 +88,12 @@ export async function checkCartContentInBlocksCart(
  * @param {Array}   products      - An array of objects in the format { data: { name: 'Product name', price: '12', }, qty: quantity } expected to be in the cart.
  * @param {Object}  tax           - The tax object containing the tax rate. Expected format: { rate: '0.00' }
  */
-export async function checkCartContent( isClassicCart: boolean, page: Page, products: any[], tax: any ) {
+export async function checkCartContent(
+	isClassicCart: boolean,
+	page: Page,
+	products: any[],
+	tax: any
+) {
 	if ( products.length === 0 ) {
 		await expect(
 			page.locator( 'main' ).getByText( 'Your cart is currently empty' )

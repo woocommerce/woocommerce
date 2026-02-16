@@ -1,4 +1,11 @@
+/**
+ * External dependencies
+ */
 import { test as base, expect, request } from '@playwright/test';
+
+/**
+ * Internal dependencies
+ */
 import { admin } from '../test-data/data';
 import { tags } from './fixtures';
 

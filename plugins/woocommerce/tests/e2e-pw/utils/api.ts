@@ -154,7 +154,10 @@ export const create = {
 	 * @param {object[]}      variations Array of variations to add. See [Product variation properties](https://woocommerce.github.io/woocommerce-rest-api-docs/#product-variation-properties)
 	 * @return {Promise<number[]>} Array of variation ID's.
 	 */
-	productVariations: async ( productId: number | string, variations: any[] ) => {
+	productVariations: async (
+		productId: number | string,
+		variations: any[]
+	) => {
 		const response = await api.post(
 			`${ WC_API_PATH }/products/${ productId }/variations/batch`,
 			{

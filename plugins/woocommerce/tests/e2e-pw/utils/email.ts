@@ -19,7 +19,11 @@ import playwrightConfig from '../playwright.config';
  * @param {RegExp}                           subject              The subject of the email, in regular expression format.
  * @return {Promise<*>} Returns the row element of the email in the Email Log page.
  */
-export async function expectEmail( page: Page, receiverEmailAddress: string, subject: RegExp ) {
+export async function expectEmail(
+	page: Page,
+	receiverEmailAddress: string,
+	subject: RegExp
+) {
 	await page.goto(
 		`wp-admin/tools.php?page=wpml_plugin_log&search[place]=receiver&search[term]=${ encodeURIComponent(
 			receiverEmailAddress
@@ -95,7 +99,10 @@ export async function getWooEmails( params: any ) {
  * @param {import('@playwright/test').Page } page       The Playwright page.
  * @param {string}                           emailTitle The transactional email title.
  */
-export async function accessTheEmailEditor( page: Page, emailTitle = 'New order' ) {
+export async function accessTheEmailEditor(
+	page: Page,
+	emailTitle = 'New order'
+) {
 	await page.goto( '/wp-admin/admin.php?page=wc-settings&tab=email' );
 	const theRow = page.getByRole( 'row', {
 		name: new RegExp( emailTitle ),

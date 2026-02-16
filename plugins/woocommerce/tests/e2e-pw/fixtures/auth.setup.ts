@@ -14,7 +14,11 @@ import {
 	STORAGE_DIR_PATH,
 } from '../playwright.config';
 
-async function authenticate( request: import('@playwright/test').APIRequestContext, user: { username: string; password: string }, storagePath: string ) {
+async function authenticate(
+	request: import('@playwright/test').APIRequestContext,
+	user: { username: string; password: string },
+	storagePath: string
+) {
 	await request.post( './wp-login.php', {
 		form: {
 			log: user.username,

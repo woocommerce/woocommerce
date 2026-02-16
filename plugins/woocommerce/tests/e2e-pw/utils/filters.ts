@@ -16,7 +16,12 @@ const testURL = new URL( defaultConfig.use.baseURL );
  * code to observe the requested filter, you may need to `page.reload()` prior to writing assertions that rely on your
  * filter.
  */
-export async function setFilterValue( page: Page, hook: string, value: any, priority = 10 ) {
+export async function setFilterValue(
+	page: Page,
+	hook: string,
+	value: any,
+	priority = 10
+) {
 	const context = page.context();
 	const existingCookies = await context.cookies();
 	let filterSpecs: any = {};

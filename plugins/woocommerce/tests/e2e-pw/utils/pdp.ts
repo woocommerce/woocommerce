@@ -1,3 +1,6 @@
+/**
+ * External dependencies
+ */
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
@@ -8,7 +11,11 @@ import { expect } from '@playwright/test';
  * @param productName
  * @param quantityCount
  */
-export async function addProductsToCart( page: Page, productName: string, quantityCount: string ) {
+export async function addProductsToCart(
+	page: Page,
+	productName: string,
+	quantityCount: string
+) {
 	await page.goto(
 		`product/${ productName.replace( / /gi, '-' ).toLowerCase() }`
 	);

@@ -63,7 +63,10 @@ export async function updateIfNeeded( path: string, desiredValue: string ) {
  * @param {{initial: string, updated: string}} values - An object containing the initial and updated values of the setting. E.g. { initial: 'no', updated: 'yes' }.
  * @return {Promise<void>} A promise that resolves when the reset is complete.
  */
-export async function resetValue( path: string, values: { initial: string; updated: string } ) {
+export async function resetValue(
+	path: string,
+	values: { initial: string; updated: string }
+) {
 	if ( values.initial !== values.updated ) {
 		await updateValue( path, values.initial );
 	}
