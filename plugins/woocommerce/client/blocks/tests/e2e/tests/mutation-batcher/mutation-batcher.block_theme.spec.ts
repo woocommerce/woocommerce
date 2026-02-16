@@ -199,16 +199,13 @@ test.describe( 'Mutation Batcher', () => {
 				status: 200,
 				contentType: 'application/json',
 				body: JSON.stringify( {
-					responses: Array.from(
-						{ length: requestCount },
-						() => ( {
-							status: 500,
-							body: {
-								message: 'Simulated server error',
-								code: 'internal_error',
-							},
-						} )
-					),
+					responses: Array.from( { length: requestCount }, () => ( {
+						status: 500,
+						body: {
+							message: 'Simulated server error',
+							code: 'internal_error',
+						},
+					} ) ),
 				} ),
 			} );
 		} );

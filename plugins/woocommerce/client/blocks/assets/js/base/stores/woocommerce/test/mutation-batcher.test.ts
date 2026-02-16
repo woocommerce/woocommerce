@@ -663,10 +663,7 @@ describe( 'createMutationQueue', () => {
 			] );
 			global.fetch = mockFetch;
 
-			const takeSnapshotSpy = jest.spyOn(
-				stateHandler,
-				'takeSnapshot'
-			);
+			const takeSnapshotSpy = jest.spyOn( stateHandler, 'takeSnapshot' );
 
 			mockState.value = 42;
 
@@ -783,9 +780,7 @@ describe( 'createMutationQueue', () => {
 					ok: true,
 					json: () =>
 						Promise.resolve( {
-							responses: [
-								{ status: 200, body: { value: 1 } },
-							],
+							responses: [ { status: 200, body: { value: 1 } } ],
 						} ),
 				} );
 			} ) as jest.Mock;
@@ -815,9 +810,7 @@ describe( 'createMutationQueue', () => {
 		} );
 
 		it( 'rolls back on network failure even with applyOptimistic', async () => {
-			global.fetch = createFailingFetch(
-				new Error( 'Network error' )
-			);
+			global.fetch = createFailingFetch( new Error( 'Network error' ) );
 
 			mockState.value = 50;
 
