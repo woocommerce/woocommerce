@@ -3,7 +3,9 @@
  */
 import axios from 'axios';
 import fs from 'fs';
+import { pipeline } from 'stream/promises';
 import path from 'path';
+import type { APIRequest } from '@playwright/test';
 
 /**
  * Internal dependencies
@@ -124,7 +126,7 @@ export const deletePlugin = async ( {
 	username,
 	password,
 }: {
-	request: import('@playwright/test').APIRequest;
+	request: APIRequest;
 	baseURL: string;
 	slug: string;
 	username: string;
@@ -224,7 +226,7 @@ export const downloadZip = async ( {
 		throw new Error( error.message );
 	} );
 
-	response.data.pipe( fs.createWriteStream( zipFilePath ) );
+	await pipeline( response.data, fs.createWriteStream( zipFilePath ) );
 
 	return zipFilePath;
 };
