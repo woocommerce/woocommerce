@@ -191,11 +191,32 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 		}
 
 		/**
+		 * Auto-trigger this email when a POS-paid order is completed.
+		 *
+		 * @param int            $order_id The order ID.
+		 * @param WC_Order|false $order    The order object.
+		 *
+		 * @internal
+		 * @since 10.6.0
+		 */
+		public function auto_trigger( $order_id, $order = false ) {
+			if ( ! $order instanceof WC_Order ) {
+				$order = wc_get_order( $order_id );
+			}
+			if ( ! $order instanceof WC_Order || ! PointOfSaleOrderUtil::is_order_paid_at_pos( $order ) ) {
+				return;
+			}
+			$this->trigger( $order_id, $this->id );
+		}
+
+		/**
 		 * Enable order email actions for POS orders.
+		 *
+		 * @since 10.6.0
 		 */
 		private function enable_order_email_actions_for_pos_orders() {
+			add_action( 'woocommerce_order_status_completed_notification', array( $this, 'auto_trigger' ), 10, 2 );
 			$this->enable_email_template_for_pos_orders();
-			// Enable send email when requested.
 			add_action( 'woocommerce_rest_order_actions_email_send', array( $this, 'trigger' ), 10, 2 );
 		}
 
@@ -361,14 +382,19 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 		}
 
 		/**
-		 * Add this email template to the list of valid templates for POS orders.
+		 * Add this email template to the list of valid templates for POS-paid completed orders.
 		 *
 		 * @param array    $valid_template_classes Array of valid template class names.
 		 * @param WC_Order $order                  The order.
 		 * @return array Modified array of valid template class names.
+		 *
+		 * @since 10.6.0
 		 */
 		public function add_to_valid_template_classes( $valid_template_classes, $order ) {
-			if ( ! PointOfSaleOrderUtil::is_pos_order( $order ) ) {
+			if ( 'completed' !== $order->get_status( 'edit' ) ) {
+				return $valid_template_classes;
+			}
+			if ( ! PointOfSaleOrderUtil::is_order_paid_at_pos( $order ) ) {
 				return $valid_template_classes;
 			}
 			$valid_template_classes[] = get_class( $this );
