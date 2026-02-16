@@ -656,6 +656,192 @@ describe( 'createMutationQueue', () => {
 		} );
 	} );
 
+	describe( 'applyOptimistic and snapshot ordering', () => {
+		it( 'takes snapshot before running applyOptimistic', async () => {
+			const mockFetch = createMockFetch( [
+				{ status: 200, body: { value: 99 } },
+			] );
+			global.fetch = mockFetch;
+
+			const takeSnapshotSpy = jest.spyOn(
+				stateHandler,
+				'takeSnapshot'
+			);
+
+			mockState.value = 42;
+
+			const queue = createMutationQueue( {
+				endpoint: '/batch',
+				getHeaders: () => ( {} ),
+				...stateHandler,
+			} );
+
+			await queue.submit( {
+				path: '/a',
+				method: 'POST',
+				applyOptimistic: () => {
+					mockState.value = 999;
+				},
+			} );
+
+			// Snapshot should have captured the state BEFORE
+			// applyOptimistic mutated it.
+			expect( takeSnapshotSpy ).toHaveBeenCalledTimes( 1 );
+			expect( snapshot ).toEqual( { value: 42 } );
+		} );
+
+		it( 'rolls back optimistic mutations when all requests fail', async () => {
+			const mockFetch = createMockFetch( [
+				{ status: 500, body: { message: 'Server error' } },
+			] );
+			global.fetch = mockFetch;
+
+			mockState.value = 10;
+
+			const queue = createMutationQueue( {
+				endpoint: '/batch',
+				getHeaders: () => ( {} ),
+				...stateHandler,
+			} );
+
+			const p1 = queue.submit( {
+				path: '/a',
+				method: 'POST',
+				applyOptimistic: () => {
+					mockState.value = 20;
+				},
+			} );
+
+			// Optimistic update should be applied immediately.
+			expect( mockState.value ).toBe( 20 );
+
+			await expect( p1 ).rejects.toThrow();
+
+			// After failure, state should be rolled back to
+			// pre-optimistic value.
+			expect( mockState.value ).toBe( 10 );
+		} );
+
+		it( 'rolls back all optimistic updates from multiple rapid submits', async () => {
+			const mockFetch = createMockFetch( [
+				{ status: 400, body: { message: 'Error 1' } },
+				{ status: 400, body: { message: 'Error 2' } },
+				{ status: 400, body: { message: 'Error 3' } },
+			] );
+			global.fetch = mockFetch;
+
+			mockState.value = 0;
+
+			const queue = createMutationQueue( {
+				endpoint: '/batch',
+				getHeaders: () => ( {} ),
+				...stateHandler,
+			} );
+
+			// Simulate three rapid clicks — each compounds on previous.
+			const p1 = queue.submit( {
+				path: '/a',
+				method: 'POST',
+				applyOptimistic: () => {
+					mockState.value += 10;
+				},
+			} );
+			const p2 = queue.submit( {
+				path: '/b',
+				method: 'POST',
+				applyOptimistic: () => {
+					mockState.value += 10;
+				},
+			} );
+			const p3 = queue.submit( {
+				path: '/c',
+				method: 'POST',
+				applyOptimistic: () => {
+					mockState.value += 10;
+				},
+			} );
+
+			// All three optimistic updates should have been applied.
+			expect( mockState.value ).toBe( 30 );
+
+			await expect( p1 ).rejects.toThrow();
+			await expect( p2 ).rejects.toThrow();
+			await expect( p3 ).rejects.toThrow();
+
+			// Snapshot was taken before the first applyOptimistic,
+			// so rollback should undo ALL three updates.
+			expect( mockState.value ).toBe( 0 );
+		} );
+
+		it( 'clones body before applyOptimistic mutates shared references', async () => {
+			let capturedBody: unknown;
+
+			global.fetch = jest.fn( ( _url, options ) => {
+				const parsed = JSON.parse( options.body as string );
+				capturedBody = parsed.requests[ 0 ].body;
+				return Promise.resolve( {
+					ok: true,
+					json: () =>
+						Promise.resolve( {
+							responses: [
+								{ status: 200, body: { value: 1 } },
+							],
+						} ),
+				} );
+			} ) as jest.Mock;
+
+			const queue = createMutationQueue( {
+				endpoint: '/batch',
+				getHeaders: () => ( {} ),
+				...stateHandler,
+			} );
+
+			// Shared object — like an item reference in state.cart.items.
+			const item = { id: 1, quantity: 1 };
+
+			await queue.submit( {
+				path: '/update-item',
+				method: 'POST',
+				body: item,
+				applyOptimistic: () => {
+					// This mutates the same object passed as body.
+					// The body must have been cloned before this runs.
+					item.quantity = 5;
+				},
+			} );
+
+			// Server should receive the pre-optimistic quantity.
+			expect( capturedBody ).toEqual( { id: 1, quantity: 1 } );
+		} );
+
+		it( 'rolls back on network failure even with applyOptimistic', async () => {
+			global.fetch = createFailingFetch(
+				new Error( 'Network error' )
+			);
+
+			mockState.value = 50;
+
+			const queue = createMutationQueue( {
+				endpoint: '/batch',
+				getHeaders: () => ( {} ),
+				...stateHandler,
+			} );
+
+			const p1 = queue.submit( {
+				path: '/a',
+				method: 'POST',
+				applyOptimistic: () => {
+					mockState.value = 777;
+				},
+			} );
+
+			expect( mockState.value ).toBe( 777 );
+
+			await expect( p1 ).rejects.toThrow( 'Network error' );
+			expect( mockState.value ).toBe( 50 );
+		} );
+	} );
+
 	describe( 'waitForIdle', () => {
 		it( 'resolves immediately when not processing', async () => {
 			const mockFetch = createMockFetch( [] );
