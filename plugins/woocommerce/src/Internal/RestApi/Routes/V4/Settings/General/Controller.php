@@ -323,7 +323,24 @@ class Controller extends AbstractController {
 				break;
 		}
 
-		return true;
+		/**
+		 * Filters the validation result before a setting is updated via the REST API.
+		 *
+		 * Allows plugins to perform additional validation or block setting updates.
+		 *
+		 * @since 9.8.0
+		 *
+		 * @param true|WP_Error $result  True if validation passed, WP_Error to block the update.
+		 * @param array         $setting The setting being updated, with 'id' and 'new_value' keys.
+		 */
+		return apply_filters(
+			'woocommerce_rest_pre_update_setting',
+			true,
+			array(
+				'id'        => $setting_id,
+				'new_value' => $value,
+			)
+		);
 	}
 
 	/**
