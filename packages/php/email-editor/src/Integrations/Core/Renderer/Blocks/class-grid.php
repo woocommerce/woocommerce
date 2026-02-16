@@ -196,7 +196,7 @@ class Grid {
 			array_filter(
 				array(
 					'border-collapse' => 'separate',
-					'background-size' => $table_styles['background-size'] ?? 'cover',
+					'background-size' => $table_styles['declarations']['background-size'] ?? 'cover',
 				)
 			)
 		);

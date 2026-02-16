@@ -127,6 +127,7 @@ class Grid_Test extends \Email_Editor_Integration_Test_Case {
 		$rendered = $this->group_renderer->render( $block_content, $parsed_block, $this->rendering_context );
 
 		$this->checkValidHTML( $rendered );
+		$this->assertStringContainsString( 'width: 33.33%', $rendered, 'Should calculate 3 columns from 200px min-width' );
 		$this->assertStringContainsString( 'A', $rendered );
 		$this->assertStringContainsString( 'B', $rendered );
 		$this->assertStringContainsString( 'C', $rendered );
