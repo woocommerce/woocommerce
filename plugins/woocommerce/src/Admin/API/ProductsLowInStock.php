@@ -9,7 +9,7 @@ namespace Automattic\WooCommerce\Admin\API;
 
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
-use Automattic\WooCommerce\Internal\Admin\ProductStockIndicator;
+use Automattic\WooCommerce\Internal\Admin\LowStockCounter;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -70,7 +70,7 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 	 * @return \WP_Error|\WP_HTTP_Response|\WP_REST_Response
 	 */
 	public function get_low_in_stock_count( $request ) {
-		$total_results = ProductStockIndicator::get_low_stock_count( $request->get_param( 'status' ) );
+		$total_results = LowStockCounter::get_low_stock_count( $request->get_param( 'status' ) );
 
 		$response = rest_ensure_response( array( 'total' => $total_results ) );
 		$response->header( 'X-WP-Total', $total_results );
@@ -188,7 +188,7 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 		$offset              = ( $page - 1 ) * $per_page;
 		$low_stock_threshold = absint( max( get_option( 'woocommerce_notify_low_stock_amount' ), 1 ) );
 
-		$sidewide_stock_threshold_only = ProductStockIndicator::is_using_sitewide_stock_threshold_only( $low_stock_threshold );
+		$sidewide_stock_threshold_only = LowStockCounter::is_using_sitewide_stock_threshold_only( $low_stock_threshold );
 
 		$query_string = $this->get_query( $sidewide_stock_threshold_only );
 
@@ -198,7 +198,7 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 			OBJECT_K
 		);
 
-		$total_results = ProductStockIndicator::get_count( $sidewide_stock_threshold_only, $status, $low_stock_threshold );
+		$total_results = LowStockCounter::get_count( $sidewide_stock_threshold_only, $status, $low_stock_threshold );
 
 		return array(
 			'results' => $query_results,
@@ -245,7 +245,7 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 	 * @return string
 	 */
 	protected function get_query( $sitewide_only = false ) {
-		$query = ProductStockIndicator::get_base_query(
+		$query = LowStockCounter::get_base_query(
 			array(
 				':selects'       => 'wp_posts.*, :postmeta_select wc_product_meta_lookup.stock_quantity',
 				':orderAndLimit' => 'order by wc_product_meta_lookup.product_id DESC limit %d, %d',
@@ -253,7 +253,7 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 		);
 
 		if ( ! $sitewide_only ) {
-			return ProductStockIndicator::add_sitewide_stock_query_str( $query );
+			return LowStockCounter::add_sitewide_stock_query_str( $query );
 		}
 
 		return strtr(

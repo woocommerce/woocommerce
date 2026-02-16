@@ -388,7 +388,7 @@ class Settings {
 	 */
 	private function get_low_stock_count() {
 		return 'yes' === get_option( 'woocommerce_manage_stock' )
-			? ProductStockIndicator::get_low_stock_count()
+			? LowStockCounter::get_low_stock_count()
 			: 0;
 	}
 

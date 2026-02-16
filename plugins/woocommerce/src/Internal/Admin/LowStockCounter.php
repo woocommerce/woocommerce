@@ -10,7 +10,7 @@ namespace Automattic\WooCommerce\Internal\Admin;
  *
  * @since 10.6.0
  */
-class ProductStockIndicator {
+class LowStockCounter {
 
 	/**
 	 * Get the count of low in stock products.
