@@ -282,7 +282,7 @@ final class WooCommerce {
 		$disable_wp_cron = ( $page_id && ( $page_id === wc_get_page_id( 'checkout' ) || $page_id === wc_get_page_id( 'cart' ) ) );
 		if ( $disable_wp_cron ) {
 			// Minimal intervention: gracefully define the constant (can be present from config or an extension).
-			// We intentionally avoid fallbacks here (as unhooking wp_cron from actions) for feature-proof compatibility.
+			// We intentionally avoid fallbacks here (as unhooking wp_cron from actions) for future-proof compatibility.
 			if ( ! defined( 'DISABLE_WP_CRON' ) ) {
 				define( 'DISABLE_WP_CRON', true );
 			}
