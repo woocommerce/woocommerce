@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+[Refactor product filters blocks to use isPreviewMode flag](https://github.com/woocommerce/woocommerce/commit/07fa510f05aa6caaa4237887dc09f5eb9f16d076)
