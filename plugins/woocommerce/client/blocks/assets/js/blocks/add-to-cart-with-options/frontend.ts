@@ -20,7 +20,6 @@ import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 /**
  * Internal dependencies
  */
-import { doesCartItemMatchAttributes } from '../../base/utils/variations/does-cart-item-match-attributes';
 import { findMatchingVariation } from '../../base/utils/variations/attribute-matching';
 import type { GroupedProductAddToCartWithOptionsStore } from './grouped-product-selector/frontend';
 import type { Context as QuantitySelectorContext } from './quantity-selector/frontend';
@@ -61,12 +60,6 @@ const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
-
-const { state: wooState } = store< WooCommerce >(
-	'woocommerce',
-	{},
-	{ lock: universalLock }
-);
 
 const { state: productDataState } = store< ProductDataStore >(
 	'woocommerce/product-data',
@@ -127,34 +120,6 @@ export const getProductData = (
 		max: maximum > 0 ? maximum : Number.MAX_SAFE_INTEGER,
 		step: addToCart?.multiple_of ?? 1,
 	};
-};
-
-export const getNewQuantity = (
-	productId: number,
-	quantity: number,
-	variation?: SelectedAttributes[]
-) => {
-	const product = wooState.cart?.items.find( ( item ) => {
-		if ( item.type === 'variation' ) {
-			// If it's a variation, check that attributes match.
-			// While different variations have different attributes,
-			// some variations might accept 'Any' value for an attribute,
-			// in which case, we need to check that the attributes match.
-			if (
-				item.id !== productId ||
-				! item.variation ||
-				! variation ||
-				item.variation.length !== variation.length
-			) {
-				return false;
-			}
-			return doesCartItemMatchAttributes( item, variation );
-		}
-
-		return item.id === productId;
-	} );
-	const currentQuantity = product?.quantity || 0;
-	return currentQuantity + quantity;
 };
 
 export type AddToCartWithOptionsStore = {
@@ -399,12 +364,6 @@ const { actions, state } = store<
 
 				const { quantity } = getContext< Context >();
 
-				const newQuantity = getNewQuantity(
-					id,
-					quantity[ id ],
-					selectedAttributes
-				);
-
 				const { actions: wooActions } = store< WooCommerce >(
 					'woocommerce',
 					{},
@@ -413,7 +372,7 @@ const { actions, state } = store<
 				yield wooActions.addCartItem(
 					{
 						id,
-						quantity: newQuantity,
+						quantityToAdd: quantity[ id ],
 						variation: selectedAttributes,
 						type: productType,
 					},

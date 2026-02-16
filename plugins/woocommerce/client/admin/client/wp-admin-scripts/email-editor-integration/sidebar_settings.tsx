@@ -16,6 +16,7 @@ import clsx from 'clsx';
 import { useState } from '@wordpress/element';
 import {
 	EmailActionsFill,
+	TemplateSelection,
 	recordEvent as emailEditorRecordEvent,
 } from '@woocommerce/email-editor';
 import { registerPlugin } from '@wordpress/plugins';
@@ -296,6 +297,15 @@ export function modifySidebar() {
 		render: () => (
 			<EmailActionsFill>
 				<EmailStatus recordEvent={ emailEditorRecordEvent } />
+			</EmailActionsFill>
+		),
+	} );
+
+	registerPlugin( 'woocommerce-email-editor-template-selection', {
+		scope: 'woocommerce-email-editor',
+		render: () => (
+			<EmailActionsFill>
+				<TemplateSelection />
 			</EmailActionsFill>
 		),
 	} );
