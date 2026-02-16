@@ -1,14 +1,13 @@
 /**
  * External dependencies
  */
-import { createRequire } from 'module';
+import fs from 'fs';
+import path from 'path';
 
 /**
  * Internal dependencies
  */
 import { test, expect } from '../../../fixtures/api-tests-fixtures';
-
-const require = createRequire( import.meta.url );
 
 // 259 countries total
 const countryCodes = [
@@ -4002,7 +4001,15 @@ test.describe( 'Data API tests', () => {
 
 		// loop through all the countries and validate against the expected data
 		for ( const country of countryCodes ) {
-			const countryData = require( `../../../data/countries/${ country }.json` );
+			const countryData = JSON.parse(
+				fs.readFileSync(
+					path.resolve(
+						__dirname,
+						`../../../data/countries/${ country }.json`
+					),
+					'utf-8'
+				)
+			);
 			expect( responseJSON, `Checking country ${ country }` ).toEqual(
 				expect.arrayContaining( [
 					expect.objectContaining( {
@@ -6332,7 +6339,6 @@ test.describe( 'Data API tests', () => {
 				expect.objectContaining( {
 					code: 'LYD',
 					name: 'Libyan dinar',
-					//"symbol": "&#x62f;.&#x644;",
 					symbol: expect.stringContaining( '&#x62f' ),
 					_links: {
 						self: [
