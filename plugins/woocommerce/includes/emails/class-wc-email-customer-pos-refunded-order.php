@@ -199,7 +199,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 			}
 
 			$order = wc_get_order( $order_id );
-			if ( ! is_a( $order, 'WC_Order' ) ) {
+			if ( ! $order instanceof WC_Order ) {
 				return;
 			}
 
