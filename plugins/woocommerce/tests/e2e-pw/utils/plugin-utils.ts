@@ -235,9 +235,7 @@ export const downloadZip = async ( {
  * @param {string} zipFilePath Local file path to the ZIP.
  */
 export const deleteZip = async ( zipFilePath: string ) => {
-	await fs.unlink( zipFilePath, ( err ) => {
-		if ( err ) throw err;
-	} );
+	await fs.promises.unlink( zipFilePath );
 };
 
 /**

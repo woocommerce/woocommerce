@@ -188,10 +188,10 @@ export const deletePost = {
 			.then( ( response ) => response );
 		return res.data;
 	},
-	productAttributes: async ( id: number[] ) => {
+	productAttributes: async ( ids: number[] ) => {
 		const res = await api
 			.post( `${ WC_API_PATH }/products/attributes/batch`, {
-				delete: id,
+				delete: ids,
 			} )
 			.then( ( response ) => response );
 		return res.data;

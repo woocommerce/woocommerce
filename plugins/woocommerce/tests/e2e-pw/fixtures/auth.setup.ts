@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { test as setup } from '@playwright/test';
+import { test as setup, type APIRequestContext } from '@playwright/test';
 import fs from 'fs';
 
 /**
@@ -15,7 +15,7 @@ import {
 } from '../playwright.config';
 
 async function authenticate(
-	request: import('@playwright/test').APIRequestContext,
+	request: APIRequestContext,
 	user: { username: string; password: string },
 	storagePath: string
 ) {

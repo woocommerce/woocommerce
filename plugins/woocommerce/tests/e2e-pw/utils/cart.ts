@@ -4,8 +4,8 @@
 import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
-function formatAmount( amount: number ) {
-	return parseFloat( amount ).toLocaleString( 'en-US', {
+function formatAmount( amount: number | string ) {
+	return parseFloat( String( amount ) ).toLocaleString( 'en-US', {
 		minimumFractionDigits: 2,
 		maximumFractionDigits: 2,
 	} );
