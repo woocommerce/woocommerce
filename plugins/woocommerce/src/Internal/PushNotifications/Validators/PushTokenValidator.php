@@ -12,6 +12,8 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use WP_Error;
 
+// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+
 /**
  * Validator class for push tokens.
  *
@@ -23,8 +25,10 @@ class PushTokenValidator {
 		'user_id',
 		'origin',
 		'device_uuid',
+		'device_locale',
 		'platform',
 		'token',
+		'metadata',
 	);
 
 	/**
@@ -33,6 +37,14 @@ class PushTokenValidator {
 	 * @since 10.6.0
 	 */
 	const ERROR_CODE = 'woocommerce_invalid_data';
+
+	/**
+	 * Validates device locale format:
+	 * - language code (2–3 lowercase letters)
+	 * - underscore
+	 * - region code (2 uppercase letters).
+	 */
+	const DEVICE_LOCALE_FORMAT = '/^(?<language>[a-z]{2,3})_(?<region>[A-Z]{2})$/';
 
 	/**
 	 * The regex to use when validating device UUID format.
@@ -107,17 +119,11 @@ class PushTokenValidator {
 	 *
 	 * @since 10.6.0
 	 *
-	 * @param mixed $value The value to validate.
-	 * @param array $context An array of other values included as context for the validation.
+	 * @param mixed      $value The value to validate.
+	 * @param array|null $context An array of other values included as context for the validation.
 	 * @return bool|WP_Error
 	 */
-	private static function validate_id( $value, array $context ) {
-		/**
-		 * Context is unused in this specific method, but required by the
-		 * validate() dispatch signature.
-		 */
-		unset( $context );
-
+	private static function validate_id( $value, ?array $context = array() ) {
 		if ( is_null( $value ) ) {
 			return new WP_Error( self::ERROR_CODE, 'ID is required.' );
 		}
@@ -138,17 +144,11 @@ class PushTokenValidator {
 	 *
 	 * @since 10.6.0
 	 *
-	 * @param mixed $value The value to validate.
-	 * @param array $context An array of other values included as context for the validation.
+	 * @param mixed      $value The value to validate.
+	 * @param array|null $context An array of other values included as context for the validation.
 	 * @return bool|WP_Error
 	 */
-	private static function validate_user_id( $value, array $context ) {
-		/**
-		 * Context is unused in this specific method, but required by the
-		 * validate() dispatch signature.
-		 */
-		unset( $context );
-
+	private static function validate_user_id( $value, ?array $context = array() ) {
 		if ( is_null( $value ) ) {
 			return new WP_Error( self::ERROR_CODE, 'User ID is required.' );
 		}
@@ -169,17 +169,11 @@ class PushTokenValidator {
 	 *
 	 * @since 10.6.0
 	 *
-	 * @param mixed $value The value to validate.
-	 * @param array $context An array of other values included as context for the validation.
+	 * @param mixed      $value The value to validate.
+	 * @param array|null $context An array of other values included as context for the validation.
 	 * @return bool|WP_Error
 	 */
-	private static function validate_origin( $value, array $context ) {
-		/**
-		 * Context is unused in this specific method, but required by the
-		 * validate() dispatch signature.
-		 */
-		unset( $context );
-
+	private static function validate_origin( $value, ?array $context = array() ) {
 		if ( is_null( $value ) ) {
 			return new WP_Error( self::ERROR_CODE, 'Origin is required.' );
 		}
@@ -209,11 +203,11 @@ class PushTokenValidator {
 	 *
 	 * @since 10.6.0
 	 *
-	 * @param mixed $value The value to validate.
-	 * @param array $context An array of other values included as context for the validation.
+	 * @param mixed      $value The value to validate.
+	 * @param array|null $context An array of other values included as context for the validation.
 	 * @return bool|WP_Error
 	 */
-	private static function validate_device_uuid( $value, array $context ) {
+	private static function validate_device_uuid( $value, ?array $context = array() ) {
 		/**
 		 * We may or may not have platform; if we don't have it, we can skip the
 		 * platform-specific checks and allow the platform validation to trigger
@@ -267,21 +261,46 @@ class PushTokenValidator {
 	}
 
 	/**
+	 * Validates device locale.
+	 *
+	 * @param mixed      $value The value to validate.
+	 * @param array|null $context An array of other values included as context for the validation.
+	 * @return bool|WP_Error
+	 *
+	 * @since 10.6.0
+	 */
+	private static function validate_device_locale( $value, ?array $context = array() ) {
+		if ( ! isset( $value ) ) {
+			return new WP_Error( self::ERROR_CODE, 'Device locale is required.' );
+		}
+
+		if ( ! is_string( $value ) ) {
+			return new WP_Error( self::ERROR_CODE, 'Device locale must be a string.' );
+		}
+
+		$value = trim( $value );
+
+		if ( '' === $value ) {
+			return new WP_Error( self::ERROR_CODE, 'Device locale cannot be empty.' );
+		}
+
+		if ( ! preg_match( self::DEVICE_LOCALE_FORMAT, $value ) ) {
+			return new WP_Error( self::ERROR_CODE, 'Device locale is an invalid format.' );
+		}
+
+		return true;
+	}
+
+	/**
 	 * Validates platform.
 	 *
 	 * @since 10.6.0
 	 *
-	 * @param mixed $value The value to validate.
-	 * @param array $context An array of other values included as context for the validation.
+	 * @param mixed      $value The value to validate.
+	 * @param array|null $context An array of other values included as context for the validation.
 	 * @return bool|WP_Error
 	 */
-	private static function validate_platform( $value, array $context ) {
-		/**
-		 * Context is unused in this specific method, but required by the
-		 * validate() dispatch signature.
-		 */
-		unset( $context );
-
+	private static function validate_platform( $value, ?array $context = array() ) {
 		if ( is_null( $value ) ) {
 			return new WP_Error( self::ERROR_CODE, 'Platform is required.' );
 		}
@@ -311,11 +330,11 @@ class PushTokenValidator {
 	 *
 	 * @since 10.6.0
 	 *
-	 * @param mixed $value The value to validate.
-	 * @param array $context An array of other values included as context for the validation.
+	 * @param mixed      $value The value to validate.
+	 * @param array|null $context An array of other values included as context for the validation.
 	 * @return bool|WP_Error
 	 */
-	private static function validate_token( $value, array $context ) {
+	private static function validate_token( $value, ?array $context = array() ) {
 		if ( is_null( $value ) ) {
 			return new WP_Error( self::ERROR_CODE, 'Token is required.' );
 		}
@@ -378,4 +397,33 @@ class PushTokenValidator {
 
 		return true;
 	}
+
+	/**
+	 * Validates metadata.
+	 *
+	 * @param mixed      $value The value to validate.
+	 * @param array|null $context An array of other values included as context for the validation.
+	 * @return bool|WP_Error
+	 *
+	 * @since 10.6.0
+	 */
+	private static function validate_metadata( $value, ?array $context = array() ) {
+		if ( ! isset( $value ) ) {
+			return new WP_Error( self::ERROR_CODE, 'Metadata is required.' );
+		}
+
+		if ( ! is_array( $value ) ) {
+			return new WP_Error( self::ERROR_CODE, 'Metadata must be an array.' );
+		}
+
+		foreach ( $value as $key => $item ) {
+			if ( ! is_scalar( $item ) ) {
+				return new WP_Error( self::ERROR_CODE, 'Metadata items must be scalar values.' );
+			}
+		}
+
+		return true;
+	}
 }
+
+// phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed

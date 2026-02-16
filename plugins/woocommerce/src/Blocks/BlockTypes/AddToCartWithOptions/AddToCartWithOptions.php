@@ -573,6 +573,15 @@ class AddToCartWithOptions extends AbstractBlock {
 									array(
 										isset( $wrapper_attributes['class'] ) ? $wrapper_attributes['class'] : '',
 										isset( $form_attributes['class'] ) ? $form_attributes['class'] : '',
+										// Add the `is-layout-flow` class so inner elements automatically get the
+										// default vertical margin from the theme. That's especially useful for
+										// elements added by extensions like express payment method buttons.
+										// In the future, we want to use `supports.layout` in block.json instead
+										// of hardcoding the class here. However, right now that wouldn't work
+										// because the wrapper element of the block is the notices `<div>`, so the
+										// `is-layout-flow` class would be applied to the notices container instead
+										// of the `<form>` as we want.
+										'is-layout-flow',
 									)
 								)
 							),

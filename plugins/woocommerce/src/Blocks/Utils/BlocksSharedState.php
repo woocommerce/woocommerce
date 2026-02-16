@@ -87,7 +87,6 @@ class BlocksSharedState {
 
 		wp_interactivity_config( self::$settings_namespace, self::get_currency_data() );
 		wp_interactivity_config( self::$settings_namespace, self::get_locale_data() );
-		wp_interactivity_config( self::$settings_namespace, self::get_core_data() );
 	}
 
 	/**
@@ -124,17 +123,6 @@ class BlocksSharedState {
 				)
 			);
 		}
-	}
-
-	/**
-	 * Get core data to include in settings.
-	 *
-	 * @return array
-	 */
-	private static function get_core_data(): array {
-		return array(
-			'isBlockTheme' => wp_is_block_theme(),
-		);
 	}
 
 	/**
