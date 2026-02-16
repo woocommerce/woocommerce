@@ -13,7 +13,7 @@ function registerCustomSiteLogoBlockVariation() {
 		title: 'Site Logo',
 		attributes: {
 			align: 'center',
-			width: 44, // set a default width for the site logo
+			width: 120, // set a default width for the site logo
 		},
 		isDefault: true, // set this as the default variation
 	} );
