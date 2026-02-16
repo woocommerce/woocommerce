@@ -333,7 +333,7 @@ class Controller extends AbstractController {
 		 * @param true|WP_Error $result  True if validation passed, WP_Error to block the update.
 		 * @param array         $setting The setting being updated, with 'id' and 'new_value' keys.
 		 */
-		return apply_filters(
+		$result = apply_filters(
 			'woocommerce_rest_pre_update_setting',
 			true,
 			array(
@@ -341,6 +341,20 @@ class Controller extends AbstractController {
 				'new_value' => $value,
 			)
 		);
+
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+
+		if ( true !== $result ) {
+			return new WP_Error(
+				'rest_setting_update_blocked',
+				__( 'The setting update was blocked by a validation filter.', 'woocommerce' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		return true;
 	}
 
 	/**
