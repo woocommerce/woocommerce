@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add EmailActionsFill allowing extenders to add custom email actions to the sidebar
