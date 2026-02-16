@@ -1,13 +1,16 @@
-const { test, expect } = require( '../../../fixtures/api-tests-fixtures' );
-const {
+/**
+ * Internal dependencies
+ */
+import { test, expect } from '../../../fixtures/api-tests-fixtures';
+import {
 	getOrderExample,
 	getTaxRateExamples,
 	getVariationExample,
-	simpleProduct: defaultSimpleProduct,
-	variableProduct: defaultVariableProduct,
-	groupedProduct: defaultGroupedProduct,
-	externalProduct: defaultExternalProduct,
-} = require( '../../../data' );
+	simpleProduct as defaultSimpleProduct,
+	variableProduct as defaultVariableProduct,
+	groupedProduct as defaultGroupedProduct,
+	externalProduct as defaultExternalProduct,
+} from '../../../data';
 
 /**
  * Simple product with Standard tax rate

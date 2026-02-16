@@ -1,9 +1,13 @@
-const { test, expect } = require( '../../../fixtures/api-tests-fixtures' );
-const { refund } = require( '../../../data' );
+/**
+ * Internal dependencies
+ */
+import { test, expect } from '../../../fixtures/api-tests-fixtures';
+import { refund } from '../../../data';
 
-let productId;
-let expectedRefund;
-let orderId;
+let productId: number;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let expectedRefund: any;
+let orderId: number;
 
 test.describe( 'Refunds API tests', () => {
 	test.beforeAll( async ( { request } ) => {

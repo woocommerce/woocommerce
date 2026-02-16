@@ -1,6 +1,6 @@
 /* eslint-disable */
-const { test, expect } = require( '../../../fixtures/api-tests-fixtures' );
-const { getShippingZoneExample } = require( '../../../data' );
+import { test, expect } from '../../../fixtures/api-tests-fixtures';
+import { getShippingZoneExample } from '../../../data';
 const { BASE_URL } = process.env;
 const shouldSkip = BASE_URL !== undefined;
 /**

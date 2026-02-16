@@ -1,4 +1,14 @@
-const { test, expect } = require( '../../../fixtures/api-tests-fixtures' );
+/**
+ * External dependencies
+ */
+import { createRequire } from 'module';
+
+/**
+ * Internal dependencies
+ */
+import { test, expect } from '../../../fixtures/api-tests-fixtures';
+
+const require = createRequire( import.meta.url );
 
 // 259 countries total
 const countryCodes = [

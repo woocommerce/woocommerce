@@ -1,9 +1,12 @@
-const { test, expect } = require( '../../../fixtures/api-tests-fixtures' );
-const { coupon, order } = require( '../../../data' );
+/**
+ * Internal dependencies
+ */
+import { test, expect } from '../../../fixtures/api-tests-fixtures';
+import { coupon, order } from '../../../data';
 
 test.describe( 'Coupons API tests', () => {
 	//create variable to store the coupon id we will be using
-	let couponId;
+	let couponId: number;
 
 	test( 'can create a coupon', async ( { request } ) => {
 		//create testCoupon
@@ -336,7 +339,7 @@ test.describe( 'Add coupon to order', () => {
 		discount_type: 'percent',
 		amount: '10',
 	};
-	let orderId;
+	let orderId: number;
 
 	test.beforeAll( async ( { request } ) => {
 		// Create a coupon

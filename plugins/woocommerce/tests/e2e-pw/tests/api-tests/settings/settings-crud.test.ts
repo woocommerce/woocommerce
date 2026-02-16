@@ -1,18 +1,16 @@
-const {
+/**
+ * Internal dependencies
+ */
+import {
 	test,
 	expect,
-	request: apiRequest,
+	request as apiRequest,
 	tags,
-} = require( '../../../fixtures/api-tests-fixtures' );
-const { setOption } = require( '../../../utils/options' );
+} from '../../../fixtures/api-tests-fixtures';
+import { setOption } from '../../../utils/options';
+import { countries, currencies, stateOptions } from '../../../data/settings';
 
 const { BASE_URL } = process.env;
-
-const {
-	countries,
-	currencies,
-	stateOptions,
-} = require( '../../../data/settings' );
 
 const enableEmailImprovementsFeature = async () => {
 	await setOption(

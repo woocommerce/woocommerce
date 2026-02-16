@@ -1,18 +1,22 @@
-const {
+/**
+ * Internal dependencies
+ */
+import {
 	test,
-	expect: baseExpect,
-} = require( '../../../fixtures/api-tests-fixtures' );
+	expect as baseExpect,
+} from '../../../fixtures/api-tests-fixtures';
 const expect = baseExpect.extend( {
 	/**
 	 * Custom matcher for matching an object with multiple possible types.
 	 *
-	 * @param {*} received
+	 * @param {*}        received
 	 * @param {string[]} expectedTypes
 	 */
 	anyOf( received, expectedTypes ) {
 		const assertionName = 'anyOf';
-		let pass;
-		let matcherResult;
+		let pass: boolean;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		let matcherResult: any;
 
 		try {
 			baseExpect( expectedTypes ).toContain( typeof received );
@@ -254,7 +258,8 @@ const getExpectedWooCommerceTables = ( dbPrefix ) => {
 /* eslint-disable playwright/no-nested-step */
 test.describe( 'System Status API tests', () => {
 	test( 'can view all system status items', async ( { request } ) => {
-		let responseJSON,
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		let responseJSON: any,
 			databasePrefix,
 			databaseSize,
 			databaseTables,

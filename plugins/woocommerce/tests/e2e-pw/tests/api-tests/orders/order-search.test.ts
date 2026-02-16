@@ -1,10 +1,10 @@
-const { test, expect } = require( '../../../fixtures/api-tests-fixtures' );
-
-const { getOrderExampleSearchTest } = require( '../../../data/order' );
-const {
-	customerShippingSearchTest,
-} = require( '../../../data/shared/customer' );
-const { simpleProduct } = require( '../../../data/products-crud' );
+/**
+ * Internal dependencies
+ */
+import { test, expect } from '../../../fixtures/api-tests-fixtures';
+import { getOrderExampleSearchTest } from '../../../data/order';
+import { customerShippingSearchTest } from '../../../data/shared/customer';
+import { simpleProduct } from '../../../data/products-crud';
 
 /**
  * Order to be searched

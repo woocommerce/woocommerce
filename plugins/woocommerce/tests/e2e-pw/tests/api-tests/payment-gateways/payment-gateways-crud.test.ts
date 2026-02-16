@@ -1,5 +1,8 @@
-const { test, expect } = require( '../../../fixtures/api-tests-fixtures' );
-const { resetGatewayOrder } = require( '../../../utils/payments-settings' );
+/**
+ * Internal dependencies
+ */
+import { test, expect } from '../../../fixtures/api-tests-fixtures';
+import { resetGatewayOrder } from '../../../utils/payments-settings';
 
 const { BASE_URL } = process.env;
 
