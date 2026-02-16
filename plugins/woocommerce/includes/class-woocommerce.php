@@ -276,13 +276,16 @@ final class WooCommerce {
 	 * @return void
 	 */
 	public function on_plugins_loaded() {
-		// TODO: bypass cron during the checkout to avoid redirects and better page performance.
-		// TODO: pages to consider are cart, checkout and order confirmation pages.
-		if ( ! defined( 'DISABLE_WP_CRON' ) ) {
-			//define('DISABLE_WP_CRON', true);
-		} else {
-			//remove_action('init', 'wp_cron');
-			//remove_action('wp_loaded', '_wp_cron');
+		// TODO: installation case, permalink case - verify for errors and correctness.
+		// Optimization note: ensures wp_cron doesn't interfere with timing-sensitive pages (cart, checkout, and etc.).
+		$page_id         = (int) ( $_REQUEST['page_id'] ?? null );
+		$disable_wp_cron = ( $page_id && ( $page_id === wc_get_page_id( 'checkout' ) || $page_id === wc_get_page_id( 'cart' ) ) );
+		if ( $disable_wp_cron ) {
+			// Minimal intervention: gracefully define the constant (can be present from config or an extension).
+			// We intentionally avoid fallbacks here (as unhooking wp_cron from actions) for feature-proof compatibility.
+			if ( ! defined( 'DISABLE_WP_CRON' ) ) {
+				define( 'DISABLE_WP_CRON', true );
+			}
 		}
 
 		/**
