@@ -82,17 +82,9 @@ class Grid {
 		libxml_clear_errors();
 
 		$children = array();
-		$body     = $dom->getElementsByTagName( 'body' )->item( 0 );
+		$divs     = $dom->getElementsByTagName( 'div' );
 
-		if ( ! $body ) {
-			return $children;
-		}
-
-		foreach ( $body->childNodes as $node ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
-			if ( ! ( $node instanceof \DOMElement ) || 'div' !== $node->tagName ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
-				continue;
-			}
-
+		foreach ( $divs as $node ) {
 			$class = $node->getAttribute( 'class' );
 			if ( false === strpos( $class, 'email-block-layout' ) ) {
 				continue;
@@ -266,7 +258,7 @@ class Grid {
 		$cell_width_percent = sprintf( '%.2f%%', 100 / $items_in_row );
 		$row_cells          = '';
 
-		$vertical_padding = $is_first_row ? '0' : sprintf( '%dpx', (int) $cell_gap );
+		$vertical_padding = $is_first_row ? '0' : sprintf( '%dpx', (int) ( $cell_gap * 2 ) );
 
 		foreach ( $row_children as $index => $child_html ) {
 			$padding_left  = 0 === $index ? '0' : sprintf( '%dpx', (int) $cell_gap );

@@ -62,6 +62,8 @@ class Grid_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test grid renders with children.
+	 *
 	 * @testdox Should render grid content with children in a table structure.
 	 */
 	public function test_renders_grid_with_children(): void {
@@ -78,10 +80,12 @@ class Grid_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test correct column count per row.
+	 *
 	 * @testdox Should render correct number of cells per row based on columnCount.
 	 */
 	public function test_renders_correct_column_count(): void {
-		$parsed_block                              = $this->parsed_grid_block;
+		$parsed_block                                   = $this->parsed_grid_block;
 		$parsed_block['attrs']['layout']['columnCount'] = 2;
 
 		$block_content = $this->build_grid_block_content(
@@ -99,6 +103,8 @@ class Grid_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test column calculation from minimum width.
+	 *
 	 * @testdox Should calculate column count from minimumColumnWidth.
 	 */
 	public function test_calculates_columns_from_minimum_width(): void {
@@ -127,6 +133,8 @@ class Grid_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test block styles are applied to grid wrapper.
+	 *
 	 * @testdox Should apply block styles to the grid wrapper.
 	 */
 	public function test_applies_block_styles(): void {
@@ -161,6 +169,8 @@ class Grid_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test padding styles are applied to grid wrapper cell.
+	 *
 	 * @testdox Should apply padding styles to the grid wrapper cell.
 	 */
 	public function test_applies_padding_styles(): void {
@@ -195,10 +205,12 @@ class Grid_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test editor classes are preserved.
+	 *
 	 * @testdox Should preserve classes set by the editor.
 	 */
 	public function test_preserves_editor_classes(): void {
-		$parsed_block = $this->parsed_grid_block;
+		$parsed_block  = $this->parsed_grid_block;
 		$block_content = $this->build_grid_block_content(
 			array( '<table><tbody><tr><td>Content</td></tr></tbody></table>' ),
 			'wp-block-group is-layout-grid custom-class-1 another-class'
@@ -211,6 +223,8 @@ class Grid_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test empty return for grid with no children.
+	 *
 	 * @testdox Should return empty when grid has no children.
 	 */
 	public function test_returns_empty_for_no_children(): void {
@@ -222,6 +236,8 @@ class Grid_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test single child renders at full width.
+	 *
 	 * @testdox Should render single child at full width.
 	 */
 	public function test_renders_single_child_full_width(): void {
@@ -237,6 +253,8 @@ class Grid_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test columns are capped at maximum.
+	 *
 	 * @testdox Should cap columns at maximum of 4.
 	 */
 	public function test_caps_columns_at_maximum(): void {
@@ -256,6 +274,8 @@ class Grid_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test non-grid layout renders as group.
+	 *
 	 * @testdox Should still render as group when layout type is not grid.
 	 */
 	public function test_renders_as_group_for_non_grid_layout(): void {
@@ -271,11 +291,13 @@ class Grid_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test gap spacing is applied between grid cells.
+	 *
 	 * @testdox Should apply gap spacing between grid cells.
 	 */
 	public function test_applies_gap_spacing(): void {
-		$parsed_block          = $this->parsed_grid_block;
-		$parsed_block['attrs'] = array_merge(
+		$parsed_block                                   = $this->parsed_grid_block;
+		$parsed_block['attrs']                          = array_merge(
 			$parsed_block['attrs'],
 			array(
 				'style' => array(
