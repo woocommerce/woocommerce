@@ -341,3 +341,17 @@ export {
 	 */
 	isEventTrackingEnabled,
 } from './events';
+
+/**
+ * A slot fill for the post actions section of the email editor above Template Selection.
+ *
+ * This component is used to allow plugins to add content to the post action section of the email editor.
+ *
+ * @example
+ * ```jsx
+ * import { EmailActionsFill } from '@woocommerce/email-editor';
+ *
+ * <EmailActionsFill />
+ * ```
+ */
+export { EmailActionsFill } from './components/sidebar/settings-panel';

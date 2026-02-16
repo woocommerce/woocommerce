@@ -231,6 +231,48 @@ describe( 'getChangelogSignificance', () => {
 		);
 	} );
 
+	it( 'should return the selected significance with LF-only line endings', () => {
+		const body =
+			'### Changelog entry\n' +
+			'\n' +
+			'<!-- You can optionally choose to enter a changelog entry by checking the box and supplying data. -->\n' +
+			'\n' +
+			'- [x] Automatically create a changelog entry from the details below.\n' +
+			'\n' +
+			'<details>\n' +
+			'\n' +
+			'#### Significance\n' +
+			'<!-- Choose only one -->\n' +
+			'- [ ] Patch\n' +
+			'- [x] Minor\n' +
+			'- [ ] Major\n' +
+			'\n' +
+			'#### Type\n' +
+			'<!-- Choose only one -->\n' +
+			'- [x] Fix - Fixes an existing bug\n' +
+			'- [ ] Add - Adds functionality\n' +
+			'- [ ] Update - Update existing functionality\n' +
+			'- [ ] Dev - Development related task\n' +
+			'- [ ] Tweak - A minor adjustment to the codebase\n' +
+			'- [ ] Performance - Address performance issues\n' +
+			'- [ ] Enhancement\n' +
+			'\n' +
+			'#### Message ' +
+			'<!-- Add a changelog message here -->\n' +
+			'This is a very useful fix.\n' +
+			'</details>\n' +
+			'<details>\n' +
+			'<summary>Changelog Entry Comment</summary>' +
+			'\n' +
+			'#### Comment ' +
+			`<!-- If the changes in this pull request don't warrant a changelog entry, you can alternatively supply a comment here. Note that comments are only accepted with a significance of "Patch" -->\n` +
+			'\n' +
+			'</details>';
+
+		const significance = getChangelogSignificance( body );
+		expect( significance ).toBe( 'minor' );
+	} );
+
 	it( 'should error when more than one significance selected', () => {
 		const body =
 			'### Changelog entry\r\n' +
@@ -637,6 +679,51 @@ describe( 'getChangelogDetails', () => {
 		const details = getChangelogDetails( body );
 		expect( details.comment ).toEqual( 'This is a very useful comment.' );
 		expect( details.significance ).toEqual( 'minor' );
+	} );
+
+	it( 'should return the changelog details with LF-only line endings', () => {
+		const body =
+			'### Changelog entry\n' +
+			'\n' +
+			'<!-- You can optionally choose to enter a changelog entry by checking the box and supplying data. -->\n' +
+			'\n' +
+			'- [x] Automatically create a changelog entry from the details below.\n' +
+			'- [ ] This Pull Request does not require a changelog entry. (Comment required below)\n' +
+			'\n' +
+			'<details>\n' +
+			'\n' +
+			'#### Significance\n' +
+			'<!-- Choose only one -->\n' +
+			'- [x] Patch\n' +
+			'- [ ] Minor\n' +
+			'- [ ] Major\n' +
+			'\n' +
+			'#### Type\n' +
+			'<!-- Choose only one -->\n' +
+			'- [x] Fix - Fixes an existing bug\n' +
+			'- [ ] Add - Adds functionality\n' +
+			'- [ ] Update - Update existing functionality\n' +
+			'- [ ] Dev - Development related task\n' +
+			'- [ ] Tweak - A minor adjustment to the codebase\n' +
+			'- [ ] Performance - Address performance issues\n' +
+			'- [ ] Enhancement\n' +
+			'\n' +
+			'#### Message ' +
+			'<!-- Add a changelog message here -->\n' +
+			'This is a very useful fix.\n' +
+			'</details>\n' +
+			'<details>\n' +
+			'<summary>Changelog Entry Comment</summary>' +
+			'\n' +
+			'#### Comment <!-- A comment explaining why there is no changelog --> ' +
+			'\n' +
+			'</details>';
+
+		const details = getChangelogDetails( body );
+		expect( details.significance ).toEqual( 'patch' );
+		expect( details.type ).toEqual( 'fix' );
+		expect( details.message ).toEqual( 'This is a very useful fix.' );
+		expect( details.comment ).toEqual( '' );
 	} );
 
 	it( 'should return details when no changelog required is checked', () => {

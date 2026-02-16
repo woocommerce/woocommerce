@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Skip category term processing in product permalinks when structure doesn't include category placeholders

@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Replace custom `needsRefreshForInteractivityAPI` with native `clientNavigationDisabled` from WordPress core's Interactivity Router.

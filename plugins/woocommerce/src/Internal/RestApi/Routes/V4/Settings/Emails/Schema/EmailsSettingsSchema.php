@@ -491,6 +491,28 @@ class EmailsSettingsSchema extends AbstractSchema {
 			$validated[ $field_id ] = $sanitized;
 		}
 
+		/**
+		 * Filters the validated settings after validation and sanitization.
+		 *
+		 * @param array $validated Validated settings.
+		 * @param WC_Email $email Email instance.
+		 * @param array $values Values to validate and sanitize.
+		 * @return array Validated settings.
+		 * @since 10.6.0
+		 */
+		$validated = apply_filters( 'woocommerce_emails_settings_schema_validate_and_sanitize_settings', $validated, $email, $values );
+		if ( is_wp_error( $validated ) ) {
+			return $validated;
+		}
+
+		if ( ! is_array( $validated ) ) {
+			return new WP_Error(
+				'rest_invalid_filter_result',
+				__( 'Invalid result from filter.', 'woocommerce' ),
+				array( 'status' => 500 )
+			);
+		}
+
 		return $validated;
 	}
 

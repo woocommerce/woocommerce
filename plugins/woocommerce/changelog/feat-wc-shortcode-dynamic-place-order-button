@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+feat: allow payment methods to render a custom "Place order" button on shortcode-based checkout.

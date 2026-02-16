@@ -117,6 +117,8 @@ class WC_Cart extends WC_Legacy_Cart {
 
 	/**
 	 * Constructor for the cart class. Loads options and hooks in the init method.
+	 *
+	 * @return void
 	 */
 	public function __construct() {
 		$this->session  = new WC_Cart_Session( $this );
@@ -139,6 +141,8 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * When cloning, ensure object properties are handled.
 	 *
 	 * These properties store a reference to the cart, so we use new instead of clone.
+	 *
+	 * @return void
 	 */
 	public function __clone() {
 		$this->session  = clone $this->session;
@@ -350,6 +354,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * Get taxes.
 	 *
 	 * @since 3.2.0
+	 * @return array
 	 */
 	public function get_shipping_taxes() {
 		return apply_filters( 'woocommerce_cart_' . __FUNCTION__, $this->get_totals_var( 'shipping_taxes' ) );
@@ -359,6 +364,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * Get taxes.
 	 *
 	 * @since 3.2.0
+	 * @return array
 	 */
 	public function get_cart_contents_taxes() {
 		return apply_filters( 'woocommerce_cart_' . __FUNCTION__, $this->get_totals_var( 'cart_contents_taxes' ) );
@@ -368,6 +374,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * Get taxes.
 	 *
 	 * @since 3.2.0
+	 * @return array
 	 */
 	public function get_fee_taxes() {
 		return apply_filters( 'woocommerce_cart_' . __FUNCTION__, $this->get_totals_var( 'fee_taxes' ) );
@@ -395,6 +402,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * Sets the contents of the cart.
 	 *
 	 * @param array $value Cart array.
+	 * @return void
 	 */
 	public function set_cart_contents( $value ) {
 		$this->cart_contents = (array) $value;
@@ -405,6 +413,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 *
 	 * @since 3.2.0
 	 * @param array $value Item array.
+	 * @return void
 	 */
 	public function set_removed_cart_contents( $value = array() ) {
 		$this->removed_cart_contents = (array) $value;
@@ -414,6 +423,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * Sets the array of applied coupon codes.
 	 *
 	 * @param array $value List of applied coupon codes.
+	 * @return void
 	 */
 	public function set_applied_coupons( $value = array() ) {
 		$this->applied_coupons = (array) $value;
@@ -424,6 +434,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 *
 	 * @since 3.2.0
 	 * @param array $value Value to set.
+	 * @return void
 	 */
 	public function set_coupon_discount_totals( $value = array() ) {
 		$this->coupon_discount_totals = (array) $value;
@@ -433,6 +444,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 *
 	 * @since 3.2.0
 	 * @param array $value Value to set.
+	 * @return void
 	 */
 	public function set_coupon_discount_tax_totals( $value = array() ) {
 		$this->coupon_discount_tax_totals = (array) $value;
@@ -443,6 +455,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 *
 	 * @since 3.2.0
 	 * @param array $value Value to set.
+	 * @return void
 	 */
 	public function set_totals( $value = array() ) {
 		$this->totals = wp_parse_args( $value, $this->default_totals );
@@ -453,6 +466,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 *
 	 * @since 3.2.0
 	 * @param string $value Value to set.
+	 * @return void
 	 */
 	public function set_subtotal( $value ) {
 		$this->totals['subtotal'] = wc_format_decimal( $value );
@@ -463,6 +477,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 *
 	 * @since 3.2.0
 	 * @param string $value Value to set.
+	 * @return void
 	 */
 	public function set_subtotal_tax( $value ) {
 		$this->totals['subtotal_tax'] = $value;
@@ -473,6 +488,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 *
 	 * @since 3.2.0
 	 * @param string $value Value to set.
+	 * @return void
 	 */
 	public function set_discount_total( $value ) {
 		$this->totals['discount_total'] = $value;
@@ -483,6 +499,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 *
 	 * @since 3.2.0
 	 * @param string $value Value to set.
+	 * @return void
 	 */
 	public function set_discount_tax( $value ) {
 		$this->totals['discount_tax'] = $value;
@@ -493,6 +510,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 *
 	 * @since 3.2.0
 	 * @param string $value Value to set.
+	 * @return void
 	 */
 	public function set_shipping_total( $value ) {
 		$this->totals['shipping_total'] = wc_format_decimal( $value );
@@ -503,6 +521,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 *
 	 * @since 3.2.0
 	 * @param string $value Value to set.
+	 * @return void
 	 */
 	public function set_shipping_tax( $value ) {
 		$this->totals['shipping_tax'] = $value;
@@ -513,6 +532,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 *
 	 * @since 3.2.0
 	 * @param string $value Value to set.
+	 * @return void
 	 */
 	public function set_cart_contents_total( $value ) {
 		$this->totals['cart_contents_total'] = wc_format_decimal( $value );
@@ -523,6 +543,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 *
 	 * @since 3.2.0
 	 * @param string $value Value to set.
+	 * @return void
 	 */
 	public function set_cart_contents_tax( $value ) {
 		$this->totals['cart_contents_tax'] = $value;
@@ -533,6 +554,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 *
 	 * @since 3.2.0
 	 * @param string $value Value to set.
+	 * @return void
 	 */
 	public function set_total( $value ) {
 		$this->totals['total'] = wc_format_decimal( $value, wc_get_price_decimals() );
@@ -543,6 +565,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 *
 	 * @since 3.2.0
 	 * @param string $value Value to set.
+	 * @return void
 	 */
 	public function set_total_tax( $value ) {
 		// We round here because this is a total entry, as opposed to line items in other setters.
@@ -554,6 +577,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 *
 	 * @since 3.2.0
 	 * @param string $value Value to set.
+	 * @return void
 	 */
 	public function set_fee_total( $value ) {
 		$this->totals['fee_total'] = wc_format_decimal( $value );
@@ -564,6 +588,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 *
 	 * @since 3.2.0
 	 * @param string $value Value to set.
+	 * @return void
 	 */
 	public function set_fee_tax( $value ) {
 		$this->totals['fee_tax'] = $value;
@@ -574,6 +599,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 *
 	 * @since 3.2.0
 	 * @param array $value Tax values.
+	 * @return void
 	 */
 	public function set_shipping_taxes( $value ) {
 		$this->totals['shipping_taxes'] = (array) $value;
@@ -584,6 +610,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 *
 	 * @since 3.2.0
 	 * @param array $value Tax values.
+	 * @return void
 	 */
 	public function set_cart_contents_taxes( $value ) {
 		$this->totals['cart_contents_taxes'] = (array) $value;
@@ -594,6 +621,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 *
 	 * @since 3.2.0
 	 * @param array $value Tax values.
+	 * @return void
 	 */
 	public function set_fee_taxes( $value ) {
 		$this->totals['fee_taxes'] = (array) $value;
@@ -654,6 +682,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @since 9.7.0 Also clears shipping methods and packages since the items they are linked to are cleared.
 	 *
 	 * @param bool $clear_persistent_cart Should the persistent cart be cleared too. Defaults to true.
+	 * @return void
 	 */
 	public function empty_cart( $clear_persistent_cart = true ) {
 		/**
@@ -757,6 +786,8 @@ class WC_Cart extends WC_Legacy_Cart {
 
 	/**
 	 * Check cart coupons for errors.
+	 *
+	 * @return void
 	 */
 	public function check_cart_coupons() {
 		foreach ( $this->get_applied_coupons() as $code ) {
@@ -986,7 +1017,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * (tax is shown after coupons).
 	 *
 	 * @since 2.6.0
-	 * @return string
+	 * @return float
 	 */
 	public function get_displayed_subtotal() {
 		return $this->display_prices_including_tax() ? $this->get_subtotal() + $this->get_subtotal_tax() : $this->get_subtotal();
@@ -1453,6 +1484,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * Calculate totals for the items in the cart.
 	 *
 	 * @uses WC_Cart_Totals
+	 * @return void
 	 */
 	public function calculate_totals() {
 		$this->reset_totals();
@@ -1502,6 +1534,8 @@ class WC_Cart extends WC_Legacy_Cart {
 
 	/**
 	 * Uses the shipping class to calculate shipping then gets the totals when its finished.
+	 *
+	 * @return array
 	 */
 	public function calculate_shipping() {
 		// Reset totals.
@@ -1812,6 +1846,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 *  2. Where a usage_limit_per_user is set (limits coupon usage to a number based on user ID and email).
 	 *
 	 * @param array $posted Post data.
+	 * @return void
 	 */
 	public function check_customer_coupons( $posted ) {
 		foreach ( $this->get_applied_coupons() as $code ) {
@@ -2071,6 +2106,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * Remove coupons from the cart of a defined type. Type 1 is before tax, type 2 is after tax.
 	 *
 	 * @param null $deprecated No longer used.
+	 * @return void
 	 */
 	public function remove_coupons( $deprecated = null ) {
 		$this->set_coupon_discount_totals( array() );
@@ -2107,6 +2143,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * Trigger an action so 3rd parties can add custom fees.
 	 *
 	 * @since 2.0.0
+	 * @return void
 	 */
 	public function calculate_fees() {
 		do_action( 'woocommerce_cart_calculate_fees', $this );
@@ -2134,6 +2171,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @param float  $amount    Fee amount (do not enter negative amounts).
 	 * @param bool   $taxable   Is the fee taxable? (default: false).
 	 * @param string $tax_class The tax class for the fee if taxable. A blank string is standard tax class. (default: '').
+	 * @return void
 	 */
 	public function add_fee( $name, $amount, $taxable = false, $tax_class = '' ) {
 		$this->fees_api()->add_fee(
@@ -2329,6 +2367,8 @@ class WC_Cart extends WC_Legacy_Cart {
 
 	/**
 	 * Reset cart totals to the defaults. Useful before running calculations.
+	 *
+	 * @return void
 	 */
 	private function reset_totals() {
 		$this->totals = $this->default_totals;

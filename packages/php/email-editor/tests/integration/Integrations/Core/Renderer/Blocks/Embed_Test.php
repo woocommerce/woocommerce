@@ -591,6 +591,28 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test that YouTube embed correctly handles URLs with underscores in the video ID
+	 */
+	public function test_youtube_embed_handles_urls_with_underscores(): void {
+		$parsed_youtube_underscore = array(
+			'blockName' => 'core/embed',
+			'attrs'     => array(
+				'url'              => 'https://www.youtube.com/watch?v=dQw4w9_WgXcQ',
+				'type'             => 'video',
+				'providerNameSlug' => 'youtube',
+				'responsive'       => true,
+			),
+			'innerHTML' => '<figure class="wp-block-embed is-type-video is-provider-youtube wp-block-embed-youtube"><div class="wp-block-embed__wrapper">https://www.youtube.com/watch?v=dQw4w9_WgXcQ</div></figure>',
+		);
+
+		$rendered = $this->embed_renderer->render( $parsed_youtube_underscore['innerHTML'], $parsed_youtube_underscore, $this->rendering_context );
+
+		// Should extract full video ID including underscore.
+		$this->assertStringContainsString( 'https://img.youtube.com/vi/dQw4w9_WgXcQ/0.jpg', $rendered );
+		$this->assertStringContainsString( 'play2x.png', $rendered );
+	}
+
+	/**
 	 * Test that VideoPress embed detects VideoPress by providerNameSlug
 	 */
 	public function test_videopress_embed_detects_videopress_by_provider_name_slug(): void {
