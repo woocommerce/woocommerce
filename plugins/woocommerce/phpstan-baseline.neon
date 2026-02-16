@@ -15627,7 +15627,7 @@ parameters:
 		-
 			message: '#^Call to an undefined method WC_Product\:\:get_variation_prices\(\)\.$#'
 			identifier: method.notFound
-			count: 2
+			count: 1
 			path: includes/class-wc-structured-data.php
 
 		-
@@ -15841,7 +15841,7 @@ parameters:
 			path: includes/class-wc-structured-data.php
 
 		-
-			message: '#^Offset ''price'' on array\{priceValidUntil\: string, availability\: ''https\://schema\.org…'', url\: mixed, seller\: array\{''@type''\: ''Organization'', name\: mixed, url\: mixed\}, ''@type''\: ''AggregateOffer'', lowPrice\: mixed, highPrice\: mixed, offerCount\: int\<0, max\>, \.\.\.\}\|array\{priceValidUntil\: string, availability\: ''https\://schema\.org…'', url\: mixed, seller\: array\{''@type''\: ''Organization'', name\: mixed, url\: mixed\}, ''@type''\: ''Offer'', priceSpecification\: array\{0\: array\{''@type''\: ''UnitPriceSpecificat…'', price\: mixed, priceCurrency\: mixed, valueAddedTaxIncluded\: mixed, validThrough\: string, priceType\?\: ''https\://schema\.org…''\}, 1\?\: array\{''@type''\: ''UnitPriceSpecificat…'', price\: mixed, priceCurrency\: mixed, valueAddedTaxIncluded\: mixed, validThrough\: string, priceType\?\: ''https\://schema\.org…''\}\}\} in empty\(\) does not exist\.$#'
+			message: '#^Offset ''price'' on array\{priceValidUntil\: string, availability\: ''https\://schema\.org…'', url\: mixed, seller\: array\{''@type''\: ''Organization'', name\: mixed, url\: mixed\}, ''@type''\: ''AggregateOffer'', lowPrice\: mixed, highPrice\: mixed, offerCount\: int\<0, max\>, \.\.\.\}\|array\{priceValidUntil\: string, availability\: ''https\://schema\.org…'', url\: mixed, seller\: array\{''@type''\: ''Organization'', name\: mixed, url\: mixed\}, ''@type''\: ''Offer'', priceSpecification\: array\{0\: array\{''@type''\: ''UnitPriceSpecificat…'', price\: mixed, priceCurrency\: mixed, valueAddedTaxIncluded\: bool, validThrough\: string, priceType\?\: ''https\://schema\.org…''\}, 1\?\: array\{''@type''\: ''UnitPriceSpecificat…'', price\: mixed, priceCurrency\: mixed, valueAddedTaxIncluded\: bool, validThrough\: string, priceType\?\: ''https\://schema\.org…''\}\}\} in empty\(\) does not exist\.$#'
 			identifier: empty.offset
 			count: 1
 			path: includes/class-wc-structured-data.php

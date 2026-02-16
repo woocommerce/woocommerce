@@ -20,12 +20,14 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	public function test_it_validates_all_keys(): void {
 		$result = PushTokenValidator::validate(
 			array(
-				'id'          => 1,
-				'user_id'     => 42,
-				'origin'      => PushToken::ORIGINS[0],
-				'platform'    => PushToken::PLATFORM_APPLE,
-				'device_uuid' => 'valid-uuid-123',
-				'token'       => null,
+				'id'            => 1,
+				'user_id'       => 42,
+				'origin'        => PushToken::ORIGINS[0],
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'device_uuid'   => 'valid-uuid-123',
+				'device_locale' => 'en_US',
+				'token'         => null,
+				'metadata'      => array(),
 			)
 		);
 
@@ -39,12 +41,14 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	public function test_it_validates_all_keys_with_valid_data(): void {
 		$result = PushTokenValidator::validate(
 			array(
-				'id'          => 1,
-				'user_id'     => 42,
-				'origin'      => PushToken::ORIGINS[0],
-				'platform'    => PushToken::PLATFORM_APPLE,
-				'device_uuid' => 'valid-uuid-123',
-				'token'       => str_repeat( 'a', 64 ),
+				'id'            => 1,
+				'user_id'       => 42,
+				'origin'        => PushToken::ORIGINS[0],
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'device_uuid'   => 'valid-uuid-123',
+				'device_locale' => 'en_US',
+				'token'         => str_repeat( 'a', 64 ),
+				'metadata'      => array(),
 			)
 		);
 
@@ -479,6 +483,74 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return true for valid locale formats.
+	 * @dataProvider valid_locales_provider
+	 * @param string $locale The locale to test.
+	 */
+	public function test_validate_accepts_valid_device_locale_formats( string $locale ): void {
+		$this->assertTrue(
+			PushTokenValidator::validate(
+				array( 'device_locale' => $locale ),
+				array( 'device_locale' )
+			)
+		);
+	}
+
+	/**
+	 * @testdox Should return WP_Error when device locale is missing.
+	 */
+	public function test_validate_rejects_missing_device_locale(): void {
+		$result = PushTokenValidator::validate(
+			array(),
+			array( 'device_locale' )
+		);
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertSame( 'Device locale is required.', $result->get_error_message() );
+	}
+
+	/**
+	 * @testdox Should return WP_Error when device locale is not a string.
+	 */
+	public function test_validate_rejects_non_string_for_device_locale(): void {
+		$result = PushTokenValidator::validate(
+			array( 'device_locale' => 123 ),
+			array( 'device_locale' )
+		);
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertSame( 'Device locale must be a string.', $result->get_error_message() );
+	}
+
+	/**
+	 * @testdox Should return WP_Error when device locale is empty.
+	 */
+	public function test_validate_rejects_empty_device_locale(): void {
+		$result = PushTokenValidator::validate(
+			array( 'device_locale' => '' ),
+			array( 'device_locale' )
+		);
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertSame( 'Device locale cannot be empty.', $result->get_error_message() );
+	}
+
+	/**
+	 * @testdox Should return WP_Error for invalid locale formats.
+	 * @dataProvider invalid_locales_provider
+	 * @param string $locale The locale to test.
+	 */
+	public function test_validate_rejects_invalid_formats_for_device_locale( string $locale ): void {
+		$result = PushTokenValidator::validate(
+			array( 'device_locale' => $locale ),
+			array( 'device_locale' )
+		);
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertSame( 'Device locale is an invalid format.', $result->get_error_message() );
+	}
+
+	/**
 	 * @testdox Should return true for a valid Apple token.
 	 */
 	public function test_validate_token_accepts_valid_apple_token(): void {
@@ -752,21 +824,111 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should use the standard error code for all validation errors.
+	 * @testdox Should return true for a valid metadata array with values.
 	 */
-	public function test_all_errors_use_standard_error_code(): void {
-		$errors = array(
-			PushTokenValidator::validate( array(), array( 'id' ) ),
-			PushTokenValidator::validate( array(), array( 'user_id' ) ),
-			PushTokenValidator::validate( array(), array( 'origin' ) ),
-			PushTokenValidator::validate( array(), array( 'platform' ) ),
-			PushTokenValidator::validate( array(), array( 'token' ) ),
+	public function test_validate_accepts_valid_array_for_metadata(): void {
+		$this->assertTrue(
+			PushTokenValidator::validate(
+				array( 'metadata' => array( 'app_version' => '1.0.0' ) ),
+				array( 'metadata' )
+			)
+		);
+	}
+
+	/**
+	 * @testdox Should return true for an empty metadata array.
+	 */
+	public function test_validate_accepts_empty_array_for_metadata(): void {
+		$this->assertTrue(
+			PushTokenValidator::validate(
+				array( 'metadata' => array() ),
+				array( 'metadata' )
+			)
+		);
+	}
+
+	/**
+	 * @testdox Should return WP_Error when metadata is missing.
+	 */
+	public function test_validate_rejects_missing_metadata(): void {
+		$result = PushTokenValidator::validate( array(), array( 'metadata' ) );
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertSame( 'Metadata is required.', $result->get_error_message() );
+	}
+
+	/**
+	 * @testdox Should return WP_Error when metadata is not an array.
+	 */
+	public function test_validate_rejects_non_array_for_metadata(): void {
+		$result = PushTokenValidator::validate(
+			array( 'metadata' => 'not an array' ),
+			array( 'metadata' )
 		);
 
-		foreach ( $errors as $error ) {
-			$this->assertInstanceOf( WP_Error::class, $error );
-			$this->assertSame( PushTokenValidator::ERROR_CODE, $error->get_error_code() );
-		}
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertSame( 'Metadata must be an array.', $result->get_error_message() );
+	}
+
+	/**
+	 * @testdox Should return WP_Error when metadata contains non-scalar values.
+	 */
+	public function test_validate_rejects_non_scalar_metadata_items(): void {
+		$result = PushTokenValidator::validate(
+			array( 'metadata' => array( 'nested' => array( 'a' => 'b' ) ) ),
+			array( 'metadata' )
+		);
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertSame( 'Metadata items must be scalar values.', $result->get_error_message() );
+	}
+
+	/**
+	 * @testdox Should use the standard error code for all validation errors.
+	 * @dataProvider validatable_fields_provider
+	 * @param string $field The field to validate.
+	 */
+	public function test_all_errors_use_standard_error_code( string $field ): void {
+		/**
+		 * If field isn't platform, pass the platform in so we can check token
+		 * and device_uuid.
+		 */
+		$data  = 'platform' === $field ? array() : array( 'platform' => PushToken::PLATFORM_APPLE );
+		$error = PushTokenValidator::validate( $data, array( $field ) );
+
+		$this->assertInstanceOf( WP_Error::class, $error );
+		$this->assertSame( PushTokenValidator::ERROR_CODE, $error->get_error_code() );
+	}
+
+	/**
+	 * Data provider for valid locale formats.
+	 *
+	 * @return array
+	 */
+	public function valid_locales_provider(): array {
+		return array(
+			'English US'   => array( 'en_US' ),
+			'French'       => array( 'fr_FR' ),
+			'Chinese'      => array( 'zh_CN' ),
+			'Portuguese'   => array( 'pt_BR' ),
+			'Three-letter' => array( 'ast_ES' ),
+		);
+	}
+
+	/**
+	 * Data provider for invalid locale formats.
+	 *
+	 * @return array
+	 */
+	public function invalid_locales_provider(): array {
+		return array(
+			'no underscore'    => array( 'enUS' ),
+			'lowercase region' => array( 'en_gb' ),
+			'uppercase lang'   => array( 'EN_US' ),
+			'just language'    => array( 'en' ),
+			'with hyphen'      => array( 'en-US' ),
+			'too long lang'    => array( 'engl_US' ),
+		);
 	}
 
 	/**
@@ -785,5 +947,14 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 */
 	public function valid_origins_provider(): array {
 		return array_map( fn ( $value ) => array( $value ), PushToken::ORIGINS );
+	}
+
+	/**
+	 * Data provider for validatable fields.
+	 *
+	 * @return array
+	 */
+	public function validatable_fields_provider(): array {
+		return array_map( fn ( $value ) => array( $value ), PushTokenValidator::VALIDATABLE_FIELDS );
 	}
 }
