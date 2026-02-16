@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Preload low stock count in admin settings to eliminate unnecessary REST API call on every WooCommerce admin page load.
