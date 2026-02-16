@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add `customSavePanel` prop to the Email Editor component and pass it down to the Gutenberg Editor component
