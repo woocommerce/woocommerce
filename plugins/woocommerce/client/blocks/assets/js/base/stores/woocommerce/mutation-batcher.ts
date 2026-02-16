@@ -135,11 +135,8 @@ export function createMutationQueue< TState >(
 
 		// If new requests arrived while in-flight, send them.
 		if ( pendingIds.length > 0 ) {
-			if ( ! microtaskScheduled ) {
-				microtaskScheduled = true;
-				// eslint-disable-next-line @typescript-eslint/no-use-before-define
-				queueMicrotask( () => processRequests() );
-			}
+			// eslint-disable-next-line @typescript-eslint/no-use-before-define
+			processRequests();
 			return;
 		}
 
