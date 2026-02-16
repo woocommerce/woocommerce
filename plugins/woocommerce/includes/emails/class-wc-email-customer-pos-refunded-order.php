@@ -556,7 +556,6 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 			);
 		}
 
-
 		/**
 		 * Replace footer text placeholders with POS-specific values.
 		 *
