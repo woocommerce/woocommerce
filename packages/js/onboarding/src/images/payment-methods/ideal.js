@@ -8,6 +8,7 @@ export default () => (
 		xmlns="http://www.w3.org/2000/svg"
 		fill="none"
 		viewBox="3 1.895 32 20.21"
+		style={ { background: '#FFF48D' } }
 	>
 		<rect x="3" y="1.895" width="32" height="20.21" fill="#FFF48D" />
 		<g clipPath="url(#clip0_13222_20674)">
