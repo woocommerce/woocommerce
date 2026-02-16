@@ -22,13 +22,15 @@ import {
  */
 import './style.scss';
 import { IconFlag } from './icon-flag';
-import { hasUnreadNotes as checkIfHasUnreadNotes } from './unread-indicators';
+import {
+	hasUnreadNotes as checkIfHasUnreadNotes,
+	getLowStockCount,
+} from './unread-indicators';
 import { Tabs } from './tabs';
 import { SetupProgress } from './setup-progress';
 import { DisplayOptions } from './display-options';
 import { Panel } from './panel';
 import {
-	getLowStockCount as getLowStockProducts,
 	getOrderStatuses,
 	getUnreadOrders,
 } from '../homescreen/activity-panel/orders/utils';
@@ -132,7 +134,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 				? getUnapprovedReviews( select )
 				: false;
 			const isLowStockCardVisible = setupTaskListHidden
-				? getLowStockProducts( select )
+				? getLowStockCount() > 0
 				: false;
 
 			return (

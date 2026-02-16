@@ -181,6 +181,7 @@ class Settings {
 		$settings['manageStock']          = get_option( 'woocommerce_manage_stock' );
 		$settings['commentModeration']    = get_option( 'comment_moderation' );
 		$settings['notifyLowStockAmount'] = get_option( 'woocommerce_notify_low_stock_amount' );
+		$settings['lowStockCount']        = $this->get_low_stock_count();
 
 		/**
 		 * Deprecate wcAdminAssetUrl as we no longer need it after The Merge.
@@ -378,6 +379,17 @@ class Settings {
 		}
 
 		return $settings;
+	}
+
+	/**
+	 * Get the count of low in stock products.
+	 *
+	 * @return int
+	 */
+	private function get_low_stock_count() {
+		return 'yes' === get_option( 'woocommerce_manage_stock' )
+			? ProductStockIndicator::get_low_stock_count()
+			: 0;
 	}
 
 	/**

@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Admin\API;
 
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\Admin\ProductStockIndicator;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -69,11 +70,7 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 	 * @return \WP_Error|\WP_HTTP_Response|\WP_REST_Response
 	 */
 	public function get_low_in_stock_count( $request ) {
-		$status              = $request->get_param( 'status' );
-		$low_stock_threshold = absint( max( get_option( 'woocommerce_notify_low_stock_amount' ), 1 ) );
-
-		$sidewide_stock_threshold_only = $this->is_using_sitewide_stock_threshold_only( $low_stock_threshold );
-		$total_results                 = $this->get_count( $sidewide_stock_threshold_only, $status, $low_stock_threshold );
+		$total_results = ProductStockIndicator::get_low_stock_count( $request->get_param( 'status' ) );
 
 		$response = rest_ensure_response( array( 'total' => $total_results ) );
 		$response->header( 'X-WP-Total', $total_results );
@@ -191,7 +188,7 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 		$offset              = ( $page - 1 ) * $per_page;
 		$low_stock_threshold = absint( max( get_option( 'woocommerce_notify_low_stock_amount' ), 1 ) );
 
-		$sidewide_stock_threshold_only = $this->is_using_sitewide_stock_threshold_only( $low_stock_threshold );
+		$sidewide_stock_threshold_only = ProductStockIndicator::is_using_sitewide_stock_threshold_only( $low_stock_threshold );
 
 		$query_string = $this->get_query( $sidewide_stock_threshold_only );
 
@@ -201,76 +198,13 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 			OBJECT_K
 		);
 
-		$total_results = $this->get_count( $sidewide_stock_threshold_only, $status, $low_stock_threshold );
+		$total_results = ProductStockIndicator::get_count( $sidewide_stock_threshold_only, $status, $low_stock_threshold );
 
 		return array(
 			'results' => $query_results,
 			'total'   => (int) $total_results,
 			'pages'   => (int) ceil( $total_results / (int) $per_page ),
 		);
-	}
-
-	/**
-	 * Get the count of low in stock products.
-	 *
-	 * @param bool   $sidewide_stock_threshold_only Boolean to check if the store is using sitewide stock threshold only.
-	 * @param string $status Post status.
-	 * @param int    $low_stock_threshold Low stock threshold.
-	 *
-	 * @return int
-	 */
-	protected function get_count( $sidewide_stock_threshold_only, $status, $low_stock_threshold ) {
-		global $wpdb;
-		if ( $sidewide_stock_threshold_only ) {
-			$count_query_string  = $this->get_count_query( $sidewide_stock_threshold_only );
-			$count_query_results = $wpdb->get_results(
-				// phpcs:ignore -- not sure why phpcs complains about this line when prepare() is used here.
-				$wpdb->prepare( $count_query_string, $status, $low_stock_threshold ),
-			);
-
-			return (int) $count_query_results[0]->total;
-		}
-
-		// Split the query into two queries, one for products with a custom stock threshold and one for products without a custom stock threshold.
-		// Splitting the queries also speeds up the query.
-		$count_query_with_custom_stock_threshold_string    = $this->get_products_with_custom_stock_threshold_count_query_str();
-		$count_query_without_custom_stock_threshold_string = $this->get_products_without_custom_stock_threshold_count_query_str();
-		$count_query_with_custom_stock_threshold_results   = $wpdb->get_results(
-			// phpcs:ignore -- not sure why phpcs complains about this line when prepare() is used here.
-			$wpdb->prepare( $count_query_with_custom_stock_threshold_string, $status ),
-		);
-		$count_query_without_custom_stock_threshold_results = $wpdb->get_results(
-			// phpcs:ignore -- not sure why phpcs complains about this line when prepare() is used here.
-			$wpdb->prepare( $count_query_without_custom_stock_threshold_string, $status, $low_stock_threshold ),
-		);
-
-		return (int) $count_query_with_custom_stock_threshold_results[0]->total + (int) $count_query_without_custom_stock_threshold_results[0]->total;
-	}
-
-	/**
-	 * Check to see if store is using sitewide threshold only. Meaning that it does not have any custom
-	 * stock threshold for a product.
-	 *
-	 * @param int|null $low_stock_threshold Low stock threshold.
-	 * @return bool
-	 */
-	protected function is_using_sitewide_stock_threshold_only( $low_stock_threshold = null ) {
-		global $wpdb;
-		$query_string = "
-			select count(*) as total
-			from {$wpdb->postmeta}
-			where 
-			  meta_key='_low_stock_amount'
-			  AND meta_value > ''
-		";
-		$args         = array();
-		if ( $low_stock_threshold ) {
-			$query_string .= ' AND meta_value != %d';
-			$args[]        = $low_stock_threshold;
-		}
-		// phpcs:ignore -- not sure why phpcs complains about this line when prepare() is used here.
-		$count = $wpdb->get_var( $wpdb->prepare( $query_string, $args ) );
-		return 0 === (int) $count;
 	}
 
 	/**
@@ -304,145 +238,14 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 	}
 
 	/**
-	 * Return a query string for low in stock products.
-	 * The query string includes the following replacement strings:
-	 * - :selects
-	 * - :postmeta_join
-	 * - :postmeta_wheres
-	 * - :orderAndLimit
-	 *
-	 * @param array $replacements  of replacement strings.
-	 *
-	 * @return string
-	 */
-	private function get_base_query( $replacements = array() ) {
-		global $wpdb;
-		$query = "
-			SELECT
-				:selects
-			FROM
-			  {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup
-			  LEFT JOIN {$wpdb->posts} wp_posts ON wp_posts.ID = wc_product_meta_lookup.product_id
-			  :postmeta_join
-			WHERE
-			  wp_posts.post_type IN ('product', 'product_variation')
-			  AND wp_posts.post_status = %s
-			  AND wc_product_meta_lookup.stock_quantity IS NOT NULL
-			  AND wc_product_meta_lookup.stock_status IN('instock', 'outofstock')
-			  :postmeta_wheres
-			  :orderAndLimit
-		";
-
-		return strtr( $query, $replacements );
-	}
-
-	/**
-	 * Add sitewide stock query string to base query string.
-	 *
-	 * @param string $query Base query string.
-	 *
-	 * @return string
-	 */
-	private function add_sitewide_stock_query_str( $query ) {
-		global $wpdb;
-		$postmeta = array(
-			'select' => 'meta.meta_value AS low_stock_amount,',
-			'join'   => "LEFT JOIN {$wpdb->postmeta} AS meta ON wp_posts.ID = meta.post_id
-			  AND meta.meta_key = '_low_stock_amount'",
-			'wheres' => "AND (
-			    (
-			      meta.meta_value > ''
-			      AND wc_product_meta_lookup.stock_quantity <= CAST(
-			        meta.meta_value AS SIGNED
-			      )
-			    )
-			    OR (
-			      (
-			        meta.meta_value IS NULL
-			        OR meta.meta_value <= ''
-			      )
-			      AND wc_product_meta_lookup.stock_quantity <= %d
-			    )
-		    )",
-		);
-
-		return strtr(
-			$query,
-			array(
-				':postmeta_select' => $postmeta['select'],
-				':postmeta_join'   => $postmeta['join'],
-				':postmeta_wheres' => $postmeta['wheres'],
-			)
-		);
-	}
-
-	/**
-	 * Get a query string for products with a custom stock threshold.
-	 *
-	 * @return string
-	 */
-	private function get_products_with_custom_stock_threshold_count_query_str() {
-		global $wpdb;
-		$query    = $this->get_base_query(
-			array(
-				':selects'       => 'count(*) as total',
-				':orderAndLimit' => '',
-			)
-		);
-		$postmeta = array(
-			'select' => 'meta.meta_value AS low_stock_amount,',
-			'join'   => "JOIN {$wpdb->postmeta} AS meta ON wp_posts.ID = meta.post_id AND meta.meta_key = '_low_stock_amount' AND meta.meta_value > ''",
-			'wheres' => 'AND wc_product_meta_lookup.stock_quantity <= CAST(meta.meta_value AS SIGNED)',
-		);
-
-		return strtr(
-			$query,
-			array(
-				':postmeta_select' => $postmeta['select'],
-				':postmeta_join'   => $postmeta['join'],
-				':postmeta_wheres' => $postmeta['wheres'],
-			)
-		);
-	}
-
-	/**
-	 * Get a query string for products without a custom stock threshold.
-	 *
-	 * @return string
-	 */
-	private function get_products_without_custom_stock_threshold_count_query_str() {
-		global $wpdb;
-		$query    = $this->get_base_query(
-			array(
-				':selects'       => 'count(*) as total',
-				':orderAndLimit' => '',
-			)
-		);
-		$postmeta = array(
-			'select' => 'meta.meta_value AS low_stock_amount,',
-			'join'   => "LEFT JOIN {$wpdb->postmeta} AS meta ON wp_posts.ID = meta.post_id AND meta.meta_key = '_low_stock_amount' AND meta.meta_value > ''",
-			'wheres' => 'AND meta.post_id IS NULL AND wc_product_meta_lookup.stock_quantity <= %d',
-		);
-
-		return strtr(
-			$query,
-			array(
-				':postmeta_select' => $postmeta['select'],
-				':postmeta_join'   => $postmeta['join'],
-				':postmeta_wheres' => $postmeta['wheres'],
-			)
-		);
-	}
-
-	/**
-	 * Generate a query.
+	 * Generate a query for listing low in stock products.
 	 *
 	 * @param bool $sitewide_only generates a query for sitewide low stock threshold only query.
 	 *
 	 * @return string
 	 */
 	protected function get_query( $sitewide_only = false ) {
-		$query = $this->get_base_query(
+		$query = ProductStockIndicator::get_base_query(
 			array(
 				':selects'       => 'wp_posts.*, :postmeta_select wc_product_meta_lookup.stock_quantity',
 				':orderAndLimit' => 'order by wc_product_meta_lookup.product_id DESC limit %d, %d',
@@ -450,36 +253,7 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 		);
 
 		if ( ! $sitewide_only ) {
-			return $this->add_sitewide_stock_query_str( $query );
-		}
-
-		return strtr(
-			$query,
-			array(
-				':postmeta_select' => '',
-				':postmeta_join'   => '',
-				':postmeta_wheres' => 'AND wc_product_meta_lookup.stock_quantity <= %d',
-			)
-		);
-	}
-
-	/**
-	 * Generate a count query.
-	 *
-	 * @param bool $sitewide_only generates a query for sitewide low stock threshold only query.
-	 *
-	 * @return string
-	 */
-	protected function get_count_query( $sitewide_only = false ) {
-		$query = $this->get_base_query(
-			array(
-				':selects'       => 'count(*) as total',
-				':orderAndLimit' => '',
-			)
-		);
-
-		if ( ! $sitewide_only ) {
-			return $this->add_sitewide_stock_query_str( $query );
+			return ProductStockIndicator::add_sitewide_stock_query_str( $query );
 		}
 
 		return strtr(
