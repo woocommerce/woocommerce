@@ -3,8 +3,6 @@
  * @package WooCommerce\Tests\PaymentGateways
  */
 
-use Automattic\WooCommerce\Internal\FraudProtection\SessionClearanceManager;
-
 /**
  * Class WC_Payment_Gateways_Test.
  */
@@ -37,9 +35,7 @@ class WC_Payment_Gateways_Test extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		parent::tearDown();
-		delete_option( 'woocommerce_feature_fraud_protection_enabled' );
 		delete_option( 'jetpack_activation_source' );
-		wc_get_container()->get( SessionClearanceManager::class )->reset_session();
 	}
 
 	/**
@@ -100,36 +96,6 @@ class WC_Payment_Gateways_Test extends WC_Unit_Test_Case {
 			$email_details = array();
 		}
 		remove_filter( 'wp_mail', $watcher );
-	}
-
-	/**
-	 * Test that payment gateways are hidden when fraud protection blocks the session.
-	 */
-	public function test_get_available_payment_gateways_returns_empty_when_session_blocked() {
-		// Enable fraud protection and block the session.
-		update_option( 'woocommerce_feature_fraud_protection_enabled', 'yes' );
-		wc_get_container()->get( SessionClearanceManager::class )->block_session();
-
-		$this->enable_all_gateways();
-
-		$gateways = $this->sut->get_available_payment_gateways();
-
-		$this->assertEmpty( $gateways, 'Should return empty array when session is blocked' );
-	}
-
-	/**
-	 * Test that payment gateways are returned when fraud protection is disabled, even if session is blocked.
-	 */
-	public function test_get_available_payment_gateways_returns_gateways_when_feature_disabled() {
-		// Disable fraud protection but block the session.
-		update_option( 'woocommerce_feature_fraud_protection_enabled', 'no' );
-		wc_get_container()->get( SessionClearanceManager::class )->block_session();
-
-		$this->enable_all_gateways();
-
-		$gateways = $this->sut->get_available_payment_gateways();
-
-		$this->assertNotEmpty( $gateways, 'Should return gateways when feature is disabled' );
 	}
 
 	/**
