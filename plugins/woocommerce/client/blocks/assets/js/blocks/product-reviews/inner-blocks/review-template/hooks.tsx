@@ -169,22 +169,16 @@ export const useCommentTree = (
 	commentOrder: string
 ) => {
 	const commentTree = useMemo( () => {
-		const comments = topLevelComments.map(
-			( {
-				id,
-				children,
-			}: {
-				id: number;
-				children?: Array< { id: number } >;
-			} ) => {
+		const comments: Comment[] = topLevelComments.map(
+			( { id, children } ) => {
 				return {
 					commentId: id,
 					children: Array.isArray( children )
-						? children.map( ( child: { id: number } ) => ( {
+						? children.map( ( child ) => ( {
 								commentId: child.id,
 						  } ) )
 						: [],
-				} as Comment;
+				};
 			}
 		);
 		if ( commentOrder === 'desc' ) {

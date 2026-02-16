@@ -133,27 +133,25 @@ const ReviewTemplateInnerBlocks = memo( function ReviewTemplateInnerBlocks( {
 			/>
 			{ comment.children && comment.children.length > 0 ? (
 				<ol>
-					{ comment.children.map(
-						(
-							{ commentId, ...childComment }: Comment,
-							index: number
-						) => (
-							<BlockContextProvider
-								key={ commentId || index }
-								value={ {
-									commentId: commentId < 0 ? null : commentId,
-								} }
-							>
-								<ReviewTemplateInnerBlocks
-									comment={ { commentId, ...childComment } }
-									activeCommentId={ activeCommentId }
-									setActiveCommentId={ setActiveCommentId }
-									blocks={ blocks }
-									firstCommentId={ firstCommentId }
-								/>
-							</BlockContextProvider>
-						)
-					) }
+					{ comment.children.map( ( child, index ) => (
+						<BlockContextProvider
+							key={ child.commentId || index }
+							value={ {
+								commentId:
+									child.commentId < 0
+										? null
+										: child.commentId,
+							} }
+						>
+							<ReviewTemplateInnerBlocks
+								comment={ child }
+								activeCommentId={ activeCommentId }
+								setActiveCommentId={ setActiveCommentId }
+								blocks={ blocks }
+								firstCommentId={ firstCommentId }
+							/>
+						</BlockContextProvider>
+					) ) }
 				</ol>
 			) : null }
 		</li>
@@ -265,27 +263,25 @@ export default function ReviewTemplateEdit( {
 	return (
 		<ol { ...blockProps }>
 			{ commentTree &&
-				commentTree.map(
-					(
-						{ commentId, ...commentData }: Comment,
-						index: number
-					) => (
-						<BlockContextProvider
-							key={ commentId || index }
-							value={ {
-								commentId: commentId < 0 ? null : commentId,
-							} }
-						>
-							<ReviewTemplateInnerBlocks
-								comment={ { commentId, ...commentData } }
-								activeCommentId={ activeCommentId }
-								setActiveCommentId={ setActiveCommentId }
-								blocks={ blocks }
-								firstCommentId={ commentTree[ 0 ]?.commentId }
-							/>
-						</BlockContextProvider>
-					)
-				) }
+				commentTree.map( ( comment, index ) => (
+					<BlockContextProvider
+						key={ comment.commentId || index }
+						value={ {
+							commentId:
+								comment.commentId < 0
+									? null
+									: comment.commentId,
+						} }
+					>
+						<ReviewTemplateInnerBlocks
+							comment={ comment }
+							activeCommentId={ activeCommentId }
+							setActiveCommentId={ setActiveCommentId }
+							blocks={ blocks }
+							firstCommentId={ commentTree[ 0 ]?.commentId }
+						/>
+					</BlockContextProvider>
+				) ) }
 		</ol>
 	);
 }
