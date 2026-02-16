@@ -187,6 +187,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 		 * @param int    $order_id    The order ID.
 		 * @param string $template_id The email template ID.
 		 *
+		 * @internal
 		 * @since 10.6.0
 		 */
 		public function trigger( $order_id, $template_id ) {
@@ -442,8 +443,6 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 
 		/**
 		 * Enable order email actions for POS refunded orders.
-		 *
-		 * @since 10.6.0
 		 */
 		private function enable_order_email_actions() {
 			add_action( 'woocommerce_order_fully_refunded_notification', array( $this, 'auto_trigger' ), 10, 2 );

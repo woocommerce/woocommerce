@@ -211,8 +211,6 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 
 		/**
 		 * Enable order email actions for POS orders.
-		 *
-		 * @since 10.6.0
 		 */
 		private function enable_order_email_actions_for_pos_orders() {
 			add_action( 'woocommerce_order_status_completed_notification', array( $this, 'auto_trigger' ), 10, 2 );
