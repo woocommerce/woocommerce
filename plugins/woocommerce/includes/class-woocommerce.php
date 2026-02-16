@@ -277,14 +277,12 @@ final class WooCommerce {
 	 */
 	public function on_plugins_loaded() {
 		// Optimization note: ensures wp_cron doesn't interfere with timing-sensitive WooCommerce pages.
+		// Minimal intervention: gracefully define the constant (can be present from config or an extension).
+		// We intentionally avoid fallbacks here (as unhooking wp_cron from actions) for future-proof compatibility.
 		$page_id         = (int) ( $_GET['page_id'] ?? null ); // phpcs:ignore WordPress.Security
-		$disable_wp_cron = ( $page_id && ( wc_get_page_id( 'checkout' ) === $page_id || wc_get_page_id( 'cart' ) === $page_id ) );
+		$disable_wp_cron = ( $page_id && ! defined( 'DISABLE_WP_CRON' ) && ( wc_get_page_id( 'checkout' ) === $page_id || wc_get_page_id( 'cart' ) === $page_id ) );
 		if ( $disable_wp_cron ) {
-			// Minimal intervention: gracefully define the constant (can be present from config or an extension).
-			// We intentionally avoid fallbacks here (as unhooking wp_cron from actions) for future-proof compatibility.
-			if ( ! defined( 'DISABLE_WP_CRON' ) ) {
-				define( 'DISABLE_WP_CRON', true );
-			}
+			define( 'DISABLE_WP_CRON', true );
 		}
 
 		/**
