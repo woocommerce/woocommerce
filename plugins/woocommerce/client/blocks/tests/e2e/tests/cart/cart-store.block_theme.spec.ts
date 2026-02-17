@@ -26,7 +26,7 @@ test.describe( 'Cart Store', () => {
 		let responseNonce: string | null = null;
 
 		// Intercept GET /cart (refreshCartItems) to capture the nonce.
-		await page.route( '**/wc/store/v1/cart', async ( route ) => {
+		await page.route( '**/wc/store/v1/cart**', async ( route ) => {
 			if ( route.request().method() === 'GET' ) {
 				const response = await route.fetch();
 				refreshNonce = response.headers()[ 'nonce' ] || null;
@@ -47,17 +47,36 @@ test.describe( 'Cart Store', () => {
 
 		await frontendUtils.goToShop();
 
-		// 1. refreshCartItems should return a nonce.
+		// Wait for the GET /cart request (refreshCartItems) to complete.
+		await page.waitForResponse( '**/wc/store/v1/cart**' );
+
+		// refreshCartItems should return a nonce.
 		expect( refreshNonce ).toBeTruthy();
 
-		// 2. Adding a product should use the nonce from refreshCartItems.
+		// Adding a product should use the nonce from refreshCartItems.
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		expect( requestNonce ).toBe( refreshNonce );
 
-		// 3. Adding another product should use the second nonce.
+		// Wait for the nonce to expire.
+		// eslint-disable-next-line playwright/no-wait-for-timeout, no-restricted-syntax
+		await page.waitForTimeout( 2000 );
+
+		// Adding another product should fail because it is using an expired nonce.
+		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+		await expect( page.getByText( 'Nonce is invalid.' ) ).toBeVisible();
 		const previousResponseNonce = responseNonce;
+
+		// Nonce should be updated now and the request should succeed.
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		expect( requestNonce ).not.toBe( refreshNonce );
 		expect( requestNonce ).toBe( previousResponseNonce );
+
+		// Verify the product was actually added to the cart properly.
+		await frontendUtils.goToCart();
+		await expect(
+			page.getByLabel(
+				`Quantity of ${ REGULAR_PRICED_PRODUCT_NAME } in your cart.`
+			)
+		).toHaveValue( '2' );
 	} );
 } );
