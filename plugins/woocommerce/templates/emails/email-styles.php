@@ -288,6 +288,10 @@ body {
 	width: auto;
 }
 
+#body_content .order-item-data h3 {
+	margin: 8px 0;
+}
+
 #body_content .email-order-details .order-totals td,
 #body_content .email-order-details .order-totals th {
 	font-weight: normal;
