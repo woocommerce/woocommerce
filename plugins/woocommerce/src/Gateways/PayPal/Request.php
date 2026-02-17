@@ -456,7 +456,7 @@ class Request {
 				),
 			);
 
-			$response = $this->send_wpcom_proxy_request( 'POST', self::WPCOM_PROXY_ORDER_ENDPOINT . '/' . $paypal_order_id, $request_body );
+			$response = $this->send_wpcom_proxy_request( 'PATCH', self::WPCOM_PROXY_ORDER_ENDPOINT . '/' . $paypal_order_id, $request_body );
 
 			if ( is_wp_error( $response ) ) {
 				throw new Exception( 'PayPal patch invoice_id request failed. Response error: ' . $response->get_error_message() );
@@ -710,7 +710,7 @@ class Request {
 				array(
 					'custom_id'  => $this->get_paypal_order_custom_id( $order ),
 					'amount'     => $purchase_unit_amount,
-					'invoice_id' => 'TEST-101', //$this->limit_length( $this->gateway->get_option( 'invoice_prefix' ) . $order->get_order_number(), PayPalConstants::PAYPAL_INVOICE_ID_MAX_LENGTH ),
+					'invoice_id' => $this->limit_length( $this->gateway->get_option( 'invoice_prefix' ) . $order->get_order_number(), PayPalConstants::PAYPAL_INVOICE_ID_MAX_LENGTH ),
 					'items'      => $order_items,
 					'payee'      => array(
 						'email_address' => $payee_email,
