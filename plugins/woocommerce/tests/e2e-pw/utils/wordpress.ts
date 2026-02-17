@@ -28,9 +28,17 @@ const getVersionWPLatestMinusOne = async ( {
 		.filter( ( version ) => body[ version ] === 'outdated' )
 		.sort()
 		.reverse();
-	const latestMajorAndMinorNumbers = allVersions
-		.find( ( version ) => body[ version ] === 'latest' )
-		.match( /^\d+.\d+/ )[ 0 ];
+	const latestVersion = allVersions.find(
+		( version ) => body[ version ] === 'latest'
+	);
+	if ( ! latestVersion ) {
+		throw new Error( 'No latest WordPress version found in API response' );
+	}
+	const match = latestVersion.match( /^\d+\.\d+/ );
+	if ( ! match ) {
+		throw new Error( `Unexpected version format: ${ latestVersion }` );
+	}
+	const latestMajorAndMinorNumbers = match[ 0 ];
 
 	const latestMinus1 = previousStableVersions.find(
 		( version ) => ! version.startsWith( latestMajorAndMinorNumbers )
