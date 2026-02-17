@@ -17,42 +17,47 @@ test.describe( 'Cart Store', () => {
 		);
 	} );
 
-	test( 'should add product to cart with expired nonce (simulated cached page)', async ( {
+	test( 'should refresh nonce from Store API and use it for cart mutations', async ( {
 		page,
 		frontendUtils,
 	} ) => {
-		// 1. Visit the shop page and capture the HTML (simulating caching).
-		await frontendUtils.goToShop();
-		const cachedHtml = await page.content();
+		let refreshNonce: string | null = null;
+		let requestNonce: string | null = null;
+		let responseNonce: string | null = null;
 
-		// 2. Wait for the nonce to expire (intentional timeout - nonce has 2s lifetime).
-		// eslint-disable-next-line playwright/no-wait-for-timeout, no-restricted-syntax
-		await page.waitForTimeout( 2500 );
-
-		// 3. Set up route interception to serve the "cached" shop page.
-		await page.route( '**/shop**', async ( route ) => {
-			// Only intercept document requests, not assets.
-			if ( route.request().resourceType() === 'document' ) {
-				await route.fulfill( {
-					status: 200,
-					contentType: 'text/html',
-					body: cachedHtml,
-				} );
+		// Intercept GET /cart (refreshCartItems) to capture the nonce.
+		await page.route( '**/wc/store/v1/cart', async ( route ) => {
+			if ( route.request().method() === 'GET' ) {
+				const response = await route.fetch();
+				refreshNonce = response.headers()[ 'nonce' ] || null;
+				await route.fulfill( { response } );
 			} else {
 				await route.continue();
 			}
 		} );
 
-		// 4. Navigate to the "cached" shop page with expired nonce.
+		// Intercept batch requests to track which nonce the client sends
+		// and which nonce the server returns.
+		await page.route( '**/wc/store/v1/batch**', async ( route ) => {
+			requestNonce = route.request().headers()[ 'nonce' ] || null;
+			const response = await route.fetch();
+			responseNonce = response.headers()[ 'nonce' ] || null;
+			await route.fulfill( { response } );
+		} );
+
 		await frontendUtils.goToShop();
 
-		// 5. Add to cart - this should work after the nonce refresh fix.
-		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+		// 1. refreshCartItems should return a nonce.
+		expect( refreshNonce ).toBeTruthy();
 
-		// 6. Verify product was added successfully.
-		await frontendUtils.goToCheckout();
-		await expect(
-			page.getByText( REGULAR_PRICED_PRODUCT_NAME, { exact: true } )
-		).toBeVisible();
+		// 2. Adding a product should use the nonce from refreshCartItems.
+		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+		expect( requestNonce ).toBe( refreshNonce );
+
+		// 3. Adding another product should use the second nonce.
+		const previousResponseNonce = responseNonce;
+		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+		expect( requestNonce ).not.toBe( refreshNonce );
+		expect( requestNonce ).toBe( previousResponseNonce );
 	} );
 } );

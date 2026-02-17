@@ -11,11 +11,12 @@
 declare( strict_types=1 );
 
 /**
- * Set nonce lifetime to 2 seconds.
+ * Automatically expire nonces immediately for testing purposes.
+ * It is used to check new requests use the nonce from the latest response.
  */
 add_filter(
 	'nonce_life',
 	function () {
-		return 2;
+		return 0.001;
 	}
 );
