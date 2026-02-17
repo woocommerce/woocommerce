@@ -12,7 +12,7 @@ const resetGatewayOrder = async ( baseURL: string ) => {
 	try {
 		await deleteOption( request, baseURL, 'woocommerce_gateway_order' );
 	} catch ( error ) {
-		console.log( error );
+		console.error( error );
 	}
 };
 
