@@ -2,9 +2,9 @@
 
 declare( strict_types = 1 );
 
-namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Notification;
+namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Notifications;
 
-use Automattic\WooCommerce\Internal\PushNotifications\Notification\Notification;
+use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
 use WC_Unit_Test_Case;
 
 /**

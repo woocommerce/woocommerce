@@ -2,7 +2,7 @@
 
 declare( strict_types = 1 );
 
-namespace Automattic\WooCommerce\Internal\PushNotifications\Notification;
+namespace Automattic\WooCommerce\Internal\PushNotifications\Notifications;
 
 defined( 'ABSPATH' ) || exit;
 

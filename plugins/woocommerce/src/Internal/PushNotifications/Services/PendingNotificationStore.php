@@ -6,7 +6,7 @@ namespace Automattic\WooCommerce\Internal\PushNotifications\Services;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Internal\PushNotifications\Notification\Notification;
+use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
 
 /**
  * Shared store that collects notifications during a request and dispatches
