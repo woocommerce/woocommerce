@@ -187,16 +187,19 @@ async function showVariableProductTour( browser: Browser, show: boolean ) {
  * @return All possible variations from the given attributes
  */
 function generateVariationsFromAttributes( attributes: ProductAttribute[] ) {
-	const combine = ( runningList, nextAttribute ) => {
-		const variations = [];
-		let newVar;
+	const combine = (
+		runningList: string[] | string[][],
+		nextAttribute: string[]
+	): string[][] => {
+		const variations: string[][] = [];
+		let newVar: string[];
 
-		if ( ! Array.isArray( runningList[ 0 ] ) ) {
-			runningList = [ runningList ];
-		}
+		const normalized: string[][] = Array.isArray( runningList[ 0 ] )
+			? ( runningList as string[][] )
+			: [ runningList as string[] ];
 
-		for ( const partialVariation of runningList ) {
-			if ( runningList.length === 1 ) {
+		for ( const partialVariation of normalized ) {
+			if ( normalized.length === 1 ) {
 				for ( const startingAttribute of partialVariation ) {
 					for ( const nextAttrValue of nextAttribute ) {
 						newVar = [ startingAttribute, nextAttrValue ];
@@ -214,7 +217,7 @@ function generateVariationsFromAttributes( attributes: ProductAttribute[] ) {
 		return variations;
 	};
 
-	let allVariations = attributes[ 0 ].options;
+	let allVariations: string[] | string[][] = attributes[ 0 ].options;
 
 	for ( let i = 1; i < attributes.length; i++ ) {
 		const nextAttribute = attributes[ i ].options;
