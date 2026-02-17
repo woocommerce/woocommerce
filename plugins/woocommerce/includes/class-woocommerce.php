@@ -926,6 +926,7 @@ final class WooCommerce {
 	 */
 	public function maybe_halt_cron_activity_for_this_request(): void {
 		// We don't have fully initialized environment yet and have to use low-level PHP environment below instead.
+		// Alternative hooks were explored as well, but by time the environment is initialized, cron already invoked.
 		$is_cron_disabled = defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON;
 		$request_uri      = $_SERVER['REQUEST_URI'] ?? '';  // phpcs:ignore WordPress.Security
 		if ( ! $is_cron_disabled && '' !== $request_uri && has_action( 'init', 'wp_cron' ) ) {
