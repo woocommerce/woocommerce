@@ -44,6 +44,12 @@ const getVersionWPLatestMinusOne = async ( {
 		( version ) => ! version.startsWith( latestMajorAndMinorNumbers )
 	);
 
+	if ( ! latestMinus1 ) {
+		throw new Error(
+			'Unable to find the previous stable WordPress version'
+		);
+	}
+
 	core.setOutput( 'version', latestMinus1 );
 };
 
