@@ -281,7 +281,7 @@ body {
 }
 
 #body_content .order-item-data td:first-child {
-	width: <?php echo $email_improvements_enabled ? '72px' : '48px'; ?>;
+	width: 60px;
 }
 
 #body_content .order-item-data td:last-child {
