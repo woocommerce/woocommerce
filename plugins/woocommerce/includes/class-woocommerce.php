@@ -932,8 +932,9 @@ final class WooCommerce {
 			// Disable for AJAX: the AJAX calls are initiated from somewhere and if handling cron, add unnecessary concurrency.
 			// Disable for REST: the REST performance is critical in the modern environment and has already concurrent nature.
 			// The cron disabling approach (via `remove_action`) is aligned with upstreams' \WP_Customize_Manager implementation.
-			$serving_rest_request = wp_is_serving_rest_request() && false !== strpos( $request_uri, trim( rest_get_url_prefix(), '/' ) . '/wc/' );
-			if ( $serving_rest_request || wp_doing_ajax() ) {
+			$rest_route            = (string) ( $_GET['rest_route'] ?? null );
+			$serving_public_rest   = '' !== $rest_route && preg_match( '#^/(wc|wc-telemetry|wc-admin|wc-analytics)/#', $rest_route );
+			if ( $serving_public_rest || wp_doing_ajax() ) {
 				remove_action( 'init', 'wp_cron' );
 				return;
 			}
