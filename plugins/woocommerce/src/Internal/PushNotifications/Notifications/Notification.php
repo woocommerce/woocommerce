@@ -37,7 +37,6 @@ abstract class Notification {
 	 *
 	 * @param string $type        The notification type.
 	 * @param int    $resource_id The resource ID.
-	 *
 	 * @throws InvalidArgumentException If any argument is invalid.
 	 *
 	 * @since 10.7.0
