@@ -949,16 +949,12 @@ final class WooCommerce {
 					if ( ! empty( array_intersect( $slugs, $page_id_or_slugs ) ) ) {
 						remove_action( 'init', 'wp_cron' );
 					}
-					return;
-				}
-
-				if ( is_numeric( $page_id_or_slugs ) ) {
+				} else {
 					// Under the hood, the functions will read options, which already preloaded by WordPress core at this point.
 					$pages = array( wc_get_page_id( 'checkout' ), wc_get_page_id( 'cart' ), wc_get_page_id( 'myaccount' ) );
 					if ( in_array( $page_id_or_slugs, $pages, true ) ) {
 						remove_action( 'init', 'wp_cron' );
 					}
-					return;
 				}
 			}
 		}
