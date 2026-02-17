@@ -18,7 +18,7 @@ defined( 'ABSPATH' ) || exit;
 				sprintf(
 					/* translators: %s: URL to blog post about this change. */
 					__( 'Compatibility mode for HPOS no longer pulls order changes made to the posts database back into your orders automatically. If your site uses custom code or plugins that modify orders outside of WooCommerce, this may affect how order data is handled. <a href="%s">Learn more about this change and what to do</a>.', 'woocommerce' ),
-					'https://developer.woocommerce.com/PLACEHOLDER'
+					'https://developer.woocommerce.com/2026/02/16/hpos-sync-on-read-to-be-disabled-by-default-in-woocommerce-10-7/'
 				)
 			);
 			?>
