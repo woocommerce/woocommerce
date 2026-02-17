@@ -45,6 +45,13 @@ export function InnerEditor( {
 	postType: initialPostType,
 	settings,
 	contentRef,
+	customSavePanel,
+}: {
+	postId: number | string;
+	postType: string;
+	settings: Record< string, unknown >;
+	contentRef?: React.Ref< HTMLDivElement > | null;
+	customSavePanel?: React.ReactElement;
 } ) {
 	const {
 		currentPost,
@@ -161,6 +168,7 @@ export function InnerEditor( {
 					templateId={ template && template.id }
 					contentRef={ contentRef }
 					styles={ styles } // This is needed for BC for Gutenberg below v22
+					customSavePanel={ customSavePanel }
 				>
 					<AutosaveMonitor />
 					<LocalAutosaveMonitor />

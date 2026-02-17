@@ -117,6 +117,8 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
 		$request->set_param( 'device_uuid', $device_uuid );
 		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+		$request->set_param( 'device_locale', 'en_US' );
+		$request->set_param( 'metadata', array( 'app_version' => '1.0' ) );
 
 		$response = $this->server->dispatch( $request );
 
@@ -154,6 +156,8 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'platform', PushToken::PLATFORM_ANDROID );
 		$request->set_param( 'device_uuid', $device_uuid );
 		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_ANDROID );
+		$request->set_param( 'device_locale', 'en_US' );
+		$request->set_param( 'metadata', array( 'app_version' => '1.0' ) );
 
 		$response = $this->server->dispatch( $request );
 
@@ -193,6 +197,8 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
 		$request->set_param( 'device_uuid', 'device-1' );
 		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+		$request->set_param( 'device_locale', 'en_US' );
+		$request->set_param( 'metadata', array( 'app_version' => '1.0' ) );
 
 		$response = $this->server->dispatch( $request );
 
@@ -208,6 +214,8 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
 		$request->set_param( 'device_uuid', 'device-2' );
 		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+		$request->set_param( 'device_locale', 'en_US' );
+		$request->set_param( 'metadata', array( 'app_version' => '1.0' ) );
 
 		$response = $this->server->dispatch( $request );
 
@@ -249,6 +257,8 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
 		$request->set_param( 'device_uuid', $device_uuid );
 		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+		$request->set_param( 'device_locale', 'en_US' );
+		$request->set_param( 'metadata', array( 'app_version' => '1.0' ) );
 
 		$response = $this->server->dispatch( $request );
 
@@ -264,6 +274,8 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
 		$request->set_param( 'device_uuid', $device_uuid );
 		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+		$request->set_param( 'device_locale', 'en_US' );
+		$request->set_param( 'metadata', array( 'app_version' => '1.0' ) );
 
 		$response = $this->server->dispatch( $request );
 
@@ -287,6 +299,66 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Test it updates a legacy token that was created without
+	 * device_locale and metadata.
+	 */
+	public function test_it_updates_legacy_token_without_device_locale_and_metadata() {
+		wp_set_current_user( $this->user_id );
+
+		$this->mock_jetpack_connection_manager_is_connected( true );
+
+		$token_value = str_repeat( 'a', 64 );
+		$device_uuid = 'legacy-device-uuid';
+
+		/**
+		 * Insert a legacy token directly into the database without
+		 * device_locale and metadata meta.
+		 */
+		$post_id = wp_insert_post(
+			array(
+				'post_author' => $this->user_id,
+				'post_type'   => PushToken::POST_TYPE,
+				'post_status' => 'private',
+				'meta_input'  => array(
+					'platform'    => PushToken::PLATFORM_APPLE,
+					'token'       => $token_value,
+					'device_uuid' => $device_uuid,
+					'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				),
+			)
+		);
+
+		/**
+		 * Re-register the same token via the REST API, which should find the
+		 * legacy token and update it.
+		 */
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'token', $token_value );
+		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
+		$request->set_param( 'device_uuid', $device_uuid );
+		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+		$request->set_param( 'device_locale', 'fr_FR' );
+		$request->set_param( 'metadata', array( 'app_version' => '2.0' ) );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::CREATED, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertEquals( $post_id, $data['id'] );
+
+		/**
+		 * Verify the legacy token was updated with the new fields.
+		 */
+		$device_locale = get_post_meta( $post_id, 'device_locale', true );
+		$metadata      = get_post_meta( $post_id, 'metadata', true );
+
+		$this->assertEquals( 'fr_FR', $device_locale );
+		$this->assertEquals( array( 'app_version' => '2.0' ), $metadata );
+	}
+
+	/**
 	 * @testdox Test it cannot create a push token without authentication.
 	 */
 	public function test_it_cannot_create_push_token_without_authentication() {
@@ -295,6 +367,8 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
 		$request->set_param( 'device_uuid', 'test-device-uuid' );
 		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+		$request->set_param( 'device_locale', 'en_US' );
+		$request->set_param( 'metadata', array( 'app_version' => '1.0' ) );
 
 		$response = $this->server->dispatch( $request );
 
@@ -318,6 +392,8 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
 		$request->set_param( 'device_uuid', 'test-device-uuid' );
 		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+		$request->set_param( 'device_locale', 'en_US' );
+		$request->set_param( 'metadata', array( 'app_version' => '1.0' ) );
 
 		$response = $this->server->dispatch( $request );
 
@@ -338,6 +414,8 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
 		$request->set_param( 'device_uuid', 'test-device-uuid' );
 		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+		$request->set_param( 'device_locale', 'en_US' );
+		$request->set_param( 'metadata', array( 'app_version' => '1.0' ) );
 
 		$response = $this->server->dispatch( $request );
 
@@ -363,6 +441,8 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
 		$request->set_param( 'device_uuid', 'test-device-uuid-nonhex' );
 		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+		$request->set_param( 'device_locale', 'en_US' );
+		$request->set_param( 'metadata', array( 'app_version' => '1.0' ) );
 
 		$response = $this->server->dispatch( $request );
 
@@ -386,6 +466,8 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
 		$request->set_param( 'device_uuid', 'test-device-uuid-short' );
 		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+		$request->set_param( 'device_locale', 'en_US' );
+		$request->set_param( 'metadata', array( 'app_version' => '1.0' ) );
 
 		$response = $this->server->dispatch( $request );
 
@@ -410,6 +492,8 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'platform', PushToken::PLATFORM_ANDROID );
 		$request->set_param( 'device_uuid', 'test-device-uuid' );
 		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_ANDROID );
+		$request->set_param( 'device_locale', 'en_US' );
+		$request->set_param( 'metadata', array( 'app_version' => '1.0' ) );
 
 		$response = $this->server->dispatch( $request );
 
@@ -434,6 +518,8 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'platform', PushToken::PLATFORM_ANDROID );
 		$request->set_param( 'device_uuid', 'test-device-uuid' );
 		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_ANDROID );
+		$request->set_param( 'device_locale', 'en_US' );
+		$request->set_param( 'metadata', array( 'app_version' => '1.0' ) );
 
 		$response = $this->server->dispatch( $request );
 
@@ -457,6 +543,8 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'token', 'not-valid-json' );
 		$request->set_param( 'platform', PushToken::PLATFORM_BROWSER );
 		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+		$request->set_param( 'device_locale', 'en_US' );
+		$request->set_param( 'metadata', array( 'app_version' => '1.0' ) );
 
 		$response = $this->server->dispatch( $request );
 
@@ -487,6 +575,8 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'token', $token );
 		$request->set_param( 'platform', PushToken::PLATFORM_BROWSER );
 		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+		$request->set_param( 'device_locale', 'en_US' );
+		$request->set_param( 'metadata', array( 'app_version' => '1.0' ) );
 
 		$response = $this->server->dispatch( $request );
 
@@ -520,6 +610,8 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'token', $token );
 		$request->set_param( 'platform', PushToken::PLATFORM_BROWSER );
 		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+		$request->set_param( 'device_locale', 'en_US' );
+		$request->set_param( 'metadata', array( 'app_version' => '1.0' ) );
 
 		$response = $this->server->dispatch( $request );
 
@@ -543,6 +635,8 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
 		$request->set_param( 'device_uuid', 'test-device-uuid' );
 		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+		$request->set_param( 'device_locale', 'en_US' );
+		$request->set_param( 'metadata', array( 'app_version' => '1.0' ) );
 
 		$response = $this->server->dispatch( $request );
 
@@ -566,6 +660,8 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'token', str_repeat( 'a', 64 ) );
 		$request->set_param( 'device_uuid', 'test-device-uuid' );
 		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+		$request->set_param( 'device_locale', 'en_US' );
+		$request->set_param( 'metadata', array( 'app_version' => '1.0' ) );
 
 		$response = $this->server->dispatch( $request );
 
@@ -589,6 +685,8 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'token', str_repeat( 'a', 64 ) );
 		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
 		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+		$request->set_param( 'device_locale', 'en_US' );
+		$request->set_param( 'metadata', array( 'app_version' => '1.0' ) );
 
 		$response = $this->server->dispatch( $request );
 
@@ -613,6 +711,8 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'platform', 'windows' );
 		$request->set_param( 'device_uuid', 'test-device-uuid' );
 		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+		$request->set_param( 'device_locale', 'en_US' );
+		$request->set_param( 'metadata', array( 'app_version' => '1.0' ) );
 
 		$response = $this->server->dispatch( $request );
 
@@ -636,6 +736,8 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'token', str_repeat( 'a', 64 ) );
 		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
 		$request->set_param( 'device_uuid', 'test-device-uuid' );
+		$request->set_param( 'device_locale', 'en_US' );
+		$request->set_param( 'metadata', array( 'app_version' => '1.0' ) );
 
 		$response = $this->server->dispatch( $request );
 
@@ -659,6 +761,8 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
 		$request->set_param( 'device_uuid', 'test-device-uuid' );
 		$request->set_param( 'origin', 'development' );
+		$request->set_param( 'device_locale', 'en_US' );
+		$request->set_param( 'metadata', array( 'app_version' => '1.0' ) );
 
 		$response = $this->server->dispatch( $request );
 
@@ -667,6 +771,114 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 
 		$this->assertEquals( 'rest_invalid_param', $data['code'] );
+	}
+
+	/**
+	 * @testdox Test it cannot create a push token without required device_locale
+	 * parameter.
+	 */
+	public function test_it_cannot_create_push_token_with_a_missing_device_locale() {
+		wp_set_current_user( $this->user_id );
+
+		$this->mock_jetpack_connection_manager_is_connected( true );
+
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'token', str_repeat( 'a', 64 ) );
+		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
+		$request->set_param( 'device_uuid', 'test-device-uuid' );
+		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+		$request->set_param( 'metadata', array() );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::BAD_REQUEST, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertEquals( 'rest_missing_callback_param', $data['code'] );
+	}
+
+	/**
+	 * @testdox Test it cannot create a push token with invalid device_locale
+	 * format.
+	 */
+	public function test_it_cannot_create_push_token_with_invalid_device_locale_format() {
+		wp_set_current_user( $this->user_id );
+
+		$this->mock_jetpack_connection_manager_is_connected( true );
+
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'token', str_repeat( 'a', 64 ) );
+		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
+		$request->set_param( 'device_uuid', 'test-device-uuid' );
+		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+		$request->set_param( 'device_locale', 'invalid-locale' );
+		$request->set_param( 'metadata', array() );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::BAD_REQUEST, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertEquals( 'rest_invalid_param', $data['code'] );
+		$this->assertStringContainsString( 'Invalid parameter(s): device_locale', $data['message'] );
+	}
+
+	/**
+	 * @testdox Test it can create a push token without required metadata
+	 * parameter.
+	 */
+	public function test_it_can_create_push_token_with_a_missing_metadata() {
+		wp_set_current_user( $this->user_id );
+
+		$this->mock_jetpack_connection_manager_is_connected( true );
+
+		$token_value = str_repeat( 'a', 64 );
+		$device_uuid = 'test-device-uuid';
+
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'token', $token_value );
+		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
+		$request->set_param( 'device_uuid', $device_uuid );
+		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+		$request->set_param( 'device_locale', 'en_US' );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::CREATED, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertArrayHasKey( 'id', $data );
+		$this->assertIsInt( $data['id'] );
+		$this->assertGreaterThan( 0, $data['id'] );
+	}
+
+	/**
+	 * @testdox Test it cannot create a push token with non-array metadata.
+	 */
+	public function test_it_cannot_create_push_token_with_non_array_metadata() {
+		wp_set_current_user( $this->user_id );
+
+		$this->mock_jetpack_connection_manager_is_connected( true );
+
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'token', str_repeat( 'a', 64 ) );
+		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
+		$request->set_param( 'device_uuid', 'test-device-uuid' );
+		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+		$request->set_param( 'device_locale', 'en_US' );
+		$request->set_param( 'metadata', 'not an array' );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::BAD_REQUEST, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertEquals( 'rest_invalid_param', $data['code'] );
+		$this->assertStringContainsString( 'Invalid parameter(s): metadata', $data['message'] );
 	}
 
 	/**
@@ -681,11 +893,13 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		 * Create a token first.
 		 */
 		$data = array(
-			'user_id'     => $this->user_id,
-			'token'       => str_repeat( 'a', 64 ),
-			'platform'    => PushToken::PLATFORM_APPLE,
-			'device_uuid' => 'device-to-delete',
-			'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+			'user_id'       => $this->user_id,
+			'token'         => str_repeat( 'a', 64 ),
+			'platform'      => PushToken::PLATFORM_APPLE,
+			'device_uuid'   => 'device-to-delete',
+			'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+			'device_locale' => 'en_US',
+			'metadata'      => array( 'app_version' => '1.0' ),
 		);
 
 		$data_store = wc_get_container()->get( PushTokensDataStore::class );
@@ -740,11 +954,13 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		 * Create a token for another shop manager.
 		 */
 		$data = array(
-			'user_id'     => $this->other_shop_manager_id,
-			'token'       => str_repeat( 'a', 64 ),
-			'platform'    => PushToken::PLATFORM_APPLE,
-			'device_uuid' => 'device-other-user',
-			'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+			'user_id'       => $this->other_shop_manager_id,
+			'token'         => str_repeat( 'a', 64 ),
+			'platform'      => PushToken::PLATFORM_APPLE,
+			'device_uuid'   => 'device-other-user',
+			'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+			'device_locale' => 'en_US',
+			'metadata'      => array( 'app_version' => '1.0' ),
 		);
 
 		$data_store = wc_get_container()->get( PushTokensDataStore::class );
@@ -794,11 +1010,13 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_it_returns_500_when_wp_delete_post_fails() {
 		$data = array(
-			'user_id'     => $this->user_id,
-			'token'       => str_repeat( 'a', 64 ),
-			'platform'    => PushToken::PLATFORM_APPLE,
-			'device_uuid' => 'device-delete-fail',
-			'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+			'user_id'       => $this->user_id,
+			'token'         => str_repeat( 'a', 64 ),
+			'platform'      => PushToken::PLATFORM_APPLE,
+			'device_uuid'   => 'device-delete-fail',
+			'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+			'device_locale' => 'en_US',
+			'metadata'      => array( 'app_version' => '1.0' ),
 		);
 
 		$data_store = wc_get_container()->get( PushTokensDataStore::class );
@@ -907,6 +1125,8 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
 		$request->set_param( 'device_uuid', str_repeat( 'a', 256 ) );
 		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+		$request->set_param( 'device_locale', 'en_US' );
+		$request->set_param( 'metadata', array( 'app_version' => '1.0' ) );
 
 		$response = $this->server->dispatch( $request );
 
@@ -932,6 +1152,8 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
 		$request->set_param( 'device_uuid', 'invalid device uuid with spaces' );
 		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+		$request->set_param( 'device_locale', 'en_US' );
+		$request->set_param( 'metadata', array( 'app_version' => '1.0' ) );
 
 		$response = $this->server->dispatch( $request );
 
@@ -1191,5 +1413,9 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( $platform, $meta['platform'] );
 		$this->assertEquals( $device_uuid, $meta['device_uuid'] );
 		$this->assertEquals( $origin, $meta['origin'] );
+		$this->assertArrayHasKey( 'device_locale', $meta );
+		$this->assertEquals( 'en_US', $meta['device_locale'] );
+		$this->assertArrayHasKey( 'metadata', $meta );
+		$this->assertEquals( array( 'app_version' => '1.0' ), maybe_unserialize( $meta['metadata'] ) );
 	}
 }
