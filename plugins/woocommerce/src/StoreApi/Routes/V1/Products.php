@@ -108,7 +108,6 @@ class Products extends AbstractRoute {
 		$params                       = [];
 		$params['context']            = $this->get_context_param();
 		$params['context']['default'] = 'view';
-		$params['context']['enum'][]  = 'embed';
 
 		$params['page'] = array(
 			'description'       => __( 'Current page of the collection.', 'woocommerce' ),
