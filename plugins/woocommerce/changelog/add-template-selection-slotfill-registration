@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Register TemplateSelection via EmailActionsFill for extensibility

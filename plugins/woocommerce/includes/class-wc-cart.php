@@ -12,10 +12,6 @@
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
-use Automattic\WooCommerce\Internal\FraudProtection\BlockedSessionNotice;
-use Automattic\WooCommerce\Internal\FraudProtection\CartEventTracker;
-use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
-use Automattic\WooCommerce\Internal\FraudProtection\SessionClearanceManager;
 use Automattic\WooCommerce\Utilities\DiscountsUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Utilities\ShippingUtil;
@@ -1096,14 +1092,6 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function add_to_cart( $product_id = 0, $quantity = 1, $variation_id = 0, $variation = array(), $cart_item_data = array() ) {
 		try {
-			// Block add-to-cart if session is blocked by fraud protection.
-			if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled()
-				&& wc_get_container()->get( SessionClearanceManager::class )->is_session_blocked() ) {
-				throw new Exception(
-					wc_get_container()->get( BlockedSessionNotice::class )->get_message_html( 'purchase' )
-				);
-			}
-
 			$product_id   = absint( $product_id );
 			$variation_id = absint( $variation_id );
 
@@ -1387,12 +1375,6 @@ class WC_Cart extends WC_Legacy_Cart {
 
 			do_action( 'woocommerce_add_to_cart', $cart_item_key, $product_id, $quantity, $variation_id, $variation, $cart_item_data );
 
-			// Track cart event for fraud protection (only for newly added items).
-			if ( ! $item_was_already_in_cart && wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
-				wc_get_container()->get( CartEventTracker::class )
-					->track_cart_item_added( $cart_item_key, (int) $product_id, (int) $quantity, $variation_id );
-			}
-
 			return $cart_item_key;
 
 		} catch ( Exception $e ) {
@@ -1411,28 +1393,12 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return bool
 	 */
 	public function remove_cart_item( $cart_item_key ) {
-		// Block remove if session is blocked by fraud protection.
-		if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled()
-			&& wc_get_container()->get( SessionClearanceManager::class )->is_session_blocked() ) {
-			wc_add_notice(
-				wc_get_container()->get( BlockedSessionNotice::class )->get_message_html( 'purchase' ),
-				'error'
-			);
-			return false;
-		}
-
 		if ( isset( $this->cart_contents[ $cart_item_key ] ) ) {
 			$this->removed_cart_contents[ $cart_item_key ] = $this->cart_contents[ $cart_item_key ];
 
 			unset( $this->removed_cart_contents[ $cart_item_key ]['data'] );
 
 			do_action( 'woocommerce_remove_cart_item', $cart_item_key, $this );
-
-			// Track cart event for fraud protection.
-			if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
-				wc_get_container()->get( CartEventTracker::class )
-					->track_cart_item_removed( $cart_item_key, $this );
-			}
 
 			unset( $this->cart_contents[ $cart_item_key ] );
 
@@ -1456,12 +1422,6 @@ class WC_Cart extends WC_Legacy_Cart {
 			$this->cart_contents[ $cart_item_key ]['data'] = wc_get_product( $restore_item['variation_id'] ? $restore_item['variation_id'] : $restore_item['product_id'] );
 
 			do_action( 'woocommerce_restore_cart_item', $cart_item_key, $this );
-
-			// Track cart event for fraud protection.
-			if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
-				wc_get_container()->get( CartEventTracker::class )
-					->track_cart_item_restored( $cart_item_key, $this );
-			}
 
 			unset( $this->removed_cart_contents[ $cart_item_key ] );
 
@@ -1487,27 +1447,11 @@ class WC_Cart extends WC_Legacy_Cart {
 			return $this->remove_cart_item( $cart_item_key );
 		}
 
-		// Block quantity update if session is blocked by fraud protection.
-		if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled()
-			&& wc_get_container()->get( SessionClearanceManager::class )->is_session_blocked() ) {
-			wc_add_notice(
-				wc_get_container()->get( BlockedSessionNotice::class )->get_message_html( 'purchase' ),
-				'error'
-			);
-			return false;
-		}
-
 		// Update qty.
 		$old_quantity                                      = $this->cart_contents[ $cart_item_key ]['quantity'];
 		$this->cart_contents[ $cart_item_key ]['quantity'] = $quantity;
 
 		do_action( 'woocommerce_after_cart_item_quantity_update', $cart_item_key, $quantity, $old_quantity, $this );
-
-		// Track cart event for fraud protection.
-		if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
-			wc_get_container()->get( CartEventTracker::class )
-				->track_cart_item_updated( $cart_item_key, $quantity, $old_quantity, $this );
-		}
 
 		if ( $refresh_totals ) {
 			$this->calculate_totals();
