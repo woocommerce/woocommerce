@@ -103,6 +103,23 @@ export const OtherPaymentGateways = ( {
 		setCategoryIdWithPopoverVisible( '' );
 	};
 
+	const handleInfoIconKeyDown = (
+		event: React.KeyboardEvent,
+		categoryId: string
+	) => {
+		if (
+			event.key === 'Escape' &&
+			categoryId === categoryIdWithPopoverVisible
+		) {
+			event.stopPropagation();
+			setCategoryIdWithPopoverVisible( '' );
+			buttonRefs.current[ categoryId ]?.focus();
+		} else if ( event.key === 'Enter' || event.key === ' ' ) {
+			event.preventDefault();
+			handleInfoIconClick( event, categoryId );
+		}
+	};
+
 	const handleSectionToggle = () => {
 		const expand = ! isExpanded;
 
@@ -206,17 +223,12 @@ export const OtherPaymentGateways = ( {
 											category.id
 										)
 									}
-									onKeyDown={ ( event ) => {
-										if (
-											event.key === 'Enter' ||
-											event.key === ' '
-										) {
-											handleInfoIconClick(
-												event,
-												category.id
-											);
-										}
-									} }
+									onKeyDown={ ( event ) =>
+										handleInfoIconKeyDown(
+											event,
+											category.id
+										)
+									}
 									tabIndex={ 0 }
 									role="button"
 									ref={ ( el ) => {
@@ -240,8 +252,23 @@ export const OtherPaymentGateways = ( {
 											onFocusOutside={
 												handleFocusOutsidePopover
 											}
+											onKeyDown={ ( event ) =>
+												handleInfoIconKeyDown(
+													event,
+													category.id
+												)
+											}
 										>
-											<div className="components-popover__content-container">
+											{ /* eslint-disable-next-line jsx-a11y/no-static-element-interactions */ }
+											<div
+												className="components-popover__content-container"
+												onKeyDown={ ( event ) =>
+													handleInfoIconKeyDown(
+														event,
+														category.id
+													)
+												}
+											>
 												<p>
 													{ decodeEntities(
 														category.description
@@ -365,27 +392,26 @@ export const OtherPaymentGateways = ( {
 				'other-payment-gateways' + ( isExpanded ? ' is-expanded' : '' )
 			}
 		>
-			<div
+			<button
 				className="other-payment-gateways__header"
 				onClick={ handleSectionToggle }
-				onKeyDown={ ( event ) => {
-					if ( event.key === 'Enter' || event.key === ' ' ) {
-						handleSectionToggle();
-					}
-				} }
-				role="button"
-				tabIndex={ 0 }
 				aria-expanded={ isExpanded }
+				type="button"
 			>
-				<div className="other-payment-gateways__header__title">
+				<span className="other-payment-gateways__header__title">
 					<span>{ __( 'More payment options', 'woocommerce' ) }</span>
 					{ ! isExpanded && <>{ collapsedImages }</> }
-				</div>
+				</span>
 				<Gridicon
 					className="other-payment-gateways__header__arrow"
 					icon={ isExpanded ? 'chevron-up' : 'chevron-down' }
 				/>
-			</div>
+				<span className="screen-reader-text">
+					{ isExpanded
+						? __( 'Collapse section', 'woocommerce' )
+						: __( 'Expand section', 'woocommerce' ) }
+				</span>
+			</button>
 			{ isExpanded && (
 				<div className="other-payment-gateways__content">
 					{ expandedContent }

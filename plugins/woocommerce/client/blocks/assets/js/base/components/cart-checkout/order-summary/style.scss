@@ -98,6 +98,35 @@
 		}
 	}
 
+	.wc-block-cart-item__prices {
+		display: flex;
+		flex-direction: row;
+		flex-wrap: wrap;
+		gap: $gap-smaller;
+		align-items: center;
+	}
+
+	.wc-block-components-order-summary-item__individual-prices {
+		del {
+			margin-right: 0.5em;
+		}
+
+		ins {
+			display: inline-block;
+			margin-left: 0;
+		}
+	}
+
+	.wc-block-cart-item__total-price-and-sale-badge-wrapper {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-end;
+
+		.wc-block-components-sale-badge {
+			margin-top: $gap-smallest;
+		}
+	}
+
 	.wc-block-components-order-summary-item__total-price {
 		margin-left: auto;
 		text-align: right;

@@ -927,12 +927,12 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 			// phpcs:disable Squiz.Commenting
 			use RestApiCache;
 
-			public $responses              = array(
-				'single_entity'          => array(
+			public $responses                  = array(
+				'single_entity'                   => array(
 					'id'   => 1,
 					'name' => 'Product 1',
 				),
-				'multiple_entities'      => array(
+				'multiple_entities'               => array(
 					array(
 						'id'   => 2,
 						'name' => 'Product 2',
@@ -942,63 +942,68 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 						'name' => 'Product 3',
 					),
 				),
-				'custom_entity_type'     => array(
+				'custom_entity_type'              => array(
 					'id'   => 100,
 					'name' => 'Custom Thing 100',
 				),
-				'no_vary_by_user'        => array(
+				'no_vary_by_user'                 => array(
 					'id'   => 50,
 					'name' => 'Shared Product',
 				),
-				'with_endpoint_id'       => array(
+				'with_endpoint_id'                => array(
 					'id'   => 60,
 					'name' => 'Product with Endpoint ID',
 				),
-				'custom_ttl'             => array(
+				'custom_ttl'                      => array(
 					'id'   => 70,
 					'name' => 'Product with Custom TTL',
 				),
-				'with_endpoint_hooks'    => array(
+				'with_endpoint_hooks'             => array(
 					'id'   => 80,
 					'name' => 'Product with Endpoint Hooks',
 				),
-				'with_controller_hooks'  => array(
+				'with_controller_hooks'           => array(
 					'id'   => 90,
 					'name' => 'Product with Controller Hooks',
 				),
-				'with_controller_files'  => array(
+				'with_controller_files'           => array(
 					'id'   => 91,
 					'name' => 'Product with Controller Files',
 				),
-				'standard'               => array(
+				'with_controller_version_strings' => array(
+					'id'   => 92,
+					'name' => 'Product with Controller Version Strings',
+				),
+				'standard'                        => array(
 					'id'   => 10,
 					'name' => 'Standard Product',
 				),
-				'custom_endpoint_config' => array(
+				'custom_endpoint_config'          => array(
 					'id'   => 20,
 					'name' => 'Custom Config Product',
 				),
-				'test_false_override'    => array(
+				'test_false_override'             => array(
 					'id'   => 30,
 					'name' => 'Test False Override Product',
 				),
-				'invalid_headers'        => array(
+				'invalid_headers'                 => array(
 					'id'   => 40,
 					'name' => 'Invalid Headers Product',
 				),
 			);
-			public $default_entity_type    = 'product';
-			public $default_vary_by_user   = true;
-			public $endpoint_vary_by_user  = array();
-			public $endpoint_ids           = array();
-			public $controller_hooks       = array();
-			public $controller_files       = array();
-			public $response_headers       = array();
-			public $custom_exclude_headers = array();
-			public $custom_include_headers = false;
-			public $endpoint_cache_config  = array();
-			public $allowed_directories    = null;
-			public $file_check_interval    = null;
+			public $default_entity_type        = 'product';
+			public $default_vary_by_user       = true;
+			public $endpoint_vary_by_user      = array();
+			public $endpoint_ids               = array();
+			public $controller_hooks           = array();
+			public $controller_files           = array();
+			public $controller_version_strings = array();
+			public $response_headers           = array();
+			public $custom_exclude_headers     = array();
+			public $custom_include_headers     = false;
+			public $endpoint_cache_config      = array();
+			public $allowed_directories        = null;
+			public $file_check_interval        = null;
 
 			public function __construct() {
 				$this->namespace = 'wc/v3';
@@ -1019,6 +1024,7 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 				$this->register_cached_route( 'with_endpoint_hooks', array( 'relevant_hooks' => array( 'test_endpoint_hook_for_caching' ) ) );
 				$this->register_cached_route( 'with_controller_hooks' );
 				$this->register_cached_route( 'with_controller_files' );
+				$this->register_cached_route( 'with_controller_version_strings' );
 				$this->register_cached_route( 'standard' );
 				$this->register_custom_config_route( 'custom_endpoint_config' );
 				$this->register_custom_config_route( 'test_false_override' );
@@ -1108,6 +1114,10 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 
 			protected function get_files_relevant_to_response_caching( WP_REST_Request $request, ?string $endpoint_id = null ): array {
 				return $this->controller_files;
+			}
+
+			protected function get_version_strings_relevant_to_caching( WP_REST_Request $request, ?string $endpoint_id = null ): array {
+				return $this->controller_version_strings;
 			}
 
 			protected function get_allowed_directories_for_file_based_response_caching(): array {
@@ -2286,6 +2296,158 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 
 		remove_filter( 'woocommerce_rest_api_cache_file_warning_suppression_ttl', $filter, 10 );
 		$this->sut->controller_files = array();
+	}
+
+	/**
+	 * @testdox Cache is invalidated when controller-level relevant version strings change.
+	 */
+	public function test_cache_invalidated_when_controller_version_string_changes() {
+		$this->sut->controller_version_strings = array( 'list_products' );
+
+		$this->version_generator->get_version( 'list_products' );
+
+		$response1 = $this->query_endpoint( 'with_controller_version_strings' );
+		$this->assertCacheHeader( $response1, 'MISS' );
+		$this->assertCount( 1, $this->get_all_cache_keys() );
+
+		$response2 = $this->query_endpoint( 'with_controller_version_strings' );
+		$this->assertCacheHeader( $response2, 'HIT' );
+
+		// Invalidate the version string.
+		$this->version_generator->delete_version( 'list_products' );
+		$this->fixed_time += 1;
+
+		$response3 = $this->query_endpoint( 'with_controller_version_strings' );
+		$this->assertCacheHeader( $response3, 'MISS' );
+
+		$this->sut->controller_version_strings = array();
+	}
+
+	/**
+	 * @testdox Version strings hash is stored in cache when tracking version strings.
+	 */
+	public function test_version_strings_hash_stored_in_cache() {
+		$this->sut->controller_version_strings = array( 'list_products' );
+
+		$this->version_generator->get_version( 'list_products' );
+
+		$response1 = $this->query_endpoint( 'with_controller_version_strings' );
+		$this->assertCacheHeader( $response1, 'MISS' );
+
+		$cache_keys = $this->get_all_cache_keys();
+		$this->assertCount( 1, $cache_keys );
+		$cache_key    = $cache_keys[0];
+		$cached_entry = wp_cache_get( $cache_key, self::CACHE_GROUP );
+
+		$this->assertArrayHasKey( 'version_strings_hash', $cached_entry );
+		$this->assertNotEmpty( $cached_entry['version_strings_hash'] );
+
+		$this->sut->controller_version_strings = array();
+	}
+
+	/**
+	 * @testdox Cache is invalidated when endpoint-level relevant version strings change.
+	 */
+	public function test_cache_invalidated_when_endpoint_version_strings_change() {
+		$this->version_generator->get_version( 'list_products' );
+
+		$this->sut->endpoint_cache_config['custom_endpoint_config']['config'] = array(
+			'relevant_version_strings' => array( 'list_products' ),
+		);
+		$this->sut->reinitialize_cache();
+		$this->reset_rest_server();
+
+		$response1 = $this->query_endpoint( 'custom_endpoint_config' );
+		$this->assertCacheHeader( $response1, 'MISS' );
+
+		$response2 = $this->query_endpoint( 'custom_endpoint_config' );
+		$this->assertCacheHeader( $response2, 'HIT' );
+
+		// Invalidate the version string.
+		$this->version_generator->delete_version( 'list_products' );
+		$this->fixed_time += 1;
+
+		$response3 = $this->query_endpoint( 'custom_endpoint_config' );
+		$this->assertCacheHeader( $response3, 'MISS', 'Cache should be invalidated when endpoint-tracked version string changes' );
+	}
+
+	/**
+	 * @testdox Filter woocommerce_rest_api_cache_version_strings_hash_data can modify version strings tracking data.
+	 */
+	public function test_filter_can_modify_version_strings_hash_data() {
+		$this->sut->controller_version_strings = array( 'list_products' );
+
+		$this->version_generator->get_version( 'list_products' );
+
+		$filter_called = false;
+		$filter        = function ( $version_data, $version_string_ids, $controller ) use ( &$filter_called ) {
+			unset( $controller ); // Avoid parameter not used PHPCS errors.
+			$filter_called = true;
+			$this->assertIsArray( $version_data );
+			$this->assertIsArray( $version_string_ids );
+			$this->assertContains( 'list_products', $version_string_ids );
+			return array(); // Return empty to prevent storing the hash.
+		};
+		add_filter( 'woocommerce_rest_api_cache_version_strings_hash_data', $filter, 10, 3 );
+
+		$response1 = $this->query_endpoint( 'with_controller_version_strings' );
+		$this->assertCacheHeader( $response1, 'MISS' );
+		$this->assertTrue( $filter_called, 'Filter should have been called' );
+
+		$cache_keys   = $this->get_all_cache_keys();
+		$cache_key    = $cache_keys[0];
+		$cached_entry = wp_cache_get( $cache_key, self::CACHE_GROUP );
+		$this->assertArrayNotHasKey( 'version_strings_hash', $cached_entry, 'Filter cleared version data, so no hash should be stored' );
+
+		remove_filter( 'woocommerce_rest_api_cache_version_strings_hash_data', $filter, 10 );
+		$this->sut->controller_version_strings = array();
+	}
+
+	/**
+	 * @testdox Empty version strings array does not store a hash in cache.
+	 */
+	public function test_empty_version_strings_not_stored() {
+		$this->sut->controller_version_strings = array();
+
+		$response1 = $this->query_endpoint( 'with_controller_version_strings' );
+		$this->assertCacheHeader( $response1, 'MISS' );
+
+		$cache_keys   = $this->get_all_cache_keys();
+		$cache_key    = $cache_keys[0];
+		$cached_entry = wp_cache_get( $cache_key, self::CACHE_GROUP );
+
+		$this->assertArrayNotHasKey( 'version_strings_hash', $cached_entry, 'No hash should be stored when version strings array is empty' );
+	}
+
+	/**
+	 * @testdox Cache is invalidated when version string changes from existing to deleted.
+	 */
+	public function test_cache_invalidated_when_version_string_deleted() {
+		$this->sut->controller_version_strings = array( 'list_products' );
+
+		$original_version = $this->version_generator->get_version( 'list_products' );
+		$this->assertNotNull( $original_version );
+
+		$response1 = $this->query_endpoint( 'with_controller_version_strings' );
+		$this->assertCacheHeader( $response1, 'MISS' );
+
+		$response2 = $this->query_endpoint( 'with_controller_version_strings' );
+		$this->assertCacheHeader( $response2, 'HIT' );
+
+		// Delete the version string.
+		$this->version_generator->delete_version( 'list_products' );
+		$this->fixed_time += 1;
+
+		// Next request should get a MISS because version string was deleted (and will be regenerated).
+		$response3 = $this->query_endpoint( 'with_controller_version_strings' );
+		$this->assertCacheHeader( $response3, 'MISS' );
+
+		// New version should be different.
+		$new_version = $this->version_generator->get_version( 'list_products', false );
+		$this->assertNotNull( $new_version );
+		$this->assertNotSame( $original_version, $new_version );
+
+		$this->sut->controller_version_strings = array();
 	}
 
 	/**

@@ -288,6 +288,14 @@ class Email_Editor {
 				'permission_callback' => function () {
 					return current_user_can( 'edit_posts' );
 				},
+				'args'                => array(
+					'post_id' => array(
+						'description'       => __( 'The post ID for context-aware tag filtering.', 'woocommerce' ),
+						'type'              => 'integer',
+						'required'          => false,
+						'sanitize_callback' => 'absint',
+					),
+				),
 			)
 		);
 	}
