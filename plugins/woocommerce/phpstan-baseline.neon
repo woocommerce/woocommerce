@@ -41302,12 +41302,6 @@ parameters:
 			path: src/Admin/API/ProductsLowInStock.php
 
 		-
-			message: '#^Access to an undefined property object\:\:\$post_type\.$#'
-			identifier: property.notFound
-			count: 1
-			path: src/Admin/API/ProductsLowInStock.php
-
-		-
 			message: '#^Access to an undefined property object\:\:\$stock_quantity\.$#'
 			identifier: property.notFound
 			count: 1

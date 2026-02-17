@@ -172,10 +172,12 @@ const productButtonStore = {
 				{ lock: universalLock }
 			);
 
+			// Pass quantityToAdd as a delta. The cart store will add this
+			// to the current quantity, ensuring rapid clicks compound correctly.
 			yield actions.addCartItem(
 				{
 					id: state.productId,
-					quantity: state.quantity + context.quantityToAdd,
+					quantityToAdd: context.quantityToAdd,
 					type: context.productType,
 				},
 				{
