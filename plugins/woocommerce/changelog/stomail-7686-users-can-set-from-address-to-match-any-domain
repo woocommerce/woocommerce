@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add filters `woocommerce_emails_api_settings_schema_validate_and_sanitize_settings` and `woocommerce_emails_settings_schema_validate_and_sanitize_settings` to allow customization of email settings validation in the REST API.

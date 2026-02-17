@@ -4,7 +4,7 @@ WooCommerce powers many online stores across the internet, and your help making 
 
 There are many ways to contribute to the project!
 
-- [Translating strings into your language](https://github.com/woocommerce/woocommerce/wiki/Translating-WooCommerce).
+- [Translating strings into your language](https://developer.woocommerce.com/docs/best-practices/localization-translation/translating-woocommerce/).
 - Answering questions on the various WooCommerce communities like the [WP.org support forums](https://wordpress.org/support/plugin/woocommerce/).
 - Testing open [issues](https://github.com/woocommerce/woocommerce/issues) or [pull requests](https://github.com/woocommerce/woocommerce/pulls) and sharing your findings in a comment.
 - Testing WooCommerce beta versions and release candidates. Those are announced in the [WooCommerce development blog](https://developer.woocommerce.com/blog/).
@@ -23,18 +23,18 @@ If you have questions about the process to contribute code or want to discuss de
 
 Please take a moment to review the [project readme](https://github.com/woocommerce/woocommerce/blob/trunk/README.md) and our [development notes](https://github.com/woocommerce/woocommerce/blob/trunk/DEVELOPMENT.md), which cover the basics needed to start working on this project. You may also be interested in the following resources:
 
-- [How to set up WooCommerce development environment](https://github.com/woocommerce/woocommerce/wiki/How-to-set-up-WooCommerce-development-environment)
-- [Git Flow](https://github.com/woocommerce/woocommerce/wiki/WooCommerce-Git-Flow)
-- [Minification of SCSS and JS](https://github.com/woocommerce/woocommerce/wiki/Minification-of-SCSS-and-JS)
-- [Naming conventions](https://github.com/woocommerce/woocommerce/wiki/Naming-conventions)
-- [String localisation guidelines](https://github.com/woocommerce/woocommerce/wiki/String-localisation-guidelines)
+- [How to set up WooCommerce development environment](https://developer.woocommerce.com/docs/contribution/contributing/#setting-up-your-development-environment)
+- [Git Flow](https://developer.woocommerce.com/docs/contribution/contributing/woocommerce-git-flow/)
+- [Minification of SCSS and JS](https://developer.woocommerce.com/docs/contribution/contributing/minification-of-SCSS-and-JS/)
+- [Naming conventions](https://developer.woocommerce.com/docs/contribution/contributing/naming-conventions/)
+- [String localisation guidelines](https://developer.woocommerce.com/docs/contribution/contributing/string-localisation-guidelines/)
 - [Running unit tests](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/README.md)
 - [Running e2e tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e-pw#guide-for-writing-e2e-tests)
 
 ## Coding Guidelines and Development 🛠
 
 - Ensure you stick to the [WordPress Coding Standards](https://make.wordpress.org/core/handbook/best-practices/coding-standards/php/).
-- Run our build process described in the document on [how to set up WooCommerce development environment](https://github.com/woocommerce/woocommerce/wiki/How-to-set-up-WooCommerce-development-environment), it will install our pre-commit hook, code sniffs, dependencies, and more.
+- Run our build process described in the document on [how to set up WooCommerce development environment](https://developer.woocommerce.com/docs/contribution/contributing/#setting-up-your-development-environment), it will install our pre-commit hook, code sniffs, dependencies, and more.
 - Before pushing commits to GitHub, check your code against our code standards. For PHP code in the WooCommerce Core project you can do this by running `pnpm --filter=@woocommerce/plugin-woocommerce lint:php:changes:branch`.
 - Whenever possible, please fix pre-existing code standards errors in code that you change.
 - Please consider adding appropriate tests related to your change if applicable such as unit, API and E2E tests. You can check the following guides for this purpose:

@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Move `handleSubmit` inside `addToCart` in `add-to-cart-with-options` store.
