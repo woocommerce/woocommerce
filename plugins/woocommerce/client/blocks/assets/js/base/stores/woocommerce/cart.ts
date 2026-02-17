@@ -275,10 +275,11 @@ let cartQueue: MutationQueue< Cart > | null = null;
  *
  * Handles optimistic updates, request queuing, and state reconciliation.
  */
-function sendCartRequest(
+async function sendCartRequest(
 	stateRef: Store[ 'state' ],
 	options: MutationRequest< Cart >
 ): Promise< MutationResult< Cart > > {
+	await isNonceReady;
 	// Lazily initialize queue on first use.
 	if ( ! cartQueue ) {
 		cartQueue = createMutationQueue< Cart >( {
@@ -303,14 +304,8 @@ function sendCartRequest(
 const { state, actions } = store< Store >(
 	'woocommerce',
 	{
-		state: {
-			nonce: '',
-		},
 		actions: {
 			*removeCartItem( key: string ) {
-				yield isNonceReady;
-
-				const previousCart = JSON.stringify( state.cart );
 				// Track what changes we're making for notice comparison.
 				const quantityChanges: QuantityChanges = {
 					cartItemsPendingDelete: [ key ],
@@ -367,7 +362,6 @@ const { state, actions } = store< Store >(
 				{ id, key, quantity, quantityToAdd, variation }: ClientCartItem,
 				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
 			) {
-				yield isNonceReady;
 				if ( quantity !== undefined && quantityToAdd !== undefined ) {
 					throw new Error(
 						'addCartItem: pass either quantity or quantityToAdd, not both.'
@@ -526,8 +520,6 @@ const { state, actions } = store< Store >(
 				items: ClientCartItem[],
 				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
 			) {
-				yield isNonceReady;
-
 				const a11yModulePromise = import( '@wordpress/a11y' );
 				const quantityChanges: QuantityChanges = {};
 
