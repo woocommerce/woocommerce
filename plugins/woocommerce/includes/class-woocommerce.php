@@ -940,17 +940,20 @@ final class WooCommerce {
 			// Optimization note: we don't have fully initialized environment yet and have to use low-level PHP environment instead.
 			$page_id_or_slugs = $_GET['page_id'] ?? explode( '/', trim( (string) wp_parse_url( $_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH ), '/' ) ); // phpcs:ignore WordPress.Security
 			if ( $page_id_or_slugs ) {
-				$sensitive_slugs = array( 'checkout', 'cart', 'my-account' );
-				$disable_cron    = ( is_array( $page_id_or_slugs ) && ! empty( array_intersect( $sensitive_slugs, $page_id_or_slugs ) ) );
-				if ( $disable_cron ) {
-					remove_action( 'init', 'wp_cron' );
+				if ( is_array( $page_id_or_slugs ) ) {
+					$slugs = array( 'checkout', 'cart', 'my-account' );
+					if ( ! empty( array_intersect( $slugs, $page_id_or_slugs ) ) ) {
+						remove_action( 'init', 'wp_cron' );
+					}
 					return;
 				}
 
-				$sensitive_pages = array( wc_get_page_id( 'checkout' ), wc_get_page_id( 'cart' ), wc_get_page_id( 'myaccount' ) );
-				$disable_cron    = ( is_numeric( $page_id_or_slugs ) && in_array( (int) $page_id_or_slugs, $sensitive_pages, true ) );
-				if ( $disable_cron ) {
-					remove_action( 'init', 'wp_cron' );
+				if ( is_numeric( $page_id_or_slugs ) ) {
+					$pages = array( wc_get_page_id( 'checkout' ), wc_get_page_id( 'cart' ), wc_get_page_id( 'myaccount' ) );
+					if ( in_array( (int) $page_id_or_slugs, $pages, true ) ) {
+						remove_action( 'init', 'wp_cron' );
+					}
+					return;
 				}
 			}
 		}
