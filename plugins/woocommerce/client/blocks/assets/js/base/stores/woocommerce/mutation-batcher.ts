@@ -44,6 +44,7 @@ export type MutationQueueConfig< TState = unknown > = {
 	takeSnapshot: () => TState;
 	rollback: ( snapshot: TState ) => void;
 	commit: ( serverState: TState ) => void;
+	onResponse?: ( response: Response ) => void;
 };
 
 type TrackedRequest< TState = unknown > = {
@@ -56,7 +57,8 @@ type TrackedRequest< TState = unknown > = {
 export function createMutationQueue< TState >(
 	config: MutationQueueConfig< TState >
 ) {
-	const { endpoint, getHeaders, takeSnapshot, rollback, commit } = config;
+	const { endpoint, getHeaders, takeSnapshot, rollback, commit, onResponse } =
+		config;
 
 	// Snapshot taken once at the start of each processing cycle.
 	let snapshot: TState | null = null;
@@ -223,6 +225,8 @@ export function createMutationQueue< TState >(
 				},
 				body: JSON.stringify( { requests } ),
 			} );
+
+			onResponse?.( response );
 
 			if ( ! response.ok ) {
 				handleBatchFailure(
