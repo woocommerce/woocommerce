@@ -42,7 +42,7 @@ class ProductCatalogTemplateTest extends WC_Unit_Test_Case {
 		$_GET['action'] = 'trash';
 		$_GET['post']   = (string) wc_get_page_id( 'shop' );
 
-		$result = $this->sut->redirect_shop_page_to_product_catalog_template();
+		$result = $this->sut->get_product_catalog_template_editor_url();
 
 		$this->assertNull( $result, 'Should not redirect when action is not edit' );
 	}
@@ -54,7 +54,7 @@ class ProductCatalogTemplateTest extends WC_Unit_Test_Case {
 		$_GET['action'] = 'edit';
 		$_GET['post']   = '99999';
 
-		$result = $this->sut->redirect_shop_page_to_product_catalog_template();
+		$result = $this->sut->get_product_catalog_template_editor_url();
 
 		$this->assertNull( $result, 'Should not redirect for non-shop pages' );
 	}
@@ -66,7 +66,7 @@ class ProductCatalogTemplateTest extends WC_Unit_Test_Case {
 		$_GET['action'] = 'edit';
 		$_GET['post']   = '-1';
 
-		$result = $this->sut->redirect_shop_page_to_product_catalog_template();
+		$result = $this->sut->get_product_catalog_template_editor_url();
 
 		$this->assertNull( $result, 'Should not redirect when shop page is not set' );
 	}
@@ -83,7 +83,7 @@ class ProductCatalogTemplateTest extends WC_Unit_Test_Case {
 		$_GET['action'] = 'edit';
 		$_GET['post']   = (string) wc_get_page_id( 'shop' );
 
-		$result = $this->sut->redirect_shop_page_to_product_catalog_template();
+		$result = $this->sut->get_product_catalog_template_editor_url();
 
 		$this->assertNotNull( $result, 'Should return a redirect URL for the shop page' );
 		$this->assertStringContainsString( 'site-editor.php', $result );
@@ -103,7 +103,7 @@ class ProductCatalogTemplateTest extends WC_Unit_Test_Case {
 		$_GET['action'] = 'edit';
 		$_GET['post']   = (string) wc_get_page_id( 'shop' );
 
-		$result = $this->sut->redirect_shop_page_to_product_catalog_template();
+		$result = $this->sut->get_product_catalog_template_editor_url();
 
 		$expected_post_id = BlockTemplateUtils::theme_has_template( 'archive-product' )
 			? wp_get_theme()->get_stylesheet() . '//archive-product'
