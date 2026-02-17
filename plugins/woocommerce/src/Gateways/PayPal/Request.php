@@ -439,8 +439,8 @@ class Request {
 	 * @param string   $action The action.
 	 * @return void
 	 */
-	public function handle_duplicate_invoice_id( WC_Order $order, string $paypal_order_id, string $action_url, string $action ): void {
-		$new_invoice_id = $this->generate_paypal_invoice_id( $order );
+	private function handle_duplicate_invoice_id( WC_Order $order, string $paypal_order_id, string $action_url, string $action ): void {
+		$new_invoice_id = $this->generate_paypal_invoice_id_with_unique_suffix( $order );
 
 		\WC_Gateway_Paypal::log( 'Attempting to patch PayPal order invoice_id. PayPal Order ID: ' . $paypal_order_id . '. New invoice_id: ' . $new_invoice_id . '. Order ID: ' . $order->get_id() );
 
@@ -475,7 +475,7 @@ class Request {
 			$order->add_order_note(
 				sprintf(
 					/* translators: %1$s: New invoice ID */
-					__( 'PayPal order Invoice ID updated to %1$s due to duplicate Invoice ID error.', 'woocommerce' ),
+					__( 'PayPal order Invoice ID updated to %1$s to ensure uniqueness.', 'woocommerce' ),
 					esc_html( $new_invoice_id )
 				)
 			);
@@ -495,14 +495,13 @@ class Request {
 	 * @param WC_Order $order Order object.
 	 * @return string
 	 */
-	private function generate_paypal_invoice_id( WC_Order $order ): string {
+	private function generate_paypal_invoice_id_with_unique_suffix( WC_Order $order ): string {
 		$prefix          = $this->gateway->get_option( 'invoice_prefix' );
 		$order_number    = $order->get_order_number();
 		$base_invoice_id = $prefix . $order_number;
 
 		// generate a unique ID for the site.
-		$site_id = class_exists( '\Jetpack_Options' ) ? (string) \Jetpack_Options::get_option( 'id' ) : '';
-		$unique_id = substr( md5( $site_id . wp_rand( 1, 99 ) ), 0, 8 );
+		$unique_id = bin2hex( random_bytes( 6 ) );
 
 		$invoice_id = $this->limit_length( $base_invoice_id . '-' . $unique_id, PayPalConstants::PAYPAL_INVOICE_ID_MAX_LENGTH );
 		return $invoice_id;
@@ -711,7 +710,7 @@ class Request {
 				array(
 					'custom_id'  => $this->get_paypal_order_custom_id( $order ),
 					'amount'     => $purchase_unit_amount,
-					'invoice_id' => $this->limit_length( $this->gateway->get_option( 'invoice_prefix' ) . $order->get_order_number(), PayPalConstants::PAYPAL_INVOICE_ID_MAX_LENGTH ),
+					'invoice_id' => 'TEST-101', //$this->limit_length( $this->gateway->get_option( 'invoice_prefix' ) . $order->get_order_number(), PayPalConstants::PAYPAL_INVOICE_ID_MAX_LENGTH ),
 					'items'      => $order_items,
 					'payee'      => array(
 						'email_address' => $payee_email,
