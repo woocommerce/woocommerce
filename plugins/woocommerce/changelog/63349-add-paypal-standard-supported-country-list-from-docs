@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Validate shipping country against PayPal’s supported countries instead of WooCommerce’s full country list to avoid invalid country codes in PayPal requests.
