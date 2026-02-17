@@ -106,6 +106,53 @@ const mockShippingPartnerSuggestions = async ( page, shippingPartners ) => {
 	);
 };
 
+const getMethodSettingsValues = ( settings = {} ) =>
+	Object.entries( settings ).reduce( ( settingsValues, [ key, value ] ) => {
+		if (
+			value &&
+			typeof value === 'object' &&
+			Object.prototype.hasOwnProperty.call( value, 'value' )
+		) {
+			settingsValues[ key ] = value.value;
+		}
+		return settingsValues;
+	}, {} );
+
+const getNonDefaultShippingZones = async ( restApi ) => {
+	const { data: zones } = await restApi.get(
+		`${ WC_API_PATH }/shipping/zones`
+	);
+	const nonDefaultZones = zones.filter( ( zone ) => zone.id !== 0 );
+
+	return Promise.all(
+		nonDefaultZones.map( async ( zone ) => {
+			const [ locationsResponse, methodsResponse ] = await Promise.all( [
+				restApi.get(
+					`${ WC_API_PATH }/shipping/zones/${ zone.id }/locations`
+				),
+				restApi.get(
+					`${ WC_API_PATH }/shipping/zones/${ zone.id }/methods`
+				),
+			] );
+
+			return {
+				name: zone.name,
+				order: zone.order,
+				locations: locationsResponse.data.map( ( location ) => ( {
+					code: location.code,
+					type: location.type,
+				} ) ),
+				methods: methodsResponse.data.map( ( method ) => ( {
+					method_id: method.method_id,
+					enabled: method.enabled,
+					order: method.order,
+					settings: getMethodSettingsValues( method.settings ),
+				} ) ),
+			};
+		} )
+	);
+};
+
 const clearShippingZones = async ( restApi ) => {
 	const { data: zones } = await restApi.get(
 		`${ WC_API_PATH }/shipping/zones`
@@ -121,16 +168,71 @@ const clearShippingZones = async ( restApi ) => {
 	);
 };
 
+const restoreShippingZones = async ( restApi, shippingZones ) => {
+	await clearShippingZones( restApi );
+
+	for ( const zone of shippingZones ) {
+		const { data: createdZone } = await restApi.post(
+			`${ WC_API_PATH }/shipping/zones`,
+			{
+				name: zone.name,
+				order: zone.order,
+			}
+		);
+
+		if ( zone.locations.length > 0 ) {
+			await restApi.put(
+				`${ WC_API_PATH }/shipping/zones/${ createdZone.id }/locations`,
+				zone.locations
+			);
+		}
+
+		for ( const method of zone.methods ) {
+			const methodPayload = {
+				method_id: method.method_id,
+				enabled: method.enabled,
+				order: method.order,
+			};
+
+			if ( Object.keys( method.settings ).length > 0 ) {
+				methodPayload.settings = method.settings;
+			}
+
+			await restApi.post(
+				`${ WC_API_PATH }/shipping/zones/${ createdZone.id }/methods`,
+				methodPayload
+			);
+		}
+	}
+};
+
 const updateStoreLocationForShippingTask = async (
 	restApi,
 	{ defaultCountry, storeAddress }
 ) => {
-	const initialShippingDefaultsOption = await restApi.get(
-		`${ WC_ADMIN_API_PATH }/options?options=woocommerce_admin_created_default_shipping_zones`
-	);
-	const initialMarketplaceSuggestionsSetting = await restApi.get(
-		`${ WC_API_PATH }/settings/advanced/woocommerce_show_marketplace_suggestions`
-	);
+	const [
+		initialShippingDefaultsOption,
+		initialMarketplaceSuggestionsSetting,
+		initialOnboardingProfile,
+		initialDefaultCountry,
+		initialStoreAddress,
+		initialShippingZones,
+	] = await Promise.all( [
+		restApi.get(
+			`${ WC_ADMIN_API_PATH }/options?options=woocommerce_admin_created_default_shipping_zones`
+		),
+		restApi.get(
+			`${ WC_API_PATH }/settings/advanced/woocommerce_show_marketplace_suggestions`
+		),
+		restApi.get( `${ WC_ADMIN_API_PATH }/onboarding/profile` ),
+		restApi.get(
+			`${ WC_API_PATH }/settings/general/woocommerce_default_country`
+		),
+		restApi.get(
+			`${ WC_API_PATH }/settings/general/woocommerce_store_address`
+		),
+		getNonDefaultShippingZones( restApi ),
+	] );
 
 	await clearShippingZones( restApi );
 	await restApi.put( `${ WC_ADMIN_API_PATH }/options`, {
@@ -146,15 +248,6 @@ const updateStoreLocationForShippingTask = async (
 	await restApi.put( `${ WC_ADMIN_API_PATH }/onboarding/profile`, {
 		skipped: true,
 	} );
-
-	const [ initialDefaultCountry, initialStoreAddress ] = await Promise.all( [
-		restApi.get(
-			`${ WC_API_PATH }/settings/general/woocommerce_default_country`
-		),
-		restApi.get(
-			`${ WC_API_PATH }/settings/general/woocommerce_store_address`
-		),
-	] );
 
 	await restApi.put(
 		`${ WC_API_PATH }/settings/general/woocommerce_default_country`,
@@ -178,10 +271,14 @@ const updateStoreLocationForShippingTask = async (
 		shippingDefaultsOption: initialShippingDefaultsOption.data,
 		marketplaceSuggestionsSetting:
 			initialMarketplaceSuggestionsSetting.data.value,
+		onboardingProfileSkipped: initialOnboardingProfile.data.skipped,
+		shippingZones: initialShippingZones,
 	};
 };
 
 const resetStoreLocationForShippingTask = async ( restApi, initialValues ) => {
+	await restoreShippingZones( restApi, initialValues.shippingZones );
+
 	await restApi.put(
 		`${ WC_API_PATH }/settings/general/woocommerce_default_country`,
 		{
@@ -204,6 +301,12 @@ const resetStoreLocationForShippingTask = async ( restApi, initialValues ) => {
 			value: initialValues.marketplaceSuggestionsSetting,
 		}
 	);
+
+	if ( typeof initialValues.onboardingProfileSkipped === 'boolean' ) {
+		await restApi.put( `${ WC_ADMIN_API_PATH }/onboarding/profile`, {
+			skipped: initialValues.onboardingProfileSkipped,
+		} );
+	}
 };
 
 const openShippingLabelPrintingStep = async ( page ) => {
