@@ -152,6 +152,10 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 	 * @return bool
 	 */
 	public function is_available() {
+		if ( 'yes' !== $this->enabled ) {
+			return false;
+		}
+
 		$is_virtual       = true;
 		$shipping_methods = array();
 
