@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Redirect Shop page editor to Product Catalog template in the Site Editor on block themes, so users land on the correct editing surface instead of an empty page.
