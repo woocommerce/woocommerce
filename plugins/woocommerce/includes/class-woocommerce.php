@@ -276,15 +276,6 @@ final class WooCommerce {
 	 * @return void
 	 */
 	public function on_plugins_loaded() {
-		// Optimization note: ensures wp_cron doesn't interfere with timing-sensitive WooCommerce pages.
-		// Minimal intervention: gracefully define the constant (can be present from config or an extension).
-		// We intentionally avoid fallbacks here (as unhooking wp_cron from actions) for future-proof compatibility.
-		$page_id         = (int) ( $_GET['page_id'] ?? null ); // phpcs:ignore WordPress.Security
-		$disable_wp_cron = ( $page_id && ! defined( 'DISABLE_WP_CRON' ) && ( wc_get_page_id( 'checkout' ) === $page_id || wc_get_page_id( 'cart' ) === $page_id ) );
-		if ( $disable_wp_cron ) {
-			define( 'DISABLE_WP_CRON', true );
-		}
-
 		/**
 		 * Action to signal that WooCommerce has finished loading.
 		 *
@@ -340,6 +331,7 @@ final class WooCommerce {
 		add_action( 'switch_blog', array( $this, 'wpdb_table_fix' ), 0 );
 		add_action( 'activated_plugin', array( $this, 'activated_plugin' ) );
 		add_action( 'deactivated_plugin', array( $this, 'deactivated_plugin' ) );
+		add_action( 'woocommerce_loaded', array( $this, 'maybe_halt_cron_activity_for_this_request' ) );
 		add_action( 'woocommerce_installed', array( $this, 'add_woocommerce_inbox_variant' ) );
 		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_inbox_variant' ) );
 		add_action( 'rest_api_init', array( $this, 'register_wp_admin_settings' ) );
@@ -922,6 +914,27 @@ final class WooCommerce {
 	 */
 	public function include_template_functions() {
 		include_once WC_ABSPATH . 'includes/wc-template-functions.php';
+	}
+
+	/**
+	 * Disable cron on speed-sensitive pages and endpoints.
+	 *
+	 * @internal
+	 * @since 10.7.0
+	 *
+	 * @return void
+	 */
+	public function maybe_halt_cron_activity_for_this_request (): void {
+		$is_cron_disabled = defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON;
+		if ( ! $is_cron_disabled && has_action( 'init', 'wp_cron' ) ) {
+			// Optimization note: detach cron from async and api requests (predictable execution times and concurrency).
+			// TBD: decide on narrowing down the check to WooCommerce REST APIs only.
+			$rest_or_ajax_request = wp_doing_ajax() || wp_is_serving_rest_request();
+			if ( $rest_or_ajax_request ) {
+				// The cron disabling approach is aligned with upstreams' \WP_Customize_Manager implementation.
+				remove_action( 'init', 'wp_cron' );
+			}
+		}
 	}
 
 	/**
