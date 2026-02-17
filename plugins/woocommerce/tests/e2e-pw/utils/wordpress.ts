@@ -54,7 +54,7 @@ const getInstalledWordPressVersion = async () => {
 		);
 
 		return Number.parseFloat( stdout.trim() );
-	} catch ( error ) {
+	} catch ( error: Error ) {
 		throw new Error(
 			`Error getting WordPress version: ${ error.message }`
 		);
