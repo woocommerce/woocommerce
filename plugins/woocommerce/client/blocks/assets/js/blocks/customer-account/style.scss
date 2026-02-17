@@ -17,7 +17,7 @@
 
 :where(.wp-block-woocommerce-customer-account) {
 	--wc-customer-account-gap: var(--wp--preset--spacing--20, #{em($gap-smaller)});
-	--wc-customer-account-padding: var(
+	--wc-customer-account-padding: 0 var(
 		--wp--preset--spacing--20,
 		#{em($gap-smaller)}
 	);
@@ -100,7 +100,6 @@
 			border: 1px solid var(--wc-customer-account-dropdown-border-color);
 			border-radius: $universal-border-radius;
 			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-			padding: var(--wc-customer-account-dropdown-padding-block) 0;
 			position: absolute;
 			top: 100%;
 			left: 0;
@@ -127,31 +126,24 @@
 			right: 0;
 		}
 
-		.wc-block-customer-account__dropdown-section {
-			padding: calc(
-					var(--wc-customer-account-dropdown-padding-block) * 0.5
-				)
-				0;
-		}
-
 		.wc-block-customer-account__dropdown-divider {
 			background: var(--wc-customer-account-dropdown-border-color);
-			margin: calc(
-					var(--wc-customer-account-dropdown-padding-block) * 0.5
-				)
-				0;
 			height: 1px;
 		}
 
 		.wc-block-customer-account__dropdown-item {
 			color: inherit;
 			display: block;
-			font-size: var(--wp--preset--font-size--medium);
+			font-size: var(--wp--preset--font-size--small);
 			line-height: 1.5;
-			padding: var(--wc-customer-account-dropdown-padding-block)
-				var(--wc-customer-account-dropdown-padding-inline);
+			padding: var(--wc-customer-account-dropdown-padding-block);
+			padding-bottom: 0;
 			text-decoration: none;
 			white-space: nowrap;
+
+			&:last-child {
+				padding-bottom: var(--wc-customer-account-dropdown-padding-block);
+			}
 
 			&:hover,
 			&:focus {
