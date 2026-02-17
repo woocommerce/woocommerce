@@ -917,7 +917,7 @@ final class WooCommerce {
 	}
 
 	/**
-	 * Disable cron on speed-sensitive pages and endpoints.
+	 * Disable cron on execution timing sensitive pages and endpoints.
 	 *
 	 * @internal
 	 * @since 10.7.0
