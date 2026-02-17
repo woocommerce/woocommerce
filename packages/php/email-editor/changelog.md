@@ -2,6 +2,10 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.8.0](https://github.com/woocommerce/email-editor/releases/tag/2.8.0) - 2026-02-17 
+
+-   Minor - Fix spacing issues in email editor product collection rendering. [#63177]
+
 ## [2.7.0](https://github.com/woocommerce/email-editor/releases/tag/2.7.0) - 2026-02-12 
 
 -   Patch - Fix YouTube URL truncation in subscription emails when video IDs contain underscores. [#63252]

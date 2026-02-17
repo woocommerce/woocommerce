@@ -2,6 +2,14 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.7.0) - 2026-02-17 
+
+-   Patch - Add memoization for the getEmailTemplates selector [#63200]
+-   Patch - Fix blank modal when using swap template action in email editor [#63229]
+-   Minor - Add EmailActionsFill allowing extenders to add custom email actions to the sidebar [#63269]
+-   Patch - Add `customSavePanel` prop to the Email Editor component and pass it down to the Gutenberg Editor component [#63323]
+-   Minor - Move TemplateSelection to EmailActionsFill slot and export TemplateSelection component for extensibility [#63277]
+
 ## [1.6.0](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.6.0) - 2026-02-04 
 
 -   Minor - Ensure reset template action for email templates [#62984]
