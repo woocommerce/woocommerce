@@ -9,12 +9,14 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
 
 /**
- * Shared store that collects notifications during a request and dispatches
- * them all on shutdown.
+ * Store that collects notifications during a request and dispatches them all on
+ * on shutdown. Should be accessed from the container (`wc_get_container`) to
+ * ensure store is shared by all usage.
  *
- * Notifications are keyed by `{type}_{resource_id}` to prevent duplicates
- * within a single request. On shutdown, a `wc_push_notifications_dispatch`
- * action is fired with all pending notifications.
+ * Notifications are keyed by `{blog_id}_{type}_{resource_id}` to prevent
+ * duplicates within a single request. On shutdown, a
+ * `wc_push_notifications_dispatch` action is fired with all pending
+ * notifications.
  *
  * @since 10.7.0
  */
@@ -23,6 +25,13 @@ class PendingNotificationStore {
 	 * Action hook fired on shutdown with pending notifications.
 	 */
 	const DISPATCH_HOOK = 'wc_push_notifications_dispatch';
+
+	/**
+	 * Whether the store is enabled and accepting notifications.
+	 *
+	 * @var bool
+	 */
+	private bool $enabled = false;
 
 	/**
 	 * Pending notifications keyed by identifier.
@@ -37,13 +46,6 @@ class PendingNotificationStore {
 	 * @var bool
 	 */
 	private bool $shutdown_registered = false;
-
-	/**
-	 * Whether the store is enabled and accepting notifications.
-	 *
-	 * @var bool
-	 */
-	private bool $enabled = false;
 
 	/**
 	 * Enables the store so it accepts notifications.
@@ -61,7 +63,7 @@ class PendingNotificationStore {
 	/**
 	 * Adds a notification to the pending store.
 	 *
-	 * Duplicate notifications (same type and resource ID) within a single
+	 * Duplicate notifications (same blog, type and resource ID) within a single
 	 * request are silently ignored. The shutdown hook is registered on the
 	 * first call.
 	 *
@@ -116,7 +118,8 @@ class PendingNotificationStore {
 		do_action( self::DISPATCH_HOOK, $notifications );
 
 		/**
-		 * Store is single-use per request lifecycle.
+		 * Store is single-use per request lifecycle, so disable it and clear
+		 * pending notifications.
 		 */
 		$this->enabled = false;
 		$this->pending = array();

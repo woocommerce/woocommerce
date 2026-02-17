@@ -51,7 +51,7 @@ abstract class Notification {
 	 * @since 10.7.0
 	 */
 	public function __construct( string $type, int $resource_id, int $blog_id ) {
-		if ( '' === $type ) {
+		if ( '' === trim( $type ) ) {
 			throw new InvalidArgumentException( 'Notification type must not be empty.' );
 		}
 
@@ -63,7 +63,7 @@ abstract class Notification {
 			throw new InvalidArgumentException( 'Notification blog_id must be positive.' );
 		}
 
-		$this->type        = $type;
+		$this->type        = trim( $type );
 		$this->resource_id = $resource_id;
 		$this->blog_id     = $blog_id;
 	}
