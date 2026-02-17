@@ -115,6 +115,10 @@ class PendingNotificationStore {
 		 */
 		do_action( self::DISPATCH_HOOK, $notifications );
 
+		/**
+		 * Store is single-use per request lifecycle.
+		 */
+		$this->enabled = false;
 		$this->pending = array();
 	}
 

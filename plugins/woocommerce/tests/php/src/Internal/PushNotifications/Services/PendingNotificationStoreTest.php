@@ -34,7 +34,7 @@ class PendingNotificationStoreTest extends WC_Unit_Test_Case {
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		remove_all_actions( 'shutdown' );
+		remove_action( 'shutdown', array( $this->store, 'dispatch_all' ) );
 		remove_all_actions( PendingNotificationStore::DISPATCH_HOOK );
 		parent::tearDown();
 	}

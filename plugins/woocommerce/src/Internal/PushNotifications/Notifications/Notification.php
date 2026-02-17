@@ -4,6 +4,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\PushNotifications\Notifications;
 
+use InvalidArgumentException;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -44,9 +46,23 @@ abstract class Notification {
 	 * @param int    $resource_id The resource ID.
 	 * @param int    $blog_id     The blog ID.
 	 *
+	 * @throws InvalidArgumentException If any argument is invalid.
+	 *
 	 * @since 10.7.0
 	 */
 	public function __construct( string $type, int $resource_id, int $blog_id ) {
+		if ( '' === $type ) {
+			throw new InvalidArgumentException( 'Notification type must not be empty.' );
+		}
+
+		if ( $resource_id <= 0 ) {
+			throw new InvalidArgumentException( 'Notification resource_id must be positive.' );
+		}
+
+		if ( $blog_id <= 0 ) {
+			throw new InvalidArgumentException( 'Notification blog_id must be positive.' );
+		}
+
 		$this->type        = $type;
 		$this->resource_id = $resource_id;
 		$this->blog_id     = $blog_id;
@@ -85,7 +101,7 @@ abstract class Notification {
 	 * @since 10.7.0
 	 */
 	public function get_identifier(): string {
-		return $this->type . '_' . $this->resource_id;
+		return sprintf( '%s_%s_%s', $this->blog_id, $this->type, $this->resource_id );
 	}
 
 	/**

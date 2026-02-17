@@ -44,7 +44,7 @@ class NotificationTest extends WC_Unit_Test_Case {
 	public function test_get_identifier(): void {
 		$notification = $this->create_notification( 'store_order', 42, 1 );
 
-		$this->assertSame( 'store_order_42', $notification->get_identifier() );
+		$this->assertSame( '1_store_order_42', $notification->get_identifier() );
 	}
 
 	/**
