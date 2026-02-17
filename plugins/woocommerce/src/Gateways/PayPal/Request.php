@@ -267,9 +267,9 @@ class Request {
 			$http_code     = wp_remote_retrieve_response_code( $response );
 			$body          = wp_remote_retrieve_body( $response );
 			$response_data = json_decode( $body, true );
-			
-			$issue                 = isset( $response_data['details'][0]['issue'] ) ? $response_data['details'][0]['issue'] : '';
-			$duplicate_invoice_id  = 422 === $http_code && PayPalConstants::PAYPAL_ISSUE_DUPLICATE_INVOICE_ID === $issue;
+
+			$issue                = isset( $response_data['details'][0]['issue'] ) ? $response_data['details'][0]['issue'] : '';
+			$duplicate_invoice_id = 422 === $http_code && PayPalConstants::PAYPAL_ISSUE_DUPLICATE_INVOICE_ID === $issue;
 
 			// If the payment failed with a duplicate invoice ID error and it's not a retry, handle it.
 			// If it's a retry, don't handle it again.
@@ -438,6 +438,7 @@ class Request {
 	 * @param string   $action_url The action URL.
 	 * @param string   $action The action.
 	 * @return void
+	 * @throws Exception If the PayPal patch invoice_id request fails.
 	 */
 	private function handle_duplicate_invoice_id( WC_Order $order, string $paypal_order_id, string $action_url, string $action ): void {
 		$new_invoice_id = $this->generate_paypal_invoice_id_with_unique_suffix( $order );
@@ -450,7 +451,7 @@ class Request {
 				'order'     => array(
 					array(
 						'op'    => 'replace',
-						'path' => "/purchase_units/@reference_id=='default'/invoice_id",
+						'path'  => "/purchase_units/@reference_id=='default'/invoice_id",
 						'value' => $new_invoice_id,
 					),
 				),
@@ -485,6 +486,7 @@ class Request {
 			$this->authorize_or_capture_payment( $order, $action_url, $action, true );
 		} catch ( Exception $e ) {
 			\WC_Gateway_Paypal::log( $e->getMessage() );
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			throw new Exception( $e->getMessage() );
 		}
 	}
