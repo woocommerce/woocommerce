@@ -125,6 +125,6 @@ class WooCommerce_Test extends \WC_Unit_Test_Case {
 		remove_filter( 'wp_doing_ajax', '__return_true' );
 
 		add_action( 'init', 'wp_cron' );
-		unset( $_GET['page_id'], $_SERVER['REQUEST_URI'] );
+		unset( $_SERVER['REQUEST_URI'] );
 	}
 }
