@@ -940,6 +940,7 @@ final class WooCommerce {
 				return;
 			}
 
+			// Optimization note: the page detection is limited here and aiming to support "vanilla core" functionality only.
 			$page_id_or_slugs = $_GET['page_id'] ?? explode( '/', trim( (string) wp_parse_url( $request_uri, PHP_URL_PATH ), '/' ) ); // phpcs:ignore WordPress.Security
 			if ( $page_id_or_slugs ) {
 				if ( is_array( $page_id_or_slugs ) ) {
