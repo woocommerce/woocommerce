@@ -37,9 +37,12 @@ jest.mock( '@woocommerce/blocks-components', () => {
 	return {
 		__esModule: true,
 		...originalModule,
-		RadioControlAccordion: ( { onChange } ) => (
+		RadioControlAccordion: ( { onChange, className = '' } ) => (
 			<>
 				<span>Payment method options</span>
+				<span data-testid="payment-method-options-class-name">
+					{ className }
+				</span>
 				<button onClick={ () => onChange( 'credit-card' ) }>
 					Select new payment
 				</button>
@@ -107,6 +110,24 @@ const registerMockExpressPaymentMethods = () => {
 		content: <div>A payment method</div>,
 		edit: <div>A payment method</div>,
 		canMakePayment: () => true,
+	} );
+	dispatch( paymentStore ).__internalUpdateAvailablePaymentMethods();
+};
+
+const registerMockSinglePaymentMethod = () => {
+	registerPaymentMethod( {
+		name: 'cod',
+		label: 'cod',
+		content: <div>A payment method</div>,
+		edit: <div>A payment method</div>,
+		icons: null,
+		canMakePayment: () => true,
+		supports: {
+			showSavedCards: true,
+			showSaveOption: true,
+			features: [ 'products' ],
+		},
+		ariaLabel: 'cod',
 	} );
 	dispatch( paymentStore ).__internalUpdateAvailablePaymentMethods();
 };
@@ -261,6 +282,38 @@ describe( 'PaymentMethods', () => {
 			);
 			expect( activePaymentMethod ).not.toBeNull();
 		} );
+
+		act( () => resetMockPaymentMethods() );
+	} );
+
+	test( 'should not apply single-method radio disable class when only one payment method is available', async () => {
+		act( () => {
+			registerMockSinglePaymentMethod();
+		} );
+
+		wpDataFunctions.dispatch( CART_STORE_KEY ).receiveCart( {
+			...previewCart,
+			payment_methods: [ 'cod' ],
+		} );
+
+		await waitFor( () => {
+			expect(
+				wpDataFunctions.select( paymentStore ).getActivePaymentMethod()
+			).toBe( 'cod' );
+		} );
+
+		render( <PaymentMethods /> );
+
+		await waitFor( () => {
+			const paymentMethodOptions = screen.queryByText(
+				/Payment method options/
+			);
+			expect( paymentMethodOptions ).not.toBeNull();
+		} );
+
+		expect(
+			screen.getByTestId( 'payment-method-options-class-name' )
+		).not.toHaveTextContent( /disable-radio-control/ );
 
 		act( () => resetMockPaymentMethods() );
 	} );
