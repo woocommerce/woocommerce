@@ -1663,7 +1663,7 @@ class WC_Cart extends WC_Legacy_Cart {
 		$index = 1;
 		foreach ( $shipping_packages as $key => $package ) {
 			$shipping_packages[ $key ]['package_id']   = $package['package_id'] ?? $key;
-			$shipping_packages[ $key ]['package_name'] = $this->get_shipping_package_name( $shipping_packages[ $key ], $index );
+			$shipping_packages[ $key ]['package_name'] = $this->get_shipping_package_name( $shipping_packages[ $key ], $index, count( $shipping_packages ) );
 			++$index;
 		}
 
@@ -1675,9 +1675,10 @@ class WC_Cart extends WC_Legacy_Cart {
 	 *
 	 * @param array $package Shipping package data.
 	 * @param int   $index Package number.
+	 * @param int   $total_packages Total number of packages.
 	 * @return string
 	 */
-	private function get_shipping_package_name( $package, $index ) {
+	private function get_shipping_package_name( $package, $index, $total_packages ) {
 		/**
 		 * Filters the shipping package name.
 		 *
@@ -1689,11 +1690,13 @@ class WC_Cart extends WC_Legacy_Cart {
 		 */
 		return apply_filters(
 			'woocommerce_shipping_package_name',
-			sprintf(
-				/* translators: %d: shipping package number */
-				_x( 'Shipment %d', 'shipping packages', 'woocommerce' ),
-				$index
-			),
+
+				sprintf(
+					/* translators: %d: shipping package number */
+					_x( 'Shipment %d', 'shipping packages', 'woocommerce' ),
+					$index
+				),
+
 			$package['package_id'],
 			$package
 		);
