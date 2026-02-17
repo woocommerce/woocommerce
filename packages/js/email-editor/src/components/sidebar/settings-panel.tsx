@@ -16,7 +16,6 @@ import {
  * Internal dependencies
  */
 import { RichTextWithButton } from '../personalization-tags/rich-text-with-button';
-import { TemplateSelection } from './template-selection';
 import {
 	recordEvent,
 	recordEventOnce,
@@ -58,7 +57,6 @@ export function SettingsPanel() {
 			className="woocommerce-email-editor__settings-panel"
 		>
 			<Slot />
-			{ <TemplateSelection /> }
 			{ /* @ts-expect-error canCopyContent is missing in @types/wordpress__editor */ }
 			<ErrorBoundary canCopyContent>
 				{ <SidebarExtensionComponent /> }

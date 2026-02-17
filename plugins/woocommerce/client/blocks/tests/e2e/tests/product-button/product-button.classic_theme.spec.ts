@@ -66,4 +66,25 @@ test.describe( `${ blockData.name } Block`, () => {
 		} );
 		await expect( productElement ).toBeVisible();
 	} );
+
+	test( 'should compound quantity when rapidly clicking same button', async ( {
+		frontendUtils,
+	} ) => {
+		const blocks = await frontendUtils.getBlockByName( blockData.slug );
+		const block = blocks.first();
+
+		await block.locator( 'loading' ).waitFor( {
+			state: 'detached',
+		} );
+
+		// Click the same button 3 times rapidly.
+		await block.click();
+		await block.click();
+		await block.click();
+
+		// All 3 clicks should compound to "3 in cart".
+		await expect( block.getByRole( 'button' ) ).toHaveText( '3 in cart', {
+			timeout: 15000,
+		} );
+	} );
 } );

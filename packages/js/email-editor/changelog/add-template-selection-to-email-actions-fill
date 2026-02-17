@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Move TemplateSelection to EmailActionsFill slot and export TemplateSelection component for extensibility
