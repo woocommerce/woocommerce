@@ -942,8 +942,8 @@ final class WooCommerce {
 			// Optimization note: the page detection is limited here and aiming to support "vanilla core" functionality only.
 			// The target pages are critical for revenue and retention, while not cache friendly and serving ~10% of traffic all together.
 			// Hence, disabling cron there is financially sensible and not blocking upstreams' cron functionality of the store.
-			$page_id          = (int) ( $_GET['page_id'] ?? null );  // phpcs:ignore WordPress.Security
-			$page_id_or_slugs = $page_id ? $page_id : explode( '/', trim( (string) wp_parse_url( $request_uri, PHP_URL_PATH ), '/' ) );
+			$page_id          = $_GET['page_id'] ?? null;  // phpcs:ignore WordPress.Security
+			$page_id_or_slugs = is_numeric( $page_id ) ? (int) $page_id : explode( '/', trim( (string) wp_parse_url( $request_uri, PHP_URL_PATH ), '/' ) );
 			if ( $page_id_or_slugs ) {
 				if ( is_array( $page_id_or_slugs ) ) {
 					$slugs = array( 'checkout', 'cart', 'my-account' );
@@ -956,7 +956,7 @@ final class WooCommerce {
 				if ( is_numeric( $page_id_or_slugs ) ) {
 					// Under the hood, the functions will read options, which already preloaded by WordPress core at this point.
 					$pages = array( wc_get_page_id( 'checkout' ), wc_get_page_id( 'cart' ), wc_get_page_id( 'myaccount' ) );
-					if ( in_array( (int) $page_id_or_slugs, $pages, true ) ) {
+					if ( in_array( $page_id_or_slugs, $pages, true ) ) {
 						remove_action( 'init', 'wp_cron' );
 					}
 					return;
