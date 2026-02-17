@@ -52,74 +52,58 @@ export const update = {
 
 export const get = {
 	coupons: async ( params: any ) => {
-		const response = await api
-			.get( `${ WC_API_PATH }/coupons`, params )
-			.then( ( r ) => r );
-
+		const response = await api.get( `${ WC_API_PATH }/coupons`, params );
 		return response.data;
 	},
 	orders: async ( params: any ) => {
-		const response = await api
-			.get( `${ WC_API_PATH }/orders`, params )
-			.then( ( r ) => r );
-
+		const response = await api.get( `${ WC_API_PATH }/orders`, params );
 		return response.data;
 	},
 	products: async ( params: any ) => {
-		const response = await api
-			.get( `${ WC_API_PATH }/products`, params )
-			.then( ( r ) => r );
-
+		const response = await api.get( `${ WC_API_PATH }/products`, params );
 		return response.data;
 	},
 	productAttributes: async ( params: any ) => {
-		const response = await api
-			.get( `${ WC_API_PATH }/products/attributes`, params )
-			.then( ( r ) => r );
-
+		const response = await api.get(
+			`${ WC_API_PATH }/products/attributes`,
+			params
+		);
 		return response.data;
 	},
 	productCategories: async ( params: any ) => {
-		const response = await api
-			.get( `${ WC_API_PATH }/products/categories`, params )
-			.then( ( r ) => r );
-
+		const response = await api.get(
+			`${ WC_API_PATH }/products/categories`,
+			params
+		);
 		return response.data;
 	},
 	productTags: async ( params: any ) => {
-		const response = await api
-			.get( `${ WC_API_PATH }/products/tags`, params )
-			.then( ( r ) => r );
+		const response = await api.get(
+			`${ WC_API_PATH }/products/tags`,
+			params
+		);
 		return response.data;
 	},
 	shippingClasses: async ( params: any ) => {
-		const response = await api
-			.get( `${ WC_API_PATH }/products/shipping_classes`, params )
-			.then( ( r ) => r );
-
+		const response = await api.get(
+			`${ WC_API_PATH }/products/shipping_classes`,
+			params
+		);
 		return response.data;
 	},
-
 	shippingZones: async ( params: any ) => {
-		const response = await api
-			.get( `${ WC_API_PATH }/shipping/zones`, params )
-			.then( ( r ) => r );
-
+		const response = await api.get(
+			`${ WC_API_PATH }/shipping/zones`,
+			params
+		);
 		return response.data;
 	},
-
 	taxClasses: async () => {
-		const response = await api
-			.get( `${ WC_API_PATH }/taxes/classes` )
-			.then( ( r ) => r );
-
+		const response = await api.get( `${ WC_API_PATH }/taxes/classes` );
 		return response.data;
 	},
 	taxRates: async ( params: any ) => {
-		const response = await api
-			.get( `${ WC_API_PATH }/taxes`, params )
-			.then( ( r ) => r );
-
+		const response = await api.get( `${ WC_API_PATH }/taxes`, params );
 		return response.data;
 	},
 };
@@ -171,10 +155,9 @@ export const create = {
 
 export const deletePost = {
 	coupons: async ( ids: number[] ) => {
-		const res = await api
-			.post( `${ WC_API_PATH }/coupons/batch`, { delete: ids } )
-			.then( ( response ) => response );
-
+		const res = await api.post( `${ WC_API_PATH }/coupons/batch`, {
+			delete: ids,
+		} );
 		return res.data;
 	},
 	product: async ( id: number ) => {
@@ -183,31 +166,29 @@ export const deletePost = {
 		} );
 	},
 	products: async ( ids: number[] ) => {
-		const res = await api
-			.post( `${ WC_API_PATH }/products/batch`, { delete: ids } )
-			.then( ( response ) => response );
+		const res = await api.post( `${ WC_API_PATH }/products/batch`, {
+			delete: ids,
+		} );
 		return res.data;
 	},
 	productAttributes: async ( ids: number[] ) => {
-		const res = await api
-			.post( `${ WC_API_PATH }/products/attributes/batch`, {
-				delete: ids,
-			} )
-			.then( ( response ) => response );
+		const res = await api.post(
+			`${ WC_API_PATH }/products/attributes/batch`,
+			{ delete: ids }
+		);
 		return res.data;
 	},
 	productCategories: async ( ids: number[] ) => {
-		const res = await api
-			.post( `${ WC_API_PATH }/products/categories/batch`, {
-				delete: ids,
-			} )
-			.then( ( response ) => response );
+		const res = await api.post(
+			`${ WC_API_PATH }/products/categories/batch`,
+			{ delete: ids }
+		);
 		return res.data;
 	},
 	productTags: async ( ids: number[] ) => {
-		const res = await api
-			.post( `${ WC_API_PATH }/products/tags/batch`, { delete: ids } )
-			.then( ( response ) => response );
+		const res = await api.post( `${ WC_API_PATH }/products/tags/batch`, {
+			delete: ids,
+		} );
 		return res.data;
 	},
 	order: async ( id: number ) => {
@@ -216,39 +197,36 @@ export const deletePost = {
 		} );
 	},
 	orders: async ( ids: number[] ) => {
-		const res = await api
-			.post( `${ WC_API_PATH }/orders/batch`, { delete: ids } )
-			.then( ( response ) => response );
+		const res = await api.post( `${ WC_API_PATH }/orders/batch`, {
+			delete: ids,
+		} );
 		return res.data;
 	},
 	shippingClasses: async ( ids: number[] ) => {
-		const res = await api
-			.post( `${ WC_API_PATH }/products/shipping_classes/batch`, {
-				delete: ids,
-			} )
-			.then( ( response ) => response );
+		const res = await api.post(
+			`${ WC_API_PATH }/products/shipping_classes/batch`,
+			{ delete: ids }
+		);
 		return res.data;
 	},
 	shippingZone: async ( id: number ) => {
-		const res = await api
-			.delete( `${ WC_API_PATH }/shipping/zones/${ id }`, {
-				force: true,
-			} )
-			.then( ( response ) => response );
+		const res = await api.delete(
+			`${ WC_API_PATH }/shipping/zones/${ id }`,
+			{ force: true }
+		);
 		return res.data;
 	},
 	taxClass: async ( slug: string ) => {
-		const res = await api
-			.delete( `${ WC_API_PATH }/taxes/classes/${ slug }`, {
-				force: true,
-			} )
-			.then( ( response ) => response );
+		const res = await api.delete(
+			`${ WC_API_PATH }/taxes/classes/${ slug }`,
+			{ force: true }
+		);
 		return res.data;
 	},
 	taxRates: async ( ids: number[] ) => {
-		const res = await api
-			.post( `${ WC_API_PATH }/taxes/batch`, { delete: ids } )
-			.then( ( response ) => response );
+		const res = await api.post( `${ WC_API_PATH }/taxes/batch`, {
+			delete: ids,
+		} );
 		return res.data;
 	},
 };
