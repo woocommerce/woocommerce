@@ -8,6 +8,7 @@ use Exception;
 use WC_Order;
 use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
 use Automattic\WooCommerce\Gateways\PayPal\AddressRequirements as PayPalAddressRequirements;
+use Automattic\WooCommerce\Gateways\PayPal\Helper as PayPalHelper;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\Jetpack\Connection\Client as Jetpack_Connection_Client;
 
@@ -943,7 +944,7 @@ class Request {
 
 		// Check if it's a valid alpha-2 code.
 		if ( strlen( $code ) === PayPalConstants::PAYPAL_COUNTRY_CODE_LENGTH ) {
-			if ( WC()->countries->country_exists( $code ) ) {
+			if ( PayPalHelper::is_country_supported_by_paypal( $code ) ) {
 				return $code;
 			}
 
@@ -962,8 +963,9 @@ class Request {
 
 		// Check if it's a valid alpha-3 code.
 		$alpha2 = WC()->countries->get_country_from_alpha_3_code( $code );
-		if ( null === $alpha2 ) {
+		if ( null === $alpha2 || ! PayPalHelper::is_country_supported_by_paypal( $alpha2 ) ) {
 			\WC_Gateway_Paypal::log( sprintf( 'Invalid alpha-3 country code: %s', $code ) );
+			return null;
 		}
 
 		return $alpha2;
