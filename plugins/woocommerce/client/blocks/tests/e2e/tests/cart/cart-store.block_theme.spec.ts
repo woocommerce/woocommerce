@@ -29,7 +29,7 @@ test.describe( 'Cart Store', () => {
 		await page.route( '**/wc/store/v1/cart**', async ( route ) => {
 			if ( route.request().method() === 'GET' ) {
 				const response = await route.fetch();
-				refreshNonce = response.headers()[ 'nonce' ] || null;
+				refreshNonce = response.headers().nonce || null;
 				await route.fulfill( { response } );
 			} else {
 				await route.continue();
@@ -39,9 +39,9 @@ test.describe( 'Cart Store', () => {
 		// Intercept batch requests to track which nonce the client sends
 		// and which nonce the server returns.
 		await page.route( '**/wc/store/v1/batch**', async ( route ) => {
-			requestNonce = route.request().headers()[ 'nonce' ] || null;
+			requestNonce = route.request().headers().nonce || null;
 			const response = await route.fetch();
-			responseNonce = response.headers()[ 'nonce' ] || null;
+			responseNonce = response.headers().nonce || null;
 			await route.fulfill( { response } );
 		} );
 
