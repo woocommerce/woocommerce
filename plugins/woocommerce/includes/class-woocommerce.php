@@ -931,7 +931,7 @@ final class WooCommerce {
 		$request_uri      = $_SERVER['REQUEST_URI'] ?? '';  // phpcs:ignore WordPress.Security
 		if ( ! $is_cron_disabled && '' !== $request_uri && has_action( 'init', 'wp_cron' ) ) {
 			// Optimization note: detach cron from async and api requests (predictable execution times and concurrency).
-			// Disable for ajax: the AJAX calls are initiated from somewhere and if handling cron, add unnecessary concurrency.
+			// Disable for AJAX: the AJAX calls are initiated from somewhere and if handling cron, add unnecessary concurrency.
 			// Disable for REST: the REST performance is critical in the modern environment and has already concurrent nature.
 			// The cron disabling approach (via `remove_action`) is aligned with upstreams' \WP_Customize_Manager implementation.
 			$serving_rest_request = wp_is_serving_rest_request() && false !== strpos( $request_uri, trim( rest_get_url_prefix(), '/' ) . '/wc/' );
