@@ -269,10 +269,23 @@ body {
 	padding-top: 24px;
 }
 
+#body_content .order-item-data {
+	table-layout: fixed;
+	width: 100%;
+}
+
 #body_content .order-item-data td {
 	border: 0 !important;
 	padding: 0 !important;
 	vertical-align: middle;
+}
+
+#body_content .order-item-data td:first-child {
+	width: <?php echo $email_improvements_enabled ? '72px' : '48px'; ?>;
+}
+
+#body_content .order-item-data td:last-child {
+	width: auto;
 }
 
 #body_content .email-order-details .order-totals td,
