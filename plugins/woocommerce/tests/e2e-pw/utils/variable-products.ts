@@ -8,14 +8,14 @@ import type { Browser } from '@playwright/test';
  */
 import * as api from './api';
 
-interface ProductAttribute {
+export interface ProductAttribute {
 	name: string;
 	visible: boolean;
 	variation: boolean;
 	options: string[];
 }
 
-interface Variation {
+export interface Variation {
 	regular_price: string;
 	attributes: { name: string; option: string }[];
 }
