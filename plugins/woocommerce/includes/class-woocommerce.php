@@ -932,7 +932,7 @@ final class WooCommerce {
 
 			// Disable for WooCommerce REST: the REST performance is important in the modern environment and has already concurrent nature.
 			$rest_prefix     = '/' . trim( rest_get_url_prefix(), '/' ) . '/';
-			$is_serving_rest = isset( $_GET['rest_route'] ) || 0 === strpos( $request_uri, $rest_prefix );
+			$is_serving_rest = isset( $_GET['rest_route'] ) || 0 === strpos( $request_uri, $rest_prefix );  // phpcs:ignore WordPress.Security
 			if ( $is_serving_rest ) {
 				$rest_route               = (string) ( $_GET['rest_route'] ?? $request_uri ); // phpcs:ignore WordPress.Security
 				$rest_route_namespace     = explode( '/', trim( str_replace( $rest_prefix, '/', $rest_route ), '/' ), 2 )[0] ?? '';
