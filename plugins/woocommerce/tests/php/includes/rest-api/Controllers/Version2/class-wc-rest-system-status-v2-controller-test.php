@@ -56,7 +56,7 @@ class WC_REST_System_Status_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 
 		$override_files = array_column( $theme_info['overrides'], 'file' );
 		$this->assertContains(
-			str_replace( WP_CONTENT_DIR . '/themes/', '', $override_path ),
+			str_replace( ABSPATH, '', $override_path ),
 			$override_files,
 			'Template overridden via wc_get_template filter should appear in overrides'
 		);

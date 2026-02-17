@@ -1395,7 +1395,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 						}
 					}
 					$override_files[] = array(
-						'file'         => str_replace( WP_CONTENT_DIR . '/themes/', '', $override_file ),
+						'file'         => str_replace( ABSPATH, '', $override_file ),
 						'version'      => $override_version,
 						'core_version' => $core_version,
 					);
