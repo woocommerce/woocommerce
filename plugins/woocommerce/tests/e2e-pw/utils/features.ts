@@ -1,11 +1,16 @@
 /**
+ * External dependencies
+ */
+import type { APIRequest } from '@playwright/test';
+
+/**
  * Internal dependencies
  */
 import { encodeCredentials } from './plugin-utils';
 import { admin } from '../test-data/data';
 
 const setFeatureFlag = async (
-	request,
+	request: APIRequest,
 	baseURL: string,
 	flagName: string,
 	enable: boolean
@@ -27,7 +32,7 @@ const setFeatureFlag = async (
 	} );
 };
 
-const resetFeatureFlags = async ( request, baseURL: string ) => {
+const resetFeatureFlags = async ( request: APIRequest, baseURL: string ) => {
 	const apiContext = await request.newContext( {
 		baseURL,
 		extraHTTPHeaders: {
