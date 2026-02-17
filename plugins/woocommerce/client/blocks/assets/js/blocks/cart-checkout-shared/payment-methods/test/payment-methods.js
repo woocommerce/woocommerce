@@ -83,8 +83,8 @@ jest.mock( '@wordpress/data', () => {
 	};
 } );
 
-const registerMockPaymentMethods = () => {
-	[ 'cod', 'credit-card' ].forEach( ( name ) => {
+const registerMockPaymentMethodsByName = ( names ) => {
+	names.forEach( ( name ) => {
 		registerPaymentMethod( {
 			name,
 			label: name,
@@ -103,6 +103,10 @@ const registerMockPaymentMethods = () => {
 	dispatch( paymentStore ).__internalUpdateAvailablePaymentMethods();
 };
 
+const registerMockPaymentMethods = () => {
+	registerMockPaymentMethodsByName( [ 'cod', 'credit-card' ] );
+};
+
 const registerMockExpressPaymentMethods = () => {
 	registerExpressPaymentMethod( {
 		name: 'dummy-express',
@@ -115,27 +119,21 @@ const registerMockExpressPaymentMethods = () => {
 };
 
 const registerMockSinglePaymentMethod = () => {
-	registerPaymentMethod( {
-		name: 'cod',
-		label: 'cod',
-		content: <div>A payment method</div>,
-		edit: <div>A payment method</div>,
-		icons: null,
-		canMakePayment: () => true,
-		supports: {
-			showSavedCards: true,
-			showSaveOption: true,
-			features: [ 'products' ],
-		},
-		ariaLabel: 'cod',
+	registerMockPaymentMethodsByName( [ 'cod' ] );
+};
+
+const resetMockPaymentMethodsByName = ( names ) => {
+	names.forEach( ( name ) => {
+		__experimentalDeRegisterPaymentMethod( name );
 	} );
-	dispatch( paymentStore ).__internalUpdateAvailablePaymentMethods();
 };
 
 const resetMockPaymentMethods = () => {
-	[ 'cod', 'credit-card' ].forEach( ( name ) => {
-		__experimentalDeRegisterPaymentMethod( name );
-	} );
+	resetMockPaymentMethodsByName( [ 'cod', 'credit-card' ] );
+};
+
+const resetMockSinglePaymentMethod = () => {
+	resetMockPaymentMethodsByName( [ 'cod' ] );
 };
 
 const resetMockExpressPaymentMethods = () => {
@@ -315,6 +313,6 @@ describe( 'PaymentMethods', () => {
 			screen.getByTestId( 'payment-method-options-class-name' )
 		).not.toHaveTextContent( /disable-radio-control/ );
 
-		act( () => resetMockPaymentMethods() );
+		act( () => resetMockSinglePaymentMethod() );
 	} );
 } );
