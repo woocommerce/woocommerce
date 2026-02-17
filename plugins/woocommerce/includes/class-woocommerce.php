@@ -931,10 +931,10 @@ final class WooCommerce {
 			// Optimization note: detach cron from async and api requests (predictable execution times and concurrency).
 
 			// Disable for WooCommerce REST: the REST performance is important in the modern environment and has already concurrent nature.
-			$rest_route      = (string) ( $_GET['rest_route'] ?? wp_parse_url( $request_uri, PHP_URL_PATH ) ); // phpcs:ignore WordPress.Security
 			$rest_prefix     = '/' . trim( rest_get_url_prefix(), '/' ) . '/';
-			$is_serving_rest = isset( $_GET['rest_route'] ) || 0 === strpos( $rest_route, $rest_prefix );
+			$is_serving_rest = isset( $_GET['rest_route'] ) || 0 === strpos( $request_uri, $rest_prefix );
 			if ( $is_serving_rest ) {
+				$rest_route               = (string) ( $_GET['rest_route'] ?? $request_uri ); // phpcs:ignore WordPress.Security
 				$rest_route_namespace     = explode( '/', trim( str_replace( $rest_prefix, '/', $rest_route ), '/' ), 2 )[0] ?? '';
 				$serving_woocommerce_rest = in_array( $rest_route_namespace, array( 'wc', 'wc-telemetry', 'wc-admin', 'wc-analytics' ), true );
 				if ( $serving_woocommerce_rest ) {
