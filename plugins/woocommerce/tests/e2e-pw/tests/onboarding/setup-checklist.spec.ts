@@ -61,6 +61,194 @@ const test = baseTest.extend( {
 	},
 } );
 
+const SHIPPING_LABEL_PRINTING_STEP =
+	/Enable shipping label printing and discounted rates/;
+const shippingTaskTest = baseTest.extend( {
+	storageState: ADMIN_STATE_PATH,
+} );
+const US_SHIPPING_PARTNER = {
+	id: 'woocommerce-shipping',
+	name: 'WooCommerce Shipping',
+	slug: 'woocommerce-shipping',
+	description: '',
+	learn_more_link: 'https://woocommerce.com/products/shipping/',
+	layout_column: {
+		image: '',
+		features: [],
+	},
+	available_layouts: [ 'column' ],
+	is_visible: true,
+};
+const CHILE_SHIPPING_PARTNER = {
+	id: 'envia',
+	name: 'Envia',
+	slug: '',
+	description: '',
+	learn_more_link:
+		'https://woocommerce.com/products/envia-shipping-and-fulfillment/',
+	layout_column: {
+		image: '',
+		features: [],
+	},
+	available_layouts: [ 'column' ],
+	is_visible: true,
+};
+
+const mockShippingPartnerSuggestions = async ( page, shippingPartners ) => {
+	await page.route(
+		'**/wp-json/wc-admin/shipping-partner-suggestions*',
+		( route ) =>
+			route.fulfill( {
+				status: 200,
+				contentType: 'application/json',
+				body: JSON.stringify( shippingPartners ),
+			} )
+	);
+};
+
+const clearShippingZones = async ( restApi ) => {
+	const { data: zones } = await restApi.get(
+		`${ WC_API_PATH }/shipping/zones`
+	);
+	const deletableZones = zones.filter( ( zone ) => zone.id !== 0 );
+
+	await Promise.all(
+		deletableZones.map( ( zone ) =>
+			restApi.delete( `${ WC_API_PATH }/shipping/zones/${ zone.id }`, {
+				force: true,
+			} )
+		)
+	);
+};
+
+const updateStoreLocationForShippingTask = async (
+	restApi,
+	{ defaultCountry, storeAddress }
+) => {
+	const initialShippingDefaultsOption = await restApi.get(
+		`${ WC_ADMIN_API_PATH }/options?options=woocommerce_admin_created_default_shipping_zones`
+	);
+	const initialMarketplaceSuggestionsSetting = await restApi.get(
+		`${ WC_API_PATH }/settings/advanced/woocommerce_show_marketplace_suggestions`
+	);
+
+	await clearShippingZones( restApi );
+	await restApi.put( `${ WC_ADMIN_API_PATH }/options`, {
+		woocommerce_admin_created_default_shipping_zones: 'no',
+	} );
+	await restApi.put(
+		`${ WC_API_PATH }/settings/advanced/woocommerce_show_marketplace_suggestions`,
+		{
+			value: 'no',
+		}
+	);
+
+	await restApi.put( `${ WC_ADMIN_API_PATH }/onboarding/profile`, {
+		skipped: true,
+	} );
+
+	const [ initialDefaultCountry, initialStoreAddress ] = await Promise.all( [
+		restApi.get(
+			`${ WC_API_PATH }/settings/general/woocommerce_default_country`
+		),
+		restApi.get(
+			`${ WC_API_PATH }/settings/general/woocommerce_store_address`
+		),
+	] );
+
+	await restApi.put(
+		`${ WC_API_PATH }/settings/general/woocommerce_default_country`,
+		{
+			value: defaultCountry,
+		}
+	);
+
+	if ( typeof storeAddress === 'string' ) {
+		await restApi.put(
+			`${ WC_API_PATH }/settings/general/woocommerce_store_address`,
+			{
+				value: storeAddress,
+			}
+		);
+	}
+
+	return {
+		defaultCountry: initialDefaultCountry.data.value,
+		storeAddress: initialStoreAddress.data.value,
+		shippingDefaultsOption: initialShippingDefaultsOption.data,
+		marketplaceSuggestionsSetting:
+			initialMarketplaceSuggestionsSetting.data.value,
+	};
+};
+
+const resetStoreLocationForShippingTask = async ( restApi, initialValues ) => {
+	await restApi.put(
+		`${ WC_API_PATH }/settings/general/woocommerce_default_country`,
+		{
+			value: initialValues.defaultCountry,
+		}
+	);
+	await restApi.put(
+		`${ WC_API_PATH }/settings/general/woocommerce_store_address`,
+		{
+			value: initialValues.storeAddress,
+		}
+	);
+	await restApi.put(
+		`${ WC_ADMIN_API_PATH }/options`,
+		initialValues.shippingDefaultsOption
+	);
+	await restApi.put(
+		`${ WC_API_PATH }/settings/advanced/woocommerce_show_marketplace_suggestions`,
+		{
+			value: initialValues.marketplaceSuggestionsSetting,
+		}
+	);
+};
+
+const openShippingLabelPrintingStep = async ( page ) => {
+	await page.goto( 'wp-admin/admin.php?page=wc-admin&task=shipping' );
+
+	const skipGuidedSetupButton = page.getByRole( 'button', {
+		name: 'Skip guided setup',
+	} );
+	if ( ( await skipGuidedSetupButton.count() ) > 0 ) {
+		await skipGuidedSetupButton.first().click();
+		await page.goto( 'wp-admin/admin.php?page=wc-admin&task=shipping' );
+	}
+
+	await expect
+		.poll(
+			() =>
+				page
+					.getByText( SHIPPING_LABEL_PRINTING_STEP, {
+						exact: false,
+					} )
+					.count(),
+			{ timeout: 15000 }
+		)
+		.toBeGreaterThan( 0 );
+
+	const reviewShippingOptionsButton = page.getByRole( 'button', {
+		name: /Review your shipping options/,
+	} );
+	if ( ( await reviewShippingOptionsButton.count() ) > 0 ) {
+		await reviewShippingOptionsButton.click();
+	}
+
+	const saveShippingOptionsButton = page.getByRole( 'button', {
+		name: /Save shipping options|Continue|Complete task/,
+	} );
+	await expect( saveShippingOptionsButton ).toBeVisible();
+	await saveShippingOptionsButton.click();
+
+	await expect(
+		page.getByText( SHIPPING_LABEL_PRINTING_STEP, {
+			exact: false,
+		} )
+	).toBeVisible();
+};
+
 test(
 	'Can hide the task list',
 	{ tag: [ tags.NOT_E2E ] },
@@ -172,3 +360,57 @@ test( 'Can connect to WooCommerce.com', async ( { page } ) => {
 		).toBeVisible( { timeout: 30000 } );
 	} );
 } );
+
+shippingTaskTest(
+	'Shipping task shows install CTA for US stores',
+	async ( { page, restApi } ) => {
+		const initialValues = await updateStoreLocationForShippingTask(
+			restApi,
+			{
+				defaultCountry: 'US:CA',
+				storeAddress: '',
+			}
+		);
+
+		try {
+			await mockShippingPartnerSuggestions( page, [
+				US_SHIPPING_PARTNER,
+			] );
+			await openShippingLabelPrintingStep( page );
+
+			await expect(
+				page.getByRole( 'button', { name: 'Install and enable' } )
+			).toBeVisible();
+		} finally {
+			await resetStoreLocationForShippingTask( restApi, initialValues );
+		}
+	}
+);
+
+shippingTaskTest(
+	'Shipping task shows download CTA for Chile stores',
+	async ( { page, restApi } ) => {
+		const initialValues = await updateStoreLocationForShippingTask(
+			restApi,
+			{
+				defaultCountry: 'CL:CL-RM',
+			}
+		);
+
+		try {
+			await mockShippingPartnerSuggestions( page, [
+				CHILE_SHIPPING_PARTNER,
+			] );
+			await openShippingLabelPrintingStep( page );
+
+			await expect(
+				page.getByRole( 'button', { name: 'Download' } )
+			).toBeVisible();
+			await expect(
+				page.getByRole( 'button', { name: 'Install and enable' } )
+			).toHaveCount( 0 );
+		} finally {
+			await resetStoreLocationForShippingTask( restApi, initialValues );
+		}
+	}
+);

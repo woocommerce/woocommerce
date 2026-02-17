@@ -8,7 +8,7 @@ import { TaskType } from '@woocommerce/data';
 /**
  * Internal dependencies
  */
-import { Shipping } from '../index';
+import { Shipping, hasInstallableSlug } from '../index';
 
 jest.mock( '@woocommerce/tracks', () => ( {
 	recordEvent: jest.fn(),
@@ -72,5 +72,21 @@ describe( 'Shipping', () => {
 		expect( mockLocation.href ).toContain(
 			'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=shipping'
 		);
+	} );
+
+	it( 'treats empty or missing slugs as non-installable partners', () => {
+		expect(
+			hasInstallableSlug( {
+				slug: 'packlink-pro-shipping',
+			} )
+		).toBe( true );
+
+		expect(
+			hasInstallableSlug( {
+				slug: '',
+			} )
+		).toBe( false );
+
+		expect( hasInstallableSlug( {} ) ).toBe( false );
 	} );
 } );
