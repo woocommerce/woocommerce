@@ -928,8 +928,8 @@ final class WooCommerce {
 		$is_cron_disabled = defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON;
 		if ( ! $is_cron_disabled && has_action( 'init', 'wp_cron' ) ) {
 			// Optimization note: detach cron from async and api requests (predictable execution times and concurrency).
-			// Disable for ajax: the ajax calls are initiated from somewhere and if handling cron, add unnecessary concurrency.
-			// Disable for REST: the rest performance is critical in the modern environment (TBD: limit to WooCommerce endpoints only).
+			// Disable for ajax: the AJAX calls are initiated from somewhere and if handling cron, add unnecessary concurrency.
+			// Disable for REST: the REST performance is critical in the modern environment and has already concurrent nature.
 			// The cron disabling approach (via `remove_action`) is aligned with upstreams' \WP_Customize_Manager implementation.
 			$rest_or_ajax_request = wp_is_serving_rest_request() || wp_doing_ajax();
 			if ( $rest_or_ajax_request ) {
@@ -949,6 +949,7 @@ final class WooCommerce {
 				}
 
 				if ( is_numeric( $page_id_or_slugs ) ) {
+					// Under the hood, the functions will read options, which already preloaded by WordPress core at this point.
 					$pages = array( wc_get_page_id( 'checkout' ), wc_get_page_id( 'cart' ), wc_get_page_id( 'myaccount' ) );
 					if ( in_array( (int) $page_id_or_slugs, $pages, true ) ) {
 						remove_action( 'init', 'wp_cron' );
