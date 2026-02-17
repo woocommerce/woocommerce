@@ -928,7 +928,7 @@ final class WooCommerce {
 		$is_cron_disabled = defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON;
 		if ( ! $is_cron_disabled && has_action( 'init', 'wp_cron' ) ) {
 			// Optimization note: detach cron from async and api requests (predictable execution times and concurrency).
-			// TBD: decide on narrowing down the check to WooCommerce REST APIs only.
+			// Disable for ajax: the ajax calls are initiated from somewhere and if handling cron, add unnecessary concurrency.
 			$rest_or_ajax_request = wp_doing_ajax() || wp_is_serving_rest_request();
 			if ( $rest_or_ajax_request ) {
 				// The cron disabling approach is aligned with upstreams' \WP_Customize_Manager implementation.
