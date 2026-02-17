@@ -925,20 +925,21 @@ final class WooCommerce {
 	 * @return void
 	 */
 	public function maybe_halt_cron_activity_for_this_request(): void {
+		// We don't have fully initialized environment yet and have to use low-level PHP environment below instead.
 		$is_cron_disabled = defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON;
-		if ( ! $is_cron_disabled && has_action( 'init', 'wp_cron' ) ) {
+		$request_uri      = $_SERVER['REQUEST_URI'] ?? '';  // phpcs:ignore WordPress.Security
+		if ( ! $is_cron_disabled && '' !== $request_uri && has_action( 'init', 'wp_cron' ) ) {
 			// Optimization note: detach cron from async and api requests (predictable execution times and concurrency).
 			// Disable for ajax: the AJAX calls are initiated from somewhere and if handling cron, add unnecessary concurrency.
 			// Disable for REST: the REST performance is critical in the modern environment and has already concurrent nature.
 			// The cron disabling approach (via `remove_action`) is aligned with upstreams' \WP_Customize_Manager implementation.
-			$rest_or_ajax_request = wp_is_serving_rest_request() || wp_doing_ajax();
-			if ( $rest_or_ajax_request ) {
+			$serving_rest_request = wp_is_serving_rest_request() && false !== strpos( $request_uri, trim( rest_get_url_prefix(), '/' ) . '/wc/' );
+			if ( $serving_rest_request || wp_doing_ajax() ) {
 				remove_action( 'init', 'wp_cron' );
 				return;
 			}
 
-			// Optimization note: we don't have fully initialized environment yet and have to use low-level PHP environment instead.
-			$page_id_or_slugs = $_GET['page_id'] ?? explode( '/', trim( (string) wp_parse_url( $_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH ), '/' ) ); // phpcs:ignore WordPress.Security
+			$page_id_or_slugs = $_GET['page_id'] ?? explode( '/', trim( (string) wp_parse_url( $request_uri, PHP_URL_PATH ), '/' ) ); // phpcs:ignore WordPress.Security
 			if ( $page_id_or_slugs ) {
 				if ( is_array( $page_id_or_slugs ) ) {
 					$slugs = array( 'checkout', 'cart', 'my-account' );
