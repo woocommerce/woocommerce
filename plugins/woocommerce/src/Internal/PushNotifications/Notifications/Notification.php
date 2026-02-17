@@ -39,6 +39,8 @@ abstract class Notification {
 	 * @param int    $resource_id The resource ID.
 	 * @throws InvalidArgumentException If any argument is invalid.
 	 *
+	 * @throws InvalidArgumentException If any argument is invalid.
+	 *
 	 * @since 10.7.0
 	 */
 	public function __construct( string $type, int $resource_id ) {
