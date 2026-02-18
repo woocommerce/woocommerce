@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { getConfig, store } from '@wordpress/interactivity';
+import type { AsyncAction, TypeYield } from '@wordpress/interactivity';
 import type {
 	Cart,
 	CartItem,
@@ -105,20 +106,23 @@ export type Store = {
 		};
 	};
 	actions: {
-		removeCartItem: ( key: string ) => void;
+		removeCartItem: ( key: string ) => Promise< void >;
 		addCartItem: (
 			args: ClientCartItem,
 			options?: CartUpdateOptions
-		) => void;
+		) => Promise< void >;
 		batchAddCartItems: (
 			items: ClientCartItem[],
 			options?: CartUpdateOptions
-		) => void;
+		) => Promise< void >;
 		// Todo: Check why if I switch to an async function here the types of the store stop working.
-		refreshCartItems: () => void;
-		waitForIdle: () => void;
-		showNoticeError: ( error: Error | ApiErrorResponse ) => void;
-		updateNotices: ( notices: Notice[], removeOthers?: boolean ) => void;
+		refreshCartItems: () => Promise< void >;
+		waitForIdle: () => Promise< void >;
+		showNoticeError: ( error: Error | ApiErrorResponse ) => Promise< void >;
+		updateNotices: (
+			notices: Notice[],
+			removeOthers?: boolean
+		) => Promise< void >;
 	};
 };
 
@@ -172,13 +176,13 @@ const getInfoNoticesFromCartUpdates = (
 		cartItemsPendingDelete: pendingDelete = [],
 	} = quantityChanges;
 
-	const autoDeletedToNotify = oldItems.filter(
-		( old ) =>
-			old.key &&
-			isCartItem( old ) &&
-			! newItems.some( ( item ) => old.key === item.key ) &&
-			! pendingDelete.includes( old.key )
-	);
+	const autoDeletedToNotify = oldItems
+		.filter( isCartItem )
+		.filter(
+			( old ) =>
+				! newItems.some( ( item ) => old.key === item.key ) &&
+				! pendingDelete.includes( old.key )
+		);
 
 	const autoUpdatedToNotify = newItems.filter( ( item ) => {
 		if ( ! isCartItem( item ) ) {
@@ -190,6 +194,7 @@ const getInfoNoticesFromCartUpdates = (
 					item.quantity !== old.quantity
 			: ! pendingAdd.includes( item.id );
 	} );
+
 	return [
 		...autoDeletedToNotify.map( ( item ) =>
 			// TODO: move the message template to iAPI config.
@@ -309,7 +314,7 @@ const { state, actions } = store< Store >(
 	'woocommerce',
 	{
 		actions: {
-			*removeCartItem( key: string ) {
+			*removeCartItem( key: string ): AsyncAction< void > {
 				// Track what changes we're making for notice comparison.
 				const quantityChanges: QuantityChanges = {
 					cartItemsPendingDelete: [ key ],
@@ -319,7 +324,7 @@ const { state, actions } = store< Store >(
 				let cartAfterOptimistic: typeof state.cart | null = null;
 
 				try {
-					const result = yield sendCartRequest( state, {
+					const result = ( yield sendCartRequest( state, {
 						path: '/wc/store/v1/cart/remove-item',
 						method: 'POST',
 						body: { key },
@@ -340,7 +345,7 @@ const { state, actions } = store< Store >(
 								emitSyncEvent( { quantityChanges } );
 							}
 						},
-					} );
+					} ) ) as TypeYield< typeof sendCartRequest >;
 
 					// Show notices from server response.
 					const cart = result.data as Cart;
@@ -365,7 +370,7 @@ const { state, actions } = store< Store >(
 			*addCartItem(
 				{ id, key, quantity, quantityToAdd, variation }: ClientCartItem,
 				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
-			) {
+			): AsyncAction< void > {
 				if ( quantity !== undefined && quantityToAdd !== undefined ) {
 					throw new Error(
 						'addCartItem: pass either quantity or quantityToAdd, not both.'
@@ -446,7 +451,7 @@ const { state, actions } = store< Store >(
 				let cartAfterOptimistic: typeof state.cart | null = null;
 
 				try {
-					const result = yield sendCartRequest( state, {
+					const result = ( yield sendCartRequest( state, {
 						path: `/wc/store/v1/cart/${ endpoint }`,
 						method: 'POST',
 						body: itemToSend,
@@ -482,7 +487,7 @@ const { state, actions } = store< Store >(
 								emitSyncEvent( { quantityChanges } );
 							}
 						},
-					} );
+					} ) ) as TypeYield< typeof sendCartRequest >;
 
 					// Success - handle side effects that don't trigger refreshCartItems
 					const cart = result.data as Cart;
@@ -511,7 +516,10 @@ const { state, actions } = store< Store >(
 						'woocommerce'
 					) as WooCommerceConfig;
 					if ( messages?.addedToCartText ) {
-						const { speak } = yield a11yModulePromise;
+						const { speak } =
+							( yield a11yModulePromise ) as Awaited<
+								typeof a11yModulePromise
+							>;
 						speak( messages.addedToCartText, 'polite' );
 					}
 				} catch ( error ) {
@@ -523,7 +531,7 @@ const { state, actions } = store< Store >(
 			*batchAddCartItems(
 				items: ClientCartItem[],
 				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
-			) {
+			): AsyncAction< void > {
 				const a11yModulePromise = import( '@wordpress/a11y' );
 				const quantityChanges: QuantityChanges = {};
 
@@ -593,18 +601,18 @@ const { state, actions } = store< Store >(
 							// succeeded (data is set from the last
 							// successful server state). Only the last
 							// item's callback fires to avoid duplicates.
-							onSettled: isLastItem
-								? ( { data } ) => {
-										if ( data ) {
-											triggerAddedToCartEvent( {
-												preserveCartData: true,
-											} );
-											emitSyncEvent( {
-												quantityChanges,
-											} );
-										}
-								  }
-								: undefined,
+							...( isLastItem && {
+								onSettled: ( { data } ) => {
+									if ( data ) {
+										triggerAddedToCartEvent( {
+											preserveCartData: true,
+										} );
+										emitSyncEvent( {
+											quantityChanges,
+										} );
+									}
+								},
+							} ),
 						} );
 					} );
 
@@ -613,9 +621,9 @@ const { state, actions } = store< Store >(
 						JSON.stringify( state.cart )
 					);
 
-					const results: PromiseSettledResult<
-						MutationResult< Cart >
-					>[] = yield Promise.allSettled( promises );
+					const results = ( yield Promise.allSettled(
+						promises
+					) ) as PromiseSettledResult< MutationResult< Cart > >[];
 
 					// Find the last successful result for notices/a11y.
 					const lastSuccess = [ ...results ]
@@ -649,7 +657,10 @@ const { state, actions } = store< Store >(
 							'woocommerce'
 						) as WooCommerceConfig;
 						if ( messages?.addedToCartText ) {
-							const { speak } = yield a11yModulePromise;
+							const { speak } =
+								( yield a11yModulePromise ) as Awaited<
+									typeof a11yModulePromise
+								>;
 							speak( messages.addedToCartText, 'polite' );
 						}
 					}
@@ -671,7 +682,7 @@ const { state, actions } = store< Store >(
 				}
 			},
 
-			*refreshCartItems() {
+			*refreshCartItems(): AsyncAction< void > {
 				// Skip if queue is processing - it will apply server state when done
 				if ( cartQueue?.getStatus().isProcessing ) {
 					return;
@@ -683,19 +694,19 @@ const { state, actions } = store< Store >(
 				pendingRefresh = true;
 
 				try {
-					const res: Response = yield fetch(
+					const res = ( yield fetch(
 						`${ state.restUrl }wc/store/v1/cart`,
 						{
 							method: 'GET',
 							cache: 'no-store',
 							headers: { 'Content-Type': 'application/json' },
 						}
-					);
+					) ) as TypeYield< typeof fetch >;
 
 					// Extract fresh nonce from response headers.
 					state.nonce = res.headers.get( 'Nonce' ) || state.nonce;
 
-					const json: Cart = yield res.json();
+					const json = ( yield res.json() ) as Cart;
 
 					// Checks if the response contains an error.
 					if ( isApiErrorResponse( res, json ) )
@@ -723,13 +734,15 @@ const { state, actions } = store< Store >(
 				}
 			},
 
-			*waitForIdle() {
+			*waitForIdle(): AsyncAction< void > {
 				if ( cartQueue ) {
 					yield cartQueue.waitForIdle();
 				}
 			},
 
-			*showNoticeError( error: Error | ApiErrorResponse ) {
+			*showNoticeError(
+				error: Error | ApiErrorResponse
+			): AsyncAction< void > {
 				// Todo: Use the module exports instead of `store()` once the store-notices
 				// store is public.
 				yield import( '@woocommerce/stores/store-notices' );
@@ -758,7 +771,10 @@ const { state, actions } = store< Store >(
 				console.error( error );
 			},
 
-			*updateNotices( newNotices: Notice[] = [], removeOthers = false ) {
+			*updateNotices(
+				newNotices: Notice[] = [],
+				removeOthers = false
+			): AsyncAction< void > {
 				// Todo: Use the module exports instead of `store()` once the store-notices
 				// store is public.
 				yield import( '@woocommerce/stores/store-notices' );
@@ -790,7 +806,7 @@ const { state, actions } = store< Store >(
 );
 
 // Async actions are typed as void for consumers, but are actually Promises internally.
-isNonceReady = actions.refreshCartItems() as unknown as Promise< void >;
+isNonceReady = actions.refreshCartItems();
 
 window.addEventListener(
 	'wc-blocks_store_sync_required',
