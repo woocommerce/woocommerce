@@ -427,10 +427,13 @@ const productGallery = {
 	},
 	callbacks: {
 		listenToProductDataChanges: () => {
-			const currentProduct = productContextState?.currentProduct;
-			const parentProduct = productContextState?.parentProduct;
-			const productId = parentProduct?.id ?? currentProduct?.id;
-			if ( ! productId ) {
+			const { currentProduct, parentProduct } =
+				productContextState ?? {};
+
+			// Config is keyed by the main (non-variation) product ID.
+			const mainProductId =
+				parentProduct?.id ?? currentProduct?.id;
+			if ( ! mainProductId ) {
 				return;
 			}
 
@@ -441,9 +444,9 @@ const productGallery = {
 			const variationId =
 				parentProduct !== null ? currentProduct?.id : undefined;
 			const productData =
-				products?.[ productId ]?.variations?.[
+				products?.[ mainProductId ]?.variations?.[
 					variationId || 0
-				] || products?.[ productId ];
+				] || products?.[ mainProductId ];
 
 			const imageId = productData?.image_id;
 			if ( ! imageId ) {

@@ -485,16 +485,17 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 
 				const { selectedAttributes } = getContext< Context >();
 
-				const productId =
+				// getProductData expects the main (non-variation) product ID.
+				const mainProductId =
 					productContextState.parentProduct?.id ??
 					productContextState.currentProduct?.id;
 
-				if ( ! productId ) {
+				if ( ! mainProductId ) {
 					return;
 				}
 
 				const productObject = getProductData(
-					productId,
+					mainProductId,
 					selectedAttributes
 				);
 
@@ -515,7 +516,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 						newValue !== currentValue
 					) {
 						actions.setQuantity(
-							productId,
+							mainProductId,
 							newValue
 						);
 					}
