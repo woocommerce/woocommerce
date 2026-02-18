@@ -377,13 +377,18 @@ const { actions, state } = store<
 
 				const { selectedAttributes } = getContext< Context >();
 
-				const id =
-					productContextState.variationId ||
-					productContextState.productId;
+				const currentProduct =
+					productContextState.currentProduct;
+				const id = currentProduct?.id;
 
-				const productType = productContextState.variationId
-					? 'variation'
-					: getProductData( id, selectedAttributes )?.type;
+				if ( ! id ) {
+					return;
+				}
+
+				const productType =
+					productContextState.parentProduct !== null
+						? 'variation'
+						: getProductData( id, selectedAttributes )?.type;
 
 				if ( ! productType ) {
 					return;

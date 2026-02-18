@@ -103,7 +103,6 @@ class ProductContextStore {
 			ProductsStore::load_variations( $consent_statement, $product_id );
 		}
 
-		// Update the context state.
 		self::$context_state['productId']   = $product_id;
 		self::$context_state['variationId'] = $variation_id;
 

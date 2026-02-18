@@ -422,15 +422,8 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					selectedAttributes
 				);
 
-				const { actions: productContextActions } =
-					store< ProductContextStore >(
-						'woocommerce/product-context',
-						{},
-						{ lock: universalLock }
-					);
-				productContextActions.setVariationId(
-					matchedVariation?.id ?? null
-				);
+				productContextState.variationId =
+					matchedVariation?.id ?? null;
 			},
 			validateVariation() {
 				actions.clearErrors( 'variable-product' );

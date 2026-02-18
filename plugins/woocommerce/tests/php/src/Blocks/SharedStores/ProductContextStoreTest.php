@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Blocks\SharedStores;
 
 use Automattic\WooCommerce\Blocks\SharedStores\ProductContextStore;
+use Automattic\WooCommerce\Blocks\SharedStores\ProductsStore;
 use WP_UnitTestCase;
 
 /**
@@ -17,6 +18,38 @@ class ProductContextStoreTest extends WP_UnitTestCase {
 	 * @var string
 	 */
 	private string $consent = 'I acknowledge that using experimental APIs means my theme or plugin will inevitably break in the next version of WooCommerce';
+
+	/**
+	 * Reset static state between tests.
+	 */
+	public function tearDown(): void {
+		parent::tearDown();
+
+		// Reset ProductContextStore static state.
+		$ref = new \ReflectionClass( ProductContextStore::class );
+
+		$context_loaded = $ref->getProperty( 'context_loaded' );
+		$context_loaded->setAccessible( true );
+		$context_loaded->setValue( null, false );
+
+		$context_state = $ref->getProperty( 'context_state' );
+		$context_state->setAccessible( true );
+		$context_state->setValue( null, array(
+			'productId'   => 0,
+			'variationId' => null,
+		) );
+
+		// Reset ProductsStore static state.
+		$products_ref = new \ReflectionClass( ProductsStore::class );
+
+		$products = $products_ref->getProperty( 'products' );
+		$products->setAccessible( true );
+		$products->setValue( null, array() );
+
+		$variations = $products_ref->getProperty( 'product_variations' );
+		$variations->setAccessible( true );
+		$variations->setValue( null, array() );
+	}
 
 	/**
 	 * @testdox get_context_data returns productId and variationId.
