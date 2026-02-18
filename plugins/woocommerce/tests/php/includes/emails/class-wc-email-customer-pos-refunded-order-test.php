@@ -439,7 +439,7 @@ class WC_Email_Customer_POS_Refunded_Order_Test extends \WC_Unit_Test_Case {
 				'reason'   => 'First refund',
 			)
 		);
-		$second_refund = wc_create_refund(
+		wc_create_refund(
 			array(
 				'order_id' => $order->get_id(),
 				'amount'   => '3.00',
