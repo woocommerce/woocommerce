@@ -388,16 +388,18 @@ class WC_Query {
 
 		// Fallback 2: Slug comparison when page_id still not resolved.
 		if ( ! $page_id && $q->get( 'pagename' ) ) {
-			$shop_page = get_post( $shop_id );
-			if ( $shop_page && $shop_page->post_name === $q->get( 'pagename' ) ) {
+			$shop_post     = get_post( $shop_id );
+			$path_segments = explode( '/', $q->get( 'pagename' ) );
+			$slug_matches  = $shop_post && end( $path_segments ) === $shop_post->post_name;
+
+			if ( $slug_matches ) {
 				$page_id = $shop_id;
 			}
 		}
-		$shop_page = null;
 
 		if ( wc_current_theme_supports_woocommerce_or_fse() && $q->is_page() && 'page' === get_option( 'show_on_front' ) && $page_id === $shop_id ) {
 			// This is a front-page shop.
-			$shop_page = get_post( wc_get_page_id( 'shop' ) );
+			$shop_page = get_post( $shop_id );
 
 			$q->set( 'post_type', 'product' );
 			$q->set( 'page_id', '' );
@@ -423,9 +425,9 @@ class WC_Query {
 				add_filter( 'wpseo_metadesc', array( $this, 'wpseo_metadesc' ) );
 				add_filter( 'wpseo_metakey', array( $this, 'wpseo_metakey' ) );
 			}
-		} elseif ( $q->is_post_type_archive( 'product' ) && ! $q->is_tax() && wc_get_page_id( 'shop' ) ) {
-			// This is a regular shop page.
-			$shop_page = get_post( wc_get_page_id( 'shop' ) );
+		} elseif ( $q->is_post_type_archive( 'product' ) && ! $q->is_tax() && $shop_id > 0 ) {
+			// This is a regular shop page (product archive).
+			$shop_page = get_post( $shop_id );
 		} elseif ( ! $q->is_post_type_archive( 'product' ) && ! $q->is_tax( get_object_taxonomies( 'product' ) ) ) {
 			// Only apply to product categories, the product post archive, the shop page, product tags, and product attribute taxonomies.
 			return;

@@ -199,4 +199,70 @@ class WC_Query_Test extends \WC_Unit_Test_Case {
 		wp_delete_post( $shop_page_id, true );
 	}
 
+	/**
+	 * @testdox Shop page resolves correctly when it's a child page.
+	 */
+	public function test_shop_page_resolves_as_child_page() {
+		switch_theme( 'twentytwentyfour' );
+
+		// Create parent page.
+		$parent_page_id = wp_insert_post(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+				'post_title'  => 'Parent',
+				'post_name'   => 'parent',
+			)
+		);
+
+		// Create shop page as child.
+		$shop_page_id = wp_insert_post(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+				'post_title'  => 'Shop',
+				'post_name'   => 'shop',
+				'post_parent' => $parent_page_id,
+			)
+		);
+
+		$default_woocommerce_shop_page_id = get_option( 'woocommerce_shop_page_id' );
+		update_option( 'woocommerce_shop_page_id', $shop_page_id );
+
+		// Set as homepage.
+		$default_show_on_front = get_option( 'show_on_front' );
+		$default_page_on_front = get_option( 'page_on_front' );
+		update_option( 'show_on_front', 'page' );
+		update_option( 'page_on_front', $shop_page_id );
+
+		// Query with hierarchical pagename.
+		$query = new WP_Query(
+			array(
+				'post_type' => 'page',
+				'pagename'  => 'parent/shop',
+			)
+		);
+
+		global $wp_the_query;
+		$previous_wp_the_query = $wp_the_query;
+		$wp_the_query          = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$query->get_posts();
+
+		// Verify shop page is identified.
+		$this->assertTrue( defined( 'SHOP_IS_ON_FRONT' ) && SHOP_IS_ON_FRONT );
+
+		// Verify queried object is correct.
+		$queried_object = $query->get_queried_object();
+		$this->assertInstanceOf( 'WP_Post', $queried_object );
+		$this->assertEquals( $shop_page_id, $queried_object->ID );
+
+		// Cleanup.
+		$wp_the_query = $previous_wp_the_query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		update_option( 'woocommerce_shop_page_id', $default_woocommerce_shop_page_id );
+		update_option( 'show_on_front', $default_show_on_front );
+		update_option( 'page_on_front', $default_page_on_front );
+		wp_delete_post( $shop_page_id, true );
+		wp_delete_post( $parent_page_id, true );
+	}
+
 }
