@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Notifications;
 
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
+use InvalidArgumentException;
 use WC_Unit_Test_Case;
 
 /**
@@ -39,7 +40,7 @@ class NotificationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should return an identifier combining type and resource ID.
+	 * @testdox Should return an identifier combining blog ID, type, and resource ID.
 	 */
 	public function test_get_identifier(): void {
 		$notification = $this->create_notification( 'store_order', 42, 1 );
@@ -71,6 +72,51 @@ class NotificationTest extends WC_Unit_Test_Case {
 		$this->assertSame( 99, $result['resource_id'] );
 		$this->assertArrayHasKey( 'blog_id', $result );
 		$this->assertSame( 3, $result['blog_id'] );
+	}
+
+	/**
+	 * @testdox Should throw when type is empty.
+	 */
+	public function test_throws_for_empty_type(): void {
+		$this->expectException( InvalidArgumentException::class );
+
+		$this->create_notification( '', 1, 1 );
+	}
+
+	/**
+	 * @testdox Should throw when resource_id is zero.
+	 */
+	public function test_throws_for_zero_resource_id(): void {
+		$this->expectException( InvalidArgumentException::class );
+
+		$this->create_notification( 'store_order', 0, 1 );
+	}
+
+	/**
+	 * @testdox Should throw when resource_id is negative.
+	 */
+	public function test_throws_for_negative_resource_id(): void {
+		$this->expectException( InvalidArgumentException::class );
+
+		$this->create_notification( 'store_order', -1, 1 );
+	}
+
+	/**
+	 * @testdox Should throw when blog_id is zero.
+	 */
+	public function test_throws_for_zero_blog_id(): void {
+		$this->expectException( InvalidArgumentException::class );
+
+		$this->create_notification( 'store_order', 1, 0 );
+	}
+
+	/**
+	 * @testdox Should throw when blog_id is negative.
+	 */
+	public function test_throws_for_negative_blog_id(): void {
+		$this->expectException( InvalidArgumentException::class );
+
+		$this->create_notification( 'store_order', 1, -1 );
 	}
 
 	/**

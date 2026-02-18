@@ -71,11 +71,13 @@ abstract class Notification {
 	/**
 	 * Returns the WPCOM-ready payload for this notification.
 	 *
-	 * @return array
+	 * Returns null if the underlying resource no longer exists.
+	 *
+	 * @return array|null
 	 *
 	 * @since 10.7.0
 	 */
-	abstract public function to_payload(): array;
+	abstract public function to_payload(): ?array;
 
 	/**
 	 * Returns the notification data as an array.
