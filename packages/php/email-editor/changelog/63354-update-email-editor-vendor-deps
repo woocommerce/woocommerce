@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Email Editor: fix memory leaks in CSS inlining vendor packages.
