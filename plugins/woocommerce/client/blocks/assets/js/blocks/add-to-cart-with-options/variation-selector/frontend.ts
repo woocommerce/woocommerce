@@ -419,15 +419,8 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					selectedAttributes
 				);
 
-				const { actions: productContextActions } =
-					store< ProductContextStore >(
-						'woocommerce/product-context',
-						{},
-						{ lock: universalLock }
-					);
-				productContextActions.setVariationId(
-					matchedVariation?.id ?? null
-				);
+				productContextState.variationId =
+					matchedVariation?.id ?? null;
 			},
 			validateVariation() {
 				actions.clearErrors( 'variable-product' );
@@ -492,8 +485,16 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 
 				const { selectedAttributes } = getContext< Context >();
 
+				const productId =
+					productContextState.parentProduct?.id ??
+					productContextState.currentProduct?.id;
+
+				if ( ! productId ) {
+					return;
+				}
+
 				const productObject = getProductData(
-					productContextState.currentProductId,
+					productId,
 					selectedAttributes
 				);
 
@@ -514,7 +515,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 						newValue !== currentValue
 					) {
 						actions.setQuantity(
-							productContextState.currentProductId,
+							productId,
 							newValue
 						);
 					}

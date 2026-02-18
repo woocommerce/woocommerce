@@ -184,11 +184,15 @@ const { actions, state } = store<
 			},
 			get productData() {
 				const { selectedAttributes } = getContext< Context >();
+				const productId =
+					productContextState.parentProduct?.id ??
+					productContextState.currentProduct?.id;
 
-				return getProductData(
-					productContextState.currentProductId,
-					selectedAttributes
-				);
+				if ( ! productId ) {
+					return null;
+				}
+
+				return getProductData( productId, selectedAttributes );
 			},
 		},
 		actions: {
@@ -344,15 +348,18 @@ const { actions, state } = store<
 				// woocommerce store is public.
 				yield import( '@woocommerce/stores/woocommerce/cart' );
 
+				const currentProduct = productContextState.currentProduct;
+				const id = currentProduct?.id;
+
+				if ( ! id ) {
+					return;
+				}
+
 				const { selectedAttributes } = getContext< Context >();
-
-				const id =
-					productContextState.variationId ||
-					productContextState.productId;
-
-				const productType = productContextState.variationId
-					? 'variation'
-					: getProductData( id, selectedAttributes )?.type;
+				const productType =
+					productContextState.parentProduct !== null
+						? 'variation'
+						: getProductData( id, selectedAttributes )?.type;
 
 				if ( ! productType ) {
 					return;
