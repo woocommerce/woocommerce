@@ -41,10 +41,10 @@ type BatchItemResponse = {
 export type MutationQueueConfig< TState = unknown > = {
 	endpoint: string;
 	getHeaders: () => Record< string, string >;
+	fetchHandler?: typeof fetch;
 	takeSnapshot: () => TState;
 	rollback: ( snapshot: TState ) => void;
 	commit: ( serverState: TState ) => void;
-	onResponse?: ( response: Response ) => void;
 };
 
 type TrackedRequest< TState = unknown > = {
@@ -57,8 +57,14 @@ type TrackedRequest< TState = unknown > = {
 export function createMutationQueue< TState >(
 	config: MutationQueueConfig< TState >
 ) {
-	const { endpoint, getHeaders, takeSnapshot, rollback, commit, onResponse } =
-		config;
+	const {
+		endpoint,
+		getHeaders,
+		takeSnapshot,
+		rollback,
+		commit,
+		fetchHandler = fetch,
+	} = config;
 
 	// Snapshot taken once at the start of each processing cycle.
 	let snapshot: TState | null = null;
@@ -217,7 +223,7 @@ export function createMutationQueue< TState >(
 				} )
 				.filter( Boolean );
 
-			const response = await fetch( endpoint, {
+			const response = await fetchHandler( endpoint, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -225,8 +231,6 @@ export function createMutationQueue< TState >(
 				},
 				body: JSON.stringify( { requests } ),
 			} );
-
-			onResponse?.( response );
 
 			if ( ! response.ok ) {
 				handleBatchFailure(

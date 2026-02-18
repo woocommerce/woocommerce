@@ -299,9 +299,11 @@ async function sendCartRequest(
 			commit: ( serverState ) => {
 				stateRef.cart = serverState;
 			},
-			onResponse: ( response ) => {
+			fetchHandler: async ( ...args ) => {
+				const response = await fetch( ...args );
 				stateRef.nonce =
 					response.headers.get( 'Nonce' ) || stateRef.nonce;
+				return response;
 			},
 		} );
 	}
