@@ -1081,9 +1081,6 @@ add_action( 'wp_login', 'wc_user_logged_in', 10, 2 );
  * @since 3.4.0
  */
 function wc_current_user_is_active() {
-	if ( ! is_user_logged_in() ) {
-		return;
-	}
 	wc_update_user_last_active( get_current_user_id() );
 }
 add_action( 'wp', 'wc_current_user_is_active', 10 );
@@ -1095,10 +1092,24 @@ add_action( 'wp', 'wc_current_user_is_active', 10 );
  * @param int $user_id User ID to mark active.
  */
 function wc_update_user_last_active( $user_id ) {
-	if ( ! $user_id ) {
-		return;
+	if ( $user_id ) {
+		// Optimization note: meta write invalidates caches and triggers repopulating them, hence guarded updates.
+		// Default threshold: order placement, automation - guard against repetitive updates in short period of time.
+		$threshold = MINUTE_IN_SECONDS;
+		if ( doing_action( 'wp_login' ) ) {
+			// When user logged in, execute update right away.
+			$threshold = 0;
+		} elseif ( doing_action( 'wp' ) ) {
+			// When navigating the store pages, track online presence (5 minutes works for this sort of tracking).
+			$threshold = 5 * MINUTE_IN_SECONDS;
+		}
+
+		$now         = time();
+		$last_active = get_user_meta( $user_id, 'wc_last_active', true );
+		if ( ! $last_active || ( $now - $last_active ) > $threshold ) {
+			update_user_meta( $user_id, 'wc_last_active', (string) $now );
+		}
 	}
-	update_user_meta( $user_id, 'wc_last_active', (string) time() );
 }
 
 /**
