@@ -638,6 +638,9 @@ function wc_price( $price, $args = array() ) {
 	 */
 	$price = apply_filters( 'formatted_woocommerce_price', number_format( $price, $args['decimals'], $args['decimal_separator'], $args['thousand_separator'] ), $price, $args['decimals'], $args['decimal_separator'], $args['thousand_separator'], $original_price );
 
+	// Replace regular spaces with non-breaking spaces to prevent prices from wrapping at thousands separators.
+	$price = str_replace( ' ', "\xC2\xA0", $price );
+
 	if ( apply_filters( 'woocommerce_price_trim_zeros', false ) && $args['decimals'] > 0 ) {
 		$price = wc_trim_zeros( $price );
 	}
