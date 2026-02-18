@@ -341,3 +341,66 @@ export {
 	 */
 	isEventTrackingEnabled,
 } from './events';
+
+/**
+ * A Fill component for the email actions slot in the Settings panel.
+ *
+ * Use this Fill together with `registerPlugin` to render content in the
+ * email actions slot inside the email editor's Settings panel. Both
+ * EmailStatus and TemplateSelection are rendered through this slot by default.
+ * Registrations can be removed with `unregisterPlugin` and replaced with
+ * custom implementations.
+ *
+ * @example
+ * ```jsx
+ * import { EmailActionsFill, TemplateSelection } from '@woocommerce/email-editor';
+ * import { registerPlugin, unregisterPlugin } from '@wordpress/plugins';
+ *
+ * // Remove the default TemplateSelection from the Settings panel
+ * unregisterPlugin( 'woocommerce-email-editor-template-selection' );
+ *
+ * // Render TemplateSelection in a custom location via registerPlugin
+ * registerPlugin( 'my-custom-template-selection', {
+ *   scope: 'woocommerce-email-editor',
+ *   render: () => (
+ *     <EmailActionsFill>
+ *       <TemplateSelection />
+ *     </EmailActionsFill>
+ *   ),
+ * } );
+ * ```
+ *
+ * @since 1.0.0
+ */
+export { EmailActionsFill } from './components/sidebar/settings-panel';
+
+/**
+ * A sidebar component for selecting and managing email templates.
+ *
+ * Displays the currently active template with options to edit or swap templates.
+ * This component is rendered by default inside the Settings panel via a
+ * `registerPlugin` registration using `EmailActionsFill`. Consumers can remove
+ * it with `unregisterPlugin` and re-render it in a custom location.
+ *
+ * @example
+ * ```jsx
+ * import { EmailActionsFill, TemplateSelection } from '@woocommerce/email-editor';
+ * import { registerPlugin, unregisterPlugin } from '@wordpress/plugins';
+ *
+ * // Remove the default TemplateSelection from the Settings panel
+ * unregisterPlugin( 'woocommerce-email-editor-template-selection' );
+ *
+ * // Render TemplateSelection in a custom location
+ * registerPlugin( 'my-custom-template-selection', {
+ *   scope: 'woocommerce-email-editor',
+ *   render: () => (
+ *     <EmailActionsFill>
+ *       <TemplateSelection />
+ *     </EmailActionsFill>
+ *   ),
+ * } );
+ * ```
+ *
+ * @since 1.0.0
+ */
+export { TemplateSelection } from './components/sidebar/template-selection';

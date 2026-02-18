@@ -40,6 +40,10 @@ import {
 import { TermsOfService } from '~/task-lists/components/terms-of-service';
 import { TrackedLink } from '~/components/tracked-link/tracked-link';
 
+export const hasInstallableSlug = ( shippingMethod ) =>
+	typeof shippingMethod?.slug === 'string' &&
+	shippingMethod.slug.trim().length > 0;
+
 export class Shipping extends Component {
 	constructor( props ) {
 		super( props );
@@ -206,9 +210,11 @@ export class Shipping extends Component {
 		} = this.props;
 		const pluginsToPromote = shippingPartners;
 
-		const pluginsToActivate = pluginsToPromote.map( ( pluginToPromote ) => {
-			return pluginToPromote.slug;
-		} );
+		const pluginsToActivate = pluginsToPromote
+			.map( ( pluginToPromote ) => pluginToPromote.slug )
+			.filter(
+				( slug ) => typeof slug === 'string' && slug.trim().length > 0
+			);
 
 		const onShippingPluginInstalltionSkip = () => {
 			recordEvent( 'tasklist_shipping_label_printing', {
@@ -372,7 +378,7 @@ export class Shipping extends Component {
 						/>
 					</>
 				),
-				visible: pluginsToActivate.length,
+				visible: pluginsToPromote.length,
 			},
 
 			// Only needed for WooCommerce Shipping
@@ -526,7 +532,9 @@ export class Shipping extends Component {
 								</div>
 							) }
 							{ pluginsToPromote.length === 1 &&
-								pluginsToPromote[ 0 ].slug === undefined && ( // if it doesn't have a slug we just show a download button
+								! hasInstallableSlug(
+									pluginsToPromote[ 0 ]
+								) && ( // if it doesn't have a slug we just show a download button
 									<a
 										href={
 											pluginsToPromote[ 0 ]
@@ -541,7 +549,7 @@ export class Shipping extends Component {
 									</a>
 								) }
 							{ pluginsToPromote.length === 1 &&
-							pluginsToPromote[ 0 ].slug ? (
+							hasInstallableSlug( pluginsToPromote[ 0 ] ) ? (
 								<>
 									{ ! isJetpackConnected &&
 										pluginsToPromote[ 0 ].slug ===

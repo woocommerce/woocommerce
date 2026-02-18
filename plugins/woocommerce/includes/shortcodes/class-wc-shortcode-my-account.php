@@ -8,9 +8,6 @@
  * @version 2.0.0
  */
 
-use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
-use Automattic\WooCommerce\Internal\FraudProtection\PaymentMethodEventTracker;
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -237,7 +234,8 @@ class WC_Shortcode_My_Account {
 		 * After sending the reset link, don't show the form again.
 		 */
 		if ( ! empty( $_GET['reset-link-sent'] ) ) { // WPCS: input var ok, CSRF ok.
-			return wc_get_template( 'myaccount/lost-password-confirmation.php' );
+			wc_get_template( 'myaccount/lost-password-confirmation.php' );
+			return;
 
 			/**
 			 * Process reset key / login from email confirmation link
@@ -251,13 +249,14 @@ class WC_Shortcode_My_Account {
 
 				// Reset key / login is correct, display reset password form with hidden key / login values.
 				if ( is_object( $user ) ) {
-					return wc_get_template(
+					wc_get_template(
 						'myaccount/form-reset-password.php',
 						array(
 							'key'   => $rp_key,
 							'login' => $rp_login,
 						)
 					);
+					return;
 				}
 			}
 		}
@@ -412,12 +411,6 @@ class WC_Shortcode_My_Account {
 			wp_safe_redirect( wc_get_page_permalink( 'myaccount' ) );
 			exit();
 		} else {
-			// Track add payment method page loaded for fraud protection.
-			if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
-				wc_get_container()->get( PaymentMethodEventTracker::class )
-					->track_add_payment_method_page_loaded();
-			}
-
 			do_action( 'before_woocommerce_add_payment_method' );
 
 			wc_get_template( 'myaccount/form-add-payment-method.php' );

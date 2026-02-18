@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Update woocommerce_email_editor_integration_personalizer_context_data filter to allow overwrite values from core
