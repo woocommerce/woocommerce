@@ -25,7 +25,6 @@ function setStyles() {
 	 * We only set the background color, instead of the whole background. As
 	 * we only provide the option to customize the background color.
 	 */
-	const style = document.createElement( 'style' );
 	const backgroundColor = getComputedStyle( document.body ).backgroundColor;
 	// For simplicity, we only consider the background color of the first Mini-Cart button.
 	const firstMiniCartButton = document.querySelector(
@@ -39,19 +38,18 @@ function setStyles() {
 	// We use :where here to reduce specificity so customized colors and theme
 	// CSS take priority.
 	// We need to set `div` and `span` in the selector so it has more specificity than the CSS.
-	style.appendChild(
-		document.createTextNode(
-			`div:where(.wp-block-woocommerce-mini-cart-contents) {
-				background-color: ${ backgroundColor };
-			}
-			span:where(.wc-block-mini-cart__badge) {
-				background-color: ${ badgeBackgroundColor };
-				color: ${ badgeTextColor };
-			}`
-		)
+	const sheet = new CSSStyleSheet();
+	sheet.replaceSync(
+		`div:where(.wp-block-woocommerce-mini-cart-contents) {
+			background-color: ${ backgroundColor };
+		}
+		span:where(.wc-block-mini-cart__badge) {
+			background-color: ${ badgeBackgroundColor };
+			color: ${ badgeTextColor };
+		}`
 	);
 
-	document.head.appendChild( style );
+	document.adoptedStyleSheets = [ ...document.adoptedStyleSheets, sheet ];
 }
 
 export default setStyles;
