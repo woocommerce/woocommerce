@@ -178,7 +178,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 			if ( ! $order instanceof WC_Order || ! PointOfSaleOrderUtil::is_order_paid_at_pos( $order ) ) {
 				return;
 			}
-			$this->trigger( $order_id, $this->id );
+			$this->trigger( $order_id, $this->id, $refund_id );
 		}
 
 		/**
@@ -186,11 +186,12 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 		 *
 		 * @param int    $order_id    The order ID.
 		 * @param string $template_id The email template ID.
+		 * @param int    $refund_id   The refund ID.
 		 *
 		 * @internal
 		 * @since 10.6.0
 		 */
-		public function trigger( $order_id, $template_id ): void {
+		public function trigger( $order_id, $template_id, $refund_id = null ): void {
 			if ( $this->id !== $template_id ) {
 				return;
 			}
@@ -213,8 +214,12 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 			$this->placeholders['{order_date}']   = wc_format_datetime( $order->get_date_created() );
 			$this->placeholders['{order_number}'] = $order->get_order_number();
 
-			$refunds      = $order->get_refunds();
-			$this->refund = ! empty( $refunds ) ? reset( $refunds ) : false;
+			if ( ! empty( $refund_id ) ) {
+				$refund       = wc_get_order( $refund_id );
+				$this->refund = $refund instanceof WC_Order_Refund ? $refund : false;
+			} else {
+				$this->refund = false;
+			}
 
 			if ( $this->get_recipient() ) {
 				$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
