@@ -412,6 +412,60 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 	}
 
 	/**
+	 * Test deeply nested post-content (group → group → post-content) delegates correctly
+	 */
+	public function testItDelegatesThroughDeeplyNestedPostContent(): void {
+		$blocks = array(
+			array(
+				'blockName'   => 'core/group',
+				'attrs'       => array(),
+				'innerBlocks' => array(
+					array(
+						'blockName'   => 'core/group',
+						'attrs'       => array(),
+						'innerBlocks' => array(
+							array(
+								'blockName'   => 'core/group',
+								'attrs'       => array(),
+								'innerBlocks' => array(
+									array(
+										'blockName'   => 'core/post-content',
+										'attrs'       => array(),
+										'innerBlocks' => array(
+											array(
+												'blockName' => 'core/paragraph',
+												'attrs' => array(),
+												'innerBlocks' => array(),
+											),
+										),
+									),
+								),
+							),
+						),
+					),
+				),
+			),
+		);
+
+		$result       = $this->preprocessor->preprocess( $blocks, $this->layout, $this->styles );
+		$root_group   = $result[0];
+		$middle_group = $root_group['innerBlocks'][0];
+		$inner_group  = $middle_group['innerBlocks'][0];
+		$post_content = $inner_group['innerBlocks'][0];
+		$user_block   = $post_content['innerBlocks'][0];
+
+		// All container groups in the chain should be transparent (no padding).
+		$this->assertArrayNotHasKey( 'padding-left', $root_group['email_attrs'] );
+		$this->assertArrayNotHasKey( 'padding-left', $middle_group['email_attrs'] );
+		$this->assertArrayNotHasKey( 'padding-left', $inner_group['email_attrs'] );
+		$this->assertArrayNotHasKey( 'padding-left', $post_content['email_attrs'] );
+
+		// User block inside post-content should get root padding.
+		$this->assertEquals( '10px', $user_block['email_attrs']['padding-left'] );
+		$this->assertEquals( '10px', $user_block['email_attrs']['padding-right'] );
+	}
+
+	/**
 	 * Test it skips root padding for alignfull children of root-level containers
 	 */
 	public function testItSkipsRootPaddingForAlignfullBlocks(): void {

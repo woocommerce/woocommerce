@@ -114,14 +114,22 @@ class Spacing_Preprocessor implements Preprocessor {
 	}
 
 	/**
-	 * Checks whether a block directly contains a core/post-content child.
+	 * Checks whether a block contains a core/post-content descendant.
+	 *
+	 * Searches recursively through container blocks (groups) so that
+	 * deeply nested template structures like group → group → post-content
+	 * are handled correctly.
 	 *
 	 * @param array $block The block to check.
-	 * @return bool True if the block has a direct post-content child.
+	 * @return bool True if the block has a post-content descendant.
 	 */
 	private function contains_post_content( array $block ): bool {
 		foreach ( $block['innerBlocks'] ?? array() as $inner_block ) {
-			if ( 'core/post-content' === ( $inner_block['blockName'] ?? '' ) ) {
+			$name = $inner_block['blockName'] ?? '';
+			if ( 'core/post-content' === $name ) {
+				return true;
+			}
+			if ( in_array( $name, self::CONTAINER_BLOCKS, true ) && $this->contains_post_content( $inner_block ) ) {
 				return true;
 			}
 		}
