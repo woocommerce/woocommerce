@@ -257,13 +257,8 @@ class Renderer {
 	 */
 	private function handle_block_dimensions( $p, $block ) {
     if ( isset( $block['attrs']['dimensions'] ) && isset( $block['attrs']['dimensions']['widthType'] ) ) {
-        if ( 'fixed' === $block['attrs']['dimensions']['widthType'] ) {
-            $fixed_width = isset( $block['attrs']['dimensions']['fixedWidth'] ) 
-                ? $block['attrs']['dimensions']['fixedWidth'] 
-                : null; // or set a default, e.g. '200px'
-			// REMOVES THE ERROR PHP Warning: Undefined array key "fixedWidth" in /var/www/html/wp-content/plugins/woocommerce/src/Blocks/BlockTypes/ProductCollection/Renderer.php on line 263
-
-            $this->set_fixed_width_style( $p, $fixed_width );
+        if ( 'fixed' === $block['attrs']['dimensions']['widthType'] && isset( $block['attrs']['dimensions']['fixedWidth'] )) {
+            $this->set_fixed_width_style( $p, $block['attrs']['dimensions']['fixedWidth'] );
         }
     }
 }
