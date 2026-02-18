@@ -389,9 +389,6 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 		 * @since 10.6.0
 		 */
 		public function add_to_valid_template_classes( $valid_template_classes, $order ) {
-			if ( 'completed' !== $order->get_status( 'edit' ) ) {
-				return $valid_template_classes;
-			}
 			if ( ! PointOfSaleOrderUtil::is_order_paid_at_pos( $order ) ) {
 				return $valid_template_classes;
 			}
