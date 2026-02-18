@@ -1,0 +1,130 @@
+<?php
+/**
+ * This file is part of the WooCommerce Email Editor package
+ *
+ * @package Automattic\WooCommerce\EmailEditor
+ */
+
+declare( strict_types = 1 );
+namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
+
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Dom_Document_Helper;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
+
+/**
+ * Renders a group block.
+ */
+class Group extends Abstract_Block_Renderer {
+	/**
+	 * Grid layout renderer instance.
+	 *
+	 * @var Grid|null
+	 */
+	private ?Grid $grid_renderer = null;
+
+	/**
+	 * Renders the block content.
+	 *
+	 * Detects grid layout type and delegates to the Grid renderer,
+	 * otherwise uses the default group table wrapper.
+	 *
+	 * @param string            $block_content Block content.
+	 * @param array             $parsed_block Parsed block.
+	 * @param Rendering_Context $rendering_context Rendering context.
+	 * @return string
+	 */
+	protected function render_content( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
+		if ( $this->is_grid_layout( $parsed_block, $block_content ) ) {
+			return $this->get_grid_renderer()->render_grid_content( $block_content, $parsed_block, $rendering_context );
+		}
+
+		return str_replace(
+			'{group_content}',
+			$this->get_inner_content( $block_content ),
+			$this->get_block_wrapper( $block_content, $parsed_block, $rendering_context )
+		);
+	}
+
+	/**
+	 * Determines if the block has a grid layout.
+	 *
+	 * Checks block attributes first, then falls back to checking CSS classes
+	 * in the rendered block content for cases where WordPress processes the
+	 * layout attribute before the email renderer receives it.
+	 *
+	 * @param array  $parsed_block Parsed block data.
+	 * @param string $block_content Rendered block content.
+	 * @return bool
+	 */
+	private function is_grid_layout( array $parsed_block, string $block_content ): bool {
+		$layout_type = $parsed_block['attrs']['layout']['type'] ?? '';
+		if ( 'grid' === $layout_type ) {
+			return true;
+		}
+
+		return false !== strpos( $block_content, 'is-layout-grid' );
+	}
+
+	/**
+	 * Returns the Grid renderer instance.
+	 *
+	 * @return Grid
+	 */
+	private function get_grid_renderer(): Grid {
+		if ( null === $this->grid_renderer ) {
+			$this->grid_renderer = new Grid();
+		}
+		return $this->grid_renderer;
+	}
+
+	/**
+	 * Returns the block wrapper.
+	 *
+	 * @param string            $block_content Block content.
+	 * @param array             $parsed_block Parsed block.
+	 * @param Rendering_Context $rendering_context Rendering context.
+	 */
+	private function get_block_wrapper( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
+		$original_classname = ( new Dom_Document_Helper( $block_content ) )->get_attribute_value_by_tag_name( 'div', 'class' ) ?? '';
+		$block_attributes   = wp_parse_args(
+			$parsed_block['attrs'] ?? array(),
+			array(
+				'style'           => array(),
+				'backgroundColor' => '',
+				'textColor'       => '',
+				'borderColor'     => '',
+				'layout'          => array(),
+			)
+		);
+
+		$table_styles = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'border', 'background', 'background-color', 'color', 'text-align' ) );
+		$table_styles = Styles_Helper::extend_block_styles(
+			$table_styles,
+			array_filter(
+				array(
+					'border-collapse' => 'separate',
+					'background-size' => $table_styles['declarations']['background-size'] ?? 'cover',
+				)
+			)
+		);
+
+		// Padding properties need to be added to the table cell.
+		$cell_styles = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'padding' ) );
+
+		$table_attrs = array(
+			'class' => 'email-block-group ' . $original_classname,
+			'style' => $table_styles['css'],
+			'width' => '100%',
+		);
+
+		$cell_attrs = array(
+			'class' => 'email-block-group-content',
+			'style' => $cell_styles['css'],
+			'width' => $parsed_block['email_attrs']['width'] ?? '100%',
+		);
+
+		return Table_Wrapper_Helper::render_table_wrapper( '{group_content}', $table_attrs, $cell_attrs );
+	}
+}
