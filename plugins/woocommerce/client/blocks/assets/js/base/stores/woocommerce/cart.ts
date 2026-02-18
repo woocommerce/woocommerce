@@ -250,7 +250,10 @@ const doesCartItemMatchAttributes = (
 
 let pendingRefresh = false;
 let refreshTimeout = 3000;
-let isNonceReady: Promise< void > | null = null;
+let resolveNonceReady: ( () => void ) | null = null;
+const isNonceReady = new Promise< void >( ( resolve ) => {
+	resolveNonceReady = resolve;
+} );
 
 function emitSyncEvent( {
 	quantityChanges,
@@ -708,6 +711,11 @@ const { state, actions } = store< Store >(
 					// Extract fresh nonce from response headers.
 					state.nonce = res.headers.get( 'Nonce' ) || state.nonce;
 
+					if ( resolveNonceReady ) {
+						resolveNonceReady();
+						resolveNonceReady = null;
+					}
+
 					const json = ( yield res.json() ) as Cart;
 
 					// Checks if the response contains an error.
@@ -807,8 +815,8 @@ const { state, actions } = store< Store >(
 	{ lock: true }
 );
 
-// Async actions are typed as void for consumers, but are actually Promises internally.
-isNonceReady = actions.refreshCartItems();
+// Trigger initial cart refresh.
+actions.refreshCartItems();
 
 window.addEventListener(
 	'wc-blocks_store_sync_required',
