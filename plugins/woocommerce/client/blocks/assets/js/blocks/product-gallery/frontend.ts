@@ -430,7 +430,9 @@ const productGallery = {
 			const { currentProduct, parentProduct } =
 				productContextState ?? {};
 
-			// Config is keyed by the main (non-variation) product ID.
+			// The gallery reads from page config (keyed by parent product
+			// ID with variations nested) rather than the products store,
+			// so we can't just use currentProduct directly here.
 			const mainProductId =
 				parentProduct?.id ?? currentProduct?.id;
 			if ( ! mainProductId ) {
