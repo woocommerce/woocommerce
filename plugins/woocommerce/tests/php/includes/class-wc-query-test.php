@@ -264,5 +264,4 @@ class WC_Query_Test extends \WC_Unit_Test_Case {
 		wp_delete_post( $shop_page_id, true );
 		wp_delete_post( $parent_page_id, true );
 	}
-
 }
