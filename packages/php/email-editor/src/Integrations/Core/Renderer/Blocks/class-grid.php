@@ -16,8 +16,6 @@ use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
 /**
  * Renders grid layout for Group blocks with layout.type = 'grid'.
  * Converts CSS Grid layout to table-based HTML for email client compatibility.
- *
- * @since 10.6.0
  */
 class Grid {
 	/**
@@ -76,25 +74,17 @@ class Grid {
 		$element    = $dom_helper->find_element( 'div' );
 		$inner_html = $element ? $dom_helper->get_element_inner_html( $element ) : $block_content;
 
-		libxml_use_internal_errors( true );
-		$dom = new \DOMDocument();
-		$dom->loadHTML( '<?xml encoding="UTF-8">' . $inner_html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD );
-		libxml_clear_errors();
+		$inner_dom_helper = new Dom_Document_Helper( $inner_html );
+		$divs             = $inner_dom_helper->find_elements( 'div' );
 
 		$children = array();
-		$divs     = $dom->getElementsByTagName( 'div' );
-
 		foreach ( $divs as $node ) {
-			$class = $node->getAttribute( 'class' );
+			$class = $inner_dom_helper->get_attribute_value( $node, 'class' );
 			if ( false === strpos( $class, 'email-block-layout' ) ) {
 				continue;
 			}
 
-			$child_html = '';
-			foreach ( $node->childNodes as $child ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
-				$child_html .= $dom->saveHTML( $child );
-			}
-
+			$child_html = $inner_dom_helper->get_element_inner_html( $node );
 			if ( '' !== trim( $child_html ) ) {
 				$children[] = $child_html;
 			}
@@ -278,9 +268,14 @@ class Grid {
 			$row_cells .= Table_Wrapper_Helper::render_table_cell( $child_html, $cell_attrs );
 		}
 
-		return sprintf(
-			'<table role="presentation" style="width: 100%%; border-collapse: collapse; table-layout: fixed;"><tr>%s</tr></table>',
-			$row_cells
+		return Table_Wrapper_Helper::render_table_wrapper(
+			$row_cells,
+			array(
+				'style' => 'width: 100%; border-collapse: collapse; table-layout: fixed;',
+			),
+			array(),
+			array(),
+			false
 		);
 	}
 }
