@@ -427,7 +427,9 @@ const productGallery = {
 	},
 	callbacks: {
 		listenToProductDataChanges: () => {
-			const productId = productContextState?.currentProductId;
+			const currentProduct = productContextState?.currentProduct;
+			const parentProduct = productContextState?.parentProduct;
+			const productId = parentProduct?.id ?? currentProduct?.id;
 			if ( ! productId ) {
 				return;
 			}
@@ -436,9 +438,11 @@ const productGallery = {
 				'woocommerce'
 			) as WooCommerceConfig;
 
+			const variationId =
+				parentProduct !== null ? currentProduct?.id : undefined;
 			const productData =
 				products?.[ productId ]?.variations?.[
-					productContextState?.currentVariationId || 0
+					variationId || 0
 				] || products?.[ productId ];
 
 			const imageId = productData?.image_id;
