@@ -114,8 +114,7 @@ export type Store = {
 			items: ClientCartItem[],
 			options?: CartUpdateOptions
 		) => void;
-		// Todo: Check why if I switch to an async function here the types of the store stop working.
-		refreshCartItems: () => void;
+		refreshCartItems: () => Promise< void >;
 		waitForIdle: () => void;
 		showNoticeError: ( error: Error | ApiErrorResponse ) => void;
 		updateNotices: ( notices: Notice[], removeOthers?: boolean ) => void;
@@ -299,7 +298,17 @@ function sendCartRequest(
 }
 
 // Todo: export this store once the store is public.
-const { state, actions } = store< Store >(
+// Using `let` with explicit type annotations to break a circular reference
+// in TypeScript's type inference. The store definition closures reference
+// `state` and `actions`, which are destructured from the store() return.
+// With `() => void` actions, the iAPI ConvertPromisesToGenerators/
+// ConvertGeneratorsToPromises conditionals short-circuit (both return
+// `never`), keeping types simple enough for TS to handle the cycle. With
+// `() => Promise<void>`, the conversions activate and TS bails out with
+// TS7022 ("implicitly has type 'any'"). Pre-declaring the types avoids this.
+let state: Store[ 'state' ];
+let actions: Store[ 'actions' ];
+( { state, actions } = store< Store >(
 	'woocommerce',
 	{
 		actions: {
@@ -777,7 +786,7 @@ const { state, actions } = store< Store >(
 		},
 	},
 	{ lock: true }
-);
+) );
 
 window.addEventListener(
 	'wc-blocks_store_sync_required',
