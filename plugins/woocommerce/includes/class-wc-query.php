@@ -397,6 +397,8 @@ class WC_Query {
 			}
 		}
 
+		$shop_page = null;
+
 		if ( wc_current_theme_supports_woocommerce_or_fse() && $q->is_page() && 'page' === get_option( 'show_on_front' ) && $page_id === $shop_id ) {
 			// This is a front-page shop.
 			$shop_page = get_post( $shop_id );
