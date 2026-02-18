@@ -8,12 +8,10 @@ import type { ProductResponseItem } from '@woocommerce/types';
  */
 import type { ProductContextStore } from '../product-context';
 
-type MockStore = {
+let mockRegisteredStore: {
 	state: ProductContextStore[ 'state' ];
-	actions: ProductContextStore[ 'actions' ];
-};
+} | null = null;
 
-let mockRegisteredStore: MockStore | null = null;
 let mockProductsState: {
 	products: Record< number, ProductResponseItem >;
 	productVariations: Record< number, ProductResponseItem >;
@@ -41,7 +39,6 @@ jest.mock(
 			if ( namespace === 'woocommerce/product-context' ) {
 				mockRegisteredStore = {
 					state: definition.state,
-					actions: definition.actions,
 				};
 				return mockRegisteredStore;
 			}
@@ -62,35 +59,29 @@ describe( 'woocommerce/product-context store', () => {
 		jest.isolateModules( () => require( '../product-context' ) );
 	} );
 
-	describe( 'actions', () => {
-		it( 'setProductId updates productId in state', () => {
-			expect( mockRegisteredStore ).not.toBeNull();
+	it( 'has writable productId and variationId state', () => {
+		expect( mockRegisteredStore ).not.toBeNull();
 
-			mockRegisteredStore!.actions.setProductId( 100 );
+		mockRegisteredStore!.state.productId = 42;
+		mockRegisteredStore!.state.variationId = 99;
 
-			expect( mockRegisteredStore!.state.productId ).toBe( 100 );
-		} );
-
-		it( 'setVariationId updates variationId in state', () => {
-			expect( mockRegisteredStore ).not.toBeNull();
-
-			mockRegisteredStore!.actions.setVariationId( 200 );
-
-			expect( mockRegisteredStore!.state.variationId ).toBe( 200 );
-		} );
-
-		it( 'setVariationId accepts null to clear selection', () => {
-			expect( mockRegisteredStore ).not.toBeNull();
-
-			mockRegisteredStore!.actions.setVariationId( 200 );
-			mockRegisteredStore!.actions.setVariationId( null );
-
-			expect( mockRegisteredStore!.state.variationId ).toBeNull();
-		} );
+		expect( mockRegisteredStore!.state.productId ).toBe( 42 );
+		expect( mockRegisteredStore!.state.variationId ).toBe( 99 );
 	} );
 
-	describe( 'computed getters', () => {
-		it( 'currentProduct returns selectedVariation when set, otherwise parentProduct', () => {
+	describe( 'currentProduct', () => {
+		it( 'returns the product when variationId is null', () => {
+			expect( mockRegisteredStore ).not.toBeNull();
+
+			mockRegisteredStore!.state.productId = 42;
+			mockRegisteredStore!.state.variationId = null;
+
+			expect( mockRegisteredStore!.state.currentProduct ).toBe(
+				mockProduct
+			);
+		} );
+
+		it( 'returns the variation when variationId is set', () => {
 			expect( mockRegisteredStore ).not.toBeNull();
 
 			mockRegisteredStore!.state.productId = 42;
@@ -99,10 +90,62 @@ describe( 'woocommerce/product-context store', () => {
 			expect( mockRegisteredStore!.state.currentProduct ).toBe(
 				mockVariation
 			);
+		} );
 
-			mockRegisteredStore!.actions.setVariationId( null );
+		it( 'returns undefined when product is not in the store', () => {
+			expect( mockRegisteredStore ).not.toBeNull();
 
-			expect( mockRegisteredStore!.state.currentProduct ).toBe(
+			mockRegisteredStore!.state.productId = 999;
+			mockRegisteredStore!.state.variationId = null;
+
+			expect(
+				mockRegisteredStore!.state.currentProduct
+			).toBeUndefined();
+		} );
+
+		it( 'returns undefined when productId is 0', () => {
+			expect( mockRegisteredStore ).not.toBeNull();
+
+			expect(
+				mockRegisteredStore!.state.currentProduct
+			).toBeUndefined();
+		} );
+	} );
+
+	describe( 'parentProduct', () => {
+		it( 'returns null when variationId is null (simple product)', () => {
+			expect( mockRegisteredStore ).not.toBeNull();
+
+			mockRegisteredStore!.state.productId = 42;
+			mockRegisteredStore!.state.variationId = null;
+
+			expect(
+				mockRegisteredStore!.state.parentProduct
+			).toBeNull();
+		} );
+
+		it( 'returns null when variationId is null (variable product, no selection)', () => {
+			expect( mockRegisteredStore ).not.toBeNull();
+
+			mockProductsState.products[ 10 ] = {
+				id: 10,
+				type: 'variable',
+			} as ProductResponseItem;
+			mockRegisteredStore!.state.productId = 10;
+			mockRegisteredStore!.state.variationId = null;
+
+			expect(
+				mockRegisteredStore!.state.parentProduct
+			).toBeNull();
+		} );
+
+		it( 'returns the variable product when variationId is set', () => {
+			expect( mockRegisteredStore ).not.toBeNull();
+
+			mockRegisteredStore!.state.productId = 42;
+			mockRegisteredStore!.state.variationId = 99;
+
+			expect( mockRegisteredStore!.state.parentProduct ).toBe(
 				mockProduct
 			);
 		} );

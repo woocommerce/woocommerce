@@ -16,54 +16,52 @@ const productsStore = store< ProductsStore >( 'woocommerce/products', {
 	},
 } );
 
-export type ProductContextState = {
-	productId: number;
-	variationId: number | null;
+export type ProductContextStore = {
+	state: {
+		productId: number;
+		variationId: number | null;
+		/**
+		 * The currently active product for display/cart operations.
+		 * Returns the variation if variationId is set, otherwise the main product.
+		 */
+		currentProduct: ProductResponseItem | undefined;
+		/**
+		 * The parent variable product when a variation is active.
+		 * Null for simple products or when no variation is selected.
+		 */
+		parentProduct: ProductResponseItem | null;
+	};
 };
 
-const productContextStore = store< {
-	state: ProductContextState & {
-		parentProduct: ProductResponseItem | undefined;
-		selectedVariation: ProductResponseItem | undefined;
-		currentProduct: ProductResponseItem | undefined;
-	};
-	actions: {
-		setProductId: ( productId: number ) => void;
-		setVariationId: ( variationId: number | null ) => void;
-	};
-} >(
+const productContextStore = store< ProductContextStore >(
 	'woocommerce/product-context',
 	{
 		state: {
-			get parentProduct(): ProductResponseItem | undefined {
-				return productsStore.state.products[
-					productContextStore.state.productId
-				];
-			},
-			get selectedVariation(): ProductResponseItem | undefined {
-				const { variationId } = productContextStore.state;
-				if ( variationId === null ) {
+			get currentProduct(): ProductResponseItem | undefined {
+				const { productId, variationId } =
+					productContextStore.state;
+				if ( ! productId ) {
 					return undefined;
 				}
-				return productsStore.state.productVariations[ variationId ];
+				if ( variationId ) {
+					return productsStore.state.productVariations[
+						variationId
+					];
+				}
+				return productsStore.state.products[ productId ];
 			},
-			get currentProduct(): ProductResponseItem | undefined {
+
+			get parentProduct(): ProductResponseItem | null {
+				const { productId, variationId } =
+					productContextStore.state;
+				if ( ! variationId ) {
+					return null;
+				}
 				return (
-					productContextStore.state.selectedVariation ??
-					productContextStore.state.parentProduct
+					productsStore.state.products[ productId ] ?? null
 				);
-			},
-		},
-		actions: {
-			setProductId: ( productId: number ) => {
-				productContextStore.state.productId = productId;
-			},
-			setVariationId: ( variationId: number | null ) => {
-				productContextStore.state.variationId = variationId;
 			},
 		},
 	},
 	{ lock: universalLock }
 );
-
-export type ProductContextStore = typeof productContextStore;
