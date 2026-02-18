@@ -12,7 +12,6 @@ import { getTotalBlockingTime, median } from '../utils';
 
 // See https://github.com/WordPress/gutenberg/issues/51383#issuecomment-1613460429
 const BROWSER_IDLE_WAIT = 1000;
-const HOME = '/';
 const SHOP = '/shop/';
 
 const results = {
