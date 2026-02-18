@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Distribute root horizontal padding to individual block wrappers for future alignfull support.
