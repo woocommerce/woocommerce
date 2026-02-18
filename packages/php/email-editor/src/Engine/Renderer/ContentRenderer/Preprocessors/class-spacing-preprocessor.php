@@ -22,10 +22,7 @@ class Spacing_Preprocessor implements Preprocessor {
 	 * @return array
 	 */
 	public function preprocess( array $parsed_blocks, array $layout, array $styles ): array {
-		$root_padding = array(
-			'left'  => $styles['spacing']['padding']['left'] ?? '0px',
-			'right' => $styles['spacing']['padding']['right'] ?? '0px',
-		);
+		$root_padding = $this->get_root_padding( $styles );
 
 		$parsed_blocks = $this->add_block_gaps( $parsed_blocks, $styles['spacing']['blockGap'] ?? '', null, $root_padding );
 		return $parsed_blocks;
@@ -129,6 +126,27 @@ class Spacing_Preprocessor implements Preprocessor {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Extracts and sanitizes root horizontal padding from theme styles.
+	 *
+	 * @param array $styles Theme styles.
+	 * @return array Root padding with 'left' and 'right' keys, or empty array if invalid.
+	 */
+	private function get_root_padding( array $styles ): array {
+		$left  = $styles['spacing']['padding']['left'] ?? '0px';
+		$right = $styles['spacing']['padding']['right'] ?? '0px';
+
+		// Validate against potentially malicious values.
+		if ( ! is_string( $left ) || ! is_string( $right ) || preg_match( '/[<>"\']/', $left . $right ) ) {
+			return array();
+		}
+
+		return array(
+			'left'  => $left,
+			'right' => $right,
+		);
 	}
 
 	/**
