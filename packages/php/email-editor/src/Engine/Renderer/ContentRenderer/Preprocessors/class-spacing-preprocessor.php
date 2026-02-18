@@ -135,8 +135,17 @@ class Spacing_Preprocessor implements Preprocessor {
 	 * @return array Root padding with 'left' and 'right' keys, or empty array if invalid.
 	 */
 	private function get_root_padding( array $styles ): array {
-		$left  = $styles['spacing']['padding']['left'] ?? '0px';
-		$right = $styles['spacing']['padding']['right'] ?? '0px';
+		$padding   = $styles['spacing']['padding'] ?? array();
+		$has_left  = isset( $padding['left'] );
+		$has_right = isset( $padding['right'] );
+
+		// If neither horizontal padding key is defined, skip root padding entirely.
+		if ( ! $has_left && ! $has_right ) {
+			return array();
+		}
+
+		$left  = $has_left ? $padding['left'] : '0px';
+		$right = $has_right ? $padding['right'] : '0px';
 
 		// Validate against potentially malicious values.
 		if ( ! is_string( $left ) || ! is_string( $right ) || preg_match( '/[<>"\']/', $left . $right ) ) {
