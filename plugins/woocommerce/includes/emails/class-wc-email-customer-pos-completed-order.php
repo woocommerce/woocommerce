@@ -380,7 +380,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 		}
 
 		/**
-		 * Add this email template to the list of valid templates for POS-paid completed orders.
+		 * Add this email template to the list of valid templates for POS-paid orders.
 		 *
 		 * @param array    $valid_template_classes Array of valid template class names.
 		 * @param WC_Order $order                  The order.
