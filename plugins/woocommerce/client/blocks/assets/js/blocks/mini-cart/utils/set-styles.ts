@@ -38,18 +38,26 @@ function setStyles() {
 	// We use :where here to reduce specificity so customized colors and theme
 	// CSS take priority.
 	// We need to set `div` and `span` in the selector so it has more specificity than the CSS.
-	const sheet = new CSSStyleSheet();
-	sheet.replaceSync(
-		`div:where(.wp-block-woocommerce-mini-cart-contents) {
+	const css = `div:where(.wp-block-woocommerce-mini-cart-contents) {
 			background-color: ${ backgroundColor };
 		}
 		span:where(.wc-block-mini-cart__badge) {
 			background-color: ${ badgeBackgroundColor };
 			color: ${ badgeTextColor };
-		}`
-	);
+		}`;
 
-	document.adoptedStyleSheets = [ ...document.adoptedStyleSheets, sheet ];
+	// Use adoptedStyleSheets so styles survive iAPI client-side navigations.
+	// Fall back to a <style> element for environments that don't support it,
+	// (specifically it would fail in tests).
+	try {
+		const sheet = new CSSStyleSheet();
+		sheet.replaceSync( css );
+		document.adoptedStyleSheets = [ ...document.adoptedStyleSheets, sheet ];
+	} catch {
+		const style = document.createElement( 'style' );
+		style.appendChild( document.createTextNode( css ) );
+		document.head.appendChild( style );
+	}
 }
 
 export default setStyles;
