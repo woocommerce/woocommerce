@@ -26,6 +26,11 @@ use Automattic\WooCommerce\EmailEditorVendor\Symfony\Component\CssSelector\XPath
  */
 class CssSelectorConverter
 {
+    /**
+     * @var int Maximum number of cached items per cache (LRU eviction threshold).
+     */
+    public static $maxCachedItems = 200;
+
     private $translator;
     private $cache;
 
@@ -64,6 +69,20 @@ class CssSelectorConverter
      */
     public function toXPath(string $cssExpr, string $prefix = 'descendant-or-self::')
     {
-        return $this->cache[$prefix][$cssExpr] ?? $this->cache[$prefix][$cssExpr] = $this->translator->cssToXPath($cssExpr, $prefix);
+        if (isset($this->cache[$prefix][$cssExpr])) {
+            // LRU promotion: move accessed entry to end of array.
+            $value = $this->cache[$prefix][$cssExpr];
+            unset($this->cache[$prefix][$cssExpr]);
+            $this->cache[$prefix][$cssExpr] = $value;
+
+            return $value;
+        }
+
+        // Evict oldest entry when cache is full.
+        if (isset($this->cache[$prefix]) && \count($this->cache[$prefix]) >= self::$maxCachedItems) {
+            unset($this->cache[$prefix][\array_key_first($this->cache[$prefix])]);
+        }
+
+        return $this->cache[$prefix][$cssExpr] = $this->translator->cssToXPath($cssExpr, $prefix);
     }
 }
