@@ -7,6 +7,7 @@ import { test, expect, BlockData } from '@woocommerce/e2e-utils';
  * Internal dependencies
  */
 import { REGULAR_PRICED_PRODUCT_NAME } from '../checkout/constants';
+import config from '../../../../../admin/config/core.json';
 
 const blockData: BlockData = {
 	name: 'Mini-Cart',
@@ -218,21 +219,34 @@ test.describe( `${ blockData.name } Block`, () => {
 			page.getByLabel( 'Quantity of Polo in your cart.' )
 		).toHaveValue( '1' );
 
+		// iAPI cart uses batch requests, legacy cart uses individual endpoints.
+		// Set up waitForResponse BEFORE the click to avoid race condition.
+		const useBatch = config.features[ 'experimental-iapi-mini-cart' ];
+		let batchPromise = useBatch
+			? page.waitForResponse( '**/wp-json/wc/store/v1/batch**' )
+			: null;
 		await page
 			.getByRole( 'button', { name: 'Increase quantity of Polo' } )
 			.click();
 
-		await page.waitForResponse( '**/wp-json/wc/store/v1/cart**' );
+		if ( batchPromise ) {
+			await batchPromise;
+		}
 
 		await expect(
 			page.getByLabel( 'Quantity of Polo in your cart.' )
 		).toHaveValue( '2' );
 
+		batchPromise = useBatch
+			? page.waitForResponse( '**/wp-json/wc/store/v1/batch**' )
+			: null;
 		await page
 			.getByRole( 'button', { name: 'Reduce quantity of Polo' } )
 			.click();
 
-		await page.waitForResponse( '**/wp-json/wc/store/v1/cart**' );
+		if ( batchPromise ) {
+			await batchPromise;
+		}
 
 		await expect(
 			page.getByLabel( 'Quantity of Polo in your cart.' )
