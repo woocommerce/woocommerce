@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix price amounts wrapping onto multiple lines when space is used as thousands separator
