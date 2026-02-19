@@ -54,16 +54,6 @@ class Dom_Document_Helper {
 	}
 
 	/**
-	 * Searches for all elements with the given tag name.
-	 *
-	 * @param string $tag_name The tag name to search for.
-	 * @return \DOMNodeList List of matching elements.
-	 */
-	public function find_elements( string $tag_name ): \DOMNodeList {
-		return $this->dom->getElementsByTagName( $tag_name );
-	}
-
-	/**
 	 * Returns the value of the given attribute from the given element.
 	 *
 	 * @param \DOMElement $element The element to get the attribute value from.

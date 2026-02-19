@@ -75,10 +75,17 @@ class Grid {
 		$inner_html = $element ? $dom_helper->get_element_inner_html( $element ) : $block_content;
 
 		$inner_dom_helper = new Dom_Document_Helper( $inner_html );
-		$divs             = $inner_dom_helper->find_elements( 'div' );
+		$wrapper          = $inner_dom_helper->find_element( 'div' );
 
 		$children = array();
-		foreach ( $divs as $node ) {
+		if ( ! $wrapper ) {
+			return $children;
+		}
+
+		foreach ( $wrapper->childNodes as $node ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+			if ( ! $node instanceof \DOMElement || 'div' !== $node->tagName ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+				continue;
+			}
 			$class = $inner_dom_helper->get_attribute_value( $node, 'class' );
 			if ( false === strpos( $class, 'email-block-layout' ) ) {
 				continue;
