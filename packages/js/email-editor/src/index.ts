@@ -404,3 +404,36 @@ export { EmailActionsFill } from './components/sidebar/settings-panel';
  * @since 1.0.0
  */
 export { TemplateSelection } from './components/sidebar/template-selection';
+
+/**
+ * A confirmation modal shown before navigating to the template editor.
+ *
+ * Warns the user that editing a template affects all emails using it,
+ * then navigates to the template editor on confirmation. Used internally
+ * by `TemplateSelection` and exported for consumers building custom
+ * template selection UIs.
+ *
+ * @param props       - Component properties
+ * @param props.close - Callback to close the modal without navigating
+ *
+ * @since 1.7.0
+ */
+export { EditTemplateModal } from './components/sidebar/edit-template-modal';
+
+/**
+ * A full-screen modal for browsing and selecting email templates.
+ *
+ * Displays available templates in a categorized grid with previews.
+ * Handles template selection by applying the chosen template to the
+ * current post. Used internally by `TemplateSelection` and exported
+ * for consumers building custom template selection UIs.
+ *
+ * @param props                  - Component properties
+ * @param props.onSelectCallback - Called after a template is selected
+ * @param props.closeCallback    - Called when the modal is closed without selection
+ * @param props.previewContent   - Custom email content for template previews
+ * @param props.postType         - The post type of the current email
+ *
+ * @since 1.7.0
+ */
+export { SelectTemplateModal } from './components/template-select';
