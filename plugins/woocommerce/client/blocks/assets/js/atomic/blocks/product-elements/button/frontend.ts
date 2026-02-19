@@ -151,14 +151,12 @@ const productButtonStore = {
 		get productId() {
 			const { productId } = getContext< Context >();
 
-			const mainProductId =
-				productContextState?.parentProduct?.id ??
-				productContextState?.currentProduct?.id;
+			const mainProductId = productContextState?.product?.id;
 			const isDescendantOfAddToCartWithOptions =
 				productId === mainProductId;
 
 			return isDescendantOfAddToCartWithOptions
-				? productContextState?.currentProduct?.id || productId
+				? productContextState?.selectedVariation?.id ?? productId
 				: productId;
 		},
 	},

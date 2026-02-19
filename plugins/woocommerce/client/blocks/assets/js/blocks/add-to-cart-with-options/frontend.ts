@@ -183,10 +183,7 @@ const { actions, state } = store<
 				return context.selectedAttributes || [];
 			},
 			get productData() {
-				// getProductData expects the main (non-variation) product ID.
-				const mainProductId =
-					productContextState.parentProduct?.id ??
-					productContextState.currentProduct?.id;
+				const mainProductId = productContextState.product?.id;
 
 				if ( ! mainProductId ) {
 					return null;
@@ -349,8 +346,8 @@ const { actions, state } = store<
 				// woocommerce store is public.
 				yield import( '@woocommerce/stores/woocommerce/cart' );
 
-				const currentProduct = productContextState.currentProduct;
-				const id = currentProduct?.id;
+				const variation = productContextState.selectedVariation;
+				const id = variation?.id ?? productContextState.product?.id;
 
 				if ( ! id ) {
 					return;
@@ -358,7 +355,7 @@ const { actions, state } = store<
 
 				const { selectedAttributes } = getContext< Context >();
 				const productType =
-					productContextState.parentProduct !== null
+					variation !== null
 						? 'variation'
 						: getProductData( id, selectedAttributes )?.type;
 

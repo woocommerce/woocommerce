@@ -425,8 +425,10 @@ const productGallery = {
 	},
 	callbacks: {
 		listenToProductDataChanges: () => {
-			const { currentProduct } = productContextState ?? {};
-			const imageId = currentProduct?.images?.[ 0 ]?.id;
+			const displayProduct =
+				productContextState?.selectedVariation ??
+				productContextState?.product;
+			const imageId = displayProduct?.images?.[ 0 ]?.id;
 
 			if ( ! imageId ) {
 				return;
