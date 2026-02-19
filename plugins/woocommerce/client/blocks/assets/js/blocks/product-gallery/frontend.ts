@@ -6,11 +6,9 @@ import {
 	getContext as getContextFn,
 	getElement,
 	withScope,
-	getConfig,
 } from '@wordpress/interactivity';
 import '@woocommerce/stores/woocommerce/product-context';
 import type { ProductContextStore } from '@woocommerce/stores/woocommerce/product-context';
-import type { WooCommerceConfig } from '@woocommerce/stores/woocommerce/cart';
 
 /**
  * Internal dependencies
@@ -427,30 +425,9 @@ const productGallery = {
 	},
 	callbacks: {
 		listenToProductDataChanges: () => {
-			const { currentProduct, parentProduct } =
-				productContextState ?? {};
+			const { currentProduct } = productContextState ?? {};
+			const imageId = currentProduct?.images?.[ 0 ]?.id;
 
-			// The gallery reads from page config (keyed by parent product
-			// ID with variations nested) rather than the products store,
-			// so we can't just use currentProduct directly here.
-			const mainProductId =
-				parentProduct?.id ?? currentProduct?.id;
-			if ( ! mainProductId ) {
-				return;
-			}
-
-			const { products } = getConfig(
-				'woocommerce'
-			) as WooCommerceConfig;
-
-			const variationId =
-				parentProduct !== null ? currentProduct?.id : undefined;
-			const productData =
-				products?.[ mainProductId ]?.variations?.[
-					variationId || 0
-				] || products?.[ mainProductId ];
-
-			const imageId = productData?.image_id;
 			if ( ! imageId ) {
 				return;
 			}
