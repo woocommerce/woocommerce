@@ -13,10 +13,8 @@ use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification
  * on shutdown. Should be accessed from the container (`wc_get_container`) to
  * ensure store is shared by all usage.
  *
- * Notifications are keyed by `{blog_id}_{type}_{resource_id}` to prevent
- * duplicates within a single request. On shutdown, a
- * `wc_push_notifications_dispatch` action is fired with all pending
- * notifications.
+ * Notifications are keyed by `{type}_{resource_id}` (with blog ID from
+ * `get_current_blog_id()`) to prevent duplicates within a single request.
  *
  * @since 10.7.0
  */
@@ -63,7 +61,7 @@ class PendingNotificationStore {
 	/**
 	 * Adds a notification to the pending store.
 	 *
-	 * Duplicate notifications (same blog, type and resource ID) within a single
+	 * Duplicate notifications (same type and resource ID) within a single
 	 * request are silently ignored. The shutdown hook is registered on the
 	 * first call.
 	 *
@@ -114,8 +112,9 @@ class PendingNotificationStore {
 		 * @param Notification[] $notifications The notifications to dispatch.
 		 *
 		 * @since 10.7.0
+		 *
+		 * @todo Implement the call to dispatch the notifications.
 		 */
-		do_action( self::DISPATCH_HOOK, $notifications );
 
 		/**
 		 * Store is single-use per request lifecycle, so disable it and clear

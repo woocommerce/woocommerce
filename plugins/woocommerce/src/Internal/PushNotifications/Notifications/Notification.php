@@ -33,24 +33,16 @@ abstract class Notification {
 	private int $resource_id;
 
 	/**
-	 * The blog ID for the site this notification originates from.
-	 *
-	 * @var int
-	 */
-	private int $blog_id;
-
-	/**
 	 * Creates a new Notification instance.
 	 *
 	 * @param string $type        The notification type.
 	 * @param int    $resource_id The resource ID.
-	 * @param int    $blog_id     The blog ID.
 	 *
 	 * @throws InvalidArgumentException If any argument is invalid.
 	 *
 	 * @since 10.7.0
 	 */
-	public function __construct( string $type, int $resource_id, int $blog_id ) {
+	public function __construct( string $type, int $resource_id ) {
 		if ( '' === trim( $type ) ) {
 			throw new InvalidArgumentException( 'Notification type must not be empty.' );
 		}
@@ -59,13 +51,8 @@ abstract class Notification {
 			throw new InvalidArgumentException( 'Notification resource_id must be positive.' );
 		}
 
-		if ( $blog_id <= 0 ) {
-			throw new InvalidArgumentException( 'Notification blog_id must be positive.' );
-		}
-
 		$this->type        = trim( $type );
 		$this->resource_id = $resource_id;
-		$this->blog_id     = $blog_id;
 	}
 
 	/**
@@ -82,7 +69,7 @@ abstract class Notification {
 	/**
 	 * Returns the notification data as an array.
 	 *
-	 * @return array{type: string, resource_id: int, blog_id: int}
+	 * @return array{type: string, resource_id: int}
 	 *
 	 * @since 10.7.0
 	 */
@@ -90,7 +77,6 @@ abstract class Notification {
 		return array(
 			'type'        => $this->type,
 			'resource_id' => $this->resource_id,
-			'blog_id'     => $this->blog_id,
 		);
 	}
 
@@ -103,7 +89,7 @@ abstract class Notification {
 	 * @since 10.7.0
 	 */
 	public function get_identifier(): string {
-		return sprintf( '%s_%s_%s', $this->blog_id, $this->type, $this->resource_id );
+		return sprintf( '%s_%s_%s', get_current_blog_id(), $this->type, $this->resource_id );
 	}
 
 	/**
@@ -128,14 +114,4 @@ abstract class Notification {
 		return $this->resource_id;
 	}
 
-	/**
-	 * Gets the blog ID.
-	 *
-	 * @return int
-	 *
-	 * @since 10.7.0
-	 */
-	public function get_blog_id(): int {
-		return $this->blog_id;
-	}
 }
