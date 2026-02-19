@@ -419,8 +419,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					selectedAttributes
 				);
 
-				productContextState.variationId =
-					matchedVariation?.id ?? null;
+				productContextState.variationId = matchedVariation?.id ?? null;
 			},
 			validateVariation() {
 				actions.clearErrors( 'variable-product' );
@@ -483,8 +482,6 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					return;
 				}
 
-				const { selectedAttributes } = getContext< Context >();
-
 				// getProductData expects the main (non-variation) product ID.
 				const mainProductId =
 					productContextState.parentProduct?.id ??
@@ -494,6 +491,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					return;
 				}
 
+				const { selectedAttributes } = getContext< Context >();
 				const productObject = getProductData(
 					mainProductId,
 					selectedAttributes
@@ -515,10 +513,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 						newValue !== ref.valueAsNumber ||
 						newValue !== currentValue
 					) {
-						actions.setQuantity(
-							mainProductId,
-							newValue
-						);
+						actions.setQuantity( mainProductId, newValue );
 					}
 				}
 			},
