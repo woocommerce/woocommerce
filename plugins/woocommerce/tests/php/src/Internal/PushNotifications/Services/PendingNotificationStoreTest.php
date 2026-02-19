@@ -35,7 +35,6 @@ class PendingNotificationStoreTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		remove_action( 'shutdown', array( $this->store, 'dispatch_all' ) );
-		remove_all_actions( PendingNotificationStore::DISPATCH_HOOK );
 		parent::tearDown();
 	}
 
@@ -126,29 +125,6 @@ class PendingNotificationStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should fire dispatch action with all pending notifications.
-	 */
-	public function test_dispatch_all_fires_action_with_notifications(): void {
-		$dispatched = array();
-
-		add_action(
-			PendingNotificationStore::DISPATCH_HOOK,
-			function ( $notifications ) use ( &$dispatched ) {
-				$dispatched = $notifications;
-			}
-		);
-
-		$this->store->add( $this->create_notification( 'store_order', 1 ) );
-		$this->store->add( $this->create_notification( 'store_review', 2 ) );
-
-		$this->store->dispatch_all();
-
-		$this->assertCount( 2, $dispatched );
-		$this->assertSame( 'store_order', $dispatched[0]->get_type() );
-		$this->assertSame( 'store_review', $dispatched[1]->get_type() );
-	}
-
-	/**
 	 * @testdox Should clear pending notifications after dispatch.
 	 */
 	public function test_dispatch_all_clears_store(): void {
@@ -157,24 +133,6 @@ class PendingNotificationStoreTest extends WC_Unit_Test_Case {
 		$this->store->dispatch_all();
 
 		$this->assertSame( 0, $this->store->count() );
-	}
-
-	/**
-	 * @testdox Should not fire dispatch action when store is empty.
-	 */
-	public function test_dispatch_all_does_nothing_when_empty(): void {
-		$fired = false;
-
-		add_action(
-			PendingNotificationStore::DISPATCH_HOOK,
-			function () use ( &$fired ) {
-				$fired = true;
-			}
-		);
-
-		$this->store->dispatch_all();
-
-		$this->assertFalse( $fired, 'Dispatch action should not fire when store is empty' );
 	}
 
 	/**

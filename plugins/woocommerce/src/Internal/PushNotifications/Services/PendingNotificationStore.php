@@ -20,11 +20,6 @@ use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification
  */
 class PendingNotificationStore {
 	/**
-	 * Action hook fired on shutdown with pending notifications.
-	 */
-	const DISPATCH_HOOK = 'wc_push_notifications_dispatch';
-
-	/**
 	 * Whether the store is enabled and accepting notifications.
 	 *
 	 * @var bool
