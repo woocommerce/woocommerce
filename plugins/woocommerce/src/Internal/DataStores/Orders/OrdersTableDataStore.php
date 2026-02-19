@@ -2174,7 +2174,6 @@ FROM $order_meta_table
 				if ( 0.0 === $cogs_value ) {
 					$this->data_store_meta->delete_meta( $order, $existing_meta );
 				} else {
-					$existing_meta->key   = '_cogs_total_value';
 					$existing_meta->value = $cogs_value;
 					$this->data_store_meta->update_meta( $order, $existing_meta );
 				}
