@@ -300,4 +300,35 @@ test.describe( `${ blockData.name } Block`, () => {
 		await page.getByRole( 'link', { name: 'Go to checkout' } ).click();
 		await expect( page ).toHaveURL( /\/checkout\/?$/ );
 	} );
+
+	test.describe( 'optimistic updates', () => {
+		test( 'should show the server filtered item count in the mini-cart title', async ( {
+			page,
+			frontendUtils,
+			miniCartUtils,
+			requestUtils,
+		} ) => {
+			await requestUtils.activatePlugin(
+				'woocommerce-blocks-test-cart-contents-count-filter'
+			);
+
+			await frontendUtils.goToShop();
+			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+			await miniCartUtils.openMiniCart();
+
+			// The filter overrides the count to 999. The mini-cart title should
+			// display this filtered value rather than the actual number of items.
+			const miniCartTitleItemsCounterBlock = page.locator(
+				'[data-block-name="woocommerce/mini-cart-title-items-counter-block"]'
+			);
+			await expect( miniCartTitleItemsCounterBlock ).toBeVisible();
+			await expect( miniCartTitleItemsCounterBlock ).toContainText(
+				'999'
+			);
+
+			await requestUtils.deactivatePlugin(
+				'woocommerce-blocks-test-cart-contents-count-filter'
+			);
+		} );
+	} );
 } );
