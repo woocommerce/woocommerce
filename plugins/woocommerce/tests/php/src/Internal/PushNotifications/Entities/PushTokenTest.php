@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Entities;
 
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenInvalidDataException;
+use Automattic\WooCommerce\Internal\PushNotifications\Validators\PushTokenValidator;
 use WC_Unit_Test_Case;
 
 /**
@@ -70,11 +71,13 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	public function test_it_can_be_created_when_all_fields_are_set_except_id() {
 		$push_token = new PushToken(
 			array(
-				'user_id'     => 1,
-				'token'       => 'test_token',
-				'device_uuid' => 'test-device-uuid',
-				'platform'    => PushToken::PLATFORM_APPLE,
-				'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'user_id'       => 1,
+				'token'         => 'test_token',
+				'device_uuid'   => 'test-device-uuid',
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+				'metadata'      => array( 'app_version' => '1.0' ),
 			)
 		);
 
@@ -87,12 +90,14 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	public function test_it_cannot_be_created_when_id_is_set() {
 		$push_token = new PushToken(
 			array(
-				'id'          => 1,
-				'user_id'     => 1,
-				'token'       => 'test_token',
-				'device_uuid' => 'test-device-uuid',
-				'platform'    => PushToken::PLATFORM_APPLE,
-				'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'id'            => 1,
+				'user_id'       => 1,
+				'token'         => 'test_token',
+				'device_uuid'   => 'test-device-uuid',
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+				'metadata'      => array( 'app_version' => '1.0' ),
 			)
 		);
 
@@ -105,10 +110,12 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	public function test_it_cannot_be_created_when_user_id_is_missing() {
 		$push_token = new PushToken(
 			array(
-				'token'       => 'test_token',
-				'device_uuid' => 'test-device-uuid',
-				'platform'    => PushToken::PLATFORM_APPLE,
-				'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'token'         => 'test_token',
+				'device_uuid'   => 'test-device-uuid',
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+				'metadata'      => array( 'app_version' => '1.0' ),
 			)
 		);
 
@@ -121,10 +128,12 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	public function test_it_cannot_be_created_when_platform_is_missing() {
 		$push_token = new PushToken(
 			array(
-				'user_id'     => 1,
-				'token'       => 'test_token',
-				'device_uuid' => 'test-device-uuid',
-				'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'user_id'       => 1,
+				'token'         => 'test_token',
+				'device_uuid'   => 'test-device-uuid',
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+				'metadata'      => array( 'app_version' => '1.0' ),
 			)
 		);
 
@@ -137,10 +146,12 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	public function test_it_cannot_be_created_when_token_is_missing() {
 		$push_token = new PushToken(
 			array(
-				'user_id'     => 1,
-				'device_uuid' => 'test-device-uuid',
-				'platform'    => PushToken::PLATFORM_APPLE,
-				'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'user_id'       => 1,
+				'device_uuid'   => 'test-device-uuid',
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+				'metadata'      => array( 'app_version' => '1.0' ),
 			)
 		);
 
@@ -153,10 +164,12 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	public function test_it_cannot_be_created_when_device_uuid_is_missing() {
 		$push_token = new PushToken(
 			array(
-				'user_id'  => 1,
-				'token'    => 'test_token',
-				'platform' => PushToken::PLATFORM_APPLE,
-				'origin'   => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'user_id'       => 1,
+				'token'         => 'test_token',
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+				'metadata'      => array( 'app_version' => '1.0' ),
 			)
 		);
 
@@ -170,12 +183,14 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	public function test_it_can_be_updated_when_all_fields_are_set() {
 		$push_token = new PushToken(
 			array(
-				'id'          => 1,
-				'user_id'     => 1,
-				'token'       => 'test_token',
-				'device_uuid' => 'test-device-uuid',
-				'platform'    => PushToken::PLATFORM_APPLE,
-				'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'id'            => 1,
+				'user_id'       => 1,
+				'token'         => 'test_token',
+				'device_uuid'   => 'test-device-uuid',
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+				'metadata'      => array( 'app_version' => '1.0' ),
 			)
 		);
 
@@ -188,11 +203,13 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	public function test_it_cannot_be_updated_when_id_is_not_set() {
 		$push_token = new PushToken(
 			array(
-				'user_id'     => 1,
-				'token'       => 'test_token',
-				'device_uuid' => 'test-device-uuid',
-				'platform'    => PushToken::PLATFORM_APPLE,
-				'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'user_id'       => 1,
+				'token'         => 'test_token',
+				'device_uuid'   => 'test-device-uuid',
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+				'metadata'      => array( 'app_version' => '1.0' ),
 			)
 		);
 
@@ -205,11 +222,13 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	public function test_it_cannot_be_updated_when_user_id_is_not_set() {
 		$push_token = new PushToken(
 			array(
-				'id'          => 1,
-				'token'       => 'test_token',
-				'device_uuid' => 'test-device-uuid',
-				'platform'    => PushToken::PLATFORM_APPLE,
-				'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'id'            => 1,
+				'token'         => 'test_token',
+				'device_uuid'   => 'test-device-uuid',
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+				'metadata'      => array( 'app_version' => '1.0' ),
 			)
 		);
 
@@ -222,11 +241,13 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	public function test_it_cannot_be_updated_when_platform_is_not_set() {
 		$push_token = new PushToken(
 			array(
-				'id'          => 1,
-				'user_id'     => 1,
-				'token'       => 'test_token',
-				'device_uuid' => 'test-device-uuid',
-				'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'id'            => 1,
+				'user_id'       => 1,
+				'token'         => 'test_token',
+				'device_uuid'   => 'test-device-uuid',
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+				'metadata'      => array( 'app_version' => '1.0' ),
 			)
 		);
 
@@ -239,11 +260,13 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	public function test_it_cannot_be_updated_when_device_uuid_is_not_set() {
 		$push_token = new PushToken(
 			array(
-				'id'       => 1,
-				'user_id'  => 1,
-				'token'    => 'test_token',
-				'platform' => PushToken::PLATFORM_APPLE,
-				'origin'   => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'id'            => 1,
+				'user_id'       => 1,
+				'token'         => 'test_token',
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+				'metadata'      => array( 'app_version' => '1.0' ),
 			)
 		);
 
@@ -256,11 +279,13 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	public function test_it_cannot_be_updated_when_token_is_not_set() {
 		$push_token = new PushToken(
 			array(
-				'id'          => 1,
-				'user_id'     => 1,
-				'device_uuid' => 'test-device-uuid',
-				'platform'    => PushToken::PLATFORM_APPLE,
-				'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'id'            => 1,
+				'user_id'       => 1,
+				'device_uuid'   => 'test-device-uuid',
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+				'metadata'      => array( 'app_version' => '1.0' ),
 			)
 		);
 
@@ -333,10 +358,12 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	public function test_it_can_be_created_for_browser_without_device_uuid() {
 		$push_token = new PushToken(
 			array(
-				'user_id'  => 1,
-				'token'    => 'test_token',
-				'platform' => PushToken::PLATFORM_BROWSER,
-				'origin'   => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'user_id'       => 1,
+				'token'         => 'test_token',
+				'platform'      => PushToken::PLATFORM_BROWSER,
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+				'metadata'      => array( 'app_version' => '1.0' ),
 			)
 		);
 
@@ -350,11 +377,13 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	public function test_it_can_be_updated_for_browser_without_device_uuid() {
 		$push_token = new PushToken(
 			array(
-				'id'       => 1,
-				'user_id'  => 1,
-				'token'    => 'test_token',
-				'platform' => PushToken::PLATFORM_BROWSER,
-				'origin'   => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'id'            => 1,
+				'user_id'       => 1,
+				'token'         => 'test_token',
+				'platform'      => PushToken::PLATFORM_BROWSER,
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+				'metadata'      => array( 'app_version' => '1.0' ),
 			)
 		);
 
@@ -367,10 +396,12 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	public function test_it_cannot_be_created_when_origin_is_missing() {
 		$push_token = new PushToken(
 			array(
-				'user_id'     => 1,
-				'token'       => 'test_token',
-				'device_uuid' => 'test-device-uuid',
-				'platform'    => PushToken::PLATFORM_APPLE,
+				'user_id'       => 1,
+				'token'         => 'test_token',
+				'device_uuid'   => 'test-device-uuid',
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'device_locale' => 'en_US',
+				'metadata'      => array( 'app_version' => '1.0' ),
 			)
 		);
 
@@ -383,15 +414,91 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	public function test_it_cannot_be_updated_when_origin_is_missing() {
 		$push_token = new PushToken(
 			array(
+				'id'            => 1,
+				'user_id'       => 1,
+				'token'         => 'test_token',
+				'device_uuid'   => 'test-device-uuid',
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'device_locale' => 'en_US',
+				'metadata'      => array( 'app_version' => '1.0' ),
+			)
+		);
+
+		$this->assertFalse( $push_token->can_be_updated() );
+	}
+
+	/**
+	 * @testdox Tests can_be_created returns false when device_locale is missing.
+	 */
+	public function test_it_cannot_be_created_when_device_locale_is_missing() {
+		$push_token = new PushToken(
+			array(
+				'user_id'     => 1,
+				'token'       => 'test_token',
+				'device_uuid' => 'test-device-uuid',
+				'platform'    => PushToken::PLATFORM_APPLE,
+				'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'metadata'    => array( 'app_version' => '1.0' ),
+			)
+		);
+
+		$this->assertFalse( $push_token->can_be_created() );
+	}
+
+	/**
+	 * @testdox Tests can_be_updated returns false when device_locale is missing.
+	 */
+	public function test_it_cannot_be_updated_when_device_locale_is_missing() {
+		$push_token = new PushToken(
+			array(
 				'id'          => 1,
 				'user_id'     => 1,
 				'token'       => 'test_token',
 				'device_uuid' => 'test-device-uuid',
 				'platform'    => PushToken::PLATFORM_APPLE,
+				'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'metadata'    => array( 'app_version' => '1.0' ),
 			)
 		);
 
 		$this->assertFalse( $push_token->can_be_updated() );
+	}
+
+	/**
+	 * @testdox Tests can_be_created returns true when metadata is missing.
+	 */
+	public function test_it_can_be_created_when_metadata_is_missing() {
+		$push_token = new PushToken(
+			array(
+				'user_id'       => 1,
+				'token'         => 'test_token',
+				'device_uuid'   => 'test-device-uuid',
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+			)
+		);
+
+		$this->assertTrue( $push_token->can_be_created() );
+	}
+
+	/**
+	 * @testdox Tests can_be_updated returns true when metadata is missing.
+	 */
+	public function test_it_can_be_updated_when_metadata_is_missing() {
+		$push_token = new PushToken(
+			array(
+				'id'            => 1,
+				'user_id'       => 1,
+				'token'         => 'test_token',
+				'device_uuid'   => 'test-device-uuid',
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+			)
+		);
+
+		$this->assertTrue( $push_token->can_be_updated() );
 	}
 
 	/**
@@ -401,7 +508,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 		$push_token = new PushToken();
 
 		$this->expectException( PushTokenInvalidDataException::class );
-		$this->expectExceptionMessage( 'Platform for PushToken is invalid.' );
+		$this->expectExceptionMessage( 'Platform must be one of: apple, android, browser.' );
 
 		$push_token->set_platform( 'invalid' );
 	}
@@ -413,7 +520,10 @@ class PushTokenTest extends WC_Unit_Test_Case {
 		$push_token = new PushToken();
 
 		$this->expectException( PushTokenInvalidDataException::class );
-		$this->expectExceptionMessage( 'Origin for PushToken is invalid.' );
+
+		$this->expectExceptionMessage(
+			'Origin must be one of: browser, com.woocommerce.android, com.woocommerce.android:dev, com.automattic.woocommerce, com.automattic.woocommerce:dev'
+		);
 
 		$push_token->set_origin( 'com.invalid.app' );
 	}
@@ -462,6 +572,54 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Tests set_device_locale throws exception with empty string.
+	 */
+	public function test_it_throws_exception_when_setting_empty_device_locale() {
+		$push_token = new PushToken();
+
+		$this->expectException( PushTokenInvalidDataException::class );
+		$this->expectExceptionMessage( 'Device locale cannot be empty.' );
+
+		$push_token->set_device_locale( '' );
+	}
+
+	/**
+	 * @testdox Tests set_device_locale throws exception with invalid format.
+	 */
+	public function test_it_throws_exception_when_setting_invalid_device_locale_format() {
+		$push_token = new PushToken();
+
+		$this->expectException( PushTokenInvalidDataException::class );
+		$this->expectExceptionMessage( 'Device locale is an invalid format.' );
+
+		$push_token->set_device_locale( 'invalid' );
+	}
+
+	/**
+	 * @testdox Tests set_device_locale throws exception with lowercase region.
+	 */
+	public function test_it_throws_exception_when_setting_device_locale_with_lowercase_region() {
+		$push_token = new PushToken();
+
+		$this->expectException( PushTokenInvalidDataException::class );
+		$this->expectExceptionMessage( 'Device locale is an invalid format.' );
+
+		$push_token->set_device_locale( 'en_gb' );
+	}
+
+	/**
+	 * @testdox Tests set_metadata throws exception with non-scalar values.
+	 */
+	public function test_it_throws_exception_when_setting_non_scalar_metadata() {
+		$push_token = new PushToken();
+
+		$this->expectException( PushTokenInvalidDataException::class );
+		$this->expectExceptionMessage( 'Metadata items must be scalar values.' );
+
+		$push_token->set_metadata( array( 'nested' => array( 'a' => 'b' ) ) );
+	}
+
+	/**
 	 * @testdox Tests set_token throws exception with empty string.
 	 */
 	public function test_it_throws_exception_when_setting_empty_token() {
@@ -490,7 +648,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	 */
 	public function test_it_throws_exception_when_token_exceeds_max_length() {
 		$push_token = new PushToken();
-		$long_token = str_repeat( 'A', PushToken::MAX_TOKEN_LENGTH + 1 );
+		$long_token = str_repeat( 'A', PushTokenValidator::TOKEN_MAXIMUM_LENGTH + 1 );
 
 		$this->expectException( PushTokenInvalidDataException::class );
 		$this->expectExceptionMessage( 'Token exceeds maximum length of 4096.' );
@@ -533,7 +691,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	 */
 	public function test_it_accepts_token_at_max_length() {
 		$push_token       = new PushToken();
-		$max_length_token = str_repeat( 'A', PushToken::MAX_TOKEN_LENGTH );
+		$max_length_token = str_repeat( 'A', PushTokenValidator::TOKEN_MAXIMUM_LENGTH );
 
 		$push_token->set_token( $max_length_token );
 
@@ -546,12 +704,14 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	public function test_constructor_creates_token_with_all_properties() {
 		$push_token = new PushToken(
 			array(
-				'id'          => 123,
-				'user_id'     => 456,
-				'token'       => 'test_token_value',
-				'device_uuid' => 'device-uuid-123',
-				'platform'    => PushToken::PLATFORM_APPLE,
-				'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'id'            => 123,
+				'user_id'       => 456,
+				'token'         => 'test_token_value',
+				'device_uuid'   => 'device-uuid-123',
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+				'metadata'      => array( 'app_version' => '1.0' ),
 			)
 		);
 
@@ -561,6 +721,8 @@ class PushTokenTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'device-uuid-123', $push_token->get_device_uuid() );
 		$this->assertSame( PushToken::PLATFORM_APPLE, $push_token->get_platform() );
 		$this->assertSame( PushToken::ORIGIN_WOOCOMMERCE_IOS, $push_token->get_origin() );
+		$this->assertSame( 'en_US', $push_token->get_device_locale() );
+		$this->assertSame( array( 'app_version' => '1.0' ), $push_token->get_metadata() );
 	}
 
 	/**
@@ -588,7 +750,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	 */
 	public function test_constructor_throws_exception_for_invalid_platform() {
 		$this->expectException( PushTokenInvalidDataException::class );
-		$this->expectExceptionMessage( 'Platform for PushToken is invalid.' );
+		$this->expectExceptionMessage( 'Platform must be one of: apple, android, browser.' );
 
 		new PushToken(
 			array(

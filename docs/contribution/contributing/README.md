@@ -15,11 +15,17 @@ The WooCommerce core plugin code can be found in our [monorepo](https://github.c
 - [WooCommerce Core Plugin](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce)
 - [WooCommerce Blocks](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks) 
 
-### Code of Conduct
+## Setting up your development environment
 
-Contributing to an open source project requires cooperation amongst individuals and organizations all working to make our project a stable and safe place to build and ask questions. Please thoroughly read our [Code of Conduct](https://github.com/woocommerce/woocommerce/blob/trunk/SECURITY.md) to get familiar with our standards and processes.
+Please check out [our getting started guide](https://github.com/woocommerce/woocommerce#getting-started) for information about prerequisites and initial setup.
 
-### Contributor Guidelines
+We also have [more in-depth documentation](https://github.com/woocommerce/woocommerce/blob/trunk/DEVELOPMENT.md) on how to develop in our repository. This also includes information about how to set up the development environment.
+
+## Code of Conduct
+
+Contributing to an open source project requires cooperation amongst individuals and organizations all working to make our project a stable and safe place to build and ask questions. Please thoroughly read our [Code of Conduct](https://github.com/woocommerce/woocommerce/blob/trunk/CODE_OF_CONDUCT.md) to get familiar with our standards and processes.
+
+## Contributor Guidelines
 
 Our [contributor guidelines](https://github.com/woocommerce/woocommerce/blob/trunk/.github/CONTRIBUTING.md) layout the first steps to contributing.
 
@@ -27,7 +33,7 @@ Our [contributor guidelines](https://github.com/woocommerce/woocommerce/blob/tru
 - [PNPM commands, plugin development environment packages, and troubleshooting](https://github.com/woocommerce/woocommerce/blob/trunk/DEVELOPMENT.md)
 - [Coding standards, E2E testing links](https://github.com/woocommerce/woocommerce/blob/trunk/.github/CONTRIBUTING.md) 
 
-### Templates, Bug Reports, and Feature Requests
+## Templates, Bug Reports, and Feature Requests
 
 - [Pull Request template](https://github.com/woocommerce/woocommerce/blob/trunk/.github/PULL_REQUEST_TEMPLATE.md)
 - [Core Issue template](https://github.com/woocommerce/woocommerce/blob/trunk/.github/ISSUE_TEMPLATE.md)
@@ -35,7 +41,7 @@ Our [contributor guidelines](https://github.com/woocommerce/woocommerce/blob/tru
 - [Enhancement template](https://github.com/woocommerce/woocommerce/blob/trunk/.github/ISSUE_TEMPLATE/2-enhancement.yml)
 - [Feature requests](https://woocommerce.com/feature-requests/woocommerce/)
 
-### Security
+## Security
 
 Security and safety for data management are incredibly important to us at Woo. Please check out the [Automattic security policy](https://automattic.com/security/) to learn about our foundational requirements.
 
