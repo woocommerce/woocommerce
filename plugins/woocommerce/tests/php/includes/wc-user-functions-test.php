@@ -25,6 +25,10 @@ class WC_User_Functions_Tests extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		parent::tearDown();
 		$this->clean_up_cot_setup();
+
+		// In case `wc_update_user_last_active` test fail, clean the global state.
+		global $wp_current_filter;
+		$wp_current_filter = array(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 	}
 
 	/**
@@ -157,7 +161,6 @@ class WC_User_Functions_Tests extends WC_Unit_Test_Case {
 		$this->toggle_cot_feature_and_usage( true );
 
 		global $wp_current_filter;
-		$backup      = $wp_current_filter;
 		$customer    = WC_Helper_Customer::create_customer();
 		$customer_id = $customer->get_id();
 
@@ -187,7 +190,6 @@ class WC_User_Functions_Tests extends WC_Unit_Test_Case {
 		wc_update_user_last_active( $customer_id );
 		$this->assertGreaterThan( $original, get_user_meta( $customer_id, 'wc_last_active', true ) );
 
-		$wp_current_filter = $backup; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$customer->delete();
 	}
 }
