@@ -62,7 +62,11 @@ const productElementStore = store(
 	{
 		state: {
 			get productData(): ProductData | undefined {
-				if ( ! productContextState?.currentProductId ) {
+				const mainProductId =
+					productContextState?.parentProduct?.id ??
+					productContextState?.currentProduct?.id;
+
+				if ( ! mainProductId ) {
 					return undefined;
 				}
 
@@ -74,11 +78,15 @@ const productElementStore = store(
 					return undefined;
 				}
 
+				const variationId =
+					productContextState?.parentProduct !== null
+						? productContextState?.currentProduct?.id
+						: undefined;
+
 				return (
-					products?.[ productContextState.currentProductId ]
-						?.variations?.[
-						productContextState?.currentVariationId || 0
-					] || products?.[ productContextState.currentProductId ]
+					products?.[ mainProductId ]?.variations?.[
+						variationId || 0
+					] || products?.[ mainProductId ]
 				);
 			},
 		},
@@ -88,7 +96,7 @@ const productElementStore = store(
 
 				if (
 					! element.ref ||
-					! productContextState?.currentProductId
+					! productContextState?.currentProduct
 				) {
 					return;
 				}
