@@ -113,9 +113,7 @@ class PendingNotificationStoreTest extends WC_Unit_Test_Case {
 		global $wp_filter;
 
 		if ( isset( $wp_filter['shutdown'] ) ) {
-			foreach ( $wp_filter['shutdown']->callbacks as $priority => $callbacks ) {
-				unset( $priority );
-
+			foreach ( $wp_filter['shutdown']->callbacks as $callbacks ) {
 				foreach ( $callbacks as $callback ) {
 					if ( is_array( $callback['function'] ) && $callback['function'][0] === $this->store ) {
 						++$hook_count;

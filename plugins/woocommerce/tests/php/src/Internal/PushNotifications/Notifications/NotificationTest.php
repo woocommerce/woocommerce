@@ -49,6 +49,26 @@ class NotificationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return different identifiers for different resource IDs with the same resource ID.
+	 */
+	public function test_get_identifier_differs_by_resource_id(): void {
+		$order  = $this->create_notification( 'store_order', 42, 1 );
+		$review = $this->create_notification( 'store_order', 43, 1 );
+
+		$this->assertNotSame( $order->get_identifier(), $review->get_identifier() );
+	}
+
+	/**
+	 * @testdox Should return different identifiers for different blog IDs with the same resource ID.
+	 */
+	public function test_get_identifier_differs_by_blog_id(): void {
+		$order  = $this->create_notification( 'store_order', 42, 1 );
+		$review = $this->create_notification( 'store_order', 42, 2 );
+
+		$this->assertNotSame( $order->get_identifier(), $review->get_identifier() );
+	}
+
+	/**
 	 * @testdox Should return different identifiers for different types with the same resource ID.
 	 */
 	public function test_get_identifier_differs_by_type(): void {
