@@ -1362,21 +1362,23 @@ WHERE
 			return;
 		}
 
-		$data_sync_enabled = $data_synchronizer->data_sync_is_enabled();
-		if ( $data_sync_enabled ) {
-			// We prefer not syncing-on-read if we are inside a webhook delivery or importing orders, as those events are likely triggered after the order is written
-			// and we don't want to possibly create loops of sync-on-read.
-			$should_sync_on_read = ! doing_action( 'woocommerce_deliver_webhook_async' ) && ! doing_action( 'wc-admin_import_orders' );
+		$data_sync_enabled = $data_synchronizer->data_sync_is_enabled()
+			&& ! doing_action( 'woocommerce_deliver_webhook_async' )
+			&& ! doing_action( 'wc-admin_import_orders' );
 
+		if ( $data_sync_enabled ) {
 			/**
-			 * Allow opportunity to disable sync on read, while keeping sync on write enabled. This adds another step as a large shop progresses from full sync to no sync with HPOS authoritative.
-			 * This filter is only executed if data sync is enabled from settings in the first place as it's meant to be a step between full sync -> no sync, rather than be a control for enabling just the sync on read. Sync on read without sync on write is problematic as any update will reset on the next read, but sync on write without sync on read is fine.
+			 * Filters whether to sync order data from posts on read.
 			 *
-			 * @param bool $read_on_sync_enabled Whether to sync on read.
+			 * Defaults to false because sync-on-read can be dangerous when HPOS is
+			 * authoritative and running correctly, as it allows the posts data store
+			 * to override HPOS data.
+			 *
+			 * @param bool $sync_on_read_enabled Whether to sync on read.
 			 *
 			 * @since 8.1.0
 			 */
-			$data_sync_enabled = apply_filters( 'woocommerce_hpos_enable_sync_on_read', $should_sync_on_read );
+			$data_sync_enabled = apply_filters( 'woocommerce_hpos_enable_sync_on_read', false );
 		}
 
 		$load_posts_for = array_diff( $order_ids, array_merge( self::$reading_order_ids, self::$backfilling_order_ids ) );
