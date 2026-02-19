@@ -113,5 +113,4 @@ abstract class Notification {
 	public function get_resource_id(): int {
 		return $this->resource_id;
 	}
-
 }

@@ -113,7 +113,7 @@ class PendingNotificationStore {
 		 *
 		 * @since 10.7.0
 		 *
-		 * @todo Implement the call to dispatch the notifications.
+		 * The call to dispatch the notifications will go here.
 		 */
 
 		/**
