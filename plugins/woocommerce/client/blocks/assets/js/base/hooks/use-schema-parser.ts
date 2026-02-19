@@ -115,9 +115,17 @@ const useDocumentObject = < T extends FormType | 'global' >(
 						) {
 							acc[ key as keyof OrderFormValues ] = value;
 						}
+						// Also include address-location.
+						else if (
+							! CONTACT_FORM_KEYS.includes(
+								key as keyof ContactFormValues
+							)
+						) {
+							acc[ key ] = value;
+						}
 						return acc;
 					},
-					{} as OrderFormValues
+					{} as OrderFormValues & Record< string, unknown >
 				),
 				paymentMethod: activePaymentMethod,
 			},
@@ -240,3 +248,4 @@ export interface DocumentObject< T extends FormType | 'global' > {
 		  }
 		| Record< string, never >;
 }
+
