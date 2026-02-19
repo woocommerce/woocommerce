@@ -1094,8 +1094,8 @@ class Cart extends ControllerTestCase {
 
 		$captured_args = array();
 		// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
-		$callback = function ( $item_id, $quantity, $cart ) use ( &$captured_args ) {
-			$captured_args = compact( 'item_id', 'quantity', 'cart' );
+		$callback = function ( $item_key, $quantity, $cart ) use ( &$captured_args ) {
+			$captured_args = compact( 'item_key', 'quantity', 'cart' );
 		};
 
 		add_action( 'woocommerce_store_api_cart_item_add_from_request', $callback, 10, 3 );
@@ -1112,8 +1112,40 @@ class Cart extends ControllerTestCase {
 		$this->assertAPIResponse( $request, 201 );
 
 		$this->assertNotEmpty( $captured_args, 'The add action should have been fired' );
-		$this->assertIsString( $captured_args['item_id'] );
-		$this->assertEquals( 2, $captured_args['quantity'] );
+		$this->assertIsString( $captured_args['item_key'] );
+		$this->assertSame( 2, $captured_args['quantity'] );
+		$this->assertInstanceOf( \WC_Cart::class, $captured_args['cart'] );
+
+		remove_action( 'woocommerce_store_api_cart_item_add_from_request', $callback );
+	}
+
+	/**
+	 * Test that adding an item without specifying quantity fires the add action with default quantity of 1.
+	 */
+	public function test_add_item_fires_add_action_when_quantity_omitted() {
+		wc_empty_cart();
+
+		$captured_args = array();
+		// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		$callback = function ( $item_key, $quantity, $cart ) use ( &$captured_args ) {
+			$captured_args = compact( 'item_key', 'quantity', 'cart' );
+		};
+
+		add_action( 'woocommerce_store_api_cart_item_add_from_request', $callback, 10, 3 );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/add-item' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'id' => $this->products[0]->get_id(),
+			)
+		);
+
+		$this->assertAPIResponse( $request, 201 );
+
+		$this->assertNotEmpty( $captured_args, 'The add action should have been fired' );
+		$this->assertIsString( $captured_args['item_key'] );
+		$this->assertSame( 1, $captured_args['quantity'] );
 		$this->assertInstanceOf( \WC_Cart::class, $captured_args['cart'] );
 
 		remove_action( 'woocommerce_store_api_cart_item_add_from_request', $callback );
@@ -1144,8 +1176,8 @@ class Cart extends ControllerTestCase {
 
 		$this->assertNotEmpty( $captured_args, 'The update action should have been fired' );
 		$this->assertSame( $this->keys[0], $captured_args['item_key'] );
-		$this->assertEquals( 5, $captured_args['quantity'] );
-		$this->assertEquals( 2, $captured_args['old_quantity'] );
+		$this->assertSame( 5, $captured_args['quantity'] );
+		$this->assertSame( 2, $captured_args['old_quantity'] );
 		$this->assertInstanceOf( \WC_Cart::class, $captured_args['cart'] );
 
 		remove_action( 'woocommerce_store_api_cart_item_update_from_request', $callback );
