@@ -337,13 +337,13 @@ class FulfillmentsRenderer {
 					wp_kses( __( '<b>Shipment %1$s</b> was shipped on <b>%2$s</b>', 'woocommerce' ), 'b' ),
 					intval( $index ) + 1,
 					esc_html(
-						gmdate(
+						wp_date(
 							'F j, Y',
 							strtotime(
 								$fulfillment->get_date_fulfilled() // Get the fulfilled date.
 								?? $fulfillment->get_date_updated() // Fallback to the updated date if fulfilled date is not set.
 							)
-						)
+						) ?: ''
 					)
 				);
 				?>
