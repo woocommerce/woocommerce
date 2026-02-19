@@ -64303,19 +64303,7 @@ parameters:
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
 
 		-
-			message: '#^Parameter \#2 \$prop_name of method Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\OrdersTableDataStore\:\:set_order_prop\(\) expects string, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
 			message: '#^Parameter \#2 \$property_name of function property_exists expects string, array\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
-			message: '#^Parameter \#2 \.\.\.\$values of function sprintf expects bool\|float\|int\|string\|null, array given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
