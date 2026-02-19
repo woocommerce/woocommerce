@@ -1,10 +1,13 @@
-const { test, expect } = require( '../../../fixtures/api-tests-fixtures' );
-const { admin } = require( '../../../test-data/data' );
+/**
+ * Internal dependencies
+ */
+import { test, expect } from '../../../fixtures/api-tests-fixtures';
+import { admin } from '../../../test-data/data';
 
 test.describe( 'Customers API tests: CRUD', () => {
-	let adminId;
-	let customerId;
-	let subscriberUserId;
+	let adminId: number;
+	let customerId: number;
+	let subscriberUserId: number;
 	let subscriberUserCreatedDuringTests = false;
 
 	test.beforeAll( async ( { request } ) => {

@@ -1,7 +1,10 @@
-const { test, expect } = require( '../../../fixtures/api-tests-fixtures' );
+/**
+ * Internal dependencies
+ */
+import { test, expect } from '../../../fixtures/api-tests-fixtures';
 
 test.describe( 'Tax Classes API tests: CRUD', () => {
-	let taxClassSlug;
+	let taxClassSlug: string;
 
 	test.describe( 'Create a tax class', () => {
 		test( 'can enable tax calculations', async ( { request } ) => {

@@ -1,10 +1,13 @@
-const { test, expect } = require( '../../../fixtures/api-tests-fixtures' );
-const { allUSTaxesExample } = require( '../../../data' );
+/**
+ * Internal dependencies
+ */
+import { test, expect } from '../../../fixtures/api-tests-fixtures';
+import { allUSTaxesExample } from '../../../data';
 const { BASE_URL } = process.env;
 const shouldSkip = BASE_URL !== undefined;
 
 test.describe.serial( 'Tax Rates API tests: CRUD', () => {
-	let taxRateId;
+	let taxRateId: number;
 
 	test.describe( 'Create a tax rate', () => {
 		test( 'can create a tax rate', async ( { request } ) => {

@@ -1,19 +1,13 @@
-const {
-	test: baseTest,
-	expect,
-} = require( '../../../fixtures/api-tests-fixtures' );
-const { BASE_URL } = process.env;
-const { admin } = require( '../../../test-data/data' );
-const shouldSkip = BASE_URL !== undefined;
-
 /**
  * Internal dependencies
  */
-const {
-	virtualProduct,
-	variableProduct,
-} = require( '../../../data/products-crud' );
-const { batch } = require( '../../../data/shared/batch-update' );
+import { test as baseTest, expect } from '../../../fixtures/api-tests-fixtures';
+import { admin } from '../../../test-data/data';
+import { virtualProduct, variableProduct } from '../../../data/products-crud';
+import { batch } from '../../../data/shared/batch-update';
+
+const { BASE_URL } = process.env;
+const shouldSkip = BASE_URL !== undefined;
 
 const test = baseTest.extend( {
 	extraHTTPHeaders: {
@@ -69,7 +63,7 @@ test.describe( 'Products API tests: CRUD', () => {
 	} );
 
 	test.describe( 'Product attributes tests: CRUD', () => {
-		let productAttributeId;
+		let productAttributeId: number;
 
 		test( 'can add a product attribute', async ( { request } ) => {
 			const response = await request.post(
@@ -97,7 +91,7 @@ test.describe( 'Products API tests: CRUD', () => {
 		} );
 
 		test.describe( 'Product attribute terms tests: CRUD', () => {
-			let productAttributeTermId;
+			let productAttributeTermId: number;
 
 			test( 'can add a product attribute term', async ( { request } ) => {
 				const response = await request.post(
@@ -415,7 +409,7 @@ test.describe( 'Products API tests: CRUD', () => {
 	} );
 
 	test.describe( 'Product categories tests: CRUD', () => {
-		let productCategoryId;
+		let productCategoryId: number;
 
 		test( 'can add a product category', async ( { request } ) => {
 			const response = await request.post(
@@ -590,8 +584,9 @@ test.describe( 'Products API tests: CRUD', () => {
 	} );
 
 	test.describe( 'Product review tests: CRUD', () => {
-		let productReviewId;
-		let reviewsTestProduct;
+		let productReviewId: number;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		let reviewsTestProduct: any;
 
 		test.beforeAll( async ( { simpleTestProduct } ) => {
 			reviewsTestProduct = simpleTestProduct;
@@ -863,7 +858,7 @@ test.describe( 'Products API tests: CRUD', () => {
 	} );
 
 	test.describe( 'Product shipping classes tests: CRUD', () => {
-		let productShippingClassId;
+		let productShippingClassId: number;
 
 		test( 'can add a product shipping class', async ( { request } ) => {
 			const response = await request.post(
@@ -1048,7 +1043,7 @@ test.describe( 'Products API tests: CRUD', () => {
 	} );
 
 	test.describe( 'Product tags tests: CRUD', () => {
-		let productTagId;
+		let productTagId: number;
 
 		test( 'can add a product tag', async ( { request } ) => {
 			const response = await request.post(
@@ -1239,8 +1234,8 @@ test.describe( 'Products API tests: CRUD', () => {
 	} );
 
 	test.describe( 'Product variation tests: CRUD', () => {
-		let variableProductId;
-		let productVariationId;
+		let variableProductId: number;
+		let productVariationId: number;
 
 		test( 'can add a variable product', async ( { request } ) => {
 			const response = await request.post( 'wp-json/wc/v3/products', {

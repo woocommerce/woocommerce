@@ -1,9 +1,9 @@
 /* eslint-disable */
-const { test, expect } = require( '../../../fixtures/api-tests-fixtures' );
+import { test, expect } from '../../../fixtures/api-tests-fixtures';
 
-const {
+import {
 	getShippingMethodExample
-} = require('../../../data');
+} from '../../../data';
 
 /**
  * Shipping zone id for "Locations not covered by your other zones".

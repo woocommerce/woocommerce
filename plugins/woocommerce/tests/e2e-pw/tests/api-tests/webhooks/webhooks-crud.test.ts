@@ -1,7 +1,10 @@
-const { test, expect } = require( '../../../fixtures/api-tests-fixtures' );
+/**
+ * Internal dependencies
+ */
+import { test, expect } from '../../../fixtures/api-tests-fixtures';
 
 test.describe( 'Webhooks API tests', () => {
-	let webhookId;
+	let webhookId: number;
 
 	test.describe( 'Create a webhook', () => {
 		test( 'can create a webhook', async ( { request } ) => {
@@ -107,9 +110,9 @@ test.describe( 'Webhooks API tests', () => {
 	} );
 
 	test.describe( 'Batch webhook operations', () => {
-		let webhookId1;
-		let webhookId2;
-		let webhookId3;
+		let webhookId1: number;
+		let webhookId2: number;
+		let webhookId3: number;
 		test( 'can batch create webhooks', async ( { request } ) => {
 			// Batch create webhooks
 			// call API to batch create a webhook

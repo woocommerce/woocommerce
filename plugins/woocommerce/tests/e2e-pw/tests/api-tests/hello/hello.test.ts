@@ -1,4 +1,7 @@
-const { test, expect } = require( '../../../fixtures/api-tests-fixtures' );
+/**
+ * Internal dependencies
+ */
+import { test, expect } from '../../../fixtures/api-tests-fixtures';
 
 test.describe( 'Test API connectivity', () => {
 	test( 'can access a non-authenticated endpoint', async ( { request } ) => {

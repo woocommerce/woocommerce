@@ -1,5 +1,8 @@
-const { test, expect } = require( '../../../fixtures/api-tests-fixtures' );
-const { order } = require( '../../../data' );
+/**
+ * Internal dependencies
+ */
+import { test, expect } from '../../../fixtures/api-tests-fixtures';
+import { order } from '../../../data';
 const { API_BASE_URL } = process.env;
 const shouldSkip = API_BASE_URL !== undefined;
 
@@ -58,7 +61,7 @@ const simpleProduct = {
 };
 
 test.describe.serial( 'Orders API tests: CRUD', () => {
-	let orderId;
+	let orderId: number;
 
 	test.describe( 'Create an order', () => {
 		test( 'can create a pending order by default', async ( {
@@ -115,7 +118,7 @@ test.describe.serial( 'Orders API tests: CRUD', () => {
 		}
 
 		test.describe( 'Order Notes tests', () => {
-			let orderNoteId;
+			let orderNoteId: number;
 			test( 'can create a order note', async ( { request } ) => {
 				// call API to create an order note on the previously created order
 				const response = await request.post(
