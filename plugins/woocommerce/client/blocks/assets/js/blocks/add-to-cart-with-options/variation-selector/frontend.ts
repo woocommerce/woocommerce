@@ -101,10 +101,7 @@ const isAttributeValueValid = ( {
 		? selectedAttributes.length - 1
 		: selectedAttributes.length;
 
-	const product =
-		productContextState.parentProduct ??
-		productContextState.currentProduct ??
-		null;
+	const product = productContextState.product;
 
 	if ( ! product?.variations?.length ) {
 		return false;
@@ -343,10 +340,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					return;
 				}
 
-				const product =
-					productContextState.parentProduct ??
-					productContextState.currentProduct ??
-					null;
+				const product = productContextState.product;
 				if ( ! product ) {
 					return;
 				}
@@ -413,10 +407,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				} );
 			},
 			setSelectedVariationId: () => {
-				const product =
-					productContextState.parentProduct ??
-					productContextState.currentProduct ??
-					null;
+				const product = productContextState.product;
 
 				if ( ! product?.variations?.length ) {
 					return;
@@ -433,10 +424,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 			validateVariation() {
 				actions.clearErrors( 'variable-product' );
 
-				const product =
-					productContextState.parentProduct ??
-					productContextState.currentProduct ??
-					null;
+				const product = productContextState.product;
 
 				if ( ! product?.variations?.length ) {
 					return;
@@ -495,9 +483,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				}
 
 				// getProductData expects the main (non-variation) product ID.
-				const mainProductId =
-					productContextState.parentProduct?.id ??
-					productContextState.currentProduct?.id;
+				const mainProductId = productContextState.product?.id;
 
 				if ( ! mainProductId ) {
 					return;

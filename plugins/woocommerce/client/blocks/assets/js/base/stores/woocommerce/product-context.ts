@@ -63,8 +63,7 @@ const productContextStore = store< ProductContextStore >(
 					return null;
 				}
 				return (
-					productsStore.state.productVariations[ variationId ] ??
-					null
+					productsStore.state.productVariations[ variationId ] ?? null
 				);
 			},
 		},

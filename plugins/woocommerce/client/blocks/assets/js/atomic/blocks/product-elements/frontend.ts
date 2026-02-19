@@ -62,9 +62,7 @@ const productElementStore = store(
 	{
 		state: {
 			get productData(): ProductData | undefined {
-				const mainProductId =
-					productContextState?.parentProduct?.id ??
-					productContextState?.currentProduct?.id;
+				const mainProductId = productContextState?.product?.id;
 
 				if ( ! mainProductId ) {
 					return undefined;
@@ -78,10 +76,7 @@ const productElementStore = store(
 					return undefined;
 				}
 
-				const variationId =
-					productContextState?.parentProduct !== null
-						? productContextState?.currentProduct?.id
-						: undefined;
+				const variationId = productContextState?.selectedVariation?.id;
 
 				return (
 					products?.[ mainProductId ]?.variations?.[
@@ -94,7 +89,7 @@ const productElementStore = store(
 			updateValue: () => {
 				const element = getElement();
 
-				if ( ! element.ref || ! productContextState?.currentProduct ) {
+				if ( ! element.ref || ! productContextState?.product ) {
 					return;
 				}
 
