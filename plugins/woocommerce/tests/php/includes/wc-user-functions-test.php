@@ -149,4 +149,41 @@ class WC_User_Functions_Tests extends WC_Unit_Test_Case {
 		$this->assertEquals( $order->get_id(), $download['order_id'] );
 		$this->assertEquals( $product2->get_id(), $download['product_id'] );
 	}
+
+	/**
+	 * Test `wc_update_user_last_active`: verify the applied thresholds.
+	 */
+	public function test_wc_update_user_last_active(): void {
+		$this->toggle_cot_feature_and_usage( true );
+
+		global $wp_current_filter;
+		$backup      = $wp_current_filter;
+		$customer    = WC_Helper_Customer::create_customer();
+		$customer_id = $customer->get_id();
+
+		// Verify threshold crossing is handled as intended.
+		update_user_meta( $customer_id, 'wc_last_active', (string) ( $original = time() - 30 ) );
+		wc_update_user_last_active( $customer_id );
+		$this->assertSame( (string) $original, get_user_meta( $customer_id, 'wc_last_active', true ));
+
+		// Verify fallback of one-minute update interval.
+		update_user_meta( $customer_id, 'wc_last_active', (string) ( $original = time() - MINUTE_IN_SECONDS - 1 ) );
+		wc_update_user_last_active( $customer_id );
+		$this->assertGreaterThan( $original, get_user_meta( $customer_id, 'wc_last_active', true ));
+
+		// Verify immediate update after logging in.
+		update_user_meta( $customer_id, 'wc_last_active', (string) ( $original = time() - 1 ) );
+		$wp_current_filter = array( 'wp_login' );
+		wc_update_user_last_active( $customer_id );
+		$this->assertGreaterThan( $original, get_user_meta( $customer_id, 'wc_last_active', true ));
+
+		// Verify five minutes update interval for pages navigation use-case.
+		update_user_meta( $customer_id, 'wc_last_active', (string) ( $original = time() - ( 5 * MINUTE_IN_SECONDS ) - 1 ) );
+		$wp_current_filter = array( 'wp' );
+		wc_update_user_last_active( $customer_id );
+		$this->assertGreaterThan( $original, get_user_meta( $customer_id, 'wc_last_active', true ));
+
+		$wp_current_filter = $backup;
+		$customer->delete();
+	}
 }
