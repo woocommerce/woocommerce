@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Enable customer cancelled order email notification by default for new installations

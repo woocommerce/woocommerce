@@ -273,9 +273,10 @@ export const updateReleaseBranchChangelogs = async (
 			};
 		}
 		Logger.notice( `Creating PR for ${ branch }` );
-		const warningMessage = noEntriesWritten
-			? '> [!CAUTION]\n> No entries were written to the changelog. You will be required to manually add a changelog entry before releasing.\n\n'
-			: '';
+		const warningMessage =
+			noEntriesWritten && ! options.appendChangelog
+				? '> [!CAUTION]\n> No entries were written to the changelog. You will be required to manually add a changelog entry before releasing.\n\n'
+				: '';
 		const pullRequest = await createPullRequest( {
 			owner,
 			name,

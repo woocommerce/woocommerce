@@ -75,7 +75,7 @@ The copied file will now override the WooCommerce default template file, so you 
 
 ## Declare Theme Support for Custom Templates
 
-If you are a theme developer or using a theme with custom templates, you must declare WooCommerce theme support using the `add_theme_support` function. See [Declaring WooCommerce Support in Themes](https://github.com/woocommerce/woocommerce/wiki/Declaring-WooCommerce-support-in-themes) at GitHub.
+If you are a theme developer or using a theme with custom templates, you must declare WooCommerce theme support using the `add_theme_support` function. See [Declaring WooCommerce Support in Themes](/docs/theming/theme-development/classic-theme-developer-handbook/#declaring-woocommerce-support).
 
 If your theme has `woocommerce.php`, you will be unable to override `woocommerce/archive-product.php` custom template in your theme, as `woocommerce.php` has priority over other template files. This is intended to prevent display issues.
 
