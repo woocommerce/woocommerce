@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import type { Page } from '@playwright/test';
 import { createClient, WP_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
@@ -18,7 +19,11 @@ import playwrightConfig from '../playwright.config';
  * @param {RegExp}                           subject              The subject of the email, in regular expression format.
  * @return {Promise<*>} Returns the row element of the email in the Email Log page.
  */
-export async function expectEmail( page, receiverEmailAddress, subject ) {
+export async function expectEmail(
+	page: Page,
+	receiverEmailAddress: string,
+	subject: RegExp
+) {
 	await page.goto(
 		`wp-admin/tools.php?page=wpml_plugin_log&search[place]=receiver&search[term]=${ encodeURIComponent(
 			receiverEmailAddress
@@ -54,10 +59,10 @@ export async function expectEmail( page, receiverEmailAddress, subject ) {
  * @param {RegExp}                           emailContent         A part of the email content, in regular expression format.
  */
 export async function expectEmailContent(
-	page,
-	receiverEmailAddress,
-	emailSubject,
-	emailContent
+	page: Page,
+	receiverEmailAddress: string,
+	emailSubject: RegExp,
+	emailContent: RegExp
 ) {
 	const modalContent = page.locator(
 		'#wp-mail-logging-modal-content-body-content'
@@ -75,7 +80,7 @@ export async function expectEmailContent(
 	);
 }
 
-export async function getWooEmails( params ) {
+export async function getWooEmails( params: any ) {
 	const apiClient = createClient( playwrightConfig.use.baseURL, {
 		type: 'basic',
 		username: admin.username,
@@ -94,7 +99,10 @@ export async function getWooEmails( params ) {
  * @param {import('@playwright/test').Page } page       The Playwright page.
  * @param {string}                           emailTitle The transactional email title.
  */
-export async function accessTheEmailEditor( page, emailTitle = 'New order' ) {
+export async function accessTheEmailEditor(
+	page: Page,
+	emailTitle = 'New order'
+) {
 	await page.goto( '/wp-admin/admin.php?page=wc-settings&tab=email' );
 	const theRow = page.getByRole( 'row', {
 		name: new RegExp( emailTitle ),
@@ -106,7 +114,7 @@ export async function accessTheEmailEditor( page, emailTitle = 'New order' ) {
 	await expect( page.locator( '#woocommerce-email-editor' ) ).toBeVisible();
 }
 
-export async function ensureEmailEditorSettingsPanelIsOpened( page ) {
+export async function ensureEmailEditorSettingsPanelIsOpened( page: Page ) {
 	const status = await page.evaluate( async () => {
 		const elem = document.querySelector(
 			'.woocommerce-email-editor__settings-panel'

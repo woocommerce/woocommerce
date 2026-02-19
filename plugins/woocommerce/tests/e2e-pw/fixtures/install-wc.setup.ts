@@ -3,7 +3,7 @@
  */
 import { test as setup } from './fixtures';
 
-async function deactivateWooCommerce( restApi ) {
+async function deactivateWooCommerce( restApi: any ) {
 	try {
 		await restApi.get( 'wc-admin-test-helper/live-branches/deactivate/v1' );
 		console.log( 'WC deactivated.' );
@@ -12,10 +12,11 @@ async function deactivateWooCommerce( restApi ) {
 	}
 }
 
-async function getActivatedWooCommerceVersion( restApi ) {
+async function getActivatedWooCommerceVersion( restApi: any ) {
 	const response = await restApi.get( 'wp/v2/plugins', { status: 'active' } );
 	const plugins = await response.data;
-	return plugins.find( ( plugin ) => plugin.name === 'WooCommerce' )?.version;
+	return plugins.find( ( plugin: any ) => plugin.name === 'WooCommerce' )
+		?.version;
 }
 
 setup( 'Install WC using WC Beta Tester', async ( { restApi } ) => {

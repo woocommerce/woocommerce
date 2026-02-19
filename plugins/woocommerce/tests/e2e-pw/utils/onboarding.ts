@@ -19,7 +19,7 @@ import playwrightConfig from '../playwright.config';
  * @return {Promise<void>} the value for the skipped field in the onboarding profile
  */
 
-export async function updateOnboardingProfile( data ) {
+export async function updateOnboardingProfile( data: any ) {
 	const apiClient = createClient( playwrightConfig.use.baseURL, {
 		type: 'basic',
 		username: admin.username,

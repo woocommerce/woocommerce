@@ -15,7 +15,7 @@ const apiClient = createClient( playwrightConfig.use.baseURL, {
 	password: admin.password,
 } );
 
-function resolvePath( path ) {
+function resolvePath( path: string ) {
 	return `${ WC_API_PATH }/settings/${ path }`.replace( /\/+/g, '/' );
 }
 
@@ -26,7 +26,7 @@ function resolvePath( path ) {
  * @param {string} desiredValue - The new value to set for the setting. E.g. 'yes'.
  * @return {Promise<void>} A promise that resolves when the update is complete.
  */
-export async function updateValue( path, desiredValue ) {
+export async function updateValue( path: string, desiredValue: string ) {
 	await apiClient
 		.put( resolvePath( path ), { value: desiredValue } )
 		.catch( ( err ) => {
@@ -42,7 +42,7 @@ export async function updateValue( path, desiredValue ) {
  * @param {string} desiredValue - The desired value to set for the setting. E.g. 'yes'.
  * @return {Promise<{initial: string, updated: string}>} A promise that resolves to an object containing the initial and updated values.
  */
-export async function updateIfNeeded( path, desiredValue ) {
+export async function updateIfNeeded( path: string, desiredValue: string ) {
 	const initialValue = await apiClient
 		.get( resolvePath( path ) )
 		.then( ( r ) => r.data.value )
@@ -63,7 +63,10 @@ export async function updateIfNeeded( path, desiredValue ) {
  * @param {{initial: string, updated: string}} values - An object containing the initial and updated values of the setting. E.g. { initial: 'no', updated: 'yes' }.
  * @return {Promise<void>} A promise that resolves when the reset is complete.
  */
-export async function resetValue( path, values ) {
+export async function resetValue(
+	path: string,
+	values: { initial: string; updated: string }
+) {
 	if ( values.initial !== values.updated ) {
 		await updateValue( path, values.initial );
 	}

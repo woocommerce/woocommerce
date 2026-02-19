@@ -1,10 +1,11 @@
 /**
  * External dependencies
  */
+import type { Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 
-function formatAmount( amount ) {
-	return parseFloat( amount ).toLocaleString( 'en-US', {
+function formatAmount( amount: number | string ) {
+	return parseFloat( String( amount ) ).toLocaleString( 'en-US', {
 		minimumFractionDigits: 2,
 		maximumFractionDigits: 2,
 	} );
@@ -18,9 +19,9 @@ function formatAmount( amount ) {
  * @param {number} expectedTotal - The expected total amount in the cart.
  */
 export async function checkCartContentInClassicCart(
-	page,
-	products,
-	expectedTotal
+	page: Page,
+	products: any[],
+	expectedTotal: number
 ) {
 	for ( const product of products ) {
 		const row = await page
@@ -52,9 +53,9 @@ export async function checkCartContentInClassicCart(
  * @param {number} expectedTotal - The expected total amount in the cart.
  */
 export async function checkCartContentInBlocksCart(
-	page,
-	products,
-	expectedTotal
+	page: Page,
+	products: any[],
+	expectedTotal: number
 ) {
 	for ( const product of products ) {
 		const row = await page
@@ -87,7 +88,12 @@ export async function checkCartContentInBlocksCart(
  * @param {Array}   products      - An array of objects in the format { data: { name: 'Product name', price: '12', }, qty: quantity } expected to be in the cart.
  * @param {Object}  tax           - The tax object containing the tax rate. Expected format: { rate: '0.00' }
  */
-export async function checkCartContent( isClassicCart, page, products, tax ) {
+export async function checkCartContent(
+	isClassicCart: boolean,
+	page: Page,
+	products: any[],
+	tax: any
+) {
 	if ( products.length === 0 ) {
 		await expect(
 			page.locator( 'main' ).getByText( 'Your cart is currently empty' )

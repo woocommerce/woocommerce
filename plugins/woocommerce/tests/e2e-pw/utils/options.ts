@@ -1,14 +1,19 @@
 /**
+ * External dependencies
+ */
+import type { APIRequest } from '@playwright/test';
+
+/**
  * Internal dependencies
  */
 import { encodeCredentials } from './plugin-utils';
-const { admin } = require( '../test-data/data' );
+import { admin } from '../test-data/data';
 
 export const setOption = async (
-	request,
-	baseURL,
-	optionName,
-	optionValue
+	request: APIRequest,
+	baseURL: string,
+	optionName: string,
+	optionValue: string
 ) => {
 	const apiContext = await request.newContext( {
 		baseURL,
@@ -31,7 +36,11 @@ export const setOption = async (
 		} );
 };
 
-export const deleteOption = async ( request, baseURL, optionName ) => {
+export const deleteOption = async (
+	request: APIRequest,
+	baseURL: string,
+	optionName: string
+) => {
 	const apiContext = await request.newContext( {
 		baseURL,
 		extraHTTPHeaders: {

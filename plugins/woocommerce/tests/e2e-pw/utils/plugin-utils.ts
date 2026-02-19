@@ -1,7 +1,16 @@
-const axios = require( 'axios' ).default;
-const fs = require( 'fs' );
-const path = require( 'path' );
-const { wpCLI } = require( './cli' );
+/**
+ * External dependencies
+ */
+import axios from 'axios';
+import fs from 'fs';
+import { pipeline } from 'stream/promises';
+import path from 'path';
+import type { APIRequest } from '@playwright/test';
+
+/**
+ * Internal dependencies
+ */
+import { wpCLI } from './cli';
 
 /**
  * Encode basic auth username and password to be used in HTTP Authorization header.
@@ -10,7 +19,7 @@ const { wpCLI } = require( './cli' );
  * @param {string} password
  * @return {string} Base64-encoded string
  */
-export const encodeCredentials = ( username, password ) => {
+export const encodeCredentials = ( username: string, password: string ) => {
 	return Buffer.from( `${ username }:${ password }` ).toString( 'base64' );
 };
 
@@ -30,6 +39,11 @@ export const getLatestReleaseZipUrl = async ( {
 	authorizationToken,
 	prerelease = false,
 	perPage = 3,
+}: {
+	repository: string;
+	authorizationToken?: string;
+	prerelease?: boolean;
+	perPage?: number;
 } ) => {
 	const requesturl = prerelease
 		? `https://api.github.com/repos/${ repository }/releases?per_page=${ perPage }`
@@ -49,7 +63,7 @@ export const getLatestReleaseZipUrl = async ( {
 	let response;
 	try {
 		response = await axios( options );
-	} catch ( error ) {
+	} catch ( error: any ) {
 		let errorMessage =
 			'Something went wrong when downloading the plugin.\n';
 
@@ -111,6 +125,12 @@ export const deletePlugin = async ( {
 	slug,
 	username,
 	password,
+}: {
+	request: APIRequest;
+	baseURL: string;
+	slug: string;
+	username: string;
+	password: string;
 } ) => {
 	// Check if plugin is installed by getting the list of installed plugins, and then finding the one whose `textdomain` property equals `slug`.
 	const apiContext = await request.newContext( {
@@ -128,7 +148,7 @@ export const deletePlugin = async ( {
 	);
 	const pluginsList = await listPluginsResponse.json();
 	const pluginToDelete = pluginsList.find(
-		( { textdomain } ) => textdomain === slug
+		( { textdomain }: { textdomain: string } ) => textdomain === slug
 	);
 
 	// If installed, get its `plugin` value and use it to deactivate and delete it.
@@ -162,6 +182,12 @@ export const downloadZip = async ( {
 	authorizationToken,
 	prerelease = false,
 	downloadDir = 'tmp',
+}: {
+	url?: string;
+	repository: string;
+	authorizationToken?: string;
+	prerelease?: boolean;
+	downloadDir?: string;
 } ) => {
 	let zipFilename = path.basename( url || repository );
 	zipFilename = zipFilename.endsWith( '.zip' )
@@ -184,7 +210,7 @@ export const downloadZip = async ( {
 	const options = {
 		method: 'get',
 		url: downloadURL,
-		responseType: 'stream',
+		responseType: 'stream' as const,
 		headers: {
 			Authorization: authorizationToken
 				? `token ${ authorizationToken }`
@@ -193,14 +219,14 @@ export const downloadZip = async ( {
 		},
 	};
 
-	const response = await axios( options ).catch( ( error ) => {
+	const response = await axios( options ).catch( ( error: any ) => {
 		if ( error.response ) {
 			console.error( error.response.data );
 		}
 		throw new Error( error.message );
 	} );
 
-	response.data.pipe( fs.createWriteStream( zipFilePath ) );
+	await pipeline( response.data, fs.createWriteStream( zipFilePath ) );
 
 	return zipFilePath;
 };
@@ -210,10 +236,8 @@ export const downloadZip = async ( {
  *
  * @param {string} zipFilePath Local file path to the ZIP.
  */
-export const deleteZip = async ( zipFilePath ) => {
-	await fs.unlink( zipFilePath, ( err ) => {
-		if ( err ) throw err;
-	} );
+export const deleteZip = async ( zipFilePath: string ) => {
+	await fs.promises.unlink( zipFilePath );
 };
 
 /**
@@ -224,7 +248,7 @@ export const deleteZip = async ( zipFilePath ) => {
  *
  * @param {string} pluginPath
  */
-export const installPluginThruWpCli = async ( pluginPath ) => {
+export const installPluginThruWpCli = async ( pluginPath: string ) => {
 	const wpEnvPluginPath = pluginPath.replace(
 		/.*\/plugins\/woocommerce/,
 		'wp-content/plugins/woocommerce'

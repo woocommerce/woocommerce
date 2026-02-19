@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import type { Browser } from '@playwright/test';
 import {
 	createClient,
 	goToPageEditor,
@@ -36,7 +37,7 @@ export const CLASSIC_CART_PAGE = {
 	slug: 'classic-cart',
 };
 
-export async function pageExists( slug ) {
+export async function pageExists( slug: string ) {
 	const apiClient = createClient( playwrightConfig.use.baseURL, {
 		type: 'basic',
 		username: admin.username,
@@ -53,7 +54,11 @@ export async function pageExists( slug ) {
 	return pages.data.length > 0;
 }
 
-async function createShortcodePage( slug, title, shortcode ) {
+async function createShortcodePage(
+	slug: string,
+	title: string,
+	shortcode: string
+) {
 	if ( ! ( await pageExists( slug ) ) ) {
 		console.log( `Creating ${ title } page` );
 		const apiClient = createClient( playwrightConfig.use.baseURL, {
@@ -96,7 +101,12 @@ export async function createClassicCartPage() {
 	);
 }
 
-async function createBlocksPage( browser, slug, title, blockName ) {
+async function createBlocksPage(
+	browser: Browser,
+	slug: string,
+	title: string,
+	blockName: string
+) {
 	if ( ! ( await pageExists( slug ) ) ) {
 		console.log( 'Creating Checkout Blocks page' );
 		const context = await browser.newContext( {
@@ -112,7 +122,7 @@ async function createBlocksPage( browser, slug, title, blockName ) {
 	}
 }
 
-export async function createBlocksCheckoutPage( browser ) {
+export async function createBlocksCheckoutPage( browser: Browser ) {
 	await createBlocksPage(
 		browser,
 		BLOCKS_CHECKOUT_PAGE.slug,
@@ -121,7 +131,7 @@ export async function createBlocksCheckoutPage( browser ) {
 	);
 }
 
-export async function createBlocksCartPage( browser ) {
+export async function createBlocksCartPage( browser: Browser ) {
 	await createBlocksPage(
 		browser,
 		BLOCKS_CART_PAGE.slug,

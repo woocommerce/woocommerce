@@ -1,6 +1,9 @@
-const { faker } = require( '@faker-js/faker' );
+/**
+ * External dependencies
+ */
+import { faker } from '@faker-js/faker';
 
-function getFakeUser( role ) {
+export function getFakeUser( role: string ) {
 	const firstName = faker.person.firstName();
 	const lastName = faker.person.lastName();
 	const email = faker.internet.email( {
@@ -42,11 +45,11 @@ function getFakeUser( role ) {
 	};
 }
 
-function getFakeCustomer() {
+export function getFakeCustomer() {
 	return getFakeUser( 'customer' );
 }
 
-function getFakeProduct( options = {} ) {
+export function getFakeProduct( options: any = {} ) {
 	const dec = options.dec ?? 2;
 
 	return {
@@ -59,17 +62,10 @@ function getFakeProduct( options = {} ) {
 	};
 }
 
-function getFakeCategory( options = { extraRandomTerm: false } ) {
+export function getFakeCategory( options = { extraRandomTerm: false } ) {
 	return {
 		name: `${ faker.commerce.productMaterial() } ${ faker.commerce.department() } ${
 			options.extraRandomTerm ? faker.string.alphanumeric( 5 ) : ''
 		}`.trim(),
 	};
 }
-
-module.exports = {
-	getFakeUser,
-	getFakeCustomer,
-	getFakeProduct,
-	getFakeCategory,
-};

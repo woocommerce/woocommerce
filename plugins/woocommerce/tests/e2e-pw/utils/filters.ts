@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import type { Page } from '@playwright/test';
+
+/**
  * Internal dependencies
  */
 import defaultConfig from '../playwright.config';
@@ -11,10 +16,15 @@ const testURL = new URL( defaultConfig.use.baseURL );
  * code to observe the requested filter, you may need to `page.reload()` prior to writing assertions that rely on your
  * filter.
  */
-export async function setFilterValue( page, hook, value, priority = 10 ) {
+export async function setFilterValue(
+	page: Page,
+	hook: string,
+	value: any,
+	priority = 10
+) {
 	const context = page.context();
 	const existingCookies = await context.cookies();
-	let filterSpecs = {};
+	let filterSpecs: any = {};
 
 	for ( const cookie of existingCookies ) {
 		if ( cookie.name === 'e2e-filters' ) {
@@ -45,7 +55,7 @@ export async function setFilterValue( page, hook, value, priority = 10 ) {
  * before performing further assertions.
  *
  */
-export async function clearFilters( page ) {
+export async function clearFilters( page: Page ) {
 	await page.context().addCookies( [
 		{
 			name: 'e2e-filters',

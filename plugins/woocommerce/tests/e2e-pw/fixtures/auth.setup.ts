@@ -1,20 +1,24 @@
 /**
  * External dependencies
  */
-import { test as setup } from '@playwright/test';
+import { test as setup, type APIRequestContext } from '@playwright/test';
 import fs from 'fs';
 
 /**
  * Internal dependencies
  */
-const { admin, customer } = require( '../test-data/data' );
+import { admin, customer } from '../test-data/data';
 import {
 	ADMIN_STATE_PATH,
 	CUSTOMER_STATE_PATH,
 	STORAGE_DIR_PATH,
 } from '../playwright.config';
 
-async function authenticate( request, user, storagePath ) {
+async function authenticate(
+	request: APIRequestContext,
+	user: { username: string; password: string },
+	storagePath: string
+) {
 	await request.post( './wp-login.php', {
 		form: {
 			log: user.username,
