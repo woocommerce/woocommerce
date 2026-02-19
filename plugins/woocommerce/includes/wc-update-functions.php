@@ -3398,3 +3398,23 @@ function wc_update_1060_add_woo_idx_comment_approved_type_index(): void {
 		$wpdb->query( "ALTER TABLE {$wpdb->comments} ADD INDEX woo_idx_comment_approved_type (comment_approved, comment_type, comment_post_ID)" );
 	}
 }
+
+/**
+ * Add an admin notice about HPOS sync-on-read being disabled by default for sites
+ * that have both HPOS and data synchronization enabled.
+ *
+ * @since 10.7.0
+ *
+ * @return void
+ */
+function wc_update_1070_disable_hpos_sync_on_read(): void {
+	if ( 'yes' !== get_option( 'woocommerce_custom_orders_table_enabled' ) ) {
+		return;
+	}
+
+	if ( 'yes' !== get_option( 'woocommerce_custom_orders_table_data_sync_enabled' ) ) {
+		return;
+	}
+
+	WC_Admin_Notices::add_notice( 'hpos_sync_on_read_disabled' );
+}
