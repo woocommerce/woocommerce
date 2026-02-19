@@ -124,7 +124,18 @@ class CartAddItem extends AbstractCartRoute {
 			$request
 		);
 
-		$this->cart_controller->add_to_cart( $add_to_cart_data );
+		$item_id = $this->cart_controller->add_to_cart( $add_to_cart_data );
+		$cart = $this->cart_controller->get_cart_instance();
+
+		/**
+		 * Fires when a cart item is updated from the Store API.
+		 *
+		 * @param string $item_id Cart item id.
+		 * @param int $quantity Quantity.
+		 * @param int $old_quantity Old quantity.
+		 * @param \WC_Cart $cart Cart object.
+		 */
+		do_action( 'woocommerce_store_api_cart_item_add_from_request', $item_id, $request['quantity'], $cart );
 
 		$response = rest_ensure_response( $this->schema->get_item_response( $this->cart_controller->get_cart_for_response() ) );
 		$response->set_status( 201 );
