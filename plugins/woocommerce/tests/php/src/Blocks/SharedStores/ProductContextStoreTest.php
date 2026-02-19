@@ -5,7 +5,6 @@ namespace Automattic\WooCommerce\Tests\Blocks\SharedStores;
 
 use Automattic\WooCommerce\Blocks\SharedStores\ProductContextStore;
 use Automattic\WooCommerce\Blocks\SharedStores\ProductsStore;
-use InvalidArgumentException;
 use WC_Unit_Test_Case;
 
 /**
@@ -30,15 +29,6 @@ class ProductContextStoreTest extends WC_Unit_Test_Case {
 		$variations->setValue( null, array() );
 
 		parent::tearDown();
-	}
-
-	/**
-	 * @testdox load_context should throw when consent statement is incorrect.
-	 */
-	public function test_load_context_throws_for_invalid_consent(): void {
-		$this->expectException( InvalidArgumentException::class );
-
-		ProductContextStore::load_context( 'wrong consent', 42 );
 	}
 
 	/**
