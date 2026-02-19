@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix selectWoo not initializing on the layered nav dropdown widget when using the OR query type.
