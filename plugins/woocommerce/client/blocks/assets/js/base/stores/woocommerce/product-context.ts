@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { store } from '@wordpress/interactivity';
+import { store, getContext } from '@wordpress/interactivity';
 import type { ProductResponseItem } from '@woocommerce/types';
 import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 
@@ -16,20 +16,31 @@ const productsStore = store< ProductsStore >( 'woocommerce/products', {
 	},
 } );
 
+/**
+ * Per-element context set via data-wp-context on wrapper elements (e.g. the
+ * SingleProduct block). When present, this takes precedence over the
+ * server-hydrated state so that each product in a loop gets its own IDs.
+ */
+type ProductContext = {
+	productId: number;
+	variationId?: number | null;
+};
+
 export type ProductContextStore = {
 	state: {
 		productId: number;
 		variationId: number | null;
 		/**
-		 * The currently active product for display/cart operations.
-		 * Returns the variation if variationId is set, otherwise the main product.
+		 * The main product for this page/block. Always the top-level product
+		 * (e.g. the variable product "Hoodie"), never a variation.
+		 * Resolves productId from per-block context when available.
 		 */
-		currentProduct: ProductResponseItem | undefined;
+		product: ProductResponseItem | undefined;
 		/**
-		 * The parent variable product when a variation is active.
-		 * Null for simple products or when no variation is selected.
+		 * The currently selected variation, or null if none is selected.
+		 * For simple/grouped products, this is always null.
 		 */
-		parentProduct: ProductResponseItem | null;
+		selectedVariation: ProductResponseItem | null;
 	};
 };
 
@@ -37,23 +48,27 @@ const productContextStore = store< ProductContextStore >(
 	'woocommerce/product-context',
 	{
 		state: {
-			get currentProduct(): ProductResponseItem | undefined {
-				const { productId, variationId } = productContextStore.state;
+			get product(): ProductResponseItem | undefined {
+				const context = getContext< ProductContext >();
+				const productId =
+					context?.productId !== undefined
+						? context.productId
+						: productContextStore.state.productId;
+
 				if ( ! productId ) {
 					return undefined;
-				}
-				if ( variationId ) {
-					return productsStore.state.productVariations[ variationId ];
 				}
 				return productsStore.state.products[ productId ];
 			},
 
-			get parentProduct(): ProductResponseItem | null {
-				const { productId, variationId } = productContextStore.state;
+			get selectedVariation(): ProductResponseItem | null {
+				const { variationId } = productContextStore.state;
 				if ( ! variationId ) {
 					return null;
 				}
-				return productsStore.state.products[ productId ] ?? null;
+				return (
+					productsStore.state.productVariations[ variationId ] ?? null
+				);
 			},
 		},
 	},
