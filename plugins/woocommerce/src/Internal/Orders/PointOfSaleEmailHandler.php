@@ -56,6 +56,8 @@ class PointOfSaleEmailHandler implements RegisterHooksInterface {
 	 * @param bool  $enabled Whether the email is enabled.
 	 * @param mixed $order   The order object (or null).
 	 * @return bool False if the order was paid at POS, original value otherwise.
+	 *
+	 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
 	 */
 	public function maybe_suppress_email( bool $enabled, $order ): bool {
 		if ( ! $order instanceof WC_Abstract_Order ) {

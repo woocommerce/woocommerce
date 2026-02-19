@@ -440,6 +440,8 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 		 * @param int      $item_id       Order item ID.
 		 * @param array    $item          Order item data.
 		 * @param WC_Order $order         Order object.
+		 *
+		 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
 		 */
 		public function add_unit_price( $item_id, $item, $order ) {
 			$unit_price = OrderPriceFormatter::get_formatted_item_subtotal( $order, $item, get_option( 'woocommerce_tax_display_cart' ) );
@@ -463,6 +465,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 		 * @param WC_Order $order                  The order.
 		 * @return array Modified array of valid template class names.
 		 *
+		 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
 		 * @since 10.6.0
 		 */
 		public function add_to_valid_template_classes( $valid_template_classes, $order ) {
@@ -483,6 +486,8 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 		 * @param WC_Order $order      Order object.
 		 * @param string   $tax_display Tax display.
 		 * @return array Modified array of total rows.
+		 *
+		 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
 		 */
 		public function order_item_totals( $total_rows, $order, $tax_display ) {
 			$auth_code = $order->get_meta( '_charge_id', true );
