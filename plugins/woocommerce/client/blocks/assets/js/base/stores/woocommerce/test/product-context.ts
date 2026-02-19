@@ -98,17 +98,13 @@ describe( 'woocommerce/product-context store', () => {
 			mockRegisteredStore!.state.productId = 999;
 			mockRegisteredStore!.state.variationId = null;
 
-			expect(
-				mockRegisteredStore!.state.currentProduct
-			).toBeUndefined();
+			expect( mockRegisteredStore!.state.currentProduct ).toBeUndefined();
 		} );
 
 		it( 'returns undefined when productId is 0', () => {
 			expect( mockRegisteredStore ).not.toBeNull();
 
-			expect(
-				mockRegisteredStore!.state.currentProduct
-			).toBeUndefined();
+			expect( mockRegisteredStore!.state.currentProduct ).toBeUndefined();
 		} );
 	} );
 
@@ -119,9 +115,7 @@ describe( 'woocommerce/product-context store', () => {
 			mockRegisteredStore!.state.productId = 42;
 			mockRegisteredStore!.state.variationId = null;
 
-			expect(
-				mockRegisteredStore!.state.parentProduct
-			).toBeNull();
+			expect( mockRegisteredStore!.state.parentProduct ).toBeNull();
 		} );
 
 		it( 'returns null when variationId is null (variable product, no selection)', () => {
@@ -134,9 +128,7 @@ describe( 'woocommerce/product-context store', () => {
 			mockRegisteredStore!.state.productId = 10;
 			mockRegisteredStore!.state.variationId = null;
 
-			expect(
-				mockRegisteredStore!.state.parentProduct
-			).toBeNull();
+			expect( mockRegisteredStore!.state.parentProduct ).toBeNull();
 		} );
 
 		it( 'returns the variable product when variationId is set', () => {

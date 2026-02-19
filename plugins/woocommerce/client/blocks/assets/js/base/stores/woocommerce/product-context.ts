@@ -38,28 +38,22 @@ const productContextStore = store< ProductContextStore >(
 	{
 		state: {
 			get currentProduct(): ProductResponseItem | undefined {
-				const { productId, variationId } =
-					productContextStore.state;
+				const { productId, variationId } = productContextStore.state;
 				if ( ! productId ) {
 					return undefined;
 				}
 				if ( variationId ) {
-					return productsStore.state.productVariations[
-						variationId
-					];
+					return productsStore.state.productVariations[ variationId ];
 				}
 				return productsStore.state.products[ productId ];
 			},
 
 			get parentProduct(): ProductResponseItem | null {
-				const { productId, variationId } =
-					productContextStore.state;
+				const { productId, variationId } = productContextStore.state;
 				if ( ! variationId ) {
 					return null;
 				}
-				return (
-					productsStore.state.products[ productId ] ?? null
-				);
+				return productsStore.state.products[ productId ] ?? null;
 			},
 		},
 	},
