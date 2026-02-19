@@ -162,23 +162,27 @@ class WC_User_Functions_Tests extends WC_Unit_Test_Case {
 		$customer_id = $customer->get_id();
 
 		// Verify threshold crossing is handled as intended.
-		update_user_meta( $customer_id, 'wc_last_active', (string) ( $original = time() - 30 ) );
+		$original = time() - 30;
+		update_user_meta( $customer_id, 'wc_last_active', (string) $original );
 		wc_update_user_last_active( $customer_id );
 		$this->assertSame( (string) $original, get_user_meta( $customer_id, 'wc_last_active', true ));
 
 		// Verify fallback of one-minute update interval.
-		update_user_meta( $customer_id, 'wc_last_active', (string) ( $original = time() - MINUTE_IN_SECONDS - 1 ) );
+		$original = time() - MINUTE_IN_SECONDS - 1 ;
+		update_user_meta( $customer_id, 'wc_last_active', (string) $original );
 		wc_update_user_last_active( $customer_id );
 		$this->assertGreaterThan( $original, get_user_meta( $customer_id, 'wc_last_active', true ));
 
 		// Verify immediate update after logging in.
-		update_user_meta( $customer_id, 'wc_last_active', (string) ( $original = time() - 1 ) );
+		$original = time() - 1;
+		update_user_meta( $customer_id, 'wc_last_active', (string) $original );
 		$wp_current_filter = array( 'wp_login' );
 		wc_update_user_last_active( $customer_id );
 		$this->assertGreaterThan( $original, get_user_meta( $customer_id, 'wc_last_active', true ));
 
 		// Verify five minutes update interval for pages navigation use-case.
-		update_user_meta( $customer_id, 'wc_last_active', (string) ( $original = time() - ( 5 * MINUTE_IN_SECONDS ) - 1 ) );
+		$original = time() - ( 5 * MINUTE_IN_SECONDS ) - 1;
+		update_user_meta( $customer_id, 'wc_last_active', (string) $original );
 		$wp_current_filter = array( 'wp' );
 		wc_update_user_last_active( $customer_id );
 		$this->assertGreaterThan( $original, get_user_meta( $customer_id, 'wc_last_active', true ));
