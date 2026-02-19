@@ -8,7 +8,7 @@ import { TaskType } from '@woocommerce/data';
 /**
  * Internal dependencies
  */
-import { Shipping } from '../index';
+import { Shipping, hasInstallableSlug } from '../index';
 
 jest.mock( '@woocommerce/tracks', () => ( {
 	recordEvent: jest.fn(),
@@ -39,6 +39,18 @@ describe( 'Shipping', () => {
 		isUpdateSettingsRequesting: false,
 		onComplete: jest.fn(),
 		task: { id: 'shipping' } as TaskType,
+	};
+
+	const usShippingPartner = {
+		id: 'woocommerce-shipping',
+		name: 'WooCommerce Shipping',
+		slug: 'woocommerce-shipping',
+	};
+
+	const chileShippingPartner = {
+		id: 'envia',
+		name: 'Envia',
+		slug: '',
 	};
 
 	it( 'should trigger event tasklist_shipping_visit_marketplace_click when clicking the WooCommerce Marketplace link', () => {
@@ -72,5 +84,17 @@ describe( 'Shipping', () => {
 		expect( mockLocation.href ).toContain(
 			'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=shipping'
 		);
+	} );
+
+	it( 'treats US shipping partners with slugs as installable', () => {
+		expect( hasInstallableSlug( usShippingPartner ) ).toBe( true );
+	} );
+
+	it( 'treats Chile shipping partners without slugs as non-installable', () => {
+		expect( hasInstallableSlug( chileShippingPartner ) ).toBe( false );
+	} );
+
+	it( 'treats missing slugs as non-installable partners', () => {
+		expect( hasInstallableSlug( {} ) ).toBe( false );
 	} );
 } );

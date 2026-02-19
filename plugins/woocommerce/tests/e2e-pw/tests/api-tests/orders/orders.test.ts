@@ -1,6 +1,13 @@
-const { test, expect } = require( '../../../fixtures/api-tests-fixtures' );
-const { order } = require( '../../../data' );
-const { faker } = require( '@faker-js/faker' );
+/**
+ * External dependencies
+ */
+import { faker } from '@faker-js/faker';
+
+/**
+ * Internal dependencies
+ */
+import { test, expect } from '../../../fixtures/api-tests-fixtures';
+import { order } from '../../../data';
 
 const RAND_STRING = faker.string.alphanumeric( 8 ).toLowerCase();
 const COUPON_CODE = `coupon-${ faker.string.alphanumeric( 4 ).toLowerCase() }`;
@@ -39,7 +46,8 @@ const updatedCustomerShipping = {
 };
 
 test.describe.serial( 'Orders API tests', () => {
-	let orderId, sampleData;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	let orderId: number, sampleData: any;
 
 	test.beforeAll( async ( { request } ) => {
 		const createSampleCategories = async () => {

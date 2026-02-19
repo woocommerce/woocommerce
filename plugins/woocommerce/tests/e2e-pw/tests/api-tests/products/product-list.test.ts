@@ -1,10 +1,18 @@
-const { test, expect } = require( '../../../fixtures/api-tests-fixtures' );
-const { faker } = require( '@faker-js/faker' );
+/**
+ * External dependencies
+ */
+import { faker } from '@faker-js/faker';
+
+/**
+ * Internal dependencies
+ */
+import { test, expect } from '../../../fixtures/api-tests-fixtures';
 
 test.describe( 'Products API tests: List All Products', () => {
 	const PRODUCTS_COUNT = 20;
 	const RAND_NUM = faker.number.int( { min: 1000, max: 9999 } );
-	let sampleData;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	let sampleData: any;
 
 	test.beforeAll( async ( { request } ) => {
 		const createSampleCategories = async () => {

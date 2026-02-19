@@ -1,4 +1,7 @@
-const { test, expect } = require( '../../../fixtures/api-tests-fixtures' );
+/**
+ * Internal dependencies
+ */
+import { test, expect } from '../../../fixtures/api-tests-fixtures';
 
 test.describe( 'Reports API tests', () => {
 	test( 'can view all reports', async ( { request } ) => {
