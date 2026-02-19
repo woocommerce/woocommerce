@@ -94,10 +94,7 @@ const productElementStore = store(
 			updateValue: () => {
 				const element = getElement();
 
-				if (
-					! element.ref ||
-					! productContextState?.currentProduct
-				) {
+				if ( ! element.ref || ! productContextState?.currentProduct ) {
 					return;
 				}
 
