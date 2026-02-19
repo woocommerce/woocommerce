@@ -2179,8 +2179,9 @@ FROM $order_meta_table
 					$this->data_store_meta->update_meta( $order, $existing_meta );
 				}
 			} else {
-				// Do not persist the meta which be dropped on the consequent order saves.
-				if ( 0.0 !== $cogs_value ) {
+				// Do not persist the meta which will be dropped on the consequent order saves.
+				$sync_meta = 0.0 !== $cogs_value;
+				if ( $sync_meta ) {
 					$meta        = new \WC_Meta_Data();
 					$meta->key   = '_cogs_total_value';
 					$meta->value = $cogs_value;
