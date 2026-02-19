@@ -61,7 +61,7 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 		$is_fulfill_action = $data->get_is_fulfilled();
 		// If the fulfillment is fulfilled, set the fulfilled date.
 		if ( $is_fulfill_action ) {
-			$data->set_date_fulfilled( current_time( 'mysql' ) );
+			$data->set_date_fulfilled( gmdate( 'c' ) );
 
 			/**
 			 * Filter to modify the fulfillment data before it is fulfilled.
@@ -101,7 +101,7 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 
 		// If the fulfillment is fulfilled, set the fulfilled date.
 		if ( $data->get_is_fulfilled() ) {
-			$data->set_date_fulfilled( current_time( 'mysql' ) );
+			$data->set_date_fulfilled( gmdate( 'c' ) );
 		}
 
 		// Save the metadata for the fulfillment to the database.
@@ -201,7 +201,7 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 		$is_fulfill_action = false;
 		if ( $data->get_is_fulfilled() && empty( $data->get_date_fulfilled() ) ) {
 			$is_fulfill_action = true;
-			$data->set_date_fulfilled( current_time( 'mysql' ) );
+			$data->set_date_fulfilled( gmdate( 'c' ) );
 
 			/**
 			 * Filter to modify the fulfillment data before it is fulfilled.
@@ -242,8 +242,8 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 		}
 
 		// If the fulfillment is fulfilled, set the fulfilled date.
-		if ( $data->get_is_fulfilled() && ! $data->meta_exists( '_fulfilled_date' ) ) {
-			$data->set_date_fulfilled( current_time( 'mysql' ) );
+		if ( $data->get_is_fulfilled() && ! $data->meta_exists( '_date_fulfilled' ) ) {
+			$data->set_date_fulfilled( gmdate( 'c' ) );
 		}
 
 		// Update the metadata for the fulfillment.
