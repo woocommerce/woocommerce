@@ -1085,4 +1085,95 @@ class Cart extends ControllerTestCase {
 			)
 		);
 	}
+
+	/**
+	 * Test that adding an item to cart fires the cart item add action.
+	 */
+	public function test_add_item_fires_add_action() {
+		wc_empty_cart();
+
+		$captured_args = array();
+		// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		$callback = function ( $item_id, $quantity, $cart ) use ( &$captured_args ) {
+			$captured_args = compact( 'item_id', 'quantity', 'cart' );
+		};
+
+		add_action( 'woocommerce_store_api_cart_item_add_from_request', $callback, 10, 3 );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/add-item' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'id'       => $this->products[0]->get_id(),
+				'quantity' => 2,
+			)
+		);
+
+		$this->assertAPIResponse( $request, 201 );
+
+		$this->assertNotEmpty( $captured_args, 'The add action should have been fired' );
+		$this->assertIsString( $captured_args['item_id'] );
+		$this->assertEquals( 2, $captured_args['quantity'] );
+		$this->assertInstanceOf( \WC_Cart::class, $captured_args['cart'] );
+
+		remove_action( 'woocommerce_store_api_cart_item_add_from_request', $callback );
+	}
+
+	/**
+	 * Test that updating a cart item quantity fires the cart item update action.
+	 */
+	public function test_update_item_fires_update_action() {
+		$captured_args = array();
+		// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		$callback = function ( $item_key, $quantity, $old_quantity, $cart ) use ( &$captured_args ) {
+			$captured_args = compact( 'item_key', 'quantity', 'old_quantity', 'cart' );
+		};
+
+		add_action( 'woocommerce_store_api_cart_item_update_from_request', $callback, 10, 4 );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/update-item' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'key'      => $this->keys[0],
+				'quantity' => 5,
+			)
+		);
+
+		$this->assertAPIResponse( $request, 200 );
+
+		$this->assertNotEmpty( $captured_args, 'The update action should have been fired' );
+		$this->assertSame( $this->keys[0], $captured_args['item_key'] );
+		$this->assertEquals( 5, $captured_args['quantity'] );
+		$this->assertEquals( 2, $captured_args['old_quantity'] );
+		$this->assertInstanceOf( \WC_Cart::class, $captured_args['cart'] );
+
+		remove_action( 'woocommerce_store_api_cart_item_update_from_request', $callback );
+	}
+
+	/**
+	 * Test that updating a cart item without changing quantity does not fire the update action.
+	 */
+	public function test_update_item_without_quantity_does_not_fire_update_action() {
+		$action_fired = false;
+		$callback     = function () use ( &$action_fired ) {
+			$action_fired = true;
+		};
+
+		add_action( 'woocommerce_store_api_cart_item_update_from_request', $callback, 10, 4 );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/update-item' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'key' => $this->keys[0],
+			)
+		);
+
+		$this->assertAPIResponse( $request, 200 );
+
+		$this->assertFalse( $action_fired, 'The update action should not fire when quantity is not set' );
+
+		remove_action( 'woocommerce_store_api_cart_item_update_from_request', $callback );
+	}
 }
