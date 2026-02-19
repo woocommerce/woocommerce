@@ -54166,12 +54166,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductGallery.php
 
 		-
-			message: '#^Call to an undefined method WC_Product\:\:get_available_variations\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductGallery.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductGallery\:\:render_dialog\(\) should return string but returns string\|false\.$#'
 			identifier: return.type
 			count: 1

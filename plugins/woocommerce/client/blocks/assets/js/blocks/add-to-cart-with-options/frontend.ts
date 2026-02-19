@@ -183,8 +183,6 @@ const { actions, state } = store<
 				return context.selectedAttributes || [];
 			},
 			get productData() {
-				const { selectedAttributes } = getContext< Context >();
-
 				// getProductData expects the main (non-variation) product ID.
 				const mainProductId =
 					productContextState.parentProduct?.id ??
@@ -194,10 +192,8 @@ const { actions, state } = store<
 					return null;
 				}
 
-				return getProductData(
-					mainProductId,
-					selectedAttributes
-				);
+				const { selectedAttributes } = getContext< Context >();
+				return getProductData( mainProductId, selectedAttributes );
 			},
 		},
 		actions: {
