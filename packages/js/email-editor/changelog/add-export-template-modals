@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Export EditTemplateModal and SelectTemplateModal from the email editor package for extensibility.
