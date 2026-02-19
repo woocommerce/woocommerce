@@ -166,10 +166,11 @@ Below is an example of this response:
       "test_type": "api",
       "result_url": "https://qit.woo.com/?qit_results=67890"
     }
-    ...
   }
 }
 ```
+
+> **Note:** Additional test run objects may be present in the response, one for each test type that was executed.
 
 ### Maximize compatibility and reliability via custom E2E tests
 

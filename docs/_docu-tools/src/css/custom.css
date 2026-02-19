@@ -93,64 +93,6 @@ html.docs-doc-id-getting-started\/version-control-deployment .pagination-nav .pa
 }
 
 
-/* ===== Image Lightbox ===== */
-.markdown img {
-  cursor: zoom-in;
-  transition: transform 0.2s ease;
-}
-
-.markdown img:hover {
-  opacity: 0.9;
-}
-
-/* Lightbox overlay */
-.lightbox-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.9);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-  cursor: zoom-out;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
-}
-
-.lightbox-overlay.active {
-  opacity: 1;
-  visibility: visible;
-}
-
-.lightbox-overlay img {
-  max-width: 90%;
-  max-height: 90%;
-  object-fit: contain;
-  border-radius: 4px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-}
-
-.lightbox-close {
-  position: absolute;
-  top: 20px;
-  right: 30px;
-  color: white;
-  font-size: 40px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: color 0.2s ease;
-  line-height: 1;
-}
-
-.lightbox-close:hover {
-  color: #ccc;
-}
-
-
 /* ===== FAQ Details/Summary Styling ===== */
 .markdown details summary {
   font-weight: 700;

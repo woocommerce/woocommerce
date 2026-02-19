@@ -166,7 +166,7 @@ For general tips and helpful information:
 [box]This extension requires WooCommerce 8.0 or higher.[/box]
 ```
 
-Can be used with or without `style="info"`.
+This component can be used with or without `style="info"`.
 
 #### Alert box (style="alert")
 

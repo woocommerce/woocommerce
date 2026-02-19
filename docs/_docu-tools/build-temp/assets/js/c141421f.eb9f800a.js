@@ -1,0 +1,1 @@
+"use strict";(globalThis.webpackChunkwoo_docs_migration=globalThis.webpackChunkwoo_docs_migration||[]).push([[957],{40936(a){a.exports=JSON.parse('{"name":"docusaurus-theme-search-algolia","id":"default"}')}}]);
