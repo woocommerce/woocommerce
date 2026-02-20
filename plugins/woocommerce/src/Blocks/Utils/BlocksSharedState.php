@@ -176,7 +176,7 @@ class BlocksSharedState {
 	 * property must use the server-computed value instead of a client-side
 	 * optimistic computation.
 	 *
-	 * @since 10.7.0
+	 * `@return` string[] List of cart property paths (dot-delimited) that cannot be optimistic.
 	 *
 	 * @return string[] List of cart property paths (dot-delimited) that cannot be optimistic.
 	 */
