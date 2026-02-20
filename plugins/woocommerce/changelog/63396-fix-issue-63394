@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix shipping row column mismatch when Cost of Goods Sold is enabled on the order edit screen. Fix validation error message overlapping the advanced cost help text in Flat Rate shipping method settings.
