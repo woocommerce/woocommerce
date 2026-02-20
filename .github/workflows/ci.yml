@@ -156,7 +156,7 @@ jobs:
     strategy:
       fail-fast: false
       max-parallel: 30
-      matrix: 
+      matrix:
         include: ${{ fromJSON( needs.project-jobs.outputs.test-jobs ) }}
     steps:
       - uses: 'actions/checkout@v4'
