@@ -66,18 +66,18 @@ class FilesystemUtilTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Check that get_wp_filesystem throws for an unusable FTP filesystem.
+	 * @testdox Check that get_wp_filesystem validates FTP filesystem instances.
 	 *
-	 * @testWith [true, false]
-	 *           [false, true]
+	 * @testWith [true, true, true]
+	 *           [false, false, true]
+	 *           [false, true, false]
 	 *
-	 * @param bool $has_errors Whether the mock should have connection errors.
-	 * @param bool $has_link   Whether the mock should have a connection link.
+	 * @param bool $has_errors   Whether the mock should have connection errors.
+	 * @param bool $has_link     Whether the mock should have a connection link.
+	 * @param bool $should_throw Whether get_wp_filesystem should throw.
 	 */
-	public function test_get_wp_filesystem_throws_for_unusable_ftp( bool $has_errors, bool $has_link ): void {
+	public function test_get_wp_filesystem_validates_ftp( bool $has_errors, bool $has_link, bool $should_throw ): void {
 		global $wp_filesystem;
-
-		$this->expectException( 'Exception' );
 
 		$mock_wp_filesystem         = $this->createMock( WP_Filesystem_Base::class );
 		$mock_wp_filesystem->method = 'ftpext';
@@ -85,22 +85,15 @@ class FilesystemUtilTest extends WC_Unit_Test_Case {
 		$mock_wp_filesystem->link   = $has_link ? true : null;
 		$wp_filesystem              = $mock_wp_filesystem; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
-		FilesystemUtil::get_wp_filesystem();
-	}
+		if ( $should_throw ) {
+			$this->expectException( 'Exception' );
+		}
 
-	/**
-	 * @testdox Check that get_wp_filesystem returns the instance when the FTP filesystem has no errors and a valid connection.
-	 */
-	public function test_get_wp_filesystem_returns_ftp_without_errors(): void {
-		global $wp_filesystem;
+		$result = FilesystemUtil::get_wp_filesystem();
 
-		$mock_wp_filesystem         = $this->createMock( WP_Filesystem_Base::class );
-		$mock_wp_filesystem->method = 'ftpext';
-		$mock_wp_filesystem->errors = new \WP_Error();
-		$mock_wp_filesystem->link   = true;
-		$wp_filesystem              = $mock_wp_filesystem; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-
-		$this->assertSame( $mock_wp_filesystem, FilesystemUtil::get_wp_filesystem() );
+		if ( ! $should_throw ) {
+			$this->assertSame( $mock_wp_filesystem, $result );
+		}
 	}
 
 	/**

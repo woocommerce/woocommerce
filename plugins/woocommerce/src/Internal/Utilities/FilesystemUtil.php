@@ -15,15 +15,11 @@ class FilesystemUtil {
 
 	/**
 	 * Transient key for tracking FTP filesystem initialization failures.
-	 *
-	 * @since 10.7.0
 	 */
 	private const FTP_INIT_FAILURE_TRANSIENT = 'wc_ftp_filesystem_init_failed';
 
 	/**
 	 * Cooldown period in minutes before retrying a failed FTP connection.
-	 *
-	 * @since 10.7.0
 	 */
 	private const FTP_INIT_COOLDOWN_MINUTES = 2;
 
@@ -155,8 +151,6 @@ class FilesystemUtil {
 	 * Checks both the connection resource and the error state. The connection
 	 * resource can be null if PHP's max execution time interrupted ftp_connect()
 	 * before it completed, leaving the instance in a broken state without errors.
-	 *
-	 * @since 10.7.0
 	 *
 	 * @param WP_Filesystem_Base $wp_filesystem The filesystem instance to check.
 	 * @return bool False if FTP-based and unusable, true otherwise.
