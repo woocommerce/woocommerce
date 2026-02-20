@@ -89,7 +89,7 @@ class DefaultShippingPartners {
 					self::get_rules_for_countries( array( 'US', 'AU', 'NZ', 'CA', 'GB' ) ),
 				),
 				'available_layouts' => array( 'row', 'column' ),
-				'is_primary'       => array( 'NZ', 'CA', 'GB' ),
+				'is_primary'        => array( 'NZ', 'CA', 'GB' ),
 			),
 			array(
 				'id'                => 'skydropx-cotizador-y-envios',
@@ -105,7 +105,7 @@ class DefaultShippingPartners {
 					self::get_rules_for_countries( array() ), // No countries eligible for SkydropX promotion at this time.
 				),
 				'available_layouts' => array( 'column' ),
-				'is_primary'       => array(),
+				'is_primary'        => array(),
 			),
 			array(
 				'id'                => 'envia',
@@ -121,7 +121,7 @@ class DefaultShippingPartners {
 					self::get_rules_for_countries( array( 'MX', 'CO', 'CL', 'AR', 'PE', 'BR', 'UY', 'GT' ) ),
 				),
 				'available_layouts' => array( 'column' ),
-				'is_primary'       => array( 'MX', 'CO', 'CL', 'AR', 'PE', 'BR', 'UY', 'GT' ),
+				'is_primary'        => array( 'MX', 'CO', 'CL', 'AR', 'PE', 'BR', 'UY', 'GT' ),
 			),
 			array(
 				'id'                => 'easyship-woocommerce-shipping-rates',
@@ -165,7 +165,7 @@ class DefaultShippingPartners {
 					self::get_rules_for_countries( array( 'SG', 'HK', 'AU', 'NZ' ) ),
 				),
 				'available_layouts' => array( 'row', 'column' ),
-				'is_primary'       => array( 'SG', 'HK', 'AU' ),
+				'is_primary'        => array( 'SG', 'HK', 'AU' ),
 			),
 			array(
 				'id'                => 'packlink-pro-shipping',
@@ -215,7 +215,7 @@ class DefaultShippingPartners {
 					self::get_rules_for_countries( array( 'FR', 'DE', 'ES', 'IT', 'NL', 'AT', 'BE' ) ),
 				),
 				'available_layouts' => array( 'row', 'column' ),
-				'is_primary'       => array( 'FR', 'DE', 'ES', 'IT', 'NL', 'AT', 'BE' ),
+				'is_primary'        => array( 'FR', 'DE', 'ES', 'IT', 'NL', 'AT', 'BE' ),
 			),
 			array(
 				'id'                => 'woocommerce-shipping',
@@ -256,7 +256,7 @@ class DefaultShippingPartners {
 					),
 				),
 				'available_layouts' => array( 'column' ),
-				'is_primary'       => array( 'US' ),
+				'is_primary'        => array( 'US' ),
 			),
 		);
 	}

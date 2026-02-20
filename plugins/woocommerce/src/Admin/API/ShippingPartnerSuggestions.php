@@ -54,7 +54,6 @@ class ShippingPartnerSuggestions extends \WC_REST_Data_Controller {
 				'schema' => array( $this, 'get_suggestions_schema' ),
 			)
 		);
-
 	}
 
 	/**
