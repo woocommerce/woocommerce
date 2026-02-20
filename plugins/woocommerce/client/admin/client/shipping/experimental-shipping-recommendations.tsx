@@ -1,8 +1,8 @@
 /**
  * External dependencies
  */
-import { useSelect } from '@wordpress/data';
-
+import { useState } from '@wordpress/element';
+import { useSelect, useDispatch } from '@wordpress/data';
 import {
 	pluginsStore,
 	settingsStore,
@@ -12,13 +12,45 @@ import {
 /**
  * Internal dependencies
  */
+import { createNoticesFromResponse } from '../lib/notices';
 import { getCountryCode } from '~/dashboard/utils';
 import WooCommerceShippingItem from './experimental-woocommerce-shipping-item';
+import ShipStationItem from './shipstation-item';
+import PacklinkItem from './packlink-item';
 import { ShippingRecommendationsList } from './shipping-recommendations';
 import './shipping-recommendations.scss';
 import { ShippingTour } from '../guided-tours/shipping-tour';
 
+type ExtensionId = 'woocommerce-shipping' | 'shipstation' | 'packlink';
+
+const COUNTRY_EXTENSIONS_MAP: Record< string, ExtensionId[] > = {
+	US: [ 'woocommerce-shipping', 'shipstation' ],
+	CA: [ 'shipstation' ],
+	FR: [ 'packlink' ],
+	ES: [ 'packlink' ],
+	IT: [ 'packlink' ],
+	DE: [ 'shipstation', 'packlink' ],
+	GB: [ 'shipstation', 'packlink' ],
+	NL: [ 'packlink' ],
+	AT: [ 'packlink' ],
+	BE: [ 'packlink' ],
+	AU: [ 'shipstation' ],
+	NZ: [ 'shipstation' ],
+};
+
+const EXTENSION_PLUGIN_SLUGS: Record< ExtensionId, string > = {
+	'woocommerce-shipping': 'woocommerce-shipping',
+	shipstation: 'woocommerce-shipstation-integration',
+	packlink: 'packlink-pro-shipping',
+};
+
 const ShippingRecommendations = () => {
+	const [ pluginsBeingSetup, setPluginsBeingSetup ] = useState<
+		Array< string >
+	>( [] );
+
+	const { installAndActivatePlugins } = useDispatch( pluginsStore );
+
 	const {
 		activePlugins,
 		installedPlugins,
@@ -44,11 +76,37 @@ const ShippingRecommendations = () => {
 		};
 	}, [] );
 
-	if ( activePlugins.includes( 'woocommerce-shipping' ) ) {
+	const handleSetup = ( slugs: string[] ): PromiseLike< void > => {
+		if ( pluginsBeingSetup.length > 0 ) {
+			return Promise.resolve();
+		}
+
+		setPluginsBeingSetup( slugs );
+
+		return installAndActivatePlugins( slugs )
+			.then( () => {
+				setPluginsBeingSetup( [] );
+			} )
+			.catch( ( response: { errors: Record< string, string > } ) => {
+				createNoticesFromResponse( response );
+				setPluginsBeingSetup( [] );
+
+				return Promise.reject();
+			} );
+	};
+
+	if ( isSellingDigitalProductsOnly ) {
 		return <ShippingTour showShippingRecommendationsStep={ false } />;
 	}
 
-	if ( countryCode !== 'US' || isSellingDigitalProductsOnly ) {
+	const extensionsForCountry =
+		COUNTRY_EXTENSIONS_MAP[ countryCode ?? '' ] ?? [];
+
+	const visibleExtensions = extensionsForCountry.filter(
+		( ext ) => ! activePlugins.includes( EXTENSION_PLUGIN_SLUGS[ ext ] )
+	);
+
+	if ( visibleExtensions.length === 0 ) {
 		return <ShippingTour showShippingRecommendationsStep={ false } />;
 	}
 
@@ -56,11 +114,37 @@ const ShippingRecommendations = () => {
 		<>
 			<ShippingTour showShippingRecommendationsStep={ true } />
 			<ShippingRecommendationsList>
-				<WooCommerceShippingItem
-					isPluginInstalled={ installedPlugins.includes(
-						'woocommerce-shipping'
-					) }
-				/>
+				{ visibleExtensions.map( ( ext ) => {
+					switch ( ext ) {
+						case 'woocommerce-shipping':
+							return (
+								<WooCommerceShippingItem
+									key={ ext }
+									isPluginInstalled={ installedPlugins.includes(
+										'woocommerce-shipping'
+									) }
+								/>
+							);
+						case 'shipstation':
+							return (
+								<ShipStationItem
+									key={ ext }
+									pluginsBeingSetup={ pluginsBeingSetup }
+									onSetupClick={ handleSetup }
+								/>
+							);
+						case 'packlink':
+							return (
+								<PacklinkItem
+									key={ ext }
+									pluginsBeingSetup={ pluginsBeingSetup }
+									onSetupClick={ handleSetup }
+								/>
+							);
+						default:
+							return null;
+					}
+				} ) }
 			</ShippingRecommendationsList>
 		</>
 	);
