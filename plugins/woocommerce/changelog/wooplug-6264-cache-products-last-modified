@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Cache Store API products last modified timestamp in the object cache to avoid a database query on every request.

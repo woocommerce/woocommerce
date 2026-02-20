@@ -46,16 +46,6 @@
 		}
 	}
 
-	.wc-block-components-radio-control.disable-radio-control {
-		.wc-block-components-radio-control__option {
-			padding-left: $gap;
-		}
-
-		.wc-block-components-radio-control__input {
-			display: none;
-		}
-	}
-
 	.wc-block-components-checkout-step__description-payments-aligned {
 		@include font-small-locked;
 		margin: 0;
