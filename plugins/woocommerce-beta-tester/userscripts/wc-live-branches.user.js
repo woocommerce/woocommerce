@@ -83,6 +83,7 @@
 					currentBranch: pr.headBranch,
 					branchStatus: pr.state,
 					headRepoOwner: pr.headRepositoryOwnerLogin || '',
+					isDraft: !! pr.isDraft,
 				};
 			}
 		} catch ( e ) {
@@ -97,7 +98,7 @@
 	 * @return {object|null} Data with currentBranch and branchStatus, or null.
 	 */
 	function getPRDataFromDom() {
-		const currentBranch = jQuery( '.head-ref:first' ).text();
+		const currentBranch = $( '.head-ref:first' ).text().trim();
 		if ( ! currentBranch ) {
 			return null;
 		}
@@ -107,7 +108,7 @@
 		if ( ! branchStatus ) {
 			return null;
 		}
-		return { currentBranch, branchStatus, headRepoOwner: '' };
+		return { currentBranch, branchStatus, headRepoOwner: '', isDraft: false };
 	}
 
 	/** Function. */
@@ -149,6 +150,7 @@
 			appendHtml( markdownBody, contents );
 		} else if (
 			branchStatus === 'Draft' ||
+			prData.isDraft ||
 			document.querySelector( '[data-status="draft"]' )
 		) {
 			appendHtml(
