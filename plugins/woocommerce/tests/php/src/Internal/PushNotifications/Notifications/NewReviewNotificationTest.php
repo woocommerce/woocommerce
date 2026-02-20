@@ -70,9 +70,10 @@ class NewReviewNotificationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should strip HTML tags from reviewer name in message args.
+	 * @testdox Should strip HTML tags, and script tags including content, from
+	 * reviewer name in message args.
 	 */
-	public function test_to_payload_strips_html_from_comment_author(): void {
+	public function test_to_payload_strips_html_and_script_content_from_comment_author(): void {
 		$product    = WC_Helper_Product::create_simple_product();
 		$comment_id = wp_insert_comment(
 			array(
@@ -88,13 +89,14 @@ class NewReviewNotificationTest extends WC_Unit_Test_Case {
 		$notification = new NewReviewNotification( $comment_id );
 		$payload      = $notification->to_payload();
 
-		$this->assertSame( 'Evil alert("xss")Author', $payload['message']['args'][0] );
+		$this->assertSame( 'Evil Author', $payload['message']['args'][0] );
 	}
 
 	/**
-	 * @testdox Should strip HTML tags from review content in message args.
+	 * @testdox Should strip HTML tags, and script tags including content, from
+	 * review content in message args.
 	 */
-	public function test_to_payload_strips_html_from_comment_content(): void {
+	public function test_to_payload_strips_html_and_script_content_from_comment_content(): void {
 		$product    = WC_Helper_Product::create_simple_product();
 		$comment_id = wp_insert_comment(
 			array(
@@ -110,7 +112,7 @@ class NewReviewNotificationTest extends WC_Unit_Test_Case {
 		$notification = new NewReviewNotification( $comment_id );
 		$payload      = $notification->to_payload();
 
-		$this->assertSame( 'Great product! alert("xss")', $payload['message']['args'][2] );
+		$this->assertSame( 'Great product!', $payload['message']['args'][2] );
 	}
 
 	/**
