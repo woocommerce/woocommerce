@@ -82,7 +82,24 @@ class FilesystemUtilTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Check that get_wp_filesystem returns the instance when the FTP filesystem has no errors.
+	 * @testdox Check that get_wp_filesystem throws when the FTP filesystem has a null connection (e.g. interrupted by timeout).
+	 */
+	public function test_get_wp_filesystem_throws_for_ftp_with_null_link(): void {
+		global $wp_filesystem;
+
+		$this->expectException( 'Exception' );
+
+		$mock_wp_filesystem         = $this->createMock( WP_Filesystem_Base::class );
+		$mock_wp_filesystem->method = 'ftpext';
+		$mock_wp_filesystem->errors = new \WP_Error();
+		$mock_wp_filesystem->link   = null;
+		$wp_filesystem              = $mock_wp_filesystem; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		FilesystemUtil::get_wp_filesystem();
+	}
+
+	/**
+	 * @testdox Check that get_wp_filesystem returns the instance when the FTP filesystem has no errors and a valid connection.
 	 */
 	public function test_get_wp_filesystem_returns_ftp_without_errors(): void {
 		global $wp_filesystem;
@@ -90,6 +107,7 @@ class FilesystemUtilTest extends WC_Unit_Test_Case {
 		$mock_wp_filesystem         = $this->createMock( WP_Filesystem_Base::class );
 		$mock_wp_filesystem->method = 'ftpext';
 		$mock_wp_filesystem->errors = new \WP_Error();
+		$mock_wp_filesystem->link   = true;
 		$wp_filesystem              = $mock_wp_filesystem; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
 		$this->assertSame( $mock_wp_filesystem, FilesystemUtil::get_wp_filesystem() );

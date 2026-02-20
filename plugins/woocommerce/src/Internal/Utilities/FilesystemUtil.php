@@ -152,12 +152,24 @@ class FilesystemUtil {
 	/**
 	 * Check if an FTP-based filesystem instance is usable.
 	 *
+	 * Checks both the connection resource and the error state. The connection
+	 * resource can be null if PHP's max execution time interrupted ftp_connect()
+	 * before it completed, leaving the instance in a broken state without errors.
+	 *
 	 * @since 10.7.0
 	 *
 	 * @param WP_Filesystem_Base $wp_filesystem The filesystem instance to check.
-	 * @return bool False if FTP-based and has connection errors, true otherwise.
+	 * @return bool False if FTP-based and unusable, true otherwise.
 	 */
 	private static function is_usable_ftp_filesystem( WP_Filesystem_Base $wp_filesystem ): bool {
+		if ( 'ftpext' === $wp_filesystem->method && empty( $wp_filesystem->link ) ) {
+			return false;
+		}
+
+		if ( 'ftpsockets' === $wp_filesystem->method && empty( $wp_filesystem->ftp ) ) {
+			return false;
+		}
+
 		if ( in_array( $wp_filesystem->method, array( 'ftpext', 'ftpsockets' ), true )
 			&& is_wp_error( $wp_filesystem->errors ) && $wp_filesystem->errors->has_errors() ) {
 			return false;
