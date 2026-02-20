@@ -8,7 +8,7 @@ use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 /**
  * Tests for the BlocksSharedState class.
  */
-class BlocksSharedStateTest extends \WP_UnitTestCase {
+class BlocksSharedStateTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * The consent statement required by the private API.
