@@ -9,6 +9,7 @@ use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Caching\WPCacheEngine;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Admin\Orders\EditLock;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
@@ -2140,7 +2141,7 @@ FROM $order_meta_table
 		$this->set_custom_taxonomies( $order, $default_taxonomies );
 
 		if ( $order->has_cogs() && $this->cogs_is_enabled() ) {
-			$this->save_cogs_data( $order, array_key_exists( 'cogs_total_value', $changes ) );
+			$this->save_cogs_data( $order, ! $only_changes || array_key_exists( 'cogs_total_value', $changes ) );
 		}
 
 		$this->clear_cached_data( array( $order->get_id() ) );
