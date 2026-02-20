@@ -25,7 +25,7 @@ class FilesystemUtil {
 	 *
 	 * @since 10.7.0
 	 */
-	private const FTP_INIT_COOLDOWN_MINUTES = 5;
+	private const FTP_INIT_COOLDOWN_MINUTES = 2;
 
 	/**
 	 * Wrapper to retrieve the class instance contained in the $wp_filesystem global, after initializing if necessary.
