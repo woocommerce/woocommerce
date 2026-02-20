@@ -2149,10 +2149,10 @@ FROM $order_meta_table
 	/**
 	 * Save the Cost of Goods Sold value of a given order to the database.
 	 *
-	 * @param WC_Abstract_Order $order                    The order to save the COGS value for.
-	 * @param bool              $changed_via_order_object Whether the CoGS value was changed through the order object API.
+	 * @param WC_Abstract_Order $order              The order to save the COGS value for.
+	 * @param bool              $cogs_value_changed Whether the CoGS value was changed through the order object API.
 	 */
-	private function save_cogs_data( WC_Abstract_Order $order, bool $changed_via_order_object ): void {
+	private function save_cogs_data( WC_Abstract_Order $order, bool $cogs_value_changed ): void {
 		$cogs_value_original = $order->get_cogs_total_value();
 
 		/**
@@ -2169,7 +2169,7 @@ FROM $order_meta_table
 			return;
 		}
 
-		$sync_meta = $changed_via_order_object || $cogs_value_original !== $cogs_value;
+		$sync_meta = $cogs_value_changed || $cogs_value_original !== $cogs_value;
 		if ( $sync_meta ) {
 			$existing_meta = $this->data_store_meta->get_metadata_by_key( $order, '_cogs_total_value' );
 			if ( 0.0 === $cogs_value && $existing_meta ) {
