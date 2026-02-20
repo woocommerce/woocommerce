@@ -4,6 +4,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\PushNotifications\Notifications;
 
+use WP_Comment;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -40,7 +42,7 @@ class NewReviewNotification extends Notification {
 	public function to_payload(): ?array {
 		$comment = WC()->call_function( 'get_comment', $this->get_resource_id() );
 
-		if ( ! $comment ) {
+		if ( ! $comment || ! $comment instanceof WP_Comment ) {
 			return null;
 		}
 
@@ -52,7 +54,10 @@ class NewReviewNotification extends Notification {
 				'format' => 'You have a new review! ⭐️',
 			),
 			'message'     => array(
-				/* translators: 1: reviewer name, 2: product name, 3: comment content */
+				/**
+				 * This will be translated in WordPress.com, format:
+				 * 1: reviewer name, 2: product name, 3: comment content
+				 */
 				'format' => '%1$s left a review on %2$s: %3$s',
 				'args'   => array(
 					wp_strip_all_tags( $comment->comment_author ),

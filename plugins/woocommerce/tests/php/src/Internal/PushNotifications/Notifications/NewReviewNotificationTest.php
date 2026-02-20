@@ -54,7 +54,8 @@ class NewReviewNotificationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should include the reviewer name in the message args.
+	 * @testdox Should include the reviewer name, product name, and review
+	 * content in the message args.
 	 */
 	public function test_to_payload_message_args_contains_expected_values(): void {
 		$product    = WC_Helper_Product::create_simple_product();
