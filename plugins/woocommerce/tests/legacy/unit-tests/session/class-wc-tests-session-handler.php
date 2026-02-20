@@ -308,6 +308,12 @@ class WC_Tests_Session_Handler extends WC_Unit_Test_Case {
 
 		$this->assertNotNull( $session_cookie_value, 'Session cookie was set.' );
 		$this->assertStringStartsWith( (string) $user_id . '|', $session_cookie_value, 'Cookie has user id, not guest id.' );
+
+		// User gets 1 week, guest gets 2 days. Cookie must be 1 week.
+		$parts = explode( '|', $session_cookie_value );
+		$this->assertCount( 4, $parts, 'Cookie value has 4 parts.' );
+		$cookie_expiration = (int) $parts[1];
+		$this->assertGreaterThanOrEqual( time() + 6 * DAY_IN_SECONDS, $cookie_expiration, 'Cookie expires in about a week.' );
 	}
 
 	/**
