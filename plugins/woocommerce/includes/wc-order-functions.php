@@ -99,7 +99,7 @@ function wc_get_order( $the_order = false ) {
  *
  * @since 2.2
  * @used-by WC_Order::set_status
- * @return array
+ * @return array<string,string>
  */
 function wc_get_order_statuses() {
 	$order_statuses = array(
@@ -473,8 +473,9 @@ function wc_downloadable_product_permissions( $order_id, $force = false ) {
 		return;
 	}
 
-	if ( count( $order->get_items() ) > 0 ) {
-		foreach ( $order->get_items() as $item ) {
+	$line_items = $order->get_items();
+	if ( count( $line_items ) > 0 ) {
+		foreach ( $line_items as $item ) {
 			$product = $item->get_product();
 
 			if ( $product && $product->exists() && $product->is_downloadable() ) {
@@ -499,18 +500,32 @@ add_action( 'woocommerce_order_status_processing', 'wc_downloadable_product_perm
  * @param int|WC_Order $order Order instance or ID.
  */
 function wc_delete_shop_order_transients( $order = 0 ) {
-	if ( is_numeric( $order ) ) {
+	if ( $order && is_numeric( $order ) ) {
 		$order = wc_get_order( $order );
 	}
 
 	// Clear customer's order related caches.
 	$order_id = 0;
-	if ( is_a( $order, 'WC_Order' ) ) {
-		$order_id    = $order->get_id();
+	if ( $order && is_a( $order, 'WC_Order' ) ) {
+		$order_id = $order->get_id();
+
 		$customer_id = $order->get_customer_id();
-		Users::delete_site_user_meta( $customer_id, 'wc_money_spent' );
-		Users::delete_site_user_meta( $customer_id, 'wc_order_count' );
-		Users::delete_site_user_meta( $customer_id, 'wc_last_order' );
+		if ( $customer_id ) {
+			// Optimization note: the function is fired multiple times during order persistence lifecycle, and by
+			// verifying that metas carry non-empty values we ensure no repetitive attempts dropping the metas.
+			$metas_to_purge = array_filter(
+				array(
+					is_numeric( Users::get_site_user_meta( $customer_id, 'wc_order_count' ) ) ? 'wc_order_count' : '',
+					is_numeric( Users::get_site_user_meta( $customer_id, 'wc_last_order' ) ) ? 'wc_last_order' : '',
+					is_numeric( Users::get_site_user_meta( $customer_id, 'wc_money_spent' ) ) ? 'wc_money_spent' : '',
+				)
+			);
+			if ( ! empty( $metas_to_purge ) ) {
+				foreach ( $metas_to_purge as $meta ) {
+					Users::delete_site_user_meta( $customer_id, $meta );
+				}
+			}
+		}
 	}
 
 	// Increments the transient version to invalidate cache.
@@ -668,9 +683,9 @@ function wc_create_refund( $args = array() ) {
 
 			// delete downloads that were refunded using order and product id, if present.
 			if ( ! empty( $refunded_order_and_products ) ) {
+				$download_data_store = WC_Data_Store::load( 'customer-download' );
 				foreach ( $refunded_order_and_products as $refunded_order_and_product ) {
-					$download_data_store = WC_Data_Store::load( 'customer-download' );
-					$downloads           = $download_data_store->get_downloads( $refunded_order_and_product );
+					$downloads = $download_data_store->get_downloads( $refunded_order_and_product );
 					if ( ! empty( $downloads ) ) {
 						foreach ( $downloads as $download ) {
 							$download_data_store->delete_by_id( $download->get_id() );
@@ -950,12 +965,12 @@ function wc_update_total_sales_counts( $order_id ) {
 
 	$operation = $recorded_sales && $reflected_order ? 'decrease' : 'increase';
 
-	if ( count( $order->get_items() ) > 0 ) {
-		foreach ( $order->get_items() as $item ) {
+	$line_items = $order->get_items();
+	if ( count( $line_items ) > 0 ) {
+		$data_store = WC_Data_Store::load( 'product' );
+		foreach ( $line_items as $item ) {
 			$product_id = $item->get_product_id();
-
 			if ( $product_id ) {
-				$data_store = WC_Data_Store::load( 'product' );
 				$data_store->update_product_sales( $product_id, absint( $item->get_quantity() ), $operation );
 			}
 		}

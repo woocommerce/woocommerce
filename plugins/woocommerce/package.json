@@ -682,7 +682,7 @@
 						"@woocommerce/classic-assets"
 					],
 					"testEnv": {
-						"start": "env:test"
+						"start": "env:perf"
 					},
 					"events": [
 						"push",
