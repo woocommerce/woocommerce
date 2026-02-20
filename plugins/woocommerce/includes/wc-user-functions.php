@@ -1112,7 +1112,6 @@ function wc_update_user_last_active( $user_id ) {
 		 * @return int
 		 *
 		 * @since 10.7.0
-		 *
 		 */
 		$threshold = (int) apply_filters( 'woocommerce_update_user_last_active_threshold', $threshold );
 
