@@ -260,8 +260,9 @@ We send notifications to your application about important events in the lifecycl
 
 Webhook calls expect a successful HTTP code in response. Otherwise, the delivery is considered to have failed. A retry system will attempt to call your webhook endpoint again, up to five times, increasing the pause between each retry. Be sure to have monitoring in place for your webhook endpoint. There's no other way to get updates on some of the contract events. A typical request body payload looks like this:
 
+**Example: Subscription contract payload**
+
 ```json
-// example of a subscription contract
 {
   "subscription":{
     "id":"4733be9c-8d6c-4a78-a4f8-268a64770985",
@@ -300,7 +301,9 @@ Webhook calls expect a successful HTTP code in response. Otherwise, the delivery
   }
 }
 
-// example of a one-time charge contract
+**Example: One-time charge contract payload**
+
+```json
 {
   "charge":{
     "id":"68f28fbe-8510-4369-8f80-c5a5380c85db",
