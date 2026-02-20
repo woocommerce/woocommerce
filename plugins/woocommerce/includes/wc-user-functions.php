@@ -1104,6 +1104,18 @@ function wc_update_user_last_active( $user_id ) {
 			$threshold = 5 * MINUTE_IN_SECONDS;
 		}
 
+		/**
+		 * Enables customization of the update frequency for user last active meta by adjusting the threshold from default to custom values.
+		 * Note that a lower threshold results in more frequent database writes by Woo core and, if enabled, Analytics.
+		 *
+		 * @param int $threshold The threshold in seconds to be applied (1 minute, 5 minutes and 0 for immediate update).
+		 * @return int
+		 *
+		 * @since 10.7.0
+		 *
+		 */
+		$threshold = (int) apply_filters( 'woocommerce_update_user_last_active_threshold', $threshold );
+
 		$now         = time();
 		$last_active = get_user_meta( $user_id, 'wc_last_active', true );
 		if ( ! $last_active || ( $now - $last_active ) > $threshold ) {
