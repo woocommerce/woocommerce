@@ -1118,7 +1118,7 @@ function wc_update_user_last_active( $user_id ) {
 		$now         = time();
 		$last_active = get_user_meta( $user_id, 'wc_last_active', true );
 		if ( ! $last_active || ( $now - $last_active ) > $threshold ) {
-			update_user_meta( $user_id, 'wc_last_active', (string) $now );
+			update_user_meta( $user_id, 'wc_last_active', (string) $now, (string) $last_active );
 		}
 	}
 }
