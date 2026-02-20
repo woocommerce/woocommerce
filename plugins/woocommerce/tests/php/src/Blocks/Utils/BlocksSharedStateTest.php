@@ -49,11 +49,12 @@ class BlocksSharedStateTest extends \WP_UnitTestCase {
 		$cart_state->setAccessible( true );
 		$cart_state->setValue( null, null );
 
-		$interactivity       = wp_interactivity();
-		$interactivity_ref   = new \ReflectionClass( $interactivity );
-		$config_data         = $interactivity_ref->getProperty( 'config_data' );
+		$interactivity     = wp_interactivity();
+		$interactivity_ref = new \ReflectionClass( $interactivity );
+		$config_data       = $interactivity_ref->getProperty( 'config_data' );
+
 		$config_data->setAccessible( true );
-		$data                = $config_data->getValue( $interactivity );
+		$data = $config_data->getValue( $interactivity );
 		unset( $data['woocommerce'] );
 		$config_data->setValue( $interactivity, $data );
 	}

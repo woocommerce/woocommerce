@@ -8,6 +8,8 @@
  * @package woocommerce-blocks-test-cart-contents-count-filter
  */
 
+declare( strict_types = 1 );
+
 add_filter(
 	'woocommerce_cart_contents_count',
 	function () {
