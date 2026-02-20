@@ -1690,13 +1690,13 @@ class WC_Cart extends WC_Legacy_Cart {
 		 */
 		return apply_filters(
 			'woocommerce_shipping_package_name',
-
+				$total_packages == 1 ?
+				_x( 'Shipment', 'shipping packages', 'woocommerce' ) :
 				sprintf(
 					/* translators: %d: shipping package number */
 					_x( 'Shipment %d', 'shipping packages', 'woocommerce' ),
-					$index
+					$index + 1
 				),
-
 			$package['package_id'],
 			$package
 		);
