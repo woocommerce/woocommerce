@@ -81,6 +81,8 @@ class DefaultFreeExtensions {
 					array(
 						self::get_plugin( 'woocommerce-payments' ),
 						self::get_plugin( 'woocommerce-shipping' ),
+						self::get_plugin( 'woocommerce-shipstation-integration' ),
+						self::get_plugin( 'packlink-pro-shipping' ),
 						self::get_plugin( 'jetpack' ),
 						self::get_plugin( 'pinterest-for-woocommerce' ),
 						self::get_plugin( 'mailpoet' ),
@@ -473,6 +475,32 @@ class DefaultFreeExtensions {
 				'is_built_by_wc' => true,
 				'is_visible'     => true,
 			),
+			'woocommerce-shipstation-integration' => array(
+				'name'           => __( 'ShipStation', 'woocommerce' ),
+				'image_url'      => plugins_url( '/assets/images/core-profiler/logo-shipstation.svg', WC_PLUGIN_FILE ),
+				'manage_url'     => 'admin.php?page=shipstation',
+				'is_visible'     => array(
+					array(
+						'type'      => 'base_location_country',
+						'value'     => array( 'CA', 'DE', 'GB', 'AU', 'NZ' ),
+						'operation' => 'in',
+					),
+				),
+				'is_built_by_wc' => false,
+			),
+			'packlink-pro-shipping'         => array(
+				'name'           => __( 'Packlink', 'woocommerce' ),
+				'image_url'      => plugins_url( '/assets/images/core-profiler/logo-packlink.svg', WC_PLUGIN_FILE ),
+				'manage_url'     => 'admin.php?page=packlink-pro-shipping',
+				'is_visible'     => array(
+					array(
+						'type'      => 'base_location_country',
+						'value'     => array( 'FR', 'ES', 'IT', 'NL', 'AT', 'BE' ),
+						'operation' => 'in',
+					),
+				),
+				'is_built_by_wc' => false,
+			),
 		);
 
 		$plugin        = $plugins[ $slug ];
@@ -580,6 +608,20 @@ class DefaultFreeExtensions {
 				'description'      => __( 'Seamlessly sync your products and start Reddit Ads.', 'woocommerce' ),
 				'learn_more_link'  => 'https://woocommerce.com/products/reddit/?utm_source=storeprofiler&utm_medium=product&utm_campaign=freefeatures',
 				'install_priority' => 1,
+			),
+			'woocommerce-shipstation-integration' => array(
+				'label'            => __( 'Print discounted shipping labels with ShipStation', 'woocommerce' ),
+				'image_url'        => plugins_url( '/assets/images/core-profiler/logo-shipstation.svg', WC_PLUGIN_FILE ),
+				'description'      => __( 'Automate your order fulfillment and save on top carriers', 'woocommerce' ),
+				'learn_more_link'  => 'https://wordpress.org/plugins/woocommerce-shipstation-integration/',
+				'install_priority' => 3,
+			),
+			'packlink-pro-shipping'       => array(
+				'label'            => __( 'Print discounted shipping labels with Packlink', 'woocommerce' ),
+				'image_url'        => plugins_url( '/assets/images/core-profiler/logo-packlink.svg', WC_PLUGIN_FILE ),
+				'description'      => __( 'Automate your order fulfillment and save on top carriers', 'woocommerce' ),
+				'learn_more_link'  => 'https://wordpress.org/plugins/packlink-pro-shipping/',
+				'install_priority' => 3,
 			),
 			'woocommerce-services:tax'  => array(
 				'label'            => __( 'Get automated tax rates with WooCommerce Tax', 'woocommerce' ),
