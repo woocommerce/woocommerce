@@ -19,7 +19,7 @@ class NewReviewNotificationTest extends WC_Unit_Test_Case {
 		$product    = WC_Helper_Product::create_simple_product();
 		$comment_id = WC_Helper_Product::create_product_review( $product->get_id() );
 
-		$notification = new NewReviewNotification( $comment_id, 1 );
+		$notification = new NewReviewNotification( $comment_id );
 		$payload      = $notification->to_payload();
 
 		$this->assertArrayHasKey( 'type', $payload );
@@ -39,7 +39,7 @@ class NewReviewNotificationTest extends WC_Unit_Test_Case {
 	 * @testdox Should return store_review as the notification type.
 	 */
 	public function test_type_is_store_review(): void {
-		$notification = new NewReviewNotification( 1, 1 );
+		$notification = new NewReviewNotification( 1 );
 
 		$this->assertSame( 'store_review', $notification->get_type() );
 	}
@@ -48,7 +48,7 @@ class NewReviewNotificationTest extends WC_Unit_Test_Case {
 	 * @testdox Should return the comment ID as the resource ID.
 	 */
 	public function test_resource_id_matches_comment_id(): void {
-		$notification = new NewReviewNotification( 42, 1 );
+		$notification = new NewReviewNotification( 42 );
 
 		$this->assertSame( 42, $notification->get_resource_id() );
 	}
@@ -61,7 +61,7 @@ class NewReviewNotificationTest extends WC_Unit_Test_Case {
 		$comment_id = WC_Helper_Product::create_product_review( $product->get_id() );
 		$comment    = get_comment( $comment_id );
 
-		$notification = new NewReviewNotification( $comment_id, 1 );
+		$notification = new NewReviewNotification( $comment_id );
 		$payload      = $notification->to_payload();
 
 		$this->assertSame( $comment->comment_author, $payload['message']['args'][0] );
@@ -70,10 +70,54 @@ class NewReviewNotificationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should strip HTML tags from reviewer name in message args.
+	 */
+	public function test_to_payload_strips_html_from_comment_author(): void {
+		$product    = WC_Helper_Product::create_simple_product();
+		$comment_id = wp_insert_comment(
+			array(
+				'comment_post_ID'      => $product->get_id(),
+				'comment_author'       => '<b>Evil</b> <script>alert("xss")</script>Author',
+				'comment_author_email' => 'test@test.local',
+				'comment_content'      => 'A clean review.',
+				'comment_approved'     => 1,
+				'comment_type'         => 'review',
+			)
+		);
+
+		$notification = new NewReviewNotification( $comment_id );
+		$payload      = $notification->to_payload();
+
+		$this->assertSame( 'Evil alert("xss")Author', $payload['message']['args'][0] );
+	}
+
+	/**
+	 * @testdox Should strip HTML tags from review content in message args.
+	 */
+	public function test_to_payload_strips_html_from_comment_content(): void {
+		$product    = WC_Helper_Product::create_simple_product();
+		$comment_id = wp_insert_comment(
+			array(
+				'comment_post_ID'      => $product->get_id(),
+				'comment_author'       => 'Reviewer',
+				'comment_author_email' => 'test@test.local',
+				'comment_content'      => '<p>Great product!</p> <script>alert("xss")</script>',
+				'comment_approved'     => 1,
+				'comment_type'         => 'review',
+			)
+		);
+
+		$notification = new NewReviewNotification( $comment_id );
+		$payload      = $notification->to_payload();
+
+		$this->assertSame( 'Great product! alert("xss")', $payload['message']['args'][2] );
+	}
+
+	/**
 	 * @testdox Should return null when the comment no longer exists.
 	 */
 	public function test_to_payload_returns_null_for_deleted_comment(): void {
-		$notification = new NewReviewNotification( 999999, 1 );
+		$notification = new NewReviewNotification( 999999 );
 
 		$this->assertNull( $notification->to_payload() );
 	}

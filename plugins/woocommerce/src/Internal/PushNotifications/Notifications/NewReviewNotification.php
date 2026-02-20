@@ -38,7 +38,7 @@ class NewReviewNotification extends Notification {
 	 * @since 10.7.0
 	 */
 	public function to_payload(): ?array {
-		$comment = get_comment( $this->get_resource_id() );
+		$comment = WC()->call_function( 'get_comment', $this->get_resource_id() );
 
 		if ( ! $comment ) {
 			return null;
@@ -53,7 +53,7 @@ class NewReviewNotification extends Notification {
 			),
 			'message'     => array(
 				/* translators: 1: reviewer name, 2: product name, 3: comment content */
-				'format' => '%1$s left a review on %2$s: %3$s️',
+				'format' => '%1$s left a review on %2$s: %3$s',
 				'args'   => array(
 					wp_strip_all_tags( $comment->comment_author ),
 					get_the_title( (int) $comment->comment_post_ID ),

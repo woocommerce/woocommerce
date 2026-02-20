@@ -51,7 +51,7 @@ class NewOrderNotification extends Notification {
 	 * @since 10.7.0
 	 */
 	public function to_payload(): ?array {
-		$order = wc_get_order( $this->get_resource_id() );
+		$order = WC()->call_function( 'wc_get_order', $this->get_resource_id() );
 
 		if ( ! $order instanceof WC_Order ) {
 			return null;
@@ -63,7 +63,7 @@ class NewOrderNotification extends Notification {
 			'blog_id'     => get_current_blog_id(),
 			'resource_id' => $this->get_resource_id(),
 			'title'       => array(
-				/* translators: %s: order number */
+				/* translators: %s: emoji */
 				'format' => 'You have a new order! %1$s',
 				'args'   => array( self::EMOJI_LIST[ wp_rand( 0, count( self::EMOJI_LIST ) - 1 ) ] ),
 			),
@@ -71,7 +71,7 @@ class NewOrderNotification extends Notification {
 				/* translators: 1: order total, 2: site title */
 				'format' => 'New order for %1$s on %2$s',
 				'args'   => array(
-					$order->get_formatted_order_total(),
+					wp_strip_all_tags( $order->get_formatted_order_total() ),
 					get_bloginfo( 'name' ),
 				),
 			),

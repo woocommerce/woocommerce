@@ -17,7 +17,7 @@ class NewOrderNotificationTest extends WC_Unit_Test_Case {
 	 */
 	public function test_to_payload_contains_required_keys(): void {
 		$order        = WC_Helper_Order::create_order();
-		$notification = new NewOrderNotification( $order->get_id(), 1 );
+		$notification = new NewOrderNotification( $order->get_id() );
 
 		$payload = $notification->to_payload();
 
@@ -39,7 +39,7 @@ class NewOrderNotificationTest extends WC_Unit_Test_Case {
 	 * @testdox Should return store_order as the notification type.
 	 */
 	public function test_type_is_store_order(): void {
-		$notification = new NewOrderNotification( 1, 1 );
+		$notification = new NewOrderNotification( 1 );
 
 		$this->assertSame( 'store_order', $notification->get_type() );
 	}
@@ -48,7 +48,7 @@ class NewOrderNotificationTest extends WC_Unit_Test_Case {
 	 * @testdox Should return the order ID as the resource ID.
 	 */
 	public function test_resource_id_matches_order_id(): void {
-		$notification = new NewOrderNotification( 42, 1 );
+		$notification = new NewOrderNotification( 42 );
 
 		$this->assertSame( 42, $notification->get_resource_id() );
 	}
@@ -58,7 +58,7 @@ class NewOrderNotificationTest extends WC_Unit_Test_Case {
 	 */
 	public function test_to_payload_title_args_contain_emoji(): void {
 		$order        = WC_Helper_Order::create_order();
-		$notification = new NewOrderNotification( $order->get_id(), 1 );
+		$notification = new NewOrderNotification( $order->get_id() );
 
 		$payload = $notification->to_payload();
 
@@ -70,19 +70,23 @@ class NewOrderNotificationTest extends WC_Unit_Test_Case {
 	 */
 	public function test_to_payload_message_args_contain_order_total_and_blog_name(): void {
 		$order        = WC_Helper_Order::create_order();
-		$notification = new NewOrderNotification( $order->get_id(), 1 );
+		$notification = new NewOrderNotification( $order->get_id() );
 
 		$payload = $notification->to_payload();
 
-		$this->assertSame( $order->get_formatted_order_total(), $payload['message']['args'][0] );
 		$this->assertSame( get_bloginfo( 'name' ), $payload['message']['args'][1] );
+
+		$this->assertSame(
+			wp_strip_all_tags( $order->get_formatted_order_total() ),
+			$payload['message']['args'][0]
+		);
 	}
 
 	/**
 	 * @testdox Should return null when the order no longer exists.
 	 */
 	public function test_to_payload_returns_null_for_deleted_order(): void {
-		$notification = new NewOrderNotification( 999999, 1 );
+		$notification = new NewOrderNotification( 999999 );
 
 		$this->assertNull( $notification->to_payload() );
 	}
