@@ -1764,7 +1764,10 @@ WHERE
 	protected function set_order_props_from_data( &$order, $order_data ) {
 		foreach ( $this->get_all_order_column_mappings() as $table_name => $column_mapping ) {
 			foreach ( $column_mapping as $column_name => $prop_details ) {
-				if ( ! isset( $prop_details['name'] ) ) {
+				if ( ! isset( $prop_details['name'] ) || ! is_string( $prop_details['name'] ) ) {
+					continue;
+				}
+				if ( ! property_exists( $order_data, $prop_details['name'] ) ) {
 					continue;
 				}
 				$prop_value = $order_data->{$prop_details['name']};
