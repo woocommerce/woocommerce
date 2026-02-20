@@ -86,9 +86,10 @@ class DefaultShippingPartners {
 				),
 				'learn_more_link'   => 'https://wordpress.org/plugins/woocommerce-shipstation-integration/',
 				'is_visible'        => array(
-					self::get_rules_for_countries( array( 'AU', 'CA', 'GB' ) ),
+					self::get_rules_for_countries( array( 'US', 'AU', 'NZ', 'CA', 'GB' ) ),
 				),
 				'available_layouts' => array( 'row', 'column' ),
+				'is_primary'       => array( 'NZ', 'CA', 'GB' ),
 			),
 			array(
 				'id'                => 'skydropx-cotizador-y-envios',
@@ -104,6 +105,7 @@ class DefaultShippingPartners {
 					self::get_rules_for_countries( array() ), // No countries eligible for SkydropX promotion at this time.
 				),
 				'available_layouts' => array( 'column' ),
+				'is_primary'       => array(),
 			),
 			array(
 				'id'                => 'envia',
@@ -116,9 +118,10 @@ class DefaultShippingPartners {
 				),
 				'learn_more_link'   => 'https://woocommerce.com/products/envia-shipping-and-fulfillment/',
 				'is_visible'        => array(
-					self::get_rules_for_countries( array( 'CL', 'AR', 'PE', 'BR', 'UY', 'GT' ) ),
+					self::get_rules_for_countries( array( 'MX', 'CO', 'CL', 'AR', 'PE', 'BR', 'UY', 'GT' ) ),
 				),
 				'available_layouts' => array( 'column' ),
+				'is_primary'       => array( 'MX', 'CO', 'CL', 'AR', 'PE', 'BR', 'UY', 'GT' ),
 			),
 			array(
 				'id'                => 'easyship-woocommerce-shipping-rates',
@@ -162,6 +165,7 @@ class DefaultShippingPartners {
 					self::get_rules_for_countries( array( 'SG', 'HK', 'AU', 'NZ' ) ),
 				),
 				'available_layouts' => array( 'row', 'column' ),
+				'is_primary'       => array( 'SG', 'HK', 'AU' ),
 			),
 			array(
 				'id'                => 'packlink-pro-shipping',
@@ -208,9 +212,10 @@ class DefaultShippingPartners {
 				),
 				'learn_more_link'   => 'https://wordpress.org/plugins/packlink-pro-shipping/',
 				'is_visible'        => array(
-					self::get_rules_for_countries( array( 'FR', 'DE', 'ES', 'IT' ) ),
+					self::get_rules_for_countries( array( 'FR', 'DE', 'ES', 'IT', 'NL', 'AT', 'BE' ) ),
 				),
 				'available_layouts' => array( 'row', 'column' ),
+				'is_primary'       => array( 'FR', 'DE', 'ES', 'IT', 'NL', 'AT', 'BE' ),
 			),
 			array(
 				'id'                => 'woocommerce-shipping',
@@ -251,6 +256,7 @@ class DefaultShippingPartners {
 					),
 				),
 				'available_layouts' => array( 'column' ),
+				'is_primary'       => array( 'US' ),
 			),
 		);
 	}

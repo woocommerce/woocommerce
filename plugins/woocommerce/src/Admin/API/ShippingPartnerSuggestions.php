@@ -197,6 +197,15 @@ class ShippingPartnerSuggestions extends \WC_REST_Data_Controller {
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
+				'is_primary'        => array(
+					'description' => __( 'Countries where this partner should appear first.', 'woocommerce' ),
+					'type'        => 'array',
+					'items'       => array(
+						'type' => 'string',
+					),
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
 			),
 		);
 

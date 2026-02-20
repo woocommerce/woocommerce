@@ -37,7 +37,34 @@ class ShippingPartnerSuggestions extends RemoteSpecsEngine {
 			ShippingPartnerSuggestionsDataSourcePoller::get_instance()->set_specs_transient( array( $locale => $specs_to_save ), 3 * HOUR_IN_SECONDS );
 		}
 
-		return $specs_to_return;
+		return self::sort_by_primary( $specs_to_return );
+	}
+
+	/**
+	 * Sort suggestions so that partners whose is_primary list contains the
+	 * current store country appear first.
+	 *
+	 * @param array $suggestions Suggestions to sort.
+	 * @return array Sorted suggestions.
+	 */
+	private static function sort_by_primary( array $suggestions ) {
+		$country = wc_get_base_location()['country'] ?? '';
+
+		usort(
+			$suggestions,
+			function ( $a, $b ) use ( $country ) {
+				$a_primary = isset( $a->is_primary ) && is_array( $a->is_primary ) && in_array( $country, $a->is_primary, true );
+				$b_primary = isset( $b->is_primary ) && is_array( $b->is_primary ) && in_array( $country, $b->is_primary, true );
+
+				if ( $a_primary === $b_primary ) {
+					return 0;
+				}
+
+				return $a_primary ? -1 : 1;
+			}
+		);
+
+		return $suggestions;
 	}
 
 	/**
