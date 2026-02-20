@@ -1293,6 +1293,7 @@ class WC_AJAX {
 
 			$order_taxes      = $order->get_taxes();
 			$shipping_methods = WC()->shipping() ? WC()->shipping()->load_shipping_methods() : array();
+			$cogs_is_enabled  = wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled();
 
 			// Add new shipping.
 			$item = new WC_Order_Item_Shipping();
