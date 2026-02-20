@@ -302,6 +302,12 @@ test.describe( `${ blockData.name } Block`, () => {
 	} );
 
 	test.describe( 'optimistic updates', () => {
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip(
+			! config.features[ 'experimental-iapi-mini-cart' ],
+			'These tests are only relevant for the iAPI mini cart.'
+		);
+
 		test( 'should show the server filtered item count in the mini-cart title', async ( {
 			page,
 			frontendUtils,
@@ -312,23 +318,25 @@ test.describe( `${ blockData.name } Block`, () => {
 				'woocommerce-blocks-test-cart-contents-count-filter'
 			);
 
-			await frontendUtils.goToShop();
-			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-			await miniCartUtils.openMiniCart();
+			try {
+				await frontendUtils.goToShop();
+				await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+				await miniCartUtils.openMiniCart();
 
-			// The filter overrides the count to 999. The mini-cart title should
-			// display this filtered value rather than the actual number of items.
-			const miniCartTitleItemsCounterBlock = page.locator(
-				'[data-block-name="woocommerce/mini-cart-title-items-counter-block"]'
-			);
-			await expect( miniCartTitleItemsCounterBlock ).toBeVisible();
-			await expect( miniCartTitleItemsCounterBlock ).toContainText(
-				'999'
-			);
-
-			await requestUtils.deactivatePlugin(
-				'woocommerce-blocks-test-cart-contents-count-filter'
-			);
+				// The filter overrides the count to 999. The mini-cart title should
+				// display this filtered value rather than the actual number of items.
+				const miniCartTitleItemsCounterBlock = page.locator(
+					'[data-block-name="woocommerce/mini-cart-title-items-counter-block"]'
+				);
+				await expect( miniCartTitleItemsCounterBlock ).toBeVisible();
+				await expect( miniCartTitleItemsCounterBlock ).toContainText(
+					'999'
+				);
+			} finally {
+				await requestUtils.deactivatePlugin(
+					'woocommerce-blocks-test-cart-contents-count-filter'
+				);
+			}
 		} );
 	} );
 } );
