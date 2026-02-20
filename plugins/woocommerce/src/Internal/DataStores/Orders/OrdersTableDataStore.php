@@ -2147,7 +2147,7 @@ FROM $order_meta_table
 	 * Save the Cost of Goods Sold value of a given order to the database.
 	 *
 	 * @param WC_Abstract_Order $order                    The order to save the COGS value for.
-	 * @param bool              $changed_via_order_object Where the cogs value was changes via order object api.
+	 * @param bool              $changed_via_order_object Whether the CoGS value was changed through the order object API.
 	 */
 	private function save_cogs_data( WC_Abstract_Order $order, bool $changed_via_order_object ): void {
 		$cogs_value_original = $order->get_cogs_total_value();
