@@ -37,6 +37,7 @@ class WC_Post_Data {
 	 * @return void
 	 */
 	public static function init() {
+		add_action( 'clean_post_cache', array( __CLASS__, 'invalidate_products_last_modified' ), 10, 2 );
 		add_filter( 'post_type_link', array( __CLASS__, 'variation_post_link' ), 10, 2 );
 		add_action( 'shutdown', array( __CLASS__, 'do_deferred_product_sync' ), 10 );
 		add_action( 'set_object_terms', array( __CLASS__, 'force_default_term' ), 10, 5 );
@@ -154,6 +155,28 @@ class WC_Post_Data {
 	 */
 	public static function delete_product_query_transients() {
 		WC_Cache_Helper::get_transient_version( 'product_query', true );
+	}
+
+	/**
+	 * Invalidate the cached products last modified timestamp when a product post cache is cleaned.
+	 *
+	 * This does not use wp_cache_set_last_changed() because the cached value is exposed to
+	 * clients via the Last-Modified HTTP header for collection cache invalidation. WordPress
+	 * core's last_changed pattern auto-seeds with the current time on cache miss, which is
+	 * acceptable for opaque cache-key salts but would force all clients to unnecessarily
+	 * invalidate their local caches. Instead, invalidating the cache here allows the read side
+	 * in ProductQuery::get_last_modified() to fall back to the DB and re-seed with the real
+	 * last modification time.
+	 *
+	 * @since 10.6.0
+	 *
+	 * @param int     $post_id Post ID.
+	 * @param WP_Post $post    Post object.
+	 */
+	public static function invalidate_products_last_modified( $post_id, $post ): void {
+		if ( $post instanceof WP_Post && in_array( $post->post_type, array( 'product', 'product_variation' ), true ) ) {
+			wp_cache_delete( 'last_modified', 'wc_products' );
+		}
 	}
 
 	/**
