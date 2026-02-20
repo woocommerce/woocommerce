@@ -49,7 +49,7 @@ Customers submit tickets through the support request form and are automatically 
 Specify the email address that support tickets should be routed to in your vendor dashboard via _Settings > Store_. The WooCommerce team will also use this address to copy (CC) you in on tickets.
 
 :::note
-The Support Email field is different to Contact Email, which is used for order notifications.
+The Support Email field is different from Contact Email, which is used for order notifications.
 :::
 
 ![Support Email field in the vendor dashboard](./_media/support-email-field.png)
