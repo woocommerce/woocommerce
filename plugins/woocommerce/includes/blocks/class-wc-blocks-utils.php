@@ -73,12 +73,25 @@ class WC_Blocks_Utils {
 		}
 
 		$blocks = parse_blocks( $page_to_check->post_content );
+		return self::has_block_in_blocks( $blocks, $block_name );
+	}
+	
+	/**
+	 * Recursively searches an array of blocks (and their innerBlocks).
+	 *
+	 * @param array  $blocks     Array of parsed blocks.
+	 * @param string $block_name The block name to search for.
+	 * @return bool True if the block is found, false otherwise.
+	 */
+	private static function has_block_in_blocks( array $blocks, string $block_name ): bool {
 		foreach ( $blocks as $block ) {
 			if ( $block_name === $block['blockName'] ) {
 				return true;
 			}
+			if ( ! empty( $block['innerBlocks'] ) && self::has_block_in_blocks( $block['innerBlocks'], $block_name ) ) {
+				return true;
+			}
 		}
-
 		return false;
 	}
 }
