@@ -27,13 +27,6 @@ class PendingNotificationStore {
 	private bool $enabled = false;
 
 	/**
-	 * Whether the store is enabled and accepting notifications.
-	 *
-	 * @var bool
-	 */
-	private bool $enabled = false;
-
-	/**
 	 * Pending notifications keyed by identifier.
 	 *
 	 * @var array<string, Notification>
@@ -63,7 +56,7 @@ class PendingNotificationStore {
 	/**
 	 * Adds a notification to the pending store.
 	 *
-	 * Duplicate notifications (same blog, type and resource ID) within a single
+	 * Duplicate notifications (same type and resource ID) within a single
 	 * request are silently ignored. The shutdown hook is registered on the
 	 * first call.
 	 *

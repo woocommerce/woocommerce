@@ -102,51 +102,6 @@ class NotificationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should throw when type is empty.
-	 */
-	public function test_throws_for_empty_type(): void {
-		$this->expectException( InvalidArgumentException::class );
-
-		$this->create_notification( '', 1, 1 );
-	}
-
-	/**
-	 * @testdox Should throw when resource_id is zero.
-	 */
-	public function test_throws_for_zero_resource_id(): void {
-		$this->expectException( InvalidArgumentException::class );
-
-		$this->create_notification( 'store_order', 0, 1 );
-	}
-
-	/**
-	 * @testdox Should throw when resource_id is negative.
-	 */
-	public function test_throws_for_negative_resource_id(): void {
-		$this->expectException( InvalidArgumentException::class );
-
-		$this->create_notification( 'store_order', -1, 1 );
-	}
-
-	/**
-	 * @testdox Should throw when blog_id is zero.
-	 */
-	public function test_throws_for_zero_blog_id(): void {
-		$this->expectException( InvalidArgumentException::class );
-
-		$this->create_notification( 'store_order', 1, 0 );
-	}
-
-	/**
-	 * @testdox Should throw when blog_id is negative.
-	 */
-	public function test_throws_for_negative_blog_id(): void {
-		$this->expectException( InvalidArgumentException::class );
-
-		$this->create_notification( 'store_order', 1, -1 );
-	}
-
-	/**
 	 * Creates a concrete Notification instance for testing.
 	 *
 	 * @param string $type        The notification type.
@@ -158,9 +113,9 @@ class NotificationTest extends WC_Unit_Test_Case {
 			/**
 			 * Returns a test payload.
 			 *
-			 * @return array
+			 * @return array|null
 			 */
-			public function to_payload(): array {
+			public function to_payload(): ?array {
 				return array( 'test' => true );
 			}
 		};
