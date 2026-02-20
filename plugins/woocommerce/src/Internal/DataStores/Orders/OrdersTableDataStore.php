@@ -2169,7 +2169,7 @@ FROM $order_meta_table
 			return;
 		}
 
-		$sync_meta = $cogs_value_changed || $cogs_value_original !== $cogs_value;
+		$sync_meta = $cogs_value_changed || $cogs_value_original !== (float) $cogs_value;
 		if ( $sync_meta ) {
 			$existing_meta = $this->data_store_meta->get_metadata_by_key( $order, '_cogs_total_value' );
 			if ( 0.0 === $cogs_value && $existing_meta ) {
