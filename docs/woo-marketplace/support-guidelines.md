@@ -15,7 +15,7 @@ That said, great support is not only a requirement — it's a growth opportunity
 
 Marketplace vendors are responsible for customer support in line with WooCommerce's Support Policy, including:
 
-- Timeous responses to customer emails.
+- Timely responses to customer emails.
 - Handling customer reviews and ratings promptly.
 - Managing feature requests posted on product pages.
 
