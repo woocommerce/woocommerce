@@ -1101,4 +1101,213 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		// Track for cleanup.
 		$this->created_refunds[] = $response_data['id'];
 	}
+
+	/**
+	 * Test refund creation with automatic tax extraction handles rounding correctly.
+	 *
+	 * This tests a specific scenario where multiple tax rates with decimals can cause
+	 * a 1 cent rounding error when extracting taxes from an inclusive total.
+	 *
+	 * Scenario: $50.00 item with California-style tax rates:
+	 * - County Tax: 1% = $0.50
+	 * - Special Tax: 3.25% = $1.625 → $1.63 (rounded)
+	 * - State Sales Tax: 6.25% = $3.125 → $3.13 (rounded)
+	 * - Total tax: $5.26
+	 * - Total with tax: $55.26
+	 *
+	 * The bug: When extracting taxes from $55.26 using calc_inclusive_tax(),
+	 * the internal precision (6DP) extraction gives different results than
+	 * the 2DP rounded values that were used to build the original total.
+	 * This causes the base to be calculated as $50.01 instead of $50.00.
+	 *
+	 * @link https://github.com/woocommerce/woocommerce/issues/XXXXX
+	 */
+	public function test_refunds_create_with_automatic_tax_extraction_rounding_precision(): void {
+		// Create three non-compound tax rates matching California-style setup.
+		// Priority 1 = all applied to base price (not compound).
+		$tax_rate_county = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => 'CA',
+				'tax_rate'          => '1.0000',
+				'tax_rate_name'     => 'County Tax',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$tax_rate_special = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => 'CA',
+				'tax_rate'          => '3.2500',
+				'tax_rate_name'     => 'Special Tax',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '2',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$tax_rate_state = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => 'CA',
+				'tax_rate'          => '6.2500',
+				'tax_rate_name'     => 'State Sales Tax',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '3',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		// Create order with $50.00 product.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 50.00 );
+		$product->set_tax_status( 'taxable' );
+		$product->save();
+
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 50.00,
+				'total'    => 50.00,
+			)
+		);
+
+		// Set taxes as they would be calculated by WooCommerce (forward calculation).
+		// County: 50 × 0.01 = 0.50.
+		// Special: 50 × 0.0325 = 1.625 → stored/displayed as 1.63.
+		// State: 50 × 0.0625 = 3.125 → stored/displayed as 3.13.
+		$item->set_taxes(
+			array(
+				'total'    => array(
+					$tax_rate_county  => '0.50',
+					$tax_rate_special => '1.63',
+					$tax_rate_state   => '3.13',
+				),
+				'subtotal' => array(
+					$tax_rate_county  => '0.50',
+					$tax_rate_special => '1.63',
+					$tax_rate_state   => '3.13',
+				),
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+
+		// Add tax items to the order.
+		$tax_item_county = new WC_Order_Item_Tax();
+		$tax_item_county->set_rate( $tax_rate_county );
+		$tax_item_county->set_tax_total( 0.50 );
+		$tax_item_county->save();
+		$order->add_item( $tax_item_county );
+
+		$tax_item_special = new WC_Order_Item_Tax();
+		$tax_item_special->set_rate( $tax_rate_special );
+		$tax_item_special->set_tax_total( 1.63 );
+		$tax_item_special->save();
+		$order->add_item( $tax_item_special );
+
+		$tax_item_state = new WC_Order_Item_Tax();
+		$tax_item_state->set_rate( $tax_rate_state );
+		$tax_item_state->set_tax_total( 3.13 );
+		$tax_item_state->save();
+		$order->add_item( $tax_item_state );
+
+		$order->set_billing_country( 'US' );
+		$order->set_billing_state( 'CA' );
+		$order->set_total( 55.26 ); // 50.00 + 0.50 + 1.63 + 3.13.
+		$order->save();
+
+		$this->created_orders[] = $order->get_id();
+
+		// Create full refund with just refund_total (should extract taxes automatically).
+		// The v4 API should extract taxes from the inclusive amount and get the correct base.
+		$refund_data = array(
+			'order_id'   => $order->get_id(),
+			'amount'     => 55.26,
+			'reason'     => 'Testing rounding precision with multiple tax rates',
+			'line_items' => array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 1,
+					'refund_total' => 55.26, // Includes all taxes.
+				),
+			),
+		);
+
+		$request = new WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$request->set_body_params( $refund_data );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 201, $response->get_status(), 'Refund should be created successfully' );
+		$response_data = $response->get_data();
+
+		// Verify the refund was created.
+		$this->assertIsArray( $response_data );
+		$this->assertArrayHasKey( 'id', $response_data );
+		$this->assertEquals( $order->get_id(), $response_data['order_id'] );
+
+		// Total refund amount should be 55.26.
+		$this->assertEquals( '55.26', $response_data['amount'], 'Refund amount should be 55.26' );
+
+		// Get the actual refund object to check line item details.
+		$refund           = wc_get_order( $response_data['id'] );
+		$refund_items     = $refund->get_items( 'line_item' );
+		$refund_line_item = reset( $refund_items );
+
+		// CRITICAL: Line item total should be exactly -50.00, not -50.01.
+		// This is the core of the rounding bug being tested.
+		$this->assertEquals(
+			-50.00,
+			(float) $refund_line_item->get_total(),
+			'Line item total should be exactly -50.00 (not -50.01 due to rounding error)'
+		);
+
+		// Verify extracted taxes match the original order taxes.
+		$refund_taxes = $refund_line_item->get_taxes();
+		$this->assertEquals(
+			-0.50,
+			(float) $refund_taxes['total'][ $tax_rate_county ],
+			'County Tax refund should be -0.50'
+		);
+		$this->assertEquals(
+			-1.63,
+			(float) $refund_taxes['total'][ $tax_rate_special ],
+			'Special Tax refund should be -1.63'
+		);
+		$this->assertEquals(
+			-3.13,
+			(float) $refund_taxes['total'][ $tax_rate_state ],
+			'State Sales Tax refund should be -3.13'
+		);
+
+		// Verify the math adds up: base + all taxes = total refund amount.
+		$calculated_total = abs( (float) $refund_line_item->get_total() )
+			+ abs( (float) $refund_taxes['total'][ $tax_rate_county ] )
+			+ abs( (float) $refund_taxes['total'][ $tax_rate_special ] )
+			+ abs( (float) $refund_taxes['total'][ $tax_rate_state ] );
+		$this->assertEqualsWithDelta(
+			55.26,
+			$calculated_total,
+			0.001,
+			'Sum of base and taxes should equal the refund amount'
+		);
+
+		// Track for cleanup.
+		$this->created_refunds[] = $response_data['id'];
+
+		// Clean up product.
+		$product->delete( true );
+	}
 }
