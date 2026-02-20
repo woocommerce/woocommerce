@@ -224,6 +224,11 @@ class WC_Session_Handler extends WC_Session {
 		$this->_customer_id = $user_session_id;
 		$this->save_data( $guest_session_id );
 
+		// Refresh the session cookie so the browser sends the new user session ID
+		// instead of the now-deleted guest session ID on subsequent requests.
+		$this->set_session_expiration();
+		$this->set_customer_session_cookie( true );
+
 		/**
 		 * Fires after a customer has logged in, and their guest session id has been
 		 * deleted with its data migrated to a customer id.

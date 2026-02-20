@@ -452,6 +452,50 @@ class WC_Tests_Session_Handler extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Session cookie should be updated when guest session is migrated to user session.
+	 */
+	public function test_migrate_guest_session_to_user_session_sets_customer_session_cookie(): void {
+		global $wpdb;
+
+		$guest_session_id   = 't_' . wp_generate_password( 28, false );
+		$session_expiration = time() + 50000;
+		$session_expiring   = time() + 5000;
+		$cookie_hash        = '';
+
+		$wpdb->query(
+			$wpdb->prepare(
+				"REPLACE INTO {$wpdb->prefix}woocommerce_sessions (session_key, session_value, session_expiry) VALUES (%s, %s, %d)",
+				$guest_session_id,
+				maybe_serialize( array( 'cart' => 'guest cart' ) ),
+				$session_expiration
+			)
+		);
+
+		$customer = WC_Helper_Customer::create_customer();
+		wp_set_current_user( $customer->get_id() );
+
+		$handler = $this
+			->getMockBuilder( WC_Session_Handler::class )
+			->onlyMethods( array( 'get_session_cookie', 'set_customer_session_cookie' ) )
+			->getMock();
+
+		$handler
+			->method( 'get_session_cookie' )
+			->willReturn( array( $guest_session_id, $session_expiration, $session_expiring, $cookie_hash ) );
+
+		$handler
+			->expects( $this->once() )
+			->method( 'set_customer_session_cookie' )
+			->with( true );
+
+		$handler->init_session_cookie();
+
+		$this->assertEquals( (string) $customer->get_id(), $handler->get_customer_id(), 'Customer ID should be the user ID after migration' );
+		$this->assertNull( $this->get_session_from_db( $guest_session_id ), 'Guest session should be deleted after migration' );
+		$this->assertNotNull( $this->get_session_from_db( (string) $customer->get_id() ), 'User session should exist after migration' );
+	}
+
+	/**
 	 * Helper function to create a WC session and save it to the DB.
 	 */
 	protected function create_session() {
