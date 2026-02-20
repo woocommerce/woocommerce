@@ -2169,23 +2169,19 @@ FROM $order_meta_table
 		$sync_meta = $changed_via_order_object || $cogs_value_original !== $cogs_value;
 		if ( $sync_meta ) {
 			$existing_meta = $this->data_store_meta->get_metadata_by_key( $order, '_cogs_total_value' );
-			if ( $existing_meta ) {
+			if ( 0.0 === $cogs_value && $existing_meta ) {
 				$existing_meta = current( $existing_meta );
-				if ( 0.0 === $cogs_value ) {
-					$this->data_store_meta->delete_meta( $order, $existing_meta );
-				} else {
-					$existing_meta->value = $cogs_value;
-					$this->data_store_meta->update_meta( $order, $existing_meta );
-				}
+				$this->data_store_meta->delete_meta( $order, $existing_meta );
+			} elseif ( $existing_meta ) {
+				$existing_meta        = current( $existing_meta );
+				$existing_meta->key   = '_cogs_total_value';
+				$existing_meta->value = $cogs_value;
+				$this->data_store_meta->update_meta( $order, $existing_meta );
 			} else {
-				// Do not persist the meta which will be dropped on the consequent order saves.
-				$sync_meta = 0.0 !== $cogs_value;
-				if ( $sync_meta ) {
-					$meta        = new \WC_Meta_Data();
-					$meta->key   = '_cogs_total_value';
-					$meta->value = $cogs_value;
-					$this->data_store_meta->add_meta( $order, $meta );
-				}
+				$meta        = new \WC_Meta_Data();
+				$meta->key   = '_cogs_total_value';
+				$meta->value = $cogs_value;
+				$this->data_store_meta->add_meta( $order, $meta );
 			}
 		}
 	}
