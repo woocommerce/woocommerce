@@ -35,6 +35,7 @@ export type WooCommerceConfig = {
 	};
 	placeholderImgSrc?: string;
 	currency?: Currency;
+	nonOptimisticProperties?: string[];
 };
 
 export type SelectedAttributes = Omit< CartVariationItem, 'raw_attribute' >;
