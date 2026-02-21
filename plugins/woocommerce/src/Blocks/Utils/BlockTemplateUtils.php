@@ -743,6 +743,7 @@ class BlockTemplateUtils {
 		}
 
 		if ( ! empty( $saved_templates ) ) {
+			// TBD: re-evaluate complexity vs cache hit/miss ratio and drop cache if misses are dominating.
 			static $request_level_block_template_cache = array();
 
 			$block_templates = array();
