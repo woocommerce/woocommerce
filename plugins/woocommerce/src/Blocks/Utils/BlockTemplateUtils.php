@@ -714,9 +714,8 @@ class BlockTemplateUtils {
 	 * @return \WP_Block_Template[] An array of found templates.
 	 */
 	public static function get_block_templates_from_db( $slugs = array(), $template_type = 'wp_template' ) {
-		static $request_level_cache = array();
-
-		if ( ! isset( $request_level_cache[ $template_type ] ) ) {
+		static $request_level_post_cache = array();
+		if ( ! isset( $request_level_post_cache[ $template_type ] ) ) {
 			// Optimization note: the query is one of the slowest on checkout pages, hence "prefetch style" to ensure the
 			// constant number of such queries. Also, the query args are optimized for `build_template_result_from_post`.
 			$check_query_args                      = array(
@@ -733,15 +732,26 @@ class BlockTemplateUtils {
 				),
 				'update_post_meta_cache' => false,
 			);
-			$request_level_cache[ $template_type ] = ( new \WP_Query( $check_query_args ) )->posts;
+			$request_level_post_cache[ $template_type ] = ( new \WP_Query( $check_query_args ) )->posts;
 		}
 
-		$saved_templates = $request_level_cache[ $template_type ];
+		$saved_templates = $request_level_post_cache[ $template_type ];
 		if ( is_array( $slugs ) && count( $slugs ) > 0 ) {
 			$saved_templates = array_values( array_filter( $saved_templates, fn( $template ) => in_array( $template->post_name, $slugs, true ) ) );
 		}
 
-		return array_map( fn( $template ) => self::build_template_result_from_post( $template ), $saved_templates );
+		if ( ! empty ( $saved_templates ) ) {
+			static $request_level_dto_cache = array();
+			$block_templates                = array();
+			foreach ( $saved_templates as $template ) {
+				$id                             = $template->ID;
+				$request_level_dto_cache[ $id ] = $request_level_dto_cache[ $id ] ?? self::build_template_result_from_post( $template );
+				$block_templates[]              = $request_level_dto_cache[ $id ];
+			}
+			return $block_templates;
+		}
+
+		return array();
 	}
 
 	/**
