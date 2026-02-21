@@ -725,6 +725,7 @@ class BlockTemplateUtils {
 					'terms'    => array( self::DEPRECATED_PLUGIN_SLUG, self::PLUGIN_SLUG, get_stylesheet() ),
 				),
 			),
+			'update_post_meta_cache' => false,
 		);
 
 		if ( is_array( $slugs ) && count( $slugs ) > 0 ) {
