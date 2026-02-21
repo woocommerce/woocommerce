@@ -720,19 +720,21 @@ class BlockTemplateUtils {
 		// Optimization note: first query, which optimized for fetching IDs, to minimize temporary/filesort overhead.
 		$ids = wp_cache_get( $template_type . '-ids', 'woocommerce_blocks' );
 		if ( false === $ids ) {
-			$ids = ( new \WP_Query( array(
-				'post_type'      => $template_type,
-				'posts_per_page' => -1,
-				'fields'         => 'ids',
-				'orderby'        => 'none',
-				'tax_query'      => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
-					array(
-						'taxonomy' => 'wp_theme',
-						'field'    => 'name',
-						'terms'    => array( self::DEPRECATED_PLUGIN_SLUG, self::PLUGIN_SLUG, get_stylesheet() ),
+			$ids = ( new \WP_Query(
+				array(
+					'post_type'      => $template_type,
+					'posts_per_page' => -1,
+					'fields'         => 'ids',
+					'orderby'        => 'none',
+					'tax_query'      => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+						array(
+							'taxonomy' => 'wp_theme',
+							'field'    => 'name',
+							'terms'    => array( self::DEPRECATED_PLUGIN_SLUG, self::PLUGIN_SLUG, get_stylesheet() ),
+						),
 					),
-				),
-			) ) )->posts;
+				)
+			) )->posts;
 			wp_cache_set( $template_type . '-ids', $ids, 'woocommerce_blocks' );
 			$request_level_cache[ $template_type ] = null;
 		}
