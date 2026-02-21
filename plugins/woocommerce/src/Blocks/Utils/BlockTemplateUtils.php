@@ -765,7 +765,7 @@ class BlockTemplateUtils {
 			}
 		}
 
-		return array();
+		return $saved_templates;
 	}
 
 	/**
