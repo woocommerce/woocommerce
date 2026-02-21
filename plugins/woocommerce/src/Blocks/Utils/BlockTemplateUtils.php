@@ -719,7 +719,7 @@ class BlockTemplateUtils {
 		if ( ! isset( $request_level_cache[ $template_type ] ) ) {
 			// Optimization note: the query is one of the slowest on checkout pages, hence "prefetch style" to
 			// ensure constant number of such queries. Also, the query args are optimized for `build_template_result_from_post`.
-			$check_query_args                    = array(
+			$check_query_args                      = array(
 				'post_type'              => $template_type,
 				'posts_per_page'         => -1,
 				'orderby'                => 'none',
