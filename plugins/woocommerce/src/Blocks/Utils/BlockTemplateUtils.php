@@ -756,7 +756,7 @@ class BlockTemplateUtils {
 		// Optimization note: populate template objects; optimized for subsequent calls, without spawning consequent SQLs.
 		$saved_templates = $request_level_cache[ $template_type ];
 		if ( ! empty( $saved_templates ) && is_array( $slugs ) && array() !== $slugs ) {
-			$saved_templates = array_values( array_filter( $saved_templates, fn( $template ) => in_array( $template->post_name, $slugs, true ) ) );
+			$saved_templates = array_filter( $saved_templates, fn( $template ) => in_array( $template->post_name, $slugs, true ) );
 			if ( array() !== $saved_templates ) {
 				$block_templates = array_map( fn( $template ) => self::build_template_result_from_post( $template ), $saved_templates );
 				$block_templates = array_values( array_filter( $block_templates, fn( $template ) => $template instanceof \WP_Block_Template ) );
