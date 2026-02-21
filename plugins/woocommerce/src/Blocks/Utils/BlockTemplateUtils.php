@@ -735,7 +735,7 @@ class BlockTemplateUtils {
 				)
 			) )->posts;
 			wp_cache_set( $template_type . '-ids', $ids, 'woocommerce_blocks' );
-			$request_level_cache[ $template_type ] = null;
+			$request_level_cache[ $template_type ] = empty( $ids ) ? array() : null;
 		}
 
 		// Optimization note: second query, which optimized for fetching templates data, to minimize grouping overhead.
