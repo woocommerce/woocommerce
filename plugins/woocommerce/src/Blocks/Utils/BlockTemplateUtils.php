@@ -716,14 +716,14 @@ class BlockTemplateUtils {
 	public static function get_block_templates_from_db( $slugs = array(), $template_type = 'wp_template' ) {
 		static $request_level_cache = array();
 
-		if ( ! isset( $request_level_cache[$template_type] ) ) {
+		if ( ! isset( $request_level_cache[ $template_type ] ) ) {
 			// Optimization note: the query is one of the slowest on checkout pages, hence "prefetch style" to
 			// ensure constant number of such queries. Also, the query args are optimized for `build_template_result_from_post`.
-			$check_query_args = array(
-				'post_type'      => $template_type,
-				'posts_per_page' => -1,
-				'orderby'        => 'none',
-				'no_found_rows'  => true,
+			$check_query_args                    = array(
+				'post_type'              => $template_type,
+				'posts_per_page'         => -1,
+				'orderby'                => 'none',
+				'no_found_rows'          => true,
 				'tax_query'      => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 					array(
 						'taxonomy' => 'wp_theme',
@@ -733,10 +733,10 @@ class BlockTemplateUtils {
 				),
 				'update_post_meta_cache' => false,
 			);
-			$request_level_cache[$template_type] = ( new \WP_Query( $check_query_args ) )->posts;
+			$request_level_cache[ $template_type ] = ( new \WP_Query( $check_query_args ) )->posts;
 		}
 
-		$saved_woo_templates = $request_level_cache[$template_type];
+		$saved_woo_templates = $request_level_cache[ $template_type ];
 		if ( is_array( $slugs ) && count( $slugs ) > 0 ) {
 			$saved_woo_templates = array_filter( $saved_woo_templates, fn( $template ) => in_array( $template->post_name, $slugs ) );
 		}
