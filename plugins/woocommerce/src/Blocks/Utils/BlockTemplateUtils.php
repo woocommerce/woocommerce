@@ -734,7 +734,8 @@ class BlockTemplateUtils {
 					),
 				)
 			) )->posts;
-			wp_cache_set( $template_type . '-ids', $ids, 'woocommerce_blocks' );
+			// Optimization note: 12 hours is half of default nonce lifetime, if out sync blocks depending on nonce keep running.
+			wp_cache_set( $template_type . '-ids', $ids, 'woocommerce_blocks', 12 * HOUR_IN_SECONDS );
 			$request_level_cache[ $template_type ] = empty( $ids ) ? array() : null;
 		}
 
@@ -754,9 +755,9 @@ class BlockTemplateUtils {
 
 		// Optimization note: populate template objects; optimized for subsequent calls, without spawning consequent SQLs.
 		$saved_templates = $request_level_cache[ $template_type ];
-		if ( count( $saved_templates ) > 0 && is_array( $slugs ) && count( $slugs ) > 0 ) {
+		if ( ! empty( $saved_templates ) && is_array( $slugs ) && array() !== $slugs ) {
 			$saved_templates = array_values( array_filter( $saved_templates, fn( $template ) => in_array( $template->post_name, $slugs, true ) ) );
-			if ( count( $saved_templates ) > 0 ) {
+			if ( array() !== $saved_templates ) {
 				return array_map( fn( $template ) => self::build_template_result_from_post( $template ), $saved_templates );
 			}
 		}
