@@ -714,33 +714,31 @@ class BlockTemplateUtils {
 	 * @return \WP_Block_Template[] An array of found templates.
 	 */
 	public static function get_block_templates_from_db( $slugs = array(), $template_type = 'wp_template' ) {
-		$check_query_args = array(
-			'post_type'      => $template_type,
-			'posts_per_page' => -1,
-			'no_found_rows'  => true,
-			'tax_query'      => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
-				array(
-					'taxonomy' => 'wp_theme',
-					'field'    => 'name',
-					'terms'    => array( self::DEPRECATED_PLUGIN_SLUG, self::PLUGIN_SLUG, get_stylesheet() ),
-				),
-			),
-			'update_post_meta_cache' => false,
-		);
+		static $request_level_cache = array();
 
-		if ( is_array( $slugs ) && count( $slugs ) > 0 ) {
-			$check_query_args['post_name__in'] = $slugs;
+		if ( ! isset( $request_level_cache[$template_type] ) ) {
+			$check_query_args = array(
+				'post_type'      => $template_type,
+				'posts_per_page' => -1,
+				'no_found_rows'  => true,
+				'tax_query'      => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+					array(
+						'taxonomy' => 'wp_theme',
+						'field'    => 'name',
+						'terms'    => array( self::DEPRECATED_PLUGIN_SLUG, self::PLUGIN_SLUG, get_stylesheet() ),
+					),
+				),
+				'update_post_meta_cache' => false,
+			);
+			$request_level_cache[$template_type] = ( new \WP_Query( $check_query_args ) )->posts;
 		}
 
-		$check_query         = new \WP_Query( $check_query_args );
-		$saved_woo_templates = $check_query->posts;
+		$saved_woo_templates = $request_level_cache[$template_type];
+		if ( is_array( $slugs ) && count( $slugs ) > 0 ) {
+			$saved_woo_templates = array_filter( $saved_woo_templates, fn( $template ) => in_array( $template->post_name, $slugs ) );
+		}
 
-		return array_map(
-			function ( $saved_woo_template ) {
-				return self::build_template_result_from_post( $saved_woo_template );
-			},
-			$saved_woo_templates
-		);
+		return array_map( fn( $template ) => self::build_template_result_from_post( $template ), $saved_woo_templates );
 	}
 
 	/**
