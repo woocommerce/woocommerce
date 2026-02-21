@@ -721,11 +721,11 @@ class BlockTemplateUtils {
 		$ids = wp_cache_get( $template_type . '-ids', 'woocommerce_blocks' );
 		if ( false === $ids ) {
 			$ids = ( new \WP_Query( array(
-				'post_type'              => $template_type,
-				'posts_per_page'         => -1,
-				'fields'                 => 'ids',
-				'orderby'                => 'none',
-				'tax_query'              => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+				'post_type'      => $template_type,
+				'posts_per_page' => -1,
+				'fields'         => 'ids',
+				'orderby'        => 'none',
+				'tax_query'      => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 					array(
 						'taxonomy' => 'wp_theme',
 						'field'    => 'name',
