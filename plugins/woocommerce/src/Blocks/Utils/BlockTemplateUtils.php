@@ -738,7 +738,7 @@ class BlockTemplateUtils {
 
 		$saved_woo_templates = $request_level_cache[ $template_type ];
 		if ( is_array( $slugs ) && count( $slugs ) > 0 ) {
-			$saved_woo_templates = array_filter( $saved_woo_templates, fn( $template ) => in_array( $template->post_name, $slugs, true ) );
+			$saved_woo_templates = array_values( array_filter( $saved_woo_templates, fn( $template ) => in_array( $template->post_name, $slugs, true ) ) );
 		}
 
 		return array_map( fn( $template ) => self::build_template_result_from_post( $template ), $saved_woo_templates );
