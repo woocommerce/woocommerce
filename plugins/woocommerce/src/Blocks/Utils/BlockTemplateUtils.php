@@ -737,7 +737,7 @@ class BlockTemplateUtils {
 			$request_level_cache[ $template_type ] = null;
 		}
 
-		// Optimization note: second query, which perform the optimized templates fetching, to minimize grouping overhead.
+		// Optimization note: second query, which optimized for fetching templates data, to minimize grouping overhead.
 		if ( null === ( $request_level_cache[ $template_type ] ?? null ) ) {
 			$request_level_cache[ $template_type ] = ( new \WP_Query( array(
 				'post_type'              => $template_type,
