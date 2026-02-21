@@ -209,6 +209,7 @@ class Products extends ControllerTestCase {
 		$this->assertArrayHasKey( 'attributes', $params );
 		$this->assertArrayHasKey( 'catalog_visibility', $params );
 		$this->assertArrayHasKey( 'rating', $params );
+		$this->assertArrayHasKey( 'related', $params );
 	}
 
 	/**
@@ -287,5 +288,258 @@ class Products extends ControllerTestCase {
 		$data     = $response->get_data();
 
 		$this->assertNull( $data['image'] );
+	}
+
+	/**
+	 * @testdox Single product response should include self and collection _links.
+	 */
+	public function test_single_product_has_self_and_collection_links() {
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $this->products[0]->get_id() ) );
+		$links    = $response->get_links();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertArrayHasKey( 'self', $links );
+		$this->assertArrayHasKey( 'collection', $links );
+		$this->assertStringContainsString( '/wc/store/v1/products/' . $this->products[0]->get_id(), $links['self'][0]['href'] );
+		$this->assertStringContainsString( '/wc/store/v1/products', $links['collection'][0]['href'] );
+	}
+
+	/**
+	 * @testdox Product with upsells should include embeddable upsells link.
+	 */
+	public function test_product_with_upsells_has_embeddable_upsells_link() {
+		$fixtures       = new FixtureData();
+		$upsell_product = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Upsell Product',
+				'stock_status'  => ProductStockStatus::IN_STOCK,
+				'regular_price' => 20,
+			)
+		);
+
+		$main_product = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Main Product',
+				'stock_status'  => ProductStockStatus::IN_STOCK,
+				'regular_price' => 10,
+				'upsell_ids'    => array( $upsell_product->get_id() ),
+			)
+		);
+
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $main_product->get_id() ) );
+		$links    = $response->get_links();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertArrayHasKey( 'upsells', $links );
+		$this->assertStringContainsString( 'include=' . $upsell_product->get_id(), $links['upsells'][0]['href'] );
+		$this->assertArrayHasKey( 'embeddable', $links['upsells'][0]['attributes'] );
+		$this->assertTrue( $links['upsells'][0]['attributes']['embeddable'] );
+	}
+
+	/**
+	 * @testdox Product with cross-sells should include embeddable cross_sells link.
+	 */
+	public function test_product_with_cross_sells_has_embeddable_cross_sells_link() {
+		$fixtures           = new FixtureData();
+		$cross_sell_product = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Cross-sell Product',
+				'stock_status'  => ProductStockStatus::IN_STOCK,
+				'regular_price' => 15,
+			)
+		);
+
+		$main_product = $fixtures->get_simple_product(
+			array(
+				'name'           => 'Main Product',
+				'stock_status'   => ProductStockStatus::IN_STOCK,
+				'regular_price'  => 10,
+				'cross_sell_ids' => array( $cross_sell_product->get_id() ),
+			)
+		);
+
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $main_product->get_id() ) );
+		$links    = $response->get_links();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertArrayHasKey( 'cross_sells', $links );
+		$this->assertStringContainsString( 'include=' . $cross_sell_product->get_id(), $links['cross_sells'][0]['href'] );
+		$this->assertArrayHasKey( 'embeddable', $links['cross_sells'][0]['attributes'] );
+		$this->assertTrue( $links['cross_sells'][0]['attributes']['embeddable'] );
+	}
+
+	/**
+	 * @testdox Product without upsells should not include upsells link.
+	 */
+	public function test_product_without_upsells_has_no_upsells_link() {
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $this->products[0]->get_id() ) );
+		$links    = $response->get_links();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertArrayNotHasKey( 'upsells', $links );
+	}
+
+	/**
+	 * @testdox Product without cross-sells should not include cross_sells link.
+	 */
+	public function test_product_without_cross_sells_has_no_cross_sells_link() {
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $this->products[0]->get_id() ) );
+		$links    = $response->get_links();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertArrayNotHasKey( 'cross_sells', $links );
+	}
+
+	/**
+	 * @testdox Collection endpoint should return products with _links.
+	 */
+	public function test_collection_endpoint_returns_links() {
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products' ) );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertGreaterThan( 0, count( $data ) );
+
+		foreach ( $data as $product ) {
+			$this->assertArrayHasKey( '_links', $product );
+			$this->assertArrayHasKey( 'self', $product['_links'] );
+			$this->assertArrayHasKey( 'collection', $product['_links'] );
+		}
+	}
+
+	/**
+	 * @testdox Context parameter should accept embed value.
+	 */
+	public function test_context_accepts_embed_value() {
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $this->products[0]->get_id() );
+		$request->set_param( 'context', 'embed' );
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+	}
+
+	/**
+	 * @testdox Product variation should include up link to parent product.
+	 */
+	public function test_product_variation_has_up_link() {
+		$fixtures  = new FixtureData();
+		$attribute = FixtureData::get_product_attribute( 'color', array( 'red', 'blue' ) );
+
+		$variable_product = $fixtures->get_variable_product(
+			array(
+				'name' => 'Variable Product',
+			),
+			array( $attribute )
+		);
+
+		$variation = $fixtures->get_variation_product(
+			$variable_product->get_id(),
+			array( 'pa_color' => 'red' ),
+			array(
+				'regular_price' => 10,
+				'stock_status'  => ProductStockStatus::IN_STOCK,
+			)
+		);
+
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $variation->get_id() ) );
+		$links    = $response->get_links();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertArrayHasKey( 'up', $links );
+		$this->assertStringContainsString( '/wc/store/v1/products/' . $variable_product->get_id(), $links['up'][0]['href'] );
+	}
+
+	/**
+	 * @testdox Product should always include embeddable related link using related parameter format.
+	 */
+	public function test_product_has_related_link_with_related_parameter_format() {
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $this->products[0]->get_id() ) );
+		$links    = $response->get_links();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertArrayHasKey( 'related', $links );
+		$this->assertStringContainsString( 'related=' . $this->products[0]->get_id(), $links['related'][0]['href'] );
+		$this->assertStringContainsString( 'per_page=10', $links['related'][0]['href'] );
+		$this->assertStringNotContainsString( 'include=', $links['related'][0]['href'] );
+		$this->assertArrayHasKey( 'embeddable', $links['related'][0]['attributes'] );
+		$this->assertTrue( $links['related'][0]['attributes']['embeddable'] );
+	}
+
+	/**
+	 * @testdox Related query parameter should filter products to related products.
+	 */
+	public function test_related_query_parameter_filters_products() {
+		$fixtures = new FixtureData();
+
+		// Create products in the same category so they are related.
+		$term = wp_insert_term( 'Related Category', 'product_cat' );
+
+		$main_product = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Main Related Product',
+				'stock_status'  => ProductStockStatus::IN_STOCK,
+				'regular_price' => 10,
+			)
+		);
+		wp_set_object_terms( $main_product->get_id(), $term['term_id'], 'product_cat' );
+
+		$related_product = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Related Product In Same Category',
+				'stock_status'  => ProductStockStatus::IN_STOCK,
+				'regular_price' => 15,
+			)
+		);
+
+		wp_set_object_terms( $related_product->get_id(), $term['term_id'], 'product_cat' );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_param( 'related', $main_product->get_id() );
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$data        = $response->get_data();
+		$product_ids = array_map(
+			function ( $product ) {
+				return $product['id'];
+			},
+			$data
+		);
+
+		// Main product should not be in its own related products.
+		$this->assertNotContains( $main_product->get_id(), $product_ids );
+
+		// Related product should be returned.
+		$this->assertContains( $related_product->get_id(), $product_ids );
+	}
+
+	/**
+	 * @testdox Related query parameter returns empty when no related products exist.
+	 */
+	public function test_related_query_parameter_returns_empty_when_no_related() {
+		$fixtures = new FixtureData();
+
+		// Create a product with unique category (no other products).
+		$term = wp_insert_term( 'Unique Category ' . uniqid(), 'product_cat' );
+
+		$lonely_product = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Lonely Product',
+				'stock_status'  => ProductStockStatus::IN_STOCK,
+				'regular_price' => 10,
+			)
+		);
+		wp_set_object_terms( $lonely_product->get_id(), $term['term_id'], 'product_cat' );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_param( 'related', $lonely_product->get_id() );
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 0, $response->get_data() );
 	}
 }

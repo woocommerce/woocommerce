@@ -31,9 +31,11 @@ import { translateJQueryEventToNative } from '../../base/stores/woocommerce/lega
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-const { currency, placeholderImgSrc } = getConfig(
-	'woocommerce'
-) as WooCommerceConfig;
+const {
+	currency,
+	placeholderImgSrc,
+	nonOptimisticProperties = [],
+} = getConfig( 'woocommerce' ) as WooCommerceConfig;
 const {
 	onCartClickBehaviour,
 	checkoutUrl,
@@ -171,6 +173,9 @@ store< MiniCart >(
 	{
 		state: {
 			get totalItemsInCart() {
+				if ( nonOptimisticProperties.includes( 'cart.items_count' ) ) {
+					return woocommerceState.cart.items_count as number;
+				}
 				return woocommerceState.cart.items.reduce< number >(
 					( total, { quantity } ) => total + quantity,
 					0
