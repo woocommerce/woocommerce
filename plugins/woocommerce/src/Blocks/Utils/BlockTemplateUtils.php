@@ -751,11 +751,14 @@ class BlockTemplateUtils {
 
 		// Optimization note: populate template objects; optimized for subsequent calls, without spawning consequent SQLs.
 		$saved_templates = $request_level_cache[ $template_type ];
-		if ( is_array( $slugs ) && count( $slugs ) > 0 ) {
+		if ( is_array( $slugs ) && count( $slugs ) > 0 && count( $saved_templates ) > 0 ) {
 			$saved_templates = array_values( array_filter( $saved_templates, fn( $template ) => in_array( $template->post_name, $slugs, true ) ) );
+			if ( count( $saved_templates ) > 0 ) {
+				return array_map( fn( $template ) => self::build_template_result_from_post( $template ), $saved_templates );
+			}
 		}
 
-		return array_map( fn( $template ) => self::build_template_result_from_post( $template ), $saved_templates );
+		return array();
 	}
 
 	/**
