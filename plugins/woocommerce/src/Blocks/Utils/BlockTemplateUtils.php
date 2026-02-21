@@ -722,6 +722,7 @@ class BlockTemplateUtils {
 			$ids = ( new \WP_Query(
 				array(
 					'post_type'      => $template_type,
+					'post__not_in'   => array( 0 ), // Eliminates `Using join buffer (flat, BNL join)` on the posts table
 					'posts_per_page' => -1,
 					'fields'         => 'ids',
 					'orderby'        => 'none',
