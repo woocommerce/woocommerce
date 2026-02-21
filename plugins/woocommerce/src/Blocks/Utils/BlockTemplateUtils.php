@@ -717,7 +717,7 @@ class BlockTemplateUtils {
 		static $request_level_cache = array();
 
 		// TBD: invalidate the cache on 'clean_post_cache'.
-		// Optimization note: first query, which optimized for fetching IDs, to minimize temp/filesort overhead.
+		// Optimization note: first query, which optimized for fetching IDs, to minimize temporary/filesort overhead.
 		$ids = wp_cache_get( $template_type . '-ids', 'woocommerce_blocks' );
 		if ( false === $ids ) {
 			$ids = ( new \WP_Query( array(
