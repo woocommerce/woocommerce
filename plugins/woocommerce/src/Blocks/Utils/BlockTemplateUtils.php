@@ -749,7 +749,7 @@ class BlockTemplateUtils {
 			) ) )->posts;
 		}
 
-		// Optimization note: optimized for subsequent calls, while not performing repetitive SQLs.
+		// Optimization note: populate template objects, optimized for subsequent calls, while not performing repetitive SQLs.
 		$saved_templates = $request_level_cache[ $template_type ];
 		if ( is_array( $slugs ) && count( $slugs ) > 0 ) {
 			$saved_templates = array_values( array_filter( $saved_templates, fn( $template ) => in_array( $template->post_name, $slugs, true ) ) );
