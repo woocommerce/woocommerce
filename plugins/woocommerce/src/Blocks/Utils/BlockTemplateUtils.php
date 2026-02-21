@@ -733,7 +733,7 @@ class BlockTemplateUtils {
 					),
 				),
 			) ) )->posts;
-			wp_cache_set( $template_type . '-ids', $ids, 'woocommerce_blocks', DAY_IN_SECONDS );
+			wp_cache_set( $template_type . '-ids', $ids, 'woocommerce_blocks' );
 			$request_level_cache[ $template_type ] = null;
 		}
 
