@@ -715,6 +715,7 @@ class BlockTemplateUtils {
 	 */
 	public static function get_block_templates_from_db( $slugs = array(), $template_type = 'wp_template' ) {
 		static $request_level_post_cache = array();
+
 		if ( ! isset( $request_level_post_cache[ $template_type ] ) ) {
 			// Optimization note: the query is one of the slowest on checkout pages, hence "prefetch style" to ensure the
 			// constant number of such queries. Also, the query args are optimized for `build_template_result_from_post`.
@@ -741,12 +742,13 @@ class BlockTemplateUtils {
 		}
 
 		if ( ! empty ( $saved_templates ) ) {
-			static $request_level_dto_cache = array();
-			$block_templates                = array();
+			static $request_level_block_template_cache = array();
+
+			$block_templates                           = array();
 			foreach ( $saved_templates as $template ) {
-				$id                             = $template->ID;
-				$request_level_dto_cache[ $id ] = $request_level_dto_cache[ $id ] ?? self::build_template_result_from_post( $template );
-				$block_templates[]              = $request_level_dto_cache[ $id ];
+				$id                                        = $template->ID;
+				$request_level_block_template_cache[ $id ] = $request_level_block_template_cache[ $id ] ?? self::build_template_result_from_post( $template );
+				$block_templates[]                         = $request_level_block_template_cache[ $id ];
 			}
 			return $block_templates;
 		}
