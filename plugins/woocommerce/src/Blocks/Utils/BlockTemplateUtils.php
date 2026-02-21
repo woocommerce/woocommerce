@@ -714,6 +714,7 @@ class BlockTemplateUtils {
 	 * @return \WP_Block_Template[] An array of found templates.
 	 */
 	public static function get_block_templates_from_db( $slugs = array(), $template_type = 'wp_template' ) {
+		// TBD: use cache api ('woocommerce_blocks' group) to cache post ids and probably invalidate it on 'clean_post_cache'.
 		static $request_level_post_cache = array();
 
 		if ( ! isset( $request_level_post_cache[ $template_type ] ) ) {
