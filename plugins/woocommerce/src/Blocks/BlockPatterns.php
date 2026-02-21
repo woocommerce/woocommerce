@@ -126,6 +126,9 @@ class BlockPatterns {
 	 * @param int      $post_id Post ID.
 	 * @param \WP_Post $post    Post object.
 	 *
+	 * @internal
+	 * @since 10.7.0
+	 *
 	 * @return void
 	 */
 	public function invalidate_db_block_patterns_cache( $post_id, $post ): void {
