@@ -724,7 +724,7 @@ class BlockTemplateUtils {
 				'posts_per_page'         => -1,
 				'orderby'                => 'none',
 				'no_found_rows'          => true,
-				'tax_query'      => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+				'tax_query'              => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 					array(
 						'taxonomy' => 'wp_theme',
 						'field'    => 'name',
@@ -738,7 +738,7 @@ class BlockTemplateUtils {
 
 		$saved_woo_templates = $request_level_cache[ $template_type ];
 		if ( is_array( $slugs ) && count( $slugs ) > 0 ) {
-			$saved_woo_templates = array_filter( $saved_woo_templates, fn( $template ) => in_array( $template->post_name, $slugs ) );
+			$saved_woo_templates = array_filter( $saved_woo_templates, fn( $template ) => in_array( $template->post_name, $slugs, true ) );
 		}
 
 		return array_map( fn( $template ) => self::build_template_result_from_post( $template ), $saved_woo_templates );
