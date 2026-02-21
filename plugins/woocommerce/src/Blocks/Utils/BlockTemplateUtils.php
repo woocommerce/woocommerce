@@ -719,10 +719,12 @@ class BlockTemplateUtils {
 		// Optimization note: first query, which optimized for fetching IDs, to minimize temporary/filesort overhead.
 		$ids = wp_cache_get( $template_type . '-ids', 'woocommerce_blocks' );
 		if ( false === $ids ) {
+			// 'post__not_in' eliminates `Using join buffer (flat, BNL join)` on the posts table; as the table grows the
+			// template type entries still remain a handful (small selectivity) enabling this query performance.
 			$ids = ( new \WP_Query(
 				array(
 					'post_type'      => $template_type,
-					'post__not_in'   => array( 0 ), // Eliminates `Using join buffer (flat, BNL join)` on the posts table.
+					'post__not_in'   => array( 0 ),
 					'posts_per_page' => -1,
 					'fields'         => 'ids',
 					'orderby'        => 'none',
