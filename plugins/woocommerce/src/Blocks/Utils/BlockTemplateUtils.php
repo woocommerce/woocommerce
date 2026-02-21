@@ -719,7 +719,7 @@ class BlockTemplateUtils {
 		if ( ! isset( $request_level_post_cache[ $template_type ] ) ) {
 			// Optimization note: the query is one of the slowest on checkout pages, hence "prefetch style" to ensure the
 			// constant number of such queries. Also, the query args are optimized for `build_template_result_from_post`.
-			$check_query_args                      = array(
+			$check_query_args                           = array(
 				'post_type'              => $template_type,
 				'posts_per_page'         => -1,
 				'orderby'                => 'none',
@@ -741,10 +741,10 @@ class BlockTemplateUtils {
 			$saved_templates = array_values( array_filter( $saved_templates, fn( $template ) => in_array( $template->post_name, $slugs, true ) ) );
 		}
 
-		if ( ! empty ( $saved_templates ) ) {
+		if ( ! empty( $saved_templates ) ) {
 			static $request_level_block_template_cache = array();
 
-			$block_templates                           = array();
+			$block_templates = array();
 			foreach ( $saved_templates as $template ) {
 				$id                                        = $template->ID;
 				$request_level_block_template_cache[ $id ] = $request_level_block_template_cache[ $id ] ?? self::build_template_result_from_post( $template );
