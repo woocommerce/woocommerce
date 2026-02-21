@@ -714,17 +714,17 @@ class BlockTemplateUtils {
 	 * @return \WP_Block_Template[] An array of found templates.
 	 */
 	public static function get_block_templates_from_db( $slugs = array(), $template_type = 'wp_template' ) {
-		// TBD: use cache api ('woocommerce_blocks' group) to cache post ids and probably invalidate it on 'clean_post_cache'.
-		static $request_level_post_cache = array();
+		static $request_level_cache = array();
 
-		if ( ! isset( $request_level_post_cache[ $template_type ] ) ) {
-			// Optimization note: the query is one of the slowest on checkout pages, hence "prefetch style" to ensure the
-			// constant number of such queries. Also, the query args are optimized for `build_template_result_from_post`.
-			$check_query_args                           = array(
+		// TBD: invalidate the cache on 'clean_post_cache'.
+		// Optimization note: first query, which optimized for fetching IDs, to minimize temp/filesort overhead.
+		$ids = wp_cache_get( $template_type . '-ids', 'woocommerce_blocks' );
+		if ( false === $ids ) {
+			$ids = ( new \WP_Query( array(
 				'post_type'              => $template_type,
 				'posts_per_page'         => -1,
+				'fields'                 => 'ids',
 				'orderby'                => 'none',
-				'no_found_rows'          => true,
 				'tax_query'              => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 					array(
 						'taxonomy' => 'wp_theme',
@@ -732,12 +732,25 @@ class BlockTemplateUtils {
 						'terms'    => array( self::DEPRECATED_PLUGIN_SLUG, self::PLUGIN_SLUG, get_stylesheet() ),
 					),
 				),
-				'update_post_meta_cache' => false,
-			);
-			$request_level_post_cache[ $template_type ] = ( new \WP_Query( $check_query_args ) )->posts;
+			) ) )->posts;
+			wp_cache_set( $template_type . '-ids', $ids, 'woocommerce_blocks', DAY_IN_SECONDS );
+			$request_level_cache[ $template_type ] = null;
 		}
 
-		$saved_templates = $request_level_post_cache[ $template_type ];
+		// Optimization note: second query, which perform the optimized templates fetching (no grouping is involved).
+		if ( null === ( $request_level_cache[ $template_type ] ?? null ) ) {
+			$request_level_cache[ $template_type ] = ( new \WP_Query( array(
+				'post_type'              => $template_type,
+				'post__in'               => $ids,
+				'posts_per_page'         => -1,
+				'orderby'                => 'none',
+				'no_found_rows'          => true,
+				'update_post_meta_cache' => false,
+			) ) )->posts;
+		}
+
+		// Optimization note: optimized for subsequent calls, while not performing repetitive SQLs.
+		$saved_templates = $request_level_cache[ $template_type ];
 		if ( is_array( $slugs ) && count( $slugs ) > 0 ) {
 			$saved_templates = array_values( array_filter( $saved_templates, fn( $template ) => in_array( $template->post_name, $slugs, true ) ) );
 		}
