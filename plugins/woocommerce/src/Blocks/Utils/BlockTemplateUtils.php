@@ -742,20 +742,7 @@ class BlockTemplateUtils {
 			$saved_templates = array_values( array_filter( $saved_templates, fn( $template ) => in_array( $template->post_name, $slugs, true ) ) );
 		}
 
-		if ( ! empty( $saved_templates ) ) {
-			// TBD: re-evaluate complexity vs cache hit/miss ratio and drop cache if misses are dominating.
-			static $request_level_block_template_cache = array();
-
-			$block_templates = array();
-			foreach ( $saved_templates as $template ) {
-				$id                                        = $template->ID;
-				$request_level_block_template_cache[ $id ] = $request_level_block_template_cache[ $id ] ?? self::build_template_result_from_post( $template );
-				$block_templates[]                         = $request_level_block_template_cache[ $id ];
-			}
-			return $block_templates;
-		}
-
-		return array();
+		return array_map( fn( $template ) => self::build_template_result_from_post( $template ), $saved_templates );
 	}
 
 	/**
