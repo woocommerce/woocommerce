@@ -2,6 +2,10 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.8.1](https://github.com/woocommerce/email-editor/releases/tag/2.8.1) - 2026-02-20 
+
+-   Patch - Fix unbounded static cache memory leaks in vendor-prefixed CSS inlining dependencies (emogrifier and symfony/css-selector) for long-running processes. [#63365]
+
 ## [2.8.0](https://github.com/woocommerce/email-editor/releases/tag/2.8.0) - 2026-02-17 
 
 -   Minor - Fix spacing issues in email editor product collection rendering. [#63177]
