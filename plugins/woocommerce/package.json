@@ -664,7 +664,7 @@
 					"name": "Metrics",
 					"testType": "performance",
 					"command": "test:metrics:ci",
-					"optional": false,
+					"optional": true,
 					"changes": [
 						"composer.json",
 						"composer.lock",
@@ -682,7 +682,7 @@
 						"@woocommerce/classic-assets"
 					],
 					"testEnv": {
-						"start": "env:test"
+						"start": "env:perf"
 					},
 					"events": [
 						"push",
