@@ -74,7 +74,6 @@ class BlockPatterns {
 		$this->ptk_patterns_store = $ptk_patterns_store;
 
 		add_action( 'init', array( $this, 'register_block_patterns' ) );
-		add_action( 'clean_post_cache', array( $this, 'invalidate_db_block_patterns_cache' ), 10, 2 );
 
 		if ( Features::is_enabled( 'pattern-toolkit-full-composability' ) ) {
 			add_action( 'init', array( $this, 'register_ptk_patterns' ) );
@@ -116,24 +115,6 @@ class BlockPatterns {
 			$pattern['content'] = $content;
 
 			$this->pattern_registry->register_block_pattern( $pattern_path, $pattern );
-		}
-	}
-
-	/**
-	 * Invalidates cache entries related to fetching block templates from DB. Please reference to
-	 * `Utils\BlockTemplateUtils::get_block_templates_from_db` for further details.
-	 *
-	 * @param int      $post_id Post ID.
-	 * @param \WP_Post $post    Post object.
-	 *
-	 * @internal
-	 * @since 10.7.0
-	 *
-	 * @return void
-	 */
-	public function invalidate_db_block_patterns_cache( $post_id, $post ): void {
-		if ( $post instanceof \WP_Post && in_array( $post->post_type, array( 'wp_template_part', 'wp_template' ), true ) ) {
-			wp_cache_delete( $post->post_type . '-ids', 'woocommerce_blocks' );
 		}
 	}
 
