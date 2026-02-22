@@ -319,6 +319,38 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test `get_block_templates_from_db`: workflow and properly handling input parameters.
+	 */
+	public function test_get_block_templates_from_db(): void {
+		$attributes = array(
+			'post_name'   => 'slug',
+			'post_type'   => 'wp_template',
+			'post_title'  => 'title',
+			'post_status' => 'publish',
+		);
+		$template = $this->createPost( $attributes, BlockTemplateUtils::PLUGIN_SLUG );
+
+		// Verify fetching all templates and caches population correctness.
+		$templates = BlockTemplateUtils::get_block_templates_from_db();
+		$this->assertSame( array( $template->ID ), wp_cache_get( 'wp_template-ids', 'woocommerce_blocks' ) );
+		$this->assertCount( 1, $templates );
+		$this->assertSame( 'slug', $templates[0]->slug );
+
+		// Verify request-level cache hit handling correctness.
+		$templates = BlockTemplateUtils::get_block_templates_from_db( array( 'slug' ), 'wp_template' );
+		$this->assertCount( 1, $templates );
+		$this->assertSame( 'slug', $templates[0]->slug );
+
+		// Verify request-level cache miss handling correctness: no templates with specified slug.
+		$templates = BlockTemplateUtils::get_block_templates_from_db( array( 'oops' ), 'wp_template_part' );
+		$this->assertCount( 0, $templates );
+
+		// Verify request-level cache miss handling correctness: no templates with the specified type.
+		$templates = BlockTemplateUtils::get_block_templates_from_db( array( 'slug' ), 'wp_template_part' );
+		$this->assertCount( 0, $templates );
+	}
+
+	/**
 	 * Runs the migration that happen after a plugin update
 	 *
 	 * @return void
@@ -334,7 +366,7 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 	 * @param array  $post Post data.
 	 * @param string $theme Theme name.
 	 *
-	 * @return WP_Post
+	 * @return \WP_Post
 	 */
 	private function createPost( $post, $theme ) {
 		$term = wp_insert_term( $theme, 'wp_theme' );
