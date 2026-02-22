@@ -747,10 +747,10 @@ class BlockTemplateUtils {
 
 		// Optimization note: second query, which optimized for fetching templates data, to minimize grouping overhead.
 		if ( null === ( $request_level_cache[ $template_type ][ $theme ] ?? null ) ) {
-			$request_level_cache[ $template_type ][ $theme ] = empty( $ids ) ? array() : ( new \WP_Query(
+			$request_level_cache[ $template_type ][ $theme ] = empty( $ids[ $theme ] ) ? array() : ( new \WP_Query(
 				array(
 					'post_type'              => $template_type,
-					'post__in'               => $ids,
+					'post__in'               => $ids[ $theme ],
 					'posts_per_page'         => -1,
 					'no_found_rows'          => true,
 					'update_post_meta_cache' => false,
