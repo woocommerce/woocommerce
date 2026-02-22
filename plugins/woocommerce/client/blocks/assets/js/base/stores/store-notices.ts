@@ -93,9 +93,10 @@ const { state } = store< Store >(
         state: {
             get role() {
                 const context = getStoreNoticeContext();
+                // Fix: Added optional chaining on notice property
                 if (
-                    context?.notice.type === 'error' ||
-                    context?.notice.type === 'success'
+                    context?.notice?.type === 'error' ||
+                    context?.notice?.type === 'success'
                 ) {
                     return 'alert';
                 }
@@ -104,15 +105,18 @@ const { state } = store< Store >(
             },
             get isError() {
                 const context = getStoreNoticeContext();
-                return context?.notice.type === 'error';
+                // Fix: Added optional chaining on notice property
+                return context?.notice?.type === 'error';
             },
             get isSuccess() {
                 const context = getStoreNoticeContext();
-                return context?.notice.type === 'success';
+                // Fix: Added optional chaining on notice property
+                return context?.notice?.type === 'success';
             },
             get isInfo() {
                 const context = getStoreNoticeContext();
-                return context?.notice.type === 'notice';
+                // Fix: Added optional chaining on notice property
+                return context?.notice?.type === 'notice';
             },
             get notices() {
                 const productCollectionContext = getProductCollectionContext();
@@ -154,16 +158,17 @@ const { state } = store< Store >(
             removeNotice: ( noticeId: string | PointerEvent ) => {
                 const { notices } = state;
 
-                noticeId =
+                // Fix: Use local variable for better type safety
+                const resolvedId =
                     typeof noticeId === 'string'
                         ? noticeId
                         : getStoreNoticeContext()?.notice?.id;
-                
+
                 // If noticeId is not found (e.g., context was null), do nothing.
-                if ( ! noticeId ) return;
+                if ( ! resolvedId ) return;
 
                 const index = notices.findIndex(
-                    ( { id } ) => id === noticeId
+                    ( { id } ) => id === resolvedId
                 );
                 if ( index !== -1 ) {
                     notices.splice( index, 1 );
@@ -176,6 +181,7 @@ const { state } = store< Store >(
                 const { ref } = getElement();
 
                 if ( ref && context?.notice ) {
+                    // Note: Notice content is sanitized server-side via wp_kses.
                     ref.innerHTML = context.notice.notice;
                 }
             },
