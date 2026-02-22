@@ -715,12 +715,11 @@ class BlockTemplateUtils {
 	 */
 	public static function get_block_templates_from_db( $slugs = array(), $template_type = 'wp_template' ) {
 		static $request_level_cache = array();
-		$bypass_cache               = false;
 
 		// Optimization note: first query, which optimized for fetching IDs, to minimize temporary/filesort overhead.
 		$theme = get_stylesheet();
 		$ids   = wp_cache_get( $template_type . '-ids', 'woocommerce_blocks' );
-		if ( ! isset( $ids[ $theme ] ) || $bypass_cache ) {
+		if ( ! isset( $ids[ $theme ] ) ) {
 			// 'post__not_in' guarantees using `type_status_date` index on the posts table; as the table grows the
 			// template type entries still remain a handful (small selectivity) enabling this query performance.
 			$ids           = false === $ids ? array() : $ids;
