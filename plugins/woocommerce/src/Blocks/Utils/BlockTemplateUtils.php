@@ -715,7 +715,7 @@ class BlockTemplateUtils {
 	 */
 	public static function get_block_templates_from_db( $slugs = array(), $template_type = 'wp_template' ) {
 		static $request_level_cache = array();
-		$bypass_cache               = true;
+		$bypass_cache               = false;
 
 		// Optimization note: first query, which optimized for fetching IDs, to minimize temporary/filesort overhead.
 		$ids = wp_cache_get( $template_type . '-ids', 'woocommerce_blocks' );
