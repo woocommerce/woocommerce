@@ -718,7 +718,7 @@ class BlockTemplateUtils {
 
 		// Optimization note: first query, which optimized for fetching IDs, to minimize temporary/filesort overhead.
 		$ids = wp_cache_get( $template_type . '-ids', 'woocommerce_blocks' );
-		if ( false === $ids ) {
+		if ( false === $ids || true ) {
 			// 'post__not_in' guarantees using `type_status_date` index on the posts table; as the table grows the
 			// template type entries still remain a handful (small selectivity) enabling this query performance.
 			$ids = ( new \WP_Query(
