@@ -294,21 +294,10 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 
 		// Add additional applied coupon information.
 		if ( $item instanceof WC_Order_Item_Coupon ) {
-			$temp_coupon = new WC_Coupon();
-			$coupon_info = $item->get_meta( 'coupon_info', true );
-			if ( $coupon_info ) {
-				$temp_coupon->set_short_info( $coupon_info );
-			} else {
-				$coupon_meta = $item->get_meta( 'coupon_data', true );
-				if ( $coupon_meta ) {
-					$temp_coupon->set_props( (array) $coupon_meta );
-
-				}
-			}
-
-			$data['discount_type']  = $temp_coupon->get_discount_type();
-			$data['nominal_amount'] = (float) $temp_coupon->get_amount();
-			$data['free_shipping']  = $temp_coupon->get_free_shipping();
+			$coupon                 = WC_Coupon::from_order_item( $item );
+			$data['discount_type']  = $coupon->get_discount_type();
+			$data['nominal_amount'] = (float) $coupon->get_amount();
+			$data['free_shipping']  = $coupon->get_free_shipping();
 		}
 
 		$data['meta_data'] = array_map(

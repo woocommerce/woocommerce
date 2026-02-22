@@ -1,0 +1,11 @@
+{
+    "label": "Woo Marketplace",
+    "customProps" : {
+      "id" : "woo-marketplace"
+    },
+    "link": {
+      "type": "generated-index",
+      "title": "Woo Marketplace",
+      "description": "Documentation for developers publishing extensions, themes, and integrations on the Woo Marketplace."
+    }
+}

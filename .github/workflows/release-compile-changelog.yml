@@ -5,6 +5,10 @@ on:
       version:
         description: 'Version (in X.Y or X.Y.Z format). Branch "release/{x.y.z}" or "release/{x.y}" should already exist.'
         required: true
+      release_date:
+        description: 'Release date in YYYY-MM-DD format. If not provided, the current date will be used.'
+        required: false
+        default: ''        
       append_changelog:
         description: 'Append or replace entries in changelog?'
         type: choice
@@ -14,10 +18,6 @@ on:
           - append
         required: false
         default: auto
-      release_date:
-        description: 'Release date in YYYY-MM-DD format. If not provided, the current date will be used.'
-        required: false
-        default: ''
 
 concurrency:
   group: release-compile-changelog-${{ inputs.version }}

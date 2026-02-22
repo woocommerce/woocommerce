@@ -59,7 +59,7 @@ For RC and stable releases, deploying to our staging environment and monitoring 
 
 #### How to proceed once the bug fix is merged into the release branch?
 
-1. **Create a new tracking issue** for the new version (e.g., `-rc.2` if the bug was detected during `-rc.1`, or `x.y.2` if detected while monitoring `x.y.1`). Do not reuse the existing tracking issue.
+1. **Create a new tracking issue** for the new version (e.g., `-rc.2` if the bug was detected during `-rc.1`, or `x.y.2` if detected while monitoring `x.y.1`) by running the [`Release: Create Tracking Issue`](https://github.com/woocommerce/woocommerce/actions/workflows/release-create-tracking-issue.yml) workflow. Do not reuse the existing tracking issue.
 2. **Follow the release procedure as normal** for the new version.
 3. **Publish all draft releases** for the affected version series. Even if the prior version wasn't made publicly available, it must be published along with the valid version. Each version will have its own changelog section.
 
