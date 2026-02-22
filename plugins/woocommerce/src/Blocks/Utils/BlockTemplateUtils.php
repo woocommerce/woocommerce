@@ -714,7 +714,7 @@ class BlockTemplateUtils {
 	 * @return \WP_Block_Template[] An array of found templates.
 	 */
 	public static function get_block_templates_from_db( $slugs = array(), $template_type = 'wp_template' ) {
-		static $request_level_cache = array();
+		$request_level_cache = array();
 
 		// Optimization note: first query, which optimized for fetching IDs, to minimize temporary/filesort overhead.
 		$ids = wp_cache_get( $template_type . '-ids', 'woocommerce_blocks' );
@@ -758,9 +758,6 @@ class BlockTemplateUtils {
 
 		// Optimization note: populate template objects; optimized for subsequent calls, without spawning consequent SQLs.
 		$saved_templates = $request_level_cache[ $template_type ];
-
-		$request_level_cache[ $template_type ] = null;
-
 		if ( ! empty( $saved_templates ) && is_array( $slugs ) && array() !== $slugs ) {
 			$saved_templates = array_filter( $saved_templates, fn( $template ) => in_array( $template->post_name, $slugs, true ) );
 		}
