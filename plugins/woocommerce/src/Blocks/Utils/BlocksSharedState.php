@@ -24,7 +24,7 @@ class BlocksSharedState {
 	private static string $consent_statement = 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce';
 
 	/**
-	 * The namespace for the config.
+	 * The namespace for interactivity config and state.
 	 *
 	 * @var string
 	 */
@@ -113,8 +113,13 @@ class BlocksSharedState {
 				self::prevent_cache();
 			}
 
+			wp_interactivity_config(
+				self::$settings_namespace,
+				array( 'nonOptimisticProperties' => self::get_non_optimistic_properties() )
+			);
+
 			wp_interactivity_state(
-				'woocommerce',
+				self::$settings_namespace,
 				array(
 					'cart'     => self::$blocks_shared_cart_state,
 					'nonce'    => wp_create_nonce( 'wc_store_api' ),
@@ -161,6 +166,28 @@ class BlocksSharedState {
 				'weekdaysShort' => array_values( $wp_locale->weekday_abbrev ),
 			),
 		);
+	}
+
+	/**
+	 * Get cart properties that cannot use optimistic UI on the frontend.
+	 *
+	 * Detects whether third-party code has registered callbacks on filters that
+	 * modify cart property values. When callbacks are present, the corresponding
+	 * property must use the server-computed value instead of a client-side
+	 * optimistic computation.
+	 *
+	 * `@return` string[] List of cart property paths (dot-delimited) that cannot be optimistic.
+	 *
+	 * @return string[] List of cart property paths (dot-delimited) that cannot be optimistic.
+	 */
+	private static function get_non_optimistic_properties(): array {
+		$properties = array();
+
+		if ( has_filter( 'woocommerce_cart_contents_count' ) ) {
+			$properties[] = 'cart.items_count';
+		}
+
+		return $properties;
 	}
 
 	/**
