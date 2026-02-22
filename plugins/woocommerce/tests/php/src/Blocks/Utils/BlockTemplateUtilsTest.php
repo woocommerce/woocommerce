@@ -353,6 +353,7 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 
 		// Verify request-level cache miss handling correctness: no templates with the specified type.
 		$templates = BlockTemplateUtils::get_block_templates_from_db( array( 'slug' ), 'wp_template_part' );
+		$this->assertSame( array(), wp_cache_get( 'wp_template_part-ids', 'woocommerce_blocks' ) );
 		$this->assertCount( 0, $templates );
 	}
 
