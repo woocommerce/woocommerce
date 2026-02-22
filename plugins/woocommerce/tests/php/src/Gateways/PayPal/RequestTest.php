@@ -116,6 +116,40 @@ class RequestTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test create_paypal_order returns null when shipping preference is SET_PROVIDED_ADDRESS but order has no shipping address.
+	 *
+	 * @return void
+	 */
+	public function test_create_paypal_order_returns_null_when_set_provided_address_but_no_shipping(): void {
+		$order = \WC_Helper_Order::create_order();
+		$order->set_shipping_country( 'SX' );
+		$order->set_shipping_first_name( 'John' );
+		$order->set_shipping_last_name( 'Doe' );
+		$order->set_shipping_address_1( '123 Main St' );
+		$order->set_shipping_address_2( 'Apt 1' );
+		$order->set_shipping_city( 'Anytown' );
+		$order->set_shipping_state( 'Anystate' );
+		$order->set_shipping_postcode( '12345' );
+		$order->save();
+
+		$previous_settings            = get_option( 'woocommerce_paypal_settings', array() );
+		$settings                     = $previous_settings;
+		$settings['address_override'] = 'yes';
+		$settings['send_shipping']    = 'yes';
+		update_option( 'woocommerce_paypal_settings', $settings );
+
+		add_filter( 'pre_http_request', array( $this, 'create_paypal_order_success' ), 10, 3 );
+
+		$request = new PayPalRequest( new \WC_Gateway_Paypal() );
+		$result  = $request->create_paypal_order( $order );
+
+		remove_filter( 'pre_http_request', array( $this, 'create_paypal_order_success' ) );
+		update_option( 'woocommerce_paypal_settings', $previous_settings );
+
+		$this->assertNull( $result, 'create_paypal_order should return null when SET_PROVIDED_ADDRESS is set but order has no shipping address' );
+	}
+
+	/**
 	 * Check that the create_paypal_order params are correct.
 	 *
 	 * @param bool   $value      Original value.
