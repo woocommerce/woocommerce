@@ -1,44 +1,23 @@
 /**
  * External dependencies
  */
-import { store, getConfig, withSyncEvent } from '@wordpress/interactivity';
+import { store, withSyncEvent } from '@wordpress/interactivity';
 
 const BLOCK_NAME = 'woocommerce/catalog-sorting';
-
-/**
- * Check if we should use client-side navigation with Interactivity API.
- *
- * @return {boolean} True if client-side navigation should be used.
- */
-const shouldUseClientNavigation = (): boolean => {
-	const sharedConfig = getConfig( 'woocommerce' );
-	const isBlockTheme = sharedConfig?.isBlockTheme || false;
-	const needsRefresh = sharedConfig?.needsRefreshForInteractivityAPI || false;
-
-	return isBlockTheme && ! needsRefresh;
-};
 
 const catalogSortingStore = {
 	actions: {
 		/**
-		 * Prevent default form submission only when using client-side navigation.
+		 * Prevent default form submission.
 		 */
 		preventSubmit: withSyncEvent( ( event: Event ) => {
-			if ( shouldUseClientNavigation() ) {
-				event.preventDefault();
-			}
+			event.preventDefault();
 		} ),
 
 		/**
 		 * Handle sort order change.
 		 */
 		handleSortChange: withSyncEvent( function* ( event: Event ): Generator {
-			// Only intercept when using client-side navigation.
-			if ( ! shouldUseClientNavigation() ) {
-				// Let legacy handler and form submission do their job.
-				return;
-			}
-
 			// Stop propagation to prevent jQuery handler from seeing the event.
 			event.stopPropagation();
 
