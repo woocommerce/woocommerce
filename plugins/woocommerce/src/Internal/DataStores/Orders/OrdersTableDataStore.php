@@ -2140,7 +2140,7 @@ FROM $order_meta_table
 		$this->set_custom_taxonomies( $order, $default_taxonomies );
 
 		if ( $order->has_cogs() && $this->cogs_is_enabled() ) {
-			$this->save_cogs_data( $order );
+			$this->save_cogs_data( $order, ! $only_changes || array_key_exists( 'cogs_total_value', $changes ) );
 		}
 
 		$this->clear_cached_data( array( $order->get_id() ) );
@@ -2149,10 +2149,11 @@ FROM $order_meta_table
 	/**
 	 * Save the Cost of Goods Sold value of a given order to the database.
 	 *
-	 * @param WC_Abstract_Order $order The order to save the COGS value for.
+	 * @param WC_Abstract_Order $order              The order to save the COGS value for.
+	 * @param bool              $cogs_value_changed Whether the CoGS value was changed through the order object API.
 	 */
-	private function save_cogs_data( WC_Abstract_Order $order ) {
-		$cogs_value = $order->get_cogs_total_value();
+	private function save_cogs_data( WC_Abstract_Order $order, bool $cogs_value_changed ): void {
+		$cogs_value_original = $order->get_cogs_total_value();
 
 		/**
 		 * Filter to customize the Cost of Goods Sold value that gets saved for a given order,
@@ -2160,29 +2161,31 @@ FROM $order_meta_table
 		 *
 		 * @since 9.5.0
 		 *
-		 * @param float|null $cogs_value The value to be written to the database. If returned as null, nothing will be written.
-		 * @param WC_Abstract_Order $item The order for which the value is being saved.
+		 * @param float             $cogs_value The value to be written to the database. If returned as null, nothing will be written.
+		 * @param WC_Abstract_Order $order      The order for which the value is being saved.
 		 */
-		$cogs_value = apply_filters( 'woocommerce_save_order_cogs_value', $cogs_value, $order );
-		if ( is_null( $cogs_value ) ) {
+		$cogs_value = apply_filters( 'woocommerce_save_order_cogs_value', $cogs_value_original, $order );
+		if ( null === $cogs_value ) {
 			return;
 		}
 
-		$existing_meta = $this->data_store_meta->get_metadata_by_key( $order, '_cogs_total_value' );
-
-		if ( 0.0 === $cogs_value && $existing_meta ) {
-			$existing_meta = current( $existing_meta );
-			$this->data_store_meta->delete_meta( $order, $existing_meta );
-		} elseif ( $existing_meta ) {
+		$sync_meta = $cogs_value_changed || $cogs_value_original !== (float) $cogs_value;
+		if ( $sync_meta ) {
+			$existing_meta = $this->data_store_meta->get_metadata_by_key( $order, '_cogs_total_value' );
+			if ( 0.0 === $cogs_value && $existing_meta ) {
+				$existing_meta = current( $existing_meta );
+				$this->data_store_meta->delete_meta( $order, $existing_meta );
+			} elseif ( $existing_meta ) {
 				$existing_meta        = current( $existing_meta );
 				$existing_meta->key   = '_cogs_total_value';
 				$existing_meta->value = $cogs_value;
 				$this->data_store_meta->update_meta( $order, $existing_meta );
-		} else {
-			$meta        = new \WC_Meta_Data();
-			$meta->key   = '_cogs_total_value';
-			$meta->value = $cogs_value;
-			$this->data_store_meta->add_meta( $order, $meta );
+			} else {
+				$meta        = new \WC_Meta_Data();
+				$meta->key   = '_cogs_total_value';
+				$meta->value = $cogs_value;
+				$this->data_store_meta->add_meta( $order, $meta );
+			}
 		}
 	}
 

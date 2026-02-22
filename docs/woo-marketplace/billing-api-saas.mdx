@@ -1,0 +1,438 @@
+---
+sidebar_position: 10
+sidebar_label: 'Billing API for SaaS products'
+---
+
+# Billing API for SaaS products
+
+## Introduction
+
+Woo Marketplace's Billing API enables you to sell subscriptions for your SaaS app on the Woo Marketplace, via our in-house billing and subscription system. Woo Marketplace's Billing API supports recurring payments, free trials, upgrades, downgrades, and one-time payments.
+
+Follow this guide to get your billing powered by WooCommerce's world-class billing system, and listed on the Woo Marketplace. You can integrate the Billing API with your existing sign-up and purchase flows, or create a different experience specifically for customers coming from WooCommerce.com.
+
+[View API Documentation on Apiary](https://woocommercecomsaasbillingapi.docs.apiary.io/)
+
+## Set up your SaaS App
+
+To complete integrating WooCommerce Billing into your SaaS app, you'll need a sandbox and the API reference. The various API flows are described below.
+
+To get started, please [submit your product](https://woocommerce.com/document/submitting-your-product-to-the-woo-marketplace/) to the WooCommerce Marketplace. Include details about your product and upload a zip file to test whether your product utilizes a WordPress plugin to connect to your app. We will review your product to determine if it is a good fit before granting sandbox access.
+
+### Sandbox for testing
+
+The integration with the SaaS Billing API should be implemented and tested inside the sandbox, before being opened up for production usage. The differences between production and sandbox are the domain (sandbox.woocommerce.com) and the API credentials. Switching from sandbox to production should just be a matter of changing the domain name, API key and secret.
+
+**Sandbox domain:** `https://sandbox.woocommerce.com/`
+**Base URL for API on the sandbox:** `https://sandbox.woocommerce.com/wp-json/wccom/billing/1.0/`
+
+### Local Development
+
+There are a couple of things to consider when developing locally:
+
+1. The `return_url` API parameter doesn't accept `localhost` as a value. You can map the localhost IP to a domain in your `hosts` file and use that instead. Example: `127.0.0.1 app.local`
+
+2. Your app must be publicly accessible for webhook calls to reach it. One option is to use a service such as ngrok.com to expose it to the internet. You don't need the `hosts` file mapping in this case. You'll use the generated public URL instead.
+
+### SaaS application settings
+
+Once your submission is advanced from Business Review, we will create an app for you on our sandbox to complete the integration. From this sandbox vendor account, you can view and edit your SaaS application settings. After setup, you'll be able to log in to your vendor dashboard and access your SaaS application settings.
+
+Navigate to **SaaS Apps** to view the list of applications. You'll likely have only one.
+
+![SaaS Apps list](./_media/image-85.png)
+
+To access the application's settings, click on the API key. On the settings page, you can view and copy your API key and secret, generate a new API key & secret pair, and add/edit/remove the webhook URL associated with your application.
+
+![SaaS application settings](./_media/image-86.png)
+
+### API reference
+
+**API reference documentation:** [https://woocommercecomsaasbillingapi.docs.apiary.io/](https://woocommercecomsaasbillingapi.docs.apiary.io/)
+
+You can download the OpenAPI specification file from the documentation link above and use it with any tool that supports this standard. For example, you can import it into Postman to get a ready-to-use collection of requests.
+
+Please note that all paths in the reference documentation are relative to the base URL. For example, the `/subscriptions` endpoint will be resolved into the full URL `https://woocommerce.com/wp-json/wccom/billing/1.0/subscriptions`.
+
+### Authentication
+
+Each vendor application is issued a set of credentials (API key and secret) during onboarding. To authenticate API requests, you need to use the [Basic](https://tools.ietf.org/html/rfc7617) authentication method and pass the following HTTP header with your request:
+
+`Authorization: Basic base64encode(api_key:api_secret)`
+
+Here's an example of a POST request to the /subscriptions endpoint to initiate a plan purchase (please replace ENCODED_KEY_SECRET_STRING with your own secret key):
+
+```bash
+curl --request POST \
+  --url https://sandbox.woocommerce.com/wp-json/wccom/billing/1.0/subscriptions \
+  --header 'Authorization: Basic ENCODED_KEY_SECRET_STRING' \
+  --header 'Content-Type: application/json' \
+  --data '{"name": "test plan", "price": 199.99, "billing_period": "year", "billing_interval": 1, "return_url": "https://example.com"}'
+```
+
+### Technical review
+
+Your integration with the WooCommerce.com billing system goes through a technical review before the SaaS product can be listed in the marketplace. Once your integration with the WooCommerce.com sandbox is ready, please send us a link where we can test it so we can confirm everything's working great. It doesn't need to be your live environment, but it should be a working example that can be accessed by our technical team for review.
+
+## Creating a Subscription
+
+![The flow for completing a purchase using WooCommerce.com's Billing API](./_media/saas-billing-contract-flow.png)
+
+Merchants need to go through the contract sign-up flow to acquire an active subscription to your SaaS plan.
+
+### 1. Merchant clicks a link to purchase a plan
+
+Either via a link on your website, or from the Woo Marketplace, merchants follow a link to purchase your paid SaaS plan.
+
+The customer is then directed to WooCommerce.com to pay for their purchase.
+
+Before purchasing, it is useful to have the customer sign up for an account. This account can then be linked in your SaaS app to the paid purchase, once confirmed.
+
+Please ensure that customers coming from WooCommerce.com are distinguished from others: the only available payment method for them is WooCommerce.com's billing system.
+
+If there are several plans available in your application, you can have the merchant choose one before initiating the purchase.
+
+You may also decide to not show the merchant anything and initiate the purchase immediately, as described in the next step.
+
+### 2. Initiate the purchase
+
+Make an **API call to WooCommerce.com's Billing API** with the subscription plan information. You'll receive a **confirmation URL** in the response.
+
+Typical [subscription plan information](https://woocommercecomsaasbillingapi.docs.apiary.io/#reference/0/subscriptions/post) includes:
+
+- the plan name
+- price
+- billing period
+- billing interval
+- trial period (optional)
+- trial length (optional)
+- Return URL
+
+The return URL is a URL in your application where we'll redirect the merchant after they complete the purchase on WooCommerce.com.
+
+The confirmation URL is unique on WooCommerce.com. Your application needs to redirect the merchant to it to confirm and pay for the subscription.
+
+The response also contains a unique subscription contract ID in the form of a UUID, which you can use to associate the subscription in our systems with your application's internal customer ID.
+
+If you initiate the purchase immediately when the customer lands on the application, and then redirect to WooCommerce.com confirmation URL during the same request, the operation will take less than a few seconds to complete. The experience for the merchant is seamless, as if they never left WooCommerce.com.
+
+### 3. Merchant confirms the purchase
+
+The application redirects the merchant to the confirmation URL on WooCommerce.com, where they'll confirm and pay for the subscription. The merchant goes through a familiar checkout experience, with all the necessary payment information pre-filled if they've purchased from WooCommerce.com before.
+
+Note: The application must associate a successful purchase with a user only after the user has given "consent" and completed the entire checkout flow on WooCommerce.com. The application must account for interruptions during the purchase flow, e.g app crashes, connection drops, power outages, etc. This also includes if the user is redirected to WooCommerce.com checkout and then navigates back to your application instead of confirming the purchase. The application should not update with the plan information until the user confirms their purchase on WooCommerce.com.
+
+### 4. Merchant is redirected to your application
+
+After the merchant confirms and completes the purchase, they are redirected to the return URL you provided in the initiation step. If you haven't already signed up the merchant, you can do it in this phase. The return URL passes the contract ID in a GET parameter, so you can associate it with your internal customer ID.
+
+WooCommerce.com also makes a webhook call to your webhook URL with the saas_billing_contract.activated topic. This signals that the contract was confirmed and the payment was successful.
+
+## Free Trials
+
+Our billing system optionally supports free trials. Free trials help reduce the number of refunds and cancelations by allowing merchants to see if the service is a good fit for them before purchasing. You can specify the trial period during the subscription signup initiation phase. Pass the trial_period and trial_length parameters during the initial API call.
+
+We automatically charge the subscription price when the trial period ends if the merchant didn't cancel the subscription. You will get a webhook call with the saas_billing_contract.renewed topic and the contract details. Please review the webhook section for more information.
+
+## Switching between subscriptions
+
+The Billing API supports subscription upgrades, downgrades, and crossgrades. Use this feature to change the billing interval (ex. monthly to yearly) or switch to a subscription with a higher, lower, or equal price per day.
+
+### The typical flow
+
+1. **Initiate the switch**
+   Initiate a subscription switch using the POST /subscriptions/\{contractID\} endpoint. Provide all of the necessary information, as described in the API documentation. There will be a confirmation_url parameter in the response. Redirect the merchant to this URL so they can confirm the switch and pay any prorated amount. Please see the API documentation for more details.
+
+2. **Merchant confirms the switch**
+   The merchant lands on WooCommerce.com to confirm the switch. If a prorated amount is due, or if one was passed in the previous step, they'll need to pay to complete the switch. If the new subscription is cheaper (a downgrade) they'll be credited for the difference by having their subscription extended.
+
+3. **Merchant is redirected to your application**
+   Once the merchant confirms the switch, the subscription is updated on WooCommerce.com and they are redirected to the return URL you provided in the initiation phase. The contract id is appended to this URL as a GET parameter. This is a good time to update their subscription in your systems. WooCommerce.com also makes a server-to-server call to your webhook URL with the saas_billing_contract.updated topic. The webhook request body contains the contract object. Check out the webhook section for more details.
+
+### How proration works
+
+The Billing API automatically adjusts the next payment date and charges any prorated fee by looking at the cost per day of the old and new subscriptions.
+
+#### Downgrade
+
+The system compensates the merchant for the prepaid amount by pushing the next payment date into the future. It multiplies the price per day of the old subscription with the number of days left in the current billing cycle. It uses this amount to cover as many days as possible at the new subscription price per day. The merchant doesn't pay a prorated fee when they downgrade their subscription.
+
+#### Example: Downgrade proration
+
+A merchant purchased a $100/year subscription on the 1st of January. They downgrade to a $6/month subscription two months into the billing cycle. As a result, the system pushes the next payment date to the 19th of April of the following year.
+
+- Price/day of the old subscription → $0.27/day ( $100 / 365 days )
+- Price/day of the new subscription → $0.2/day ( $6 / 30 days )
+- Total days spent on old plan → 59 days ( 31 in Jan + 28 in Feb )
+- Days remaining on old plan → 306 ( 365 – 59 )
+- Total prepaid credit remaining → $82.62 ( 306 days left * $0.27/day )
+- The number of days the credit can cover for the new plan → 414 days ( $82.62 / $0.2 = 413.1 rounded up to 414 )
+- Next payment date → April 19th, 2023 ( March 1st + 414 days )
+
+#### Crossgrade
+
+It's the simplest type of switch to understand. The price per day doesn't change in this case. The system doesn't change the next payment date or charge a prorated fee.
+
+#### Example: Crossgrade equal price/day
+
+A merchant switches from a $10/month subscription to a $120/year one (or vice versa). The price per day is the same, $0.33. The subscription will renew after the prepaid month is up at $120 for the following year.
+
+### Upgrade
+
+#### Upgrading to a subscription with a shorter billing cycle
+
+The system doesn't charge the merchant a prorated fee when they upgrade to a subscription with a shorter billing cycle. It brings the next payment date closer to the upgrade date, depending on the nr. of days spent in the old billing cycle. The next payment date can be as early as the upgrade date.
+
+#### Example: Upgrade to shorter billing cycle
+
+A merchant subscribes to a $10/month subscription. Twelve days into the billing cycle, they upgrade to a $7/week subscription. Notice the billing cycle of the new subscription is shorter, so no prorated fee is charged.
+
+The system adjusts the next payment date. It multiplies the days spent in the old billing cycle, 12, with the new subscription price per day of $1. The resulting amount, $12, is higher than the new subscription price of $7. So it charges the merchant $7 for renewal and sets the next payment date a week into the future. The same applies when the amount is equal to the new subscription price.
+
+When the amount is lower, it compensates for the difference by extending the renewal date with the number of days covered by the resulting amount, counting from the upgrade date.
+
+#### Upgrading to a subscription with an equal or longer billing cycle
+
+The system charges a prorated fee when the merchant upgrades to a subscription with a billing cycle equal to or longer than the old one. It calculates the prorated fee by multiplying the nr. of days remaining in the current subscription's billing cycle with the price per day difference between the two subscriptions. The next payment date doesn't change in this case.
+
+#### Example: Upgrade to equal or longer billing cycle
+
+The merchant subscribes to a $10/month subscription. Fifteen days into the billing cycle, they upgrade to a $150/year subscription. Note that the billing cycle is longer in this case, so a prorated fee is due. The cost per day for the old and new subscriptions is approximately $0.33 and $0.41, respectively. The price difference between the two is $0.08 per day. There are 15 days left in the current billing cycle, so the system charges a proration fee of $0.08 x 15 days, resulting in a $1.20 upgrade cost. The subscription will renew after those 15 days at $150/year.
+
+## One-time charges
+
+The Billing API also supports one-time charges. This feature can be used to charge merchants for things that are not renewable. For example, say you're offering email delivery services and you want to offer credit packs to your customers to use during promotions, or whenever they need an extra boost. These don't incur recurring charges and can be purchased as needed. The typical one-time charge flow is very similar to the subscription signup flow and is described below.
+
+### 1. Initiate the charge
+
+Initiate a charge by calling the POST /charges endpoint. Provide the necessary information as described in the API documentation. The response will have a confirmation_url. Redirect the merchant to this URL. See the API documentation for more details.
+
+### 2. Merchant confirms the charge
+
+The merchant lands on WooCommerce.com and confirms the charge details. Once they complete the payment, they're redirected to the return URL you provided in the initiation phase.
+
+### 3. Merchant is redirected to your application
+
+The merchant is redirected back to you via the return URL. The charge contract id is appended to this URL as a GET parameter. This is a good time to add the product they paid for to their account. WooCommerce.com also makes a server-to-server call to your webhook URL with the saas_billing_contract.activated topic. The webhook request body will have the charge object. Please review the webhook section for more details.
+
+## Renewals
+
+WooCommerce.com handles renewals automatically. It provides a hands-off experience for merchants, like all other products sold through the Marketplace.
+
+Your application needs to support automatic renewals. Please make sure the merchant doesn't have to take any manual action on your end for the renewal to occur.
+
+Use the webhook system to get notifications about renewals. We'll notify you about successful and failed renewals alike. If a renewal fails, we'll place the subscription in the paused state and notify you. We'll make further attempts to renew the subscription in the following days and notify you if we succeed. We don't delete expired subscriptions. Feel free to cancel an expired subscription at your discretion.
+
+WooCommerce.com will email merchants before and on the day of the renewal. Feel free to send any renewal-related communication of your own to them as well.
+
+## Refunds
+
+Merchants can request a refund for all of the following types of SaaS billing orders. There is no limit on the number of days after payment during which the refund can be requested:
+
+- Subscription contract sign-up
+- Subscription plan upgrade
+- Subscription renewal
+- One-time charge
+
+As a vendor, you will receive an email notification when a refund is requested for any of your SaaS products. You can review all the pending refund requests in your vendor dashboard by going to the "SaaS Apps -> Pending Refunds" page.
+
+![View pending refund requests for your SaaS applications](./_media/image-87.png)
+
+You can review each request, contact the merchant if you want to discuss the reasons for their refund request, and finally decide to either Approve or Reject the request. You need to provide a reason if you are rejecting a refund request.
+
+If you approve a refund request for a SaaS billing order, the underlying SaaS contract will also be canceled.
+
+WooCommerce.com also makes server-to-server calls to your webhook URL with the saas_billing_contract.refunded and saas_billing_contract.canceled topics. The webhook request body contains the contract object. Check out the webhook section for more details.
+
+## Subscription cancelations
+
+Merchants must be able to cancel a subscription from your application, so please make sure that feature is implemented. There is a dedicated endpoint in the HTTP API to cancel contracts. Please review our API documentation for the DELETE endpoints.
+
+If the merchant cancels the subscription, the expectation is that they'll benefit from their current plan until the end of the prepaid period.
+
+For example, if a yearly subscription is canceled after 3 months the merchant will benefit from your service for the remaining 9 months. What you do with the merchant account in your application after they cancel their subscription is up to you.
+
+## Webhooks
+
+We send notifications to your application about important events in the lifecycle of your subscriptions. The events are listed below and always include a snapshot of the contract in the request's body and reflects the state of the contract at the time of the call.
+
+![Webhook example](./_media/webhook.png)
+
+Webhook calls expect a successful HTTP code in response. Otherwise, the delivery is considered to have failed. A retry system will attempt to call your webhook endpoint again, up to five times, increasing the pause between each retry. Be sure to have monitoring in place for your webhook endpoint. There's no other way to get updates on some of the contract events. A typical request body payload looks like this:
+
+**Example: Subscription contract payload**
+
+```json
+{
+  "subscription":{
+    "id":"4733be9c-8d6c-4a78-a4f8-268a64770985",
+    "status":"active",
+    "next_payment_date":"2022-08-24 14:13:42",
+    "end_date":null,
+    "billing_intents":[
+      {
+        "id":1,
+        "status":"completed",
+        "payload":{},
+        "created_at":"2022-06-24 14:13:35",
+        "updated_at":"2022-06-24 14:14:06"
+      }
+    ],
+    "transactions":[
+      {
+        "id":1,
+        "billing_intent_id":1,
+        "created_at":"2022-06-24 14:13:42",
+        "completed_at":"2022-06-24 14:14:03",
+        "amount":89.5,
+        "amount_refunded":0,
+        "url":"https://woocommerce.com/my-account/view-order/172"
+      },
+      {
+        "id":2,
+        "billing_intent_id":1,
+        "created_at":"2022-07-24 14:13:42",
+        "completed_at":"2022-07-24 14:14:23",
+        "amount":89.5,
+        "amount_refunded":0,
+        "url":"https://woocommerce.com/my-account/view-order/179"
+      }
+    ]
+  }
+}
+```
+
+**Example: One-time charge contract payload**
+
+```json
+{
+  "charge":{
+    "id":"68f28fbe-8510-4369-8f80-c5a5380c85db",
+    "status":"active",
+    "billing_intents":[
+      {
+        "id":1,
+        "status":"completed",
+        "payload":{},
+        "created_at":"2022-07-01 10:21:24",
+        "updated_at":"2022-07-01 10:22:39"
+      }
+    ],
+    "transactions":[
+      {
+        "id":1,
+        "billing_intent_id":1,
+        "created_at":"2022-07-01 10:21:31",
+        "completed_at":"2022-07-01 10:22:39",
+        "amount":89.5,
+        "amount_refunded":0,
+        "url":"https://woocommerce.com/my-account/view-order/199"
+      }
+    ]
+  }
+}
+```
+
+As you can see, we don't share merchant information via webhooks. They are primarily used to notify you, the vendor, about various changes in the lifetime of a contract. The request payload includes the contract ID, status, and any billing intents. The event that triggers the webhook call is delivered as a topic and can be found in the x-wc-webhook-topic request header.
+
+The topics that are currently available are:
+
+- **saas_billing_contract.activated** – This event signals a merchant successfully checked out with a subscription or one-time charge. This indicates the contract is paid for and active. You can use this event to activate their plan or feature.
+- **saas_billing_contract.updated** – This event is specific to subscriptions. It's fired when a merchant successfully confirms a plan upgrade or downgrade and pays the prorated amount (if any). The contract status is active. You can use this event to update their plan in your system.
+- **saas_billing_contract.renewed** – This event is specific to subscriptions and is fired when a successful subscription renewal occurs. This event indicates that the merchant was successfully charged the renewal amount. The contract status is active.
+- **saas_billing_contract.paused** – This event is specific to subscriptions and is fired when a subscription contract status becomes paused. This happens when a renewal is due, but for whatever reason, we couldn't process it. Issues with the payment method usually cause this, but we have systems to retry renewals. The subscription will eventually be paid for and trigger a renewed event or expire, in which case a canceled event will be triggered. You can use this event to reach out to the customer if you wish.
+- **saas_billing_contract.canceled** – This one is fired when a subscription or one-time charge is canceled. Use this to deactivate a merchant's plan or feature based on the end of the prepaid term date. Please note that charges can only be canceled before the merchant confirms them. As the vendor, you can cancel contracts using the corresponding DELETE call described in the API documentation. Please note that when you cancel the contract, the customer is entitled to continue using the plan until the prepaid period ends. The date is included in the contract payload in the body of the webhook call. Don't worry. We'll send a follow-up event when the prepaid period ends. The contract or charge included with the webhook call will have the canceled status.
+- **saas_billing_contract.prepaid_term_ended** – This follow-up event is fired when the prepaid period for a canceled contract is reached. Use this to deactivate a merchant's plan or feature.
+- **saas_billing_contract.refunded** – This one is fired when a subscription or one-time charge is refunded. You can find the refunded amount by inspecting the amount_refunded field on the latest transaction (from the transactions property of the subscription or one-time charge).
+
+The request body payload is signed with the API secret, and the signature is included with the X-WC-Webhook-Signature request header. You can use the signature to confirm the integrity of the payload.
+
+An example of PHP code to make the validation:
+
+```php
+$api_secret = 'YOUR_SECRET';
+$payload = file_get_contents( 'php://input' );
+$provided_signature = $_SERVER['HTTP_X_WC_WEBHOOK_SIGNATURE'] ?? '';
+$valid_signature = base64_encode( hash_hmac( 'sha256', $payload, $api_secret, true ) );
+
+if (hash_equals($valid_signature, $provided_signature)) {
+  $request_origin_confirmed = true;
+} else {
+  $request_origin_confirmed = false;
+}
+```
+
+To enable webhook notifications, you need to provide a URL in your application that accepts webhook requests. The URL must be publicly accessible, with no authentication or IP whitelisting. We currently support one webhook endpoint per application. You can add, update, or remove the application's webhook URL in your SaaS application settings.
+
+### SaaS webhook testing tool
+
+This tool is only available on the sandbox to help with the integration step. This is not available in production as it has side effects for payments, user communication, subscription status, etc. This tool aims to help you, the vendor, test your webhook integration in an easy, repeatable way.
+
+To use the webhook testing tool, log into your vendor dashboard on sandbox.woocommerce.com and navigate to SaaS Apps > Webhooks.
+
+Input any contract UUID you'd like to test webhook calls against in the form and hit enter or click on Select for testing. The page will reload with the contract selected. You can trigger webhook calls for the selected contract by clicking on the appropriate event button on the page. Please note that the available events depend on the current contract status. The webhook call is triggered async, so it may take up to a minute to receive the call. You can read more about the available webhook events in the webhooks section of this documentation. Make sure you have a webhook URL set up in your SaaS Application settings.
+
+## Questions & answers
+
+<details>
+<summary>Is there support for multi-currency?</summary>
+
+Not at the moment. Only USD is currently supported. We're considering adding currencies like EUR or GBP, but there's no ETA.
+
+</details>
+
+<details>
+<summary>How are taxes handled?</summary>
+
+We add tax on top of the original price to comply with the merchant's local regulations. The tax amount will vary depending on the merchant's country of residence and will be calculated automatically. You can add a notice about this in your application to inform merchants that the total may differ due to tax.
+
+There's no reliable way to confidently calculate tax before the merchant lands on WooCommerce.com and submits their billing details. Many factors determine the tax calculation. This makes it impossible to make a correct prediction without having all the necessary data upfront (such as billing address, IP address, validated VAT ID, and others).
+
+</details>
+
+<details>
+<summary>Do my application and WooCommerce.com exchange merchant personal information?</summary>
+
+No, we don't share personal details like email, name, or address with the vendor application. And we don't expect you to either. The flows are designed to work without exchanging personal information. So, if you need any personal data from the merchant, you can request it from them during sign-up.
+
+</details>
+
+<details>
+<summary>How do I link a merchant with their subscription on WooCommerce.com?</summary>
+
+You can map them using the unique contract ID appended to the return URL the merchant is redirected to after a successful purchase. The billing API and webhooks also use this ID to identify the subscription. There's no need to use personal information to map merchants to purchases.
+
+</details>
+
+<details>
+<summary>My SaaS product allows for multi-store connections. Can I still integrate with the billing API?</summary>
+
+Yes. You can offer a multi-site plan for purchase. The billing API doesn't support setting a quantity parameter in its current iteration. However, you can factor the multisite aspect into the contract and offer a multisite subscription. You can then track the usage internally using a combination of the contract ID and a store identifier.
+
+</details>
+
+<details>
+<summary>Do I need to apply billing requirements to all customers?</summary>
+
+Getting listed on the WooCommerce.com Marketplace enables software vendors to offer their products to a broad audience of millions of registered users. As with any other marketplace, you must follow some guidelines and requirements to get your product listed. This improves customers' overall quality and experience, so they choose to purchase through us rather than from software vendors directly.
+
+These requirements don't apply to all your customers, only those from WooCommerce.com. You can use your current billing system and flows for your existing customer base or customers from sources other than our marketplace.
+
+</details>
+
+<details>
+<summary>How do I apply a discount to a subscription?</summary>
+
+When initiating a contract sign-up via the API, you can set a price by specifying the lower amount in the price param when submitting the POST /subscriptions request.
+
+</details>
+
+## Glossary
+
+- **Vendor** – SaaS service provider partnering with WooCommerce.com to sell their solution via the WooCommerce.com marketplace.
+- **Vendor application (application)** – The Vendor's application integrates with the Billing API to communicate with WooCommerce.com.
+- **Merchant** – WooCommerce.com user, purchasing the SaaS product.
+- **Subscription plan (plan)** – A subscription product.
+- **Subscription contract (contract)** – Agreement in which merchant consents to have their payment method charged recurrently in exchange for the service the SaaS Vendor offers.
+- **One-time charge (charge)** – A one-off (non-renewable) charge.
+- **Contract sign-up** – Creating a subscription or charge contract and getting the merchant's confirmation.
