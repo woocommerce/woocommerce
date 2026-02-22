@@ -737,7 +737,7 @@ class BlockTemplateUtils {
 					),
 				)
 			) )->posts;
-			// 12 hours is half of default nonce lifetime, if out of sync, blocks using nonce will keep running.
+			// 12 hours is half of default nonce lifetime, if out of sync, templates operating with nonce will keep running.
 			wp_cache_set( $template_type . '-ids', $ids, 'woocommerce_blocks', 12 * HOUR_IN_SECONDS );
 			$request_level_cache[ $template_type ] = null;
 		}
