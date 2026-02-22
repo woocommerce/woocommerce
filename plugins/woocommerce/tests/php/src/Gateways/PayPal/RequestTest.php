@@ -376,6 +376,51 @@ class RequestTest extends \WC_Unit_Test_Case {
 	}
 
 	// ========================================================================
+	// Tests for normalize_paypal_order_shipping_country_code method
+	// ========================================================================
+
+	/**
+	 * Data provider for normalize_paypal_order_shipping_country_code.
+	 *
+	 * @return array<string, array{string, string|null}>
+	 */
+	public function provider_normalize_paypal_order_shipping_country_code(): array {
+		return array(
+			'alpha2_supported_uppercase'   => array( 'US', 'US' ),
+			'alpha2_supported_lowercase'   => array( 'us', 'US' ),
+			'alpha2_supported_with_space'  => array( ' GB ', 'GB' ),
+			'alpha2_not_supported_by_paypal' => array( 'SX', null ),
+			'alpha2_invalid'               => array( 'XX', null ),
+			'alpha3_maps_to_supported'     => array( 'USA', 'US' ),
+			'alpha3_maps_to_unsupported'   => array( 'AFG', null ),
+			'alpha3_invalid'               => array( 'XXX', null ),
+		);
+	}
+
+	/**
+	 * Test normalize_paypal_order_shipping_country_code with various country code scenarios.
+	 *
+	 * @dataProvider provider_normalize_paypal_order_shipping_country_code
+	 *
+	 * @param string      $input    Country code to normalize.
+	 * @param string|null $expected Expected normalized alpha-2 code or null.
+	 *
+	 * @return void
+	 */
+	public function test_normalize_paypal_order_shipping_country_code( string $input, ?string $expected ): void {
+		$gateway = new \WC_Gateway_Paypal();
+		$request = new PayPalRequest( $gateway );
+
+		$reflection = new \ReflectionClass( $request );
+		$method     = $reflection->getMethod( 'normalize_paypal_order_shipping_country_code' );
+		$method->setAccessible( true );
+
+		$result = $method->invokeArgs( $request, array( $input ) );
+
+		$this->assertSame( $expected, $result );
+	}
+
+	// ========================================================================
 	// Tests for capture_authorized_payment method
 	// ========================================================================
 
