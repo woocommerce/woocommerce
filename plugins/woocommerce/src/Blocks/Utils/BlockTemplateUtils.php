@@ -745,7 +745,7 @@ class BlockTemplateUtils {
 			$request_level_cache[ $template_type ][ $theme ] = null;
 		}
 
-		// Optimization note: second query, which optimized for fetching templates data, to minimize grouping overhead.
+		// Optimization note: second query (default sorting sensitive!), which optimized for fetching templates data, to minimize grouping overhead.
 		if ( null === ( $request_level_cache[ $template_type ][ $theme ] ?? null ) ) {
 			$request_level_cache[ $template_type ][ $theme ] = empty( $ids[ $theme ] ) ? array() : ( new \WP_Query(
 				array(
