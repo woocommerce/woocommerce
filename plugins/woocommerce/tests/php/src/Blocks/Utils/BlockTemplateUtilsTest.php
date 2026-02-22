@@ -380,7 +380,7 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 	private function createPost( $post, $theme ) {
 		$term = get_term_by( 'slug', $theme, 'wp_theme', ARRAY_A );
 		if ( ! $term ) {
-			$term = wp_insert_term($theme, 'wp_theme' );
+			$term = wp_insert_term( $theme, 'wp_theme' );
 		}
 
 		$post_id = wp_insert_post( $post );
