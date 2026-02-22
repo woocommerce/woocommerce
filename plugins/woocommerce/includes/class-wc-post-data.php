@@ -193,8 +193,9 @@ class WC_Post_Data {
 	 * @return void
 	 */
 	public static function invalidate_db_block_patterns_cache( $post_id, $post ): void {
-		if ( $post instanceof \WP_Post && in_array( $post->post_type, array( 'wp_template_part', 'wp_template' ), true ) ) {
-			wp_cache_delete( $post->post_type . '-ids', 'woocommerce_blocks' );
+		if ( $post instanceof \WP_Post && in_array( $post->post_type, array( 'page', 'wp_template_part', 'wp_template' ), true ) ) {
+			wp_cache_delete( 'wp_template_part-ids', 'woocommerce_blocks' );
+			wp_cache_delete( 'wp_template-ids', 'woocommerce_blocks' );
 		}
 	}
 
