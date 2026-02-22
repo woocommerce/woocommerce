@@ -328,7 +328,7 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 			'post_title'  => 'title',
 			'post_status' => 'publish',
 		);
-		$template = $this->createPost( $attributes, BlockTemplateUtils::PLUGIN_SLUG );
+		$template   = $this->createPost( $attributes, BlockTemplateUtils::PLUGIN_SLUG );
 
 		// Verify fetching all templates and caches population correctness.
 		$templates = BlockTemplateUtils::get_block_templates_from_db();
