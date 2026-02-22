@@ -356,7 +356,7 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 		$this->assertSame( array(), wp_cache_get( 'wp_template_part-ids', 'woocommerce_blocks' ) );
 		$this->assertCount( 0, $templates );
 
-		wp_cache_delete( 'wp_template-ids', 'woocommerce_blocks'  );
+		wp_cache_delete( 'wp_template-ids', 'woocommerce_blocks' );
 		wp_cache_delete( 'wp_template_part-ids', 'woocommerce_blocks' );
 	}
 
