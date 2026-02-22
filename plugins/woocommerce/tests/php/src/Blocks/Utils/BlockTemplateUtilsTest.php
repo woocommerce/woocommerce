@@ -322,19 +322,28 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 	 * Test `get_block_templates_from_db`: workflow and properly handling input parameters.
 	 */
 	public function test_get_block_templates_from_db(): void {
-		$attributes = array(
+		$attributes      = array(
+			'post_name'   => 'slug-1',
+			'post_type'   => 'wp_template',
+			'post_title'  => 'title',
+			'post_status' => 'publish',
+		);
+		$template_slug_1 = $this->createPost( $attributes, BlockTemplateUtils::PLUGIN_SLUG );
+
+		$attributes    = array(
 			'post_name'   => 'slug',
 			'post_type'   => 'wp_template',
 			'post_title'  => 'title',
 			'post_status' => 'publish',
 		);
-		$template   = $this->createPost( $attributes, BlockTemplateUtils::PLUGIN_SLUG );
+		$template_slug = $this->createPost( $attributes, BlockTemplateUtils::PLUGIN_SLUG );
 
 		// Verify fetching all templates and caches population correctness.
 		$templates = BlockTemplateUtils::get_block_templates_from_db();
-		$this->assertSame( array( $template->ID ), wp_cache_get( 'wp_template-ids', 'woocommerce_blocks' ) );
-		$this->assertCount( 1, $templates );
-		$this->assertSame( 'slug', $templates[0]->slug );
+		$this->assertSame( array( $template_slug_1->ID, $template_slug->ID ), wp_cache_get( 'wp_template-ids', 'woocommerce_blocks' ) );
+		$this->assertCount( 2, $templates );
+		$this->assertSame( 'slug-1', $templates[0]->slug );
+		$this->assertSame( 'slug', $templates[1]->slug );
 
 		// Verify request-level cache hit handling correctness.
 		$templates = BlockTemplateUtils::get_block_templates_from_db( array( 'slug' ), 'wp_template' );
@@ -369,7 +378,10 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 	 * @return \WP_Post
 	 */
 	private function createPost( $post, $theme ) {
-		$term = wp_insert_term( $theme, 'wp_theme' );
+		$term = get_term_by( 'slug', $theme, 'wp_theme', ARRAY_A );
+		if ( ! $term ) {
+			$term = wp_insert_term($theme, 'wp_theme' );
+		}
 
 		$post_id = wp_insert_post( $post );
 		wp_set_post_terms( $post_id, array( $term['term_id'] ), 'wp_theme' );
