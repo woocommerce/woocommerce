@@ -355,6 +355,9 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 		$templates = BlockTemplateUtils::get_block_templates_from_db( array( 'slug' ), 'wp_template_part' );
 		$this->assertSame( array(), wp_cache_get( 'wp_template_part-ids', 'woocommerce_blocks' ) );
 		$this->assertCount( 0, $templates );
+
+		wp_cache_delete( 'wp_template-ids', 'woocommerce_blocks'  );
+		wp_cache_delete( 'wp_template_part-ids', 'woocommerce_blocks' );
 	}
 
 	/**
