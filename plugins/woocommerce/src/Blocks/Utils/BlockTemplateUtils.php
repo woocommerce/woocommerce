@@ -739,12 +739,12 @@ class BlockTemplateUtils {
 			) )->posts;
 			// 12 hours is half of default nonce lifetime, if out of sync, blocks using nonce will keep running.
 			wp_cache_set( $template_type . '-ids', $ids, 'woocommerce_blocks', 12 * HOUR_IN_SECONDS );
-			$request_level_cache[ $template_type ] = empty( $ids ) ? array() : null;
+			$request_level_cache[ $template_type ] = null;
 		}
 
 		// Optimization note: second query, which optimized for fetching templates data, to minimize grouping overhead.
 		if ( null === ( $request_level_cache[ $template_type ] ?? null ) ) {
-			$request_level_cache[ $template_type ] = ( new \WP_Query(
+			$request_level_cache[ $template_type ] = empty( $ids ) ? array() : ( new \WP_Query(
 				array(
 					'post_type'              => $template_type,
 					'post__in'               => $ids,
