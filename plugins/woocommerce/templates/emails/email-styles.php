@@ -23,6 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 $email_improvements_enabled = FeaturesUtil::feature_is_enabled( 'email_improvements' );
+$block_email_editor_enabled = FeaturesUtil::feature_is_enabled( 'block_email_editor' );
 
 // Load colors.
 $bg               = get_option( 'woocommerce_email_background_color' );
@@ -459,7 +460,7 @@ img {
 	outline: none;
 	text-decoration: none;
 	text-transform: capitalize;
-	vertical-align: <?php echo $email_improvements_enabled ? 'top' : 'middle'; ?>;
+	vertical-align: <?php echo $block_email_editor_enabled ? 'top' : 'middle'; ?>;
 	margin-<?php echo is_rtl() ? 'left' : 'right'; ?>: <?php echo $email_improvements_enabled ? '24px' : '10px'; ?>;
 	max-width: 100%;
 }
