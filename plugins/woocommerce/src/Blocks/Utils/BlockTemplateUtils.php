@@ -719,7 +719,6 @@ class BlockTemplateUtils {
 		// Optimization note: first query, which optimized for fetching IDs, to minimize temporary/filesort overhead.
 		$ids = wp_cache_get( $template_type . '-ids', 'woocommerce_blocks' );
 		if ( false === $ids ) {
-			$request_level_cache[ $template_type ] = null;
 			// 'post__not_in' guarantees using `type_status_date` index on the posts table; as the table grows the
 			// template type entries still remain a handful (small selectivity) enabling this query performance.
 			$ids = ( new \WP_Query(
@@ -759,6 +758,9 @@ class BlockTemplateUtils {
 
 		// Optimization note: populate template objects; optimized for subsequent calls, without spawning consequent SQLs.
 		$saved_templates = $request_level_cache[ $template_type ];
+
+		$request_level_cache[ $template_type ] = null;
+
 		if ( ! empty( $saved_templates ) && is_array( $slugs ) && array() !== $slugs ) {
 			$saved_templates = array_filter( $saved_templates, fn( $template ) => in_array( $template->post_name, $slugs, true ) );
 		}
