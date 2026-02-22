@@ -19,11 +19,12 @@ type NoticeWithId = Notice & {
 
 /**
  * Safe wrapper for getting store notice context.
- * Prevents "Cannot read properties of undefined" errors when context stack is empty
+ * Prevents "Cannot read properties of undefined" errors when context stack is empty.
+ * 'notice' property is optional because container contexts might only have 'notices'.
  */
 const getStoreNoticeContext = (): {
     notices: NoticeWithId[];
-    notice: NoticeWithId;
+    notice?: NoticeWithId; // Fix: Made optional to match runtime reality
 } | null => {
     try {
         return getContextFn< {
@@ -93,7 +94,6 @@ const { state } = store< Store >(
         state: {
             get role() {
                 const context = getStoreNoticeContext();
-                // Fix: Added optional chaining on notice property
                 if (
                     context?.notice?.type === 'error' ||
                     context?.notice?.type === 'success'
@@ -105,17 +105,14 @@ const { state } = store< Store >(
             },
             get isError() {
                 const context = getStoreNoticeContext();
-                // Fix: Added optional chaining on notice property
                 return context?.notice?.type === 'error';
             },
             get isSuccess() {
                 const context = getStoreNoticeContext();
-                // Fix: Added optional chaining on notice property
                 return context?.notice?.type === 'success';
             },
             get isInfo() {
                 const context = getStoreNoticeContext();
-                // Fix: Added optional chaining on notice property
                 return context?.notice?.type === 'notice';
             },
             get notices() {
@@ -158,7 +155,6 @@ const { state } = store< Store >(
             removeNotice: ( noticeId: string | PointerEvent ) => {
                 const { notices } = state;
 
-                // Fix: Use local variable for better type safety
                 const resolvedId =
                     typeof noticeId === 'string'
                         ? noticeId
@@ -195,8 +191,11 @@ const { state } = store< Store >(
             },
 
             injectIcon: () => {
+                const context = getStoreNoticeContext();
                 const { ref } = getElement();
-                if ( ! ref ) {
+                
+                // Fix: Guard against missing context or notice to prevent wrong icon injection
+                if ( ! ref || ! context?.notice ) {
                     return;
                 }
 
