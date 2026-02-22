@@ -341,14 +341,11 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 		// Verify fetching all templates and caches population correctness.
 		$templates = BlockTemplateUtils::get_block_templates_from_db();
 		$this->assertSame( array( $template_slug_1->ID, $template_slug->ID ), wp_cache_get( 'wp_template-ids', 'woocommerce_blocks' ) );
-		$this->assertCount( 2, $templates );
-		$this->assertSame( 'slug-1', $templates[0]->slug );
-		$this->assertSame( 'slug', $templates[1]->slug );
+		$this->assertSame( array( 'slug-1', 'slug' ), array_column( $templates, 'slug' ) );
 
 		// Verify request-level cache hit handling correctness.
 		$templates = BlockTemplateUtils::get_block_templates_from_db( array( 'slug' ), 'wp_template' );
-		$this->assertCount( 1, $templates );
-		$this->assertSame( 'slug', $templates[0]->slug );
+		$this->assertSame( array( 'slug' ), array_column( $templates, 'slug' ) );
 
 		// Verify request-level cache miss handling correctness: no templates with specified slug.
 		$templates = BlockTemplateUtils::get_block_templates_from_db( array( 'oops' ), 'wp_template_part' );
