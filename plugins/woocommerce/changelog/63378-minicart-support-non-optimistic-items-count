@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Mini-Cart: use server-computed item count when third-party filters modify `woocommerce_cart_contents_count`.
