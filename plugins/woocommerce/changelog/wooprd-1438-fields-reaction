@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Prevent errors showing on empty checkout fields until the form is submitted.
