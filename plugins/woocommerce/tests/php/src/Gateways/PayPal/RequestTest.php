@@ -1412,6 +1412,166 @@ class RequestTest extends \WC_Unit_Test_Case {
 	}
 
 	// ========================================================================
+	// Tests for duplicate invoice ID handling (authorize_or_capture_payment)
+	// ========================================================================
+
+	/**
+	 * Test that duplicate invoice ID triggers patch and retry, and retry success completes without throwing.
+	 *
+	 * @return void
+	 */
+	public function test_authorize_or_capture_payment_handles_duplicate_invoice_id_patch_and_retry(): void {
+		$order = \WC_Helper_Order::create_order();
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_ORDER_ID, 'PAYPAL_ORDER_123' );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_STATUS, PayPalConstants::STATUS_APPROVED );
+		$order->save();
+
+		$request_sequence = array();
+		add_filter(
+			'pre_http_request',
+			function ( $value, $parsed_args, $url ) use ( &$request_sequence ) {
+				if ( strpos( $url, 'payment/capture' ) !== false ) {
+					$request_sequence[] = 'capture';
+					// First capture returns 422 DUPLICATE_INVOICE_ID; second (retry) returns 200.
+					if ( count( $request_sequence ) === 1 ) {
+						return array(
+							'response' => array( 'code' => 422 ),
+							'body'     => wp_json_encode(
+								array(
+									'name'     => 'UNPROCESSABLE_ENTITY',
+									'message'  => 'Duplicate invoice ID.',
+									'debug_id' => 'dup_inv',
+									'details'  => array(
+										array(
+											'issue'       => PayPalConstants::PAYPAL_ISSUE_DUPLICATE_INVOICE_ID,
+											'description' => 'Invoice ID has already been used.',
+										),
+									),
+								)
+							),
+						);
+					}
+					return array(
+						'response' => array( 'code' => 200 ),
+						'body'     => wp_json_encode(
+							array(
+								'id'     => 'CAPTURE_456',
+								'status' => PayPalConstants::STATUS_COMPLETED,
+							)
+						),
+					);
+				}
+				if ( strpos( $url, 'order/' ) !== false && isset( $parsed_args['method'] ) && 'PATCH' === $parsed_args['method'] ) {
+					$request_sequence[] = 'patch';
+					$body = json_decode( $parsed_args['body'], true );
+					$this->assertArrayHasKey( 'order', $body );
+					$this->assertCount( 1, $body['order'] );
+					$this->assertSame( 'replace', $body['order'][0]['op'] );
+					$this->assertStringContainsString( 'invoice_id', $body['order'][0]['path'] );
+					$this->assertNotEmpty( $body['order'][0]['value'] );
+					return array(
+						'response' => array( 'code' => 204 ),
+						'body'     => '',
+					);
+				}
+				return $value;
+			},
+			10,
+			3
+		);
+
+		$request = new PayPalRequest( new \WC_Gateway_Paypal() );
+		$request->authorize_or_capture_payment( $order, 'https://api.paypal.com/v2/checkout/orders/PAYPAL_ORDER_123/capture', PayPalConstants::PAYMENT_ACTION_CAPTURE );
+
+		remove_all_filters( 'pre_http_request' );
+
+		$this->assertSame( array( 'capture', 'patch', 'capture' ), $request_sequence );
+		$order = wc_get_order( $order->get_id() );
+		$notes = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
+		$invoice_note = null;
+		foreach ( $notes as $note ) {
+			if ( strpos( $note->content, 'Invoice ID updated' ) !== false ) {
+				$invoice_note = $note->content;
+				break;
+			}
+		}
+		$this->assertNotNull( $invoice_note, 'Order should have a note about Invoice ID updated' );
+		$this->assertNotEquals( 'failed', $order->get_status() );
+	}
+
+	/**
+	 * Test that when retry also returns duplicate invoice ID, we do not loop and order is marked failed.
+	 *
+	 * @return void
+	 */
+	public function test_authorize_or_capture_payment_duplicate_invoice_id_on_retry_does_not_loop(): void {
+		$order = \WC_Helper_Order::create_order();
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_ORDER_ID, 'PAYPAL_ORDER_123' );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_STATUS, PayPalConstants::STATUS_APPROVED );
+		$order->save();
+
+		$capture_count = 0;
+		add_filter(
+			'pre_http_request',
+			function ( $value, $parsed_args, $url ) use ( &$capture_count ) {
+				if ( strpos( $url, 'payment/capture' ) !== false ) {
+					++$capture_count;
+					return array(
+						'response' => array( 'code' => 422 ),
+						'body'     => wp_json_encode(
+							array(
+								'details' => array(
+									array(
+										'issue' => PayPalConstants::PAYPAL_ISSUE_DUPLICATE_INVOICE_ID,
+									),
+								),
+							)
+						),
+					);
+				}
+				if ( strpos( $url, 'order/' ) !== false && isset( $parsed_args['method'] ) && 'PATCH' === $parsed_args['method'] ) {
+					return array( 'response' => array( 'code' => 204 ), 'body' => '' );
+				}
+				return $value;
+			},
+			10,
+			3
+		);
+
+		$request = new PayPalRequest( new \WC_Gateway_Paypal() );
+		$request->authorize_or_capture_payment( $order, 'https://api.paypal.com/v2/checkout/orders/PAYPAL_ORDER_123/capture', PayPalConstants::PAYMENT_ACTION_CAPTURE );
+
+		remove_all_filters( 'pre_http_request' );
+
+		// First attempt: 422 -> handle_duplicate_invoice_id -> patch -> retry. Retry: 422 again, is_retry=true so we throw (no second handle).
+		$this->assertSame( 2, $capture_count, 'Capture should be called twice (initial + retry), not more' );
+		$order = wc_get_order( $order->get_id() );
+		$this->assertEquals( 'failed', $order->get_status() );
+	}
+
+	/**
+	 * Test generate_paypal_invoice_id_with_unique_suffix format and max length.
+	 *
+	 * @return void
+	 */
+	public function test_generate_paypal_invoice_id_with_unique_suffix(): void {
+		$order = \WC_Helper_Order::create_order();
+		$order->save();
+
+		$request  = new PayPalRequest( new \WC_Gateway_Paypal() );
+		$reflection = new \ReflectionClass( $request );
+		$method = $reflection->getMethod( 'generate_paypal_invoice_id_with_unique_suffix' );
+		$method->setAccessible( true );
+
+		$invoice_id = $method->invoke( $request, $order );
+
+		$this->assertIsString( $invoice_id );
+		$this->assertLessThanOrEqual( 127, strlen( $invoice_id ), 'Invoice ID must not exceed PayPal max length' );
+		$prefix = ( new \WC_Gateway_Paypal() )->get_option( 'invoice_prefix' );
+		$this->assertStringStartsWith( $prefix . $order->get_order_number() . '-', $invoice_id );
+	}
+
+	// ========================================================================
 	// Helper methods for capture_authorized_payment tests
 	// ========================================================================
 
