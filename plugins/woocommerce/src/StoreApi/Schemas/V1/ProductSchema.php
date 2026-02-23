@@ -463,6 +463,56 @@ class ProductSchema extends AbstractSchema {
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
+			'dimensions'          => [
+				'description' => __( 'Product dimensions.', 'woocommerce' ),
+				'type'        => 'object',
+				'context'     => [ 'view', 'edit' ],
+				'readonly'    => true,
+				'properties'  => [
+					'length' => [
+						'description' => sprintf(
+							/* translators: %s: dimension unit */
+							__( 'Product length (%s).', 'woocommerce' ),
+							get_option( 'woocommerce_dimension_unit' )
+						),
+						'type'        => 'string',
+						'context'     => [ 'view', 'edit' ],
+						'readonly'    => true,
+					],
+					'width'  => [
+						'description' => sprintf(
+							/* translators: %s: dimension unit */
+							__( 'Product width (%s).', 'woocommerce' ),
+							get_option( 'woocommerce_dimension_unit' )
+						),
+						'type'        => 'string',
+						'context'     => [ 'view', 'edit' ],
+						'readonly'    => true,
+					],
+					'height' => [
+						'description' => sprintf(
+							/* translators: %s: dimension unit */
+							__( 'Product height (%s).', 'woocommerce' ),
+							get_option( 'woocommerce_dimension_unit' )
+						),
+						'type'        => 'string',
+						'context'     => [ 'view', 'edit' ],
+						'readonly'    => true,
+					],
+				],
+			],
+			'formatted_weight'    => [
+				'description' => __( 'Product weight formatted for display (e.g. "2.5 kg").', 'woocommerce' ),
+				'type'        => 'string',
+				'context'     => [ 'view', 'edit' ],
+				'readonly'    => true,
+			],
+			'formatted_dimensions' => [
+				'description' => __( 'Product dimensions formatted for display (e.g. "10 × 5 × 3 cm").', 'woocommerce' ),
+				'type'        => 'string',
+				'context'     => [ 'view', 'edit' ],
+				'readonly'    => true,
+			],
 			'add_to_cart'         => [
 				'description' => __( 'Add to cart button parameters.', 'woocommerce' ),
 				'type'        => 'object',
@@ -559,6 +609,14 @@ class ProductSchema extends AbstractSchema {
 				'class' => $availability['class'] ?? '',
 			),
 			'sold_individually'   => $product->is_sold_individually(),
+			'weight'              => $product->get_weight(),
+			'dimensions'          => (object) [
+				'length' => $product->get_length(),
+				'width'  => $product->get_width(),
+				'height' => $product->get_height(),
+			],
+			'formatted_weight'     => wc_format_weight( (float) $product->get_weight() ),
+			'formatted_dimensions' => wc_format_dimensions( (array) $product->get_dimensions( false ) ),
 			'add_to_cart'         => (object) array_merge(
 				[
 					'text'        => $this->prepare_html_response( $product->add_to_cart_text() ),
