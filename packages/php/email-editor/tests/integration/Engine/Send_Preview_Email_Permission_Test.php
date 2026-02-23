@@ -35,13 +35,36 @@ class Send_Preview_Email_Permission_Test extends \Email_Editor_Integration_Test_
 	private const ROUTE = '/woocommerce-email-editor/v1/send_preview_email';
 
 	/**
+	 * Creates a user and returns an integer ID.
+	 *
+	 * @param array $args Arguments for user creation.
+	 * @return int
+	 */
+	private function create_user( array $args ): int {
+		$result = self::factory()->user->create( $args );
+		$this->assertIsInt( $result );
+		return $result;
+	}
+
+	/**
+	 * Creates a post and returns an integer ID.
+	 *
+	 * @param array $args Arguments for post creation.
+	 * @return int
+	 */
+	private function create_post( array $args = array() ): int {
+		$result = self::factory()->post->create( $args );
+		$this->assertIsInt( $result );
+		return $result;
+	}
+
+	/**
 	 * Set up before each test.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 		$this->email_editor = $this->di_container->get( Email_Editor::class );
 
-		/** @var \WP_REST_Server $wp_rest_server */
 		global $wp_rest_server;
 		$wp_rest_server = new \WP_REST_Server();
 		$this->server   = $wp_rest_server;
@@ -55,7 +78,6 @@ class Send_Preview_Email_Permission_Test extends \Email_Editor_Integration_Test_
 	 */
 	public function tearDown(): void {
 		parent::tearDown();
-		/** @var \WP_REST_Server $wp_rest_server */
 		global $wp_rest_server;
 		$wp_rest_server = null;
 	}
@@ -64,8 +86,8 @@ class Send_Preview_Email_Permission_Test extends \Email_Editor_Integration_Test_
 	 * Test that an admin can send a preview email for their own post.
 	 */
 	public function testAdminCanSendPreviewForOwnPost(): void {
-		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
-		$post_id  = self::factory()->post->create( array( 'post_author' => $admin_id ) );
+		$admin_id = $this->create_user( array( 'role' => 'administrator' ) );
+		$post_id  = $this->create_post( array( 'post_author' => $admin_id ) );
 
 		wp_set_current_user( $admin_id );
 
@@ -86,9 +108,9 @@ class Send_Preview_Email_Permission_Test extends \Email_Editor_Integration_Test_
 	 * Test that an editor can send a preview email for another user's post.
 	 */
 	public function testEditorCanSendPreviewForOtherUsersPost(): void {
-		$author_id = self::factory()->user->create( array( 'role' => 'author' ) );
-		$editor_id = self::factory()->user->create( array( 'role' => 'editor' ) );
-		$post_id   = self::factory()->post->create( array( 'post_author' => $author_id ) );
+		$author_id = $this->create_user( array( 'role' => 'author' ) );
+		$editor_id = $this->create_user( array( 'role' => 'editor' ) );
+		$post_id   = $this->create_post( array( 'post_author' => $author_id ) );
 
 		wp_set_current_user( $editor_id );
 
@@ -109,9 +131,9 @@ class Send_Preview_Email_Permission_Test extends \Email_Editor_Integration_Test_
 	 * Test that a contributor cannot send a preview email for another user's private post.
 	 */
 	public function testContributorCannotSendPreviewForOtherUsersPrivatePost(): void {
-		$admin_id       = self::factory()->user->create( array( 'role' => 'administrator' ) );
-		$contributor_id = self::factory()->user->create( array( 'role' => 'contributor' ) );
-		$post_id        = self::factory()->post->create(
+		$admin_id       = $this->create_user( array( 'role' => 'administrator' ) );
+		$contributor_id = $this->create_user( array( 'role' => 'contributor' ) );
+		$post_id        = $this->create_post(
 			array(
 				'post_author' => $admin_id,
 				'post_status' => 'private',
@@ -137,9 +159,9 @@ class Send_Preview_Email_Permission_Test extends \Email_Editor_Integration_Test_
 	 * Test that a subscriber cannot send a preview email.
 	 */
 	public function testSubscriberCannotSendPreview(): void {
-		$admin_id      = self::factory()->user->create( array( 'role' => 'administrator' ) );
-		$subscriber_id = self::factory()->user->create( array( 'role' => 'subscriber' ) );
-		$post_id       = self::factory()->post->create( array( 'post_author' => $admin_id ) );
+		$admin_id      = $this->create_user( array( 'role' => 'administrator' ) );
+		$subscriber_id = $this->create_user( array( 'role' => 'subscriber' ) );
+		$post_id       = $this->create_post( array( 'post_author' => $admin_id ) );
 
 		wp_set_current_user( $subscriber_id );
 
@@ -160,7 +182,7 @@ class Send_Preview_Email_Permission_Test extends \Email_Editor_Integration_Test_
 	 * Test that a request without postId is denied.
 	 */
 	public function testRequestWithoutPostIdIsDenied(): void {
-		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$admin_id = $this->create_user( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $admin_id );
 
 		$request = new \WP_REST_Request( 'POST', self::ROUTE );
@@ -179,7 +201,7 @@ class Send_Preview_Email_Permission_Test extends \Email_Editor_Integration_Test_
 	 * Test that a request with non-numeric postId is denied.
 	 */
 	public function testRequestWithNonNumericPostIdIsDenied(): void {
-		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$admin_id = $this->create_user( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $admin_id );
 
 		$request = new \WP_REST_Request( 'POST', self::ROUTE );
@@ -199,7 +221,7 @@ class Send_Preview_Email_Permission_Test extends \Email_Editor_Integration_Test_
 	 * Test that a request with zero postId is denied.
 	 */
 	public function testRequestWithZeroPostIdIsDenied(): void {
-		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$admin_id = $this->create_user( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $admin_id );
 
 		$request = new \WP_REST_Request( 'POST', self::ROUTE );
@@ -219,7 +241,7 @@ class Send_Preview_Email_Permission_Test extends \Email_Editor_Integration_Test_
 	 * Test that a request with negative postId is denied.
 	 */
 	public function testRequestWithNegativePostIdIsDenied(): void {
-		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$admin_id = $this->create_user( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $admin_id );
 
 		$request = new \WP_REST_Request( 'POST', self::ROUTE );
@@ -239,8 +261,8 @@ class Send_Preview_Email_Permission_Test extends \Email_Editor_Integration_Test_
 	 * Test that an unauthenticated request is denied.
 	 */
 	public function testUnauthenticatedRequestIsDenied(): void {
-		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
-		$post_id  = self::factory()->post->create( array( 'post_author' => $admin_id ) );
+		$admin_id = $this->create_user( array( 'role' => 'administrator' ) );
+		$post_id  = $this->create_post( array( 'post_author' => $admin_id ) );
 
 		wp_set_current_user( 0 );
 
@@ -261,7 +283,7 @@ class Send_Preview_Email_Permission_Test extends \Email_Editor_Integration_Test_
 	 * Test that a request with non-existent postId is denied.
 	 */
 	public function testRequestWithNonExistentPostIdIsDenied(): void {
-		$admin_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$admin_id = $this->create_user( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $admin_id );
 
 		$request = new \WP_REST_Request( 'POST', self::ROUTE );
