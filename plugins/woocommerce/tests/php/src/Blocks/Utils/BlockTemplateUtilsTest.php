@@ -322,9 +322,9 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 	 * Test `get_block_templates_from_db`: workflow and properly handling input parameters.
 	 */
 	public function test_get_block_templates_from_db(): void {
-		$now             = time();
-		$date            = gmdate( 'Y-m-d H:i:s', $now - 1 );
-		$attributes      = array(
+		$now        = time();
+		$date       = gmdate( 'Y-m-d H:i:s', $now - 1 );
+		$attributes = array(
 			'post_name'     => 'slug-1',
 			'post_type'     => 'wp_template',
 			'post_title'    => 'title',
@@ -335,8 +335,8 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 		);
 		$template_slug_1 = $this->createPost( $attributes, BlockTemplateUtils::PLUGIN_SLUG );
 
-		$date          = gmdate( 'Y-m-d H:i:s', $now );
-		$attributes    = array(
+		$date       = gmdate( 'Y-m-d H:i:s', $now );
+		$attributes = array(
 			'post_name'     => 'slug',
 			'post_type'     => 'wp_template',
 			'post_title'    => 'title',
