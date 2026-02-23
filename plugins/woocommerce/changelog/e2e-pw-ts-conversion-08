@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Convert fixtures and utils of the e2e-pw directory to TypeScript.

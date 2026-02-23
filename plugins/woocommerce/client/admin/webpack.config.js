@@ -223,19 +223,6 @@ const webpackConfig = {
 			],
 		} ),
 
-		// The email-editor assets for the rich-text.js file need to be copied to the build directory.
-		new CopyWebpackPlugin( {
-			patterns: [
-				{
-					from: path.join(
-						__dirname,
-						'../../../../packages/js/email-editor/assets'
-					),
-					to: './email-editor/assets',
-				},
-			],
-		} ),
-
 		// React Fast Refresh.
 		! isProduction && isHot && new ReactRefreshWebpackPlugin(),
 

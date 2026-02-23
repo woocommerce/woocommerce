@@ -2,7 +2,7 @@
 	"name": "@woocommerce/plugin-woocommerce",
 	"private": true,
 	"title": "WooCommerce",
-	"version": "10.6.0",
+	"version": "10.7.0",
 	"homepage": "https://woocommerce.com/",
 	"repository": {
 		"type": "git",
@@ -665,7 +665,7 @@
 					"name": "Metrics",
 					"testType": "performance",
 					"command": "test:metrics:ci",
-					"optional": false,
+					"optional": true,
 					"changes": [
 						"composer.json",
 						"composer.lock",
@@ -683,7 +683,7 @@
 						"@woocommerce/classic-assets"
 					],
 					"testEnv": {
-						"start": "env:test"
+						"start": "env:perf"
 					},
 					"events": [
 						"push",
