@@ -907,11 +907,13 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 */
 	public function valid_locales_provider(): array {
 		return array(
-			'English US'   => array( 'en_US' ),
-			'French'       => array( 'fr_FR' ),
-			'Chinese'      => array( 'zh_CN' ),
-			'Portuguese'   => array( 'pt_BR' ),
-			'Three-letter' => array( 'ast_ES' ),
+			'English US'          => array( 'en_US' ),
+			'French'              => array( 'fr_FR' ),
+			'Chinese'             => array( 'zh_CN' ),
+			'Portuguese'          => array( 'pt_BR' ),
+			'Three-letter'        => array( 'ast_ES' ),
+			'Two-letter locale'   => array( 'ja' ),
+			'Three-letter locale' => array( 'ast' ),
 		);
 	}
 
@@ -925,7 +927,7 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 			'no underscore'    => array( 'enUS' ),
 			'lowercase region' => array( 'en_gb' ),
 			'uppercase lang'   => array( 'EN_US' ),
-			'just language'    => array( 'en' ),
+			'single char'      => array( 'e' ),
 			'with hyphen'      => array( 'en-US' ),
 			'too long lang'    => array( 'engl_US' ),
 		);
