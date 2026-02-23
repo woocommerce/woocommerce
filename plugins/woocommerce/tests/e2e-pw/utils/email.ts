@@ -104,14 +104,20 @@ export async function accessTheEmailEditor(
 	emailTitle = 'New order'
 ) {
 	await page.goto( '/wp-admin/admin.php?page=wc-settings&tab=email' );
+	// TODO: WP 7.0 compat - WP 7.0 changed page rendering timing for the
+	// email settings table. Explicit wait needed. Simplify when WP 7.0 is the
+	// minimum supported version.
 	const theRow = page.getByRole( 'row', {
 		name: new RegExp( emailTitle ),
 	} );
+	await theRow.waitFor( { timeout: 20000 } );
 	await theRow
 		.getByRole( 'button', { name: 'Actions', exact: true } )
 		.click();
 	await page.getByRole( 'menuitem', { name: 'Edit', exact: true } ).click();
-	await expect( page.locator( '#woocommerce-email-editor' ) ).toBeVisible();
+	await expect( page.locator( '#woocommerce-email-editor' ) ).toBeVisible( {
+		timeout: 20000,
+	} );
 }
 
 export async function ensureEmailEditorSettingsPanelIsOpened( page: Page ) {

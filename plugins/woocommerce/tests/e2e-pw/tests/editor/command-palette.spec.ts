@@ -34,10 +34,11 @@ const clickOnCommandPaletteOption = async ( {
 		)
 		.fill( optionName );
 
-	// Click on the relevant option.
+	// TODO: WP 7.0 compat - WP 7.0 changed the command palette option accessible names
+	// (possibly including icon text). Using regex instead of exact match.
+	// Tighten back to exact: true when WP 7.0 is the minimum supported version.
 	const option = page.getByRole( 'option', {
-		name: optionName,
-		exact: true,
+		name: new RegExp( optionName ),
 	} );
 	await expect( option ).toBeVisible();
 	option.click();

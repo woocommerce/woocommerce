@@ -186,7 +186,12 @@ test.describe( `${ blockData.name } Block`, () => {
 			canvas: 'edit',
 		} );
 
-		await expect( editor.canvas.getByText( 'placeholder' ) ).toBeVisible();
+		// TODO: WP 7.0 compat - WP 7.0 always iframes the editor with different
+		// loading timing. Explicit timeout needed. Simplify when WP 7.0 is the
+		// minimum supported version.
+		await expect( editor.canvas.getByText( 'placeholder' ) ).toBeVisible( {
+			timeout: 10000,
+		} );
 
 		await editor.insertBlock( { name: 'woocommerce/single-product' } );
 
@@ -221,7 +226,12 @@ test.describe( `${ blockData.name } Block`, () => {
 			canvas: 'edit',
 		} );
 
-		await expect( editor.canvas.getByText( 'placeholder' ) ).toBeVisible();
+		// TODO: WP 7.0 compat - WP 7.0 always iframes the editor with different
+		// loading timing. Explicit timeout needed. Simplify when WP 7.0 is the
+		// minimum supported version.
+		await expect( editor.canvas.getByText( 'placeholder' ) ).toBeVisible( {
+			timeout: 10000,
+		} );
 
 		await editor.insertBlock( { name: blockData.slug } );
 

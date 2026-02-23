@@ -142,6 +142,12 @@ test( 'can bulk edit products', async ( { page, products } ) => {
 	await test.step( 'select and bulk edit the products', async () => {
 		await selectAllProducts( page, products );
 
+		// TODO: WP 7.0 compat - WP 7.0 changed list table rendering timing;
+		// the select may not be immediately interactive. Remove explicit wait
+		// when WP 7.0 is the minimum supported version (if no longer needed).
+		await page
+			.locator( '#bulk-action-selector-top' )
+			.waitFor( { state: 'attached' } );
 		await page
 			.locator( '#bulk-action-selector-top' )
 			.selectOption( 'Edit' );

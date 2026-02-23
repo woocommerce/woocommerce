@@ -35,7 +35,13 @@ test.describe( 'WooCommerce Email Editor Core', () => {
 	test( 'Can access the email editor', async ( { page } ) => {
 		// Try with the new order email.
 		await accessTheEmailEditor( page, 'New order' );
-		await page.getByRole( 'tab', { name: 'Email' } ).click();
+		// TODO: WP 7.0 compat - WP 7.0 changed the editor sidebar tab structure.
+		// Using .or() to match both old and new tab markup. Keep only the new
+		// selector when WP 7.0 is the minimum supported version.
+		const emailTab = page
+			.getByRole( 'tab', { name: 'Email' } )
+			.or( page.getByRole( 'button', { name: 'Email' } ) );
+		await emailTab.click();
 		await expect(
 			page.locator( '.editor-post-card-panel__title' )
 		).toContainText( 'New order' );

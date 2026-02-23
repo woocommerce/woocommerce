@@ -43,7 +43,12 @@ test.describe( `${ blockData.slug } Block`, () => {
 			canvas: 'edit',
 		} );
 
-		await expect( editor.canvas.getByText( 'howdy' ) ).toBeVisible();
+		// TODO: WP 7.0 compat - WP 7.0 always iframes the editor with different
+		// loading timing. Explicit timeout needed. Simplify when WP 7.0 is the
+		// minimum supported version.
+		await expect( editor.canvas.getByText( 'howdy' ) ).toBeVisible( {
+			timeout: 10000,
+		} );
 
 		await editor.insertBlock( {
 			name: blockData.slug,

@@ -118,9 +118,14 @@ export class Editor extends CoreEditor {
 	 * Search for a template or template part in the Site Editor.
 	 */
 	async searchTemplate( { templateName }: { templateName: string } ) {
+		// TODO: WP 7.0 compat - WP 7.0 changed Site Editor rendering timing;
+		// the DataViews grid may not be populated immediately. Wait for at least
+		// one card to be present before counting. Simplify when WP 7.0 is the
+		// minimum supported version.
 		const templateCards = this.page.locator(
 			'.dataviews-view-grid > .dataviews-view-grid__card'
 		);
+		await templateCards.first().waitFor( { timeout: 10000 } );
 		const templatesBeforeSearch = await templateCards.count();
 
 		await this.page.getByPlaceholder( 'Search' ).fill( templateName );
@@ -134,7 +139,7 @@ export class Editor extends CoreEditor {
 		// Using expect.poll() for a retrying assertion since toHaveCount
 		// requires an exact number.
 		await expect
-			.poll( () => templateCards.count(), { timeout: 5000 } )
+			.poll( () => templateCards.count(), { timeout: 10000 } )
 			.toBeLessThan( templatesBeforeSearch );
 	}
 
