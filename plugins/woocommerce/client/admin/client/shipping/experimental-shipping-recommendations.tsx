@@ -93,20 +93,22 @@ const ShippingRecommendations = () => {
 			<ShippingTour showShippingRecommendationsStep={ true } />
 			<ShippingRecommendationsList>
 				{ visibleExtensions.map( ( ext ) => {
+					const isPluginInstalled = installedPlugins.includes(
+						EXTENSION_PLUGIN_SLUGS[ ext ]
+					);
 					switch ( ext ) {
 						case 'woocommerce-shipping':
 							return (
 								<WooCommerceShippingItem
 									key={ ext }
-									isPluginInstalled={ installedPlugins.includes(
-										'woocommerce-shipping'
-									) }
+									isPluginInstalled={ isPluginInstalled }
 								/>
 							);
 						case 'shipstation':
 							return (
 								<ShipStationItem
 									key={ ext }
+									isPluginInstalled={ isPluginInstalled }
 									pluginsBeingSetup={ pluginsBeingSetup }
 									onSetupClick={ handleSetup }
 								/>
@@ -115,6 +117,7 @@ const ShippingRecommendations = () => {
 							return (
 								<PacklinkItem
 									key={ ext }
+									isPluginInstalled={ isPluginInstalled }
 									pluginsBeingSetup={ pluginsBeingSetup }
 									onSetupClick={ handleSetup }
 								/>

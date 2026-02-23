@@ -13,9 +13,11 @@ import './woocommerce-shipping-item.scss';
 const SHIPSTATION_PLUGIN_SLUG = 'woocommerce-shipstation-integration';
 
 const ShipStationItem = ( {
+	isPluginInstalled,
 	onSetupClick,
 	pluginsBeingSetup,
 }: {
+	isPluginInstalled: boolean;
 	pluginsBeingSetup: Array< string >;
 	onSetupClick: ( slugs: string[] ) => PromiseLike< void >;
 } ) => {
@@ -66,7 +68,9 @@ const ShipStationItem = ( {
 					) }
 					disabled={ pluginsBeingSetup.length > 0 }
 				>
-					{ __( 'Get started', 'woocommerce' ) }
+					{ isPluginInstalled
+						? __( 'Activate', 'woocommerce' )
+						: __( 'Get started', 'woocommerce' ) }
 				</Button>
 			</div>
 		</div>

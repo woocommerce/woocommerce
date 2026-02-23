@@ -17,7 +17,7 @@ import WooIcon from './woo-icon.svg';
 const WooCommerceShippingItem = ( {
 	isPluginInstalled,
 }: {
-	isPluginInstalled: boolean | undefined;
+	isPluginInstalled: boolean;
 } ) => {
 	const { layoutString } = useLayoutContext();
 
