@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
 import { Button, ExternalLink } from '@wordpress/components';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -14,17 +15,24 @@ const SHIPSTATION_PLUGIN_SLUG = 'woocommerce-shipstation-integration';
 
 const ShipStationItem = ( {
 	isPluginInstalled,
-	onSetupClick,
+	onInstallClick,
+	onActivateClick,
 	pluginsBeingSetup,
 }: {
 	isPluginInstalled: boolean;
 	pluginsBeingSetup: Array< string >;
-	onSetupClick: ( slugs: string[] ) => PromiseLike< void >;
+	onInstallClick: ( slugs: string[] ) => PromiseLike< void >;
+	onActivateClick: ( slugs: string[] ) => PromiseLike< void >;
 } ) => {
 	const { createSuccessNotice } = useDispatch( 'core/notices' );
 
-	const handleSetupClick = () => {
-		onSetupClick( [ SHIPSTATION_PLUGIN_SLUG ] ).then(
+	const handleClick = () => {
+		recordEvent( 'settings_shipping_recommendation_setup_click', {
+			plugin: SHIPSTATION_PLUGIN_SLUG,
+			action: isPluginInstalled ? 'activate' : 'install',
+		} );
+		const action = isPluginInstalled ? onActivateClick : onInstallClick;
+		action( [ SHIPSTATION_PLUGIN_SLUG ] ).then(
 			() => {
 				createSuccessNotice(
 					isPluginInstalled
@@ -63,8 +71,8 @@ const ShipStationItem = ( {
 			</div>
 			<div className="woocommerce-list__item-after">
 				<Button
-					isSecondary
-					onClick={ handleSetupClick }
+					onClick={ handleClick }
+					variant={ isPluginInstalled ? 'primary' : 'secondary' }
 					isBusy={ pluginsBeingSetup.includes(
 						SHIPSTATION_PLUGIN_SLUG
 					) }
@@ -72,7 +80,7 @@ const ShipStationItem = ( {
 				>
 					{ isPluginInstalled
 						? __( 'Activate', 'woocommerce' )
-						: __( 'Get started', 'woocommerce' ) }
+						: __( 'Install', 'woocommerce' ) }
 				</Button>
 			</div>
 		</div>

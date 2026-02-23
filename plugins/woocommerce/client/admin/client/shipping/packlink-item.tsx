@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
 import { Button, ExternalLink } from '@wordpress/components';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -14,17 +15,24 @@ const PACKLINK_PLUGIN_SLUG = 'packlink-pro-shipping';
 
 const PacklinkItem = ( {
 	isPluginInstalled,
-	onSetupClick,
+	onInstallClick,
+	onActivateClick,
 	pluginsBeingSetup,
 }: {
 	isPluginInstalled: boolean;
 	pluginsBeingSetup: Array< string >;
-	onSetupClick: ( slugs: string[] ) => PromiseLike< void >;
+	onInstallClick: ( slugs: string[] ) => PromiseLike< void >;
+	onActivateClick: ( slugs: string[] ) => PromiseLike< void >;
 } ) => {
 	const { createSuccessNotice } = useDispatch( 'core/notices' );
 
-	const handleSetupClick = () => {
-		onSetupClick( [ PACKLINK_PLUGIN_SLUG ] ).then(
+	const handleClick = () => {
+		recordEvent( 'settings_shipping_recommendation_setup_click', {
+			plugin: PACKLINK_PLUGIN_SLUG,
+			action: isPluginInstalled ? 'activate' : 'install',
+		} );
+		const action = isPluginInstalled ? onActivateClick : onInstallClick;
+		action( [ PACKLINK_PLUGIN_SLUG ] ).then(
 			() => {
 				createSuccessNotice(
 					isPluginInstalled
@@ -63,8 +71,8 @@ const PacklinkItem = ( {
 			</div>
 			<div className="woocommerce-list__item-after">
 				<Button
-					isSecondary
-					onClick={ handleSetupClick }
+					variant={ isPluginInstalled ? 'primary' : 'secondary' }
+					onClick={ handleClick }
 					isBusy={ pluginsBeingSetup.includes(
 						PACKLINK_PLUGIN_SLUG
 					) }
@@ -72,7 +80,7 @@ const PacklinkItem = ( {
 				>
 					{ isPluginInstalled
 						? __( 'Activate', 'woocommerce' )
-						: __( 'Get started', 'woocommerce' ) }
+						: __( 'Install', 'woocommerce' ) }
 				</Button>
 			</div>
 		</div>

@@ -29,7 +29,8 @@ export const useInstallPlugin = () => {
 		Array< string >
 	>( [] );
 
-	const { installAndActivatePlugins } = useDispatch( pluginsStore );
+	const { installAndActivatePlugins, installPlugins, activatePlugins } =
+		useDispatch( pluginsStore );
 
 	const handleSetup = ( slugs: string[] ): PromiseLike< void > => {
 		if ( pluginsBeingSetup.length > 0 ) {
@@ -50,7 +51,50 @@ export const useInstallPlugin = () => {
 			} );
 	};
 
-	return [ pluginsBeingSetup, handleSetup ] as const;
+	const handleInstall = ( slugs: string[] ): PromiseLike< void > => {
+		if ( pluginsBeingSetup.length > 0 ) {
+			return Promise.resolve();
+		}
+
+		setPluginsBeingSetup( slugs );
+
+		return installPlugins( slugs )
+			.then( () => {
+				setPluginsBeingSetup( [] );
+			} )
+			.catch( ( response: { errors: Record< string, string > } ) => {
+				createNoticesFromResponse( response );
+				setPluginsBeingSetup( [] );
+
+				return Promise.reject();
+			} );
+	};
+
+	const handleActivate = ( slugs: string[] ): PromiseLike< void > => {
+		if ( pluginsBeingSetup.length > 0 ) {
+			return Promise.resolve();
+		}
+
+		setPluginsBeingSetup( slugs );
+
+		return activatePlugins( slugs )
+			.then( () => {
+				setPluginsBeingSetup( [] );
+			} )
+			.catch( ( response: { errors: Record< string, string > } ) => {
+				createNoticesFromResponse( response );
+				setPluginsBeingSetup( [] );
+
+				return Promise.reject();
+			} );
+	};
+
+	return [
+		pluginsBeingSetup,
+		handleSetup,
+		handleInstall,
+		handleActivate,
+	] as const;
 };
 
 export const ShippingRecommendationsList = ( {

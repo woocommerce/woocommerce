@@ -82,6 +82,8 @@ describe( 'ShippingRecommendations', () => {
 		);
 		( useDispatch as jest.Mock ).mockReturnValue( {
 			installAndActivatePlugins: () => Promise.resolve(),
+			installPlugins: () => Promise.resolve(),
+			activatePlugins: () => Promise.resolve(),
 			createSuccessNotice: () => null,
 		} );
 	} );
@@ -313,12 +315,14 @@ describe( 'ShippingRecommendations', () => {
 
 	describe( 'plugin installation', () => {
 		it( 'allows to install WooCommerce Shipping', async () => {
-			const installAndActivatePluginsMock = jest
+			const installPluginsMock = jest
 				.fn()
 				.mockResolvedValue( undefined );
 			const successNoticeMock = jest.fn();
 			( useDispatch as jest.Mock ).mockReturnValue( {
-				installAndActivatePlugins: installAndActivatePluginsMock,
+				installAndActivatePlugins: jest.fn().mockResolvedValue( undefined ),
+				installPlugins: installPluginsMock,
+				activatePlugins: jest.fn().mockResolvedValue( undefined ),
 				createSuccessNotice: successNoticeMock,
 			} );
 			mockSelectForCountry( 'US', [
@@ -326,9 +330,16 @@ describe( 'ShippingRecommendations', () => {
 			] );
 			render( <ShippingRecommendations /> );
 
-			userEvent.click( screen.getByText( 'Get started' ) );
+			userEvent.click( screen.getByText( 'Install' ) );
 
-			expect( installAndActivatePluginsMock ).toHaveBeenCalledWith( [
+			expect( recordEvent ).toHaveBeenCalledWith(
+				'settings_shipping_recommendation_setup_click',
+				{
+					plugin: 'woocommerce-shipping',
+					action: 'install',
+				}
+			);
+			expect( installPluginsMock ).toHaveBeenCalledWith( [
 				'woocommerce-shipping',
 			] );
 			await waitFor( () => {
@@ -340,20 +351,29 @@ describe( 'ShippingRecommendations', () => {
 		} );
 
 		it( 'allows to install ShipStation', async () => {
-			const installAndActivatePluginsMock = jest
+			const installPluginsMock = jest
 				.fn()
 				.mockResolvedValue( undefined );
 			const successNoticeMock = jest.fn();
 			( useDispatch as jest.Mock ).mockReturnValue( {
-				installAndActivatePlugins: installAndActivatePluginsMock,
+				installAndActivatePlugins: jest.fn().mockResolvedValue( undefined ),
+				installPlugins: installPluginsMock,
+				activatePlugins: jest.fn().mockResolvedValue( undefined ),
 				createSuccessNotice: successNoticeMock,
 			} );
 			mockSelectForCountry( 'CA' );
 			render( <ShippingRecommendations /> );
 
-			userEvent.click( screen.getByText( 'Get started' ) );
+			userEvent.click( screen.getByText( 'Install' ) );
 
-			expect( installAndActivatePluginsMock ).toHaveBeenCalledWith( [
+			expect( recordEvent ).toHaveBeenCalledWith(
+				'settings_shipping_recommendation_setup_click',
+				{
+					plugin: 'woocommerce-shipstation-integration',
+					action: 'install',
+				}
+			);
+			expect( installPluginsMock ).toHaveBeenCalledWith( [
 				'woocommerce-shipstation-integration',
 			] );
 			await waitFor( () => {
@@ -365,20 +385,29 @@ describe( 'ShippingRecommendations', () => {
 		} );
 
 		it( 'allows to install Packlink PRO', async () => {
-			const installAndActivatePluginsMock = jest
+			const installPluginsMock = jest
 				.fn()
 				.mockResolvedValue( undefined );
 			const successNoticeMock = jest.fn();
 			( useDispatch as jest.Mock ).mockReturnValue( {
-				installAndActivatePlugins: installAndActivatePluginsMock,
+				installAndActivatePlugins: jest.fn().mockResolvedValue( undefined ),
+				installPlugins: installPluginsMock,
+				activatePlugins: jest.fn().mockResolvedValue( undefined ),
 				createSuccessNotice: successNoticeMock,
 			} );
 			mockSelectForCountry( 'FR' );
 			render( <ShippingRecommendations /> );
 
-			userEvent.click( screen.getByText( 'Get started' ) );
+			userEvent.click( screen.getByText( 'Install' ) );
 
-			expect( installAndActivatePluginsMock ).toHaveBeenCalledWith( [
+			expect( recordEvent ).toHaveBeenCalledWith(
+				'settings_shipping_recommendation_setup_click',
+				{
+					plugin: 'packlink-pro-shipping',
+					action: 'install',
+				}
+			);
+			expect( installPluginsMock ).toHaveBeenCalledWith( [
 				'packlink-pro-shipping',
 			] );
 			await waitFor( () => {
@@ -414,7 +443,7 @@ describe( 'ShippingRecommendations', () => {
 
 			expect( screen.getByText( 'Activate' ) ).toBeInTheDocument();
 			expect(
-				screen.queryByText( 'Get started' )
+				screen.queryByText( 'Install' )
 			).not.toBeInTheDocument();
 		} );
 
@@ -426,17 +455,19 @@ describe( 'ShippingRecommendations', () => {
 
 			expect( screen.getByText( 'Activate' ) ).toBeInTheDocument();
 			expect(
-				screen.queryByText( 'Get started' )
+				screen.queryByText( 'Install' )
 			).not.toBeInTheDocument();
 		} );
 
 		it( 'shows activated notice for WooCommerce Shipping when activating installed plugin', async () => {
-			const installAndActivatePluginsMock = jest
+			const activatePluginsMock = jest
 				.fn()
 				.mockResolvedValue( undefined );
 			const successNoticeMock = jest.fn();
 			( useDispatch as jest.Mock ).mockReturnValue( {
-				installAndActivatePlugins: installAndActivatePluginsMock,
+				installAndActivatePlugins: jest.fn().mockResolvedValue( undefined ),
+				installPlugins: jest.fn().mockResolvedValue( undefined ),
+				activatePlugins: activatePluginsMock,
 				createSuccessNotice: successNoticeMock,
 			} );
 			mockSelectForCountry(
@@ -450,7 +481,14 @@ describe( 'ShippingRecommendations', () => {
 
 			userEvent.click( screen.getByText( 'Activate' ) );
 
-			expect( installAndActivatePluginsMock ).toHaveBeenCalledWith( [
+			expect( recordEvent ).toHaveBeenCalledWith(
+				'settings_shipping_recommendation_setup_click',
+				{
+					plugin: 'woocommerce-shipping',
+					action: 'activate',
+				}
+			);
+			expect( activatePluginsMock ).toHaveBeenCalledWith( [
 				'woocommerce-shipping',
 			] );
 			await waitFor( () => {
@@ -462,12 +500,14 @@ describe( 'ShippingRecommendations', () => {
 		} );
 
 		it( 'shows activated notice for ShipStation when activating installed plugin', async () => {
-			const installAndActivatePluginsMock = jest
+			const activatePluginsMock = jest
 				.fn()
 				.mockResolvedValue( undefined );
 			const successNoticeMock = jest.fn();
 			( useDispatch as jest.Mock ).mockReturnValue( {
-				installAndActivatePlugins: installAndActivatePluginsMock,
+				installAndActivatePlugins: jest.fn().mockResolvedValue( undefined ),
+				installPlugins: jest.fn().mockResolvedValue( undefined ),
+				activatePlugins: activatePluginsMock,
 				createSuccessNotice: successNoticeMock,
 			} );
 			mockSelectForCountry( 'CA', [], {
@@ -479,7 +519,14 @@ describe( 'ShippingRecommendations', () => {
 
 			userEvent.click( screen.getByText( 'Activate' ) );
 
-			expect( installAndActivatePluginsMock ).toHaveBeenCalledWith( [
+			expect( recordEvent ).toHaveBeenCalledWith(
+				'settings_shipping_recommendation_setup_click',
+				{
+					plugin: 'woocommerce-shipstation-integration',
+					action: 'activate',
+				}
+			);
+			expect( activatePluginsMock ).toHaveBeenCalledWith( [
 				'woocommerce-shipstation-integration',
 			] );
 			await waitFor( () => {
@@ -491,12 +538,14 @@ describe( 'ShippingRecommendations', () => {
 		} );
 
 		it( 'shows activated notice for Packlink PRO when activating installed plugin', async () => {
-			const installAndActivatePluginsMock = jest
+			const activatePluginsMock = jest
 				.fn()
 				.mockResolvedValue( undefined );
 			const successNoticeMock = jest.fn();
 			( useDispatch as jest.Mock ).mockReturnValue( {
-				installAndActivatePlugins: installAndActivatePluginsMock,
+				installAndActivatePlugins: jest.fn().mockResolvedValue( undefined ),
+				installPlugins: jest.fn().mockResolvedValue( undefined ),
+				activatePlugins: activatePluginsMock,
 				createSuccessNotice: successNoticeMock,
 			} );
 			mockSelectForCountry( 'FR', [], {
@@ -506,7 +555,14 @@ describe( 'ShippingRecommendations', () => {
 
 			userEvent.click( screen.getByText( 'Activate' ) );
 
-			expect( installAndActivatePluginsMock ).toHaveBeenCalledWith( [
+			expect( recordEvent ).toHaveBeenCalledWith(
+				'settings_shipping_recommendation_setup_click',
+				{
+					plugin: 'packlink-pro-shipping',
+					action: 'activate',
+				}
+			);
+			expect( activatePluginsMock ).toHaveBeenCalledWith( [
 				'packlink-pro-shipping',
 			] );
 			await waitFor( () => {

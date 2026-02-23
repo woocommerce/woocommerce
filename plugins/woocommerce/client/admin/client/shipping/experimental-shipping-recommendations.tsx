@@ -46,7 +46,8 @@ const EXTENSION_PLUGIN_SLUGS: Record< ExtensionId, string > = {
 };
 
 const ShippingRecommendations = () => {
-	const [ pluginsBeingSetup, handleSetup ] = useInstallPlugin();
+	const [ pluginsBeingSetup, , handleInstall, handleActivate ] =
+		useInstallPlugin();
 
 	const {
 		activePlugins,
@@ -103,7 +104,8 @@ const ShippingRecommendations = () => {
 									key={ ext }
 									isPluginInstalled={ isPluginInstalled }
 									pluginsBeingSetup={ pluginsBeingSetup }
-									onSetupClick={ handleSetup }
+									onInstallClick={ handleInstall }
+									onActivateClick={ handleActivate }
 								/>
 							);
 						case 'shipstation':
@@ -112,7 +114,8 @@ const ShippingRecommendations = () => {
 									key={ ext }
 									isPluginInstalled={ isPluginInstalled }
 									pluginsBeingSetup={ pluginsBeingSetup }
-									onSetupClick={ handleSetup }
+									onInstallClick={ handleInstall }
+									onActivateClick={ handleActivate }
 								/>
 							);
 						case 'packlink':
@@ -121,7 +124,8 @@ const ShippingRecommendations = () => {
 									key={ ext }
 									isPluginInstalled={ isPluginInstalled }
 									pluginsBeingSetup={ pluginsBeingSetup }
-									onSetupClick={ handleSetup }
+									onInstallClick={ handleInstall }
+									onActivateClick={ handleActivate }
 								/>
 							);
 						default:

@@ -3,6 +3,7 @@
  */
 import { render, screen } from '@testing-library/react';
 import { useDispatch } from '@wordpress/data';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -11,6 +12,10 @@ import WooCommerceShippingItem from '../experimental-woocommerce-shipping-item';
 jest.mock( '@wordpress/data', () => ( {
 	...jest.requireActual( '@wordpress/data' ),
 	useDispatch: jest.fn(),
+} ) );
+jest.mock( '@woocommerce/tracks', () => ( {
+	...jest.requireActual( '@woocommerce/tracks' ),
+	recordEvent: jest.fn(),
 } ) );
 
 jest.mock( '@woocommerce/admin-layout', () => {
@@ -30,7 +35,8 @@ jest.mock( '@woocommerce/admin-layout', () => {
 describe( 'WooCommerceShippingItem', () => {
 	const defaultProps = {
 		pluginsBeingSetup: [] as string[],
-		onSetupClick: jest.fn( () => Promise.resolve() ),
+		onInstallClick: jest.fn( () => Promise.resolve() ),
+		onActivateClick: jest.fn( () => Promise.resolve() ),
 	};
 
 	beforeEach( () => {
@@ -39,7 +45,7 @@ describe( 'WooCommerceShippingItem', () => {
 		} );
 	} );
 
-	it( 'should render WC Shipping item with CTA = "Get started" when WC Shipping is not installed', () => {
+	it( 'should render WC Shipping item with CTA = "Install" when WC Shipping is not installed', () => {
 		render(
 			<WooCommerceShippingItem
 				isPluginInstalled={ false }
@@ -52,7 +58,7 @@ describe( 'WooCommerceShippingItem', () => {
 		).toBeInTheDocument();
 
 		expect(
-			screen.queryByRole( 'button', { name: 'Get started' } )
+			screen.queryByRole( 'button', { name: 'Install' } )
 		).toBeInTheDocument();
 	} );
 
@@ -73,18 +79,72 @@ describe( 'WooCommerceShippingItem', () => {
 		).toBeInTheDocument();
 	} );
 
-	it( 'should call onSetupClick when clicking setup button', () => {
-		const onSetupClick = jest.fn( () => Promise.resolve() );
+	it( 'should call onInstallClick when clicking Install button', () => {
+		const onInstallClick = jest.fn( () => Promise.resolve() );
 		render(
 			<WooCommerceShippingItem
 				isPluginInstalled={ false }
 				pluginsBeingSetup={ [] }
-				onSetupClick={ onSetupClick }
+				onInstallClick={ onInstallClick }
+				onActivateClick={ jest.fn( () => Promise.resolve() ) }
 			/>
 		);
 
-		screen.queryByRole( 'button', { name: 'Get started' } )?.click();
-		expect( onSetupClick ).toHaveBeenCalledWith( [
+		screen.queryByRole( 'button', { name: 'Install' } )?.click();
+		expect( onInstallClick ).toHaveBeenCalledWith( [
+			'woocommerce-shipping',
+		] );
+	} );
+
+	it( 'should record track when clicking Install button', () => {
+		render(
+			<WooCommerceShippingItem
+				isPluginInstalled={ false }
+				{ ...defaultProps }
+			/>
+		);
+
+		screen.queryByRole( 'button', { name: 'Install' } )?.click();
+		expect( recordEvent ).toHaveBeenCalledWith(
+			'settings_shipping_recommendation_setup_click',
+			{
+				plugin: 'woocommerce-shipping',
+				action: 'install',
+			}
+		);
+	} );
+
+	it( 'should record track when clicking Activate button', () => {
+		render(
+			<WooCommerceShippingItem
+				isPluginInstalled={ true }
+				{ ...defaultProps }
+			/>
+		);
+
+		screen.queryByRole( 'button', { name: 'Activate' } )?.click();
+		expect( recordEvent ).toHaveBeenCalledWith(
+			'settings_shipping_recommendation_setup_click',
+			{
+				plugin: 'woocommerce-shipping',
+				action: 'activate',
+			}
+		);
+	} );
+
+	it( 'should call onActivateClick when clicking Activate button', () => {
+		const onActivateClick = jest.fn( () => Promise.resolve() );
+		render(
+			<WooCommerceShippingItem
+				isPluginInstalled={ true }
+				pluginsBeingSetup={ [] }
+				onInstallClick={ jest.fn( () => Promise.resolve() ) }
+				onActivateClick={ onActivateClick }
+			/>
+		);
+
+		screen.queryByRole( 'button', { name: 'Activate' } )?.click();
+		expect( onActivateClick ).toHaveBeenCalledWith( [
 			'woocommerce-shipping',
 		] );
 	} );
