@@ -108,7 +108,7 @@ export async function accessTheEmailEditor(
 	// email settings table. Explicit wait needed. Simplify when WP 7.0 is the
 	// minimum supported version.
 	const theRow = page.getByRole( 'row', {
-		name: new RegExp( emailTitle ),
+		name: emailTitle,
 	} );
 	await theRow.waitFor( { timeout: 20000 } );
 	await theRow

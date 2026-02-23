@@ -34,14 +34,17 @@ const clickOnCommandPaletteOption = async ( {
 		)
 		.fill( optionName );
 
-	// TODO: WP 7.0 compat - WP 7.0 changed the command palette option accessible names
-	// (possibly including icon text). Using regex instead of exact match.
-	// Tighten back to exact: true when WP 7.0 is the minimum supported version.
-	const option = page.getByRole( 'option', {
-		name: new RegExp( optionName ),
-	} );
+	// TODO: WP 7.0 compat - WP 7.0 changed the command palette option accessible
+	// names (possibly including icon text). Dropped exact match in favor of
+	// Playwright's default substring match plus .first() to handle multiple
+	// matches. Restore exact: true when WP 7.0 is the minimum supported version.
+	const option = page
+		.getByRole( 'option', {
+			name: optionName,
+		} )
+		.first();
 	await expect( option ).toBeVisible();
-	option.click();
+	await option.click();
 };
 
 const test = baseTest.extend( {
