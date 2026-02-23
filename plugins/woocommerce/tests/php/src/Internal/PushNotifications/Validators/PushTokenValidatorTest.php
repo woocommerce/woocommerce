@@ -907,13 +907,13 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 */
 	public function valid_locales_provider(): array {
 		return array(
-			'English US'          => array( 'en_US' ),
-			'French'              => array( 'fr_FR' ),
-			'Chinese'             => array( 'zh_CN' ),
-			'Portuguese'          => array( 'pt_BR' ),
-			'Three-letter'        => array( 'ast_ES' ),
-			'Two-letter locale'   => array( 'ja' ),
-			'Three-letter locale' => array( 'ast' ),
+			'English US'                  => array( 'en_US' ),
+			'French'                      => array( 'fr_FR' ),
+			'Chinese'                     => array( 'zh_CN' ),
+			'Portuguese'                  => array( 'pt_BR' ),
+			'Three-letter with region'    => array( 'rup_MK' ),
+			'Two-letter without region'   => array( 'ja' ),
+			'Three-letter without region' => array( 'ast' ),
 		);
 	}
 
