@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { useState, Children } from '@wordpress/element';
 import { Text } from '@woocommerce/experimental';
-import { pluginsStore } from '@woocommerce/data';
+import { PluginNames, pluginsStore } from '@woocommerce/data';
 import { getAdminLink } from '@woocommerce/settings';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore VisuallyHidden is present, it's just not typed
@@ -58,7 +58,7 @@ export const useInstallPlugin = () => {
 
 		setPluginsBeingSetup( slugs );
 
-		return installPlugins( slugs )
+		return installPlugins( slugs as Partial< PluginNames >[] )
 			.then( () => {
 				setPluginsBeingSetup( [] );
 			} )
@@ -77,7 +77,7 @@ export const useInstallPlugin = () => {
 
 		setPluginsBeingSetup( slugs );
 
-		return activatePlugins( slugs )
+		return activatePlugins( slugs as Partial< PluginNames >[] )
 			.then( () => {
 				setPluginsBeingSetup( [] );
 			} )
