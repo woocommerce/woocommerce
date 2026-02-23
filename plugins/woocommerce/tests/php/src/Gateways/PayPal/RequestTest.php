@@ -117,10 +117,11 @@ class RequestTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test create_paypal_order returns null when shipping preference is SET_PROVIDED_ADDRESS but order has no shipping address.
+	 * No create order request is sent to PayPal in this case.
 	 *
 	 * @return void
 	 */
-	public function test_create_paypal_order_returns_null_when_set_provided_address_but_no_shipping(): void {
+	public function test_create_paypal_order_returns_null_when_set_provided_address_but_shipping_country_is_unsupported(): void {
 		$order = \WC_Helper_Order::create_order();
 		$order->set_shipping_country( 'SX' );
 		$order->set_shipping_first_name( 'John' );
@@ -146,7 +147,7 @@ class RequestTest extends \WC_Unit_Test_Case {
 		remove_filter( 'pre_http_request', array( $this, 'create_paypal_order_success' ) );
 		update_option( 'woocommerce_paypal_settings', $previous_settings );
 
-		$this->assertNull( $result, 'create_paypal_order should return null when SET_PROVIDED_ADDRESS is set but order has no shipping address' );
+		$this->assertNull( $result, 'create_paypal_order should return null when SET_PROVIDED_ADDRESS is set but the selected shipping country is unsupported' );
 	}
 
 	/**

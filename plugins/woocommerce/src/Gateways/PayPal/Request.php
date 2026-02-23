@@ -679,7 +679,7 @@ class Request {
 		if ( $shipping ) {
 			$params['purchase_units'][0]['shipping'] = $shipping;
 		} elseif ( PayPalConstants::SHIPPING_SET_PROVIDED_ADDRESS === $shipping_preference ) {
-			// If the shipping preference is set to SET_PROVIDED_ADDRESS, but no shipping information is provided, PayPal craete order request will fail.
+			// If the shipping preference is set to SET_PROVIDED_ADDRESS, but no shipping information is provided, PayPal create order request will fail.
 			// Throw an exception to prevent the request from being sent.
 			throw new Exception( 'Shipping address is required for PayPal create-order request. Order ID: ' . esc_html( (string) $order->get_id() ) );
 		}
