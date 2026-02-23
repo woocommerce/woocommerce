@@ -315,12 +315,12 @@ describe( 'ShippingRecommendations', () => {
 
 	describe( 'plugin installation', () => {
 		it( 'allows to install WooCommerce Shipping', async () => {
-			const installPluginsMock = jest
-				.fn()
-				.mockResolvedValue( undefined );
+			const installPluginsMock = jest.fn().mockResolvedValue( undefined );
 			const successNoticeMock = jest.fn();
 			( useDispatch as jest.Mock ).mockReturnValue( {
-				installAndActivatePlugins: jest.fn().mockResolvedValue( undefined ),
+				installAndActivatePlugins: jest
+					.fn()
+					.mockResolvedValue( undefined ),
 				installPlugins: installPluginsMock,
 				activatePlugins: jest.fn().mockResolvedValue( undefined ),
 				createSuccessNotice: successNoticeMock,
@@ -351,12 +351,12 @@ describe( 'ShippingRecommendations', () => {
 		} );
 
 		it( 'allows to install ShipStation', async () => {
-			const installPluginsMock = jest
-				.fn()
-				.mockResolvedValue( undefined );
+			const installPluginsMock = jest.fn().mockResolvedValue( undefined );
 			const successNoticeMock = jest.fn();
 			( useDispatch as jest.Mock ).mockReturnValue( {
-				installAndActivatePlugins: jest.fn().mockResolvedValue( undefined ),
+				installAndActivatePlugins: jest
+					.fn()
+					.mockResolvedValue( undefined ),
 				installPlugins: installPluginsMock,
 				activatePlugins: jest.fn().mockResolvedValue( undefined ),
 				createSuccessNotice: successNoticeMock,
@@ -385,12 +385,12 @@ describe( 'ShippingRecommendations', () => {
 		} );
 
 		it( 'allows to install Packlink PRO', async () => {
-			const installPluginsMock = jest
-				.fn()
-				.mockResolvedValue( undefined );
+			const installPluginsMock = jest.fn().mockResolvedValue( undefined );
 			const successNoticeMock = jest.fn();
 			( useDispatch as jest.Mock ).mockReturnValue( {
-				installAndActivatePlugins: jest.fn().mockResolvedValue( undefined ),
+				installAndActivatePlugins: jest
+					.fn()
+					.mockResolvedValue( undefined ),
 				installPlugins: installPluginsMock,
 				activatePlugins: jest.fn().mockResolvedValue( undefined ),
 				createSuccessNotice: successNoticeMock,
@@ -442,9 +442,7 @@ describe( 'ShippingRecommendations', () => {
 			render( <ShippingRecommendations /> );
 
 			expect( screen.getByText( 'Activate' ) ).toBeInTheDocument();
-			expect(
-				screen.queryByText( 'Install' )
-			).not.toBeInTheDocument();
+			expect( screen.queryByText( 'Install' ) ).not.toBeInTheDocument();
 		} );
 
 		it( 'shows Activate button for Packlink PRO when installed but not active', () => {
@@ -454,9 +452,7 @@ describe( 'ShippingRecommendations', () => {
 			render( <ShippingRecommendations /> );
 
 			expect( screen.getByText( 'Activate' ) ).toBeInTheDocument();
-			expect(
-				screen.queryByText( 'Install' )
-			).not.toBeInTheDocument();
+			expect( screen.queryByText( 'Install' ) ).not.toBeInTheDocument();
 		} );
 
 		it( 'shows activated notice for WooCommerce Shipping when activating installed plugin', async () => {
@@ -465,7 +461,9 @@ describe( 'ShippingRecommendations', () => {
 				.mockResolvedValue( undefined );
 			const successNoticeMock = jest.fn();
 			( useDispatch as jest.Mock ).mockReturnValue( {
-				installAndActivatePlugins: jest.fn().mockResolvedValue( undefined ),
+				installAndActivatePlugins: jest
+					.fn()
+					.mockResolvedValue( undefined ),
 				installPlugins: jest.fn().mockResolvedValue( undefined ),
 				activatePlugins: activatePluginsMock,
 				createSuccessNotice: successNoticeMock,
@@ -505,7 +503,9 @@ describe( 'ShippingRecommendations', () => {
 				.mockResolvedValue( undefined );
 			const successNoticeMock = jest.fn();
 			( useDispatch as jest.Mock ).mockReturnValue( {
-				installAndActivatePlugins: jest.fn().mockResolvedValue( undefined ),
+				installAndActivatePlugins: jest
+					.fn()
+					.mockResolvedValue( undefined ),
 				installPlugins: jest.fn().mockResolvedValue( undefined ),
 				activatePlugins: activatePluginsMock,
 				createSuccessNotice: successNoticeMock,
@@ -543,7 +543,9 @@ describe( 'ShippingRecommendations', () => {
 				.mockResolvedValue( undefined );
 			const successNoticeMock = jest.fn();
 			( useDispatch as jest.Mock ).mockReturnValue( {
-				installAndActivatePlugins: jest.fn().mockResolvedValue( undefined ),
+				installAndActivatePlugins: jest
+					.fn()
+					.mockResolvedValue( undefined ),
 				installPlugins: jest.fn().mockResolvedValue( undefined ),
 				activatePlugins: activatePluginsMock,
 				createSuccessNotice: successNoticeMock,
