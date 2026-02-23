@@ -6,4 +6,4 @@ Please DO NOT USE. Instead, use the version available in WordPress core.
 
 We are keeping these files here for now to prevent fatal errors for websites with aggressive caching.
 
-See https://github.com/woocommerce/woocommerce/pull/63289 for more info.
+See <https://github.com/woocommerce/woocommerce/pull/63289> for more info.
