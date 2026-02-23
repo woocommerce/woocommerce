@@ -24,7 +24,8 @@
 		"build",
 		"build-module",
 		"build-style",
-		"build-types"
+		"build-types",
+		"assets"
 	],
 	"publishConfig": {
 		"access": "public"
