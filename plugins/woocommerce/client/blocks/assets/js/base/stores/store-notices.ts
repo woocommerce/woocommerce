@@ -17,40 +17,17 @@ type NoticeWithId = Notice & {
 	id: string;
 };
 
-/**
- * Safe wrapper for getting store notice context.
- * Prevents "Cannot read properties of undefined" errors when context stack is empty.
- */
-const getStoreNoticeContext = (): {
+const getStoreNoticeContext = getContextFn< {
 	notices: NoticeWithId[];
 	notice: NoticeWithId;
-} | null => {
-	try {
-		return getContextFn< {
-			notices: NoticeWithId[];
-			notice: NoticeWithId;
-		} >();
-	} catch ( e ) {
-		return null;
-	}
-};
+} >;
 
 // Todo: Go back to the Store Notices block context once more than one context
 // can be added to an element (https://github.com/WordPress/gutenberg/discussions/62720).
-/**
- * Safe wrapper for getting product collection context.
- */
-const getProductCollectionContext = (): {
-	notices: NoticeWithId[];
-} | null => {
-	try {
-		return getContextFn< {
-			notices: NoticeWithId[];
-		} >( 'woocommerce/product-collection' );
-	} catch ( e ) {
-		return null;
-	}
-};
+const getProductCollectionContext = () =>
+	getContextFn< {
+		notices: NoticeWithId[];
+	} >( 'woocommerce/product-collection' );
 
 type StoreNoticesState = {
 	get role(): string;
@@ -94,8 +71,8 @@ const { state } = store< Store >(
 			get role() {
 				const context = getStoreNoticeContext();
 				if (
-					context?.notice?.type === 'error' ||
-					context?.notice?.type === 'success'
+					context.notice.type === 'error' ||
+					context.notice.type === 'success'
 				) {
 					return 'alert';
 				}
@@ -103,26 +80,26 @@ const { state } = store< Store >(
 				return 'status';
 			},
 			get isError() {
-				const context = getStoreNoticeContext();
-				return context?.notice?.type === 'error';
+				const { notice } = getStoreNoticeContext();
+				return notice.type === 'error';
 			},
 			get isSuccess() {
-				const context = getStoreNoticeContext();
-				return context?.notice?.type === 'success';
+				const { notice } = getStoreNoticeContext();
+				return notice.type === 'success';
 			},
 			get isInfo() {
-				const context = getStoreNoticeContext();
-				return context?.notice?.type === 'notice';
+				const { notice } = getStoreNoticeContext();
+				return notice.type === 'notice';
 			},
 			get notices() {
 				const productCollectionContext = getProductCollectionContext();
-				if ( productCollectionContext?.notices ) {
-					return productCollectionContext.notices;
+				if ( productCollectionContext ) {
+					return productCollectionContext?.notices;
 				}
 
 				const context = getStoreNoticeContext();
 
-				if ( context?.notices ) {
+				if ( context && context.notices ) {
 					return context.notices;
 				}
 
@@ -154,16 +131,12 @@ const { state } = store< Store >(
 			removeNotice: ( noticeId: string | PointerEvent ) => {
 				const { notices } = state;
 
-				const resolvedId =
+				noticeId =
 					typeof noticeId === 'string'
 						? noticeId
-						: getStoreNoticeContext()?.notice?.id;
-
-				// If noticeId is not found (e.g., context was null), do nothing.
-				if ( ! resolvedId ) return;
-
+						: getStoreNoticeContext().notice.id;
 				const index = notices.findIndex(
-					( { id } ) => id === resolvedId
+					( { id } ) => id === noticeId
 				);
 				if ( index !== -1 ) {
 					notices.splice( index, 1 );
@@ -175,8 +148,7 @@ const { state } = store< Store >(
 				const context = getStoreNoticeContext();
 				const { ref } = getElement();
 
-				if ( ref && context?.notice ) {
-					// Note: Notice content is sanitized server-side via wp_kses.
+				if ( ref ) {
 					ref.innerHTML = context.notice.notice;
 				}
 			},
@@ -190,11 +162,8 @@ const { state } = store< Store >(
 			},
 
 			injectIcon: () => {
-				const context = getStoreNoticeContext();
 				const { ref } = getElement();
-
-				// Guard against missing context or notice to prevent wrong icon injection.
-				if ( ! ref || ! context?.notice ) {
+				if ( ! ref ) {
 					return;
 				}
 
