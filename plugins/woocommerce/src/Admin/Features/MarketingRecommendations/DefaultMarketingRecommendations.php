@@ -74,13 +74,13 @@ class DefaultMarketingRecommendations {
 				),
 			),
 			array(
-				'title'          => 'Pinterest for WooCommerce',
-				'description'    => __( 'Grow your business on Pinterest! Use this official plugin to allow shoppers to Pin products while browsing your store, track conversions, and advertise on Pinterest.', 'woocommerce' ),
-				'url'            => "https://woocommerce.com/products/pinterest-for-woocommerce/{$utm_string}",
+				'title'          => 'Reddit for WooCommerce',
+				'description'    => __( 'Seamlessly sync your products to find new customers using Reddit Ads.', 'woocommerce' ),
+				'url'            => "https://woocommerce.com/products/reddit/{$utm_string}",
 				'direct_install' => true,
-				'icon'           => "{$icon_dir_url}/pinterest.svg",
-				'product'        => 'pinterest-for-woocommerce',
-				'plugin'         => 'pinterest-for-woocommerce/pinterest-for-woocommerce.php',
+				'icon'           => "{$icon_dir_url}/reddit.svg",
+				'product'        => 'reddit-for-woocommerce',
+				'plugin'         => 'reddit-for-woocommerce/reddit-for-woocommerce.php',
 				'categories'     => array(
 					$marketing,
 				),
@@ -108,6 +108,42 @@ class DefaultMarketingRecommendations {
 				'tags'           => array(),
 			),
 			array(
+				'title'          => 'Snapchat for WooCommerce',
+				'description'    => __( 'Find new customers by reaching an untapped audience using Snapchat for WooCommerce.', 'woocommerce' ),
+				'url'            => "https://woocommerce.com/products/snapchat/{$utm_string}",
+				'direct_install' => true,
+				'icon'           => "{$icon_dir_url}/snapchat.svg",
+				'product'        => 'snapchat-for-woocommerce',
+				'plugin'         => 'snapchat-for-woocommerce/snapchat-for-woocommerce.php',
+				'categories'     => array(
+					$marketing,
+				),
+				'subcategories'  => array(
+					$sales_channels,
+				),
+				'tags'           => array(
+					$built_by_woocommerce,
+				),
+			),
+			array(
+				'title'          => 'Pinterest for WooCommerce',
+				'description'    => __( 'Grow your business on Pinterest! Use this official plugin to allow shoppers to Pin products while browsing your store, track conversions, and advertise on Pinterest.', 'woocommerce' ),
+				'url'            => "https://woocommerce.com/products/pinterest-for-woocommerce/{$utm_string}",
+				'direct_install' => true,
+				'icon'           => "{$icon_dir_url}/pinterest.svg",
+				'product'        => 'pinterest-for-woocommerce',
+				'plugin'         => 'pinterest-for-woocommerce/pinterest-for-woocommerce.php',
+				'categories'     => array(
+					$marketing,
+				),
+				'subcategories'  => array(
+					$sales_channels,
+				),
+				'tags'           => array(
+					$built_by_woocommerce,
+				),
+			),
+			array(
 				'title'          => 'Blaze Ads',
 				'description'    => __(
 					'The quickest way to grow your business by advertising to over 100 million users across Tumblr and WordPress, starting at just \$5/day.',
@@ -118,42 +154,6 @@ class DefaultMarketingRecommendations {
 				'icon'           => "{$icon_dir_url}/blaze.svg",
 				'product'        => 'blaze-ads',
 				'plugin'         => 'blaze-ads/blaze-ads.php',
-				'categories'     => array(
-					$marketing,
-				),
-				'subcategories'  => array(
-					$sales_channels,
-				),
-				'tags'           => array(
-					$built_by_woocommerce,
-				),
-			),
-			array(
-				'title'          => 'Reddit for WooCommerce',
-				'description'    => __( 'Seamlessly sync your products to find new customers using Reddit Ads.', 'woocommerce' ),
-				'url'            => "https://woocommerce.com/products/reddit/{$utm_string}",
-				'direct_install' => true,
-				'icon'           => "{$icon_dir_url}/reddit.svg",
-				'product'        => 'reddit-for-woocommerce',
-				'plugin'         => 'reddit-for-woocommerce/reddit-for-woocommerce.php',
-				'categories'     => array(
-					$marketing,
-				),
-				'subcategories'  => array(
-					$sales_channels,
-				),
-				'tags'           => array(
-					$built_by_woocommerce,
-				),
-			),
-			array(
-				'title'          => 'Snapchat for WooCommerce',
-				'description'    => __( 'Find new customers by reaching an untapped audience using Snapchat for WooCommerce.', 'woocommerce' ),
-				'url'            => "https://woocommerce.com/products/snapchat/{$utm_string}",
-				'direct_install' => true,
-				'icon'           => "{$icon_dir_url}/snapchat.svg",
-				'product'        => 'snapchat-for-woocommerce',
-				'plugin'         => 'snapchat-for-woocommerce/snapchat-for-woocommerce.php',
 				'categories'     => array(
 					$marketing,
 				),
