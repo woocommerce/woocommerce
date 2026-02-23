@@ -41,7 +41,7 @@ class ShippingPartnerSuggestions extends RemoteSpecsEngine {
 	}
 
 	/**
-	 * Sort suggestions so that partners whose is_primary list contains the
+	 * Sort suggestions so that partners whose countries_where_primary list contains the
 	 * current store country appear first.
 	 *
 	 * @param array $suggestions Suggestions to sort.
@@ -63,8 +63,8 @@ class ShippingPartnerSuggestions extends RemoteSpecsEngine {
 		usort(
 			$indexed,
 			function ( $a, $b ) use ( $country ) {
-				$a_primary = isset( $a[0]->is_primary ) && is_array( $a[0]->is_primary ) && in_array( $country, $a[0]->is_primary, true );
-				$b_primary = isset( $b[0]->is_primary ) && is_array( $b[0]->is_primary ) && in_array( $country, $b[0]->is_primary, true );
+				$a_primary = isset( $a[0]->countries_where_primary ) && is_array( $a[0]->countries_where_primary ) && in_array( $country, $a[0]->countries_where_primary, true );
+				$b_primary = isset( $b[0]->countries_where_primary ) && is_array( $b[0]->countries_where_primary ) && in_array( $country, $b[0]->countries_where_primary, true );
 
 				if ( $a_primary === $b_primary ) {
 					return $a[1] - $b[1];

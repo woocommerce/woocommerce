@@ -187,9 +187,9 @@ class ShippingPartnerSuggestionsTest extends WC_Unit_Test_Case {
 				'is_visible' => true,
 			),
 			(object) array(
-				'id'         => 'primary-partner',
-				'is_visible' => true,
-				'is_primary' => array( 'US' ),
+				'id'                      => 'primary-partner',
+				'is_visible'              => true,
+				'countries_where_primary' => array( 'US' ),
 			),
 			(object) array(
 				'id'         => 'another-non-primary',
@@ -216,14 +216,14 @@ class ShippingPartnerSuggestionsTest extends WC_Unit_Test_Case {
 
 		$specs = array(
 			(object) array(
-				'id'         => 'primary-a',
-				'is_visible' => true,
-				'is_primary' => array( 'US' ),
+				'id'                      => 'primary-a',
+				'is_visible'              => true,
+				'countries_where_primary' => array( 'US' ),
 			),
 			(object) array(
-				'id'         => 'primary-b',
-				'is_visible' => true,
-				'is_primary' => array( 'US' ),
+				'id'                      => 'primary-b',
+				'is_visible'              => true,
+				'countries_where_primary' => array( 'US' ),
 			),
 			(object) array(
 				'id'         => 'non-primary-a',
