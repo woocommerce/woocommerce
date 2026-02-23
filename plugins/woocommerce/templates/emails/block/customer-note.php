@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails\Block
- * @version 10.6.0
+ * @version 10.7.0
  */
 
 use Automattic\WooCommerce\Internal\EmailEditor\BlockEmailRenderer;
@@ -29,8 +29,8 @@ defined( 'ABSPATH' ) || exit;
 
 <!-- wp:paragraph -->
 <p><?php
-	/* translators: %s: Customer first name */
-	printf( esc_html__( 'Hi %s,', 'woocommerce' ), '<!--[woocommerce/customer-first-name]-->' );
+/* translators: %s: Customer first name */
+printf( esc_html__( 'Hi %s,', 'woocommerce' ), '<!--[woocommerce/customer-first-name]-->' );
 ?></p>
 <!-- /wp:paragraph -->
 
@@ -41,7 +41,7 @@ defined( 'ABSPATH' ) || exit;
 <!-- wp:quote {"lock":{"move":false,"remove":true}} -->
 <blockquote class="wp-block-quote">
 <!-- wp:paragraph {"lock":{"move":false,"remove":true}} -->
-<p> <?php echo '| <!--[woocommerce/admin-order-note]--> |'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>  </p>
+<p> <?php echo '<!--[woocommerce/admin-order-note]-->';?>  </p>
 <!-- /wp:paragraph -->
 </blockquote>
 <!-- /wp:quote -->
