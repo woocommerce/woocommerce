@@ -45,11 +45,11 @@ class PushTokenValidator {
 	 *
 	 * We don't have access to a locale dictionary to check valid locales, but
 	 * it's important to note that we do not support country codes here, ONLY
-	 * valid locales. Some countries have valid 2 and 3 character locales (like
+	 * valid locales. Some languages have valid 2 and 3 character locales (like
 	 * Japanese - ja, Arabic - ar, Asturian - ast), which is what this regex
 	 * reflects.
 	 */
-	const DEVICE_LOCALE_FORMAT = '/^(?<language>[a-z]{2,3})(_(?<region>[A-Z]{2}))?$/';
+	const DEVICE_LOCALE_FORMAT = '/^(?<language>[a-z]{2,3})(?:_(?<region>[A-Z]{2}))?$/';
 
 	/**
 	 * The regex to use when validating device UUID format.

@@ -924,12 +924,13 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 */
 	public function invalid_locales_provider(): array {
 		return array(
-			'no underscore'    => array( 'enUS' ),
-			'lowercase region' => array( 'en_gb' ),
-			'uppercase lang'   => array( 'EN_US' ),
-			'single char'      => array( 'e' ),
-			'with hyphen'      => array( 'en-US' ),
-			'too long lang'    => array( 'engl_US' ),
+			'no underscore'       => array( 'enUS' ),
+			'lowercase region'    => array( 'en_gb' ),
+			'uppercase lang'      => array( 'EN_US' ),
+			'single char'         => array( 'e' ),
+			'with hyphen'         => array( 'en-US' ),
+			'too long lang'       => array( 'engl_US' ),
+			'trailing underscore' => array( 'en_US_' ),
 		);
 	}
 
