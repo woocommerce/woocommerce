@@ -312,6 +312,33 @@ describe( 'ShippingRecommendations', () => {
 	} );
 
 	describe( 'plugin installation', () => {
+		it( 'allows to install WooCommerce Shipping', async () => {
+			const installAndActivatePluginsMock = jest
+				.fn()
+				.mockResolvedValue( undefined );
+			const successNoticeMock = jest.fn();
+			( useDispatch as jest.Mock ).mockReturnValue( {
+				installAndActivatePlugins: installAndActivatePluginsMock,
+				createSuccessNotice: successNoticeMock,
+			} );
+			mockSelectForCountry( 'US', [
+				'woocommerce-shipstation-integration',
+			] );
+			render( <ShippingRecommendations /> );
+
+			userEvent.click( screen.getByText( 'Get started' ) );
+
+			expect( installAndActivatePluginsMock ).toHaveBeenCalledWith( [
+				'woocommerce-shipping',
+			] );
+			await waitFor( () => {
+				expect( successNoticeMock ).toHaveBeenCalledWith(
+					'WooCommerce Shipping is installed!',
+					expect.anything()
+				);
+			} );
+		} );
+
 		it( 'allows to install ShipStation', async () => {
 			const installAndActivatePluginsMock = jest
 				.fn()
@@ -357,6 +384,134 @@ describe( 'ShippingRecommendations', () => {
 			await waitFor( () => {
 				expect( successNoticeMock ).toHaveBeenCalledWith(
 					'Packlink PRO is installed!',
+					expect.anything()
+				);
+			} );
+		} );
+	} );
+
+	describe( 'plugin activation (installed but not active)', () => {
+		it( 'shows Activate button for WooCommerce Shipping when installed but not active', () => {
+			mockSelectForCountry( 'US', [], {
+				getInstalledPlugins: () => [ 'woocommerce-shipping' ],
+			} );
+			render( <ShippingRecommendations /> );
+
+			const buttons = screen.getAllByText( 'Activate' );
+			expect( buttons ).toHaveLength( 1 );
+			expect(
+				screen.queryByText( 'WooCommerce Shipping' )
+			).toBeInTheDocument();
+		} );
+
+		it( 'shows Activate button for ShipStation when installed but not active', () => {
+			mockSelectForCountry( 'CA', [], {
+				getInstalledPlugins: () => [
+					'woocommerce-shipstation-integration',
+				],
+			} );
+			render( <ShippingRecommendations /> );
+
+			expect( screen.getByText( 'Activate' ) ).toBeInTheDocument();
+			expect(
+				screen.queryByText( 'Get started' )
+			).not.toBeInTheDocument();
+		} );
+
+		it( 'shows Activate button for Packlink PRO when installed but not active', () => {
+			mockSelectForCountry( 'FR', [], {
+				getInstalledPlugins: () => [ 'packlink-pro-shipping' ],
+			} );
+			render( <ShippingRecommendations /> );
+
+			expect( screen.getByText( 'Activate' ) ).toBeInTheDocument();
+			expect(
+				screen.queryByText( 'Get started' )
+			).not.toBeInTheDocument();
+		} );
+
+		it( 'shows activated notice for WooCommerce Shipping when activating installed plugin', async () => {
+			const installAndActivatePluginsMock = jest
+				.fn()
+				.mockResolvedValue( undefined );
+			const successNoticeMock = jest.fn();
+			( useDispatch as jest.Mock ).mockReturnValue( {
+				installAndActivatePlugins: installAndActivatePluginsMock,
+				createSuccessNotice: successNoticeMock,
+			} );
+			mockSelectForCountry(
+				'US',
+				[ 'woocommerce-shipstation-integration' ],
+				{
+					getInstalledPlugins: () => [ 'woocommerce-shipping' ],
+				}
+			);
+			render( <ShippingRecommendations /> );
+
+			userEvent.click( screen.getByText( 'Activate' ) );
+
+			expect( installAndActivatePluginsMock ).toHaveBeenCalledWith( [
+				'woocommerce-shipping',
+			] );
+			await waitFor( () => {
+				expect( successNoticeMock ).toHaveBeenCalledWith(
+					'WooCommerce Shipping activated!',
+					expect.anything()
+				);
+			} );
+		} );
+
+		it( 'shows activated notice for ShipStation when activating installed plugin', async () => {
+			const installAndActivatePluginsMock = jest
+				.fn()
+				.mockResolvedValue( undefined );
+			const successNoticeMock = jest.fn();
+			( useDispatch as jest.Mock ).mockReturnValue( {
+				installAndActivatePlugins: installAndActivatePluginsMock,
+				createSuccessNotice: successNoticeMock,
+			} );
+			mockSelectForCountry( 'CA', [], {
+				getInstalledPlugins: () => [
+					'woocommerce-shipstation-integration',
+				],
+			} );
+			render( <ShippingRecommendations /> );
+
+			userEvent.click( screen.getByText( 'Activate' ) );
+
+			expect( installAndActivatePluginsMock ).toHaveBeenCalledWith( [
+				'woocommerce-shipstation-integration',
+			] );
+			await waitFor( () => {
+				expect( successNoticeMock ).toHaveBeenCalledWith(
+					'ShipStation activated!',
+					expect.anything()
+				);
+			} );
+		} );
+
+		it( 'shows activated notice for Packlink PRO when activating installed plugin', async () => {
+			const installAndActivatePluginsMock = jest
+				.fn()
+				.mockResolvedValue( undefined );
+			const successNoticeMock = jest.fn();
+			( useDispatch as jest.Mock ).mockReturnValue( {
+				installAndActivatePlugins: installAndActivatePluginsMock,
+				createSuccessNotice: successNoticeMock,
+			} );
+			mockSelectForCountry( 'FR', [], {
+				getInstalledPlugins: () => [ 'packlink-pro-shipping' ],
+			} );
+			render( <ShippingRecommendations /> );
+
+			userEvent.click( screen.getByText( 'Activate' ) );
+
+			expect( installAndActivatePluginsMock ).toHaveBeenCalledWith( [
+				'packlink-pro-shipping',
+			] );
+			await waitFor( () => {
+				expect( successNoticeMock ).toHaveBeenCalledWith(
+					'Packlink PRO activated!',
 					expect.anything()
 				);
 			} );

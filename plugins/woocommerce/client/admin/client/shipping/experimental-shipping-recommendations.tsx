@@ -102,6 +102,8 @@ const ShippingRecommendations = () => {
 								<WooCommerceShippingItem
 									key={ ext }
 									isPluginInstalled={ isPluginInstalled }
+									pluginsBeingSetup={ pluginsBeingSetup }
+									onSetupClick={ handleSetup }
 								/>
 							);
 						case 'shipstation':

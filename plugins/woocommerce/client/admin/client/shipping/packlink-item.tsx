@@ -27,7 +27,9 @@ const PacklinkItem = ( {
 		onSetupClick( [ PACKLINK_PLUGIN_SLUG ] ).then(
 			() => {
 				createSuccessNotice(
-					__( 'Packlink PRO is installed!', 'woocommerce' ),
+					isPluginInstalled
+						? __( 'Packlink PRO activated!', 'woocommerce' )
+						: __( 'Packlink PRO is installed!', 'woocommerce' ),
 					{}
 				);
 			},

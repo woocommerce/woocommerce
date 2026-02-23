@@ -27,7 +27,9 @@ const ShipStationItem = ( {
 		onSetupClick( [ SHIPSTATION_PLUGIN_SLUG ] ).then(
 			() => {
 				createSuccessNotice(
-					__( 'ShipStation is installed!', 'woocommerce' ),
+					isPluginInstalled
+						? __( 'ShipStation activated!', 'woocommerce' )
+						: __( 'ShipStation is installed!', 'woocommerce' ),
 					{}
 				);
 			},
