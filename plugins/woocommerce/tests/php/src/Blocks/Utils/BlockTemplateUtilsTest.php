@@ -322,26 +322,35 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 	 * Test `get_block_templates_from_db`: workflow and properly handling input parameters.
 	 */
 	public function test_get_block_templates_from_db(): void {
+		$now             = time();
+		$date            = gmdate( 'Y-m-d H:i:s', $now - 1 );
 		$attributes      = array(
-			'post_name'   => 'slug-1',
-			'post_type'   => 'wp_template',
-			'post_title'  => 'title',
-			'post_status' => 'publish',
+			'post_name'     => 'slug-1',
+			'post_type'     => 'wp_template',
+			'post_title'    => 'title',
+			'post_status'   => 'publish',
+			'post_date'     => $date,
+			'post_date_gmt' => get_gmt_from_date( $date ),
+
 		);
 		$template_slug_1 = $this->createPost( $attributes, BlockTemplateUtils::PLUGIN_SLUG );
 
+		$date          = gmdate( 'Y-m-d H:i:s', $now );
 		$attributes    = array(
-			'post_name'   => 'slug',
-			'post_type'   => 'wp_template',
-			'post_title'  => 'title',
-			'post_status' => 'publish',
+			'post_name'     => 'slug',
+			'post_type'     => 'wp_template',
+			'post_title'    => 'title',
+			'post_status'   => 'publish',
+			'post_date'     => $date,
+			'post_date_gmt' => get_gmt_from_date( $date ),
+
 		);
 		$template_slug = $this->createPost( $attributes, BlockTemplateUtils::PLUGIN_SLUG );
 
 		// Verify fetching all templates and caches population correctness.
 		$templates = BlockTemplateUtils::get_block_templates_from_db();
-		$this->assertSame( array( $template_slug_1->ID, $template_slug->ID ), wp_cache_get( 'wp_template-ids', 'woocommerce_blocks' )['twentytwentytwo'] ?? null );
-		$this->assertSame( array( 'slug-1', 'slug' ), array_column( $templates, 'slug' ) );
+		$this->assertSame( array( $template_slug->ID, $template_slug_1->ID ), wp_cache_get( 'wp_template-ids', 'woocommerce_blocks' )['twentytwentytwo'] ?? null );
+		$this->assertSame( array( 'slug', 'slug-1' ), array_column( $templates, 'slug' ) );
 
 		// Verify request-level cache hit handling correctness.
 		$templates = BlockTemplateUtils::get_block_templates_from_db( array( 'slug' ), 'wp_template' );
