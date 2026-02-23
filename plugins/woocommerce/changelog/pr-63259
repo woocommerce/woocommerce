@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Make VersionStringGenerator and RestApiCache more robust against bad-behaved object caches
