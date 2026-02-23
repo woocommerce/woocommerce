@@ -64042,12 +64042,6 @@ parameters:
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\OrdersTableDataStore\:\:save_cogs_data\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\OrdersTableDataStore\:\:set_download_permissions_granted\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
