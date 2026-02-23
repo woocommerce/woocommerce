@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-fix: ensure address autocomplete is persisted on both billing and shipping forms
