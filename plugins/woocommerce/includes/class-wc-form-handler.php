@@ -725,7 +725,19 @@ class WC_Form_Handler {
 					}
 
 					if ( $passed_validation ) {
+						$old_quantity = WC()->cart->get_cart()[ $cart_item_key ]['quantity'];
 						WC()->cart->set_quantity( $cart_item_key, $quantity, false );
+						/**
+						 * Fires when a cart item quantity is updated via the shortcode cart form.
+						 *
+						 * @param string   $cart_item_key Cart item key.
+						 * @param int      $quantity      New quantity.
+						 * @param int      $old_quantity  Old quantity.
+						 * @param \WC_Cart $cart          Cart object.
+						 *
+						 * @since 10.7.0
+						 */
+						do_action( 'woocommerce_shortcode_cart_item_update_quantity', $cart_item_key, $quantity, $old_quantity, WC()->cart );
 						$cart_updated = true;
 					}
 				}

@@ -1224,4 +1224,46 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$product->delete( true );
 		wp_delete_user( $user_id );
 	}
+
+	/**
+	 * @testdox Should fire woocommerce_shortcode_cart_item_update_quantity when cart item quantity is updated via form.
+	 */
+	public function test_update_cart_action_fires_update_quantity_action(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 2 );
+
+		$cart_items    = WC()->cart->get_cart();
+		$cart_item_key = array_key_first( $cart_items );
+
+		$nonce = wp_create_nonce( 'woocommerce-cart' );
+
+		$_POST['_wpnonce']   = $nonce;
+		$_REQUEST['_wpnonce'] = $nonce;
+		$_POST['update_cart'] = 'Update Cart';
+		$_REQUEST['update_cart'] = 'Update Cart';
+		$_POST['cart']        = array(
+			$cart_item_key => array( 'qty' => 5 ),
+		);
+
+		$captured_args = array();
+		// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		$callback = function ( $item_key, $quantity, $old_quantity, $cart ) use ( &$captured_args ) {
+			$captured_args = compact( 'item_key', 'quantity', 'old_quantity', 'cart' );
+		};
+
+		add_action( 'woocommerce_shortcode_cart_item_update_quantity', $callback, 10, 4 );
+
+		WC_Form_Handler::update_cart_action();
+
+		$this->assertNotEmpty( $captured_args, 'The update quantity action should have been fired' );
+		$this->assertSame( $cart_item_key, $captured_args['item_key'] );
+		$this->assertSame( 5, $captured_args['quantity'] );
+		$this->assertSame( 2, $captured_args['old_quantity'] );
+		$this->assertInstanceOf( WC_Cart::class, $captured_args['cart'] );
+
+		remove_action( 'woocommerce_shortcode_cart_item_update_quantity', $callback );
+
+		unset( $_POST['_wpnonce'], $_REQUEST['_wpnonce'], $_POST['update_cart'], $_REQUEST['update_cart'], $_POST['cart'] );
+		$product->delete( true );
+	}
 }
