@@ -656,6 +656,17 @@ class WC_Form_Handler {
 			if ( $cart_item ) {
 				WC()->cart->remove_cart_item( $cart_item_key );
 
+				/**
+				 * Action hook to track cart item removed event.
+				 *
+				 * @since 10.7.0
+				 *
+				 * @param string $cart_item_key Cart item key.
+				 * @param object $cart          Cart object.
+				 * @return void
+				 */
+				do_action( 'woocommerce_shortcode_cart_item_removed', $cart_item_key, WC()->cart );
+
 				$product = wc_get_product( $cart_item['product_id'] );
 
 				/* translators: %s: Item name. */

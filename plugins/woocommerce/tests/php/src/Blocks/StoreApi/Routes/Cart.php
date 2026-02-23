@@ -1184,6 +1184,35 @@ class Cart extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox Should fire woocommerce_store_api_cart_item_removed_from_request when removing a cart item.
+	 */
+	public function test_remove_item_fires_remove_action() {
+		$captured_args = array();
+		// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		$callback = function ( $item_key, $cart ) use ( &$captured_args ) {
+			$captured_args = compact( 'item_key', 'cart' );
+		};
+
+		add_action( 'woocommerce_store_api_cart_item_removed_from_request', $callback, 10, 2 );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/remove-item' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'key' => $this->keys[0],
+			)
+		);
+
+		$this->assertAPIResponse( $request, 200 );
+
+		$this->assertNotEmpty( $captured_args, 'The remove action should have been fired' );
+		$this->assertSame( $this->keys[0], $captured_args['item_key'] );
+		$this->assertInstanceOf( \WC_Cart::class, $captured_args['cart'] );
+
+		remove_action( 'woocommerce_store_api_cart_item_removed_from_request', $callback );
+	}
+
+	/**
 	 * Test that updating a cart item without changing quantity does not fire the update action.
 	 */
 	public function test_update_item_without_quantity_does_not_fire_update_action() {
