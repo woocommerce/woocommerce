@@ -748,7 +748,7 @@ class BlockTemplateUtils {
 			$request_level_cache[ $template_type ][ $theme ] = array();
 			if ( ! empty( $ids[ $theme ] ) ) {
 				_prime_post_caches( $ids[ $theme ], false, false );
-				$request_level_cache[ $template_type ][ $theme ] = array_map( 'get_post', $ids[ $theme ] );
+				$request_level_cache[ $template_type ][ $theme ] = array_filter( array_map( 'get_post', $ids[ $theme ] ) );
 			}
 		}
 
