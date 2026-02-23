@@ -50,21 +50,31 @@ class ShippingPartnerSuggestions extends RemoteSpecsEngine {
 	private static function sort_by_primary( array $suggestions ) {
 		$country = wc_get_base_location()['country'] ?? '';
 
-		usort(
+		// Attach original indices to preserve input order for equal-priority items
+		// (usort is not stable on PHP < 8.0).
+		$indexed = array_map(
+			function ( $item, $idx ) {
+				return array( $item, $idx );
+			},
 			$suggestions,
+			array_keys( $suggestions )
+		);
+
+		usort(
+			$indexed,
 			function ( $a, $b ) use ( $country ) {
-				$a_primary = isset( $a->is_primary ) && is_array( $a->is_primary ) && in_array( $country, $a->is_primary, true );
-				$b_primary = isset( $b->is_primary ) && is_array( $b->is_primary ) && in_array( $country, $b->is_primary, true );
+				$a_primary = isset( $a[0]->is_primary ) && is_array( $a[0]->is_primary ) && in_array( $country, $a[0]->is_primary, true );
+				$b_primary = isset( $b[0]->is_primary ) && is_array( $b[0]->is_primary ) && in_array( $country, $b[0]->is_primary, true );
 
 				if ( $a_primary === $b_primary ) {
-					return 0;
+					return $a[1] - $b[1];
 				}
 
 				return $a_primary ? -1 : 1;
 			}
 		);
 
-		return $suggestions;
+		return array_column( $indexed, 0 );
 	}
 
 	/**
