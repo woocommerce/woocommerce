@@ -67,13 +67,6 @@ pnpm run test:js                            # runs JS component test using Jest
 
 ### Dependencies
 
-#### Rich-text
-
-The **Personalization tags** feature relies on the `@wordpress/rich-text` package, which is included in both the Gutenberg plugin and WordPress core.
-To ensure the correct functionality of the Email Editor and its features, you must use **at least version 7.14.0** of the `@wordpress/rich-text` package.
-The required minimum version of this package is stored in the assets directory.
-If your WordPress installation does not use the Gutenberg plugin or does not include the required version, replace the existing `@wordpress/rich-text` package with the one provided in the assets directory.
-
 #### Global Styles Engine
 
 A of 1.4.3 the email editor package depends on `@wordpress/global-styles-engine`, which is **not enqueued by WordPress core**. Unlike most `@wordpress/*` packages, this package is not available globally in WordPress environments and must be bundled.
