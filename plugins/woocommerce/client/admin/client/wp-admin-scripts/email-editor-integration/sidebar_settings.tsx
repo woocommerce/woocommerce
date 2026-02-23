@@ -14,6 +14,12 @@ import { addFilter } from '@wordpress/hooks';
 import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
 import { useState } from '@wordpress/element';
+import {
+	EmailActionsFill,
+	TemplateSelection,
+	recordEvent as emailEditorRecordEvent,
+} from '@woocommerce/email-editor';
+import { registerPlugin } from '@wordpress/plugins';
 
 /**
  * Internal dependencies
@@ -286,13 +292,24 @@ const SidebarSettings = ( {
 };
 
 export function modifySidebar() {
-	addFilter(
-		'woocommerce_email_editor_setting_sidebar_email_status_component',
-		NAME_SPACE,
-		( _originalComponent, tracking ) => {
-			return () => <EmailStatus recordEvent={ tracking.recordEvent } />;
-		}
-	);
+	registerPlugin( 'woocommerce-email-editor-email-status', {
+		scope: 'woocommerce-email-editor',
+		render: () => (
+			<EmailActionsFill>
+				<EmailStatus recordEvent={ emailEditorRecordEvent } />
+			</EmailActionsFill>
+		),
+	} );
+
+	registerPlugin( 'woocommerce-email-editor-template-selection', {
+		scope: 'woocommerce-email-editor',
+		render: () => (
+			<EmailActionsFill>
+				<TemplateSelection />
+			</EmailActionsFill>
+		),
+	} );
+
 	addFilter(
 		'woocommerce_email_editor_setting_sidebar_extension_component',
 		NAME_SPACE,

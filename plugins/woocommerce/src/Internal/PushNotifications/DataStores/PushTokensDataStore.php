@@ -28,6 +28,8 @@ class PushTokensDataStore {
 		'device_uuid',
 		'token',
 		'platform',
+		'device_locale',
+		'metadata',
 	);
 
 	/**
@@ -111,6 +113,13 @@ class PushTokensDataStore {
 		$push_token->set_device_uuid( $meta['device_uuid'] ?? null );
 		$push_token->set_platform( $meta['platform'] );
 		$push_token->set_origin( $meta['origin'] );
+
+		/**
+		 * These meta items were added after the ability to store tokens, so may
+		 * not be available for older tokens. Use sensible defaults.
+		 */
+		$push_token->set_device_locale( $meta['device_locale'] ?? PushToken::DEFAULT_DEVICE_LOCALE );
+		$push_token->set_metadata( $meta['metadata'] ?? array() );
 
 		return $push_token;
 	}
@@ -272,12 +281,19 @@ class PushTokensDataStore {
 			) {
 				return new PushToken(
 					array(
-						'id'          => $post_id,
-						'user_id'     => $user_id,
-						'token'       => $meta['token'],
-						'device_uuid' => $meta['device_uuid'] ?? null,
-						'platform'    => $meta['platform'],
-						'origin'      => $meta['origin'],
+						'id'            => $post_id,
+						'user_id'       => $user_id,
+						'token'         => $meta['token'],
+						'device_uuid'   => $meta['device_uuid'] ?? null,
+						'platform'      => $meta['platform'],
+						'origin'        => $meta['origin'],
+						/**
+						 * These meta items were added after the ability to store
+						 * tokens, so may not be available for older tokens. Use
+						 * sensible defaults.
+						 */
+						'device_locale' => $meta['device_locale'] ?? PushToken::DEFAULT_DEVICE_LOCALE,
+						'metadata'      => $meta['metadata'] ?? array(),
 					)
 				);
 			}
@@ -288,23 +304,23 @@ class PushTokensDataStore {
 
 	/**
 	 * Returns an associative array of post meta as key => value pairs for the
-	 * keys defined in SUPPORTED_META; missing keys return null.
+	 * keys defined in SUPPORTED_META; missing keys return null. Use
+	 * `update_meta_cache` with `get_post_meta` to allow reading the meta as
+	 * single values which automatically unserialize when requires,
+	 * rather than nested arrays that don't.
 	 *
 	 * @since 10.5.0
 	 * @param int $id The push token ID.
 	 * @return array
 	 */
 	private function build_meta_array_from_database( int $id ): array {
-		$meta        = (array) get_post_meta( $id );
-		$meta_by_key = (array) array_combine( static::SUPPORTED_META, static::SUPPORTED_META );
+		$meta_by_key = array_fill_keys( static::SUPPORTED_META, null );
 
 		foreach ( static::SUPPORTED_META as $key ) {
-			if ( ! isset( $meta[ $key ] ) ) {
-				$meta_by_key[ $key ] = null;
-			} elseif ( is_array( $meta[ $key ] ) ) {
-				$meta_by_key[ $key ] = $meta[ $key ][0];
-			} else {
-				$meta_by_key[ $key ] = $meta[ $key ];
+			$meta = get_post_meta( $id, $key, true );
+
+			if ( '' !== $meta ) {
+				$meta_by_key[ $key ] = $meta;
 			}
 		}
 
@@ -322,11 +338,14 @@ class PushTokensDataStore {
 	private function build_meta_array_from_token( PushToken $push_token ) {
 		return array_filter(
 			array(
-				'platform'    => $push_token->get_platform(),
-				'token'       => $push_token->get_token(),
-				'device_uuid' => $push_token->get_device_uuid(),
-				'origin'      => $push_token->get_origin(),
-			)
+				'platform'      => $push_token->get_platform(),
+				'token'         => $push_token->get_token(),
+				'device_uuid'   => $push_token->get_device_uuid(),
+				'origin'        => $push_token->get_origin(),
+				'device_locale' => $push_token->get_device_locale(),
+				'metadata'      => $push_token->get_metadata(),
+			),
+			fn ( $value ) => null !== $value && '' !== $value
 		);
 	}
 }

@@ -11,8 +11,6 @@
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
-use Automattic\WooCommerce\Internal\FraudProtection\CheckoutEventTracker;
-use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -1102,15 +1100,6 @@ class WC_Checkout {
 				true
 			);
 
-			// Track successful order placement.
-			if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
-				$fp_order = wc_get_order( $order_id );
-				if ( $fp_order instanceof \WC_Order ) {
-					wc_get_container()->get( CheckoutEventTracker::class )
-						->track_order_placed( $order_id, $fp_order );
-				}
-			}
-
 			if ( ! wp_doing_ajax() ) {
 				// phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect
 				wp_redirect( $result['redirect'] );
@@ -1141,12 +1130,6 @@ class WC_Checkout {
 			),
 			true
 		);
-
-		// Track successful order placement.
-		if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() && $order instanceof \WC_Order ) {
-			wc_get_container()->get( CheckoutEventTracker::class )
-				->track_order_placed( $order_id, $order );
-		}
 
 		if ( ! wp_doing_ajax() ) {
 			wp_safe_redirect(

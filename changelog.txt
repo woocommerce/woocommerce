@@ -1,5 +1,12 @@
 == Changelog ==
 
+= 10.5.2 2026-02-13 =
+
+**WooCommerce**
+
+* Fix - Fix variable products add-to-cart button appearing disabled in some stores [#63262](https://github.com/woocommerce/woocommerce/pull/63262)
+
+
 = 10.5.1 2026-02-10 =
 
 **WooCommerce**
