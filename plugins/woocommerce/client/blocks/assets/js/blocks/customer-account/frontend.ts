@@ -100,5 +100,17 @@ store( 'woocommerce/customer-account', {
 			context.isDropdownOpen = false;
 			focusTrigger();
 		},
+		handleFocusOut: ( event: FocusEvent ) => {
+			const context = getContext< CustomerAccountContext >();
+			if ( ! context.isDropdownOpen ) {
+				return;
+			}
+
+			const { ref } = getElement();
+			const relatedTarget = event.relatedTarget as Node | null;
+			if ( ref && ( ! relatedTarget || ! ref.contains( relatedTarget ) ) ) {
+				context.isDropdownOpen = false;
+			}
+		},
 	},
 } );

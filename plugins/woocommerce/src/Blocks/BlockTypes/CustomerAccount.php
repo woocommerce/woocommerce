@@ -201,6 +201,7 @@ class CustomerAccount extends AbstractBlock {
 			data-wp-class--align-right="context.alignRight"
 			data-wp-class--is-dropdown-open="context.isDropdownOpen"
 			data-wp-class--show-above="context.showAbove"
+			data-wp-on--focusout="actions.handleFocusOut"
 			data-wp-on-document--click="actions.handleDocumentClick"
 			data-wp-on-document--keydown="actions.handleKeydown"
 		>
