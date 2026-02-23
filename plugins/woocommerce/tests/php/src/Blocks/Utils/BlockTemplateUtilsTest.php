@@ -322,7 +322,9 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 	 * Test `get_block_templates_from_db`: workflow and properly handling input parameters.
 	 */
 	public function test_get_block_templates_from_db(): void {
-		$now        = time();
+		$now   = time();
+		$theme = get_stylesheet();
+
 		$date       = gmdate( 'Y-m-d H:i:s', $now - 1 );
 		$attributes = array(
 			'post_name'     => 'slug-1',
@@ -349,7 +351,7 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 
 		// Verify fetching all templates and caches population correctness.
 		$templates = BlockTemplateUtils::get_block_templates_from_db();
-		$this->assertSame( array( $template_slug->ID, $template_slug_1->ID ), wp_cache_get( 'wp_template-ids', 'woocommerce_blocks' )['twentytwentytwo'] ?? null );
+		$this->assertSame( array( $template_slug->ID, $template_slug_1->ID ), wp_cache_get( 'wp_template-ids', 'woocommerce_blocks' )[ $theme ] ?? null );
 		$this->assertSame( array( 'slug', 'slug-1' ), array_column( $templates, 'slug' ) );
 
 		// Verify request-level cache hit handling correctness.
@@ -362,7 +364,7 @@ class BlockTemplateUtilsTest extends WP_UnitTestCase {
 
 		// Verify request-level cache miss handling correctness: no templates with the specified type.
 		$templates = BlockTemplateUtils::get_block_templates_from_db( array( 'slug' ), 'wp_template_part' );
-		$this->assertSame( array(), wp_cache_get( 'wp_template_part-ids', 'woocommerce_blocks' )['twentytwentytwo'] ?? null );
+		$this->assertSame( array(), wp_cache_get( 'wp_template_part-ids', 'woocommerce_blocks' )[ $theme ] ?? null );
 		$this->assertCount( 0, $templates );
 
 		wp_cache_delete_multiple( array( 'wp_template-ids', 'wp_template_part-ids' ), 'woocommerce_blocks' );
