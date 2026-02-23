@@ -616,7 +616,7 @@ class ProductSchema extends AbstractSchema {
 				'height' => $product->get_height(),
 			],
 			'formatted_weight'     => wc_format_weight( (float) $product->get_weight() ),
-			'formatted_dimensions' => wc_format_dimensions( (array) $product->get_dimensions( false ) ),
+			'formatted_dimensions' => html_entity_decode( wc_format_dimensions( (array) $product->get_dimensions( false ) ), ENT_QUOTES, get_bloginfo( 'charset' ) ),
 			'add_to_cart'         => (object) array_merge(
 				[
 					'text'        => $this->prepare_html_response( $product->add_to_cart_text() ),
