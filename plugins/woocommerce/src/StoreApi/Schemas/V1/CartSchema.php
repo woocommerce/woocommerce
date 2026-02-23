@@ -2,8 +2,8 @@
 namespace Automattic\WooCommerce\StoreApi\Schemas\V1;
 
 use Automattic\WooCommerce\StoreApi\SchemaController;
-use Automattic\WooCommerce\StoreApi\Utilities\CartController;
 use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
+use Automattic\WooCommerce\StoreApi\Utilities\CartController;
 use WC_Tax;
 
 /**
@@ -341,7 +341,13 @@ class CartSchema extends AbstractSchema {
 		$shipping_packages = $cart->has_calculated_shipping() ? $controller->get_shipping_packages() : [];
 
 		// Get visible cross sells products.
-		$cross_sells = array_filter( array_map( 'wc_get_product', $cart->get_cross_sells() ), 'wc_products_array_filter_visible' );
+		$cross_sells    = array();
+		$cross_sell_ids = $cart->get_cross_sells();
+		if ( ! empty( $cross_sell_ids ) ) {
+			// Optimization note: priming reduces the number of SQLs required to populate the product objects.
+			_prime_post_caches( $cross_sell_ids );
+			$cross_sells = array_filter( array_map( 'wc_get_product', $cross_sell_ids ), 'wc_products_array_filter_visible' );
+		}
 
 		return [
 			'items'                   => $this->get_item_responses_from_schema( $this->item_schema, $cart->get_cart() ),

@@ -322,6 +322,9 @@ class WC_Install {
 		'10.6.0' => array(
 			'wc_update_1060_add_woo_idx_comment_approved_type_index',
 		),
+		'10.7.0' => array(
+			'wc_update_1070_disable_hpos_sync_on_read',
+		),
 	);
 
 	/**
