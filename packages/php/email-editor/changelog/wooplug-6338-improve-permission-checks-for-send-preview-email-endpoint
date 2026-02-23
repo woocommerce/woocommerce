@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Verify user can edit post in send preview email endpoint permission check
