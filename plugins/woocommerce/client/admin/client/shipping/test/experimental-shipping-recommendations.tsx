@@ -283,6 +283,7 @@ describe( 'ShippingRecommendations', () => {
 
 		it( 'should navigate to the marketplace when clicking the WooCommerce Marketplace link', async () => {
 			const { isFeatureEnabled } = jest.requireMock( '~/utils/features' );
+			const originalLocation = global.window.location;
 			( isFeatureEnabled as jest.Mock ).mockReturnValue( true );
 
 			const mockLocation = {
@@ -303,6 +304,10 @@ describe( 'ShippingRecommendations', () => {
 			expect( mockLocation.href ).toContain(
 				'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=shipping'
 			);
+
+			Object.defineProperty( global.window, 'location', {
+				value: originalLocation,
+			} );
 		} );
 	} );
 

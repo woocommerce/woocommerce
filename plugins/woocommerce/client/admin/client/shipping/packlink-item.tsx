@@ -22,12 +22,15 @@ const PacklinkItem = ( {
 	const { createSuccessNotice } = useDispatch( 'core/notices' );
 
 	const handleSetupClick = () => {
-		onSetupClick( [ PACKLINK_PLUGIN_SLUG ] ).then( () => {
-			createSuccessNotice(
-				__( 'Packlink PRO is installed!', 'woocommerce' ),
-				{}
-			);
-		} );
+		onSetupClick( [ PACKLINK_PLUGIN_SLUG ] ).then(
+			() => {
+				createSuccessNotice(
+					__( 'Packlink PRO is installed!', 'woocommerce' ),
+					{}
+				);
+			},
+			() => {}
+		);
 	};
 
 	return (

@@ -24,7 +24,7 @@ import WoocommerceShippingItem from './woocommerce-shipping-item';
 import './shipping-recommendations.scss';
 import { TrackedLink } from '~/components/tracked-link/tracked-link';
 
-const useInstallPlugin = () => {
+export const useInstallPlugin = () => {
 	const [ pluginsBeingSetup, setPluginsBeingSetup ] = useState<
 		Array< string >
 	>( [] );

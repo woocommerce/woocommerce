@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { useState } from '@wordpress/element';
-import { useSelect, useDispatch } from '@wordpress/data';
+import { useSelect } from '@wordpress/data';
 import {
 	pluginsStore,
 	settingsStore,
@@ -12,12 +11,14 @@ import {
 /**
  * Internal dependencies
  */
-import { createNoticesFromResponse } from '../lib/notices';
 import { getCountryCode } from '~/dashboard/utils';
 import WooCommerceShippingItem from './experimental-woocommerce-shipping-item';
 import ShipStationItem from './shipstation-item';
 import PacklinkItem from './packlink-item';
-import { ShippingRecommendationsList } from './shipping-recommendations';
+import {
+	ShippingRecommendationsList,
+	useInstallPlugin,
+} from './shipping-recommendations';
 import './shipping-recommendations.scss';
 import { ShippingTour } from '../guided-tours/shipping-tour';
 
@@ -45,11 +46,7 @@ const EXTENSION_PLUGIN_SLUGS: Record< ExtensionId, string > = {
 };
 
 const ShippingRecommendations = () => {
-	const [ pluginsBeingSetup, setPluginsBeingSetup ] = useState<
-		Array< string >
-	>( [] );
-
-	const { installAndActivatePlugins } = useDispatch( pluginsStore );
+	const [ pluginsBeingSetup, handleSetup ] = useInstallPlugin();
 
 	const {
 		activePlugins,
@@ -75,25 +72,6 @@ const ShippingRecommendations = () => {
 				profileItems?.length === 1 && profileItems[ 0 ] === 'downloads',
 		};
 	}, [] );
-
-	const handleSetup = ( slugs: string[] ): PromiseLike< void > => {
-		if ( pluginsBeingSetup.length > 0 ) {
-			return Promise.resolve();
-		}
-
-		setPluginsBeingSetup( slugs );
-
-		return installAndActivatePlugins( slugs )
-			.then( () => {
-				setPluginsBeingSetup( [] );
-			} )
-			.catch( ( response: { errors: Record< string, string > } ) => {
-				createNoticesFromResponse( response );
-				setPluginsBeingSetup( [] );
-
-				return Promise.reject();
-			} );
-	};
 
 	if ( isSellingDigitalProductsOnly ) {
 		return <ShippingTour showShippingRecommendationsStep={ false } />;

@@ -22,12 +22,15 @@ const ShipStationItem = ( {
 	const { createSuccessNotice } = useDispatch( 'core/notices' );
 
 	const handleSetupClick = () => {
-		onSetupClick( [ SHIPSTATION_PLUGIN_SLUG ] ).then( () => {
-			createSuccessNotice(
-				__( 'ShipStation is installed!', 'woocommerce' ),
-				{}
-			);
-		} );
+		onSetupClick( [ SHIPSTATION_PLUGIN_SLUG ] ).then(
+			() => {
+				createSuccessNotice(
+					__( 'ShipStation is installed!', 'woocommerce' ),
+					{}
+				);
+			},
+			() => {}
+		);
 	};
 
 	return (
