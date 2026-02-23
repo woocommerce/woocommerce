@@ -110,7 +110,9 @@ export async function accessTheEmailEditor(
 	const theRow = page.getByRole( 'row', {
 		name: emailTitle,
 	} );
-	await theRow.waitFor( { timeout: 20000 } );
+	await theRow
+		.getByRole( 'button', { name: 'Actions', exact: true } )
+		.waitFor( { timeout: 20000 } );
 	await theRow
 		.getByRole( 'button', { name: 'Actions', exact: true } )
 		.click();

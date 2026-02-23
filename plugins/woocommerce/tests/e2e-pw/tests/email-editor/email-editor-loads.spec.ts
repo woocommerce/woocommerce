@@ -40,7 +40,7 @@ test.describe( 'WooCommerce Email Editor Core', () => {
 		// selector when WP 7.0 is the minimum supported version.
 		const emailTab = page
 			.getByRole( 'tab', { name: 'Email' } )
-			.or( page.getByRole( 'button', { name: 'Email' } ) );
+			.or( page.getByRole( 'button', { name: 'Email', exact: true } ) );
 		await emailTab.click();
 		await expect(
 			page.locator( '.editor-post-card-panel__title' )
