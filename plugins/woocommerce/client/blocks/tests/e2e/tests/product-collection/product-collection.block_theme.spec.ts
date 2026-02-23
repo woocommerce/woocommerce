@@ -816,7 +816,7 @@ test.describe( 'Product Collection', () => {
 					// when WP 7.0 is the minimum supported version.
 					await expect(
 						editor.canvas.getByText( 'howdy' )
-					).toBeVisible( { timeout: 10000 } );
+					).toBeVisible( { timeout: 20000 } );
 
 					await editor.insertBlock( { name: legacyBlockName } );
 

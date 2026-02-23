@@ -190,7 +190,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		// loading timing. Explicit timeout needed. Simplify when WP 7.0 is the
 		// minimum supported version.
 		await expect( editor.canvas.getByText( 'placeholder' ) ).toBeVisible( {
-			timeout: 10000,
+			timeout: 20000,
 		} );
 
 		await editor.insertBlock( { name: 'woocommerce/single-product' } );
@@ -230,7 +230,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		// loading timing. Explicit timeout needed. Simplify when WP 7.0 is the
 		// minimum supported version.
 		await expect( editor.canvas.getByText( 'placeholder' ) ).toBeVisible( {
-			timeout: 10000,
+			timeout: 20000,
 		} );
 
 		await editor.insertBlock( { name: blockData.slug } );

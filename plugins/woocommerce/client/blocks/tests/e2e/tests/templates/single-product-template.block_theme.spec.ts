@@ -41,6 +41,10 @@ test.describe( 'Single Product template', () => {
 			.click();
 		await page.getByLabel( 'Close', { exact: true } ).click();
 
+		// TODO: WP 7.0 compat - WP 7.0 always iframes the editor with different
+		// loading timing. Simplify when WP 7.0 is the minimum supported version.
+		await editor.canvas.locator( 'body' ).waitFor( { timeout: 20000 } );
+
 		// Edit the template.
 		await editor.insertBlock( {
 			name: 'core/paragraph',

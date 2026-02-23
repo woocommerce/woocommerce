@@ -43,6 +43,10 @@ test.describe( 'Template customization', () => {
 					canvas: 'edit',
 				} );
 
+				// TODO: WP 7.0 compat - WP 7.0 always iframes the editor with different
+				// loading timing. Simplify when WP 7.0 is the minimum supported version.
+				await editor.canvas.locator( 'body' ).waitFor( { timeout: 20000 } );
+
 				await editor.insertBlock( {
 					name: 'core/paragraph',
 					attributes: { content: userText },
@@ -112,6 +116,9 @@ test.describe( 'Template customization', () => {
 						postType: testData.templateType,
 						canvas: 'edit',
 					} );
+
+					// TODO: WP 7.0 compat
+					await editor.canvas.locator( 'body' ).waitFor( { timeout: 20000 } );
 
 					await editor.insertBlock( {
 						name: 'core/paragraph',

@@ -125,7 +125,7 @@ export class Editor extends CoreEditor {
 		const templateCards = this.page.locator(
 			'.dataviews-view-grid > .dataviews-view-grid__card'
 		);
-		await templateCards.first().waitFor( { timeout: 10000 } );
+		await templateCards.first().waitFor( { timeout: 20000 } );
 		const templatesBeforeSearch = await templateCards.count();
 
 		await this.page.getByPlaceholder( 'Search' ).fill( templateName );
@@ -139,7 +139,7 @@ export class Editor extends CoreEditor {
 		// Using expect.poll() for a retrying assertion since toHaveCount
 		// requires an exact number.
 		await expect
-			.poll( () => templateCards.count(), { timeout: 10000 } )
+			.poll( () => templateCards.count(), { timeout: 20000 } )
 			.toBeLessThan( templatesBeforeSearch );
 	}
 

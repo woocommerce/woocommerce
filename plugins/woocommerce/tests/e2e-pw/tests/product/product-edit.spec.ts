@@ -147,7 +147,7 @@ test( 'can bulk edit products', async ( { page, products } ) => {
 		// when WP 7.0 is the minimum supported version (if no longer needed).
 		await page
 			.locator( '#bulk-action-selector-top' )
-			.waitFor( { state: 'attached' } );
+			.waitFor( { state: 'visible', timeout: 20000 } );
 		await page
 			.locator( '#bulk-action-selector-top' )
 			.selectOption( 'Edit' );
@@ -244,7 +244,7 @@ test(
 			// when WP 7.0 is the minimum supported version (if no longer needed).
 			await page
 				.locator( '#bulk-action-selector-top' )
-				.waitFor( { state: 'attached' } );
+				.waitFor( { state: 'visible', timeout: 20000 } );
 			await page
 				.locator( '#bulk-action-selector-top' )
 				.selectOption( 'Edit' );
@@ -303,7 +303,7 @@ test(
 			// TODO: WP 7.0 compat - WP 7.0 changed list table rendering timing.
 			await page
 				.locator( '#bulk-action-selector-top' )
-				.waitFor( { state: 'attached' } );
+				.waitFor( { state: 'visible', timeout: 20000 } );
 			await page
 				.locator( '#bulk-action-selector-top' )
 				.selectOption( 'Edit' );
@@ -348,7 +348,7 @@ test(
 			// TODO: WP 7.0 compat - WP 7.0 changed list table rendering timing.
 			await page
 				.locator( '#bulk-action-selector-top' )
-				.waitFor( { state: 'attached' } );
+				.waitFor( { state: 'visible', timeout: 20000 } );
 			await page
 				.locator( '#bulk-action-selector-top' )
 				.selectOption( 'Edit' );
@@ -420,7 +420,7 @@ test(
 			// TODO: WP 7.0 compat - WP 7.0 changed list table rendering timing.
 			await page
 				.locator( '#bulk-action-selector-top' )
-				.waitFor( { state: 'attached' } );
+				.waitFor( { state: 'visible', timeout: 20000 } );
 			await page
 				.locator( '#bulk-action-selector-top' )
 				.selectOption( 'Edit' );
