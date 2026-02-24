@@ -164,14 +164,21 @@ const recordTracksBusinessInfoCompleted = ( {
 	} );
 };
 
+let shippingPartnerImpressionRecorded = false;
+
 const recordShippingPartnerImpression = ( {
 	context,
 }: {
 	context: CoreProfilerStateMachineContext;
 } ) => {
+	if ( shippingPartnerImpressionRecorded ) {
+		return;
+	}
+
 	const trackingBase = getShippingPartnerTrackingBase( context );
 
 	if ( trackingBase.plugins.length > 0 ) {
+		shippingPartnerImpressionRecorded = true;
 		recordEvent( 'shipping_partner_impression', trackingBase );
 	}
 };
@@ -309,6 +316,10 @@ const recordSuccessfulPluginInstallation = ( {
 		'coreprofiler_store_extensions_installed_and_activated',
 		trackData
 	);
+};
+
+export const resetShippingPartnerImpressionFlag = () => {
+	shippingPartnerImpressionRecorded = false;
 };
 
 export default {

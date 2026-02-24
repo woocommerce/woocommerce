@@ -6,7 +6,7 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
-import tracksActions from '../tracks';
+import tracksActions, { resetShippingPartnerImpressionFlag } from '../tracks';
 import type { CoreProfilerStateMachineContext } from '../../index';
 import type { PluginInstallError } from '../../services/installAndActivatePlugins';
 
@@ -80,6 +80,7 @@ const nonShippingPlugin = {
 describe( 'Core Profiler shipping partner tracking', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
+		resetShippingPartnerImpressionFlag();
 	} );
 
 	describe( 'recordShippingPartnerImpression', () => {
@@ -112,6 +113,31 @@ describe( 'Core Profiler shipping partner tracking', () => {
 				'shipping_partner_impression',
 				expect.anything()
 			);
+		} );
+
+		it( 'should only fire shipping_partner_impression once even if called multiple times', () => {
+			const context = makeContext( {
+				pluginsAvailable: [ ...shippingPlugins, nonShippingPlugin ],
+			} );
+
+			tracksActions.recordShippingPartnerImpression( { context } );
+			tracksActions.recordShippingPartnerImpression( { context } );
+
+			expect( recordEvent ).toHaveBeenCalledWith(
+				'shipping_partner_impression',
+				{
+					context: 'core-profiler',
+					country: 'US',
+					plugins:
+						'woocommerce-shipping,woocommerce-shipstation-integration',
+				}
+			);
+			expect(
+				( recordEvent as jest.Mock ).mock.calls.filter(
+					( [ eventName ] ) =>
+						eventName === 'shipping_partner_impression'
+				)
+			).toHaveLength( 1 );
 		} );
 	} );
 
