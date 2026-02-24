@@ -1,4 +1,0 @@
-Significance: minor
-Type: performance
-
-Defer has_products() check to shutdown hook for bulk delete/trash products.
