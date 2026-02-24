@@ -41,7 +41,7 @@ printf( esc_html__( 'Hi %s,', 'woocommerce' ), '<!--[woocommerce/customer-first-
 <!-- wp:quote {"lock":{"move":false,"remove":true}} -->
 <blockquote class="wp-block-quote">
 <!-- wp:paragraph {"lock":{"move":false,"remove":true}} -->
-<p> <?php echo '<!--[woocommerce/admin-order-note]-->';?>  </p>
+<p> <?php echo '<!--[woocommerce/admin-order-note]-->'; ?>  </p>
 <!-- /wp:paragraph -->
 </blockquote>
 <!-- /wp:quote -->
