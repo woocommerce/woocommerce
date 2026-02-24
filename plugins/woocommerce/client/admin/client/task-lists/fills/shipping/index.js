@@ -138,7 +138,7 @@ export class Shipping extends Component {
 	}
 
 	getShippingPartnerTrackingProps() {
-		const { countryCode, shippingPartners } = this.props;
+		const { countryCode, shippingPartners = [] } = this.props;
 		const pluginSlugs = shippingPartners
 			.map( ( partner ) => partner.slug )
 			.filter(
