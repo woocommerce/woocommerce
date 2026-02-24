@@ -14065,30 +14065,6 @@ parameters:
 			path: includes/class-wc-product-grouped.php
 
 		-
-			message: '#^Cannot call method get_price\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-product-grouped.php
-
-		-
-			message: '#^Cannot call method has_child\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-product-grouped.php
-
-		-
-			message: '#^Cannot call method is_on_sale\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-product-grouped.php
-
-		-
-			message: '#^Cannot call method is_purchasable\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-product-grouped.php
-
-		-
 			message: '#^Method WC_Product_Grouped\:\:set_children\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -14098,12 +14074,6 @@ parameters:
 			message: '#^Method WC_Product_Grouped\:\:sync\(\) should return WC_Product but returns WC_Product\|false\|null\.$#'
 			identifier: return.type
 			count: 1
-			path: includes/class-wc-product-grouped.php
-
-		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(WC_Product\|false\|null\)\: mixed\)\|null, ''wc_get_price_to…'' given\.$#'
-			identifier: argument.type
-			count: 2
 			path: includes/class-wc-product-grouped.php
 
 		-
@@ -14131,21 +14101,9 @@ parameters:
 			path: includes/class-wc-product-grouped.php
 
 		-
-			message: '#^Parameter \#1 \$product of function wc_get_price_excluding_tax expects WC_Product, WC_Product\|false\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-product-grouped.php
-
-		-
-			message: '#^Parameter \#1 \$product of function wc_get_price_including_tax expects WC_Product, WC_Product\|false\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-product-grouped.php
-
-		-
 			message: '#^Parameter \#2 \$callback of function array_filter expects \(callable\(WC_Product\|false\|null\)\: bool\)\|null, ''wc_products_array…'' given\.$#'
 			identifier: argument.type
-			count: 5
+			count: 1
 			path: includes/class-wc-product-grouped.php
 
 		-
@@ -19135,18 +19093,6 @@ parameters:
 			path: includes/emails/class-wc-email-customer-pos-refunded-order.php
 
 		-
-			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:get_billing_email\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/emails/class-wc-email-customer-pos-refunded-order.php
-
-		-
-			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:get_order_number\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/emails/class-wc-email-customer-pos-refunded-order.php
-
-		-
 			message: '#^Callback expects 3 parameters, \$accepted_args is set to 4\.$#'
 			identifier: arguments.count
 			count: 1
@@ -19160,12 +19106,6 @@ parameters:
 
 		-
 			message: '#^Method WC_Email_Customer_POS_Refunded_Order\:\:add_unit_price\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/emails/class-wc-email-customer-pos-refunded-order.php
-
-		-
-			message: '#^Method WC_Email_Customer_POS_Refunded_Order\:\:disable_default_refund_emails_for_pos_orders\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: includes/emails/class-wc-email-customer-pos-refunded-order.php
@@ -19189,12 +19129,6 @@ parameters:
 			path: includes/emails/class-wc-email-customer-pos-refunded-order.php
 
 		-
-			message: '#^Method WC_Email_Customer_POS_Refunded_Order\:\:register_refund_email_triggers\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/emails/class-wc-email-customer-pos-refunded-order.php
-
-		-
 			message: '#^Method WC_Email_Customer_POS_Refunded_Order\:\:remove_pos_customizations\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -19202,24 +19136,6 @@ parameters:
 
 		-
 			message: '#^Method WC_Email_Customer_POS_Refunded_Order\:\:set_email_strings\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/emails/class-wc-email-customer-pos-refunded-order.php
-
-		-
-			message: '#^Method WC_Email_Customer_POS_Refunded_Order\:\:trigger\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/emails/class-wc-email-customer-pos-refunded-order.php
-
-		-
-			message: '#^Method WC_Email_Customer_POS_Refunded_Order\:\:trigger_full\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/emails/class-wc-email-customer-pos-refunded-order.php
-
-		-
-			message: '#^Method WC_Email_Customer_POS_Refunded_Order\:\:trigger_partial\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: includes/emails/class-wc-email-customer-pos-refunded-order.php
@@ -19242,11 +19158,6 @@ parameters:
 			count: 1
 			path: includes/emails/class-wc-email-customer-pos-refunded-order.php
 
-		-
-			message: '#^Property WC_Email_Customer_POS_Refunded_Order\:\:\$refund \(bool\|WC_Order\) does not accept WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: includes/emails/class-wc-email-customer-pos-refunded-order.php
 
 		-
 			message: '#^Method WC_Email_Customer_Processing_Order\:\:trigger\(\) has no return type specified\.$#'
@@ -64079,12 +63990,6 @@ parameters:
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\OrdersTableDataStore\:\:release_held_coupons\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\OrdersTableDataStore\:\:save_cogs_data\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php

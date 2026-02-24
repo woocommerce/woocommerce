@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix unbounded static cache memory leaks in vendor-prefixed CSS inlining dependencies (emogrifier and symfony/css-selector) for long-running processes.
