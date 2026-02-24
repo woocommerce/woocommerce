@@ -110,15 +110,12 @@ describe( 'WooCommerceShippingItem', () => {
 		);
 
 		screen.queryByRole( 'button', { name: 'Install' } )?.click();
-		expect( recordEvent ).toHaveBeenCalledWith(
-			'shipping_partner_click',
-			{
-				context: 'settings',
-				country: 'US',
-				plugins: 'woocommerce-shipping',
-				selected_plugin: 'woocommerce-shipping',
-			}
-		);
+		expect( recordEvent ).toHaveBeenCalledWith( 'shipping_partner_click', {
+			context: 'settings',
+			country: 'US',
+			plugins: 'woocommerce-shipping',
+			selected_plugin: 'woocommerce-shipping',
+		} );
 	} );
 
 	it( 'should record shipping_partner_click when clicking Activate button', () => {
@@ -135,15 +132,12 @@ describe( 'WooCommerceShippingItem', () => {
 		);
 
 		screen.queryByRole( 'button', { name: 'Activate' } )?.click();
-		expect( recordEvent ).toHaveBeenCalledWith(
-			'shipping_partner_click',
-			{
-				context: 'settings',
-				country: 'US',
-				plugins: 'woocommerce-shipping',
-				selected_plugin: 'woocommerce-shipping',
-			}
-		);
+		expect( recordEvent ).toHaveBeenCalledWith( 'shipping_partner_click', {
+			context: 'settings',
+			country: 'US',
+			plugins: 'woocommerce-shipping',
+			selected_plugin: 'woocommerce-shipping',
+		} );
 	} );
 
 	it( 'should call onActivateClick when clicking Activate button', () => {

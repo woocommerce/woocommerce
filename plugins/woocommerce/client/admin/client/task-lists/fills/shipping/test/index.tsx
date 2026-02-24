@@ -205,7 +205,9 @@ describe( 'Shipping', () => {
 				{ step: 'rates' }
 			);
 
-			const impressionCalls = ( recordEvent as jest.Mock ).mock.calls.filter(
+			const impressionCalls = (
+				recordEvent as jest.Mock
+			 ).mock.calls.filter(
 				( call ) => call[ 0 ] === 'shipping_partner_impression'
 			);
 			expect( impressionCalls ).toHaveLength( 1 );
