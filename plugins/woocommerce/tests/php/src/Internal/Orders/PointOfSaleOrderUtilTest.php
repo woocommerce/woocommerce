@@ -34,4 +34,73 @@ class PointOfSaleOrderUtilTest extends WC_Unit_Test_Case {
 		$order->save();
 		$this->assertFalse( PointOfSaleOrderUtil::is_pos_order( $order ), 'Order with empty created_via should not be identified as POS order' );
 	}
+
+	/**
+	 * @testdox is_order_paid_at_pos returns true for POS-created orders.
+	 */
+	public function test_is_order_paid_at_pos_returns_true_for_pos_created_order(): void {
+		$order = new WC_Order();
+		$order->set_created_via( 'pos-rest-api' );
+		$order->save();
+
+		$this->assertTrue( PointOfSaleOrderUtil::is_order_paid_at_pos( $order ) );
+	}
+
+	/**
+	 * @testdox is_order_paid_at_pos returns true for POS card reader payment.
+	 */
+	public function test_is_order_paid_at_pos_returns_true_for_card_reader_payment(): void {
+		$order = new WC_Order();
+		$order->set_created_via( 'bookings' );
+		$order->update_meta_data( '_wcpay_ipp_channel', 'mobile_pos' );
+		$order->save();
+
+		$this->assertTrue( PointOfSaleOrderUtil::is_order_paid_at_pos( $order ) );
+	}
+
+	/**
+	 * @testdox is_order_paid_at_pos returns true for cash payment at POS.
+	 */
+	public function test_is_order_paid_at_pos_returns_true_for_cash_payment(): void {
+		$order = new WC_Order();
+		$order->set_created_via( 'admin' );
+		$order->update_meta_data( '_cash_change_amount', '5.00' );
+		$order->save();
+
+		$this->assertTrue( PointOfSaleOrderUtil::is_order_paid_at_pos( $order ) );
+	}
+
+	/**
+	 * @testdox is_order_paid_at_pos returns true for cash payment with zero change.
+	 */
+	public function test_is_order_paid_at_pos_returns_true_for_zero_change(): void {
+		$order = new WC_Order();
+		$order->set_created_via( 'bookings' );
+		$order->update_meta_data( '_cash_change_amount', '0' );
+		$order->save();
+
+		$this->assertTrue( PointOfSaleOrderUtil::is_order_paid_at_pos( $order ) );
+	}
+
+	/**
+	 * @testdox is_order_paid_at_pos returns false for regular web orders.
+	 */
+	public function test_is_order_paid_at_pos_returns_false_for_regular_order(): void {
+		$order = new WC_Order();
+		$order->set_created_via( 'checkout' );
+		$order->save();
+
+		$this->assertFalse( PointOfSaleOrderUtil::is_order_paid_at_pos( $order ) );
+	}
+
+	/**
+	 * @testdox is_order_paid_at_pos returns false for bookings order without POS payment.
+	 */
+	public function test_is_order_paid_at_pos_returns_false_for_bookings_without_pos(): void {
+		$order = new WC_Order();
+		$order->set_created_via( 'bookings' );
+		$order->save();
+
+		$this->assertFalse( PointOfSaleOrderUtil::is_order_paid_at_pos( $order ) );
+	}
 }
