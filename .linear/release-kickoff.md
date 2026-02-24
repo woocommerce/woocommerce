@@ -1,18 +1,31 @@
-# WooCommerce Release {RELEASE_VERSION}: Tracking
+# [{release_main_version}] Release tracking
 
-This issue provides visibility on the progress of the release process of WooCommerce core **{RELEASE_VERSION}**, and it centralizes all related discussions and documentation. The ultimate goal of this issue is to keep a reference to the steps, resources, work, and conversations associated with this release so it can be helpful for future contributors handling the release of a new WooCommerce core version.
+This issue provides visibility on the progress of the release process of WooCommerce core **{release_main_version}**.
 
-• **WooCommerce core version to release:** {RELEASE_VERSION} ([milestone](https://github.com/woocommerce/woocommerce/milestones/{MILESTONE_NUMBER}))
-• **Release lead:** {RELEASE_LEAD} ({RELEASE_TEAM})
-• **Beta 1 Release Date:** {BETA_1_RELEASE_DATE}
-• **Beta 2 Release Date:** {BETA_2_RELEASE_DATE}
-• **RC 1 Release Date:** {RC1_RELEASE_DATE}
-• **Final Release Date:** {RELEASE_DATE} ([release calendar](https://developer.woocommerce.com/release-calendar/))
+- **Main version being released:** `{release_main_version}`
+- **Milestone:** [{release_milestone}]({repository_url}/issues?q=is:open+milestone:{release_milestone})
+- **Release branch:** [`{release_branch}`]({repository_url}/tree/{release_branch})
+- **Release lead:** {lead_user} ({lead_team})
+- **Relevant dates:** ([release calendar](https://developer.woocommerce.com/release-calendar/))
+  - **Feature Freeze:** {date_feature_freeze}
+  - **Beta 1:** {date_beta1}
+  - **Beta 2:** {date_beta2}
+  - **RC 1:** {date_rc1}
+  - **Stable:** {date_stable}
 
-## Resources
+---
 
-• **[WooCommerce core changelog](https://github.com/woocommerce/woocommerce/blob/trunk/changelog.txt)**
-• **[Previous releases](https://github.com/woocommerce/woocommerce/releases)**
-• **[Release process documentation](https://developer.woocommerce.com/docs/contribution/releases/)**
+⚠ Dear release lead:
 
-Add any new Sub-issues as needed for any point releases (patch) needed after the `x.y.0` stable release using the [`.linear/release-kickoff-patch.md`](https://github.com/woocommerce/woocommerce/blob/trunk/.linear/release-kickoff-patch.md) template.
+- Please read this issue carefully and familiarize yourself with the [release process documentation](https://developer.woocommerce.com/docs/contribution/releases/).
+- Join the release channels in Slack (`#woo-core-releases`, `#woo-core-releases-notifications`), where discussions happen and notifications are sent.
+- For every release in the cycle, there's a corresponding sub-issue. On the date of each release (see schedule above), open the relevant issue and follow the instructions in it.
+- Any additional point/patch releases after the first stable must be tracked as well. Run the **[Release: Create Tracking Issue]({repository_url}/actions/workflows/release-create-tracking-issue.yml)** workflow with the version (e.g., `{release_main_version}.1`) to create the sub-issue.
+
+##### Resources
+
+- [Release process documentation](https://developer.woocommerce.com/docs/contribution/releases/).
+- [Troubleshooting Guide](https://developer.woocommerce.com/docs/contribution/releases/troubleshooting/).
+- [Previous releases]({repository_url}/releases).
+- [WooCommerce core changelog]({repository_url}/blob/trunk/changelog.txt).
+

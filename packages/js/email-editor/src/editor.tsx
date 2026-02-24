@@ -28,6 +28,7 @@ import {
 	initDomTracking,
 } from './events';
 import { initContentValidationMiddleware } from './middleware/content-validation';
+import { initHacks } from './hacks';
 import {
 	useContentValidation,
 	useRemoveSavingFailedNotices,
@@ -42,11 +43,13 @@ function Editor( {
 	postType,
 	isPreview = false,
 	contentRef = null,
+	customSavePanel,
 }: {
 	postId: number | string;
 	postType: string;
 	isPreview?: boolean;
 	contentRef?: React.Ref< HTMLDivElement > | null;
+	customSavePanel?: React.ReactElement;
 } ) {
 	const [ isInitialized, setIsInitialized ] = useState( false );
 	const { settings } = useSelect(
@@ -89,6 +92,7 @@ function Editor( {
 				postType={ postType }
 				settings={ editorSettings }
 				contentRef={ mergedContentRef }
+				customSavePanel={ customSavePanel }
 			/>
 		</StrictMode>
 	);
@@ -101,6 +105,7 @@ function onInit() {
 	createStore();
 	initContentValidationMiddleware();
 	initBlocks();
+	initHacks();
 	initTextHooks();
 	initializeLayout();
 }
@@ -147,12 +152,14 @@ export function ExperimentalEmailEditor( {
 	isPreview = false,
 	contentRef = null,
 	config,
+	customSavePanel,
 }: {
 	postId: string;
 	postType: string;
 	isPreview?: boolean;
 	contentRef?: React.Ref< HTMLDivElement > | null;
 	config?: EmailEditorConfig;
+	customSavePanel?: React.ReactElement;
 } ) {
 	const [ isInitialized, setIsInitialized ] = useState( false );
 
@@ -191,6 +198,7 @@ export function ExperimentalEmailEditor( {
 			postType={ postType }
 			isPreview={ isPreview }
 			contentRef={ contentRef }
+			customSavePanel={ customSavePanel }
 		/>
 	);
 }

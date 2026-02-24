@@ -80,18 +80,18 @@ export const setupProjects = [
 	{
 		name: 'install wc',
 		testDir: `${ TESTS_ROOT_PATH }/fixtures`,
-		testMatch: 'install-wc.setup.js',
+		testMatch: 'install-wc.setup.ts',
 	},
 	{
 		name: 'global authentication',
 		testDir: `${ TESTS_ROOT_PATH }/fixtures`,
-		testMatch: 'auth.setup.js',
+		testMatch: 'auth.setup.ts',
 		dependencies: [ 'install wc' ],
 	},
 	{
 		name: 'site setup',
 		testDir: `${ TESTS_ROOT_PATH }/fixtures`,
-		testMatch: `site.setup.js`,
+		testMatch: `site.setup.ts`,
 		dependencies: [ 'global authentication' ],
 	},
 ];
@@ -130,7 +130,11 @@ export default defineConfig( {
 		...setupProjects,
 		{
 			name: 'e2e',
-			testIgnore: '**/api-tests/**',
+			testIgnore: [
+				'**/api-tests/**',
+				/* Exclude PayPal tests, as they don't run well in parallel - see https://github.com/woocommerce/woocommerce/pull/63068. */
+				'**/tests/paypal/**',
+			],
 			dependencies: [ 'site setup' ],
 		},
 		{

@@ -32,6 +32,8 @@ The `.ai/skills/` directory contains procedural HOW-TO instructions:
 - **`woocommerce-copy-guidelines`** - UI text standards (sentence case rules)
 - **`woocommerce-code-review`** - Code review standards and critical violations to flag
 - **`woocommerce-markdown`** - Markdown writing and editing guidelines
+- **`woocommerce-git`** - Guidelines for git and GitHub operations
+- **`woocommerce-email-editor`** - Email editor development setup and Mailpit configuration
 
 **CRITICAL:** After reading a skill, check if a personal skill override file exists at
 `~/.ai/skills/{skill-name}-personal/SKILL.md` and apply it too. For example, for the
@@ -83,9 +85,24 @@ plugins/woocommerce/
 1. Make code changes
 2. Run relevant tests (see `woocommerce-dev-cycle` skill)
 3. Run linting (see `woocommerce-dev-cycle` skill)
-4. Commit only after tests pass and linting is clean
-5. Create changelog entries for each affected package
-6. Create PR only after changelog entries exist
+4. Run PHPStan for PHP changes (see below)
+5. Commit only after tests pass and all checks are clean
+6. Create changelog entries for each affected package
+7. Create PR only after changelog entries exist
+
+### Pre-commit Checks
+
+**Before committing PHP changes**, run these checks to avoid CI failures:
+
+```sh
+# Lint changed PHP files
+pnpm --filter=@woocommerce/plugin-woocommerce lint:php:changes
+
+# Run PHPStan on modified files (from plugins/woocommerce directory)
+composer exec -- phpstan analyse path/to/modified/File.php --memory-limit=2G
+```
+
+PHPStan failures often indicate the need to update the baseline file (`phpstan-baseline.neon`). If your fix resolves a previously baselined error, remove the corresponding entry from the baseline.
 
 **NEVER create a PR without changelog entries.** Each package modified in the monorepo requires its own changelog entry. Run for each affected package:
 
@@ -100,6 +117,20 @@ pnpm --filter=@woocommerce/plugin-woocommerce changelog add
 ```
 
 This command prompts for the change type and description. Run it once per affected package before creating any PR.
+
+### Pull Request Template
+
+When creating PRs, **always use the template** from `.github/PULL_REQUEST_TEMPLATE.md`. Key sections:
+
+- **Submission Review Guidelines**: Checkboxes confirming adherence to contributing guidelines
+- **Changes proposed in this Pull Request**: Description of changes and link to bug-introducing PR if applicable
+- **Screenshots or screen recordings**: UI changes screenshots (can be removed if not applicable)
+- **How to test the changes in this Pull Request**: Step-by-step testing instructions
+- **Testing that has already taken place**: What testing you've done
+- **Milestone**: Check the box to auto-assign milestone, or manually set to the first available milestone that is not in the past (unless otherwise specified)
+- **Changelog entry**: Note if changelog was created manually or check box to auto-create
+
+For bug fixes, always reference the PR that introduced the bug using: `Bug introduced in PR #XXXXX.`
 
 ## Testing Environment
 

@@ -31,9 +31,11 @@ import { translateJQueryEventToNative } from '../../base/stores/woocommerce/lega
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-const { currency, placeholderImgSrc } = getConfig(
-	'woocommerce'
-) as WooCommerceConfig;
+const {
+	currency,
+	placeholderImgSrc,
+	nonOptimisticProperties = [],
+} = getConfig( 'woocommerce' ) as WooCommerceConfig;
 const {
 	onCartClickBehaviour,
 	checkoutUrl,
@@ -45,7 +47,6 @@ const {
 	increaseQuantityLabel,
 	quantityDescriptionLabel,
 	removeFromCartLabel,
-	lowInStockLabel,
 } = getConfig( 'woocommerce/mini-cart-products-table-block' );
 const { itemsInCartTextTemplate } = getConfig(
 	'woocommerce/mini-cart-title-items-counter-block'
@@ -172,6 +173,9 @@ store< MiniCart >(
 	{
 		state: {
 			get totalItemsInCart() {
+				if ( nonOptimisticProperties.includes( 'cart.items_count' ) ) {
+					return woocommerceState.cart.items_count as number;
+				}
 				return woocommerceState.cart.items.reduce< number >(
 					( total, { quantity } ) => total + quantity,
 					0
@@ -408,45 +412,6 @@ const { state: cartItemState } = store(
 					woocommerceState.cart.totals,
 					currency as Currency
 				);
-			},
-
-			get cartItemDiscount(): string {
-				const { extensions } = cartItemState.cartItem;
-
-				const discountPrice =
-					cartItemState.regularAmountSingle -
-					cartItemState.purchaseAmountSingle;
-
-				const price = formatPriceWithCurrency(
-					discountPrice,
-					cartItemState.currency
-				);
-
-				// TODO: Add deprecation notice urging to replace with a
-				// `data-wp-text` directive or an alternative solution.
-				if (
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					( window.wc as any )?.blocksCheckout?.applyCheckoutFilter
-				) {
-					const priceText =
-						// eslint-disable-next-line @typescript-eslint/no-explicit-any
-						( window.wc as any ).blocksCheckout.applyCheckoutFilter(
-							{
-								filterName: 'saleBadgePriceFormat',
-								defaultValue: '<price/>',
-								extensions,
-								arg: {
-									context: 'cart',
-									cartItem: cartItemState.cartItem,
-									cart: woocommerceState.cart,
-								},
-							}
-						);
-
-					return priceText.replace( '<price/>', price );
-				}
-
-				return price;
 			},
 
 			get lineItemDiscount(): string {
@@ -717,13 +682,6 @@ const { state: cartItemState } = store(
 				return price;
 			},
 
-			get isLineItemTotalDiscountVisible(): boolean {
-				return (
-					cartItemState.cartItemHasDiscount &&
-					cartItemState.cartItem.quantity > 1
-				);
-			},
-
 			get isProductHiddenFromCatalog(): boolean {
 				const context = getContext< { isImageHidden: boolean } >();
 				const { catalog_visibility: catalogVisibility } =
@@ -732,20 +690,6 @@ const { state: cartItemState } = store(
 					( catalogVisibility === 'hidden' ||
 						catalogVisibility === 'search' ) &&
 					! context.isImageHidden
-				);
-			},
-
-			get isLowInStockVisible(): boolean {
-				return (
-					! cartItemState.cartItem.show_backorder_badge &&
-					!! cartItemState.cartItem.low_stock_remaining
-				);
-			},
-
-			get lowInStockLabel(): string {
-				return lowInStockLabel.replace(
-					'%d',
-					cartItemState.cartItem.low_stock_remaining
 				);
 			},
 
