@@ -192,13 +192,11 @@ test.describe( 'Products > Product Images', () => {
 				)
 				.click();
 			await expect(
-				page
-					.getByRole( 'link', { name: 'Set product image' } )
-					.or(
-						page.getByRole( 'button', {
-							name: 'Set product image',
-						} )
-					)
+				page.getByRole( 'link', { name: 'Set product image' } ).or(
+					page.getByRole( 'button', {
+						name: 'Set product image',
+					} )
+				)
 			).toBeVisible();
 
 			await page
