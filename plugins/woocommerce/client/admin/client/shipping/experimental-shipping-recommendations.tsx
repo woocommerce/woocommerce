@@ -76,8 +76,10 @@ const ShippingRecommendations = () => {
 		};
 	}, [] );
 
+	const normalizedCountry = countryCode ?? '';
+
 	const extensionsForCountry =
-		COUNTRY_EXTENSIONS_MAP[ countryCode ?? '' ] ?? [];
+		COUNTRY_EXTENSIONS_MAP[ normalizedCountry ] ?? [];
 
 	const visibleExtensions = isSellingDigitalProductsOnly
 		? []
@@ -95,12 +97,12 @@ const ShippingRecommendations = () => {
 		if ( visibleExtensions.length > 0 && ! impressionFired.current ) {
 			recordEvent( 'shipping_partner_impression', {
 				context: 'settings',
-				country: countryCode,
+				country: normalizedCountry,
 				plugins: visiblePluginSlugs,
 			} );
 			impressionFired.current = true;
 		}
-	}, [ visibleExtensions.length, countryCode, visiblePluginSlugs ] );
+	}, [ visibleExtensions.length, normalizedCountry, visiblePluginSlugs ] );
 
 	if ( isSellingDigitalProductsOnly ) {
 		return <ShippingTour showShippingRecommendationsStep={ false } />;
@@ -120,7 +122,7 @@ const ShippingRecommendations = () => {
 					);
 					const trackingProps = {
 						context: 'settings' as const,
-						country: countryCode ?? '',
+						country: normalizedCountry,
 						plugins: visiblePluginSlugs,
 					};
 					switch ( ext ) {
