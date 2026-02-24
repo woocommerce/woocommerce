@@ -159,10 +159,11 @@ test.describe(
 			await setFilterValue( page, 'pre_http_request', {
 				response: {
 					code: 200,
+					message: 'OK',
 				},
-				body: {
+				body: JSON.stringify( {
 					public_id: 'test_public_id',
-				},
+				} ),
 			} );
 
 			const originalPayPalTitle = await page
