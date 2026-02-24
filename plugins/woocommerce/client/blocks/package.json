@@ -440,7 +440,6 @@
 				"node_modules/@woocommerce/email-editor/build-module",
 				"node_modules/@woocommerce/email-editor/build-style",
 				"node_modules/@woocommerce/email-editor/build-types",
-				"node_modules/@woocommerce/email-editor/assets",
 				"node_modules/@woocommerce/sanitize/build",
 				"node_modules/@woocommerce/sanitize/build-module",
 				"node_modules/@woocommerce/sanitize/build-style",

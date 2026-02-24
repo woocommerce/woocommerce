@@ -4,18 +4,16 @@
 import { __ } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
 import { Button, ExternalLink } from '@wordpress/components';
-import { Pill } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
 import './woocommerce-shipping-item.scss';
-import WooIcon from './woo-icon.svg';
 
-const WOOCOMMERCE_SHIPPING_PLUGIN_SLUG = 'woocommerce-shipping';
+const PACKLINK_PLUGIN_SLUG = 'packlink-pro-shipping';
 
-const WooCommerceShippingItem = ( {
+const PacklinkItem = ( {
 	isPluginInstalled,
 	onInstallClick,
 	onActivateClick,
@@ -30,19 +28,16 @@ const WooCommerceShippingItem = ( {
 
 	const handleClick = () => {
 		recordEvent( 'settings_shipping_recommendation_setup_click', {
-			plugin: WOOCOMMERCE_SHIPPING_PLUGIN_SLUG,
+			plugin: PACKLINK_PLUGIN_SLUG,
 			action: isPluginInstalled ? 'activate' : 'install',
 		} );
 		const action = isPluginInstalled ? onActivateClick : onInstallClick;
-		action( [ WOOCOMMERCE_SHIPPING_PLUGIN_SLUG ] ).then(
+		action( [ PACKLINK_PLUGIN_SLUG ] ).then(
 			() => {
 				createSuccessNotice(
 					isPluginInstalled
-						? __( 'WooCommerce Shipping activated!', 'woocommerce' )
-						: __(
-								'WooCommerce Shipping is installed!',
-								'woocommerce'
-						  ),
+						? __( 'Packlink PRO activated!', 'woocommerce' )
+						: __( 'Packlink PRO is installed!', 'woocommerce' ),
 					{}
 				);
 			},
@@ -55,22 +50,21 @@ const WooCommerceShippingItem = ( {
 			<div className="woocommerce-list__item-before">
 				<img
 					className="woocommerce-shipping-plugin-item__logo"
-					src={ WooIcon }
-					alt="WooCommerce Shipping Logo"
+					src="https://ps.w.org/packlink-pro-shipping/assets/icon-128x128.png"
+					alt=""
 				/>
 			</div>
 			<div className="woocommerce-list__item-text">
 				<span className="woocommerce-list__item-title">
-					{ __( 'WooCommerce Shipping', 'woocommerce' ) }
-					<Pill>{ __( 'Recommended', 'woocommerce' ) }</Pill>
+					{ __( 'Packlink PRO', 'woocommerce' ) }
 				</span>
 				<span className="woocommerce-list__item-content">
 					{ __(
-						'Print USPS, UPS, and DHL Express labels straight from your WooCommerce dashboard and save on shipping.',
+						'Leverage a multi-carrier shipping platform that automates order shipping and delivery, optimizes logistics, and offers pre-negotiated rates with carriers such as Royal Mail, Evri, UPS, DPD, Yodel and GlobalPost. Manage orders, print shipping labels individually or in bulk, track shipments in real time, and handle returns from a single dashboard.',
 						'woocommerce'
 					) }
 					<br />
-					<ExternalLink href="https://woocommerce.com/woocommerce-shipping/">
+					<ExternalLink href="https://woocommerce.com/products/packlink-pro/">
 						{ __( 'Learn more', 'woocommerce' ) }
 					</ExternalLink>
 				</span>
@@ -80,7 +74,7 @@ const WooCommerceShippingItem = ( {
 					variant={ isPluginInstalled ? 'primary' : 'secondary' }
 					onClick={ handleClick }
 					isBusy={ pluginsBeingSetup.includes(
-						WOOCOMMERCE_SHIPPING_PLUGIN_SLUG
+						PACKLINK_PLUGIN_SLUG
 					) }
 					disabled={ pluginsBeingSetup.length > 0 }
 				>
@@ -93,4 +87,4 @@ const WooCommerceShippingItem = ( {
 	);
 };
 
-export default WooCommerceShippingItem;
+export default PacklinkItem;
