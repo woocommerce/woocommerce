@@ -62,9 +62,7 @@ class WC_Product_Grouped extends WC_Product {
 	 * @return bool
 	 */
 	public function is_on_sale( $context = 'view' ) {
-		$child_ids = $this->get_children( $context );
-		_prime_post_caches( $child_ids );
-		$children = array_filter( array_map( 'wc_get_product', $child_ids ), 'wc_products_array_filter_visible_grouped' );
+		$children = $this->get_primed_visible_children( $context );
 		$on_sale  = false;
 
 		foreach ( $children as $child ) {
@@ -95,7 +93,7 @@ class WC_Product_Grouped extends WC_Product {
 	public function get_price_html( $price = '' ) {
 		$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
 		$child_prices     = array();
-		$children         = array_filter( array_map( 'wc_get_product', $this->get_children() ), 'wc_products_array_filter_visible_grouped' );
+		$children         = $this->get_primed_visible_children();
 
 		foreach ( $children as $child ) {
 			if ( '' !== $child->get_price() ) {
@@ -157,11 +155,7 @@ class WC_Product_Grouped extends WC_Product {
 	 * @return WC_Product[] Child products
 	 */
 	public function get_visible_children() {
-		$grouped_products = array_map( 'wc_get_product', $this->get_children() );
-		$grouped_products = array_filter( $grouped_products, 'wc_products_array_filter_visible_grouped' );
-		/** @var WC_Product[] $grouped_products */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
-
-		return $grouped_products;
+		return $this->get_primed_visible_children();
 	}
 
 	/**
@@ -171,7 +165,7 @@ class WC_Product_Grouped extends WC_Product {
 	 * @return string Minimum price or empty string if no children
 	 */
 	public function get_min_price() {
-		$children = array_filter( array_map( 'wc_get_product', $this->get_children() ), 'wc_products_array_filter_visible_grouped' );
+		$children = $this->get_primed_visible_children();
 		$prices   = array_map( 'wc_get_price_to_display', $children );
 
 		if ( empty( $prices ) ) {
@@ -188,7 +182,7 @@ class WC_Product_Grouped extends WC_Product {
 	 * @return string Maximum price or empty string if no children
 	 */
 	public function get_max_price() {
-		$children = array_filter( array_map( 'wc_get_product', $this->get_children() ), 'wc_products_array_filter_visible_grouped' );
+		$children = $this->get_primed_visible_children();
 		$prices   = array_map( 'wc_get_price_to_display', $children );
 
 		if ( empty( $prices ) ) {
@@ -196,6 +190,20 @@ class WC_Product_Grouped extends WC_Product {
 		}
 
 		return wc_format_decimal( max( $prices ) );
+	}
+
+	/**
+	 * Get visible child products with post caches primed to avoid extra queries.
+	 *
+	 * @param string $context What the value is for. Valid values are view and edit.
+	 * @return WC_Product[] Visible child products.
+	 */
+	private function get_primed_visible_children( $context = 'view' ) {
+		$child_ids = $this->get_children( $context );
+		_prime_post_caches( $child_ids );
+		$children = array_filter( array_map( 'wc_get_product', $child_ids ), 'wc_products_array_filter_visible_grouped' );
+		/** @var WC_Product[] $children */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
+		return $children;
 	}
 
 	/*
