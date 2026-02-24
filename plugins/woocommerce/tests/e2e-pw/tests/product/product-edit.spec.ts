@@ -144,7 +144,7 @@ test( 'can bulk edit products', async ( { page, products } ) => {
 
 		await page
 			.locator( '#bulk-action-selector-top' )
-			.selectOption( 'Edit' );
+			.selectOption( 'Bulk edit' );
 		await page.locator( '#doaction' ).click();
 
 		await expect(
@@ -235,7 +235,7 @@ test(
 
 			await page
 				.locator( '#bulk-action-selector-top' )
-				.selectOption( 'Edit' );
+				.selectOption( 'Bulk edit' );
 			await page.locator( '#doaction' ).click();
 
 			await expect( page.locator( '#bulk-titles-list li' ) ).toHaveCount(
@@ -290,7 +290,7 @@ test(
 
 			await page
 				.locator( '#bulk-action-selector-top' )
-				.selectOption( 'Edit' );
+				.selectOption( 'Bulk edit' );
 			await page.locator( '#doaction' ).click();
 
 			await page
@@ -331,7 +331,7 @@ test(
 
 			await page
 				.locator( '#bulk-action-selector-top' )
-				.selectOption( 'Edit' );
+				.selectOption( 'Bulk edit' );
 			await page.locator( '#doaction' ).click();
 
 			await page
@@ -399,7 +399,7 @@ test(
 
 			await page
 				.locator( '#bulk-action-selector-top' )
-				.selectOption( 'Edit' );
+				.selectOption( 'Bulk edit' );
 			await page.locator( '#doaction' ).click();
 
 			await page
