@@ -187,10 +187,11 @@ test.describe( `${ blockData.name } Block`, () => {
 			canvas: 'edit',
 		} );
 
+		// TODO: WP 7.0 compat - Custom HTML block content is inside an iframe
+		// since WP 7.0. Simplify when WP 7.0 is the minimum supported version.
 		const placeholderLocator =
 			wpCoreVersion >= 7
-				? // Custom HTML block content is inside an iframe since WP 7.0
-				  editor.canvas
+				? editor.canvas
 						.frameLocator( 'iframe' )
 						.getByText( 'placeholder' )
 				: editor.canvas.getByText( 'placeholder' );
@@ -231,10 +232,11 @@ test.describe( `${ blockData.name } Block`, () => {
 			canvas: 'edit',
 		} );
 
+		// TODO: WP 7.0 compat - Custom HTML block content is inside an iframe
+		// since WP 7.0. Simplify when WP 7.0 is the minimum supported version.
 		const placeholderLocator =
 			wpCoreVersion >= 7
-				? // Custom HTML block content is inside an iframe since WP 7.0
-				  editor.canvas
+				? editor.canvas
 						.frameLocator( 'iframe' )
 						.getByText( 'placeholder' )
 				: editor.canvas.getByText( 'placeholder' );
