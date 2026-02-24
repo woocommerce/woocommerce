@@ -10,6 +10,7 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import './woocommerce-shipping-item.scss';
+import type { ShippingPartnerTrackingProps } from './experimental-woocommerce-shipping-item';
 
 const PACKLINK_PLUGIN_SLUG = 'packlink-pro-shipping';
 
@@ -18,22 +19,35 @@ const PacklinkItem = ( {
 	onInstallClick,
 	onActivateClick,
 	pluginsBeingSetup,
+	tracking,
 }: {
 	isPluginInstalled: boolean;
 	pluginsBeingSetup: Array< string >;
 	onInstallClick: ( slugs: string[] ) => PromiseLike< void >;
 	onActivateClick: ( slugs: string[] ) => PromiseLike< void >;
+	tracking?: ShippingPartnerTrackingProps;
 } ) => {
 	const { createSuccessNotice } = useDispatch( 'core/notices' );
 
 	const handleClick = () => {
-		recordEvent( 'settings_shipping_recommendation_setup_click', {
-			plugin: PACKLINK_PLUGIN_SLUG,
-			action: isPluginInstalled ? 'activate' : 'install',
-		} );
+		const trackingBase = {
+			...( tracking ?? {} ),
+			selected_plugin: PACKLINK_PLUGIN_SLUG,
+		};
+
+		recordEvent( 'shipping_partner_click', trackingBase );
+
 		const action = isPluginInstalled ? onActivateClick : onInstallClick;
+		const eventName = isPluginInstalled
+			? 'shipping_partner_activate'
+			: 'shipping_partner_install';
+
 		action( [ PACKLINK_PLUGIN_SLUG ] ).then(
 			() => {
+				recordEvent( eventName, {
+					...trackingBase,
+					success: true,
+				} );
 				createSuccessNotice(
 					isPluginInstalled
 						? __( 'Packlink PRO activated!', 'woocommerce' )
@@ -41,7 +55,12 @@ const PacklinkItem = ( {
 					{}
 				);
 			},
-			() => {}
+			() => {
+				recordEvent( eventName, {
+					...trackingBase,
+					success: false,
+				} );
+			}
 		);
 	};
 

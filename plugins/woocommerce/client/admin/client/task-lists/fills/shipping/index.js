@@ -65,6 +65,7 @@ export class Shipping extends Component {
 
 		this.storeLocationCompleted = false;
 		this.shippingPartners = props.shippingPartners;
+		this.impressionFired = false;
 
 		this.jetpackAuthRedirectUrl = getAdminLink( 'admin.php?page=wc-admin' );
 	}
@@ -136,6 +137,21 @@ export class Shipping extends Component {
 		this.setState( { isPending: false, shippingZones } );
 	}
 
+	getShippingPartnerTrackingProps() {
+		const { countryCode, shippingPartners } = this.props;
+		const pluginSlugs = shippingPartners
+			.map( ( partner ) => partner.slug )
+			.filter(
+				( slug ) => typeof slug === 'string' && slug.trim().length > 0
+			)
+			.join( ',' );
+		return {
+			context: 'tasklist',
+			country: countryCode,
+			plugins: pluginSlugs,
+		};
+	}
+
 	componentDidUpdate( prevProps, prevState ) {
 		const { countryCode, countryName, settings } = this.props;
 		const {
@@ -154,6 +170,21 @@ export class Shipping extends Component {
 			this.setState( { isPending: true } );
 			if ( countryName ) {
 				this.fetchShippingZones();
+			}
+		}
+
+		if (
+			step === 'label_printing' &&
+			prevState.step !== 'label_printing' &&
+			! this.impressionFired
+		) {
+			const { shippingPartners } = this.props;
+			if ( shippingPartners.length > 0 ) {
+				recordEvent(
+					'shipping_partner_impression',
+					this.getShippingPartnerTrackingProps()
+				);
+				this.impressionFired = true;
 			}
 		}
 
@@ -350,26 +381,28 @@ export class Shipping extends Component {
 						<Plugins
 							onComplete={ ( _plugins, response ) => {
 								createNoticesFromResponse( response );
-								recordEvent(
-									'tasklist_shipping_label_printing',
-									{
-										install: true,
-										plugins_to_activate: pluginsToActivate,
-									}
-								);
+								recordEvent( 'shipping_partner_install', {
+									...this.getShippingPartnerTrackingProps(),
+									selected_plugin: pluginsToActivate[ 0 ],
+									success: true,
+								} );
 								this.completeStep();
 							} }
-							onError={ ( errors, response ) =>
-								createNoticesFromResponse( response )
-							}
+							onError={ ( errors, response ) => {
+								createNoticesFromResponse( response );
+								recordEvent( 'shipping_partner_install', {
+									...this.getShippingPartnerTrackingProps(),
+									selected_plugin: pluginsToActivate[ 0 ],
+									success: false,
+								} );
+							} }
+							onClick={ () => {
+								recordEvent( 'shipping_partner_click', {
+									...this.getShippingPartnerTrackingProps(),
+									selected_plugin: pluginsToActivate[ 0 ],
+								} );
+							} }
 							onSkip={ () => {
-								recordEvent(
-									'tasklist_shipping_label_printing',
-									{
-										install: false,
-										plugins_to_activate: pluginsToActivate,
-									}
-								);
 								invalidateResolutionForStoreSelector();
 								getHistory().push( getNewPath( {}, '/', {} ) );
 								onComplete();
@@ -484,11 +517,12 @@ export class Shipping extends Component {
 																	response
 																);
 																recordEvent(
-																	'tasklist_shipping_label_printing',
+																	'shipping_partner_install',
 																	{
-																		install: true,
-																		plugins_to_activate:
-																			pluginsForPartner,
+																		...this.getShippingPartnerTrackingProps(),
+																		selected_plugin:
+																			shippingMethod.slug,
+																		success: true,
 																	}
 																);
 																invalidateResolutionForStoreSelector();
@@ -497,11 +531,30 @@ export class Shipping extends Component {
 															onError={ (
 																errors,
 																response
-															) =>
+															) => {
 																createNoticesFromResponse(
 																	response
-																)
-															}
+																);
+																recordEvent(
+																	'shipping_partner_install',
+																	{
+																		...this.getShippingPartnerTrackingProps(),
+																		selected_plugin:
+																			shippingMethod.slug,
+																		success: false,
+																	}
+																);
+															} }
+															onClick={ () => {
+																recordEvent(
+																	'shipping_partner_click',
+																	{
+																		...this.getShippingPartnerTrackingProps(),
+																		selected_plugin:
+																			shippingMethod.slug,
+																	}
+																);
+															} }
 															installText={ __(
 																'Install and enable',
 																'woocommerce'
@@ -567,21 +620,44 @@ export class Shipping extends Component {
 												response
 											);
 											recordEvent(
-												'tasklist_shipping_label_printing',
+												'shipping_partner_install',
 												{
-													install: true,
-													plugins_to_activate:
-														pluginsToActivate,
+													...this.getShippingPartnerTrackingProps(),
+													selected_plugin:
+														pluginsToPromote[ 0 ]
+															?.slug,
+													success: true,
 												}
 											);
 											invalidateResolutionForStoreSelector();
 											this.completeStep();
 										} }
-										onError={ ( errors, response ) =>
+										onError={ ( errors, response ) => {
 											createNoticesFromResponse(
 												response
-											)
-										}
+											);
+											recordEvent(
+												'shipping_partner_install',
+												{
+													...this.getShippingPartnerTrackingProps(),
+													selected_plugin:
+														pluginsToPromote[ 0 ]
+															?.slug,
+													success: false,
+												}
+											);
+										} }
+										onClick={ () => {
+											recordEvent(
+												'shipping_partner_click',
+												{
+													...this.getShippingPartnerTrackingProps(),
+													selected_plugin:
+														pluginsToPromote[ 0 ]
+															?.slug,
+												}
+											);
+										} }
 										onSkip={
 											onShippingPluginInstalltionSkip
 										}

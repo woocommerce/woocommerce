@@ -2,11 +2,13 @@
  * External dependencies
  */
 import { useSelect } from '@wordpress/data';
+import { useEffect, useRef } from '@wordpress/element';
 import {
 	pluginsStore,
 	settingsStore,
 	onboardingStore,
 } from '@woocommerce/data';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -74,16 +76,35 @@ const ShippingRecommendations = () => {
 		};
 	}, [] );
 
-	if ( isSellingDigitalProductsOnly ) {
-		return <ShippingTour showShippingRecommendationsStep={ false } />;
-	}
-
 	const extensionsForCountry =
 		COUNTRY_EXTENSIONS_MAP[ countryCode ?? '' ] ?? [];
 
-	const visibleExtensions = extensionsForCountry.filter(
-		( ext ) => ! activePlugins.includes( EXTENSION_PLUGIN_SLUGS[ ext ] )
-	);
+	const visibleExtensions = isSellingDigitalProductsOnly
+		? []
+		: extensionsForCountry.filter(
+				( ext ) =>
+					! activePlugins.includes( EXTENSION_PLUGIN_SLUGS[ ext ] )
+		  );
+
+	const visiblePluginSlugs = visibleExtensions
+		.map( ( ext ) => EXTENSION_PLUGIN_SLUGS[ ext ] )
+		.join( ',' );
+
+	const impressionFired = useRef( false );
+	useEffect( () => {
+		if ( visibleExtensions.length > 0 && ! impressionFired.current ) {
+			recordEvent( 'shipping_partner_impression', {
+				context: 'settings',
+				country: countryCode,
+				plugins: visiblePluginSlugs,
+			} );
+			impressionFired.current = true;
+		}
+	}, [ visibleExtensions.length, countryCode, visiblePluginSlugs ] );
+
+	if ( isSellingDigitalProductsOnly ) {
+		return <ShippingTour showShippingRecommendationsStep={ false } />;
+	}
 
 	if ( visibleExtensions.length === 0 ) {
 		return <ShippingTour showShippingRecommendationsStep={ false } />;
@@ -97,6 +118,11 @@ const ShippingRecommendations = () => {
 					const isPluginInstalled = installedPlugins.includes(
 						EXTENSION_PLUGIN_SLUGS[ ext ]
 					);
+					const trackingProps = {
+						context: 'settings' as const,
+						country: countryCode ?? '',
+						plugins: visiblePluginSlugs,
+					};
 					switch ( ext ) {
 						case 'woocommerce-shipping':
 							return (
@@ -106,6 +132,7 @@ const ShippingRecommendations = () => {
 									pluginsBeingSetup={ pluginsBeingSetup }
 									onInstallClick={ handleInstall }
 									onActivateClick={ handleActivate }
+									tracking={ trackingProps }
 								/>
 							);
 						case 'shipstation':
@@ -116,6 +143,7 @@ const ShippingRecommendations = () => {
 									pluginsBeingSetup={ pluginsBeingSetup }
 									onInstallClick={ handleInstall }
 									onActivateClick={ handleActivate }
+									tracking={ trackingProps }
 								/>
 							);
 						case 'packlink':
@@ -126,6 +154,7 @@ const ShippingRecommendations = () => {
 									pluginsBeingSetup={ pluginsBeingSetup }
 									onInstallClick={ handleInstall }
 									onActivateClick={ handleActivate }
+									tracking={ trackingProps }
 								/>
 							);
 						default:
