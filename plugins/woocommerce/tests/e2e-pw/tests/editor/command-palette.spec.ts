@@ -36,8 +36,7 @@ const clickOnCommandPaletteOption = async ( {
 
 	// Click on the relevant option.
 	const option = page.getByRole( 'option', {
-		name: `${ optionName } Action`,
-		exact: true,
+		name: new RegExp( `^${ optionName }( Action)?$` ),
 	} );
 	await expect( option ).toBeVisible();
 	option.click();

@@ -182,6 +182,11 @@ test.describe( 'Products > Product Images', () => {
 		await test.step( 'Remove product image', async () => {
 			await page
 				.getByRole( 'link', { name: 'Remove product image' } )
+				.or(
+					page.getByRole( 'button', {
+						name: 'Remove product image',
+					} )
+				)
 				.click();
 			await expect(
 				page
