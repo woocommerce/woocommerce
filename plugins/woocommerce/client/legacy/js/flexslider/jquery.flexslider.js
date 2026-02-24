@@ -106,7 +106,7 @@
         slider.started = false;
         slider.startTimeout = null;
         // TOUCH/USECSS:
-        slider.transforms = slider.transitions = !slider.vars.video && !fade && slider.vars.useCSS; // TODO: Delete "slider.transitions", this variable name is only kept for backwards compatibility
+        slider.transforms = slider.transitions = !slider.vars.video && !fade && slider.vars.useCSS;
         if (slider.transforms) slider.prop = "transform";
         slider.isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1;
         slider.ensureAnimationEnd = '';
