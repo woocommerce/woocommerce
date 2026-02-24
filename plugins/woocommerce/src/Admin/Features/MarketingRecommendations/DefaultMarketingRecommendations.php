@@ -78,7 +78,7 @@ class DefaultMarketingRecommendations {
 				'description'    => __( 'Seamlessly sync your products to find new customers using Reddit Ads.', 'woocommerce' ),
 				'url'            => "https://woocommerce.com/products/reddit/{$utm_string}",
 				'direct_install' => true,
-				'icon'           => "{$icon_dir_url}/reddit.svg",
+				'icon'           => WC_ADMIN_IMAGES_FOLDER_URL . '/core-profiler/logo-reddit.svg',
 				'product'        => 'reddit-for-woocommerce',
 				'plugin'         => 'reddit-for-woocommerce/reddit-for-woocommerce.php',
 				'categories'     => array(
@@ -112,7 +112,7 @@ class DefaultMarketingRecommendations {
 				'description'    => __( 'Find new customers by reaching an untapped audience using Snapchat for WooCommerce.', 'woocommerce' ),
 				'url'            => "https://woocommerce.com/products/snapchat/{$utm_string}",
 				'direct_install' => true,
-				'icon'           => "{$icon_dir_url}/snapchat.svg",
+				'icon'           => WC_ADMIN_IMAGES_FOLDER_URL . '/core-profiler/logo-snapchat.svg',
 				'product'        => 'snapchat-for-woocommerce',
 				'plugin'         => 'snapchat-for-woocommerce/snapchat-for-woocommerce.php',
 				'categories'     => array(
