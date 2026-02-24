@@ -214,6 +214,118 @@ describe( 'Shipping', () => {
 		} );
 	} );
 
+	describe( 'recordInstallAndActivateEvents', () => {
+		const shippingPartners = [
+			{
+				id: 'woocommerce-shipping',
+				name: 'WooCommerce Shipping',
+				slug: 'woocommerce-shipping',
+			},
+		];
+
+		it( 'should fire both install and activate success events on success', () => {
+			( recordEvent as jest.Mock ).mockClear();
+
+			const component = new Shipping( {
+				...props,
+				shippingPartners,
+				installedPlugins: [],
+			} );
+
+			component.recordInstallAndActivateEvents(
+				'woocommerce-shipping',
+				true
+			);
+
+			expect( recordEvent ).toHaveBeenCalledWith(
+				'shipping_partner_install',
+				{
+					context: 'tasklist',
+					country: 'US',
+					plugins: 'woocommerce-shipping',
+					selected_plugin: 'woocommerce-shipping',
+					success: true,
+				}
+			);
+			expect( recordEvent ).toHaveBeenCalledWith(
+				'shipping_partner_activate',
+				{
+					context: 'tasklist',
+					country: 'US',
+					plugins: 'woocommerce-shipping',
+					selected_plugin: 'woocommerce-shipping',
+					success: true,
+				}
+			);
+		} );
+
+		it( 'should fire install failure only when plugin was not installed', () => {
+			( recordEvent as jest.Mock ).mockClear();
+
+			const component = new Shipping( {
+				...props,
+				shippingPartners,
+				installedPlugins: [],
+			} );
+
+			component.recordInstallAndActivateEvents(
+				'woocommerce-shipping',
+				false
+			);
+
+			expect( recordEvent ).toHaveBeenCalledWith(
+				'shipping_partner_install',
+				{
+					context: 'tasklist',
+					country: 'US',
+					plugins: 'woocommerce-shipping',
+					selected_plugin: 'woocommerce-shipping',
+					success: false,
+				}
+			);
+			expect( recordEvent ).not.toHaveBeenCalledWith(
+				'shipping_partner_activate',
+				expect.anything()
+			);
+		} );
+
+		it( 'should fire install success and activate failure when plugin was installed but activation failed', () => {
+			( recordEvent as jest.Mock ).mockClear();
+
+			const component = new Shipping( {
+				...props,
+				shippingPartners,
+				installedPlugins: [ 'woocommerce-shipping' ],
+			} );
+
+			component.recordInstallAndActivateEvents(
+				'woocommerce-shipping',
+				false
+			);
+
+			expect( recordEvent ).toHaveBeenCalledWith(
+				'shipping_partner_install',
+				{
+					context: 'tasklist',
+					country: 'US',
+					plugins: 'woocommerce-shipping',
+					selected_plugin: 'woocommerce-shipping',
+					success: true,
+				}
+			);
+			expect( recordEvent ).toHaveBeenCalledWith(
+				'shipping_partner_activate',
+				{
+					context: 'tasklist',
+					country: 'US',
+					plugins: 'woocommerce-shipping',
+					selected_plugin: 'woocommerce-shipping',
+					success: false,
+				}
+			);
+		} );
+	} );
+
 	describe( 'getShippingPartnerTrackingProps', () => {
 		it( 'should return correct tracking props', () => {
 			const shippingPartners = [

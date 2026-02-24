@@ -152,6 +152,43 @@ export class Shipping extends Component {
 		};
 	}
 
+	recordInstallAndActivateEvents( selectedPlugin, success ) {
+		const trackingBase = {
+			...this.getShippingPartnerTrackingProps(),
+			selected_plugin: selectedPlugin,
+		};
+
+		if ( success ) {
+			recordEvent( 'shipping_partner_install', {
+				...trackingBase,
+				success: true,
+			} );
+			recordEvent( 'shipping_partner_activate', {
+				...trackingBase,
+				success: true,
+			} );
+		} else {
+			const { installedPlugins } = this.props;
+			const wasInstalled = installedPlugins.includes( selectedPlugin );
+
+			if ( wasInstalled ) {
+				recordEvent( 'shipping_partner_install', {
+					...trackingBase,
+					success: true,
+				} );
+				recordEvent( 'shipping_partner_activate', {
+					...trackingBase,
+					success: false,
+				} );
+			} else {
+				recordEvent( 'shipping_partner_install', {
+					...trackingBase,
+					success: false,
+				} );
+			}
+		}
+	}
+
 	componentDidUpdate( prevProps, prevState ) {
 		const { countryCode, countryName, settings } = this.props;
 		const {
@@ -381,20 +418,18 @@ export class Shipping extends Component {
 						<Plugins
 							onComplete={ ( _plugins, response ) => {
 								createNoticesFromResponse( response );
-								recordEvent( 'shipping_partner_install', {
-									...this.getShippingPartnerTrackingProps(),
-									selected_plugin: pluginsToActivate[ 0 ],
-									success: true,
-								} );
+								this.recordInstallAndActivateEvents(
+									pluginsToActivate[ 0 ],
+									true
+								);
 								this.completeStep();
 							} }
 							onError={ ( errors, response ) => {
 								createNoticesFromResponse( response );
-								recordEvent( 'shipping_partner_install', {
-									...this.getShippingPartnerTrackingProps(),
-									selected_plugin: pluginsToActivate[ 0 ],
-									success: false,
-								} );
+								this.recordInstallAndActivateEvents(
+									pluginsToActivate[ 0 ],
+									false
+								);
 							} }
 							onClick={ () => {
 								recordEvent( 'shipping_partner_click', {
@@ -516,14 +551,9 @@ export class Shipping extends Component {
 																createNoticesFromResponse(
 																	response
 																);
-																recordEvent(
-																	'shipping_partner_install',
-																	{
-																		...this.getShippingPartnerTrackingProps(),
-																		selected_plugin:
-																			shippingMethod.slug,
-																		success: true,
-																	}
+																this.recordInstallAndActivateEvents(
+																	shippingMethod.slug,
+																	true
 																);
 																invalidateResolutionForStoreSelector();
 																this.completeStep();
@@ -535,14 +565,9 @@ export class Shipping extends Component {
 																createNoticesFromResponse(
 																	response
 																);
-																recordEvent(
-																	'shipping_partner_install',
-																	{
-																		...this.getShippingPartnerTrackingProps(),
-																		selected_plugin:
-																			shippingMethod.slug,
-																		success: false,
-																	}
+																this.recordInstallAndActivateEvents(
+																	shippingMethod.slug,
+																	false
 																);
 															} }
 															onClick={ () => {
@@ -619,15 +644,9 @@ export class Shipping extends Component {
 											createNoticesFromResponse(
 												response
 											);
-											recordEvent(
-												'shipping_partner_install',
-												{
-													...this.getShippingPartnerTrackingProps(),
-													selected_plugin:
-														pluginsToPromote[ 0 ]
-															?.slug,
-													success: true,
-												}
+											this.recordInstallAndActivateEvents(
+												pluginsToPromote[ 0 ]?.slug,
+												true
 											);
 											invalidateResolutionForStoreSelector();
 											this.completeStep();
@@ -636,15 +655,9 @@ export class Shipping extends Component {
 											createNoticesFromResponse(
 												response
 											);
-											recordEvent(
-												'shipping_partner_install',
-												{
-													...this.getShippingPartnerTrackingProps(),
-													selected_plugin:
-														pluginsToPromote[ 0 ]
-															?.slug,
-													success: false,
-												}
+											this.recordInstallAndActivateEvents(
+												pluginsToPromote[ 0 ]?.slug,
+												false
 											);
 										} }
 										onClick={ () => {
@@ -763,7 +776,8 @@ const ShippingWrapper = compose(
 	withSelect( ( select ) => {
 		const { getSettings, isUpdateSettingsRequesting } =
 			select( settingsStore );
-		const { getActivePlugins, isJetpackConnected } = select( pluginsStore );
+		const { getActivePlugins, getInstalledPlugins, isJetpackConnected } =
+			select( pluginsStore );
 		const { getCountry } = select( COUNTRIES_STORE_NAME );
 
 		const { general: settings = {} } = getSettings( 'general' );
@@ -777,6 +791,7 @@ const ShippingWrapper = compose(
 		const country = countryCode ? getCountry( countryCode ) : null;
 		const countryName = country ? country.name : null;
 		const activePlugins = getActivePlugins();
+		const installedPlugins = getInstalledPlugins();
 
 		return {
 			countryCode,
@@ -784,6 +799,7 @@ const ShippingWrapper = compose(
 			isUpdateSettingsRequesting: isUpdateSettingsRequesting( 'general' ),
 			settings,
 			activePlugins,
+			installedPlugins,
 			isJetpackConnected: isJetpackConnected(),
 			shippingPartners,
 		};
