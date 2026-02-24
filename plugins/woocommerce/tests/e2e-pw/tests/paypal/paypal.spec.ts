@@ -124,6 +124,21 @@ test.describe(
 
 			const paypalDiv = await waitForPayPalToLoad( page );
 
+			// Ensure PayPal Standard is enabled before trying to open the Manage dialog.
+			const enableLink = paypalDiv.getByRole( 'link', {
+				name: 'Enable',
+			} );
+
+			// eslint-disable-next-line playwright/no-conditional-in-test
+			if ( await enableLink.isVisible() ) {
+				await enableLink.click();
+				await expect(
+					paypalDiv
+						.getByText( 'Active' )
+						.or( paypalDiv.getByText( 'Test account' ) )
+				).toBeVisible( visibilityOptions );
+			}
+
 			await paypalDiv
 				.getByRole( 'button', {
 					name: 'Manage',
