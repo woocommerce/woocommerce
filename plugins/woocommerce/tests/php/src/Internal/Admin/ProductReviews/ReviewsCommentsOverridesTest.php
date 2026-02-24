@@ -53,10 +53,7 @@ class ReviewsCommentsOverridesTest extends WC_Unit_Test_Case {
 	public function test_display_notices( string $current_screen_base, bool $should_display_notices ) : void {
 		global $current_screen;
 
-		$screen = new \stdClass();
-		$screen->base = $current_screen_base;
-
-		$current_screen = $screen; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$current_screen = \WP_Screen::get( $current_screen_base ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
 		// phpcs:disable Squiz.Commenting
 		$instance = new class() extends ReviewsCommentsOverrides {
