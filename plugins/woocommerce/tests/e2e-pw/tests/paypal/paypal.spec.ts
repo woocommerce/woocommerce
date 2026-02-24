@@ -12,7 +12,7 @@ import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { setFilterValue } from '../../utils/filters';
 
 test.describe(
-	'PayPal Standard Enablement',
+	'PayPal Standard enablement and Jetpack onboarding',
 	{ tag: [ tags.PAYMENTS, tags.PAYPAL ] },
 	() => {
 		test.use( { storageState: ADMIN_STATE_PATH } );
