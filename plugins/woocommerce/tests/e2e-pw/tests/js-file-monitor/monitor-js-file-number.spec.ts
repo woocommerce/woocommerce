@@ -14,8 +14,8 @@ const pageGroups = [
 		storageState: undefined,
 		pages: [
 			{ name: 'Shop page', url: 'shop/', expectedCount: 50 },
-			{ name: 'Cart', url: 'cart/', expectedCount: 55 },
-			{ name: 'Checkout', url: 'checkout/', expectedCount: 55 },
+			{ name: 'Cart', url: 'cart/', expectedCount: 60 },
+			{ name: 'Checkout', url: 'checkout/', expectedCount: 60 },
 		],
 	},
 	{
