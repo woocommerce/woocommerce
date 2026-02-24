@@ -93,30 +93,30 @@ class WC_Tests_Payment_Gateway_COD extends WC_Unit_Test_Case {
 		$gateway->enabled = 'no';
 
 		$cart = WC()->cart;
-		WC()->cart = new class() {
-			/**
-			 * Number of times needs_shipping() is called.
-			 *
-			 * @var int
-			 */
-			public $needs_shipping_call_count = 0;
-
-			/**
-			 * Track calls to needs_shipping().
-			 *
-			 * @return bool
-			 */
-			public function needs_shipping() {
-				++$this->needs_shipping_call_count;
-				return false;
-			}
-		};
-
 		$has_order_pay_query_var = array_key_exists( 'order-pay', $GLOBALS['wp']->query_vars );
 		$order_pay_query_var     = $has_order_pay_query_var ? $GLOBALS['wp']->query_vars['order-pay'] : null;
-		unset( $GLOBALS['wp']->query_vars['order-pay'] );
 
 		try {
+			WC()->cart = new class() {
+				/**
+				 * Number of times needs_shipping() is called.
+				 *
+				 * @var int
+				 */
+				public $needs_shipping_call_count = 0;
+
+				/**
+				 * Track calls to needs_shipping().
+				 *
+				 * @return bool
+				 */
+				public function needs_shipping() {
+					++$this->needs_shipping_call_count;
+					return false;
+				}
+			};
+			unset( $GLOBALS['wp']->query_vars['order-pay'] );
+
 			$this->assertFalse( $gateway->is_available() );
 			$this->assertSame( 0, WC()->cart->needs_shipping_call_count );
 		} finally {

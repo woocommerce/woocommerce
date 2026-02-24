@@ -149,6 +149,7 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 	/**
 	 * Check If The Gateway Is Available For Use.
 	 *
+	 * @since 10.7.0 Added early return when gateway is disabled.
 	 * @return bool
 	 */
 	public function is_available() {

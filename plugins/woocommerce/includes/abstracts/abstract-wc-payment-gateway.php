@@ -340,6 +340,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	/**
 	 * Check if the gateway is available for use.
 	 *
+	 * @since 10.7.0 Added early return when gateway is disabled.
 	 * @return bool
 	 */
 	public function is_available() {
