@@ -10,7 +10,8 @@ namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Dom_Document_Helper;
-use WP_Style_Engine;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
 
 /**
  * Renders a group block.
@@ -25,16 +26,9 @@ class Group extends Abstract_Block_Renderer {
 	 * @return string
 	 */
 	protected function render_content( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
-		$content      = '';
-		$inner_blocks = $parsed_block['innerBlocks'] ?? array();
-
-		foreach ( $inner_blocks as $block ) {
-			$content .= render_block( $block );
-		}
-
 		return str_replace(
 			'{group_content}',
-			$content,
+			$this->get_inner_content( $block_content ),
 			$this->get_block_wrapper( $block_content, $parsed_block, $rendering_context )
 		);
 	}
@@ -59,48 +53,32 @@ class Group extends Abstract_Block_Renderer {
 			)
 		);
 
-		// Layout, background, borders need to be on the outer table element.
-		$table_styles = $this->get_styles_from_block(
-			array(
-				'color'      => array_filter(
-					array(
-						'background' => $block_attributes['backgroundColor'] ? $rendering_context->translate_slug_to_color( $block_attributes['backgroundColor'] ) : null,
-						'text'       => $block_attributes['textColor'] ? $rendering_context->translate_slug_to_color( $block_attributes['textColor'] ) : null,
-						'border'     => $block_attributes['borderColor'] ? $rendering_context->translate_slug_to_color( $block_attributes['borderColor'] ) : null,
-					)
-				),
-				'background' => $block_attributes['style']['background'] ?? array(),
-				'border'     => $block_attributes['style']['border'] ?? array(),
-				'spacing'    => array( 'padding' => $block_attributes['style']['spacing']['margin'] ?? array() ),
+		$table_styles = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'border', 'background', 'background-color', 'color', 'text-align' ) );
+		$table_styles = Styles_Helper::extend_block_styles(
+			$table_styles,
+			array_filter(
+				array(
+					'border-collapse' => 'separate',
+					'background-size' => $table_styles['background-size'] ?? 'cover',
+				)
 			)
-		)['declarations'];
-
-		$table_styles['border-collapse'] = 'separate'; // Needed for the border radius to work.
+		);
 
 		// Padding properties need to be added to the table cell.
-		$cell_styles = $this->get_styles_from_block(
-			array(
-				'spacing' => array( 'padding' => $block_attributes['style']['spacing']['padding'] ?? array() ),
-			)
-		)['declarations'];
+		$cell_styles = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'padding' ) );
 
-		$table_styles['background-size'] = empty( $table_styles['background-size'] ) ? 'cover' : $table_styles['background-size'];
-		$width                           = $parsed_block['email_attrs']['width'] ?? '100%';
-
-		return sprintf(
-			'<table class="email-block-group %3$s" style="%1$s" width="100%%" border="0" cellpadding="0" cellspacing="0" role="presentation">
-        <tbody>
-          <tr>
-            <td class="email-block-group-content" style="%2$s" width="%4$s">
-              {group_content}
-            </td>
-          </tr>
-        </tbody>
-      </table>',
-			esc_attr( WP_Style_Engine::compile_css( $table_styles, '' ) ),
-			esc_attr( WP_Style_Engine::compile_css( $cell_styles, '' ) ),
-			esc_attr( $original_classname ),
-			esc_attr( $width ),
+		$table_attrs = array(
+			'class' => 'email-block-group ' . $original_classname,
+			'style' => $table_styles['css'],
+			'width' => '100%',
 		);
+
+		$cell_attrs = array(
+			'class' => 'email-block-group-content',
+			'style' => $cell_styles['css'],
+			'width' => $parsed_block['email_attrs']['width'] ?? '100%',
+		);
+
+		return Table_Wrapper_Helper::render_table_wrapper( '{group_content}', $table_attrs, $cell_attrs );
 	}
 }

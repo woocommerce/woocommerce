@@ -50,6 +50,8 @@ class CustomerHelper {
 
 	/**
 	 * Creates a customer in the tests DB.
+	 *
+	 * @return WC_Customer
 	 */
 	public static function create_customer( $username = 'testcustomer', $password = 'hunter2', $email = 'test@woo.local' ) {
 		$customer = new WC_Customer();

@@ -37,23 +37,32 @@ const buildCollectionDataQuery = (
 		).asc( [ 'taxonomy', 'query_type' ] );
 	}
 
+	if ( Array.isArray( collectionDataQueryState.calculate_taxonomy_counts ) ) {
+		query.calculate_taxonomy_counts =
+			collectionDataQueryState.calculate_taxonomy_counts;
+	}
+
 	return query;
 };
 
 interface UseCollectionDataProps {
-	queryAttribute?: {
-		taxonomy: string;
-		queryType: string;
-	};
-	queryPrices?: boolean;
-	queryStock?: boolean;
-	queryRating?: boolean;
+	queryAttribute?:
+		| {
+				taxonomy: string;
+				queryType: string;
+		  }
+		| undefined;
+	queryTaxonomy?: string | undefined;
+	queryPrices?: boolean | undefined;
+	queryStock?: boolean | undefined;
+	queryRating?: boolean | undefined;
 	queryState: Record< string, unknown >;
 	isEditor?: boolean;
 }
 
 export const useCollectionData = ( {
 	queryAttribute,
+	queryTaxonomy,
 	queryPrices,
 	queryStock,
 	queryRating,
@@ -66,6 +75,10 @@ export const useCollectionData = ( {
 	const [ collectionDataQueryState ] = useQueryStateByContext( context );
 	const [ calculateAttributesQueryState, setCalculateAttributesQueryState ] =
 		useQueryStateByKey( 'calculate_attribute_counts', [], context );
+	const [
+		calculateTaxonomyCountsQueryState,
+		setCalculateTaxonomyCountsQueryState,
+	] = useQueryStateByKey( 'calculate_taxonomy_counts', [], context );
 	const [ calculatePriceRangeQueryState, setCalculatePriceRangeQueryState ] =
 		useQueryStateByKey( 'calculate_price_range', null, context );
 	const [
@@ -76,6 +89,7 @@ export const useCollectionData = ( {
 		useQueryStateByKey( 'calculate_rating_counts', null, context );
 
 	const currentQueryAttribute = useShallowEqual( queryAttribute || {} );
+	const currentQueryTaxonomy = useShallowEqual( queryTaxonomy );
 	const currentQueryPrices = useShallowEqual( queryPrices );
 	const currentQueryStock = useShallowEqual( queryStock );
 	const currentQueryRating = useShallowEqual( queryRating );
@@ -105,6 +119,22 @@ export const useCollectionData = ( {
 		currentQueryAttribute,
 		calculateAttributesQueryState,
 		setCalculateAttributesQueryState,
+	] );
+
+	useEffect( () => {
+		if (
+			currentQueryTaxonomy &&
+			! calculateTaxonomyCountsQueryState.includes( currentQueryTaxonomy )
+		) {
+			setCalculateTaxonomyCountsQueryState( [
+				...calculateTaxonomyCountsQueryState,
+				currentQueryTaxonomy,
+			] );
+		}
+	}, [
+		currentQueryTaxonomy,
+		calculateTaxonomyCountsQueryState,
+		setCalculateTaxonomyCountsQueryState,
 	] );
 
 	useEffect( () => {

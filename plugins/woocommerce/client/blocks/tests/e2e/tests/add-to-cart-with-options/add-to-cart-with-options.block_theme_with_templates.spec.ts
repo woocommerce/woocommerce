@@ -35,7 +35,7 @@ test.describe( `Add to Cart + Options Block (block theme with templates)`, () =>
 		admin,
 	} ) => {
 		await admin.visitSiteEditor( {
-			postId: 'woocommerce/woocommerce//single-product',
+			postId: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//single-product`,
 			postType: 'wp_template',
 			canvas: 'edit',
 		} );

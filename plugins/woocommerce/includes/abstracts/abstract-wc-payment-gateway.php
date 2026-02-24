@@ -11,9 +11,8 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
+use Automattic\WooCommerce\Internal\Admin\Settings\Utils as SettingsUtils;
 use Automattic\WooCommerce\Internal\Utilities\HtmlSanitizer;
-use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -37,6 +36,22 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * @var string
 	 */
 	public $order_button_text;
+
+	/**
+	 * Whether the gateway provides a custom place order button.
+	 *
+	 * When true, the default "Place order" button will be hidden on page load
+	 * if this gateway is pre-selected. The gateway must register its custom
+	 * button via JavaScript using wc.customPlaceOrderButton.register().
+	 *
+	 * Note: This property is purely for UX (preventing flash of default button).
+	 * It does NOT affect security or functionality - the JS registration is what
+	 * actually enables the custom button.
+	 *
+	 * @since 10.6.0
+	 * @var bool
+	 */
+	public $has_custom_place_order_button = false;
 
 	/**
 	 * Yes or no based on whether the method is enabled.
@@ -210,12 +225,17 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 		$offline_payment_gateways = array( WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID );
 		$is_offline_gateway       = in_array( $this->id, $offline_payment_gateways, true );
 
-		$return_url = admin_url( 'admin.php?page=wc-settings&tab=checkout' );
+		$return_path = null;
 		if ( $is_offline_gateway ) {
-			$return_url = add_query_arg( 'section', 'offline', $return_url );
+			// For offline gateways, we return to the offline settings section which is a Reactified page,
+			// hence the use of `path` parameter.
+			$offline_section = class_exists( 'WC_Settings_Payment_Gateways' )
+				? WC_Settings_Payment_Gateways::OFFLINE_SECTION_NAME
+				: 'offline';
+			$return_path     = '/' . $offline_section;
 		}
 
-		wc_back_header( $this->get_method_title(), __( 'Return to payments', 'woocommerce' ), $return_url );
+		wc_back_header( $this->get_method_title(), esc_html__( 'Return to payments', 'woocommerce' ), SettingsUtils::wc_payments_settings_url( $return_path ) );
 
 		echo wp_kses_post( wpautop( $this->get_method_description() ) );
 		parent::admin_options();

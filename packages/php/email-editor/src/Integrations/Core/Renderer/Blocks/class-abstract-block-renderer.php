@@ -10,6 +10,9 @@ namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Block_Renderer;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Dom_Document_Helper;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 use WP_Style_Engine;
 
 /**
@@ -24,15 +27,7 @@ abstract class Abstract_Block_Renderer implements Block_Renderer {
 	 * @return array
 	 */
 	protected function get_styles_from_block( array $block_styles, $skip_convert_vars = false ) {
-		$styles = wp_style_engine_get_styles( $block_styles, array( 'convert_vars_to_classnames' => $skip_convert_vars ) );
-		return wp_parse_args(
-			$styles,
-			array(
-				'css'          => '',
-				'declarations' => array(),
-				'classnames'   => '',
-			)
-		);
+		return Styles_Helper::get_styles_from_block( $block_styles, $skip_convert_vars );
 	}
 
 	/**
@@ -46,6 +41,23 @@ abstract class Abstract_Block_Renderer implements Block_Renderer {
 	}
 
 	/**
+	 * Extract inner content from a wrapper element.
+	 *
+	 * Removes the outer wrapper element (e.g., div) and returns only the inner HTML content.
+	 * This is useful when you need to strip the wrapper and use only the inner content.
+	 *
+	 * @param string $block_content Block content with wrapper element.
+	 * @param string $tag_name      Tag name of the wrapper element (default: 'div').
+	 * @return string Inner content without the wrapper element, or original content if wrapper not found.
+	 */
+	protected function get_inner_content( string $block_content, string $tag_name = 'div' ): string {
+		$dom_helper = new Dom_Document_Helper( $block_content );
+		$element    = $dom_helper->find_element( $tag_name );
+
+		return $element ? $dom_helper->get_element_inner_html( $element ) : $block_content;
+	}
+
+	/**
 	 * Add a spacer around the block.
 	 *
 	 * @param string $content The block content.
@@ -53,21 +65,33 @@ abstract class Abstract_Block_Renderer implements Block_Renderer {
 	 * @return string
 	 */
 	protected function add_spacer( $content, $email_attrs ): string {
-		$gap_style     = WP_Style_Engine::compile_css( array_intersect_key( $email_attrs, array_flip( array( 'margin-top' ) ) ), '' );
-		$padding_style = WP_Style_Engine::compile_css( array_intersect_key( $email_attrs, array_flip( array( 'padding-left', 'padding-right' ) ) ), '' );
-
-		if ( ! $gap_style && ! $padding_style ) {
-			return $content;
+		// Filter out empty margin-top values to prevent malformed CSS output.
+		$margin_top_attrs = array_intersect_key( $email_attrs, array_flip( array( 'margin-top' ) ) );
+		if ( isset( $margin_top_attrs['margin-top'] ) && '' === trim( $margin_top_attrs['margin-top'] ) ) {
+			$margin_top_attrs = array();
 		}
 
-		return sprintf(
-			'<!--[if mso | IE]><table align="left" role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%%" style="%2$s"><tr><td style="%3$s"><![endif]-->
-      <div class="email-block-layout" style="%2$s %3$s">%1$s</div>
-      <!--[if mso | IE]></td></tr></table><![endif]-->',
-			$content,
-			esc_attr( $gap_style ),
-			esc_attr( $padding_style )
+		$gap_style     = WP_Style_Engine::compile_css( $margin_top_attrs, '' ) ?? '';
+		$padding_style = WP_Style_Engine::compile_css( array_intersect_key( $email_attrs, array_flip( array( 'padding-left', 'padding-right' ) ) ), '' ) ?? '';
+
+		$table_attrs = array(
+			'align' => 'left',
+			'width' => '100%',
+			'style' => $gap_style,
 		);
+
+		$cell_attrs = array(
+			'style' => $padding_style,
+		);
+
+		$div_content = sprintf(
+			'<div class="email-block-layout" style="%1$s %2$s">%3$s</div>',
+			esc_attr( $gap_style ),
+			esc_attr( $padding_style ),
+			$content
+		);
+
+		return Table_Wrapper_Helper::render_outlook_table_wrapper( $div_content, $table_attrs, $cell_attrs );
 	}
 
 	/**

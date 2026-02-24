@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Introduce a new Rendering_Context class that replaces Settings_Controller in renderer classes

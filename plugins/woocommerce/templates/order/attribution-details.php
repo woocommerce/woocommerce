@@ -6,7 +6,7 @@
  *
  * @see     Automattic\WooCommerce\Internal\Orders\OrderAttributionController
  * @package WooCommerce\Templates
- * @version 9.5.0
+ * @version 10.3.0
  */
 
 declare( strict_types=1 );
@@ -108,6 +108,33 @@ defined( 'ABSPATH' ) || exit;
 			</span>
 		<?php endif; ?>
 
+		<?php if ( array_key_exists( 'utm_content', $meta ) ) : ?>
+			<h4>
+				<?php esc_html_e( 'Content', 'woocommerce' ); ?>
+			</h4>
+			<span class="order-attribution-utm-content">
+				<?php echo esc_html( $meta['utm_content'] ); ?>
+			</span>
+		<?php endif; ?>
+		
+		<?php if ( array_key_exists( 'utm_term', $meta ) ) : ?>
+			<h4>
+				<?php esc_html_e( 'Term', 'woocommerce' ); ?>
+			</h4>
+			<span class="order-attribution-utm-term">
+				<?php echo esc_html( $meta['utm_term'] ); ?>
+			</span>
+		<?php endif; ?>
+		
+		<?php if ( array_key_exists( 'utm_id', $meta ) ) : ?>
+			<h4>
+				<?php esc_html_e( 'ID', 'woocommerce' ); ?>
+			</h4>
+			<span class="order-attribution-utm-id">
+				<?php echo esc_html( $meta['utm_id'] ); ?>
+			</span>
+		<?php endif; ?>
+
 	</div>
 
 	<?php if ( array_key_exists( 'device_type', $meta ) ) : ?>
@@ -136,5 +163,7 @@ defined( 'ABSPATH' ) || exit;
 		</span>
 	<?php endif; ?>
 	<!-- A placeholder for the OA install banner React component. -->
-	<div id="order-attribution-install-banner-slotfill"></div>
+	<?php if ( class_exists( 'WC_Marketplace_Suggestions' ) && \WC_Marketplace_Suggestions::allow_suggestions() ) : ?>
+		<div id="order-attribution-install-banner-slotfill"></div>
+	<?php endif; ?>
 </div>

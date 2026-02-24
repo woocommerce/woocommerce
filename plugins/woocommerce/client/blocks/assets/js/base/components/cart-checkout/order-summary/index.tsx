@@ -7,7 +7,8 @@ import {
 } from '@woocommerce/base-context';
 import type { CartItem } from '@woocommerce/types';
 import clsx from 'clsx';
-import { CartLineItemsSkeleton } from '@woocommerce/base-components/skeleton/patterns/cart-line-items';
+import { CartLineItemsCheckoutSkeleton } from '@woocommerce/base-components/skeleton/patterns/cart-line-items';
+import { DelayedContentWithSkeleton } from '@woocommerce/base-components/delayed-content-with-skeleton';
 /**
  * Internal dependencies
  */
@@ -24,31 +25,38 @@ const OrderSummary = ( {
 	disableProductDescriptions = false,
 }: OrderSummaryProps ): null | JSX.Element => {
 	const { isLarge } = useContainerWidthContext();
-	const { cartIsLoading } = useStoreCart();
+	const { cartIsLoading, hasPendingItemsOperations } = useStoreCart();
+	const showSkeleton = cartIsLoading || hasPendingItemsOperations;
 
-	if ( cartIsLoading ) {
-		return <CartLineItemsSkeleton />;
-	}
 	return (
-		<div
-			className={ clsx( 'wc-block-components-order-summary', {
-				'is-large': isLarge,
-			} ) }
+		<DelayedContentWithSkeleton
+			isLoading={ showSkeleton }
+			skeleton={
+				<CartLineItemsCheckoutSkeleton
+					rows={ cartItems?.length || 2 }
+				/>
+			}
 		>
-			<div className="wc-block-components-order-summary__content">
-				{ cartItems.map( ( cartItem ) => {
-					return (
-						<OrderSummaryItem
-							disableProductDescriptions={
-								disableProductDescriptions
-							}
-							key={ cartItem.key }
-							cartItem={ cartItem }
-						/>
-					);
+			<div
+				className={ clsx( 'wc-block-components-order-summary', {
+					'is-large': isLarge,
 				} ) }
+			>
+				<div className="wc-block-components-order-summary__content">
+					{ cartItems.map( ( cartItem ) => {
+						return (
+							<OrderSummaryItem
+								disableProductDescriptions={
+									disableProductDescriptions
+								}
+								key={ cartItem.key }
+								cartItem={ cartItem }
+							/>
+						);
+					} ) }
+				</div>
 			</div>
-		</div>
+		</DelayedContentWithSkeleton>
 	);
 };
 

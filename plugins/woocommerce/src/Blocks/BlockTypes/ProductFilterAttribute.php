@@ -28,7 +28,6 @@ final class ProductFilterAttribute extends AbstractBlock {
 	protected function initialize() {
 		parent::initialize();
 
-		add_filter( 'woocommerce_blocks_product_filters_param_keys', array( $this, 'get_filter_query_param_keys' ), 10, 2 );
 		add_filter( 'woocommerce_blocks_product_filters_selected_items', array( $this, 'prepare_selected_filters' ), 10, 2 );
 		add_action( 'deleted_transient', array( $this, 'delete_default_attribute_id_transient' ) );
 		add_action( 'wp_loaded', array( $this, 'register_block_patterns' ) );
@@ -60,27 +59,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 		}
 	}
 
-	/**
-	 * Register the query param keys.
-	 *
-	 * @param array $filter_param_keys The active filters data.
-	 * @param array $url_param_keys    The query param parsed from the URL.
-	 *
-	 * @return array Active filters param keys.
-	 */
-	public function get_filter_query_param_keys( $filter_param_keys, $url_param_keys ) {
-		$attribute_param_keys = array_filter(
-			$url_param_keys,
-			function ( $param ) {
-				return strpos( $param, 'filter_' ) === 0 || strpos( $param, 'query_type_' ) === 0;
-			}
-		);
 
-		return array_merge(
-			$filter_param_keys,
-			$attribute_param_keys
-		);
-	}
 
 	/**
 	 * Prepare the active filter items.
@@ -99,43 +78,55 @@ final class ProductFilterAttribute extends AbstractBlock {
 			array()
 		);
 
-		$active_product_attributes = array_reduce(
-			array_keys( $params ),
-			function ( $acc, $attribute ) {
-				if ( strpos( $attribute, 'filter_' ) === 0 ) {
-					$acc[] = str_replace( 'filter_', '', $attribute );
-				}
-				return $acc;
-			},
-			array()
-		);
+		$active_attributes = array();
+		$all_term_slugs    = array();
+		$query_types       = array();
 
-		$active_product_attributes = array_filter(
-			$active_product_attributes,
-			function ( $item ) use ( $product_attributes_map ) {
-				return in_array( $item, array_keys( $product_attributes_map ), true );
-			}
-		);
+		foreach ( array_keys( $product_attributes_map ) as $attribute_name ) {
+			$param_key = "filter_{$attribute_name}";
 
-		foreach ( $active_product_attributes as $product_attribute ) {
-			if ( empty( $params[ "filter_{$product_attribute}" ] ) || ! is_string( $params[ "filter_{$product_attribute}" ] ) ) {
+			if ( empty( $params[ $param_key ] ) || ! is_string( $params[ $param_key ] ) ) {
 				continue;
 			}
 
-			$terms                = explode( ',', $params[ "filter_{$product_attribute}" ] );
-			$attribute_label      = wc_attribute_label( "pa_{$product_attribute}" );
-			$attribute_query_type = $params[ "query_type_{$product_attribute}" ] ?? 'or';
+			// Filter out empty slugs and trim whitespace.
+			$term_slugs = array_filter(
+				array_map( 'trim', explode( ',', $params[ $param_key ] ) ),
+			);
 
-			// Get attribute term by slug.
-			foreach ( $terms as $term ) {
-				$term_object = get_term_by( 'slug', $term, "pa_{$product_attribute}" );
-				$items[]     = array(
-					'type'               => 'attribute/' . $product_attribute,
-					'value'              => $term,
-					'activeLabel'        => "$attribute_label: $term_object->name",
-					'attributeQueryType' => $attribute_query_type,
-				);
+			if ( empty( $term_slugs ) ) {
+				continue;
 			}
+
+			$active_attributes[ "pa_{$attribute_name}" ] = $term_slugs;
+			$query_types[ $attribute_name ]              = $params[ 'query_type_' . $attribute_name ] ?? 'or';
+			$all_term_slugs                              = array_merge( $all_term_slugs, $term_slugs );
+		}
+
+		if ( empty( $active_attributes ) ) {
+			return $items;
+		}
+
+		$attribute_terms = get_terms(
+			array(
+				'taxonomy'   => array_keys( $active_attributes ),
+				'slug'       => $all_term_slugs,
+				'hide_empty' => false,
+			)
+		);
+
+		if ( is_wp_error( $attribute_terms ) || empty( $attribute_terms ) ) {
+			return $items;
+		}
+
+		foreach ( $attribute_terms as $term_object ) {
+			$attribute_name = str_replace( 'pa_', '', $term_object->taxonomy );
+			$items[]        = array(
+				'type'               => 'attribute/' . $attribute_name,
+				'value'              => $term_object->slug,
+				'activeLabel'        => sprintf( '%s: %s', $product_attributes_map[ $attribute_name ], $term_object->name ),
+				'attributeQueryType' => $query_types[ $attribute_name ] ?? 'or',
+			);
 		}
 
 		return $items;

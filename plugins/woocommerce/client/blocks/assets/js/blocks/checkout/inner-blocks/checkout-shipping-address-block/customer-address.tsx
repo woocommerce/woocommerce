@@ -1,9 +1,13 @@
 /**
  * External dependencies
  */
-import { useCallback, useEffect, useMemo, useState } from '@wordpress/element';
+import { useCallback, useEffect, useState } from '@wordpress/element';
 import { Form } from '@woocommerce/base-components/cart-checkout';
-import { useCheckoutAddress, useStoreEvents } from '@woocommerce/base-context';
+import {
+	useCheckoutAddress,
+	useStoreEvents,
+	useCustomerData,
+} from '@woocommerce/base-context';
 import type { ShippingAddress } from '@woocommerce/settings';
 import { useSelect } from '@wordpress/data';
 import { validationStore } from '@woocommerce/block-data';
@@ -21,40 +25,48 @@ const CustomerAddress = () => {
 		setShippingAddress,
 		setBillingAddress,
 		useShippingAsBilling,
-		editingShippingAddress: editing,
-		setEditingShippingAddress: setEditing,
+		editingShippingAddress,
+		setEditingShippingAddress,
 	} = useCheckoutAddress();
 	const { dispatchCheckoutEvent } = useStoreEvents();
 	const [ shouldAnimate, setShouldAnimate ] = useState( false );
 
-	// Forces editing state if store has errors.
-	const { hasValidationErrors, getValidationErrorSelector } = useSelect(
+	const { isInitialized } = useCustomerData();
+
+	const { validationErrors } = useSelect(
 		( select ) => {
-			const store = select( validationStore );
 			return {
-				hasValidationErrors: store.hasValidationErrors(),
-				getValidationErrorSelector: store.getValidationError,
+				validationErrors:
+					select( validationStore ).getValidationErrors(),
 			};
 		},
-		[]
+		[ shippingAddress ]
 	);
 
-	const invalidProps = useMemo( () => {
-		return Object.keys( shippingAddress )
-			.filter( ( key ) => {
-				return (
-					getValidationErrorSelector( 'shipping_' + key ) !==
-					undefined
-				);
-			} )
-			.filter( Boolean );
-	}, [ shippingAddress, getValidationErrorSelector ] );
-
 	useEffect( () => {
-		if ( invalidProps.length > 0 && editing === false ) {
-			setEditing( true );
+		// Check if any shipping field has validation errors
+		const hasValidationErrors = Object.keys( shippingAddress ).some(
+			( key ) => {
+				// Check if 'shipping_' + key exists in validationErrors
+				return validationErrors[ `shipping_${ key }` ] !== undefined;
+			}
+		);
+
+		// Forces editing state if store has errors,
+		// but not on initial render when all fields are empty.
+		if (
+			isInitialized &&
+			hasValidationErrors &&
+			editingShippingAddress === false
+		) {
+			setEditingShippingAddress( true );
 		}
-	}, [ editing, hasValidationErrors, invalidProps.length, setEditing ] );
+	}, [
+		editingShippingAddress,
+		shippingAddress,
+		isInitialized,
+		validationErrors,
+	] );
 
 	const onChangeAddress = useCallback(
 		( values: ShippingAddress ) => {
@@ -75,19 +87,19 @@ const CustomerAddress = () => {
 
 	const handleEditClick = useCallback( () => {
 		setShouldAnimate( true );
-		setEditing( true );
-	}, [ setEditing ] );
+		setEditingShippingAddress( true );
+	}, [ setEditingShippingAddress ] );
 
 	return (
 		<AddressWrapper
-			isEditing={ editing }
+			isEditing={ editingShippingAddress }
 			shouldAnimate={ shouldAnimate }
 			addressCard={
 				<AddressCard
 					address={ shippingAddress }
 					target="shipping"
 					onEdit={ handleEditClick }
-					isExpanded={ true }
+					isExpanded={ editingShippingAddress }
 				/>
 			}
 			addressForm={
@@ -97,7 +109,7 @@ const CustomerAddress = () => {
 					onChange={ onChangeAddress }
 					values={ shippingAddress }
 					fields={ ADDRESS_FORM_KEYS }
-					isEditing={ editing }
+					isEditing={ editingShippingAddress }
 				/>
 			}
 		/>

@@ -5,18 +5,19 @@ import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import { PaymentsProviderIncentive } from '@woocommerce/data';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
  */
 import {
 	getWooPaymentsSetupLiveAccountLink,
-	disableWooPaymentsTestAccount,
 	recordPaymentsEvent,
 	recordPaymentsOnboardingEvent,
 } from '~/settings-payments/utils';
 import {
 	wooPaymentsExtensionSlug,
+	wooPaymentsOnboardingSessionEntrySettings,
 	wooPaymentsProviderId,
 	wooPaymentsSuggestionId,
 } from '~/settings-payments/constants';
@@ -48,6 +49,10 @@ interface ActivatePaymentsButtonProps {
 	 * The onboarding type for the gateway.
 	 */
 	onboardingType?: string;
+	/**
+	 * URL to disable the test account before proceeding to live account setup.
+	 */
+	disableTestAccountUrl?: string;
 }
 
 /**
@@ -62,6 +67,7 @@ export const ActivatePaymentsButton = ( {
 	incentive = null,
 	setOnboardingModalOpen,
 	onboardingType,
+	disableTestAccountUrl,
 }: ActivatePaymentsButtonProps ) => {
 	const [ isUpdating, setIsUpdating ] = useState( false );
 
@@ -76,8 +82,35 @@ export const ActivatePaymentsButton = ( {
 			provider_extension_slug: wooPaymentsExtensionSlug,
 		} );
 
+		// If no URL to disable the test account is provided, we just point the user to the live account setup.
+		if ( ! disableTestAccountUrl ) {
+			if ( incentive ) {
+				acceptIncentive( incentive.promo_id );
+			}
+
+			setIsUpdating( false );
+			if ( onboardingType === 'native_in_context' ) {
+				// Open the onboarding modal.
+				recordPaymentsOnboardingEvent(
+					'woopayments_onboarding_modal_opened',
+					{
+						from: 'activate_payments_button',
+						source: wooPaymentsOnboardingSessionEntrySettings,
+					}
+				);
+				setOnboardingModalOpen( true );
+			} else {
+				window.location.href = getWooPaymentsSetupLiveAccountLink();
+			}
+
+			return;
+		}
+
 		// Disable test account and redirect to the live account setup link.
-		disableWooPaymentsTestAccount()
+		apiFetch( {
+			url: disableTestAccountUrl,
+			method: 'POST',
+		} )
 			.then( () => {
 				if ( incentive ) {
 					acceptIncentive( incentive.promo_id );
@@ -88,7 +121,11 @@ export const ActivatePaymentsButton = ( {
 				if ( onboardingType === 'native_in_context' ) {
 					// Open the onboarding modal.
 					recordPaymentsOnboardingEvent(
-						'woopayments_onboarding_modal_opened'
+						'woopayments_onboarding_modal_opened',
+						{
+							from: 'activate_payments_button',
+							source: wooPaymentsOnboardingSessionEntrySettings,
+						}
 					);
 					setOnboardingModalOpen( true );
 				} else {

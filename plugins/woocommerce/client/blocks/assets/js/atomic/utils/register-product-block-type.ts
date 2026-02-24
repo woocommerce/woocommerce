@@ -11,7 +11,8 @@ import {
 	BlockConfiguration,
 } from '@wordpress/blocks';
 import { subscribe, select } from '@wordpress/data';
-import { isNumber, isEmpty } from '@woocommerce/types';
+import { store as editorStore } from '@wordpress/editor';
+import { isEmpty } from '@woocommerce/types';
 
 /**
  * Settings for product block registration.
@@ -95,22 +96,6 @@ export class BlockRegistrationManager {
 	}
 
 	/**
-	 * Parses a template ID from various possible formats.
-	 * Handles both string and number inputs due to Gutenberg changes.
-	 *
-	 * @param {string | number | undefined} templateId - The template ID to parse
-	 * @return {string | undefined} The parsed template ID
-	 */
-	private parseTemplateId(
-		templateId: string | number | undefined
-	): string | undefined {
-		const parsedTemplateId = isNumber( templateId )
-			? undefined
-			: templateId;
-		return parsedTemplateId?.split( '//' )[ 1 ];
-	}
-
-	/**
 	 * Initializes subscriptions for template changes and block registration.
 	 * Sets up listeners for both the site editor and post editor contexts.
 	 */
@@ -121,43 +106,23 @@ export class BlockRegistrationManager {
 
 		// Main store subscription to detect which editor we're in
 		const unsubscribe = subscribe( () => {
-			const editSiteStore = select( 'core/edit-site' );
-			const editPostStore = select( 'core/edit-post' );
+			const editorSelectors = select( editorStore );
 
-			// Return if neither store is available yet
-			if ( ! editSiteStore && ! editPostStore ) {
+			// Return if editor store is not available yet
+			if ( ! editorSelectors ) {
 				return;
 			}
 
-			// Site Editor Context
-			if ( editSiteStore ) {
-				const postId = editSiteStore.getEditedPostId();
+			// @ts-expect-error getCurrentPostType is not typed
+			const postType = editorSelectors.getCurrentPostType();
 
-				// Unsubscribe from the main subscription since we've detected our context
-				unsubscribe();
-
-				// Set initial template ID
-				this.currentTemplateId =
-					typeof postId === 'string'
-						? this.parseTemplateId( postId )
-						: undefined;
-
-				// Set up the template change listener
-				subscribe( () => {
-					const previousTemplateId = this.currentTemplateId;
-					this.currentTemplateId = this.parseTemplateId(
-						editSiteStore.getEditedPostId()
-					);
-
-					if ( previousTemplateId !== this.currentTemplateId ) {
-						this.handleTemplateChange( previousTemplateId );
-					}
-				}, 'core/edit-site' );
-
-				this.initialized = true;
+			// Return if post type is not available yet
+			if ( ! postType ) {
+				return;
 			}
-			// Post Editor Context
-			else if ( editPostStore ) {
+
+			// Post Editor Context (Posts, Pages)
+			if ( postType === 'post' || postType === 'page' ) {
 				// Unsubscribe from the main subscription since we've detected our context
 				unsubscribe();
 
@@ -170,6 +135,35 @@ export class BlockRegistrationManager {
 						}
 					}
 				} );
+
+				this.initialized = true;
+				// Site Editor Context (Templates, Patterns, etc.)
+			} else {
+				// Unsubscribe from the main subscription since we've detected our context
+				unsubscribe();
+
+				// getEditedPostSlug may return string or number so we cast it to string.
+				// @ts-expect-error getEditedPostSlug is not typed
+				const postSlug = String( editorSelectors.getEditedPostSlug() );
+
+				// Set initial template ID
+				this.currentTemplateId = postSlug;
+
+				// Handle the initial template change
+				this.handleTemplateChange( undefined );
+
+				// Set up the template change listener
+				subscribe( () => {
+					const previousTemplateId = this.currentTemplateId;
+					this.currentTemplateId =
+						// getEditedPostSlug may return string or number so we cast it to string.
+						// @ts-expect-error getEditedPostSlug is not typed
+						String( editorSelectors.getEditedPostSlug() );
+
+					if ( previousTemplateId !== this.currentTemplateId ) {
+						this.handleTemplateChange( previousTemplateId );
+					}
+				}, editorStore );
 
 				this.initialized = true;
 			}

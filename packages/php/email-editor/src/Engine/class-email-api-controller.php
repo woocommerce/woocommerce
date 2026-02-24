@@ -89,7 +89,10 @@ class Email_Api_Controller {
 
 	/**
 	 * Returns all registered personalization tags.
+	 * We need to keep this endpoint for backward compatibility for older JS clients.
+	 * We might consider removing it in the future (perhaps in late 2026).
 	 *
+	 * @deprecated Use get_personalization_tags_collection instead.
 	 * @return WP_REST_Response
 	 */
 	public function get_personalization_tags(): WP_REST_Response {
@@ -106,11 +109,58 @@ class Email_Api_Controller {
 								'category'      => $tag->get_category(),
 								'attributes'    => $tag->get_attributes(),
 								'valueToInsert' => $tag->get_value_to_insert(),
+								'postTypes'     => $tag->get_post_types(),
 							);
 						},
 						$tags
 					),
 				),
+			),
+			200
+		);
+	}
+
+	/**
+	 * Returns all registered personalization tags as a collection.
+	 * This endpoint follows WordPress REST API conventions by returning
+	 * the array directly instead of wrapping it in a response object.
+	 *
+	 * @param WP_REST_Request $request The REST request object.
+	 * @return WP_REST_Response
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 */
+	public function get_personalization_tags_collection( WP_REST_Request $request ): WP_REST_Response {
+		$post_id = $request->get_param( 'post_id' );
+
+		// Allow extensions to extend or modify tags based on post context.
+		// This fires before getting tags so extensions can register additional tags.
+		$post_id = is_numeric( $post_id ) ? (int) $post_id : 0;
+		if ( $post_id > 0 ) {
+			/**
+			 * Fires before retrieving personalization tags, allowing extensions
+			 * to register or modify tags based on the post context.
+			 *
+			 * @param int $post_id The post ID for context-aware tag handling.
+			 */
+			do_action( 'woocommerce_email_editor_personalization_tags_for_post', $post_id );
+		}
+
+		$tags = $this->personalization_tags_registry->get_all();
+		return new WP_REST_Response(
+			array_values(
+				array_map(
+					function ( Personalization_Tag $tag ) {
+						return array(
+							'name'          => $tag->get_name(),
+							'token'         => $tag->get_token(),
+							'category'      => $tag->get_category(),
+							'attributes'    => $tag->get_attributes(),
+							'valueToInsert' => $tag->get_value_to_insert(),
+							'postTypes'     => $tag->get_post_types(),
+						);
+					},
+					$tags
+				)
 			),
 			200
 		);

@@ -72,6 +72,7 @@ describe( 'defaultPaymentState', () => {
 				activePaymentMethod: 'stripe',
 				availablePaymentMethods: {},
 				availableExpressPaymentMethods: {},
+				registeredExpressPaymentMethods: {},
 				savedPaymentMethods: {},
 				paymentMethodData: {},
 				paymentResult: null,

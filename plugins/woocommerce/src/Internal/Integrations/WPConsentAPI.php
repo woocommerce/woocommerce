@@ -105,7 +105,7 @@ class WPConsentAPI {
 			'wp-consent-api-integration',
 			sprintf(
 				'window.wc_order_attribution.params.consentCategory = %s;',
-				wp_json_encode( self::$consent_category )
+				wp_json_encode( self::$consent_category, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES )
 			),
 			'before'
 		);

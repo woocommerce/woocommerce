@@ -153,4 +153,39 @@ class WCAdminUser {
 
 		return $meta_value;
 	}
+
+	/**
+	 * Get the current user data.
+	 *
+	 * @return array User data.
+	 */
+	public static function get_user_data() {
+		$user_controller = new \WP_REST_Users_Controller();
+		$request         = new \WP_REST_Request();
+		$request->set_query_params( array( 'context' => 'edit' ) );
+		$user_response     = $user_controller->get_current_item( $request );
+		$current_user_data = is_wp_error( $user_response ) ? (object) array() : $user_response->get_data();
+		$current_user_data = self::filter_user_capabilities( $current_user_data );
+
+		return $current_user_data;
+	}
+
+	/**
+	 * Filter user capabilities to respect file modification restrictions.
+	 *
+	 * @param array $user_data User data.
+	 * @return array Filtered user data.
+	 */
+	private static function filter_user_capabilities( $user_data ) {
+		if ( ! is_array( $user_data ) || ! isset( $user_data['capabilities'] ) ) {
+			return $user_data;
+		}
+
+		// If the user has install_plugins capability, check if file modifications are allowed.
+		if ( isset( $user_data['capabilities']->install_plugins ) && $user_data['capabilities']->install_plugins ) {
+			$user_data['capabilities']->install_plugins = wp_is_file_mod_allowed( 'woocommerce' );
+		}
+
+		return $user_data;
+	}
 }

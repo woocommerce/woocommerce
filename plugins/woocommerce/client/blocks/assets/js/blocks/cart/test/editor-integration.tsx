@@ -1,11 +1,14 @@
 /**
  * External dependencies
  */
-import { act, screen } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 import { registerCheckoutFilters } from '@woocommerce/blocks-checkout';
 import { type BlockAttributes } from '@wordpress/blocks';
 import { getAllByRole, getByLabelText } from '@testing-library/dom';
 import { userEvent } from '@testing-library/user-event';
+import { previewCart } from '@woocommerce/resource-previews';
+import { dispatch } from '@wordpress/data';
+import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
@@ -18,6 +21,13 @@ import '../index';
 import '../inner-blocks/index';
 import '../inner-blocks/cart-order-summary-coupon-form/index';
 import '../../product-new/index';
+import '../../../atomic/blocks/product-elements/sale-badge/index';
+import '../../../atomic/blocks/product-elements/image/index';
+import '../../../atomic/blocks/product-elements/price/index';
+import '../../../atomic/blocks/product-elements/button/index';
+import '../../../atomic/blocks/product-elements/title/index';
+import '../../product-template/index.tsx';
+import '../../product-collection/index.tsx';
 
 async function setup( attributes: BlockAttributes ) {
 	const testBlock = [ { name: 'woocommerce/cart', attributes } ];
@@ -44,17 +54,38 @@ describe( 'Cart block editor integration', () => {
 		} );
 	} );
 
+	beforeEach( () => {
+		act( () => {
+			// need to clear the store resolution state between tests.
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			( dispatch( storeKey ) as any ).invalidateResolutionForStore();
+			// Set up cart data with preview cart items
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			( dispatch( storeKey ) as any ).receiveCart( previewCart );
+		} );
+	} );
+
 	it( 'inner blocks can be added/removed by filters', async () => {
 		await setup( {} );
 
 		// Verify Cart block is properly initialized in the editor.
-		expect( screen.getByLabelText( /^Block: Cart$/i ) ).toBeInTheDocument();
+		await waitFor( () => {
+			expect( screen.getByLabelText( /^Block: Cart$/i ) ).toBeVisible();
+			// Test Order Summary block - should have both Table and Audio options (specific filter applied).
+		} );
 
-		// Test Order Summary block - should have both Table and Audio options (specific filter applied).
+		await waitFor( () => {
+			expect(
+				screen.getByLabelText( /^Block: Order Summary$/i )
+			).toBeVisible();
+		} );
+
 		await selectBlock( /^Block: Order Summary$/i );
+
 		const orderSummaryBlock = screen.getByLabelText(
 			/^Block: Order Summary$/i
 		);
+
 		const orderSummaryAddButton = getByLabelText(
 			orderSummaryBlock,
 			/^Add block$/i
@@ -73,11 +104,13 @@ describe( 'Cart block editor integration', () => {
 			( element ) => element.textContent === 'Audio'
 		);
 
-		// Verify Table option is available (should be available on all blocks).
-		expect( tableOption ).toBeInTheDocument();
+		await waitFor( () => {
+			// Verify Table option is available (should be available on all blocks).
+			expect( tableOption ).toBeVisible();
 
-		// Verify Audio option is available (added only for order summary block).
-		expect( audioOption ).toBeInTheDocument();
+			// Verify Audio option is available (added only for order summary block).
+			expect( audioOption ).toBeVisible();
+		} );
 
 		// Test Filled Cart block - should only have Table option (no block-specific Audio filter).
 		const filledCartBlock = screen.getByLabelText( /Block: Filled Cart/i );
@@ -107,7 +140,9 @@ describe( 'Cart block editor integration', () => {
 		const filledCartTableOption = screen.getByRole( 'option', {
 			name: /Table/i,
 		} );
-		expect( filledCartTableOption ).toBeInTheDocument();
+		await waitFor( () => {
+			expect( filledCartTableOption ).toBeVisible();
+		} );
 
 		// Verify Audio option is NOT available (block-specific filter only applies to Order Summary).
 		const filledCartAudioOption = screen.queryByRole( 'option', {
@@ -116,22 +151,75 @@ describe( 'Cart block editor integration', () => {
 		expect( filledCartAudioOption ).not.toBeInTheDocument();
 	} );
 
+	it( 'renders the Product collection cross-sells', async () => {
+		await setup( {} );
+
+		// Verify Cart block is properly initialized in the editor.
+		expect(
+			await screen.findByLabelText( /^Block: Cart$/i )
+		).toBeVisible();
+
+		// Navigate to the Filled Cart block first
+		await selectBlock( /^Block: Filled Cart$/i );
+
+		// Verify Product Collection block is present in the Cart Items
+		const productCollection = await screen.findByLabelText(
+			/^Block: Product Collection$/i
+		);
+		expect( productCollection ).toBeVisible();
+	} );
+
+	it( 'shows the cart preview in the editor', async () => {
+		await setup( {} );
+
+		// Verify Cart block is properly initialized in the editor.
+		await waitFor( () => {
+			expect( screen.getByLabelText( /^Block: Cart$/i ) ).toBeVisible();
+			// Test Order Summary block - should have both Table and Audio options (specific filter applied).
+		} );
+
+		await waitFor( () => {
+			expect(
+				screen.getByLabelText( /Block: Filled Cart$/i )
+			).toBeVisible();
+		} );
+
+		await selectBlock( /Block: Filled Cart/i );
+		await selectBlock( /Block: Cart Line Items/i );
+
+		const cartItems = previewCart.items;
+		// Now the product links should be rendered
+		cartItems.forEach( ( item ) => {
+			const productNameElement = screen.getByRole( 'link', {
+				name: item.name,
+			} );
+			expect( productNameElement ).toBeVisible();
+			expect( productNameElement ).toHaveTextContent( item.name );
+		} );
+	} );
+
 	it( 'can convert to Empty Cart block', async () => {
 		// Setup the cart block with default attributes (filled cart view)
 		await setup( {} );
 
 		// Verify Cart block is properly initialized in the editor
-		expect( screen.getByLabelText( /^Block: Cart$/i ) ).toBeInTheDocument();
+		expect( screen.getByLabelText( /^Block: Cart$/i ) ).toBeVisible();
+
+		await selectBlock( /Block: Filled Cart/i );
 
 		const filledCartBlock = screen.getByLabelText( /Block: Filled Cart/i );
 		const emptyCartBlock = screen.getByLabelText( /Block: Empty Cart/i );
 
-		expect( filledCartBlock ).toBeInTheDocument();
+		expect( filledCartBlock ).toBeVisible();
 		expect( filledCartBlock ).not.toHaveAttribute( 'hidden' );
 		expect( emptyCartBlock ).toBeInTheDocument();
 		expect( emptyCartBlock ).toHaveAttribute( 'hidden' );
 
-		await selectBlock( /Block: Filled Cart/i );
+		await waitFor( () => {
+			expect(
+				screen.getByLabelText( /Block: Filled Cart$/i )
+			).toBeVisible();
+		} );
 
 		const selectParentBlockButton = screen.getByRole( 'button', {
 			name: /Select parent block: Cart/i,

@@ -12,12 +12,13 @@ const { scriptModuleEntries } = require( './webpack-interactivity-entries' );
 // block directory.
 const blocks = {
 	'active-filters': {},
-	'add-to-cart-form': {
-		customDir: 'product-elements/add-to-cart-form',
-	},
+	'add-to-cart-form': {},
 	'add-to-cart-with-options': {},
 	'add-to-cart-with-options-quantity-selector': {
 		customDir: 'add-to-cart-with-options/quantity-selector',
+	},
+	'add-to-cart-with-options-variation-description': {
+		customDir: 'add-to-cart-with-options/variation-description',
 	},
 	'add-to-cart-with-options-variation-selector': {
 		customDir: 'add-to-cart-with-options/variation-selector',
@@ -43,7 +44,6 @@ const blocks = {
 		customDir:
 			'add-to-cart-with-options/grouped-product-selector/product-item-selector',
 	},
-
 	'add-to-cart-with-options-grouped-product-item-label': {
 		customDir:
 			'add-to-cart-with-options/grouped-product-selector/product-item-label',
@@ -57,8 +57,12 @@ const blocks = {
 	'attribute-filter': {},
 	breadcrumbs: {},
 	'catalog-sorting': {},
+	'category-description': {},
+	'category-title': {},
 	'coming-soon': {},
+	'coupon-code': {},
 	'customer-account': {},
+	'email-content': {},
 	'featured-category': {
 		customDir: 'featured-items/featured-category',
 	},
@@ -73,6 +77,7 @@ const blocks = {
 	},
 	'classic-shortcode': {},
 	'page-content-wrapper': {},
+	'payment-method-icons': {},
 	'price-filter': {},
 	'product-best-sellers': {},
 	'product-category': {},
@@ -86,8 +91,7 @@ const blocks = {
 		customDir: 'product-gallery/inner-blocks/product-gallery-large-image',
 	},
 	'product-gallery-large-image-next-previous': {
-		customDir:
-			'product-gallery/inner-blocks/product-gallery-large-image-next-previous',
+		customDir: 'next-previous-buttons',
 	},
 	'product-gallery-thumbnails': {
 		customDir: 'product-gallery/inner-blocks/product-gallery-thumbnails',
@@ -129,6 +133,9 @@ const blocks = {
 	},
 	'product-filter-active': {
 		customDir: 'product-filters/inner-blocks/active-filters',
+	},
+	'product-filter-taxonomy': {
+		customDir: 'product-filters/inner-blocks/taxonomy-filter',
 	},
 	'product-filter-removable-chips': {
 		customDir: 'product-filters/inner-blocks/removable-chips',
@@ -328,10 +335,6 @@ const entries = {
 			'./assets/js/atomic/blocks/product-elements/product-image-gallery/index.ts',
 
 		...blockStylingEntries,
-
-		// Templates
-		'wc-blocks-classic-template-revert-button-style':
-			'./assets/js/templates/revert-button/index.tsx',
 	},
 	core: {
 		wcBlocksRegistry: './assets/js/blocks-registry/index.js',
@@ -344,6 +347,7 @@ const entries = {
 		wcSchemaParser: './assets/js/utils/schema-parser/index.ts',
 		priceFormat: './packages/prices/index.js',
 		wcTypes: './assets/js/types/index.ts',
+		wcEntities: './assets/js/entities/index.ts',
 	},
 	main: {
 		// Shared blocks code
@@ -375,10 +379,6 @@ const entries = {
 			'./assets/js/extensions/google-analytics/index.ts',
 		'wc-shipping-method-pickup-location':
 			'./assets/js/extensions/shipping-methods/pickup-location/index.js',
-	},
-	editor: {
-		'wc-blocks-classic-template-revert-button':
-			'./assets/js/templates/revert-button/index.tsx',
 	},
 	cartAndCheckoutFrontend: {
 		...getBlockEntries( 'frontend.{t,j}s{,x}', cartAndCheckoutBlocks ),

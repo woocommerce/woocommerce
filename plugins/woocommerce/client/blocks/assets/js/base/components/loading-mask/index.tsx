@@ -10,7 +10,7 @@ import { Spinner } from '@woocommerce/blocks-components';
  */
 import './style.scss';
 
-interface LoadingMaskProps {
+export interface LoadingMaskProps {
 	children?: React.ReactNode | React.ReactNode[];
 	className?: string;
 	screenReaderLabel?: string;

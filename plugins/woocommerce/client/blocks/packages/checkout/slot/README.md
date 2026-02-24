@@ -181,7 +181,7 @@ registerPlugin( 'my-plugin', { render } );
 
 ## Available Slot Fills
 
-Slot Fills are implemented throughout the Cart and Checkout Blocks, as well as some components. For a list of available Slot Fills, [see this document](../../../docs/third-party-developers/extensibility/checkout-block/available-slot-fills.md).
+Slot Fills are implemented throughout the Cart and Checkout Blocks, as well as some components. For a list of available Slot Fills, [see this document](/docs/block-development/extensible-blocks/cart-and-checkout-blocks/available-slot-fills.md).
 
 <!-- FEEDBACK -->
 

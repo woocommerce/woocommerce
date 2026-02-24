@@ -1,4 +1,5 @@
 <?php
+declare( strict_types=1 );
 namespace Automattic\WooCommerce\Blocks;
 
 use Automattic\WooCommerce\Admin\Features\Features;
@@ -12,6 +13,7 @@ use Automattic\WooCommerce\Blocks\Templates\CheckoutHeaderTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ComingSoonTemplate;
 use Automattic\WooCommerce\Blocks\Templates\OrderConfirmationTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductAttributeTemplate;
+use Automattic\WooCommerce\Blocks\Templates\ProductBrandTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductCatalogTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductCategoryTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductTagTemplate;
@@ -47,6 +49,7 @@ class BlockTemplatesRegistry {
 				ProductCategoryTemplate::SLUG      => new ProductCategoryTemplate(),
 				ProductTagTemplate::SLUG           => new ProductTagTemplate(),
 				ProductAttributeTemplate::SLUG     => new ProductAttributeTemplate(),
+				ProductBrandTemplate::SLUG         => new ProductBrandTemplate(),
 				ProductSearchResultsTemplate::SLUG => new ProductSearchResultsTemplate(),
 				CartTemplate::SLUG                 => new CartTemplate(),
 				CheckoutTemplate::SLUG             => new CheckoutTemplate(),
@@ -85,12 +88,33 @@ class BlockTemplatesRegistry {
 		} else {
 			$template_parts = array();
 		}
-		$this->templates = array_merge( $templates, $template_parts );
 
 		// Init all templates.
-		foreach ( $this->templates as $template ) {
+		foreach ( $templates as $template ) {
 			$template->init();
+
+			// Taxonomy templates are registered automatically by WordPress and
+			// are made available through the Add Template menu.
+			if ( ! $template->is_taxonomy_template ) {
+				$directory          = BlockTemplateUtils::get_templates_directory( 'wp_template' );
+				$template_file_path = $directory . '/' . $template::SLUG . '.html';
+				register_block_template(
+					'woocommerce//' . $template::SLUG,
+					array(
+						'title'       => $template->get_template_title(),
+						'description' => $template->get_template_description(),
+						// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+						'content'     => file_get_contents( $template_file_path ),
+					)
+				);
+			}
 		}
+
+		foreach ( $template_parts as $template_part ) {
+			$template_part->init();
+		}
+
+		$this->templates = array_merge( $templates, $template_parts );
 	}
 
 	/**

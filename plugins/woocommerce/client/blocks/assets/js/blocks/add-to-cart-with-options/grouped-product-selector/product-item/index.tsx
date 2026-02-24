@@ -13,7 +13,6 @@ import ProductItemTemplateSave from './save';
 
 registerBlockType( metadata, {
 	edit: ProductItemTemplateEdit,
-	attributes: metadata.attributes,
 	icon: {
 		src: (
 			<Icon

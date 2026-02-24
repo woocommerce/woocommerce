@@ -11,5 +11,6 @@
 	"supports": {
 		"interactivity": true
 	},
-	"$schema": "https://schemas.wp.org/trunk/block.json"
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"viewScriptModule": "woocommerce/add-to-cart-with-options-variation-selector"
 }

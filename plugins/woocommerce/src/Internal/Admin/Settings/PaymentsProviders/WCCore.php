@@ -91,4 +91,21 @@ class WCCore extends PaymentGateway {
 
 		return parent::is_in_test_mode_onboarding( $payment_gateway );
 	}
+
+	/**
+	 * Get the plugin details for a WC core-provided payment gateway.
+	 *
+	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
+	 *
+	 * @return array The plugin details for the payment gateway.
+	 */
+	public function get_plugin_details( WC_Payment_Gateway $payment_gateway ): array {
+		$plugin_details = parent::get_plugin_details( $payment_gateway );
+
+		// Since these are core-provided gateways, we need to make sure that the provider (WC) can't be deactivated.
+		// The way to do this is to NOT provide a plugin file path.
+		$plugin_details['file'] = '';
+
+		return $plugin_details;
+	}
 }

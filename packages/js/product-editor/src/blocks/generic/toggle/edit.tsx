@@ -6,6 +6,7 @@ import { ToggleControl } from '@wordpress/components';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { recordEvent } from '@woocommerce/tracks';
 import { ReactNode } from 'react';
+import { sanitizeHTML } from '@woocommerce/sanitize';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -15,7 +16,6 @@ import { useEntityProp, useEntityId } from '@wordpress/core-data';
  * Internal dependencies
  */
 import { ToggleBlockAttributes } from './types';
-import { sanitizeHTML } from '../../../utils/sanitize-html';
 import { ProductEditorBlockEditProps } from '../../../types';
 import useProductEntityProp from '../../../hooks/use-product-entity-prop';
 import { TRACKS_SOURCE } from '../../../constants';
@@ -71,7 +71,7 @@ export function Edit( {
 	if ( attributes?.help ) {
 		help = createElement( 'div', {
 			dangerouslySetInnerHTML: {
-				__html: sanitizeHTML( attributes.help )?.__html,
+				__html: sanitizeHTML( attributes.help ),
 			},
 		} );
 	}
@@ -84,7 +84,7 @@ export function Edit( {
 	if ( attributes?.checkedHelp && isChecked() ) {
 		help = createElement( 'div', {
 			dangerouslySetInnerHTML: {
-				__html: sanitizeHTML( attributes.checkedHelp )?.__html,
+				__html: sanitizeHTML( attributes.checkedHelp ),
 			},
 		} );
 	}
@@ -97,7 +97,7 @@ export function Edit( {
 	if ( attributes?.uncheckedHelp && ! isChecked() ) {
 		help = createElement( 'div', {
 			dangerouslySetInnerHTML: {
-				__html: sanitizeHTML( attributes.uncheckedHelp )?.__html,
+				__html: sanitizeHTML( attributes.uncheckedHelp ),
 			},
 		} );
 	}
@@ -116,7 +116,9 @@ export function Edit( {
 			{ disabled && (
 				<p
 					className="wp-block-woocommerce-product-toggle__disable-copy"
-					dangerouslySetInnerHTML={ sanitizeHTML( disabledCopy ) }
+					dangerouslySetInnerHTML={ {
+						__html: sanitizeHTML( disabledCopy ),
+					} }
 				/>
 			) }
 		</div>

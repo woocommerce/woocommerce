@@ -99,7 +99,7 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 			const block = await frontendUtils.getBlockByName(
 				'woocommerce/mini-cart'
 			);
-			await block.click();
+			await block.getByRole( 'button' ).click();
 		},
 		templateName: 'Mini-Cart',
 		templatePath: 'mini-cart',

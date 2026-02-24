@@ -13,7 +13,7 @@ import { previewCart } from '@woocommerce/resource-previews';
 import { dispatch } from '@wordpress/data';
 import { CART_STORE_KEY as storeKey } from '@woocommerce/block-data';
 import { SlotFillProvider } from '@woocommerce/blocks-checkout';
-import { default as fetchMock } from 'jest-fetch-mock';
+import { server, http, HttpResponse } from '@woocommerce/test-utils/msw';
 import userEvent from '@testing-library/user-event';
 
 /**
@@ -39,23 +39,19 @@ const MiniCartBlock = ( props ) => (
 );
 
 const mockEmptyCart = () => {
-	fetchMock.mockResponse( ( req ) => {
-		if ( req.url.match( /wc\/store\/v1\/cart/ ) ) {
-			return Promise.resolve(
-				JSON.stringify( defaultCartState.cartData )
-			);
-		}
-		return Promise.resolve( '' );
-	} );
+	server.use(
+		http.get( '*/wc/store/v1/cart*', () => {
+			return HttpResponse.json( defaultCartState.cartData );
+		} )
+	);
 };
 
 const mockFullCart = () => {
-	fetchMock.mockResponse( ( req ) => {
-		if ( req.url.match( /wc\/store\/v1\/cart/ ) ) {
-			return Promise.resolve( JSON.stringify( previewCart ) );
-		}
-		return Promise.resolve( '' );
-	} );
+	server.use(
+		http.get( '*/wc/store/v1/cart*', () => {
+			return HttpResponse.json( previewCart );
+		} )
+	);
 };
 
 describe( 'Testing Mini-Cart', () => {
@@ -69,12 +65,11 @@ describe( 'Testing Mini-Cart', () => {
 	} );
 
 	afterEach( () => {
-		fetchMock.resetMocks();
+		server.resetHandlers();
 	} );
 
 	it( 'shows Mini-Cart count badge when there are items in the cart', async () => {
 		render( <MiniCartBlock /> );
-		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
 
 		await waitFor( () =>
 			expect( screen.getByText( '3' ) ).toBeInTheDocument()
@@ -84,7 +79,9 @@ describe( 'Testing Mini-Cart', () => {
 	it( "doesn't show Mini-Cart count badge when cart is empty", async () => {
 		mockEmptyCart();
 		render( <MiniCartBlock /> );
-		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
+		await waitFor( () =>
+			expect( screen.getByLabelText( /0 items in cart/i ) ).toBeVisible()
+		);
 		const badgeWith0Count = screen.queryByText( '0' );
 
 		expect( badgeWith0Count ).toBeNull();
@@ -94,7 +91,9 @@ describe( 'Testing Mini-Cart', () => {
 		const user = userEvent.setup();
 		render( <MiniCartBlock /> );
 
-		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
+		await waitFor( () =>
+			expect( screen.getByLabelText( /3 items in cart/i ) ).toBeVisible()
+		);
 		await act( async () => {
 			await user.click( screen.getByLabelText( /items/i ) );
 		} );
@@ -107,7 +106,9 @@ describe( 'Testing Mini-Cart', () => {
 	it( 'closes the drawer when clicking on the close button', async () => {
 		const user = userEvent.setup();
 		render( <MiniCartBlock /> );
-		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
+		await waitFor( () =>
+			expect( screen.getByLabelText( /3 items in cart/i ) ).toBeVisible()
+		);
 
 		// Open drawer.
 		await act( async () => {
@@ -139,18 +140,27 @@ describe( 'Testing Mini-Cart', () => {
 		mockEmptyCart();
 		render( <MiniCartBlock /> );
 
-		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
+		await waitFor( () =>
+			expect( screen.getByLabelText( /0 items in cart/i ) ).toBeVisible()
+		);
 
 		await act( async () => {
 			await user.click( screen.getByLabelText( /items/i ) );
 		} );
 
-		expect( fetchMock ).toHaveBeenCalledTimes( 1 );
+		// Should show empty cart message
+		await waitFor( () =>
+			expect(
+				screen.getByText( /Your cart is currently empty!/i )
+			).toBeVisible()
+		);
 	} );
 
 	it( 'updates contents when removed from cart event is triggered', async () => {
 		render( <MiniCartBlock /> );
-		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
+		await waitFor( () =>
+			expect( screen.getByLabelText( /3 items in cart/i ) ).toBeVisible()
+		);
 
 		mockEmptyCart();
 		// eslint-disable-next-line no-undef
@@ -163,16 +173,16 @@ describe( 'Testing Mini-Cart', () => {
 			screen.queryByLabelText( /3 items in cart/i )
 		);
 		await waitFor( () =>
-			expect(
-				screen.getByLabelText( /0 items in cart/i )
-			).toBeInTheDocument()
+			expect( screen.getByLabelText( /0 items in cart/i ) ).toBeVisible()
 		);
 	} );
 
 	it( 'updates contents when added to cart event is triggered', async () => {
 		mockEmptyCart();
 		render( <MiniCartBlock /> );
-		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
+		await waitFor( () =>
+			expect( screen.getByLabelText( /0 items in cart/i ) ).toBeVisible()
+		);
 
 		mockFullCart();
 		// eslint-disable-next-line no-undef
@@ -194,7 +204,11 @@ describe( 'Testing Mini-Cart', () => {
 	it( 'renders cart price if "Hide Cart Price" setting is not enabled', async () => {
 		mockEmptyCart();
 		render( <MiniCartBlock hasHiddenPrice={ false } /> );
-		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
+		await waitFor( () =>
+			expect(
+				screen.getByLabelText( /0 items in cart/i )
+			).toBeInTheDocument()
+		);
 
 		await waitFor( () =>
 			expect( screen.getByText( '$0.00' ) ).toBeInTheDocument()
@@ -204,7 +218,11 @@ describe( 'Testing Mini-Cart', () => {
 	it( 'does not render cart price if "Hide Cart Price" setting is enabled', async () => {
 		mockEmptyCart();
 		const { container } = render( <MiniCartBlock /> );
-		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
+		await waitFor( () =>
+			expect(
+				screen.getByLabelText( /0 items in cart/i )
+			).toBeInTheDocument()
+		);
 
 		await waitFor( () =>
 			expect( queryByText( container, '$0.00' ) ).not.toBeInTheDocument()

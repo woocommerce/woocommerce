@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { test, expect } from '@woocommerce/e2e-utils';
+import { test, expect, BLOCK_THEME_SLUG } from '@woocommerce/e2e-utils';
 
 test.describe( 'Test the order confirmation template', () => {
 	test( 'Template can be opened in the site editor', async ( {
@@ -9,7 +9,7 @@ test.describe( 'Test the order confirmation template', () => {
 		admin,
 	} ) => {
 		await admin.visitSiteEditor( {
-			postId: 'woocommerce/woocommerce//order-confirmation',
+			postId: `${ BLOCK_THEME_SLUG }//order-confirmation`,
 			postType: 'wp_template',
 			canvas: 'edit',
 		} );

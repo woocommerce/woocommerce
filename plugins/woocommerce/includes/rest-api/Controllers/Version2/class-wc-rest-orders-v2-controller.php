@@ -225,20 +225,20 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 
 		// Add SKU, PRICE, and IMAGE to products.
 		if ( is_callable( array( $item, 'get_product' ) ) ) {
-			$data['sku']   = $item->get_product() ? $item->get_product()->get_sku() : null;
-			$data['price'] = $item->get_quantity() ? $item->get_total() / $item->get_quantity() : 0;
+			$product = $item->get_product();
 
-			$image_id      = $item->get_product() ? $item->get_product()->get_image_id() : 0;
+			$data['sku']              = $product ? $product->get_sku() : null;
+			$data['global_unique_id'] = $product ? $product->get_global_unique_id() : null;
+			$data['price']            = $item->get_quantity() ? $item->get_total() / $item->get_quantity() : 0;
+
+			$image_id = $product ? $product->get_image_id() : 0;
+
 			$data['image'] = array(
 				'id'  => $image_id,
 				'src' => $image_id ? wp_get_attachment_image_url( $image_id, 'full' ) : '',
 			);
-		}
 
-		// Add parent_name if the product is a variation.
-		if ( is_callable( array( $item, 'get_product' ) ) ) {
-			$product = $item->get_product();
-
+			// Add parent_name if the product is a variation.
 			if ( is_callable( array( $product, 'get_parent_data' ) ) ) {
 				$data['parent_name'] = $product->get_title();
 			} else {
@@ -294,21 +294,10 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 
 		// Add additional applied coupon information.
 		if ( $item instanceof WC_Order_Item_Coupon ) {
-			$temp_coupon = new WC_Coupon();
-			$coupon_info = $item->get_meta( 'coupon_info', true );
-			if ( $coupon_info ) {
-				$temp_coupon->set_short_info( $coupon_info );
-			} else {
-				$coupon_meta = $item->get_meta( 'coupon_data', true );
-				if ( $coupon_meta ) {
-					$temp_coupon->set_props( (array) $coupon_meta );
-
-				}
-			}
-
-			$data['discount_type']  = $temp_coupon->get_discount_type();
-			$data['nominal_amount'] = (float) $temp_coupon->get_amount();
-			$data['free_shipping']  = $temp_coupon->get_free_shipping();
+			$coupon                 = WC_Coupon::from_order_item( $item );
+			$data['discount_type']  = $coupon->get_discount_type();
+			$data['nominal_amount'] = (float) $coupon->get_amount();
+			$data['free_shipping']  = $coupon->get_free_shipping();
 		}
 
 		$data['meta_data'] = array_map(
@@ -1490,65 +1479,65 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 					'items'       => array(
 						'type'       => 'object',
 						'properties' => array(
-							'id'           => array(
+							'id'               => array(
 								'description' => __( 'Item ID.', 'woocommerce' ),
 								'type'        => 'integer',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
-							'name'         => array(
+							'name'             => array(
 								'description' => __( 'Product name.', 'woocommerce' ),
 								'type'        => 'mixed',
 								'context'     => array( 'view', 'edit' ),
 							),
-							'parent_name'  => array(
+							'parent_name'      => array(
 								'description' => __( 'Parent product name if the product is a variation.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 							),
-							'product_id'   => array(
+							'product_id'       => array(
 								'description' => __( 'Product ID.', 'woocommerce' ),
 								'type'        => 'mixed',
 								'context'     => array( 'view', 'edit' ),
 							),
-							'variation_id' => array(
+							'variation_id'     => array(
 								'description' => __( 'Variation ID, if applicable.', 'woocommerce' ),
 								'type'        => 'integer',
 								'context'     => array( 'view', 'edit' ),
 							),
-							'quantity'     => array(
+							'quantity'         => array(
 								'description' => __( 'Quantity ordered.', 'woocommerce' ),
 								'type'        => 'integer',
 								'context'     => array( 'view', 'edit' ),
 							),
-							'tax_class'    => array(
+							'tax_class'        => array(
 								'description' => __( 'Tax class of product.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 							),
-							'subtotal'     => array(
+							'subtotal'         => array(
 								'description' => __( 'Line subtotal (before discounts).', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 							),
-							'subtotal_tax' => array(
+							'subtotal_tax'     => array(
 								'description' => __( 'Line subtotal tax (before discounts).', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
-							'total'        => array(
+							'total'            => array(
 								'description' => __( 'Line total (after discounts).', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 							),
-							'total_tax'    => array(
+							'total_tax'        => array(
 								'description' => __( 'Line total tax (after discounts).', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
-							'taxes'        => array(
+							'taxes'            => array(
 								'description' => __( 'Line taxes.', 'woocommerce' ),
 								'type'        => 'array',
 								'context'     => array( 'view', 'edit' ),
@@ -1574,7 +1563,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 									),
 								),
 							),
-							'meta_data'    => array(
+							'meta_data'        => array(
 								'description' => __( 'Meta data.', 'woocommerce' ),
 								'type'        => 'array',
 								'context'     => array( 'view', 'edit' ),
@@ -1610,19 +1599,25 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 									),
 								),
 							),
-							'sku'          => array(
+							'sku'              => array(
 								'description' => __( 'Product SKU.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
-							'price'        => array(
+							'global_unique_id' => array(
+								'description' => __( 'GTIN, UPC, EAN or ISBN.', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => array( 'view', 'edit' ),
+								'readonly'    => true,
+							),
+							'price'            => array(
 								'description' => __( 'Product price.', 'woocommerce' ),
 								'type'        => 'number',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
-							'image'        => array(
+							'image'            => array(
 								'description' => __( 'Properties of the main product image.', 'woocommerce' ),
 								'type'        => 'object',
 								'context'     => array( 'view', 'edit' ),

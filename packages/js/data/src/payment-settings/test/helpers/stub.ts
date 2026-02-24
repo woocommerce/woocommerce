@@ -78,13 +78,18 @@ export const providersStub: PaymentsProvider[] = [
 		},
 		onboarding: {
 			state: {
+				supported: true,
 				started: false,
 				completed: false,
 				test_mode: true,
 			},
+			messages: {},
 			_links: {
 				onboard: {
 					href: 'http://localhost:8082/wp-admin/admin.php?page=wc-admin&path=/payments/onboarding',
+				},
+				reset: {
+					href: 'http://localhost:8082/wp-admin/admin.php?page=wc-admin&path=/payments/reset',
 				},
 			},
 			recommended_payment_methods: [
@@ -113,6 +118,7 @@ export const providersStub: PaymentsProvider[] = [
 						'http://localhost:8082/wp-content/plugins/woocommerce/assets/images/onboarding/extra-icon.svg',
 				},
 			],
+			type: 'native_in_context',
 		},
 		image: 'http://localhost:8082/wp-content/plugins/woocommerce/assets/images/onboarding/woopayments.svg',
 		icon: 'http://localhost:8082/wp-content/plugins/woocommerce/assets/images/onboarding/woopayments.svg',
@@ -183,19 +189,20 @@ export const offlinePaymentGatewaysStub: OfflinePaymentMethodProvider[] = [
 		management: {
 			_links: {
 				settings: {
-					href: 'http://localhost:8082/wp-admin/admin.php?page=wc-settings&tab=checkout&section=bacs',
+					href: 'http://localhost:8082/wp-admin/admin.php?page=wc-settings&tab=checkout&path=/offline/bacs',
 				},
 			},
 		},
 		onboarding: {
 			state: {
+				supported: true,
 				started: true,
 				completed: true,
 				test_mode: false,
 			},
 			_links: {
 				onboard: {
-					href: 'http://localhost:8082/wp-admin/admin.php?page=wc-settings&tab=checkout&section=bacs',
+					href: 'http://localhost:8082/wp-admin/admin.php?page=wc-settings&tab=checkout&path=/offline/bacs',
 				},
 			},
 		},
@@ -226,19 +233,20 @@ export const offlinePaymentGatewaysStub: OfflinePaymentMethodProvider[] = [
 		management: {
 			_links: {
 				settings: {
-					href: 'http://localhost:8082/wp-admin/admin.php?page=wc-settings&tab=checkout&section=cheque',
+					href: 'http://localhost:8082/wp-admin/admin.php?page=wc-settings&tab=checkout&path=/offline/cheque',
 				},
 			},
 		},
 		onboarding: {
 			state: {
+				supported: true,
 				started: true,
 				completed: true,
 				test_mode: false,
 			},
 			_links: {
 				onboard: {
-					href: 'http://localhost:8082/wp-admin/admin.php?page=wc-settings&tab=checkout&section=cheque',
+					href: 'http://localhost:8082/wp-admin/admin.php?page=wc-settings&tab=checkout&path=/offline/cheque',
 				},
 			},
 		},
@@ -269,19 +277,20 @@ export const offlinePaymentGatewaysStub: OfflinePaymentMethodProvider[] = [
 		management: {
 			_links: {
 				settings: {
-					href: 'http://localhost:8082/wp-admin/admin.php?page=wc-settings&tab=checkout&section=cod',
+					href: 'http://localhost:8082/wp-admin/admin.php?page=wc-settings&tab=checkout&path=/offline/cod',
 				},
 			},
 		},
 		onboarding: {
 			state: {
+				supported: true,
 				started: true,
 				completed: true,
 				test_mode: false,
 			},
 			_links: {
 				onboard: {
-					href: 'http://localhost:8082/wp-admin/admin.php?page=wc-settings&tab=checkout&section=cod',
+					href: 'http://localhost:8082/wp-admin/admin.php?page=wc-settings&tab=checkout&path=/offline/cod',
 				},
 			},
 		},

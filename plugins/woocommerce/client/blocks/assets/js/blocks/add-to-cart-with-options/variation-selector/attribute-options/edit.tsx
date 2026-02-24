@@ -1,19 +1,23 @@
 /**
  * External dependencies
  */
+import clsx from 'clsx';
+import { useCustomDataContext } from '@woocommerce/shared-context';
+import type { ProductResponseAttributeItem } from '@woocommerce/types';
 import { __ } from '@wordpress/i18n';
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import { type BlockEditProps } from '@wordpress/blocks';
 import {
 	Disabled,
-	PanelBody,
 	SelectControl,
+	ToggleControl,
 	__experimentalToggleGroupControl as ToggleGroupControl,
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToolsPanel as ToolsPanel,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';
-import { useCustomDataContext } from '@woocommerce/shared-context';
-import type { ProductResponseAttributeItem } from '@woocommerce/types';
-import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -22,7 +26,9 @@ import { useThemeColors } from '../../../../shared/hooks/use-theme-colors';
 
 interface Attributes {
 	className?: string;
-	style?: 'pills' | 'dropdown';
+	optionStyle: 'pills' | 'dropdown';
+	autoselect: boolean;
+	disabledAttributesAction: 'disable' | 'hide';
 }
 
 function Pills( {
@@ -61,7 +67,8 @@ export default function AttributeOptionsEdit(
 	props: BlockEditProps< Attributes >
 ) {
 	const { attributes, setAttributes } = props;
-	const { className, style } = attributes;
+	const { className, optionStyle, autoselect, disabledAttributesAction } =
+		attributes;
 
 	const blockProps = useBlockProps( {
 		className,
@@ -72,9 +79,8 @@ export default function AttributeOptionsEdit(
 		'add-to-cart-with-options-variation-selector-attribute-options',
 		( { editorBackgroundColor, editorColor } ) => `
 			:where(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill--selected) {
-				background-color: ${ editorColor };
-				color: ${ editorBackgroundColor };
-				border-color: ${ editorColor };
+				--pill-color: ${ editorBackgroundColor };
+				--pill-background-color: ${ editorColor };
 			}
 		`
 	);
@@ -82,7 +88,7 @@ export default function AttributeOptionsEdit(
 	const { data: attribute } =
 		useCustomDataContext< ProductResponseAttributeItem >( 'attribute' );
 
-	if ( ! attribute ) return;
+	if ( ! attribute ) return null;
 
 	const options = attribute.terms.map( ( term, index ) => ( {
 		value: term.slug,
@@ -93,32 +99,126 @@ export default function AttributeOptionsEdit(
 	return (
 		<div { ...blockProps }>
 			<InspectorControls>
-				<PanelBody title={ __( 'Style', 'woocommerce' ) }>
-					<ToggleGroupControl
-						value={ style }
-						onChange={ ( option: 'pills' | 'dropdown' ) => {
-							setAttributes( { style: option } );
-						} }
-						isBlock
-						hideLabelFromVision
-						size="__unstable-large"
+				<ToolsPanel
+					label={ __( 'Style', 'woocommerce' ) }
+					resetAll={ () => setAttributes( { optionStyle: 'pills' } ) }
+				>
+					<ToolsPanelItem
+						hasValue={ () => optionStyle !== 'pills' }
+						label={ __( 'Style', 'woocommerce' ) }
+						onDeselect={ () =>
+							setAttributes( { optionStyle: 'pills' } )
+						}
+						isShownByDefault
 					>
-						<ToggleGroupControlOption
-							value="pills"
-							label={ __( 'Pills', 'woocommerce' ) }
+						<ToggleGroupControl
+							label={ __( 'Style', 'woocommerce' ) }
+							value={ optionStyle }
+							onChange={ ( newOptionStyle ) => {
+								if (
+									newOptionStyle === 'pills' ||
+									newOptionStyle === 'dropdown'
+								) {
+									setAttributes( {
+										optionStyle: newOptionStyle,
+									} );
+								}
+							} }
+							isBlock
+							hideLabelFromVision
+							size="__unstable-large"
+						>
+							<ToggleGroupControlOption
+								value="pills"
+								label={ __( 'Pills', 'woocommerce' ) }
+							/>
+							<ToggleGroupControlOption
+								value="dropdown"
+								label={ __( 'Dropdown', 'woocommerce' ) }
+							/>
+						</ToggleGroupControl>
+					</ToolsPanelItem>
+				</ToolsPanel>
+				<ToolsPanel
+					label={ __( 'Auto-select', 'woocommerce' ) }
+					resetAll={ () =>
+						setAttributes( {
+							autoselect: false,
+							disabledAttributesAction: 'disable',
+						} )
+					}
+				>
+					<ToolsPanelItem
+						label={ __(
+							'Auto-select when only one option is available',
+							'woocommerce'
+						) }
+						hasValue={ () => autoselect }
+						onDeselect={ () =>
+							setAttributes( { autoselect: false } )
+						}
+						isShownByDefault
+					>
+						<ToggleControl
+							label={ __(
+								'Auto-select when only one option is available',
+								'woocommerce'
+							) }
+							help={ __(
+								'Automatically select options on page load or after the shopper changes attributes, when only one valid choice is available.',
+								'woocommerce'
+							) }
+							checked={ autoselect }
+							onChange={ () =>
+								setAttributes( { autoselect: ! autoselect } )
+							}
+							__nextHasNoMarginBottom
 						/>
-						<ToggleGroupControlOption
-							value="dropdown"
-							label={ __( 'Dropdown', 'woocommerce' ) }
-						/>
-					</ToggleGroupControl>
-				</PanelBody>
+					</ToolsPanelItem>
+					<ToolsPanelItem
+						label={ __( 'Invalid options', 'woocommerce' ) }
+						hasValue={ () =>
+							disabledAttributesAction !== 'disable'
+						}
+						onDeselect={ () =>
+							setAttributes( {
+								disabledAttributesAction: 'disable',
+							} )
+						}
+						isShownByDefault
+					>
+						<ToggleGroupControl
+							label={ __( 'Invalid options', 'woocommerce' ) }
+							help={ __(
+								'Control the display of invalid options.',
+								'woocommerce'
+							) }
+							value={ disabledAttributesAction }
+							onChange={ ( value ) => {
+								if ( value === 'hide' || value === 'disable' ) {
+									setAttributes( {
+										disabledAttributesAction: value,
+									} );
+								}
+							} }
+							isBlock
+							size="__unstable-large"
+						>
+							<ToggleGroupControlOption
+								value="disable"
+								label={ __( 'Grayed-out', 'woocommerce' ) }
+							/>
+							<ToggleGroupControlOption
+								value="hide"
+								label={ __( 'Hidden', 'woocommerce' ) }
+							/>
+						</ToggleGroupControl>
+					</ToolsPanelItem>
+				</ToolsPanel>
 			</InspectorControls>
 
 			<Disabled>
-				{ style === 'pills' ? (
-					<Pills id={ attribute.taxonomy } options={ options } />
-				) : (
+				{ optionStyle === 'dropdown' ? (
 					<select
 						id={ attribute.taxonomy }
 						className="wc-block-add-to-cart-with-options-variation-selector-attribute-options__dropdown"
@@ -129,6 +229,8 @@ export default function AttributeOptionsEdit(
 							</option>
 						) ) }
 					</select>
+				) : (
+					<Pills id={ attribute.taxonomy } options={ options } />
 				) }
 			</Disabled>
 		</div>

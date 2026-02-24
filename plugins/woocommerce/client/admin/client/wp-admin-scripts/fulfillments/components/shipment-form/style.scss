@@ -1,0 +1,156 @@
+.woocommerce-fulfillment-shipment-information-options {
+	width: 100%;
+	.woocommerce-fulfillment-shipment-information-option-tracking-number,
+	.woocommerce-fulfillment-shipment-information-option-manual-entry,
+	.woocommerce-fulfillment-shipment-information-option-no-info {
+		display: flex;
+		flex-direction: column;
+		padding: 20px 0;
+		gap: 16px;
+		width: 100%;
+		justify-content: flex-start;
+		border-bottom: 1px solid #e0e0e0;
+		.components-checkbox-control {
+			width: 100%;
+			svg {
+				display: none;
+			}
+		}
+	}
+
+	.woocommerce-fulfillment-shipment-information-option-tracking-number {
+		padding: 12px 0 20px 0;
+	}
+
+	.woocommerce-fulfillment-shipment-information-option-no-info {
+		border-bottom: 0;
+		padding: 20px 0 12px 0;
+	}
+
+	.woocommerce-fulfillment-input-container {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		width: 100%;
+
+		h4 {
+			font-size: 11px;
+			line-height: 16px;
+			font-weight: 500;
+			color: #1e1e1e;
+			margin: 0;
+			text-transform: uppercase;
+		}
+
+		.woocommerce-fulfillment-input-group {
+			display: flex;
+			flex-direction: row;
+			gap: 12px;
+			width: 100%;
+			align-items: flex-end;
+			justify-content: flex-start;
+			position: relative;
+
+			& > div {
+				flex: 1;
+			}
+
+			&.space-between {
+				justify-content: space-between;
+			}
+
+			.woocommerce-fulfillment-shipment-provider-search-icon {
+				position: absolute;
+				right: 14px;
+				top: 36px;
+			}
+
+			.woocommerce-fulfillment-shipment-provider-icon {
+				width: 16px;
+				height: 16px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				float: left;
+				margin-right: 8px;
+
+				img {
+					height: 16px;
+				}
+			}
+
+			.components-base-control {
+				flex: 1;
+				.components-base-control__field {
+					margin: 0;
+				}
+			}
+
+			.woocommerce-fulfillment-input {
+				width: 100%;
+				border-radius: 2px;
+				border: 1px solid #ddd;
+				padding: 4px 8px;
+				font-size: 13px;
+				line-height: 20px;
+				color: #1e1e1e;
+
+				&::placeholder {
+					color: var(--wc-admin-subtext, #767676);
+					font-size: 11px;
+					line-height: 16px;
+					font-weight: 400;
+				}
+			}
+			.components-combobox-control__suggestions-container {
+				.components-form-token-field__suggestions-list {
+					max-height: 180px;
+					li {
+						padding: 0 16px;
+						background-color: var(--wc-content-bg, #fff);
+						&:hover,
+						&.is-selected {
+							background-color: var(--wp-admin-theme-color, #3858e9);
+						}
+
+						.woocommerce-fulfillment-shipping-provider-list-item {
+							display: flex;
+							flex-direction: row;
+							gap: 8px;
+							align-items: center;
+							justify-content: flex-start;
+							padding: 8px 0;
+
+							&.woocommerce-fulfillment-shipping-provider-list-item-other {
+								border-top: 1px solid #e0e0e0;
+							}
+
+							.woocommerce-fulfillment-shipping-provider-list-item-icon {
+								width: 24px;
+								height: 24px;
+								display: flex;
+								align-items: center;
+								justify-content: center;
+
+								img {
+									width: 16px;
+									height: 16px;
+								}
+							}
+							.woocommerce-fulfillment-shipping-provider-list-item-label {
+								flex: 1;
+								font-size: 13px;
+								line-height: 20px;
+								font-weight: 400;
+							}
+						}
+						&:has(.woocommerce-fulfillment-shipping-provider-list-item-other) {
+							position: sticky;
+							bottom: 0;
+						}
+					}
+				}
+			}
+		}
+	}
+}

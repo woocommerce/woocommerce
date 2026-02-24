@@ -5,9 +5,11 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
+use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils;
+use Automattic\WooCommerce\Enums\ProductType;
 
 /**
- * CatalogSorting class.
+ * AddToCartForm class.
  */
 class AddToCartForm extends AbstractBlock {
 
@@ -35,7 +37,6 @@ class AddToCartForm extends AbstractBlock {
 		return wp_parse_args( $attributes, $defaults );
 	}
 
-
 	/**
 	 * Enqueue assets specific to this block.
 	 * We enqueue frontend scripts only if the quantitySelectorStyle is set to 'stepper'.
@@ -45,7 +46,8 @@ class AddToCartForm extends AbstractBlock {
 	 * @param WP_Block $block Block instance.
 	 */
 	protected function enqueue_assets( $attributes, $content, $block ) {
-		if ( 'stepper' !== $attributes['quantitySelectorStyle'] ) {
+		$parsed_attributes = $this->parse_attributes( $attributes );
+		if ( 'stepper' !== $parsed_attributes['quantitySelectorStyle'] ) {
 			return;
 		}
 
@@ -61,28 +63,27 @@ class AddToCartForm extends AbstractBlock {
 	 */
 	protected function enqueue_data( array $attributes = [] ) {
 		parent::enqueue_data( $attributes );
-		$this->asset_data_registry->add( 'isStepperLayoutFeatureEnabled', Features::is_enabled( 'add-to-cart-with-options-stepper-layout' ) );
 		$this->asset_data_registry->add( 'isBlockTheme', wp_is_block_theme() );
 	}
 
 	/**
 	 * Add increment and decrement buttons to the quantity input field.
 	 *
-	 * @param string $product_html add-to-cart form HTML.
+	 * @param string $product_html Add to Cart form HTML.
 	 * @param string $product_name Product name.
-	 * @return stringa add-to-cart form HTML with increment and decrement buttons.
+	 * @return string Add to Cart form HTML with increment and decrement buttons.
 	 */
 	private function add_steppers( $product_html, $product_name ) {
 		// Regex pattern to match the <input> element with id starting with 'quantity_'.
 		$pattern = '/(<input[^>]*id="quantity_[^"]*"[^>]*\/>)/';
-		// Replacement string to add button BEFORE the matched <input> element.
+		// Replacement string to add button AFTER the matched <input> element.
 		/* translators: %s refers to the item name in the cart. */
-		$minus_button = '<button aria-label="' . esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) ) . '"type="button" data-wp-on--click="actions.removeQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">-</button>$1';
+		$minus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.removeQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">−</button>';
 		// Replacement string to add button AFTER the matched <input> element.
 		/* translators: %s refers to the item name in the cart. */
 		$plus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Increase quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.addQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">+</button>';
-		$new_html    = preg_replace( $pattern, $minus_button, $product_html );
-		$new_html    = preg_replace( $pattern, $plus_button, $new_html );
+		$new_html    = preg_replace( $pattern, $plus_button, $product_html );
+		$new_html    = preg_replace( $pattern, $minus_button, $new_html );
 		return $new_html;
 	}
 
@@ -119,7 +120,7 @@ class AddToCartForm extends AbstractBlock {
 	 */
 	private function has_all_attributes_set( $product ) {
 		// If it's not a variation product, return true.
-		if ( ! $product->is_type( 'variation' ) ) {
+		if ( ! $product->is_type( ProductType::VARIATION ) ) {
 			return true;
 		}
 
@@ -168,7 +169,7 @@ class AddToCartForm extends AbstractBlock {
 		}
 
 		// Check if all attributes are set for variation product.
-		if ( $product->is_type( 'variation' ) && ! $this->has_all_attributes_set( $product ) ) {
+		if ( $product->is_type( ProductType::VARIATION ) && ! $this->has_all_attributes_set( $product ) ) {
 			$product = $previous_product;
 
 			return '';
@@ -178,10 +179,13 @@ class AddToCartForm extends AbstractBlock {
 		$managing_stock               = $product->managing_stock();
 		$stock_quantity               = $product->get_stock_quantity();
 
+		$should_hide_quantity_selector = $product->is_sold_individually() || Utils::is_min_max_quantity_same( $product ) || ( $managing_stock && $stock_quantity <= 1 );
+
 		/**
 		 * The stepper buttons don't show when the product is sold individually or stock quantity is less or equal to 1 because the quantity input field is hidden.
+		 * Additionally, if min and max purchase quantity are the same, the buttons should not be rendered at all.
 		 */
-		$is_stepper_style = 'stepper' === $attributes['quantitySelectorStyle'] && ! $product->is_sold_individually() && ( ( $managing_stock && $stock_quantity > 1 ) || ! $managing_stock ) && Features::is_enabled( 'add-to-cart-with-options-stepper-layout' );
+		$is_stepper_style = 'stepper' === $attributes['quantitySelectorStyle'] && ! $should_hide_quantity_selector;
 
 		if ( $is_descendent_of_single_product_block ) {
 			add_filter( 'woocommerce_add_to_cart_form_action', array( $this, 'add_to_cart_form_action' ), 10 );
@@ -218,11 +222,17 @@ class AddToCartForm extends AbstractBlock {
 			return '';
 		}
 
-		$product_name = $product->get_name();
-		$product_html = $is_stepper_style ? $this->add_steppers( $product_html, $product_name ) : $product_html;
+		// If the quantity input is hidden, don't render the stepper buttons and styles.
+		if ( $is_stepper_style && ! Utils::has_visible_quantity_input( $product_html ) ) {
+			$is_stepper_style = false;
+		}
 
-		$parsed_attributes  = $this->parse_attributes( $attributes );
-		$product_html       = $is_stepper_style ? $this->add_stepper_classes_to_add_to_cart_form_input( $product_html ) : $product_html;
+		if ( $is_stepper_style ) {
+			$product_name = $product->get_name();
+			$product_html = $this->add_steppers( $product_html, $product_name );
+			$product_html = $this->add_stepper_classes_to_add_to_cart_form_input( $product_html );
+		}
+
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
 
 		$product_classname = $is_descendent_of_single_product_block ? 'product' : '';

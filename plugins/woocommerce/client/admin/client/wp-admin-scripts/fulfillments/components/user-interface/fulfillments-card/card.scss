@@ -1,0 +1,69 @@
+.woocommerce-fulfillment-card {
+	border: 1px solid #e0e0e0;
+	border-radius: 4px;
+	display: flex;
+	flex-direction: column;
+
+	& &__header {
+		& &--clickable {
+			cursor: pointer;
+		}
+		display: flex;
+		gap: 8px;
+		align-items: center;
+		justify-content: space-between;
+		padding: 16px 24px;
+
+		h3 {
+			display: flex;
+			flex: 1;
+			align-items: center;
+			gap: 8px;
+			flex: 1;
+			font-size: 13px;
+			line-height: 20px;
+			font-weight: 500;
+			color: #1e1e1e;
+			margin: 0;
+			padding: 0 !important;
+		}
+		img,
+		svg {
+			width: 24px;
+			height: 24px;
+			box-sizing: border-box;
+			padding: 2px 4px;
+		}
+		button {
+			padding: 0;
+			width: 24px;
+			height: 24px;
+			border: 0;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+
+			&:focus {
+				outline: none;
+				box-shadow: none;
+			}
+		}
+	}
+
+	& &__body {
+		display: flex;
+		padding: 8px 24px 24px 24px;
+		&.no-collapse {
+			padding: 0 24px 24px 24px;
+		}
+	}
+}
+
+.woocommerce-fulfillment-card__size-small {
+	.woocommerce-fulfillment-card__header {
+		padding: 16px 24px 0;
+	}
+	.woocommerce-fulfillment-card__body {
+		padding: 8px 24px 16px 24px !important;
+	}
+}

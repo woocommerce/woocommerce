@@ -74,7 +74,10 @@ $task-alert-yellow: #f0b849;
 	}
 
 	.woocommerce-task-list__item-text {
-		padding: $gap 0;
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		gap: $gap;
 
 		.woocommerce-pill {
 			padding: 1px $gap-smaller;
@@ -120,6 +123,17 @@ $task-alert-yellow: #f0b849;
 	.woocommerce-task-list__item-after {
 		display: flex;
 		align-items: center;
+	}
+
+	.woocommerce-task-list__item-progress {
+		background-color: var(--Alias-bg-bg-surface-warning, #fff2d7);
+		border-radius: 4px;
+		color: var(--Alias-text-text-warning, #4d3716);
+		padding: var(--grid-unit-05, $gap-smallest) var(--grid-unit-10, $gap-smaller);
+		font-size: 12px;
+		font-style: normal;
+		font-weight: 400;
+		line-height: 16px;
 	}
 
 	.woocommerce-task-list__item-before .woocommerce-task__icon {

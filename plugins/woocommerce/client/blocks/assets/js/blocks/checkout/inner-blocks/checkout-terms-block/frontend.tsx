@@ -14,7 +14,6 @@ import { validationStore } from '@woocommerce/block-data';
  * Internal dependencies
  */
 import { termsConsentDefaultText, termsCheckboxDefaultText } from './constants';
-import { CheckoutOrderSummarySlot } from '../checkout-order-summary-block/slotfills';
 
 const FrontendBlock = ( {
 	text,
@@ -37,11 +36,14 @@ const FrontendBlock = ( {
 	const { setValidationErrors, clearValidationError } =
 		useDispatch( validationStore );
 
-	const error = useSelect( ( select ) => {
-		return select( validationStore ).getValidationError(
-			validationErrorId
-		);
-	} );
+	const error = useSelect(
+		( select ) => {
+			return select( validationStore ).getValidationError(
+				validationErrorId
+			);
+		},
+		[ validationErrorId ]
+	);
 	const hasError = !! ( error?.message && ! error?.hidden );
 
 	// Track validation errors for this input.
@@ -75,7 +77,6 @@ const FrontendBlock = ( {
 
 	return (
 		<>
-			<CheckoutOrderSummarySlot />
 			<div
 				className={ clsx(
 					'wc-block-checkout__terms',
@@ -89,24 +90,20 @@ const FrontendBlock = ( {
 				) }
 			>
 				{ checkbox ? (
-					<>
-						<CheckboxControl
-							id="terms-and-conditions"
-							checked={ checked }
-							onChange={ () =>
-								setChecked( ( value ) => ! value )
-							}
-							hasError={ hasError }
-							disabled={ isDisabled }
-						>
-							<span
-								className="wc-block-components-checkbox__label"
-								dangerouslySetInnerHTML={ {
-									__html: text || termsCheckboxDefaultText,
-								} }
-							/>
-						</CheckboxControl>
-					</>
+					<CheckboxControl
+						id="terms-and-conditions"
+						checked={ checked }
+						onChange={ () => setChecked( ( value ) => ! value ) }
+						hasError={ hasError }
+						disabled={ isDisabled }
+					>
+						<span
+							className="wc-block-components-checkbox__label"
+							dangerouslySetInnerHTML={ {
+								__html: text || termsCheckboxDefaultText,
+							} }
+						/>
+					</CheckboxControl>
 				) : (
 					<span
 						className="wc-block-components-checkbox__label"

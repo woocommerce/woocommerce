@@ -10,7 +10,10 @@
 		"multiple": false,
 		"reusable": false,
 		"inserter": false,
-		"lock": false
+		"lock": false,
+		"interactivity": {
+			"clientNavigation": true
+		}
 	},
 	"attributes": {
 		"lock": {
@@ -21,9 +24,7 @@
 			}
 		}
 	},
-	"parent": [
-		"woocommerce/filled-mini-cart-contents-block"
-	],
+	"parent": [ "woocommerce/filled-mini-cart-contents-block" ],
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"

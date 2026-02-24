@@ -1,4 +1,0 @@
-Significance: patch
-Type: enhancement
-
-Add theme color pallete to base theme and remove the default heading color and use text color as fallback

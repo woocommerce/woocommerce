@@ -1,4 +1,3 @@
-/* eslint-disable no-shadow */
 /* eslint-disable import/no-unresolved */
 /**
  * External dependencies
@@ -50,8 +49,8 @@ export function products() {
 		);
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
-			"body contains: 'Products' header": ( response ) =>
-				response.body.includes( 'Products</h1>' ),
+			"body contains: 'Products' header": ( r ) =>
+				r.body.includes( 'Products</h1>' ),
 		} );
 
 		// Correlate nonce values for use in subsequent requests.
@@ -62,8 +61,8 @@ export function products() {
 		);
 		api_x_wp_nonce = findBetween(
 			response.body,
-			'wp-json\\/","nonce":"',
-			'",'
+			'wp.apiFetch.createNonceMiddleware( "',
+			'" )'
 		);
 
 		// Create request header with nonce value for use in subsequent requests.

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-Comment: Hide the quantity selector in the experimental minicart when the product is sold individually.
-

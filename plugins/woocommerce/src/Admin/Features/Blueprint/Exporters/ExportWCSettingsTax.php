@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Admin\Features\Blueprint\Exporters;
 use Automattic\WooCommerce\Blueprint\UseWPFunctions;
 use Automattic\WooCommerce\Blueprint\Steps\RunSql;
 use Automattic\WooCommerce\Blueprint\Util;
+use Automattic\WooCommerce\Admin\Features\Blueprint\SettingOptions;
 
 /**
  * Class ExportWCSettingsTax
@@ -17,6 +18,15 @@ use Automattic\WooCommerce\Blueprint\Util;
  */
 class ExportWCSettingsTax extends ExportWCSettings {
 	use UseWPFunctions;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param SettingOptions|null $setting_options The setting options class.
+	 */
+	public function __construct( ?SettingOptions $setting_options = null ) { // phpcs:ignore Generic.CodeAnalysis.UselessOverridingMethod.Found
+		parent::__construct( $setting_options );
+	}
 
 	/**
 	 * Get the alias for this exporter.
@@ -38,6 +48,7 @@ class ExportWCSettingsTax extends ExportWCSettings {
 
 		return array(
 			$basic_tax_settings,
+			...$this->generateTaxRateSteps( 'wc_tax_rate_classes' ),
 			...$this->generateTaxRateSteps( 'woocommerce_tax_rates' ),
 			...$this->generateTaxRateSteps( 'woocommerce_tax_rate_locations' ),
 		);

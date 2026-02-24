@@ -12,8 +12,10 @@
 		"inserter": true,
 		"color": {
 			"text": true,
-			"background": true,
-			"__experimentalSkipSerialization": true
+			"background": true
+		},
+		"interactivity": {
+			"clientNavigation": true
 		}
 	},
 	"attributes": {
@@ -23,6 +25,10 @@
 				"remove": false,
 				"move": false
 			}
+		},
+		"startShoppingButtonLabel": {
+			"type": "string",
+			"default": ""
 		}
 	},
 	"styles": [
@@ -36,9 +42,7 @@
 			"label": "Outline"
 		}
 	],
-	"parent": [
-		"woocommerce/empty-mini-cart-contents-block"
-	],
+	"parent": [ "woocommerce/empty-mini-cart-contents-block" ],
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"

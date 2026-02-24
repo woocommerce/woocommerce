@@ -480,6 +480,7 @@ class DataSynchronizerTests extends \HposTestCase {
 		// Sync enabled and CPT authoritative.
 		update_option( $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, 'yes' );
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
+		add_filter( 'woocommerce_hpos_enable_sync_on_read', '__return_true' );
 
 		$order = OrderHelper::create_order();
 		$order->add_meta_data( 'foo', 'bar' );
@@ -503,6 +504,91 @@ class DataSynchronizerTests extends \HposTestCase {
 			'',
 			'Meta data deleted from the CPT datastore should also be deleted from the HPOS datastore.'
 		);
+		remove_all_filters( 'woocommerce_hpos_enable_sync_on_read' );
+	}
+
+	/**
+	 * @testdox When an order sync is performed, changes to meta data should propagate from the CPT to the HPOS datastore
+	 * preserving number of values in metadata as well as handling values deleted at the source.
+	 *
+	 * @return void
+	 */
+	public function test_sync_propagates_meta_data_to_hpos(): void {
+		$legacy_handler = wc_get_container()->get( \Automattic\WooCommerce\Internal\DataStores\Orders\LegacyDataHandler::class );
+
+		// Sync disabled, no sync-on-read and legacy authoritative.
+		add_filter( 'woocommerce_hpos_enable_sync_on_read', '__return_false' );
+		update_option( $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, 'no' );
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
+
+		// Create (and sync) an order with some metadata.
+		$legacy_order = OrderHelper::create_order();
+		$legacy_order->add_meta_data( 'foo', 'bar' );
+		$legacy_order->add_meta_data( 'quux', 'yes' );
+		$legacy_order->save();
+		$this->sut->process_batch( array( $legacy_order->get_id() ) );
+
+		// Load the order from HPOS and confirm metadata matches.
+		$hpos_order = $legacy_handler->get_order_from_datastore( $legacy_order->get_id(), 'hpos' );
+		$this->assertEquals( $hpos_order->get_meta( 'foo' ), 'bar' );
+		$this->assertEquals( $hpos_order->get_meta( 'quux' ), 'yes' );
+
+		// Add 'baz' to 'foo' meta.
+		$legacy_order = wc_get_order( $legacy_order->get_id() );
+		$legacy_order->add_meta_data( 'foo', 'baz' );
+		$legacy_order->save();
+		$this->sut->process_batch( array( $legacy_order->get_id() ) );
+
+		$hpos_order = $legacy_handler->get_order_from_datastore( $legacy_order->get_id(), 'hpos' );
+		$this->assertEqualsCanonicalizing( array_column( $hpos_order->get_meta( 'foo', false ), 'value' ), array( 'bar', 'baz' ) );
+
+		// Remove 'quux' meta.
+		$legacy_order = wc_get_order( $legacy_order->get_id() );
+		$legacy_order->delete_meta_data( 'quux' );
+		$legacy_order->save();
+		$this->sut->process_batch( array( $legacy_order->get_id() ) );
+
+		$hpos_order = $legacy_handler->get_order_from_datastore( $legacy_order->get_id(), 'hpos' );
+		$this->assertEquals( $hpos_order->get_meta( 'quux' ), '' );
+
+		remove_all_filters( 'woocommerce_hpos_enable_sync_on_read' );
+	}
+
+	/**
+	 * @testDox When sync-on-read is enabled, orders with placeholder posts are not updated with placeholder data during sync-on-read.
+	 */
+	public function test_sync_on_read_with_placeholder_post() {
+		$this->toggle_cot_authoritative( true );
+		$this->disable_cot_sync();
+
+		$order = new \WC_Order();
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->set_billing_first_name( 'Duke' );
+		$order->set_billing_last_name( 'Ellington' );
+		$order->save();
+
+		add_filter( 'pre_option_' . $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, fn() => 'yes', 999 );
+		add_filter( 'woocommerce_hpos_enable_sync_on_read', '__return_true' );
+
+		// Ensure placeholder exists.
+		$this->assertEquals( $this->sut::PLACEHOLDER_ORDER_POST_TYPE, get_post_type( $order->get_id() ) );
+
+		// Read order to trigger sync-on-read.
+		$order = wc_get_order( $order->get_id() );
+
+		// Ensure values were not updated based on placeholder.
+		$this->assertEquals( 'Duke', $order->get_billing_first_name() );
+		$this->assertEquals( 'Ellington', $order->get_billing_last_name() );
+		$this->assertEquals( OrderStatus::PROCESSING, $order->get_status() );
+
+		// Save order to update placeholder.
+		$order->save();
+
+		// Confirm placeholder has been updated.
+		$this->assertNotEquals( $this->sut::PLACEHOLDER_ORDER_POST_TYPE, get_post_type( $order->get_id() ) );
+
+		remove_all_filters( 'pre_option_' . $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION );
+		remove_all_filters( 'woocommerce_hpos_enable_sync_on_read' );
 	}
 
 	/**

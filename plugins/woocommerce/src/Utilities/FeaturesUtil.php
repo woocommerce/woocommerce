@@ -39,7 +39,37 @@ class FeaturesUtil {
 	 * @return bool True if the feature is enabled, false if not or if the feature doesn't exist.
 	 */
 	public static function feature_is_enabled( string $feature_id ): bool {
-		return wc_get_container()->get( FeaturesController::class )->feature_is_enabled( $feature_id );
+		$features_controller = wc_get_container()->get( FeaturesController::class );
+		$feature             = $features_controller->get_feature_definition( $feature_id );
+
+		// Log deprecation notice for deprecated features (only from the public API).
+		if ( ! empty( $feature['deprecated_since'] ) ) {
+			self::log_deprecated_feature_usage( $feature_id, $feature['deprecated_since'] );
+		}
+
+		return $features_controller->feature_is_enabled( $feature_id );
+	}
+
+	/**
+	 * Log usage of a deprecated feature.
+	 *
+	 * This method ensures logging only happens once per request to avoid spam.
+	 *
+	 * @param string $feature_id       The feature id being checked.
+	 * @param string $deprecated_since The version since which the feature is deprecated.
+	 */
+	private static function log_deprecated_feature_usage( string $feature_id, string $deprecated_since ): void {
+		static $logged = array();
+
+		if ( isset( $logged[ $feature_id ] ) ) {
+			return;
+		}
+		$logged[ $feature_id ] = true;
+
+		wc_deprecated_function(
+			"FeaturesUtil::feature_is_enabled('{$feature_id}')",
+			$deprecated_since
+		);
 	}
 
 	/**
@@ -55,15 +85,11 @@ class FeaturesUtil {
 	 * @return bool True on success, false on error (feature doesn't exist or not inside the required hook).
 	 */
 	public static function declare_compatibility( string $feature_id, string $plugin_file, bool $positive_compatibility = true ): bool {
-		$plugin_id = wc_get_container()->get( PluginUtil::class )->get_wp_plugin_id( $plugin_file );
-
-		if ( ! $plugin_id ) {
-			$logger = wc_get_logger();
-			$logger->error( "FeaturesUtil::declare_compatibility: {$plugin_file} is not a known WordPress plugin." );
-			return false;
-		}
-
-		return wc_get_container()->get( FeaturesController::class )->declare_compatibility( $feature_id, $plugin_id, $positive_compatibility );
+		return wc_get_container()->get( FeaturesController::class )->declare_compatibility(
+			$feature_id,
+			$plugin_file,
+			$positive_compatibility
+		);
 	}
 
 	/**

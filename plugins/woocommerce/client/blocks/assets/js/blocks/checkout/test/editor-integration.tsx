@@ -1,11 +1,16 @@
 /**
  * External dependencies
  */
-import { act, screen } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 import { registerCheckoutFilters } from '@woocommerce/blocks-checkout';
 import { type BlockAttributes } from '@wordpress/blocks';
 import { getByLabelText, getByRole } from '@testing-library/dom';
 import { userEvent } from '@testing-library/user-event';
+
+jest.mock( '@wordpress/data', () =>
+	// eslint-disable-next-line @typescript-eslint/no-var-requires -- Must use require due to Jest mock hoisting
+	require( '@woocommerce/blocks-test-utils/mock-editor-store' ).mockWordPressDataWithEditorStore()
+);
 
 /**
  * Internal dependencies
@@ -46,9 +51,13 @@ describe( 'Checkout block editor integration', () => {
 		await setup( {} );
 
 		// Verify Checkout block is properly initialized in the editor.
-		expect(
-			screen.getByLabelText( /^Block: Checkout$/i )
-		).toBeInTheDocument();
+		expect( screen.getByLabelText( /^Block: Checkout$/i ) ).toBeVisible();
+
+		await waitFor( () => {
+			expect(
+				screen.getByLabelText( /^Block: Order Summary$/i )
+			).toBeVisible();
+		} );
 
 		const orderSummaryBlock = screen.getByLabelText(
 			/^Block: Order Summary$/i
@@ -77,11 +86,13 @@ describe( 'Checkout block editor integration', () => {
 			( element ) => element.textContent === 'Audio'
 		);
 
-		// Verify Table option is available (should be available on all blocks).
-		expect( tableOption ).toBeInTheDocument();
+		await waitFor( () => {
+			// Verify Table option is available (should be available on all blocks).
+			expect( tableOption ).toBeInTheDocument();
 
-		// Verify Audio option is available (added only for checkout totals block).
-		expect( audioOption ).toBeInTheDocument();
+			// Verify Audio option is available (added only for checkout totals block).
+			expect( audioOption ).toBeInTheDocument();
+		} );
 
 		await act( async () => {
 			await userEvent.click(
@@ -108,7 +119,9 @@ describe( 'Checkout block editor integration', () => {
 		const contactInformationTableOption = screen.getByRole( 'option', {
 			name: /Table/i,
 		} );
-		expect( contactInformationTableOption ).toBeInTheDocument();
+		await waitFor( () => {
+			expect( contactInformationTableOption ).toBeVisible();
+		} );
 
 		// Verify Audio option is NOT available (block-specific filter only applies to Checkout Totals).
 		const ContactInformationAudioOption = screen.queryByRole( 'option', {

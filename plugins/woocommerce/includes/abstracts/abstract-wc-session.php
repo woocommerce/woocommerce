@@ -7,6 +7,8 @@
  * @package     WooCommerce\Abstracts
  */
 
+declare(strict_types=1);
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -19,23 +21,23 @@ abstract class WC_Session {
 	/**
 	 * Customer ID.
 	 *
-	 * @var string $_customer_id Customer ID.
+	 * @var ?string $_customer_id Customer ID.
 	 */
-	protected $_customer_id;
+	protected $_customer_id; // phpcs:ignore PSR2.Classes.PropertyDeclaration.Underscore
 
 	/**
 	 * Session Data.
 	 *
 	 * @var array $_data Data array.
 	 */
-	protected $_data = array();
+	protected $_data = array(); // phpcs:ignore PSR2.Classes.PropertyDeclaration.Underscore
 
 	/**
 	 * Dirty when the session needs saving.
 	 *
 	 * @var bool $_dirty When something changes
 	 */
-	protected $_dirty = false;
+	protected $_dirty = false; // phpcs:ignore PSR2.Classes.PropertyDeclaration.Underscore
 
 	/**
 	 * Init hooks and session data. Extended by child classes.
@@ -52,7 +54,7 @@ abstract class WC_Session {
 	/**
 	 * Magic get method.
 	 *
-	 * @param mixed $key Key to get.
+	 * @param string $key Key to get.
 	 * @return mixed
 	 */
 	public function __get( $key ) {
@@ -62,8 +64,8 @@ abstract class WC_Session {
 	/**
 	 * Magic set method.
 	 *
-	 * @param mixed $key Key to set.
-	 * @param mixed $value Value to set.
+	 * @param string $key Key to set.
+	 * @param mixed  $value Value to set.
 	 */
 	public function __set( $key, $value ) {
 		$this->set( $key, $value );
@@ -72,17 +74,17 @@ abstract class WC_Session {
 	/**
 	 * Magic isset method.
 	 *
-	 * @param mixed $key Key to check.
+	 * @param string $key Key to check.
 	 * @return bool
 	 */
 	public function __isset( $key ) {
-		return isset( $this->_data[ sanitize_title( $key ) ] );
+		return isset( $this->_data[ sanitize_key( $key ) ] );
 	}
 
 	/**
 	 * Magic unset method.
 	 *
-	 * @param mixed $key Key to unset.
+	 * @param string $key Key to unset.
 	 */
 	public function __unset( $key ) {
 		$key = sanitize_key( $key );
@@ -96,12 +98,12 @@ abstract class WC_Session {
 	 * Get a session variable.
 	 *
 	 * @param string $key Key to get.
-	 * @param mixed  $default used if the session variable isn't set.
-	 * @return array|string value of session variable
+	 * @param mixed  $default_value used if the session variable isn't set.
+	 * @return mixed value of session variable
 	 */
-	public function get( $key, $default = null ) {
+	public function get( $key, $default_value = null ) {
 		$key = sanitize_key( $key );
-		return isset( $this->_data[ $key ] ) ? maybe_unserialize( $this->_data[ $key ] ) : $default;
+		return isset( $this->_data[ $key ] ) ? maybe_unserialize( $this->_data[ $key ] ) : $default_value;
 	}
 
 	/**
@@ -130,11 +132,11 @@ abstract class WC_Session {
 	}
 
 	/**
-	 * Get customer ID.
+	 * Get customer ID. If the session is not initialized, returns an empty string.
 	 *
 	 * @return string
 	 */
 	public function get_customer_id() {
-		return $this->_customer_id;
+		return $this->_customer_id ?? '';
 	}
 }

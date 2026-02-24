@@ -155,7 +155,8 @@ class Controller extends AbstractBlock {
 		if (
 			$is_product_collection_block &&
 			'woocommerce/product-collection' === $block_name &&
-			! $force_page_reload_global
+			! $force_page_reload_global &&
+			isset( $parsed_block['attrs']['queryId'] )
 		) {
 			$enhanced_query_stack[] = $parsed_block['attrs']['queryId'];
 
@@ -179,7 +180,7 @@ class Controller extends AbstractBlock {
 						return $content;
 					}
 
-					if ( isset( $dirty_enhanced_queries[ $block['attrs']['queryId'] ] ) ) {
+					if ( isset( $block['attrs']['queryId'] ) && isset( $dirty_enhanced_queries[ $block['attrs']['queryId'] ] ) ) {
 						wp_interactivity_config( 'core/router', array( 'clientNavigationDisabled' => true ) );
 						$dirty_enhanced_queries[ $block['attrs']['queryId'] ] = null;
 					}
@@ -283,13 +284,15 @@ class Controller extends AbstractBlock {
 			return $this->query_builder->get_preview_query_args( $collection_args, array_merge( $query, array( 'orderby' => $orderby ) ), $request );
 		}
 
-		$on_sale             = $request->get_param( 'woocommerceOnSale' ) === 'true';
-		$stock_status        = $request->get_param( 'woocommerceStockStatus' );
-		$product_attributes  = $request->get_param( 'woocommerceAttributes' );
-		$handpicked_products = $request->get_param( 'woocommerceHandPickedProducts' );
-		$featured            = $request->get_param( 'featured' );
-		$time_frame          = $request->get_param( 'timeFrame' );
-		$price_range         = $request->get_param( 'priceRange' );
+		$on_sale                        = $request->get_param( 'woocommerceOnSale' ) === 'true';
+		$stock_status                   = $request->get_param( 'woocommerceStockStatus' );
+		$product_attributes             = $request->get_param( 'woocommerceAttributes' );
+		$handpicked_products            = $request->get_param( 'woocommerceHandPickedProducts' );
+		$featured                       = $request->get_param( 'featured' );
+		$time_frame                     = $request->get_param( 'timeFrame' );
+		$price_range                    = $request->get_param( 'priceRange' );
+		$raw_tax_query_from_rest_params = $query['tax_query'] ?? array();
+
 		// This argument is required for the tests to PHP Unit Tests to run correctly.
 		// Most likely this argument is being accessed in the test environment image.
 		$query['author'] = '';
@@ -307,6 +310,7 @@ class Controller extends AbstractBlock {
 				'featured'            => $featured,
 				'timeFrame'           => $time_frame,
 				'priceRange'          => $price_range,
+				'taxonomies_query'    => $raw_tax_query_from_rest_params,
 			)
 		);
 	}

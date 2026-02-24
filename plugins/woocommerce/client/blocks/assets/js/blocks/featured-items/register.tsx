@@ -92,7 +92,6 @@ export function register(
 			alt: '',
 			contentAlign: 'center',
 			dimRatio: 50,
-			editMode: false,
 			hasParallax: false,
 			isRepeated: false,
 			height: getSetting( 'defaultHeight', 500 ),

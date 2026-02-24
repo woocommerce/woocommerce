@@ -100,7 +100,8 @@ export const IncentiveBanner = ( {
 	}, [ incentive, provider ] );
 
 	/**
-	 * Handles accepting the incentive.
+	 * Handles explicitly accepting the incentive via the banner CTA button.
+	 *
 	 * Triggers the onAccept callback, dismisses the banner, and triggers plugin setup.
 	 */
 	const handleAccept = () => {

@@ -21,6 +21,19 @@
 			"isBanned": true
 		},
 		{
+			"label": "Allow @woocommerce/tracks to support Node.js v22+",
+			"dependencies": [
+				"node"
+			],
+			"dependencyTypes": [
+				"engines"
+			],
+			"pinVersion": ">=20.11.1",
+			"packages": [
+				"@woocommerce/tracks"
+			]
+		},
+		{
 			"dependencies": [
 				"node"
 			],
@@ -159,6 +172,15 @@
 				"**"
 			],
 			"pinVersion": "5.7.x"
+		},
+		{
+			"dependencies": [
+				"jest-fixed-jsdom"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^0.0.10"
 		},
 		{
 			"dependencies": [
@@ -320,7 +342,16 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^1.50.1"
+			"pinVersion": "^1.57.0"
+		},
+		{
+			"dependencies": [
+				"playwright-ctrf-json-reporter"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "0.0.27"
 		},
 		{
 			"dependencies": [
@@ -388,7 +419,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "10.17.0"
+			"pinVersion": "11.0.1-next.v.20260206T143.0"
 		},
 		{
 			"dependencies": [
@@ -435,6 +466,15 @@
 				"**"
 			],
 			"pinVersion": "next"
+		},
+		{
+			"dependencies": [
+				"@wordpress/global-styles-engine"
+			],
+			"packages": [
+				"**"
+			],
+			"isIgnored": true
 		},
 		{
 			"label": "@wordpress/* runtime-dependencies",
@@ -571,7 +611,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "27.5.x"
+			"pinVersion": "29.5.x"
 		},
 		{
 			"dependencies": [
@@ -607,7 +647,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^2.5.7"
+			"pinVersion": "^3.2.6"
 		},
 		{
 			"dependencies": [

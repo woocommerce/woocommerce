@@ -2,13 +2,18 @@
  * External dependencies
  */
 import { useSelect } from '@wordpress/data';
+import { isString } from '@woocommerce/types';
+import { CORE_EDITOR_STORE } from '@woocommerce/utils';
 
 export const useIsDescendentOfSingleProductTemplate = () => {
 	const isDescendentOfSingleProductTemplate = useSelect( ( select ) => {
-		const store = select( 'core/edit-site' );
-		const postId = store?.getEditedPostId< string | undefined >();
+		const editor = select( CORE_EDITOR_STORE );
+		// @ts-expect-error getEditedPostSlug is not typed
+		const postSlug = editor?.getEditedPostSlug?.();
 
-		return Boolean( postId?.includes( '//single-product' ) );
+		return isString( postSlug )
+			? postSlug.includes( 'single-product' )
+			: false;
 	}, [] );
 
 	return { isDescendentOfSingleProductTemplate };

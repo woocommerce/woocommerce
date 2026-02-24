@@ -32,6 +32,7 @@
 			"__experimentalDefaultControls": {
 				"fontSize": true
 			}
-		}
+		},
+		"email": true
 	}
 }

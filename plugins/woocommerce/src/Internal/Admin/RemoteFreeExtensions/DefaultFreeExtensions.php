@@ -69,7 +69,6 @@ class DefaultFreeExtensions {
 				'title'   => __( 'Grow your store', 'woocommerce' ),
 				'plugins' => array(
 					self::get_plugin( 'google-listings-and-ads:alt' ),
-					self::get_plugin( 'multichannel-by-cedcommerce' ),
 					self::get_plugin( 'tiktok-for-business' ),
 					self::get_plugin( 'pinterest-for-woocommerce:alt' ),
 					self::get_plugin( 'facebook-for-woocommerce:alt' ),
@@ -89,6 +88,9 @@ class DefaultFreeExtensions {
 						self::get_plugin( 'google-listings-and-ads' ),
 						self::get_plugin( 'woocommerce-services:tax' ),
 						self::get_plugin( 'tiktok-for-business' ),
+						self::get_plugin( 'snapchat-for-woocommerce' ),
+						self::get_plugin( 'facebook-for-woocommerce' ),
+						self::get_plugin( 'reddit-for-woocommerce' ),
 					)
 				),
 			),
@@ -137,18 +139,6 @@ class DefaultFreeExtensions {
 				'manage_url'     => 'admin.php?page=wc-admin&path=%2Fgoogle%2Fstart',
 				'is_built_by_wc' => true,
 			),
-			'multichannel-by-cedcommerce'   => array(
-				'name'             => __( 'Multichannel for WooCommerce', 'woocommerce' ),
-				'description'      => __( 'Sync your sales data across platforms and manage everything from a unified dashboard.', 'woocommerce' ),
-				'image_url'        => plugins_url( '/assets/images/onboarding/multichannel.webp', WC_PLUGIN_FILE ),
-				'manage_url'       => 'admin.php?page=sales_channel',
-				'is_built_by_wc'   => false,
-				'install_external' => true,
-				'learn_more_link'  => 'https://woocommerce.com/products/multichannel-by-cedcommerce-ebay-amazon-walmart-etsy-integration/?utm_source=marketing_task&utm_medium=product',
-				'tags'             => array(
-					'marketplace',
-				),
-			),
 			'facebook-for-woocommerce'      => array(
 				'name'           => __( 'Facebook for WooCommerce', 'woocommerce' ),
 				'description'    => __( 'List products and create ads on Facebook and Instagram with <a href="https://woocommerce.com/products/facebook/">Facebook for WooCommerce</a>', 'woocommerce' ),
@@ -190,7 +180,7 @@ class DefaultFreeExtensions {
 					array(
 						'type'        => 'option',
 						'option_name' => 'woocommerce_remote_variant_assignment',
-						'value'       => array( 1, 60 ), // 50% segment with klaviyo
+						'value'       => array( 1, 84 ), // 70% segment with klaviyo
 						'default'     => false,
 						'operation'   => 'range',
 					),
@@ -220,7 +210,7 @@ class DefaultFreeExtensions {
 					array(
 						'type'        => 'option',
 						'option_name' => 'woocommerce_remote_variant_assignment',
-						'value'       => array( 61, 120 ), // 50% segment with mailpoet
+						'value'       => array( 85, 120 ), // 30% segment with mailpoet
 						'default'     => false,
 						'operation'   => 'range',
 					),
@@ -467,6 +457,22 @@ class DefaultFreeExtensions {
 				'is_built_by_wc' => false,
 				'is_visible'     => false,
 			),
+			'snapchat-for-woocommerce'      => array(
+				'name'           => __( 'Snapchat Ads', 'woocommerce' ),
+				'description'    => __( 'Reach an untapped audience on Snapchat and drive more sales.', 'woocommerce' ),
+				'image_url'      => plugins_url( '/assets/images/core-profiler/logo-snapchat.svg', WC_PLUGIN_FILE ),
+				'manage_url'     => 'admin.php?page=wc-admin&path=%2Fsnapchat%2Fstart',
+				'is_built_by_wc' => true,
+				'is_visible'     => true,
+			),
+			'reddit-for-woocommerce'        => array(
+				'name'           => __( 'Reddit Ads', 'woocommerce' ),
+				'description'    => __( 'Seamlessly sync your products and start Reddit Ads.', 'woocommerce' ),
+				'image_url'      => plugins_url( '/assets/images/core-profiler/logo-reddit.svg', WC_PLUGIN_FILE ),
+				'manage_url'     => 'admin.php?page=wc-admin&path=%2Freddit%2Fsetup',
+				'is_built_by_wc' => true,
+				'is_visible'     => true,
+			),
 		);
 
 		$plugin        = $plugins[ $slug ];
@@ -489,7 +495,8 @@ class DefaultFreeExtensions {
 	public static function with_core_profiler_fields( array $plugins ) {
 		$_plugins = array(
 			'woocommerce-payments'      => array(
-				'label'            => __( 'Get paid with WooPayments', 'woocommerce' ),
+				/* translators: %s: Payment provider name. */
+				'label'            => sprintf( __( 'Get paid with %s', 'woocommerce' ), 'WooPayments' ),
 				'image_url'        => self::get_woo_logo(),
 				'description'      => __( "Securely accept payments and manage payment activity straight from your store's dashboard", 'woocommerce' ),
 				'learn_more_link'  => 'https://woocommerce.com/products/woocommerce-payments?utm_source=storeprofiler&utm_medium=product&utm_campaign=freefeatures',
@@ -553,6 +560,27 @@ class DefaultFreeExtensions {
 				'learn_more_link'  => 'https://woocommerce.com/products/google-listings-and-ads?utm_source=storeprofiler&utm_medium=product&utm_campaign=freefeatures',
 				'install_priority' => 6,
 			),
+			'snapchat-for-woocommerce'  => array(
+				'label'            => __( 'Find New Customers with Snapchat Ads', 'woocommerce' ),
+				'image_url'        => plugins_url( '/assets/images/core-profiler/logo-snapchat.svg', WC_PLUGIN_FILE ),
+				'description'      => __( 'Reach an untapped audience on Snapchat and drive more sales.', 'woocommerce' ),
+				'learn_more_link'  => 'https://woocommerce.com/products/snapchat/?utm_source=storeprofiler&utm_medium=product&utm_campaign=freefeatures',
+				'install_priority' => 1,
+			),
+			'facebook-for-woocommerce'  => array(
+				'label'            => __( 'Grow your business with Facebook and Instagram', 'woocommerce' ),
+				'image_url'        => plugins_url( '/assets/images/core-profiler/logo-facebook.svg', WC_PLUGIN_FILE ),
+				'description'      => __( 'List products and create ads on Facebook and Instagram.', 'woocommerce' ),
+				'learn_more_link'  => 'https://woocommerce.com/products/facebook/?utm_source=storeprofiler&utm_medium=product&utm_campaign=freefeatures',
+				'install_priority' => 2,
+			),
+			'reddit-for-woocommerce'    => array(
+				'label'            => __( 'Find New Customers with Reddit Ads', 'woocommerce' ),
+				'image_url'        => plugins_url( '/assets/images/core-profiler/logo-reddit.svg', WC_PLUGIN_FILE ),
+				'description'      => __( 'Seamlessly sync your products and start Reddit Ads.', 'woocommerce' ),
+				'learn_more_link'  => 'https://woocommerce.com/products/reddit/?utm_source=storeprofiler&utm_medium=product&utm_campaign=freefeatures',
+				'install_priority' => 1,
+			),
 			'woocommerce-services:tax'  => array(
 				'label'            => __( 'Get automated tax rates with WooCommerce Tax', 'woocommerce' ),
 				'image_url'        => self::get_woo_logo(),
@@ -572,6 +600,37 @@ class DefaultFreeExtensions {
 
 		$_plugins['woocommerce-services:tax']['is_visible'] = array(
 			self::get_rules_for_wcservices_tax_countries(),
+		);
+
+		// TikTok, Pinterest, and Facebook share a single spot with 1/3 rotation each.
+		$_plugins['tiktok-for-business']['is_visible'] = array(
+			array(
+				'type'        => 'option',
+				'option_name' => 'woocommerce_remote_variant_assignment',
+				'value'       => array( 1, 40 ),
+				'default'     => false,
+				'operation'   => 'range',
+			),
+		);
+
+		$_plugins['pinterest-for-woocommerce']['is_visible'] = array(
+			array(
+				'type'        => 'option',
+				'option_name' => 'woocommerce_remote_variant_assignment',
+				'value'       => array( 41, 80 ),
+				'default'     => false,
+				'operation'   => 'range',
+			),
+		);
+
+		$_plugins['facebook-for-woocommerce']['is_visible'] = array(
+			array(
+				'type'        => 'option',
+				'option_name' => 'woocommerce_remote_variant_assignment',
+				'value'       => array( 81, 120 ),
+				'default'     => false,
+				'operation'   => 'range',
+			),
 		);
 
 		$remove_plugins_activated_rule = function ( $is_visible ) {

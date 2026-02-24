@@ -23,7 +23,6 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		// Test valid prices data with single hash structure.
 		$valid_prices = array(
-			'version'    => $current_version,
 			$price_hash1 => array(
 				'price'         => array(
 					123 => '10.00',
@@ -47,7 +46,6 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		// Test valid prices data with multiple hash structure.
 		$valid_prices_multiple = array(
-			'version'    => $current_version,
 			$price_hash1 => array(
 				'price'         => array(
 					123 => '10.00',
@@ -91,7 +89,6 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		// Test valid prices data with empty sale prices.
 		$valid_prices_empty_sale = array(
-			'version'    => $current_version,
 			$price_hash1 => array(
 				'price'         => array(
 					123 => '15.00',
@@ -115,7 +112,6 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		// Test valid prices data with mixed empty and set prices.
 		$valid_prices_mixed = array(
-			'version'    => $current_version,
 			$price_hash1 => array(
 				'price'         => array(
 					123 => '10.00',
@@ -150,7 +146,6 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		// Test missing required price types.
 		$missing_price_types = array(
-			'version'    => $current_version,
 			$price_hash1 => array(
 				'price' => array( 123 => '10.00' ),
 				// missing regular_price and sale_price.
@@ -164,7 +159,6 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		// Test invalid variation ID type.
 		$invalid_variation_id = array(
-			'version'    => $current_version,
 			$price_hash1 => array(
 				'price'         => array( 'not_numeric' => '10.00' ),
 				'regular_price' => array( 'not_numeric' => '15.00' ),
@@ -179,7 +173,6 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		// Test invalid price value type.
 		$invalid_price_value = array(
-			'version'    => $current_version,
 			$price_hash1 => array(
 				'price'         => array( 123 => 'not_numeric' ),
 				'regular_price' => array( 123 => 'not_numeric' ),
@@ -192,24 +185,8 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			'Non-numeric price values should fail validation'
 		);
 
-		// Test mismatched version.
-		$wrong_version = array(
-			'version'    => 'wrong_version',
-			$price_hash1 => array(
-				'price'         => array( 123 => '10.00' ),
-				'regular_price' => array( 123 => '15.00' ),
-				'sale_price'    => array( 123 => '10.00' ),
-			),
-		);
-
-		$this->assertFalse(
-			$this->invokeMethod( $data_store, 'validate_prices_data', array( $wrong_version, $current_version ) ),
-			'Data with wrong version should fail validation'
-		);
-
 		// Test one valid hash and one invalid hash.
 		$mixed_valid_invalid = array(
-			'version'    => $current_version,
 			$price_hash1 => array(
 				'price'         => array( 123 => '10.00' ),
 				'regular_price' => array( 123 => '15.00' ),
@@ -229,7 +206,6 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		// Test empty prices data with version (likely corrupt).
 		$empty_prices_with_version = array(
-			'version'    => $current_version,
 			$price_hash1 => array(
 				'price'         => array(),
 				'regular_price' => array(),
@@ -260,7 +236,6 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		// Test valid children data.
 		$valid_children = array(
-			'version' => $current_version,
 			'all'     => array( 123, 456, 789 ),
 			'visible' => array( 123, 456 ),
 		);
@@ -278,8 +253,7 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		// Test missing required keys.
 		$missing_keys = array(
-			'version' => $current_version,
-			'all'     => array( 123, 456 ),
+			'all' => array( 123, 456 ),
 			// missing 'visible' key.
 		);
 
@@ -290,7 +264,6 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		// Test invalid child ID type.
 		$invalid_child_id = array(
-			'version' => $current_version,
 			'all'     => array( 'not_numeric', 456 ),
 			'visible' => array( 'not_numeric' ),
 		);
@@ -302,7 +275,6 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		// Test invalid arrays for all/visible.
 		$invalid_arrays = array(
-			'version' => $current_version,
 			'all'     => 'not an array',
 			'visible' => 'not an array',
 		);
@@ -312,21 +284,8 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			'Non-array values for all/visible should fail validation'
 		);
 
-		// Test mismatched version.
-		$wrong_version = array(
-			'version' => 'wrong_version',
-			'all'     => array( 123, 456 ),
-			'visible' => array( 123 ),
-		);
-
-		$this->assertFalse(
-			$this->invokeMethod( $data_store, 'validate_children_data', array( $wrong_version, $current_version ) ),
-			'Data with wrong version should fail validation'
-		);
-
 		// Test empty children data with version (likely corrupt).
 		$empty_children_with_version = array(
-			'version' => $current_version,
 			'all'     => array(),
 			'visible' => array(),
 		);
@@ -504,6 +463,172 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox read_prices caches both prices for display and not for display when prices are the same in both cases.
+	 *
+	 * @testWith [false, true, true, false]
+	 *           [false, false, true, false]
+	 *           [true, true, false, false]
+	 *           [true, true, true, true]
+	 *
+	 * @param bool $tax_enabled Taxes enabled shop-wide or not.
+	 * @param bool $taxable_product Product is taxable or not.
+	 * @param bool $tax_has_rates Product tax has defined rates or not.
+	 * @param bool $user_vat_exempt User is VAT exempt or not.
+	 */
+	public function test_read_prices_cache_when_taxes_dont_influence_price( bool $tax_enabled, bool $taxable_product, bool $tax_has_rates, bool $user_vat_exempt ) {
+		add_filter( 'wc_tax_enabled', $tax_enabled ? '__return_true' : '__return_false' );
+		add_filter( 'woocommerce_product_is_taxable', $taxable_product ? '__return_true' : '__return_false' );
+		add_filter( 'woocommerce_matched_rates', $tax_has_rates ? array( $this, '__return_rates' ) : '__return_empty_array' );
+		WC()->customer->set_is_vat_exempt( $user_vat_exempt );
+
+		$data_store     = new WC_Product_Variable_Data_Store_CPT();
+		$product        = WC_Helper_Product::create_variation_product();
+		$transient_name = 'wc_var_prices_' . $product->get_id();
+		delete_transient( $transient_name );
+
+		$extended_data_store = $this->get_data_store_with_public_get_price_hash();
+
+		$expected_hashes = array_unique( array( $extended_data_store->get_price_hash( $product, true ), $extended_data_store->get_price_hash( $product, false ) ) );
+		sort( $expected_hashes );
+
+		delete_transient( $transient_name );
+		$data_store->read_price_data( $product, false );
+		$actual_hashes = array_unique( $this->get_keys_for_json_encoded_transient( $transient_name ) );
+		sort( $actual_hashes );
+		$this->assertEquals( $expected_hashes, $actual_hashes );
+
+		$data_store = new WC_Product_Variable_Data_Store_CPT();
+		delete_transient( $transient_name );
+		$data_store->read_price_data( $product, false );
+		$actual_hashes = array_unique( $this->get_keys_for_json_encoded_transient( $transient_name ) );
+		sort( $actual_hashes );
+		$this->assertEquals( $expected_hashes, $actual_hashes );
+
+		remove_filter( 'wc_tax_enabled', $tax_enabled ? '__return_true' : '__return_false' );
+		remove_filter( 'woocommerce_product_is_taxable', $taxable_product ? '__return_true' : '__return_false' );
+		remove_filter( 'woocommerce_matched_rates', $tax_has_rates ? array( $this, '__return_rates' ) : '__return_empty_array' );
+	}
+
+	/**
+	 * @testdox read_prices does separate caching for prices for display and not for display when they are different.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $for_display Test getting prices for display or not for display.
+	 */
+	public function test_read_prices_cache_when_taxes_influence_price( bool $for_display ) {
+		add_filter( 'wc_tax_enabled', '__return_true' );
+		add_filter( 'woocommerce_product_is_taxable', '__return_true' );
+		add_filter( 'woocommerce_matched_rates', array( $this, '__return_rates' ) );
+		WC()->customer->set_is_vat_exempt( false );
+
+		$data_store     = new WC_Product_Variable_Data_Store_CPT();
+		$product        = WC_Helper_Product::create_variation_product();
+		$transient_name = 'wc_var_prices_' . $product->get_id();
+		delete_transient( $transient_name );
+
+		$extended_data_store = $this->get_data_store_with_public_get_price_hash();
+
+		delete_transient( $transient_name );
+		$data_store->read_price_data( $product, $for_display );
+		$expected_hashes = array( $extended_data_store->get_price_hash( $product, $for_display ) );
+		$actual_hashes   = array_unique( $this->get_keys_for_json_encoded_transient( $transient_name ) );
+		$this->assertEquals( $expected_hashes, $actual_hashes );
+
+		remove_filter( 'wc_tax_enabled', '__return_true' );
+		remove_filter( 'woocommerce_product_is_taxable', '__return_true' );
+		remove_filter( 'woocommerce_matched_rates', array( $this, '__return_rates' ) );
+	}
+
+	/**
+	 * @testdox read_prices skips unified caching if code hooked to woocommerce_variation_prices_array modifies the prices array.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $hook_modifies_prices The hooked code modifies the prices array or not.
+	 * @return void
+	 */
+	public function test_read_prices_cache_when_taxes_dont_influence_price_plus_hook( bool $hook_modifies_prices ) {
+		add_filter( 'wc_tax_enabled', '__return_true' );
+		add_filter( 'woocommerce_product_is_taxable', '__return_false' );
+		add_filter( 'woocommerce_matched_rates', array( $this, '__return_rates' ) );
+		WC()->customer->set_is_vat_exempt( false );
+
+		add_filter(
+			'woocommerce_variation_prices_array',
+			function ( $prices_array, $variation, $for_display ) use ( $hook_modifies_prices ) {
+				if ( $hook_modifies_prices ) {
+					$prices_array['foobar'] = $for_display;
+				}
+				return $prices_array;
+			},
+			10,
+			3
+		);
+
+		$data_store     = new WC_Product_Variable_Data_Store_CPT();
+		$product        = WC_Helper_Product::create_variation_product();
+		$transient_name = 'wc_var_prices_' . $product->get_id();
+		delete_transient( $transient_name );
+
+		$extended_data_store = $this->get_data_store_with_public_get_price_hash();
+
+		$data_store->read_price_data( $product, true );
+		$actual_hashes   = array_unique( $this->get_keys_for_json_encoded_transient( $transient_name ) );
+		$expected_hashes =
+			$hook_modifies_prices ?
+			array( $extended_data_store->get_price_hash( $product, true ) ) :
+			array( $extended_data_store->get_price_hash( $product, true ), $extended_data_store->get_price_hash( $product, false ) );
+		$this->assertEquals( $expected_hashes, $actual_hashes );
+
+		remove_all_filters( 'woocommerce_variation_prices_array' );
+		remove_filter( 'wc_tax_enabled', '__return_true' );
+		remove_filter( 'woocommerce_product_is_taxable', '__return_false' );
+		remove_filter( 'woocommerce_matched_rates', array( $this, '__return_rates' ) );
+	}
+
+	/**
+	 * Get an instance of WC_Product_Variable_Data_Store_CPT whose get_price_hash method is public.
+	 *
+	 * @return WC_Product_Variable_Data_Store_CPT
+	 */
+	private function get_data_store_with_public_get_price_hash(): object {
+		// phpcs:disable Generic.CodeAnalysis, Squiz.Commenting
+		return new class() extends WC_Product_Variable_Data_Store_CPT {
+			public function get_price_hash( &$product, $for_display = false ) {
+				return parent::get_price_hash( $product, $for_display );
+			}
+		};
+		// phpcs:enable Generic.CodeAnalysis, Squiz.Commenting
+	}
+
+	/**
+	 * Parse a variable product prices transient and return the hashes only.
+	 *
+	 * @param string $transient_name Name of the transient to parse.
+	 * @return array
+	 */
+	private function get_keys_for_json_encoded_transient( string $transient_name ): array {
+		return array_keys( array_filter( (array) json_decode( strval( get_transient( $transient_name ) ), true ) ) );
+	}
+
+	/**
+	 * Return dummy tax rates.
+	 *
+	 * @return array
+	 */
+	public function __return_rates() {
+		return array(
+			'rate'     => 10,
+			'label'    => 'rate',
+			'shipping' => 'no',
+			'compund'  => 'no',
+		);
+	}
+
+	/**
 	 * @testdox Test read_price_data method works even when price validation fails
 	 */
 	public function test_read_price_data_with_validation_failure() {
@@ -580,5 +705,36 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			get_transient( 'wc_product_children_' . $product->get_id() ),
 			'Transient should not be set when validation fails'
 		);
+	}
+
+	/**
+	 * Tests `read_attributes` for handling metas migration due to sanitize_title BC breaks.
+	 */
+	public function test_read_attributes_addresses_bc_break_in_sanitize(): void {
+		$product    = WC_Helper_Product::create_variation_product();
+		$product_id = $product->get_id();
+		$child_ids  = array_values( $product->get_children() );
+
+		// Patch up the metas to match pre-BC state.
+		$attributes                      = get_post_meta( $product_id, '_product_attributes', true );
+		$attributes['Size/Size']         = $attributes['pa_size'];
+		$attributes['Size/Size']['name'] = 'Size/Size';
+		unset( $attributes['pa_size'] );
+		update_post_meta( $product_id, '_product_attributes', $attributes );
+		foreach ( $child_ids as $child_id ) {
+			update_post_meta( $child_id, 'attribute_Size/Size', get_post_meta( $child_id, 'attribute_pa_size', true ) );
+			delete_post_meta( $child_id, 'attribute_pa_size' );
+		}
+
+		// Reload the product object, so the migration is executed.
+		$product = wc_get_product( $product_id );
+
+		// Verify the migrated entries and cleanup.
+		$sizes = array( 'small', 'large', 'huge', 'huge', 'huge', 'huge' );
+		foreach ( $child_ids as $index => $child_id ) {
+			$this->assertSame( $sizes[ $index ], get_post_meta( $child_id, 'attribute_size-size', true ) );
+			$this->assertSame( $sizes[ $index ], get_post_meta( $child_id, 'attribute_Size/Size', true ) );
+		}
+		$product->delete();
 	}
 }

@@ -157,6 +157,20 @@ const ExpressPaymentMethods = () => {
 	 * paymentMethodInterface itself also updates on most renders.
 	 */
 	const entries = Object.entries( paymentMethods );
+	/*
+	 * Define the elements used for the Express Payments markup.
+	 *
+	 * When multiple express payment options are available, this will use an
+	 * unordered list to display each option.
+	 *
+	 * When only one express payment option is available, this will use a
+	 * non-semantic DIV for both the wrapper and the individual items. This
+	 * is to prevent accessibility issues caused by a list of one (which isn't
+	 * a list).
+	 */
+	const ExpressPayWrapper = entries.length > 1 ? 'ul' : 'div';
+	const ExpressPayItem = entries.length > 1 ? 'li' : 'div';
+
 	const content =
 		entries.length > 0 ? (
 			entries.map( ( [ id, paymentMethod ] ) => {
@@ -164,7 +178,10 @@ const ExpressPaymentMethods = () => {
 					? paymentMethod.edit
 					: paymentMethod.content;
 				return isValidElement( expressPaymentMethod ) ? (
-					<li key={ id } id={ `express-payment-method-${ id }` }>
+					<ExpressPayItem
+						key={ id }
+						id={ `express-payment-method-${ id }` }
+					>
 						{ cloneElement( expressPaymentMethod, {
 							...paymentMethodInterface,
 							onClick: onExpressPaymentClick( id ),
@@ -174,20 +191,20 @@ const ExpressPaymentMethods = () => {
 								deprecatedSetExpressPaymentError,
 							buttonAttributes,
 						} ) }
-					</li>
+					</ExpressPayItem>
 				) : null;
 			} )
 		) : (
-			<li key="noneRegistered">
+			<div key="noneRegistered">
 				{ __( 'No registered Payment Methods', 'woocommerce' ) }
-			</li>
+			</div>
 		);
 
 	return (
 		<PaymentMethodErrorBoundary isEditor={ isEditor }>
-			<ul className="wc-block-components-express-payment__event-buttons">
+			<ExpressPayWrapper className="wc-block-components-express-payment__event-buttons">
 				{ content }
-			</ul>
+			</ExpressPayWrapper>
 		</PaymentMethodErrorBoundary>
 	);
 };

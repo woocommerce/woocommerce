@@ -79,16 +79,15 @@ $gutenberg-blueberry-focus: #1d35b4;
 			&__wrapper {
 				width: 620px;
 				max-width: 620px;
-				margin: 56px auto 0;
+				margin: 56px auto;
 				display: flex;
 				flex-direction: column;
 				align-items: center;
-				margin-bottom: $gap-large;
 
 				@media screen and ( max-width: $break-xlarge ) {
 					width: 100%;
 					padding: 0 $gap;
-					margin: $gap auto 0;
+					margin: $gap auto;
 				}
 			}
 
@@ -121,7 +120,6 @@ $gutenberg-blueberry-focus: #1d35b4;
 			}
 
 			&__content {
-				max-width: 615px;
 				width: 100%;
 			}
 
@@ -181,6 +179,35 @@ $gutenberg-blueberry-focus: #1d35b4;
 		.components-custom-select-control,
 		.components-grouped-select-control {
 			margin-bottom: $gap-large;
+		}
+
+		.components-custom-select-control button.components-custom-select-control__button,
+		.components-grouped-select-control button.components-grouped-select-control__button {
+			margin: 0;
+		}
+
+		.components-custom-select-control .components-custom-select-control__menu,
+		.components-grouped-select-control .components-grouped-select-control__list {
+			margin-left: 0;
+			margin-right: 0;
+
+			// Use :after to force the list to take on more vertical space so that when opened in a container with scroll,
+			// the list does not sit flush with the bottom.
+			&::after {
+				content: " ";
+				position: absolute;
+				top: 0;
+				height: 100%;
+				width: 1px;
+				margin-top: $gap-larger; // This is what makes the list take more vertical space.
+				background: transparent;
+				pointer-events: none;
+				z-index: 0;
+
+				@media screen and ( max-width: $break-xlarge ) {
+					margin-top: $gap; // Align the bottom gap with the side padding.
+				}
+			}
 		}
 
 		.components-form-field__error {

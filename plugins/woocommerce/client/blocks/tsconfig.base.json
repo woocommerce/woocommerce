@@ -124,6 +124,9 @@
 			"@woocommerce/stores/woocommerce/product-data": [
 				"assets/js/base/stores/woocommerce/product-data"
 			],
+			"@woocommerce/stores/woocommerce/products": [
+				"assets/js/base/stores/woocommerce/products"
+			],
 			"@woocommerce/type-defs/*": [
 				"assets/js/types/type-defs/*"
 			],
@@ -139,15 +142,21 @@
 			"@woocommerce/e2e-utils": [
 				"tests/e2e/utils"
 			],
-			"@woocommerce/templates/*": [
-				"assets/js/templates/*"
-			],
 			"@wordpress/interactivity": [
 				"node_modules/@wordpress/interactivity/src/index.ts"
 			],
 			"@wordpress/interactivity-router": [
 				"node_modules/@wordpress/interactivity-router/src/index.ts"
-			]
+			],
+			"@woocommerce/test-utils/msw": [
+				"tests/js/config/msw-setup"
+			],
+			"@woocommerce/entities": [
+				"assets/js/entities"
+			],
+			"@woocommerce/sanitize": [
+				"node_modules/@woocommerce/sanitize/src/index.ts"
+			],
 		}
 	}
 }

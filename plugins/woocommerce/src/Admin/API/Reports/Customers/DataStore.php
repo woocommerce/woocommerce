@@ -76,13 +76,16 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'user_id'          => 'user_id',
 			'username'         => 'username',
 			'name'             => "CONCAT_WS( ' ', first_name, last_name ) as name", // @xxx: What does this mean for RTL?
+			'first_name'       => 'first_name',
+			'last_name'        => 'last_name',
 			'email'            => 'email',
 			'country'          => 'country',
 			'city'             => 'city',
 			'state'            => 'state',
 			'postcode'         => 'postcode',
 			'date_registered'  => 'date_registered',
-			'date_last_active' => 'IF( date_last_active <= "0000-00-00 00:00:00", NULL, date_last_active ) AS date_last_active',
+			// Use single quotes for string literals to ensure compatibility with sql_mode=ANSI_QUOTES.
+			'date_last_active' => "IF( date_last_active <= '0000-00-00 00:00:00', NULL, date_last_active ) AS date_last_active",
 			'date_last_order'  => "MAX( {$wpdb->prefix}wc_order_stats.date_created ) as date_last_order",
 			'orders_count'     => "{$orders_count} as orders_count",
 			'total_spend'      => "{$total_spend} as total_spend",
@@ -176,19 +179,44 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	}
 
 	/**
+	 * Fills ORDER BY clause of SQL request based on user supplied parameters. Overridden here to allow multiple direction
+	 * clauses.
+	 *
+	 * @since 10.5.0
+	 * @param array $query_args Parameters supplied by the user.
+	 * @return void
+	 */
+	protected function add_order_by_sql_params( $query_args ) {
+		$order_by_clause = $this->normalize_order_by_clause(
+			$query_args['orderby'] ?? 'date_registered',
+			$query_args['order'] ?? 'desc'
+		);
+		$this->clear_sql_clause( 'order_by' );
+		$this->add_sql_clause( 'order_by', $order_by_clause );
+	}
+
+	/**
 	 * Maps ordering specified by the user to columns in the database/fields in the data.
 	 *
-	 * @override ReportsDataStore::normalize_order_by()
+	 * Handles both order_by and direction.
 	 *
+	 * @since 10.5.0
 	 * @param string $order_by Sorting criterion.
+	 * @param string $order Order direction.
 	 * @return string
 	 */
-	protected function normalize_order_by( $order_by ) {
-		if ( 'name' === $order_by ) {
-			return "CONCAT_WS( ' ', first_name, last_name )";
+	protected function normalize_order_by_clause( $order_by, $order = 'desc' ) {
+		$order_by        = esc_sql( $order_by );
+		$order           = strtolower( $order ) === 'asc' ? 'ASC' : 'DESC';
+		$order_by_clause = '';
+
+		if ( 'location' === $order_by ) {
+			$order_by_clause = "state {$order}, country {$order}";
+		} else {
+			$order_by_clause = "{$order_by} {$order}";
 		}
 
-		return $order_by;
+		return $order_by_clause;
 	}
 
 	/**
@@ -364,6 +392,28 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$where_clauses[] = "{$customer_lookup_table}.user_id IN ({$included_users})";
 		}
 
+		// Allow a list of locations to be specified (includes).
+		if ( ! empty( $query_args['location_includes'] ) ) {
+			$location_clause = $this->build_location_filter_clause( $query_args['location_includes'], true );
+			if ( '' !== $location_clause ) {
+				$where_clauses[] = $location_clause;
+			}
+		}
+
+		// Allow a list of locations to be excluded.
+		if ( ! empty( $query_args['location_excludes'] ) ) {
+			$location_clause = $this->build_location_filter_clause( $query_args['location_excludes'], false );
+			if ( '' !== $location_clause ) {
+				$where_clauses[] = $location_clause;
+			}
+		}
+
+		// Filter by user type.
+		if ( ! empty( $query_args['user_type'] ) && 'all' !== $query_args['user_type'] ) {
+			$user_type       = $query_args['user_type'];
+			$where_clauses[] = "{$customer_lookup_table}.user_id IS " . ( 'registered' === $user_type ? 'NOT NULL' : 'NULL' );
+		}
+
 		$numeric_params = array(
 			'orders_count'    => array(
 				'column' => 'COUNT( order_id )',
@@ -469,7 +519,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$email = $order->get_billing_email( 'edit' );
 
 			if ( $email ) {
-				return self::get_guest_id_by_email( $email );
+				return self::get_customer_id_by_email( $email );
 			} else {
 				return false;
 			}
@@ -518,7 +568,24 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		$this->subquery->clear_sql_clause( 'select' );
 		$this->subquery->add_sql_clause( 'select', $selections );
-		$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
+		// For aggregated fields, ensure deterministic ordering by including GROUP BY field.
+		$order_by             = $this->get_sql_clause( 'order_by' );
+		$aggregated_fields    = array( 'orders_count', 'total_spend', 'avg_order_value' );
+		$has_aggregated_field = false;
+
+		foreach ( $aggregated_fields as $field ) {
+			if ( false !== strpos( $order_by, $field ) ) {
+				$has_aggregated_field = true;
+				break;
+			}
+		}
+
+		if ( $has_aggregated_field ) {
+			$customer_lookup_table = self::get_db_table_name();
+			$this->subquery->add_sql_clause( 'order_by', $order_by . ", {$customer_lookup_table}.customer_id" );
+		} else {
+			$this->subquery->add_sql_clause( 'order_by', $order_by );
+		}
 		$this->subquery->add_sql_clause( 'limit', $this->get_sql_clause( 'limit' ) );
 
 		$customer_data = $wpdb->get_results(
@@ -644,6 +711,32 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				"SELECT customer_id FROM {$table_name} WHERE email = %s AND user_id IS NULL LIMIT 1",
+				$email
+			)
+		);
+
+		return $customer_id ? (int) $customer_id : false;
+	}
+
+	/**
+	 * Retrieve a customer ID by email address, regardless of user registration status.
+	 * Prioritizes registered customers over guest customers when both exist.
+	 *
+	 * @param string $email Email address.
+	 * @return false|int Customer ID if found, boolean false if not.
+	 */
+	public static function get_customer_id_by_email( $email ) {
+		global $wpdb;
+
+		if ( empty( $email ) || ! is_email( $email ) ) {
+			return false;
+		}
+
+		$table_name  = self::get_db_table_name();
+		$customer_id = $wpdb->get_var(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT customer_id FROM {$table_name} WHERE email = %s ORDER BY user_id IS NOT NULL DESC LIMIT 1",
 				$email
 			)
 		);
@@ -792,6 +885,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		);
 		$format      = array(
 			'%d',
+			'%s',
 			'%s',
 			'%s',
 			'%s',
@@ -969,6 +1063,71 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		if ( $updated ) {
 			ReportsCache::invalidate();
 		}
+	}
+
+	/**
+	 * Build location filter SQL clause for includes or excludes.
+	 *
+	 * @since 10.5.0
+	 * @param string $locations_string Comma-separated list of locations (e.g., "US:CA,US:NY,GB").
+	 * @param bool   $is_include       True for IN clause, false for NOT IN clause.
+	 * @return string SQL WHERE clause condition.
+	 */
+	protected function build_location_filter_clause( $locations_string, $is_include = true ) {
+		$customer_lookup_table = self::get_db_table_name();
+		$locations_array       = explode( ',', $locations_string );
+		$country_state_pairs   = array();
+		$countries             = array();
+
+		foreach ( $locations_array as $location ) {
+			$location = trim( $location );
+			if ( empty( $location ) ) {
+				continue;
+			}
+
+			if ( false !== strpos( $location, ':' ) ) {
+				$parts = explode( ':', $location );
+				if ( 2 === count( $parts ) ) {
+					$country_state_pairs[] = array(
+						'country' => esc_sql( $parts[0] ),
+						'state'   => esc_sql( $parts[1] ),
+					);
+				}
+			} else {
+				$countries[] = esc_sql( $location );
+			}
+		}
+
+		$conditions = array();
+
+		// Build country:state pair conditions.
+		if ( ! empty( $country_state_pairs ) ) {
+			$pair_conditions = array();
+			foreach ( $country_state_pairs as $pair ) {
+				if ( $is_include ) {
+					$pair_conditions[] = "({$customer_lookup_table}.country = '{$pair['country']}' AND {$customer_lookup_table}.state = '{$pair['state']}')";
+				} else {
+					$pair_conditions[] = "({$customer_lookup_table}.country != '{$pair['country']}' OR {$customer_lookup_table}.state != '{$pair['state']}')";
+				}
+			}
+			$pair_connector = $is_include ? ' OR ' : ' AND ';
+			$conditions[]   = '(' . implode( $pair_connector, $pair_conditions ) . ')';
+		}
+
+		// Build country-only conditions.
+		if ( ! empty( $countries ) ) {
+			$operator     = $is_include ? 'IN' : 'NOT IN';
+			$conditions[] = "{$customer_lookup_table}.country {$operator} ('" . implode( "','", $countries ) . "')";
+		}
+
+		if ( empty( $conditions ) ) {
+			return '';
+		}
+
+		// Combine conditions with OR for includes, AND for excludes.
+		$connector = $is_include ? ' OR ' : ' AND ';
+
+		return '(' . implode( $connector, $conditions ) . ')';
 	}
 
 	/**

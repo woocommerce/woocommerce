@@ -5,9 +5,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import apiFetch from '@wordpress/api-fetch';
 import { Loader } from '@woocommerce/onboarding';
 import { __ } from '@wordpress/i18n';
-import interpolateComponents from '@automattic/interpolate-components';
-import { Notice, Button } from '@wordpress/components';
-import { Link } from '@woocommerce/components';
+import { Notice } from '@wordpress/components';
 import { navigateTo, getNewPath } from '@woocommerce/navigation';
 
 /**
@@ -16,11 +14,14 @@ import { navigateTo, getNewPath } from '@woocommerce/navigation';
 import WooPaymentsStepHeader from '../../components/header';
 import { useOnboardingContext } from '../../data/onboarding-context';
 import { WC_ASSET_URL } from '~/utils/admin-settings';
-import {
-	disableWooPaymentsTestAccount,
-	recordPaymentsOnboardingEvent,
-} from '~/settings-payments/utils';
+import { recordPaymentsOnboardingEvent } from '~/settings-payments/utils';
+import { WooPaymentsResetAccountModal } from '~/settings-payments/components/modals';
 import './style.scss';
+
+const TEST_ACCOUNT_ERROR_CODES = {
+	ACCOUNT_ALREADY_EXISTS:
+		'woocommerce_woopayments_test_account_already_exists',
+};
 
 interface StepCheckResponse {
 	status: string;
@@ -37,7 +38,7 @@ const TestDriveLoader: React.FunctionComponent< {
 			<Loader.Illustration>
 				<img
 					src={ `${ WC_ASSET_URL }images/onboarding/test-account-setup.svg` }
-					alt="setup"
+					alt={ __( 'Setup', 'woocommerce' ) }
 					style={ { maxWidth: '223px' } }
 				/>
 			</Loader.Illustration>
@@ -90,11 +91,10 @@ const PHASE_MESSAGES = [
 const TestAccountStep = () => {
 	const {
 		currentStep,
-		navigateToNextStep,
 		closeModal,
-		refreshStoreData,
 		setJustCompletedStepId,
 		sessionEntryPoint,
+		setSnackbar,
 	} = useOnboardingContext();
 
 	// Component State.
@@ -107,12 +107,15 @@ const TestAccountStep = () => {
 		PHASE_MESSAGES[ 0 ]
 	);
 
+	const [ isResetAccountModalOpen, setIsResetAccountModalOpen ] =
+		useState( false );
+	const [ errorCode, setErrorCode ] = useState< string | undefined >();
+
 	// Refs for timers and phase tracking.
 	const pollingTimeoutRef = useRef< number | null >( null );
 	const phase1StartTimeRef = useRef< number | null >( null );
 	const initializingTimeoutRef = useRef< number | null >( null );
 	const titlePhaseRef = useRef< number >( 0 );
-
 	// Update loader title based on time intervals
 	useEffect( () => {
 		if ( status === 'success' ) {
@@ -160,35 +163,6 @@ const TestAccountStep = () => {
 			clearTimeout( initializingTimeoutRef.current );
 			initializingTimeoutRef.current = null;
 		}
-	};
-
-	const [ isContinueButtonLoading, setIsContinueButtonLoading ] =
-		useState( false );
-
-	const handleContinue = () => {
-		recordPaymentsOnboardingEvent( 'woopayments_onboarding_modal_click', {
-			step: currentStep?.id || 'unknown',
-			action: 'activate_payments',
-			source: sessionEntryPoint,
-		} );
-
-		setIsContinueButtonLoading( true );
-
-		// Disable test account and proceed to live KYC.
-		disableWooPaymentsTestAccount()
-			.then( () => {
-				setIsContinueButtonLoading( false );
-
-				// This will refresh the steps and move the modal to the next step.
-				navigateToNextStep();
-
-				return refreshStoreData();
-			} )
-			.catch( () => {
-				// Handle any errors that occur during the process.
-				setIsContinueButtonLoading( false );
-				// Error tracking is handled on the backend, so we don't need to do anything here.
-			} );
 	};
 
 	const resetState = useCallback( () => {
@@ -254,9 +228,13 @@ const TestAccountStep = () => {
 						return apiFetch< {
 							success: boolean;
 							message?: string;
+							code?: string;
 						} >( {
 							url: currentStep?.actions?.init?.href,
 							method: 'POST',
+							data: {
+								source: sessionEntryPoint,
+							},
 						} );
 					} )
 					.then( ( response ) => {
@@ -264,6 +242,7 @@ const TestAccountStep = () => {
 							// Start polling immediately after successful init.
 							setStatus( 'polling' );
 						} else {
+							setErrorCode( response?.code || '' );
 							setErrorMessage(
 								response?.message ||
 									__(
@@ -275,6 +254,7 @@ const TestAccountStep = () => {
 						}
 					} )
 					.catch( ( error ) => {
+						setErrorCode( error?.code || '' );
 						setErrorMessage( error.message );
 						setStatus( 'error' );
 					} );
@@ -445,158 +425,68 @@ const TestAccountStep = () => {
 		return undefined;
 	};
 
-	if ( status === 'success' ) {
-		// Render success state.
-		return (
-			<>
-				<WooPaymentsStepHeader onClose={ closeModal } />
-				<div className="settings-payments-onboarding-modal__step--content">
-					<div className="woocommerce-payments-test-account-step__success_content_container">
-						<div className="woocommerce-woopayments-modal__content woocommerce-payments-test-account-step__success_content">
-							<h1 className="woocommerce-payments-test-account-step__success_content_title">
-								{ __(
-									"You're ready to test payments!",
-									'woocommerce'
-								) }
-							</h1>
-							<div className="woocommerce-woopayments-modal__content__item">
-								<div className="woocommerce-woopayments-modal__content__item__description">
-									<p>
-										{ interpolateComponents( {
-											mixedString: __(
-												"We've created a test account for you so that you can begin {{link}}testing payments on your store{{/link}}.",
-												'woocommerce'
-											),
-											components: {
-												link: (
-													<Link
-														href="https://woocommerce.com/document/woopayments/testing-and-troubleshooting/sandbox-mode/"
-														target="_blank"
-														rel="noreferrer"
-														type="external"
-													/>
-												),
-												break: <br />,
-											},
-										} ) }
-									</p>
-								</div>
-							</div>
-							<div className="woocommerce-payments-test-account-step__success-whats-next">
-								<div className="woocommerce-woopayments-modal__content__item">
-									<h2>
-										{ __( "What's next:", 'woocommerce' ) }
-									</h2>
-								</div>
-								<div className="woocommerce-woopayments-modal__content__item-flex">
-									<img
-										src={
-											WC_ASSET_URL +
-											'images/icons/store.svg'
-										}
-										alt="store icon"
-									/>
-									<div className="woocommerce-woopayments-modal__content__item-flex__description">
-										<h3>
-											{ __(
-												'Continue setting up your store',
-												'woocommerce'
-											) }
-										</h3>
-										<div>
-											{ __(
-												'Test payments and finish off any other tasks required to launch your store.',
-												'woocommerce'
-											) }
-										</div>
-									</div>
-								</div>
-								<Button
-									variant="primary"
-									onClick={ () => {
-										recordPaymentsOnboardingEvent(
-											'woopayments_onboarding_modal_click',
-											{
-												step:
-													currentStep?.id ||
-													'unknown',
-												action: 'continue_store_setup',
-												source: sessionEntryPoint,
-											}
-										);
+	useEffect( () => {
+		if ( status === 'success' ) {
+			navigateTo( {
+				url: getNewPath( { nox: 'test_account_created' }, '', {
+					page: 'wc-admin',
+				} ),
+			} );
+		}
+	}, [ status ] );
 
-										// Navigate to wc-admin page
-										navigateTo( {
-											url: getNewPath( {}, '', {
-												page: 'wc-admin',
-											} ),
-										} );
-									} }
-								>
-									{ __(
-										'Continue store setup',
-										'woocommerce'
-									) }
-								</Button>
+	const isAccountAlreadyExistsError =
+		errorCode === TEST_ACCOUNT_ERROR_CODES.ACCOUNT_ALREADY_EXISTS;
 
-								<div className="woocommerce-payments-test-account-step__success_content_or-divider">
-									<hr />
-									{ __( 'OR', 'woocommerce' ) }
-									<hr />
-								</div>
+	const actions = isAccountAlreadyExistsError
+		? [
+				{
+					label: __( 'Reset Account', 'woocommerce' ),
+					variant: 'secondary' as const,
+					onClick: () => {
+						setIsResetAccountModalOpen( true );
+					},
+				},
+		  ]
+		: [
+				{
+					label: __( 'Try Again', 'woocommerce' ),
+					variant: 'primary' as const,
+					onClick: () => {
+						recordPaymentsOnboardingEvent(
+							'woopayments_onboarding_modal_click',
+							{
+								step: currentStep?.id || 'unknown',
+								action: 'try_again_on_error',
+								retries: retryCounter + 1,
+								source: sessionEntryPoint,
+							}
+						);
 
-								<div className="woocommerce-woopayments-modal__content__item-flex">
-									<img
-										src={
-											WC_ASSET_URL +
-											'images/icons/dollar.svg'
-										}
-										alt="dollar icon"
-									/>
-									<div className="woocommerce-woopayments-modal__content__item-flex__description">
-										<h3>
-											{ __(
-												'Activate real payments',
-												'woocommerce'
-											) }
-										</h3>
-										<div>
-											<p>
-												{ interpolateComponents( {
-													mixedString: __(
-														'Provide additional details about your business so you can begin accepting real payments. {{link}}Learn more{{/link}}',
-														'woocommerce'
-													),
-													components: {
-														link: (
-															<Link
-																href="https://woocommerce.com/document/woopayments/startup-guide/#sign-up-process"
-																target="_blank"
-																rel="noreferrer"
-																type="external"
-															/>
-														),
-													},
-												} ) }
-											</p>
-										</div>
-									</div>
-								</div>
-								<Button
-									variant="secondary"
-									isBusy={ isContinueButtonLoading }
-									disabled={ isContinueButtonLoading }
-									onClick={ handleContinue }
-								>
-									{ __( 'Activate payments', 'woocommerce' ) }
-								</Button>
-							</div>
-						</div>
-					</div>
-				</div>
-			</>
-		);
-	}
+						resetState();
+						setRetryCounter( ( c ) => c + 1 );
+					},
+				},
+				{
+					label: __( 'Cancel', 'woocommerce' ),
+					variant: 'secondary' as const,
+					className:
+						'woocommerce-payments-test-account-step__error-cancel-button',
+					onClick: () => {
+						recordPaymentsOnboardingEvent(
+							'woopayments_onboarding_modal_click',
+							{
+								step: currentStep?.id || 'unknown',
+								action: 'cancel_on_error',
+								retries: retryCounter,
+								source: sessionEntryPoint,
+							}
+						);
+
+						closeModal();
+					},
+				},
+		  ];
 
 	// Render loading/error state.
 	return (
@@ -610,51 +500,7 @@ const TestAccountStep = () => {
 					isDismissible={ false }
 					actions={
 						// Only show actions if the step is not blocked.
-						status !== 'blocked'
-							? [
-									{
-										label: __( 'Try Again', 'woocommerce' ),
-										variant: 'primary',
-										onClick: () => {
-											recordPaymentsOnboardingEvent(
-												'woopayments_onboarding_modal_click',
-												{
-													step:
-														currentStep?.id ||
-														'unknown',
-													action: 'try_again_on_error',
-													retries: retryCounter + 1,
-													source: sessionEntryPoint,
-												}
-											);
-
-											resetState();
-											setRetryCounter( ( c ) => c + 1 );
-										},
-									},
-									{
-										label: __( 'Cancel', 'woocommerce' ),
-										variant: 'secondary',
-										className:
-											'woocommerce-payments-test-account-step__error-cancel-button',
-										onClick: () => {
-											recordPaymentsOnboardingEvent(
-												'woopayments_onboarding_modal_click',
-												{
-													step:
-														currentStep?.id ||
-														'unknown',
-													action: 'cancel_on_error',
-													retries: retryCounter,
-													source: sessionEntryPoint,
-												}
-											);
-
-											closeModal();
-										},
-									},
-							  ]
-							: []
+						status !== 'blocked' ? actions : []
 					}
 					className="woocommerce-payments-test-account-step__error"
 				>
@@ -669,13 +515,32 @@ const TestAccountStep = () => {
 			) }
 
 			{ /* Loader - shown during initializing and polling */ }
-			{ ( status === 'initializing' || status === 'polling' ) && (
+			{ /* The success state is added just to keep the current loader state while we redirect to the admin page */ }
+			{ ( status === 'initializing' ||
+				status === 'polling' ||
+				status === 'success' ) && (
 				<TestDriveLoader
 					progress={ progress }
 					title={ loaderTitle }
 					message={ getPhaseMessage( pollingPhase ) }
 				/>
 			) }
+
+			<WooPaymentsResetAccountModal
+				isOpen={ isResetAccountModalOpen }
+				onClose={ () => {
+					setIsResetAccountModalOpen( false );
+					setSnackbar( {
+						show: true,
+						message: __(
+							'Your test account was successfully reset.',
+							'woocommerce'
+						),
+					} );
+				} }
+				isEmbeddedResetFlow
+				resetUrl={ currentStep?.actions?.reset?.href }
+			/>
 		</div>
 	);
 };

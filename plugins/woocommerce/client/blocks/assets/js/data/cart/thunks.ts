@@ -160,6 +160,33 @@ export const syncCartWithIAPIStore =
 	}: QuantityChanges ) =>
 	async ( { dispatch, select }: CartThunkArgs ) => {
 		try {
+			// Dispatch pending state actions to show loading indicators
+			// before fetching the updated cart data
+
+			// Set pending add states for new products
+			if ( productsPendingAdd && productsPendingAdd.length > 0 ) {
+				productsPendingAdd.forEach( ( productId ) => {
+					dispatch.setProductsPendingAdd( productId, true );
+				} );
+			}
+
+			// Set pending quantity states for items being updated
+			if (
+				cartItemsPendingQuantity &&
+				cartItemsPendingQuantity.length > 0
+			) {
+				cartItemsPendingQuantity.forEach( ( cartItemKey ) => {
+					dispatch.itemIsPendingQuantity( cartItemKey, true );
+				} );
+			}
+
+			// Set pending delete states for items being removed
+			if ( cartItemsPendingDelete && cartItemsPendingDelete.length > 0 ) {
+				cartItemsPendingDelete.forEach( ( cartItemKey ) => {
+					dispatch.itemIsPendingDelete( cartItemKey, true );
+				} );
+			}
+
 			const { response } = await apiFetchWithHeaders< {
 				response: CartResponse;
 			} >( {
@@ -180,6 +207,28 @@ export const syncCartWithIAPIStore =
 			dispatch.setCartData( cartResponse );
 			setTriggerStoreSyncEvent( true );
 
+			// Clear pending states after updating cart data
+			if ( productsPendingAdd && productsPendingAdd.length > 0 ) {
+				productsPendingAdd.forEach( ( productId ) => {
+					dispatch.setProductsPendingAdd( productId, false );
+				} );
+			}
+
+			if (
+				cartItemsPendingQuantity &&
+				cartItemsPendingQuantity.length > 0
+			) {
+				cartItemsPendingQuantity.forEach( ( cartItemKey ) => {
+					dispatch.itemIsPendingQuantity( cartItemKey, false );
+				} );
+			}
+
+			if ( cartItemsPendingDelete && cartItemsPendingDelete.length > 0 ) {
+				cartItemsPendingDelete.forEach( ( cartItemKey ) => {
+					dispatch.itemIsPendingDelete( cartItemKey, false );
+				} );
+			}
+
 			// Get the new cart data before showing updates.
 			const newCart = select.getCartData();
 
@@ -194,6 +243,28 @@ export const syncCartWithIAPIStore =
 			updateCartErrorNotices( newCart.errors, oldCartErrors );
 			dispatch.setErrorData( null );
 		} catch ( error ) {
+			// Clear pending states on error as well
+			if ( productsPendingAdd && productsPendingAdd.length > 0 ) {
+				productsPendingAdd.forEach( ( productId ) => {
+					dispatch.setProductsPendingAdd( productId, false );
+				} );
+			}
+
+			if (
+				cartItemsPendingQuantity &&
+				cartItemsPendingQuantity.length > 0
+			) {
+				cartItemsPendingQuantity.forEach( ( cartItemKey ) => {
+					dispatch.itemIsPendingQuantity( cartItemKey, false );
+				} );
+			}
+
+			if ( cartItemsPendingDelete && cartItemsPendingDelete.length > 0 ) {
+				cartItemsPendingDelete.forEach( ( cartItemKey ) => {
+					dispatch.itemIsPendingDelete( cartItemKey, false );
+				} );
+			}
+
 			dispatch.receiveError( isApiErrorResponse( error ) ? error : null );
 			return Promise.reject( error );
 		}
@@ -221,7 +292,7 @@ export const applyCoupon =
 				},
 				cache: 'no-store',
 			} );
-			dispatch.receiveCart( response );
+			dispatch.receiveCartContents( response );
 			return response;
 		} catch ( error ) {
 			dispatch.receiveError( isApiErrorResponse( error ) ? error : null );
@@ -253,7 +324,7 @@ export const removeCoupon =
 				},
 				cache: 'no-store',
 			} );
-			dispatch.receiveCart( response );
+			dispatch.receiveCartContents( response );
 			return response;
 		} catch ( error ) {
 			dispatch.receiveError( isApiErrorResponse( error ) ? error : null );
@@ -372,10 +443,16 @@ export const removeItemFromCart =
 	};
 
 /**
- * Persists a quantity change the for specified cart item:
+ * Tracks AbortControllers per cart item for cancelling in-flight quantity requests.
+ */
+const quantityAbortControllers = new Map< string, AbortController >();
+
+/**
+ * Persists a quantity change for the specified cart item:
+ * - Aborts any in-flight request for the same item.
  * - Calls API to set quantity.
  * - If successful, yields action to update store.
- * - If error, yields action to store error.
+ * - If error (except AbortError), yields action to store error.
  *
  * @param {string} cartItemKey Cart item being updated.
  * @param {number} quantity    Specified (new) quantity.
@@ -391,6 +468,22 @@ export const changeCartItemQuantity =
 		if ( cartItem?.quantity === quantity ) {
 			return;
 		}
+
+		// Abort any existing in-flight request for this item.
+		const existingController = quantityAbortControllers.get( cartItemKey );
+		if ( existingController ) {
+			existingController.abort();
+		}
+
+		// Create new AbortController for this request.
+		const abortController =
+			typeof AbortController === 'undefined'
+				? null
+				: new AbortController();
+		if ( abortController ) {
+			quantityAbortControllers.set( cartItemKey, abortController );
+		}
+
 		try {
 			dispatch.itemIsPendingQuantity( cartItemKey );
 			const { response } = await apiFetchWithHeaders< {
@@ -403,18 +496,33 @@ export const changeCartItemQuantity =
 					quantity,
 				},
 				cache: 'no-store',
+				signal: abortController?.signal ?? null,
 			} );
+
 			dispatch.receiveCart( response );
 			return response;
 		} catch ( error ) {
+			// Don't treat aborted requests as errors - they were intentionally cancelled.
+			if (
+				error instanceof DOMException &&
+				error.name === 'AbortError'
+			) {
+				return;
+			}
 			dispatch.receiveError( isApiErrorResponse( error ) ? error : null );
 			return Promise.reject( error );
 		} finally {
+			// Clean up controller if it's still the current one for this item.
+			if (
+				quantityAbortControllers.get( cartItemKey ) === abortController
+			) {
+				quantityAbortControllers.delete( cartItemKey );
+			}
 			dispatch.itemIsPendingQuantity( cartItemKey, false );
 		}
 	};
 
-// Facilitates aborting fetch requests.
+// Facilitates aborting fetch requests for shipping rate selection.
 let abortController: AbortController | null = null;
 
 /**
@@ -484,13 +592,11 @@ export const selectShippingRate =
 
 			dispatch.receiveCart( rest );
 			dispatch.shippingRatesBeingSelected( false );
-			return response as CartResponse;
+			return response;
 		} catch ( error ) {
 			dispatch.receiveError( isApiErrorResponse( error ) ? error : null );
 			dispatch.shippingRatesBeingSelected( false );
 			return Promise.reject( error );
-		} finally {
-			abortController = null;
 		}
 	};
 
