@@ -802,7 +802,7 @@ test.describe( 'Product Collection', () => {
 						{
 							slug,
 							title: 'classic template test',
-							content: 'howdy',
+							content: 'palceholder',
 						}
 					);
 
