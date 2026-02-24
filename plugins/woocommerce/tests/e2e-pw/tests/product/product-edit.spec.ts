@@ -142,9 +142,13 @@ test( 'can bulk edit products', async ( { page, products } ) => {
 	await test.step( 'select and bulk edit the products', async () => {
 		await selectAllProducts( page, products );
 
-		await page
-			.locator( '#bulk-action-selector-top' )
-			.selectOption( 'Bulk edit' );
+		const bulkActionSelect = page.locator( '#bulk-action-selector-top' );
+		const bulkEditOption = bulkActionSelect.locator( 'option', {
+			hasText: /^(Bulk edit|Edit)$/,
+		} );
+		await bulkActionSelect.selectOption( {
+			label: ( await bulkEditOption.textContent() ) ?? undefined,
+		} );
 		await page.locator( '#doaction' ).click();
 
 		await expect(
