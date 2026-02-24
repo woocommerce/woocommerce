@@ -29,8 +29,8 @@ defined( 'ABSPATH' ) || exit;
 
 <!-- wp:paragraph -->
 <p><?php
-/* translators: %s: Customer first name */
-printf( esc_html__( 'Hi %s,', 'woocommerce' ), '<!--[woocommerce/customer-first-name]-->' );
+	/* translators: %s: Customer first name */
+	printf( esc_html__( 'Hi %s,', 'woocommerce' ), '<!--[woocommerce/customer-first-name]-->' );
 ?></p>
 <!-- /wp:paragraph -->
 
