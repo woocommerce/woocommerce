@@ -125,27 +125,9 @@ class ProductStockIndicator extends AbstractBlock {
 		$watch_attribute    = '';
 
 		if ( $is_interactive && 'out-of-stock' !== $availability['class'] ) {
-			$variations                = $product_to_render->get_available_variations( 'objects' );
-			$formatted_variations_data = array();
-			foreach ( $variations as $variation ) {
-				$variation_availability = $variation->get_availability();
-				if ( is_string( $variation_availability['availability'] ) && ! empty( $variation_availability['availability'] ) ) {
-					$formatted_variations_data[ $variation->get_id() ] = array(
-						'availability' => $variation_availability['availability'],
-					);
-				}
-			}
-
-			wp_interactivity_config(
-				'woocommerce',
-				array(
-					'products' => array(
-						$product_to_render->get_id() => array(
-							'availability' => $availability['availability'],
-							'variations'   => $formatted_variations_data,
-						),
-					),
-				)
+			wc_interactivity_api_load_variations(
+				'I acknowledge that using experimental APIs means my theme or plugin will inevitably break in the next version of WooCommerce',
+				$product_to_render->get_id()
 			);
 
 			wp_enqueue_script_module( 'woocommerce/product-elements' );

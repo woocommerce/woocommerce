@@ -68,26 +68,9 @@ class ProductSpecifications extends AbstractBlock {
 		$is_interactive = $product->is_type( ProductType::VARIABLE );
 
 		if ( $is_interactive ) {
-			$variations                = $product->get_available_variations( 'objects' );
-			$formatted_variations_data = array();
-			foreach ( $variations as $variation ) {
-				$formatted_variations_data[ $variation->get_id() ] = array(
-					'weight'     => wc_format_weight( $variation->get_weight() ),
-					'dimensions' => html_entity_decode( wc_format_dimensions( $variation->get_dimensions( false ) ), ENT_QUOTES, get_bloginfo( 'charset' ) ),
-				);
-			}
-
-			wp_interactivity_config(
-				'woocommerce',
-				array(
-					'products' => array(
-						$product->get_id() => array(
-							'weight'     => $product_data['weight']['value'] ?? '',
-							'dimensions' => html_entity_decode( $product_data['dimensions']['value'] ?? '', ENT_QUOTES, get_bloginfo( 'charset' ) ),
-							'variations' => $formatted_variations_data,
-						),
-					),
-				)
+			wc_interactivity_api_load_variations(
+				'I acknowledge that using experimental APIs means my theme or plugin will inevitably break in the next version of WooCommerce',
+				$product->get_id()
 			);
 			wp_enqueue_script_module( 'woocommerce/product-elements' );
 		}

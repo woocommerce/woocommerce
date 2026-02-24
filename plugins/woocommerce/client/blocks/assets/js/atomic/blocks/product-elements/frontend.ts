@@ -9,10 +9,8 @@ import {
 } from '@wordpress/interactivity';
 import '@woocommerce/stores/woocommerce/product-context';
 import type { ProductContextStore } from '@woocommerce/stores/woocommerce/product-context';
-import type {
-	ProductData,
-	WooCommerceConfig,
-} from '@woocommerce/stores/woocommerce/cart';
+import type { ProductResponseItem } from '@woocommerce/types';
+import type { WooCommerceConfig } from '@woocommerce/stores/woocommerce/cart';
 import { sanitizeHTML } from '@woocommerce/sanitize';
 
 // Stores are locked to prevent 3PD usage until the API is stable.
@@ -54,20 +52,58 @@ export type Context = {
 		| 'availability'
 		| 'sku'
 		| 'weight'
-		| 'dimensions';
+		| 'dimensions'
+		| 'variation_description'
+		| 'min'
+		| 'max'
+		| 'step';
 };
+
+/**
+ * Maps productElementKey values to the corresponding field on ProductResponseItem.
+ * Keys not in this map (min, max, step) fall through to the legacy getConfig path.
+ */
+const FIELD_MAP: Record<
+	string,
+	( p: ProductResponseItem ) => string | undefined
+> = {
+	price_html: ( p ) => p.price_html,
+	sku: ( p ) => p.sku,
+	availability: ( p ) => p.stock_availability?.text,
+	weight: ( p ) => p.formatted_weight,
+	dimensions: ( p ) => p.formatted_dimensions,
+	variation_description: ( p ) => p.description,
+};
+
+type ProductData = Record< string, string | number | undefined >;
 
 const productElementStore = store(
 	'woocommerce/product-elements',
 	{
 		state: {
 			get productData(): ProductData | undefined {
-				const mainProductId = productContextState?.product?.id;
+				const product = productContextState?.product;
 
-				if ( ! mainProductId ) {
+				if ( ! product ) {
 					return undefined;
 				}
 
+				const activeProduct =
+					productContextState?.selectedVariation ?? product;
+
+				const { productElementKey } = getContext< Context >();
+
+				const fieldAccessor = FIELD_MAP[ productElementKey ];
+
+				// For keys in FIELD_MAP, resolve directly from the products store.
+				if ( fieldAccessor ) {
+					return {
+						[ productElementKey ]:
+							fieldAccessor( activeProduct ),
+					} as ProductData;
+				}
+
+				// For unmigrated keys (min, max, step), fall through to getConfig.
 				const { products } = getConfig(
 					'woocommerce'
 				) as WooCommerceConfig;
@@ -76,12 +112,13 @@ const productElementStore = store(
 					return undefined;
 				}
 
-				const variationId = productContextState?.selectedVariation?.id;
+				const variationId =
+					productContextState?.selectedVariation?.id;
 
 				return (
-					products?.[ mainProductId ]?.variations?.[
+					products?.[ product.id ]?.variations?.[
 						variationId || 0
-					] || products?.[ mainProductId ]
+					] || products?.[ product.id ]
 				);
 			},
 		},

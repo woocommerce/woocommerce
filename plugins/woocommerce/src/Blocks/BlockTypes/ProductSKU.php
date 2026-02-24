@@ -71,24 +71,9 @@ class ProductSKU extends AbstractBlock {
 		$is_interactive = $product->is_type( ProductType::VARIABLE );
 
 		if ( $is_interactive ) {
-			$variations                = $product->get_available_variations( 'objects' );
-			$formatted_variations_data = array();
-			foreach ( $variations as $variation ) {
-				$formatted_variations_data[ $variation->get_id() ] = array(
-					'sku' => $variation->get_sku(),
-				);
-			}
-
-			wp_interactivity_config(
-				'woocommerce',
-				array(
-					'products' => array(
-						$product->get_id() => array(
-							'sku'        => $product_sku,
-							'variations' => $formatted_variations_data,
-						),
-					),
-				)
+			wc_interactivity_api_load_variations(
+				'I acknowledge that using experimental APIs means my theme or plugin will inevitably break in the next version of WooCommerce',
+				$product->get_id()
 			);
 			wp_enqueue_script_module( 'woocommerce/product-elements' );
 		}

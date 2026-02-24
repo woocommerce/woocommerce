@@ -62,13 +62,7 @@ export type VariationData = {
 	attributes: Record< string, string >;
 	is_in_stock: boolean;
 	sold_individually: boolean;
-	price_html?: string;
 	image_id?: number;
-	availability?: string;
-	variation_description?: string;
-	sku?: string;
-	weight?: string;
-	dimensions?: string;
 	min?: number;
 	max?: number;
 	step?: number;
@@ -78,12 +72,7 @@ export type ProductData = {
 	type: string;
 	is_in_stock: boolean;
 	sold_individually: boolean;
-	price_html?: string;
 	image_id?: number;
-	availability?: string;
-	sku?: string;
-	weight?: string;
-	dimensions?: string;
 	min?: number;
 	max?: number;
 	step?: number;
