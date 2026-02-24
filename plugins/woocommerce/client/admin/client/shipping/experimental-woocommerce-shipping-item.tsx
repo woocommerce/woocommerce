@@ -16,7 +16,7 @@ import WooIcon from './woo-icon.svg';
 const WOOCOMMERCE_SHIPPING_PLUGIN_SLUG = 'woocommerce-shipping';
 
 export type ShippingPartnerTrackingProps = {
-	context: 'settings' | 'tasklist';
+	context: 'settings' | 'tasklist' | 'core-profiler';
 	country: string;
 	plugins: string;
 };
