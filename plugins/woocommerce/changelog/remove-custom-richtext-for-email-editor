@@ -1,5 +1,5 @@
 Significance: patch
 Type: tweak
-Comment: Updated build of admin scripts to skipe custom RichText package for email editor. We are switching to core version
+Comment: Updated build of admin scripts to skip custom RichText package for email editor. We are switching to core version
 
 
