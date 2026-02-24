@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\EmailEditor;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Email_Editor;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Initializer as CoreEmailEditorIntegration;
+use Automattic\WooCommerce\EmailEditor\Integrations\WooCommerce\Initializer as WooCommerceEmailEditorIntegration;
 
 /**
  * Bootstrap class for initializing the Email Editor functionality.
@@ -31,17 +32,27 @@ class Bootstrap {
 	private $core_email_editor_integration;
 
 	/**
+	 * WooCommerce email editor integration instance.
+	 *
+	 * @var WooCommerceEmailEditorIntegration
+	 */
+	private $woocommerce_email_editor_integration;
+
+	/**
 	 * Constructor.
 	 *
-	 * @param Email_Editor               $email_editor Email editor instance.
-	 * @param CoreEmailEditorIntegration $core_email_editor_integration  Core email editor integration instance.
+	 * @param Email_Editor                      $email_editor Email editor instance.
+	 * @param CoreEmailEditorIntegration        $core_email_editor_integration  Core email editor integration instance.
+	 * @param WooCommerceEmailEditorIntegration $woocommerce_email_editor_integration  WooCommerce email editor integration instance.
 	 */
 	public function __construct(
 		Email_Editor $email_editor,
-		CoreEmailEditorIntegration $core_email_editor_integration
+		CoreEmailEditorIntegration $core_email_editor_integration,
+		WooCommerceEmailEditorIntegration $woocommerce_email_editor_integration
 	) {
-		$this->email_editor                  = $email_editor;
-		$this->core_email_editor_integration = $core_email_editor_integration;
+		$this->email_editor                         = $email_editor;
+		$this->core_email_editor_integration        = $core_email_editor_integration;
+		$this->woocommerce_email_editor_integration = $woocommerce_email_editor_integration;
 	}
 
 	/**
@@ -69,6 +80,15 @@ class Bootstrap {
 			10,
 			1
 		);
+
+		if ( class_exists( 'WooCommerce' ) ) {
+			add_filter(
+				'block_type_metadata_settings',
+				array( $this->woocommerce_email_editor_integration, 'update_block_settings' ),
+				10,
+				1
+			);
+		}
 	}
 
 	/**

@@ -26,6 +26,14 @@ class SynchronizeTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Clean up after all tests have run.
+	 */
+	public static function tearDownAfterClass(): void {
+		parent::tearDownAfterClass();
+		wc_get_container()->get( \Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register::class )->delete_all();
+	}
+
+	/**
 	 * @testdox Ensure basic controls to start and stop synchronization behave as expected.
 	 */
 	public function test_basic_synchronization_controls() {

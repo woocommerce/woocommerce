@@ -126,6 +126,7 @@ const coreModules = [
 	'@woocommerce/blocks-components',
 	'@woocommerce/blocks-registry',
 	'@woocommerce/block-settings',
+	'@woocommerce/email-editor',
 	'@woocommerce/price-format',
 	'@woocommerce/settings',
 	'@woocommerce/shared-context',

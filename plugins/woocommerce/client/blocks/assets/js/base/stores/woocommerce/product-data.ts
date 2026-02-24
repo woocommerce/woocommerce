@@ -3,10 +3,13 @@
  */
 import { getContext, store } from '@wordpress/interactivity';
 
-type EntityId = number | null;
+// Stores are locked to prevent 3PD usage until the API is stable.
+const universalLock =
+	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
+
 type ProductRef = {
-	productId: EntityId;
-	variationId: EntityId;
+	productId: number;
+	variationId: number | null;
 };
 
 export type Context = ProductRef;
@@ -18,35 +21,35 @@ type ServerState = {
 const productDataStore = store< {
 	state: ProductRef & ServerState;
 	actions: {
-		setVariationId: ( variationId: EntityId ) => void;
+		setVariationId: ( variationId: number | null ) => void;
 	};
 } >(
 	'woocommerce/product-data',
 	{
 		state: {
-			get productId(): EntityId {
+			get productId(): number {
 				const context = getContext< Context >(
 					'woocommerce/single-product'
 				);
 
 				return (
-					context?.productId ||
+					context?.productId ??
 					productDataStore?.state?.templateState?.productId
 				);
 			},
-			get variationId(): EntityId {
+			get variationId(): number | null {
 				const context = getContext< Context >(
 					'woocommerce/single-product'
 				);
 
 				return (
-					context?.variationId ||
+					context?.variationId ??
 					productDataStore?.state?.templateState?.variationId
 				);
 			},
 		},
 		actions: {
-			setVariationId: ( variationId: EntityId ) => {
+			setVariationId: ( variationId: number | null ) => {
 				const context = getContext< Context >(
 					'woocommerce/single-product'
 				);
@@ -63,7 +66,7 @@ const productDataStore = store< {
 			},
 		},
 	},
-	{ lock: true }
+	{ lock: universalLock }
 );
 
 export type ProductDataStore = typeof productDataStore;

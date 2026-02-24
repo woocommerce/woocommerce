@@ -58,6 +58,7 @@
 		"typography": {
 			"fontSize": true,
 			"lineHeight": true,
+			"textAlign": true,
 			"__experimentalFontFamily": true,
 			"__experimentalFontWeight": true,
 			"__experimentalFontStyle": true,
@@ -72,6 +73,7 @@
 	},
 	"ancestor": [
 		"woocommerce/all-products",
+		"woocommerce/featured-product",
 		"woocommerce/single-product",
 		"woocommerce/product-template",
 		"core/post-template"

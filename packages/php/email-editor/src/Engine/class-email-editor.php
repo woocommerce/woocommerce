@@ -13,6 +13,7 @@ use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalizatio
 use Automattic\WooCommerce\EmailEditor\Engine\Templates\Templates;
 use Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger;
 use WP_Post;
+use WP_REST_Request;
 use WP_Theme_JSON;
 
 /**
@@ -263,8 +264,15 @@ class Email_Editor {
 			array(
 				'methods'             => 'POST',
 				'callback'            => array( $this->email_api_controller, 'send_preview_email_data' ),
-				'permission_callback' => function () {
-					return current_user_can( 'edit_posts' );
+				'permission_callback' => function ( WP_REST_Request $request ) {
+					if ( ! current_user_can( 'edit_posts' ) ) {
+						return false;
+					}
+					$post_id = $request->get_param( 'postId' );
+					if ( ! is_numeric( $post_id ) || (int) $post_id <= 0 ) {
+						return false;
+					}
+					return current_user_can( 'edit_post', (int) $post_id );
 				},
 			)
 		);
@@ -277,6 +285,25 @@ class Email_Editor {
 				'permission_callback' => function () {
 					return current_user_can( 'edit_posts' );
 				},
+			)
+		);
+		register_rest_route(
+			'woocommerce-email-editor/v1',
+			'/personalization_tags',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this->email_api_controller, 'get_personalization_tags_collection' ),
+				'permission_callback' => function () {
+					return current_user_can( 'edit_posts' );
+				},
+				'args'                => array(
+					'post_id' => array(
+						'description'       => __( 'The post ID for context-aware tag filtering.', 'woocommerce' ),
+						'type'              => 'integer',
+						'required'          => false,
+						'sanitize_callback' => 'absint',
+					),
+				),
 			)
 		);
 	}

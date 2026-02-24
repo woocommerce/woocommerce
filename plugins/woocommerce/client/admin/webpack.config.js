@@ -57,6 +57,7 @@ const wcAdminPackages = [
 	'onboarding',
 	'block-templates',
 	'product-editor',
+	'sanitize',
 	'settings-editor',
 	'remote-logging',
 	'email-editor',
@@ -222,19 +223,6 @@ const webpackConfig = {
 			],
 		} ),
 
-		// The email-editor assets for the rich-text.js file need to be copied to the build directory.
-		new CopyWebpackPlugin( {
-			patterns: [
-				{
-					from: path.join(
-						__dirname,
-						'../../../../packages/js/email-editor/assets'
-					),
-					to: './email-editor/assets',
-				},
-			],
-		} ),
-
 		// React Fast Refresh.
 		! isProduction && isHot && new ReactRefreshWebpackPlugin(),
 
@@ -248,6 +236,10 @@ const webpackConfig = {
 							// @wordpress/dependency-extraction-webpack-plugin version bump related, which added 'react-jsx-runtime' dependency.
 							// See https://github.com/WordPress/gutenberg/pull/61692 for more details about the dependency in general.
 							// For backward compatibility reasons we need to skip requesting to external here.
+							return null;
+						case '@wordpress/global-styles-engine':
+							// @wordpress/global-styles-engine is not a standard WordPress package available globally,
+							// so we need to bundle it instead of treating it as an external.
 							return null;
 					}
 

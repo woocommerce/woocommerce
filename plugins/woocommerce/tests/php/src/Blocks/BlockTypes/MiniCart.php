@@ -158,17 +158,17 @@ class MiniCart extends \WP_UnitTestCase {
 		// Test badge is shown when "always" is selected.
 		$block  = parse_blocks( '<!-- wp:woocommerce/mini-cart {"productCountVisibility":"always"} /-->' );
 		$output = render_block( $block[0] );
-		$this->assertStringContainsString( '<span class="wc-block-mini-cart__badge"', $output );
+		$this->assertTrue( $this->has_mini_cart_badge( $output ) );
 
 		// Tests badge is not shown, because product count is not greater than zero when "greater_than_zero" is selected.
 		$block  = parse_blocks( '<!-- wp:woocommerce/mini-cart {"productCountVisibility":"greater_than_zero"} /-->' );
 		$output = render_block( $block[0] );
-		$this->assertStringContainsString( '<span class="wc-block-mini-cart__badge"', $output );
+		$this->assertTrue( $this->has_mini_cart_badge( $output ) );
 
 		// Tests badge is not shown when "never" is selected.
 		$block  = parse_blocks( '<!-- wp:woocommerce/mini-cart {"productCountVisibility":"never"} /-->' );
 		$output = render_block( $block[0] );
-		$this->assertStringNotContainsString( '<span class="wc-block-mini-cart__badge"', $output );
+		$this->assertFalse( $this->has_mini_cart_badge( $output ) );
 	}
 
 	/**
@@ -181,17 +181,17 @@ class MiniCart extends \WP_UnitTestCase {
 		// Tests badge is shown with items in cart when "always" is selected.
 		$block  = parse_blocks( '<!-- wp:woocommerce/mini-cart {"productCountVisibility":"always"} /-->' );
 		$output = render_block( $block[0] );
-		$this->assertStringContainsString( '<span class="wc-block-mini-cart__badge"', $output );
+		$this->assertTrue( $this->has_mini_cart_badge( $output ) );
 
 		// Tests badge *is* shown, because product count is greater than zero when "greater_than_zero" is selected.
 		$block  = parse_blocks( '<!-- wp:woocommerce/mini-cart {"productCountVisibility":"greater_than_zero"} /-->' );
 		$output = render_block( $block[0] );
-		$this->assertStringContainsString( '<span class="wc-block-mini-cart__badge"', $output );
+		$this->assertTrue( $this->has_mini_cart_badge( $output ) );
 
 		// Tests badge is not shown with items in cart when "never" is selected.
 		$block  = parse_blocks( '<!-- wp:woocommerce/mini-cart {"productCountVisibility":"never"} /-->' );
 		$output = render_block( $block[0] );
-		$this->assertStringNotContainsString( '<span class="wc-block-mini-cart__badge"', $output );
+		$this->assertFalse( $this->has_mini_cart_badge( $output ) );
 	}
 
 	/**
@@ -290,5 +290,116 @@ class MiniCart extends \WP_UnitTestCase {
 			),
 			'The hr with class wp-block-separator should be preserved.'
 		);
+	}
+
+	/**
+	 * Helper method to check if mini-cart badge exists in the HTML using WP_HTML_Tag_Processor.
+	 *
+	 * @param string $html The HTML to search in.
+	 * @return bool True if mini-cart badge is found, false otherwise.
+	 */
+	private function has_mini_cart_badge( string $html ): bool {
+		$processor = new \WP_HTML_Tag_Processor( $html );
+
+		return $processor->next_tag(
+			array(
+				'tag_name'   => 'span',
+				'class_name' => 'wc-block-mini-cart__badge',
+			)
+		);
+	}
+
+	/**
+	 * Test that mini-cart does not render for logged-out users when coming soon mode is enabled for store pages only.
+	 *
+	 * @return void
+	 */
+	public function test_mini_cart_does_not_render_for_logged_out_users_when_store_coming_soon() {
+		// Set up coming soon mode for store pages only.
+		update_option( 'woocommerce_coming_soon', 'yes' );
+		update_option( 'woocommerce_store_pages_only', 'yes' );
+
+		// Ensure user is logged out.
+		wp_set_current_user( 0 );
+
+		$block  = parse_blocks( '<!-- wp:woocommerce/mini-cart /-->' );
+		$output = render_block( $block[0] );
+
+		// Mini-cart should not render (empty output).
+		$this->assertEmpty( $output, 'Mini-cart should not render for logged-out users when store is in coming soon mode.' );
+
+		// Clean up.
+		update_option( 'woocommerce_coming_soon', 'no' );
+		update_option( 'woocommerce_store_pages_only', 'no' );
+	}
+
+	/**
+	 * Test that mini-cart renders for logged-in users when coming soon mode is enabled for store pages only.
+	 *
+	 * @return void
+	 */
+	public function test_mini_cart_renders_for_logged_in_users_when_store_coming_soon() {
+		// Set up coming soon mode for store pages only.
+		update_option( 'woocommerce_coming_soon', 'yes' );
+		update_option( 'woocommerce_store_pages_only', 'yes' );
+
+		// Create and log in a user.
+		$user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $user_id );
+
+		$block  = parse_blocks( '<!-- wp:woocommerce/mini-cart /-->' );
+		$output = render_block( $block[0] );
+
+		// Mini-cart should render (non-empty output).
+		$this->assertNotEmpty( $output, 'Mini-cart should render for logged-in users even when store is in coming soon mode.' );
+
+		// Clean up.
+		wp_set_current_user( 0 );
+		update_option( 'woocommerce_coming_soon', 'no' );
+		update_option( 'woocommerce_store_pages_only', 'no' );
+	}
+
+	/**
+	 * Test that mini-cart renders for logged-out users when coming soon mode is disabled.
+	 *
+	 * @return void
+	 */
+	public function test_mini_cart_renders_for_logged_out_users_when_coming_soon_disabled() {
+		// Ensure coming soon mode is disabled.
+		update_option( 'woocommerce_coming_soon', 'no' );
+		update_option( 'woocommerce_store_pages_only', 'no' );
+
+		// Ensure user is logged out.
+		wp_set_current_user( 0 );
+
+		$block  = parse_blocks( '<!-- wp:woocommerce/mini-cart /-->' );
+		$output = render_block( $block[0] );
+
+		// Mini-cart should render (non-empty output).
+		$this->assertNotEmpty( $output, 'Mini-cart should render for logged-out users when coming soon mode is disabled.' );
+	}
+
+	/**
+	 * Test that mini-cart renders for logged-out users when site-wide coming soon mode is enabled (not store pages only).
+	 *
+	 * @return void
+	 */
+	public function test_mini_cart_renders_when_site_wide_coming_soon_not_store_only() {
+		// Set up site-wide coming soon mode (not store pages only).
+		update_option( 'woocommerce_coming_soon', 'yes' );
+		update_option( 'woocommerce_store_pages_only', 'no' );
+
+		// Ensure user is logged out.
+		wp_set_current_user( 0 );
+
+		$block  = parse_blocks( '<!-- wp:woocommerce/mini-cart /-->' );
+		$output = render_block( $block[0] );
+
+		// Mini-cart should render (non-empty output) because the logic only checks for store pages coming soon.
+		$this->assertNotEmpty( $output, 'Mini-cart should render when site-wide coming soon is enabled but not store pages only.' );
+
+		// Clean up.
+		update_option( 'woocommerce_coming_soon', 'no' );
+		update_option( 'woocommerce_store_pages_only', 'no' );
 	}
 }

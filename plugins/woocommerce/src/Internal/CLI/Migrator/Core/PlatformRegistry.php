@@ -23,10 +23,27 @@ class PlatformRegistry {
 	private array $platforms = array();
 
 	/**
-	 * Constructor to load platforms when the service is instantiated.
+	 * The credential manager instance.
+	 *
+	 * @var CredentialManager
+	 */
+	private CredentialManager $credential_manager;
+
+	/**
+	 * Constructor.
 	 */
 	public function __construct() {
 		$this->load_platforms();
+	}
+
+	/**
+	 * Initialize the registry with dependencies.
+	 *
+	 * @internal
+	 * @param CredentialManager $credential_manager The credential manager.
+	 */
+	final public function init( CredentialManager $credential_manager ): void {
+		$this->credential_manager = $credential_manager;
 	}
 
 	/**
@@ -89,7 +106,7 @@ class PlatformRegistry {
 	 *
 	 * @return PlatformFetcherInterface An instance of the platform's fetcher class.
 	 *
-	 * @throws InvalidArgumentException If the platform is not found or the fetcher class is invalid.
+	 * @throws InvalidArgumentException If the platform is not found, fetcher class is invalid, or credentials are not configured.
 	 */
 	public function get_fetcher( string $platform_id ): PlatformFetcherInterface {
 		$platform = $this->get_platform( $platform_id );
@@ -140,9 +157,18 @@ class PlatformRegistry {
 			);
 		}
 
-		// Use the WooCommerce DI container to properly inject dependencies.
-		$container = wc_get_container();
-		return $container->get( $fetcher_class );
+		// Get credentials from credential manager and pass to fetcher constructor.
+		$credentials = $this->credential_manager->get_credentials( $platform_id );
+		if ( ! is_array( $credentials ) ) {
+			throw new InvalidArgumentException(
+				sprintf(
+					/* translators: %s: platform ID */
+					'No credentials found for platform "%s". Please configure credentials using: wp wc migrate setup',
+					esc_html( $platform_id )
+				)
+			);
+		}
+		return new $fetcher_class( $credentials );
 	}
 
 	/**
@@ -226,8 +252,9 @@ class PlatformRegistry {
 		$platform = $assoc_args['platform'] ?? null;
 
 		if ( empty( $platform ) ) {
-			$platform = $default_platform;
-			WP_CLI::log( "Platform not specified, using default: '{$platform}'." );
+			$platform              = $default_platform;
+			$platform_display_name = $this->get_platform_display_name( $platform );
+			WP_CLI::log( "Platform not specified, using default: '{$platform_display_name}'." );
 		}
 
 		// Validate the platform exists.
@@ -257,15 +284,29 @@ class PlatformRegistry {
 	 * @return array Array of field_name => prompt_text pairs.
 	 */
 	public function get_platform_credential_fields( string $platform_slug ): array {
+		$platform = $this->get_platform( $platform_slug );
+		if ( ! is_array( $platform ) ) {
+			return array();
+		}
+		$credentials = $platform['credentials'] ?? array();
+		return is_array( $credentials ) ? $credentials : array();
+	}
 
-		// Default field mappings for known platforms.
-		$default_fields = array(
-			'shopify' => array(
-				'shop_url'     => 'Enter shop URL (e.g., mystore.myshopify.com):',
-				'access_token' => 'Enter access token:',
-			),
-		);
+	/**
+	 * Gets the display name for a platform.
+	 *
+	 * @param string $platform_slug The platform identifier (e.g., 'shopify').
+	 *
+	 * @return string The proper display name (e.g., 'Shopify').
+	 */
+	public function get_platform_display_name( string $platform_slug ): string {
+		$platform = $this->get_platform( $platform_slug );
 
-		return $default_fields[ $platform_slug ] ?? array();
+		if ( is_array( $platform ) && isset( $platform['name'] ) ) {
+			return $platform['name'];
+		}
+
+		// Fallback to ucfirst if platform not found or no name configured.
+		return ucfirst( $platform_slug );
 	}
 }

@@ -5,10 +5,6 @@
 	"description": "Let shoppers know when products are out of stock or on backorder. This block is hidden when products are in stock.",
 	"category": "woocommerce-product-elements",
 	"attributes": {
-		"isDescendentOfQueryLoop": {
-			"type": "boolean",
-			"default": false
-		},
 		"isDescendantOfAllProducts": {
 			"type": "boolean",
 			"default": false

@@ -19,10 +19,23 @@ class WC_Payment_Gateways_Test extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->reset_legacy_proxy_mocks();
+
+		// Set jetpack_activation_source option to prevent "Cannot use bool as array" error
+		// in Jetpack Connection Manager's apply_activation_source_to_args method.
+		update_option( 'jetpack_activation_source', array( '', '' ) );
+
 		$container = wc_get_container();
 		$container->reset_all_resolved();
 		$this->sut = new WC_Payment_Gateways();
 		$this->sut->init();
+	}
+
+	/**
+	 * Tear down test fixtures.
+	 */
+	public function tearDown(): void {
+		parent::tearDown();
+		delete_option( 'jetpack_activation_source' );
 	}
 
 	/**
@@ -83,5 +96,39 @@ class WC_Payment_Gateways_Test extends WC_Unit_Test_Case {
 			$email_details = array();
 		}
 		remove_filter( 'wp_mail', $watcher );
+	}
+
+	/**
+	 * Test get_payment_gateway_name_by_id returns gateway title for known gateway.
+	 *
+	 * @return void
+	 */
+	public function test_get_payment_gateway_name_by_id_returns_gateway_title_for_known_gateway(): void {
+		// Test with a known gateway (bacs is available by default in WooCommerce).
+		$result = $this->sut->get_payment_gateway_name_by_id( 'bacs' );
+
+		// Should return a readable name, not just the ID.
+		$this->assertNotEmpty( $result );
+		$this->assertEquals( 'Direct bank transfer', $result );
+	}
+
+	/**
+	 * Test get_payment_gateway_name_by_id returns ID when gateway not found.
+	 *
+	 * @return void
+	 */
+	public function test_get_payment_gateway_name_by_id_returns_id_when_gateway_not_found(): void {
+		// Test that get_payment_gateway_name_by_id returns the ID as fallback.
+		$result = $this->sut->get_payment_gateway_name_by_id( 'nonexistent_gateway' );
+		$this->assertEquals( 'nonexistent_gateway', $result );
+	}
+
+	/**
+	 * Enable all payment gateways.
+	 */
+	private function enable_all_gateways() {
+		foreach ( $this->sut->payment_gateways() as $gateway ) {
+			$gateway->enabled = 'yes';
+		}
 	}
 }

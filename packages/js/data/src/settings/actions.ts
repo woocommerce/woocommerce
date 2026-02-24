@@ -6,11 +6,11 @@ import { __ } from '@wordpress/i18n';
 import { apiFetch, select } from '@wordpress/data-controls';
 import { controls } from '@wordpress/data';
 import { concat } from 'lodash';
-import { DispatchFromMap } from '@automattic/data-stores';
 
 /**
  * Internal dependencies
  */
+import { DispatchFromMap } from '../types';
 import { NAMESPACE } from '../constants';
 import { STORE_NAME } from './constants';
 import TYPES from './action-types';

@@ -118,14 +118,6 @@ export const isWooPayEligible = ( provider: PaymentsProvider ) => {
 	);
 };
 
-export const getWooPaymentsTestDriveAccountLink = () => {
-	return getAdminLink(
-		'admin.php?wcpay-connect=1&_wpnonce=' +
-			getAdminSetting( 'wcpay_welcome_page_connect_nonce' ) +
-			'&test_drive=true&auto_start_test_drive_onboarding=true&redirect_to_settings_page=true'
-	);
-};
-
 export const getWooPaymentsSetupLiveAccountLink = () => {
 	return getAdminLink(
 		'admin.php?wcpay-connect=1&_wpnonce=' +
@@ -345,17 +337,11 @@ export const recordPaymentsProviderEvent = (
 	const enrichedData: Record< string, string | boolean | number > = {
 		...data,
 		provider_id: provider.id,
+		provider_type: provider._type ?? 'unknown',
+		suggestion_id: provider._suggestion_id ?? 'unknown',
 	};
 
-	// Add provider-specific data to the event.
-	// If the provider is a suggestion, use its ID as the suggestion ID.
-	if ( provider._type === 'suggestion' ) {
-		enrichedData.suggestion_id = provider.id;
-	} else {
-		enrichedData.suggestion_id = provider._suggestion_id ?? 'unknown';
-	}
-
-	// The provider state.
+	// Capture the provider state.
 	enrichedData.provider_enabled = provider.state?.enabled ?? false;
 	enrichedData.provider_account_connected =
 		provider.state?.account_connected ?? false;

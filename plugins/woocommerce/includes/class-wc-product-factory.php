@@ -8,6 +8,7 @@
  * @version 3.0.0
  */
 
+use Automattic\WooCommerce\Internal\Caches\ProductCache;
 use Automattic\WooCommerce\Enums\ProductType;
 
 defined( 'ABSPATH' ) || exit;
@@ -20,16 +21,27 @@ class WC_Product_Factory {
 	/**
 	 * Get a product.
 	 *
-	 * @param mixed $product_id WC_Product|WP_Post|int|bool $product Product instance, post instance, numeric or false to use global $post.
+	 * @param mixed $product_id Product instance, post instance, numeric or false to use global $post.
 	 * @param array $deprecated Previously used to pass arguments to the factory, e.g. to force a type.
-	 * @return WC_Product|bool Product object or false if the product cannot be loaded.
+	 * @return WC_Product|bool  Product object or false if the product cannot be loaded.
 	 */
 	public function get_product( $product_id = false, $deprecated = array() ) {
-		$product_id = $this->get_product_id( $product_id );
+		$product_id = (int) $this->get_product_id( $product_id );
 
 		if ( ! $product_id ) {
 			return false;
 		}
+
+		$use_product_cache = \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_instance_caching' );
+		if ( $use_product_cache && empty( $deprecated ) ) {
+			// Nothing should be using the $deprecated argument still, but avoid using cache if they are.
+			$product_cache = wc_get_container()->get( ProductCache::class );
+			$product       = $product_cache->get( $product_id );
+			if ( $product ) {
+				return $product;
+			}
+		}
+		_prime_post_caches( array( $product_id ) );
 
 		$product_type = self::get_product_type( $product_id );
 
@@ -45,7 +57,11 @@ class WC_Product_Factory {
 		$classname = self::get_product_classname( $product_id, $product_type );
 
 		try {
-			return new $classname( $product_id, $deprecated );
+			$product = new $classname( $product_id, $deprecated );
+			if ( $use_product_cache && isset( $product_cache ) && $product instanceof \WC_Product ) {
+				$product_cache->set( $product );
+			}
+			return $product;
 		} catch ( Exception $e ) {
 			return false;
 		}

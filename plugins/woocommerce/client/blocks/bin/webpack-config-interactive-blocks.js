@@ -33,6 +33,10 @@ const entries = {
 	// Product elements frontend module. Share by several blocks.
 	'woocommerce/product-elements':
 		'./assets/js/atomic/blocks/product-elements/frontend.ts',
+	// Add to cart with options quantity selector frontend module used by the
+	// Product Quantity block and the Grouped Product Selector block.
+	'woocommerce/add-to-cart-with-options-quantity-selector':
+		'./assets/js/blocks/add-to-cart-with-options/quantity-selector/frontend.ts',
 
 	// Other
 	'@woocommerce/stores/woocommerce/cart':
@@ -41,6 +45,8 @@ const entries = {
 		'./assets/js/base/stores/store-notices.ts',
 	'@woocommerce/stores/woocommerce/product-data':
 		'./assets/js/base/stores/woocommerce/product-data.ts',
+	'@woocommerce/stores/woocommerce/products':
+		'./assets/js/base/stores/woocommerce/products.ts',
 };
 
 module.exports = {

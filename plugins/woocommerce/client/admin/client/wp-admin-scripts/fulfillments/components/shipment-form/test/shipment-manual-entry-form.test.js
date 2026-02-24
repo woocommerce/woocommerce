@@ -113,4 +113,31 @@ describe( 'ShipmentManualEntryForm', () => {
 			'http://example.com'
 		);
 	} );
+
+	it( 'updates tracking URL when provider changes without tracking number', () => {
+		render( <ShipmentManualEntryForm /> );
+		const combobox = screen.getByRole( 'combobox' );
+		fireEvent.change( combobox, { target: { value: 'ups' } } );
+		expect( mockContext.setTrackingUrl ).toHaveBeenCalledWith(
+			'https://www.ups.com/track?loc=en_US&tracknum='
+		);
+	} );
+
+	it( 'updates tracking URL with tracking number when provider changes', () => {
+		mockContext.trackingNumber = '123456789';
+		render( <ShipmentManualEntryForm /> );
+		const combobox = screen.getByRole( 'combobox' );
+		fireEvent.change( combobox, { target: { value: 'dhl' } } );
+		expect( mockContext.setTrackingUrl ).toHaveBeenCalledWith(
+			'https://www.dhl.com/en/express/tracking.html?AWB=123456789'
+		);
+	} );
+
+	it( 'sets empty tracking URL when provider does not exist in settings', () => {
+		mockContext.trackingNumber = '123456789';
+		render( <ShipmentManualEntryForm /> );
+		const combobox = screen.getByRole( 'combobox' );
+		fireEvent.change( combobox, { target: { value: 'unknown-provider' } } );
+		expect( mockContext.setTrackingUrl ).toHaveBeenCalledWith( '' );
+	} );
 } );

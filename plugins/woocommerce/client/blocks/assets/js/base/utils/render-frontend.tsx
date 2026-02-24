@@ -144,21 +144,6 @@ const renderBlockInContainers = <
 	const roots: ReactRootWithContainer[] = [];
 
 	containers.forEach( ( el, i ) => {
-		const isCheckoutBlock = el.classList.contains(
-			'wp-block-woocommerce-checkout'
-		);
-		const isCartBlock = el.classList.contains(
-			'wp-block-woocommerce-cart'
-		);
-		// Check for reduced motion preference with sensible fallback
-		// Default to reduced motion (safer for accessibility) when matchMedia is unavailable
-		const hasMotionReduced =
-			typeof window !== 'undefined' &&
-			typeof window.matchMedia === 'function'
-				? window.matchMedia( '(prefers-reduced-motion: reduce)' )
-						.matches
-				: true; // Fallback: assume reduced motion for better accessibility
-
 		const props = getProps( el, i );
 
 		const errorBoundaryProps = getErrorBoundaryProps( el, i );
@@ -167,38 +152,16 @@ const renderBlockInContainers = <
 			...( props.attributes || ( {} as TAttributes ) ),
 		};
 
-		// Determine rendering delay based on block type and user preferences.
-		// The cart and checkout blocks page placeholders should fade out if motion is not reduced.
-		const shouldAnimate =
-			( isCheckoutBlock || isCartBlock ) && ! hasMotionReduced;
-
-		const performRender = () => {
-			const root = renderBlock( {
+		roots.push( {
+			container: el,
+			root: renderBlock( {
 				Block,
 				container: el,
 				props,
 				attributes,
 				errorBoundaryProps,
-			} );
-
-			roots.push( {
-				container: el,
-				root,
-			} );
-
-			if ( shouldAnimate ) {
-				el.classList.remove( 'is-fading' );
-			}
-		};
-
-		if ( shouldAnimate ) {
-			// Apply fade-in animation for cart/checkout blocks when motion is not reduced
-			el.classList.add( 'is-fading' );
-			setTimeout( performRender, 200 );
-		} else {
-			// Render immediately for all other cases (non-cart/checkout blocks or reduced motion)
-			performRender();
-		}
+			} ),
+		} );
 	} );
 
 	return roots;

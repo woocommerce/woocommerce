@@ -2,9 +2,9 @@
  * External dependencies
  */
 import clsx from 'clsx';
-import { forwardRef, useState } from '@wordpress/element';
+import { forwardRef, isValidElement, useState } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
-import type { InputHTMLAttributes } from 'react';
+import type { InputHTMLAttributes, ReactNode } from 'react';
 
 /**
  * Internal dependencies
@@ -23,10 +23,11 @@ export interface TextInputProps
 	ariaDescribedBy?: string | undefined;
 	screenReaderLabel?: string | undefined;
 	help?: string;
-	feedback?: JSX.Element | null;
+	feedback?: ReactNode | null;
 	autoComplete?: string | undefined;
 	onChange: ( newValue: string ) => void;
 	onBlur?: ( newValue: string ) => void;
+	icon?: ReactNode;
 }
 
 const TextInput = forwardRef< HTMLInputElement, TextInputProps >(
@@ -50,18 +51,15 @@ const TextInput = forwardRef< HTMLInputElement, TextInputProps >(
 				/* Do nothing */
 			},
 			feedback,
+			icon = null,
 			...rest
 		},
 		ref
 	) => {
 		const [ isActive, setIsActive ] = useState( false );
 
-		return (
-			<div
-				className={ clsx( 'wc-block-components-text-input', className, {
-					'is-active': isActive || value,
-				} ) }
-			>
+		const inputWithLabel = (
+			<>
 				<input
 					type={ type }
 					id={ id }
@@ -96,6 +94,23 @@ const TextInput = forwardRef< HTMLInputElement, TextInputProps >(
 					} }
 					htmlFor={ id }
 				/>
+			</>
+		);
+
+		return (
+			<div
+				className={ clsx( 'wc-block-components-text-input', className, {
+					'is-active': isActive || value,
+				} ) }
+			>
+				{ isValidElement( icon ) ? (
+					<div className="wc-block-components-text-input__wrapper">
+						{ inputWithLabel }
+						{ icon }
+					</div>
+				) : (
+					inputWithLabel
+				) }
 				{ !! help && (
 					<p
 						id={ id + '__help' }

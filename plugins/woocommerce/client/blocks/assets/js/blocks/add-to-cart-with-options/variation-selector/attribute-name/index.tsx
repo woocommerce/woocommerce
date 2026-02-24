@@ -12,7 +12,6 @@ import AttributeNameEdit from './edit';
 
 registerBlockType( metadata, {
 	edit: AttributeNameEdit,
-	attributes: metadata.attributes,
 	icon: {
 		src: <Icon icon={ heading } />,
 	},

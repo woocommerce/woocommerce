@@ -122,7 +122,7 @@ class WC_Product_Collection_Block_Tracking {
 					'in_single_product' => $is_in_single_product ? 'yes' : 'no',
 					'in_template_part'  => $is_in_template_part ? 'yes' : 'no',
 					'in_synced_pattern' => $is_in_synced_pattern ? 'yes' : 'no',
-					'filters'           => wp_json_encode( $this->get_query_filters_usage_data( $block ) ),
+					'filters'           => wp_json_encode( $this->get_query_filters_usage_data( $block ), JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ),
 				);
 			}
 

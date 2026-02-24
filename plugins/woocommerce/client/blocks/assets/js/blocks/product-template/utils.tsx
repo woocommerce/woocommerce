@@ -19,7 +19,7 @@ type Context< T > = T & {
 };
 type SetEntityId = (
 	kind: 'postType' | 'taxonomy',
-	name: 'product' | 'product_cat' | 'product_tag',
+	name: 'product' | 'product_cat' | 'product_tag' | 'product_brand',
 	slug: string,
 	stateSetter: ( entityId: number | null ) => void
 ) => void;
@@ -28,6 +28,7 @@ const templateSlugs = {
 	singleProduct: 'single-product',
 	productCategory: 'taxonomy-product_cat',
 	productTag: 'taxonomy-product_tag',
+	productBrand: 'taxonomy-product_brand',
 	productAttribute: 'taxonomy-product_attribute',
 	orderConfirmation: 'order-confirmation',
 	cart: 'page-cart',
@@ -148,10 +149,14 @@ export const useGetLocation = < T, >(
 	const isInSpecificTagTemplate = isInSpecificTemplate(
 		templateSlugs.productTag
 	);
+	const isInSpecificBrandTemplate = isInSpecificTemplate(
+		templateSlugs.productBrand
+	);
 
 	const [ productId, setProductId ] = useState< number | null >( null );
 	const [ categoryId, setCategoryId ] = useState< number | null >( null );
 	const [ tagId, setTagId ] = useState< number | null >( null );
+	const [ brandId, setBrandId ] = useState< number | null >( null );
 
 	useEffect( () => {
 		if ( isInSpecificProductTemplate ) {
@@ -168,10 +173,16 @@ export const useGetLocation = < T, >(
 			const slug = getEntitySlug( templateSlugs.productTag );
 			setEntityId( 'taxonomy', 'product_tag', slug, setTagId );
 		}
+
+		if ( isInSpecificBrandTemplate ) {
+			const slug = getEntitySlug( templateSlugs.productBrand );
+			setEntityId( 'taxonomy', 'product_brand', slug, setBrandId );
+		}
 	}, [
 		isInSpecificProductTemplate,
 		isInSpecificCategoryTemplate,
 		isInSpecificTagTemplate,
+		isInSpecificBrandTemplate,
 		getEntitySlug,
 	] );
 
@@ -269,7 +280,19 @@ export const useGetLocation = < T, >(
 	}
 
 	/**
-	 * Case 2.5: TEMPLATES: GENERIC TAXONOMY
+	 * Case 2.5: TEMPLATES: SPECIFIC TAXONOMY
+	 * Specific Brand template
+	 */
+
+	if ( isInSpecificBrandTemplate ) {
+		return createLocationObject( LocationType.Archive, {
+			taxonomy: 'product_brand',
+			termId: brandId,
+		} );
+	}
+
+	/**
+	 * Case 2.6: TEMPLATES: GENERIC TAXONOMY
 	 * Generic Taxonomy template
 	 */
 
@@ -295,6 +318,17 @@ export const useGetLocation = < T, >(
 		} );
 	}
 
+	const isInProductsByBrandTemplate = isInGenericTemplate(
+		templateSlugs.productBrand
+	);
+
+	if ( isInProductsByBrandTemplate ) {
+		return createLocationObject( LocationType.Archive, {
+			taxonomy: 'product_brand',
+			termId: null,
+		} );
+	}
+
 	const isInProductsByAttributeTemplate = isInGenericTemplate(
 		templateSlugs.productAttribute
 	);
@@ -307,7 +341,7 @@ export const useGetLocation = < T, >(
 	}
 
 	/**
-	 * Case 2.6: TEMPLATES: GENERIC CART
+	 * Case 2.7: TEMPLATES: GENERIC CART
 	 * Cart/Checkout templates
 	 */
 
@@ -320,7 +354,7 @@ export const useGetLocation = < T, >(
 	}
 
 	/**
-	 * Case 2.7: TEMPLATES: GENERIC ORDER
+	 * Case 2.8: TEMPLATES: GENERIC ORDER
 	 * Order Confirmation template
 	 */
 
@@ -419,6 +453,7 @@ export const parseTemplateSlug = ( rawTemplateSlug = '' ) => {
 	const categoryPrefix = 'category-';
 	const productCategoryPrefix = 'taxonomy-product_cat-';
 	const productTagPrefix = 'taxonomy-product_tag-';
+	const productBrandPrefix = 'taxonomy-product_brand-';
 
 	if ( rawTemplateSlug.startsWith( categoryPrefix ) ) {
 		return {
@@ -438,6 +473,13 @@ export const parseTemplateSlug = ( rawTemplateSlug = '' ) => {
 		return {
 			taxonomy: 'product_tag',
 			slug: rawTemplateSlug.replace( productTagPrefix, '' ),
+		};
+	}
+
+	if ( rawTemplateSlug.startsWith( productBrandPrefix ) ) {
+		return {
+			taxonomy: 'product_brand',
+			slug: rawTemplateSlug.replace( productBrandPrefix, '' ),
 		};
 	}
 

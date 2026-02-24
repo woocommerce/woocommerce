@@ -15,6 +15,8 @@ import NoPaymentMethods from './no-payment-methods';
 import OnlyExpressPayments from './only-express-payments';
 import PaymentMethodOptions from './payment-method-options';
 import SavedPaymentMethodOptions from './saved-payment-method-options';
+
+import './style-legacy.scss';
 import './style.scss';
 
 /**
@@ -87,9 +89,8 @@ const PaymentMethods = ( {
 					) }
 					wrapperElement="p"
 					wrapperProps={ {
-						className: [
-							'wc-block-components-checkout-step__description wc-block-components-checkout-step__description-payments-aligned',
-						],
+						className:
+							'wc-block-components-checkout-step__description-payments-aligned',
 					} }
 				/>
 			) }

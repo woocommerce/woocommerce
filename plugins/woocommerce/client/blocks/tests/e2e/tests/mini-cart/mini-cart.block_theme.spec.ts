@@ -7,6 +7,7 @@ import { test, expect, BlockData } from '@woocommerce/e2e-utils';
  * Internal dependencies
  */
 import { REGULAR_PRICED_PRODUCT_NAME } from '../checkout/constants';
+import config from '../../../../../admin/config/core.json';
 
 const blockData: BlockData = {
 	name: 'Mini-Cart',
@@ -19,6 +20,52 @@ const blockData: BlockData = {
 };
 
 test.describe( `${ blockData.name } Block`, () => {
+	const checkMiniCartTitle = async ( page, itemCount ) => {
+		try {
+			// iAPI Mini Cart.
+			const miniCartTitleBlock = page.locator(
+				'[data-block-name="woocommerce/mini-cart-title-block"]'
+			);
+			await expect( miniCartTitleBlock ).toBeVisible( { timeout: 1000 } );
+			const titleText = await miniCartTitleBlock.innerText();
+			expect(
+				titleText?.includes(
+					`(${ itemCount } item${ itemCount > 1 ? 's' : '' })`
+				) || titleText?.includes( `(items: ${ itemCount })` )
+			).toBeTruthy();
+		} catch ( e ) {
+			// Legacy React Mini Cart.
+			if ( itemCount > 0 ) {
+				await expect(
+					page.getByRole( 'heading', {
+						name: `Your cart (${ itemCount } item${
+							itemCount > 1 ? 's' : ''
+						})`,
+					} )
+				).toBeVisible();
+			} else {
+				await expect( page.getByRole( 'dialog' ) ).toContainText(
+					'Your cart is currently empty!'
+				);
+			}
+		}
+	};
+
+	const checkProductLink = async ( page ) => {
+		try {
+			// iAPI Mini Cart.
+			await expect(
+				page
+					.getByRole( 'link', { name: REGULAR_PRICED_PRODUCT_NAME } )
+					.filter( { has: page.locator( ':visible' ) } )
+			).toBeVisible( { timeout: 1000 } );
+		} catch ( e ) {
+			// Legacy React Mini Cart.
+			await expect(
+				page.getByRole( 'link', { name: REGULAR_PRICED_PRODUCT_NAME } )
+			).toBeVisible();
+		}
+	};
 	/**
 	 * This is a workaround to run tests in isolation.
 	 * Ideally, the test should be run in isolation by default. But we're
@@ -101,9 +148,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		await page.click( 'text=Add to cart' );
 		await miniCartUtils.openMiniCart();
 
-		await expect( page.getByRole( 'dialog' ) ).toContainText(
-			'Your cart (1 item)'
-		);
+		await checkMiniCartTitle( page, 1 );
 	} );
 
 	test( 'should show the correct cart items count', async ( {
@@ -115,9 +160,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await miniCartUtils.openMiniCart();
 
-		await expect(
-			page.getByRole( 'heading', { name: 'Your cart (1 item)' } )
-		).toBeVisible();
+		await checkMiniCartTitle( page, 1 );
 
 		await page.getByRole( 'button', { name: 'Close' } ).click();
 
@@ -128,9 +171,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await miniCartUtils.openMiniCart();
 
-		await expect(
-			page.getByRole( 'heading', { name: 'Your cart (2 items)' } )
-		).toBeVisible();
+		await checkMiniCartTitle( page, 2 );
 	} );
 
 	test( 'should show the correct cart item name', async ( {
@@ -142,9 +183,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await miniCartUtils.openMiniCart();
 
-		await expect(
-			page.getByRole( 'link', { name: REGULAR_PRICED_PRODUCT_NAME } )
-		).toBeVisible();
+		await checkProductLink( page );
 	} );
 
 	test( 'should show subtotal, view cart button and checkout button', async ( {
@@ -180,17 +219,34 @@ test.describe( `${ blockData.name } Block`, () => {
 			page.getByLabel( 'Quantity of Polo in your cart.' )
 		).toHaveValue( '1' );
 
+		// iAPI cart uses batch requests, legacy cart uses individual endpoints.
+		// Set up waitForResponse BEFORE the click to avoid race condition.
+		const useBatch = config.features[ 'experimental-iapi-mini-cart' ];
+		let batchPromise = useBatch
+			? page.waitForResponse( '**/wp-json/wc/store/v1/batch**' )
+			: null;
 		await page
 			.getByRole( 'button', { name: 'Increase quantity of Polo' } )
 			.click();
+
+		if ( batchPromise ) {
+			await batchPromise;
+		}
 
 		await expect(
 			page.getByLabel( 'Quantity of Polo in your cart.' )
 		).toHaveValue( '2' );
 
+		batchPromise = useBatch
+			? page.waitForResponse( '**/wp-json/wc/store/v1/batch**' )
+			: null;
 		await page
 			.getByRole( 'button', { name: 'Reduce quantity of Polo' } )
 			.click();
+
+		if ( batchPromise ) {
+			await batchPromise;
+		}
 
 		await expect(
 			page.getByLabel( 'Quantity of Polo in your cart.' )
@@ -210,9 +266,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await miniCartUtils.openMiniCart();
 
-		await expect(
-			page.getByRole( 'link', { name: REGULAR_PRICED_PRODUCT_NAME } )
-		).toBeVisible();
+		await checkProductLink( page );
 
 		await page
 			.getByRole( 'button', { name: 'Remove Polo from cart' } )
@@ -245,5 +299,44 @@ test.describe( `${ blockData.name } Block`, () => {
 		await miniCartUtils.openMiniCart();
 		await page.getByRole( 'link', { name: 'Go to checkout' } ).click();
 		await expect( page ).toHaveURL( /\/checkout\/?$/ );
+	} );
+
+	test.describe( 'optimistic updates', () => {
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip(
+			! config.features[ 'experimental-iapi-mini-cart' ],
+			'These tests are only relevant for the iAPI mini cart.'
+		);
+
+		test( 'should show the server filtered item count in the mini-cart title', async ( {
+			page,
+			frontendUtils,
+			miniCartUtils,
+			requestUtils,
+		} ) => {
+			await requestUtils.activatePlugin(
+				'woocommerce-blocks-test-cart-contents-count-filter'
+			);
+
+			try {
+				await frontendUtils.goToShop();
+				await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+				await miniCartUtils.openMiniCart();
+
+				// The filter overrides the count to 999. The mini-cart title should
+				// display this filtered value rather than the actual number of items.
+				const miniCartTitleItemsCounterBlock = page.locator(
+					'[data-block-name="woocommerce/mini-cart-title-items-counter-block"]'
+				);
+				await expect( miniCartTitleItemsCounterBlock ).toBeVisible();
+				await expect( miniCartTitleItemsCounterBlock ).toContainText(
+					'999'
+				);
+			} finally {
+				await requestUtils.deactivatePlugin(
+					'woocommerce-blocks-test-cart-contents-count-filter'
+				);
+			}
+		} );
 	} );
 } );

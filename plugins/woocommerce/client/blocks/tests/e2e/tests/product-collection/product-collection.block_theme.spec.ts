@@ -452,6 +452,7 @@ test.describe( 'Product Collection', () => {
 			await page
 				.getByRole( 'button', { name: 'Single Item: Product' } )
 				.click();
+
 			await page
 				.getByRole( 'option', {
 					name: `Cap http://localhost:${

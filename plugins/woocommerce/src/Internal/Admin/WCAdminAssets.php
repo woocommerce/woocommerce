@@ -325,6 +325,7 @@ class WCAdminAssets {
 			'wc-product-editor',
 			'wc-settings-editor',
 			'wc-remote-logging',
+			'wc-sanitize',
 		);
 
 		$scripts_map = array(

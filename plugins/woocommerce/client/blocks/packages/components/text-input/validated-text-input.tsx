@@ -30,6 +30,7 @@ export type ValidatedTextInputHandle = {
 	revalidate: () => void;
 	isFocused: () => boolean;
 	setErrorMessage: ( errorMessage: string ) => void;
+	inputRef: React.RefObject< HTMLInputElement >;
 };
 
 /**
@@ -58,6 +59,7 @@ const ValidatedTextInput = forwardRef<
 			label,
 			validateOnMount = true,
 			instanceId: preferredInstanceId = '',
+			icon = null,
 			...rest
 		},
 		forwardedRef
@@ -177,6 +179,7 @@ const ValidatedTextInput = forwardRef<
 					setErrorMessage( errorMessage: string ) {
 						inputRef.current?.setCustomValidity( errorMessage );
 					},
+					inputRef,
 				};
 			},
 			[ validateInput, value ]
@@ -297,11 +300,26 @@ const ValidatedTextInput = forwardRef<
 						onChange( formattedValue );
 					}
 				} }
-				onBlur={ () => validateInput( false ) }
+				onBlur={ () => {
+					const isEmpty = ! inputRef.current?.value.trim();
+
+					if ( isEmpty ) {
+						// If the error was already shown (e.g. after form
+						// submission), keep it visible. Otherwise, keep it
+						// hidden until the next form submission.
+						validateInput(
+							! validationError?.message ||
+								validationError?.hidden
+						);
+					} else {
+						validateInput( false );
+					}
+				} }
 				aria-describedby={ ariaDescribedBy }
 				value={ value }
 				title="" // This prevents the same error being shown on hover.
 				label={ label }
+				icon={ icon }
 				{ ...rest }
 			/>
 		);

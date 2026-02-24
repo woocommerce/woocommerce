@@ -41,6 +41,13 @@ class WC_Test_WooCommerce extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that `stable_version()` returns the correct version.
+	 */
+	public function test_stable_version_method() {
+		$this->assertTrue( version_compare( $this->wc->stable_version(), $this->wc->version, '>=' ) );
+	}
+
+	/**
 	 * Test that all WC constants are set.
 	 *
 	 * @since 2.2

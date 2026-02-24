@@ -5,10 +5,6 @@ export {
 export { WooProductFieldItem as __experimentalWooProductFieldItem } from './woo-product-field-item';
 export { WooProductSectionItem as __experimentalWooProductSectionItem } from './woo-product-section-item';
 export { WooProductTabItem as __experimentalWooProductTabItem } from './woo-product-tab-item';
-export { DetailsNameField as __experimentalDetailsNameField } from './details-name-field';
-export { DetailsFeatureField as __experimentalDetailsFeatureField } from './details-feature-field';
-export { DetailsSummaryField as __experimentalDetailsSummaryField } from './details-summary-field';
-export { DetailsDescriptionField as __experimentalDetailsDescriptionField } from './details-description-field';
 export { WooProductMoreMenuItem as __experimentalWooProductMoreMenuItem } from './header';
 export {
 	PluginHeaderItemModal as __experimentalPluginHeaderItemModal,

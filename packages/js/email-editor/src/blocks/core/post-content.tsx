@@ -1,10 +1,13 @@
 /**
  * External dependencies
  */
-import { addFilter } from '@wordpress/hooks';
-import { Block } from '@wordpress/blocks/index';
 import { __ } from '@wordpress/i18n';
 import { useBlockProps } from '@wordpress/block-editor';
+
+/**
+ * Internal dependencies
+ */
+import { updateBlockSettings } from '../../config-tools/block-config';
 
 function Placeholder( { layoutClassNames } ) {
 	const blockProps = useBlockProps( { className: layoutClassNames } );
@@ -38,19 +41,10 @@ function PostContentEdit( OriginalEditComponent ) {
 }
 
 function enhancePostContentBlock() {
-	addFilter(
-		'blocks.registerBlockType',
-		'woocommerce-email-editor/change-post-content',
-		( settings: Block, name ) => {
-			if ( name === 'core/post-content' ) {
-				return {
-					...settings,
-					edit: PostContentEdit( settings.edit ),
-				};
-			}
-			return settings;
-		}
-	);
+	updateBlockSettings( 'core/post-content', ( current ) => ( {
+		...current,
+		edit: PostContentEdit( current.edit ),
+	} ) );
 }
 
 export { enhancePostContentBlock };

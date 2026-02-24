@@ -118,17 +118,28 @@ export class Editor extends CoreEditor {
 	 * Search for a template or template part in the Site Editor.
 	 */
 	async searchTemplate( { templateName }: { templateName: string } ) {
+		const templateCards = this.page.locator(
+			'.dataviews-view-grid > .dataviews-view-grid__card'
+		);
+		const templatesBeforeSearch = await templateCards.count();
+
 		await this.page.getByPlaceholder( 'Search' ).fill( templateName );
 
-		// Wait for the search to finish.
 		await expect(
-			this.page.getByRole( 'button', { name: 'Reset' } )
+			this.page.getByRole( 'button', { name: 'Reset Search' } )
 		).toBeVisible();
 		await expect( this.page.getByLabel( 'No results' ) ).toBeHidden();
+
+		// Wait for the grid to update with fewer items than before.
+		// Using expect.poll() for a retrying assertion since toHaveCount
+		// requires an exact number.
+		await expect
+			.poll( () => templateCards.count(), { timeout: 5000 } )
+			.toBeLessThan( templatesBeforeSearch );
 	}
 
 	/**
-	 * Opens a template or template part in the Site Editor given it's name.
+	 * Opens a template or template part in the Site Editor given its name.
 	 */
 	async openTemplate( { templateName }: { templateName: string } ) {
 		const templateButton = this.page
@@ -181,7 +192,11 @@ export class Editor extends CoreEditor {
 	}
 
 	async createTemplate( { templateName }: { templateName: string } ) {
-		await this.page.getByLabel( 'Add Template' ).click();
+		// We need to take into account two versions of WordPress where label has changed.
+		await this.page
+			.getByLabel( 'Add Template' )
+			.or( this.page.getByText( 'Add New Template' ) )
+			.click();
 
 		const dialog = this.page.getByRole( 'dialog' );
 		await dialog.getByRole( 'button', { name: templateName } ).click();

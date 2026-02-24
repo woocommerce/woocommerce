@@ -70,6 +70,9 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 		// Clear cart.
 		WC()->cart->empty_cart();
 
+		remove_all_filters( 'woocommerce_shipping_tax_class' );
+		remove_all_filters( 'woocommerce_shipping_prices_include_tax' );
+
 		// Clean up created products.
 		foreach ( $this->created_products as $product_id ) {
 			wp_delete_post( $product_id, true );
@@ -501,5 +504,511 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 
 		// Should return the first tax class found in the hierarchy (reduced-rate comes before zero-rate).
 		$this->assertEquals( 'reduced-rate', $result );
+	}
+
+	/**
+	 * Test woocommerce_shipping_tax_class filter fires with correct parameters.
+	 */
+	public function test_shipping_tax_class_filter_fires_with_correct_parameters() {
+		update_option( 'woocommerce_shipping_tax_class', 'inherit' );
+
+		$product = $this->create_product_with_tax_class( '', 'Standard Product' );
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$this->create_tax_rate_for_class( '', 20.0 );
+
+		$filter_called = false;
+		$filter_params = array();
+
+		add_filter(
+			'woocommerce_shipping_tax_class',
+			function ( $tax_class, $cart, $customer, $location ) use ( &$filter_called, &$filter_params ) {
+				$filter_called = true;
+				$filter_params = array(
+					'tax_class' => $tax_class,
+					'cart'      => $cart,
+					'customer'  => $customer,
+					'location'  => $location,
+				);
+				return $tax_class;
+			},
+			10,
+			4
+		);
+
+		WC_Tax::get_shipping_tax_rates();
+
+		$this->assertTrue( $filter_called, 'Filter should have been called' );
+		$this->assertEquals( '', $filter_params['tax_class'], 'Tax class should be empty string (standard)' );
+		$this->assertInstanceOf( 'WC_Cart', $filter_params['cart'], 'Cart parameter should be WC_Cart instance' );
+		$this->assertIsArray( $filter_params['location'], 'Location should be an array' );
+		$this->assertCount( 4, $filter_params['location'], 'Location should have 4 elements' );
+	}
+
+	/**
+	 * Test woocommerce_shipping_tax_class filter can modify tax class.
+	 */
+	public function test_shipping_tax_class_filter_can_modify_tax_class() {
+		$standard_product = $this->create_product_with_tax_class( '', 'Standard Product' );
+		WC()->cart->add_to_cart( $standard_product->get_id(), 1 );
+
+		$this->create_tax_rate_for_class( '', 20.0 );
+		$this->create_tax_rate_for_class( 'reduced-rate', 10.0 );
+
+		update_option( 'woocommerce_shipping_tax_class', 'inherit' );
+
+		$rates_without_filter = WC_Tax::get_shipping_tax_rates();
+		$this->assertNotEmpty( $rates_without_filter );
+		$rate_without_filter = reset( $rates_without_filter );
+		$this->assertEquals( '20.0000', $rate_without_filter['rate'] );
+
+		add_filter(
+			'woocommerce_shipping_tax_class',
+			function () {
+				return 'reduced-rate';
+			}
+		);
+
+		wp_cache_flush();
+		\WC_Cache_Helper::invalidate_cache_group( 'taxes' );
+
+		$rates_with_filter = WC_Tax::get_shipping_tax_rates();
+		$this->assertNotEmpty( $rates_with_filter );
+		$rate_with_filter = reset( $rates_with_filter );
+		$this->assertEquals( '10.0000', $rate_with_filter['rate'], 'Filter should override tax class to reduced-rate (10%)' );
+	}
+
+	/**
+	 * Test woocommerce_shipping_tax_class filter receives empty string when standard tax class.
+	 */
+	public function test_shipping_tax_class_filter_receives_empty_string_for_standard() {
+		update_option( 'woocommerce_shipping_tax_class', 'inherit' );
+
+		$product = $this->create_product_with_tax_class( '', 'Standard Product' );
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$this->create_tax_rate_for_class( '', 20.0 );
+
+		$received_tax_class = null;
+
+		add_filter(
+			'woocommerce_shipping_tax_class',
+			function ( $tax_class ) use ( &$received_tax_class ) {
+				$received_tax_class = $tax_class;
+				return $tax_class;
+			}
+		);
+
+		WC_Tax::get_shipping_tax_rates();
+
+		$this->assertSame( '', $received_tax_class, 'Filter should receive empty string for standard tax class' );
+	}
+
+	/**
+	 * Test woocommerce_shipping_tax_class filter can return null to indicate no taxable items.
+	 */
+	public function test_shipping_tax_class_filter_can_return_null() {
+		update_option( 'woocommerce_shipping_tax_class', 'inherit' );
+
+		$product = $this->create_product_with_tax_class( '', 'Standard Product' );
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$this->create_tax_rate_for_class( '', 20.0 );
+
+		add_filter(
+			'woocommerce_shipping_tax_class',
+			function () {
+				return null;
+			}
+		);
+
+		$rates = WC_Tax::get_shipping_tax_rates();
+
+		$this->assertEmpty( $rates, 'Should return empty array when filter returns null' );
+	}
+
+	/**
+	 * Test backward compatibility: original behavior without filter.
+	 */
+	public function test_shipping_tax_class_backward_compatibility_without_filter() {
+		$standard_product = $this->create_product_with_tax_class( '', 'Standard Product' );
+		$reduced_product  = $this->create_product_with_tax_class( 'reduced-rate', 'Reduced Product' );
+
+		WC()->cart->add_to_cart( $standard_product->get_id(), 1 );
+		WC()->cart->add_to_cart( $reduced_product->get_id(), 1 );
+
+		$this->create_tax_rate_for_class( '', 20.0 );
+		$this->create_tax_rate_for_class( 'reduced-rate', 10.0 );
+
+		update_option( 'woocommerce_shipping_tax_class', 'inherit' );
+
+		$rates = WC_Tax::get_shipping_tax_rates();
+
+		$this->assertNotEmpty( $rates );
+		$rate = reset( $rates );
+		$this->assertEquals( '20.0000', $rate['rate'], 'Should use standard rate (20%) when no filter is hooked' );
+	}
+
+	/**
+	 * Test woocommerce_shipping_tax_class filter works with explicit shipping tax class setting.
+	 */
+	public function test_shipping_tax_class_filter_with_explicit_setting() {
+		$standard_product = $this->create_product_with_tax_class( '', 'Standard Product' );
+		WC()->cart->add_to_cart( $standard_product->get_id(), 1 );
+
+		$this->create_tax_rate_for_class( '', 20.0 );
+		$this->create_tax_rate_for_class( 'reduced-rate', 10.0 );
+
+		update_option( 'woocommerce_shipping_tax_class', 'reduced-rate' );
+
+		$received_tax_class = null;
+
+		add_filter(
+			'woocommerce_shipping_tax_class',
+			function ( $tax_class ) use ( &$received_tax_class ) {
+				$received_tax_class = $tax_class;
+				return $tax_class;
+			}
+		);
+
+		$rates = WC_Tax::get_shipping_tax_rates();
+
+		$this->assertEquals( 'reduced-rate', $received_tax_class, 'Filter should receive explicitly set tax class' );
+		$this->assertNotEmpty( $rates );
+		$rate = reset( $rates );
+		$this->assertEquals( '10.0000', $rate['rate'], 'Should use reduced rate (10%) from explicit setting' );
+	}
+
+	/**
+	 * Helper method to create a tax rate for a specific tax class.
+	 *
+	 * @param string $tax_class Tax class slug ('' for standard, 'reduced-rate', etc).
+	 * @param float  $rate Tax rate percentage.
+	 * @return int Tax rate ID.
+	 */
+	private function create_tax_rate_for_class( $tax_class = '', $rate = 20.0 ) {
+		$tax_rate = array(
+			'tax_rate_country'  => '',
+			'tax_rate_state'    => '',
+			'tax_rate'          => number_format( $rate, 4, '.', '' ),
+			'tax_rate_name'     => $tax_class ? ucfirst( str_replace( '-', ' ', $tax_class ) ) . ' Rate' : 'Standard Rate',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => $tax_class,
+		);
+
+		return WC_Tax::_insert_tax_rate( $tax_rate );
+	}
+
+	/**
+	 * Test calc_shipping_tax default behavior (exclusive).
+	 */
+	public function test_calc_shipping_tax_default_behavior() {
+		$tax_rate = array(
+			'tax_rate_country'  => 'GB',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '10.0000',
+			'tax_rate_name'     => 'VAT',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => '',
+		);
+
+		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
+
+		$tax_rates = WC_Tax::find_rates(
+			array(
+				'country'   => 'GB',
+				'state'     => 'Cambs',
+				'postcode'  => 'PE14 1XX',
+				'city'      => 'Somewhere',
+				'tax_class' => '',
+			)
+		);
+
+		$taxes = WC_Tax::calc_shipping_tax( 10.00, $tax_rates );
+
+		// 10.00 * 10% = 1.00
+		$this->assertEquals( 1.00, array_sum( $taxes ), 'Default: 10% of 10.00 should be 1.00' );
+		$this->assertArrayHasKey( $tax_rate_id, $taxes, 'Default: Tax should be calculated from net price' );
+		$this->assertEquals( 1.00, $taxes[ $tax_rate_id ], 'Default: Tax amount should be 1.00' );
+	}
+
+	/**
+	 * Test calc_shipping_tax with inclusive filter enabled.
+	 */
+	public function test_calc_shipping_tax_inclusive_filter() {
+		$tax_rate = array(
+			'tax_rate_country'  => 'GB',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '20.0000',
+			'tax_rate_name'     => 'VAT',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => '',
+		);
+
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		$tax_rates = WC_Tax::find_rates(
+			array(
+				'country'   => 'GB',
+				'state'     => 'Cambs',
+				'postcode'  => 'PE14 1XX',
+				'city'      => 'Somewhere',
+				'tax_class' => '',
+			)
+		);
+
+		// With filter: shipping cost is gross, tax is calculated from inclusive price.
+		// 10.00 gross, tax = 10.00 - (10.00 / 1.20) ≈ 1.67.
+		add_filter( 'woocommerce_shipping_prices_include_tax', '__return_true' );
+		$taxes = WC_Tax::calc_shipping_tax( 10.00, $tax_rates );
+		remove_filter( 'woocommerce_shipping_prices_include_tax', '__return_true' );
+
+		$expected_tax = 10.00 - ( 10.00 / 1.20 );
+		$this->assertEqualsWithDelta( $expected_tax, array_sum( $taxes ), 0.01, 'Inclusive: tax should be calculated from gross price' );
+	}
+
+	/**
+	 * Test calc_shipping_tax filter can be toggled.
+	 */
+	public function test_calc_shipping_tax_filter_toggle() {
+		$tax_rate = array(
+			'tax_rate_country'  => 'GB',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '20.0000',
+			'tax_rate_name'     => 'VAT',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => '',
+		);
+
+		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
+
+		$tax_rates = WC_Tax::find_rates(
+			array(
+				'country'   => 'GB',
+				'state'     => 'Cambs',
+				'postcode'  => 'PE14 1XX',
+				'city'      => 'Somewhere',
+				'tax_class' => '',
+			)
+		);
+
+		// Without filter: 10.00 * 20% = 2.00.
+		$taxes_exclusive = WC_Tax::calc_shipping_tax( 10.00, $tax_rates );
+		$this->assertEquals( 2.00, array_sum( $taxes_exclusive ), 'Without filter: tax should be 2.00' );
+
+		// With filter: 10.00 is gross, tax = 10.00 - (10.00 / 1.20) ≈ 1.67.
+		add_filter( 'woocommerce_shipping_prices_include_tax', '__return_true' );
+		$taxes_inclusive = WC_Tax::calc_shipping_tax( 10.00, $tax_rates );
+		$expected_tax    = 10.00 - ( 10.00 / 1.20 );
+		$this->assertEqualsWithDelta( $expected_tax, array_sum( $taxes_inclusive ), 0.01, 'With filter: tax should be calculated from gross' );
+
+		// Verify net cost after removing tax from gross.
+		$expected_net = 10.00 / 1.20;
+		$net          = 10.00 - array_sum( $taxes_inclusive );
+		$this->assertEqualsWithDelta( $expected_net, $net, 0.01, 'Net cost should equal gross divided by (1 + rate)' );
+
+		remove_filter( 'woocommerce_shipping_prices_include_tax', '__return_true' );
+	}
+
+	/**
+	 * Test calc_shipping_tax with zero tax rate.
+	 */
+	public function test_calc_shipping_tax_zero_rate() {
+		$tax_rate = array(
+			'tax_rate_country'  => 'GB',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '0.0000',
+			'tax_rate_name'     => 'VAT',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => '',
+		);
+
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		$tax_rates = WC_Tax::find_rates(
+			array(
+				'country'   => 'GB',
+				'state'     => 'Cambs',
+				'postcode'  => 'PE14 1XX',
+				'city'      => 'Somewhere',
+				'tax_class' => '',
+			)
+		);
+
+		// With zero tax, both exclusive and inclusive should return same result.
+		$taxes_exclusive = WC_Tax::calc_shipping_tax( 10.00, $tax_rates );
+		$this->assertEquals( 0.00, array_sum( $taxes_exclusive ), 'Zero tax: exclusive should be 0' );
+
+		add_filter( 'woocommerce_shipping_prices_include_tax', '__return_true' );
+		$taxes_inclusive = WC_Tax::calc_shipping_tax( 10.00, $tax_rates );
+		$this->assertEquals( 0.00, array_sum( $taxes_inclusive ), 'Zero tax: inclusive should be 0' );
+		remove_filter( 'woocommerce_shipping_prices_include_tax', '__return_true' );
+	}
+
+	/**
+	 * Test calc_shipping_tax with no tax rates.
+	 */
+	public function test_calc_shipping_tax_no_rates() {
+		$taxes = WC_Tax::calc_shipping_tax( 10.00, array() );
+		$this->assertEmpty( $taxes, 'No tax rates should return empty array' );
+
+		add_filter( 'woocommerce_shipping_prices_include_tax', '__return_true' );
+		$taxes = WC_Tax::calc_shipping_tax( 10.00, array() );
+		$this->assertEmpty( $taxes, 'No tax rates with filter should return empty array' );
+		remove_filter( 'woocommerce_shipping_prices_include_tax', '__return_true' );
+	}
+
+	/**
+	 * Test calc_shipping_tax filter receives correct parameters.
+	 */
+	public function test_calc_shipping_tax_filter_parameters() {
+		$tax_rate = array(
+			'tax_rate_country'  => 'GB',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '10.0000',
+			'tax_rate_name'     => 'VAT',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => '',
+		);
+
+		$tax_rate_id = WC_Tax::_insert_tax_rate( $tax_rate );
+
+		$tax_rates = WC_Tax::find_rates(
+			array(
+				'country'   => 'GB',
+				'state'     => 'Cambs',
+				'postcode'  => 'PE14 1XX',
+				'city'      => 'Somewhere',
+				'tax_class' => '',
+			)
+		);
+
+		$received_args = null;
+
+		add_filter(
+			'woocommerce_shipping_prices_include_tax',
+			// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found -- Parameter is captured via func_get_args() for the assertion.
+			function ( $include_tax ) use ( &$received_args ) {
+				$received_args = func_get_args();
+				return true;
+			},
+			10,
+			1
+		);
+
+		$taxes_with_filter = WC_Tax::calc_shipping_tax( 15.00, $tax_rates );
+
+		$this->assertIsArray( $received_args, 'Filter should be called' );
+		$this->assertCount( 1, $received_args, 'Filter should only receive the include_tax parameter' );
+
+		$expected_tax = 15.00 - ( 15.00 / 1.10 );
+		$this->assertEqualsWithDelta( $expected_tax, array_sum( $taxes_with_filter ), 0.01, 'Filter return value should be used for inclusive calculation' );
+
+		remove_all_filters( 'woocommerce_shipping_prices_include_tax' );
+	}
+
+	/**
+	 * Test per-item shipping tax when prices do not include tax.
+	 */
+	public function test_calc_shipping_tax_per_item_flow_exclusive() {
+		$tax_rate = array(
+			'tax_rate_country'  => 'GB',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '20.0000',
+			'tax_rate_name'     => 'VAT',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => '',
+		);
+
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		$tax_rates = WC_Tax::find_rates(
+			array(
+				'country'   => 'GB',
+				'state'     => 'Cambs',
+				'postcode'  => 'PE14 1XX',
+				'city'      => 'Somewhere',
+				'tax_class' => '',
+			)
+		);
+
+		// Two items at 5 each. Tax is added on top.
+		$cost_item1 = 5.00;
+		$cost_item2 = 5.00;
+		$taxes1     = WC_Tax::calc_shipping_tax( $cost_item1, $tax_rates );
+		$taxes2     = WC_Tax::calc_shipping_tax( $cost_item2, $tax_rates );
+
+		$total_tax  = array_sum( $taxes1 ) + array_sum( $taxes2 );
+		$total_cost = $cost_item1 + $cost_item2;
+
+		$this->assertEquals( 2.00, $total_tax, 'Tax should be 2.00' );
+		$this->assertEquals( 10.00, $total_cost, 'Cost should stay 10.00' );
+	}
+
+	/**
+	 * Test per-item shipping tax when prices include tax.
+	 */
+	public function test_calc_shipping_tax_per_item_flow_inclusive() {
+		$tax_rate = array(
+			'tax_rate_country'  => 'GB',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '20.0000',
+			'tax_rate_name'     => 'VAT',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => '',
+		);
+
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		$tax_rates = WC_Tax::find_rates(
+			array(
+				'country'   => 'GB',
+				'state'     => 'Cambs',
+				'postcode'  => 'PE14 1XX',
+				'city'      => 'Somewhere',
+				'tax_class' => '',
+			)
+		);
+
+		add_filter( 'woocommerce_shipping_prices_include_tax', '__return_true' );
+
+		// Two items at 6 each. Price includes tax.
+		$cost_item1 = 6.00;
+		$cost_item2 = 6.00;
+		$taxes1     = WC_Tax::calc_shipping_tax( $cost_item1, $tax_rates );
+		$taxes2     = WC_Tax::calc_shipping_tax( $cost_item2, $tax_rates );
+
+		$total_tax   = array_sum( $taxes1 ) + array_sum( $taxes2 );
+		$total_gross = $cost_item1 + $cost_item2;
+		$net_cost    = $total_gross - $total_tax;
+
+		$this->assertEqualsWithDelta( 2.00, $total_tax, 0.02, 'Tax taken from 12.00 should be about 2.00' );
+		$this->assertEqualsWithDelta( 10.00, $net_cost, 0.02, 'Net cost should be 10.00' );
+
+		remove_filter( 'woocommerce_shipping_prices_include_tax', '__return_true' );
 	}
 }

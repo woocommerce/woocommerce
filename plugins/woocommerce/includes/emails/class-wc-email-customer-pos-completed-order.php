@@ -35,6 +35,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 			$this->id             = 'customer_pos_completed_order';
 			$this->customer_email = true;
 			$this->title          = __( 'POS completed order', 'woocommerce' );
+			$this->email_group    = 'payments';
 			$this->template_html  = 'emails/customer-pos-completed-order.php';
 			$this->template_plain = 'emails/plain/customer-pos-completed-order.php';
 			$this->placeholders   = array(
@@ -53,6 +54,11 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 				: __( 'Order complete emails are sent to customers when their POS orders are marked completed.', 'woocommerce' );
 
 			$this->manual = true;
+
+			if ( $this->block_email_editor_enabled ) {
+				$this->title       = __( 'POS order complete', 'woocommerce' );
+				$this->description = __( 'Notifies customers when their in-person (POS) order has been completed.', 'woocommerce' );
+			}
 		}
 
 		/**
@@ -60,6 +66,8 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 		 *
 		 * @param int    $order_id The order ID.
 		 * @param string $template_id The email template ID.
+		 *
+		 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
 		 */
 		public function trigger( $order_id, $template_id ) {
 			if ( $this->id !== $template_id ) {
@@ -185,11 +193,30 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 		}
 
 		/**
+		 * Auto-trigger this email when a POS-paid order is completed.
+		 *
+		 * @param int            $order_id The order ID.
+		 * @param WC_Order|false $order    The order object.
+		 *
+		 * @internal
+		 * @since 10.6.0
+		 */
+		public function auto_trigger( $order_id, $order = false ): void {
+			if ( ! $order instanceof WC_Order ) {
+				$order = wc_get_order( $order_id );
+			}
+			if ( ! $order instanceof WC_Order || ! PointOfSaleOrderUtil::is_order_paid_at_pos( $order ) ) {
+				return;
+			}
+			$this->trigger( $order_id, $this->id );
+		}
+
+		/**
 		 * Enable order email actions for POS orders.
 		 */
 		private function enable_order_email_actions_for_pos_orders() {
+			add_action( 'woocommerce_order_status_completed_notification', array( $this, 'auto_trigger' ), 10, 2 );
 			$this->enable_email_template_for_pos_orders();
-			// Enable send email when requested.
 			add_action( 'woocommerce_rest_order_actions_email_send', array( $this, 'trigger' ), 10, 2 );
 		}
 
@@ -302,6 +329,8 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 		 * @param int      $item_id       Order item ID.
 		 * @param array    $item          Order item data.
 		 * @param WC_Order $order         Order object.
+		 *
+		 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
 		 */
 		public function add_unit_price( $item_id, $item, $order ) {
 			$unit_price = OrderPriceFormatter::get_formatted_item_subtotal( $order, $item, get_option( 'woocommerce_tax_display_cart' ) );
@@ -315,6 +344,8 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 		 * @param WC_Order $order      Order object.
 		 * @param string   $tax_display Tax display.
 		 * @return array Modified array of total rows.
+		 *
+		 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
 		 */
 		public function order_item_totals( $total_rows, $order, $tax_display ) {
 			$cash_payment_change_due_amount = $order->get_meta( '_cash_change_amount', true );
@@ -355,14 +386,17 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 		}
 
 		/**
-		 * Add this email template to the list of valid templates for POS orders.
+		 * Add this email template to the list of valid templates for POS-paid orders.
 		 *
 		 * @param array    $valid_template_classes Array of valid template class names.
 		 * @param WC_Order $order                  The order.
 		 * @return array Modified array of valid template class names.
+		 *
+		 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
+		 * @since 10.6.0
 		 */
 		public function add_to_valid_template_classes( $valid_template_classes, $order ) {
-			if ( ! PointOfSaleOrderUtil::is_pos_order( $order ) ) {
+			if ( ! PointOfSaleOrderUtil::is_order_paid_at_pos( $order ) ) {
 				return $valid_template_classes;
 			}
 			$valid_template_classes[] = get_class( $this );

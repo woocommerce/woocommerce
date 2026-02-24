@@ -111,8 +111,18 @@ abstract class MetaToMetaTableMigrator extends TableMigrator {
 
 		$to_insert = $data[0];
 		$to_update = $data[1];
+		$to_delete = $data[2] ?? array();
 
 		try {
+			if ( ! empty( $to_delete ) ) {
+				$delete_queries = $this->generate_delete_sql_for_batch( $to_delete );
+
+				if ( $delete_queries ) {
+					$processed_rows_count = $this->db_query( $delete_queries );
+					$this->maybe_add_insert_or_update_error( 'delete', $processed_rows_count );
+				}
+			}
+
 			if ( ! empty( $to_insert ) ) {
 				$insert_queries       = $this->generate_insert_sql_for_batch( $to_insert );
 				$processed_rows_count = $this->db_query( $insert_queries );
@@ -132,6 +142,56 @@ abstract class MetaToMetaTableMigrator extends TableMigrator {
 			'errors'    => $this->get_errors(),
 			'exception' => $exception,
 		);
+	}
+
+	/**
+	 * Generate delete SQL for given batch.
+	 *
+	 * @since 10.4.0
+	 *
+	 * @param array $batch List of data to generate delete SQL for. Should be in same format as output of $this->fetch_data_for_migration_for_ids.
+	 * @return string
+	 */
+	private function generate_delete_sql_for_batch( array $batch ): string {
+		global $wpdb;
+
+		$table                 = $this->schema_config['destination']['meta']['table_name'];
+		$meta_id_column        = $this->schema_config['destination']['meta']['meta_id_column'];
+		$entity_id_column      = $this->schema_config['destination']['meta']['entity_id_column'];
+		$entity_id_placeholder = MigrationHelper::get_wpdb_placeholder_for_type( $this->schema_config['destination']['meta']['entity_id_type'] );
+
+		$clauses = array();
+
+		foreach ( $batch as $entity_id => $metas ) {
+			$meta_ids = array_column(
+				array_reduce( $metas, 'array_merge', array() ),
+				$meta_id_column
+			);
+
+			if ( ! $meta_ids ) {
+				continue;
+			}
+
+			$meta_id_placeholders = implode( ',', array_fill( 0, count( $meta_ids ), '%d' ) );
+
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+			$clauses[] = $wpdb->prepare(
+				"( %i = {$entity_id_placeholder} AND %i IN ({$meta_id_placeholders}) )",
+				$entity_id_column,
+				$entity_id,
+				$meta_id_column,
+				...$meta_ids
+			);
+			// phpcs:enable
+		}
+
+		if ( ! $clauses ) {
+			return '';
+		}
+
+		$clauses_sql = implode( ' OR ', $clauses );
+
+		return "DELETE FROM {$table} WHERE {$clauses_sql}";
 	}
 
 	/**
@@ -320,8 +380,19 @@ WHERE destination.$destination_entity_id_column in ( $entity_ids_placeholder ) O
 	private function classify_update_insert_records( array $to_migrate, array $already_migrated ): array {
 		$to_update = array();
 		$to_insert = array();
+		$to_delete = array();
 
 		foreach ( $to_migrate as $entity_id => $rows ) {
+			// Meta keys we need to fully delete because they don't exist in the source data.
+			$no_longer_exist = array_diff_key(
+				$already_migrated[ $entity_id ] ?? array(),
+				$rows
+			);
+
+			if ( $no_longer_exist ) {
+				$to_delete[ $entity_id ] = array_merge( $to_delete[ $entity_id ] ?? array(), $no_longer_exist );
+			}
+
 			foreach ( $rows as $meta_key => $meta_values ) {
 				// If there is no corresponding record in the destination table then insert.
 				// If there is single value in both already migrated and current then update.
@@ -347,20 +418,20 @@ WHERE destination.$destination_entity_id_column in ( $entity_ids_placeholder ) O
 						continue;
 					}
 
-					// There are multiple meta entries, let's find the unique entries and insert.
-					$unique_meta_values = array_diff( $meta_values, array_column( $already_migrated[ $entity_id ][ $meta_key ], 'meta_value' ) );
-					if ( 0 === count( $unique_meta_values ) ) {
-						continue;
-					}
+					// There might be multiple entries with the same value, or destination entries that no longer exist in the source data.
+					// It is easier to delete all existing entries with this meta key and insert fresh new ones to honor multiplicity, etc.
+					$to_delete[ $entity_id ][ $meta_key ] = $already_migrated[ $entity_id ][ $meta_key ];
+
 					if ( ! isset( $to_insert[ $entity_id ] ) ) {
 						$to_insert[ $entity_id ] = array();
 					}
-					$to_insert[ $entity_id ][ $meta_key ] = $unique_meta_values;
+
+					$to_insert[ $entity_id ][ $meta_key ] = $meta_values;
 				}
 			}
 		}
 
-		return array( $to_insert, $to_update );
+		return array( $to_insert, $to_update, $to_delete );
 	}
 
 	/**

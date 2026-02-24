@@ -1,4 +1,0 @@
-Significance: patch
-Type: enhancement
-
-Ensure the email editor obtains and utilizes the site theme styles as part of its default values.

@@ -9,14 +9,14 @@ import PropTypes from 'prop-types';
  */
 import { advancedFilters, showDatePicker, filters } from './config';
 import StockReportTable from './table';
-import ReportFilters from '../../components/report-filters';
+import { ReportHeader } from '../../components/report-header';
 
 export default class StockReport extends Component {
 	render() {
 		const { query, path } = this.props;
 		return (
 			<Fragment>
-				<ReportFilters
+				<ReportHeader
 					query={ query }
 					path={ path }
 					showDatePicker={ showDatePicker }

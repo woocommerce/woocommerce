@@ -21,7 +21,12 @@ const config: Config = {
 	projectName: 'woocommerce', // Usually your repo name.
 
 	onBrokenLinks: 'throw',
-	onBrokenMarkdownLinks: 'warn',
+	onBrokenAnchors: 'warn',
+	markdown: {
+		hooks: {
+			onBrokenMarkdownLinks: 'warn',
+		},
+	},
 
 	trailingSlash: true,
 
@@ -101,6 +106,11 @@ const config: Config = {
 					label: 'CLI',
 				},
 				{
+					type: 'docSidebar',
+					sidebarId: 'marketplaceSidebar',
+					label: 'Marketplace',
+				},
+				{
 					href: 'https://developer.woocommerce.com/',
 					label: 'Blog',
 					position: 'right',
@@ -143,6 +153,10 @@ const config: Config = {
 					title: 'GROW WITH WOO',
 					items: [
 						{
+							label: 'WooCommerce Marketplace',
+							href: 'https://woocommerce.com/woocommerce-marketplace/',
+						},
+						{
 							label: 'Become a Woo agency partner',
 							href: 'https://woocommerce.com/for-agencies/',
 						},
@@ -168,16 +182,16 @@ const config: Config = {
 							href: 'https://github.com/woocommerce/woocommerce/',
 						},
 						{
+							label: 'WooCommerce Code Reference',
+							href: 'https://woocommerce.github.io/code-reference/',
+						},
+						{
 							label: 'Woo Storybook',
 							href: 'https://woocommerce.github.io/woocommerce/',
 						},
 						{
 							label: 'Merchant Documentation',
 							href: 'https://woocommerce.com/docs',
-						},
-						{
-							label: 'WooCommerce Marketplace',
-							href: 'https://woocommerce.com/woocommerce-marketplace/',
 						},
 						{
 							label: 'GitHub',
@@ -190,8 +204,8 @@ const config: Config = {
 				<div class="docusaurus-footer-for-automattic">
 					<a href="https://automattic.com/">
 						An
-						<img src="img/automattic.svg" alt="Automattic" class="automattic-logo automattic-logo-light" />
-						<img src="img/automattic_dark.svg" alt="Automattic" class="automattic-logo automattic-logo-dark" />
+						<img src="/docs/img/automattic.svg" alt="Automattic" class="automattic-logo automattic-logo-light" />
+						<img src="/docs/img/automattic_dark.svg" alt="Automattic" class="automattic-logo automattic-logo-dark" />
 						Creation</a>
 				</div>`,
 		},
