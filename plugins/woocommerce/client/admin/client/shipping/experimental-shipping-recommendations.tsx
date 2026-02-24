@@ -90,7 +90,7 @@ const ShippingRecommendations = () => {
 	}
 
 	return (
-		<>
+		<div style={ { paddingBottom: 60 } }>
 			<ShippingTour showShippingRecommendationsStep={ true } />
 			<ShippingRecommendationsList>
 				{ visibleExtensions.map( ( ext ) => {
@@ -133,7 +133,7 @@ const ShippingRecommendations = () => {
 					}
 				} ) }
 			</ShippingRecommendationsList>
-		</>
+		</div>
 	);
 };
 

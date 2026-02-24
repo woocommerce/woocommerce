@@ -118,7 +118,7 @@ export const ShippingRecommendationsList = ( {
 				lineHeight="16px"
 			>
 				{ __(
-					'We recommend adding one of the following shipping extensions to your store. The extension will be installed and activated for you when you click "Get started".',
+					'We recommend adding one of the following shipping extensions to your store.',
 					'woocommerce'
 				) }
 			</Text>
