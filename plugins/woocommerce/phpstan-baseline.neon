@@ -19093,18 +19093,6 @@ parameters:
 			path: includes/emails/class-wc-email-customer-pos-refunded-order.php
 
 		-
-			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:get_billing_email\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/emails/class-wc-email-customer-pos-refunded-order.php
-
-		-
-			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:get_order_number\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/emails/class-wc-email-customer-pos-refunded-order.php
-
-		-
 			message: '#^Callback expects 3 parameters, \$accepted_args is set to 4\.$#'
 			identifier: arguments.count
 			count: 1
@@ -19118,12 +19106,6 @@ parameters:
 
 		-
 			message: '#^Method WC_Email_Customer_POS_Refunded_Order\:\:add_unit_price\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/emails/class-wc-email-customer-pos-refunded-order.php
-
-		-
-			message: '#^Method WC_Email_Customer_POS_Refunded_Order\:\:disable_default_refund_emails_for_pos_orders\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: includes/emails/class-wc-email-customer-pos-refunded-order.php
@@ -19147,12 +19129,6 @@ parameters:
 			path: includes/emails/class-wc-email-customer-pos-refunded-order.php
 
 		-
-			message: '#^Method WC_Email_Customer_POS_Refunded_Order\:\:register_refund_email_triggers\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/emails/class-wc-email-customer-pos-refunded-order.php
-
-		-
 			message: '#^Method WC_Email_Customer_POS_Refunded_Order\:\:remove_pos_customizations\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -19160,24 +19136,6 @@ parameters:
 
 		-
 			message: '#^Method WC_Email_Customer_POS_Refunded_Order\:\:set_email_strings\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/emails/class-wc-email-customer-pos-refunded-order.php
-
-		-
-			message: '#^Method WC_Email_Customer_POS_Refunded_Order\:\:trigger\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/emails/class-wc-email-customer-pos-refunded-order.php
-
-		-
-			message: '#^Method WC_Email_Customer_POS_Refunded_Order\:\:trigger_full\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/emails/class-wc-email-customer-pos-refunded-order.php
-
-		-
-			message: '#^Method WC_Email_Customer_POS_Refunded_Order\:\:trigger_partial\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: includes/emails/class-wc-email-customer-pos-refunded-order.php
@@ -19200,11 +19158,6 @@ parameters:
 			count: 1
 			path: includes/emails/class-wc-email-customer-pos-refunded-order.php
 
-		-
-			message: '#^Property WC_Email_Customer_POS_Refunded_Order\:\:\$refund \(bool\|WC_Order\) does not accept WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: includes/emails/class-wc-email-customer-pos-refunded-order.php
 
 		-
 			message: '#^Method WC_Email_Customer_Processing_Order\:\:trigger\(\) has no return type specified\.$#'
