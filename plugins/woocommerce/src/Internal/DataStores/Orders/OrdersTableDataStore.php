@@ -3188,6 +3188,7 @@ FROM $order_meta_table
 			$orders = $query->orders;
 		} else {
 			$orders = WC()->order_factory->get_orders( $query->orders );
+			$this->prime_order_item_caches_for_orders( $query->orders, $query_vars );
 		}
 
 		if ( isset( $query_vars['paginate'] ) && $query_vars['paginate'] ) {
