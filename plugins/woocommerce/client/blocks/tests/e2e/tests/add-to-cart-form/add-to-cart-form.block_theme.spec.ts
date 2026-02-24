@@ -170,6 +170,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		editor,
 		requestUtils,
 		blockUtils,
+		wpCoreVersion,
 	} ) => {
 		// Add to Cart with Options in the Site Editor is only available as
 		// inner block of the Single Product Block except for the Single Product
@@ -186,7 +187,15 @@ test.describe( `${ blockData.name } Block`, () => {
 			canvas: 'edit',
 		} );
 
-		await expect( editor.canvas.getByText( 'placeholder' ) ).toBeVisible();
+		const placeholderLocator =
+			wpCoreVersion >= 7
+				? // Custom HTML block content is inside an iframe since WP 7.0
+				  editor.canvas
+						.frameLocator( 'iframe' )
+						.getByText( 'placeholder' )
+				: editor.canvas.getByText( 'placeholder' );
+
+		await expect( placeholderLocator ).toBeVisible();
 
 		await editor.insertBlock( { name: 'woocommerce/single-product' } );
 
@@ -208,6 +217,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		admin,
 		editor,
 		requestUtils,
+		wpCoreVersion,
 	} ) => {
 		const template = await requestUtils.createTemplate( 'wp_template', {
 			slug: 'single-product',
@@ -221,7 +231,15 @@ test.describe( `${ blockData.name } Block`, () => {
 			canvas: 'edit',
 		} );
 
-		await expect( editor.canvas.getByText( 'placeholder' ) ).toBeVisible();
+		const placeholderLocator =
+			wpCoreVersion >= 7
+				? // Custom HTML block content is inside an iframe since WP 7.0
+				  editor.canvas
+						.frameLocator( 'iframe' )
+						.getByText( 'placeholder' )
+				: editor.canvas.getByText( 'placeholder' );
+
+		await expect( placeholderLocator ).toBeVisible();
 
 		await editor.insertBlock( { name: blockData.slug } );
 
