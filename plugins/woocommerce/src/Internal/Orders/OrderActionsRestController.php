@@ -470,6 +470,7 @@ class OrderActionsRestController extends RestApiControllerBase {
 				do_action( 'woocommerce_order_status_pending_to_processing_notification', $order->get_id(), $order );
 				break;
 			case 'customer_refunded_order':
+			case 'customer_pos_refunded_order':
 				if ( $this->order_is_partially_refunded( $order ) ) {
 					/** This action is documented in includes/class-wc-emails.php */
 					do_action( 'woocommerce_order_partially_refunded_notification', $order->get_id() );
