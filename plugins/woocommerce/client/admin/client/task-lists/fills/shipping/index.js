@@ -168,7 +168,7 @@ export class Shipping extends Component {
 				success: true,
 			} );
 		} else {
-			const { installedPlugins } = this.props;
+			const { installedPlugins = [] } = this.props;
 			const wasInstalled = installedPlugins.includes( selectedPlugin );
 
 			if ( wasInstalled ) {
