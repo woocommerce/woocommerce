@@ -1087,9 +1087,9 @@ class Cart extends ControllerTestCase {
 	}
 
 	/**
-	 * Test that adding an item to cart fires the cart item add action.
+	 * @testdox Should fire woocommerce_store_api_cart_item_add_from_request when adding an item.
 	 */
-	public function test_add_item_fires_add_action() {
+	public function test_add_item_fires_add_action(): void {
 		wc_empty_cart();
 
 		$captured_args = array();
@@ -1120,9 +1120,9 @@ class Cart extends ControllerTestCase {
 	}
 
 	/**
-	 * Test that adding an item without specifying quantity fires the add action with default quantity of 1.
+	 * @testdox Should fire woocommerce_store_api_cart_item_add_from_request with default quantity of 1 when quantity is omitted.
 	 */
-	public function test_add_item_fires_add_action_when_quantity_omitted() {
+	public function test_add_item_fires_add_action_when_quantity_omitted(): void {
 		wc_empty_cart();
 
 		$captured_args = array();
@@ -1152,9 +1152,9 @@ class Cart extends ControllerTestCase {
 	}
 
 	/**
-	 * Test that updating a cart item quantity fires the cart item update action.
+	 * @testdox Should fire woocommerce_store_api_cart_item_update_from_request when updating item quantity.
 	 */
-	public function test_update_item_fires_update_action() {
+	public function test_update_item_fires_update_action(): void {
 		$captured_args = array();
 		// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		$callback = function ( $item_key, $quantity, $old_quantity, $cart ) use ( &$captured_args ) {
@@ -1186,7 +1186,7 @@ class Cart extends ControllerTestCase {
 	/**
 	 * @testdox Should fire woocommerce_store_api_cart_item_removed_from_request when removing a cart item.
 	 */
-	public function test_remove_item_fires_remove_action() {
+	public function test_remove_item_fires_remove_action(): void {
 		$captured_args = array();
 		// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		$callback = function ( $item_key, $cart ) use ( &$captured_args ) {
@@ -1213,9 +1213,9 @@ class Cart extends ControllerTestCase {
 	}
 
 	/**
-	 * Test that updating a cart item without changing quantity does not fire the update action.
+	 * @testdox Should not fire woocommerce_store_api_cart_item_update_from_request when quantity is not set.
 	 */
-	public function test_update_item_without_quantity_does_not_fire_update_action() {
+	public function test_update_item_without_quantity_does_not_fire_update_action(): void {
 		$action_fired = false;
 		$callback     = function () use ( &$action_fired ) {
 			$action_fired = true;

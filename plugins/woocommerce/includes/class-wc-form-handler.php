@@ -657,13 +657,12 @@ class WC_Form_Handler {
 				WC()->cart->remove_cart_item( $cart_item_key );
 
 				/**
-				 * Action hook to track cart item removed event.
+				 * Fires when a cart item is removed via the shortcode cart form.
+				 *
+				 * @param string   $cart_item_key Cart item key.
+				 * @param \WC_Cart $cart          Cart object.
 				 *
 				 * @since 10.7.0
-				 *
-				 * @param string $cart_item_key Cart item key.
-				 * @param object $cart          Cart object.
-				 * @return void
 				 */
 				do_action( 'woocommerce_shortcode_cart_item_removed', $cart_item_key, WC()->cart );
 
@@ -736,7 +735,7 @@ class WC_Form_Handler {
 					}
 
 					if ( $passed_validation ) {
-						$old_quantity = WC()->cart->get_cart()[ $cart_item_key ]['quantity'];
+						$old_quantity = $values['quantity'];
 						WC()->cart->set_quantity( $cart_item_key, $quantity, false );
 						/**
 						 * Fires when a cart item quantity is updated via the shortcode cart form.

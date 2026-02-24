@@ -72,17 +72,17 @@ class CartUpdateItem extends AbstractCartRoute {
 
 		if ( isset( $request['quantity'] ) ) {
 			$cart_item    = $cart->get_cart_item( $request['key'] );
-			$old_quantity = ! empty( $cart_item ) && isset( $cart_item['quantity'] ) ? $cart_item['quantity'] : 0;
+			$old_quantity = $cart_item['quantity'] ?? 0;
 			$this->cart_controller->set_cart_item_quantity( $request['key'], $request['quantity'] );
 			/**
 			 * Fires when a cart item quantity is updated via the Store API.
-			 *
-			 * @since 10.7.0
 			 *
 			 * @param string   $item_key     Cart item key.
 			 * @param int      $quantity     Quantity.
 			 * @param int      $old_quantity Old quantity.
 			 * @param \WC_Cart $cart         Cart object.
+			 *
+			 * @since 10.7.0
 			 */
 			do_action( 'woocommerce_store_api_cart_item_update_from_request', $request['key'], (int) $request['quantity'], $old_quantity, $cart );
 		}

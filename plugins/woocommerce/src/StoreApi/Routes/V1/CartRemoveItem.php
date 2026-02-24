@@ -76,13 +76,12 @@ class CartRemoveItem extends AbstractCartRoute {
 		$cart->remove_cart_item( $request['key'] );
 
 		/**
-		 * Action hook to track cart item removed event.
+		 * Fires when a cart item is removed via the Store API.
+		 *
+		 * @param string   $cart_item_key Cart item key.
+		 * @param \WC_Cart $cart          Cart object.
 		 *
 		 * @since 10.7.0
-		 *
-		 * @param string $cart_item_key Cart item key.
-		 * @param object $cart          Cart object.
-		 * @return void
 		 */
 		do_action( 'woocommerce_store_api_cart_item_removed_from_request', $request['key'], $cart );
 
