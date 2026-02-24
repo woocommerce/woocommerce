@@ -6,4 +6,6 @@ Please DO NOT USE. Instead, use the version available in WordPress core.
 
 We are keeping these files here for now to prevent fatal errors for websites with aggressive caching.
 
+These files will be deleted after 2026-08-24.
+
 See <https://github.com/woocommerce/woocommerce/pull/63289> for more info.
