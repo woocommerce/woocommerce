@@ -931,6 +931,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 */
 	public static function update_registered_customer_via_last_active( $meta_id, $user_id, $meta_key ) {
 		if ( 'wc_last_active' === $meta_key ) {
+			// Optimization note related to guarded updates in `wc_update_user_last_active`: the meta update will trigger
+			// this method execution. We evaluated adding `! doing_action( 'wp' )` here, but the performance gain lays
+			// in the micro-optimization area while exposing the Analytics to certain edge-cases.
 			self::update_registered_customer( $user_id );
 		}
 	}
