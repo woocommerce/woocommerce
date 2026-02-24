@@ -100,12 +100,12 @@ const { state } = store< Store >(
 				return context?.notice?.type === 'error';
 			},
 			get isSuccess() {
-                const context = getStoreNoticeContext();
-                return context?.notice?.type === 'success';
+				const context = getStoreNoticeContext();
+				return context?.notice?.type === 'success';
 			},
 			get isInfo() {
-                const context = getStoreNoticeContext();
-                return context?.notice?.type === 'notice';
+				const context = getStoreNoticeContext();
+				return context?.notice?.type === 'notice';
 			},
 			get notices() {
 				const productCollectionContext = getProductCollectionContext();
@@ -147,32 +147,32 @@ const { state } = store< Store >(
 			removeNotice: ( noticeId: string | PointerEvent ) => {
 				const { notices } = state;
 
-	            const resolvedId =
-	                typeof noticeId === 'string'
-	                    ? noticeId
-	                    : getStoreNoticeContext()?.notice?.id;
-	
-	            // If noticeId is not found (e.g., context was null), do nothing.
-	            if ( ! resolvedId ) return;
-	
-	            const index = notices.findIndex(
-	                ( { id } ) => id === resolvedId
-	            );
+				const resolvedId =
+					typeof noticeId === 'string'
+						? noticeId
+						: getStoreNoticeContext()?.notice?.id;
+
+				// If noticeId is not found (e.g., context was null), do nothing.
+				if ( ! resolvedId ) return;
+
+				const index = notices.findIndex(
+					( { id } ) => id === resolvedId
+				);
 				if ( index !== -1 ) {
 					notices.splice( index, 1 );
 				}
 			},
 		},
 		callbacks: {
-	        renderNoticeContent: () => {
-	            const context = getStoreNoticeContext();
-	            const { ref } = getElement();
-	
-	            if ( ref && context?.notice ) {
-	                // Note: Notice content is sanitized server-side via wp_kses.
-	                ref.innerHTML = context.notice.notice;
-	            }
-	        },
+			renderNoticeContent: () => {
+				const context = getStoreNoticeContext();
+				const { ref } = getElement();
+
+				if ( ref && context?.notice ) {
+					// Note: Notice content is sanitized server-side via wp_kses.
+					ref.innerHTML = context.notice.notice;
+				}
+			},
 
 			scrollIntoView: () => {
 				const { ref } = getElement();
@@ -183,13 +183,13 @@ const { state } = store< Store >(
 			},
 
 			injectIcon: () => {
-			    const context = getStoreNoticeContext();
-			    const { ref } = getElement();
-			
-			    // Guard against missing context or notice to prevent wrong icon injection.
-			    if ( ! ref || ! context?.notice ) {
-			        return;
-			    }
+				const context = getStoreNoticeContext();
+				const { ref } = getElement();
+
+				// Guard against missing context or notice to prevent wrong icon injection.
+				if ( ! ref || ! context?.notice ) {
+					return;
+				}
 
 				// Remove existing icon SVG if present (watch may run multiple times).
 				const existingSvg = ref.querySelector( ':scope > svg' );
