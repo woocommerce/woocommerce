@@ -215,7 +215,7 @@ export class Shipping extends Component {
 			prevState.step !== 'label_printing' &&
 			! this.impressionFired
 		) {
-			const { shippingPartners } = this.props;
+			const { shippingPartners = [] } = this.props;
 			if ( shippingPartners.length > 0 ) {
 				recordEvent(
 					'shipping_partner_impression',
