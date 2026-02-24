@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Don't disable submit button in meta boxes with empty textarea fields
