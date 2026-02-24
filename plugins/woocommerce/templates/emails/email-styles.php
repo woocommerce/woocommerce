@@ -12,7 +12,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 10.5.0
+ * @version 10.7.0
  */
 
 use Automattic\WooCommerce\Internal\Email\EmailFont;
@@ -23,6 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 $email_improvements_enabled = FeaturesUtil::feature_is_enabled( 'email_improvements' );
+$block_email_editor_enabled = FeaturesUtil::feature_is_enabled( 'block_email_editor' );
 
 // Load colors.
 $bg               = get_option( 'woocommerce_email_background_color' );
@@ -272,7 +273,7 @@ body {
 #body_content .order-item-data td {
 	border: 0 !important;
 	padding: 0 !important;
-	vertical-align: middle;
+	vertical-align: top;
 }
 
 #body_content .email-order-details .order-totals td,
@@ -352,6 +353,7 @@ body {
 	<?php if ( $email_improvements_enabled ) { ?>
 		color: <?php echo esc_attr( $text ); ?>;
 		font-style: normal;
+		line-height: 120%;
 		padding: 8px 0;
 	<?php } else { ?>
 		padding: 12px;
@@ -458,7 +460,7 @@ img {
 	outline: none;
 	text-decoration: none;
 	text-transform: capitalize;
-	vertical-align: middle;
+	vertical-align: <?php echo $block_email_editor_enabled ? 'top' : 'middle'; ?>;
 	margin-<?php echo is_rtl() ? 'left' : 'right'; ?>: <?php echo $email_improvements_enabled ? '24px' : '10px'; ?>;
 	max-width: 100%;
 }
@@ -468,6 +470,10 @@ h2.email-order-detail-heading span {
 	display: block;
 	font-size: 14px;
 	font-weight: normal;
+}
+
+h2.email-order-detail-heading span a {
+	text-decoration: none;
 }
 
 .font-family {
