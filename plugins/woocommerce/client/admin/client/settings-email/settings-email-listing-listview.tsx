@@ -114,7 +114,7 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 				label: __( 'Edit', 'woocommerce' ),
 				icon: <Icon icon={ edit } />,
 				supportsBulk: false,
-				callback: ( items: EmailType[] ) => {
+				callback: async ( items: EmailType[] ) => {
 					const email = items[ 0 ];
 					if ( email.post_id ) {
 						window.location.href = getAdminLink(
@@ -123,11 +123,17 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 							) }&action=edit`
 						);
 					} else {
-						window.location.href = getAdminLink(
-							`admin.php?page=wc-settings&tab=email&section=${ encodeURIComponent(
-								email.email_key
-							) }`
+						// Lazily create an auto-draft post for this email type.
+						const response = await recreateEmailPost(
+							email.id
 						);
+						if ( response?.post_id ) {
+							window.location.href = getAdminLink(
+								`post.php?post=${ encodeURIComponent(
+									response.post_id
+								) }&action=edit`
+							);
+						}
 					}
 				},
 			},
@@ -165,17 +171,6 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 						items[ 0 ].id,
 						! items[ 0 ].enabled
 					);
-				},
-			},
-			{
-				id: 'recreate-email-post',
-				label: __( 'Recreate email post', 'woocommerce' ),
-				disabled: false,
-				supportsBulk: false,
-				isEligible: ( item: EmailType ) => ! item?.post_id,
-				callback: ( items: EmailType[] ) => {
-					void recreateEmailPost( items[ 0 ].id );
-					return true;
 				},
 			},
 		],

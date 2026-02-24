@@ -152,6 +152,26 @@ class WCTransactionalEmailPostsGenerator {
 	}
 
 	/**
+	 * Get the file-based template content for a given email type.
+	 *
+	 * Looks up the \WC_Email object from the mailer and loads
+	 * the template HTML from the file system.
+	 *
+	 * @param string $email_type The email type identifier (e.g., 'customer_processing_order').
+	 * @return string|null The template HTML content, or null if the email type is not found.
+	 */
+	public static function get_file_template_content( $email_type ) {
+		$emails = \WC()->mailer()->get_emails();
+		foreach ( $emails as $email ) {
+			if ( $email->id === $email_type ) {
+				$generator = new self();
+				return $generator->get_email_template( $email );
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * Generate initial email templates.
 	 *
 	 * This function generates the initial email templates for the core transactional emails.

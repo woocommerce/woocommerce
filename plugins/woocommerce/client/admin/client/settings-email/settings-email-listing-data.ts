@@ -257,7 +257,9 @@ export const useTransactionalEmails = (
 	);
 
 	const recreateEmailPost = useCallback(
-		async ( emailId: string ) => {
+		async (
+			emailId: string
+		): Promise< EmailListingRecreateEmailPostResponse | null > => {
 			try {
 				const response: EmailListingRecreateEmailPostResponse =
 					await apiFetch( {
@@ -266,6 +268,7 @@ export const useTransactionalEmails = (
 						data: { email_id: emailId },
 					} );
 				updateEmailPostIdInState( emailId, response?.post_id || '' );
+				return response;
 			} catch ( e ) {
 				const wpError = e as WPError;
 				// eslint-disable-next-line no-console
@@ -273,6 +276,7 @@ export const useTransactionalEmails = (
 					'[WooCommerce Admin] Error recreating email post: ',
 					wpError
 				);
+				return null;
 			}
 		},
 		[ updateEmailPostIdInState ]

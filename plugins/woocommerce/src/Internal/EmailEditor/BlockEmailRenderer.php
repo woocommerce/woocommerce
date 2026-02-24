@@ -6,6 +6,8 @@ namespace Automattic\WooCommerce\Internal\EmailEditor;
 use Automattic\WooCommerce\EmailEditor\Email_Editor_Container;
 use Automattic\WooCommerce\EmailEditor\Engine\Personalizer;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\Renderer as EmailRenderer;
+use Automattic\WooCommerce\Internal\EmailEditor\EmailTemplates\WooEmailTemplate;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsGenerator;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsManager;
 
 /**
@@ -72,8 +74,14 @@ class BlockEmailRenderer {
 	 */
 	public function maybe_render_block_email( \WC_Email $wc_email ): ?string {
 		$email_post = $this->get_email_post_by_wc_email( $wc_email );
+
+		// If no published post exists, build a synthetic WP_Post from the file template.
+		// This follows the WP Site Editor pattern: file templates are used until the user edits and saves.
 		if ( ! $email_post ) {
-			return null;
+			$email_post = $this->build_post_from_file_template( $wc_email );
+			if ( ! $email_post ) {
+				return null;
+			}
 		}
 
 		$woo_content = $this->woo_content_processor->get_woo_content( $wc_email );
@@ -96,9 +104,11 @@ class BlockEmailRenderer {
 			};
 			add_filter( 'woocommerce_email_editor_rendering_email_context', $filter_callback, 10, 1 );
 
-			$subject             = $wc_email->get_subject(); // We will get subject from $email_post after we add it to the editor.
-			$preheader           = $wc_email->get_preheader();
-			$rendered_email_data = $this->renderer->render( $email_post, $subject, $preheader, 'en' );
+			$subject       = $wc_email->get_subject(); // We will get subject from $email_post after we add it to the editor.
+			$preheader     = $wc_email->get_preheader();
+			$template_slug = 0 === $email_post->ID ? ( new WooEmailTemplate() )->get_slug() : '';
+
+			$rendered_email_data = $this->renderer->render( $email_post, $subject, $preheader, 'en', '', $template_slug );
 			$personalized_email  = $this->personalizer->personalize_content( $rendered_email_data['html'] );
 			$rendered_email      = str_replace( self::WOO_EMAIL_CONTENT_PLACEHOLDER, $woo_content, $personalized_email );
 
@@ -139,6 +149,33 @@ class BlockEmailRenderer {
 	 * @param \WC_Email $wc_email WooCommerce email object.
 	 * @return array Email context data.
 	 */
+	/**
+	 * Build a synthetic WP_Post from the file-based template for an email type.
+	 *
+	 * Used when no published post exists in the database, allowing rendering
+	 * directly from file templates without requiring a DB record.
+	 *
+	 * @param \WC_Email $wc_email WooCommerce email object.
+	 * @return \WP_Post|null Synthetic post or null if file template not found.
+	 */
+	private function build_post_from_file_template( \WC_Email $wc_email ): ?\WP_Post {
+		$file_content = WCTransactionalEmailPostsGenerator::get_file_template_content( $wc_email->id );
+		if ( null === $file_content ) {
+			return null;
+		}
+
+		return new \WP_Post(
+			(object) array(
+				'ID'           => 0,
+				'post_type'    => Integration::EMAIL_POST_TYPE,
+				'post_status'  => 'publish',
+				'post_content' => $file_content,
+				'post_title'   => $wc_email->get_title(),
+				'post_name'    => $wc_email->id,
+			)
+		);
+	}
+
 	private function build_email_context( \WC_Email $wc_email ): array {
 		$recipient_raw = $wc_email->get_recipient();
 		$emails        = array_values( array_filter( array_map( 'sanitize_email', array_map( 'trim', explode( ',', $recipient_raw ) ) ) ) );

@@ -139,6 +139,7 @@ class Integration {
 		add_filter( 'woocommerce_email_editor_preview_post_template_html', array( $this, 'update_preview_post_template_html_data' ), 100, 1 );
 		add_action( 'woocommerce_email_editor_send_preview_email_before_wp_mail', array( $this, 'send_preview_email_before_wp_mail' ), 10 );
 		add_action( 'woocommerce_email_editor_send_preview_email_after_wp_mail', array( $this, 'send_preview_email_after_wp_mail' ), 10 );
+		add_action( 'transition_post_status', array( $this, 'save_email_mapping_on_publish' ), 10, 3 );
 	}
 
 	/**
@@ -414,5 +415,33 @@ class Integration {
 	public function send_preview_email_after_wp_mail() {
 		remove_filter( 'wp_mail_from', array( $this->wc_email_instance, 'get_from_address' ) );
 		remove_filter( 'wp_mail_from_name', array( $this->wc_email_instance, 'get_from_name' ) );
+	}
+
+	/**
+	 * Save the email type → post ID mapping when a woo_email auto-draft is published.
+	 *
+	 * This follows the WordPress Site Editor pattern: the post only becomes "permanent"
+	 * when the user actually saves in the editor (auto-draft → publish).
+	 *
+	 * @param string   $new_status New post status.
+	 * @param string   $old_status Old post status.
+	 * @param \WP_Post $post       Post object.
+	 */
+	public function save_email_mapping_on_publish( $new_status, $old_status, $post ): void {
+		if ( self::EMAIL_POST_TYPE !== $post->post_type ) {
+			return;
+		}
+
+		if ( 'publish' !== $new_status || 'publish' === $old_status ) {
+			return;
+		}
+
+		$email_type = get_post_meta( $post->ID, '_wc_email_type', true );
+		if ( empty( $email_type ) ) {
+			return;
+		}
+
+		$post_manager = WCTransactionalEmailPostsManager::get_instance();
+		$post_manager->save_email_template_post_id( $email_type, $post->ID );
 	}
 }

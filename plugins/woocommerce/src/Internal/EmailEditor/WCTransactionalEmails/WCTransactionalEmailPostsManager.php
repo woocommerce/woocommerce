@@ -129,7 +129,17 @@ class WCTransactionalEmailPostsManager {
 		);
 
 		if ( empty( $option_name ) ) {
-			return null;
+			// Fallback: check post meta for auto-draft posts that don't have an options mapping yet.
+			$email_type = get_post_meta( $post_id, '_wc_email_type', true );
+			if ( empty( $email_type ) ) {
+				return null;
+			}
+
+			// Store in both caches.
+			$this->post_id_to_email_type_cache[ $post_id ] = $email_type;
+			wp_cache_set( $cache_key, $email_type, self::CACHE_GROUP, self::CACHE_EXPIRATION );
+
+			return $email_type;
 		}
 
 		$email_type = $this->get_email_type_from_option_name( $option_name );

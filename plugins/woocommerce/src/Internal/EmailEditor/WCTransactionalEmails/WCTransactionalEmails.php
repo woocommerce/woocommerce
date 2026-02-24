@@ -58,7 +58,10 @@ class WCTransactionalEmails {
 	 * @internal
 	 */
 	final public function init() {
-		add_action( 'current_screen', array( $this, 'init_email_templates' ), 50 );
+		// Email posts are no longer created on initialization.
+		// They are created lazily when a user opens the email editor for a specific email type.
+		// This aligns with the WordPress Site Editor pattern where wp_template posts
+		// are only created when the user edits and saves a template.
 	}
 
 	/**

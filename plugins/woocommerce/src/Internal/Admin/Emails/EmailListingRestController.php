@@ -4,8 +4,11 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Admin\Emails;
 
 use Automattic\WooCommerce\Internal\RestApiControllerBase;
+use Automattic\WooCommerce\Internal\EmailEditor\Integration;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmails;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsGenerator;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsManager;
+use Automattic\WooCommerce\Internal\EmailEditor\EmailTemplates\WooEmailTemplate;
 use WP_Error;
 use WP_REST_Request;
 
@@ -168,16 +171,50 @@ class EmailListingRestController extends RestApiControllerBase {
 	/**
 	 * Handle the POST /settings/email/listing/recreate-email-post.
 	 *
+	 * Creates an auto-draft email post for the given email type, or returns an existing
+	 * published/auto-draft post if one already exists. This follows the WordPress Site Editor
+	 * pattern where posts are only created when the user opens the editor.
+	 *
 	 * @param WP_REST_Request $request The received request.
 	 * @return array|WP_Error Request response or an error.
 	 */
 	public function recreate_email_post( WP_REST_Request $request ) {
 		$email_id = $request->get_param( 'email_id' );
 
-		$generated_post_id = '';
+		$post_manager = WCTransactionalEmailPostsManager::get_instance();
 
+		// Check for existing published post first.
+		$existing_post_id = $post_manager->get_email_template_post_id( $email_id );
+		if ( $existing_post_id ) {
+			$post = get_post( $existing_post_id );
+			if ( $post instanceof \WP_Post ) {
+				return array(
+					'message' => sprintf(
+						// translators: %s: WooCommerce transactional email ID.
+						__( 'Email post already exists for %s.', 'woocommerce' ),
+						$email_id
+					),
+					'post_id' => (string) $existing_post_id,
+				);
+			}
+		}
+
+		// Check for existing auto-draft.
+		$existing_auto_draft = $this->find_auto_draft_for_email_type( $email_id );
+		if ( $existing_auto_draft ) {
+			return array(
+				'message' => sprintf(
+					// translators: %s: WooCommerce transactional email ID.
+					__( 'Email auto-draft exists for %s.', 'woocommerce' ),
+					$email_id
+				),
+				'post_id' => (string) $existing_auto_draft->ID,
+			);
+		}
+
+		// Create a new auto-draft with file template content.
 		try {
-			$generated_post_id = $this->email_template_generator->generate_email_template_if_not_exists( $email_id );
+			$post_id = $this->create_auto_draft( $email_id );
 		} catch ( \Exception $e ) {
 			return new WP_Error(
 				'woocommerce_rest_email_post_generation_failed',
@@ -187,17 +224,90 @@ class EmailListingRestController extends RestApiControllerBase {
 			);
 		}
 
-		if ( $generated_post_id ) {
+		if ( $post_id ) {
 			return array(
 				// translators: %s: WooCommerce transactional email ID.
-				'message' => sprintf( __( 'Email post generated for %s.', 'woocommerce' ), $email_id ),
-				'post_id' => (string) $generated_post_id,
+				'message' => sprintf( __( 'Email auto-draft created for %s.', 'woocommerce' ), $email_id ),
+				'post_id' => (string) $post_id,
 			);
 		}
+
 		return new WP_Error(
 			'woocommerce_rest_email_post_generation_error',
 			__( 'Error unable to generate email post.', 'woocommerce' ),
 			array( 'status' => 500 )
 		);
+	}
+
+	/**
+	 * Find an existing auto-draft post for the given email type.
+	 *
+	 * @param string $email_id The email type identifier.
+	 * @return \WP_Post|null The auto-draft post if found, null otherwise.
+	 */
+	private function find_auto_draft_for_email_type( string $email_id ): ?\WP_Post {
+		$posts = get_posts(
+			array(
+				'post_type'   => Integration::EMAIL_POST_TYPE,
+				'post_status' => 'auto-draft',
+				'meta_key'    => '_wc_email_type', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'meta_value'  => $email_id, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+				'numberposts' => 1,
+			)
+		);
+
+		return ! empty( $posts ) ? $posts[0] : null;
+	}
+
+	/**
+	 * Create an auto-draft email post with file template content.
+	 *
+	 * @param string $email_id The email type identifier.
+	 * @return int The post ID of the created auto-draft.
+	 * @throws \Exception When the email type is not found or post creation fails.
+	 */
+	private function create_auto_draft( string $email_id ): int {
+		$file_content = WCTransactionalEmailPostsGenerator::get_file_template_content( $email_id );
+		if ( null === $file_content ) {
+			throw new \Exception(
+				esc_html( sprintf( 'Could not load file template for email type: %s', $email_id ) )
+			);
+		}
+
+		$emails = \WC()->mailer()->get_emails();
+		$email  = null;
+		foreach ( $emails as $e ) {
+			if ( $e->id === $email_id ) {
+				$email = $e;
+				break;
+			}
+		}
+
+		if ( ! $email ) {
+			throw new \Exception(
+				esc_html( sprintf( 'Email type not found: %s', $email_id ) )
+			);
+		}
+
+		$post_data = array(
+			'post_type'    => Integration::EMAIL_POST_TYPE,
+			'post_status'  => 'auto-draft',
+			'post_name'    => $email_id,
+			'post_title'   => $email->get_title(),
+			'post_excerpt' => $email->get_description(),
+			'post_content' => $file_content,
+			'meta_input'   => array(
+				'_wp_page_template' => ( new WooEmailTemplate() )->get_slug(),
+				'_wc_email_type'    => $email_id,
+			),
+		);
+
+		$post_id = wp_insert_post( $post_data, true );
+
+		if ( is_wp_error( $post_id ) ) {
+			throw new \Exception( esc_html( $post_id->get_error_message() ) );
+		}
+
+		return $post_id;
 	}
 }
