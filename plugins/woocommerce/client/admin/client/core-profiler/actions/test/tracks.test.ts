@@ -340,6 +340,10 @@ describe( 'Core Profiler shipping partner tracking', () => {
 					success: false,
 				}
 			);
+			expect( recordEvent ).not.toHaveBeenCalledWith(
+				'shipping_partner_activate',
+				expect.anything()
+			);
 		} );
 
 		it( 'should not fire shipping_partner_install for failed non-shipping plugins', () => {
