@@ -638,6 +638,29 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		}
 		$order_item_ids = wp_list_pluck( $order_items, 'order_item_id' );
 		update_meta_cache( 'order_item', $order_item_ids );
+
+		// Prime WC_Data meta cache (includes meta_id required by read_meta_data).
+		$order_item_ids_sql    = esc_sql( $order_item_ids );
+		$order_item_ids_string = implode( ',', $order_item_ids_sql );
+		$raw_meta_data_array   = $wpdb->get_results(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			"SELECT order_item_id as object_id, meta_id, meta_key, meta_value FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id IN ({$order_item_ids_string}) ORDER BY meta_id"
+		);
+
+		if ( ! empty( $raw_meta_data_array ) ) {
+			$raw_meta_data_collection = array_reduce(
+				$raw_meta_data_array,
+				function ( $collection, $raw_meta_data ) {
+					if ( ! isset( $collection[ $raw_meta_data->object_id ] ) ) {
+						$collection[ $raw_meta_data->object_id ] = array();
+					}
+					$collection[ $raw_meta_data->object_id ][] = $raw_meta_data;
+					return $collection;
+				},
+				array()
+			);
+			\WC_Order_Item::prime_raw_meta_data_cache( $raw_meta_data_collection, 'order-items' );
+		}
 	}
 
 	/**
