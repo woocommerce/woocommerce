@@ -100,6 +100,8 @@ test.describe( 'Products > Product Images', () => {
 		await test.step( 'Set product image', async () => {
 			await page
 				.getByRole( 'link', { name: 'Set product image' } )
+				// It's button since WordPress 7.0
+				.or( page.getByRole( 'button', { name: 'Set product image' } ) )
 				.click();
 			await addImageFromLibrary( page, 'image-01', 'Set product image' );
 
@@ -182,7 +184,14 @@ test.describe( 'Products > Product Images', () => {
 				.getByRole( 'link', { name: 'Remove product image' } )
 				.click();
 			await expect(
-				page.getByRole( 'link', { name: 'Set product image' } )
+				page
+					.getByRole( 'link', { name: 'Set product image' } )
+					// It's button since WordPress 7.0
+					.or(
+						page.getByRole( 'button', {
+							name: 'Set product image',
+						} )
+					)
 			).toBeVisible();
 
 			await page
