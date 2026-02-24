@@ -34,7 +34,9 @@ test.describe( 'Template customization', () => {
 				canvas: 'edit',
 			} );
 
-			await editor.canvas.locator( 'body' ).waitFor( { timeout: 20000 } );
+			await editor.canvas
+				.locator( 'body' )
+				.waitFor( { timeout: 20000 } );
 
 			await editor.insertBlock( {
 				name: 'core/paragraph',
@@ -93,7 +95,9 @@ test.describe( 'Template customization', () => {
 					canvas: 'edit',
 				} );
 
-				await editor.canvas.locator( 'body' ).waitFor( { timeout: 20000 } );
+				await editor.canvas
+					.locator( 'body' )
+					.waitFor( { timeout: 20000 } );
 
 				await editor.insertBlock( {
 					name: 'core/paragraph',
@@ -160,7 +164,9 @@ test.describe( 'Template customization', () => {
 				canvas: 'edit',
 			} );
 
-			await editor.canvas.locator( 'body' ).waitFor( { timeout: 20000 } );
+			await editor.canvas
+				.locator( 'body' )
+				.waitFor( { timeout: 20000 } );
 
 			await editor.insertBlock( {
 				name: 'core/paragraph',
@@ -181,7 +187,9 @@ test.describe( 'Template customization', () => {
 				canvas: 'edit',
 			} );
 
-			await editor.canvas.locator( 'body' ).waitFor( { timeout: 20000 } );
+			await editor.canvas
+				.locator( 'body' )
+				.waitFor( { timeout: 20000 } );
 
 			await editor.insertBlock( {
 				name: 'core/paragraph',
