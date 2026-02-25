@@ -133,7 +133,7 @@ export default defineConfig( {
 			testIgnore: [
 				'**/api-tests/**',
 				/* Exclude PayPal tests, as they don't run well in parallel - see https://github.com/woocommerce/woocommerce/pull/63068. */
-				'**/tests/paypal/**',
+				'**/tests/paypal/*',
 			],
 			dependencies: [ 'site setup' ],
 		},
@@ -149,7 +149,7 @@ export default defineConfig( {
 		},
 		{
 			name: 'paypal-standard',
-			testMatch: [ '**/tests/paypal/**' ],
+			testMatch: [ '**/tests/paypal/*' ],
 			dependencies: [ 'site setup' ],
 		},
 	],
