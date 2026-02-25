@@ -1,7 +1,4 @@
-export type {
-	ProductContextStore,
-	ProductContextState,
-} from './product-context';
+export type { ProductContextStore } from './product-context';
 export type {
 	ProductDataStore,
 	Context as ProductDataContext,
