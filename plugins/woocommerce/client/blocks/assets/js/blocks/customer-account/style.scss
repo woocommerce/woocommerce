@@ -16,8 +16,7 @@
 }
 
 :where(.wp-block-woocommerce-customer-account) {
-	--wc-customer-account-gap: var(--wp--preset--spacing--20, #{em($gap-smaller)});
-	--wc-customer-account-padding: 0 var(
+	--wc-customer-account-padding: var(
 		--wp--preset--spacing--20,
 		#{em($gap-smaller)}
 	);
@@ -57,7 +56,6 @@
 	font-family: inherit;
 	font-size: inherit;
 	font-weight: inherit;
-	gap: var(--wc-customer-account-gap);
 	line-height: 1;
 	padding: var(--wc-customer-account-padding);
 	text-decoration: none;
@@ -142,7 +140,9 @@
 			white-space: nowrap;
 
 			&:last-child {
-				padding-bottom: var(--wc-customer-account-dropdown-padding-block);
+				padding-bottom: var(
+					--wc-customer-account-dropdown-padding-block
+				);
 			}
 
 			&:hover,
