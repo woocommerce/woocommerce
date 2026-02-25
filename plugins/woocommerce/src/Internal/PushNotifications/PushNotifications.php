@@ -10,6 +10,8 @@ use Automattic\Jetpack\Connection\Manager as JetpackConnectionManager;
 use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushTokenRestController;
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\PendingNotificationStore;
+use Automattic\WooCommerce\Internal\PushNotifications\Triggers\NewOrderNotificationTrigger;
+use Automattic\WooCommerce\Internal\PushNotifications\Triggers\NewReviewNotificationTrigger;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use WC_Logger;
@@ -72,6 +74,8 @@ class PushNotifications {
 
 		wc_get_container()->get( PushTokenRestController::class )->register();
 		wc_get_container()->get( PendingNotificationStore::class )->register();
+		wc_get_container()->get( NewOrderNotificationTrigger::class )->register();
+		wc_get_container()->get( NewReviewNotificationTrigger::class )->register();
 	}
 
 	/**
