@@ -135,7 +135,9 @@ class FilesystemUtil {
 			$initialized = $credentials && WP_Filesystem( $credentials );
 
 			if ( ! $initialized ) {
-				set_transient( self::FTP_INIT_FAILURE_TRANSIENT, true, self::FTP_INIT_COOLDOWN_MINUTES * MINUTE_IN_SECONDS );
+				// A fixed cooldown is used instead of exponential backoff since this handles a non-critical
+			// edge case (broken FTP filesystem during logging) that most sites will never encounter.
+			set_transient( self::FTP_INIT_FAILURE_TRANSIENT, true, self::FTP_INIT_COOLDOWN_MINUTES * MINUTE_IN_SECONDS );
 				error_log( sprintf( 'WooCommerce: FTP filesystem connection failed. Please check your FTP credentials. Retrying in %d minutes.', self::FTP_INIT_COOLDOWN_MINUTES ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 			} else {
 				delete_transient( self::FTP_INIT_FAILURE_TRANSIENT );
