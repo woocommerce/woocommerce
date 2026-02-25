@@ -15,27 +15,46 @@ import WooIcon from './woo-icon.svg';
 
 const WOOCOMMERCE_SHIPPING_PLUGIN_SLUG = 'woocommerce-shipping';
 
+export type ShippingPartnerTrackingProps = {
+	context: 'settings';
+	country: string;
+	plugins: string;
+};
+
 const WooCommerceShippingItem = ( {
 	isPluginInstalled,
 	onInstallClick,
 	onActivateClick,
 	pluginsBeingSetup,
+	tracking,
 }: {
 	isPluginInstalled: boolean;
 	pluginsBeingSetup: Array< string >;
 	onInstallClick: ( slugs: string[] ) => PromiseLike< void >;
 	onActivateClick: ( slugs: string[] ) => PromiseLike< void >;
+	tracking?: ShippingPartnerTrackingProps;
 } ) => {
 	const { createSuccessNotice } = useDispatch( 'core/notices' );
 
 	const handleClick = () => {
-		recordEvent( 'settings_shipping_recommendation_setup_click', {
-			plugin: WOOCOMMERCE_SHIPPING_PLUGIN_SLUG,
-			action: isPluginInstalled ? 'activate' : 'install',
-		} );
+		const trackingBase = {
+			...( tracking ?? {} ),
+			selected_plugin: WOOCOMMERCE_SHIPPING_PLUGIN_SLUG,
+		};
+
+		recordEvent( 'shipping_partner_click', trackingBase );
+
 		const action = isPluginInstalled ? onActivateClick : onInstallClick;
+		const eventName = isPluginInstalled
+			? 'shipping_partner_activate'
+			: 'shipping_partner_install';
+
 		action( [ WOOCOMMERCE_SHIPPING_PLUGIN_SLUG ] ).then(
 			() => {
+				recordEvent( eventName, {
+					...trackingBase,
+					success: true,
+				} );
 				createSuccessNotice(
 					isPluginInstalled
 						? __( 'WooCommerce Shipping activated!', 'woocommerce' )
@@ -46,7 +65,12 @@ const WooCommerceShippingItem = ( {
 					{}
 				);
 			},
-			() => {}
+			() => {
+				recordEvent( eventName, {
+					...trackingBase,
+					success: false,
+				} );
+			}
 		);
 	};
 
