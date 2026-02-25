@@ -89,10 +89,10 @@ class WC_Tests_Payment_Gateway_COD extends WC_Unit_Test_Case {
 	 * Make sure is_available() returns early for disabled gateways.
 	 */
 	public function test_is_available_returns_early_when_disabled() {
-		$gateway = new WC_Gateway_COD();
+		$gateway          = new WC_Gateway_COD();
 		$gateway->enabled = 'no';
 
-		$cart = WC()->cart;
+		$cart                    = WC()->cart;
 		$has_order_pay_query_var = array_key_exists( 'order-pay', $GLOBALS['wp']->query_vars );
 		$order_pay_query_var     = $has_order_pay_query_var ? $GLOBALS['wp']->query_vars['order-pay'] : null;
 
