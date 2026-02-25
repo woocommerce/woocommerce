@@ -172,27 +172,27 @@ const getInfoNoticesFromCartUpdates = (
 	const newItems = newCart.items;
 
 	const {
-	    cartItemsPendingQuantity: pendingQuantity = [],
+		cartItemsPendingQuantity: pendingQuantity = [],
 	} = quantityChanges;
 
-    const autoDeletedToNotify = oldItems.filter(
-        ( old ) =>
-            old.key &&
-            isCartItem( old ) &&
-            ! newItems.some( ( item ) => old.key === item.key )
-    );
+	const autoDeletedToNotify = oldItems.filter(
+		( old ) =>
+			old.key &&
+			isCartItem( old ) &&
+			! newItems.some( ( item ) => old.key === item.key )
+	);
 
-    const autoUpdatedToNotify = newItems.filter( ( item ) => {
-        if ( ! isCartItem( item ) ) {
-            return false;
-        }
-        const old = oldItems.find( ( o ) => o.key === item.key );
-        return old
-            ? ! pendingQuantity.includes( item.key ) &&
-                    item.quantity !== old.quantity &&
-                    old.quantity > 0
-            : false;
-    } );
+	const autoUpdatedToNotify = newItems.filter( ( item ) => {
+		if ( ! isCartItem( item ) ) {
+			return false;
+		}
+		const old = oldItems.find( ( o ) => o.key === item.key );
+		return old
+			? ! pendingQuantity.includes( item.key ) &&
+					item.quantity !== old.quantity &&
+					old.quantity > 0
+			: false;
+	} );
 	return [
 		...autoDeletedToNotify.map( ( item ) =>
 			// TODO: move the message template to iAPI config.
@@ -318,22 +318,22 @@ const { state, actions } = store< Store >(
 	{
 		actions: {
 			*removeCartItem( key: string ) {
-			    // 1. Find the item to get its name BEFORE removing it
-			    const itemToRemove = state.cart.items.find( ( item ) => item.key === key );
-			
-			    // 2. Show "Removed" notice IMMEDIATELY (Optimistic UI)
-			    if ( itemToRemove && isCartItem( itemToRemove ) ) {
-			        yield actions.updateNotices( [
-			            generateInfoNotice(
-			                '"%s" was removed from your cart.'.replace( '%s', itemToRemove.name )
-			            ),
-			        ] );
-			    }
-			
-			    // Track what changes we're making for notice comparison.
-			    const quantityChanges: QuantityChanges = {
-			        cartItemsPendingDelete: [ key ],
-			    };
+				// 1. Find the item to get its name BEFORE removing it
+				const itemToRemove = state.cart.items.find( ( item ) => item.key === key );
+
+				// 2. Show "Removed" notice IMMEDIATELY (Optimistic UI)
+				if ( itemToRemove && isCartItem( itemToRemove ) ) {
+					yield actions.updateNotices( [
+						generateInfoNotice(
+							'"%s" was removed from your cart.'.replace( '%s', itemToRemove.name )
+						),
+					] );
+				}
+
+				// Track what changes we're making for notice comparison.
+				const quantityChanges: QuantityChanges = {
+					cartItemsPendingDelete: [ key ],
+				};
 
 				// Capture cart state after optimistic updates for notice comparison.
 				let cartAfterOptimistic: typeof state.cart | null = null;
