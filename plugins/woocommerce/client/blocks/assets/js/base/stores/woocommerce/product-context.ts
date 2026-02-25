@@ -9,12 +9,7 @@ import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-const productsStore = store< ProductsStore >( 'woocommerce/products', {
-	state: {
-		products: {},
-		productVariations: {},
-	},
-} );
+const productsStore = store< ProductsStore >( 'woocommerce/products', {} );
 
 /**
  * Per-element context set via data-wp-context on wrapper elements (e.g. the
