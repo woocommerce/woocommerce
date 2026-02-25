@@ -156,20 +156,20 @@ class FilesystemUtil {
 	 * @return bool False if FTP-based and unusable, true otherwise.
 	 */
 	private static function is_usable_ftp_filesystem( WP_Filesystem_Base $wp_filesystem ): bool {
-		if ( 'ftpext' === $wp_filesystem->method && empty( $wp_filesystem->link ) ) {
-			return false;
+		$has_broken_state = false;
+		$has_errors       = false;
+
+		if ( 'ftpext' === $wp_filesystem->method ) {
+			$has_broken_state = empty( $wp_filesystem->link );
+			$has_errors       = is_wp_error( $wp_filesystem->errors ) && $wp_filesystem->errors->has_errors();
 		}
 
-		if ( 'ftpsockets' === $wp_filesystem->method && empty( $wp_filesystem->ftp ) ) {
-			return false;
+		if ( 'ftpsockets' === $wp_filesystem->method ) {
+			$has_broken_state = empty( $wp_filesystem->ftp );
+			$has_errors       = is_wp_error( $wp_filesystem->errors ) && $wp_filesystem->errors->has_errors();
 		}
 
-		if ( in_array( $wp_filesystem->method, array( 'ftpext', 'ftpsockets' ), true )
-			&& is_wp_error( $wp_filesystem->errors ) && $wp_filesystem->errors->has_errors() ) {
-			return false;
-		}
-
-		return true;
+		return ! $has_broken_state && ! $has_errors;
 	}
 
 	/**
