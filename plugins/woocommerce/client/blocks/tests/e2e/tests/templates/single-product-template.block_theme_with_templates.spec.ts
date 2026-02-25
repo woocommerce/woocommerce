@@ -34,6 +34,8 @@ test.describe( 'Single Product Template', () => {
 			canvas: 'edit',
 		} );
 
+		await editor.canvas.locator( 'body' ).waitFor( { timeout: 20000 } );
+
 		await editor.insertBlock( {
 			name: 'core/paragraph',
 			attributes: { content: userText },
