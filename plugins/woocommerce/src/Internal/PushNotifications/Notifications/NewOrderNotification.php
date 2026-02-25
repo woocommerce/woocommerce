@@ -78,7 +78,7 @@ class NewOrderNotification extends Notification {
 				'format' => 'New order for %1$s on %2$s',
 				'args'   => array(
 					wp_strip_all_tags( $order->get_formatted_order_total() ),
-					get_bloginfo( 'name' ),
+					wp_strip_all_tags( get_bloginfo( 'name' ) ),
 				),
 			),
 			'meta'        => array(

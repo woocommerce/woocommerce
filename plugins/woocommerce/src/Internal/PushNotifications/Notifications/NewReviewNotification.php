@@ -61,7 +61,7 @@ class NewReviewNotification extends Notification {
 				'format' => '%1$s left a review on %2$s: %3$s',
 				'args'   => array(
 					wp_strip_all_tags( $comment->comment_author ),
-					get_the_title( (int) $comment->comment_post_ID ),
+					wp_strip_all_tags( get_the_title( (int) $comment->comment_post_ID ) ),
 					wp_strip_all_tags( $comment->comment_content ),
 				),
 			),
