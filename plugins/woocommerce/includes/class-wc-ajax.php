@@ -530,6 +530,16 @@ class WC_AJAX {
 
 			do_action( 'woocommerce_ajax_added_to_cart', $product_id );
 
+			/**
+			 * Fires when an item is added to the cart from a user request.
+			 *
+			 * @param int $product_id Product ID.
+			 * @param int $quantity   Quantity added to the cart.
+			 *
+			 * @since 10.7.0
+			 */
+			do_action( 'woocommerce_cart_item_added_from_user_request', $product_id, (int) $quantity );
+
 			if ( 'yes' === get_option( 'woocommerce_cart_redirect_after_add' ) ) {
 				wc_add_to_cart_message( array( $product_id => $quantity ), true );
 			}

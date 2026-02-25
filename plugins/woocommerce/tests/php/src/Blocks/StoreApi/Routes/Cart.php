@@ -1087,18 +1087,20 @@ class Cart extends ControllerTestCase {
 	}
 
 	/**
-	 * @testdox Should fire woocommerce_store_api_cart_item_add_from_request when adding an item.
+	 * @testdox Should fire woocommerce_cart_item_added_from_user_request when adding an item.
 	 */
 	public function test_add_item_fires_add_action(): void {
 		wc_empty_cart();
 
 		$captured_args = array();
-		// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
-		$callback = function ( $item_key, $quantity, $cart ) use ( &$captured_args ) {
-			$captured_args = compact( 'item_key', 'quantity', 'cart' );
+		$callback      = function ( $product_id, $quantity ) use ( &$captured_args ) {
+			$captured_args = array(
+				'product_id' => $product_id,
+				'quantity'   => $quantity,
+			);
 		};
 
-		add_action( 'woocommerce_store_api_cart_item_add_from_request', $callback, 10, 3 );
+		add_action( 'woocommerce_cart_item_added_from_user_request', $callback, 10, 2 );
 
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/add-item' );
 		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
@@ -1112,26 +1114,27 @@ class Cart extends ControllerTestCase {
 		$this->assertAPIResponse( $request, 201 );
 
 		$this->assertNotEmpty( $captured_args, 'The add action should have been fired' );
-		$this->assertIsString( $captured_args['item_key'] );
+		$this->assertSame( $this->products[0]->get_id(), $captured_args['product_id'] );
 		$this->assertSame( 2, $captured_args['quantity'] );
-		$this->assertInstanceOf( \WC_Cart::class, $captured_args['cart'] );
 
-		remove_action( 'woocommerce_store_api_cart_item_add_from_request', $callback );
+		remove_action( 'woocommerce_cart_item_added_from_user_request', $callback );
 	}
 
 	/**
-	 * @testdox Should fire woocommerce_store_api_cart_item_add_from_request with default quantity of 1 when quantity is omitted.
+	 * @testdox Should fire woocommerce_cart_item_added_from_user_request with default quantity of 1 when quantity is omitted.
 	 */
 	public function test_add_item_fires_add_action_when_quantity_omitted(): void {
 		wc_empty_cart();
 
 		$captured_args = array();
-		// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
-		$callback = function ( $item_key, $quantity, $cart ) use ( &$captured_args ) {
-			$captured_args = compact( 'item_key', 'quantity', 'cart' );
+		$callback      = function ( $product_id, $quantity ) use ( &$captured_args ) {
+			$captured_args = array(
+				'product_id' => $product_id,
+				'quantity'   => $quantity,
+			);
 		};
 
-		add_action( 'woocommerce_store_api_cart_item_add_from_request', $callback, 10, 3 );
+		add_action( 'woocommerce_cart_item_added_from_user_request', $callback, 10, 2 );
 
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/add-item' );
 		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
@@ -1144,11 +1147,10 @@ class Cart extends ControllerTestCase {
 		$this->assertAPIResponse( $request, 201 );
 
 		$this->assertNotEmpty( $captured_args, 'The add action should have been fired' );
-		$this->assertIsString( $captured_args['item_key'] );
+		$this->assertSame( $this->products[0]->get_id(), $captured_args['product_id'] );
 		$this->assertSame( 1, $captured_args['quantity'] );
-		$this->assertInstanceOf( \WC_Cart::class, $captured_args['cart'] );
 
-		remove_action( 'woocommerce_store_api_cart_item_add_from_request', $callback );
+		remove_action( 'woocommerce_cart_item_added_from_user_request', $callback );
 	}
 
 	/**

@@ -1302,4 +1302,36 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		unset( $_REQUEST['_wpnonce'], $_GET['remove_item'], $_REQUEST['remove_item'] );
 		$product->delete( true );
 	}
+
+	/**
+	 * @testdox Should fire woocommerce_cart_item_added_from_user_request when a simple product is added via the shortcode form.
+	 */
+	public function test_add_to_cart_action_fires_cart_item_added_from_user_request(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$_REQUEST['add-to-cart'] = $product->get_id();
+		$_REQUEST['quantity']    = 3;
+		$_POST['quantity']       = 3;
+
+		$captured_args = array();
+		$callback      = function ( $product_id, $quantity ) use ( &$captured_args ) {
+			$captured_args = array(
+				'product_id' => $product_id,
+				'quantity'   => $quantity,
+			);
+		};
+
+		add_action( 'woocommerce_cart_item_added_from_user_request', $callback, 10, 2 );
+
+		WC_Form_Handler::add_to_cart_action( false );
+
+		$this->assertNotEmpty( $captured_args, 'The action should have been fired' );
+		$this->assertSame( $product->get_id(), $captured_args['product_id'] );
+		$this->assertSame( 3, $captured_args['quantity'] );
+
+		remove_action( 'woocommerce_cart_item_added_from_user_request', $callback );
+
+		unset( $_REQUEST['add-to-cart'], $_REQUEST['quantity'], $_POST['quantity'] );
+		$product->delete( true );
+	}
 }

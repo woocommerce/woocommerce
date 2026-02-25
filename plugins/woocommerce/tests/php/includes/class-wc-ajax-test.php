@@ -315,6 +315,37 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Should fire woocommerce_cart_item_added_from_user_request when adding an item via AJAX.
+	 */
+	public function test_add_to_cart_fires_cart_item_added_from_user_request(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$_POST['product_id'] = $product->get_id();
+		$_POST['quantity']   = 3;
+
+		$captured_args = array();
+		$callback      = function ( $product_id, $quantity ) use ( &$captured_args ) {
+			$captured_args = array(
+				'product_id' => $product_id,
+				'quantity'   => $quantity,
+			);
+		};
+
+		add_action( 'woocommerce_cart_item_added_from_user_request', $callback, 10, 2 );
+
+		$this->do_ajax( 'woocommerce_add_to_cart' );
+
+		$this->assertNotEmpty( $captured_args, 'The action should have been fired' );
+		$this->assertSame( $product->get_id(), $captured_args['product_id'] );
+		$this->assertSame( 3, $captured_args['quantity'] );
+
+		remove_action( 'woocommerce_cart_item_added_from_user_request', $callback );
+
+		unset( $_POST['product_id'], $_POST['quantity'] );
+		$product->delete( true );
+	}
+
+	/**
 	 * Does the 'hard work' of triggering an ajax endpoint and capturing the response.
 	 *
 	 * @param string $ajax_action The action to be triggered.

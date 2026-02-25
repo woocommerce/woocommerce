@@ -870,6 +870,18 @@ class WC_Form_Handler {
 
 		// If we added the product to the cart we can now optionally do a redirect.
 		if ( $was_added_to_cart && 0 === wc_notice_count( 'error' ) ) {
+			$quantity = isset( $_POST['quantity'] ) ? absint( wp_unslash( $_POST['quantity'] ) ) : 1; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+
+			/**
+			 * Fires when an item is added to the cart from a user request.
+			 *
+			 * @param int $product_id Product ID.
+			 * @param int $quantity   Quantity added to the cart.
+			 *
+			 * @since 10.7.0
+			 */
+			do_action( 'woocommerce_cart_item_added_from_user_request', $product_id, $quantity );
+
 			$url = apply_filters( 'woocommerce_add_to_cart_redirect', $url, $adding_to_cart );
 
 			if ( $url ) {

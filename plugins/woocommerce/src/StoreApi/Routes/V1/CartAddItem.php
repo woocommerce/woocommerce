@@ -124,20 +124,20 @@ class CartAddItem extends AbstractCartRoute {
 			$request
 		);
 
-		$item_id   = $this->cart_controller->add_to_cart( $add_to_cart_data );
-		$cart      = $this->cart_controller->get_cart_instance();
-		$cart_item = $cart->get_cart_item( $item_id );
+		$item_id    = $this->cart_controller->add_to_cart( $add_to_cart_data );
+		$cart       = $this->cart_controller->get_cart_instance();
+		$cart_item  = $cart->get_cart_item( $item_id );
+		$product_id = $cart_item['variation_id'] ? $cart_item['variation_id'] : $cart_item['product_id'];
 
 		/**
-		 * Fires when an item is added to the cart via the Store API.
+		 * Fires when an item is added to the cart from a user request.
 		 *
-		 * @param string   $item_id  Cart item id.
-		 * @param int      $quantity Quantity added to the cart.
-		 * @param \WC_Cart $cart     Cart object.
+		 * @param int $product_id Product ID.
+		 * @param int $quantity   Quantity added to the cart.
 		 *
 		 * @since 10.7.0
 		 */
-		do_action( 'woocommerce_store_api_cart_item_add_from_request', $item_id, $cart_item['quantity'] ?? 1, $cart );
+		do_action( 'woocommerce_cart_item_added_from_user_request', $product_id, (int) $cart_item['quantity'] );
 
 		$response = rest_ensure_response( $this->schema->get_item_response( $this->cart_controller->get_cart_for_response() ) );
 		$response->set_status( 201 );
