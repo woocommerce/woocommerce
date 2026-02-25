@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Update border color on selects when using dark mode to match other fields
