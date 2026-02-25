@@ -3,7 +3,11 @@
  */
 import { NoticeList } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';
-import { store as noticesStore, SnackbarNotices } from '@wordpress/notices';
+import { store as noticesStore } from '@wordpress/notices';
+import {
+	// @ts-expect-error EditorSnackbars is not declared in @types/wordpress__editor
+	EditorSnackbars,
+} from '@wordpress/editor';
 
 /**
  * Internal dependencies
@@ -51,12 +55,7 @@ export function EditorNotices( {
 				/>
 				<ValidationNotices />
 			</NoticesSlot>
-			{ ! disableSnackbarNotices && (
-				<SnackbarNotices
-					className="components-editor-notices__snackbar"
-					context="global"
-				/>
-			) }
+			{ ! disableSnackbarNotices && <EditorSnackbars /> }
 		</>
 	);
 }
