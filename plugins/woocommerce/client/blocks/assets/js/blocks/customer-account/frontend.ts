@@ -58,59 +58,91 @@ const updateDropdownPosition = (
 	context.alignRight = rightSpace < FLIP_THRESHOLD;
 };
 
+const { actions: privateActions } = store(
+	'woocommerce/customer-account/private',
+	{
+		actions: {
+			handleDocumentClick: ( event: MouseEvent ) => {
+				const context = getContext< CustomerAccountContext >();
+				if ( ! context.isDropdownOpen ) {
+					return;
+				}
+				const { ref } = getElement();
+				if ( ref && ! ref.contains( event.target as Node ) ) {
+					context.isDropdownOpen = false;
+				}
+			},
+			handleKeydown: ( event: KeyboardEvent ) => {
+				if ( event.key !== 'Escape' ) {
+					return;
+				}
+
+				const context = getContext< CustomerAccountContext >();
+				if ( ! context.isDropdownOpen ) {
+					return;
+				}
+
+				context.isDropdownOpen = false;
+				focusTrigger();
+			},
+			handleFocusOut: ( event: FocusEvent ) => {
+				const context = getContext< CustomerAccountContext >();
+				if ( ! context.isDropdownOpen ) {
+					return;
+				}
+
+				const { ref } = getElement();
+				const relatedTarget = event.relatedTarget as Node | null;
+				if (
+					ref &&
+					( ! relatedTarget || ! ref.contains( relatedTarget ) )
+				) {
+					context.isDropdownOpen = false;
+				}
+			},
+			toggleDropdown: ( event: MouseEvent ) => {
+				event.preventDefault();
+				event.stopPropagation();
+
+				const context = getContext< CustomerAccountContext >();
+				if ( context.isDropdownOpen ) {
+					context.isDropdownOpen = false;
+					return;
+				}
+
+				const wrapper = getWrapper();
+				if ( wrapper ) {
+					updateDropdownPosition( context, wrapper );
+				}
+
+				context.isDropdownOpen = true;
+			},
+		},
+	}
+);
+
 store( 'woocommerce/customer-account', {
+	state: {
+		/**
+		 * Whether the dropdown is open.
+		 *
+		 * @type {boolean}
+		 */
+		get isDropdownOpen() {
+			const context = getContext< CustomerAccountContext >();
+			return context.isDropdownOpen;
+		},
+	},
 	actions: {
+		/**
+		 * Toggle the dropdown.
+		 *
+		 * Public API for third-party toggling of the dropdown.
+		 *
+		 * @param event MouseEvent The event that triggered the toggle.
+		 */
 		toggleDropdown: ( event: MouseEvent ) => {
-			event.preventDefault();
-			event.stopPropagation();
-
-			const context = getContext< CustomerAccountContext >();
-			if ( context.isDropdownOpen ) {
-				context.isDropdownOpen = false;
-				return;
-			}
-
-			const wrapper = getWrapper();
-			if ( wrapper ) {
-				updateDropdownPosition( context, wrapper );
-			}
-
-			context.isDropdownOpen = true;
-		},
-		handleDocumentClick: ( event: MouseEvent ) => {
-			const context = getContext< CustomerAccountContext >();
-			if ( ! context.isDropdownOpen ) {
-				return;
-			}
-			const { ref } = getElement();
-			if ( ref && ! ref.contains( event.target as Node ) ) {
-				context.isDropdownOpen = false;
-			}
-		},
-		handleKeydown: ( event: KeyboardEvent ) => {
-			if ( event.key !== 'Escape' ) {
-				return;
-			}
-
-			const context = getContext< CustomerAccountContext >();
-			if ( ! context.isDropdownOpen ) {
-				return;
-			}
-
-			context.isDropdownOpen = false;
-			focusTrigger();
-		},
-		handleFocusOut: ( event: FocusEvent ) => {
-			const context = getContext< CustomerAccountContext >();
-			if ( ! context.isDropdownOpen ) {
-				return;
-			}
-
-			const { ref } = getElement();
-			const relatedTarget = event.relatedTarget as Node | null;
-			if ( ref && ( ! relatedTarget || ! ref.contains( relatedTarget ) ) ) {
-				context.isDropdownOpen = false;
-			}
+			privateActions.toggleDropdown( event as MouseEvent );
 		},
 	},
 } );

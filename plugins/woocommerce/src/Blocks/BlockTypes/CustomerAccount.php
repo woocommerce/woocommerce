@@ -196,7 +196,7 @@ class CustomerAccount extends AbstractBlock {
 		<div
 			class="wp-block-woocommerce-customer-account has-dropdown <?php echo esc_attr( $classes_and_styles['classes'] ); ?>"
 			style="<?php echo esc_attr( $classes_and_styles['styles'] ); ?>"
-			data-wp-interactive="woocommerce/customer-account"
+			data-wp-interactive="woocommerce/customer-account/private"
 			<?php echo wp_interactivity_data_wp_context( $context ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			data-wp-class--align-right="context.alignRight"
 			data-wp-class--is-dropdown-open="context.isDropdownOpen"
