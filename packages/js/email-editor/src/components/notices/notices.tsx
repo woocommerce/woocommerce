@@ -45,14 +45,7 @@ export function EditorNotices() {
 				/>
 				<ValidationNotices />
 			</NoticesSlot>
-			<SnackbarNotices
-				className="components-editor-notices__snackbar"
-				context="global"
-			/>
-			<SnackbarNotices
-				className="components-editor-notices__snackbar"
-				context="email-editor"
-			/>
+			<SnackbarNotices className="components-editor-notices__snackbar" />
 		</>
 	);
 }
