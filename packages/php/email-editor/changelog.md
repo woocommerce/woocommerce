@@ -2,6 +2,11 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.9.0](https://github.com/woocommerce/email-editor/releases/tag/2.9.0) - 2026-02-23 
+
+-   Patch - Verify user can edit post in send preview email endpoint permission check [#63413]
+-   Minor - Removed enqueuing of custom RichText package that was needed for WordPress < 6.8 [#63289]
+
 ## [2.8.1](https://github.com/woocommerce/email-editor/releases/tag/2.8.1) - 2026-02-20 
 
 -   Patch - Fix unbounded static cache memory leaks in vendor-prefixed CSS inlining dependencies (emogrifier and symfony/css-selector) for long-running processes. [#63365]

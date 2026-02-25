@@ -130,7 +130,11 @@ export default defineConfig( {
 		...setupProjects,
 		{
 			name: 'e2e',
-			testIgnore: '**/api-tests/**',
+			testIgnore: [
+				'**/api-tests/**',
+				/* Exclude PayPal tests, as they don't run well in parallel - see https://github.com/woocommerce/woocommerce/pull/63068. */
+				'**/tests/paypal/**',
+			],
 			dependencies: [ 'site setup' ],
 		},
 		{
@@ -141,6 +145,11 @@ export default defineConfig( {
 		{
 			name: 'legacy-mini-cart',
 			testMatch: [ '**/tests/cart/**', '**/tests/checkout/**' ],
+			dependencies: [ 'site setup' ],
+		},
+		{
+			name: 'paypal-standard',
+			testMatch: [ '**/tests/paypal/**' ],
 			dependencies: [ 'site setup' ],
 		},
 	],
