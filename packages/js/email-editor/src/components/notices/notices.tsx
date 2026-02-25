@@ -13,7 +13,13 @@ import { NoticesSlot } from '../../hacks/notices-slot';
 
 // See: https://github.com/WordPress/gutenberg/blob/5be0ec4153c3adf9f0f2513239f4f7a358ba7948/packages/editor/src/components/editor-notices/index.js
 
-export function EditorNotices() {
+interface EditorNoticesProps {
+	disableSnackbarNotices?: boolean;
+}
+
+export function EditorNotices( {
+	disableSnackbarNotices = false,
+}: EditorNoticesProps = {} ) {
 	const { notices } = useSelect(
 		( select ) => ( {
 			notices: select( noticesStore ).getNotices( 'email-editor' ),
@@ -45,7 +51,12 @@ export function EditorNotices() {
 				/>
 				<ValidationNotices />
 			</NoticesSlot>
-			<SnackbarNotices className="components-editor-notices__snackbar" />
+			{ ! disableSnackbarNotices && (
+				<SnackbarNotices
+					className="components-editor-notices__snackbar"
+					context="global"
+				/>
+			) }
 		</>
 	);
 }
