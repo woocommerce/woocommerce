@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Prevents false "Quantity changed to 1" notices and add optimistic removal feedback
+Fix cart: prevent false "Quantity changed to 1" notices and add optimistic removal feedback
