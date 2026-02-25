@@ -66,7 +66,7 @@ class WC_Payment_Gateways_Test extends WC_Unit_Test_Case {
 		$action_watcher = function ( $gateway ) use ( &$action_fired ) {
 			$action_fired[] = $gateway;
 		};
-		add_action( 'woocommerce_payment_gateway_enabled_notification', $action_watcher );
+		add_action( 'woocommerce_payment_gateway_enabled', $action_watcher );
 
 		foreach ( $this->sut->payment_gateways() as $gateway ) {
 			$gateway->settings['enabled'] = 'no';
@@ -87,7 +87,7 @@ class WC_Payment_Gateways_Test extends WC_Unit_Test_Case {
 			$this->assertEquals( $gateway->id, $last_fired->id, 'Action should fire with the correct gateway' );
 		}
 
-		remove_action( 'woocommerce_payment_gateway_enabled_notification', $action_watcher );
+		remove_action( 'woocommerce_payment_gateway_enabled', $action_watcher );
 	}
 
 	/**

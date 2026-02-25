@@ -187,12 +187,14 @@ class WC_Payment_Gateways {
 			 * Fires when a payment gateway has been enabled.
 			 *
 			 * Used by WC_Email_Admin_Payment_Gateway_Enabled to send an admin notification email.
+			 * This action is registered as a transactional email action in WC_Emails::init_transactional_emails(),
+			 * which ensures WC_Emails is instantiated before the _notification variant is fired.
 			 *
 			 * @param WC_Payment_Gateway $gateway The gateway that was enabled.
 			 *
-			 * @since 10.6.0
+			 * @since 10.7.0
 			 */
-			do_action( 'woocommerce_payment_gateway_enabled_notification', $gateway );
+			do_action( 'woocommerce_payment_gateway_enabled', $gateway );
 
 			// Track the gateway enable.
 			$this->record_gateway_event( 'enable', $gateway );

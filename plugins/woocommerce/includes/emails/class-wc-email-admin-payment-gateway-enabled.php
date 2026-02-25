@@ -125,6 +125,17 @@ if ( ! class_exists( 'WC_Email_Admin_Payment_Gateway_Enabled', false ) ) :
 					self_admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . $gateway->id )
 				);
 
+				/**
+				 * Filters the payment gateway settings URL for the admin payment gateway enabled email.
+				 *
+				 * @param string           $gateway_settings_url The payment gateway settings URL.
+				 * @param WC_Payment_Gateway $gateway The payment gateway object.
+				 * @return string The filtered payment gateway settings URL.
+				 *
+				 * @since 10.7.0
+				 */
+				$this->gateway_settings_url = apply_filters( 'woocommerce_payment_gateway_enabled_notification_settings_url', $this->gateway_settings_url, $gateway );
+
 				$this->admin_email = get_option( 'admin_email' );
 				$user              = get_user_by( 'email', $this->admin_email );
 				$this->username    = $user ? $user->user_login : $this->admin_email;
@@ -270,7 +281,8 @@ if ( ! class_exists( 'WC_Email_Admin_Payment_Gateway_Enabled', false ) ) :
 				return;
 			}
 
-			$gateway_title        = ! empty( $this->gateway_title ) ? $this->gateway_title : __( 'Dummy Gateway', 'woocommerce' );
+			$gateway_title = ! empty( $this->gateway_title ) ? $this->gateway_title : __( 'Dummy Gateway', 'woocommerce' );
+
 			$gateway_settings_url = ! empty( $this->gateway_settings_url ) ? $this->gateway_settings_url : __( 'Dummy Settings URL', 'woocommerce' );
 
 			// phpcs:disable Squiz.PHP.EmbeddedPhp.ContentBeforeOpen -- Template-like output.
