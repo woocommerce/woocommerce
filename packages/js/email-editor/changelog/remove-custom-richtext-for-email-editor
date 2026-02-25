@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Removed custom RichText package, which was needed for WordPress < 6.8

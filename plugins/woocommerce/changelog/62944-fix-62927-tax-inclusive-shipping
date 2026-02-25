@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add `woocommerce_shipping_prices_include_tax` filter to support tax-inclusive shipping prices

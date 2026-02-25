@@ -2,11 +2,10 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { useDispatch } from '@wordpress/data';
 import { Button, ExternalLink } from '@wordpress/components';
 import { Pill } from '@woocommerce/components';
-import { getNewPath, navigateTo } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
-import { useLayoutContext } from '@woocommerce/admin-layout';
 
 /**
  * Internal dependencies
@@ -14,21 +13,41 @@ import { useLayoutContext } from '@woocommerce/admin-layout';
 import './woocommerce-shipping-item.scss';
 import WooIcon from './woo-icon.svg';
 
+const WOOCOMMERCE_SHIPPING_PLUGIN_SLUG = 'woocommerce-shipping';
+
 const WooCommerceShippingItem = ( {
 	isPluginInstalled,
+	onInstallClick,
+	onActivateClick,
+	pluginsBeingSetup,
 }: {
-	isPluginInstalled: boolean | undefined;
+	isPluginInstalled: boolean;
+	pluginsBeingSetup: Array< string >;
+	onInstallClick: ( slugs: string[] ) => PromiseLike< void >;
+	onActivateClick: ( slugs: string[] ) => PromiseLike< void >;
 } ) => {
-	const { layoutString } = useLayoutContext();
+	const { createSuccessNotice } = useDispatch( 'core/notices' );
 
-	const handleSetupClick = () => {
-		recordEvent( 'tasklist_click', {
-			task_name: 'shipping-recommendation',
-			context: `${ layoutString }/wc-settings`,
+	const handleClick = () => {
+		recordEvent( 'settings_shipping_recommendation_setup_click', {
+			plugin: WOOCOMMERCE_SHIPPING_PLUGIN_SLUG,
+			action: isPluginInstalled ? 'activate' : 'install',
 		} );
-		navigateTo( {
-			url: getNewPath( { task: 'shipping-recommendation' }, '/', {} ),
-		} );
+		const action = isPluginInstalled ? onActivateClick : onInstallClick;
+		action( [ WOOCOMMERCE_SHIPPING_PLUGIN_SLUG ] ).then(
+			() => {
+				createSuccessNotice(
+					isPluginInstalled
+						? __( 'WooCommerce Shipping activated!', 'woocommerce' )
+						: __(
+								'WooCommerce Shipping is installed!',
+								'woocommerce'
+						  ),
+					{}
+				);
+			},
+			() => {}
+		);
 	};
 
 	return (
@@ -57,10 +76,17 @@ const WooCommerceShippingItem = ( {
 				</span>
 			</div>
 			<div className="woocommerce-list__item-after">
-				<Button isSecondary onClick={ handleSetupClick }>
+				<Button
+					variant={ isPluginInstalled ? 'primary' : 'secondary' }
+					onClick={ handleClick }
+					isBusy={ pluginsBeingSetup.includes(
+						WOOCOMMERCE_SHIPPING_PLUGIN_SLUG
+					) }
+					disabled={ pluginsBeingSetup.length > 0 }
+				>
 					{ isPluginInstalled
 						? __( 'Activate', 'woocommerce' )
-						: __( 'Get started', 'woocommerce' ) }
+						: __( 'Install', 'woocommerce' ) }
 				</Button>
 			</div>
 		</div>

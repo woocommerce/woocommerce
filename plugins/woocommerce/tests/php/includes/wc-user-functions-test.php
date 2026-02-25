@@ -16,7 +16,7 @@ class WC_User_Functions_Tests extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->setup_cot();
-		$this->toggle_cot_feature_and_usage( false );
+		$this->toggle_cot_feature_and_usage( true );
 	}
 
 	/**
@@ -25,13 +25,16 @@ class WC_User_Functions_Tests extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		parent::tearDown();
 		$this->clean_up_cot_setup();
+
+		// In case `wc_update_user_last_active` test fail, clean the global state.
+		global $wp_current_filter;
+		$wp_current_filter = array(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 	}
 
 	/**
 	 * Test wc_get_customer_order_count. Borrowed from `WC_Tests_Customer_Functions` class for COT.
 	 */
 	public function test_hpos_wc_customer_bought_product() {
-		$this->toggle_cot_feature_and_usage( true );
 		$customer_id_1 = wc_create_new_customer( 'test@example.com', 'testuser', 'testpassword' );
 		$customer_id_2 = wc_create_new_customer( 'test2@example.com', 'testuser2', 'testpassword2' );
 		$product_1     = new WC_Product_Simple();
@@ -78,6 +81,8 @@ class WC_User_Functions_Tests extends WC_Unit_Test_Case {
 	 * @since 9.3
 	 */
 	public function test_wc_get_customer_available_downloads_for_partial_refunds(): void {
+		$this->toggle_cot_feature_and_usage( false );
+
 		/** @var Download_Directories $download_directories */
 		$download_directories = wc_get_container()->get( Download_Directories::class );
 		$download_directories->set_mode( Download_Directories::MODE_ENABLED );
@@ -148,5 +153,42 @@ class WC_User_Functions_Tests extends WC_Unit_Test_Case {
 		$this->assertEquals( $prod_download2->get_id(), $download['download_id'] );
 		$this->assertEquals( $order->get_id(), $download['order_id'] );
 		$this->assertEquals( $product2->get_id(), $download['product_id'] );
+	}
+
+	/**
+	 * Test `wc_update_user_last_active`: verify the applied thresholds.
+	 */
+	public function test_wc_update_user_last_active(): void {
+		global $wp_current_filter;
+		$customer    = WC_Helper_Customer::create_customer();
+		$customer_id = $customer->get_id();
+
+		// Verify threshold crossing is handled as intended.
+		$original = time() - 30;
+		update_user_meta( $customer_id, 'wc_last_active', (string) $original );
+		wc_update_user_last_active( $customer_id );
+		$this->assertSame( (string) $original, get_user_meta( $customer_id, 'wc_last_active', true ) );
+
+		// Verify fallback of one-minute update interval.
+		$original = time() - MINUTE_IN_SECONDS - 1;
+		update_user_meta( $customer_id, 'wc_last_active', (string) $original );
+		wc_update_user_last_active( $customer_id );
+		$this->assertGreaterThan( $original, get_user_meta( $customer_id, 'wc_last_active', true ) );
+
+		// Verify immediate update after logging in.
+		$original = time() - 1;
+		update_user_meta( $customer_id, 'wc_last_active', (string) $original );
+		$wp_current_filter = array( 'wp_login' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		wc_update_user_last_active( $customer_id );
+		$this->assertGreaterThan( $original, get_user_meta( $customer_id, 'wc_last_active', true ) );
+
+		// Verify five minutes update interval for pages navigation use-case.
+		$original = time() - ( 5 * MINUTE_IN_SECONDS ) - 1;
+		update_user_meta( $customer_id, 'wc_last_active', (string) $original );
+		$wp_current_filter = array( 'wp' ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		wc_update_user_last_active( $customer_id );
+		$this->assertGreaterThan( $original, get_user_meta( $customer_id, 'wc_last_active', true ) );
+
+		$customer->delete();
 	}
 }
