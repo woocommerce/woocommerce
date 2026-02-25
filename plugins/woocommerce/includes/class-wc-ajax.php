@@ -2204,7 +2204,8 @@ class WC_AJAX {
 	 * @return void
 	 */
 	public static function term_ordering() {
-		// phpcs:disable WordPress.Security.NonceVerification.Missing
+		check_ajax_referer( 'term-ordering', 'security' );
+
 		if ( ! current_user_can( 'edit_products' ) || empty( $_POST['id'] ) ) {
 			wp_die( -1 );
 		}
@@ -2227,7 +2228,6 @@ class WC_AJAX {
 			echo 'children';
 			wp_die();
 		}
-		// phpcs:enable
 	}
 
 	/**
@@ -2240,7 +2240,8 @@ class WC_AJAX {
 	public static function product_ordering() {
 		global $wpdb;
 
-		// phpcs:disable WordPress.Security.NonceVerification.Missing
+		check_ajax_referer( 'product-ordering', 'security' );
+
 		if ( ! current_user_can( 'edit_products' ) || empty( $_POST['id'] ) ) {
 			wp_die( -1 );
 		}
@@ -2293,7 +2294,6 @@ class WC_AJAX {
 
 		do_action( 'woocommerce_after_product_ordering', $sorting_id, $menu_orders );
 		wp_send_json( $menu_orders );
-		// phpcs:enable
 	}
 
 	/**
