@@ -46,9 +46,8 @@ const productContextStore = store< ProductContextStore >(
 			get product(): ProductResponseItem | undefined {
 				const context = getContext< ProductContext >();
 				const productId =
-					context?.productId !== undefined
-						? context.productId
-						: productContextStore.state.productId;
+					context?.productId ||
+					productContextStore.state.productId;
 
 				if ( ! productId ) {
 					return undefined;
