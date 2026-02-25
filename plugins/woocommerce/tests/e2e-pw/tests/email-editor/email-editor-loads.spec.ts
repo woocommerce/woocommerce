@@ -24,7 +24,10 @@ test.describe( 'WooCommerce Email Editor Core', () => {
 			.getByRole( 'checkbox', { name: 'Enable the block-based email' } )
 			.check();
 		await page.getByRole( 'button', { name: 'Save changes' } ).click();
-		await page.getByRole( 'link', { name: 'Emails' } ).click();
+		await page
+			.locator( '#mainform' )
+			.getByRole( 'link', { name: 'Emails' } )
+			.click();
 		await expect(
 			page.locator( '#email_notification_settings-description' )
 		).toContainText(
