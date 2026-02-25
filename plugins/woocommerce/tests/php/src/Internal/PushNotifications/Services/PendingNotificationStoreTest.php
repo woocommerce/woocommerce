@@ -161,9 +161,9 @@ class PendingNotificationStoreTest extends WC_Unit_Test_Case {
 			/**
 			 * Returns a test payload.
 			 *
-			 * @return array
+			 * @return array|null
 			 */
-			public function to_payload(): array {
+			public function to_payload(): ?array {
 				return array( 'test' => true );
 			}
 		};
