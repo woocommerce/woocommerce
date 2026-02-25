@@ -14,8 +14,10 @@ const pageGroups = [
 		storageState: undefined,
 		pages: [
 			{ name: 'Shop page', url: 'shop/', expectedCount: 50 },
-			{ name: 'Cart', url: 'cart/', expectedCount: 55 },
-			{ name: 'Checkout', url: 'checkout/', expectedCount: 55 },
+			// TODO: WP 7.0 compat - threshold bumped from 55 for WP 7.0 extra
+			// core scripts. Re-evaluate when WP 7.0 is the minimum version.
+			{ name: 'Cart', url: 'cart/', expectedCount: 65 },
+			{ name: 'Checkout', url: 'checkout/', expectedCount: 65 },
 		],
 	},
 	{
