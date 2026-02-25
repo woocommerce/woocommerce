@@ -49,7 +49,6 @@
 		}
 
 		.has-dark-controls & {
-			border-color: $input-border-dark;
 			color: $input-text-dark;
 			&:focus {
 				border-color: currentColor;
