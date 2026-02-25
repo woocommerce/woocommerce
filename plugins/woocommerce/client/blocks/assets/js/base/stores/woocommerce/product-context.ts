@@ -56,7 +56,10 @@ const productContextStore = store< ProductContextStore >(
 			},
 
 			get selectedVariation(): ProductResponseItem | null {
-				const { variationId } = productContextStore.state;
+				const context = getContext< ProductContext >();
+				const variationId =
+					context?.variationId ||
+					productContextStore.state.variationId;
 				if ( ! variationId ) {
 					return null;
 				}
