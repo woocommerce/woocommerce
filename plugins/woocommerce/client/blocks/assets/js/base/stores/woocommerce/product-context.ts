@@ -45,7 +45,8 @@ const productContextStore = store< ProductContextStore >(
 		state: {
 			get product(): ProductResponseItem | undefined {
 				const context = getContext< ProductContext >();
-				const productId = context?.productId || productContextStore.state.productId;
+				const productId =
+					context?.productId || productContextStore.state.productId;
 
 				if ( ! productId ) {
 					return undefined;
@@ -55,7 +56,9 @@ const productContextStore = store< ProductContextStore >(
 
 			get selectedVariation(): ProductResponseItem | null {
 				const context = getContext< ProductContext >();
-				const variationId = context?.variationId || productContextStore.state.variationId;
+				const variationId =
+					context?.variationId ||
+					productContextStore.state.variationId;
 				if ( ! variationId ) {
 					return null;
 				}
