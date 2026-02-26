@@ -1,0 +1,103 @@
+diff -ruN a/types/@wordpress/block-editor/index.d.ts b/types/@wordpress/block-editor/index.d.ts
+--- a/types/@wordpress/block-editor/index.d.ts	2026-02-25 18:00:43
++++ b/types/@wordpress/block-editor/index.d.ts	2026-02-25 18:00:39
+@@ -6,9 +6,26 @@
+ /// <reference path="./store/selectors.d.ts" />
+ /// <reference path="./utils/index.d.ts" />
+ 
++/**
++ * DT types are already curried (no state parameter), so we add a fake state param
++ * to match the expected ReduxStoreConfig selector shape, which gets curried away.
++ */
++type WithState< Selectors > = {
++	[ K in keyof Selectors ]: Selectors[ K ] extends (
++		...args: infer A
++	) => infer R
++		? ( state: unknown, ...args: A ) => R
++		: Selectors[ K ];
++};
++
+ declare module '@wordpress/block-editor' {
+ 	import { BlockIconNormalized } from "@wordpress/blocks";
+-	import { dispatch, select, StoreDescriptor } from "@wordpress/data";
++	import type * as blockEditorActions from '@wordpress/block-editor/store/actions';
++	import type * as blockEditorSelectors from '@wordpress/block-editor/store/selectors';
++	import type {
++		StoreDescriptor,
++		ReduxStoreConfig,
++	} from '@wordpress/data/build-types/types';
+ 
+ 	export * from "@wordpress/block-editor/components";
+ 	export * from "@wordpress/block-editor/hooks";
+@@ -16,14 +33,17 @@
+ 	export { SETTINGS_DEFAULTS } from "@wordpress/block-editor/store/defaults";
+ 	export * from "@wordpress/block-editor/utils";
+ 
+-	declare module "@wordpress/data" {
+-	    function dispatch(key: "core/block-editor"): typeof import("@wordpress/block-editor/store/actions");
+-	    function select(key: "core/block-editor"): typeof import("@wordpress/block-editor/store/selectors");
+-	}
++	type BlockEditorConfig = ReduxStoreConfig<
++		unknown,
++		{
++			[ K in keyof typeof blockEditorActions ]: ( typeof blockEditorActions )[ K ];
++		},
++		WithState< typeof blockEditorSelectors >
++	>;
+ 
+-	export interface BlockEditorStoreDescriptor extends StoreDescriptor {
+-	    name: "core/block-editor";
+-	}
++	type BlockEditorStoreDescriptor = StoreDescriptor< BlockEditorConfig > & {
++		name: 'core/block-editor';
++	};
+ 
+ 	export const store: BlockEditorStoreDescriptor;
+ 
+@@ -223,4 +243,46 @@
+ 	     */
+ 	    titlePlaceholder: string;
+ 	}
++}
++
++declare module '@wordpress/data' {
++	import type * as blockEditorActions from '@wordpress/block-editor/store/actions';
++	import type * as blockEditorSelectors from '@wordpress/block-editor/store/selectors';
++	import type {
++		StoreDescriptor,
++		ReduxStoreConfig,
++	} from '@wordpress/data/build-types/types';
++
++	type BlockEditorConfig = ReduxStoreConfig<
++		unknown,
++		{
++			[ K in keyof typeof blockEditorActions ]: ( typeof blockEditorActions )[ K ];
++		},
++		WithState< typeof blockEditorSelectors >
++	>;
++
++	type BlockEditorStoreDescriptor = StoreDescriptor< BlockEditorConfig > & {
++		name: 'core/block-editor';
++	};
++
++	interface StoreRegistry {
++		'core/block-editor': BlockEditorStoreDescriptor;
++	}
++
++	// Override DT's function overloads — the original @types package is still
++	// loaded by TypeScript's automatic @types resolution and its string-literal
++	// overloads beat the generic StoreRegistry lookup, so we need our own
++	// string-literal overloads with correct return types.
++	export function select(
++		key: 'core/block-editor'
++	): CurriedSelectorsOf< BlockEditorStoreDescriptor >;
++	export function dispatch(
++		key: 'core/block-editor'
++	): ActionCreatorsOf< BlockEditorConfig >;
++	export function resolveSelect(
++		key: 'core/block-editor'
++	): CurriedAndPromisifiedSelectorsOf< BlockEditorStoreDescriptor >;
++	export function useDispatch(
++		key: 'core/block-editor'
++	): ActionCreatorsOf< BlockEditorConfig >;
+ }

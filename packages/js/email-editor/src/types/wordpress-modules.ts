@@ -16,8 +16,6 @@ declare module '@wordpress/block-editor' {
 		fontFamily: string;
 	};
 
-	export * from '@wordpress/block-editor/index';
-
 	export const __experimentalLibrary: any;
 	export const __experimentalListView: any;
 
@@ -46,8 +44,6 @@ declare module '@wordpress/block-editor' {
 declare module '@wordpress/editor' {
 	import { ComponentType } from 'react';
 	import { PostPreviewButton as WPPostPreviewButton } from '@wordpress/editor/components';
-
-	export * from '@wordpress/editor/index';
 
 	export const PostPreviewButton: ComponentType<
 		WPPostPreviewButton.Props & {

@@ -14,15 +14,25 @@
 		"types"
 	],
 	"scripts": {
+		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
+		"build:project": "pnpm --if-present '/^build:project:.*$/'",
+		"build:project:types": "wireit",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:js": "eslint 'types/**/*.d.ts' --fix",
-		"lint:lang:js": "eslint 'types/**/*.d.ts'"
+		"lint:lang:js": "eslint 'types/**/*.d.ts'",
+		"types:update-patch": "node scripts/generate-types.mjs update-patch"
 	},
 	"devDependencies": {
+		"@types/wordpress__block-editor": ">=11.5.0",
+		"@types/wordpress__editor": ">=13.6.0",
+		"@types/wordpress__notices": ">=3.5.0",
 		"@woocommerce/eslint-plugin": "workspace:*",
+		"@wordpress/core-data": "wp-6.6",
+		"@wordpress/data": "wp-6.6",
 		"eslint": "^8.55.0",
-		"typescript": "5.7.x"
+		"typescript": "5.7.x",
+		"wireit": "0.14.12"
 	},
 	"peerDependencies": {
 		"@types/wordpress__block-editor": ">=11.5.0",
@@ -38,16 +48,68 @@
 		"@wordpress/preferences": "wp-6.6"
 	},
 	"peerDependenciesMeta": {
-		"@types/wordpress__block-editor": { "optional": true },
-		"@types/wordpress__editor": { "optional": true },
-		"@types/wordpress__notices": { "optional": true },
-		"@wordpress/block-editor": { "optional": true },
-		"@wordpress/components": { "optional": true },
-		"@wordpress/core-data": { "optional": true },
-		"@wordpress/data": { "optional": true },
-		"@wordpress/editor": { "optional": true },
-		"@wordpress/keyboard-shortcuts": { "optional": true },
-		"@wordpress/notices": { "optional": true },
-		"@wordpress/preferences": { "optional": true }
+		"@types/wordpress__block-editor": {
+			"optional": true
+		},
+		"@types/wordpress__editor": {
+			"optional": true
+		},
+		"@types/wordpress__notices": {
+			"optional": true
+		},
+		"@wordpress/block-editor": {
+			"optional": true
+		},
+		"@wordpress/components": {
+			"optional": true
+		},
+		"@wordpress/core-data": {
+			"optional": true
+		},
+		"@wordpress/data": {
+			"optional": true
+		},
+		"@wordpress/editor": {
+			"optional": true
+		},
+		"@wordpress/keyboard-shortcuts": {
+			"optional": true
+		},
+		"@wordpress/notices": {
+			"optional": true
+		},
+		"@wordpress/preferences": {
+			"optional": true
+		}
+	},
+	"wireit": {
+		"build:project:types": {
+			"command": "node scripts/generate-types.mjs generate",
+			"files": [
+				"scripts/generate-types.mjs",
+				"types/@wordpress/block-editor.patch",
+				"types/@wordpress/core-data.patch",
+				"types/@wordpress/data.patch",
+				"types/@wordpress/editor.patch",
+				"types/@wordpress/notices.patch"
+			],
+			"output": [
+				"types/@wordpress/block-editor/",
+				"types/@wordpress/core-data/",
+				"types/@wordpress/data/",
+				"types/@wordpress/editor/",
+				"types/@wordpress/notices/"
+			],
+			"clean": "if-file-deleted"
+		},
+		"dependencyOutputs": {
+			"allowUsuallyExcludedPaths": true,
+			"files": [
+				"package.json",
+				"node_modules/@woocommerce/eslint-plugin/configs",
+				"node_modules/@woocommerce/eslint-plugin/rules",
+				"node_modules/@woocommerce/eslint-plugin/index.js"
+			]
+		}
 	}
 }

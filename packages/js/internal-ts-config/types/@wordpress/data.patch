@@ -1,0 +1,459 @@
+diff -ruN a/types/@wordpress/data/index.d.ts b/types/@wordpress/data/index.d.ts
+--- a/types/@wordpress/data/index.d.ts	2026-02-25 18:00:44
++++ b/types/@wordpress/data/index.d.ts	2026-02-25 18:00:39
+@@ -19,14 +19,11 @@
+ 	export { default as withSelect } from "@wordpress/data/build-types/components/with-select";
+ 	export { default as withDispatch } from "@wordpress/data/build-types/components/with-dispatch";
+ 	export { default as withRegistry } from "@wordpress/data/build-types/components/with-registry";
+-	export { useDispatch } from "@wordpress/data/build-types/components/use-dispatch";
+ 	export { AsyncModeProvider } from "@wordpress/data/build-types/components/async-mode-provider";
+ 	export { createRegistry } from "@wordpress/data/build-types/registry";
+ 	export { createSelector } from "@wordpress/data/build-types/create-selector";
+ 	export { controls } from "@wordpress/data/build-types/controls";
+ 	export { default as createReduxStore } from "@wordpress/data/build-types/redux-store";
+-	export { dispatch } from "@wordpress/data/build-types/dispatch";
+-	export { select } from "@wordpress/data/build-types/select";
+ 	export { plugins };
+ 	/**
+ 	 * The combineReducers helper function turns an object whose values are different
+@@ -68,7 +65,68 @@
+ 	 *                    object, and constructs a state object with the same shape.
+ 	 */
+ 	export const combineReducers: import('@wordpress/data/build-types/types').combineReducers;
++
++	import type {
++		AnyConfig,
++		StoreDescriptor,
++		ConfigOf,
++		ActionCreatorsOf,
++		CurriedSelectorsOf,
++		CurriedAndPromisifiedSelectorsOf,
++		StoreRegistry,
++		SelectFunction,
++		MapSelect,
++		UseSelectReturn,
++		UseDispatchReturn,
++		DataRegistry,
++	} from '@wordpress/data/build-types/types';
++
+ 	/**
++	 * Given a store descriptor, returns an object of the store's action creators.
++	 * Calling an action creator will cause it to be dispatched, updating the state value accordingly.
++	 *
++	 * Note: Action creators returned by the dispatch will return a promise when
++	 * they are called.
++	 *
++	 * @param storeNameOrDescriptor The store descriptor. The legacy calling convention of passing
++	 *                              the store name is also supported.
++	 *
++	 * @example
++	 * ```js
++	 * import { dispatch } from '@wordpress/data';
++	 * import { store as myCustomStore } from 'my-custom-store';
++	 *
++	 * dispatch( myCustomStore ).setPrice( 'hammer', 9.75 );
++	 * ```
++	 * @return Object containing the action creators.
++	 */
++	export function dispatch<T extends StoreDescriptor<AnyConfig>>(storeDescriptor: T): T extends StoreDescriptor<infer Config extends AnyConfig> ? ActionCreatorsOf<Config> : any;
++	export function dispatch<K extends keyof StoreRegistry>(storeDescriptor: K): ActionCreatorsOf<ConfigOf<StoreRegistry[K]>>;
++	export function dispatch(storeDescriptor: string): any;
++
++	/**
++	 * Given a store descriptor, returns an object of the store's selectors.
++	 * The selector functions are been pre-bound to pass the current state automatically.
++	 * As a consumer, you need only pass arguments of the selector, if applicable.
++	 *
++	 * @param storeNameOrDescriptor The store descriptor. The legacy calling convention
++	 *                              of passing the store name is also supported.
++	 *
++	 * @example
++	 * ```js
++	 * import { select } from '@wordpress/data';
++	 * import { store as myCustomStore } from 'my-custom-store';
++	 *
++	 * select( myCustomStore ).getPrice( 'hammer' );
++	 * ```
++	 *
++	 * @return Object containing the store's selectors.
++	 */
++	export function select<T extends StoreDescriptor<AnyConfig>>(storeDescriptor: T): CurriedSelectorsOf<T>;
++	export function select<K extends keyof StoreRegistry>(storeDescriptor: K): CurriedSelectorsOf<StoreRegistry[K]>;
++	export function select(storeDescriptor: string): any;
++
++	/**
+ 	 * Given a store descriptor, returns an object containing the store's selectors pre-bound to state
+ 	 * so that you only need to supply additional arguments, and modified so that they return promises
+ 	 * that resolve to their eventual values, after any resolvers have ran.
+@@ -87,19 +145,15 @@
+ 	 *
+ 	 * @return {Object} Object containing the store's promise-wrapped selectors.
+ 	 */
+-	export const resolveSelect: any;
++	export function resolveSelect<T extends StoreDescriptor<AnyConfig>>(storeDescriptor: T): CurriedAndPromisifiedSelectorsOf<T>;
++	export function resolveSelect<K extends keyof StoreRegistry>(storeDescriptor: K): CurriedAndPromisifiedSelectorsOf<StoreRegistry[K]>;
++	export function resolveSelect(storeDescriptor: string): any;
++
+ 	/**
+-	 * Given a store descriptor, returns an object containing the store's selectors pre-bound to state
+-	 * so that you only need to supply additional arguments, and modified so that they throw promises
+-	 * in case the selector is not resolved yet.
+-	 *
+-	 * @param {StoreDescriptor|string} storeNameOrDescriptor The store descriptor. The legacy calling
+-	 *                                                       convention of passing the store name is
+-	 *                                                       also supported.
+-	 *
+-	 * @return {Object} Object containing the store's suspense-wrapped selectors.
++	 * suspendSelect (similar to resolveSelect but throws promises)
+ 	 */
+-	export const suspendSelect: any;
++	export const suspendSelect: typeof resolveSelect;
++
+ 	/**
+ 	 * Given a listener function, the function will be called any time the state value
+ 	 * of one of the registered stores has changed. If you specify the optional
+@@ -172,9 +226,187 @@
+ 	 * @param {StoreDescriptor} store Store descriptor.
+ 	 */
+ 	export const register: any;
+-	export type StoreDescriptor = import("@wordpress/data/build-types/types").StoreDescriptor<any>;
+ 	import * as plugins from '@wordpress/data/build-types/plugins';
+-	export { RegistryProvider, RegistryConsumer, useRegistry } from "@wordpress/data/build-types/components/registry-provider";
+-	export { default as useSelect, useSuspenseSelect } from "@wordpress/data/build-types/components/use-select";
+-	export { createRegistrySelector, createRegistryControl } from "@wordpress/data/build-types/factory";
++	export { RegistryProvider, RegistryConsumer } from "@wordpress/data/build-types/components/registry-provider";
++	export { createRegistryControl } from "@wordpress/data/build-types/factory";
++
++	/**
++	 * A custom react hook returning the current registry dispatch actions creators.
++	 *
++	 * Note: The component using this hook must be within the context of a
++	 * RegistryProvider.
++	 *
++	 * @param storeNameOrDescriptor Optionally provide the name of the store or its
++	 *                              descriptor from which to retrieve action creators.
++	 *                              If not provided, the registry.dispatch function is
++	 *                              returned instead.
++	 *
++	 * @example
++	 * ```jsx
++	 * import { useCallback } from 'react';
++	 * import { useDispatch, useSelect } from '@wordpress/data';
++	 * import { store as myCustomStore } from 'my-custom-store';
++	 *
++	 * function Button( { onClick, children } ) {
++	 *   return <button type="button" onClick={ onClick }>{ children }</button>
++	 * }
++	 *
++	 * const SaleButton = ( { children } ) => {
++	 *   const { stockNumber } = useSelect(
++	 *     ( select ) => select( myCustomStore ).getStockNumber(),
++	 *     []
++	 *   );
++	 *   const { startSale } = useDispatch( myCustomStore );
++	 *   const onClick = useCallback( () => {
++	 *     const discountPercent = stockNumber > 50 ? 10: 20;
++	 *     startSale( discountPercent );
++	 *   }, [ stockNumber ] );
++	 *   return <Button onClick={ onClick }>{ children }</Button>
++	 * }
++	 *
++	 * // Rendered somewhere in the application:
++	 * //
++	 * // <SaleButton>Start Sale!</SaleButton>
++	 * ```
++	 * @return A custom react hook.
++	 */
++	export function useDispatch<StoreNameOrDescriptor extends string | StoreDescriptor<AnyConfig> | undefined>(storeNameOrDescriptor?: StoreNameOrDescriptor): UseDispatchReturn<StoreNameOrDescriptor>;
++
++	/**
++	 * Custom react hook for retrieving props from registered selectors.
++	 *
++	 * In general, this custom React hook follows the
++	 * [rules of hooks](https://reactjs.org/docs/hooks-rules.html).
++	 *
++	 * @param mapSelect Function called on every state change. The returned value is
++	 *                  exposed to the component implementing this hook. The function
++	 *                  receives the `registry.select` method on the first argument
++	 *                  and the `registry` on the second argument.
++	 *                  When a store key is passed, all selectors for the store will be
++	 *                  returned. This is only meant for usage of these selectors in event
++	 *                  callbacks, not for data needed to create the element tree.
++	 * @param deps      If provided, this memoizes the mapSelect so the same `mapSelect` is
++	 *                  invoked on every state change unless the dependencies change.
++	 *
++	 * @example
++	 * ```js
++	 * import { useSelect } from '@wordpress/data';
++	 * import { store as myCustomStore } from 'my-custom-store';
++	 *
++	 * function HammerPriceDisplay( { currency } ) {
++	 *   const price = useSelect( ( select ) => {
++	 *     return select( myCustomStore ).getPrice( 'hammer', currency );
++	 *   }, [ currency ] );
++	 *   return new Intl.NumberFormat( 'en-US', {
++	 *     style: 'currency',
++	 *     currency,
++	 *   } ).format( price );
++	 * }
++	 *
++	 * // Rendered in the application:
++	 * // <HammerPriceDisplay currency="USD" />
++	 * ```
++	 *
++	 * @return A custom react hook.
++	 */
++	export function useSelect<F extends MapSelect | StoreDescriptor<any>>(mapSelect: F, deps?: any[]): UseSelectReturn<F>;
++	/**
++	 * A variant of the `useSelect` hook that has the same API, but is a compatible
++	 * Suspense-enabled data source.
++	 *
++	 * @param mapSelect Function called on every state change. The returned value is
++	 *                  exposed to the component using this hook. The function receives
++	 *                  the `registry.suspendSelect` method as the first argument and
++	 *                  the `registry` as the second one.
++	 * @param deps      A dependency array used to memoize the `mapSelect` so that the
++	 *                  same `mapSelect` is invoked on every state change unless the
++	 *                  dependencies change.
++	 *
++	 * @throws {Promise} A suspense Promise that is thrown if any of the called
++	 * selectors is in an unresolved state.
++	 *
++	 * @return Data object returned by the `mapSelect` function.
++	 */
++	export const useSuspenseSelect: typeof useSelect;
++
++	/**
++	 * A custom react hook exposing the registry context for use.
++	 *
++	 * This exposes the `registry` value provided via the
++	 * RegistryProvider to a component implementing this hook.
++	 *
++	 * It acts similarly to the `useContext` react hook.
++	 *
++	 * Note: Generally speaking, `useRegistry` is a low level hook that in most cases
++	 * won't be needed for implementation. Most interactions with the `@wordpress/data`
++	 * API can be performed via the `useSelect` hook, or the `withSelect` and
++	 * `withDispatch` higher order components.
++	 *
++	 * @example
++	 * ```js
++	 * import {
++	 *   RegistryProvider,
++	 *   createRegistry,
++	 *   useRegistry,
++	 * } from '@wordpress/data';
++	 *
++	 * const registry = createRegistry( {} );
++	 *
++	 * const SomeChildUsingRegistry = ( props ) => {
++	 *   const registry = useRegistry();
++	 *   // ...logic implementing the registry in other react hooks.
++	 * };
++	 *
++	 * const ParentProvidingRegistry = ( props ) => {
++	 *   return <RegistryProvider value={ registry }>
++	 *     <SomeChildUsingRegistry { ...props } />
++	 *   </RegistryProvider>
++	 * };
++	 * ```
++	 *
++	 * @return A custom react hook exposing the registry context value.
++	 */
++	export function useRegistry(): DataRegistry;
++
++	/**
++	 * Creates a selector function that takes additional curried argument with the
++	 * registry `select` function. While a regular selector has signature
++	 * ```js
++	 * ( state, ...selectorArgs ) => ( result )
++	 * ```
++	 * that allows to select data from the store's `state`, a registry selector
++	 * has signature:
++	 * ```js
++	 * ( select ) => ( state, ...selectorArgs ) => ( result )
++	 * ```
++	 * that supports also selecting from other registered stores.
++	 *
++	 * @example
++	 * ```js
++	 * import { store as coreStore } from '@wordpress/core-data';
++	 * import { store as editorStore } from '@wordpress/editor';
++	 *
++	 * const getCurrentPostId = createRegistrySelector( ( select ) => ( state ) => {
++	 *   return select( editorStore ).getCurrentPostId();
++	 * } );
++	 *
++	 * const getPostEdits = createRegistrySelector( ( select ) => ( state ) => {
++	 *   // calling another registry selector just like any other function
++	 *   const postType = getCurrentPostType( state );
++	 *   const postId = getCurrentPostId( state );
++	 *   return select( coreStore ).getEntityRecordEdits( 'postType', postType, postId );
++	 * } );
++	 * ```
++	 *
++	 * Note how the `getCurrentPostId` selector can be called just like any other function,
++	 * (it works even inside a regular non-registry selector) and we don't need to pass the
++	 * registry as argument. The registry binding happens automatically when registering the
++	 * selector with a store.
++	 *
++	 * @param registrySelector Function receiving a registry `select` function and returning
++	 *                         a state selector.
++	 *
++	 * @return Registry selector that can be registered with a store.
++	 */
++	export function createRegistrySelector<T extends (state: any, ...args: any[]) => any>(registrySelector: (select: SelectFunction) => T): T;
+ }
+diff -ruN a/types/@wordpress/data/types.d.ts b/types/@wordpress/data/types.d.ts
+--- a/types/@wordpress/data/types.d.ts	2026-02-25 18:00:44
++++ b/types/@wordpress/data/types.d.ts	2026-02-25 18:00:39
+@@ -3,6 +3,8 @@
+ 	 * External dependencies
+ 	 */
+ 	import type { combineReducers as reduxCombineReducers } from 'redux';
++	import * as MetadataActions from '@wordpress/data/build-types/redux-store/metadata/actions';
++	import * as MetadataSelectors from '@wordpress/data/build-types/redux-store/metadata/selectors';
+ 	type MapOf<T> = {
+ 	    [name: string]: T;
+ 	};
+@@ -34,19 +36,27 @@
+ 	    controls?: MapOf<Function>;
+ 	}
+ 	export type UseSelectReturn<F extends MapSelect | StoreDescriptor<any>> = F extends MapSelect ? ReturnType<F> : F extends StoreDescriptor<any> ? CurriedSelectorsOf<F> : never;
+-	export type UseDispatchReturn<StoreNameOrDescriptor> = StoreNameOrDescriptor extends StoreDescriptor<any> ? ActionCreatorsOf<ConfigOf<StoreNameOrDescriptor>> : StoreNameOrDescriptor extends undefined ? DispatchFunction : any;
+-	export type DispatchFunction = <StoreNameOrDescriptor>(store: StoreNameOrDescriptor) => DispatchReturn<StoreNameOrDescriptor>;
++	export type UseDispatchReturn<StoreNameOrDescriptor> = StoreNameOrDescriptor extends StoreDescriptor<any> ? ActionCreatorsOf<ConfigOf<StoreNameOrDescriptor>> : StoreNameOrDescriptor extends keyof StoreRegistry ? ActionCreatorsOf<ConfigOf<StoreRegistry[StoreNameOrDescriptor]>> : StoreNameOrDescriptor extends undefined ? DispatchFunction : any;
++	export interface DispatchFunction {
++	    <T extends StoreDescriptor<AnyConfig>>(storeDescriptor: T): ActionCreatorsOf<ConfigOf<T>>;
++	    <K extends keyof StoreRegistry>(storeDescriptor: K): ActionCreatorsOf<ConfigOf<StoreRegistry[K]>>;
++	    (storeDescriptor: string): any;
++	}
+ 	export type DispatchReturn<StoreNameOrDescriptor> = StoreNameOrDescriptor extends StoreDescriptor<any> ? ActionCreatorsOf<ConfigOf<StoreNameOrDescriptor>> : unknown;
+ 	export type MapSelect = (select: SelectFunction, registry: DataRegistry) => any;
+-	export type SelectFunction = <S>(store: S) => CurriedSelectorsOf<S>;
++	export interface SelectFunction {
++	    <T extends StoreDescriptor<AnyConfig>>(storeDescriptor: T): CurriedSelectorsOf<T>;
++	    <K extends keyof StoreRegistry>(storeDescriptor: K): CurriedSelectorsOf<StoreRegistry[K]>;
++	    (storeDescriptor: string): any;
++	}
+ 	/**
+ 	 * Callback for store's `subscribe()` method that
+ 	 * runs when the store data has changed.
+ 	 */
+ 	export type ListenerFunction = () => void;
+-	export type CurriedSelectorsOf<S> = S extends StoreDescriptor<ReduxStoreConfig<any, any, infer Selectors>> ? {
++	export type CurriedSelectorsOf<S> = S extends StoreDescriptor<ReduxStoreConfig<any, any, infer Selectors>> ? keyof Selectors extends never ? any : {
+ 	    [key in keyof Selectors]: CurriedState<Selectors[key]>;
+-	} : never;
++	} & TypedMetadataSelectors<ConfigOf<S>> : never;
+ 	/**
+ 	 * Removes the first argument from a function.
+ 	 *
+@@ -110,9 +120,15 @@
+ 	 */
+ 	export interface SelectorWithCustomCurrySignature {
+ 	    CurriedSignature: Function;
++	    PromiseCurriedSignature?: Function;
+ 	}
+ 	export interface DataRegistry {
+ 	    register: (store: StoreDescriptor<any>) => void;
++	    select: SelectFunction;
++	    dispatch: DispatchFunction;
++	    resolveSelect: ResolveSelectFunction;
++	    subscribe: (listener: () => void) => () => void;
++	    batch: (callback: () => void) => void;
+ 	}
+ 	export interface DataEmitter {
+ 	    emit: () => void;
+@@ -122,15 +138,88 @@
+ 	    isPaused: boolean;
+ 	}
+ 	export type ConfigOf<S> = S extends StoreDescriptor<infer C> ? C : never;
+-	export type ActionCreatorsOf<Config extends AnyConfig> = Config extends ReduxStoreConfig<any, infer ActionCreators, any> ? PromisifiedActionCreators<ActionCreators> : never;
++	export type ActionCreatorsOf<Config extends AnyConfig> = Config extends ReduxStoreConfig<any, infer ActionCreators, any> ? keyof ActionCreators extends never ? any : PromisifiedActionCreators<ActionCreators & TypedMetadataActions<Config>> : never;
+ 	export type PromisifiedActionCreators<ActionCreators extends MapOf<ActionCreator>> = {
+ 	    [Action in keyof ActionCreators]: PromisifyActionCreator<ActionCreators[Action]>;
+ 	};
+-	export type PromisifyActionCreator<Action extends ActionCreator> = (...args: Parameters<Action>) => Promise<ReturnType<Action> extends (..._args: any[]) => any ? ThunkReturnType<Action> : ReturnType<Action>>;
++	export type PromisifyActionCreator<Action extends ActionCreator> = (...args: Parameters<Action>) => Promise<ReturnType<Action> extends (..._args: any[]) => any ? ThunkReturnType<Action> : ReturnType<Action> extends Generator ? GeneratorReturnType<ReturnType<Action>> : ReturnType<Action>>;
+ 	export type ThunkReturnType<Action extends ActionCreator> = Awaited<ReturnType<ReturnType<Action>>>;
+ 	type SelectorsOf<Config extends AnyConfig> = Config extends ReduxStoreConfig<any, any, infer Selectors> ? {
+-	    [name in keyof Selectors]: Function;
++	    [name in keyof Selectors]: Selectors[name] extends (...args: any[]) => any ? (...args: Parameters<Selectors[name]>) => ReturnType<Selectors[name]> : (...args: any[]) => any;
+ 	} : never;
+ 	export type combineReducers = typeof reduxCombineReducers;
++	/**
++	 * Extract the return type from a Generator function.
++	 */
++	type GeneratorReturnType<T> = T extends Generator<any, infer R, any> ? R : never;
++	/**
++	 * Helper type to extract selector parameters (excluding state)
++	 */
++	export type SelectorParameters<S extends Selector> = S extends (state: any, ...args: infer P) => any ? P : never;
++	/**
++	 * Metadata actions that are automatically added to every store.
++	 */
++	export type TypedMetadataActions<Config extends AnyConfig> = {
++	    startResolution<SelectorName extends keyof SelectorsOf<Config>>(selectorName: SelectorName, args: SelectorParameters<SelectorsOf<Config>[SelectorName]>): Generator;
++	    finishResolution<SelectorName extends keyof SelectorsOf<Config>>(selectorName: SelectorName, args: SelectorParameters<SelectorsOf<Config>[SelectorName]>): Generator;
++	    failResolution<SelectorName extends keyof SelectorsOf<Config>>(selectorName: SelectorName, args: SelectorParameters<SelectorsOf<Config>[SelectorName]>, error: Error | unknown): Generator;
++	    startResolutions<SelectorName extends keyof SelectorsOf<Config>>(selectorName: SelectorName, args: Array<SelectorParameters<SelectorsOf<Config>[SelectorName]>>): Generator;
++	    finishResolutions<SelectorName extends keyof SelectorsOf<Config>>(selectorName: SelectorName, args: Array<SelectorParameters<SelectorsOf<Config>[SelectorName]>>): Generator;
++	    failResolutions<SelectorName extends keyof SelectorsOf<Config>>(selectorName: SelectorName, args: SelectorParameters<SelectorsOf<Config>[SelectorName]>, errors: (Error | unknown)[]): Generator;
++	    invalidateResolution<SelectorName extends keyof SelectorsOf<Config>>(selectorName: SelectorName, args?: SelectorParameters<SelectorsOf<Config>[SelectorName]>): void;
++	    invalidateResolutionForStore(): void;
++	    invalidateResolutionForStoreSelector<SelectorName extends keyof SelectorsOf<Config>>(selectorName: SelectorName, args?: SelectorParameters<SelectorsOf<Config>[SelectorName]>): void;
++	};
++	/**
++	 * Metadata selectors that are automatically added to every store.
++	 */
++	export type TypedMetadataSelectors<Config extends AnyConfig> = {
++	    getResolutionState<SelectorName extends keyof SelectorsOf<Config>>(selectorName: SelectorName, args?: SelectorParameters<SelectorsOf<Config>[SelectorName]> | null): any;
++	    getIsResolving<SelectorName extends keyof SelectorsOf<Config>>(selectorName: SelectorName, args?: SelectorParameters<SelectorsOf<Config>[SelectorName]>): boolean;
++	    hasStartedResolution<SelectorName extends keyof SelectorsOf<Config>>(selectorName: SelectorName, args?: SelectorParameters<SelectorsOf<Config>[SelectorName]>): boolean;
++	    hasFinishedResolution<SelectorName extends keyof SelectorsOf<Config>>(selectorName: SelectorName, args?: SelectorParameters<SelectorsOf<Config>[SelectorName]>): boolean;
++	    hasResolutionFailed<SelectorName extends keyof SelectorsOf<Config>>(selectorName: SelectorName, args?: SelectorParameters<SelectorsOf<Config>[SelectorName]>): boolean;
++	    getResolutionError<SelectorName extends keyof SelectorsOf<Config>>(selectorName: SelectorName, args?: SelectorParameters<SelectorsOf<Config>[SelectorName]>): Error | unknown | undefined;
++	    isResolving<SelectorName extends keyof SelectorsOf<Config>>(selectorName: SelectorName, args?: SelectorParameters<SelectorsOf<Config>[SelectorName]>): boolean;
++	    getCachedResolvers(): unknown;
++	    hasResolvingSelectors(): boolean;
++	    countSelectorsByStatus(): { resolving: number; finished: number; error: number; };
++	};
++	/**
++	 * Helper to remove first argument (state) from a selector
++	 */
++	type RemoveFirstArgument<F> = F extends (state: any, ...args: infer P) => infer R ? (...args: P) => R : F;
++	/**
++	 * Helper to curry and promisify a selector
++	 *
++	 * Checks for PromiseCurriedSignature first (preserves generics),
++	 * then falls back to CurriedSignature wrapping, then to transformation.
++	 */
++	type CurriedAndPromisifiedSelector<F> = F extends SelectorWithCustomCurrySignature & { PromiseCurriedSignature: infer S; } ? S : F extends SelectorWithCustomCurrySignature ? F['CurriedSignature'] extends (...args: any[]) => infer Ret ? (...args: Parameters<F['CurriedSignature']>) => Promise<Ret> : never : RemoveFirstArgument<F> extends (...args: any[]) => infer Ret ? (...args: Parameters<RemoveFirstArgument<F>>) => Promise<Ret> : never;
++	/**
++	 * Helper to promisify metadata selectors while preserving optional parameters
++	 */
++	type PromisifyMetadataSelector<F> = F extends (...args: any[]) => infer Ret ? (...args: Parameters<F>) => Promise<Ret> : never;
++	/**
++	 * Curried and promisified selectors for resolveSelect
++	 */
++	export type CurriedAndPromisifiedSelectorsOf<S> = S extends StoreDescriptor<ReduxStoreConfig<any, any, infer Selectors>> ? keyof Selectors extends never ? any : {
++	    [key in keyof Selectors]: CurriedAndPromisifiedSelector<Selectors[key]>;
++	} & {
++	    [key in keyof TypedMetadataSelectors<ConfigOf<S>>]: PromisifyMetadataSelector<TypedMetadataSelectors<ConfigOf<S>>[key]>;
++	} : never;
++	/**
++	 * StoreRegistry - base interface for string-based store lookups.
++	 * Consumers should augment this interface to add their stores.
++	 */
++	export interface StoreRegistry {}
++	/**
++	 * ResolveSelect function interface for registry and top-level usage.
++	 */
++	export interface ResolveSelectFunction {
++	    <T extends StoreDescriptor<AnyConfig>>(storeDescriptor: T): CurriedAndPromisifiedSelectorsOf<T>;
++	    <K extends keyof StoreRegistry>(storeDescriptor: K): CurriedAndPromisifiedSelectorsOf<StoreRegistry[K]>;
++	    (storeDescriptor: string): any;
++	}
+ 	export {};
+ }

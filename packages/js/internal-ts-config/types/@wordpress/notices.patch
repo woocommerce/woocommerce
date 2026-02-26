@@ -1,0 +1,103 @@
+diff -ruN a/types/@wordpress/notices/index.d.ts b/types/@wordpress/notices/index.d.ts
+--- a/types/@wordpress/notices/index.d.ts	2026-02-25 18:00:44
++++ b/types/@wordpress/notices/index.d.ts	2026-02-25 18:00:39
+@@ -1,15 +1,27 @@
+ /// <reference path="./store/actions.d.ts" />
+ /// <reference path="./store/selectors.d.ts" />
+ 
++/**
++ * DT types are already curried (no state parameter), so we add a fake state param
++ * to match the expected ReduxStoreConfig selector shape, which gets curried away.
++ */
++type WithState< Selectors > = {
++	[ K in keyof Selectors ]: Selectors[ K ] extends (
++		...args: infer A
++	) => infer R
++		? ( state: unknown, ...args: A ) => R
++		: Selectors[ K ];
++};
++
+ declare module '@wordpress/notices' {
+-	import { StoreDescriptor } from "@wordpress/data";
++	import type * as noticesActions from '@wordpress/notices/store/actions';
++	import type * as noticesSelectors from '@wordpress/notices/store/selectors';
++	import type {
++		StoreDescriptor,
++		ReduxStoreConfig,
++	} from '@wordpress/data/build-types/types';
+ 	import { JSX, MouseEventHandler } from "react";
+ 
+-	declare module "@wordpress/data" {
+-	    function dispatch(key: "core/notices"): typeof import("@wordpress/notices/store/actions");
+-	    function select(key: "core/notices"): typeof import("@wordpress/notices/store/selectors");
+-	}
+-
+ 	export type Status = "error" | "info" | "success" | "warning";
+ 	export type NoticeType = "snackbar" | "default";
+ 
+@@ -114,12 +126,59 @@
+ 	    onDismiss(): void;
+ 	}
+ 
+-	export interface NoticesStoreDescriptor extends StoreDescriptor {
+-	    name: "core/notices";
+-	}
++	type NoticesConfig = ReduxStoreConfig<
++		unknown,
++		{
++			[ K in keyof typeof noticesActions ]: ( typeof noticesActions )[ K ];
++		},
++		WithState< typeof noticesSelectors >
++	>;
+ 
+-	// eslint-disable-next-line @definitelytyped/no-declare-current-package
+-	declare module "@wordpress/notices" {
+-	    const store: NoticesStoreDescriptor;
++	type NoticesStoreDescriptor = StoreDescriptor< NoticesConfig > & {
++		name: 'core/notices';
++	};
++
++	export const store: NoticesStoreDescriptor;
++}
++
++declare module '@wordpress/data' {
++	import type * as noticesActions from '@wordpress/notices/store/actions';
++	import type * as noticesSelectors from '@wordpress/notices/store/selectors';
++	import type {
++		StoreDescriptor,
++		ReduxStoreConfig,
++	} from '@wordpress/data/build-types/types';
++
++	type NoticesConfig = ReduxStoreConfig<
++		unknown,
++		{
++			[ K in keyof typeof noticesActions ]: ( typeof noticesActions )[ K ];
++		},
++		WithState< typeof noticesSelectors >
++	>;
++
++	type NoticesStoreDescriptor = StoreDescriptor< NoticesConfig > & {
++		name: 'core/notices';
++	};
++
++	interface StoreRegistry {
++		'core/notices': NoticesStoreDescriptor;
+ 	}
++
++	// Override DT's function overloads — the original @types package is still
++	// loaded by TypeScript's automatic @types resolution and its string-literal
++	// overloads beat the generic StoreRegistry lookup, so we need our own
++	// string-literal overloads with correct return types.
++	export function select(
++		key: 'core/notices'
++	): CurriedSelectorsOf< NoticesStoreDescriptor >;
++	export function dispatch(
++		key: 'core/notices'
++	): ActionCreatorsOf< NoticesConfig >;
++	export function resolveSelect(
++		key: 'core/notices'
++	): CurriedAndPromisifiedSelectorsOf< NoticesStoreDescriptor >;
++	export function useDispatch(
++		key: 'core/notices'
++	): ActionCreatorsOf< NoticesConfig >;
+ }
