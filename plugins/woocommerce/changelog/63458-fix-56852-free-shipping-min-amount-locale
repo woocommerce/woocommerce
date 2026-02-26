@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix free shipping minimum order amount when stored with comma decimal separator.
