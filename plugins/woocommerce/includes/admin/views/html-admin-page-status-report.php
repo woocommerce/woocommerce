@@ -1056,7 +1056,7 @@ if ( 0 < $mu_plugins_count ) :
 					$total_overrides = is_countable( $theme['overrides'] ) ? count( $theme['overrides'] ) : 0;
 					for ( $i = 0; $i < $total_overrides; $i++ ) {
 						$override = $theme['overrides'][ $i ];
-						if ( $override['core_version'] && empty( $override['version'] ) ) {
+						if ( $override['core_version'] && '' === $override['version'] ) {
 							printf(
 								/* Translators: %1$s: Template name, %2$s: Core version. */
 								esc_html__( '%1$s - version header is missing. The core version is %2$s', 'woocommerce' ),
