@@ -562,7 +562,59 @@ class ProductSchema extends AbstractSchema {
 					],
 				],
 			],
+			'password_required'   => [
+				'description' => __( 'Whether the product is password protected.', 'woocommerce' ),
+				'type'        => 'boolean',
+				'context'     => [ 'view', 'edit', 'embed' ],
+				'readonly'    => true,
+				'default'     => false,
+			],
 			self::EXTENDING_KEY   => $this->get_extended_schema( self::IDENTIFIER ),
+		];
+	}
+
+	/**
+	 * Check whether the given product is password protected and the correct password has not been provided.
+	 *
+	 * @since 10.7.0
+	 *
+	 * @param \WC_Product $product Product instance.
+	 * @return bool True if content should be redacted.
+	 */
+	protected function is_product_password_protected( \WC_Product $product ) {
+		$post = get_post( $product->get_id() );
+
+		if ( ! $post || empty( $post->post_password ) ) {
+			return false;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$password = isset( $_GET['password'] ) ? wp_unslash( $_GET['password'] ) : '';
+
+		if ( $password && hash_equals( $post->post_password, $password ) ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Get minimal metadata response for a password-protected product.
+	 *
+	 * @since 10.7.0
+	 *
+	 * @param \WC_Product $product Product instance.
+	 * @return array
+	 */
+	protected function get_password_protected_item_response( \WC_Product $product ) {
+		return [
+			'id'                => $product->get_id(),
+			'name'              => $this->prepare_html_response( $product->get_title() ),
+			'slug'              => $product->get_slug(),
+			'permalink'         => $product->get_permalink(),
+			'type'              => $product->get_type(),
+			'parent'            => $product->get_parent_id(),
+			'password_required' => true,
 		];
 	}
 
@@ -573,6 +625,10 @@ class ProductSchema extends AbstractSchema {
 	 * @return array
 	 */
 	public function get_item_response( $product ) {
+		if ( $this->is_product_password_protected( $product ) ) {
+			return $this->get_password_protected_item_response( $product );
+		}
+
 		$availability = ProductAvailabilityUtils::get_product_availability( $product );
 		return [
 			'id'                  => $product->get_id(),
@@ -622,6 +678,7 @@ class ProductSchema extends AbstractSchema {
 				],
 				( new QuantityLimits() )->get_add_to_cart_limits( $product )
 			),
+			'password_required'   => false,
 			self::EXTENDING_KEY   => $this->get_extended_data( self::IDENTIFIER, $product ),
 
 		];
