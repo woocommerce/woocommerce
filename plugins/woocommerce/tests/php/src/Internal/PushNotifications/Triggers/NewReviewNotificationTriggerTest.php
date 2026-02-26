@@ -48,7 +48,6 @@ class NewReviewNotificationTriggerTest extends WC_Unit_Test_Case {
 
 		$this->trigger = new NewReviewNotificationTrigger();
 		$this->trigger->init( $this->store );
-		$this->trigger->register();
 
 		$product          = WC_Helper_Product::create_simple_product();
 		$this->product_id = $product->get_id();
@@ -71,6 +70,8 @@ class NewReviewNotificationTriggerTest extends WC_Unit_Test_Case {
 	 * @testdox Should register the comment_post hook.
 	 */
 	public function test_register_adds_comment_post_hook(): void {
+		$this->trigger->register();
+
 		$this->assertNotFalse(
 			has_action(
 				'comment_post',
@@ -85,9 +86,8 @@ class NewReviewNotificationTriggerTest extends WC_Unit_Test_Case {
 	 */
 	public function test_adds_notification_for_approved_review(): void {
 		$commentdata = $this->build_review_data( $this->product_id );
-		$comment_id  = wp_insert_comment( $commentdata );
 
-		$this->trigger->on_comment_post( $comment_id, 1, $commentdata );
+		$this->trigger->on_comment_post( 1, 1, $commentdata );
 
 		$this->assertSame( 1, $this->store->count() );
 	}
@@ -97,9 +97,8 @@ class NewReviewNotificationTriggerTest extends WC_Unit_Test_Case {
 	 */
 	public function test_adds_notification_for_unapproved_review(): void {
 		$commentdata = $this->build_review_data( $this->product_id );
-		$comment_id  = wp_insert_comment( $commentdata );
 
-		$this->trigger->on_comment_post( $comment_id, 0, $commentdata );
+		$this->trigger->on_comment_post( 1, 0, $commentdata );
 
 		$this->assertSame( 1, $this->store->count() );
 	}
@@ -109,9 +108,8 @@ class NewReviewNotificationTriggerTest extends WC_Unit_Test_Case {
 	 */
 	public function test_ignores_spam_review(): void {
 		$commentdata = $this->build_review_data( $this->product_id );
-		$comment_id  = wp_insert_comment( $commentdata );
 
-		$this->trigger->on_comment_post( $comment_id, 'spam', $commentdata );
+		$this->trigger->on_comment_post( 1, 'spam', $commentdata );
 
 		$this->assertSame( 0, $this->store->count() );
 	}
@@ -127,9 +125,8 @@ class NewReviewNotificationTriggerTest extends WC_Unit_Test_Case {
 			'comment_approved' => 1,
 			'comment_type'     => '',
 		);
-		$comment_id  = wp_insert_comment( $commentdata );
 
-		$this->trigger->on_comment_post( $comment_id, 1, $commentdata );
+		$this->trigger->on_comment_post( 1, 1, $commentdata );
 
 		$this->assertSame( 0, $this->store->count() );
 	}
@@ -153,9 +150,8 @@ class NewReviewNotificationTriggerTest extends WC_Unit_Test_Case {
 			'comment_approved' => 1,
 			'comment_type'     => 'review',
 		);
-		$comment_id  = wp_insert_comment( $commentdata );
 
-		$this->trigger->on_comment_post( $comment_id, 1, $commentdata );
+		$this->trigger->on_comment_post( 1, 1, $commentdata );
 
 		$this->assertSame( 0, $this->store->count() );
 	}

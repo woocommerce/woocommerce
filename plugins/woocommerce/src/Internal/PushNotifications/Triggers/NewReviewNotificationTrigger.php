@@ -50,7 +50,7 @@ class NewReviewNotificationTrigger {
 	/**
 	 * Handles the comment_post hook.
 	 *
-	 * Only creates a notification for approved reviews on products.
+	 * Only creates a notification for non-spam reviews on products.
 	 *
 	 * @param int        $comment_id       The comment ID.
 	 * @param int|string $comment_approved 1 if approved, 0 if not, 'spam' if spam.
