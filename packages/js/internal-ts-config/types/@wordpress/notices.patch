@@ -1,6 +1,6 @@
 diff -ruN a/types/@wordpress/notices/index.d.ts b/types/@wordpress/notices/index.d.ts
---- a/types/@wordpress/notices/index.d.ts	2026-02-25 18:00:44
-+++ b/types/@wordpress/notices/index.d.ts	2026-02-25 18:00:39
+--- a/types/@wordpress/notices/index.d.ts	2026-02-25 19:03:39
++++ b/types/@wordpress/notices/index.d.ts	2026-02-25 19:03:33
 @@ -1,15 +1,27 @@
  /// <reference path="./store/actions.d.ts" />
  /// <reference path="./store/selectors.d.ts" />
@@ -35,7 +35,7 @@ diff -ruN a/types/@wordpress/notices/index.d.ts b/types/@wordpress/notices/index
  	export type Status = "error" | "info" | "success" | "warning";
  	export type NoticeType = "snackbar" | "default";
  
-@@ -114,12 +126,59 @@
+@@ -114,12 +126,42 @@
  	    onDismiss(): void;
  	}
  
@@ -60,7 +60,7 @@ diff -ruN a/types/@wordpress/notices/index.d.ts b/types/@wordpress/notices/index
 +	export const store: NoticesStoreDescriptor;
 +}
 +
-+declare module '@wordpress/data' {
++declare module '@wordpress/data/build-types/types' {
 +	import type * as noticesActions from '@wordpress/notices/store/actions';
 +	import type * as noticesSelectors from '@wordpress/notices/store/selectors';
 +	import type {
@@ -83,21 +83,4 @@ diff -ruN a/types/@wordpress/notices/index.d.ts b/types/@wordpress/notices/index
 +	interface StoreRegistry {
 +		'core/notices': NoticesStoreDescriptor;
  	}
-+
-+	// Override DT's function overloads — the original @types package is still
-+	// loaded by TypeScript's automatic @types resolution and its string-literal
-+	// overloads beat the generic StoreRegistry lookup, so we need our own
-+	// string-literal overloads with correct return types.
-+	export function select(
-+		key: 'core/notices'
-+	): CurriedSelectorsOf< NoticesStoreDescriptor >;
-+	export function dispatch(
-+		key: 'core/notices'
-+	): ActionCreatorsOf< NoticesConfig >;
-+	export function resolveSelect(
-+		key: 'core/notices'
-+	): CurriedAndPromisifiedSelectorsOf< NoticesStoreDescriptor >;
-+	export function useDispatch(
-+		key: 'core/notices'
-+	): ActionCreatorsOf< NoticesConfig >;
  }

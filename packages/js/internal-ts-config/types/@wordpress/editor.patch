@@ -1,7 +1,7 @@
 diff -ruN a/types/@wordpress/editor/index.d.ts b/types/@wordpress/editor/index.d.ts
---- a/types/@wordpress/editor/index.d.ts	2026-02-25 18:00:44
-+++ b/types/@wordpress/editor/index.d.ts	2026-02-25 18:00:39
-@@ -3,25 +3,80 @@
+--- a/types/@wordpress/editor/index.d.ts	2026-02-25 19:03:39
++++ b/types/@wordpress/editor/index.d.ts	2026-02-25 19:03:23
+@@ -3,25 +3,63 @@
  /// <reference path="./store/selectors.d.ts" />
  /// <reference path="./utils/index.d.ts" />
  
@@ -55,7 +55,7 @@ diff -ruN a/types/@wordpress/editor/index.d.ts b/types/@wordpress/editor/index.d
  	export * from "@wordpress/editor/utils";
 +}
 +
-+declare module '@wordpress/data' {
++declare module '@wordpress/data/build-types/types' {
 +	import type * as editorActions from '@wordpress/editor/store/actions';
 +	import type * as editorSelectors from '@wordpress/editor/store/selectors';
 +	import type {
@@ -76,21 +76,4 @@ diff -ruN a/types/@wordpress/editor/index.d.ts b/types/@wordpress/editor/index.d
 +	interface StoreRegistry {
 +		'core/editor': EditorStoreDescriptor;
 +	}
-+
-+	// Override DT's function overloads — the original @types package is still
-+	// loaded by TypeScript's automatic @types resolution and its string-literal
-+	// overloads beat the generic StoreRegistry lookup, so we need our own
-+	// string-literal overloads with correct return types.
-+	export function select(
-+		key: 'core/editor'
-+	): CurriedSelectorsOf< EditorStoreDescriptor >;
-+	export function dispatch(
-+		key: 'core/editor'
-+	): ActionCreatorsOf< EditorConfig >;
-+	export function resolveSelect(
-+		key: 'core/editor'
-+	): CurriedAndPromisifiedSelectorsOf< EditorStoreDescriptor >;
-+	export function useDispatch(
-+		key: 'core/editor'
-+	): ActionCreatorsOf< EditorConfig >;
  }

@@ -57,7 +57,7 @@ declare module '@wordpress/keyboard-shortcuts' {
 	) => void;
 }
 
-declare module '@wordpress/data' {
+declare module '@wordpress/data/build-types/types' {
 	import type {
 		StoreDescriptor,
 		ReduxStoreConfig,
@@ -147,7 +147,7 @@ declare module '@wordpress/preferences' {
 	export const PreferenceToggleMenuItem: any;
 }
 
-declare module '@wordpress/data' {
+declare module '@wordpress/data/build-types/types' {
 	import type {
 		StoreDescriptor,
 		ReduxStoreConfig,
