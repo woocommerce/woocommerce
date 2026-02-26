@@ -860,6 +860,7 @@ class WC_Form_Handler {
 
 		if ( ProductType::VARIABLE === $add_to_cart_handler || ProductType::VARIATION === $add_to_cart_handler ) {
 			$was_added_to_cart = self::add_to_cart_handler_variable( $product_id );
+			$product_id        = ! empty( $_REQUEST['variation_id'] ) ? absint( wp_unslash( $_REQUEST['variation_id'] ) ) : $product_id; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		} elseif ( ProductType::GROUPED === $add_to_cart_handler ) {
 			$was_added_to_cart = self::add_to_cart_handler_grouped( $product_id );
 		} elseif ( has_action( 'woocommerce_add_to_cart_handler_' . $add_to_cart_handler ) ) {

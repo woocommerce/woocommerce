@@ -1334,4 +1334,49 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		unset( $_REQUEST['add-to-cart'], $_REQUEST['quantity'], $_POST['quantity'] );
 		$product->delete( true );
 	}
+
+	/**
+	 * @testdox Should fire woocommerce_cart_item_added_from_user_request with the variation ID when a variable product is added via the shortcode form.
+	 */
+	public function test_add_to_cart_action_fires_cart_item_added_from_user_request_for_variable_product(): void {
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Test Variable Product' );
+		$attribute = WC_Helper_Product::create_product_attribute_object( 'color', array( 'blue' ) );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array( 'pa_color' => 'blue' ) );
+		$variation->set_regular_price( 10 );
+		$variation->save();
+
+		$_REQUEST['add-to-cart']        = $product->get_id();
+		$_REQUEST['variation_id']       = $variation->get_id();
+		$_REQUEST['quantity']           = 2;
+		$_POST['quantity']              = 2;
+		$_REQUEST['attribute_pa_color'] = 'blue';
+
+		$captured_args = array();
+		$callback      = function ( $product_id, $quantity ) use ( &$captured_args ) {
+			$captured_args = array(
+				'product_id' => $product_id,
+				'quantity'   => $quantity,
+			);
+		};
+
+		add_action( 'woocommerce_cart_item_added_from_user_request', $callback, 10, 2 );
+
+		WC_Form_Handler::add_to_cart_action( false );
+
+		$this->assertNotEmpty( $captured_args, 'The action should have been fired' );
+		$this->assertSame( $variation->get_id(), $captured_args['product_id'], 'The product_id should be the variation ID, not the parent product ID' );
+		$this->assertSame( 2, $captured_args['quantity'] );
+
+		remove_action( 'woocommerce_cart_item_added_from_user_request', $callback );
+
+		unset( $_REQUEST['add-to-cart'], $_REQUEST['variation_id'], $_REQUEST['quantity'], $_POST['quantity'], $_REQUEST['attribute_pa_color'] );
+		$variation->delete( true );
+		$product->delete( true );
+	}
 }
