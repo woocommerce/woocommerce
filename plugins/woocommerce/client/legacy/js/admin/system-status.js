@@ -36,7 +36,7 @@ jQuery( function ( $ ) {
 		generateReport: function() {
 			var report = '';
 
-			$( '.wc_status_table thead, .wc_status_table tbody' ).each( function() {
+			$( '.wc_status_table thead, .wc_status_table tbody, .wc_status_table tfoot' ).each( function() {
 				if ( $( this ).is( 'thead' ) ) {
 					var label = $( this ).find( 'th:eq(0)' ).data( 'exportLabel' ) || $( this ).text();
 					report = report + '\n### ' + label.trim() + ' ###\n\n';
@@ -66,7 +66,11 @@ jQuery( function ( $ ) {
 							the_value = temp_line;
 						}
 
-						report = report + '' + the_name + ': ' + the_value + '\n';
+						if ( the_name || the_value ) {
+							report = report + '' + the_name + ': ' + the_value + '\n';
+						} else {
+							report = report + '\n';
+						}
 					});
 				}
 			});

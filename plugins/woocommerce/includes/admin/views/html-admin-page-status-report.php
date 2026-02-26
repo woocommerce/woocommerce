@@ -1048,41 +1048,39 @@ if ( 0 < $mu_plugins_count ) :
 		</tr>
 		<?php endif ?>
 		<?php if ( ! empty( $theme['overrides'] ) ) : ?>
+			<?php foreach ( $theme['overrides'] as $i => $override ) : ?>
 			<tr>
-				<td data-export-label="Overrides"><?php esc_html_e( 'Overrides', 'woocommerce' ); ?></td>
-				<td class="help">&nbsp;</td>
-				<td>
-					<?php
-					$total_overrides = is_countable( $theme['overrides'] ) ? count( $theme['overrides'] ) : 0;
-					for ( $i = 0; $i < $total_overrides; $i++ ) {
-						$override = $theme['overrides'][ $i ];
-						if ( $override['core_version'] && '' === $override['version'] ) {
-							printf(
-								/* Translators: %1$s: Template name, %2$s: Core version. */
-								esc_html__( '%1$s - version header is missing. The core version is %2$s', 'woocommerce' ),
-								'<code>' . esc_html( $override['file'] ) . '</code>',
-								esc_html( $override['core_version'] )
-							);
-						} elseif ( $override['core_version'] && version_compare( $override['version'], $override['core_version'], '<' ) ) {
-							printf(
-								/* Translators: %1$s: Template name, %2$s: Template version, %3$s: Core version. */
-								esc_html__( '%1$s version %2$s is out of date. The core version is %3$s', 'woocommerce' ),
-								'<code>' . esc_html( $override['file'] ) . '</code>',
-								'<strong style="color:red">' . esc_html( $override['version'] ) . '</strong>',
-								esc_html( $override['core_version'] )
-							);
-						} else {
-							echo '<code>' . esc_html( $override['file'] ) . '</code>';
-						}
-
-						if ( ( $total_overrides - 1 ) !== $i ) {
-							echo ', ';
-						}
-						echo '<br />';
-					}
-					?>
+				<td data-export-label="Override">
+					<?php if ( 0 === $i ) : ?>
+						<?php esc_html_e( 'Overrides', 'woocommerce' ); ?>:
+					<?php endif; ?>
 				</td>
+				<td class="help">&nbsp;</td>
+				<?php
+				echo '<td>';
+				echo '<code>' . esc_html( $override['file'] ) . '</code>';
+				if ( $override['core_version'] && '' === $override['version'] ) {
+					echo ' <br><mark class="error"><span class="dashicons dashicons-warning"></span> ';
+					printf(
+						/* Translators: %s: Core version. */
+						esc_html__( 'Version header is missing. The core version is %s', 'woocommerce' ),
+						'<strong>' . esc_html( $override['core_version'] ) . '</strong>'
+					);
+					echo '</mark>';
+				} elseif ( $override['core_version'] && version_compare( $override['version'], $override['core_version'], '<' ) ) {
+					echo ' <br><mark class="error"><span class="dashicons dashicons-warning"></span> ';
+					printf(
+						/* Translators: %1$s: Template version, %2$s: Core version. */
+						esc_html__( 'Version %1$s is out of date. The core version is %2$s', 'woocommerce' ),
+						'<strong>' . esc_html( $override['version'] ) . '</strong>',
+						'<strong>' . esc_html( $override['core_version'] ) . '</strong>'
+					);
+					echo '</mark>';
+				}
+				echo '</td>';
+				?>
 			</tr>
+			<?php endforeach; ?>
 		<?php else : ?>
 			<tr>
 				<td data-export-label="Overrides"><?php esc_html_e( 'Overrides', 'woocommerce' ); ?>:</td>
@@ -1090,30 +1088,31 @@ if ( 0 < $mu_plugins_count ) :
 				<td>&ndash;</td>
 			</tr>
 		<?php endif; ?>
-
-		<?php if ( true === $theme['has_outdated_templates'] ) : ?>
-			<tr>
-				<td data-export-label="Outdated Templates"><?php esc_html_e( 'Outdated templates', 'woocommerce' ); ?>:</td>
-				<td class="help">&nbsp;</td>
-				<td>
-					<mark class="error">
-						<span class="dashicons dashicons-warning"></span>
-					</mark>
-					<span class="private">
-						<a href="https://developer.woocommerce.com/docs/theming/theme-development/fixing-outdated-woocommerce-templates/" target="_blank">
-							<?php esc_html_e( 'Learn how to update', 'woocommerce' ); ?>
-						</a> |
-						<mark class="info">
-							<span class="dashicons dashicons-info"></span>
-						</mark>
-						<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-status&tab=tools' ) ); ?>">
-							<?php esc_html_e( 'Clear system status theme info cache', 'woocommerce' ); ?>
-						</a>
-					</span>
-				</td>
-			</tr>
-		<?php endif; ?>
 	</tbody>
+	<?php if ( true === $theme['has_outdated_templates'] ) : ?>
+	<tfoot>
+		<tr>
+			<td data-export-label="Outdated Templates"><?php esc_html_e( 'Outdated templates', 'woocommerce' ); ?>:</td>
+			<td class="help">&nbsp;</td>
+			<td>
+				<mark class="error">
+					<span class="dashicons dashicons-warning"></span>
+				</mark>
+				<span class="private">
+					<a href="https://developer.woocommerce.com/docs/theming/theme-development/fixing-outdated-woocommerce-templates/" target="_blank">
+						<?php esc_html_e( 'Learn how to update', 'woocommerce' ); ?>
+					</a> |
+					<mark class="info">
+						<span class="dashicons dashicons-info"></span>
+					</mark>
+					<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-status&tab=tools' ) ); ?>">
+						<?php esc_html_e( 'Clear system status theme info cache', 'woocommerce' ); ?>
+					</a>
+				</span>
+			</td>
+		</tr>
+	</tfoot>
+	<?php endif; ?>
 </table>
 
 <?php
