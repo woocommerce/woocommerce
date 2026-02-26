@@ -287,7 +287,9 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 		$value = str_replace( array( get_woocommerce_currency_symbol(), html_entity_decode( get_woocommerce_currency_symbol() ) ), '', $value );
 
 		$contains_shortcodes = false !== strpos( $value, '[' ) || false !== strpos( $value, ']' );
-		if ( ! $contains_shortcodes ) {
+		$is_math_expression = (bool) preg_match( '/^[\d\.\s]+([+\-*\/][\d\.\s]+)+$/', trim( $value ) );
+
+		if ( ! $contains_shortcodes && ! $is_math_expression ) {
 			$value = \Automattic\WooCommerce\Utilities\NumberUtil::sanitize_cost_in_current_locale( $value );
 		}
 
