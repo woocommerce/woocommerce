@@ -202,7 +202,6 @@ class Email_Editor_Container {
 			function ( $container ) {
 				return new Content_Renderer(
 					$container->get( Process_Manager::class ),
-					new Email_Css_Inliner(),
 					$container->get( Theme_Controller::class ),
 					$container->get( Email_Editor_Logger::class )
 				);
@@ -217,6 +216,7 @@ class Email_Editor_Container {
 					new Email_Css_Inliner(),
 					$container->get( Theme_Controller::class ),
 					$container->get( Personalization_Tags_Registry::class ),
+					$container->get( Process_Manager::class ),
 				);
 			}
 		);

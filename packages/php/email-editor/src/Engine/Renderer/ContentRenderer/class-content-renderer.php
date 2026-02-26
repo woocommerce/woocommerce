@@ -9,7 +9,6 @@ declare(strict_types = 1);
 namespace Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger;
-use Automattic\WooCommerce\EmailEditor\Engine\Renderer\Css_Inliner;
 use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Fallback;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Post_Content;
@@ -43,13 +42,6 @@ class Content_Renderer {
 	 * @var WP_Block_Type_Registry
 	 */
 	private WP_Block_Type_Registry $block_type_registry;
-
-	/**
-	 * CSS inliner
-	 *
-	 * @var Css_Inliner
-	 */
-	private Css_Inliner $css_inliner;
 
 	/**
 	 * Property to store the backup of the current template content.
@@ -104,19 +96,16 @@ class Content_Renderer {
 	 * Content_Renderer constructor.
 	 *
 	 * @param Process_Manager     $preprocess_manager Preprocess manager.
-	 * @param Css_Inliner         $css_inliner Css inliner.
 	 * @param Theme_Controller    $theme_controller Theme controller.
 	 * @param Email_Editor_Logger $logger Logger instance.
 	 */
 	public function __construct(
 		Process_Manager $preprocess_manager,
-		Css_Inliner $css_inliner,
 		Theme_Controller $theme_controller,
 		Email_Editor_Logger $logger
 	) {
 		$this->process_manager     = $preprocess_manager;
 		$this->theme_controller    = $theme_controller;
-		$this->css_inliner         = $css_inliner;
 		$this->logger              = $logger;
 		$this->block_type_registry = WP_Block_Type_Registry::get_instance();
 		$this->fallback_renderer   = new Fallback();
@@ -147,19 +136,22 @@ class Content_Renderer {
 	}
 
 	/**
-	 * Render the content
+	 * Render the content.
 	 *
 	 * @param WP_Post           $post Post object.
 	 * @param WP_Block_Template $template Block template.
-	 * @return string
+	 * @return array{html: string, styles: string} Rendered HTML and collected CSS.
 	 */
-	public function render( WP_Post $post, WP_Block_Template $template ): string {
+	public function render( WP_Post $post, WP_Block_Template $template ): array {
 		$this->set_template_globals( $post, $template );
 		$this->initialize();
 		$rendered_html = get_the_block_template_html();
 		$this->reset();
 
-		return $this->process_manager->postprocess( $this->inline_styles( $rendered_html, $post, $template ) );
+		return array(
+			'html'   => $rendered_html,
+			'styles' => $this->collect_styles( $post, $template ),
+		);
 	}
 
 	/**
@@ -286,14 +278,13 @@ class Content_Renderer {
 	}
 
 	/**
-	 * Method to inline styles into the HTML
+	 * Collects CSS for the rendered content without inlining it.
 	 *
-	 * @param string                 $html HTML content.
 	 * @param WP_Post                $post Post object.
 	 * @param WP_Block_Template|null $template Block template.
-	 * @return string
+	 * @return string The collected CSS string (without <style> wrapper).
 	 */
-	private function inline_styles( $html, WP_Post $post, $template = null ) {
+	private function collect_styles( WP_Post $post, $template = null ): string {
 		$styles  = (string) file_get_contents( __DIR__ . '/' . self::CONTENT_STYLES_FILE );
 		$styles .= (string) file_get_contents( __DIR__ . '/../../content-shared.css' );
 
@@ -342,15 +333,6 @@ class Content_Renderer {
 
 		$styles .= $block_support_styles;
 
-		/*
-		 * Debugging for content styles. Remember these get inlined.
-		 * echo '<pre>';
-		 * var_dump($styles);
-		 * echo '</pre>';
-		 */
-
-		$styles = '<style>' . wp_strip_all_tags( (string) apply_filters( 'woocommerce_email_content_renderer_styles', $styles, $post ) ) . '</style>';
-
-		return $this->css_inliner->from_html( $styles . $html )->inline_css()->render();
+		return wp_strip_all_tags( (string) apply_filters( 'woocommerce_email_content_renderer_styles', $styles, $post ) );
 	}
 }

@@ -243,7 +243,6 @@ abstract class Email_Editor_Integration_Test_Case extends \WP_UnitTestCase {
 			function ( $container ) {
 				return new Content_Renderer(
 					$container->get( Process_Manager::class ),
-					$container->get( Email_Css_Inliner::class ),
 					$container->get( Theme_Controller::class ),
 					$container->get( Email_Editor_Logger::class ),
 				);
@@ -258,6 +257,7 @@ abstract class Email_Editor_Integration_Test_Case extends \WP_UnitTestCase {
 					$container->get( Email_Css_Inliner::class ),
 					$container->get( Theme_Controller::class ),
 					$container->get( Personalization_Tags_Registry::class ),
+					$container->get( Process_Manager::class ),
 				);
 			}
 		);
