@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Improve template overrides list legibility in Status screen by displaying overrides as an unordered list instead of a comma-separated inline list.

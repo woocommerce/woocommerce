@@ -52,18 +52,30 @@ jQuery( function ( $ ) {
 						$value_html.find( '.dashicons-no-alt, .dashicons-warning' ).replaceWith( '&#10060;' );
 
 						// Format value
-						var the_value   = $value_html.text().trim();
-						var value_array = the_value.split( ', ' );
+						var the_value;
+						var $list_items = $value_html.find( 'li' );
 
-						if ( value_array.length > 1 ) {
-							// If value have a list of plugins ','.
-							// Split to add new line.
-							var temp_line ='';
-							$.each( value_array, function( key, line ) {
-								temp_line = temp_line + line + '\n';
-							});
+						if ( $list_items.length ) {
+							// If value is a list, extract each item on its own line.
+							var lines = [];
+							$list_items.each( function() {
+								lines.push( $( this ).text().trim() );
+							} );
+							the_value = lines.join( '\n' );
+						} else {
+							the_value = $value_html.text().trim();
+							var value_array = the_value.split( ', ' );
 
-							the_value = temp_line;
+							if ( value_array.length > 1 ) {
+								// If value have a list of plugins ','.
+								// Split to add new line.
+								var temp_line = '';
+								$.each( value_array, function( key, line ) {
+									temp_line = temp_line + line + '\n';
+								});
+
+								the_value = temp_line;
+							}
 						}
 
 						report = report + '' + the_name + ': ' + the_value + '\n';

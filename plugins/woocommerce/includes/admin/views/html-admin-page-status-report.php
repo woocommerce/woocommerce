@@ -1053,9 +1053,9 @@ if ( 0 < $mu_plugins_count ) :
 				<td class="help">&nbsp;</td>
 				<td>
 					<?php
-					$total_overrides = is_countable( $theme['overrides'] ) ? count( $theme['overrides'] ) : 0;
-					for ( $i = 0; $i < $total_overrides; $i++ ) {
-						$override = $theme['overrides'][ $i ];
+					echo '<ul>';
+					foreach ( $theme['overrides'] as $override ) {
+						echo '<li>';
 						if ( $override['core_version'] && ( empty( $override['version'] ) || version_compare( $override['version'], $override['core_version'], '<' ) ) ) {
 							$current_version = $override['version'] ? $override['version'] : '-';
 							printf(
@@ -1066,14 +1066,11 @@ if ( 0 < $mu_plugins_count ) :
 								esc_html( $override['core_version'] )
 							);
 						} else {
-							echo esc_html( $override['file'] );
+							echo '<code>' . esc_html( $override['file'] ) . '</code>';
 						}
-
-						if ( ( $total_overrides - 1 ) !== $i ) {
-							echo ', ';
-						}
-						echo '<br />';
+						echo '</li>';
 					}
+					echo '</ul>';
 					?>
 				</td>
 			</tr>
