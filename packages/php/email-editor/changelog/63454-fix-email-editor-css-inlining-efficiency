@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+Comment: Email Editor: update CSS inlining to make rendering more performant
+
