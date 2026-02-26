@@ -146,7 +146,7 @@ class Renderer {
 		$template_styles   = wp_strip_all_tags( (string) apply_filters( 'woocommerce_email_renderer_styles', $template_styles, $post ) );
 
 		// Single CSS inlining pass: combine content and template styles, then inline all at once.
-		$all_styles        = '<style>' . $content_styles . $template_styles . '</style>';
+		$all_styles        = '<style>' . $template_styles . $content_styles . '</style>';
 		$rendered_template = $this->inline_css_styles( $all_styles . $rendered_template );
 
 		// Postprocess after CSS inlining (border normalization, CSS variable replacement, etc.).
