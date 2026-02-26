@@ -121,17 +121,50 @@ $text_content = $rendered_email['text'];
 
 The `Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Content_Renderer` class is responsible for rendering only the HTML of block template content and a post. The block template has to contain a `core/post-content` block.
 
-**Main Method:**
+**Methods:**
+
+#### `render()`
+
+Returns the rendered HTML content as a string. This is the original method, preserved for backward compatibility.
 
 ```php
 /**
  * Render the content.
  *
+ * @deprecated Use render_with_styles() to get both HTML and collected CSS.
+ *
+ * @param WP_Post           $post Post object.
+ * @param WP_Block_Template $template Block template.
+ * @return string Rendered HTML content.
+ */
+public function render(
+    WP_Post $post,
+    WP_Block_Template $template
+): string
+```
+
+**Example Usage:**
+
+```php
+$post        = get_post( $post_id );
+$template_id = get_stylesheet() . '//' . $template_slug;
+$template    = get_block_template( $template_id );
+$content     = $content_renderer->render( $post, $template );
+```
+
+#### `render_with_styles()`
+
+Returns both the rendered HTML and collected CSS styles as an array. CSS inlining is performed by the `Renderer` class, which combines these content styles with template styles into a single inlining pass.
+
+```php
+/**
+ * Render the content and collect CSS styles without inlining them.
+ *
  * @param WP_Post           $post Post object.
  * @param WP_Block_Template $template Block template.
  * @return array{html: string, styles: string} Rendered HTML and collected CSS.
  */
-public function render(
+public function render_with_styles(
     WP_Post $post,
     WP_Block_Template $template
 ): array
@@ -142,15 +175,13 @@ public function render(
 -   `html`: The rendered HTML content (without inlined styles)
 -   `styles`: The collected CSS string (without `<style>` wrapper)
 
-CSS inlining is performed by the `Renderer` class, which combines these content styles with template styles into a single inlining pass.
-
 **Example Usage:**
 
 ```php
 $post        = get_post( $post_id );
 $template_id = get_stylesheet() . '//' . $template_slug;
 $template    = get_block_template( $template_id );
-$result      = $content_renderer->render( $post, $template );
+$result      = $content_renderer->render_with_styles( $post, $template );
 $html        = $result['html'];
 $styles      = $result['styles'];
 ```

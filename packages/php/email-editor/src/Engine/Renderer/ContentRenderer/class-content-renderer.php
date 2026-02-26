@@ -138,11 +138,24 @@ class Content_Renderer {
 	/**
 	 * Render the content.
 	 *
+	 * @deprecated Use render_with_styles() to get both HTML and collected CSS.
+	 *
+	 * @param WP_Post           $post Post object.
+	 * @param WP_Block_Template $template Block template.
+	 * @return string Rendered HTML content.
+	 */
+	public function render( WP_Post $post, WP_Block_Template $template ): string {
+		return $this->render_with_styles( $post, $template )['html'];
+	}
+
+	/**
+	 * Render the content and collect CSS styles without inlining them.
+	 *
 	 * @param WP_Post           $post Post object.
 	 * @param WP_Block_Template $template Block template.
 	 * @return array{html: string, styles: string} Rendered HTML and collected CSS.
 	 */
-	public function render( WP_Post $post, WP_Block_Template $template ): array {
+	public function render_with_styles( WP_Post $post, WP_Block_Template $template ): array {
 		$this->set_template_globals( $post, $template );
 		$this->initialize();
 		$rendered_html = get_the_block_template_html();

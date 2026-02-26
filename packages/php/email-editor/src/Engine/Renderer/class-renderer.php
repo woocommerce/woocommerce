@@ -117,7 +117,7 @@ class Renderer {
 		$template = $this->templates->get_block_template( $template_slug );
 
 		$email_styles   = $this->theme_controller->get_styles();
-		$content_result = $this->content_renderer->render( $post, $template );
+		$content_result = $this->content_renderer->render_with_styles( $post, $template );
 		$template_html  = $content_result['html'];
 		$content_styles = $content_result['styles'];
 		$layout         = $this->theme_controller->get_layout_settings();
@@ -126,7 +126,7 @@ class Renderer {
 		include self::TEMPLATE_FILE;
 		$rendered_template = (string) ob_get_clean();
 
-		$template_styles   =
+		$template_styles  =
 		WP_Style_Engine::compile_css(
 			array(
 				'background-color' => $email_styles['color']['background'] ?? 'inherit',
@@ -141,9 +141,9 @@ class Renderer {
 			),
 			'body, .email_layout_wrapper'
 		);
-		$template_styles  .= '.email_layout_wrapper { box-sizing: border-box;}';
-		$template_styles  .= file_get_contents( __DIR__ . '/' . self::TEMPLATE_STYLES_FILE );
-		$template_styles   = wp_strip_all_tags( (string) apply_filters( 'woocommerce_email_renderer_styles', $template_styles, $post ) );
+		$template_styles .= '.email_layout_wrapper { box-sizing: border-box;}';
+		$template_styles .= file_get_contents( __DIR__ . '/' . self::TEMPLATE_STYLES_FILE );
+		$template_styles  = wp_strip_all_tags( (string) apply_filters( 'woocommerce_email_renderer_styles', $template_styles, $post ) );
 
 		// Single CSS inlining pass: combine content and template styles, then inline all at once.
 		$all_styles        = '<style>' . $template_styles . $content_styles . '</style>';
