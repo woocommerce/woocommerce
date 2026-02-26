@@ -125,19 +125,24 @@ The `Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Content_
 
 ```php
 /**
- * Render the content
+ * Render the content.
  *
  * @param WP_Post           $post Post object.
  * @param WP_Block_Template $template Block template.
- * @return string
+ * @return array{html: string, styles: string} Rendered HTML and collected CSS.
  */
 public function render(
     WP_Post $post,
     WP_Block_Template $template
-): string
+): array
 ```
 
-**Returns:** A string containing the rendered HTML content
+**Returns:** An array containing:
+
+-   `html`: The rendered HTML content (without inlined styles)
+-   `styles`: The collected CSS string (without `<style>` wrapper)
+
+CSS inlining is performed by the `Renderer` class, which combines these content styles with template styles into a single inlining pass.
 
 **Example Usage:**
 
@@ -145,7 +150,9 @@ public function render(
 $post        = get_post( $post_id );
 $template_id = get_stylesheet() . '//' . $template_slug;
 $template    = get_block_template( $template_id );
-$content     = $content_renderer->render( $post, $template );
+$result      = $content_renderer->render( $post, $template );
+$html        = $result['html'];
+$styles      = $result['styles'];
 ```
 
 ## Core Blocks Integration
