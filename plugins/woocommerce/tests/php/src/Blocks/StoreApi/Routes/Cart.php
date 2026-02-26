@@ -1186,7 +1186,7 @@ class Cart extends ControllerTestCase {
 	}
 
 	/**
-	 * @testdox Should fire woocommerce_store_api_cart_item_removed_from_request when removing a cart item.
+	 * @testdox Should fire woocommerce_cart_item_removed_from_user_request when removing a cart item.
 	 */
 	public function test_remove_item_fires_remove_action(): void {
 		$captured_args = array();
@@ -1195,7 +1195,7 @@ class Cart extends ControllerTestCase {
 			$captured_args = compact( 'item_key', 'cart' );
 		};
 
-		add_action( 'woocommerce_store_api_cart_item_removed_from_request', $callback, 10, 2 );
+		add_action( 'woocommerce_cart_item_removed_from_user_request', $callback, 10, 2 );
 
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/remove-item' );
 		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
@@ -1211,7 +1211,7 @@ class Cart extends ControllerTestCase {
 		$this->assertSame( $this->keys[0], $captured_args['item_key'] );
 		$this->assertInstanceOf( \WC_Cart::class, $captured_args['cart'] );
 
-		remove_action( 'woocommerce_store_api_cart_item_removed_from_request', $callback );
+		remove_action( 'woocommerce_cart_item_removed_from_user_request', $callback );
 	}
 
 	/**

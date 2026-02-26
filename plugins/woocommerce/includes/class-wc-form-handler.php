@@ -657,14 +657,14 @@ class WC_Form_Handler {
 				WC()->cart->remove_cart_item( $cart_item_key );
 
 				/**
-				 * Fires when a cart item is removed via the shortcode cart form.
+				 * Fires when a cart item is removed from a user request (shortcode or Store API).
 				 *
 				 * @param string   $cart_item_key Cart item key.
 				 * @param \WC_Cart $cart          Cart object.
 				 *
 				 * @since 10.7.0
 				 */
-				do_action( 'woocommerce_shortcode_cart_item_removed', $cart_item_key, WC()->cart );
+				do_action( 'woocommerce_cart_item_removed_from_user_request', $cart_item_key, WC()->cart );
 
 				$product = wc_get_product( $cart_item['product_id'] );
 
