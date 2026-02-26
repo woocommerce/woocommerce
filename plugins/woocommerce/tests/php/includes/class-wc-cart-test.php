@@ -1226,7 +1226,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should fire woocommerce_shortcode_cart_item_update_quantity when cart item quantity is updated via form.
+	 * @testdox Should fire woocommerce_cart_item_updated_from_user_request when cart item quantity is updated via form.
 	 */
 	public function test_update_cart_action_fires_update_quantity_action(): void {
 		$product = WC_Helper_Product::create_simple_product();
@@ -1251,7 +1251,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 			$captured_args = compact( 'item_key', 'quantity', 'old_quantity', 'cart' );
 		};
 
-		add_action( 'woocommerce_shortcode_cart_item_update_quantity', $callback, 10, 4 );
+		add_action( 'woocommerce_cart_item_updated_from_user_request', $callback, 10, 4 );
 
 		WC_Form_Handler::update_cart_action();
 
@@ -1261,7 +1261,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( 2, $captured_args['old_quantity'] );
 		$this->assertInstanceOf( WC_Cart::class, $captured_args['cart'] );
 
-		remove_action( 'woocommerce_shortcode_cart_item_update_quantity', $callback );
+		remove_action( 'woocommerce_cart_item_updated_from_user_request', $callback );
 
 		unset( $_POST['_wpnonce'], $_REQUEST['_wpnonce'], $_POST['update_cart'], $_REQUEST['update_cart'], $_POST['cart'] );
 		$product->delete( true );

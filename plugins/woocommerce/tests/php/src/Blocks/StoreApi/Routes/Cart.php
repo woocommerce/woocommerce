@@ -1154,7 +1154,7 @@ class Cart extends ControllerTestCase {
 	}
 
 	/**
-	 * @testdox Should fire woocommerce_store_api_cart_item_update_from_request when updating item quantity.
+	 * @testdox Should fire woocommerce_cart_item_updated_from_user_request when updating item quantity.
 	 */
 	public function test_update_item_fires_update_action(): void {
 		$captured_args = array();
@@ -1163,7 +1163,7 @@ class Cart extends ControllerTestCase {
 			$captured_args = compact( 'item_key', 'quantity', 'old_quantity', 'cart' );
 		};
 
-		add_action( 'woocommerce_store_api_cart_item_update_from_request', $callback, 10, 4 );
+		add_action( 'woocommerce_cart_item_updated_from_user_request', $callback, 10, 4 );
 
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/update-item' );
 		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
@@ -1182,7 +1182,7 @@ class Cart extends ControllerTestCase {
 		$this->assertSame( 2, $captured_args['old_quantity'] );
 		$this->assertInstanceOf( \WC_Cart::class, $captured_args['cart'] );
 
-		remove_action( 'woocommerce_store_api_cart_item_update_from_request', $callback );
+		remove_action( 'woocommerce_cart_item_updated_from_user_request', $callback );
 	}
 
 	/**
@@ -1215,7 +1215,7 @@ class Cart extends ControllerTestCase {
 	}
 
 	/**
-	 * @testdox Should not fire woocommerce_store_api_cart_item_update_from_request when quantity is not set.
+	 * @testdox Should not fire woocommerce_cart_item_updated_from_user_request when quantity is not set.
 	 */
 	public function test_update_item_without_quantity_does_not_fire_update_action(): void {
 		$action_fired = false;
@@ -1223,7 +1223,7 @@ class Cart extends ControllerTestCase {
 			$action_fired = true;
 		};
 
-		add_action( 'woocommerce_store_api_cart_item_update_from_request', $callback, 10, 4 );
+		add_action( 'woocommerce_cart_item_updated_from_user_request', $callback, 10, 4 );
 
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/update-item' );
 		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
@@ -1237,6 +1237,6 @@ class Cart extends ControllerTestCase {
 
 		$this->assertFalse( $action_fired, 'The update action should not fire when quantity is not set' );
 
-		remove_action( 'woocommerce_store_api_cart_item_update_from_request', $callback );
+		remove_action( 'woocommerce_cart_item_updated_from_user_request', $callback );
 	}
 }
