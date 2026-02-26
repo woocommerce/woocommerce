@@ -1056,17 +1056,23 @@ if ( 0 < $mu_plugins_count ) :
 					$total_overrides = is_countable( $theme['overrides'] ) ? count( $theme['overrides'] ) : 0;
 					for ( $i = 0; $i < $total_overrides; $i++ ) {
 						$override = $theme['overrides'][ $i ];
-						if ( $override['core_version'] && ( empty( $override['version'] ) || version_compare( $override['version'], $override['core_version'], '<' ) ) ) {
-							$current_version = $override['version'] ? $override['version'] : '-';
+						if ( $override['core_version'] && empty( $override['version'] ) ) {
+							printf(
+								/* Translators: %1$s: Template name, %2$s: Core version. */
+								esc_html__( '%1$s - version header is missing. The core version is %2$s', 'woocommerce' ),
+								'<code>' . esc_html( $override['file'] ) . '</code>',
+								esc_html( $override['core_version'] )
+							);
+						} elseif ( $override['core_version'] && version_compare( $override['version'], $override['core_version'], '<' ) ) {
 							printf(
 								/* Translators: %1$s: Template name, %2$s: Template version, %3$s: Core version. */
 								esc_html__( '%1$s version %2$s is out of date. The core version is %3$s', 'woocommerce' ),
 								'<code>' . esc_html( $override['file'] ) . '</code>',
-								'<strong style="color:red">' . esc_html( $current_version ) . '</strong>',
+								'<strong style="color:red">' . esc_html( $override['version'] ) . '</strong>',
 								esc_html( $override['core_version'] )
 							);
 						} else {
-							echo esc_html( $override['file'] );
+							echo '<code>' . esc_html( $override['file'] ) . '</code>';
 						}
 
 						if ( ( $total_overrides - 1 ) !== $i ) {
