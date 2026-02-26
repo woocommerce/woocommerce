@@ -200,7 +200,9 @@ class WC_Shipping_Legacy_Free_Shipping extends WC_Shipping_Method {
 				$total = NumberUtil::round( $total - WC()->cart->get_discount_total(), wc_get_price_decimals() );
 			}
 
-			if ( $total >= $this->min_amount ) {
+			// Convert to number for comparison (value may be locale-formatted in DB).
+			$min_amount = '' !== $this->min_amount ? (float) wc_format_decimal( $this->min_amount ) : 0.0;
+			if ( $total >= $min_amount ) {
 				$has_met_min_amount = true;
 			}
 		}

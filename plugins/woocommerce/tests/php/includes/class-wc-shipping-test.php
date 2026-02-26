@@ -208,4 +208,42 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 			),
 		);
 	}
+
+	/**
+	 * @testdox Free shipping min_amount works when stored with comma decimal (e.g. "100,00").
+	 */
+	public function test_free_shipping_min_amount_compared_numerically_with_locale_formatted_value(): void {
+		$saved_decimal_sep = get_option( 'woocommerce_price_decimal_sep' );
+		update_option( 'woocommerce_price_decimal_sep', ',' );
+
+		$method = new WC_Shipping_Free_Shipping( 1 );
+		$method->requires   = 'min_amount';
+		$method->min_amount = '100,00';
+
+		$package = array(
+			'contents'    => array(),
+			'destination' => array(
+				'country'  => 'US',
+				'state'    => '',
+				'postcode' => '',
+				'city'     => '',
+			),
+		);
+
+		WC()->cart->empty_cart();
+		$product = WC_Helper_Product::create_simple_product( true, array( 'price' => 100, 'regular_price' => 100 ) );
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->calculate_totals();
+
+		$this->assertTrue( $method->is_available( $package ) );
+
+		WC()->cart->empty_cart();
+		$cheap_product = WC_Helper_Product::create_simple_product( true, array( 'price' => 99, 'regular_price' => 99 ) );
+		WC()->cart->add_to_cart( $cheap_product->get_id(), 1 );
+		WC()->cart->calculate_totals();
+
+		$this->assertFalse( $method->is_available( $package ) );
+
+		update_option( 'woocommerce_price_decimal_sep', $saved_decimal_sep );
+	}
 }
