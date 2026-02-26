@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails\HTML
- * @version 10.6.0
+ * @version 10.7.0
  */
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -25,7 +25,7 @@ $email_improvements_enabled = FeaturesUtil::feature_is_enabled( 'email_improveme
  * Output the email header.
  *
  * @hooked WC_Emails::email_header() Output the email header.
- * @since 10.6.0
+ * @since 10.7.0
  */
 do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 
