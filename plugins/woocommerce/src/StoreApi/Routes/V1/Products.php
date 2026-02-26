@@ -445,6 +445,13 @@ class Products extends AbstractRoute {
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
+		$params['password'] = array(
+			'description'       => __( 'Password for password-protected products.', 'woocommerce' ),
+			'type'              => 'string',
+			'sanitize_callback' => 'sanitize_text_field',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
 		return $params;
 	}
 }

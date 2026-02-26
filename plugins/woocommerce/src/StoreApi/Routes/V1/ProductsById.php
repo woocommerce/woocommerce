@@ -1,6 +1,7 @@
 <?php // phpcs:ignore Generic.PHP.RequireStrictTypes.MissingDeclaration
 namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Utilities\ProductLinksTrait;
 
@@ -60,10 +61,16 @@ class ProductsById extends AbstractRoute {
 				'callback'            => [ $this, 'get_response' ],
 				'permission_callback' => '__return_true',
 				'args'                => array(
-					'context' => $this->get_context_param(
+					'context'  => $this->get_context_param(
 						array(
 							'default' => 'view',
 						)
+					),
+					'password' => array(
+						'description'       => __( 'Password for password-protected products.', 'woocommerce' ),
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_text_field',
+						'validate_callback' => 'rest_validate_request_arg',
 					),
 				),
 				'allow_batch'         => [ 'v1' => true ],
@@ -82,7 +89,7 @@ class ProductsById extends AbstractRoute {
 	protected function get_route_response( \WP_REST_Request $request ) {
 		$object = wc_get_product( (int) $request['id'] );
 
-		if ( ! $object || 0 === $object->get_id() ) {
+		if ( ! $object || 0 === $object->get_id() || ProductStatus::PUBLISH !== $object->get_status() ) {
 			throw new RouteException( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce' ), 404 );
 		}
 
