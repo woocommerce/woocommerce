@@ -554,4 +554,165 @@ class Products extends ControllerTestCase {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertCount( 0, $response->get_data() );
 	}
+
+	/**
+	 * @testdox Draft product should return 404 on single product endpoint.
+	 */
+	public function test_draft_product_returns_404() {
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Draft Product',
+				'regular_price' => 10,
+			)
+		);
+		wp_update_post(
+			array(
+				'ID'          => $product->get_id(),
+				'post_status' => 'draft',
+			)
+		);
+
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $product->get_id() ) );
+
+		$this->assertEquals( 404, $response->get_status() );
+	}
+
+	/**
+	 * @testdox Draft products should not appear in the collection endpoint.
+	 */
+	public function test_draft_product_excluded_from_collection() {
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Draft Collection Product',
+				'regular_price' => 10,
+			)
+		);
+		$product_id = $product->get_id();
+		wp_update_post(
+			array(
+				'ID'          => $product_id,
+				'post_status' => 'draft',
+			)
+		);
+
+		$response    = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products' ) );
+		$data        = $response->get_data();
+		$product_ids = array_map(
+			function ( $item ) {
+				return $item['id'];
+			},
+			$data
+		);
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertNotContains( $product_id, $product_ids );
+	}
+
+	/**
+	 * @testdox Password-protected product should return minimal data on single product endpoint.
+	 */
+	public function test_password_protected_product_returns_minimal_data() {
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Protected Product',
+				'regular_price' => 10,
+			)
+		);
+		wp_update_post(
+			array(
+				'ID'            => $product->get_id(),
+				'post_password' => 'secret123',
+			)
+		);
+
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $product->get_id() ) );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertTrue( $data['password_required'] );
+		$this->assertEquals( $product->get_id(), $data['id'] );
+		$this->assertArrayHasKey( 'name', $data );
+		$this->assertArrayHasKey( 'slug', $data );
+		$this->assertArrayHasKey( 'permalink', $data );
+		$this->assertArrayHasKey( 'type', $data );
+		$this->assertArrayHasKey( 'parent', $data );
+		$this->assertArrayNotHasKey( 'prices', $data );
+		$this->assertArrayNotHasKey( 'description', $data );
+		$this->assertArrayNotHasKey( 'images', $data );
+		$this->assertArrayNotHasKey( 'add_to_cart', $data );
+	}
+
+	/**
+	 * @testdox Password-protected product with correct password should return full data.
+	 */
+	public function test_password_protected_product_with_correct_password() {
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Protected Product Unlocked',
+				'regular_price' => 10,
+			)
+		);
+		wp_update_post(
+			array(
+				'ID'            => $product->get_id(),
+				'post_password' => 'secret123',
+			)
+		);
+
+		// Simulate the query param as it would be in a real HTTP request.
+		$_GET['password'] = 'secret123';
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $product->get_id() );
+		$request->set_param( 'password', 'secret123' );
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		unset( $_GET['password'] );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertFalse( $data['password_required'] );
+		$this->assertArrayHasKey( 'prices', $data );
+		$this->assertArrayHasKey( 'description', $data );
+		$this->assertArrayHasKey( 'images', $data );
+		$this->assertArrayHasKey( 'add_to_cart', $data );
+	}
+
+	/**
+	 * @testdox Password-protected products in collection should show minimal data.
+	 */
+	public function test_password_protected_product_in_collection() {
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Protected In Collection',
+				'regular_price' => 10,
+			)
+		);
+		wp_update_post(
+			array(
+				'ID'            => $product->get_id(),
+				'post_password' => 'secret123',
+			)
+		);
+
+		$response    = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products' ) );
+		$data        = $response->get_data();
+		$protected   = null;
+
+		foreach ( $data as $item ) {
+			if ( $item['id'] === $product->get_id() ) {
+				$protected = $item;
+				break;
+			}
+		}
+
+		$this->assertNotNull( $protected, 'Password-protected product should appear in collection' );
+		$this->assertTrue( $protected['password_required'] );
+		$this->assertArrayNotHasKey( 'prices', $protected );
+		$this->assertArrayNotHasKey( 'description', $protected );
+	}
 }
