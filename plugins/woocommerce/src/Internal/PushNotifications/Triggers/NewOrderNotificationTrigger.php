@@ -76,7 +76,7 @@ class NewOrderNotificationTrigger {
 		}
 
 		$this->pending_notification_store->add(
-			new NewOrderNotification( $order_id, get_current_blog_id() )
+			new NewOrderNotification( $order_id )
 		);
 	}
 
@@ -104,7 +104,7 @@ class NewOrderNotificationTrigger {
 		}
 
 		$this->pending_notification_store->add(
-			new NewOrderNotification( $order_id, get_current_blog_id() )
+			new NewOrderNotification( $order_id )
 		);
 	}
 }

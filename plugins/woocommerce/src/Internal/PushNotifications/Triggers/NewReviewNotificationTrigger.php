@@ -74,7 +74,7 @@ class NewReviewNotificationTrigger {
 		}
 
 		$this->store->add(
-			new NewReviewNotification( $comment_id, get_current_blog_id() )
+			new NewReviewNotification( $comment_id )
 		);
 	}
 }
