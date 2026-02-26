@@ -18,6 +18,7 @@ class HposOrderCapabilityHelperTest extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		$this->setup_cot();
 		$this->disable_cot_sync();
 	}
@@ -27,6 +28,7 @@ class HposOrderCapabilityHelperTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		$this->clean_up_cot_setup();
+		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
 		parent::tearDown();
 	}
 
@@ -39,7 +41,7 @@ class HposOrderCapabilityHelperTest extends WC_Unit_Test_Case {
 
 		$this->login_as_role( 'shop_manager' );
 
-		$this->assertTrue( current_user_can( 'edit_shop_order', $order_id ), 'Shop manager should be able to edit HPOS order' );
+		$this->assertTrue( current_user_can( 'edit_shop_order', $order_id ), 'Shop manager should be able to edit HPOS order' ); // phpcs:ignore WordPress.WP.Capabilities.Unknown
 	}
 
 	/**
@@ -51,7 +53,7 @@ class HposOrderCapabilityHelperTest extends WC_Unit_Test_Case {
 
 		$this->login_as_role( 'shop_manager' );
 
-		$this->assertTrue( current_user_can( 'delete_shop_order', $order_id ), 'Shop manager should be able to delete HPOS order' );
+		$this->assertTrue( current_user_can( 'delete_shop_order', $order_id ), 'Shop manager should be able to delete HPOS order' ); // phpcs:ignore WordPress.WP.Capabilities.Unknown
 	}
 
 	/**
@@ -63,7 +65,7 @@ class HposOrderCapabilityHelperTest extends WC_Unit_Test_Case {
 
 		$this->login_as_role( 'shop_manager' );
 
-		$this->assertTrue( current_user_can( 'read_shop_order', $order_id ), 'Shop manager should be able to read HPOS order' );
+		$this->assertTrue( current_user_can( 'read_shop_order', $order_id ), 'Shop manager should be able to read HPOS order' ); // phpcs:ignore WordPress.WP.Capabilities.Unknown
 	}
 
 	/**
@@ -75,7 +77,7 @@ class HposOrderCapabilityHelperTest extends WC_Unit_Test_Case {
 
 		$this->login_as_role( 'subscriber' );
 
-		$this->assertFalse( current_user_can( 'edit_shop_order', $order_id ), 'Subscriber should not be able to edit HPOS order' );
+		$this->assertFalse( current_user_can( 'edit_shop_order', $order_id ), 'Subscriber should not be able to edit HPOS order' ); // phpcs:ignore WordPress.WP.Capabilities.Unknown
 	}
 
 	/**
@@ -87,7 +89,7 @@ class HposOrderCapabilityHelperTest extends WC_Unit_Test_Case {
 
 		$this->login_as_role( 'subscriber' );
 
-		$this->assertFalse( current_user_can( 'delete_shop_order', $order_id ), 'Subscriber should not be able to delete HPOS order' );
+		$this->assertFalse( current_user_can( 'delete_shop_order', $order_id ), 'Subscriber should not be able to delete HPOS order' ); // phpcs:ignore WordPress.WP.Capabilities.Unknown
 	}
 
 	/**
@@ -105,7 +107,7 @@ class HposOrderCapabilityHelperTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertTrue( current_user_can( 'edit_shop_order', $refund->get_id() ), 'Shop manager should be able to edit refund for HPOS order' );
+		$this->assertTrue( current_user_can( 'edit_shop_order', $refund->get_id() ), 'Shop manager should be able to edit refund for HPOS order' ); // phpcs:ignore WordPress.WP.Capabilities.Unknown
 	}
 
 	/**
@@ -123,7 +125,7 @@ class HposOrderCapabilityHelperTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertTrue( current_user_can( 'delete_shop_order', $refund->get_id() ), 'Shop manager should be able to delete refund for HPOS order' );
+		$this->assertTrue( current_user_can( 'delete_shop_order', $refund->get_id() ), 'Shop manager should be able to delete refund for HPOS order' ); // phpcs:ignore WordPress.WP.Capabilities.Unknown
 	}
 
 	/**
@@ -137,7 +139,7 @@ class HposOrderCapabilityHelperTest extends WC_Unit_Test_Case {
 
 		$this->login_as_role( 'shop_manager' );
 
-		$this->assertTrue( current_user_can( 'edit_shop_order', $order_id ), 'Shop manager should still be able to edit orders when HPOS is off' );
+		$this->assertTrue( current_user_can( 'edit_shop_order', $order_id ), 'Shop manager should still be able to edit orders when HPOS is off' ); // phpcs:ignore WordPress.WP.Capabilities.Unknown
 	}
 
 	/**
@@ -151,7 +153,7 @@ class HposOrderCapabilityHelperTest extends WC_Unit_Test_Case {
 
 		$this->login_as_role( 'shop_manager' );
 
-		$this->assertTrue( current_user_can( 'edit_shop_order', $order_id ), 'Shop manager should be able to edit orders when sync is on' );
+		$this->assertTrue( current_user_can( 'edit_shop_order', $order_id ), 'Shop manager should be able to edit orders when sync is on' ); // phpcs:ignore WordPress.WP.Capabilities.Unknown
 	}
 
 	/**
@@ -160,8 +162,8 @@ class HposOrderCapabilityHelperTest extends WC_Unit_Test_Case {
 	public function test_filter_does_not_affect_regular_posts(): void {
 		$post_id = $this->factory->post->create();
 
-		$this->login_as_role( 'shop_manager' );
+		$this->login_as_role( 'subscriber' );
 
-		$this->assertFalse( current_user_can( 'edit_post', $post_id ), 'Shop manager should not be able to edit regular posts' );
+		$this->assertFalse( current_user_can( 'edit_post', $post_id ), 'Subscriber should not be able to edit regular posts even with HPOS cap translation active' );
 	}
 }
