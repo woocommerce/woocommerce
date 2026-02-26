@@ -1,4 +1,4 @@
 Significance: patch
-Type: fix
+Type: performance
 Comment: Email Editor: update CSS inlining to make rendering more performant
 
