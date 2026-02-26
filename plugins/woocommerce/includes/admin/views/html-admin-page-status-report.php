@@ -1093,21 +1093,23 @@ if ( 0 < $mu_plugins_count ) :
 
 		<?php if ( true === $theme['has_outdated_templates'] ) : ?>
 			<tr>
-				<td data-export-label="Outdated Templates"><?php esc_html_e( 'Outdated templates', 'woocommerce' ); ?>:</td>
+				<td data-export-label="Templates up to date"><?php esc_html_e( 'Templates up to date', 'woocommerce' ); ?>:</td>
 				<td class="help">&nbsp;</td>
 				<td>
 					<mark class="error">
 						<span class="dashicons dashicons-warning"></span>
 					</mark>
-					<a href="https://developer.woocommerce.com/docs/theming/theme-development/fixing-outdated-woocommerce-templates/" target="_blank">
-						<?php esc_html_e( 'Learn how to update', 'woocommerce' ); ?>
-					</a> |
-					<mark class="info">
-						<span class="dashicons dashicons-info"></span>
-					</mark>
-					<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-status&tab=tools' ) ); ?>">
-						<?php esc_html_e( 'Clear system status theme info cache', 'woocommerce' ); ?>
-					</a>
+					<span class="private">
+						<a href="https://developer.woocommerce.com/docs/theming/theme-development/fixing-outdated-woocommerce-templates/" target="_blank">
+							<?php esc_html_e( 'Learn how to update', 'woocommerce' ); ?>
+						</a> |
+						<mark class="info">
+							<span class="dashicons dashicons-info"></span>
+						</mark>
+						<a href="<?php echo esc_url( admin_url( 'admin.php?page=wc-status&tab=tools' ) ); ?>">
+							<?php esc_html_e( 'Clear system status theme info cache', 'woocommerce' ); ?>
+						</a>
+					</span>
 				</td>
 			</tr>
 		<?php endif; ?>
