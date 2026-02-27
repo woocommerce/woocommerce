@@ -23,7 +23,7 @@ trait ProductPasswordTrait {
 	 * Check if the user can access password-protected product content.
 	 *
 	 * @param \WC_Product      $product Product object.
-	 * @param \WP_REST_Request<array{password?: string}> $request Request object.
+	 * @param \WP_REST_Request $request Request object.
 	 * @return bool True if the user can access password-protected content.
 	 *
 	 * @since 10.6.0
@@ -75,7 +75,7 @@ trait ProductPasswordTrait {
 	 * Follows the same pattern as WP_REST_Posts_Controller::can_access_password_content().
 	 *
 	 * @param \WC_Product      $product Product object.
-	 * @param \WP_REST_Request<array{password?: string}> $request Request object.
+	 * @param \WP_REST_Request $request Request object.
 	 *
 	 * @since 10.6.0
 	 */
