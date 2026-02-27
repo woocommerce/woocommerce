@@ -30,7 +30,7 @@ export type ProductContextStore = {
 		 * (e.g. the variable product "Hoodie"), never a variation.
 		 * Resolves productId from per-block context when available.
 		 */
-		product: ProductResponseItem | undefined;
+		product: ProductResponseItem | null;
 		/**
 		 * The currently selected variation, or null if none is selected.
 		 * For simple/grouped products, this is always null.
@@ -43,19 +43,23 @@ const productContextStore = store< ProductContextStore >(
 	'woocommerce/product-context',
 	{
 		state: {
-			get product(): ProductResponseItem | undefined {
-				const context = getContext< ProductContext >();
+			get product(): ProductResponseItem | null {
+				const context = getContext< ProductContext >(
+					'woocommerce/product-context'
+				);
 				const productId =
 					context?.productId || productContextStore.state.productId;
 
 				if ( ! productId ) {
-					return undefined;
+					return null;
 				}
-				return productsStore.state.products[ productId ];
+				return productsStore.state.products[ productId ] ?? null;
 			},
 
 			get selectedVariation(): ProductResponseItem | null {
-				const context = getContext< ProductContext >();
+				const context = getContext< ProductContext >(
+					'woocommerce/product-context'
+				);
 				const variationId =
 					context?.variationId ||
 					productContextStore.state.variationId;
