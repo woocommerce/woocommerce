@@ -78,10 +78,11 @@ export default function Discover(): JSX.Element | null {
 			.finally( () => {
 				setIsLoading( false );
 			} );
-	}, [] );
+	}, [ setIsLoading ] );
 
 	useEffect( () => {
 		if (
+			isLoading ||
 			! productGroups.length ||
 			! ( 'IntersectionObserver' in window )
 		) {
@@ -135,7 +136,7 @@ export default function Discover(): JSX.Element | null {
 		return () => {
 			observer.disconnect();
 		};
-	}, [ productGroups ] );
+	}, [ isLoading, productGroups ] );
 
 	if ( isLoading ) {
 		return (
