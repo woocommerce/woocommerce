@@ -26,6 +26,8 @@ trait ProductPasswordTrait {
 	 * @param \WP_REST_Request $request Request object.
 	 * @return bool True if the user can access password-protected content.
 	 *
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 *
 	 * @since 10.6.0
 	 */
 	protected function can_access_password_content( \WC_Product $product, \WP_REST_Request $request ): bool {
@@ -76,6 +78,8 @@ trait ProductPasswordTrait {
 	 *
 	 * @param \WC_Product      $product Product object.
 	 * @param \WP_REST_Request $request Request object.
+	 *
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
 	 *
 	 * @since 10.6.0
 	 */

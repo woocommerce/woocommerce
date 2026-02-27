@@ -73711,18 +73711,6 @@ parameters:
 			path: src/StoreApi/Routes/V1/ProductsById.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\ProductsById\:\:can_access_password_content\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
-			identifier: missingType.generics
-			count: 1
-			path: src/StoreApi/Utilities/ProductPasswordTrait.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\ProductsById\:\:maybe_unlock_password_protected_product\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
-			identifier: missingType.generics
-			count: 1
-			path: src/StoreApi/Utilities/ProductPasswordTrait.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\ProductsBySlug\:\:get_product_by_slug\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -73745,18 +73733,6 @@ parameters:
 			identifier: missingType.generics
 			count: 1
 			path: src/StoreApi/Routes/V1/ProductsBySlug.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\ProductsBySlug\:\:can_access_password_content\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
-			identifier: missingType.generics
-			count: 1
-			path: src/StoreApi/Utilities/ProductPasswordTrait.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\ProductsBySlug\:\:maybe_unlock_password_protected_product\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
-			identifier: missingType.generics
-			count: 1
-			path: src/StoreApi/Utilities/ProductPasswordTrait.php
 
 		-
 			message: '#^Default value of the parameter \#2 \$controller \(false\) of method Automattic\\WooCommerce\\StoreApi\\RoutesController\:\:get_all_routes\(\) is incompatible with type string\.$#'
