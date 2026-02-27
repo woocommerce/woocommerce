@@ -29,7 +29,6 @@
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@wordpress/core-data": "wp-6.6",
 		"@wordpress/data": "wp-6.6",
-		"@wordpress/notices": "wp-6.6",
 		"eslint": "^8.55.0",
 		"typescript": "5.7.x",
 		"wireit": "0.14.12"
@@ -43,7 +42,6 @@
 		"@wordpress/data": "wp-6.6",
 		"@wordpress/editor": "wp-6.6",
 		"@wordpress/keyboard-shortcuts": "wp-6.6",
-		"@wordpress/notices": "wp-6.6",
 		"@wordpress/preferences": "wp-6.6"
 	},
 	"peerDependenciesMeta": {
@@ -71,9 +69,6 @@
 		"@wordpress/keyboard-shortcuts": {
 			"optional": true
 		},
-		"@wordpress/notices": {
-			"optional": true
-		},
 		"@wordpress/preferences": {
 			"optional": true
 		}
@@ -86,15 +81,13 @@
 				"types/@wordpress/block-editor.patch",
 				"types/@wordpress/core-data.patch",
 				"types/@wordpress/data.patch",
-				"types/@wordpress/editor.patch",
-				"types/@wordpress/notices.patch"
+				"types/@wordpress/editor.patch"
 			],
 			"output": [
 				"types/@wordpress/block-editor/",
 				"types/@wordpress/core-data/",
 				"types/@wordpress/data/",
-				"types/@wordpress/editor/",
-				"types/@wordpress/notices/"
+				"types/@wordpress/editor/"
 			],
 			"clean": "if-file-deleted"
 		},
