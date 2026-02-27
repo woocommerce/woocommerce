@@ -339,21 +339,19 @@ describe( 'ValidatedTextInput', () => {
 	describe( 'correctly validates on mount', () => {
 		it( 'validates when focusOnMount is true and validateOnMount is not set', async () => {
 			const setValidationErrors = jest.fn();
-			wpData.useDispatch.mockImplementation(
-				( store: any ) => {
-					if ( store === validationStore ) {
-						return {
-							...jest
-								.requireActual( '@wordpress/data' )
-								.useDispatch( store ),
-							setValidationErrors,
-						};
-					}
-					return jest
-						.requireActual( '@wordpress/data' )
-						.useDispatch( store );
+			wpData.useDispatch.mockImplementation( ( store: any ) => {
+				if ( store === validationStore ) {
+					return {
+						...jest
+							.requireActual( '@wordpress/data' )
+							.useDispatch( store ),
+						setValidationErrors,
+					};
 				}
-			);
+				return jest
+					.requireActual( '@wordpress/data' )
+					.useDispatch( store );
+			} );
 
 			const TestComponent = () => {
 				const [ inputValue, setInputValue ] = useState( '' );
@@ -383,21 +381,19 @@ describe( 'ValidatedTextInput', () => {
 		} );
 		it( 'validates when focusOnMount is false, regardless of validateOnMount value', async () => {
 			const setValidationErrors = jest.fn();
-			wpData.useDispatch.mockImplementation(
-				( store: any ) => {
-					if ( store === validationStore ) {
-						return {
-							...jest
-								.requireActual( '@wordpress/data' )
-								.useDispatch( store ),
-							setValidationErrors,
-						};
-					}
-					return jest
-						.requireActual( '@wordpress/data' )
-						.useDispatch( store );
+			wpData.useDispatch.mockImplementation( ( store: any ) => {
+				if ( store === validationStore ) {
+					return {
+						...jest
+							.requireActual( '@wordpress/data' )
+							.useDispatch( store ),
+						setValidationErrors,
+					};
 				}
-			);
+				return jest
+					.requireActual( '@wordpress/data' )
+					.useDispatch( store );
+			} );
 
 			const TestComponent = ( { validateOnMount = false } ) => {
 				const [ inputValue, setInputValue ] = useState( '' );
@@ -427,21 +423,19 @@ describe( 'ValidatedTextInput', () => {
 		} );
 		it( 'does not validate when validateOnMount is false and focusOnMount is true', async () => {
 			const setValidationErrors = jest.fn();
-			wpData.useDispatch.mockImplementation(
-				( store: any ) => {
-					if ( store === validationStore ) {
-						return {
-							...jest
-								.requireActual( '@wordpress/data' )
-								.useDispatch( store ),
-							setValidationErrors,
-						};
-					}
-					return jest
-						.requireActual( '@wordpress/data' )
-						.useDispatch( store );
+			wpData.useDispatch.mockImplementation( ( store: any ) => {
+				if ( store === validationStore ) {
+					return {
+						...jest
+							.requireActual( '@wordpress/data' )
+							.useDispatch( store ),
+						setValidationErrors,
+					};
 				}
-			);
+				return jest
+					.requireActual( '@wordpress/data' )
+					.useDispatch( store );
+			} );
 
 			const TestComponent = () => {
 				const [ inputValue, setInputValue ] = useState( '' );

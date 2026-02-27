@@ -99,7 +99,7 @@ async function resetToInitialAddressMock() {
 describe( 'pushChanges', () => {
 	beforeAll( () => {
 		wpDataFunctions.select.mockImplementation(
-			( storeNameOrDescriptor: any ) => {
+			( storeNameOrDescriptor: unknown ) => {
 				if ( storeNameOrDescriptor === cartStore ) {
 					return {
 						...jest
@@ -125,7 +125,7 @@ describe( 'pushChanges', () => {
 			}
 		);
 		wpDataFunctions.dispatch.mockImplementation(
-			( storeNameOrDescriptor: any ) => {
+			( storeNameOrDescriptor: unknown ) => {
 				if ( storeNameOrDescriptor === cartStore ) {
 					return {
 						...jest
