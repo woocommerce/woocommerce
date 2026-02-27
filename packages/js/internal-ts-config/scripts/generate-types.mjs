@@ -119,7 +119,8 @@ function resolveRelativeSpecifier( specifier, fromDir, allFiles ) {
 		`${ resolved }/index.d.ts`,
 	];
 
-	for ( const candidate of candidates ) {
+	for ( const raw of candidates ) {
+		const candidate = posix.normalize( raw );
 		if ( allFiles.has( candidate ) ) {
 			return {
 				filePath: candidate,
@@ -304,6 +305,23 @@ function transformFile( { sourceText, filePath, packageName, typesDir, entryPoin
 		/\/\/\/ <reference types="([^"]+)" \/>\s*\n?/g,
 		( _match, typesName ) => {
 			referenceTypesDirectives.push( typesName );
+			return '';
+		}
+	);
+
+	// Extract and remove triple-slash reference-path directives.
+	// These are direct file paths (already have .d.ts extension), so resolve
+	// them relative to the current file and add to referencedFiles for
+	// correct top-level directive generation.
+	modified = modified.replace(
+		/\/\/\/ <reference path="([^"]+)" \/>\s*\n?/g,
+		( _match, refPath ) => {
+			const candidate = posix.normalize(
+				fileDir ? `${ fileDir }/${ refPath }` : refPath
+			);
+			if ( allFiles.has( candidate ) ) {
+				referencedFiles.add( candidate );
+			}
 			return '';
 		}
 	);

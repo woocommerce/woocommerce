@@ -26,10 +26,10 @@
 	"devDependencies": {
 		"@types/wordpress__block-editor": ">=11.5.0",
 		"@types/wordpress__editor": ">=13.6.0",
-		"@types/wordpress__notices": ">=3.5.0",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@wordpress/core-data": "wp-6.6",
 		"@wordpress/data": "wp-6.6",
+		"@wordpress/notices": "wp-6.6",
 		"eslint": "^8.55.0",
 		"typescript": "5.7.x",
 		"wireit": "0.14.12"
@@ -37,7 +37,6 @@
 	"peerDependencies": {
 		"@types/wordpress__block-editor": ">=11.5.0",
 		"@types/wordpress__editor": ">=13.6.0",
-		"@types/wordpress__notices": ">=3.5.0",
 		"@wordpress/block-editor": "wp-6.6",
 		"@wordpress/components": "wp-6.6",
 		"@wordpress/core-data": "wp-6.6",
@@ -52,9 +51,6 @@
 			"optional": true
 		},
 		"@types/wordpress__editor": {
-			"optional": true
-		},
-		"@types/wordpress__notices": {
 			"optional": true
 		},
 		"@wordpress/block-editor": {
