@@ -46,8 +46,10 @@
 
 	.wc-block-components-order-summary-item__image,
 	.wc-block-components-order-summary-item__description {
-		display: table-cell;
-		vertical-align: top;
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: $gap-smallest;
 	}
 
 	.wc-block-components-order-summary-item__image {
@@ -93,8 +95,7 @@
 
 		p,
 		.wc-block-components-product-metadata {
-			line-height: 1.375;
-			margin-top: $gap-smallest;
+			line-height: 1.4;
 		}
 	}
 
@@ -104,6 +105,10 @@
 		flex-wrap: wrap;
 		gap: $gap-smaller;
 		align-items: center;
+
+		> :empty {
+			display: none;
+		}
 	}
 
 	.wc-block-components-order-summary-item__individual-prices {
@@ -121,10 +126,7 @@
 		display: flex;
 		flex-direction: column;
 		align-items: flex-end;
-
-		.wc-block-components-sale-badge {
-			margin-top: $gap-smallest;
-		}
+		gap: $gap-smallest;
 	}
 
 	.wc-block-components-order-summary-item__total-price {

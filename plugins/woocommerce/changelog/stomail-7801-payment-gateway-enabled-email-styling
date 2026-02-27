@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Integrate the payment gateway admin notification into the WooCommerce email system with full support for email styling, customizable settings, and block email editor.
