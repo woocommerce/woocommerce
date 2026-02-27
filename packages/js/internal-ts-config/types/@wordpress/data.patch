@@ -1,6 +1,6 @@
 diff -ruN a/types/@wordpress/data/index.d.ts b/types/@wordpress/data/index.d.ts
---- a/types/@wordpress/data/index.d.ts	2026-02-25 19:03:39
-+++ b/types/@wordpress/data/index.d.ts	2026-02-25 19:01:35
+--- a/types/@wordpress/data/index.d.ts
++++ b/types/@wordpress/data/index.d.ts
 @@ -19,14 +19,11 @@
  	export { default as withSelect } from "@wordpress/data/build-types/components/with-select";
  	export { default as withDispatch } from "@wordpress/data/build-types/components/with-dispatch";
@@ -305,8 +305,8 @@ diff -ruN a/types/@wordpress/data/index.d.ts b/types/@wordpress/data/index.d.ts
 +	export function createRegistrySelector<T extends (state: any, ...args: any[]) => any>(registrySelector: (select: SelectFunction) => T): T;
  }
 diff -ruN a/types/@wordpress/data/types.d.ts b/types/@wordpress/data/types.d.ts
---- a/types/@wordpress/data/types.d.ts	2026-02-25 19:03:39
-+++ b/types/@wordpress/data/types.d.ts	2026-02-25 19:01:35
+--- a/types/@wordpress/data/types.d.ts
++++ b/types/@wordpress/data/types.d.ts
 @@ -3,6 +3,8 @@
  	 * External dependencies
  	 */

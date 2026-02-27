@@ -1,6 +1,6 @@
 diff -ruN a/types/@wordpress/block-editor/index.d.ts b/types/@wordpress/block-editor/index.d.ts
---- a/types/@wordpress/block-editor/index.d.ts	2026-02-25 19:03:39
-+++ b/types/@wordpress/block-editor/index.d.ts	2026-02-25 19:03:08
+--- a/types/@wordpress/block-editor/index.d.ts
++++ b/types/@wordpress/block-editor/index.d.ts
 @@ -6,9 +6,26 @@
  /// <reference path="./store/selectors.d.ts" />
  /// <reference path="./utils/index.d.ts" />
