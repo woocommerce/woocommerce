@@ -36,7 +36,7 @@ jQuery( function ( $ ) {
 		generateReport: function() {
 			var report = '';
 
-			$( '.wc_status_table thead, .wc_status_table tbody, .wc_status_table tfoot' ).each( function() {
+			$( '.wc_status_table thead, .wc_status_table tbody' ).each( function() {
 				if ( $( this ).is( 'thead' ) ) {
 					var label = $( this ).find( 'th:eq(0)' ).data( 'exportLabel' ) || $( this ).text();
 					report = report + '\n### ' + label.trim() + ' ###\n\n';
