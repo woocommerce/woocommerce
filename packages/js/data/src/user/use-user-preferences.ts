@@ -164,7 +164,7 @@ export const useUserPreferences = () => {
 				await saveEntityRecord( 'root', 'user', userToSave );
 
 				// Respond with the updated user.
-				return userData.getEntityRecord(
+				return userData.getEntityRecord< WCUser >(
 					'root',
 					'user',
 					userToSave.id
@@ -178,7 +178,7 @@ export const useUserPreferences = () => {
 		return updateUserPrefs(
 			receiveCurrentUser,
 			currentUser,
-			saveUser!,
+			saveUser,
 			userData.getLastEntitySaveError,
 			userPrefs
 		);
