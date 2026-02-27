@@ -25,14 +25,19 @@ export default function Discover(): JSX.Element | null {
 	function recordTracksEvent( products: ProductGroup[] ) {
 		const product_ids = products
 			.flatMap( ( group ) => group.items )
-			.map( ( product ) => {
-				return product.id;
-			} );
+			.map( ( product ) => product.id );
+		const utm_groups = Object.fromEntries(
+			products.map( ( group ) => [
+				group.id,
+				group.items.map( ( product ) => product.id ),
+			] )
+		);
 
 		// This is a new event specific to the Discover tab, added with Woo 8.4.
 		recordEvent( 'marketplace_discover_viewed', {
 			view: 'discover',
 			product_ids,
+			utm_groups,
 		} );
 
 		// This is the new page view event added with Woo 8.3. It's improved with the marketplace_discover_viewed event
