@@ -1355,24 +1355,31 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			$scan_files[] = 'taxonomy-product_cat.php';
 			$scan_files[] = 'taxonomy-product_tag.php';
 
-			foreach ( $scan_files as $file ) {
-				$located = apply_filters( 'wc_get_template', $file, $file, array(), WC()->template_path(), WC()->plugin_path() . '/templates/' );
+			$wc_templates_dir = WC()->plugin_path() . '/templates/';
 
-				if ( file_exists( $located ) ) {
-					$theme_file = $located;
-				} elseif ( file_exists( get_stylesheet_directory() . '/' . $file ) ) {
-					$theme_file = get_stylesheet_directory() . '/' . $file;
-				} elseif ( file_exists( get_stylesheet_directory() . '/' . WC()->template_path() . $file ) ) {
-					$theme_file = get_stylesheet_directory() . '/' . WC()->template_path() . $file;
-				} elseif ( file_exists( get_template_directory() . '/' . $file ) ) {
-					$theme_file = get_template_directory() . '/' . $file;
-				} elseif ( file_exists( get_template_directory() . '/' . WC()->template_path() . $file ) ) {
-					$theme_file = get_template_directory() . '/' . WC()->template_path() . $file;
-				} else {
-					$theme_file = false;
+			foreach ( $scan_files as $file ) {
+				$located = wc_locate_template( $file, WC()->template_path(), $wc_templates_dir );
+
+				/**
+				 * Allow 3rd party plugins to filter the template file location.
+				 *
+				 * @param string $located       The located template path.
+				 * @param string $file          The template file name.
+				 * @param array  $args          Template arguments.
+				 * @param string $template_path The template path.
+				 * @param string $default_path  The default path.
+				 *
+				 * @since 2.1.0
+				 */
+				$located = apply_filters( 'wc_get_template', $located, $file, array(), WC()->template_path(), $wc_templates_dir );
+
+				// Check if the template is overridden (located outside WC core templates dir).
+				$override_file = false;
+				if ( 0 !== strpos( $located, $wc_templates_dir ) && file_exists( $located ) ) {
+					$override_file = $located;
 				}
 
-				if ( ! empty( $theme_file ) ) {
+				if ( ! empty( $override_file ) ) {
 					$core_file = $file;
 
 					// Update *-product_<cat|tag> template name before searching in core.
@@ -1380,16 +1387,16 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 						$core_file = str_replace( '_', '-', $core_file );
 					}
 
-					$core_version  = WC_Admin_Status::get_file_version( WC()->plugin_path() . '/templates/' . $core_file );
-					$theme_version = WC_Admin_Status::get_file_version( $theme_file );
-					if ( $core_version && ( empty( $theme_version ) || version_compare( $theme_version, $core_version, '<' ) ) ) {
+					$core_version     = WC_Admin_Status::get_file_version( WC()->plugin_path() . '/templates/' . $core_file );
+					$override_version = WC_Admin_Status::get_file_version( $override_file );
+					if ( $core_version && ( empty( $override_version ) || version_compare( $override_version, $core_version, '<' ) ) ) {
 						if ( ! $outdated_templates ) {
 							$outdated_templates = true;
 						}
 					}
 					$override_files[] = array(
-						'file'         => str_replace( WP_CONTENT_DIR . '/themes/', '', $theme_file ),
-						'version'      => $theme_version,
+						'file'         => str_replace( ABSPATH, '', $override_file ),
+						'version'      => $override_version,
 						'core_version' => $core_version,
 					);
 				}

@@ -30,6 +30,7 @@ GET /products?max_price=10000
 GET /products?stock_status=['outofstock']
 GET /products?catalog_visibility=search
 GET /products?rating=4,5
+GET /products?related=34
 GET /products?return_price_range=true
 GET /products?return_attribute_counts=pa_size,pa_color
 GET /products?return_rating_counts=true
@@ -68,6 +69,7 @@ GET /products?return_rating_counts=true
 | `attribute_relation`                        | string  |    no    | The logical relationship between attributes when filtering across multiple at once.                                                                                                                                                   |
 | `catalog_visibility`                        | string  |    no    | Determines if hidden or visible catalog products are shown. Allowed values: `any`, `visible`, `catalog`, `search`, `hidden`                                                                                                           |
 | `rating`                                    | array   |    no    | Limit result set to products with a certain average rating. Allowed values: `1`, `2`, `3`, `4`, `5`.                                                                                                                                  |
+| `related`                                   | integer |    no    | Limit result set to products related to a specific product ID.                                                                                                                                                                        |
 
 ```sh
 curl "https://example-store.com/wp-json/wc/store/v1/products"
@@ -256,6 +258,65 @@ curl "https://example-store.com/wp-json/wc/store/v1/products/wordpress-pennant"
 	"add_to_cart": {
 		"text": "Add to cart",
 		"description": "Add &ldquo;WordPress Pennant&rdquo; to your cart"
+	}
+}
+```
+
+## Product Links and Embedding
+
+Product responses include `_links` that provide URLs to related resources. When products have upsells, cross-sells, or related products configured, embeddable links are included that can be used with WordPress's `_embed` feature.
+
+### Available Links
+
+| Link         | Description                                         | Embeddable |
+| :----------- | :-------------------------------------------------- | :--------: |
+| `self`       | Link to the current product                         | No         |
+| `collection` | Link to the products collection                     | No         |
+| `up`         | Link to parent product (for variations)             | No         |
+| `upsells`    | Link to fetch upsell products (if configured)       | Yes        |
+| `cross_sells`| Link to fetch cross-sell products (if configured)   | Yes        |
+| `related`    | Link to fetch related products                      | Yes        |
+
+### Example Response with Links
+
+```json
+{
+	"id": 34,
+	"name": "WordPress Pennant",
+	"_links": {
+		"self": [{"href": "https://local.wordpress.test/wp-json/wc/store/v1/products/34"}],
+		"collection": [{"href": "https://local.wordpress.test/wp-json/wc/store/v1/products"}],
+		"upsells": [{"href": "https://local.wordpress.test/wp-json/wc/store/v1/products?include=10,20", "embeddable": true}],
+		"cross_sells": [{"href": "https://local.wordpress.test/wp-json/wc/store/v1/products?include=30", "embeddable": true}],
+		"related": [{"href": "https://local.wordpress.test/wp-json/wc/store/v1/products?related=34&per_page=10", "embeddable": true}]
+	}
+}
+```
+
+### Using the `_embed` Parameter
+
+Add `?_embed` to any product request to automatically fetch and include the linked resources in an `_embedded` object:
+
+```sh
+curl "https://local.wordpress.test/wp-json/wc/store/v1/products/34?_embed"
+```
+
+**Example response with embedding:**
+
+```json
+{
+	"id": 34,
+	"name": "WordPress Pennant",
+	"_links": {
+		"self": [{"href": "https://local.wordpress.test/wp-json/wc/store/v1/products/34"}],
+		"collection": [{"href": "https://local.wordpress.test/wp-json/wc/store/v1/products"}],
+		"upsells": [{"href": "https://local.wordpress.test/wp-json/wc/store/v1/products?include=10,20", "embeddable": true}]
+	},
+	"_embedded": {
+		"upsells": [
+			{"id": 10, "name": "Upsell Product 1", "...": "..."},
+			{"id": 20, "name": "Upsell Product 2", "...": "..."}
+		]
 	}
 }
 ```

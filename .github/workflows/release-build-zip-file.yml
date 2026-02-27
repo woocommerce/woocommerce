@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
     inputs:
       branch:
-        description: 'Release branch (e.g.: release/x.y).'
+        description: 'Release branch (e.g. "release/9.8" or just "9.8").'
         required: true
       skip_verify:
         description: 'Skip verification steps.'
@@ -43,18 +43,40 @@ jobs:
     runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     permissions:
       contents: write # Required to fetch draft releases for some reason. See https://github.com/cli/cli/issues/9076#issuecomment-2146148572.
+    outputs:
+      branch: ${{ steps.normalize-branch.outputs.branch }}
     steps:
+      - name: Normalize branch input
+        id: normalize-branch
+        env:
+          INPUT_BRANCH: ${{ inputs.branch }}
+        run: |
+          branch="$INPUT_BRANCH"
+          if [[ "$branch" =~ ^[0-9]+\.[0-9]+$ ]]; then
+            branch="release/$branch"
+          fi
+          echo "branch=$branch" >> $GITHUB_OUTPUT
+
+      - run: |
+          echo "Building WooCommerce ZIP: branch=${{ steps.normalize-branch.outputs.branch }}, skip_verify=${{ inputs.skip_verify }}, create_github_release=${{ inputs.create_github_release }}"          
+
+      - name: Verify release branch
+        env:
+          BRANCH: ${{ steps.normalize-branch.outputs.branch }}
+        run: |
+          if ! git ls-remote --exit-code --heads https://github.com/${GITHUB_REPOSITORY} ${BRANCH} > /dev/null; then
+            echo "::error::Source branch '$BRANCH' does not exist."
+            exit 1
+          fi
+
       - name: Workflow checks
         env:
-          BRANCH: ${{ inputs.branch || github.ref }}
+          BRANCH: ${{ steps.normalize-branch.outputs.branch }}
         run: |
           # No special checks when running as a reusable workflow.
           if [ "${{ ! contains( github.workflow_ref, 'release-build-zip-file.yml' ) }}" = "true" ]; then
             exit 0
           fi
-
-          # Log inputs to console.
-          echo "Building WooCommerce ZIP: branch=${BRANCH}, skip_verify=${{ inputs.skip_verify }}, create_github_release=${{ inputs.create_github_release }}"
 
           # Write summary header.
           options=""
@@ -88,7 +110,7 @@ jobs:
         # Checkout branch.
       - uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.branch || github.ref }}
+          ref: ${{ steps.normalize-branch.outputs.branch }}
           path: checkout-branch
           sparse-checkout: |
             /plugins/woocommerce/woocommerce.php
@@ -100,7 +122,7 @@ jobs:
         id: pre-build-verification
         if: ${{ ! inputs.skip_verify }}
         env:
-          BRANCH: ${{ inputs.branch || github.ref }}
+          BRANCH: ${{ steps.normalize-branch.outputs.branch }}
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
@@ -181,7 +203,7 @@ jobs:
         with:
           script: |
             const { run } = require( './checkout-trunk/.github/workflows/scripts/release-check-db-updates' );
-            await run( `${{ inputs.branch }}`, { github, context } );
+            await run( `${{ steps.normalize-branch.outputs.branch }}`, { github, context } );
 
   build:
     name: Build release zip file
@@ -193,18 +215,10 @@ jobs:
     permissions:
       contents: read
     steps:
-      - name: Verify release branch.
-        env:
-          BRANCH: ${{ inputs.branch || github.ref }}
-        run: |
-          if ! git ls-remote --exit-code --heads https://github.com/${GITHUB_REPOSITORY} ${BRANCH} > /dev/null; then
-            echo "::error::Source branch '$BRANCH' does not exist."
-            exit 1
-          fi
-
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.branch || github.ref }}
+          ref: ${{ needs.verify.outputs.branch }}
 
       - name: Setup WooCommerce Monorepo
         uses: ./.github/actions/setup-woocommerce-monorepo
@@ -235,7 +249,7 @@ jobs:
           echo "artifact-url=$ARTIFACT_URL" >> $GITHUB_OUTPUT
 
           # Fetch commit hash for this build.
-          commit_hash=$(git rev-parse "${{ inputs.branch || github.ref }}")
+          commit_hash=$(git rev-parse "${{ needs.verify.outputs.branch }}")
           echo "commit-hash=$commit_hash" >> $GITHUB_OUTPUT
 
           # Write artifact to summary.
