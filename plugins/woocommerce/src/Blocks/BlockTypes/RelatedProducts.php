@@ -145,7 +145,7 @@ class RelatedProducts extends AbstractBlock {
 	 */
 	private function is_related_products_block( $parsed_block, $rendered_block = null ) {
 		$is_product_collection_block = $rendered_block->context['query']['isProductCollectionBlock'] ?? false;
-		if ( ProductQuery::is_woocommerce_variation( $parsed_block ) && isset( $parsed_block['attrs']['namespace'] ) && 'woocommerce/related-products' === $parsed_block['attrs']['namespace'] && ! $is_product_collection_block ) {
+		if ( ! $is_product_collection_block && 'woocommerce/related-products' === ( $parsed_block['attrs']['namespace'] ?? null ) && ProductQuery::is_woocommerce_variation( $parsed_block ) ) {
 			return true;
 		}
 
@@ -157,9 +157,9 @@ class RelatedProducts extends AbstractBlock {
 	 * The logic is copied from the core function woocommerce_related_products. https://github.com/woocommerce/woocommerce/blob/ca49caabcba84ce9f60a03c6d3534ec14b350b80/plugins/woocommerce/includes/wc-template-functions.php/#L2039-L2074
 	 *
 	 * @param number $product_per_page Products per page.
-	 * @return array Products ids.
+	 * @return int[] Products ids.
 	 */
-	private function get_related_products_ids( $product_per_page = 5 ) {
+	private function get_related_products_ids( $product_per_page = 5 ): array {
 		global $post;
 
 		$product = wc_get_product( $post->ID );
@@ -168,16 +168,21 @@ class RelatedProducts extends AbstractBlock {
 			return array();
 		}
 
-		$related_products = array_filter( array_map( 'wc_get_product', wc_get_related_products( $product->get_id(), $product_per_page, $product->get_upsell_ids() ) ), 'wc_products_array_filter_visible' );
-		$related_products = wc_products_array_orderby( $related_products, 'rand', 'desc' );
+		$related_products_ids = wc_get_related_products( $product->get_id(), $product_per_page, $product->get_upsell_ids() );
+		if ( ! empty( $related_products_ids ) ) {
+			// Optimization: reduce the number of SQLs needed to populate product objects.
+			_prime_post_caches( $related_products_ids );
 
-		$related_product_ids = array_map(
-			function ( $product ) {
-				return $product->get_id();
-			},
-			$related_products
-		);
+			$related_products = array_filter( array_map( 'wc_get_product', $related_products_ids ), 'wc_products_array_filter_visible' );
+			$related_products = wc_products_array_orderby( $related_products, 'rand', 'desc' );
+			/** @var \WC_Product[] $related_products */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 
-		return $related_product_ids;
+			// Optimization: reduce the number of SQLs needed to fetch images when rendering.
+			_prime_post_caches( array_filter( array_map( fn( $product ) => (int) $product->get_image_id(), $related_products ) ) );
+
+			$related_products_ids = array_map( fn( $product ) => $product->get_id(), $related_products );
+		}
+
+		return $related_products_ids;
 	}
 }

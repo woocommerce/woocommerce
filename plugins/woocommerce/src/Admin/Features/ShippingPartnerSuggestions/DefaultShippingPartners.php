@@ -45,15 +45,15 @@ class DefaultShippingPartners {
 
 		return array(
 			array(
-				'id'                => 'woocommerce-shipstation-integration',
-				'name'              => 'ShipStation',
-				'slug'              => 'woocommerce-shipstation-integration',
-				'description'       => __( 'Powerful yet easy-to-use solution:', 'woocommerce' ),
-				'layout_column'     => array(
+				'id'                      => 'woocommerce-shipstation-integration',
+				'name'                    => 'ShipStation',
+				'slug'                    => 'woocommerce-shipstation-integration',
+				'description'             => __( 'Powerful yet easy-to-use solution:', 'woocommerce' ),
+				'layout_column'           => array(
 					'image'    => $asset_base_url . 'shipstation-column.svg',
 					'features' => $column_layout_features,
 				),
-				'layout_row'        => array(
+				'layout_row'              => array(
 					'image'    => $asset_base_url . 'shipstation-row.svg',
 					'features' => array(
 						array(
@@ -84,52 +84,55 @@ class DefaultShippingPartners {
 						),
 					),
 				),
-				'learn_more_link'   => 'https://wordpress.org/plugins/woocommerce-shipstation-integration/',
-				'is_visible'        => array(
-					self::get_rules_for_countries( array( 'AU', 'CA', 'GB' ) ),
+				'learn_more_link'         => 'https://wordpress.org/plugins/woocommerce-shipstation-integration/',
+				'is_visible'              => array(
+					self::get_rules_for_countries( array( 'US', 'AU', 'NZ', 'CA', 'GB' ) ),
 				),
-				'available_layouts' => array( 'row', 'column' ),
+				'available_layouts'       => array( 'row', 'column' ),
+				'countries_where_primary' => array( 'NZ', 'CA', 'GB' ),
 			),
 			array(
-				'id'                => 'skydropx-cotizador-y-envios',
-				'name'              => 'Skydropx',
-				'slug'              => 'skydropx-cotizador-y-envios',
-				'layout_column'     => array(
+				'id'                      => 'skydropx-cotizador-y-envios',
+				'name'                    => 'Skydropx',
+				'slug'                    => 'skydropx-cotizador-y-envios',
+				'layout_column'           => array(
 					'image'    => $asset_base_url . 'skydropx-column.svg',
 					'features' => $column_layout_features,
 				),
-				'description'       => '',
-				'learn_more_link'   => 'https://wordpress.org/plugins/skydropx-cotizador-y-envios/',
-				'is_visible'        => array(
+				'description'             => '',
+				'learn_more_link'         => 'https://wordpress.org/plugins/skydropx-cotizador-y-envios/',
+				'is_visible'              => array(
 					self::get_rules_for_countries( array() ), // No countries eligible for SkydropX promotion at this time.
 				),
-				'available_layouts' => array( 'column' ),
+				'available_layouts'       => array( 'column' ),
+				'countries_where_primary' => array(),
 			),
 			array(
-				'id'                => 'envia',
-				'name'              => 'Envia',
-				'slug'              => '',
-				'description'       => '',
-				'layout_column'     => array(
+				'id'                      => 'envia',
+				'name'                    => 'Envia',
+				'slug'                    => '',
+				'description'             => '',
+				'layout_column'           => array(
 					'image'    => $asset_base_url . 'envia-column.svg',
 					'features' => $column_layout_features,
 				),
-				'learn_more_link'   => 'https://woocommerce.com/products/envia-shipping-and-fulfillment/',
-				'is_visible'        => array(
-					self::get_rules_for_countries( array( 'CL', 'AR', 'PE', 'BR', 'UY', 'GT' ) ),
+				'learn_more_link'         => 'https://woocommerce.com/products/envia-shipping-and-fulfillment/',
+				'is_visible'              => array(
+					self::get_rules_for_countries( array( 'MX', 'CO', 'CL', 'AR', 'PE', 'BR', 'UY', 'GT' ) ),
 				),
-				'available_layouts' => array( 'column' ),
+				'available_layouts'       => array( 'column' ),
+				'countries_where_primary' => array( 'MX', 'CO', 'CL', 'AR', 'PE', 'BR', 'UY', 'GT' ),
 			),
 			array(
-				'id'                => 'easyship-woocommerce-shipping-rates',
-				'name'              => 'Easyship',
-				'slug'              => 'easyship-woocommerce-shipping-rates',
-				'description'       => __( 'Simplified shipping with: ', 'woocommerce' ),
-				'layout_column'     => array(
+				'id'                      => 'easyship-woocommerce-shipping-rates',
+				'name'                    => 'Easyship',
+				'slug'                    => 'easyship-woocommerce-shipping-rates',
+				'description'             => __( 'Simplified shipping with: ', 'woocommerce' ),
+				'layout_column'           => array(
 					'image'    => $asset_base_url . 'easyship-column.svg',
 					'features' => $column_layout_features,
 				),
-				'layout_row'        => array(
+				'layout_row'              => array(
 					'image'    => $asset_base_url . 'easyship-row.svg',
 					'features' => array(
 						array(
@@ -157,22 +160,23 @@ class DefaultShippingPartners {
 						),
 					),
 				),
-				'learn_more_link'   => 'https://woocommerce.com/products/easyship-shipping-rates/',
-				'is_visible'        => array(
+				'learn_more_link'         => 'https://woocommerce.com/products/easyship-shipping-rates/',
+				'is_visible'              => array(
 					self::get_rules_for_countries( array( 'SG', 'HK', 'AU', 'NZ' ) ),
 				),
-				'available_layouts' => array( 'row', 'column' ),
+				'available_layouts'       => array( 'row', 'column' ),
+				'countries_where_primary' => array( 'SG', 'HK', 'AU' ),
 			),
 			array(
-				'id'                => 'packlink-pro-shipping',
-				'name'              => 'Packlink',
-				'slug'              => 'packlink-pro-shipping',
-				'description'       => __( 'Optimize your full shipping process:', 'woocommerce' ),
-				'layout_column'     => array(
+				'id'                      => 'packlink-pro-shipping',
+				'name'                    => 'Packlink',
+				'slug'                    => 'packlink-pro-shipping',
+				'description'             => __( 'Optimize your full shipping process:', 'woocommerce' ),
+				'layout_column'           => array(
 					'image'    => $asset_base_url . 'packlink-column.svg',
 					'features' => $column_layout_features,
 				),
-				'layout_row'        => array(
+				'layout_row'              => array(
 					'image'    => $asset_base_url . 'packlink-row.svg',
 					'features' => array(
 						array(
@@ -206,18 +210,19 @@ class DefaultShippingPartners {
 						),
 					),
 				),
-				'learn_more_link'   => 'https://wordpress.org/plugins/packlink-pro-shipping/',
-				'is_visible'        => array(
-					self::get_rules_for_countries( array( 'FR', 'DE', 'ES', 'IT' ) ),
+				'learn_more_link'         => 'https://wordpress.org/plugins/packlink-pro-shipping/',
+				'is_visible'              => array(
+					self::get_rules_for_countries( array( 'FR', 'DE', 'ES', 'IT', 'NL', 'AT', 'BE' ) ),
 				),
-				'available_layouts' => array( 'row', 'column' ),
+				'available_layouts'       => array( 'row', 'column' ),
+				'countries_where_primary' => array( 'FR', 'DE', 'ES', 'IT', 'NL', 'AT', 'BE' ),
 			),
 			array(
-				'id'                => 'woocommerce-shipping',
-				'name'              => 'WooCommerce Shipping',
-				'slug'              => 'woocommerce-shipping',
-				'description'       => __( 'Save time and money by printing your shipping labels right from your computer with WooCommerce Shipping. Try WooCommerce Shipping for free.', 'woocommerce' ),
-				'layout_column'     => array(
+				'id'                      => 'woocommerce-shipping',
+				'name'                    => 'WooCommerce Shipping',
+				'slug'                    => 'woocommerce-shipping',
+				'description'             => __( 'Save time and money by printing your shipping labels right from your computer with WooCommerce Shipping. Try WooCommerce Shipping for free.', 'woocommerce' ),
+				'layout_column'           => array(
 					'image'    => $asset_base_url . 'wcs-column.svg',
 					'features' => array(
 						array(
@@ -237,8 +242,8 @@ class DefaultShippingPartners {
 						),
 					),
 				),
-				'learn_more_link'   => 'https://woocommerce.com/products/shipping/',
-				'is_visible'        => array(
+				'learn_more_link'         => 'https://woocommerce.com/products/shipping/',
+				'is_visible'              => array(
 					self::get_rules_for_countries( array( 'US' ) ),
 					(object) array(
 						'type'    => 'not',
@@ -250,7 +255,8 @@ class DefaultShippingPartners {
 						),
 					),
 				),
-				'available_layouts' => array( 'column' ),
+				'available_layouts'       => array( 'column' ),
+				'countries_where_primary' => array( 'US' ),
 			),
 		);
 	}

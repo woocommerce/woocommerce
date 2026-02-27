@@ -12,6 +12,20 @@
 		"node": "^20.11.1"
 	},
 	"main": "build/index.js",
+	"module": "build-module/index.js",
+	"types": "build-types/index.d.ts",
+	"exports": {
+		".": {
+			"types": "./build-types/index.d.ts",
+			"import": "./build-module/index.js",
+			"require": "./build/index.js"
+		}
+	},
+	"files": [
+		"build",
+		"build-module",
+		"build-types"
+	],
 	"scripts": {
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
 		"update:php": "XDEBUG_MODE=off composer update --quiet",
@@ -21,21 +35,47 @@
 		"prepack": "pnpm build",
 		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
-		"build:project:esm": "wireit"
+		"build:project:cjs": "wireit",
+		"build:project:esm": "wireit",
+		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:.*$/'",
+		"watch:build:project": "pnpm --if-present run '/^watch:build:project:.*$/'",
+		"watch:build:project:cjs": "wireit",
+		"watch:build:project:esm": "wireit"
 	},
 	"config": {
 		"ci": {
 			"lint": {
 				"command": "lint",
 				"changes": "src/**/*.{js,ts,tsx}"
-			}
+			},
+			"tests": [
+				{
+					"name": "JavaScript",
+					"command": "test",
+					"changes": [
+						"jest.config.json",
+						"tsconfig.json",
+						"src/**/*.{js,jsx,ts,tsx}"
+					],
+					"events": [
+						"pull_request",
+						"push"
+					]
+				}
+			]
 		}
 	},
 	"devDependencies": {
-		"@babel/cli": "7.25.7",
-		"@babel/core": "7.25.7",
-		"@wordpress/babel-preset-default": "next",
+		"@playwright/test": "^1.57.0",
+		"@types/jest": "29.5.x",
+		"@types/node": "20.x.x",
+		"@woocommerce/eslint-plugin": "workspace:*",
+		"@woocommerce/internal-js-tests": "workspace:*",
+		"eslint": "^8.55.0",
 		"jest": "29.5.x",
+		"jest-cli": "29.5.x",
+		"ts-jest": "29.1.x",
+		"typescript": "5.7.x",
 		"wireit": "0.14.12"
 	},
 	"dependencies": {
@@ -46,18 +86,54 @@
 		"access": "public"
 	},
 	"wireit": {
-		"build:project:esm": {
-			"command": "babel src --out-dir build --copy-files --no-copy-ignored --ignore '**/test/**'",
+		"build:project:cjs": {
+			"command": "tsc --project tsconfig-cjs.json --noCheck",
 			"clean": "if-file-deleted",
 			"files": [
-				"babel.config.js",
-				"src/**/*.{js,jsx,ts,tsx}",
-				"typings/**/*.ts"
+				"tsconfig-cjs.json",
+				"src/**/*.{js,jsx,ts,tsx}"
 			],
 			"output": [
 				"build"
 			],
-			"dependencies": []
+			"dependencies": [
+				"dependencyOutputs"
+			]
+		},
+		"watch:build:project:cjs": {
+			"command": "tsc --project tsconfig-cjs.json --watch --noCheck",
+			"service": true
+		},
+		"build:project:esm": {
+			"command": "tsc --project tsconfig.json",
+			"clean": "if-file-deleted",
+			"files": [
+				"tsconfig.json",
+				"src/**/*.{js,jsx,ts,tsx}"
+			],
+			"output": [
+				"build-module",
+				"build-types"
+			],
+			"dependencies": [
+				"dependencyOutputs"
+			]
+		},
+		"watch:build:project:esm": {
+			"command": "tsc --project tsconfig.json --watch",
+			"service": true
+		},
+		"dependencyOutputs": {
+			"allowUsuallyExcludedPaths": true,
+			"files": [
+				"package.json",
+				"node_modules/@woocommerce/eslint-plugin/configs",
+				"node_modules/@woocommerce/eslint-plugin/rules",
+				"node_modules/@woocommerce/eslint-plugin/index.js",
+				"node_modules/@woocommerce/internal-js-tests/build",
+				"node_modules/@woocommerce/internal-js-tests/build-module",
+				"node_modules/@woocommerce/internal-js-tests/jest-preset.js"
+			]
 		}
 	}
 }
