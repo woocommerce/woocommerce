@@ -1092,7 +1092,7 @@ if ( 0 < $mu_plugins_count ) :
 	<?php if ( true === $theme['has_outdated_templates'] ) : ?>
 	<tfoot>
 		<tr>
-			<td data-export-label="Outdated Templates"><?php esc_html_e( 'Outdated templates', 'woocommerce' ); ?>:</td>
+			<td><?php esc_html_e( 'Outdated templates', 'woocommerce' ); ?>:</td>
 			<td class="help">&nbsp;</td>
 			<td>
 				<mark class="error">
