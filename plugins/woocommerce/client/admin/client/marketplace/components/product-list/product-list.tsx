@@ -15,7 +15,7 @@ interface ProductListProps {
 	cardType?: ProductCardType;
 	groupURLText: string | null;
 	groupURLType: 'wc-admin' | 'wp-admin' | 'external' | undefined; // types defined by Link component
-	utmGroup?: string;
+	groupId?: string;
 	containerRef?: ( element: HTMLDivElement | null ) => void;
 }
 
@@ -30,14 +30,14 @@ export default function ProductList( props: ProductListProps ): JSX.Element {
 		groupURLText,
 		groupURLType,
 		cardType,
-		utmGroup,
+		groupId,
 		containerRef,
 	} = props;
 
 	return (
 		<div
 			className="woocommerce-marketplace__product-list"
-			data-utm-group={ utmGroup }
+			data-group-id={ groupId }
 			ref={ containerRef }
 		>
 			<ProductListHeader

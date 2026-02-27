@@ -19,7 +19,7 @@ export default function Discover(): JSX.Element | null {
 	const [ productGroups, setProductGroups ] = useState<
 		Array< ProductGroup >
 	>( [] );
-	const seenUtmGroups = useRef( new Set< string >() );
+	const seenGroups = useRef( new Set< string >() );
 	const groupElements = useRef< Record< string, HTMLDivElement | null > >(
 		{}
 	);
@@ -30,7 +30,7 @@ export default function Discover(): JSX.Element | null {
 		const product_ids = products
 			.flatMap( ( group ) => group.items )
 			.map( ( product ) => product.id );
-		const utm_groups = Object.fromEntries(
+		const groups = Object.fromEntries(
 			products.map( ( group ) => [
 				group.id,
 				group.items.map( ( product ) => product.id ),
@@ -41,7 +41,7 @@ export default function Discover(): JSX.Element | null {
 		recordEvent( 'marketplace_discover_viewed', {
 			view: 'discover',
 			product_ids,
-			utm_groups,
+			groups,
 		} );
 
 		// This is the new page view event added with Woo 8.3. It's improved with the marketplace_discover_viewed event
@@ -54,7 +54,7 @@ export default function Discover(): JSX.Element | null {
 	function recordGroupViewedTrackEvent( group: ProductGroup ) {
 		recordEvent( 'marketplace_discover_group_viewed', {
 			view: 'discover',
-			utm_group: group.id,
+			group_id: group.id,
 			product_ids: group.items.map( ( product ) => product.id ),
 		} );
 	}
@@ -103,21 +103,21 @@ export default function Discover(): JSX.Element | null {
 						return;
 					}
 
-					const utmGroup = ( entry.target as HTMLDivElement ).dataset
-						.utmGroup;
+					const groupId = ( entry.target as HTMLDivElement ).dataset
+						.groupId;
 
-					if ( ! utmGroup || seenUtmGroups.current.has( utmGroup ) ) {
+					if ( ! groupId || seenGroups.current.has( groupId ) ) {
 						return;
 					}
 
-					const group = productGroupsById.get( utmGroup );
+					const group = productGroupsById.get( groupId );
 
 					if ( ! group ) {
 						return;
 					}
 
 					recordGroupViewedTrackEvent( group );
-					seenUtmGroups.current.add( utmGroup );
+					seenGroups.current.add( groupId );
 					observer.unobserve( entry.target );
 				} );
 			},
@@ -163,7 +163,7 @@ export default function Discover(): JSX.Element | null {
 					groupURLType={ groups.url_type }
 					type={ groups.itemType }
 					cardType={ groups.cardType ?? ProductCardType.regular }
-					utmGroup={ groups.id }
+					groupId={ groups.id }
 					containerRef={ ( element ) => {
 						groupElements.current[ groups.id ] = element;
 					} }
