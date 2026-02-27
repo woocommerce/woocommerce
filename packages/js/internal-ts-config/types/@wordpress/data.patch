@@ -16,7 +16,7 @@ diff -ruN a/types/@wordpress/data/index.d.ts b/types/@wordpress/data/index.d.ts
  	export { plugins };
  	/**
  	 * The combineReducers helper function turns an object whose values are different
-@@ -68,7 +65,68 @@
+@@ -68,7 +65,70 @@
  	 *                    object, and constructs a state object with the same shape.
  	 */
  	export const combineReducers: import('@wordpress/data/build-types/types').combineReducers;
@@ -35,6 +35,8 @@ diff -ruN a/types/@wordpress/data/index.d.ts b/types/@wordpress/data/index.d.ts
 +		UseDispatchReturn,
 +		DataRegistry,
 +	} from '@wordpress/data/build-types/types';
++
++	export type { StoreDescriptor } from '@wordpress/data/build-types/types';
 +
  	/**
 +	 * Given a store descriptor, returns an object of the store's action creators.
@@ -55,9 +57,9 @@ diff -ruN a/types/@wordpress/data/index.d.ts b/types/@wordpress/data/index.d.ts
 +	 * ```
 +	 * @return Object containing the action creators.
 +	 */
-+	export function dispatch<T extends StoreDescriptor<AnyConfig>>(storeDescriptor: T): T extends StoreDescriptor<infer Config extends AnyConfig> ? ActionCreatorsOf<Config> : any;
-+	export function dispatch<K extends keyof StoreRegistry>(storeDescriptor: K): ActionCreatorsOf<ConfigOf<StoreRegistry[K]>>;
-+	export function dispatch(storeDescriptor: string): any;
++	export function dispatch<T extends StoreDescriptor<AnyConfig>>(store: T): T extends StoreDescriptor<infer Config extends AnyConfig> ? ActionCreatorsOf<Config> : any;
++	export function dispatch<K extends keyof StoreRegistry>(store: K): ActionCreatorsOf<ConfigOf<StoreRegistry[K]>>;
++	export function dispatch(store: string): any;
 +
 +	/**
 +	 * Given a store descriptor, returns an object of the store's selectors.
@@ -77,34 +79,29 @@ diff -ruN a/types/@wordpress/data/index.d.ts b/types/@wordpress/data/index.d.ts
 +	 *
 +	 * @return Object containing the store's selectors.
 +	 */
-+	export function select<T extends StoreDescriptor<AnyConfig>>(storeDescriptor: T): CurriedSelectorsOf<T>;
-+	export function select<K extends keyof StoreRegistry>(storeDescriptor: K): CurriedSelectorsOf<StoreRegistry[K]>;
-+	export function select(storeDescriptor: string): any;
++	export function select<T extends StoreDescriptor<AnyConfig>>(store: T): CurriedSelectorsOf<T>;
++	export function select<K extends keyof StoreRegistry>(store: K): CurriedSelectorsOf<StoreRegistry[K]>;
++	export function select(store: string): any;
 +
 +	/**
  	 * Given a store descriptor, returns an object containing the store's selectors pre-bound to state
  	 * so that you only need to supply additional arguments, and modified so that they return promises
  	 * that resolve to their eventual values, after any resolvers have ran.
-@@ -87,19 +145,15 @@
+@@ -87,7 +147,10 @@
  	 *
  	 * @return {Object} Object containing the store's promise-wrapped selectors.
  	 */
 -	export const resolveSelect: any;
-+	export function resolveSelect<T extends StoreDescriptor<AnyConfig>>(storeDescriptor: T): CurriedAndPromisifiedSelectorsOf<T>;
-+	export function resolveSelect<K extends keyof StoreRegistry>(storeDescriptor: K): CurriedAndPromisifiedSelectorsOf<StoreRegistry[K]>;
-+	export function resolveSelect(storeDescriptor: string): any;
++	export function resolveSelect<T extends StoreDescriptor<AnyConfig>>(store: T): CurriedAndPromisifiedSelectorsOf<T>;
++	export function resolveSelect<K extends keyof StoreRegistry>(store: K): CurriedAndPromisifiedSelectorsOf<StoreRegistry[K]>;
++	export function resolveSelect(store: string): any;
 +
  	/**
--	 * Given a store descriptor, returns an object containing the store's selectors pre-bound to state
--	 * so that you only need to supply additional arguments, and modified so that they throw promises
--	 * in case the selector is not resolved yet.
--	 *
--	 * @param {StoreDescriptor|string} storeNameOrDescriptor The store descriptor. The legacy calling
--	 *                                                       convention of passing the store name is
--	 *                                                       also supported.
--	 *
--	 * @return {Object} Object containing the store's suspense-wrapped selectors.
-+	 * suspendSelect (similar to resolveSelect but throws promises)
+ 	 * Given a store descriptor, returns an object containing the store's selectors pre-bound to state
+ 	 * so that you only need to supply additional arguments, and modified so that they throw promises
+@@ -99,7 +162,8 @@
+ 	 *
+ 	 * @return {Object} Object containing the store's suspense-wrapped selectors.
  	 */
 -	export const suspendSelect: any;
 +	export const suspendSelect: typeof resolveSelect;
@@ -112,7 +109,7 @@ diff -ruN a/types/@wordpress/data/index.d.ts b/types/@wordpress/data/index.d.ts
  	/**
  	 * Given a listener function, the function will be called any time the state value
  	 * of one of the registered stores has changed. If you specify the optional
-@@ -172,9 +226,187 @@
+@@ -172,9 +236,187 @@
  	 * @param {StoreDescriptor} store Store descriptor.
  	 */
  	export const register: any;
@@ -324,17 +321,17 @@ diff -ruN a/types/@wordpress/data/types.d.ts b/types/@wordpress/data/types.d.ts
 -	export type DispatchFunction = <StoreNameOrDescriptor>(store: StoreNameOrDescriptor) => DispatchReturn<StoreNameOrDescriptor>;
 +	export type UseDispatchReturn<StoreNameOrDescriptor> = StoreNameOrDescriptor extends StoreDescriptor<any> ? ActionCreatorsOf<ConfigOf<StoreNameOrDescriptor>> : StoreNameOrDescriptor extends keyof StoreRegistry ? ActionCreatorsOf<ConfigOf<StoreRegistry[StoreNameOrDescriptor]>> : StoreNameOrDescriptor extends undefined ? DispatchFunction : any;
 +	export interface DispatchFunction {
-+	    <T extends StoreDescriptor<AnyConfig>>(storeDescriptor: T): ActionCreatorsOf<ConfigOf<T>>;
-+	    <K extends keyof StoreRegistry>(storeDescriptor: K): ActionCreatorsOf<ConfigOf<StoreRegistry[K]>>;
-+	    (storeDescriptor: string): any;
++	    <T extends StoreDescriptor<AnyConfig>>(store: T): ActionCreatorsOf<ConfigOf<T>>;
++	    <K extends keyof StoreRegistry>(store: K): ActionCreatorsOf<ConfigOf<StoreRegistry[K]>>;
++	    (store: string): any;
 +	}
  	export type DispatchReturn<StoreNameOrDescriptor> = StoreNameOrDescriptor extends StoreDescriptor<any> ? ActionCreatorsOf<ConfigOf<StoreNameOrDescriptor>> : unknown;
  	export type MapSelect = (select: SelectFunction, registry: DataRegistry) => any;
 -	export type SelectFunction = <S>(store: S) => CurriedSelectorsOf<S>;
 +	export interface SelectFunction {
-+	    <T extends StoreDescriptor<AnyConfig>>(storeDescriptor: T): CurriedSelectorsOf<T>;
-+	    <K extends keyof StoreRegistry>(storeDescriptor: K): CurriedSelectorsOf<StoreRegistry[K]>;
-+	    (storeDescriptor: string): any;
++	    <T extends StoreDescriptor<AnyConfig>>(store: T): CurriedSelectorsOf<T>;
++	    <K extends keyof StoreRegistry>(store: K): CurriedSelectorsOf<StoreRegistry[K]>;
++	    (store: string): any;
 +	}
  	/**
  	 * Callback for store's `subscribe()` method that
@@ -451,9 +448,9 @@ diff -ruN a/types/@wordpress/data/types.d.ts b/types/@wordpress/data/types.d.ts
 +	 * ResolveSelect function interface for registry and top-level usage.
 +	 */
 +	export interface ResolveSelectFunction {
-+	    <T extends StoreDescriptor<AnyConfig>>(storeDescriptor: T): CurriedAndPromisifiedSelectorsOf<T>;
-+	    <K extends keyof StoreRegistry>(storeDescriptor: K): CurriedAndPromisifiedSelectorsOf<StoreRegistry[K]>;
-+	    (storeDescriptor: string): any;
++	    <T extends StoreDescriptor<AnyConfig>>(store: T): CurriedAndPromisifiedSelectorsOf<T>;
++	    <K extends keyof StoreRegistry>(store: K): CurriedAndPromisifiedSelectorsOf<StoreRegistry[K]>;
++	    (store: string): any;
 +	}
  	export {};
  }

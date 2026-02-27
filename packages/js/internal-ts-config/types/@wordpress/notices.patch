@@ -41,7 +41,6 @@ diff -ruN a/types/@wordpress/notices/index.d.ts b/types/@wordpress/notices/index
  
 -	export interface NoticesStoreDescriptor extends StoreDescriptor {
 -	    name: "core/notices";
--	}
 +	type NoticesConfig = ReduxStoreConfig<
 +		unknown,
 +		{
@@ -49,14 +48,14 @@ diff -ruN a/types/@wordpress/notices/index.d.ts b/types/@wordpress/notices/index
 +		},
 +		WithState< typeof noticesSelectors >
 +	>;
++
++	export interface NoticesStoreDescriptor extends StoreDescriptor< NoticesConfig > {
++		name: "core/notices";
+ 	}
  
 -	// eslint-disable-next-line @definitelytyped/no-declare-current-package
 -	declare module "@wordpress/notices" {
 -	    const store: NoticesStoreDescriptor;
-+	type NoticesStoreDescriptor = StoreDescriptor< NoticesConfig > & {
-+		name: 'core/notices';
-+	};
-+
 +	export const store: NoticesStoreDescriptor;
 +}
 +
@@ -76,9 +75,9 @@ diff -ruN a/types/@wordpress/notices/index.d.ts b/types/@wordpress/notices/index
 +		WithState< typeof noticesSelectors >
 +	>;
 +
-+	type NoticesStoreDescriptor = StoreDescriptor< NoticesConfig > & {
-+		name: 'core/notices';
-+	};
++	interface NoticesStoreDescriptor extends StoreDescriptor< NoticesConfig > {
++		name: "core/notices";
++	}
 +
 +	interface StoreRegistry {
 +		'core/notices': NoticesStoreDescriptor;

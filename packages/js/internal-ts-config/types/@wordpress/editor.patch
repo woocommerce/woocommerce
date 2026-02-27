@@ -40,10 +40,9 @@ diff -ruN a/types/@wordpress/editor/index.d.ts b/types/@wordpress/editor/index.d
  
 -	export interface EditorStoreDescriptor extends StoreDescriptor {
 -	    name: "core/editor";
--	}
-+	type EditorStoreDescriptor = StoreDescriptor< EditorConfig > & {
-+		name: 'core/editor';
-+	};
++	export interface EditorStoreDescriptor extends StoreDescriptor< EditorConfig > {
++		name: "core/editor";
+ 	}
  
 -	// eslint-disable-next-line @definitelytyped/no-declare-current-package
 -	declare module "@wordpress/editor" {
@@ -69,9 +68,9 @@ diff -ruN a/types/@wordpress/editor/index.d.ts b/types/@wordpress/editor/index.d
 +		WithState< typeof editorSelectors >
 +	>;
 +
-+	type EditorStoreDescriptor = StoreDescriptor< EditorConfig > & {
-+		name: 'core/editor';
-+	};
++	interface EditorStoreDescriptor extends StoreDescriptor< EditorConfig > {
++		name: "core/editor";
++	}
 +
 +	interface StoreRegistry {
 +		'core/editor': EditorStoreDescriptor;

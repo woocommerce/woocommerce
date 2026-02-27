@@ -29,7 +29,7 @@ diff -ruN a/types/@wordpress/block-editor/index.d.ts b/types/@wordpress/block-ed
  
  	export * from "@wordpress/block-editor/components";
  	export * from "@wordpress/block-editor/hooks";
-@@ -16,14 +33,17 @@
+@@ -16,13 +33,16 @@
  	export { SETTINGS_DEFAULTS } from "@wordpress/block-editor/store/defaults";
  	export * from "@wordpress/block-editor/utils";
  
@@ -47,13 +47,11 @@ diff -ruN a/types/@wordpress/block-editor/index.d.ts b/types/@wordpress/block-ed
  
 -	export interface BlockEditorStoreDescriptor extends StoreDescriptor {
 -	    name: "core/block-editor";
--	}
-+	type BlockEditorStoreDescriptor = StoreDescriptor< BlockEditorConfig > & {
-+		name: 'core/block-editor';
-+	};
++	export interface BlockEditorStoreDescriptor extends StoreDescriptor< BlockEditorConfig > {
++		name: "core/block-editor";
+ 	}
  
  	export const store: BlockEditorStoreDescriptor;
- 
 @@ -222,5 +242,30 @@
  	     * @defaultValue `"Add title"`
  	     */
@@ -77,9 +75,9 @@ diff -ruN a/types/@wordpress/block-editor/index.d.ts b/types/@wordpress/block-ed
 +		WithState< typeof blockEditorSelectors >
 +	>;
 +
-+	type BlockEditorStoreDescriptor = StoreDescriptor< BlockEditorConfig > & {
-+		name: 'core/block-editor';
-+	};
++	interface BlockEditorStoreDescriptor extends StoreDescriptor< BlockEditorConfig > {
++		name: "core/block-editor";
++	}
 +
 +	interface StoreRegistry {
 +		'core/block-editor': BlockEditorStoreDescriptor;
