@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent draft products showing in Store API and add password handling for password-protected products
