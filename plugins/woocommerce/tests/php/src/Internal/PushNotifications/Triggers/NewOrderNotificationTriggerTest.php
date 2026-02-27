@@ -59,88 +59,34 @@ class NewOrderNotificationTriggerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should register the woocommerce_new_order hook.
+	 * @testdox Should add a notification when a new order is created with a notifiable status.
 	 */
-	public function test_register_adds_new_order_hook(): void {
-		$this->assertNotFalse(
-			has_action(
-				'woocommerce_new_order',
-				array( $this->trigger, 'on_new_order' )
-			),
-			'woocommerce_new_order hook should be registered'
-		);
+	public function test_new_order_with_notifiable_status_adds_notification(): void {
+		wc_create_order( array( 'status' => 'processing' ) );
+
+		$this->assertSame( 1, $this->store->count(), 'Exactly one notification should be stored even though both hooks fire' );
 	}
 
 	/**
-	 * @testdox Should register the woocommerce_order_status_changed hook.
+	 * @testdox Should not add a notification when a new order is created with a non-notifiable status.
 	 */
-	public function test_register_adds_status_changed_hook(): void {
-		$this->assertNotFalse(
-			has_action(
-				'woocommerce_order_status_changed',
-				array( $this->trigger, 'on_order_status_changed' )
-			),
-			'woocommerce_order_status_changed hook should be registered'
-		);
-	}
-
-	/**
-	 * @testdox Should add a notification when a new order has a notifiable status.
-	 */
-	public function test_on_new_order_adds_notification_for_notifiable_status(): void {
-		$order = $this->createMock( WC_Order::class );
-		$order->method( 'get_status' )->willReturn( 'processing' );
-
-		$this->trigger->on_new_order( 1, $order );
-
-		$this->assertSame( 1, $this->store->count() );
-	}
-
-	/**
-	 * @testdox Should not add a notification when a new order has a non-notifiable status.
-	 */
-	public function test_on_new_order_ignores_non_notifiable_status(): void {
-		$order = $this->createMock( WC_Order::class );
-		$order->method( 'get_status' )->willReturn( 'pending' );
-
-		$this->trigger->on_new_order( 1, $order );
+	public function test_new_order_with_non_notifiable_status_is_ignored(): void {
+		wc_create_order( array( 'status' => 'pending' ) );
 
 		$this->assertSame( 0, $this->store->count() );
 	}
 
 	/**
-	 * @testdox Should add a notification when order status changes to a notifiable status.
+	 * @testdox Should add a notification when an order status changes to a notifiable status.
 	 */
-	public function test_on_order_status_changed_adds_notification_for_notifiable_status(): void {
-		$order = $this->createMock( WC_Order::class );
+	public function test_status_change_to_notifiable_adds_notification(): void {
+		$order = wc_create_order( array( 'status' => 'pending' ) );
+		$this->assertSame( 0, $this->store->count() );
 
-		$this->trigger->on_order_status_changed( 1, 'pending', 'processing', $order );
+		$order->set_status( 'processing' );
+		$order->save();
 
 		$this->assertSame( 1, $this->store->count() );
-	}
-
-	/**
-	 * @testdox Should not add a notification when order status changes to a non-notifiable status.
-	 */
-	public function test_on_order_status_changed_ignores_non_notifiable_status(): void {
-		$order = $this->createMock( WC_Order::class );
-
-		$this->trigger->on_order_status_changed( 1, 'pending', 'cancelled', $order );
-
-		$this->assertSame( 0, $this->store->count() );
-	}
-
-	/**
-	 * @testdox Should deduplicate notifications for the same order across hooks.
-	 */
-	public function test_same_order_deduplicated_across_hooks(): void {
-		$order = $this->createMock( WC_Order::class );
-		$order->method( 'get_status' )->willReturn( 'processing' );
-
-		$this->trigger->on_new_order( 1, $order );
-		$this->trigger->on_order_status_changed( 1, 'pending', 'processing', $order );
-
-		$this->assertSame( 1, $this->store->count(), 'Same order should be deduplicated' );
 	}
 
 	/**
@@ -156,6 +102,17 @@ class NewOrderNotificationTriggerTest extends WC_Unit_Test_Case {
 		$this->trigger->on_new_order( 1, $order );
 
 		$this->assertSame( 1, $this->store->count(), "Status '$status' should be notifiable" );
+	}
+
+	/**
+	 * @testdox Should not add a notification when order status changes to a non-notifiable status.
+	 */
+	public function test_on_order_status_changed_ignores_non_notifiable_status(): void {
+		$order = $this->createMock( WC_Order::class );
+
+		$this->trigger->on_order_status_changed( 1, 'pending', 'cancelled', $order );
+
+		$this->assertSame( 0, $this->store->count() );
 	}
 
 	/**

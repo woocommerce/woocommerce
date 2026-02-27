@@ -21,11 +21,23 @@ class NewOrderNotificationTrigger {
 	 * Order statuses that should trigger a notification.
 	 */
 	const NOTIFIABLE_STATUSES = array(
+		/**
+		 * Source: WooCommerce plugin.
+		 */
 		'processing',
 		'on-hold',
 		'completed',
+		/**
+		 * Source: WooCommerce Pre-Orders plugin.
+		 */
 		'pre-order',
+		/**
+		 *  Source: WPCOM - "commonly used custom pre-order status".
+		 */
 		'pre-ordered',
+		/**
+		 *  Source: WooCommerce Deposits plugin.
+		 */
 		'partial-payment',
 	);
 
