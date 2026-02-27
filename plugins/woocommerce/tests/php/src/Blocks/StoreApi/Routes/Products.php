@@ -8,6 +8,7 @@ namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
 use Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes\ControllerTestCase;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\ValidateSchema;
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 
 /**
@@ -528,6 +529,71 @@ class Products extends ControllerTestCase {
 
 		// Related product should be returned.
 		$this->assertContains( $related_product->get_id(), $product_ids );
+	}
+
+	/**
+	 * @testdox Draft products should not be returned when queried by ID.
+	 */
+	public function test_get_draft_product_by_id_returns_404() {
+		$fixtures      = new FixtureData();
+		$draft_product = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Draft Product',
+				'regular_price' => 10,
+			)
+		);
+		$draft_product->set_status( ProductStatus::DRAFT );
+		$draft_product->save();
+
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $draft_product->get_id() ) );
+
+		$this->assertEquals( 404, $response->get_status() );
+	}
+
+	/**
+	 * @testdox Draft products should not be included in the collection response.
+	 */
+	public function test_draft_products_excluded_from_collection() {
+		$fixtures      = new FixtureData();
+		$draft_product = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Draft Product In Collection',
+				'regular_price' => 10,
+			)
+		);
+		$draft_product->set_status( ProductStatus::DRAFT );
+		$draft_product->save();
+
+		$response    = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products' ) );
+		$data        = $response->get_data();
+		$product_ids = array_map(
+			function ( $product ) {
+				return $product['id'];
+			},
+			$data
+		);
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertNotContains( $draft_product->get_id(), $product_ids );
+	}
+
+	/**
+	 * @testdox Draft products should not be returned when queried by slug.
+	 */
+	public function test_get_draft_product_by_slug_returns_404() {
+		$fixtures      = new FixtureData();
+		$draft_product = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Draft Product By Slug',
+				'regular_price' => 10,
+			)
+		);
+		$draft_product->set_status( ProductStatus::DRAFT );
+		$draft_product->save();
+
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $draft_product->get_slug() ) );
+
+		$this->assertEquals( 404, $response->get_status() );
 	}
 
 	/**
