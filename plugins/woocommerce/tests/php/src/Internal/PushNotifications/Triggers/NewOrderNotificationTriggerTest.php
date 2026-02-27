@@ -105,6 +105,17 @@ class NewOrderNotificationTriggerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should not add a notification when order status changes between two notifiable statuses.
+	 */
+	public function test_status_change_between_notifiable_statuses_is_ignored(): void {
+		$order = $this->createMock( WC_Order::class );
+
+		$this->trigger->on_order_status_changed( 1, 'processing', 'completed', $order );
+
+		$this->assertSame( 0, $this->store->count() );
+	}
+
+	/**
 	 * @testdox Should not add a notification when order status changes to a non-notifiable status.
 	 */
 	public function test_on_order_status_changed_ignores_non_notifiable_status(): void {

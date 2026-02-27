@@ -111,7 +111,10 @@ class NewOrderNotificationTrigger {
 		WC_Order $order
 	): void {
 		// phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
-		if ( ! in_array( $next_status, self::NOTIFIABLE_STATUSES, true ) ) {
+		if (
+			in_array( $previous_status, self::NOTIFIABLE_STATUSES, true )
+			|| ! in_array( $next_status, self::NOTIFIABLE_STATUSES, true )
+		) {
 			return;
 		}
 
