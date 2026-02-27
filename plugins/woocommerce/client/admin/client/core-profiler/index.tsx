@@ -150,7 +150,6 @@ const handleTrackingOption = assign( {
 
 const getStoreNameOption = fromPromise( async () =>
 	resolveSelect( coreStore )
-		// @ts-expect-error getEntityRecord is not typed correctly in coreStore
 		.getEntityRecord( 'root', 'site' )
 		.then( ( site ) => ( site as Settings ).title )
 );

@@ -22,6 +22,7 @@ export const usePublishedProductsCount = () => {
 
 		const loadingPublishedProductsCount = ! hasFinishedResolution(
 			'getProductsTotalCount',
+			// @ts-expect-error The default value type is not inferred correctly.
 			[ PUBLISHED_PRODUCTS_QUERY_PARAMS, 0 ]
 		);
 
