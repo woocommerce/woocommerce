@@ -32574,7 +32574,7 @@ snapshots:
     dependencies:
       '@types/react': 18.3.16
       '@types/tinycolor2': 1.4.6
-      '@types/wordpress__notices': 3.3.0
+      '@types/wordpress__notices': 3.27.6(react@18.3.1)
       '@types/wordpress__rich-text': 6.10.0(react@18.3.1)
       '@wordpress/element': 5.22.0
       downshift: 6.1.12(react@18.3.1)

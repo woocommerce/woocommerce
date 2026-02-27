@@ -30,7 +30,7 @@ import ts from 'typescript';
 // Configuration
 // ---------------------------------------------------------------------------
 
-// Package names to generate ambient type declarations for.
+// Packages to generate ambient type declarations for.
 // DT vs build-types is auto-detected from devDependencies in package.json:
 // if @types/wordpress__<slug> exists → DT package (typesDir '.'),
 // otherwise → the package's own build-types directory.
@@ -91,9 +91,11 @@ function resolvePackageTypesDir( packageName, typesDir, dtPackage ) {
 }
 
 function collectDtsFiles( dir ) {
-	return readdirSync( dir, { recursive: true } )
-		.filter( ( f ) => f.endsWith( '.d.ts' ) )
-		.map( ( f ) => f.replaceAll( '\\', '/' ) );
+	return new Set(
+		readdirSync( dir, { recursive: true } )
+			.filter( ( f ) => f.endsWith( '.d.ts' ) )
+			.map( ( f ) => f.replaceAll( '\\', '/' ) )
+	);
 }
 
 /**
@@ -204,6 +206,24 @@ function collectRelativeSpecifiers( sourceFile ) {
 			}
 		}
 
+		// ModuleDeclaration: declare module './foo' { ... }
+		// Nested declare module blocks with relative specifiers must be
+		// rewritten to absolute module specifiers so that the augmentation
+		// targets the correct module. Without rewriting, the relative path
+		// resolves against the file on disk (e.g. types/@wordpress/core-data/...)
+		// instead of the declared module specifier (@wordpress/core-data/build-types/...).
+		if (
+			ts.isModuleDeclaration( node ) &&
+			ts.isStringLiteral( node.name ) &&
+			node.name.text.startsWith( '.' )
+		) {
+			results.push( {
+				specifier: node.name.text,
+				start: node.name.getStart( sourceFile ) + 1,
+				end: node.name.getEnd() - 1,
+			} );
+		}
+
 		ts.forEachChild( node, visit );
 	}
 
@@ -288,18 +308,15 @@ function transformFile( { sourceText, filePath, packageName, typesDir, entryPoin
 		}
 	);
 
-	// Trim trailing whitespace from lines and remove trailing blank lines.
-	modified = modified
-		.split( '\n' )
-		.map( ( line ) => line.trimEnd() )
-		.join( '\n' )
-		.trimEnd();
-
-	// Indent the body by one tab.
+	// Trim trailing whitespace and indent the body by one tab (single pass).
 	const indented = modified
 		.split( '\n' )
-		.map( ( line ) => ( line.trim() === '' ? '' : `\t${ line }` ) )
-		.join( '\n' );
+		.map( ( line ) => {
+			const trimmed = line.trimEnd();
+			return trimmed === '' ? '' : `\t${ trimmed }`;
+		} )
+		.join( '\n' )
+		.trimEnd();
 
 	// Build reference path directives for same-package dependencies.
 	const outputPath = computeOutputPath( filePath, packageName );
@@ -346,7 +363,6 @@ function generate( outputDir ) {
 	for ( const pkg of PACKAGES ) {
 		const sourceDir = resolvePackageTypesDir( pkg.name, pkg.typesDir, pkg.dtPackage );
 		const allFiles = collectDtsFiles( sourceDir );
-		const allFilesSet = new Set( allFiles );
 		const pkgOutputDir = join( outputDir, pkg.name );
 
 		// Clean output directory.
@@ -363,7 +379,7 @@ function generate( outputDir ) {
 				packageName: pkg.name,
 				typesDir: pkg.typesDir,
 				entryPoint: pkg.entryPoint,
-				allFiles: allFilesSet,
+				allFiles,
 			} );
 
 			const outPath = join( pkgOutputDir, filePath );
@@ -371,7 +387,7 @@ function generate( outputDir ) {
 			writeFileSync( outPath, transformed );
 		}
 
-		console.log( `Generated types for ${ pkg.name } (${ allFiles.length } files)` );
+		console.log( `Generated types for ${ pkg.name } (${ allFiles.size } files)` );
 	}
 }
 
@@ -456,7 +472,10 @@ function runUpdatePatch() {
 					// Rewrite paths so the patch applies from the package root.
 					const patchContent = error.stdout
 						.replaceAll( cleanPkgDir, `a/types/${ pkg.name }` )
-						.replaceAll( currentPkgDir, `b/types/${ pkg.name }` );
+						.replaceAll( currentPkgDir, `b/types/${ pkg.name }` )
+						// Strip timestamps from diff headers to avoid noisy diffs.
+						.replace( /^(---\s+\S+)\t.+$/gm, '$1' )
+						.replace( /^(\+\+\+\s+\S+)\t.+$/gm, '$1' );
 					writeFileSync( patchFile, patchContent );
 					console.log( `Updated patch: ${ relative( PKG_ROOT, patchFile ) }` );
 				} else {
