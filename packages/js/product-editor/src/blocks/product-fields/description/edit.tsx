@@ -15,6 +15,7 @@ import { useEntityProp } from '@wordpress/core-data';
 import { __ } from '@wordpress/i18n';
 import {
 	BlockControls,
+	// @ts-expect-error no exported member.
 	useInnerBlocksProps,
 	// @ts-expect-error no exported member.
 	BlockPreview,
