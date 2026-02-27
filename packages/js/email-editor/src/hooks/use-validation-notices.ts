@@ -4,18 +4,31 @@
 import { useCallback } from '@wordpress/element';
 import { dispatch, useSelect } from '@wordpress/data';
 import { store as noticesStore } from '@wordpress/notices';
-import type {
-	WPNotice,
-	WPNoticeAction,
-} from '@wordpress/notices/build-types/store/selectors';
+
+export type NoticeAction = {
+	label: string;
+	onClick?: React.MouseEventHandler< HTMLButtonElement >;
+};
+
+export type Notice = {
+	id?: string;
+	title?: string;
+	content?: string;
+	className?: string;
+	type?: string;
+	children?: React.ReactNode;
+	isDismissible?: boolean;
+	handleDismiss?: () => void;
+	actions?: NoticeAction[];
+};
 
 export type ValidationNoticesData = {
-	notices: WPNotice[];
+	notices: Notice[];
 	hasValidationNotice: ( noticeId?: string ) => boolean;
 	addValidationNotice: (
 		noticeId: string,
 		message: string,
-		actions?: WPNoticeAction[]
+		actions?: NoticeAction[]
 	) => void;
 	removeValidationNotice: ( noticeId: string ) => void;
 };

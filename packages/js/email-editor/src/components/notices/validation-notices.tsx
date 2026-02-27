@@ -34,7 +34,7 @@ export function ValidationNotices() {
 								? actions.map( ( { label, onClick } ) => (
 										<Button
 											key={ label }
-											onClick={ () => onClick?.() }
+											onClick={ onClick }
 											variant="link"
 										>
 											{ label }
