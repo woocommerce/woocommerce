@@ -91,6 +91,20 @@ class SingleProductTemplate extends AbstractTemplate {
 				// state closures can resolve it during server-side rendering.
 				ProductsStore::load_product( $consent, $product->get_id() );
 
+				// Keep the existing product-data store hydrated so current
+				// consumers (add-to-cart-with-options, variation-selector)
+				// continue to work. This will be removed when consumers are
+				// migrated to product-context.
+				wp_interactivity_state(
+					'woocommerce/product-data',
+					array(
+						'templateState' => array(
+							'productId'   => $product->get_id(),
+							'variationId' => null,
+						),
+					)
+				);
+
 				// Register the product-context store state. The derived state
 				// closures (product, selectedVariation) mirror the JS getters
 				// so that directives referencing state.product resolve during
