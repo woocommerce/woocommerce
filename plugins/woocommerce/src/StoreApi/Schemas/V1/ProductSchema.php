@@ -574,6 +574,12 @@ class ProductSchema extends AbstractSchema {
 					],
 				],
 			],
+			'is_password_protected' => [
+				'description' => __( 'Whether the product requires a password to access its content.', 'woocommerce' ),
+				'type'        => 'boolean',
+				'context'     => [ 'view', 'edit', 'embed' ],
+				'readonly'    => true,
+			],
 			self::EXTENDING_KEY    => $this->get_extended_schema( self::IDENTIFIER ),
 		];
 	}
@@ -585,7 +591,11 @@ class ProductSchema extends AbstractSchema {
 	 * @return array
 	 */
 	public function get_item_response( $product ) {
-		$availability = ProductAvailabilityUtils::get_product_availability( $product );
+		$availability        = ProductAvailabilityUtils::get_product_availability( $product );
+		$password_required   = post_password_required( $product->get_id() );
+		$short_description   = $password_required ? '' : $this->prepare_html_response( wc_format_content( wp_kses_post( $product->get_short_description() ) ) );
+		$description         = $password_required ? '' : $this->prepare_html_response( wc_format_content( wp_kses_post( $product->get_description() ) ) );
+
 		return [
 			'id'                   => $product->get_id(),
 			'name'                 => $this->prepare_html_response( $product->get_title() ),
@@ -595,8 +605,8 @@ class ProductSchema extends AbstractSchema {
 			'variation'            => $this->prepare_html_response( $product->is_type( ProductType::VARIATION ) ? wc_get_formatted_variation( $product, true, true, false ) : '' ),
 			'permalink'            => $product->get_permalink(),
 			'sku'                  => $this->prepare_html_response( $product->get_sku() ),
-			'short_description'    => $this->prepare_html_response( wc_format_content( wp_kses_post( $product->get_short_description() ) ) ),
-			'description'          => $this->prepare_html_response( wc_format_content( wp_kses_post( $product->get_description() ) ) ),
+			'short_description'    => $short_description,
+			'description'          => $description,
 			'on_sale'              => $product->is_on_sale(),
 			'prices'               => (object) $this->prepare_product_price_response( $product ),
 			'price_html'           => $this->prepare_html_response( $product->get_price_html() ),
@@ -636,6 +646,7 @@ class ProductSchema extends AbstractSchema {
 				],
 				( new QuantityLimits() )->get_add_to_cart_limits( $product )
 			),
+			'is_password_protected' => $password_required,
 			self::EXTENDING_KEY    => $this->get_extended_data( self::IDENTIFIER, $product ),
 
 		];

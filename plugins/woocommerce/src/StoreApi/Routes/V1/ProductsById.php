@@ -61,10 +61,15 @@ class ProductsById extends AbstractRoute {
 				'callback'            => [ $this, 'get_response' ],
 				'permission_callback' => '__return_true',
 				'args'                => array(
-					'context' => $this->get_context_param(
+					'context'  => $this->get_context_param(
 						array(
 							'default' => 'view',
 						)
+					),
+					'password' => array(
+						'description' => __( 'Password for password-protected products.', 'woocommerce' ),
+						'type'        => 'string',
+						'required'    => false,
 					),
 				),
 				'allow_batch'         => [ 'v1' => true ],
@@ -87,6 +92,38 @@ class ProductsById extends AbstractRoute {
 			throw new RouteException( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce' ), 404 );
 		}
 
+		$this->maybe_unlock_password_protected_product( $object, $request );
+
 		return $this->prepare_item_for_response( $object, $request );
+	}
+
+	/**
+	 * If a valid password is provided for a password-protected product,
+	 * bypass the password requirement for the current request.
+	 *
+	 * @param \WC_Product               $product Product object.
+	 * @param \WP_REST_Request<array{password?: string}> $request Request object.
+	 */
+	protected function maybe_unlock_password_protected_product( \WC_Product $product, \WP_REST_Request $request ): void {
+		if ( empty( $request['password'] ) || ! $product->get_post_password() ) {
+			return;
+		}
+
+		if ( $product->get_post_password() !== $request['password'] ) {
+			return;
+		}
+
+		$product_id = $product->get_id();
+		add_filter(
+			'post_password_required',
+			function ( $required, $post ) use ( $product_id ) {
+				if ( $post->ID === $product_id ) {
+					return false;
+				}
+				return $required;
+			},
+			10,
+			2
+		);
 	}
 }

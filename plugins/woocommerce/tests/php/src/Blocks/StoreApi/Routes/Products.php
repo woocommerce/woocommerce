@@ -597,6 +597,150 @@ class Products extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox Password-protected products in collection should have redacted content and is_password_protected true.
+	 */
+	public function test_password_protected_product_redacts_content_in_collection() {
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name'              => 'Protected Product',
+				'regular_price'     => 10,
+				'short_description' => 'Secret short desc',
+				'description'       => 'Secret full desc',
+			)
+		);
+
+		wp_update_post(
+			array(
+				'ID'            => $product->get_id(),
+				'post_password' => 'testpass',
+			)
+		);
+
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products' ) );
+		$data     = $response->get_data();
+
+		$protected_product = null;
+		foreach ( $data as $item ) {
+			if ( $item['id'] === $product->get_id() ) {
+				$protected_product = $item;
+				break;
+			}
+		}
+
+		$this->assertNotNull( $protected_product );
+		$this->assertTrue( $protected_product['is_password_protected'] );
+		$this->assertEmpty( $protected_product['description'] );
+		$this->assertEmpty( $protected_product['short_description'] );
+	}
+
+	/**
+	 * @testdox Password-protected product by ID should have redacted content.
+	 */
+	public function test_password_protected_product_by_id_redacts_content() {
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name'              => 'Protected Product By ID',
+				'regular_price'     => 10,
+				'short_description' => 'Secret short desc',
+				'description'       => 'Secret full desc',
+			)
+		);
+
+		wp_update_post(
+			array(
+				'ID'            => $product->get_id(),
+				'post_password' => 'testpass',
+			)
+		);
+
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $product->get_id() ) );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertTrue( $data['is_password_protected'] );
+		$this->assertEmpty( $data['description'] );
+		$this->assertEmpty( $data['short_description'] );
+	}
+
+	/**
+	 * @testdox Password-protected product with correct password should return full content.
+	 */
+	public function test_password_protected_product_with_correct_password_returns_content() {
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name'              => 'Protected Product With Pass',
+				'regular_price'     => 10,
+				'short_description' => 'Secret short desc',
+				'description'       => 'Secret full desc',
+			)
+		);
+
+		wp_update_post(
+			array(
+				'ID'            => $product->get_id(),
+				'post_password' => 'testpass',
+			)
+		);
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $product->get_id() );
+		$request->set_param( 'password', 'testpass' );
+
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertNotEmpty( $data['description'] );
+		$this->assertNotEmpty( $data['short_description'] );
+	}
+
+	/**
+	 * @testdox Password-protected product with wrong password should still redact content.
+	 */
+	public function test_password_protected_product_with_wrong_password_still_redacts() {
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name'              => 'Protected Product Wrong Pass',
+				'regular_price'     => 10,
+				'short_description' => 'Secret short desc',
+				'description'       => 'Secret full desc',
+			)
+		);
+
+		wp_update_post(
+			array(
+				'ID'            => $product->get_id(),
+				'post_password' => 'testpass',
+			)
+		);
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $product->get_id() );
+		$request->set_param( 'password', 'wrongpass' );
+
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertTrue( $data['is_password_protected'] );
+		$this->assertEmpty( $data['description'] );
+		$this->assertEmpty( $data['short_description'] );
+	}
+
+	/**
+	 * @testdox Non-password-protected product should have is_password_protected false.
+	 */
+	public function test_non_password_protected_product_has_false_flag() {
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $this->products[0]->get_id() ) );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertFalse( $data['is_password_protected'] );
+	}
+
+	/**
 	 * @testdox Related query parameter returns empty when no related products exist.
 	 */
 	public function test_related_query_parameter_returns_empty_when_no_related() {
