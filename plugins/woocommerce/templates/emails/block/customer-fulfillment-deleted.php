@@ -39,6 +39,7 @@ defined( 'ABSPATH' ) || exit;
 
 <!-- wp:paragraph {"align":"center"} -->
 <p class="has-text-align-center"><?php
-echo esc_html__( 'If you have any questions or notice anything unexpected, feel free to reach out to our support team through your account or reply to this email.', 'woocommerce' );
+/* translators: %s: Store admin email */
+printf( esc_html__( 'Thanks again! If you need any help with your order, please contact us at %s.', 'woocommerce' ), '<!--[woocommerce/store-email]-->' );
 ?></p>
 <!-- /wp:paragraph -->
