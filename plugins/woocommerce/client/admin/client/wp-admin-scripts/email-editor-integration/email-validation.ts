@@ -25,6 +25,7 @@ type EmailContentValidationRule = {
  * @return The WooCommerce data for the current post.
  */
 function getWooCommerceData() {
+	// @ts-expect-error The type is missing
 	return select( 'core' ).getEditedEntityRecord(
 		'postType',
 		window.WooCommerceEmailEditor.current_post_type,

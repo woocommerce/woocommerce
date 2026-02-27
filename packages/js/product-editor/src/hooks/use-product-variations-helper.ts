@@ -26,9 +26,11 @@ async function getDefaultVariationValues(
 	productId: number
 ): Promise< Partial< Omit< ProductVariation, 'id' > > > {
 	try {
-		const product = await resolveSelect(
-			'core'
-		).getEntityRecord< Product >( 'postType', 'product', productId );
+		const product = ( await resolveSelect( 'core' ).getEntityRecord(
+			'postType',
+			'product',
+			productId
+		) ) as Product;
 		if ( ! product ) {
 			return {};
 		}
