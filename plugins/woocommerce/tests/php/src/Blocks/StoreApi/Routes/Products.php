@@ -692,6 +692,7 @@ class Products extends ControllerTestCase {
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
+		$this->assertTrue( $data['is_password_protected'] );
 		$this->assertNotEmpty( $data['description'] );
 		$this->assertNotEmpty( $data['short_description'] );
 	}

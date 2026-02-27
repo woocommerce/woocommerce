@@ -646,7 +646,7 @@ class ProductSchema extends AbstractSchema {
 				],
 				( new QuantityLimits() )->get_add_to_cart_limits( $product )
 			),
-			'is_password_protected' => $password_required,
+			'is_password_protected' => '' !== $product->get_post_password(),
 			self::EXTENDING_KEY    => $this->get_extended_data( self::IDENTIFIER, $product ),
 
 		];
