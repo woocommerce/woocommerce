@@ -19,7 +19,6 @@ export default function Discover(): JSX.Element | null {
 	const [ productGroups, setProductGroups ] = useState<
 		Array< ProductGroup >
 	>( [] );
-	const seenGroups = useRef( new Set< string >() );
 	const groupElements = useRef< Record< string, HTMLDivElement | null > >(
 		{}
 	);
@@ -95,6 +94,7 @@ export default function Discover(): JSX.Element | null {
 				productGroup,
 			] )
 		);
+		const seenGroups = new Set< string >();
 
 		const observer = new IntersectionObserver(
 			( entries ) => {
@@ -106,7 +106,7 @@ export default function Discover(): JSX.Element | null {
 					const groupId = ( entry.target as HTMLDivElement ).dataset
 						.groupId;
 
-					if ( ! groupId || seenGroups.current.has( groupId ) ) {
+					if ( ! groupId || seenGroups.has( groupId ) ) {
 						return;
 					}
 
@@ -117,7 +117,7 @@ export default function Discover(): JSX.Element | null {
 					}
 
 					recordGroupViewedTrackEvent( group );
-					seenGroups.current.add( groupId );
+					seenGroups.add( groupId );
 					observer.unobserve( entry.target );
 				} );
 			},
