@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useContext, useEffect, useState } from '@wordpress/element';
+import { useContext, useEffect, useRef, useState } from '@wordpress/element';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -19,6 +19,10 @@ export default function Discover(): JSX.Element | null {
 	const [ productGroups, setProductGroups ] = useState<
 		Array< ProductGroup >
 	>( [] );
+	const seenUtmGroups = useRef( new Set< string >() );
+	const groupElements = useRef< Record< string, HTMLDivElement | null > >(
+		{}
+	);
 	const marketplaceContextValue = useContext( MarketplaceContext );
 	const { isLoading, setIsLoading } = marketplaceContextValue;
 
@@ -47,6 +51,14 @@ export default function Discover(): JSX.Element | null {
 		} );
 	}
 
+	function recordGroupViewedTrackEvent( group: ProductGroup ) {
+		recordEvent( 'marketplace_discover_group_viewed', {
+			view: 'discover',
+			utm_group: group.id,
+			product_ids: group.items.map( ( product ) => product.id ),
+		} );
+	}
+
 	// Get the content for this screen
 	useEffect( () => {
 		setIsLoading( true );
@@ -68,6 +80,62 @@ export default function Discover(): JSX.Element | null {
 				setIsLoading( false );
 			} );
 	}, [] );
+
+	useEffect( () => {
+		if (
+			! productGroups.length ||
+			! ( 'IntersectionObserver' in window )
+		) {
+			return;
+		}
+
+		const productGroupsById = new Map(
+			productGroups.map( ( productGroup ) => [
+				productGroup.id,
+				productGroup,
+			] )
+		);
+
+		const observer = new IntersectionObserver(
+			( entries ) => {
+				entries.forEach( ( entry ) => {
+					if ( ! entry.isIntersecting ) {
+						return;
+					}
+
+					const utmGroup = ( entry.target as HTMLDivElement ).dataset
+						.utmGroup;
+
+					if ( ! utmGroup || seenUtmGroups.current.has( utmGroup ) ) {
+						return;
+					}
+
+					const group = productGroupsById.get( utmGroup );
+
+					if ( ! group ) {
+						return;
+					}
+
+					recordGroupViewedTrackEvent( group );
+					seenUtmGroups.current.add( utmGroup );
+					observer.unobserve( entry.target );
+				} );
+			},
+			{ threshold: 0.25 }
+		);
+
+		productGroups.forEach( ( group ) => {
+			const groupElement = groupElements.current[ group.id ];
+
+			if ( groupElement ) {
+				observer.observe( groupElement );
+			}
+		} );
+
+		return () => {
+			observer.disconnect();
+		};
+	}, [ productGroups ] );
 
 	if ( isLoading ) {
 		return (
@@ -95,6 +163,10 @@ export default function Discover(): JSX.Element | null {
 					groupURLType={ groups.url_type }
 					type={ groups.itemType }
 					cardType={ groups.cardType ?? ProductCardType.regular }
+					utmGroup={ groups.id }
+					containerRef={ ( element ) => {
+						groupElements.current[ groups.id ] = element;
+					} }
 				/>
 			) ) }
 		</div>
