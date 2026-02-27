@@ -274,6 +274,32 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 	}
 
 	/**
+	 * Check if a value is a math expression.
+	 *
+	 * Matches two or more numeric operands separated by arithmetic operators.
+	 *
+	 * @param string $value Value to test.
+	 * @return bool True if value is a well-formed math expression.
+	 */
+	protected function is_math_expression( string $value ): bool {
+		$decimal_separator  = wc_get_price_decimal_separator();
+		$thousand_separator = wc_get_price_thousand_separator();
+
+		/*
+		* Breakdown:
+		*   [\d{dec}{thou}\s]+           - First operand: digits, decimal/thousand separators, or spaces.
+		*   (                            - Begin repeating group:
+		*     [+\-*\/]                   -   An arithmetic operator (+, -, *, /).
+		*     [\d{dec}{thou}\s]+         -   Next operand: digits, decimal/thousand separators, or spaces.
+		*   )+                           - One or more operator+operand pairs (ensures no trailing operator).
+		* */
+		return (bool) preg_match(
+			'/^[\d\\' . $decimal_separator . '\\' . $thousand_separator . '\s]+([+\-*\/][\d\\' . $decimal_separator . '\\' . $thousand_separator . '\s]+)+$/',
+			trim( $value )
+		);
+	}
+
+	/**
 	 * Sanitize the cost field.
 	 *
 	 * @since 3.4.0
@@ -287,9 +313,8 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 		$value = str_replace( array( get_woocommerce_currency_symbol(), html_entity_decode( get_woocommerce_currency_symbol() ) ), '', $value );
 
 		$contains_shortcodes = false !== strpos( $value, '[' ) || false !== strpos( $value, ']' );
-		$is_math_expression = (bool) preg_match( '/^[\d\.\s]+([+\-*\/][\d\.\s]+)+$/', trim( $value ) );
 
-		if ( ! $contains_shortcodes && ! $is_math_expression ) {
+		if ( ! $contains_shortcodes && ! $this->is_math_expression( $value ) ) {
 			$value = \Automattic\WooCommerce\Utilities\NumberUtil::sanitize_cost_in_current_locale( $value );
 		}
 
