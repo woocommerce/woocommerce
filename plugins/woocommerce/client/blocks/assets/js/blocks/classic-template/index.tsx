@@ -183,7 +183,6 @@ const Edit = ( {
 	const blockProps = useBlockProps();
 	const { currentPostId } = useSelect( ( sel ) => {
 		return {
-			// @ts-expect-error getCurrentPostId is not typed
 			currentPostId: sel( CORE_EDITOR_STORE )?.getCurrentPostId?.() ?? 0,
 		};
 	}, [] );

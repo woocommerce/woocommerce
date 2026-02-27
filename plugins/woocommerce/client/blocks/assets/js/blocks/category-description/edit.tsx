@@ -60,7 +60,6 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 	if ( termId ) {
 		descriptionElement = userCanEdit ? (
 			<PlainText
-				// @ts-expect-error PlainText component types are not up-to-date
 				tagName="p"
 				placeholder={ __( 'No description', 'woocommerce' ) as string }
 				value={ rawDescription }
@@ -82,7 +81,6 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 
 	return (
 		<>
-			{ /* @ts-expect-error BlockControls typing */ }
 			<BlockControls group="block">
 				<AlignmentControl
 					value={ textAlign }

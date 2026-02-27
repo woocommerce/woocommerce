@@ -123,7 +123,6 @@ export default function Edit( {
 	}, [ postId, isSiteEditor ] );
 
 	const blockControls = (
-		// @ts-expect-error BlockControls is not typed.
 		<BlockControls group="block">
 			<AlignmentControl
 				value={ textAlign }

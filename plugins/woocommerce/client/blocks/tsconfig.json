@@ -1,6 +1,7 @@
 {
 	"extends": "./tsconfig.base.json",
 	"include": [
+		"./typings/**/*",
 		"./assets/js/**/*",
 		"./assets/js/**/*.json",
 		"./packages/checkout/**/*",

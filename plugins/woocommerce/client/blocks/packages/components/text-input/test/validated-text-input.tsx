@@ -3,7 +3,7 @@
  */
 import { act, render, screen } from '@testing-library/react';
 import { validationStore } from '@woocommerce/block-data';
-import { dispatch, select, StoreDescriptor } from '@wordpress/data';
+import { dispatch, select } from '@wordpress/data';
 import userEvent from '@testing-library/user-event';
 import { useState } from '@wordpress/element';
 import * as wpData from '@wordpress/data';
@@ -340,7 +340,7 @@ describe( 'ValidatedTextInput', () => {
 		it( 'validates when focusOnMount is true and validateOnMount is not set', async () => {
 			const setValidationErrors = jest.fn();
 			wpData.useDispatch.mockImplementation(
-				( store: StoreDescriptor | string ) => {
+				( store: any ) => {
 					if ( store === validationStore ) {
 						return {
 							...jest
@@ -384,7 +384,7 @@ describe( 'ValidatedTextInput', () => {
 		it( 'validates when focusOnMount is false, regardless of validateOnMount value', async () => {
 			const setValidationErrors = jest.fn();
 			wpData.useDispatch.mockImplementation(
-				( store: StoreDescriptor | string ) => {
+				( store: any ) => {
 					if ( store === validationStore ) {
 						return {
 							...jest
@@ -428,7 +428,7 @@ describe( 'ValidatedTextInput', () => {
 		it( 'does not validate when validateOnMount is false and focusOnMount is true', async () => {
 			const setValidationErrors = jest.fn();
 			wpData.useDispatch.mockImplementation(
-				( store: StoreDescriptor | string ) => {
+				( store: any ) => {
 					if ( store === validationStore ) {
 						return {
 							...jest

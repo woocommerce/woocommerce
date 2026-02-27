@@ -117,7 +117,6 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 	if ( termId ) {
 		titleElement = userCanEdit ? (
 			<PlainText
-				// @ts-expect-error PlainText component types are not up-to-date
 				tagName={ TagName }
 				placeholder={ __( 'No title', 'woocommerce' ) }
 				value={ rawTitle }
@@ -140,7 +139,6 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 		titleElement = userCanEdit ? (
 			<ContainerElement tagName={ TagName } { ...blockProps }>
 				<PlainText
-					// @ts-expect-error PlainText component types are not up-to-date
 					tagName="a"
 					href={ link }
 					target={ linkTarget }
@@ -172,7 +170,6 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 
 	return (
 		<>
-			{ /* @ts-expect-error BlockControls typing */ }
 			<BlockControls group="block">
 				<HeadingLevelDropdown
 					value={ level }

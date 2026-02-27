@@ -2,7 +2,6 @@
  * External dependencies
  */
 import {
-	// @ts-expect-error Missing types for this package.
 	useInnerBlocksProps,
 	useBlockProps,
 } from '@wordpress/block-editor';

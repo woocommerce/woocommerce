@@ -3,7 +3,6 @@
  */
 import {
 	useBlockProps,
-	// @ts-expect-error no exported member.
 	useInnerBlocksProps,
 } from '@wordpress/block-editor';
 

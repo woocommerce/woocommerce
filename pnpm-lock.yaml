@@ -3568,6 +3568,9 @@ importers:
       '@woocommerce/internal-style-build':
         specifier: workspace:*
         version: link:../../../../packages/js/internal-style-build
+      '@woocommerce/internal-ts-config':
+        specifier: workspace:*
+        version: link:../../../../packages/js/internal-ts-config
       '@woocommerce/navigation':
         specifier: workspace:*
         version: link:../../../../packages/js/navigation
@@ -4077,6 +4080,9 @@ importers:
       '@woocommerce/eslint-plugin':
         specifier: workspace:*
         version: link:../../../../packages/js/eslint-plugin
+      '@woocommerce/internal-ts-config':
+        specifier: workspace:*
+        version: link:../../../../packages/js/internal-ts-config
       '@wordpress/api-fetch':
         specifier: 6.21.0
         version: 6.21.0

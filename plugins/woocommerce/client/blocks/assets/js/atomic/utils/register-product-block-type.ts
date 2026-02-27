@@ -113,7 +113,6 @@ export class BlockRegistrationManager {
 				return;
 			}
 
-			// @ts-expect-error getCurrentPostType is not typed
 			const postType = editorSelectors.getCurrentPostType();
 
 			// Return if post type is not available yet

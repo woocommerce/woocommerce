@@ -67,7 +67,6 @@ export const Edit = ( {
 	const fieldSettings = useSelect( ( select ) => {
 		return select(
 			coreStore as unknown as string
-			// @ts-expect-error getEditedEntityRecord is not typed in @wordpress/core-data yet.
 		).getEditedEntityRecord( 'root', 'site' ) as Record< string, string >;
 	}, [] );
 

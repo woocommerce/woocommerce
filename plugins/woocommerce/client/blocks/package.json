@@ -103,6 +103,7 @@
 	},
 	"devDependencies": {
 		"@automattic/color-studio": "4.0.0",
+		"@woocommerce/internal-ts-config": "workspace:*",
 		"@babel/cli": "7.25.7",
 		"@babel/core": "7.25.7",
 		"@babel/plugin-syntax-jsx": "7.25.7",
@@ -448,6 +449,9 @@
 				"node_modules/@woocommerce/tracks/build",
 				"node_modules/@woocommerce/tracks/build-module",
 				"node_modules/@woocommerce/tracks/build-types",
+				"node_modules/@woocommerce/internal-ts-config/tsconfig.json",
+				"node_modules/@woocommerce/internal-ts-config/tsconfig-cjs.json",
+				"node_modules/@woocommerce/internal-ts-config/types",
 				"node_modules/@woocommerce/customer-effort-score/build",
 				"node_modules/@woocommerce/customer-effort-score/build-module",
 				"node_modules/@woocommerce/customer-effort-score/build-style",

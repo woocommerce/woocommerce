@@ -6,7 +6,6 @@ import userEvent from '@testing-library/user-event';
 import { useState } from '@wordpress/element';
 import * as wpData from '@wordpress/data';
 import { cartStore } from '@woocommerce/block-data';
-import type { StoreDescriptor } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -52,7 +51,7 @@ wpData.useSelect.mockImplementation(
 	} )
 );
 
-wpData.useDispatch.mockImplementation( ( store: StoreDescriptor | string ) => {
+wpData.useDispatch.mockImplementation( ( store: any ) => {
 	if ( store === cartStore || store === 'wc/store/cart' ) {
 		return {
 			...jest.requireActual( '@wordpress/data' ).useDispatch( store ),
@@ -756,7 +755,7 @@ describe( 'Suggestions - when rendered in AddressAutocomplete component', () => 
 
 			// Override the mock for this specific test
 			wpData.useDispatch.mockImplementation(
-				( store: StoreDescriptor | string ) => {
+				( store: any ) => {
 					if ( store === cartStore || store === 'wc/store/cart' ) {
 						return {
 							...jest
@@ -855,7 +854,7 @@ describe( 'Suggestions - when rendered in AddressAutocomplete component', () => 
 
 			// Override the mock for this specific test
 			wpData.useDispatch.mockImplementation(
-				( store: StoreDescriptor | string ) => {
+				( store: any ) => {
 					if ( store === cartStore || store === 'wc/store/cart' ) {
 						return {
 							...jest
@@ -937,7 +936,7 @@ describe( 'Suggestions - when rendered in AddressAutocomplete component', () => 
 
 			// Override the mock for this specific test
 			wpData.useDispatch.mockImplementation(
-				( store: StoreDescriptor | string ) => {
+				( store: any ) => {
 					if ( store === cartStore || store === 'wc/store/cart' ) {
 						return {
 							...jest
@@ -1004,7 +1003,7 @@ describe( 'Suggestions - when rendered in AddressAutocomplete component', () => 
 
 			// Override the mock for this specific test
 			wpData.useDispatch.mockImplementation(
-				( store: StoreDescriptor | string ) => {
+				( store: any ) => {
 					if ( store === cartStore || store === 'wc/store/cart' ) {
 						return {
 							...jest
@@ -1091,7 +1090,7 @@ describe( 'Suggestions - when rendered in AddressAutocomplete component', () => 
 
 			// Override the mock for this specific test
 			wpData.useDispatch.mockImplementation(
-				( store: StoreDescriptor | string ) => {
+				( store: any ) => {
 					if ( store === cartStore || store === 'wc/store/cart' ) {
 						return {
 							...jest
@@ -1290,7 +1289,7 @@ describe( 'Suggestions - when rendered in AddressAutocomplete component', () => 
 				} );
 
 				wpData.useDispatch.mockImplementation(
-					( store: StoreDescriptor | string ) => {
+					( store: any ) => {
 						if (
 							store === cartStore ||
 							store === 'wc/store/cart'
@@ -1388,7 +1387,7 @@ describe( 'Suggestions - when rendered in AddressAutocomplete component', () => 
 				} );
 
 				wpData.useDispatch.mockImplementation(
-					( store: StoreDescriptor | string ) => {
+					( store: any ) => {
 						if (
 							store === cartStore ||
 							store === 'wc/store/cart'

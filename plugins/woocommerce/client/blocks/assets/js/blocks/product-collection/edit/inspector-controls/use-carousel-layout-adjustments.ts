@@ -104,7 +104,6 @@ const handleTransitionToCarouselLayout = (
 	} );
 
 	if ( headingBlock ) {
-		// @ts-expect-error getBlockIndex is not typed.
 		const headingBlockIndex = selectData( blockEditorStore ).getBlockIndex(
 			headingBlock.clientId
 		);
@@ -198,7 +197,6 @@ const handleTransitionFromCarouselLayout = (
 			if ( headingBlock && groupBlock.innerBlocks.length === 2 ) {
 				const headingBlockIndex = selectData(
 					blockEditorStore
-					// @ts-expect-error getBlockIndex is not typed.
 				).getBlockIndex( headingBlock.clientId );
 				removeBlock( groupBlock.clientId, false );
 				insertBlock(
@@ -249,7 +247,6 @@ const useCarouselLayoutAdjustments = (
 	const { productCollectionBlock } = useSelect(
 		( select ) => ( {
 			productCollectionBlock:
-				// @ts-expect-error getBlock is not typed.
 				select( blockEditorStore ).getBlock( clientId ),
 		} ),
 		[ clientId ]

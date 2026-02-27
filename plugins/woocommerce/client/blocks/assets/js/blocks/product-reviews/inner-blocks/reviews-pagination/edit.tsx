@@ -8,7 +8,6 @@ import type { BlockEditProps } from '@wordpress/blocks';
 import {
 	InspectorControls,
 	useBlockProps,
-	// @ts-expect-error useInnerBlocksProps is not exported from @wordpress/block-editor
 	useInnerBlocksProps,
 	store as blockEditorStore,
 	Warning,
@@ -35,8 +34,6 @@ export default function Edit( {
 }: Props ) {
 	const hasNextPreviousBlocks = useSelect(
 		( select ) => {
-			// TODO: remove the @ts-expect-error comment and typecast for innerBlock once we upgrade @wordpress/block-editor types version.
-			// @ts-expect-error We're using an outdated types of `@wordpress/block-editor`, so the property 'getBlocks' does not exist on type returned by select.
 			const { getBlocks } = select( blockEditorStore );
 			const innerBlocks = getBlocks( clientId );
 			/**
@@ -61,7 +58,6 @@ export default function Edit( {
 
 	// Get the Discussion settings
 	const pageComments = useSelect( ( select ) => {
-		// @ts-expect-error We're using an outdated types of `@wordpress/block-editor`, so the property 'getSettings' does not exist on type returned by select.
 		const { getSettings } = select( blockEditorStore );
 		const { __experimentalDiscussionSettings } = getSettings();
 		return __experimentalDiscussionSettings?.pageComments;
