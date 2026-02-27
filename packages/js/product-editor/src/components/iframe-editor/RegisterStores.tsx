@@ -12,7 +12,6 @@ export const RegisterStores = () => {
 	const registry = useRegistry();
 
 	useEffect( () => {
-		// @ts-expect-error No types for this exist yet.
 		registry.register( interfaceStore );
 	}, [ registry ] );
 
