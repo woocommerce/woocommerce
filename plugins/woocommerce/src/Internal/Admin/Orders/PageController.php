@@ -362,12 +362,22 @@ class PageController {
 	/**
 	 * Remove WordPress-generated post type menus for order types.
 	 *
-	 * Order types remain registered as post types (for backwards compatibility) with show_in_menu
-	 * enabled, which causes WordPress to auto-generate menus. We remove these to prevent duplicates
-	 * with our custom HPOS menus.
+	 * When HPOS is active, register_menu() creates custom admin.php-based menus for all order types
+	 * (e.g. admin.php?page=wc-orders). However, order types are still registered as post types with
+	 * show_in_menu enabled, which causes WordPress to auto-generate edit.php?post_type=X menus too.
+	 * This method removes those legacy CPT menus to prevent duplicates.
 	 *
-	 * We can't set show_in_menu => false at registration because wc_get_order_types('admin-menu')
-	 * uses this flag to determine which types get HPOS menus.
+	 * We can't set show_in_menu => false at registration time because wc_get_order_types('admin-menu')
+	 * relies on this flag to determine which order types should receive HPOS menus.
+	 *
+	 * This works for all users regardless of their capabilities. Users who can see the WooCommerce
+	 * parent menu get custom order type submenus placed under it by register_menu(); users who cannot
+	 * see it get top-level menus instead. In both cases, the legacy CPT menus are removed here.
+	 *
+	 * Any direct navigation to legacy CPT URLs (e.g. edit.php?post_type=shop_order) is handled
+	 * separately by PostsRedirectionController, which 301-redirects to the corresponding HPOS URL.
+	 *
+	 * @since 10.5.0
 	 */
 	public function remove_legacy_order_type_menus(): void {
 		$order_types = wc_get_order_types( 'admin-menu' );
