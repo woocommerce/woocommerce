@@ -4,12 +4,14 @@ namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Utilities\ProductLinksTrait;
+use Automattic\WooCommerce\StoreApi\Utilities\ProductPasswordTrait;
 
 /**
  * ProductsBySlug class.
  */
 class ProductsBySlug extends AbstractRoute {
 	use ProductLinksTrait;
+	use ProductPasswordTrait;
 
 	/**
 	 * The route identifier.
@@ -134,35 +136,5 @@ class ProductsBySlug extends AbstractRoute {
 		}
 
 		return wc_get_product( $result[0]->ID );
-	}
-
-	/**
-	 * If a valid password is provided for a password-protected product,
-	 * bypass the password requirement for the current request.
-	 *
-	 * @param \WC_Product               $product Product object.
-	 * @param \WP_REST_Request<array{password?: string}> $request Request object.
-	 */
-	protected function maybe_unlock_password_protected_product( \WC_Product $product, \WP_REST_Request $request ): void {
-		if ( empty( $request['password'] ) || ! $product->get_post_password() ) {
-			return;
-		}
-
-		if ( $product->get_post_password() !== $request['password'] ) {
-			return;
-		}
-
-		$product_id = $product->get_id();
-		add_filter(
-			'post_password_required',
-			function ( $required, $post ) use ( $product_id ) {
-				if ( $post->ID === $product_id ) {
-					return false;
-				}
-				return $required;
-			},
-			10,
-			2
-		);
 	}
 }
