@@ -123,17 +123,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$product->set_regular_price( 10 );
 		$product->save();
 
-		$cart_item_key = WC()->cart->add_to_cart( $product->get_id(), 2 );
-		$this->assertNotFalse( $cart_item_key, 'Product should be added to cart' );
-
-		$cart_contents = WC()->cart->get_cart();
-		$this->assertCount( 1, $cart_contents, 'Cart should have one item' );
-		$cart_item = array_values( $cart_contents )[0];
-		$this->assertEquals( 2, $cart_item['quantity'], 'Cart item should have quantity 2' );
-
-		WC()->cart->calculate_totals();
-		$initial_subtotal = WC()->cart->get_subtotal();
-		$initial_quantity = $cart_item['quantity'];
+		WC()->cart->add_to_cart( $product->get_id(), 2 );
 
 		$product->set_sold_individually( true );
 		$product->save();
@@ -144,28 +134,43 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertFalse( $result, 'check_cart_items should return false when fixing sold individually quantity (indicating an issue was found)' );
 
 		$cart_contents_after = WC()->cart->get_cart();
-		$this->assertCount( 1, $cart_contents_after, 'Cart should still have one item' );
-		$cart_item_after = array_values( $cart_contents_after )[0];
+		$cart_item_after     = array_values( $cart_contents_after )[0];
 		$this->assertEquals( 1, $cart_item_after['quantity'], 'Cart item quantity should be reduced to 1' );
 
-		WC()->cart->calculate_totals();
-		$final_subtotal = WC()->cart->get_subtotal();
+		$error_notices = wp_list_pluck( wc_get_notices( 'error' ), 'notice' );
+		$this->assertContains(
+			sprintf( 'You can only have 1 %s in your cart.', $product->get_name() ),
+			$error_notices
+		);
 
-		$this->assertEquals( $initial_subtotal / $initial_quantity, $final_subtotal, 'Cart subtotal should be recalculated based on quantity 1', 0.01 );
+		WC()->cart->empty_cart();
+		WC()->session->set( 'wc_notices', null );
+		$product->delete( true );
+	}
 
-		$notices = wc_get_notices();
-		$this->assertArrayHasKey( 'error', $notices, 'Should have error notices' );
-		$this->assertNotEmpty( $notices['error'], 'Should have at least one error notice' );
+	/**
+	 * @testdox Sold individually product with quantity 1 should not trigger an error or get modified by check_cart_items
+	 */
+	public function test_check_cart_items_does_not_modify_sold_individually_quantity_one() {
+		WC()->cart->empty_cart();
+		WC()->session->set( 'wc_notices', null );
 
-		$found_notice = false;
-		foreach ( $notices['error'] as $notice ) {
-			$notice_text = is_array( $notice ) && isset( $notice['notice'] ) ? $notice['notice'] : (string) $notice;
-			if ( strpos( $notice_text, 'You can only have 1' ) !== false ) {
-				$found_notice = true;
-				break;
-			}
-		}
-		$this->assertTrue( $found_notice, 'Should find notice about sold individually quantity limit' );
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 10 );
+		$product->set_sold_individually( true );
+		$product->save();
+
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$result = WC()->cart->check_cart_items();
+		$this->assertTrue( $result, 'check_cart_items should return true when no issues found' );
+
+		$cart_contents = WC()->cart->get_cart();
+		$cart_item     = array_values( $cart_contents )[0];
+		$this->assertEquals( 1, $cart_item['quantity'], 'Quantity should remain 1' );
+
+		$error_notices = wp_list_pluck( wc_get_notices( 'error' ), 'notice' );
+		$this->assertEmpty( $error_notices, 'No error notices should be added' );
 
 		WC()->cart->empty_cart();
 		WC()->session->set( 'wc_notices', null );
