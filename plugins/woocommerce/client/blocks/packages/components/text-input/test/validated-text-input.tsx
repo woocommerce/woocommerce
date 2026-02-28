@@ -3,7 +3,7 @@
  */
 import { act, render, screen } from '@testing-library/react';
 import { validationStore } from '@woocommerce/block-data';
-import { dispatch, select } from '@wordpress/data';
+import { dispatch, select, useDispatch } from '@wordpress/data';
 import userEvent from '@testing-library/user-event';
 import { useState } from '@wordpress/element';
 /**
@@ -11,19 +11,21 @@ import { useState } from '@wordpress/element';
  */
 import ValidatedTextInput from '../validated-text-input';
 
-const mockUseDispatch = jest.fn();
-
 jest.mock( '@wordpress/data', () => ( {
 	__esModule: true,
 	...jest.requireActual( '@wordpress/data' ),
-	useDispatch: mockUseDispatch,
+	useDispatch: jest.fn(),
 } ) );
 
-mockUseDispatch.mockImplementation( ( args ) => {
-	return jest.requireActual( '@wordpress/data' ).useDispatch( args );
-} );
+const mockUseDispatch = useDispatch as jest.Mock;
 
 describe( 'ValidatedTextInput', () => {
+	beforeAll( () => {
+		mockUseDispatch.mockImplementation( ( args ) => {
+			return jest.requireActual( '@wordpress/data' ).useDispatch( args );
+		} );
+	} );
+
 	it( 'Removes related validation error on change', async () => {
 		const user = userEvent.setup();
 

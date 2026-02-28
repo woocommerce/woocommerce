@@ -4,6 +4,7 @@
 import { act, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useState } from '@wordpress/element';
+import { useSelect, useDispatch } from '@wordpress/data';
 import { cartStore } from '@woocommerce/block-data';
 
 /**
@@ -17,53 +18,15 @@ jest.mock( '@woocommerce/base-context', () => ( {
 	useCheckoutAddress: () => mockUseCheckoutAddress(),
 } ) );
 
-const mockUseSelect = jest.fn();
-const mockUseDispatch = jest.fn();
-
 jest.mock( '@wordpress/data', () => ( {
 	__esModule: true,
 	...jest.requireActual( '@wordpress/data' ),
-	useSelect: mockUseSelect,
-	useDispatch: mockUseDispatch,
+	useSelect: jest.fn(),
+	useDispatch: jest.fn(),
 } ) );
 
-// Mock use select so we can override it when wc/store/checkout is accessed, but return the original select function if any other store is accessed.
-mockUseSelect.mockImplementation(
-	jest.fn().mockImplementation( ( passedMapSelect ) => {
-		const mockedSelect = jest.fn().mockImplementation( ( storeName ) => {
-			if ( storeName === 'wc/store/cart' || storeName === cartStore ) {
-				return {
-					getCartData() {
-						return {
-							shippingAddress: {
-								country: 'DE',
-							},
-							billingAddress: {
-								country: 'DE',
-							},
-						};
-					},
-				};
-			}
-			return jest.requireActual( '@wordpress/data' ).select( storeName );
-		} );
-		return passedMapSelect( mockedSelect, {
-			dispatch: jest.requireActual( '@wordpress/data' ).dispatch,
-		} );
-	} )
-);
-
-mockUseDispatch.mockImplementation( ( store: string | { name: string } ) => {
-	if ( store === cartStore || store === 'wc/store/cart' ) {
-		return {
-			...jest.requireActual( '@wordpress/data' ).useDispatch( store ),
-			setShippingAddress: jest.fn(),
-			setBillingAddress: jest.fn(),
-		};
-	}
-
-	return jest.requireActual( '@wordpress/data' ).useDispatch( store );
-} );
+const mockUseSelect = useSelect as jest.Mock;
+const mockUseDispatch = useDispatch as jest.Mock;
 
 jest.mock( '@woocommerce/settings', () => ( {
 	...jest.requireActual( '@woocommerce/settings' ),
@@ -86,6 +49,57 @@ jest.mock( '@woocommerce/settings', () => ( {
 } ) );
 describe( 'Suggestions - when rendered in AddressAutocomplete component', () => {
 	beforeAll( () => {
+		// Mock use select so we can override it when wc/store/checkout is accessed, but return the original select function if any other store is accessed.
+		mockUseSelect.mockImplementation(
+			jest.fn().mockImplementation( ( passedMapSelect ) => {
+				const mockedSelect = jest
+					.fn()
+					.mockImplementation( ( storeName ) => {
+						if (
+							storeName === 'wc/store/cart' ||
+							storeName === cartStore
+						) {
+							return {
+								getCartData() {
+									return {
+										shippingAddress: {
+											country: 'DE',
+										},
+										billingAddress: {
+											country: 'DE',
+										},
+									};
+								},
+							};
+						}
+						return jest
+							.requireActual( '@wordpress/data' )
+							.select( storeName );
+					} );
+				return passedMapSelect( mockedSelect, {
+					dispatch: jest.requireActual( '@wordpress/data' ).dispatch,
+				} );
+			} )
+		);
+
+		mockUseDispatch.mockImplementation(
+			( store: string | { name: string } ) => {
+				if ( store === cartStore || store === 'wc/store/cart' ) {
+					return {
+						...jest
+							.requireActual( '@wordpress/data' )
+							.useDispatch( store ),
+						setShippingAddress: jest.fn(),
+						setBillingAddress: jest.fn(),
+					};
+				}
+
+				return jest
+					.requireActual( '@wordpress/data' )
+					.useDispatch( store );
+			}
+		);
+
 		mockUseCheckoutAddress.mockReturnValue( {
 			useShippingAsBilling: false,
 			useBillingAsShipping: false,
