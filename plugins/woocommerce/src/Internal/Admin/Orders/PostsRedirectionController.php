@@ -183,5 +183,4 @@ class PostsRedirectionController {
 		wp_safe_redirect( $new_url, 301 );
 		exit;
 	}
-
 }
