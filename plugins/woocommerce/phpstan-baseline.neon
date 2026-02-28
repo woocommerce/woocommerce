@@ -2287,15 +2287,27 @@ parameters:
 			path: includes/admin/class-wc-admin-menus.php
 
 		-
+			message: '#^Method WC_Admin_Menus\:\:menu_order_count\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: includes/admin/class-wc-admin-menus.php
+
+		-
 			message: '#^Parameter \#1 \$text of function esc_attr expects string, int\<min, \-1\> given\.$#'
 			identifier: argument.type
 			count: 6
 			path: includes/admin/class-wc-admin-menus.php
 
 		-
+			message: '#^Parameter \#1 \$text of function esc_attr expects string, int\<min, \-1\>\|int\<1, max\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/admin/class-wc-admin-menus.php
+
+		-
 			message: '#^Parameter \#2 \$haystack of function array_search expects array, int given\.$#'
 			identifier: argument.type
-			count: 2
+			count: 3
 			path: includes/admin/class-wc-admin-menus.php
 
 		-
@@ -60400,24 +60412,6 @@ parameters:
 			path: src/Internal/Admin/Orders/EditLock.php
 
 		-
-			message: '#^Access to an undefined property object\:\:\$base\.$#'
-			identifier: property.notFound
-			count: 2
-			path: src/Internal/Admin/Orders/MenuCompatibilityHelper.php
-
-		-
-			message: '#^Access to an undefined property object\:\:\$original_base\.$#'
-			identifier: property.notFound
-			count: 1
-			path: src/Internal/Admin/Orders/MenuCompatibilityHelper.php
-
-		-
-			message: '#^Access to an undefined property object\:\:\$original_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: src/Internal/Admin/Orders/MenuCompatibilityHelper.php
-
-		-
 			message: '#^Access to property \$cap on an unknown class Automattic\\WooCommerce\\Internal\\Admin\\Orders\\WP_Post_Type\.$#'
 			identifier: class.notFound
 			count: 1
@@ -60724,6 +60718,18 @@ parameters:
 			path: src/Internal/Admin/Orders/ListTable.php
 
 		-
+			message: '#^Access to an undefined property WP_Screen\:\:\$original_base\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Internal/Admin/Orders/MenuCompatibilityHelper.php
+
+		-
+			message: '#^Access to an undefined property WP_Screen\:\:\$original_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Internal/Admin/Orders/MenuCompatibilityHelper.php
+
+		-
 			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
 			count: 1
@@ -60972,13 +60978,7 @@ parameters:
 		-
 			message: '#^Cannot access property \$cap on WP_Post_Type\|null\.$#'
 			identifier: property.nonObject
-			count: 5
-			path: src/Internal/Admin/Orders/PageController.php
-
-		-
-			message: '#^Cannot access property \$labels on WP_Post_Type\|null\.$#'
-			identifier: property.nonObject
-			count: 4
+			count: 2
 			path: src/Internal/Admin/Orders/PageController.php
 
 		-
@@ -61012,12 +61012,6 @@ parameters:
 			path: src/Internal/Admin/Orders/PageController.php
 
 		-
-			message: '#^Parameter \#2 \$callback of function add_action expects callable\(\)\: mixed, ''register_menu'' given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Orders/PageController.php
-
-		-
 			message: '#^Property Automattic\\WooCommerce\\Internal\\Admin\\Orders\\PageController\:\:\$order \(WC_Order\) does not accept WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: assign.propertyType
 			count: 1
@@ -61042,14 +61036,14 @@ parameters:
 			path: src/Internal/Admin/Orders/PageController.php
 
 		-
-			message: '#^Property WP_Post_Type\:\:\$menu_icon \(string\) on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.property
+			message: '#^Property Automattic\\WooCommerce\\Internal\\Admin\\Orders\\PageController\:\:\$redirection_controller is never read, only written\.$#'
+			identifier: property.onlyWritten
 			count: 1
 			path: src/Internal/Admin/Orders/PageController.php
 
 		-
-			message: '#^Property Automattic\\WooCommerce\\Internal\\Admin\\Orders\\PageController\:\:\$redirection_controller is never read, only written\.$#'
-			identifier: property.onlyWritten
+			message: '#^Property WP_Post_Type\:\:\$menu_icon \(string\) on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.property
 			count: 1
 			path: src/Internal/Admin/Orders/PageController.php
 
