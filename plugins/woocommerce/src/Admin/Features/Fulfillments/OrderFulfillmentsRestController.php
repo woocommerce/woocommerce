@@ -9,7 +9,6 @@ namespace Automattic\WooCommerce\Admin\Features\Fulfillments;
 
 use Automattic\WooCommerce\Internal\Admin\Settings\Exceptions\ApiException;
 use Automattic\WooCommerce\Internal\RestApiControllerBase;
-use Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDataStore;
 use WC_Order;
 use WP_Http;
 use WP_REST_Request;
