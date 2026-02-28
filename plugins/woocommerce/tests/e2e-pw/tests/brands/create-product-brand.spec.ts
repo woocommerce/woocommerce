@@ -90,8 +90,9 @@ test( 'Merchant can add brands', async ( { page } ) => {
 	 */
 	const editBrand = async ( currentName: string, brand: Brand ) => {
 		await page
-			.locator( '#posts-filter' )
-			.getByRole( 'link', { name: currentName, exact: true } )
+			.locator( '#posts-filter .row-title' )
+			.filter( { hasText: currentName } )
+			.first()
 			.click();
 		await page.getByLabel( 'Name' ).fill( brand.name );
 		await page.getByLabel( 'Slug' ).fill( brand.slug );
@@ -133,8 +134,9 @@ test( 'Merchant can add brands', async ( { page } ) => {
 	 */
 	const deleteBrand = async ( name: string ) => {
 		await page
-			.locator( '#posts-filter' )
-			.getByRole( 'link', { name, exact: true } )
+			.locator( '#posts-filter .row-title' )
+			.filter( { hasText: name } )
+			.first()
 			.click();
 
 		// After clicking the "Delete" button, there will be a confirmation dialog.
