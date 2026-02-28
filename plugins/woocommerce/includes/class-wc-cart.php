@@ -853,6 +853,7 @@ class WC_Cart extends WC_Legacy_Cart {
 			}
 
 			if ( $product_to_check->is_sold_individually() && $values['quantity'] > 1 ) {
+				// Re-fetch and overwrite to reflect product changes made after item was added to cart.
 				$this->cart_contents[ $cart_item_key ]['data'] = $product_to_check;
 				$this->set_quantity( $cart_item_key, 1, false );
 				/* translators: %s: product name */
