@@ -7,7 +7,6 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Fulfillments;
 
-use Automattic\WooCommerce\Internal\DataStores\Fulfillments\FulfillmentsDataStore;
 use Automattic\WooCommerce\Internal\Fulfillments\Providers\AbstractShippingProvider;
 use WC_Order;
 use WC_Order_Refund;
@@ -122,14 +121,8 @@ class FulfillmentsManager {
 			return;
 		}
 
-		/**
-		 * Get the FulfillmentsDataStore instance.
-		 *
-		 * @var FulfillmentsDataStore $fulfillments_data_store
-		 */
-		$fulfillments_data_store = wc_get_container()->get( FulfillmentsDataStore::class );
-		// Read all fulfillments for the order.
-		$fulfillments = $fulfillments_data_store->read_fulfillments( \WC_Order::class, (string) $order->get_id() );
+		$fulfillments_data_store = \WC_Data_Store::load( 'order-fulfillment' );
+		$fulfillments            = $fulfillments_data_store->read_fulfillments( \WC_Order::class, (string) $order->get_id() );
 
 		$this->update_fulfillment_status( $order, $fulfillments );
 	}
@@ -160,7 +153,7 @@ class FulfillmentsManager {
 			return; // If the order is not valid, do nothing.
 		}
 
-		$fulfillments_data_store = wc_get_container()->get( FulfillmentsDataStore::class );
+		$fulfillments_data_store = \WC_Data_Store::load( 'order-fulfillment' );
 		$fulfillments            = $fulfillments_data_store->read_fulfillments( \WC_Order::class, (string) $order_id );
 
 		$this->update_fulfillment_status( $order, $fulfillments );
@@ -196,7 +189,7 @@ class FulfillmentsManager {
 		}
 
 		// Get the fulfillments data store and read all fulfillments for the order.
-		$fulfillments_data_store = wc_get_container()->get( FulfillmentsDataStore::class );
+		$fulfillments_data_store = \WC_Data_Store::load( 'order-fulfillment' );
 		$fulfillments            = $fulfillments_data_store->read_fulfillments( \WC_Order::class, (string) $order_id );
 		if ( empty( $fulfillments ) ) {
 			return; // No fulfillments found for the order.

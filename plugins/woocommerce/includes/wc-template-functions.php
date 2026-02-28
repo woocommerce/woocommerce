@@ -13,7 +13,6 @@ use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\WooCommerce\Enums\ProductType;
-use Automattic\WooCommerce\Internal\DataStores\Fulfillments\FulfillmentsDataStore;
 use Automattic\WooCommerce\Internal\Fulfillments\Fulfillment;
 use Automattic\WooCommerce\Internal\Utilities\HtmlSanitizer;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -3038,7 +3037,7 @@ if ( ! function_exists( 'woocommerce_order_details_table' ) ) {
 		$template = 'order/order-details.php';
 
 		if ( FeaturesUtil::feature_is_enabled( 'fulfillments' ) ) {
-			$fulfillment_data_store = wc_get_container()->get( FulfillmentsDataStore::class );
+			$fulfillment_data_store = \WC_Data_Store::load( 'order-fulfillment' );
 			$fulfillments           = $fulfillment_data_store->read_fulfillments( WC_Order::class, $order_id );
 			if ( ! empty( $fulfillments ) ) {
 				$template = 'order/order-details-fulfillments.php';

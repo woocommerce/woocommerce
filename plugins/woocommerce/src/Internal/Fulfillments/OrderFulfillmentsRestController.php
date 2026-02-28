@@ -9,7 +9,6 @@ namespace Automattic\WooCommerce\Internal\Fulfillments;
 
 use Automattic\WooCommerce\Internal\Admin\Settings\Exceptions\ApiException;
 use Automattic\WooCommerce\Internal\RestApiControllerBase;
-use Automattic\WooCommerce\Internal\DataStores\Fulfillments\FulfillmentsDataStore;
 use WC_Order;
 use WP_Http;
 use WP_REST_Request;
@@ -216,7 +215,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 
 		// Fetch fulfillments for the order.
 		try {
-			$datastore    = wc_get_container()->get( FulfillmentsDataStore::class );
+			$datastore    = \WC_Data_Store::load( 'order-fulfillment' );
 			$fulfillments = $datastore->read_fulfillments( WC_Order::class, "$order_id" );
 		} catch ( \Exception $e ) {
 			return $this->prepare_error_response(

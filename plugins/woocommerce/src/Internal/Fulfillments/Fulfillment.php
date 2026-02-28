@@ -12,7 +12,6 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Fulfillments;
 
-use Automattic\WooCommerce\Internal\DataStores\Fulfillments\FulfillmentsDataStore;
 use WC_Meta_Data;
 
 defined( 'ABSPATH' ) || exit;
@@ -46,7 +45,7 @@ class Fulfillment extends \WC_Data {
 		}
 
 		// Load the items array.
-		$this->data_store = wc_get_container()->get( FulfillmentsDataStore::class );
+		$this->data_store = \WC_Data_Store::load( 'order-fulfillment' );
 		if ( $this->get_id() > 0 ) {
 			$this->data_store->read( $this );
 		}
