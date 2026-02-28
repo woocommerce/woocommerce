@@ -1,10 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	useBlockProps,
-	useInnerBlocksProps,
-} from '@wordpress/block-editor';
+import { useBlockProps, useInnerBlocksProps } from '@wordpress/block-editor';
 
 export const Edit = () => {
 	const innerBlocksProps = useInnerBlocksProps(

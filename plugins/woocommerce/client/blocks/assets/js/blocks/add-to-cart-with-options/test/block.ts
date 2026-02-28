@@ -220,6 +220,7 @@ describe( 'Add to Cart + Options block', () => {
 	// during async block editor setup. Filter it from jest-console's spy
 	// before it checks for unexpected warnings.
 	afterEach( () => {
+		/* eslint-disable no-console */
 		( console.warn as jest.Mock ).mock.calls = (
 			console.warn as jest.Mock
 		 ).mock.calls.filter(
@@ -229,6 +230,7 @@ describe( 'Add to Cart + Options block', () => {
 					firstArg.includes( '__unstableIsPreviewMode' )
 				)
 		);
+		/* eslint-enable no-console */
 	} );
 
 	it( 'should render inner blocks for simple and external products', async () => {

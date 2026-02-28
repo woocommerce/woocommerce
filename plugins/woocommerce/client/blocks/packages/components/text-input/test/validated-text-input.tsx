@@ -6,20 +6,22 @@ import { validationStore } from '@woocommerce/block-data';
 import { dispatch, select } from '@wordpress/data';
 import userEvent from '@testing-library/user-event';
 import { useState } from '@wordpress/element';
-import * as wpData from '@wordpress/data';
-
 /**
  * Internal dependencies
  */
 import ValidatedTextInput from '../validated-text-input';
 
+const mockUseDispatch = jest.fn();
+
 jest.mock( '@wordpress/data', () => ( {
 	__esModule: true,
 	...jest.requireActual( '@wordpress/data' ),
-	useDispatch: jest.fn().mockImplementation( ( args ) => {
-		return jest.requireActual( '@wordpress/data' ).useDispatch( args );
-	} ),
+	useDispatch: mockUseDispatch,
 } ) );
+
+mockUseDispatch.mockImplementation( ( args ) => {
+	return jest.requireActual( '@wordpress/data' ).useDispatch( args );
+} );
 
 describe( 'ValidatedTextInput', () => {
 	it( 'Removes related validation error on change', async () => {
@@ -339,19 +341,21 @@ describe( 'ValidatedTextInput', () => {
 	describe( 'correctly validates on mount', () => {
 		it( 'validates when focusOnMount is true and validateOnMount is not set', async () => {
 			const setValidationErrors = jest.fn();
-			wpData.useDispatch.mockImplementation( ( store: any ) => {
-				if ( store === validationStore ) {
-					return {
-						...jest
-							.requireActual( '@wordpress/data' )
-							.useDispatch( store ),
-						setValidationErrors,
-					};
+			mockUseDispatch.mockImplementation(
+				( store: string | { name: string } ) => {
+					if ( store === validationStore ) {
+						return {
+							...jest
+								.requireActual( '@wordpress/data' )
+								.useDispatch( store ),
+							setValidationErrors,
+						};
+					}
+					return jest
+						.requireActual( '@wordpress/data' )
+						.useDispatch( store );
 				}
-				return jest
-					.requireActual( '@wordpress/data' )
-					.useDispatch( store );
-			} );
+			);
 
 			const TestComponent = () => {
 				const [ inputValue, setInputValue ] = useState( '' );
@@ -381,19 +385,21 @@ describe( 'ValidatedTextInput', () => {
 		} );
 		it( 'validates when focusOnMount is false, regardless of validateOnMount value', async () => {
 			const setValidationErrors = jest.fn();
-			wpData.useDispatch.mockImplementation( ( store: any ) => {
-				if ( store === validationStore ) {
-					return {
-						...jest
-							.requireActual( '@wordpress/data' )
-							.useDispatch( store ),
-						setValidationErrors,
-					};
+			mockUseDispatch.mockImplementation(
+				( store: string | { name: string } ) => {
+					if ( store === validationStore ) {
+						return {
+							...jest
+								.requireActual( '@wordpress/data' )
+								.useDispatch( store ),
+							setValidationErrors,
+						};
+					}
+					return jest
+						.requireActual( '@wordpress/data' )
+						.useDispatch( store );
 				}
-				return jest
-					.requireActual( '@wordpress/data' )
-					.useDispatch( store );
-			} );
+			);
 
 			const TestComponent = ( { validateOnMount = false } ) => {
 				const [ inputValue, setInputValue ] = useState( '' );
@@ -423,19 +429,21 @@ describe( 'ValidatedTextInput', () => {
 		} );
 		it( 'does not validate when validateOnMount is false and focusOnMount is true', async () => {
 			const setValidationErrors = jest.fn();
-			wpData.useDispatch.mockImplementation( ( store: any ) => {
-				if ( store === validationStore ) {
-					return {
-						...jest
-							.requireActual( '@wordpress/data' )
-							.useDispatch( store ),
-						setValidationErrors,
-					};
+			mockUseDispatch.mockImplementation(
+				( store: string | { name: string } ) => {
+					if ( store === validationStore ) {
+						return {
+							...jest
+								.requireActual( '@wordpress/data' )
+								.useDispatch( store ),
+							setValidationErrors,
+						};
+					}
+					return jest
+						.requireActual( '@wordpress/data' )
+						.useDispatch( store );
 				}
-				return jest
-					.requireActual( '@wordpress/data' )
-					.useDispatch( store );
-			} );
+			);
 
 			const TestComponent = () => {
 				const [ inputValue, setInputValue ] = useState( '' );

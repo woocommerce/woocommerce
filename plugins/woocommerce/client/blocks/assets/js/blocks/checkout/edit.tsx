@@ -65,9 +65,10 @@ export const Edit = ( {
 	} = attributes;
 
 	const fieldSettings = useSelect( ( select ) => {
-		return select(
-			coreStore as unknown as string
-		).getEditedEntityRecord( 'root', 'site' ) as Record< string, string >;
+		return select( coreStore as unknown as string ).getEditedEntityRecord(
+			'root',
+			'site'
+		) as Record< string, string >;
 	}, [] );
 
 	const fieldsWithDefaults = {

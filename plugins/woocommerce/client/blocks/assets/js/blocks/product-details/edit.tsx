@@ -91,9 +91,8 @@ const Edit = ( {
 			const blockJustInserted =
 				blockEditorSelect.wasBlockJustInserted( clientId );
 
-			const productDetailsBlock = select(
-				blockEditorStore
-			).getBlock( clientId );
+			const productDetailsBlock =
+				select( blockEditorStore ).getBlock( clientId );
 
 			const productSpecificationClientId = getInnerBlockByName(
 				productDetailsBlock,

@@ -33,8 +33,9 @@ const useEmailPaginationAdjustments = (
 
 	const { productCollectionBlock } = useSelect(
 		( select ) => ( {
-			productCollectionBlock:
-				select( blockEditorStore ).getBlock( clientId ) as Block | null,
+			productCollectionBlock: select( blockEditorStore ).getBlock(
+				clientId
+			) as Block | null,
 		} ),
 		[ clientId ]
 	);

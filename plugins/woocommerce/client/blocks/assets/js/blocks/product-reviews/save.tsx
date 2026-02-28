@@ -1,10 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	useInnerBlocksProps,
-	useBlockProps,
-} from '@wordpress/block-editor';
+import { useInnerBlocksProps, useBlockProps } from '@wordpress/block-editor';
 
 export default function Save( {
 	attributes: { tagName: Tag = 'div' },
