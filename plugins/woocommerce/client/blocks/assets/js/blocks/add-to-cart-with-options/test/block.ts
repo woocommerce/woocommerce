@@ -222,7 +222,7 @@ describe( 'Add to Cart + Options block', () => {
 	afterEach( () => {
 		( console.warn as jest.Mock ).mock.calls = (
 			console.warn as jest.Mock
-		).mock.calls.filter(
+		 ).mock.calls.filter(
 			( [ firstArg ]: [ unknown ] ) =>
 				! (
 					typeof firstArg === 'string' &&
