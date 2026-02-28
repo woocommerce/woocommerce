@@ -367,7 +367,9 @@ class PageController {
 			}
 
 			// Map hooks for backwards compatibility.
-			$hook_mappings[ $hook_suffix ] = 'woocommerce_page_' . $page_slug;
+			if ( $hook_suffix ) {
+				$hook_mappings[ $hook_suffix ] = 'woocommerce_page_' . $page_slug;
+			}
 		}
 
 		// Create backwards compatibility layer.
