@@ -262,6 +262,8 @@ class PageController {
 	 * (e.g., shop_subscription) are placed under WooCommerce if the user has access, otherwise
 	 * under Orders, or as top-level menus if neither parent is available.
 	 *
+	 * @since 10.7.0
+	 *
 	 * @return void
 	 */
 	public function register_menu(): void {
@@ -356,7 +358,7 @@ class PageController {
 		}
 
 		// Create backwards compatibility layer.
-		wc_get_container()->get( MenuCompatibilityController::class )->register_hook_compatibility( $hook_mappings );
+		wc_get_container()->get( MenuCompatibilityHelper::class )->register_hook_compatibility( $hook_mappings );
 	}
 
 	/**
@@ -377,7 +379,7 @@ class PageController {
 	 * Any direct navigation to legacy CPT URLs (e.g. edit.php?post_type=shop_order) is handled
 	 * separately by PostsRedirectionController, which 301-redirects to the corresponding HPOS URL.
 	 *
-	 * @since 10.5.0
+	 * @since 10.7.0
 	 */
 	public function remove_legacy_order_type_menus(): void {
 		$order_types = wc_get_order_types( 'admin-menu' );

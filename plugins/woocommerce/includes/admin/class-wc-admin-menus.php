@@ -270,6 +270,8 @@ class WC_Admin_Menus {
 	 * WordPress auto-highlights post type screens but not custom admin pages,
 	 * so this is only needed when HPOS is enabled.
 	 *
+	 * @since 10.7.0
+	 *
 	 * @param string $submenu_file The current submenu file.
 	 * @return string The modified submenu file.
 	 */
@@ -286,7 +288,7 @@ class WC_Admin_Menus {
 	 *
 	 * Applies filters and returns the badge HTML, or empty string if not applicable.
 	 *
-	 * @since 10.5.0
+	 * @since 10.7.0
 	 *
 	 * @return string The badge HTML or empty string.
 	 */

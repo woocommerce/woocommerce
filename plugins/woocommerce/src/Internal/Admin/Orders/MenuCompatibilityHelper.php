@@ -1,4 +1,6 @@
 <?php
+declare( strict_types=1 );
+
 namespace Automattic\WooCommerce\Internal\Admin\Orders;
 
 /**
@@ -12,9 +14,9 @@ namespace Automattic\WooCommerce\Internal\Admin\Orders;
  * This class ensures plugins and extensions that hook into the original submenu-based hook names
  * continue to work correctly after the menu is promoted to top-level.
  *
- * @since 10.5.0
+ * @since 10.7.0
  */
-class MenuCompatibilityController {
+class MenuCompatibilityHelper {
 
 	/**
 	 * Hook prefixes to map for backwards compatibility.
@@ -31,6 +33,13 @@ class MenuCompatibilityController {
 	);
 
 	/**
+	 * Mappings that have already been registered, to prevent duplicate hook registrations.
+	 *
+	 * @var array<string, string>
+	 */
+	private array $registered_mappings = array();
+
+	/**
 	 * Register backwards compatibility hooks for the top-level Orders menu.
 	 *
 	 * When Orders becomes a top-level menu, WordPress uses different hook names
@@ -40,18 +49,29 @@ class MenuCompatibilityController {
 	 * Also modifies the screen ID and JavaScript `adminpage` variable so plugins
 	 * checking these values continue to work.
 	 *
-	 * @since 10.5.0
+	 * @since 10.7.0
 	 *
 	 * @param array $hook_mappings Array mapping actual hooks to expected hooks
 	 *                             (e.g., 'toplevel_page_wc-orders' => 'woocommerce_page_wc-orders').
 	 */
 	public function register_hook_compatibility( array $hook_mappings ): void {
+		$new_mappings = array();
+
 		foreach ( $hook_mappings as $actual_hook => $expected_hook ) {
+			if ( isset( $this->registered_mappings[ $actual_hook ] ) ) {
+				continue;
+			}
+
 			$this->register_prefixed_hooks( $actual_hook, $expected_hook );
 			$this->register_base_hook( $actual_hook, $expected_hook );
+
+			$this->registered_mappings[ $actual_hook ] = $expected_hook;
+			$new_mappings[ $actual_hook ]              = $expected_hook;
 		}
 
-		$this->register_screen_id_compatibility( $hook_mappings );
+		if ( ! empty( $new_mappings ) ) {
+			$this->register_screen_id_compatibility( $new_mappings );
+		}
 	}
 
 	/**
@@ -71,7 +91,7 @@ class MenuCompatibilityController {
 						/**
 						 * Fires compatibility hooks for the orders page.
 						 *
-						 * @since 10.5.0
+						 * @since 10.7.0
 						 */
 						do_action( $expected_full_hook ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores -- WordPress core uses hyphens for some hook patterns.
 					}
@@ -95,7 +115,7 @@ class MenuCompatibilityController {
 					/**
 					 * Fires for the orders page hook.
 					 *
-					 * @since 10.5.0
+					 * @since 10.7.0
 					 */
 					do_action( $expected_hook );
 				}

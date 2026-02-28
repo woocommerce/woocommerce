@@ -1,21 +1,22 @@
 <?php
+declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Orders;
 
-use Automattic\WooCommerce\Internal\Admin\Orders\MenuCompatibilityController;
+use Automattic\WooCommerce\Internal\Admin\Orders\MenuCompatibilityHelper;
 
 /**
- * Tests for the MenuCompatibilityController class.
+ * Tests for the MenuCompatibilityHelper class.
  *
  * Tests backwards compatibility when the Orders menu is promoted from a submenu
  * under "WooCommerce" to a top-level menu item.
  */
-class MenuCompatibilityControllerTest extends \WC_Unit_Test_Case {
+class MenuCompatibilityHelperTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * The System Under Test.
 	 *
-	 * @var MenuCompatibilityController
+	 * @var MenuCompatibilityHelper
 	 */
 	private $sut;
 
@@ -24,7 +25,7 @@ class MenuCompatibilityControllerTest extends \WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->sut = new MenuCompatibilityController();
+		$this->sut = new MenuCompatibilityHelper();
 	}
 
 	/**
@@ -180,5 +181,29 @@ class MenuCompatibilityControllerTest extends \WC_Unit_Test_Case {
 			has_action( 'load-toplevel_page_wc-orders--shop_subscription' ) !== false,
 			'Second mapping should be registered'
 		);
+	}
+
+	/**
+	 * @testdox Calling register_hook_compatibility twice with the same mappings does not register duplicate callbacks.
+	 */
+	public function test_register_hook_compatibility_does_not_duplicate_callbacks(): void {
+		$hook_mappings = array(
+			'toplevel_page_wc-orders' => 'woocommerce_page_wc-orders',
+		);
+
+		$this->sut->register_hook_compatibility( $hook_mappings );
+		$this->sut->register_hook_compatibility( $hook_mappings );
+
+		$call_count = 0;
+		add_action(
+			'woocommerce_page_wc-orders',
+			function () use ( &$call_count ) {
+				++$call_count;
+			}
+		);
+
+		do_action( 'toplevel_page_wc-orders' );
+
+		$this->assertSame( 1, $call_count, 'Callback should only fire once even when register_hook_compatibility is called twice' );
 	}
 }
