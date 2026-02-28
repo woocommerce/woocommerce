@@ -313,11 +313,16 @@ test.describe( 'Product Reviews', () => {
 			await reviewRow.hover();
 
 			await reviewRow.getByRole( 'button', { name: 'Trash' } ).click();
-			await expect(
-				page.locator( '.trash-undo-inside' ).first()
-			).toContainText(
-				`Comment by ${ review.reviewer } moved to the Trash`
-			);
+			// WordPress wptexturize may convert straight apostrophes (') to
+			// smart quotes (\u2019) in the reviewer name, so check for both.
+			const trashMessage = `Comment by ${ review.reviewer } moved to the Trash`;
+			const trashMessageSmart = trashMessage.replace( /'/g, '\u2019' );
+			const trashNotice = page.locator( '.trash-undo-inside' ).first();
+			const trashNoticeText = await trashNotice.textContent();
+			expect(
+				trashNoticeText?.includes( trashMessage ) ||
+				trashNoticeText?.includes( trashMessageSmart )
+			).toBeTruthy();
 			await page.getByRole( 'button', { name: 'Undo' } ).click();
 
 			await expect(
@@ -326,11 +331,12 @@ test.describe( 'Product Reviews', () => {
 
 			await reviewRow.getByRole( 'button', { name: 'Trash' } ).click();
 
-			await expect(
-				page.locator( '.trash-undo-inside' ).first()
-			).toContainText(
-				`Comment by ${ review.reviewer } moved to the Trash`
-			);
+			const trashNotice2 = page.locator( '.trash-undo-inside' ).first();
+			const trashNoticeText2 = await trashNotice2.textContent();
+			expect(
+				trashNoticeText2?.includes( trashMessage ) ||
+				trashNoticeText2?.includes( trashMessageSmart )
+			).toBeTruthy();
 
 			await page.click( 'a[href*="comment_status=trash"]' );
 
