@@ -132,20 +132,17 @@ class MenuCompatibilityHelper {
 	private function register_screen_id_compatibility( array $hook_mappings ): void {
 		add_action(
 			'current_screen',
-			function ( $screen ) use ( $hook_mappings ) {
-				if ( ! is_object( $screen ) || ! property_exists( $screen, 'id' ) ) {
-					return;
-				}
-
+			function ( \WP_Screen $screen ) use ( $hook_mappings ) {
 				if ( isset( $hook_mappings[ $screen->id ] ) ) {
+					$expected_hook = $hook_mappings[ $screen->id ];
 					// Store the original ID and base in case something needs them.
 					$screen->original_id   = $screen->id;
 					$screen->original_base = $screen->base;
 					// Change the screen ID and base to what plugins expect.
-					$screen->id   = $hook_mappings[ $screen->original_id ];
-					$screen->base = $hook_mappings[ $screen->original_id ];
+					$screen->id   = $expected_hook;
+					$screen->base = $expected_hook;
 
-					$this->update_adminpage_js_variable( $screen->id );
+					$this->update_adminpage_js_variable( $expected_hook );
 				}
 			},
 			1
