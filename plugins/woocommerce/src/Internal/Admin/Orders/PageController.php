@@ -311,7 +311,10 @@ class PageController {
 		}
 
 		// Process remaining order types (custom order types like shop_subscription).
-		// These are placed under WooCommerce if accessible, otherwise as top-level.
+		// Placement honors the order type's show_in_menu setting, matching CPT behavior:
+		// - true: top-level menu
+		// - 'woocommerce': submenu under WooCommerce if accessible, otherwise top-level
+		// - other string: submenu under that specific parent menu slug
 		foreach ( $order_types as $order_type ) {
 			// Skip shop_order if we already processed it.
 			if ( 'shop_order' === $order_type && $has_shop_order ) {
@@ -327,11 +330,21 @@ class PageController {
 
 			$page_slug = 'wc-orders' . ( 'shop_order' === $order_type ? '' : '--' . $order_type );
 
-			// Determine menu parent: WooCommerce menu if user can access it, otherwise top-level.
-			$menu_parent = \WC_Admin_Menus::can_view_woocommerce_menu_item() ? 'woocommerce' : null;
+			// Determine menu parent based on the order type's show_in_menu value,
+			// matching how WordPress handles this for regular post types.
+			if ( true === $post_type->show_in_menu ) {
+				// Order type explicitly requested a top-level menu.
+				$menu_parent = null;
+			} elseif ( 'woocommerce' === $post_type->show_in_menu ) {
+				// Order type requested placement under WooCommerce.
+				$menu_parent = \WC_Admin_Menus::can_view_woocommerce_menu_item() ? 'woocommerce' : null;
+			} else {
+				// Order type requested placement under a custom parent — honor it directly.
+				$menu_parent = $post_type->show_in_menu;
+			}
 
 			if ( null === $menu_parent ) {
-				// Create as top-level menu if no parent available.
+				// Create as top-level menu.
 				$hook_suffix = add_menu_page(
 					$post_type->labels->name,
 					$post_type->labels->menu_name,
@@ -353,7 +366,7 @@ class PageController {
 				);
 			}
 
-			// Map submenu hooks - they should appear as if under woocommerce for backwards compatibility.
+			// Map hooks for backwards compatibility.
 			$hook_mappings[ $hook_suffix ] = 'woocommerce_page_' . $page_slug;
 		}
 
