@@ -136,8 +136,8 @@ class MenuCompatibilityHelper {
 				if ( isset( $hook_mappings[ $screen->id ] ) ) {
 					$expected_hook = $hook_mappings[ $screen->id ];
 					// Store the original ID and base in case something needs them.
-					$screen->original_id   = $screen->id;
-					$screen->original_base = $screen->base;
+					$screen->original_id   = $screen->id; // @phpstan-ignore property.notFound
+					$screen->original_base = $screen->base; // @phpstan-ignore property.notFound
 					// Change the screen ID and base to what plugins expect.
 					$screen->id   = $expected_hook;
 					$screen->base = $expected_hook;

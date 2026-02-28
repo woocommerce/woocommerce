@@ -60718,18 +60718,6 @@ parameters:
 			path: src/Internal/Admin/Orders/ListTable.php
 
 		-
-			message: '#^Access to an undefined property WP_Screen\:\:\$original_base\.$#'
-			identifier: property.notFound
-			count: 1
-			path: src/Internal/Admin/Orders/MenuCompatibilityHelper.php
-
-		-
-			message: '#^Access to an undefined property WP_Screen\:\:\$original_id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: src/Internal/Admin/Orders/MenuCompatibilityHelper.php
-
-		-
 			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
 			count: 1
