@@ -74,7 +74,7 @@ class MenuCompatibilityHelperTest extends \WC_Unit_Test_Case {
 			}
 		);
 
-		do_action( 'load-toplevel_page_wc-orders' );
+		do_action( 'load-toplevel_page_wc-orders' ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores, WooCommerce.Commenting.CommentHooks.MissingHookComment
 
 		$this->assertTrue( $expected_hook_fired, 'Expected hook should fire when actual hook fires' );
 	}
@@ -97,7 +97,7 @@ class MenuCompatibilityHelperTest extends \WC_Unit_Test_Case {
 			}
 		);
 
-		do_action( 'toplevel_page_wc-orders' );
+		do_action( 'toplevel_page_wc-orders' ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores, WooCommerce.Commenting.CommentHooks.MissingHookComment
 
 		$this->assertTrue( $expected_hook_fired, 'Expected base hook should fire when actual hook fires' );
 	}
@@ -120,7 +120,7 @@ class MenuCompatibilityHelperTest extends \WC_Unit_Test_Case {
 			}
 		);
 
-		do_action( 'toplevel_page_wc-orders' );
+		do_action( 'toplevel_page_wc-orders' ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores, WooCommerce.Commenting.CommentHooks.MissingHookComment
 
 		$this->assertSame( 1, $call_count, 'Hook should only fire once, not infinitely' );
 	}
@@ -167,7 +167,7 @@ class MenuCompatibilityHelperTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_register_hook_compatibility_handles_multiple_mappings(): void {
 		$hook_mappings = array(
-			'toplevel_page_wc-orders'                  => 'woocommerce_page_wc-orders',
+			'toplevel_page_wc-orders'                    => 'woocommerce_page_wc-orders',
 			'toplevel_page_wc-orders--shop_subscription' => 'woocommerce_page_wc-orders--shop_subscription',
 		);
 
@@ -202,7 +202,7 @@ class MenuCompatibilityHelperTest extends \WC_Unit_Test_Case {
 			}
 		);
 
-		do_action( 'toplevel_page_wc-orders' );
+		do_action( 'toplevel_page_wc-orders' ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores, WooCommerce.Commenting.CommentHooks.MissingHookComment -- Test firing a WordPress-generated hook.
 
 		$this->assertSame( 1, $call_count, 'Callback should only fire once even when register_hook_compatibility is called twice' );
 	}

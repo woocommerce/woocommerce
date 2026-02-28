@@ -321,7 +321,7 @@ class PageController {
 		// Placement honors the order type's show_in_menu setting, matching CPT behavior:
 		// - true: top-level menu
 		// - 'woocommerce': submenu under WooCommerce if accessible, otherwise top-level
-		// - other string: submenu under that specific parent menu slug
+		// - other string: submenu under that specific parent menu slug.
 		foreach ( $order_types as $order_type ) {
 			// Skip shop_order if we already processed it.
 			if ( 'shop_order' === $order_type && $has_shop_order ) {
