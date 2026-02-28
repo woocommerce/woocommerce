@@ -274,6 +274,11 @@ class PageController {
 		if ( $has_shop_order ) {
 			// Process shop_order first to create top-level menu.
 			$post_type = get_post_type_object( 'shop_order' );
+
+			if ( ! $post_type ) {
+				return;
+			}
+
 			$menu_name = $post_type->labels->menu_name . \WC_Admin_Menus::get_orders_menu_badge();
 
 			// Create top-level Orders menu and capture the hook suffix.
@@ -288,7 +293,9 @@ class PageController {
 			);
 
 			// Map the new top-level hook to the expected submenu hook for backwards compatibility.
-			$hook_mappings[ $main_hook_suffix ] = 'woocommerce_page_wc-orders';
+			if ( $main_hook_suffix ) {
+				$hook_mappings[ $main_hook_suffix ] = 'woocommerce_page_wc-orders';
+			}
 
 			// Add submenu items for shop_order.
 			add_submenu_page(
@@ -338,9 +345,11 @@ class PageController {
 			} elseif ( 'woocommerce' === $post_type->show_in_menu ) {
 				// Order type requested placement under WooCommerce.
 				$menu_parent = \WC_Admin_Menus::can_view_woocommerce_menu_item() ? 'woocommerce' : null;
-			} else {
+			} elseif ( is_string( $post_type->show_in_menu ) ) {
 				// Order type requested placement under a custom parent — honor it directly.
 				$menu_parent = $post_type->show_in_menu;
+			} else {
+				continue;
 			}
 
 			if ( null === $menu_parent ) {
