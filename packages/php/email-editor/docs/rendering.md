@@ -125,17 +125,15 @@ The `Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Content_
 
 #### `render()`
 
-Returns the rendered HTML content as a string. This is the original method, preserved for backward compatibility.
+Returns the rendered HTML content as a string with CSS styles inlined.
 
 ```php
 /**
- * Render the content.
- *
- * @deprecated Use render_with_styles() to get both HTML and collected CSS.
+ * Render the content with inlined CSS styles.
  *
  * @param WP_Post           $post Post object.
  * @param WP_Block_Template $template Block template.
- * @return string Rendered HTML content.
+ * @return string Rendered HTML content with inlined styles.
  */
 public function render(
     WP_Post $post,
@@ -152,9 +150,9 @@ $template    = get_block_template( $template_id );
 $content     = $content_renderer->render( $post, $template );
 ```
 
-#### `render_with_styles()`
+#### `render_without_css_inline()`
 
-Returns both the rendered HTML and collected CSS styles as an array. CSS inlining is performed by the `Renderer` class, which combines these content styles with template styles into a single inlining pass.
+Returns both the rendered HTML and collected CSS styles as an array, without inlining the CSS. This is used by the `Renderer` class, which combines these content styles with template styles into a single inlining pass.
 
 ```php
 /**
@@ -164,7 +162,7 @@ Returns both the rendered HTML and collected CSS styles as an array. CSS inlinin
  * @param WP_Block_Template $template Block template.
  * @return array{html: string, styles: string} Rendered HTML and collected CSS.
  */
-public function render_with_styles(
+public function render_without_css_inline(
     WP_Post $post,
     WP_Block_Template $template
 ): array
@@ -181,7 +179,7 @@ public function render_with_styles(
 $post        = get_post( $post_id );
 $template_id = get_stylesheet() . '//' . $template_slug;
 $template    = get_block_template( $template_id );
-$result      = $content_renderer->render_with_styles( $post, $template );
+$result      = $content_renderer->render_without_css_inline( $post, $template );
 $html        = $result['html'];
 $styles      = $result['styles'];
 ```

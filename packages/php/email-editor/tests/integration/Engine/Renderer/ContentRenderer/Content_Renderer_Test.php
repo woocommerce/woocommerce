@@ -49,7 +49,7 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * Test render() returns an HTML string for backward compatibility.
+	 * Test render() returns an HTML string with inlined styles.
 	 */
 	public function testItRendersContent(): void {
 		$template          = new \WP_Block_Template();
@@ -64,13 +64,27 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * Test render_with_styles() returns HTML and collected CSS.
+	 * Test render() inlines content styles into the HTML.
 	 */
-	public function testRenderWithStylesReturnsArray(): void {
+	public function testRenderInlinesContentStyles(): void {
 		$template          = new \WP_Block_Template();
 		$template->id      = 'template-id';
 		$template->content = '<!-- wp:post-content /-->';
-		$result            = $this->renderer->render_with_styles( $this->email_post, $template );
+		$rendered          = $this->renderer->render( $this->email_post, $template );
+		$paragraph_styles  = $this->getStylesValueForTag( $rendered, 'p' );
+		$this->assertIsString( $paragraph_styles );
+		$this->assertStringContainsString( 'margin: 0', $paragraph_styles );
+		$this->assertStringContainsString( 'display: block', $paragraph_styles );
+	}
+
+	/**
+	 * Test render_without_css_inline() returns HTML and collected CSS.
+	 */
+	public function testRenderWithoutCssInlineReturnsArray(): void {
+		$template          = new \WP_Block_Template();
+		$template->id      = 'template-id';
+		$template->content = '<!-- wp:post-content /-->';
+		$result            = $this->renderer->render_without_css_inline( $this->email_post, $template );
 		$this->assertArrayHasKey( 'html', $result );
 		$this->assertArrayHasKey( 'styles', $result );
 		$this->assertStringContainsString( 'Hello!', $result['html'] );
@@ -83,19 +97,19 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		$template          = new \WP_Block_Template();
 		$template->id      = 'template-id';
 		$template->content = '<!-- wp:post-content /-->';
-		$result            = $this->renderer->render_with_styles( $this->email_post, $template );
+		$result            = $this->renderer->render_without_css_inline( $this->email_post, $template );
 		$this->assertStringContainsString( 'margin: 0', $result['styles'] );
 		$this->assertStringContainsString( 'display: block', $result['styles'] );
 	}
 
 	/**
-	 * Test render_with_styles returns HTML without inlined styles.
+	 * Test render_without_css_inline() returns HTML without inlined styles.
 	 */
-	public function testRenderWithStylesDoesNotInlineStyles(): void {
+	public function testRenderWithoutCssInlineDoesNotInlineStyles(): void {
 		$template          = new \WP_Block_Template();
 		$template->id      = 'template-id';
 		$template->content = '<!-- wp:post-content /-->';
-		$result            = $this->renderer->render_with_styles( $this->email_post, $template );
+		$result            = $this->renderer->render_without_css_inline( $this->email_post, $template );
 		$paragraph_styles  = $this->getStylesValueForTag( $result['html'], 'p' );
 		// Content_Renderer no longer inlines CSS; that happens in Renderer.
 		$this->assertNull( $paragraph_styles );

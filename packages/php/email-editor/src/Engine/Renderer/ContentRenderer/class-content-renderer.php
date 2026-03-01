@@ -9,6 +9,7 @@ declare(strict_types = 1);
 namespace Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\Css_Inliner;
 use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Fallback;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Post_Content;
@@ -93,18 +94,28 @@ class Content_Renderer {
 	private $backup_post_content_callback;
 
 	/**
+	 * CSS inliner
+	 *
+	 * @var Css_Inliner
+	 */
+	private Css_Inliner $css_inliner;
+
+	/**
 	 * Content_Renderer constructor.
 	 *
 	 * @param Process_Manager     $preprocess_manager Preprocess manager.
+	 * @param Css_Inliner         $css_inliner CSS inliner.
 	 * @param Theme_Controller    $theme_controller Theme controller.
 	 * @param Email_Editor_Logger $logger Logger instance.
 	 */
 	public function __construct(
 		Process_Manager $preprocess_manager,
+		Css_Inliner $css_inliner,
 		Theme_Controller $theme_controller,
 		Email_Editor_Logger $logger
 	) {
 		$this->process_manager     = $preprocess_manager;
+		$this->css_inliner         = $css_inliner;
 		$this->theme_controller    = $theme_controller;
 		$this->logger              = $logger;
 		$this->block_type_registry = WP_Block_Type_Registry::get_instance();
@@ -136,16 +147,18 @@ class Content_Renderer {
 	}
 
 	/**
-	 * Render the content.
-	 *
-	 * @deprecated Use render_with_styles() to get both HTML and collected CSS.
+	 * Render the content with inlined CSS styles.
 	 *
 	 * @param WP_Post           $post Post object.
 	 * @param WP_Block_Template $template Block template.
-	 * @return string Rendered HTML content.
+	 * @return string Rendered HTML content with inlined styles.
 	 */
 	public function render( WP_Post $post, WP_Block_Template $template ): string {
-		return $this->render_with_styles( $post, $template )['html'];
+		$result = $this->render_without_css_inline( $post, $template );
+		$styles = '<style>' . $result['styles'] . '</style>';
+		$html   = $this->css_inliner->from_html( $styles . $result['html'] )->inline_css()->render();
+
+		return $this->process_manager->postprocess( $html );
 	}
 
 	/**
@@ -155,7 +168,7 @@ class Content_Renderer {
 	 * @param WP_Block_Template $template Block template.
 	 * @return array{html: string, styles: string} Rendered HTML and collected CSS.
 	 */
-	public function render_with_styles( WP_Post $post, WP_Block_Template $template ): array {
+	public function render_without_css_inline( WP_Post $post, WP_Block_Template $template ): array {
 		$this->set_template_globals( $post, $template );
 		$this->initialize();
 		$rendered_html = get_the_block_template_html();

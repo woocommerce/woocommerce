@@ -117,7 +117,7 @@ class Renderer {
 		$template = $this->templates->get_block_template( $template_slug );
 
 		$email_styles   = $this->theme_controller->get_styles();
-		$content_result = $this->content_renderer->render_with_styles( $post, $template );
+		$content_result = $this->content_renderer->render_without_css_inline( $post, $template );
 		$template_html  = $content_result['html'];
 		$content_styles = $content_result['styles'];
 		$layout         = $this->theme_controller->get_layout_settings();
