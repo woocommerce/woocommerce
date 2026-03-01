@@ -164,6 +164,8 @@ class Content_Renderer {
 	/**
 	 * Render the content and collect CSS styles without inlining them.
 	 *
+	 * @since 10.7.0
+	 *
 	 * @param WP_Post           $post Post object.
 	 * @param WP_Block_Template $template Block template.
 	 * @return array{html: string, styles: string} Rendered HTML and collected CSS.
