@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add strict parameter and return type declarations to Agentic Store API message classes to prevent invalid payload values from being accepted.

@@ -49,7 +49,7 @@ abstract class Message {
 	/**
 	 * Use markdown content type for the content of the error.
 	 */
-	public function use_markdown() {
+	public function use_markdown(): void {
 		$this->content_type = MessageContentType::MARKDOWN;
 	}
 }
