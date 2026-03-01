@@ -47,7 +47,7 @@ class MessageError extends Message {
 	 * @param string|null $param   RFC 9535 JSONPath (optional).
 	 * @return MessageError
 	 */
-	public static function missing( $content, $param = null ) {
+	public static function missing( string $content, ?string $param = null ): self {
 		return new self( ErrorCode::MISSING, $content, $param );
 	}
 
@@ -58,7 +58,7 @@ class MessageError extends Message {
 	 * @param string|null $param   RFC 9535 JSONPath (optional).
 	 * @return MessageError
 	 */
-	public static function invalid( $content, $param = null ) {
+	public static function invalid( string $content, ?string $param = null ): self {
 		return new self( ErrorCode::INVALID, $content, $param );
 	}
 
@@ -69,7 +69,7 @@ class MessageError extends Message {
 	 * @param string|null $param   RFC 9535 JSONPath (optional).
 	 * @return MessageError
 	 */
-	public static function out_of_stock( $content, $param = null ) {
+	public static function out_of_stock( string $content, ?string $param = null ): self {
 		return new self( ErrorCode::OUT_OF_STOCK, $content, $param );
 	}
 
@@ -80,7 +80,7 @@ class MessageError extends Message {
 	 * @param string|null $param   RFC 9535 JSONPath (optional).
 	 * @return MessageError
 	 */
-	public static function payment_declined( $content, $param = null ) {
+	public static function payment_declined( string $content, ?string $param = null ): self {
 		return new self( ErrorCode::PAYMENT_DECLINED, $content, $param );
 	}
 
@@ -91,7 +91,7 @@ class MessageError extends Message {
 	 * @param string|null $param   RFC 9535 JSONPath (optional).
 	 * @return MessageError
 	 */
-	public static function requires_sign_in( $content, $param = null ) {
+	public static function requires_sign_in( string $content, ?string $param = null ): self {
 		return new self( ErrorCode::REQUIRES_SIGN_IN, $content, $param );
 	}
 
@@ -102,7 +102,7 @@ class MessageError extends Message {
 	 * @param string|null $param   RFC 9535 JSONPath (optional).
 	 * @return MessageError
 	 */
-	public static function requires_3ds( $content, $param = null ) {
+	public static function requires_3ds( string $content, ?string $param = null ): self {
 		return new self( ErrorCode::REQUIRES_3DS, $content, $param );
 	}
 

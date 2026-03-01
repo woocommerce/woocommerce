@@ -24,7 +24,7 @@ class MessageInfo extends Message {
 	 * @param string      $content Error content/message.
 	 * @param string|null $param   RFC 9535 JSONPath (optional).
 	 */
-	public function __construct( $content, $param = null ) {
+	public function __construct( string $content, ?string $param = null ) {
 		$this->content = $content;
 		$this->param   = $param;
 	}
