@@ -43,6 +43,8 @@ class WC_Helper {
 
 	/**
 	 * Loads the helper class, runs on init.
+	 *
+	 * @return void
 	 */
 	public static function load() {
 		self::includes();
@@ -57,6 +59,8 @@ class WC_Helper {
 
 	/**
 	 * Remove all notes signaling an error with the WCCOM API, when the request was successful.
+	 *
+	 * @return void
 	 */
 	protected static function remove_api_error_notice() {
 		try {
@@ -79,6 +83,8 @@ class WC_Helper {
 
 	/**
 	 * Adds at most one note signaling that there was an error with the WCCOM API.
+	 *
+	 * @return void
 	 */
 	protected static function add_api_error_notice() {
 		try {
@@ -132,6 +138,8 @@ class WC_Helper {
 
 	/**
 	 * Include supporting helper classes.
+	 *
+	 * @return void
 	 */
 	protected static function includes() {
 		include_once __DIR__ . '/class-wc-helper-options.php';
@@ -150,6 +158,8 @@ class WC_Helper {
 
 	/**
 	 * Render the helper section content based on context.
+	 *
+	 * @return void
 	 */
 	public static function render_helper_output() {
 		$auth           = WC_Helper_Options::get( 'auth' );
@@ -526,6 +536,8 @@ class WC_Helper {
 	 *
 	 * @param array  $subscriptions The subscriptions array, passed by ref.
 	 * @param string $filter The filter.
+	 *
+	 * @return void
 	 */
 	private static function _filter( &$subscriptions, $filter ) {
 		switch ( $filter ) {
@@ -569,6 +581,8 @@ class WC_Helper {
 
 	/**
 	 * Enqueue admin scripts and styles.
+	 *
+	 * @return void
 	 */
 	public static function admin_enqueue_scripts() {
 		$screen       = get_current_screen();
@@ -771,6 +785,8 @@ class WC_Helper {
 
 	/**
 	 * Maybe redirect to the new Marketplace installer.
+	 *
+	 * @return void
 	 */
 	private static function maybe_redirect_to_new_marketplace_installer() {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
@@ -850,6 +866,8 @@ class WC_Helper {
 
 	/**
 	 * Initiate a new OAuth connection.
+	 *
+	 * @return never
 	 */
 	private static function _helper_auth_connect() {
 		if ( empty( $_GET['wc-helper-nonce'] ) || ! wp_verify_nonce( wp_unslash( $_GET['wc-helper-nonce'] ), 'connect' ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
@@ -938,6 +956,8 @@ class WC_Helper {
 
 	/**
 	 * Return from WooCommerce.com OAuth flow.
+	 *
+	 * @return never
 	 */
 	private static function _helper_auth_return() {
 		if ( empty( $_GET['wc-helper-nonce'] ) || ! wp_verify_nonce( wp_unslash( $_GET['wc-helper-nonce'] ), 'connect' ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
@@ -1034,6 +1054,8 @@ class WC_Helper {
 
 	/**
 	 * Disconnect from WooCommerce.com, clear OAuth tokens.
+	 *
+	 * @return never
 	 */
 	private static function _helper_auth_disconnect() {
 		if ( empty( $_GET['wc-helper-nonce'] ) || ! wp_verify_nonce( wp_unslash( $_GET['wc-helper-nonce'] ), 'disconnect' ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
@@ -1062,6 +1084,8 @@ class WC_Helper {
 
 	/**
 	 * User hit the Refresh button, clear all caches.
+	 *
+	 * @return never
 	 */
 	private static function _helper_auth_refresh() {
 		if ( empty( $_GET['wc-helper-nonce'] ) || ! wp_verify_nonce( wp_unslash( $_GET['wc-helper-nonce'] ), 'refresh' ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
@@ -1088,6 +1112,8 @@ class WC_Helper {
 	 * Flush helper authentication cache.
 	 *
 	 * @throws Exception If there is an error refreshing subscriptions.
+	 *
+	 * @return void
 	 */
 	public static function refresh_helper_subscriptions() {
 		/**
@@ -1104,6 +1130,8 @@ class WC_Helper {
 
 	/**
 	 * Active a product subscription.
+	 *
+	 * @return never
 	 */
 	private static function _helper_subscription_activate() {
 		$product_key = isset( $_GET['wc-helper-product-key'] ) ? wc_clean( wp_unslash( $_GET['wc-helper-product-key'] ) ) : '';
@@ -1223,6 +1251,8 @@ class WC_Helper {
 
 	/**
 	 * Deactivate a product subscription.
+	 *
+	 * @return never
 	 */
 	private static function helper_subscription_deactivate() {
 		$product_key = isset( $_GET['wc-helper-product-key'] ) ? wc_clean( wp_unslash( $_GET['wc-helper-product-key'] ) ) : '';
@@ -1335,6 +1365,8 @@ class WC_Helper {
 
 	/**
 	 * Deactivate a plugin.
+	 *
+	 * @return never
 	 */
 	private static function _helper_plugin_deactivate() {
 		$product_id  = isset( $_GET['wc-helper-product-id'] ) ? absint( $_GET['wc-helper-product-id'] ) : 0;
@@ -1578,6 +1610,8 @@ class WC_Helper {
 
 	/**
 	 * Obtain a list of data about locally installed Woo extensions.
+	 *
+	 * @return array
 	 */
 	public static function get_local_woo_plugins() {
 		if ( ! function_exists( 'get_plugins' ) ) {
@@ -1641,6 +1675,8 @@ class WC_Helper {
 
 	/**
 	 * Get locally installed Woo themes.
+	 *
+	 * @return array
 	 */
 	public static function get_local_woo_themes() {
 		$themes     = wp_get_themes();
@@ -2215,6 +2251,8 @@ class WC_Helper {
 	 * need to visit the Helper UI at all after installing a new extension.
 	 *
 	 * @param string $filename The filename of the activated plugin.
+	 *
+	 * @return void
 	 */
 	public static function activated_plugin( $filename ) {
 		$plugins = self::get_local_woo_plugins();
@@ -2279,6 +2317,8 @@ class WC_Helper {
 	 * need to visit the Helper UI at all after installing a new extension.
 	 *
 	 * @param string $product_id The product id of the activated theme.
+	 *
+	 * @return void
 	 */
 	public static function connect_theme( $product_id ) {
 		// Make sure we have a connection.
@@ -2347,6 +2387,8 @@ class WC_Helper {
 	 * associated with the extension.
 	 *
 	 * @param string $filename The filename of the deactivated plugin.
+	 *
+	 * @return void
 	 */
 	public static function deactivated_plugin( $filename ) {
 		$plugins = self::get_local_woo_plugins();
@@ -2426,6 +2468,8 @@ class WC_Helper {
 
 	/**
 	 * Various Helper-related admin notices.
+	 *
+	 * @return void
 	 */
 	public static function admin_notices() {
 		if ( apply_filters( 'woocommerce_helper_suppress_admin_notices', false ) ) {
@@ -2509,6 +2553,8 @@ class WC_Helper {
 
 	/**
 	 * Flush subscriptions cache.
+	 *
+	 * @return void
 	 */
 	public static function _flush_subscriptions_cache() {
 		delete_transient( '_woocommerce_helper_subscriptions' );
@@ -2516,6 +2562,8 @@ class WC_Helper {
 
 	/**
 	 * Flush product-usage-notice-rules cache.
+	 *
+	 * @return void
 	 */
 	public static function flush_product_usage_notice_rules_cache() {
 		delete_transient( '_woocommerce_helper_product_usage_notice_rules' );
@@ -2523,6 +2571,8 @@ class WC_Helper {
 
 	/**
 	 * Flush connection data cache.
+	 *
+	 * @return void
 	 */
 	public static function flush_connection_data_cache() {
 		delete_transient( self::CACHE_KEY_CONNECTION_DATA );
@@ -2530,6 +2580,8 @@ class WC_Helper {
 
 	/**
 	 * Flush auth cache.
+	 *
+	 * @return bool
 	 */
 	public static function _flush_authentication_cache() {
 		$request = WC_Helper_API::get(
@@ -2562,6 +2614,8 @@ class WC_Helper {
 
 	/**
 	 * Flush updates cache.
+	 *
+	 * @return void
 	 */
 	private static function _flush_updates_cache() {
 		WC_Helper_Updater::flush_updates_cache();
@@ -2596,6 +2650,8 @@ class WC_Helper {
 	 *
 	 * @param string $message Log message.
 	 * @param string $level Optional, defaults to info, valid levels: emergency|alert|critical|error|warning|notice|info|debug.
+	 *
+	 * @return void
 	 */
 	public static function log( $message, $level = 'info' ) {
 		if ( ! Constants::is_true( 'WP_DEBUG' ) ) {

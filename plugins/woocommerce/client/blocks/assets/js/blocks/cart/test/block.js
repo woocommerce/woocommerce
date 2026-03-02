@@ -275,7 +275,11 @@ describe( 'Testing cart', () => {
 		render( <CartBlock /> );
 
 		await waitFor( () => {
-			expect( screen.queryAllByText( /Remove item/i ).length ).toBe( 1 );
+			expect(
+				screen.queryAllByRole( 'button', {
+					name: /Remove .* from cart/i,
+				} ).length
+			).toBe( 1 );
 		} );
 	} );
 } );

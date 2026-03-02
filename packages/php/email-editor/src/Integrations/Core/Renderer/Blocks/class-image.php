@@ -63,12 +63,12 @@ class Image extends Abstract_Block_Renderer {
 		// Because the isn't an attribute for definition of rounded style, we have to check the class name.
 		if ( isset( $parsed_block['attrs']['className'] ) && strpos( $parsed_block['attrs']['className'], 'is-style-rounded' ) !== false ) {
 			// If the image should be in a circle, we need to set the border-radius to 9999px to make it the same as is in the editor
-			// This style is applied to both wrapper and the image.
+			// This style is applied to both the border cell wrapper and the image.
 			$block_content = $this->remove_style_attribute_from_element(
 				$block_content,
 				array(
 					'tag_name'   => 'td',
-					'class_name' => 'email-image-cell',
+					'class_name' => 'email-image-border-cell',
 				),
 				'border-radius'
 			);
@@ -76,7 +76,7 @@ class Image extends Abstract_Block_Renderer {
 				$block_content,
 				array(
 					'tag_name'   => 'td',
-					'class_name' => 'email-image-cell',
+					'class_name' => 'email-image-border-cell',
 				),
 				'border-radius: 9999px;'
 			);
@@ -174,9 +174,11 @@ class Image extends Abstract_Block_Renderer {
 			$border_styles['border-style'] = 'solid';
 			$border_styles['box-sizing']   = 'border-box';
 		}
+		// Apply border to the dedicated border cell wrapper, not the outer image cell.
+		// This ensures borders stay tight around the image on mobile when the outer wrapper becomes 100% width.
 		$border_element_tag         = array(
 			'tag_name'   => 'td',
-			'class_name' => 'email-image-cell',
+			'class_name' => 'email-image-border-cell',
 		);
 		$content_with_border_styles = $this->add_style_to_element( $block_content, $border_element_tag, \WP_Style_Engine::compile_css( $border_styles, '' ) );
 		// Remove border styles from the image HTML tag.
@@ -315,6 +317,7 @@ class Image extends Abstract_Block_Renderer {
 		$image_cell_attrs = array(
 			'class' => 'email-image-cell',
 			'style' => 'overflow: hidden;',
+			'align' => $align,
 		);
 
 		$image_content = '{image_content}';
@@ -329,6 +332,22 @@ class Image extends Abstract_Block_Renderer {
 				'{image_content}'
 			);
 		}
+
+		// Wrap image in a border wrapper table that won't expand to 100% on mobile.
+		// This ensures borders stay tight around the image regardless of screen size.
+		$border_wrapper_styles = array(
+			'border-collapse' => 'separate',
+			'border-spacing'  => '0px',
+		);
+		$border_wrapper_attrs  = array(
+			'class' => 'email-image-border-wrapper',
+			'style' => \WP_Style_Engine::compile_css( $border_wrapper_styles, '' ),
+		);
+		$border_cell_attrs     = array(
+			'class' => 'email-image-border-cell',
+		);
+		$image_content         = Table_Wrapper_Helper::render_table_wrapper( $image_content, $border_wrapper_attrs, $border_cell_attrs );
+
 		$image_html    = Table_Wrapper_Helper::render_table_wrapper( $image_content, $image_table_attrs, $image_cell_attrs );
 		$inner_content = $image_html . $caption_html;
 

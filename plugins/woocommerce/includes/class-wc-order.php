@@ -357,6 +357,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @param Exception $e Exception object.
 	 * @param string    $message Message regarding exception thrown.
 	 * @since 3.7.0
+	 * @return void
 	 */
 	protected function handle_exception( $e, $message = 'Error' ) {
 		wc_get_logger()->error(
@@ -412,6 +413,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * `payment_complete` method.
 	 *
 	 * @since 3.0.0
+	 * @return void
 	 */
 	public function maybe_set_date_paid() {
 		// This logic only runs if the date_paid prop has not been set yet.
@@ -443,6 +445,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * Sets the date completed variable when transitioning to completed status.
 	 *
 	 * @since 3.0.0
+	 * @return void
 	 */
 	protected function maybe_set_date_completed() {
 		if ( $this->has_status( OrderStatus::COMPLETED ) ) {
@@ -487,6 +490,8 @@ class WC_Order extends WC_Abstract_Order {
 
 	/**
 	 * Handle the status transition.
+	 *
+	 * @return void
 	 */
 	protected function status_transition() {
 		$status_transition = $this->status_transition;
@@ -617,6 +622,8 @@ class WC_Order extends WC_Abstract_Order {
 
 	/**
 	 * Expands the shipping and billing information in the changes array.
+	 *
+	 * @return array
 	 */
 	public function get_changes() {
 		$changed_props = parent::get_changes();
@@ -1227,6 +1234,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @param string $prop Name of prop to set.
 	 * @param string $address_type Type of address; 'billing' or 'shipping'.
 	 * @param mixed  $value Value of the prop.
+	 * @return void
 	 */
 	protected function set_address_prop( $prop, $address_type, $value ) {
 		if ( array_key_exists( $prop, $this->data[ $address_type ] ) ) {
@@ -1295,6 +1303,7 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @param string $value Max length 22 chars.
 	 * @throws WC_Data_Exception Throws exception when invalid data is found.
+	 * @return void
 	 */
 	public function set_order_key( $value ) {
 		$this->set_prop( 'order_key', substr( $value, 0, 22 ) );
@@ -1305,6 +1314,7 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @param int $value Customer ID.
 	 * @throws WC_Data_Exception Throws exception when invalid data is found.
+	 * @return void
 	 */
 	public function set_customer_id( $value ) {
 		$this->set_prop( 'customer_id', absint( $value ) );
@@ -1315,6 +1325,7 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @param string $value Billing first name.
 	 * @throws WC_Data_Exception Throws exception when invalid data is found.
+	 * @return void
 	 */
 	public function set_billing_first_name( $value ) {
 		$this->set_address_prop( 'first_name', 'billing', $value );
@@ -1325,6 +1336,7 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @param string $value Billing last name.
 	 * @throws WC_Data_Exception Throws exception when invalid data is found.
+	 * @return void
 	 */
 	public function set_billing_last_name( $value ) {
 		$this->set_address_prop( 'last_name', 'billing', $value );
@@ -1335,6 +1347,7 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @param string $value Billing company.
 	 * @throws WC_Data_Exception Throws exception when invalid data is found.
+	 * @return void
 	 */
 	public function set_billing_company( $value ) {
 		$this->set_address_prop( 'company', 'billing', $value );
@@ -1345,6 +1358,7 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @param string $value Billing address line 1.
 	 * @throws WC_Data_Exception Throws exception when invalid data is found.
+	 * @return void
 	 */
 	public function set_billing_address_1( $value ) {
 		$this->set_address_prop( 'address_1', 'billing', $value );
@@ -1355,6 +1369,7 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @param string $value Billing address line 2.
 	 * @throws WC_Data_Exception Throws exception when invalid data is found.
+	 * @return void
 	 */
 	public function set_billing_address_2( $value ) {
 		$this->set_address_prop( 'address_2', 'billing', $value );
@@ -1365,6 +1380,7 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @param string $value Billing city.
 	 * @throws WC_Data_Exception Throws exception when invalid data is found.
+	 * @return void
 	 */
 	public function set_billing_city( $value ) {
 		$this->set_address_prop( 'city', 'billing', $value );
@@ -1375,6 +1391,7 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @param string $value Billing state.
 	 * @throws WC_Data_Exception Throws exception when invalid data is found.
+	 * @return void
 	 */
 	public function set_billing_state( $value ) {
 		$this->set_address_prop( 'state', 'billing', $value );
@@ -1385,6 +1402,7 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @param string $value Billing postcode.
 	 * @throws WC_Data_Exception Throws exception when invalid data is found.
+	 * @return void
 	 */
 	public function set_billing_postcode( $value ) {
 		$this->set_address_prop( 'postcode', 'billing', $value );
@@ -1395,6 +1413,7 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @param string $value Billing country.
 	 * @throws WC_Data_Exception Throws exception when invalid data is found.
+	 * @return void
 	 */
 	public function set_billing_country( $value ) {
 		$this->set_address_prop( 'country', 'billing', $value );
@@ -1402,6 +1421,8 @@ class WC_Order extends WC_Abstract_Order {
 
 	/**
 	 * Maybe set empty billing email to that of the user who owns the order.
+	 *
+	 * @return void
 	 */
 	protected function maybe_set_user_billing_email() {
 		$user = $this->get_user();
@@ -1419,6 +1440,7 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @param string $value Billing email.
 	 * @throws WC_Data_Exception Throws exception when invalid data is found.
+	 * @return void
 	 */
 	public function set_billing_email( $value ) {
 		if ( $value && ! is_email( $value ) ) {
@@ -1432,6 +1454,7 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @param string $value Billing phone.
 	 * @throws WC_Data_Exception Throws exception when invalid data is found.
+	 * @return void
 	 */
 	public function set_billing_phone( $value ) {
 		$this->set_address_prop( 'phone', 'billing', $value );
@@ -1442,6 +1465,7 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @param string $value Shipping first name.
 	 * @throws WC_Data_Exception Throws exception when invalid data is found.
+	 * @return void
 	 */
 	public function set_shipping_first_name( $value ) {
 		$this->set_address_prop( 'first_name', 'shipping', $value );
@@ -1452,6 +1476,7 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @param string $value Shipping last name.
 	 * @throws WC_Data_Exception Throws exception when invalid data is found.
+	 * @return void
 	 */
 	public function set_shipping_last_name( $value ) {
 		$this->set_address_prop( 'last_name', 'shipping', $value );
@@ -1462,6 +1487,7 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @param string $value Shipping company.
 	 * @throws WC_Data_Exception Throws exception when invalid data is found.
+	 * @return void
 	 */
 	public function set_shipping_company( $value ) {
 		$this->set_address_prop( 'company', 'shipping', $value );
@@ -1472,6 +1498,7 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @param string $value Shipping address line 1.
 	 * @throws WC_Data_Exception Throws exception when invalid data is found.
+	 * @return void
 	 */
 	public function set_shipping_address_1( $value ) {
 		$this->set_address_prop( 'address_1', 'shipping', $value );
@@ -1482,6 +1509,7 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @param string $value Shipping address line 2.
 	 * @throws WC_Data_Exception Throws exception when invalid data is found.
+	 * @return void
 	 */
 	public function set_shipping_address_2( $value ) {
 		$this->set_address_prop( 'address_2', 'shipping', $value );
@@ -1492,6 +1520,7 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @param string $value Shipping city.
 	 * @throws WC_Data_Exception Throws exception when invalid data is found.
+	 * @return void
 	 */
 	public function set_shipping_city( $value ) {
 		$this->set_address_prop( 'city', 'shipping', $value );
@@ -1502,6 +1531,7 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @param string $value Shipping state.
 	 * @throws WC_Data_Exception Throws exception when invalid data is found.
+	 * @return void
 	 */
 	public function set_shipping_state( $value ) {
 		$this->set_address_prop( 'state', 'shipping', $value );
@@ -1512,6 +1542,7 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @param string $value Shipping postcode.
 	 * @throws WC_Data_Exception Throws exception when invalid data is found.
+	 * @return void
 	 */
 	public function set_shipping_postcode( $value ) {
 		$this->set_address_prop( 'postcode', 'shipping', $value );
@@ -1522,6 +1553,7 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @param string $value Shipping country.
 	 * @throws WC_Data_Exception Throws exception when invalid data is found.
+	 * @return void
 	 */
 	public function set_shipping_country( $value ) {
 		$this->set_address_prop( 'country', 'shipping', $value );
@@ -1533,6 +1565,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @since 5.6.0
 	 * @param string $value Shipping phone.
 	 * @throws WC_Data_Exception Throws exception when invalid data is found.
+	 * @return void
 	 */
 	public function set_shipping_phone( $value ) {
 		$this->set_address_prop( 'phone', 'shipping', $value );
@@ -1543,6 +1576,7 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @param string $payment_method Supports WC_Payment_Gateway for bw compatibility with < 3.0.
 	 * @throws WC_Data_Exception Throws exception when invalid data is found.
+	 * @return void
 	 */
 	public function set_payment_method( $payment_method = '' ) {
 		if ( is_object( $payment_method ) ) {
@@ -1561,6 +1595,7 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @param string $value Payment method title.
 	 * @throws WC_Data_Exception Throws exception when invalid data is found.
+	 * @return void
 	 */
 	public function set_payment_method_title( $value ) {
 		$this->set_prop( 'payment_method_title', $value );
@@ -1571,6 +1606,7 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @param string $value Transaction id.
 	 * @throws WC_Data_Exception Throws exception when invalid data is found.
+	 * @return void
 	 */
 	public function set_transaction_id( $value ) {
 		$this->set_prop( 'transaction_id', $value );
@@ -1581,6 +1617,7 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @param string $value Customer ip address.
 	 * @throws WC_Data_Exception Throws exception when invalid data is found.
+	 * @return void
 	 */
 	public function set_customer_ip_address( $value ) {
 		$this->set_prop( 'customer_ip_address', $value );
@@ -1591,6 +1628,7 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @param string $value Customer user agent.
 	 * @throws WC_Data_Exception Throws exception when invalid data is found.
+	 * @return void
 	 */
 	public function set_customer_user_agent( $value ) {
 		$this->set_prop( 'customer_user_agent', $value );
@@ -1601,6 +1639,7 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @param string $value Created via.
 	 * @throws WC_Data_Exception Throws exception when invalid data is found.
+	 * @return void
 	 */
 	public function set_created_via( $value ) {
 		$this->set_prop( 'created_via', $value );
@@ -1611,6 +1650,7 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @param string $value Customer note.
 	 * @throws WC_Data_Exception Throws exception when invalid data is found.
+	 * @return void
 	 */
 	public function set_customer_note( $value ) {
 		$this->set_prop( 'customer_note', $value );
@@ -1621,6 +1661,7 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @param  string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if their is no date.
 	 * @throws WC_Data_Exception Throws exception when invalid data is found.
+	 * @return void
 	 */
 	public function set_date_completed( $date = null ) {
 		$this->set_date_prop( 'date_completed', $date );
@@ -1631,6 +1672,7 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @param  string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if their is no date.
 	 * @throws WC_Data_Exception Throws exception when invalid data is found.
+	 * @return void
 	 */
 	public function set_date_paid( $date = null ) {
 		$this->set_date_prop( 'date_paid', $date );
@@ -1641,6 +1683,7 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @param string $value Cart hash.
 	 * @throws WC_Data_Exception Throws exception when invalid data is found.
+	 * @return void
 	 */
 	public function set_cart_hash( $value ) {
 		$this->set_prop( 'cart_hash', $value );
@@ -1896,8 +1939,9 @@ class WC_Order extends WC_Abstract_Order {
 		if ( false === $needs_processing ) {
 			$needs_processing = 0;
 
-			if ( count( $this->get_items() ) > 0 ) {
-				foreach ( $this->get_items() as $item ) {
+			$line_items = $this->get_items();
+			if ( count( $line_items ) > 0 ) {
+				foreach ( $line_items as $item ) {
 					if ( $item->is_type( 'line_item' ) ) {
 						$product = $item->get_product();
 
@@ -2502,6 +2546,7 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @param array  $total_rows  Total rows.
 	 * @param string $tax_display Tax to display.
+	 * @return void
 	 */
 	protected function add_order_item_totals_payment_method_row( &$total_rows, $tax_display ) {
 		if ( $this->get_total() > 0 && $this->get_payment_method_title() && 'other' !== $this->get_payment_method() ) {
@@ -2525,6 +2570,7 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * @param array  $total_rows  Total rows.
 	 * @param string $tax_display Tax to display.
+	 * @return void
 	 */
 	protected function add_order_item_totals_refund_rows( &$total_rows, $tax_display ) {
 		$refunds = $this->get_refunds();

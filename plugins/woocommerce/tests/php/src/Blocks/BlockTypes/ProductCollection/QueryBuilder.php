@@ -1059,4 +1059,176 @@ class QueryBuilder extends \WP_UnitTestCase {
 		wp_delete_term( $nike_brand_id, 'product_brand' );
 		wp_delete_term( $adidas_brand_id, 'product_brand' );
 	}
+
+	/**
+	 * Test merging filter queries by Category Slug (e.g. ?categories=accessories).
+	 */
+	public function test_merging_filter_by_category_slug() {
+		// Set the URL query variables.
+		set_query_var( 'categories', 'accessories' );
+
+		// Execute the query builder.
+		$merged_query   = Utils::initialize_merged_query( $this->block_instance );
+		$filter_clauses = $this->extract_filter_clauses( $merged_query['tax_query'] );
+
+		// Assertions.
+		$this->assertContainsEquals(
+			array(
+				'taxonomy' => 'product_cat',
+				'field'    => 'slug',
+				'terms'    => array( 'accessories' ),
+				'operator' => 'IN',
+			),
+			$filter_clauses,
+			'Should contain correct product_cat tax query using slug.'
+		);
+
+		// Clean up.
+		set_query_var( 'categories', '' );
+	}
+
+	/**
+	 * Test merging filter queries specifically for Tags.
+	 * Scenario: ?tags=tag-new (Slug)
+	 */
+	public function test_merging_filter_by_tags() {
+		// Set the URL query variables.
+		set_query_var( 'tags', 'tag-new' );
+
+		// Execute the query builder.
+		$merged_query   = Utils::initialize_merged_query( $this->block_instance );
+		$filter_clauses = $this->extract_filter_clauses( $merged_query['tax_query'] );
+
+		// Assertions.
+		$this->assertContainsEquals(
+			array(
+				'taxonomy' => 'product_tag',
+				'field'    => 'slug',
+				'terms'    => array( 'tag-new' ),
+				'operator' => 'IN',
+			),
+			$filter_clauses,
+			'Should contain correct product_tag tax query with IN operator.'
+		);
+
+		// Clean up.
+		set_query_var( 'tags', '' );
+	}
+
+	/**
+	 * Test merging filter queries for Categories, Tags, and Brands simultaneously.
+	 * Scenario: ?categories=accessories&tags=tag-new&brands=nike
+	 */
+	public function test_merging_filter_by_all_taxonomies_together() {
+		// Set the URL query variables.
+		set_query_var( 'categories', 'accessories' );
+		set_query_var( 'tags', 'tag-new' );
+		set_query_var( 'brands', 'nike' );
+
+		// Execute the query builder.
+		$merged_query   = Utils::initialize_merged_query( $this->block_instance );
+		$filter_clauses = $this->extract_filter_clauses( $merged_query['tax_query'] );
+
+		// Assertions.
+		// Verify Category.
+		$this->assertContainsEquals(
+			array(
+				'taxonomy' => 'product_cat',
+				'field'    => 'slug',
+				'terms'    => array( 'accessories' ),
+				'operator' => 'IN',
+			),
+			$filter_clauses,
+			'Should contain correct product_cat tax query.'
+		);
+
+		// Verify Tag.
+		$this->assertContainsEquals(
+			array(
+				'taxonomy' => 'product_tag',
+				'field'    => 'slug',
+				'terms'    => array( 'tag-new' ),
+				'operator' => 'IN',
+			),
+			$filter_clauses,
+			'Should contain correct product_tag tax query.'
+		);
+
+		// Verify Brand.
+		$this->assertContainsEquals(
+			array(
+				'taxonomy' => 'product_brand',
+				'field'    => 'slug',
+				'terms'    => array( 'nike' ),
+				'operator' => 'IN',
+			),
+			$filter_clauses,
+			'Should contain correct product_brand tax query.'
+		);
+
+		// Clean up global state.
+		set_query_var( 'categories', '' );
+		set_query_var( 'tags', '' );
+		set_query_var( 'brands', '' );
+	}
+
+	/**
+	 * Test that the strictly string-based filter logic works and SAFELY ignores arrays.
+	 * Matches logic: if ( ! is_string($param_value) ) continue;
+	 */
+	public function test_filter_strict_string_handling() {
+		// Scenario: Array Input (Should be IGNORED).
+		// ?categories[]=hats.
+		set_query_var( 'categories', array( 'hats' ) );
+
+		// Execute.
+		$merged_query   = Utils::initialize_merged_query( $this->block_instance );
+		$tax_queries    = $merged_query['tax_query'] ?? array();
+		$filter_clauses = $this->extract_filter_clauses( $tax_queries );
+
+		// Assertion: The array input should have been ignored.
+		$this->assertNotContainsEquals(
+			array(
+				'taxonomy' => 'product_cat',
+				'field'    => 'slug',
+				'terms'    => array( 'hats' ),
+				'operator' => 'IN',
+			),
+			$filter_clauses,
+			'Should not contain product_cat tax query because array input should be ignored.'
+		);
+
+		// Clean up.
+		set_query_var( 'categories', '' );
+	}
+
+	/**
+	 * Helper to extract filter clauses from the tax_query array.
+	 *
+	 * @param array $tax_queries The tax_query array from the merged query.
+	 * @return array The extracted filter clauses.
+	 */
+	private function extract_filter_clauses( array $tax_queries ) {
+
+		$and_query = array();
+
+		// Find the 'AND' relation group where filters are stored.
+		foreach ( $tax_queries as $tax_query ) {
+			if ( isset( $tax_query['relation'] ) && 'AND' === $tax_query['relation'] ) {
+				$and_query = $tax_query;
+				break;
+			}
+		}
+
+		$clauses = array();
+		if ( ! empty( $and_query ) ) {
+			foreach ( $and_query as $item ) {
+				if ( is_array( $item ) ) {
+					$clauses[] = $item;
+				}
+			}
+		}
+
+		return $clauses;
+	}
 }

@@ -500,8 +500,10 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 		$controller = new class() extends Site_Style_Sync_Controller {
 			/**
 			 * Mock sync_site_styles to return empty data.
+			 *
+			 * @param WP_Theme_JSON|null $base_theme Base theme for fallback values.
 			 */
-			public function sync_site_styles(): array {
+			public function sync_site_styles( ?WP_Theme_JSON $base_theme = null ): array {
 				return array();
 			}
 		};
@@ -912,5 +914,213 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 		$this->assertArrayHasKey( 'heading', $synced_data['styles']['elements'] );
 		$this->assertArrayHasKey( 'color', $synced_data['styles']['elements']['heading'] );
 		$this->assertArrayNotHasKey( 'text', $synced_data['styles']['elements']['heading']['color'] );
+	}
+
+	/**
+	 * Data provider for fallback mechanism tests.
+	 *
+	 * @return array Test cases with base theme data, site theme data, and expected assertions.
+	 */
+	public function fallback_data_provider(): array {
+		return array(
+			'global fontSize fallback'     => array(
+				'base_theme' => array(
+					'styles' => array(
+						'typography' => array( 'fontSize' => '16px' ),
+					),
+				),
+				'site_theme' => array(
+					'styles' => array(
+						'typography' => array( 'fontSize' => 'min(calc(var(--wp--custom--spacing-unit) * 2), 2vw)' ),
+					),
+				),
+				'assertions' => array(
+					'path'     => array( 'typography', 'fontSize' ),
+					'expected' => '16px',
+				),
+			),
+			'element-specific h1 fallback' => array(
+				'base_theme' => array(
+					'styles' => array(
+						'typography' => array( 'fontSize' => '16px' ),
+						'elements'   => array(
+							'h1' => array(
+								'typography' => array( 'fontSize' => '40px' ),
+							),
+						),
+					),
+				),
+				'site_theme' => array(
+					'styles' => array(
+						'elements' => array(
+							'h1' => array(
+								'typography' => array( 'fontSize' => 'clamp(var(--min), var(--preferred), var(--max))' ),
+							),
+						),
+					),
+				),
+				'assertions' => array(
+					'path'     => array( 'elements', 'h1', 'typography', 'fontSize' ),
+					'expected' => '40px',
+				),
+			),
+			'blockGap spacing fallback'    => array(
+				'base_theme' => array(
+					'styles' => array(
+						'spacing' => array( 'blockGap' => '16px' ),
+					),
+				),
+				'site_theme' => array(
+					'styles' => array(
+						'spacing' => array( 'blockGap' => 'max(var(--gap-min), var(--gap-preferred))' ),
+					),
+				),
+				'assertions' => array(
+					'path'     => array( 'spacing', 'blockGap' ),
+					'expected' => '16px',
+				),
+			),
+			'padding object with sides'    => array(
+				'base_theme' => array(
+					'styles' => array(
+						'spacing' => array(
+							'padding' => array(
+								'top'    => '20px',
+								'right'  => '20px',
+								'bottom' => '20px',
+								'left'   => '20px',
+							),
+						),
+					),
+				),
+				'site_theme' => array(
+					'styles' => array(
+						'spacing' => array(
+							'padding' => array(
+								'top'    => 'min(var(--padding-top), 5vw)',
+								'right'  => 'min(var(--padding-right), 5vw)',
+								'bottom' => 'min(var(--padding-bottom), 5vw)',
+								'left'   => 'min(var(--padding-left), 5vw)',
+							),
+						),
+					),
+				),
+				'assertions' => array(
+					'path'     => array( 'spacing', 'padding' ),
+					'expected' => array(
+						'top'    => '20px',
+						'right'  => '20px',
+						'bottom' => '20px',
+						'left'   => '20px',
+					),
+				),
+			),
+		);
+	}
+
+	/**
+	 * Test fallback mechanism uses base theme defaults.
+	 *
+	 * @dataProvider fallback_data_provider
+	 *
+	 * @param array $base_theme_styles Base theme styles configuration.
+	 * @param array $site_theme_styles Site theme styles configuration.
+	 * @param array $assertions Expected assertions with path and expected value.
+	 */
+	public function test_fallback_uses_base_theme_defaults( array $base_theme_styles, array $site_theme_styles, array $assertions ): void {
+		// Create base theme.
+		$base_theme_data = array_merge(
+			array(
+				'version'  => 3,
+				'settings' => array(),
+			),
+			$base_theme_styles
+		);
+		$base_theme      = new WP_Theme_JSON( $base_theme_data, 'default' );
+
+		// Create site theme.
+		$site_theme_data = array_merge(
+			array(
+				'version'  => 3,
+				'settings' => array(),
+			),
+			$site_theme_styles
+		);
+		$site_theme      = new WP_Theme_JSON( $site_theme_data );
+
+		// Use reflection to set the site theme.
+		$reflection          = new \ReflectionClass( $this->controller );
+		$site_theme_property = $reflection->getProperty( 'site_theme' );
+		$site_theme_property->setAccessible( true );
+		$site_theme_property->setValue( $this->controller, $site_theme );
+
+		$synced_data = $this->controller->sync_site_styles( $base_theme );
+
+		// Navigate to the expected path and verify the value.
+		$current = $synced_data['styles'];
+		foreach ( $assertions['path'] as $key ) {
+			$this->assertArrayHasKey( $key, $current );
+			$current = $current[ $key ];
+		}
+		$this->assertEquals( $assertions['expected'], $current );
+	}
+
+	/**
+	 * Test no fallback when base theme is not provided (backwards compatibility).
+	 */
+	public function test_no_fallback_when_base_theme_not_provided(): void {
+		$site_theme_data = array(
+			'version'  => 3,
+			'settings' => array(),
+			'styles'   => array(
+				'typography' => array(
+					'fontSize' => 'min(var(--size), 2vw)',
+				),
+			),
+		);
+		$site_theme      = new WP_Theme_JSON( $site_theme_data );
+
+		$reflection          = new \ReflectionClass( $this->controller );
+		$site_theme_property = $reflection->getProperty( 'site_theme' );
+		$site_theme_property->setAccessible( true );
+		$site_theme_property->setValue( $this->controller, $site_theme );
+
+		$synced_data = $this->controller->sync_site_styles();
+
+		$this->assertArrayHasKey( 'typography', $synced_data['styles'] );
+		$this->assertEquals( 'min(var(--size), 2vw)', $synced_data['styles']['typography']['fontSize'] );
+	}
+
+	/**
+	 * Test already-valid px values don't use fallback.
+	 */
+	public function test_valid_px_values_dont_use_fallback(): void {
+		$base_theme_data = array(
+			'version'  => 3,
+			'settings' => array(),
+			'styles'   => array(
+				'typography' => array( 'fontSize' => '16px' ),
+			),
+		);
+		$base_theme      = new WP_Theme_JSON( $base_theme_data, 'default' );
+
+		$site_theme_data = array(
+			'version'  => 3,
+			'settings' => array(),
+			'styles'   => array(
+				'typography' => array( 'fontSize' => '24px' ),
+			),
+		);
+		$site_theme      = new WP_Theme_JSON( $site_theme_data );
+
+		$reflection          = new \ReflectionClass( $this->controller );
+		$site_theme_property = $reflection->getProperty( 'site_theme' );
+		$site_theme_property->setAccessible( true );
+		$site_theme_property->setValue( $this->controller, $site_theme );
+
+		$synced_data = $this->controller->sync_site_styles( $base_theme );
+
+		$this->assertArrayHasKey( 'typography', $synced_data['styles'] );
+		$this->assertEquals( '24px', $synced_data['styles']['typography']['fontSize'] );
 	}
 }
