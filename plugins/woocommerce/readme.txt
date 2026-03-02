@@ -170,6 +170,11 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 10.5.3 2026-XX-XX =
+= 10.5.3 2026-03-02 =
+
+**WooCommerce**
+
+* Fix - Fix Store API batch endpoint path validation to prevent routing requests to non-Store-API endpoints. [#63501](https://github.com/woocommerce/woocommerce/pull/63501)
+
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
