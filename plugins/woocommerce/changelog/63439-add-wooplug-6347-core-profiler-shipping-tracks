@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add unified shipping partner Tracks events (impression, click, install, activate) in the Core Profiler onboarding flow.

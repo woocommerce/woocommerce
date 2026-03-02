@@ -247,8 +247,8 @@ class BlockTemplateUtils {
 		$template->area           = self::get_block_template_area( $template->slug, $template_type );
 
 		/*
-		* Run the block hooks algorithm introduced in WP 6.4 on the template content.
-		*/
+		 * Run the block hooks algorithm introduced in WP 6.4 on the template content.
+		 */
 		if ( function_exists( 'inject_ignored_hooked_blocks_metadata_attributes' ) ) {
 			$before_block_visitor = '_inject_theme_attribute_in_template_part_block';
 			$after_block_visitor  = null;
@@ -328,10 +328,10 @@ class BlockTemplateUtils {
 		);
 
 		/*
-		* This may return the blockified directory for wp_templates.
-		* At the moment every template file has a corresponding blockified file.
-		* If we decide to add a new template file that doesn't, we will need to update this logic.
-		*/
+		 * This may return the blockified directory for `wp_templates`.
+		 * At the moment every template file has a corresponding blockified file.
+		 * If we decide to add a new template file that doesn't, we will need to update this logic.
+		 */
 		$directory = self::get_templates_directory( $template_type );
 
 		$path_list = array_map(

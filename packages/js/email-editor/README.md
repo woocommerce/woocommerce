@@ -18,7 +18,10 @@ window.WooCommerceEmailEditor = {
     current_post_type: '', // The post type of the current post
     current_post_id: '', // The ID of the current post
     current_wp_user_email: '', // The email of the current user
-    editor_settings: {}, // The block editor settings
+    editor_settings: {
+        // Standard block editor settings, plus email-editor-specific options.
+        // See the "Editor settings" section below for available options.
+    },
     editor_theme: {}, // The block editor theme
     user_theme_post_id: '', // The ID of the user theme post
     urls: {
@@ -39,6 +42,16 @@ The `initializeEditor` function accepts a single parameter:
 
 Make sure to set up the required data on `window.WooCommerceEmailEditor` before calling `initializeEditor`.
 
+### Editor settings
+
+The `editor_settings` object (or `config.editorSettings` when using `ExperimentalEmailEditor`) accepts all standard WordPress block editor settings plus the following email-editor-specific options:
+
+| Setting                  | Type      | Default | Description                                                                                                                                                          |
+| ------------------------ | --------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `isFullScreenForced`     | `boolean` | `false` | When `true`, the editor is always rendered in fullscreen mode and the user cannot toggle it off. The "More menu" is hidden and a back button is shown in the header. |
+| `displaySendEmailButton` | `boolean` | `false` | When `true`, a "Send" button is displayed in the editor header, allowing users to publish/send the email directly from the editor.                                   |
+| `disableSnackbarNotices` | `boolean` | `false` | When `true`, the editor does not render its own snackbar notices. Pinned and validation notices are unaffected.                                                      |
+
 ## Exports
 
 ### Components
@@ -56,13 +69,18 @@ import { ExperimentalEmailEditor } from '@woocommerce/email-editor';
     postId="123"
     postType="email"
     config={ {
-        editorSettings: { /* ... */ },
-        theme: { /* ... */ },
+        editorSettings: {
+            // Standard block editor settings, plus email-editor-specific
+            // options. See the "Editor settings" section for details.
+        },
+        theme: {
+            /* ... */
+        },
         urls: { listings: '/emails', back: '/' },
         userEmail: 'user@example.com',
         globalStylesPostId: 456,
     } }
-/>
+/>;
 ```
 
 #### `SendPreviewEmail`
@@ -76,7 +94,7 @@ import { createStore, SendPreviewEmail } from '@woocommerce/email-editor';
 
 createStore();
 // ...
-<SendPreviewEmail />
+<SendPreviewEmail />;
 ```
 
 #### `RichTextWithButton`
@@ -96,7 +114,7 @@ createStore();
     attributeName="subject"
     attributeValue={ currentSubject }
     updateProperty={ ( name, value ) => setEmailProperty( name, value ) }
-/>
+/>;
 ```
 
 ### Hooks
@@ -166,7 +184,11 @@ createStore();
 Analytics tracking utilities. Events are prefixed with `email_editor_events_` and only recorded when tracking is enabled. `recordEventOnce` deduplicates per session. `debouncedRecordEvent` waits 700ms to batch rapid actions.
 
 ```js
-import { recordEvent, recordEventOnce, debouncedRecordEvent } from '@woocommerce/email-editor';
+import {
+    recordEvent,
+    recordEventOnce,
+    debouncedRecordEvent,
+} from '@woocommerce/email-editor';
 
 recordEvent( 'button_clicked', { buttonType: 'save' } );
 recordEventOnce( 'editor_loaded' );
@@ -229,8 +251,8 @@ new DependencyExtractionWebpackPlugin( {
             return null;
         }
         // ... handle other dependencies
-    }
-} )
+    },
+} );
 ```
 
 ### Email Editor
