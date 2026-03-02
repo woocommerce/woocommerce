@@ -3107,7 +3107,7 @@ if ( ! function_exists( 'woocommerce_order_again_button' ) ) {
 		 * @param array $statuses_for_reordering Array of valid order statuses for reordering.
 		 */
 		$statuses_for_reordering = apply_filters( 'woocommerce_valid_order_statuses_for_order_again', array( OrderStatus::COMPLETED ) );
-		if ( ! $order || ! $order->has_status( $statuses_for_reordering ) || ! is_user_logged_in() ) {
+		if ( ! $order || ! $order->has_status( $statuses_for_reordering ) || ! is_user_logged_in() || is_order_received_page() ) {
 			return;
 		}
 
