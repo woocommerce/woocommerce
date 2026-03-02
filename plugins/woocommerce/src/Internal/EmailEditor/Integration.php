@@ -139,6 +139,7 @@ class Integration {
 		add_filter( 'woocommerce_email_editor_preview_post_template_html', array( $this, 'update_preview_post_template_html_data' ), 100, 1 );
 		add_action( 'woocommerce_email_editor_send_preview_email_before_wp_mail', array( $this, 'send_preview_email_before_wp_mail' ), 10 );
 		add_action( 'woocommerce_email_editor_send_preview_email_after_wp_mail', array( $this, 'send_preview_email_after_wp_mail' ), 10 );
+		add_filter( 'woocommerce_email_editor_send_preview_email_subject', array( $this, 'update_email_subject_for_send_preview_email' ), 10, 2 );
 	}
 
 	/**
@@ -414,5 +415,40 @@ class Integration {
 	public function send_preview_email_after_wp_mail() {
 		remove_filter( 'wp_mail_from', array( $this->wc_email_instance, 'get_from_address' ) );
 		remove_filter( 'wp_mail_from_name', array( $this->wc_email_instance, 'get_from_name' ) );
+	}
+
+	/**
+	 * Update the email subject for the send preview email.
+	 *
+	 * @param string  $subject The email subject.
+	 * @param WP_Post $post    The post object.
+	 * @return string The updated email subject.
+	 */
+	public function update_email_subject_for_send_preview_email( $subject, $post ) {
+		if ( ! ( $post instanceof \WP_Post ) || self::EMAIL_POST_TYPE !== $post->post_type ) {
+			return $subject;
+		}
+
+		$post_manager = WCTransactionalEmailPostsManager::get_instance();
+
+		$email_type_class_name = $post_manager->get_email_type_class_name_from_post_id( $post->ID );
+
+		if ( empty( $email_type_class_name ) ) {
+			return $subject;
+		}
+
+		$registered_emails = \WC_Emails::instance()->get_emails();
+
+		if ( ! isset( $registered_emails[ $email_type_class_name ] ) ) {
+			return $subject;
+		}
+
+		$email = $registered_emails[ $email_type_class_name ];
+
+		if ( ! ( $email instanceof \WC_Email ) ) {
+			return $subject;
+		}
+
+		return $email->get_subject();
 	}
 }
