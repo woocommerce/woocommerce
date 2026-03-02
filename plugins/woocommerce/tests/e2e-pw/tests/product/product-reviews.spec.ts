@@ -321,7 +321,7 @@ test.describe( 'Product Reviews', () => {
 			const trashNoticeText = await trashNotice.textContent();
 			expect(
 				trashNoticeText?.includes( trashMessage ) ||
-				trashNoticeText?.includes( trashMessageSmart )
+					trashNoticeText?.includes( trashMessageSmart )
 			).toBeTruthy();
 			await page.getByRole( 'button', { name: 'Undo' } ).click();
 
@@ -335,7 +335,7 @@ test.describe( 'Product Reviews', () => {
 			const trashNoticeText2 = await trashNotice2.textContent();
 			expect(
 				trashNoticeText2?.includes( trashMessage ) ||
-				trashNoticeText2?.includes( trashMessageSmart )
+					trashNoticeText2?.includes( trashMessageSmart )
 			).toBeTruthy();
 
 			await page.click( 'a[href*="comment_status=trash"]' );
