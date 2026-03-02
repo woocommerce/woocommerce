@@ -212,10 +212,15 @@ namespace Automattic\WooCommerce\Tests\Internal\Logging {
 			$formatted_log = $this->sut->get_formatted_log( $level, $message, $context );
 
 			// Restore the initial data before any assertions.
-			if ( false !== $initial_cached_plugin_data ) {
-				\wp_cache_set( 'plugins', $initial_cached_plugin_data, 'plugins' );
+			if ( null !== $mock_cached_plugin_data ) {
+				if ( ! $initial_cached_plugin_data ) {
+					\wp_cache_delete( 'plugins', 'plugins' );
+				} else {
+					\wp_cache_set( 'plugins', $initial_cached_plugin_data, 'plugins' );
+				}
 			}
-			if ( null !== $initial_wp_theme_directories ) {
+
+			if ( null !== $mock_wp_theme_directories ) {
 				// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test cleanup.
 				$wp_theme_directories = $initial_wp_theme_directories;
 			}
