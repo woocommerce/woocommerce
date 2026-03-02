@@ -2,6 +2,7 @@ export { default as Alert } from './library/alert';
 export { default as bag } from './library/bag';
 export { default as bagAlt } from './library/bag-alt';
 export { default as barcode } from './library/barcode';
+export { default as caret } from './library/caret';
 export { default as cart } from './library/cart';
 export { default as cartOutline } from './library/cart-outline';
 export { default as checkMark } from './library/check-mark';
