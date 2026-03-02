@@ -422,47 +422,45 @@ test.describe(
 			} );
 
 			await test.step( 'Clean up installed extensions', async () => {
-				await page.goto( 'wp-admin/plugins.php' );
-				await page.getByLabel( 'Deactivate Google' ).click();
-				await expect(
-					page.getByText( 'Plugin deactivated.' )
-				).toBeVisible();
-				// delete plugin regularly or, if attempted, accept deleting data as well
-				try {
-					await page.getByLabel( 'Delete Google' ).click();
-					await expect(
-						page.getByText( 'was successfully deleted.' )
-					).toBeVisible( { timeout: 5000 } );
-				} catch ( e ) {
-					await page
-						.getByText( 'Yes, delete these files and data' )
-						.click();
-					await page
-						.getByText( 'The selected plugin has been deleted.' )
-						.waitFor();
-				}
-				await expect( page.getByLabel( 'Delete Google' ) ).toBeHidden();
-				await page.getByLabel( 'Deactivate Pinterest for' ).click();
-				await expect(
-					page.getByText( 'Plugin deactivated.' )
-				).toBeVisible();
-				// delete plugin regularly or, if attempted, accept deleting data as well
-				try {
-					await page.getByLabel( 'Delete Pinterest for' ).click();
-					await expect(
-						page.getByText( 'was successfully deleted.' )
-					).toBeVisible( { timeout: 5000 } );
-				} catch ( e ) {
-					await page
-						.getByText( 'Yes, delete these files and data' )
-						.click();
-					await page
-						.getByText( 'The selected plugin has been deleted.' )
-						.waitFor();
-				}
-				await expect(
-					page.getByLabel( 'Delete Pinterest for' )
-				).toBeHidden();
+				const deactivateAndDeletePlugin = async ( slug: string ) => {
+					await page.goto( 'wp-admin/plugins.php' );
+					const pluginRow = page.locator( `tr[data-slug="${ slug }"]` );
+
+					// Skip if plugin is not present
+					if ( ! ( await pluginRow.isVisible() ) ) {
+						return;
+					}
+
+					// Deactivate if active
+					const deactivateLink = pluginRow.getByRole( 'link', { name: 'Deactivate', exact: true } );
+					if ( await deactivateLink.isVisible() ) {
+						await deactivateLink.click();
+						await expect(
+							page.getByText( 'Plugin deactivated.' )
+						).toBeVisible();
+					}
+
+					// Delete plugin
+					const deleteLink = pluginRow.getByRole( 'link', { name: 'Delete', exact: true } );
+					if ( await deleteLink.isVisible() ) {
+						try {
+							await deleteLink.click();
+							await expect(
+								page.getByText( 'was successfully deleted.' )
+							).toBeVisible( { timeout: 5000 } );
+						} catch ( e ) {
+							await page
+								.getByText( 'Yes, delete these files and data' )
+								.click();
+							await page
+								.getByText( 'The selected plugin has been deleted.' )
+								.waitFor();
+						}
+					}
+				};
+
+				await deactivateAndDeletePlugin( 'google-listings-and-ads' );
+				await deactivateAndDeletePlugin( 'pinterest-for-woocommerce' );
 			} );
 
 			await test.step( 'Confirm that the store is in coming soon mode after completing the core profiler', async () => {
