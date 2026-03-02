@@ -27,7 +27,9 @@ const pageGroups = [
 			{
 				name: 'WC Dashboard',
 				url: 'wp-admin/admin.php?page=wc-admin',
-				expectedCount: 84,
+				// TODO: WP 7.0 compat - threshold bumped from 84 for WP 7.0 extra
+				// core scripts. Re-evaluate when WP 7.0 is the minimum version.
+				expectedCount: 90,
 			},
 			{
 				name: 'Reports',
