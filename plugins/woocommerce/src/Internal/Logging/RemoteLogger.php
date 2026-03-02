@@ -494,15 +494,17 @@ class RemoteLogger extends \WC_Log_Handler {
 		// Then check for other plugins.
 		if ( defined( 'WP_PLUGIN_DIR' ) && str_starts_with( $file_path, \WP_PLUGIN_DIR . '/' ) ) {
 			$plugins_directory_length = strlen( \WP_PLUGIN_DIR . '/' );
-			$next_slash_index         = strpos( $file_path, '/', $plugins_directory_length );
+			$subdirectory_index       = strpos( $file_path, '/', $plugins_directory_length );
 			$plugin_slug              = null;
 			$plugin_file              = null;
 			$plugin_version           = null;
 			// Check for plugins in subdirectories and in top-level directory.
-			if ( false !== $next_slash_index ) {
-				$plugin_slug = substr( $file_path, $plugins_directory_length, $next_slash_index - $plugins_directory_length );
+			if ( false !== $subdirectory_index ) {
+				// We have a subdirectory, so use the directory name as the slug.
+				$plugin_slug = substr( $file_path, $plugins_directory_length, $subdirectory_index - $plugins_directory_length );
 				$plugin_file = "$plugin_slug/$plugin_slug.php";
 			} elseif ( str_ends_with( $file_path, '.php' ) ) {
+				// We have a single file plugin, so use the file name as the slug.
 				$plugin_slug = substr( $file_path, $plugins_directory_length, -4 );
 				$plugin_file = "$plugin_slug.php";
 			}
@@ -533,14 +535,15 @@ class RemoteLogger extends \WC_Log_Handler {
 			);
 		}
 
+		// Then check for mu-plugins.
 		if ( defined( 'WPMU_PLUGIN_DIR' ) && str_starts_with( $file_path, \WPMU_PLUGIN_DIR . '/' ) ) {
 			$mu_plugins_directory_length = strlen( \WPMU_PLUGIN_DIR . '/' );
-			$next_slash_index            = strpos( $file_path, '/', $mu_plugins_directory_length );
-			if ( false === $next_slash_index ) {
+			$subdirectory_index          = strpos( $file_path, '/', $mu_plugins_directory_length );
+			if ( false === $subdirectory_index ) {
 				$mu_plugin_slug = str_ends_with( $file_path, '.php' ) ? substr( $file_path, $mu_plugins_directory_length, -4 ) : substr( $file_path, $mu_plugins_directory_length );
 			} else {
 				// Use subdirectory as the slug - we can't tell for sure which mu-plugin it is/was.
-				$mu_plugin_slug = substr( $file_path, $mu_plugins_directory_length, $next_slash_index - $mu_plugins_directory_length );
+				$mu_plugin_slug = substr( $file_path, $mu_plugins_directory_length, $subdirectory_index - $mu_plugins_directory_length );
 			}
 			// We may want to get the mu-plugin version in future, but it depends on a number of functions, so skipping for now.
 
@@ -551,6 +554,7 @@ class RemoteLogger extends \WC_Log_Handler {
 			);
 		}
 
+		// Check for themes.
 		global $wp_theme_directories;
 
 		$theme_directories = array();
@@ -565,12 +569,12 @@ class RemoteLogger extends \WC_Log_Handler {
 			$full_theme_directory = $theme_directory . '/';
 			if ( str_starts_with( $file_path, $full_theme_directory ) ) {
 				$full_theme_directory_length = strlen( $full_theme_directory );
-				$next_slash_index            = strpos( $file_path, '/', $full_theme_directory_length );
-				if ( false === $next_slash_index ) {
+				$subdirectory_index          = strpos( $file_path, '/', $full_theme_directory_length );
+				if ( false === $subdirectory_index ) {
 					return null;
 				}
 
-				$theme_slug = substr( $file_path, $full_theme_directory_length, $next_slash_index - $full_theme_directory_length );
+				$theme_slug = substr( $file_path, $full_theme_directory_length, $subdirectory_index - $full_theme_directory_length );
 				return array(
 					'type'    => 'theme',
 					'slug'    => $theme_slug,
