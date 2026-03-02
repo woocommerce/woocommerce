@@ -10,7 +10,7 @@ export interface CustomerAccountContext {
 }
 
 const SELECTORS = {
-	wrapper: '.has-dropdown',
+	wrapper: '.wc-block-customer-account--has-dropdown',
 	dropdown: '.wc-block-customer-account__dropdown',
 	trigger: '.wc-block-customer-account__toggle',
 };
