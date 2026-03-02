@@ -425,7 +425,7 @@ class Integration {
 	 * @return string The updated email subject.
 	 */
 	public function update_email_subject_for_send_preview_email( $subject, $post ) {
-		if ( ! ( $post instanceof \WP_Post ) || self::EMAIL_POST_TYPE !== $post->post_type ) {
+		if ( ! $post instanceof \WP_Post || self::EMAIL_POST_TYPE !== $post->post_type ) {
 			return $subject;
 		}
 
@@ -437,18 +437,20 @@ class Integration {
 			return $subject;
 		}
 
-		$registered_emails = \WC_Emails::instance()->get_emails();
+		/**
+		 * Validate the email type class name.
+		 *
+		 * @var EmailPreview $email_preview
+		 */
+		$email_preview = wc_get_container()->get( EmailPreview::class );
 
-		if ( ! isset( $registered_emails[ $email_type_class_name ] ) ) {
+		try {
+			$email_preview->set_email_type( $email_type_class_name );
+			return $email_preview->get_subject();
+		} catch ( \InvalidArgumentException $e ) {
+			return $subject;
+		} catch ( \Throwable $e ) {
 			return $subject;
 		}
-
-		$email = $registered_emails[ $email_type_class_name ];
-
-		if ( ! ( $email instanceof \WC_Email ) ) {
-			return $subject;
-		}
-
-		return $email->get_subject();
 	}
 }
