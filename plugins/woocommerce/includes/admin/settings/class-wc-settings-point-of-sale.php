@@ -72,13 +72,13 @@ class WC_Settings_Point_Of_Sale extends WC_Settings_Page {
 			),
 
 			array(
-				'title'              => __( 'Store name', 'woocommerce' ),
-				'desc'               => __( 'The name of your physical store.', 'woocommerce' ),
-				'id'                 => 'woocommerce_pos_store_name',
-				'default'            => PointOfSaleDefaultSettings::get_default_store_name(),
-				'type'               => 'text',
-				'css'                => 'min-width:300px;',
-				'skip_initial_save'  => true,
+				'title'             => __( 'Store name', 'woocommerce' ),
+				'desc'              => __( 'The name of your physical store.', 'woocommerce' ),
+				'id'                => 'woocommerce_pos_store_name',
+				'default'           => PointOfSaleDefaultSettings::get_default_store_name(),
+				'type'              => 'text',
+				'css'               => 'min-width:300px;',
+				'skip_initial_save' => true,
 			),
 
 			array(
