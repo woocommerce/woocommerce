@@ -170,7 +170,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 10.6.0-beta.2 2026-XX-XX =
+= 10.6.0-beta.2 2026-03-02 =
 
 **WooCommerce**
 
@@ -218,6 +218,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Use existing "Save %s" translation for mini cart discount badge to ensure correct translation for discount savings. [#62647](https://github.com/woocommerce/woocommerce/pull/62647)
 * Fix - Validate page IDs returned by the `woocommerce_navigation_connect_page_options` filter before registering them [#62925](https://github.com/woocommerce/woocommerce/pull/62925)
 * Fix - Verify checkout page exists before adding customizer styles. [#61847](https://github.com/woocommerce/woocommerce/pull/61847)
+* Fix - Fix Store API batch endpoint path validation to prevent routing requests to non-Store-API endpoints. [#63512](https://github.com/woocommerce/woocommerce/pull/63512)
 * Add - Add "Products by Brand" collection to Product Collection block. [#62817](https://github.com/woocommerce/woocommerce/pull/62817)
 * Add - Add caching for the taxes REST API endpoints [#62931](https://github.com/woocommerce/woocommerce/pull/62931)
 * Add - Add dedicated email class and block template for partially refunded orders in the block email editor to ensure consistent visual styling across all transactional emails. [#62895](https://github.com/woocommerce/woocommerce/pull/62895)
@@ -292,6 +293,8 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Dev - Replace internal wiki links with updated developer docs links [#63251](https://github.com/woocommerce/woocommerce/pull/63251)
 * Dev - Scaffold support files for TypeScript conversion of e2e-pw tests. [#63188](https://github.com/woocommerce/woocommerce/pull/63188)
 * Dev - Update Add to Cart with Options to use server hydrated product state. [#62880](https://github.com/woocommerce/woocommerce/pull/62880)
+* Dev - Adjust tests for WP 7.0-beta.1 compatibility [#63427](https://github.com/woocommerce/woocommerce/pull/63427)
+* Dev - E2E tests adjustments to WP 7.0 [#63432](https://github.com/woocommerce/woocommerce/pull/63432)
 * Tweak - Add instanceof/is_callable checks to the `clear` method of `WC_Logger` [#62637](https://github.com/woocommerce/woocommerce/pull/62637)
 * Tweak - Changed subscription status from "Cancelled" to "Auto-renew: off" for non-auto-renewing subscriptions in My Subscriptions. [#62772](https://github.com/woocommerce/woocommerce/pull/62772)
 * Tweak - Fix Kurdistan state name formatting in Iranian provinces to use parentheses like all other states [#60337](https://github.com/woocommerce/woocommerce/pull/60337)
