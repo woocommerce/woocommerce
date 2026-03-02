@@ -161,6 +161,7 @@ class Batch extends ControllerTestCase {
 	/**
 	 * @testdox Should reject batch sub-request with path outside Store API namespace.
 	 * @dataProvider invalid_batch_paths_data
+	 * @param string $path The path to test.
 	 */
 	public function test_batch_rejects_invalid_path( string $path ): void {
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/batch' );
@@ -201,6 +202,7 @@ class Batch extends ControllerTestCase {
 	/**
 	 * @testdox Should accept batch sub-request with valid Store API path.
 	 * @dataProvider valid_batch_paths_data
+	 * @param string $path The path to test.
 	 */
 	public function test_batch_accepts_valid_store_api_path( string $path ): void {
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/batch' );
