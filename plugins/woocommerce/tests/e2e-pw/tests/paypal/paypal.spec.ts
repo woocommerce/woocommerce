@@ -176,7 +176,7 @@ test.describe(
 					.fill( 'PayPal Custom Title ' + Date.now() );
 
 				// TODO: Temporarily removing the disabled attribute from the Save changes button.
-				await enableSaveButton( page );
+				// await enableSaveButton( page );
 
 				await page
 					.getByRole( 'button', {
@@ -210,7 +210,7 @@ test.describe(
 					.uncheck();
 
 				// TODO: Temporarily removing the disabled attribute from the Save changes button.
-				await enableSaveButton( page );
+				// await enableSaveButton( page );
 
 				await page
 					.getByRole( 'button', {
