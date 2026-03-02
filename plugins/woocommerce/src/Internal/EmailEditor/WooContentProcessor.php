@@ -87,8 +87,30 @@ class WooContentProcessor {
 		if ( empty( $woo_content ) ) {
 			return '';
 		}
-		$css = $this->theme_controller->get_stylesheet_for_rendering();
+		$css  = $this->theme_controller->get_stylesheet_for_rendering();
+		$css .= $this->get_woo_content_css();
 		return $this->css_inliner->from_html( $woo_content )->inline_css( $css )->render();
+	}
+
+	/**
+	 * Get CSS rules for WooCommerce-specific selectors in block emails.
+	 *
+	 * Email clients like Outlook don't reliably inherit font-family through table elements,
+	 * so we need to explicitly set it on WooCommerce content selectors.
+	 *
+	 * @since 10.7.0
+	 * @return string
+	 */
+	private function get_woo_content_css(): string {
+		$email_styles = $this->theme_controller->get_styles();
+		$font_family  = $email_styles['typography']['fontFamily'] ?? 'inherit';
+
+		return "
+			.td { font-family: {$font_family}; }
+			.address { font-family: {$font_family}; }
+			h2.email-order-detail-heading span { font-family: {$font_family}; }
+			.wc-bacs-bank-details, .wc-bacs-bank-details li { font-family: {$font_family}; }
+		";
 	}
 
 	/**

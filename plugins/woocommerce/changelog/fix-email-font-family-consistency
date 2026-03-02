@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add explicit font-family to email CSS selectors (.td, .address, h2.email-order-detail-heading span, .wc-bacs-bank-details) to prevent inconsistent fonts in email clients that don't inherit font-family through table elements.
