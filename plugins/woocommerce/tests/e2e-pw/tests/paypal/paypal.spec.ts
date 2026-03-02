@@ -82,6 +82,7 @@ test.describe(
 		/**
 		 * Temporary function to remove the disabled attribute from the Save changes button, as it is currently disabled by default and prevents saving changes in tests.
 		 * This should be removed once the underlying issue is resolved and the Save changes button can be enabled as expected.
+		 * See: https://github.com/woocommerce/woocommerce/issues/63498
 		 *
 		 * @param {Page} page The Playwright Page object representing the browser page to interact with.
 		 */
@@ -176,7 +177,7 @@ test.describe(
 					.fill( 'PayPal Custom Title ' + Date.now() );
 
 				// TODO: Temporarily removing the disabled attribute from the Save changes button.
-				// await enableSaveButton( page );
+				await enableSaveButton( page );
 
 				await page
 					.getByRole( 'button', {
@@ -210,7 +211,7 @@ test.describe(
 					.uncheck();
 
 				// TODO: Temporarily removing the disabled attribute from the Save changes button.
-				// await enableSaveButton( page );
+				await enableSaveButton( page );
 
 				await page
 					.getByRole( 'button', {
