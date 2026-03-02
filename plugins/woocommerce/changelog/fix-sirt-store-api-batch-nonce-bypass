@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix Store API batch endpoint path validation to prevent routing requests to non-Store-API endpoints.
