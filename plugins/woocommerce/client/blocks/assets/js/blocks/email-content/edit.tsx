@@ -6,11 +6,10 @@ import { useState } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import ServerSideRender from '@wordpress/server-side-render';
 import { useBlockProps } from '@wordpress/block-editor';
+import { CORE_EDITOR_STORE } from '@woocommerce/utils';
 import {
 	__experimentalText as Text, // eslint-disable-line
 } from '@wordpress/components';
-// eslint-disable-next-line @woocommerce/dependency-group
-import { store as editorStore } from '@wordpress/editor';
 
 /**
  * Internal dependencies
@@ -41,7 +40,7 @@ export default function Edit() {
 	const blockProps = useBlockProps();
 	const { postId } = useSelect(
 		( select ) => ( {
-			postId: select( editorStore ).getCurrentPostId?.() ?? 0,
+			postId: select( CORE_EDITOR_STORE )?.getCurrentPostId?.() ?? 0,
 		} ),
 		[]
 	);

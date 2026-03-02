@@ -268,6 +268,19 @@ class WCTransactionalEmailPostsGenerator {
 			),
 		);
 
+		/**
+		 * Filter the email content post data before creating the post.
+		 *
+		 * Allows third-party integrators to modify the post data (title, content, meta, etc.)
+		 * before the email content post is created.
+		 *
+		 * @since 10.5.0
+		 * @param array     $post_data  The post data array to be used for wp_insert_post().
+		 * @param string    $email_type The email type identifier (e.g., 'customer_processing_order').
+		 * @param \WC_Email $email_data The WooCommerce email object.
+		 */
+		$post_data = apply_filters( 'woocommerce_email_content_post_data', $post_data, $email_type, $email_data );
+
 		$post_id = wp_insert_post( $post_data, true );
 
 		if ( is_wp_error( $post_id ) ) {

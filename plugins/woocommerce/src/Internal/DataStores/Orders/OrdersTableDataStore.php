@@ -45,6 +45,14 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	private static $backfilling_order_ids = array();
 
 	/**
+	 * Keep track of order IDs (as keys) that are being synced on read. This is used to prevent backfilling to posts of an order being updated
+	 * from posts.
+	 *
+	 * @var array
+	 */
+	private static $sync_on_read_order_ids = array();
+
+	/**
 	 * Data stored in meta keys, but not considered "meta" for an order.
 	 *
 	 * @since 7.0.0
@@ -1354,17 +1362,23 @@ WHERE
 			return;
 		}
 
-		$data_sync_enabled = $data_synchronizer->data_sync_is_enabled();
+		$data_sync_enabled = $data_synchronizer->data_sync_is_enabled()
+			&& ! doing_action( 'woocommerce_deliver_webhook_async' )
+			&& ! doing_action( 'wc-admin_import_orders' );
+
 		if ( $data_sync_enabled ) {
 			/**
-			 * Allow opportunity to disable sync on read, while keeping sync on write enabled. This adds another step as a large shop progresses from full sync to no sync with HPOS authoritative.
-			 * This filter is only executed if data sync is enabled from settings in the first place as it's meant to be a step between full sync -> no sync, rather than be a control for enabling just the sync on read. Sync on read without sync on write is problematic as any update will reset on the next read, but sync on write without sync on read is fine.
+			 * Filters whether to sync order data from posts on read.
 			 *
-			 * @param bool $read_on_sync_enabled Whether to sync on read.
+			 * Defaults to false because sync-on-read can be dangerous when HPOS is
+			 * authoritative and running correctly, as it allows the posts data store
+			 * to override HPOS data.
+			 *
+			 * @param bool $sync_on_read_enabled Whether to sync on read.
 			 *
 			 * @since 8.1.0
 			 */
-			$data_sync_enabled = apply_filters( 'woocommerce_hpos_enable_sync_on_read', $data_sync_enabled );
+			$data_sync_enabled = apply_filters( 'woocommerce_hpos_enable_sync_on_read', false );
 		}
 
 		$load_posts_for = array_diff( $order_ids, array_merge( self::$reading_order_ids, self::$backfilling_order_ids ) );
@@ -1390,8 +1404,8 @@ WHERE
 
 			$this->init_order_record( $order, $order_id, $order_data );
 
-			if ( $order->has_cogs() && $cogs_is_enabled ) {
-				$this->read_cogs_data( $order );
+			if ( $cogs_is_enabled && $order->has_cogs() ) {
+				$this->read_cogs_data( $order, $order_data->meta_data );
 			}
 
 			if ( $data_sync_enabled && isset( $post_orders[ $order_id ] ) && $this->should_sync_order( $order ) ) {
@@ -1404,11 +1418,12 @@ WHERE
 	/**
 	 * Read the Cost of Goods Sold value for a given order from the database, if available, and apply it to the order.
 	 *
-	 * @param \WC_Abstract_Order $order The order to get the COGS value for.
+	 * @param \WC_Abstract_Order                          $order     The order to get the COGS value for.
+	 * @param object{meta_key:string,meta_value:string}[] $meta_data The original meta-data fetched for the order.
 	 */
-	private function read_cogs_data( WC_Abstract_Order $order ) {
-		$meta_entry = $this->data_store_meta->get_metadata_by_key( $order, '_cogs_total_value' );
-		$cogs_value = false === $meta_entry ? 0 : (float) current( $meta_entry )->meta_value;
+	private function read_cogs_data( WC_Abstract_Order $order, array $meta_data ) {
+		$meta_entry = array_filter( $meta_data, fn( object $meta ) => '_cogs_total_value' === $meta->meta_key );
+		$cogs_value = array() === $meta_entry ? 0 : (float) current( $meta_entry )->meta_value;
 
 		/**
 		 * Filter to customize the Cost of Goods Sold value that gets loaded for a given order.
@@ -1710,6 +1725,8 @@ WHERE
 	 * @return void
 	 */
 	private function migrate_post_record( \WC_Abstract_Order &$order, \WC_Abstract_Order $post_order ): void {
+		self::$sync_on_read_order_ids[ $order->get_id() ] = true;
+
 		$diff                 = $this->migrate_meta_data_from_post_order( $order, $post_order );
 		$post_order_base_data = $post_order->get_base_data();
 		foreach ( $post_order_base_data as $key => $value ) {
@@ -1724,6 +1741,8 @@ WHERE
 			$this->set_order_prop( $order, $key, $value );
 		}
 		$this->persist_updates( $order, false );
+
+		unset( self::$sync_on_read_order_ids[ $order->get_id() ] );
 
 		/**
 		 * Fired when an HPOS order is updated from its corresponding post record on read due to a difference in the data.
@@ -1745,7 +1764,10 @@ WHERE
 	protected function set_order_props_from_data( &$order, $order_data ) {
 		foreach ( $this->get_all_order_column_mappings() as $table_name => $column_mapping ) {
 			foreach ( $column_mapping as $column_name => $prop_details ) {
-				if ( ! isset( $prop_details['name'] ) ) {
+				if ( ! isset( $prop_details['name'] ) || ! is_string( $prop_details['name'] ) ) {
+					continue;
+				}
+				if ( ! property_exists( $order_data, $prop_details['name'] ) ) {
 					continue;
 				}
 				$prop_value = $order_data->{$prop_details['name']};
@@ -2118,7 +2140,7 @@ FROM $order_meta_table
 		$this->set_custom_taxonomies( $order, $default_taxonomies );
 
 		if ( $order->has_cogs() && $this->cogs_is_enabled() ) {
-			$this->save_cogs_data( $order );
+			$this->save_cogs_data( $order, ! $only_changes || array_key_exists( 'cogs_total_value', $changes ) );
 		}
 
 		$this->clear_cached_data( array( $order->get_id() ) );
@@ -2127,10 +2149,11 @@ FROM $order_meta_table
 	/**
 	 * Save the Cost of Goods Sold value of a given order to the database.
 	 *
-	 * @param WC_Abstract_Order $order The order to save the COGS value for.
+	 * @param WC_Abstract_Order $order              The order to save the COGS value for.
+	 * @param bool              $cogs_value_changed Whether the CoGS value was changed through the order object API.
 	 */
-	private function save_cogs_data( WC_Abstract_Order $order ) {
-		$cogs_value = $order->get_cogs_total_value();
+	private function save_cogs_data( WC_Abstract_Order $order, bool $cogs_value_changed ): void {
+		$cogs_value_original = $order->get_cogs_total_value();
 
 		/**
 		 * Filter to customize the Cost of Goods Sold value that gets saved for a given order,
@@ -2138,29 +2161,31 @@ FROM $order_meta_table
 		 *
 		 * @since 9.5.0
 		 *
-		 * @param float|null $cogs_value The value to be written to the database. If returned as null, nothing will be written.
-		 * @param WC_Abstract_Order $item The order for which the value is being saved.
+		 * @param float             $cogs_value The value to be written to the database. If returned as null, nothing will be written.
+		 * @param WC_Abstract_Order $order      The order for which the value is being saved.
 		 */
-		$cogs_value = apply_filters( 'woocommerce_save_order_cogs_value', $cogs_value, $order );
-		if ( is_null( $cogs_value ) ) {
+		$cogs_value = apply_filters( 'woocommerce_save_order_cogs_value', $cogs_value_original, $order );
+		if ( null === $cogs_value ) {
 			return;
 		}
 
-		$existing_meta = $this->data_store_meta->get_metadata_by_key( $order, '_cogs_total_value' );
-
-		if ( 0.0 === $cogs_value && $existing_meta ) {
-			$existing_meta = current( $existing_meta );
-			$this->data_store_meta->delete_meta( $order, $existing_meta );
-		} elseif ( $existing_meta ) {
+		$sync_meta = $cogs_value_changed || $cogs_value_original !== (float) $cogs_value;
+		if ( $sync_meta ) {
+			$existing_meta = $this->data_store_meta->get_metadata_by_key( $order, '_cogs_total_value' );
+			if ( 0.0 === $cogs_value && $existing_meta ) {
+				$existing_meta = current( $existing_meta );
+				$this->data_store_meta->delete_meta( $order, $existing_meta );
+			} elseif ( $existing_meta ) {
 				$existing_meta        = current( $existing_meta );
 				$existing_meta->key   = '_cogs_total_value';
 				$existing_meta->value = $cogs_value;
 				$this->data_store_meta->update_meta( $order, $existing_meta );
-		} else {
-			$meta        = new \WC_Meta_Data();
-			$meta->key   = '_cogs_total_value';
-			$meta->value = $cogs_value;
-			$this->data_store_meta->add_meta( $order, $meta );
+			} else {
+				$meta        = new \WC_Meta_Data();
+				$meta->key   = '_cogs_total_value';
+				$meta->value = $cogs_value;
+				$this->data_store_meta->add_meta( $order, $meta );
+			}
 		}
 	}
 
@@ -2552,6 +2577,7 @@ FROM $order_meta_table
 					$order_id
 				)
 			);
+			clean_post_cache( $order_id );
 		} else {
 			// phpcs:disable WordPress.DB.SlowDBQuery
 			$wpdb->insert(
@@ -2877,7 +2903,11 @@ FROM $order_meta_table
 
 		// Fetch changes.
 		$changes = $order->get_changes();
-		$this->persist_updates( $order );
+
+		// Does not make much sense to backfill to posts an order being sync-on-read from posts.
+		$should_backfill = ! isset( self::$sync_on_read_order_ids[ $order->get_id() ] );
+
+		$this->persist_updates( $order, $should_backfill );
 
 		// Update download permissions if necessary.
 		if ( array_key_exists( 'billing_email', $changes ) || array_key_exists( 'customer_id', $changes ) ) {
@@ -3215,6 +3245,7 @@ CREATE TABLE $orders_table_name (
 	KEY status (status),
 	KEY date_created (date_created_gmt),
 	KEY customer_id_billing_email (customer_id, billing_email({$composite_customer_id_email_length})),
+	KEY customer_id_status (customer_id, status),
 	KEY billing_email (billing_email($max_index_length)),
 	KEY type_status_date (type, status, date_created_gmt),
 	KEY parent_order_id (parent_order_id),
@@ -3421,6 +3452,7 @@ CREATE TABLE $meta_table (
 
 		$should_save =
 			$order->get_id() > 0
+			&& ! isset( self::$sync_on_read_order_ids[ $order->get_id() ] )
 			&& $order->get_date_modified() < $current_date_time && empty( $order->get_changes() )
 			&& ( ! is_object( $meta ) || ! in_array( $meta->key, $this->ephemeral_meta_keys, true ) );
 

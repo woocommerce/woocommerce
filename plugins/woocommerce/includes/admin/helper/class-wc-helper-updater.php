@@ -659,11 +659,23 @@ class WC_Helper_Updater {
 			'errors'   => array(),
 		);
 
+		// Detect if this is a manual refresh button click.
+		$request_uri = wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$source      = '';
+		if ( stripos( $request_uri, 'wc/v3/marketplace/refresh' ) !== false ) {
+			$source = 'refresh-button';
+		}
+
+		$request_body = array( 'products' => $payload );
+		if ( ! empty( $source ) ) {
+			$request_body['source'] = $source;
+		}
+
 		if ( WC_Helper::is_site_connected() ) {
 			$request = WC_Helper_API::post(
 				'update-check',
 				array(
-					'body'          => wp_json_encode( array( 'products' => $payload ) ),
+					'body'          => wp_json_encode( $request_body ),
 					'authenticated' => true,
 				)
 			);
@@ -671,7 +683,7 @@ class WC_Helper_Updater {
 			$request = WC_Helper_API::post(
 				'update-check-public',
 				array(
-					'body' => wp_json_encode( array( 'products' => $payload ) ),
+					'body' => wp_json_encode( $request_body ),
 				)
 			);
 		}

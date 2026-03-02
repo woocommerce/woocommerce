@@ -10,7 +10,17 @@
 	"attributes": {
 		"optionStyle": {
 			"type": "string",
-			"enum": [ "pills", "dropdown" ]
+			"enum": [ "pills", "dropdown" ],
+			"default": "pills"
+		},
+		"autoselect": {
+			"type": "boolean",
+			"default": false
+		},
+		"disabledAttributesAction": {
+			"type": "string",
+			"enum": [ "disable", "hide" ],
+			"default": "disable"
 		}
 	},
 	"textdomain": "woocommerce",

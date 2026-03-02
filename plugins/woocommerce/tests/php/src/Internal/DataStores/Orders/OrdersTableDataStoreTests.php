@@ -1373,6 +1373,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	public function test_read_with_direct_meta_write() {
 		$this->toggle_cot_feature_and_usage( true );
 		$this->enable_cot_sync();
+		add_filter( 'woocommerce_hpos_enable_sync_on_read', '__return_true' );
 		$order = $this->create_complex_cot_order();
 
 		$post_object = get_post( $order->get_id() );
@@ -1388,6 +1389,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->sut->read( $refreshed_order );
 
 		$this->assertEquals( array( 'key' => 'value' ), $refreshed_order->get_meta( 'my_custom_meta' ) );
+		remove_all_filters( 'woocommerce_hpos_enable_sync_on_read' );
 	}
 
 	/**
@@ -1396,6 +1398,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	public function test_read_multiple_with_direct_write() {
 		$this->enable_cot_sync();
 		$this->toggle_cot_feature_and_usage( true );
+		add_filter( 'woocommerce_hpos_enable_sync_on_read', '__return_true' );
 		$order       = $this->create_complex_cot_order();
 		$order_total = $order->get_total();
 		$order->add_meta_data( 'custom_meta_1', 'custom_value_1' );
@@ -1425,6 +1428,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->assertEquals( 'custom_value_4', $refreshed_order->get_meta( 'custom_meta_4' ) );
 		$this->assertEquals( 'custom_value_1_updated', $refreshed_order->get_meta( 'custom_meta_1' ) );
 		$this->assertEquals( '', $refreshed_order->get_meta( 'custom_meta_2' ) );
+		remove_all_filters( 'woocommerce_hpos_enable_sync_on_read' );
 	}
 
 	/**
@@ -1433,6 +1437,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	public function test_is_post_different_from_order() {
 		$this->toggle_cot_feature_and_usage( true );
 		$this->enable_cot_sync();
+		add_filter( 'woocommerce_hpos_enable_sync_on_read', '__return_true' );
 		$order                         = $this->create_complex_cot_order();
 		$post_order_comparison_closure = function ( $order ) {
 			$post_order = $this->get_post_orders_for_ids( array( $order->get_id() => $order ) )[ $order->get_id() ];
@@ -1455,6 +1460,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->sut->read( $r_order );
 		$this->assertFalse( $post_order_comparison_closure->call( $this->sut, $r_order ) );
 		$this->assertEquals( array( 'key' => 'value' ), $r_order->get_meta( 'my_custom_meta' ) );
+		remove_all_filters( 'woocommerce_hpos_enable_sync_on_read' );
 	}
 
 	/**
@@ -1481,6 +1487,148 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		};
 
 		$this->assertFalse( $post_order_comparison_closure->call( $this->sut ) );
+	}
+
+	/**
+	 * @testdox Test sync-on-read with date and metadata differences.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $with_metadata Whether to add a new metadata to the post version of the order.
+	 */
+	public function test_sync_on_read_with_date_differences( $with_metadata = false ) {
+		global $wpdb;
+
+		$this->toggle_cot_authoritative( true );
+		$this->enable_cot_sync();
+		add_filter( 'woocommerce_hpos_enable_sync_on_read', '__return_true' );
+
+		$now    = time() - ( 10 * MINUTE_IN_SECONDS );
+		$before = $now - ( 10 * MINUTE_IN_SECONDS );
+
+		$order = new \WC_Order();
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->set_billing_first_name( 'Duke' );
+		$order->save();
+
+		$order->set_date_modified( $before );
+		$order->save();
+
+		// Refresh order from HPOS datastore.
+		$order = wc_get_order( $order->get_id() );
+
+		// Confirm post version exists and that both have the same modified date.
+		$this->assertSame( 'shop_order', get_post_type( $order->get_id() ) );
+		$this->assertEquals( $order->get_date_modified( 'edit' )->getTimestamp(), $before );
+		$this->assertEquals( get_post_modified_time( 'U', true, $order->get_id() ), $before );
+
+		// Update the posts modified date and confirm the change was made.
+		$wpdb->update(
+			$wpdb->posts,
+			array(
+				'post_modified_gmt' => gmdate( 'Y-m-d H:i:s', $now ),
+			),
+			array(
+				'ID' => $order->get_id(),
+			)
+		);
+		clean_post_cache( $order->get_id() );
+		$this->assertEquals( get_post_modified_time( 'U', true, $order->get_id() ), $now );
+
+		// Add a new metadata so sync-on-read does something.
+		if ( $with_metadata ) {
+			add_post_meta( $order->get_id(), 'foo', 'bar' );
+		}
+
+		// Trigger sync-on-read by re-reading the order and compare dates again.
+		$sync_on_read_triggered = false;
+		add_action(
+			'woocommerce_hpos_post_record_migrated_on_read',
+			function ( $o ) use ( &$sync_on_read_triggered, $order ) {
+				$sync_on_read_triggered = $o->get_id() === $order->get_id();
+			}
+		);
+
+		$this->reset_order_data_store_state( $this->sut );
+		$order = wc_get_order( $order->get_id() );
+		$this->assertTrue( $sync_on_read_triggered );
+		remove_all_actions( 'woocommerce_hpos_post_record_migrated_on_read' );
+		remove_all_filters( 'woocommerce_hpos_enable_sync_on_read' );
+
+		// Compare dates again.
+		$this->assertEquals( $order->get_date_modified( 'edit' )->getTimestamp(), $now );
+		$this->assertEquals( get_post_modified_time( 'U', true, $order->get_id() ), $now );
+	}
+
+	/**
+	 * @testdox Confirm that sync on read doesn't run by default and can be enabled via filter.
+	 */
+	public function test_sync_on_read_on_and_off(): void {
+		global $wpdb;
+
+		$this->toggle_cot_authoritative( true );
+		$this->enable_cot_sync();
+
+		$now    = time() - ( 10 * MINUTE_IN_SECONDS );
+		$before = $now - ( 10 * MINUTE_IN_SECONDS );
+
+		$order = new \WC_Order();
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->save();
+
+		// Set the HPOS modified date to the past.
+		$order->set_date_modified( $before );
+		$order->save();
+
+		// Make the post version newer (would normally trigger sync on read).
+		$wpdb->update(
+			$wpdb->posts,
+			array( 'post_modified_gmt' => gmdate( 'Y-m-d H:i:s', $now ) ),
+			array( 'ID' => $order->get_id() )
+		);
+		clean_post_cache( $order->get_id() );
+
+		// Track whether sync on read fires.
+		$sync_on_read_triggered = false;
+		add_action(
+			'woocommerce_hpos_post_record_migrated_on_read',
+			function () use ( &$sync_on_read_triggered ) {
+				$sync_on_read_triggered = true;
+			}
+		);
+
+		// Read order without filter — sync on read should NOT trigger.
+		$this->reset_order_data_store_state( $this->sut );
+		wc_get_order( $order->get_id() );
+		$this->assertFalse( $sync_on_read_triggered, 'Sync on read should not trigger by default.' );
+
+		// Enable sync on read via filter.
+		add_filter( 'woocommerce_hpos_enable_sync_on_read', '__return_true' );
+
+		// Read order with filter — sync on read SHOULD trigger (post is newer).
+		$this->reset_order_data_store_state( $this->sut );
+		wc_get_order( $order->get_id() );
+		$this->assertTrue( $sync_on_read_triggered, 'Sync on read should trigger when enabled and post is newer.' );
+
+		// Reset and make the post version older — sync on read should NOT trigger even with filter.
+		$sync_on_read_triggered = false;
+		$order->set_date_modified( $now );
+		$order->save();
+
+		$wpdb->update(
+			$wpdb->posts,
+			array( 'post_modified_gmt' => gmdate( 'Y-m-d H:i:s', $before ) ),
+			array( 'ID' => $order->get_id() )
+		);
+		clean_post_cache( $order->get_id() );
+
+		$this->reset_order_data_store_state( $this->sut );
+		wc_get_order( $order->get_id() );
+		$this->assertFalse( $sync_on_read_triggered, 'Sync on read should not trigger when post is older.' );
+
+		remove_all_actions( 'woocommerce_hpos_post_record_migrated_on_read' );
+		remove_all_filters( 'woocommerce_hpos_enable_sync_on_read' );
 	}
 
 	/**
@@ -2244,6 +2392,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	public function test_read_multiple_dont_sync_again_for_same_order() {
 		$this->toggle_cot_feature_and_usage( true );
 		$this->disable_cot_sync();
+		add_filter( 'woocommerce_hpos_enable_sync_on_read', '__return_true' );
 		$order = $this->create_complex_cot_order();
 		$this->sut->backfill_post_record( $order );
 		$this->enable_cot_sync();
@@ -2260,6 +2409,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->assertTrue( $should_sync_callable->call( $this->sut, $order ) );
 		$this->sut->read_multiple( $orders );
 		$this->assertFalse( $should_sync_callable->call( $this->sut, $order ) );
+		remove_all_filters( 'woocommerce_hpos_enable_sync_on_read' );
 		$this->toggle_cot_feature_and_usage( false );
 	}
 
@@ -3018,8 +3168,9 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	 */
 	private function reset_order_data_store_state( $sut ) {
 		$reset_state = function () use ( $sut ) {
-			self::$backfilling_order_ids = array();
-			self::$reading_order_ids     = array();
+			self::$backfilling_order_ids  = array();
+			self::$reading_order_ids      = array();
+			self::$sync_on_read_order_ids = array();
 		};
 		$reset_state->call( $sut );
 		wc_get_container()->get( \Automattic\WooCommerce\Caches\OrderCache::class )->flush();

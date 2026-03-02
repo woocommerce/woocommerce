@@ -23,7 +23,6 @@ const config: PlaywrightTestConfig = {
 	reporter: process.env.CI
 		? [
 				[ 'list' ],
-				[ './flaky-tests-reporter.ts' ],
 				[
 					'allure-playwright',
 					{

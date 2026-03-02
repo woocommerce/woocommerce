@@ -43,13 +43,10 @@ import Taxes from '../inner-blocks/checkout-order-summary-taxes/frontend';
 import { defaultCartState } from '../../../data/cart/default-state';
 import Checkout from '../block';
 
-jest.mock( '@wordpress/data', () => {
-	const wpData = jest.requireActual( 'wordpress-data-wp-6-7' );
-	return {
-		__esModule: true,
-		...wpData,
-	};
-} );
+jest.mock( '@wordpress/data', () =>
+	// eslint-disable-next-line @typescript-eslint/no-var-requires -- Must use require due to Jest mock hoisting
+	require( '@woocommerce/blocks-test-utils/mock-editor-store' ).mockWordPressDataWithEditorStore()
+);
 
 jest.mock( '@wordpress/compose', () => ( {
 	...jest.requireActual( '@wordpress/compose' ),

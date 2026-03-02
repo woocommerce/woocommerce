@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Rework snackbar notices by using the `EditorSnackbars` component from `@wordpress/editor` to render notices, removing the `email-editor` context snackbar notices renderer, and adding a `disableSnackbarNotices` setting to the email editor component

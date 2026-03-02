@@ -2,12 +2,38 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.1](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.7.1) - 2026-02-20 
+
+-   Patch - Export EditTemplateModal and SelectTemplateModal from the email editor package for extensibility. [#63374]
+
+## [1.7.0](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.7.0) - 2026-02-17 
+
+-   Patch - Add memoization for the getEmailTemplates selector [#63200]
+-   Patch - Fix blank modal when using swap template action in email editor [#63229]
+-   Patch - Add `customSavePanel` prop to the Email Editor component and pass it down to the Gutenberg Editor component [#63323]
+-   Minor - Add EmailActionsFill allowing extenders to add custom email actions to the sidebar [#63269]
+-   Minor - Move TemplateSelection to EmailActionsFill slot and export TemplateSelection component for extensibility [#63277]
+
+## [1.6.0](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.6.0) - 2026-02-04 
+
+-   Minor - Ensure reset template action for email templates [#62984]
+-   Minor - Add post_id context support and cache invalidation for personalization tags [#63103]
+
+## [1.5.2](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.5.2) - 2026-01-29 
+
+-   Patch - Fix infinite loop when selecting a template in the email design selector modal [#63000]
+
+## [1.5.1](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.5.1) - 2026-01-16 
+
+-   Patch - Fix buttons block layout controls initialization [#62708]
+-   Patch - Unify loading indicator with the site editor [#62729]
+
 ## [1.5.0](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.5.0) - 2025-12-15 
 
 -   Patch - Handle missing layout settings in the editor settings [#61471]
--   Minor - Add category tabs navigation to email template selection modal. The TemplateCategory type is now a string to support dynamic categories loaded from block patterns. [#62441]
 -   Patch - Add optional createCoupon URL to EmailEditorUrls type for coupon creation integration
 -   Patch - Improve UX for tax-inclusive pricing configuration by adding validation notice and clearer setting description when base tax rate is not configured. [#61471]
+-   Minor - Add category tabs navigation to email template selection modal. The TemplateCategory type is now a string to support dynamic categories loaded from block patterns. [#62441]
 
 ## [1.4.3](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.4.3) - 2025-12-11 
 

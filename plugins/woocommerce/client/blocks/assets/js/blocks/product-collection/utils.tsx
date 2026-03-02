@@ -5,8 +5,8 @@ import { store as blockEditorStore } from '@wordpress/block-editor';
 import { addFilter } from '@wordpress/hooks';
 import { select, useSelect, useDispatch } from '@wordpress/data';
 import { store as coreDataStore } from '@wordpress/core-data';
-import { store as editorStore } from '@wordpress/editor';
 import type { BlockEditProps, Block } from '@wordpress/blocks';
+import { CORE_EDITOR_STORE } from '@woocommerce/utils';
 import {
 	useEffect,
 	useLayoutEffect,
@@ -34,6 +34,7 @@ import {
 	PreviewState,
 	SetPreviewState,
 	ProductCollectionUIStatesInEditor,
+	CoreCollectionNames,
 } from './types';
 import {
 	coreQueryPaginationBlockName,
@@ -85,7 +86,8 @@ const isInProductArchive = () => {
 	];
 
 	// @ts-expect-error getEditedPostSlug is not typed
-	const currentTemplateId = select( editorStore ).getEditedPostSlug();
+	const currentTemplateId =
+		select( CORE_EDITOR_STORE )?.getEditedPostSlug?.();
 
 	/**
 	 * Set inherit value when Product Collection block is first added to the page.
@@ -264,7 +266,60 @@ export const useProductCollectionUIState = ( {
 		}
 
 		/**
-		 * Case 3: Preview mode - based on `usesReference` value
+		 * Case 3: Hand-picked products picker
+		 * Show the product picker when the Hand-Picked collection is selected
+		 * but no products have been chosen yet.
+		 */
+		const isHandPickedCollection =
+			attributes.collection === CoreCollectionNames.HAND_PICKED;
+		const hasHandPickedProducts =
+			( attributes.query?.woocommerceHandPickedProducts?.length ?? 0 ) >
+			0;
+
+		if (
+			isCollectionSelected &&
+			isHandPickedCollection &&
+			! hasHandPickedProducts
+		) {
+			return ProductCollectionUIStatesInEditor.HAND_PICKED_PRODUCTS_PICKER;
+		}
+
+		/**
+		 * Case 4: Taxonomy picker for BY_CATEGORY, BY_TAG, BY_BRAND collections
+		 * Show the picker when no taxonomy terms are selected.
+		 */
+		const isTaxonomyCollection =
+			attributes.collection === CoreCollectionNames.BY_CATEGORY ||
+			attributes.collection === CoreCollectionNames.BY_TAG ||
+			attributes.collection === CoreCollectionNames.BY_BRAND;
+
+		if ( isCollectionSelected && isTaxonomyCollection ) {
+			let taxonomySlug: string;
+			switch ( attributes.collection ) {
+				case CoreCollectionNames.BY_CATEGORY:
+					taxonomySlug = 'product_cat';
+					break;
+				case CoreCollectionNames.BY_TAG:
+					taxonomySlug = 'product_tag';
+					break;
+				case CoreCollectionNames.BY_BRAND:
+					taxonomySlug = 'product_brand';
+					break;
+				default:
+					taxonomySlug = '';
+			}
+
+			const selectedTermIds =
+				attributes.query?.taxQuery?.[ taxonomySlug ] || [];
+			const hasSelectedTerms = selectedTermIds.length > 0;
+
+			if ( ! hasSelectedTerms ) {
+				return ProductCollectionUIStatesInEditor.TAXONOMY_PICKER;
+			}
+		}
+
+		/**
+		 * Case 5: Preview mode - based on `usesReference` value
 		 */
 		if ( isInRequiredLocation ) {
 			/**
@@ -309,6 +364,8 @@ export const useProductCollectionUIState = ( {
 		product,
 		hasInnerBlocks,
 		attributes.query?.productReference,
+		attributes.query?.woocommerceHandPickedProducts,
+		attributes.query?.taxQuery,
 	] );
 
 	return { productCollectionUIStateInEditor, isLoading: ! hasResolved };

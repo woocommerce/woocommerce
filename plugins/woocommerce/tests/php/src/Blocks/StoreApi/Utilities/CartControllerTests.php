@@ -19,6 +19,11 @@ class CartControllerTests extends TestCase {
 		parent::tearDown();
 		WC()->cart->empty_cart();
 		remove_all_filters( 'woocommerce_cart_shipping_packages' );
+
+		// Reset DI container to clear any mocks.
+		$container = wc_get_container();
+		$container->reset_all_resolved();
+		$container->reset_all_replacements();
 	}
 
 	/**

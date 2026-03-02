@@ -2100,4 +2100,45 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 
 		$this->assertEquals( 110.06, $order->get_total_fees() );
 	}
+
+	/**
+	 * Test that WC_Order::get_total_fees() returns negative values for discount fees.
+	 */
+	public function test_get_total_fees_should_return_negative_fees() {
+		$order = WC_Helper_Order::create_order();
+
+		$fee = new WC_Order_Item_Fee();
+		$fee->set_props(
+			array(
+				'name'       => 'Discount Fee',
+				'tax_status' => ProductTaxStatus::NONE,
+				'total'      => -10,
+			)
+		);
+		$order->add_item( $fee );
+
+		$this->assertEquals( -10, $order->get_total_fees() );
+	}
+
+	/**
+	 * Test that WC_Order::get_total_fees() correctly sums mixed positive and negative fees.
+	 */
+	public function test_get_total_fees_should_sum_mixed_positive_and_negative_fees() {
+		$order      = WC_Helper_Order::create_order();
+		$fee_totals = array( 25, -10, 5.50 ); // Net: 20.50.
+
+		foreach ( $fee_totals as $total ) {
+			$fee = new WC_Order_Item_Fee();
+			$fee->set_props(
+				array(
+					'name'       => $total < 0 ? 'Discount Fee' : 'Regular Fee',
+					'tax_status' => ProductTaxStatus::NONE,
+					'total'      => $total,
+				)
+			);
+			$order->add_item( $fee );
+		}
+
+		$this->assertEquals( 20.50, $order->get_total_fees() );
+	}
 }

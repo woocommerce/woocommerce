@@ -467,16 +467,21 @@ class Checkout extends AbstractBlock {
 
 		$is_block_editor = $this->is_block_editor();
 
-		if ( $is_block_editor && ! $this->asset_data_registry->exists( 'localPickupLocations' ) ) {
+		if ( $is_block_editor ) {
 			$this->asset_data_registry->add(
 				'localPickupLocations',
-				array_map(
-					function ( $location ) {
-						$location['formatted_address'] = wc()->countries->get_formatted_address( $location['address'], ', ' );
-						return $location;
-					},
-					get_option( 'pickup_location_pickup_locations', array() )
-				)
+				array_filter(
+					array_map(
+						function ( $location ) {
+							if ( ! wc_string_to_bool( $location['enabled'] ) ) {
+								return null;
+							}
+							$location['formatted_address'] = wc()->countries->get_formatted_address( $location['address'], ', ' );
+							return $location;
+						},
+						LocalPickupUtils::get_local_pickup_method_locations()
+					)
+				),
 			);
 		}
 
