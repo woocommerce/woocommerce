@@ -167,6 +167,9 @@ test.describe(
 				} ),
 			} );
 
+			// Ensure that the filters above are 100% in place by reloading the page.
+			await page.reload();
+
 			const originalPayPalTitle = await page
 				.locator( '#woocommerce_paypal_title' )
 				.inputValue();
