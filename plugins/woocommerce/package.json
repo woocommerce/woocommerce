@@ -887,7 +887,9 @@
 					],
 					"events": [
 						"pull_request",
-						"push"
+						"push",
+						"release-checks",
+						"core-e2e"
 					],
 					"testEnv": {
 						"start": "env:test --debug"
