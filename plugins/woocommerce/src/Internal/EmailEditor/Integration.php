@@ -78,6 +78,11 @@ class Integration {
 		}
 
 		add_action( 'woocommerce_init', array( $this, 'initialize' ) );
+
+		// Register the post deletion cleanup hook early and unconditionally so it works in
+		// both admin and non-admin contexts (e.g. WP-CLI). This only needs $wpdb and the
+		// posts manager singleton — it must not depend on the full editor init chain.
+		add_action( 'before_delete_post', array( $this, 'delete_email_template_associated_with_email_editor_post' ), 10, 2 );
 	}
 
 	/**
@@ -133,7 +138,6 @@ class Integration {
 		add_filter( 'woocommerce_email_editor_post_types', array( $this, 'add_email_post_type' ) );
 		add_filter( 'woocommerce_is_email_editor_page', array( $this, 'is_editor_page' ), 10, 1 );
 		add_filter( 'replace_editor', array( $this, 'replace_editor' ), 10, 2 );
-		add_action( 'before_delete_post', array( $this, 'delete_email_template_associated_with_email_editor_post' ), 10, 2 );
 		add_filter( 'woocommerce_email_editor_send_preview_email_rendered_data', array( $this, 'update_send_preview_email_rendered_data' ), 10, 2 );
 		add_filter( 'woocommerce_email_editor_send_preview_email_personalizer_context', array( $this, 'update_send_preview_email_personalizer_context' ) );
 		add_filter( 'woocommerce_email_editor_preview_post_template_html', array( $this, 'update_preview_post_template_html_data' ), 100, 1 );
