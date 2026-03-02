@@ -16,6 +16,14 @@ use WP_Query;
  */
 class Product_Collection extends Abstract_Product_Block_Renderer {
 	/**
+	 * Default spacing between inner product elements (image, title, price).
+	 * This is a fixed value from the email editor's base theme.json, independent
+	 * of the site theme's blockGap, because the editor does not apply blockGap
+	 * between inner product elements.
+	 */
+	private const INNER_BLOCK_SPACING = '8px';
+
+	/**
 	 * Render the product collection block content for email.
 	 *
 	 * @param string            $block_content Block content.
@@ -30,12 +38,15 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 		// Get collection type to pass to child blocks.
 		$collection_type = $parsed_block['attrs']['collection'] ?? '';
 
+		// Get column count from display layout attributes.
+		$columns = (int) ( $parsed_block['attrs']['displayLayout']['columns'] ?? 1 );
+
 		$content = '';
 
 		foreach ( $parsed_block['innerBlocks'] as $inner_block ) {
 			switch ( $inner_block['blockName'] ) {
 				case 'woocommerce/product-template':
-					$content .= $this->render_product_template( $inner_block, $query, $collection_type );
+					$content .= $this->render_product_template( $inner_block, $query, $collection_type, $columns, $rendering_context );
 					break;
 				default:
 					$content .= render_block( $inner_block );
@@ -51,12 +62,14 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 	/**
 	 * Render the product template block.
 	 *
-	 * @param array     $inner_block Inner block data.
-	 * @param \WP_Query $query WP_Query object.
-	 * @param string    $collection_type Collection type identifier.
+	 * @param array             $inner_block Inner block data.
+	 * @param \WP_Query         $query WP_Query object.
+	 * @param string            $collection_type Collection type identifier.
+	 * @param int               $columns Number of columns for the grid layout.
+	 * @param Rendering_Context $rendering_context Rendering context.
 	 * @return string
 	 */
-	private function render_product_template( array $inner_block, \WP_Query $query, string $collection_type ): string {
+	private function render_product_template( array $inner_block, \WP_Query $query, string $collection_type, int $columns, Rendering_Context $rendering_context ): string {
 		if ( ! $query->have_posts() ) {
 			return $this->render_no_results_message();
 		}
@@ -76,26 +89,113 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 				$posts
 			)
 		);
-		return $this->render_product_grid( $products, $inner_block, $collection_type );
+		return $this->render_product_grid( $products, $inner_block, $collection_type, $columns, $rendering_context );
 	}
 
 	/**
 	 * Render product grid using HTML table structure for email compatibility.
 	 *
-	 * @param array  $products Array of WC_Product objects.
-	 * @param array  $inner_block Inner block data.
-	 * @param string $collection_type Collection type identifier.
+	 * @param array             $products Array of WC_Product objects.
+	 * @param array             $inner_block Inner block data.
+	 * @param string            $collection_type Collection type identifier.
+	 * @param int               $columns Number of columns for the grid layout.
+	 * @param Rendering_Context $rendering_context Rendering context.
 	 * @return string
 	 */
-	private function render_product_grid( array $products, array $inner_block, string $collection_type ): string {
-		// We start with supporting 1 product per row.
-		$content = '';
-		foreach ( $products as $product ) {
-			$content .= $this->add_spacer(
-				$this->render_product_content( $product, $inner_block, $collection_type ),
-				$inner_block['email_attrs'] ?? array()
-			);
+	private function render_product_grid( array $products, array $inner_block, string $collection_type, int $columns, Rendering_Context $rendering_context ): string {
+		// Limit columns to max 2 for email compatibility.
+		$columns = min( max( $columns, 1 ), 2 );
+
+		// Get the block gap from theme styles to match the editor spacing.
+		$theme_styles = $rendering_context->get_theme_styles();
+		$block_gap    = $theme_styles['spacing']['blockGap'] ?? '16px';
+
+		if ( 1 === $columns ) {
+			// Single column layout - render products vertically.
+			$content = '';
+			$index   = 0;
+			foreach ( $products as $product ) {
+				// For the first product, use the original email_attrs.
+				// For subsequent products, add margin-top for spacing between items.
+				$email_attrs = $inner_block['email_attrs'] ?? array();
+				if ( $index > 0 && ! isset( $email_attrs['margin-top'] ) ) {
+					$email_attrs['margin-top'] = $block_gap;
+				}
+				$content .= $this->add_spacer(
+					$this->render_product_content( $product, $inner_block, $collection_type ),
+					$email_attrs
+				);
+				++$index;
+			}
+			return $content;
 		}
+
+		// Two-column layout using HTML tables for email compatibility.
+		// Wrap with add_spacer to match single-column spacing behavior.
+		return $this->add_spacer(
+			$this->render_two_column_grid( $products, $inner_block, $collection_type, $rendering_context, $block_gap ),
+			$inner_block['email_attrs'] ?? array()
+		);
+	}
+
+	/**
+	 * Render products in a two-column grid layout using HTML tables.
+	 *
+	 * @param array             $products Array of WC_Product objects.
+	 * @param array             $inner_block Inner block data.
+	 * @param string            $collection_type Collection type identifier.
+	 * @param Rendering_Context $rendering_context Rendering context.
+	 * @param string            $block_gap Block gap value from theme styles.
+	 * @return string
+	 */
+	private function render_two_column_grid( array $products, array $inner_block, string $collection_type, Rendering_Context $rendering_context, string $block_gap = '16px' ): string {
+		$content = '';
+
+		// Calculate the cell width from the actual layout width.
+		// Subtract 20px total gap (10px padding on each side of the gap between columns),
+		// then divide by 2 for two columns.
+		$layout_width = (int) $rendering_context->get_layout_width_without_padding();
+		$gap          = 20;
+
+		// Guard against zero or very small layout width to ensure $cell_width is always positive.
+		if ( $layout_width < $gap + 2 ) {
+			$layout_width = $gap + 2;
+		}
+
+		$cell_width = (int) ( ( $layout_width - $gap ) / 2 );
+
+		$content .= '<table role="presentation" border="0" cellpadding="0" cellspacing="0" width="100%" style="width: 100%; border-collapse: collapse;">';
+
+		$product_chunks = array_chunk( $products, 2 );
+
+		foreach ( $product_chunks as $row_index => $row_products ) {
+			$content .= '<tr>';
+
+			foreach ( $row_products as $col_index => $product ) {
+				$cell_style  = 'width: 50%; vertical-align: top; padding: 0;';
+				$cell_style .= 0 === $col_index ? ' padding-right: 10px;' : ' padding-left: 10px;';
+
+				$content .= sprintf(
+					'<td style="%s">%s</td>',
+					esc_attr( $cell_style ),
+					$this->render_product_content( $product, $inner_block, $collection_type, $cell_width )
+				);
+			}
+
+			// If odd number of products, add empty cell to complete the row.
+			if ( 1 === count( $row_products ) ) {
+				$content .= '<td style="width: 50%; vertical-align: top; padding: 0; padding-left: 10px;"></td>';
+			}
+
+			$content .= '</tr>';
+
+			// Add spacing between rows (except after the last row).
+			if ( $row_index < count( $product_chunks ) - 1 ) {
+				$content .= sprintf( '<tr><td colspan="2" style="height: %s;"></td></tr>', esc_attr( $block_gap ) );
+			}
+		}
+
+		$content .= '</table>';
 
 		return $content;
 	}
@@ -106,16 +206,35 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 	 * @param \WC_Product|null $product Product object.
 	 * @param array            $template_block Inner block data.
 	 * @param string           $collection_type Collection type identifier.
+	 * @param int|null         $cell_width Optional cell width for multi-column layouts.
 	 * @return string
 	 */
-	private function render_product_content( ?\WC_Product $product, array $template_block, string $collection_type ): string {
+	private function render_product_content( ?\WC_Product $product, array $template_block, string $collection_type, ?int $cell_width = null ): string {
 		$content = '';
 
 		if ( ! $product ) {
 			return $content;
 		}
 
+		$inner_index = 0;
 		foreach ( $template_block['innerBlocks'] as $inner_block ) {
+			// Override the preprocessor-applied blockGap margin-top for inner blocks.
+			// The editor does not vary spacing between inner product elements
+			// (image, title, price) when blockGap changes, so we use a fixed value
+			// to keep editor and preview consistent.
+			$inner_block['email_attrs'] = $inner_block['email_attrs'] ?? array();
+			if ( 0 === $inner_index ) {
+				unset( $inner_block['email_attrs']['margin-top'] );
+			} else {
+				$inner_block['email_attrs']['margin-top'] = self::INNER_BLOCK_SPACING;
+			}
+
+			// Set cell width context for multi-column layouts.
+			if ( null !== $cell_width ) {
+				$inner_block['email_attrs']['width'] = $cell_width . 'px';
+			}
+
+			++$inner_index;
 			switch ( $inner_block['blockName'] ) {
 				case 'woocommerce/product-price':
 				case 'woocommerce/product-button':

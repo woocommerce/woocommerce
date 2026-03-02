@@ -2,7 +2,7 @@
 	"name": "@woocommerce/plugin-woocommerce",
 	"private": true,
 	"title": "WooCommerce",
-	"version": "10.6.0",
+	"version": "10.7.0",
 	"homepage": "https://woocommerce.com/",
 	"repository": {
 		"type": "git",
@@ -138,7 +138,7 @@
 						"phpunit.xml"
 					],
 					"testEnv": {
-						"start": "env:test",
+						"start": "env:test --debug",
 						"config": {
 							"phpVersion": "8.5",
 							"wpVersion": "latest"
@@ -168,7 +168,7 @@
 						"phpunit.xml"
 					],
 					"testEnv": {
-						"start": "env:test",
+						"start": "env:test --debug",
 						"config": {
 							"phpVersion": "8.5",
 							"wpVersion": "latest"
@@ -197,7 +197,7 @@
 						"phpunit.xml"
 					],
 					"testEnv": {
-						"start": "env:test",
+						"start": "env:test --debug",
 						"config": {
 							"phpVersion": "7.4",
 							"wpVersion": "latest-1"
@@ -226,7 +226,7 @@
 						"phpunit.xml"
 					],
 					"testEnv": {
-						"start": "env:test",
+						"start": "env:test --debug",
 						"config": {
 							"phpVersion": "7.4",
 							"wpVersion": "prerelease"
@@ -244,7 +244,7 @@
 					"optional": true,
 					"changes": [],
 					"testEnv": {
-						"start": "env:test"
+						"start": "env:test --debug"
 					},
 					"events": [
 						"nightly-checks",
@@ -278,7 +278,7 @@
 						"uninstall.php"
 					],
 					"testEnv": {
-						"start": "env:test"
+						"start": "env:test --debug"
 					},
 					"events": [
 						"pull_request",
@@ -312,7 +312,7 @@
 						"uninstall.php"
 					],
 					"testEnv": {
-						"start": "env:test"
+						"start": "env:test --debug"
 					},
 					"events": [
 						"pull_request",
@@ -345,7 +345,7 @@
 						"core-e2e-gutenberg"
 					],
 					"testEnv": {
-						"start": "env:test"
+						"start": "env:test --debug"
 					},
 					"report": {
 						"resultsBlobName": "gutenberg-stable-e2e-report",
@@ -373,7 +373,7 @@
 						"core-e2e-gutenberg"
 					],
 					"testEnv": {
-						"start": "env:test"
+						"start": "env:test --debug"
 					},
 					"report": {
 						"resultsBlobName": "gutenberg-nightly-e2e-report",
@@ -399,7 +399,7 @@
 						"core-e2e-hpos-disabled"
 					],
 					"testEnv": {
-						"start": "env:test"
+						"start": "env:test --debug"
 					},
 					"report": {
 						"resultsBlobName": "core-e2e-reports-hpos-disabled",
@@ -425,7 +425,7 @@
 						"@woocommerce/e2e-utils-playwright"
 					],
 					"testEnv": {
-						"start": "env:test",
+						"start": "env:test --debug",
 						"config": {
 							"phpVersion": "8.5"
 						}
@@ -460,7 +460,7 @@
 						"@woocommerce/e2e-utils-playwright"
 					],
 					"testEnv": {
-						"start": "env:test",
+						"start": "env:test --debug",
 						"config": {
 							"wpVersion": "latest-1"
 						}
@@ -496,7 +496,7 @@
 						"@woocommerce/e2e-utils-playwright"
 					],
 					"testEnv": {
-						"start": "env:test",
+						"start": "env:test --debug",
 						"config": {
 							"wpVersion": "prerelease"
 						}
@@ -534,7 +534,7 @@
 					],
 					"onlyForDependencies": [],
 					"testEnv": {
-						"start": "env:test"
+						"start": "env:test --debug"
 					},
 					"events": [
 						"pull_request",
@@ -572,7 +572,7 @@
 						"core-api-hpos-disabled"
 					],
 					"testEnv": {
-						"start": "env:test"
+						"start": "env:test --debug"
 					},
 					"report": {
 						"resultsBlobName": "core-api-report-hpos-disabled",
@@ -598,7 +598,7 @@
 						"phpunit.xml"
 					],
 					"testEnv": {
-						"start": "env:test",
+						"start": "env:test --debug",
 						"config": {
 							"phpVersion": "8.5",
 							"wpVersion": "latest"
@@ -635,7 +635,7 @@
 						"core-api-object-cache"
 					],
 					"testEnv": {
-						"start": "env:test"
+						"start": "env:test --debug"
 					},
 					"report": {
 						"resultsBlobName": "core-api-report-object-cache",
@@ -665,7 +665,7 @@
 					"name": "Metrics",
 					"testType": "performance",
 					"command": "test:metrics:ci",
-					"optional": false,
+					"optional": true,
 					"changes": [
 						"composer.json",
 						"composer.lock",
@@ -683,7 +683,7 @@
 						"@woocommerce/classic-assets"
 					],
 					"testEnv": {
-						"start": "env:test"
+						"start": "env:perf"
 					},
 					"events": [
 						"push",
@@ -883,10 +883,12 @@
 					"changes": [],
 					"events": [
 						"pull_request",
-						"push"
+						"push",
+						"release-checks",
+						"core-e2e"
 					],
 					"testEnv": {
-						"start": "env:test"
+						"start": "env:test --debug"
 					},
 					"report": {
 						"resultsBlobName": "core-e2e-report",
@@ -910,7 +912,7 @@
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@wordpress/browserslist-config": "next",
 		"@wordpress/e2e-test-utils-playwright": "wp-6.8",
-		"@wordpress/env": "10.32.0",
+		"@wordpress/env": "11.0.1-next.v.20260206T143.0",
 		"@wordpress/scripts": "30.6.0",
 		"@wordpress/stylelint-config": "^21.36.0",
 		"allure-commandline": "^2.32.2",
@@ -979,6 +981,9 @@
 				"node_modules/@woocommerce/admin-library/build",
 				"node_modules/@woocommerce/block-library/build",
 				"node_modules/@woocommerce/classic-assets/build",
+				"node_modules/@woocommerce/e2e-utils-playwright/build",
+				"node_modules/@woocommerce/e2e-utils-playwright/build-module",
+				"node_modules/@woocommerce/e2e-utils-playwright/build-types",
 				"node_modules/@woocommerce/eslint-plugin/configs",
 				"node_modules/@woocommerce/eslint-plugin/rules",
 				"node_modules/@woocommerce/eslint-plugin/index.js"

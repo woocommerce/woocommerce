@@ -359,9 +359,7 @@ class Embed extends Abstract_Block_Renderer {
 					$text_content = $body_element->textContent; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 
 					// Look for HTTP/HTTPS URLs in the text content.
-					if ( preg_match( '/(?<![a-zA-Z0-9.-])https?:\/\/[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}[a-zA-Z0-9\/?=&%-]*(?![a-zA-Z0-9.-])/', $text_content, $matches ) ) {
-						$url = $matches[0];
-					}
+					$url = Html_Processing_Helper::extract_url_from_text( $text_content );
 				}
 			}
 		}
@@ -501,7 +499,8 @@ class Embed extends Abstract_Block_Renderer {
 		$mock_video_block = array(
 			'blockName' => 'core/video',
 			'attrs'     => array(
-				'poster' => $poster_url,
+				'poster'   => $poster_url,
+				'videoUrl' => $url,
 			),
 			'innerHTML' => '<figure class="wp-block-video wp-block-embed is-type-video is-provider-' . esc_attr( $provider ) . '"><div class="wp-block-embed__wrapper">' . esc_url( $url ) . '</div></figure>',
 		);

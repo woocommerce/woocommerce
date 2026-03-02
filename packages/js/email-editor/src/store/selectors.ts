@@ -322,21 +322,34 @@ export const getGlobalEmailStylesPost = createRegistrySelector(
 /**
  * Retrieves the email templates.
  */
-export const getEmailTemplates = createRegistrySelector( ( select ) => () => {
+export const getEmailTemplates = createRegistrySelector( ( select ) => {
 	const postType = select( storeName ).getEmailPostType();
-	return (
-		select( coreDataStore )
-			.getEntityRecords( 'postType', 'wp_template', {
-				per_page: -1,
-				post_type: postType,
-				context: 'view',
-			} )
-			// We still need to filter the templates because, in some cases, the API also returns custom templates
-			// ignoring the post_type filter in the query
-			?.filter( ( template ) =>
-				// @ts-expect-error Missing property in type
-				template.post_types.includes( postType )
-			)
+
+	return createSelector(
+		() =>
+			select( coreDataStore )
+				.getEntityRecords( 'postType', 'wp_template', {
+					per_page: -1,
+					post_type: postType,
+					context: 'view',
+				} )
+				// We still need to filter the templates because, in some cases, the API also returns custom templates
+				// ignoring the post_type filter in the query
+				?.filter( ( template ) =>
+					// @ts-expect-error Missing property in type
+					template.post_types.includes( postType )
+				),
+		() => [
+			select( coreDataStore ).getEntityRecords(
+				'postType',
+				'wp_template',
+				{
+					per_page: -1,
+					post_type: postType,
+					context: 'view',
+				}
+			),
+		]
 	);
 } );
 
@@ -367,13 +380,21 @@ export function getPreviewState( state: State ): State[ 'preview' ] {
 
 export const getPersonalizationTagsList = createRegistrySelector(
 	( select ) => () => {
+		const postId = select( storeName ).getEmailPostId();
+		const queryParams: Record< string, unknown > = {
+			context: 'view',
+			per_page: -1,
+		};
+
+		// Include post_id for context-aware tag filtering (e.g., automation emails)
+		if ( postId ) {
+			queryParams.post_id = postId;
+		}
+
 		const tags = ( select( coreDataStore ).getEntityRecords(
 			PERSONALIZATION_TAG_ENTITY.kind,
 			PERSONALIZATION_TAG_ENTITY.name,
-			{
-				context: 'view',
-				per_page: -1,
-			}
+			queryParams
 		) || [] ) as PersonalizationTag[];
 
 		const postType = select( storeName ).getEmailPostType();

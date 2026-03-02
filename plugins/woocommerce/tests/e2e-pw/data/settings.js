@@ -1095,7 +1095,7 @@ const stateOptions = {
 	'IR:SMN': 'Iran - Semnan (سمنان)',
 	'IR:FRS': 'Iran - Fars (فارس)',
 	'IR:QHM': 'Iran - Qom (قم)',
-	'IR:KRD': 'Iran - Kurdistan / کردستان)',
+	'IR:KRD': 'Iran - Kurdistan (کردستان)',
 	'IR:KBD': 'Iran - Kohgiluyeh and BoyerAhmad (کهگیلوییه و بویراحمد)',
 	'IR:GLS': 'Iran - Golestan (گلستان)',
 	'IR:GIL': 'Iran - Gilan (گیلان)',

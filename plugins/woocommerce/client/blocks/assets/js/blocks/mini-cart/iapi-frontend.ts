@@ -31,9 +31,11 @@ import { translateJQueryEventToNative } from '../../base/stores/woocommerce/lega
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-const { currency, placeholderImgSrc } = getConfig(
-	'woocommerce'
-) as WooCommerceConfig;
+const {
+	currency,
+	placeholderImgSrc,
+	nonOptimisticProperties = [],
+} = getConfig( 'woocommerce' ) as WooCommerceConfig;
 const {
 	onCartClickBehaviour,
 	checkoutUrl,
@@ -45,7 +47,6 @@ const {
 	increaseQuantityLabel,
 	quantityDescriptionLabel,
 	removeFromCartLabel,
-	lowInStockLabel,
 } = getConfig( 'woocommerce/mini-cart-products-table-block' );
 const { itemsInCartTextTemplate } = getConfig(
 	'woocommerce/mini-cart-title-items-counter-block'
@@ -172,6 +173,9 @@ store< MiniCart >(
 	{
 		state: {
 			get totalItemsInCart() {
+				if ( nonOptimisticProperties.includes( 'cart.items_count' ) ) {
+					return woocommerceState.cart.items_count as number;
+				}
 				return woocommerceState.cart.items.reduce< number >(
 					( total, { quantity } ) => total + quantity,
 					0
@@ -408,45 +412,6 @@ const { state: cartItemState } = store(
 					woocommerceState.cart.totals,
 					currency as Currency
 				);
-			},
-
-			get cartItemDiscount(): string {
-				const { extensions } = cartItemState.cartItem;
-
-				const discountPrice =
-					cartItemState.regularAmountSingle -
-					cartItemState.purchaseAmountSingle;
-
-				const price = formatPriceWithCurrency(
-					discountPrice,
-					cartItemState.currency
-				);
-
-				// TODO: Add deprecation notice urging to replace with a
-				// `data-wp-text` directive or an alternative solution.
-				if (
-					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					( window.wc as any )?.blocksCheckout?.applyCheckoutFilter
-				) {
-					const priceText =
-						// eslint-disable-next-line @typescript-eslint/no-explicit-any
-						( window.wc as any ).blocksCheckout.applyCheckoutFilter(
-							{
-								filterName: 'saleBadgePriceFormat',
-								defaultValue: '<price/>',
-								extensions,
-								arg: {
-									context: 'cart',
-									cartItem: cartItemState.cartItem,
-									cart: woocommerceState.cart,
-								},
-							}
-						);
-
-					return priceText.replace( '<price/>', price );
-				}
-
-				return price;
 			},
 
 			get lineItemDiscount(): string {
@@ -717,13 +682,6 @@ const { state: cartItemState } = store(
 				return price;
 			},
 
-			get isLineItemTotalDiscountVisible(): boolean {
-				return (
-					cartItemState.cartItemHasDiscount &&
-					cartItemState.cartItem.quantity > 1
-				);
-			},
-
 			get isProductHiddenFromCatalog(): boolean {
 				const context = getContext< { isImageHidden: boolean } >();
 				const { catalog_visibility: catalogVisibility } =
@@ -732,20 +690,6 @@ const { state: cartItemState } = store(
 					( catalogVisibility === 'hidden' ||
 						catalogVisibility === 'search' ) &&
 					! context.isImageHidden
-				);
-			},
-
-			get isLowInStockVisible(): boolean {
-				return (
-					! cartItemState.cartItem.show_backorder_badge &&
-					!! cartItemState.cartItem.low_stock_remaining
-				);
-			},
-
-			get lowInStockLabel(): string {
-				return lowInStockLabel.replace(
-					'%d',
-					cartItemState.cartItem.low_stock_remaining
 				);
 			},
 
@@ -853,13 +797,6 @@ const { state: cartItemState } = store(
 				return `${ name }:${ value }`;
 			},
 
-			get itemDataHasMultipleAttributes(): boolean {
-				const { dataProperty } = getContext< {
-					dataProperty: DataProperty;
-				} >();
-				return cartItemState.cartItem[ dataProperty ]?.length > 1;
-			},
-
 			get shouldHideProductDetails(): boolean {
 				const { dataProperty } = getContext< {
 					dataProperty: DataProperty;
@@ -867,18 +804,35 @@ const { state: cartItemState } = store(
 				return cartItemState.cartItem[ dataProperty ].length === 0;
 			},
 
-			get shouldHideSingleProductDetails(): boolean {
-				return (
-					cartItemState.shouldHideProductDetails ||
-					cartItemState.itemDataHasMultipleAttributes
-				);
-			},
+			get isLastCartItemDataAttr(): boolean {
+				const { itemData, dataProperty } = getContext< {
+					itemData: ItemData;
+					dataProperty: DataProperty;
+				} >();
 
-			get shouldHideMultipleProductDetails(): boolean {
-				return (
-					cartItemState.shouldHideProductDetails ||
-					! cartItemState.itemDataHasMultipleAttributes
+				const items = cartItemState.cartItem[ dataProperty ];
+				if ( ! items || items.length === 0 ) {
+					return true;
+				}
+
+				// Filter out hidden items
+				const visibleItems = items.filter(
+					( item: ItemData ) =>
+						! (
+							item.hidden === true ||
+							item.hidden === 'true' ||
+							item.hidden === '1' ||
+							// eslint-disable-next-line @typescript-eslint/no-explicit-any
+							( item.hidden as any ) === 1
+						)
 				);
+
+				if ( visibleItems.length === 0 ) {
+					return true;
+				}
+
+				const lastItem = visibleItems[ visibleItems.length - 1 ];
+				return itemData === lastItem;
 			},
 		},
 
