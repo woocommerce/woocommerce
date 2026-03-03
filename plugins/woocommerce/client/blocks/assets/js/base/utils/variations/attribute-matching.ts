@@ -90,7 +90,7 @@ export const findMatchingVariation = (
 						).toLowerCase() === attrNameLower
 				);
 
-				// If variation attribute has empty value, it accepts "Any" value.
+				// If variation attribute is null, it accepts "Any" value.
 				if ( attr.value === null ) {
 					return (
 						selectedAttr !== undefined &&
