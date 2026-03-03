@@ -4,14 +4,12 @@ namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Utilities\ProductLinksTrait;
-use Automattic\WooCommerce\StoreApi\Utilities\ProductPasswordTrait;
 
 /**
  * ProductsBySlug class.
  */
 class ProductsBySlug extends AbstractRoute {
 	use ProductLinksTrait;
-	use ProductPasswordTrait;
 
 	/**
 	 * The route identifier.
@@ -98,8 +96,6 @@ class ProductsBySlug extends AbstractRoute {
 		if ( ! $object || 0 === $object->get_id() || ProductStatus::PUBLISH !== $object->get_status() ) {
 			throw new RouteException( 'woocommerce_rest_product_invalid_slug', __( 'Invalid product slug.', 'woocommerce' ), 404 );
 		}
-
-		$this->maybe_unlock_password_protected_product( $object, $request );
 
 		return $this->prepare_item_for_response( $object, $request );
 	}
