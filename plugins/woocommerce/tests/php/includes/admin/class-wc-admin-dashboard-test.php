@@ -127,16 +127,16 @@ class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
 			}
 		);
 
-		$password = wp_generate_password( 8, false, false );
-		$author   = wp_insert_user(
+		$password   = wp_generate_password( 8, false, false );
+		$subscriber = wp_insert_user(
 			array(
-				'user_login' => "test_author$password",
+				'user_login' => "test_subscriber$password",
 				'user_pass'  => $password,
-				'user_email' => "author$password@example.com",
+				'user_email' => "subscriber$password@example.com",
 				'role'       => 'subscriber',
 			)
 		);
-		wp_set_current_user( $author );
+		wp_set_current_user( $subscriber );
 
 		$dashboard = new WC_Admin_Dashboard();
 
