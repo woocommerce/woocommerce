@@ -26,7 +26,7 @@ jobs:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           claude_args: >
             --allowedTools "Bash(gh pr diff *),Bash(gh pr view *)"
-            --json-schema '{"type":"object","properties":{"needs_docs":{"type":"boolean"},"confidence":{"type":"string","enum":["high","medium","low"]},"reason":{"type":"string"}},"required":["needs_docs","confidence","reason"]}'
+            --json-schema '{"type":"object","properties":{"needs_docs":{"type":"boolean"},"confidence":{"type":"string","enum":["high","medium","low"]},"reason":{"type":"string"},"pr_title":{"type":"string"}},"required":["needs_docs","confidence","reason","pr_title"]}'
           prompt: |
             Docs update detection for WooCommerce
 
@@ -47,6 +47,7 @@ jobs:
             - needs_docs: true or false
             - confidence: "high", "medium", or "low"
             - reason: 1-2 sentence explanation
+            - pr_title: the PR title (from gh pr view output)
 
             SKIP CONDITIONS (check these FIRST, before analyzing the diff)
             1. Get the PR metadata:
@@ -136,9 +137,11 @@ jobs:
       - name: 'Apply Label'
         if: ${{ steps.analyze.outputs.structured_output && fromJSON(steps.analyze.outputs.structured_output).needs_docs }}
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        env:
+          STRUCTURED_OUTPUT: ${{ steps.analyze.outputs.structured_output }}
         with:
           script: |
-            const verdict = ${{ steps.analyze.outputs.structured_output }};
+            const verdict = JSON.parse( process.env.STRUCTURED_OUTPUT );
             console.log( `Reason: ${ verdict.reason } (confidence: ${ verdict.confidence })` );
 
             const { data: pr } = await github.rest.pulls.get( {
@@ -161,24 +164,30 @@ jobs:
       - name: 'Create Linear Issue'
         if: ${{ steps.analyze.outputs.structured_output && fromJSON(steps.analyze.outputs.structured_output).needs_docs }}
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        env:
+          STRUCTURED_OUTPUT: ${{ steps.analyze.outputs.structured_output }}
         with:
           script: |
-            const verdict = ${{ steps.analyze.outputs.structured_output }};
-            const prNumber = context.issue.number;
-            const prTitle = context.payload.pull_request.title;
+            const verdict = JSON.parse( process.env.STRUCTURED_OUTPUT );
             const prUrl = context.payload.pull_request.html_url;
             const repoFullName = context.payload.repository.full_name;
+            const prTitle = verdict.pr_title;
 
             const { LinearClient } = require( '@linear/sdk' );
             const linearClient = new LinearClient( {
               apiKey: '${{ secrets.LINEAR_OAUTH_TOKEN }}'
             } );
 
+            const escapedTitle = prTitle
+              .replace( /\\/g, '\\\\' )
+              .replace( /\[/g, '\\[' )
+              .replace( /\]/g, '\\]' );
+
             const title = `Docs update needed: ${ prTitle }`;
             const description = [
               'A pull request was flagged as containing user-facing changes that may require documentation updates.',
               '',
-              `**Pull request:** [${ prTitle }](${ prUrl })`,
+              `**Pull request:** [${ escapedTitle }](${ prUrl })`,
               `**Repository:** ${ repoFullName }`,
               `**Confidence:** ${ verdict.confidence }`,
               `**AI reasoning:** ${ verdict.reason }`,
