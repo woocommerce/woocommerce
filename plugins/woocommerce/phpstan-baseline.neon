@@ -65468,12 +65468,6 @@ parameters:
 			path: src/Internal/Fulfillments/FulfillmentsController.php
 
 		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:read_fulfillments\(\)\.$#'
-			identifier: method.notFound
-			count: 3
-			path: src/Internal/Fulfillments/FulfillmentsManager.php
-
-		-
 			message: '#^Call to function is_string\(\) with string will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
 			count: 2
