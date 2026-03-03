@@ -31,8 +31,9 @@ import { initContentValidationMiddleware } from './middleware/content-validation
 import { initHacks } from './hacks';
 import {
 	useContentValidation,
-	useRemoveSavingFailedNotices,
 	useFilterEditorContentStylesheets,
+	useNoticeOverrides,
+	useRemoveSavingFailedNotices,
 } from './hooks';
 import { cleanupConfigurationChanges } from './config-tools';
 import { getEditorConfigFromWindow } from './store/settings';
@@ -61,6 +62,7 @@ function Editor( {
 
 	useContentValidation();
 	useRemoveSavingFailedNotices();
+	useNoticeOverrides();
 
 	const { setEmailPost } = useDispatch( storeName );
 	useEffect( () => {

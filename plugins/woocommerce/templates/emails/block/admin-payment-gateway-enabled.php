@@ -1,6 +1,6 @@
 <?php
 /**
- * Customer partially refunded order email (initial block version)
+ * Admin payment gateway enabled email (initial block content)
  *
  * This template can be overridden by editing it in the WooCommerce email editor.
  *
@@ -24,28 +24,18 @@ defined( 'ABSPATH' ) || exit;
 ?>
 
 <!-- wp:heading -->
-<h2 class="wp-block-heading"><?php
-/* translators: %s: Order number */
-printf( esc_html__( 'Partial refund: Order %s', 'woocommerce' ), '<!--[woocommerce/order-number]-->' );
-?></h2>
+<h2 class="wp-block-heading"><?php echo esc_html__( 'Payment gateway enabled', 'woocommerce' ); ?></h2>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
-<p><?php
-	/* translators: %s: Customer first name */
-	printf( esc_html__( 'Hi %s,', 'woocommerce' ), '<!--[woocommerce/customer-first-name]-->' );
-?></p>
+<p><?php echo esc_html__( 'Hello,', 'woocommerce' ); ?></p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
 <p><?php
-/* translators: %s: Site title */
-printf( esc_html__( 'Your order from %s has been partially refunded.', 'woocommerce' ), '<!--[woocommerce/site-title]-->' );
+	/* translators: %s: Site title */
+	printf( esc_html__( 'A payment gateway was just enabled on %s.', 'woocommerce' ), '<!--[woocommerce/site-title]-->' );
 ?></p>
-<!-- /wp:paragraph -->
-
-<!-- wp:paragraph -->
-<p> <?php echo esc_html__( 'Here’s a reminder of what you’ve ordered:', 'woocommerce' ); ?> </p>
 <!-- /wp:paragraph -->
 
 <!-- wp:woocommerce/email-content {"lock":{"move":false,"remove":true}} -->
@@ -53,8 +43,5 @@ printf( esc_html__( 'Your order from %s has been partially refunded.', 'woocomme
 <!-- /wp:woocommerce/email-content -->
 
 <!-- wp:paragraph {"align":"center"} -->
-<p class="has-text-align-center"><?php
-/* translators: %s: Store admin email */
-printf( esc_html__( 'Thanks again! If you need any help with your order, please contact us at %s.', 'woocommerce' ), '<!--[woocommerce/store-email]-->' );
-?></p>
+<p class="has-text-align-center"> <?php echo esc_html__( 'If this was intentional, you can safely ignore and delete this email.', 'woocommerce' ); ?> </p>
 <!-- /wp:paragraph -->
