@@ -61,15 +61,10 @@ class ProductsBySlug extends AbstractRoute {
 				'callback'            => [ $this, 'get_response' ],
 				'permission_callback' => '__return_true',
 				'args'                => array(
-					'context'  => $this->get_context_param(
+					'context' => $this->get_context_param(
 						array(
 							'default' => 'view',
 						)
-					),
-					'password' => array(
-						'description' => __( 'Password for password-protected products.', 'woocommerce' ),
-						'type'        => 'string',
-						'required'    => false,
 					),
 				),
 				'allow_batch'         => [ 'v1' => true ],
