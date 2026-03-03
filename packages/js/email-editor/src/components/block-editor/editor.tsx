@@ -107,7 +107,11 @@ export function InnerEditor( {
 		};
 	}, [] );
 
-	const { isFullScreenForced, displaySendEmailButton } = settings;
+	const {
+		isFullScreenForced,
+		displaySendEmailButton,
+		disableSnackbarNotices,
+	} = settings;
 
 	// @ts-expect-error Type is missing in @types/wordpress__editor
 	const { removeEditorPanel } = useDispatch( editorStore );
@@ -192,7 +196,11 @@ export function InnerEditor( {
 						<SettingsPanel />
 					) }
 					{ displaySendEmailButton && <PublishSave /> }
-					<EditorNotices />
+					<EditorNotices
+						disableSnackbarNotices={
+							disableSnackbarNotices as boolean | undefined
+						}
+					/>
 					<BlockCompatibilityWarnings />
 					<PluginArea scope="woocommerce-email-editor" />
 				</Editor>
