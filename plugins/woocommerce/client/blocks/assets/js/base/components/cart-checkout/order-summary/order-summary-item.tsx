@@ -12,21 +12,23 @@ import {
 } from '@woocommerce/price-format';
 import {
 	applyCheckoutFilter,
+	productPriceScreenReaderValidation,
 	productPriceValidation,
 } from '@woocommerce/blocks-checkout';
 import Dinero from 'dinero.js';
 import { getSetting } from '@woocommerce/settings';
-import { useMemo } from '@wordpress/element';
+import { createInterpolateElement, useMemo } from '@wordpress/element';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
 import { CartItem, isString } from '@woocommerce/types';
+import { calculateSaleAmount } from '@woocommerce/base-utils';
 
 /**
  * Internal dependencies
  */
 import ProductBackorderBadge from '../product-backorder-badge';
 import ProductImage from '../product-image';
-import ProductLowStockBadge from '../product-low-stock-badge';
 import ProductMetadata from '../product-metadata';
+import ProductSaleBadge from '../product-sale-badge';
 
 interface OrderSummaryProps {
 	cartItem: CartItem;
@@ -39,7 +41,6 @@ const OrderSummaryItem = ( {
 }: OrderSummaryProps ): JSX.Element => {
 	const {
 		images,
-		low_stock_remaining: lowStockRemaining,
 		show_backorder_badge: showBackorderBadge,
 		name: initialName,
 		permalink,
@@ -102,8 +103,22 @@ const OrderSummaryItem = ( {
 		amount: lineSubtotal,
 		precision: totalsCurrency.minorUnit,
 	} ).getAmount();
+
+	const saleAmountSingle = calculateSaleAmount(
+		prices,
+		priceCurrency.minorUnit
+	);
+
 	const subtotalPriceFormat = applyCheckoutFilter( {
 		filterName: 'subtotalPriceFormat',
+		defaultValue: '<price/>',
+		extensions,
+		arg,
+		validation: productPriceValidation,
+	} );
+
+	const saleBadgePriceFormat = applyCheckoutFilter( {
+		filterName: 'saleBadgePriceFormat',
 		defaultValue: '<price/>',
 		extensions,
 		arg,
@@ -118,6 +133,30 @@ const OrderSummaryItem = ( {
 		arg,
 		validation: productPriceValidation,
 	} );
+
+	/* translators: <quantity/>, <productName/> and <price/> are placeholders and should not be translated. */
+	const productPriceScreenReaderDefault = _n(
+		'Total price for <quantity/> <productName/> item: <price/>',
+		'Total price for <quantity/> <productName/> items: <price/>',
+		quantity,
+		'woocommerce'
+	);
+
+	const productPriceScreenReaderFormat = applyCheckoutFilter( {
+		filterName: 'cartItemScreenReaderPrice',
+		defaultValue: productPriceScreenReaderDefault,
+		extensions,
+		arg,
+		validation: productPriceScreenReaderValidation,
+	} );
+
+	const ProductPriceScreenReaderOutput = () => {
+		return createInterpolateElement( productPriceScreenReaderFormat, {
+			quantity: <>{ quantity }</>,
+			productName: <>{ name }</>,
+			price: <>{ formatPrice( subtotalPrice, totalsCurrency ) }</>,
+		} );
+	};
 
 	const cartItemClassNameFilter = applyCheckoutFilter( {
 		filterName: 'cartItemClass',
@@ -164,6 +203,8 @@ const OrderSummaryItem = ( {
 				<ProductImage
 					image={ images.length ? images[ 0 ] : {} }
 					fallbackAlt={ name }
+					width={ 48 }
+					height={ 48 }
 				/>
 			</div>
 			<div className="wc-block-components-order-summary-item__description">
@@ -173,49 +214,39 @@ const OrderSummaryItem = ( {
 					permalink={ permalink }
 					disabledTagName="h3"
 				/>
-				<ProductPrice
-					currency={ priceCurrency }
-					price={ priceSingle }
-					regularPrice={ regularPriceSingle }
-					className="wc-block-components-order-summary-item__individual-prices"
-					priceClassName="wc-block-components-order-summary-item__individual-price"
-					regularPriceClassName="wc-block-components-order-summary-item__regular-individual-price"
-					format={ subtotalPriceFormat }
-				/>
-				{ showBackorderBadge ? (
-					<ProductBackorderBadge />
-				) : (
-					!! lowStockRemaining && (
-						<ProductLowStockBadge
-							lowStockRemaining={ lowStockRemaining }
-						/>
-					)
-				) }
+				<div className="wc-block-cart-item__prices">
+					<ProductPrice
+						currency={ priceCurrency }
+						price={ priceSingle }
+						regularPrice={ regularPriceSingle }
+						className="wc-block-components-order-summary-item__individual-prices"
+						priceClassName="wc-block-components-order-summary-item__individual-price"
+						regularPriceClassName="wc-block-components-order-summary-item__regular-individual-price"
+						format={ subtotalPriceFormat }
+					/>
+				</div>
+				{ showBackorderBadge && <ProductBackorderBadge /> }
 				<ProductMetadata { ...productMetaProps } />
 			</div>
 			<span className="screen-reader-text">
-				{ sprintf(
-					/* translators: %1$d is the number of items, %2$s is the item name and %3$s is the total price including the currency symbol. */
-					_n(
-						'Total price for %1$d %2$s item: %3$s',
-						'Total price for %1$d %2$s items: %3$s',
-						quantity,
-						'woocommerce'
-					),
-					quantity,
-					name,
-					formatPrice( subtotalPrice, totalsCurrency )
-				) }
+				<ProductPriceScreenReaderOutput />
 			</span>
 			<div
 				className="wc-block-components-order-summary-item__total-price"
 				aria-hidden="true"
 			>
-				<ProductPrice
-					currency={ totalsCurrency }
-					format={ productPriceFormat }
-					price={ subtotalPrice }
-				/>
+				<div className="wc-block-cart-item__total-price-and-sale-badge-wrapper">
+					<ProductPrice
+						currency={ totalsCurrency }
+						format={ productPriceFormat }
+						price={ subtotalPrice }
+					/>
+					<ProductSaleBadge
+						currency={ priceCurrency }
+						saleAmount={ saleAmountSingle * quantity }
+						format={ saleBadgePriceFormat }
+					/>
+				</div>
 			</div>
 		</div>
 	);

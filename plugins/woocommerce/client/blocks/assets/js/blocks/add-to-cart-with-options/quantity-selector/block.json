@@ -12,5 +12,6 @@
 		"interactivity": true
 	},
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"style": "file:../woocommerce/add-to-cart-with-options-quantity-selector-style.css"
+	"style": "file:../woocommerce/add-to-cart-with-options-quantity-selector-style.css",
+	"viewScriptModule": "woocommerce/add-to-cart-with-options-quantity-selector"
 }

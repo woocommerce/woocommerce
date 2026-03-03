@@ -21,7 +21,7 @@ export function EditTemplateModal( { close } ) {
 		return {
 			onNavigateToEntityRecord:
 				// @ts-expect-error onNavigateToEntityRecord type is not defined
-				editorSettings.onNavigateToEntityRecord,
+				editorSettings?.onNavigateToEntityRecord,
 			template: sel( storeName ).getCurrentTemplate(),
 		};
 	}, [] );
@@ -56,12 +56,12 @@ export function EditTemplateModal( { close } ) {
 								'edit_template_modal_continue_button_clicked',
 								{ templateId: template.id }
 							);
-							onNavigateToEntityRecord( {
+							onNavigateToEntityRecord?.( {
 								postId: template.id,
 								postType: 'wp_template',
 							} );
 						} }
-						disabled={ ! template.id }
+						disabled={ ! template.id || ! onNavigateToEntityRecord }
 					>
 						{ __( 'Edit template', 'woocommerce' ) }
 					</Button>

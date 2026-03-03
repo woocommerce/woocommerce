@@ -10,9 +10,9 @@ import {
 	checkoutStore,
 	validationStore,
 } from '@woocommerce/block-data';
-import { default as fetchMock } from 'jest-fetch-mock';
 import { allSettings } from '@woocommerce/settings';
 import { registerPaymentMethod } from '@woocommerce/blocks-registry';
+import { server, http, HttpResponse } from '@woocommerce/test-utils/msw';
 
 /**
  * Internal dependencies
@@ -43,13 +43,10 @@ import Taxes from '../inner-blocks/checkout-order-summary-taxes/frontend';
 import { defaultCartState } from '../../../data/cart/default-state';
 import Checkout from '../block';
 
-jest.mock( '@wordpress/data', () => {
-	const wpData = jest.requireActual( 'wordpress-data-wp-6-7' );
-	return {
-		__esModule: true,
-		...wpData,
-	};
-} );
+jest.mock( '@wordpress/data', () =>
+	// eslint-disable-next-line @typescript-eslint/no-var-requires -- Must use require due to Jest mock hoisting
+	require( '@woocommerce/blocks-test-utils/mock-editor-store' ).mockWordPressDataWithEditorStore()
+);
 
 jest.mock( '@wordpress/compose', () => ( {
 	...jest.requireActual( '@wordpress/compose' ),
@@ -138,13 +135,13 @@ const CheckoutBlock = () => {
 
 describe( 'Testing Checkout', () => {
 	beforeEach( () => {
+		// Set up MSW handlers for cart API
+		server.use(
+			http.get( '/wc/store/v1/cart', () => {
+				return HttpResponse.json( previewCart );
+			} )
+		);
 		act( () => {
-			fetchMock.mockResponse( ( req ) => {
-				if ( req.url.match( /wc\/store\/v1\/cart/ ) ) {
-					return Promise.resolve( JSON.stringify( previewCart ) );
-				}
-				return Promise.resolve( '' );
-			} );
 			// need to clear the store resolution state between tests.
 			dispatch( cartStore ).invalidateResolutionForStore();
 			dispatch( cartStore ).receiveCart( defaultCartState.cartData );
@@ -170,17 +167,15 @@ describe( 'Testing Checkout', () => {
 	} );
 
 	afterEach( () => {
-		fetchMock.resetMocks();
+		// MSW handlers are reset automatically in the global setup
 	} );
 
 	it( 'Renders checkout if there are items in the cart', async () => {
 		render( <CheckoutBlock /> );
 
-		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
-
-		expect( screen.getByText( /Place Order/i ) ).toBeInTheDocument();
-
-		expect( fetchMock ).toHaveBeenCalledTimes( 1 );
+		await waitFor( () =>
+			expect( screen.getByText( /Place Order/i ) ).toBeVisible()
+		);
 	} );
 
 	it( 'Allows saving payment method if the customer is creating an account or has already logged in', async () => {
@@ -188,13 +183,13 @@ describe( 'Testing Checkout', () => {
 
 		expect(
 			await screen.findByText( /Payment method with cards/i )
-		).toBeInTheDocument();
+		).toBeVisible();
 
 		expect(
 			screen.getByRole( 'checkbox', {
 				name: 'Save payment information to my account for future purchases.',
 			} )
-		).toBeInTheDocument();
+		).toBeVisible();
 
 		act( () => {
 			dispatch( checkoutStore ).__internalSetCustomerId( 0 );
@@ -246,7 +241,7 @@ describe( 'Testing Checkout', () => {
 			screen.getByRole( 'checkbox', {
 				name: 'Save payment information to my account for future purchases.',
 			} )
-		).toBeInTheDocument();
+		).toBeVisible();
 
 		// cleanup
 		act( () => {
@@ -286,26 +281,23 @@ describe( 'Testing Checkout', () => {
 					email: '',
 				},
 			};
-			fetchMock.mockResponse( ( req ) => {
-				if ( req.url.match( /wc\/store\/v1\/cart/ ) ) {
-					return Promise.resolve( JSON.stringify( cartWithAddress ) );
-				}
-				return Promise.resolve( '' );
-			} );
+			// Override the MSW handler with cart that has address
+			server.use(
+				http.get( '/wc/store/v1/cart', () => {
+					return HttpResponse.json( cartWithAddress );
+				} )
+			);
 		} );
+
 		const { rerender } = render( <CheckoutBlock /> );
 
-		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
+		await waitFor( () =>
+			expect(
+				screen.getByRole( 'button', { name: 'Edit shipping address' } )
+			).toBeVisible()
+		);
 
-		expect(
-			screen.getByRole( 'button', { name: 'Edit shipping address' } )
-		).toBeInTheDocument();
-
-		expect(
-			screen.getByText( 'Toronto ON M4W 1A6', {
-				selector: '.wc-block-components-address-card span',
-			} )
-		).toBeInTheDocument();
+		expect( screen.getByText( /Toronto ON M4W 1A6/ ) ).toBeVisible();
 
 		// Async is needed here despite the IDE warnings. Testing Library gives a warning if not awaited.
 		await act( () =>
@@ -325,9 +317,7 @@ describe( 'Testing Checkout', () => {
 		rerender( <CheckoutBlock /> );
 
 		expect(
-			screen.getByText( 'Hyogo Kobe Address 1 JP', {
-				selector: '.wc-block-components-address-card span',
-			} )
+			screen.getByText( /Hyogo Kobe Address 1 JP/ )
 		).toBeInTheDocument();
 
 		// Testing the default address format
@@ -347,23 +337,9 @@ describe( 'Testing Checkout', () => {
 		);
 		rerender( <CheckoutBlock /> );
 
-		expect(
-			screen.getByText( 'Liverpool', {
-				selector: '.wc-block-components-address-card span',
-			} )
-		).toBeInTheDocument();
-		expect(
-			screen.getByText( 'Merseyside', {
-				selector: '.wc-block-components-address-card span',
-			} )
-		).toBeInTheDocument();
-		expect(
-			screen.getByText( 'L1 0BP', {
-				selector: '.wc-block-components-address-card span',
-			} )
-		).toBeInTheDocument();
-
-		expect( fetchMock ).toHaveBeenCalledTimes( 1 );
+		expect( screen.getByText( /Liverpool/ ) ).toBeInTheDocument();
+		expect( screen.getByText( /Merseyside/ ) ).toBeInTheDocument();
+		expect( screen.getByText( /L1 0BP/ ) ).toBeInTheDocument();
 	} );
 
 	it( 'Renders the billing address card if the address is filled and the cart contains a virtual product', async () => {
@@ -372,22 +348,20 @@ describe( 'Testing Checkout', () => {
 				...previewCart,
 				needs_shipping: false,
 			};
-			fetchMock.mockResponse( ( req ) => {
-				if ( req.url.match( /wc\/store\/v1\/cart/ ) ) {
-					return Promise.resolve(
-						JSON.stringify( cartWithVirtualProduct )
-					);
-				}
-				return Promise.resolve( '' );
-			} );
+			// Override the MSW handler with virtual product cart
+			server.use(
+				http.get( '/wc/store/v1/cart', () => {
+					return HttpResponse.json( cartWithVirtualProduct );
+				} )
+			);
 		} );
 		render( <CheckoutBlock /> );
 
-		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
-
-		expect(
-			screen.getByRole( 'button', { name: 'Edit billing address' } )
-		).toBeInTheDocument();
+		await waitFor( () =>
+			expect(
+				screen.getByRole( 'button', { name: 'Edit billing address' } )
+			).toBeVisible()
+		);
 	} );
 
 	it( 'Ensures checkbox labels have unique IDs', async () => {
@@ -467,13 +441,14 @@ describe( 'Testing Checkout', () => {
 		// Render the CheckoutBlock
 		const { rerender, queryByText } = render( <CheckoutBlock /> );
 
-		// Wait for the component to fully load, assuming fetch calls or state updates
-		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
-
-		// Query the text.
-		expect(
-			queryByText( /You are currently checking out as a guest./i )
-		).toBeInTheDocument();
+		// Wait for the component to fully load
+		await waitFor( () =>
+			expect(
+				screen.getByText(
+					/You are currently checking out as a guest./i
+				)
+			).toBeVisible()
+		);
 
 		act( () => {
 			allSettings.checkoutAllowsGuest = true;
@@ -495,11 +470,13 @@ describe( 'Testing Checkout', () => {
 		} );
 	} );
 
-	it.only( "Ensures hidden postcode fields don't block Checkout", async () => {
+	it( "Ensures hidden postcode fields don't block Checkout", async () => {
 		const user = userEvent.setup();
 		render( <CheckoutBlock /> );
 
-		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
+		await waitFor( () =>
+			expect( screen.getByText( /Place Order/i ) ).toBeVisible()
+		);
 
 		const shippingForm = screen.getByRole( 'group', {
 			name: /shipping address/i,
@@ -582,8 +559,12 @@ describe( 'Testing Checkout', () => {
 			}
 		} );
 
-		// wait for fetch to be called
-		await waitFor( () => expect( fetchMock ).toHaveBeenCalled() );
+		// wait for form to be ready
+		await waitFor( () =>
+			expect(
+				screen.getByRole( 'button', { name: /Place order/i } )
+			).toBeVisible()
+		);
 
 		// Submit the form
 		await act( async () => {

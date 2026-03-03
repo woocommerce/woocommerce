@@ -74,11 +74,17 @@ const compareVersionSettingIgnorePrerelease = (
 	operator: compareVersions.CompareOperator
 ): boolean => {
 	const settingValue = getSetting( setting, '' ) as string;
-	let replacement = settingValue.replace( /-[a-zA-Z0-9]*[\-]*/, '.0-rc.' );
-	replacement = replacement.endsWith( '.' )
-		? replacement.substring( 0, replacement.length - 1 )
-		: replacement;
-	return compareVersions.compare( replacement, version, operator );
+	let cleanVersion = settingValue;
+
+	// Only augment version if missing patch number.
+	if ( /^\d+\.\d+-.*$/.test( cleanVersion ) ) {
+		cleanVersion = cleanVersion.replace( /-[a-zA-Z0-9]*[\-.]*/, '.0-rc.' );
+		cleanVersion = cleanVersion.endsWith( '.' )
+			? cleanVersion.substring( 0, cleanVersion.length - 1 )
+			: cleanVersion;
+	}
+
+	return compareVersions.compare( cleanVersion, version, operator );
 };
 
 /**

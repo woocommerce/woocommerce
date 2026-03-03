@@ -2,12 +2,6 @@
  * External dependencies
  */
 import clsx from 'clsx';
-import {
-	Disabled,
-	Button,
-	ButtonGroup,
-	PanelBody,
-} from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import {
 	AlignmentToolbar,
@@ -18,12 +12,26 @@ import {
 import type { BlockEditProps } from '@wordpress/blocks';
 import { useEffect } from '@wordpress/element';
 import { ProductQueryContext as Context } from '@woocommerce/blocks/product-query/types';
+import { useProduct } from '@woocommerce/entities';
+import {
+	Disabled,
+	Button,
+	ButtonGroup,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToolsPanel as ToolsPanel,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToolsPanelItem as ToolsPanelItem,
+} from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
 import Block from './block';
 import { BlockAttributes } from './types';
+
+const DEFAULT_ATTRIBUTES = {
+	width: undefined,
+};
 
 function WidthPanel( {
 	selectedWidth,
@@ -41,26 +49,40 @@ function WidthPanel( {
 	}
 
 	return (
-		<PanelBody title={ __( 'Width settings', 'woocommerce' ) }>
-			<ButtonGroup aria-label={ __( 'Button width', 'woocommerce' ) }>
-				{ [ 25, 50, 75, 100 ].map( ( widthValue ) => {
-					return (
-						<Button
-							key={ widthValue }
-							isSmall
-							variant={
-								widthValue === selectedWidth
-									? 'primary'
-									: undefined
-							}
-							onClick={ () => handleChange( widthValue ) }
-						>
-							{ widthValue }%
-						</Button>
-					);
-				} ) }
-			</ButtonGroup>
-		</PanelBody>
+		<ToolsPanel
+			label={ __( 'Width settings', 'woocommerce' ) }
+			resetAll={ () =>
+				setAttributes( { width: DEFAULT_ATTRIBUTES.width } )
+			}
+		>
+			<ToolsPanelItem
+				label={ __( 'Button width', 'woocommerce' ) }
+				hasValue={ () => selectedWidth !== DEFAULT_ATTRIBUTES.width }
+				onDeselect={ () =>
+					setAttributes( { width: DEFAULT_ATTRIBUTES.width } )
+				}
+				isShownByDefault
+			>
+				<ButtonGroup aria-label={ __( 'Button width', 'woocommerce' ) }>
+					{ [ 25, 50, 75, 100 ].map( ( widthValue ) => {
+						return (
+							<Button
+								key={ widthValue }
+								isSmall
+								variant={
+									widthValue === selectedWidth
+										? 'primary'
+										: undefined
+								}
+								onClick={ () => handleChange( widthValue ) }
+							>
+								{ widthValue }%
+							</Button>
+						);
+					} ) }
+				</ButtonGroup>
+			</ToolsPanelItem>
+		</ToolsPanel>
 	);
 }
 
@@ -72,6 +94,7 @@ const Edit = ( {
 	context?: Context | undefined;
 } ): JSX.Element => {
 	const blockProps = useBlockProps();
+	const { product } = useProduct( context?.postId );
 	const isDescendentOfQueryLoop = Number.isFinite( context?.queryId );
 	const { width } = attributes;
 
@@ -99,6 +122,11 @@ const Edit = ( {
 				<Disabled>
 					<Block
 						{ ...{ ...attributes, ...context } }
+						product={ {
+							...product,
+							button_text: product?.button_text || '',
+						} }
+						isAdmin={ true }
 						blockClientId={ blockProps?.id }
 						className={ clsx( attributes.className, {
 							[ `has-custom-width wp-block-button__width-${ width }` ]:

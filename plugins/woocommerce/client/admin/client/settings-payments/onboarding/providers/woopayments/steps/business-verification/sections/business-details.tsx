@@ -27,7 +27,7 @@ import strings from '../strings';
  */
 const BusinessDetails: React.FC = () => {
 	const { data, setData } = useBusinessVerificationContext();
-	const { currentStep } = useOnboardingContext();
+	const { currentStep, sessionEntryPoint } = useOnboardingContext();
 	const countries = getAvailableCountries(
 		currentStep?.context?.fields?.available_countries || {}
 	);
@@ -78,6 +78,7 @@ const BusinessDetails: React.FC = () => {
 				method: 'POST',
 				data: {
 					self_assessment: selfAssessmentData,
+					source: sessionEntryPoint,
 				},
 			} );
 		}

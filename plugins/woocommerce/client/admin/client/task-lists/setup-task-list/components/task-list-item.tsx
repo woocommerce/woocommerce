@@ -35,6 +35,8 @@ export const TaskListItem = ( {
 		content,
 		time,
 		actionLabel,
+		isInProgress,
+		inProgressLabel,
 		isComplete,
 		additionalInfo,
 		isDismissable,
@@ -64,6 +66,7 @@ export const TaskListItem = ( {
 			const className = clsx(
 				'woocommerce-task-list__item index-' + taskIndex,
 				{
+					in_progress: isInProgress,
 					complete: isComplete,
 					'is-active': taskId === activeTaskId,
 				}
@@ -86,6 +89,8 @@ export const TaskListItem = ( {
 					className={ className }
 					title={ title }
 					badge={ badge }
+					inProgress={ isInProgress }
+					inProgressLabel={ inProgressLabel }
 					completed={ isComplete }
 					additionalInfo={ additionalInfo }
 					content={ content }

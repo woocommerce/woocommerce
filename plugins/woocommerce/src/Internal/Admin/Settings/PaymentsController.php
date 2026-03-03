@@ -15,6 +15,8 @@ defined( 'ABSPATH' ) || exit;
  * Payments settings controller class.
  *
  * Use this class for hooks and actions related to the Payments settings page.
+ *
+ * @internal
  */
 class PaymentsController {
 

@@ -8,7 +8,7 @@ const QuantityStepper = () => {
 				readOnly
 			/>
 			<button className="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">
-				-
+				−
 			</button>
 			<button className="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">
 				+

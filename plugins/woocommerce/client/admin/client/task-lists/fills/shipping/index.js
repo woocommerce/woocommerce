@@ -39,7 +39,10 @@ import {
 } from './shipping-providers/partners';
 import { TermsOfService } from '~/task-lists/components/terms-of-service';
 import { TrackedLink } from '~/components/tracked-link/tracked-link';
-import { isFeatureEnabled } from '~/utils/features';
+
+export const hasInstallableSlug = ( shippingMethod ) =>
+	typeof shippingMethod?.slug === 'string' &&
+	shippingMethod.slug.trim().length > 0;
 
 export class Shipping extends Component {
 	constructor( props ) {
@@ -207,9 +210,11 @@ export class Shipping extends Component {
 		} = this.props;
 		const pluginsToPromote = shippingPartners;
 
-		const pluginsToActivate = pluginsToPromote.map( ( pluginToPromote ) => {
-			return pluginToPromote.slug;
-		} );
+		const pluginsToActivate = pluginsToPromote
+			.map( ( pluginToPromote ) => pluginToPromote.slug )
+			.filter(
+				( slug ) => typeof slug === 'string' && slug.trim().length > 0
+			);
 
 		const onShippingPluginInstalltionSkip = () => {
 			recordEvent( 'tasklist_shipping_label_printing', {
@@ -373,7 +378,7 @@ export class Shipping extends Component {
 						/>
 					</>
 				),
-				visible: pluginsToActivate.length,
+				visible: pluginsToPromote.length,
 			},
 
 			// Only needed for WooCommerce Shipping
@@ -527,7 +532,9 @@ export class Shipping extends Component {
 								</div>
 							) }
 							{ pluginsToPromote.length === 1 &&
-								pluginsToPromote[ 0 ].slug === undefined && ( // if it doesn't have a slug we just show a download button
+								! hasInstallableSlug(
+									pluginsToPromote[ 0 ]
+								) && ( // if it doesn't have a slug we just show a download button
 									<a
 										href={
 											pluginsToPromote[ 0 ]
@@ -542,7 +549,7 @@ export class Shipping extends Component {
 									</a>
 								) }
 							{ pluginsToPromote.length === 1 &&
-							pluginsToPromote[ 0 ].slug ? (
+							hasInstallableSlug( pluginsToPromote[ 0 ] ) ? (
 								<>
 									{ ! isJetpackConnected &&
 										pluginsToPromote[ 0 ].slug ===
@@ -666,18 +673,10 @@ export class Shipping extends Component {
 						'woocommerce'
 					) }
 					eventName="tasklist_shipping_visit_marketplace_click"
-					targetUrl={
-						isFeatureEnabled( 'marketplace' )
-							? getAdminLink(
-									'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=shipping-delivery-and-fulfillment'
-							  )
-							: 'https://woocommerce.com/product-category/woocommerce-extensions/shipping-delivery-and-fulfillment/'
-					}
-					linkType={
-						isFeatureEnabled( 'marketplace' )
-							? 'wc-admin'
-							: 'external'
-					}
+					targetUrl={ getAdminLink(
+						'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=shipping-delivery-and-fulfillment'
+					) }
+					linkType="wc-admin"
 				/>
 			</div>
 		);

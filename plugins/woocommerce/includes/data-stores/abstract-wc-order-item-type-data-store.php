@@ -179,19 +179,25 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 		$item->read_meta_data();
 
 		if ( $this->cogs_is_enabled && $item->has_cogs() ) {
-			$cogs_value = (float) $this->order_item_data_store->get_metadata( $item->get_id(), '_cogs_value', true );
+			$cogs_metadata = $this->order_item_data_store->get_metadata( $item->get_id(), '_cogs_value', true );
 
-			/**
-			 * Filter to customize the Cost of Goods Sold value that gets loaded for a given order item.
-			 *
-			 * @since 9.5.0
-			 *
-			 * @param float $cogs_value The value as read from the database.
-			 * @param WC_Order_Item $product The order item for which the value is being loaded.
-			 */
-			$cogs_value = apply_filters( 'woocommerce_load_order_item_cogs_value', $cogs_value, $item );
+			// Only set COGS value if the metadata actually exists.
+			// If it doesn't exist, leave it as null so it can be calculated later.
+			if ( '' !== $cogs_metadata && false !== $cogs_metadata ) {
+				$cogs_value = (float) $cogs_metadata;
 
-			$item->set_cogs_value( (float) $cogs_value );
+				/**
+				 * Filter to customize the Cost of Goods Sold value that gets loaded for a given order item.
+				 *
+				 * @since 9.5.0
+				 *
+				 * @param float $cogs_value The value as read from the database.
+				 * @param WC_Order_Item $product The order item for which the value is being loaded.
+				 */
+				$cogs_value = apply_filters( 'woocommerce_load_order_item_cogs_value', $cogs_value, $item );
+
+				$item->set_cogs_value( (float) $cogs_value );
+			}
 		}
 	}
 

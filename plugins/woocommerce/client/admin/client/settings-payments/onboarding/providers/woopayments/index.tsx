@@ -20,6 +20,21 @@ import {
 } from './data/onboarding-context';
 import { recordPaymentsOnboardingEvent } from '~/settings-payments/utils';
 import { steps } from './steps';
+import WooPaymentsOnboardingModalSnackbar from './components/snackbar';
+
+const SnackbarWrapper = () => {
+	const { snackbar } = useOnboardingContext();
+	if ( ! snackbar.show ) return null;
+
+	return (
+		<WooPaymentsOnboardingModalSnackbar
+			className={ snackbar.className || '' }
+			duration={ snackbar.duration }
+		>
+			{ snackbar.message }
+		</WooPaymentsOnboardingModalSnackbar>
+	);
+};
 
 /**
  * Modal component for WooPayments onboarding
@@ -122,6 +137,7 @@ export default function WooPaymentsModal( {
 				onboardingSteps={ steps }
 			>
 				<WooPaymentsOnboarding />
+				<SnackbarWrapper />
 			</OnboardingProvider>
 		</Modal>
 	);

@@ -11,6 +11,10 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
+
+		@media screen and (max-width: 782px) {
+			width: 100%;
+		}
 	}
 }
 
@@ -20,6 +24,13 @@
 	width: 100vw;
 	min-height: 100vh;
 	max-width: 100vw;
+
+	// Prevent horizontal scroll
+	@media screen and (max-width: 782px) {
+		width: 100%;
+		max-width: 100%;
+		overflow-x: hidden;
+	}
 
 	.woocommerce-launch-store__congrats-header-container {
 		min-height: 64px;
@@ -60,6 +71,15 @@
 				font-weight: 500;
 			}
 		}
+
+		@media screen and (max-width: 782px) {
+			padding: 0 16px;
+
+			.woologo svg {
+				margin-left: 0;
+				margin-right: 16px;
+			}
+		}
 	}
 
 	.woocommerce-launch-store__congrats-content {
@@ -68,6 +88,10 @@
 		align-items: center;
 		justify-content: center;
 		padding: 40px;
+
+		@media screen and (max-width: 782px) {
+			padding: 20px 16px;
+		}
 
 		.woocommerce-launch-store__congrats-buttons {
 			display: flex;

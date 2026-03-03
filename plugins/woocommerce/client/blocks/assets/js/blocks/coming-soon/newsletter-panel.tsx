@@ -16,8 +16,8 @@ const NewsletterPanel = () => {
 		select( 'core/editor' ).getCurrentPostId()
 	);
 
-	// Restrict the panel to only show on the coming soon page tempalte
-	if ( postId !== 'woocommerce/woocommerce//coming-soon' ) {
+	// Restrict the panel to only show on the coming soon page template.
+	if ( typeof postId === 'string' && ! postId?.endsWith( '//coming-soon' ) ) {
 		return null;
 	}
 

@@ -8,6 +8,7 @@
 		"query",
 		"queryId",
 		"postId",
+		"collection",
 		"woocommerce/isDescendantOfAddToCartWithOptions"
 	],
 	"textdomain": "woocommerce",
@@ -64,6 +65,7 @@
 			"padding": true,
 			"__experimentalSkipSerialization": true
 		},
+		"email": true,
 		"__experimentalSelector": ".wp-block-button.wc-block-components-product-button .wc-block-components-product-button__button"
 	},
 	"ancestor": [

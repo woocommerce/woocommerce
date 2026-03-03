@@ -5,12 +5,12 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
+use Automattic\WooCommerce\Internal\ProductFilters\Params;
 
 /**
  * ProductFilters class.
  */
 class ProductFilters extends AbstractBlock {
-	use BlocksSharedState;
 
 	/**
 	 * Block name.
@@ -39,14 +39,14 @@ class ProductFilters extends AbstractBlock {
 		global $pagenow;
 		parent::enqueue_data( $attributes );
 
-		$this->initialize_shared_config( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
+		BlocksSharedState::load_store_config( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
 
-		wp_interactivity_config(
-			$this->get_full_block_name(),
-			[
-				'isProductArchive' => is_shop() || is_product_taxonomy() || ( is_search() && 'product' === get_post_type() ),
-			]
-		);
+		// Classic themes do not support client-side navigation on product
+		// archive pages, so disable it globally for the Interactivity Router.
+		$is_product_archive = is_shop() || is_product_taxonomy() || ( is_search() && 'product' === get_post_type() );
+		if ( ! wp_is_block_theme() && $is_product_archive ) {
+			wp_interactivity_config( 'core/router', array( 'clientNavigationDisabled' => true ) );
+		}
 	}
 
 	/**
@@ -226,17 +226,7 @@ class ProductFilters extends AbstractBlock {
 
 		parse_str( $parsed_url['query'], $url_query_params );
 
-		/**
-		 * Filters the active filter data provided by filter blocks.
-		 *
-		 * @since 11.7.0
-		 *
-		 * @param array $filter_param_keys The active filters data
-		 * @param array $url_param_keys    The query param parsed from the URL.
-		 *
-		 * @return array Active filters params.
-		 */
-		$filter_param_keys = array_unique( apply_filters( 'woocommerce_blocks_product_filters_param_keys', array(), array_keys( $url_query_params ) ) );
+		$filter_param_keys = wc_get_container()->get( Params::class )->get_param_keys();
 
 		return array_filter(
 			$url_query_params,
@@ -283,11 +273,12 @@ class ProductFilters extends AbstractBlock {
 	 */
 	private function get_canonical_url_no_pagination( $filter_params ) {
 		$canonical_url_no_pagination = is_singular() ? get_permalink() : get_pagenum_link( 1 );
-		$parsed_url                  = wp_parse_url( html_entity_decode( $canonical_url_no_pagination, ENT_QUOTES, get_bloginfo( 'charset' ) ) );
+		$decoded_url                 = html_entity_decode( $canonical_url_no_pagination, ENT_QUOTES, get_bloginfo( 'charset' ) );
+		$parsed_url                  = wp_parse_url( $decoded_url );
 
 		// If there are active filters, $parsed_url['query'] is empty for page or post but not empty for archives.
 		if ( empty( $filter_params ) || empty( $parsed_url['query'] ) ) {
-			return $canonical_url_no_pagination;
+			return $decoded_url;
 		}
 
 		foreach ( array_keys( $filter_params ) as $key ) {

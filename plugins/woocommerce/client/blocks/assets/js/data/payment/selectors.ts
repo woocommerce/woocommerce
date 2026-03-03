@@ -107,6 +107,10 @@ export const getAvailableExpressPaymentMethods = ( state: PaymentState ) => {
 	return state.availableExpressPaymentMethods;
 };
 
+export const getRegisteredExpressPaymentMethods = ( state: PaymentState ) => {
+	return state.registeredExpressPaymentMethods;
+};
+
 export const getPaymentMethodData = ( state: PaymentState ) => {
 	return state.paymentMethodData;
 };

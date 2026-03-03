@@ -85,11 +85,8 @@ class WC_Payment_Gateways {
 			'WC_Gateway_BACS',
 			'WC_Gateway_Cheque',
 			'WC_Gateway_COD',
+			'WC_Gateway_Paypal',
 		);
-
-		if ( $this->should_load_paypal_standard() ) {
-			$load_gateways[] = 'WC_Gateway_Paypal';
-		}
 
 		// Filter.
 		$load_gateways = apply_filters( 'woocommerce_payment_gateways', $load_gateways );
@@ -102,6 +99,13 @@ class WC_Payment_Gateways {
 		foreach ( $load_gateways as $gateway ) {
 			if ( is_string( $gateway ) && class_exists( $gateway ) ) {
 				$gateway = new $gateway();
+			}
+
+			if ( is_a( $gateway, 'WC_Gateway_Paypal' ) ) {
+				WC_Gateway_Paypal::set_instance( $gateway );
+				if ( ! $this->should_load_paypal_standard() ) {
+					continue;
+				}
 			}
 
 			// Gateways need to be valid and extend WC_Payment_Gateway.
@@ -176,9 +180,21 @@ class WC_Payment_Gateways {
 	 */
 	private function payment_gateway_settings_option_changed( $gateway, $value, $option, $old_value = null ) {
 		if ( $this->was_gateway_enabled( $value, $old_value ) ) {
-			// This is a change to a payment gateway's settings and it was just enabled. Let's send an email to the admin.
-			// "untitled" shouldn't happen, but just in case.
-			$this->notify_admin_payment_gateway_enabled( $gateway );
+			$logger = wc_get_container()->get( LegacyProxy::class )->call_function( 'wc_get_logger' );
+			$logger->info( sprintf( 'Payment gateway enabled: "%s"', $gateway->get_method_title() ) );
+
+			/**
+			 * Fires when a payment gateway has been enabled.
+			 *
+			 * Used by WC_Email_Admin_Payment_Gateway_Enabled to send an admin notification email.
+			 * This action is registered as a transactional email action in WC_Emails::init_transactional_emails(),
+			 * which ensures WC_Emails is instantiated before the _notification variant is fired.
+			 *
+			 * @param WC_Payment_Gateway $gateway The gateway that was enabled.
+			 *
+			 * @since 10.7.0
+			 */
+			do_action( 'woocommerce_payment_gateway_enabled', $gateway );
 
 			// Track the gateway enable.
 			$this->record_gateway_event( 'enable', $gateway );
@@ -188,90 +204,6 @@ class WC_Payment_Gateways {
 			// This is a change to a payment gateway's settings and it was just disabled. Let's track it.
 			$this->record_gateway_event( 'disable', $gateway );
 		}
-	}
-
-	/**
-	 * Email the site admin when a payment gateway has been enabled.
-	 *
-	 * @param WC_Payment_Gateway $gateway The gateway that was enabled.
-	 * @return bool Whether the email was sent or not.
-	 * @since 8.5.0
-	 */
-	private function notify_admin_payment_gateway_enabled( $gateway ) {
-		$admin_email          = get_option( 'admin_email' );
-		$user                 = get_user_by( 'email', $admin_email );
-		$username             = $user ? $user->user_login : $admin_email;
-		$gateway_title        = $gateway->get_method_title();
-		$gateway_settings_url = esc_url_raw( self_admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . $gateway->id ) );
-		$site_name            = wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES );
-		$site_url             = home_url();
-		/**
-		 * Allows adding to the addresses that receive payment gateway enabled notifications.
-		 *
-		 * @param array              $email_addresses The array of email addresses to notify.
-		 * @param WC_Payment_Gateway $gateway The gateway that was enabled.
-		 * @return array             The augmented array of email addresses to notify.
-		 * @since 8.5.0
-		 */
-		$email_addresses   = apply_filters( 'wc_payment_gateway_enabled_notification_email_addresses', array(), $gateway );
-		$email_addresses[] = $admin_email;
-		$email_addresses   = array_unique(
-			array_filter(
-				$email_addresses,
-				function ( $email_address ) {
-					return filter_var( $email_address, FILTER_VALIDATE_EMAIL );
-				}
-			)
-		);
-
-		$logger = wc_get_container()->get( LegacyProxy::class )->call_function( 'wc_get_logger' );
-		$logger->info( sprintf( 'Payment gateway enabled: "%s"', $gateway_title ) );
-
-		$email_text = sprintf(
-			/* translators: Payment gateway enabled notification email. 1: Username, 2: Gateway Title, 3: Site URL, 4: Gateway Settings URL, 5: Admin Email, 6: Site Name, 7: Site URL. */
-			__(
-				'Howdy %1$s,
-
-The payment gateway "%2$s" was just enabled on this site:
-%3$s
-
-If this was intentional you can safely ignore and delete this email.
-
-If you did not enable this payment gateway, please log in to your site and consider disabling it here:
-%4$s
-
-This email has been sent to %5$s
-
-Regards,
-All at %6$s
-%7$s',
-				'woocommerce'
-			),
-			$username,
-			$gateway_title,
-			$site_url,
-			$gateway_settings_url,
-			$admin_email,
-			$site_name,
-			$site_url
-		);
-
-		if ( '' !== get_option( 'blogname' ) ) {
-			$site_title = wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES );
-		} else {
-			$site_title = wp_parse_url( home_url(), PHP_URL_HOST );
-		}
-
-		return wp_mail(
-			$email_addresses,
-			sprintf(
-				/* translators: Payment gateway enabled notification email subject. %s1: Site title, $s2: Gateway title. */
-				__( '[%1$s] Payment gateway "%2$s" enabled', 'woocommerce' ),
-				$site_title,
-				$gateway_title
-			),
-			$email_text
-		);
 	}
 
 	/**
@@ -340,6 +272,33 @@ All at %6$s
 	}
 
 	/**
+	 * Get readable payment method name from payment method ID.
+	 *
+	 * Retrieves the payment gateway title from the payment method ID by loading
+	 * the payment gateway instance.
+	 *
+	 * @param string $payment_gateway_id Payment method ID (e.g., "stripe", "paypal", "bacs").
+	 * @return string Payment method name or ID if name not found.
+	 */
+	public function get_payment_gateway_name_by_id( string $payment_gateway_id ): string {
+		// Get available payment gateways.
+		$payment_gateways = $this->payment_gateways();
+
+		// Check if the payment method exists and has a title.
+		if ( isset( $payment_gateways[ $payment_gateway_id ] ) ) {
+			$gateway = $payment_gateways[ $payment_gateway_id ];
+			if ( is_object( $gateway ) && method_exists( $gateway, 'get_title' ) ) {
+				return $gateway->get_title();
+			} elseif ( is_object( $gateway ) && isset( $gateway->title ) ) {
+				return $gateway->title;
+			}
+		}
+
+		// Return the ID as fallback if no title found.
+		return $payment_gateway_id;
+	}
+
+	/**
 	 * Get array of registered gateway ids
 	 *
 	 * @since 2.6.0
@@ -367,7 +326,7 @@ All at %6$s
 			if ( $gateway->is_available() ) {
 				if ( ! is_add_payment_method_page() ) {
 					$_available_gateways[ $gateway->id ] = $gateway;
-				} elseif ( $gateway->supports( PaymentGatewayFeature::ADD_PAYMENT_METHODS ) || $gateway->supports( PaymentGatewayFeature::TOKENIZATION ) ) {
+				} elseif ( $gateway->supports( PaymentGatewayFeature::ADD_PAYMENT_METHOD ) || $gateway->supports( PaymentGatewayFeature::TOKENIZATION ) ) {
 					$_available_gateways[ $gateway->id ] = $gateway;
 				}
 			}
@@ -443,9 +402,7 @@ All at %6$s
 	 * @return bool Whether PayPal Standard should be loaded or not.
 	 */
 	protected function should_load_paypal_standard() {
-		// Tech debt: This class needs to be initialized to make sure any existing subscriptions gets processed as expected, even if the gateway is not enabled for new orders.
-		// Eventually, we want to load this via a singleton pattern to avoid unnecessary instantiation.
-		$paypal = new WC_Gateway_Paypal();
+		$paypal = WC_Gateway_Paypal::get_instance();
 		return $paypal->should_load();
 	}
 

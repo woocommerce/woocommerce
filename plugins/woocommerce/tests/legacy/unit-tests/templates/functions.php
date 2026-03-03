@@ -119,6 +119,78 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test: test_wc_dropdown_variation_attribute_options_displays_aria_label_when_defined.
+	 */
+	public function test_wc_dropdown_variation_attribute_options_displays_aria_label_when_defined() {
+		$product = WC_Helper_Product::create_variation_product();
+
+		$this->expectOutputString( '<select id="pa_size" class="" name="attribute_pa_size" aria-label="Size for product" data-attribute_name="attribute_pa_size" data-show_option_none="yes"><option value="">Choose an option</option><option value="huge" >huge</option><option value="large" >large</option><option value="small" >small</option></select>' );
+
+		wc_dropdown_variation_attribute_options(
+			array(
+				'product'    => $product,
+				'attribute'  => 'pa_size',
+				'aria-label' => 'Size for product',
+			)
+		);
+	}
+
+	/**
+	 * Test: test_wc_dropdown_variation_attribute_options_escapes_aria_label_attribute.
+	 */
+	public function test_wc_dropdown_variation_attribute_options_escapes_aria_label_attribute() {
+		$product = WC_Helper_Product::create_variation_product();
+
+		$this->expectOutputString( '<select id="pa_size" class="" name="attribute_pa_size" aria-label="&quot; onload=&quot;alert(&#039;XSS&#039;)&quot;" data-attribute_name="attribute_pa_size" data-show_option_none="yes"><option value="">Choose an option</option><option value="huge" >huge</option><option value="large" >large</option><option value="small" >small</option></select>' );
+
+		wc_dropdown_variation_attribute_options(
+			array(
+				'product'    => $product,
+				'attribute'  => 'pa_size',
+				'aria-label' => '" onload="alert(\'XSS\')"',
+			)
+		);
+	}
+
+	/**
+	 * Test: test_wc_dropdown_variation_attribute_does_not_include_attribute_with_falsey_values.
+	 *
+	 * @dataProvider data_wc_dropdown_variation_attribute_does_not_include_attribute_with_falsey_values
+	 *
+	 * @param mixed $attribute_value The falsey attribute value to test.
+	 */
+	public function test_wc_dropdown_variation_attribute_does_not_include_attribute_with_falsey_values( $attribute_value ) {
+		$product = WC_Helper_Product::create_variation_product();
+
+		$this->expectOutputString( '<select id="pa_size" class="" name="attribute_pa_size" data-attribute_name="attribute_pa_size" data-show_option_none="yes"><option value="">Choose an option</option><option value="huge" >huge</option><option value="large" >large</option><option value="small" >small</option></select>' );
+
+		wc_dropdown_variation_attribute_options(
+			array(
+				'product'    => $product,
+				'attribute'  => 'pa_size',
+				'aria-label' => $attribute_value,
+			)
+		);
+	}
+
+	/**
+	 * Data provider for test_wc_dropdown_variation_attribute_does_not_include_attribute_with_falsey_values.
+	 *
+	 * @return array[] Data provider
+	 */
+	public function data_wc_dropdown_variation_attribute_does_not_include_attribute_with_falsey_values() {
+		return array(
+			'false'        => array( false ),
+			'null'         => array( null ),
+			'0 (int)'      => array( 0 ),
+			'0 (string)'   => array( '0' ),
+			'0.0 (float)'  => array( 0.0 ),
+			'empty string' => array( '' ),
+			'empty array'  => array( array() ),
+		);
+	}
+
+	/**
 	 * Test wc_query_string_form_fields.
 	 *
 	 * @return void
@@ -338,5 +410,113 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 		// by defaulting to page 0 and still add appropriate aria-labels to maintain accessibility.
 		$this->assertStringContainsString( 'aria-label="Page 0"', $output );
 		$this->assertStringContainsString( 'aria-label="Page 0"', $output );
+	}
+
+	/**
+	 * Test that hidden field with label does not have "for" attribute.
+	 */
+	public function test_hidden_field_with_label() {
+		$actual_html = woocommerce_form_field(
+			'test_hidden',
+			array(
+				'type'   => 'hidden',
+				'id'     => 'test_hidden_field',
+				'label'  => 'Test Label',
+				'return' => true,
+			),
+			'test value'
+		);
+
+		// Should contain label without "for" attribute.
+		$this->assertStringContainsString( '<label class="">', $actual_html );
+		$this->assertStringNotContainsString( 'for=', $actual_html );
+		$this->assertStringContainsString( 'Test Label', $actual_html );
+	}
+
+	/**
+	 * Test that country field with one country uses a readonly text input.
+	 */
+	public function test_country_field_single_country() {
+		// Mock WC()->countries to return only one country.
+		$mock_countries = $this->getMockBuilder( WC_Countries::class )
+			->onlyMethods( array( 'get_allowed_countries' ) )
+			->getMock();
+
+		$mock_countries->method( 'get_allowed_countries' )
+			->willReturn( array( 'US' => 'United States' ) );
+
+		// Store original countries object.
+		$original_countries = WC()->countries;
+		WC()->countries     = $mock_countries;
+
+		$actual_html = woocommerce_form_field(
+			'billing_country',
+			array(
+				'type'   => 'country',
+				'id'     => 'billing_country',
+				'label'  => 'Country / Region',
+				'return' => true,
+			),
+			'US'
+		);
+
+		// Restore original countries object.
+		WC()->countries = $original_countries;
+
+		// Should contain label "for" attribute pointing to the select.
+		$this->assertStringContainsString( 'for="billing_country"', $actual_html );
+		$this->assertStringContainsString( 'Country / Region', $actual_html );
+		// Should contain single-option select styled as plain text.
+		$this->assertStringContainsString( '<select', $actual_html );
+		$this->assertStringContainsString( 'country_to_state--single', $actual_html );
+		$this->assertStringContainsString( 'value="US"', $actual_html );
+		$this->assertStringContainsString( '>United States</option>', $actual_html );
+		// Should NOT have strong tag, hidden input, or text input.
+		$this->assertStringNotContainsString( '<strong>', $actual_html );
+		$this->assertStringNotContainsString( 'type="hidden"', $actual_html );
+		$this->assertStringNotContainsString( 'type="text"', $actual_html );
+	}
+
+	/**
+	 * Test that country field with multiple countries has "for" attribute.
+	 */
+	public function test_country_field_multiple_countries() {
+		// Mock WC()->countries to return multiple countries.
+		$mock_countries = $this->getMockBuilder( WC_Countries::class )
+			->onlyMethods( array( 'get_allowed_countries' ) )
+			->getMock();
+
+		$mock_countries->method( 'get_allowed_countries' )
+			->willReturn(
+				array(
+					'US' => 'United States',
+					'CA' => 'Canada',
+				)
+			);
+
+		// Store original countries object.
+		$original_countries = WC()->countries;
+		WC()->countries     = $mock_countries;
+
+		$actual_html = woocommerce_form_field(
+			'billing_country',
+			array(
+				'type'   => 'country',
+				'id'     => 'billing_country',
+				'label'  => 'Country / Region',
+				'return' => true,
+			),
+			'US'
+		);
+
+		// Restore original countries object.
+		WC()->countries = $original_countries;
+
+		// Should contain label with "for" attribute.
+		$this->assertStringContainsString( 'for="billing_country"', $actual_html );
+		$this->assertStringContainsString( 'Country / Region', $actual_html );
+		// Should contain select dropdown.
+		$this->assertStringContainsString( '<select', $actual_html );
+		$this->assertStringNotContainsString( 'type="hidden"', $actual_html );
 	}
 }

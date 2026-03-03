@@ -26,7 +26,6 @@ class WC_Order_Factory_Test extends WC_Unit_Test_Case {
 		parent::setUp();
 		$this->cot_state = \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled();
 		OrderHelper::toggle_cot_feature_and_usage( false );
-		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 	}
 
 	/**
@@ -38,7 +37,6 @@ class WC_Order_Factory_Test extends WC_Unit_Test_Case {
 		parent::tearDown();
 		wp_cache_flush();
 		OrderHelper::toggle_cot_feature_and_usage( $this->cot_state );
-		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
 	}
 
 	/**
@@ -97,7 +95,6 @@ class WC_Order_Factory_Test extends WC_Unit_Test_Case {
 		$this->assertEquals( 2, count( $orders ) );
 		$this->assertEquals( $order1->get_id(), $orders[0]->get_id() );
 		$this->assertEquals( $order2->get_id(), $orders[1]->get_id() );
-		OrderHelper::toggle_cot_feature_and_usage( false );
 	}
 
 }

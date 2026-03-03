@@ -4,6 +4,7 @@
 import clsx from 'clsx';
 import {
 	useCheckoutSubmit,
+	usePaymentMethodInterface,
 	useStoreCart,
 } from '@woocommerce/base-context/hooks';
 import { check } from '@wordpress/icons';
@@ -14,12 +15,22 @@ import {
 	FormattedMonetaryAmount,
 	Spinner,
 } from '@woocommerce/blocks-components';
+import { useValidateCheckout } from '@woocommerce/blocks-checkout';
+import type { CustomPlaceOrderButtonComponent } from '@woocommerce/types';
+import { useEditorContext } from '@woocommerce/base-context';
+
+/**
+ * Internal dependencies
+ */
+import './style.scss';
 
 interface PlaceOrderButtonProps {
-	label: string;
+	label: React.ReactNode;
 	fullWidth?: boolean;
 	showPrice?: boolean;
 	priceSeparator?: string;
+	// eslint-disable-next-line @typescript-eslint/naming-convention
+	CustomButtonComponent?: CustomPlaceOrderButtonComponent;
 }
 
 const PlaceOrderButton = ( {
@@ -27,6 +38,7 @@ const PlaceOrderButton = ( {
 	fullWidth = false,
 	showPrice = false,
 	priceSeparator = '·',
+	CustomButtonComponent,
 }: PlaceOrderButtonProps ): JSX.Element => {
 	const {
 		onSubmit,
@@ -36,38 +48,32 @@ const PlaceOrderButton = ( {
 		waitingForRedirect,
 	} = useCheckoutSubmit();
 
-	const { cartTotals } = useStoreCart();
-	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
+	const paymentMethodInterface = usePaymentMethodInterface();
+	const validateCheckout = useValidateCheckout();
+	const { isEditor, isPreview = false } = useEditorContext();
 
-	const buttonLabel = (
-		<div
-			className={
-				'wc-block-components-checkout-place-order-button__text'
-			}
-		>
-			{ label }
-			{ showPrice && (
-				<>
-					<style>
-						{ `.wp-block-woocommerce-checkout-actions-block {
-							.wc-block-components-checkout-place-order-button__separator {
-								&::after {
-									content: "${ priceSeparator }";
-								}
-							}
-						}` }
-					</style>
-					<div className="wc-block-components-checkout-place-order-button__separator" />
-					<div className="wc-block-components-checkout-place-order-button__price">
-						<FormattedMonetaryAmount
-							value={ cartTotals.total_price }
-							currency={ totalsCurrency }
-						/>
-					</div>
-				</>
-			) }
-		</div>
-	);
+	const { cartTotals, cartIsLoading } = useStoreCart();
+
+	// when provided, the `CustomButtonComponent` should take precedence over the default button.
+	if ( CustomButtonComponent ) {
+		return (
+			<CustomButtonComponent
+				waitingForProcessing={ waitingForProcessing }
+				waitingForRedirect={ waitingForRedirect }
+				disabled={
+					isCalculating ||
+					isDisabled ||
+					waitingForProcessing ||
+					waitingForRedirect ||
+					cartIsLoading
+				}
+				isEditor={ isEditor }
+				isPreview={ isPreview }
+				validate={ validateCheckout }
+				{ ...paymentMethodInterface }
+			/>
+		);
+	}
 
 	return (
 		<Button
@@ -87,7 +93,8 @@ const PlaceOrderButton = ( {
 				isCalculating ||
 				isDisabled ||
 				waitingForProcessing ||
-				waitingForRedirect
+				waitingForRedirect ||
+				cartIsLoading
 			}
 		>
 			{ waitingForProcessing && <Spinner /> }
@@ -97,7 +104,35 @@ const PlaceOrderButton = ( {
 					icon={ check }
 				/>
 			) }
-			{ buttonLabel }
+			<div
+				className={
+					'wc-block-components-checkout-place-order-button__text'
+				}
+			>
+				{ label }
+				{ showPrice && (
+					<>
+						<style>
+							{ `.wp-block-woocommerce-checkout-actions-block {
+							.wc-block-components-checkout-place-order-button__separator {
+								&::after {
+									content: "${ priceSeparator }";
+								}
+							}
+						}` }
+						</style>
+						<div className="wc-block-components-checkout-place-order-button__separator" />
+						<div className="wc-block-components-checkout-place-order-button__price">
+							<FormattedMonetaryAmount
+								value={ cartTotals.total_price }
+								currency={ getCurrencyFromPriceResponse(
+									cartTotals
+								) }
+							/>
+						</div>
+					</>
+				) }
+			</div>
 		</Button>
 	);
 };

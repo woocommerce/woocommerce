@@ -1,9 +1,9 @@
 /**
  * External dependencies
  */
-import { Notice } from '@wordpress/components';
+import { NoticeProps } from '@wordpress/components/build-types/notice/types';
 
-export type UpgradeDowngradeNoticeProps = Omit< Notice.Props, 'actions' > & {
+export type UpgradeDowngradeNoticeProps = Omit< NoticeProps, 'actions' > & {
 	actionLabel: string;
 	onActionClick(): void;
 };

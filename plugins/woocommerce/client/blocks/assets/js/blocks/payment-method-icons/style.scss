@@ -1,0 +1,25 @@
+.wc-block-payment-method-icons {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	align-items: center;
+
+	.wc-block-payment-method-icons__item {
+		display: flex;
+		height: 24px;
+		justify-content: center;
+		align-items: center;
+	}
+
+	.wc-block-payment-method-icons__icon {
+		display: inline-block;
+		width: 38px;
+		height: 24px;
+		background-size: contain;
+		background-repeat: no-repeat;
+		background-position: center;
+		text-indent: -9999px;
+		overflow: hidden;
+		white-space: nowrap;
+	}
+}

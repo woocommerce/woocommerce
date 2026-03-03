@@ -18,21 +18,21 @@ final class SessionHandler extends WC_Session {
 	 *
 	 * @var string
 	 */
-	protected $token;
+	protected $token = '';
 
 	/**
 	 * Table name for session data.
 	 *
 	 * @var string Custom session table name
 	 */
-	protected $table;
+	protected $table = '';
 
 	/**
 	 * Expiration timestamp.
 	 *
 	 * @var int
 	 */
-	protected $session_expiration;
+	protected $session_expiration = 0;
 
 	/**
 	 * Constructor for the session class.
@@ -58,7 +58,7 @@ final class SessionHandler extends WC_Session {
 
 		$this->_customer_id       = $payload['user_id'];
 		$this->session_expiration = $payload['exp'];
-		$this->_data              = (array) $this->get_session( $this->_customer_id, array() );
+		$this->_data              = (array) $this->get_session( $this->get_customer_id(), array() );
 	}
 
 	/**
@@ -66,15 +66,15 @@ final class SessionHandler extends WC_Session {
 	 *
 	 * @param string $customer_id Customer ID.
 	 * @param mixed  $default_value Default session value.
-	 *
-	 * @return string|array|bool
+
+	 * @return mixed Returns either the session data or the default value. Returns false if WP setup is in progress.
 	 */
 	public function get_session( $customer_id, $default_value = false ) {
 		global $wpdb;
 
 		// This mimics behaviour from default WC_Session_Handler class. There will be no sessions retrieved while WP setup is due.
 		if ( Constants::is_defined( 'WP_SETUP_CONFIG' ) ) {
-			return false;
+			return $default_value;
 		}
 
 		$value = $wpdb->get_var(
@@ -104,7 +104,7 @@ final class SessionHandler extends WC_Session {
 				$wpdb->prepare(
 					'INSERT INTO %i (`session_key`, `session_value`, `session_expiry`) VALUES (%s, %s, %d) ON DUPLICATE KEY UPDATE `session_value` = VALUES(`session_value`), `session_expiry` = VALUES(`session_expiry`)',
 					$this->table,
-					$this->_customer_id,
+					$this->get_customer_id(),
 					maybe_serialize( $this->_data ),
 					$this->session_expiration
 				)

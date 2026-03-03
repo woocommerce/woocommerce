@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\StoreApi\Utilities;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
+use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\QueryClausesGenerator;
 use WC_Tax;
 
 /**
@@ -13,7 +14,7 @@ use WC_Tax;
  *
  * Helper class to handle product queries for the API.
  */
-class ProductQuery {
+class ProductQuery implements QueryClausesGenerator {
 	/**
 	 * Prepare query args to pass to WP_Query for a REST API request.
 	 *
@@ -250,6 +251,22 @@ class ProductQuery {
 			$args['meta_key'] = $ordering_args['meta_key']; // phpcs:ignore
 		}
 
+		// Filter by related products.
+		if ( ! empty( $request['related'] ) ) {
+			$product_id = absint( $request['related'] );
+			$limit      = ! empty( $request['per_page'] ) ? (int) $request['per_page'] : 100;
+			$related    = wc_get_related_products( $product_id, $limit );
+
+			if ( ! empty( $related ) ) {
+				$args['post__in'] = ! empty( $args['post__in'] )
+					? array_values( array_intersect( $args['post__in'], $related ) )
+					: array_values( $related );
+			} else {
+				// No related products found, return empty result.
+				$args['post__in'] = array( 0 );
+			}
+		}
+
 		return $args;
 	}
 
@@ -322,6 +339,10 @@ class ProductQuery {
 	public function get_objects( $request ) {
 		$results = $this->get_results( $request );
 
+		if ( is_callable( '_prime_post_caches' ) ) {
+			_prime_post_caches( $results['results'] );
+		}
+
 		return array(
 			'objects' => array_map( 'wc_get_product', $results['results'] ),
 			'total'   => $results['total'],
@@ -330,26 +351,51 @@ class ProductQuery {
 	}
 
 	/**
-	 * Get last modified date for all products.
+	 * Get last modified date for all products as an HTTP-date (RFC 7232).
 	 *
-	 * @return int timestamp.
+	 * The result is cached in the 'wc_products' object cache group and invalidated via the
+	 * clean_post_cache hook in WC_Post_Data::invalidate_products_last_modified().
+	 *
+	 * Note: This intentionally does NOT use WordPress core's wp_cache_get_last_changed() /
+	 * wp_cache_set_last_changed() pattern. Those functions are designed for opaque cache-key
+	 * salting where auto-seeding with the current time on a cache miss is acceptable (a wrong
+	 * salt simply causes a cache miss and re-query). Here, the value is exposed to clients via
+	 * the Last-Modified HTTP header for collection cache invalidation. Auto-seeding with "now"
+	 * on a cache miss would force all clients to unnecessarily invalidate their local caches.
+	 * Instead, on a cache miss we fall back to the database to get the real last modification
+	 * time and cache that.
+	 *
+	 * @return string|null HTTP-date formatted string, or null if no products exist.
 	 */
 	public function get_last_modified() {
-		global $wpdb;
+		$last_modified = wp_cache_get( 'last_modified', 'wc_products' );
 
-		$last_modified = $wpdb->get_var( "SELECT MAX( post_modified_gmt ) FROM {$wpdb->posts} WHERE post_type IN ( 'product', 'product_variation' );" );
+		if ( false === $last_modified ) {
+			global $wpdb;
 
-		return $last_modified ? strtotime( $last_modified ) : null;
+			$last_modified_gmt = $wpdb->get_var(
+				"SELECT MAX( post_modified_gmt ) FROM {$wpdb->posts} WHERE post_type IN ( 'product', 'product_variation' )"
+			);
+
+			if ( ! $last_modified_gmt ) {
+				return null;
+			}
+
+			$last_modified = gmdate( 'D, d M Y H:i:s', strtotime( $last_modified_gmt ) ) . ' GMT';
+			wp_cache_set( 'last_modified', $last_modified, 'wc_products' );
+		}
+
+		return $last_modified;
 	}
 
 	/**
 	 * Add in conditional search filters for products.
 	 *
 	 * @param array     $args Query args.
-	 * @param \WC_Query $wp_query WC_Query object.
+	 * @param \WP_Query $wp_query WP_Query object.
 	 * @return array
 	 */
-	public function add_query_clauses( $args, $wp_query ) {
+	public function add_query_clauses( array $args, \WP_Query $wp_query ): array {
 		global $wpdb;
 
 		if ( $wp_query->get( 'search' ) ) {

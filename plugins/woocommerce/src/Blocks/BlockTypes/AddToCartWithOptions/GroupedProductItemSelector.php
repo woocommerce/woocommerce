@@ -25,6 +25,15 @@ class GroupedProductItemSelector extends AbstractBlock {
 	protected $block_name = 'add-to-cart-with-options-grouped-product-item-selector';
 
 	/**
+	 * Set the quantity input type to number.
+	 *
+	 * @return string The quantity input type.
+	 */
+	public function set_quantity_input_type() {
+		return 'number';
+	}
+
+	/**
 	 * Gets the quantity selector markup for a product.
 	 *
 	 * @param \WC_Product $product The product object.
@@ -33,27 +42,20 @@ class GroupedProductItemSelector extends AbstractBlock {
 	private function get_quantity_selector_markup( $product ) {
 		ob_start();
 
+		$min_value = $product->get_min_purchase_quantity();
+		$max_value = $product->get_max_purchase_quantity();
+
+		if ( $min_value === $max_value && $min_value > 0 ) {
+			add_filter( 'woocommerce_quantity_input_type', array( $this, 'set_quantity_input_type' ) );
+		}
+
 		woocommerce_quantity_input(
 			array(
 				'input_name'  => 'quantity[' . $product->get_id() . ']',
 				'input_id'    => 'quantity_' . $product->get_id(),
 				'input_value' => isset( $_POST['quantity'][ $product->get_id() ] ) ? wc_stock_amount( wc_clean( wp_unslash( $_POST['quantity'][ $product->get_id() ] ) ) ) : '', // phpcs:ignore WordPress.Security.NonceVerification.Missing
-				/**
-				 * Filter the minimum quantity value allowed for the product.
-				 *
-				 * @since 2.0.0
-				 * @param int        $min_value Minimum quantity value.
-				 * @param WC_Product $product   Product object.
-				 */
-				'min_value'   => apply_filters( 'woocommerce_quantity_input_min', 0, $product ),
-				/**
-				 * Filter the maximum quantity value allowed for the product.
-				 *
-				 * @since 2.0.0
-				 * @param int        $max_value Maximum quantity value.
-				 * @param WC_Product $product   Product object.
-				 */
-				'max_value'   => apply_filters( 'woocommerce_quantity_input_max', $product->get_max_purchase_quantity(), $product ),
+				'min_value'   => 0,
+				'max_value'   => $max_value,
 				/**
 				 * Filter the placeholder value allowed for the product.
 				 *
@@ -64,6 +66,10 @@ class GroupedProductItemSelector extends AbstractBlock {
 				'placeholder' => apply_filters( 'woocommerce_quantity_input_placeholder', 0, $product ),
 			)
 		);
+
+		if ( $min_value === $max_value && $min_value > 0 ) {
+			remove_filter( 'woocommerce_quantity_input_type', array( $this, 'set_quantity_input_type' ) );
+		}
 
 		$quantity_html = ob_get_clean();
 
@@ -76,8 +82,13 @@ class GroupedProductItemSelector extends AbstractBlock {
 		$quantity_html = AddToCartWithOptionsUtils::add_quantity_steppers( $quantity_html, $product_name );
 		$quantity_html = AddToCartWithOptionsUtils::add_quantity_stepper_classes( $quantity_html );
 
+		$context = array(
+			'productId' => $product->get_id(),
+			'allowZero' => true, // The item is optional in grouped products.
+		);
+
 		// Add interactive data attribute for the stepper functionality.
-		$quantity_html = AddToCartWithOptionsUtils::make_quantity_input_interactive( $quantity_html );
+		$quantity_html = AddToCartWithOptionsUtils::make_quantity_input_interactive( $quantity_html, array(), array(), $context );
 
 		return $quantity_html;
 	}
@@ -131,7 +142,9 @@ class GroupedProductItemSelector extends AbstractBlock {
 				esc_html( wp_strip_all_tags( wc_price( $product->get_price() ) ) )
 			);
 		}
-		return '<input type="checkbox" name="' . esc_attr( 'quantity[' . $product->get_id() . ']' ) . '" value="1" class="wc-grouped-product-add-to-cart-checkbox" id="' . esc_attr( 'quantity_' . $product->get_id() ) . '" data-wp-on--change="actions.handleQuantityCheckboxChange" />';
+
+		$context_attribute = wp_interactivity_data_wp_context( array( 'productId' => $product->get_id() ) );
+		return '<input type="checkbox" name="' . esc_attr( 'quantity[' . $product->get_id() . ']' ) . '" value="1" class="wc-grouped-product-add-to-cart-checkbox" id="' . esc_attr( 'quantity_' . $product->get_id() ) . '" data-wp-interactive="woocommerce/add-to-cart-with-options-quantity-selector" data-wp-on--change="actions.handleQuantityCheckboxChange" ' . $context_attribute . ' aria-label="' . esc_attr( $label ) . '"/>';
 	}
 
 	/**
@@ -150,12 +163,19 @@ class GroupedProductItemSelector extends AbstractBlock {
 		$markup  = '';
 
 		if ( $product ) {
+			$is_interactive = false;
 			if ( ! $product->is_purchasable() || $product->has_options() || ! $product->is_in_stock() ) {
 				$markup = $this->get_button_markup( $product );
 			} elseif ( $product->is_sold_individually() ) {
-				$markup = $this->get_checkbox_markup( $product );
+				$is_interactive = true;
+				$markup         = $this->get_checkbox_markup( $product );
 			} else {
-				$markup = $this->get_quantity_selector_markup( $product );
+				$is_interactive = true;
+				$markup         = $this->get_quantity_selector_markup( $product );
+			}
+
+			if ( $is_interactive ) {
+				wp_enqueue_script_module( 'woocommerce/add-to-cart-with-options-quantity-selector' );
 			}
 
 			if ( $markup ) {

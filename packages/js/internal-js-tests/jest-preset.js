@@ -17,6 +17,9 @@ const transformModules = {
 	'y-protocols': {
 		'.*\\.js$': 'babel-jest',
 	},
+	'parsel-js': {
+		'.*\\.js$': 'babel-jest',
+	},
 };
 
 /**

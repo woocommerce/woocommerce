@@ -46,9 +46,14 @@ export class Editor extends CoreEditor {
 	}
 
 	/**
-	 * Opens the global inserter.
+	 * Clicks the global block inserter for given action.
+	 *
+	 * @param action - The action to perform on the global block inserter ( 'toggle' | 'open' | 'close' ).
+	 * @default 'toggle'
 	 */
-	async openGlobalBlockInserter() {
+	async clickGlobalBlockInserter(
+		action: 'toggle' | 'open' | 'close' = 'toggle'
+	) {
 		const toggleButton = this.page.getByRole( 'button', {
 			name:
 				this.wpCoreVersion >= 6.8
@@ -60,9 +65,27 @@ export class Editor extends CoreEditor {
 		const isOpen =
 			( await toggleButton.getAttribute( 'aria-pressed' ) ) === 'true';
 
-		if ( ! isOpen ) {
+		if (
+			action === 'toggle' ||
+			( action === 'open' && ! isOpen ) ||
+			( action === 'close' && isOpen )
+		) {
 			await toggleButton.click();
 		}
+	}
+
+	/**
+	 * Opens the global inserter.
+	 */
+	async openGlobalBlockInserter() {
+		await this.clickGlobalBlockInserter( 'open' );
+	}
+
+	/**
+	 * Closes the global inserter.
+	 */
+	async closeGlobalBlockInserter() {
+		await this.clickGlobalBlockInserter( 'close' );
 	}
 
 	async transformIntoBlocks() {
@@ -91,12 +114,54 @@ export class Editor extends CoreEditor {
 		}
 	}
 
-	async revertTemplate( { templateName }: { templateName: string } ) {
+	/**
+	 * Search for a template or template part in the Site Editor.
+	 */
+	async searchTemplate( { templateName }: { templateName: string } ) {
+		const templateCards = this.page.locator(
+			'.dataviews-view-grid .dataviews-view-grid__card'
+		);
+		const templatesBeforeSearch = await templateCards.count();
+
 		await this.page.getByPlaceholder( 'Search' ).fill( templateName );
-		// Let's wait for the search to finish.
+
 		await expect(
-			this.page.locator( '.dataviews-view-grid__title-actions' ).first()
-		).toHaveText( templateName );
+			this.page.getByRole( 'button', { name: 'Reset Search' } )
+		).toBeVisible();
+		await expect( this.page.getByLabel( 'No results' ) ).toBeHidden();
+
+		// Wait for the grid to update with fewer items than before.
+		// Using expect.poll() for a retrying assertion since toHaveCount
+		// requires an exact number.
+		await expect
+			.poll( () => templateCards.count(), { timeout: 5000 } )
+			.toBeLessThan( templatesBeforeSearch );
+	}
+
+	/**
+	 * Opens a template or template part in the Site Editor given its name.
+	 */
+	async openTemplate( { templateName }: { templateName: string } ) {
+		const templateButton = this.page
+			.getByRole( 'button', {
+				name: templateName,
+				exact: true,
+			} )
+			.first();
+		if ( ! ( await templateButton.isVisible() ) ) {
+			await this.searchTemplate( { templateName } );
+		}
+
+		await templateButton.click();
+
+		// Wait until editor has loaded.
+		await this.page
+			.getByRole( 'heading', { name: templateName, level: 1 } )
+			.waitFor();
+	}
+
+	async revertTemplate( { templateName }: { templateName: string } ) {
+		await this.searchTemplate( { templateName } );
 
 		await this.page
 			.getByRole( 'button', { name: 'Actions' } )
@@ -124,6 +189,29 @@ export class Editor extends CoreEditor {
 			.getByLabel( 'Dismiss this notice' )
 			.getByText( /reset|deleted/ )
 			.waitFor();
+	}
+
+	async createTemplate( { templateName }: { templateName: string } ) {
+		// We need to take into account two versions of WordPress where label has changed.
+		await this.page
+			.getByLabel( 'Add Template' )
+			.or( this.page.getByText( 'Add New Template' ) )
+			.click();
+
+		const dialog = this.page.getByRole( 'dialog' );
+		await dialog.getByRole( 'button', { name: templateName } ).click();
+		// There is the chance that the Add template dialog is opened before
+		// product taxonomies could load. In that case, the screen to select
+		// whether to create a template for a specific taxonomy or for all of
+		// them won't be shown. That's why we click the 'All Categories' /
+		// 'All Tags' button only if visible.
+		const allButton = dialog.getByRole( 'button', {
+			name: 'For all items',
+		} );
+		if ( await allButton.isVisible() ) {
+			await allButton.click();
+		}
+		await this.page.getByLabel( 'Fallback content' ).click();
 	}
 
 	async publishAndVisitPost() {

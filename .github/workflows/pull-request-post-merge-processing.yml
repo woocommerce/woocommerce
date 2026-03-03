@@ -19,14 +19,14 @@ jobs:
         steps:
             - name: 'Get the action scripts'
               run: |
-                  scripts="assign-milestone-to-merged-pr.php add-post-merge-comment.php post-request-shared.php"
+                  scripts="add-post-merge-comment.php post-request-shared.php"
                   for script in $scripts
                   do
                     curl \
                     --silent \
                     --fail \
                     --header 'Authorization: bearer ${{ secrets.GITHUB_TOKEN }}' \
-                    --header 'User-Agent: GitHub action to set the milestone for a pull request' \
+                    --header 'User-Agent: GitHub action for post-merge pull request processing' \
                     --header 'Accept: application/vnd.github.v3.raw' \
                     --output $script \
                     --location "$GITHUB_API_URL/repos/${{ github.repository }}/contents/.github/workflows/scripts/$script?ref=${{ github.event.pull_request.base.ref }}"
@@ -37,12 +37,20 @@ jobs:
               uses: shivammathur/setup-php@8e2ac35f639d3e794c1da1f28999385ab6fdf0fc
               with:
                   php-version: '7.4'
-            - name: 'Run the script to assign a milestone'
-              if: github.event.pull_request.base.ref == 'trunk'
-              run: php assign-milestone-to-merged-pr.php
-              env:
-                  PULL_REQUEST_ID: ${{ github.event.pull_request.node_id }}
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    process-feature-freeze-exception:
+        name: Log the merge of a Feature Freeze exception
+        if: ${{ github.event.pull_request.merged && startsWith( github.event.pull_request.base.ref, 'release/' ) && ! contains( github.event.pull_request.labels.*.name, 'Release' ) }}
+        runs-on: ubuntu-latest
+        permissions:
+            pull-requests: write
+        steps:
+            - env:
+                  GH_TOKEN: ${{ github.token }}
+              run: |
+                  gh pr edit ${{ github.event.pull_request.number }} \
+                      --add-label "metric: feature freeze exception" \
+                      --repo ${{ github.repository }}
 
     process-pull-request-after-close:
         name: "Process a pull request after it's been closed"

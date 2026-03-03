@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
+use Automattic\WooCommerce\Internal\Customers\SearchService as CustomersSearchService;
 use Automattic\WooCommerce\Internal\Orders\PaymentInfo;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
@@ -226,11 +227,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 			$this->save_items();
 
-			if ( OrderUtil::orders_cache_usage_is_enabled() ) {
-				$order_cache = wc_get_container()->get( OrderCache::class );
-				$order_cache->remove( $this->get_id() );
-			}
-
 			/**
 			 * Trigger action after saving to the DB.
 			 *
@@ -262,6 +258,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @param Exception $e Exception object.
 	 * @param string    $message Message regarding exception thrown.
 	 * @since 3.7.0
+	 * @return void
 	 */
 	protected function handle_exception( $e, $message = 'Error' ) {
 		wc_get_logger()->error(
@@ -275,6 +272,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Save all order items which are part of this order.
+	 *
+	 * @return void
 	 */
 	protected function save_items() {
 		$items_changed = false;
@@ -308,6 +307,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		if ( $items_changed ) {
 			delete_transient( 'wc_order_' . $this->get_id() . '_needs_processing' );
+
+			// Invalidate the order cache to prevent stale item data.
+			// This fixes a race condition where get_items() may have been called
+			// before items were saved, caching empty items arrays.
+			// See https://github.com/woocommerce/woocommerce/issues/62173.
+			if ( OrderUtil::orders_cache_usage_is_enabled() ) {
+				wc_get_container()->get( OrderCache::class )->remove( $this->get_id() );
+			}
 		}
 	}
 
@@ -633,6 +640,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 *
 	 * @since 3.0.0
 	 * @param int $value Value to set.
+	 * @return void
 	 * @throws WC_Data_Exception Exception thrown if parent ID does not exist or is invalid.
 	 */
 	public function set_parent_id( $value ) {
@@ -692,6 +700,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Set order_version.
 	 *
 	 * @param string $value Value to set.
+	 * @return void
 	 * @throws WC_Data_Exception Exception may be thrown if value is invalid.
 	 */
 	public function set_version( $value ) {
@@ -702,6 +711,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Set order_currency.
 	 *
 	 * @param string $value Value to set.
+	 * @return void
 	 * @throws WC_Data_Exception Exception may be thrown if value is invalid.
 	 */
 	public function set_currency( $value ) {
@@ -715,6 +725,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Set prices_include_tax.
 	 *
 	 * @param bool $value Value to set.
+	 * @return void
 	 * @throws WC_Data_Exception Exception may be thrown if value is invalid.
 	 */
 	public function set_prices_include_tax( $value ) {
@@ -725,6 +736,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Set date_created.
 	 *
 	 * @param  string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if there is no date.
+	 * @return void
 	 * @throws WC_Data_Exception Exception may be thrown if value is invalid.
 	 */
 	public function set_date_created( $date = null ) {
@@ -735,6 +747,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Set date_modified.
 	 *
 	 * @param  string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if there is no date.
+	 * @return void
 	 * @throws WC_Data_Exception Exception may be thrown if value is invalid.
 	 */
 	public function set_date_modified( $date = null ) {
@@ -745,6 +758,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Set discount_total.
 	 *
 	 * @param string $value Value to set.
+	 * @return void
 	 * @throws WC_Data_Exception Exception may be thrown if value is invalid.
 	 */
 	public function set_discount_total( $value ) {
@@ -755,6 +769,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Set discount_tax.
 	 *
 	 * @param string $value Value to set.
+	 * @return void
 	 * @throws WC_Data_Exception Exception may be thrown if value is invalid.
 	 */
 	public function set_discount_tax( $value ) {
@@ -765,6 +780,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Set shipping_total.
 	 *
 	 * @param string $value Value to set.
+	 * @return void
 	 * @throws WC_Data_Exception Exception may be thrown if value is invalid.
 	 */
 	public function set_shipping_total( $value ) {
@@ -775,6 +791,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Set shipping_tax.
 	 *
 	 * @param string $value Value to set.
+	 * @return void
 	 * @throws WC_Data_Exception Exception may be thrown if value is invalid.
 	 */
 	public function set_shipping_tax( $value ) {
@@ -786,6 +803,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Set cart tax.
 	 *
 	 * @param string $value Value to set.
+	 * @return void
 	 * @throws WC_Data_Exception Exception may be thrown if value is invalid.
 	 */
 	public function set_cart_tax( $value ) {
@@ -797,6 +815,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Sets order tax (sum of cart and shipping tax). Used internally only.
 	 *
 	 * @param string $value Value to set.
+	 * @return void
 	 * @throws WC_Data_Exception Exception may be thrown if value is invalid.
 	 */
 	protected function set_total_tax( $value ) {
@@ -818,6 +837,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			wc_deprecated_argument( 'total_type', '3.0', 'Use dedicated total setter methods instead.' );
 			return $this->legacy_set_total( $value, $deprecated );
 		}
+
+		if ( ! is_string( $value ) || 0 === strlen( $value ) ) {
+			$value = (float) $value;
+		}
+
 		$this->set_prop( 'total', wc_format_decimal( $value, wc_get_price_decimals() ) );
 	}
 
@@ -845,6 +869,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Remove all line items (products, coupons, shipping, taxes) from the order.
 	 *
 	 * @param string $type Order item type. Default null.
+	 * @return void
 	 */
 	public function remove_order_items( $type = null ) {
 
@@ -1149,6 +1174,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @throws Exception When not able to apply coupon.
 	 *
 	 * @param string $billing_email Billing email of order.
+	 * @return void
 	 */
 	public function hold_applied_coupons( $billing_email ) {
 		$held_keys          = array();
@@ -1175,7 +1201,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 					if ( ! isset( $user_ids_and_emails ) ) {
 						$user_alias          = get_current_user_id() ? wp_get_current_user()->ID : sanitize_email( $billing_email );
-						$user_ids_and_emails = $this->get_billing_and_current_user_aliases( $billing_email );
+						$user_ids_and_emails = $this->get_billing_and_current_user_ids_and_aliases( $billing_email );
 					}
 
 					$held_key_for_user = $this->hold_coupon_for_users( $coupon, $user_ids_and_emails, $user_alias );
@@ -1243,23 +1269,20 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * Helper method to get all aliases for current user and provide billing email.
+	 * Helper method to get all aliases and IDs for current user and provided billing email.
 	 *
-	 * @param string $billing_email Billing email provided in form.
+	 * @param string $billing_email Billing email to look up for.
 	 *
-	 * @return array     Array of all aliases.
+	 * @return array     Array of all aliases and IDs.
 	 * @throws Exception When validation fails.
 	 */
-	private function get_billing_and_current_user_aliases( $billing_email ) {
+	private function get_billing_and_current_user_ids_and_aliases( $billing_email ): array {
 		$emails = array( $billing_email );
 		if ( get_current_user_id() ) {
 			$emails[] = wp_get_current_user()->user_email;
 		}
-		$emails              = array_unique(
-			array_map( 'strtolower', array_map( 'sanitize_email', $emails ) )
-		);
-		$customer_data_store = WC_Data_Store::load( 'customer' );
-		$user_ids            = $customer_data_store->get_user_ids_for_billing_email( $emails );
+		$emails   = array_unique( array_map( 'strtolower', array_map( 'sanitize_email', $emails ) ) );
+		$user_ids = wc_get_container()->get( CustomersSearchService::class )->find_user_ids_by_billing_email_for_coupons_usage_lookup( $emails );
 		return array_merge( $user_ids, $emails );
 	}
 
@@ -1395,6 +1418,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * This method is public since WooCommerce 3.8.0.
 	 *
 	 * @since 3.2.0
+	 * @return void
 	 */
 	public function recalculate_coupons() {
 		// Reset line item totals.
@@ -1486,6 +1510,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 *
 	 * @since 3.2.0
 	 * @param WC_Discounts $discounts Discounts class.
+	 * @return void
 	 */
 	protected function set_item_discount_amounts( $discounts ) {
 		$item_discounts = $discounts->get_discounts_by_item();
@@ -1514,6 +1539,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 *
 	 * @since 3.2.0
 	 * @param WC_Discounts $discounts Discounts class.
+	 * @return void
 	 */
 	protected function set_coupon_discount_amounts( $discounts ) {
 		$coupons           = $this->get_items( 'coupon' );
@@ -1816,6 +1842,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Will use the base country unless customer addresses are set.
 	 *
 	 * @param array $args Added in 3.0.0 to pass things like location.
+	 * @return void
 	 */
 	public function calculate_taxes( $args = array() ) {
 		do_action( 'woocommerce_order_before_calculate_taxes', $args, $this );
@@ -1867,6 +1894,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 	/**
 	 * Update tax lines for the order based on the line item taxes themselves.
+	 *
+	 * @return void
 	 */
 	public function update_taxes() {
 		$cart_taxes     = array();
@@ -2299,6 +2328,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 *
 	 * @param array  $total_rows Reference to total rows array.
 	 * @param string $tax_display Excl or incl tax display mode.
+	 * @return void
 	 */
 	protected function add_order_item_totals_subtotal_row( &$total_rows, $tax_display ) {
 		$subtotal = $this->get_subtotal_to_display( false, $tax_display );
@@ -2317,6 +2347,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 *
 	 * @param array  $total_rows Reference to total rows array.
 	 * @param string $tax_display Excl or incl tax display mode.
+	 * @return void
 	 */
 	protected function add_order_item_totals_discount_row( &$total_rows, $tax_display ) {
 		if ( $this->get_total_discount() > 0 ) {
@@ -2333,6 +2364,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 *
 	 * @param array  $total_rows Reference to total rows array.
 	 * @param string $tax_display Excl or incl tax display mode.
+	 * @return void
 	 */
 	protected function add_order_item_totals_shipping_row( &$total_rows, $tax_display ) {
 		if ( $this->get_shipping_method() ) {
@@ -2350,6 +2382,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 *
 	 * @param array  $total_rows Reference to total rows array.
 	 * @param string $tax_display Excl or incl tax display mode.
+	 * @return void
 	 */
 	protected function add_order_item_totals_fee_rows( &$total_rows, $tax_display ) {
 		$fees = $this->get_fees();
@@ -2373,6 +2406,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 *
 	 * @param array  $total_rows Reference to total rows array.
 	 * @param string $tax_display Excl or incl tax display mode.
+	 * @return void
 	 */
 	protected function add_order_item_totals_tax_rows( &$total_rows, $tax_display ) {
 		// Tax for tax exclusive prices.
@@ -2400,6 +2434,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 *
 	 * @param array  $total_rows Reference to total rows array.
 	 * @param string $tax_display Excl or incl tax display mode.
+	 * @return void
 	 */
 	protected function add_order_item_totals_total_row( &$total_rows, $tax_display ) {
 		$total_rows['order_total'] = array(
@@ -2476,7 +2511,12 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$needs_shipping = false;
 
 		foreach ( $this->get_items() as $item ) {
-			if ( is_a( $item, 'WC_Order_Item_Product' ) && $item->get_product()->needs_shipping() ) {
+			if ( ! is_a( $item, 'WC_Order_Item_Product' ) ) {
+				continue;
+			}
+
+			$product = $item->get_product();
+			if ( is_a( $product, 'WC_Product' ) && $product->needs_shipping() ) {
 				$needs_shipping = true;
 				break;
 			}
@@ -2602,6 +2642,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * WARNING! If the Cost of Goods Sold feature is disabled this method will have no effect.
 	 *
 	 * @param float $value The value to set for this order.
+	 * @return void
 	 *
 	 * @internal This method is intended for data store usage only, the value set here will be overridden by calculate_cogs_total_value.
 	 */
@@ -2609,5 +2650,35 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		if ( $this->has_cogs() && $this->cogs_is_enabled( __METHOD__ ) ) {
 			$this->set_prop( 'cogs_total_value', $value );
 		}
+	}
+
+	/**
+	 * Return the HTML to render the total Cost of Goods Sold for the order.
+	 *
+	 * @param array|null $wc_price_arg Arguments to be passed to wc_price, defaults to an array containing only the currency symbol.
+	 * @return string
+	 */
+	public function get_cogs_total_value_html( ?array $wc_price_arg = null ): string {
+		if ( ! $this->cogs_is_enabled( __METHOD__ ) || ! $this->has_cogs() ) {
+			return '';
+		}
+
+		$cogs_total_value = $this->get_cogs_total_value();
+
+		/**
+		 * Filter to customize the total Cost of Goods Sold (COGS) value HTML for a given order.
+		 *
+		 * @since 10.3.0
+		 *
+		 * @param string   $total_html The formatted total COGS HTML.
+		 * @param float    $total      The total COGS value.
+		 * @param WC_Order $order      The order object.
+		 */
+		return apply_filters(
+			'woocommerce_order_cogs_total_value_html',
+			wc_price( $cogs_total_value, $wc_price_arg ?? array( 'currency' => $this->get_currency() ) ),
+			$cogs_total_value,
+			$this
+		);
 	}
 }

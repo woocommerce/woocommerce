@@ -7,7 +7,9 @@ type Context = {
 	context: { postId: string; postType: string };
 };
 
-export type ProductDetailsEditProps = BlockEditProps<
-	Record< string, never >
-> &
-	Context;
+export type Attributes = {
+	align?: 'wide' | 'full';
+	hideTabTitle: boolean;
+};
+
+export type ProductDetailsEditProps = BlockEditProps< Attributes > & Context;

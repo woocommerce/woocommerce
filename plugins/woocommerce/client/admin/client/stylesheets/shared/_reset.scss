@@ -53,8 +53,13 @@
 	margin-top: $header-height;
 }
 
-#wpfooter {
-	display: none;
+// Hide wpfooter on customize store pages.
+body.woocommerce-customize-store,
+body.woocommerce-launch-your-store,
+body.woocommerce-admin-full-screen {
+	#wpfooter {
+		display: none;
+	}
 }
 
 .woocommerce_page_wc-admin {

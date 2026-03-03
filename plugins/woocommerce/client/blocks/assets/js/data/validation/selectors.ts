@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import type { FieldValidationStatus } from '@woocommerce/types';
+
+/**
  * Internal dependencies
  */
 import type { State } from './reducers';
@@ -36,3 +41,10 @@ export const getValidationErrorId = ( state: State, errorId: string ) => {
 export const hasValidationErrors = ( state: State ) => {
 	return Object.keys( state ).length > 0;
 };
+
+/**
+ * Gets all validation errors.
+ */
+export const getValidationErrors = (
+	state: State
+): Record< string, FieldValidationStatus > => state;

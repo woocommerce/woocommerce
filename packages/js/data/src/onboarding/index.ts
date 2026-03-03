@@ -3,7 +3,6 @@
  */
 import { createReduxStore, register } from '@wordpress/data';
 import { controls } from '@wordpress/data-controls';
-import { SelectFromMap } from '@automattic/data-stores';
 
 /**
  * Internal dependencies
@@ -13,7 +12,7 @@ import * as selectors from './selectors';
 import * as actions from './actions';
 import * as resolvers from './resolvers';
 import reducer, { State } from './reducer';
-import { WPDataSelectors } from '../types';
+import { SelectFromMap, WPDataSelectors } from '../types';
 export * from './types';
 export type { State };
 

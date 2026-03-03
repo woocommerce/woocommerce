@@ -3,10 +3,13 @@
  * A class of utilities for dealing with orders.
  */
 
+declare( strict_types=1 );
+
 namespace Automattic\WooCommerce\Utilities;
 
 use Automattic\WooCommerce\Caches\OrderCacheController;
 use Automattic\WooCommerce\Caches\OrderCountCache;
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Admin\Orders\PageController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\Utilities\COTMigrationUtil;
@@ -23,7 +26,7 @@ final class OrderUtil {
 	 *
 	 * @return string
 	 */
-	public static function get_order_admin_screen() : string {
+	public static function get_order_admin_screen(): string {
 		return wc_get_container()->get( COTMigrationUtil::class )->get_order_admin_screen();
 	}
 
@@ -33,7 +36,7 @@ final class OrderUtil {
 	 *
 	 * @return bool
 	 */
-	public static function custom_orders_table_usage_is_enabled() : bool {
+	public static function custom_orders_table_usage_is_enabled(): bool {
 		return wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled();
 	}
 
@@ -51,7 +54,7 @@ final class OrderUtil {
 	 *
 	 * @return bool True if the orders cache should be used, false otherwise.
 	 */
-	public static function orders_cache_usage_is_enabled() : bool {
+	public static function orders_cache_usage_is_enabled(): bool {
 		return wc_get_container()->get( OrderCacheController::class )->orders_cache_usage_is_enabled();
 	}
 
@@ -60,7 +63,7 @@ final class OrderUtil {
 	 *
 	 * @return bool
 	 */
-	public static function is_custom_order_tables_in_sync() : bool {
+	public static function is_custom_order_tables_in_sync(): bool {
 		return wc_get_container()->get( COTMigrationUtil::class )->is_custom_order_tables_in_sync();
 	}
 
@@ -97,7 +100,7 @@ final class OrderUtil {
 	 *
 	 * @return int Order or post ID.
 	 */
-	public static function get_post_or_order_id( $post_or_order_object ) : int {
+	public static function get_post_or_order_id( $post_or_order_object ): int {
 		return wc_get_container()->get( COTMigrationUtil::class )->get_post_or_order_id( $post_or_order_object );
 	}
 
@@ -131,7 +134,7 @@ final class OrderUtil {
 	 *
 	 * @return string Admin url for an order.
 	 */
-	public static function get_order_admin_edit_url( int $order_id ) : string {
+	public static function get_order_admin_edit_url( int $order_id ): string {
 		return wc_get_container()->get( PageController::class )->get_edit_url( $order_id );
 	}
 
@@ -140,7 +143,7 @@ final class OrderUtil {
 	 *
 	 * @return string Link for new order.
 	 */
-	public static function get_order_admin_new_url() : string {
+	public static function get_order_admin_new_url(): string {
 		return wc_get_container()->get( PageController::class )->get_new_page_url();
 	}
 
@@ -151,7 +154,7 @@ final class OrderUtil {
 	 *
 	 * @return bool
 	 */
-	public static function is_order_list_table_screen( $order_type = 'shop_order' ) : bool {
+	public static function is_order_list_table_screen( $order_type = 'shop_order' ): bool {
 		return wc_get_container()->get( PageController::class )->is_order_screen( $order_type, 'list' );
 	}
 
@@ -162,7 +165,7 @@ final class OrderUtil {
 	 *
 	 * @return bool
 	 */
-	public static function is_order_edit_screen( $order_type = 'shop_order' ) : bool {
+	public static function is_order_edit_screen( $order_type = 'shop_order' ): bool {
 		return wc_get_container()->get( PageController::class )->is_order_screen( $order_type, 'edit' );
 	}
 
@@ -173,7 +176,7 @@ final class OrderUtil {
 	 *
 	 * @return bool
 	 */
-	public static function is_new_order_screen( $order_type = 'shop_order' ) : bool {
+	public static function is_new_order_screen( $order_type = 'shop_order' ): bool {
 		return wc_get_container()->get( PageController::class )->is_order_screen( $order_type, 'new' );
 	}
 
@@ -206,6 +209,8 @@ final class OrderUtil {
 	public static function get_count_for_type( $order_type ) {
 		global $wpdb;
 
+		$order_type = (string) $order_type;
+
 		$order_count_cache = new OrderCountCache();
 		$count_per_status  = $order_count_cache->get( $order_type );
 
@@ -229,13 +234,11 @@ final class OrderUtil {
 
 			// Make sure all order statuses are included just in case.
 			$count_per_status = array_merge(
-				array_fill_keys( $order_count_cache->get_default_statuses(), 0 ),
+				array_fill_keys( array_merge( array_keys( wc_get_order_statuses() ), array( OrderStatus::TRASH ) ), 0 ),
 				$count_per_status
 			);
 
-			foreach ( $count_per_status as $order_status => $count ) {
-				$order_count_cache->set( $order_type, $order_status, $count );
-			}
+			$order_count_cache->set_multiple( $order_type, $count_per_status );
 		}
 
 		return $count_per_status;
@@ -255,5 +258,29 @@ final class OrderUtil {
 		}
 
 		return $status;
+	}
+
+	/**
+	 * Checks if the new full refund data is used.
+	 *
+	 * @return bool
+	 */
+	public static function uses_new_full_refund_data() {
+		$db_version                = get_option( 'woocommerce_db_version', null );
+		$uses_old_full_refund_data = get_option( 'woocommerce_analytics_uses_old_full_refund_data', 'no' );
+		if ( null === $db_version ) {
+			return 'no' === $uses_old_full_refund_data;
+		}
+		return version_compare( $db_version, '10.2.0', '>=' ) && 'no' === $uses_old_full_refund_data;
+	}
+
+	/**
+	 * Checks if the data store currently in use for orders is unknown (none of the ones managed by WooCommerce core).
+	 *
+	 * @return bool True if the data store currently in use for orders is neither the HPOS one nor the CPT one.
+	 */
+	public static function unknown_orders_data_store_in_use(): bool {
+		return ! self::custom_orders_table_usage_is_enabled() &&
+			( \WC_Order_Data_Store_CPT::class !== \WC_Data_Store::load( 'order' )->get_current_class_name() );
 	}
 }

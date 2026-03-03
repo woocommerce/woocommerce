@@ -16,6 +16,7 @@ export interface SkeletonProps {
 	className?: string;
 	maxWidth?: string;
 	isStatic?: boolean;
+	ariaMessage?: string;
 }
 
 export const Skeleton = ( {
@@ -26,6 +27,7 @@ export const Skeleton = ( {
 	className = '',
 	borderRadius = '',
 	isStatic = false,
+	ariaMessage,
 }: SkeletonProps ): JSX.Element => {
 	return (
 		<Tag
@@ -36,7 +38,14 @@ export const Skeleton = ( {
 				},
 				className
 			) }
-			aria-hidden="true"
+			{ ...( ariaMessage
+				? {
+						'aria-live': 'polite',
+						'aria-label': ariaMessage,
+				  }
+				: {
+						'aria-hidden': 'true',
+				  } ) }
 			style={ {
 				width,
 				height,

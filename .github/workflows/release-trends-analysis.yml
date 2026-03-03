@@ -1,0 +1,90 @@
+name: 'Release: analyze trends (CFEs and PRRs)'
+on:
+  workflow_dispatch:
+    inputs:
+      milestone:
+        description: 'Milestone (in X.Y.Z format)'
+        required: true
+
+jobs:
+  analyze-trends-cfes:
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    steps:
+      - name: Analyze CFEs trends
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          cfes=$( gh pr list --search "is:pr milestone:${{ inputs.milestone }} is:closed label:\"metric: feature freeze exception\"" --json url | jq --compact-output '.[]' |  jq --raw-output '( "- " + .url )' )
+          issue=$( gh issue create --title "[Release] trend analysis for ${{ inputs.milestone }} milestone (CFEs)" --assignee "${{ github.actor }}" --body "Generated automatically via release-trends-analysis.yml." | grep '/issues/' | sed -E 's/[^0-9]*//' )
+
+          gh issue comment ${issue} --body "
+          @coderabbitai: for the following GitHub PRs:
+          ${cfes}
+
+          please analyze the similarity and trends. When reporting results, please provide a separate comment on the criteria used for classification and grouping.
+
+          Additional instructions:
+          - If processing any of the PRs takes more than 5 minutes, please skip it and report the list of skipped PRs in the full/final summary.
+          - When starting to process this request, please estimate and memorize how much time it can take to complete the request processing.
+          - In the full/final summary, please also report the estimated and elapsed time for completing the request processing.
+          - When reporting the intermediate results, please report how much time it took to process each of the PRs.
+          - When unable to process this comment, please retry once more in five minutes.
+          " > /dev/null
+  analyze-trends-prrs:
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    steps:
+      - name: Analyze PRRs trends
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          prrs=$( gh issue list --search "is:issue milestone:${{ inputs.milestone }} state:closed label:\"point release request\"" --json url | jq --compact-output '.[]' | jq --raw-output '( "- " + .url )' )
+          issue=$( gh issue create --title "[Release] trend analysis for ${{ inputs.milestone }} milestone (PRRs)" --assignee "${{ github.actor }}" --body "Generated automatically via release-trends-analysis.yml." | grep '/issues/' | sed -E 's/[^0-9]*//' )
+
+          gh issue comment ${issue} --body "
+          @coderabbitai: for the following GitHub issues and their comments:
+          ${prrs}
+
+          please analyze the similarity and trends. When reporting results, please provide a separate comment on the criteria used for classification and grouping.
+
+          Additional instructions:
+          - If processing any of the issues takes more than 5 minutes, please skip it and report the list of skipped issues in the full/final summary.
+          - When starting to process this request, please estimate and memorize how much time it can take to complete the request processing.
+          - In the full/final summary, please also report the estimated and elapsed time for completing the request processing.
+          - When reporting the intermediate results, please report how much time it took to process each of the issues.
+          - When unable to process this comment, please retry once more in five minutes.
+          "
+  analyze-quality:
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    steps:
+      - name: Analyze quality issues
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          cfes=$( gh pr list --search "is:pr milestone:${{ inputs.milestone }} is:closed label:\"metric: feature freeze exception\"" --json url | jq --compact-output '.[]' |  jq --raw-output '( "- " + .url )' )
+          prrs=$( gh issue list --search "is:issue milestone:${{ inputs.milestone }} state:closed label:\"point release request\"" --json url | jq --compact-output '.[]' | jq --raw-output '( "- " + .url )' )
+          issue=$( gh issue create --title "[Release] quality trend analysis for ${{ inputs.milestone }} milestone (CFEs and PRRs)" --assignee "${{ github.actor }}" --body "Generated automatically via release-trends-analysis.yml." | grep '/issues/' | sed -E 's/[^0-9]*//' )
+
+          gh issue comment ${issue} --body "
+          @coderabbitai: for the following GitHub issues and their comments:
+          ${prrs}
+
+          and the following GitHub PRs:
+          ${cfes}
+
+          please answer the following questions (full report):
+          - What are the changes types (one of the following options: bug fix, performance fix, enhancement, configuration changes, maintenance, other)?
+          - What are the root causes (one of the following options: backward compatibility break, strict types issue, loose types issue, error/exception handling issue, validation issue, business logic issue, configuration issue, environment issue, other)?
+          - Replace the 'other' option from above with one of your choice, which is fit to the PR context.
+          - Which PRs, in your opinion, address issues caused by the technical debt?
+          - Explain your definitions for the options listed above.
+
+          Additional instructions:
+          - If processing any of the issues/PRs takes more than 5 minutes, please skip it and report the list of skipped issues/PRs in the full/final summary.
+          - When starting to process this request, please estimate and memorize how much time it can take to complete the request processing.
+          - In the full/final summary, please also report the estimated and elapsed time for completing the request processing.
+          - When reporting the intermediate results, please report how much time it took to process each of the issues/PRs.
+          - When unable to process this comment, please retry once more in five minutes.
+          "

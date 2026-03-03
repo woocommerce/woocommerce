@@ -118,6 +118,29 @@ class ProductCollectionDataSchema extends AbstractSchema {
 					],
 				],
 			],
+			'taxonomy_counts'     => [
+				'description' => __( 'Returns number of products within taxonomy terms.', 'woocommerce' ),
+				'type'        => [ 'array', 'null' ],
+				'context'     => [ 'view', 'edit' ],
+				'readonly'    => true,
+				'items'       => [
+					'type'       => 'object',
+					'properties' => [
+						'term'  => [
+							'description' => __( 'Term ID', 'woocommerce' ),
+							'type'        => 'integer',
+							'context'     => [ 'view', 'edit' ],
+							'readonly'    => true,
+						],
+						'count' => [
+							'description' => __( 'Number of products.', 'woocommerce' ),
+							'type'        => 'integer',
+							'context'     => [ 'view', 'edit' ],
+							'readonly'    => true,
+						],
+					],
+				],
+			],
 		];
 	}
 
@@ -138,6 +161,7 @@ class ProductCollectionDataSchema extends AbstractSchema {
 			'attribute_counts'    => $data['attribute_counts'],
 			'rating_counts'       => $data['rating_counts'],
 			'stock_status_counts' => $data['stock_status_counts'],
+			'taxonomy_counts'     => $data['taxonomy_counts'],
 		];
 	}
 }

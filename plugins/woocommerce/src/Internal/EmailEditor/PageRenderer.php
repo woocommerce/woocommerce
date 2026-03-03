@@ -4,11 +4,9 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\EmailEditor;
 
-use Automattic\WooCommerce\EmailEditor\Engine\Settings_Controller;
+use Automattic\WooCommerce\EmailEditor\Engine\Assets_Manager;
 use Automattic\WooCommerce\EmailEditor\Engine\Templates\Template;
 use Automattic\WooCommerce\EmailEditor\Engine\Templates\Templates_Registry;
-use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
-use Automattic\WooCommerce\EmailEditor\Engine\User_Theme;
 use Automattic\WooCommerce\EmailEditor\Email_Editor_Container;
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 
@@ -19,27 +17,6 @@ defined( 'ABSPATH' ) || exit;
  */
 class PageRenderer {
 	/**
-	 * Settings controller instance.
-	 *
-	 * @var Settings_Controller
-	 */
-	private Settings_Controller $settings_controller;
-
-	/**
-	 * Theme controller instance.
-	 *
-	 * @var Theme_Controller
-	 */
-	private Theme_Controller $theme_controller;
-
-	/**
-	 * User theme instance.
-	 *
-	 * @var User_Theme
-	 */
-	private User_Theme $user_theme;
-
-	/**
 	 * Template registry instance.
 	 *
 	 * @var Templates_Registry
@@ -47,14 +24,23 @@ class PageRenderer {
 	private Templates_Registry $template_registry;
 
 	/**
+	 * Assets manager instance.
+	 *
+	 * @var Assets_Manager
+	 */
+	private Assets_Manager $assets_manager;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
-		$editor_container          = Email_Editor_Container::container();
-		$this->settings_controller = $editor_container->get( Settings_Controller::class );
-		$this->theme_controller    = $editor_container->get( Theme_Controller::class );
-		$this->user_theme          = $editor_container->get( User_Theme::class );
-		$this->template_registry   = $editor_container->get( Templates_Registry::class );
+		$editor_container        = Email_Editor_Container::container();
+		$this->template_registry = $editor_container->get( Templates_Registry::class );
+
+		$assets_manager = $editor_container->get( Assets_Manager::class );
+		$assets_manager->set_assets_path( WC_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . 'email-editor/' );
+		$assets_manager->set_assets_url( WC()->plugin_url() . '/' . WC_ADMIN_DIST_JS_FOLDER . 'email-editor/' );
+		$this->assets_manager = $assets_manager;
 	}
 
 	/**
@@ -72,81 +58,29 @@ class PageRenderer {
 			return;
 		}
 
-		// Load the email editor assets.
-		$this->load_editor_assets( $edited_item );
-
-		// Load CSS from Post Editor.
-		wp_enqueue_style( 'wp-edit-post' );
-		// Load CSS for the format library - used for example in popover.
-		wp_enqueue_style( 'wp-format-library' );
-
-		// Enqueue media library scripts.
-		wp_enqueue_media();
-
-		// Enqueue CSS containing --wp--preset variables.
-		// They are needed for usage outside of the iframed email canvas (e.g. in the styles preview).
-		wp_enqueue_global_styles_css_custom_properties();
-
-		$this->preload_rest_api_data( $post_id, $post_type );
-
-		require_once ABSPATH . 'wp-admin/admin-header.php';
-		echo '<div id="woocommerce-email-editor" class="block-editor block-editor__container hide-if-no-js"></div>';
-	}
-
-	/**
-	 * Load editor assets.
-	 *
-	 * @param \WP_Post|\WP_Block_Template $edited_item  The edited post or template.
-	 */
-	private function load_editor_assets( $edited_item ): void {
-		$post_type = $edited_item instanceof \WP_Post ? $edited_item->post_type : 'wp_template';
-		$post_id   = $edited_item instanceof \WP_Post ? $edited_item->ID : $edited_item->id;
+		add_filter( 'woocommerce_email_editor_script_localization_data', array( $this, 'update_localized_data' ) );
 		// Load the email editor integration script.
 		// The JS file is located in plugins/woocommerce/client/admin/client/wp-admin-scripts/email-editor-integration/index.ts.
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'email-editor-integration', true );
 		WCAdminAssets::register_style( 'email-editor-integration', 'style', true );
 
-		$email_editor_assets_path = WC_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . 'email-editor/';
-		$email_editor_assets_url  = WC()->plugin_url() . '/' . WC_ADMIN_DIST_JS_FOLDER . 'email-editor/';
+		$this->assets_manager->load_editor_assets( $edited_item, 'wc-admin-email-editor-integration' );
+		$this->assets_manager->render_email_editor_html();
 
-		// Email editor rich text JS - Because the Personalization Tags depend on Gutenberg 19.8.0 and higher
-		// the following code replaces used Rich Text for the version containing the necessary changes.
-		$rich_text_assets_params = require $email_editor_assets_path . 'assets/rich-text.asset.php';
-		wp_deregister_script( 'wp-rich-text' );
-		wp_enqueue_script(
-			'wp-rich-text',
-			$email_editor_assets_url . 'assets/rich-text.js',
-			$rich_text_assets_params['dependencies'],
-			$rich_text_assets_params['version'],
-			true
+		remove_filter(
+			'woocommerce_email_editor_script_localization_data',
+			array( $this, 'update_localized_data' ),
+			10
 		);
-		// End of replacing Rich Text package.
+	}
 
-		$assets_params = require $email_editor_assets_path . 'index.asset.php';
-		wp_enqueue_style(
-			'wc-admin-email-editor-integration',
-			$email_editor_assets_url . 'style.css',
-			array(),
-			$assets_params['version']
-		);
-
-		// The email editor needs to load block categories to avoid warning and missing category names.
-		// See: https://github.com/WordPress/WordPress/blob/753817d462955eb4e40a89034b7b7c375a1e43f3/wp-admin/edit-form-blocks.php#L116-L120.
-		wp_add_inline_script(
-			'wp-blocks',
-			sprintf( 'wp.blocks.setCategories( %s );', wp_json_encode( get_block_categories( $edited_item ) ) ),
-			'after'
-		);
-
-		// Preload server-registered block schemas to avoid warning about missing block titles.
-		// See: https://github.com/WordPress/WordPress/blob/753817d462955eb4e40a89034b7b7c375a1e43f3/wp-admin/edit-form-blocks.php#L144C1-L148C3.
-		wp_add_inline_script(
-			'wp-blocks',
-			sprintf( 'wp.blocks.unstable__bootstrapServerSideBlockDefinitions( %s );', wp_json_encode( get_block_editor_server_block_settings() ) )
-		);
-
-		$current_user_email = wp_get_current_user()->user_email;
-
+	/**
+	 * Update localized script data.
+	 *
+	 * @param array $localized_data Original localized data.
+	 * @return array
+	 */
+	public function update_localized_data( array $localized_data ): array {
 		// Fetch all email types from WooCommerce including those added by other plugins.
 		$wc_emails   = \WC_Emails::instance();
 		$email_types = $wc_emails->get_emails();
@@ -163,74 +97,12 @@ class PageRenderer {
 			)
 		);
 
-		$email_editor_settings                           = $this->settings_controller->get_settings();
-		$email_editor_settings['isFullScreenForced']     = true;
-		$email_editor_settings['displaySendEmailButton'] = false;
+		$localized_data['email_types'] = $email_types;
+		// Modify email editor settings.
+		$localized_data['editor_settings']['isFullScreenForced']     = true;
+		$localized_data['editor_settings']['displaySendEmailButton'] = false;
 
-		wp_localize_script(
-			'wc-admin-email-editor-integration',
-			'WooCommerceEmailEditor',
-			array(
-				'current_post_type'     => esc_js( $post_type ),
-				'current_post_id'       => $post_id,
-				'current_wp_user_email' => esc_js( $current_user_email ),
-				'editor_settings'       => $email_editor_settings,
-				'editor_theme'          => $this->theme_controller->get_base_theme()->get_raw_data(),
-				'user_theme_post_id'    => $this->user_theme->get_user_theme_post()->ID,
-				'urls'                  => array(
-					'listings' => admin_url( 'admin.php?page=wc-settings&tab=email' ),
-					'send'     => admin_url( 'admin.php?page=wc-settings&tab=email' ),
-					'back'     => admin_url( 'admin.php?page=wc-settings&tab=email' ),
-				),
-				'email_types'           => $email_types,
-				'block_preview_url'     => esc_url( wp_nonce_url( admin_url( '?preview_woocommerce_mail_editor_content=true' ), 'preview-mail' ) ),
-			)
-		);
-	}
-
-	/**
-	 * Preload REST API data for the email editor.
-	 *
-	 * @param int|string $post_id  The post ID.
-	 * @param string     $post_type The post type.
-	 */
-	private function preload_rest_api_data( $post_id, string $post_type ): void {
-		$email_post_type    = $post_type;
-		$user_theme_post_id = $this->user_theme->get_user_theme_post()->ID;
-		$template_slug      = get_post_meta( $post_id, '_wp_page_template', true );
-		$routes             = array(
-			"/wp/v2/{$email_post_type}/" . intval( $post_id ) . '?context=edit',
-			"/wp/v2/types/{$email_post_type}?context=edit",
-			'/wp/v2/global-styles/' . intval( $user_theme_post_id ) . '?context=view', // Global email styles.
-			'/wp/v2/block-patterns/patterns',
-			'/wp/v2/templates?context=view',
-			'/wp/v2/block-patterns/categories',
-			'/wp/v2/settings',
-			'/wp/v2/types?context=view',
-			'/wp/v2/taxonomies?context=view',
-		);
-
-		if ( $template_slug ) {
-			$routes[] = '/wp/v2/templates/lookup?slug=' . $template_slug;
-		} else {
-			$routes[] = "/wp/v2/{$email_post_type}?context=edit&per_page=30&status=publish,sent";
-		}
-
-		// Preload the data for the specified routes.
-		$preload_data = array_reduce(
-			$routes,
-			'rest_preload_api_request',
-			array()
-		);
-
-		// Add inline script to set up preloading middleware.
-		wp_add_inline_script(
-			'wp-blocks',
-			sprintf(
-				'wp.apiFetch.use( wp.apiFetch.createPreloadingMiddleware( %s ) );',
-				wp_json_encode( $preload_data )
-			)
-		);
+		return $localized_data;
 	}
 
 	/**

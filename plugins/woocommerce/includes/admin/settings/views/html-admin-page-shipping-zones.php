@@ -1,4 +1,12 @@
 <?php
+/**
+ * Shipping zones admin page.
+ *
+ * @package WooCommerce\Admin\Shipping
+ */
+
+use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -10,16 +18,23 @@ if ( ! defined( 'ABSPATH' ) ) {
 </h2>
 <p class="wc-shipping-zone-heading-help-text">
 	<?php
-	echo wp_kses_post(
-		sprintf(
-			/* translators: %s: URL to local pickup settings */
-			__(
-				"A shipping zone consists of the region(s) you'd like to ship to and the shipping method(s) offered. A shopper can only be matched to one zone, and we'll use their shipping address to show them the methods available in their area. To offer local pickup, configure your pickup locations in the <a href='%s'>local pickup settings</a>.",
-				'woocommerce'
-			),
-			esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&section=pickup_location' ) )
-		)
+	esc_html_e(
+		"A shipping zone consists of the region(s) you'd like to ship to and the shipping method(s) offered. A shopper can only be matched to one zone, and we'll use their shipping address to show them the methods available in their area.",
+		'woocommerce'
 	);
+
+	if ( CartCheckoutUtils::is_checkout_block_default() ) {
+		echo ' ' . wp_kses_post(
+			sprintf(
+			/* translators: %s: URL to local pickup settings */
+				__(
+					"To offer local pickup, configure your pickup locations in the <a href='%s'>local pickup settings</a>.",
+					'woocommerce'
+				),
+				esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&section=pickup_location' ) )
+			)
+		);
+	}
 	?>
 </p>
 <table class="wc-shipping-zones widefat">
@@ -53,7 +68,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 						echo '<li class="wc-shipping-zone-method ' . esc_attr( $class_name ) . '" data-id="' . esc_attr( $method->instance_id ) . '">' . esc_html( $method->get_title() ) . '</li>';
 					}
 				} else {
-					echo '<li>' . esc_html_e( 'No shipping methods offered to this zone.', 'woocommerce' ) . '</li>';
+					echo '<li>' . esc_html__( 'No shipping methods offered to this zone.', 'woocommerce' ) . '</li>';
 				}
 				?>
 			</ul>
@@ -72,8 +87,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 				<p class="main"><?php esc_html_e( 'A shipping zone is a geographic region where a certain set of shipping methods and rates apply.', 'woocommerce' ); ?></p>
 				<p><?php esc_html_e( 'For example:', 'woocommerce' ); ?></p>
 				<ul>
-					<li><?php esc_html_e( 'US domestic zone = All US states = Flat rate shipping', 'woocommerce' ); ?>
-					<li><?php esc_html_e( 'Europe zone = Any country in Europe = Flat rate shipping', 'woocommerce' ); ?>
+					<li><?php esc_html_e( 'US domestic zone = All US states = Flat rate shipping', 'woocommerce' ); ?></li>
+					<li><?php esc_html_e( 'Europe zone = Any country in Europe = Flat rate shipping', 'woocommerce' ); ?></li>
 				</ul>
 				<p><?php esc_html_e( 'Add as many zones as you need &ndash; customers will only see the methods available for their address.', 'woocommerce' ); ?></p>
 				<a class="button button-primary wc-shipping-zone-add" href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping&zone_id=new' ) ); ?>"><?php _e( 'Add shipping zone', 'woocommerce' ); ?></a>

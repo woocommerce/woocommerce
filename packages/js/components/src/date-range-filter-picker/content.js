@@ -61,6 +61,7 @@ class DatePickerContent extends Component {
 			afterError,
 			beforeError,
 			shortDateFormat,
+			shortDateFormatPlaceholder,
 		} = this.props;
 		return (
 			<div>
@@ -111,6 +112,9 @@ class DatePickerContent extends Component {
 										afterError={ afterError }
 										beforeError={ beforeError }
 										shortDateFormat={ shortDateFormat }
+										shortDateFormatPlaceholder={
+											shortDateFormatPlaceholder
+										}
 										losesFocusTo={
 											this.controlsRef.current
 										}
@@ -196,6 +200,7 @@ DatePickerContent.propTypes = {
 	afterError: PropTypes.string,
 	beforeError: PropTypes.string,
 	shortDateFormat: PropTypes.string.isRequired,
+	shortDateFormatPlaceholder: PropTypes.string,
 };
 
 export default DatePickerContent;

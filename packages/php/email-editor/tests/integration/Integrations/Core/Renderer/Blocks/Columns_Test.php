@@ -81,7 +81,7 @@ class Columns_Test extends \Email_Editor_Integration_Test_Case {
 	 * Test it renders inner column
 	 */
 	public function testItRendersInnerColumn(): void {
-		$rendered = $this->columns_renderer->render( '', $this->parsed_columns, $this->rendering_context );
+		$rendered = $this->columns_renderer->render( '<p>Column 1</p>', $this->parsed_columns, $this->rendering_context );
 		$this->assertStringContainsString( 'Column 1', $rendered );
 	}
 
@@ -96,6 +96,7 @@ class Columns_Test extends \Email_Editor_Integration_Test_Case {
 					'color'  => '#123456',
 					'radius' => '10px',
 					'width'  => '2px',
+					'style'  => 'solid',
 				),
 				'color'   => array(
 					'background' => '#abcdef',

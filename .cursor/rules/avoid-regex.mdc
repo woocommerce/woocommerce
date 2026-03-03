@@ -1,0 +1,67 @@
+---
+description: This rule discourages the use of regular expressions in favor of more readable and maintainable alternatives.
+globs: **/*.php,**/*.js,**/*.jsx,**/*.tsx,**/*.ts
+alwaysApply: true
+---
+
+# Avoid Regular Expressions
+
+This rule provides guidance for writing more readable and maintainable code by avoiding regular expressions unless absolutely necessary.
+
+## Why Avoid Regex?
+
+Regular expressions are:
+- Hard to read and understand
+- Difficult to debug when issues arise
+- Prone to unexpected side effects
+- Easy to introduce security vulnerabilities
+- Not accessible to developers who don't use them regularly
+
+## When Regex Might Be Acceptable
+
+Only consider regex when:
+1. **No built-in alternative exists** - The language doesn't provide a suitable string/array method
+2. **Performance is critical** - And regex is significantly faster (measure first)
+3. **Complex pattern matching** - And the pattern is well-documented and tested
+4. **Legacy code maintenance** - When modifying existing regex that works correctly
+
+## If You Must Use Regex
+
+When regex is truly necessary:
+1. **Document extensively** - Explain what the pattern matches
+2. **Add comprehensive tests** - Test edge cases and potential security issues
+3. **Use named groups** - Make the pattern more readable
+4. **Validate input first** - Ensure the input is safe before applying regex
+5. **Consider security implications** - ReDoS attacks, injection vulnerabilities
+
+**Example of acceptable regex usage:**
+```javascript
+// Well-documented regex for a specific, complex pattern
+/**
+ * Matches WooCommerce product SKU format:
+ * - Starts with 2-4 letters (category)
+ * - Followed by 4-6 digits (product ID)
+ * - Optional suffix with dash and 2-3 characters
+ * Examples: ABC1234, XY123456, DEF1234-XL
+ */
+const SKU_PATTERN = /^[A-Z]{2,4}\d{4,6}(-[A-Z0-9]{2,3})?$/;
+```
+
+## Security Considerations
+
+Regular expressions can introduce security vulnerabilities:
+- **ReDoS (Regular Expression Denial of Service)** - Malicious input causing exponential backtracking
+- **Injection attacks** - When regex is used in security-sensitive contexts
+- **Unexpected matches** - Patterns that match more than intended
+
+Always prefer explicit, readable code that clearly shows intent and is easier to audit for security issues.
+
+## Code Review Guidelines
+
+When reviewing code that uses regex:
+1. Ask: "Could this be written more clearly without regex?"
+2. Verify: "Is this regex pattern well-tested and documented?"
+3. Check: "Are there any security implications with this pattern?"
+4. Consider: "Will other developers easily understand this code?"
+
+Remember: Code is read far more often than it's written. Prioritize clarity and maintainability over brevity.

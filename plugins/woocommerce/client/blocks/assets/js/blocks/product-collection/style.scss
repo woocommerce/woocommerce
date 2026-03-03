@@ -1,6 +1,33 @@
 .wp-block-woocommerce-product-collection {
+	margin-bottom: $gap-large * 1.25;
+
 	.wc-block-components-product-stock-indicator {
 		text-align: center;
+	}
+
+	h2.wp-block-heading {
+		@include font-small-locked;
+	}
+
+	// Gutenberg adds margin between elements but notices are often empty
+	// resulting in an unnecessary margin on product template.
+	.wc-block-components-notices:not(:has(*)) + .wc-block-product-template {
+		margin-block-start: 0;
+	}
+
+	&:has(.is-product-collection-layout-carousel) {
+		// Hide navigation buttons on mobile phones (small touch screens), but keep them
+		// visible on tablets and desktop (even when zoomed).
+		// Combines screen size check with device capability detection.
+		@include breakpoint("<600px") {
+			@media (hover: none) and (pointer: coarse) {
+				// This rule is overriding a `display: flex` from WordPress core, that's
+				// why it needs a higher specificity.
+				:where(.wc-block-next-previous-buttons.wc-block-next-previous-buttons) {
+					display: none;
+				}
+			}
+		}
 	}
 }
 

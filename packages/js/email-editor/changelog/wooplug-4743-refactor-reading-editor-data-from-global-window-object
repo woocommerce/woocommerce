@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Remove hardcoded post type and ID from constants in email editor store. This change is made to dynamically retrieve these values, enhancing flexibility and maintainability.

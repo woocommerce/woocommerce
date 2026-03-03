@@ -12,6 +12,8 @@ import { WooCommerceBlockLocation } from '../product-template/utils';
 export enum ProductCollectionUIStatesInEditor {
 	COLLECTION_PICKER = 'collection_chooser',
 	PRODUCT_REFERENCE_PICKER = 'product_context_picker',
+	HAND_PICKED_PRODUCTS_PICKER = 'hand_picked_products_picker',
+	TAXONOMY_PICKER = 'taxonomy_picker',
 	VALID_WITH_PREVIEW = 'uses_reference_preview_mode',
 	VALID = 'valid',
 	DELETED_PRODUCT_REFERENCE = 'deleted_product_reference',
@@ -47,6 +49,7 @@ export interface ProductCollectionAttributes {
 export enum LayoutOptions {
 	GRID = 'flex',
 	STACK = 'list',
+	CAROUSEL = 'carousel',
 }
 
 export enum WidthOptions {
@@ -187,6 +190,10 @@ export enum CoreCollectionNames {
 	RELATED = 'woocommerce/product-collection/related',
 	UPSELLS = 'woocommerce/product-collection/upsells',
 	CROSS_SELLS = 'woocommerce/product-collection/cross-sells',
+	BY_CATEGORY = 'woocommerce/product-collection/by-category',
+	BY_TAG = 'woocommerce/product-collection/by-tag',
+	BY_BRAND = 'woocommerce/product-collection/by-brand',
+	CART_CONTENTS = 'woocommerce/product-collection/cart-contents',
 }
 
 export enum CoreFilterNames {

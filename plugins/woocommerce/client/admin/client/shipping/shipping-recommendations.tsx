@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { useState, Children } from '@wordpress/element';
 import { Text } from '@woocommerce/experimental';
-import { pluginsStore } from '@woocommerce/data';
+import { PluginNames, pluginsStore } from '@woocommerce/data';
 import { getAdminLink } from '@woocommerce/settings';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore VisuallyHidden is present, it's just not typed
@@ -23,14 +23,14 @@ import {
 import WoocommerceShippingItem from './woocommerce-shipping-item';
 import './shipping-recommendations.scss';
 import { TrackedLink } from '~/components/tracked-link/tracked-link';
-import { isFeatureEnabled } from '~/utils/features';
 
-const useInstallPlugin = () => {
+export const useInstallPlugin = () => {
 	const [ pluginsBeingSetup, setPluginsBeingSetup ] = useState<
 		Array< string >
 	>( [] );
 
-	const { installAndActivatePlugins } = useDispatch( pluginsStore );
+	const { installAndActivatePlugins, installPlugins, activatePlugins } =
+		useDispatch( pluginsStore );
 
 	const handleSetup = ( slugs: string[] ): PromiseLike< void > => {
 		if ( pluginsBeingSetup.length > 0 ) {
@@ -51,7 +51,50 @@ const useInstallPlugin = () => {
 			} );
 	};
 
-	return [ pluginsBeingSetup, handleSetup ] as const;
+	const handleInstall = ( slugs: string[] ): PromiseLike< void > => {
+		if ( pluginsBeingSetup.length > 0 ) {
+			return Promise.resolve();
+		}
+
+		setPluginsBeingSetup( slugs );
+
+		return installPlugins( slugs as Partial< PluginNames >[] )
+			.then( () => {
+				setPluginsBeingSetup( [] );
+			} )
+			.catch( ( response: { errors: Record< string, string > } ) => {
+				createNoticesFromResponse( response );
+				setPluginsBeingSetup( [] );
+
+				return Promise.reject();
+			} );
+	};
+
+	const handleActivate = ( slugs: string[] ): PromiseLike< void > => {
+		if ( pluginsBeingSetup.length > 0 ) {
+			return Promise.resolve();
+		}
+
+		setPluginsBeingSetup( slugs );
+
+		return activatePlugins( slugs as Partial< PluginNames >[] )
+			.then( () => {
+				setPluginsBeingSetup( [] );
+			} )
+			.catch( ( response: { errors: Record< string, string > } ) => {
+				createNoticesFromResponse( response );
+				setPluginsBeingSetup( [] );
+
+				return Promise.reject();
+			} );
+	};
+
+	return [
+		pluginsBeingSetup,
+		handleSetup,
+		handleInstall,
+		handleActivate,
+	] as const;
 };
 
 export const ShippingRecommendationsList = ( {
@@ -75,7 +118,7 @@ export const ShippingRecommendationsList = ( {
 				lineHeight="16px"
 			>
 				{ __(
-					'We recommend adding one of the following shipping extensions to your store. The extension will be installed and activated for you when you click "Get started".',
+					'We recommend adding one of the following shipping extensions to your store.',
 					'woocommerce'
 				) }
 			</Text>
@@ -92,16 +135,10 @@ export const ShippingRecommendationsList = ( {
 					'Visit {{Link}}the WooCommerce Marketplace{{/Link}} to find more shipping, delivery, and fulfillment solutions.',
 					'woocommerce'
 				) }
-				targetUrl={
-					isFeatureEnabled( 'marketplace' )
-						? getAdminLink(
-								'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=shipping-delivery-and-fulfillment'
-						  )
-						: 'https://woocommerce.com/product-category/woocommerce-extensions/shipping-delivery-and-fulfillment/'
-				}
-				linkType={
-					isFeatureEnabled( 'marketplace' ) ? 'wc-admin' : 'external'
-				}
+				targetUrl={ getAdminLink(
+					'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=shipping-delivery-and-fulfillment'
+				) }
+				linkType="wc-admin"
 				eventName="settings_shipping_recommendation_visit_marketplace_click"
 			/>
 		</CardFooter>

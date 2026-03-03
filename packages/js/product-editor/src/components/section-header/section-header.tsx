@@ -4,12 +4,12 @@
 import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { __experimentalTooltip as Tooltip } from '@woocommerce/components';
+import { sanitizeHTML } from '@woocommerce/sanitize';
 
 /**
  * Internal dependencies
  */
 import { SectionHeaderProps } from './types';
-import { sanitizeHTML } from '../../utils/sanitize-html';
 import { BlockSlot } from '../block-slot-fill';
 
 export function SectionHeader( {
@@ -30,9 +30,9 @@ export function SectionHeader( {
 							text={
 								<p
 									className="wp-block-woocommerce-product-section-header__heading-description"
-									dangerouslySetInnerHTML={ sanitizeHTML(
-										description
-									) }
+									dangerouslySetInnerHTML={ {
+										__html: sanitizeHTML( description ),
+									} }
 								/>
 							}
 							position={ 'bottom center' }

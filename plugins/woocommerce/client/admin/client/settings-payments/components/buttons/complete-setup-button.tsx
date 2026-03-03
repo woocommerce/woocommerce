@@ -6,9 +6,9 @@ import { Button } from '@wordpress/components';
 import { useState, useEffect } from '@wordpress/element';
 import {
 	PaymentGatewayProvider,
+	PaymentsProviderIncentive,
 	woopaymentsOnboardingStore,
 } from '@woocommerce/data';
-import { getHistory, getNewPath } from '@woocommerce/navigation';
 import { useSelect } from '@wordpress/data';
 
 /**
@@ -19,6 +19,8 @@ import {
 	recordPaymentsOnboardingEvent,
 	recordPaymentsProviderEvent,
 } from '~/settings-payments/utils';
+import { wooPaymentsOnboardingSessionEntrySettings } from '~/settings-payments/constants';
+import { WooPaymentsUpdateRequiredModal } from '~/settings-payments/components/modals';
 
 interface CompleteSetupButtonProps {
 	/**
@@ -53,6 +55,24 @@ interface CompleteSetupButtonProps {
 	 * The onboarding type for the gateway.
 	 */
 	onboardingType?: string;
+	/**
+	 * Callback used when an incentive is accepted.
+	 *
+	 * @param id Incentive ID.
+	 */
+	acceptIncentive?: ( id: string ) => void;
+	/**
+	 * Incentive data. If provided, the incentive will be accepted when the button is clicked.
+	 */
+	incentive?: PaymentsProviderIncentive | null;
+	/**
+	 * Whether the button should be disabled.
+	 */
+	disabled?: boolean;
+	/**
+	 * Accessible label for screen readers, especially useful when button is disabled.
+	 */
+	ariaLabel?: string;
 }
 
 /**
@@ -69,8 +89,13 @@ export const CompleteSetupButton = ( {
 	buttonText = __( 'Complete setup', 'woocommerce' ),
 	setOnboardingModalOpen,
 	onboardingType,
+	acceptIncentive = () => {},
+	incentive = null,
+	disabled = false,
+	ariaLabel,
 }: CompleteSetupButtonProps ) => {
 	const [ isUpdating, setIsUpdating ] = useState( false );
+	const [ showUpdateModal, setShowUpdateModal ] = useState( false );
 
 	// Get the store's `select` function to trigger selector resolution later (in useEffect).
 	// We don't need to select data directly here, just the function itself.
@@ -101,15 +126,23 @@ export const CompleteSetupButton = ( {
 
 		setIsUpdating( true );
 
+		if ( incentive ) {
+			acceptIncentive( incentive.promo_id );
+		}
+
 		if ( onboardingType === 'native_in_context' ) {
 			recordPaymentsOnboardingEvent(
-				'woopayments_onboarding_modal_opened'
+				'woopayments_onboarding_modal_opened',
+				{
+					from: 'complete_setup_button',
+					source: wooPaymentsOnboardingSessionEntrySettings,
+				}
 			);
 			setOnboardingModalOpen( true );
 		} else if ( ! accountConnected || ! onboardingStarted ) {
 			if ( gatewayHasRecommendedPaymentMethods ) {
-				const history = getHistory();
-				history.push( getNewPath( {}, '/payment-methods' ) );
+				setShowUpdateModal( true );
+				setIsUpdating( false );
 			} else {
 				// Redirect to the gateway's onboarding URL if it needs setup.
 				window.location.href = onboardingHref;
@@ -133,14 +166,21 @@ export const CompleteSetupButton = ( {
 	};
 
 	return (
-		<Button
-			key={ gatewayProvider.id }
-			variant={ 'primary' }
-			isBusy={ isUpdating }
-			disabled={ isUpdating || !! installingPlugin }
-			onClick={ completeSetup }
-		>
-			{ buttonText }
-		</Button>
+		<>
+			<Button
+				key={ gatewayProvider.id }
+				variant="primary"
+				isBusy={ isUpdating }
+				disabled={ disabled || isUpdating || !! installingPlugin }
+				onClick={ completeSetup }
+				aria-label={ ariaLabel }
+			>
+				{ buttonText }
+			</Button>
+			<WooPaymentsUpdateRequiredModal
+				isOpen={ showUpdateModal }
+				onClose={ () => setShowUpdateModal( false ) }
+			/>
+		</>
 	);
 };

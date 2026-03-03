@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import { useContext, useEffect, useMemo } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import clsx from 'clsx';
@@ -98,6 +98,52 @@ const renderTabs = (
 									'is-active': tabKey === selectedTab,
 								}
 							) }
+							title={
+								tabKey === 'my-subscriptions'
+									? sprintf(
+											/* translators: %d: number of updates */
+											_n(
+												'%d update available for your subscriptions',
+												'%d updates available for your subscriptions',
+												tabs[ tabKey ]?.updateCount,
+												'woocommerce'
+											),
+											tabs[ tabKey ]?.updateCount
+									  )
+									: sprintf(
+											/* translators: %d: number of matching items */
+											_n(
+												'%d matching item in this category',
+												'%d matching items in this category',
+												tabs[ tabKey ]?.updateCount,
+												'woocommerce'
+											),
+											tabs[ tabKey ]?.updateCount
+									  )
+							}
+							aria-label={
+								tabKey === 'my-subscriptions'
+									? sprintf(
+											/* translators: %d: number of updates */
+											_n(
+												'%d update available for your subscriptions',
+												'%d updates available for your subscriptions',
+												tabs[ tabKey ]?.updateCount,
+												'woocommerce'
+											),
+											tabs[ tabKey ]?.updateCount
+									  )
+									: sprintf(
+											/* translators: %d: number of matching items */
+											_n(
+												'%d matching item in this category',
+												'%d matching items in this category',
+												tabs[ tabKey ]?.updateCount,
+												'woocommerce'
+											),
+											tabs[ tabKey ]?.updateCount
+									  )
+							}
 						>
 							<span> { tabs[ tabKey ]?.updateCount } </span>
 						</span>

@@ -39,18 +39,33 @@ const reporter = [
 		},
 	],
 	[
-		`${ TESTS_ROOT_PATH }/reporters/environment-reporter.js`,
-		{ outputFolder: `${ TESTS_ROOT_PATH }/test-results/allure-results` },
+		'playwright-ctrf-json-reporter',
+		{
+			outputDir: `${ TESTS_ROOT_PATH }/test-results`,
+			outputFile: `ctrf-report-${ Date.now() }.json`,
+			branchName: process.env.GITHUB_REF_NAME || '',
+			commit: process.env.GITHUB_SHA || '',
+			appName: 'woocommerce-core',
+			repositoryName: process.env.GITHUB_REPOSITORY || '',
+		},
 	],
 	[
-		`${ TESTS_ROOT_PATH }/reporters/flaky-tests-reporter.js`,
-		{ outputFolder: `${ TESTS_ROOT_PATH }/test-results/flaky-tests` },
+		`${ TESTS_ROOT_PATH }/reporters/environment-reporter.js`,
+		{ outputFolder: `${ TESTS_ROOT_PATH }/test-results/allure-results` },
 	],
 ];
 
 if ( process.env.CI ) {
 	reporter.push( [ 'buildkite-test-collector/playwright/reporter' ] );
 	reporter.push( [ `${ TESTS_ROOT_PATH }/reporters/skipped-tests.js` ] );
+	reporter.push( [
+		'junit',
+		{
+			outputFile: `${ TESTS_ROOT_PATH }/test-results/results.xml`,
+			stripANSIControlSequences: true,
+			includeProjectInTestName: true,
+		},
+	] );
 } else {
 	reporter.push( [
 		'html',
@@ -65,18 +80,18 @@ export const setupProjects = [
 	{
 		name: 'install wc',
 		testDir: `${ TESTS_ROOT_PATH }/fixtures`,
-		testMatch: 'install-wc.setup.js',
+		testMatch: 'install-wc.setup.ts',
 	},
 	{
 		name: 'global authentication',
 		testDir: `${ TESTS_ROOT_PATH }/fixtures`,
-		testMatch: 'auth.setup.js',
+		testMatch: 'auth.setup.ts',
 		dependencies: [ 'install wc' ],
 	},
 	{
 		name: 'site setup',
 		testDir: `${ TESTS_ROOT_PATH }/fixtures`,
-		testMatch: `site.setup.js`,
+		testMatch: `site.setup.ts`,
 		dependencies: [ 'global authentication' ],
 	},
 ];
@@ -103,6 +118,9 @@ export default defineConfig( {
 		video: 'retain-on-failure',
 		actionTimeout: CI ? 20 * 1000 : 10 * 1000,
 		navigationTimeout: CI ? 20 * 1000 : 10 * 1000,
+		contextOptions: {
+			reducedMotion: 'reduce',
+		},
 		channel: 'chrome',
 		...devices[ 'Desktop Chrome' ],
 	},
@@ -112,12 +130,26 @@ export default defineConfig( {
 		...setupProjects,
 		{
 			name: 'e2e',
-			testIgnore: '**/api-tests/**',
+			testIgnore: [
+				'**/api-tests/**',
+				/* Exclude PayPal tests, as they don't run well in parallel - see https://github.com/woocommerce/woocommerce/pull/63068. */
+				'**/tests/paypal/**',
+			],
 			dependencies: [ 'site setup' ],
 		},
 		{
 			name: 'api',
 			testMatch: '**/api-tests/**',
+			dependencies: [ 'site setup' ],
+		},
+		{
+			name: 'legacy-mini-cart',
+			testMatch: [ '**/tests/cart/**', '**/tests/checkout/**' ],
+			dependencies: [ 'site setup' ],
+		},
+		{
+			name: 'paypal-standard',
+			testMatch: [ '**/tests/paypal/**' ],
 			dependencies: [ 'site setup' ],
 		},
 	],

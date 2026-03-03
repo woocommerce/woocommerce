@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Internal\Orders;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\RestApiControllerBase;
+use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 use WC_Data_Exception;
 use WC_Email;
 use WC_Order;
@@ -469,6 +470,7 @@ class OrderActionsRestController extends RestApiControllerBase {
 				do_action( 'woocommerce_order_status_pending_to_processing_notification', $order->get_id(), $order );
 				break;
 			case 'customer_refunded_order':
+			case 'customer_pos_refunded_order':
 				if ( $this->order_is_partially_refunded( $order ) ) {
 					/** This action is documented in includes/class-wc-emails.php */
 					do_action( 'woocommerce_order_partially_refunded_notification', $order->get_id() );
@@ -500,16 +502,23 @@ class OrderActionsRestController extends RestApiControllerBase {
 
 		$user_agent = esc_html( $request->get_header( 'User-Agent' ) );
 		$messages[] = sprintf(
-			// translators: 1. The name of an email template; 2. Email address; 3. User-agent that requested the action.
-			esc_html__( 'Email template "%1$s" sent to %2$s, via %3$s.', 'woocommerce' ),
+			// translators: 1. The name of an email template; 2. Email address.
+			esc_html__( 'Email template "%1$s" sent to %2$s.', 'woocommerce' ),
 			esc_html( $template->get_title() ),
-			esc_html( $order->get_billing_email() ),
-			$user_agent ? $user_agent : 'REST API'
+			esc_html( $order->get_billing_email() )
 		);
 
 		$messages = array_filter( $messages );
 		foreach ( $messages as $message ) {
-			$order->add_order_note( $message, false, true );
+			$order->add_order_note(
+				$message,
+				false,
+				true,
+				array(
+					'user_agent' => $user_agent ? $user_agent : 'REST API',
+					'note_group' => OrderNoteGroup::EMAIL_NOTIFICATION,
+				)
+			);
 		}
 
 		return array(
@@ -555,15 +564,23 @@ class OrderActionsRestController extends RestApiControllerBase {
 
 		$user_agent = esc_html( $request->get_header( 'User-Agent' ) );
 		$messages[] = sprintf(
-			// translators: %1$s is the customer email, %2$s is the user agent that requested the action.
-			esc_html__( 'Order details sent to %1$s, via %2$s.', 'woocommerce' ),
-			esc_html( $order->get_billing_email() ),
-			$user_agent ? $user_agent : 'REST API'
+			// translators: %s is an email address.
+			esc_html__( 'Order details sent to %s.', 'woocommerce' ),
+			esc_html( $order->get_billing_email() )
 		);
 
 		$messages = array_filter( $messages );
 		foreach ( $messages as $message ) {
-			$order->add_order_note( $message, false, true );
+			$order->add_order_note(
+				$message,
+				false,
+				true,
+				array(
+					'user_agent' => $user_agent ? $user_agent : 'REST API',
+					'note_title' => __( 'Order confirmation email', 'woocommerce' ),
+					'note_group' => OrderNoteGroup::EMAIL_NOTIFICATION,
+				)
+			);
 		}
 
 		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingSinceComment

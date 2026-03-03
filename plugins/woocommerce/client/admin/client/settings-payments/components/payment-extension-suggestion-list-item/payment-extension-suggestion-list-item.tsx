@@ -148,7 +148,12 @@ export const PaymentExtensionSuggestionListItem = ( {
 									// Record the event when user clicks on a suggestion's enable button.
 									recordPaymentsProviderEvent(
 										'enable_click',
-										suggestion
+										suggestion,
+										{
+											incentive_id: incentive
+												? incentive.promo_id
+												: 'none',
+										}
 									);
 								}
 

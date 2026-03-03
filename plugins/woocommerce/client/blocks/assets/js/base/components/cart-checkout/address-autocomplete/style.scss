@@ -1,0 +1,89 @@
+/**
+This file is part of the WooCommerce Blocks autocomplete. If editing shortcode, you need to modify: plugins/woocommerce/client/legacy/css/address-autocomplete.scss
+*/
+.wc-block-components-address-autocomplete-container {
+	width: 100%;
+	margin-top: $gap;
+	position: relative;
+
+	.wc-block-components-address-autocomplete-icon {
+		width: 24px;
+		height: 24px;
+		position: absolute;
+		top: 50%;
+		right: 16px;
+		z-index: 2;
+		transform: translateY(-50%);
+
+		// Mask needed to ensure the SVG has the correct color.
+		background-color: var(--wc-form-color-text, #444);
+
+		.has-dark-controls & {
+			background-color: var(--wc-form-color-text, $input-text-dark);
+		}
+
+		mask: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNCAxNCIgZm9jdXNhYmxlPSJmYWxzZSIgYXJpYS1oaWRkZW49InRydWUiPgogIDxjaXJjbGUgY3g9IjYiIGN5PSI2IiByPSI0IiBmaWxsPSJub25lIiBzdHJva2U9ImJsYWNrIiBzdHJva2Utd2lkdGg9IjEuNSI+PC9jaXJjbGU+CiAgPHBhdGggc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBzdHJva2U9ImJsYWNrIiBzdHJva2Utd2lkdGg9IjEuNSIgZD0ibTkuMjUgOS4yNSAyLjUgMi41Ij48L3BhdGg+Cjwvc3ZnPg==)
+		no-repeat center;
+		mask-size: 16px;
+
+		// Safari support.
+		-webkit-mask: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNCAxNCIgZm9jdXNhYmxlPSJmYWxzZSIgYXJpYS1oaWRkZW49InRydWUiPgogIDxjaXJjbGUgY3g9IjYiIGN5PSI2IiByPSI0IiBmaWxsPSJub25lIiBzdHJva2U9ImJsYWNrIiBzdHJva2Utd2lkdGg9IjEuNSI+PC9jaXJjbGU+CiAgPHBhdGggc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBzdHJva2U9ImJsYWNrIiBzdHJva2Utd2lkdGg9IjEuNSIgZD0ibTkuMjUgOS4yNSAyLjUgMi41Ij48L3BhdGg+Cjwvc3ZnPg==)
+		no-repeat center;
+		-webkit-mask-size: 16px;
+	}
+}
+
+.wc-block-components-address-autocomplete-suggestions {
+	position: absolute;
+	z-index: 1000;
+	width: 100%;
+	max-width: 100%;
+	margin-top: 4px;
+	background: #fff;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	box-sizing: border-box;
+
+	.suggestions-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		max-height: 200px;
+		overflow-y: auto;
+
+		li {
+			padding: 8px 12px;
+			font-size: 14px;
+			cursor: pointer;
+			text-overflow: ellipsis;
+			overflow: hidden;
+			white-space: nowrap;
+			color: var(--wc-form-color-text, #444);
+
+			&:last-child {
+				border-bottom: none;
+			}
+
+			&:hover,
+			&.active {
+				background-color: #0073aa;
+				color: #fff;
+			}
+
+			&:focus {
+				outline: none;
+				background-color: #0073aa;
+				color: #fff;
+			}
+		}
+	}
+
+	.woocommerce-address-autocomplete-branding {
+		background: #d3d3d3;
+		padding: 8px 12px;
+		color: rgba(34, 34, 34, 0.66);
+		font-size: 12px;
+		display: flex;
+		align-items: center;
+	}
+}

@@ -211,10 +211,7 @@ export function TypographyElementPanel( {
 	};
 
 	const resetAll = () => {
-		updateElementStyleProp(
-			[ 'typography' ],
-			defaultElementStyles.typography
-		);
+		updateElementStyleProp( [ 'typography' ], {} );
 		recordEvent(
 			'styles_sidebar_screen_typography_element_panel_reset_all_styles_selected',
 			{
@@ -232,7 +229,7 @@ export function TypographyElementPanel( {
 			<ToolsPanelItem
 				label={ __( 'Font family', 'woocommerce' ) }
 				hasValue={ hasFontFamily }
-				onDeselect={ () => setFontFamily( defaultFontFamily ) }
+				onDeselect={ () => setFontFamily( undefined ) }
 				isShownByDefault={ defaultControls.fontFamily }
 			>
 				<FontFamilyControl
@@ -247,7 +244,7 @@ export function TypographyElementPanel( {
 				<ToolsPanelItem
 					label={ __( 'Font size', 'woocommerce' ) }
 					hasValue={ hasFontSize }
-					onDeselect={ () => setFontSize( defaultFontSize ) }
+					onDeselect={ () => setFontSize( undefined ) }
 					isShownByDefault={ defaultControls.fontSize }
 				>
 					<FontSizePicker
@@ -268,8 +265,8 @@ export function TypographyElementPanel( {
 				hasValue={ hasFontAppearance }
 				onDeselect={ () => {
 					setFontAppearance( {
-						fontStyle: defaultFontStyle,
-						fontWeight: defaultFontWeight,
+						fontStyle: undefined,
+						fontWeight: undefined,
 					} );
 				} }
 				isShownByDefault={ defaultControls.fontAppearance }
@@ -289,7 +286,7 @@ export function TypographyElementPanel( {
 				className="single-column"
 				label={ __( 'Line height', 'woocommerce' ) }
 				hasValue={ hasLineHeight }
-				onDeselect={ () => setLineHeight( defaultLineHeight ) }
+				onDeselect={ () => setLineHeight( undefined ) }
 				isShownByDefault={ defaultControls.lineHeight }
 			>
 				<LineHeightControl
@@ -304,7 +301,7 @@ export function TypographyElementPanel( {
 				className="single-column"
 				label={ __( 'Letter spacing', 'woocommerce' ) }
 				hasValue={ hasLetterSpacing }
-				onDeselect={ () => setLetterSpacing( defaultLetterSpacing ) }
+				onDeselect={ () => setLetterSpacing( undefined ) }
 				isShownByDefault={ defaultControls.letterSpacing }
 			>
 				<LetterSpacingControl
@@ -318,7 +315,7 @@ export function TypographyElementPanel( {
 				className="single-column"
 				label={ __( 'Text decoration', 'woocommerce' ) }
 				hasValue={ hasTextDecoration }
-				onDeselect={ () => setTextDecoration( defaultTextDecoration ) }
+				onDeselect={ () => setTextDecoration( undefined ) }
 				isShownByDefault={ defaultControls.textDecoration }
 			>
 				<TextDecorationControl

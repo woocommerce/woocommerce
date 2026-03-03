@@ -18,7 +18,7 @@ import ProductsReportTable from './table';
 import ReportChart from '../../components/report-chart';
 import ReportSummary from '../../components/report-summary';
 import VariationsReportTable from '../variations/table';
-import ReportFilters from '../../components/report-filters';
+import { ReportHeader } from '../../components/report-header';
 
 class ProductsReport extends Component {
 	getChartMeta() {
@@ -71,7 +71,7 @@ class ProductsReport extends Component {
 
 		return (
 			<Fragment>
-				<ReportFilters
+				<ReportHeader
 					query={ query }
 					path={ path }
 					filters={ filters }
@@ -153,10 +153,12 @@ export default compose(
 			const includeArgs = { include: productId };
 			// TODO Look at similar usage to populate tags in the Search component.
 			const products = getItems( 'products', includeArgs );
+			const product = products?.get( productId );
 			const isVariable =
-				products &&
-				products.get( productId ) &&
-				products.get( productId ).type === 'variable';
+				product &&
+				( product.type === 'variable' ||
+					( Array.isArray( product.variations ) &&
+						product.variations.length > 0 ) );
 			const isProductsRequesting = isResolving( 'getItems', [
 				'products',
 				includeArgs,

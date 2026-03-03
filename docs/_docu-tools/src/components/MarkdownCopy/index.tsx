@@ -24,7 +24,7 @@ const MarkdownCopy: React.FC = () => {
       const contentClone = mainContent.cloneNode(true) as HTMLElement;
 
       // Remove unwanted elements
-      const elementsToRemove = contentClone.querySelectorAll('.theme-code-block, .theme-edit-this-page, .theme-last-updated, .theme-prev-next-button, .markdown-copy-button, .hash-link');
+      const elementsToRemove = contentClone.querySelectorAll('.theme-edit-this-page, .theme-last-updated, .theme-prev-next-button, .markdown-copy-button, .hash-link');
       elementsToRemove.forEach(el => el.remove());
 
       // Configure turndown service
@@ -43,7 +43,7 @@ const MarkdownCopy: React.FC = () => {
           const code = pre.querySelector('code');
           if (!code) return content;
           
-          const language = code.className.replace('language-', '') || '';
+          const language = pre.className.split(' ').find(className => className.startsWith('language-'))?.replace('language-', '') || '';
           return `\n\`\`\`${language}\n${code.textContent || ''}\n\`\`\`\n\n`;
         }
       });

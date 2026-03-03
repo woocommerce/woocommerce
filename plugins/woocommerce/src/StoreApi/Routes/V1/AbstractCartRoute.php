@@ -158,6 +158,7 @@ abstract class AbstractCartRoute extends AbstractRoute {
 		$response->header( 'User-ID', get_current_user_id() );
 		$response->header( 'Cart-Token', $this->get_cart_token() );
 		$response->header( 'Cart-Hash', WC()->cart->get_cart_hash() );
+		$response->header( 'Cache-Control', 'no-store' );
 
 		return $response;
 	}
@@ -197,7 +198,7 @@ abstract class AbstractCartRoute extends AbstractRoute {
 			return null;
 		}
 
-		return CartTokenUtils::get_cart_token( wc()->session->get_customer_id() );
+		return CartTokenUtils::get_cart_token( (string) wc()->session->get_customer_id() );
 	}
 
 	/**

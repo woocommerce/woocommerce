@@ -62,9 +62,11 @@ test.describe( 'Template part customization', () => {
 			testUtils,
 		} ) => {
 			await admin.visitSiteEditor( {
-				postId: `woocommerce/woocommerce//${ templatePath }`,
 				postType: 'wp_template_part',
-				canvas: 'edit',
+			} );
+
+			await editor.openTemplate( {
+				templateName,
 			} );
 
 			await editor.insertBlock( {
@@ -108,9 +110,10 @@ test.describe( 'Template part customization', () => {
 		} ) => {
 			// Edit the WooCommerce default template
 			await admin.visitSiteEditor( {
-				postId: `woocommerce/woocommerce//${ templatePath }`,
 				postType: 'wp_template_part',
-				canvas: 'edit',
+			} );
+			await editor.openTemplate( {
+				templateName,
 			} );
 
 			await editor.insertBlock( {

@@ -8,10 +8,19 @@
 		"woocommerce/add-to-cart-with-options-variation-selector-attribute"
 	],
 	"attributes": {
-		"style": {
+		"optionStyle": {
 			"type": "string",
 			"enum": [ "pills", "dropdown" ],
 			"default": "pills"
+		},
+		"autoselect": {
+			"type": "boolean",
+			"default": false
+		},
+		"disabledAttributesAction": {
+			"type": "string",
+			"enum": [ "disable", "hide" ],
+			"default": "disable"
 		}
 	},
 	"textdomain": "woocommerce",
@@ -26,6 +35,5 @@
 		"woocommerce/attributeName",
 		"woocommerce/attributeTerms"
 	],
-	"viewScriptModule": "woocommerce/add-to-cart-with-options-variation-selector-attribute-options",
 	"style": "file:../woocommerce/add-to-cart-with-options-variation-selector-attribute-options-style.css"
 }

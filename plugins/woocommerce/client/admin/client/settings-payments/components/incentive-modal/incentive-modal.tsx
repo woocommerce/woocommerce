@@ -117,7 +117,8 @@ export const IncentiveModal = ( {
 	};
 
 	/**
-	 * Handles accepting the incentive.
+	 * Handles explicitly accepting the incentive via the modal CTA button.
+	 *
 	 * Triggers the onAccept callback, dismisses the incentive, closes the modal, and trigger plugin setup.
 	 */
 	const handleAccept = () => {

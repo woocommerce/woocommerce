@@ -2,13 +2,8 @@
  * External dependencies
  */
 import { FrameLocator, Locator, Page } from '@playwright/test';
-import { Editor, Admin } from '@woocommerce/e2e-utils';
+import { Editor, Admin, BLOCK_THEME_SLUG } from '@woocommerce/e2e-utils';
 import { BlockRepresentation } from '@wordpress/e2e-test-utils-playwright/build-types/editor/insert-block';
-
-/**
- * Internal dependencies
- */
-import { BLOCK_THEME_SLUG } from '../../utils/constants';
 
 export const BLOCK_LABELS = {
 	productTemplate: 'Block: Product Template',
@@ -61,7 +56,10 @@ export const SELECTORS = {
 	previewButtonTestID: 'product-collection-preview-button',
 	collectionPlaceholder:
 		'[data-type="woocommerce/product-collection"] .components-placeholder',
-	productPicker: '.wc-blocks-product-collection__editor-product-picker',
+	productPicker: '.wc-block-editor-product-collection__product-picker',
+	taxonomyPicker:
+		'.wc-block-editor-product-collection__taxonomy-picker-selection',
+	pickerDoneButton: '.components-button.is-primary',
 	linkedProductControl: {
 		button: '.wc-block-product-collection-linked-product-control__button',
 		popoverContent:
@@ -76,6 +74,10 @@ export type Collections =
 	| 'onSale'
 	| 'featured'
 	| 'relatedProducts'
+	| 'handPicked'
+	| 'productsByCategory'
+	| 'productsByTag'
+	| 'productsByBrand'
 	| 'productCatalog'
 	| 'myCustomCollection'
 	| 'myCustomCollectionWithPreview'
@@ -95,6 +97,10 @@ const collectionToButtonNameMap = {
 	onSale: 'On Sale Products',
 	featured: 'Featured Products',
 	relatedProducts: 'Related Products',
+	handPicked: 'Hand-Picked Products',
+	productsByCategory: 'Products by Category',
+	productsByTag: 'Products by Tag',
+	productsByBrand: 'Products by Brand',
 	productCatalog: 'create your own',
 	myCustomCollection: 'My Custom Collection',
 	myCustomCollectionWithPreview: 'My Custom Collection with Preview',
@@ -336,7 +342,7 @@ class ProductCollectionPage {
 
 	// Going to Product Catalog by default
 	async goToEditorTemplate(
-		template = 'woocommerce/woocommerce//archive-product'
+		template = `${ BLOCK_THEME_SLUG }//archive-product`
 	) {
 		await this.admin.visitSiteEditor( {
 			postId: template,
@@ -348,7 +354,7 @@ class ProductCollectionPage {
 
 	async goToProductCatalogAndInsertCollection( collection: Collections ) {
 		await this.goToTemplateAndInsertCollection(
-			'woocommerce/woocommerce//archive-product',
+			`${ BLOCK_THEME_SLUG }//archive-product`,
 			collection
 		);
 	}
@@ -376,7 +382,7 @@ class ProductCollectionPage {
 			postType: 'wp_template',
 			canvas: 'edit',
 		} );
-		await this.editor.canvas.locator( 'body' ).click();
+		await this.editor.setContent( '' );
 		await this.insertProductCollection();
 		await this.chooseCollectionInTemplate( collection );
 		// If product picker is available, choose a product.
@@ -406,6 +412,7 @@ class ProductCollectionPage {
 			| 'Keyword'
 			| 'Show product categories'
 			| 'Show product tags'
+			| 'Show Brands'
 			| 'Show Product Attributes'
 			| 'Featured'
 			| 'Created'
@@ -665,6 +672,38 @@ class ProductCollectionPage {
 
 		// Now, check the value.
 		await productAttributesContainer.getByLabel( value ).check();
+		await this.refreshLocators( 'editor' );
+	}
+
+	/**
+	 * Check a taxonomy term checkbox (categories, tags, brands).
+	 */
+	async checkTaxonomyTerm(
+		taxonomy: 'categories' | 'tags' | 'brands',
+		term: string
+	) {
+		const sidebarSettings = this.locateSidebarSettings();
+		const taxonomyContainer = sidebarSettings.locator(
+			`.woocommerce-product-${ taxonomy }`
+		);
+		await taxonomyContainer.waitFor();
+		await taxonomyContainer.getByText( term, { exact: true } ).check();
+		await this.refreshLocators( 'editor' );
+	}
+
+	/**
+	 * Uncheck a taxonomy term checkbox (categories, tags, brands).
+	 */
+	async uncheckTaxonomyTerm(
+		taxonomy: 'categories' | 'tags' | 'brands',
+		term: string
+	) {
+		const sidebarSettings = this.locateSidebarSettings();
+		const taxonomyContainer = sidebarSettings.locator(
+			`.woocommerce-product-${ taxonomy }`
+		);
+		await taxonomyContainer.waitFor();
+		await taxonomyContainer.getByText( term, { exact: true } ).uncheck();
 		await this.refreshLocators( 'editor' );
 	}
 
