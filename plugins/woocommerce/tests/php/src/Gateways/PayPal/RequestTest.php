@@ -1426,14 +1426,20 @@ class RequestTest extends \WC_Unit_Test_Case {
 		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_STATUS, PayPalConstants::STATUS_APPROVED );
 		$order->save();
 
-		$request_sequence = array();
+		$request_sequence     = array();
+		$capture_invoice_ids  = array();
+		$gateway              = new \WC_Gateway_Paypal();
+		$basic_invoice_id     = $gateway->get_option( 'invoice_prefix' ) . $order->get_order_number();
+		$modified_invoice_id  = null;
+
 		add_filter(
 			'pre_http_request',
-			function ( $value, $parsed_args, $url ) use ( &$request_sequence ) {
+			function ( $value, $parsed_args, $url ) use ( &$request_sequence, &$capture_invoice_ids, &$modified_invoice_id, $basic_invoice_id ) {
 				if ( strpos( $url, 'transact/paypal_standard/proxy/payment/capture' ) !== false ) {
 					$request_sequence[] = 'capture';
-					// First capture returns 422 DUPLICATE_INVOICE_ID; second (retry) returns 200.
+					// First capture: order still has basic invoice_id (set at order creation). Second capture: after PATCH, order has modified invoice_id.
 					if ( count( $request_sequence ) === 1 ) {
+						$capture_invoice_ids[] = $basic_invoice_id;
 						return array(
 							'response' => array( 'code' => 422 ),
 							'body'     => wp_json_encode(
@@ -1451,6 +1457,7 @@ class RequestTest extends \WC_Unit_Test_Case {
 							),
 						);
 					}
+					$capture_invoice_ids[] = $modified_invoice_id;
 					return array(
 						'response' => array( 'code' => 200 ),
 						'body'     => wp_json_encode(
@@ -1469,6 +1476,10 @@ class RequestTest extends \WC_Unit_Test_Case {
 					$this->assertSame( 'replace', $body['order'][0]['op'] );
 					$this->assertStringContainsString( 'invoice_id', $body['order'][0]['path'] );
 					$this->assertNotEmpty( $body['order'][0]['value'] );
+					$patch_invoice_id = $body['order'][0]['value'];
+					$this->assertNotEquals( $basic_invoice_id, $patch_invoice_id, 'PATCH should send modified invoice_id (with unique suffix), not the basic one that caused the duplicate.' );
+					$this->assertStringStartsWith( $basic_invoice_id . '-', $patch_invoice_id, 'PATCH invoice_id should have format: prefix + order_number + "-" + unique suffix.' );
+					$modified_invoice_id = $patch_invoice_id;
 					return array(
 						'response' => array( 'code' => 204 ),
 						'body'     => '',
@@ -1486,6 +1497,10 @@ class RequestTest extends \WC_Unit_Test_Case {
 		remove_all_filters( 'pre_http_request' );
 
 		$this->assertSame( array( 'capture', 'patch', 'capture' ), $request_sequence );
+		$this->assertCount( 2, $capture_invoice_ids, 'Should have one invoice_id per capture call.' );
+		$this->assertSame( $basic_invoice_id, $capture_invoice_ids[0], 'First capture call should use the basic invoice_id (order creation value).' );
+		$this->assertSame( $modified_invoice_id, $capture_invoice_ids[1], 'Second capture call should use the modified invoice_id (after PATCH).' );
+		$this->assertNotEquals( $basic_invoice_id, $modified_invoice_id, 'Modified invoice_id should be different from the basic one.' );
 		$order = wc_get_order( $order->get_id() );
 		$notes = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
 		$invoice_note = null;
