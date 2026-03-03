@@ -101,7 +101,7 @@ class FulfillmentOrderNotes {
 	 */
 	public function capture_previous_status( Fulfillment $fulfillment ): Fulfillment {
 		if ( $fulfillment->get_id() > 0 ) {
-			$old_fulfillment = new Fulfillment( (string) $fulfillment->get_id() );
+			$old_fulfillment                                   = new Fulfillment( (string) $fulfillment->get_id() );
 			$this->previous_statuses[ $fulfillment->get_id() ] = $old_fulfillment->get_status() ?? 'unfulfilled';
 		}
 		return $fulfillment;

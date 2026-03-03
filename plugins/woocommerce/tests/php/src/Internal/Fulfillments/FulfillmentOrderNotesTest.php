@@ -160,7 +160,7 @@ class FulfillmentOrderNotesTest extends \WC_Unit_Test_Case {
 				'is_fulfilled' => false,
 			),
 			array(
-				'_items'            => array(
+				'_items'           => array(
 					array(
 						'item_id' => $first_item->get_id(),
 						'qty'     => 1,
@@ -218,7 +218,7 @@ class FulfillmentOrderNotesTest extends \WC_Unit_Test_Case {
 		$found = false;
 		foreach ( $notes as $note ) {
 			if ( str_contains( $note->content, 'status changed' ) && str_contains( $note->content, 'unfulfilled' ) && str_contains( $note->content, 'fulfilled' ) ) {
-				$found = true;
+				$found      = true;
 				$note_group = get_comment_meta( $note->id, 'note_group', true );
 				$this->assertSame( OrderNoteGroup::FULFILLMENT, $note_group );
 				break;
@@ -305,7 +305,7 @@ class FulfillmentOrderNotesTest extends \WC_Unit_Test_Case {
 		$found = false;
 		foreach ( $notes as $note ) {
 			if ( str_contains( $note->content, 'deleted' ) && str_contains( $note->content, (string) $fulfillment_id ) ) {
-				$found = true;
+				$found      = true;
 				$note_group = get_comment_meta( $note->id, 'note_group', true );
 				$this->assertSame( OrderNoteGroup::FULFILLMENT, $note_group );
 				break;
