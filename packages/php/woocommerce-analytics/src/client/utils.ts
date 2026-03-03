@@ -20,7 +20,7 @@ export function getCookie( name: string ): string | null {
  * @return string
  */
 export function generateRandomToken( randomBytesLength: number ): string {
-	let randomBytes: Uint8Array | number[];
+	let randomBytes: Uint8Array< ArrayBuffer >;
 
 	if ( window.crypto && window.crypto.getRandomValues ) {
 		randomBytes = new Uint8Array( randomBytesLength );

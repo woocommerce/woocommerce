@@ -1,0 +1,4 @@
+Significance: patch
+Type: fixed
+
+Fix TS type errors detected by tsgo.
