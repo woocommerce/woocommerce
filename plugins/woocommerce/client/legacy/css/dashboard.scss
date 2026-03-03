@@ -82,7 +82,6 @@ ul.woocommerce_stats {
 
 			a {
 				display: block;
-				color: $subtext;
 				padding: 9px 12px;
 				position: relative;
 				font-size: 12px;
@@ -104,16 +103,6 @@ ul.woocommerce_stats {
 					line-height: 1.2em;
 					font-weight: normal;
 					display: block;
-					color: var(--wp-admin-theme-color, #3858e9);
-				}
-
-				&:hover {
-					color: var(--wp-admin-theme-color-darker-10, #2145c9);
-
-					&::before,
-					strong {
-						color: var(--wp-admin-theme-color-darker-10, #2145c9) !important;
-					}
 				}
 
 				&::before {
