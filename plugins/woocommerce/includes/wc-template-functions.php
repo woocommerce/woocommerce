@@ -3037,6 +3037,7 @@ if ( ! function_exists( 'woocommerce_order_details_table' ) ) {
 		$template = 'order/order-details.php';
 
 		if ( FeaturesUtil::feature_is_enabled( 'fulfillments' ) ) {
+			/** @var \Automattic\WooCommerce\Internal\DataStores\Fulfillments\FulfillmentsDataStore $fulfillment_data_store */
 			$fulfillment_data_store = \WC_Data_Store::load( 'order-fulfillment' );
 			$fulfillments           = $fulfillment_data_store->read_fulfillments( WC_Order::class, $order_id );
 			if ( ! empty( $fulfillments ) ) {

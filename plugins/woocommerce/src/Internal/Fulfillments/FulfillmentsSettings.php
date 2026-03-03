@@ -179,7 +179,9 @@ class FulfillmentsSettings {
 		}
 
 		// If fulfillments already exist, skip auto-fulfillment.
-		$fulfillments = \WC_Data_Store::load( 'order-fulfillment' )->read_fulfillments( \WC_Order::class, (string) $order_id );
+		/** @var \Automattic\WooCommerce\Internal\DataStores\Fulfillments\FulfillmentsDataStore $fulfillment_data_store */
+		$fulfillment_data_store = \WC_Data_Store::load( 'order-fulfillment' );
+		$fulfillments           = $fulfillment_data_store->read_fulfillments( \WC_Order::class, (string) $order_id );
 		if ( ! empty( $fulfillments ) ) {
 			return;
 		}

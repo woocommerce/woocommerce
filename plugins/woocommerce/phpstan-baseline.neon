@@ -19152,6 +19152,7 @@ parameters:
 			count: 1
 			path: includes/emails/class-wc-email-customer-pos-refunded-order.php
 
+
 		-
 			message: '#^Method WC_Email_Customer_Processing_Order\:\:trigger\(\) has no return type specified\.$#'
 			identifier: missingType.return
@@ -36240,12 +36241,6 @@ parameters:
 		-
 			message: '#^Action callback returns WC_Product but should not return anything\.$#'
 			identifier: return.void
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:read_fulfillments\(\)\.$#'
-			identifier: method.notFound
 			count: 1
 			path: includes/wc-template-functions.php
 
@@ -65473,12 +65468,6 @@ parameters:
 			path: src/Internal/Fulfillments/FulfillmentsController.php
 
 		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:read_fulfillments\(\)\.$#'
-			identifier: method.notFound
-			count: 3
-			path: src/Internal/Fulfillments/FulfillmentsManager.php
-
-		-
 			message: '#^Call to function is_string\(\) with string will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
 			count: 2
@@ -65531,12 +65520,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Internal/Fulfillments/FulfillmentsManager.php
-
-		-
-			message: '#^Call to an undefined method WC_Data_Store\:\:read_fulfillments\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/Fulfillments/FulfillmentsRenderer.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Fulfillments\\FulfillmentsRenderer\:\:filter_legacy_orders_list_query\(\) has no return type specified\.$#'
