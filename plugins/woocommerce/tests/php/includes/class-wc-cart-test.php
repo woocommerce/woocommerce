@@ -113,6 +113,71 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox check_cart_items should reduce quantity to 1 when product is marked as sold individually after being added to cart
+	 */
+	public function test_check_cart_items_reduces_sold_individually_quantity() {
+		WC()->cart->empty_cart();
+		WC()->session->set( 'wc_notices', null );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 10 );
+		$product->save();
+
+		WC()->cart->add_to_cart( $product->get_id(), 2 );
+
+		$product->set_sold_individually( true );
+		$product->save();
+
+		WC()->session->set( 'wc_notices', null );
+
+		$result = WC()->cart->check_cart_items();
+		$this->assertFalse( $result, 'check_cart_items should return false when fixing sold individually quantity (indicating an issue was found)' );
+
+		$cart_contents_after = WC()->cart->get_cart();
+		$cart_item_after     = array_values( $cart_contents_after )[0];
+		$this->assertEquals( 1, $cart_item_after['quantity'], 'Cart item quantity should be reduced to 1' );
+
+		$error_notices = wp_list_pluck( wc_get_notices( 'error' ), 'notice' );
+		$this->assertContains(
+			sprintf( 'You can only have 1 %s in your cart.', $product->get_name() ),
+			$error_notices
+		);
+
+		WC()->cart->empty_cart();
+		WC()->session->set( 'wc_notices', null );
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox Sold individually product with quantity 1 should not trigger an error or get modified by check_cart_items
+	 */
+	public function test_check_cart_items_does_not_modify_sold_individually_quantity_one() {
+		WC()->cart->empty_cart();
+		WC()->session->set( 'wc_notices', null );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 10 );
+		$product->set_sold_individually( true );
+		$product->save();
+
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$result = WC()->cart->check_cart_items();
+		$this->assertTrue( $result, 'check_cart_items should return true when no issues found' );
+
+		$cart_contents = WC()->cart->get_cart();
+		$cart_item     = array_values( $cart_contents )[0];
+		$this->assertEquals( 1, $cart_item['quantity'], 'Quantity should remain 1' );
+
+		$error_notices = wp_list_pluck( wc_get_notices( 'error' ), 'notice' );
+		$this->assertEmpty( $error_notices, 'No error notices should be added' );
+
+		WC()->cart->empty_cart();
+		WC()->session->set( 'wc_notices', null );
+		$product->delete( true );
+	}
+
+	/**
 	 * @testdox should throw a notice to the cart if an "any" attribute is empty.
 	 */
 	public function test_add_variation_to_the_cart_with_empty_attributes() {
