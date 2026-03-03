@@ -1430,7 +1430,7 @@ class RequestTest extends \WC_Unit_Test_Case {
 		add_filter(
 			'pre_http_request',
 			function ( $value, $parsed_args, $url ) use ( &$request_sequence ) {
-				if ( strpos( $url, 'payment/capture' ) !== false ) {
+				if ( strpos( $url, 'transact/paypal_standard/proxy/payment/capture' ) !== false ) {
 					$request_sequence[] = 'capture';
 					// First capture returns 422 DUPLICATE_INVOICE_ID; second (retry) returns 200.
 					if ( count( $request_sequence ) === 1 ) {
@@ -1514,7 +1514,7 @@ class RequestTest extends \WC_Unit_Test_Case {
 		add_filter(
 			'pre_http_request',
 			function ( $value, $parsed_args, $url ) use ( &$capture_count ) {
-				if ( strpos( $url, 'payment/capture' ) !== false ) {
+				if ( strpos( $url, 'transact/paypal_standard/proxy/payment/capture' ) !== false ) {
 					++$capture_count;
 					return array(
 						'response' => array( 'code' => 422 ),
@@ -1529,7 +1529,7 @@ class RequestTest extends \WC_Unit_Test_Case {
 						),
 					);
 				}
-				if ( strpos( $url, 'order/' ) !== false && isset( $parsed_args['method'] ) && 'PATCH' === $parsed_args['method'] ) {
+				if ( strpos( $url, 'transact/paypal_standard/proxy/order/' ) !== false && isset( $parsed_args['method'] ) && 'PATCH' === $parsed_args['method'] ) {
 					return array( 'response' => array( 'code' => 204 ), 'body' => '' );
 				}
 				return $value;
