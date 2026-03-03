@@ -243,7 +243,7 @@ const doesCartItemMatchAttributes = (
 				return (
 					item.attribute === raw_attribute &&
 					( item.value.toLowerCase() === value.toLowerCase() ||
-						( item.value && value === '' ) ) // Handle "any" attribute type
+						( item.value && value === null ) ) // Handle "any" attribute type
 				);
 			} )
 	);

@@ -91,9 +91,10 @@ export const findMatchingVariation = (
 				);
 
 				// If variation attribute has empty value, it accepts "Any" value.
-				if ( attr.value === '' ) {
+				if ( attr.value === null ) {
 					return (
-						selectedAttr !== undefined && selectedAttr.value !== ''
+						selectedAttr !== undefined &&
+						selectedAttr.value !== null
 					);
 				}
 
