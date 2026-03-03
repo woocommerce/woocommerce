@@ -15,24 +15,146 @@
 	@include flex-justify-content(center);
 }
 
-.wp-block-woocommerce-customer-account {
-	a {
-		text-decoration: none !important;
-		align-items: center;
-		display: flex;
-		color: currentColor !important;
-		gap: em($gap-smaller);
-		white-space: nowrap;
-		line-height: 1;
-		padding: em($gap-smaller);
+:where(.wp-block-woocommerce-customer-account) {
+	--wc-customer-account-padding: var(
+		--wp--preset--spacing--20,
+		#{em($gap-smaller)}
+	);
+	--wc-customer-account-viewport-gutter: var(--wp--preset--spacing--20, 16px);
+	--wc-customer-account-dropdown-padding-inline: var(
+		--wp--preset--spacing--30,
+		#{$gap}
+	);
+	--wc-customer-account-dropdown-padding-block: var(
+		--wp--preset--spacing--20,
+		#{$gap-smaller}
+	);
+	--wc-customer-account-dropdown-surface: var(
+		--wp--preset--color--base,
+		#fff
+	);
+	--wc-customer-account-dropdown-border-color: color-mix(
+		in srgb,
+		currentColor 20%,
+		transparent
+	);
+	--wc-customer-account-dropdown-item-hover-bg: color-mix(
+		in srgb,
+		currentColor 8%,
+		transparent
+	);
+}
 
-		&:hover {
-			text-decoration: underline !important;
+:where(.wp-block-woocommerce-customer-account .wc-block-customer-account__link),
+:where(
+		.wp-block-woocommerce-customer-account.wc-block-customer-account--has-dropdown
+			.wc-block-customer-account__toggle
+	) {
+	align-items: center;
+	color: inherit;
+	display: flex;
+	font-family: inherit;
+	font-size: inherit;
+	font-weight: inherit;
+	line-height: 1;
+	padding: var(--wc-customer-account-padding);
+	text-decoration: none;
+	white-space: nowrap;
+
+	&:hover {
+		text-decoration: underline;
+	}
+
+	.wc-block-customer-account__account-icon {
+		width: em($grid-unit-30);
+		height: em($grid-unit-30);
+	}
+}
+
+:where(.wp-block-woocommerce-customer-account) {
+	.wc-block-customer-account__caret {
+		margin-left: em($gap-smallest);
+		transition: transform 0.2s ease;
+		width: em(10px);
+		height: em(6px);
+	}
+
+	&.wc-block-customer-account--has-dropdown {
+		position: relative;
+
+		.wc-block-customer-account__toggle {
+			background: none;
+			border: none;
+			cursor: pointer;
+			font: inherit;
 		}
 
-		.wc-block-customer-account__account-icon {
-			width: em($grid-unit-30);
-			height: em($grid-unit-30);
+		&.is-dropdown-open .wc-block-customer-account__caret {
+			transform: rotate(180deg);
+		}
+
+		.wc-block-customer-account__dropdown {
+			background: var(--wc-customer-account-dropdown-surface);
+			border: 1px solid var(--wc-customer-account-dropdown-border-color);
+			border-radius: $universal-border-radius;
+			box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+			position: absolute;
+			top: 100%;
+			left: 0;
+			min-width: 200px;
+			max-width: calc(
+				100vw - (2 * var(--wc-customer-account-viewport-gutter))
+			);
+			z-index: 100;
+
+			&[hidden] {
+				display: none;
+			}
+		}
+
+		// Show above the trigger when near viewport bottom.
+		&.wc-block-customer-account--show-above
+			.wc-block-customer-account__dropdown {
+			top: auto;
+			bottom: 100%;
+		}
+
+		// Align right when too close to the edge.
+		&.wc-block-customer-account--align-right
+			.wc-block-customer-account__dropdown {
+			left: auto;
+			right: 0;
+		}
+
+		.wc-block-customer-account__dropdown-divider {
+			background: var(--wc-customer-account-dropdown-border-color);
+			height: 1px;
+		}
+
+		.wc-block-customer-account__dropdown-item {
+			color: inherit;
+			display: block;
+			font-size: var(--wp--preset--font-size--small);
+			line-height: 1.5;
+			padding: calc(var(--wc-customer-account-dropdown-padding-block) / 2)
+				var(--wc-customer-account-dropdown-padding-block);
+			text-decoration: none;
+			white-space: nowrap;
+
+			&:only-child {
+				padding: var(--wc-customer-account-dropdown-padding-block);
+			}
+
+			&:hover,
+			&:focus {
+				background: var(--wc-customer-account-dropdown-item-hover-bg);
+				text-decoration: none;
+			}
+
+			&:focus-visible {
+				outline: 2px solid currentColor;
+				outline-offset: -2px;
+			}
 		}
 	}
 }
