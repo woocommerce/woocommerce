@@ -16,8 +16,10 @@ class DeprecatedOptions {
 	 * Initialize.
 	 */
 	public static function init() {
+		add_filter( 'pre_option_woocommerce_task_list_complete', array( __CLASS__, 'get_deprecated_options' ), 10, 2 );
 		add_filter( 'pre_option_woocommerce_task_list_hidden', array( __CLASS__, 'get_deprecated_options' ), 10, 2 );
 		add_filter( 'pre_option_woocommerce_extended_task_list_hidden', array( __CLASS__, 'get_deprecated_options' ), 10, 2 );
+		add_action( 'pre_update_option_woocommerce_task_list_complete', array( __CLASS__, 'update_deprecated_options' ), 10, 3 );
 		add_action( 'pre_update_option_woocommerce_task_list_hidden', array( __CLASS__, 'update_deprecated_options' ), 10, 3 );
 		add_action( 'pre_update_option_woocommerce_extended_task_list_hidden', array( __CLASS__, 'update_deprecated_options' ), 10, 3 );
 	}
@@ -34,11 +36,15 @@ class DeprecatedOptions {
 			return $pre_option;
 		}
 
-		$hidden = get_option( 'woocommerce_task_list_hidden_lists', array() );
 		switch ( $option ) {
+			case 'woocommerce_task_list_complete':
+				$completed = get_option( 'woocommerce_task_list_completed_lists', array() );
+				return in_array( 'setup', $completed, true ) ? 'yes' : 'no';
 			case 'woocommerce_task_list_hidden':
+				$hidden = get_option( 'woocommerce_task_list_hidden_lists', array() );
 				return in_array( 'setup', $hidden, true ) ? 'yes' : 'no';
 			case 'woocommerce_extended_task_list_hidden':
+				$hidden = get_option( 'woocommerce_task_list_hidden_lists', array() );
 				return in_array( 'extended', $hidden, true ) ? 'yes' : 'no';
 		}
 	}
@@ -54,6 +60,19 @@ class DeprecatedOptions {
 	 */
 	public static function update_deprecated_options( $value, $old_value, $option ) {
 		switch ( $option ) {
+			case 'woocommerce_task_list_complete':
+				$completed = get_option( 'woocommerce_task_list_completed_lists', array() );
+				if ( 'yes' === $value ) {
+					if ( ! in_array( 'setup', $completed, true ) ) {
+						$completed[] = 'setup';
+						update_option( 'woocommerce_task_list_completed_lists', $completed, true );
+					}
+				} else {
+					$completed = array_diff( $completed, array( 'setup' ) );
+					update_option( 'woocommerce_task_list_completed_lists', array_values( $completed ), true );
+				}
+				delete_option( 'woocommerce_task_list_complete' );
+				return false;
 			case 'woocommerce_task_list_hidden':
 				$task_list = TaskLists::get_list( 'setup' );
 				if ( ! $task_list ) {

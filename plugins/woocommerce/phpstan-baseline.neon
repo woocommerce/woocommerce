@@ -46891,7 +46891,7 @@ parameters:
 		-
 			message: '#^Action callback returns string but should not return anything\.$#'
 			identifier: return.void
-			count: 2
+			count: 3
 			path: src/Admin/Features/OnboardingTasks/DeprecatedOptions.php
 
 		-
@@ -46921,7 +46921,7 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\DeprecatedOptions\:\:update_deprecated_options\(\) should return string but returns false\.$#'
 			identifier: return.type
-			count: 2
+			count: 3
 			path: src/Admin/Features/OnboardingTasks/DeprecatedOptions.php
 
 		-
