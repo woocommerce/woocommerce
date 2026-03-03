@@ -1504,6 +1504,9 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 							params: { step: 'plugins' },
 						},
 						{
+							type: 'recordShippingPartnerImpression',
+						},
+						{
 							type: 'updateQueryStep',
 							params: { step: 'plugins' },
 						},

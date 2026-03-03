@@ -176,6 +176,80 @@ class ShippingPartnerSuggestionsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that primary suggestions are sorted before non-primary ones.
+	 */
+	public function test_sort_primary_suggestions_first() {
+		update_option( 'woocommerce_default_country', 'US' );
+
+		$specs = array(
+			(object) array(
+				'id'         => 'non-primary',
+				'is_visible' => true,
+			),
+			(object) array(
+				'id'                      => 'primary-partner',
+				'is_visible'              => true,
+				'countries_where_primary' => array( 'US' ),
+			),
+			(object) array(
+				'id'         => 'another-non-primary',
+				'is_visible' => true,
+			),
+		);
+
+		$suggestions = ShippingPartnerSuggestions::get_suggestions( $specs );
+		$ids         = array_map(
+			function ( $s ) {
+				return $s->id;
+			},
+			$suggestions
+		);
+
+		$this->assertSame( 'primary-partner', $ids[0] );
+	}
+
+	/**
+	 * Test that suggestions with equal primary status preserve their original order (stable sort).
+	 */
+	public function test_sort_preserves_order_for_equal_priority() {
+		update_option( 'woocommerce_default_country', 'US' );
+
+		$specs = array(
+			(object) array(
+				'id'                      => 'primary-a',
+				'is_visible'              => true,
+				'countries_where_primary' => array( 'US' ),
+			),
+			(object) array(
+				'id'                      => 'primary-b',
+				'is_visible'              => true,
+				'countries_where_primary' => array( 'US' ),
+			),
+			(object) array(
+				'id'         => 'non-primary-a',
+				'is_visible' => true,
+			),
+			(object) array(
+				'id'         => 'non-primary-b',
+				'is_visible' => true,
+			),
+		);
+
+		$suggestions = ShippingPartnerSuggestions::get_suggestions( $specs );
+		$ids         = array_map(
+			function ( $s ) {
+				return $s->id;
+			},
+			$suggestions
+		);
+
+		$this->assertSame(
+			array( 'primary-a', 'primary-b', 'non-primary-a', 'non-primary-b' ),
+			$ids
+		);
+	}
+
+	/**
 	 * Overrides the WC logger.
 	 *
 	 * @return mixed

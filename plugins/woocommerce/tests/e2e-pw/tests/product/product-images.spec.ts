@@ -98,8 +98,11 @@ test.describe( 'Products > Product Images', () => {
 		} );
 
 		await test.step( 'Set product image', async () => {
+			// TODO: WP 7.0 compat - WP 7.0 changed the featured image metabox link
+			// to a button. Simplify when WP 7.0 is the minimum supported version.
 			await page
 				.getByRole( 'link', { name: 'Set product image' } )
+				.or( page.getByRole( 'button', { name: 'Set product image' } ) )
 				.click();
 			await addImageFromLibrary( page, 'image-01', 'Set product image' );
 
@@ -178,11 +181,22 @@ test.describe( 'Products > Product Images', () => {
 		} );
 
 		await test.step( 'Remove product image', async () => {
+			// TODO: WP 7.0 compat - WP 7.0 changed the featured image metabox link
+			// to a button. Simplify when WP 7.0 is the minimum supported version.
 			await page
 				.getByRole( 'link', { name: 'Remove product image' } )
+				.or(
+					page.getByRole( 'button', {
+						name: 'Remove product image',
+					} )
+				)
 				.click();
 			await expect(
-				page.getByRole( 'link', { name: 'Set product image' } )
+				page.getByRole( 'link', { name: 'Set product image' } ).or(
+					page.getByRole( 'button', {
+						name: 'Set product image',
+					} )
+				)
 			).toBeVisible();
 
 			await page
