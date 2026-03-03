@@ -502,7 +502,7 @@ class Request {
 		$order_number    = $order->get_order_number();
 		$base_invoice_id = $prefix . $order_number;
 
-		// generate a unique ID for the site.
+		// Generate a unique ID for the invoice.
 		$unique_id = bin2hex( random_bytes( 6 ) );
 
 		$invoice_id = $this->limit_length( $base_invoice_id . '-' . $unique_id, PayPalConstants::PAYPAL_INVOICE_ID_MAX_LENGTH );
