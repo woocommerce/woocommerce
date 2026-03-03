@@ -14,8 +14,10 @@ use WC_Install;
 class DeprecatedOptions {
 	/**
 	 * Initialize.
+	 *
+	 * @internal
 	 */
-	public static function init(): void {
+	final public static function init(): void {
 		add_filter( 'pre_option_woocommerce_task_list_complete', array( __CLASS__, 'get_deprecated_options' ), 10, 2 );
 		add_filter( 'pre_option_woocommerce_task_list_hidden', array( __CLASS__, 'get_deprecated_options' ), 10, 2 );
 		add_filter( 'pre_option_woocommerce_extended_task_list_hidden', array( __CLASS__, 'get_deprecated_options' ), 10, 2 );

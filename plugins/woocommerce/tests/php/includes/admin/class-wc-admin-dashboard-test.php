@@ -13,6 +13,13 @@ declare( strict_types = 1 );
 class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
 
 	/**
+	 * The system under test.
+	 *
+	 * @var WC_Admin_Dashboard
+	 */
+	private WC_Admin_Dashboard $sut;
+
+	/**
 	 * Admin user ID.
 	 *
 	 * @var int
@@ -35,6 +42,7 @@ class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
 			)
 		);
 		wp_set_current_user( $this->admin_user );
+		$this->sut = new WC_Admin_Dashboard();
 	}
 
 	/**
@@ -74,10 +82,8 @@ class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
 			}
 		);
 
-		$dashboard = new WC_Admin_Dashboard();
-
 		$this->assertTrue(
-			$this->invoke_should_display_widget( $dashboard ),
+			$this->invoke_should_display_widget( $this->sut ),
 			'Widget should display when task list is complete'
 		);
 	}
@@ -93,10 +99,8 @@ class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
 			}
 		);
 
-		$dashboard = new WC_Admin_Dashboard();
-
 		$this->assertTrue(
-			$this->invoke_should_display_widget( $dashboard ),
+			$this->invoke_should_display_widget( $this->sut ),
 			'Widget should display when task list is hidden'
 		);
 	}
@@ -108,10 +112,8 @@ class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
 		delete_option( 'woocommerce_task_list_completed_lists' );
 		delete_option( 'woocommerce_task_list_hidden_lists' );
 
-		$dashboard = new WC_Admin_Dashboard();
-
 		$this->assertFalse(
-			$this->invoke_should_display_widget( $dashboard ),
+			$this->invoke_should_display_widget( $this->sut ),
 			'Widget should not display when task list is neither complete nor hidden'
 		);
 	}
@@ -138,10 +140,8 @@ class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
 		);
 		wp_set_current_user( $subscriber );
 
-		$dashboard = new WC_Admin_Dashboard();
-
 		$this->assertFalse(
-			$this->invoke_should_display_widget( $dashboard ),
+			$this->invoke_should_display_widget( $this->sut ),
 			'Widget should not display for users without proper capabilities'
 		);
 	}
