@@ -468,7 +468,7 @@ class Request {
 			$response_data = json_decode( $body, true );
 
 			if ( 200 !== $http_code && 204 !== $http_code ) {
-				throw new Exception( 'Failed to patch PayPal order invoice_id. Response status: ' . $http_code . '. Response body: ' . $body );
+				throw new Exception( 'Failed to patch PayPal order invoice_id. Response status: ' . $http_code );
 			}
 
 			\WC_Gateway_Paypal::log( 'Successfully patched PayPal order invoice_id. PayPal Order ID: ' . $paypal_order_id . '. New invoice_id: ' . $new_invoice_id . '. Order ID: ' . $order->get_id() );
