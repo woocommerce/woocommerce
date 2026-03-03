@@ -4,8 +4,6 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\EmailEditor;
 
-use Automattic\WooCommerce\EmailEditor\Email_Editor_Container;
-use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
 use Automattic\WooCommerce\Internal\EmailEditor\WooContentProcessor;
 
 /**
@@ -68,24 +66,16 @@ class WooContentProcessorTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that get_woo_content_css returns font-family rules for WooCommerce-specific selectors.
+	 * Test that get_woo_content_css resets letter-spacing on order detail heading span.
 	 */
-	public function testGetWooContentCssIncludesFontFamilyForWooSelectors(): void {
+	public function testGetWooContentCssResetsLetterSpacingOnOrderDetailHeadingSpan(): void {
 		$reflection = new \ReflectionClass( $this->woo_content_processor );
 		$method     = $reflection->getMethod( 'get_woo_content_css' );
 		$method->setAccessible( true );
 
 		$css = $method->invoke( $this->woo_content_processor );
 
-		// Get the expected font-family from the theme controller.
-		$theme_controller = Email_Editor_Container::container()->get( Theme_Controller::class );
-		$email_styles     = $theme_controller->get_styles();
-		$font_family      = $email_styles['typography']['fontFamily'] ?? 'inherit';
-
-		$this->assertStringContainsString( '.td', $css );
-		$this->assertStringContainsString( '.address', $css );
 		$this->assertStringContainsString( 'h2.email-order-detail-heading span', $css );
-		$this->assertStringContainsString( '.wc-bacs-bank-details', $css );
-		$this->assertStringContainsString( "font-family: {$font_family}", $css );
+		$this->assertStringContainsString( 'letter-spacing: normal', $css );
 	}
 }

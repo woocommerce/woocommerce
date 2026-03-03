@@ -346,14 +346,12 @@ body {
 .td {
 	color: <?php echo esc_attr( $text_lighter_20 ); ?>;
 	border: <?php echo $email_improvements_enabled ? '0' : '1px solid ' . esc_attr( $body_darker_10 ); ?>;
-	font-family: <?php echo $safe_font_family; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>;
 	vertical-align: middle;
 }
 
 .address {
 	<?php if ( $email_improvements_enabled ) { ?>
 		color: <?php echo esc_attr( $text ); ?>;
-		font-family: <?php echo $safe_font_family; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>;
 		font-style: normal;
 		line-height: 120%;
 		padding: 8px 0;
@@ -370,11 +368,6 @@ body {
 	padding-<?php echo is_rtl() ? 'right' : 'left'; ?>: 10px !important;
 }
 <?php endif; ?>
-
-.wc-bacs-bank-details,
-.wc-bacs-bank-details li {
-	font-family: <?php echo $safe_font_family; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>;
-}
 
 .additional-fields {
 	padding: 12px 12px 0;
@@ -475,9 +468,9 @@ img {
 h2.email-order-detail-heading span {
 	color: <?php echo esc_attr( $footer_text ); ?>;
 	display: block;
-	font-family: <?php echo $safe_font_family; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>;
 	font-size: 14px;
 	font-weight: normal;
+	letter-spacing: normal;
 }
 
 h2.email-order-detail-heading span a {

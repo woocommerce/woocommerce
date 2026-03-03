@@ -95,22 +95,15 @@ class WooContentProcessor {
 	/**
 	 * Get CSS rules for WooCommerce-specific selectors in block emails.
 	 *
-	 * Email clients like Outlook don't reliably inherit font-family through table elements,
-	 * so we need to explicitly set it on WooCommerce content selectors.
+	 * The block email editor theme applies letter-spacing: -.1px to headings. When the
+	 * order detail heading span is rendered at body-text size (14px) it inherits that
+	 * negative value, making the text look noticeably tight. This resets it.
 	 *
 	 * @since 10.7.0
 	 * @return string
 	 */
 	private function get_woo_content_css(): string {
-		$email_styles = $this->theme_controller->get_styles();
-		$font_family  = $email_styles['typography']['fontFamily'] ?? 'inherit';
-
-		return "
-			.td { font-family: {$font_family}; }
-			.address { font-family: {$font_family}; }
-			h2.email-order-detail-heading span { font-family: {$font_family}; }
-			.wc-bacs-bank-details, .wc-bacs-bank-details li { font-family: {$font_family}; }
-		";
+		return 'h2.email-order-detail-heading span { letter-spacing: normal; }';
 	}
 
 	/**
