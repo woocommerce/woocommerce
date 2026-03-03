@@ -1,5 +1,12 @@
 == Changelog ==
 
+= 10.5.3 2026-03-02 =
+
+**WooCommerce**
+
+* Fix - Fix Store API batch endpoint path validation to prevent routing requests to non-Store-API endpoints. [#63501](https://github.com/woocommerce/woocommerce/pull/63501)
+
+
 = 10.5.2 2026-02-13 =
 
 **WooCommerce**
