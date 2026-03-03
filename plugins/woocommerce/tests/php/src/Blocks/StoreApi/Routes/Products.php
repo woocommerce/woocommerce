@@ -532,37 +532,59 @@ class Products extends ControllerTestCase {
 	}
 
 	/**
-	 * @testdox Draft products should not be returned when queried by ID.
+	 * Data provider for non-published product statuses.
+	 *
+	 * @return array<string, array{string}>
 	 */
-	public function test_get_draft_product_by_id_returns_404() {
-		$fixtures      = new FixtureData();
-		$draft_product = $fixtures->get_simple_product(
+	public function provider_non_published_statuses() {
+		return array(
+			'draft'      => array( ProductStatus::DRAFT ),
+			'pending'    => array( ProductStatus::PENDING ),
+			'private'    => array( ProductStatus::PRIVATE ),
+			'trash'      => array( ProductStatus::TRASH ),
+			'future'     => array( ProductStatus::FUTURE ),
+			'auto-draft' => array( ProductStatus::AUTO_DRAFT ),
+		);
+	}
+
+	/**
+	 * @testdox Non-published products should not be returned when queried by ID ($status).
+	 * @dataProvider provider_non_published_statuses
+	 *
+	 * @param string $status The product status to test.
+	 */
+	public function test_non_published_product_by_id_returns_404( $status ) {
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_simple_product(
 			array(
-				'name'          => 'Draft Product',
+				'name'          => 'Non Published Product',
 				'regular_price' => 10,
 			)
 		);
-		$draft_product->set_status( ProductStatus::DRAFT );
-		$draft_product->save();
+		$product->set_status( $status );
+		$product->save();
 
-		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $draft_product->get_id() ) );
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $product->get_id() ) );
 
 		$this->assertEquals( 404, $response->get_status() );
 	}
 
 	/**
-	 * @testdox Draft products should not be included in the collection response.
+	 * @testdox Non-published products should not be included in the collection response ($status).
+	 * @dataProvider provider_non_published_statuses
+	 *
+	 * @param string $status The product status to test.
 	 */
-	public function test_draft_products_excluded_from_collection() {
-		$fixtures      = new FixtureData();
-		$draft_product = $fixtures->get_simple_product(
+	public function test_non_published_products_excluded_from_collection( $status ) {
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_simple_product(
 			array(
-				'name'          => 'Draft Product In Collection',
+				'name'          => 'Non Published Product In Collection',
 				'regular_price' => 10,
 			)
 		);
-		$draft_product->set_status( ProductStatus::DRAFT );
-		$draft_product->save();
+		$product->set_status( $status );
+		$product->save();
 
 		$response    = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products' ) );
 		$data        = $response->get_data();
@@ -574,24 +596,27 @@ class Products extends ControllerTestCase {
 		);
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertNotContains( $draft_product->get_id(), $product_ids );
+		$this->assertNotContains( $product->get_id(), $product_ids );
 	}
 
 	/**
-	 * @testdox Draft products should not be returned when queried by slug.
+	 * @testdox Non-published products should not be returned when queried by slug ($status).
+	 * @dataProvider provider_non_published_statuses
+	 *
+	 * @param string $status The product status to test.
 	 */
-	public function test_get_draft_product_by_slug_returns_404() {
-		$fixtures      = new FixtureData();
-		$draft_product = $fixtures->get_simple_product(
+	public function test_non_published_product_by_slug_returns_404( $status ) {
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_simple_product(
 			array(
-				'name'          => 'Draft Product By Slug',
+				'name'          => 'Non Published Product By Slug',
 				'regular_price' => 10,
 			)
 		);
-		$draft_product->set_status( ProductStatus::DRAFT );
-		$draft_product->save();
+		$product->set_status( $status );
+		$product->save();
 
-		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $draft_product->get_slug() ) );
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $product->get_slug() ) );
 
 		$this->assertEquals( 404, $response->get_status() );
 	}
@@ -630,8 +655,10 @@ class Products extends ControllerTestCase {
 
 		$this->assertNotNull( $protected_product );
 		$this->assertTrue( $protected_product['is_password_protected'] );
-		$this->assertEmpty( $protected_product['description'] );
-		$this->assertEmpty( $protected_product['short_description'] );
+		$this->assertArrayHasKey( 'description', $protected_product );
+		$this->assertSame( '', $protected_product['description'] );
+		$this->assertArrayHasKey( 'short_description', $protected_product );
+		$this->assertSame( '', $protected_product['short_description'] );
 	}
 
 	/**
@@ -660,8 +687,42 @@ class Products extends ControllerTestCase {
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertTrue( $data['is_password_protected'] );
-		$this->assertEmpty( $data['description'] );
-		$this->assertEmpty( $data['short_description'] );
+		$this->assertArrayHasKey( 'description', $data );
+		$this->assertSame( '', $data['description'] );
+		$this->assertArrayHasKey( 'short_description', $data );
+		$this->assertSame( '', $data['short_description'] );
+	}
+
+	/**
+	 * @testdox Password-protected product by slug should have redacted content.
+	 */
+	public function test_password_protected_product_by_slug_redacts_content() {
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name'              => 'Protected Product By Slug',
+				'regular_price'     => 10,
+				'short_description' => 'Secret short desc',
+				'description'       => 'Secret full desc',
+			)
+		);
+
+		wp_update_post(
+			array(
+				'ID'            => $product->get_id(),
+				'post_password' => 'testpass',
+			)
+		);
+
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $product->get_slug() ) );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertTrue( $data['is_password_protected'] );
+		$this->assertArrayHasKey( 'description', $data );
+		$this->assertSame( '', $data['description'] );
+		$this->assertArrayHasKey( 'short_description', $data );
+		$this->assertSame( '', $data['short_description'] );
 	}
 
 	/**
