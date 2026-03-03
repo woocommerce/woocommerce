@@ -321,13 +321,23 @@ const { state, actions } = store< Store >(
 				// 1. Find the item to get its name BEFORE removing it
 				const itemToRemove = state.cart.items.find( ( item ) => item.key === key );
 
-				// 2. Show "Removed" notice IMMEDIATELY (Optimistic UI)
+				// 2. Show "Removed" notice IMMEDIATELY (Optimistic UI).
+				// If this is the last item, clear all notices so the empty-cart
+				// placeholder appears without leftover messages.
 				if ( itemToRemove && isCartItem( itemToRemove ) ) {
-					yield actions.updateNotices( [
-						generateInfoNotice(
-							'"%s" was removed from your cart.'.replace( '%s', itemToRemove.name )
-						),
-					] );
+					const isLastItem = state.cart.items.length === 1;
+					if ( isLastItem ) {
+						yield actions.updateNotices( [], true );
+					} else {
+						yield actions.updateNotices( [
+							generateInfoNotice(
+								'"%s" was removed from your cart.'.replace(
+									'%s',
+									itemToRemove.name
+								)
+							),
+						] );
+					}
 				}
 
 				// Track what changes we're making for notice comparison.
