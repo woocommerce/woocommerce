@@ -132,7 +132,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * Finally, record the date of payment.
 	 *
 	 * @param string $transaction_id Optional transaction id to store in post meta.
-	 * @return bool success
+	 * @return bool True on success, false if order missing or blocked for lack of checkout evidence.
 	 */
 	public function payment_complete( $transaction_id = '' ) {
 		if ( ! $this->get_id() ) { // Order must exist.
@@ -140,20 +140,19 @@ class WC_Order extends WC_Abstract_Order {
 		}
 
 		try {
-			do_action( 'woocommerce_pre_payment_complete', $this->get_id(), $transaction_id );
-
+			// Validate before pre_payment_complete so blocked orders do not trigger side effects.
 			$created_via = $this->get_created_via();
 			$cart_hash   = $this->get_cart_hash();
 			$has_checkout_evidence = false;
 
 			/**
-			 * Filter which created_via values are considered valid checkout evidence.
+			 * Allowed created_via values for checkout evidence.
 			 *
 			 * @param array    $allowed_created_via_values Allowed created_via values.
 			 * @param WC_Order $this                      Order object.
 			 * @since 10.6.0
 			 */
-			$allowed_created_via_values = apply_filters( 'woocommerce_payment_complete_allowed_created_via_values', array( 'checkout', 'store-api' ), $this );
+			$allowed_created_via_values = apply_filters( 'woocommerce_payment_complete_allowed_created_via_values', array( 'checkout', 'store-api', 'rest-api', 'admin', 'pos-rest-api' ), $this );
 
 			if ( ! empty( $created_via ) && in_array( $created_via, $allowed_created_via_values, true ) ) {
 				$has_checkout_evidence = true;
@@ -163,48 +162,54 @@ class WC_Order extends WC_Abstract_Order {
 				$has_checkout_evidence = true;
 			}
 
-			/**
-			 * Allow payment completion for orders without checkout evidence.
-			 *
-			 * @param bool     $allow_payment_complete Whether to allow payment completion without checkout evidence.
-			 * @param WC_Order $this                  Order object.
-			 * @param string   $transaction_id         Transaction ID.
-			 * @since 10.6.0
-			 */
-			$allow_without_checkout_evidence = apply_filters( 'woocommerce_allow_payment_complete_without_checkout_evidence', false, $this, $transaction_id );
+			if ( ! $has_checkout_evidence ) {
+				/**
+				 * Allow payment completion without checkout evidence.
+				 *
+				 * @param bool     $allow_payment_complete Whether to allow.
+				 * @param WC_Order $this                  Order object.
+				 * @param string   $transaction_id        Transaction ID.
+				 * @since 10.6.0
+				 */
+				$allow_without_checkout_evidence = apply_filters( 'woocommerce_allow_payment_complete_without_checkout_evidence', false, $this, $transaction_id );
 
-			if ( ! $has_checkout_evidence && ! $allow_without_checkout_evidence ) {
-				$logger = wc_get_logger();
-				$logger->warning(
-					sprintf(
-						'Payment completion blocked for order #%d: Order lacks evidence of legitimate checkout session (created_via: %s, cart_hash: %s)',
-						$this->get_id(),
-						$created_via ? $created_via : 'empty',
-						$cart_hash ? 'present' : 'empty'
-					),
-					array(
-						'order_id'    => $this->get_id(),
-						'created_via' => $created_via,
-						'cart_hash'   => $cart_hash ? 'present' : 'empty',
-						'payment_method' => $this->get_payment_method(),
-					)
-				);
-				$created_via_message = empty( $created_via ) ? __( 'No created_via reference', 'woocommerce' ) : sprintf( __( 'Unexpected created_via value: %s', 'woocommerce' ), $created_via );
-				$cart_hash_message   = empty( $cart_hash ) ? __( 'No cart_hash', 'woocommerce' ) : __( 'Cart hash present', 'woocommerce' );
+				if ( ! $allow_without_checkout_evidence ) {
+					$logger = wc_get_logger();
+					$logger->error(
+						sprintf(
+							'Payment completion blocked for order #%d: Order lacks checkout session evidence (created_via: %s, cart_hash: empty)',
+							$this->get_id(),
+							$created_via ? $created_via : 'empty'
+						),
+						array(
+							'order_id'       => $this->get_id(),
+							'created_via'    => $created_via,
+							'cart_hash'      => 'empty',
+							'payment_method' => $this->get_payment_method(),
+						)
+					);
+					$created_via_message = empty( $created_via ) ? __( 'No created_via reference', 'woocommerce' ) : sprintf( __( 'Unexpected created_via value: %s', 'woocommerce' ), esc_html( $created_via ) );
+					$cart_hash_message   = __( 'No cart_hash', 'woocommerce' );
 
-				$this->add_order_note(
-					sprintf(
-						/* translators: %1$s: created_via message, %2$s: cart_hash message */
-						__( 'Payment completion blocked: Order lacks evidence of legitimate checkout session (%1$s, %2$s). This may indicate a security issue.', 'woocommerce' ),
-						$created_via_message,
-						$cart_hash_message
-					),
-					false,
-					false,
-					array( 'note_group' => OrderNoteGroup::ERROR )
-				);
-				return false;
+					$this->add_order_note(
+						sprintf(
+							/* translators: %1$s: created_via message, %2$s: cart_hash message */
+							__( 'Payment completion blocked: Order lacks checkout session evidence (%1$s, %2$s).', 'woocommerce' ),
+							$created_via_message,
+							$cart_hash_message
+						),
+						false,
+						false,
+						array( 'note_group' => OrderNoteGroup::ERROR )
+					);
+
+					do_action( 'woocommerce_payment_complete_blocked', $this->get_id(), $created_via, $cart_hash );
+
+					return false;
+				}
 			}
+
+			do_action( 'woocommerce_pre_payment_complete', $this->get_id(), $transaction_id );
 
 			if ( WC()->session ) {
 				WC()->session->set( 'order_awaiting_payment', false );

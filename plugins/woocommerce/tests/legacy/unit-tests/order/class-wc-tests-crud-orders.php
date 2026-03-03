@@ -1038,19 +1038,39 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: payment_complete blocks orders without checkout evidence
 	 *
+	 * @testdox payment_complete blocks order when no created_via or cart_hash and fires payment_complete_blocked
 	 * @since 10.6.0
 	 */
 	public function test_payment_complete_blocks_orders_without_checkout_evidence() {
 		$object = new WC_Order();
 		$object->save();
-		// Order has no created_via and no cart_hash - should be blocked.
+		// No created_via or cart_hash. Payment should be blocked.
 		$object->set_status( OrderStatus::PENDING );
 		$object->save();
+
+		$blocked_action_fired = false;
+		$blocked_action_args  = array();
+		add_action(
+			'woocommerce_payment_complete_blocked',
+			function( $order_id, $created_via, $cart_hash ) use ( &$blocked_action_fired, &$blocked_action_args ) {
+				$blocked_action_fired = true;
+				$blocked_action_args  = array( $order_id, $created_via, $cart_hash );
+			},
+			10,
+			3
+		);
 
 		$this->assertFalse( $object->payment_complete( '12345' ) );
 		$this->assertEquals( OrderStatus::PENDING, $object->get_status() );
 
-		// Verify order note was added.
+		$this->assertTrue( $blocked_action_fired );
+		$this->assertEquals( $object->get_id(), $blocked_action_args[0] );
+		$this->assertEquals( '', $blocked_action_args[1] );
+		$this->assertEquals( '', $blocked_action_args[2] );
+
+		remove_all_actions( 'woocommerce_payment_complete_blocked' );
+
+		// Confirm blocked-payment order note exists.
 		$notes = wc_get_order_notes(
 			array(
 				'order_id' => $object->get_id(),
@@ -1063,12 +1083,37 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 				break;
 			}
 		}
-		$this->assertNotNull( $blocked_note, 'Order note about blocked payment should be added' );
+		$this->assertNotNull( $blocked_note );
+	}
+
+	/**
+	 * Test: payment_complete does not fire woocommerce_pre_payment_complete when blocked
+	 *
+	 * @testdox pre_payment_complete does not fire when payment is blocked for lack of checkout evidence
+	 * @since 10.6.0
+	 */
+	public function test_payment_complete_does_not_fire_pre_payment_complete_when_blocked() {
+		$object = new WC_Order();
+		$object->set_status( OrderStatus::PENDING );
+		$object->save();
+
+		$pre_payment_complete_fired = false;
+		$callback                   = function() use ( &$pre_payment_complete_fired ) {
+			$pre_payment_complete_fired = true;
+		};
+		add_action( 'woocommerce_pre_payment_complete', $callback, 10, 0 );
+
+		$object->payment_complete( '12345' );
+
+		$this->assertFalse( $pre_payment_complete_fired );
+
+		remove_action( 'woocommerce_pre_payment_complete', $callback, 10 );
 	}
 
 	/**
 	 * Test: payment_complete allows orders with created_via checkout
 	 *
+	 * @testdox payment_complete allows order with created_via checkout
 	 * @since 10.6.0
 	 */
 	public function test_payment_complete_allows_orders_with_created_via_checkout() {
@@ -1084,6 +1129,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: payment_complete allows orders with created_via store-api
 	 *
+	 * @testdox payment_complete allows order with created_via store-api
 	 * @since 10.6.0
 	 */
 	public function test_payment_complete_allows_orders_with_created_via_store_api() {
@@ -1097,8 +1143,57 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test: payment_complete allows orders with created_via rest-api
+	 *
+	 * @testdox payment_complete allows order with created_via rest-api
+	 * @since 10.6.0
+	 */
+	public function test_payment_complete_allows_orders_with_created_via_rest_api() {
+		$object = new WC_Order();
+		$object->set_created_via( 'rest-api' );
+		$object->set_status( OrderStatus::PENDING );
+		$object->save();
+
+		$this->assertTrue( $object->payment_complete( '12345' ) );
+		$this->assertEquals( OrderStatus::COMPLETED, $object->get_status() );
+	}
+
+	/**
+	 * Test: payment_complete allows orders with created_via admin
+	 *
+	 * @testdox payment_complete allows order with created_via admin
+	 * @since 10.6.0
+	 */
+	public function test_payment_complete_allows_orders_with_created_via_admin() {
+		$object = new WC_Order();
+		$object->set_created_via( 'admin' );
+		$object->set_status( OrderStatus::PENDING );
+		$object->save();
+
+		$this->assertTrue( $object->payment_complete( '12345' ) );
+		$this->assertEquals( OrderStatus::COMPLETED, $object->get_status() );
+	}
+
+	/**
+	 * Test: payment_complete allows orders with created_via pos-rest-api
+	 *
+	 * @testdox payment_complete allows order with created_via pos-rest-api
+	 * @since 10.6.0
+	 */
+	public function test_payment_complete_allows_orders_with_created_via_pos_rest_api() {
+		$object = new WC_Order();
+		$object->set_created_via( 'pos-rest-api' );
+		$object->set_status( OrderStatus::PENDING );
+		$object->save();
+
+		$this->assertTrue( $object->payment_complete( '12345' ) );
+		$this->assertEquals( OrderStatus::COMPLETED, $object->get_status() );
+	}
+
+	/**
 	 * Test: payment_complete allows orders with cart_hash
 	 *
+	 * @testdox payment_complete allows order with cart_hash
 	 * @since 10.6.0
 	 */
 	public function test_payment_complete_allows_orders_with_cart_hash() {
@@ -1114,6 +1209,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: payment_complete allows bypass via filter
 	 *
+	 * @testdox payment_complete allows bypass via woocommerce_allow_payment_complete_without_checkout_evidence
 	 * @since 10.6.0
 	 */
 	public function test_payment_complete_allows_bypass_via_filter() {
@@ -1121,7 +1217,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object->set_status( OrderStatus::PENDING );
 		$object->save();
 
-		// Add filter to allow payment completion without checkout evidence.
+		// Allow this order via bypass filter.
 		add_filter(
 			'woocommerce_allow_payment_complete_without_checkout_evidence',
 			function( $allow, $order, $transaction_id ) use ( $object ) {
@@ -1140,6 +1236,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	/**
 	 * Test: payment_complete allows custom created_via values via filter
 	 *
+	 * @testdox payment_complete allows custom created_via via woocommerce_payment_complete_allowed_created_via_values
 	 * @since 10.6.0
 	 */
 	public function test_payment_complete_allows_custom_created_via_via_filter() {
@@ -1148,7 +1245,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object->set_status( OrderStatus::PENDING );
 		$object->save();
 
-		// Add filter to allow custom created_via value.
+		// Allow custom created_via via filter.
 		add_filter(
 			'woocommerce_payment_complete_allowed_created_via_values',
 			function( $allowed_values, $order ) {
