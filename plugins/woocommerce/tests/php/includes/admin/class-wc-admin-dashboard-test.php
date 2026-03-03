@@ -75,12 +75,7 @@ class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
 	 * @testdox Widget shows when task list is complete via the bridge.
 	 */
 	public function test_widget_shows_when_task_list_complete(): void {
-		add_filter(
-			'pre_option_woocommerce_task_list_complete',
-			function () {
-				return 'yes';
-			}
-		);
+		add_filter( 'pre_option_woocommerce_task_list_complete', fn() => 'yes' );
 
 		$this->assertTrue(
 			$this->invoke_should_display_widget( $this->sut ),
@@ -92,12 +87,7 @@ class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
 	 * @testdox Widget shows when task list is hidden via the bridge.
 	 */
 	public function test_widget_shows_when_task_list_hidden(): void {
-		add_filter(
-			'pre_option_woocommerce_task_list_hidden',
-			function () {
-				return 'yes';
-			}
-		);
+		add_filter( 'pre_option_woocommerce_task_list_hidden', fn() => 'yes' );
 
 		$this->assertTrue(
 			$this->invoke_should_display_widget( $this->sut ),
@@ -122,12 +112,7 @@ class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
 	 * @testdox Widget does not show without proper capabilities.
 	 */
 	public function test_widget_does_not_show_without_capabilities(): void {
-		add_filter(
-			'pre_option_woocommerce_task_list_complete',
-			function () {
-				return 'yes';
-			}
-		);
+		add_filter( 'pre_option_woocommerce_task_list_complete', fn() => 'yes' );
 
 		$password   = wp_generate_password( 8, false, false );
 		$subscriber = wp_insert_user(
