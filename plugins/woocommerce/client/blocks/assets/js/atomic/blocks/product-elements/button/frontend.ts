@@ -74,7 +74,7 @@ const productButtonStore = {
 				variation: formContext?.selectedAttributes,
 			} );
 
-			return product?.quantity || 0;
+			return product?.quantity ?? 0;
 		},
 		get slideInAnimation() {
 			const { animationStatus } = getContext< Context >();
