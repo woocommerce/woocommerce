@@ -106,6 +106,7 @@ export const ImageSizeSettings = ( {
 				>
 					<ToggleGroupControl
 						__next40pxDefaultSize
+						__nextHasNoMarginBottom
 						label={ __( 'Scale', 'woocommerce' ) }
 						value={ scale }
 						help={ scaleHelp[ scale ] }

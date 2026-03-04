@@ -173,6 +173,7 @@ const Edit = ( {
 							isShownByDefault
 						>
 							<ToggleControl
+								__nextHasNoMarginBottom
 								label={ __(
 									'Link to Product Page',
 									'woocommerce'
@@ -203,6 +204,7 @@ const Edit = ( {
 						>
 							<ToggleGroupControl
 								__next40pxDefaultSize
+								__nextHasNoMarginBottom
 								label={ __( 'Resolution', 'woocommerce' ) }
 								isBlock
 								help={
