@@ -189,7 +189,7 @@ jQuery(function ($) {
 			},
 
 			onError: function ( error ) {
-				const errorMessage = createOrderError || error.message || paypal_standard.generic_error_message;
+				const errorMessage = createOrderError || ( error && error.message )|| paypal_standard.generic_error_message;
 				const sanitizedErrorMessage = $( '<div>' ).text( errorMessage ).html();
 				const messageWrapper =
 					'<ul class="woocommerce-error" role="alert"><li>' +

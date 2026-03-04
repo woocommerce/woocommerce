@@ -424,7 +424,7 @@ class RequestTest extends \WC_Unit_Test_Case {
 	/**
 	 * Data provider for normalize_paypal_order_shipping_country_code.
 	 *
-	 * @return array<string, array{country_code: string, expected: string|null}>
+	 * @return array<string, array{country_code: string, expected: string|null, is_supported: bool}>
 	 */
 	public function provider_normalize_paypal_order_shipping_country_code(): array {
 		return array(
@@ -482,7 +482,7 @@ class RequestTest extends \WC_Unit_Test_Case {
 	 *
 	 * @return void
 	 */
-	public function test_normalize_paypal_order_shipping_country_code( string $input, ?string $expected, bool $is_supported ): void {
+	public function test_normalize_paypal_order_shipping_country_code( string $country_code, ?string $expected, bool $is_supported ): void {
 		$gateway = new \WC_Gateway_Paypal();
 		$request = new PayPalRequest( $gateway );
 
@@ -491,11 +491,11 @@ class RequestTest extends \WC_Unit_Test_Case {
 		$method->setAccessible( true );
 
 		if ( $is_supported ) {
-			$result = $method->invokeArgs( $request, array( $input ) );
+			$result = $method->invokeArgs( $request, array( $country_code ) );
 			$this->assertSame( $expected, $result );
 		} else {
 			$this->expectException( PayPalStandardException::class );
-			$method->invokeArgs( $request, array( $input ) );
+			$method->invokeArgs( $request, array( $country_code ) );
 		}
 	}
 
