@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Notifications;
 
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
+
 use InvalidArgumentException;
 use WC_Unit_Test_Case;
 
@@ -112,9 +113,9 @@ class NotificationTest extends WC_Unit_Test_Case {
 			/**
 			 * Returns a test payload.
 			 *
-			 * @return array
+			 * @return array|null
 			 */
-			public function to_payload(): array {
+			public function to_payload(): ?array {
 				return array( 'test' => true );
 			}
 		};

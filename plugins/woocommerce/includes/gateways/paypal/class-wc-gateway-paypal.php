@@ -185,8 +185,8 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		self::$log_enabled                  = $this->debug;
 
 		if ( $this->testmode ) {
-			/* translators: %s: Link to PayPal sandbox testing guide page */
-			$this->description .= '<br>' . sprintf( __( '<strong>Sandbox mode enabled</strong>. Only sandbox test accounts can be used. See the <a href="%s">PayPal Sandbox Testing Guide</a> for more details.', 'woocommerce' ), 'https://developer.paypal.com/tools/sandbox/' );
+			/* translators: 1: Link to PayPal sandbox testing guide page, 2: Link to PayPal info page */
+			$this->description .= '<br>' . sprintf( __( '<strong>Sandbox mode enabled</strong>. Only sandbox test accounts can be used. See the <a href="%1$s">PayPal Sandbox Testing Guide</a> for more details. <a href="%2$s" target="_blank">What is PayPal?</a>', 'woocommerce' ), 'https://developer.paypal.com/tools/sandbox/', esc_url( 'https://www.paypal.com/digital-wallet/how-paypal-works' ) );
 			$this->description  = trim( $this->description );
 		}
 
@@ -414,19 +414,8 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @return string
 	 */
 	public function get_icon() {
-		// We need a base country for the link to work, bail if in the unlikely event no country is set.
-		$base_country = WC()->countries->get_base_country();
-		if ( empty( $base_country ) ) {
-			return '';
-		}
-		$icon_html = '';
-		$icon      = (array) $this->get_icon_image( $base_country );
-
-		foreach ( $icon as $i ) {
-			$icon_html .= '<img src="' . esc_attr( $i ) . '" alt="' . esc_attr__( 'PayPal acceptance mark', 'woocommerce' ) . '" />';
-		}
-
-		$icon_html .= sprintf( '<a href="%1$s" class="about_paypal" onclick="javascript:window.open(\'%1$s\',\'WIPaypal\',\'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=yes, resizable=yes, width=1060, height=700\'); return false;">' . esc_attr__( 'What is PayPal?', 'woocommerce' ) . '</a>', esc_url( $this->get_icon_url( $base_country ) ) );
+		$icon      = $this->get_paypal_icon_image();
+		$icon_html = '<img src="' . esc_attr( $icon ) . '" alt="' . esc_attr__( 'PayPal acceptance mark', 'woocommerce' ) . '" />';
 
 		return apply_filters( 'woocommerce_gateway_icon', $icon_html, $this->id );
 	}
@@ -452,12 +441,32 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	}
 
 	/**
+	 * Get PayPal icon image.
+	 *
+	 * @return string The PayPal icon image.
+	 */
+	protected function get_paypal_icon_image() {
+		$icon = WC_HTTPS::force_https_url( WC()->plugin_url() . '/assets/images/paypal.png' );
+
+		/**
+		 * Filters the PayPal icon image.
+		 *
+		 * @param string $icon The PayPal icon image.
+		 * @return string The PayPal icon image.
+		 * @since 10.6.0
+		 */
+		return apply_filters( 'woocommerce_paypal_icon', $icon );
+	}
+
+	/**
 	 * Get PayPal images for a country.
 	 *
 	 * @param string $country Country code.
 	 * @return array of image URLs
+	 * @deprecated 10.6.0 Use get_paypal_icon_image() instead.
 	 */
 	protected function get_icon_image( $country ) {
+		wc_deprecated_function( __METHOD__, '10.6.0', 'get_paypal_icon_image()' );
 		switch ( $country ) {
 			case 'US':
 			case 'NZ':

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add nonce verification to `product_ordering` and `term_ordering` AJAX handlers to prevent CSRF.
