@@ -49,12 +49,16 @@ export default function Edit( { clientId }: EditProps ) {
 	const { addEntities } = useDispatch( coreStore );
 	const { replaceInnerBlocks } = useDispatch( blockEditorStore );
 
-	const hasInnerBlocks = useSelect(
+	const savedOrder = useSelect(
 		( select ) => {
 			const store = select( blockEditorStore ) as unknown as {
-				getBlockCount: ( id: string ) => number;
+				getBlocks: ( id: string ) => Array< {
+					attributes: Record< string, unknown >;
+				} >;
 			};
-			return store.getBlockCount( clientId ) > 0;
+			return store
+				.getBlocks( clientId )
+				.map( ( b ) => b.attributes.pageId as number );
 		},
 		[ clientId ]
 	);
@@ -73,24 +77,50 @@ export default function Edit( { clientId }: EditProps ) {
 			{}
 		);
 
-	// Only sync inner blocks from REST on fresh insert (no saved inner blocks).
+	// Reconcile inner blocks with REST data on mount.
+	// Preserves saved order for known links, appends new ones, removes stale ones.
 	useEffect( () => {
-		if ( isResolving || ! links || synced.current || hasInnerBlocks ) {
+		if ( isResolving || ! links || synced.current ) {
 			return;
 		}
 		synced.current = true;
 
-		const blocks = links.map( ( link ) =>
+		const linksByPageId = new Map(
+			links.map( ( link ) => [ link.page_id ?? 0, link ] )
+		);
+
+		const makeBlock = ( link: PrivacyLinkRecord ) =>
 			createBlock( CHILD_BLOCK_NAME, {
 				label: link.label,
 				url: link.url,
 				pageId: link.page_id ?? 0,
 				status: link.status ?? 'publish',
 				editUrl: link.edit_url ?? '',
-			} )
+			} );
+
+		// Start with saved order — keep only links still in REST data.
+		const ordered: PrivacyLinkRecord[] = [];
+		const used = new Set< number >();
+		for ( const pageId of savedOrder ) {
+			const link = linksByPageId.get( pageId );
+			if ( link ) {
+				ordered.push( link );
+				used.add( pageId );
+			}
+		}
+
+		// Append any new links not in saved order.
+		for ( const link of links ) {
+			if ( ! used.has( link.page_id ?? 0 ) ) {
+				ordered.push( link );
+			}
+		}
+
+		replaceInnerBlocks(
+			clientId,
+			ordered.map( makeBlock )
 		);
-		replaceInnerBlocks( clientId, blocks );
-	}, [ links, isResolving, clientId, replaceInnerBlocks, hasInnerBlocks ] );
+	}, [ links, isResolving, clientId, replaceInnerBlocks, savedOrder ] );
 
 	const innerBlocksProps = useInnerBlocksProps( blockProps, {
 		allowedBlocks: [ CHILD_BLOCK_NAME ],
