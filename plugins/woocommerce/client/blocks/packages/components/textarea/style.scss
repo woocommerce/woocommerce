@@ -15,7 +15,6 @@
 
 	&::placeholder {
 		color: currentColor;
-		opacity: 0.7;
 	}
 
 	// When the user has typed text, use the standard input text color.
@@ -38,7 +37,6 @@
 
 		&::placeholder {
 			color: currentColor;
-			opacity: 0.6;
 		}
 	}
 }
