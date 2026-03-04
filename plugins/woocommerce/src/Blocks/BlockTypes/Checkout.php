@@ -443,10 +443,11 @@ class Checkout extends AbstractBlock {
 				FILTER_VALIDATE_BOOLEAN
 			)
 		);
-		// Optimization note: reduce the number of SQLs required to fetch the options in the lines below (1 instead of 4).
+		// Optimization note: reduce the number of SQLs required to fetch the options in the lines below.
 		wp_prime_option_caches(
 			array(
 				'woocommerce_enable_checkout_login_reminder',
+				'woocommerce_tax_display_cart', // This one is autoloaded, but we add it here for clarity.
 				'woocommerce_tax_total_display',
 				'woocommerce_ship_to_destination',
 				'woocommerce_registration_generate_password',
