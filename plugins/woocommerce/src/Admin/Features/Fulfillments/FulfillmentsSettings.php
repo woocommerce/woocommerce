@@ -190,7 +190,7 @@ class FulfillmentsSettings {
 			if ( ! empty( $fulfillments ) ) {
 				return;
 			}
-		} catch ( \Exception $e ) {
+		} catch ( \Throwable $e ) {
 			wc_get_logger()->error(
 				sprintf( 'Failed to load fulfillments for order %d: %s', $order_id, $e->getMessage() ),
 				array( 'source' => 'fulfillments' )

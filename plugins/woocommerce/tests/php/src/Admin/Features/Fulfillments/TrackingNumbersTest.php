@@ -26,7 +26,7 @@ class TrackingNumbersTest extends WP_UnitTestCase {
 	/**
 	 * Set up the combinator instance.
 	 */
-	protected function setUp(): void {
+	public function setUp(): void {
 		parent::setUp();
 		$this->original_fulfillments_flag = get_option( 'woocommerce_feature_fulfillments_enabled' );
 		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
@@ -39,7 +39,7 @@ class TrackingNumbersTest extends WP_UnitTestCase {
 	/**
 	 * Tear down the test environment.
 	 */
-	protected function tearDown(): void {
+	public function tearDown(): void {
 		if ( false === $this->original_fulfillments_flag ) {
 			delete_option( 'woocommerce_feature_fulfillments_enabled' );
 		} else {
