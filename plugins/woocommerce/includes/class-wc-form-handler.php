@@ -662,7 +662,7 @@ class WC_Form_Handler {
 				 * @param string   $cart_item_key Cart item key.
 				 * @param \WC_Cart $cart          Cart object.
 				 *
-				 * @since 10.7.0
+				 * @since 10.6.0
 				 */
 				do_action( 'woocommerce_cart_item_removed_from_user_request', $cart_item_key, WC()->cart );
 
@@ -745,7 +745,7 @@ class WC_Form_Handler {
 						 * @param int      $old_quantity  Old quantity.
 						 * @param \WC_Cart $cart          Cart object.
 						 *
-						 * @since 10.7.0
+						 * @since 10.6.0
 						 */
 						do_action( 'woocommerce_cart_item_updated_from_user_request', $cart_item_key, $quantity, $old_quantity, WC()->cart );
 						$cart_updated = true;
@@ -879,7 +879,7 @@ class WC_Form_Handler {
 			 * @param int $product_id Product ID.
 			 * @param int $quantity   Quantity added to the cart.
 			 *
-			 * @since 10.7.0
+			 * @since 10.6.0
 			 */
 			do_action( 'woocommerce_cart_item_added_from_user_request', $product_id, $quantity );
 

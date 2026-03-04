@@ -81,7 +81,7 @@ class CartRemoveItem extends AbstractCartRoute {
 		 * @param string   $cart_item_key Cart item key.
 		 * @param \WC_Cart $cart          Cart object.
 		 *
-		 * @since 10.7.0
+		 * @since 10.6.0
 		 */
 		do_action( 'woocommerce_cart_item_removed_from_user_request', $request['key'], $cart );
 

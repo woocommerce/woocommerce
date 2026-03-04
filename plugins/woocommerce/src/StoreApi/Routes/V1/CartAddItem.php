@@ -135,7 +135,7 @@ class CartAddItem extends AbstractCartRoute {
 		 * @param int $product_id Product ID.
 		 * @param int $quantity   Quantity added to the cart.
 		 *
-		 * @since 10.7.0
+		 * @since 10.6.0
 		 */
 		do_action( 'woocommerce_cart_item_added_from_user_request', $product_id, (int) $cart_item['quantity'] );
 
