@@ -979,7 +979,7 @@ class Request {
 	 * @return string
 	 * @throws PayPalStandardException If the country code is invalid.
 	 */
-	private function normalize_paypal_order_shipping_country_code( string $country_code ): ?string {
+	private function normalize_paypal_order_shipping_country_code( string $country_code ): string {
 		// Normalize to uppercase.
 		$code = strtoupper( trim( (string) $country_code ) );
 
