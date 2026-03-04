@@ -186,7 +186,9 @@ class Request {
 			return array( 'localized_error_message' => $e->get_localized_message() );
 		} catch ( \Exception $e ) {
 			\WC_Gateway_Paypal::log( $e->getMessage() );
-			return null;
+			return array(
+				'localized_error_message' => __( 'We couldn\'t create your PayPal order. Please try again or choose another payment method.', 'woocommerce' ),
+			);
 		}
 	}
 
