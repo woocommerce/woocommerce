@@ -145,6 +145,13 @@ class Constants {
 	const PAYPAL_ISSUE_PAYEE_ACCOUNT_RESTRICTED = 'PAYEE_ACCOUNT_RESTRICTED';
 
 	/**
+	 * PayPal duplicate invoice ID issue code.
+	 *
+	 * @var string
+	 */
+	const PAYPAL_ISSUE_DUPLICATE_INVOICE_ID = 'DUPLICATE_INVOICE_ID';
+
+	/**
 	 * Meta key for storing PayPal payment status in order meta.
 	 *
 	 * @var string
