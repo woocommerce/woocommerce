@@ -21,6 +21,13 @@ use WC_Order_Refund;
  */
 class FulfillmentsManager {
 	/**
+	 * The fulfillment order notes instance.
+	 *
+	 * @var FulfillmentOrderNotes|null
+	 */
+	private ?FulfillmentOrderNotes $fulfillment_order_notes = null;
+
+	/**
 	 * This method registers the hooks related to fulfillments.
 	 */
 	public function register() {
@@ -30,6 +37,11 @@ class FulfillmentsManager {
 
 		$this->init_fulfillment_status_hooks();
 		$this->init_refund_hooks();
+
+		if ( ! $this->fulfillment_order_notes ) {
+			$this->fulfillment_order_notes = wc_get_container()->get( FulfillmentOrderNotes::class );
+		}
+		$this->fulfillment_order_notes->register();
 	}
 
 	/**
@@ -343,15 +355,20 @@ class FulfillmentsManager {
 	 * This method updates the fulfillment status for the order based on the fulfillments data store.
 	 */
 	private function update_fulfillment_status( $order, $fulfillments = array() ) {
-		$last_status = FulfillmentUtils::calculate_order_fulfillment_status( $order, $fulfillments );
-		if ( 'no_fulfillments' === $last_status ) {
+		$old_status = FulfillmentUtils::get_order_fulfillment_status( $order );
+		$new_status = FulfillmentUtils::calculate_order_fulfillment_status( $order, $fulfillments );
+
+		if ( 'no_fulfillments' === $new_status ) {
 			$order->delete_meta_data( '_fulfillment_status' );
 		} else {
-			// Update the fulfillment status meta data.
-			$order->update_meta_data( '_fulfillment_status', $last_status );
+			$order->update_meta_data( '_fulfillment_status', $new_status );
 		}
 
 		$order->save();
+
+		if ( $old_status !== $new_status && isset( $this->fulfillment_order_notes ) ) {
+			$this->fulfillment_order_notes->add_order_fulfillment_status_changed_note( $order, $old_status, $new_status );
+		}
 	}
 
 	/**
