@@ -42,7 +42,7 @@ export const doesCartItemMatchAttributes = (
 					attributeNamesMatch(
 						item.attribute,
 						// It needs to check both because it uses different keys from the same value depending on the context.
-						raw_attribute || attribute
+						raw_attribute ?? attribute
 					) && item.value.toLowerCase() === value?.toLowerCase()
 				);
 			} )
