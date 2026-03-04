@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+PayPal Standard: add specific shopper-facing error messages for order creation failures.
