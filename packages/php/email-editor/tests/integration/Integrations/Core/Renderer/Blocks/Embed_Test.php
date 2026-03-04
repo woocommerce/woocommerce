@@ -735,11 +735,12 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 	/**
 	 * Helper to register example.com as an oEmbed provider and mock HTTP responses.
 	 *
-	 * @param string $mock_body      JSON-encoded oEmbed response body.
-	 * @param string $embed_page_html Optional HTML for the embed page response. Empty string disables.
+	 * @param string|false $mock_body      JSON-encoded oEmbed response body (from wp_json_encode).
+	 * @param string       $embed_page_html Optional HTML for the embed page response. Empty string disables.
 	 * @return callable The HTTP filter callback (for removal in cleanup).
 	 */
-	private function mock_oembed_for_example_com( string $mock_body, string $embed_page_html = '' ): callable {
+	private function mock_oembed_for_example_com( $mock_body, string $embed_page_html = '' ): callable {
+		$mock_body                      = (string) $mock_body;
 		$this->oembed_provider_callback = function ( $providers ) {
 			$providers['https://example.com/*'] = array( 'https://example.com/wp-json/oembed/1.0/embed', false );
 			return $providers;

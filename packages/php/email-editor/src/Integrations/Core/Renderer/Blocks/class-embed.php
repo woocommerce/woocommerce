@@ -710,10 +710,12 @@ class Embed extends Abstract_Block_Renderer {
 		$cache_key = 'wc_email_embed_pg_' . md5( $url );
 		$cached    = get_transient( $cache_key );
 
-		if ( false !== $cached && is_array( $cached ) && isset( $cached['excerpt'], $cached['site_icon_url'] ) ) {
+		if ( false !== $cached && is_array( $cached ) && isset( $cached['excerpt'], $cached['site_icon_url'] )
+			&& is_string( $cached['excerpt'] ) && is_string( $cached['site_icon_url'] )
+		) {
 			return array(
-				'excerpt'       => (string) $cached['excerpt'],
-				'site_icon_url' => (string) $cached['site_icon_url'],
+				'excerpt'       => $cached['excerpt'],
+				'site_icon_url' => $cached['site_icon_url'],
 			);
 		}
 		if ( false !== $cached ) {
