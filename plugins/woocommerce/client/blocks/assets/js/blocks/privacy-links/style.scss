@@ -1,0 +1,20 @@
+.wp-block-woocommerce-privacy-links {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+
+.wp-block-woocommerce-privacy-links__item {
+		margin: 0;
+		padding: 0;
+	}
+
+	.wp-block-woocommerce-privacy-links__draft-badge {
+		font-size: 0.7em;
+		background: #d63638;
+		color: #fff;
+		padding: 1px 6px;
+		border-radius: 2px;
+		margin-inline-start: 6px;
+		vertical-align: middle;
+	}
+}

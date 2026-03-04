@@ -1,0 +1,14 @@
+// Prevent privacy links from being clickable in the editor.
+.wp-block-woocommerce-privacy-links {
+	.wp-block-woocommerce-privacy-links__draft-badge {
+		text-decoration: none;
+	}
+
+	.wp-block-woocommerce-privacy-links__link {
+		pointer-events: none;
+
+		&--is-draft {
+			opacity: 0.7;
+		}
+	}
+}
