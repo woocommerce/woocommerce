@@ -312,12 +312,12 @@ class FulfillmentOrderNotes {
 		$parts       = array();
 
 		foreach ( $items as $item ) {
-			$item_id = $item['item_id'] ?? 0;
-			$qty     = $item['qty'] ?? 0;
+			$item_id = isset( $item['item_id'] ) ? (int) $item['item_id'] : 0;
+			$qty     = isset( $item['qty'] ) ? (int) $item['qty'] : 0;
 			$name    = '';
 
 			foreach ( $order_items as $order_item ) {
-				if ( $order_item->get_id() === $item_id ) {
+				if ( (int) $order_item->get_id() === $item_id ) {
 					$name = $order_item->get_name();
 					break;
 				}

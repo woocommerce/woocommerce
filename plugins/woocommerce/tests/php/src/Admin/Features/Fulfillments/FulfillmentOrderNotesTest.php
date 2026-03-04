@@ -14,6 +14,7 @@ use WC_Order;
 /**
  * Tests for FulfillmentOrderNotes.
  *
+ * @testdox FulfillmentOrderNotes
  * @since 10.7.0
  */
 class FulfillmentOrderNotesTest extends \WC_Unit_Test_Case {
@@ -24,10 +25,18 @@ class FulfillmentOrderNotesTest extends \WC_Unit_Test_Case {
 	private FulfillmentsManager $manager;
 
 	/**
+	 * The original value of the fulfillments feature flag before tests.
+	 *
+	 * @var string|false
+	 */
+	private static $original_fulfillments_enabled;
+
+	/**
 	 * Set up the test environment.
 	 */
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
+		self::$original_fulfillments_enabled = get_option( 'woocommerce_feature_fulfillments_enabled' );
 		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
 		$controller = wc_get_container()->get( \Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsController::class );
 		$controller->register();
@@ -38,7 +47,11 @@ class FulfillmentOrderNotesTest extends \WC_Unit_Test_Case {
 	 * Tear down the test environment.
 	 */
 	public static function tearDownAfterClass(): void {
-		update_option( 'woocommerce_feature_fulfillments_enabled', 'no' );
+		if ( false === self::$original_fulfillments_enabled ) {
+			delete_option( 'woocommerce_feature_fulfillments_enabled' );
+		} else {
+			update_option( 'woocommerce_feature_fulfillments_enabled', self::$original_fulfillments_enabled );
+		}
 		parent::tearDownAfterClass();
 	}
 
