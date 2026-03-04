@@ -231,7 +231,6 @@ class Request {
 	 * @param string|null   $action_url The URL to authorize or capture the payment.
 	 * @param string        $action The action to perform. Either 'authorize' or 'capture'.
 	 * @return void
-	 * @throws PayPalStandardException If the PayPal payment authorization or capture fails.
 	 */
 	public function authorize_or_capture_payment( ?WC_Order $order, ?string $action_url, string $action = PayPalConstants::PAYMENT_ACTION_CAPTURE ): void {
 		if ( ! $order ) {
@@ -317,7 +316,6 @@ class Request {
 	 *
 	 * @param WC_Order|null $order Order object.
 	 * @return void
-	 * @throws PayPalStandardException If the PayPal payment capture fails.
 	 */
 	public function capture_authorized_payment( ?WC_Order $order ): void {
 		if ( ! $order ) {
@@ -1055,7 +1053,6 @@ class Request {
 	 * Fetch the PayPal client-id from the Transact platform.
 	 *
 	 * @return string|null The PayPal client-id, or null if the request fails.
-	 * @throws PayPalStandardException If the request fails.
 	 */
 	public function fetch_paypal_client_id(): ?string {
 		try {
