@@ -9,7 +9,6 @@ namespace Automattic\WooCommerce\Admin\Features\Fulfillments;
 
 use Automattic\WooCommerce\Internal\Admin\Settings\Exceptions\ApiException;
 use Automattic\WooCommerce\Internal\RestApiControllerBase;
-use Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDataStore;
 use WC_Order;
 use WP_Http;
 use WP_REST_Request;
@@ -216,9 +215,14 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 
 		// Fetch fulfillments for the order.
 		try {
-			$datastore    = wc_get_container()->get( FulfillmentsDataStore::class );
+			/**
+			 * Fulfillments data store.
+			 *
+			 * @var \Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDataStore $datastore
+			 */
+			$datastore    = \WC_Data_Store::load( 'order-fulfillment' );
 			$fulfillments = $datastore->read_fulfillments( WC_Order::class, "$order_id" );
-		} catch ( \Exception $e ) {
+		} catch ( \Throwable $e ) {
 			return $this->prepare_error_response(
 				$e->getCode(),
 				$e->getMessage(),
@@ -272,7 +276,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 				WP_Http::BAD_REQUEST
 			);
 
-		} catch ( \Exception $e ) {
+		} catch ( \Throwable $e ) {
 			return $this->prepare_error_response(
 				$e->getCode(),
 				$e->getMessage(),
@@ -306,7 +310,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 					WP_Http::NOT_FOUND
 				);
 			}
-		} catch ( \Exception $e ) {
+		} catch ( \Throwable $e ) {
 			return $this->prepare_error_response(
 				$e->getCode(),
 				$e->getMessage(),
@@ -381,7 +385,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 				$ex->getMessage(),
 				WP_Http::BAD_REQUEST
 			);
-		} catch ( \Exception $e ) {
+		} catch ( \Throwable $e ) {
 			return $this->prepare_error_response(
 				$e->getCode(),
 				$e->getMessage(),
@@ -418,7 +422,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 				$ex->getMessage(),
 				WP_Http::BAD_REQUEST
 			);
-		} catch ( \Exception $e ) {
+		} catch ( \Throwable $e ) {
 			return $this->prepare_error_response(
 				$e->getCode(),
 				$e->getMessage(),
@@ -457,7 +461,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 		try {
 			$fulfillment = new Fulfillment( $fulfillment_id );
 			$this->validate_fulfillment( $fulfillment, $fulfillment_id, $order_id );
-		} catch ( \Exception $e ) {
+		} catch ( \Throwable $e ) {
 			return $this->prepare_error_response(
 				$e->getCode(),
 				$e->getMessage(),
@@ -506,7 +510,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 				$ex->getMessage(),
 				WP_Http::BAD_REQUEST
 			);
-		} catch ( \Exception $e ) {
+		} catch ( \Throwable $e ) {
 			return $this->prepare_error_response(
 				$e->getCode(),
 				$e->getMessage(),
@@ -545,7 +549,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 				$ex->getMessage(),
 				WP_Http::BAD_REQUEST
 			);
-		} catch ( \Exception $e ) {
+		} catch ( \Throwable $e ) {
 			return $this->prepare_error_response(
 				$e->getCode(),
 				$e->getMessage(),

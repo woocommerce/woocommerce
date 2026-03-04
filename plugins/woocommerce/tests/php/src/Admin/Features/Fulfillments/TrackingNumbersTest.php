@@ -17,15 +17,35 @@ class TrackingNumbersTest extends WP_UnitTestCase {
 	private $combinator;
 
 	/**
+	 * Original value of the fulfillments feature flag.
+	 *
+	 * @var mixed
+	 */
+	private $original_fulfillments_flag;
+
+	/**
 	 * Set up the combinator instance.
 	 */
-	protected function setUp(): void {
+	public function setUp(): void {
 		parent::setUp();
+		$this->original_fulfillments_flag = get_option( 'woocommerce_feature_fulfillments_enabled' );
 		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
 		$controller = wc_get_container()->get( \Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsController::class );
 		$controller->register();
 		$controller->initialize_fulfillments();
 		$this->combinator = wc_get_container()->get( FulfillmentsManager::class );
+	}
+
+	/**
+	 * Tear down the test environment.
+	 */
+	public function tearDown(): void {
+		if ( false === $this->original_fulfillments_flag ) {
+			delete_option( 'woocommerce_feature_fulfillments_enabled' );
+		} else {
+			update_option( 'woocommerce_feature_fulfillments_enabled', $this->original_fulfillments_flag );
+		}
+		parent::tearDown();
 	}
 
 	/**

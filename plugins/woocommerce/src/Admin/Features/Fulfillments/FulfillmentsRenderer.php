@@ -8,7 +8,6 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Admin\Features\Fulfillments;
 
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
-use Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDataStore;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Order;
 
@@ -558,8 +557,21 @@ class FulfillmentsRenderer {
 		}
 
 		// If not, fetch them and cache them.
-		$data_store                                   = wc_get_container()->get( FulfillmentsDataStore::class );
-		$fulfillments                                 = $data_store->read_fulfillments( WC_Order::class, '' . $order->get_id() );
+		try {
+			/**
+			 * Fulfillments data store.
+			 *
+			 * @var \Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDataStore $data_store
+			 */
+			$data_store   = \WC_Data_Store::load( 'order-fulfillment' );
+			$fulfillments = $data_store->read_fulfillments( WC_Order::class, '' . $order->get_id() );
+		} catch ( \Throwable $e ) {
+			wc_get_logger()->error(
+				sprintf( 'Failed to load fulfillments for order %d: %s', $order->get_id(), $e->getMessage() ),
+				array( 'source' => 'fulfillments' )
+			);
+			$fulfillments = array();
+		}
 		$this->fulfillments_cache[ $order->get_id() ] = $fulfillments;
 
 		return $fulfillments;

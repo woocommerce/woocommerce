@@ -329,7 +329,7 @@ class Controller extends AbstractController {
 						$ex->getMessage(),
 						array( 'status' => esc_attr( WP_Http::BAD_REQUEST ) )
 					);
-				} catch ( \Exception $e ) {
+				} catch ( \Throwable $e ) {
 					return new WP_Error(
 						'woocommerce_rest_fulfillment_invalid_id',
 						$e->getMessage(),

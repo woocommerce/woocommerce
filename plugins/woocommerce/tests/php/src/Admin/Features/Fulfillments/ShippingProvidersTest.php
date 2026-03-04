@@ -11,6 +11,34 @@ use Automattic\WooCommerce\Admin\Features\Fulfillments\Providers as ShippingProv
  * This class tests the shipping providers configuration.
  */
 class ShippingProvidersTest extends \WP_UnitTestCase {
+
+	/**
+	 * Original value of the fulfillments feature flag.
+	 *
+	 * @var mixed
+	 */
+	private $original_fulfillments_flag;
+
+	/**
+	 * Set up the test environment.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		$this->original_fulfillments_flag = get_option( 'woocommerce_feature_fulfillments_enabled' );
+	}
+
+	/**
+	 * Tear down the test environment.
+	 */
+	public function tearDown(): void {
+		if ( false === $this->original_fulfillments_flag ) {
+			delete_option( 'woocommerce_feature_fulfillments_enabled' );
+		} else {
+			update_option( 'woocommerce_feature_fulfillments_enabled', $this->original_fulfillments_flag );
+		}
+		parent::tearDown();
+	}
+
 	/**
 	 * Test that the shipping providers configuration returns the correct classes.
 	 */
