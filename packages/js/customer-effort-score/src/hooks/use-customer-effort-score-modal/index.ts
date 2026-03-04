@@ -10,28 +10,33 @@ import { optionsStore } from '@woocommerce/data';
 import { SHOWN_FOR_ACTIONS_OPTION_NAME } from '../../constants';
 import { STORE_KEY } from '../../store';
 
+const EMPTY_SHOWN_ACTIONS: string[] = [];
+
 export const useCustomerEffortScoreModal = () => {
 	const { showCesModal: _showCesModal, showProductMVPFeedbackModal } =
 		useDispatch( STORE_KEY );
 	const { updateOptions } = useDispatch( optionsStore );
 
-	const { wasPreviouslyShown, isLoading } = useSelect( ( select ) => {
+	const { shownForActions, isLoading } = useSelect( ( select ) => {
 		const { getOption, hasFinishedResolution } = select( optionsStore );
 
 		const shownForActionsOption =
-			( getOption( SHOWN_FOR_ACTIONS_OPTION_NAME ) as string[] ) || [];
+			( getOption( SHOWN_FOR_ACTIONS_OPTION_NAME ) as string[] ) ||
+			EMPTY_SHOWN_ACTIONS;
 
 		const resolving = ! hasFinishedResolution( 'getOption', [
 			SHOWN_FOR_ACTIONS_OPTION_NAME,
 		] );
 
 		return {
-			wasPreviouslyShown: ( action: string ) => {
-				return shownForActionsOption.includes( action );
-			},
+			shownForActions: shownForActionsOption,
 			isLoading: resolving,
 		};
 	}, [] );
+
+	const wasPreviouslyShown = ( action: string ) => {
+		return shownForActions.includes( action );
+	};
 
 	const markCesAsShown = async ( action: string ) => {
 		const { getOption } = resolveSelect( optionsStore );
