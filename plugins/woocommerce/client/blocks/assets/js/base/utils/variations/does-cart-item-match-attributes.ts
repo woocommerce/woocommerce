@@ -28,8 +28,8 @@ export const doesCartItemMatchAttributes = (
 
 	return cartItem.variation.every(
 		( {
-			// eslint-disable-next-line
 			attribute,
+			// eslint-disable-next-line
 			raw_attribute,
 			value,
 		}: {
