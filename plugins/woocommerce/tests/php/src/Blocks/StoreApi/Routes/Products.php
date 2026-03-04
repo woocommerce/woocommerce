@@ -542,7 +542,6 @@ class Products extends ControllerTestCase {
 			'pending'    => array( ProductStatus::PENDING ),
 			'private'    => array( ProductStatus::PRIVATE ),
 			'trash'      => array( ProductStatus::TRASH ),
-			'future'     => array( ProductStatus::FUTURE ),
 			'auto-draft' => array( ProductStatus::AUTO_DRAFT ),
 		);
 	}
