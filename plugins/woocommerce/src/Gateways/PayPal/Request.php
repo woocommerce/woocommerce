@@ -967,8 +967,12 @@ class Request {
 
 		// Check if it's a valid alpha-3 code.
 		$alpha2 = WC()->countries->get_country_from_alpha_3_code( $code );
-		if ( null === $alpha2 || ! PayPalHelper::is_country_supported_by_paypal( $alpha2 ) ) {
-			\WC_Gateway_Paypal::log( sprintf( 'Invalid alpha-3 country code: %s', $code ) );
+		if ( null === $alpha2 ) {
+			\WC_Gateway_Paypal::log( sprintf( 'Invalid alpha-3 country code: %s', $code ), 'error' );
+			return null;
+		}
+		if ( ! PayPalHelper::is_country_supported_by_paypal( $alpha2 ) ) {
+			\WC_Gateway_Paypal::log( sprintf( 'Country not supported by PayPal: %s (resolved from alpha-3: %s)', $alpha2, $code ) );
 			return null;
 		}
 
