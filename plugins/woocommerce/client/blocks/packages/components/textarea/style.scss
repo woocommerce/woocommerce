@@ -4,7 +4,9 @@
 	background-color: $input-background-light;
 	border: 1px solid $universal-border-strong;
 	border-radius: $universal-border-radius;
-	color: $input-text-light;
+	// Use inherit so the placeholder picks up the global text color.
+	// Typed text color is reset below via :not(:placeholder-shown).
+	color: inherit;
 	font-family: inherit;
 	margin: 0;
 	padding: $gap-small;
@@ -12,12 +14,17 @@
 	box-sizing: border-box;
 
 	&::placeholder {
-		color: $universal-body-low-emphasis;
+		color: currentColor;
+		opacity: 0.7;
+	}
+
+	// When the user has typed text, use the standard input text color.
+	&:not(:placeholder-shown) {
+		color: $input-text-light;
 	}
 
 	&:focus {
 		background-color: $input-background-light;
-		color: $input-text-light;
 		// Keep border at 1px to prevent layout shift, use box-shadow for the extra
 		// 0.5px thickness
 		border: 1px solid currentColor;
@@ -30,7 +37,8 @@
 		color: $input-text-dark;
 
 		&::placeholder {
-			color: $input-placeholder-dark;
+			color: currentColor;
+			opacity: 0.6;
 		}
 	}
 }
