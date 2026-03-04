@@ -213,10 +213,11 @@ class Request {
 	 * @param WC_Order|null $order Order object.
 	 * @param string|null   $action_url The URL to authorize or capture the payment.
 	 * @param string        $action The action to perform. Either 'authorize' or 'capture'.
+	 * @param bool          $is_retry Whether the payment is being retried.
 	 * @return void
 	 * @throws Exception If the PayPal payment authorization or capture fails.
 	 */
-	public function authorize_or_capture_payment( ?WC_Order $order, ?string $action_url, string $action = PayPalConstants::PAYMENT_ACTION_CAPTURE ): void {
+	public function authorize_or_capture_payment( ?WC_Order $order, ?string $action_url, string $action = PayPalConstants::PAYMENT_ACTION_CAPTURE, bool $is_retry = false ): void {
 		if ( ! $order ) {
 			\WC_Gateway_Paypal::log( 'Order not found to authorize or capture payment.' );
 			return;
@@ -266,6 +267,16 @@ class Request {
 			$http_code     = wp_remote_retrieve_response_code( $response );
 			$body          = wp_remote_retrieve_body( $response );
 			$response_data = json_decode( $body, true );
+
+			$issue                = isset( $response_data['details'][0]['issue'] ) ? $response_data['details'][0]['issue'] : '';
+			$duplicate_invoice_id = 422 === $http_code && PayPalConstants::PAYPAL_ISSUE_DUPLICATE_INVOICE_ID === $issue;
+
+			// If the payment failed with a duplicate invoice ID error and it's not a retry, handle it.
+			// If it's a retry, don't handle it again.
+			if ( $duplicate_invoice_id && ! $is_retry ) {
+				$this->handle_duplicate_invoice_id( $order, $paypal_order_id, $action_url, $action );
+				return;
+			}
 
 			if ( 200 !== $http_code && 201 !== $http_code ) {
 				$paypal_debug_id = isset( $response_data['debug_id'] ) ? $response_data['debug_id'] : null;
@@ -414,6 +425,89 @@ class Request {
 			$order->add_order_note( $note_message );
 			$order->save();
 		}
+	}
+
+	/**
+	 * Handle duplicate invoice ID.
+	 * This is a workaround to handle the duplicate invoice ID error that occurs when the invoice ID is not unique.
+	 * We generate a new invoice ID and patch the invoice ID in the PayPal order.
+	 * Then we retry capturing the payment.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @param string   $paypal_order_id The PayPal order ID.
+	 * @param string   $action_url The action URL.
+	 * @param string   $action The action.
+	 * @return void
+	 * @throws Exception If the PayPal patch invoice_id request fails.
+	 */
+	private function handle_duplicate_invoice_id( WC_Order $order, string $paypal_order_id, string $action_url, string $action ): void {
+		$new_invoice_id = $this->generate_paypal_invoice_id_with_unique_suffix( $order );
+
+		\WC_Gateway_Paypal::log( 'Attempting to patch PayPal order invoice_id. PayPal Order ID: ' . $paypal_order_id . '. New invoice_id: ' . $new_invoice_id . '. Order ID: ' . $order->get_id() );
+
+		try {
+			$request_body = array(
+				'test_mode' => $this->gateway->testmode,
+				'order'     => array(
+					array(
+						'op'    => 'replace',
+						'path'  => "/purchase_units/@reference_id=='default'/invoice_id",
+						'value' => $new_invoice_id,
+					),
+				),
+			);
+
+			$response = $this->send_wpcom_proxy_request( 'PATCH', self::WPCOM_PROXY_ORDER_ENDPOINT . '/' . $paypal_order_id, $request_body );
+
+			if ( is_wp_error( $response ) ) {
+				throw new Exception( 'PayPal patch invoice_id request failed. Response error: ' . $response->get_error_message() );
+			}
+
+			$http_code     = wp_remote_retrieve_response_code( $response );
+			$body          = wp_remote_retrieve_body( $response );
+			$response_data = json_decode( $body, true );
+
+			if ( 200 !== $http_code && 204 !== $http_code ) {
+				\WC_Gateway_Paypal::log( 'PayPal patch invoice_id failed. Response status: ' . $http_code . '. Response body: ' . $body );
+				throw new Exception( 'Failed to patch PayPal order invoice_id. Response status: ' . $http_code );
+			}
+
+			\WC_Gateway_Paypal::log( 'Successfully patched PayPal order invoice_id. PayPal Order ID: ' . $paypal_order_id . '. New invoice_id: ' . $new_invoice_id . '. Order ID: ' . $order->get_id() );
+
+			$order->add_order_note(
+				sprintf(
+					/* translators: %1$s: New invoice ID */
+					__( 'PayPal order Invoice ID updated to %1$s to ensure uniqueness.', 'woocommerce' ),
+					esc_html( $new_invoice_id )
+				)
+			);
+			$order->save();
+
+			// Retry authorizing or capturing the payment after patching the invoice_id.
+			$this->authorize_or_capture_payment( $order, $action_url, $action, true );
+		} catch ( Exception $e ) {
+			\WC_Gateway_Paypal::log( $e->getMessage() );
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+			throw new Exception( $e->getMessage() );
+		}
+	}
+
+	/**
+	 * Generate a unique invoice ID for the order.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return string
+	 */
+	private function generate_paypal_invoice_id_with_unique_suffix( WC_Order $order ): string {
+		$prefix          = $this->gateway->get_option( 'invoice_prefix' );
+		$order_number    = $order->get_order_number();
+		$base_invoice_id = $prefix . $order_number;
+
+		// Generate a unique ID for the invoice.
+		$unique_id = bin2hex( random_bytes( 6 ) );
+
+		$invoice_id = $this->limit_length( $base_invoice_id . '-' . $unique_id, PayPalConstants::PAYPAL_INVOICE_ID_MAX_LENGTH );
+		return $invoice_id;
 	}
 
 	/**
