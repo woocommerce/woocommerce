@@ -77,10 +77,10 @@ class CartUpdateItem extends AbstractCartRoute {
 			/**
 			 * Fires when a cart item quantity is updated from a user request.
 			 *
-			 * @param string   $item_key     Cart item key.
-			 * @param int      $quantity     Quantity.
-			 * @param int      $old_quantity Old quantity.
-			 * @param \WC_Cart $cart         Cart object.
+			 * @param string   $cart_item_key Cart item key.
+			 * @param int      $quantity      Quantity.
+			 * @param int      $old_quantity  Old quantity.
+			 * @param \WC_Cart $cart          Cart object.
 			 *
 			 * @since 10.6.0
 			 */

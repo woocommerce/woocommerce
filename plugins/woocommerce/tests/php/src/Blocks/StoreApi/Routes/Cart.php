@@ -1159,8 +1159,8 @@ class Cart extends ControllerTestCase {
 	public function test_update_item_fires_update_action(): void {
 		$captured_args = array();
 		// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
-		$callback = function ( $item_key, $quantity, $old_quantity, $cart ) use ( &$captured_args ) {
-			$captured_args = compact( 'item_key', 'quantity', 'old_quantity', 'cart' );
+		$callback = function ( $cart_item_key, $quantity, $old_quantity, $cart ) use ( &$captured_args ) {
+			$captured_args = compact( 'cart_item_key', 'quantity', 'old_quantity', 'cart' );
 		};
 
 		add_action( 'woocommerce_cart_item_updated_from_user_request', $callback, 10, 4 );
@@ -1177,7 +1177,7 @@ class Cart extends ControllerTestCase {
 		$this->assertAPIResponse( $request, 200 );
 
 		$this->assertNotEmpty( $captured_args, 'The update action should have been fired' );
-		$this->assertSame( $this->keys[0], $captured_args['item_key'] );
+		$this->assertSame( $this->keys[0], $captured_args['cart_item_key'] );
 		$this->assertSame( 5, $captured_args['quantity'] );
 		$this->assertSame( 2, $captured_args['old_quantity'] );
 		$this->assertInstanceOf( \WC_Cart::class, $captured_args['cart'] );
@@ -1191,8 +1191,8 @@ class Cart extends ControllerTestCase {
 	public function test_remove_item_fires_remove_action(): void {
 		$captured_args = array();
 		// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
-		$callback = function ( $item_key, $cart ) use ( &$captured_args ) {
-			$captured_args = compact( 'item_key', 'cart' );
+		$callback = function ( $cart_item_key, $cart ) use ( &$captured_args ) {
+			$captured_args = compact( 'cart_item_key', 'cart' );
 		};
 
 		add_action( 'woocommerce_cart_item_removed_from_user_request', $callback, 10, 2 );
@@ -1208,7 +1208,7 @@ class Cart extends ControllerTestCase {
 		$this->assertAPIResponse( $request, 200 );
 
 		$this->assertNotEmpty( $captured_args, 'The remove action should have been fired' );
-		$this->assertSame( $this->keys[0], $captured_args['item_key'] );
+		$this->assertSame( $this->keys[0], $captured_args['cart_item_key'] );
 		$this->assertInstanceOf( \WC_Cart::class, $captured_args['cart'] );
 
 		remove_action( 'woocommerce_cart_item_removed_from_user_request', $callback );
