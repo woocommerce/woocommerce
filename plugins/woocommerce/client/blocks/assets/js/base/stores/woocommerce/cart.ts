@@ -102,6 +102,9 @@ export type Store = {
 		};
 		restUrl: string;
 		nonce: string;
+		itemInCart: (
+			args: Pick< ClientCartItem, 'id' | 'key' | 'variation' >
+		) => CartItem | OptimisticCartItem | undefined;
 		cart: Omit< Cart, 'items' > & {
 			items: ( OptimisticCartItem | CartItem )[];
 			totals: CartResponseTotals;
@@ -215,27 +218,6 @@ const getInfoNoticesFromCartUpdates = (
 	];
 };
 
-export const findExistingCartItem = ( {
-	id,
-	key,
-	variation,
-}: Pick< ClientCartItem, 'id' | 'key' | 'variation' > ) => {
-	return state.cart.items.find( ( cartItem ) => {
-		if ( cartItem.type === 'variation' ) {
-			if (
-				id !== cartItem.id ||
-				! cartItem.variation ||
-				! variation ||
-				cartItem.variation.length !== variation.length
-			) {
-				return false;
-			}
-			return doesCartItemMatchAttributes( cartItem, variation );
-		}
-		return key ? key === cartItem.key : id === cartItem.id;
-	} );
-};
-
 let pendingRefresh = false;
 let refreshTimeout = 3000;
 let resolveNonceReady: ( () => void ) | null = null;
@@ -306,6 +288,31 @@ async function sendCartRequest(
 const { state, actions } = store< Store >(
 	'woocommerce',
 	{
+		state: {
+			itemInCart( {
+				id,
+				key,
+				variation,
+			}: Pick< ClientCartItem, 'id' | 'key' | 'variation' > ) {
+				return state.cart.items.find( ( cartItem ) => {
+					if ( cartItem.type === 'variation' ) {
+						if (
+							id !== cartItem.id ||
+							! cartItem.variation ||
+							! variation ||
+							cartItem.variation.length !== variation.length
+						) {
+							return false;
+						}
+						return doesCartItemMatchAttributes(
+							cartItem,
+							variation
+						);
+					}
+					return key ? key === cartItem.key : id === cartItem.id;
+				} );
+			},
+		},
 		actions: {
 			*removeCartItem( key: string ): AsyncAction< void > {
 				// Track what changes we're making for notice comparison.
@@ -374,7 +381,7 @@ const { state, actions } = store< Store >(
 				const a11yModulePromise = import( '@wordpress/a11y' );
 
 				// Find existing item
-				const existingItem = findExistingCartItem( item );
+				const existingItem = state.itemInCart( item );
 
 				// Determine the target quantity.
 				// If quantityToAdd is provided, calculate target based on current
@@ -517,7 +524,7 @@ const { state, actions } = store< Store >(
 					// Submit each item through the batcher. They'll be
 					// collected into a single batch request automatically.
 					const promises = items.map( ( item, index ) => {
-						const existingItem = findExistingCartItem( item );
+						const existingItem = state.itemInCart( item );
 
 						let quantity: number;
 						if ( typeof item.quantityToAdd === 'number' ) {

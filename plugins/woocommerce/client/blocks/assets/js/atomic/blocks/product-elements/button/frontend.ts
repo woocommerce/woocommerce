@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { store, getContext, useLayoutEffect } from '@wordpress/interactivity';
-import { findExistingCartItem } from '@woocommerce/stores/woocommerce/cart';
 import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
 import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
 
@@ -45,6 +44,12 @@ type ServerState = {
 	};
 };
 
+const { state: wooState } = store< WooCommerce >(
+	'woocommerce',
+	{},
+	{ lock: universalLock }
+);
+
 const { state: addToCartWithOptionsState } = store< AddToCartWithOptionsStore >(
 	'woocommerce/add-to-cart-with-options',
 	{},
@@ -64,7 +69,7 @@ const productButtonStore = {
 				'woocommerce/add-to-cart-with-options'
 			);
 
-			const product = findExistingCartItem( {
+			const product = wooState.itemInCart( {
 				id: state.productId,
 				variation: formContext?.selectedAttributes,
 			} );
@@ -102,7 +107,7 @@ const productButtonStore = {
 			if ( productType === 'grouped' ) {
 				const groupedProductIdsInCart = groupedProductIds?.map(
 					( productId ) => {
-						const product = findExistingCartItem( {
+						const product = wooState.itemInCart( {
 							id: productId,
 						} );
 						return product?.quantity || 0;

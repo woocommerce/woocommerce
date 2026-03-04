@@ -10,7 +10,6 @@ import {
 	useRef,
 	withSyncEvent,
 } from '@wordpress/interactivity';
-import { findExistingCartItem } from '@woocommerce/stores/woocommerce/cart';
 import '@woocommerce/stores/store-notices';
 import type {
 	Store as WooCommerce,
@@ -447,8 +446,9 @@ const { state: cartItemState } = store(
 				const { cartItem } =
 					getContext< CartItemContext >( 'woocommerce' );
 
-				const currentCartItem = ( findExistingCartItem( cartItem ) ||
-					{} ) as CartItem;
+				const currentCartItem = ( woocommerceState.itemInCart(
+					cartItem
+				) || {} ) as CartItem;
 
 				currentCartItem.variation = currentCartItem.variation || [];
 				currentCartItem.item_data = currentCartItem.item_data || [];
