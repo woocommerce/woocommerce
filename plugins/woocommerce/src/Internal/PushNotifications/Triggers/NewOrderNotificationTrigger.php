@@ -49,6 +49,8 @@ class NewOrderNotificationTrigger {
 	private PendingNotificationStore $pending_notification_store;
 
 	/**
+	 * Constructs the trigger.
+	 *
 	 * @param PendingNotificationStore $pending_notification_store The notification store.
 	 *
 	 * @since 10.7.0

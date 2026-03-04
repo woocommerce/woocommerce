@@ -24,6 +24,8 @@ class NewReviewNotificationTrigger {
 	private PendingNotificationStore $store;
 
 	/**
+	 * Constructs the trigger.
+	 *
 	 * @param PendingNotificationStore $store The notification store.
 	 *
 	 * @since 10.7.0
