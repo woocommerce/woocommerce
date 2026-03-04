@@ -755,6 +755,7 @@ class BlockTemplateUtils {
 		// Optimization note: populate template objects; optimized for subsequent calls, without spawning consequent SQLs.
 		$saved_templates = $request_level_cache[ $template_type ][ $theme ];
 		if ( ! empty( $saved_templates ) && is_array( $slugs ) && array() !== $slugs ) {
+			$slugs           = array_map( 'sanitize_title', $slugs );
 			$saved_templates = array_filter( $saved_templates, fn( $template ) => in_array( $template->post_name, $slugs, true ) );
 		}
 		if ( ! empty( $saved_templates ) ) {
