@@ -125,7 +125,7 @@ class FulfillmentsManager {
 			/**
 			 * Fulfillments data store.
 			 *
-			 * @var \Automattic\WooCommerce\Internal\DataStores\Fulfillments\FulfillmentsDataStore $fulfillments_data_store
+			 * @var \Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDataStore $fulfillments_data_store
 			 */
 			$fulfillments_data_store = \WC_Data_Store::load( 'order-fulfillment' );
 			$fulfillments            = $fulfillments_data_store->read_fulfillments( \WC_Order::class, (string) $order->get_id() );
@@ -170,7 +170,7 @@ class FulfillmentsManager {
 			/**
 			 * Fulfillments data store.
 			 *
-			 * @var \Automattic\WooCommerce\Internal\DataStores\Fulfillments\FulfillmentsDataStore $fulfillments_data_store
+			 * @var \Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDataStore $fulfillments_data_store
 			 */
 			$fulfillments_data_store = \WC_Data_Store::load( 'order-fulfillment' );
 			$fulfillments            = $fulfillments_data_store->read_fulfillments( \WC_Order::class, (string) $order_id );
@@ -219,7 +219,7 @@ class FulfillmentsManager {
 			/**
 			 * Fulfillments data store.
 			 *
-			 * @var \Automattic\WooCommerce\Internal\DataStores\Fulfillments\FulfillmentsDataStore $fulfillments_data_store
+			 * @var \Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDataStore $fulfillments_data_store
 			 */
 			$fulfillments_data_store = \WC_Data_Store::load( 'order-fulfillment' );
 			$fulfillments            = $fulfillments_data_store->read_fulfillments( \WC_Order::class, (string) $order_id );

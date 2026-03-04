@@ -3040,7 +3040,7 @@ if ( ! function_exists( 'woocommerce_order_details_table' ) ) {
 			/**
 			 * Fulfillments data store.
 			 *
-			 * @var \Automattic\WooCommerce\Internal\DataStores\Fulfillments\FulfillmentsDataStore $fulfillment_data_store
+			 * @var \Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDataStore $fulfillment_data_store
 			 */
 			$fulfillment_data_store = \WC_Data_Store::load( 'order-fulfillment' );
 			$fulfillments           = $fulfillment_data_store->read_fulfillments( WC_Order::class, $order_id );

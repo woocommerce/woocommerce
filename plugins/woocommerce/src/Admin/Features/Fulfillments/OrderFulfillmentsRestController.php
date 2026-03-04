@@ -218,7 +218,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 			/**
 			 * Fulfillments data store.
 			 *
-			 * @var \Automattic\WooCommerce\Internal\DataStores\Fulfillments\FulfillmentsDataStore $datastore
+			 * @var \Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDataStore $datastore
 			 */
 			$datastore    = \WC_Data_Store::load( 'order-fulfillment' );
 			$fulfillments = $datastore->read_fulfillments( WC_Order::class, "$order_id" );

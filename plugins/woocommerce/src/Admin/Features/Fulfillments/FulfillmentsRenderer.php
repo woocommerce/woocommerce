@@ -561,7 +561,7 @@ class FulfillmentsRenderer {
 			/**
 			 * Fulfillments data store.
 			 *
-			 * @var \Automattic\WooCommerce\Internal\DataStores\Fulfillments\FulfillmentsDataStore $data_store
+			 * @var \Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDataStore $data_store
 			 */
 			$data_store   = \WC_Data_Store::load( 'order-fulfillment' );
 			$fulfillments = $data_store->read_fulfillments( WC_Order::class, '' . $order->get_id() );
