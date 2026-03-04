@@ -26,6 +26,7 @@ import {
 	type MutationQueue,
 	type MutationResult,
 } from './mutation-batcher';
+import { doesCartItemMatchAttributes } from '../../utils/variations/does-cart-item-match-attributes';
 
 export type WooCommerceConfig = {
 	products?: {
@@ -214,38 +215,25 @@ const getInfoNoticesFromCartUpdates = (
 	];
 };
 
-// Same as the one in /assets/js/base/utils/variations/does-cart-item-match-attributes.ts.
-const doesCartItemMatchAttributes = (
-	cartItem: OptimisticCartItem,
-	selectedAttributes: SelectedAttributes[]
-) => {
-	if (
-		! Array.isArray( cartItem.variation ) ||
-		! Array.isArray( selectedAttributes )
-	) {
-		return false;
-	}
-
-	if ( cartItem.variation.length !== selectedAttributes.length ) {
-		return false;
-	}
-
-	return cartItem.variation.every(
-		( {
-			// eslint-disable-next-line
-			raw_attribute,
-			value,
-		}: {
-			raw_attribute: string;
-			value: string;
-		} ) =>
-			selectedAttributes.some( ( item: SelectedAttributes ) => {
-				return (
-					item.attribute === raw_attribute &&
-					item.value.toLowerCase() === value?.toLowerCase()
-				);
-			} )
-	);
+export const findExistingCartItem = ( {
+	id,
+	key,
+	variation,
+}: ClientCartItem ) => {
+	return state.cart.items.find( ( cartItem ) => {
+		if ( cartItem.type === 'variation' ) {
+			if (
+				id !== cartItem.id ||
+				! cartItem.variation ||
+				! variation ||
+				cartItem.variation.length !== variation.length
+			) {
+				return false;
+			}
+			return doesCartItemMatchAttributes( cartItem, variation );
+		}
+		return key ? key === cartItem.key : id === cartItem.id;
+	} );
 };
 
 let pendingRefresh = false;
@@ -373,9 +361,10 @@ const { state, actions } = store< Store >(
 			},
 
 			*addCartItem(
-				{ id, key, quantity, quantityToAdd, variation }: ClientCartItem,
+				item: ClientCartItem,
 				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
 			): AsyncAction< void > {
+				const { id, quantity, quantityToAdd, variation } = item;
 				if ( quantity !== undefined && quantityToAdd !== undefined ) {
 					throw new Error(
 						'addCartItem: pass either quantity or quantityToAdd, not both.'
@@ -385,23 +374,7 @@ const { state, actions } = store< Store >(
 				const a11yModulePromise = import( '@wordpress/a11y' );
 
 				// Find existing item
-				const existingItem = state.cart.items.find( ( cartItem ) => {
-					if ( cartItem.type === 'variation' ) {
-						if (
-							id !== cartItem.id ||
-							! cartItem.variation ||
-							! variation ||
-							cartItem.variation.length !== variation.length
-						) {
-							return false;
-						}
-						return doesCartItemMatchAttributes(
-							cartItem,
-							variation
-						);
-					}
-					return key ? key === cartItem.key : id === cartItem.id;
-				} );
+				const existingItem = findExistingCartItem( item );
 
 				// Determine the target quantity.
 				// If quantityToAdd is provided, calculate target based on current
@@ -544,9 +517,7 @@ const { state, actions } = store< Store >(
 					// Submit each item through the batcher. They'll be
 					// collected into a single batch request automatically.
 					const promises = items.map( ( item, index ) => {
-						const existingItem = state.cart.items.find(
-							( { id: productId } ) => item.id === productId
-						);
+						const existingItem = findExistingCartItem( item );
 
 						let quantity: number;
 						if ( typeof item.quantityToAdd === 'number' ) {
