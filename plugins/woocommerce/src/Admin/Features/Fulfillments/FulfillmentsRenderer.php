@@ -557,13 +557,21 @@ class FulfillmentsRenderer {
 		}
 
 		// If not, fetch them and cache them.
-		/**
-		 * Fulfillments data store.
-		 *
-		 * @var \Automattic\WooCommerce\Internal\DataStores\Fulfillments\FulfillmentsDataStore $data_store
-		 */
-		$data_store                                   = \WC_Data_Store::load( 'order-fulfillment' );
-		$fulfillments                                 = $data_store->read_fulfillments( WC_Order::class, '' . $order->get_id() );
+		try {
+			/**
+			 * Fulfillments data store.
+			 *
+			 * @var \Automattic\WooCommerce\Internal\DataStores\Fulfillments\FulfillmentsDataStore $data_store
+			 */
+			$data_store   = \WC_Data_Store::load( 'order-fulfillment' );
+			$fulfillments = $data_store->read_fulfillments( WC_Order::class, '' . $order->get_id() );
+		} catch ( \Exception $e ) {
+			wc_get_logger()->error(
+				sprintf( 'Failed to load fulfillments for order %d: %s', $order->get_id(), $e->getMessage() ),
+				array( 'source' => 'fulfillments' )
+			);
+			$fulfillments = array();
+		}
 		$this->fulfillments_cache[ $order->get_id() ] = $fulfillments;
 
 		return $fulfillments;
