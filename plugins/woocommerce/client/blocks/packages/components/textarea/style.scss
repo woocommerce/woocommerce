@@ -2,7 +2,7 @@
 	@include reset-typography();
 	@include font-small-locked;
 	background-color: $input-background-light;
-	border: 1px solid $universal-border-strong;
+	border: 1px solid color-mix(in srgb, $input-text-light 80%, transparent);
 	border-radius: $universal-border-radius;
 	// Use inherit so the placeholder picks up the global text color.
 	// Typed text color is reset below via :not(:placeholder-shown).
@@ -26,8 +26,8 @@
 		background-color: $input-background-light;
 		// Keep border at 1px to prevent layout shift, use box-shadow for the extra
 		// 0.5px thickness
-		border: 1px solid currentColor;
-		box-shadow: inset 0 0 0 0.5px currentColor;
+		border: 1px solid $input-text-light;
+		box-shadow: inset 0 0 0 0.5px $input-text-light;
 	}
 
 	.has-dark-controls & {
