@@ -16,8 +16,8 @@ namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Fulfillments;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\Admin\Settings\Exceptions\ApiException;
-use Automattic\WooCommerce\Internal\Fulfillments\Fulfillment;
-use Automattic\WooCommerce\Internal\Fulfillments\OrderFulfillmentsRestController;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\OrderFulfillmentsRestController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Fulfillments\Schema\FulfillmentSchema;
 use WP_Http;
@@ -436,7 +436,7 @@ class Controller extends AbstractController {
 	 * @return WP_REST_Response
 	 */
 	public function get_providers( WP_REST_Request $request ): WP_REST_Response {
-		$providers = \Automattic\WooCommerce\Internal\Fulfillments\FulfillmentUtils::get_shipping_providers_object();
+		$providers = \Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentUtils::get_shipping_providers_object();
 
 		/**
 		 * Filters the shipping providers response before it is returned.

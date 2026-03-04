@@ -443,6 +443,16 @@ class Checkout extends AbstractBlock {
 				FILTER_VALIDATE_BOOLEAN
 			)
 		);
+		// Optimization note: reduce the number of SQLs required to fetch the options in the lines below.
+		wp_prime_option_caches(
+			array(
+				'woocommerce_enable_checkout_login_reminder',
+				'woocommerce_tax_display_cart', // This one is autoloaded, but we add it here for clarity.
+				'woocommerce_tax_total_display',
+				'woocommerce_ship_to_destination',
+				'woocommerce_registration_generate_password',
+			)
+		);
 		$this->asset_data_registry->add( 'checkoutShowLoginReminder', filter_var( get_option( 'woocommerce_enable_checkout_login_reminder' ), FILTER_VALIDATE_BOOLEAN ) );
 		$this->asset_data_registry->add( 'displayCartPricesIncludingTax', 'incl' === get_option( 'woocommerce_tax_display_cart' ) );
 		$this->asset_data_registry->add( 'displayItemizedTaxes', 'itemized' === get_option( 'woocommerce_tax_total_display' ) );

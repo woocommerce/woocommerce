@@ -17,7 +17,7 @@
  * @var bool $show_downloads Controls whether the downloads table should be rendered.
  */
 
-use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentUtils;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentUtils;
 
  // phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
 
