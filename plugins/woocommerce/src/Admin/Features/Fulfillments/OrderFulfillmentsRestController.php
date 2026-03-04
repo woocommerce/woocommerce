@@ -360,7 +360,6 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 				}
 			}
 			$fulfillment->save();
-			$fulfillment->save_meta_data();
 
 			if ( $notify_customer ) {
 				if ( ! $previous_state && $next_state ) {
