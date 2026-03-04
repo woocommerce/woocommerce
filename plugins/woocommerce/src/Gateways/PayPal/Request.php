@@ -4,7 +4,6 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Gateways\PayPal;
 
-use Exception;
 use WC_Order;
 use Automattic\WooCommerce\Gateways\PayPal\PayPalStandardException;
 use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
@@ -185,7 +184,7 @@ class Request {
 				);
 			}
 			return array( 'localized_error_message' => $e->get_localized_message() );
-		} catch ( Exception $e ) {
+		} catch ( \Exception $e ) {
 			\WC_Gateway_Paypal::log( $e->getMessage() );
 			return null;
 		}
@@ -196,8 +195,8 @@ class Request {
 	 *
 	 * @param string $paypal_order_id The ID of the PayPal order.
 	 * @return array
-	 * @throws Exception If the PayPal order details request fails.
-	 * @throws Exception If the PayPal order details are not found.
+	 * @throws PayPalStandardException If the PayPal order details request fails.
+	 * @throws PayPalStandardException If the PayPal order details are not found.
 	 */
 	public function get_paypal_order_details( string $paypal_order_id ): array {
 		$request_body = array(
@@ -205,7 +204,7 @@ class Request {
 		);
 		$response     = $this->send_wpcom_proxy_request( 'GET', self::WPCOM_PROXY_ORDER_ENDPOINT . '/' . $paypal_order_id, $request_body );
 		if ( is_wp_error( $response ) ) {
-			throw new Exception( 'PayPal order details request failed: ' . esc_html( $response->get_error_message() ) );
+			throw new PayPalStandardException( 'PayPal order details request failed: ' . esc_html( $response->get_error_message() ) );
 		}
 
 		$http_code     = wp_remote_retrieve_response_code( $response );
@@ -215,7 +214,7 @@ class Request {
 		if ( 200 !== $http_code ) {
 			$debug_id = isset( $response_data['debug_id'] ) ? $response_data['debug_id'] : null;
 			$message  = 'PayPal order details request failed. HTTP ' . (int) $http_code . ( $debug_id ? '. Debug ID: ' . $debug_id : '' );
-			throw new Exception( esc_html( $message ) );
+			throw new PayPalStandardException( esc_html( $message ) );
 		}
 
 		return $response_data;
@@ -230,7 +229,7 @@ class Request {
 	 * @param string|null   $action_url The URL to authorize or capture the payment.
 	 * @param string        $action The action to perform. Either 'authorize' or 'capture'.
 	 * @return void
-	 * @throws Exception If the PayPal payment authorization or capture fails.
+	 * @throws PayPalStandardException If the PayPal payment authorization or capture fails.
 	 */
 	public function authorize_or_capture_payment( ?WC_Order $order, ?string $action_url, string $action = PayPalConstants::PAYMENT_ACTION_CAPTURE ): void {
 		if ( ! $order ) {
@@ -276,7 +275,7 @@ class Request {
 			$response = $this->send_wpcom_proxy_request( 'POST', $endpoint, $request_body );
 
 			if ( is_wp_error( $response ) ) {
-				throw new Exception( 'PayPal ' . $action . ' payment request failed. Response error: ' . $response->get_error_message() );
+				throw new PayPalStandardException( 'PayPal ' . $action . ' payment request failed. Response error: ' . $response->get_error_message() );
 			}
 
 			$http_code     = wp_remote_retrieve_response_code( $response );
@@ -285,9 +284,9 @@ class Request {
 
 			if ( 200 !== $http_code && 201 !== $http_code ) {
 				$paypal_debug_id = isset( $response_data['debug_id'] ) ? $response_data['debug_id'] : null;
-				throw new Exception( 'PayPal ' . $action . ' payment failed. Response status: ' . $http_code . '. Response body: ' . $body );
+				throw new PayPalStandardException( 'PayPal ' . $action . ' payment failed. Response status: ' . $http_code . '. Response body: ' . $body );
 			}
-		} catch ( Exception $e ) {
+		} catch ( PayPalStandardException $e ) {
 			\WC_Gateway_Paypal::log( $e->getMessage() );
 			$note_message = sprintf(
 				/* translators: %1$s: Action, %2$s: PayPal order ID */
@@ -316,7 +315,7 @@ class Request {
 	 *
 	 * @param WC_Order|null $order Order object.
 	 * @return void
-	 * @throws Exception If the PayPal payment capture fails.
+	 * @throws PayPalStandardException If the PayPal payment capture fails.
 	 */
 	public function capture_authorized_payment( ?WC_Order $order ): void {
 		if ( ! $order ) {
@@ -376,7 +375,7 @@ class Request {
 			$response     = $this->send_wpcom_proxy_request( 'POST', self::WPCOM_PROXY_PAYMENT_CAPTURE_AUTH_ENDPOINT, $request_body );
 
 			if ( is_wp_error( $response ) ) {
-				throw new Exception( 'PayPal capture payment request failed. Response error: ' . $response->get_error_message() );
+				throw new PayPalStandardException( 'PayPal capture payment request failed. Response error: ' . $response->get_error_message() );
 			}
 
 			$http_code             = wp_remote_retrieve_response_code( $response );
@@ -387,13 +386,13 @@ class Request {
 
 			if ( 200 !== $http_code && 201 !== $http_code && ! $auth_already_captured ) {
 				$paypal_debug_id = isset( $response_data['debug_id'] ) ? $response_data['debug_id'] : null;
-				throw new Exception( 'PayPal capture payment failed. Response status: ' . $http_code . '. Response body: ' . $body );
+				throw new PayPalStandardException( 'PayPal capture payment failed. Response status: ' . $http_code . '. Response body: ' . $body );
 			}
 
 			// Set custom status for successful capture response, or if the authorization was already captured.
 			$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_STATUS, PayPalConstants::STATUS_CAPTURED );
 			$order->save();
-		} catch ( Exception $e ) {
+		} catch ( PayPalStandardException $e ) {
 			\WC_Gateway_Paypal::log( $e->getMessage() );
 
 			$note_message = sprintf(
@@ -502,7 +501,7 @@ class Request {
 					$order->save();
 					return null;
 				}
-			} catch ( Exception $e ) {
+			} catch ( PayPalStandardException $e ) {
 				\WC_Gateway_Paypal::log( 'Error retrieving authorization ID from PayPal order details. Order ID: ' . $order->get_id() . '. Error: ' . $e->getMessage() );
 				return null;
 			}
@@ -701,7 +700,7 @@ class Request {
 			$params['purchase_units'][0]['shipping'] = $shipping;
 		} elseif ( PayPalConstants::SHIPPING_SET_PROVIDED_ADDRESS === $shipping_preference ) {
 			// If the shipping preference is set to SET_PROVIDED_ADDRESS, but no shipping information is provided, PayPal create order request will fail.
-			// Throw an exception to prevent the request from being sent.
+			// Throw an PayPalStandardException to prevent the request from being sent.
 			throw new PayPalStandardException(
 					'Shipping address is required for PayPal create-order request. Order ID: ' . esc_html( (string) $order->get_id() ),
 					'A valid shipping address is required to complete your PayPal payment.'
@@ -1054,7 +1053,7 @@ class Request {
 	 * Fetch the PayPal client-id from the Transact platform.
 	 *
 	 * @return string|null The PayPal client-id, or null if the request fails.
-	 * @throws Exception If the request fails.
+	 * @throws PayPalStandardException If the request fails.
 	 */
 	public function fetch_paypal_client_id(): ?string {
 		try {
@@ -1065,7 +1064,7 @@ class Request {
 			$response = $this->send_wpcom_proxy_request( 'GET', self::WPCOM_PROXY_CLIENT_ID_ENDPOINT, $request_body );
 
 			if ( is_wp_error( $response ) ) {
-				throw new Exception( 'Failed to fetch the client ID. Response error: ' . $response->get_error_message() );
+				throw new PayPalStandardException( 'Failed to fetch the client ID. Response error: ' . $response->get_error_message() );
 			}
 
 			$http_code     = wp_remote_retrieve_response_code( $response );
@@ -1073,11 +1072,11 @@ class Request {
 			$response_data = json_decode( $body, true );
 
 			if ( 200 !== $http_code ) {
-				throw new Exception( 'Failed to fetch the client ID. Response status: ' . $http_code . '. Response body: ' . $body );
+				throw new PayPalStandardException( 'Failed to fetch the client ID. Response status: ' . $http_code . '. Response body: ' . $body );
 			}
 
 			return $response_data['client_id'] ?? null;
-		} catch ( Exception $e ) {
+		} catch ( PayPalStandardException $e ) {
 			\WC_Gateway_Paypal::log( $e->getMessage() );
 			return null;
 		}
@@ -1091,13 +1090,13 @@ class Request {
 	 * @param array  $request_body The request body.
 	 *
 	 * @return array|\WP_Error The API response body, or WP_Error if the request fails.
-	 * @throws Exception If the site ID is not found.
+	 * @throws PayPalStandardException If the site ID is not found.
 	 */
 	private function send_wpcom_proxy_request( string $method, string $endpoint, array $request_body ) {
 		$site_id = \Jetpack_Options::get_option( 'id' );
 		if ( ! $site_id ) {
 			\WC_Gateway_Paypal::log( sprintf( 'Site ID not found. Cannot send request to %s.', $endpoint ) );
-			throw new Exception( 'Site ID not found. Cannot send proxy request.' );
+			throw new PayPalStandardException( 'Site ID not found. Cannot send proxy request.' );
 		}
 
 		if ( 'GET' === $method ) {
