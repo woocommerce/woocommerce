@@ -657,7 +657,7 @@ class WC_Form_Handler {
 				WC()->cart->remove_cart_item( $cart_item_key );
 
 				/**
-				 * Fires when a cart item is removed from a user request (shortcode or Store API).
+				 * Fires when a cart item is removed from a user request.
 				 *
 				 * @param string   $cart_item_key Cart item key.
 				 * @param \WC_Cart $cart          Cart object.
