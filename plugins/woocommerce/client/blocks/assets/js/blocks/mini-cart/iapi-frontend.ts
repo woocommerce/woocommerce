@@ -10,7 +10,7 @@ import {
 	useRef,
 	withSyncEvent,
 } from '@wordpress/interactivity';
-import '@woocommerce/stores/woocommerce/cart';
+import { findExistingCartItem } from '@woocommerce/stores/woocommerce/cart';
 import '@woocommerce/stores/store-notices';
 import type {
 	Store as WooCommerce,
@@ -444,18 +444,16 @@ const { state: cartItemState } = store(
 			// find the cart item. Where we need reactivity for the wp-each, use
 			// state.cartItem to get the cart item.
 			get cartItem() {
-				const {
-					cartItem: { id, key },
-				} = getContext< CartItemContext >( 'woocommerce' );
+				const { cartItem } =
+					getContext< CartItemContext >( 'woocommerce' );
 
-				const cartItem = ( woocommerceState.cart.items.find( ( item ) =>
-					key ? item.key === key : item.id === id
-				) || {} ) as CartItem;
+				const currentCartItem = ( findExistingCartItem( cartItem ) ||
+					{} ) as CartItem;
 
-				cartItem.variation = cartItem.variation || [];
-				cartItem.item_data = cartItem.item_data || [];
+				currentCartItem.variation = currentCartItem.variation || [];
+				currentCartItem.item_data = currentCartItem.item_data || [];
 
-				return cartItem;
+				return currentCartItem;
 			},
 
 			get currency(): Currency {

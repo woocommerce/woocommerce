@@ -219,7 +219,7 @@ export const findExistingCartItem = ( {
 	id,
 	key,
 	variation,
-}: ClientCartItem ) => {
+}: Pick< ClientCartItem, 'id' | 'key' | 'variation' > ) => {
 	return state.cart.items.find( ( cartItem ) => {
 		if ( cartItem.type === 'variation' ) {
 			if (

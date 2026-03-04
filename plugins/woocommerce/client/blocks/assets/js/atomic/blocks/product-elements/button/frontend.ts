@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { store, getContext, useLayoutEffect } from '@wordpress/interactivity';
+import { findExistingCartItem } from '@woocommerce/stores/woocommerce/cart';
 import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
 import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
 
@@ -121,9 +122,9 @@ const productButtonStore = {
 			if ( productType === 'grouped' ) {
 				const groupedProductIdsInCart = groupedProductIds?.map(
 					( productId ) => {
-						const product = wooState.cart?.items.find(
-							( item ) => item.id === productId
-						);
+						const product = findExistingCartItem( {
+							id: productId,
+						} );
 						return product?.quantity || 0;
 					}
 				);
