@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add woocommerce_email_editor_send_preview_email_subject filter to allow customizing the preview email subject.

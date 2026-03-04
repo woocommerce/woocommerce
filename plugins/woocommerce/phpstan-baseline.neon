@@ -56477,12 +56477,6 @@ parameters:
 			path: src/Blocks/Utils/BlockTemplateUtils.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\Utils\\BlockTemplateUtils\:\:get_block_templates_from_db\(\) should return array\<WP_Block_Template\> but returns array\<WP_Block_Template\|WP_Error\>\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Blocks/Utils/BlockTemplateUtils.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\Utils\\BlockTemplateUtils\:\:get_template\(\) has invalid return type Automattic\\WooCommerce\\Blocks\\Utils\\AbstractTemplate\.$#'
 			identifier: class.notFound
 			count: 1
@@ -56503,12 +56497,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\Utils\\BlockTemplateUtils\:\:update_template_data\(\) has invalid return type Automattic\\WooCommerce\\Blocks\\Utils\\WP_Block_Template\.$#'
 			identifier: class.notFound
-			count: 1
-			path: src/Blocks/Utils/BlockTemplateUtils.php
-
-		-
-			message: '#^Parameter \#1 \$post of static method Automattic\\WooCommerce\\Blocks\\Utils\\BlockTemplateUtils\:\:build_template_result_from_post\(\) expects WP_Post, int\|WP_Post given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Blocks/Utils/BlockTemplateUtils.php
 
