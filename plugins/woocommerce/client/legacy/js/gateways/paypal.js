@@ -142,7 +142,7 @@ jQuery(function ($) {
 
 					return paypalResponseData.paypal_order_id;
 				} catch ( error ) {
-					createOrderError = error?.error_message;
+					createOrderError = error && error.error_message;
 					// eslint-disable-next-line no-console
 					console.error( 'Failed to create order', error );
 					return null;
