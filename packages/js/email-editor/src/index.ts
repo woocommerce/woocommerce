@@ -167,7 +167,10 @@ export type {
 	EmailEditorSettings,
 	EmailTheme,
 	EmailEditorUrls,
+	PostWithPermissions,
 } from './store/types';
+
+export { registerEntityAction } from './private-apis';
 
 /**
  * A modal component for sending test emails from the email editor.

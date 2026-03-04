@@ -11,9 +11,13 @@ use Automattic\WooCommerce\Internal\EmailEditor\EmailPatterns\PatternsController
 use Automattic\WooCommerce\Internal\EmailEditor\EmailTemplates\TemplatesController;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmails;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsManager;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsGenerator;
 use Automattic\WooCommerce\Internal\EmailEditor\EmailTemplates\TemplateApiController;
 use Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger;
 use WP_Post;
+use WP_REST_Request;
+use WP_REST_Response;
+use WP_Error;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -140,6 +144,7 @@ class Integration {
 		add_action( 'woocommerce_email_editor_send_preview_email_before_wp_mail', array( $this, 'send_preview_email_before_wp_mail' ), 10 );
 		add_action( 'woocommerce_email_editor_send_preview_email_after_wp_mail', array( $this, 'send_preview_email_after_wp_mail' ), 10 );
 		add_filter( 'woocommerce_email_editor_send_preview_email_subject', array( $this, 'update_email_subject_for_send_preview_email' ), 10, 2 );
+		add_action( 'rest_api_init', array( $this, 'register_email_content_api_routes' ) );
 	}
 
 	/**
@@ -452,5 +457,84 @@ class Integration {
 		} catch ( \Throwable $e ) {
 			return $subject;
 		}
+	}
+
+	/**
+	 * Register REST API routes for email content management.
+	 */
+	public function register_email_content_api_routes(): void {
+		register_rest_route(
+			'woocommerce-email-editor/v1',
+			'/emails/(?P<id>\d+)/default-content',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this, 'get_default_email_content' ),
+				'permission_callback' => function ( WP_REST_Request $request ) {
+					return current_user_can( 'edit_post', (int) $request->get_param( 'id' ) );
+				},
+				'args'                => array(
+					'id' => array(
+						'description'       => __( 'The email post ID.', 'woocommerce' ),
+						'type'              => 'integer',
+						'required'          => true,
+						'sanitize_callback' => 'absint',
+					),
+				),
+			)
+		);
+	}
+
+	/**
+	 * Get the default (plugin-distributed) content for a woo_email post.
+	 *
+	 * @param WP_REST_Request $request The REST request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_default_email_content( WP_REST_Request $request ) {
+		$post_id = (int) $request->get_param( 'id' );
+		$post    = get_post( $post_id );
+
+		if ( ! $post || self::EMAIL_POST_TYPE !== $post->post_type ) {
+			return new WP_Error(
+				'invalid_post',
+				__( 'Invalid email post.', 'woocommerce' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		$post_manager = WCTransactionalEmailPostsManager::get_instance();
+		$email_type   = $post_manager->get_email_type_from_post_id( $post_id );
+
+		if ( empty( $email_type ) ) {
+			return new WP_Error(
+				'email_type_not_found',
+				__( 'Email type not found for this post.', 'woocommerce' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		$email = null;
+		foreach ( WC()->mailer()->get_emails() as $wc_email ) {
+			if ( $wc_email->id === $email_type ) {
+				$email = $wc_email;
+				break;
+			}
+		}
+
+		if ( ! $email ) {
+			return new WP_Error(
+				'email_not_found',
+				__( 'Email configuration not found.', 'woocommerce' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		$generator       = new WCTransactionalEmailPostsGenerator();
+		$default_content = $generator->get_email_template( $email );
+
+		return new WP_REST_Response(
+			array( 'content' => $default_content ),
+			200
+		);
 	}
 }
