@@ -13,6 +13,7 @@ use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Audio;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Video;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Dom_Document_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Html_Processing_Helper;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 
 /**
  * Embed block renderer.
@@ -148,7 +149,14 @@ class Embed extends Abstract_Block_Renderer {
 		// Check if this is a supported audio or video provider embed and has a valid URL.
 		$provider = $this->get_supported_provider( $attr, $block_content );
 		if ( empty( $provider ) ) {
-			// For non-supported embeds, try to render as a simple link fallback.
+			// For non-supported embeds, try to render as a rich card using oEmbed data.
+			$url = $this->extract_provider_url( $attr, $block_content );
+			if ( ! empty( $url ) ) {
+				$card_result = $this->render_link_embed_card( $url, $parsed_block, $rendering_context );
+				if ( ! empty( $card_result ) ) {
+					return $card_result;
+				}
+			}
 			return $this->render_link_fallback( $attr, $block_content, $parsed_block, $rendering_context );
 		}
 
@@ -638,5 +646,270 @@ class Embed extends Abstract_Block_Renderer {
 		// Cache empty result for invalid URLs.
 		set_transient( $cache_key, '', $cache_ttl );
 		return '';
+	}
+
+	/**
+	 * Fetch oEmbed data for a URL with transient caching.
+	 *
+	 * @param string $url URL to fetch oEmbed data for.
+	 * @return object|null oEmbed data object or null on failure.
+	 */
+	private function fetch_oembed_data( string $url ) {
+		if ( ! $this->is_valid_url( $url ) ) {
+			return null;
+		}
+
+		$cache_key = 'wc_email_oembed_' . md5( $url );
+		$cached    = get_transient( $cache_key );
+
+		if ( false !== $cached ) {
+			if ( is_object( $cached ) ) {
+				return $cached;
+			}
+			// Empty string means previous lookup failed.
+			return null;
+		}
+
+		$oembed      = new \WP_oEmbed();
+		$oembed_data = $oembed->get_data( $url );
+
+		/** This filter is documented in packages/php/email-editor/src/Integrations/Core/Renderer/Blocks/class-embed.php */
+		$cache_ttl = (int) apply_filters( 'oembed_ttl', DAY_IN_SECONDS, $url, array(), '' );
+
+		if ( false === $oembed_data || ! is_object( $oembed_data ) ) {
+			set_transient( $cache_key, '', $cache_ttl );
+			return null;
+		}
+
+		set_transient( $cache_key, $oembed_data, $cache_ttl );
+		return $oembed_data;
+	}
+
+	/**
+	 * Fetch metadata from a WordPress embed page.
+	 *
+	 * WordPress sites expose a {url}/embed/ endpoint that renders a post preview
+	 * containing the excerpt inside a <div class="wp-embed-excerpt"> element and
+	 * a site icon inside an <img class="wp-embed-site-icon"> element.
+	 *
+	 * @param string $url URL of the post to fetch metadata for.
+	 * @return array{ excerpt: string, site_icon_url: string } Embed page metadata.
+	 */
+	private function fetch_embed_page_data( string $url ): array {
+		$empty_result = array(
+			'excerpt'       => '',
+			'site_icon_url' => '',
+		);
+
+		$embed_url = trailingslashit( $url ) . 'embed/';
+
+		if ( ! $this->is_valid_url( $embed_url ) ) {
+			return $empty_result;
+		}
+
+		$cache_key = 'wc_email_embed_pg_' . md5( $url );
+		$cached    = get_transient( $cache_key );
+
+		if ( false !== $cached && is_array( $cached ) && isset( $cached['excerpt'], $cached['site_icon_url'] ) ) {
+			return array(
+				'excerpt'       => (string) $cached['excerpt'],
+				'site_icon_url' => (string) $cached['site_icon_url'],
+			);
+		}
+		if ( false !== $cached ) {
+			// Negative cache (empty string from previous failure).
+			return $empty_result;
+		}
+
+		/** This filter is documented in packages/php/email-editor/src/Integrations/Core/Renderer/Blocks/class-embed.php */
+		$cache_ttl = (int) apply_filters( 'oembed_ttl', DAY_IN_SECONDS, $url, array(), '' );
+
+		$response = wp_safe_remote_get(
+			$embed_url,
+			array( 'timeout' => 5 )
+		);
+
+		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
+			set_transient( $cache_key, '', $cache_ttl );
+			return $empty_result;
+		}
+
+		$body = wp_remote_retrieve_body( $response );
+		if ( empty( $body ) ) {
+			set_transient( $cache_key, '', $cache_ttl );
+			return $empty_result;
+		}
+
+		// Parse HTML and extract excerpt and site icon using XPath.
+		libxml_use_internal_errors( true );
+		$dom = new \DOMDocument();
+		$dom->loadHTML( '<?xml encoding="UTF-8">' . $body, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD );
+		libxml_clear_errors();
+
+		$xpath = new \DOMXPath( $dom );
+
+		// Extract excerpt.
+		$excerpt       = '';
+		$excerpt_nodes = $xpath->query( "//*[contains(concat(' ', normalize-space(@class), ' '), ' wp-embed-excerpt ')]" );
+		$excerpt_node  = ( false !== $excerpt_nodes && $excerpt_nodes->length > 0 ) ? $excerpt_nodes->item( 0 ) : null;
+		if ( $excerpt_node instanceof \DOMElement ) {
+			$excerpt = trim( $excerpt_node->textContent ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+		}
+
+		// Cap at 200 characters as a safety limit.
+		if ( mb_strlen( $excerpt ) > 200 ) {
+			$excerpt = mb_substr( $excerpt, 0, 200 );
+			$excerpt = rtrim( $excerpt ) . '…';
+		}
+
+		// Extract site icon URL.
+		$site_icon_url = '';
+		$icon_nodes    = $xpath->query( "//img[contains(concat(' ', normalize-space(@class), ' '), ' wp-embed-site-icon ')]" );
+		$icon_node     = ( false !== $icon_nodes && $icon_nodes->length > 0 ) ? $icon_nodes->item( 0 ) : null;
+		if ( $icon_node instanceof \DOMElement ) {
+			$icon_src = $icon_node->getAttribute( 'src' );
+			if ( $this->is_valid_url( $icon_src ) ) {
+				$site_icon_url = $icon_src;
+			}
+		}
+
+		$result = array(
+			'excerpt'       => $excerpt,
+			'site_icon_url' => $site_icon_url,
+		);
+
+		set_transient( $cache_key, $result, $cache_ttl );
+		return $result;
+	}
+
+	/**
+	 * Render a link embed as a rich card using oEmbed data.
+	 *
+	 * @param string            $url URL to render as a card.
+	 * @param array             $parsed_block Parsed block.
+	 * @param Rendering_Context $rendering_context Rendering context.
+	 * @return string Rendered card HTML or empty string if oEmbed data is insufficient.
+	 */
+	private function render_link_embed_card( string $url, array $parsed_block, Rendering_Context $rendering_context ): string {
+		$oembed_data = $this->fetch_oembed_data( $url );
+
+		if ( null === $oembed_data || empty( $oembed_data->title ) ) {
+			return '';
+		}
+
+		$title = $oembed_data->title;
+
+		// Only use thumbnail if it's valid and wide enough to not look blurry at full width.
+		$min_thumbnail_width = 300;
+		$thumbnail_width     = isset( $oembed_data->thumbnail_width ) ? (int) $oembed_data->thumbnail_width : 0;
+		$thumbnail_url       = isset( $oembed_data->thumbnail_url ) && $this->is_valid_url( $oembed_data->thumbnail_url )
+			&& ( 0 === $thumbnail_width || $thumbnail_width >= $min_thumbnail_width )
+			? $oembed_data->thumbnail_url
+			: '';
+		$provider_name       = ! empty( $oembed_data->provider_name )
+			? $oembed_data->provider_name
+			: wp_parse_url( $url, PHP_URL_HOST );
+		$provider_url        = ! empty( $oembed_data->provider_url ) && $this->is_valid_url( $oembed_data->provider_url )
+			? $oembed_data->provider_url
+			: '';
+		$embed_page_data     = $this->fetch_embed_page_data( $url );
+		$excerpt             = $embed_page_data['excerpt'];
+		$site_icon_url       = $embed_page_data['site_icon_url'];
+
+		$email_styles = $rendering_context->get_theme_styles();
+		$text_color   = $email_styles['color']['text'] ?? '#1e1e1e';
+		$text_color   = Html_Processing_Helper::sanitize_color( $text_color );
+		$link_color   = $email_styles['elements']['link']['color']['text'] ?? '#0073aa';
+		$link_color   = Html_Processing_Helper::sanitize_color( $link_color );
+
+		// Build card rows.
+		$rows_html = '';
+
+		// Optional thumbnail row.
+		if ( ! empty( $thumbnail_url ) ) {
+			$thumbnail_cell = Table_Wrapper_Helper::render_table_cell(
+				sprintf(
+					'<a href="%s" target="_blank" rel="noopener nofollow"><img src="%s" alt="%s" style="display: block; width: 100%%; border-radius: 4px 4px 0 0;" /></a>',
+					esc_url( $url ),
+					esc_url( $thumbnail_url ),
+					esc_attr( $title )
+				),
+				array( 'style' => 'padding: 0;' )
+			);
+			$rows_html     .= '<tr>' . $thumbnail_cell . '</tr>';
+		}
+
+		// Build content: title, optional excerpt, provider.
+		$content_parts = sprintf(
+			'<a href="%s" target="_blank" rel="noopener nofollow" style="color: %s; text-decoration: none; font-weight: bold;">%s</a>',
+			esc_url( $url ),
+			esc_attr( $text_color ),
+			esc_html( $title )
+		);
+
+		if ( ! empty( $excerpt ) ) {
+			$content_parts .= sprintf(
+				'<br /><span style="font-size: 14px; color: #555; line-height: 1.4;">%s</span>',
+				esc_html( $excerpt )
+			);
+			$content_parts .= sprintf(
+				' <a href="%s" target="_blank" rel="noopener nofollow" style="font-size: 14px; color: %s; text-decoration: none;">%s</a>',
+				esc_url( $url ),
+				esc_attr( $link_color ),
+				esc_html__( 'Continue reading', 'woocommerce' )
+			);
+		}
+
+		// Provider row with optional site icon.
+		$provider_text = ! empty( $provider_url )
+			? sprintf(
+				'<a href="%s" target="_blank" rel="noopener nofollow" style="font-size: 13px; color: #757575; text-decoration: none;">%s</a>',
+				esc_url( $provider_url ),
+				esc_html( $provider_name )
+			)
+			: sprintf(
+				'<span style="font-size: 13px; color: #757575;">%s</span>',
+				esc_html( $provider_name )
+			);
+
+		if ( ! empty( $site_icon_url ) ) {
+			$content_parts .= sprintf(
+				'<table border="0" cellpadding="0" cellspacing="0" role="presentation" style="margin-top: 16px;">'
+				. '<tr>'
+				. '<td style="vertical-align: middle; padding-right: 6px;">'
+				. '<img src="%s" width="16" height="16" alt="" style="display: block; border-radius: 2px;" />'
+				. '</td>'
+				. '<td style="vertical-align: middle;">%s</td>'
+				. '</tr></table>',
+				esc_url( $site_icon_url ),
+				$provider_text
+			);
+		} else {
+			$content_parts .= '<br />' . $provider_text;
+		}
+
+		$content_cell = Table_Wrapper_Helper::render_table_cell(
+			$content_parts,
+			array( 'style' => 'padding: 12px;' )
+		);
+		$rows_html   .= '<tr>' . $content_cell . '</tr>';
+
+		$card_html  = sprintf(
+			'<table border="0" cellpadding="0" cellspacing="0" role="presentation" style="border: 1px solid #ddd; border-radius: 4px; width: 100%%;">'
+		);
+		$card_html .= '<tbody>' . $rows_html . '</tbody></table>';
+
+		$outlook_wrapped = Table_Wrapper_Helper::render_outlook_table_wrapper(
+			$card_html,
+			array(
+				'align' => 'left',
+				'width' => '100%',
+			)
+		);
+
+		return $this->add_spacer(
+			$outlook_wrapped,
+			$parsed_block['email_attrs'] ?? array()
+		);
 	}
 }

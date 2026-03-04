@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Fetch excerpt and site icon from WordPress embed page for rich embed cards in email rendering.
