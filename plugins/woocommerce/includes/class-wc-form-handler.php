@@ -654,17 +654,19 @@ class WC_Form_Handler {
 			$cart_item     = WC()->cart->get_cart_item( $cart_item_key );
 
 			if ( $cart_item ) {
-				WC()->cart->remove_cart_item( $cart_item_key );
+				$removed = WC()->cart->remove_cart_item( $cart_item_key );
 
-				/**
-				 * Fires when a cart item is removed from a user request.
-				 *
-				 * @param string   $cart_item_key Cart item key.
-				 * @param \WC_Cart $cart          Cart object.
-				 *
-				 * @since 10.6.0
-				 */
-				do_action( 'woocommerce_cart_item_removed_from_user_request', $cart_item_key, WC()->cart );
+				if ( $removed ) {
+					/**
+					 * Fires when a cart item is removed from a user request.
+					 *
+					 * @param string   $cart_item_key Cart item key.
+					 * @param \WC_Cart $cart          Cart object.
+					 *
+					 * @since 10.6.0
+					 */
+					do_action( 'woocommerce_cart_item_removed_from_user_request', $cart_item_key, WC()->cart );
+				}
 
 				$product = wc_get_product( $cart_item['product_id'] );
 
@@ -744,8 +746,8 @@ class WC_Form_Handler {
 							 * Fires when a cart item quantity is updated from a user request.
 							 *
 							 * @param string   $cart_item_key Cart item key.
-							 * @param int      $quantity      New quantity.
-							 * @param int      $old_quantity  Old quantity.
+							 * @param int|float $quantity     New quantity.
+							 * @param int|float $old_quantity Old quantity.
 							 * @param \WC_Cart $cart          Cart object.
 							 *
 							 * @since 10.6.0
@@ -874,13 +876,13 @@ class WC_Form_Handler {
 
 		// If we added the product to the cart we can now optionally do a redirect.
 		if ( $was_added_to_cart && 0 === wc_notice_count( 'error' ) ) {
-			$quantity = isset( $_POST['quantity'] ) ? absint( wp_unslash( $_POST['quantity'] ) ) : 1; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			$quantity = empty( $_REQUEST['quantity'] ) ? 1 : wc_stock_amount( wp_unslash( $_REQUEST['quantity'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 			/**
 			 * Fires when an item is added to the cart from a user request.
 			 *
-			 * @param int $product_id Product ID.
-			 * @param int $quantity   Quantity added to the cart.
+			 * @param int       $product_id Product ID.
+			 * @param int|float $quantity   Quantity added to the cart.
 			 *
 			 * @since 10.6.0
 			 */

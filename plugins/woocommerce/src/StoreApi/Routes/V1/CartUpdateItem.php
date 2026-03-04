@@ -74,15 +74,15 @@ class CartUpdateItem extends AbstractCartRoute {
 			$cart_item    = $cart->get_cart_item( $request['key'] );
 			$old_quantity = $cart_item['quantity'] ?? 0;
 			$this->cart_controller->set_cart_item_quantity( $request['key'], $request['quantity'] );
-			
-			if ( $old_quantity !== $request['quantity'] ) {
+
+			if ( $old_quantity !== (int) $request['quantity'] ) {
 				/**
 				 * Fires when a cart item quantity is updated from a user request.
 				 *
-				 * @param string   $cart_item_key Cart item key.
-				 * @param int      $quantity      Quantity.
-				 * @param int      $old_quantity  Old quantity.
-				 * @param \WC_Cart $cart          Cart object.
+				 * @param string    $cart_item_key Cart item key.
+				 * @param int       $quantity      New quantity.
+				 * @param int|float $old_quantity  Old quantity.
+				 * @param \WC_Cart  $cart          Cart object.
 				 *
 				 * @since 10.6.0
 				 */

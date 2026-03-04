@@ -337,11 +337,55 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 
 		$this->assertNotEmpty( $captured_args, 'The action should have been fired' );
 		$this->assertSame( $product->get_id(), $captured_args['product_id'] );
-		$this->assertSame( 3, $captured_args['quantity'] );
+		$this->assertEquals( 3, $captured_args['quantity'] );
 
 		remove_action( 'woocommerce_cart_item_added_from_user_request', $callback );
 
+		WC()->cart->empty_cart();
 		unset( $_POST['product_id'], $_POST['quantity'] );
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox Should fire woocommerce_cart_item_added_from_user_request with variation ID when adding a variation via AJAX.
+	 */
+	public function test_add_to_cart_fires_cart_item_added_from_user_request_for_variation(): void {
+		$product = new \WC_Product_Variable();
+		$product->set_name( 'Test Variable Product' );
+		$attribute = WC_Helper_Product::create_product_attribute_object( 'color', array( 'blue' ) );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$variation = new \WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array( 'pa_color' => 'blue' ) );
+		$variation->set_regular_price( 10 );
+		$variation->save();
+
+		$_POST['product_id'] = $variation->get_id();
+		$_POST['quantity']   = 2;
+
+		$captured_args = array();
+		$callback      = function ( $product_id, $quantity ) use ( &$captured_args ) {
+			$captured_args = array(
+				'product_id' => $product_id,
+				'quantity'   => $quantity,
+			);
+		};
+
+		add_action( 'woocommerce_cart_item_added_from_user_request', $callback, 10, 2 );
+
+		$this->do_ajax( 'woocommerce_add_to_cart' );
+
+		$this->assertNotEmpty( $captured_args, 'The action should have been fired' );
+		$this->assertSame( $variation->get_id(), $captured_args['product_id'], 'The product_id should be the variation ID, not the parent product ID' );
+		$this->assertEquals( 2, $captured_args['quantity'] );
+
+		remove_action( 'woocommerce_cart_item_added_from_user_request', $callback );
+
+		WC()->cart->empty_cart();
+		unset( $_POST['product_id'], $_POST['quantity'] );
+		$variation->delete( true );
 		$product->delete( true );
 	}
 

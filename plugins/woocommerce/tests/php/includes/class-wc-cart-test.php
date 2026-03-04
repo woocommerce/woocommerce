@@ -1257,8 +1257,8 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 
 		$this->assertNotEmpty( $captured_args, 'The update quantity action should have been fired' );
 		$this->assertSame( $cart_item_key, $captured_args['cart_item_key'] );
-		$this->assertSame( 5, $captured_args['quantity'] );
-		$this->assertSame( 2, $captured_args['old_quantity'] );
+		$this->assertEquals( 5, $captured_args['quantity'] );
+		$this->assertEquals( 2, $captured_args['old_quantity'] );
 		$this->assertInstanceOf( WC_Cart::class, $captured_args['cart'] );
 
 		remove_action( 'woocommerce_cart_item_updated_from_user_request', $callback );
@@ -1364,7 +1364,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 
 		$this->assertNotEmpty( $captured_args, 'The action should have been fired' );
 		$this->assertSame( $product->get_id(), $captured_args['product_id'] );
-		$this->assertSame( 3, $captured_args['quantity'] );
+		$this->assertEquals( 3, $captured_args['quantity'] );
 
 		remove_action( 'woocommerce_cart_item_added_from_user_request', $callback );
 
@@ -1408,7 +1408,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 
 		$this->assertNotEmpty( $captured_args, 'The action should have been fired' );
 		$this->assertSame( $variation->get_id(), $captured_args['product_id'], 'The product_id should be the variation ID, not the parent product ID' );
-		$this->assertSame( 2, $captured_args['quantity'] );
+		$this->assertEquals( 2, $captured_args['quantity'] );
 
 		remove_action( 'woocommerce_cart_item_added_from_user_request', $callback );
 

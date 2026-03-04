@@ -1115,7 +1115,7 @@ class Cart extends ControllerTestCase {
 
 		$this->assertNotEmpty( $captured_args, 'The add action should have been fired' );
 		$this->assertSame( $this->products[0]->get_id(), $captured_args['product_id'] );
-		$this->assertSame( 2, $captured_args['quantity'] );
+		$this->assertEquals( 2, $captured_args['quantity'] );
 
 		remove_action( 'woocommerce_cart_item_added_from_user_request', $callback );
 	}
@@ -1148,7 +1148,7 @@ class Cart extends ControllerTestCase {
 
 		$this->assertNotEmpty( $captured_args, 'The add action should have been fired' );
 		$this->assertSame( $this->products[0]->get_id(), $captured_args['product_id'] );
-		$this->assertSame( 1, $captured_args['quantity'] );
+		$this->assertEquals( 1, $captured_args['quantity'] );
 
 		remove_action( 'woocommerce_cart_item_added_from_user_request', $callback );
 	}
@@ -1178,8 +1178,8 @@ class Cart extends ControllerTestCase {
 
 		$this->assertNotEmpty( $captured_args, 'The update action should have been fired' );
 		$this->assertSame( $this->keys[0], $captured_args['cart_item_key'] );
-		$this->assertSame( 5, $captured_args['quantity'] );
-		$this->assertSame( 2, $captured_args['old_quantity'] );
+		$this->assertEquals( 5, $captured_args['quantity'] );
+		$this->assertEquals( 2, $captured_args['old_quantity'] );
 		$this->assertInstanceOf( \WC_Cart::class, $captured_args['cart'] );
 
 		remove_action( 'woocommerce_cart_item_updated_from_user_request', $callback );
@@ -1212,6 +1212,82 @@ class Cart extends ControllerTestCase {
 		$this->assertInstanceOf( \WC_Cart::class, $captured_args['cart'] );
 
 		remove_action( 'woocommerce_cart_item_removed_from_user_request', $callback );
+	}
+
+	/**
+	 * @testdox Should not fire woocommerce_cart_item_updated_from_user_request when quantity is unchanged.
+	 */
+	public function test_update_item_with_same_quantity_does_not_fire_update_action(): void {
+		$action_fired = false;
+		$callback     = function () use ( &$action_fired ) {
+			$action_fired = true;
+		};
+
+		add_action( 'woocommerce_cart_item_updated_from_user_request', $callback, 10, 4 );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/update-item' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'key'      => $this->keys[0],
+				'quantity' => 2,
+			)
+		);
+
+		$this->assertAPIResponse( $request, 200 );
+
+		$this->assertFalse( $action_fired, 'The update action should not fire when quantity is unchanged' );
+
+		remove_action( 'woocommerce_cart_item_updated_from_user_request', $callback );
+	}
+
+	/**
+	 * @testdox Should fire woocommerce_cart_item_added_from_user_request with the variation ID when adding a variable product.
+	 */
+	public function test_add_item_fires_add_action_with_variation_id(): void {
+		wc_empty_cart();
+
+		$fixtures  = new FixtureData();
+		$attribute = $fixtures->get_product_attribute( 'color', array( 'blue' ) );
+		$product   = $fixtures->get_variable_product(
+			array(
+				'name' => 'Test Variable Product',
+			),
+			array( $attribute )
+		);
+
+		$variation = new \WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array( 'pa_color' => 'blue' ) );
+		$variation->set_regular_price( 10 );
+		$variation->save();
+
+		$captured_args = array();
+		$callback      = function ( $product_id, $quantity ) use ( &$captured_args ) {
+			$captured_args = array(
+				'product_id' => $product_id,
+				'quantity'   => $quantity,
+			);
+		};
+
+		add_action( 'woocommerce_cart_item_added_from_user_request', $callback, 10, 2 );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/add-item' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'id'       => $variation->get_id(),
+				'quantity' => 1,
+			)
+		);
+
+		$this->assertAPIResponse( $request, 201 );
+
+		$this->assertNotEmpty( $captured_args, 'The add action should have been fired' );
+		$this->assertSame( $variation->get_id(), $captured_args['product_id'], 'The product_id should be the variation ID, not the parent product ID' );
+		$this->assertEquals( 1, $captured_args['quantity'] );
+
+		remove_action( 'woocommerce_cart_item_added_from_user_request', $callback );
 	}
 
 	/**
