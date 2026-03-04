@@ -54,12 +54,13 @@ class FulfillmentOrderNotes {
 		$items_text    = $this->format_items( $fulfillment, $order );
 		$tracking_text = $this->format_tracking( $fulfillment );
 		$status        = $fulfillment->get_status() ?? 'unfulfilled';
+		$status_label  = $this->get_fulfillment_status_label( $status );
 
 		$message = sprintf(
-			/* translators: 1: fulfillment ID, 2: fulfillment status, 3: item list */
+			/* translators: 1: fulfillment ID, 2: fulfillment status label, 3: item list */
 			__( 'Fulfillment #%1$d created (status: %2$s). Items: %3$s.', 'woocommerce' ),
 			$fulfillment->get_id(),
-			$status,
+			$status_label,
 			$items_text
 		);
 
@@ -217,11 +218,14 @@ class FulfillmentOrderNotes {
 	 * @param string    $new_status The new fulfillment status.
 	 */
 	public function add_order_fulfillment_status_changed_note( \WC_Order $order, string $old_status, string $new_status ): void {
+		$old_status_label = $this->get_order_fulfillment_status_label( $old_status );
+		$new_status_label = $this->get_order_fulfillment_status_label( $new_status );
+
 		$message = sprintf(
-			/* translators: 1: old fulfillment status, 2: new fulfillment status */
+			/* translators: 1: old fulfillment status label, 2: new fulfillment status label */
 			__( 'Order fulfillment status changed from %1$s to %2$s.', 'woocommerce' ),
-			$old_status,
-			$new_status
+			$old_status_label,
+			$new_status_label
 		);
 
 		/**
@@ -253,12 +257,15 @@ class FulfillmentOrderNotes {
 	 * @param string      $new_status  The new status.
 	 */
 	private function add_fulfillment_status_changed_note( Fulfillment $fulfillment, \WC_Order $order, string $old_status, string $new_status ): void {
+		$old_status_label = $this->get_fulfillment_status_label( $old_status );
+		$new_status_label = $this->get_fulfillment_status_label( $new_status );
+
 		$message = sprintf(
-			/* translators: 1: fulfillment ID, 2: old status, 3: new status */
+			/* translators: 1: fulfillment ID, 2: old status label, 3: new status label */
 			__( 'Fulfillment #%1$d status changed from %2$s to %3$s.', 'woocommerce' ),
 			$fulfillment->get_id(),
-			$old_status,
-			$new_status
+			$old_status_label,
+			$new_status_label
 		);
 
 		/**
@@ -356,5 +363,27 @@ class FulfillmentOrderNotes {
 		}
 
 		return implode( ', ', $parts );
+	}
+
+	/**
+	 * Get the display label for a fulfillment status key.
+	 *
+	 * @param string $status The fulfillment status key.
+	 * @return string The status label, or the key itself if no label is found.
+	 */
+	private function get_fulfillment_status_label( string $status ): string {
+		$statuses = FulfillmentUtils::get_fulfillment_statuses();
+		return $statuses[ $status ]['label'] ?? $status;
+	}
+
+	/**
+	 * Get the display label for an order fulfillment status key.
+	 *
+	 * @param string $status The order fulfillment status key.
+	 * @return string The status label, or the key itself if no label is found.
+	 */
+	private function get_order_fulfillment_status_label( string $status ): string {
+		$statuses = FulfillmentUtils::get_order_fulfillment_statuses();
+		return $statuses[ $status ]['label'] ?? $status;
 	}
 }

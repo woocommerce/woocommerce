@@ -93,7 +93,7 @@ class FulfillmentOrderNotesTest extends \WC_Unit_Test_Case {
 
 		$found_created_note = false;
 		foreach ( $notes as $note ) {
-			if ( str_contains( $note->content, 'created' ) && str_contains( $note->content, 'unfulfilled' ) ) {
+			if ( str_contains( $note->content, 'created' ) && str_contains( $note->content, 'Unfulfilled' ) ) {
 				$found_created_note = true;
 				$note_group         = get_comment_meta( $note->id, 'note_group', true );
 				$this->assertSame( OrderNoteGroup::FULFILLMENT, $note_group );
@@ -349,7 +349,7 @@ class FulfillmentOrderNotesTest extends \WC_Unit_Test_Case {
 
 		$found = false;
 		foreach ( $notes as $note ) {
-			if ( str_contains( $note->content, 'status changed' ) && str_contains( $note->content, 'unfulfilled' ) && str_contains( $note->content, 'fulfilled' ) ) {
+			if ( str_contains( $note->content, 'status changed' ) && str_contains( $note->content, 'Unfulfilled' ) && str_contains( $note->content, 'Fulfilled' ) ) {
 				$found      = true;
 				$note_group = get_comment_meta( $note->id, 'note_group', true );
 				$this->assertSame( OrderNoteGroup::FULFILLMENT, $note_group );
@@ -478,12 +478,15 @@ class FulfillmentOrderNotesTest extends \WC_Unit_Test_Case {
 
 		$found = false;
 		foreach ( $notes as $note ) {
-			if ( str_contains( $note->content, 'Order fulfillment status changed' ) ) {
+			if ( str_contains( $note->content, 'Order fulfillment status changed' )
+				&& str_contains( $note->content, 'No fulfillments' )
+				&& str_contains( $note->content, 'Unfulfilled' )
+			) {
 				$found = true;
 				break;
 			}
 		}
-		$this->assertTrue( $found, 'Expected an order fulfillment status changed note.' );
+		$this->assertTrue( $found, 'Expected an order fulfillment status changed note with status labels.' );
 	}
 
 	/**
