@@ -202,6 +202,7 @@ const Edit = ( {
 							isShownByDefault
 						>
 							<ToggleGroupControl
+								__next40pxDefaultSize
 								label={ __( 'Resolution', 'woocommerce' ) }
 								isBlock
 								help={
