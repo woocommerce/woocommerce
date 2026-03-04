@@ -39,6 +39,7 @@ import type {
 import { apiFetchWithHeaders } from '../shared-controls';
 import { CheckoutPutAbortController } from '../utils/clear-put-requests';
 import { CART_STORE_KEY } from '../cart';
+import { getIsCustomerDataDirty } from '../cart/utils';
 
 export interface CheckoutThunkArgs {
 	select: CurriedSelectorsOf< CheckoutStoreDescriptor >;
@@ -165,6 +166,7 @@ export const __internalEmitAfterProcessingEvents: emitAfterProcessingEventsType 
 export const updateDraftOrder = ( data: CheckoutPutData ) => {
 	return async ( { registry } ) => {
 		const { receiveCartContents } = registry.dispatch( CART_STORE_KEY );
+		const customerDataDirtyBeforeRequest = getIsCustomerDataDirty();
 		try {
 			const response = await apiFetchWithHeaders( {
 				path: '/wc/store/v1/checkout?__experimental_calc_totals=true',
@@ -173,7 +175,26 @@ export const updateDraftOrder = ( data: CheckoutPutData ) => {
 				signal: CheckoutPutAbortController.signal,
 			} );
 			if ( response?.response?.__experimentalCart ) {
-				receiveCartContents( response.response.__experimentalCart );
+				const cart = response.response.__experimentalCart;
+				// The checkout PUT does not send address data; shipping is
+				// recalculated from the server session. When the customer's
+				// address hasn't been pushed yet, the session is stale and the
+				// returned shipping rates would be wrong. Preserve the
+				// existing rates in that case to avoid a momentary "no
+				// shipping available" flash.
+				if (
+					customerDataDirtyBeforeRequest ||
+					getIsCustomerDataDirty()
+				) {
+					const {
+						shipping_rates: _,
+						has_calculated_shipping: __,
+						...cartWithoutShipping
+					} = cart;
+					receiveCartContents( cartWithoutShipping );
+				} else {
+					receiveCartContents( cart );
+				}
 			}
 			return response;
 		} catch ( error ) {

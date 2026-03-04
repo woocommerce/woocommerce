@@ -19,6 +19,7 @@ import {
 	hasValidationError,
 	validateAdditionalFields,
 } from './utils';
+import { flushChanges as flushCartChanges } from '../cart/push-changes';
 
 // This is used to track and cache the local state of push changes.
 const localState = {
@@ -163,6 +164,10 @@ const updateCheckoutData = (): void => {
 
 	// Update local cache
 	localState.checkoutData = newCheckoutData;
+
+	// Flush any pending cart address updates so the server session has the
+	// latest address before recalculating totals in the checkout PUT.
+	flushCartChanges();
 
 	dispatch( CHECKOUT_STORE_KEY )
 		.updateDraftOrder( requestData )
