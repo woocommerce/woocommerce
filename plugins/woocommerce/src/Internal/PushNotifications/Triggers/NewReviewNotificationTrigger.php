@@ -24,15 +24,11 @@ class NewReviewNotificationTrigger {
 	private PendingNotificationStore $store;
 
 	/**
-	 * Receives dependencies from the DI container.
-	 *
 	 * @param PendingNotificationStore $store The notification store.
-	 * @return void
 	 *
-	 * @internal
 	 * @since 10.7.0
 	 */
-	final public function init( PendingNotificationStore $store ): void {
+	public function __construct( PendingNotificationStore $store ) {
 		$this->store = $store;
 	}
 

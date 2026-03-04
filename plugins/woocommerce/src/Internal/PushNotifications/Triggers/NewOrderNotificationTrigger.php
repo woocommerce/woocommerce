@@ -49,16 +49,12 @@ class NewOrderNotificationTrigger {
 	private PendingNotificationStore $pending_notification_store;
 
 	/**
-	 * Receives dependencies from the DI container.
+	 * @param PendingNotificationStore $pending_notification_store The notification store.
 	 *
-	 * @param PendingNotificationStore $store The notification store.
-	 * @return void
-	 *
-	 * @internal
 	 * @since 10.7.0
 	 */
-	final public function init( PendingNotificationStore $store ): void {
-		$this->pending_notification_store = $store;
+	public function __construct( PendingNotificationStore $pending_notification_store ) {
+		$this->pending_notification_store = $pending_notification_store;
 	}
 
 	/**
