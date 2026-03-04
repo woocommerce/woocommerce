@@ -137,6 +137,8 @@ const PayPalButtonsContainer = ( {
 
 	const createOrder = async ( data ) => {
 		let responseData;
+		// Reset the create order error.
+		setCreateOrderError( '' );
 		try {
 			// If we're inside the product page, we need to empty the cart,
 			// and add the current product to the cart.

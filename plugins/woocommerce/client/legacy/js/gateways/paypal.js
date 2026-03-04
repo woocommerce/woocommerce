@@ -95,6 +95,8 @@ jQuery(function ($) {
 		const buttons = paypal.Buttons( {
 			appSwitchWhenAvailable: true,
 			async createOrder( data ) {
+				// Reset the create order error.
+				createOrderError = '';
 				// If we're inside the product page, we need to manage the cart contents
 				// ourselves.
 				if ( paypal_standard.is_product_page ) {
