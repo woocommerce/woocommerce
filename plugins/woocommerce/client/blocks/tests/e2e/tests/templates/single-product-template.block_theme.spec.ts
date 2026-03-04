@@ -41,6 +41,8 @@ test.describe( 'Single Product template', () => {
 			.click();
 		await page.getByLabel( 'Close', { exact: true } ).click();
 
+		await editor.canvas.locator( 'body' ).waitFor( { timeout: 20000 } );
+
 		// Edit the template.
 		await editor.insertBlock( {
 			name: 'core/paragraph',
