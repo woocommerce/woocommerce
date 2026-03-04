@@ -329,6 +329,48 @@ test.describe( 'Add to Cart + Options Block', () => {
 		} );
 	} );
 
+	test( 'allows adding variable products that have "any" as a variation attribute', async ( {
+		page,
+		pageObject,
+		editor,
+	} ) => {
+		await pageObject.updateSingleProductTemplate();
+
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
+
+		await page.goto( '/product/v-neck-t-shirt/' );
+
+		// The radio input is visually hidden and, thus, not clickable. That's
+		// why we need to select the <label> instead.
+		const colorBlueOption = page.locator( 'label:has-text("Blue")' );
+		const colorRedOption = page.locator( 'label:has-text("Red")' );
+		const sizeLargeOption = page.locator( 'label:has-text("Large")' );
+
+		await colorBlueOption.click();
+		await sizeLargeOption.click();
+
+		// We use the Add to Cart + Options class to make sure we don't select
+		// the Add to Cart button from the Related Products block.
+		const addToCartButton = page
+			.locator( '.wp-block-add-to-cart-with-options' )
+			.getByRole( 'button', { name: 'Add to cart' } );
+
+		// Note: The button is always enabled for accessibility reasons.
+		// Instead, we check directly for the "disabled" class, which grays
+		// out the button.
+		await expect( addToCartButton ).not.toHaveClass( /\bdisabled\b/ );
+
+		await addToCartButton.click();
+
+		await expect( page.getByText( '1 in cart' ) ).toBeVisible();
+
+		await colorRedOption.click();
+
+		await expect( page.getByText( '1 in cart' ) ).toBeHidden();
+	} );
+
 	test( 'allows adding grouped products to cart', async ( {
 		page,
 		pageObject,
