@@ -1268,6 +1268,43 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should not fire woocommerce_cart_item_updated_from_user_request when quantity is unchanged.
+	 */
+	public function test_update_cart_action_does_not_fire_update_quantity_action_when_unchanged(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 2 );
+
+		$cart_items    = WC()->cart->get_cart();
+		$cart_item_key = array_key_first( $cart_items );
+
+		$nonce = wp_create_nonce( 'woocommerce-cart' );
+
+		$_POST['_wpnonce']       = $nonce;
+		$_REQUEST['_wpnonce']    = $nonce;
+		$_POST['update_cart']    = 'Update Cart';
+		$_REQUEST['update_cart'] = 'Update Cart';
+		$_POST['cart']           = array(
+			$cart_item_key => array( 'qty' => 2 ),
+		);
+
+		$hook_fired = false;
+		$callback   = function () use ( &$hook_fired ) {
+			$hook_fired = true;
+		};
+
+		add_action( 'woocommerce_cart_item_updated_from_user_request', $callback, 10, 4 );
+
+		WC_Form_Handler::update_cart_action();
+
+		$this->assertFalse( $hook_fired, 'The update quantity action should not fire when the quantity is unchanged' );
+
+		remove_action( 'woocommerce_cart_item_updated_from_user_request', $callback );
+
+		unset( $_POST['_wpnonce'], $_REQUEST['_wpnonce'], $_POST['update_cart'], $_REQUEST['update_cart'], $_POST['cart'] );
+		$product->delete( true );
+	}
+
+	/**
 	 * @testdox Should fire woocommerce_cart_item_removed_from_user_request when cart item is removed via form.
 	 */
 	public function test_update_cart_action_fires_remove_item_action(): void {

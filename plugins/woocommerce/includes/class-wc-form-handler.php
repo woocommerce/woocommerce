@@ -737,18 +737,21 @@ class WC_Form_Handler {
 					if ( $passed_validation ) {
 						$old_quantity = $values['quantity'];
 						WC()->cart->set_quantity( $cart_item_key, $quantity, false );
-						/**
-						 * Fires when a cart item quantity is updated from a user request.
-						 *
-						 * @param string   $cart_item_key Cart item key.
-						 * @param int      $quantity      New quantity.
-						 * @param int      $old_quantity  Old quantity.
-						 * @param \WC_Cart $cart          Cart object.
-						 *
-						 * @since 10.6.0
-						 */
-						do_action( 'woocommerce_cart_item_updated_from_user_request', $cart_item_key, $quantity, $old_quantity, WC()->cart );
 						$cart_updated = true;
+
+						if ( $old_quantity !== $quantity ) {
+							/**
+							 * Fires when a cart item quantity is updated from a user request.
+							 *
+							 * @param string   $cart_item_key Cart item key.
+							 * @param int      $quantity      New quantity.
+							 * @param int      $old_quantity  Old quantity.
+							 * @param \WC_Cart $cart          Cart object.
+							 *
+							 * @since 10.6.0
+							 */
+							do_action( 'woocommerce_cart_item_updated_from_user_request', $cart_item_key, $quantity, $old_quantity, WC()->cart );
+						}
 					}
 				}
 			}
