@@ -1,6 +1,7 @@
 jQuery(function ($) {
 	const containerSelector = 'paypal-standard-container';
 	let orderReceivedUrl = '';
+	let createOrderError = '';
 	let orderId = '';
 	let orderKey = '';
 	let productPageCartData = {};
@@ -141,6 +142,7 @@ jQuery(function ($) {
 
 					return paypalResponseData.paypal_order_id;
 				} catch ( error ) {
+					createOrderError = error?.error_message;
 					// eslint-disable-next-line no-console
 					console.error( 'Failed to create order', error );
 					return null;
@@ -185,7 +187,8 @@ jQuery(function ($) {
 			},
 
 			onError: function ( error ) {
-				const sanitizedErrorMessage = $( '<div>' ).text( error.message || paypal_standard.generic_error_message ).html();
+				const errorMessage = createOrderError || error.message || paypal_standard.generic_error_message;
+				const sanitizedErrorMessage = $( '<div>' ).text( errorMessage ).html();
 				const messageWrapper =
 					'<ul class="woocommerce-error" role="alert"><li>' +
 						sanitizedErrorMessage +

@@ -39,6 +39,7 @@ const PayPalButtonsContainer = ( {
 	appSwitchRequestOrigin,
 } ) => {
 	const [ orderReceivedUrl, setOrderReceivedURL ] = useState( '' );
+	const [ createOrderError, setCreateOrderError ] = useState( '' );
 	const [ orderId, setOrderId ] = useState( '' );
 	const [ productPageCartData, setProductPageCartData ] = useState( {
 		id: '',
@@ -184,6 +185,7 @@ const PayPalButtonsContainer = ( {
 
 			return paypalResponseData.paypal_order_id;
 		} catch ( error ) {
+			setCreateOrderError( error?.error_message );
 			// eslint-disable-next-line no-console
 			console.error( 'Failed to create order', error );
 			return null;
@@ -235,8 +237,7 @@ const PayPalButtonsContainer = ( {
 	};
 
 	const onError = ( error ) => {
-		const errorMessage =
-			error.message || __( 'An unknown error occurred', 'woocommerce' );
+		const errorMessage = createOrderError || error?.message || __( 'An unknown error occurred', 'woocommerce' );
 		dispatch( 'core/notices' ).createErrorNotice( errorMessage, {
 			context: pageType === 'checkout' ? 'wc/checkout' : 'wc/cart',
 		} );
