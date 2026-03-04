@@ -25,13 +25,6 @@ class PayPalStandardException extends \Exception {
 	private string $localized_message;
 
 	/**
-	 * The default localized message to use if no localized message is provided.
-	 *
-	 * @var string
-	 */
-	private string $default_localized_message = 'PayPal order creation failed. Please try again.';
-
-	/**
 	 * Constructor.
 	 *
 	 * @param string $log_message     Detailed message for server logs (may contain sensitive data).
@@ -48,9 +41,9 @@ class PayPalStandardException extends \Exception {
 	 * @return string
 	 */
 	public function get_localized_message(): string {
-		if ( empty( $this->localized_message ) ) {
-			$this->localized_message = $this->default_localized_message;
+		if ( ! empty( $this->localized_message ) ) {
+			return $this->localized_message;
 		}
-		return $this->localized_message;
+		return __( 'PayPal order creation failed. Please try again.', 'woocommerce' );
 	}
 }
