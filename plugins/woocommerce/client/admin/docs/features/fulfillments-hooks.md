@@ -58,14 +58,19 @@ Fired after a fulfillment is successfully updated in the database.
 **Parameters:**
 
 -   `$data` (Fulfillment) - The updated fulfillment object
+-   `$changed_props` (array) - List of tracked property keys that changed (e.g. `'status'`, `'items'`, `'_tracking_number'`, `'_tracking_url'`, `'_shipping_provider'`)
+-   `$old_state` (array) - Snapshot of tracked property values before the update
 
-**Purpose:** Allows plugins to perform actions after a fulfillment is updated.
+**Purpose:** Allows plugins to perform actions after a fulfillment is updated. Only tracked properties (status, items, tracking number, tracking URL, shipping provider) are compared; changes to other metadata do not appear in `$changed_props`.
 
 ```php
-add_action( 'woocommerce_fulfillment_after_update', 'sync_fulfillment_changes' );
+add_action( 'woocommerce_fulfillment_after_update', 'sync_fulfillment_changes', 10, 3 );
 
-function sync_fulfillment_changes( $fulfillment ) {
-    // Sync changes to external fulfillment service
+function sync_fulfillment_changes( $fulfillment, $changed_props, $old_state ) {
+    // Only sync when tracking info changes
+    if ( in_array( '_tracking_number', $changed_props, true ) ) {
+        // Sync tracking to external service
+    }
 }
 ```
 

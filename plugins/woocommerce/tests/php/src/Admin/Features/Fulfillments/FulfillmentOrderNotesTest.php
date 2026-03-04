@@ -69,7 +69,6 @@ class FulfillmentOrderNotesTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_hooks_registered(): void {
 		$this->assertNotFalse( has_action( 'woocommerce_fulfillment_after_create' ) );
-		$this->assertNotFalse( has_filter( 'woocommerce_fulfillment_before_update' ) );
 		$this->assertNotFalse( has_action( 'woocommerce_fulfillment_after_update' ) );
 		$this->assertNotFalse( has_action( 'woocommerce_fulfillment_after_delete' ) );
 	}
