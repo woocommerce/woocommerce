@@ -720,9 +720,9 @@ class BlockTemplateUtils {
 		$theme = get_stylesheet();
 		$ids   = wp_cache_get( $template_type . '-ids', 'woocommerce_blocks' );
 		if ( ! isset( $ids[ $theme ] ) ) {
-			// 'post__not_in' guarantees using `type_status_date` index on the posts table; as the table grows the
-			// template type entries still remain a handful (small selectivity) enabling this query performance.
-			$ids           = false === $ids ? array() : $ids;
+			// 'post__not_in' directs the query to use the `type_status_date` index on the posts table. Omitting this may
+			// impact index usage on some systems and result in `Using join buffer (flat, BNL join)`.
+			// As the table grows, the number of template type entries stays small, which helps maintain strong query performance.
 			$ids[ $theme ] = ( new \WP_Query(
 				array(
 					'post_type'      => $template_type,
