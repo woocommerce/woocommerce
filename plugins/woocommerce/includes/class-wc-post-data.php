@@ -38,7 +38,7 @@ class WC_Post_Data {
 	 */
 	public static function init() {
 		add_action( 'clean_post_cache', array( __CLASS__, 'invalidate_products_last_modified' ), 10, 2 );
-		add_action( 'clean_post_cache', array( __CLASS__, 'invalidate_db_block_templates_cache'), 10, 2 );
+		add_action( 'clean_post_cache', array( __CLASS__, 'invalidate_db_block_templates_cache' ), 10, 2 );
 		add_filter( 'post_type_link', array( __CLASS__, 'variation_post_link' ), 10, 2 );
 		add_action( 'shutdown', array( __CLASS__, 'do_deferred_product_sync' ), 10 );
 		add_action( 'set_object_terms', array( __CLASS__, 'force_default_term' ), 10, 5 );
