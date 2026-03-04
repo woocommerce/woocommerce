@@ -183,6 +183,138 @@ class FulfillmentOrderNotesTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that the created note includes shipping provider when present.
+	 */
+	public function test_created_note_includes_shipping_provider(): void {
+		$product = \WC_Helper_Product::create_simple_product();
+		$order   = OrderHelper::create_order( get_current_user_id(), $product );
+
+		$order_items = $order->get_items();
+		$first_item  = reset( $order_items );
+
+		FulfillmentsHelper::create_fulfillment(
+			array(
+				'entity_type'  => WC_Order::class,
+				'entity_id'    => $order->get_id(),
+				'status'       => 'unfulfilled',
+				'is_fulfilled' => false,
+			),
+			array(
+				'_items'             => array(
+					array(
+						'item_id' => $first_item->get_id(),
+						'qty'     => 1,
+					),
+				),
+				'_tracking_number'   => 'TRACK123456',
+				'_shipping_provider' => 'fedex',
+			)
+		);
+
+		$notes = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
+
+		$found = false;
+		foreach ( $notes as $note ) {
+			if ( str_contains( $note->content, 'TRACK123456' ) && str_contains( $note->content, 'fedex' ) ) {
+				$found = true;
+				break;
+			}
+		}
+		$this->assertTrue( $found, 'Expected the created note to include the shipping provider.' );
+	}
+
+	/**
+	 * Test that the created note includes tracking URL when present.
+	 */
+	public function test_created_note_includes_tracking_url(): void {
+		$product = \WC_Helper_Product::create_simple_product();
+		$order   = OrderHelper::create_order( get_current_user_id(), $product );
+
+		$order_items = $order->get_items();
+		$first_item  = reset( $order_items );
+
+		FulfillmentsHelper::create_fulfillment(
+			array(
+				'entity_type'  => WC_Order::class,
+				'entity_id'    => $order->get_id(),
+				'status'       => 'unfulfilled',
+				'is_fulfilled' => false,
+			),
+			array(
+				'_items'           => array(
+					array(
+						'item_id' => $first_item->get_id(),
+						'qty'     => 1,
+					),
+				),
+				'_tracking_number' => 'TRACK123456',
+				'_tracking_url'    => 'https://example.com/track/TRACK123456',
+			)
+		);
+
+		$notes = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
+
+		$found = false;
+		foreach ( $notes as $note ) {
+			if ( str_contains( $note->content, 'TRACK123456' ) && str_contains( $note->content, 'https://example.com/track/TRACK123456' ) ) {
+				$found = true;
+				break;
+			}
+		}
+		$this->assertTrue( $found, 'Expected the created note to include the tracking URL.' );
+	}
+
+	/**
+	 * Test that the updated note includes shipping provider and tracking URL.
+	 */
+	public function test_updated_note_includes_provider_and_url(): void {
+		$product = \WC_Helper_Product::create_simple_product();
+		$order   = OrderHelper::create_order( get_current_user_id(), $product );
+
+		$order_items = $order->get_items();
+		$first_item  = reset( $order_items );
+
+		$fulfillment = FulfillmentsHelper::create_fulfillment(
+			array(
+				'entity_type'  => WC_Order::class,
+				'entity_id'    => $order->get_id(),
+				'status'       => 'unfulfilled',
+				'is_fulfilled' => false,
+			),
+			array(
+				'_items' => array(
+					array(
+						'item_id' => $first_item->get_id(),
+						'qty'     => 1,
+					),
+				),
+			)
+		);
+
+		// Update with tracking info (non-status change).
+		$fulfillment->update_meta_data( '_tracking_number', 'UPS999' );
+		$fulfillment->update_meta_data( '_shipping_provider', 'ups' );
+		$fulfillment->update_meta_data( '_tracking_url', 'https://ups.com/track/UPS999' );
+		$fulfillment->save();
+
+		$notes = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
+
+		$found = false;
+		foreach ( $notes as $note ) {
+			if (
+				str_contains( $note->content, 'updated' )
+				&& str_contains( $note->content, 'UPS999' )
+				&& str_contains( $note->content, 'ups' )
+				&& str_contains( $note->content, 'https://ups.com/track/UPS999' )
+			) {
+				$found = true;
+				break;
+			}
+		}
+		$this->assertTrue( $found, 'Expected the updated note to include tracking number, provider, and URL.' );
+	}
+
+	/**
 	 * Test that an order note is added when a fulfillment status changes.
 	 */
 	public function test_note_added_on_fulfillment_status_change(): void {

@@ -321,13 +321,40 @@ class FulfillmentOrderNotes {
 	}
 
 	/**
-	 * Format the tracking number from a fulfillment.
+	 * Format the tracking information from a fulfillment.
+	 *
+	 * Includes the tracking number, shipping provider, and tracking URL when available.
 	 *
 	 * @param Fulfillment $fulfillment The fulfillment object.
-	 * @return string The tracking number, or empty string if not present.
+	 * @return string The formatted tracking information, or empty string if no tracking number is present.
 	 */
 	private function format_tracking( Fulfillment $fulfillment ): string {
-		$tracking_number = $fulfillment->get_meta( '_tracking_number', true );
-		return is_string( $tracking_number ) ? $tracking_number : '';
+		$tracking_number   = $fulfillment->get_meta( '_tracking_number', true );
+		$shipping_provider = $fulfillment->get_meta( '_shipping_provider', true );
+		$tracking_url      = $fulfillment->get_meta( '_tracking_url', true );
+
+		if ( ! is_string( $tracking_number ) || '' === $tracking_number ) {
+			return '';
+		}
+
+		$parts = array( $tracking_number );
+
+		if ( is_string( $shipping_provider ) && '' !== $shipping_provider ) {
+			$parts[] = sprintf(
+				/* translators: %s: shipping provider name */
+				__( 'Provider: %s', 'woocommerce' ),
+				$shipping_provider
+			);
+		}
+
+		if ( is_string( $tracking_url ) && '' !== $tracking_url ) {
+			$parts[] = sprintf(
+				/* translators: %s: tracking URL */
+				__( 'URL: %s', 'woocommerce' ),
+				$tracking_url
+			);
+		}
+
+		return implode( ', ', $parts );
 	}
 }
