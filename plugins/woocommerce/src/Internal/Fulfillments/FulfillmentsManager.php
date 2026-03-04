@@ -24,9 +24,9 @@ class FulfillmentsManager {
 	/**
 	 * The fulfillment order notes instance.
 	 *
-	 * @var FulfillmentOrderNotes
+	 * @var FulfillmentOrderNotes|null
 	 */
-	private FulfillmentOrderNotes $fulfillment_order_notes;
+	private ?FulfillmentOrderNotes $fulfillment_order_notes = null;
 
 	/**
 	 * This method registers the hooks related to fulfillments.
@@ -39,7 +39,9 @@ class FulfillmentsManager {
 		$this->init_fulfillment_status_hooks();
 		$this->init_refund_hooks();
 
-		$this->fulfillment_order_notes = new FulfillmentOrderNotes();
+		if ( ! $this->fulfillment_order_notes ) {
+			$this->fulfillment_order_notes = wc_get_container()->get( FulfillmentOrderNotes::class );
+		}
 		$this->fulfillment_order_notes->register();
 	}
 

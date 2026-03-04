@@ -490,6 +490,241 @@ class FulfillmentOrderNotesTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that disallowed HTML tags are stripped from note messages.
+	 */
+	public function test_normalize_strips_disallowed_html(): void {
+		$malicious_filter = function () {
+			return 'Fulfillment created <script>alert("xss")</script> successfully.';
+		};
+		add_filter( 'woocommerce_fulfillment_created_order_note', $malicious_filter );
+
+		$product = \WC_Helper_Product::create_simple_product();
+		$order   = OrderHelper::create_order( get_current_user_id(), $product );
+
+		$order_items = $order->get_items();
+		$first_item  = reset( $order_items );
+
+		FulfillmentsHelper::create_fulfillment(
+			array(
+				'entity_type'  => WC_Order::class,
+				'entity_id'    => $order->get_id(),
+				'status'       => 'unfulfilled',
+				'is_fulfilled' => false,
+			),
+			array(
+				'_items' => array(
+					array(
+						'item_id' => $first_item->get_id(),
+						'qty'     => 1,
+					),
+				),
+			)
+		);
+
+		$notes = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
+
+		$found = false;
+		foreach ( $notes as $note ) {
+			if ( str_contains( $note->content, 'Fulfillment created' ) ) {
+				$found = true;
+				$this->assertStringNotContainsString( '<script>', $note->content );
+				$this->assertStringNotContainsString( '</script>', $note->content );
+				$this->assertStringContainsString( 'successfully.', $note->content );
+				break;
+			}
+		}
+		$this->assertTrue( $found, 'Expected a sanitized fulfillment note.' );
+
+		remove_filter( 'woocommerce_fulfillment_created_order_note', $malicious_filter );
+	}
+
+	/**
+	 * Test that allowed HTML tags are preserved in note messages.
+	 */
+	public function test_normalize_preserves_allowed_html(): void {
+		$filter_with_html = function () {
+			return 'Fulfillment <strong>created</strong> with <a href="https://example.com">link</a>.';
+		};
+		add_filter( 'woocommerce_fulfillment_created_order_note', $filter_with_html );
+
+		$product = \WC_Helper_Product::create_simple_product();
+		$order   = OrderHelper::create_order( get_current_user_id(), $product );
+
+		$order_items = $order->get_items();
+		$first_item  = reset( $order_items );
+
+		FulfillmentsHelper::create_fulfillment(
+			array(
+				'entity_type'  => WC_Order::class,
+				'entity_id'    => $order->get_id(),
+				'status'       => 'unfulfilled',
+				'is_fulfilled' => false,
+			),
+			array(
+				'_items' => array(
+					array(
+						'item_id' => $first_item->get_id(),
+						'qty'     => 1,
+					),
+				),
+			)
+		);
+
+		$notes = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
+
+		$found = false;
+		foreach ( $notes as $note ) {
+			if ( str_contains( $note->content, 'Fulfillment' ) && str_contains( $note->content, 'created' ) ) {
+				$found = true;
+				$this->assertStringContainsString( '<strong>created</strong>', $note->content );
+				$this->assertStringContainsString( '<a href="https://example.com">link</a>', $note->content );
+				break;
+			}
+		}
+		$this->assertTrue( $found, 'Expected allowed HTML to be preserved in note.' );
+
+		remove_filter( 'woocommerce_fulfillment_created_order_note', $filter_with_html );
+	}
+
+	/**
+	 * Test that returning a non-string value from a filter cancels the note.
+	 */
+	public function test_filter_returning_non_string_cancels_note(): void {
+		$non_string_filter = function () {
+			return 12345;
+		};
+		add_filter( 'woocommerce_fulfillment_created_order_note', $non_string_filter );
+
+		$product = \WC_Helper_Product::create_simple_product();
+		$order   = OrderHelper::create_order( get_current_user_id(), $product );
+
+		$order_items = $order->get_items();
+		$first_item  = reset( $order_items );
+
+		FulfillmentsHelper::create_fulfillment(
+			array(
+				'entity_type'  => WC_Order::class,
+				'entity_id'    => $order->get_id(),
+				'status'       => 'unfulfilled',
+				'is_fulfilled' => false,
+			),
+			array(
+				'_items' => array(
+					array(
+						'item_id' => $first_item->get_id(),
+						'qty'     => 1,
+					),
+				),
+			)
+		);
+
+		$notes = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
+
+		$found_created_note = false;
+		foreach ( $notes as $note ) {
+			if ( str_contains( $note->content, 'created' ) || str_contains( $note->content, '12345' ) ) {
+				$found_created_note = true;
+				break;
+			}
+		}
+		$this->assertFalse( $found_created_note, 'Expected no fulfillment note when filter returns a non-string value.' );
+
+		remove_filter( 'woocommerce_fulfillment_created_order_note', $non_string_filter );
+	}
+
+	/**
+	 * Test that returning an empty string from a filter cancels the note.
+	 */
+	public function test_filter_returning_empty_string_cancels_note(): void {
+		$empty_filter = function () {
+			return '';
+		};
+		add_filter( 'woocommerce_fulfillment_created_order_note', $empty_filter );
+
+		$product = \WC_Helper_Product::create_simple_product();
+		$order   = OrderHelper::create_order( get_current_user_id(), $product );
+
+		$order_items = $order->get_items();
+		$first_item  = reset( $order_items );
+
+		FulfillmentsHelper::create_fulfillment(
+			array(
+				'entity_type'  => WC_Order::class,
+				'entity_id'    => $order->get_id(),
+				'status'       => 'unfulfilled',
+				'is_fulfilled' => false,
+			),
+			array(
+				'_items' => array(
+					array(
+						'item_id' => $first_item->get_id(),
+						'qty'     => 1,
+					),
+				),
+			)
+		);
+
+		$notes = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
+
+		$found_created_note = false;
+		foreach ( $notes as $note ) {
+			if ( str_contains( $note->content, 'created' ) ) {
+				$found_created_note = true;
+				break;
+			}
+		}
+		$this->assertFalse( $found_created_note, 'Expected no fulfillment note when filter returns empty string.' );
+
+		remove_filter( 'woocommerce_fulfillment_created_order_note', $empty_filter );
+	}
+
+	/**
+	 * Test that returning whitespace-only string from a filter cancels the note.
+	 */
+	public function test_filter_returning_whitespace_only_cancels_note(): void {
+		$whitespace_filter = function () {
+			return '   ';
+		};
+		add_filter( 'woocommerce_fulfillment_created_order_note', $whitespace_filter );
+
+		$product = \WC_Helper_Product::create_simple_product();
+		$order   = OrderHelper::create_order( get_current_user_id(), $product );
+
+		$order_items = $order->get_items();
+		$first_item  = reset( $order_items );
+
+		FulfillmentsHelper::create_fulfillment(
+			array(
+				'entity_type'  => WC_Order::class,
+				'entity_id'    => $order->get_id(),
+				'status'       => 'unfulfilled',
+				'is_fulfilled' => false,
+			),
+			array(
+				'_items' => array(
+					array(
+						'item_id' => $first_item->get_id(),
+						'qty'     => 1,
+					),
+				),
+			)
+		);
+
+		$notes = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
+
+		$found_created_note = false;
+		foreach ( $notes as $note ) {
+			if ( str_contains( $note->content, 'created' ) ) {
+				$found_created_note = true;
+				break;
+			}
+		}
+		$this->assertFalse( $found_created_note, 'Expected no fulfillment note when filter returns whitespace-only string.' );
+
+		remove_filter( 'woocommerce_fulfillment_created_order_note', $whitespace_filter );
+	}
+
+	/**
 	 * Test that returning null from a filter cancels the note.
 	 */
 	public function test_filter_returning_null_cancels_note(): void {

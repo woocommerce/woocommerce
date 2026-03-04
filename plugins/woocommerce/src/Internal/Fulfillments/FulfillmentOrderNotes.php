@@ -84,6 +84,8 @@ class FulfillmentOrderNotes {
 		 * @param \WC_Order    $order       The order object.
 		 */
 		$message = apply_filters( 'woocommerce_fulfillment_created_order_note', $message, $fulfillment, $order );
+		$message = $this->normalize_note_message( $message );
+
 		if ( null === $message ) {
 			return;
 		}
@@ -165,6 +167,8 @@ class FulfillmentOrderNotes {
 		 * @param \WC_Order    $order       The order object.
 		 */
 		$message = apply_filters( 'woocommerce_fulfillment_updated_order_note', $message, $fulfillment, $order );
+		$message = $this->normalize_note_message( $message );
+
 		if ( null === $message ) {
 			return;
 		}
@@ -201,6 +205,8 @@ class FulfillmentOrderNotes {
 		 * @param \WC_Order    $order       The order object.
 		 */
 		$message = apply_filters( 'woocommerce_fulfillment_deleted_order_note', $message, $fulfillment, $order );
+		$message = $this->normalize_note_message( $message );
+
 		if ( null === $message ) {
 			return;
 		}
@@ -241,6 +247,8 @@ class FulfillmentOrderNotes {
 		 * @param string      $new_status The new fulfillment status.
 		 */
 		$message = apply_filters( 'woocommerce_fulfillment_order_status_changed_order_note', $message, $order, $old_status, $new_status );
+		$message = $this->normalize_note_message( $message );
+
 		if ( null === $message ) {
 			return;
 		}
@@ -282,6 +290,8 @@ class FulfillmentOrderNotes {
 		 * @param string       $new_status  The new status.
 		 */
 		$message = apply_filters( 'woocommerce_fulfillment_status_changed_order_note', $message, $fulfillment, $order, $old_status, $new_status );
+		$message = $this->normalize_note_message( $message );
+
 		if ( null === $message ) {
 			return;
 		}
@@ -385,5 +395,28 @@ class FulfillmentOrderNotes {
 	private function get_order_fulfillment_status_label( string $status ): string {
 		$statuses = FulfillmentUtils::get_order_fulfillment_statuses();
 		return $statuses[ $status ]['label'] ?? $status;
+	}
+
+	/**
+	 * Sanitize an order note message.
+	 *
+	 * Ensures the message is a string and strips any disallowed HTML tags.
+	 *
+	 * @param mixed $message The original message.
+	 * @return string|null The sanitized message, or null if the message is not valid.
+	 */
+	private function normalize_note_message( $message ): ?string {
+		if ( ! $message || ! is_string( $message ) ) {
+			return null;
+		}
+
+		$message = wp_kses_post( $message );
+		$message = trim( $message );
+
+		if ( '' === $message ) {
+			return null;
+		}
+
+		return $message;
 	}
 }
