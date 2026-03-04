@@ -198,6 +198,7 @@ jobs:
                 teamId: '${{ secrets.LINEAR_DOCS_TEAM_ID }}',
                 title,
                 description,
+                labelIds: [ '${{ secrets.LINEAR_DOCS_AUTO_LABEL }}' ],
               } );
 
               const issue = await result.issue;
