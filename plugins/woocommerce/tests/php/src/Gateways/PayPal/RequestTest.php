@@ -428,7 +428,7 @@ class RequestTest extends \WC_Unit_Test_Case {
 	 */
 	public function provider_normalize_paypal_order_shipping_country_code(): array {
 		return array(
-			'alpha2_supported_uppercase'     => array( 
+			'alpha2_supported_uppercase'     => array(
 				'country_code' => 'US',
 				'expected'     => 'US',
 				'is_supported' => true,

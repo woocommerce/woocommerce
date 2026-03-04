@@ -75,6 +75,8 @@ class Request {
 	 * @param string   $payment_source The payment source.
 	 * @param array    $js_sdk_params Extra parameters for a PayPal JS SDK (Buttons) request.
 	 * @return array|null
+	 *
+	 * @phpcs:ignore Squiz.Commenting.FunctionCommentThrowTag.Missing -- As we wrap the throw in a try/catch.
 	 */
 	public function create_paypal_order(
 		WC_Order $order,
@@ -231,6 +233,8 @@ class Request {
 	 * @param string|null   $action_url The URL to authorize or capture the payment.
 	 * @param string        $action The action to perform. Either 'authorize' or 'capture'.
 	 * @return void
+	 *
+	 * @phpcs:ignore Squiz.Commenting.FunctionCommentThrowTag.Missing -- As we wrap the throw in a try/catch.
 	 */
 	public function authorize_or_capture_payment( ?WC_Order $order, ?string $action_url, string $action = PayPalConstants::PAYMENT_ACTION_CAPTURE ): void {
 		if ( ! $order ) {
@@ -316,6 +320,8 @@ class Request {
 	 *
 	 * @param WC_Order|null $order Order object.
 	 * @return void
+	 *
+	 * @phpcs:ignore Squiz.Commenting.FunctionCommentThrowTag.Missing -- As we wrap the throw in a try/catch.
 	 */
 	public function capture_authorized_payment( ?WC_Order $order ): void {
 		if ( ! $order ) {
@@ -702,9 +708,9 @@ class Request {
 			// If the shipping preference is set to SET_PROVIDED_ADDRESS, but no shipping information is provided, PayPal create order request will fail.
 			// Throw an PayPalStandardException to prevent the request from being sent.
 			throw new PayPalStandardException(
-					'Shipping address is required for PayPal create-order request. Order ID: ' . esc_html( (string) $order->get_id() ),
-					'A valid shipping address is required to complete your PayPal payment.'
-				);
+				'Shipping address is required for PayPal create-order request. Order ID: ' . esc_html( (string) $order->get_id() ),
+				'A valid shipping address is required to complete your PayPal payment.'
+			);
 		}
 
 		return $params;
@@ -984,7 +990,7 @@ class Request {
 			}
 
 			throw new PayPalStandardException(
-				sprintf( 'Invalid alpha-2 country code: %s', $code ),
+				sprintf( 'Invalid alpha-2 country code: %s', esc_html( $code ) ),
 				'The country code you entered is not supported by PayPal. Please use a different country.'
 			);
 		}
@@ -1002,13 +1008,13 @@ class Request {
 		$alpha2 = WC()->countries->get_country_from_alpha_3_code( $code );
 		if ( null === $alpha2 ) {
 			throw new PayPalStandardException(
-				sprintf( 'Invalid alpha-3 country code: %s', $code ),
+				sprintf( 'Invalid alpha-3 country code: %s', esc_html( $code ) ),
 				'The country code you entered is not supported by PayPal. Please use a different country.'
 			);
 		}
 		if ( ! PayPalHelper::is_country_supported_by_paypal( $alpha2 ) ) {
 			throw new PayPalStandardException(
-				sprintf( 'Country not supported by PayPal: %s (resolved from alpha-3: %s)', $alpha2, $code ),
+				sprintf( 'Country not supported by PayPal: %s (resolved from alpha-3: %s)', esc_html( $alpha2 ), esc_html( $code ) ),
 				'The country code you entered is not supported by PayPal. Please use a different country.'
 			);
 		}
@@ -1053,6 +1059,8 @@ class Request {
 	 * Fetch the PayPal client-id from the Transact platform.
 	 *
 	 * @return string|null The PayPal client-id, or null if the request fails.
+	 *
+	 * @phpcs:ignore Squiz.Commenting.FunctionCommentThrowTag.Missing -- As we wrap the throw in a try/catch.
 	 */
 	public function fetch_paypal_client_id(): ?string {
 		try {

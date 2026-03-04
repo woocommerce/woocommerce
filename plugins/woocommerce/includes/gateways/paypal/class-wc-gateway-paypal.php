@@ -634,7 +634,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 			$paypal_order = $paypal_request->create_paypal_order( $order );
 			if ( isset( $paypal_order['localized_error_message'] ) ) {
-				throw new Exception( $paypal_order['localized_error_message'] );
+				throw new Exception( esc_html( $paypal_order['localized_error_message'] ) );
 			}
 			if ( ! $paypal_order || empty( $paypal_order['id'] ) || empty( $paypal_order['redirect_url'] ) ) {
 				throw new Exception(
