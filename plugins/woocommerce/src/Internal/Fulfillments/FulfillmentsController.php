@@ -48,6 +48,14 @@ class FulfillmentsController {
 			return $data_stores;
 		}
 
+		$container           = wc_get_container();
+		$features_controller = $container->get( FeaturesController::class );
+
+		// If fulfillments feature is not enabled, don't register the data store.
+		if ( ! $features_controller->feature_is_enabled( 'fulfillments' ) ) {
+			return $data_stores;
+		}
+
 		$data_stores['order-fulfillment'] = FulfillmentsDataStore::class;
 		return $data_stores;
 	}
