@@ -774,6 +774,15 @@ class WC_Cart extends WC_Legacy_Cart {
 			$return = false;
 		}
 
+		$result = $this->check_cart_item_sold_individually();
+
+		if ( is_wp_error( $result ) ) {
+			foreach ( $result->get_error_messages() as $message ) {
+				wc_add_notice( $message, 'error' );
+			}
+			$return = false;
+		}
+
 		$result = $this->check_cart_item_stock();
 
 		if ( is_wp_error( $result ) ) {
@@ -818,6 +827,41 @@ class WC_Cart extends WC_Legacy_Cart {
 		}
 
 		return $return;
+	}
+
+	/**
+	 * Looks through cart items and ensures sold individually products have quantity of 1.
+	 *
+	 * @since 10.7.0
+	 * @return bool|WP_Error
+	 */
+	public function check_cart_item_sold_individually() {
+		$errors = new WP_Error();
+
+		foreach ( $this->get_cart() as $cart_item_key => $values ) {
+			$product = $values['data'];
+
+			if ( ! $product || ! $product->exists() ) {
+				continue;
+			}
+
+			$product_id       = $values['variation_id'] ? $values['variation_id'] : $values['product_id'];
+			$product_to_check = wc_get_product( $product_id );
+
+			if ( ! $product_to_check || ! $product_to_check->exists() ) {
+				continue;
+			}
+
+			if ( $product_to_check->is_sold_individually() && $values['quantity'] > 1 ) {
+				// Re-fetch and overwrite to reflect product changes made after item was added to cart.
+				$this->cart_contents[ $cart_item_key ]['data'] = $product_to_check;
+				$this->set_quantity( $cart_item_key, 1, false );
+				/* translators: %s: product name */
+				$errors->add( 'sold-individually', sprintf( __( 'You can only have 1 %s in your cart.', 'woocommerce' ), $product_to_check->get_name() ) );
+			}
+		}
+
+		return $errors->has_errors() ? $errors : true;
 	}
 
 	/**

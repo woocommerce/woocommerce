@@ -13507,12 +13507,6 @@ parameters:
 			path: includes/class-wc-payment-gateways.php
 
 		-
-			message: '#^Parameter \#2 \$callback of function array_filter expects \(callable\(mixed\)\: bool\)\|null, Closure\(mixed\)\: \(non\-falsy\-string\|false\) given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-payment-gateways.php
-
-		-
 			message: '#^Call to an undefined method WC_Data_Store\:\:get_metadata\(\)\.$#'
 			identifier: method.notFound
 			count: 1

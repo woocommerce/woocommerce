@@ -119,6 +119,7 @@ class WC_Emails {
 				'woocommerce_order_partially_refunded',
 				'woocommerce_new_customer_note',
 				'woocommerce_created_customer',
+				'woocommerce_payment_gateway_enabled',
 			)
 		);
 
@@ -282,19 +283,20 @@ class WC_Emails {
 		include_once __DIR__ . '/emails/class-wc-email.php';
 
 		$emails = array(
-			'WC_Email_New_Order'                 => __DIR__ . '/emails/class-wc-email-new-order.php',
-			'WC_Email_Cancelled_Order'           => __DIR__ . '/emails/class-wc-email-cancelled-order.php',
-			'WC_Email_Customer_Cancelled_Order'  => __DIR__ . '/emails/class-wc-email-customer-cancelled-order.php',
-			'WC_Email_Failed_Order'              => __DIR__ . '/emails/class-wc-email-failed-order.php',
-			'WC_Email_Customer_Failed_Order'     => __DIR__ . '/emails/class-wc-email-customer-failed-order.php',
-			'WC_Email_Customer_On_Hold_Order'    => __DIR__ . '/emails/class-wc-email-customer-on-hold-order.php',
-			'WC_Email_Customer_Processing_Order' => __DIR__ . '/emails/class-wc-email-customer-processing-order.php',
-			'WC_Email_Customer_Completed_Order'  => __DIR__ . '/emails/class-wc-email-customer-completed-order.php',
-			'WC_Email_Customer_Refunded_Order'   => __DIR__ . '/emails/class-wc-email-customer-refunded-order.php',
-			'WC_Email_Customer_Invoice'          => __DIR__ . '/emails/class-wc-email-customer-invoice.php',
-			'WC_Email_Customer_Note'             => __DIR__ . '/emails/class-wc-email-customer-note.php',
-			'WC_Email_Customer_Reset_Password'   => __DIR__ . '/emails/class-wc-email-customer-reset-password.php',
-			'WC_Email_Customer_New_Account'      => __DIR__ . '/emails/class-wc-email-customer-new-account.php',
+			'WC_Email_New_Order'                     => __DIR__ . '/emails/class-wc-email-new-order.php',
+			'WC_Email_Cancelled_Order'               => __DIR__ . '/emails/class-wc-email-cancelled-order.php',
+			'WC_Email_Customer_Cancelled_Order'      => __DIR__ . '/emails/class-wc-email-customer-cancelled-order.php',
+			'WC_Email_Failed_Order'                  => __DIR__ . '/emails/class-wc-email-failed-order.php',
+			'WC_Email_Customer_Failed_Order'         => __DIR__ . '/emails/class-wc-email-customer-failed-order.php',
+			'WC_Email_Customer_On_Hold_Order'        => __DIR__ . '/emails/class-wc-email-customer-on-hold-order.php',
+			'WC_Email_Customer_Processing_Order'     => __DIR__ . '/emails/class-wc-email-customer-processing-order.php',
+			'WC_Email_Customer_Completed_Order'      => __DIR__ . '/emails/class-wc-email-customer-completed-order.php',
+			'WC_Email_Customer_Refunded_Order'       => __DIR__ . '/emails/class-wc-email-customer-refunded-order.php',
+			'WC_Email_Customer_Invoice'              => __DIR__ . '/emails/class-wc-email-customer-invoice.php',
+			'WC_Email_Customer_Note'                 => __DIR__ . '/emails/class-wc-email-customer-note.php',
+			'WC_Email_Customer_Reset_Password'       => __DIR__ . '/emails/class-wc-email-customer-reset-password.php',
+			'WC_Email_Customer_New_Account'          => __DIR__ . '/emails/class-wc-email-customer-new-account.php',
+			'WC_Email_Admin_Payment_Gateway_Enabled' => __DIR__ . '/emails/class-wc-email-admin-payment-gateway-enabled.php',
 		);
 		if ( FeaturesUtil::feature_is_enabled( 'point_of_sale' ) ) {
 			$emails['WC_Email_Customer_POS_Completed_Order'] = __DIR__ . '/emails/class-wc-email-customer-pos-completed-order.php';
