@@ -165,6 +165,9 @@ jobs:
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
         env:
           STRUCTURED_OUTPUT: ${{ steps.analyze.outputs.structured_output }}
+          LINEAR_API_KEY: ${{ secrets.LINEAR_OAUTH_TOKEN }}
+          LINEAR_TEAM_ID: ${{ secrets.LINEAR_DOCS_TEAM_ID }}
+          LINEAR_LABEL_ID: ${{ secrets.LINEAR_DOCS_AUTO_LABEL }}
         with:
           script: |
             const verdict = JSON.parse( process.env.STRUCTURED_OUTPUT );
@@ -174,7 +177,7 @@ jobs:
 
             const { LinearClient } = require( '@linear/sdk' );
             const linearClient = new LinearClient( {
-              apiKey: '${{ secrets.LINEAR_OAUTH_TOKEN }}'
+              apiKey: process.env.LINEAR_API_KEY,
             } );
 
             const title = `Docs update needed: ${ prTitle }`;
@@ -189,10 +192,10 @@ jobs:
 
             try {
               const result = await linearClient.createIssue( {
-                teamId: '${{ secrets.LINEAR_DOCS_TEAM_ID }}',
+                teamId: process.env.LINEAR_TEAM_ID,
                 title,
                 description,
-                labelIds: [ '${{ secrets.LINEAR_DOCS_AUTO_LABEL }}' ],
+                labelIds: [ process.env.LINEAR_LABEL_ID ],
               } );
 
               const issue = await result.issue;
