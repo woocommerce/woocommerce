@@ -20,18 +20,30 @@ class FulfillmentsControllerTest extends WC_Unit_Test_Case {
 	private $sut;
 
 	/**
+	 * Original value of the fulfillments feature flag.
+	 *
+	 * @var mixed
+	 */
+	private $original_fulfillments_flag;
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->sut = wc_get_container()->get( FulfillmentsController::class );
+		$this->original_fulfillments_flag = get_option( 'woocommerce_feature_fulfillments_enabled' );
+		$this->sut                        = wc_get_container()->get( FulfillmentsController::class );
 	}
 
 	/**
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		update_option( 'woocommerce_feature_fulfillments_enabled', 'no' );
+		if ( false === $this->original_fulfillments_flag ) {
+			delete_option( 'woocommerce_feature_fulfillments_enabled' );
+		} else {
+			update_option( 'woocommerce_feature_fulfillments_enabled', $this->original_fulfillments_flag );
+		}
 		parent::tearDown();
 	}
 
