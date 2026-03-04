@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Gateways\PayPal;
 
 use Exception;
 use WC_Order;
+use Automattic\WooCommerce\Gateways\PayPal\PayPalStandardException;
 use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
 use Automattic\WooCommerce\Gateways\PayPal\AddressRequirements as PayPalAddressRequirements;
 use Automattic\WooCommerce\Gateways\PayPal\Helper as PayPalHelper;
@@ -75,7 +76,6 @@ class Request {
 	 * @param string   $payment_source The payment source.
 	 * @param array    $js_sdk_params Extra parameters for a PayPal JS SDK (Buttons) request.
 	 * @return array|null
-	 * @throws Exception If the PayPal order creation fails.
 	 */
 	public function create_paypal_order(
 		WC_Order $order,
@@ -100,11 +100,17 @@ class Request {
 			$response     = $this->send_wpcom_proxy_request( 'POST', self::WPCOM_PROXY_ORDER_ENDPOINT, $request_body );
 
 			if ( is_wp_error( $response ) ) {
-				throw new Exception( 'PayPal order creation failed. Response error: ' . $response->get_error_message() );
+				throw new PayPalStandardException(
+					'PayPal order creation failed. Response error: ' . $response->get_error_message(),
+					'We were unable to connect to PayPal. Please try again.'
+				);
 			}
 
 			if ( ! is_array( $response ) ) {
-				throw new Exception( 'PayPal order creation failed. Invalid response type.' );
+				throw new PayPalStandardException(
+					'PayPal order creation failed. Invalid response type.',
+					'We received an unexpected response from PayPal. Please try again.'
+				);
 			}
 
 			$http_code     = wp_remote_retrieve_response_code( $response );
@@ -134,7 +140,10 @@ class Request {
 
 			if ( ! in_array( $http_code, array( 200, 201 ), true ) ) {
 				$paypal_debug_id = isset( $response_data['debug_id'] ) ? $response_data['debug_id'] : null;
-				throw new Exception( 'PayPal order creation failed. Response status: ' . $http_code . '. Response body: ' . $body );
+				throw new PayPalStandardException(
+					'PayPal order creation failed. Response status: ' . $http_code . '. Response body: ' . $body,
+					'PayPal was unable to process your payment. Please try again or use a different payment method.'
+				);
 			}
 
 			$redirect_url = null;
@@ -142,7 +151,10 @@ class Request {
 				// We only need an approve link for the classic, redirect flow.
 				$redirect_url = $this->get_approve_link( $http_code, $response_data );
 				if ( empty( $redirect_url ) ) {
-					throw new Exception( 'PayPal order creation failed. Missing approval link.' );
+					throw new PayPalStandardException(
+						'PayPal order creation failed. Missing approval link.',
+						'We could not retrieve the PayPal approval link. Please try again.'
+					);
 				}
 			}
 
@@ -161,7 +173,7 @@ class Request {
 				'id'           => $response_data['id'],
 				'redirect_url' => $redirect_url,
 			);
-		} catch ( Exception $e ) {
+		} catch ( PayPalStandardException $e ) {
 			\WC_Gateway_Paypal::log( $e->getMessage() );
 			if ( $paypal_debug_id ) {
 				$order->add_order_note(
@@ -172,6 +184,9 @@ class Request {
 					)
 				);
 			}
+			return array( 'localized_error_message' => $e->get_localized_message() );
+		} catch ( Exception $e ) {
+			\WC_Gateway_Paypal::log( $e->getMessage() );
 			return null;
 		}
 	}
@@ -556,7 +571,7 @@ class Request {
 	 * @param array    $js_sdk_params Extra parameters for a PayPal JS SDK (Buttons) request.
 	 * @return array
 	 *
-	 * @throws Exception If the order items cannot be built.
+	 * @throws PayPalStandardException If the order request params cannot be built.
 	 */
 	private function get_paypal_create_order_request_params( WC_Order $order, string $payment_source, array $js_sdk_params ): array {
 		$payee_email         = sanitize_email( (string) $this->gateway->get_option( 'email' ) );
@@ -575,14 +590,20 @@ class Request {
 			PayPalConstants::SUPPORTED_CURRENCIES
 		);
 		if ( ! in_array( strtoupper( $order->get_currency() ), $supported_currencies, true ) ) {
-			throw new Exception( 'Currency is not supported by PayPal. Order ID: ' . esc_html( (string) $order->get_id() ) );
+			throw new PayPalStandardException(
+				'Currency is not supported by PayPal. Order ID: ' . esc_html( (string) $order->get_id() ),
+				'Your order currency is not supported by PayPal. Please use a different payment method.'
+			);
 		}
 
 		$purchase_unit_amount = $this->get_paypal_order_purchase_unit_amount( $order );
 		if ( $purchase_unit_amount['value'] <= 0 ) {
 			// If we cannot build purchase unit amount (e.g. negative or zero order total),
 			// we should not proceed with the create-order request.
-			throw new Exception( 'Cannot build PayPal order purchase unit amount. Order total is not valid. Order ID: ' . esc_html( (string) $order->get_id() ) . ', Total: ' . esc_html( (string) $purchase_unit_amount['value'] ) );
+			throw new PayPalStandardException(
+				'Cannot build PayPal order purchase unit amount. Order total is not valid. Order ID: ' . esc_html( (string) $order->get_id() ) . ', Total: ' . esc_html( (string) $purchase_unit_amount['value'] ),
+				'Your order total is invalid and cannot be processed by PayPal. Please review your cart.'
+			);
 		}
 
 		$order_items = $this->get_paypal_order_items( $order );
@@ -681,7 +702,10 @@ class Request {
 		} elseif ( PayPalConstants::SHIPPING_SET_PROVIDED_ADDRESS === $shipping_preference ) {
 			// If the shipping preference is set to SET_PROVIDED_ADDRESS, but no shipping information is provided, PayPal create order request will fail.
 			// Throw an exception to prevent the request from being sent.
-			throw new Exception( 'Shipping address is required for PayPal create-order request. Order ID: ' . esc_html( (string) $order->get_id() ) );
+			throw new PayPalStandardException(
+					'Shipping address is required for PayPal create-order request. Order ID: ' . esc_html( (string) $order->get_id() ),
+					'A valid shipping address is required to complete your PayPal payment.'
+				);
 		}
 
 		return $params;
@@ -730,7 +754,7 @@ class Request {
 	 *
 	 * @param WC_Order $order Order object.
 	 * @return string
-	 * @throws Exception If the custom ID is too long.
+	 * @throws PayPalStandardException If the custom ID cannot be built.
 	 */
 	private function get_paypal_order_custom_id( WC_Order $order ): string {
 		$custom_id = wp_json_encode(
@@ -745,11 +769,17 @@ class Request {
 		);
 
 		if ( false === $custom_id ) {
-			throw new Exception( 'Failed to encode custom ID.' );
+			throw new PayPalStandardException(
+				'Failed to encode custom ID.',
+				'We were unable to prepare your PayPal order. Please try again.'
+			);
 		}
 
 		if ( strlen( $custom_id ) > 255 ) {
-			throw new Exception( 'PayPal order custom ID is too long. Max length is 255 chars.' );
+			throw new PayPalStandardException(
+				'PayPal order custom ID is too long. Max length is 255 chars.',
+				'We were unable to prepare your PayPal order. Please try again.'
+			);
 		}
 
 		return $custom_id ? $custom_id : '';
@@ -856,6 +886,7 @@ class Request {
 	 * @param WC_Order $order Order object.
 	 * @return array|null Returns null if the shipping is not required,
 	 *  or the address is not set, or is incomplete.
+	 * @throws PayPalStandardException If the shipping information cannot be built.
 	 */
 	private function get_paypal_order_shipping( WC_Order $order ): ?array {
 		if ( ! $order->needs_shipping() ) {
@@ -941,6 +972,7 @@ class Request {
 	 *
 	 * @param string $country_code Country code to normalize.
 	 * @return string|null
+	 * @throws PayPalStandardException If the country code is invalid.
 	 */
 	private function normalize_paypal_order_shipping_country_code( string $country_code ): ?string {
 		// Normalize to uppercase.
@@ -952,8 +984,10 @@ class Request {
 				return $code;
 			}
 
-			\WC_Gateway_Paypal::log( sprintf( 'Invalid country code: %s', $code ) );
-			return null;
+			throw new PayPalStandardException(
+				sprintf( 'Invalid alpha-2 country code: %s', $code ),
+				'The country code you entered is not supported by PayPal. Please use a different country.'
+			);
 		}
 
 		// Log when we get an unexpected country code length.
@@ -968,12 +1002,16 @@ class Request {
 		// Check if it's a valid alpha-3 code.
 		$alpha2 = WC()->countries->get_country_from_alpha_3_code( $code );
 		if ( null === $alpha2 ) {
-			\WC_Gateway_Paypal::log( sprintf( 'Invalid alpha-3 country code: %s', $code ), 'error' );
-			return null;
+			throw new PayPalStandardException(
+				sprintf( 'Invalid alpha-3 country code: %s', $code ),
+				'The country code you entered is not supported by PayPal. Please use a different country.'
+			);
 		}
 		if ( ! PayPalHelper::is_country_supported_by_paypal( $alpha2 ) ) {
-			\WC_Gateway_Paypal::log( sprintf( 'Country not supported by PayPal: %s (resolved from alpha-3: %s)', $alpha2, $code ) );
-			return null;
+			throw new PayPalStandardException(
+				sprintf( 'Country not supported by PayPal: %s (resolved from alpha-3: %s)', $alpha2, $code ),
+				'The country code you entered is not supported by PayPal. Please use a different country.'
+			);
 		}
 
 		return $alpha2;
