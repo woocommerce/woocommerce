@@ -1426,11 +1426,11 @@ class RequestTest extends \WC_Unit_Test_Case {
 		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_STATUS, PayPalConstants::STATUS_APPROVED );
 		$order->save();
 
-		$request_sequence     = array();
-		$capture_invoice_ids  = array();
-		$gateway              = new \WC_Gateway_Paypal();
-		$basic_invoice_id     = $gateway->get_option( 'invoice_prefix' ) . $order->get_order_number();
-		$modified_invoice_id  = null;
+		$request_sequence    = array();
+		$capture_invoice_ids = array();
+		$gateway             = new \WC_Gateway_Paypal();
+		$basic_invoice_id    = $gateway->get_option( 'invoice_prefix' ) . $order->get_order_number();
+		$modified_invoice_id = null;
 
 		add_filter(
 			'pre_http_request',
@@ -1470,7 +1470,7 @@ class RequestTest extends \WC_Unit_Test_Case {
 				}
 				if ( strpos( $url, 'order/' ) !== false && isset( $parsed_args['method'] ) && 'PATCH' === $parsed_args['method'] ) {
 					$request_sequence[] = 'patch';
-					$body = json_decode( $parsed_args['body'], true );
+					$body               = json_decode( $parsed_args['body'], true );
 					$this->assertArrayHasKey( 'order', $body );
 					$this->assertCount( 1, $body['order'] );
 					$this->assertSame( 'replace', $body['order'][0]['op'] );
@@ -1501,8 +1501,8 @@ class RequestTest extends \WC_Unit_Test_Case {
 		$this->assertSame( $basic_invoice_id, $capture_invoice_ids[0], 'First capture call should use the basic invoice_id (order creation value).' );
 		$this->assertSame( $modified_invoice_id, $capture_invoice_ids[1], 'Second capture call should use the modified invoice_id (after PATCH).' );
 		$this->assertNotEquals( $basic_invoice_id, $modified_invoice_id, 'Modified invoice_id should be different from the basic one.' );
-		$order = wc_get_order( $order->get_id() );
-		$notes = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
+		$order        = wc_get_order( $order->get_id() );
+		$notes        = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
 		$invoice_note = null;
 		foreach ( $notes as $note ) {
 			if ( strpos( $note->content, 'Invoice ID updated' ) !== false ) {
@@ -1545,7 +1545,10 @@ class RequestTest extends \WC_Unit_Test_Case {
 					);
 				}
 				if ( strpos( $url, 'transact/paypal_standard/proxy/order/' ) !== false && isset( $parsed_args['method'] ) && 'PATCH' === $parsed_args['method'] ) {
-					return array( 'response' => array( 'code' => 204 ), 'body' => '' );
+					return array(
+						'response' => array( 'code' => 204 ),
+						'body'     => '',
+					);
 				}
 				return $value;
 			},
@@ -1573,9 +1576,9 @@ class RequestTest extends \WC_Unit_Test_Case {
 		$order = \WC_Helper_Order::create_order();
 		$order->save();
 
-		$request  = new PayPalRequest( new \WC_Gateway_Paypal() );
+		$request    = new PayPalRequest( new \WC_Gateway_Paypal() );
 		$reflection = new \ReflectionClass( $request );
-		$method = $reflection->getMethod( 'generate_paypal_invoice_id_with_unique_suffix' );
+		$method     = $reflection->getMethod( 'generate_paypal_invoice_id_with_unique_suffix' );
 		$method->setAccessible( true );
 
 		$invoice_id = $method->invoke( $request, $order );
