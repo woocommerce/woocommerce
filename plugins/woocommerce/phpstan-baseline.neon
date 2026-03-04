@@ -46739,6 +46739,492 @@ parameters:
 			path: src/Admin/Features/Features.php
 
 		-
+			message: '#^Access to an undefined property WC_Meta_Data\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: src/Admin/Features/Fulfillments/DataStore/FulfillmentsDataStore.php
+
+		-
+			message: '#^Access to an undefined property WC_Meta_Data\:\:\$key\.$#'
+			identifier: property.notFound
+			count: 2
+			path: src/Admin/Features/Fulfillments/DataStore/FulfillmentsDataStore.php
+
+		-
+			message: '#^Access to an undefined property WC_Meta_Data\:\:\$value\.$#'
+			identifier: property.notFound
+			count: 2
+			path: src/Admin/Features/Fulfillments/DataStore/FulfillmentsDataStore.php
+
+		-
+			message: '#^Parameter \#2 \$meta \(WC_Meta_Data\) of method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\DataStore\\FulfillmentsDataStore\:\:add_meta\(\) should be compatible with parameter \$meta \(stdClass\) of method WC_Data_Store_WP\:\:add_meta\(\)$#'
+			identifier: method.childParameterType
+			count: 1
+			path: src/Admin/Features/Fulfillments/DataStore/FulfillmentsDataStore.php
+
+		-
+			message: '#^Parameter \#2 \$meta \(WC_Meta_Data\) of method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\DataStore\\FulfillmentsDataStore\:\:delete_meta\(\) should be compatible with parameter \$meta \(stdClass\) of method WC_Data_Store_WP\:\:delete_meta\(\)$#'
+			identifier: method.childParameterType
+			count: 1
+			path: src/Admin/Features/Fulfillments/DataStore/FulfillmentsDataStore.php
+
+		-
+			message: '#^Parameter \#2 \$meta \(WC_Meta_Data\) of method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\DataStore\\FulfillmentsDataStore\:\:update_meta\(\) should be compatible with parameter \$meta \(stdClass\) of method WC_Data_Store_WP\:\:update_meta\(\)$#'
+			identifier: method.childParameterType
+			count: 1
+			path: src/Admin/Features/Fulfillments/DataStore/FulfillmentsDataStore.php
+
+		-
+			message: '#^Return type \(void\) of method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\DataStore\\FulfillmentsDataStore\:\:delete\(\) should be compatible with return type \(bool\) of method WC_Object_Data_Store_Interface\:\:delete\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: src/Admin/Features/Fulfillments/DataStore/FulfillmentsDataStore.php
+
+		-
+			message: '#^Return type \(void\) of method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\DataStore\\FulfillmentsDataStore\:\:delete_meta\(\) should be compatible with return type \(array\) of method WC_Object_Data_Store_Interface\:\:delete_meta\(\)$#'
+			identifier: method.childReturnType
+			count: 1
+			path: src/Admin/Features/Fulfillments/DataStore/FulfillmentsDataStore.php
+
+		-
+			message: '#^Call to function is_object\(\) with ''''\|''0''\|array will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 1
+			path: src/Admin/Features/Fulfillments/Fulfillment.php
+
+		-
+			message: '#^Parameter \#1 \$read of method WC_Data\:\:__construct\(\) expects array\|int\|object, array\|Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\Fulfillment\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Admin/Features/Fulfillments/Fulfillment.php
+
+		-
+			message: '#^Parameter \#2 \$value of method WC_Data\:\:update_meta_data\(\) expects array\|string, bool given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Admin/Features/Fulfillments/Fulfillment.php
+
+		-
+			message: '#^Binary operation "\*" between string and 1\|3\|7 results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: src/Admin/Features/Fulfillments/FulfillmentUtils.php
+
+		-
+			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Admin/Features/Fulfillments/FulfillmentUtils.php
+
+		-
+			message: '#^Cannot access offset int on array\|false\.$#'
+			identifier: offsetAccess.nonOffsetAccessible
+			count: 1
+			path: src/Admin/Features/Fulfillments/FulfillmentUtils.php
+
+		-
+			message: '#^Instanceof between WC_Order and WC_Order will always evaluate to true\.$#'
+			identifier: instanceof.alwaysTrue
+			count: 2
+			path: src/Admin/Features/Fulfillments/FulfillmentUtils.php
+
+		-
+			message: '#^Parameter \#1 \$item_id of method WC_Order\:\:get_qty_refunded_for_item\(\) expects int, WC_Order_Item given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Admin/Features/Fulfillments/FulfillmentUtils.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\FulfillmentsController\:\:delete_legacy_order_fulfillment_meta\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Admin/Features/Fulfillments/FulfillmentsController.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\FulfillmentsController\:\:initialize_fulfillments\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Admin/Features/Fulfillments/FulfillmentsController.php
+
+		-
+			message: '#^Parameter \#1 \$id of method Automattic\\WooCommerce\\Container\:\:get\(\) expects class\-string\<object\>, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Admin/Features/Fulfillments/FulfillmentsController.php
+
+		-
+			message: '#^Unable to resolve the template type T in call to method Automattic\\WooCommerce\\Container\:\:get\(\)$#'
+			identifier: argument.templateType
+			count: 1
+			path: src/Admin/Features/Fulfillments/FulfillmentsController.php
+
+		-
+			message: '#^Call to function is_string\(\) with string will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 2
+			path: src/Admin/Features/Fulfillments/FulfillmentsManager.php
+
+		-
+			message: '#^Instanceof between Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\Fulfillment and Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\Fulfillment will always evaluate to true\.$#'
+			identifier: instanceof.alwaysTrue
+			count: 1
+			path: src/Admin/Features/Fulfillments/FulfillmentsManager.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\FulfillmentsManager\:\:init_fulfillment_status_hooks\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Admin/Features/Fulfillments/FulfillmentsManager.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\FulfillmentsManager\:\:init_refund_hooks\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Admin/Features/Fulfillments/FulfillmentsManager.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\FulfillmentsManager\:\:register\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Admin/Features/Fulfillments/FulfillmentsManager.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\FulfillmentsManager\:\:update_fulfillment_status\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Admin/Features/Fulfillments/FulfillmentsManager.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\FulfillmentsManager\:\:update_order_fulfillment_status_on_fulfillment_update\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Admin/Features/Fulfillments/FulfillmentsManager.php
+
+		-
+			message: '#^Parameter \#1 \$tracking_number of method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\Providers\\AbstractShippingProvider\:\:try_parse_tracking_number\(\) expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Admin/Features/Fulfillments/FulfillmentsManager.php
+
+		-
+			message: '#^Parameter \#2 \$tracking_number of method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\FulfillmentsManager\:\:get_best_parsing_result\(\) expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Admin/Features/Fulfillments/FulfillmentsManager.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\FulfillmentsRenderer\:\:filter_legacy_orders_list_query\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Admin/Features/Fulfillments/FulfillmentsRenderer.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\FulfillmentsRenderer\:\:init_admin_hooks\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Admin/Features/Fulfillments/FulfillmentsRenderer.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\FulfillmentsRenderer\:\:load_components\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Admin/Features/Fulfillments/FulfillmentsRenderer.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\FulfillmentsRenderer\:\:register\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Admin/Features/Fulfillments/FulfillmentsRenderer.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\FulfillmentsRenderer\:\:register_fulfillments_assets\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Admin/Features/Fulfillments/FulfillmentsRenderer.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\FulfillmentsRenderer\:\:render_fulfillment_column_row_data\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Admin/Features/Fulfillments/FulfillmentsRenderer.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\FulfillmentsRenderer\:\:render_fulfillment_column_row_data_legacy\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Admin/Features/Fulfillments/FulfillmentsRenderer.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\FulfillmentsRenderer\:\:render_fulfillment_customer_details\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Admin/Features/Fulfillments/FulfillmentsRenderer.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\FulfillmentsRenderer\:\:render_fulfillment_drawer_slot\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Admin/Features/Fulfillments/FulfillmentsRenderer.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\FulfillmentsRenderer\:\:render_fulfillment_filters\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Admin/Features/Fulfillments/FulfillmentsRenderer.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\FulfillmentsRenderer\:\:render_fulfillment_filters_legacy\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Admin/Features/Fulfillments/FulfillmentsRenderer.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\FulfillmentsRenderer\:\:render_order_details_badges\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Admin/Features/Fulfillments/FulfillmentsRenderer.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\FulfillmentsRenderer\:\:render_order_fulfillment_status_badge\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Admin/Features/Fulfillments/FulfillmentsRenderer.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\FulfillmentsRenderer\:\:render_order_fulfillment_status_column_row_data\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Admin/Features/Fulfillments/FulfillmentsRenderer.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\FulfillmentsRenderer\:\:render_shipment_provider_column_row_data\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Admin/Features/Fulfillments/FulfillmentsRenderer.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\FulfillmentsRenderer\:\:render_shipment_tracking_column_row_data\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Admin/Features/Fulfillments/FulfillmentsRenderer.php
+
+		-
+			message: '#^Parameter \#1 \$order of method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\FulfillmentsRenderer\:\:maybe_read_fulfillments\(\) expects WC_Order, WC_Order\|WC_Order_Refund given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Admin/Features/Fulfillments/FulfillmentsRenderer.php
+
+		-
+			message: '#^Parameter \#1 \$order of static method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\FulfillmentUtils\:\:get_pending_items\(\) expects WC_Order, WC_Order\|WC_Order_Refund given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Admin/Features/Fulfillments/FulfillmentsRenderer.php
+
+		-
+			message: '#^Parameter \#1 \$text of function esc_attr expects string, int given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Admin/Features/Fulfillments/FulfillmentsRenderer.php
+
+		-
+			message: '#^Static method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\FulfillmentUtils\:\:get_order_fulfillment_status_text\(\) invoked with 2 parameters, 1 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: src/Admin/Features/Fulfillments/FulfillmentsRenderer.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\FulfillmentsSettings\:\:init_settings_auto_fulfill\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Admin/Features/Fulfillments/FulfillmentsSettings.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\FulfillmentsSettings\:\:register\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Admin/Features/Fulfillments/FulfillmentsSettings.php
+
+		-
+			message: '#^Negated boolean expression is always false\.$#'
+			identifier: booleanNot.alwaysFalse
+			count: 2
+			path: src/Admin/Features/Fulfillments/FulfillmentsSettings.php
+
+		-
+			message: '#^Parameter \#2 \$value of method WC_Data\:\:update_meta_data\(\) expects array\|string, true given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Admin/Features/Fulfillments/FulfillmentsSettings.php
+
+		-
+			message: '#^Cannot call method get_customer_id\(\) on WC_Order\|WC_Order_Refund\|null\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: src/Admin/Features/Fulfillments/OrderFulfillmentsRestController.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\OrderFulfillmentsRestController\:\:check_permission_for_fulfillments\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Admin/Features/Fulfillments/OrderFulfillmentsRestController.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\OrderFulfillmentsRestController\:\:create_fulfillment\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Admin/Features/Fulfillments/OrderFulfillmentsRestController.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\OrderFulfillmentsRestController\:\:delete_fulfillment\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Admin/Features/Fulfillments/OrderFulfillmentsRestController.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\OrderFulfillmentsRestController\:\:delete_fulfillment_meta\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Admin/Features/Fulfillments/OrderFulfillmentsRestController.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\OrderFulfillmentsRestController\:\:get_fulfillment\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Admin/Features/Fulfillments/OrderFulfillmentsRestController.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\OrderFulfillmentsRestController\:\:get_fulfillment_meta\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Admin/Features/Fulfillments/OrderFulfillmentsRestController.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\OrderFulfillmentsRestController\:\:get_fulfillments\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Admin/Features/Fulfillments/OrderFulfillmentsRestController.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\OrderFulfillmentsRestController\:\:get_tracking_number_details\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Admin/Features/Fulfillments/OrderFulfillmentsRestController.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\OrderFulfillmentsRestController\:\:register_routes\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Admin/Features/Fulfillments/OrderFulfillmentsRestController.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\OrderFulfillmentsRestController\:\:update_fulfillment\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Admin/Features/Fulfillments/OrderFulfillmentsRestController.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\OrderFulfillmentsRestController\:\:update_fulfillment_meta\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
+			identifier: missingType.generics
+			count: 1
+			path: src/Admin/Features/Fulfillments/OrderFulfillmentsRestController.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\OrderFulfillmentsRestController\:\:validate_fulfillment\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Admin/Features/Fulfillments/OrderFulfillmentsRestController.php
+
+		-
+			message: '#^PHPDoc tag @throws with type WP_Error is not subtype of Throwable$#'
+			identifier: throws.notThrowable
+			count: 1
+			path: src/Admin/Features/Fulfillments/OrderFulfillmentsRestController.php
+
+		-
+			message: '#^Parameter \#1 \$data of class Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\Fulfillment constructor expects array\|Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\Fulfillment\|string, int given\.$#'
+			identifier: argument.type
+			count: 6
+			path: src/Admin/Features/Fulfillments/OrderFulfillmentsRestController.php
+
+		-
+			message: '#^Parameter \#1 \$text of function esc_attr expects string, int given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Admin/Features/Fulfillments/OrderFulfillmentsRestController.php
+
+		-
+			message: '#^Parameter \#3 \$status of method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\OrderFulfillmentsRestController\:\:prepare_error_response\(\) expects int, array\<string, int\> given\.$#'
+			identifier: argument.type
+			count: 3
+			path: src/Admin/Features/Fulfillments/OrderFulfillmentsRestController.php
+
+		-
+			message: '#^Parameter \#1 \$str of function strtoupper expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Admin/Features/Fulfillments/Providers/AmazonLogisticsShippingProvider.php
+
+		-
+			message: '#^Parameter \#1 \$str of function strtoupper expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Admin/Features/Fulfillments/Providers/AustraliaPostShippingProvider.php
+
+		-
+			message: '#^Parameter \#1 \$str of function strtoupper expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Admin/Features/Fulfillments/Providers/CanadaPostShippingProvider.php
+
+		-
+			message: '#^Comparison operation "\>" between 60\|70\|75\|80\|85\|88\|90\|92\|95\|98 and 0 is always true\.$#'
+			identifier: greater.alwaysTrue
+			count: 1
+			path: src/Admin/Features/Fulfillments/Providers/DHLShippingProvider.php
+
+		-
+			message: '#^Parameter \#1 \$str of function strtoupper expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Admin/Features/Fulfillments/Providers/DHLShippingProvider.php
+
+		-
+			message: '#^Offset ''s10'' on array\{classic\: 80, express\: 85, predict\: 85, s10\: 90\}\|array\{classic\: 82, express\: 85, s10\: 90\}\|array\{next_day\: 88, express\: 88, s10\: 90\}\|array\{relais\: 82, predict\: 82, s10\: 90\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: src/Admin/Features/Fulfillments/Providers/DPDShippingProvider.php
+
+		-
+			message: '#^Parameter \#1 \$str of function strtoupper expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Admin/Features/Fulfillments/Providers/DPDShippingProvider.php
+
+		-
+			message: '#^Parameter \#1 \$str of function strtoupper expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Admin/Features/Fulfillments/Providers/EvriHermesShippingProvider.php
+
+		-
+			message: '#^Parameter \#1 \$str of function strtoupper expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Admin/Features/Fulfillments/Providers/FedExShippingProvider.php
+
+		-
+			message: '#^Parameter \#1 \$str of function strtoupper expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Admin/Features/Fulfillments/Providers/RoyalMailShippingProvider.php
+
+		-
+			message: '#^Parameter \#1 \$str of function strtoupper expects string, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Admin/Features/Fulfillments/Providers/USPSShippingProvider.php
+
+		-
 			message: '#^Access to an undefined property object\:\:\$ID\.$#'
 			identifier: property.notFound
 			count: 2
@@ -63431,54 +63917,6 @@ parameters:
 			path: src/Internal/DataStores/CustomMetaDataStore.php
 
 		-
-			message: '#^Access to an undefined property WC_Meta_Data\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 2
-			path: src/Internal/DataStores/Fulfillments/FulfillmentsDataStore.php
-
-		-
-			message: '#^Access to an undefined property WC_Meta_Data\:\:\$key\.$#'
-			identifier: property.notFound
-			count: 2
-			path: src/Internal/DataStores/Fulfillments/FulfillmentsDataStore.php
-
-		-
-			message: '#^Access to an undefined property WC_Meta_Data\:\:\$value\.$#'
-			identifier: property.notFound
-			count: 2
-			path: src/Internal/DataStores/Fulfillments/FulfillmentsDataStore.php
-
-		-
-			message: '#^Parameter \#2 \$meta \(WC_Meta_Data\) of method Automattic\\WooCommerce\\Internal\\DataStores\\Fulfillments\\FulfillmentsDataStore\:\:add_meta\(\) should be compatible with parameter \$meta \(stdClass\) of method WC_Data_Store_WP\:\:add_meta\(\)$#'
-			identifier: method.childParameterType
-			count: 1
-			path: src/Internal/DataStores/Fulfillments/FulfillmentsDataStore.php
-
-		-
-			message: '#^Parameter \#2 \$meta \(WC_Meta_Data\) of method Automattic\\WooCommerce\\Internal\\DataStores\\Fulfillments\\FulfillmentsDataStore\:\:delete_meta\(\) should be compatible with parameter \$meta \(stdClass\) of method WC_Data_Store_WP\:\:delete_meta\(\)$#'
-			identifier: method.childParameterType
-			count: 1
-			path: src/Internal/DataStores/Fulfillments/FulfillmentsDataStore.php
-
-		-
-			message: '#^Parameter \#2 \$meta \(WC_Meta_Data\) of method Automattic\\WooCommerce\\Internal\\DataStores\\Fulfillments\\FulfillmentsDataStore\:\:update_meta\(\) should be compatible with parameter \$meta \(stdClass\) of method WC_Data_Store_WP\:\:update_meta\(\)$#'
-			identifier: method.childParameterType
-			count: 1
-			path: src/Internal/DataStores/Fulfillments/FulfillmentsDataStore.php
-
-		-
-			message: '#^Return type \(void\) of method Automattic\\WooCommerce\\Internal\\DataStores\\Fulfillments\\FulfillmentsDataStore\:\:delete\(\) should be compatible with return type \(bool\) of method WC_Object_Data_Store_Interface\:\:delete\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: src/Internal/DataStores/Fulfillments/FulfillmentsDataStore.php
-
-		-
-			message: '#^Return type \(void\) of method Automattic\\WooCommerce\\Internal\\DataStores\\Fulfillments\\FulfillmentsDataStore\:\:delete_meta\(\) should be compatible with return type \(array\) of method WC_Object_Data_Store_Interface\:\:delete_meta\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: src/Internal/DataStores/Fulfillments/FulfillmentsDataStore.php
-
-		-
 			message: '#^Filter callback return statement is missing\.$#'
 			identifier: return.missing
 			count: 1
@@ -65382,444 +65820,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Internal/Features/ProductBlockEditor/ProductTemplates/SimpleProductTemplate.php
-
-		-
-			message: '#^Call to function is_object\(\) with ''''\|''0''\|array will always evaluate to false\.$#'
-			identifier: function.impossibleType
-			count: 1
-			path: src/Internal/Fulfillments/Fulfillment.php
-
-		-
-			message: '#^Parameter \#1 \$read of method WC_Data\:\:__construct\(\) expects array\|int\|object, array\|Automattic\\WooCommerce\\Internal\\Fulfillments\\Fulfillment\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Fulfillments/Fulfillment.php
-
-		-
-			message: '#^Parameter \#2 \$value of method WC_Data\:\:update_meta_data\(\) expects array\|string, bool given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Fulfillments/Fulfillment.php
-
-		-
-			message: '#^Binary operation "\*" between string and 1\|3\|7 results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: src/Internal/Fulfillments/FulfillmentUtils.php
-
-		-
-			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Internal/Fulfillments/FulfillmentUtils.php
-
-		-
-			message: '#^Cannot access offset int on array\|false\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Internal/Fulfillments/FulfillmentUtils.php
-
-		-
-			message: '#^Instanceof between WC_Order and WC_Order will always evaluate to true\.$#'
-			identifier: instanceof.alwaysTrue
-			count: 2
-			path: src/Internal/Fulfillments/FulfillmentUtils.php
-
-		-
-			message: '#^Parameter \#1 \$item_id of method WC_Order\:\:get_qty_refunded_for_item\(\) expects int, WC_Order_Item given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Fulfillments/FulfillmentUtils.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Fulfillments\\FulfillmentsController\:\:delete_legacy_order_fulfillment_meta\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Fulfillments/FulfillmentsController.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Fulfillments\\FulfillmentsController\:\:initialize_fulfillments\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Fulfillments/FulfillmentsController.php
-
-		-
-			message: '#^Parameter \#1 \$id of method Automattic\\WooCommerce\\Container\:\:get\(\) expects class\-string\<object\>, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Fulfillments/FulfillmentsController.php
-
-		-
-			message: '#^Unable to resolve the template type T in call to method Automattic\\WooCommerce\\Container\:\:get\(\)$#'
-			identifier: argument.templateType
-			count: 1
-			path: src/Internal/Fulfillments/FulfillmentsController.php
-
-		-
-			message: '#^Call to function is_string\(\) with string will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 2
-			path: src/Internal/Fulfillments/FulfillmentsManager.php
-
-		-
-			message: '#^Instanceof between Automattic\\WooCommerce\\Internal\\Fulfillments\\Fulfillment and Automattic\\WooCommerce\\Internal\\Fulfillments\\Fulfillment will always evaluate to true\.$#'
-			identifier: instanceof.alwaysTrue
-			count: 1
-			path: src/Internal/Fulfillments/FulfillmentsManager.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Fulfillments\\FulfillmentsManager\:\:init_fulfillment_status_hooks\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Fulfillments/FulfillmentsManager.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Fulfillments\\FulfillmentsManager\:\:init_refund_hooks\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Fulfillments/FulfillmentsManager.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Fulfillments\\FulfillmentsManager\:\:register\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Fulfillments/FulfillmentsManager.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Fulfillments\\FulfillmentsManager\:\:update_fulfillment_status\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Fulfillments/FulfillmentsManager.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Fulfillments\\FulfillmentsManager\:\:update_order_fulfillment_status_on_fulfillment_update\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Fulfillments/FulfillmentsManager.php
-
-		-
-			message: '#^Parameter \#1 \$tracking_number of method Automattic\\WooCommerce\\Internal\\Fulfillments\\Providers\\AbstractShippingProvider\:\:try_parse_tracking_number\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Fulfillments/FulfillmentsManager.php
-
-		-
-			message: '#^Parameter \#2 \$tracking_number of method Automattic\\WooCommerce\\Internal\\Fulfillments\\FulfillmentsManager\:\:get_best_parsing_result\(\) expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Fulfillments/FulfillmentsManager.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Fulfillments\\FulfillmentsRenderer\:\:filter_legacy_orders_list_query\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Fulfillments/FulfillmentsRenderer.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Fulfillments\\FulfillmentsRenderer\:\:init_admin_hooks\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Fulfillments/FulfillmentsRenderer.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Fulfillments\\FulfillmentsRenderer\:\:load_components\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Fulfillments/FulfillmentsRenderer.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Fulfillments\\FulfillmentsRenderer\:\:register\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Fulfillments/FulfillmentsRenderer.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Fulfillments\\FulfillmentsRenderer\:\:register_fulfillments_assets\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Fulfillments/FulfillmentsRenderer.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Fulfillments\\FulfillmentsRenderer\:\:render_fulfillment_column_row_data\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Fulfillments/FulfillmentsRenderer.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Fulfillments\\FulfillmentsRenderer\:\:render_fulfillment_column_row_data_legacy\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Fulfillments/FulfillmentsRenderer.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Fulfillments\\FulfillmentsRenderer\:\:render_fulfillment_customer_details\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Fulfillments/FulfillmentsRenderer.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Fulfillments\\FulfillmentsRenderer\:\:render_fulfillment_drawer_slot\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Fulfillments/FulfillmentsRenderer.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Fulfillments\\FulfillmentsRenderer\:\:render_fulfillment_filters\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Fulfillments/FulfillmentsRenderer.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Fulfillments\\FulfillmentsRenderer\:\:render_fulfillment_filters_legacy\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Fulfillments/FulfillmentsRenderer.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Fulfillments\\FulfillmentsRenderer\:\:render_order_details_badges\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Fulfillments/FulfillmentsRenderer.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Fulfillments\\FulfillmentsRenderer\:\:render_order_fulfillment_status_badge\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Fulfillments/FulfillmentsRenderer.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Fulfillments\\FulfillmentsRenderer\:\:render_order_fulfillment_status_column_row_data\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Fulfillments/FulfillmentsRenderer.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Fulfillments\\FulfillmentsRenderer\:\:render_shipment_provider_column_row_data\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Fulfillments/FulfillmentsRenderer.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Fulfillments\\FulfillmentsRenderer\:\:render_shipment_tracking_column_row_data\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Fulfillments/FulfillmentsRenderer.php
-
-		-
-			message: '#^Parameter \#1 \$order of method Automattic\\WooCommerce\\Internal\\Fulfillments\\FulfillmentsRenderer\:\:maybe_read_fulfillments\(\) expects WC_Order, WC_Order\|WC_Order_Refund given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Fulfillments/FulfillmentsRenderer.php
-
-		-
-			message: '#^Parameter \#1 \$order of static method Automattic\\WooCommerce\\Internal\\Fulfillments\\FulfillmentUtils\:\:get_pending_items\(\) expects WC_Order, WC_Order\|WC_Order_Refund given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Fulfillments/FulfillmentsRenderer.php
-
-		-
-			message: '#^Parameter \#1 \$text of function esc_attr expects string, int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Fulfillments/FulfillmentsRenderer.php
-
-		-
-			message: '#^Static method Automattic\\WooCommerce\\Internal\\Fulfillments\\FulfillmentUtils\:\:get_order_fulfillment_status_text\(\) invoked with 2 parameters, 1 required\.$#'
-			identifier: arguments.count
-			count: 1
-			path: src/Internal/Fulfillments/FulfillmentsRenderer.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Fulfillments\\FulfillmentsSettings\:\:init_settings_auto_fulfill\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Fulfillments/FulfillmentsSettings.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Fulfillments\\FulfillmentsSettings\:\:register\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Fulfillments/FulfillmentsSettings.php
-
-		-
-			message: '#^Negated boolean expression is always false\.$#'
-			identifier: booleanNot.alwaysFalse
-			count: 2
-			path: src/Internal/Fulfillments/FulfillmentsSettings.php
-
-		-
-			message: '#^Parameter \#2 \$value of method WC_Data\:\:update_meta_data\(\) expects array\|string, true given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Fulfillments/FulfillmentsSettings.php
-
-		-
-			message: '#^Cannot call method get_customer_id\(\) on WC_Order\|WC_Order_Refund\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Fulfillments/OrderFulfillmentsRestController.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Fulfillments\\OrderFulfillmentsRestController\:\:check_permission_for_fulfillments\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
-			identifier: missingType.generics
-			count: 1
-			path: src/Internal/Fulfillments/OrderFulfillmentsRestController.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Fulfillments\\OrderFulfillmentsRestController\:\:create_fulfillment\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
-			identifier: missingType.generics
-			count: 1
-			path: src/Internal/Fulfillments/OrderFulfillmentsRestController.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Fulfillments\\OrderFulfillmentsRestController\:\:delete_fulfillment\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
-			identifier: missingType.generics
-			count: 1
-			path: src/Internal/Fulfillments/OrderFulfillmentsRestController.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Fulfillments\\OrderFulfillmentsRestController\:\:delete_fulfillment_meta\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
-			identifier: missingType.generics
-			count: 1
-			path: src/Internal/Fulfillments/OrderFulfillmentsRestController.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Fulfillments\\OrderFulfillmentsRestController\:\:get_fulfillment\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
-			identifier: missingType.generics
-			count: 1
-			path: src/Internal/Fulfillments/OrderFulfillmentsRestController.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Fulfillments\\OrderFulfillmentsRestController\:\:get_fulfillment_meta\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
-			identifier: missingType.generics
-			count: 1
-			path: src/Internal/Fulfillments/OrderFulfillmentsRestController.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Fulfillments\\OrderFulfillmentsRestController\:\:get_fulfillments\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
-			identifier: missingType.generics
-			count: 1
-			path: src/Internal/Fulfillments/OrderFulfillmentsRestController.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Fulfillments\\OrderFulfillmentsRestController\:\:get_tracking_number_details\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
-			identifier: missingType.generics
-			count: 1
-			path: src/Internal/Fulfillments/OrderFulfillmentsRestController.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Fulfillments\\OrderFulfillmentsRestController\:\:register_routes\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Fulfillments/OrderFulfillmentsRestController.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Fulfillments\\OrderFulfillmentsRestController\:\:update_fulfillment\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
-			identifier: missingType.generics
-			count: 1
-			path: src/Internal/Fulfillments/OrderFulfillmentsRestController.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Fulfillments\\OrderFulfillmentsRestController\:\:update_fulfillment_meta\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
-			identifier: missingType.generics
-			count: 1
-			path: src/Internal/Fulfillments/OrderFulfillmentsRestController.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Fulfillments\\OrderFulfillmentsRestController\:\:validate_fulfillment\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Fulfillments/OrderFulfillmentsRestController.php
-
-		-
-			message: '#^PHPDoc tag @throws with type WP_Error is not subtype of Throwable$#'
-			identifier: throws.notThrowable
-			count: 1
-			path: src/Internal/Fulfillments/OrderFulfillmentsRestController.php
-
-		-
-			message: '#^Parameter \#1 \$data of class Automattic\\WooCommerce\\Internal\\Fulfillments\\Fulfillment constructor expects array\|Automattic\\WooCommerce\\Internal\\Fulfillments\\Fulfillment\|string, int given\.$#'
-			identifier: argument.type
-			count: 6
-			path: src/Internal/Fulfillments/OrderFulfillmentsRestController.php
-
-		-
-			message: '#^Parameter \#1 \$text of function esc_attr expects string, int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Fulfillments/OrderFulfillmentsRestController.php
-
-		-
-			message: '#^Parameter \#3 \$status of method Automattic\\WooCommerce\\Internal\\Fulfillments\\OrderFulfillmentsRestController\:\:prepare_error_response\(\) expects int, array\<string, int\> given\.$#'
-			identifier: argument.type
-			count: 3
-			path: src/Internal/Fulfillments/OrderFulfillmentsRestController.php
-
-		-
-			message: '#^Parameter \#1 \$str of function strtoupper expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Fulfillments/Providers/AmazonLogisticsShippingProvider.php
-
-		-
-			message: '#^Parameter \#1 \$str of function strtoupper expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Fulfillments/Providers/AustraliaPostShippingProvider.php
-
-		-
-			message: '#^Parameter \#1 \$str of function strtoupper expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Fulfillments/Providers/CanadaPostShippingProvider.php
-
-		-
-			message: '#^Comparison operation "\>" between 60\|70\|75\|80\|85\|88\|90\|92\|95\|98 and 0 is always true\.$#'
-			identifier: greater.alwaysTrue
-			count: 1
-			path: src/Internal/Fulfillments/Providers/DHLShippingProvider.php
-
-		-
-			message: '#^Parameter \#1 \$str of function strtoupper expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Fulfillments/Providers/DHLShippingProvider.php
-
-		-
-			message: '#^Offset ''s10'' on array\{classic\: 80, express\: 85, predict\: 85, s10\: 90\}\|array\{classic\: 82, express\: 85, s10\: 90\}\|array\{next_day\: 88, express\: 88, s10\: 90\}\|array\{relais\: 82, predict\: 82, s10\: 90\} on left side of \?\? always exists and is not nullable\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: src/Internal/Fulfillments/Providers/DPDShippingProvider.php
-
-		-
-			message: '#^Parameter \#1 \$str of function strtoupper expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Fulfillments/Providers/DPDShippingProvider.php
-
-		-
-			message: '#^Parameter \#1 \$str of function strtoupper expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Fulfillments/Providers/EvriHermesShippingProvider.php
-
-		-
-			message: '#^Parameter \#1 \$str of function strtoupper expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Fulfillments/Providers/FedExShippingProvider.php
-
-		-
-			message: '#^Parameter \#1 \$str of function strtoupper expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Fulfillments/Providers/RoyalMailShippingProvider.php
-
-		-
-			message: '#^Parameter \#1 \$str of function strtoupper expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Fulfillments/Providers/USPSShippingProvider.php
 
 		-
 			message: '#^Action callback returns array but should not return anything\.$#'
@@ -67742,13 +67742,13 @@ parameters:
 			path: src/Internal/RestApi/Routes/V4/Fulfillments/Controller.php
 
 		-
-			message: '#^Parameter \#1 \$data of class Automattic\\WooCommerce\\Internal\\Fulfillments\\Fulfillment constructor expects array\|Automattic\\WooCommerce\\Internal\\Fulfillments\\Fulfillment\|string, int given\.$#'
+			message: '#^Parameter \#1 \$data of class Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\Fulfillment constructor expects array\|Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\Fulfillment\|string, int given\.$#'
 			identifier: argument.type
 			count: 3
 			path: src/Internal/RestApi/Routes/V4/Fulfillments/Controller.php
 
 		-
-			message: '#^Parameter \#1 \$data of class Automattic\\WooCommerce\\Internal\\Fulfillments\\Fulfillment constructor expects array\|Automattic\\WooCommerce\\Internal\\Fulfillments\\Fulfillment\|string, int\<min, \-1\>\|int\<1, max\> given\.$#'
+			message: '#^Parameter \#1 \$data of class Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\Fulfillment constructor expects array\|Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\Fulfillment\|string, int\<min, \-1\>\|int\<1, max\> given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Internal/RestApi/Routes/V4/Fulfillments/Controller.php

@@ -12,13 +12,13 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 10.1.0
+ * @version 10.6.0
  *
  * @var bool $show_downloads Controls whether the downloads table should be rendered.
  */
 
-use Automattic\WooCommerce\Internal\DataStores\Fulfillments\FulfillmentsDataStore;
-use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentUtils;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDataStore;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentUtils;
 
  // phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
 
