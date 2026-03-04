@@ -78,6 +78,10 @@ const blocks = {
 	'classic-shortcode': {},
 	'page-content-wrapper': {},
 	'payment-method-icons': {},
+	'privacy-link': {
+		customDir: 'privacy-links/inner-blocks/privacy-link',
+	},
+	'privacy-links': {},
 	'price-filter': {},
 	'product-best-sellers': {},
 	'product-category': {},

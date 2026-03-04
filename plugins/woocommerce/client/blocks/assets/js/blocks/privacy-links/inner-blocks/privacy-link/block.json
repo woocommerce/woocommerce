@@ -1,0 +1,37 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "woocommerce/privacy-link",
+	"title": "Privacy Link",
+	"description": "A single privacy link item.",
+	"category": "woocommerce",
+	"parent": [ "woocommerce/privacy-links" ],
+	"editorScript": "file:../../privacy-link.js",
+	"textdomain": "woocommerce",
+	"supports": {
+		"html": false,
+		"inserter": false
+	},
+	"attributes": {
+		"label": {
+			"type": "string",
+			"default": ""
+		},
+		"url": {
+			"type": "string",
+			"default": ""
+		},
+		"pageId": {
+			"type": "number",
+			"default": 0
+		},
+		"status": {
+			"type": "string",
+			"default": "publish"
+		},
+		"editUrl": {
+			"type": "string",
+			"default": ""
+		}
+	}
+}

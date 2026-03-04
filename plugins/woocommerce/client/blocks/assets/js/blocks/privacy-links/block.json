@@ -1,0 +1,35 @@
+{
+	"name": "woocommerce/privacy-links",
+	"title": "Privacy Links",
+	"description": "Display links to your store's policy pages, such as privacy policy and refund policy.",
+	"category": "woocommerce",
+	"keywords": [ "privacy", "policy", "terms" ],
+	"textdomain": "woocommerce",
+	"supports": {
+		"html": false,
+		"layout": {
+			"default": {
+				"type": "flex",
+				"orientation": "vertical"
+			},
+			"allowOrientation": true,
+			"allowJustification": true
+		},
+		"color": {
+			"text": false,
+			"link": true
+		},
+		"backgroundColor": true,
+		"typography": {
+			"fontSize": true
+		},
+		"spacing": {
+			"padding": true,
+			"blockGap": true
+		}
+	},
+	"allowedBlocks": [ "woocommerce/privacy-link" ],
+	"attributes": {},
+	"apiVersion": 3,
+	"$schema": "https://schemas.wp.org/trunk/block.json"
+}

@@ -458,6 +458,8 @@ final class BlockTypesController {
 			'NextPreviousButtons',
 			'StoreNotices',
 			'PaymentMethodIcons',
+			'PrivacyLink',
+			'PrivacyLinks',
 			'PriceFilter',
 			'ProductBestSellers',
 			'ProductButton',
