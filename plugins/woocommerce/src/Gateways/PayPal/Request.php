@@ -970,7 +970,7 @@ class Request {
 	 * Normalize PayPal order shipping country code.
 	 *
 	 * @param string $country_code Country code to normalize.
-	 * @return string|null
+	 * @return string
 	 * @throws PayPalStandardException If the country code is invalid.
 	 */
 	private function normalize_paypal_order_shipping_country_code( string $country_code ): ?string {
