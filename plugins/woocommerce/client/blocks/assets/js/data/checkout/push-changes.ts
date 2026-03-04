@@ -179,8 +179,6 @@ const updateCheckoutData = (): void => {
 			localState.doingPush = false;
 			processErrorResponse( response );
 		} );
-
-	localState.doingPush = false;
 };
 
 /**
