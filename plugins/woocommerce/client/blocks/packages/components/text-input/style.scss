@@ -64,13 +64,11 @@
 
 		.has-dark-controls & {
 			background-color: $input-background-dark;
-			border-color: $input-border-dark;
 			color: $input-text-dark;
 
 			&:focus {
 				background-color: $input-background-dark;
 				color: $input-text-dark;
-				border: 1.5px solid currentColor;
 			}
 		}
 	}
