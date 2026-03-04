@@ -12,7 +12,7 @@ Action hooks allow you to execute custom code at specific points in the fulfillm
 
 Fired after a fulfillment is successfully created in the database.
 
-**File:** `src/Internal/DataStores/Fulfillments/FulfillmentsDataStore.php:122`
+**File:** `src/Admin/Features/Fulfillments/DataStore/FulfillmentsDataStore.php:122`
 
 **Parameters:**
 
@@ -32,7 +32,7 @@ function log_fulfillment_creation( $fulfillment ) {
 
 Fired after a fulfillment is marked as fulfilled (both during create and update operations).
 
-**File:** `src/Internal/DataStores/Fulfillments/FulfillmentsDataStore.php:131` and `273`
+**File:** `src/Admin/Features/Fulfillments/DataStore/FulfillmentsDataStore.php:131` and `273`
 
 **Parameters:**
 
@@ -53,7 +53,7 @@ function update_inventory_system( $fulfillment ) {
 
 Fired after a fulfillment is successfully updated in the database.
 
-**File:** `src/Internal/DataStores/Fulfillments/FulfillmentsDataStore.php:262`
+**File:** `src/Admin/Features/Fulfillments/DataStore/FulfillmentsDataStore.php:262`
 
 **Parameters:**
 
@@ -73,7 +73,7 @@ function sync_fulfillment_changes( $fulfillment ) {
 
 Fired after a fulfillment is soft-deleted from the database.
 
-**File:** `src/Internal/DataStores/Fulfillments/FulfillmentsDataStore.php:331`
+**File:** `src/Admin/Features/Fulfillments/DataStore/FulfillmentsDataStore.php:331`
 
 **Parameters:**
 
@@ -95,7 +95,7 @@ function cleanup_fulfillment_data( $fulfillment ) {
 
 Fired when customer notification should be sent for a new fulfilled fulfillment. This should only be triggered for fulfilled fulfillments. Draft fulfillments shouldn’t send a notification when created.
 
-**File:** `src/Internal/Fulfillments/OrderFulfillmentsRestController.php:268` and `370`
+**File:** `src/Admin/Features/Fulfillments/OrderFulfillmentsRestController.php:268` and `370`
 
 **Parameters:**
 
@@ -126,7 +126,7 @@ function send_sms_notification( $order_id, $fulfillment, $order ) {
 
 Fired when customer notification should be sent for an updated fulfillment. This should only be triggered for fulfilled fulfillments. Draft fulfillments shouldn’t send a notification when updated.
 
-**File:** `src/Internal/Fulfillments/OrderFulfillmentsRestController.php:377`
+**File:** `src/Admin/Features/Fulfillments/OrderFulfillmentsRestController.php:377`
 
 **Parameters:**
 
@@ -152,7 +152,7 @@ function notify_fulfillment_update( $order_id, $fulfillment, $order ) {
 
 Fired when customer notification should be sent for a deleted fulfillment. This should only be triggered for fulfilled fulfillments. Draft fulfillments shouldn’t send a notification when deleted.
 
-**File:** `src/Internal/Fulfillments/OrderFulfillmentsRestController.php:437`
+**File:** `src/Admin/Features/Fulfillments/OrderFulfillmentsRestController.php:437`
 
 **Parameters:**
 
@@ -341,7 +341,7 @@ function custom_fulfillment_table( $html, $order, $fulfillment ) {
 
 Allows modification of fulfillment data before it's created in the database. If you want to cancel the creation, you can throw a `FulfillmentException` exception, which will cancel the process , and show the error message on the user’s form.
 
-**File:** `src/Internal/DataStores/Fulfillments/FulfillmentsDataStore.php:59`
+**File:** `src/Admin/Features/Fulfillments/DataStore/FulfillmentsDataStore.php:59`
 
 **Parameters:**
 
@@ -373,7 +373,7 @@ function validate_fulfillment_data( $fulfillment ) {
 
 Allows modification of fulfillment data before it's updated in the database.
 
-**File:** `src/Internal/DataStores/Fulfillments/FulfillmentsDataStore.php:197`
+**File:** `src/Admin/Features/Fulfillments/DataStore/FulfillmentsDataStore.php:197`
 
 **Parameters:**
 
@@ -402,7 +402,7 @@ function log_fulfillment_changes( $fulfillment ) {
 
 Allows modification of fulfillment data before it's marked as fulfilled. If you want to cancel the fulfillment, you can throw a `FulfillmentException` exception, which will cancel the process, and show the error message on the user’s form.
 
-**File:** `src/Internal/DataStores/Fulfillments/FulfillmentsDataStore.php:72` and `213`
+**File:** `src/Admin/Features/Fulfillments/DataStore/FulfillmentsDataStore.php:72` and `213`
 
 **Parameters:**
 
@@ -430,7 +430,7 @@ function set_fulfillment_timestamp( $fulfillment ) {
 
 Allows modification of fulfillment data before it's deleted. If you want to cancel the deletion, you can throw a `FulfillmentException` exception, which will cancel the process, and show the error message on the user’s form.
 
-**File:** `src/Internal/DataStores/Fulfillments/FulfillmentsDataStore.php:298`
+**File:** `src/Admin/Features/Fulfillments/DataStore/FulfillmentsDataStore.php:298`
 
 **Parameters:**
 
@@ -461,7 +461,7 @@ function log_fulfillment_deletion( $fulfillment ) {
 
 Allows customization of how order fulfillment status is calculated.
 
-**File:** `src/Internal/Fulfillments/FulfillmentUtils.php:174`
+**File:** `src/Admin/Features/Fulfillments/FulfillmentUtils.php:174`
 
 **Parameters:**
 
@@ -494,7 +494,7 @@ Allows customization of fulfillment status text display on the customer order de
 
 ![Fulfillment status text](images/fulfillment-status-text.png)
 
-**File:** `src/Internal/Fulfillments/FulfillmentUtils.php:268`
+**File:** `src/Admin/Features/Fulfillments/FulfillmentUtils.php:268`
 
 **Parameters:**
 
@@ -521,7 +521,7 @@ function custom_status_text( $text, $status, $order ) {
 
 Allows adding/modifying available order fulfillment statuses.
 
-**File:** `src/Internal/Fulfillments/FulfillmentUtils.php:325`
+**File:** `src/Admin/Features/Fulfillments/FulfillmentUtils.php:325`
 
 **Parameters:**
 
@@ -545,7 +545,7 @@ function add_custom_order_fulfillment_statuses( $statuses ) {
 
 Allows adding/modifying available fulfillment statuses.
 
-**File:** `src/Internal/Fulfillments/FulfillmentUtils.php:350`
+**File:** `src/Admin/Features/Fulfillments/FulfillmentUtils.php:350`
 
 **Parameters:**
 
@@ -571,7 +571,7 @@ function add_custom_fulfillment_statuses( $statuses ) {
 
 Allows translation of fulfillment meta keys for display purposes.
 
-**File:** `src/Internal/Fulfillments/FulfillmentsManager.php:75`
+**File:** `src/Admin/Features/Fulfillments/FulfillmentsManager.php:75`
 
 **Parameters:**
 
@@ -595,7 +595,7 @@ function add_meta_translations( $translations ) {
 
 Translates individual fulfillment meta keys for user-friendly display.
 
-**File:** `src/Internal/Fulfillments/FulfillmentsManager.php:29`
+**File:** `src/Admin/Features/Fulfillments/FulfillmentsManager.php:29`
 
 **Parameters:**
 
@@ -618,7 +618,7 @@ $translated_meta_key = apply_filters( 'woocommerce_fulfillment_translate_meta_ke
 
 Allows specifying which products should be automatically fulfilled.
 
-**File:** `src/Internal/Fulfillments/FulfillmentsSettings.php:121`
+**File:** `src/Admin/Features/Fulfillments/FulfillmentsSettings.php:121`
 
 **Parameters:**
 
@@ -655,7 +655,7 @@ function custom_auto_fulfill_logic( $product_ids, $order ) {
 
 Allows adding/modifying available shipping providers.
 
-**File:** `src/Internal/Fulfillments/FulfillmentUtils.php:374`
+**File:** `src/Admin/Features/Fulfillments/FulfillmentUtils.php:374`
 
 **Parameters:**
 
@@ -674,7 +674,7 @@ function add_custom_providers( $providers ) {
 }
 ```
 
-**Note:** `My_Custom_Shipping_Provider` class needs to extend `Automattic\WooCommerce\Internal\Fulfillments\Providers\AbstractShippingProvider` class to be able to run tracking number parsing.
+**Note:** `My_Custom_Shipping_Provider` class needs to extend `Automattic\WooCommerce\Admin\Features\Fulfillments\Providers\AbstractShippingProvider` class to be able to run tracking number parsing.
 
 ## Best Practices
 
