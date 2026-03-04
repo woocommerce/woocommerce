@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Tests\Gateways\PayPal;
 
 use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
+use Automattic\WooCommerce\Gateways\PayPal\PayPalStandardException;
 use Automattic\WooCommerce\Gateways\PayPal\Request as PayPalRequest;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -66,7 +67,10 @@ class RequestTest extends \WC_Unit_Test_Case {
 
 		remove_filter( 'pre_http_request', array( $this, 'create_paypal_order_error' ) );
 
-		$this->assertNull( $result );
+		$this->assertIsArray( $result );
+		$this->assertArrayHasKey( 'localized_error_message', $result );
+		$this->assertIsString( $result['localized_error_message'] );
+		$this->assertNotEmpty( $result['localized_error_message'] );
 	}
 
 	/**
@@ -116,12 +120,12 @@ class RequestTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test create_paypal_order returns null when shipping preference is SET_PROVIDED_ADDRESS but order has no shipping address.
+	 * Test create_paypal_order returns an error when shipping preference is SET_PROVIDED_ADDRESS but order has no shipping address.
 	 * No create order request is sent to PayPal in this case.
 	 *
 	 * @return void
 	 */
-	public function test_create_paypal_order_returns_null_when_set_provided_address_but_shipping_country_is_unsupported(): void {
+	public function test_create_paypal_order_returns_error_when_set_provided_address_but_shipping_country_is_unsupported(): void {
 		$order = \WC_Helper_Order::create_order();
 		$order->set_shipping_country( 'SX' );
 		$order->set_shipping_first_name( 'John' );
@@ -147,7 +151,10 @@ class RequestTest extends \WC_Unit_Test_Case {
 		remove_filter( 'pre_http_request', array( $this, 'create_paypal_order_success' ) );
 		update_option( 'woocommerce_paypal_settings', $previous_settings );
 
-		$this->assertNull( $result, 'create_paypal_order should return null when SET_PROVIDED_ADDRESS is set but the selected shipping country is unsupported' );
+		$this->assertIsArray( $result, 'create_paypal_order should return an error array when SET_PROVIDED_ADDRESS is set but the selected shipping country is unsupported' );
+		$this->assertArrayHasKey( 'localized_error_message', $result );
+		$this->assertIsString( $result['localized_error_message'] );
+		$this->assertNotEmpty( $result['localized_error_message'] );
 	}
 
 	/**
@@ -417,18 +424,50 @@ class RequestTest extends \WC_Unit_Test_Case {
 	/**
 	 * Data provider for normalize_paypal_order_shipping_country_code.
 	 *
-	 * @return array<string, array{string, string|null}>
+	 * @return array<string, array{country_code: string, expected: string|null}>
 	 */
 	public function provider_normalize_paypal_order_shipping_country_code(): array {
 		return array(
-			'alpha2_supported_uppercase'     => array( 'US', 'US' ),
-			'alpha2_supported_lowercase'     => array( 'us', 'US' ),
-			'alpha2_supported_with_space'    => array( ' GB ', 'GB' ),
-			'alpha2_not_supported_by_paypal' => array( 'SX', null ),
-			'alpha2_invalid'                 => array( 'XX', null ),
-			'alpha3_maps_to_supported'       => array( 'USA', 'US' ),
-			'alpha3_maps_to_unsupported'     => array( 'AFG', null ),
-			'alpha3_invalid'                 => array( 'XXX', null ),
+			'alpha2_supported_uppercase'     => array( 
+				'country_code' => 'US',
+				'expected'     => 'US',
+				'is_supported' => true,
+			),
+			'alpha2_supported_lowercase'     => array(
+				'country_code' => 'us',
+				'expected'     => 'US',
+				'is_supported' => true,
+			),
+			'alpha2_supported_with_space'    => array(
+				'country_code' => ' GB ',
+				'expected'     => 'GB',
+				'is_supported' => true,
+			),
+			'alpha2_not_supported_by_paypal' => array(
+				'country_code' => 'SX',
+				'expected'     => null,
+				'is_supported' => false,
+			),
+			'alpha2_invalid'                 => array(
+				'country_code' => 'XX',
+				'expected'     => null,
+				'is_supported' => false,
+			),
+			'alpha3_maps_to_supported'       => array(
+				'country_code' => 'USA',
+				'expected'     => 'US',
+				'is_supported' => true,
+			),
+			'alpha3_maps_to_unsupported'     => array(
+				'country_code' => 'AFG',
+				'expected'     => null,
+				'is_supported' => false,
+			),
+			'alpha3_invalid'                 => array(
+				'country_code' => 'XXX',
+				'expected'     => null,
+				'is_supported' => false,
+			),
 		);
 	}
 
@@ -437,12 +476,13 @@ class RequestTest extends \WC_Unit_Test_Case {
 	 *
 	 * @dataProvider provider_normalize_paypal_order_shipping_country_code
 	 *
-	 * @param string      $input    Country code to normalize.
-	 * @param string|null $expected Expected normalized alpha-2 code or null.
+	 * @param string      $country_code Country code to normalize.
+	 * @param string|null $expected     Expected normalized alpha-2 code or null if the country is not supported by PayPal.
+	 * @param bool        $is_supported Whether the country is supported by PayPal.
 	 *
 	 * @return void
 	 */
-	public function test_normalize_paypal_order_shipping_country_code( string $input, ?string $expected ): void {
+	public function test_normalize_paypal_order_shipping_country_code( string $input, ?string $expected, bool $is_supported ): void {
 		$gateway = new \WC_Gateway_Paypal();
 		$request = new PayPalRequest( $gateway );
 
@@ -450,9 +490,13 @@ class RequestTest extends \WC_Unit_Test_Case {
 		$method     = $reflection->getMethod( 'normalize_paypal_order_shipping_country_code' );
 		$method->setAccessible( true );
 
-		$result = $method->invokeArgs( $request, array( $input ) );
-
-		$this->assertSame( $expected, $result );
+		if ( $is_supported ) {
+			$result = $method->invokeArgs( $request, array( $input ) );
+			$this->assertSame( $expected, $result );
+		} else {
+			$this->expectException( PayPalStandardException::class );
+			$method->invokeArgs( $request, array( $input ) );
+		}
 	}
 
 	// ========================================================================
