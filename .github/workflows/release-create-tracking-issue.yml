@@ -28,7 +28,7 @@ on:
         type: boolean
         default: false
     secrets:
-      LINEAR_OAUTH_TOKEN:
+      LINEAR_ACCESS_TOKEN:
         required: true
       LINEAR_TEAM_ID:
         required: true
@@ -105,6 +105,34 @@ jobs:
       - name: Install linear-sdk
         run: npm install @linear/sdk@71.0.0
 
+      - name: Checkout repository for linear-auth action
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            .github/actions/linear-auth
+          sparse-checkout-cone-mode: false
+
+      - name: Refresh Linear OAuth token (manual trigger only)
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        id: linear-auth
+        uses: ./.github/actions/linear-auth
+        with:
+          linear-client-id: ${{ secrets.LINEAR_CLIENT_ID }}
+          linear-client-secret: ${{ secrets.LINEAR_CLIENT_SECRET }}
+          linear-refresh-token: ${{ secrets.LINEAR_REFRESH_TOKEN }}
+          gh-secrets-token: ${{ secrets.GH_SECRETS_TOKEN }}
+
+      - name: Resolve Linear access token
+        id: resolve-token
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "token=${{ steps.linear-auth.outputs.access-token }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "token=${{ secrets.LINEAR_ACCESS_TOKEN }}" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Check if tracking issue already exists
         id: check-existing
         uses: actions/github-script@v7
@@ -112,7 +140,7 @@ jobs:
           script: |
             const { LinearClient } = require( '@linear/sdk' );
             const linearClient = new LinearClient( {
-              apiKey: '${{ secrets.LINEAR_OAUTH_TOKEN }}'
+              accessToken: '${{ steps.resolve-token.outputs.token }}'
             } );
 
             const mainVersion = '${{ steps.parse-version.outputs.main-version }}';
@@ -123,7 +151,7 @@ jobs:
 
             const existingIssues = await linearClient.issues( {
               filter: {
-                team: { id: { eq: '${{ secrets.LINEAR_TEAM_ID }}' } },
+                team: { id: { eq: '${{ secrets.LINEAR_TEST_TEAM_ID }}' } },
                 title: { eq: specificTitle }
               }
             } );
@@ -161,7 +189,7 @@ jobs:
           script: |
             const { LinearClient } = require( '@linear/sdk' );
             const linearClient = new LinearClient( {
-              apiKey: '${{ secrets.LINEAR_OAUTH_TOKEN }}'
+              accessToken: '${{ steps.resolve-token.outputs.token }}'
             } );
 
             const labels = await linearClient.issueLabels( {
@@ -184,7 +212,7 @@ jobs:
           script: |
             const { LinearClient } = require( '@linear/sdk' );
             const linearClient = new LinearClient( {
-              apiKey: '${{ secrets.LINEAR_OAUTH_TOKEN }}'
+              accessToken: '${{ steps.resolve-token.outputs.token }}'
             } );
 
             const mainVersion = '${{ steps.parse-version.outputs.main-version }}';
@@ -194,7 +222,7 @@ jobs:
 
             const parentIssues = await linearClient.issues( {
               filter: {
-                team: { id: { eq: '${{ secrets.LINEAR_TEAM_ID }}' } },
+                team: { id: { eq: '${{ secrets.LINEAR_TEST_TEAM_ID }}' } },
                 title: { eq: parentTitle }
               }
             } );
@@ -227,7 +255,7 @@ jobs:
             const fs = require( 'fs' );
 
             const linearClient = new LinearClient( {
-              apiKey: '${{ secrets.LINEAR_OAUTH_TOKEN }}'
+              accessToken: '${{ steps.resolve-token.outputs.token }}'
             } );
 
             // Read template file.
@@ -289,7 +317,7 @@ jobs:
 
             try {
               const result = await linearClient.createIssue( {
-                teamId: '${{ secrets.LINEAR_TEAM_ID }}',
+                teamId: '${{ secrets.LINEAR_TEST_TEAM_ID }}',
                 title: processedTitle,
                 description: processedBody,
                 priority: 2,

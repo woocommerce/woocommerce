@@ -236,16 +236,27 @@ jobs:
     outputs:
       sub-issues-matrix: ${{ steps.build-matrix.outputs.matrix }}
       issue-url: ${{ steps.check-existing-issue.outputs.issue-url || steps.create-tracking-issue.outputs.issue-url }}
+      linear-access-token: ${{ steps.linear-auth.outputs.access-token }}
     steps:
       - name: Checkout repository (sparse)
         uses: actions/checkout@v4
         with:
           sparse-checkout: |
             .linear
+            .github/actions/linear-auth
           sparse-checkout-cone-mode: false
 
       - name: Install linear-sdk
         run: npm install @linear/sdk@71.0.0
+
+      - name: Refresh Linear OAuth token
+        id: linear-auth
+        uses: ./.github/actions/linear-auth
+        with:
+          linear-client-id: ${{ secrets.LINEAR_CLIENT_ID }}
+          linear-client-secret: ${{ secrets.LINEAR_CLIENT_SECRET }}
+          linear-refresh-token: ${{ secrets.LINEAR_REFRESH_TOKEN }}
+          gh-secrets-token: ${{ secrets.GH_SECRETS_TOKEN }}
 
       - name: Check for existing release tracking issue
         id: check-existing-issue
@@ -254,7 +265,7 @@ jobs:
           script: |
             const { LinearClient } = require( '@linear/sdk' );
             const linearClient = new LinearClient( {
-              apiKey: '${{ secrets.LINEAR_OAUTH_TOKEN }}'
+              accessToken: '${{ steps.linear-auth.outputs.access-token }}'
             } );
 
             const releaseMainVersion = '${{ needs.check-upcoming-release-events.outputs.version }}';
@@ -286,7 +297,7 @@ jobs:
           script: |
             const { LinearClient } = require( '@linear/sdk' );
             const linearClient = new LinearClient( {
-              apiKey: '${{ secrets.LINEAR_OAUTH_TOKEN }}'
+              accessToken: '${{ steps.linear-auth.outputs.access-token }}'
             } );
 
             const organization = await linearClient.organization;
@@ -319,7 +330,7 @@ jobs:
           script: |
             const { LinearClient } = require( '@linear/sdk' );
             const linearClient = new LinearClient( {
-              apiKey: '${{ secrets.LINEAR_OAUTH_TOKEN }}'
+              accessToken: '${{ steps.linear-auth.outputs.access-token }}'
             } );
 
             const email = '${{ needs.trigger-upcoming-code-freeze-events.outputs.release-lead-google-login }}';
@@ -349,7 +360,7 @@ jobs:
             const fs = require( 'fs' );
 
             const linearClient = new LinearClient( {
-              apiKey: '${{ secrets.LINEAR_OAUTH_TOKEN }}'
+              accessToken: '${{ steps.linear-auth.outputs.access-token }}'
             } );
 
             // Read template file.
@@ -459,7 +470,7 @@ jobs:
       release-date: ${{ matrix.releaseDate }}
       skip-branch-validation: true
     secrets:
-      LINEAR_OAUTH_TOKEN: ${{ secrets.LINEAR_OAUTH_TOKEN }}
+      LINEAR_ACCESS_TOKEN: ${{ needs.create-parent-tracking-issue.outputs.linear-access-token }}
       LINEAR_TEAM_ID: ${{ secrets.LINEAR_TEAM_ID }}
 
   notify-on-failure:
