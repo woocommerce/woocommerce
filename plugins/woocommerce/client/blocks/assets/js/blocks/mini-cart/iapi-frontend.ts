@@ -20,7 +20,6 @@ import type {
 /**
  * Internal dependencies
  */
-import setStyles from './utils/set-styles';
 import {
 	formatPriceWithCurrency,
 	normalizeCurrencyResponse,
@@ -68,15 +67,35 @@ const scalePrice = ( {
 	return Math.round( scaledPrice );
 };
 
-// Inject style tags for badge styles based on background colors of the document.
-setStyles();
-
-type MiniCartContext = {
-	productCountVisibility: 'never' | 'always' | 'greater_than_zero';
-};
+/**
+ * Recursively traverses the DOM hierarchy to find the closest non-transparent color.
+ *
+ * @param element   The starting element to check.
+ * @param colorType Either 'color' (text) or 'backgroundColor'.
+ * @return The computed color as an RGB string, or null if not found.
+ */
+function getClosestColor(
+	element: Element | null,
+	colorType: 'color' | 'backgroundColor'
+): string | null {
+	if ( ! element ) {
+		return null;
+	}
+	const color = window.getComputedStyle( element )[ colorType ];
+	if ( color !== 'rgba(0, 0, 0, 0)' && color !== 'transparent' ) {
+		const matches = color.match( /\d+/g );
+		if ( ! matches || matches.length < 3 ) {
+			return null;
+		}
+		const [ r, g, b ] = matches.slice( 0, 3 );
+		return `rgb(${ r }, ${ g }, ${ b })`;
+	}
+	return getClosestColor( element.parentElement, colorType );
+}
 
 type MiniCart = {
 	state: {
+		isHydrated: boolean;
 		isOpen: boolean;
 		totalItemsInCart: number;
 		formattedSubtotal: string;
@@ -88,6 +107,9 @@ type MiniCart = {
 		buttonAriaLabel: string;
 		shouldShowTaxLabel: boolean;
 		miniCartButtonRef: HTMLElement | null;
+		contentsBackgroundColor: string;
+		badgeBackgroundColor: string | undefined;
+		badgeTextColor: string | undefined;
 	};
 	actions: {
 		openDrawer: () => void;
@@ -96,10 +118,15 @@ type MiniCart = {
 		handleOverlayKeydown: ( e: KeyboardEvent ) => void;
 	};
 	callbacks: {
+		markAsHydrated: () => void;
 		setupJQueryEventBridge: () => void;
 		disableScrollingOnBody: () => void;
 		focusFirstElement: () => void;
 	};
+};
+
+type MiniCartContext = {
+	productCountVisibility: 'never' | 'always' | 'greater_than_zero';
 };
 
 type CartItemContext = {
@@ -172,6 +199,7 @@ store< MiniCart >(
 	'woocommerce/mini-cart',
 	{
 		state: {
+			isHydrated: false,
 			get totalItemsInCart() {
 				if ( nonOptimisticProperties.includes( 'cart.items_count' ) ) {
 					return woocommerceState.cart.items_count as number;
@@ -249,6 +277,26 @@ store< MiniCart >(
 						10
 					) > 0
 				);
+			},
+
+			get contentsBackgroundColor(): string {
+				return (
+					getComputedStyle( document.body ).backgroundColor || '#fff'
+				);
+			},
+
+			get badgeBackgroundColor(): string | undefined {
+				if ( state.isHydrated ) {
+					const { ref } = getElement();
+					return getClosestColor( ref!, 'color' ) || '#000';
+				}
+			},
+
+			get badgeTextColor(): string | undefined {
+				if ( state.isHydrated ) {
+					const { ref } = getElement();
+					return getClosestColor( ref, 'backgroundColor' ) || '#fff';
+				}
 			},
 		},
 
@@ -357,6 +405,9 @@ store< MiniCart >(
 					// Focus first element when the minicart is opened.
 					getFocusableElements( ref )[ 0 ]?.focus();
 				}
+			},
+			markAsHydrated() {
+				state.isHydrated = true;
 			},
 		},
 	},

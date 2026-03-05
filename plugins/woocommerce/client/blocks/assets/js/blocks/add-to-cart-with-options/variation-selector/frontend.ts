@@ -118,7 +118,7 @@ const isAttributeValueValid = ( {
 		// Skip variations that don't match the current attribute value.
 		if (
 			variationAttrValue !== attributeValue &&
-			variationAttrValue !== '' // "" is used for "any".
+			variationAttrValue !== null // null is used for "any".
 		) {
 			return false;
 		}
@@ -138,11 +138,11 @@ const isAttributeValueValid = ( {
 				) {
 					return true;
 				}
-				// If the current available variation has an empty value
+				// If the current available variation has a null value
 				// (matching any), count it if it refers to a different
 				// attribute or the attribute it refers matches the current
 				// selection.
-				if ( availableVariationAttributeValue === '' ) {
+				if ( availableVariationAttributeValue === null ) {
 					if (
 						! attributeNamesMatch(
 							selectedAttribute.attribute,

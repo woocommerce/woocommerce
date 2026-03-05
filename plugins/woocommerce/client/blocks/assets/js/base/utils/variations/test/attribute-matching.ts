@@ -157,7 +157,7 @@ describe( 'findMatchingVariation', () => {
 				{
 					id: 201,
 					attributes: [
-						{ name: 'Color', value: '' }, // "Any" color
+						{ name: 'Color', value: null }, // "Any" color
 						{ name: 'Size', value: 'Small' },
 					],
 				},
@@ -165,7 +165,7 @@ describe( 'findMatchingVariation', () => {
 					id: 202,
 					attributes: [
 						{ name: 'Color', value: 'Blue' },
-						{ name: 'Size', value: '' }, // "Any" size
+						{ name: 'Size', value: null }, // "Any" size
 					],
 				},
 			],
@@ -183,9 +183,9 @@ describe( 'findMatchingVariation', () => {
 			expect( result?.id ).toBe( 201 );
 		} );
 
-		it( 'does not match "Any" attribute when selected value is empty', () => {
+		it( 'does not match "Any" attribute when selected value is null', () => {
 			const selectedAttributes = [
-				{ attribute: 'Color', value: '' },
+				{ attribute: 'Color', value: null },
 				{ attribute: 'Size', value: 'Small' },
 			];
 			expect(

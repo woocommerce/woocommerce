@@ -38,8 +38,7 @@ export const doesCartItemMatchAttributes = (
 			selectedAttributes.some( ( item: SelectedAttributes ) => {
 				return (
 					attributeNamesMatch( item.attribute, raw_attribute ) &&
-					( item.value.toLowerCase() === value.toLowerCase() ||
-						( item.value && value === '' ) ) // Handle "any" attribute type
+					item.value.toLowerCase() === value?.toLowerCase()
 				);
 			} )
 	);
