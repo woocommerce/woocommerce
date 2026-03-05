@@ -505,8 +505,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			return -1;
 		}
 
-		// phpcs:ignore Generic.Commenting.DocComment.MissingShort -- PHPStan type hint.
-		/** @var false|Order|OrderRefund $order */
+		/**
+		 * Get the order object for syncing.
+		 *
+		 * @var false|Order|OrderRefund $order
+		 */
 		$order = wc_get_order( $post_id );
 		if ( ! $order ) {
 			return -1;
