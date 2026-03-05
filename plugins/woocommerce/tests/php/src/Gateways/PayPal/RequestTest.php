@@ -536,7 +536,11 @@ class RequestTest extends \WC_Unit_Test_Case {
 		add_filter(
 			'pre_http_request',
 			function ( $value, $parsed_args, $url ) use ( &$order_details_call_count ) {
-				if ( \strpos( $url, 'order/PAYPAL_ORDER_123' ) !== false ) {
+				if (
+					isset( $parsed_args['method'] ) &&
+					'GET' === $parsed_args['method'] &&
+					strpos( $url, 'order/PAYPAL_ORDER_123' ) !== false
+				) {
 					++$order_details_call_count;
 					return array(
 						'response' => array( 'code' => 404 ),
