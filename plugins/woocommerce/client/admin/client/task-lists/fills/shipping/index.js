@@ -432,6 +432,13 @@ export class Shipping extends Component {
 								);
 							} }
 							onClick={ () => {
+								recordEvent(
+									'tasklist_shipping_label_printing',
+									{
+										install: true,
+										plugins_to_activate: pluginsToActivate,
+									}
+								);
 								recordEvent( 'shipping_partner_click', {
 									...this.getShippingPartnerTrackingProps(),
 									selected_plugin: pluginsToActivate[ 0 ],
@@ -572,6 +579,14 @@ export class Shipping extends Component {
 															} }
 															onClick={ () => {
 																recordEvent(
+																	'tasklist_shipping_label_printing',
+																	{
+																		install: true,
+																		plugins_to_activate:
+																			pluginsToActivate,
+																	}
+																);
+																recordEvent(
 																	'shipping_partner_click',
 																	{
 																		...this.getShippingPartnerTrackingProps(),
@@ -661,6 +676,14 @@ export class Shipping extends Component {
 											);
 										} }
 										onClick={ () => {
+											recordEvent(
+												'tasklist_shipping_label_printing',
+												{
+													install: true,
+													plugins_to_activate:
+														pluginsToActivate,
+												}
+											);
 											recordEvent(
 												'shipping_partner_click',
 												{
