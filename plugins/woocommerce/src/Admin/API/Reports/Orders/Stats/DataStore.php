@@ -506,11 +506,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			return -1;
 		}
 
-		/**
-		 * Get the order object for syncing.
-		 *
-		 * @var false|Order|OrderRefund $order
-		 */
+		/** @var false|Order|OrderRefund $order (Override classes registered via OrdersScheduler::init()) */
 		$order = wc_get_order( $post_id );
 		if ( ! $order ) {
 			return -1;
@@ -533,7 +529,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			return -1;
 		}
 
-		// Skip test orders.
+		// Exclude test orders (e.g., WCPay test mode) from analytics stats.
+		// Defense-in-depth: also checked in OrdersScheduler::import(), but
+		// update() can be called directly outside of the import flow.
 		if ( OrdersScheduler::is_test_order( $order ) ) {
 			return -1;
 		}
@@ -668,7 +666,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Get number of items sold among all orders.
 	 *
-	 * @param WC_Order|WC_Order_Refund $order Order or refund object.
+	 * @param WC_Order|WC_Order_Refund $order WC_Order or WC_Order_Refund object.
 	 * @return int
 	 */
 	protected static function get_num_items_sold( $order ) {
@@ -685,7 +683,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Get the net amount from an order without shipping, tax, or refunds.
 	 *
-	 * @param WC_Order|WC_Order_Refund $order Order or refund object.
+	 * @param WC_Order|WC_Order_Refund $order WC_Order or WC_Order_Refund object.
 	 * @return float
 	 */
 	protected static function get_net_total( $order ) {

@@ -346,8 +346,12 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 			return;
 		}
 
-		// Skip test orders from analytics.
+		// Skip test orders (e.g., WCPay test mode) from analytics.
 		if ( self::is_test_order( $order ) ) {
+			wc_get_logger()->debug(
+				sprintf( 'Skipping test order #%d from analytics import.', $order_id ),
+				array( 'source' => 'wc-analytics-order-import' )
+			);
 			return;
 		}
 
@@ -692,8 +696,13 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	/**
 	 * Check if an order is a test order that should be excluded from analytics.
 	 *
+	 * For refunds, the parent order is checked instead, since refunds do not
+	 * carry the test mode metadata directly.
+	 *
 	 * @param \WC_Abstract_Order $order Order object.
 	 * @return bool
+	 *
+	 * @since 10.7.0
 	 */
 	public static function is_test_order( $order ) {
 		// For refunds, check the parent order.
@@ -710,9 +719,14 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 		/**
 		 * Filter whether an order is a test order excluded from analytics.
 		 *
-		 * @since 10.7.0
+		 * Use this filter to customize test order detection beyond the default
+		 * WCPay test mode check, e.g., to exclude orders from other payment
+		 * gateways' test/sandbox modes.
+		 *
 		 * @param bool               $is_test Whether the order is a test order.
-		 * @param \WC_Abstract_Order $order   The order being checked.
+		 * @param \WC_Abstract_Order $order   The order being checked (for refunds, this is the parent order).
+		 *
+		 * @since 10.7.0
 		 */
 		return apply_filters( 'woocommerce_analytics_is_test_order', $is_test, $check_order );
 	}
