@@ -20,7 +20,7 @@
 		"clean": "rm -rf build/",
 		"test": "jest",
 		"test-coverage": "pnpm run test --coverage",
-		"typecheck": "tsc --noEmit",
+		"typecheck": "tsgo --noEmit",
 		"validate": "pnpm exec validate-es build/",
 		"watch": "pnpm build --watch"
 	},
@@ -34,9 +34,9 @@
 		"@jest/globals": "30.2.0",
 		"@types/jest": "30.0.0",
 		"@types/jquery": "3.5.33",
+		"@typescript/native-preview": "7.0.0-dev.20260225.1",
 		"@wordpress/browserslist-config": "6.40.0",
 		"jest": "30.2.0",
-		"typescript": "5.9.3",
 		"webpack": "5.105.2",
 		"webpack-cli": "6.0.1"
 	}
