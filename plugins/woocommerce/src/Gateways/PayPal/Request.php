@@ -4,6 +4,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Gateways\PayPal;
 
+use Exception;
 use WC_Order;
 use Automattic\WooCommerce\Gateways\PayPal\PayPalStandardException;
 use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
