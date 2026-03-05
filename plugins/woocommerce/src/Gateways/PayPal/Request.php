@@ -460,7 +460,8 @@ class Request {
 	 * @param string   $action_url The action URL.
 	 * @param string   $action The action.
 	 * @return void
-	 * @throws Exception If the PayPal patch invoice_id request fails.
+	 * 
+	 * @phpcs:ignore Squiz.Commenting.FunctionCommentThrowTag.Missing -- As we wrap the throw in a try/catch.
 	 */
 	private function handle_duplicate_invoice_id( WC_Order $order, string $paypal_order_id, string $action_url, string $action ): void {
 		$new_invoice_id = $this->generate_paypal_invoice_id_with_unique_suffix( $order );
@@ -482,7 +483,7 @@ class Request {
 			$response = $this->send_wpcom_proxy_request( 'PATCH', self::WPCOM_PROXY_ORDER_ENDPOINT . '/' . $paypal_order_id, $request_body );
 
 			if ( is_wp_error( $response ) ) {
-				throw new Exception( 'PayPal patch invoice_id request failed. Response error: ' . $response->get_error_message() );
+				throw new PayPalStandardException( 'PayPal patch invoice_id request failed. Response error: ' . $response->get_error_message() );
 			}
 
 			$http_code     = wp_remote_retrieve_response_code( $response );
@@ -491,7 +492,7 @@ class Request {
 
 			if ( 200 !== $http_code && 204 !== $http_code ) {
 				\WC_Gateway_Paypal::log( 'PayPal patch invoice_id failed. Response status: ' . $http_code . '. Response body: ' . $body );
-				throw new Exception( 'Failed to patch PayPal order invoice_id. Response status: ' . $http_code );
+				throw new PayPalStandardException( 'Failed to patch PayPal order invoice_id. Response status: ' . $http_code );
 			}
 
 			\WC_Gateway_Paypal::log( 'Successfully patched PayPal order invoice_id. PayPal Order ID: ' . $paypal_order_id . '. New invoice_id: ' . $new_invoice_id . '. Order ID: ' . $order->get_id() );
@@ -507,10 +508,10 @@ class Request {
 
 			// Retry authorizing or capturing the payment after patching the invoice_id.
 			$this->authorize_or_capture_payment( $order, $action_url, $action, true );
-		} catch ( Exception $e ) {
+		} catch ( PayPalStandardException $e ) {
 			\WC_Gateway_Paypal::log( $e->getMessage() );
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
-			throw new Exception( $e->getMessage() );
+			throw new PayPalStandardException( $e->getMessage() );
 		}
 	}
 
