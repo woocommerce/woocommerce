@@ -346,6 +346,11 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 			return;
 		}
 
+		// Skip test orders from analytics.
+		if ( self::is_test_order( $order ) ) {
+			return;
+		}
+
 		$results = array(
 			OrdersStatsDataStore::sync_order( $order_id ),
 			ProductsDataStore::sync_order_products( $order_id ),
@@ -682,6 +687,34 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 				$limit
 			)
 		);
+	}
+
+	/**
+	 * Check if an order is a test order that should be excluded from analytics.
+	 *
+	 * @param \WC_Abstract_Order $order Order object.
+	 * @return bool
+	 */
+	public static function is_test_order( $order ) {
+		// For refunds, check the parent order.
+		$check_order = $order;
+		if ( 'shop_order_refund' === $order->get_type() ) {
+			$check_order = wc_get_order( $order->get_parent_id() );
+			if ( ! $check_order ) {
+				return false;
+			}
+		}
+
+		$is_test = 'test' === $check_order->get_meta( '_wcpay_mode' );
+
+		/**
+		 * Filter whether an order is a test order excluded from analytics.
+		 *
+		 * @since 10.7.0
+		 * @param bool               $is_test Whether the order is a test order.
+		 * @param \WC_Abstract_Order $order   The order being checked.
+		 */
+		return apply_filters( 'woocommerce_analytics_is_test_order', $is_test, $check_order );
 	}
 
 	/**

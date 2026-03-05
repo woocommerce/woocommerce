@@ -206,6 +206,109 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that an order with _wcpay_mode = 'test' is identified as a test order.
+	 */
+	public function test_is_test_order_with_wcpay_test_mode() {
+		$order = \WC_Helper_Order::create_order();
+		$order->update_meta_data( '_wcpay_mode', 'test' );
+		$order->save();
+
+		$this->assertTrue( OrdersScheduler::is_test_order( $order ) );
+	}
+
+	/**
+	 * Test that a normal order is not identified as a test order.
+	 */
+	public function test_is_test_order_with_normal_order() {
+		$order = \WC_Helper_Order::create_order();
+
+		$this->assertFalse( OrdersScheduler::is_test_order( $order ) );
+	}
+
+	/**
+	 * Test that an order with _wcpay_mode = 'live' is not a test order.
+	 */
+	public function test_is_test_order_with_wcpay_live_mode() {
+		$order = \WC_Helper_Order::create_order();
+		$order->update_meta_data( '_wcpay_mode', 'live' );
+		$order->save();
+
+		$this->assertFalse( OrdersScheduler::is_test_order( $order ) );
+	}
+
+	/**
+	 * Test that a refund of a test order is also identified as a test order.
+	 */
+	public function test_is_test_order_with_refund_of_test_order() {
+		$order = \WC_Helper_Order::create_order();
+		$order->update_meta_data( '_wcpay_mode', 'test' );
+		$order->save();
+
+		$refund = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 10,
+				'reason'   => 'Test refund',
+			)
+		);
+
+		$this->assertTrue( OrdersScheduler::is_test_order( $refund ) );
+	}
+
+	/**
+	 * Test that a refund of a normal order is not a test order.
+	 */
+	public function test_is_test_order_with_refund_of_normal_order() {
+		$order = \WC_Helper_Order::create_order();
+
+		$refund = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 10,
+				'reason'   => 'Test refund',
+			)
+		);
+
+		$this->assertFalse( OrdersScheduler::is_test_order( $refund ) );
+	}
+
+	/**
+	 * Test that the woocommerce_analytics_is_test_order filter can override the default check.
+	 */
+	public function test_is_test_order_filter_can_override() {
+		$order = \WC_Helper_Order::create_order();
+
+		// Order has no _wcpay_mode meta, so default is false.
+		$this->assertFalse( OrdersScheduler::is_test_order( $order ) );
+
+		// Override via filter to mark it as test.
+		add_filter( 'woocommerce_analytics_is_test_order', '__return_true' );
+
+		$this->assertTrue( OrdersScheduler::is_test_order( $order ) );
+
+		remove_filter( 'woocommerce_analytics_is_test_order', '__return_true' );
+	}
+
+	/**
+	 * Test that the woocommerce_analytics_is_test_order filter can allow a test order.
+	 */
+	public function test_is_test_order_filter_can_allow_test_order() {
+		$order = \WC_Helper_Order::create_order();
+		$order->update_meta_data( '_wcpay_mode', 'test' );
+		$order->save();
+
+		// Default is true because _wcpay_mode is 'test'.
+		$this->assertTrue( OrdersScheduler::is_test_order( $order ) );
+
+		// Override via filter to allow it.
+		add_filter( 'woocommerce_analytics_is_test_order', '__return_false' );
+
+		$this->assertFalse( OrdersScheduler::is_test_order( $order ) );
+
+		remove_filter( 'woocommerce_analytics_is_test_order', '__return_false' );
+	}
+
+	/**
 	 * Clear any scheduled batch processor actions.
 	 *
 	 * @return void
