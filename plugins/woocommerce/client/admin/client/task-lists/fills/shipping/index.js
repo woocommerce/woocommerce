@@ -418,6 +418,13 @@ export class Shipping extends Component {
 						<Plugins
 							onComplete={ ( _plugins, response ) => {
 								createNoticesFromResponse( response );
+								recordEvent(
+									'tasklist_shipping_label_printing',
+									{
+										install: true,
+										plugins_to_activate: pluginsToActivate,
+									}
+								);
 								this.recordInstallAndActivateEvents(
 									pluginsToActivate[ 0 ],
 									true
@@ -432,13 +439,6 @@ export class Shipping extends Component {
 								);
 							} }
 							onClick={ () => {
-								recordEvent(
-									'tasklist_shipping_label_printing',
-									{
-										install: true,
-										plugins_to_activate: pluginsToActivate,
-									}
-								);
 								recordEvent( 'shipping_partner_click', {
 									...this.getShippingPartnerTrackingProps(),
 									selected_plugin: pluginsToActivate[ 0 ],
@@ -558,6 +558,14 @@ export class Shipping extends Component {
 																createNoticesFromResponse(
 																	response
 																);
+																recordEvent(
+																	'tasklist_shipping_label_printing',
+																	{
+																		install: true,
+																		plugins_to_activate:
+																			pluginsForPartner,
+																	}
+																);
 																this.recordInstallAndActivateEvents(
 																	shippingMethod.slug,
 																	true
@@ -578,14 +586,6 @@ export class Shipping extends Component {
 																);
 															} }
 															onClick={ () => {
-																recordEvent(
-																	'tasklist_shipping_label_printing',
-																	{
-																		install: true,
-																		plugins_to_activate:
-																			pluginsToActivate,
-																	}
-																);
 																recordEvent(
 																	'shipping_partner_click',
 																	{
@@ -659,6 +659,14 @@ export class Shipping extends Component {
 											createNoticesFromResponse(
 												response
 											);
+											recordEvent(
+												'tasklist_shipping_label_printing',
+												{
+													install: true,
+													plugins_to_activate:
+														pluginsToActivate,
+												}
+											);
 											this.recordInstallAndActivateEvents(
 												pluginsToPromote[ 0 ]?.slug,
 												true
@@ -676,14 +684,6 @@ export class Shipping extends Component {
 											);
 										} }
 										onClick={ () => {
-											recordEvent(
-												'tasklist_shipping_label_printing',
-												{
-													install: true,
-													plugins_to_activate:
-														pluginsToActivate,
-												}
-											);
 											recordEvent(
 												'shipping_partner_click',
 												{
