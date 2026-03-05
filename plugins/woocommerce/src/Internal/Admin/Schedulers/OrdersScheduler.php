@@ -705,11 +705,15 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	 * @since 10.7.0
 	 */
 	public static function is_test_order( $order ) {
+		if ( ! $order instanceof \WC_Abstract_Order ) {
+			return false;
+		}
+
 		// For refunds, check the parent order.
 		$check_order = $order;
 		if ( 'shop_order_refund' === $order->get_type() ) {
 			$check_order = wc_get_order( $order->get_parent_id() );
-			if ( ! $check_order ) {
+			if ( ! $check_order instanceof \WC_Abstract_Order ) {
 				return false;
 			}
 		}
