@@ -43739,24 +43739,6 @@ parameters:
 			path: src/Admin/API/Reports/Orders/Stats/DataStore.php
 
 		-
-			message: '#^Access to property \$intervals on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 3
-			path: src/Admin/API/Reports/Orders/Stats/DataStore.php
-
-		-
-			message: '#^Access to property \$intervals on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\stdClass\.$#'
-			identifier: class.notFound
-			count: 7
-			path: src/Admin/API/Reports/Orders/Stats/DataStore.php
-
-		-
-			message: '#^Access to property \$totals on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\stdClass\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Admin/API/Reports/Orders/Stats/DataStore.php
-
-		-
 			message: '#^Binary operation "\*" between \-1 and string results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
@@ -43799,21 +43781,15 @@ parameters:
 			path: src/Admin/API/Reports/Orders/Stats/DataStore.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\DataStore\:\:get_noncached_stats_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\stdClass\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Orders/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\DataStore\:\:get_noncached_stats_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\WP_Error but returns Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Reports/Orders/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\DataStore\:\:get_noncached_stats_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\WP_Error but returns WP_Error\.$#'
+			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\DataStore\:\:get_noncached_stats_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\WP_Error\|stdClass but returns WP_Error\.$#'
 			identifier: return.type
 			count: 2
+			path: src/Admin/API/Reports/Orders/Stats/DataStore.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\DataStore\:\:get_noncached_stats_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\WP_Error\|stdClass but returns Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\.$#'
+			identifier: return.type
+			count: 1
 			path: src/Admin/API/Reports/Orders/Stats/DataStore.php
 
 		-
@@ -43859,7 +43835,7 @@ parameters:
 			path: src/Admin/API/Reports/Orders/Stats/DataStore.php
 
 		-
-			message: '#^Parameter \#1 \$data of method Automattic\\WooCommerce\\Admin\\API\\Reports\\Segmenter\:\:add_intervals_segments\(\) expects Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass, Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass given\.$#'
+			message: '#^Parameter \#1 \$data of method Automattic\\WooCommerce\\Admin\\API\\Reports\\Segmenter\:\:add_intervals_segments\(\) expects Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass, Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\|stdClass given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Admin/API/Reports/Orders/Stats/DataStore.php
@@ -43871,20 +43847,8 @@ parameters:
 			path: src/Admin/API/Reports/Orders/Stats/DataStore.php
 
 		-
-			message: '#^Parameter \#3 \$data of method Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\DataStore\:\:get_noncached_stats_data\(\) expects Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\stdClass, object\{totals\: null, intervals\: array, total\: int, pages\: int, page_no\: int\}&stdClass given\.$#'
+			message: '#^Parameter \#5 \$data of method Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:fill_in_missing_intervals\(\) expects Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass, stdClass given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Admin/API/Reports/Orders/Stats/DataStore.php
-
-		-
-			message: '#^Parameter \#5 \$data of method Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:fill_in_missing_intervals\(\) expects Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass, Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\stdClass given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/API/Reports/Orders/Stats/DataStore.php
-
-		-
-			message: '#^Parameter \$data of method Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\DataStore\:\:get_noncached_stats_data\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\stdClass\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Admin/API/Reports/Orders/Stats/DataStore.php
 

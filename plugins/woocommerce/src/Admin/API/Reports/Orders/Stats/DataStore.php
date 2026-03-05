@@ -18,6 +18,7 @@ use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Admin\API\Reports\StatsDataStoreTrait;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
+use stdClass;
 use WC_Order;
 use WC_Order_Refund;
 use Automattic\WooCommerce\Admin\Overrides\Order;
