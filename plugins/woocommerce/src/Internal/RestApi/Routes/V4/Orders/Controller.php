@@ -200,9 +200,26 @@ class Controller extends AbstractController {
 	 * @return array
 	 */
 	protected function prepare_links( $item, WP_REST_Request $request, WP_REST_Response $response ): array {
+		$target_hints = array( 'allow' => array() );
+
+		if ( wc_rest_check_post_permissions( $this->post_type, 'read', $item->get_id() ) ) {
+			$target_hints['allow'][] = 'GET';
+		}
+		if ( wc_rest_check_post_permissions( $this->post_type, 'edit', $item->get_id() ) ) {
+			$target_hints['allow'][] = 'PUT';
+			$target_hints['allow'][] = 'PATCH';
+		}
+		if ( wc_rest_check_post_permissions( $this->post_type, 'delete', $item->get_id() ) ) {
+			$target_hints['allow'][] = 'DELETE';
+		}
+		if ( wc_rest_check_post_permissions( $this->post_type, 'create', $item->get_id() ) ) {
+			$target_hints['allow'][] = 'POST';
+		}
+
 		$links = array(
 			'self'            => array(
-				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $item->get_id() ) ),
+				'href'        => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $item->get_id() ) ),
+				'targetHints' => $target_hints,
 			),
 			'collection'      => array(
 				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ),
