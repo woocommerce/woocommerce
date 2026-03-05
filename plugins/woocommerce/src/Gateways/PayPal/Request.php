@@ -103,14 +103,14 @@ class Request {
 			if ( is_wp_error( $response ) ) {
 				throw new PayPalStandardException(
 					'PayPal order creation failed. Response error: ' . $response->get_error_message(),
-					'We were unable to connect to PayPal. Please try again.'
+					__( 'We were unable to connect to PayPal. Please try again.', 'woocommerce' )
 				);
 			}
 
 			if ( ! is_array( $response ) ) {
 				throw new PayPalStandardException(
 					'PayPal order creation failed. Invalid response type.',
-					'We received an unexpected response from PayPal. Please try again.'
+					__( 'We received an unexpected response from PayPal. Please try again.', 'woocommerce' )
 				);
 			}
 
@@ -143,7 +143,7 @@ class Request {
 				$paypal_debug_id = isset( $response_data['debug_id'] ) ? $response_data['debug_id'] : null;
 				throw new PayPalStandardException(
 					'PayPal order creation failed. Response status: ' . $http_code . '. Response body: ' . $body,
-					'PayPal was unable to process your payment. Please try again or use a different payment method.'
+					__( 'PayPal was unable to process your payment. Please try again or use a different payment method.', 'woocommerce' )
 				);
 			}
 
@@ -154,7 +154,7 @@ class Request {
 				if ( empty( $redirect_url ) ) {
 					throw new PayPalStandardException(
 						'PayPal order creation failed. Missing approval link.',
-						'We could not retrieve the PayPal approval link. Please try again.'
+						__( 'We could not retrieve the PayPal approval link. Please try again.', 'woocommerce' )
 					);
 				}
 			}
@@ -702,7 +702,7 @@ class Request {
 		if ( ! in_array( strtoupper( $order->get_currency() ), $supported_currencies, true ) ) {
 			throw new PayPalStandardException(
 				'Currency is not supported by PayPal. Order ID: ' . esc_html( (string) $order->get_id() ),
-				'Your order currency is not supported by PayPal. Please use a different payment method.'
+				__( 'Your order currency is not supported by PayPal. Please use a different payment method.', 'woocommerce' )
 			);
 		}
 
@@ -712,7 +712,7 @@ class Request {
 			// we should not proceed with the create-order request.
 			throw new PayPalStandardException(
 				'Cannot build PayPal order purchase unit amount. Order total is not valid. Order ID: ' . esc_html( (string) $order->get_id() ) . ', Total: ' . esc_html( (string) $purchase_unit_amount['value'] ),
-				'Your order total is invalid and cannot be processed by PayPal. Please review your cart.'
+				__( 'Your order total is invalid and cannot be processed by PayPal. Please review your cart.', 'woocommerce' )
 			);
 		}
 
@@ -814,7 +814,7 @@ class Request {
 			// Throw a PayPalStandardException to prevent the request from being sent.
 			throw new PayPalStandardException(
 				'Shipping address is required for PayPal create-order request. Order ID: ' . esc_html( (string) $order->get_id() ),
-				'A valid shipping address is required to complete your PayPal payment.'
+				__( 'A valid shipping address is required to complete your PayPal payment.', 'woocommerce' )
 			);
 		}
 
@@ -881,14 +881,14 @@ class Request {
 		if ( false === $custom_id ) {
 			throw new PayPalStandardException(
 				'Failed to encode custom ID.',
-				'We were unable to prepare your PayPal order. Please try again.'
+				__( 'We were unable to prepare your PayPal order. Please try again.', 'woocommerce' )
 			);
 		}
 
 		if ( strlen( $custom_id ) > 255 ) {
 			throw new PayPalStandardException(
 				'PayPal order custom ID is too long. Max length is 255 chars.',
-				'We were unable to prepare your PayPal order. Please try again.'
+				__( 'We were unable to prepare your PayPal order. Please try again.', 'woocommerce' )
 			);
 		}
 
@@ -1096,7 +1096,7 @@ class Request {
 
 			throw new PayPalStandardException(
 				sprintf( 'Invalid alpha-2 country code: %s', esc_html( $code ) ),
-				'The country code you entered is not supported by PayPal. Please use a different country.'
+				__( 'The country code you entered is not supported by PayPal. Please use a different country.', 'woocommerce' )
 			);
 		}
 
@@ -1114,13 +1114,13 @@ class Request {
 		if ( null === $alpha2 ) {
 			throw new PayPalStandardException(
 				sprintf( 'Invalid alpha-3 country code: %s', esc_html( $code ) ),
-				'The country code you entered is not supported by PayPal. Please use a different country.'
+				__( 'The country code you entered is not supported by PayPal. Please use a different country.', 'woocommerce' )
 			);
 		}
 		if ( ! PayPalHelper::is_country_supported_by_paypal( $alpha2 ) ) {
 			throw new PayPalStandardException(
 				sprintf( 'Country not supported by PayPal: %s (resolved from alpha-3: %s)', esc_html( $alpha2 ), esc_html( $code ) ),
-				'The country code you entered is not supported by PayPal. Please use a different country.'
+				__( 'The country code you entered is not supported by PayPal. Please use a different country.', 'woocommerce' )
 			);
 		}
 
