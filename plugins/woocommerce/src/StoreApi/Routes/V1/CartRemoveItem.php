@@ -84,7 +84,7 @@ class CartRemoveItem extends AbstractCartRoute {
 			 *
 			 * @since 10.6.0
 			 */
-			do_action( 'woocommerce_cart_item_removed_from_user_request', $request['key'], $cart );
+			do_action( 'internal_woocommerce_cart_item_removed_from_user_request', $request['key'], $cart );
 		}
 
 		$this->maybe_release_stock();

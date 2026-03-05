@@ -665,7 +665,7 @@ class WC_Form_Handler {
 					 *
 					 * @since 10.6.0
 					 */
-					do_action( 'woocommerce_cart_item_removed_from_user_request', $cart_item_key, WC()->cart );
+					do_action( 'internal_woocommerce_cart_item_removed_from_user_request', $cart_item_key, WC()->cart );
 				}
 
 				$product = wc_get_product( $cart_item['product_id'] );
@@ -751,7 +751,7 @@ class WC_Form_Handler {
 						 *
 						 * @since 10.6.0
 						 */
-						do_action( 'woocommerce_cart_item_updated_from_user_request', $cart_item_key, $quantity, $old_quantity, WC()->cart );
+						do_action( 'internal_woocommerce_cart_item_updated_from_user_request', $cart_item_key, $quantity, $old_quantity, WC()->cart );
 					}
 				}
 			}
@@ -884,7 +884,7 @@ class WC_Form_Handler {
 			 *
 			 * @since 10.6.0
 			 */
-			do_action( 'woocommerce_cart_item_added_from_user_request', $product_id, $quantity );
+			do_action( 'internal_woocommerce_cart_item_added_from_user_request', $product_id, $quantity );
 
 			$url = apply_filters( 'woocommerce_add_to_cart_redirect', $url, $adding_to_cart );
 

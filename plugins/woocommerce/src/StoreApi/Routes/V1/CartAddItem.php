@@ -140,7 +140,7 @@ class CartAddItem extends AbstractCartRoute {
 			 *
 			 * @since 10.6.0
 			 */
-			do_action( 'woocommerce_cart_item_added_from_user_request', $product_id, $quantity );
+			do_action( 'internal_woocommerce_cart_item_added_from_user_request', $product_id, $quantity );
 		}
 
 		$response = rest_ensure_response( $this->schema->get_item_response( $this->cart_controller->get_cart_for_response() ) );

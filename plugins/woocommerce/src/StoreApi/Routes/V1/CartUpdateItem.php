@@ -86,7 +86,7 @@ class CartUpdateItem extends AbstractCartRoute {
 				 *
 				 * @since 10.6.0
 				 */
-				do_action( 'woocommerce_cart_item_updated_from_user_request', $request['key'], (int) $request['quantity'], $old_quantity, $cart );
+				do_action( 'internal_woocommerce_cart_item_updated_from_user_request', $request['key'], (int) $request['quantity'], $old_quantity, $cart );
 			}
 		}
 

@@ -1226,7 +1226,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should fire woocommerce_cart_item_updated_from_user_request when cart item quantity is updated via form.
+	 * @testdox Should fire internal_woocommerce_cart_item_updated_from_user_request when cart item quantity is updated via form.
 	 */
 	public function test_update_cart_action_fires_update_quantity_action(): void {
 		$product = WC_Helper_Product::create_simple_product();
@@ -1251,7 +1251,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 			$captured_args = compact( 'cart_item_key', 'quantity', 'old_quantity', 'cart' );
 		};
 
-		add_action( 'woocommerce_cart_item_updated_from_user_request', $callback, 10, 4 );
+		add_action( 'internal_woocommerce_cart_item_updated_from_user_request', $callback, 10, 4 );
 
 		WC_Form_Handler::update_cart_action();
 
@@ -1261,14 +1261,14 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( 2, $captured_args['old_quantity'] );
 		$this->assertInstanceOf( WC_Cart::class, $captured_args['cart'] );
 
-		remove_action( 'woocommerce_cart_item_updated_from_user_request', $callback );
+		remove_action( 'internal_woocommerce_cart_item_updated_from_user_request', $callback );
 
 		unset( $_POST['_wpnonce'], $_REQUEST['_wpnonce'], $_POST['update_cart'], $_REQUEST['update_cart'], $_POST['cart'] );
 		$product->delete( true );
 	}
 
 	/**
-	 * @testdox Should not fire woocommerce_cart_item_updated_from_user_request when quantity is unchanged.
+	 * @testdox Should not fire internal_woocommerce_cart_item_updated_from_user_request when quantity is unchanged.
 	 */
 	public function test_update_cart_action_does_not_fire_update_quantity_action_when_unchanged(): void {
 		$product = WC_Helper_Product::create_simple_product();
@@ -1292,20 +1292,20 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 			$hook_fired = true;
 		};
 
-		add_action( 'woocommerce_cart_item_updated_from_user_request', $callback, 10, 4 );
+		add_action( 'internal_woocommerce_cart_item_updated_from_user_request', $callback, 10, 4 );
 
 		WC_Form_Handler::update_cart_action();
 
 		$this->assertFalse( $hook_fired, 'The update quantity action should not fire when the quantity is unchanged' );
 
-		remove_action( 'woocommerce_cart_item_updated_from_user_request', $callback );
+		remove_action( 'internal_woocommerce_cart_item_updated_from_user_request', $callback );
 
 		unset( $_POST['_wpnonce'], $_REQUEST['_wpnonce'], $_POST['update_cart'], $_REQUEST['update_cart'], $_POST['cart'] );
 		$product->delete( true );
 	}
 
 	/**
-	 * @testdox Should fire woocommerce_cart_item_removed_from_user_request when cart item is removed via form.
+	 * @testdox Should fire internal_woocommerce_cart_item_removed_from_user_request when cart item is removed via form.
 	 */
 	public function test_update_cart_action_fires_remove_item_action(): void {
 		$product = WC_Helper_Product::create_simple_product();
@@ -1326,7 +1326,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 			$captured_args = compact( 'cart_item_key', 'cart' );
 		};
 
-		add_action( 'woocommerce_cart_item_removed_from_user_request', $callback, 10, 2 );
+		add_action( 'internal_woocommerce_cart_item_removed_from_user_request', $callback, 10, 2 );
 
 		WC_Form_Handler::update_cart_action();
 
@@ -1334,14 +1334,14 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( $cart_item_key, $captured_args['cart_item_key'] );
 		$this->assertInstanceOf( WC_Cart::class, $captured_args['cart'] );
 
-		remove_action( 'woocommerce_cart_item_removed_from_user_request', $callback );
+		remove_action( 'internal_woocommerce_cart_item_removed_from_user_request', $callback );
 
 		unset( $_REQUEST['_wpnonce'], $_GET['remove_item'], $_REQUEST['remove_item'] );
 		$product->delete( true );
 	}
 
 	/**
-	 * @testdox Should fire woocommerce_cart_item_added_from_user_request when a simple product is added via the shortcode form.
+	 * @testdox Should fire internal_woocommerce_cart_item_added_from_user_request when a simple product is added via the shortcode form.
 	 */
 	public function test_add_to_cart_action_fires_cart_item_added_from_user_request(): void {
 		$product = WC_Helper_Product::create_simple_product();
@@ -1358,7 +1358,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 			);
 		};
 
-		add_action( 'woocommerce_cart_item_added_from_user_request', $callback, 10, 2 );
+		add_action( 'internal_woocommerce_cart_item_added_from_user_request', $callback, 10, 2 );
 
 		WC_Form_Handler::add_to_cart_action( false );
 
@@ -1366,14 +1366,14 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( $product->get_id(), $captured_args['product_id'] );
 		$this->assertEquals( 3, $captured_args['quantity'] );
 
-		remove_action( 'woocommerce_cart_item_added_from_user_request', $callback );
+		remove_action( 'internal_woocommerce_cart_item_added_from_user_request', $callback );
 
 		unset( $_REQUEST['add-to-cart'], $_REQUEST['quantity'], $_POST['quantity'] );
 		$product->delete( true );
 	}
 
 	/**
-	 * @testdox Should fire woocommerce_cart_item_added_from_user_request with the variation ID when a variable product is added via the shortcode form.
+	 * @testdox Should fire internal_woocommerce_cart_item_added_from_user_request with the variation ID when a variable product is added via the shortcode form.
 	 */
 	public function test_add_to_cart_action_fires_cart_item_added_from_user_request_for_variable_product(): void {
 		$product = new WC_Product_Variable();
@@ -1402,7 +1402,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 			);
 		};
 
-		add_action( 'woocommerce_cart_item_added_from_user_request', $callback, 10, 2 );
+		add_action( 'internal_woocommerce_cart_item_added_from_user_request', $callback, 10, 2 );
 
 		WC_Form_Handler::add_to_cart_action( false );
 
@@ -1410,7 +1410,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( $variation->get_id(), $captured_args['product_id'], 'The product_id should be the variation ID, not the parent product ID' );
 		$this->assertEquals( 2, $captured_args['quantity'] );
 
-		remove_action( 'woocommerce_cart_item_added_from_user_request', $callback );
+		remove_action( 'internal_woocommerce_cart_item_added_from_user_request', $callback );
 
 		unset( $_REQUEST['add-to-cart'], $_REQUEST['variation_id'], $_REQUEST['quantity'], $_POST['quantity'], $_REQUEST['attribute_pa_color'] );
 		$variation->delete( true );

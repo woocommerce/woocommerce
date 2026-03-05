@@ -315,7 +315,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
-	 * @testdox Should fire woocommerce_cart_item_added_from_user_request when adding an item via AJAX.
+	 * @testdox Should fire internal_woocommerce_cart_item_added_from_user_request when adding an item via AJAX.
 	 */
 	public function test_add_to_cart_fires_cart_item_added_from_user_request(): void {
 		$product = WC_Helper_Product::create_simple_product();
@@ -331,7 +331,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 			);
 		};
 
-		add_action( 'woocommerce_cart_item_added_from_user_request', $callback, 10, 2 );
+		add_action( 'internal_woocommerce_cart_item_added_from_user_request', $callback, 10, 2 );
 
 		$this->do_ajax( 'woocommerce_add_to_cart' );
 
@@ -339,7 +339,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		$this->assertSame( $product->get_id(), $captured_args['product_id'] );
 		$this->assertEquals( 3, $captured_args['quantity'] );
 
-		remove_action( 'woocommerce_cart_item_added_from_user_request', $callback );
+		remove_action( 'internal_woocommerce_cart_item_added_from_user_request', $callback );
 
 		WC()->cart->empty_cart();
 		unset( $_POST['product_id'], $_POST['quantity'] );
@@ -347,7 +347,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
-	 * @testdox Should fire woocommerce_cart_item_added_from_user_request with variation ID when adding a variation via AJAX.
+	 * @testdox Should fire internal_woocommerce_cart_item_added_from_user_request with variation ID when adding a variation via AJAX.
 	 */
 	public function test_add_to_cart_fires_cart_item_added_from_user_request_for_variation(): void {
 		$product = new \WC_Product_Variable();
@@ -373,7 +373,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 			);
 		};
 
-		add_action( 'woocommerce_cart_item_added_from_user_request', $callback, 10, 2 );
+		add_action( 'internal_woocommerce_cart_item_added_from_user_request', $callback, 10, 2 );
 
 		$this->do_ajax( 'woocommerce_add_to_cart' );
 
@@ -381,7 +381,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		$this->assertSame( $variation->get_id(), $captured_args['product_id'], 'The product_id should be the variation ID, not the parent product ID' );
 		$this->assertEquals( 2, $captured_args['quantity'] );
 
-		remove_action( 'woocommerce_cart_item_added_from_user_request', $callback );
+		remove_action( 'internal_woocommerce_cart_item_added_from_user_request', $callback );
 
 		WC()->cart->empty_cart();
 		unset( $_POST['product_id'], $_POST['quantity'] );
