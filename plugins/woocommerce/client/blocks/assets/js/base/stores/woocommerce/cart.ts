@@ -312,7 +312,7 @@ const { state, actions } = store< Store >(
 	'woocommerce',
 	{
 		actions: {
-			*removeCartItem( key: string ) {
+			*removeCartItem( key: string ): AsyncAction< void > {
 				// Track what changes we're making for the sync event.
 				const quantityChanges: QuantityChanges = {
 					cartItemsPendingDelete: [ key ],
