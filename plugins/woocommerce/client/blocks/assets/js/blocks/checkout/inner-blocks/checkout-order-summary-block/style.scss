@@ -57,6 +57,9 @@
 	}
 
 	.wc-block-components-product-name {
+		@include font-small-locked;
+		display: block;
+		max-width: max-content;
 		margin: 0;
 		font-weight: 500;
 	}

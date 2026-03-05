@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add order notes for fulfillment lifecycle events (created, updated, deleted, status changes) to improve order history tracking and auditability.

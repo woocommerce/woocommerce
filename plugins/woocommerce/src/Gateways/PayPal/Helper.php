@@ -19,6 +19,16 @@ defined( 'ABSPATH' ) || exit;
  */
 class Helper {
 	/**
+	 * Check if a country code is supported by PayPal.
+	 *
+	 * @param string $country_code Country code.
+	 * @return bool True if the country is supported by PayPal, false otherwise.
+	 */
+	public static function is_country_supported_by_paypal( string $country_code ): bool {
+		return array_key_exists( $country_code, PayPalConstants::SUPPORTED_COUNTRIES );
+	}
+
+	/**
 	 * Check if the PayPal gateway is enabled.
 	 *
 	 * @return bool

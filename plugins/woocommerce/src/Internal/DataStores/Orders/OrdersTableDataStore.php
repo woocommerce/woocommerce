@@ -19,7 +19,7 @@ use Exception;
 use WC_Abstract_Order;
 use WC_Data;
 use WC_Order;
-use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentUtils;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentUtils;
 
 defined( 'ABSPATH' ) || exit;
 
