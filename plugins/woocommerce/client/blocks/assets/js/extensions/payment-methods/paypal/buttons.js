@@ -22,7 +22,7 @@ import { __ } from '@wordpress/i18n';
  * @param {string}  [props.partnerAttributionId]
  * @param {string}  [props.pageType]
  * @param {boolean} [props.isProductPage]
- * @param {string} [props.appSwitchRequestOrigin]
+ * @param {string}  [props.appSwitchRequestOrigin]
  * @return {JSX.Element} The PayPal Buttons container component.
  */
 const PayPalButtonsContainer = ( {
@@ -239,7 +239,10 @@ const PayPalButtonsContainer = ( {
 	};
 
 	const onError = ( error ) => {
-		const errorMessage = createOrderError || error?.message || __( 'An unknown error occurred', 'woocommerce' );
+		const errorMessage =
+			createOrderError ||
+			error?.message ||
+			__( 'An unknown error occurred', 'woocommerce' );
 		dispatch( 'core/notices' ).createErrorNotice( errorMessage, {
 			context: pageType === 'checkout' ? 'wc/checkout' : 'wc/cart',
 		} );
