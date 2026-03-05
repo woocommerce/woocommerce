@@ -571,6 +571,15 @@ class WC_AJAX {
 		$cart_item_key = wc_clean( isset( $_POST['cart_item_key'] ) ? wp_unslash( $_POST['cart_item_key'] ) : '' );
 
 		if ( $cart_item_key && false !== WC()->cart->remove_cart_item( $cart_item_key ) ) {
+			/**
+			 * Fires when an item is removed from the cart from a user request.
+			 *
+			 * @param string|array $cart_item_key Cart item key.
+			 * @param \WC_Cart     $cart          Cart object.
+			 *
+			 * @since 10.6.0
+			 */
+			do_action( 'internal_woocommerce_cart_item_removed_from_user_request', $cart_item_key, WC()->cart );
 			self::get_refreshed_fragments();
 		} else {
 			wp_send_json_error();
