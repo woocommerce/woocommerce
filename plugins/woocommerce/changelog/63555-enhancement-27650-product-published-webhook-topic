@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Add 'product.published' webhook topic than runs when a product is published.
