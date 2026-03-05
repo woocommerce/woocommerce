@@ -65925,19 +65925,13 @@ parameters:
 		-
 			message: '#^Cannot call method add_order_note\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
-			count: 2
+			count: 1
 			path: src/Internal/Orders/OrderActionsRestController.php
 
 		-
 			message: '#^Cannot call method get_billing_email\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
-			count: 4
-			path: src/Internal/Orders/OrderActionsRestController.php
-
-		-
-			message: '#^Cannot call method get_id\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 7
+			count: 2
 			path: src/Internal/Orders/OrderActionsRestController.php
 
 		-
@@ -65997,17 +65991,11 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$order of method Automattic\\WooCommerce\\Internal\\Orders\\OrderActionsRestController\:\:get_available_email_templates\(\) expects WC_Order, WC_Order\|WC_Order_Refund\|false given\.$#'
 			identifier: argument.type
-			count: 2
+			count: 1
 			path: src/Internal/Orders/OrderActionsRestController.php
 
 		-
 			message: '#^Parameter \#1 \$order of method Automattic\\WooCommerce\\Internal\\Orders\\OrderActionsRestController\:\:maybe_update_billing_email\(\) expects WC_Order, WC_Order\|WC_Order_Refund\|false given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Internal/Orders/OrderActionsRestController.php
-
-		-
-			message: '#^Parameter \#1 \$order of method Automattic\\WooCommerce\\Internal\\Orders\\OrderActionsRestController\:\:order_is_partially_refunded\(\) expects WC_Order, WC_Order\|WC_Order_Refund\|false given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Internal/Orders/OrderActionsRestController.php
@@ -66022,6 +66010,12 @@ parameters:
 			message: '#^Parameter \#1 \$text of function esc_html expects string, string\|null given\.$#'
 			identifier: argument.type
 			count: 2
+			path: src/Internal/Orders/OrderActionsRestController.php
+
+		-
+			message: '#^Parameter \#2 \$is_customer_note of method WC_Order\:\:add_order_note\(\) expects int, false given\.$#'
+			identifier: argument.type
+			count: 1
 			path: src/Internal/Orders/OrderActionsRestController.php
 
 		-
