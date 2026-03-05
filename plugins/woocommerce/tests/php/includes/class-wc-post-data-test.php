@@ -45,4 +45,75 @@ class WC_Post_Data_Test extends \WC_Unit_Test_Case {
 		$order = wc_get_order( $order->get_id() );
 		$this->assertEmpty( $order->get_items() );
 	}
+
+	/**
+	 * @testdox Should fire woocommerce_product_published when product transitions to publish status.
+	 */
+	public function test_transition_post_status_fires_product_published_action(): void {
+		$product = \WC_Helper_Product::create_simple_product( false );
+		$product->set_status( 'draft' );
+		$product->save();
+
+		$published_ids = array();
+		$callback      = function ( $product_id ) use ( &$published_ids ) {
+			$published_ids[] = $product_id;
+		};
+		add_action( 'woocommerce_product_published', $callback );
+
+		$post = get_post( $product->get_id() );
+		WC_Post_Data::transition_post_status( 'publish', 'draft', $post );
+
+		$this->assertContains( $product->get_id(), $published_ids, 'woocommerce_product_published should fire when product transitions to publish' );
+
+		remove_action( 'woocommerce_product_published', $callback );
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox Should not fire woocommerce_product_published when product is already published and updated.
+	 */
+	public function test_transition_post_status_does_not_fire_product_published_on_update(): void {
+		$product = \WC_Helper_Product::create_simple_product();
+
+		$published_ids = array();
+		$callback      = function ( $product_id ) use ( &$published_ids ) {
+			$published_ids[] = $product_id;
+		};
+		add_action( 'woocommerce_product_published', $callback );
+
+		$post = get_post( $product->get_id() );
+		WC_Post_Data::transition_post_status( 'publish', 'publish', $post );
+
+		$this->assertEmpty( $published_ids, 'woocommerce_product_published should not fire when product is already published' );
+
+		remove_action( 'woocommerce_product_published', $callback );
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox Should not fire woocommerce_product_published for non-product post types.
+	 */
+	public function test_transition_post_status_does_not_fire_product_published_for_non_products(): void {
+		$post_id = wp_insert_post(
+			array(
+				'post_title'  => 'Test Post',
+				'post_type'   => 'post',
+				'post_status' => 'draft',
+			)
+		);
+
+		$published_ids = array();
+		$callback      = function ( $product_id ) use ( &$published_ids ) {
+			$published_ids[] = $product_id;
+		};
+		add_action( 'woocommerce_product_published', $callback );
+
+		$post = get_post( $post_id );
+		WC_Post_Data::transition_post_status( 'publish', 'draft', $post );
+
+		$this->assertEmpty( $published_ids, 'woocommerce_product_published should not fire for non-product post types' );
+
+		remove_action( 'woocommerce_product_published', $callback );
+		wp_delete_post( $post_id, true );
+	}
 }

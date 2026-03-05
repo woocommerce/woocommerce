@@ -80,8 +80,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 									'product.created'  => __( 'Product created', 'woocommerce' ),
 									'product.updated'  => __( 'Product updated', 'woocommerce' ),
 									'product.deleted'  => __( 'Product deleted', 'woocommerce' ),
-									'product.restored' => __( 'Product restored', 'woocommerce' ),
-									'action'           => __( 'Action', 'woocommerce' ),
+									'product.restored'  => __( 'Product restored', 'woocommerce' ),
+									'product.published' => __( 'Product published', 'woocommerce' ),
+									'action'            => __( 'Action', 'woocommerce' ),
 								)
 							);
 

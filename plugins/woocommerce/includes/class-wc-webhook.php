@@ -992,11 +992,14 @@ class WC_Webhook extends WC_Legacy_Webhook {
 				'woocommerce_update_product',
 				'woocommerce_update_product_variation',
 			),
-			'product.deleted'  => array(
+			'product.deleted'   => array(
 				'wp_trash_post',
 			),
-			'product.restored' => array(
+			'product.restored'  => array(
 				'untrashed_post',
+			),
+			'product.published' => array(
+				'woocommerce_product_published',
 			),
 		);
 
