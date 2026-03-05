@@ -170,7 +170,14 @@ export type {
 	PostWithPermissions,
 } from './store/types';
 
-export { registerEntityAction } from './private-apis';
+/**
+ * The registerEntityAction and unregisterEntityAction are used to register and unregister entity actions.
+ * These use Gutenberg's private APIs and are highly unstable.
+ * DO NOT USE OUTSIDE WooCommerce.
+ *
+ * If necessary, import the unlock module and access the private APIs for your use case.
+ */
+export { registerEntityAction, unregisterEntityAction } from './private-apis';
 
 /**
  * A modal component for sending test emails from the email editor.

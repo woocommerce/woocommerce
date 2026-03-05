@@ -6,8 +6,11 @@ namespace Automattic\WooCommerce\Internal\EmailEditor;
 
 use Automattic\WooCommerce\EmailEditor\Validator\Builder;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsManager;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsGenerator;
 use WC_Email;
 use WP_Error;
+use WP_REST_Request;
+use WP_REST_Response;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -246,5 +249,56 @@ class EmailApiController {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Register REST API routes for the email API controller.
+	 */
+	public function register_routes(): void {
+		register_rest_route(
+			'woocommerce-email-editor/v1',
+			'/emails/(?P<id>\d+)/default-content',
+			array(
+				'methods'             => \WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'get_default_content_response' ),
+				'permission_callback' => function () {
+					return current_user_can( 'manage_woocommerce' );
+				},
+				'args'                => array(
+					'id' => array(
+						'description'       => __( 'The ID of the woo_email post.', 'woocommerce' ),
+						'type'              => 'integer',
+						'required'          => true,
+						'sanitize_callback' => 'absint',
+					),
+				),
+			)
+		);
+	}
+
+	/**
+	 * Return the default (plugin-distributed) block content for a woo_email post.
+	 *
+	 * @param WP_REST_Request $request The REST request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_default_content_response( WP_REST_Request $request ) {
+		$post_id    = (int) $request->get_param( 'id' );
+		$email_type = $this->post_manager->get_email_type_from_post_id( $post_id );
+		$email      = $this->get_email_by_type( $email_type ?? '' );
+
+		if ( ! $email ) {
+			return new WP_Error(
+				'woocommerce_email_not_found',
+				__( 'No email found for the given post ID.', 'woocommerce' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		$generator = new WCTransactionalEmailPostsGenerator();
+		return new WP_REST_Response(
+			array( 'content' => $generator->get_email_template( $email ) ),
+			200
+		);
 	}
 }

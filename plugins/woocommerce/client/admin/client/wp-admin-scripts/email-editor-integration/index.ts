@@ -88,16 +88,8 @@ const registerResetNotificationEmailContentAction = ( postType: string ) => {
 	);
 };
 
-// Available in WordPress 6.8+
 addAction(
 	'core.registerPostTypeSchema',
-	`${ NAME_SPACE }/reset-notification-email-content`,
-	registerResetNotificationEmailContentAction
-);
-
-// Support for WordPress 6.7+
-addAction(
-	'core.registerPostTypeActions',
 	`${ NAME_SPACE }/reset-notification-email-content`,
 	registerResetNotificationEmailContentAction
 );
