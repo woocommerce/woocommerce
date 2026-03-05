@@ -165,33 +165,29 @@ const generateInfoNotice = ( message: string ): Notice => ( {
 
 const getInfoNoticesFromCartUpdates = (
 	oldCart: Store[ 'state' ][ 'cart' ],
-	newCart: Cart,
-	quantityChanges: QuantityChanges
+	newCart: Cart
 ): Notice[] => {
 	const oldItems = oldCart.items;
 	const newItems = newCart.items;
 
-	const {
-		cartItemsPendingQuantity: pendingQuantity = [],
-	} = quantityChanges;
-
+	// Items auto-removed by the server (stock change, product deleted, etc.).
+	// We pass the optimistic snapshot as oldCart, so user-initiated removals
+	// are already absent and do not generate spurious notices here.
 	const autoDeletedToNotify = oldItems.filter(
 		( old ) =>
-			old.key &&
 			isCartItem( old ) &&
 			! newItems.some( ( item ) => old.key === item.key )
 	);
 
+	// Items whose quantity was adjusted by the server (stock cap, sold-individually).
+	// Comparing optimistic → server means intentional user changes are already
+	// reflected in oldItems and will not trigger this notice.
 	const autoUpdatedToNotify = newItems.filter( ( item ) => {
 		if ( ! isCartItem( item ) ) {
 			return false;
 		}
 		const old = oldItems.find( ( o ) => o.key === item.key );
-		return old
-			? ! pendingQuantity.includes( item.key ) &&
-					item.quantity !== old.quantity &&
-					old.quantity > 0
-			: false;
+		return old && item.quantity !== old.quantity;
 	} );
 	return [
 		...autoDeletedToNotify.map( ( item ) =>
@@ -317,29 +313,7 @@ const { state, actions } = store< Store >(
 	{
 		actions: {
 			*removeCartItem( key: string ) {
-				// 1. Find the item to get its name BEFORE removing it
-				const itemToRemove = state.cart.items.find( ( item ) => item.key === key );
-
-				// 2. Show "Removed" notice IMMEDIATELY (Optimistic UI).
-				// If this is the last item, clear all notices so the empty-cart
-				// placeholder appears without leftover messages.
-				if ( itemToRemove && isCartItem( itemToRemove ) ) {
-					const isLastItem = state.cart.items.length === 1;
-					if ( isLastItem ) {
-						yield actions.updateNotices( [], true );
-					} else {
-						yield actions.updateNotices( [
-							generateInfoNotice(
-								'"%s" was removed from your cart.'.replace(
-									'%s',
-									itemToRemove.name
-								)
-							),
-						] );
-					}
-				}
-
-				// Track what changes we're making for notice comparison.
+				// Track what changes we're making for the sync event.
 				const quantityChanges: QuantityChanges = {
 					cartItemsPendingDelete: [ key ],
 				};
@@ -376,8 +350,7 @@ const { state, actions } = store< Store >(
 					if ( cart && cartAfterOptimistic ) {
 						const infoNotices = getInfoNoticesFromCartUpdates(
 							cartAfterOptimistic,
-							cart,
-							quantityChanges
+							cart
 						);
 						const errorNotices =
 							cart.errors.map( generateErrorNotice );
@@ -524,8 +497,7 @@ const { state, actions } = store< Store >(
 					) {
 						const infoNotices = getInfoNoticesFromCartUpdates(
 							cartAfterOptimistic,
-							cart,
-							quantityChanges
+							cart
 						);
 						const errorNotices =
 							cart.errors.map( generateErrorNotice );
@@ -666,8 +638,7 @@ const { state, actions } = store< Store >(
 						if ( showCartUpdatesNotices ) {
 							const infoNotices = getInfoNoticesFromCartUpdates(
 								cartAfterOptimistic,
-								cart,
-								quantityChanges
+								cart
 							);
 							const errorNotices =
 								cart.errors.map( generateErrorNotice );
