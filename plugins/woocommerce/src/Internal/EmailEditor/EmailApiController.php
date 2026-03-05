@@ -279,7 +279,8 @@ class EmailApiController {
 	/**
 	 * Return the default (plugin-distributed) block content for a woo_email post.
 	 *
-	 * @param WP_REST_Request<array<string, mixed>> $request The REST request.
+	 * @param WP_REST_Request $request The REST request.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_default_content_response( WP_REST_Request $request ) {
