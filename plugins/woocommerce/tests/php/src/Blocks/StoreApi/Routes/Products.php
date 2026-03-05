@@ -76,6 +76,8 @@ class Products extends ControllerTestCase {
 		$this->assertEquals( $this->products[0]->get_length(), $data['dimensions']->length );
 		$this->assertEquals( $this->products[0]->get_width(), $data['dimensions']->width );
 		$this->assertEquals( $this->products[0]->get_height(), $data['dimensions']->height );
+		$this->assertEquals( wc_format_weight( (float) $this->products[0]->get_weight() ), $data['formatted_weight'] );
+		$this->assertEquals( html_entity_decode( wc_format_dimensions( (array) $this->products[0]->get_dimensions( false ) ), ENT_QUOTES, get_bloginfo( 'charset' ) ), $data['formatted_dimensions'] );
 		$this->assertCount( 0, $data['grouped_products'] );
 
 		$this->assertCount( 1, $data['images'] );

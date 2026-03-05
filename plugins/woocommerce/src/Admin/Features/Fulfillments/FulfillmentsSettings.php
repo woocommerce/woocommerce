@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Admin\Features\Fulfillments;
 
-use Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDataStore;
 use WC_Order;
 
 /**
@@ -180,8 +179,22 @@ class FulfillmentsSettings {
 		}
 
 		// If fulfillments already exist, skip auto-fulfillment.
-		$fulfillments = wc_get_container()->get( FulfillmentsDataStore::class )->read_fulfillments( \WC_Order::class, (string) $order_id );
-		if ( ! empty( $fulfillments ) ) {
+		try {
+			/**
+			 * Fulfillments data store.
+			 *
+			 * @var \Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDataStore $fulfillment_data_store
+			 */
+			$fulfillment_data_store = \WC_Data_Store::load( 'order-fulfillment' );
+			$fulfillments           = $fulfillment_data_store->read_fulfillments( \WC_Order::class, (string) $order_id );
+			if ( ! empty( $fulfillments ) ) {
+				return;
+			}
+		} catch ( \Throwable $e ) {
+			wc_get_logger()->error(
+				sprintf( 'Failed to load fulfillments for order %d: %s', $order_id, $e->getMessage() ),
+				array( 'source' => 'fulfillments' )
+			);
 			return;
 		}
 

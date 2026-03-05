@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\Admin\Features\Fulfillments;
 
+use Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDataStore;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 
@@ -29,7 +30,34 @@ class FulfillmentsController {
 	 * @return void
 	 */
 	public function register() {
+		add_filter( 'woocommerce_data_stores', array( $this, 'register_data_stores' ) );
 		add_action( 'init', array( $this, 'initialize_fulfillments' ), 10, 0 );
+	}
+
+	/**
+	 * Register the fulfillments data store via the woocommerce_data_stores filter.
+	 *
+	 * This allows extensions to replace the data store with a custom implementation
+	 * by filtering 'woocommerce_data_stores' or 'woocommerce_order-fulfillment_data_store'.
+	 *
+	 * @param array $data_stores Data stores.
+	 * @return array
+	 */
+	public function register_data_stores( $data_stores ) {
+		if ( ! is_array( $data_stores ) ) {
+			return $data_stores;
+		}
+
+		$container           = wc_get_container();
+		$features_controller = $container->get( FeaturesController::class );
+
+		// If fulfillments feature is not enabled, don't register the data store.
+		if ( ! $features_controller->feature_is_enabled( 'fulfillments' ) ) {
+			return $data_stores;
+		}
+
+		$data_stores['order-fulfillment'] = FulfillmentsDataStore::class;
+		return $data_stores;
 	}
 
 	/**

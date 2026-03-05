@@ -217,19 +217,26 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 		$fulfillment->save();
 		$this->assertNotNull( $fulfillment->get_id(), 'Fulfillment ID should not be null.' );
 
-		$hook_called = false;
+		$hook_called          = false;
+		$received_fulfillment = null;
+		$received_changed     = null;
+		$received_old_state   = null;
 		add_action(
 			'woocommerce_fulfillment_after_update',
-			function ( $fulfillment ) use ( &$hook_called, &$received_fulfillment ) {
+			function ( $fulfillment, $changed_props, $old_state ) use ( &$hook_called, &$received_fulfillment, &$received_changed, &$received_old_state ) {
 				$received_fulfillment = $fulfillment;
+				$received_changed     = $changed_props;
+				$received_old_state   = $old_state;
 				$hook_called          = true;
-				return $fulfillment;
 			},
 			10,
-			2
+			3
 		);
 
-		// Add a modification to the saved fulfillment, so we can see the difference.
+		$old_status = $fulfillment->get_status();
+
+		// Modify a tracked property so changed_props is populated.
+		$fulfillment->set_status( 'fulfilled' );
 		$fulfillment->add_meta_data( 'test_meta_update', 'test_meta_value' );
 
 		$this->store->update( $fulfillment );
@@ -245,6 +252,13 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 		$this->assertEquals( $received_fulfillment->get_meta( 'test_meta_key_2' ), $fulfillment->get_meta( 'test_meta_key_2' ) );
 		$this->assertEquals( $received_fulfillment->get_meta( 'test_meta_update' ), $fulfillment->get_meta( 'test_meta_update' ) );
 		$this->assertEquals( $received_fulfillment->get_items(), $fulfillment->get_items() );
+
+		// Verify changed_props and old_state are passed correctly.
+		$this->assertIsArray( $received_changed );
+		$this->assertContains( 'status', $received_changed );
+		$this->assertIsArray( $received_old_state );
+		$this->assertArrayHasKey( 'status', $received_old_state );
+		$this->assertEquals( $old_status, $received_old_state['status'] );
 	}
 
 	/**
