@@ -271,7 +271,8 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 			 *                                   (e.g. 'status', 'items', '_tracking_number').
 			 * @param array       $old_state     Snapshot of tracked property values before the update.
 			 *
-			 * @since 10.7.0
+			 * @since 10.1.0
+			 * @since 10.7.0 Added $changed_props and $old_state parameters.
 			 */
 			do_action( 'woocommerce_fulfillment_after_update', $data, $changed_props, $old_state );
 		}
