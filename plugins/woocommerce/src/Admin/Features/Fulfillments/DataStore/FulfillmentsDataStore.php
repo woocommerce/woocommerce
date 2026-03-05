@@ -25,6 +25,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Interface, FulfillmentsDataStoreInterface {
 
 	/**
+	 * Tracked meta keys for detecting meaningful fulfillment property changes.
+	 */
+	private const TRACKED_META_KEYS = array( '_tracking_number', '_tracking_url', '_shipping_provider' );
+
+	/**
 	 * Method to create a new fulfillment in the database.
 	 *
 	 * @param Fulfillment $data The fulfillment object to create.
@@ -188,6 +193,9 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 
 		$this->validate_items( $data );
 
+		// Snapshot tracked properties before the update so we can detect changes.
+		$old_state = $this->snapshot_tracked_state( $data_id );
+
 		/**
 		 * Filter to modify the fulfillment data before it is updated.
 		 *
@@ -253,14 +261,20 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 		$data->set_object_read( true );
 
 		if ( ! doing_action( 'woocommerce_fulfillment_after_update' ) ) {
+			$changed_props = $this->compute_changed_props( $data, $old_state );
+
 			/**
 			 * Action to perform after a fulfillment is updated.
 			 *
-			 * @param Fulfillment $data The fulfillment object that was updated.
+			 * @param Fulfillment $data          The fulfillment object that was updated.
+			 * @param array       $changed_props List of tracked property keys that changed
+			 *                                   (e.g. 'status', 'items', '_tracking_number').
+			 * @param array       $old_state     Snapshot of tracked property values before the update.
 			 *
 			 * @since 10.1.0
+			 * @since 10.7.0 Added $changed_props and $old_state parameters.
 			 */
-			do_action( 'woocommerce_fulfillment_after_update', $data );
+			do_action( 'woocommerce_fulfillment_after_update', $data, $changed_props, $old_state );
 		}
 
 		if ( $is_fulfill_action && ! doing_action( 'woocommerce_fulfillment_after_fulfill' ) ) {
@@ -273,6 +287,58 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 			 */
 			do_action( 'woocommerce_fulfillment_after_fulfill', $data );
 		}
+	}
+
+	/**
+	 * Snapshot tracked properties of a fulfillment from the database.
+	 *
+	 * @param int $fulfillment_id The fulfillment ID.
+	 * @return array The snapshot of tracked property values.
+	 */
+	private function snapshot_tracked_state( int $fulfillment_id ): array {
+		$old = new Fulfillment( (string) $fulfillment_id );
+
+		$state = array(
+			'status' => $old->get_status() ?? 'unfulfilled',
+			'items'  => $old->get_items(),
+		);
+
+		foreach ( self::TRACKED_META_KEYS as $key ) {
+			$value         = $old->get_meta( $key, true );
+			$state[ $key ] = is_string( $value ) ? $value : '';
+		}
+
+		return $state;
+	}
+
+	/**
+	 * Compute which tracked properties changed between the old state and the updated fulfillment.
+	 *
+	 * @param Fulfillment $fulfillment The updated fulfillment object.
+	 * @param array       $old_state   The previous state snapshot.
+	 * @return array List of changed property keys (e.g. 'status', 'items', '_tracking_number').
+	 */
+	private function compute_changed_props( Fulfillment $fulfillment, array $old_state ): array {
+		$changed = array();
+
+		$new_status = $fulfillment->get_status() ?? 'unfulfilled';
+		if ( $new_status !== $old_state['status'] ) {
+			$changed[] = 'status';
+		}
+
+		if ( $fulfillment->get_items() !== $old_state['items'] ) {
+			$changed[] = 'items';
+		}
+
+		foreach ( self::TRACKED_META_KEYS as $key ) {
+			$new_value = $fulfillment->get_meta( $key, true );
+			$new_value = is_string( $new_value ) ? $new_value : '';
+			if ( $new_value !== $old_state[ $key ] ) {
+				$changed[] = $key;
+			}
+		}
+
+		return $changed;
 	}
 
 	/**
