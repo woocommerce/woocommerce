@@ -279,10 +279,18 @@ class EmailApiController {
 	/**
 	 * Return the default (plugin-distributed) block content for a woo_email post.
 	 *
-	 * @param WP_REST_Request $request The REST request.
+	 * @param WP_REST_Request<array<string, mixed>> $request The REST request.
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_default_content_response( WP_REST_Request $request ) {
+		if ( ! $this->post_manager ) {
+			return new WP_Error(
+				'woocommerce_email_editor_not_initialized',
+				__( 'Email editor is not initialized.', 'woocommerce' ),
+				array( 'status' => 500 )
+			);
+		}
+
 		$post_id    = (int) $request->get_param( 'id' );
 		$email_type = $this->post_manager->get_email_type_from_post_id( $post_id );
 		$email      = $this->get_email_by_type( $email_type ?? '' );

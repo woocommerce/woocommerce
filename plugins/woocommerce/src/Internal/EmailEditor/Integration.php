@@ -394,7 +394,6 @@ class Integration {
 				'schema'          => $this->email_api_controller->get_email_data_schema(),
 			)
 		);
-
 	}
 
 	/**
