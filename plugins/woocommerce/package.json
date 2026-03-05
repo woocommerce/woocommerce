@@ -880,7 +880,11 @@
 					"testType": "e2e",
 					"command": "test:e2e:paypal-standard",
 					"shardingArguments": [],
-					"changes": [],
+					"changes": [
+						"includes/gateways/paypal/**/*.php",
+						"src/Gateways/PayPal/**/*.php",
+						"tests/e2e-pw/tests/paypal/**"
+					],
 					"events": [
 						"pull_request",
 						"push",

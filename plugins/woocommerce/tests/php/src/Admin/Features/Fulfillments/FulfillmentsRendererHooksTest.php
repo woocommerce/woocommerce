@@ -18,10 +18,18 @@ class FulfillmentsRendererHooksTest extends \WC_Unit_Test_Case {
 	private FulfillmentsRenderer $renderer;
 
 	/**
+	 * Original value of the fulfillments feature flag.
+	 *
+	 * @var mixed
+	 */
+	private static $original_fulfillments_flag;
+
+	/**
 	 * Set up the test environment.
 	 */
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
+		self::$original_fulfillments_flag = get_option( 'woocommerce_feature_fulfillments_enabled' );
 		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
 		$controller = wc_get_container()->get( \Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsController::class );
 		$controller->register();
@@ -32,7 +40,11 @@ class FulfillmentsRendererHooksTest extends \WC_Unit_Test_Case {
 	 * Tear down the test environment.
 	 */
 	public static function tearDownAfterClass(): void {
-		update_option( 'woocommerce_feature_fulfillments_enabled', 'no' );
+		if ( false === self::$original_fulfillments_flag ) {
+			delete_option( 'woocommerce_feature_fulfillments_enabled' );
+		} else {
+			update_option( 'woocommerce_feature_fulfillments_enabled', self::$original_fulfillments_flag );
+		}
 		parent::tearDownAfterClass();
 	}
 
