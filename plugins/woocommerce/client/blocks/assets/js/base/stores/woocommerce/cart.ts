@@ -165,37 +165,30 @@ const generateInfoNotice = ( message: string ): Notice => ( {
 
 const getInfoNoticesFromCartUpdates = (
 	oldCart: Store[ 'state' ][ 'cart' ],
-	newCart: Cart,
-	quantityChanges: QuantityChanges
+	newCart: Cart
 ): Notice[] => {
 	const oldItems = oldCart.items;
 	const newItems = newCart.items;
 
-	const {
-		productsPendingAdd: pendingAdd = [],
-		cartItemsPendingQuantity: pendingQuantity = [],
-		cartItemsPendingDelete: pendingDelete = [],
-	} = quantityChanges;
+	// Items auto-removed by the server (stock change, product deleted, etc.).
+	// We pass the optimistic snapshot as oldCart, so user-initiated removals
+	// are already absent and do not generate spurious notices here.
+	const autoDeletedToNotify = oldItems.filter(
+		( old ) =>
+			isCartItem( old ) &&
+			! newItems.some( ( item ) => old.key === item.key )
+	);
 
-	const autoDeletedToNotify = oldItems
-		.filter( isCartItem )
-		.filter(
-			( old ) =>
-				! newItems.some( ( item ) => old.key === item.key ) &&
-				! pendingDelete.includes( old.key )
-		);
-
+	// Items whose quantity was adjusted by the server (stock cap, sold-individually).
+	// Comparing optimistic → server means intentional user changes are already
+	// reflected in oldItems and will not trigger this notice.
 	const autoUpdatedToNotify = newItems.filter( ( item ) => {
 		if ( ! isCartItem( item ) ) {
 			return false;
 		}
 		const old = oldItems.find( ( o ) => o.key === item.key );
-		return old
-			? ! pendingQuantity.includes( item.key ) &&
-					item.quantity !== old.quantity
-			: ! pendingAdd.includes( item.id );
+		return old && item.quantity !== old.quantity;
 	} );
-
 	return [
 		...autoDeletedToNotify.map( ( item ) =>
 			// TODO: move the message template to iAPI config.
@@ -320,7 +313,7 @@ const { state, actions } = store< Store >(
 	{
 		actions: {
 			*removeCartItem( key: string ): AsyncAction< void > {
-				// Track what changes we're making for notice comparison.
+				// Track what changes we're making for the sync event.
 				const quantityChanges: QuantityChanges = {
 					cartItemsPendingDelete: [ key ],
 				};
@@ -357,8 +350,7 @@ const { state, actions } = store< Store >(
 					if ( cart && cartAfterOptimistic ) {
 						const infoNotices = getInfoNoticesFromCartUpdates(
 							cartAfterOptimistic,
-							cart,
-							quantityChanges
+							cart
 						);
 						const errorNotices =
 							cart.errors.map( generateErrorNotice );
@@ -505,8 +497,7 @@ const { state, actions } = store< Store >(
 					) {
 						const infoNotices = getInfoNoticesFromCartUpdates(
 							cartAfterOptimistic,
-							cart,
-							quantityChanges
+							cart
 						);
 						const errorNotices =
 							cart.errors.map( generateErrorNotice );
@@ -647,8 +638,7 @@ const { state, actions } = store< Store >(
 						if ( showCartUpdatesNotices ) {
 							const infoNotices = getInfoNoticesFromCartUpdates(
 								cartAfterOptimistic,
-								cart,
-								quantityChanges
+								cart
 							);
 							const errorNotices =
 								cart.errors.map( generateErrorNotice );
