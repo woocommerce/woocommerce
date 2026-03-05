@@ -460,7 +460,7 @@ class Request {
 	 * @param string   $action_url The action URL.
 	 * @param string   $action The action.
 	 * @return void
-	 * 
+	 *
 	 * @phpcs:ignore Squiz.Commenting.FunctionCommentThrowTag.Missing -- As we wrap the throw in a try/catch.
 	 */
 	private function handle_duplicate_invoice_id( WC_Order $order, string $paypal_order_id, string $action_url, string $action ): void {
