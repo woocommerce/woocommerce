@@ -79,8 +79,8 @@ class CartRemoveItem extends AbstractCartRoute {
 			/**
 			 * Fires when a cart item is removed from a user request.
 			 *
-			 * @param string|array $cart_item_key Cart item key.
-			 * @param \WC_Cart     $cart          Cart object.
+			 * @param string   $cart_item_key Cart item key.
+			 * @param \WC_Cart $cart          Cart object.
 			 *
 			 * @since 10.6.0
 			 */
