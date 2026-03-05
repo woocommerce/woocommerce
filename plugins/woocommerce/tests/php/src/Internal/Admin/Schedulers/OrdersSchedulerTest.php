@@ -346,7 +346,7 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$received_order = null;
+		$received_order  = null;
 		$filter_callback = function ( $is_test, $filter_order ) use ( &$received_order ) {
 			$received_order = $filter_order;
 			return $is_test;

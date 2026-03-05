@@ -506,7 +506,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			return -1;
 		}
 
-		/** @var false|Order|OrderRefund $order (Override classes registered via OrdersScheduler::init()) */
+		/** @var false|Order|OrderRefund $order Order instance (Override classes registered via OrdersScheduler::init()). */
 		$order = wc_get_order( $post_id );
 		if ( ! $order ) {
 			return -1;
