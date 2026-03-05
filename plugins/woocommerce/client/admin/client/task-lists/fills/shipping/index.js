@@ -445,6 +445,13 @@ export class Shipping extends Component {
 								} );
 							} }
 							onSkip={ () => {
+								recordEvent(
+									'tasklist_shipping_label_printing',
+									{
+										install: false,
+										plugins_to_activate: pluginsToActivate,
+									}
+								);
 								invalidateResolutionForStoreSelector();
 								getHistory().push( getNewPath( {}, '/', {} ) );
 								onComplete();
