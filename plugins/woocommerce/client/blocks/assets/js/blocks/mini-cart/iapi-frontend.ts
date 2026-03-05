@@ -444,17 +444,20 @@ const { state: cartItemState } = store(
 			// find the cart item. Where we need reactivity for the wp-each, use
 			// state.cartItem to get the cart item.
 			get cartItem() {
-				const { cartItem } =
-					getContext< CartItemContext >( 'woocommerce' );
+				const {
+					cartItem: { id, key, variation },
+				} = getContext< CartItemContext >( 'woocommerce' );
 
-				const currentCartItem = ( woocommerceState.itemInCart(
-					cartItem
-				) || {} ) as CartItem;
+				const cartItem = ( woocommerceState.itemInCart( {
+					id,
+					key,
+					variation,
+				} ) || {} ) as CartItem;
 
-				currentCartItem.variation = currentCartItem.variation || [];
-				currentCartItem.item_data = currentCartItem.item_data || [];
+				cartItem.variation = cartItem.variation || [];
+				cartItem.item_data = cartItem.item_data || [];
 
-				return currentCartItem;
+				return cartItem;
 			},
 
 			get currency(): Currency {

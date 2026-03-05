@@ -102,9 +102,11 @@ export type Store = {
 		};
 		restUrl: string;
 		nonce: string;
-		itemInCart: (
-			args: Pick< ClientCartItem, 'id' | 'key' | 'variation' >
-		) => CartItem | OptimisticCartItem | undefined;
+		itemInCart: ( args: {
+			id: ClientCartItem[ 'id' ];
+			key?: ClientCartItem[ 'key' ];
+			variation?: ClientCartItem[ 'variation' ];
+		} ) => CartItem | OptimisticCartItem | undefined;
 		cart: Omit< Cart, 'items' > & {
 			items: ( OptimisticCartItem | CartItem )[];
 			totals: CartResponseTotals;
@@ -293,7 +295,11 @@ const { state, actions } = store< Store >(
 				id,
 				key,
 				variation,
-			}: Pick< ClientCartItem, 'id' | 'key' | 'variation' > ) {
+			}: {
+				id: ClientCartItem[ 'id' ];
+				key?: ClientCartItem[ 'key' ];
+				variation?: ClientCartItem[ 'variation' ];
+			} ) {
 				return state.cart.items.find( ( cartItem ) => {
 					if ( cartItem.type === 'variation' ) {
 						if (
@@ -368,10 +374,9 @@ const { state, actions } = store< Store >(
 			},
 
 			*addCartItem(
-				item: ClientCartItem,
+				{ id, key, quantity, quantityToAdd, variation }: ClientCartItem,
 				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
 			): AsyncAction< void > {
-				const { id, quantity, quantityToAdd, variation } = item;
 				if ( quantity !== undefined && quantityToAdd !== undefined ) {
 					throw new Error(
 						'addCartItem: pass either quantity or quantityToAdd, not both.'
@@ -381,7 +386,7 @@ const { state, actions } = store< Store >(
 				const a11yModulePromise = import( '@wordpress/a11y' );
 
 				// Find existing item
-				const existingItem = state.itemInCart( item );
+				const existingItem = state.itemInCart( { id, key, variation } );
 
 				// Determine the target quantity.
 				// If quantityToAdd is provided, calculate target based on current
@@ -524,7 +529,11 @@ const { state, actions } = store< Store >(
 					// Submit each item through the batcher. They'll be
 					// collected into a single batch request automatically.
 					const promises = items.map( ( item, index ) => {
-						const existingItem = state.itemInCart( item );
+						const existingItem = state.itemInCart( {
+							id: item.id,
+							key: item.key,
+							variation: item.variation,
+						} );
 
 						let quantity: number;
 						if ( typeof item.quantityToAdd === 'number' ) {
