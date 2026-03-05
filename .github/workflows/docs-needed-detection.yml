@@ -1,4 +1,4 @@
-name: 'Docs update detection'
+name: 'User-Facing Documentation Check'
 
 on:
   pull_request_target:
@@ -10,13 +10,14 @@ concurrency:
 
 jobs:
   detect-docs-needed:
-    name: 'Evaluate Documentation Update Requirement'
+    name: 'Evaluate User-Facing Changes'
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
       contents: read
       pull-requests: write
+      id-token: write
 
     steps:
       - name: 'Analyze Pull Request'
