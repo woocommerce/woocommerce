@@ -19152,7 +19152,6 @@ parameters:
 			count: 1
 			path: includes/emails/class-wc-email-customer-pos-refunded-order.php
 
-
 		-
 			message: '#^Method WC_Email_Customer_Processing_Order\:\:trigger\(\) has no return type specified\.$#'
 			identifier: missingType.return
@@ -43739,6 +43738,12 @@ parameters:
 			path: src/Admin/API/Reports/Orders/Stats/DataStore.php
 
 		-
+			message: '#^Access to property \$intervals on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\WP_Error\.$#'
+			identifier: class.notFound
+			count: 3
+			path: src/Admin/API/Reports/Orders/Stats/DataStore.php
+
+		-
 			message: '#^Binary operation "\*" between \-1 and string results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
@@ -43769,7 +43774,7 @@ parameters:
 			path: src/Admin/API/Reports/Orders/Stats/DataStore.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\DataStore\:\:get_noncached_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\WP_Error but returns Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\WP_Error\|\(object\{totals\: null, intervals\: array, total\: int, pages\: int, page_no\: int\}&stdClass\)\.$#'
+			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\DataStore\:\:get_noncached_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\WP_Error but returns Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\WP_Error\|stdClass\.$#'
 			identifier: return.type
 			count: 1
 			path: src/Admin/API/Reports/Orders/Stats/DataStore.php
@@ -43781,15 +43786,15 @@ parameters:
 			path: src/Admin/API/Reports/Orders/Stats/DataStore.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\DataStore\:\:get_noncached_stats_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\WP_Error\|stdClass but returns WP_Error\.$#'
-			identifier: return.type
-			count: 2
-			path: src/Admin/API/Reports/Orders/Stats/DataStore.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\DataStore\:\:get_noncached_stats_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\WP_Error\|stdClass but returns Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\.$#'
 			identifier: return.type
 			count: 1
+			path: src/Admin/API/Reports/Orders/Stats/DataStore.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\DataStore\:\:get_noncached_stats_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\WP_Error\|stdClass but returns WP_Error\.$#'
+			identifier: return.type
+			count: 2
 			path: src/Admin/API/Reports/Orders/Stats/DataStore.php
 
 		-
