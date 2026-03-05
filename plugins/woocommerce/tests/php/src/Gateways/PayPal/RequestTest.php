@@ -523,6 +523,53 @@ class RequestTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that 404 from get order details sets authorization_checked flag and prevents repeated requests.
+	 *
+	 * @return void
+	 */
+	public function test_capture_authorized_payment_not_attempted_when_order_details_404(): void {
+		$order = \WC_Helper_Order::create_order();
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_ORDER_ID, 'PAYPAL_ORDER_123' );
+		$order->save();
+
+		$order_details_call_count = 0;
+		add_filter(
+			'pre_http_request',
+			function ( $value, $parsed_args, $url ) use ( &$order_details_call_count ) {
+				if (
+					isset( $parsed_args['method'] ) &&
+					'GET' === $parsed_args['method'] &&
+					strpos( $url, 'order/PAYPAL_ORDER_123' ) !== false
+				) {
+					++$order_details_call_count;
+					return array(
+						'response' => array( 'code' => 404 ),
+						'body'     => wp_json_encode( array( 'message' => 'Order not found' ) ),
+					);
+				}
+
+				return $value;
+			},
+			10,
+			3
+		);
+
+		$request = new PayPalRequest( new \WC_Gateway_Paypal() );
+		$request->capture_authorized_payment( $order );
+
+		// First call: one order details request, flag should be set.
+		$this->assertEquals( 1, $order_details_call_count, 'Expected one order details request on first capture attempt' );
+		$order = wc_get_order( $order->get_id() );
+		$this->assertSame( 'yes', $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_AUTHORIZATION_CHECKED, true ), 'Expected authorization_checked flag to be set after 404' );
+
+		// Second call: should not hit order details again because flag is set.
+		$request->capture_authorized_payment( $order );
+		$this->assertEquals( 1, $order_details_call_count, 'Expected no additional order details request after 404 (flag prevents retry)' );
+
+		remove_all_filters( 'pre_http_request' );
+	}
+
+	/**
 	 * Test capture is skipped when payment is already captured (via capture_id).
 	 *
 	 * @return void

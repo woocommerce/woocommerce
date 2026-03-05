@@ -541,7 +541,18 @@ class Request {
 			\WC_Gateway_Paypal::log( 'Authorization ID not found, trying to retrieve from PayPal order details as a fallback for backwards compatibility. Order ID: ' . $order->get_id() );
 
 			try {
-				$order_data         = $this->get_paypal_order_details( $paypal_order_id );
+				$order_data = $this->get_paypal_order_details( $paypal_order_id );
+			} catch ( Exception $e ) {
+				\WC_Gateway_Paypal::log( 'Error retrieving PayPal order details. Order ID: ' . $order->get_id() . '. Error: ' . $e->getMessage() );
+				// On 404 (order not found), set flag to prevent repeated API calls.
+				if ( false !== strpos( $e->getMessage(), 'HTTP 404' ) ) {
+					$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_AUTHORIZATION_CHECKED, 'yes' );
+					$order->save();
+				}
+				return null;
+			}
+
+			try {
 				$authorization_data = $this->get_latest_transaction_data(
 					$order_data['purchase_units'][0]['payments']['authorizations'] ?? array()
 				);
