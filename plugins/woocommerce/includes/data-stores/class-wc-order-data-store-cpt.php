@@ -1220,6 +1220,39 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		$this->prime_raw_meta_cache_for_orders( $order_ids, $query_vars );
 		$this->prime_refund_caches_for_order( $order_ids, $query_vars );
 		$this->prime_order_item_caches_for_orders( $order_ids, $query_vars );
+		$this->prime_needs_processing_transients( $order_ids );
+	}
+
+	/**
+	 * Prime the needs_processing transient cache for a batch of orders.
+	 *
+	 * WC_Order::needs_processing() calls get_transient() per order, which
+	 * triggers an individual wp_options query each time. By priming the
+	 * object cache for all transient option names in a single query, we
+	 * eliminate the N+1.
+	 *
+	 * @param array $order_ids  Order Ids to prime cache for.
+	 */
+	private function prime_needs_processing_transients( $order_ids ) {
+		$option_names = array();
+		foreach ( $order_ids as $order_id ) {
+			$option_names[] = '_transient_wc_order_' . $order_id . '_needs_processing';
+			$option_names[] = '_transient_timeout_wc_order_' . $order_id . '_needs_processing';
+		}
+
+		// Filter to only options not already in cache.
+		$options_to_prime = array();
+		foreach ( $option_names as $name ) {
+			if ( false === wp_cache_get( $name, 'options' ) ) {
+				$options_to_prime[] = $name;
+			}
+		}
+
+		if ( empty( $options_to_prime ) ) {
+			return;
+		}
+
+		wp_prime_option_caches( $options_to_prime );
 	}
 
 	/**
