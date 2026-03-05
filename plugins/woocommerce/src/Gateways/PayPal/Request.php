@@ -201,7 +201,6 @@ class Request {
 	 * @param string $paypal_order_id The ID of the PayPal order.
 	 * @return array
 	 * @throws PayPalStandardException If the PayPal order details request fails.
-	 * @throws PayPalStandardException If the PayPal order details are not found.
 	 */
 	public function get_paypal_order_details( string $paypal_order_id ): array {
 		$request_body = array(
@@ -511,7 +510,7 @@ class Request {
 		} catch ( PayPalStandardException $e ) {
 			\WC_Gateway_Paypal::log( $e->getMessage() );
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
-			throw new PayPalStandardException( $e->getMessage() );
+			throw $e;
 		}
 	}
 
