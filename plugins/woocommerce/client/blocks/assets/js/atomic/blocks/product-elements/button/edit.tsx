@@ -60,6 +60,7 @@ function WidthPanel( {
 				<ToggleGroupControl
 					__next40pxDefaultSize
 					__nextHasNoMarginBottom
+					hideLabelFromVision
 					label={ __( 'Button width', 'woocommerce' ) }
 					value={ selectedWidth }
 					isDeselectable
