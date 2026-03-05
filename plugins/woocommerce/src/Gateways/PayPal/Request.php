@@ -8,6 +8,7 @@ use Exception;
 use WC_Order;
 use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
 use Automattic\WooCommerce\Gateways\PayPal\AddressRequirements as PayPalAddressRequirements;
+use Automattic\WooCommerce\Gateways\PayPal\Helper as PayPalHelper;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\Jetpack\Connection\Client as Jetpack_Connection_Client;
 
@@ -771,6 +772,10 @@ class Request {
 		$shipping = $this->get_paypal_order_shipping( $order );
 		if ( $shipping ) {
 			$params['purchase_units'][0]['shipping'] = $shipping;
+		} elseif ( PayPalConstants::SHIPPING_SET_PROVIDED_ADDRESS === $shipping_preference ) {
+			// If the shipping preference is set to SET_PROVIDED_ADDRESS, but no shipping information is provided, PayPal create order request will fail.
+			// Throw an exception to prevent the request from being sent.
+			throw new Exception( 'Shipping address is required for PayPal create-order request. Order ID: ' . esc_html( (string) $order->get_id() ) );
 		}
 
 		return $params;
@@ -1037,7 +1042,7 @@ class Request {
 
 		// Check if it's a valid alpha-2 code.
 		if ( strlen( $code ) === PayPalConstants::PAYPAL_COUNTRY_CODE_LENGTH ) {
-			if ( WC()->countries->country_exists( $code ) ) {
+			if ( PayPalHelper::is_country_supported_by_paypal( $code ) ) {
 				return $code;
 			}
 
@@ -1057,7 +1062,12 @@ class Request {
 		// Check if it's a valid alpha-3 code.
 		$alpha2 = WC()->countries->get_country_from_alpha_3_code( $code );
 		if ( null === $alpha2 ) {
-			\WC_Gateway_Paypal::log( sprintf( 'Invalid alpha-3 country code: %s', $code ) );
+			\WC_Gateway_Paypal::log( sprintf( 'Invalid alpha-3 country code: %s', $code ), 'error' );
+			return null;
+		}
+		if ( ! PayPalHelper::is_country_supported_by_paypal( $alpha2 ) ) {
+			\WC_Gateway_Paypal::log( sprintf( 'Country not supported by PayPal: %s (resolved from alpha-3: %s)', $alpha2, $code ) );
+			return null;
 		}
 
 		return $alpha2;

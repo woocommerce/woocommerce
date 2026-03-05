@@ -24,19 +24,11 @@ use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 class FulfillmentOrderNotes {
 
 	/**
-	 * Stores the previous status of a fulfillment before update.
-	 *
-	 * @var array<int, string>
-	 */
-	private array $previous_statuses = array();
-
-	/**
 	 * Register hooks for fulfillment order notes.
 	 */
 	public function register(): void {
 		add_action( 'woocommerce_fulfillment_after_create', array( $this, 'add_fulfillment_created_note' ), 10, 1 );
-		add_filter( 'woocommerce_fulfillment_before_update', array( $this, 'capture_previous_status' ), 10, 1 );
-		add_action( 'woocommerce_fulfillment_after_update', array( $this, 'add_fulfillment_updated_note' ), 10, 1 );
+		add_action( 'woocommerce_fulfillment_after_update', array( $this, 'add_fulfillment_updated_note' ), 10, 3 );
 		add_action( 'woocommerce_fulfillment_after_delete', array( $this, 'add_fulfillment_deleted_note' ), 10, 1 );
 	}
 
@@ -94,48 +86,33 @@ class FulfillmentOrderNotes {
 	}
 
 	/**
-	 * Capture the previous status of a fulfillment before update.
-	 *
-	 * This is hooked into `woocommerce_fulfillment_before_update` to record
-	 * the old status so we can detect status changes in the after_update hook.
-	 *
-	 * @param Fulfillment $fulfillment The fulfillment object.
-	 * @return Fulfillment The unmodified fulfillment object.
-	 */
-	public function capture_previous_status( Fulfillment $fulfillment ): Fulfillment {
-		if ( $fulfillment->get_id() > 0 ) {
-			$old_fulfillment                                   = new Fulfillment( (string) $fulfillment->get_id() );
-			$this->previous_statuses[ $fulfillment->get_id() ] = $old_fulfillment->get_status() ?? 'unfulfilled';
-		}
-		return $fulfillment;
-	}
-
-	/**
 	 * Add an order note when a fulfillment is updated.
 	 *
-	 * If the status changed, a status change note is added.
-	 * Otherwise, a general update note is added.
+	 * Only adds a note when tracked properties change (status, items,
+	 * tracking number, tracking URL, shipping provider). If the status
+	 * changed, a dedicated status change note is added instead.
 	 *
-	 * @param Fulfillment $fulfillment The fulfillment object.
+	 * @param Fulfillment $fulfillment   The fulfillment object.
+	 * @param array       $changed_props List of tracked property keys that changed.
+	 * @param array       $old_state     Snapshot of tracked property values before the update.
 	 */
-	public function add_fulfillment_updated_note( Fulfillment $fulfillment ): void {
+	public function add_fulfillment_updated_note( Fulfillment $fulfillment, array $changed_props = array(), array $old_state = array() ): void {
+		if ( empty( $changed_props ) ) {
+			return;
+		}
+
 		$order = $fulfillment->get_order();
 		if ( ! $order instanceof \WC_Order ) {
 			return;
 		}
 
-		$fulfillment_id = $fulfillment->get_id();
-		$old_status     = $this->previous_statuses[ $fulfillment_id ] ?? null;
-		$new_status     = $fulfillment->get_status() ?? 'unfulfilled';
-
-		// If status changed, add a status change note.
-		if ( null !== $old_status && $old_status !== $new_status ) {
+		// If status changed, add a dedicated status change note.
+		if ( in_array( 'status', $changed_props, true ) ) {
+			$old_status = $old_state['status'] ?? 'unfulfilled';
+			$new_status = $fulfillment->get_status() ?? 'unfulfilled';
 			$this->add_fulfillment_status_changed_note( $fulfillment, $order, $old_status, $new_status );
-			unset( $this->previous_statuses[ $fulfillment_id ] );
 			return;
 		}
-
-		unset( $this->previous_statuses[ $fulfillment_id ] );
 
 		$items_text    = $this->format_items( $fulfillment, $order );
 		$tracking_text = $this->format_tracking( $fulfillment );

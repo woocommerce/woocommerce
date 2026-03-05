@@ -116,6 +116,41 @@ class RequestTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test create_paypal_order returns null when shipping preference is SET_PROVIDED_ADDRESS but order has no shipping address.
+	 * No create order request is sent to PayPal in this case.
+	 *
+	 * @return void
+	 */
+	public function test_create_paypal_order_returns_null_when_set_provided_address_but_shipping_country_is_unsupported(): void {
+		$order = \WC_Helper_Order::create_order();
+		$order->set_shipping_country( 'SX' );
+		$order->set_shipping_first_name( 'John' );
+		$order->set_shipping_last_name( 'Doe' );
+		$order->set_shipping_address_1( '123 Main St' );
+		$order->set_shipping_address_2( 'Apt 1' );
+		$order->set_shipping_city( 'Anytown' );
+		$order->set_shipping_state( 'Anystate' );
+		$order->set_shipping_postcode( '12345' );
+		$order->save();
+
+		$previous_settings            = get_option( 'woocommerce_paypal_settings', array() );
+		$settings                     = $previous_settings;
+		$settings['address_override'] = 'yes';
+		$settings['send_shipping']    = 'yes';
+		update_option( 'woocommerce_paypal_settings', $settings );
+
+		add_filter( 'pre_http_request', array( $this, 'create_paypal_order_success' ), 10, 3 );
+
+		$request = new PayPalRequest( new \WC_Gateway_Paypal() );
+		$result  = $request->create_paypal_order( $order );
+
+		remove_filter( 'pre_http_request', array( $this, 'create_paypal_order_success' ) );
+		update_option( 'woocommerce_paypal_settings', $previous_settings );
+
+		$this->assertNull( $result, 'create_paypal_order should return null when SET_PROVIDED_ADDRESS is set but the selected shipping country is unsupported' );
+	}
+
+	/**
 	 * Check that the create_paypal_order params are correct.
 	 *
 	 * @param bool   $value      Original value.
@@ -373,6 +408,51 @@ class RequestTest extends \WC_Unit_Test_Case {
 		$result = $method->invokeArgs( $request, array( $input ) );
 
 		$this->assertEquals( $expected, $result );
+	}
+
+	// ========================================================================
+	// Tests for normalize_paypal_order_shipping_country_code method
+	// ========================================================================
+
+	/**
+	 * Data provider for normalize_paypal_order_shipping_country_code.
+	 *
+	 * @return array<string, array{string, string|null}>
+	 */
+	public function provider_normalize_paypal_order_shipping_country_code(): array {
+		return array(
+			'alpha2_supported_uppercase'     => array( 'US', 'US' ),
+			'alpha2_supported_lowercase'     => array( 'us', 'US' ),
+			'alpha2_supported_with_space'    => array( ' GB ', 'GB' ),
+			'alpha2_not_supported_by_paypal' => array( 'SX', null ),
+			'alpha2_invalid'                 => array( 'XX', null ),
+			'alpha3_maps_to_supported'       => array( 'USA', 'US' ),
+			'alpha3_maps_to_unsupported'     => array( 'AFG', null ),
+			'alpha3_invalid'                 => array( 'XXX', null ),
+		);
+	}
+
+	/**
+	 * Test normalize_paypal_order_shipping_country_code with various country code scenarios.
+	 *
+	 * @dataProvider provider_normalize_paypal_order_shipping_country_code
+	 *
+	 * @param string      $input    Country code to normalize.
+	 * @param string|null $expected Expected normalized alpha-2 code or null.
+	 *
+	 * @return void
+	 */
+	public function test_normalize_paypal_order_shipping_country_code( string $input, ?string $expected ): void {
+		$gateway = new \WC_Gateway_Paypal();
+		$request = new PayPalRequest( $gateway );
+
+		$reflection = new \ReflectionClass( $request );
+		$method     = $reflection->getMethod( 'normalize_paypal_order_shipping_country_code' );
+		$method->setAccessible( true );
+
+		$result = $method->invokeArgs( $request, array( $input ) );
+
+		$this->assertSame( $expected, $result );
 	}
 
 	// ========================================================================
