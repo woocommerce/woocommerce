@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent repeated PayPal Standard order details API requests when the first request returns 404.

@@ -17,17 +17,33 @@ type NoticeWithId = Notice & {
 	id: string;
 };
 
-const getStoreNoticeContext = getContextFn< {
+const getStoreNoticeContext = (): {
 	notices: NoticeWithId[];
 	notice: NoticeWithId;
-} >;
+} | null => {
+	try {
+		return getContextFn< {
+			notices: NoticeWithId[];
+			notice: NoticeWithId;
+		} >();
+	} catch ( e ) {
+		return null;
+	}
+};
 
 // Todo: Go back to the Store Notices block context once more than one context
 // can be added to an element (https://github.com/WordPress/gutenberg/discussions/62720).
-const getProductCollectionContext = () =>
-	getContextFn< {
-		notices: NoticeWithId[];
-	} >( 'woocommerce/product-collection' );
+const getProductCollectionContext = (): {
+	notices: NoticeWithId[];
+} | null => {
+	try {
+		return getContextFn< {
+			notices: NoticeWithId[];
+		} >( 'woocommerce/product-collection' );
+	} catch ( e ) {
+		return null;
+	}
+};
 
 type StoreNoticesState = {
 	get role(): string;
@@ -94,8 +110,8 @@ const { state } = store< Store >(
 			},
 			get notices() {
 				const productCollectionContext = getProductCollectionContext();
-				if ( productCollectionContext ) {
-					return productCollectionContext?.notices ?? [];
+				if ( productCollectionContext?.notices ) {
+					return productCollectionContext.notices;
 				}
 
 				const context = getStoreNoticeContext();
@@ -137,9 +153,8 @@ const { state } = store< Store >(
 						? noticeId
 						: getStoreNoticeContext()?.notice?.id;
 
-				if ( ! resolvedId ) {
-					return;
-				}
+				// If noticeId is not found (e.g., context was null), do nothing.
+				if ( ! resolvedId ) return;
 
 				const index = notices.findIndex(
 					( { id } ) => id === resolvedId
@@ -163,7 +178,8 @@ const { state } = store< Store >(
 				const context = getStoreNoticeContext();
 				const { ref } = getElement();
 
-				if ( ref && context?.notice?.notice ) {
+				if ( ref && context?.notice ) {
+					// Note: Notice content is sanitized server-side via wp_kses.
 					ref.innerHTML = context.notice.notice;
 				}
 			},
@@ -177,8 +193,11 @@ const { state } = store< Store >(
 			},
 
 			injectIcon: () => {
+				const context = getStoreNoticeContext();
 				const { ref } = getElement();
-				if ( ! ref ) {
+
+				// Guard against missing context or notice to prevent wrong icon injection.
+				if ( ! ref || ! context?.notice ) {
 					return;
 				}
 

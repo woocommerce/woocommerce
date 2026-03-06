@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Blocks: pin the number of SQL queries required to retrieve block templates from the database (2 per template type).
