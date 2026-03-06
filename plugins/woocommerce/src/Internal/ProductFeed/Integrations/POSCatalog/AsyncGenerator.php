@@ -207,7 +207,7 @@ class AsyncGenerator {
 					$feed->get_file_path(),
 				),
 				'woo-product-feed',
-				true
+				false
 			);
 		} catch ( \Throwable $e ) {
 			wc_get_logger()->error(

@@ -4,7 +4,7 @@ This directory holds Composer packages containing functionality developed outsid
 
 ## Installing Composer
 
-You need Composer to use the packages. If you don't have it installed, go and check how to [install Composer](https://github.com/woocommerce/woocommerce/wiki/How-to-set-up-WooCommerce-development-environment) and then continue here.
+You need Composer to use the packages. If you don't have it installed, go and check how to [install Composer](https://developer.woocommerce.com/docs/contribution/contributing/#setting-up-your-development-environment) and then continue here.
 
 ## Developing new packages
 

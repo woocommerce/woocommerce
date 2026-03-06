@@ -586,22 +586,10 @@ class FeaturesController {
 					'[Performance] Speeds up your store by caching product objects during each request, preventing duplicate product loads. Can improve page load times on product-heavy pages.',
 					'woocommerce'
 				),
-				'default_plugin_compatibility' => FeaturePluginCompatibility::INCOMPATIBLE,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'enabled_by_default'           => false,
 				'is_experimental'              => true,
 				'disable_ui'                   => false,
-			),
-			'fraud_protection'                   => array(
-				'name'                         => __( 'Fraud protection', 'woocommerce' ),
-				'description'                  => __(
-					'Enable fraud protection features for your store.',
-					'woocommerce'
-				),
-				'enabled_by_default'           => false,
-				'disable_ui'                   => true,
-				'is_experimental'              => true,
-				'skip_compatibility_checks'    => true,
-				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
 		);
 

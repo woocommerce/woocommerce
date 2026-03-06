@@ -130,7 +130,7 @@ jobs:
                   ## Testing Guidelines
                   Hi ${{ env.REVIEWERS }} ${{ env.TEAMS }},
 
-                  Apart from reviewing the code changes, please make sure to **review the testing instructions** ([Guide](https://github.com/woocommerce/woocommerce/wiki/Writing-high-quality-testing-instructions)) and verify that relevant tests (E2E, Unit, Integration, etc.) have been added or updated as needed.
+                  Apart from reviewing the code changes, please make sure to **review the testing instructions** ([Guide](https://developer.woocommerce.com/docs/contribution/testing/writing-high-quality-testing-instructions)) and verify that relevant tests (E2E, Unit, Integration, etc.) have been added or updated as needed.
 
                   **Reminder:** PR reviewers are required to document testing performed. This includes:
                   - 🖼️ **Screenshots or screen recordings**.

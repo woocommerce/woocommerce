@@ -285,7 +285,41 @@ export const useProductCollectionUIState = ( {
 		}
 
 		/**
-		 * Case 4: Preview mode - based on `usesReference` value
+		 * Case 4: Taxonomy picker for BY_CATEGORY, BY_TAG, BY_BRAND collections
+		 * Show the picker when no taxonomy terms are selected.
+		 */
+		const isTaxonomyCollection =
+			attributes.collection === CoreCollectionNames.BY_CATEGORY ||
+			attributes.collection === CoreCollectionNames.BY_TAG ||
+			attributes.collection === CoreCollectionNames.BY_BRAND;
+
+		if ( isCollectionSelected && isTaxonomyCollection ) {
+			let taxonomySlug: string;
+			switch ( attributes.collection ) {
+				case CoreCollectionNames.BY_CATEGORY:
+					taxonomySlug = 'product_cat';
+					break;
+				case CoreCollectionNames.BY_TAG:
+					taxonomySlug = 'product_tag';
+					break;
+				case CoreCollectionNames.BY_BRAND:
+					taxonomySlug = 'product_brand';
+					break;
+				default:
+					taxonomySlug = '';
+			}
+
+			const selectedTermIds =
+				attributes.query?.taxQuery?.[ taxonomySlug ] || [];
+			const hasSelectedTerms = selectedTermIds.length > 0;
+
+			if ( ! hasSelectedTerms ) {
+				return ProductCollectionUIStatesInEditor.TAXONOMY_PICKER;
+			}
+		}
+
+		/**
+		 * Case 5: Preview mode - based on `usesReference` value
 		 */
 		if ( isInRequiredLocation ) {
 			/**
@@ -331,6 +365,7 @@ export const useProductCollectionUIState = ( {
 		hasInnerBlocks,
 		attributes.query?.productReference,
 		attributes.query?.woocommerceHandPickedProducts,
+		attributes.query?.taxQuery,
 	] );
 
 	return { productCollectionUIStateInEditor, isLoading: ! hasResolved };
