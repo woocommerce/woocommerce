@@ -267,8 +267,8 @@ class WC_Tests_Session_Handler extends WC_Unit_Test_Case {
 		$wpdb->insert(
 			$wpdb->prefix . 'woocommerce_sessions',
 			array(
-				'session_key'   => $guest_session_id,
-				'session_value' => maybe_serialize( $guest_session_data ),
+				'session_key'    => $guest_session_id,
+				'session_value'  => maybe_serialize( $guest_session_data ),
 				'session_expiry' => $session_expiration,
 			),
 			array( '%s', '%s', '%d' )
