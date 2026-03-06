@@ -1233,6 +1233,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * eliminate the N+1.
 	 *
 	 * @param array $order_ids  Order Ids to prime cache for.
+	 * @return void
 	 */
 	private function prime_needs_processing_transients( $order_ids ) {
 		$option_names = array();
