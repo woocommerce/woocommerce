@@ -54,5 +54,5 @@
 		{ "path": "./packages/js/number" },
 		{ "path": "./packages/js/onboarding" },
 		{ "path": "./packages/js/tracks" }
-	]
+		]
 }
