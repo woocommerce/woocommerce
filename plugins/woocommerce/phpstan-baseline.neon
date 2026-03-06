@@ -17773,12 +17773,6 @@ parameters:
 			path: includes/data-stores/class-wc-order-data-store-cpt.php
 
 		-
-			message: '#^Method WC_Order_Data_Store_CPT\:\:prime_refund_caches_for_order\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/data-stores/class-wc-order-data-store-cpt.php
-
-		-
 			message: '#^Method WC_Order_Data_Store_CPT\:\:read_cogs_data\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1

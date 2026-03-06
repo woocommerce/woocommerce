@@ -3188,7 +3188,7 @@ FROM $order_meta_table
 			$orders = $query->orders;
 		} else {
 			$orders = WC()->order_factory->get_orders( $query->orders );
-			$this->prime_order_item_caches_for_orders( $query->orders, $query_vars );
+			$this->prime_caches_for_orders( $query->orders, $query_vars );
 		}
 
 		if ( isset( $query_vars['paginate'] ) && $query_vars['paginate'] ) {
@@ -3203,6 +3203,20 @@ FROM $order_meta_table
 	}
 
 	//phpcs:enable Squiz.Commenting, Generic.Commenting
+
+	/**
+	 * Prime caches for a collection of orders. Reduces N+1 queries when iterating over order results.
+	 *
+	 * @param array $order_ids  List of order IDs to prime caches for.
+	 * @param array $query_vars Original query arguments.
+	 * @return void
+	 * @since 10.7.0
+	 */
+	public function prime_caches_for_orders( array $order_ids, array $query_vars ): void {
+		$this->prime_order_item_caches_for_orders( $order_ids, $query_vars );
+		$this->prime_refund_caches_for_orders( $order_ids, $query_vars );
+		$this->prime_needs_processing_transients( $order_ids, $query_vars );
+	}
 
 	/**
 	 * Get the SQL needed to create all the tables needed for the custom orders table feature.
