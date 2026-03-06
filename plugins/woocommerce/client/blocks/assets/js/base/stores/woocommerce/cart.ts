@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { getConfig, store } from '@wordpress/interactivity';
+import type { AsyncAction, TypeYield } from '@wordpress/interactivity';
 import type {
 	Cart,
 	CartItem,
@@ -35,6 +36,7 @@ export type WooCommerceConfig = {
 	};
 	placeholderImgSrc?: string;
 	currency?: Currency;
+	nonOptimisticProperties?: string[];
 };
 
 export type SelectedAttributes = Omit< CartVariationItem, 'raw_attribute' >;
@@ -92,6 +94,8 @@ export type ProductData = {
 
 type CartUpdateOptions = { showCartUpdatesNotices?: boolean };
 
+type CartRequestResult = MutationResult< Cart > & { notices: Notice[] };
+
 export type Store = {
 	state: {
 		errorMessages?: {
@@ -105,20 +109,23 @@ export type Store = {
 		};
 	};
 	actions: {
-		removeCartItem: ( key: string ) => void;
+		removeCartItem: ( key: string ) => Promise< void >;
 		addCartItem: (
 			args: ClientCartItem,
 			options?: CartUpdateOptions
-		) => void;
+		) => Promise< void >;
 		batchAddCartItems: (
 			items: ClientCartItem[],
 			options?: CartUpdateOptions
-		) => void;
+		) => Promise< void >;
 		// Todo: Check why if I switch to an async function here the types of the store stop working.
-		refreshCartItems: () => void;
-		waitForIdle: () => void;
-		showNoticeError: ( error: Error | ApiErrorResponse ) => void;
-		updateNotices: ( notices: Notice[], removeOthers?: boolean ) => void;
+		refreshCartItems: () => Promise< void >;
+		waitForIdle: () => Promise< void >;
+		showNoticeError: ( error: Error | ApiErrorResponse ) => Promise< void >;
+		updateNotices: (
+			notices: Notice[],
+			removeOthers?: boolean
+		) => Promise< void >;
 	};
 };
 
@@ -160,36 +167,30 @@ const generateInfoNotice = ( message: string ): Notice => ( {
 
 const getInfoNoticesFromCartUpdates = (
 	oldCart: Store[ 'state' ][ 'cart' ],
-	newCart: Cart,
-	quantityChanges: QuantityChanges
+	newCart: Cart
 ): Notice[] => {
 	const oldItems = oldCart.items;
 	const newItems = newCart.items;
 
-	const {
-		productsPendingAdd: pendingAdd = [],
-		cartItemsPendingQuantity: pendingQuantity = [],
-		cartItemsPendingDelete: pendingDelete = [],
-	} = quantityChanges;
-    //
-    const autoDeletedToNotify = oldItems.filter(
-        ( old ) =>
-            old.key &&
-            isCartItem( old ) &&
-            ! newItems.some( ( item ) => old.key === item.key )
-    );
-    //
-    const autoUpdatedToNotify = newItems.filter( ( item ) => {
-        if ( ! isCartItem( item ) ) {
-            return false;
-        }
-        const old = oldItems.find( ( o ) => o.key === item.key );
-        return old
-            ? ! pendingQuantity.includes( item.key ) &&
-                    item.quantity !== old.quantity &&
-                    old.quantity > 0
-            : false;
-    } );
+	// Items auto-removed by the server (stock change, product deleted, etc.).
+	// We pass the optimistic snapshot as oldCart, so user-initiated removals
+	// are already absent and do not generate spurious notices here.
+	const autoDeletedToNotify = oldItems.filter(
+		( old ) =>
+			isCartItem( old ) &&
+			! newItems.some( ( item ) => old.key === item.key )
+	);
+
+	// Items whose quantity was adjusted by the server (stock cap, sold-individually).
+	// Comparing optimistic → server means intentional user changes are already
+	// reflected in oldItems and will not trigger this notice.
+	const autoUpdatedToNotify = newItems.filter( ( item ) => {
+		if ( ! isCartItem( item ) ) {
+			return false;
+		}
+		const old = oldItems.find( ( o ) => o.key === item.key );
+		return old && item.quantity !== old.quantity;
+	} );
 	return [
 		...autoDeletedToNotify.map( ( item ) =>
 			// TODO: move the message template to iAPI config.
@@ -236,8 +237,7 @@ const doesCartItemMatchAttributes = (
 			selectedAttributes.some( ( item: SelectedAttributes ) => {
 				return (
 					item.attribute === raw_attribute &&
-					( item.value.toLowerCase() === value.toLowerCase() ||
-						( item.value && value === '' ) ) // Handle "any" attribute type
+					item.value.toLowerCase() === value?.toLowerCase()
 				);
 			} )
 	);
@@ -245,6 +245,10 @@ const doesCartItemMatchAttributes = (
 
 let pendingRefresh = false;
 let refreshTimeout = 3000;
+let resolveNonceReady: ( () => void ) | null = null;
+const isNonceReady = new Promise< void >( ( resolve ) => {
+	resolveNonceReady = resolve;
+} );
 
 function emitSyncEvent( {
 	quantityChanges,
@@ -268,16 +272,18 @@ function emitSyncEvent( {
  * Queues cart requests and handles optimistic updates and reconciliation.
  */
 let cartQueue: MutationQueue< Cart > | null = null;
+let cycleNotices: Notice[] | null = null;
 
 /**
  * Send a cart request through the queue.
  *
  * Handles optimistic updates, request queuing, and state reconciliation.
  */
-function sendCartRequest(
+async function sendCartRequest(
 	stateRef: Store[ 'state' ],
 	options: MutationRequest< Cart >
-): Promise< MutationResult< Cart > > {
+): Promise< CartRequestResult > {
+	await isNonceReady;
 	// Lazily initialize queue on first use.
 	if ( ! cartQueue ) {
 		cartQueue = createMutationQueue< Cart >( {
@@ -289,13 +295,26 @@ function sendCartRequest(
 			rollback: ( snapshot ) => {
 				stateRef.cart = snapshot;
 			},
-			commit: ( serverState ) => {
+			commit: ( serverState, _snapshot ) => {
+				cycleNotices = [
+					...getInfoNoticesFromCartUpdates( stateRef.cart, serverState ),
+					...serverState.errors.map( generateErrorNotice ),
+				];
 				stateRef.cart = serverState;
+			},
+			fetchHandler: async ( ...args ) => {
+				const response = await fetch( ...args );
+				stateRef.nonce =
+					response.headers.get( 'Nonce' ) || stateRef.nonce;
+				return response;
 			},
 		} );
 	}
 
-	return cartQueue.submit( options );
+	const result = await cartQueue.submit( options );
+	const notices = cycleNotices ?? [];
+	cycleNotices = null;
+	return { ...result, notices };
 }
 
 // Todo: export this store once the store is public.
@@ -303,27 +322,20 @@ const { state, actions } = store< Store >(
 	'woocommerce',
 	{
 		actions: {
-			*removeCartItem( key: string ) {
-				// Track what changes we're making for notice comparison.
+			*removeCartItem( key: string ): AsyncAction< void > {
+				// Track what changes we're making for the sync event.
 				const quantityChanges: QuantityChanges = {
 					cartItemsPendingDelete: [ key ],
 				};
 
-				// Capture cart state after optimistic updates for notice comparison.
-				let cartAfterOptimistic: typeof state.cart | null = null;
-
 				try {
-					const result = yield sendCartRequest( state, {
+					const result = ( yield sendCartRequest( state, {
 						path: '/wc/store/v1/cart/remove-item',
 						method: 'POST',
 						body: { key },
 						applyOptimistic: () => {
 							state.cart.items = state.cart.items.filter(
 								( item ) => item.key !== key
-							);
-							// Capture state after optimistic update.
-							cartAfterOptimistic = JSON.parse(
-								JSON.stringify( state.cart )
 							);
 						},
 						// Side effects run synchronously during reconciliation,
@@ -334,22 +346,10 @@ const { state, actions } = store< Store >(
 								emitSyncEvent( { quantityChanges } );
 							}
 						},
-					} );
+					} ) ) as TypeYield< typeof sendCartRequest >;
 
-					// Show notices from server response.
-					const cart = result.data as Cart;
-					if ( cart && cartAfterOptimistic ) {
-						const infoNotices = getInfoNoticesFromCartUpdates(
-							cartAfterOptimistic,
-							cart,
-							quantityChanges
-						);
-						const errorNotices =
-							cart.errors.map( generateErrorNotice );
-						yield actions.updateNotices(
-							[ ...infoNotices, ...errorNotices ],
-							true
-						);
+					if ( result.notices.length > 0 ) {
+						yield actions.updateNotices( result.notices, true );
 					}
 				} catch ( error ) {
 					actions.showNoticeError( error as Error );
@@ -359,7 +359,7 @@ const { state, actions } = store< Store >(
 			*addCartItem(
 				{ id, key, quantity, quantityToAdd, variation }: ClientCartItem,
 				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
-			) {
+			): AsyncAction< void > {
 				if ( quantity !== undefined && quantityToAdd !== undefined ) {
 					throw new Error(
 						'addCartItem: pass either quantity or quantityToAdd, not both.'
@@ -436,11 +436,8 @@ const { state, actions } = store< Store >(
 					} as OptimisticCartItem;
 				}
 
-				// Capture cart state after optimistic updates for notice comparison.
-				let cartAfterOptimistic: typeof state.cart | null = null;
-
 				try {
-					const result = yield sendCartRequest( state, {
+					const result = ( yield sendCartRequest( state, {
 						path: `/wc/store/v1/cart/${ endpoint }`,
 						method: 'POST',
 						body: itemToSend,
@@ -457,10 +454,6 @@ const { state, actions } = store< Store >(
 								// No existing item: push new optimistic item.
 								state.cart.items.push( itemToSend );
 							}
-							// Capture state after optimistic update.
-							cartAfterOptimistic = JSON.parse(
-								JSON.stringify( state.cart )
-							);
 						},
 						// Side effects run synchronously during reconciliation,
 						// before isProcessing clears. This prevents
@@ -476,28 +469,10 @@ const { state, actions } = store< Store >(
 								emitSyncEvent( { quantityChanges } );
 							}
 						},
-					} );
+					} ) ) as TypeYield< typeof sendCartRequest >;
 
-					// Success - handle side effects that don't trigger refreshCartItems
-					const cart = result.data as Cart;
-
-					// Show notices if enabled
-					if (
-						showCartUpdatesNotices &&
-						cart &&
-						cartAfterOptimistic
-					) {
-						const infoNotices = getInfoNoticesFromCartUpdates(
-							cartAfterOptimistic,
-							cart,
-							quantityChanges
-						);
-						const errorNotices =
-							cart.errors.map( generateErrorNotice );
-						yield actions.updateNotices(
-							[ ...infoNotices, ...errorNotices ],
-							true
-						);
+					if ( showCartUpdatesNotices && result.notices.length > 0 ) {
+						yield actions.updateNotices( result.notices, true );
 					}
 
 					// Announce to screen readers
@@ -505,7 +480,10 @@ const { state, actions } = store< Store >(
 						'woocommerce'
 					) as WooCommerceConfig;
 					if ( messages?.addedToCartText ) {
-						const { speak } = yield a11yModulePromise;
+						const { speak } =
+							( yield a11yModulePromise ) as Awaited<
+								typeof a11yModulePromise
+							>;
 						speak( messages.addedToCartText, 'polite' );
 					}
 				} catch ( error ) {
@@ -517,7 +495,7 @@ const { state, actions } = store< Store >(
 			*batchAddCartItems(
 				items: ClientCartItem[],
 				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
-			) {
+			): AsyncAction< void > {
 				const a11yModulePromise = import( '@wordpress/a11y' );
 				const quantityChanges: QuantityChanges = {};
 
@@ -587,54 +565,40 @@ const { state, actions } = store< Store >(
 							// succeeded (data is set from the last
 							// successful server state). Only the last
 							// item's callback fires to avoid duplicates.
-							onSettled: isLastItem
-								? ( { data } ) => {
-										if ( data ) {
-											triggerAddedToCartEvent( {
-												preserveCartData: true,
-											} );
-											emitSyncEvent( {
-												quantityChanges,
-											} );
-										}
-								  }
-								: undefined,
+							...( isLastItem && {
+								onSettled: ( { data } ) => {
+									if ( data ) {
+										triggerAddedToCartEvent( {
+											preserveCartData: true,
+										} );
+										emitSyncEvent( {
+											quantityChanges,
+										} );
+									}
+								},
+							} ),
 						} );
 					} );
 
-					// Capture cart state after optimistic updates for notices.
-					const cartAfterOptimistic = JSON.parse(
-						JSON.stringify( state.cart )
+					const results = ( yield Promise.allSettled(
+						promises
+					) ) as PromiseSettledResult< CartRequestResult >[];
+
+					// The first fulfilled result owns cycleNotices (consumed once by sendCartRequest).
+					const firstSuccess = results.find(
+						(
+							r
+						): r is PromiseFulfilledResult< CartRequestResult > =>
+							r.status === 'fulfilled' && r.value.success
 					);
 
-					const results: PromiseSettledResult<
-						MutationResult< Cart >
-					>[] = yield Promise.allSettled( promises );
-
-					// Find the last successful result for notices/a11y.
-					const lastSuccess = [ ...results ]
-						.reverse()
-						.find(
-							(
-								r
-							): r is PromiseFulfilledResult<
-								MutationResult< Cart >
-							> => r.status === 'fulfilled' && r.value.success
-						);
-
-					if ( lastSuccess ) {
-						const cart = lastSuccess.value.data as Cart;
-
-						if ( showCartUpdatesNotices ) {
-							const infoNotices = getInfoNoticesFromCartUpdates(
-								cartAfterOptimistic,
-								cart,
-								quantityChanges
-							);
-							const errorNotices =
-								cart.errors.map( generateErrorNotice );
+					if ( firstSuccess ) {
+						if (
+							showCartUpdatesNotices &&
+							firstSuccess.value.notices.length > 0
+						) {
 							yield actions.updateNotices(
-								[ ...infoNotices, ...errorNotices ],
+								firstSuccess.value.notices,
 								true
 							);
 						}
@@ -643,7 +607,10 @@ const { state, actions } = store< Store >(
 							'woocommerce'
 						) as WooCommerceConfig;
 						if ( messages?.addedToCartText ) {
-							const { speak } = yield a11yModulePromise;
+							const { speak } =
+								( yield a11yModulePromise ) as Awaited<
+									typeof a11yModulePromise
+								>;
 							speak( messages.addedToCartText, 'polite' );
 						}
 					}
@@ -665,7 +632,7 @@ const { state, actions } = store< Store >(
 				}
 			},
 
-			*refreshCartItems() {
+			*refreshCartItems(): AsyncAction< void > {
 				// Skip if queue is processing - it will apply server state when done
 				if ( cartQueue?.getStatus().isProcessing ) {
 					return;
@@ -677,15 +644,24 @@ const { state, actions } = store< Store >(
 				pendingRefresh = true;
 
 				try {
-					const res: Response = yield fetch(
+					const res = ( yield fetch(
 						`${ state.restUrl }wc/store/v1/cart`,
 						{
 							method: 'GET',
 							cache: 'no-store',
 							headers: { 'Content-Type': 'application/json' },
 						}
-					);
-					const json: Cart = yield res.json();
+					) ) as TypeYield< typeof fetch >;
+
+					// Extract fresh nonce from response headers.
+					state.nonce = res.headers.get( 'Nonce' ) || state.nonce;
+
+					if ( resolveNonceReady ) {
+						resolveNonceReady();
+						resolveNonceReady = null;
+					}
+
+					const json = ( yield res.json() ) as Cart;
 
 					// Checks if the response contains an error.
 					if ( isApiErrorResponse( res, json ) )
@@ -713,13 +689,15 @@ const { state, actions } = store< Store >(
 				}
 			},
 
-			*waitForIdle() {
+			*waitForIdle(): AsyncAction< void > {
 				if ( cartQueue ) {
 					yield cartQueue.waitForIdle();
 				}
 			},
 
-			*showNoticeError( error: Error | ApiErrorResponse ) {
+			*showNoticeError(
+				error: Error | ApiErrorResponse
+			): AsyncAction< void > {
 				// Todo: Use the module exports instead of `store()` once the store-notices
 				// store is public.
 				yield import( '@woocommerce/stores/store-notices' );
@@ -748,7 +726,10 @@ const { state, actions } = store< Store >(
 				console.error( error );
 			},
 
-			*updateNotices( newNotices: Notice[] = [], removeOthers = false ) {
+			*updateNotices(
+				newNotices: Notice[] = [],
+				removeOthers = false
+			): AsyncAction< void > {
 				// Todo: Use the module exports instead of `store()` once the store-notices
 				// store is public.
 				yield import( '@woocommerce/stores/store-notices' );
@@ -778,6 +759,9 @@ const { state, actions } = store< Store >(
 	},
 	{ lock: true }
 );
+
+// Trigger initial cart refresh.
+actions.refreshCartItems();
 
 window.addEventListener(
 	'wc-blocks_store_sync_required',
