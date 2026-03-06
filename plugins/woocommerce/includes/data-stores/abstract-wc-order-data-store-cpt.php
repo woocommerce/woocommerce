@@ -676,7 +676,9 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 * @since 10.7.0
 	 */
 	protected function prime_refund_caches_for_orders( $order_ids, $query_vars ) {
-		if ( ! isset( $query_vars['type'] ) || 'shop_order' !== $query_vars['type'] ) {
+		$order_type = $query_vars['type'] ?? $query_vars['post_type'] ?? '';
+		$order_type = is_array( $order_type ) ? $order_type : array( $order_type );
+		if ( ! in_array( 'shop_order', $order_type, true ) ) {
 			return;
 		}
 		if ( isset( $query_vars['fields'] ) && 'all' !== $query_vars['fields'] ) {
@@ -741,7 +743,9 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 * @since 10.7.0
 	 */
 	protected function prime_needs_processing_transients( $order_ids, $query_vars ) {
-		if ( isset( $query_vars['type'] ) && 'shop_order' !== $query_vars['type'] ) {
+		$order_type = $query_vars['type'] ?? $query_vars['post_type'] ?? 'shop_order';
+		$order_type = is_array( $order_type ) ? $order_type : array( $order_type );
+		if ( ! in_array( 'shop_order', $order_type, true ) ) {
 			return;
 		}
 
