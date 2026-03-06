@@ -95,7 +95,7 @@ class WC_Brands_Admin {
 		add_action( 'current_screen', array( $this, 'add_brand_base_setting' ) );
 
 		// CSV Import/Export Support.
-		// https://github.com/woocommerce/woocommerce/wiki/Product-CSV-Importer-&-Exporter
+		// https://woocommerce.com/document/product-csv-importer-exporter/
 		// Import.
 		add_filter( 'woocommerce_csv_product_import_mapping_options', array( $this, 'add_column_to_importer_exporter' ), 10 );
 		add_filter( 'woocommerce_csv_product_import_mapping_default_columns', array( $this, 'add_default_column_mapping' ), 10 );

@@ -1,4 +1,8 @@
-export interface ProductCategoryResponseImageItem {
+/**
+ * Generic taxonomy term image response from the Store API.
+ * Used for categories, brands, and other hierarchical taxonomies.
+ */
+export interface TaxonomyResponseImageItem {
 	id: number;
 	src: string;
 	thumbnail: string;
@@ -8,14 +12,24 @@ export interface ProductCategoryResponseImageItem {
 	alt: string;
 }
 
-export interface ProductCategoryResponseItem {
+/**
+ * Generic taxonomy term response from the Store API.
+ * Used for categories, brands, and other hierarchical taxonomies.
+ */
+export interface TaxonomyResponseItem {
 	id: number;
 	name: string;
 	slug: string;
 	description: string;
 	parent: number;
 	count: number;
-	image: ProductCategoryResponseImageItem | null;
+	image: TaxonomyResponseImageItem | null;
 	review_count: number;
 	permalink: string;
 }
+
+// Aliases for backward compatibility and semantic clarity
+export type ProductCategoryResponseImageItem = TaxonomyResponseImageItem;
+export type ProductCategoryResponseItem = TaxonomyResponseItem;
+export type ProductBrandResponseImageItem = TaxonomyResponseImageItem;
+export type ProductBrandResponseItem = TaxonomyResponseItem;

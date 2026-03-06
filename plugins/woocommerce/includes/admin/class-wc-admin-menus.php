@@ -80,6 +80,8 @@ class WC_Admin_Menus {
 
 	/**
 	 * Add menu items.
+	 *
+	 * @return void
 	 */
 	public function admin_menu() {
 		global $menu, $admin_page_hooks;
@@ -101,6 +103,8 @@ class WC_Admin_Menus {
 
 	/**
 	 * Add menu item.
+	 *
+	 * @return void
 	 */
 	public function reports_menu() {
 		if ( self::can_view_woocommerce_menu_item() ) {
@@ -112,6 +116,8 @@ class WC_Admin_Menus {
 
 	/**
 	 * Add menu item.
+	 *
+	 * @return void
 	 */
 	public function settings_menu() {
 		$settings_page = add_submenu_page(
@@ -128,6 +134,8 @@ class WC_Admin_Menus {
 
 	/**
 	 * Check if the user can access the top-level WooCommerce item.
+	 *
+	 * @return bool
 	 */
 	public static function can_view_woocommerce_menu_item() {
 		return current_user_can( 'edit_others_shop_orders' );
@@ -135,6 +143,8 @@ class WC_Admin_Menus {
 
 	/**
 	 * Loads gateways and shipping methods into memory for use within settings.
+	 *
+	 * @return void
 	 */
 	public function settings_page_init() {
 		WC()->payment_gateways();
@@ -185,6 +195,8 @@ class WC_Admin_Menus {
 
 	/**
 	 * Add menu item.
+	 *
+	 * @return void
 	 */
 	public function status_menu() {
 		$status_page = add_submenu_page( 'woocommerce', __( 'WooCommerce status', 'woocommerce' ), __( 'Status', 'woocommerce' ), 'manage_woocommerce', 'wc-status', array( $this, 'status_page' ) );
@@ -205,6 +217,8 @@ class WC_Admin_Menus {
 	 * Addons menu item.
 	 *
 	 * @deprecated 10.5.0 The marketplace feature is now always enabled. Use the Extensions menu instead.
+	 *
+	 * @return void
 	 */
 	public function addons_menu() {
 		wc_deprecated_function( __METHOD__, '10.5.0' );
@@ -229,6 +243,8 @@ class WC_Admin_Menus {
 
 	/**
 	 * Highlights the correct top level admin menu item for post type add screens.
+	 *
+	 * @return void
 	 */
 	public function menu_highlight() {
 		global $parent_file, $submenu_file, $post_type;
@@ -250,6 +266,8 @@ class WC_Admin_Menus {
 
 	/**
 	 * Adds the order processing count to the menu.
+	 *
+	 * @return void
 	 */
 	public function menu_order_count() {
 		global $submenu;
@@ -324,6 +342,7 @@ class WC_Admin_Menus {
 	 * @param bool|int $status Screen option value. Default false to skip.
 	 * @param string   $option The option name.
 	 * @param int      $value  The number of rows to use.
+	 * @return bool|int
 	 */
 	public function set_screen_option( $status, $option, $value ) {
 		$screen_options = array(
@@ -343,6 +362,8 @@ class WC_Admin_Menus {
 
 	/**
 	 * Init the reports page.
+	 *
+	 * @return void
 	 */
 	public function reports_page() {
 		WC_Admin_Reports::output();
@@ -350,6 +371,8 @@ class WC_Admin_Menus {
 
 	/**
 	 * Init the settings page.
+	 *
+	 * @return void
 	 */
 	public function settings_page() {
 		if ( Features::is_enabled( 'settings' ) ) {
@@ -361,6 +384,8 @@ class WC_Admin_Menus {
 
 	/**
 	 * Init the attributes page.
+	 *
+	 * @return void
 	 */
 	public function attributes_page() {
 		WC_Admin_Attributes::output();
@@ -368,6 +393,8 @@ class WC_Admin_Menus {
 
 	/**
 	 * Init the status page.
+	 *
+	 * @return void
 	 */
 	public function status_page() {
 		WC_Admin_Status::output();
@@ -375,6 +402,8 @@ class WC_Admin_Menus {
 
 	/**
 	 * Init the addons page.
+	 *
+	 * @return void
 	 */
 	public function addons_page() {
 		WC_Admin_Addons::handle_legacy_marketplace_redirects();
@@ -397,6 +426,8 @@ class WC_Admin_Menus {
 	 * Add custom nav meta box.
 	 *
 	 * Adapted from http://www.johnmorrisonline.com/how-to-add-a-fully-functional-custom-meta-box-to-wordpress-navigation-menus/.
+	 *
+	 * @return void
 	 */
 	public function add_nav_menu_meta_boxes() {
 		add_meta_box( 'woocommerce_endpoints_nav_link', __( 'WooCommerce endpoints', 'woocommerce' ), array( $this, 'nav_menu_links' ), 'nav-menus', 'side', 'low' );
@@ -404,6 +435,8 @@ class WC_Admin_Menus {
 
 	/**
 	 * Output menu links.
+	 *
+	 * @return void
 	 */
 	public function nav_menu_links() {
 		// Get items from account menu.
@@ -465,6 +498,7 @@ class WC_Admin_Menus {
 	 *
 	 * @since 2.4.0
 	 * @param WP_Admin_Bar $wp_admin_bar Admin bar instance.
+	 * @return void
 	 */
 	public function admin_bar_menus( $wp_admin_bar ) {
 		if ( ! is_admin() || ! is_admin_bar_showing() ) {
@@ -494,6 +528,8 @@ class WC_Admin_Menus {
 
 	/**
 	 * Maybe add new management product experience.
+	 *
+	 * @return void
 	 */
 	public function maybe_add_new_product_management_experience() {
 		if ( FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
@@ -550,6 +586,7 @@ class WC_Admin_Menus {
 	 * @param int    $index The position of a submenu item in the submenu array.
 	 * @param string $parent_slug The parent slug.
 	 * @param array  $item The submenu item.
+	 * @return void
 	 */
 	public function hide_submenu_element( $index, $parent_slug, $item ) {
 		global $submenu;

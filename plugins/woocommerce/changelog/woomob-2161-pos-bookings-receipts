@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Suppress standard transactional emails and auto-trigger POS email templates for orders paid at POS, regardless of where the order was created.

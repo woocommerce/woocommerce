@@ -10,8 +10,6 @@ use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\StoreApi\Utilities\PaymentUtils;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsSchema\Validation;
 use Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController;
-use Automattic\WooCommerce\Internal\FraudProtection\CheckoutEventTracker;
-use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
 
 /**
  * Checkout class.
@@ -232,12 +230,6 @@ class Checkout extends AbstractBlock {
 			return wp_is_block_theme() ? do_shortcode( '[woocommerce_checkout]' ) : '[woocommerce_checkout]';
 		}
 
-		// Track checkout page loaded for fraud protection.
-		if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
-			wc_get_container()->get( CheckoutEventTracker::class )
-				->track_checkout_page_loaded();
-		}
-
 		// Dequeue the core scripts when rendering this block.
 		add_action( 'wp_enqueue_scripts', array( $this, 'dequeue_woocommerce_core_scripts' ), 20 );
 
@@ -449,6 +441,16 @@ class Checkout extends AbstractBlock {
 			filter_var(
 				wc()->checkout()->is_registration_enabled(),
 				FILTER_VALIDATE_BOOLEAN
+			)
+		);
+		// Optimization note: reduce the number of SQLs required to fetch the options in the lines below.
+		wp_prime_option_caches(
+			array(
+				'woocommerce_enable_checkout_login_reminder',
+				'woocommerce_tax_display_cart', // This one is autoloaded, but we add it here for clarity.
+				'woocommerce_tax_total_display',
+				'woocommerce_ship_to_destination',
+				'woocommerce_registration_generate_password',
 			)
 		);
 		$this->asset_data_registry->add( 'checkoutShowLoginReminder', filter_var( get_option( 'woocommerce_enable_checkout_login_reminder' ), FILTER_VALIDATE_BOOLEAN ) );

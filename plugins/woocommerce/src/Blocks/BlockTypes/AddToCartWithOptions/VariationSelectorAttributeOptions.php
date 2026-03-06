@@ -169,7 +169,6 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 						'data-wp-bind--checked'  => 'state.isOptionSelected',
 						'data-wp-bind--disabled' => 'state.isOptionDisabled',
 						'data-wp-bind--hidden'   => 'hide' === $disabled_attributes_action ? 'state.isOptionDisabled' : null,
-						'data-wp-watch'          => 'callbacks.watchSelected',
 						'data-wp-on--click'      => 'actions.handlePillClick',
 						'data-wp-on--keydown'    => 'actions.handleKeyDown',
 						'data-wp-context'        => array(
