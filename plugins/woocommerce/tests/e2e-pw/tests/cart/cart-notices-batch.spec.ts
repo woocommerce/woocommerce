@@ -98,8 +98,8 @@ test.describe( 'Cart notices — centralized batch commit', () => {
 			.click();
 		await addAProductToCart( page, SECOND_PRODUCT_NAME );
 
-		// Wait for queue idle (2 s max).
-		await page.waitForTimeout( 2000 );
+		// Deterministic wait
+		await page.waitForLoadState( 'networkidle' );
 
 		// noticeMutations should have at most one distinct non-empty text snapshot,
 		// meaning commit fired once and pushed a single notice update.
@@ -158,7 +158,10 @@ test.describe( 'Cart notices — centralized batch commit', () => {
 			.first()
 			.click();
 
-		await page.waitForTimeout( 1500 );
+		await page.waitForSelector(
+			`.wc-block-mini-cart__products-table [data-title="${ SIMPLE_PRODUCT_NAME }"]`,
+			{ state: 'visible' }
+		);
 
 		// No info notice should appear on pure network failure.
 		const noticesArea = page.locator(
