@@ -1214,6 +1214,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 *
 	 * @param array $order_ids List of order IDS to prime caches for.
 	 * @param array $query_vars Original query arguments.
+	 * @return void
 	 */
 	public function prime_caches_for_orders( $order_ids, $query_vars ) {
 		// Lets do some cache hydrations so that we don't have to fetch data from DB for every order.
