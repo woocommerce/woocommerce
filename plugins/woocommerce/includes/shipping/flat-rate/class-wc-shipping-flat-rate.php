@@ -285,16 +285,20 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 		$decimal_separator  = wc_get_price_decimal_separator();
 		$thousand_separator = wc_get_price_thousand_separator();
 
-		/*
-		* Breakdown:
-		*   [\d{dec}{thou}\s]+           - First operand: digits, decimal/thousand separators, or spaces.
-		*   (                            - Begin repeating group:
-		*     [+\-*\/]                   -   An arithmetic operator (+, -, *, /).
-		*     [\d{dec}{thou}\s]+         -   Next operand: digits, decimal/thousand separators, or spaces.
-		*   )+                           - One or more operator+operand pairs (ensures no trailing operator).
-		* */
+		// Use preg_quote() to safely escaping separators.
+		$separators = preg_quote( $decimal_separator, '/' );
+		if ( '' !== $thousand_separator ) {
+			$separators .= preg_quote( $thousand_separator, '/' );
+		}
+
+		// Breakdown:
+		// [\d{sep}\s]+             - First operand: digits, separators, or spaces.
+		// (                        - Begin repeating group:
+		// [+\-*\/]               -   An arithmetic operator (+, -, *, /).
+		// [\d{sep}\s]+           -   Next operand: digits, separators, or spaces.
+		// )+                       - One or more operator+operand pairs (ensures no trailing operator).
 		return (bool) preg_match(
-			'/^[\d\\' . $decimal_separator . '\\' . $thousand_separator . '\s]+([+\-*\/][\d\\' . $decimal_separator . '\\' . $thousand_separator . '\s]+)+$/',
+			'/^[\d' . $separators . '\s]+([+\-*\/][\d' . $separators . '\s]+)+$/',
 			trim( $value )
 		);
 	}
