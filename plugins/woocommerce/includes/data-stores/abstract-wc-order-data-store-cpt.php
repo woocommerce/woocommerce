@@ -699,27 +699,21 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 			return;
 		}
 
-		$refunds       = wc_get_orders(
+		/** @var WC_Order_Refund[] $refunds Without 'paginate', wc_get_orders always returns an array. */
+		$refunds = wc_get_orders(
 			array(
 				'type'            => 'shop_order_refund',
 				'post_parent__in' => $non_cached_ids,
 				'limit'           => -1,
 			)
 		);
-		$order_refunds = array_reduce(
-			$refunds,
-			function ( $order_refunds_array, $refund ) {
-				if ( ! $refund instanceof \WC_Order_Refund ) {
-					return $order_refunds_array;
-				}
-				if ( ! isset( $order_refunds_array[ $refund->get_parent_id() ] ) ) {
-					$order_refunds_array[ $refund->get_parent_id() ] = array();
-				}
-				$order_refunds_array[ $refund->get_parent_id() ][] = $refund;
-				return $order_refunds_array;
-			},
-			array()
-		);
+
+		$order_refunds = array();
+		foreach ( $refunds as $refund ) {
+			if ( $refund instanceof \WC_Order_Refund ) {
+				$order_refunds[ $refund->get_parent_id() ][] = $refund;
+			}
+		}
 
 		foreach ( $non_cached_ids as $order_id ) {
 			$cached_refunds = isset( $order_refunds[ $order_id ] ) ? $order_refunds[ $order_id ] : array();
@@ -747,19 +741,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 			$option_names[] = '_transient_timeout_wc_order_' . $order_id . '_needs_processing';
 		}
 
-		$cache_values     = wp_cache_get_multiple( $option_names, 'options' );
-		$options_to_prime = array();
-		foreach ( $option_names as $name ) {
-			if ( false === $cache_values[ $name ] ) {
-				$options_to_prime[] = $name;
-			}
-		}
-
-		if ( empty( $options_to_prime ) ) {
-			return;
-		}
-
-		wp_prime_option_caches( $options_to_prime );
+		wp_prime_option_caches( $option_names );
 	}
 
 	/**
