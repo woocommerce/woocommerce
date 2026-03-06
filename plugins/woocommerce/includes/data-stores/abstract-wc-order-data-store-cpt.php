@@ -699,7 +699,11 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 			return;
 		}
 
-		/** @var WC_Order_Refund[] $refunds Without 'paginate', wc_get_orders always returns an array. */
+		/**
+		 * Fetch all refunds for the given order IDs.
+		 *
+		 * @var WC_Order_Refund[] $refunds
+		 */
 		$refunds = wc_get_orders(
 			array(
 				'type'            => 'shop_order_refund',
