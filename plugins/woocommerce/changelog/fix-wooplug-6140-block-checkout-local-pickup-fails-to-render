@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix Local Pickup not rendering in Block Checkout when third-party plugins call calculate_totals() early with shortcode cart context.

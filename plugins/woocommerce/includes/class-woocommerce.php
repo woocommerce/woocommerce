@@ -52,7 +52,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '10.6.0-dev';
+	public $version = '10.7.0-dev';
 
 	/**
 	 * WooCommerce Schema version.
@@ -388,15 +388,15 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\Orders\OrderAttributionController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Orders\OrderAttributionBlocksController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController::class )->register();
-		$container->get( Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Utilities\LegacyRestApiStub::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Email\EmailStyleSync::class )->register();
-		$container->get( Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsController::class )->register();
+		$container->get( Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Admin\Agentic\AgenticController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ProductFeed\ProductFeed::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\PushNotifications\PushNotifications::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\Orders\PointOfSaleEmailHandler::class )->register();
 
 		// Classes inheriting from RestApiControllerBase.
 		$container->get( Automattic\WooCommerce\Internal\ReceiptRendering\ReceiptRenderingRestController::class )->register();

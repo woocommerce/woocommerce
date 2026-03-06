@@ -65,7 +65,13 @@ abstract class Abstract_Block_Renderer implements Block_Renderer {
 	 * @return string
 	 */
 	protected function add_spacer( $content, $email_attrs ): string {
-		$gap_style     = WP_Style_Engine::compile_css( array_intersect_key( $email_attrs, array_flip( array( 'margin-top' ) ) ), '' ) ?? '';
+		// Filter out empty margin-top values to prevent malformed CSS output.
+		$margin_top_attrs = array_intersect_key( $email_attrs, array_flip( array( 'margin-top' ) ) );
+		if ( isset( $margin_top_attrs['margin-top'] ) && '' === trim( $margin_top_attrs['margin-top'] ) ) {
+			$margin_top_attrs = array();
+		}
+
+		$gap_style     = WP_Style_Engine::compile_css( $margin_top_attrs, '' ) ?? '';
 		$padding_style = WP_Style_Engine::compile_css( array_intersect_key( $email_attrs, array_flip( array( 'padding-left', 'padding-right' ) ) ), '' ) ?? '';
 
 		$table_attrs = array(

@@ -2,8 +2,6 @@
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
-use Automattic\WooCommerce\Internal\FraudProtection\CartEventTracker;
-use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
 
 /**
  * Cart class.
@@ -166,12 +164,6 @@ class Cart extends AbstractBlock {
 		// Dequeue the core scripts when rendering this block.
 		add_action( 'wp_enqueue_scripts', array( $this, 'dequeue_woocommerce_core_scripts' ), 20 );
 
-		// Track cart page loaded for fraud protection.
-		if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
-			wc_get_container()->get( CartEventTracker::class )
-				->track_cart_page_loaded();
-		}
-
 		/**
 		 * We need to check if $content has any templates from prior iterations of the block, in order to update to the latest iteration.
 		 * We test the iteration version by searching for new blocks brought in by it.
@@ -251,6 +243,31 @@ class Cart extends AbstractBlock {
 		$this->asset_data_registry->register_page_id( isset( $attributes['checkoutPageId'] ) ? $attributes['checkoutPageId'] : 0 );
 		$this->asset_data_registry->add( 'isBlockTheme', wp_is_block_theme() );
 		$this->asset_data_registry->add( 'shippingMethodsExist', CartCheckoutUtils::shipping_methods_exist() > 0 );
+
+		$is_block_editor = $this->is_block_editor();
+
+		// Check `current_user_can` so we can show notices about incompatible extensions in the front-end to admins too.
+		if ( ( $is_block_editor || current_user_can( 'manage_woocommerce' ) ) && ! $this->asset_data_registry->exists( 'incompatibleExtensions' ) ) {
+			if ( class_exists( '\Automattic\WooCommerce\Utilities\FeaturesUtil' ) && function_exists( 'get_plugins' ) ) {
+				$declared_extensions     = \Automattic\WooCommerce\Utilities\FeaturesUtil::get_compatible_plugins_for_feature( 'cart_checkout_blocks' );
+				$all_plugins             = \get_plugins();
+				$incompatible_extensions = array_reduce(
+					$declared_extensions['incompatible'],
+					function ( array $acc, $item ) use ( $all_plugins ) {
+						$plugin      = $all_plugins[ $item ] ?? null;
+						$plugin_id   = $plugin['TextDomain'] ?? dirname( $item );
+						$plugin_name = $plugin['Name'] ?? $plugin_id;
+						$acc[]       = [
+							'id'    => $plugin_id,
+							'title' => $plugin_name,
+						];
+						return $acc;
+					},
+					[]
+				);
+				$this->asset_data_registry->add( 'incompatibleExtensions', $incompatible_extensions );
+			}
+		}
 
 		// Hydrate the following data depending on admin or frontend context.
 		if ( ! is_admin() && ! WC()->is_rest_api_request() ) {

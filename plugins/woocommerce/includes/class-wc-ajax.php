@@ -15,8 +15,6 @@ use Automattic\WooCommerce\Internal\Orders\CouponsController;
 use Automattic\WooCommerce\Internal\Orders\TaxesController;
 use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomMetaBox;
-use Automattic\WooCommerce\Internal\FraudProtection\CheckoutEventTracker;
-use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
@@ -404,12 +402,6 @@ class WC_AJAX {
 
 		do_action( 'woocommerce_checkout_update_order_review', isset( $_POST['post_data'] ) ? wp_unslash( $_POST['post_data'] ) : '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
-		// Track checkout field update for fraud protection.
-		if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
-			wc_get_container()->get( CheckoutEventTracker::class )
-				->track_shortcode_checkout_field_update( isset( $_POST['post_data'] ) ? wp_unslash( $_POST['post_data'] ) : '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		}
-
 		$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
 		$posted_shipping_methods = isset( $_POST['shipping_method'] ) ? wc_clean( wp_unslash( $_POST['shipping_method'] ) ) : array();
 
@@ -538,6 +530,16 @@ class WC_AJAX {
 
 			do_action( 'woocommerce_ajax_added_to_cart', $product_id );
 
+			/**
+			 * Fires when an item is added to the cart from a user request.
+			 *
+			 * @param int       $product_id Product ID.
+			 * @param int|float $quantity   Quantity added to the cart.
+			 *
+			 * @since 10.6.0
+			 */
+			do_action( 'internal_woocommerce_cart_item_added_from_user_request', $variation_id ? $variation_id : $product_id, $quantity );
+
 			if ( 'yes' === get_option( 'woocommerce_cart_redirect_after_add' ) ) {
 				wc_add_to_cart_message( array( $product_id => $quantity ), true );
 			}
@@ -568,7 +570,16 @@ class WC_AJAX {
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing
 		$cart_item_key = wc_clean( isset( $_POST['cart_item_key'] ) ? wp_unslash( $_POST['cart_item_key'] ) : '' );
 
-		if ( $cart_item_key && false !== WC()->cart->remove_cart_item( $cart_item_key ) ) {
+		if ( $cart_item_key && is_string( $cart_item_key ) && false !== WC()->cart->remove_cart_item( $cart_item_key ) ) {
+			/**
+			 * Fires when an item is removed from the cart from a user request.
+			 *
+			 * @param string   $cart_item_key Cart item key.
+			 * @param \WC_Cart $cart          Cart object.
+			 *
+			 * @since 10.6.0
+			 */
+			do_action( 'internal_woocommerce_cart_item_removed_from_user_request', $cart_item_key, WC()->cart );
 			self::get_refreshed_fragments();
 		} else {
 			wp_send_json_error();
@@ -2212,7 +2223,8 @@ class WC_AJAX {
 	 * @return void
 	 */
 	public static function term_ordering() {
-		// phpcs:disable WordPress.Security.NonceVerification.Missing
+		check_ajax_referer( 'term-ordering', 'security' );
+
 		if ( ! current_user_can( 'edit_products' ) || empty( $_POST['id'] ) ) {
 			wp_die( -1 );
 		}
@@ -2235,7 +2247,6 @@ class WC_AJAX {
 			echo 'children';
 			wp_die();
 		}
-		// phpcs:enable
 	}
 
 	/**
@@ -2248,7 +2259,8 @@ class WC_AJAX {
 	public static function product_ordering() {
 		global $wpdb;
 
-		// phpcs:disable WordPress.Security.NonceVerification.Missing
+		check_ajax_referer( 'product-ordering', 'security' );
+
 		if ( ! current_user_can( 'edit_products' ) || empty( $_POST['id'] ) ) {
 			wp_die( -1 );
 		}
@@ -2301,7 +2313,6 @@ class WC_AJAX {
 
 		do_action( 'woocommerce_after_product_ordering', $sorting_id, $menu_orders );
 		wp_send_json( $menu_orders );
-		// phpcs:enable
 	}
 
 	/**
