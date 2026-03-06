@@ -309,8 +309,8 @@ const productGallery = {
 				}
 			}
 		},
-		openDialog: withSyncEvent( ( event: Event ) => {
-			event.preventDefault();
+		openDialog: withSyncEvent( ( event?: Event ) => {
+			event?.preventDefault();
 			const context = getContext();
 			context.isDialogOpen = true;
 			document.body.classList.add(
