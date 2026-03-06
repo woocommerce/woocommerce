@@ -17121,7 +17121,7 @@ parameters:
 		-
 			message: '#^Cannot access offset non\-falsy\-string on array\|bool\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 2
+			count: 1
 			path: includes/data-stores/abstract-wc-order-data-store-cpt.php
 
 		-
@@ -17703,12 +17703,6 @@ parameters:
 		-
 			message: '#^Call to an undefined method WC_Data_Store\:\:update_user_by_order_id\(\)\.$#'
 			identifier: method.notFound
-			count: 1
-			path: includes/data-stores/class-wc-order-data-store-cpt.php
-
-		-
-			message: '#^Cannot access offset non\-falsy\-string on array\|bool\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: includes/data-stores/class-wc-order-data-store-cpt.php
 
@@ -64037,12 +64031,6 @@ parameters:
 
 		-
 			message: '#^Cannot access offset ''class_name'' on array\|bool\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
-			message: '#^Cannot access offset non\-falsy\-string on array\|bool\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
