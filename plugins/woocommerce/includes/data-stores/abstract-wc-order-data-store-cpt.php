@@ -708,7 +708,10 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		);
 		$order_refunds = array_reduce(
 			$refunds,
-			function ( $order_refunds_array, WC_Order_Refund $refund ) {
+			function ( $order_refunds_array, $refund ) {
+				if ( ! $refund instanceof \WC_Order_Refund ) {
+					return $order_refunds_array;
+				}
 				if ( ! isset( $order_refunds_array[ $refund->get_parent_id() ] ) ) {
 					$order_refunds_array[ $refund->get_parent_id() ] = array();
 				}
