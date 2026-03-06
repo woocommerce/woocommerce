@@ -676,11 +676,6 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 * @since 10.7.0
 	 */
 	protected function prime_refund_caches_for_orders( $order_ids, $query_vars ) {
-		$order_type = $query_vars['type'] ?? $query_vars['post_type'] ?? '';
-		$order_type = is_array( $order_type ) ? $order_type : array( $order_type );
-		if ( ! in_array( 'shop_order', $order_type, true ) ) {
-			return;
-		}
 		if ( isset( $query_vars['fields'] ) && 'all' !== $query_vars['fields'] ) {
 			if ( is_array( $query_vars['fields'] ) && ! in_array( 'refunds', $query_vars['fields'], true ) ) {
 				return;
@@ -743,12 +738,6 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 * @since 10.7.0
 	 */
 	protected function prime_needs_processing_transients( $order_ids, $query_vars ) {
-		$order_type = $query_vars['type'] ?? $query_vars['post_type'] ?? 'shop_order';
-		$order_type = is_array( $order_type ) ? $order_type : array( $order_type );
-		if ( ! in_array( 'shop_order', $order_type, true ) ) {
-			return;
-		}
-
 		$option_names = array();
 		foreach ( $order_ids as $order_id ) {
 			$option_names[] = '_transient_wc_order_' . $order_id . '_needs_processing';

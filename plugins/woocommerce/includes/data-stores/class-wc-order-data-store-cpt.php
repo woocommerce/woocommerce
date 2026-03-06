@@ -1217,11 +1217,103 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * @return void
 	 */
 	public function prime_caches_for_orders( $order_ids, $query_vars ) {
-		// Lets do some cache hydrations so that we don't have to fetch data from DB for every order.
 		$this->prime_raw_meta_cache_for_orders( $order_ids, $query_vars );
-		$this->prime_refund_caches_for_orders( $order_ids, $query_vars );
 		$this->prime_order_item_caches_for_orders( $order_ids, $query_vars );
+
+		// The following priming methods only apply to shop_order queries.
+		$order_type = $query_vars['type'] ?? $query_vars['post_type'] ?? '';
+		$order_type = is_array( $order_type ) ? $order_type : array( $order_type );
+		if ( ! in_array( 'shop_order', $order_type, true ) ) {
+			return;
+		}
+
+		$this->prime_refund_caches_for_orders( $order_ids, $query_vars );
+		$this->prime_refund_total_caches_for_orders( $order_ids, $query_vars );
 		$this->prime_needs_processing_transients( $order_ids, $query_vars );
+	}
+
+	/**
+	 * Prime the refund total and refund tax total caches for a batch of orders.
+	 *
+	 * @param array $order_ids  Order IDs to prime cache for.
+	 * @param array $query_vars Query vars for the query.
+	 * @return void
+	 * @since 10.7.0
+	 */
+	protected function prime_refund_total_caches_for_orders( $order_ids, $query_vars ) {
+		global $wpdb;
+
+		$cache_prefix = \WC_Cache_Helper::get_cache_prefix( 'orders' );
+
+		// Find which orders need priming (check both total_refunded and total_tax_refunded).
+		$total_keys     = array();
+		$tax_keys       = array();
+		$non_cached_ids = array();
+		foreach ( $order_ids as $order_id ) {
+			$total_keys[ $order_id ] = $cache_prefix . 'total_refunded' . $order_id;
+			$tax_keys[ $order_id ]   = $cache_prefix . 'total_tax_refunded' . $order_id;
+		}
+
+		$all_keys     = array_merge( array_values( $total_keys ), array_values( $tax_keys ) );
+		$cache_values = wc_cache_get_multiple( $all_keys, 'orders' );
+		foreach ( $order_ids as $order_id ) {
+			if ( false === $cache_values[ $total_keys[ $order_id ] ] || false === $cache_values[ $tax_keys[ $order_id ] ] ) {
+				$non_cached_ids[] = $order_id;
+			}
+		}
+
+		if ( empty( $non_cached_ids ) ) {
+			return;
+		}
+
+		$ids_placeholder = implode( ', ', array_fill( 0, count( $non_cached_ids ), '%d' ) );
+
+		// Batch query: total refunded per order.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		$refund_totals = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT posts.post_parent AS order_id, SUM( postmeta.meta_value ) AS total
+				FROM $wpdb->postmeta AS postmeta
+				INNER JOIN $wpdb->posts AS posts ON ( posts.post_type = 'shop_order_refund' AND posts.post_parent IN ( $ids_placeholder ) )
+				WHERE postmeta.meta_key = '_refund_amount'
+				AND postmeta.post_id = posts.ID
+				GROUP BY posts.post_parent",
+				...$non_cached_ids
+			)
+		);
+		// phpcs:enable
+
+		$totals_by_order = array();
+		foreach ( $refund_totals as $row ) {
+			$totals_by_order[ $row->order_id ] = floatval( $row->total );
+		}
+		foreach ( $non_cached_ids as $order_id ) {
+			wp_cache_set( $total_keys[ $order_id ], $totals_by_order[ $order_id ] ?? 0.0, 'orders' );
+		}
+
+		// Batch query: total tax refunded per order.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		$tax_totals = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT posts.post_parent AS order_id, SUM( order_itemmeta.meta_value ) AS total
+				FROM {$wpdb->prefix}woocommerce_order_itemmeta AS order_itemmeta
+				INNER JOIN $wpdb->posts AS posts ON ( posts.post_type = 'shop_order_refund' AND posts.post_parent IN ( $ids_placeholder ) )
+				INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON ( order_items.order_id = posts.ID AND order_items.order_item_type = 'tax' )
+				WHERE order_itemmeta.order_item_id = order_items.order_item_id
+				AND order_itemmeta.meta_key IN ('tax_amount', 'shipping_tax_amount')
+				GROUP BY posts.post_parent",
+				...$non_cached_ids
+			)
+		);
+		// phpcs:enable
+
+		$tax_by_order = array();
+		foreach ( $tax_totals as $row ) {
+			$tax_by_order[ $row->order_id ] = abs( floatval( $row->total ) );
+		}
+		foreach ( $non_cached_ids as $order_id ) {
+			wp_cache_set( $tax_keys[ $order_id ], $tax_by_order[ $order_id ] ?? 0.0, 'orders' );
+		}
 	}
 
 	/**
