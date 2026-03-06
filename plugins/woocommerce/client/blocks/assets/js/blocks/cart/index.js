@@ -7,17 +7,18 @@ import { registerBlockType, createBlock } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
+import metadata from './block.json';
 import { Edit, Save } from './edit';
 import './style.scss';
-import { blockName, blockAttributes } from './attributes';
+import { blockAttributes as attrs } from './attributes';
 import './inner-blocks';
-import { metadata } from './metadata';
+
+const blockAttributes  = { ...metadata.attributes, ...attrs };
 
 /**
  * Register and run the Cart block.
  */
 export const settings = {
-	...metadata,
 	attributes: blockAttributes,
 	edit: Edit,
 	save: Save,
@@ -101,4 +102,4 @@ export const settings = {
 	],
 };
 
-registerBlockType( blockName, settings );
+registerBlockType( metadata.name, settings );
