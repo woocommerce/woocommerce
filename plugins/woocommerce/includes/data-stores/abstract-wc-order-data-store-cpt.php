@@ -664,6 +664,109 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	}
 
 	/**
+	 * Prime refund cache for a batch of orders.
+	 *
+	 * WC_Order::get_refunds() checks wp_cache before querying. By fetching
+	 * all refunds for the batch in a single query and populating the cache,
+	 * we eliminate one query per order.
+	 *
+	 * @param array $order_ids  Order IDs to prime cache for.
+	 * @param array $query_vars Query vars for the query.
+	 * @return void
+	 * @since 10.7.0
+	 */
+	protected function prime_refund_caches_for_orders( $order_ids, $query_vars ) {
+		if ( ! isset( $query_vars['type'] ) || 'shop_order' !== $query_vars['type'] ) {
+			return;
+		}
+		if ( isset( $query_vars['fields'] ) && 'all' !== $query_vars['fields'] ) {
+			if ( is_array( $query_vars['fields'] ) && ! in_array( 'refunds', $query_vars['fields'], true ) ) {
+				return;
+			}
+		}
+
+		$cache_keys_mapping = array();
+		foreach ( $order_ids as $order_id ) {
+			$cache_keys_mapping[ $order_id ] = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refunds' . $order_id;
+		}
+
+		$non_cached_ids = array();
+		$cache_values   = wc_cache_get_multiple( array_values( $cache_keys_mapping ), 'orders' );
+		foreach ( $order_ids as $order_id ) {
+			if ( false === $cache_values[ $cache_keys_mapping[ $order_id ] ] ) {
+				$non_cached_ids[] = $order_id;
+			}
+		}
+
+		if ( empty( $non_cached_ids ) ) {
+			return;
+		}
+
+		$refunds       = wc_get_orders(
+			array(
+				'type'            => 'shop_order_refund',
+				'post_parent__in' => $non_cached_ids,
+				'limit'           => -1,
+			)
+		);
+		$order_refunds = array_reduce(
+			$refunds,
+			function ( $order_refunds_array, WC_Order_Refund $refund ) {
+				if ( ! isset( $order_refunds_array[ $refund->get_parent_id() ] ) ) {
+					$order_refunds_array[ $refund->get_parent_id() ] = array();
+				}
+				$order_refunds_array[ $refund->get_parent_id() ][] = $refund;
+				return $order_refunds_array;
+			},
+			array()
+		);
+
+		foreach ( $non_cached_ids as $order_id ) {
+			$cached_refunds = isset( $order_refunds[ $order_id ] ) ? $order_refunds[ $order_id ] : array();
+			wp_cache_set( $cache_keys_mapping[ $order_id ], $cached_refunds, 'orders' );
+		}
+	}
+
+	/**
+	 * Prime the needs_processing transient cache for a batch of orders.
+	 *
+	 * WC_Order::needs_processing() calls get_transient() per order, which
+	 * triggers an individual wp_options query each time. By priming the
+	 * object cache for all transient option names in a single query, we
+	 * eliminate the N+1.
+	 *
+	 * @param array $order_ids  Order IDs to prime cache for.
+	 * @param array $query_vars Query vars for the query.
+	 * @return void
+	 * @since 10.7.0
+	 */
+	protected function prime_needs_processing_transients( $order_ids, $query_vars ) {
+		if ( isset( $query_vars['type'] ) && 'shop_order' !== $query_vars['type'] ) {
+			return;
+		}
+
+		$option_names = array();
+		foreach ( $order_ids as $order_id ) {
+			$option_names[] = '_transient_wc_order_' . $order_id . '_needs_processing';
+			$option_names[] = '_transient_timeout_wc_order_' . $order_id . '_needs_processing';
+		}
+
+		$cache_values     = wp_cache_get_multiple( $option_names, 'options' );
+		$options_to_prime = array();
+		foreach ( $option_names as $name ) {
+			if ( false === $cache_values[ $name ] ) {
+				$options_to_prime[] = $name;
+			}
+		}
+
+		if ( empty( $options_to_prime ) ) {
+			return;
+		}
+
+		wp_prime_option_caches( $options_to_prime );
+	}
+
+	/**
 	 * Remove all line items (products, coupons, shipping, taxes) from the order.
 	 *
 	 * @param WC_Order $order Order object.
