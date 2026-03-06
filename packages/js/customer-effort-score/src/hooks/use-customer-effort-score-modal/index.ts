@@ -20,9 +20,10 @@ export const useCustomerEffortScoreModal = () => {
 	const { shownForActions, isLoading } = useSelect( ( select ) => {
 		const { getOption, hasFinishedResolution } = select( optionsStore );
 
-		const shownForActionsOption =
-			( getOption( SHOWN_FOR_ACTIONS_OPTION_NAME ) as string[] ) ||
-			EMPTY_SHOWN_ACTIONS;
+		const rawShownForActions = getOption( SHOWN_FOR_ACTIONS_OPTION_NAME );
+		const shownForActionsOption = Array.isArray( rawShownForActions )
+			? rawShownForActions
+			: EMPTY_SHOWN_ACTIONS;
 
 		const resolving = ! hasFinishedResolution( 'getOption', [
 			SHOWN_FOR_ACTIONS_OPTION_NAME,
@@ -41,10 +42,12 @@ export const useCustomerEffortScoreModal = () => {
 	const markCesAsShown = async ( action: string ) => {
 		const { getOption } = resolveSelect( optionsStore );
 
-		const shownForActionsOption =
-			( ( await getOption(
-				SHOWN_FOR_ACTIONS_OPTION_NAME
-			) ) as string[] ) || [];
+		const rawShownForActions = await getOption(
+			SHOWN_FOR_ACTIONS_OPTION_NAME
+		);
+		const shownForActionsOption = Array.isArray( rawShownForActions )
+			? rawShownForActions
+			: [];
 
 		updateOptions( {
 			[ SHOWN_FOR_ACTIONS_OPTION_NAME ]: [
