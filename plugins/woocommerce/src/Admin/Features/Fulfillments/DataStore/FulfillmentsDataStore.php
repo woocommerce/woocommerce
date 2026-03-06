@@ -630,15 +630,6 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 	}
 
 	/**
-	 * Method to validate the items in a fulfillment.
-	 *
-	 * @param Fulfillment $data The fulfillment object to validate.
-	 *
-	 * @return void
-	 *
-	 * @throws \Exception If the fulfillment data is invalid.
-	 */
-	/**
 	 * Hard-delete all fulfillment records (and their metadata) for a given entity.
 	 *
 	 * This is used when an order is permanently deleted to prevent orphaned rows.
@@ -687,6 +678,15 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 		return (int) $rows_deleted;
 	}
 
+	/**
+	 * Method to validate the items in a fulfillment.
+	 *
+	 * @param Fulfillment $data The fulfillment object to validate.
+	 *
+	 * @return void
+	 *
+	 * @throws \Exception If the fulfillment data is invalid.
+	 */
 	private function validate_items( Fulfillment $data ): void {
 		$items = $data->get_meta( '_items', true );
 		if ( empty( $items ) ) {
