@@ -225,7 +225,6 @@
 		"postcss-loader": "4.3.x",
 		"prettier": "npm:wp-prettier@^2.8.5",
 		"progress-bar-webpack-plugin": "2.1.x",
-		"react-docgen": "5.4.3",
 		"react-docgen-typescript-plugin": "^1.0.5",
 		"react-test-renderer": "18.3.x",
 		"redux": "4.2.1",
@@ -234,7 +233,6 @@
 		"rtlcss": "^4.1.1",
 		"sass-loader": "10.5.x",
 		"storybook": "^7.6.4",
-		"storybook-addon-react-docgen": "1.2.44",
 		"stylelint": "^16.8.2",
 		"stylelint-scss": "^6.4.0",
 		"typescript": "5.7.x",
@@ -247,7 +245,7 @@
 		"wp-types": "3.63.0"
 	},
 	"engines": {
-		"node": "^20.11.1"
+		"node": ">=20.11.1"
 	},
 	"dependencies": {
 		"@ariakit/react": "^0.4.5",
@@ -440,6 +438,7 @@
 				"node_modules/@woocommerce/email-editor/build-module",
 				"node_modules/@woocommerce/email-editor/build-style",
 				"node_modules/@woocommerce/email-editor/build-types",
+				"node_modules/@woocommerce/email-editor/assets",
 				"node_modules/@woocommerce/sanitize/build",
 				"node_modules/@woocommerce/sanitize/build-module",
 				"node_modules/@woocommerce/sanitize/build-style",

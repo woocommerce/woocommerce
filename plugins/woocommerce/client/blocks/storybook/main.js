@@ -16,7 +16,6 @@ module.exports = {
 		'@storybook/addon-docs',
 		'@storybook/addon-a11y',
 		'@storybook/addon-links',
-		'storybook-addon-react-docgen',
 		'@storybook/addon-styling-webpack',
 	],
 	typescript: {
