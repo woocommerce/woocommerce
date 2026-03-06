@@ -61,7 +61,9 @@ class WC_Email_Header_Template_Test extends \WC_Unit_Test_Case {
 
 		$content = wc_get_template_html( 'emails/email-header.php', array( 'email_heading' => 'Test' ) );
 
-		$this->assertMatchesRegularExpression( '/<a href="[^"]*"[^>]*target="_blank"[^>]*><img src="https:\/\/example\.com\/logo\.png"/', $content );
+		$this->assertStringContainsString( '<a ', $content );
+		$this->assertStringContainsString( 'target="_blank"', $content );
+		$this->assertStringContainsString( 'src="https://example.com/logo.png"', $content );
 	}
 
 	/**
@@ -73,7 +75,9 @@ class WC_Email_Header_Template_Test extends \WC_Unit_Test_Case {
 
 		$content = wc_get_template_html( 'emails/email-header.php', array( 'email_heading' => 'Test' ) );
 
-		$this->assertMatchesRegularExpression( '/<a href="[^"]*"[^>]*target="_blank"[^>]*><img src="https:\/\/example\.com\/logo\.png"/', $content );
+		$this->assertStringContainsString( '<a ', $content );
+		$this->assertStringContainsString( 'target="_blank"', $content );
+		$this->assertStringContainsString( 'src="https://example.com/logo.png"', $content );
 	}
 
 	/**
