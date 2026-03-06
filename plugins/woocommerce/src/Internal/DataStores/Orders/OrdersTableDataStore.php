@@ -3215,7 +3215,7 @@ FROM $order_meta_table
 		$this->prime_order_item_caches_for_orders( $order_ids, $query_vars );
 
 		// The following priming methods only apply to shop_order queries.
-		$order_type = $query_vars['type'] ?? '';
+		$order_type = $query_vars['type'] ?? $query_vars['post_type'] ?? '';
 		$order_type = is_array( $order_type ) ? $order_type : array( $order_type );
 		if ( ! in_array( 'shop_order', $order_type, true ) ) {
 			return;
