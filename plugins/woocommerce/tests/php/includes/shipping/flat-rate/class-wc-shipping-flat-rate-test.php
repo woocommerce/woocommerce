@@ -18,15 +18,23 @@ class WC_Shipping_Flat_Rate_Test extends WC_Unit_Test_Case {
 	private $call_evaluate_cost;
 
 	/**
+	 * @var Closure Function to call protected method is_math_expression.
+	 */
+	private $call_is_math_expression;
+
+	/**
 	 * Set up test case.
 	 *
 	 * @return void
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->sut                = new WC_Shipping_Flat_Rate();
-		$this->call_evaluate_cost = function ( $sum, $args ) {
+		$this->sut                     = new WC_Shipping_Flat_Rate();
+		$this->call_evaluate_cost      = function ( $sum, $args ) {
 			return $this->evaluate_cost( $sum, $args );
+		};
+		$this->call_is_math_expression = function ( $value ) {
+			return $this->is_math_expression( $value );
 		};
 		update_option( 'woocommerce_price_decimal_sep', ',' );
 		update_option( 'woocommerce_price_thousand_sep', '.' );
@@ -150,5 +158,102 @@ class WC_Shipping_Flat_Rate_Test extends WC_Unit_Test_Case {
 			)
 		);
 		$this->assertEquals( 10, $val );
+	}
+
+	/**
+	 * @testDox is_math_expression() returns true for valid math expressions.
+	 *
+	 * @dataProvider provider_valid_math_expressions
+	 *
+	 * @param string $value       Value to test.
+	 * @param string $decimal_sep  Decimal separator to use.
+	 * @param string $thousand_sep Thousand separator to use.
+	 */
+	public function test_is_math_expression_returns_true( string $value, string $decimal_sep, string $thousand_sep ): void {
+		update_option( 'woocommerce_price_decimal_sep', $decimal_sep );
+		update_option( 'woocommerce_price_thousand_sep', $thousand_sep );
+
+		$this->assertTrue(
+			$this->call_is_math_expression->call( $this->sut, $value ),
+			"Expected '{$value}' to be recognised as a math expression."
+		);
+	}
+
+	/**
+	 * @testDox is_math_expression() returns false for non-math-expression values.
+	 *
+	 * @dataProvider provider_invalid_math_expressions
+	 *
+	 * @param string $value       Value to test.
+	 * @param string $decimal_sep  Decimal separator to use.
+	 * @param string $thousand_sep Thousand separator to use.
+	 */
+	public function test_is_math_expression_returns_false( string $value, string $decimal_sep, string $thousand_sep ): void {
+		update_option( 'woocommerce_price_decimal_sep', $decimal_sep );
+		update_option( 'woocommerce_price_thousand_sep', $thousand_sep );
+
+		$this->assertFalse(
+			$this->call_is_math_expression->call( $this->sut, $value ),
+			"Expected '{$value}' to NOT be recognised as a math expression."
+		);
+	}
+
+	/**
+	 * Valid math expression cases.
+	 *
+	 * Format: [ value, decimal_separator, thousand_separator ]
+	 */
+	public function provider_valid_math_expressions(): array {
+		return array(
+			// period decimal, comma thousand.
+			'simple division'                   => array( '3.50 / 1.21', '.', ',' ),
+			'simple multiplication'             => array( '10.00 * 1.21', '.', ',' ),
+			'simple addition'                   => array( '10 + 5', '.', ',' ),
+			'simple subtraction'                => array( '20 - 3.50', '.', ',' ),
+			'chained operators'                 => array( '10 * 2 + 5', '.', ',' ),
+			'thousand separated operand'        => array( '10,500 * 3000', '.', ',' ),
+
+			// comma decimal, period thousand.
+			'EU locale division'                => array( '10,350 / 11,121', ',', '.' ),
+			'EU locale multiplication'          => array( '10,000 * 1,218', ',', '.' ),
+			'EU locale thousand separated'      => array( '10.500 * 30000', ',', '.' ),
+
+			// No thousand separator locale.
+			'no thousand separator simple'      => array( '3.50 / 1.21', '.', '' ),
+			'no thousand separator chained'     => array( '10 * 2 + 5', '.', '' ),
+
+			// Whitespace variations.
+			'extra whitespace between operands' => array( '3.50  /  1.21', '.', ',' ),
+			'leading and trailing whitespace'   => array( '  3.50 / 1.21  ', '.', ',' ),
+		);
+	}
+
+	/**
+	 * Invalid math expression cases.
+	 *
+	 * Format: [ value, decimal_separator, thousand_separator ]
+	 */
+	public function provider_invalid_math_expressions(): array {
+		return array(
+			// Plain numbers.
+			'plain integer'             => array( '10', '.', ',' ),
+			'plain decimal'             => array( '10.00', '.', ',' ),
+			'plain EU decimal'          => array( '10,000', ',', '.' ),
+
+			// Trailing operator — incomplete expressions.
+			'trailing plus'             => array( '20 +', '.', ',' ),
+			'trailing minus'            => array( '20 -', '.', ',' ),
+			'trailing multiply'         => array( '20 *', '.', ',' ),
+			'trailing divide'           => array( '3.50 /', '.', ',' ),
+
+			// Invalid characters.
+			'alphabetic string'         => array( 'abc', '.', ',' ),
+			'alphanumeric'              => array( '10abc', '.', ',' ),
+			'empty string'              => array( '', '.', ',' ),
+
+			// Shortcodes — handled separately by $contains_shortcodes check.
+			'shortcode qty'             => array( '[qty]', '.', ',' ),
+			'expression with shortcode' => array( '10 * [qty]', '.', ',' ),
+		);
 	}
 }
