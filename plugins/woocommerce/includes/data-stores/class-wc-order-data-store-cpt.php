@@ -1256,9 +1256,14 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 		$all_keys     = array_merge( array_values( $total_keys ), array_values( $tax_keys ) );
 		$cache_values = wc_cache_get_multiple( $all_keys, 'orders' );
-		foreach ( $order_ids as $order_id ) {
-			if ( false === $cache_values[ $total_keys[ $order_id ] ] || false === $cache_values[ $tax_keys[ $order_id ] ] ) {
-				$non_cached_ids[] = $order_id;
+
+		if ( ! is_array( $cache_values ) ) {
+			$non_cached_ids = $order_ids;
+		} else {
+			foreach ( $order_ids as $order_id ) {
+				if ( false === $cache_values[ $total_keys[ $order_id ] ] || false === $cache_values[ $tax_keys[ $order_id ] ] ) {
+					$non_cached_ids[] = $order_id;
+				}
 			}
 		}
 

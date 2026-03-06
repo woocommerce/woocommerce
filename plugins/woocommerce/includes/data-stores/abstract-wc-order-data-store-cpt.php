@@ -689,9 +689,14 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 
 		$non_cached_ids = array();
 		$cache_values   = wc_cache_get_multiple( array_values( $cache_keys_mapping ), 'orders' );
-		foreach ( $order_ids as $order_id ) {
-			if ( false === $cache_values[ $cache_keys_mapping[ $order_id ] ] ) {
-				$non_cached_ids[] = $order_id;
+
+		if ( ! is_array( $cache_values ) ) {
+			$non_cached_ids = $order_ids;
+		} else {
+			foreach ( $order_ids as $order_id ) {
+				if ( false === $cache_values[ $cache_keys_mapping[ $order_id ] ] ) {
+					$non_cached_ids[] = $order_id;
+				}
 			}
 		}
 
