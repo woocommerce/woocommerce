@@ -322,11 +322,13 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 			)
 		);
 
+		$order_id = $order->get_id();
+
 		$fulfillments_before = $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(*) FROM {$wpdb->prefix}wc_order_fulfillments WHERE entity_type = %s AND entity_id = %d",
 				WC_Order::class,
-				$order->get_id()
+				$order_id
 			)
 		);
 		$this->assertSame( '1', $fulfillments_before, 'Fulfillment should exist before deletion' );
@@ -337,7 +339,7 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 			$wpdb->prepare(
 				"SELECT COUNT(*) FROM {$wpdb->prefix}wc_order_fulfillments WHERE entity_type = %s AND entity_id = %d",
 				WC_Order::class,
-				$order->get_id()
+				$order_id
 			)
 		);
 		$this->assertSame( '0', $fulfillments_after, 'Fulfillments should be deleted after order deletion' );

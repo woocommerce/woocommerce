@@ -651,13 +651,17 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 		try {
 			// Delete metadata for all fulfillments belonging to this entity.
 			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table names are safe.
-			$wpdb->query(
+			$result = $wpdb->query(
 				$wpdb->prepare(
 					"DELETE m FROM {$wpdb->prefix}wc_order_fulfillment_meta m INNER JOIN {$wpdb->prefix}wc_order_fulfillments f ON m.fulfillment_id = f.fulfillment_id WHERE f.entity_type = %s AND f.entity_id = %d",
 					$entity_type,
 					$entity_id
 				)
 			);
+
+			if ( false === $result ) {
+				throw new \RuntimeException( 'Failed to delete fulfillment metadata: ' . $wpdb->last_error );
+			}
 
 			// Delete the fulfillment records themselves.
 			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is safe.
@@ -668,6 +672,10 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 					$entity_id
 				)
 			);
+
+			if ( false === $rows_deleted ) {
+				throw new \RuntimeException( 'Failed to delete fulfillment records: ' . $wpdb->last_error );
+			}
 
 			$wpdb->query( 'COMMIT' );
 		} catch ( \Throwable $e ) {
