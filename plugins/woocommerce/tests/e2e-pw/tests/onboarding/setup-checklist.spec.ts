@@ -125,6 +125,7 @@ test( 'Can connect to WooCommerce.com', async ( { page } ) => {
 	await test.step( 'Go to the extensions tab and connect store', async () => {
 		const connectButton = page.getByRole( 'link', {
 			name: 'Connect',
+			exact: true,
 		} );
 
 		// Set up response waiter BEFORE navigation to avoid race condition

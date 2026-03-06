@@ -675,6 +675,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 
 				$woocommerce_term_order_params = array(
 					'taxonomy' => $taxonomy,
+					'nonce'    => wp_create_nonce( 'term-ordering' ),
 				);
 
 				wp_localize_script( 'woocommerce_term_ordering', 'woocommerce_term_ordering_params', $woocommerce_term_order_params );
@@ -685,6 +686,12 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			if ( current_user_can( 'edit_others_pages' ) && 'edit-product' === $screen_id && isset( $wp_query->query['orderby'] ) && 'menu_order title' === $wp_query->query['orderby'] ) {
 				wp_register_script( 'woocommerce_product_ordering', WC()->plugin_url() . '/assets/js/admin/product-ordering' . $suffix . '.js', array( 'jquery-ui-sortable' ), $version, true );
 				wp_enqueue_script( 'woocommerce_product_ordering' );
+
+				wp_localize_script(
+					'woocommerce_product_ordering',
+					'woocommerce_product_ordering_params',
+					array( 'nonce' => wp_create_nonce( 'product-ordering' ) )
+				);
 			}
 
 			// Reports Pages.

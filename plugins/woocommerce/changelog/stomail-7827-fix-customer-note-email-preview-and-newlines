@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix customer note email preview using wrong note text and missing newline support in admin order note personalization tag.
