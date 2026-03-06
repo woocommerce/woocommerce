@@ -1093,7 +1093,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @param array $cart_item_data other cart item data passed which affects this items uniqueness in the cart.
 	 * @return string cart item key
 	 */
-	public function generate_cart_id( $product_id, $variation_id = 0, $variation = array(), $cart_item_data = array() ) {
+	public static function generate_cart_id( $product_id, $variation_id = 0, $variation = array(), $cart_item_data = array() ) {
 		$id_parts = array( $product_id );
 
 		if ( $variation_id && 0 !== $variation_id ) {
