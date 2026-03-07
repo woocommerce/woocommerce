@@ -157,6 +157,70 @@ class RestAbilityFactory {
 	}
 
 	/**
+	 * Recursively sanitize a JSON Schema array, normalizing PHP-specific or
+	 * otherwise invalid 'type' values to valid JSON Schema primitive types.
+	 *
+	 * Mappings applied:
+	 *  - 'date-time'              → type:'string', format:'date-time'
+	 *  - 'action'                 → type:'object'
+	 *  - 'mixed' / unrecognized   → unset type key
+	 *  - valid primitive types    → left unchanged
+	 *
+	 * Recurses into 'properties', 'items', 'allOf', 'anyOf', 'oneOf',
+	 * 'if', 'then', and 'else' sub-schemas.
+	 *
+	 * @param array $schema JSON Schema array to sanitize.
+	 * @return array Sanitized JSON Schema array.
+	 */
+	private static function sanitize_schema_types( array $schema ): array {
+		$valid_types = array( 'string', 'number', 'integer', 'boolean', 'array', 'object', 'null' );
+
+		if ( isset( $schema['type'] ) ) {
+			if ( 'date-time' === $schema['type'] ) {
+				$schema['type']   = 'string';
+				$schema['format'] = 'date-time';
+			} elseif ( 'action' === $schema['type'] ) {
+				$schema['type'] = 'object';
+			} elseif ( 'mixed' === $schema['type'] || ! in_array( $schema['type'], $valid_types, true ) ) {
+				unset( $schema['type'] );
+			}
+		}
+
+		// Recurse into properties.
+		if ( isset( $schema['properties'] ) && is_array( $schema['properties'] ) ) {
+			foreach ( $schema['properties'] as $key => $sub_schema ) {
+				if ( is_array( $sub_schema ) ) {
+					$schema['properties'][ $key ] = self::sanitize_schema_types( $sub_schema );
+				}
+			}
+		}
+
+		// Recurse into items.
+		if ( isset( $schema['items'] ) && is_array( $schema['items'] ) ) {
+			$schema['items'] = self::sanitize_schema_types( $schema['items'] );
+		}
+
+		// Recurse into combining/conditional keywords.
+		foreach ( array( 'allOf', 'anyOf', 'oneOf' ) as $keyword ) {
+			if ( isset( $schema[ $keyword ] ) && is_array( $schema[ $keyword ] ) ) {
+				foreach ( $schema[ $keyword ] as $i => $sub_schema ) {
+					if ( is_array( $sub_schema ) ) {
+						$schema[ $keyword ][ $i ] = self::sanitize_schema_types( $sub_schema );
+					}
+				}
+			}
+		}
+
+		foreach ( array( 'if', 'then', 'else' ) as $keyword ) {
+			if ( isset( $schema[ $keyword ] ) && is_array( $schema[ $keyword ] ) ) {
+				$schema[ $keyword ] = self::sanitize_schema_types( $schema[ $keyword ] );
+			}
+		}
+
+		return $schema;
+	}
+
+	/**
 	 * Sanitize WordPress REST args to valid JSON Schema format.
 	 *
 	 * Converts WordPress REST API argument arrays to JSON Schema by:
@@ -173,6 +237,7 @@ class RestAbilityFactory {
 		$required   = array();
 
 		foreach ( $args as $key => $arg ) {
+			$arg      = self::sanitize_schema_types( $arg );
 			$property = array();
 
 			// Copy valid JSON Schema fields.
@@ -238,7 +303,7 @@ class RestAbilityFactory {
 	 */
 	private static function get_output_schema( $controller, string $operation ): array {
 		if ( method_exists( $controller, 'get_item_schema' ) ) {
-			$schema = $controller->get_item_schema();
+			$schema = self::sanitize_schema_types( $controller->get_item_schema() );
 
 			if ( 'list' === $operation ) {
 				// For list operations, return object wrapping array of items.
