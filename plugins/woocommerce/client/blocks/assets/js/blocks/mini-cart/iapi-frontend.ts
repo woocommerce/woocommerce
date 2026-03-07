@@ -888,7 +888,7 @@ const { state: cartItemState } = store(
 		},
 
 		actions: {
-			overrideInvalidQuantity( e: InputEvent ) {
+			overrideInvalidQuantity: withSyncEvent( ( e: InputEvent ) => {
 				const input = e.target as HTMLInputElement;
 				const qty = input.value;
 
@@ -911,7 +911,7 @@ const { state: cartItemState } = store(
 				}
 
 				cartItemState.cartItem.quantity = finalQuantity;
-			},
+			} ),
 
 			*changeQuantity(): Generator< unknown, void > {
 				const variation = cartItemState.cartItem.variation.map(
