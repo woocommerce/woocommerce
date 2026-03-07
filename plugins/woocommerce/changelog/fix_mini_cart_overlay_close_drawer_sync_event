@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Fix - Wrap overlayCloseDrawer action in withSyncEvent() to resolve WordPress 7.0 deprecation warning when accessing event.currentTarget synchronously.
+Fix - Wrap overlayCloseDrawer and overrideInvalidQuantity actions in withSyncEvent() to resolve WordPress 7.0 deprecation warnings when accessing event.currentTarget and event.target synchronously in Interactivity API store actions.
