@@ -65,7 +65,7 @@ async function setup( attributes: BlockAttributes ) {
 			},
 		},
 	];
-	return initializeEditor( testBlock );
+	return initializeEditor( testBlock, { isPreviewMode: true } );
 }
 
 /**

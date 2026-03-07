@@ -78,7 +78,9 @@ const RatingFilterEdit = ( props: BlockEditProps< Attributes > ) => {
 	);
 
 	const isLoading =
-		! isPreviewMode && filteredCountsLoading && displayedOptions.length === 0;
+		! isPreviewMode &&
+		filteredCountsLoading &&
+		displayedOptions.length === 0;
 
 	const initialFilters = useMemo(
 		() => getActiveFilters( 'rating_filter' ),
