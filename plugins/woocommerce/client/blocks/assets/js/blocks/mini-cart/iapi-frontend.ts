@@ -316,12 +316,12 @@ store< MiniCart >(
 				state.miniCartButtonRef?.focus();
 			},
 
-			overlayCloseDrawer( e: MouseEvent ) {
+			overlayCloseDrawer: withSyncEvent( ( e: MouseEvent ) => {
 				// Only close the drawer if the overlay itself was clicked.
 				if ( e.target === e.currentTarget ) {
 					miniCartActions.closeDrawer();
 				}
-			},
+			} ),
 
 			handleOverlayKeydown: withSyncEvent( ( e: KeyboardEvent ) => {
 				if ( state.isOpen ) {
