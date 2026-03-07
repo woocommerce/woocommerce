@@ -8935,12 +8935,6 @@ parameters:
 			path: includes/class-wc-ajax.php
 
 		-
-			message: '#^Parameter \#1 \$cart_item_key of method WC_Cart\:\:remove_cart_item\(\) expects string, array\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
 			message: '#^Parameter \#1 \$coupon_code of method WC_Cart\:\:remove_coupon\(\) expects string, string\|false given\.$#'
 			identifier: argument.type
 			count: 1
