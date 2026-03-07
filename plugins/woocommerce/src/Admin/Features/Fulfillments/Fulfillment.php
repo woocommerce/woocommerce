@@ -272,14 +272,19 @@ class Fulfillment extends \WC_Data {
 	 */
 	public function get_tracking_number(): ?string {
 		$value = $this->get_meta( '_tracking_number', true );
+		if ( ! is_scalar( $value ) ) {
+			return null;
+		}
+
+		$value = (string) $value;
 		return '' !== $value ? $value : null;
 	}
 
 	/**
 	 * Set the tracking number.
 	 *
-	 * @since 10.7.0
-	 * @param string $tracking_number Tracking number.
+	 * `@since` 10.7.0
+	 * `@param` string $tracking_number Tracking number.
 	 */
 	public function set_tracking_number( string $tracking_number ): void {
 		$this->update_meta_data( '_tracking_number', $tracking_number );
@@ -288,19 +293,24 @@ class Fulfillment extends \WC_Data {
 	/**
 	 * Get the shipping provider.
 	 *
-	 * @since 10.7.0
-	 * @return string|null Shipping provider slug.
+	 * `@since` 10.7.0
+	 * `@return` string|null Shipping provider slug.
 	 */
 	public function get_shipping_provider(): ?string {
 		$value = $this->get_meta( '_shipping_provider', true );
+		if ( ! is_scalar( $value ) ) {
+			return null;
+		}
+
+		$value = (string) $value;
 		return '' !== $value ? $value : null;
 	}
 
 	/**
 	 * Set the shipping provider.
 	 *
-	 * @since 10.7.0
-	 * @param string $shipping_provider Shipping provider slug.
+	 * `@since` 10.7.0
+	 * `@param` string $shipping_provider Shipping provider slug.
 	 */
 	public function set_shipping_provider( string $shipping_provider ): void {
 		$this->update_meta_data( '_shipping_provider', $shipping_provider );
@@ -309,22 +319,28 @@ class Fulfillment extends \WC_Data {
 	/**
 	 * Get the tracking URL.
 	 *
-	 * @since 10.7.0
-	 * @return string|null Tracking URL.
+	 * `@since` 10.7.0
+	 * `@return` string|null Tracking URL.
 	 */
 	public function get_tracking_url(): ?string {
 		$value = $this->get_meta( '_tracking_url', true );
+		if ( ! is_scalar( $value ) ) {
+			return null;
+		}
+
+		$value = (string) $value;
 		return '' !== $value ? $value : null;
 	}
 
 	/**
 	 * Set the tracking URL.
 	 *
-	 * @since 10.7.0
-	 * @param string $tracking_url Tracking URL.
+	 * `@since` 10.7.0
+	 * `@param` string $tracking_url Tracking URL.
 	 */
 	public function set_tracking_url( string $tracking_url ): void {
 		$this->update_meta_data( '_tracking_url', $tracking_url );
+	}
 	}
 
 	/**
