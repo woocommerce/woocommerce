@@ -106,6 +106,16 @@ class WC_Product_Factory {
 		// Allow the overriding of the lookup in this function. Return the product type here.
 		$override = apply_filters( 'woocommerce_product_type_query', false, $product_id );
 		if ( ! $override ) {
+			// When per-type post types are enabled, resolve type from post type directly.
+			if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_type_post_types' ) ) {
+				$post_type = get_post_type( $product_id );
+				if ( $post_type ) {
+					$type = wc_post_type_to_product_type( $post_type );
+					if ( false !== $type ) {
+						return $type;
+					}
+				}
+			}
 			return WC_Data_Store::load( 'product' )->get_product_type( $product_id );
 		} else {
 			return $override;
@@ -132,7 +142,7 @@ class WC_Product_Factory {
 	private function get_product_id( $product ) {
 		global $post;
 
-		if ( false === $product && isset( $post, $post->ID ) && 'product' === get_post_type( $post->ID ) ) {
+		if ( false === $product && isset( $post, $post->ID ) && wc_is_product_post_type( get_post_type( $post->ID ) ) ) {
 			return absint( $post->ID );
 		} elseif ( is_numeric( $product ) ) {
 			return $product;

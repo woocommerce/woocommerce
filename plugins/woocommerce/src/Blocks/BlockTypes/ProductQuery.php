@@ -263,7 +263,9 @@ class ProductQuery extends AbstractBlock {
 			'offset'         => $query['offset'],
 			'post__in'       => array(),
 			'post_status'    => ProductStatus::PUBLISH,
-			'post_type'      => 'product',
+			'post_type'      => \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_type_post_types' )
+				? array_values( array_diff( wc_get_product_post_types(), array( 'product_variation' ) ) )
+				: 'product',
 			'tax_query'      => array(),
 		);
 

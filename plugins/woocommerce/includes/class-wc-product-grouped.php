@@ -27,6 +27,18 @@ class WC_Product_Grouped extends WC_Product {
 	);
 
 	/**
+	 * Initialize grouped product.
+	 *
+	 * @param WC_Product|int $product Product instance or ID.
+	 */
+	public function __construct( $product = 0 ) {
+		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_type_post_types' ) ) {
+			$this->post_type = 'wc_product_grouped';
+		}
+		parent::__construct( $product );
+	}
+
+	/**
 	 * Get internal type.
 	 *
 	 * @return string

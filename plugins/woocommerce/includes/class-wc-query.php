@@ -412,7 +412,7 @@ class WC_Query {
 				add_filter( 'wpseo_metadesc', array( $this, 'wpseo_metadesc' ) );
 				add_filter( 'wpseo_metakey', array( $this, 'wpseo_metakey' ) );
 			}
-		} elseif ( ! $q->is_post_type_archive( 'product' ) && ! $q->is_tax( get_object_taxonomies( 'product' ) ) ) {
+		} elseif ( ! $q->is_post_type_archive( 'product' ) && ! $q->is_tax( get_object_taxonomies( 'product' ) ) && ! ( function_exists( 'wc_is_product_post_type' ) && $q->is_post_type_archive( wc_get_product_post_types() ) ) ) {
 			// Only apply to product categories, the product post archive, the shop page, product tags, and product attribute taxonomies.
 			return;
 		}

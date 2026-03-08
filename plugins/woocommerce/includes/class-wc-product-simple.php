@@ -22,6 +22,9 @@ class WC_Product_Simple extends WC_Product {
 	 * @param WC_Product|int $product Product instance or ID.
 	 */
 	public function __construct( $product = 0 ) {
+		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_type_post_types' ) ) {
+			$this->post_type = 'wc_product_simple';
+		}
 		$this->supports[] = 'ajax_add_to_cart';
 		parent::__construct( $product );
 	}

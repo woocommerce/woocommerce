@@ -813,6 +813,8 @@ final class WooCommerce {
 
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			include_once WC_ABSPATH . 'includes/class-wc-cli.php';
+			\Automattic\WooCommerce\Internal\ProductTypePostTypes\MigrationCLICommand::register();
+			\Automattic\WooCommerce\Internal\ProductTypePostTypes\PerformanceBenchmarkCLICommand::register();
 		}
 
 		if ( $this->is_request( 'admin' ) ) {

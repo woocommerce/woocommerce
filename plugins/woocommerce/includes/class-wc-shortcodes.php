@@ -340,7 +340,7 @@ class WC_Shortcodes {
 			return '';
 		}
 
-		$product = is_object( $product_data ) && in_array( $product_data->post_type, array( 'product', 'product_variation' ), true ) ? wc_setup_product_data( $product_data ) : false;
+		$product = is_object( $product_data ) && wc_is_product_post_type( $product_data->post_type ) ? wc_setup_product_data( $product_data ) : false;
 
 		if ( ! $product ) {
 			return '';
@@ -390,7 +390,7 @@ class WC_Shortcodes {
 			return '';
 		}
 
-		$product = is_object( $product_data ) && in_array( $product_data->post_type, array( 'product', 'product_variation' ), true ) ? wc_setup_product_data( $product_data ) : false;
+		$product = is_object( $product_data ) && wc_is_product_post_type( $product_data->post_type ) ? wc_setup_product_data( $product_data ) : false;
 
 		if ( ! $product ) {
 			return '';
@@ -543,9 +543,13 @@ class WC_Shortcodes {
 			return '';
 		}
 
+		$shortcode_post_type = \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_type_post_types' )
+			? array_values( array_diff( wc_get_product_post_types(), array( 'product_variation' ) ) )
+			: 'product';
+
 		$args = array(
 			'posts_per_page'      => 1,
-			'post_type'           => 'product',
+			'post_type'           => $shortcode_post_type,
 			'post_status'         => $product_status,
 			'ignore_sticky_posts' => 1,
 			'no_found_rows'       => 1,
@@ -558,7 +562,9 @@ class WC_Shortcodes {
 				'compare' => '=',
 			);
 
-			$args['post_type'] = array( 'product', 'product_variation' );
+			$args['post_type'] = \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_type_post_types' )
+				? wc_get_product_post_types()
+				: array( 'product', 'product_variation' );
 		}
 
 		if ( isset( $atts['id'] ) ) {
@@ -598,7 +604,7 @@ class WC_Shortcodes {
 			// Get the parent product object.
 			$args = array(
 				'posts_per_page'      => 1,
-				'post_type'           => 'product',
+				'post_type'           => $shortcode_post_type,
 				'post_status'         => ProductStatus::PUBLISH,
 				'ignore_sticky_posts' => 1,
 				'no_found_rows'       => 1,

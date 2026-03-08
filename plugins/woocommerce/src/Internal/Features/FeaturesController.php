@@ -591,6 +591,18 @@ class FeaturesController {
 				'is_experimental'              => true,
 				'disable_ui'                   => false,
 			),
+			'product_type_post_types'            => array(
+				'name'                         => __( 'Product type post types', 'woocommerce' ),
+				'description'                  => __(
+					'Register each product type (simple, variable, grouped, external) as its own custom post type instead of using the product_type taxonomy.',
+					'woocommerce'
+				),
+				'enabled_by_default'           => false,
+				'is_experimental'              => true,
+				'disable_ui'                   => true,
+				'skip_compatibility_checks'    => false,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::INCOMPATIBLE,
+			),
 		);
 
 		if ( ! $tracking_enabled ) {

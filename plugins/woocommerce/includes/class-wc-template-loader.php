@@ -159,7 +159,7 @@ class WC_Template_Loader {
 	 */
 	private static function get_template_loader_default_file() {
 		if (
-			is_singular( 'product' ) &&
+			is_product() &&
 			! self::has_block_template( 'single-product' )
 		) {
 			$default_file = 'single-product.php';
@@ -212,7 +212,7 @@ class WC_Template_Loader {
 			}
 		}
 
-		if ( is_singular( 'product' ) ) {
+		if ( is_product() ) {
 			$object       = get_queried_object();
 			$name_decoded = urldecode( $object->post_name );
 			if ( $name_decoded !== $object->post_name ) {

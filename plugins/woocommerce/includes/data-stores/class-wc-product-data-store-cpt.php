@@ -104,6 +104,23 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 */
 	protected $updated_props = array();
 
+	/**
+	 * Get the SQL IN clause for all product post types, for use in raw queries.
+	 *
+	 * @param bool $include_variations Whether to include product_variation.
+	 * @return string SQL fragment like "'product', 'product_variation'" or "'wc_product_simple', ...".
+	 */
+	protected static function get_product_post_types_sql( $include_variations = true ) {
+		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_type_post_types' ) ) {
+			$types = wc_get_product_post_types();
+			if ( ! $include_variations ) {
+				$types = array_diff( $types, array( 'product_variation' ) );
+			}
+		} else {
+			$types = $include_variations ? array( 'product', 'product_variation' ) : array( 'product' );
+		}
+		return implode( ', ', array_map( function ( $t ) { return "'" . esc_sql( $t ) . "'"; }, $types ) );
+	}
 
 	/**
 	 * Method to obtain DB lock on SKU to make sure we only
@@ -203,11 +220,16 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$product->set_date_created( time() );
 		}
 
+		$create_post_type = 'product';
+		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_type_post_types' ) ) {
+			$create_post_type = wc_product_type_to_post_type( $product->get_type() );
+		}
+
 		$id = wp_insert_post(
 			apply_filters(
 				'woocommerce_new_product_data',
 				array(
-					'post_type'      => 'product',
+					'post_type'      => $create_post_type,
 					'post_status'    => $product->get_status() ? $product->get_status() : ProductStatus::PUBLISH,
 					'post_author'    => get_current_user_id(),
 					'post_title'     => $product->get_name() ? $product->get_name() : __( 'Product', 'woocommerce' ),
@@ -274,7 +296,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$product->set_defaults();
 		$post_object = get_post( $product->get_id() );
 
-		if ( ! $product->get_id() || ! $post_object || 'product' !== $post_object->post_type ) {
+		if ( ! $product->get_id() || ! $post_object || ! wc_is_product_post_type( $post_object->post_type ) ) {
 			throw new Exception( __( 'Invalid product.', 'woocommerce' ) );
 		}
 
@@ -325,6 +347,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		// Only update the post when the post data changes.
 		if ( array_intersect( array( 'description', 'short_description', 'name', 'parent_id', 'reviews_allowed', 'status', 'menu_order', 'date_created', 'date_modified', 'slug', 'post_password' ), array_keys( $changes ) ) ) {
+			$update_post_type = 'product';
+			if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_type_post_types' ) ) {
+				$update_post_type = wc_product_type_to_post_type( $product->get_type() );
+			}
+
 			$post_data = array(
 				'post_content'   => $product->get_description( 'edit' ),
 				'post_excerpt'   => $product->get_short_description( 'edit' ),
@@ -335,7 +362,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				'menu_order'     => $product->get_menu_order( 'edit' ),
 				'post_password'  => $product->get_post_password( 'edit' ),
 				'post_name'      => $product->get_slug( 'edit' ),
-				'post_type'      => 'product',
+				'post_type'      => $update_post_type,
 			);
 			if ( $product->get_date_created( 'edit' ) ) {
 				$post_data['post_date']     = gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getOffsetTimestamp() );
@@ -404,8 +431,14 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @param array      $args Array of args to pass to the delete method.
 	 */
 	public function delete( &$product, $args = array() ) {
-		$id        = $product->get_id();
-		$post_type = $product->is_type( ProductType::VARIATION ) ? 'product_variation' : 'product';
+		$id = $product->get_id();
+		if ( $product->is_type( ProductType::VARIATION ) ) {
+			$post_type = 'product_variation';
+		} elseif ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_type_post_types' ) ) {
+			$post_type = wc_product_type_to_post_type( $product->get_type() );
+		} else {
+			$post_type = 'product';
+		}
 
 		$args = wp_parse_args(
 			$args,
@@ -1128,7 +1161,23 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$old_type = WC_Product_Factory::get_product_type( $product->get_id() );
 		$new_type = $product->get_type();
 
-		wp_set_object_terms( $product->get_id(), $new_type, 'product_type' );
+		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_type_post_types' ) ) {
+			// Update the post type directly instead of using taxonomy.
+			$new_post_type     = wc_product_type_to_post_type( $new_type );
+			$current_post_type = get_post_type( $product->get_id() );
+
+			if ( $current_post_type !== $new_post_type ) {
+				wp_update_post(
+					array(
+						'ID'        => $product->get_id(),
+						'post_type' => $new_post_type,
+					)
+				);
+			}
+		} else {
+			wp_set_object_terms( $product->get_id(), $new_type, 'product_type' );
+		}
+
 		update_post_meta( $product->get_id(), '_product_version', Constants::get_constant( 'WC_VERSION' ) );
 
 		// Action for the transition.
@@ -1199,6 +1248,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$outofstock_where = ' AND exclude_join.object_id IS NULL';
 		}
 
+		$all_product_types_sql     = self::get_product_post_types_sql( true );
+		$non_variation_types_sql   = self::get_product_post_types_sql( false );
+
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		return $wpdb->get_results(
 			"
@@ -1206,13 +1258,13 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			FROM {$wpdb->posts} AS posts
 			INNER JOIN {$wpdb->wc_product_meta_lookup} AS lookup ON posts.ID = lookup.product_id
 			$outofstock_join
-			WHERE posts.post_type IN ( 'product', 'product_variation' )
+			WHERE posts.post_type IN ( $all_product_types_sql )
 			AND posts.post_status = 'publish'
 			AND lookup.onsale = 1
 			$outofstock_where
 			AND posts.post_parent NOT IN (
 				SELECT ID FROM `$wpdb->posts` as posts
-				WHERE posts.post_type = 'product'
+				WHERE posts.post_type IN ( $non_variation_types_sql )
 				AND posts.post_parent = 0
 				AND posts.post_status != 'publish'
 			)
@@ -1232,10 +1284,13 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 */
 	public function get_featured_product_ids() {
 		$product_visibility_term_ids = wc_get_product_visibility_term_ids();
+		$featured_post_types         = \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_type_post_types' )
+			? wc_get_product_post_types()
+			: array( 'product', 'product_variation' );
 
 		return get_posts(
 			array(
-				'post_type'      => array( 'product', 'product_variation' ),
+				'post_type'      => $featured_post_types,
 				'posts_per_page' => -1,
 				'post_status'    => 'publish',
 				'tax_query'      => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
@@ -1268,15 +1323,18 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	public function is_existing_sku( $product_id, $sku ) {
 		global $wpdb;
 
+		$product_types_sql = self::get_product_post_types_sql( true );
+
 		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
 		return (bool) $wpdb->get_var(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$wpdb->prepare(
 				"
 				SELECT posts.ID
 				FROM {$wpdb->posts} as posts
 				INNER JOIN {$wpdb->wc_product_meta_lookup} AS lookup ON posts.ID = lookup.product_id
 				WHERE
-				posts.post_type IN ( 'product', 'product_variation' )
+				posts.post_type IN ( $product_types_sql )
 				AND posts.post_status != 'trash'
 				AND lookup.sku = %s
 				AND lookup.product_id <> %d
@@ -1299,15 +1357,18 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	public function is_existing_global_unique_id( $product_id, $global_unique_id ) {
 		global $wpdb;
 
+		$product_types_sql = self::get_product_post_types_sql( true );
+
 		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
 		return (bool) $wpdb->get_var(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$wpdb->prepare(
 				"
 				SELECT posts.ID
 				FROM {$wpdb->posts} as posts
 				INNER JOIN {$wpdb->wc_product_meta_lookup} AS lookup ON posts.ID = lookup.product_id
 				WHERE
-				posts.post_type IN ( 'product', 'product_variation' )
+				posts.post_type IN ( $product_types_sql )
 				AND posts.post_status != 'trash'
 				AND lookup.global_unique_id = %s
 				AND lookup.product_id <> %d
@@ -1329,15 +1390,18 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	public function get_product_id_by_sku( $sku ) {
 		global $wpdb;
 
+		$product_types_sql = self::get_product_post_types_sql( true );
+
 		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
 		$id = $wpdb->get_var(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$wpdb->prepare(
 				"
 				SELECT posts.ID
 				FROM {$wpdb->posts} as posts
 				INNER JOIN {$wpdb->wc_product_meta_lookup} AS lookup ON posts.ID = lookup.product_id
 				WHERE
-				posts.post_type IN ( 'product', 'product_variation' )
+				posts.post_type IN ( $product_types_sql )
 				AND posts.post_status != 'trash'
 				AND lookup.sku = %s
 				LIMIT 1
@@ -1359,15 +1423,18 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	public function get_product_id_by_global_unique_id( $global_unique_id ) {
 		global $wpdb;
 
+		$product_types_sql = self::get_product_post_types_sql( true );
+
 		// phpcs:ignore WordPress.VIP.DirectDatabaseQuery.DirectQuery
 		$id = $wpdb->get_var(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$wpdb->prepare(
 				"
 				SELECT posts.ID
 				FROM {$wpdb->posts} as posts
 				INNER JOIN {$wpdb->wc_product_meta_lookup} AS lookup ON posts.ID = lookup.product_id
 				WHERE
-				posts.post_type IN ( 'product', 'product_variation' )
+				posts.post_type IN ( $product_types_sql )
 				AND posts.post_status != 'trash'
 				AND lookup.global_unique_id = %s
 				LIMIT 1
@@ -1678,6 +1745,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$exclude_term_ids[] = $product_visibility_term_ids[ ProductStockStatus::OUT_OF_STOCK ];
 		}
 
+		$non_variation_types_sql = self::get_product_post_types_sql( false );
+
 		$query = array(
 			'fields' => "
 				SELECT DISTINCT ID FROM {$wpdb->posts} p
@@ -1686,7 +1755,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			'where'  => "
 				WHERE 1=1
 				AND p.post_status = 'publish'
-				AND p.post_type = 'product'
+				AND p.post_type IN ( $non_variation_types_sql )
 
 			",
 			'limits' => '
@@ -1967,7 +2036,14 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			return $custom_results;
 		}
 
-		$post_types   = $include_variations ? array( 'product', 'product_variation' ) : array( 'product' );
+		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_type_post_types' ) ) {
+			$post_types = wc_get_product_post_types();
+			if ( ! $include_variations ) {
+				$post_types = array_diff( $post_types, array( 'product_variation' ) );
+			}
+		} else {
+			$post_types = $include_variations ? array( 'product', 'product_variation' ) : array( 'product' );
+		}
 		$join_query   = '';
 		$type_where   = '';
 		$status_where = '';
@@ -2116,7 +2192,13 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		$post_type = get_post_type( $product_id );
 
-		if ( 'product_variation' === $post_type ) {
+		// When per-type post types are enabled, resolve from post type directly.
+		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_type_post_types' ) ) {
+			$product_type = wc_post_type_to_product_type( $post_type );
+			if ( false === $product_type ) {
+				$product_type = false;
+			}
+		} elseif ( 'product_variation' === $post_type ) {
 			$product_type = ProductType::VARIATION;
 		} elseif ( 'product' === $post_type ) {
 			$terms        = get_the_terms( $product_id, 'product_type' );
@@ -2213,7 +2295,23 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		}
 
 		// Handle product types.
-		if ( ProductType::VARIATION === $query_vars['type'] ) {
+		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_type_post_types' ) ) {
+			// Map type(s) directly to post types — no tax_query needed.
+			$types = (array) $query_vars['type'];
+			$post_types_for_query = array();
+
+			foreach ( $types as $type ) {
+				$post_types_for_query[] = wc_product_type_to_post_type( $type );
+			}
+
+			$post_types_for_query = array_unique( $post_types_for_query );
+
+			if ( 1 === count( $post_types_for_query ) ) {
+				$wp_query_args['post_type'] = reset( $post_types_for_query );
+			} else {
+				$wp_query_args['post_type'] = $post_types_for_query;
+			}
+		} elseif ( ProductType::VARIATION === $query_vars['type'] ) {
 			$wp_query_args['post_type'] = 'product_variation';
 		} elseif ( is_array( $query_vars['type'] ) && in_array( ProductType::VARIATION, $query_vars['type'], true ) ) {
 			$wp_query_args['post_type']   = array( 'product_variation', 'product' );
@@ -2438,7 +2536,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		if ( isset( $query_vars['return'] ) && 'objects' === $query_vars['return'] && ! empty( $query->posts ) ) {
 			// Prime caches before grabbing objects.
-			update_post_caches( $query->posts, array( 'product', 'product_variation' ) );
+			$cache_post_types = \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_type_post_types' )
+				? wc_get_product_post_types()
+				: array( 'product', 'product_variation' );
+			update_post_caches( $query->posts, $cache_post_types );
 		}
 
 		$products = ( isset( $query_vars['return'] ) && 'ids' === $query_vars['return'] ) ? $query->posts : array_filter( array_map( 'wc_get_product', $query->posts ) );

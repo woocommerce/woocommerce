@@ -29,6 +29,18 @@ class WC_Product_External extends WC_Product {
 	);
 
 	/**
+	 * Initialize external product.
+	 *
+	 * @param WC_Product|int $product Product instance or ID.
+	 */
+	public function __construct( $product = 0 ) {
+		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_type_post_types' ) ) {
+			$this->post_type = 'wc_product_external';
+		}
+		parent::__construct( $product );
+	}
+
+	/**
 	 * Get internal type.
 	 *
 	 * @return string

@@ -33,6 +33,25 @@ class WC_Post_Types {
 		add_action( 'woocommerce_flush_rewrite_rules', array( __CLASS__, 'flush_rewrite_rules' ) );
 		add_filter( 'gutenberg_can_edit_post_type', array( __CLASS__, 'gutenberg_can_edit_post_type' ), 10, 2 );
 		add_filter( 'use_block_editor_for_post_type', array( __CLASS__, 'gutenberg_can_edit_post_type' ), 10, 2 );
+
+		// Attach product taxonomies to per-type post types when the feature is on.
+		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_type_post_types' ) ) {
+			$taxonomy_filters = array(
+				'woocommerce_taxonomy_objects_product_type',
+				'woocommerce_taxonomy_objects_product_visibility',
+				'woocommerce_taxonomy_objects_product_cat',
+				'woocommerce_taxonomy_objects_product_tag',
+				'woocommerce_taxonomy_objects_product_shipping_class',
+				'woocommerce_taxonomy_objects_pos_product_visibility',
+			);
+
+			foreach ( $taxonomy_filters as $filter ) {
+				add_filter( $filter, array( __CLASS__, 'add_product_type_post_types_to_taxonomy' ) );
+			}
+
+			// Also hook attribute taxonomies via a dynamic filter.
+			add_filter( 'woocommerce_register_taxonomy', array( __CLASS__, 'hook_attribute_taxonomy_filters' ) );
+		}
 	}
 
 	/**
@@ -484,6 +503,47 @@ class WC_Post_Types {
 			)
 		);
 
+		// Register per-type product post types when the feature flag is enabled.
+		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_type_post_types' ) ) {
+			$product_type_post_types = array(
+				'wc_product_simple'   => __( 'Simple products', 'woocommerce' ),
+				'wc_product_variable' => __( 'Variable products', 'woocommerce' ),
+				'wc_product_grouped'  => __( 'Grouped products', 'woocommerce' ),
+				'wc_product_external' => __( 'External products', 'woocommerce' ),
+			);
+
+			foreach ( $product_type_post_types as $post_type_name => $label ) {
+				register_post_type(
+					$post_type_name,
+					apply_filters(
+						'woocommerce_register_post_type_' . $post_type_name,
+						array(
+							'label'              => $label,
+							'public'             => true,
+							'publicly_queryable' => true,
+							'show_ui'            => false,
+							'show_in_menu'       => false,
+							'show_in_nav_menus'  => false,
+							'show_in_rest'       => true,
+							'hierarchical'       => false,
+							'supports'           => $supports,
+							'capability_type'    => 'product',
+							'map_meta_cap'       => true,
+							'rewrite'            => false,
+							'has_archive'        => false,
+							'query_var'          => false,
+						)
+					)
+				);
+			}
+
+			// Expand product slug resolution to include the new post types.
+			add_filter( 'pre_get_posts', array( __CLASS__, 'expand_product_post_type_query' ) );
+
+			// Ensure product permalinks use the /product/ slug regardless of post type.
+			add_filter( 'post_type_link', array( __CLASS__, 'product_type_post_type_link' ), 10, 2 );
+		}
+
 		wc_register_order_type(
 			'shop_order',
 			apply_filters(
@@ -758,7 +818,16 @@ class WC_Post_Types {
 	 * @return bool
 	 */
 	public static function gutenberg_can_edit_post_type( $can_edit, $post_type ) {
-		return 'product' === $post_type ? false : $can_edit;
+		if ( 'product' === $post_type ) {
+			return false;
+		}
+
+		// Also disable block editor for per-type product post types.
+		if ( function_exists( 'wc_is_product_post_type' ) && wc_is_product_post_type( $post_type ) && 'product_variation' !== $post_type ) {
+			return false;
+		}
+
+		return $can_edit;
 	}
 
 	/**
@@ -780,6 +849,97 @@ class WC_Post_Types {
 		$post_types[] = 'product';
 
 		return $post_types;
+	}
+
+	/**
+	 * Ensure product permalinks use the standard /product/ slug for all product post types.
+	 *
+	 * Since the new post types have rewrite=false, WordPress would generate
+	 * ugly ?wc_product_simple=slug URLs. This filter intercepts that and
+	 * generates the correct /product/slug/ URL.
+	 *
+	 * @param string  $post_link The post's permalink.
+	 * @param WP_Post $post      The post object.
+	 * @return string
+	 */
+	public static function product_type_post_type_link( $post_link, $post ) {
+		$product_post_types = array( 'wc_product_simple', 'wc_product_variable', 'wc_product_grouped', 'wc_product_external' );
+
+		if ( ! in_array( $post->post_type, $product_post_types, true ) ) {
+			return $post_link;
+		}
+
+		$permalinks = wc_get_permalink_structure();
+		$slug       = $post->post_name;
+
+		if ( ! empty( $permalinks['product_rewrite_slug'] ) ) {
+			return home_url( '/' . $permalinks['product_rewrite_slug'] . '/' . $slug . '/' );
+		}
+
+		// Fallback: use the 'product' post type permalink structure.
+		return home_url( '/product/' . $slug . '/' );
+	}
+
+	/**
+	 * Add per-type product post types to taxonomy object type arrays.
+	 *
+	 * @param array $post_types The current post types for the taxonomy.
+	 * @return array
+	 */
+	public static function add_product_type_post_types_to_taxonomy( $post_types ) {
+		$new_types = array( 'wc_product_simple', 'wc_product_variable', 'wc_product_grouped', 'wc_product_external' );
+		return array_unique( array_merge( $post_types, $new_types ) );
+	}
+
+	/**
+	 * Hook attribute taxonomy filters for per-type product post types.
+	 *
+	 * Since attribute taxonomies are dynamic (pa_*), we can't pre-register
+	 * filters for them in init(). Instead, we hook into the
+	 * woocommerce_register_taxonomy action and add filters for all known
+	 * attribute taxonomy names.
+	 */
+	public static function hook_attribute_taxonomy_filters() {
+		$attribute_taxonomies = wc_get_attribute_taxonomies();
+		if ( $attribute_taxonomies ) {
+			foreach ( $attribute_taxonomies as $tax ) {
+				$name = wc_attribute_taxonomy_name( $tax->attribute_name );
+				if ( $name ) {
+					add_filter( "woocommerce_taxonomy_objects_{$name}", array( __CLASS__, 'add_product_type_post_types_to_taxonomy' ) );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Expand product post type queries to include per-type post types.
+	 *
+	 * When the product_type_post_types feature is enabled, queries for the
+	 * 'product' post type on the frontend need to also include the new
+	 * per-type post types so that product slug resolution works correctly.
+	 *
+	 * @param WP_Query $query The WP_Query instance.
+	 */
+	public static function expand_product_post_type_query( $query ) {
+		if ( is_admin() || ! $query->is_main_query() ) {
+			return;
+		}
+
+		$post_type = $query->get( 'post_type' );
+
+		if ( 'product' === $post_type || ( is_array( $post_type ) && in_array( 'product', $post_type, true ) ) ) {
+			$product_post_types = function_exists( 'wc_get_product_post_types' )
+				? wc_get_product_post_types()
+				: array( 'product', 'wc_product_simple', 'wc_product_variable', 'wc_product_grouped', 'wc_product_external', 'product_variation' );
+
+			if ( is_array( $post_type ) ) {
+				$post_type = array_unique( array_merge( $post_type, $product_post_types ) );
+			} else {
+				$post_type = $product_post_types;
+			}
+
+			$query->set( 'post_type', $post_type );
+		}
 	}
 }
 

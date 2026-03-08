@@ -41,9 +41,16 @@ class ProductQuery implements QueryClausesGenerator {
 			'post_type'           => 'product',
 		);
 
+		$feature_enabled = \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_type_post_types' );
+
+		if ( $feature_enabled ) {
+			// Default to all non-variation product post types.
+			$args['post_type'] = array_values( array_diff( wc_get_product_post_types(), array( 'product_variation' ) ) );
+		}
+
 		// If searching for a specific SKU or slug, allow any post type.
 		if ( ! empty( $request['sku'] ) || ! empty( $request['slug'] ) ) {
-			$args['post_type'] = array( 'product', 'product_variation' );
+			$args['post_type'] = $feature_enabled ? wc_get_product_post_types() : array( 'product', 'product_variation' );
 		}
 
 		// Taxonomy query to filter products by type, category, tag, shipping class, and attribute.
@@ -51,7 +58,10 @@ class ProductQuery implements QueryClausesGenerator {
 
 		// Filter product type by slug.
 		if ( ! empty( $request['type'] ) ) {
-			if ( ProductType::VARIATION === $request['type'] ) {
+			if ( $feature_enabled ) {
+				// Map type to post type directly.
+				$args['post_type'] = wc_product_type_to_post_type( $request['type'] );
+			} elseif ( ProductType::VARIATION === $request['type'] ) {
 				$args['post_type'] = 'product_variation';
 			} else {
 				$args['post_type'] = 'product';

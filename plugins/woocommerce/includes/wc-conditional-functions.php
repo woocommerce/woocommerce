@@ -32,7 +32,16 @@ if ( ! function_exists( 'is_shop' ) ) {
 	 * @return bool
 	 */
 	function is_shop() {
-		return ( is_post_type_archive( 'product' ) || is_page( wc_get_page_id( 'shop' ) ) );
+		if ( is_post_type_archive( 'product' ) || is_page( wc_get_page_id( 'shop' ) ) ) {
+			return true;
+		}
+
+		// When per-type post types are on, check if this is an archive of any product post type.
+		if ( function_exists( 'wc_get_product_post_types' ) && \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_type_post_types' ) ) {
+			return is_post_type_archive( wc_get_product_post_types() );
+		}
+
+		return false;
 	}
 }
 
@@ -82,6 +91,9 @@ if ( ! function_exists( 'is_product' ) ) {
 	 * @return bool
 	 */
 	function is_product() {
+		if ( function_exists( 'wc_get_product_post_types' ) && \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_type_post_types' ) ) {
+			return is_singular( wc_get_product_post_types() );
+		}
 		return is_singular( array( 'product' ) );
 	}
 }

@@ -959,6 +959,108 @@ function wc_get_product_types() {
 }
 
 /**
+ * Get all product post types.
+ *
+ * When the product_type_post_types feature flag is enabled, returns the
+ * per-type post types. Otherwise returns the legacy 'product' post type.
+ * Always includes 'product_variation'.
+ *
+ * @return array
+ */
+function wc_get_product_post_types() {
+	if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_type_post_types' ) ) {
+		$post_types = array(
+			'wc_product_simple',
+			'wc_product_variable',
+			'wc_product_grouped',
+			'wc_product_external',
+			'product_variation',
+		);
+
+		/**
+		 * Filter the product post types when per-type post types are enabled.
+		 *
+		 * Extensions that register custom product types as post types should
+		 * filter this to include their own post types.
+		 *
+		 * @param array $post_types The product post types.
+		 */
+		return apply_filters( 'wc_product_post_types', $post_types );
+	}
+
+	return array( 'product', 'product_variation' );
+}
+
+/**
+ * Map a product type string to its corresponding post type name.
+ *
+ * @param string $product_type The product type (e.g. 'simple', 'variable').
+ * @return string The post type name (e.g. 'wc_product_simple').
+ */
+function wc_product_type_to_post_type( $product_type ) {
+	$map = array(
+		ProductType::SIMPLE   => 'wc_product_simple',
+		ProductType::VARIABLE => 'wc_product_variable',
+		ProductType::GROUPED  => 'wc_product_grouped',
+		ProductType::EXTERNAL => 'wc_product_external',
+		ProductType::VARIATION => 'product_variation',
+	);
+
+	/**
+	 * Filter the product type to post type mapping.
+	 *
+	 * @param array $map The mapping of product type strings to post type names.
+	 */
+	$map = apply_filters( 'wc_product_type_to_post_type_map', $map );
+
+	return isset( $map[ $product_type ] ) ? $map[ $product_type ] : 'product';
+}
+
+/**
+ * Map a post type name to its corresponding product type string.
+ *
+ * @param string $post_type The post type name (e.g. 'wc_product_simple').
+ * @return string|false The product type string (e.g. 'simple'), or false if not a product post type.
+ */
+function wc_post_type_to_product_type( $post_type ) {
+	$map = array(
+		'wc_product_simple'   => ProductType::SIMPLE,
+		'wc_product_variable' => ProductType::VARIABLE,
+		'wc_product_grouped'  => ProductType::GROUPED,
+		'wc_product_external' => ProductType::EXTERNAL,
+		'product_variation'   => ProductType::VARIATION,
+		'product'             => ProductType::SIMPLE, // Legacy fallback: untyped products are simple.
+	);
+
+	/**
+	 * Filter the post type to product type mapping.
+	 *
+	 * @param array $map The mapping of post type names to product type strings.
+	 */
+	$map = apply_filters( 'wc_post_type_to_product_type_map', $map );
+
+	return isset( $map[ $post_type ] ) ? $map[ $post_type ] : false;
+}
+
+/**
+ * Check if a given post type is a product post type.
+ *
+ * @param string $post_type The post type to check.
+ * @return bool
+ */
+function wc_is_product_post_type( $post_type ) {
+	if ( 'product' === $post_type || 'product_variation' === $post_type ) {
+		return true;
+	}
+
+	if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_type_post_types' ) ) {
+		return in_array( $post_type, wc_get_product_post_types(), true );
+	}
+
+	return false;
+}
+
+/**
  * Check if product sku is unique.
  *
  * @since 2.2

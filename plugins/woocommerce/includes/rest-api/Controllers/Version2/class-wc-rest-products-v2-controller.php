@@ -368,11 +368,16 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 
 		// Filter product type by slug.
 		if ( ! empty( $request['type'] ) ) {
-			$tax_query[] = array(
-				'taxonomy' => 'product_type',
-				'field'    => 'slug',
-				'terms'    => $request['type'],
-			);
+			if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_type_post_types' ) ) {
+				// Map type to post type directly — no tax_query needed.
+				$args['post_type'] = wc_product_type_to_post_type( $request['type'] );
+			} else {
+				$tax_query[] = array(
+					'taxonomy' => 'product_type',
+					'field'    => 'slug',
+					'terms'    => $request['type'],
+				);
+			}
 		}
 
 		// Filter by attribute and term.
@@ -457,7 +462,15 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 		}
 
 		// Force the post_type argument, since it's not a user input variable.
-		if ( ! empty( $request['sku'] ) ) {
+		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'product_type_post_types' ) ) {
+			if ( ! empty( $request['sku'] ) ) {
+				$args['post_type'] = wc_get_product_post_types();
+			} elseif ( ! isset( $args['post_type'] ) || $this->post_type === $args['post_type'] ) {
+				// Query all product post types when no specific type filter was set.
+				$non_variation_types = array_diff( wc_get_product_post_types(), array( 'product_variation' ) );
+				$args['post_type']  = array_values( $non_variation_types );
+			}
+		} elseif ( ! empty( $request['sku'] ) ) {
 			$args['post_type'] = array( 'product', 'product_variation' );
 		} else {
 			$args['post_type'] = $this->post_type;
