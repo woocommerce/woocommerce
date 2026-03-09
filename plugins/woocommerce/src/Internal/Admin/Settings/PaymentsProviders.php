@@ -561,6 +561,41 @@ class PaymentsProviders {
 	}
 
 	/**
+	 * Check if the offline payment methods group is the last non-offline entry in an order map.
+	 *
+	 * This is used to detect whether the merchant has customized the provider ordering.
+	 * If the offline group is still at the bottom (its default position), new gateways
+	 * should be inserted above it. If the merchant has moved it, we respect their layout
+	 * and append new gateways at the end.
+	 *
+	 * @param array $order_map The payment providers order map.
+	 *
+	 * @return bool True if the offline group is the last non-offline entry, false otherwise.
+	 */
+	public function is_offline_group_last( array $order_map ): bool {
+		if ( ! isset( $order_map[ self::OFFLINE_METHODS_ORDERING_GROUP ] ) ) {
+			return false;
+		}
+
+		$offline_group_order = $order_map[ self::OFFLINE_METHODS_ORDERING_GROUP ];
+
+		// Check if any non-offline entry has an order higher than the offline group.
+		foreach ( $order_map as $id => $order ) {
+			if ( self::OFFLINE_METHODS_ORDERING_GROUP === $id ) {
+				continue;
+			}
+			if ( $this->is_offline_payment_method( $id ) ) {
+				continue;
+			}
+			if ( $order > $offline_group_order ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
 	 * Check if a payment gateway is a shell payment gateway.
 	 *
 	 * A shell payment gateway is generally one that has no method title or description.
@@ -1057,8 +1092,17 @@ class PaymentsProviders {
 				}
 			}
 
-			// Add the missing payment gateway at the end.
-			$order_map[ $id ] = empty( $order_map ) ? 0 : max( $order_map ) + 1;
+			// If the offline PMs group is the last non-offline entry, place above it.
+			// Otherwise (custom ordering or no offline group), place at the end.
+			if ( $this->is_offline_group_last( $order_map ) ) {
+				$order_map = Utils::order_map_add_at_order(
+					$order_map,
+					$id,
+					$order_map[ self::OFFLINE_METHODS_ORDERING_GROUP ]
+				);
+			} else {
+				$order_map[ $id ] = empty( $order_map ) ? 0 : max( $order_map ) + 1;
+			}
 		}
 
 		$handled_suggestion_ids = array_unique( $handled_suggestion_ids );

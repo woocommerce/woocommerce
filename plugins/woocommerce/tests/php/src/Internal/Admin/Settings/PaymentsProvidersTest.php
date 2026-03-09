@@ -5943,4 +5943,182 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 
 		$this->sut->reset_memo();
 	}
+
+	/**
+	 * @dataProvider data_provider_is_offline_group_last
+	 *
+	 * @param array $order_map The order map to test.
+	 * @param bool  $expected  Whether the offline group should be considered last.
+	 */
+	public function test_is_offline_group_last( array $order_map, bool $expected ) {
+		$sut = $this->sut;
+
+		$this->assertSame( $expected, $sut->is_offline_group_last( $order_map ) );
+	}
+
+	/**
+	 * Data provider for test_is_offline_group_last.
+	 */
+	public function data_provider_is_offline_group_last(): array {
+		return array(
+			'empty order map'                       => array(
+				array(),
+				false,
+			),
+			'no offline group in map'               => array(
+				array(
+					'gateway1' => 0,
+					'gateway2' => 1,
+				),
+				false,
+			),
+			'offline group is last'                 => array(
+				array(
+					'gateway1' => 0,
+					'gateway2' => 1,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 2,
+					'bacs'     => 3,
+					'cheque'   => 4,
+					'cod'      => 5,
+				),
+				true,
+			),
+			'offline group is last, no offline PMs' => array(
+				array(
+					'gateway1' => 0,
+					'gateway2' => 1,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 2,
+				),
+				true,
+			),
+			'gateway after offline group'           => array(
+				array(
+					'gateway1' => 0,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 1,
+					'bacs'     => 2,
+					'cheque'   => 3,
+					'cod'      => 4,
+					'gateway2' => 5,
+				),
+				false,
+			),
+			'offline group at start'                => array(
+				array(
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 0,
+					'bacs'     => 1,
+					'cheque'   => 2,
+					'cod'      => 3,
+					'gateway1' => 4,
+				),
+				false,
+			),
+			'only offline group and offline PMs'    => array(
+				array(
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 0,
+					'bacs'   => 1,
+					'cheque' => 2,
+				),
+				true,
+			),
+			'only offline group'                    => array(
+				array(
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 0,
+				),
+				true,
+			),
+		);
+	}
+
+	/**
+	 * @dataProvider data_provider_enhance_order_map_new_gateway_placement
+	 *
+	 * @param array    $gateway_ids     The gateway IDs to register.
+	 * @param array    $start_order_map The starting order map.
+	 * @param string   $new_gateway_id  The new gateway ID (present in gateway_ids but missing from start_order_map).
+	 * @param string[] $expected_order  The expected order of IDs after enhancement.
+	 */
+	public function test_enhance_order_map_new_gateway_placement(
+		array $gateway_ids,
+		array $start_order_map,
+		string $new_gateway_id,
+		array $expected_order
+	) {
+		// Mock payment gateways — all gateways including the new one are registered.
+		$this->mock_payment_gateways(
+			array_combine(
+				$gateway_ids,
+				array_map(
+					function () {
+						return array( 'enabled' => true );
+					},
+					$gateway_ids
+				)
+			)
+		);
+		// No suggestions for any gateway.
+		$this->mock_extension_suggestions
+			->expects( $this->any() )
+			->method( 'get_by_plugin_slug' )
+			->willReturn( null );
+
+		$sut = $this->sut;
+
+		$result = $sut->enhance_order_map( $start_order_map );
+
+		// Extract the order — keys sorted by value.
+		$actual_order = array_keys( $result );
+		// Filter to only the IDs we care about for assertion clarity.
+		$actual_order = array_values( array_intersect( $actual_order, $expected_order ) );
+
+		$this->assertSame( $expected_order, $actual_order );
+	}
+
+	/**
+	 * Data provider for test_enhance_order_map_new_gateway_placement.
+	 */
+	public function data_provider_enhance_order_map_new_gateway_placement(): array {
+		return array(
+			'new gateway placed above offline group (default ordering)'    => array(
+				// gateway_ids: all registered gateways.
+				array( 'gateway1', 'stripe', 'bacs', 'cheque', 'cod' ),
+				// start_order_map: existing map WITHOUT the new gateway.
+				array(
+					'gateway1' => 0,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 1,
+					'bacs'     => 2,
+					'cheque'   => 3,
+					'cod'      => 4,
+				),
+				// new_gateway_id.
+				'stripe',
+				// expected_order: stripe should be above offline group.
+				array( 'gateway1', 'stripe', PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP, 'bacs', 'cheque', 'cod' ),
+			),
+			'new gateway placed at end (custom ordering — offline group not last)' => array(
+				array( 'gateway1', 'stripe', 'bacs', 'cheque', 'cod' ),
+				array(
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 0,
+					'bacs'     => 1,
+					'cheque'   => 2,
+					'cod'      => 3,
+					'gateway1' => 4,
+				),
+				'stripe',
+				// expected_order: stripe at the end since offline group is not last.
+				array( PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP, 'bacs', 'cheque', 'cod', 'gateway1', 'stripe' ),
+			),
+			'multiple new gateways placed above offline group'            => array(
+				array( 'gateway1', 'stripe', 'paypal', 'bacs', 'cheque', 'cod' ),
+				array(
+					'gateway1' => 0,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 1,
+					'bacs'     => 2,
+					'cheque'   => 3,
+					'cod'      => 4,
+				),
+				'stripe', // We only check stripe here, paypal is also new.
+				array( 'gateway1', 'stripe', 'paypal', PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP, 'bacs', 'cheque', 'cod' ),
+			),
+		);
+	}
 }
