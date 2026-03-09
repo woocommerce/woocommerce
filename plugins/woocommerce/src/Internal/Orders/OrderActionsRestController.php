@@ -199,7 +199,7 @@ class OrderActionsRestController extends RestApiControllerBase {
 
 		if ( 'send_email' === $action_slug ) {
 			$args['template_id'] = array(
-				'description'       => __( 'The ID of the template to use for sending the email.', 'woocommerce' ),
+				'description'       => __( 'The email template to use. If omitted, the best template is auto-selected based on order status.', 'woocommerce' ),
 				'type'              => 'string',
 				'enum'              => $this->get_template_id_enum(),
 				'context'           => array( 'edit' ),
