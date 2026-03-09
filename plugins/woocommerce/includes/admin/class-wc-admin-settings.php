@@ -985,6 +985,9 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 					case 'relative_date_selector':
 						$value = wc_parse_relative_date_option( $raw_value );
 						break;
+					case 'password':
+						$value = wp_strip_all_tags( trim( $raw_value ) );
+						break;
 					default:
 						$value = wc_clean( $raw_value );
 						break;
