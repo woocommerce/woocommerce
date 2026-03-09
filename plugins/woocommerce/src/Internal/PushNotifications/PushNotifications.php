@@ -72,13 +72,11 @@ class PushNotifications {
 
 		$this->register_post_types();
 
-		wc_get_container()->get( PushTokenRestController::class )->register();
+		wc_get_container()->get( PendingNotificationStore::class )->register();
 
-		$store = wc_get_container()->get( PendingNotificationStore::class );
-		$store->register();
-
-		( new NewOrderNotificationTrigger( $store ) )->register();
-		( new NewReviewNotificationTrigger( $store ) )->register();
+		( new PushTokenRestController() )->register();
+		( new NewOrderNotificationTrigger() )->register();
+		( new NewReviewNotificationTrigger() )->register();
 	}
 
 	/**
