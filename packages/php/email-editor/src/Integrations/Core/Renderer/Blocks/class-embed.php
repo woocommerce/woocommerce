@@ -24,17 +24,18 @@ use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
  */
 class Embed extends Abstract_Block_Renderer {
 	/**
-	 * Maximum number of rich card embeds per email render.
+	 * Maximum number of embed page fetch attempts per email render.
 	 * Beyond this limit, embeds render as compact link cards (no HTTP fetch).
+	 * Counts attempts, not successes, to cap outbound HTTP requests.
 	 */
-	private const MAX_RICH_CARDS = 5;
+	private const MAX_EMBED_FETCHES = 5;
 
 	/**
-	 * Number of rich cards rendered so far by this instance.
+	 * Number of embed page fetch attempts so far by this instance.
 	 *
 	 * @var int
 	 */
-	private int $rich_card_count = 0;
+	private int $embed_fetch_count = 0;
 
 	/**
 	 * Supported audio providers with their configuration.
@@ -168,10 +169,10 @@ class Embed extends Abstract_Block_Renderer {
 			$url         = $this->extract_provider_url( $attr, $block_content );
 			$is_wp_embed = isset( $attr['type'] ) && 'wp-embed' === $attr['type'];
 			if ( ! empty( $url ) && $is_wp_embed ) {
-				if ( $this->rich_card_count >= self::MAX_RICH_CARDS ) {
+				if ( $this->embed_fetch_count >= self::MAX_EMBED_FETCHES ) {
 					return $this->render_compact_link_card( $url, $parsed_block, $rendering_context );
 				}
-				++$this->rich_card_count;
+				++$this->embed_fetch_count;
 				$card_result = $this->render_link_embed_card( $url, $parsed_block, $rendering_context );
 				if ( ! empty( $card_result ) ) {
 					return $card_result;
