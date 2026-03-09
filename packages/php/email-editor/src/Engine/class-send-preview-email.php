@@ -69,7 +69,7 @@ class Send_Preview_Email {
 		$post_id = $data['postId'];
 
 		$post    = $this->fetch_post( $post_id );
-		$subject = $post->post_title;
+		$subject = $this->get_preview_email_subject( $post );
 
 		$email_html_content = $this->render_html( $post );
 
@@ -83,7 +83,7 @@ class Send_Preview_Email {
 	 * @return string
 	 */
 	public function render_html( $post ): string {
-		$subject  = $post->post_title;
+		$subject  = $this->get_preview_email_subject( $post );
 		$language = get_bloginfo( 'language' );
 
 		// Add filter to set preview context for block renderers.
@@ -102,6 +102,25 @@ class Send_Preview_Email {
 		$rendered_data = apply_filters( 'woocommerce_email_editor_send_preview_email_rendered_data', $rendered_data, $post );
 
 		return $this->set_personalize_content( $rendered_data['html'] );
+	}
+
+	/**
+	 * Get the subject of the preview email.
+	 *
+	 * @param \WP_Post $post The WordPress post object.
+	 * @return string
+	 */
+	public function get_preview_email_subject( $post ): string {
+		/**
+		 * Filters the subject of the preview email before it is sent or rendered.
+		 *
+		 * @param string   $subject The email subject, defaults to the post title.
+		 * @param \WP_Post $post    The email post object.
+		 *
+		 * @since 2.9.0
+		 */
+		$subject = (string) apply_filters( 'woocommerce_email_editor_send_preview_email_subject', $post->post_title, $post );
+		return $subject;
 	}
 
 	/**

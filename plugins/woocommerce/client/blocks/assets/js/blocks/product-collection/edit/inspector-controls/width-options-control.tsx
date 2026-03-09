@@ -73,6 +73,7 @@ const WidthOptionsControl = ( {
 			</ToggleGroupControl>
 			{ widthType === WidthOptions.FIXED && (
 				<UnitControl
+					__next40pxDefaultSize
 					onChange={ ( value: string ) => {
 						setAttributes( {
 							dimensions: {
