@@ -9,3 +9,41 @@
 		list-style: none;
 	}
 }
+
+// Placeholder product cards shown in preview mode when the store has no products.
+// Uses WordPress/theme CSS custom properties so placeholders adapt to the active theme.
+.wc-block-product-template__placeholder {
+	padding: 12px 0;
+	text-align: center;
+
+	.wc-block-product-template__placeholder-image {
+		width: 100%;
+		aspect-ratio: 1;
+		background-color: var(--wp--preset--color--base-2, #f2f2f2);
+		border-radius: 2px;
+		margin-bottom: var(--wp--preset--spacing--20, 8px);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.wc-block-product-template__placeholder-icon {
+		width: 48px;
+		height: 48px;
+		color: var(--wp--preset--color--contrast-3, #ccc);
+	}
+
+	.wc-block-product-template__placeholder-title {
+		font-size: var(--wp--preset--font-size--medium, 24px);
+		line-height: 1.4;
+		color: var(--wp--preset--color--contrast, #1e1e1e);
+		margin-top: 0;
+		margin-bottom: 0.75rem;
+	}
+
+	.wc-block-product-template__placeholder-price {
+		font-size: var(--wp--preset--font-size--small, 14px);
+		color: var(--wp--preset--color--contrast-2, #757575);
+		margin-bottom: var(--wp--preset--spacing--20, 8px);
+	}
+}

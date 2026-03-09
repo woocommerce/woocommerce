@@ -17,7 +17,7 @@ import {
 import { Spinner } from '@wordpress/components';
 import { store as coreStore } from '@wordpress/core-data';
 import { ProductCollectionAttributes } from '@woocommerce/blocks/product-collection/types';
-import { getSettingWithCoercion } from '@woocommerce/settings';
+import { getSettingWithCoercion, SITE_CURRENCY } from '@woocommerce/settings';
 import { isNumber, ProductResponseItem } from '@woocommerce/types';
 import { ProductDataContextProvider } from '@woocommerce/shared-context';
 import { withProduct } from '@woocommerce/block-hocs';
@@ -396,8 +396,16 @@ const ProductTemplateEdit = (
 	const hasLayoutFlex = layoutType === 'flex' && columns > 1;
 	let customClassName = '';
 
-	// We don't want to apply layout styles if there's no products.
-	if ( products && products.length && hasLayoutFlex ) {
+	const isPreviewWithNoProducts =
+		__privateProductCollectionPreviewState?.isPreview &&
+		products &&
+		! products.length;
+
+	// Apply layout styles when products are present or when showing preview placeholders.
+	if (
+		( ( products && products.length ) || isPreviewWithNoProducts ) &&
+		hasLayoutFlex
+	) {
 		const dynamicGrid = `wc-block-product-template__responsive columns-${ columns }`;
 		const staticGrid = `is-flex-container columns-${ columns }`;
 
@@ -422,6 +430,51 @@ const ProductTemplateEdit = (
 	}
 
 	if ( ! products.length ) {
+		if ( __privateProductCollectionPreviewState?.isPreview ) {
+			const count = perPage ?? 4;
+			return (
+				<ul { ...blockProps }>
+					{ Array.from( { length: count } ).map( ( _, i ) => (
+						<li
+							key={ i }
+							className="wc-block-product wc-block-product-template__placeholder"
+						>
+							<div className="wc-block-product-template__placeholder-image">
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									viewBox="0 0 24 24"
+									fill="none"
+									stroke="currentColor"
+									strokeWidth="1.5"
+									className="wc-block-product-template__placeholder-icon"
+								>
+									<rect
+										x="3"
+										y="3"
+										width="18"
+										height="18"
+										rx="2"
+									/>
+									<circle cx="8.5" cy="8.5" r="1.5" />
+									<path d="M21 15l-5-5L5 21" />
+								</svg>
+							</div>
+							<h2 className="wc-block-components-product-title wc-block-product-template__placeholder-title">
+								{ __( 'Product name', 'woocommerce' ) }
+							</h2>
+							<div className="wc-block-product-template__placeholder-price">
+								{ `${ SITE_CURRENCY.prefix }9.99${ SITE_CURRENCY.suffix }` }
+							</div>
+							<div className="wp-block-button wc-block-components-product-button">
+								<span className="wp-block-button__link wp-element-button wc-block-components-product-button__button">
+									{ __( 'Add to cart', 'woocommerce' ) }
+								</span>
+							</div>
+						</li>
+					) ) }
+				</ul>
+			);
+		}
 		return (
 			<p { ...blockProps }>
 				{ ' ' }
