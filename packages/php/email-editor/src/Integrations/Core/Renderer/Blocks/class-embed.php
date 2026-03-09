@@ -714,7 +714,7 @@ class Embed extends Abstract_Block_Renderer {
 				'site_icon_url' => $cached['site_icon_url'],
 			);
 		}
-		if ( false !== $cached ) {
+		if ( is_string( $cached ) ) {
 			// Negative cache (empty string from previous failure).
 			return $empty_result;
 		}
