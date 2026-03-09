@@ -651,6 +651,9 @@ class PaymentsTest extends WC_Unit_Test_Case {
 		// Act.
 		$data = $this->sut->get_payment_providers( $location );
 
+		// Verify providers were returned.
+		$this->assertNotEmpty( $data );
+
 		// Assert: stripe should be between gateway1 and the offline group (compare order values).
 		$this->assertArrayHasKey( 'stripe', $captured_order_map, 'stripe should be in the order map' );
 		$this->assertGreaterThan( $captured_order_map['gateway1'], $captured_order_map['stripe'], 'stripe should be after gateway1' );
@@ -711,6 +714,9 @@ class PaymentsTest extends WC_Unit_Test_Case {
 
 		// Act.
 		$data = $this->sut->get_payment_providers( $location );
+
+		// Verify providers were returned.
+		$this->assertNotEmpty( $data );
 
 		// Assert: stripe should NOT be placed at the offline group's position (above-offline logic not triggered).
 		// In the custom ordering fallback, stripe is placed at count($payment_providers) — the old behavior.
