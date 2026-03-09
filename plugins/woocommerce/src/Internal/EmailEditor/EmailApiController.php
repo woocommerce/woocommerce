@@ -29,12 +29,20 @@ class EmailApiController {
 	private ?WCTransactionalEmailPostsManager $post_manager;
 
 	/**
+	 * The WooCommerce transactional email posts generator.
+	 *
+	 * @var WCTransactionalEmailPostsGenerator|null
+	 */
+	private ?WCTransactionalEmailPostsGenerator $posts_generator = null;
+
+	/**
 	 * Initialize the controller.
 	 *
 	 * @internal
 	 */
 	final public function init(): void {
-		$this->post_manager = WCTransactionalEmailPostsManager::get_instance();
+		$this->post_manager    = WCTransactionalEmailPostsManager::get_instance();
+		$this->posts_generator = new WCTransactionalEmailPostsGenerator();
 	}
 
 	/**
@@ -272,7 +280,28 @@ class EmailApiController {
 						'sanitize_callback' => 'absint',
 					),
 				),
+				'schema'              => array( $this, 'get_default_content_schema' ),
 			)
+		);
+	}
+
+	/**
+	 * Get the schema for the default content endpoint response.
+	 *
+	 * @return array
+	 */
+	public function get_default_content_schema(): array {
+		return array(
+			'$schema'    => 'http://json-schema.org/draft-04/schema#',
+			'title'      => 'woo_email_default_content',
+			'type'       => 'object',
+			'properties' => array(
+				'content' => array(
+					'description' => __( 'The default block content for the email.', 'woocommerce' ),
+					'type'        => 'string',
+					'readonly'    => true,
+				),
+			),
 		);
 	}
 
@@ -284,7 +313,7 @@ class EmailApiController {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_default_content_response( WP_REST_Request $request ) {
-		if ( ! $this->post_manager ) {
+		if ( ! ( $this->post_manager && $this->posts_generator ) ) {
 			return new WP_Error(
 				'woocommerce_email_editor_not_initialized',
 				__( 'Email editor is not initialized.', 'woocommerce' ),
@@ -304,9 +333,8 @@ class EmailApiController {
 			);
 		}
 
-		$generator = new WCTransactionalEmailPostsGenerator();
 		return new WP_REST_Response(
-			array( 'content' => $generator->get_email_template( $email ) ),
+			array( 'content' => $this->posts_generator->get_email_template( $email ) ),
 			200
 		);
 	}
