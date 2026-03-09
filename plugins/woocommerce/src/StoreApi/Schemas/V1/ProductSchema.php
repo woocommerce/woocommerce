@@ -731,7 +731,7 @@ class ProductSchema extends AbstractSchema {
 			function ( $defaults, $attribute ) use ( $product ) {
 				$meta_key              = wc_variation_attribute_name( $attribute->get_name() );
 				$defaults[ $meta_key ] = [
-					'name'  => wc_attribute_label( $attribute->get_name(), $product ),
+					'name'  => sanitize_title( $attribute->get_name() ),
 					'value' => null,
 				];
 				return $defaults;
