@@ -162,20 +162,34 @@ class WC_Shipping_Flat_Rate_Test extends WC_Unit_Test_Case {
 
 	/**
 	 * @testDox is_math_expression() returns true for valid math expressions.
-	 *
 	 * @dataProvider provider_valid_math_expressions
 	 *
-	 * @param string $value       Value to test.
-	 * @param string $decimal_sep  Decimal separator to use.
-	 * @param string $thousand_sep Thousand separator to use.
+	 * @param string $value           Value to test.
+	 * @param string $decimal_sep     Decimal separator to use.
+	 * @param string $thousand_sep    Thousand separator to use.
+	 * @param float  $expected_result Expected result of evaluating the expression.
 	 */
-	public function test_is_math_expression_returns_true( string $value, string $decimal_sep, string $thousand_sep ): void {
+	public function test_is_math_expression_returns_true( string $value, string $decimal_sep, string $thousand_sep, float $expected_result ): void {
 		update_option( 'woocommerce_price_decimal_sep', $decimal_sep );
 		update_option( 'woocommerce_price_thousand_sep', $thousand_sep );
 
 		$this->assertTrue(
 			$this->call_is_math_expression->call( $this->sut, $value ),
 			"Expected '{$value}' to be recognised as a math expression."
+		);
+
+		$result = $this->call_evaluate_cost->call(
+			$this->sut,
+			$value,
+			array(
+				'qty'  => 1,
+				'cost' => 1,
+			)
+		);
+		$this->assertEquals(
+			$expected_result,
+			$result,
+			"Expected '{$value}' to evaluate to {$expected_result}."
 		);
 	}
 
@@ -201,30 +215,28 @@ class WC_Shipping_Flat_Rate_Test extends WC_Unit_Test_Case {
 	/**
 	 * Valid math expression cases.
 	 *
-	 * Format: [ value, decimal_separator, thousand_separator ]
+	 * Format: [ value, decimal_separator, thousand_separator, expected_result ]
 	 */
 	public function provider_valid_math_expressions(): array {
 		return array(
 			// period decimal, comma thousand.
-			'simple division'                   => array( '3.50 / 1.21', '.', ',' ),
-			'simple multiplication'             => array( '10.00 * 1.21', '.', ',' ),
-			'simple addition'                   => array( '10 + 5', '.', ',' ),
-			'simple subtraction'                => array( '20 - 3.50', '.', ',' ),
-			'chained operators'                 => array( '10 * 2 + 5', '.', ',' ),
-			'thousand separated operand'        => array( '10,500 * 3000', '.', ',' ),
+			'simple division'                   => array( '3.50 / 1.21', '.', ',', 3.50 / 1.21 ),
+			'simple multiplication'             => array( '10.00 * 1.21', '.', ',', 10.00 * 1.21 ),
+			'simple addition'                   => array( '10 + 5', '.', ',', 15.0 ),
+			'simple subtraction'                => array( '20 - 3.50', '.', ',', 16.50 ),
+			'chained operators'                 => array( '10 * 2 + 5', '.', ',', 25.0 ),
 
 			// comma decimal, period thousand.
-			'EU locale division'                => array( '10,350 / 11,121', ',', '.' ),
-			'EU locale multiplication'          => array( '10,000 * 1,218', ',', '.' ),
-			'EU locale thousand separated'      => array( '10.500 * 30000', ',', '.' ),
+			'EU locale division'                => array( '3,50 / 1,21', ',', '.', 3.50 / 1.21 ),
+			'EU locale multiplication'          => array( '10,00 * 1,21', ',', '.', 10.00 * 1.21 ),
 
 			// No thousand separator locale.
-			'no thousand separator simple'      => array( '3.50 / 1.21', '.', '' ),
-			'no thousand separator chained'     => array( '10 * 2 + 5', '.', '' ),
+			'no thousand separator simple'      => array( '3.50 / 1.21', '.', '', 3.50 / 1.21 ),
+			'no thousand separator chained'     => array( '10 * 2 + 5', '.', '', 25.0 ),
 
 			// Whitespace variations.
-			'extra whitespace between operands' => array( '3.50  /  1.21', '.', ',' ),
-			'leading and trailing whitespace'   => array( '  3.50 / 1.21  ', '.', ',' ),
+			'extra whitespace between operands' => array( '3.50  /  1.21', '.', ',', 3.50 / 1.21 ),
+			'leading and trailing whitespace'   => array( '  3.50 / 1.21  ', '.', ',', 3.50 / 1.21 ),
 		);
 	}
 
@@ -236,24 +248,30 @@ class WC_Shipping_Flat_Rate_Test extends WC_Unit_Test_Case {
 	public function provider_invalid_math_expressions(): array {
 		return array(
 			// Plain numbers.
-			'plain integer'             => array( '10', '.', ',' ),
-			'plain decimal'             => array( '10.00', '.', ',' ),
-			'plain EU decimal'          => array( '10,000', ',', '.' ),
+			'plain integer'                 => array( '10', '.', ',' ),
+			'plain decimal'                 => array( '10.00', '.', ',' ),
+			'plain EU decimal'              => array( '10,00', ',', '.' ),
+
+			// Thousand-separated operands must not be used in math expressions
+			// as evaluate_cost() normalises all separators to ".", causing
+			// "10,000" to be evaluated as "10.0" instead of "10000".
+			'thousand separated operand'    => array( '10,500 * 3000', '.', ',' ),
+			'EU thousand separated operand' => array( '10.500 * 3000', ',', '.' ),
 
 			// Trailing operator — incomplete expressions.
-			'trailing plus'             => array( '20 +', '.', ',' ),
-			'trailing minus'            => array( '20 -', '.', ',' ),
-			'trailing multiply'         => array( '20 *', '.', ',' ),
-			'trailing divide'           => array( '3.50 /', '.', ',' ),
+			'trailing plus'                 => array( '20 +', '.', ',' ),
+			'trailing minus'                => array( '20 -', '.', ',' ),
+			'trailing multiply'             => array( '20 *', '.', ',' ),
+			'trailing divide'               => array( '3.50 /', '.', ',' ),
 
 			// Invalid characters.
-			'alphabetic string'         => array( 'abc', '.', ',' ),
-			'alphanumeric'              => array( '10abc', '.', ',' ),
-			'empty string'              => array( '', '.', ',' ),
+			'alphabetic string'             => array( 'abc', '.', ',' ),
+			'alphanumeric'                  => array( '10abc', '.', ',' ),
+			'empty string'                  => array( '', '.', ',' ),
 
 			// Shortcodes — handled separately by $contains_shortcodes check.
-			'shortcode qty'             => array( '[qty]', '.', ',' ),
-			'expression with shortcode' => array( '10 * [qty]', '.', ',' ),
+			'shortcode qty'                 => array( '[qty]', '.', ',' ),
+			'expression with shortcode'     => array( '10 * [qty]', '.', ',' ),
 		);
 	}
 }

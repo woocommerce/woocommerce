@@ -282,23 +282,19 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 	 * @return bool True if value is a well-formed math expression.
 	 */
 	protected function is_math_expression( string $value ): bool {
-		$decimal_separator  = wc_get_price_decimal_separator();
-		$thousand_separator = wc_get_price_thousand_separator();
+		$decimal_separator = wc_get_price_decimal_separator();
 
-		// Use preg_quote() to safely escaping separators.
-		$separators = preg_quote( $decimal_separator, '/' );
-		if ( '' !== $thousand_separator ) {
-			$separators .= preg_quote( $thousand_separator, '/' );
-		}
+		// Use preg_quote() to safely escaping separator.
+		$separator = preg_quote( $decimal_separator, '/' );
 
 		// Breakdown:
-		// [\d{sep}\s]+             - First operand: digits, separators, or spaces.
+		// [\d{sep}\s]+             - First operand: digits, separator, or spaces.
 		// (                        - Begin repeating group:
 		// [+\-*\/]               -   An arithmetic operator (+, -, *, /).
-		// [\d{sep}\s]+           -   Next operand: digits, separators, or spaces.
+		// [\d{sep}\s]+           -   Next operand: digits, separator, or spaces.
 		// )+                       - One or more operator+operand pairs (ensures no trailing operator).
 		return (bool) preg_match(
-			'/^[\d' . $separators . '\s]+([+\-*\/][\d' . $separators . '\s]+)+$/',
+			'/^[\d' . $separator . '\s]+([+\-*\/][\d' . $separator . '\s]+)+$/',
 			trim( $value )
 		);
 	}
