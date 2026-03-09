@@ -120,7 +120,16 @@ class PendingNotificationStore {
 			return;
 		}
 
-		$this->dispatcher->dispatch( array_values( $this->pending ) );
+		/**
+		 * Fires when pending push notifications are ready to be dispatched.
+		 *
+		 * @param Notification[] $notifications The notifications to dispatch.
+		 *
+		 * @since 10.7.0
+		 *
+		 * The call to dispatch the notifications will go here when the
+		 * receiving controller has been added.
+		 */
 
 		/**
 		 * Store is single-use per request lifecycle, so disable it and clear
