@@ -27,7 +27,7 @@ class StoreTagsProvider extends AbstractTagProvider {
 				'woocommerce/store-email',
 				__( 'Store', 'woocommerce' ),
 				function ( array $context ): string {
-					if ( isset( $context['wc_email'], $context['wc_email']->get_from_address ) ) {
+					if ( isset( $context['wc_email'] ) && method_exists( $context['wc_email'], 'get_from_address' ) ) {
 						return $context['wc_email']->get_from_address();
 					}
 					return get_option( 'admin_email' );
