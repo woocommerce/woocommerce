@@ -551,8 +551,10 @@ class EmailsSettingsSchema extends AbstractSchema {
 				}
 				return is_string( $value ) ? array( sanitize_text_field( $value ) ) : array();
 
-			case 'color':
 			case 'password':
+				return wp_strip_all_tags( trim( $value ) );
+
+			case 'color':
 			case 'text':
 			case 'select':
 			default:

@@ -707,6 +707,42 @@ class EmailsSettingsControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should preserve percent-encoded characters in password field sanitization.
+	 */
+	public function test_sanitize_field_value_preserves_percent_encoded_chars_in_password_fields() {
+		// Arrange — use reflection since sanitize_field_value is private.
+		$schema     = new EmailsSettingsSchema();
+		$reflection = new \ReflectionClass( $schema );
+		$method     = $reflection->getMethod( 'sanitize_field_value' );
+		$method->setAccessible( true );
+
+		$password = 'NlP4%EcCx}Na';
+
+		// Act.
+		$result = $method->invoke( $schema, 'password', $password );
+
+		// Assert.
+		$this->assertSame( $password, $result, 'Password with %Ec sequence should be preserved' );
+	}
+
+	/**
+	 * @testdox Should strip HTML tags from password fields while preserving percent-encoded characters.
+	 */
+	public function test_sanitize_field_value_strips_html_from_password_fields() {
+		// Arrange.
+		$schema     = new EmailsSettingsSchema();
+		$reflection = new \ReflectionClass( $schema );
+		$method     = $reflection->getMethod( 'sanitize_field_value' );
+		$method->setAccessible( true );
+
+		// Act.
+		$result = $method->invoke( $schema, 'password', '<b>bold</b>secret%E0pass' );
+
+		// Assert.
+		$this->assertSame( 'boldsecret%E0pass', $result, 'HTML tags should be stripped but percent sequences preserved' );
+	}
+
+	/**
 	 * Helper: Get stored subject from database.
 	 *
 	 * @param string $email_id Email ID.

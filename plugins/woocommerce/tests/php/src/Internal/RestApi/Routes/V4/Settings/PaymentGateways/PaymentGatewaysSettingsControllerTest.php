@@ -552,6 +552,53 @@ class PaymentGatewaysSettingsControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should preserve percent-encoded characters in password fields.
+	 */
+	public function test_update_payment_gateway_preserves_percent_encoded_chars_in_password_fields() {
+		// Arrange — PayPal gateway has password-type fields (api_password, api_signature).
+		$password = 'NlP4%EcCx}Na';
+
+		// Act.
+		$request = new WP_REST_Request( 'PUT', self::ENDPOINT . '/paypal' );
+		$request->set_param(
+			'values',
+			array(
+				'api_password' => $password,
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		// Assert.
+		$this->assertSame( 200, $response->get_status() );
+
+		$gateway = WC()->payment_gateways->payment_gateways()['paypal'];
+		$this->assertSame( $password, $gateway->settings['api_password'], 'Password with %Ec sequence should be preserved' );
+	}
+
+	/**
+	 * @testdox Should strip HTML tags from password fields while preserving percent-encoded characters.
+	 */
+	public function test_update_payment_gateway_strips_html_from_password_fields() {
+		// Arrange.
+		$request = new WP_REST_Request( 'PUT', self::ENDPOINT . '/paypal' );
+		$request->set_param(
+			'values',
+			array(
+				'api_password' => '<b>bold</b>secret%E0pass',
+			)
+		);
+
+		// Act.
+		$response = $this->server->dispatch( $request );
+
+		// Assert.
+		$this->assertSame( 200, $response->get_status() );
+
+		$gateway = WC()->payment_gateways->payment_gateways()['paypal'];
+		$this->assertSame( 'boldsecret%E0pass', $gateway->settings['api_password'], 'HTML tags should be stripped but percent sequences preserved' );
+	}
+
+	/**
 	 * Test that COD gateway enable_for_methods field has options populated.
 	 */
 	public function test_cod_gateway_enable_for_methods_has_options() {

@@ -555,6 +555,8 @@ abstract class AbstractPaymentGatewaySettingsSchema extends AbstractSchema {
 				return sanitize_email( $value );
 
 			case 'password':
+				return wp_strip_all_tags( trim( $value ) );
+
 			case 'color':
 				return sanitize_text_field( $value );
 
