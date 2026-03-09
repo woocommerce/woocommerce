@@ -106,10 +106,10 @@ class PendingNotificationStore {
 	}
 
 	/**
-	 * Dispatches all pending notifications by firing an action hook.
+	 * Dispatches all pending notifications via the loopback endpoint.
 	 *
-	 * Called on shutdown. Fires the `wc_push_notifications_dispatch` action
-	 * with the array of pending notifications, then clears the store.
+	 * Called on shutdown. Sends all pending notifications through the
+	 * InternalNotificationDispatcher, then clears the store.
 	 *
 	 * @return void
 	 *
