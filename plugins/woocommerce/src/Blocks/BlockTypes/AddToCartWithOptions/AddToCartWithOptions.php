@@ -633,7 +633,7 @@ class AddToCartWithOptions extends AbstractBlock {
 
 			$form_html = ob_get_clean();
 
-			$has_visible_quantity_input = Utils::has_visible_quantity_input( $form_html );
+			$has_visible_quantity_input = $form_html ? Utils::has_visible_quantity_input( $form_html ) : false;
 			if ( $has_visible_quantity_input ) {
 				$product_name                              = $product->get_name();
 				$form_html                                 = Utils::add_quantity_steppers( $form_html, $product_name );
