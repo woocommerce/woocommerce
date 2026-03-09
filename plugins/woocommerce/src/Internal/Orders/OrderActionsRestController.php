@@ -393,6 +393,8 @@ class OrderActionsRestController extends RestApiControllerBase {
 			return null;
 		}
 
+		$default_preferred_ids = $this->get_default_preferred_template_ids( $order );
+
 		/**
 		 * Filter the preferred template IDs for auto-selecting an email template.
 		 *
@@ -407,13 +409,13 @@ class OrderActionsRestController extends RestApiControllerBase {
 		 */
 		$preferred_template_ids = apply_filters(
 			'woocommerce_rest_order_actions_email_preferred_template_ids',
-			$this->get_default_preferred_template_ids( $order ),
+			$default_preferred_ids,
 			$order,
 			array_map( fn( $t ) => $t->id, $available_templates )
 		);
 
 		if ( ! is_array( $preferred_template_ids ) ) {
-			$preferred_template_ids = $this->get_default_preferred_template_ids( $order );
+			$preferred_template_ids = $default_preferred_ids;
 		}
 
 		$preferred_template_ids = array_filter( array_unique( $preferred_template_ids ), 'is_string' );
@@ -528,8 +530,7 @@ class OrderActionsRestController extends RestApiControllerBase {
 		$available_templates = $this->get_available_email_templates( $order );
 
 		if ( empty( $template_id ) ) {
-			$template    = $this->select_default_template( $order, $available_templates );
-			$template_id = $template ? $template->id : null;
+			$template = $this->select_default_template( $order, $available_templates );
 
 			if ( is_null( $template ) ) {
 				return new WP_Error(
@@ -538,6 +539,8 @@ class OrderActionsRestController extends RestApiControllerBase {
 					array( 'status' => 400 )
 				);
 			}
+
+			$template_id = $template->id;
 		} else {
 			$template = $this->get_email_template_by_id( $template_id, $available_templates );
 

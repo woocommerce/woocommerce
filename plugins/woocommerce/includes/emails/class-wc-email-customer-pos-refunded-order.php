@@ -455,7 +455,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 			add_action( 'woocommerce_order_fully_refunded_notification', array( $this, 'auto_trigger' ), 10, 2 );
 			add_action( 'woocommerce_order_partially_refunded_notification', array( $this, 'auto_trigger' ), 10, 2 );
 			add_filter( 'woocommerce_rest_order_actions_email_valid_template_classes', array( $this, 'add_to_valid_template_classes' ), 10, 2 );
-			add_filter( 'woocommerce_rest_order_actions_email_preferred_template_ids', array( $this, 'add_to_default_template_priority' ), 10, 2 );
+			add_filter( 'woocommerce_rest_order_actions_email_preferred_template_ids', array( $this, 'add_to_preferred_template_ids' ), 10, 2 );
 			add_action( 'woocommerce_rest_order_actions_email_send', array( $this, 'trigger' ), 10, 2 );
 		}
 
@@ -491,7 +491,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 		 *
 		 * @since 10.7.0
 		 */
-		public function add_to_default_template_priority( $preferred_template_ids, $order ) {
+		public function add_to_preferred_template_ids( $preferred_template_ids, $order ) {
 			if ( PointOfSaleOrderUtil::is_order_paid_at_pos( $order ) ) {
 				array_unshift( $preferred_template_ids, $this->id );
 			}
