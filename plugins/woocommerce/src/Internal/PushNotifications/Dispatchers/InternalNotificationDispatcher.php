@@ -11,7 +11,7 @@ use Automattic\WooCommerce\StoreApi\Utilities\JsonWebToken;
 
 /**
  * Fires a non-blocking POST to the internal REST endpoint with JSON-encoded
- * notification metadata and a signed JWT.
+ * notification data and a signed JWT.
  *
  * Called directly by PendingNotificationStore::dispatch_all() on shutdown.
  *

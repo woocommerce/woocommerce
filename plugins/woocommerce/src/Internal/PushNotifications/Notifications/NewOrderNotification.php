@@ -60,7 +60,7 @@ class NewOrderNotification extends Notification {
 		return array(
 			'type'        => self::TYPE,
 			'icon'        => self::ICON,
-			'blog_id'     => get_current_blog_id(),
+			'timestamp'   => gmdate( 'c' ),
 			'resource_id' => $this->get_resource_id(),
 			'title'       => array(
 				/**

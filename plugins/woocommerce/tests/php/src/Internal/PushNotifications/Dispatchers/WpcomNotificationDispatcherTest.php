@@ -185,11 +185,31 @@ class WpcomNotificationDispatcherTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should include notification payload and formatted tokens in the request body.
+	 * @testdox Should include notification payload fields at the top level of the request body.
 	 */
-	public function test_dispatch_includes_payload_and_tokens_in_request_body(): void {
-		$notification = $this->create_notification( array( 'title' => 'New Order' ) );
+	public function test_dispatch_includes_payload_fields_at_top_level(): void {
+		$notification = $this->create_notification(
+			array(
+				'type'        => 'store_order',
+				'title'       => array( 'format' => 'New Order' ),
+				'resource_id' => 1,
+			)
+		);
 
+		$this->sut->dispatch( $notification, $this->create_tokens() );
+
+		$body = json_decode( $this->captured_request['body'], true );
+
+		$this->assertArrayNotHasKey( 'payload', $body );
+		$this->assertSame( 'store_order', $body['type'] );
+		$this->assertSame( array( 'format' => 'New Order' ), $body['title'] );
+		$this->assertSame( 1, $body['resource_id'] );
+	}
+
+	/**
+	 * @testdox Should include formatted tokens alongside payload fields in the request body.
+	 */
+	public function test_dispatch_includes_tokens_in_request_body(): void {
 		$tokens = array(
 			new PushToken(
 				array(
@@ -213,11 +233,10 @@ class WpcomNotificationDispatcherTest extends WC_Unit_Test_Case {
 			),
 		);
 
-		$this->sut->dispatch( $notification, $tokens );
+		$this->sut->dispatch( $this->create_notification(), $tokens );
 
 		$body = json_decode( $this->captured_request['body'], true );
 
-		$this->assertSame( array( 'title' => 'New Order' ), $body['payload'] );
 		$this->assertCount( 2, $body['tokens'] );
 
 		$this->assertSame(

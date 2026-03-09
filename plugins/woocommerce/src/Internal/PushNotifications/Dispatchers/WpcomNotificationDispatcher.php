@@ -17,10 +17,10 @@ use WP_Http;
 /**
  * Sends a notification to WPCOM via the Jetpack connection.
  *
- * Called by the NotificationProcessor (not wired to any hook). Combines the
- * notification payload with formatted push tokens and sends to the WPCOM
- * push endpoint. Returns a result array indicating success/failure and an
- * optional retry-after value.
+ * Called directly by the NotificationProcessor. Combines the notification
+ * payload with formatted push tokens and sends to the WPCOM push endpoint.
+ * Returns a result array indicating success/failure and an optional retry-after
+ * value.
  *
  * @since 10.7.0
  */
@@ -34,7 +34,7 @@ class WpcomNotificationDispatcher {
 	/**
 	 * WPCOM endpoint path (appended after /sites/{id}/).
 	 */
-	const SEND_ENDPOINT = 'push-notifications/send';
+	const SEND_ENDPOINT = 'push-notifications';
 
 	/**
 	 * HTTP request timeout in seconds.
@@ -134,15 +134,19 @@ class WpcomNotificationDispatcher {
 	 * @return array|WP_Error
 	 *
 	 * @since 10.7.0
+	 *
+	 * @phpstan-ignore return.unusedType
 	 */
 	private function make_request( int $site_id, array $payload, array $tokens ) {
 		$body = (string) wp_json_encode(
-			array(
-				'payload' => $payload,
-				'tokens'  => array_map(
-					fn ( PushToken $token ) => $token->to_wpcom_format(),
-					$tokens
-				),
+			array_merge(
+				$payload,
+				array(
+					'tokens' => array_map(
+						fn ( PushToken $token ) => $token->to_wpcom_format(),
+						$tokens
+					),
+				)
 			)
 		);
 
