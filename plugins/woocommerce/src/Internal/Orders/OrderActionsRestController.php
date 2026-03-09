@@ -412,6 +412,12 @@ class OrderActionsRestController extends RestApiControllerBase {
 			array_map( fn( $t ) => $t->id, $available_templates )
 		);
 
+		if ( ! is_array( $priority ) ) {
+			$priority = $this->get_default_template_priority( $order );
+		}
+
+		$priority = array_filter( array_unique( $priority ), 'is_string' );
+
 		foreach ( $priority as $candidate_id ) {
 			$template = $this->get_email_template_by_id( $candidate_id, $available_templates );
 			if ( $template ) {
