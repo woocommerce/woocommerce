@@ -75,7 +75,7 @@ class WC_Blocks_Utils {
 		$blocks = parse_blocks( $page_to_check->post_content );
 		return self::has_block_in_blocks( $blocks, $block_name );
 	}
-	
+
 	/**
 	 * Recursively searches an array of blocks (and their innerBlocks).
 	 *
