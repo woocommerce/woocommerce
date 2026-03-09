@@ -16,6 +16,7 @@ use Automattic\WooCommerce\StoreApi\Utilities\JsonWebToken;
  *
  * Called directly by PendingNotificationStore::dispatch_all() on shutdown.
  *
+ * @internal
  * @since 10.7.0
  */
 class InternalNotificationDispatcher {
@@ -64,7 +65,7 @@ class InternalNotificationDispatcher {
 			wp_salt( 'auth' )
 		);
 
-		wp_remote_post(
+		$response = wp_remote_post(
 			rest_url( self::SEND_ENDPOINT ),
 			array(
 				'blocking' => false,
@@ -76,5 +77,12 @@ class InternalNotificationDispatcher {
 				'body'     => $body,
 			)
 		);
+
+		if ( is_wp_error( $response ) ) {
+			wc_get_logger()->error(
+				sprintf( 'Loopback dispatch failed: %s', $response->get_error_message() ),
+				array( 'source' => PushNotifications::FEATURE_NAME )
+			);
+		}
 	}
 }

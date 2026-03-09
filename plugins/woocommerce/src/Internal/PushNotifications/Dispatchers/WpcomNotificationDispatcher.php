@@ -22,6 +22,7 @@ use WP_Http;
  * Returns a result array indicating success/failure and an optional retry-after
  * value.
  *
+ * @internal
  * @since 10.7.0
  */
 class WpcomNotificationDispatcher {
