@@ -613,9 +613,9 @@ class OrderActionsRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The priority filter hook overrides default template auto-selection.
+	 * @testdox The preferred template IDs filter hook overrides default template auto-selection.
 	 */
-	public function test_send_email_auto_select_respects_priority_filter() {
+	public function test_send_email_auto_select_respects_preferred_template_ids_filter() {
 		$order = WC_Helper_Order::create_order();
 		$order->set_billing_email( 'customer@example.org' );
 		$order->set_status( 'completed' );
@@ -624,11 +624,11 @@ class OrderActionsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		wp_set_current_user( $this->user['shop_manager'] );
 
-		// Override priority to prefer invoice over the status-specific template.
-		$override_priority = function () {
+		// Override preferred template IDs to prefer invoice over the status-specific template.
+		$override_preferred_ids = function () {
 			return array( 'customer_invoice', 'customer_completed_order' );
 		};
-		add_filter( 'woocommerce_rest_order_actions_email_default_template_priority', $override_priority );
+		add_filter( 'woocommerce_rest_order_actions_email_preferred_template_ids', $override_preferred_ids );
 
 		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() . '/actions/send_email' );
 		$request->add_header( 'User-Agent', 'some app' );
@@ -640,7 +640,7 @@ class OrderActionsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 		$this->assertStringContainsString( 'Order details sent to', $data['message'] );
 
-		remove_filter( 'woocommerce_rest_order_actions_email_default_template_priority', $override_priority );
+		remove_filter( 'woocommerce_rest_order_actions_email_preferred_template_ids', $override_preferred_ids );
 	}
 
 	/**

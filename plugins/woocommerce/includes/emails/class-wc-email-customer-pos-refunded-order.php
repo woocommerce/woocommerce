@@ -455,7 +455,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 			add_action( 'woocommerce_order_fully_refunded_notification', array( $this, 'auto_trigger' ), 10, 2 );
 			add_action( 'woocommerce_order_partially_refunded_notification', array( $this, 'auto_trigger' ), 10, 2 );
 			add_filter( 'woocommerce_rest_order_actions_email_valid_template_classes', array( $this, 'add_to_valid_template_classes' ), 10, 2 );
-			add_filter( 'woocommerce_rest_order_actions_email_default_template_priority', array( $this, 'add_to_default_template_priority' ), 10, 2 );
+			add_filter( 'woocommerce_rest_order_actions_email_preferred_template_ids', array( $this, 'add_to_default_template_priority' ), 10, 2 );
 			add_action( 'woocommerce_rest_order_actions_email_send', array( $this, 'trigger' ), 10, 2 );
 		}
 
@@ -481,21 +481,21 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 		}
 
 		/**
-		 * Prepend this template to the default priority list for POS-paid orders.
+		 * Prepend this template to the preferred template IDs for POS-paid orders.
 		 *
 		 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
 		 *
-		 * @param array    $priority Ordered array of template IDs.
-		 * @param WC_Order $order    The order.
-		 * @return array Modified priority array.
+		 * @param array    $preferred_template_ids Ordered array of template IDs.
+		 * @param WC_Order $order                  The order.
+		 * @return array Modified array of template IDs.
 		 *
 		 * @since 10.7.0
 		 */
-		public function add_to_default_template_priority( $priority, $order ) {
+		public function add_to_default_template_priority( $preferred_template_ids, $order ) {
 			if ( PointOfSaleOrderUtil::is_order_paid_at_pos( $order ) ) {
-				array_unshift( $priority, $this->id );
+				array_unshift( $preferred_template_ids, $this->id );
 			}
-			return $priority;
+			return $preferred_template_ids;
 		}
 
 		/**

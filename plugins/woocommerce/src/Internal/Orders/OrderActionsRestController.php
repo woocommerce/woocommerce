@@ -394,31 +394,31 @@ class OrderActionsRestController extends RestApiControllerBase {
 		}
 
 		/**
-		 * Filter the priority order for auto-selecting an email template.
+		 * Filter the preferred template IDs for auto-selecting an email template.
 		 *
 		 * Template IDs earlier in the array are preferred. Only templates that
 		 * are also in the available templates list will be considered.
 		 *
 		 * @since 10.7.0
 		 *
-		 * @param string[] $priority  Ordered array of template IDs (highest priority first).
-		 * @param WC_Order $order     The order.
-		 * @param string[] $available The available template IDs for this order.
+		 * @param string[] $preferred_template_ids Ordered array of template IDs (most preferred first).
+		 * @param WC_Order $order                  The order.
+		 * @param string[] $available              The available template IDs for this order.
 		 */
-		$priority = apply_filters(
-			'woocommerce_rest_order_actions_email_default_template_priority',
-			$this->get_default_template_priority( $order ),
+		$preferred_template_ids = apply_filters(
+			'woocommerce_rest_order_actions_email_preferred_template_ids',
+			$this->get_default_preferred_template_ids( $order ),
 			$order,
 			array_map( fn( $t ) => $t->id, $available_templates )
 		);
 
-		if ( ! is_array( $priority ) ) {
-			$priority = $this->get_default_template_priority( $order );
+		if ( ! is_array( $preferred_template_ids ) ) {
+			$preferred_template_ids = $this->get_default_preferred_template_ids( $order );
 		}
 
-		$priority = array_filter( array_unique( $priority ), 'is_string' );
+		$preferred_template_ids = array_filter( array_unique( $preferred_template_ids ), 'is_string' );
 
-		foreach ( $priority as $candidate_id ) {
+		foreach ( $preferred_template_ids as $candidate_id ) {
 			$template = $this->get_email_template_by_id( $candidate_id, $available_templates );
 			if ( $template ) {
 				return $template;
@@ -431,25 +431,25 @@ class OrderActionsRestController extends RestApiControllerBase {
 	}
 
 	/**
-	 * Get ordered template IDs for auto-selection based on order status.
+	 * Get the default preferred template IDs for auto-selection based on order status.
 	 *
 	 * @param WC_Order $order The order.
 	 *
 	 * @return string[]
 	 */
-	private function get_default_template_priority( WC_Order $order ): array {
-		$status   = $order->get_status( 'edit' );
-		$priority = array();
+	private function get_default_preferred_template_ids( WC_Order $order ): array {
+		$status                 = $order->get_status( 'edit' );
+		$preferred_template_ids = array();
 
 		// Status-specific template.
 		if ( isset( self::STATUS_TEMPLATE_MAP[ $status ] ) ) {
-			$priority[] = self::STATUS_TEMPLATE_MAP[ $status ]['id'];
+			$preferred_template_ids[] = self::STATUS_TEMPLATE_MAP[ $status ]['id'];
 		}
 
 		// Generic fallback.
-		$priority[] = 'customer_invoice';
+		$preferred_template_ids[] = 'customer_invoice';
 
-		return $priority;
+		return $preferred_template_ids;
 	}
 
 	/**
