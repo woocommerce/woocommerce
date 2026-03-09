@@ -66013,12 +66013,6 @@ parameters:
 			path: src/Internal/Orders/OrderActionsRestController.php
 
 		-
-			message: '#^Parameter \#2 \$is_customer_note of method WC_Order\:\:add_order_note\(\) expects int, false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Orders/OrderActionsRestController.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Orders\\OrderAttributionBlocksController\:\:init\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1

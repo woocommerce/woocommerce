@@ -615,7 +615,7 @@ class OrderActionsRestController extends RestApiControllerBase {
 		foreach ( $messages as $message ) {
 			$order->add_order_note(
 				$message,
-				false,
+				0,
 				true,
 				array(
 					'user_agent' => $user_agent ? $user_agent : 'REST API',
@@ -676,7 +676,7 @@ class OrderActionsRestController extends RestApiControllerBase {
 		foreach ( $messages as $message ) {
 			$order->add_order_note(
 				$message,
-				false,
+				0,
 				true,
 				array(
 					'user_agent' => $user_agent ? $user_agent : 'REST API',
