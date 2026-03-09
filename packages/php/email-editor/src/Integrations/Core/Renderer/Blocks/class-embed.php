@@ -690,7 +690,13 @@ class Embed extends Abstract_Block_Renderer {
 			'site_icon_url' => '',
 		);
 
-		$embed_url = trailingslashit( $url ) . 'embed/';
+		$parsed = wp_parse_url( $url );
+		if ( empty( $parsed['scheme'] ) || empty( $parsed['host'] ) ) {
+			return $empty_result;
+		}
+		$embed_url = $parsed['scheme'] . '://' . $parsed['host']
+			. ( isset( $parsed['port'] ) ? ':' . $parsed['port'] : '' )
+			. trailingslashit( $parsed['path'] ?? '/' ) . 'embed/';
 
 		if ( ! $this->is_valid_url( $embed_url ) ) {
 			return $empty_result;
@@ -739,10 +745,14 @@ class Embed extends Abstract_Block_Renderer {
 		}
 
 		// Parse HTML and extract metadata using XPath.
-		libxml_use_internal_errors( true );
-		$dom = new \DOMDocument();
-		$dom->loadHTML( '<?xml encoding="UTF-8">' . $body, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD );
-		libxml_clear_errors();
+		$previous_libxml_errors = libxml_use_internal_errors( true );
+		try {
+			$dom = new \DOMDocument();
+			$dom->loadHTML( '<?xml encoding="UTF-8">' . $body, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD );
+			libxml_clear_errors();
+		} finally {
+			libxml_use_internal_errors( $previous_libxml_errors );
+		}
 
 		$xpath = new \DOMXPath( $dom );
 
