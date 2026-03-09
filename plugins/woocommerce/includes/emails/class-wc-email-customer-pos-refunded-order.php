@@ -5,6 +5,7 @@
  * @package WooCommerce\Emails
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Email\OrderPriceFormatter;
 use Automattic\WooCommerce\Internal\Orders\PointOfSaleOrderUtil;
 use Automattic\WooCommerce\Internal\Settings\PointOfSaleDefaultSettings;
@@ -470,10 +471,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 		 * @since 10.6.0
 		 */
 		public function add_to_valid_template_classes( $valid_template_classes, $order ) {
-			if ( 0 === count( $order->get_refunds() ) ) {
-				return $valid_template_classes;
-			}
-			if ( ! PointOfSaleOrderUtil::is_order_paid_at_pos( $order ) ) {
+			if ( ! $this->is_applicable_for_order( $order ) ) {
 				return $valid_template_classes;
 			}
 			$valid_template_classes[] = get_class( $this );
@@ -492,10 +490,22 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 		 * @since 10.7.0
 		 */
 		public function add_to_preferred_template_ids( $preferred_template_ids, $order ) {
-			if ( PointOfSaleOrderUtil::is_order_paid_at_pos( $order ) ) {
-				array_unshift( $preferred_template_ids, $this->id );
+			if ( ! $this->is_applicable_for_order( $order ) ) {
+				return $preferred_template_ids;
 			}
+			array_unshift( $preferred_template_ids, $this->id );
 			return $preferred_template_ids;
+		}
+
+		/**
+		 * Check if this email template is applicable for the given order.
+		 *
+		 * @param WC_Order $order The order.
+		 * @return bool
+		 */
+		private function is_applicable_for_order( $order ): bool {
+			return PointOfSaleOrderUtil::is_order_paid_at_pos( $order )
+				&& ( OrderStatus::REFUNDED === $order->get_status( 'edit' ) || 0 !== count( $order->get_refunds() ) );
 		}
 
 		/**

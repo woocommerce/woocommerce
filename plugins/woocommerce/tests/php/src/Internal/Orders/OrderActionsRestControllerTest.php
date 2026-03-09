@@ -438,6 +438,40 @@ class OrderActionsRestControllerTest extends WC_REST_Unit_Test_Case {
 				),
 			),
 		);
+		yield 'auto-select POS failed order' => array(
+			'shop_manager',
+			array(
+				'created_via' => 'pos-rest-api',
+				'status'      => 'failed',
+			),
+			array(
+				'template_id' => '',
+			),
+			array(
+				'status'  => 200,
+				'message' => 'Email template &quot;Failed order&quot; sent to customer@example.org.',
+				'notes'   => array(
+					'Email template &quot;Failed order&quot; sent to customer@example.org.',
+				),
+			),
+		);
+		yield 'auto-select POS on-hold order' => array(
+			'shop_manager',
+			array(
+				'created_via' => 'pos-rest-api',
+				'status'      => 'on-hold',
+			),
+			array(
+				'template_id' => '',
+			),
+			array(
+				'status'  => 200,
+				'message' => 'Email template &quot;Order on-hold&quot; sent to customer@example.org.',
+				'notes'   => array(
+					'Email template &quot;Order on-hold&quot; sent to customer@example.org.',
+				),
+			),
+		);
 		yield 'auto-select POS completed order' => array(
 			'shop_manager',
 			array(
@@ -451,6 +485,23 @@ class OrderActionsRestControllerTest extends WC_REST_Unit_Test_Case {
 				'message' => 'Email template &quot;POS completed order&quot; sent to customer@example.org.',
 				'notes'   => array(
 					'Email template &quot;POS completed order&quot; sent to customer@example.org.',
+				),
+			),
+		);
+		yield 'auto-select POS refunded order without refund records' => array(
+			'shop_manager',
+			array(
+				'created_via' => 'pos-rest-api',
+				'status'      => 'refunded',
+			),
+			array(
+				'template_id' => '',
+			),
+			array(
+				'status'  => 200,
+				'message' => 'Email template &quot;POS refunded order&quot; sent to customer@example.org.',
+				'notes'   => array(
+					'Email template &quot;POS refunded order&quot; sent to customer@example.org.',
 				),
 			),
 		);
