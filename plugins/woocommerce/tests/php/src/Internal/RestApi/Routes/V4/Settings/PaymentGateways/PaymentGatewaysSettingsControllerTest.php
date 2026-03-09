@@ -599,6 +599,29 @@ class PaymentGatewaysSettingsControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should trim whitespace from password fields while preserving percent-encoded characters.
+	 */
+	public function test_update_payment_gateway_trims_whitespace_from_password_fields() {
+		// Arrange.
+		$request = new WP_REST_Request( 'PUT', self::ENDPOINT . '/paypal' );
+		$request->set_param(
+			'values',
+			array(
+				'api_password' => '  my%20password  ',
+			)
+		);
+
+		// Act.
+		$response = $this->server->dispatch( $request );
+
+		// Assert.
+		$this->assertSame( 200, $response->get_status() );
+
+		$gateway = WC()->payment_gateways->payment_gateways()['paypal'];
+		$this->assertSame( 'my%20password', $gateway->settings['api_password'], 'Password should be trimmed but percent sequences preserved' );
+	}
+
+	/**
 	 * Test that COD gateway enable_for_methods field has options populated.
 	 */
 	public function test_cod_gateway_enable_for_methods_has_options() {

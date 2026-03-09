@@ -743,6 +743,23 @@ class EmailsSettingsControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should trim whitespace from password field values.
+	 */
+	public function test_sanitize_field_value_trims_whitespace_from_password_fields() {
+		// Arrange.
+		$schema     = new EmailsSettingsSchema();
+		$reflection = new \ReflectionClass( $schema );
+		$method     = $reflection->getMethod( 'sanitize_field_value' );
+		$method->setAccessible( true );
+
+		// Act.
+		$result = $method->invoke( $schema, 'password', '  my%20password  ' );
+
+		// Assert.
+		$this->assertSame( 'my%20password', $result, 'Password should be trimmed but percent sequences preserved' );
+	}
+
+	/**
 	 * Helper: Get stored subject from database.
 	 *
 	 * @param string $email_id Email ID.
