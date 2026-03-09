@@ -3062,15 +3062,16 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				array(
 					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 0,
 				),
+				// New gateways are placed above the offline group (default ordering).
 				array(
-					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
-					WC_Gateway_BACS::ID,
-					WC_Gateway_Cheque::ID,
-					WC_Gateway_COD::ID,
 					'gateway1',
 					'gateway2',
 					'gateway3_0',
 					'gateway3_1',
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					WC_Gateway_BACS::ID,
+					WC_Gateway_Cheque::ID,
+					WC_Gateway_COD::ID,
 				),
 				$gateways + $offline_payment_methods_gateways,
 				array(),
@@ -3080,17 +3081,18 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				array(
 					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 0,
 				),
+				// New gateways (and their suggestions) are placed above the offline group (default ordering).
 				array(
-					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
-					WC_Gateway_BACS::ID,
-					WC_Gateway_Cheque::ID,
-					WC_Gateway_COD::ID,
 					'_wc_pes_suggestion1',
 					'gateway1',
 					'gateway2',
 					'_wc_pes_suggestion3',
 					'gateway3_0',
 					'gateway3_1',
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					WC_Gateway_BACS::ID,
+					WC_Gateway_Cheque::ID,
+					WC_Gateway_COD::ID,
 				),
 				$gateways + $offline_payment_methods_gateways,
 				$suggestions,

@@ -651,15 +651,10 @@ class PaymentsTest extends WC_Unit_Test_Case {
 		// Act.
 		$data = $this->sut->get_payment_providers( $location );
 
-		// Assert: stripe should be between gateway1 and the offline group.
-		$ids               = array_keys( $captured_order_map );
-		$stripe_pos        = array_search( 'stripe', $ids, true );
-		$offline_group_pos = array_search( PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP, $ids, true );
-		$gateway1_pos      = array_search( 'gateway1', $ids, true );
-
-		$this->assertNotFalse( $stripe_pos, 'stripe should be in the order map' );
-		$this->assertGreaterThan( $gateway1_pos, $stripe_pos, 'stripe should be after gateway1' );
-		$this->assertLessThan( $offline_group_pos, $stripe_pos, 'stripe should be before the offline group' );
+		// Assert: stripe should be between gateway1 and the offline group (compare order values).
+		$this->assertArrayHasKey( 'stripe', $captured_order_map, 'stripe should be in the order map' );
+		$this->assertGreaterThan( $captured_order_map['gateway1'], $captured_order_map['stripe'], 'stripe should be after gateway1' );
+		$this->assertLessThan( $captured_order_map[ PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP ], $captured_order_map['stripe'], 'stripe should be before the offline group' );
 	}
 
 	/**
@@ -717,12 +712,13 @@ class PaymentsTest extends WC_Unit_Test_Case {
 		// Act.
 		$data = $this->sut->get_payment_providers( $location );
 
-		// Assert: stripe should be at the end (after gateway1).
-		$ids          = array_keys( $captured_order_map );
-		$stripe_pos   = array_search( 'stripe', $ids, true );
-		$gateway1_pos = array_search( 'gateway1', $ids, true );
-
-		$this->assertNotFalse( $stripe_pos, 'stripe should be in the order map' );
-		$this->assertGreaterThan( $gateway1_pos, $stripe_pos, 'stripe should be after gateway1 (at the end)' );
+		// Assert: stripe should NOT be placed at the offline group's position (above-offline logic not triggered).
+		// In the custom ordering fallback, stripe is placed at count($payment_providers) — the old behavior.
+		$this->assertArrayHasKey( 'stripe', $captured_order_map, 'stripe should be in the order map' );
+		$this->assertGreaterThan(
+			$captured_order_map[ PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP ],
+			$captured_order_map['stripe'],
+			'stripe should not be placed before the offline group'
+		);
 	}
 }
