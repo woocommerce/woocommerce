@@ -8,6 +8,9 @@
  * @package woocommerce-blocks-test-custom-product-type
  */
 
+// phpcs:disable Squiz.Commenting.ClassComment.Missing
+// phpcs:disable Squiz.Commenting.FunctionComment.Missing
+
 declare(strict_types=1);
 
 add_action(

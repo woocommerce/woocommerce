@@ -50,7 +50,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 		);
 		const customProductId = cliOutput.stdout.match( /\d+/g )?.pop();
 
-		test.step( 'allows switching to 3rd-party product types in the editor', async () => {
+		await test.step( 'allows switching to 3rd-party product types in the editor', async () => {
 			await pageObject.updateSingleProductTemplate();
 			await pageObject.switchProductType( 'Custom Product Type' );
 
@@ -65,7 +65,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			} );
 		} );
 
-		test.step( 'allows interacting with the form in the frontend', async () => {
+		await test.step( 'allows interacting with the form in the frontend', async () => {
 			await page.goto( `/?p=${ customProductId }` );
 			const quantityInput = page.getByLabel( 'Product quantity' );
 
