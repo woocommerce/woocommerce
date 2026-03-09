@@ -64,10 +64,10 @@ const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
 // rendering third party product types that don't use block template parts.
 store( 'woocommerce/add-to-cart-form', {
 	state: {
-		allowsIncrease: () => {
+		get allowsIncrease() {
 			return true;
 		},
-		allowsDecrease: () => {
+		get allowsDecrease() {
 			return true;
 		},
 	},
