@@ -170,7 +170,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 10.6.0-rc.1 2026-XX-XX =
+= 10.6.0-rc.1 2026-03-09 =
 
 **WooCommerce**
 
@@ -219,6 +219,10 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Validate page IDs returned by the `woocommerce_navigation_connect_page_options` filter before registering them [#62925](https://github.com/woocommerce/woocommerce/pull/62925)
 * Fix - Verify checkout page exists before adding customizer styles. [#61847](https://github.com/woocommerce/woocommerce/pull/61847)
 * Fix - Fix Store API batch endpoint path validation to prevent routing requests to non-Store-API endpoints. [#63512](https://github.com/woocommerce/woocommerce/pull/63512)
+* Fix - Fix - Handle PayPal Standard duplicate invoice ID errors by updating the invoice ID in the PayPal order and retrying payment capture. [#63540](https://github.com/woocommerce/woocommerce/pull/63540)
+* Fix - Fix Product Gallery dialog page refresh on WordPress 7.0 by using withSyncEvent for the openDialog action. [#63571](https://github.com/woocommerce/woocommerce/pull/63571)
+* Fix - Prevent repeated PayPal Standard order details API requests when the first request returns 404. [#63561](https://github.com/woocommerce/woocommerce/pull/63561)
+* Fix - Validate shipping country against PayPal’s supported countries instead of WooCommerce’s full country list to avoid invalid country codes in PayPal requests. [#63548](https://github.com/woocommerce/woocommerce/pull/63548)
 * Add - Add "Products by Brand" collection to Product Collection block. [#62817](https://github.com/woocommerce/woocommerce/pull/62817)
 * Add - Add caching for the taxes REST API endpoints [#62931](https://github.com/woocommerce/woocommerce/pull/62931)
 * Add - Add dedicated email class and block template for partially refunded orders in the block email editor to ensure consistent visual styling across all transactional emails. [#62895](https://github.com/woocommerce/woocommerce/pull/62895)
@@ -271,6 +275,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Update - Update downloadable file URL placeholder from 'http://' to 'https://'. [#63081](https://github.com/woocommerce/woocommerce/pull/63081)
 * Update - Update inputs and border colours in Cart/Checkout blocks to match the theme's text colour. [#62710](https://github.com/woocommerce/woocommerce/pull/62710)
 * Update - Update the `cancel_url` of PayPal Standard to the checkout page URL. [#63050](https://github.com/woocommerce/woocommerce/pull/63050)
+* Update - Added hooks for user triggered cart updates. [#63575](https://github.com/woocommerce/woocommerce/pull/63575)
 * Dev - Add experimental wc_interactivity_api_load_product API for hydrating product state for iAPI powered blocks. [#62167](https://github.com/woocommerce/woocommerce/pull/62167)
 * Dev - Add missing @return PHPDoc annotations to 5 files, reducing PHPStan baseline by 149 errors (batch 3). [#63149](https://github.com/woocommerce/woocommerce/pull/63149)
 * Dev - Add missing @return PHPDoc annotations to 6 files, reducing PHPStan baseline by 152 errors (batch 4). [#63173](https://github.com/woocommerce/woocommerce/pull/63173)
@@ -305,6 +310,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Tweak - Replace admin bar height with css variable [#62608](https://github.com/woocommerce/woocommerce/pull/62608)
 * Tweak - Stop autoloading `woocommerce_status_log_db_sources` option [#62806](https://github.com/woocommerce/woocommerce/pull/62806)
 * Tweak - Use wp_is_serving_rest_request() in MCPAdapterProvider instead of contants. [#62972](https://github.com/woocommerce/woocommerce/pull/62972)
+* Tweak - Update PayPal Standard logo on classic checkout. [#63530](https://github.com/woocommerce/woocommerce/pull/63530)
 * Performance - Admin: Improved the performance of approved comment counting and reduced the number of SQL queries on the product reviews page. [#62805](https://github.com/woocommerce/woocommerce/pull/62805)
 * Performance - Admin: optimized SQL fetching dates for month filter on orders page [#63039](https://github.com/woocommerce/woocommerce/pull/63039)
 * Performance - Avoid extra queries in group product pages by priming the post cache. [#63267](https://github.com/woocommerce/woocommerce/pull/63267)
