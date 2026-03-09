@@ -31,6 +31,9 @@ class PendingNotificationStore {
 	 * The dispatcher used to send notifications on shutdown.
 	 *
 	 * @var InternalNotificationDispatcher
+	 *
+	 * @phpstan-ignore property.onlyWritten (this will be read when the loopback
+	 * controller is added)
 	 */
 	private InternalNotificationDispatcher $dispatcher;
 

@@ -461,7 +461,7 @@ class PushToken {
 			'user_id'       => $this->user_id,
 			'token'         => $this->token,
 			'origin'        => $this->origin,
-			'device_locale' => $this->device_locale,
+			'device_locale' => $this->device_locale ?? self::DEFAULT_DEVICE_LOCALE,
 		);
 	}
 
