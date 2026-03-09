@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Internal\PushNotifications\Dispatchers;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
+use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\StoreApi\Utilities\JsonWebToken;
 
 /**
@@ -44,7 +45,15 @@ class InternalNotificationDispatcher {
 		}
 
 		$encoded = array_map( fn ( Notification $notification ) => $notification->to_array(), $notifications );
-		$body    = (string) wp_json_encode( array( 'notifications' => $encoded ) );
+		$body    = wp_json_encode( array( 'notifications' => $encoded ) );
+
+		if ( false === $body ) {
+			wc_get_logger()->error(
+				'Failed to JSON-encode push notification payload.',
+				array( 'source' => PushNotifications::FEATURE_NAME )
+			);
+			return;
+		}
 
 		$token = JsonWebToken::create(
 			array(

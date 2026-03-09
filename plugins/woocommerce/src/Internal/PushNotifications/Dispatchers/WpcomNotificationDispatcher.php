@@ -135,10 +135,10 @@ class WpcomNotificationDispatcher {
 	 *
 	 * @since 10.7.0
 	 *
-	 * @phpstan-ignore return.unusedType
+	 * @phpstan-ignore return.unusedType (Jetpack stubs lack array return type.)
 	 */
 	private function make_request( int $site_id, array $payload, array $tokens ) {
-		$body = (string) wp_json_encode(
+		$body = wp_json_encode(
 			array_merge(
 				$payload,
 				array(
@@ -149,6 +149,10 @@ class WpcomNotificationDispatcher {
 				)
 			)
 		);
+
+		if ( false === $body ) {
+			return new WP_Error( 'json_encode_failed', 'Failed to encode push notification payload.' );
+		}
 
 		// @phpstan-ignore return.type
 		return Jetpack_Connection_Client::wpcom_json_api_request_as_blog(
