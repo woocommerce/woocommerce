@@ -726,36 +726,15 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * Callback for oembed_providers filter.
+	 * Helper to mock the embed page HTTP response for example.com URLs.
 	 *
-	 * @var callable|null
-	 */
-	private $oembed_provider_callback;
-
-	/**
-	 * Helper to register example.com as an oEmbed provider and mock HTTP responses.
-	 *
-	 * @param string|false $mock_body      JSON-encoded oEmbed response body (from wp_json_encode).
-	 * @param string       $embed_page_html Optional HTML for the embed page response. Empty string disables.
+	 * @param string $embed_page_html HTML for the embed page response.
 	 * @return callable The HTTP filter callback (for removal in cleanup).
 	 */
-	private function mock_oembed_for_example_com( $mock_body, string $embed_page_html = '' ): callable {
-		$mock_body                      = (string) $mock_body;
-		$this->oembed_provider_callback = function ( $providers ) {
-			$providers['https://example.com/*'] = array( 'https://example.com/wp-json/oembed/1.0/embed', false );
-			return $providers;
-		};
-		add_filter( 'oembed_providers', $this->oembed_provider_callback );
-
-		$filter_callback = function ( $preempt, $args, $url ) use ( $mock_body, $embed_page_html ) {
-			if ( strpos( $url, 'example.com/wp-json/oembed' ) !== false ) {
-				return array(
-					'response' => array( 'code' => 200 ),
-					'body'     => $mock_body,
-				);
-			}
+	private function mock_embed_page_for_example_com( string $embed_page_html ): callable {
+		$filter_callback = function ( $preempt, $args, $url ) use ( $embed_page_html ) {
 			// Intercept embed page requests (URLs ending with /embed/).
-			if ( ! empty( $embed_page_html ) && preg_match( '#example\.com/.*/embed/?$#', $url ) ) {
+			if ( preg_match( '#example\.com/.*/embed/?$#', $url ) ) {
 				return array(
 					'response' => array( 'code' => 200 ),
 					'body'     => $embed_page_html,
@@ -769,67 +748,30 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * Helper to register example.com as an oEmbed provider that returns errors.
-	 *
-	 * @return callable The HTTP filter callback (for removal in cleanup).
-	 */
-	private function mock_oembed_failure_for_example_com(): callable {
-		$this->oembed_provider_callback = function ( $providers ) {
-			$providers['https://example.com/*'] = array( 'https://example.com/wp-json/oembed/1.0/embed', false );
-			return $providers;
-		};
-		add_filter( 'oembed_providers', $this->oembed_provider_callback );
-
-		$filter_callback = function ( $preempt, $args, $url ) {
-			if ( strpos( $url, 'example.com/wp-json/oembed' ) !== false ) {
-				return new \WP_Error( 'http_request_failed', 'Connection refused' );
-			}
-			return $preempt;
-		};
-
-		add_filter( 'pre_http_request', $filter_callback, 10, 3 );
-		return $filter_callback;
-	}
-
-	/**
-	 * Helper to clean up oEmbed mocks.
+	 * Helper to clean up embed page mocks.
 	 *
 	 * @param callable $filter_callback The HTTP filter callback to remove.
 	 * @param string   $url The URL whose transient should be deleted.
 	 */
-	private function cleanup_oembed_mock( callable $filter_callback, string $url ): void {
+	private function cleanup_embed_mock( callable $filter_callback, string $url ): void {
 		remove_filter( 'pre_http_request', $filter_callback, 10 );
-		delete_transient( 'wc_email_oembed_' . md5( $url ) );
 		delete_transient( 'wc_email_embed_pg_' . md5( $url ) );
-		if ( null !== $this->oembed_provider_callback ) {
-			remove_filter( 'oembed_providers', $this->oembed_provider_callback );
-			$this->oembed_provider_callback = null;
-		}
 	}
 
 	/**
-	 * Test that wp-embed link renders as rich card when oEmbed returns title and thumbnail
+	 * Test that wp-embed link renders as rich card from embed page data
 	 */
 	public function test_renders_wp_embed_as_rich_card(): void {
 		$url             = 'https://example.com/my-blog-post';
 		$embed_page_html = '<html><body><div class="wp-embed">'
+			. '<p class="wp-embed-heading"><a href="' . $url . '" target="_top">My Blog Post Title</a></p>'
 			. '<div class="wp-embed-excerpt"><p>A short excerpt about garlic roasted potatoes and other delicious things.</p></div>'
+			. '<div class="wp-embed-featured-image square"><a href="' . $url . '" target="_top"><img src="https://example.com/image.jpg" alt="" /></a></div>'
 			. '<div class="wp-embed-site-title"><a href="https://example.com" target="_top">'
 			. '<img src="https://example.com/icon-32.png" width="32" height="32" alt="" class="wp-embed-site-icon" />'
 			. '<span>Example Blog</span></a></div>'
 			. '</div></body></html>';
-		$filter_callback = $this->mock_oembed_for_example_com(
-			wp_json_encode(
-				array(
-					'title'         => 'My Blog Post Title',
-					'thumbnail_url' => 'https://example.com/image.jpg',
-					'provider_name' => 'Example Blog',
-					'provider_url'  => 'https://example.com',
-					'type'          => 'link',
-				)
-			),
-			$embed_page_html
-		);
+		$filter_callback = $this->mock_embed_page_for_example_com( $embed_page_html );
 
 		$parsed_wp_embed = array(
 			'blockName' => 'core/embed',
@@ -844,10 +786,10 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 		try {
 			$rendered = $this->embed_renderer->render( $parsed_wp_embed['innerHTML'], $parsed_wp_embed, $this->rendering_context );
 		} finally {
-			$this->cleanup_oembed_mock( $filter_callback, $url );
+			$this->cleanup_embed_mock( $filter_callback, $url );
 		}
 
-		$this->assertStringContainsString( 'My Blog Post Title', $rendered, 'Card should contain the oEmbed title' );
+		$this->assertStringContainsString( 'My Blog Post Title', $rendered, 'Card should contain the title' );
 		$this->assertStringContainsString( 'https://example.com/image.jpg', $rendered, 'Card should contain the thumbnail image' );
 		$this->assertStringContainsString( 'garlic roasted potatoes', $rendered, 'Card should contain the excerpt from embed page' );
 		$this->assertStringContainsString( 'Continue reading', $rendered, 'Card should contain a Continue reading link' );
@@ -860,19 +802,16 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * Test that card renders without thumbnail when oEmbed has title but no thumbnail_url
+	 * Test that card renders without thumbnail when embed page has no featured image
 	 */
 	public function test_renders_card_without_thumbnail(): void {
 		$url             = 'https://example.com/no-image-post';
-		$filter_callback = $this->mock_oembed_for_example_com(
-			wp_json_encode(
-				array(
-					'title'         => 'A Post Without Image',
-					'provider_name' => 'No Image Blog',
-					'type'          => 'link',
-				)
-			)
-		);
+		$embed_page_html = '<html><body><div class="wp-embed">'
+			. '<p class="wp-embed-heading"><a href="' . $url . '" target="_top">A Post Without Image</a></p>'
+			. '<div class="wp-embed-site-title"><a href="https://example.com" target="_top">'
+			. '<span>No Image Blog</span></a></div>'
+			. '</div></body></html>';
+		$filter_callback = $this->mock_embed_page_for_example_com( $embed_page_html );
 
 		$parsed_wp_embed = array(
 			'blockName' => 'core/embed',
@@ -887,7 +826,7 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 		try {
 			$rendered = $this->embed_renderer->render( $parsed_wp_embed['innerHTML'], $parsed_wp_embed, $this->rendering_context );
 		} finally {
-			$this->cleanup_oembed_mock( $filter_callback, $url );
+			$this->cleanup_embed_mock( $filter_callback, $url );
 		}
 
 		$this->assertStringContainsString( 'A Post Without Image', $rendered, 'Card should contain the title' );
@@ -896,18 +835,14 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * Test that card uses domain as provider name when oEmbed does not include provider_name
+	 * Test that card uses domain as provider name when embed page has no site title
 	 */
 	public function test_renders_card_with_domain_fallback_for_provider(): void {
 		$url             = 'https://example.com/domain-fallback';
-		$filter_callback = $this->mock_oembed_for_example_com(
-			wp_json_encode(
-				array(
-					'title' => 'Domain Fallback Post',
-					'type'  => 'link',
-				)
-			)
-		);
+		$embed_page_html = '<html><body><div class="wp-embed">'
+			. '<p class="wp-embed-heading"><a href="' . $url . '" target="_top">Domain Fallback Post</a></p>'
+			. '</div></body></html>';
+		$filter_callback = $this->mock_embed_page_for_example_com( $embed_page_html );
 
 		$parsed_wp_embed = array(
 			'blockName' => 'core/embed',
@@ -922,7 +857,7 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 		try {
 			$rendered = $this->embed_renderer->render( $parsed_wp_embed['innerHTML'], $parsed_wp_embed, $this->rendering_context );
 		} finally {
-			$this->cleanup_oembed_mock( $filter_callback, $url );
+			$this->cleanup_embed_mock( $filter_callback, $url );
 		}
 
 		$this->assertStringContainsString( 'Domain Fallback Post', $rendered, 'Card should contain the title' );
@@ -930,12 +865,12 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * Test that embed falls back to bare link when oEmbed HTTP request fails
+	 * Test that embed falls back to compact link card when embed page HTTP request fails
 	 */
-	public function test_falls_back_to_link_when_oembed_fails(): void {
-		$url             = 'https://example.com/failing-post';
-		$filter_callback = $this->mock_oembed_failure_for_example_com();
+	public function test_falls_back_to_compact_card_when_embed_page_fails(): void {
+		$url = 'https://example.com/failing-post';
 
+		// No mock registered — wp_safe_remote_get will fail in the test environment.
 		$parsed_wp_embed = array(
 			'blockName' => 'core/embed',
 			'attrs'     => array(
@@ -949,26 +884,24 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 		try {
 			$rendered = $this->embed_renderer->render( $parsed_wp_embed['innerHTML'], $parsed_wp_embed, $this->rendering_context );
 		} finally {
-			$this->cleanup_oembed_mock( $filter_callback, $url );
+			delete_transient( 'wc_email_embed_pg_' . md5( $url ) );
 		}
 
-		$this->assertStringContainsString( '<a href="https://example.com/failing-post"', $rendered, 'Should fall back to bare link' );
-		$this->assertStringNotContainsString( 'border: 1px solid #ddd', $rendered, 'Should not render as card' );
+		$this->assertStringContainsString( '<a href="https://example.com/failing-post"', $rendered, 'Should contain link to URL' );
+		$this->assertStringContainsString( 'border: 1px solid #ddd', $rendered, 'Should render as compact link card' );
+		$this->assertStringContainsString( 'example.com/failing-post', $rendered, 'Should display URL without scheme' );
 	}
 
 	/**
-	 * Test that embed falls back to bare link when oEmbed response has no title
+	 * Test that embed falls back to compact link card when embed page has no title
 	 */
-	public function test_falls_back_to_link_when_oembed_has_no_title(): void {
+	public function test_falls_back_to_compact_card_when_embed_page_has_no_title(): void {
 		$url             = 'https://example.com/no-title';
-		$filter_callback = $this->mock_oembed_for_example_com(
-			wp_json_encode(
-				array(
-					'type'          => 'link',
-					'provider_name' => 'Example',
-				)
-			)
-		);
+		$embed_page_html = '<html><body><div class="wp-embed">'
+			. '<div class="wp-embed-site-title"><a href="https://example.com" target="_top">'
+			. '<span>Example</span></a></div>'
+			. '</div></body></html>';
+		$filter_callback = $this->mock_embed_page_for_example_com( $embed_page_html );
 
 		$parsed_wp_embed = array(
 			'blockName' => 'core/embed',
@@ -983,28 +916,26 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 		try {
 			$rendered = $this->embed_renderer->render( $parsed_wp_embed['innerHTML'], $parsed_wp_embed, $this->rendering_context );
 		} finally {
-			$this->cleanup_oembed_mock( $filter_callback, $url );
+			$this->cleanup_embed_mock( $filter_callback, $url );
 		}
 
-		$this->assertStringContainsString( '<a href="https://example.com/no-title"', $rendered, 'Should fall back to bare link' );
-		$this->assertStringNotContainsString( 'border: 1px solid #ddd', $rendered, 'Should not render as card' );
+		$this->assertStringContainsString( '<a href="https://example.com/no-title"', $rendered, 'Should contain link to URL' );
+		$this->assertStringContainsString( 'border: 1px solid #ddd', $rendered, 'Should render as compact link card' );
+		$this->assertStringContainsString( 'example.com/no-title', $rendered, 'Should display URL without scheme' );
 	}
 
 	/**
-	 * Test that card renders without thumbnail when thumbnail_url is invalid
+	 * Test that card renders without thumbnail when featured image URL is invalid
 	 */
 	public function test_renders_card_without_thumbnail_when_thumbnail_url_invalid(): void {
 		$url             = 'https://example.com/bad-thumbnail';
-		$filter_callback = $this->mock_oembed_for_example_com(
-			wp_json_encode(
-				array(
-					'title'         => 'Post With Bad Thumbnail',
-					'thumbnail_url' => 'javascript:alert(1)',
-					'provider_name' => 'Sketchy Blog',
-					'type'          => 'link',
-				)
-			)
-		);
+		$embed_page_html = '<html><body><div class="wp-embed">'
+			. '<p class="wp-embed-heading"><a href="' . $url . '" target="_top">Post With Bad Thumbnail</a></p>'
+			. '<div class="wp-embed-featured-image square"><a href="' . $url . '" target="_top"><img src="javascript:alert(1)" alt="" /></a></div>'
+			. '<div class="wp-embed-site-title"><a href="https://example.com" target="_top">'
+			. '<span>Sketchy Blog</span></a></div>'
+			. '</div></body></html>';
+		$filter_callback = $this->mock_embed_page_for_example_com( $embed_page_html );
 
 		$parsed_wp_embed = array(
 			'blockName' => 'core/embed',
@@ -1019,7 +950,7 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 		try {
 			$rendered = $this->embed_renderer->render( $parsed_wp_embed['innerHTML'], $parsed_wp_embed, $this->rendering_context );
 		} finally {
-			$this->cleanup_oembed_mock( $filter_callback, $url );
+			$this->cleanup_embed_mock( $filter_callback, $url );
 		}
 
 		$this->assertStringContainsString( 'Post With Bad Thumbnail', $rendered, 'Card should still render with title' );
@@ -1028,19 +959,16 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * Test that oEmbed response is cached and reused on subsequent renders
+	 * Test that embed page response is cached and reused on subsequent renders
 	 */
-	public function test_oembed_response_is_cached(): void {
+	public function test_embed_page_response_is_cached(): void {
 		$url             = 'https://example.com/cached-post';
-		$filter_callback = $this->mock_oembed_for_example_com(
-			wp_json_encode(
-				array(
-					'title'         => 'Cached Post',
-					'provider_name' => 'Cache Blog',
-					'type'          => 'link',
-				)
-			)
-		);
+		$embed_page_html = '<html><body><div class="wp-embed">'
+			. '<p class="wp-embed-heading"><a href="' . $url . '" target="_top">Cached Post</a></p>'
+			. '<div class="wp-embed-site-title"><a href="https://example.com" target="_top">'
+			. '<span>Cache Blog</span></a></div>'
+			. '</div></body></html>';
+		$filter_callback = $this->mock_embed_page_for_example_com( $embed_page_html );
 
 		$parsed_wp_embed = array(
 			'blockName' => 'core/embed',
@@ -1059,7 +987,7 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 
 			$second_render = $this->embed_renderer->render( $parsed_wp_embed['innerHTML'], $parsed_wp_embed, $this->rendering_context );
 		} finally {
-			$this->cleanup_oembed_mock( $filter_callback, $url );
+			$this->cleanup_embed_mock( $filter_callback, $url );
 		}
 
 		$this->assertStringContainsString( 'Cached Post', $first_render, 'First render should contain the title' );
@@ -1071,15 +999,12 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 	 */
 	public function test_link_embed_card_respects_email_attrs_spacing(): void {
 		$url             = 'https://example.com/spaced-post';
-		$filter_callback = $this->mock_oembed_for_example_com(
-			wp_json_encode(
-				array(
-					'title'         => 'Spaced Post',
-					'provider_name' => 'Space Blog',
-					'type'          => 'link',
-				)
-			)
-		);
+		$embed_page_html = '<html><body><div class="wp-embed">'
+			. '<p class="wp-embed-heading"><a href="' . $url . '" target="_top">Spaced Post</a></p>'
+			. '<div class="wp-embed-site-title"><a href="https://example.com" target="_top">'
+			. '<span>Space Blog</span></a></div>'
+			. '</div></body></html>';
+		$filter_callback = $this->mock_embed_page_for_example_com( $embed_page_html );
 
 		$parsed_wp_embed = array(
 			'blockName'   => 'core/embed',
@@ -1097,7 +1022,7 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 		try {
 			$rendered = $this->embed_renderer->render( $parsed_wp_embed['innerHTML'], $parsed_wp_embed, $this->rendering_context );
 		} finally {
-			$this->cleanup_oembed_mock( $filter_callback, $url );
+			$this->cleanup_embed_mock( $filter_callback, $url );
 		}
 
 		$this->assertStringContainsString( 'Spaced Post', $rendered, 'Card should render' );
@@ -1105,28 +1030,24 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * Test that card skips thumbnail when thumbnail_width is below minimum
+	 * Test that card shows thumbnail when embed page has a featured image
 	 */
-	public function test_renders_card_without_thumbnail_when_too_small(): void {
-		$url             = 'https://example.com/small-thumb-post';
-		$filter_callback = $this->mock_oembed_for_example_com(
-			wp_json_encode(
-				array(
-					'title'           => 'Small Thumbnail Post',
-					'thumbnail_url'   => 'https://example.com/tiny.jpg',
-					'thumbnail_width' => 150,
-					'provider_name'   => 'Tiny Blog',
-					'type'            => 'link',
-				)
-			)
-		);
+	public function test_renders_card_with_thumbnail(): void {
+		$url             = 'https://example.com/thumb-post';
+		$embed_page_html = '<html><body><div class="wp-embed">'
+			. '<p class="wp-embed-heading"><a href="' . $url . '" target="_top">Post With Thumbnail</a></p>'
+			. '<div class="wp-embed-featured-image square"><a href="' . $url . '" target="_top"><img src="https://example.com/featured.jpg" alt="" /></a></div>'
+			. '<div class="wp-embed-site-title"><a href="https://example.com" target="_top">'
+			. '<span>Image Blog</span></a></div>'
+			. '</div></body></html>';
+		$filter_callback = $this->mock_embed_page_for_example_com( $embed_page_html );
 
 		$parsed_wp_embed = array(
 			'blockName' => 'core/embed',
 			'attrs'     => array(
 				'url'              => $url,
 				'type'             => 'wp-embed',
-				'providerNameSlug' => 'tiny-blog',
+				'providerNameSlug' => 'image-blog',
 			),
 			'innerHTML' => '<figure class="wp-block-embed is-type-wp-embed"><div class="wp-block-embed__wrapper">' . $url . '</div></figure>',
 		);
@@ -1134,128 +1055,12 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 		try {
 			$rendered = $this->embed_renderer->render( $parsed_wp_embed['innerHTML'], $parsed_wp_embed, $this->rendering_context );
 		} finally {
-			$this->cleanup_oembed_mock( $filter_callback, $url );
+			$this->cleanup_embed_mock( $filter_callback, $url );
 		}
 
-		$this->assertStringContainsString( 'Small Thumbnail Post', $rendered, 'Card should still render with title' );
-		$this->assertStringContainsString( 'Tiny Blog', $rendered, 'Card should contain provider name' );
-		$this->assertStringNotContainsString( '<img', $rendered, 'Card should not show small thumbnail' );
-		$this->assertStringNotContainsString( 'tiny.jpg', $rendered, 'Small thumbnail URL should not appear' );
-	}
-
-	/**
-	 * Test that card shows thumbnail when thumbnail_width meets minimum
-	 */
-	public function test_renders_card_with_thumbnail_when_large_enough(): void {
-		$url             = 'https://example.com/large-thumb-post';
-		$filter_callback = $this->mock_oembed_for_example_com(
-			wp_json_encode(
-				array(
-					'title'           => 'Large Thumbnail Post',
-					'thumbnail_url'   => 'https://example.com/big.jpg',
-					'thumbnail_width' => 600,
-					'provider_name'   => 'Big Blog',
-					'type'            => 'link',
-				)
-			)
-		);
-
-		$parsed_wp_embed = array(
-			'blockName' => 'core/embed',
-			'attrs'     => array(
-				'url'              => $url,
-				'type'             => 'wp-embed',
-				'providerNameSlug' => 'big-blog',
-			),
-			'innerHTML' => '<figure class="wp-block-embed is-type-wp-embed"><div class="wp-block-embed__wrapper">' . $url . '</div></figure>',
-		);
-
-		try {
-			$rendered = $this->embed_renderer->render( $parsed_wp_embed['innerHTML'], $parsed_wp_embed, $this->rendering_context );
-		} finally {
-			$this->cleanup_oembed_mock( $filter_callback, $url );
-		}
-
-		$this->assertStringContainsString( 'Large Thumbnail Post', $rendered, 'Card should render with title' );
-		$this->assertStringContainsString( 'https://example.com/big.jpg', $rendered, 'Card should show large thumbnail' );
-		$this->assertStringContainsString( '<img', $rendered, 'Card should contain an image tag' );
-	}
-
-	/**
-	 * Test that card shows thumbnail when thumbnail_width is not provided by oEmbed
-	 */
-	public function test_renders_card_with_thumbnail_when_width_unknown(): void {
-		$url             = 'https://example.com/unknown-width-post';
-		$filter_callback = $this->mock_oembed_for_example_com(
-			wp_json_encode(
-				array(
-					'title'         => 'Unknown Width Post',
-					'thumbnail_url' => 'https://example.com/mystery.jpg',
-					'provider_name' => 'Mystery Blog',
-					'type'          => 'link',
-				)
-			)
-		);
-
-		$parsed_wp_embed = array(
-			'blockName' => 'core/embed',
-			'attrs'     => array(
-				'url'              => $url,
-				'type'             => 'wp-embed',
-				'providerNameSlug' => 'mystery-blog',
-			),
-			'innerHTML' => '<figure class="wp-block-embed is-type-wp-embed"><div class="wp-block-embed__wrapper">' . $url . '</div></figure>',
-		);
-
-		try {
-			$rendered = $this->embed_renderer->render( $parsed_wp_embed['innerHTML'], $parsed_wp_embed, $this->rendering_context );
-		} finally {
-			$this->cleanup_oembed_mock( $filter_callback, $url );
-		}
-
-		$this->assertStringContainsString( 'Unknown Width Post', $rendered, 'Card should render with title' );
-		$this->assertStringContainsString( 'https://example.com/mystery.jpg', $rendered, 'Card should show thumbnail when width is unknown' );
-		$this->assertStringContainsString( '<img', $rendered, 'Card should contain an image tag' );
-	}
-
-	/**
-	 * Test that card renders without excerpt when embed page fetch fails
-	 */
-	public function test_renders_card_without_excerpt_when_embed_page_fails(): void {
-		$url = 'https://example.com/no-embed-page';
-
-		// Register oEmbed provider but do NOT provide embed page HTML — the default
-		// pre_http_request will not intercept the /embed/ URL, so wp_safe_remote_get
-		// will return an error in the test environment.
-		$filter_callback = $this->mock_oembed_for_example_com(
-			wp_json_encode(
-				array(
-					'title'         => 'Post Without Embed Page',
-					'provider_name' => 'Example Blog',
-					'type'          => 'link',
-				)
-			)
-		);
-
-		$parsed_wp_embed = array(
-			'blockName' => 'core/embed',
-			'attrs'     => array(
-				'url'              => $url,
-				'type'             => 'wp-embed',
-				'providerNameSlug' => 'example-blog',
-			),
-			'innerHTML' => '<figure class="wp-block-embed is-type-wp-embed"><div class="wp-block-embed__wrapper">' . $url . '</div></figure>',
-		);
-
-		try {
-			$rendered = $this->embed_renderer->render( $parsed_wp_embed['innerHTML'], $parsed_wp_embed, $this->rendering_context );
-		} finally {
-			$this->cleanup_oembed_mock( $filter_callback, $url );
-		}
-
-		$this->assertStringContainsString( 'Post Without Embed Page', $rendered, 'Card should still render title' );
-		$this->assertStringContainsString( 'Example Blog', $rendered, 'Card should contain provider name' );
-		$this->assertStringNotContainsString( 'font-size: 14px; color: #555', $rendered, 'Card should not contain excerpt styling' );
+		$this->assertStringContainsString( 'Post With Thumbnail', $rendered, 'Card should render with title' );
+		$this->assertStringContainsString( 'https://example.com/featured.jpg', $rendered, 'Card should show featured image as thumbnail' );
+		$this->assertStringContainsString( 'Image Blog', $rendered, 'Card should contain provider name' );
 	}
 
 	/**
@@ -1263,17 +1068,12 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 	 */
 	public function test_renders_card_without_excerpt_when_no_excerpt_element(): void {
 		$url             = 'https://example.com/no-excerpt-element';
-		$embed_page_html = '<html><body><div class="wp-embed"><p class="wp-embed-heading"><a href="' . $url . '">Post Title</a></p></div></body></html>';
-		$filter_callback = $this->mock_oembed_for_example_com(
-			wp_json_encode(
-				array(
-					'title'         => 'Post Without Excerpt Element',
-					'provider_name' => 'Example Blog',
-					'type'          => 'link',
-				)
-			),
-			$embed_page_html
-		);
+		$embed_page_html = '<html><body><div class="wp-embed">'
+			. '<p class="wp-embed-heading"><a href="' . $url . '">Post Title</a></p>'
+			. '<div class="wp-embed-site-title"><a href="https://example.com" target="_top">'
+			. '<span>Example Blog</span></a></div>'
+			. '</div></body></html>';
+		$filter_callback = $this->mock_embed_page_for_example_com( $embed_page_html );
 
 		$parsed_wp_embed = array(
 			'blockName' => 'core/embed',
@@ -1288,11 +1088,114 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 		try {
 			$rendered = $this->embed_renderer->render( $parsed_wp_embed['innerHTML'], $parsed_wp_embed, $this->rendering_context );
 		} finally {
-			$this->cleanup_oembed_mock( $filter_callback, $url );
+			$this->cleanup_embed_mock( $filter_callback, $url );
 		}
 
-		$this->assertStringContainsString( 'Post Without Excerpt Element', $rendered, 'Card should still render title' );
+		$this->assertStringContainsString( 'Post Title', $rendered, 'Card should still render title' );
 		$this->assertStringContainsString( 'Example Blog', $rendered, 'Card should contain provider name' );
 		$this->assertStringNotContainsString( 'font-size: 14px; color: #555', $rendered, 'Card should not contain excerpt styling' );
+	}
+
+	/**
+	 * Test that rich cards are capped at five per render instance
+	 */
+	public function test_caps_rich_cards_at_five_per_render(): void {
+		$embed_page_html = '<html><body><div class="wp-embed">'
+			. '<p class="wp-embed-heading"><a href="https://example.com/post" target="_top">Rich Card Title</a></p>'
+			. '<div class="wp-embed-site-title"><a href="https://example.com" target="_top">'
+			. '<span>Example Blog</span></a></div>'
+			. '</div></body></html>';
+		$filter_callback = $this->mock_embed_page_for_example_com( $embed_page_html );
+
+		$urls = array();
+		try {
+			for ( $i = 1; $i <= 6; $i++ ) {
+				$url    = 'https://example.com/post-' . $i;
+				$urls[] = $url;
+
+				$parsed_block = array(
+					'blockName' => 'core/embed',
+					'attrs'     => array(
+						'url'              => $url,
+						'type'             => 'wp-embed',
+						'providerNameSlug' => 'example-blog',
+					),
+					'innerHTML' => '<figure class="wp-block-embed is-type-wp-embed"><div class="wp-block-embed__wrapper">' . $url . '</div></figure>',
+				);
+
+				$rendered = $this->embed_renderer->render( $parsed_block['innerHTML'], $parsed_block, $this->rendering_context );
+
+				if ( $i <= 5 ) {
+					$this->assertStringContainsString( 'Rich Card Title', $rendered, "Embed #{$i} should render as a rich card" );
+				} else {
+					$this->assertStringNotContainsString( 'Rich Card Title', $rendered, 'Embed #6 should NOT render as a rich card' );
+					$this->assertStringContainsString( 'border: 1px solid #ddd', $rendered, 'Embed #6 should render as a compact link card' );
+					$this->assertStringContainsString( 'example.com/post-6', $rendered, 'Compact card should display the URL' );
+				}
+			}
+		} finally {
+			remove_filter( 'pre_http_request', $filter_callback, 10 );
+			foreach ( $urls as $url ) {
+				delete_transient( 'wc_email_embed_pg_' . md5( $url ) );
+			}
+		}
+	}
+
+	/**
+	 * Test that compact link card shows URL in a styled card with theme link color
+	 */
+	public function test_compact_link_card_shows_url_in_card(): void {
+		$embed_page_html = '<html><body><div class="wp-embed">'
+			. '<p class="wp-embed-heading"><a href="https://example.com/post" target="_top">Title</a></p>'
+			. '<div class="wp-embed-site-title"><a href="https://example.com" target="_top">'
+			. '<span>Blog</span></a></div>'
+			. '</div></body></html>';
+		$filter_callback = $this->mock_embed_page_for_example_com( $embed_page_html );
+
+		$urls = array();
+		try {
+			// Exhaust the 5 rich card slots.
+			for ( $i = 1; $i <= 5; $i++ ) {
+				$url    = 'https://example.com/filler-' . $i;
+				$urls[] = $url;
+
+				$parsed_block = array(
+					'blockName' => 'core/embed',
+					'attrs'     => array(
+						'url'              => $url,
+						'type'             => 'wp-embed',
+						'providerNameSlug' => 'example-blog',
+					),
+					'innerHTML' => '<figure class="wp-block-embed is-type-wp-embed"><div class="wp-block-embed__wrapper">' . $url . '</div></figure>',
+				);
+				$this->embed_renderer->render( $parsed_block['innerHTML'], $parsed_block, $this->rendering_context );
+			}
+
+			// The 6th should be a compact link card.
+			$target_url   = 'https://example.com/the-target-post';
+			$urls[]       = $target_url;
+			$parsed_block = array(
+				'blockName' => 'core/embed',
+				'attrs'     => array(
+					'url'              => $target_url,
+					'type'             => 'wp-embed',
+					'providerNameSlug' => 'example-blog',
+				),
+				'innerHTML' => '<figure class="wp-block-embed is-type-wp-embed"><div class="wp-block-embed__wrapper">' . $target_url . '</div></figure>',
+			);
+			$rendered     = $this->embed_renderer->render( $parsed_block['innerHTML'], $parsed_block, $this->rendering_context );
+
+			$this->assertStringContainsString( 'border: 1px solid #ddd', $rendered, 'Compact card should have a card border' );
+			$this->assertStringContainsString( 'border-radius: 4px', $rendered, 'Compact card should have rounded corners' );
+			$this->assertStringContainsString( 'example.com/the-target-post', $rendered, 'Compact card should display the URL without scheme' );
+			$this->assertStringContainsString( 'href="https://example.com/the-target-post"', $rendered, 'Compact card URL should link to the original URL' );
+			// Verify the link uses theme link color (default for test context).
+			$this->assertStringContainsString( 'text-decoration: none', $rendered, 'Compact card link should have no underline' );
+		} finally {
+			remove_filter( 'pre_http_request', $filter_callback, 10 );
+			foreach ( $urls as $url ) {
+				delete_transient( 'wc_email_embed_pg_' . md5( $url ) );
+			}
+		}
 	}
 }
