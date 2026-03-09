@@ -28,7 +28,7 @@ class PendingNotificationStore {
 	private bool $enabled = false;
 
 	/**
-	 * The dispatcher used to send notifications on shutdown.
+	 * The dispatcher that will be used to send notifications on shutdown.
 	 *
 	 * @var InternalNotificationDispatcher
 	 *
