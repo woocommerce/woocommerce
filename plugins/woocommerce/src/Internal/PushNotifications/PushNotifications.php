@@ -8,6 +8,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\Jetpack\Connection\Manager as JetpackConnectionManager;
 use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushTokenRestController;
+use Automattic\WooCommerce\Internal\PushNotifications\Dispatchers\InternalNotificationDispatcher;
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\PendingNotificationStore;
 use Automattic\WooCommerce\Internal\PushNotifications\Triggers\NewOrderNotificationTrigger;

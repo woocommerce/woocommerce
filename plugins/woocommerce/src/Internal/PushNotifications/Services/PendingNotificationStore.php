@@ -6,12 +6,13 @@ namespace Automattic\WooCommerce\Internal\PushNotifications\Services;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\PushNotifications\Dispatchers\InternalNotificationDispatcher;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
 
 /**
  * Store that collects notifications during a request and dispatches them all on
- * on shutdown. Should be accessed from the container (`wc_get_container`) to
- * ensure store is shared by all usage.
+ * shutdown via the InternalNotificationDispatcher. Should be accessed from the
+ * container (`wc_get_container`) to ensure store is shared by all usage.
  *
  * Notifications are keyed by `{type}_{resource_id}` (with blog ID from
  * `get_current_blog_id()`) to prevent duplicates within a single request.
@@ -27,6 +28,13 @@ class PendingNotificationStore {
 	private bool $enabled = false;
 
 	/**
+	 * The dispatcher used to send notifications on shutdown.
+	 *
+	 * @var InternalNotificationDispatcher
+	 */
+	private InternalNotificationDispatcher $dispatcher;
+
+	/**
 	 * Pending notifications keyed by identifier.
 	 *
 	 * @var array<string, Notification>
@@ -39,6 +47,19 @@ class PendingNotificationStore {
 	 * @var bool
 	 */
 	private bool $shutdown_registered = false;
+
+	/**
+	 * Initialize dependencies.
+	 *
+	 * @internal
+	 *
+	 * @param InternalNotificationDispatcher $dispatcher The dispatcher to use on shutdown.
+	 *
+	 * @since 10.7.0
+	 */
+	final public function init( InternalNotificationDispatcher $dispatcher ): void {
+		$this->dispatcher = $dispatcher;
+	}
 
 	/**
 	 * Enables the store so it accepts notifications.
@@ -99,17 +120,7 @@ class PendingNotificationStore {
 			return;
 		}
 
-		$notifications = array_values( $this->pending );
-
-		/**
-		 * Fires when pending push notifications are ready to be dispatched.
-		 *
-		 * @param Notification[] $notifications The notifications to dispatch.
-		 *
-		 * @since 10.7.0
-		 *
-		 * The call to dispatch the notifications will go here.
-		 */
+		$this->dispatcher->dispatch( array_values( $this->pending ) );
 
 		/**
 		 * Store is single-use per request lifecycle, so disable it and clear

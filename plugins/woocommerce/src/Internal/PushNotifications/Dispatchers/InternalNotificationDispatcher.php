@@ -1,0 +1,71 @@
+<?php
+
+declare( strict_types = 1 );
+
+namespace Automattic\WooCommerce\Internal\PushNotifications\Dispatchers;
+
+defined( 'ABSPATH' ) || exit;
+
+use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
+use Automattic\WooCommerce\StoreApi\Utilities\JsonWebToken;
+
+/**
+ * Fires a non-blocking POST to the internal REST endpoint with JSON-encoded
+ * notification metadata and a signed JWT.
+ *
+ * Called directly by PendingNotificationStore::dispatch_all() on shutdown.
+ *
+ * @since 10.7.0
+ */
+class InternalNotificationDispatcher {
+
+	/**
+	 * REST route for the send endpoint.
+	 */
+	const SEND_ENDPOINT = 'wc-push-notifications/send';
+
+	/**
+	 * JWT expiry in seconds.
+	 */
+	const JWT_EXPIRY_SECONDS = 30;
+
+	/**
+	 * JSON-encodes notifications and fires a non-blocking POST to the internal
+	 * REST endpoint.
+	 *
+	 * @param Notification[] $notifications The notifications to dispatch.
+	 * @return void
+	 *
+	 * @since 10.7.0
+	 */
+	public function dispatch( array $notifications ): void {
+		if ( empty( $notifications ) ) {
+			return;
+		}
+
+		$encoded = array_map( fn ( Notification $notification ) => $notification->to_array(), $notifications );
+		$body    = (string) wp_json_encode( array( 'notifications' => $encoded ) );
+
+		$token = JsonWebToken::create(
+			array(
+				'iss'       => get_site_url(),
+				'exp'       => time() + self::JWT_EXPIRY_SECONDS,
+				'body_hash' => hash( 'sha256', $body ),
+			),
+			wp_salt( 'auth' )
+		);
+
+		wp_remote_post(
+			rest_url( self::SEND_ENDPOINT ),
+			array(
+				'blocking' => false,
+				'timeout'  => 1,
+				'headers'  => array(
+					'Content-Type'  => 'application/json',
+					'Authorization' => 'Bearer ' . $token,
+				),
+				'body'     => $body,
+			)
+		);
+	}
+}

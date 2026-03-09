@@ -33,7 +33,10 @@ class NewOrderNotificationTriggerTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
+		$dispatcher  = $this->createMock( InternalNotificationDispatcher::class );
 		$this->store = new PendingNotificationStore();
+
+		$this->store->init( $dispatcher );
 		$this->store->register();
 
 		wc_get_container()->replace( PendingNotificationStore::class, $this->store );
