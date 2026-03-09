@@ -39,7 +39,7 @@ class NewOrderNotificationTriggerTest extends WC_Unit_Test_Case {
 		wc_get_container()->replace( PendingNotificationStore::class, $this->store );
 		wc_get_container()->reset_all_resolved();
 
-		$this->trigger = new NewOrderNotificationTrigger( $this->store );
+		$this->trigger = new NewOrderNotificationTrigger();
 		$this->trigger->register();
 	}
 
