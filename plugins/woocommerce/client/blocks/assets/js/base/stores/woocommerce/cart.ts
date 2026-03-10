@@ -301,6 +301,9 @@ const { state, actions } = store< Store >(
 				variation?: ClientCartItem[ 'variation' ];
 			} ) {
 				return state.cart.items.find( ( cartItem ) => {
+					if ( key ) {
+						return key === cartItem.key;
+					}
 					if ( cartItem.type === 'variation' ) {
 						if (
 							id !== cartItem.id ||
@@ -315,7 +318,7 @@ const { state, actions } = store< Store >(
 							variation
 						);
 					}
-					return key ? key === cartItem.key : id === cartItem.id;
+					return id === cartItem.id;
 				} );
 			},
 		},
