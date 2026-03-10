@@ -630,17 +630,11 @@ class PaymentsTest extends WC_Unit_Test_Case {
 				)
 			);
 
-		// Pass through the order map so we can verify the loop's placement.
-		$captured_order_map = null;
+		// Pass through the order map unchanged.
 		$this->mock_providers
 			->expects( $this->any() )
 			->method( 'enhance_order_map' )
-			->willReturnCallback(
-				function ( $order_map ) use ( &$captured_order_map ) {
-					$captured_order_map = $order_map;
-					return $order_map;
-				}
-			);
+			->willReturnArgument( 0 );
 
 		$this->mock_providers
 			->expects( $this->any() )
@@ -651,13 +645,16 @@ class PaymentsTest extends WC_Unit_Test_Case {
 		// Act.
 		$data = $this->sut->get_payment_providers( $location );
 
-		// Verify providers were returned.
-		$this->assertNotEmpty( $data );
+		// Assert: stripe should appear between gateway1 and the offline group in the final sorted output.
+		$provider_ids        = array_column( $data, 'id' );
+		$stripe_index        = array_search( 'stripe', $provider_ids, true );
+		$gateway1_index      = array_search( 'gateway1', $provider_ids, true );
+		$offline_group_index = array_search( PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP, $provider_ids, true );
 
-		// Assert: stripe should be between gateway1 and the offline group (compare order values).
-		$this->assertArrayHasKey( 'stripe', $captured_order_map, 'stripe should be in the order map' );
-		$this->assertGreaterThan( $captured_order_map['gateway1'], $captured_order_map['stripe'], 'stripe should be after gateway1' );
-		$this->assertLessThan( $captured_order_map[ PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP ], $captured_order_map['stripe'], 'stripe should be before the offline group' );
+		$this->assertNotFalse( $stripe_index, 'stripe should be in the providers list' );
+		$this->assertNotFalse( $offline_group_index, 'offline group should be in the providers list' );
+		$this->assertGreaterThan( $gateway1_index, $stripe_index, 'stripe should be after gateway1' );
+		$this->assertLessThan( $offline_group_index, $stripe_index, 'stripe should be before the offline group' );
 	}
 
 	/**
@@ -694,17 +691,11 @@ class PaymentsTest extends WC_Unit_Test_Case {
 				)
 			);
 
-		// Pass through the order map.
-		$captured_order_map = null;
+		// Pass through the order map unchanged.
 		$this->mock_providers
 			->expects( $this->any() )
 			->method( 'enhance_order_map' )
-			->willReturnCallback(
-				function ( $order_map ) use ( &$captured_order_map ) {
-					$captured_order_map = $order_map;
-					return $order_map;
-				}
-			);
+			->willReturnArgument( 0 );
 
 		$this->mock_providers
 			->expects( $this->any() )
@@ -715,21 +706,14 @@ class PaymentsTest extends WC_Unit_Test_Case {
 		// Act.
 		$data = $this->sut->get_payment_providers( $location );
 
-		// Verify providers were returned.
-		$this->assertNotEmpty( $data );
+		// Assert: stripe should be at the end — after all existing gateways (custom ordering fallback).
+		$provider_ids   = array_column( $data, 'id' );
+		$stripe_index   = array_search( 'stripe', $provider_ids, true );
+		$gateway1_index = array_search( 'gateway1', $provider_ids, true );
 
-		// Assert: stripe should NOT be placed at the offline group's position (above-offline logic not triggered).
-		// In the custom ordering fallback, stripe is placed at the end — after all existing gateways.
-		$this->assertArrayHasKey( 'stripe', $captured_order_map, 'stripe should be in the order map' );
-		$this->assertGreaterThan(
-			$captured_order_map[ PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP ],
-			$captured_order_map['stripe'],
-			'stripe should not be placed before the offline group'
-		);
-		$this->assertGreaterThan(
-			$captured_order_map['gateway1'],
-			$captured_order_map['stripe'],
-			'stripe should be after all non-offline gateways'
-		);
+		$this->assertNotFalse( $stripe_index, 'stripe should be in the providers list' );
+		$this->assertGreaterThan( $gateway1_index, $stripe_index, 'stripe should be after gateway1' );
+		// Stripe should be the last non-offline-PM provider.
+		$this->assertSame( count( $provider_ids ) - 1, $stripe_index, 'stripe should be the last provider' );
 	}
 }
