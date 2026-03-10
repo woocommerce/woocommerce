@@ -24,6 +24,17 @@ describe( 'getExportQuery', () => {
 		expect( result.currency ).toBe( 'EUR' );
 	} );
 
+	it( 'should not forward a filter param present in urlQuery but not in reportQuery', () => {
+		const reportQuery = { orderby: 'date', order: 'desc' };
+		const urlQuery = { status: 'completed' };
+		const filters = [ { param: 'currency', filters: [] } ];
+
+		const result = getExportQuery( reportQuery, urlQuery, filters );
+
+		expect( result.currency ).not.toBeDefined();
+		expect( result.status ).not.toBeDefined();
+	} );
+
 	it( 'forwards multiple filter params dynamically', () => {
 		const reportQuery = { orderby: 'date' };
 		const urlQuery = { currency: 'CAD', region: 'NA' };
