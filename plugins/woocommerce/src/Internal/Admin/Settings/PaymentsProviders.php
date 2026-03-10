@@ -1101,7 +1101,7 @@ class PaymentsProviders {
 					$order_map[ self::OFFLINE_METHODS_ORDERING_GROUP ]
 				);
 			} else {
-				$order_map[ $id ] = empty( $order_map ) ? 0 : max( $order_map ) + 1;
+				$order_map = Utils::order_map_add_at_order( $order_map, $id, empty( $order_map ) ? 0 : max( $order_map ) + 1 );
 			}
 		}
 

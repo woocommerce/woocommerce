@@ -149,7 +149,7 @@ class Payments {
 					$providers_order_map = Utils::order_map_add_at_order(
 						$providers_order_map,
 						$payment_gateway->id,
-						count( $payment_providers )
+						empty( $providers_order_map ) ? 0 : max( $providers_order_map ) + 1
 					);
 				}
 			}
