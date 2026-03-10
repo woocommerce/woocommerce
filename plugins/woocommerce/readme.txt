@@ -170,7 +170,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 10.6.0 2026-XX-XX =
+= 10.6.0 2026-03-10 =
 
 **WooCommerce**
 
@@ -223,6 +223,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Fix Product Gallery dialog page refresh on WordPress 7.0 by using withSyncEvent for the openDialog action. [#63571](https://github.com/woocommerce/woocommerce/pull/63571)
 * Fix - Prevent repeated PayPal Standard order details API requests when the first request returns 404. [#63561](https://github.com/woocommerce/woocommerce/pull/63561)
 * Fix - Validate shipping country against PayPal’s supported countries instead of WooCommerce’s full country list to avoid invalid country codes in PayPal requests. [#63548](https://github.com/woocommerce/woocommerce/pull/63548)
+* Fix - Prevent stored XSS on order notes added via REST API [#63616](https://github.com/woocommerce/woocommerce/pull/63616)
 * Add - Add "Products by Brand" collection to Product Collection block. [#62817](https://github.com/woocommerce/woocommerce/pull/62817)
 * Add - Add caching for the taxes REST API endpoints [#62931](https://github.com/woocommerce/woocommerce/pull/62931)
 * Add - Add dedicated email class and block template for partially refunded orders in the block email editor to ensure consistent visual styling across all transactional emails. [#62895](https://github.com/woocommerce/woocommerce/pull/62895)
