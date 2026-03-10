@@ -287,14 +287,14 @@ store< MiniCart >(
 			},
 
 			get badgeBackgroundColor(): string | undefined {
-				if ( state.isHydrated && ! state.hasBadgeColorAttribute ) {
+				if ( state.isHydrated && state.hasBadgeColorAttribute ) {
 					const { ref } = getElement();
 					return getClosestColor( ref!, 'color' ) || '#000';
 				}
 			},
 
 			get badgeTextColor(): string | undefined {
-				if ( state.isHydrated && ! state.hasBadgeColorAttribute ) {
+				if ( state.isHydrated && state.hasBadgeColorAttribute ) {
 					const { ref } = getElement();
 					return getClosestColor( ref, 'backgroundColor' ) || '#fff';
 				}
