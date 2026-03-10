@@ -91,6 +91,29 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should not overwrite an existing password option when the field is absent from POST data.
+	 */
+	public function test_save_fields_does_not_overwrite_missing_password_field(): void {
+		$option_name                   = 'test_password_missing';
+		$this->option_names_to_clean[] = $option_name;
+		$original_password             = 'existing%25secret';
+		update_option( $option_name, $original_password );
+
+		$options = array(
+			array(
+				'id'   => $option_name,
+				'type' => 'password',
+			),
+		);
+		// $data intentionally omits $option_name to simulate a missing field.
+		$data = array();
+
+		WC_Admin_Settings::save_fields( $options, $data );
+
+		$this->assertSame( $original_password, get_option( $option_name ), 'Existing password should not be overwritten when field is absent from POST data' );
+	}
+
+	/**
 	 * @testdox Should still sanitize text fields with wc_clean as before.
 	 */
 	public function test_save_fields_still_sanitizes_text_fields(): void {
