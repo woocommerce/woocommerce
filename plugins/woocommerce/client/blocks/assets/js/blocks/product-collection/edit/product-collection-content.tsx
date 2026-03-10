@@ -15,6 +15,7 @@ import fastDeepEqual from 'fast-deep-equal/es6';
 /**
  * Internal dependencies
  */
+import { useIsEmailEditor } from '@woocommerce/email-editor';
 import {
 	ProductCollectionAttributes,
 	ProductCollectionQuery,
@@ -78,6 +79,8 @@ const ProductCollectionContent = ( {
 		location,
 		isUsingReferencePreviewMode,
 	} = props;
+
+	const isEmailEditor = useIsEmailEditor();
 
 	useSetPreviewState( {
 		setPreviewState,
@@ -164,7 +167,7 @@ const ProductCollectionContent = ( {
 	return (
 		<div { ...blockProps }>
 			{ attributes.__privatePreviewState?.isPreview &&
-				props.isSelected && (
+				( isEmailEditor || props.isSelected ) && (
 					<Button
 						variant="primary"
 						size="small"
