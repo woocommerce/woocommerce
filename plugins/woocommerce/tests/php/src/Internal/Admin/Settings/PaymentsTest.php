@@ -719,12 +719,17 @@ class PaymentsTest extends WC_Unit_Test_Case {
 		$this->assertNotEmpty( $data );
 
 		// Assert: stripe should NOT be placed at the offline group's position (above-offline logic not triggered).
-		// In the custom ordering fallback, stripe is placed at count($payment_providers) — the old behavior.
+		// In the custom ordering fallback, stripe is placed at the end — after all existing gateways.
 		$this->assertArrayHasKey( 'stripe', $captured_order_map, 'stripe should be in the order map' );
 		$this->assertGreaterThan(
 			$captured_order_map[ PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP ],
 			$captured_order_map['stripe'],
 			'stripe should not be placed before the offline group'
+		);
+		$this->assertGreaterThan(
+			$captured_order_map['gateway1'],
+			$captured_order_map['stripe'],
+			'stripe should be after all non-offline gateways'
 		);
 	}
 }
