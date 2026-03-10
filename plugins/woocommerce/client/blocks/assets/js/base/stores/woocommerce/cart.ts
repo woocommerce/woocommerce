@@ -247,6 +247,20 @@ let cartQueue: MutationQueue< Cart > | null = null;
 let cycleNotices: Notice[] | null = null;
 
 /**
+ * Atomically read and clear the pending cycle notices.
+ *
+ * Called once per sendCartRequest continuation so that the first action
+ * to resume after a batch cycle consumes the notices and all subsequent
+ * actions in the same cycle receive an empty array — preventing duplicate
+ * updateNotices calls when multiple actions land in the same batch.
+ */
+function consumeCycleNotices(): Notice[] {
+	const notices = cycleNotices ?? [];
+	cycleNotices = null;
+	return notices;
+}
+
+/**
  * Send a cart request through the queue.
  *
  * Handles optimistic updates, request queuing, and state reconciliation.
@@ -284,12 +298,12 @@ async function sendCartRequest(
 	}
 
 	const result = await cartQueue.submit( options );
-	const notices = cycleNotices ?? [];
-	// Do NOT null cycleNotices here — leave it for the action that will
-	// actually call updateNotices() to consume. This ensures a mixed batch
-	// where the first resumed action has showCartUpdatesNotices: false does
-	// not silently discard notices before a visible action can render them.
-	return { ...result, notices };
+	// consumeCycleNotices() atomically reads and clears cycleNotices.
+	// The first sendCartRequest continuation to resume after a batch cycle
+	// takes ownership of the notices; all others receive [].
+	// This guarantees updateNotices is called at most once per cycle even
+	// when multiple actions are batched together.
+	return { ...result, notices: consumeCycleNotices() };
 }
 
 // Todo: export this store once the store is public.
@@ -356,7 +370,6 @@ const { state, actions } = store< Store >(
 					} ) ) as TypeYield< typeof sendCartRequest >;
 
 					if ( result.notices.length > 0 ) {
-						cycleNotices = null;
 						yield actions.updateNotices( result.notices, true );
 					}
 				} catch ( error ) {
@@ -468,7 +481,6 @@ const { state, actions } = store< Store >(
 					} ) ) as TypeYield< typeof sendCartRequest >;
 
 					if ( showCartUpdatesNotices && result.notices.length > 0 ) {
-						cycleNotices = null;
 						yield actions.updateNotices( result.notices, true );
 					}
 
@@ -596,7 +608,6 @@ const { state, actions } = store< Store >(
 							showCartUpdatesNotices &&
 							firstSuccess.value.notices.length > 0
 						) {
-							cycleNotices = null;
 							yield actions.updateNotices(
 								firstSuccess.value.notices,
 								true
