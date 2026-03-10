@@ -30,16 +30,16 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 	 * @testdox Should preserve percent-encoded sequences in password fields.
 	 */
 	public function test_save_fields_preserves_percent_encoded_chars_in_password_fields(): void {
-		$option_name                 = 'test_password_with_percent';
+		$option_name                   = 'test_password_with_percent';
 		$this->option_names_to_clean[] = $option_name;
-		$password                    = 'NlP4%EcCx}Na';
-		$options                     = array(
+		$password                      = 'NlP4%EcCx}Na';
+		$options                       = array(
 			array(
 				'id'   => $option_name,
 				'type' => 'password',
 			),
 		);
-		$data                        = array(
+		$data                          = array(
 			$option_name => $password,
 		);
 
@@ -52,15 +52,15 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 	 * @testdox Should strip HTML tags from password field values.
 	 */
 	public function test_save_fields_strips_html_tags_from_password_fields(): void {
-		$option_name                 = 'test_password_html_strip';
+		$option_name                   = 'test_password_html_strip';
 		$this->option_names_to_clean[] = $option_name;
-		$options                     = array(
+		$options                       = array(
 			array(
 				'id'   => $option_name,
 				'type' => 'password',
 			),
 		);
-		$data                        = array(
+		$data                          = array(
 			$option_name => '<b>bold</b>secret%E0pass',
 		);
 
@@ -73,15 +73,15 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 	 * @testdox Should trim whitespace from password field values.
 	 */
 	public function test_save_fields_trims_whitespace_from_password_fields(): void {
-		$option_name                 = 'test_password_trim';
+		$option_name                   = 'test_password_trim';
 		$this->option_names_to_clean[] = $option_name;
-		$options                     = array(
+		$options                       = array(
 			array(
 				'id'   => $option_name,
 				'type' => 'password',
 			),
 		);
-		$data                        = array(
+		$data                          = array(
 			$option_name => '  my%20password  ',
 		);
 
@@ -117,15 +117,15 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 	 * @testdox Should still sanitize text fields with wc_clean as before.
 	 */
 	public function test_save_fields_still_sanitizes_text_fields(): void {
-		$option_name                 = 'test_text_field';
+		$option_name                   = 'test_text_field';
 		$this->option_names_to_clean[] = $option_name;
-		$options                     = array(
+		$options                       = array(
 			array(
 				'id'   => $option_name,
 				'type' => 'text',
 			),
 		);
-		$data                        = array(
+		$data                          = array(
 			$option_name => '<b>bold</b> text',
 		);
 
