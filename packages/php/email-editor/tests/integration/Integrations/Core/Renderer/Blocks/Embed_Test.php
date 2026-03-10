@@ -1093,7 +1093,7 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 
 		$this->assertStringContainsString( 'Post Title', $rendered, 'Card should still render title' );
 		$this->assertStringContainsString( 'Example Blog', $rendered, 'Card should contain provider name' );
-		$this->assertStringNotContainsString( 'font-size: 14px; color: #555', $rendered, 'Card should not contain excerpt styling' );
+		$this->assertStringNotContainsString( 'line-height: 1.4;', $rendered, 'Card should not contain excerpt styling' );
 	}
 
 	/**

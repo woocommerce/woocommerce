@@ -890,7 +890,8 @@ class Embed extends Abstract_Block_Renderer {
 
 		if ( ! empty( $excerpt ) ) {
 			$content_parts .= sprintf(
-				'<br /><span style="font-size: 14px; color: #555; line-height: 1.4;">%s</span>',
+				'<br /><span style="font-size: 14px; color: %s; line-height: 1.4;">%s</span>',
+				esc_attr( $text_color ),
 				esc_html( $excerpt )
 			);
 			$content_parts .= sprintf(
@@ -904,12 +905,14 @@ class Embed extends Abstract_Block_Renderer {
 		// Provider row with optional site icon.
 		$provider_text = ! empty( $provider_url )
 			? sprintf(
-				'<a href="%s" target="_blank" rel="noopener nofollow" style="font-size: 13px; color: #757575; text-decoration: none;">%s</a>',
+				'<a href="%s" target="_blank" rel="noopener nofollow" style="font-size: 13px; color: %s; text-decoration: none;">%s</a>',
 				esc_url( $provider_url ),
+				esc_attr( $text_color ),
 				esc_html( $provider_name )
 			)
 			: sprintf(
-				'<span style="font-size: 13px; color: #757575;">%s</span>',
+				'<span style="font-size: 13px; color: %s;">%s</span>',
+				esc_attr( $text_color ),
 				esc_html( $provider_name )
 			);
 
