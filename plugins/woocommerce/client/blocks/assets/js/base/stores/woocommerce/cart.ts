@@ -98,14 +98,11 @@ export type Store = {
 			args: ClientCartItem,
 			options?: CartUpdateOptions
 		) => void;
-		batchAddCartItems: (
-			items: ClientCartItem[],
-			options?: CartUpdateOptions
-		) => void;
 		// Todo: Check why if I switch to an async function here the types of the store stop working.
 		refreshCartItems: () => void;
 		showNoticeError: ( error: Error | ApiErrorResponse ) => void;
 		updateNotices: ( notices: Notice[], removeOthers?: boolean ) => void;
+		_processLifecycle: ( chainCount: number ) => void;
 	};
 };
 
@@ -118,6 +115,26 @@ type QuantityChanges = {
 type BatchResponse = {
 	responses: ApiResponse< Cart >[];
 };
+
+type PendingEntry = {
+	request: {
+		method: string;
+		path: string;
+		headers: Record< string, string >;
+		body: unknown;
+	};
+	addItem: boolean;
+	showNotices: boolean;
+	/** IDs accumulated across batches; deduplicated before reconciliation (set semantics). */
+	qtyChanges: QuantityChanges;
+	resolve: () => void;
+};
+
+const MAX_LIFECYCLE_CHAINS = 10;
+
+let pending: PendingEntry[] = [];
+let running = false;
+let savedSnapshot: string | null = null;
 
 // Guard to distinguish between optimistic and cart items.
 function isCartItem( item: OptimisticCartItem | CartItem ): item is CartItem {
@@ -216,21 +233,17 @@ const doesCartItemMatchAttributes = (
 	}
 
 	return cartItem.variation.every(
-		( {
-			// eslint-disable-next-line
-			raw_attribute,
-			value,
-		}: {
-			raw_attribute: string;
-			value: string;
-		} ) =>
-			selectedAttributes.some( ( item: SelectedAttributes ) => {
-				return (
-					item.attribute === raw_attribute &&
+		( variationEntry: Record< string, string > ) => {
+			const attrName =
+				variationEntry.raw_attribute ?? variationEntry.attribute;
+			const { value } = variationEntry;
+			return selectedAttributes.some(
+				( item: SelectedAttributes ) =>
+					item.attribute === attrName &&
 					( item.value.toLowerCase() === value.toLowerCase() ||
 						( item.value && value === '' ) ) // Handle "any" attribute type
-				);
-			} )
+			);
+		}
 	);
 };
 
@@ -252,70 +265,110 @@ function emitSyncEvent( {
 	);
 }
 
+function enqueue( entry: Omit< PendingEntry, 'resolve' > ): {
+	promise: Promise< void >;
+	entry: PendingEntry;
+} {
+	let resolve: () => void;
+	const promise = new Promise< void >( ( res ) => {
+		resolve = res;
+	} );
+
+	const fullEntry: PendingEntry = { ...entry, resolve: resolve! };
+	pending.push( fullEntry );
+
+	if ( ! running ) {
+		running = true;
+		// Snapshot BEFORE optimistic updates — matches flowchart ordering
+		// (IDLE → SNAPSHOT → DEBOUNCE → COLLECTING). Actions call enqueue()
+		// before applying optimistic state mutations.
+		try {
+			// eslint-disable-next-line @typescript-eslint/no-use-before-define -- safe: enqueue() is only called after store() initializes state
+			savedSnapshot = JSON.stringify( state.cart );
+		} catch ( e ) {
+			// eslint-disable-next-line no-console
+			console.error( 'Cart snapshot failed:', e );
+			running = false;
+			pending.pop(); // remove the entry we just pushed
+			throw e; // propagate to caller
+		}
+		queueMicrotask( () => {
+			// The Interactivity API runtime auto-drives generators
+			// and returns a Promise. If store() returns the raw
+			// generator (e.g., in test mocks), drive it manually.
+			// eslint-disable-next-line @typescript-eslint/no-use-before-define -- safe: runs in queueMicrotask after store() completes
+			const result: unknown = actions._processLifecycle( 0 );
+			if (
+				result &&
+				typeof ( result as Generator ).next === 'function'
+			) {
+				const gen = result as Generator;
+				( function step( it: IteratorResult< unknown > ) {
+					if ( it.done ) return;
+					Promise.resolve( it.value ).then(
+						( v ) => step( gen.next( v ) ),
+						( e ) => {
+							try {
+								step( gen.throw!( e ) );
+							} catch {
+								/* generator done */
+							}
+						}
+					);
+				} )( gen.next() );
+			}
+		} );
+	}
+
+	return { promise, entry: fullEntry };
+}
+
 // Todo: export this store once the store is public.
 const { state, actions } = store< Store >(
 	'woocommerce',
 	{
 		actions: {
 			*removeCartItem( key: string ) {
-				const previousCart = JSON.stringify( state.cart );
+				// 1. Enqueue FIRST — snapshot taken here if idle → collecting
+				const { promise, entry: enqueuedEntry } = enqueue( {
+					request: {
+						method: 'POST',
+						path: '/wc/store/v1/cart/remove-item',
+						headers: {
+							Nonce: state.nonce,
+							'Content-Type': 'application/json',
+						},
+						body: { key },
+					},
+					addItem: false,
+					showNotices: true,
+					qtyChanges: { cartItemsPendingDelete: [ key ] },
+				} );
 
-				// optimistically update the cart
-				state.cart.items = state.cart.items.filter(
-					( item ) => item.key !== key
-				);
-
+				// 2. Apply optimistic update AFTER enqueue()
 				try {
-					const res: Response = yield fetch(
-						`${ state.restUrl }wc/store/v1/cart/remove-item`,
-						{
-							method: 'POST',
-							headers: {
-								Nonce: state.nonce,
-								'Content-Type': 'application/json',
-							},
-							body: JSON.stringify( { key } ),
-						}
+					state.cart.items = state.cart.items.filter(
+						( item ) => item.key !== key
 					);
-
-					const json: Cart | ApiErrorResponse = yield res.json();
-
-					if ( isApiErrorResponse( res, json ) ) {
-						throw generateError( json );
+				} catch ( optimisticError ) {
+					const idx = pending.indexOf( enqueuedEntry );
+					if ( idx !== -1 ) {
+						pending.splice( idx, 1 );
 					}
-					const quantityChanges = { cartItemsPendingDelete: [ key ] };
-					const infoNotices = getInfoNoticesFromCartUpdates(
-						state.cart,
-						json,
-						quantityChanges
-					);
-					const errorNotices = json.errors.map( generateErrorNotice );
-					yield actions.updateNotices(
-						[ ...infoNotices, ...errorNotices ],
-						true
-					);
-
-					state.cart = json;
-					emitSyncEvent( { quantityChanges } );
-				} catch ( error ) {
-					state.cart = JSON.parse( previousCart );
-
-					// Shows the error notice.
-					actions.showNoticeError( error as Error );
+					throw optimisticError;
 				}
+
+				// 3. Wait for reconciliation
+				yield promise;
 			},
 
 			*addCartItem(
 				{ id, key, quantity, variation }: ClientCartItem,
 				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
 			) {
-				const a11yModulePromise = import( '@wordpress/a11y' );
+				// 1. Prepare request metadata (no state mutation yet)
 				let item = state.cart.items.find( ( cartItem ) => {
 					if ( cartItem.type === 'variation' ) {
-						// If it's a variation, check that attributes match.
-						// While different variations have different attributes,
-						// some variations might accept 'Any' value for an attribute,
-						// in which case, we need to check that the attributes match.
 						if (
 							id !== cartItem.id ||
 							! cartItem.variation ||
@@ -329,264 +382,418 @@ const { state, actions } = store< Store >(
 							variation
 						);
 					}
-					// If no key is provided, rely on the id.
 					return key ? key === cartItem.key : id === cartItem.id;
 				} );
 				const endpoint = item ? 'update-item' : 'add-item';
-				const previousCart = JSON.stringify( state.cart );
 				const quantityChanges: QuantityChanges = {};
 
-				// Optimistically update the number of items in the cart except
-				// if the product is sold individually and is already in the
-				// cart.
-				let updatedItem = null;
+				let updatedItem;
 				if ( item ) {
-					const isSoldIndividually =
-						isCartItem( item ) && item.sold_individually;
 					updatedItem = { ...item, quantity };
-					if ( item.key && ! isSoldIndividually ) {
-						quantityChanges.cartItemsPendingQuantity = [ item.key ];
-						item.quantity = quantity;
-					}
 				} else {
-					item = {
+					updatedItem = {
 						id,
 						quantity,
 						...( variation && { variation } ),
 					} as OptimisticCartItem;
-					quantityChanges.productsPendingAdd = [ id ];
-					state.cart.items.push( item );
-					updatedItem = item;
 				}
 
-				// Updates the database.
+				// 2. Enqueue FIRST — snapshot taken here if idle → collecting
+				const { promise, entry: enqueuedEntry } = enqueue( {
+					request: {
+						method: 'POST',
+						path: `/wc/store/v1/cart/${ endpoint }`,
+						headers: {
+							Nonce: state.nonce,
+							'Content-Type': 'application/json',
+						},
+						body: updatedItem,
+					},
+					addItem: true,
+					showNotices: showCartUpdatesNotices,
+					qtyChanges: quantityChanges,
+				} );
+
+				// 3. Apply optimistic update AFTER enqueue() (snapshot already saved).
 				try {
-					const res: Response = yield fetch(
-						`${ state.restUrl }wc/store/v1/cart/${ endpoint }`,
-						{
-							method: 'POST',
-							headers: {
-								Nonce: state.nonce,
-								'Content-Type': 'application/json',
-							},
-							body: JSON.stringify( updatedItem ),
+					if ( item ) {
+						const isSoldIndividually =
+							isCartItem( item ) && item.sold_individually;
+						if ( item.key && ! isSoldIndividually ) {
+							quantityChanges.cartItemsPendingQuantity = [
+								item.key,
+							];
+							item.quantity = quantity;
 						}
-					);
-					const json: Cart = yield res.json();
-
-					// Checks if the response contains an error.
-					if ( isApiErrorResponse( res, json ) )
-						throw generateError( json );
-
-					const infoNotices = showCartUpdatesNotices
-						? getInfoNoticesFromCartUpdates(
-								state.cart,
-								json,
-								quantityChanges
-						  )
-						: [];
-					const errorNotices = json.errors.map( generateErrorNotice );
-					yield actions.updateNotices(
-						[ ...infoNotices, ...errorNotices ],
-						true
-					);
-
-					// Updates the local cart.
-					state.cart = json;
-
-					// Dispatches a legacy event.
-					triggerAddedToCartEvent( {
-						preserveCartData: true,
-					} );
-
-					const { messages } = getConfig(
-						'woocommerce'
-					) as WooCommerceConfig;
-					if ( messages?.addedToCartText ) {
-						const { speak } = yield a11yModulePromise;
-						speak( messages.addedToCartText, 'polite' );
+					} else {
+						item = updatedItem as OptimisticCartItem;
+						quantityChanges.productsPendingAdd = [ id ];
+						state.cart.items.push( item );
 					}
-
-					// Dispatches the event to sync the @wordpress/data store.
-					emitSyncEvent( { quantityChanges } );
-				} catch ( error ) {
-					// Reverts the optimistic update.
-					// Todo: Prevent racing conditions with multiple addToCart calls for the same item.
-					state.cart = JSON.parse( previousCart );
-
-					// Shows the error notice.
-					actions.showNoticeError( error as Error );
+				} catch ( optimisticError ) {
+					const idx = pending.indexOf( enqueuedEntry );
+					if ( idx !== -1 ) {
+						pending.splice( idx, 1 );
+					}
+					throw optimisticError;
 				}
+
+				// 4. Wait for reconciliation
+				yield promise;
 			},
 
-			*batchAddCartItems(
-				items: ClientCartItem[],
-				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
-			) {
-				const a11yModulePromise = import( '@wordpress/a11y' );
-				const previousCart = JSON.stringify( state.cart );
-				const quantityChanges: QuantityChanges = {};
+			*_processLifecycle( chainCount: number ) {
+				const processedEntries: PendingEntry[] = [];
 
-				// Updates the database.
+				// Snapshot consumed — chained lifecycles get fresh snapshot
+				if ( ! savedSnapshot ) {
+					// eslint-disable-next-line no-console
+					console.error( 'Cart batch: no snapshot available' );
+					processedEntries.push( ...pending );
+					pending = [];
+					return; // → finally resolves entries, sets running = false
+				}
+				const snapshot = savedSnapshot;
+				savedSnapshot = null;
+
+				// Lifecycle accumulators
+				let lastServerState: Cart | null = null;
+				const allErrors: Array< {
+					error: Error | ApiErrorResponse;
+					isFromCartErrors: boolean;
+				} > = [];
+				let hadSuccessfulAdd = false;
+				let showNotices = false;
+				const qtyChanges: Required< QuantityChanges > = {
+					productsPendingAdd: [],
+					cartItemsPendingQuantity: [],
+					cartItemsPendingDelete: [],
+				};
+
 				try {
-					const requests = items.map( ( item ) => {
-						const existingItem = state.cart.items.find(
-							( { id: productId } ) => item.id === productId
-						);
+					// ── BATCH LOOP ──
+					// The first lifecycle (chainCount===0) re-drains pending
+					// to pick up items enqueued during in-flight yields.
+					// Chained lifecycles (chainCount>0) drain once — new items
+					// are handled by chaining in the finally block.
+					do {
+						const entries = pending;
+						pending = [];
+						processedEntries.push( ...entries );
 
-						// Updates existing cart item.
-						if ( existingItem ) {
-							// Optimistically updates the number of items in the cart.
-							existingItem.quantity = item.quantity;
-							if ( existingItem.key ) {
-								quantityChanges.cartItemsPendingQuantity = [
-									...( quantityChanges.cartItemsPendingQuantity ??
-										[] ),
-									existingItem.key,
-								];
+						const requests = entries.map( ( e ) => e.request );
+
+						try {
+							const res: Response = yield fetch(
+								`${ state.restUrl }wc/store/v1/batch`,
+								{
+									method: 'POST',
+									headers: {
+										Nonce: state.nonce,
+										'Content-Type': 'application/json',
+									},
+									body: JSON.stringify( { requests } ),
+								}
+							);
+
+							const json: BatchResponse = yield res.json();
+
+							// Total failure: non-207 or malformed
+							if (
+								res.status !== 207 ||
+								! Array.isArray( json.responses )
+							) {
+								if ( isApiErrorResponse( res, json ) ) {
+									allErrors.push( {
+										error: generateError(
+											json as unknown as ApiErrorResponse
+										),
+										isFromCartErrors: false,
+									} );
+								} else {
+									allErrors.push( {
+										error: new Error(
+											`Batch failed: ${ res.status }`
+										),
+										isFromCartErrors: false,
+									} );
+								}
+							} else {
+								// Process sub-responses
+								const count = Math.min(
+									json.responses.length,
+									entries.length
+								);
+								if (
+									json.responses.length !== entries.length
+								) {
+									// eslint-disable-next-line no-console
+									console.warn(
+										`Batch response count mismatch: sent ${ entries.length }, ` +
+											`received ${ json.responses.length }`
+									);
+								}
+
+								for ( let i = 0; i < count; i++ ) {
+									const r = json.responses[ i ];
+									if ( r.status >= 200 && r.status < 300 ) {
+										lastServerState = r.body as Cart;
+
+										if ( entries[ i ].addItem ) {
+											hadSuccessfulAdd = true;
+										}
+
+										const entry = entries[ i ];
+										showNotices ||= entry.showNotices;
+										qtyChanges.productsPendingAdd.push(
+											...( entry.qtyChanges
+												.productsPendingAdd ?? [] )
+										);
+										qtyChanges.cartItemsPendingQuantity.push(
+											...( entry.qtyChanges
+												.cartItemsPendingQuantity ??
+												[] )
+										);
+										qtyChanges.cartItemsPendingDelete.push(
+											...( entry.qtyChanges
+												.cartItemsPendingDelete ?? [] )
+										);
+
+										const cart = r.body as Cart;
+										if ( cart.errors?.length ) {
+											for ( const cartError of cart.errors ) {
+												if (
+													typeof cartError ===
+														'object' &&
+													cartError !== null &&
+													'message' in cartError
+												) {
+													allErrors.push( {
+														error: cartError as unknown as ApiErrorResponse,
+														isFromCartErrors: true,
+													} );
+												} else {
+													allErrors.push( {
+														error: new Error(
+															String( cartError )
+														),
+														isFromCartErrors: true,
+													} );
+												}
+											}
+										}
+									} else {
+										if (
+											r.body &&
+											typeof r.body === 'object'
+										) {
+											allErrors.push( {
+												error: generateError(
+													r.body as ApiErrorResponse
+												),
+												isFromCartErrors: false,
+											} );
+										}
+
+										showNotices ||=
+											entries[ i ].showNotices;
+									}
+								}
+
+								for ( let i = count; i < entries.length; i++ ) {
+									allErrors.push( {
+										error: new Error(
+											'Server did not return a response for this request'
+										),
+										isFromCartErrors: false,
+									} );
+									showNotices ||= entries[ i ].showNotices;
+								}
 							}
-
-							return {
-								method: 'POST',
-								path: `/wc/store/v1/cart/update-item`,
-								headers: {
-									Nonce: state.nonce,
-									'Content-Type': 'application/json',
-								},
-								body: existingItem,
-							};
+						} catch ( networkError ) {
+							allErrors.push( {
+								error: networkError as Error,
+								isFromCartErrors: false,
+							} );
 						}
+					} while ( pending.length > 0 && chainCount === 0 );
 
-						// Adds new cart item.
-						item = {
-							id: item.id,
-							quantity: item.quantity,
-							...( item.variation && {
-								variation: item.variation,
-							} ),
-						} as OptimisticCartItem;
-						state.cart.items.push( item );
-						quantityChanges.productsPendingAdd =
-							quantityChanges.productsPendingAdd
-								? [
-										...quantityChanges.productsPendingAdd,
-										item.id,
-								  ]
-								: [ item.id ];
+					// ── Deduplicate metadata arrays ──
+					qtyChanges.productsPendingAdd = [
+						...new Set( qtyChanges.productsPendingAdd ),
+					];
+					qtyChanges.cartItemsPendingQuantity = [
+						...new Set( qtyChanges.cartItemsPendingQuantity ),
+					];
+					qtyChanges.cartItemsPendingDelete = [
+						...new Set( qtyChanges.cartItemsPendingDelete ),
+					];
 
-						return {
-							method: 'POST',
-							path: `/wc/store/v1/cart/add-item`,
-							headers: {
-								Nonce: state.nonce,
-								'Content-Type': 'application/json',
-							},
-							body: item,
-						};
-					} );
+					// ── RECONCILIATION ──
+					running = false;
 
-					const res: Response = yield fetch(
-						`${ state.restUrl }wc/store/v1/batch`,
-						{
-							method: 'POST',
-							headers: {
-								Nonce: state.nonce,
-								'Content-Type': 'application/json',
-							},
-							body: JSON.stringify( { requests } ),
-						}
-					);
-
-					const json: BatchResponse = yield res.json();
-
-					// Checks if the response contains an error.
-					if ( isApiErrorResponse( res, json ) )
-						throw generateError( json );
-
-					const errorResponses = Array.isArray( json.responses )
-						? json.responses.filter(
-								( response ) =>
-									response.status < 200 ||
-									response.status >= 300
-						  )
-						: [];
-
-					const successfulResponses = Array.isArray( json.responses )
-						? json.responses.filter(
-								( response ) =>
-									response.status >= 200 &&
-									response.status < 300
-						  )
-						: [];
-
-					// Only update the cart and trigger events if there is at least one successful response.
-					if ( successfulResponses.length > 0 ) {
-						const lastSuccessfulCartResponse = successfulResponses[
-							successfulResponses.length - 1
-						]?.body as Cart;
-
-						const infoNotices = showCartUpdatesNotices
-							? getInfoNoticesFromCartUpdates(
-									state.cart,
-									lastSuccessfulCartResponse,
-									quantityChanges
-							  )
-							: [];
-
-						// Generate notices for any error that successful
-						// responses may contain.
-						const errorNotices = successfulResponses.flatMap(
-							( response ) => {
-								const errors = ( response.body.errors ??
-									[] ) as ApiErrorResponse[];
-								return errors.map( generateErrorNotice );
-							}
-						);
-
-						yield actions.updateNotices(
-							[ ...infoNotices, ...errorNotices ],
-							true
-						);
-
-						// Use the last successful response to update the local cart.
-						state.cart = lastSuccessfulCartResponse;
-
-						// Dispatches a legacy event.
-						triggerAddedToCartEvent( {
-							preserveCartData: true,
-						} );
-
-						const { messages } = getConfig(
-							'woocommerce'
-						) as WooCommerceConfig;
-						if ( messages?.addedToCartText ) {
-							const { speak } = yield a11yModulePromise;
-							speak( messages.addedToCartText, 'polite' );
-						}
-
-						// Dispatches the event to sync the @wordpress/data store.
-						emitSyncEvent( { quantityChanges } );
+					// State resolution
+					if ( lastServerState !== null ) {
+						state.cart = lastServerState;
+					} else {
+						state.cart = JSON.parse( snapshot );
 					}
 
-					// Show error notices for all failed responses.
-					yield actions.updateNotices(
-						errorResponses
-							.filter(
-								( response ) =>
-									response.body &&
-									typeof response.body === 'object'
-							)
-							.map( ( { body } ) =>
-								generateErrorNotice( body as ApiErrorResponse )
-							)
-					);
-				} catch ( error ) {
-					// Reverts the optimistic update.
-					// Todo: Prevent racing conditions with multiple addToCart calls for the same item.
-					state.cart = JSON.parse( previousCart );
+					// Build notices array (synchronous)
+					const notices: Notice[] = [];
 
-					// Shows the error notice.
-					actions.showNoticeError( error as Error );
+					for ( const { error, isFromCartErrors } of allErrors ) {
+						notices.push( generateErrorNotice( error ) );
+						if ( ! isFromCartErrors ) {
+							// eslint-disable-next-line no-console
+							console.error( error );
+						}
+					}
+
+					if ( showNotices ) {
+						const previousCart = JSON.parse( snapshot );
+						const infoNotices = getInfoNoticesFromCartUpdates(
+							previousCart,
+							state.cart,
+							{
+								productsPendingAdd:
+									qtyChanges.productsPendingAdd,
+								cartItemsPendingQuantity:
+									qtyChanges.cartItemsPendingQuantity,
+							}
+						);
+						notices.push( ...infoNotices );
+					}
+
+					// Synchronous side effects (before yields so callers
+					// observe them within the same generator step)
+					if ( hadSuccessfulAdd ) {
+						triggerAddedToCartEvent( { preserveCartData: true } );
+					}
+
+					if ( lastServerState !== null ) {
+						emitSyncEvent( { quantityChanges: qtyChanges } );
+					}
+
+					// Resolve processed entries now — state.cart is final.
+					// Callers' microtasks run after this synchronous block,
+					// seeing the reconciled state. The finally block also
+					// calls resolve() as a safety net (double-resolve is a
+					// no-op on native Promises).
+					for ( const entry of processedEntries ) {
+						try {
+							entry.resolve();
+						} catch {
+							// defensive
+						}
+					}
+
+					// Display notices (requires yield)
+					if ( notices.length > 0 ) {
+						try {
+							yield actions.updateNotices( notices, true );
+						} catch {
+							try {
+								yield actions.updateNotices( notices, true );
+							} catch ( noticeError ) {
+								// eslint-disable-next-line no-console
+								console.error(
+									'Failed to display cart notices:',
+									noticeError
+								);
+								for ( const n of notices ) {
+									// eslint-disable-next-line no-console
+									console.warn(
+										'Lost cart notice:',
+										n.notice ?? n
+									);
+								}
+							}
+						}
+					}
+
+					// Async side effects (requires yield for dynamic import)
+					if ( hadSuccessfulAdd ) {
+						/* eslint-disable @typescript-eslint/no-var-requires */
+						const { getConfig: cfg } =
+							require( '@wordpress/interactivity' ) as {
+								getConfig: typeof getConfig;
+							};
+						/* eslint-enable @typescript-eslint/no-var-requires */
+						const { messages } = ( cfg( 'woocommerce' ) ??
+							{} ) as WooCommerceConfig;
+						if ( messages?.addedToCartText ) {
+							const { speak } = yield import( '@wordpress/a11y' );
+							speak( messages.addedToCartText, 'polite' );
+						}
+					}
+				} catch ( error ) {
+					if ( allErrors.length > 0 ) {
+						// eslint-disable-next-line no-console
+						console.error(
+							`Cart batch: ${ allErrors.length } accumulated error(s) lost due to reconciliation failure:`
+						);
+						for ( const { error: accError } of allErrors ) {
+							// eslint-disable-next-line no-console
+							console.error( accError );
+						}
+					}
+
+					if ( ! ( error instanceof Error ) ) {
+						throw error;
+					}
+					// eslint-disable-next-line no-console
+					console.error( 'Cart batch error:', error );
+				} finally {
+					// ── Resolve all processed entries — SOLE resolution point ──
+					for ( const entry of processedEntries ) {
+						try {
+							entry.resolve();
+						} catch {
+							// defensive
+						}
+					}
+
+					// ── Schedule next lifecycle or transition to idle ──
+					if (
+						pending.length > 0 &&
+						chainCount < MAX_LIFECYCLE_CHAINS
+					) {
+						try {
+							running = true;
+							savedSnapshot = JSON.stringify( state.cart );
+							queueMicrotask( () => {
+								actions._processLifecycle( chainCount + 1 );
+							} );
+						} catch {
+							for ( const entry of pending ) {
+								try {
+									entry.resolve();
+								} catch {
+									/* defensive */
+								}
+							}
+							pending = [];
+							running = false;
+						}
+					} else {
+						if ( pending.length > 0 ) {
+							// eslint-disable-next-line no-console
+							console.error(
+								`Cart batch circuit breaker: ${ MAX_LIFECYCLE_CHAINS } ` +
+									`consecutive lifecycles. ${ pending.length } entries dropped.`
+							);
+							for ( const entry of pending ) {
+								try {
+									entry.resolve();
+								} catch {
+									/* defensive */
+								}
+							}
+							pending = [];
+						}
+						running = false;
+					}
 				}
 			},
 

@@ -127,9 +127,11 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 					{ lock: universalLock }
 				);
 
-				yield wooActions.batchAddCartItems( addedItems, {
-					showCartUpdatesNotices: false,
-				} );
+				for ( const item of addedItems ) {
+					wooActions.addCartItem( item, {
+						showCartUpdatesNotices: false,
+					} );
+				}
 			},
 		},
 		callbacks: {
