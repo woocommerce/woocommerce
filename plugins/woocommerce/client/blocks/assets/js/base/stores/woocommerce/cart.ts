@@ -285,7 +285,10 @@ async function sendCartRequest(
 
 	const result = await cartQueue.submit( options );
 	const notices = cycleNotices ?? [];
-	cycleNotices = null;
+	// Do NOT null cycleNotices here — leave it for the action that will
+	// actually call updateNotices() to consume. This ensures a mixed batch
+	// where the first resumed action has showCartUpdatesNotices: false does
+	// not silently discard notices before a visible action can render them.
 	return { ...result, notices };
 }
 
@@ -353,6 +356,7 @@ const { state, actions } = store< Store >(
 					} ) ) as TypeYield< typeof sendCartRequest >;
 
 					if ( result.notices.length > 0 ) {
+						cycleNotices = null;
 						yield actions.updateNotices( result.notices, true );
 					}
 				} catch ( error ) {
@@ -464,6 +468,7 @@ const { state, actions } = store< Store >(
 					} ) ) as TypeYield< typeof sendCartRequest >;
 
 					if ( showCartUpdatesNotices && result.notices.length > 0 ) {
+						cycleNotices = null;
 						yield actions.updateNotices( result.notices, true );
 					}
 
@@ -578,7 +583,7 @@ const { state, actions } = store< Store >(
 						promises
 					) ) as PromiseSettledResult< CartRequestResult >[];
 
-					// The first fulfilled result owns cycleNotices (consumed once by sendCartRequest).
+					// The first fulfilled result that renders notices consumes cycleNotices.
 					const firstSuccess = results.find(
 						(
 							r
@@ -591,6 +596,7 @@ const { state, actions } = store< Store >(
 							showCartUpdatesNotices &&
 							firstSuccess.value.notices.length > 0
 						) {
+							cycleNotices = null;
 							yield actions.updateNotices(
 								firstSuccess.value.notices,
 								true
