@@ -69,12 +69,12 @@ const productButtonStore = {
 				'woocommerce/add-to-cart-with-options'
 			);
 
-			const product = wooState.itemInCart( {
+			const item = wooState.findItemInCart( {
 				id: state.productId,
 				variation: formContext?.selectedAttributes,
 			} );
 
-			return product?.quantity ?? 0;
+			return item?.quantity ?? 0;
 		},
 		get slideInAnimation() {
 			const { animationStatus } = getContext< Context >();
@@ -107,7 +107,7 @@ const productButtonStore = {
 			if ( productType === 'grouped' ) {
 				const groupedProductIdsInCart = groupedProductIds?.map(
 					( productId ) => {
-						const product = wooState.itemInCart( {
+						const product = wooState.findItemInCart( {
 							id: productId,
 						} );
 						return product?.quantity || 0;

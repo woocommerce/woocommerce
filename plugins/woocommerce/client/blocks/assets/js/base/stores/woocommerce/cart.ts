@@ -102,7 +102,7 @@ export type Store = {
 		};
 		restUrl: string;
 		nonce: string;
-		itemInCart: ( args: {
+		findItemInCart: ( args: {
 			id: ClientCartItem[ 'id' ];
 			key?: ClientCartItem[ 'key' ];
 			variation?: ClientCartItem[ 'variation' ];
@@ -291,7 +291,7 @@ const { state, actions } = store< Store >(
 	'woocommerce',
 	{
 		state: {
-			itemInCart( {
+			findItemInCart( {
 				id,
 				key,
 				variation,
@@ -389,7 +389,11 @@ const { state, actions } = store< Store >(
 				const a11yModulePromise = import( '@wordpress/a11y' );
 
 				// Find existing item
-				const existingItem = state.itemInCart( { id, key, variation } );
+				const existingItem = state.findItemInCart( {
+					id,
+					key,
+					variation,
+				} );
 
 				// Determine the target quantity.
 				// If quantityToAdd is provided, calculate target based on current
@@ -532,7 +536,7 @@ const { state, actions } = store< Store >(
 					// Submit each item through the batcher. They'll be
 					// collected into a single batch request automatically.
 					const promises = items.map( ( item, index ) => {
-						const existingItem = state.itemInCart( {
+						const existingItem = state.findItemInCart( {
 							id: item.id,
 							key: item.key,
 							variation: item.variation,
