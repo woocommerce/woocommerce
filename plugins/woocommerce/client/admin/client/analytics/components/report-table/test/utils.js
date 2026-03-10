@@ -116,4 +116,12 @@ describe( 'getExportQuery', () => {
 		expect( result ).not.toBe( reportQuery );
 		expect( reportQuery ).not.toHaveProperty( 'currency' );
 	} );
+
+	it( 'returns an empty object when all inputs are null or undefined', () => {
+		expect( () => getExportQuery( null, null, null, null ) ).not.toThrow();
+
+		const result = getExportQuery( null, null, null, null );
+
+		expect( result ).toEqual( {} );
+	} );
 } );

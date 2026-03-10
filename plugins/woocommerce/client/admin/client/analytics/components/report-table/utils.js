@@ -12,12 +12,17 @@ import { first } from 'lodash';
  */
 function getFilterParamKeys( filters = [] ) {
 	const keys = new Set();
-	for ( const config of filters ) {
+	for ( const config of Array.isArray( filters ) ? filters : [] ) {
+		if ( ! config || typeof config !== 'object' ) {
+			continue;
+		}
 		if ( config.param ) {
 			keys.add( config.param );
 		}
-		for ( const filter of config.filters || [] ) {
-			if ( filter.settings && filter.settings.param ) {
+		for ( const filter of Array.isArray( config.filters )
+			? config.filters
+			: [] ) {
+			if ( filter && filter.settings && filter.settings.param ) {
 				keys.add( filter.settings.param );
 			}
 		}
@@ -45,28 +50,36 @@ function getFilterParamKeys( filters = [] ) {
  * @return {Object} Query object for the export request.
  */
 export function getExportQuery(
-	reportQuery,
-	urlQuery,
+	reportQuery = {},
+	urlQuery = {},
 	filters = [],
 	advancedFilters = {}
 ) {
+	const safeReportQuery =
+		reportQuery && typeof reportQuery === 'object' ? reportQuery : {};
+	const safeUrlQuery =
+		urlQuery && typeof urlQuery === 'object' ? urlQuery : {};
 	const filterParamKeys = getFilterParamKeys( filters );
+	const advancedFilterMap =
+		advancedFilters && typeof advancedFilters === 'object'
+			? advancedFilters.filters || {}
+			: {};
 
-	for ( const key of Object.keys( advancedFilters.filters || {} ) ) {
+	for ( const key of Object.keys( advancedFilterMap ) ) {
 		filterParamKeys.add( key );
 	}
 
 	const extraParams = Object.fromEntries(
-		Object.entries( urlQuery ).filter(
+		Object.entries( safeUrlQuery ).filter(
 			( [ key, value ] ) =>
 				filterParamKeys.has( key ) &&
-				! ( key in reportQuery ) &&
+				! ( key in safeReportQuery ) &&
 				value !== undefined &&
 				value !== ''
 		)
 	);
 
-	return { ...reportQuery, ...extraParams };
+	return { ...safeReportQuery, ...extraParams };
 }
 
 export function extendTableData(
