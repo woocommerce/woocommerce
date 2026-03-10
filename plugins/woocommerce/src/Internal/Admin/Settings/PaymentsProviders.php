@@ -579,12 +579,15 @@ class PaymentsProviders {
 
 		$offline_group_order = $order_map[ self::OFFLINE_METHODS_ORDERING_GROUP ];
 
-		// Check if any non-offline entry has an order higher than the offline group.
+		// Check if any non-offline, non-suggestion entry has an order higher than the offline group.
 		foreach ( $order_map as $id => $order ) {
 			if ( self::OFFLINE_METHODS_ORDERING_GROUP === $id ) {
 				continue;
 			}
 			if ( $this->is_offline_payment_method( $id ) ) {
+				continue;
+			}
+			if ( $this->is_suggestion_order_map_id( $id ) ) {
 				continue;
 			}
 			if ( $order > $offline_group_order ) {
@@ -593,6 +596,32 @@ class PaymentsProviders {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Add a new gateway to an order map with offline-awareness.
+	 *
+	 * If the offline payment methods group is the last non-offline, non-suggestion entry,
+	 * the gateway is placed above it. Otherwise, it is appended at the end.
+	 *
+	 * This is the single source of truth for new gateway placement logic,
+	 * used by both the display path (Payments) and the persistence path (enhance_order_map).
+	 *
+	 * @param array  $order_map The payment providers order map.
+	 * @param string $id        The gateway ID to add.
+	 *
+	 * @return array The updated order map.
+	 */
+	public function order_map_add_gateway( array $order_map, string $id ): array {
+		if ( $this->is_offline_group_last( $order_map ) ) {
+			return Utils::order_map_add_at_order(
+				$order_map,
+				$id,
+				$order_map[ self::OFFLINE_METHODS_ORDERING_GROUP ]
+			);
+		}
+
+		return Utils::order_map_add_at_order( $order_map, $id, empty( $order_map ) ? 0 : max( $order_map ) + 1 );
 	}
 
 	/**
@@ -1094,15 +1123,7 @@ class PaymentsProviders {
 
 			// If the offline PMs group is the last non-offline entry, place above it.
 			// Otherwise (custom ordering or no offline group), place at the end.
-			if ( $this->is_offline_group_last( $order_map ) ) {
-				$order_map = Utils::order_map_add_at_order(
-					$order_map,
-					$id,
-					$order_map[ self::OFFLINE_METHODS_ORDERING_GROUP ]
-				);
-			} else {
-				$order_map = Utils::order_map_add_at_order( $order_map, $id, empty( $order_map ) ? 0 : max( $order_map ) + 1 );
-			}
+			$order_map = $this->order_map_add_gateway( $order_map, $id );
 		}
 
 		$handled_suggestion_ids = array_unique( $handled_suggestion_ids );

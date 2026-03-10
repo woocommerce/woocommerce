@@ -6028,6 +6028,17 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				),
 				true,
 			),
+			'suggestion after offline group'        => array(
+				array(
+					'gateway1'            => 0,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 1,
+					WC_Gateway_BACS::ID   => 2,
+					WC_Gateway_Cheque::ID => 3,
+					WC_Gateway_COD::ID    => 4,
+					PaymentsProviders::SUGGESTION_ORDERING_PREFIX . 'suggestion1' => 5,
+				),
+				true,
+			),
 		);
 	}
 
@@ -6115,6 +6126,14 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				),
 				// expected_order: both stripe and paypal should be above offline group.
 				array( 'gateway1', 'stripe', 'paypal', PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP, WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID ),
+			),
+			'new gateway placed at end (no offline group in map)'          => array(
+				array( 'gateway1', 'stripe' ),
+				array(
+					'gateway1' => 0,
+				),
+				// expected_order: stripe at the end since there is no offline group.
+				array( 'gateway1', 'stripe' ),
 			),
 		);
 	}

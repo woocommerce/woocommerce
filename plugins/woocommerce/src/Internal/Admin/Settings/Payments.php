@@ -139,19 +139,7 @@ class Payments {
 			// If we don't have an order for it, place it above offline PMs if the offline group
 			// is still at the bottom (default ordering). Otherwise, add to the end.
 			if ( ! isset( $providers_order_map[ $payment_gateway->id ] ) ) {
-				if ( $this->providers->is_offline_group_last( $providers_order_map ) ) {
-					$providers_order_map = Utils::order_map_add_at_order(
-						$providers_order_map,
-						$payment_gateway->id,
-						$providers_order_map[ PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP ]
-					);
-				} else {
-					$providers_order_map = Utils::order_map_add_at_order(
-						$providers_order_map,
-						$payment_gateway->id,
-						empty( $providers_order_map ) ? 0 : max( $providers_order_map ) + 1
-					);
-				}
+				$providers_order_map = $this->providers->order_map_add_gateway( $providers_order_map, $payment_gateway->id );
 			}
 
 			$payment_providers[] = $this->providers->get_payment_gateway_details(
