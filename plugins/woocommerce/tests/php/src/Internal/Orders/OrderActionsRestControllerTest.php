@@ -534,9 +534,9 @@ class OrderActionsRestControllerTest extends WC_REST_Unit_Test_Case {
 			),
 			array(
 				'status'  => 200,
-				'message' => 'Email template &quot;POS refunded order&quot; sent to customer@example.org.',
+				'message' => 'Email template &quot;POS completed order&quot; sent to customer@example.org.',
 				'notes'   => array(
-					'Email template &quot;POS refunded order&quot; sent to customer@example.org.',
+					'Email template &quot;POS completed order&quot; sent to customer@example.org.',
 				),
 			),
 		);
