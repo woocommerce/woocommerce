@@ -21,7 +21,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Session handler class.
  */
-class WC_Session_Handler extends WC_Session {
+class WC_Session_Handler extends WC_Session implements WC_Session_Interface {
 
 	/**
 	 * Cookie name used for the session.
@@ -531,7 +531,10 @@ class WC_Session_Handler extends WC_Session {
 	}
 
 	/**
-	 * Get session data.
+	 * Get session data fresh from storage.
+	 *
+	 * This re-reads session data from the database rather than returning
+	 * in-memory data, ensuring the latest persisted state is returned.
 	 *
 	 * @return array
 	 */

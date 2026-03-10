@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Move shared session methods to abstract WC_Session base class so the StoreApi SessionHandler has a complete and compatible API.
