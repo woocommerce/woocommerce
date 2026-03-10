@@ -558,8 +558,9 @@ class MiniCart extends AbstractBlock {
 					'isOpen'             => false,
 					'totalItemsInCart'   => $cart_item_count,
 					'shouldShowTaxLabel' => $cart->get_cart_contents_tax() > 0,
-					'badgeIsVisible'     => $badge_is_visible,
-					'formattedSubtotal'  => $formatted_subtotal,
+					'badgeIsVisible'         => $badge_is_visible,
+					'hasBadgeColorAttribute' => ! empty( $product_count_color ),
+					'formattedSubtotal'      => $formatted_subtotal,
 					'drawerOverlayClass' => 'wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--with-slide-out wc-block-components-drawer__screen-overlay--is-hidden',
 					'buttonAriaLabel'    => function () use ( $button_aria_label_template ) {
 						$state = wp_interactivity_state();
@@ -607,7 +608,7 @@ class MiniCart extends AbstractBlock {
 				data-wp-on-document--wc-blocks_added_to_cart---open-drawer="actions.openDrawer"
 				<?php endif; ?>
 				data-wp-watch="callbacks.disableScrollingOnBody"
-				data-wp-init--mark-as-hydrated="callbacks.markAsHydrated"
+				data-wp-init---mark-as-hydrated="callbacks.markAsHydrated"
 				<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				<?php echo wp_interactivity_data_wp_context( $context ); ?>
 				class="<?php echo esc_attr( $wrapper_classes ); ?>"
