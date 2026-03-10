@@ -86,7 +86,12 @@ describe( 'getExportQuery', () => {
 		const urlQuery = { status: 'completed' };
 		const advancedFilters = { filters: { status: {} } };
 
-		const result = getExportQuery( reportQuery, urlQuery, [], advancedFilters );
+		const result = getExportQuery(
+			reportQuery,
+			urlQuery,
+			[],
+			advancedFilters
+		);
 
 		expect( result.status ).toBe( 'completed' );
 	} );

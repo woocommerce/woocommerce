@@ -88,12 +88,11 @@ class ControllerTest extends WC_Unit_Test_Case {
 	public function test_prepare_item_for_export_filter_can_add_column(): void {
 		add_filter(
 			'woocommerce_report_variations_prepare_export_item',
-			function ( $export_item, $item ) {
+			function ( $export_item ) {
 				$export_item['currency'] = 'CAD';
 				return $export_item;
 			},
-			10,
-			2
+			10
 		);
 
 		$item = array(

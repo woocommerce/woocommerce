@@ -89,23 +89,22 @@ class ControllerTest extends WC_Unit_Test_Case {
 	public function test_prepare_item_for_export_filter_can_add_column(): void {
 		add_filter(
 			'woocommerce_report_taxes_prepare_export_item',
-			function ( $export_item, $item ) {
+			function ( $export_item ) {
 				$export_item['currency'] = 'USD';
 				return $export_item;
 			},
-			10,
-			2
+			10
 		);
 
 		$item = array(
-			'tax_rate_id' => 1,
-			'country'     => 'US',
-			'state'       => 'CA',
-			'name'        => 'State Tax',
-			'priority'    => 1,
-			'tax_rate'    => '8.25',
-			'total_tax'   => 82.50,
-			'order_tax'   => 75.00,
+			'tax_rate_id'  => 1,
+			'country'      => 'US',
+			'state'        => 'CA',
+			'name'         => 'State Tax',
+			'priority'     => 1,
+			'tax_rate'     => '8.25',
+			'total_tax'    => 82.50,
+			'order_tax'    => 75.00,
 			'shipping_tax' => 7.50,
 			'orders_count' => 10,
 		);
