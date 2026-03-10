@@ -3,6 +3,72 @@
  */
 import { first } from 'lodash';
 
+/**
+ * Collects all `param` keys declared across a filters config array, including
+ * any sub-params defined in nested filter settings.
+ *
+ * @param {Array} filters Report filters config (from props.filters).
+ * @return {Set<string>} Set of URL query param keys owned by the filters.
+ */
+function getFilterParamKeys( filters = [] ) {
+	const keys = new Set();
+	for ( const config of filters ) {
+		if ( config.param ) {
+			keys.add( config.param );
+		}
+		for ( const filter of config.filters || [] ) {
+			if ( filter.settings && filter.settings.param ) {
+				keys.add( filter.settings.param );
+			}
+		}
+	}
+	return keys;
+}
+
+/**
+ * Builds the query object to pass to startExport, merging the processed report
+ * query with any URL params that belong to a known filter config but are not
+ * already present in the report query.
+ *
+ * `reportQuery` (built by `getReportTableQuery`) only forwards a fixed set of
+ * fields (orderby, order, after, before, page, per_page, plus active filter
+ * values). Params added by plugins via `applyFilters` on the report's filters
+ * config — such as `currency` — are not forwarded because live API requests
+ * rely on `$_GET` server-side. Exports run as Action Scheduler background jobs
+ * with no HTTP context, so those params must be carried explicitly in the job
+ * payload.
+ *
+ * @param {Object} reportQuery     Processed query from tableData.query.
+ * @param {Object} urlQuery        Raw URL query params from props.query.
+ * @param {Array}  filters         Report filters config from props.filters.
+ * @param {Object} advancedFilters Report advanced filters config from props.advancedFilters.
+ * @return {Object} Query object for the export request.
+ */
+export function getExportQuery(
+	reportQuery,
+	urlQuery,
+	filters = [],
+	advancedFilters = {}
+) {
+	const filterParamKeys = getFilterParamKeys( filters );
+
+	for ( const key of Object.keys( advancedFilters.filters || {} ) ) {
+		filterParamKeys.add( key );
+	}
+
+	const extraParams = Object.fromEntries(
+		Object.entries( urlQuery ).filter(
+			( [ key, value ] ) =>
+				filterParamKeys.has( key ) &&
+				! ( key in reportQuery ) &&
+				value !== undefined &&
+				value !== ''
+		)
+	);
+
+	return { ...reportQuery, ...extraParams };
+}
+
 export function extendTableData(
 	extendedStoreSelector,
 	props,
