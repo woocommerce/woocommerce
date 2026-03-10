@@ -108,6 +108,7 @@ type MiniCart = {
 		shouldShowTaxLabel: boolean;
 		miniCartButtonRef: HTMLElement | null;
 		contentsBackgroundColor: string;
+		hasBadgeColorAttribute: boolean;
 		badgeBackgroundColor: string | undefined;
 		badgeTextColor: string | undefined;
 	};
@@ -286,14 +287,14 @@ store< MiniCart >(
 			},
 
 			get badgeBackgroundColor(): string | undefined {
-				if ( state.isHydrated ) {
+				if ( state.isHydrated && ! state.hasBadgeColorAttribute ) {
 					const { ref } = getElement();
 					return getClosestColor( ref!, 'color' ) || '#000';
 				}
 			},
 
 			get badgeTextColor(): string | undefined {
-				if ( state.isHydrated ) {
+				if ( state.isHydrated && ! state.hasBadgeColorAttribute ) {
 					const { ref } = getElement();
 					return getClosestColor( ref, 'backgroundColor' ) || '#fff';
 				}
@@ -316,12 +317,12 @@ store< MiniCart >(
 				state.miniCartButtonRef?.focus();
 			},
 
-			overlayCloseDrawer( e: MouseEvent ) {
+			overlayCloseDrawer: withSyncEvent( ( e: MouseEvent ) => {
 				// Only close the drawer if the overlay itself was clicked.
 				if ( e.target === e.currentTarget ) {
 					miniCartActions.closeDrawer();
 				}
-			},
+			} ),
 
 			handleOverlayKeydown: withSyncEvent( ( e: KeyboardEvent ) => {
 				if ( state.isOpen ) {
