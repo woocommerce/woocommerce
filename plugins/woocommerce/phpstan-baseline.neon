@@ -14887,37 +14887,7 @@ parameters:
 			path: includes/class-wc-session-handler.php
 
 		-
-			message: '#^Method WC_Session_Handler\:\:cleanup_sessions\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-session-handler.php
-
-		-
 			message: '#^Method WC_Session_Handler\:\:clone_session_data\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-session-handler.php
-
-		-
-			message: '#^Method WC_Session_Handler\:\:delete_session\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-session-handler.php
-
-		-
-			message: '#^Method WC_Session_Handler\:\:destroy_session\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-session-handler.php
-
-		-
-			message: '#^Method WC_Session_Handler\:\:forget_session\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-session-handler.php
-
-		-
-			message: '#^Method WC_Session_Handler\:\:init\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: includes/class-wc-session-handler.php
@@ -14954,12 +14924,6 @@ parameters:
 
 		-
 			message: '#^Method WC_Session_Handler\:\:restore_session_data\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-session-handler.php
-
-		-
-			message: '#^Method WC_Session_Handler\:\:save_data\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: includes/class-wc-session-handler.php
@@ -71041,18 +71005,6 @@ parameters:
 			path: src/Internal/StockNotifications/Emails/EmailActionController.php
 
 		-
-			message: '#^Call to an undefined method WC_Session\:\:has_session\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: src/Internal/StockNotifications/Emails/EmailActionController.php
-
-		-
-			message: '#^Call to an undefined method WC_Session\:\:set_customer_session_cookie\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: src/Internal/StockNotifications/Emails/EmailActionController.php
-
-		-
 			message: '#^Cannot call method get_meta\(\) on Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|true\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -74527,19 +74479,7 @@ parameters:
 			path: src/StoreApi/Schemas/V1/ProductSchema.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\StoreApi\\SessionHandler\:\:init\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/StoreApi/SessionHandler.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\SessionHandler\:\:init_session_from_token\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/StoreApi/SessionHandler.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\StoreApi\\SessionHandler\:\:save_data\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: src/StoreApi/SessionHandler.php
