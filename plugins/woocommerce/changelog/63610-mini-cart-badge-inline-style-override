@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Mini Cart badge: prevent Interactivity API from injecting inline styles when no badge color is configured in the block editor, allowing theme CSS to apply without !important overrides.
