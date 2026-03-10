@@ -65149,12 +65149,6 @@ parameters:
 			path: src/Internal/EmailEditor/PersonalizationTags/StoreTagsProvider.php
 
 		-
-			message: '#^Call to an undefined method object\:\:get_from_address\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/EmailEditor/PersonalizationTags/StoreTagsProvider.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmailPostsGenerator\:\:generate_email_templates\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
