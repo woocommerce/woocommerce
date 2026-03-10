@@ -249,10 +249,14 @@ let cycleNotices: Notice[] | null = null;
 /**
  * Atomically read and clear the pending cycle notices.
  *
- * Called once per sendCartRequest continuation so that the first action
- * to resume after a batch cycle consumes the notices and all subsequent
- * actions in the same cycle receive an empty array — preventing duplicate
- * updateNotices calls when multiple actions land in the same batch.
+ * Must be called ONLY in the code path that is about to invoke
+ * actions.updateNotices(). Actions with showCartUpdatesNotices: false
+ * must NOT call this — leaving cycleNotices intact so a later visible
+ * action in the same batch cycle can still consume them.
+ *
+ * Because JS is single-threaded, the first generator to reach an
+ * updateNotices call-site takes ownership; all subsequent calls in the
+ * same cycle receive [] and skip rendering.
  */
 function consumeCycleNotices(): Notice[] {
 	const notices = cycleNotices ?? [];
@@ -263,11 +267,20 @@ function consumeCycleNotices(): Notice[] {
 /**
  * Send a cart request through the queue.
  *
- * Handles optimistic updates, request queuing, and state reconciliation.
+ * When showCartUpdatesNotices is true (default), the returned result
+ * includes the cycle notices and clears the shared cycleNotices state
+ * atomically. When false, cycleNotices is left intact so a visible
+ * action that runs later in the same batch cycle can still consume them.
+ *
+ * This preserves the #63560 contract: the diff runs exactly once per
+ * cycle inside commit, and any action — including third-party ones —
+ * that passes showCartUpdatesNotices: true automatically receives the
+ * correct notices without replicating the diff logic.
  */
 async function sendCartRequest(
 	stateRef: Store[ 'state' ],
-	options: MutationRequest< Cart >
+	options: MutationRequest< Cart >,
+	{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
 ): Promise< CartRequestResult > {
 	await isNonceReady;
 	// Lazily initialize queue on first use.
@@ -298,12 +311,13 @@ async function sendCartRequest(
 	}
 
 	const result = await cartQueue.submit( options );
-	// consumeCycleNotices() atomically reads and clears cycleNotices.
-	// The first sendCartRequest continuation to resume after a batch cycle
-	// takes ownership of the notices; all others receive [].
-	// This guarantees updateNotices is called at most once per cycle even
-	// when multiple actions are batched together.
-	return { ...result, notices: consumeCycleNotices() };
+
+	// Only consume notices if this action intends to render them.
+	// Silent actions (showCartUpdatesNotices: false) leave cycleNotices
+	// intact so a visible action in the same batch cycle can still pick
+	// them up — preventing accidental notice loss in mixed batches.
+	const notices = showCartUpdatesNotices ? consumeCycleNotices() : [];
+	return { ...result, notices };
 }
 
 // Todo: export this store once the store is public.
@@ -478,9 +492,9 @@ const { state, actions } = store< Store >(
 								emitSyncEvent( { quantityChanges } );
 							}
 						},
-					} ) ) as TypeYield< typeof sendCartRequest >;
+					}, { showCartUpdatesNotices } ) ) as TypeYield< typeof sendCartRequest >;
 
-					if ( showCartUpdatesNotices && result.notices.length > 0 ) {
+					if ( result.notices.length > 0 ) {
 						yield actions.updateNotices( result.notices, true );
 					}
 
@@ -588,23 +602,23 @@ const { state, actions } = store< Store >(
 									}
 								},
 							} ),
-						} );
+						},
+						// Silent — notices are consumed once below after
+						// Promise.allSettled, not per individual request.
+						{ showCartUpdatesNotices: false }
+						);
 					} );
 
 					const results = ( yield Promise.allSettled(
 						promises
 					) ) as PromiseSettledResult< CartRequestResult >[];
 
-					// consumeCycleNotices() is called atomically inside sendCartRequest,
-					// so exactly one fulfilled result holds the non-empty notices array —
-					// whichever continuation ran first. Collect from all fulfilled results
-					// so we never lose notices regardless of resolution order.
-					const combinedNotices = results.flatMap(
-						( r ) =>
-							r.status === 'fulfilled' ? r.value.notices : []
-					);
+					// The last sendCartRequest in the batch has
+					// showCartUpdatesNotices: false, so cycleNotices is still
+					// intact here. Consume once for the whole batch cycle.
+					const batchNotices = consumeCycleNotices();
 
-					// firstSuccess is kept separately for the a11y speak call only.
+					// firstSuccess is used for the a11y speak() call only.
 					const firstSuccess = results.find(
 						(
 							r
@@ -615,10 +629,10 @@ const { state, actions } = store< Store >(
 					if ( firstSuccess ) {
 						if (
 							showCartUpdatesNotices &&
-							combinedNotices.length > 0
+							batchNotices.length > 0
 						) {
 							yield actions.updateNotices(
-								combinedNotices,
+								batchNotices,
 								true
 							);
 						}
