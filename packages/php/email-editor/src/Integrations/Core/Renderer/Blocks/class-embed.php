@@ -731,7 +731,10 @@ class Embed extends Abstract_Block_Renderer {
 
 		$response = wp_safe_remote_get(
 			$embed_url,
-			array( 'timeout' => 5 )
+			array(
+				'timeout'             => 5,
+				'limit_response_size' => 150 * KB_IN_BYTES,
+			)
 		);
 
 		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
