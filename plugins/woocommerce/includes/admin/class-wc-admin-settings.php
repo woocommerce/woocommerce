@@ -987,7 +987,12 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						break;
 					case 'password':
 						// Preserve null so the option is skipped (not overwritten) when the field is absent from POST data.
-						$value = is_null( $raw_value ) ? null : wp_strip_all_tags( $raw_value );
+						// Guard against non-scalar values (e.g. arrays from crafted POST data) to avoid TypeError.
+						if ( is_null( $raw_value ) || ! is_scalar( $raw_value ) ) {
+							$value = null;
+						} else {
+							$value = wp_strip_all_tags( $raw_value );
+						}
 						break;
 					default:
 						$value = wc_clean( $raw_value );
