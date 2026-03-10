@@ -1,4 +1,5 @@
 Significance: patch
 Type: fix
 
-Fix - Wrap overlayCloseDrawer action in withSyncEvent() to resolve WordPress 7.0 deprecation warning when accessing event.currentTarget synchronously in Interactivity API store actions.
+Fix: Wrap overlayCloseDrawer action in withSyncEvent() to resolve WordPress 7.0 deprecation warning when accessing event.currentTarget synchronously in Interactivity API store actions.
+Fix: Update data-wp-init directive in MiniCart.php from two-hyphens to three-hyphens unique ID syntax to resolve WordPress 7.1 deprecation warning. See #63581.
