@@ -284,7 +284,7 @@ async function sendCartRequest(
 			commit: ( serverState, _snapshot ) => {
 				cycleNotices = [
 					...getInfoNoticesFromCartUpdates( stateRef.cart, serverState ),
-					...serverState.errors.map( generateErrorNotice ),
+					...( serverState.errors ?? [] ).map( generateErrorNotice ),
 				];
 				stateRef.cart = serverState;
 			},
@@ -595,7 +595,16 @@ const { state, actions } = store< Store >(
 						promises
 					) ) as PromiseSettledResult< CartRequestResult >[];
 
-					// The first fulfilled result that renders notices consumes cycleNotices.
+					// consumeCycleNotices() is called atomically inside sendCartRequest,
+					// so exactly one fulfilled result holds the non-empty notices array —
+					// whichever continuation ran first. Collect from all fulfilled results
+					// so we never lose notices regardless of resolution order.
+					const combinedNotices = results.flatMap(
+						( r ) =>
+							r.status === 'fulfilled' ? r.value.notices : []
+					);
+
+					// firstSuccess is kept separately for the a11y speak call only.
 					const firstSuccess = results.find(
 						(
 							r
@@ -606,10 +615,10 @@ const { state, actions } = store< Store >(
 					if ( firstSuccess ) {
 						if (
 							showCartUpdatesNotices &&
-							firstSuccess.value.notices.length > 0
+							combinedNotices.length > 0
 						) {
 							yield actions.updateNotices(
-								firstSuccess.value.notices,
+								combinedNotices,
 								true
 							);
 						}
