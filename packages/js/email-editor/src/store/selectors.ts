@@ -59,6 +59,10 @@ function enhancePatternWithParsedBlocks(
 			get blocks() {
 				return parse( pattern.content );
 			},
+			// emailContent is an optional property that integrations (e.g. MailPoet)
+			// may add to patterns via REST API filters. It contains dynamic blocks
+			// (e.g. product-collection) for editor insertion, while `content` holds
+			// static HTML for template picker previews.
 			get emailBlocks() {
 				return pattern.emailContent
 					? parse( pattern.emailContent )

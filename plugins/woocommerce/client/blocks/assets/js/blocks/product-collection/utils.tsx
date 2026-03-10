@@ -539,8 +539,9 @@ export const setEmailEditorPreviewState: SetPreviewState = ( {
 } ) => {
 	let isEmailEditor = false;
 	try {
-		// Check if the email editor store is registered.
-		// select() throws if the store doesn't exist.
+		// Detect the email editor by checking for its store.
+		// Depending on @wordpress/data version, select() may throw
+		// or return undefined for unregistered stores — handle both.
 		isEmailEditor = !! select( 'email-editor/editor' );
 	} catch {
 		// Not in email editor context.
