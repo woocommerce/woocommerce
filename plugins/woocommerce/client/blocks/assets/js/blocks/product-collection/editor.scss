@@ -175,8 +175,6 @@ $max-button-width: calc(100% / #{$max-button-columns});
 	border-bottom-left-radius: 0;
 	border-bottom-right-radius: 0;
 	cursor: default;
-	opacity: 0;
-	transition: opacity 0.15s ease-in-out;
 
 	&.is-primary:focus:not(:disabled) {
 		outline: none;
@@ -190,17 +188,6 @@ $max-button-width: calc(100% / #{$max-button-columns});
 			var(--wp-admin-theme-color, #3858e9)
 		);
 		color: var(--wp-components-color-accent-inverted, #fff);
-	}
-}
-
-// Show preview button on hover or when the block is selected
-.wp-block-woocommerce-product-collection {
-	&:hover,
-	&.is-selected,
-	&.has-child-selected {
-		> .wc-block-product-collection__preview-button {
-			opacity: 1;
-		}
 	}
 }
 

@@ -163,18 +163,21 @@ const ProductCollectionContent = ( {
 
 	return (
 		<div { ...blockProps }>
-			{ attributes.__privatePreviewState?.isPreview && (
-				<Button
-					variant="primary"
-					size="small"
-					showTooltip
-					label={ attributes.__privatePreviewState?.previewMessage }
-					className="wc-block-product-collection__preview-button"
-					data-testid="product-collection-preview-button"
-				>
-					Preview
-				</Button>
-			) }
+			{ attributes.__privatePreviewState?.isPreview &&
+				props.isSelected && (
+					<Button
+						variant="primary"
+						size="small"
+						showTooltip
+						label={
+							attributes.__privatePreviewState?.previewMessage
+						}
+						className="wc-block-product-collection__preview-button"
+						data-testid="product-collection-preview-button"
+					>
+						Preview
+					</Button>
+				) }
 
 			<InspectorControls { ...props } />
 			<InspectorAdvancedControls { ...props } />
