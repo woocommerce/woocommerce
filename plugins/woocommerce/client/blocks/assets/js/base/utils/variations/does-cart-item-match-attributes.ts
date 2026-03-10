@@ -28,17 +28,22 @@ export const doesCartItemMatchAttributes = (
 
 	return cartItem.variation.every(
 		( {
+			attribute,
 			// eslint-disable-next-line
 			raw_attribute,
 			value,
 		}: {
+			attribute: string;
 			raw_attribute: string;
 			value: string;
 		} ) =>
 			selectedAttributes.some( ( item: SelectedAttributes ) => {
 				return (
-					attributeNamesMatch( item.attribute, raw_attribute ) &&
-					item.value.toLowerCase() === value?.toLowerCase()
+					attributeNamesMatch(
+						item.attribute,
+						// It needs to check both because it uses different keys from the same value depending on the context.
+						raw_attribute ?? attribute
+					) && item.value.toLowerCase() === value?.toLowerCase()
 				);
 			} )
 	);
