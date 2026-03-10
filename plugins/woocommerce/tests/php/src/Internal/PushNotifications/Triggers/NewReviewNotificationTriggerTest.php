@@ -46,7 +46,7 @@ class NewReviewNotificationTriggerTest extends WC_Unit_Test_Case {
 		wc_get_container()->replace( PendingNotificationStore::class, $this->store );
 		wc_get_container()->reset_all_resolved();
 
-		$this->trigger = new NewReviewNotificationTrigger( $this->store );
+		$this->trigger = new NewReviewNotificationTrigger();
 
 		$product          = WC_Helper_Product::create_simple_product();
 		$this->product_id = $product->get_id();
