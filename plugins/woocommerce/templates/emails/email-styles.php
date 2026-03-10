@@ -33,7 +33,7 @@ $text             = get_option( 'woocommerce_email_text_color' );
 $footer_text      = get_option( 'woocommerce_email_footer_text_color' );
 $header_alignment = get_option( 'woocommerce_email_header_alignment', $email_improvements_enabled ? 'left' : false );
 $logo_image_width = get_option( 'woocommerce_email_header_image_width', '120' );
-$default_font     = 'Helvetica';
+$default_font     = 'Inter';
 $font_family      = $email_improvements_enabled ? get_option( 'woocommerce_email_font_family', $default_font ) : $default_font;
 
 /**
