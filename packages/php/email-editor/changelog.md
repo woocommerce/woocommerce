@@ -2,6 +2,11 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.9.1](https://github.com/woocommerce/email-editor/releases/tag/2.9.1) - 2026-03-08 
+
+-   Patch - Add woocommerce_email_editor_send_preview_email_subject filter to allow customizing the preview email subject. [#63504]
+-   Patch - Email Editor: consolidate redundant CSS inlining into a single pass for improved rendering performance. [#63454]
+
 ## [2.9.0](https://github.com/woocommerce/email-editor/releases/tag/2.9.0) - 2026-02-23 
 
 -   Patch - Verify user can edit post in send preview email endpoint permission check [#63413]

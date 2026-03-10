@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+Add data-cart-item-key attribute to cart line item row block.

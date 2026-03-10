@@ -1,4 +1,0 @@
-Significance: patch
-Type: performance
-
-Email Editor: consolidate redundant CSS inlining into a single pass for improved rendering performance.
