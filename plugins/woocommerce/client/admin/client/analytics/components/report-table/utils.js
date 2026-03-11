@@ -75,6 +75,7 @@ export function getExportQuery(
 				filterParamKeys.has( key ) &&
 				! ( key in safeReportQuery ) &&
 				value !== undefined &&
+				value !== null &&
 				value !== ''
 		)
 	);
