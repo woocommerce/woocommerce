@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add `woocommerce_email_block_template_html` filter to allow customization of email block template HTML before it is saved.
