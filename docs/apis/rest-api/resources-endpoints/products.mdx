@@ -169,12 +169,9 @@ This API helps you to create a new product.
 
 ### HTTP request ###
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-post">POST</i>
-		<h6>/wp-json/wc/v3/products</h6>
-	</div>
-</div>
+```http
+POST /wp-json/wc/v3/products
+```
 
 > Example of how to create a `simple` product with one existing image and one new image:
 
@@ -1011,12 +1008,9 @@ This API lets you retrieve and view a specific product by ID.
 
 ### HTTP request ###
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-get">GET</i>
-		<h6>/wp-json/wc/v3/products/&lt;id&gt;</h6>
-	</div>
-</div>
+```http
+GET /wp-json/wc/v3/products/<id>
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">
@@ -1195,12 +1189,9 @@ This API helps you to view all the products.
 
 ### HTTP request ###
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-get">GET</i>
-		<h6>/wp-json/wc/v3/products</h6>
-	</div>
-</div>
+```http
+GET /wp-json/wc/v3/products
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">
@@ -1599,12 +1590,9 @@ This API helps you to duplicate a product.
 
 ### HTTP request ###
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-post">POST</i>
-		<h6>/wp-json/wc/v3/products/&lt;product_id&gt;/duplicate</h6>
-	</div>
-</div>
+```http
+POST /wp-json/wc/v3/products/<product_id>/duplicate
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">
@@ -1726,12 +1714,9 @@ This API lets you make changes to a product.
 
 ### HTTP request ###
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-put">PUT</i>
-		<h6>/wp-json/wc/v3/products/&lt;id&gt;</h6>
-	</div>
-</div>
+```http
+PUT /wp-json/wc/v3/products/<id>
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">
@@ -1932,12 +1917,9 @@ This API helps you delete a product.
 
 ### HTTP request ###
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-delete">DELETE</i>
-		<h6>/wp-json/wc/v3/products/&lt;id&gt;</h6>
-	</div>
-</div>
+```http
+DELETE /wp-json/wc/v3/products/<id>
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">
@@ -2128,12 +2110,9 @@ Note: By default it's limited to up to 100 objects to be created, updated or del
 
 ### HTTP request ###
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-post">POST</i>
-		<h6>/wp-json/wc/v3/products/batch</h6>
-	</div>
-</div>
+```http
+POST /wp-json/wc/v3/products/batch
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">

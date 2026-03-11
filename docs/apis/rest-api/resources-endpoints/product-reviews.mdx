@@ -31,12 +31,9 @@ This API helps you to create a new product review.
 
 ### HTTP request ###
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-post">POST</i>
-		<h6>/wp-json/wc/v3/products/reviews</h6>
-	</div>
-</div>
+```http
+POST /wp-json/wc/v3/products/reviews
+```
 
 > Example of how to create a product review:
 
@@ -170,12 +167,9 @@ woocommerce.post("products/reviews", data).parsed_response
 
 This API lets you retrieve a product review by ID.
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-get">GET</i>
-		<h6>/wp-json/wc/v3/products/reviews/&lt;id&gt;</h6>
-	</div>
-</div>
+```http
+GET /wp-json/wc/v3/products/reviews/<id>
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">
@@ -265,12 +259,9 @@ woocommerce.get("products/reviews/22").parsed_response
 
 This API lets you retrieve all product review.
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-get">GET</i>
-		<h6>/wp-json/wc/v3/products/reviews</h6>
-	</div>
-</div>
+```http
+GET /wp-json/wc/v3/products/reviews
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">
@@ -426,12 +417,9 @@ This API lets you make changes to a product review.
 
 ### HTTP request ###
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-put">PUT</i>
-		<h6>/wp-json/wc/v3/products/reviews/&lt;id&gt;</h6>
-	</div>
-</div>
+```http
+PUT /wp-json/wc/v3/products/reviews/<id>
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">
@@ -551,12 +539,9 @@ This API helps you delete a product review.
 
 ### HTTP request ###
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-delete">DELETE</i>
-		<h6>/wp-json/wc/v3/products/reviews/&lt;id&gt;</h6>
-	</div>
-</div>
+```http
+DELETE /wp-json/wc/v3/products/reviews/<id>
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">
@@ -646,12 +631,9 @@ Note: By default it's limited to up to 100 objects to be created, updated or del
 
 ### HTTP request ###
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-post">POST</i>
-		<h6>/wp-json/wc/v3/products/reviews/batch</h6>
-	</div>
-</div>
+```http
+POST /wp-json/wc/v3/products/reviews/batch
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">

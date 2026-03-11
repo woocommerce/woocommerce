@@ -42,12 +42,9 @@ This API helps you to create a new shipping method to a shipping zone.
 
 ### HTTP request ###
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-post">POST</i>
-		<h6>/wp-json/wc/v3/shipping/zones/&lt;id&gt;/methods</h6>
-	</div>
-</div>
+```http
+POST /wp-json/wc/v3/shipping/zones/<id>/methods
+```
 
 > JSON response example:
 
@@ -245,12 +242,9 @@ This API lets you retrieve and view a specific shipping method from a shipping z
 
 ### HTTP request ###
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-get">GET</i>
-		<h6>/wp-json/wc/v3/shipping/zones/&lt;zone_id&gt;/methods/&lt;id&gt;</h6>
-	</div>
-</div>
+```http
+GET /wp-json/wc/v3/shipping/zones/<zone_id>/methods/<id>
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">
@@ -424,12 +418,9 @@ This API helps you to view all the shipping methods from a shipping zone.
 
 ### HTTP request ###
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-get">GET</i>
-		<h6>/wp-json/wc/v3/shipping/zones/&lt;id&gt;/methods</h6>
-	</div>
-</div>
+```http
+GET /wp-json/wc/v3/shipping/zones/<id>/methods
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">
@@ -670,12 +661,9 @@ This API lets you make changes to a shipping method of a shipping zone.
 
 ### HTTP request ###
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-put">PUT</i>
-		<h6>/wp-json/wc/v3/shipping/zones/&lt;zone_id&gt;/methods/&lt;id&gt;</h6>
-	</div>
-</div>
+```http
+PUT /wp-json/wc/v3/shipping/zones/<zone_id>/methods/<id>
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">
@@ -881,12 +869,9 @@ This API helps you delete a shipping method from a shipping zone.
 
 ### HTTP request ###
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-delete">DELETE</i>
-		<h6>/wp-json/wc/v3/shipping/zones/&lt;zone_id&gt;/methods/&lt;id&gt;</h6>
-	</div>
-</div>
+```http
+DELETE /wp-json/wc/v3/shipping/zones/<zone_id>/methods/<id>
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">

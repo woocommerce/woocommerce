@@ -18,12 +18,9 @@ This endpoint allows you to trigger an email to the customer with the details of
 
 ### HTTP request ###
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-post">POST</i>
-		<h6>/wp-json/wc/v3/orders/&lt;id&gt;/actions/send_order_details</h6>
-	</div>
-</div>
+```http
+POST /wp-json/wc/v3/orders/<id>/actions/send_order_details
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">
@@ -120,12 +117,9 @@ This endpoint allows you to trigger an email to a customer about the status of t
 
 ### HTTP request ###
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-post">POST</i>
-		<h6>/wp-json/wc/v3/orders/&lt;id&gt;/actions/send_email</h6>
-	</div>
-</div>
+```http
+POST /wp-json/wc/v3/orders/<id>/actions/send_email
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">
@@ -227,12 +221,9 @@ This endpoint allows you to retrieve a list of email templates that are availabl
 
 ### HTTP request ###
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-get">GET</i>
-		<h6>/wp-json/wc/v3/orders/&lt;id&gt;/actions/email_templates</h6>
-	</div>
-</div>
+```http
+GET /wp-json/wc/v3/orders/<id>/actions/email_templates
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">

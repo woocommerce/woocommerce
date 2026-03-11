@@ -27,12 +27,9 @@ This API helps you to create a new product attribute term.
 
 ### HTTP request ###
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-post">POST</i>
-		<h6>/wp-json/wc/v3/products/attributes/&lt;attribute_id&gt;/terms</h6>
-	</div>
-</div>
+```http
+POST /wp-json/wc/v3/products/attributes/<attribute_id>/terms
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">
@@ -130,12 +127,9 @@ woocommerce.post("products/attributes/2/terms", data).parsed_response
 
 This API lets you retrieve a product attribute term by ID.
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-get">GET</i>
-		<h6>/wp-json/wc/v3/products/attributes/&lt;attribute_id&gt;/terms/&lt;id&gt;</h6>
-	</div>
-</div>
+```http
+GET /wp-json/wc/v3/products/attributes/<attribute_id>/terms/<id>
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">
@@ -211,12 +205,9 @@ woocommerce.get("products/attributes/2/terms/23").parsed_response
 
 This API lets you retrieve all terms from a product attribute.
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-get">GET</i>
-		<h6>/wp-json/wc/v3/products/attributes/&lt;attribute_id&gt;/terms</h6>
-	</div>
-</div>
+```http
+GET /wp-json/wc/v3/products/attributes/<attribute_id>/terms
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">
@@ -433,12 +424,9 @@ This API lets you make changes to a product attribute term.
 
 ### HTTP request ###
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-put">PUT</i>
-		<h6>/wp-json/wc/v3/products/attributes/&lt;attribute_id&gt;/terms/&lt;id&gt;</h6>
-	</div>
-</div>
+```http
+PUT /wp-json/wc/v3/products/attributes/<attribute_id>/terms/<id>
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">
@@ -538,12 +526,9 @@ This API helps you delete a product attribute term.
 
 ### HTTP request ###
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-delete">DELETE</i>
-		<h6>/wp-json/wc/v3/products/attributes/&lt;attribute_id&gt;/terms/&lt;id&gt;</h6>
-	</div>
-</div>
+```http
+DELETE /wp-json/wc/v3/products/attributes/<attribute_id>/terms/<id>
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">
@@ -633,12 +618,9 @@ Note: By default it's limited to up to 100 objects to be created, updated or del
 
 ### HTTP request ###
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-post">POST</i>
-		<h6>/wp-json/wc/v3/products/attributes/&lt;attribute_id&gt;/terms/batch</h6>
-	</div>
-</div>
+```http
+POST /wp-json/wc/v3/products/attributes/<attribute_id>/terms/batch
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">

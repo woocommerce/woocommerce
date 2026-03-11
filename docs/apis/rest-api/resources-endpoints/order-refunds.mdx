@@ -108,12 +108,9 @@ This API helps you to create a new refund for an order.
 
 ### HTTP request ###
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-post">POST</i>
-		<h6>/wp-json/wc/v3/orders/&lt;id&gt;/refunds</h6>
-	</div>
-</div>
+```http
+POST /wp-json/wc/v3/orders/<id>/refunds
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">
@@ -295,12 +292,9 @@ This API lets you retrieve and view a specific refund from an order.
 
 ### HTTP request ###
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-get">GET</i>
-		<h6>/wp-json/wc/v3/orders/&lt;id&gt;/refunds/&lt;refund_id&gt;</h6>
-	</div>
-</div>
+```http
+GET /wp-json/wc/v3/orders/<id>/refunds/<refund_id>
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">
@@ -394,12 +388,9 @@ Note: To view a list of refunds from your store, regardless of order, check out 
 
 ### HTTP request ###
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-get">GET</i>
-		<h6>/wp-json/wc/v3/orders/&lt;id&gt;/refunds</h6>
-	</div>
-</div>
+```http
+GET /wp-json/wc/v3/orders/<id>/refunds
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">
@@ -558,12 +549,9 @@ This API helps you delete an order refund.
 
 ### HTTP request ###
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-delete">DELETE</i>
-		<h6>/wp-json/wc/v3/orders/&lt;id&gt;/refunds/&lt;refund_id&gt;</h6>
-	</div>
-</div>
+```http
+DELETE /wp-json/wc/v3/orders/<id>/refunds/<refund_id>
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">

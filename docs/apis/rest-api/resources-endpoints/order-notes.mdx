@@ -29,12 +29,9 @@ This API helps you to create a new note for an order.
 
 ### HTTP request ###
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-post">POST</i>
-		<h6>/wp-json/wc/v3/orders/&lt;id&gt;/notes</h6>
-	</div>
-</div>
+```http
+POST /wp-json/wc/v3/orders/<id>/notes
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">
@@ -139,12 +136,9 @@ This API lets you retrieve and view a specific note from an order.
 
 ### HTTP request ###
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-get">GET</i>
-		<h6>/wp-json/wc/v3/orders/&lt;id&gt;/notes/&lt;note_id&gt;</h6>
-	</div>
-</div>
+```http
+GET /wp-json/wc/v3/orders/<id>/notes/<note_id>
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">
@@ -227,12 +221,9 @@ This API helps you to view all the notes from an order.
 
 ### HTTP request ###
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-get">GET</i>
-		<h6>/wp-json/wc/v3/orders/&lt;id&gt;/notes</h6>
-	</div>
-</div>
+```http
+GET /wp-json/wc/v3/orders/<id>/notes
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">
@@ -374,12 +365,9 @@ This API helps you delete an order note.
 
 ### HTTP request ###
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-delete">DELETE</i>
-		<h6>/wp-json/wc/v3/orders/&lt;id&gt;/notes/&lt;note_id&gt;</h6>
-	</div>
-</div>
+```http
+DELETE /wp-json/wc/v3/orders/<id>/notes/<note_id>
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">

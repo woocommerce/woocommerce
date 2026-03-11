@@ -26,12 +26,9 @@ This API helps you to create a new product tag.
 
 ### HTTP request ###
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-post">POST</i>
-		<h6>/wp-json/wc/v3/products/tags</h6>
-	</div>
-</div>
+```http
+POST /wp-json/wc/v3/products/tags
+```
 
 > Example of how to create a product tag:
 
@@ -130,12 +127,9 @@ woocommerce.post("products/tags", data).parsed_response
 
 This API lets you retrieve a product tag by ID.
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-get">GET</i>
-		<h6>/wp-json/wc/v3/products/tags/&lt;id&gt;</h6>
-	</div>
-</div>
+```http
+GET /wp-json/wc/v3/products/tags/<id>
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">
@@ -210,12 +204,9 @@ woocommerce.get("products/tags/34").parsed_response
 
 This API lets you retrieve all product tag.
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-get">GET</i>
-		<h6>/wp-json/wc/v3/products/tags</h6>
-	</div>
-</div>
+```http
+GET /wp-json/wc/v3/products/tags
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">
@@ -330,12 +321,9 @@ This API lets you make changes to a product tag.
 
 ### HTTP request ###
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-put">PUT</i>
-		<h6>/wp-json/wc/v3/products/tags/&lt;id&gt;</h6>
-	</div>
-</div>
+```http
+PUT /wp-json/wc/v3/products/tags/<id>
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">
@@ -434,12 +422,9 @@ This API helps you delete a product tag.
 
 ### HTTP request ###
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-delete">DELETE</i>
-		<h6>/wp-json/wc/v3/products/tags/&lt;id&gt;</h6>
-	</div>
-</div>
+```http
+DELETE /wp-json/wc/v3/products/tags/<id>
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">
@@ -528,12 +513,9 @@ Note: By default it's limited to up to 100 objects to be created, updated or del
 
 ### HTTP request ###
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-post">POST</i>
-		<h6>/wp-json/wc/v3/products/tags/batch</h6>
-	</div>
-</div>
+```http
+POST /wp-json/wc/v3/products/tags/batch
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">

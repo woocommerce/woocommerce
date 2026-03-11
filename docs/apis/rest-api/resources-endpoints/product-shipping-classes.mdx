@@ -26,12 +26,9 @@ This API helps you to create a new product shipping class.
 
 ### HTTP request ###
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-post">POST</i>
-		<h6>/wp-json/wc/v3/products/shipping_classes</h6>
-	</div>
-</div>
+```http
+POST /wp-json/wc/v3/products/shipping_classes
+```
 
 > Example of how to create a product shipping class:
 
@@ -130,12 +127,9 @@ woocommerce.post("products/shipping_classes", data).parsed_response
 
 This API lets you retrieve a product shipping class by ID.
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-get">GET</i>
-		<h6>/wp-json/wc/v3/products/shipping_classes/&lt;id&gt;</h6>
-	</div>
-</div>
+```http
+GET /wp-json/wc/v3/products/shipping_classes/<id>
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">
@@ -210,12 +204,9 @@ woocommerce.get("products/shipping_classes/32").parsed_response
 
 This API lets you retrieve all product shipping classes.
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-get">GET</i>
-		<h6>/wp-json/wc/v3/products/shipping_classes</h6>
-	</div>
-</div>
+```http
+GET /wp-json/wc/v3/products/shipping_classes
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">
@@ -330,12 +321,9 @@ This API lets you make changes to a product shipping class.
 
 ### HTTP request ###
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-put">PUT</i>
-		<h6>/wp-json/wc/v3/products/shipping_classes/&lt;id&gt;</h6>
-	</div>
-</div>
+```http
+PUT /wp-json/wc/v3/products/shipping_classes/<id>
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">
@@ -434,12 +422,9 @@ This API helps you delete a product shipping class.
 
 ### HTTP request ###
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-delete">DELETE</i>
-		<h6>/wp-json/wc/v3/products/shipping_classes/&lt;id&gt;</h6>
-	</div>
-</div>
+```http
+DELETE /wp-json/wc/v3/products/shipping_classes/<id>
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">
@@ -528,12 +513,9 @@ Note: By default it's limited to up to 100 objects to be created, updated or del
 
 ### HTTP request ###
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-post">POST</i>
-		<h6>/wp-json/wc/v3/products/shipping_classes/batch</h6>
-	</div>
-</div>
+```http
+POST /wp-json/wc/v3/products/shipping_classes/batch
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">

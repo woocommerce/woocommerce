@@ -27,12 +27,9 @@ This API helps you to create a new product attribute.
 
 ### HTTP request ###
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-post">POST</i>
-		<h6>/wp-json/wc/v3/products/attributes</h6>
-	</div>
-</div>
+```http
+POST /wp-json/wc/v3/products/attributes
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">
@@ -150,12 +147,9 @@ woocommerce.post("products/attributes", data).parsed_response
 
 This API lets you retrieve and view a specific product attribute by ID.
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-get">GET</i>
-		<h6>/wp-json/wc/v3/products/attributes/&lt;id&gt;</h6>
-	</div>
-</div>
+```http
+GET /wp-json/wc/v3/products/attributes/<id>
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">
@@ -233,12 +227,9 @@ This API helps you to view all the product attributes.
 
 ### HTTP request ###
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-get">GET</i>
-		<h6>/wp-json/wc/v3/products/attributes</h6>
-	</div>
-</div>
+```http
+GET /wp-json/wc/v3/products/attributes
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">
@@ -344,12 +335,9 @@ This API lets you make changes to a product attribute.
 
 ### HTTP request ###
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-put">PUT</i>
-		<h6>/wp-json/wc/v3/products/attributes/&lt;id&gt;</h6>
-	</div>
-</div>
+```http
+PUT /wp-json/wc/v3/products/attributes/<id>
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">
@@ -449,12 +437,9 @@ This API helps you delete a product attribute.
 
 ### HTTP request ###
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-delete">DELETE</i>
-		<h6>/wp-json/wc/v3/products/attributes/&lt;id&gt;</h6>
-	</div>
-</div>
+```http
+DELETE /wp-json/wc/v3/products/attributes/<id>
+```
 
 <aside class="warning">
 	This also will delete all terms from the selected attribute.
@@ -548,12 +533,9 @@ Note: By default it's limited to up to 100 objects to be created, updated or del
 
 ### HTTP request ###
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-post">POST</i>
-		<h6>/wp-json/wc/v3/products/attributes/batch</h6>
-	</div>
-</div>
+```http
+POST /wp-json/wc/v3/products/attributes/batch
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">

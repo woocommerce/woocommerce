@@ -43,12 +43,9 @@ This API helps you to create a new product category.
 
 ### HTTP request ###
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-post">POST</i>
-		<h6>/wp-json/wc/v3/products/categories</h6>
-	</div>
-</div>
+```http
+POST /wp-json/wc/v3/products/categories
+```
 
 > Example of how to create a product category:
 
@@ -175,12 +172,9 @@ woocommerce.post("products/categories", data).parsed_response
 
 This API lets you retrieve a product category by ID.
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-get">GET</i>
-		<h6>/wp-json/wc/v3/products/categories/&lt;id&gt;</h6>
-	</div>
-</div>
+```http
+GET /wp-json/wc/v3/products/categories/<id>
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">
@@ -268,12 +262,9 @@ woocommerce.get("products/categories/9").parsed_response
 
 This API lets you retrieve all product categories.
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-get">GET</i>
-		<h6>/wp-json/wc/v3/products/categories</h6>
-	</div>
-</div>
+```http
+GET /wp-json/wc/v3/products/categories
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">
@@ -540,12 +531,9 @@ This API lets you make changes to a product category.
 
 ### HTTP request ###
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-put">PUT</i>
-		<h6>/wp-json/wc/v3/products/categories/&lt;id&gt;</h6>
-	</div>
-</div>
+```http
+PUT /wp-json/wc/v3/products/categories/<id>
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">
@@ -657,12 +645,9 @@ This API helps you delete a product category.
 
 ### HTTP request ###
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-delete">DELETE</i>
-		<h6>/wp-json/wc/v3/products/categories/&lt;id&gt;</h6>
-	</div>
-</div>
+```http
+DELETE /wp-json/wc/v3/products/categories/<id>
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">
@@ -764,12 +749,9 @@ Note: By default it's limited to up to 100 objects to be created, updated or del
 
 ### HTTP request ###
 
-<div class="api-endpoint">
-	<div class="endpoint-data">
-		<i class="label label-post">POST</i>
-		<h6>/wp-json/wc/v3/products/categories/batch</h6>
-	</div>
-</div>
+```http
+POST /wp-json/wc/v3/products/categories/batch
+```
 
 <Tabs>
   <TabItem value="curl" label="cURL">
