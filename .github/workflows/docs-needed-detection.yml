@@ -157,6 +157,22 @@ jobs:
               } );
             }
 
+      - name: 'Checkout action'
+        if: ${{ steps.analyze.outputs.structured_output && fromJSON(steps.analyze.outputs.structured_output).needs_docs }}
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            .github/actions/linear-token
+          sparse-checkout-cone-mode: false
+
+      - name: 'Get Linear OAuth token'
+        if: ${{ steps.analyze.outputs.structured_output && fromJSON(steps.analyze.outputs.structured_output).needs_docs }}
+        id: get-linear-token
+        uses: ./.github/actions/linear-token
+        with:
+          client-id: ${{ secrets.LINEAR_DOCS_CLIENT_ID }}
+          client-secret: ${{ secrets.LINEAR_DOCS_CLIENT_SECRET }}
+
       - name: 'Setup Linear'
         if: ${{ steps.analyze.outputs.structured_output && fromJSON(steps.analyze.outputs.structured_output).needs_docs }}
         run: npm install @linear/sdk@71.0.0
@@ -166,7 +182,7 @@ jobs:
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
         env:
           STRUCTURED_OUTPUT: ${{ steps.analyze.outputs.structured_output }}
-          LINEAR_API_KEY: ${{ secrets.LINEAR_OAUTH_TOKEN }}
+          LINEAR_API_TOKEN: ${{ steps.get-linear-token.outputs.token }}
           LINEAR_TEAM_ID: ${{ secrets.LINEAR_DOCS_TEAM_ID }}
           LINEAR_LABEL_ID: ${{ secrets.LINEAR_DOCS_AUTO_LABEL }}
         with:
@@ -178,7 +194,7 @@ jobs:
 
             const { LinearClient } = require( '@linear/sdk' );
             const linearClient = new LinearClient( {
-              apiKey: process.env.LINEAR_API_KEY,
+              accessToken: process.env.LINEAR_API_TOKEN,
             } );
 
             const title = `Docs update needed: ${ prTitle }`;
