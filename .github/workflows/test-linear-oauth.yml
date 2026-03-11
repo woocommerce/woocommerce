@@ -1,0 +1,132 @@
+name: 'Test: Linear OAuth Token'
+
+on:
+  workflow_dispatch:
+    inputs:
+      app:
+        description: 'Which OAuth app to test'
+        required: true
+        type: choice
+        options:
+          - release
+          - docs
+          - both
+
+jobs:
+  test-release-app:
+    name: Test Release OAuth App
+    if: ${{ inputs.app == 'release' || inputs.app == 'both' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            .github/actions/linear-token
+          sparse-checkout-cone-mode: false
+
+      - name: Get Linear OAuth token
+        id: get-token
+        uses: ./.github/actions/linear-token
+        with:
+          client-id: ${{ secrets.LINEAR_CLIENT_ID }}
+          client-secret: ${{ secrets.LINEAR_CLIENT_SECRET }}
+
+      - name: Setup linear-sdk
+        run: npm install @linear/sdk@71.0.0
+
+      - name: Verify token with read operation
+        uses: actions/github-script@v7
+        env:
+          LINEAR_API_TOKEN: ${{ steps.get-token.outputs.token }}
+          LINEAR_TEST_TEAM_ID: ${{ secrets.LINEAR_TEST_TEAM_ID }}
+        with:
+          script: |
+            const { LinearClient } = require( '@linear/sdk' );
+            const linearClient = new LinearClient( {
+              accessToken: process.env.LINEAR_API_TOKEN,
+            } );
+
+            const team = await linearClient.team( process.env.LINEAR_TEST_TEAM_ID );
+            console.log( `✅ Read OK — team: ${ team.name }` );
+
+      - name: Create and delete test issue
+        uses: actions/github-script@v7
+        env:
+          LINEAR_API_TOKEN: ${{ steps.get-token.outputs.token }}
+          LINEAR_TEST_TEAM_ID: ${{ secrets.LINEAR_TEST_TEAM_ID }}
+        with:
+          script: |
+            const { LinearClient } = require( '@linear/sdk' );
+            const linearClient = new LinearClient( {
+              accessToken: process.env.LINEAR_API_TOKEN,
+            } );
+
+            const issue = await linearClient.createIssue( {
+              teamId: process.env.LINEAR_TEST_TEAM_ID,
+              title: '[Test] OAuth token validation — safe to delete',
+            } );
+            const created = await issue.issue;
+            console.log( `✅ Write OK — created issue: ${ created.identifier }` );
+
+            await linearClient.deleteIssue( created.id );
+            console.log( `✅ Delete OK — cleaned up issue: ${ created.identifier }` );
+
+  test-docs-app:
+    name: Test Docs OAuth App
+    if: ${{ inputs.app == 'docs' || inputs.app == 'both' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            .github/actions/linear-token
+          sparse-checkout-cone-mode: false
+
+      - name: Get Linear OAuth token
+        id: get-token
+        uses: ./.github/actions/linear-token
+        with:
+          client-id: ${{ secrets.LINEAR_DOCS_CLIENT_ID }}
+          client-secret: ${{ secrets.LINEAR_DOCS_CLIENT_SECRET }}
+
+      - name: Setup linear-sdk
+        run: npm install @linear/sdk@71.0.0
+
+      - name: Verify token with read operation
+        uses: actions/github-script@v7
+        env:
+          LINEAR_API_TOKEN: ${{ steps.get-token.outputs.token }}
+          LINEAR_TEST_TEAM_ID: ${{ secrets.LINEAR_TEST_TEAM_ID }}
+        with:
+          script: |
+            const { LinearClient } = require( '@linear/sdk' );
+            const linearClient = new LinearClient( {
+              accessToken: process.env.LINEAR_API_TOKEN,
+            } );
+
+            const team = await linearClient.team( process.env.LINEAR_TEST_TEAM_ID );
+            console.log( `✅ Read OK — team: ${ team.name }` );
+
+      - name: Create and delete test issue
+        uses: actions/github-script@v7
+        env:
+          LINEAR_API_TOKEN: ${{ steps.get-token.outputs.token }}
+          LINEAR_TEST_TEAM_ID: ${{ secrets.LINEAR_TEST_TEAM_ID }}
+        with:
+          script: |
+            const { LinearClient } = require( '@linear/sdk' );
+            const linearClient = new LinearClient( {
+              accessToken: process.env.LINEAR_API_TOKEN,
+            } );
+
+            const issue = await linearClient.createIssue( {
+              teamId: process.env.LINEAR_TEST_TEAM_ID,
+              title: '[Test] OAuth token validation (docs app) — safe to delete',
+            } );
+            const created = await issue.issue;
+            console.log( `✅ Write OK — created issue: ${ created.identifier }` );
+
+            await linearClient.deleteIssue( created.id );
+            console.log( `✅ Delete OK — cleaned up issue: ${ created.identifier }` );
