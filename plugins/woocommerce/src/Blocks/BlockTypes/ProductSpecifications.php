@@ -52,14 +52,14 @@ class ProductSpecifications extends AbstractBlock {
 		$show_attributes = isset( $attributes['showAttributes'] ) ? $attributes['showAttributes'] : true;
 
 		if ( $show_weight && $product->has_weight() ) {
-			$product_data['weight'] = array(
+			$product_data['formatted_weight'] = array(
 				'label' => __( 'Weight', 'woocommerce' ),
 				'value' => wc_format_weight( $product->get_weight() ),
 			);
 		}
 
 		if ( $show_dimensions && $product->has_dimensions() ) {
-			$product_data['dimensions'] = array(
+			$product_data['formatted_dimensions'] = array(
 				'label' => __( 'Dimensions', 'woocommerce' ),
 				'value' => wc_format_dimensions( $product->get_dimensions( false ) ),
 			);
@@ -148,7 +148,7 @@ class ProductSpecifications extends AbstractBlock {
 							<th scope="row" class="wp-block-product-specifications-item__label">
 								<?php echo wp_kses_post( $product_attribute['label'] ); ?>
 							</th>
-							<?php if ( $is_interactive && in_array( $product_attribute_key, array( 'weight', 'dimensions' ), true ) ) : ?>
+							<?php if ( $is_interactive && in_array( $product_attribute_key, array( 'formatted_weight', 'formatted_dimensions' ), true ) ) : ?>
 								<td class="wp-block-product-specifications-item__value" data-wp-interactive="woocommerce/product-elements" data-wp-text="state.productData.<?php echo esc_attr( $product_attribute_key ); ?>">
 									<?php echo wp_kses_post( $product_attribute['value'] ); ?>
 								</td>

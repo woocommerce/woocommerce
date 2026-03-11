@@ -1,26 +1,18 @@
 /**
  * External dependencies
  */
-import {
-	getElement,
-	store,
-	getContext,
-	getConfig,
-} from '@wordpress/interactivity';
-import '@woocommerce/stores/woocommerce/product-data';
-import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
-import type {
-	ProductData,
-	WooCommerceConfig,
-} from '@woocommerce/stores/woocommerce/cart';
+import { getElement, store, getContext } from '@wordpress/interactivity';
+import '@woocommerce/stores/woocommerce/product-context';
+import type { ProductContextStore } from '@woocommerce/stores/woocommerce/product-context';
+import type { ProductResponseItem } from '@woocommerce/types';
 import { sanitizeHTML } from '@woocommerce/sanitize';
 
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-const { state: productDataState } = store< ProductDataStore >(
-	'woocommerce/product-data',
+const { state: productContextState } = store< ProductContextStore >(
+	'woocommerce/product-context',
 	{},
 	{ lock: universalLock }
 );
@@ -48,44 +40,42 @@ const ALLOWED_ATTR = [
 	'aria-hidden',
 ];
 
-export type Context = {
-	productElementKey:
-		| 'price_html'
-		| 'availability'
-		| 'sku'
-		| 'weight'
-		| 'dimensions';
+type Context = {
+	productElementKey: keyof ProductResponseItem;
 };
 
 const productElementStore = store(
 	'woocommerce/product-elements',
 	{
 		state: {
-			get productData(): ProductData | undefined {
-				if ( ! productDataState?.productId ) {
+			get productData() {
+				const product =
+					productContextState.selectedVariation ||
+					productContextState.product;
+
+				if ( ! product ) {
 					return undefined;
 				}
 
-				const { products } = getConfig(
-					'woocommerce'
-				) as WooCommerceConfig;
+				const { add_to_cart: addToCart } = product;
+				const maximum = addToCart?.maximum ?? 0;
 
-				if ( ! products ) {
-					return undefined;
-				}
-
-				return (
-					products?.[ productDataState.productId ]?.variations?.[
-						productDataState?.variationId || 0
-					] || products?.[ productDataState.productId ]
-				);
+				return {
+					...product,
+					min: addToCart?.minimum ?? 1,
+					max: maximum > 0 ? maximum : null,
+					step: addToCart?.multiple_of ?? 1,
+				};
 			},
 		},
 		callbacks: {
 			updateValue: () => {
 				const element = getElement();
 
-				if ( ! element.ref || ! productDataState?.productId ) {
+				if (
+					! element.ref ||
+					! productElementStore.state?.productData
+				) {
 					return;
 				}
 

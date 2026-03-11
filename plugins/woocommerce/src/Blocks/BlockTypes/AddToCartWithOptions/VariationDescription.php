@@ -60,13 +60,13 @@ class VariationDescription extends AbstractBlock {
 
 		$context_directive = wp_interactivity_data_wp_context(
 			array(
-				'productElementKey' => 'variation_description',
+				'productElementKey' => 'description',
 			)
 		);
 
 		$wrapper_attributes = array(
 			'data-wp-interactive'  => 'woocommerce/product-elements',
-			'data-wp-bind--hidden' => '!state.productData.variation_description',
+			'data-wp-bind--hidden' => '!state.productData.description',
 			'aria-live'            => 'polite',
 			'aria-atomic'          => 'true',
 		);
