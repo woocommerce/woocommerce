@@ -6,15 +6,15 @@ sidebar_label: 'Reports'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-# Reports #
+# Reports
 
 The reports API allows you to view all types of reports available.
 
-## List all reports ##
+## List all reports
 
 This API lets you retrieve and view a simple list of available reports.
 
-### HTTP request ###
+### HTTP request
 
 ```http
 GET /wp-json/wc/v3/reports
@@ -32,13 +32,13 @@ curl https://example.com/wp-json/wc/v3/reports \
   <TabItem value="js" label="JavaScript">
 
 ```javascript
-WooCommerce.get("reports")
-  .then((response) => {
-    console.log(response.data);
-  })
-  .catch((error) => {
-    console.log(error.response.data);
-  });
+WooCommerce.get( 'reports' )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
 ```
 
   </TabItem>
@@ -65,7 +65,7 @@ woocommerce.get("reports").parsed_response
   </TabItem>
 </Tabs>
 
-> JSON response example:
+### JSON response example
 
 ```json
 [
@@ -232,11 +232,11 @@ woocommerce.get("reports").parsed_response
 ]
 ```
 
-## Retrieve sales report ##
+## Retrieve sales report
 
 This API lets you retrieve and view a sales report.
 
-### HTTP request ###
+### HTTP request
 
 ```http
 GET /wp-json/wc/v3/reports/sales
@@ -254,16 +254,16 @@ curl https://example.com/wp-json/wc/v3/reports/sales?date_min=2016-05-03&date_ma
   <TabItem value="js" label="JavaScript">
 
 ```javascript
-WooCommerce.get("reports/sales", {
-  date_min: "2016-05-03",
-  date_max: "2016-05-04"
-})
-  .then((response) => {
-    console.log(response.data);
-  })
-  .catch((error) => {
-    console.log(error.response.data);
-  });
+WooCommerce.get( 'reports/sales', {
+	date_min: '2016-05-03',
+	date_max: '2016-05-04',
+} )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
 ```
 
   </TabItem>
@@ -272,7 +272,7 @@ WooCommerce.get("reports/sales", {
 ```php
 <?php
 $query = [
-    'date_min' => '2016-05-03', 
+    'date_min' => '2016-05-03',
     'date_max' => '2016-05-04'
 ];
 
@@ -302,57 +302,57 @@ woocommerce.get("reports/sales", query).parsed_response
   </TabItem>
 </Tabs>
 
-> JSON response example:
+### JSON response example
 
 ```json
 [
-  {
-    "total_sales": "14.00",
-    "net_sales": "4.00",
-    "average_sales": "2.00",
-    "total_orders": 3,
-    "total_items": 6,
-    "total_tax": "0.00",
-    "total_shipping": "10.00",
-    "total_refunds": 0,
-    "total_discount": "0.00",
-    "totals_grouped_by": "day",
-    "totals": {
-      "2016-05-03": {
-        "sales": "14.00",
-        "orders": 3,
-        "items": 6,
-        "tax": "0.00",
-        "shipping": "10.00",
-        "discount": "0.00",
-        "customers": 0
-      },
-      "2016-05-04": {
-        "sales": "0.00",
-        "orders": 0,
-        "items": 0,
-        "tax": "0.00",
-        "shipping": "0.00",
-        "discount": "0.00",
-        "customers": 0
-      }
-    },
-    "total_customers": 0,
-    "_links": {
-      "about": [
-        {
-          "href": "https://example.com/wp-json/wc/v3/reports"
-        }
-      ]
-    }
-  }
+	{
+		"total_sales": "14.00",
+		"net_sales": "4.00",
+		"average_sales": "2.00",
+		"total_orders": 3,
+		"total_items": 6,
+		"total_tax": "0.00",
+		"total_shipping": "10.00",
+		"total_refunds": 0,
+		"total_discount": "0.00",
+		"totals_grouped_by": "day",
+		"totals": {
+			"2016-05-03": {
+				"sales": "14.00",
+				"orders": 3,
+				"items": 6,
+				"tax": "0.00",
+				"shipping": "10.00",
+				"discount": "0.00",
+				"customers": 0
+			},
+			"2016-05-04": {
+				"sales": "0.00",
+				"orders": 0,
+				"items": 0,
+				"tax": "0.00",
+				"shipping": "0.00",
+				"discount": "0.00",
+				"customers": 0
+			}
+		},
+		"total_customers": 0,
+		"_links": {
+			"about": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/reports"
+				}
+			]
+		}
+	}
 ]
 ```
 
-#### Sales report properties ####
+#### Sales report properties
 
 | Attribute           | Type    | Description                                                           |
-|---------------------|---------|-----------------------------------------------------------------------|
+| ------------------- | ------- | --------------------------------------------------------------------- |
 | `total_sales`       | string  | Gross sales in the period. <i class="label label-info">read-only</i>  |
 | `net_sales`         | string  | Net sales in the period. <i class="label label-info">read-only</i>    |
 | `average_sales`     | string  | Average net daily sales. <i class="label label-info">read-only</i>    |
@@ -365,20 +365,20 @@ woocommerce.get("reports/sales", query).parsed_response
 | `totals_grouped_by` | string  | Group type. <i class="label label-info">read-only</i>                 |
 | `totals`            | array   | Totals. <i class="label label-info">read-only</i>                     |
 
-#### Available parameters ####
+#### Available parameters
 
 | Parameter  | Type   | Description                                                                                                       |
-|------------|--------|-------------------------------------------------------------------------------------------------------------------|
+| ---------- | ------ | ----------------------------------------------------------------------------------------------------------------- |
 | `context`  | string | Scope under which the request is made; determines fields present in response. Default is `view`. Options: `view`. |
 | `period`   | string | Report period. Default is today's date. Options: `week`, `month`, `last_month` and `year`                         |
 | `date_min` | string | Return sales for a specific start date, the date need to be in the YYYY-MM-DD format.                             |
 | `date_max` | string | Return sales for a specific end date, the date need to be in the YYYY-MM-DD format.                               |
 
-## Retrieve top sellers report ##
+## Retrieve top sellers report
 
 This API lets you retrieve and view a list of top sellers report.
 
-### HTTP request ###
+### HTTP request
 
 ```http
 GET /wp-json/wc/v3/reports/top_sellers
@@ -396,15 +396,15 @@ curl https://example.com/wp-json/wc/v3/reports/top_sellers?period=last_month \
   <TabItem value="js" label="JavaScript">
 
 ```javascript
-WooCommerce.get("reports/top_sellers", {
-  period: "last_month"
-})
-  .then((response) => {
-    console.log(response.data);
-  })
-  .catch((error) => {
-    console.log(error.response.data);
-  });
+WooCommerce.get( 'reports/top_sellers', {
+	period: 'last_month',
+} )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
 ```
 
   </TabItem>
@@ -441,69 +441,69 @@ woocommerce.get("reports/top_sellers", query).parsed_response
   </TabItem>
 </Tabs>
 
-> JSON response example:
+### JSON response example
 
 ```json
 [
-  {
-    "title": "Happy Ninja",
-    "product_id": 37,
-    "quantity": 1,
-    "_links": {
-      "about": [
-        {
-          "href": "https://example.com/wp-json/wc/v3/reports"
-        }
-      ],
-      "product": [
-        {
-          "href": "https://example.com/wp-json/wc/v3/products/37"
-        }
-      ]
-    }
-  },
-  {
-    "title": "Woo Album #4",
-    "product_id": 96,
-    "quantity": 1,
-    "_links": {
-      "about": [
-        {
-          "href": "https://example.com/wp-json/wc/v3/reports"
-        }
-      ],
-      "product": [
-        {
-          "href": "https://example.com/wp-json/wc/v3/products/96"
-        }
-      ]
-    }
-  }
+	{
+		"title": "Happy Ninja",
+		"product_id": 37,
+		"quantity": 1,
+		"_links": {
+			"about": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/reports"
+				}
+			],
+			"product": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/products/37"
+				}
+			]
+		}
+	},
+	{
+		"title": "Woo Album #4",
+		"product_id": 96,
+		"quantity": 1,
+		"_links": {
+			"about": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/reports"
+				}
+			],
+			"product": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/products/96"
+				}
+			]
+		}
+	}
 ]
 ```
 
-#### Top sellers report properties ####
+#### Top sellers report properties
 
 | Attribute    | Type    | Description                                                          |
-|--------------|---------|----------------------------------------------------------------------|
+| ------------ | ------- | -------------------------------------------------------------------- |
 | `title`      | string  | Product title. <i class="label label-info">read-only</i>             |
 | `product_id` | integer | Product ID. <i class="label label-info">read-only</i>                |
 | `quantity`   | integer | Total number of purchases. <i class="label label-info">read-only</i> |
 
-#### Available parameters ####
+#### Available parameters
 
 | Parameter  | Type   | Description                                                                                                       |
-|------------|--------|-------------------------------------------------------------------------------------------------------------------|
+| ---------- | ------ | ----------------------------------------------------------------------------------------------------------------- |
 | `context`  | string | Scope under which the request is made; determines fields present in response. Default is `view`. Options: `view`. |
 | `period`   | string | Report period. Default is `week`. Options: `week`, `month`, `last_month` and `year`                               |
 | `date_min` | string | Return sales for a specific start date, the date need to be in the YYYY-MM-DD format.                             |
 | `date_max` | string | Return sales for a specific end date, the date need to be in the YYYY-MM-DD format.                               |
 
-## Retrieve coupons totals ##
+## Retrieve coupons totals
 
 This API lets you retrieve and view coupons totals report.
 
-### HTTP request ###
+### HTTP request
 
 ```http
 GET /wp-json/wc/v3/reports/coupons/totals
@@ -521,13 +521,13 @@ curl https://example.com/wp-json/wc/v3/reports/coupons/totals \
   <TabItem value="js" label="JavaScript">
 
 ```javascript
-WooCommerce.get("reports/coupons/totals")
-  .then((response) => {
-    console.log(response.data);
-  })
-  .catch((error) => {
-    console.log(error.response.data);
-  });
+WooCommerce.get( 'reports/coupons/totals' )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
 ```
 
   </TabItem>
@@ -556,7 +556,7 @@ woocommerce.get("reports/coupons/totals").parsed_response
   </TabItem>
 </Tabs>
 
-> JSON response example:
+### JSON response example
 
 ```json
 [
@@ -578,19 +578,19 @@ woocommerce.get("reports/coupons/totals").parsed_response
 ]
 ```
 
-#### Coupons totals properties ####
+#### Coupons totals properties
 
 | Attribute | Type   | Description                                                                            |
-|-----------|--------|----------------------------------------------------------------------------------------|
+| --------- | ------ | -------------------------------------------------------------------------------------- |
 | `slug`    | string | An alphanumeric identifier for the resource. <i class="label label-info">read-only</i> |
 | `name`    | string | Coupon type name. <i class="label label-info">read-only</i>                            |
 | `total`   | string | Amount of coupons. <i class="label label-info">read-only</i>                           |
 
-## Retrieve customers totals ##
+## Retrieve customers totals
 
 This API lets you retrieve and view customers totals report.
 
-### HTTP request ###
+### HTTP request
 
 ```http
 GET /wp-json/wc/v3/reports/customers/totals
@@ -608,13 +608,13 @@ curl https://example.com/wp-json/wc/v3/reports/customers/totals \
   <TabItem value="js" label="JavaScript">
 
 ```javascript
-WooCommerce.get("reports/customers/totals")
-  .then((response) => {
-    console.log(response.data);
-  })
-  .catch((error) => {
-    console.log(error.response.data);
-  });
+WooCommerce.get( 'reports/customers/totals' )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
 ```
 
   </TabItem>
@@ -643,7 +643,7 @@ woocommerce.get("reports/customers/totals").parsed_response
   </TabItem>
 </Tabs>
 
-> JSON response example:
+### JSON response example
 
 ```json
 [
@@ -660,19 +660,19 @@ woocommerce.get("reports/customers/totals").parsed_response
 ]
 ```
 
-#### Customers totals properties ####
+#### Customers totals properties
 
 | Attribute | Type   | Description                                                                            |
-|-----------|--------|----------------------------------------------------------------------------------------|
+| --------- | ------ | -------------------------------------------------------------------------------------- |
 | `slug`    | string | An alphanumeric identifier for the resource. <i class="label label-info">read-only</i> |
 | `name`    | string | Customer type name. <i class="label label-info">read-only</i>                          |
 | `total`   | string | Amount of customers. <i class="label label-info">read-only</i>                         |
 
-## Retrieve orders totals ##
+## Retrieve orders totals
 
 This API lets you retrieve and view orders totals report.
 
-### HTTP request ###
+### HTTP request
 
 ```http
 GET /wp-json/wc/v3/reports/orders/totals
@@ -690,13 +690,13 @@ curl https://example.com/wp-json/wc/v3/reports/orders/totals \
   <TabItem value="js" label="JavaScript">
 
 ```javascript
-WooCommerce.get("reports/orders/totals")
-  .then((response) => {
-    console.log(response.data);
-  })
-  .catch((error) => {
-    console.log(error.response.data);
-  });
+WooCommerce.get( 'reports/orders/totals' )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
 ```
 
   </TabItem>
@@ -725,7 +725,7 @@ woocommerce.get("reports/orders/totals").parsed_response
   </TabItem>
 </Tabs>
 
-> JSON response example:
+### JSON response example
 
 ```json
 [
@@ -767,19 +767,19 @@ woocommerce.get("reports/orders/totals").parsed_response
 ]
 ```
 
-#### Orders totals properties ####
+#### Orders totals properties
 
 | Attribute | Type   | Description                                                                            |
-|-----------|--------|----------------------------------------------------------------------------------------|
+| --------- | ------ | -------------------------------------------------------------------------------------- |
 | `slug`    | string | An alphanumeric identifier for the resource. <i class="label label-info">read-only</i> |
 | `name`    | string | Orders status name. <i class="label label-info">read-only</i>                          |
 | `total`   | string | Amount of orders. <i class="label label-info">read-only</i>                            |
 
-## Retrieve products totals ##
+## Retrieve products totals
 
 This API lets you retrieve and view products totals report.
 
-### HTTP request ###
+### HTTP request
 
 ```http
 GET /wp-json/wc/v3/reports/products/totals
@@ -797,13 +797,13 @@ curl https://example.com/wp-json/wc/v3/reports/products/totals \
   <TabItem value="js" label="JavaScript">
 
 ```javascript
-WooCommerce.get("reports/products/totals")
-  .then((response) => {
-    console.log(response.data);
-  })
-  .catch((error) => {
-    console.log(error.response.data);
-  });
+WooCommerce.get( 'reports/products/totals' )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
 ```
 
   </TabItem>
@@ -832,7 +832,7 @@ woocommerce.get("reports/products/totals").parsed_response
   </TabItem>
 </Tabs>
 
-> JSON response example:
+### JSON response example
 
 ```json
 [
@@ -859,19 +859,19 @@ woocommerce.get("reports/products/totals").parsed_response
 ]
 ```
 
-#### Products totals properties ####
+#### Products totals properties
 
 | Attribute | Type   | Description                                                                            |
-|-----------|--------|----------------------------------------------------------------------------------------|
+| --------- | ------ | -------------------------------------------------------------------------------------- |
 | `slug`    | string | An alphanumeric identifier for the resource. <i class="label label-info">read-only</i> |
 | `name`    | string | Product type name. <i class="label label-info">read-only</i>                           |
 | `total`   | string | Amount of products. <i class="label label-info">read-only</i>                          |
 
-## Retrieve reviews totals ##
+## Retrieve reviews totals
 
 This API lets you retrieve and view reviews totals report.
 
-### HTTP request ###
+### HTTP request
 
 ```http
 GET /wp-json/wc/v3/reports/reviews/totals
@@ -889,13 +889,13 @@ curl https://example.com/wp-json/wc/v3/reports/reviews/totals \
   <TabItem value="js" label="JavaScript">
 
 ```javascript
-WooCommerce.get("reports/reviews/totals")
-  .then((response) => {
-    console.log(response.data);
-  })
-  .catch((error) => {
-    console.log(error.response.data);
-  });
+WooCommerce.get( 'reports/reviews/totals' )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
 ```
 
   </TabItem>
@@ -924,7 +924,7 @@ woocommerce.get("reports/reviews/totals").parsed_response
   </TabItem>
 </Tabs>
 
-> JSON response example:
+### JSON response example
 
 ```json
 [
@@ -956,10 +956,10 @@ woocommerce.get("reports/reviews/totals").parsed_response
 ]
 ```
 
-#### Reviews totals properties ####
+#### Reviews totals properties
 
 | Attribute | Type   | Description                                                                            |
-|-----------|--------|----------------------------------------------------------------------------------------|
+| --------- | ------ | -------------------------------------------------------------------------------------- |
 | `slug`    | string | An alphanumeric identifier for the resource. <i class="label label-info">read-only</i> |
 | `name`    | string | Review type name. <i class="label label-info">read-only</i>                            |
 | `total`   | string | Amount of reviews. <i class="label label-info">read-only</i>                           |

@@ -6,15 +6,15 @@ sidebar_label: 'Data'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-# Data #
+# Data
 
 The data API allows you to view all types of data available.
 
-## List all data ##
+## List all data
 
 This API lets you retrieve and view a simple list of available data endpoints.
 
-### HTTP request ###
+### HTTP request
 
 ```http
 GET /wp-json/wc/v3/data
@@ -32,13 +32,13 @@ curl https://example.com/wp-json/wc/v3/data \
   <TabItem value="js" label="JavaScript">
 
 ```javascript
-WooCommerce.get("data")
-  .then((response) => {
-    console.log(response.data);
-  })
-  .catch((error) => {
-    console.log(error.response.data);
-  });
+WooCommerce.get( 'data' )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
 ```
 
   </TabItem>
@@ -65,7 +65,7 @@ woocommerce.get("data").parsed_response
   </TabItem>
 </Tabs>
 
-> JSON response example:
+### JSON response example
 
 ```json
 [
@@ -120,18 +120,18 @@ woocommerce.get("data").parsed_response
 ]
 ```
 
-#### Data properties ####
+#### Data properties
 
 | Attribute     | Type   | Description                                                          |
-|---------------|--------|----------------------------------------------------------------------|
+| ------------- | ------ | -------------------------------------------------------------------- |
 | `slug`        | string | Data resource ID. <i class="label label-info">read-only</i>          |
 | `description` | string | Data resource description. <i class="label label-info">read-only</i> |
 
-## List all continents ##
+## List all continents
 
 This API helps you to view all the continents.
 
-### HTTP request ###
+### HTTP request
 
 ```http
 GET /wp-json/wc/v3/data/continents
@@ -149,13 +149,13 @@ curl https://example.com/wp-json/wc/v3/data/continents \
   <TabItem value="js" label="JavaScript">
 
 ```javascript
-WooCommerce.get("data/continents")
-  .then((response) => {
-    console.log(response.data);
-  })
-  .catch((error) => {
-    console.log(error.response.data);
-  });
+WooCommerce.get( 'data/continents' )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
 ```
 
   </TabItem>
@@ -184,7 +184,7 @@ woocommerce.get("data/continents").parsed_response
   </TabItem>
 </Tabs>
 
-> JSON response example:
+### JSON response example
 
 ```json
 [
@@ -293,22 +293,22 @@ woocommerce.get("data/continents").parsed_response
 				}
 			]
 		}
-  }
+	}
 ]
 ```
 
-#### Continents properties ####
+#### Continents properties
 
 | Attribute   | Type   | Description                                                                                                                                              |
-|-------------|--------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ----------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `code`      | string | 2 character continent code. <i class="label label-info">read-only</i>                                                                                    |
 | `name`      | string | Full name of continent. <i class="label label-info">read-only</i>                                                                                        |
 | `countries` | array  | List of countries on this continent. See [Continents - Countries properties](#continents-countries-properties) <i class="label label-info">read-only</i> |
 
-##### Continents - Countries properties #####
+##### Continents - Countries properties
 
 | Attribute        | Type    | Description                                                                                                                                                         |
-|------------------|---------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ---------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `code`           | string  | ISO3166 alpha-2 country code. <i class="label label-info">read-only</i>                                                                                             |
 | `currency_code`  | string  | Default ISO4127 alpha-3 currency code for the country. <i class="label label-info">read-only</i>                                                                    |
 | `currency_pos`   | string  | Currency symbol position for this country. <i class="label label-info">read-only</i>                                                                                |
@@ -320,18 +320,18 @@ woocommerce.get("data/continents").parsed_response
 | `thousand_sep`   | string  | Thousands separator for displayed prices in this country. <i class="label label-info">read-only</i>                                                                 |
 | `weight_unit`    | string  | The unit weights are defined in for this country. <i class="label label-info">read-only</i>                                                                         |
 
-##### Continents - Countries - States properties #####
+##### Continents - Countries - States properties
 
 | Attribute | Type   | Description                                                   |
-|-----------|--------|---------------------------------------------------------------|
+| --------- | ------ | ------------------------------------------------------------- |
 | `code`    | string | State code. <i class="label label-info">read-only</i>         |
 | `name`    | string | Full name of state. <i class="label label-info">read-only</i> |
 
-## Retrieve continent data ##
+## Retrieve continent data
 
 This API lets you retrieve and view a continent data.
 
-### HTTP request ###
+### HTTP request
 
 ```http
 GET /wp-json/wc/v3/data/continents/<location>
@@ -349,13 +349,13 @@ curl https://example.com/wp-json/wc/v3/data/continents/eu \
   <TabItem value="js" label="JavaScript">
 
 ```javascript
-WooCommerce.get("data/continents/eu")
-  .then((response) => {
-    console.log(response.data);
-  })
-  .catch((error) => {
-    console.log(error.response.data);
-  });
+WooCommerce.get( 'data/continents/eu' )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
 ```
 
   </TabItem>
@@ -384,7 +384,7 @@ woocommerce.get("data/continents/eu").parsed_response
   </TabItem>
 </Tabs>
 
-> JSON response example:
+### JSON response example
 
 ```json
 {
@@ -562,15 +562,15 @@ woocommerce.get("data/continents/eu").parsed_response
 }
 ```
 
-#### Continent properties ####
+#### Continent properties
 
 See [list of continents properties](#continents-properties).
 
-## List all countries ##
+## List all countries
 
 This API helps you to view all the countries.
 
-### HTTP request ###
+### HTTP request
 
 ```http
 GET /wp-json/wc/v3/data/countries
@@ -588,13 +588,13 @@ curl https://example.com/wp-json/wc/v3/data/countries \
   <TabItem value="js" label="JavaScript">
 
 ```javascript
-WooCommerce.get("data/countries")
-  .then((response) => {
-    console.log(response.data);
-  })
-  .catch((error) => {
-    console.log(error.response.data);
-  });
+WooCommerce.get( 'data/countries' )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
 ```
 
   </TabItem>
@@ -623,7 +623,7 @@ woocommerce.get("data/countries").parsed_response
   </TabItem>
 </Tabs>
 
-> JSON response example:
+### JSON response example
 
 ```json
 [
@@ -864,26 +864,26 @@ woocommerce.get("data/countries").parsed_response
 ]
 ```
 
-#### Countries properties ####
+#### Countries properties
 
 | Attribute | Type   | Description                                                                                                                                 |
-|-----------|--------|---------------------------------------------------------------------------------------------------------------------------------------------|
+| --------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
 | `code`    | string | ISO3166 alpha-2 country code. <i class="label label-info">read-only</i>                                                                     |
 | `name`    | string | Full name of country. <i class="label label-info">read-only</i>                                                                             |
 | `states`  | array  | List of states in this country. See [Countries - States properties](#countries-states-properties) <i class="label label-info">read-only</i> |
 
-##### Countries - States properties #####
+##### Countries - States properties
 
 | Attribute | Type   | Description                                                   |
-|-----------|--------|---------------------------------------------------------------|
+| --------- | ------ | ------------------------------------------------------------- |
 | `code`    | string | State code. <i class="label label-info">read-only</i>         |
 | `name`    | string | Full name of state. <i class="label label-info">read-only</i> |
 
-## Retrieve country data ##
+## Retrieve country data
 
 This API lets you retrieve and view a country data.
 
-### HTTP request ###
+### HTTP request
 
 ```http
 GET /wp-json/wc/v3/data/countries/<location>
@@ -901,13 +901,13 @@ curl https://example.com/wp-json/wc/v3/data/countries/br \
   <TabItem value="js" label="JavaScript">
 
 ```javascript
-WooCommerce.get("data/countries/br")
-  .then((response) => {
-    console.log(response.data);
-  })
-  .catch((error) => {
-    console.log(error.response.data);
-  });
+WooCommerce.get( 'data/countries/br' )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
 ```
 
   </TabItem>
@@ -936,7 +936,7 @@ woocommerce.get("data/countries/br").parsed_response
   </TabItem>
 </Tabs>
 
-> JSON response example:
+### JSON response example
 
 ```json
 {
@@ -1067,15 +1067,15 @@ woocommerce.get("data/countries/br").parsed_response
 }
 ```
 
-#### Country properties ####
+#### Country properties
 
 See [list of countries properties](#countries-properties).
 
-## List all currencies ##
+## List all currencies
 
 This API helps you to view all the currencies.
 
-### HTTP request ###
+### HTTP request
 
 ```http
 GET /wp-json/wc/v3/data/currencies
@@ -1093,13 +1093,13 @@ curl https://example.com/wp-json/wc/v3/data/currencies \
   <TabItem value="js" label="JavaScript">
 
 ```javascript
-WooCommerce.get("data/currencies")
-  .then((response) => {
-    console.log(response.data);
-  })
-  .catch((error) => {
-    console.log(error.response.data);
-  });
+WooCommerce.get( 'data/currencies' )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
 ```
 
   </TabItem>
@@ -1128,7 +1128,7 @@ woocommerce.get("data/currencies").parsed_response
   </TabItem>
 </Tabs>
 
-> JSON response example:
+### JSON response example
 
 ```json
 [
@@ -1186,19 +1186,19 @@ woocommerce.get("data/currencies").parsed_response
 ]
 ```
 
-#### Currencies properties ####
+#### Currencies properties
 
 | Attribute | Type   | Description                                                      |
-|-----------|--------|------------------------------------------------------------------|
+| --------- | ------ | ---------------------------------------------------------------- |
 | `code`    | string | ISO4217 currency code. <i class="label label-info">read-only</i> |
 | `name`    | string | Full name of currency. <i class="label label-info">read-only</i> |
 | `symbol`  | string | Currency symbol. <i class="label label-info">read-only</i>       |
 
-## Retrieve currency data ##
+## Retrieve currency data
 
 This API lets you retrieve and view a currency data.
 
-### HTTP request ###
+### HTTP request
 
 ```http
 GET /wp-json/wc/v3/data/currencies/<currency>
@@ -1216,13 +1216,13 @@ curl https://example.com/wp-json/wc/v3/data/currencies/brl \
   <TabItem value="js" label="JavaScript">
 
 ```javascript
-WooCommerce.get("data/currencies/brl")
-  .then((response) => {
-    console.log(response.data);
-  })
-  .catch((error) => {
-    console.log(error.response.data);
-  });
+WooCommerce.get( 'data/currencies/brl' )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
 ```
 
   </TabItem>
@@ -1251,7 +1251,7 @@ woocommerce.get("data/currencies/brl").parsed_response
   </TabItem>
 </Tabs>
 
-> JSON response example:
+### JSON response example
 
 ```json
 {
@@ -1273,15 +1273,15 @@ woocommerce.get("data/currencies/brl").parsed_response
 }
 ```
 
-#### Currency properties ####
+#### Currency properties
 
 See [list of currencies properties](#currencies-properties).
 
-## Retrieve current currency ##
+## Retrieve current currency
 
 This API lets you retrieve and view store's current currency data.
 
-### HTTP request ###
+### HTTP request
 
 ```http
 GET /wp-json/wc/v3/data/currencies/current
@@ -1299,13 +1299,13 @@ curl https://example.com/wp-json/wc/v3/data/currencies/current \
   <TabItem value="js" label="JavaScript">
 
 ```javascript
-WooCommerce.get("data/currencies/current")
-  .then((response) => {
-    console.log(response.data);
-  })
-  .catch((error) => {
-    console.log(error.response.data);
-  });
+WooCommerce.get( 'data/currencies/current' )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
 ```
 
   </TabItem>
@@ -1334,7 +1334,7 @@ woocommerce.get("data/currencies/current").parsed_response
   </TabItem>
 </Tabs>
 
-> JSON response example:
+### JSON response example
 
 ```json
 {
@@ -1356,6 +1356,6 @@ woocommerce.get("data/currencies/current").parsed_response
 }
 ```
 
-#### Currency properties ####
+#### Currency properties
 
 See [list of currencies properties](#currencies-properties).

@@ -6,11 +6,11 @@ sidebar_label: 'Product Attribute Terms'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-# Product attribute terms #
+# Product attribute terms
 
 The product attribute terms API allows you to create, view, update, and delete individual, or a batch, of attribute terms.
 
-## Product attribute term properties ##
+## Product attribute term properties
 
 | Attribute     | Type    | Description                                                                              |
 | ------------- | ------- | ---------------------------------------------------------------------------------------- |
@@ -21,11 +21,11 @@ The product attribute terms API allows you to create, view, update, and delete i
 | `menu_order`  | integer | Menu order, used to custom sort the resource.                                            |
 | `count`       | integer | Number of published products for the resource. <i class="label label-info">read-only</i> |
 
-## Create an attribute term ##
+## Create an attribute term
 
 This API helps you to create a new product attribute term.
 
-### HTTP request ###
+### HTTP request
 
 ```http
 POST /wp-json/wc/v3/products/attributes/<attribute_id>/terms
@@ -48,16 +48,16 @@ curl -X POST https://example.com/wp-json/wc/v3/products/attributes/2/terms \
 
 ```javascript
 const data = {
-  name: "XXS"
+	name: 'XXS',
 };
 
-WooCommerce.post("products/attributes/2/terms", data)
-  .then((response) => {
-    console.log(response.data);
-  })
-  .catch((error) => {
-    console.log(error.response.data);
-  });
+WooCommerce.post( 'products/attributes/2/terms', data )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
 ```
 
   </TabItem>
@@ -98,32 +98,32 @@ woocommerce.post("products/attributes/2/terms", data).parsed_response
   </TabItem>
 </Tabs>
 
-> JSON response example:
+### JSON response example
 
 ```json
 {
-  "id": 23,
-  "name": "XXS",
-  "slug": "xxs",
-  "description": "",
-  "menu_order": 1,
-  "count": 1,
-  "_links": {
-    "self": [
-      {
-        "href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms/23"
-      }
-    ],
-    "collection": [
-      {
-        "href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms"
-      }
-    ]
-  }
+	"id": 23,
+	"name": "XXS",
+	"slug": "xxs",
+	"description": "",
+	"menu_order": 1,
+	"count": 1,
+	"_links": {
+		"self": [
+			{
+				"href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms/23"
+			}
+		],
+		"collection": [
+			{
+				"href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms"
+			}
+		]
+	}
 }
 ```
 
-## Retrieve an attribute term ##
+## Retrieve an attribute term
 
 This API lets you retrieve a product attribute term by ID.
 
@@ -143,13 +143,13 @@ curl https://example.com/wp-json/wc/v3/products/attributes/2/terms/23 \
   <TabItem value="js" label="JavaScript">
 
 ```javascript
-WooCommerce.get("products/attributes/2/terms/23")
-  .then((response) => {
-    console.log(response.data);
-  })
-  .catch((error) => {
-    console.log(error.response.data);
-  });
+WooCommerce.get( 'products/attributes/2/terms/23' )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
 ```
 
   </TabItem>
@@ -176,32 +176,32 @@ woocommerce.get("products/attributes/2/terms/23").parsed_response
   </TabItem>
 </Tabs>
 
-> JSON response example:
+### JSON response example
 
 ```json
 {
-  "id": 23,
-  "name": "XXS",
-  "slug": "xxs",
-  "description": "",
-  "menu_order": 1,
-  "count": 1,
-  "_links": {
-    "self": [
-      {
-        "href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms/23"
-      }
-    ],
-    "collection": [
-      {
-        "href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms"
-      }
-    ]
-  }
+	"id": 23,
+	"name": "XXS",
+	"slug": "xxs",
+	"description": "",
+	"menu_order": 1,
+	"count": 1,
+	"_links": {
+		"self": [
+			{
+				"href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms/23"
+			}
+		],
+		"collection": [
+			{
+				"href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms"
+			}
+		]
+	}
 }
 ```
 
-## List all attribute terms ##
+## List all attribute terms
 
 This API lets you retrieve all terms from a product attribute.
 
@@ -221,13 +221,13 @@ curl https://example.com/wp-json/wc/v3/products/attributes/2/terms \
   <TabItem value="js" label="JavaScript">
 
 ```javascript
-WooCommerce.get("products/attributes/2/terms")
-  .then((response) => {
-    console.log(response.data);
-  })
-  .catch((error) => {
-    console.log(error.response.data);
-  });
+WooCommerce.get( 'products/attributes/2/terms' )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
 ```
 
   </TabItem>
@@ -254,175 +254,175 @@ woocommerce.get("products/attributes/2/terms").parsed_response
   </TabItem>
 </Tabs>
 
-> JSON response example:
+### JSON response example
 
 ```json
 [
-  {
-    "id": 23,
-    "name": "XXS",
-    "slug": "xxs",
-    "description": "",
-    "menu_order": 1,
-    "count": 1,
-    "_links": {
-      "self": [
-        {
-          "href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms/23"
-        }
-      ],
-      "collection": [
-        {
-          "href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms"
-        }
-      ]
-    }
-  },
-  {
-    "id": 22,
-    "name": "XS",
-    "slug": "xs",
-    "description": "",
-    "menu_order": 2,
-    "count": 1,
-    "_links": {
-      "self": [
-        {
-          "href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms/22"
-        }
-      ],
-      "collection": [
-        {
-          "href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms"
-        }
-      ]
-    }
-  },
-  {
-    "id": 17,
-    "name": "S",
-    "slug": "s",
-    "description": "",
-    "menu_order": 3,
-    "count": 1,
-    "_links": {
-      "self": [
-        {
-          "href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms/17"
-        }
-      ],
-      "collection": [
-        {
-          "href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms"
-        }
-      ]
-    }
-  },
-  {
-    "id": 18,
-    "name": "M",
-    "slug": "m",
-    "description": "",
-    "menu_order": 4,
-    "count": 1,
-    "_links": {
-      "self": [
-        {
-          "href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms/18"
-        }
-      ],
-      "collection": [
-        {
-          "href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms"
-        }
-      ]
-    }
-  },
-  {
-    "id": 19,
-    "name": "L",
-    "slug": "l",
-    "description": "",
-    "menu_order": 5,
-    "count": 1,
-    "_links": {
-      "self": [
-        {
-          "href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms/19"
-        }
-      ],
-      "collection": [
-        {
-          "href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms"
-        }
-      ]
-    }
-  },
-  {
-    "id": 20,
-    "name": "XL",
-    "slug": "xl",
-    "description": "",
-    "menu_order": 6,
-    "count": 1,
-    "_links": {
-      "self": [
-        {
-          "href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms/20"
-        }
-      ],
-      "collection": [
-        {
-          "href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms"
-        }
-      ]
-    }
-  },
-  {
-    "id": 21,
-    "name": "XXL",
-    "slug": "xxl",
-    "description": "",
-    "menu_order": 7,
-    "count": 1,
-    "_links": {
-      "self": [
-        {
-          "href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms/21"
-        }
-      ],
-      "collection": [
-        {
-          "href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms"
-        }
-      ]
-    }
-  }
+	{
+		"id": 23,
+		"name": "XXS",
+		"slug": "xxs",
+		"description": "",
+		"menu_order": 1,
+		"count": 1,
+		"_links": {
+			"self": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms/23"
+				}
+			],
+			"collection": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms"
+				}
+			]
+		}
+	},
+	{
+		"id": 22,
+		"name": "XS",
+		"slug": "xs",
+		"description": "",
+		"menu_order": 2,
+		"count": 1,
+		"_links": {
+			"self": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms/22"
+				}
+			],
+			"collection": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms"
+				}
+			]
+		}
+	},
+	{
+		"id": 17,
+		"name": "S",
+		"slug": "s",
+		"description": "",
+		"menu_order": 3,
+		"count": 1,
+		"_links": {
+			"self": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms/17"
+				}
+			],
+			"collection": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms"
+				}
+			]
+		}
+	},
+	{
+		"id": 18,
+		"name": "M",
+		"slug": "m",
+		"description": "",
+		"menu_order": 4,
+		"count": 1,
+		"_links": {
+			"self": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms/18"
+				}
+			],
+			"collection": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms"
+				}
+			]
+		}
+	},
+	{
+		"id": 19,
+		"name": "L",
+		"slug": "l",
+		"description": "",
+		"menu_order": 5,
+		"count": 1,
+		"_links": {
+			"self": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms/19"
+				}
+			],
+			"collection": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms"
+				}
+			]
+		}
+	},
+	{
+		"id": 20,
+		"name": "XL",
+		"slug": "xl",
+		"description": "",
+		"menu_order": 6,
+		"count": 1,
+		"_links": {
+			"self": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms/20"
+				}
+			],
+			"collection": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms"
+				}
+			]
+		}
+	},
+	{
+		"id": 21,
+		"name": "XXL",
+		"slug": "xxl",
+		"description": "",
+		"menu_order": 7,
+		"count": 1,
+		"_links": {
+			"self": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms/21"
+				}
+			],
+			"collection": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms"
+				}
+			]
+		}
+	}
 ]
 ```
 
-#### Available parameters ####
+#### Available parameters
 
-| Parameter      | Type    | Description                                                                                                                                  |
-| -------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `context`      | string  | Scope under which the request is made; determines fields present in response. Options: `view` and `edit`. Default is `view`.                 |
-| `page`         | integer | Current page of the collection. Default is `1`.                                                                                              |
-| `per_page`     | integer | Maximum number of items to be returned in result set. Default is `10`.                                                                       |
-| `search`       | string  | Limit results to those matching a string.                                                                                                    |
-| `exclude`      | array   | Ensure result set excludes specific ids.                                                                                                     |
-| `include`      | array   | Limit result set to specific ids.                                                                                                            |
-| `order`        | string  | Order sort attribute ascending or descending. Options: `asc` and `desc`. Default is `asc`.                                                   |
-| `orderby`      | string  | Sort collection by resource attribute. Options: `id`, `include`, `name`, `slug`, `term_group`, `description` and `count`. Default is `name`. |
-| `hide_empty`   | boolean | Whether to hide resources not assigned to any products. Default is `false`.                                                                  |
-| `parent`       | integer | Limit result set to resources assigned to a specific parent.                                                                                 |
-| `product`      | integer | Limit result set to resources assigned to a specific product.                                                                                |
-| `slug`         | string  | Limit result set to resources with a specific slug.                                                                                          |
+| Parameter    | Type    | Description                                                                                                                                  |
+| ------------ | ------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `context`    | string  | Scope under which the request is made; determines fields present in response. Options: `view` and `edit`. Default is `view`.                 |
+| `page`       | integer | Current page of the collection. Default is `1`.                                                                                              |
+| `per_page`   | integer | Maximum number of items to be returned in result set. Default is `10`.                                                                       |
+| `search`     | string  | Limit results to those matching a string.                                                                                                    |
+| `exclude`    | array   | Ensure result set excludes specific ids.                                                                                                     |
+| `include`    | array   | Limit result set to specific ids.                                                                                                            |
+| `order`      | string  | Order sort attribute ascending or descending. Options: `asc` and `desc`. Default is `asc`.                                                   |
+| `orderby`    | string  | Sort collection by resource attribute. Options: `id`, `include`, `name`, `slug`, `term_group`, `description` and `count`. Default is `name`. |
+| `hide_empty` | boolean | Whether to hide resources not assigned to any products. Default is `false`.                                                                  |
+| `parent`     | integer | Limit result set to resources assigned to a specific parent.                                                                                 |
+| `product`    | integer | Limit result set to resources assigned to a specific product.                                                                                |
+| `slug`       | string  | Limit result set to resources with a specific slug.                                                                                          |
 
-## Update an attribute term ##
+## Update an attribute term
 
 This API lets you make changes to a product attribute term.
 
-### HTTP request ###
+### HTTP request
 
 ```http
 PUT /wp-json/wc/v3/products/attributes/<attribute_id>/terms/<id>
@@ -445,16 +445,16 @@ curl -X PUT https://example.com/wp-json/wc/v3/products/attributes/2/terms/23 \
 
 ```javascript
 const data = {
-  name: "XXS"
+	name: 'XXS',
 };
 
-WooCommerce.put("products/attributes/2/terms/23", data)
-  .then((response) => {
-    console.log(response.data);
-  })
-  .catch((error) => {
-    console.log(error.response.data);
-  });
+WooCommerce.put( 'products/attributes/2/terms/23', data )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
 ```
 
   </TabItem>
@@ -495,36 +495,36 @@ woocommerce.put("products/attributes/2/terms/23", data).parsed_response
   </TabItem>
 </Tabs>
 
-> JSON response example:
+### JSON response example
 
 ```json
 {
-  "id": 23,
-  "name": "XXS",
-  "slug": "xxs",
-  "description": "",
-  "menu_order": 1,
-  "count": 1,
-  "_links": {
-    "self": [
-      {
-        "href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms/23"
-      }
-    ],
-    "collection": [
-      {
-        "href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms"
-      }
-    ]
-  }
+	"id": 23,
+	"name": "XXS",
+	"slug": "xxs",
+	"description": "",
+	"menu_order": 1,
+	"count": 1,
+	"_links": {
+		"self": [
+			{
+				"href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms/23"
+			}
+		],
+		"collection": [
+			{
+				"href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms"
+			}
+		]
+	}
 }
 ```
 
-## Delete an attribute term ##
+## Delete an attribute term
 
 This API helps you delete a product attribute term.
 
-### HTTP request ###
+### HTTP request
 
 ```http
 DELETE /wp-json/wc/v3/products/attributes/<attribute_id>/terms/<id>
@@ -542,15 +542,15 @@ curl -X DELETE https://example.com/wp-json/wc/v3/products/attributes/2/terms/23?
   <TabItem value="js" label="JavaScript">
 
 ```javascript
-WooCommerce.delete("products/attributes/2/terms/23", {
-  force: true
-})
-  .then((response) => {
-    console.log(response.data);
-  })
-  .catch((error) => {
-    console.log(error.response.data);
-  });
+WooCommerce.delete( 'products/attributes/2/terms/23', {
+	force: true,
+} )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
 ```
 
   </TabItem>
@@ -577,46 +577,47 @@ woocommerce.delete("products/attributes/2/terms/23", force: true).parsed_respons
   </TabItem>
 </Tabs>
 
-> JSON response example:
+### JSON response example
 
 ```json
 {
-  "id": 23,
-  "name": "XXS",
-  "slug": "xxs",
-  "description": "",
-  "menu_order": 1,
-  "count": 1,
-  "_links": {
-    "self": [
-      {
-        "href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms/23"
-      }
-    ],
-    "collection": [
-      {
-        "href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms"
-      }
-    ]
-  }
+	"id": 23,
+	"name": "XXS",
+	"slug": "xxs",
+	"description": "",
+	"menu_order": 1,
+	"count": 1,
+	"_links": {
+		"self": [
+			{
+				"href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms/23"
+			}
+		],
+		"collection": [
+			{
+				"href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms"
+			}
+		]
+	}
 }
 ```
 
-#### Available parameters ####
+#### Available parameters
 
-| Parameter |  Type  |                          Description                          |
-|-----------|--------|---------------------------------------------------------------|
+| Parameter | Type   | Description                                                   |
+| --------- | ------ | ------------------------------------------------------------- |
 | `force`   | string | Required to be `true`, as resource does not support trashing. |
 
-## Batch update attribute terms ##
+## Batch update attribute terms
 
 This API helps you to batch create, update and delete multiple product attribute terms.
 
 <aside class="notice">
-Note: By default it's limited to up to 100 objects to be created, updated or deleted. 
+	Note: By default it's limited to up to 100 objects to be created, updated or
+	deleted.
 </aside>
 
-### HTTP request ###
+### HTTP request
 
 ```http
 POST /wp-json/wc/v3/products/attributes/<attribute_id>/terms/batch
@@ -656,33 +657,30 @@ curl -X POST https://example.com//wp-json/wc/v3/products/attributes/&lt;attribut
 
 ```javascript
 const data = {
-  create: [
-    {
-      name: "XXS"
-    },
-    {
-      name: "S"
-    }
-  ],
-  update: [
-    {
-      id: 19,
-      menu_order: 6
-    }
-  ],
-  delete: [
-    21,
-    20
-  ]
+	create: [
+		{
+			name: 'XXS',
+		},
+		{
+			name: 'S',
+		},
+	],
+	update: [
+		{
+			id: 19,
+			menu_order: 6,
+		},
+	],
+	delete: [ 21, 20 ],
 };
 
-WooCommerce.post("products/attributes/2/terms/batch", data)
-  .then((response) => {
-    console.log(response.data);
-  })
-  .catch((error) => {
-    console.log(error.response.data);
-  });
+WooCommerce.post( 'products/attributes/2/terms/batch', data )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
 ```
 
   </TabItem>
@@ -774,115 +772,115 @@ woocommerce.post("products/attributes/2/terms/batch", data).parsed_response
   </TabItem>
 </Tabs>
 
-> JSON response example:
+### JSON response example
 
 ```json
 {
-  "create": [
-    {
-      "id": 23,
-      "name": "XXS",
-      "slug": "xxs",
-      "description": "",
-      "menu_order": 1,
-      "count": 0,
-      "_links": {
-        "self": [
-          {
-            "href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms/23"
-          }
-        ],
-        "collection": [
-          {
-            "href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms"
-          }
-        ]
-      }
-    },
-    {
-      "id": 17,
-      "name": "S",
-      "slug": "s",
-      "description": "",
-      "menu_order": 3,
-      "count": 0,
-      "_links": {
-        "self": [
-          {
-            "href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms/17"
-          }
-        ],
-        "collection": [
-          {
-            "href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms"
-          }
-        ]
-      }
-    }
-  ],
-  "update": [
-    {
-      "id": 19,
-      "name": "L",
-      "slug": "l",
-      "description": "",
-      "menu_order": 5,
-      "count": 1,
-      "_links": {
-        "self": [
-          {
-            "href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms/19"
-          }
-        ],
-        "collection": [
-          {
-            "href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms"
-          }
-        ]
-      }
-    }
-  ],
-  "delete": [
-    {
-      "id": 21,
-      "name": "XXL",
-      "slug": "xxl",
-      "description": "",
-      "menu_order": 7,
-      "count": 1,
-      "_links": {
-        "self": [
-          {
-            "href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms/21"
-          }
-        ],
-        "collection": [
-          {
-            "href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms"
-          }
-        ]
-      }
-    },
-    {
-      "id": 20,
-      "name": "XL",
-      "slug": "xl",
-      "description": "",
-      "menu_order": 6,
-      "count": 1,
-      "_links": {
-        "self": [
-          {
-            "href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms/20"
-          }
-        ],
-        "collection": [
-          {
-            "href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms"
-          }
-        ]
-      }
-    }
-  ]
+	"create": [
+		{
+			"id": 23,
+			"name": "XXS",
+			"slug": "xxs",
+			"description": "",
+			"menu_order": 1,
+			"count": 0,
+			"_links": {
+				"self": [
+					{
+						"href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms/23"
+					}
+				],
+				"collection": [
+					{
+						"href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms"
+					}
+				]
+			}
+		},
+		{
+			"id": 17,
+			"name": "S",
+			"slug": "s",
+			"description": "",
+			"menu_order": 3,
+			"count": 0,
+			"_links": {
+				"self": [
+					{
+						"href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms/17"
+					}
+				],
+				"collection": [
+					{
+						"href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms"
+					}
+				]
+			}
+		}
+	],
+	"update": [
+		{
+			"id": 19,
+			"name": "L",
+			"slug": "l",
+			"description": "",
+			"menu_order": 5,
+			"count": 1,
+			"_links": {
+				"self": [
+					{
+						"href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms/19"
+					}
+				],
+				"collection": [
+					{
+						"href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms"
+					}
+				]
+			}
+		}
+	],
+	"delete": [
+		{
+			"id": 21,
+			"name": "XXL",
+			"slug": "xxl",
+			"description": "",
+			"menu_order": 7,
+			"count": 1,
+			"_links": {
+				"self": [
+					{
+						"href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms/21"
+					}
+				],
+				"collection": [
+					{
+						"href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms"
+					}
+				]
+			}
+		},
+		{
+			"id": 20,
+			"name": "XL",
+			"slug": "xl",
+			"description": "",
+			"menu_order": 6,
+			"count": 1,
+			"_links": {
+				"self": [
+					{
+						"href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms/20"
+					}
+				],
+				"collection": [
+					{
+						"href": "https://example.com/wp-json/wc/v3/products/attributes/2/terms"
+					}
+				]
+			}
+		}
+	]
 }
 ```

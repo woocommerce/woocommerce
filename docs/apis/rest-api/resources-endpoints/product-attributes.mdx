@@ -6,26 +6,26 @@ sidebar_label: 'Product Attributes'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-# Product attributes #
+# Product attributes
 
 The product attributes API allows you to create, view, update, and delete individual, or a batch, of product attributes.
 
-## Product attribute properties ##
+## Product attribute properties
 
 | Attribute      | Type    | Description                                                                                      |
 | -------------- | ------- | ------------------------------------------------------------------------------------------------ |
 | `id`           | integer | Unique identifier for the resource. <i class="label label-info">read-only</i>                    |
 | `name`         | string  | Attribute name. <i class="label label-info">mandatory</i>                                        |
 | `slug`         | string  | An alphanumeric identifier for the resource unique to its type.                                  |
-| `type`         | string  | Type of attribute. By default only `select` is supported.                           |
+| `type`         | string  | Type of attribute. By default only `select` is supported.                                        |
 | `order_by`     | string  | Default sort order. Options: `menu_order`, `name`, `name_num` and `id`. Default is `menu_order`. |
 | `has_archives` | boolean | Enable/Disable attribute archives. Default is `false`.                                           |
 
-## Create a product attribute ##
+## Create a product attribute
 
 This API helps you to create a new product attribute.
 
-### HTTP request ###
+### HTTP request
 
 ```http
 POST /wp-json/wc/v3/products/attributes
@@ -52,20 +52,20 @@ curl -X POST https://example.com/wp-json/wc/v3/products/attributes \
 
 ```javascript
 const data = {
-  name: "Color",
-  slug: "pa_color",
-  type: "select",
-  order_by: "menu_order",
-  has_archives: true
+	name: 'Color',
+	slug: 'pa_color',
+	type: 'select',
+	order_by: 'menu_order',
+	has_archives: true,
 };
 
-WooCommerce.post("products/attributes", data)
-  .then((response) => {
-    console.log(response.data);
-  })
-  .catch((error) => {
-    console.log(error.response.data);
-  });
+WooCommerce.post( 'products/attributes', data )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
 ```
 
   </TabItem>
@@ -118,32 +118,32 @@ woocommerce.post("products/attributes", data).parsed_response
   </TabItem>
 </Tabs>
 
-> JSON response example:
+### JSON response example
 
 ```json
 {
-  "id": 1,
-  "name": "Color",
-  "slug": "pa_color",
-  "type": "select",
-  "order_by": "menu_order",
-  "has_archives": true,
-  "_links": {
-    "self": [
-      {
-        "href": "https://example.com/wp-json/wc/v3/products/attributes/6"
-      }
-    ],
-    "collection": [
-      {
-        "href": "https://example.com/wp-json/wc/v3/products/attributes"
-      }
-    ]
-  }
+	"id": 1,
+	"name": "Color",
+	"slug": "pa_color",
+	"type": "select",
+	"order_by": "menu_order",
+	"has_archives": true,
+	"_links": {
+		"self": [
+			{
+				"href": "https://example.com/wp-json/wc/v3/products/attributes/6"
+			}
+		],
+		"collection": [
+			{
+				"href": "https://example.com/wp-json/wc/v3/products/attributes"
+			}
+		]
+	}
 }
 ```
 
-## Retrieve a product attribute ##
+## Retrieve a product attribute
 
 This API lets you retrieve and view a specific product attribute by ID.
 
@@ -163,13 +163,13 @@ curl https://example.com/wp-json/wc/v3/products/attributes/1 \
   <TabItem value="js" label="JavaScript">
 
 ```javascript
-WooCommerce.get("products/attributes/1")
-  .then((response) => {
-    console.log(response.data);
-  })
-  .catch((error) => {
-    console.log(error.response.data);
-  });
+WooCommerce.get( 'products/attributes/1' )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
 ```
 
   </TabItem>
@@ -196,36 +196,36 @@ woocommerce.get("products/attributes/1").parsed_response
   </TabItem>
 </Tabs>
 
-> JSON response example:
+### JSON response example
 
 ```json
 {
-  "id": 1,
-  "name": "Color",
-  "slug": "pa_color",
-  "type": "select",
-  "order_by": "menu_order",
-  "has_archives": true,
-  "_links": {
-    "self": [
-      {
-        "href": "https://example.com/wp-json/wc/v3/products/attributes/6"
-      }
-    ],
-    "collection": [
-      {
-        "href": "https://example.com/wp-json/wc/v3/products/attributes"
-      }
-    ]
-  }
+	"id": 1,
+	"name": "Color",
+	"slug": "pa_color",
+	"type": "select",
+	"order_by": "menu_order",
+	"has_archives": true,
+	"_links": {
+		"self": [
+			{
+				"href": "https://example.com/wp-json/wc/v3/products/attributes/6"
+			}
+		],
+		"collection": [
+			{
+				"href": "https://example.com/wp-json/wc/v3/products/attributes"
+			}
+		]
+	}
 }
 ```
 
-## List all product attributes ##
+## List all product attributes
 
 This API helps you to view all the product attributes.
 
-### HTTP request ###
+### HTTP request
 
 ```http
 GET /wp-json/wc/v3/products/attributes
@@ -243,13 +243,13 @@ curl https://example.com/wp-json/wc/v3/products/attributes \
   <TabItem value="js" label="JavaScript">
 
 ```javascript
-WooCommerce.get("products/attributes")
-  .then((response) => {
-    console.log(response.data);
-  })
-  .catch((error) => {
-    console.log(error.response.data);
-  });
+WooCommerce.get( 'products/attributes' )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
 ```
 
   </TabItem>
@@ -276,64 +276,64 @@ woocommerce.get("products/attributes").parsed_response
   </TabItem>
 </Tabs>
 
-> JSON response example:
+### JSON response example
 
 ```json
 [
-  {
-    "id": 1,
-    "name": "Color",
-    "slug": "pa_color",
-    "type": "select",
-    "order_by": "menu_order",
-    "has_archives": true,
-    "_links": {
-      "self": [
-        {
-          "href": "https://example.com/wp-json/wc/v3/products/attributes/6"
-        }
-      ],
-      "collection": [
-        {
-          "href": "https://example.com/wp-json/wc/v3/products/attributes"
-        }
-      ]
-    }
-  },
-  {
-    "id": 2,
-    "name": "Size",
-    "slug": "pa_size",
-    "type": "select",
-    "order_by": "menu_order",
-    "has_archives": false,
-    "_links": {
-      "self": [
-        {
-          "href": "https://example.com/wp-json/wc/v3/products/attributes/2"
-        }
-      ],
-      "collection": [
-        {
-          "href": "https://example.com/wp-json/wc/v3/products/attributes"
-        }
-      ]
-    }
-  }
+	{
+		"id": 1,
+		"name": "Color",
+		"slug": "pa_color",
+		"type": "select",
+		"order_by": "menu_order",
+		"has_archives": true,
+		"_links": {
+			"self": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/products/attributes/6"
+				}
+			],
+			"collection": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/products/attributes"
+				}
+			]
+		}
+	},
+	{
+		"id": 2,
+		"name": "Size",
+		"slug": "pa_size",
+		"type": "select",
+		"order_by": "menu_order",
+		"has_archives": false,
+		"_links": {
+			"self": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/products/attributes/2"
+				}
+			],
+			"collection": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/products/attributes"
+				}
+			]
+		}
+	}
 ]
 ```
 
-#### Available parameters ####
+#### Available parameters
 
 | Parameter | Type   | Description                                                                                                                  |
 | --------- | ------ | ---------------------------------------------------------------------------------------------------------------------------- |
 | `context` | string | Scope under which the request is made; determines fields present in response. Options: `view` and `edit`. Default is `view`. |
 
-## Update a product attribute ##
+## Update a product attribute
 
 This API lets you make changes to a product attribute.
 
-### HTTP request ###
+### HTTP request
 
 ```http
 PUT /wp-json/wc/v3/products/attributes/<id>
@@ -356,16 +356,16 @@ curl -X PUT https://example.com/wp-json/wc/v3/products/attributes/1 \
 
 ```javascript
 const data = {
-  order_by: "name"
+	order_by: 'name',
 };
 
-WooCommerce.put("products/attributes/1", data)
-  .then((response) => {
-    console.log(response.data);
-  })
-  .catch((error) => {
-    console.log(error.response.data);
-  });
+WooCommerce.put( 'products/attributes/1', data )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
 ```
 
   </TabItem>
@@ -406,36 +406,36 @@ woocommerce.put("products/attributes/1", data).parsed_response
   </TabItem>
 </Tabs>
 
-> JSON response example:
+### JSON response example
 
 ```json
 {
-  "id": 1,
-  "name": "Color",
-  "slug": "pa_color",
-  "type": "select",
-  "order_by": "name",
-  "has_archives": true,
-  "_links": {
-    "self": [
-      {
-        "href": "https://example.com/wp-json/wc/v3/products/attributes/6"
-      }
-    ],
-    "collection": [
-      {
-        "href": "https://example.com/wp-json/wc/v3/products/attributes"
-      }
-    ]
-  }
+	"id": 1,
+	"name": "Color",
+	"slug": "pa_color",
+	"type": "select",
+	"order_by": "name",
+	"has_archives": true,
+	"_links": {
+		"self": [
+			{
+				"href": "https://example.com/wp-json/wc/v3/products/attributes/6"
+			}
+		],
+		"collection": [
+			{
+				"href": "https://example.com/wp-json/wc/v3/products/attributes"
+			}
+		]
+	}
 }
 ```
 
-## Delete a product attribute ##
+## Delete a product attribute
 
 This API helps you delete a product attribute.
 
-### HTTP request ###
+### HTTP request
 
 ```http
 DELETE /wp-json/wc/v3/products/attributes/<id>
@@ -457,15 +457,15 @@ curl -X DELETE https://example.com/wp-json/wc/v3/products/attributes/1?force=tru
   <TabItem value="js" label="JavaScript">
 
 ```javascript
-WooCommerce.delete("products/attributes/1", {
-  force: true
-})
-  .then((response) => {
-    console.log(response.data);
-  })
-  .catch((error) => {
-    console.log(error.response.data);
-  });
+WooCommerce.delete( 'products/attributes/1', {
+	force: true,
+} )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
 ```
 
   </TabItem>
@@ -492,46 +492,47 @@ woocommerce.delete("products/attributes/1", force: true).parsed_response
   </TabItem>
 </Tabs>
 
-> JSON response example:
+### JSON response example
 
 ```json
 {
-  "id": 1,
-  "name": "Color",
-  "slug": "pa_color",
-  "type": "select",
-  "order_by": "menu_order",
-  "has_archives": true,
-  "_links": {
-    "self": [
-      {
-        "href": "https://example.com/wp-json/wc/v3/products/attributes/6"
-      }
-    ],
-    "collection": [
-      {
-        "href": "https://example.com/wp-json/wc/v3/products/attributes"
-      }
-    ]
-  }
+	"id": 1,
+	"name": "Color",
+	"slug": "pa_color",
+	"type": "select",
+	"order_by": "menu_order",
+	"has_archives": true,
+	"_links": {
+		"self": [
+			{
+				"href": "https://example.com/wp-json/wc/v3/products/attributes/6"
+			}
+		],
+		"collection": [
+			{
+				"href": "https://example.com/wp-json/wc/v3/products/attributes"
+			}
+		]
+	}
 }
 ```
 
-#### Available parameters ####
+#### Available parameters
 
-| Parameter |  Type  |                          Description                          |
-|-----------|--------|---------------------------------------------------------------|
+| Parameter | Type   | Description                                                   |
+| --------- | ------ | ------------------------------------------------------------- |
 | `force`   | string | Required to be `true`, as resource does not support trashing. |
 
-## Batch update product attributes ##
+## Batch update product attributes
 
 This API helps you to batch create, update and delete multiple product attributes.
 
 <aside class="notice">
-Note: By default it's limited to up to 100 objects to be created, updated or deleted. 
+	Note: By default it's limited to up to 100 objects to be created, updated or
+	deleted.
 </aside>
 
-### HTTP request ###
+### HTTP request
 
 ```http
 POST /wp-json/wc/v3/products/attributes/batch
@@ -570,32 +571,30 @@ curl -X POST https://example.com//wp-json/wc/v3/products/attributes/batch \
 
 ```javascript
 const data = {
-  create: [
-    {
-      name: "Brand"
-    },
-    {
-      name: "Publisher"
-    }
-  ],
-  update: [
-    {
-      id: 2,
-      order_by: "name"
-    }
-  ],
-  delete: [
-    1
-  ]
+	create: [
+		{
+			name: 'Brand',
+		},
+		{
+			name: 'Publisher',
+		},
+	],
+	update: [
+		{
+			id: 2,
+			order_by: 'name',
+		},
+	],
+	delete: [ 1 ],
 };
 
-WooCommerce.post("products/attributes/batch", data)
-  .then((response) => {
-    console.log(response.data);
-  })
-  .catch((error) => {
-    console.log(error.response.data);
-  });
+WooCommerce.post( 'products/attributes/batch', data )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
 ```
 
   </TabItem>
@@ -684,95 +683,95 @@ woocommerce.post("products/attributes/batch", data).parsed_response
   </TabItem>
 </Tabs>
 
-> JSON response example:
+### JSON response example
 
 ```json
 {
-  "create": [
-    {
-      "id": 7,
-      "name": "Brand",
-      "slug": "pa_brand",
-      "type": "select",
-      "order_by": "menu_order",
-      "has_archives": false,
-      "_links": {
-        "self": [
-          {
-            "href": "https://example.com/wp-json/wc/v3/products/attributes/7"
-          }
-        ],
-        "collection": [
-          {
-            "href": "https://example.com/wp-json/wc/v3/products/attributes"
-          }
-        ]
-      }
-    },
-    {
-      "id": 8,
-      "name": "Publisher",
-      "slug": "pa_publisher",
-      "type": "select",
-      "order_by": "menu_order",
-      "has_archives": false,
-      "_links": {
-        "self": [
-          {
-            "href": "https://example.com/wp-json/wc/v3/products/attributes/8"
-          }
-        ],
-        "collection": [
-          {
-            "href": "https://example.com/wp-json/wc/v3/products/attributes"
-          }
-        ]
-      }
-    }
-  ],
-  "update": [
-    {
-      "id": 2,
-      "name": "Size",
-      "slug": "pa_size",
-      "type": "select",
-      "order_by": "menu_order",
-      "has_archives": false,
-      "_links": {
-        "self": [
-          {
-            "href": "https://example.com/wp-json/wc/v3/products/attributes/2"
-          }
-        ],
-        "collection": [
-          {
-            "href": "https://example.com/wp-json/wc/v3/products/attributes"
-          }
-        ]
-      }
-    }
-  ],
-  "delete": [
-    {
-      "id": 1,
-      "name": "Color",
-      "slug": "pa_color",
-      "type": "select",
-      "order_by": "menu_order",
-      "has_archives": true,
-      "_links": {
-        "self": [
-          {
-            "href": "https://example.com/wp-json/wc/v3/products/attributes/6"
-          }
-        ],
-        "collection": [
-          {
-            "href": "https://example.com/wp-json/wc/v3/products/attributes"
-          }
-        ]
-      }
-    }
-  ]
+	"create": [
+		{
+			"id": 7,
+			"name": "Brand",
+			"slug": "pa_brand",
+			"type": "select",
+			"order_by": "menu_order",
+			"has_archives": false,
+			"_links": {
+				"self": [
+					{
+						"href": "https://example.com/wp-json/wc/v3/products/attributes/7"
+					}
+				],
+				"collection": [
+					{
+						"href": "https://example.com/wp-json/wc/v3/products/attributes"
+					}
+				]
+			}
+		},
+		{
+			"id": 8,
+			"name": "Publisher",
+			"slug": "pa_publisher",
+			"type": "select",
+			"order_by": "menu_order",
+			"has_archives": false,
+			"_links": {
+				"self": [
+					{
+						"href": "https://example.com/wp-json/wc/v3/products/attributes/8"
+					}
+				],
+				"collection": [
+					{
+						"href": "https://example.com/wp-json/wc/v3/products/attributes"
+					}
+				]
+			}
+		}
+	],
+	"update": [
+		{
+			"id": 2,
+			"name": "Size",
+			"slug": "pa_size",
+			"type": "select",
+			"order_by": "menu_order",
+			"has_archives": false,
+			"_links": {
+				"self": [
+					{
+						"href": "https://example.com/wp-json/wc/v3/products/attributes/2"
+					}
+				],
+				"collection": [
+					{
+						"href": "https://example.com/wp-json/wc/v3/products/attributes"
+					}
+				]
+			}
+		}
+	],
+	"delete": [
+		{
+			"id": 1,
+			"name": "Color",
+			"slug": "pa_color",
+			"type": "select",
+			"order_by": "menu_order",
+			"has_archives": true,
+			"_links": {
+				"self": [
+					{
+						"href": "https://example.com/wp-json/wc/v3/products/attributes/6"
+					}
+				],
+				"collection": [
+					{
+						"href": "https://example.com/wp-json/wc/v3/products/attributes"
+					}
+				]
+			}
+		}
+	]
 }
 ```

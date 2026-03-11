@@ -6,14 +6,14 @@ sidebar_label: 'Product Reviews'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-# Product reviews #
+# Product reviews
 
 The product reviews API allows you to create, view, update, and delete individual, or a batch, of product reviews.
 
-## Product review properties ##
+## Product review properties
 
 | Attribute          | Type    | Description                                                                                                         |
-|--------------------|---------|---------------------------------------------------------------------------------------------------------------------|
+| ------------------ | ------- | ------------------------------------------------------------------------------------------------------------------- |
 | `id`               | integer | Unique identifier for the resource. <i class="label label-info">read-only</i>                                       |
 | `date_created`     | string  | The date the review was created, in the site's timezone. <i class="label label-info">read-only</i>                  |
 | `date_created_gmt` | string  | The date the review was created, as GMT. <i class="label label-info">read-only</i>                                  |
@@ -25,11 +25,11 @@ The product reviews API allows you to create, view, update, and delete individua
 | `rating`           | integer | Review rating (0 to 5).                                                                                             |
 | `verified`         | boolean | Shows if the reviewer bought the product or not.                                                                    |
 
-## Create a product review ##
+## Create a product review
 
 This API helps you to create a new product review.
 
-### HTTP request ###
+### HTTP request
 
 ```http
 POST /wp-json/wc/v3/products/reviews
@@ -58,20 +58,20 @@ curl -X POST https://example.com/wp-json/wc/v3/products/reviews \
 
 ```javascript
 const data = {
-  product_id: 22,
-  review: "Nice album!",
-  reviewer: "John Doe",
-  reviewer_email: "john.doe@example.com",
-  rating: 5
+	product_id: 22,
+	review: 'Nice album!',
+	reviewer: 'John Doe',
+	reviewer_email: 'john.doe@example.com',
+	rating: 5,
 };
 
-WooCommerce.post("products/reviews", data)
-  .then((response) => {
-    console.log(response.data);
-  })
-  .catch((error) => {
-    console.log(error.response.data);
-  });
+WooCommerce.post( 'products/reviews', data )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
 ```
 
   </TabItem>
@@ -124,7 +124,7 @@ woocommerce.post("products/reviews", data).parsed_response
   </TabItem>
 </Tabs>
 
-> JSON response example:
+### JSON response example
 
 ```json
 {
@@ -163,7 +163,7 @@ woocommerce.post("products/reviews", data).parsed_response
 }
 ```
 
-## Retrieve a product review ##
+## Retrieve a product review
 
 This API lets you retrieve a product review by ID.
 
@@ -183,13 +183,13 @@ curl https://example.com/wp-json/wc/v3/products/reviews/22 \
   <TabItem value="js" label="JavaScript">
 
 ```javascript
-WooCommerce.get("products/reviews/22")
-  .then((response) => {
-    console.log(response.data);
-  })
-  .catch((error) => {
-    console.log(error.response.data);
-  });
+WooCommerce.get( 'products/reviews/22' )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
 ```
 
   </TabItem>
@@ -216,7 +216,7 @@ woocommerce.get("products/reviews/22").parsed_response
   </TabItem>
 </Tabs>
 
-> JSON response example:
+### JSON response example
 
 ```json
 {
@@ -255,7 +255,7 @@ woocommerce.get("products/reviews/22").parsed_response
 }
 ```
 
-## List all product reviews ##
+## List all product reviews
 
 This API lets you retrieve all product review.
 
@@ -275,13 +275,13 @@ curl https://example.com/wp-json/wc/v3/products/reviews \
   <TabItem value="js" label="JavaScript">
 
 ```javascript
-WooCommerce.get("products/reviews")
-  .then((response) => {
-    console.log(response.data);
-  })
-  .catch((error) => {
-    console.log(error.response.data);
-  });
+WooCommerce.get( 'products/reviews' )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
 ```
 
   </TabItem>
@@ -308,7 +308,7 @@ woocommerce.get("products/reviews").parsed_response
   </TabItem>
 </Tabs>
 
-> JSON response example:
+### JSON response example
 
 ```json
 [
@@ -389,10 +389,10 @@ woocommerce.get("products/reviews").parsed_response
 ]
 ```
 
-#### Available parameters ####
+#### Available parameters
 
 | Parameter          | Type    | Description                                                                                                                            |
-|--------------------|---------|----------------------------------------------------------------------------------------------------------------------------------------|
+| ------------------ | ------- | -------------------------------------------------------------------------------------------------------------------------------------- |
 | `context`          | string  | Scope under which the request is made; determines fields present in response. Options: `view` and `edit`. Default is `view`.           |
 | `page`             | integer | Current page of the collection. Default is `1`.                                                                                        |
 | `per_page`         | integer | Maximum number of items to be returned in result set. Default is `10`.                                                                 |
@@ -411,11 +411,11 @@ woocommerce.get("products/reviews").parsed_response
 | `product`          | array   | Limit result set to reviews assigned to specific product IDs.                                                                          |
 | `status`           | string  | Limit result set to reviews assigned a specific status. Options: `all`, `hold`, `approved`, `spam` and `trash`. Default is `approved`. |
 
-## Update a product review ##
+## Update a product review
 
 This API lets you make changes to a product review.
 
-### HTTP request ###
+### HTTP request
 
 ```http
 PUT /wp-json/wc/v3/products/reviews/<id>
@@ -438,16 +438,16 @@ curl -X PUT https://example.com/wp-json/wc/v3/products/reviews/20 \
 
 ```javascript
 const data = {
-  rating: 5
+	rating: 5,
 };
 
-WooCommerce.put("products/reviews/20", data)
-  .then((response) => {
-    console.log(response.data);
-  })
-  .catch((error) => {
-    console.log(error.response.data);
-  });
+WooCommerce.put( 'products/reviews/20', data )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
 ```
 
   </TabItem>
@@ -488,7 +488,7 @@ woocommerce.put("products/reviews/20", data).parsed_response
   </TabItem>
 </Tabs>
 
-> JSON response example:
+### JSON response example
 
 ```json
 {
@@ -533,11 +533,11 @@ woocommerce.put("products/reviews/20", data).parsed_response
 }
 ```
 
-## Delete a product review ##
+## Delete a product review
 
 This API helps you delete a product review.
 
-### HTTP request ###
+### HTTP request
 
 ```http
 DELETE /wp-json/wc/v3/products/reviews/<id>
@@ -555,15 +555,15 @@ curl -X DELETE https://example.com/wp-json/wc/v3/products/reviews/34?force=true 
   <TabItem value="js" label="JavaScript">
 
 ```javascript
-WooCommerce.delete("products/reviews/20", {
-  force: true
-})
-  .then((response) => {
-    console.log(response.data);
-  })
-  .catch((error) => {
-    console.log(error.response.data);
-  });
+WooCommerce.delete( 'products/reviews/20', {
+	force: true,
+} )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
 ```
 
   </TabItem>
@@ -590,7 +590,7 @@ woocommerce.delete("products/reviews/20", force: true).parsed_response
   </TabItem>
 </Tabs>
 
-> JSON response example:
+### JSON response example
 
 ```json
 {
@@ -615,21 +615,22 @@ woocommerce.delete("products/reviews/20", force: true).parsed_response
 }
 ```
 
-#### Available parameters ####
+#### Available parameters
 
 | Parameter | Type   | Description                                                   |
-|-----------|--------|---------------------------------------------------------------|
+| --------- | ------ | ------------------------------------------------------------- |
 | `force`   | string | Required to be `true`, as resource does not support trashing. |
 
-## Batch update product reviews ##
+## Batch update product reviews
 
 This API helps you to batch create, update and delete multiple product reviews.
 
 <aside class="notice">
-Note: By default it's limited to up to 100 objects to be created, updated or deleted. 
+	Note: By default it's limited to up to 100 objects to be created, updated or
+	deleted.
 </aside>
 
-### HTTP request ###
+### HTTP request
 
 ```http
 POST /wp-json/wc/v3/products/reviews/batch
@@ -677,41 +678,39 @@ curl -X POST https://example.com//wp-json/wc/v3/products/reviews/batch \
 
 ```javascript
 const data = {
-  create: [
-    {
-      product_id: 22,
-      review: "Looks fine",
-      reviewer: "John Doe",
-      reviewer_email: "john.doe@example.com",
-      rating: 4
-    },
-    {
-      product_id: 22,
-      review: "I love this album",
-      reviewer: "John Doe",
-      reviewer_email: "john.doe@example.com",
-      rating: 5
-    }
-  ],
-  update: [
-    {
-      id: 7,
-      reviewer: "John Doe",
-      reviewer_email: "john.doe@example.com"
-    }
-  ],
-  delete: [
-    22
-  ]
+	create: [
+		{
+			product_id: 22,
+			review: 'Looks fine',
+			reviewer: 'John Doe',
+			reviewer_email: 'john.doe@example.com',
+			rating: 4,
+		},
+		{
+			product_id: 22,
+			review: 'I love this album',
+			reviewer: 'John Doe',
+			reviewer_email: 'john.doe@example.com',
+			rating: 5,
+		},
+	],
+	update: [
+		{
+			id: 7,
+			reviewer: 'John Doe',
+			reviewer_email: 'john.doe@example.com',
+		},
+	],
+	delete: [ 22 ],
 };
 
-WooCommerce.post("products/reviews/batch", data)
-  .then((response) => {
-    console.log(response.data);
-  })
-  .catch((error) => {
-    console.log(error.response.data);
-  });
+WooCommerce.post( 'products/reviews/batch', data )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
 ```
 
   </TabItem>
@@ -827,7 +826,7 @@ woocommerce.post("products/reviews/batch", data).parsed_response
   </TabItem>
 </Tabs>
 
-> JSON response example:
+### JSON response example
 
 ```json
 {

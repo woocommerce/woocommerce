@@ -6,11 +6,11 @@ sidebar_label: 'Shipping Methods'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-# Shipping methods #
+# Shipping methods
 
 The shipping methods API allows you to view individual shipping methods.
 
-## Shipping method properties ##
+## Shipping method properties
 
 | Attribute     | Type   | Description                                                            |
 | ------------- | ------ | ---------------------------------------------------------------------- |
@@ -18,11 +18,11 @@ The shipping methods API allows you to view individual shipping methods.
 | `title`       | string | Shipping method title. <i class="label label-info">read-only</i>       |
 | `description` | string | Shipping method description. <i class="label label-info">read-only</i> |
 
-## Retrieve a shipping method ##
+## Retrieve a shipping method
 
 This API lets you retrieve and view a specific shipping method.
 
-### HTTP request ###
+### HTTP request
 
 ```http
 GET /wp-json/wc/v3/shipping_methods/<id>
@@ -40,13 +40,13 @@ curl https://example.com/wp-json/wc/v3/shipping_methods/flat_rate \
   <TabItem value="js" label="JavaScript">
 
 ```javascript
-WooCommerce.get("shipping_methods/flat_rate")
-  .then((response) => {
-    console.log(response.data);
-  })
-  .catch((error) => {
-    console.log(error.response.data);
-  });
+WooCommerce.get( 'shipping_methods/flat_rate' )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
 ```
 
   </TabItem>
@@ -73,33 +73,33 @@ woocommerce.get("shipping_methods/flat_rate").parsed_response
   </TabItem>
 </Tabs>
 
-> JSON response example:
+### JSON response example
 
 ```json
 {
-  "id": "flat_rate",
-  "title": "Flat rate",
-  "description": "Lets you charge a fixed rate for shipping.",
-  "_links": {
-    "self": [
-      {
-        "href": "https://example.com/wp-json/wc/v3/shipping_methods/flat_rate"
-      }
-    ],
-    "collection": [
-      {
-        "href": "https://example.com/wp-json/wc/v3/shipping_methods"
-      }
-    ]
-  }
+	"id": "flat_rate",
+	"title": "Flat rate",
+	"description": "Lets you charge a fixed rate for shipping.",
+	"_links": {
+		"self": [
+			{
+				"href": "https://example.com/wp-json/wc/v3/shipping_methods/flat_rate"
+			}
+		],
+		"collection": [
+			{
+				"href": "https://example.com/wp-json/wc/v3/shipping_methods"
+			}
+		]
+	}
 }
 ```
 
-## List all shipping methods ##
+## List all shipping methods
 
 This API helps you to view all the shipping methods.
 
-### HTTP request ###
+### HTTP request
 
 ```http
 GET /wp-json/wc/v3/shipping_methods
@@ -117,13 +117,13 @@ curl https://example.com/wp-json/wc/v3/shipping_methods \
   <TabItem value="js" label="JavaScript">
 
 ```javascript
-WooCommerce.get("shipping_methods")
-  .then((response) => {
-    console.log(response.data);
-  })
-  .catch((error) => {
-    console.log(error.response.data);
-  });
+WooCommerce.get( 'shipping_methods' )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
 ```
 
   </TabItem>
@@ -150,60 +150,60 @@ woocommerce.get("shipping_methods").parsed_response
   </TabItem>
 </Tabs>
 
-> JSON response example:
+### JSON response example
 
 ```json
 [
-  {
-    "id": "flat_rate",
-    "title": "Flat rate",
-    "description": "Lets you charge a fixed rate for shipping.",
-    "_links": {
-      "self": [
-        {
-          "href": "https://example.com/wp-json/wc/v3/shipping_methods/flat_rate"
-        }
-      ],
-      "collection": [
-        {
-          "href": "https://example.com/wp-json/wc/v3/shipping_methods"
-        }
-      ]
-    }
-  },
-  {
-    "id": "free_shipping",
-    "title": "Free shipping",
-    "description": "Free shipping is a special method which can be triggered with coupons and minimum spends.",
-    "_links": {
-      "self": [
-        {
-          "href": "https://example.com/wp-json/wc/v3/shipping_methods/free_shipping"
-        }
-      ],
-      "collection": [
-        {
-          "href": "https://example.com/wp-json/wc/v3/shipping_methods"
-        }
-      ]
-    }
-  },
-  {
-    "id": "local_pickup",
-    "title": "Local pickup",
-    "description": "Allow customers to pick up orders themselves. By default, when using local pickup store base taxes will apply regardless of customer address.",
-    "_links": {
-      "self": [
-        {
-          "href": "https://example.com/wp-json/wc/v3/shipping_methods/local_pickup"
-        }
-      ],
-      "collection": [
-        {
-          "href": "https://example.com/wp-json/wc/v3/shipping_methods"
-        }
-      ]
-    }
-  }
+	{
+		"id": "flat_rate",
+		"title": "Flat rate",
+		"description": "Lets you charge a fixed rate for shipping.",
+		"_links": {
+			"self": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/shipping_methods/flat_rate"
+				}
+			],
+			"collection": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/shipping_methods"
+				}
+			]
+		}
+	},
+	{
+		"id": "free_shipping",
+		"title": "Free shipping",
+		"description": "Free shipping is a special method which can be triggered with coupons and minimum spends.",
+		"_links": {
+			"self": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/shipping_methods/free_shipping"
+				}
+			],
+			"collection": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/shipping_methods"
+				}
+			]
+		}
+	},
+	{
+		"id": "local_pickup",
+		"title": "Local pickup",
+		"description": "Allow customers to pick up orders themselves. By default, when using local pickup store base taxes will apply regardless of customer address.",
+		"_links": {
+			"self": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/shipping_methods/local_pickup"
+				}
+			],
+			"collection": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/shipping_methods"
+				}
+			]
+		}
+	}
 ]
 ```

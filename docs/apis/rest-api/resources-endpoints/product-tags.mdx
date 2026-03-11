@@ -6,11 +6,11 @@ sidebar_label: 'Product Tags'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-# Product tags #
+# Product tags
 
 The product tags API allows you to create, view, update, and delete individual, or a batch, of product tags.
 
-## Product tag properties ##
+## Product tag properties
 
 | Attribute     | Type    | Description                                                                              |
 | ------------- | ------- | ---------------------------------------------------------------------------------------- |
@@ -20,11 +20,11 @@ The product tags API allows you to create, view, update, and delete individual, 
 | `description` | string  | HTML description of the resource.                                                        |
 | `count`       | integer | Number of published products for the resource. <i class="label label-info">read-only</i> |
 
-## Create a product tag ##
+## Create a product tag
 
 This API helps you to create a new product tag.
 
-### HTTP request ###
+### HTTP request
 
 ```http
 POST /wp-json/wc/v3/products/tags
@@ -49,16 +49,16 @@ curl -X POST https://example.com/wp-json/wc/v3/products/tags \
 
 ```javascript
 const data = {
-  name: "Leather Shoes"
+	name: 'Leather Shoes',
 };
 
-WooCommerce.post("products/tags", data)
-  .then((response) => {
-    console.log(response.data);
-  })
-  .catch((error) => {
-    console.log(error.response.data);
-  });
+WooCommerce.post( 'products/tags', data )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
 ```
 
   </TabItem>
@@ -99,31 +99,31 @@ woocommerce.post("products/tags", data).parsed_response
   </TabItem>
 </Tabs>
 
-> JSON response example:
+### JSON response example
 
 ```json
 {
-  "id": 34,
-  "name": "Leather Shoes",
-  "slug": "leather-shoes",
-  "description": "",
-  "count": 0,
-  "_links": {
-    "self": [
-      {
-        "href": "https://example.com/wp-json/wc/v3/products/tags/34"
-      }
-    ],
-    "collection": [
-      {
-        "href": "https://example.com/wp-json/wc/v3/products/tags"
-      }
-    ]
-  }
+	"id": 34,
+	"name": "Leather Shoes",
+	"slug": "leather-shoes",
+	"description": "",
+	"count": 0,
+	"_links": {
+		"self": [
+			{
+				"href": "https://example.com/wp-json/wc/v3/products/tags/34"
+			}
+		],
+		"collection": [
+			{
+				"href": "https://example.com/wp-json/wc/v3/products/tags"
+			}
+		]
+	}
 }
 ```
 
-## Retrieve a product tag ##
+## Retrieve a product tag
 
 This API lets you retrieve a product tag by ID.
 
@@ -143,13 +143,13 @@ curl https://example.com/wp-json/wc/v3/products/tags/34 \
   <TabItem value="js" label="JavaScript">
 
 ```javascript
-WooCommerce.get("products/tags/34")
-  .then((response) => {
-    console.log(response.data);
-  })
-  .catch((error) => {
-    console.log(error.response.data);
-  });
+WooCommerce.get( 'products/tags/34' )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
 ```
 
   </TabItem>
@@ -176,31 +176,31 @@ woocommerce.get("products/tags/34").parsed_response
   </TabItem>
 </Tabs>
 
-> JSON response example:
+### JSON response example
 
 ```json
 {
-  "id": 34,
-  "name": "Leather Shoes",
-  "slug": "leather-shoes",
-  "description": "",
-  "count": 0,
-  "_links": {
-    "self": [
-      {
-        "href": "https://example.com/wp-json/wc/v3/products/tags/34"
-      }
-    ],
-    "collection": [
-      {
-        "href": "https://example.com/wp-json/wc/v3/products/tags"
-      }
-    ]
-  }
+	"id": 34,
+	"name": "Leather Shoes",
+	"slug": "leather-shoes",
+	"description": "",
+	"count": 0,
+	"_links": {
+		"self": [
+			{
+				"href": "https://example.com/wp-json/wc/v3/products/tags/34"
+			}
+		],
+		"collection": [
+			{
+				"href": "https://example.com/wp-json/wc/v3/products/tags"
+			}
+		]
+	}
 }
 ```
 
-## List all product tags ##
+## List all product tags
 
 This API lets you retrieve all product tag.
 
@@ -220,13 +220,13 @@ curl https://example.com/wp-json/wc/v3/products/tags \
   <TabItem value="js" label="JavaScript">
 
 ```javascript
-WooCommerce.get("products/tags")
-  .then((response) => {
-    console.log(response.data);
-  })
-  .catch((error) => {
-    console.log(error.response.data);
-  });
+WooCommerce.get( 'products/tags' )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
 ```
 
   </TabItem>
@@ -253,52 +253,52 @@ woocommerce.get("products/tags").parsed_response
   </TabItem>
 </Tabs>
 
-> JSON response example:
+### JSON response example
 
 ```json
 [
-  {
-    "id": 34,
-    "name": "Leather Shoes",
-    "slug": "leather-shoes",
-    "description": "",
-    "count": 0,
-    "_links": {
-      "self": [
-        {
-          "href": "https://example.com/wp-json/wc/v3/products/tags/34"
-        }
-      ],
-      "collection": [
-        {
-          "href": "https://example.com/wp-json/wc/v3/products/tags"
-        }
-      ]
-    }
-  },
-  {
-    "id": 35,
-    "name": "Oxford Shoes",
-    "slug": "oxford-shoes",
-    "description": "",
-    "count": 0,
-    "_links": {
-      "self": [
-        {
-          "href": "https://example.com/wp-json/wc/v3/products/tags/35"
-        }
-      ],
-      "collection": [
-        {
-          "href": "https://example.com/wp-json/wc/v3/products/tags"
-        }
-      ]
-    }
-  }
+	{
+		"id": 34,
+		"name": "Leather Shoes",
+		"slug": "leather-shoes",
+		"description": "",
+		"count": 0,
+		"_links": {
+			"self": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/products/tags/34"
+				}
+			],
+			"collection": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/products/tags"
+				}
+			]
+		}
+	},
+	{
+		"id": 35,
+		"name": "Oxford Shoes",
+		"slug": "oxford-shoes",
+		"description": "",
+		"count": 0,
+		"_links": {
+			"self": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/products/tags/35"
+				}
+			],
+			"collection": [
+				{
+					"href": "https://example.com/wp-json/wc/v3/products/tags"
+				}
+			]
+		}
+	}
 ]
 ```
 
-#### Available parameters ####
+#### Available parameters
 
 | Parameter    | Type    | Description                                                                                                                                  |
 | ------------ | ------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -315,11 +315,11 @@ woocommerce.get("products/tags").parsed_response
 | `product`    | integer | Limit result set to resources assigned to a specific product.                                                                                |
 | `slug`       | string  | Limit result set to resources with a specific slug.                                                                                          |
 
-## Update a product tag ##
+## Update a product tag
 
 This API lets you make changes to a product tag.
 
-### HTTP request ###
+### HTTP request
 
 ```http
 PUT /wp-json/wc/v3/products/tags/<id>
@@ -342,16 +342,16 @@ curl -X PUT https://example.com/wp-json/wc/v3/products/tags/34 \
 
 ```javascript
 const data = {
-  description: "Genuine leather."
+	description: 'Genuine leather.',
 };
 
-WooCommerce.put("products/tags/34", data)
-  .then((response) => {
-    console.log(response.data);
-  })
-  .catch((error) => {
-    console.log(error.response.data);
-  });
+WooCommerce.put( 'products/tags/34', data )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
 ```
 
   </TabItem>
@@ -392,35 +392,35 @@ woocommerce.put("products/tags/34", data).parsed_response
   </TabItem>
 </Tabs>
 
-> JSON response example:
+### JSON response example
 
 ```json
 {
-  "id": 34,
-  "name": "Leather Shoes",
-  "slug": "leather-shoes",
-  "description": "Genuine leather.",
-  "count": 0,
-  "_links": {
-    "self": [
-      {
-        "href": "https://example.com/wp-json/wc/v3/products/tags/34"
-      }
-    ],
-    "collection": [
-      {
-        "href": "https://example.com/wp-json/wc/v3/products/tags"
-      }
-    ]
-  }
+	"id": 34,
+	"name": "Leather Shoes",
+	"slug": "leather-shoes",
+	"description": "Genuine leather.",
+	"count": 0,
+	"_links": {
+		"self": [
+			{
+				"href": "https://example.com/wp-json/wc/v3/products/tags/34"
+			}
+		],
+		"collection": [
+			{
+				"href": "https://example.com/wp-json/wc/v3/products/tags"
+			}
+		]
+	}
 }
 ```
 
-## Delete a product tag ##
+## Delete a product tag
 
 This API helps you delete a product tag.
 
-### HTTP request ###
+### HTTP request
 
 ```http
 DELETE /wp-json/wc/v3/products/tags/<id>
@@ -438,15 +438,15 @@ curl -X DELETE https://example.com/wp-json/wc/v3/products/tags/34?force=true \
   <TabItem value="js" label="JavaScript">
 
 ```javascript
-WooCommerce.delete("products/tags/34", {
-  force: true
-})
-  .then((response) => {
-    console.log(response.data);
-  })
-  .catch((error) => {
-    console.log(error.response.data);
-  });
+WooCommerce.delete( 'products/tags/34', {
+	force: true,
+} )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
 ```
 
   </TabItem>
@@ -473,45 +473,46 @@ woocommerce.delete("products/tags/34", force: true).parsed_response
   </TabItem>
 </Tabs>
 
-> JSON response example:
+### JSON response example
 
 ```json
 {
-  "id": 34,
-  "name": "Leather Shoes",
-  "slug": "leather-shoes",
-  "description": "Genuine leather.",
-  "count": 0,
-  "_links": {
-    "self": [
-      {
-        "href": "https://example.com/wp-json/wc/v3/products/tags/34"
-      }
-    ],
-    "collection": [
-      {
-        "href": "https://example.com/wp-json/wc/v3/products/tags"
-      }
-    ]
-  }
+	"id": 34,
+	"name": "Leather Shoes",
+	"slug": "leather-shoes",
+	"description": "Genuine leather.",
+	"count": 0,
+	"_links": {
+		"self": [
+			{
+				"href": "https://example.com/wp-json/wc/v3/products/tags/34"
+			}
+		],
+		"collection": [
+			{
+				"href": "https://example.com/wp-json/wc/v3/products/tags"
+			}
+		]
+	}
 }
 ```
 
-#### Available parameters ####
+#### Available parameters
 
-| Parameter |  Type  |                          Description                          |
-|-----------|--------|---------------------------------------------------------------|
+| Parameter | Type   | Description                                                   |
+| --------- | ------ | ------------------------------------------------------------- |
 | `force`   | string | Required to be `true`, as resource does not support trashing. |
 
-## Batch update product tags ##
+## Batch update product tags
 
 This API helps you to batch create, update and delete multiple product tags.
 
 <aside class="notice">
-Note: By default it's limited to up to 100 objects to be created, updated or deleted. 
+	Note: By default it's limited to up to 100 objects to be created, updated or
+	deleted.
 </aside>
 
-### HTTP request ###
+### HTTP request
 
 ```http
 POST /wp-json/wc/v3/products/tags/batch
@@ -550,32 +551,30 @@ curl -X POST https://example.com//wp-json/wc/v3/products/tags/batch \
 
 ```javascript
 const data = {
-  create: [
-    {
-      name: "Round toe"
-    },
-    {
-      name: "Flat"
-    }
-  ],
-  update: [
-    {
-      id: 34,
-      description: "Genuine leather."
-    }
-  ],
-  delete: [
-    35
-  ]
+	create: [
+		{
+			name: 'Round toe',
+		},
+		{
+			name: 'Flat',
+		},
+	],
+	update: [
+		{
+			id: 34,
+			description: 'Genuine leather.',
+		},
+	],
+	delete: [ 35 ],
 };
 
-WooCommerce.post("products/tags/batch", data)
-  .then((response) => {
-    console.log(response.data);
-  })
-  .catch((error) => {
-    console.log(error.response.data);
-  });
+WooCommerce.post( 'products/tags/batch', data )
+	.then( ( response ) => {
+		console.log( response.data );
+	} )
+	.catch( ( error ) => {
+		console.log( error.response.data );
+	} );
 ```
 
   </TabItem>
@@ -664,91 +663,91 @@ woocommerce.post("products/tags/batch", data).parsed_response
   </TabItem>
 </Tabs>
 
-> JSON response example:
+### JSON response example
 
 ```json
 {
-  "create": [
-    {
-      "id": 36,
-      "name": "Round toe",
-      "slug": "round-toe",
-      "description": "",
-      "count": 0,
-      "_links": {
-        "self": [
-          {
-            "href": "https://example.com/wp-json/wc/v3/products/tags/36"
-          }
-        ],
-        "collection": [
-          {
-            "href": "https://example.com/wp-json/wc/v3/products/tags"
-          }
-        ]
-      }
-    },
-    {
-      "id": 37,
-      "name": "Flat",
-      "slug": "flat",
-      "description": "",
-      "count": 0,
-      "_links": {
-        "self": [
-          {
-            "href": "https://example.com/wp-json/wc/v3/products/tags/37"
-          }
-        ],
-        "collection": [
-          {
-            "href": "https://example.com/wp-json/wc/v3/products/tags"
-          }
-        ]
-      }
-    }
-  ],
-  "update": [
-    {
-      "id": 34,
-      "name": "Leather Shoes",
-      "slug": "leather-shoes",
-      "description": "Genuine leather.",
-      "count": 0,
-      "_links": {
-        "self": [
-          {
-            "href": "https://example.com/wp-json/wc/v3/products/tags/34"
-          }
-        ],
-        "collection": [
-          {
-            "href": "https://example.com/wp-json/wc/v3/products/tags"
-          }
-        ]
-      }
-    }
-  ],
-  "delete": [
-    {
-      "id": 35,
-      "name": "Oxford Shoes",
-      "slug": "oxford-shoes",
-      "description": "",
-      "count": 0,
-      "_links": {
-        "self": [
-          {
-            "href": "https://example.com/wp-json/wc/v3/products/tags/35"
-          }
-        ],
-        "collection": [
-          {
-            "href": "https://example.com/wp-json/wc/v3/products/tags"
-          }
-        ]
-      }
-    }
-  ]
+	"create": [
+		{
+			"id": 36,
+			"name": "Round toe",
+			"slug": "round-toe",
+			"description": "",
+			"count": 0,
+			"_links": {
+				"self": [
+					{
+						"href": "https://example.com/wp-json/wc/v3/products/tags/36"
+					}
+				],
+				"collection": [
+					{
+						"href": "https://example.com/wp-json/wc/v3/products/tags"
+					}
+				]
+			}
+		},
+		{
+			"id": 37,
+			"name": "Flat",
+			"slug": "flat",
+			"description": "",
+			"count": 0,
+			"_links": {
+				"self": [
+					{
+						"href": "https://example.com/wp-json/wc/v3/products/tags/37"
+					}
+				],
+				"collection": [
+					{
+						"href": "https://example.com/wp-json/wc/v3/products/tags"
+					}
+				]
+			}
+		}
+	],
+	"update": [
+		{
+			"id": 34,
+			"name": "Leather Shoes",
+			"slug": "leather-shoes",
+			"description": "Genuine leather.",
+			"count": 0,
+			"_links": {
+				"self": [
+					{
+						"href": "https://example.com/wp-json/wc/v3/products/tags/34"
+					}
+				],
+				"collection": [
+					{
+						"href": "https://example.com/wp-json/wc/v3/products/tags"
+					}
+				]
+			}
+		}
+	],
+	"delete": [
+		{
+			"id": 35,
+			"name": "Oxford Shoes",
+			"slug": "oxford-shoes",
+			"description": "",
+			"count": 0,
+			"_links": {
+				"self": [
+					{
+						"href": "https://example.com/wp-json/wc/v3/products/tags/35"
+					}
+				],
+				"collection": [
+					{
+						"href": "https://example.com/wp-json/wc/v3/products/tags"
+					}
+				]
+			}
+		}
+	]
 }
 ```
