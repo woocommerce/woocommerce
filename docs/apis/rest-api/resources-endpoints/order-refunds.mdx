@@ -21,11 +21,11 @@ The order refunds API allows you to create, view, and delete individual refunds,
 | `reason`           | string    | Reason for refund.                                                                                                                                                            |
 | `refunded_by`      | integer   | User ID of user who created the refund.                                                                                                                                       |
 | `refunded_payment` | boolean   | If the payment was refunded via the API. See `api_refund`. <i class="label label-info">read-only</i>                                                                          |
-| `meta_data`        | array     | Meta data. See [Order refund - Meta data properties](#order-refund-meta-data-properties)                                                                                      |
-| `line_items`       | array     | Line items data. See [Order refund - Line items properties](#order-refund-line-items-properties)                                                                              |
-| `tax_lines`        | array     | Tax lines data. See [Order refund - Tax lines properties](#order-refund-tax-lines-properties) <i class="label label-info">read-only</i>                                       |
-| `shipping_lines`   | array     | Shipping lines data. See [Order refund - Shipping lines properties](#order-refund-shipping-lines-properties)                                                                  |
-| `fee_lines`        | array     | Fee lines data. See [Order refund - Fee lines properties](#order-refund-fee-lines-properties)                                                                                 |
+| `meta_data`        | array     | Meta data. See [Order refund - Meta data properties](#order-refund---meta-data-properties)                                                                                      |
+| `line_items`       | array     | Line items data. See [Order refund - Line items properties](#order-refund---line-items-properties)                                                                              |
+| `tax_lines`        | array     | Tax lines data. See [Order refund - Tax lines properties](#order-refund---tax-lines-properties) <i class="label label-info">read-only</i>                                       |
+| `shipping_lines`   | array     | Shipping lines data. See [Order refund - Shipping lines properties](#order-refund---shipping-lines-properties)                                                                  |
+| `fee_lines`        | array     | Fee lines data. See [Order refund - Fee lines properties](#order-refund---fee-lines-properties)                                                                                 |
 | `api_refund`       | boolean   | When true, the payment gateway API is used to generate the refund. Default is `true`. <i class="label label-info">write-only</i>                                              |
 | `api_restock`      | boolean   | When true, the selected line items are restocked Default is `true`. <i class="label label-info">write-only</i>                                                                |
 
@@ -51,8 +51,8 @@ The order refunds API allows you to create, view, and delete individual refunds,
 | `subtotal_tax` | string  | Line subtotal tax (before discounts). <i class="label label-info">read-only</i>                                                                 |
 | `total`        | string  | Line total (after discounts).                                                                                                                   |
 | `total_tax`    | string  | Line total tax (after discounts). <i class="label label-info">read-only</i>                                                                     |
-| `taxes`        | array   | Line taxes. See [Order refund line item - Taxes properties](#order-refund-line-item-taxes-properties) <i class="label label-info">read-only</i> |
-| `meta_data`    | array   | Meta data. See [Order refund - Meta data properties](#order-refund-meta-data-properties)                                                        |
+| `taxes`        | array   | Line taxes. See [Order refund line item - Taxes properties](#order-refund-line-item---taxes-properties) <i class="label label-info">read-only</i> |
+| `meta_data`    | array   | Meta data. See [Order refund - Meta data properties](#order-refund---meta-data-properties)                                                        |
 | `sku`          | string  | Product SKU. <i class="label label-info">read-only</i>                                                                                          |
 | `price`        | string  | Product price. <i class="label label-info">read-only</i>                                                                                        |
 
@@ -75,7 +75,7 @@ The order refunds API allows you to create, view, and delete individual refunds,
 | `compound`           | boolean | Whether or not this is a compound tax rate. <i class="label label-info">read-only</i>    |
 | `tax_total`          | string  | Tax total (not including shipping taxes). <i class="label label-info">read-only</i>      |
 | `shipping_tax_total` | string  | Shipping tax total. <i class="label label-info">read-only</i>                            |
-| `meta_data`          | array   | Meta data. See [Order refund - Meta data properties](#order-refund-meta-data-properties) |
+| `meta_data`          | array   | Meta data. See [Order refund - Meta data properties](#order-refund---meta-data-properties) |
 
 ### Order refund - Shipping lines properties
 
@@ -86,8 +86,8 @@ The order refunds API allows you to create, view, and delete individual refunds,
 | `method_id`    | string  | Shipping method ID.                                                                                                                 |
 | `total`        | string  | Line total (after discounts).                                                                                                       |
 | `total_tax`    | string  | Line total tax (after discounts). <i class="label label-info">read-only</i>                                                         |
-| `taxes`        | array   | Line taxes. See [Order refund - Tax lines properties](#order-refund-tax-lines-properties) <i class="label label-info">read-only</i> |
-| `meta_data`    | array   | Meta data. See [Order refund - Meta data properties](#order-refund-meta-data-properties)                                            |
+| `taxes`        | array   | Line taxes. See [Order refund - Tax lines properties](#order-refund---tax-lines-properties) <i class="label label-info">read-only</i> |
+| `meta_data`    | array   | Meta data. See [Order refund - Meta data properties](#order-refund---meta-data-properties)                                            |
 
 ### Order refund - Fee lines properties
 
@@ -99,8 +99,8 @@ The order refunds API allows you to create, view, and delete individual refunds,
 | `tax_status` | string  | Tax status of fee. Options: `taxable` and `none`.                                                                                   |
 | `total`      | string  | Line total (after discounts).                                                                                                       |
 | `total_tax`  | string  | Line total tax (after discounts). <i class="label label-info">read-only</i>                                                         |
-| `taxes`      | array   | Line taxes. See [Order refund - Tax lines properties](#order-refund-tax-lines-properties) <i class="label label-info">read-only</i> |
-| `meta_data`  | array   | Meta data. See [Order refund - Meta data properties](#order-refund-meta-data-properties)                                            |
+| `taxes`      | array   | Line taxes. See [Order refund - Tax lines properties](#order-refund---tax-lines-properties) <i class="label label-info">read-only</i> |
+| `meta_data`  | array   | Meta data. See [Order refund - Meta data properties](#order-refund---meta-data-properties)                                            |
 
 ## Create a refund
 
@@ -384,7 +384,7 @@ woocommerce.get("orders/723/refunds/726").parsed_response
 
 This API helps you to view all the refunds from an order.
 
-Note: To view a list of refunds from your store, regardless of order, check out the [refunds endpoint](#refunds).
+Note: To view a list of refunds from your store, regardless of order, check out the [refunds endpoint](../refunds).
 
 ### HTTP request
 

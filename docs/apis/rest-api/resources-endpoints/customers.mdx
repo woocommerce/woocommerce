@@ -25,11 +25,11 @@ The customer API allows you to create, view, update, and delete individual, or a
 | `role`               | string    | Customer role. <i class="label label-info">read-only</i>                                                   |
 | `username`           | string    | Customer login name.                                                                                       |
 | `password`           | string    | Customer password. <i class="label label-info">write-only</i>                                              |
-| `billing`            | object    | List of billing address data. See [Customer - Billing properties](#customer-billing-properties)            |
-| `shipping`           | object    | List of shipping address data. See [Customer - Shipping properties](#customer-shipping-properties)         |
+| `billing`            | object    | List of billing address data. See [Customer - Billing properties](#customer---billing-properties)            |
+| `shipping`           | object    | List of shipping address data. See [Customer - Shipping properties](#customer---shipping-properties)         |
 | `is_paying_customer` | bool      | Is the customer a paying customer? <i class="label label-info">read-only</i>                               |
 | `avatar_url`         | string    | Avatar URL. <i class="label label-info">read-only</i>                                                      |
-| `meta_data`          | array     | Meta data. See [Customer - Meta data properties](#customer-meta-data-properties)                           |
+| `meta_data`          | array     | Meta data. See [Customer - Meta data properties](#customer---meta-data-properties)                           |
 
 ### Customer - Billing properties
 
@@ -1677,7 +1677,7 @@ woocommerce.get("customers/26/downloads").parsed_response
 | `downloads_remaining` | string  | Number of downloads remaining. <i class="label label-info">read-only</i>                                                                  |
 | `access_expires`      | string  | The date when download access expires, in the site's timezone. <i class="label label-info">read-only</i>                                  |
 | `access_expires_gmt`  | string  | The date when download access expires, as GMT. <i class="label label-info">read-only</i>                                                  |
-| `file`                | object  | File details. <i class="label label-info">read-only</i> See [Customers downloads - File properties](#customers-downloads-file-properties) |
+| `file`                | object  | File details. <i class="label label-info">read-only</i> See [Customers downloads - File properties](#customer-downloads---file-properties) |
 
 #### Customer downloads - File properties
 
