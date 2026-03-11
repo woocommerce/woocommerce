@@ -557,6 +557,112 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 	}
 
 	/**
+	 * Test blocks with explicit horizontal padding skip root padding
+	 */
+	public function testItSkipsRootPaddingForBlocksWithExplicitPadding(): void {
+		$blocks = array(
+			array(
+				'blockName'   => 'core/group',
+				'attrs'       => array(),
+				'innerBlocks' => array(
+					// Group with explicit 0px padding (edge-to-edge banner).
+					array(
+						'blockName'   => 'core/group',
+						'attrs'       => array(
+							'style' => array(
+								'spacing' => array(
+									'padding' => array(
+										'left'  => '0px',
+										'right' => '0px',
+									),
+								),
+							),
+						),
+						'innerBlocks' => array(
+							array(
+								'blockName'   => 'core/paragraph',
+								'attrs'       => array(),
+								'innerBlocks' => array(),
+							),
+						),
+					),
+					// Columns with explicit 0px padding.
+					array(
+						'blockName'   => 'core/columns',
+						'attrs'       => array(
+							'style' => array(
+								'spacing' => array(
+									'padding' => array(
+										'left'  => '0px',
+										'right' => '0px',
+									),
+								),
+							),
+						),
+						'innerBlocks' => array(),
+					),
+					// Group with explicit 40px padding.
+					array(
+						'blockName'   => 'core/group',
+						'attrs'       => array(
+							'style' => array(
+								'spacing' => array(
+									'padding' => array(
+										'left'  => '40px',
+										'right' => '40px',
+									),
+								),
+							),
+						),
+						'innerBlocks' => array(
+							array(
+								'blockName'   => 'core/paragraph',
+								'attrs'       => array(),
+								'innerBlocks' => array(),
+							),
+						),
+					),
+					// Paragraph with no explicit padding (should get root padding).
+					array(
+						'blockName'   => 'core/paragraph',
+						'attrs'       => array(),
+						'innerBlocks' => array(),
+					),
+				),
+			),
+		);
+
+		$result          = $this->preprocessor->preprocess( $blocks, $this->layout, $this->styles );
+		$root_group      = $result[0];
+		$banner_group    = $root_group['innerBlocks'][0];
+		$banner_child    = $banner_group['innerBlocks'][0];
+		$columns         = $root_group['innerBlocks'][1];
+		$padded_group    = $root_group['innerBlocks'][2];
+		$padded_child    = $padded_group['innerBlocks'][0];
+		$plain_paragraph = $root_group['innerBlocks'][3];
+
+		// Banner group (0px padding): skips root padding, children don't get delegation.
+		$this->assertArrayNotHasKey( 'padding-left', $banner_group['email_attrs'] );
+		$this->assertArrayNotHasKey( 'padding-right', $banner_group['email_attrs'] );
+		$this->assertArrayNotHasKey( 'padding-left', $banner_child['email_attrs'] );
+		$this->assertArrayNotHasKey( 'padding-right', $banner_child['email_attrs'] );
+
+		// Columns (0px padding): skips root padding.
+		$this->assertArrayNotHasKey( 'padding-left', $columns['email_attrs'] );
+		$this->assertArrayNotHasKey( 'padding-right', $columns['email_attrs'] );
+
+		// Padded group (40px): skips root padding, children don't get delegation.
+		$this->assertArrayNotHasKey( 'padding-left', $padded_group['email_attrs'] );
+		$this->assertArrayNotHasKey( 'padding-right', $padded_group['email_attrs'] );
+		$this->assertArrayNotHasKey( 'padding-left', $padded_child['email_attrs'] );
+		$this->assertArrayNotHasKey( 'padding-right', $padded_child['email_attrs'] );
+
+		// Plain paragraph (no explicit padding): gets root padding.
+		$this->assertEquals( '10px', $plain_paragraph['email_attrs']['padding-left'] );
+		$this->assertEquals( '10px', $plain_paragraph['email_attrs']['padding-right'] );
+	}
+
+	/**
 	 * Test it rejects malicious values in blockGap
 	 */
 	public function testItRejectsMaliciousBlockGapValues(): void {

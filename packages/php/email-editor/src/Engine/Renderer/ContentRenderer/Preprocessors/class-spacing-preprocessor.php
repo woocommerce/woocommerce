@@ -32,7 +32,7 @@ class Spacing_Preprocessor implements Preprocessor {
 	 * Container block names that delegate root padding to their children
 	 * instead of receiving it themselves.
 	 */
-	const CONTAINER_BLOCKS = array( 'core/group', 'core/post-content' );
+	private const CONTAINER_BLOCKS = array( 'core/group', 'core/post-content' );
 
 	/**
 	 * Adds spacing to blocks: margin-top for vertical gaps, horizontal padding for
@@ -81,13 +81,17 @@ class Spacing_Preprocessor implements Preprocessor {
 			// Blocks flagged with $apply_root_padding (children of root containers)
 			// also get padding, unless they are post-content or a container wrapping
 			// post-content (both delegate further down the tree).
+			// Blocks that explicitly define their own horizontal padding are managing
+			// their own layout and skip root padding entirely. Containers with explicit
+			// padding also stop delegation so their children follow the container's padding.
 			$is_root_level      = null === $parent_block;
 			$is_container       = in_array( $block_name, self::CONTAINER_BLOCKS, true );
 			$alignment          = $block['attrs']['align'] ?? null;
-			$wraps_post_content = $apply_root_padding && $is_container && $this->contains_post_content( $block );
+			$has_own_padding    = $this->has_explicit_horizontal_padding( $block );
+			$wraps_post_content = $apply_root_padding && $is_container && ! $has_own_padding && $this->contains_post_content( $block );
 			$should_apply       = $apply_root_padding || ( $is_root_level && ! $is_container );
 
-			if ( $should_apply && 'full' !== $alignment && 'core/post-content' !== $block_name && ! $wraps_post_content && ! empty( $root_padding ) ) {
+			if ( $should_apply && ! $has_own_padding && 'full' !== $alignment && 'core/post-content' !== $block_name && ! $wraps_post_content && ! empty( $root_padding ) ) {
 				$block['email_attrs']['padding-left']  = $root_padding['left'];
 				$block['email_attrs']['padding-right'] = $root_padding['right'];
 			}
@@ -97,8 +101,10 @@ class Spacing_Preprocessor implements Preprocessor {
 			// Post-content blocks that received delegation also pass it through.
 			// Containers wrapping post-content that received delegation also delegate,
 			// so that user blocks inside post-content get padding individually.
+			// Containers with explicit horizontal padding stop delegation — they
+			// manage their own layout.
 			$children_apply = false;
-			if ( $is_root_level && $is_container ) {
+			if ( $is_root_level && $is_container && ! $has_own_padding ) {
 				$children_apply = true;
 			} elseif ( $apply_root_padding && 'core/post-content' === $block_name ) {
 				$children_apply = true;
@@ -134,6 +140,22 @@ class Spacing_Preprocessor implements Preprocessor {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Checks whether a block explicitly defines its own horizontal padding.
+	 *
+	 * When a block has explicit padding-left or padding-right in its style
+	 * attributes, it is managing its own layout. Root padding should not
+	 * be added on top, and containers with explicit padding should not
+	 * delegate root padding to their children.
+	 *
+	 * @param array $block The block to check.
+	 * @return bool True if the block defines horizontal padding.
+	 */
+	private function has_explicit_horizontal_padding( array $block ): bool {
+		$padding = $block['attrs']['style']['spacing']['padding'] ?? array();
+		return isset( $padding['left'] ) || isset( $padding['right'] );
 	}
 
 	/**
