@@ -29,14 +29,16 @@ runs:
         body=$(echo "$response" | sed '$d')
 
         if [ "$http_code" -ne 200 ]; then
-          echo "::error::Linear OAuth token request failed with HTTP $http_code: $body"
+          echo "::debug::Response body: $body"
+          echo "::error::Linear OAuth token request failed with HTTP $http_code"
           exit 1
         fi
 
         token=$(echo "$body" | jq -r '.access_token // empty')
 
         if [ -z "$token" ]; then
-          echo "::error::Linear OAuth response did not contain an access_token: $body"
+          echo "::debug::Response body: $body"
+          echo "::error::Linear OAuth response did not contain an access_token"
           exit 1
         fi
 
