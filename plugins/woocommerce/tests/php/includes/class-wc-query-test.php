@@ -172,10 +172,11 @@ class WC_Query_Test extends \WC_Unit_Test_Case {
 
 		$queried_object = $query->get_queried_object();
 
-		// Assert it's a WP_Post, not WP_Post_Type (critical for Divi and other themes).
+		// Assert it's a WP_Post, not WP_Post_Type.
 		$this->assertInstanceOf( 'WP_Post', $queried_object );
 
-		// Assert essential properties exist (these were missing in the regression).
+		// Assert essential properties exist.
+		// See: https://github.com/woocommerce/woocommerce/pull/63202
 		$this->assertObjectHasProperty( 'ID', $queried_object );
 		$this->assertObjectHasProperty( 'post_content', $queried_object );
 		$this->assertObjectHasProperty( 'post_excerpt', $queried_object );
