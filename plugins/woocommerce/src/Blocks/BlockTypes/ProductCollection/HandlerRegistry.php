@@ -348,9 +348,10 @@ class HandlerRegistry {
 		// These collections handle their main queries via JS/REST, but need
 		// a preview fallback to show recent products in the email editor
 		// when the store has no best-sellers or new arrivals yet.
-		// The build_query callback is a no-op (returns unchanged args).
-		$noop_build_query = function ( $collection_args ) {
-			return $collection_args;
+		// The build_query callback is a no-op that returns an empty array
+		// so merge_queries() has nothing extra to merge.
+		$noop_build_query = function () {
+			return array();
 		};
 
 		$this->register_collection_handlers(

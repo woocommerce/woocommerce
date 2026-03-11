@@ -17,7 +17,7 @@ import {
 import { Spinner } from '@wordpress/components';
 import { store as coreStore } from '@wordpress/core-data';
 import { ProductCollectionAttributes } from '@woocommerce/blocks/product-collection/types';
-import { getSettingWithCoercion, SITE_CURRENCY } from '@woocommerce/settings';
+import { getSettingWithCoercion } from '@woocommerce/settings';
 import { isNumber, ProductResponseItem } from '@woocommerce/types';
 import { ProductDataContextProvider } from '@woocommerce/shared-context';
 import { withProduct } from '@woocommerce/block-hocs';
@@ -32,6 +32,7 @@ import {
 	parseTemplateSlug,
 } from './utils';
 import { getDefaultStockStatuses } from '../product-collection/constants';
+import { usePlaceholderProducts } from './use-placeholder-products';
 
 const DEFAULT_QUERY_CONTEXT_ATTRIBUTES = [ 'collection' ];
 
@@ -45,9 +46,9 @@ const ProductTemplateInnerBlocks = () => {
 
 type ProductTemplateBlockPreviewProps = {
 	blocks: object[];
-	blockContextId: string;
+	blockContextId: string | number;
 	isHidden: boolean;
-	setActiveBlockContextId: ( blockContextId: string ) => void;
+	setActiveBlockContextId: ( blockContextId: string | number ) => void;
 };
 
 const ProductTemplateBlockPreview = ( {
@@ -87,14 +88,14 @@ const ProductTemplateBlockPreview = ( {
 const MemoizedProductTemplateBlockPreview = memo( ProductTemplateBlockPreview );
 
 type ProductContentProps = {
-	attributes: { productId: string };
+	attributes: { productId: string | number };
 	displayTemplate: boolean;
 	blocks: BlockInstance[];
 	blockContext: {
 		postType: string;
-		postId: string;
+		postId: string | number;
 	};
-	setActiveBlockContextId: ( id: string ) => void;
+	setActiveBlockContextId: ( id: string | number ) => void;
 };
 
 const ProductContent = ( {
@@ -234,8 +235,9 @@ const ProductTemplateEdit = (
 	const location = useGetLocation( props.context, props.clientId );
 
 	const [ { page } ] = queryContext;
-	const [ activeBlockContextId, setActiveBlockContextId ] =
-		useState< string >();
+	const [ activeBlockContextId, setActiveBlockContextId ] = useState<
+		string | number
+	>();
 	const postType = 'product';
 	const loopShopPerPage = getSettingWithCoercion(
 		'loopShopPerPage',
@@ -397,9 +399,18 @@ const ProductTemplateEdit = (
 	let customClassName = '';
 
 	const isPreviewWithNoProducts =
-		__privateProductCollectionPreviewState?.isPreview &&
-		products &&
+		!! __privateProductCollectionPreviewState?.isPreview &&
+		!! products &&
 		! products.length;
+
+	const {
+		blockContexts: placeholderContexts,
+		placeholderProductMap,
+		isReady: placeholdersReady,
+	} = usePlaceholderProducts( {
+		isPreviewWithNoProducts,
+		count: perPage ?? 4,
+	} );
 
 	// Apply layout styles when products are present or when showing preview placeholders.
 	if (
@@ -421,6 +432,10 @@ const ProductTemplateEdit = (
 		),
 	} );
 
+	const ProductContentComponent = isInSingleProductBlock
+		? ProductContentWithProduct
+		: ProductContent;
+
 	if ( ! products ) {
 		return (
 			<p { ...blockProps }>
@@ -430,51 +445,57 @@ const ProductTemplateEdit = (
 	}
 
 	if ( ! products.length ) {
-		if ( __privateProductCollectionPreviewState?.isPreview ) {
-			const count = perPage ?? 4;
+		if (
+			isPreviewWithNoProducts &&
+			placeholdersReady &&
+			placeholderContexts
+		) {
 			return (
 				<ul { ...blockProps }>
-					{ Array.from( { length: count } ).map( ( _, i ) => (
-						<li
-							key={ i }
-							className="wc-block-product wc-block-product-template__placeholder"
-						>
-							<div className="wc-block-product-template__placeholder-image">
-								<svg
-									xmlns="http://www.w3.org/2000/svg"
-									viewBox="0 0 24 24"
-									fill="none"
-									stroke="currentColor"
-									strokeWidth="1.5"
-									className="wc-block-product-template__placeholder-icon"
-								>
-									<rect
-										x="3"
-										y="3"
-										width="18"
-										height="18"
-										rx="2"
-									/>
-									<circle cx="8.5" cy="8.5" r="1.5" />
-									<path d="M21 15l-5-5L5 21" />
-								</svg>
-							</div>
-							<h2 className="wc-block-components-product-title wc-block-product-template__placeholder-title">
-								{ __( 'Product name', 'woocommerce' ) }
-							</h2>
-							<div className="wc-block-product-template__placeholder-price">
-								{ `${ SITE_CURRENCY.prefix }9.99${ SITE_CURRENCY.suffix }` }
-							</div>
-							<div className="wp-block-button wc-block-components-product-button">
-								<span className="wp-block-button__link wp-element-button wc-block-components-product-button__button">
-									{ __( 'Add to cart', 'woocommerce' ) }
-								</span>
-							</div>
-						</li>
-					) ) }
+					{ placeholderContexts.map( ( blockContext ) => {
+						const displayTemplate =
+							blockContext.postId ===
+							( activeBlockContextId ||
+								placeholderContexts[ 0 ]?.postId );
+
+						return (
+							<ProductDataContextProvider
+								key={ blockContext.postId }
+								product={
+									placeholderProductMap.get(
+										blockContext.postId as number
+									) ?? null
+								}
+								isLoading={ false }
+							>
+								{ /* Always use ProductContent for placeholders to avoid
+								   withProduct HOC making failing API calls for negative IDs. */ }
+								<ProductContent
+									attributes={ {
+										productId: blockContext.postId,
+									} }
+									blocks={ blocks }
+									displayTemplate={ displayTemplate }
+									blockContext={ blockContext }
+									setActiveBlockContextId={
+										setActiveBlockContextId
+									}
+								/>
+							</ProductDataContextProvider>
+						);
+					} ) }
 				</ul>
 			);
 		}
+
+		if ( isPreviewWithNoProducts && ! placeholdersReady ) {
+			return (
+				<p { ...blockProps }>
+					<Spinner className="wc-block-product-template__spinner" />
+				</p>
+			);
+		}
+
 		return (
 			<p { ...blockProps }>
 				{ ' ' }
@@ -485,10 +506,6 @@ const ProductTemplateEdit = (
 			</p>
 		);
 	}
-
-	const ProductContentComponent = isInSingleProductBlock
-		? ProductContentWithProduct
-		: ProductContent;
 
 	// To avoid flicker when switching active block contexts, a preview is rendered
 	// for each block context, but the preview for the active block context is hidden.
