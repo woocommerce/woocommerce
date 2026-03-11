@@ -3,6 +3,12 @@
  */
 import { store } from '@wordpress/interactivity';
 import type { ProductResponseItem } from '@woocommerce/types';
+import type { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
+
+/**
+ * Internal dependencies
+ */
+import { findMatchingVariation } from '../../utils/variations/attribute-matching';
 
 /**
  * The state shape for the products store.
@@ -19,6 +25,14 @@ export type ProductsStoreState = {
 	 * These are in Store API format (ProductResponseItem).
 	 */
 	productVariations: Record< number, ProductResponseItem >;
+	/**
+	 * Look up a product by ID, resolving to the matching variation for
+	 * variable products when selectedAttributes are provided.
+	 */
+	getProduct: ( args: {
+		id: number;
+		selectedAttributes?: SelectedAttributes[];
+	} ) => ProductResponseItem | null;
 };
 
 /**
@@ -43,12 +57,47 @@ const universalLock =
  * - products: Record<productId, ProductResponseItem>
  * - productVariations: Record<variationId, ProductResponseItem>
  */
-store< ProductsStore >(
+const { state: productsState } = store< ProductsStore >(
 	'woocommerce/products',
 	{
 		state: {
 			products: {},
 			productVariations: {},
+			getProduct( {
+				id,
+				selectedAttributes,
+			}: {
+				id: number;
+				selectedAttributes?: SelectedAttributes[];
+			} ): ProductResponseItem | null {
+				const product = productsState.products[ id ];
+
+				if ( ! product ) {
+					return null;
+				}
+
+				if (
+					product.type === 'variable' &&
+					selectedAttributes?.length
+				) {
+					const matchedVariation = findMatchingVariation(
+						product,
+						selectedAttributes
+					);
+
+					if ( ! matchedVariation ) {
+						return null;
+					}
+
+					return (
+						productsState.productVariations[
+							matchedVariation.id
+						] ?? null
+					);
+				}
+
+				return product;
+			},
 		},
 	},
 	{ lock: universalLock }
