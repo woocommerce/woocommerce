@@ -9,13 +9,14 @@ import type {
 
 /**
  * Normalize attribute name by stripping the 'attribute_' or 'attribute_pa_' prefix
- * that WooCommerce adds for variation attributes.
+ * that WooCommerce adds for variation attributes, and replacing hyphens with spaces
+ * so that slugs (e.g., "some-name") match labels (e.g., "some name").
  *
  * @param name The attribute name (e.g., 'attribute_color' or 'attribute_pa_color').
  * @return The normalized name (e.g., 'color').
  */
 export const normalizeAttributeName = ( name: string ): string => {
-	return name.replace( /^attribute_(pa_)?/, '' );
+	return name.replace( /^attribute_(pa_)?/, '' ).replace( /-/g, ' ' );
 };
 
 /**
@@ -56,7 +57,8 @@ export const getVariationAttributeValue = (
 	const normalizedName =
 		normalizeAttributeName( attributeName ).toLowerCase();
 	const attr = variation.attributes.find(
-		( a ) => a.name.toLowerCase() === normalizedName
+		( a ) =>
+			normalizeAttributeName( a.name ).toLowerCase() === normalizedName
 	);
 	return attr?.value;
 };
@@ -82,12 +84,14 @@ export const findMatchingVariation = (
 	const matchedVariation = product.variations.find(
 		( variation: ProductResponseVariationsItem ) => {
 			return variation.attributes.every( ( attr ) => {
-				const attrNameLower = attr.name.toLowerCase();
+				const attrNameNormalized = normalizeAttributeName(
+					attr.name
+				).toLowerCase();
 				const selectedAttr = selectedAttributes.find(
 					( selected ) =>
 						normalizeAttributeName(
 							selected.attribute
-						).toLowerCase() === attrNameLower
+						).toLowerCase() === attrNameNormalized
 				);
 
 				// If variation attribute is null, it accepts "Any" value.
