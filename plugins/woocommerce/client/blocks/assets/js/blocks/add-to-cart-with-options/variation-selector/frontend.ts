@@ -9,7 +9,7 @@ import {
 } from '@wordpress/interactivity';
 import { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
 import type { ChangeEvent } from 'react';
-import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
+import type { ProductContextStore } from '@woocommerce/stores/woocommerce/product-context';
 import '@woocommerce/stores/woocommerce/products';
 import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 import type { ProductResponseItem } from '@woocommerce/types';
@@ -17,7 +17,6 @@ import type { ProductResponseItem } from '@woocommerce/types';
 /**
  * Internal dependencies
  */
-import { getProductData } from '../frontend';
 import type {
 	AddToCartWithOptionsStore,
 	Context as AddToCartWithOptionsStoreContext,
@@ -51,8 +50,8 @@ setStyles();
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-const { state: productDataState } = store< ProductDataStore >(
-	'woocommerce/product-data',
+const { state: productContextState } = store< ProductContextStore >(
+	'woocommerce/product-context',
 	{},
 	{ lock: universalLock }
 );
@@ -101,7 +100,7 @@ const isAttributeValueValid = ( {
 		? selectedAttributes.length - 1
 		: selectedAttributes.length;
 
-	const product = productsState.products[ productDataState.productId ];
+	const { product } = productContextState;
 
 	if ( ! product?.variations?.length ) {
 		return false;
@@ -340,8 +339,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					return;
 				}
 
-				const product =
-					productsState.products[ productDataState.productId ];
+				const { product } = productContextState;
 				if ( ! product ) {
 					return;
 				}
@@ -408,8 +406,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				} );
 			},
 			setSelectedVariationId: () => {
-				const product =
-					productsState.products[ productDataState.productId ];
+				const { product } = productContextState;
 
 				if ( ! product?.variations?.length ) {
 					return;
@@ -421,21 +418,19 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					selectedAttributes
 				);
 
-				const { actions: productDataActions } =
-					store< ProductDataStore >(
-						'woocommerce/product-data',
-						{},
-						{ lock: universalLock }
-					);
-				productDataActions.setVariationId(
-					matchedVariation?.id ?? null
-				);
+				if ( ! matchedVariation ) {
+					return;
+				}
+
+				const productContext = getContext< {
+					variationId?: number | null;
+				} >( 'woocommerce/product-context' );
+				productContext.variationId = matchedVariation.id;
 			},
 			validateVariation() {
 				actions.clearErrors( 'variable-product' );
 
-				const product =
-					productsState.products[ productDataState.productId ];
+				const { product } = productContextState;
 
 				if ( ! product?.variations?.length ) {
 					return;
@@ -466,8 +461,6 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 
 				if ( ! variationData ) {
 					// Variation data not loaded - this is a data consistency issue.
-					// Return early; getProductData already returns null for this case,
-					// which prevents add-to-cart from proceeding.
 					return;
 				}
 
@@ -493,34 +486,32 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					return;
 				}
 
-				const { selectedAttributes } = getContext< Context >();
+				const { selectedVariation: variation } = productContextState;
 
-				const productObject = getProductData(
-					productDataState.productId,
-					selectedAttributes
-				);
+				if ( ! variation ) {
+					return;
+				}
 
-				if ( productObject ) {
-					const { quantity } = getContext< Context >();
-					const currentValue = quantity[ productObject.id ];
-					const { min, max } = productObject;
+				const { add_to_cart: addToCart } = variation;
+				const min = addToCart?.minimum ?? 1;
+				const maximum = addToCart?.maximum ?? 0;
+				const max = maximum > 0 ? maximum : Number.MAX_SAFE_INTEGER;
 
-					let newValue = currentValue;
-					if ( currentValue < min ) {
-						newValue = min;
-					} else if ( currentValue > max ) {
-						newValue = max;
-					}
+				const { quantity } = getContext< Context >();
+				const currentValue = quantity[ variation.id ];
 
-					if (
-						newValue !== ref.valueAsNumber ||
-						newValue !== currentValue
-					) {
-						actions.setQuantity(
-							productDataState.productId,
-							newValue
-						);
-					}
+				let newValue = currentValue;
+				if ( currentValue < min ) {
+					newValue = min;
+				} else if ( currentValue > max ) {
+					newValue = max;
+				}
+
+				if (
+					newValue !== ref.valueAsNumber ||
+					newValue !== currentValue
+				) {
+					actions.setQuantity( variation.id, newValue );
 				}
 			},
 		},
