@@ -1,0 +1,47 @@
+name: 'Linear: Get OAuth Token'
+description: 'Fetches a short-lived OAuth 2.0 token from Linear using client credentials.'
+inputs:
+  client-id:
+    description: 'Linear OAuth app client ID'
+    required: true
+  client-secret:
+    description: 'Linear OAuth app client secret'
+    required: true
+outputs:
+  token:
+    description: 'Linear OAuth access token'
+    value: ${{ steps.get-token.outputs.token }}
+runs:
+  using: 'composite'
+  steps:
+    - name: Fetch Linear OAuth token
+      id: get-token
+      shell: bash
+      run: |
+        response=$(curl -s -w "\n%{http_code}" -X POST https://api.linear.app/oauth/token \
+          -H "Content-Type: application/x-www-form-urlencoded" \
+          -d "grant_type=client_credentials" \
+          -d "client_id=${{ inputs.client-id }}" \
+          -d "client_secret=${{ inputs.client-secret }}" \
+          -d "scope=read,write")
+
+        http_code=$(echo "$response" | tail -n1)
+        body=$(echo "$response" | sed '$d')
+
+        if [ "$http_code" -ne 200 ]; then
+          echo "::debug::Response body: $body"
+          echo "::error::Linear OAuth token request failed with HTTP $http_code"
+          exit 1
+        fi
+
+        token=$(echo "$body" | jq -r '.access_token // empty')
+
+        if [ -z "$token" ]; then
+          echo "::debug::Response body: $body"
+          echo "::error::Linear OAuth response did not contain an access_token"
+          exit 1
+        fi
+
+        echo "::add-mask::$token"
+        echo "token=$token" >> "$GITHUB_OUTPUT"
+        echo "Successfully obtained Linear OAuth token"
