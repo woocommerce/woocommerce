@@ -6,7 +6,7 @@ sidebar_label: REST API
 
 # WooCommerce REST API
 
-The [REST API](https://woocommerce.github.io/woocommerce-rest-api-docs/#introduction) is a powerful part of WooCommerce which lets you read and write various parts of WooCommerce data such as orders, products, coupons, customers, and shipping zones.
+The [REST API](./introduction.mdx) is a powerful part of WooCommerce which lets you read and write various parts of WooCommerce data such as orders, products, coupons, customers, and shipping zones.
 
 ## Requirements
 
@@ -16,7 +16,7 @@ In order to access the REST API using the standard endpoint URI structure (e.g. 
 
 ## API reference
 
-[WooCommerce REST API Docs](https://woocommerce.github.io/woocommerce-rest-api-docs/) provides technical details and code samples for each API endpoint.
+[WooCommerce REST API Docs](./resources-endpoints/) provides technical details and code samples for each API endpoint.
 
 ## Authentication
 
@@ -24,7 +24,7 @@ Authentication is usually the part most developers get stuck on, so this guide w
 
 We'll use both [Postman](https://www.getpostman.com/) and [Insomnia](https://insomnia.rest/) clients in these examples. Both are free and will help you visualise what the API offers.
 
-Before proceeding, please read the [REST API docs on authentication which covers the important parts concerning API Keys and Auth](https://woocommerce.github.io/woocommerce-rest-api-docs/#authentication). We're only covering connecting over HTTPS here since it's the simplest and most secure method. You should avoid HTTP if possible.
+Before proceeding, please read the [REST API docs on authentication which covers the important parts concerning API Keys and Auth](./authentication.mdx). We're only covering connecting over HTTPS here since it's the simplest and most secure method. You should avoid HTTP if possible.
 
 ## Generate keys
 
