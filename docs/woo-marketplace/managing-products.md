@@ -14,7 +14,7 @@ Most of the work for managing products can be done via the [vendor dashboard](ht
 - From your vendor dashboard, navigate to _Products > All Products_.
 - Select the product you want to work on.
 
-From there, you can see information about usage, upload a new version, or edit the product page. [Review our product page guidelines](https://woocommerce.com/document/marketing-product-pages-writing/).
+From there, you can see information about usage, upload a new version, or edit the product page. [Review our product page guidelines](/docs/woo-marketplace/product-page-content-and-assets/).
 
 ![Product management interface in vendor dashboard](./_media/manage-products-overview.png)
 
@@ -22,11 +22,11 @@ From there, you can see information about usage, upload a new version, or edit t
 
 To maintain a high-quality and competitive Marketplace, we encourage all vendors to regularly update their products. Consistent updates ensure compatibility with the latest versions of WooCommerce and WordPress, improve security and performance, and deliver ongoing value to customers.
 
-[Review our product update guidelines and best practices](https://woocommerce.com/document/product-update-guidelines/).
+[Review our product update guidelines and best practices](/docs/woo-marketplace/product-update-guidelines/).
 
 ### Adding or editing documentation
 
-To review, edit, or add documentation, navigate to _Documentation_ in your vendor dashboard. [Review our guidelines for creating effective documentation](https://woocommerce.com/document/writing-documentation/).
+To review, edit, or add documentation, navigate to _Documentation_ in your vendor dashboard. [Review our guidelines for creating effective documentation](/docs/extensions/best-practices-extensions/support-and-documentation).
 
 ![Documentation management interface](./_media/manage-products-documentation.png)
 

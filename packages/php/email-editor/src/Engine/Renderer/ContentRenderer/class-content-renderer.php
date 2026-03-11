@@ -173,8 +173,12 @@ class Content_Renderer {
 	public function render_without_css_inline( WP_Post $post, WP_Block_Template $template ): array {
 		$this->set_template_globals( $post, $template );
 		$this->initialize();
-		$rendered_html = get_the_block_template_html();
-		$this->reset();
+		try {
+			do_action( 'woocommerce_email_editor_render_start' );
+			$rendered_html = get_the_block_template_html();
+		} finally {
+			$this->reset();
+		}
 
 		return array(
 			'html'   => $rendered_html,
