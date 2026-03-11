@@ -1,6 +1,7 @@
 ---
 post_title: 'Getting Started with WooCommerce APIs'
 sidebar_label: 'Getting started'
+sidebar_position: 0
 ---
 
 # Getting Started with WooCommerce APIs
