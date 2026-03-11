@@ -28,7 +28,7 @@ const ProductImage = ( {
 				src: image.thumbnail,
 				alt:
 					decodeEntities( image.alt ) ||
-					fallbackAlt ||
+					decodeEntities( fallbackAlt ) ||
 					'Product Image',
 		  }
 		: {
