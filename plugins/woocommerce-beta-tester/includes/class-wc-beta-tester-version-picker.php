@@ -173,69 +173,69 @@ class WC_Beta_Tester_Version_Picker {
 
 		?>
 		<div class="wrap">
-			<div class="wcbt-content-wrap">
-				<h1><?php esc_html_e( 'Available WooCommerce Releases', 'woocommerce-beta-tester' ); ?></h1>
-				<form name="wcbt-select-version" class="wcbt-select-version-form" action="<?php echo esc_attr( admin_url( '/tools.php' ) ); ?>">
-					<div class="wcbt-submit-wrap">
-						<a href="#wcbt-modal-version-switch-confirm" class="button-primary" id="wcbt-modal-version-switch-confirm"><?php esc_html_e( 'Switch version', 'woocommerce-beta-tester' ); ?></a>
-					</div>
-					<div class="wcbt-versions-wrap">
-						<?php echo $this->get_versions_html( $channel ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-					</div>
-					<div class="wcbt-submit-wrap">
-						<a href="#wcbt-modal-version-switch-confirm" class="button-primary" id="wcbt-modal-version-switch-confirm"><?php esc_html_e( 'Switch version', 'woocommerce-beta-tester' ); ?></a>
-					</div>
-					<?php wp_nonce_field( 'wcbt_switch_version_nonce' ); ?>
-					<input type="hidden" name="noheader" value="1">
-					<input type="hidden" name="page" value="wc-beta-tester-version-picker">
-
-					<script type="text/template" id="tmpl-wcbt-version-switch-confirm">
-						<div class="wc-backbone-modal wc-backbone-modal-beta-tester-version-info">
-							<div class="wc-backbone-modal-content">
-								<section class="wc-backbone-modal-main" role="main">
-									<header class="wc-backbone-modal-header">
-										<h1>
-											<?php
-											esc_html_e( 'Are you sure you want to switch the version of WooCommerce plugin?', 'woocommerce-beta-tester' );
-											?>
-										</h1>
-										<button class="modal-close modal-close-link dashicons dashicons-no-alt">
-											<span class="screen-reader-text"><?php esc_html_e( 'Close modal panel', 'woocommerce-beta-tester' ); ?></span>
-										</button>
-									</header>
-									<article>
-
-										<table class="wcbt-widefat widefat">
-											<tbody>
-											<tr class="alternate">
-												<td class="row-title">
-													<label for="tablecell"><?php esc_html_e( 'Installed Version:', 'woocommerce-beta-tester' ); ?></label>
-												</td>
-												<td><span class="wcbt-installed-version"><?php echo esc_html( $this->current_version ); ?></span></td>
-											</tr>
-											<tr>
-												<td class="row-title">
-													<label for="tablecell"><?php esc_html_e( 'New Version:', 'woocommerce-beta-tester' ); ?></label>
-												</td>
-												<td><span class="wcbt-new-version">{{ data.new_version }}</span></td>
-											</tr>
-											</tbody>
-										</table>
-
-										<p class="wcbt-notice"><?php esc_html_e( 'Notice: We strongly recommend you perform the test on a staging site and create a complete backup of your WordPress files and database prior to performing a version switch. We are not responsible for any misuse, deletions, white screens, fatal errors, or any other issue arising from using this plugin.', 'woocommerce-beta-tester' ); ?></p>
-									</article>
-									<footer>
-										<input type="submit" value="<?php esc_attr_e( 'Switch version', 'woocommerce-beta-tester' ); ?>" class="button-primary wcbt-go" id="wcbt-submit-version-switch"/>&nbsp;
-										<a href="#" class="modal-close modal-close-link"><?php esc_attr_e( 'Cancel', 'woocommerce-beta-tester' ); ?></a>
-									</footer>
-								</section>
+			<h1><?php esc_html_e( 'Available WooCommerce Releases', 'woocommerce-beta-tester' ); ?></h1>
+			<form name="wcbt-select-version" class="wcbt-select-version-form" action="<?php echo esc_attr( admin_url( '/tools.php' ) ); ?>">
+				<div id="poststuff">
+					<div id="post-body" class="metabox-holder columns-2">
+						<div id="post-body-content">
+							<div class="wcbt-versions-wrap">
+								<?php echo $this->get_versions_html( $channel ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 							</div>
 						</div>
-						<div class="wc-backbone-modal-backdrop modal-close"></div>
-					</script>
+						<div id="postbox-container-1" class="postbox-container">
+							<div class="wcbt-sidebar-submit">
+								<a href="#wcbt-modal-version-switch-confirm" class="button-primary button-hero" id="wcbt-modal-version-switch-confirm"><?php esc_html_e( 'Switch version', 'woocommerce-beta-tester' ); ?></a>
+							</div>
+						</div>
+					</div>
+				</div>
+				<?php wp_nonce_field( 'wcbt_switch_version_nonce' ); ?>
+				<input type="hidden" name="noheader" value="1">
+				<input type="hidden" name="page" value="wc-beta-tester-version-picker">
 
-				</form>
-			</div>
+				<script type="text/template" id="tmpl-wcbt-version-switch-confirm">
+					<div class="wc-backbone-modal wc-backbone-modal-beta-tester-version-info">
+						<div class="wc-backbone-modal-content">
+							<section class="wc-backbone-modal-main" role="main">
+								<header class="wc-backbone-modal-header">
+									<h1>
+										<?php
+										esc_html_e( 'Are you sure you want to switch the version of WooCommerce plugin?', 'woocommerce-beta-tester' );
+										?>
+									</h1>
+									<button class="modal-close modal-close-link dashicons dashicons-no-alt">
+										<span class="screen-reader-text"><?php esc_html_e( 'Close modal panel', 'woocommerce-beta-tester' ); ?></span>
+									</button>
+								</header>
+								<article>
+									<table class="wcbt-widefat widefat">
+										<tbody>
+										<tr class="alternate">
+											<td class="row-title">
+												<label for="tablecell"><?php esc_html_e( 'Installed Version:', 'woocommerce-beta-tester' ); ?></label>
+											</td>
+											<td><span class="wcbt-installed-version"><?php echo esc_html( $this->current_version ); ?></span></td>
+										</tr>
+										<tr>
+											<td class="row-title">
+												<label for="tablecell"><?php esc_html_e( 'New Version:', 'woocommerce-beta-tester' ); ?></label>
+											</td>
+											<td><span class="wcbt-new-version">{{ data.new_version }}</span></td>
+										</tr>
+										</tbody>
+									</table>
+									<p class="wcbt-notice"><?php esc_html_e( 'Notice: We strongly recommend you perform the test on a staging site and create a complete backup of your WordPress files and database prior to performing a version switch. We are not responsible for any misuse, deletions, white screens, fatal errors, or any other issue arising from using this plugin.', 'woocommerce-beta-tester' ); ?></p>
+								</article>
+								<footer>
+									<input type="submit" value="<?php esc_attr_e( 'Switch version', 'woocommerce-beta-tester' ); ?>" class="button-primary wcbt-go" id="wcbt-submit-version-switch"/>&nbsp;
+									<a href="#" class="modal-close modal-close-link"><?php esc_attr_e( 'Cancel', 'woocommerce-beta-tester' ); ?></a>
+								</footer>
+							</section>
+						</div>
+					</div>
+					<div class="wc-backbone-modal-backdrop modal-close"></div>
+				</script>
+			</form>
 		</div>
 		<?php
 	}
