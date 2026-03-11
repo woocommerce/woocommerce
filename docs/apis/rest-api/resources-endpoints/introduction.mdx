@@ -6,7 +6,7 @@ sidebar_label: 'Introduction'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-# Introduction #
+# Introduction
 
 WooCommerce (WC) 2.6+ is fully integrated with the WordPress [REST](http://en.wikipedia.org/wiki/Representational_State_Transfer) API. This allows WC data to be created, read, updated, and deleted using requests in JSON format and using WordPress REST API Authentication methods and standard HTTP verbs which are understood by most HTTP clients.
 
@@ -28,7 +28,7 @@ Prior to 2.6, WooCommerce had a REST API separate from WordPress which is now kn
 | `Legacy v2` | 2.2.x or later | 4.1 or later | [Legacy v2 docs](v2.html) |
 | `Legacy v1` | 2.1.x or later | 4.1 or later | [Legacy v1 docs](v1.html) |
 
-## Requirements ##
+## Requirements
 
 To use the latest version of the REST API you must be using:
 
@@ -43,7 +43,7 @@ If you use ModSecurity and see `501 Method Not Implemented` errors, see [this is
 	Please note that you are <strong>not</strong> required to install the <a href="https://wordpress.org/plugins/rest-api/" target="_blank">WP REST API (WP API)</a> plugin.
 </aside>
 
-## Request/Response Format ##
+## Request/Response Format
 
 The default response format is JSON. Requests with a message-body use plain JSON to set or update resource attributes. Successful requests will return a `200 OK` HTTP status.
 
@@ -55,7 +55,7 @@ Some general information about responses:
 * Other amounts, such as item counts, are returned as integers.
 * Blank fields are generally included as `null` or emtpy string instead of being omitted.
 
-### JSONP Support ###
+### JSONP Support
 
 The WP REST API supports JSONP by default. JSONP responses use the `application/javascript` content-type. You can specify the callback using the `?_jsonp` parameter for `GET` requests to have the response wrapped in a JSON function:
 
@@ -114,7 +114,7 @@ woocommerce.get("products/tags/34", _jsonp: "tagDetails").parsed_response
 /**/tagDetails({"id":34,"name":"Leather Shoes","slug":"leather-shoes","description":"","count":0,"_links":{"self":[{"href":"https://example.com/wp-json/wc/v3/products/tags/34"}],"collection":[{"href":"https://example.com/wp-json/wc/v3/products/tags"}]}})%
 ```
 
-## Errors ##
+## Errors
 
 Occasionally you might encounter errors when accessing the REST API. There are four possible types:
 
@@ -151,11 +151,11 @@ Occasionally you might encounter errors when accessing the REST API. There are f
 
 Errors return both an appropriate HTTP status code and response object which contains a `code`, `message` and `data` attribute.
 
-## Parameters ##
+## Parameters
 
 Almost all endpoints accept optional parameters which can be passed as a HTTP query string parameter, e.g. `GET /orders?status=completed`. All parameters are documented along each endpoint.
 
-## Pagination ##
+## Pagination
 
 Requests that return multiple items will be paginated to 10 items by default. This default can be changed by the site administrator by changing the `posts_per_page` option. Alternatively the items per page can be specified with the `?per_page` parameter:
 
@@ -173,7 +173,7 @@ Page number is 1-based and omitting the `?page` parameter will return the first 
 
 The total number of resources and pages are always included in the `X-WP-Total` and `X-WP-TotalPages` HTTP headers.
 
-### Link Header ###
+### Link Header
 
 Pagination info is included in the [Link Header](http://tools.ietf.org/html/rfc5988). It's recommended that you follow these values instead of building your own URLs where possible.
 
@@ -191,9 +191,9 @@ The possible `rel` values are:
 | `first` | Shows the URL of the first page of results.              |
 | `prev`  | Shows the URL of the immediate previous page of results. |
 
-## Libraries and Tools ##
+## Libraries and Tools
 
-### Official libraries ###
+### Official libraries
 
 - [JavaScript](https://www.npmjs.com/package/@woocommerce/woocommerce-rest-api) Library
 - [PHP](https://packagist.org/packages/automattic/woocommerce) Library
@@ -291,7 +291,7 @@ woocommerce = WooCommerce::API.new(
 	Use the tabs in the top-right corner of this page to see how to install and use each library.
 </aside>
 
-### Third party libraries ###
+### Third party libraries
 
 - [Java](https://github.com/icoderman/wc-api-java) Library
 - [.NET](https://github.com/XiaoFaye/WooCommerce.NET) Library
@@ -301,7 +301,7 @@ woocommerce = WooCommerce::API.new(
 	Note that we don't offer support for third party libraries, so if you have questions about how use any of this libraries you should contact the respective authors.
 </aside>
 
-### Tools ###
+### Tools
 
 Some useful tools you can use to access the API include:
 
@@ -310,6 +310,6 @@ Some useful tools you can use to access the API include:
 - [RequestBin](https://requestbin.com) - Allows you test webhooks.
 - [Hookbin](https://hookbin.com/) - Another tool to test webhooks.
 
-## Learn more ##
+## Learn more
 
 Learn more about the REST API checking the <a href="https://developer.wordpress.org/rest-api/">official WordPress REST API documentation</a>.

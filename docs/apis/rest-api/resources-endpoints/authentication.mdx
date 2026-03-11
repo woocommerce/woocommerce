@@ -6,15 +6,15 @@ sidebar_label: 'Authentication'
 import Tabs from '@theme/Tabs';
 import TabItem from '@theme/TabItem';
 
-# Authentication #
+# Authentication
 
 WooCommerce includes two ways to authenticate with the WP REST API. It is also possible to authenticate using any [WP REST API authentication](http://v3.wp-api.org/guide/authentication/) plugin or method.
 
-## REST API keys ##
+## REST API keys
 
 Pre-generated keys can be used to authenticate use of the REST API endpoints. New keys can be generated either through the WordPress admin interface or they can be auto-generated through an endpoint.
 
-### Generating API keys in the WordPress admin interface ###
+### Generating API keys in the WordPress admin interface
 
 To create or manage keys for a specific WordPress user, go to WooCommerce > Settings > Advanced > REST API.
 
@@ -34,7 +34,7 @@ Now that keys have been generated, you should see two new keys, a QRCode, and a 
 
 If the WordPress user associated with an API key is deleted, the API key will cease to function. API keys are not transferred to other users.
 
-### Auto generating API keys using our Application Authentication Endpoint ###
+### Auto generating API keys using our Application Authentication Endpoint
 
 This endpoint can be used by any APP to *allow users to generate API keys* for your APP. This makes integration with WooCommerce API easier because the user only needs to grant access to your APP via a URL. After being redirected back to your APP, the API keys will be sent back in a separate POST request.
 
@@ -46,7 +46,7 @@ The following image illustrates how this works:
 	This endpoint works exclusively for users to generate API keys and facilitate integration between the WooCommerce REST API and an application. In no way is this endpoint intended to be used as login method for customers.
 </aside>
 
-#### URL parameters ####
+#### URL parameters
 
 |   Parameter    |  Type  |                                                                                  Description                                                                                  |
 |----------------|--------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -56,7 +56,7 @@ The following image illustrates how this works:
 | `return_url`   | string | URL the user will be redirected to after authentication <i class="label label-info">mandatory</i>                                                                             |
 | `callback_url` | string | URL that will receive the generated API key. Note: this URL should be over **HTTPS** <i class="label label-info">mandatory</i>                                                |
 
-#### Creating an authentication endpoint URL ####
+#### Creating an authentication endpoint URL
 
 You must use the `/wc-auth/v1/authorize` endpoint and pass the above parameters as a query string.
 
@@ -175,7 +175,7 @@ Example of the screen that the user will see:
 
 ![Authentication Endpoint example](images/woocommerce-auth-endpoint-example.png)
 
-#### Notes ####
+#### Notes
 
 - While redirecting the user using `return_url`, you are also sent `success` and `user_id` parameters as query strings.
 - `success` sends `0` if the user denied, or `1` if authenticated successfully.
@@ -183,7 +183,7 @@ Example of the screen that the user will see:
 - The auth endpoint will send the API Keys in JSON format to the `callback_url`, so it's important to remember that some languages such as PHP will not display it inside the `$_POST` global variable, in PHP you can access it using `$HTTP_RAW_POST_DATA` (for old PHP versions) or `file_get_contents('php://input');`.
 - The URL generated must have all query string values encoded.
 
-## Authentication over HTTPS ##
+## Authentication over HTTPS
 
 You may use [HTTP Basic Auth](http://en.wikipedia.org/wiki/Basic_access_authentication) by providing the REST API Consumer Key as the username and the REST API Consumer Secret as the password.
 
@@ -354,13 +354,13 @@ woocommerce = WooCommerce::API.new(
   </TabItem>
 </Tabs>
 
-## Authentication over HTTP ##
+## Authentication over HTTP
 
 You must use [OAuth 1.0a "one-legged" authentication](http://tools.ietf.org/html/rfc5849) to ensure REST API credentials cannot be intercepted by an attacker. Typically you will use any standard OAuth 1.0a library in the language of your choice to handle the authentication, or generate the necessary parameters by following the following instructions.
 
-### Creating a signature ###
+### Creating a signature
 
-#### Collect the request method and URL ####
+#### Collect the request method and URL
 
 First you need to determine the HTTP method you will be using for the request, and the URL of the request.
 
@@ -368,7 +368,7 @@ The **HTTP method** will be `GET` in our case.
 
 The **Request URL** will be the endpoint you are posting to, e.g. `http://www.example.com/wp-json/wc/v3/orders`.
 
-#### Collect parameters ####
+#### Collect parameters
 
 Collect and normalize your parameters. This includes all `oauth_*` parameters except for the `oauth_signature` itself.
 
@@ -392,7 +392,7 @@ When sorting parameters in PHP for example, you would use `uksort( $params, 'str
 oauth_consumer_key=abc123&oauth_signature_method=HMAC-SHA1
 ```
 
-#### Create the signature base string ####
+#### Create the signature base string
 
 The above values collected so far must be joined to make a single string, from which the signature will be generated. This is called the signature base string in the OAuth specification.
 
@@ -410,7 +410,7 @@ To encode the HTTP method, request URL, and parameter string into a single strin
 GET&http%3A%2F%2Fwww.example.com%2Fwp-json%2Fwc%2Fv3%2Forders&oauth_consumer_key%3Dabc123%26oauth_signature_method%3DHMAC-SHA1
 ```
 
-#### Generate the signature ####
+#### Generate the signature
 
 Generate the signature using the *signature base string* and your consumer secret key with a `&` character with the HMAC-SHA1 hashing algorithm.
 
@@ -420,7 +420,7 @@ HMAC-SHA1 or HMAC-SHA256 are the only accepted hash algorithms.
 
 If you are having trouble generating a correct signature, you'll want to review the string you are signing for encoding errors. The [authentication source](https://github.com/woocommerce/woocommerce/blob/master/includes/class-wc-rest-authentication.php#L185) can also be helpful in understanding how to properly generate the signature.
 
-### OAuth tips ###
+### OAuth tips
 
 * The OAuth parameters may be added as query string parameters or included in the Authorization header.
 * Note there is no reliable cross-platform way to get the raw request headers in WordPress, so query string should be more reliable in some cases.
