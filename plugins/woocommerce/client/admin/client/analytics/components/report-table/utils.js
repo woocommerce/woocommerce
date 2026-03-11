@@ -4,29 +4,37 @@
 import { first } from 'lodash';
 
 /**
- * Collects all `param` keys declared across a filters config array, including
- * any sub-params defined in nested filter settings.
+ * Recursively collects all `param` keys from a filters/subFilters config tree.
  *
- * @param {Array} filters Report filters config (from props.filters).
- * @return {Set<string>} Set of URL query param keys owned by the filters.
+ * @param {Array}       configs Array of filter config objects to traverse.
+ * @param {Set<string>} keys    Set to collect param keys into.
  */
-function getFilterParamKeys( filters = [] ) {
-	const keys = new Set();
-	for ( const config of Array.isArray( filters ) ? filters : [] ) {
+function collectFilterParamKeys( configs, keys ) {
+	for ( const config of Array.isArray( configs ) ? configs : [] ) {
 		if ( ! config || typeof config !== 'object' ) {
 			continue;
 		}
 		if ( config.param ) {
 			keys.add( config.param );
 		}
-		for ( const filter of Array.isArray( config.filters )
-			? config.filters
-			: [] ) {
-			if ( filter && filter.settings && filter.settings.param ) {
-				keys.add( filter.settings.param );
-			}
+		if ( config.settings && config.settings.param ) {
+			keys.add( config.settings.param );
 		}
+		collectFilterParamKeys( config.filters, keys );
+		collectFilterParamKeys( config.subFilters, keys );
 	}
+}
+
+/**
+ * Collects all `param` keys declared across a filters config array, including
+ * any sub-params defined in nested filter and subFilter settings.
+ *
+ * @param {Array} filters Report filters config (from props.filters).
+ * @return {Set<string>} Set of URL query param keys owned by the filters.
+ */
+function getFilterParamKeys( filters = [] ) {
+	const keys = new Set();
+	collectFilterParamKeys( filters, keys );
 	return keys;
 }
 

@@ -107,9 +107,43 @@ describe( 'getExportQuery', () => {
 		expect( result.status ).toBe( 'completed' );
 	} );
 
+	it( 'forwards params from subFilters settings', () => {
+		const reportQuery = { orderby: 'date' };
+		const urlQuery = { products: '42' };
+		const filters = [
+			{
+				param: 'filter',
+				filters: [
+					{
+						value: 'select_product',
+						subFilters: [
+							{
+								settings: { param: 'products' },
+							},
+						],
+					},
+				],
+			},
+		];
+
+		const result = getExportQuery( reportQuery, urlQuery, filters );
+
+		expect( result.products ).toBe( '42' );
+	} );
+
 	it( 'does not forward empty string urlQuery values', () => {
 		const reportQuery = { orderby: 'date' };
 		const urlQuery = { currency: '' };
+		const filters = [ { param: 'currency', filters: [] } ];
+
+		const result = getExportQuery( reportQuery, urlQuery, filters );
+
+		expect( result ).not.toHaveProperty( 'currency' );
+	} );
+
+	it( 'does not forward null urlQuery values', () => {
+		const reportQuery = { orderby: 'date' };
+		const urlQuery = { currency: null };
 		const filters = [ { param: 'currency', filters: [] } ];
 
 		const result = getExportQuery( reportQuery, urlQuery, filters );
