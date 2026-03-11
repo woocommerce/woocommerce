@@ -123,38 +123,20 @@ class WpcomNotificationDispatcherTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should return failure on non-200 response.
+	 * @testdox Should return failure with correct retry_after for non-200 responses.
+	 * @dataProvider non_200_responses_provider
+	 *
+	 * @param int      $status_code    The HTTP status code.
+	 * @param int|null $expected_retry The expected retry_after value.
+	 * @param array    $headers        The response headers.
 	 */
-	public function test_dispatch_returns_failure_on_non_200(): void {
-		$this->mock_response = $this->make_response( 500 );
+	public function test_dispatch_handles_non_200_responses( int $status_code, ?int $expected_retry, array $headers ): void {
+		$this->mock_response = $this->make_response( $status_code, $headers );
 
 		$result = $this->sut->dispatch( $this->create_notification(), $this->create_tokens() );
 
 		$this->assertFalse( $result['success'] );
-	}
-
-	/**
-	 * @testdox Should extract Retry-After header from response.
-	 */
-	public function test_dispatch_extracts_retry_after_header(): void {
-		$this->mock_response = $this->make_response( 429, array( 'retry-after' => '60' ) );
-
-		$result = $this->sut->dispatch( $this->create_notification(), $this->create_tokens() );
-
-		$this->assertFalse( $result['success'] );
-		$this->assertSame( 60, $result['retry_after'] );
-	}
-
-	/**
-	 * @testdox Should return null retry_after when header is missing.
-	 */
-	public function test_dispatch_returns_null_retry_after_when_missing(): void {
-		$this->mock_response = $this->make_response( 503 );
-
-		$result = $this->sut->dispatch( $this->create_notification(), $this->create_tokens() );
-
-		$this->assertFalse( $result['success'] );
-		$this->assertNull( $result['retry_after'] );
+		$this->assertSame( $expected_retry, $result['retry_after'] );
 	}
 
 	/**
@@ -185,9 +167,9 @@ class WpcomNotificationDispatcherTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should include notification payload fields at the top level of the request body.
+	 * @testdox Should fire request to the send endpoint with payload and formatted tokens in the body.
 	 */
-	public function test_dispatch_includes_payload_fields_at_top_level(): void {
+	public function test_dispatch_sends_request_with_payload_and_tokens(): void {
 		$notification = $this->create_notification(
 			array(
 				'type'        => 'store_order',
@@ -196,20 +178,6 @@ class WpcomNotificationDispatcherTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->sut->dispatch( $notification, $this->create_tokens() );
-
-		$body = json_decode( $this->captured_request['body'], true );
-
-		$this->assertArrayNotHasKey( 'payload', $body );
-		$this->assertSame( 'store_order', $body['type'] );
-		$this->assertSame( array( 'format' => 'New Order' ), $body['title'] );
-		$this->assertSame( 1, $body['resource_id'] );
-	}
-
-	/**
-	 * @testdox Should include formatted tokens alongside payload fields in the request body.
-	 */
-	public function test_dispatch_includes_tokens_in_request_body(): void {
 		$tokens = array(
 			new PushToken(
 				array(
@@ -233,12 +201,21 @@ class WpcomNotificationDispatcherTest extends WC_Unit_Test_Case {
 			),
 		);
 
-		$this->sut->dispatch( $this->create_notification(), $tokens );
+		$this->sut->dispatch( $notification, $tokens );
+
+		$this->assertStringContainsString(
+			WpcomNotificationDispatcher::SEND_ENDPOINT,
+			$this->captured_url
+		);
 
 		$body = json_decode( $this->captured_request['body'], true );
 
-		$this->assertCount( 2, $body['tokens'] );
+		$this->assertArrayNotHasKey( 'payload', $body );
+		$this->assertSame( 'store_order', $body['type'] );
+		$this->assertSame( array( 'format' => 'New Order' ), $body['title'] );
+		$this->assertSame( 1, $body['resource_id'] );
 
+		$this->assertCount( 2, $body['tokens'] );
 		$this->assertSame(
 			array(
 				'user_id'       => 1,
@@ -248,7 +225,6 @@ class WpcomNotificationDispatcherTest extends WC_Unit_Test_Case {
 			),
 			$body['tokens'][0]
 		);
-
 		$this->assertSame(
 			array(
 				'user_id'       => 2,
@@ -261,24 +237,25 @@ class WpcomNotificationDispatcherTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should include the send endpoint in the request URL.
-	 */
-	public function test_dispatch_fires_request_to_send_endpoint(): void {
-		$this->sut->dispatch( $this->create_notification(), $this->create_tokens() );
-
-		$this->assertStringContainsString(
-			WpcomNotificationDispatcher::SEND_ENDPOINT,
-			$this->captured_url
-		);
-	}
-
-	/**
 	 * Returns fake Jetpack options without a site ID.
 	 *
 	 * @return array
 	 */
 	public function filter_jetpack_options_empty(): array {
 		return array();
+	}
+
+	/**
+	 * Data provider for non-200 response scenarios.
+	 *
+	 * @return array<string, array{int, int|null, array}>
+	 */
+	public function non_200_responses_provider(): array {
+		return array(
+			'500 without retry-after' => array( 500, null, array() ),
+			'429 with retry-after'    => array( 429, 60, array( 'retry-after' => '60' ) ),
+			'503 without retry-after' => array( 503, null, array() ),
+		);
 	}
 
 	/**

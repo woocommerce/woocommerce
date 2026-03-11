@@ -79,9 +79,9 @@ class InternalNotificationDispatcherTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should fire POST to the send endpoint URL.
+	 * @testdox Should fire a non-blocking POST to the send endpoint URL.
 	 */
-	public function test_dispatch_fires_post_to_send_endpoint(): void {
+	public function test_dispatch_fires_non_blocking_post_to_send_endpoint(): void {
 		$notifications = array( $this->create_notification( 'store_order', 1 ) );
 
 		$this->sut->dispatch( $notifications );
@@ -91,16 +91,6 @@ class InternalNotificationDispatcherTest extends WC_Unit_Test_Case {
 			$this->captured_url,
 			'Request URL should contain the send endpoint'
 		);
-	}
-
-	/**
-	 * @testdox Should send a non-blocking request.
-	 */
-	public function test_dispatch_sends_non_blocking_request(): void {
-		$notifications = array( $this->create_notification( 'store_order', 1 ) );
-
-		$this->sut->dispatch( $notifications );
-
 		$this->assertFalse(
 			$this->captured_request['blocking'],
 			'Request should be non-blocking'
@@ -108,9 +98,9 @@ class InternalNotificationDispatcherTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should include a valid JWT in the Authorization header.
+	 * @testdox Should include a valid JWT with correct claims and body hash.
 	 */
-	public function test_dispatch_includes_valid_jwt(): void {
+	public function test_dispatch_includes_valid_jwt_with_correct_claims(): void {
 		$notifications = array( $this->create_notification( 'store_order', 1 ) );
 
 		$this->sut->dispatch( $notifications );
@@ -122,37 +112,12 @@ class InternalNotificationDispatcherTest extends WC_Unit_Test_Case {
 			JsonWebToken::validate( $token, wp_salt( 'auth' ) ),
 			'JWT should be valid when verified with the auth salt'
 		);
-	}
 
-	/**
-	 * @testdox Should include correct claims in the JWT.
-	 */
-	public function test_dispatch_jwt_contains_correct_claims(): void {
-		$notifications = array( $this->create_notification( 'store_order', 1 ) );
-
-		$this->sut->dispatch( $notifications );
-
-		$auth_header = $this->captured_request['headers']['Authorization'];
-		$token       = str_replace( 'Bearer ', '', $auth_header );
-		$parts       = JsonWebToken::get_parts( $token );
+		$parts     = JsonWebToken::get_parts( $token );
+		$body_hash = hash( 'sha256', $this->captured_request['body'] );
 
 		$this->assertSame( get_site_url(), $parts->payload->iss, 'JWT issuer should be the site URL' );
 		$this->assertGreaterThan( time(), (int) $parts->payload->exp, 'JWT should not be expired' );
-	}
-
-	/**
-	 * @testdox Should include a body hash in the JWT claims.
-	 */
-	public function test_dispatch_jwt_contains_body_hash(): void {
-		$notifications = array( $this->create_notification( 'store_order', 1 ) );
-
-		$this->sut->dispatch( $notifications );
-
-		$auth_header = $this->captured_request['headers']['Authorization'];
-		$token       = str_replace( 'Bearer ', '', $auth_header );
-		$parts       = JsonWebToken::get_parts( $token );
-		$body_hash   = hash( 'sha256', $this->captured_request['body'] );
-
 		$this->assertSame(
 			$body_hash,
 			$parts->payload->body_hash,
