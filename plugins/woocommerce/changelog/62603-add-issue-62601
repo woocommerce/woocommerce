@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add embeddable _links for upsells, cross-sells, and related products to Store API Products endpoint.

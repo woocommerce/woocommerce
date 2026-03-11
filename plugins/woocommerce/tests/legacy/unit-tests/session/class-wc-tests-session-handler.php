@@ -253,6 +253,70 @@ class WC_Tests_Session_Handler extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox After guest becomes user, we set the session cookie so the next request gets the user session.
+	 */
+	public function test_migrate_guest_session_to_user_session_sets_customer_session_cookie() {
+		global $wpdb;
+
+		$guest_session_id   = 't_' . wc_rand_hash( '', 30 );
+		$session_expiration = time() + 50000;
+		$session_expiring   = time() + 5000;
+		$user_id            = 1;
+		$guest_session_data = array( 'cart' => 'migrated cart' );
+
+		$wpdb->insert(
+			$wpdb->prefix . 'woocommerce_sessions',
+			array(
+				'session_key'    => $guest_session_id,
+				'session_value'  => maybe_serialize( $guest_session_data ),
+				'session_expiry' => $session_expiration,
+			),
+			array( '%s', '%s', '%d' )
+		);
+
+		wp_cache_set(
+			WC_Cache_Helper::get_cache_prefix( WC_SESSION_CACHE_GROUP ) . $guest_session_id,
+			$guest_session_data,
+			WC_SESSION_CACHE_GROUP,
+			$session_expiration - time()
+		);
+
+		wp_set_current_user( $user_id );
+
+		$handler = $this
+			->getMockBuilder( WC_Session_Handler::class )
+			->setMethods( array( 'get_session_cookie' ) )
+			->getMock();
+
+		$handler
+			->method( 'get_session_cookie' )
+			->willReturn( array( $guest_session_id, $session_expiration, $session_expiring, 'cookie_hash' ) );
+
+		$session_cookie_value = null;
+		$capture_cookie       = function ( $enabled, $name, $value ) use ( &$session_cookie_value ) {
+			if ( strpos( (string) $name, 'woocommerce_session' ) !== false ) {
+				$session_cookie_value = $value;
+			}
+			return false;
+		};
+		add_filter( 'woocommerce_set_cookie_enabled', $capture_cookie, 10, 3 );
+
+		$handler->init_session_cookie();
+
+		remove_filter( 'woocommerce_set_cookie_enabled', $capture_cookie );
+		wp_set_current_user( 0 );
+
+		$this->assertNotNull( $session_cookie_value, 'Session cookie was set.' );
+		$this->assertStringStartsWith( (string) $user_id . '|', $session_cookie_value, 'Cookie has user id, not guest id.' );
+
+		// User gets 1 week, guest gets 2 days. Cookie must be 1 week.
+		$parts = explode( '|', $session_cookie_value );
+		$this->assertCount( 4, $parts, 'Cookie value has 4 parts.' );
+		$cookie_expiration = (int) $parts[1];
+		$this->assertGreaterThanOrEqual( time() + 6 * DAY_IN_SECONDS, $cookie_expiration, 'Cookie expires in about a week.' );
+	}
+
+	/**
 	 * Test that method destroys session when all conditions are met.
 	 */
 	public function test_destroy_session_if_empty_should_destroy_session_when_all_conditions_met() {
