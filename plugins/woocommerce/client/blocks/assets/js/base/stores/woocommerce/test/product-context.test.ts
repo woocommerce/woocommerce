@@ -106,19 +106,19 @@ describe( 'woocommerce/product-context store', () => {
 			expect( mockRegisteredStore!.state.product ).toBe( mockProduct );
 		} );
 
-		it( 'returns undefined when product is not in the store', () => {
+		it( 'returns null when product is not in the store', () => {
 			expect( mockRegisteredStore ).not.toBeNull();
 
 			mockRegisteredStore!.state.productId = 999;
 			mockRegisteredStore!.state.variationId = null;
 
-			expect( mockRegisteredStore!.state.product ).toBeUndefined();
+			expect( mockRegisteredStore!.state.product ).toBeNull();
 		} );
 
-		it( 'returns undefined when productId is 0', () => {
+		it( 'returns null when productId is 0', () => {
 			expect( mockRegisteredStore ).not.toBeNull();
 
-			expect( mockRegisteredStore!.state.product ).toBeUndefined();
+			expect( mockRegisteredStore!.state.product ).toBeNull();
 		} );
 
 		it( 'reads from block context when available', () => {
