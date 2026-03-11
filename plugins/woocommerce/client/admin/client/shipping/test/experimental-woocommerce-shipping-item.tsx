@@ -140,6 +140,42 @@ describe( 'WooCommerceShippingItem', () => {
 		} );
 	} );
 
+	it( 'should record settings_shipping_recommendation_setup_click with action=install when clicking Install button', () => {
+		render(
+			<WooCommerceShippingItem
+				isPluginInstalled={ false }
+				{ ...defaultProps }
+			/>
+		);
+
+		screen.queryByRole( 'button', { name: 'Install' } )?.click();
+		expect( recordEvent ).toHaveBeenCalledWith(
+			'settings_shipping_recommendation_setup_click',
+			{
+				plugin: 'woocommerce-shipping',
+				action: 'install',
+			}
+		);
+	} );
+
+	it( 'should record settings_shipping_recommendation_setup_click with action=activate when clicking Activate button', () => {
+		render(
+			<WooCommerceShippingItem
+				isPluginInstalled={ true }
+				{ ...defaultProps }
+			/>
+		);
+
+		screen.queryByRole( 'button', { name: 'Activate' } )?.click();
+		expect( recordEvent ).toHaveBeenCalledWith(
+			'settings_shipping_recommendation_setup_click',
+			{
+				plugin: 'woocommerce-shipping',
+				action: 'activate',
+			}
+		);
+	} );
+
 	it( 'should call onActivateClick when clicking Activate button', () => {
 		const onActivateClick = jest.fn( () => Promise.resolve() );
 		render(

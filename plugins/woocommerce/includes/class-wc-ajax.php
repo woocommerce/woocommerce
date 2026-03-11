@@ -530,6 +530,16 @@ class WC_AJAX {
 
 			do_action( 'woocommerce_ajax_added_to_cart', $product_id );
 
+			/**
+			 * Fires when an item is added to the cart from a user request.
+			 *
+			 * @param int       $product_id Product ID.
+			 * @param int|float $quantity   Quantity added to the cart.
+			 *
+			 * @since 10.6.0
+			 */
+			do_action( 'internal_woocommerce_cart_item_added_from_user_request', $variation_id ? $variation_id : $product_id, $quantity );
+
 			if ( 'yes' === get_option( 'woocommerce_cart_redirect_after_add' ) ) {
 				wc_add_to_cart_message( array( $product_id => $quantity ), true );
 			}
@@ -560,7 +570,16 @@ class WC_AJAX {
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing
 		$cart_item_key = wc_clean( isset( $_POST['cart_item_key'] ) ? wp_unslash( $_POST['cart_item_key'] ) : '' );
 
-		if ( $cart_item_key && false !== WC()->cart->remove_cart_item( $cart_item_key ) ) {
+		if ( $cart_item_key && is_string( $cart_item_key ) && false !== WC()->cart->remove_cart_item( $cart_item_key ) ) {
+			/**
+			 * Fires when an item is removed from the cart from a user request.
+			 *
+			 * @param string   $cart_item_key Cart item key.
+			 * @param \WC_Cart $cart          Cart object.
+			 *
+			 * @since 10.6.0
+			 */
+			do_action( 'internal_woocommerce_cart_item_removed_from_user_request', $cart_item_key, WC()->cart );
 			self::get_refreshed_fragments();
 		} else {
 			wp_send_json_error();

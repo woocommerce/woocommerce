@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Exclude WCPay test orders from analytics data to prevent test transactions from polluting reports.
