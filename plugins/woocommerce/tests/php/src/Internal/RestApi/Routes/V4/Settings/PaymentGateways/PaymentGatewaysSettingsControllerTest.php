@@ -45,6 +45,17 @@ class PaymentGatewaysSettingsControllerTest extends WC_REST_Unit_Test_Case {
 		$this->store_admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $this->store_admin_id );
 
+		// Register the mock password gateway so it's available via WC()->payment_gateways.
+		add_filter(
+			'woocommerce_payment_gateways',
+			function ( $gateways ) {
+				$gateways[] = WCGatewayMockPassword::class;
+				return $gateways;
+			}
+		);
+		// Force re-initialization of gateways to pick up the mock.
+		WC()->payment_gateways()->init();
+
 		$this->sut = new Controller();
 		$this->sut->register_routes();
 	}
@@ -555,11 +566,11 @@ class PaymentGatewaysSettingsControllerTest extends WC_REST_Unit_Test_Case {
 	 * @testdox Should preserve percent-encoded characters in password fields.
 	 */
 	public function test_update_payment_gateway_preserves_percent_encoded_chars_in_password_fields() {
-		// Arrange — PayPal gateway has password-type fields (api_password, api_signature).
+		// Arrange — mock gateway has a password-type field (api_password).
 		$password = 'NlP4%EcCx}Na';
 
 		// Act.
-		$request = new WP_REST_Request( 'PUT', self::ENDPOINT . '/paypal' );
+		$request = new WP_REST_Request( 'PUT', self::ENDPOINT . '/mock_password' );
 		$request->set_param(
 			'values',
 			array(
@@ -571,7 +582,7 @@ class PaymentGatewaysSettingsControllerTest extends WC_REST_Unit_Test_Case {
 		// Assert.
 		$this->assertSame( 200, $response->get_status() );
 
-		$gateway = WC()->payment_gateways->payment_gateways()['paypal'];
+		$gateway = WC()->payment_gateways->payment_gateways()['mock_password'];
 		$this->assertSame( $password, $gateway->settings['api_password'], 'Password with %Ec sequence should be preserved' );
 	}
 
@@ -580,7 +591,7 @@ class PaymentGatewaysSettingsControllerTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_update_payment_gateway_strips_html_from_password_fields() {
 		// Arrange.
-		$request = new WP_REST_Request( 'PUT', self::ENDPOINT . '/paypal' );
+		$request = new WP_REST_Request( 'PUT', self::ENDPOINT . '/mock_password' );
 		$request->set_param(
 			'values',
 			array(
@@ -594,7 +605,7 @@ class PaymentGatewaysSettingsControllerTest extends WC_REST_Unit_Test_Case {
 		// Assert.
 		$this->assertSame( 200, $response->get_status() );
 
-		$gateway = WC()->payment_gateways->payment_gateways()['paypal'];
+		$gateway = WC()->payment_gateways->payment_gateways()['mock_password'];
 		$this->assertSame( 'boldsecret%E0pass', $gateway->settings['api_password'], 'HTML tags should be stripped but percent sequences preserved' );
 	}
 
@@ -603,7 +614,7 @@ class PaymentGatewaysSettingsControllerTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_update_payment_gateway_trims_whitespace_from_password_fields() {
 		// Arrange.
-		$request = new WP_REST_Request( 'PUT', self::ENDPOINT . '/paypal' );
+		$request = new WP_REST_Request( 'PUT', self::ENDPOINT . '/mock_password' );
 		$request->set_param(
 			'values',
 			array(
@@ -617,7 +628,7 @@ class PaymentGatewaysSettingsControllerTest extends WC_REST_Unit_Test_Case {
 		// Assert.
 		$this->assertSame( 200, $response->get_status() );
 
-		$gateway = WC()->payment_gateways->payment_gateways()['paypal'];
+		$gateway = WC()->payment_gateways->payment_gateways()['mock_password'];
 		$this->assertSame( 'my%20password', $gateway->settings['api_password'], 'Password should be trimmed but percent sequences preserved' );
 	}
 
