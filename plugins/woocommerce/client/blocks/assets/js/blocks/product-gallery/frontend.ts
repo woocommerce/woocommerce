@@ -6,11 +6,10 @@ import {
 	getContext as getContextFn,
 	getElement,
 	withScope,
-	getConfig,
 	withSyncEvent,
 } from '@wordpress/interactivity';
-import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
-import type { WooCommerceConfig } from '@woocommerce/stores/woocommerce/cart';
+import '@woocommerce/stores/woocommerce/product-context';
+import type { ProductContextStore } from '@woocommerce/stores/woocommerce/product-context';
 
 /**
  * Internal dependencies
@@ -165,8 +164,8 @@ const scrollThumbnailIntoView = ( imageId: number ) => {
 	} );
 };
 
-const { state: productDataState } = store< ProductDataStore >(
-	'woocommerce/product-data',
+const { state: productContextState } = store< ProductContextStore >(
+	'woocommerce/product-context',
 	{},
 	{ lock: universalLock }
 );
@@ -428,21 +427,15 @@ const productGallery = {
 	},
 	callbacks: {
 		listenToProductDataChanges: () => {
-			const productId = productDataState?.productId;
-			if ( ! productId ) {
+			const product =
+				productContextState.selectedVariation ||
+				productContextState.product;
+
+			if ( ! product ) {
 				return;
 			}
 
-			const { products } = getConfig(
-				'woocommerce'
-			) as WooCommerceConfig;
-
-			const productData =
-				products?.[ productId ]?.variations?.[
-					productDataState?.variationId || 0
-				] || products?.[ productId ];
-
-			const imageId = productData?.image_id;
+			const imageId = product.images?.[ 0 ]?.id;
 			if ( ! imageId ) {
 				return;
 			}
