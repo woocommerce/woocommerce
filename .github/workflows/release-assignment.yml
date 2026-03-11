@@ -241,8 +241,16 @@ jobs:
         uses: actions/checkout@v4
         with:
           sparse-checkout: |
+            .github/actions/linear-token
             .linear
           sparse-checkout-cone-mode: false
+
+      - name: Get Linear OAuth token
+        id: get-linear-token
+        uses: ./.github/actions/linear-token
+        with:
+          client-id: ${{ secrets.LINEAR_CLIENT_ID }}
+          client-secret: ${{ secrets.LINEAR_CLIENT_SECRET }}
 
       - name: Install linear-sdk
         run: npm install @linear/sdk@71.0.0
@@ -254,7 +262,7 @@ jobs:
           script: |
             const { LinearClient } = require( '@linear/sdk' );
             const linearClient = new LinearClient( {
-              apiKey: '${{ secrets.LINEAR_OAUTH_TOKEN }}'
+              accessToken: '${{ steps.get-linear-token.outputs.token }}'
             } );
 
             const releaseMainVersion = '${{ needs.check-upcoming-release-events.outputs.version }}';
@@ -286,7 +294,7 @@ jobs:
           script: |
             const { LinearClient } = require( '@linear/sdk' );
             const linearClient = new LinearClient( {
-              apiKey: '${{ secrets.LINEAR_OAUTH_TOKEN }}'
+              accessToken: '${{ steps.get-linear-token.outputs.token }}'
             } );
 
             const organization = await linearClient.organization;
@@ -319,7 +327,7 @@ jobs:
           script: |
             const { LinearClient } = require( '@linear/sdk' );
             const linearClient = new LinearClient( {
-              apiKey: '${{ secrets.LINEAR_OAUTH_TOKEN }}'
+              accessToken: '${{ steps.get-linear-token.outputs.token }}'
             } );
 
             const email = '${{ needs.trigger-upcoming-code-freeze-events.outputs.release-lead-google-login }}';
@@ -349,7 +357,7 @@ jobs:
             const fs = require( 'fs' );
 
             const linearClient = new LinearClient( {
-              apiKey: '${{ secrets.LINEAR_OAUTH_TOKEN }}'
+              accessToken: '${{ steps.get-linear-token.outputs.token }}'
             } );
 
             // Read template file.
@@ -459,7 +467,8 @@ jobs:
       release-date: ${{ matrix.releaseDate }}
       skip-branch-validation: true
     secrets:
-      LINEAR_OAUTH_TOKEN: ${{ secrets.LINEAR_OAUTH_TOKEN }}
+      LINEAR_CLIENT_ID: ${{ secrets.LINEAR_CLIENT_ID }}
+      LINEAR_CLIENT_SECRET: ${{ secrets.LINEAR_CLIENT_SECRET }}
       LINEAR_TEAM_ID: ${{ secrets.LINEAR_TEAM_ID }}
 
   notify-on-failure:
