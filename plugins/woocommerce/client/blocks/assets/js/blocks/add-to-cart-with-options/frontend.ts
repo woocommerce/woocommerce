@@ -11,10 +11,10 @@ import type {
 	Store as WooCommerce,
 	SelectedAttributes,
 } from '@woocommerce/stores/woocommerce/cart';
-import '@woocommerce/stores/woocommerce/product-data';
+import '@woocommerce/stores/woocommerce/product-context';
 import '@woocommerce/stores/woocommerce/products';
 import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
-import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
+import type { ProductContextStore } from '@woocommerce/stores/woocommerce/product-context';
 import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 
 /**
@@ -61,8 +61,8 @@ const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-const { state: productDataState } = store< ProductDataStore >(
-	'woocommerce/product-data',
+const { state: productContextState } = store< ProductContextStore >(
+	'woocommerce/product-context',
 	{},
 	{ lock: universalLock }
 );
@@ -130,7 +130,6 @@ export type AddToCartWithOptionsStore = {
 		allowsAddingToCart: boolean;
 		quantity: Record< number, number >;
 		selectedAttributes: SelectedAttributes[];
-		productData: NormalizedProductData | NormalizedVariationData | null;
 	};
 	actions: {
 		validateQuantity: ( productId: number, value?: number ) => void;
@@ -163,16 +162,22 @@ const { actions, state } = store<
 				return state.validationErrors.length === 0;
 			},
 			get allowsAddingToCart(): boolean {
-				const { productData } = state;
+				const product =
+					productContextState.selectedVariation ||
+					productContextState.product;
+
+				if ( ! product ) {
+					return false;
+				}
 
 				// For grouped products, the button should always be visible.
 				// Its enabled/disabled state is controlled by isFormValid which
 				// checks whether any child products are selected.
-				if ( productData?.type === 'grouped' ) {
+				if ( product.type === 'grouped' ) {
 					return true;
 				}
 
-				return productData?.is_in_stock ?? true;
+				return product.is_purchasable && product.is_in_stock;
 			},
 			get quantity(): Record< number, number > {
 				const context = getContext< Context >();
@@ -181,14 +186,6 @@ const { actions, state } = store<
 			get selectedAttributes(): SelectedAttributes[] {
 				const context = getContext< Context >();
 				return context.selectedAttributes || [];
-			},
-			get productData() {
-				const { selectedAttributes } = getContext< Context >();
-
-				return getProductData(
-					productDataState.productId,
-					selectedAttributes
-				);
 			},
 		},
 		actions: {
@@ -266,7 +263,7 @@ const { actions, state } = store<
 					};
 				}
 
-				if ( state.productData?.type === 'grouped' ) {
+				if ( productContextState.product?.type === 'grouped' ) {
 					actions.validateGroupedProductQuantity();
 				} else {
 					actions.validateQuantity( productId, value );
@@ -346,18 +343,15 @@ const { actions, state } = store<
 
 				const { selectedAttributes } = getContext< Context >();
 
-				const id =
-					productDataState.variationId || productDataState.productId;
+				const product =
+					productContextState.selectedVariation ||
+					productContextState.product;
 
-				const productType = productDataState.variationId
-					? 'variation'
-					: getProductData( id, selectedAttributes )?.type;
-
-				if ( ! productType ) {
+				if ( ! product ) {
 					return;
 				}
 
-				if ( productType === 'grouped' ) {
+				if ( product.type === 'grouped' ) {
 					yield actions.batchAddToCart();
 					return;
 				}
@@ -371,10 +365,10 @@ const { actions, state } = store<
 				);
 				yield wooActions.addCartItem(
 					{
-						id,
-						quantityToAdd: quantity[ id ],
+						id: product.id,
+						quantityToAdd: quantity[ product.id ],
 						variation: selectedAttributes,
-						type: productType,
+						type: product.type,
 					},
 					{
 						showCartUpdatesNotices: false,
