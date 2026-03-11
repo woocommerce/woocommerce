@@ -369,6 +369,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 		await colorRedOption.click();
 
 		await expect( page.getByText( '1 in cart' ) ).toBeHidden();
+
+		// Add a second variation (Red + Large).
+		await addToCartButton.click();
+
+		await expect( page.getByText( '1 in cart' ) ).toBeVisible();
 	} );
 
 	test( 'allows adding grouped products to cart', async ( {
