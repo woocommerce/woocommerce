@@ -6,6 +6,7 @@ import type {
 	ClientCartItem,
 	Store as WooCommerce,
 } from '@woocommerce/stores/woocommerce/cart';
+import '@woocommerce/stores/woocommerce/products';
 import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 
 /**

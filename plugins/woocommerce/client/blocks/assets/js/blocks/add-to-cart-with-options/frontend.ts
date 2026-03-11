@@ -12,19 +12,15 @@ import type {
 	SelectedAttributes,
 } from '@woocommerce/stores/woocommerce/cart';
 import '@woocommerce/stores/woocommerce/product-context';
-import '@woocommerce/stores/woocommerce/products';
 import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
 import type { ProductContextStore } from '@woocommerce/stores/woocommerce/product-context';
-import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 
 /**
  * Internal dependencies
  */
-import { findMatchingVariation } from '../../base/utils/variations/attribute-matching';
 import type { GroupedProductAddToCartWithOptionsStore } from './grouped-product-selector/frontend';
 import type { Context as QuantitySelectorContext } from './quantity-selector/frontend';
 import type { VariableProductAddToCartWithOptionsStore } from './variation-selector/frontend';
-import type { NormalizedProductData, NormalizedVariationData } from './types';
 
 export type Context = {
 	selectedAttributes: SelectedAttributes[];
@@ -66,61 +62,6 @@ const { state: productContextState } = store< ProductContextStore >(
 	{},
 	{ lock: universalLock }
 );
-
-const { state: productsState } = store< ProductsStore >(
-	'woocommerce/products',
-	{},
-	{ lock: universalLock }
-);
-
-export const getProductData = (
-	id: number,
-	selectedAttributes: SelectedAttributes[]
-): NormalizedProductData | NormalizedVariationData | null => {
-	const productFromStore = productsState.products[ id ];
-
-	if ( ! productFromStore ) {
-		return null;
-	}
-
-	// Determine which product to use for the response.
-	let product = productFromStore;
-
-	// For variable products with selected attributes, find the matching variation.
-	if (
-		productFromStore.type === 'variable' &&
-		selectedAttributes?.length > 0
-	) {
-		const matchedVariation = findMatchingVariation(
-			productFromStore,
-			selectedAttributes
-		);
-
-		if ( matchedVariation ) {
-			const variation =
-				productsState.productVariations[ matchedVariation.id ];
-			if ( ! variation ) {
-				// Variation was matched but its data isn't in the store.
-				// Return null to prevent using stale parent product data.
-				return null;
-			}
-			product = variation;
-		}
-	}
-
-	const { add_to_cart: addToCart } = product;
-	const maximum = addToCart?.maximum ?? 0;
-
-	return {
-		id: product.id,
-		type: product.type,
-		is_in_stock: product.is_purchasable && product.is_in_stock,
-		sold_individually: product.sold_individually,
-		min: addToCart?.minimum ?? 1,
-		max: maximum > 0 ? maximum : Number.MAX_SAFE_INTEGER,
-		step: addToCart?.multiple_of ?? 1,
-	};
-};
 
 export type AddToCartWithOptionsStore = {
 	state: {
@@ -196,19 +137,20 @@ const { actions, state } = store<
 					return;
 				}
 
-				const { selectedAttributes } = getContext< Context >();
-
 				// If selected quantity is invalid, add an error.
-				const productObject = getProductData(
-					productId,
-					selectedAttributes
-				);
+				const product =
+					productContextState.selectedVariation ||
+					productContextState.product;
+
+				const { add_to_cart: addToCart } = product || {};
+				const min = addToCart?.minimum ?? 1;
+				const maximum = addToCart?.maximum ?? 0;
+				const max =
+					maximum > 0 ? maximum : Number.MAX_SAFE_INTEGER;
 
 				if (
 					value === 0 ||
-					( productObject &&
-						( value < productObject.min ||
-							value > productObject.max ) )
+					( product && ( value < min || value > max ) )
 				) {
 					const { errorMessages } = getConfig();
 
@@ -228,8 +170,7 @@ const { actions, state } = store<
 				const inputElement = quantitySelectorContext?.inputElement;
 				const isValueNaN = Number.isNaN( inputElement?.valueAsNumber );
 
-				// Get variations from the products store.
-				const productFromStore = productsState.products[ productId ];
+				const { product: productFromStore } = productContextState;
 				const variationIds =
 					productFromStore?.variations?.map( ( v ) => v.id ) ?? [];
 
