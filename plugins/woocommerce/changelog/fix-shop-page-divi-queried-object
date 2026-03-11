@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Fix shop page template rendering with Divi and other themes by ensuring get_queried_object() returns the shop page post instead of the product post type object. Also re-implements the fix for intermittent blank shop pages when WordPress resolves by slug instead of page ID.
+Fix for intermittent blank shop pages when WordPress resolves by slug instead of page ID.
