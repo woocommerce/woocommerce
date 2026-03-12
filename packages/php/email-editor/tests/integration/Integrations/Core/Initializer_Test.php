@@ -70,27 +70,36 @@ class Initializer_Test extends \Email_Editor_Integration_Test_Case {
 	 * Test that reset_renderers fires exactly once per render_start action even after multiple initializations.
 	 */
 	public function testResetRenderersFiresOncePerRenderStart(): void {
-		$call_count = 0;
-
-		// Use a fresh initializer so we can track calls via a wrapper.
-		$initializer = new Initializer();
-		$initializer->initialize();
-
-		// Attach a counter to the same hook at a later priority.
-		$counter = function () use ( &$call_count ) {
-			++$call_count;
-		};
-		add_action( 'woocommerce_email_editor_render_start', $counter, 20 );
+		$spy = new Initializer_Spy();
+		$spy->initialize();
 
 		// Simulate multiple renders.
 		do_action( 'woocommerce_email_editor_render_start' );
 		do_action( 'woocommerce_email_editor_render_start' );
 
-		// Counter should fire once per do_action call.
-		$this->assertSame( 2, $call_count );
+		$this->assertSame( 2, $spy->reset_renderers_call_count );
 
 		// Clean up.
-		remove_action( 'woocommerce_email_editor_render_start', $counter, 20 );
-		remove_action( 'woocommerce_email_editor_render_start', array( $initializer, 'reset_renderers' ) );
+		remove_action( 'woocommerce_email_editor_render_start', array( $spy, 'reset_renderers' ) );
+	}
+}
+
+/**
+ * Test spy that counts reset_renderers() calls.
+ */
+class Initializer_Spy extends Initializer { // phpcs:ignore -- Multiple classes needed for test spy.
+	/**
+	 * Number of times reset_renderers() was called.
+	 *
+	 * @var int
+	 */
+	public int $reset_renderers_call_count = 0;
+
+	/**
+	 * Override to count calls.
+	 */
+	public function reset_renderers(): void {
+		++$this->reset_renderers_call_count;
+		parent::reset_renderers();
 	}
 }
