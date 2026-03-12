@@ -73,14 +73,15 @@ class Initializer_Test extends \Email_Editor_Integration_Test_Case {
 		$spy = new Initializer_Spy();
 		$spy->initialize();
 
-		// Simulate multiple renders.
-		do_action( 'woocommerce_email_editor_render_start' );
-		do_action( 'woocommerce_email_editor_render_start' );
+		try {
+			// Simulate multiple renders.
+			do_action( 'woocommerce_email_editor_render_start' );
+			do_action( 'woocommerce_email_editor_render_start' );
 
-		$this->assertSame( 2, $spy->reset_renderers_call_count );
-
-		// Clean up.
-		remove_action( 'woocommerce_email_editor_render_start', array( $spy, 'reset_renderers' ) );
+			$this->assertSame( 2, $spy->reset_renderers_call_count );
+		} finally {
+			remove_action( 'woocommerce_email_editor_render_start', array( $spy, 'reset_renderers' ) );
+		}
 	}
 }
 
