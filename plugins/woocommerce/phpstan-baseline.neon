@@ -51514,7 +51514,7 @@ parameters:
 			path: src/Blocks/BlockTypes/AddToCartForm.php
 
 		-
-			message: '#^Parameter \#3 \$subject of function preg_replace expects array\<float\|int\|string\>\|string, string\|null given\.$#'
+			message: '#^Parameter \#3 \$subject of function preg_replace_callback expects array\<float\|int\|string\>\|string, string\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/AddToCartForm.php
@@ -51718,7 +51718,7 @@ parameters:
 			path: src/Blocks/BlockTypes/AddToCartWithOptions/Utils.php
 
 		-
-			message: '#^Parameter \#3 \$subject of function preg_replace expects array\<float\|int\|string\>\|string, string\|null given\.$#'
+			message: '#^Parameter \#3 \$subject of function preg_replace_callback expects array\<float\|int\|string\>\|string, string\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/AddToCartWithOptions/Utils.php
