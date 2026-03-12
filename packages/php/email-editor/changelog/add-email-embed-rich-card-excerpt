@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add rich cards for WordPress embeds in emails with excerpt, site icon, and a performance cap of 5 per email.

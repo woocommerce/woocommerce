@@ -91,6 +91,14 @@ class Initializer {
 	public function initialize(): void {
 		add_filter( 'woocommerce_email_editor_theme_json', array( $this, 'adjust_theme_json' ), 10, 1 );
 		add_filter( 'safe_style_css', array( $this, 'allow_styles' ) );
+		add_action( 'woocommerce_email_editor_render_start', array( $this, 'reset_renderers' ) );
+	}
+
+	/**
+	 * Clear cached renderer instances so stateful renderers reset between emails.
+	 */
+	public function reset_renderers(): void {
+		$this->renderers = array();
 	}
 
 	/**

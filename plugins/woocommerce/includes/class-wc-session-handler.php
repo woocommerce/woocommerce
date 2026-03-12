@@ -237,6 +237,11 @@ class WC_Session_Handler extends WC_Session {
 		 * @param string $user_session_id The Customer ID that the former session was converted to.
 		 */
 		do_action( 'woocommerce_guest_session_to_user_id', $guest_session_id, $this->_customer_id );
+
+		$this->set_session_expiration();
+		$this->update_session_timestamp( $this->get_customer_id(), $this->_session_expiration );
+		// Set cookie to user session. Otherwise next request still has guest id and the session is empty.
+		$this->set_customer_session_cookie( true );
 	}
 
 	/**

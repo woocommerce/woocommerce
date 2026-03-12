@@ -7,6 +7,7 @@ import {
 	getElement,
 	withScope,
 	getConfig,
+	withSyncEvent,
 } from '@wordpress/interactivity';
 import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
 import type { WooCommerceConfig } from '@woocommerce/stores/woocommerce/cart';
@@ -308,13 +309,14 @@ const productGallery = {
 				}
 			}
 		},
-		openDialog: () => {
+		openDialog: withSyncEvent( ( event?: Event ) => {
+			event?.preventDefault();
 			const context = getContext();
 			context.isDialogOpen = true;
 			document.body.classList.add(
 				'wc-block-product-gallery-dialog-open'
 			);
-		},
+		} ),
 		closeDialog: () => {
 			const context = getContext();
 			context.isDialogOpen = false;
