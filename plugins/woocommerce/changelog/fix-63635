@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add to Cart: fix validation of attributes with multi-word names
