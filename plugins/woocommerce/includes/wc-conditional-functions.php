@@ -131,10 +131,8 @@ if ( ! function_exists( 'is_checkout_pay_page' ) ) {
 	 * @return bool
 	 */
 	function is_checkout_pay_page( bool $use_query_params = false ): bool {
-		global $wp;
-
 		// Use-case: attempt to identify the page based on global variables.
-		if ( ! empty( $wp->query_vars['order-pay'] ) && is_checkout() ) {
+		if ( ! empty( get_query_var( 'order-pay' ) ) && is_checkout() ) {
 			return true;
 		}
 
@@ -144,6 +142,38 @@ if ( ! function_exists( 'is_checkout_pay_page' ) ) {
 		}
 
 		return false;
+	}
+}
+
+if ( ! function_exists( 'is_valid_checkout_pay_page' ) ) {
+
+	/**
+	 * Is_valid_checkout_pay_page - Returns true when viewing the checkout's pay page (aka pay for order page) and the order key in the URL matches the order key of the order being paid for.
+	 *
+	 * @param bool $use_query_params Whether to use query parameters to determine if this is the pay for order page.
+	 * @return bool
+	 */
+	function is_valid_checkout_pay_page(): bool {
+		// If not on the pay for order page or the param `key` is not set, return false.
+		if ( ! is_checkout_pay_page( true ) || ! isset( $_GET['key'] ) ) {
+			return false;
+		}
+
+		$order_id = absint( get_query_var( 'order-pay' ) );
+		$order    = wc_get_order( $order_id );
+
+		// If the order is not found or the param `key` is not set or the order key does not match the order key in the URL param, return false.
+		if ( ! $order || ! isset( $_GET['key'] ) || wc_clean( wp_unslash( $_GET['key'] ) ) !== $order->get_order_key() ) {
+			return false;
+		}
+
+		// If the order doesn't need payment, we don't need to prepare the payment page.
+		if ( ! $order->needs_payment() ) {
+			return false;
+		}
+
+		// Check if the current user has permission to pay for the order.
+		return current_user_can( 'pay_for_order', $order->get_id() );
 	}
 }
 
@@ -241,6 +271,38 @@ if ( ! function_exists( 'is_order_received_page' ) ) {
 		$page_id = wc_get_page_id( 'checkout' );
 
 		return apply_filters( 'woocommerce_is_order_received_page', ( $page_id && is_page( $page_id ) && isset( $wp->query_vars['order-received'] ) ) );
+	}
+}
+
+if ( ! function_exists( 'is_valid_order_received_endpoint' ) ) {
+
+	/**
+	 * Is_valid_order_received_endpoint - Returns true when viewing the order received page and the order key in the URL matches the order key of the order being received.
+	 *
+	 * @return bool
+	 */
+	function is_valid_order_received_endpoint(): bool {
+		// If not on the order-received page or the param `key` is not set, return false.
+		if ( ! is_order_received_page() || ! isset( $_GET['key'] ) ) {
+			return false;
+		}
+
+		$order_id_from_order_key = absint( wc_get_order_id_by_order_key( wc_clean( wp_unslash( $_GET['key'] ) ) ) );
+		$order_id_from_query_var = isset( $_GET['order_id'] ) ? absint( wp_unslash( $_GET['order_id'] ) ) : null;
+
+		// If the order ID is not found or the order ID does not match the given order ID, return false.
+		if ( ! $order_id_from_order_key || ( $order_id_from_query_var !== $order_id_from_order_key ) ) {
+			return false;
+		}
+
+		$order = wc_get_order( $order_id_from_order_key );
+
+		// If the order doesn't need payment, return false.
+		if ( ! $order->needs_payment() ) {
+			return false;
+		}
+
+		return current_user_can( 'pay_for_order', $order->get_id() );
 	}
 }
 
