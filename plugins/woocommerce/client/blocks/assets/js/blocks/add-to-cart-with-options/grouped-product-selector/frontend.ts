@@ -77,11 +77,8 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 					if ( ! product ) {
 						return false;
 					}
-					const { add_to_cart: addToCart } = product;
-					const min = addToCart?.minimum ?? 1;
-					const maximum = addToCart?.maximum ?? 0;
-					const max = maximum > 0 ? maximum : Number.MAX_SAFE_INTEGER;
-					return qty !== 0 && ( qty < min || qty > max );
+					const { minimum, maximum } = product.add_to_cart;
+					return qty !== 0 && ( qty < minimum || qty > maximum );
 				} );
 
 				if ( hasInvalidQuantity ) {

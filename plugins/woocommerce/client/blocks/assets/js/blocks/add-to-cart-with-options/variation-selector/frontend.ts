@@ -493,19 +493,16 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					return;
 				}
 
-				const { add_to_cart: addToCart } = variation;
-				const min = addToCart?.minimum ?? 1;
-				const maximum = addToCart?.maximum ?? 0;
-				const max = maximum > 0 ? maximum : Number.MAX_SAFE_INTEGER;
+				const { minimum, maximum } = variation.add_to_cart;
 
 				const { quantity } = getContext< Context >();
 				const currentValue = quantity[ variation.id ];
 
 				let newValue = currentValue;
-				if ( currentValue < min ) {
-					newValue = min;
-				} else if ( currentValue > max ) {
-					newValue = max;
+				if ( currentValue < minimum ) {
+					newValue = minimum;
+				} else if ( currentValue > maximum ) {
+					newValue = maximum;
 				}
 
 				if (

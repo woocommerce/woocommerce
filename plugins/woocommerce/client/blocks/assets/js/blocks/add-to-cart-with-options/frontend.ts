@@ -142,15 +142,9 @@ const { actions, state } = store<
 					productContextState.selectedVariation ||
 					productContextState.product;
 
-				const { add_to_cart: addToCart } = product || {};
-				const min = addToCart?.minimum ?? 1;
-				const maximum = addToCart?.maximum ?? 0;
-				const max =
-					maximum > 0 ? maximum : Number.MAX_SAFE_INTEGER;
-
 				if (
 					value === 0 ||
-					( product && ( value < min || value > max ) )
+					( product && ( value < product.add_to_cart.minimum || value > product.add_to_cart.maximum ) )
 				) {
 					const { errorMessages } = getConfig();
 

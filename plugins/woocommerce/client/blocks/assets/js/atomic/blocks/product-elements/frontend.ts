@@ -49,23 +49,10 @@ const productElementStore = store(
 	{
 		state: {
 			get productData() {
-				const product =
+				return (
 					productContextState.selectedVariation ||
-					productContextState.product;
-
-				if ( ! product ) {
-					return undefined;
-				}
-
-				const { add_to_cart: addToCart } = product;
-				const maximum = addToCart?.maximum ?? 0;
-
-				return {
-					...product,
-					min: addToCart?.minimum ?? 1,
-					max: maximum > 0 ? maximum : null,
-					step: addToCart?.multiple_of ?? 1,
-				};
+					productContextState.product
+				);
 			},
 		},
 		callbacks: {

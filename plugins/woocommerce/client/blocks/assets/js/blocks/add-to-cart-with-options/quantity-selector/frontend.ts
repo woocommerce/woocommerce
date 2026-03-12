@@ -77,14 +77,12 @@ store< QuantitySelectorStore >(
 				}
 
 				const { id, add_to_cart: addToCart } = product;
-				const min = addToCart?.minimum ?? 1;
-				const step = addToCart?.multiple_of ?? 1;
 
 				const currentQuantity = quantity[ id ] || 0;
 
 				return (
 					( allowZero && currentQuantity > 0 ) ||
-					currentQuantity - step >= min
+					currentQuantity - addToCart.multiple_of >= addToCart.minimum
 				);
 			},
 			get allowsIncrease() {
@@ -99,13 +97,10 @@ store< QuantitySelectorStore >(
 				}
 
 				const { id, add_to_cart: addToCart } = product;
-				const maximum = addToCart?.maximum ?? 0;
-				const max = maximum > 0 ? maximum : Number.MAX_SAFE_INTEGER;
-				const step = addToCart?.multiple_of ?? 1;
 
 				const currentQuantity = quantity[ id ] || 0;
 
-				return currentQuantity + step <= max;
+				return currentQuantity + addToCart.multiple_of <= addToCart.maximum;
 			},
 			get inputQuantity(): number {
 				const product =
@@ -140,16 +135,11 @@ store< QuantitySelectorStore >(
 
 				const currentValue = Number( inputElement.value ) || 0;
 				const { id: productId, add_to_cart: addToCart } = product;
-				const min = addToCart?.minimum ?? 1;
-				const max =
-					( addToCart?.maximum ?? 0 ) > 0
-						? addToCart.maximum
-						: Number.MAX_SAFE_INTEGER;
-				const step = addToCart?.multiple_of ?? 1;
+				const { minimum, maximum, multiple_of } = addToCart;
 
 				const newValue = Math.max(
-					min,
-					Math.min( max, currentValue + step )
+					minimum,
+					Math.min( maximum, currentValue + multiple_of )
 				);
 
 				addToCartWithOptionsStore.actions.setQuantity(
@@ -175,18 +165,13 @@ store< QuantitySelectorStore >(
 
 				const currentValue = Number( inputElement.value ) || 0;
 				const { id: productId, add_to_cart: addToCart } = product;
-				const min = addToCart?.minimum ?? 1;
-				const max =
-					( addToCart?.maximum ?? 0 ) > 0
-						? addToCart.maximum
-						: Number.MAX_SAFE_INTEGER;
-				const step = addToCart?.multiple_of ?? 1;
+				const { minimum, maximum, multiple_of } = addToCart;
 
-				let newValue = currentValue - step;
-				if ( allowZero && newValue < min && currentValue === min ) {
+				let newValue = currentValue - multiple_of;
+				if ( allowZero && newValue < minimum && currentValue === minimum ) {
 					newValue = 0;
 				} else {
-					newValue = Math.min( max, Math.max( min, newValue ) );
+					newValue = Math.min( maximum, Math.max( minimum, newValue ) );
 				}
 
 				if ( newValue !== currentValue ) {
@@ -212,7 +197,6 @@ store< QuantitySelectorStore >(
 				}
 
 				const { id: productId, add_to_cart: addToCart } = product;
-				const min = addToCart?.minimum ?? 1;
 				const isValueNaN = Number.isNaN( inputElement?.valueAsNumber );
 
 				if (
@@ -226,10 +210,10 @@ store< QuantitySelectorStore >(
 					return;
 				}
 
-				// In other product types, we reset inputs to `min` if they are
-				// 0 or NaN.
+				// In other product types, we reset inputs to `minimum` if they
+				// are 0 or NaN.
 				const value = inputElement?.valueAsNumber ?? NaN;
-				const newValue = ! isNaN( value ) && value > 0 ? value : min;
+				const newValue = ! isNaN( value ) && value > 0 ? value : addToCart.minimum;
 
 				addToCartWithOptionsStore.actions.setQuantity(
 					productId,
