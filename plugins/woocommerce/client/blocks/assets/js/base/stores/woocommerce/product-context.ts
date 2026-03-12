@@ -47,8 +47,9 @@ const productContextStore = store< ProductContextStore >(
 				const context = getContext< ProductContext >(
 					'woocommerce/product-context'
 				);
-				const productId =
-					context?.productId || productContextStore.state.productId;
+				const productId = context
+					? context.productId
+					: productContextStore.state.productId;
 
 				if ( ! productId ) {
 					return null;
@@ -60,9 +61,9 @@ const productContextStore = store< ProductContextStore >(
 				const context = getContext< ProductContext >(
 					'woocommerce/product-context'
 				);
-				const variationId =
-					context?.variationId ||
-					productContextStore.state.variationId;
+				const variationId = context
+					? context.variationId
+					: productContextStore.state.variationId;
 				if ( ! variationId ) {
 					return null;
 				}
