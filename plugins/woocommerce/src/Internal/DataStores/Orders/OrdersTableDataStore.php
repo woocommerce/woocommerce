@@ -3154,56 +3154,51 @@ FROM $order_meta_table
 	}
 
 	/**
-	 * Prime the refund total and refund tax total caches for a batch of orders.
+	 * Returns a prepared SQL JOIN clause for finding refund orders belonging to multiple parent orders.
 	 *
-	 * @param array $order_ids  Order IDs to prime cache for.
-	 * @param array $query_vars Query vars for the query.
-	 * @return void
+	 * Overrides the CPT version to use the HPOS orders table.
+	 *
 	 * @since 10.7.0
+	 * @param string $sanitized_ids Comma-separated list of order IDs (already sanitized via absint).
+	 * @return string Prepared SQL JOIN fragment.
 	 */
-	protected function prime_refund_total_caches_for_orders( $order_ids, $query_vars ): void {
+	protected function get_refund_orders_batch_join_clause( string $sanitized_ids ): string {
+		global $wpdb;
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $sanitized_ids is sanitized via absint by caller.
+		return $wpdb->prepare( "%i AS refunds ON ( refunds.type = %s AND refunds.parent_order_id IN ( $sanitized_ids ) )", self::get_orders_table_name(), 'shop_order_refund' );
+	}
+
+	/**
+	 * Returns the column name on the refund table alias (`refunds`) that holds the parent order ID.
+	 *
+	 * @since 10.7.0
+	 * @return string Column reference.
+	 */
+	protected function get_refund_parent_column(): string {
+		return 'refunds.parent_order_id';
+	}
+
+	/**
+	 * Query total refunded amounts per order in a batch.
+	 *
+	 * Overrides the CPT version to read directly from the HPOS orders table
+	 * rather than joining postmeta.
+	 *
+	 * @since 10.7.0
+	 * @param string $sanitized_ids Comma-separated list of order IDs (already sanitized via absint).
+	 * @return array<int, float> Map of order_id => refund total.
+	 */
+	protected function get_batch_refund_totals( string $sanitized_ids ): array {
 		global $wpdb;
 
-		$cache_prefix = \WC_Cache_Helper::get_cache_prefix( 'orders' );
-
-		// Find which orders need priming.
-		$total_keys     = array();
-		$tax_keys       = array();
-		$non_cached_ids = array();
-		foreach ( $order_ids as $order_id ) {
-			$total_keys[ $order_id ] = $cache_prefix . 'total_refunded' . $order_id;
-			$tax_keys[ $order_id ]   = $cache_prefix . 'total_tax_refunded' . $order_id;
-		}
-
-		$all_keys     = array_merge( array_values( $total_keys ), array_values( $tax_keys ) );
-		$cache_values = wc_cache_get_multiple( $all_keys, 'orders' );
-
-		if ( ! is_array( $cache_values ) ) {
-			$non_cached_ids = $order_ids;
-		} else {
-			foreach ( $order_ids as $order_id ) {
-				if ( false === $cache_values[ $total_keys[ $order_id ] ] || false === $cache_values[ $tax_keys[ $order_id ] ] ) {
-					$non_cached_ids[] = $order_id;
-				}
-			}
-		}
-
-		if ( empty( $non_cached_ids ) ) {
-			return;
-		}
-
-		$orders_table  = self::get_orders_table_name();
-		$sanitized_ids = implode( ', ', array_map( 'absint', $non_cached_ids ) );
-
-		// Batch query: total refunded per order.
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $sanitized_ids is sanitized via absint.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $sanitized_ids is sanitized via absint by caller.
 		$refund_totals = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT parent_order_id AS order_id, SUM( total_amount ) AS total
 				FROM %i
 				WHERE type = 'shop_order_refund' AND parent_order_id IN ( $sanitized_ids )
 				GROUP BY parent_order_id",
-				$orders_table
+				self::get_orders_table_name()
 			)
 		);
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -3212,35 +3207,8 @@ FROM $order_meta_table
 		foreach ( $refund_totals as $row ) {
 			$totals_by_order[ $row->order_id ] = -1 * floatval( $row->total );
 		}
-		foreach ( $non_cached_ids as $order_id ) {
-			wp_cache_set( $total_keys[ $order_id ], $totals_by_order[ $order_id ] ?? 0.0, 'orders' );
-		}
 
-		// Batch query: total tax refunded per order.
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $sanitized_ids is sanitized via absint.
-		$tax_totals = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT orders.parent_order_id AS order_id, SUM( order_itemmeta.meta_value ) AS total
-				FROM %i AS order_itemmeta
-				INNER JOIN %i AS orders ON ( orders.type = 'shop_order_refund' AND orders.parent_order_id IN ( $sanitized_ids ) )
-				INNER JOIN %i AS order_items ON ( order_items.order_id = orders.id AND order_items.order_item_type = 'tax' )
-				WHERE order_itemmeta.order_item_id = order_items.order_item_id
-				AND order_itemmeta.meta_key IN ('tax_amount', 'shipping_tax_amount')
-				GROUP BY orders.parent_order_id",
-				$wpdb->prefix . 'woocommerce_order_itemmeta',
-				$orders_table,
-				$wpdb->prefix . 'woocommerce_order_items'
-			)
-		);
-		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-
-		$tax_by_order = array();
-		foreach ( $tax_totals as $row ) {
-			$tax_by_order[ $row->order_id ] = abs( floatval( $row->total ) );
-		}
-		foreach ( $non_cached_ids as $order_id ) {
-			wp_cache_set( $tax_keys[ $order_id ], $tax_by_order[ $order_id ] ?? 0.0, 'orders' );
-		}
+		return $totals_by_order;
 	}
 
 	/**
