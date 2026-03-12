@@ -118,7 +118,7 @@ class SingleProductTemplate extends AbstractTemplate {
 						'product'           => function () {
 							$context    = wp_interactivity_get_context();
 							$state      = wp_interactivity_state( 'woocommerce/product-context' );
-							$product_id = ! empty( $context['productId'] ) ? $context['productId'] : ( $state['productId'] ?? null );
+							$product_id = ! empty( $context ) ? $context['productId'] : ( $state['productId'] ?? null );
 
 							if ( ! $product_id ) {
 								return null;
@@ -130,7 +130,7 @@ class SingleProductTemplate extends AbstractTemplate {
 						'selectedVariation' => function () {
 							$context      = wp_interactivity_get_context();
 							$state        = wp_interactivity_state( 'woocommerce/product-context' );
-							$variation_id = ! empty( $context['variationId'] ) ? $context['variationId'] : ( $state['variationId'] ?? null );
+							$variation_id = ! empty( $context ) ? $context['variationId'] : ( $state['variationId'] ?? null );
 
 							if ( ! $variation_id ) {
 								return null;
