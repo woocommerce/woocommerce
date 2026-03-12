@@ -58,7 +58,6 @@ export type ClientCartItem = Omit<
 	quantityToAdd?: number;
 };
 
-
 type CartUpdateOptions = { showCartUpdatesNotices?: boolean };
 
 export type Store = {

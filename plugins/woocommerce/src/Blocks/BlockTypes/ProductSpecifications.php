@@ -53,16 +53,16 @@ class ProductSpecifications extends AbstractBlock {
 
 		if ( $show_weight && $product->has_weight() ) {
 			$product_data['weight'] = array(
-				'label'    => __( 'Weight', 'woocommerce' ),
-				'value'    => wc_format_weight( $product->get_weight() ),
+				'label'     => __( 'Weight', 'woocommerce' ),
+				'value'     => wc_format_weight( $product->get_weight() ),
 				'api_field' => 'formatted_weight',
 			);
 		}
 
 		if ( $show_dimensions && $product->has_dimensions() ) {
 			$product_data['dimensions'] = array(
-				'label'    => __( 'Dimensions', 'woocommerce' ),
-				'value'    => wc_format_dimensions( $product->get_dimensions( false ) ),
+				'label'     => __( 'Dimensions', 'woocommerce' ),
+				'value'     => wc_format_dimensions( $product->get_dimensions( false ) ),
 				'api_field' => 'formatted_dimensions',
 			);
 		}
