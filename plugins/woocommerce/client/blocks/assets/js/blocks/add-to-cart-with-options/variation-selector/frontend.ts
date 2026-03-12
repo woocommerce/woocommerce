@@ -359,7 +359,8 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					getProductAttributesAndOptions( product );
 				Object.entries( productAttributesAndOptions ).forEach(
 					( [ attribute, options ] ) => {
-						const attributeLower = attribute.toLowerCase();
+						const attributeLower =
+							normalizeAttributeName( attribute ).toLowerCase();
 						if (
 							normalizedIncluded.length !== 0 &&
 							! normalizedIncluded.includes( attributeLower )
