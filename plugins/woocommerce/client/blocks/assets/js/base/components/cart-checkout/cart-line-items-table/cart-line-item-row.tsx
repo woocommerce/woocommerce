@@ -17,12 +17,7 @@ import {
 	applyCheckoutFilter,
 	productPriceValidation,
 } from '@woocommerce/blocks-checkout';
-import {
-	dinero,
-	transformScale,
-	toSnapshot,
-	type Dinero,
-} from 'dinero.js';
+import { dinero, transformScale, toSnapshot, type Dinero } from 'dinero.js';
 import { USD } from 'dinero.js/currencies';
 import { forwardRef, useMemo } from '@wordpress/element';
 import type { CartItem } from '@woocommerce/types';
