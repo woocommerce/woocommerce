@@ -344,6 +344,36 @@ class HandlerRegistry {
 			}
 		);
 
+		// Best-sellers and new-arrivals: register preview_query only.
+		// These collections handle their main queries via JS/REST, but need
+		// a preview fallback to show recent products in the email editor
+		// when the store has no best-sellers or new arrivals yet.
+		// The build_query callback is a no-op that returns an empty array
+		// so merge_queries() has nothing extra to merge.
+		$noop_build_query = function () {
+			return array();
+		};
+
+		$this->register_collection_handlers(
+			'woocommerce/product-collection/best-sellers',
+			$noop_build_query,
+			null,
+			null,
+			function () {
+				return $this->get_recent_product_ids_query();
+			}
+		);
+
+		$this->register_collection_handlers(
+			'woocommerce/product-collection/new-arrivals',
+			$noop_build_query,
+			null,
+			null,
+			function () {
+				return $this->get_recent_product_ids_query();
+			}
+		);
+
 		$this->register_collection_handlers(
 			'woocommerce/product-collection/cart-contents',
 			function ( $collection_args ) {
@@ -409,6 +439,29 @@ class HandlerRegistry {
 			);
 		}
 		return $product_references;
+	}
+
+	/**
+	 * Get a query that returns the most recent published products.
+	 * Used as a fallback for preview mode when the specific collection query
+	 * might return no results (e.g., no best sellers yet in a new store).
+	 *
+	 * @return array Query args to show recent products.
+	 */
+	private function get_recent_product_ids_query() {
+		$recent_product_ids = wc_get_products(
+			array(
+				'status'  => 'publish',
+				'orderby' => 'date',
+				'order'   => 'DESC',
+				'limit'   => 10,
+				'return'  => 'ids',
+			)
+		);
+
+		return array(
+			'post__in' => ! empty( $recent_product_ids ) ? $recent_product_ids : array( -1 ),
+		);
 	}
 
 	/**
