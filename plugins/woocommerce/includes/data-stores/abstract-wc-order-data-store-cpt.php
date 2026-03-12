@@ -932,9 +932,52 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	}
 
 	/**
+	 * Returns a prepared SQL JOIN clause for finding refund orders belonging to a given parent order.
+	 *
+	 * The clause aliases the refund table as `refunds`. Subclasses should override this
+	 * to use a different table (e.g. the HPOS orders table).
+	 *
+	 * @since 10.7.0
+	 * @param int $order_id Parent order ID.
+	 * @return string Prepared SQL JOIN fragment.
+	 */
+	protected function get_refund_orders_join_clause( int $order_id ): string {
+		global $wpdb;
+		return $wpdb->prepare( '%i AS refunds ON ( refunds.post_type = %s AND refunds.post_parent = %d )', $wpdb->posts, 'shop_order_refund', $order_id );
+	}
+
+	/**
+	 * Get the total tax refunded.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return float
+	 */
+	public function get_total_tax_refunded( $order ) {
+		global $wpdb;
+
+		$refund_join = $this->get_refund_orders_join_clause( $order->get_id() );
+		$total       = $wpdb->get_var(
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $refund_join is already prepared.
+			$wpdb->prepare(
+				"SELECT SUM( order_itemmeta.meta_value )
+				FROM %i AS order_itemmeta
+				INNER JOIN $refund_join
+				INNER JOIN %i AS order_items ON ( order_items.order_id = refunds.id AND order_items.order_item_type = 'tax' )
+				WHERE order_itemmeta.order_item_id = order_items.order_item_id
+				AND order_itemmeta.meta_key IN ('tax_amount', 'shipping_tax_amount')",
+				$wpdb->prefix . 'woocommerce_order_itemmeta',
+				$wpdb->prefix . 'woocommerce_order_items',
+			)
+			// phpcs:enable
+		) ?? 0;
+
+		return abs( $total );
+	}
+
+	/**
 	 * Get the total shipping tax refunded.
 	 *
-	 * @param  WC_Order $order Order object.
+	 * @param WC_Order $order Order object.
 	 *
 	 * @since 10.2.0
 	 * @return float
@@ -942,16 +985,49 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	public function get_total_shipping_tax_refunded( $order ) {
 		global $wpdb;
 
-		$total = $wpdb->get_var(
+		$refund_join = $this->get_refund_orders_join_clause( $order->get_id() );
+		$total       = $wpdb->get_var(
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $refund_join is already prepared.
 			$wpdb->prepare(
 				"SELECT SUM( order_itemmeta.meta_value )
-				FROM {$wpdb->prefix}woocommerce_order_itemmeta AS order_itemmeta
-				INNER JOIN $wpdb->posts AS posts ON ( posts.post_type = 'shop_order_refund' AND posts.post_parent = %d )
-				INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON ( order_items.order_id = posts.ID AND order_items.order_item_type = 'tax' )
+				FROM %i AS order_itemmeta
+				INNER JOIN $refund_join
+				INNER JOIN %i AS order_items ON ( order_items.order_id = refunds.id AND order_items.order_item_type = 'tax' )
 				WHERE order_itemmeta.order_item_id = order_items.order_item_id
 				AND order_itemmeta.meta_key = 'shipping_tax_amount'",
-				$order->get_id()
+				$wpdb->prefix . 'woocommerce_order_itemmeta',
+				$wpdb->prefix . 'woocommerce_order_items',
 			)
+			// phpcs:enable
+		) ?? 0;
+
+		return abs( $total );
+	}
+
+	/**
+	 * Get the total shipping refunded.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return float
+	 */
+	public function get_total_shipping_refunded( $order ) {
+		global $wpdb;
+
+		$refund_join = $this->get_refund_orders_join_clause( $order->get_id() );
+
+		$total = $wpdb->get_var(
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $refund_join is already prepared.
+			$wpdb->prepare(
+				"SELECT SUM( order_itemmeta.meta_value )
+				FROM %i AS order_itemmeta
+				INNER JOIN $refund_join
+				INNER JOIN %i AS order_items ON ( order_items.order_id = refunds.id AND order_items.order_item_type = 'shipping' )
+				WHERE order_itemmeta.order_item_id = order_items.order_item_id
+				AND order_itemmeta.meta_key IN ('cost')",
+				$wpdb->prefix . 'woocommerce_order_itemmeta',
+				$wpdb->prefix . 'woocommerce_order_items',
+			)
+			// phpcs:enable
 		) ?? 0;
 
 		return abs( $total );
