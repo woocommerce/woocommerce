@@ -16,7 +16,10 @@ import type {
  * @return The normalized name (e.g., 'color').
  */
 export const normalizeAttributeName = ( name: string ): string => {
-	return name.replace( /^attribute_(pa_)?/, '' ).replace( /-/g, ' ' );
+	return name
+		.replace( /^attribute_(pa_)?/, '' )
+		.replace( /-/g, ' ' )
+		.toLowerCase();
 };
 
 /**
@@ -33,10 +36,7 @@ export const attributeNamesMatch = (
 	name1: string,
 	name2: string
 ): boolean => {
-	return (
-		normalizeAttributeName( name1 ).toLowerCase() ===
-		normalizeAttributeName( name2 ).toLowerCase()
-	);
+	return normalizeAttributeName( name1 ) === normalizeAttributeName( name2 );
 };
 
 /**
@@ -54,11 +54,8 @@ export const getVariationAttributeValue = (
 	variation: ProductResponseVariationsItem,
 	attributeName: string
 ): string | undefined => {
-	const normalizedName =
-		normalizeAttributeName( attributeName ).toLowerCase();
-	const attr = variation.attributes.find(
-		( a ) =>
-			normalizeAttributeName( a.name ).toLowerCase() === normalizedName
+	const attr = variation.attributes.find( ( a ) =>
+		attributeNamesMatch( attributeName, a.name )
 	);
 	return attr?.value;
 };
@@ -84,14 +81,8 @@ export const findMatchingVariation = (
 	const matchedVariation = product.variations.find(
 		( variation: ProductResponseVariationsItem ) => {
 			return variation.attributes.every( ( attr ) => {
-				const attrNameNormalized = normalizeAttributeName(
-					attr.name
-				).toLowerCase();
-				const selectedAttr = selectedAttributes.find(
-					( selected ) =>
-						normalizeAttributeName(
-							selected.attribute
-						).toLowerCase() === attrNameNormalized
+				const selectedAttr = selectedAttributes.find( ( selected ) =>
+					attributeNamesMatch( attr.name, selected.attribute )
 				);
 
 				// If variation attribute is null, it accepts "Any" value.
