@@ -71,6 +71,17 @@ class ProductPrice extends AbstractBlock {
 			$is_descendant_of_grouped_product_selector = isset( $block->context['isDescendantOfGroupedProductSelector'] );
 			$is_interactive                            = ! $is_descendant_of_product_collection && ! $is_descendant_of_grouped_product_selector && $product->is_type( ProductType::VARIABLE );
 
+			if ( $is_interactive ) {
+				// phpcs:ignore Generic.Commenting.DocComment.MissingShort -- Type hint for PHPStan.
+				/** @var \WC_Product_Variable $product */
+				$prices_vary = $product->get_variation_sale_price( 'min' ) !== $product->get_variation_sale_price( 'max' )
+					|| $product->get_variation_regular_price( 'min' ) !== $product->get_variation_regular_price( 'max' );
+
+				if ( ! $prices_vary ) {
+					$is_interactive = false;
+				}
+			}
+
 			$wrapper_attributes     = array(
 				'style' => $styles_and_classes['styles'] ?? '',
 				'class' => $styles_and_classes['classes'] ?? '',
