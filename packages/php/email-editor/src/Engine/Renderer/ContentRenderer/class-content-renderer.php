@@ -173,8 +173,12 @@ class Content_Renderer {
 	public function render_without_css_inline( WP_Post $post, WP_Block_Template $template ): array {
 		$this->set_template_globals( $post, $template );
 		$this->initialize();
-		$rendered_html = get_the_block_template_html();
-		$this->reset();
+		try {
+			do_action( 'woocommerce_email_editor_render_start' );
+			$rendered_html = get_the_block_template_html();
+		} finally {
+			$this->reset();
+		}
 
 		return array(
 			'html'   => $rendered_html,
@@ -192,13 +196,20 @@ class Content_Renderer {
 	}
 
 	/**
-	 * Preprocess parsed blocks
+	 * Preprocess parsed blocks.
+	 *
+	 * Called for both template blocks and post-content user blocks. The
+	 * Spacing_Preprocessor handles root padding distribution: container
+	 * blocks (groups wrapping post-content) are transparent, delegating
+	 * padding to their children so user blocks get individual padding.
 	 *
 	 * @param array $parsed_blocks Parsed blocks.
 	 * @return array
 	 */
 	public function preprocess_parsed_blocks( array $parsed_blocks ): array {
-		return $this->process_manager->preprocess( $parsed_blocks, $this->theme_controller->get_layout_settings(), $this->theme_controller->get_styles() );
+		$styles = $this->theme_controller->get_styles();
+
+		return $this->process_manager->preprocess( $parsed_blocks, $this->theme_controller->get_layout_settings(), $styles );
 	}
 
 	/**
