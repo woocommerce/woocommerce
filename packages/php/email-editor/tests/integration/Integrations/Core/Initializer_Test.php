@@ -72,6 +72,8 @@ class Initializer_Test extends \Email_Editor_Integration_Test_Case {
 	public function testResetRenderersFiresOncePerRenderStart(): void {
 		$spy = new Initializer_Spy();
 		$spy->initialize();
+		$spy->initialize();
+		$spy->initialize();
 
 		try {
 			// Simulate multiple renders.
@@ -80,6 +82,8 @@ class Initializer_Test extends \Email_Editor_Integration_Test_Case {
 
 			$this->assertSame( 2, $spy->reset_renderers_call_count );
 		} finally {
+			remove_filter( 'woocommerce_email_editor_theme_json', array( $spy, 'adjust_theme_json' ) );
+			remove_filter( 'safe_style_css', array( $spy, 'allow_styles' ) );
 			remove_action( 'woocommerce_email_editor_render_start', array( $spy, 'reset_renderers' ) );
 		}
 	}
