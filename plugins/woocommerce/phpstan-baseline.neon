@@ -6121,6 +6121,12 @@ parameters:
 			path: includes/admin/meta-boxes/views/html-order-shipping.php
 
 		-
+			message: '#^Variable \$cogs_is_enabled might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: includes/admin/meta-boxes/views/html-order-shipping.php
+
+		-
 			message: '#^Variable \$order might not be defined\.$#'
 			identifier: variable.undefined
 			count: 7
