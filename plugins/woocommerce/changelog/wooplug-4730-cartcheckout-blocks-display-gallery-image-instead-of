@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent product images with unicode characters falling back to product gallery images in Cart/Checkout blocks
