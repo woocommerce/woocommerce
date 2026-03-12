@@ -46,6 +46,13 @@ final class OrderNoteGroup {
 	public const ORDER_UPDATE = 'order_update';
 
 	/**
+	 * Any note concerning fulfillments.
+	 *
+	 * @var string
+	 */
+	public const FULFILLMENT = 'fulfillment';
+
+	/**
 	 * Get the default group title for a given group.
 	 *
 	 * @param string $group The group.
@@ -61,6 +68,8 @@ final class OrderNoteGroup {
 				return __( 'Email notification', 'woocommerce' );
 			case self::ERROR:
 				return __( 'Error', 'woocommerce' );
+			case self::FULFILLMENT:
+				return __( 'Fulfillment', 'woocommerce' );
 			default:
 				return __( 'Order updated', 'woocommerce' );
 		}

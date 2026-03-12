@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Place newly installed payment gateways above offline payment methods instead of at the bottom of the list.

@@ -29,6 +29,10 @@ class Products extends ControllerTestCase {
 					'name'              => 'Test Product 1',
 					'stock_status'      => ProductStockStatus::IN_STOCK,
 					'regular_price'     => 10,
+					'weight'            => '2.5',
+					'length'            => '10',
+					'width'             => '5',
+					'height'            => '3',
 					'image_id'          => $fixtures->sideload_image(),
 					'gallery_image_ids' => array(),
 				)
@@ -68,6 +72,12 @@ class Products extends ControllerTestCase {
 		$this->assertEquals( $this->products[0]->add_to_cart_description(), $data['add_to_cart']->description );
 		$this->assertEquals( $this->products[0]->single_add_to_cart_text(), $data['add_to_cart']->single_text );
 		$this->assertEquals( $this->products[0]->is_on_sale(), $data['on_sale'] );
+		$this->assertEquals( $this->products[0]->get_weight(), $data['weight'] );
+		$this->assertEquals( $this->products[0]->get_length(), $data['dimensions']->length );
+		$this->assertEquals( $this->products[0]->get_width(), $data['dimensions']->width );
+		$this->assertEquals( $this->products[0]->get_height(), $data['dimensions']->height );
+		$this->assertEquals( wc_format_weight( (float) $this->products[0]->get_weight() ), $data['formatted_weight'] );
+		$this->assertEquals( html_entity_decode( wc_format_dimensions( (array) $this->products[0]->get_dimensions( false ) ), ENT_QUOTES, get_bloginfo( 'charset' ) ), $data['formatted_dimensions'] );
 		$this->assertCount( 0, $data['grouped_products'] );
 
 		$this->assertCount( 1, $data['images'] );
@@ -121,6 +131,8 @@ class Products extends ControllerTestCase {
 		$this->assertArrayHasKey( 'has_options', $data[0] );
 		$this->assertArrayHasKey( 'is_purchasable', $data[0] );
 		$this->assertArrayHasKey( 'is_in_stock', $data[0] );
+		$this->assertArrayHasKey( 'weight', $data[0] );
+		$this->assertArrayHasKey( 'dimensions', $data[0] );
 		$this->assertArrayHasKey( 'add_to_cart', $data[0] );
 		$this->assertArrayHasKey( 'extensions', $data[0] );
 	}
@@ -170,6 +182,8 @@ class Products extends ControllerTestCase {
 		$this->assertArrayHasKey( 'has_options', $data );
 		$this->assertArrayHasKey( 'is_purchasable', $data );
 		$this->assertArrayHasKey( 'is_in_stock', $data );
+		$this->assertArrayHasKey( 'weight', $data );
+		$this->assertArrayHasKey( 'dimensions', $data );
 		$this->assertArrayHasKey( 'add_to_cart', $data );
 	}
 

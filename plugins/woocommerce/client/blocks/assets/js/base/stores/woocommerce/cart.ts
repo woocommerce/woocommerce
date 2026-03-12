@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { getConfig, store } from '@wordpress/interactivity';
+import type { AsyncAction, TypeYield } from '@wordpress/interactivity';
 import type {
 	Cart,
 	CartItem,
@@ -25,6 +26,7 @@ import {
 	type MutationQueue,
 	type MutationResult,
 } from './mutation-batcher';
+import { doesCartItemMatchAttributes } from '../../utils/variations/does-cart-item-match-attributes';
 
 export type WooCommerceConfig = {
 	products?: {
@@ -100,26 +102,34 @@ export type Store = {
 		};
 		restUrl: string;
 		nonce: string;
+		findItemInCart: ( args: {
+			id: ClientCartItem[ 'id' ];
+			key?: ClientCartItem[ 'key' ];
+			variation?: ClientCartItem[ 'variation' ];
+		} ) => CartItem | OptimisticCartItem | undefined;
 		cart: Omit< Cart, 'items' > & {
 			items: ( OptimisticCartItem | CartItem )[];
 			totals: CartResponseTotals;
 		};
 	};
 	actions: {
-		removeCartItem: ( key: string ) => void;
+		removeCartItem: ( key: string ) => Promise< void >;
 		addCartItem: (
 			args: ClientCartItem,
 			options?: CartUpdateOptions
-		) => void;
+		) => Promise< void >;
 		batchAddCartItems: (
 			items: ClientCartItem[],
 			options?: CartUpdateOptions
-		) => void;
+		) => Promise< void >;
 		// Todo: Check why if I switch to an async function here the types of the store stop working.
-		refreshCartItems: () => void;
-		waitForIdle: () => void;
-		showNoticeError: ( error: Error | ApiErrorResponse ) => void;
-		updateNotices: ( notices: Notice[], removeOthers?: boolean ) => void;
+		refreshCartItems: () => Promise< void >;
+		waitForIdle: () => Promise< void >;
+		showNoticeError: ( error: Error | ApiErrorResponse ) => Promise< void >;
+		updateNotices: (
+			notices: Notice[],
+			removeOthers?: boolean
+		) => Promise< void >;
 	};
 };
 
@@ -161,35 +171,29 @@ const generateInfoNotice = ( message: string ): Notice => ( {
 
 const getInfoNoticesFromCartUpdates = (
 	oldCart: Store[ 'state' ][ 'cart' ],
-	newCart: Cart,
-	quantityChanges: QuantityChanges
+	newCart: Cart
 ): Notice[] => {
 	const oldItems = oldCart.items;
 	const newItems = newCart.items;
 
-	const {
-		productsPendingAdd: pendingAdd = [],
-		cartItemsPendingQuantity: pendingQuantity = [],
-		cartItemsPendingDelete: pendingDelete = [],
-	} = quantityChanges;
-
+	// Items auto-removed by the server (stock change, product deleted, etc.).
+	// We pass the optimistic snapshot as oldCart, so user-initiated removals
+	// are already absent and do not generate spurious notices here.
 	const autoDeletedToNotify = oldItems.filter(
 		( old ) =>
-			old.key &&
 			isCartItem( old ) &&
-			! newItems.some( ( item ) => old.key === item.key ) &&
-			! pendingDelete.includes( old.key )
+			! newItems.some( ( item ) => old.key === item.key )
 	);
 
+	// Items whose quantity was adjusted by the server (stock cap, sold-individually).
+	// Comparing optimistic → server means intentional user changes are already
+	// reflected in oldItems and will not trigger this notice.
 	const autoUpdatedToNotify = newItems.filter( ( item ) => {
 		if ( ! isCartItem( item ) ) {
 			return false;
 		}
 		const old = oldItems.find( ( o ) => o.key === item.key );
-		return old
-			? ! pendingQuantity.includes( item.key ) &&
-					item.quantity !== old.quantity
-			: ! pendingAdd.includes( item.id );
+		return old && item.quantity !== old.quantity;
 	} );
 	return [
 		...autoDeletedToNotify.map( ( item ) =>
@@ -209,43 +213,12 @@ const getInfoNoticesFromCartUpdates = (
 	];
 };
 
-// Same as the one in /assets/js/base/utils/variations/does-cart-item-match-attributes.ts.
-const doesCartItemMatchAttributes = (
-	cartItem: OptimisticCartItem,
-	selectedAttributes: SelectedAttributes[]
-) => {
-	if (
-		! Array.isArray( cartItem.variation ) ||
-		! Array.isArray( selectedAttributes )
-	) {
-		return false;
-	}
-
-	if ( cartItem.variation.length !== selectedAttributes.length ) {
-		return false;
-	}
-
-	return cartItem.variation.every(
-		( {
-			// eslint-disable-next-line
-			raw_attribute,
-			value,
-		}: {
-			raw_attribute: string;
-			value: string;
-		} ) =>
-			selectedAttributes.some( ( item: SelectedAttributes ) => {
-				return (
-					item.attribute === raw_attribute &&
-					( item.value.toLowerCase() === value.toLowerCase() ||
-						( item.value && value === '' ) ) // Handle "any" attribute type
-				);
-			} )
-	);
-};
-
 let pendingRefresh = false;
 let refreshTimeout = 3000;
+let resolveNonceReady: ( () => void ) | null = null;
+const isNonceReady = new Promise< void >( ( resolve ) => {
+	resolveNonceReady = resolve;
+} );
 
 function emitSyncEvent( {
 	quantityChanges,
@@ -275,10 +248,11 @@ let cartQueue: MutationQueue< Cart > | null = null;
  *
  * Handles optimistic updates, request queuing, and state reconciliation.
  */
-function sendCartRequest(
+async function sendCartRequest(
 	stateRef: Store[ 'state' ],
 	options: MutationRequest< Cart >
 ): Promise< MutationResult< Cart > > {
+	await isNonceReady;
 	// Lazily initialize queue on first use.
 	if ( ! cartQueue ) {
 		cartQueue = createMutationQueue< Cart >( {
@@ -293,6 +267,12 @@ function sendCartRequest(
 			commit: ( serverState ) => {
 				stateRef.cart = serverState;
 			},
+			fetchHandler: async ( ...args ) => {
+				const response = await fetch( ...args );
+				stateRef.nonce =
+					response.headers.get( 'Nonce' ) || stateRef.nonce;
+				return response;
+			},
 		} );
 	}
 
@@ -303,9 +283,41 @@ function sendCartRequest(
 const { state, actions } = store< Store >(
 	'woocommerce',
 	{
+		state: {
+			findItemInCart( {
+				id,
+				key,
+				variation,
+			}: {
+				id: ClientCartItem[ 'id' ];
+				key?: ClientCartItem[ 'key' ];
+				variation?: ClientCartItem[ 'variation' ];
+			} ) {
+				return state.cart.items.find( ( cartItem ) => {
+					if ( key ) {
+						return key === cartItem.key;
+					}
+					if ( cartItem.type === 'variation' ) {
+						if (
+							id !== cartItem.id ||
+							! cartItem.variation ||
+							! variation ||
+							cartItem.variation.length !== variation.length
+						) {
+							return false;
+						}
+						return doesCartItemMatchAttributes(
+							cartItem,
+							variation
+						);
+					}
+					return id === cartItem.id;
+				} );
+			},
+		},
 		actions: {
-			*removeCartItem( key: string ) {
-				// Track what changes we're making for notice comparison.
+			*removeCartItem( key: string ): AsyncAction< void > {
+				// Track what changes we're making for the sync event.
 				const quantityChanges: QuantityChanges = {
 					cartItemsPendingDelete: [ key ],
 				};
@@ -314,7 +326,7 @@ const { state, actions } = store< Store >(
 				let cartAfterOptimistic: typeof state.cart | null = null;
 
 				try {
-					const result = yield sendCartRequest( state, {
+					const result = ( yield sendCartRequest( state, {
 						path: '/wc/store/v1/cart/remove-item',
 						method: 'POST',
 						body: { key },
@@ -335,15 +347,14 @@ const { state, actions } = store< Store >(
 								emitSyncEvent( { quantityChanges } );
 							}
 						},
-					} );
+					} ) ) as TypeYield< typeof sendCartRequest >;
 
 					// Show notices from server response.
 					const cart = result.data as Cart;
 					if ( cart && cartAfterOptimistic ) {
 						const infoNotices = getInfoNoticesFromCartUpdates(
 							cartAfterOptimistic,
-							cart,
-							quantityChanges
+							cart
 						);
 						const errorNotices =
 							cart.errors.map( generateErrorNotice );
@@ -360,7 +371,7 @@ const { state, actions } = store< Store >(
 			*addCartItem(
 				{ id, key, quantity, quantityToAdd, variation }: ClientCartItem,
 				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
-			) {
+			): AsyncAction< void > {
 				if ( quantity !== undefined && quantityToAdd !== undefined ) {
 					throw new Error(
 						'addCartItem: pass either quantity or quantityToAdd, not both.'
@@ -370,22 +381,10 @@ const { state, actions } = store< Store >(
 				const a11yModulePromise = import( '@wordpress/a11y' );
 
 				// Find existing item
-				const existingItem = state.cart.items.find( ( cartItem ) => {
-					if ( cartItem.type === 'variation' ) {
-						if (
-							id !== cartItem.id ||
-							! cartItem.variation ||
-							! variation ||
-							cartItem.variation.length !== variation.length
-						) {
-							return false;
-						}
-						return doesCartItemMatchAttributes(
-							cartItem,
-							variation
-						);
-					}
-					return key ? key === cartItem.key : id === cartItem.id;
+				const existingItem = state.findItemInCart( {
+					id,
+					key,
+					variation,
 				} );
 
 				// Determine the target quantity.
@@ -441,7 +440,7 @@ const { state, actions } = store< Store >(
 				let cartAfterOptimistic: typeof state.cart | null = null;
 
 				try {
-					const result = yield sendCartRequest( state, {
+					const result = ( yield sendCartRequest( state, {
 						path: `/wc/store/v1/cart/${ endpoint }`,
 						method: 'POST',
 						body: itemToSend,
@@ -477,7 +476,7 @@ const { state, actions } = store< Store >(
 								emitSyncEvent( { quantityChanges } );
 							}
 						},
-					} );
+					} ) ) as TypeYield< typeof sendCartRequest >;
 
 					// Success - handle side effects that don't trigger refreshCartItems
 					const cart = result.data as Cart;
@@ -490,8 +489,7 @@ const { state, actions } = store< Store >(
 					) {
 						const infoNotices = getInfoNoticesFromCartUpdates(
 							cartAfterOptimistic,
-							cart,
-							quantityChanges
+							cart
 						);
 						const errorNotices =
 							cart.errors.map( generateErrorNotice );
@@ -506,7 +504,10 @@ const { state, actions } = store< Store >(
 						'woocommerce'
 					) as WooCommerceConfig;
 					if ( messages?.addedToCartText ) {
-						const { speak } = yield a11yModulePromise;
+						const { speak } =
+							( yield a11yModulePromise ) as Awaited<
+								typeof a11yModulePromise
+							>;
 						speak( messages.addedToCartText, 'polite' );
 					}
 				} catch ( error ) {
@@ -518,7 +519,7 @@ const { state, actions } = store< Store >(
 			*batchAddCartItems(
 				items: ClientCartItem[],
 				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
-			) {
+			): AsyncAction< void > {
 				const a11yModulePromise = import( '@wordpress/a11y' );
 				const quantityChanges: QuantityChanges = {};
 
@@ -526,9 +527,11 @@ const { state, actions } = store< Store >(
 					// Submit each item through the batcher. They'll be
 					// collected into a single batch request automatically.
 					const promises = items.map( ( item, index ) => {
-						const existingItem = state.cart.items.find(
-							( { id: productId } ) => item.id === productId
-						);
+						const existingItem = state.findItemInCart( {
+							id: item.id,
+							key: item.key,
+							variation: item.variation,
+						} );
 
 						let quantity: number;
 						if ( typeof item.quantityToAdd === 'number' ) {
@@ -588,18 +591,18 @@ const { state, actions } = store< Store >(
 							// succeeded (data is set from the last
 							// successful server state). Only the last
 							// item's callback fires to avoid duplicates.
-							onSettled: isLastItem
-								? ( { data } ) => {
-										if ( data ) {
-											triggerAddedToCartEvent( {
-												preserveCartData: true,
-											} );
-											emitSyncEvent( {
-												quantityChanges,
-											} );
-										}
-								  }
-								: undefined,
+							...( isLastItem && {
+								onSettled: ( { data } ) => {
+									if ( data ) {
+										triggerAddedToCartEvent( {
+											preserveCartData: true,
+										} );
+										emitSyncEvent( {
+											quantityChanges,
+										} );
+									}
+								},
+							} ),
 						} );
 					} );
 
@@ -608,9 +611,9 @@ const { state, actions } = store< Store >(
 						JSON.stringify( state.cart )
 					);
 
-					const results: PromiseSettledResult<
-						MutationResult< Cart >
-					>[] = yield Promise.allSettled( promises );
+					const results = ( yield Promise.allSettled(
+						promises
+					) ) as PromiseSettledResult< MutationResult< Cart > >[];
 
 					// Find the last successful result for notices/a11y.
 					const lastSuccess = [ ...results ]
@@ -629,8 +632,7 @@ const { state, actions } = store< Store >(
 						if ( showCartUpdatesNotices ) {
 							const infoNotices = getInfoNoticesFromCartUpdates(
 								cartAfterOptimistic,
-								cart,
-								quantityChanges
+								cart
 							);
 							const errorNotices =
 								cart.errors.map( generateErrorNotice );
@@ -644,7 +646,10 @@ const { state, actions } = store< Store >(
 							'woocommerce'
 						) as WooCommerceConfig;
 						if ( messages?.addedToCartText ) {
-							const { speak } = yield a11yModulePromise;
+							const { speak } =
+								( yield a11yModulePromise ) as Awaited<
+									typeof a11yModulePromise
+								>;
 							speak( messages.addedToCartText, 'polite' );
 						}
 					}
@@ -666,7 +671,7 @@ const { state, actions } = store< Store >(
 				}
 			},
 
-			*refreshCartItems() {
+			*refreshCartItems(): AsyncAction< void > {
 				// Skip if queue is processing - it will apply server state when done
 				if ( cartQueue?.getStatus().isProcessing ) {
 					return;
@@ -678,15 +683,24 @@ const { state, actions } = store< Store >(
 				pendingRefresh = true;
 
 				try {
-					const res: Response = yield fetch(
+					const res = ( yield fetch(
 						`${ state.restUrl }wc/store/v1/cart`,
 						{
 							method: 'GET',
 							cache: 'no-store',
 							headers: { 'Content-Type': 'application/json' },
 						}
-					);
-					const json: Cart = yield res.json();
+					) ) as TypeYield< typeof fetch >;
+
+					// Extract fresh nonce from response headers.
+					state.nonce = res.headers.get( 'Nonce' ) || state.nonce;
+
+					if ( resolveNonceReady ) {
+						resolveNonceReady();
+						resolveNonceReady = null;
+					}
+
+					const json = ( yield res.json() ) as Cart;
 
 					// Checks if the response contains an error.
 					if ( isApiErrorResponse( res, json ) )
@@ -714,13 +728,15 @@ const { state, actions } = store< Store >(
 				}
 			},
 
-			*waitForIdle() {
+			*waitForIdle(): AsyncAction< void > {
 				if ( cartQueue ) {
 					yield cartQueue.waitForIdle();
 				}
 			},
 
-			*showNoticeError( error: Error | ApiErrorResponse ) {
+			*showNoticeError(
+				error: Error | ApiErrorResponse
+			): AsyncAction< void > {
 				// Todo: Use the module exports instead of `store()` once the store-notices
 				// store is public.
 				yield import( '@woocommerce/stores/store-notices' );
@@ -749,7 +765,10 @@ const { state, actions } = store< Store >(
 				console.error( error );
 			},
 
-			*updateNotices( newNotices: Notice[] = [], removeOthers = false ) {
+			*updateNotices(
+				newNotices: Notice[] = [],
+				removeOthers = false
+			): AsyncAction< void > {
 				// Todo: Use the module exports instead of `store()` once the store-notices
 				// store is public.
 				yield import( '@woocommerce/stores/store-notices' );
@@ -779,6 +798,9 @@ const { state, actions } = store< Store >(
 	},
 	{ lock: true }
 );
+
+// Trigger initial cart refresh.
+actions.refreshCartItems();
 
 window.addEventListener(
 	'wc-blocks_store_sync_required',
