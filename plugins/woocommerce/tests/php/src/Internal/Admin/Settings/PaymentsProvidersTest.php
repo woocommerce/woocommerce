@@ -6141,11 +6141,11 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 	/**
 	 * @dataProvider data_provider_enhance_order_map_new_gateway_with_suggestion
 	 *
-	 * @param array      $gateway_ids     The gateway IDs to register.
-	 * @param array      $gateway_slugs   Map of gateway ID to plugin slug.
-	 * @param array      $suggestions     The suggestions list.
-	 * @param array      $start_order_map The starting order map.
-	 * @param string[]   $expected_order  The expected order of IDs after enhancement.
+	 * @param array    $gateway_ids     The gateway IDs to register.
+	 * @param array    $gateway_slugs   Map of gateway ID to plugin slug.
+	 * @param array    $suggestions     The suggestions list.
+	 * @param array    $start_order_map The starting order map.
+	 * @param string[] $expected_order  The expected order of IDs after enhancement.
 	 */
 	public function test_enhance_order_map_new_gateway_with_suggestion(
 		array $gateway_ids,
