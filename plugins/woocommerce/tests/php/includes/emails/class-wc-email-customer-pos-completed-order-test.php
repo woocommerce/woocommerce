@@ -426,6 +426,59 @@ class WC_Email_Customer_POS_Completed_Order_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox POS email displays unit price in the quantity column.
+	 */
+	public function test_pos_email_displays_unit_price_in_quantity_column() {
+		// Initialize WC_Emails to set up actions and filters.
+		$emails = new WC_Emails();
+
+		// Given an order with items.
+		$order = OrderHelper::create_order();
+		$order->save();
+
+		// When getting content from POS email.
+		$email         = new WC_Email_Customer_POS_Completed_Order();
+		$email->object = $order;
+		$content       = $email->get_content_html();
+
+		// Then POS email should show unit price followed by × and quantity.
+		$this->assertStringContainsString( '&times;&nbsp;' . $order->get_items()[ array_key_first( $order->get_items() ) ]->get_quantity(), $content );
+	}
+
+	/**
+	 * @testdox POS email unit price in quantity column does not affect regular completed order emails.
+	 */
+	public function test_pos_email_unit_price_does_not_affect_regular_emails() {
+		// Initialize WC_Emails to set up actions and filters.
+		$emails = new WC_Emails();
+
+		// Given an order with items.
+		$order = OrderHelper::create_order();
+		$order->save();
+
+		// When getting content from both email types.
+		$pos_email     = new WC_Email_Customer_POS_Completed_Order();
+		$regular_email = new WC_Email_Customer_Completed_Order();
+
+		$pos_email->object     = $order;
+		$regular_email->object = $order;
+
+		$pos_content     = $pos_email->get_content_html();
+		$regular_content = $regular_email->get_content_html();
+
+		$items = $order->get_items();
+		$item  = $items[ array_key_first( $items ) ];
+
+		// Then POS email should show formatted unit price before × quantity.
+		$unit_price     = wp_kses_post( wc_price( $order->get_item_subtotal( $item ), array( 'currency' => $order->get_currency() ) ) );
+		$expected_chunk = $unit_price . ' &times;&nbsp;' . $item->get_quantity();
+		$this->assertStringContainsString( $expected_chunk, $pos_content );
+
+		// And regular email should not contain unit price before × quantity.
+		$this->assertStringNotContainsString( $expected_chunk, $regular_content );
+	}
+
+	/**
 	 * @testdox POS email content does not include refund & returns policy when option is not set.
 	 */
 	public function test_email_content_does_not_include_refund_returns_policy_when_option_is_not_set() {

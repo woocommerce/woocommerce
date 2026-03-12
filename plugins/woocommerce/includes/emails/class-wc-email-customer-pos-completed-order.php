@@ -272,8 +272,8 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 		 * Add actions and filters before generating email content.
 		 */
 		private function add_pos_customizations() {
-			// Add action to display unit price in the beginning of the order item meta.
-			add_action( 'woocommerce_order_item_meta_start', array( $this, 'add_unit_price' ), 10, 4 );
+			// Add filter to display unit price in the quantity column.
+			add_filter( 'woocommerce_email_order_items_quantity_display', array( $this, 'format_quantity_with_unit_price' ), 10, 3 );
 			// Add filter to include additional details in the order item totals table.
 			add_filter( 'woocommerce_get_order_item_totals', array( $this, 'order_item_totals' ), 10, 3 );
 			// Add filter for custom footer text with highest priority to run before the default footer text filtering in `WC_Emails`.
@@ -285,7 +285,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 		 */
 		private function remove_pos_customizations() {
 			// Remove actions and filters after generating content to avoid affecting other emails.
-			remove_action( 'woocommerce_order_item_meta_start', array( $this, 'add_unit_price' ), 10 );
+			remove_filter( 'woocommerce_email_order_items_quantity_display', array( $this, 'format_quantity_with_unit_price' ), 10 );
 			remove_filter( 'woocommerce_get_order_item_totals', array( $this, 'order_item_totals' ), 10 );
 			remove_filter( 'woocommerce_email_footer_text', array( $this, 'replace_footer_placeholders' ), 1 );
 		}
@@ -324,17 +324,18 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 		}
 
 		/**
-		 * Add unit price to order item meta start position.
+		 * Format the quantity cell to show unit price before the quantity.
 		 *
-		 * @param int      $item_id       Order item ID.
-		 * @param array    $item          Order item data.
-		 * @param WC_Order $order         Order object.
+		 * @param string                $qty_display The default quantity display.
+		 * @param WC_Order_Item_Product $item        The order item.
+		 * @param WC_Order              $order       The order object.
+		 * @return string The formatted quantity display with unit price.
 		 *
 		 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
 		 */
-		public function add_unit_price( $item_id, $item, $order ) {
+		public function format_quantity_with_unit_price( $qty_display, $item, $order ) {
 			$unit_price = OrderPriceFormatter::get_formatted_item_subtotal( $order, $item, get_option( 'woocommerce_tax_display_cart' ) );
-			echo wp_kses_post( '<br /><small>' . $unit_price . '</small>' );
+			return $unit_price . ' &times;&nbsp;' . $item->get_quantity();
 		}
 
 		/**

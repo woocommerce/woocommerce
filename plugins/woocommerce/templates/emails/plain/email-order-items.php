@@ -12,7 +12,7 @@
  *
  * @see         https://woocommerce.com/document/template-structure/
  * @package     WooCommerce\Templates\Emails\Plain
- * @version     9.8.0
+ * @version     10.7.0
  */
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -52,7 +52,20 @@ foreach ( $items as $item_id => $item ) :
 			 * @param int           $quantity Item quantity.
 			 * @param WC_Order_Item $item     Item object.
 			 */
-			$product_name .= ' × ' . apply_filters( 'woocommerce_email_order_item_quantity', $item->get_quantity(), $item );
+			$qty_display = apply_filters( 'woocommerce_email_order_item_quantity', $item->get_quantity(), $item );
+			$qty_display = '× ' . $qty_display;
+
+			/**
+			 * Filters the complete quantity cell display in order emails.
+			 *
+			 * @param string                $qty_display The full quantity display HTML including any prefix.
+			 * @param WC_Order_Item_Product $item        The order item.
+			 * @param WC_Order              $order       The order object.
+			 *
+			 * @since 10.7.0
+			 */
+			$qty_display   = apply_filters( 'woocommerce_email_order_items_quantity_display', $qty_display, $item, $order );
+			$product_name .= ' ' . $qty_display;
 			echo wp_kses_post( str_pad( wp_kses_post( $product_name ), 40 ) );
 			echo ' ';
 			echo esc_html( str_pad( wp_kses( $order->get_formatted_line_subtotal( $item ), array() ), 20, ' ', STR_PAD_LEFT ) ) . "\n";
@@ -81,7 +94,20 @@ foreach ( $items as $item_id => $item ) :
 			 * @param int           $quantity Item quantity.
 			 * @param WC_Order_Item $item     Item object.
 			 */
-			echo ' X ' . apply_filters( 'woocommerce_email_order_item_quantity', $item->get_quantity(), $item );
+			$qty_display = apply_filters( 'woocommerce_email_order_item_quantity', $item->get_quantity(), $item );
+			$qty_display = 'X ' . $qty_display;
+
+			/**
+			 * Filters the complete quantity cell display in order emails.
+			 *
+			 * @param string                $qty_display The full quantity display HTML including any prefix.
+			 * @param WC_Order_Item_Product $item        The order item.
+			 * @param WC_Order              $order       The order object.
+			 *
+			 * @since 10.7.0
+			 */
+			$qty_display = apply_filters( 'woocommerce_email_order_items_quantity_display', $qty_display, $item, $order );
+			echo ' ' . $qty_display;
 			echo ' = ' . $order->get_formatted_line_subtotal( $item ) . "\n";
 			// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
 		}
