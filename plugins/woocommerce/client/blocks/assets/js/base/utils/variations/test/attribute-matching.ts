@@ -255,9 +255,7 @@ describe( 'findMatchingVariation', () => {
 				variations: [
 					{
 						id: 401,
-						attributes: [
-							{ name: 'numeric-size', value: '42' },
-						],
+						attributes: [ { name: 'numeric-size', value: '42' } ],
 					},
 				],
 			};
