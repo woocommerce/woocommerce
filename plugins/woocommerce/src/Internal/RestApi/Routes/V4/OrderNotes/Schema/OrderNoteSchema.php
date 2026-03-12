@@ -70,11 +70,10 @@ class OrderNoteSchema extends AbstractSchema {
 				'readonly'    => true,
 			),
 			'note'             => array(
-				'description'       => __( 'Order note content.', 'woocommerce' ),
-				'type'              => 'string',
-				'context'           => self::VIEW_EDIT_EMBED_CONTEXT,
-				'required'          => true,
-				'sanitize_callback' => 'wp_kses_post',
+				'description' => __( 'Order note content.', 'woocommerce' ),
+				'type'        => 'string',
+				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+				'required'    => true,
 			),
 			'title'            => array(
 				'description' => __( 'The title of the order note group.', 'woocommerce' ),
