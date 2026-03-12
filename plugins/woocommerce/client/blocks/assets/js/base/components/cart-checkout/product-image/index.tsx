@@ -23,7 +23,6 @@ const ProductImage = ( {
 	width,
 	height,
 }: ProductImageProps ): JSX.Element => {
-
 	const rawAlt = image.alt || fallbackAlt;
 
 	const imageProps = image.thumbnail
