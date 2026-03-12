@@ -97,5 +97,3 @@ const productElementStore = store(
 	},
 	{ lock: true }
 );
-
-export type ProductElementStore = typeof productElementStore;

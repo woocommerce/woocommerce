@@ -9,7 +9,6 @@ import type { ProductContextStore } from '@woocommerce/stores/woocommerce/produc
 import type { AddToCartWithOptionsStore } from '../frontend';
 
 export type Context = {
-	productId: number;
 	allowZero?: boolean;
 	inputElement?: HTMLInputElement | null;
 };
