@@ -178,6 +178,12 @@ class SingleProduct extends AbstractBlock {
 			return '';
 		}
 
+		// Load product into the shared products store.
+		wc_interactivity_api_load_product(
+			'I acknowledge that using experimental APIs means my theme or plugin will inevitably break in the next version of WooCommerce',
+			$product->get_id()
+		);
+
 		$interactivity_context = array(
 			'productId'   => $product->get_id(),
 			'variationId' => null,
