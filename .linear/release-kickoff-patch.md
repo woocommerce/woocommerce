@@ -20,7 +20,7 @@ Keep the _[Release Troubleshooting & Recovery](https://developer.woocommerce.com
 
 ### 2. Build the release package
 
-- [ ] Run workflow **[Release: Bump version number]({repository_url}/actions/workflows/release-bump-version.yml)**: enter `{release_main_version}` as _Release branch_ and `{release_type}` as _Type of version bump to perform_.
+- [ ] Run workflow **[Release: Bump version number]({repository_url}/actions/workflows/release-bump-version.yml)**: enter `{release_main_version}` as _Release branch_ and `stable` as _Type of version bump to perform_.
 - [ ] Review and merge the PR that was generated against the release branch. Check the [{release_milestone} milestone]({repository_url}/issues?q=is:open+milestone:{release_milestone}).
 - [ ] Run workflow **[Release: Compile changelog]({repository_url}/actions/workflows/release-compile-changelog.yml)**: enter `{release_main_version}` as _Version_ and leave _Release date_ empty, except when building the package ahead of schedule.
 - [ ] Review and merge the PRs that were generated: one against `trunk` and another one against the release branch. Both are linked in the workflow run.
