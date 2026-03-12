@@ -1010,31 +1010,47 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	}
 
 	/**
+	 * Get the summed refund item meta value for a given order, item type, and meta keys.
+	 *
+	 * @since 10.7.0
+	 * @param WC_Order $order     Order object.
+	 * @param string   $item_type Order item type (e.g. 'tax', 'shipping').
+	 * @param array    $meta_keys Meta keys to sum.
+	 * @return float Absolute total.
+	 */
+	protected function get_refunded_item_meta_total( $order, string $item_type, array $meta_keys ): float {
+		global $wpdb;
+
+		$refund_join     = $this->get_refund_orders_join_clause( $order->get_id() );
+		$meta_key_clause = "'" . implode( "', '", esc_sql( $meta_keys ) ) . "'";
+
+		$total = $wpdb->get_var(
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $refund_join and $order_items are already prepared
+			$wpdb->prepare(
+				"SELECT SUM( order_itemmeta.meta_value )
+				FROM %i AS order_itemmeta
+				INNER JOIN $refund_join
+				INNER JOIN %i AS order_items ON ( order_items.order_id = refunds.id AND order_items.order_item_type = %s )
+				WHERE order_itemmeta.order_item_id = order_items.order_item_id
+				AND order_itemmeta.meta_key IN ( $meta_key_clause )",
+				$wpdb->prefix . 'woocommerce_order_itemmeta',
+				$wpdb->prefix . 'woocommerce_order_items',
+				$item_type,
+			)
+			// phpcs:enable
+		) ?? 0;
+
+		return abs( $total );
+	}
+
+	/**
 	 * Get the total tax refunded.
 	 *
 	 * @param WC_Order $order Order object.
 	 * @return float
 	 */
 	public function get_total_tax_refunded( $order ) {
-		global $wpdb;
-
-		$refund_join = $this->get_refund_orders_join_clause( $order->get_id() );
-		$total       = $wpdb->get_var(
-			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $refund_join is already prepared.
-			$wpdb->prepare(
-				"SELECT SUM( order_itemmeta.meta_value )
-				FROM %i AS order_itemmeta
-				INNER JOIN $refund_join
-				INNER JOIN %i AS order_items ON ( order_items.order_id = refunds.id AND order_items.order_item_type = 'tax' )
-				WHERE order_itemmeta.order_item_id = order_items.order_item_id
-				AND order_itemmeta.meta_key IN ('tax_amount', 'shipping_tax_amount')",
-				$wpdb->prefix . 'woocommerce_order_itemmeta',
-				$wpdb->prefix . 'woocommerce_order_items',
-			)
-			// phpcs:enable
-		) ?? 0;
-
-		return abs( $total );
+		return $this->get_refunded_item_meta_total( $order, 'tax', array( 'tax_amount', 'shipping_tax_amount' ) );
 	}
 
 	/**
@@ -1046,25 +1062,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 * @return float
 	 */
 	public function get_total_shipping_tax_refunded( $order ) {
-		global $wpdb;
-
-		$refund_join = $this->get_refund_orders_join_clause( $order->get_id() );
-		$total       = $wpdb->get_var(
-			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $refund_join is already prepared.
-			$wpdb->prepare(
-				"SELECT SUM( order_itemmeta.meta_value )
-				FROM %i AS order_itemmeta
-				INNER JOIN $refund_join
-				INNER JOIN %i AS order_items ON ( order_items.order_id = refunds.id AND order_items.order_item_type = 'tax' )
-				WHERE order_itemmeta.order_item_id = order_items.order_item_id
-				AND order_itemmeta.meta_key = 'shipping_tax_amount'",
-				$wpdb->prefix . 'woocommerce_order_itemmeta',
-				$wpdb->prefix . 'woocommerce_order_items',
-			)
-			// phpcs:enable
-		) ?? 0;
-
-		return abs( $total );
+		return $this->get_refunded_item_meta_total( $order, 'tax', array( 'shipping_tax_amount' ) );
 	}
 
 	/**
@@ -1074,26 +1072,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 * @return float
 	 */
 	public function get_total_shipping_refunded( $order ) {
-		global $wpdb;
-
-		$refund_join = $this->get_refund_orders_join_clause( $order->get_id() );
-
-		$total = $wpdb->get_var(
-			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $refund_join is already prepared.
-			$wpdb->prepare(
-				"SELECT SUM( order_itemmeta.meta_value )
-				FROM %i AS order_itemmeta
-				INNER JOIN $refund_join
-				INNER JOIN %i AS order_items ON ( order_items.order_id = refunds.id AND order_items.order_item_type = 'shipping' )
-				WHERE order_itemmeta.order_item_id = order_items.order_item_id
-				AND order_itemmeta.meta_key IN ('cost')",
-				$wpdb->prefix . 'woocommerce_order_itemmeta',
-				$wpdb->prefix . 'woocommerce_order_items',
-			)
-			// phpcs:enable
-		) ?? 0;
-
-		return abs( $total );
+		return $this->get_refunded_item_meta_total( $order, 'shipping', array( 'cost' ) );
 	}
 
 	/**
