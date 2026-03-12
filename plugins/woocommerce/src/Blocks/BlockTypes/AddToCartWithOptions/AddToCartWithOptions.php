@@ -512,13 +512,6 @@ class AddToCartWithOptions extends AbstractBlock {
 				'data-wp-class--is-invalid' => '!state.isFormValid',
 			);
 			$context_directive  = wp_interactivity_data_wp_context( $context );
-			
-			$product_context           = array(
-				'productId'   => $product_id,
-				'variationId' => null,
-			);
-			// This should use `wp_interactivity_data_wp_context` as well, but it currently doesn't support unique IDs.
-			$product_context_directive = 'data-wp-context---product-context="woocommerce/product-context::' . esc_attr( wp_json_encode( $product_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) ) . '"';
 
 			$cart_redirect_after_add = get_option( 'woocommerce_cart_redirect_after_add' );
 			$form_attributes         = '';
@@ -568,7 +561,7 @@ class AddToCartWithOptions extends AbstractBlock {
 			}
 
 			$form_html = sprintf(
-				'<form %1$s %2$s %3$s>%4$s%5$s%6$s%7$s</form>',
+				'<form %1$s %2$s>%3$s%4$s%5$s%6$s</form>',
 				get_block_wrapper_attributes(
 					array_merge(
 						$wrapper_attributes,
@@ -596,7 +589,6 @@ class AddToCartWithOptions extends AbstractBlock {
 					)
 				),
 				$context_directive,
-				$product_context_directive,
 				$hooks_before,
 				$template_part_blocks,
 				$hooks_after,

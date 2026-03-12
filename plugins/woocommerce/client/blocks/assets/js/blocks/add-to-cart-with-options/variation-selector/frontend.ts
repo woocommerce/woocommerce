@@ -418,14 +418,15 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					selectedAttributes
 				);
 
-				if ( ! matchedVariation ) {
-					return;
-				}
-
+				const variationId = matchedVariation?.id ?? null;
 				const productContext = getContext< {
 					variationId?: number | null;
 				} >( 'woocommerce/product-context' );
-				productContext.variationId = matchedVariation.id;
+
+				// If there is context, update the context. Otherwise, update the state directly.
+				productContext
+					? ( productContext.variationId = variationId )
+					: ( productContextState.variationId = variationId );
 			},
 			validateVariation() {
 				actions.clearErrors( 'variable-product' );
