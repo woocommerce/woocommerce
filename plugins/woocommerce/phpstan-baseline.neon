@@ -5911,6 +5911,12 @@ parameters:
 			path: includes/admin/meta-boxes/views/html-order-fee.php
 
 		-
+			message: '#^Variable \$cogs_is_enabled might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: includes/admin/meta-boxes/views/html-order-fee.php
+
+		-
 			message: '#^Variable \$tax_item_total in isset\(\) always exists and is not nullable\.$#'
 			identifier: isset.variable
 			count: 1
@@ -6080,6 +6086,12 @@ parameters:
 
 		-
 			message: '#^Variable \$order_taxes might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: includes/admin/meta-boxes/views/html-order-refund.php
+
+		-
+			message: '#^Variable \$cogs_is_enabled might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1
 			path: includes/admin/meta-boxes/views/html-order-refund.php
