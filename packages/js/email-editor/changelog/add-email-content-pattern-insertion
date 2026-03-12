@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add emailBlocks getter to pattern enhancement for inserting dynamic email content blocks
