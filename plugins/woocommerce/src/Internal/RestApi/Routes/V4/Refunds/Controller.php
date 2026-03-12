@@ -314,8 +314,9 @@ class Controller extends AbstractController {
 				return $this->get_route_error_response(
 					'invalid_refund_amount',
 					sprintf(
-						/* translators: %s: calculated total from line items */
-						__( 'Refund amount cannot be less than the total of line items (%s).', 'woocommerce' ),
+						/* translators: %1$s: refund amount, %2$s: calculated total from line items */
+						__( 'Refund amount (%1$s) cannot be less than the total of line items (%2$s).', 'woocommerce' ),
+						wc_format_decimal( $refund_amount, 2 ),
 						wc_format_decimal( $calculated_total, 2 )
 					)
 				);
