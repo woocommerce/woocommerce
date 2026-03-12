@@ -23,13 +23,13 @@ const ProductImage = ( {
 	width,
 	height,
 }: ProductImageProps ): JSX.Element => {
+
+	const rawAlt = image.alt || fallbackAlt;
+
 	const imageProps = image.thumbnail
 		? {
 				src: image.thumbnail,
-				alt:
-					decodeEntities( image.alt ) ||
-					decodeEntities( fallbackAlt ) ||
-					'Product Image',
+				alt: rawAlt ? decodeEntities( rawAlt ) : 'Product Image',
 		  }
 		: {
 				src: PLACEHOLDER_IMG_SRC,
