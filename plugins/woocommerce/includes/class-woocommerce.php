@@ -682,6 +682,7 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/interfaces/class-wc-log-handler-interface.php';
 		include_once WC_ABSPATH . 'includes/interfaces/class-wc-webhooks-data-store-interface.php';
 		include_once WC_ABSPATH . 'includes/interfaces/class-wc-queue-interface.php';
+		include_once WC_ABSPATH . 'includes/interfaces/class-wc-session-interface.php';
 
 		/**
 		 * Core traits.
@@ -903,7 +904,6 @@ final class WooCommerce {
 		include_once WC_ABSPATH . 'includes/class-wc-shipping-zones.php';
 		include_once WC_ABSPATH . 'includes/class-wc-customer.php';
 		include_once WC_ABSPATH . 'includes/class-wc-embed.php';
-		include_once WC_ABSPATH . 'includes/interfaces/class-wc-session-interface.php';
 		include_once WC_ABSPATH . 'includes/class-wc-session-handler.php';
 	}
 
