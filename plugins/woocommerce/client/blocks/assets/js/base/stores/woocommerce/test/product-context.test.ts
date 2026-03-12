@@ -196,10 +196,18 @@ describe( 'woocommerce/product-context store', () => {
 			);
 		} );
 
-		it( 'selectedVariation falls back to state when context has no variationId', () => {
+		it( 'selectedVariation does not fall back to state when context variationId is null but context exists', () => {
 			expect( mockRegisteredStore ).not.toBeNull();
 
 			mockContext = { productId: 42 };
+			mockRegisteredStore!.state.variationId = 99;
+
+			expect( mockRegisteredStore!.state.selectedVariation ).toBe( null );
+		} );
+
+		it( 'selectedVariation falls back to state when context does not exist', () => {
+			expect( mockRegisteredStore ).not.toBeNull();
+
 			mockRegisteredStore!.state.variationId = 99;
 
 			expect( mockRegisteredStore!.state.selectedVariation ).toBe(
@@ -210,7 +218,6 @@ describe( 'woocommerce/product-context store', () => {
 		it( 'selectedVariation returns null when both context and state variationId are null', () => {
 			expect( mockRegisteredStore ).not.toBeNull();
 
-			mockContext = { productId: 42 };
 			mockRegisteredStore!.state.variationId = null;
 
 			expect( mockRegisteredStore!.state.selectedVariation ).toBeNull();
