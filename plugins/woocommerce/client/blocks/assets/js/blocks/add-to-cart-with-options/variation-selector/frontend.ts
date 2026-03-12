@@ -349,17 +349,18 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				// Normalize included/excluded attributes to lowercase for comparison
 				// with Store API labels (e.g., "Color" vs "attribute_pa_color" → "color").
 				const normalizedIncluded = includedAttributes.map( ( attr ) =>
-					normalizeAttributeName( attr ).toLowerCase()
+					normalizeAttributeName( attr )
 				);
 				const normalizedExcluded = excludedAttributes.map( ( attr ) =>
-					normalizeAttributeName( attr ).toLowerCase()
+					normalizeAttributeName( attr )
 				);
 
 				const productAttributesAndOptions: Record< string, string[] > =
 					getProductAttributesAndOptions( product );
 				Object.entries( productAttributesAndOptions ).forEach(
 					( [ attribute, options ] ) => {
-						const attributeLower = attribute.toLowerCase();
+						const attributeLower =
+							normalizeAttributeName( attribute );
 						if (
 							normalizedIncluded.length !== 0 &&
 							! normalizedIncluded.includes( attributeLower )
@@ -386,9 +387,8 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 							const contextName =
 								includedAttributes.find(
 									( attr ) =>
-										normalizeAttributeName(
-											attr
-										).toLowerCase() === attributeLower
+										normalizeAttributeName( attr ) ===
+										attributeLower
 								) || attribute;
 							actions.setAttribute( contextName, validOption );
 						}
