@@ -155,10 +155,20 @@ class ProductGallery extends AbstractBlock {
 			);
 
 			if ( $product->is_type( ProductType::VARIABLE ) ) {
-				// Support legacy Add to Cart with Options block.
-				$p->set_attribute( 'data-wp-init--watch-changes-on-add-to-cart-form', 'callbacks.watchForChangesOnAddToCartForm' );
-				// Support blockified Add to Cart + Options block.
-				$p->set_attribute( 'data-wp-watch', 'callbacks.listenToProductDataChanges' );
+				$has_variation_images = false;
+				foreach ( $product->get_available_variations( 'objects' ) as $variation ) {
+					if ( (int) $variation->get_image_id() ) {
+						$has_variation_images = true;
+						break;
+					}
+				}
+
+				if ( $has_variation_images ) {
+					// Support legacy Add to Cart with Options block.
+					$p->set_attribute( 'data-wp-init--watch-changes-on-add-to-cart-form', 'callbacks.watchForChangesOnAddToCartForm' );
+					// Support blockified Add to Cart + Options block.
+					$p->set_attribute( 'data-wp-watch', 'callbacks.listenToProductDataChanges' );
+				}
 			}
 
 			$p->add_class( $classname );
