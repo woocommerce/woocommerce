@@ -53,7 +53,7 @@ class ShippingZoneSchema extends AbstractSchema {
 				'default'     => 0,
 			),
 			'locations' => array(
-				'description' => __( 'Array of locations for this zone. Can be empty array but must be explicitly provided.', 'woocommerce' ),
+				'description' => __( 'Array of locations for this zone. Omit or pass an empty array for an "Everywhere" zone.', 'woocommerce' ),
 				'type'        => 'array',
 				'context'     => array( 'view', 'edit' ),
 				'required'    => false,
