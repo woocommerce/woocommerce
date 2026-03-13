@@ -5911,6 +5911,12 @@ parameters:
 			path: includes/admin/meta-boxes/views/html-order-fee.php
 
 		-
+			message: '#^Variable \$cogs_is_enabled might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: includes/admin/meta-boxes/views/html-order-fee.php
+
+		-
 			message: '#^Variable \$tax_item_total in isset\(\) always exists and is not nullable\.$#'
 			identifier: isset.variable
 			count: 1
@@ -6085,6 +6091,12 @@ parameters:
 			path: includes/admin/meta-boxes/views/html-order-refund.php
 
 		-
+			message: '#^Variable \$cogs_is_enabled might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: includes/admin/meta-boxes/views/html-order-refund.php
+
+		-
 			message: '#^Call to an undefined method object\:\:get_method_id\(\)\.$#'
 			identifier: method.notFound
 			count: 3
@@ -6118,6 +6130,12 @@ parameters:
 			message: '#^Parameter \#1 \$value of function wc_format_localized_price expects string, int given\.$#'
 			identifier: argument.type
 			count: 4
+			path: includes/admin/meta-boxes/views/html-order-shipping.php
+
+		-
+			message: '#^Variable \$cogs_is_enabled might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
 			path: includes/admin/meta-boxes/views/html-order-shipping.php
 
 		-
