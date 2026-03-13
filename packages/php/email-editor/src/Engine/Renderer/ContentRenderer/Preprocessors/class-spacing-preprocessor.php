@@ -90,7 +90,8 @@ class Spacing_Preprocessor implements Preprocessor {
 			$wraps_post_content = $apply_root_padding && $is_container && ! $has_own_padding && $this->contains_post_content( $block );
 			$should_apply       = $apply_root_padding || ( $is_root_level && ! $is_container );
 
-			if ( $should_apply && ! $has_own_padding && 'full' !== $alignment && 'core/post-content' !== $block_name && ! $wraps_post_content && ! empty( $root_padding ) ) {
+			$post_content_block_names = $this->get_post_content_block_names();
+			if ( $should_apply && ! $has_own_padding && 'full' !== $alignment && ! in_array( $block_name, $post_content_block_names, true ) && ! $wraps_post_content && ! empty( $root_padding ) ) {
 				$block['email_attrs']['root-padding-left']  = $root_padding['left'];
 				$block['email_attrs']['root-padding-right'] = $root_padding['right'];
 			}
@@ -105,7 +106,7 @@ class Spacing_Preprocessor implements Preprocessor {
 			$children_apply = false;
 			if ( $is_root_level && $is_container && ! $has_own_padding ) {
 				$children_apply = true;
-			} elseif ( $apply_root_padding && 'core/post-content' === $block_name ) {
+			} elseif ( $apply_root_padding && in_array( $block_name, $post_content_block_names, true ) ) {
 				$children_apply = true;
 			} elseif ( $wraps_post_content ) {
 				$children_apply = true;
@@ -119,6 +120,21 @@ class Spacing_Preprocessor implements Preprocessor {
 	}
 
 	/**
+	 * Returns the list of block names treated as "post content" for padding delegation.
+	 *
+	 * Filterable so that integrations can register custom post-content-like blocks
+	 * without modifying this file.
+	 *
+	 * @return string[]
+	 */
+	private function get_post_content_block_names(): array {
+		return (array) apply_filters(
+			'woocommerce_email_editor_post_content_block_names',
+			array( 'core/post-content' )
+		);
+	}
+
+	/**
 	 * Checks whether a block contains a core/post-content descendant.
 	 *
 	 * Searches recursively through container blocks (groups) so that
@@ -129,9 +145,10 @@ class Spacing_Preprocessor implements Preprocessor {
 	 * @return bool True if the block has a post-content descendant.
 	 */
 	private function contains_post_content( array $block ): bool {
+		$post_content_block_names = $this->get_post_content_block_names();
 		foreach ( $block['innerBlocks'] ?? array() as $inner_block ) {
 			$name = $inner_block['blockName'] ?? '';
-			if ( 'core/post-content' === $name ) {
+			if ( in_array( $name, $post_content_block_names, true ) ) {
 				return true;
 			}
 			if ( in_array( $name, self::CONTAINER_BLOCKS, true ) && $this->contains_post_content( $inner_block ) ) {
