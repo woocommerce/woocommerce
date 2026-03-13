@@ -699,5 +699,4 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 		// Should not have padding-left due to malicious value.
 		$this->assertArrayNotHasKey( 'padding-left', $second_column['email_attrs'] );
 	}
-
 }
