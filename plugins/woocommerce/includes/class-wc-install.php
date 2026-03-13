@@ -2021,7 +2021,9 @@ CREATE TABLE {$wpdb->prefix}woocommerce_shipping_zone_methods (
   method_id varchar(200) NOT NULL,
   method_order bigint(20) unsigned NOT NULL,
   is_enabled tinyint(1) NOT NULL DEFAULT '1',
-  PRIMARY KEY  (instance_id)
+  PRIMARY KEY  (instance_id),
+  KEY zone_id (zone_id),
+  KEY method_id (method_id(20))
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_payment_tokens (
   token_id bigint(20) unsigned NOT NULL auto_increment,
