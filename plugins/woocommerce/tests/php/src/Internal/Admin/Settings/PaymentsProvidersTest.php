@@ -6178,21 +6178,6 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 					return null;
 				}
 			);
-		// Mock getting suggestions by id.
-		$this->mock_extension_suggestions
-			->expects( $this->any() )
-			->method( 'get_by_id' )
-			->willReturnCallback(
-				function ( $id ) use ( $suggestions ) {
-					foreach ( $suggestions as $suggestion ) {
-						if ( $suggestion['id'] === $id ) {
-							return $suggestion;
-						}
-					}
-					return null;
-				}
-			);
-
 		$sut = $this->sut;
 
 		$result = $sut->enhance_order_map( $start_order_map );
@@ -6243,6 +6228,37 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				array(
 					'gateway1',
 					PaymentsProviders::SUGGESTION_ORDERING_PREFIX . 'paypal',
+					'ppcp-gateway',
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					WC_Gateway_BACS::ID,
+					WC_Gateway_Cheque::ID,
+					WC_Gateway_COD::ID,
+				),
+			),
+			'suggestion exists but placeholder absent — gateway placed via default logic' => array(
+				// gateway_ids.
+				array( 'gateway1', 'ppcp-gateway', 'bacs', 'cheque', 'cod' ),
+				// gateway_slugs.
+				array(
+					'gateway1'     => 'plugin1',
+					'ppcp-gateway' => 'woocommerce-paypal-payments',
+					'bacs'         => 'woocommerce',
+					'cheque'       => 'woocommerce',
+					'cod'          => 'woocommerce',
+				),
+				// suggestions.
+				array( $preferred_paypal ),
+				// start_order_map: NO placeholder for the suggestion — gateway falls through to default placement.
+				array(
+					'gateway1'            => 0,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 1,
+					WC_Gateway_BACS::ID   => 2,
+					WC_Gateway_Cheque::ID => 3,
+					WC_Gateway_COD::ID    => 4,
+				),
+				// expected_order: PayPal gateway placed above offline group (default behavior), not at a placeholder.
+				array(
+					'gateway1',
 					'ppcp-gateway',
 					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 					WC_Gateway_BACS::ID,
