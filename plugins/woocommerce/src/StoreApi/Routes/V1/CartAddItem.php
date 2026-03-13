@@ -124,7 +124,24 @@ class CartAddItem extends AbstractCartRoute {
 			$request
 		);
 
-		$this->cart_controller->add_to_cart( $add_to_cart_data );
+		$item_id   = $this->cart_controller->add_to_cart( $add_to_cart_data );
+		$cart      = $this->cart_controller->get_cart_instance();
+		$cart_item = $cart->get_cart_item( $item_id );
+
+		if ( ! empty( $cart_item ) ) {
+			$product_id = $cart_item['variation_id'] ? $cart_item['variation_id'] : $cart_item['product_id'];
+			$quantity   = $add_to_cart_data['quantity'] ?? $cart_item['quantity'];
+
+			/**
+			 * Fires when an item is added to the cart from a user request.
+			 *
+			 * @param int       $product_id Product ID (variation ID for variable products).
+			 * @param int|float $quantity   Quantity added to the cart.
+			 *
+			 * @since 10.6.0
+			 */
+			do_action( 'internal_woocommerce_cart_item_added_from_user_request', $product_id, $quantity );
+		}
 
 		$response = rest_ensure_response( $this->schema->get_item_response( $this->cart_controller->get_cart_for_response() ) );
 		$response->set_status( 201 );

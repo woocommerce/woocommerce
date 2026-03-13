@@ -212,6 +212,7 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 
 		return (
 			<tr
+				data-cart-item-key={ lineItem.key }
 				className={ clsx(
 					'wc-block-cart-items__row',
 					cartItemClassNameFilter,

@@ -499,7 +499,7 @@ class Checkout extends AbstractBlock {
 			$shipping_methods           = WC()->shipping()->get_shipping_methods();
 			$formatted_shipping_methods = array_reduce(
 				$shipping_methods,
-				function ( $acc, $method ) use ( $local_pickup_method_ids ) {
+				function ( array $acc, $method ) use ( $local_pickup_method_ids ) {
 					if ( in_array( $method->id, $local_pickup_method_ids, true ) ) {
 						return $acc;
 					}
@@ -527,7 +527,7 @@ class Checkout extends AbstractBlock {
 			$payment_methods           = PaymentUtils::get_enabled_payment_gateways();
 			$formatted_payment_methods = array_reduce(
 				$payment_methods,
-				function ( $acc, $method ) {
+				function ( array $acc, $method ) {
 					$acc[] = [
 						'id'          => $method->id,
 						'title'       => $method->get_method_title() !== '' ? $method->get_method_title() : $method->get_title(),
@@ -540,7 +540,8 @@ class Checkout extends AbstractBlock {
 			$this->asset_data_registry->add( 'globalPaymentMethods', $formatted_payment_methods );
 		}
 
-		if ( $is_block_editor && ! $this->asset_data_registry->exists( 'incompatibleExtensions' ) ) {
+		// Check `current_user_can` so we can show notices about incompatible extensions in the front-end to admins too.
+		if ( ( $is_block_editor || current_user_can( 'manage_woocommerce' ) ) && ! $this->asset_data_registry->exists( 'incompatibleExtensions' ) ) {
 			if ( ! class_exists( '\Automattic\WooCommerce\Utilities\FeaturesUtil' ) || ! function_exists( 'get_plugins' ) ) {
 				return;
 			}
@@ -549,9 +550,9 @@ class Checkout extends AbstractBlock {
 			$all_plugins             = \get_plugins(); // Note that `get_compatible_plugins_for_feature` calls `get_plugins` internally, so this is already in cache.
 			$incompatible_extensions = array_reduce(
 				$declared_extensions['incompatible'],
-				function ( $acc, $item ) use ( $all_plugins ) {
+				function ( array $acc, $item ) use ( $all_plugins ) {
 					$plugin      = $all_plugins[ $item ] ?? null;
-					$plugin_id   = $plugin['TextDomain'] ?? dirname( $item, 2 );
+					$plugin_id   = $plugin['TextDomain'] ?? dirname( $item );
 					$plugin_name = $plugin['Name'] ?? $plugin_id;
 					$acc[]       = [
 						'id'    => $plugin_id,
