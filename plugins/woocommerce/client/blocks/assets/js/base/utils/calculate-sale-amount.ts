@@ -2,6 +2,9 @@
  * External dependencies
  */
 import { dinero, subtract, transformScale, toSnapshot } from 'dinero.js';
+// USD is a placeholder currency required by the dinero.js v2 API.
+// The actual currency formatting is handled elsewhere; USD is only used here
+// for arithmetic operations where the specific currency is irrelevant.
 import { USD } from 'dinero.js/currencies';
 import type { CartItem } from '@woocommerce/types';
 
