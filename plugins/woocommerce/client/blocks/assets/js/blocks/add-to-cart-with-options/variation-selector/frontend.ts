@@ -9,7 +9,6 @@ import {
 } from '@wordpress/interactivity';
 import { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
 import type { ChangeEvent } from 'react';
-import type { ProductContextStore } from '@woocommerce/stores/woocommerce/product-context';
 import '@woocommerce/stores/woocommerce/products';
 import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 import type { ProductResponseItem } from '@woocommerce/types';
@@ -49,12 +48,6 @@ setStyles();
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
-
-const { state: productContextState } = store< ProductContextStore >(
-	'woocommerce/product-context',
-	{},
-	{ lock: universalLock }
-);
 
 const { state: productsState } = store< ProductsStore >(
 	'woocommerce/products',
@@ -100,7 +93,7 @@ const isAttributeValueValid = ( {
 		? selectedAttributes.length - 1
 		: selectedAttributes.length;
 
-	const { product } = productContextState;
+	const { product } = productsState;
 
 	if ( ! product?.variations?.length ) {
 		return false;
@@ -339,7 +332,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					return;
 				}
 
-				const { product } = productContextState;
+				const { product } = productsState;
 				if ( ! product ) {
 					return;
 				}
@@ -406,7 +399,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				} );
 			},
 			setSelectedVariationId: () => {
-				const { product } = productContextState;
+				const { product } = productsState;
 
 				if ( ! product?.variations?.length ) {
 					return;
@@ -419,19 +412,19 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				);
 
 				const variationId = matchedVariation?.id ?? null;
-				const productContext = getContext< {
+				const productsContext = getContext< {
 					variationId?: number | null;
-				} >( 'woocommerce/product-context' );
+				} >( 'woocommerce/products' );
 
 				// If there is context, update the context. Otherwise, update the state directly.
-				productContext
-					? ( productContext.variationId = variationId )
-					: ( productContextState.variationId = variationId );
+				productsContext
+					? ( productsContext.variationId = variationId )
+					: ( productsState.variationId = variationId );
 			},
 			validateVariation() {
 				actions.clearErrors( 'variable-product' );
 
-				const { product } = productContextState;
+				const { product } = productsState;
 
 				if ( ! product?.variations?.length ) {
 					return;
@@ -487,7 +480,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					return;
 				}
 
-				const { selectedVariation: variation } = productContextState;
+				const { selectedVariation: variation } = productsState;
 
 				if ( ! variation ) {
 					return;

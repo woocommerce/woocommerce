@@ -132,7 +132,7 @@ class Utils {
 		);
 
 		// This should use `wp_interactivity_data_wp_context` as well, but it currently doesn't support unique IDs.
-		$product_context_directive = 'data-wp-context---product-context="woocommerce/product-context::' . esc_attr( wp_json_encode( $product_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) ) . '"';
+		$product_context_directive = 'data-wp-context---product-context="woocommerce/products::' . esc_attr( wp_json_encode( $product_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) ) . '"';
 
 		return sprintf(
 			'<div %1$s %2$s %3$s>%4$s</div>',

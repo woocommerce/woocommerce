@@ -147,7 +147,7 @@ class GroupedProductItemSelector extends AbstractBlock {
 				'productId'   => $product->get_id(),
 				'variationId' => null,
 			),
-			'woocommerce/product-context'
+			'woocommerce/products'
 		);
 		return '<input type="checkbox" name="' . esc_attr( 'quantity[' . $product->get_id() . ']' ) . '" value="1" class="wc-grouped-product-add-to-cart-checkbox" id="' . esc_attr( 'quantity_' . $product->get_id() ) . '" data-wp-interactive="woocommerce/add-to-cart-with-options-quantity-selector" data-wp-on--change="actions.handleQuantityCheckboxChange" ' . $product_context_directive . ' aria-label="' . esc_attr( $label ) . '"/>';
 	}

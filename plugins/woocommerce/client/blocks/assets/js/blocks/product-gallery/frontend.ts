@@ -8,8 +8,8 @@ import {
 	withScope,
 	withSyncEvent,
 } from '@wordpress/interactivity';
-import '@woocommerce/stores/woocommerce/product-context';
-import type { ProductContextStore } from '@woocommerce/stores/woocommerce/product-context';
+import '@woocommerce/stores/woocommerce/products';
+import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 
 /**
  * Internal dependencies
@@ -164,8 +164,8 @@ const scrollThumbnailIntoView = ( imageId: number ) => {
 	} );
 };
 
-const { state: productContextState } = store< ProductContextStore >(
-	'woocommerce/product-context',
+const { state: productsState } = store< ProductsStore >(
+	'woocommerce/products',
 	{},
 	{ lock: universalLock }
 );
@@ -427,9 +427,7 @@ const productGallery = {
 	},
 	callbacks: {
 		listenToProductDataChanges: () => {
-			const product =
-				productContextState.selectedVariation ||
-				productContextState.product;
+			const product = productsState.selected;
 
 			if ( ! product ) {
 				return;

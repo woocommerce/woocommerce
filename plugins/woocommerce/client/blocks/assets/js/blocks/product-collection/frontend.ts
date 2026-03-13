@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { store, getElement, getContext } from '@wordpress/interactivity';
-import type { ProductContextStore } from '@woocommerce/stores/woocommerce/product-context';
+import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 
 /**
  * Internal dependencies
@@ -18,8 +18,8 @@ import './style.scss';
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-const { state: productContextState } = store< ProductContextStore >(
-	'woocommerce/product-context',
+const { state: productsState } = store< ProductsStore >(
+	'woocommerce/products',
 	{},
 	{ lock: universalLock }
 );
@@ -208,7 +208,7 @@ const productCollectionStore = {
 			const { collection } =
 				getContext< ProductCollectionStoreContext >();
 
-			const productId = productContextState.product?.id;
+			const productId = productsState.product?.id;
 
 			if ( productId ) {
 				triggerViewedProductEvent( { collection, productId } );

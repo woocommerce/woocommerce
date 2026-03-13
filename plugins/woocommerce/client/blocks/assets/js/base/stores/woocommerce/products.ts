@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { store } from '@wordpress/interactivity';
+import { store, getContext } from '@wordpress/interactivity';
 import type { ProductResponseItem } from '@woocommerce/types';
 import type { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
 
@@ -9,6 +9,16 @@ import type { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
  * Internal dependencies
  */
 import { findMatchingVariation } from '../../utils/variations/attribute-matching';
+
+/**
+ * Per-element context set via data-wp-context on wrapper elements (e.g. the
+ * SingleProduct block). When present, this takes precedence over the
+ * server-hydrated state so that each product in a loop gets its own IDs.
+ */
+type ProductContext = {
+	productId: number;
+	variationId?: number | null;
+};
 
 /**
  * The state shape for the products store.
@@ -29,10 +39,36 @@ export type ProductsStoreState = {
 	 * Look up a product by ID, resolving to the matching variation for
 	 * variable products when selectedAttributes are provided.
 	 */
-	getProduct: ( args: {
+	findVariation: ( args: {
 		id: number;
 		selectedAttributes?: SelectedAttributes[];
 	} ) => ProductResponseItem | null;
+
+	/**
+	 * The global product ID for the current page.
+	 */
+	productId: number;
+	/**
+	 * The global selected variation ID, or null if none is selected.
+	 */
+	variationId: number | null;
+	/**
+	 * The main product for this page/block. Always the top-level product
+	 * (e.g. the variable product "Hoodie"), never a variation.
+	 * Resolves productId from per-block context when available.
+	 */
+	product: ProductResponseItem | null;
+	/**
+	 * The currently selected variation, or null if none is selected.
+	 * For simple/grouped products, this is always null.
+	 */
+	selectedVariation: ProductResponseItem | null;
+	/**
+	 * The currently active product: the selected variation if one exists,
+	 * otherwise the main product. Convenience getter that replaces the
+	 * repeated `selectedVariation || product` pattern.
+	 */
+	selected: ProductResponseItem | null;
 };
 
 /**
@@ -56,6 +92,8 @@ const universalLock =
  * State structure:
  * - products: Record<productId, ProductResponseItem>
  * - productVariations: Record<variationId, ProductResponseItem>
+ * - productId / variationId: current product-in-context IDs
+ * - product / selectedVariation / selected: derived getters
  */
 const { state: productsState } = store< ProductsStore >(
 	'woocommerce/products',
@@ -63,7 +101,7 @@ const { state: productsState } = store< ProductsStore >(
 		state: {
 			products: {},
 			productVariations: {},
-			getProduct( {
+			findVariation( {
 				id,
 				selectedAttributes,
 			}: {
@@ -97,6 +135,37 @@ const { state: productsState } = store< ProductsStore >(
 				}
 
 				return product;
+			},
+
+			get product(): ProductResponseItem | null {
+				const context = getContext< ProductContext >(
+					'woocommerce/products'
+				);
+				const productId = context
+					? context.productId
+					: productsState.productId;
+
+				if ( ! productId ) {
+					return null;
+				}
+				return productsState.products[ productId ] ?? null;
+			},
+
+			get selectedVariation(): ProductResponseItem | null {
+				const context = getContext< ProductContext >(
+					'woocommerce/products'
+				);
+				const variationId = context
+					? context.variationId
+					: productsState.variationId;
+				if ( ! variationId ) {
+					return null;
+				}
+				return productsState.productVariations[ variationId ] ?? null;
+			},
+
+			get selected(): ProductResponseItem | null {
+				return productsState.selectedVariation || productsState.product;
 			},
 		},
 	},

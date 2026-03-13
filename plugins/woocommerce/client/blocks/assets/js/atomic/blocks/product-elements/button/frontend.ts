@@ -3,7 +3,7 @@
  */
 import { store, getContext, useLayoutEffect } from '@wordpress/interactivity';
 import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
-import type { ProductContextStore } from '@woocommerce/stores/woocommerce/product-context';
+import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 
 /**
  * Internal dependencies
@@ -55,8 +55,8 @@ const { state: addToCartWithOptionsState } = store< AddToCartWithOptionsStore >(
 	{ lock: universalLock }
 );
 
-const { state: productContextState } = store< ProductContextStore >(
-	'woocommerce/product-context',
+const { state: productsState } = store< ProductsStore >(
+	'woocommerce/products',
 	{},
 	{ lock: universalLock }
 );
@@ -64,9 +64,7 @@ const { state: productContextState } = store< ProductContextStore >(
 const productButtonStore = {
 	state: {
 		get quantity(): number {
-			const product =
-				productContextState.selectedVariation ||
-				productContextState.product;
+			const product = productsState.selected;
 
 			if ( ! product ) {
 				return 0;
@@ -144,9 +142,7 @@ const productButtonStore = {
 	actions: {
 		*addCartItem(): Generator< unknown, void > {
 			const context = getContext< Context >();
-			const product =
-				productContextState.selectedVariation ||
-				productContextState.product;
+			const product = productsState.selected;
 
 			if ( ! product ) {
 				return;

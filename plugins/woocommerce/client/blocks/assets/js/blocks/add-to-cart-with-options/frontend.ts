@@ -11,9 +11,9 @@ import type {
 	Store as WooCommerce,
 	SelectedAttributes,
 } from '@woocommerce/stores/woocommerce/cart';
-import '@woocommerce/stores/woocommerce/product-context';
+import '@woocommerce/stores/woocommerce/products';
 import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
-import type { ProductContextStore } from '@woocommerce/stores/woocommerce/product-context';
+import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 
 /**
  * Internal dependencies
@@ -57,8 +57,8 @@ const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-const { state: productContextState } = store< ProductContextStore >(
-	'woocommerce/product-context',
+const { state: productsState } = store< ProductsStore >(
+	'woocommerce/products',
 	{},
 	{ lock: universalLock }
 );
@@ -103,9 +103,7 @@ const { actions, state } = store<
 				return state.validationErrors.length === 0;
 			},
 			get allowsAddingToCart(): boolean {
-				const product =
-					productContextState.selectedVariation ||
-					productContextState.product;
+				const product = productsState.selected;
 
 				if ( ! product ) {
 					return false;
@@ -138,9 +136,7 @@ const { actions, state } = store<
 				}
 
 				// If selected quantity is invalid, add an error.
-				const product =
-					productContextState.selectedVariation ||
-					productContextState.product;
+				const product = productsState.selected;
 
 				if (
 					value === 0 ||
@@ -164,7 +160,7 @@ const { actions, state } = store<
 				const inputElement = quantitySelectorContext?.inputElement;
 				const isValueNaN = Number.isNaN( inputElement?.valueAsNumber );
 
-				const { product: productFromStore } = productContextState;
+				const { product: productFromStore } = productsState;
 				const variationIds =
 					productFromStore?.variations?.map( ( v ) => v.id ) ?? [];
 
@@ -198,7 +194,7 @@ const { actions, state } = store<
 					};
 				}
 
-				if ( productContextState.product?.type === 'grouped' ) {
+				if ( productsState.product?.type === 'grouped' ) {
 					actions.validateGroupedProductQuantity();
 				} else {
 					actions.validateQuantity( productId, value );
@@ -278,9 +274,7 @@ const { actions, state } = store<
 
 				const { selectedAttributes } = getContext< Context >();
 
-				const product =
-					productContextState.selectedVariation ||
-					productContextState.product;
+				const product = productsState.selected;
 
 				if ( ! product ) {
 					return;
