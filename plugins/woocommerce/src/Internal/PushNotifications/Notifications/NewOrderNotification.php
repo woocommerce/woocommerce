@@ -60,7 +60,8 @@ class NewOrderNotification extends Notification {
 		return array(
 			'type'        => self::TYPE,
 			'icon'        => self::ICON,
-			'blog_id'     => get_current_blog_id(),
+			// This represents the time the notification was triggered, so we can monitor age of notification at delivery.
+			'timestamp'   => gmdate( 'c' ),
 			'resource_id' => $this->get_resource_id(),
 			'title'       => array(
 				/**

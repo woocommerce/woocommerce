@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix Product Gallery dialog page refresh on WordPress 7.0 by using withSyncEvent for the openDialog action.
