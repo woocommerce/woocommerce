@@ -12,6 +12,14 @@ use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
  * Class WC_Cart_Test
  */
 class WC_Cart_Test extends \WC_Unit_Test_Case {
+
+	/**
+	 * Stores arguments received by the woocommerce_add_to_cart_quantity filter.
+	 *
+	 * @var array
+	 */
+	protected $add_to_cart_quantity_filter_args = array();
+
 	/**
 	 * Called before every test.
 	 */
@@ -1415,5 +1423,50 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		unset( $_REQUEST['add-to-cart'], $_REQUEST['variation_id'], $_REQUEST['quantity'], $_POST['quantity'], $_REQUEST['attribute_pa_color'] );
 		$variation->delete( true );
 		$product->delete( true );
+	}
+
+
+	/**
+	 * Capture all arguments passed to the filter without modifying the quantity.
+	 *
+	 * @param int   $quantity       The quantity to add to cart.
+	 * @param int   $product_id     The parent product ID.
+	 * @param int   $variation_id   The variation ID being added.
+	 * @param array $variation      The variation attributes.
+	 * @param array $cart_item_data Extra cart item data.
+	 *
+	 * @return int
+	 */
+	public function capture_add_to_cart_quantity_filter_args( $quantity, $product_id, $variation_id, $variation, $cart_item_data ) {
+		$this->add_to_cart_quantity_filter_args = func_get_args();
+		return $quantity;
+	}
+
+	/**
+	 * @testdox woocommerce_add_to_cart_quantity filter should receive variation_id, variation attributes, and cart_item_data when a variable product is added to cart.
+	 */
+	public function test_add_to_cart_quantity_filter_receives_variation_id() {
+		add_filter( 'woocommerce_add_to_cart_quantity', array( $this, 'capture_add_to_cart_quantity_filter_args' ), 10, 5 );
+
+		// Create a variable product and pick the first available variation to add.
+		$product    = WC_Helper_Product::create_variation_product();
+		$variations = $product->get_available_variations();
+		$variation  = $variations[0];
+
+		WC()->cart->add_to_cart(
+			$product->get_id(),
+			1,
+			$variation['variation_id'],
+			$variation['attributes']
+		);
+
+		// Ensure all 5 arguments were passed before accessing individual indexes.
+		$this->assertCount( 5, $this->add_to_cart_quantity_filter_args, 'Filter should receive exactly 5 arguments.' );
+
+		$this->assertEquals( 1, $this->add_to_cart_quantity_filter_args[0] );                           // $quantity
+		$this->assertEquals( $product->get_id(), $this->add_to_cart_quantity_filter_args[1] );          // $product_id.
+		$this->assertEquals( $variation['variation_id'], $this->add_to_cart_quantity_filter_args[2] );  // $variation_id — core of this fix
+		$this->assertIsArray( $this->add_to_cart_quantity_filter_args[3] );                             // $variation attributes
+		$this->assertIsArray( $this->add_to_cart_quantity_filter_args[4] );                             // $cart_item_data
 	}
 }
