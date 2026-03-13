@@ -316,8 +316,8 @@ class Controller extends AbstractController {
 					sprintf(
 						/* translators: %1$s: refund amount, %2$s: calculated total from line items */
 						__( 'Refund amount (%1$s) cannot be less than the total of line items (%2$s).', 'woocommerce' ),
-						wc_format_decimal( $refund_amount, 2 ),
-						wc_format_decimal( $calculated_total, 2 )
+						wc_format_decimal( $refund_amount, wc_get_price_decimals() ),
+						wc_format_decimal( $calculated_total, wc_get_price_decimals() )
 					)
 				);
 			}
