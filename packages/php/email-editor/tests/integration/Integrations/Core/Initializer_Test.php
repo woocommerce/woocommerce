@@ -51,22 +51,6 @@ class Initializer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * Test that calling initialize multiple times does not add duplicate hooks.
-	 */
-	public function testInitializeDoesNotRegisterDuplicateHooks(): void {
-		$this->initializer->initialize();
-		$priority_first = has_action( 'woocommerce_email_editor_render_start', array( $this->initializer, 'reset_renderers' ) );
-
-		$this->initializer->initialize();
-		$this->initializer->initialize();
-
-		$priority_after = has_action( 'woocommerce_email_editor_render_start', array( $this->initializer, 'reset_renderers' ) );
-
-		// Priority should remain unchanged — the hook was not re-added.
-		$this->assertSame( $priority_first, $priority_after );
-	}
-
-	/**
 	 * Test that reset_renderers fires exactly once per render_start action even after multiple initializations.
 	 */
 	public function testResetRenderersFiresOncePerRenderStart(): void {
