@@ -127,7 +127,7 @@ class ProductStockIndicator extends AbstractBlock {
 		if ( $is_interactive && 'out-of-stock' !== $availability['class'] ) {
 			wp_enqueue_script_module( 'woocommerce/product-elements' );
 			$wrapper_attributes['data-wp-interactive'] = 'woocommerce/product-elements';
-			$wrapper_attributes['data-wp-text']        = 'state.productData.stock_availability.text';
+			$wrapper_attributes['data-wp-text']        = 'woocommerce/products::state.selected.stock_availability.text';
 			$wrapper_attributes['aria-live']           = 'polite';
 			$wrapper_attributes['aria-atomic']         = 'true';
 		}

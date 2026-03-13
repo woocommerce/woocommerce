@@ -130,7 +130,7 @@ class ProductSpecifications extends AbstractBlock {
 								<?php echo wp_kses_post( $product_attribute['label'] ); ?>
 							</th>
 							<?php if ( $is_interactive && isset( $product_attribute['api_field'] ) ) : ?>
-								<td class="wp-block-product-specifications-item__value" data-wp-interactive="woocommerce/product-elements" data-wp-text="state.productData.<?php echo esc_attr( $product_attribute['api_field'] ); ?>">
+								<td class="wp-block-product-specifications-item__value" data-wp-interactive="woocommerce/product-elements" data-wp-text="woocommerce/products::state.selected.<?php echo esc_attr( $product_attribute['api_field'] ); ?>">
 									<?php echo wp_kses_post( $product_attribute['value'] ); ?>
 								</td>
 							<?php else : ?>	

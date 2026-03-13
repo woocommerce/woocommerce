@@ -44,31 +44,21 @@ type Context = {
 	productElementKey: keyof ProductResponseItem;
 };
 
-const productElementStore = store(
+store(
 	'woocommerce/product-elements',
 	{
-		state: {
-			get productData() {
-				return productsState.selected;
-			},
-		},
 		callbacks: {
 			updateValue: () => {
 				const element = getElement();
 
-				if (
-					! element.ref ||
-					! productElementStore.state?.productData
-				) {
+				if ( ! element.ref || ! productsState.selected ) {
 					return;
 				}
 
 				const { productElementKey } = getContext< Context >();
 
 				const productElementHtml =
-					productElementStore?.state?.productData?.[
-						productElementKey
-					];
+					productsState.selected?.[ productElementKey ];
 
 				if ( typeof productElementHtml === 'string' ) {
 					element.ref.innerHTML = sanitizeHTML( productElementHtml, {
