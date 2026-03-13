@@ -89,8 +89,8 @@ class ImageAttachmentSchema extends AbstractSchema {
 			'id'        => (int) $attachment_id,
 			'src'       => current( $attachment ),
 			'thumbnail' => current( $thumbnail ),
-			'srcset'    => (string) wp_get_attachment_image_srcset( $attachment_id, 'full' ),
-			'sizes'     => (string) wp_get_attachment_image_sizes( $attachment_id, 'full' ),
+			'srcset'    => (string) wp_get_attachment_image_srcset( $attachment_id, 'woocommerce_thumbnail' ),
+			'sizes'     => (string) wp_get_attachment_image_sizes( $attachment_id, 'woocommerce_thumbnail' ),
 			'name'      => get_the_title( $attachment_id ),
 			'alt'       => get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ),
 		];

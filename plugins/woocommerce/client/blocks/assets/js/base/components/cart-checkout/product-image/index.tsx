@@ -5,7 +5,7 @@ import { decodeEntities } from '@wordpress/html-entities';
 import { PLACEHOLDER_IMG_SRC } from '@woocommerce/settings';
 
 interface ProductImageProps {
-	image: { alt?: string; thumbnail?: string };
+	image: { alt?: string; thumbnail?: string; srcset?: string; sizes?: string };
 	fallbackAlt: string;
 	width?: number;
 	height?: number;
@@ -39,6 +39,8 @@ const ProductImage = ( {
 		<img
 			src={ imageProps.src }
 			alt={ imageProps.alt }
+			srcSet={ image.thumbnail ? image.srcset : undefined }
+			sizes={ image.thumbnail ? image.sizes : undefined }
 			width={ width }
 			height={ height }
 		/>

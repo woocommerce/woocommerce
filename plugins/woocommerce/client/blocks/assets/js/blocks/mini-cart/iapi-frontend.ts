@@ -594,6 +594,14 @@ const { state: cartItemState } = store(
 				);
 			},
 
+			get itemSrcset(): string {
+				return cartItemState.cartItem.images[ 0 ]?.srcset || '';
+			},
+
+			get itemSizes(): string {
+				return cartItemState.cartItem.images[ 0 ]?.sizes || '';
+			},
+
 			get priceWithoutDiscount(): string {
 				const { raw_prices: rawPrices } = cartItemState.cartItem.prices;
 				const priceWithoutDiscount = scalePrice( {
