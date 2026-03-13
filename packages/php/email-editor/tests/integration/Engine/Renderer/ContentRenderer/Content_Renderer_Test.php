@@ -150,6 +150,65 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test render_block applies root horizontal padding from email_attrs
+	 */
+	public function testItAppliesRootHorizontalPadding(): void {
+		register_block_type(
+			'test/padded-block',
+			array(
+				'render_email_callback' => function () {
+					return '<p>padded content</p>';
+				},
+			)
+		);
+
+		$result = $this->renderer->render_block(
+			'content',
+			array(
+				'blockName'   => 'test/padded-block',
+				'email_attrs' => array(
+					'root-padding-left'  => '24px',
+					'root-padding-right' => '24px',
+				),
+			)
+		);
+
+		$this->assertStringContainsString( 'padded content', $result );
+		$this->assertStringContainsString( 'email-root-padding', $result );
+		$this->assertStringContainsString( 'padding-left:24px', $result );
+		$this->assertStringContainsString( 'padding-right:24px', $result );
+		\WP_Block_Type_Registry::get_instance()->unregister( 'test/padded-block' );
+	}
+
+	/**
+	 * Test render_block skips root padding when no root-padding attrs are set
+	 */
+	public function testItSkipsRootPaddingWhenNotSet(): void {
+		register_block_type(
+			'test/no-padding-block',
+			array(
+				'render_email_callback' => function () {
+					return '<p>no padding</p>';
+				},
+			)
+		);
+
+		$result = $this->renderer->render_block(
+			'content',
+			array(
+				'blockName'   => 'test/no-padding-block',
+				'email_attrs' => array(
+					'margin-top' => '10px',
+				),
+			)
+		);
+
+		$this->assertEquals( '<p>no padding</p>', $result );
+		$this->assertStringNotContainsString( 'email-root-padding', $result );
+		\WP_Block_Type_Registry::get_instance()->unregister( 'test/no-padding-block' );
+	}
+
+	/**
 	 * Get the value of the style attribute for a given tag in the HTML.
 	 *
 	 * @param string $html HTML content.

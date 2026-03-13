@@ -22,8 +22,7 @@ class Spacing_Preprocessor implements Preprocessor {
 	 * @return array
 	 */
 	public function preprocess( array $parsed_blocks, array $layout, array $styles ): array {
-		$root_padding = $this->get_root_padding( $styles );
-
+		$root_padding  = $this->get_root_padding( $styles );
 		$parsed_blocks = $this->add_block_gaps( $parsed_blocks, $styles['spacing']['blockGap'] ?? '', null, $root_padding );
 		return $parsed_blocks;
 	}
@@ -92,8 +91,8 @@ class Spacing_Preprocessor implements Preprocessor {
 			$should_apply       = $apply_root_padding || ( $is_root_level && ! $is_container );
 
 			if ( $should_apply && ! $has_own_padding && 'full' !== $alignment && 'core/post-content' !== $block_name && ! $wraps_post_content && ! empty( $root_padding ) ) {
-				$block['email_attrs']['padding-left']  = $root_padding['left'];
-				$block['email_attrs']['padding-right'] = $root_padding['right'];
+				$block['email_attrs']['root-padding-left']  = $root_padding['left'];
+				$block['email_attrs']['root-padding-right'] = $root_padding['right'];
 			}
 
 			// Determine whether children should receive root padding delegation.

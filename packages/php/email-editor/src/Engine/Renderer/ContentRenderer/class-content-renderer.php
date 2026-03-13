@@ -13,9 +13,11 @@ use Automattic\WooCommerce\EmailEditor\Engine\Renderer\Css_Inliner;
 use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Fallback;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Post_Content;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 use WP_Block_Template;
 use WP_Block_Type_Registry;
 use WP_Post;
+use WP_Style_Engine;
 
 /**
  * Class Content_Renderer
@@ -246,9 +248,10 @@ class Content_Renderer {
 		$context = new Rendering_Context( $this->theme_controller->get_theme(), $email_context );
 
 		$block_type = $this->block_type_registry->get_registered( $parsed_block['blockName'] );
+		$result     = null;
 		try {
 			if ( $block_type && isset( $block_type->render_email_callback ) && is_callable( $block_type->render_email_callback ) ) {
-				return call_user_func( $block_type->render_email_callback, $block_content, $parsed_block, $context );
+				$result = call_user_func( $block_type->render_email_callback, $block_content, $parsed_block, $context );
 			}
 		} catch ( \Exception $error ) {
 			$this->logger->error(
@@ -264,7 +267,58 @@ class Content_Renderer {
 			return $block_content;
 		}
 
-		return $this->fallback_renderer->render( $block_content, $parsed_block, $context );
+		if ( null === $result ) {
+			$result = $this->fallback_renderer->render( $block_content, $parsed_block, $context );
+		}
+
+		return $this->add_root_horizontal_padding( $result, $parsed_block['email_attrs'] ?? array() );
+	}
+
+	/**
+	 * Wrap block output with root horizontal padding.
+	 *
+	 * Root padding is distributed by the Spacing_Preprocessor from the outer
+	 * email container to individual blocks. This method applies it uniformly
+	 * to all blocks regardless of whether they use Abstract_Block_Renderer
+	 * or a custom render_email_callback.
+	 *
+	 * @param string $content The rendered block content.
+	 * @param array  $email_attrs The email attributes from the parsed block.
+	 * @return string The content wrapped with horizontal padding, or unchanged if no root padding.
+	 */
+	private function add_root_horizontal_padding( string $content, array $email_attrs ): string {
+		$css_attrs = array();
+		if ( isset( $email_attrs['root-padding-left'] ) ) {
+			$css_attrs['padding-left'] = $email_attrs['root-padding-left'];
+		}
+		if ( isset( $email_attrs['root-padding-right'] ) ) {
+			$css_attrs['padding-right'] = $email_attrs['root-padding-right'];
+		}
+		if ( empty( $css_attrs ) ) {
+			return $content;
+		}
+
+		$padding_style = WP_Style_Engine::compile_css( $css_attrs, '' );
+		if ( empty( $padding_style ) ) {
+			return $content;
+		}
+
+		$table_attrs = array(
+			'align' => 'left',
+			'width' => '100%',
+		);
+
+		$cell_attrs = array(
+			'style' => $padding_style,
+		);
+
+		$div_content = sprintf(
+			'<div class="email-root-padding" style="%1$s">%2$s</div>',
+			esc_attr( $padding_style ),
+			$content
+		);
+
+		return Table_Wrapper_Helper::render_outlook_table_wrapper( $div_content, $table_attrs, $cell_attrs );
 	}
 
 	/**
