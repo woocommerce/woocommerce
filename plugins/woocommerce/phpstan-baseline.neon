@@ -19003,19 +19003,7 @@ parameters:
 			path: includes/emails/class-wc-email-customer-on-hold-order.php
 
 		-
-			message: '#^Callback expects 3 parameters, \$accepted_args is set to 4\.$#'
-			identifier: arguments.count
-			count: 1
-			path: includes/emails/class-wc-email-customer-pos-completed-order.php
-
-		-
 			message: '#^Method WC_Email_Customer_POS_Completed_Order\:\:add_pos_customizations\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/emails/class-wc-email-customer-pos-completed-order.php
-
-		-
-			message: '#^Method WC_Email_Customer_POS_Completed_Order\:\:add_unit_price\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: includes/emails/class-wc-email-customer-pos-completed-order.php
@@ -19081,12 +19069,6 @@ parameters:
 			path: includes/emails/class-wc-email-customer-pos-completed-order.php
 
 		-
-			message: '#^Parameter \#2 \$item of static method Automattic\\WooCommerce\\Internal\\Email\\OrderPriceFormatter\:\:get_formatted_item_subtotal\(\) expects WC_Order_Item, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/emails/class-wc-email-customer-pos-completed-order.php
-
-		-
 			message: '#^Variable \$order might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1
@@ -19099,19 +19081,7 @@ parameters:
 			path: includes/emails/class-wc-email-customer-pos-refunded-order.php
 
 		-
-			message: '#^Callback expects 3 parameters, \$accepted_args is set to 4\.$#'
-			identifier: arguments.count
-			count: 1
-			path: includes/emails/class-wc-email-customer-pos-refunded-order.php
-
-		-
 			message: '#^Method WC_Email_Customer_POS_Refunded_Order\:\:add_pos_customizations\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/emails/class-wc-email-customer-pos-refunded-order.php
-
-		-
-			message: '#^Method WC_Email_Customer_POS_Refunded_Order\:\:add_unit_price\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: includes/emails/class-wc-email-customer-pos-refunded-order.php
@@ -19154,12 +19124,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$date of function wc_format_datetime expects WC_DateTime, WC_DateTime\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/emails/class-wc-email-customer-pos-refunded-order.php
-
-		-
-			message: '#^Parameter \#2 \$item of static method Automattic\\WooCommerce\\Internal\\Email\\OrderPriceFormatter\:\:get_formatted_item_subtotal\(\) expects WC_Order_Item, array given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/emails/class-wc-email-customer-pos-refunded-order.php
