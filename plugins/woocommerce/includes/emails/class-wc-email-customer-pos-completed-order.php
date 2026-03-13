@@ -335,7 +335,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 		 */
 		public function format_quantity_with_unit_price( $qty_display, $item, $order ) {
 			$unit_price = OrderPriceFormatter::get_formatted_item_subtotal( $order, $item, get_option( 'woocommerce_tax_display_cart' ) );
-			return $unit_price . ' &times;&nbsp;' . $item->get_quantity();
+			return $unit_price . ' ' . $qty_display;
 		}
 
 		/**

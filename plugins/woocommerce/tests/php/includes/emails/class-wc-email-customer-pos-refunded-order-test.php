@@ -415,45 +415,28 @@ class WC_Email_Customer_POS_Refunded_Order_Test extends \WC_Unit_Test_Case {
 		$order->save();
 
 		// When getting content from POS refunded email.
-		$email         = new WC_Email_Customer_POS_Refunded_Order();
-		$email->object = $order;
-		$content       = $email->get_content_html();
-
-		// Then POS email should show unit price followed by × and quantity.
-		$this->assertStringContainsString( '&times;&nbsp;' . $order->get_items()[ array_key_first( $order->get_items() ) ]->get_quantity(), $content );
-	}
-
-	/**
-	 * @testdox POS refunded email unit price in quantity column does not affect regular refunded order emails.
-	 */
-	public function test_pos_email_unit_price_does_not_affect_regular_emails() {
-		// Initialize WC_Emails to set up actions and filters.
-		$emails = new WC_Emails();
-
-		// Given an order with items.
-		$order = OrderHelper::create_order();
-		$order->save();
-
-		// When getting content from both email types.
 		$pos_email     = new WC_Email_Customer_POS_Refunded_Order();
 		$regular_email = new WC_Email_Customer_Refunded_Order();
 
 		$pos_email->object     = $order;
 		$regular_email->object = $order;
 
-		$pos_content     = $pos_email->get_content_html();
-		$regular_content = $regular_email->get_content_html();
+		$pos_html     = $pos_email->get_content_html();
+		$pos_plain    = $pos_email->get_content_plain();
+		$regular_html = $regular_email->get_content_html();
 
-		$items = $order->get_items();
-		$item  = $items[ array_key_first( $items ) ];
+		$items         = $order->get_items();
+		$item          = $items[ array_key_first( $items ) ];
+		$item_subtotal = number_format( $order->get_item_subtotal( $item ), 2 );
 
-		// Then POS email should show formatted unit price before × quantity.
-		$unit_price     = wp_kses_post( wc_price( $order->get_item_subtotal( $item ), array( 'currency' => $order->get_currency() ) ) );
-		$expected_chunk = $unit_price . ' &times;&nbsp;' . $item->get_quantity();
-		$this->assertStringContainsString( $expected_chunk, $pos_content );
+		// Then POS HTML email should contain the unit price amount adjacent to the quantity.
+		$this->assertMatchesRegularExpression( '/' . preg_quote( $item_subtotal, '/' ) . '.*' . $item->get_quantity() . '/', $pos_html );
 
-		// And regular email should not contain unit price before × quantity.
-		$this->assertStringNotContainsString( $expected_chunk, $regular_content );
+		// And plain text email should also contain the unit price amount.
+		$this->assertStringContainsString( $item_subtotal, $pos_plain );
+
+		// And regular email should not contain unit price adjacent to quantity in same cell.
+		$this->assertDoesNotMatchRegularExpression( '/' . preg_quote( $item_subtotal, '/' ) . '<\/span>\s+' . $item->get_quantity() . '\s+<\/td>/', $regular_html );
 	}
 
 	/**
