@@ -34,7 +34,7 @@ export type ProductsStoreState = {
 	 * Product variations keyed by variation ID.
 	 * These are in Store API format (ProductResponseItem).
 	 */
-	productVariations: Record< number, ProductResponseItem >;
+	variations: Record< number, ProductResponseItem >;
 	/**
 	 * Look up a product by ID, resolving to the matching variation for
 	 * variable products when selectedAttributes are provided.
@@ -62,11 +62,11 @@ export type ProductsStoreState = {
 	 * The currently selected variation, or null if none is selected.
 	 * For simple/grouped products, this is always null.
 	 */
-	selectedVariation: ProductResponseItem | null;
+	variation: ProductResponseItem | null;
 	/**
 	 * The currently active product: the selected variation if one exists,
 	 * otherwise the main product. Convenience getter that replaces the
-	 * repeated `selectedVariation || product` pattern.
+	 * repeated `variation || product` pattern.
 	 */
 	selected: ProductResponseItem | null;
 };
@@ -91,16 +91,16 @@ const universalLock =
  *
  * State structure:
  * - products: Record<productId, ProductResponseItem>
- * - productVariations: Record<variationId, ProductResponseItem>
+ * - variations: Record<variationId, ProductResponseItem>
  * - productId / variationId: current product-in-context IDs
- * - product / selectedVariation / selected: derived getters
+ * - product / variation / selected: derived getters
  */
 const { state: productsState } = store< ProductsStore >(
 	'woocommerce/products',
 	{
 		state: {
 			products: {},
-			productVariations: {},
+			variations: {},
 			findVariation( {
 				id,
 				selectedAttributes,
@@ -128,7 +128,7 @@ const { state: productsState } = store< ProductsStore >(
 					}
 
 					return (
-						productsState.productVariations[
+						productsState.variations[
 							matchedVariation.id
 						] ?? null
 					);
@@ -151,7 +151,7 @@ const { state: productsState } = store< ProductsStore >(
 				return productsState.products[ productId ] ?? null;
 			},
 
-			get selectedVariation(): ProductResponseItem | null {
+			get variation(): ProductResponseItem | null {
 				const context = getContext< ProductContext >(
 					'woocommerce/products'
 				);
@@ -161,11 +161,11 @@ const { state: productsState } = store< ProductsStore >(
 				if ( ! variationId ) {
 					return null;
 				}
-				return productsState.productVariations[ variationId ] ?? null;
+				return productsState.variations[ variationId ] ?? null;
 			},
 
 			get selected(): ProductResponseItem | null {
-				return productsState.selectedVariation || productsState.product;
+				return productsState.variation || productsState.product;
 			},
 		},
 	},

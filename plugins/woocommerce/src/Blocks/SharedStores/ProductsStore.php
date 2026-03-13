@@ -72,7 +72,7 @@ class ProductsStore {
 		}
 
 		if ( ! empty( self::$product_variations ) ) {
-			$state['productVariations'] = self::$product_variations;
+			$state['variations'] = self::$product_variations;
 		}
 
 		if ( ! empty( $state ) ) {

@@ -33,10 +33,7 @@ jest.mock(
 				// Simulate server-hydrated state merged with client definition.
 				const stateBase = {
 					products: {} as Record< number, ProductResponseItem >,
-					productVariations: {} as Record<
-						number,
-						ProductResponseItem
-					>,
+					variations: {} as Record< number, ProductResponseItem >,
 					productId: 0,
 					variationId: null as number | null,
 				};
@@ -132,9 +129,7 @@ describe( 'woocommerce/products store', () => {
 					variations: [
 						{
 							id: 10,
-							attributes: [
-								{ name: 'Color', value: 'red' },
-							],
+							attributes: [ { name: 'Color', value: 'red' } ],
 						},
 					],
 				} as ProductResponseItem;
@@ -143,8 +138,7 @@ describe( 'woocommerce/products store', () => {
 					type: 'variation',
 				} as ProductResponseItem;
 				mockRegisteredStore!.state.products[ 1 ] = product;
-				mockRegisteredStore!.state.productVariations[ 10 ] =
-					variation;
+				mockRegisteredStore!.state.variations[ 10 ] = variation;
 
 				const result = mockRegisteredStore!.state.findVariation( {
 					id: 1,
@@ -155,16 +149,14 @@ describe( 'woocommerce/products store', () => {
 				expect( result ).toBe( variation );
 			} );
 
-			it( 'returns null when variation is matched but not in productVariations', () => {
+			it( 'returns null when variation is matched but not in variations', () => {
 				const product = {
 					id: 1,
 					type: 'variable',
 					variations: [
 						{
 							id: 10,
-							attributes: [
-								{ name: 'Color', value: 'red' },
-							],
+							attributes: [ { name: 'Color', value: 'red' } ],
 						},
 					],
 				} as ProductResponseItem;
@@ -186,9 +178,7 @@ describe( 'woocommerce/products store', () => {
 					variations: [
 						{
 							id: 10,
-							attributes: [
-								{ name: 'Color', value: 'red' },
-							],
+							attributes: [ { name: 'Color', value: 'red' } ],
 						},
 					],
 				} as ProductResponseItem;
@@ -208,8 +198,7 @@ describe( 'woocommerce/products store', () => {
 	describe( 'product-in-context getters', () => {
 		beforeEach( () => {
 			mockRegisteredStore!.state.products[ 42 ] = mockProduct;
-			mockRegisteredStore!.state.productVariations[ 99 ] =
-				mockVariation;
+			mockRegisteredStore!.state.variations[ 99 ] = mockVariation;
 		} );
 
 		it( 'has writable productId and variationId state', () => {
@@ -261,14 +250,12 @@ describe( 'woocommerce/products store', () => {
 			} );
 		} );
 
-		describe( 'selectedVariation', () => {
+		describe( 'variation', () => {
 			it( 'returns null when variationId is null (simple product)', () => {
 				mockRegisteredStore!.state.productId = 42;
 				mockRegisteredStore!.state.variationId = null;
 
-				expect(
-					mockRegisteredStore!.state.selectedVariation
-				).toBeNull();
+				expect( mockRegisteredStore!.state.variation ).toBeNull();
 			} );
 
 			it( 'returns null when variationId is null (variable product, no selection)', () => {
@@ -279,16 +266,14 @@ describe( 'woocommerce/products store', () => {
 				mockRegisteredStore!.state.productId = 10;
 				mockRegisteredStore!.state.variationId = null;
 
-				expect(
-					mockRegisteredStore!.state.selectedVariation
-				).toBeNull();
+				expect( mockRegisteredStore!.state.variation ).toBeNull();
 			} );
 
 			it( 'returns the variation when variationId is set', () => {
 				mockRegisteredStore!.state.productId = 42;
 				mockRegisteredStore!.state.variationId = 99;
 
-				expect( mockRegisteredStore!.state.selectedVariation ).toBe(
+				expect( mockRegisteredStore!.state.variation ).toBe(
 					mockVariation
 				);
 			} );
@@ -297,9 +282,7 @@ describe( 'woocommerce/products store', () => {
 				mockRegisteredStore!.state.productId = 42;
 				mockRegisteredStore!.state.variationId = 999;
 
-				expect(
-					mockRegisteredStore!.state.selectedVariation
-				).toBeNull();
+				expect( mockRegisteredStore!.state.variation ).toBeNull();
 			} );
 		} );
 
@@ -340,38 +323,34 @@ describe( 'woocommerce/products store', () => {
 				);
 			} );
 
-			it( 'selectedVariation reads variationId from context when available', () => {
+			it( 'variation reads variationId from context when available', () => {
 				mockContext = { productId: 42, variationId: 99 };
 				mockRegisteredStore!.state.variationId = null;
 
-				expect( mockRegisteredStore!.state.selectedVariation ).toBe(
+				expect( mockRegisteredStore!.state.variation ).toBe(
 					mockVariation
 				);
 			} );
 
-			it( 'selectedVariation does not fall back to state when context variationId is null but context exists', () => {
+			it( 'variation does not fall back to state when context variationId is null but context exists', () => {
 				mockContext = { productId: 42 };
 				mockRegisteredStore!.state.variationId = 99;
 
-				expect(
-					mockRegisteredStore!.state.selectedVariation
-				).toBe( null );
+				expect( mockRegisteredStore!.state.variation ).toBe( null );
 			} );
 
-			it( 'selectedVariation falls back to state when context does not exist', () => {
+			it( 'variation falls back to state when context does not exist', () => {
 				mockRegisteredStore!.state.variationId = 99;
 
-				expect( mockRegisteredStore!.state.selectedVariation ).toBe(
+				expect( mockRegisteredStore!.state.variation ).toBe(
 					mockVariation
 				);
 			} );
 
-			it( 'selectedVariation returns null when both context and state variationId are null', () => {
+			it( 'variation returns null when both context and state variationId are null', () => {
 				mockRegisteredStore!.state.variationId = null;
 
-				expect(
-					mockRegisteredStore!.state.selectedVariation
-				).toBeNull();
+				expect( mockRegisteredStore!.state.variation ).toBeNull();
 			} );
 		} );
 	} );

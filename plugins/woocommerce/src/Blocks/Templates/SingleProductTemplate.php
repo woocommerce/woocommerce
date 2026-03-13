@@ -92,7 +92,7 @@ class SingleProductTemplate extends AbstractTemplate {
 				ProductsStore::load_product( $consent, $product->get_id() );
 
 				// Register the product-context store state. The derived state
-				// closures (product, selectedVariation) mirror the JS getters
+				// closures (product, variation) mirror the JS getters
 				// so that directives referencing state.product resolve during
 				// SSR. If more call sites need to register these closures,
 				// consider extracting them into a shared helper.
@@ -112,7 +112,7 @@ class SingleProductTemplate extends AbstractTemplate {
 
 							return $state['products'][ $product_id ] ?? null;
 						},
-						'selectedVariation' => function () {
+						'variation' => function () {
 							$context      = wp_interactivity_get_context();
 							$state        = wp_interactivity_state( 'woocommerce/products' );
 							$variation_id = ! empty( $context ) ? $context['variationId'] : ( $state['variationId'] ?? null );
@@ -121,11 +121,11 @@ class SingleProductTemplate extends AbstractTemplate {
 								return null;
 							}
 
-							return $state['productVariations'][ $variation_id ] ?? null;
+							return $state['variations'][ $variation_id ] ?? null;
 						},
 						'selected'          => function () {
 							$state = wp_interactivity_state( 'woocommerce/products' );
-							return $state['selectedVariation'] ?? $state['product'] ?? null;
+							return $state['variation'] ?? $state['product'] ?? null;
 						},
 					)
 				);
