@@ -5,7 +5,12 @@ import { decodeEntities } from '@wordpress/html-entities';
 import { PLACEHOLDER_IMG_SRC } from '@woocommerce/settings';
 
 interface ProductImageProps {
-	image: { alt?: string; thumbnail?: string; srcset?: string; sizes?: string };
+	image: {
+		alt?: string;
+		thumbnail?: string;
+		srcset?: string;
+		sizes?: string;
+	};
 	fallbackAlt: string;
 	width?: number;
 	height?: number;
