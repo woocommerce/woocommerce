@@ -2004,7 +2004,8 @@ CREATE TABLE {$wpdb->prefix}woocommerce_shipping_zones (
   zone_id bigint(20) unsigned NOT NULL auto_increment,
   zone_name varchar(200) NOT NULL,
   zone_order bigint(20) unsigned NOT NULL,
-  PRIMARY KEY  (zone_id)
+  PRIMARY KEY  (zone_id),
+  KEY zone_order_id (zone_order, zone_id)
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_shipping_zone_locations (
   location_id bigint(20) unsigned NOT NULL auto_increment,
