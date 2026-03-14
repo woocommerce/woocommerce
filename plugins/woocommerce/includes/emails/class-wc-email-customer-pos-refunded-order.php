@@ -299,17 +299,21 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 		 */
 		public function get_block_editor_email_template_content() {
 			$this->add_pos_customizations();
-			return wc_get_template_html(
-				$this->template_block_content,
-				array(
-					'order'          => $this->object,
-					'refund'         => $this->refund,
-					'partial_refund' => $this->partial_refund,
-					'sent_to_admin'  => false,
-					'plain_text'     => false,
-					'email'          => $this,
-				)
-			);
+			try {
+				return wc_get_template_html(
+					$this->template_block_content,
+					array(
+						'order'          => $this->object,
+						'refund'         => $this->refund,
+						'partial_refund' => $this->partial_refund,
+						'sent_to_admin'  => false,
+						'plain_text'     => false,
+						'email'          => $this,
+					)
+				);
+			} finally {
+				$this->remove_pos_customizations();
+			}
 		}
 
 		/**
