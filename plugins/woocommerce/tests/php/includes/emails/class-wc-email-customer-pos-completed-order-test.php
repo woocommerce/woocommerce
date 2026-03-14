@@ -429,14 +429,17 @@ class WC_Email_Customer_POS_Completed_Order_Test extends \WC_Unit_Test_Case {
 	 * @testdox POS email displays unit price in the quantity column.
 	 */
 	public function test_pos_email_displays_unit_price_in_quantity_column() {
+		// Enable email improvements to get the × prefix in the quantity column.
+		update_option( 'woocommerce_feature_email_improvements_enabled', 'yes' );
+
 		// Initialize WC_Emails to set up actions and filters.
-		$emails = new WC_Emails();
+		new WC_Emails();
 
 		// Given an order with items.
 		$order = OrderHelper::create_order();
 		$order->save();
 
-		// When getting content from POS email.
+		// When getting content from POS and regular emails.
 		$pos_email     = new WC_Email_Customer_POS_Completed_Order();
 		$regular_email = new WC_Email_Customer_Completed_Order();
 
@@ -451,15 +454,18 @@ class WC_Email_Customer_POS_Completed_Order_Test extends \WC_Unit_Test_Case {
 		$item          = $items[ array_key_first( $items ) ];
 		$item_subtotal = number_format( $order->get_item_subtotal( $item ), 2 );
 
-		// Then POS HTML email should contain the unit price amount adjacent to the quantity.
-		$this->assertMatchesRegularExpression( '/' . preg_quote( $item_subtotal, '/' ) . '.*' . $item->get_quantity() . '/', $pos_html );
+		// Strip tags and decode entities so we can do simple text matching.
+		$pos_text     = html_entity_decode( wp_strip_all_tags( $pos_html ) );
+		$regular_text = html_entity_decode( wp_strip_all_tags( $regular_html ) );
+
+		// Then POS email should contain unit price followed by × and quantity.
+		$this->assertStringContainsString( $item_subtotal . " \u{00d7}\u{00a0}" . $item->get_quantity(), $pos_text );
 
 		// And plain text email should also contain the unit price amount.
 		$this->assertStringContainsString( $item_subtotal, $pos_plain );
 
-		// And regular email should not contain unit price adjacent to quantity in same cell.
-		// The regular email has the price only in the totals column, not in the quantity column.
-		$this->assertDoesNotMatchRegularExpression( '/' . preg_quote( $item_subtotal, '/' ) . '<\/span>\s+' . $item->get_quantity() . '\s+<\/td>/', $regular_html );
+		// And regular email should not contain unit price adjacent to quantity.
+		$this->assertStringNotContainsString( $item_subtotal . " \u{00d7}\u{00a0}" . $item->get_quantity(), $regular_text );
 	}
 
 	/**

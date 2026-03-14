@@ -334,6 +334,10 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 		 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
 		 */
 		public function format_quantity_with_unit_price( $qty_display, $item, $order ) {
+			if ( ! $order instanceof \WC_Order || ! $item instanceof \WC_Order_Item_Product ) {
+				return $qty_display;
+			}
+
 			$unit_price = OrderPriceFormatter::get_formatted_item_subtotal( $order, $item, get_option( 'woocommerce_tax_display_cart' ) );
 			return $unit_price . ' ' . $qty_display;
 		}
