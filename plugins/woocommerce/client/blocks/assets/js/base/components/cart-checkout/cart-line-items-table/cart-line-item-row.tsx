@@ -18,10 +18,7 @@ import {
 	productPriceValidation,
 } from '@woocommerce/blocks-checkout';
 import { dinero, transformScale, toSnapshot, type Dinero } from 'dinero.js';
-// USD is a placeholder currency required by the dinero.js v2 API.
-// The actual currency formatting is handled elsewhere; USD is only used here
-// for arithmetic operations where the specific currency is irrelevant.
-import { USD } from 'dinero.js/currencies';
+import { USD } from 'dinero.js/currencies'; // USD is used as a placeholder currency for arithmetic; actual formatting is handled elsewhere.
 import { forwardRef, useMemo } from '@wordpress/element';
 import type { CartItem } from '@woocommerce/types';
 import { objectHasProp, Currency } from '@woocommerce/types';
