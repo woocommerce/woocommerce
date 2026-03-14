@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Make zone locations optional in the V4 Shipping Zones REST API schema so that "Everywhere" zones can be created without providing a locations array.
