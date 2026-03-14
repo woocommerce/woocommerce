@@ -16615,18 +16615,6 @@ parameters:
 			path: includes/class-woocommerce.php
 
 		-
-			message: '#^Undefined variable\: \$site_url$#'
-			identifier: variable.undefined
-			count: 1
-			path: includes/class-woocommerce.php
-
-		-
-			message: '#^Variable \$site_url in empty\(\) is never defined\.$#'
-			identifier: empty.variable
-			count: 1
-			path: includes/class-woocommerce.php
-
-		-
 			message: '#^Call to method display_items\(\) on an unknown class WP_CLI\\Formatter\.$#'
 			identifier: class.notFound
 			count: 1
