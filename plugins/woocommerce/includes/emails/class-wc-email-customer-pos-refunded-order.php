@@ -383,8 +383,12 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 		 * Add actions and filters before generating email content.
 		 */
 		private function add_pos_customizations() {
-			// Add filter to display unit price in the quantity column.
-			add_filter( 'woocommerce_email_order_items_quantity_display', array( $this, 'format_quantity_with_unit_price' ), 10, 3 );
+			// Add unit price display: in the quantity column with email improvements, or below the product name without.
+			if ( $this->email_improvements_enabled ) {
+				add_filter( 'woocommerce_email_order_items_quantity_display', array( $this, 'format_quantity_with_unit_price' ), 10, 3 );
+			} else {
+				add_action( 'woocommerce_order_item_meta_start', array( $this, 'add_unit_price' ), 10, 3 );
+			}
 			// Add filter to include additional details in the order item totals table.
 			add_filter( 'woocommerce_get_order_item_totals', array( $this, 'order_item_totals' ), 10, 3 );
 			// Add filter for custom footer text with highest priority to run before the default footer text filtering in `WC_Emails`.
@@ -397,6 +401,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 		private function remove_pos_customizations() {
 			// Remove actions and filters after generating content to avoid affecting other emails.
 			remove_filter( 'woocommerce_email_order_items_quantity_display', array( $this, 'format_quantity_with_unit_price' ), 10 );
+			remove_action( 'woocommerce_order_item_meta_start', array( $this, 'add_unit_price' ), 10 );
 			remove_filter( 'woocommerce_get_order_item_totals', array( $this, 'order_item_totals' ), 10 );
 			remove_filter( 'woocommerce_email_footer_text', array( $this, 'replace_footer_placeholders' ), 1 );
 		}
@@ -437,6 +442,8 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 		/**
 		 * Format the quantity cell to show unit price before the quantity.
 		 *
+		 * Used when email improvements are enabled.
+		 *
 		 * @param string                $qty_display The default quantity display.
 		 * @param WC_Order_Item_Product $item        The order item.
 		 * @param WC_Order              $order       The order object.
@@ -451,6 +458,26 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 
 			$unit_price = OrderPriceFormatter::get_formatted_item_subtotal( $order, $item, get_option( 'woocommerce_tax_display_cart' ) );
 			return $unit_price . ' ' . $qty_display;
+		}
+
+		/**
+		 * Add unit price below the product name in order item meta.
+		 *
+		 * Used when email improvements are not enabled.
+		 *
+		 * @param int                   $item_id Order item ID.
+		 * @param WC_Order_Item_Product $item    Order item.
+		 * @param WC_Order              $order   Order object.
+		 *
+		 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
+		 */
+		public function add_unit_price( $item_id, $item, $order ): void {
+			if ( ! $order instanceof \WC_Order || ! $item instanceof \WC_Order_Item_Product ) {
+				return;
+			}
+
+			$unit_price = OrderPriceFormatter::get_formatted_item_subtotal( $order, $item, get_option( 'woocommerce_tax_display_cart' ) );
+			echo wp_kses_post( '<br /><small>' . $unit_price . '</small>' );
 		}
 
 		/**
