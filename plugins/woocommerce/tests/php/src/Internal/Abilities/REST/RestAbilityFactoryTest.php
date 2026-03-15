@@ -407,6 +407,147 @@ class RestAbilityFactoryTest extends WC_Unit_Test_Case {
 		$this->assertNotContains( 'date-time', $all_types, 'Output schema for list should not contain date-time type' );
 	}
 
+	// ── Array types (nullable fields) ──
+
+	/**
+	 * @testdox Should normalize array type with valid types preserved.
+	 */
+	public function test_normalizes_array_type_with_valid_types(): void {
+		$args = array(
+			'name' => array(
+				'type' => array( 'string', 'null' ),
+			),
+		);
+
+		$schema = $this->invoke_sanitize_args_to_schema( $args );
+
+		$this->assertSame( array( 'string', 'null' ), $schema['properties']['name']['type'], 'Valid array types should be preserved' );
+	}
+
+	/**
+	 * @testdox Should filter invalid types from array type and keep valid ones.
+	 */
+	public function test_filters_invalid_types_from_array_type(): void {
+		$args = array(
+			'value' => array(
+				'type' => array( 'mixed', 'string', 'null' ),
+			),
+		);
+
+		$schema = $this->invoke_sanitize_args_to_schema( $args );
+
+		$this->assertSame( array( 'string', 'null' ), $schema['properties']['value']['type'], 'Invalid types should be filtered from array' );
+	}
+
+	/**
+	 * @testdox Should convert date-time in array type to string and set format.
+	 */
+	public function test_converts_date_time_in_array_type(): void {
+		$args = array(
+			'created' => array(
+				'type' => array( 'date-time', 'null' ),
+			),
+		);
+
+		$schema = $this->invoke_sanitize_args_to_schema( $args );
+
+		$this->assertSame( array( 'string', 'null' ), $schema['properties']['created']['type'] );
+		$this->assertSame( 'date-time', $schema['properties']['created']['format'] );
+	}
+
+	/**
+	 * @testdox Should convert action in array type to object.
+	 */
+	public function test_converts_action_in_array_type(): void {
+		$args = array(
+			'field' => array(
+				'type' => array( 'action', 'null' ),
+			),
+		);
+
+		$schema = $this->invoke_sanitize_args_to_schema( $args );
+
+		$this->assertSame( array( 'object', 'null' ), $schema['properties']['field']['type'] );
+	}
+
+	/**
+	 * @testdox Should deduplicate array types after normalization.
+	 */
+	public function test_deduplicates_array_types_after_normalization(): void {
+		$args = array(
+			'field' => array(
+				'type' => array( 'date-time', 'string' ),
+			),
+		);
+
+		$schema = $this->invoke_sanitize_args_to_schema( $args );
+
+		$this->assertSame( 'string', $schema['properties']['field']['type'], 'Should collapse to single type after dedup' );
+	}
+
+	/**
+	 * @testdox Should remove type key when all array types are invalid.
+	 */
+	public function test_removes_type_when_all_array_types_invalid(): void {
+		$args = array(
+			'field' => array(
+				'type'        => array( 'mixed', 'foobar' ),
+				'description' => 'All bad types.',
+			),
+		);
+
+		$schema = $this->invoke_sanitize_args_to_schema( $args );
+
+		$this->assertArrayNotHasKey( 'type', $schema['properties']['field'], 'Should remove type when all array types are invalid' );
+		$this->assertSame( 'All bad types.', $schema['properties']['field']['description'] );
+	}
+
+	/**
+	 * @testdox Should handle non-string values in array type.
+	 */
+	public function test_skips_non_string_values_in_array_type(): void {
+		$args = array(
+			'field' => array(
+				'type' => array( 'string', 123, null, 'integer' ),
+			),
+		);
+
+		$schema = $this->invoke_sanitize_args_to_schema( $args );
+
+		$this->assertSame( array( 'string', 'integer' ), $schema['properties']['field']['type'], 'Non-string values in type array should be skipped' );
+	}
+
+	// ── Robust enum deduplication ──
+
+	/**
+	 * @testdox Should deduplicate enum with mixed scalar and complex values.
+	 */
+	public function test_deduplicates_enum_with_mixed_value_types(): void {
+		$args = array(
+			'value' => array(
+				'type' => 'string',
+				'enum' => array(
+					1,
+					'1',
+					null,
+					null,
+					array( 'a' => 1 ),
+					array( 'a' => 1 ),
+					array( 'a' => 2 ),
+				),
+			),
+		);
+
+		$schema = $this->invoke_sanitize_args_to_schema( $args );
+
+		$enum = $schema['properties']['value']['enum'];
+		$this->assertCount( 5, $enum, 'Should have 5 unique values: 1, "1", null, {a:1}, {a:2}' );
+		$this->assertSame(
+			array( 1, '1', null, array( 'a' => 1 ), array( 'a' => 2 ) ),
+			$enum
+		);
+	}
+
 	// ── Realistic scenario ──
 
 	/**

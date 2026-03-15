@@ -185,17 +185,9 @@ class RestAbilityFactory {
 		foreach ( $args as $key => $arg ) {
 			$property = array();
 
-			// Copy valid JSON Schema fields, sanitizing types.
+			// Copy valid JSON Schema fields, normalizing types.
 			if ( isset( $arg['type'] ) ) {
-				if ( 'date-time' === $arg['type'] ) {
-					$property['type']   = 'string';
-					$property['format'] = 'date-time';
-				} elseif ( 'action' === $arg['type'] ) {
-					$property['type'] = 'object';
-				} elseif ( in_array( $arg['type'], self::$valid_types, true ) ) {
-					$property['type'] = $arg['type'];
-				}
-				// Unrecognized types (e.g. 'mixed') are omitted — valid per JSON Schema spec.
+				$property = self::normalize_type( $property, $arg['type'] );
 			}
 			if ( isset( $arg['description'] ) ) {
 				$property['description'] = $arg['description'];
@@ -204,7 +196,7 @@ class RestAbilityFactory {
 				$property['default'] = $arg['default'];
 			}
 			if ( isset( $arg['enum'] ) ) {
-				$property['enum'] = array_values( array_unique( $arg['enum'] ) );
+				$property['enum'] = self::dedupe_enum( $arg['enum'] );
 			}
 			if ( isset( $arg['items'] ) ) {
 				$property['items'] = self::sanitize_schema( $arg['items'] );
@@ -258,18 +250,11 @@ class RestAbilityFactory {
 	 */
 	private static function sanitize_schema( array $schema ): array {
 		if ( isset( $schema['type'] ) ) {
-			if ( 'date-time' === $schema['type'] ) {
-				$schema['type']   = 'string';
-				$schema['format'] = 'date-time';
-			} elseif ( 'action' === $schema['type'] ) {
-				$schema['type'] = 'object';
-			} elseif ( ! in_array( $schema['type'], self::$valid_types, true ) ) {
-				unset( $schema['type'] );
-			}
+			$schema = self::normalize_type( $schema, $schema['type'] );
 		}
 
 		if ( isset( $schema['enum'] ) ) {
-			$schema['enum'] = array_values( array_unique( $schema['enum'] ) );
+			$schema['enum'] = self::dedupe_enum( $schema['enum'] );
 		}
 
 		if ( isset( $schema['properties'] ) && is_array( $schema['properties'] ) ) {
@@ -296,6 +281,90 @@ class RestAbilityFactory {
 			}
 		}
 		return $properties;
+	}
+
+	/**
+	 * Normalize a schema type value.
+	 *
+	 * Handles both string types ('string', 'date-time', etc.) and
+	 * array types (['string', 'null']) used for nullable fields.
+	 *
+	 * @param array        $schema The schema node being built.
+	 * @param string|array $type   The type value to normalize.
+	 * @return array Schema with normalized type (or type removed if all invalid).
+	 */
+	private static function normalize_type( array $schema, $type ): array {
+		if ( is_string( $type ) ) {
+			if ( 'date-time' === $type ) {
+				$schema['type'] = 'string';
+				if ( ! isset( $schema['format'] ) ) {
+					$schema['format'] = 'date-time';
+				}
+			} elseif ( 'action' === $type ) {
+				$schema['type'] = 'object';
+			} elseif ( in_array( $type, self::$valid_types, true ) ) {
+				$schema['type'] = $type;
+			} else {
+				unset( $schema['type'] );
+			}
+			return $schema;
+		}
+
+		if ( is_array( $type ) ) {
+			$normalized = array();
+			foreach ( $type as $single ) {
+				if ( ! is_string( $single ) ) {
+					continue;
+				}
+				if ( 'date-time' === $single ) {
+					$single = 'string';
+					if ( ! isset( $schema['format'] ) ) {
+						$schema['format'] = 'date-time';
+					}
+				} elseif ( 'action' === $single ) {
+					$single = 'object';
+				} elseif ( ! in_array( $single, self::$valid_types, true ) ) {
+					continue;
+				}
+				$normalized[] = $single;
+			}
+			$normalized = array_values( array_unique( $normalized ) );
+			if ( empty( $normalized ) ) {
+				unset( $schema['type'] );
+			} elseif ( 1 === count( $normalized ) ) {
+				$schema['type'] = $normalized[0];
+			} else {
+				$schema['type'] = $normalized;
+			}
+			return $schema;
+		}
+
+		// Non-string, non-array type — remove it.
+		unset( $schema['type'] );
+		return $schema;
+	}
+
+	/**
+	 * Remove duplicate enum values while preserving order.
+	 *
+	 * Uses JSON encoding for fingerprinting to correctly handle
+	 * mixed scalar types (1 vs '1'), nulls, and complex values (arrays).
+	 *
+	 * @param array $enum Enum values.
+	 * @return array Deduplicated enum values.
+	 */
+	private static function dedupe_enum( array $enum ): array {
+		$seen   = array();
+		$unique = array();
+		foreach ( $enum as $value ) {
+			$fingerprint = wp_json_encode( $value );
+			if ( isset( $seen[ $fingerprint ] ) ) {
+				continue;
+			}
+			$seen[ $fingerprint ] = true;
+			$unique[]             = $value;
+		}
+		return $unique;
 	}
 
 	/**
