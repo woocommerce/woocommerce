@@ -157,6 +157,13 @@ class RestAbilityFactory {
 	}
 
 	/**
+	 * Valid JSON Schema types.
+	 *
+	 * @var array
+	 */
+	private static $valid_types = array( 'string', 'number', 'integer', 'boolean', 'object', 'array', 'null' );
+
+	/**
 	 * Sanitize WordPress REST args to valid JSON Schema format.
 	 *
 	 * Converts WordPress REST API argument arrays to JSON Schema by:
@@ -164,6 +171,9 @@ class RestAbilityFactory {
 	 * - Converting 'required' from boolean-per-field to array-of-names
 	 * - Removing WordPress-specific non-schema fields
 	 * - Preserving valid JSON Schema properties
+	 * - Converting invalid types (date-time, mixed, action) to valid JSON Schema
+	 * - Recursively sanitizing nested properties and items
+	 * - Deduplicating enum values
 	 *
 	 * @param array $args WordPress REST API arguments array.
 	 * @return array Valid JSON Schema object.
@@ -175,17 +185,17 @@ class RestAbilityFactory {
 		foreach ( $args as $key => $arg ) {
 			$property = array();
 
-			// Copy valid JSON Schema fields.
+			// Copy valid JSON Schema fields, sanitizing types.
 			if ( isset( $arg['type'] ) ) {
-				// Convert 'date-time' type to proper JSON Schema format.
-				// WordPress REST API uses 'type' => 'date-time' but JSON Schema
-				// requires 'type' => 'string' with 'format' => 'date-time'.
 				if ( 'date-time' === $arg['type'] ) {
 					$property['type']   = 'string';
 					$property['format'] = 'date-time';
-				} else {
+				} elseif ( 'action' === $arg['type'] ) {
+					$property['type'] = 'object';
+				} elseif ( in_array( $arg['type'], self::$valid_types, true ) ) {
 					$property['type'] = $arg['type'];
 				}
+				// Unrecognized types (e.g. 'mixed') are omitted — valid per JSON Schema spec.
 			}
 			if ( isset( $arg['description'] ) ) {
 				$property['description'] = $arg['description'];
@@ -197,7 +207,7 @@ class RestAbilityFactory {
 				$property['enum'] = array_values( array_unique( $arg['enum'] ) );
 			}
 			if ( isset( $arg['items'] ) ) {
-				$property['items'] = $arg['items'];
+				$property['items'] = self::sanitize_schema( $arg['items'] );
 			}
 			if ( isset( $arg['minimum'] ) ) {
 				$property['minimum'] = $arg['minimum'];
@@ -205,11 +215,11 @@ class RestAbilityFactory {
 			if ( isset( $arg['maximum'] ) ) {
 				$property['maximum'] = $arg['maximum'];
 			}
-			if ( isset( $arg['format'] ) ) {
+			if ( isset( $arg['format'] ) && ! isset( $property['format'] ) ) {
 				$property['format'] = $arg['format'];
 			}
 			if ( isset( $arg['properties'] ) ) {
-				$property['properties'] = $arg['properties'];
+				$property['properties'] = self::sanitize_schema_properties( $arg['properties'] );
 			}
 
 			// Convert readonly to readOnly (JSON Schema format).
@@ -238,6 +248,57 @@ class RestAbilityFactory {
 	}
 
 	/**
+	 * Recursively sanitize a JSON Schema node.
+	 *
+	 * Fixes invalid types, deduplicates enums, and recurses into
+	 * nested properties and items.
+	 *
+	 * @param array $schema A JSON Schema node.
+	 * @return array Sanitized schema node.
+	 */
+	private static function sanitize_schema( array $schema ): array {
+		if ( isset( $schema['type'] ) ) {
+			if ( 'date-time' === $schema['type'] ) {
+				$schema['type']   = 'string';
+				$schema['format'] = 'date-time';
+			} elseif ( 'action' === $schema['type'] ) {
+				$schema['type'] = 'object';
+			} elseif ( ! in_array( $schema['type'], self::$valid_types, true ) ) {
+				unset( $schema['type'] );
+			}
+		}
+
+		if ( isset( $schema['enum'] ) ) {
+			$schema['enum'] = array_values( array_unique( $schema['enum'] ) );
+		}
+
+		if ( isset( $schema['properties'] ) && is_array( $schema['properties'] ) ) {
+			$schema['properties'] = self::sanitize_schema_properties( $schema['properties'] );
+		}
+
+		if ( isset( $schema['items'] ) && is_array( $schema['items'] ) ) {
+			$schema['items'] = self::sanitize_schema( $schema['items'] );
+		}
+
+		return $schema;
+	}
+
+	/**
+	 * Sanitize a map of JSON Schema properties.
+	 *
+	 * @param array $properties Map of property name to schema.
+	 * @return array Sanitized properties map.
+	 */
+	private static function sanitize_schema_properties( array $properties ): array {
+		foreach ( $properties as $key => $property ) {
+			if ( is_array( $property ) ) {
+				$properties[ $key ] = self::sanitize_schema( $property );
+			}
+		}
+		return $properties;
+	}
+
+	/**
 	 * Get output schema for operation.
 	 *
 	 * @param object $controller REST controller instance.
@@ -246,7 +307,7 @@ class RestAbilityFactory {
 	 */
 	private static function get_output_schema( $controller, string $operation ): array {
 		if ( method_exists( $controller, 'get_item_schema' ) ) {
-			$schema = $controller->get_item_schema();
+			$schema = self::sanitize_schema( $controller->get_item_schema() );
 
 			if ( 'list' === $operation ) {
 				// For list operations, return object wrapping array of items.

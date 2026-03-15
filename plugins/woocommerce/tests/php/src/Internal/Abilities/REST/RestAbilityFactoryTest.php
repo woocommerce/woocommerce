@@ -1,20 +1,22 @@
 <?php
-/**
- * RestAbilityFactoryTest class file.
- */
-
-declare( strict_types=1 );
+declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Abilities\REST;
 
 use Automattic\WooCommerce\Internal\Abilities\REST\RestAbilityFactory;
+use WC_Unit_Test_Case;
 
 /**
  * Tests for the RestAbilityFactory class.
  *
  * Focuses on schema sanitization logic in sanitize_args_to_schema().
  */
-class RestAbilityFactoryTest extends \WC_Unit_Test_Case {
+class RestAbilityFactoryTest extends WC_Unit_Test_Case {
+
+	/**
+	 * Valid JSON Schema types per the spec.
+	 */
+	private const VALID_JSON_SCHEMA_TYPES = array( 'string', 'number', 'integer', 'boolean', 'object', 'array', 'null' );
 
 	/**
 	 * Helper to invoke the private sanitize_args_to_schema method.
@@ -31,9 +33,91 @@ class RestAbilityFactoryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that date-time type is converted to string type with date-time format.
+	 * Helper to invoke the private get_output_schema method.
 	 *
-	 * @see https://github.com/woocommerce/woocommerce/issues/62764
+	 * @param object $controller REST controller instance.
+	 * @param string $operation  Operation type.
+	 * @return array Output schema.
+	 */
+	private function invoke_get_output_schema( $controller, string $operation ): array {
+		$reflection = new \ReflectionClass( RestAbilityFactory::class );
+		$method     = $reflection->getMethod( 'get_output_schema' );
+		$method->setAccessible( true );
+
+		return $method->invoke( null, $controller, $operation );
+	}
+
+	/**
+	 * Recursively collect all 'type' values from a schema.
+	 *
+	 * @param array $schema JSON Schema array.
+	 * @return array All type values found.
+	 */
+	private function collect_all_types( array $schema ): array {
+		$types = array();
+
+		if ( isset( $schema['type'] ) ) {
+			if ( is_array( $schema['type'] ) ) {
+				$types = array_merge( $types, $schema['type'] );
+			} else {
+				$types[] = $schema['type'];
+			}
+		}
+
+		if ( isset( $schema['properties'] ) && is_array( $schema['properties'] ) ) {
+			foreach ( $schema['properties'] as $property ) {
+				if ( is_array( $property ) ) {
+					$types = array_merge( $types, $this->collect_all_types( $property ) );
+				}
+			}
+		}
+
+		if ( isset( $schema['items'] ) && is_array( $schema['items'] ) ) {
+			$types = array_merge( $types, $this->collect_all_types( $schema['items'] ) );
+		}
+
+		return $types;
+	}
+
+	/**
+	 * Create a mock controller with a given item schema.
+	 *
+	 * @param array $item_schema The schema to return from get_item_schema.
+	 * @return object Mock controller.
+	 */
+	private function create_mock_controller_with_item_schema( array $item_schema ): object {
+		return new class( $item_schema ) {
+			/**
+			 * The schema.
+			 *
+			 * @var array
+			 */
+			private array $schema;
+
+			/**
+			 * Constructor.
+			 *
+			 * @param array $schema The schema.
+			 */
+			public function __construct( array $schema ) {
+				$this->schema = $schema;
+			}
+
+			/**
+			 * Get item schema.
+			 *
+			 * @return array
+			 */
+			public function get_item_schema(): array {
+				return $this->schema;
+			}
+		};
+	}
+
+	// ── Bug 1: date-time type conversion (issue #62764) ──
+
+	/**
+	 * @testdox Should convert date-time type to string with date-time format.
 	 */
 	public function test_converts_date_time_type_to_string_with_format(): void {
 		$args = array(
@@ -45,13 +129,12 @@ class RestAbilityFactoryTest extends \WC_Unit_Test_Case {
 
 		$schema = $this->invoke_sanitize_args_to_schema( $args );
 
-		$this->assertArrayHasKey( 'date_created', $schema['properties'] );
-		$this->assertSame( 'string', $schema['properties']['date_created']['type'] );
-		$this->assertSame( 'date-time', $schema['properties']['date_created']['format'] );
+		$this->assertSame( 'string', $schema['properties']['date_created']['type'], 'date-time should be converted to string type' );
+		$this->assertSame( 'date-time', $schema['properties']['date_created']['format'], 'date-time format should be set' );
 	}
 
 	/**
-	 * Test that date-time conversion does not overwrite an existing format.
+	 * @testdox Should preserve explicit format when converting date-time type.
 	 */
 	public function test_date_time_conversion_preserves_explicit_format(): void {
 		$args = array(
@@ -67,29 +150,10 @@ class RestAbilityFactoryTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 'date-time', $schema['properties']['date_field']['format'] );
 	}
 
-	/**
-	 * Test that non-date-time types are passed through unchanged.
-	 */
-	public function test_preserves_standard_types(): void {
-		$args = array(
-			'name'   => array( 'type' => 'string' ),
-			'count'  => array( 'type' => 'integer' ),
-			'price'  => array( 'type' => 'number' ),
-			'active' => array( 'type' => 'boolean' ),
-		);
-
-		$schema = $this->invoke_sanitize_args_to_schema( $args );
-
-		$this->assertSame( 'string', $schema['properties']['name']['type'] );
-		$this->assertSame( 'integer', $schema['properties']['count']['type'] );
-		$this->assertSame( 'number', $schema['properties']['price']['type'] );
-		$this->assertSame( 'boolean', $schema['properties']['active']['type'] );
-	}
+	// ── Bug 2: duplicate enum values (issue #62034) ──
 
 	/**
-	 * Test that duplicate enum values are removed.
-	 *
-	 * @see https://github.com/woocommerce/woocommerce/issues/62034
+	 * @testdox Should deduplicate enum values.
 	 */
 	public function test_deduplicates_enum_values(): void {
 		$args = array(
@@ -102,13 +166,12 @@ class RestAbilityFactoryTest extends \WC_Unit_Test_Case {
 		$schema = $this->invoke_sanitize_args_to_schema( $args );
 
 		$enum = $schema['properties']['orderby']['enum'];
-
 		$this->assertSame( array_values( array_unique( $enum ) ), $enum, 'Enum should not contain duplicate values' );
 		$this->assertCount( 6, $enum );
 	}
 
 	/**
-	 * Test that enum values are re-indexed after deduplication.
+	 * @testdox Should reindex enum values after deduplication.
 	 */
 	public function test_enum_values_are_reindexed(): void {
 		$args = array(
@@ -120,30 +183,78 @@ class RestAbilityFactoryTest extends \WC_Unit_Test_Case {
 
 		$schema = $this->invoke_sanitize_args_to_schema( $args );
 
-		$enum = $schema['properties']['status']['enum'];
-
-		// Keys should be sequential (0, 1) not (0, 1, 2) with gaps.
-		$this->assertSame( array( 'draft', 'published' ), $enum );
+		$this->assertSame( array( 'draft', 'published' ), $schema['properties']['status']['enum'] );
 	}
 
+	// ── Gap 1: invalid types like 'mixed' and 'action' ──
+
 	/**
-	 * Test that enum without duplicates is unchanged.
+	 * @testdox Should handle type mixed by removing the type key.
 	 */
-	public function test_enum_without_duplicates_unchanged(): void {
+	public function test_handles_mixed_type(): void {
 		$args = array(
-			'orderby' => array(
-				'type' => 'string',
-				'enum' => array( 'date', 'id', 'title' ),
+			'value' => array(
+				'type'        => 'mixed',
+				'description' => 'Meta value.',
 			),
 		);
 
 		$schema = $this->invoke_sanitize_args_to_schema( $args );
 
-		$this->assertSame( array( 'date', 'id', 'title' ), $schema['properties']['orderby']['enum'] );
+		$this->assertArrayNotHasKey( 'type', $schema['properties']['value'], 'mixed type should be removed' );
+		$this->assertSame( 'Meta value.', $schema['properties']['value']['description'] );
 	}
 
 	/**
-	 * Test that required fields are collected correctly.
+	 * @testdox Should handle type action by converting to object.
+	 */
+	public function test_handles_action_type(): void {
+		$args = array(
+			'line_items' => array(
+				'type'        => 'action',
+				'description' => 'Line items.',
+			),
+		);
+
+		$schema = $this->invoke_sanitize_args_to_schema( $args );
+
+		$this->assertSame( 'object', $schema['properties']['line_items']['type'], 'action type should be converted to object' );
+	}
+
+	/**
+	 * @testdox Should remove any unrecognized type value.
+	 */
+	public function test_handles_unrecognized_type(): void {
+		$args = array(
+			'field' => array(
+				'type'        => 'foobar',
+				'description' => 'Unknown type field.',
+			),
+		);
+
+		$schema = $this->invoke_sanitize_args_to_schema( $args );
+
+		$this->assertArrayNotHasKey( 'type', $schema['properties']['field'], 'Unrecognized type should be removed' );
+	}
+
+	/**
+	 * @testdox Should preserve all valid JSON Schema types.
+	 */
+	public function test_preserves_valid_types(): void {
+		$args = array();
+		foreach ( self::VALID_JSON_SCHEMA_TYPES as $type ) {
+			$args[ $type . '_field' ] = array( 'type' => $type );
+		}
+
+		$schema = $this->invoke_sanitize_args_to_schema( $args );
+
+		foreach ( self::VALID_JSON_SCHEMA_TYPES as $type ) {
+			$this->assertSame( $type, $schema['properties'][ $type . '_field' ]['type'], "Valid type '$type' should be preserved" );
+		}
+	}
+
+	/**
+	 * @testdox Should collect required fields correctly.
 	 */
 	public function test_collects_required_fields(): void {
 		$args = array(
@@ -169,11 +280,137 @@ class RestAbilityFactoryTest extends \WC_Unit_Test_Case {
 		$this->assertNotContains( 'sku', $schema['required'] );
 	}
 
+	// ── Gap 3: recursive sanitization of nested properties/items ──
+
 	/**
-	 * Test that realistic collection params with multiple issues are sanitized correctly.
-	 *
-	 * Simulates a WooCommerce products-list controller where date-time types
-	 * and duplicate enum values co-exist.
+	 * @testdox Should recursively sanitize nested properties with invalid types.
+	 */
+	public function test_sanitizes_nested_properties(): void {
+		$args = array(
+			'meta_data' => array(
+				'type'  => 'array',
+				'items' => array(
+					'type'       => 'object',
+					'properties' => array(
+						'key'   => array( 'type' => 'string' ),
+						'value' => array( 'type' => 'mixed' ),
+					),
+				),
+			),
+		);
+
+		$schema = $this->invoke_sanitize_args_to_schema( $args );
+
+		$all_types = $this->collect_all_types( $schema );
+		$this->assertNotContains( 'mixed', $all_types, 'Nested mixed type should be sanitized' );
+	}
+
+	/**
+	 * @testdox Should recursively sanitize date-time in nested items.
+	 */
+	public function test_sanitizes_nested_date_time(): void {
+		$args = array(
+			'dates' => array(
+				'type'  => 'array',
+				'items' => array(
+					'type'       => 'object',
+					'properties' => array(
+						'created_at' => array( 'type' => 'date-time' ),
+						'updated_at' => array( 'type' => 'date-time' ),
+					),
+				),
+			),
+		);
+
+		$schema = $this->invoke_sanitize_args_to_schema( $args );
+
+		$all_types = $this->collect_all_types( $schema );
+		$this->assertNotContains( 'date-time', $all_types, 'Nested date-time type should be converted' );
+
+		$created = $schema['properties']['dates']['items']['properties']['created_at'];
+		$this->assertSame( 'string', $created['type'] );
+		$this->assertSame( 'date-time', $created['format'] );
+	}
+
+	/**
+	 * @testdox Should recursively deduplicate nested enums.
+	 */
+	public function test_sanitizes_nested_enums(): void {
+		$args = array(
+			'filter' => array(
+				'type'       => 'object',
+				'properties' => array(
+					'status' => array(
+						'type' => 'string',
+						'enum' => array( 'active', 'inactive', 'active' ),
+					),
+				),
+			),
+		);
+
+		$schema = $this->invoke_sanitize_args_to_schema( $args );
+
+		$enum = $schema['properties']['filter']['properties']['status']['enum'];
+		$this->assertCount( 2, $enum, 'Nested enum should be deduplicated' );
+		$this->assertSame( array( 'active', 'inactive' ), $enum );
+	}
+
+	// ── Gap 2: output schema sanitization ──
+
+	/**
+	 * @testdox Should sanitize output schema types for get operations.
+	 */
+	public function test_sanitizes_output_schema_types(): void {
+		$controller = $this->create_mock_controller_with_item_schema(
+			array(
+				'type'       => 'object',
+				'properties' => array(
+					'id'           => array( 'type' => 'integer' ),
+					'date_created' => array( 'type' => 'date-time' ),
+					'meta_data'    => array(
+						'type'  => 'array',
+						'items' => array(
+							'type'       => 'object',
+							'properties' => array(
+								'value' => array( 'type' => 'mixed' ),
+							),
+						),
+					),
+				),
+			)
+		);
+
+		$schema = $this->invoke_get_output_schema( $controller, 'get' );
+
+		$all_types = $this->collect_all_types( $schema );
+		$this->assertNotContains( 'date-time', $all_types, 'Output schema should not contain date-time type' );
+		$this->assertNotContains( 'mixed', $all_types, 'Output schema should not contain mixed type' );
+	}
+
+	/**
+	 * @testdox Should sanitize output schema types for list operations.
+	 */
+	public function test_sanitizes_output_schema_for_list_operations(): void {
+		$controller = $this->create_mock_controller_with_item_schema(
+			array(
+				'type'       => 'object',
+				'properties' => array(
+					'id'           => array( 'type' => 'integer' ),
+					'date_created' => array( 'type' => 'date-time' ),
+				),
+			)
+		);
+
+		$schema = $this->invoke_get_output_schema( $controller, 'list' );
+
+		$all_types = $this->collect_all_types( $schema );
+		$this->assertNotContains( 'date-time', $all_types, 'Output schema for list should not contain date-time type' );
+	}
+
+	// ── Realistic scenario ──
+
+	/**
+	 * @testdox Should sanitize realistic collection params with multiple issues.
 	 */
 	public function test_sanitizes_realistic_collection_params(): void {
 		$args = array(
@@ -205,22 +442,16 @@ class RestAbilityFactoryTest extends \WC_Unit_Test_Case {
 
 		$schema = $this->invoke_sanitize_args_to_schema( $args );
 
-		// Date-time fields should be converted.
 		$this->assertSame( 'string', $schema['properties']['after']['type'] );
 		$this->assertSame( 'date-time', $schema['properties']['after']['format'] );
 		$this->assertSame( 'string', $schema['properties']['before']['type'] );
 		$this->assertSame( 'date-time', $schema['properties']['before']['format'] );
-
-		// Standard types should be unchanged.
 		$this->assertSame( 'integer', $schema['properties']['per_page']['type'] );
 		$this->assertArrayNotHasKey( 'format', $schema['properties']['per_page'] );
 
-		// Enum duplicates should be removed.
 		$orderby_enum = $schema['properties']['orderby']['enum'];
 		$this->assertCount( count( array_unique( $orderby_enum ) ), $orderby_enum, 'orderby enum should have no duplicates' );
 		$this->assertCount( 8, $orderby_enum );
-
-		// Clean enum should be unchanged.
 		$this->assertCount( 5, $schema['properties']['status']['enum'] );
 	}
 }
