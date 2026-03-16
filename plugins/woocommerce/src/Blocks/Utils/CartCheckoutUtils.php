@@ -347,7 +347,7 @@ class CartCheckoutUtils {
 
 	/**
 	 * Gets the default country locale data, transformed for frontend use.
-	 * 
+	 *
 	 * @since 11.4.0
 	 *
 	 * @return array
@@ -363,6 +363,14 @@ class CartCheckoutUtils {
 			remove_filter( 'woocommerce_get_country_locale_default', $callback, $had_filter );
 		}
 
+		/**
+		 * Filter the default country locale settings.
+		 *
+		 * @since 3.0.0
+		 * @see WC_Countries::get_country_locale()
+		 *
+		 * @param array $base Default address fields.
+		 */
 		$filtered = apply_filters( 'woocommerce_get_country_locale_default', $base );
 
 		if ( false !== $had_filter ) {

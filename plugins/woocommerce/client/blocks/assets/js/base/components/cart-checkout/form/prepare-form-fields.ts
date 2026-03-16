@@ -91,14 +91,10 @@ const countryAddressFields: CountryAddressFields = Object.entries(
  */
 const defaultLocaleFields: Record< string, Partial< Field > > = Object.entries(
 	DEFAULT_LOCALE
-).reduce(
-	( fields, [ localeFieldKey, localeField ] ) => {
-		fields[ localeFieldKey ] =
-			getSupportedCoreLocaleProps( localeField );
-		return fields;
-	},
-	{} as Record< string, Partial< Field > >
-);
+).reduce( ( fields, [ localeFieldKey, localeField ] ) => {
+	fields[ localeFieldKey ] = getSupportedCoreLocaleProps( localeField );
+	return fields;
+}, {} as Record< string, Partial< Field > > );
 
 /**
  * Combines address fields, including fields from the locale, and sorts them by index.
