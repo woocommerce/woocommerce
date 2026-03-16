@@ -44,7 +44,8 @@ jest.mock( '@woocommerce/stores/woocommerce/products', () => ( {} ), {
 describe( 'getProductData', () => {
 	let getProductData: (
 		id: number,
-		selectedAttributes: Array< { attribute: string; value: string } >
+		selectedAttributes: Array< { attribute: string; value: string } >,
+		slugToLabel?: Record< string, string >
 	) => NormalizedProductData | null;
 
 	beforeEach( () => {
@@ -195,9 +196,11 @@ describe( 'getProductData', () => {
 				},
 			};
 
-			const result = getProductData( 1, [
-				{ attribute: 'Color', value: 'red' },
-			] );
+			const result = getProductData(
+				1,
+				[ { attribute: 'attribute_pa_color', value: 'red' } ],
+				{ attribute_pa_color: 'Color' }
+			);
 
 			expect( result ).toEqual( {
 				id: 10,
@@ -228,9 +231,11 @@ describe( 'getProductData', () => {
 			};
 			mockProductsState.productVariations = {};
 
-			const result = getProductData( 1, [
-				{ attribute: 'Color', value: 'red' },
-			] );
+			const result = getProductData(
+				1,
+				[ { attribute: 'attribute_pa_color', value: 'red' } ],
+				{ attribute_pa_color: 'Color' }
+			);
 
 			expect( result ).toBeNull();
 		} );
