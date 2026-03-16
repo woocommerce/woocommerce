@@ -21,6 +21,7 @@ import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
  * Internal dependencies
  */
 import { findMatchingVariation } from '../../base/utils/variations/attribute-matching';
+import type { AttributeSlugToLabel } from '../../base/utils/variations/attribute-matching';
 import type { GroupedProductAddToCartWithOptionsStore } from './grouped-product-selector/frontend';
 import type { Context as QuantitySelectorContext } from './quantity-selector/frontend';
 import type { VariableProductAddToCartWithOptionsStore } from './variation-selector/frontend';
@@ -28,6 +29,7 @@ import type { NormalizedProductData, NormalizedVariationData } from './types';
 
 export type Context = {
 	selectedAttributes: SelectedAttributes[];
+	attributeSlugToLabel: AttributeSlugToLabel;
 	quantity: Record< number, number >;
 	validationErrors: AddToCartError[];
 	tempQuantity: number;
@@ -75,7 +77,8 @@ const { state: productsState } = store< ProductsStore >(
 
 export const getProductData = (
 	id: number,
-	selectedAttributes: SelectedAttributes[]
+	selectedAttributes: SelectedAttributes[],
+	slugToLabel: AttributeSlugToLabel = {}
 ): NormalizedProductData | NormalizedVariationData | null => {
 	const productFromStore = productsState.products[ id ];
 
@@ -93,7 +96,8 @@ export const getProductData = (
 	) {
 		const matchedVariation = findMatchingVariation(
 			productFromStore,
-			selectedAttributes
+			selectedAttributes,
+			slugToLabel
 		);
 
 		if ( matchedVariation ) {
@@ -130,6 +134,7 @@ export type AddToCartWithOptionsStore = {
 		allowsAddingToCart: boolean;
 		quantity: Record< number, number >;
 		selectedAttributes: SelectedAttributes[];
+		attributeSlugToLabel: Record< string, string >;
 		productData: NormalizedProductData | NormalizedVariationData | null;
 	};
 	actions: {
@@ -182,12 +187,18 @@ const { actions, state } = store<
 				const context = getContext< Context >();
 				return context.selectedAttributes || [];
 			},
+			get attributeSlugToLabel(): Record< string, string > {
+				const context = getContext< Context >();
+				return context.attributeSlugToLabel || {};
+			},
 			get productData() {
-				const { selectedAttributes } = getContext< Context >();
+				const { selectedAttributes, attributeSlugToLabel } =
+					getContext< Context >();
 
 				return getProductData(
 					productDataState.productId,
-					selectedAttributes
+					selectedAttributes,
+					attributeSlugToLabel
 				);
 			},
 		},
@@ -199,12 +210,14 @@ const { actions, state } = store<
 					return;
 				}
 
-				const { selectedAttributes } = getContext< Context >();
+				const { selectedAttributes, attributeSlugToLabel } =
+					getContext< Context >();
 
 				// If selected quantity is invalid, add an error.
 				const productObject = getProductData(
 					productId,
-					selectedAttributes
+					selectedAttributes,
+					attributeSlugToLabel
 				);
 
 				if (
@@ -344,14 +357,19 @@ const { actions, state } = store<
 				// woocommerce store is public.
 				yield import( '@woocommerce/stores/woocommerce/cart' );
 
-				const { selectedAttributes } = getContext< Context >();
+				const { selectedAttributes, attributeSlugToLabel } =
+					getContext< Context >();
 
 				const id =
 					productDataState.variationId || productDataState.productId;
 
 				const productType = productDataState.variationId
 					? 'variation'
-					: getProductData( id, selectedAttributes )?.type;
+					: getProductData(
+							id,
+							selectedAttributes,
+							attributeSlugToLabel
+					  )?.type;
 
 				if ( ! productType ) {
 					return;

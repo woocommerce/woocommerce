@@ -23,11 +23,10 @@ import type {
 	Context as AddToCartWithOptionsStoreContext,
 } from '../frontend';
 import {
-	normalizeAttributeName,
-	attributeNamesMatch,
 	getVariationAttributeValue,
 	findMatchingVariation,
 } from '../../../base/utils/variations/attribute-matching';
+import type { AttributeSlugToLabel } from '../../../base/utils/variations/attribute-matching';
 import setStyles from './set-styles';
 
 type Option = {
@@ -42,6 +41,7 @@ type Context = AddToCartWithOptionsStoreContext & {
 	option: Option;
 	options: Option[];
 	autoselect: boolean;
+	attributeSlugToLabel: AttributeSlugToLabel;
 };
 
 // Set selected pill styles for proper contrast.
@@ -75,10 +75,12 @@ const isAttributeValueValid = ( {
 	attributeName,
 	attributeValue,
 	selectedAttributes,
+	slugToLabel,
 }: {
 	attributeName: string;
 	attributeValue: string;
 	selectedAttributes: SelectedAttributes[];
+	slugToLabel: AttributeSlugToLabel;
 } ) => {
 	if (
 		! attributeName ||
@@ -94,8 +96,7 @@ const isAttributeValueValid = ( {
 	// valid, that's why we subtract one from the total number of attributes to
 	// match.
 	const isCurrentAttributeSelected = selectedAttributes.some(
-		( selectedAttribute ) =>
-			attributeNamesMatch( selectedAttribute.attribute, attributeName )
+		( selectedAttribute ) => selectedAttribute.attribute === attributeName
 	);
 	const attributesToMatch = isCurrentAttributeSelected
 		? selectedAttributes.length - 1
@@ -112,7 +113,8 @@ const isAttributeValueValid = ( {
 	return product.variations.some( ( variation ) => {
 		const variationAttrValue = getVariationAttributeValue(
 			variation,
-			attributeName
+			attributeName,
+			slugToLabel
 		);
 
 		// Skip variations that don't match the current attribute value.
@@ -129,7 +131,8 @@ const isAttributeValueValid = ( {
 				const availableVariationAttributeValue =
 					getVariationAttributeValue(
 						variation,
-						selectedAttribute.attribute
+						selectedAttribute.attribute,
+						slugToLabel
 					);
 				// If the current available variation matches the selected
 				// value, count it.
@@ -144,10 +147,7 @@ const isAttributeValueValid = ( {
 				// selection.
 				if ( availableVariationAttributeValue === null ) {
 					if (
-						! attributeNamesMatch(
-							selectedAttribute.attribute,
-							attributeName
-						) ||
+						selectedAttribute.attribute !== attributeName ||
 						attributeValue === selectedAttribute.value
 					) {
 						return true;
@@ -162,31 +162,44 @@ const isAttributeValueValid = ( {
 };
 
 /**
- * Return the product attributes and options from Store API format.
+ * Return the product attributes and options from Store API format, keyed by
+ * attribute slug using the label-to-slug reverse mapping.
  *
- * @param product The product in Store API format.
- * @return Record of attribute names to their available option values.
+ * @param product      The product in Store API format.
+ * @param slugToLabel  Mapping of attribute slugs to Store API label names.
+ * @return Record of attribute slugs to their available option values.
  */
 const getProductAttributesAndOptions = (
-	product: ProductResponseItem | null
+	product: ProductResponseItem | null,
+	slugToLabel: AttributeSlugToLabel
 ): Record< string, string[] > => {
 	if ( ! product?.variations?.length ) {
 		return {};
 	}
 
+	// Build a reverse mapping: Store API label → slug.
+	const labelToSlug: Record< string, string > = Object.fromEntries(
+		Object.entries( slugToLabel ).map( ( [ slug, label ] ) => [
+			label,
+			slug,
+		] )
+	);
+
 	const productAttributesAndOptions = {} as Record< string, string[] >;
 	product.variations.forEach( ( variation ) => {
 		variation.attributes.forEach( ( attr ) => {
-			if ( ! Array.isArray( productAttributesAndOptions[ attr.name ] ) ) {
-				productAttributesAndOptions[ attr.name ] = [];
+			const slug = labelToSlug[ attr.name ];
+			if ( ! slug ) {
+				return;
+			}
+			if ( ! Array.isArray( productAttributesAndOptions[ slug ] ) ) {
+				productAttributesAndOptions[ slug ] = [];
 			}
 			if (
 				attr.value &&
-				! productAttributesAndOptions[ attr.name ].includes(
-					attr.value
-				)
+				! productAttributesAndOptions[ slug ].includes( attr.value )
 			) {
-				productAttributesAndOptions[ attr.name ].push( attr.value );
+				productAttributesAndOptions[ slug ].push( attr.value );
 			}
 		} );
 	} );
@@ -238,14 +251,18 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 
 				return selectedAttributes.some( ( attrObject ) => {
 					return (
-						attributeNamesMatch( attrObject.attribute, name ) &&
+						attrObject.attribute === name &&
 						attrObject.value === option.value
 					);
 				} );
 			},
 			get isOptionDisabled() {
-				const { name, option, selectedAttributes } =
-					getContext< Context >();
+				const {
+					name,
+					option,
+					selectedAttributes,
+					attributeSlugToLabel,
+				} = getContext< Context >();
 
 				if ( option.value === '' ) {
 					return false;
@@ -255,6 +272,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					attributeName: name,
 					attributeValue: option.value,
 					selectedAttributes,
+					slugToLabel: attributeSlugToLabel,
 				} );
 			},
 		},
@@ -263,10 +281,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				const { selectedAttributes } = getContext< Context >();
 				const index = selectedAttributes.findIndex(
 					( selectedAttribute ) =>
-						attributeNamesMatch(
-							selectedAttribute.attribute,
-							attribute
-						)
+						selectedAttribute.attribute === attribute
 				);
 
 				if ( value === '' ) {
@@ -292,10 +307,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				const { selectedAttributes } = getContext< Context >();
 				const index = selectedAttributes.findIndex(
 					( selectedAttribute ) =>
-						attributeNamesMatch(
-							selectedAttribute.attribute,
-							attribute
-						)
+						selectedAttribute.attribute === attribute
 				);
 				if ( index >= 0 ) {
 					selectedAttributes.splice( index, 1 );
@@ -333,7 +345,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				includedAttributes?: Array< string >;
 				excludedAttributes?: Array< string >;
 			} = {} ) {
-				const { autoselect, selectedAttributes } =
+				const { autoselect, selectedAttributes, attributeSlugToLabel } =
 					getContext< Context >();
 
 				if ( ! autoselect ) {
@@ -346,51 +358,38 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					return;
 				}
 
-				// Normalize included/excluded attributes to lowercase for comparison
-				// with Store API labels (e.g., "Color" vs "attribute_pa_color" → "color").
-				const normalizedIncluded = includedAttributes.map( ( attr ) =>
-					normalizeAttributeName( attr )
-				);
-				const normalizedExcluded = excludedAttributes.map( ( attr ) =>
-					normalizeAttributeName( attr )
-				);
-
 				const productAttributesAndOptions: Record< string, string[] > =
-					getProductAttributesAndOptions( product );
+					getProductAttributesAndOptions(
+						product,
+						attributeSlugToLabel
+					);
 				Object.entries( productAttributesAndOptions ).forEach(
-					( [ attribute, options ] ) => {
-						const attributeLower =
-							normalizeAttributeName( attribute );
+					( [ attributeSlug, options ] ) => {
 						if (
-							normalizedIncluded.length !== 0 &&
-							! normalizedIncluded.includes( attributeLower )
+							includedAttributes.length !== 0 &&
+							! includedAttributes.includes( attributeSlug )
 						) {
 							return;
 						}
 						if (
-							normalizedExcluded.length !== 0 &&
-							normalizedExcluded.includes( attributeLower )
+							excludedAttributes.length !== 0 &&
+							excludedAttributes.includes( attributeSlug )
 						) {
 							return;
 						}
 						const validOptions = options.filter( ( option ) =>
 							isAttributeValueValid( {
-								attributeName: attribute,
+								attributeName: attributeSlug,
 								attributeValue: option,
 								selectedAttributes,
+								slugToLabel: attributeSlugToLabel,
 							} )
 						);
 						if ( validOptions.length === 1 ) {
-							const validOption = validOptions[ 0 ];
-							// Use the context's attribute name format for consistency.
-							// Find the matching context name by comparing normalized versions.
-							const contextName =
-								includedAttributes.find(
-									( attr ) =>
-										normalizeAttributeName( attr ) ===
-										attributeLower
-								) || attribute;
-							actions.setAttribute( contextName, validOption );
+							actions.setAttribute(
+								attributeSlug,
+								validOptions[ 0 ]
+							);
 						}
 					}
 				);
@@ -415,10 +414,12 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					return;
 				}
 
-				const { selectedAttributes } = getContext< Context >();
+				const { selectedAttributes, attributeSlugToLabel } =
+					getContext< Context >();
 				const matchedVariation = findMatchingVariation(
 					product,
-					selectedAttributes
+					selectedAttributes,
+					attributeSlugToLabel
 				);
 
 				const { actions: productDataActions } =
@@ -441,10 +442,12 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					return;
 				}
 
-				const { selectedAttributes } = getContext< Context >();
+				const { selectedAttributes, attributeSlugToLabel } =
+					getContext< Context >();
 				const matchedVariation = findMatchingVariation(
 					product,
-					selectedAttributes
+					selectedAttributes,
+					attributeSlugToLabel
 				);
 
 				const { errorMessages } = getConfig();
@@ -493,11 +496,13 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					return;
 				}
 
-				const { selectedAttributes } = getContext< Context >();
+				const { selectedAttributes, attributeSlugToLabel } =
+					getContext< Context >();
 
 				const productObject = getProductData(
 					productDataState.productId,
-					selectedAttributes
+					selectedAttributes,
+					attributeSlugToLabel
 				);
 
 				if ( productObject ) {

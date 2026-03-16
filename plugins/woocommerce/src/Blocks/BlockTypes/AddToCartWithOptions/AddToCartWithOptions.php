@@ -275,6 +275,20 @@ class AddToCartWithOptions extends AbstractBlock {
 			if ( $product->is_type( ProductType::VARIABLE ) ) {
 				$context['selectedAttributes'] = array();
 
+				// Build a mapping of attribute slugs to Store API labels so the
+				// frontend can reliably match PHP context slugs against Store API
+				// attribute names without heuristic normalization.
+				$slug_to_label = array();
+				foreach ( $product->get_attributes() as $attribute ) {
+					if ( ! $attribute->get_variation() ) {
+						continue;
+					}
+					$slug  = wc_variation_attribute_name( $attribute->get_name() );
+					$label = wc_attribute_label( $attribute->get_name(), $product );
+					$slug_to_label[ $slug ] = $label;
+				}
+				$context['attributeSlugToLabel'] = $slug_to_label;
+
 				// Load all variations into the shared store with full REST API data.
 				$variations = wc_interactivity_api_load_variations(
 					'I acknowledge that using experimental APIs means my theme or plugin will inevitably break in the next version of WooCommerce',

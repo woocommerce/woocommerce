@@ -63,14 +63,15 @@ store< QuantitySelectorStore >(
 				// Note: in grouped products, `productData` will be the parent product.
 				// We handle grouped products decrease differently because we
 				// allow setting the quantity to 0.
-				const { quantity, selectedAttributes } =
+				const { quantity, selectedAttributes, attributeSlugToLabel } =
 					addToCartWithOptionsStore.state;
 
 				const { allowZero, productId } = getContext< Context >();
 
 				const productObject = getProductData(
 					productId,
-					selectedAttributes
+					selectedAttributes,
+					attributeSlugToLabel
 				);
 
 				if ( ! productObject ) {
@@ -87,14 +88,15 @@ store< QuantitySelectorStore >(
 				);
 			},
 			get allowsIncrease() {
-				const { quantity, selectedAttributes } =
+				const { quantity, selectedAttributes, attributeSlugToLabel } =
 					addToCartWithOptionsStore.state;
 
 				const { productId } = getContext< Context >();
 
 				const productObject = getProductData(
 					productId,
-					selectedAttributes
+					selectedAttributes,
+					attributeSlugToLabel
 				);
 
 				if ( ! productObject ) {
@@ -126,11 +128,12 @@ store< QuantitySelectorStore >(
 
 				const currentValue = Number( inputElement.value ) || 0;
 
-				const { selectedAttributes } = addToCartWithOptionsStore.state;
+				const { selectedAttributes, attributeSlugToLabel } = addToCartWithOptionsStore.state;
 
 				const productObject = getProductData(
 					productId,
-					selectedAttributes
+					selectedAttributes,
+					attributeSlugToLabel
 				);
 
 				let newValue = currentValue + 1;
@@ -155,11 +158,12 @@ store< QuantitySelectorStore >(
 				}
 
 				const currentValue = Number( inputElement.value ) || 0;
-				const { selectedAttributes } = addToCartWithOptionsStore.state;
+				const { selectedAttributes, attributeSlugToLabel } = addToCartWithOptionsStore.state;
 
 				const productObject = getProductData(
 					productId,
-					selectedAttributes
+					selectedAttributes,
+					attributeSlugToLabel
 				);
 
 				let newValue = currentValue - 1;
@@ -187,11 +191,12 @@ store< QuantitySelectorStore >(
 			handleQuantityBlur: () => {
 				const { allowZero, productId, inputElement } =
 					getContext< Context >();
-				const { selectedAttributes } = addToCartWithOptionsStore.state;
+				const { selectedAttributes, attributeSlugToLabel } = addToCartWithOptionsStore.state;
 
 				const productObject = getProductData(
 					productId,
-					selectedAttributes
+					selectedAttributes,
+					attributeSlugToLabel
 				);
 
 				if ( ! productObject ) {
