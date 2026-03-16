@@ -743,6 +743,7 @@ class ProductSchema extends AbstractSchema {
 				$meta_key              = wc_variation_attribute_name( $attribute->get_name() );
 				$defaults[ $meta_key ] = [
 					'name'  => wc_attribute_label( $attribute->get_name(), $product ),
+					'slug'  => $meta_key,
 					'value' => null,
 				];
 				return $defaults;

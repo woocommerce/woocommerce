@@ -53,6 +53,7 @@ export interface ProductResponseVariationsItem {
 
 export interface ProductResponseVariationAttributeItem {
 	name: string;
+	slug: string;
 	value: string;
 }
 
