@@ -26,6 +26,7 @@ import {
 	type MutationQueue,
 	type MutationResult,
 } from './mutation-batcher';
+import { doesCartItemMatchAttributes } from '../../utils/variations/does-cart-item-match-attributes';
 
 export type WooCommerceConfig = {
 	products?: {
@@ -101,6 +102,11 @@ export type Store = {
 		};
 		restUrl: string;
 		nonce: string;
+		findItemInCart: ( args: {
+			id: ClientCartItem[ 'id' ];
+			key?: ClientCartItem[ 'key' ];
+			variation?: ClientCartItem[ 'variation' ];
+		} ) => CartItem | OptimisticCartItem | undefined;
 		cart: Omit< Cart, 'items' > & {
 			items: ( OptimisticCartItem | CartItem )[];
 			totals: CartResponseTotals;
@@ -207,40 +213,6 @@ const getInfoNoticesFromCartUpdates = (
 	];
 };
 
-// Same as the one in /assets/js/base/utils/variations/does-cart-item-match-attributes.ts.
-const doesCartItemMatchAttributes = (
-	cartItem: OptimisticCartItem,
-	selectedAttributes: SelectedAttributes[]
-) => {
-	if (
-		! Array.isArray( cartItem.variation ) ||
-		! Array.isArray( selectedAttributes )
-	) {
-		return false;
-	}
-
-	if ( cartItem.variation.length !== selectedAttributes.length ) {
-		return false;
-	}
-
-	return cartItem.variation.every(
-		( {
-			// eslint-disable-next-line
-			raw_attribute,
-			value,
-		}: {
-			raw_attribute: string;
-			value: string;
-		} ) =>
-			selectedAttributes.some( ( item: SelectedAttributes ) => {
-				return (
-					item.attribute === raw_attribute &&
-					item.value.toLowerCase() === value?.toLowerCase()
-				);
-			} )
-	);
-};
-
 let pendingRefresh = false;
 let refreshTimeout = 3000;
 let resolveNonceReady: ( () => void ) | null = null;
@@ -311,6 +283,38 @@ async function sendCartRequest(
 const { state, actions } = store< Store >(
 	'woocommerce',
 	{
+		state: {
+			findItemInCart( {
+				id,
+				key,
+				variation,
+			}: {
+				id: ClientCartItem[ 'id' ];
+				key?: ClientCartItem[ 'key' ];
+				variation?: ClientCartItem[ 'variation' ];
+			} ) {
+				return state.cart.items.find( ( cartItem ) => {
+					if ( key ) {
+						return key === cartItem.key;
+					}
+					if ( cartItem.type === 'variation' ) {
+						if (
+							id !== cartItem.id ||
+							! cartItem.variation ||
+							! variation ||
+							cartItem.variation.length !== variation.length
+						) {
+							return false;
+						}
+						return doesCartItemMatchAttributes(
+							cartItem,
+							variation
+						);
+					}
+					return id === cartItem.id;
+				} );
+			},
+		},
 		actions: {
 			*removeCartItem( key: string ): AsyncAction< void > {
 				// Track what changes we're making for the sync event.
@@ -377,22 +381,10 @@ const { state, actions } = store< Store >(
 				const a11yModulePromise = import( '@wordpress/a11y' );
 
 				// Find existing item
-				const existingItem = state.cart.items.find( ( cartItem ) => {
-					if ( cartItem.type === 'variation' ) {
-						if (
-							id !== cartItem.id ||
-							! cartItem.variation ||
-							! variation ||
-							cartItem.variation.length !== variation.length
-						) {
-							return false;
-						}
-						return doesCartItemMatchAttributes(
-							cartItem,
-							variation
-						);
-					}
-					return key ? key === cartItem.key : id === cartItem.id;
+				const existingItem = state.findItemInCart( {
+					id,
+					key,
+					variation,
 				} );
 
 				// Determine the target quantity.
@@ -535,9 +527,11 @@ const { state, actions } = store< Store >(
 					// Submit each item through the batcher. They'll be
 					// collected into a single batch request automatically.
 					const promises = items.map( ( item, index ) => {
-						const existingItem = state.cart.items.find(
-							( { id: productId } ) => item.id === productId
-						);
+						const existingItem = state.findItemInCart( {
+							id: item.id,
+							key: item.key,
+							variation: item.variation,
+						} );
 
 						let quantity: number;
 						if ( typeof item.quantityToAdd === 'number' ) {

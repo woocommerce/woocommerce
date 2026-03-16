@@ -122,23 +122,27 @@ describe( 'ShippingRecommendations', () => {
 			expect( screen.queryByText( 'Packlink PRO' ) ).toBeInTheDocument();
 		} );
 
-		it( 'should show ShipStation and Packlink PRO for DE', () => {
+		it( 'should show only Packlink PRO for DE', () => {
 			mockSelectForCountry( 'DE' );
 			render( <ShippingRecommendations /> );
 
 			expect(
 				screen.queryByText( 'WooCommerce Shipping' )
 			).not.toBeInTheDocument();
-			expect( screen.queryByText( 'ShipStation' ) ).toBeInTheDocument();
+			expect(
+				screen.queryByText( 'ShipStation' )
+			).not.toBeInTheDocument();
 			expect( screen.queryByText( 'Packlink PRO' ) ).toBeInTheDocument();
 		} );
 
-		it( 'should show ShipStation and Packlink PRO for GB', () => {
+		it( 'should show only ShipStation for GB', () => {
 			mockSelectForCountry( 'GB' );
 			render( <ShippingRecommendations /> );
 
 			expect( screen.queryByText( 'ShipStation' ) ).toBeInTheDocument();
-			expect( screen.queryByText( 'Packlink PRO' ) ).toBeInTheDocument();
+			expect(
+				screen.queryByText( 'Packlink PRO' )
+			).not.toBeInTheDocument();
 		} );
 
 		it( 'should show only ShipStation for AU', () => {
@@ -158,7 +162,7 @@ describe( 'ShippingRecommendations', () => {
 			expect( screen.queryByText( 'ShipStation' ) ).toBeInTheDocument();
 		} );
 
-		it.each( [ 'ES', 'IT', 'NL', 'AT', 'BE' ] )(
+		it.each( [ 'ES', 'IT', 'NL', 'AT', 'BE', 'IE', 'PT' ] )(
 			'should show only Packlink PRO for %s',
 			( country ) => {
 				mockSelectForCountry( country );
@@ -218,10 +222,9 @@ describe( 'ShippingRecommendations', () => {
 		} );
 
 		it( 'should not show Packlink PRO when it is already active', () => {
-			mockSelectForCountry( 'DE', [ 'packlink-pro-shipping' ] );
+			mockSelectForCountry( 'FR', [ 'packlink-pro-shipping' ] );
 			render( <ShippingRecommendations /> );
 
-			expect( screen.queryByText( 'ShipStation' ) ).toBeInTheDocument();
 			expect(
 				screen.queryByText( 'Packlink PRO' )
 			).not.toBeInTheDocument();
@@ -287,8 +290,7 @@ describe( 'ShippingRecommendations', () => {
 				{
 					context: 'settings',
 					country: 'DE',
-					plugins:
-						'woocommerce-shipstation-integration,packlink-pro-shipping',
+					plugins: 'packlink-pro-shipping',
 				}
 			);
 		} );

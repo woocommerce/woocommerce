@@ -450,6 +450,22 @@ class PushToken {
 	}
 
 	/**
+	 * Returns this token formatted for the WPCOM push notifications endpoint.
+	 *
+	 * @return array{user_id: int|null, token: string|null, origin: string|null, device_locale: string|null}
+	 *
+	 * @since 10.7.0
+	 */
+	public function to_wpcom_format(): array {
+		return array(
+			'user_id'       => $this->user_id,
+			'token'         => $this->token,
+			'origin'        => $this->origin,
+			'device_locale' => $this->device_locale ?? self::DEFAULT_DEVICE_LOCALE,
+		);
+	}
+
+	/**
 	 * Determines whether this token can be created.
 	 *
 	 * @return bool

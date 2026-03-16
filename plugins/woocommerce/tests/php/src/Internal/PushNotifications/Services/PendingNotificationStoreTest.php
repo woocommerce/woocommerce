@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Services;
 
+use Automattic\WooCommerce\Internal\PushNotifications\Dispatchers\InternalNotificationDispatcher;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\PendingNotificationStore;
 use WC_Unit_Test_Case;
@@ -26,7 +27,10 @@ class PendingNotificationStoreTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
+		$dispatcher  = $this->createMock( InternalNotificationDispatcher::class );
 		$this->store = new PendingNotificationStore();
+
+		$this->store->init( $dispatcher );
 		$this->store->register();
 	}
 
@@ -92,7 +96,9 @@ class PendingNotificationStoreTest extends WC_Unit_Test_Case {
 	 * @testdox Should not add notifications when store has not been registered.
 	 */
 	public function test_add_does_nothing_when_not_registered(): void {
-		$store = new PendingNotificationStore();
+		$dispatcher = $this->createMock( InternalNotificationDispatcher::class );
+		$store      = new PendingNotificationStore();
+		$store->init( $dispatcher );
 
 		$store->add( $this->create_notification( 'store_order', 42 ) );
 

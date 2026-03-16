@@ -418,6 +418,13 @@ export class Shipping extends Component {
 						<Plugins
 							onComplete={ ( _plugins, response ) => {
 								createNoticesFromResponse( response );
+								recordEvent(
+									'tasklist_shipping_label_printing',
+									{
+										install: true,
+										plugins_to_activate: pluginsToActivate,
+									}
+								);
 								this.recordInstallAndActivateEvents(
 									pluginsToActivate[ 0 ],
 									true
@@ -438,6 +445,13 @@ export class Shipping extends Component {
 								} );
 							} }
 							onSkip={ () => {
+								recordEvent(
+									'tasklist_shipping_label_printing',
+									{
+										install: false,
+										plugins_to_activate: pluginsToActivate,
+									}
+								);
 								invalidateResolutionForStoreSelector();
 								getHistory().push( getNewPath( {}, '/', {} ) );
 								onComplete();
@@ -551,6 +565,14 @@ export class Shipping extends Component {
 																createNoticesFromResponse(
 																	response
 																);
+																recordEvent(
+																	'tasklist_shipping_label_printing',
+																	{
+																		install: true,
+																		plugins_to_activate:
+																			pluginsForPartner,
+																	}
+																);
 																this.recordInstallAndActivateEvents(
 																	shippingMethod.slug,
 																	true
@@ -643,6 +665,14 @@ export class Shipping extends Component {
 										onComplete={ ( _plugins, response ) => {
 											createNoticesFromResponse(
 												response
+											);
+											recordEvent(
+												'tasklist_shipping_label_printing',
+												{
+													install: true,
+													plugins_to_activate:
+														pluginsToActivate,
+												}
 											);
 											this.recordInstallAndActivateEvents(
 												pluginsToPromote[ 0 ]?.slug,
