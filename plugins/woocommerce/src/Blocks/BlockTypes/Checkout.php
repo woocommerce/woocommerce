@@ -428,6 +428,7 @@ class Checkout extends AbstractBlock {
 		}
 		$this->asset_data_registry->add( 'addressAutocompleteProviders', $providers_payload );
 		$this->asset_data_registry->add( 'countryData', $country_data );
+		$this->asset_data_registry->add( 'defaultLocale', CartCheckoutUtils::get_default_country_locale() );
 		$this->asset_data_registry->add( 'defaultAddressFormat', $address_formats['default'] );
 		$this->asset_data_registry->add(
 			'checkoutAllowsGuest',

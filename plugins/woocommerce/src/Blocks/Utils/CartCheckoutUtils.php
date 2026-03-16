@@ -2,6 +2,8 @@
 namespace Automattic\WooCommerce\Blocks\Utils;
 
 use Automattic\Block_Scanner;
+use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
+use Automattic\WooCommerce\Utilities\ArrayUtil;
 
 /**
  * Class containing utility methods for dealing with the Cart and Checkout blocks.
@@ -324,6 +326,47 @@ class CartCheckoutUtils {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Gets the default country locale data, transformed for frontend use.
+	 * 
+	 * @since 10.7.0
+	 *
+	 * @return array
+	 */
+	public static function get_default_country_locale() {
+		$base = WC()->countries->get_default_address_fields();
+
+		// Temporarily unhook CheckoutFields::update_default_locale_with_fields.
+		$checkout_fields = wc_get_container()->get( CheckoutFields::class );
+		$callback        = array( $checkout_fields, 'update_default_locale_with_fields' );
+		$had_filter      = has_filter( 'woocommerce_get_country_locale_default', $callback );
+		if ( false !== $had_filter ) {
+			remove_filter( 'woocommerce_get_country_locale_default', $callback, $had_filter );
+		}
+
+		$filtered = apply_filters( 'woocommerce_get_country_locale_default', $base );
+
+		if ( false !== $had_filter ) {
+			add_filter( 'woocommerce_get_country_locale_default', $callback, $had_filter );
+		}
+
+		// Only include properties changed by the filter, to avoid overwriting blocks-specific field config (e.g., field index).
+		// Array properties like 'validate' may diff partially, but are filtered out by getSupportedCoreLocaleProps later on.
+		$diff = ArrayUtil::deep_assoc_array_diff( $filtered, $base );
+
+		foreach ( $diff as $field => $field_data ) {
+			if ( isset( $field_data['priority'] ) ) {
+				$diff[ $field ]['index'] = $field_data['priority'];
+				unset( $diff[ $field ]['priority'] );
+			}
+			if ( isset( $field_data['class'] ) ) {
+				unset( $diff[ $field ]['class'] );
+			}
+		}
+
+		return $diff;
 	}
 
 	/**
