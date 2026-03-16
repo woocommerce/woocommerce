@@ -17,7 +17,7 @@ if ( ! empty( $ids ) ) {
 }
 ```
 
-The comment `// Prime caches to reduce future queries.` must always sit **inside** the `if` block, directly above the call. Do not place it before the `if`.
+The comment `// Prime caches to reduce future queries.` must always sit **inside** the `if` block, directly above the call. Do not place it before the `if`. Place the prime as the **first statement** inside the block — before any `do_action` calls — so that hooked callbacks loading the same objects also benefit from the warmed cache.
 
 `_prime_post_caches()` is a WordPress internal (underscore-prefixed) that has existed since WP 4.1. The minimum supported WordPress version for WooCommerce guarantees its presence — `is_callable( '_prime_post_caches' )` guards are unnecessary and must be removed when encountered. Always wrap in `! empty()` to avoid a no-op SQL on empty arrays.
 
