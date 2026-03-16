@@ -185,12 +185,12 @@ describe( 'findMatchingVariation', () => {
 	} );
 
 	describe( 'multi-attribute product with transliterated slugs', () => {
-		// This is the exact scenario that broke with normalization:
-		// German store with "Größe" (slug: groesse) + "Modell" (slug: modell)
-		// with hyphenated term values like "bmc-kaius-01".
+		// Scenario: transliterated umlaut attribute + hyphenated term slugs.
+		// WordPress sanitize_title converts "Größe" → "groesse" and
+		// "Farbe" → "farbe", but wc_attribute_label returns the original.
 		const germanMapping: AttributeSlugToLabel = {
 			attribute_pa_groesse: 'Größe',
-			attribute_pa_modell: 'Modell',
+			attribute_pa_farbe: 'Farbe',
 		};
 
 		const germanProduct = {
@@ -201,14 +201,14 @@ describe( 'findMatchingVariation', () => {
 					id: 501,
 					attributes: [
 						{ name: 'Größe', value: 'xl' },
-						{ name: 'Modell', value: 'bmc-kaius-01' },
+						{ name: 'Farbe', value: 'dunkel-blau' },
 					],
 				},
 				{
 					id: 502,
 					attributes: [
 						{ name: 'Größe', value: 'm' },
-						{ name: 'Modell', value: 'bmc-urs-urs01' },
+						{ name: 'Farbe', value: 'hell-gruen' },
 					],
 				},
 			],
@@ -219,7 +219,7 @@ describe( 'findMatchingVariation', () => {
 				germanProduct,
 				[
 					{ attribute: 'attribute_pa_groesse', value: 'xl' },
-					{ attribute: 'attribute_pa_modell', value: 'bmc-kaius-01' },
+					{ attribute: 'attribute_pa_farbe', value: 'dunkel-blau' },
 				],
 				germanMapping
 			);
@@ -232,8 +232,8 @@ describe( 'findMatchingVariation', () => {
 				[
 					{ attribute: 'attribute_pa_groesse', value: 'm' },
 					{
-						attribute: 'attribute_pa_modell',
-						value: 'bmc-urs-urs01',
+						attribute: 'attribute_pa_farbe',
+						value: 'hell-gruen',
 					},
 				],
 				germanMapping
@@ -247,8 +247,8 @@ describe( 'findMatchingVariation', () => {
 				[
 					{ attribute: 'attribute_pa_groesse', value: 'xl' },
 					{
-						attribute: 'attribute_pa_modell',
-						value: 'bmc-urs-urs01',
+						attribute: 'attribute_pa_farbe',
+						value: 'hell-gruen',
 					},
 				],
 				germanMapping
