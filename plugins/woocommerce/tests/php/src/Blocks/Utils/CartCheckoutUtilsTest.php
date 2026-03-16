@@ -136,6 +136,69 @@ class CartCheckoutUtilsTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox get_default_country_locale returns only the diff from the woocommerce_get_country_locale_default filter.
+	 */
+	public function test_get_default_country_locale_returns_filter_diff(): void {
+		// Without filter customizations, the result should be empty.
+		$locale = CartCheckoutUtils::get_default_country_locale();
+		$this->assertIsArray( $locale );
+		$this->assertEmpty( $locale );
+
+		// With filter customizations, only changed properties should be returned.
+		add_filter(
+			'woocommerce_get_country_locale_default',
+			function ( $defaults ) {
+				$defaults['last_name']['hidden']   = true;
+				$defaults['last_name']['required']  = false;
+				$defaults['first_name']['label']    = 'Full name';
+				$defaults['first_name']['priority'] = 5;
+				return $defaults;
+			}
+		);
+
+		$locale = CartCheckoutUtils::get_default_country_locale();
+
+		$this->assertArrayHasKey( 'last_name', $locale );
+		$this->assertTrue( $locale['last_name']['hidden'] );
+		$this->assertFalse( $locale['last_name']['required'] );
+
+		$this->assertArrayHasKey( 'first_name', $locale );
+		$this->assertSame( 'Full name', $locale['first_name']['label'] );
+		$this->assertSame( 5, $locale['first_name']['index'] );
+		$this->assertArrayNotHasKey( 'priority', $locale['first_name'] );
+
+		$this->assertArrayNotHasKey( 'address_1', $locale );
+		$this->assertArrayNotHasKey( 'city', $locale );
+
+		remove_all_filters( 'woocommerce_get_country_locale_default' );
+	}
+
+	/**
+	 * @testdox get_default_country_locale includes custom fields added via the filter.
+	 */
+	public function test_get_default_country_locale_includes_custom_fields(): void {
+		add_filter(
+			'woocommerce_get_country_locale_default',
+			function ( $defaults ) {
+				$defaults['myplugin/custom-field'] = array(
+					'label'    => 'Custom Field',
+					'priority' => 15,
+				);
+				return $defaults;
+			}
+		);
+
+		$locale = CartCheckoutUtils::get_default_country_locale();
+
+		$this->assertArrayHasKey( 'myplugin/custom-field', $locale );
+		$this->assertSame( 'Custom Field', $locale['myplugin/custom-field']['label'] );
+		$this->assertSame( 15, $locale['myplugin/custom-field']['index'] );
+		$this->assertArrayNotHasKey( 'priority', $locale['myplugin/custom-field'] );
+
+		remove_all_filters( 'woocommerce_get_country_locale_default' );
+	}
+
+	/**
 	 * Data provider for has_block_variation test cases
 	 *
 	 * @return array
