@@ -6,8 +6,6 @@ namespace Automattic\WooCommerce\StoreApi;
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
 use WC_Session;
-use WC_Session_Interface;
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -20,7 +18,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * @since 10.7.0
  */
-final class SessionHandler extends WC_Session implements WC_Session_Interface {
+final class SessionHandler extends WC_Session {
 	/**
 	 * Token from HTTP headers.
 	 *

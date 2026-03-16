@@ -21,7 +21,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Session handler class.
  */
-class WC_Session_Handler extends WC_Session implements WC_Session_Interface {
+class WC_Session_Handler extends WC_Session {
 
 	/**
 	 * Cookie name used for the session.

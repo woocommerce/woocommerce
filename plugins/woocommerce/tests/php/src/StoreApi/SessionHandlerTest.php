@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\StoreApi;
 
 use Automattic\WooCommerce\StoreApi\SessionHandler;
-use WC_Session_Interface;
+use WC_Session;
 use WC_Unit_Test_Case;
 
 /**
@@ -39,10 +39,10 @@ class SessionHandlerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox SessionHandler implements WC_Session_Interface.
+	 * @testdox SessionHandler extends WC_Session.
 	 */
-	public function test_implements_session_interface(): void {
-		$this->assertInstanceOf( WC_Session_Interface::class, $this->sut, 'SessionHandler should implement WC_Session_Interface' );
+	public function test_extends_wc_session(): void {
+		$this->assertInstanceOf( WC_Session::class, $this->sut, 'SessionHandler should extend WC_Session' );
 	}
 
 	/**
