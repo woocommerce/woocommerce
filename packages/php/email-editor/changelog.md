@@ -2,6 +2,11 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.9.2](https://github.com/woocommerce/email-editor/releases/tag/2.9.2) - 2026-03-12 
+
+-   Patch - Add rich cards for WordPress embeds in emails with excerpt, site icon, and a performance cap of 5 per email. [#63542]
+-   Patch - Distribute root horizontal padding to individual block wrappers for future alignfull support. [#63359]
+
 ## [2.9.1](https://github.com/woocommerce/email-editor/releases/tag/2.9.1) - 2026-03-08 
 
 -   Patch - Add woocommerce_email_editor_send_preview_email_subject filter to allow customizing the preview email subject. [#63504]

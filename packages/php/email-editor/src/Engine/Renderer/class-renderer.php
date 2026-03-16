@@ -133,8 +133,6 @@ class Renderer {
 				'color'            => $email_styles['color']['text'] ?? 'inherit',
 				'padding-top'      => $email_styles['spacing']['padding']['top'] ?? '0px',
 				'padding-bottom'   => $email_styles['spacing']['padding']['bottom'] ?? '0px',
-				'padding-left'     => $email_styles['spacing']['padding']['left'] ?? '0px',
-				'padding-right'    => $email_styles['spacing']['padding']['right'] ?? '0px',
 				'font-family'      => $email_styles['typography']['fontFamily'] ?? 'inherit',
 				'line-height'      => $email_styles['typography']['lineHeight'] ?? '1.5',
 				'font-size'        => $email_styles['typography']['fontSize'] ?? 'inherit',

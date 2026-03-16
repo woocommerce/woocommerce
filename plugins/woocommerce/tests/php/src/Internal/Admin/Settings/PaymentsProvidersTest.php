@@ -6137,4 +6137,168 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 			),
 		);
 	}
+
+	/**
+	 * @dataProvider data_provider_enhance_order_map_new_gateway_with_suggestion
+	 *
+	 * @param array    $gateway_ids     The gateway IDs to register.
+	 * @param array    $gateway_slugs   Map of gateway ID to plugin slug.
+	 * @param array    $suggestions     The suggestions list.
+	 * @param array    $start_order_map The starting order map.
+	 * @param string[] $expected_order  The expected order of IDs after enhancement.
+	 */
+	public function test_enhance_order_map_new_gateway_with_suggestion(
+		array $gateway_ids,
+		array $gateway_slugs,
+		array $suggestions,
+		array $start_order_map,
+		array $expected_order
+	) {
+		// Mock payment gateways with their plugin slugs.
+		$gateway_details = array();
+		foreach ( $gateway_ids as $id ) {
+			$gateway_details[ $id ] = array(
+				'enabled'     => true,
+				'plugin_slug' => $gateway_slugs[ $id ] ?? $id,
+			);
+		}
+		$this->mock_payment_gateways( $gateway_details );
+
+		// Mock getting suggestions by plugin slug.
+		$this->mock_extension_suggestions
+			->expects( $this->any() )
+			->method( 'get_by_plugin_slug' )
+			->willReturnCallback(
+				function ( $plugin_slug ) use ( $suggestions ) {
+					foreach ( $suggestions as $suggestion ) {
+						if ( $suggestion['plugin']['slug'] === $plugin_slug ) {
+							return $suggestion;
+						}
+					}
+					return null;
+				}
+			);
+		$sut = $this->sut;
+
+		$result = $sut->enhance_order_map( $start_order_map );
+
+		// Extract the order — keys sorted by value.
+		$actual_order = array_keys( $result );
+		// Filter to only the IDs we care about for assertion clarity.
+		$actual_order = array_values( array_intersect( $actual_order, $expected_order ) );
+
+		$this->assertSame( $expected_order, $actual_order );
+	}
+
+	/**
+	 * Data provider for test_enhance_order_map_new_gateway_with_suggestion.
+	 */
+	public function data_provider_enhance_order_map_new_gateway_with_suggestion(): array {
+		$preferred_paypal = array(
+			'id'        => 'paypal',
+			'_type'     => ExtensionSuggestions::TYPE_PSP,
+			'_priority' => 0,
+			'plugin'    => array( 'slug' => 'woocommerce-paypal-payments' ),
+		);
+
+		return array(
+			'preferred provider before offline PMs — the gateway takes its placeholder' => array(
+				// gateway_ids.
+				array( 'gateway1', 'ppcp-gateway', 'bacs', 'cheque', 'cod' ),
+				// gateway_slugs.
+				array(
+					'gateway1'     => 'plugin1',
+					'ppcp-gateway' => 'woocommerce-paypal-payments',
+					'bacs'         => 'woocommerce',
+					'cheque'       => 'woocommerce',
+					'cod'          => 'woocommerce',
+				),
+				// suggestions.
+				array( $preferred_paypal ),
+				// start_order_map: preferred provider is before offline PMs, gateway not yet present.
+				array(
+					'gateway1'            => 0,
+					PaymentsProviders::SUGGESTION_ORDERING_PREFIX . 'paypal' => 1,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 2,
+					WC_Gateway_BACS::ID   => 3,
+					WC_Gateway_Cheque::ID => 4,
+					WC_Gateway_COD::ID    => 5,
+				),
+				// expected_order: PayPal gateway takes the preferred provider's placeholder place, before offline PMs.
+				array(
+					'gateway1',
+					PaymentsProviders::SUGGESTION_ORDERING_PREFIX . 'paypal',
+					'ppcp-gateway',
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					WC_Gateway_BACS::ID,
+					WC_Gateway_Cheque::ID,
+					WC_Gateway_COD::ID,
+				),
+			),
+			'suggestion exists but placeholder absent — gateway placed via default logic' => array(
+				// gateway_ids.
+				array( 'gateway1', 'ppcp-gateway', 'bacs', 'cheque', 'cod' ),
+				// gateway_slugs.
+				array(
+					'gateway1'     => 'plugin1',
+					'ppcp-gateway' => 'woocommerce-paypal-payments',
+					'bacs'         => 'woocommerce',
+					'cheque'       => 'woocommerce',
+					'cod'          => 'woocommerce',
+				),
+				// suggestions.
+				array( $preferred_paypal ),
+				// start_order_map: NO placeholder for the suggestion — gateway falls through to default placement.
+				array(
+					'gateway1'            => 0,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 1,
+					WC_Gateway_BACS::ID   => 2,
+					WC_Gateway_Cheque::ID => 3,
+					WC_Gateway_COD::ID    => 4,
+				),
+				// expected_order: PayPal gateway placed above offline group (default behavior), not at a placeholder.
+				array(
+					'gateway1',
+					'ppcp-gateway',
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					WC_Gateway_BACS::ID,
+					WC_Gateway_Cheque::ID,
+					WC_Gateway_COD::ID,
+				),
+			),
+			'preferred provider after offline PMs — the gateway takes its placeholder' => array(
+				// gateway_ids.
+				array( 'gateway1', 'ppcp-gateway', 'bacs', 'cheque', 'cod' ),
+				// gateway_slugs.
+				array(
+					'gateway1'     => 'plugin1',
+					'ppcp-gateway' => 'woocommerce-paypal-payments',
+					'bacs'         => 'woocommerce',
+					'cheque'       => 'woocommerce',
+					'cod'          => 'woocommerce',
+				),
+				// suggestions.
+				array( $preferred_paypal ),
+				// start_order_map: preferred provider is after offline PMs (custom ordering).
+				array(
+					'gateway1'            => 0,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 1,
+					WC_Gateway_BACS::ID   => 2,
+					WC_Gateway_Cheque::ID => 3,
+					WC_Gateway_COD::ID    => 4,
+					PaymentsProviders::SUGGESTION_ORDERING_PREFIX . 'paypal' => 5,
+				),
+				// expected_order: PayPal gateway takes the preferred provider's placeholder place, after offline PMs.
+				array(
+					'gateway1',
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
+					WC_Gateway_BACS::ID,
+					WC_Gateway_Cheque::ID,
+					WC_Gateway_COD::ID,
+					PaymentsProviders::SUGGESTION_ORDERING_PREFIX . 'paypal',
+					'ppcp-gateway',
+				),
+			),
+		);
+	}
 }
