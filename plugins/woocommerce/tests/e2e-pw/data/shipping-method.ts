@@ -6,9 +6,9 @@
  * - `flat_rate`
  * - `local_pickup`
  *
- * @param {string} methodId
- * @param {number} cost
- * @return {Object} shipping method object that can serve as a request payload for adding a shipping method to a shipping zone.
+ * @param {string}  methodId
+ * @param {number=} cost
+ * @return {ShippingMethodExample} Shipping method object that can serve as a request payload for adding a shipping method to a shipping zone.
  */
 interface ShippingMethodExample {
 	method_id: string;
