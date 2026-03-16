@@ -1,9 +1,9 @@
 /**
  * External dependencies
  */
+import type { CartItem } from '@woocommerce/types';
 import { dinero, subtract, transformScale, toSnapshot } from 'dinero.js';
 import { USD } from 'dinero.js/currencies'; // USD is used as a placeholder currency for arithmetic; actual formatting is handled elsewhere.
-import type { CartItem } from '@woocommerce/types';
 
 /**
  * Calculate the per-unit sale amount from raw prices.
