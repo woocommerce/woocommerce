@@ -148,7 +148,7 @@ class CartCheckoutUtilsTest extends WP_UnitTestCase {
 		add_filter(
 			'woocommerce_get_country_locale_default',
 			function ( $defaults ) {
-				$defaults['last_name']['hidden']   = true;
+				$defaults['last_name']['hidden']    = true;
 				$defaults['last_name']['required']  = false;
 				$defaults['first_name']['label']    = 'Full name';
 				$defaults['first_name']['priority'] = 5;
