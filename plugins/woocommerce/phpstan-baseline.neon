@@ -74527,12 +74527,6 @@ parameters:
 			path: src/StoreApi/SessionHandler.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\StoreApi\\SessionHandler\:\:save_data\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/StoreApi/SessionHandler.php
-
-		-
 			message: '#^Property Automattic\\WooCommerce\\StoreApi\\SessionHandler\:\:\$token \(string\) does not accept array\|string\.$#'
 			identifier: assign.propertyType
 			count: 1
