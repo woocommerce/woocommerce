@@ -298,8 +298,14 @@ const { state, actions } = store< Store >(
 						return key === cartItem.key;
 					}
 					if ( cartItem.type === 'variation' ) {
+						// A variation ID is unique — if it matches, the item
+						// is found without needing attribute comparison.
+						if ( id === cartItem.id ) {
+							return true;
+						}
+						// Fallback for callers that pass the parent product
+						// ID instead of the variation ID.
 						if (
-							id !== cartItem.id ||
 							! cartItem.variation ||
 							! variation ||
 							cartItem.variation.length !== variation.length
