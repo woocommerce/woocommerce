@@ -171,7 +171,13 @@ describe( 'getProductData', () => {
 					variations: [
 						{
 							id: 10,
-							attributes: [ { name: 'Color', value: 'red' } ],
+							attributes: [
+								{
+									name: 'Color',
+									slug: 'attribute_pa_color',
+									value: 'red',
+								},
+							],
 						},
 					],
 				},
@@ -196,7 +202,7 @@ describe( 'getProductData', () => {
 			};
 
 			const result = getProductData( 1, [
-				{ attribute: 'Color', value: 'red' },
+				{ attribute: 'attribute_pa_color', value: 'red' },
 			] );
 
 			expect( result ).toEqual( {
@@ -221,7 +227,13 @@ describe( 'getProductData', () => {
 					variations: [
 						{
 							id: 10,
-							attributes: [ { name: 'Color', value: 'red' } ],
+							attributes: [
+								{
+									name: 'Color',
+									slug: 'attribute_pa_color',
+									value: 'red',
+								},
+							],
 						},
 					],
 				},
@@ -229,7 +241,7 @@ describe( 'getProductData', () => {
 			mockProductsState.productVariations = {};
 
 			const result = getProductData( 1, [
-				{ attribute: 'Color', value: 'red' },
+				{ attribute: 'attribute_pa_color', value: 'red' },
 			] );
 
 			expect( result ).toBeNull();
@@ -255,7 +267,7 @@ describe( 'getProductData', () => {
 					variations: [
 						{
 							id: 10,
-							attributes: [ { name: 'Color', value: 'red' } ],
+							attributes: [ { name: 'Color', slug: 'attribute_pa_color', value: 'red' } ],
 						},
 					],
 				},
