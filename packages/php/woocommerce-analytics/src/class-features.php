@@ -45,4 +45,22 @@ class Features {
 		 */
 		return apply_filters( 'woocommerce_analytics_clickhouse_enabled', false );
 	}
+
+	/**
+	 * Check if auto-installation of the proxy speed module MU-plugin is enabled.
+	 *
+	 * @return bool
+	 */
+	public static function is_proxy_speed_module_enabled() {
+		/**
+		 * Filter to control auto-installation of the proxy speed module mu-plugin.
+		 *
+		 * When this filter returns false, the mu-plugin file can't be added automatically.
+		 *
+		 * @since 0.15.0
+		 *
+		 * @param bool $auto_install Whether to auto-install the mu-plugin. Default false.
+		 */
+		return apply_filters( 'woocommerce_analytics_auto_install_proxy_speed_module', false );
+	}
 }

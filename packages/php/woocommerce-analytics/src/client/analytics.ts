@@ -132,6 +132,13 @@ export class Analytics {
 			...this.commonProps,
 			...properties,
 		};
+
+		if ( this.features.ch ) {
+			eventProperties.ch = 1;
+		} else {
+			delete eventProperties.ch;
+		}
+
 		// Use API client if enabled, otherwise fall back to _wca.push
 		if ( this.features.proxy ) {
 			// Add client specific properties to the event properties. We don't need to do this for direct pixel tracking since it's already done there.
@@ -157,12 +164,6 @@ export class Analytics {
 		if ( ! window._wca ) {
 			debug( 'Skipping event recording because _wca is not defined' );
 			return;
-		}
-
-		if ( this.features.ch ) {
-			eventProperties.ch = 1;
-		} else {
-			delete eventProperties.ch;
 		}
 
 		debug( 'Recording event via _wca: "%s" with props %o', event, eventProperties );

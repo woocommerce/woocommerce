@@ -1,0 +1,4 @@
+Significance: patch
+Type: changed
+
+Handle proxy requests at MU-plugin stage and exit early for faster response time.

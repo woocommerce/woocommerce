@@ -98,7 +98,7 @@ class WC_Analytics_Tracking {
 
 		// Record ClickHouse event, if applicable.
 		$ch_error = null;
-		if ( Features::is_clickhouse_enabled() ) {
+		if ( Features::is_clickhouse_enabled() || ( isset( $properties['ch'] ) && 1 === (int) $properties['ch'] ) ) {
 			$properties['ch'] = 1;
 			$ch_result        = self::record_ch_event( $properties );
 			if ( is_wp_error( $ch_result ) ) {
