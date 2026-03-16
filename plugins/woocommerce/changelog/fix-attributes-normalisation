@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add to Cart with Options: avoid attributes name and slugs normalisation and fallback to slug vs slug comparison
