@@ -124,6 +124,7 @@ global.wcSettings = {
 			format: '{name}\n{company}\n{address_1}\n{address_2}\n{postcode} {city}\n{state}\n{country}',
 		},
 	},
+	defaultLocale: {},
 	storePages: {
 		myaccount: {
 			id: 0,

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { COUNTRY_LOCALE } from '@woocommerce/block-settings';
+import { COUNTRY_LOCALE, DEFAULT_LOCALE } from '@woocommerce/block-settings';
 import {
 	CountryAddressFields,
 	Field,
@@ -86,6 +86,21 @@ const countryAddressFields: CountryAddressFields = Object.entries(
 }, {} );
 
 /**
+ * Default locale fields from the 'woocommerce_get_country_locale_default' filter.
+ * Used as fallback when no country is selected.
+ */
+const defaultLocaleFields: Record< string, Partial< Field > > = Object.entries(
+	DEFAULT_LOCALE
+).reduce(
+	( fields, [ localeFieldKey, localeField ] ) => {
+		fields[ localeFieldKey ] =
+			getSupportedCoreLocaleProps( localeField );
+		return fields;
+	},
+	{} as Record< string, Partial< Field > >
+);
+
+/**
  * Combines address fields, including fields from the locale, and sorts them by index.
  */
 const prepareFormFields = (
@@ -99,7 +114,7 @@ const prepareFormFields = (
 	const localeConfigs =
 		addressCountry && countryAddressFields[ addressCountry ] !== undefined
 			? countryAddressFields[ addressCountry ]
-			: {};
+			: defaultLocaleFields;
 
 	return fieldKeys
 		.map( ( field ) => {
