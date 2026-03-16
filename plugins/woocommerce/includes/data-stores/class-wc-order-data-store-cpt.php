@@ -1223,17 +1223,13 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 				ORDER BY post_id"
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		);
-		$raw_meta_data_collection = array_reduce(
-			$raw_meta_data_array,
-			function ( $collection, $raw_meta_data ) {
-				if ( ! isset( $collection[ $raw_meta_data->object_id ] ) ) {
-					$collection[ $raw_meta_data->object_id ] = array();
-				}
-				$collection[ $raw_meta_data->object_id ][] = $raw_meta_data;
-				return $collection;
-			},
-			array()
-		);
+		$raw_meta_data_collection = array();
+		foreach ( $raw_meta_data_array as $raw_meta_data ) {
+			if ( ! isset( $raw_meta_data_collection[ $raw_meta_data->object_id ] ) ) {
+				$raw_meta_data_collection[ $raw_meta_data->object_id ] = array();
+			}
+			$raw_meta_data_collection[ $raw_meta_data->object_id ][] = $raw_meta_data;
+		}
 		WC_Order::prime_raw_meta_data_cache( $raw_meta_data_collection, 'orders' );
 	}
 

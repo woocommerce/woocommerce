@@ -648,17 +648,13 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		);
 
 		if ( ! empty( $raw_meta_data_array ) ) {
-			$raw_meta_data_collection = array_reduce(
-				$raw_meta_data_array,
-				function ( $collection, $raw_meta_data ) {
-					if ( ! isset( $collection[ $raw_meta_data->object_id ] ) ) {
-						$collection[ $raw_meta_data->object_id ] = array();
-					}
-					$collection[ $raw_meta_data->object_id ][] = $raw_meta_data;
-					return $collection;
-				},
-				array()
-			);
+			$raw_meta_data_collection = array();
+			foreach ( $raw_meta_data_array as $raw_meta_data ) {
+				if ( ! isset( $raw_meta_data_collection[ $raw_meta_data->object_id ] ) ) {
+					$raw_meta_data_collection[ $raw_meta_data->object_id ] = array();
+				}
+				$raw_meta_data_collection[ $raw_meta_data->object_id ][] = $raw_meta_data;
+			}
 			\WC_Order_Item::prime_raw_meta_data_cache( $raw_meta_data_collection, 'order-items' );
 		}
 	}
@@ -1021,21 +1017,23 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	protected function get_refunded_item_meta_total( $order, string $item_type, array $meta_keys ): float {
 		global $wpdb;
 
-		$refund_join     = $this->get_refund_orders_join_clause( $order->get_id() );
-		$meta_key_clause = "'" . implode( "', '", esc_sql( $meta_keys ) ) . "'";
+		$refund_join      = $this->get_refund_orders_join_clause( $order->get_id() );
+		$meta_placeholder = implode( ', ', array_fill( 0, count( $meta_keys ), '%s' ) );
 
 		$total = $wpdb->get_var(
-			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $refund_join and $order_items are already prepared
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $refund_join is already prepared.
+			// phpcs:disable WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- $meta_keys is splatted.
 			$wpdb->prepare(
 				"SELECT SUM( order_itemmeta.meta_value )
 				FROM %i AS order_itemmeta
 				INNER JOIN $refund_join
 				INNER JOIN %i AS order_items ON ( order_items.order_id = refunds.id AND order_items.order_item_type = %s )
 				WHERE order_itemmeta.order_item_id = order_items.order_item_id
-				AND order_itemmeta.meta_key IN ( $meta_key_clause )",
+				AND order_itemmeta.meta_key IN ( $meta_placeholder )",
 				$wpdb->prefix . 'woocommerce_order_itemmeta',
 				$wpdb->prefix . 'woocommerce_order_items',
 				$item_type,
+				...$meta_keys,
 			)
 			// phpcs:enable
 		) ?? 0;
