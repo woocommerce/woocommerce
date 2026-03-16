@@ -128,7 +128,8 @@ store< QuantitySelectorStore >(
 
 				const currentValue = Number( inputElement.value ) || 0;
 
-				const { selectedAttributes, attributeSlugToLabel } = addToCartWithOptionsStore.state;
+				const { selectedAttributes, attributeSlugToLabel } =
+					addToCartWithOptionsStore.state;
 
 				const productObject = getProductData(
 					productId,
@@ -158,7 +159,8 @@ store< QuantitySelectorStore >(
 				}
 
 				const currentValue = Number( inputElement.value ) || 0;
-				const { selectedAttributes, attributeSlugToLabel } = addToCartWithOptionsStore.state;
+				const { selectedAttributes, attributeSlugToLabel } =
+					addToCartWithOptionsStore.state;
 
 				const productObject = getProductData(
 					productId,
@@ -191,7 +193,8 @@ store< QuantitySelectorStore >(
 			handleQuantityBlur: () => {
 				const { allowZero, productId, inputElement } =
 					getContext< Context >();
-				const { selectedAttributes, attributeSlugToLabel } = addToCartWithOptionsStore.state;
+				const { selectedAttributes, attributeSlugToLabel } =
+					addToCartWithOptionsStore.state;
 
 				const productObject = getProductData(
 					productId,

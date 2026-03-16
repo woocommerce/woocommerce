@@ -283,8 +283,8 @@ class AddToCartWithOptions extends AbstractBlock {
 					if ( ! $attribute->get_variation() ) {
 						continue;
 					}
-					$slug  = wc_variation_attribute_name( $attribute->get_name() );
-					$label = wc_attribute_label( $attribute->get_name(), $product );
+					$slug                   = wc_variation_attribute_name( $attribute->get_name() );
+					$label                  = wc_attribute_label( $attribute->get_name(), $product );
 					$slug_to_label[ $slug ] = $label;
 				}
 				$context['attributeSlugToLabel'] = $slug_to_label;
