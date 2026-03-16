@@ -355,13 +355,13 @@ class RestAbilityFactory {
 	 * Uses JSON encoding for fingerprinting to correctly handle
 	 * mixed scalar types (1 vs '1'), nulls, and complex values (arrays).
 	 *
-	 * @param array $enum Enum values.
+	 * @param array $values Enum values.
 	 * @return array Deduplicated enum values.
 	 */
-	private static function dedupe_enum( array $enum ): array {
+	private static function dedupe_enum( array $values ): array {
 		$seen   = array();
 		$unique = array();
-		foreach ( $enum as $value ) {
+		foreach ( $values as $value ) {
 			$fingerprint = wp_json_encode( $value );
 			if ( isset( $seen[ $fingerprint ] ) ) {
 				continue;

@@ -560,7 +560,7 @@ class RestAbilityFactoryTest extends WC_Unit_Test_Case {
 				'items' => array(
 					'type'       => 'object',
 					'properties' => array(
-						'code' => array(
+						'code'   => array(
 							'type'     => 'string',
 							'required' => true,
 						),
