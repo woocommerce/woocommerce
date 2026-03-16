@@ -1038,7 +1038,7 @@ class PluginsHelper {
 				/* translators: 1) product name 3) URL to My Subscriptions page 4) Renew product price string */
 				'multiple_manage'         => __( 'One of your subscriptions for <strong>%1$s</strong> has expired. <a href="%3$s">%4$s</a> to continue receiving updates and streamlined support.', 'woocommerce' ),
 				/* translators: 1) product name 3) URL to My Subscriptions page */
-				'multiple_manage_site_covered' => __( 'One of your subscriptions for <strong>%1$s</strong> has expired. This store is still covered by another active subscription. <a href="%3$s">Please review subscriptions</a>.', 'woocommerce' ),
+				'multiple_manage_site_covered' => __( 'One of your subscriptions for <strong>%1$s</strong> has expired. This store is still covered by another active subscription.', 'woocommerce' ),
 				/* translators: 1) total expired subscriptions 2) URL to My Subscriptions page */
 				'different_subscriptions' => __( 'You have <strong>%1$s Woo extension subscriptions</strong> that expired. <a href="%2$s">Renew</a> to continue receiving updates and streamlined support.', 'woocommerce' ),
 			),
@@ -1056,7 +1056,7 @@ class PluginsHelper {
 		);
 
 		if ( 'multiple_manage_site_covered' === $notice_data['type'] ) {
-			$button_text = __( 'Please review subscriptions', 'woocommerce' );
+			$button_text = __( 'Review subscriptions', 'woocommerce' );
 			$button_link = add_query_arg(
 				array(
 					'product_id'   => $notice_data['product_id'],
