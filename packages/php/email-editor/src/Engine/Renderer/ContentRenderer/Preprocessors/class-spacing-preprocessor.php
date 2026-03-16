@@ -159,19 +159,41 @@ class Spacing_Preprocessor implements Preprocessor {
 	}
 
 	/**
-	 * Checks whether a block explicitly defines its own horizontal padding.
+	 * Checks whether a block explicitly sets zero horizontal padding.
 	 *
-	 * When a block has explicit padding-left or padding-right in its style
-	 * attributes, it is managing its own layout. Root padding should not
-	 * be added on top, and containers with explicit padding should not
+	 * Explicit zero padding (0, 0px, 0em, etc.) signals that the block
+	 * intentionally wants edge-to-edge layout. Root padding should not
+	 * be added on top, and containers with zero padding should not
 	 * delegate root padding to their children.
 	 *
+	 * Non-zero padding (e.g. 20px) is internal content spacing and does
+	 * not affect root padding — both can coexist independently.
+	 *
 	 * @param array $block The block to check.
-	 * @return bool True if the block defines horizontal padding.
+	 * @return bool True if the block explicitly sets zero horizontal padding.
 	 */
 	private function has_explicit_horizontal_padding( array $block ): bool {
 		$padding = $block['attrs']['style']['spacing']['padding'] ?? array();
-		return isset( $padding['left'] ) || isset( $padding['right'] );
+		$left    = $padding['left'] ?? null;
+		$right   = $padding['right'] ?? null;
+
+		return $this->is_zero_value( $left ) || $this->is_zero_value( $right );
+	}
+
+	/**
+	 * Checks whether a CSS value is explicitly zero.
+	 *
+	 * Matches '0', '0px', '0em', '0rem', '0%', etc.
+	 *
+	 * @param mixed $value The CSS value to check.
+	 * @return bool True if the value is explicitly zero.
+	 */
+	private function is_zero_value( $value ): bool {
+		if ( ! is_string( $value ) && ! is_numeric( $value ) ) {
+			return false;
+		}
+
+		return (bool) preg_match( '/^0(%|[a-z]*)?$/i', trim( (string) $value ) );
 	}
 
 	/**

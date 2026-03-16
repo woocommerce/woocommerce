@@ -569,7 +569,7 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 	}
 
 	/**
-	 * Test blocks with explicit horizontal padding skip root padding
+	 * Test blocks with explicit zero padding skip root padding, but non-zero padding does not
 	 */
 	public function testItSkipsRootPaddingForBlocksWithExplicitPadding(): void {
 		$blocks = array(
@@ -663,9 +663,11 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 		$this->assertArrayNotHasKey( 'root-padding-left', $columns['email_attrs'] );
 		$this->assertArrayNotHasKey( 'root-padding-right', $columns['email_attrs'] );
 
-		// Padded group (40px): skips root padding, children don't get delegation.
-		$this->assertArrayNotHasKey( 'root-padding-left', $padded_group['email_attrs'] );
-		$this->assertArrayNotHasKey( 'root-padding-right', $padded_group['email_attrs'] );
+		// Padded group (40px): non-zero padding does NOT skip root padding.
+		// The group gets root padding (its own 40px is internal content spacing).
+		$this->assertEquals( '10px', $padded_group['email_attrs']['root-padding-left'] );
+		$this->assertEquals( '10px', $padded_group['email_attrs']['root-padding-right'] );
+		// Children of a non-zero padded group still get delegation.
 		$this->assertArrayNotHasKey( 'root-padding-left', $padded_child['email_attrs'] );
 		$this->assertArrayNotHasKey( 'root-padding-right', $padded_child['email_attrs'] );
 
