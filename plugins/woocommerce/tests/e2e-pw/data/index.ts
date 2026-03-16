@@ -1,25 +1,24 @@
-const {
+import {
 	order,
 	getOrderExample,
 	getOrderExampleSearchTest,
-} = require( './order' );
-const { coupon } = require( './coupon' );
-const { refund } = require( './refund' );
-const { getTaxRateExamples, allUSTaxesExample } = require( './tax-rate' );
-const { getVariationExample } = require( './variation' );
-const {
+} from './order';
+import { coupon } from './coupon';
+import { refund } from './refund';
+import { getTaxRateExamples, allUSTaxesExample } from './tax-rate';
+import { getVariationExample } from './variation';
+import {
 	simpleProduct,
 	variableProduct,
-	variation,
 	virtualProduct,
 	groupedProduct,
 	externalProduct,
-} = require( './products-crud' );
-const { getShippingZoneExample } = require( './shipping-zone' );
-const { getShippingMethodExample } = require( './shipping-method' );
-const shared = require( './shared' );
+} from './products-crud';
+import { getShippingZoneExample } from './shipping-zone';
+import { getShippingMethodExample } from './shipping-method';
+import * as shared from './shared';
 
-module.exports = {
+export {
 	order,
 	getOrderExample,
 	getOrderExampleSearchTest,
@@ -31,7 +30,6 @@ module.exports = {
 	getVariationExample,
 	simpleProduct,
 	variableProduct,
-	variation,
 	virtualProduct,
 	groupedProduct,
 	externalProduct,

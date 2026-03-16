@@ -7,7 +7,7 @@
  *
  */
 
-const currencies = {
+export const currencies = {
 	AED: 'United Arab Emirates dirham (&#x62f;.&#x625;) — AED',
 	AFN: 'Afghan afghani (&#x60b;) — AFN',
 	ALL: 'Albanian lek (L) — ALL',
@@ -172,7 +172,7 @@ const currencies = {
 	ZMW: 'Zambian kwacha (ZK) — ZMW',
 };
 
-const externalCurrencies = {
+export const externalCurrencies = {
 	AED: 'United Arab Emirates dirham (&#x62f;.&#x625;)',
 	AFN: 'Afghan afghani (&#x60b;)',
 	ALL: 'Albanian lek (L)',
@@ -337,7 +337,7 @@ const externalCurrencies = {
 	ZMW: 'Zambian kwacha (ZK)',
 };
 
-const stateOptions = {
+export const stateOptions = {
 	AF: 'Afghanistan',
 	AX: 'Åland Islands',
 	'AL:AL-01': 'Albania - Berat',
@@ -2492,7 +2492,7 @@ const stateOptions = {
 	ZW: 'Zimbabwe',
 };
 
-const countries = {
+export const countries = {
 	AF: 'Afghanistan',
 	AX: 'Åland Islands',
 	AL: 'Albania',
@@ -2743,7 +2743,7 @@ const countries = {
 	ZW: 'Zimbabwe',
 };
 
-const externalCountries = {
+export const externalCountries = {
 	AF: 'Afghanistan',
 	AX: 'Åland Islands',
 	AL: 'Albania',
@@ -2995,10 +2995,3 @@ const externalCountries = {
 	ZW: 'Zimbabwe',
 };
 
-module.exports = {
-	countries,
-	currencies,
-	externalCurrencies,
-	externalCountries,
-	stateOptions,
-};

@@ -1,8 +1,8 @@
-const { customerBilling, customerShipping } = require( './customer' );
-const { batch, getBatchPayloadExample } = require( './batch-update' );
-const { errorResponse } = require( './error-response' );
+import { customerBilling, customerShipping } from './customer';
+import { batch, getBatchPayloadExample } from './batch-update';
+import { errorResponse } from './error-response';
 
-module.exports = {
+export {
 	customerBilling,
 	customerShipping,
 	batch,

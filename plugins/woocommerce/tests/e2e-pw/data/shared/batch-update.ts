@@ -7,7 +7,7 @@
  * @param {Array}  resources A list of resource objects. For the delete action, this will be a list of IDs.
  * @param {Object} payload   The batch payload object. Defaults to an empty object.
  */
-const batch = ( action, resources = [], payload = {} ) => {
+export const batch = ( action: string, resources: any[] = [], payload: any = {} ) => {
 	if ( ! [ 'create', 'update', 'delete' ].includes( action ) ) {
 		return;
 	}
@@ -31,15 +31,10 @@ const batch = ( action, resources = [], payload = {} ) => {
 	return payload;
 };
 
-const getBatchPayloadExample = ( resource ) => {
+export const getBatchPayloadExample = ( resource: any ) => {
 	let batchUpdatePayload = {};
 	batchUpdatePayload = batch( 'create', [ resource ], batchUpdatePayload );
 	batchUpdatePayload = batch( 'update', [ resource ], batchUpdatePayload );
 	batchUpdatePayload = batch( 'delete', [ 1, 2, 3 ], batchUpdatePayload );
 	return batchUpdatePayload;
-};
-
-module.exports = {
-	batch,
-	getBatchPayloadExample,
 };

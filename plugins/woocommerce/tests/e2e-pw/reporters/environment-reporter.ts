@@ -1,11 +1,12 @@
-require( '@playwright/test/reporter' );
-const { request } = require( '@playwright/test' );
-const fs = require( 'fs' );
-const path = require( 'path' );
-const { admin } = require( '../test-data/data' );
+import { request } from '@playwright/test';
+import fs from 'fs';
+import path from 'path';
+import { admin } from '../test-data/data';
 
 class EnvironmentReporter {
-	constructor( options ) {
+	reportOptions: { outputFolder?: string };
+
+	constructor( options: { outputFolder?: string } ) {
 		this.reportOptions = options;
 	}
 
@@ -62,4 +63,4 @@ class EnvironmentReporter {
 	}
 }
 
-module.exports = EnvironmentReporter;
+export default EnvironmentReporter;

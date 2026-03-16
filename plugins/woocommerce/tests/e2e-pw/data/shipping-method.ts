@@ -10,8 +10,8 @@
  * @param {number} cost
  * @return {Object} shipping method object that can serve as a request payload for adding a shipping method to a shipping zone.
  */
-const getShippingMethodExample = ( methodId, cost ) => {
-	const shippingMethodExample = {
+export const getShippingMethodExample = ( methodId: string, cost?: number ) => {
+	const shippingMethodExample: any = {
 		method_id: methodId,
 	};
 
@@ -22,8 +22,4 @@ const getShippingMethodExample = ( methodId, cost ) => {
 	}
 
 	return shippingMethodExample;
-};
-
-module.exports = {
-	getShippingMethodExample,
 };

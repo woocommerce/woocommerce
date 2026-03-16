@@ -24,11 +24,11 @@ const zeroTaxRate = {
 	class: 'zero-rate',
 };
 
-const getTaxRateExamples = () => {
+export const getTaxRateExamples = () => {
 	return { standardTaxRate, reducedTaxRate, zeroTaxRate };
 };
 
-const allUSTaxesExample = [
+export const allUSTaxesExample = [
 	{
 		country: 'US',
 		state: 'AL',
@@ -414,8 +414,3 @@ const allUSTaxesExample = [
 		order: 48,
 	},
 ];
-
-module.exports = {
-	getTaxRateExamples,
-	allUSTaxesExample,
-};
