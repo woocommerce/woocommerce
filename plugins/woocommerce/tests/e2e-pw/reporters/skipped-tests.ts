@@ -1,3 +1,6 @@
+/**
+ * External dependencies
+ */
 import type { TestCase, TestResult } from '@playwright/test/reporter';
 
 class SkippedReporter {

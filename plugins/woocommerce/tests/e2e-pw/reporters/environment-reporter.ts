@@ -1,6 +1,13 @@
+/**
+ * External dependencies
+ */
 import { request } from '@playwright/test';
 import fs from 'fs';
 import path from 'path';
+
+/**
+ * Internal dependencies
+ */
 import { admin } from '../test-data/data';
 
 class EnvironmentReporter {

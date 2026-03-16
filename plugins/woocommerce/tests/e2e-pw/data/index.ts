@@ -1,8 +1,7 @@
-import {
-	order,
-	getOrderExample,
-	getOrderExampleSearchTest,
-} from './order';
+/**
+ * Internal dependencies
+ */
+import { order, getOrderExample, getOrderExampleSearchTest } from './order';
 import { coupon } from './coupon';
 import { refund } from './refund';
 import { getTaxRateExamples, allUSTaxesExample } from './tax-rate';
