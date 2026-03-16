@@ -90,7 +90,7 @@ const countryAddressFields: CountryAddressFields = Object.entries(
  * Used as fallback when no country is selected.
  */
 const defaultLocaleFields: Record< string, Partial< Field > > = Object.entries(
-	DEFAULT_LOCALE || {}
+	DEFAULT_LOCALE
 ).reduce( ( fields, [ localeFieldKey, localeField ] ) => {
 	fields[ localeFieldKey ] = getSupportedCoreLocaleProps( localeField );
 	return fields;
