@@ -73,13 +73,7 @@ class Controller extends AbstractController {
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'update_item' ),
 					'permission_callback' => array( $this, 'update_item_permissions_check' ),
-					'args'                => array(
-						'values' => array(
-							'description' => __( 'Payment gateway field values to update.', 'woocommerce' ),
-							'type'        => 'object',
-							'required'    => true,
-						),
-					),
+					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
 				'args'   => array(
@@ -194,41 +188,42 @@ class Controller extends AbstractController {
 		// Get gateway-specific schema.
 		$schema = $this->get_schema_for_gateway( $id );
 
-		// Get field values from the values parameter.
+		// Get field values from the values parameter (for gateway-specific settings).
 		$params           = $request->get_params();
-		$values_to_update = $params['values'] ?? null;
-
-		if ( empty( $values_to_update ) || ! is_array( $values_to_update ) ) {
-			return new WP_Error(
-				'rest_missing_callback_param',
-				__( 'Missing parameter(s): values', 'woocommerce' ),
-				array( 'status' => 400 )
-			);
+		$values_to_update = $params['values'] ?? array();
+		if ( ! is_array( $values_to_update ) ) {
+			$values_to_update = array();
 		}
 
-		// Handle top-level gateway fields from within values.
+		// Handle top-level gateway fields. Accept both top-level params
+		// (core-data sends edits this way) and values.* (legacy/form saves).
+		// Top-level takes precedence when both are present.
 		$gateway->init_form_fields();
 
-		if ( isset( $values_to_update['enabled'] ) ) {
-			$gateway->enabled             = wc_bool_to_string( $values_to_update['enabled'] );
+		$enabled = $params['enabled'] ?? $values_to_update['enabled'] ?? null;
+		if ( null !== $enabled ) {
+			$gateway->enabled             = wc_bool_to_string( $enabled );
 			$gateway->settings['enabled'] = $gateway->enabled;
 			unset( $values_to_update['enabled'] );
 		}
 
-		if ( isset( $values_to_update['title'] ) ) {
-			$gateway->title             = sanitize_text_field( $values_to_update['title'] );
+		$title = $params['title'] ?? $values_to_update['title'] ?? null;
+		if ( null !== $title ) {
+			$gateway->title             = sanitize_text_field( $title );
 			$gateway->settings['title'] = $gateway->title;
 			unset( $values_to_update['title'] );
 		}
 
-		if ( isset( $values_to_update['description'] ) ) {
-			$gateway->description             = wp_kses_post( $values_to_update['description'] );
+		$description = $params['description'] ?? $values_to_update['description'] ?? null;
+		if ( null !== $description ) {
+			$gateway->description             = wp_kses_post( $description );
 			$gateway->settings['description'] = $gateway->description;
 			unset( $values_to_update['description'] );
 		}
 
-		if ( isset( $values_to_update['order'] ) ) {
-			$order                = absint( $values_to_update['order'] );
+		$order_value = $params['order'] ?? $values_to_update['order'] ?? null;
+		if ( null !== $order_value ) {
+			$order                = absint( $order_value );
 			$gateway_order        = (array) get_option( 'woocommerce_gateway_order', array() );
 			$gateway_order[ $id ] = $order;
 			update_option( 'woocommerce_gateway_order', $gateway_order );

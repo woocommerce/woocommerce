@@ -217,16 +217,43 @@ class PaymentGatewaysSettingsControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test updating a payment gateway without values parameter.
+	 * Test updating a payment gateway with top-level enabled field.
+	 *
+	 * Core-data sends edits as top-level fields (matching the GET response shape)
+	 * rather than nested under the values parameter.
 	 */
-	public function test_update_payment_gateway_missing_values() {
+	public function test_update_payment_gateway_with_top_level_enabled() {
 		// Act.
-		$request  = new WP_REST_Request( 'PUT', self::ENDPOINT . '/bacs' );
+		$request = new WP_REST_Request( 'PUT', self::ENDPOINT . '/bacs' );
+		$request->set_param( 'enabled', true );
 		$response = $this->server->dispatch( $request );
 
 		// Assert.
-		$this->assertSame( 400, $response->get_status() );
-		$this->assertSame( 'rest_missing_callback_param', $response->get_data()['code'] );
+		$this->assertSame( 200, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertTrue( $data['enabled'] );
+
+		// Verify the gateway is actually enabled.
+		$gateway = WC()->payment_gateways->payment_gateways()['bacs'];
+		$this->assertSame( 'yes', $gateway->enabled );
+	}
+
+	/**
+	 * Test that top-level fields take precedence over values.
+	 */
+	public function test_top_level_fields_take_precedence_over_values() {
+		// Act - send enabled=true at top level and enabled=false in values.
+		$request = new WP_REST_Request( 'PUT', self::ENDPOINT . '/bacs' );
+		$request->set_param( 'enabled', true );
+		$request->set_param( 'values', array( 'enabled' => false ) );
+		$response = $this->server->dispatch( $request );
+
+		// Assert - top-level should win.
+		$this->assertSame( 200, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertTrue( $data['enabled'] );
 	}
 
 	/**
