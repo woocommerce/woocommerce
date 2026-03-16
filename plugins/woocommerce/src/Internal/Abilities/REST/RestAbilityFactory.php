@@ -257,6 +257,11 @@ class RestAbilityFactory {
 			$schema['enum'] = self::dedupe_enum( $schema['enum'] );
 		}
 
+		// Remove WordPress-style boolean 'required' — JSON Schema requires an array.
+		if ( isset( $schema['required'] ) && is_bool( $schema['required'] ) ) {
+			unset( $schema['required'] );
+		}
+
 		if ( isset( $schema['properties'] ) && is_array( $schema['properties'] ) ) {
 			$schema['properties'] = self::sanitize_schema_properties( $schema['properties'] );
 		}

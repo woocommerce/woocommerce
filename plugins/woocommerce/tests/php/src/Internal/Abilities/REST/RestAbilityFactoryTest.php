@@ -548,6 +548,40 @@ class RestAbilityFactoryTest extends WC_Unit_Test_Case {
 		);
 	}
 
+	// ── Nested required boolean conversion ──
+
+	/**
+	 * @testdox Should remove boolean required from nested properties.
+	 */
+	public function test_removes_nested_boolean_required(): void {
+		$args = array(
+			'gift_cards' => array(
+				'type'  => 'array',
+				'items' => array(
+					'type'       => 'object',
+					'properties' => array(
+						'code' => array(
+							'type'     => 'string',
+							'required' => true,
+						),
+						'amount' => array(
+							'type'     => 'number',
+							'required' => false,
+						),
+					),
+				),
+			),
+		);
+
+		$schema = $this->invoke_sanitize_args_to_schema( $args );
+
+		$code_prop = $schema['properties']['gift_cards']['items']['properties']['code'];
+		$this->assertArrayNotHasKey( 'required', $code_prop, 'Boolean required should be removed from nested properties' );
+
+		$amount_prop = $schema['properties']['gift_cards']['items']['properties']['amount'];
+		$this->assertArrayNotHasKey( 'required', $amount_prop, 'Boolean required should be removed from nested properties' );
+	}
+
 	// ── Realistic scenario ──
 
 	/**
