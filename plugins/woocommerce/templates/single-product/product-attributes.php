@@ -24,11 +24,27 @@ if ( ! $product_attributes ) {
 }
 ?>
 <table class="woocommerce-product-attributes shop_attributes" aria-label="<?php esc_attr_e( 'Product Details', 'woocommerce' ); ?>">
-	<?php foreach ( $product_attributes as $product_attribute_key => $product_attribute ) : ?>
-		<?php $label_class = sanitize_html_class( sanitize_title( $product_attribute['label'] ) ); ?>
-		<tr class="woocommerce-product-attributes-item woocommerce-product-attributes-item--<?php echo esc_attr( $product_attribute_key ); ?><?php echo $label_class !== $product_attribute_key ? ' woocommerce-product-attributes-item--' . esc_attr( $label_class ) : ''; ?>">
+	<?php foreach ( $product_attributes as $product_attribute_key => $product_attribute ) { ?>
+		<?php
+		$attribute_item_classes = "woocommerce-product-attributes-item--$product_attribute_key";
+
+		if ( 0 === strpos( $product_attribute_key, 'attribute_' ) ) {
+			$label_based_attribute_key = sanitize_html_class( sanitize_title( $product_attribute['label'] ) );
+			$resolved_attribute_key    = "attribute_$label_based_attribute_key";
+
+			/**
+			 * Add a compatibility class when the resolved class differs from the current class.
+			 *
+			 * See details in https://github.com/woocommerce/woocommerce/issues/31086.
+			 */
+			if ( $product_attribute_key !== $resolved_attribute_key ) {
+				$attribute_item_classes .= " woocommerce-product-attributes-item--$resolved_attribute_key";
+			}
+		}
+		?>
+		<tr class="woocommerce-product-attributes-item <?php echo esc_attr( $attribute_item_classes ); ?>">
 			<th class="woocommerce-product-attributes-item__label" scope="row"><?php echo wp_kses_post( $product_attribute['label'] ); ?></th>
 			<td class="woocommerce-product-attributes-item__value"><?php echo wp_kses_post( $product_attribute['value'] ); ?></td>
 		</tr>
-	<?php endforeach; ?>
+	<?php } ?>
 </table>
