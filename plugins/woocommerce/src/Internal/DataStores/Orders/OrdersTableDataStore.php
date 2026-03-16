@@ -3159,13 +3159,14 @@ FROM $order_meta_table
 	 * Overrides the CPT version to use the HPOS orders table.
 	 *
 	 * @since 10.7.0
-	 * @param string $sanitized_ids Comma-separated list of order IDs (already sanitized via absint).
+	 * @param array $order_ids List of order IDs.
 	 * @return string Prepared SQL JOIN fragment.
 	 */
-	protected function get_refund_orders_batch_join_clause( string $sanitized_ids ): string {
+	protected function get_refund_orders_batch_join_clause( array $order_ids ): string {
 		global $wpdb;
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $sanitized_ids is sanitized via absint by caller.
-		return $wpdb->prepare( "%i AS refunds ON ( refunds.type = %s AND refunds.parent_order_id IN ( $sanitized_ids ) )", self::get_orders_table_name(), 'shop_order_refund' );
+		$id_list = implode( ', ', array_map( 'absint', $order_ids ) );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $id_list is sanitized via absint above.
+		return $wpdb->prepare( "%i AS refunds ON ( refunds.type = %s AND refunds.parent_order_id IN ( $id_list ) )", self::get_orders_table_name(), 'shop_order_refund' );
 	}
 
 	/**
@@ -3185,18 +3186,20 @@ FROM $order_meta_table
 	 * rather than joining postmeta.
 	 *
 	 * @since 10.7.0
-	 * @param string $sanitized_ids Comma-separated list of order IDs (already sanitized via absint).
+	 * @param array $order_ids List of order IDs.
 	 * @return array<int, float> Map of order_id => refund total.
 	 */
-	protected function get_batch_refund_totals( string $sanitized_ids ): array {
+	protected function get_batch_refund_totals( array $order_ids ): array {
 		global $wpdb;
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $sanitized_ids is sanitized via absint by caller.
+		$id_list = implode( ', ', array_map( 'absint', $order_ids ) );
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $id_list is sanitized via absint above.
 		$refund_totals = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT parent_order_id AS order_id, SUM( total_amount ) AS total
 				FROM %i
-				WHERE type = 'shop_order_refund' AND parent_order_id IN ( $sanitized_ids )
+				WHERE type = 'shop_order_refund' AND parent_order_id IN ( $id_list )
 				GROUP BY parent_order_id",
 				self::get_orders_table_name()
 			)
