@@ -6,12 +6,17 @@
  * - `flat_rate`
  * - `local_pickup`
  *
- * @param {number} methodId
+ * @param {string} methodId
  * @param {number} cost
  * @return {Object} shipping method object that can serve as a request payload for adding a shipping method to a shipping zone.
  */
+interface ShippingMethodExample {
+	method_id: string;
+	settings?: { cost: number };
+}
+
 export const getShippingMethodExample = ( methodId: string, cost?: number ) => {
-	const shippingMethodExample: any = {
+	const shippingMethodExample: ShippingMethodExample = {
 		method_id: methodId,
 	};
 

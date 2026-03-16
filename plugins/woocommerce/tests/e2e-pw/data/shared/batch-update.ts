@@ -12,6 +12,18 @@ export const batch = (
 	resources: any[] = [],
 	payload: any = {}
 ) => {
+	if ( ! Array.isArray( resources ) ) {
+		return;
+	}
+
+	if (
+		payload === null ||
+		typeof payload !== 'object' ||
+		Array.isArray( payload )
+	) {
+		return;
+	}
+
 	if ( ! [ 'create', 'update', 'delete' ].includes( action ) ) {
 		return;
 	}

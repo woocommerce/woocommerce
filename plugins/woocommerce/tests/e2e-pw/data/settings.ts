@@ -1,9 +1,9 @@
 /**
- * Default shipping zone object.
+ * Settings data for currencies, countries, and state options.
  *
- * For more details on shipping zone properties, see:
+ * For more details on settings properties, see:
  *
- * https://woocommerce.github.io/woocommerce-rest-api-docs/#shipping-zone-properties
+ * https://woocommerce.github.io/woocommerce-rest-api-docs/#settings
  *
  */
 
