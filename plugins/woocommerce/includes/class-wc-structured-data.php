@@ -287,8 +287,14 @@ class WC_Structured_Data {
 					}
 				}
 			} elseif ( $product->is_type( ProductType::GROUPED ) ) {
-				$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
-				$children         = array_filter( array_map( 'wc_get_product', $product->get_children() ), 'wc_products_array_filter_visible_grouped' );
+				$tax_display_mode  = get_option( 'woocommerce_tax_display_shop' );
+				$grouped_child_ids = $product->get_children();
+				$children          = array();
+				if ( ! empty( $grouped_child_ids ) ) {
+					// Prime caches to reduce future queries.
+					_prime_post_caches( $grouped_child_ids );
+					$children = array_filter( array_map( 'wc_get_product', $grouped_child_ids ), 'wc_products_array_filter_visible_grouped' );
+				}
 				$price_function   = 'incl' === $tax_display_mode ? 'wc_get_price_including_tax' : 'wc_get_price_excluding_tax';
 
 				foreach ( $children as $child ) {

@@ -1807,6 +1807,11 @@ class WC_AJAX {
 
 		$products = array();
 
+		if ( ! empty( $ids ) ) {
+			// Prime caches to reduce future queries.
+			_prime_post_caches( $ids );
+		}
+
 		foreach ( $ids as $id ) {
 			$product_object = wc_get_product( $id );
 
@@ -1866,6 +1871,11 @@ class WC_AJAX {
 		$term       = isset( $_GET['term'] ) ? (string) wc_clean( wp_unslash( $_GET['term'] ) ) : '';
 		$data_store = WC_Data_Store::load( 'product' );
 		$ids        = $data_store->search_products( $term, 'downloadable', true, false, $limit );
+
+		if ( ! empty( $ids ) ) {
+			// Prime caches to reduce future queries.
+			_prime_post_caches( $ids );
+		}
 
 		$product_objects = array_filter( array_map( 'wc_get_product', $ids ), 'wc_products_array_filter_readable' );
 		$products        = array();

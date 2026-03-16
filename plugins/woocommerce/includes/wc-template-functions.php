@@ -2029,7 +2029,13 @@ if ( ! function_exists( 'woocommerce_grouped_add_to_cart' ) ) {
 			return;
 		}
 
-		$products = array_filter( array_map( 'wc_get_product', $product->get_children() ), 'wc_products_array_filter_visible_grouped' );
+		$child_ids = $product->get_children();
+		$products  = array();
+		if ( ! empty( $child_ids ) ) {
+			// Prime caches to reduce future queries.
+			_prime_post_caches( $child_ids );
+			$products = array_filter( array_map( 'wc_get_product', $child_ids ), 'wc_products_array_filter_visible_grouped' );
+		}
 
 		if ( $products ) {
 			wc_get_template(
@@ -2513,9 +2519,13 @@ if ( ! function_exists( 'woocommerce_cross_sell_display' ) ) {
 		}
 
 		// Get visible cross sells then sort them at random.
-		$cross_sells = isset( WC()->cart )
-			? array_filter( array_map( 'wc_get_product', WC()->cart->get_cross_sells() ), 'wc_products_array_filter_visible' )
-			: array();
+		$cross_sell_ids = isset( WC()->cart ) ? WC()->cart->get_cross_sells() : array();
+		$cross_sells    = array();
+		if ( ! empty( $cross_sell_ids ) ) {
+			// Prime caches to reduce future queries.
+			_prime_post_caches( $cross_sell_ids );
+			$cross_sells = array_filter( array_map( 'wc_get_product', $cross_sell_ids ), 'wc_products_array_filter_visible' );
+		}
 
 		wc_set_loop_prop( 'name', 'cross-sells' );
 		wc_set_loop_prop( 'columns', apply_filters( 'woocommerce_cross_sells_columns', $columns ) );

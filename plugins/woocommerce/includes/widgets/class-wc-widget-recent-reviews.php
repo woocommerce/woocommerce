@@ -72,6 +72,9 @@ class WC_Widget_Recent_Reviews extends WC_Widget {
 
 			echo wp_kses_post( apply_filters( 'woocommerce_before_widget_product_review_list', '<ul class="product_list_widget">' ) );
 
+			// Prime caches to reduce future queries.
+			_prime_post_caches( array_unique( wp_list_pluck( (array) $comments, 'comment_post_ID' ) ) );
+
 			foreach ( (array) $comments as $comment ) {
 				wc_get_template(
 					'content-widget-reviews.php',

@@ -95,7 +95,13 @@ class GroupedProductItem extends AbstractBlock {
 
 		$content = '';
 
-		$children = array_filter( array_map( 'wc_get_product', $product->get_children() ), 'wc_products_array_filter_visible_grouped' );
+		$child_ids = $product->get_children();
+		$children  = array();
+		if ( ! empty( $child_ids ) ) {
+			// Prime caches to reduce future queries.
+			_prime_post_caches( $child_ids );
+			$children = array_filter( array_map( 'wc_get_product', $child_ids ), 'wc_products_array_filter_visible_grouped' );
+		}
 
 		foreach ( $children as $child ) {
 			$content .= $this->get_product_row( $child->get_id(), $attributes, $block );
