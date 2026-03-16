@@ -58,10 +58,10 @@ trait ProductItemTrait {
 					 *
 					 * @internal Matches filter name in WooCommerce core.
 					 *
-					 * @param string		$name		The term name to display.
-					 * @param \WP_Term		$term		Term object.
-					 * @param string		$taxonomy	Taxonomy name.
-					 * @param \WC_Product	$product	Product data.
+					 * @param string      $name     The term name to display.
+					 * @param \WP_Term    $term     Term object.
+					 * @param string      $taxonomy Taxonomy name.
+					 * @param \WC_Product $product  Product data.
 					 * @return string
 					 */
 					$value = apply_filters( 'woocommerce_variation_option_name', $term->name, $term, $taxonomy, $product );
