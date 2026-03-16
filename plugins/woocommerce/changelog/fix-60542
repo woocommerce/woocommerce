@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure default locale fields are honored in blocks checkout.
