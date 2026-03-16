@@ -8,16 +8,16 @@ Covers correct usage of `_prime_post_caches()` to reduce SQL query counts when l
 
 **Apply when:** any `array_map` or loop fetches multiple objects by ID using `get_post()`, `wc_get_product()`, `wc_get_order()`, or any function that resolves to a `get_post()` call per item (e.g. a `format_*` helper that calls `get_post()` internally).
 
-**Required:** `_prime_post_caches($ids)` is not called before the loop.
-
 **Correct pattern:**
 ```php
-// Prime caches to reduce future queries.
 if ( ! empty( $ids ) ) {
+    // Prime caches to reduce future queries.
     _prime_post_caches( $ids );
     $products = array_map( 'wc_get_product', $ids );
 }
 ```
+
+The comment `// Prime caches to reduce future queries.` must always sit **inside** the `if` block, directly above the call. Do not place it before the `if`.
 
 `_prime_post_caches()` is a WordPress internal (underscore-prefixed) that has existed since WP 4.1. The minimum supported WordPress version for WooCommerce guarantees its presence — `is_callable( '_prime_post_caches' )` guards are unnecessary and must be removed when encountered. Always wrap in `! empty()` to avoid a no-op SQL on empty arrays.
 
@@ -27,12 +27,10 @@ if ( ! empty( $ids ) ) {
 
 **Apply when:** Code that fetches products and then renders them (templates, blocks), especially with thumbnails.
 
-**Required:** Image attachment IDs are not primed after constructing the visible product list.
-
 **Correct pattern:**
 ```php
-// Prime caches to reduce future queries.
 if ( ! empty( $product_ids ) ) {
+    // Prime caches to reduce future queries.
     _prime_post_caches( $product_ids );
     $products = array_filter( array_map( 'wc_get_product', $product_ids ), 'wc_products_array_filter_visible' );
 
@@ -88,15 +86,7 @@ _prime_post_caches( $result );
 $products = array_map( 'wc_get_product', $result );
 ```
 
-**Priming is only needed when starting from a raw list of IDs** that were not loaded through `WP_Query`:
-```php
-// Correct — $ids came from a direct DB/data-store query, not WP_Query.
-// Prime caches to reduce future queries.
-if ( ! empty( $ids ) ) {
-    _prime_post_caches( $ids );
-    $products = array_map( 'wc_get_product', $ids );
-}
-```
+Priming is only needed when starting from a raw list of IDs not loaded through `WP_Query` — see pattern 1.
 
 ---
 
