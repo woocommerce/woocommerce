@@ -98,8 +98,13 @@ test.describe( 'Cart notices — centralized batch commit', () => {
 			.click();
 		await addAProductToCart( page, SECOND_PRODUCT_NAME );
 
-		// Deterministic wait
-		await page.waitForLoadState( 'networkidle' );
+		// Wait for the cart to settle.
+		await page.waitForFunction(
+			() =>
+				! document
+					.querySelector( '.wc-block-mini-cart__button' )
+					?.classList.contains( 'is-loading' )
+		);
 
 		// noticeMutations should have at most one distinct non-empty text snapshot,
 		// meaning commit fired once and pushed a single notice update.
