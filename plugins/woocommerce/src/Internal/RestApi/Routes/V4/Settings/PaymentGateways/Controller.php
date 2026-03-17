@@ -73,7 +73,33 @@ class Controller extends AbstractController {
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'update_item' ),
 					'permission_callback' => array( $this, 'update_item_permissions_check' ),
-					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+					'args'                => array(
+						'enabled'     => array(
+							'description' => __( 'Gateway enabled status.', 'woocommerce' ),
+							'type'        => 'boolean',
+							'required'    => false,
+						),
+						'title'       => array(
+							'description' => __( 'Gateway title.', 'woocommerce' ),
+							'type'        => 'string',
+							'required'    => false,
+						),
+						'description' => array(
+							'description' => __( 'Gateway description.', 'woocommerce' ),
+							'type'        => 'string',
+							'required'    => false,
+						),
+						'order'       => array(
+							'description' => __( 'Gateway sort order.', 'woocommerce' ),
+							'type'        => 'integer',
+							'required'    => false,
+						),
+						'values'      => array(
+							'description' => __( 'Flat key-value mapping of all setting field values.', 'woocommerce' ),
+							'type'        => 'object',
+							'required'    => false,
+						),
+					),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
 				'args'   => array(
@@ -221,12 +247,10 @@ class Controller extends AbstractController {
 			unset( $values_to_update['description'] );
 		}
 
-		$order_value = $params['order'] ?? $values_to_update['order'] ?? null;
+		$order_to_update = null;
+		$order_value     = $params['order'] ?? $values_to_update['order'] ?? null;
 		if ( null !== $order_value ) {
-			$order                = absint( $order_value );
-			$gateway_order        = (array) get_option( 'woocommerce_gateway_order', array() );
-			$gateway_order[ $id ] = $order;
-			update_option( 'woocommerce_gateway_order', $gateway_order );
+			$order_to_update = absint( $order_value );
 			unset( $values_to_update['order'] );
 		}
 
@@ -271,6 +295,13 @@ class Controller extends AbstractController {
 
 		// Save standard settings to database.
 		update_option( $gateway->get_option_key(), $gateway->settings );
+
+		// Save gateway order (deferred until after validation).
+		if ( null !== $order_to_update ) {
+			$gateway_order        = (array) get_option( 'woocommerce_gateway_order', array() );
+			$gateway_order[ $id ] = $order_to_update;
+			update_option( 'woocommerce_gateway_order', $gateway_order );
+		}
 
 		// Update special fields.
 		$schema->update_special_fields( $gateway, $validated_special );

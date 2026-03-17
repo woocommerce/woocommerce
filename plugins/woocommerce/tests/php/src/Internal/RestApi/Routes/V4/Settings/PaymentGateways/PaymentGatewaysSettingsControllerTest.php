@@ -254,6 +254,53 @@ class PaymentGatewaysSettingsControllerTest extends WC_REST_Unit_Test_Case {
 
 		$data = $response->get_data();
 		$this->assertTrue( $data['enabled'] );
+
+		// Verify persisted state matches top-level value.
+		$saved_settings = get_option( 'woocommerce_bacs_settings' );
+		$this->assertSame( 'yes', $saved_settings['enabled'] );
+	}
+
+	/**
+	 * Test updating a payment gateway with top-level title field.
+	 */
+	public function test_update_payment_gateway_with_top_level_title() {
+		// Act.
+		$request = new WP_REST_Request( 'PUT', self::ENDPOINT . '/bacs' );
+		$request->set_param( 'title', 'Wire Transfer' );
+		$response = $this->server->dispatch( $request );
+
+		// Assert.
+		$this->assertSame( 200, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertSame( 'Wire Transfer', $data['title'] );
+
+		// Verify persisted state.
+		$saved_settings = get_option( 'woocommerce_bacs_settings' );
+		$this->assertSame( 'Wire Transfer', $saved_settings['title'] );
+	}
+
+	/**
+	 * Test updating a payment gateway with top-level order field.
+	 */
+	public function test_update_payment_gateway_with_top_level_order() {
+		// Arrange.
+		delete_option( 'woocommerce_gateway_order' );
+
+		// Act.
+		$request = new WP_REST_Request( 'PUT', self::ENDPOINT . '/bacs' );
+		$request->set_param( 'order', 3 );
+		$response = $this->server->dispatch( $request );
+
+		// Assert.
+		$this->assertSame( 200, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertSame( 3, $data['order'] );
+
+		// Verify persisted state.
+		$gateway_order = get_option( 'woocommerce_gateway_order' );
+		$this->assertSame( 3, $gateway_order['bacs'] );
 	}
 
 	/**
