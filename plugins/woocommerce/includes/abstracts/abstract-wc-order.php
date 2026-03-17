@@ -475,7 +475,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return float
 	 */
 	public function get_cart_tax( $context = 'view' ) {
-		return $this->get_prop( 'cart_tax', $context );
+		return (float)$this->get_prop( 'cart_tax', $context );
 	}
 
 	/**
@@ -485,7 +485,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return float
 	 */
 	public function get_total( $context = 'view' ) {
-		return $this->get_prop( 'total', $context );
+		return (float)$this->get_prop( 'total', $context );
 	}
 
 	/**
@@ -495,7 +495,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return float
 	 */
 	public function get_total_tax( $context = 'view' ) {
-		return $this->get_prop( 'total_tax', $context );
+		return (float)$this->get_prop( 'total_tax', $context );
 	}
 
 	/*
@@ -516,7 +516,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		} else {
 			$total_discount = (float) $this->get_discount_total() + (float) $this->get_discount_tax();
 		}
-		return apply_filters( 'woocommerce_order_get_total_discount', NumberUtil::round( $total_discount, WC_ROUNDING_PRECISION ), $this );
+		return (float)apply_filters( 'woocommerce_order_get_total_discount', NumberUtil::round( $total_discount, WC_ROUNDING_PRECISION ), $this );
 	}
 
 	/**
@@ -528,7 +528,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	public function get_subtotal() {
 		$subtotal = NumberUtil::round( $this->get_cart_subtotal_for_order(), wc_get_price_decimals() );
-		return apply_filters( 'woocommerce_order_get_subtotal', (float) $subtotal, $this );
+		return (float)apply_filters( 'woocommerce_order_get_subtotal', (float) $subtotal, $this );
 	}
 
 	/**
@@ -2076,7 +2076,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$subtotal = $round ? NumberUtil::round( $subtotal, wc_get_price_decimals() ) : $subtotal;
 		}
 
-		return apply_filters( 'woocommerce_order_amount_item_subtotal', $subtotal, $this, $item, $inc_tax, $round );
+		return (float)apply_filters( 'woocommerce_order_amount_item_subtotal', $subtotal, $this, $item, $inc_tax, $round );
 	}
 
 	/**
@@ -2100,7 +2100,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$subtotal = $round ? NumberUtil::round( $subtotal, wc_get_price_decimals() ) : $subtotal;
 		}
 
-		return apply_filters( 'woocommerce_order_amount_line_subtotal', $subtotal, $this, $item, $inc_tax, $round );
+		return (float)apply_filters( 'woocommerce_order_amount_line_subtotal', $subtotal, $this, $item, $inc_tax, $round );
 	}
 
 	/**
@@ -2124,7 +2124,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$total = $round ? NumberUtil::round( $total, wc_get_price_decimals() ) : $total;
 		}
 
-		return apply_filters( 'woocommerce_order_amount_item_total', $total, $this, $item, $inc_tax, $round );
+		return (float)apply_filters( 'woocommerce_order_amount_item_total', $total, $this, $item, $inc_tax, $round );
 	}
 
 	/**
@@ -2146,7 +2146,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$total = $round ? NumberUtil::round( $total, wc_get_price_decimals() ) : $total;
 		}
 
-		return apply_filters( 'woocommerce_order_amount_line_total', $total, $this, $item, $inc_tax, $round );
+		return (float)apply_filters( 'woocommerce_order_amount_line_total', $total, $this, $item, $inc_tax, $round );
 	}
 
 	/**
@@ -2164,7 +2164,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$tax = $round ? wc_round_tax_total( $tax ) : $tax;
 		}
 
-		return apply_filters( 'woocommerce_order_amount_item_tax', $tax, $item, $round, $this );
+		return (float)apply_filters( 'woocommerce_order_amount_item_tax', $tax, $item, $round, $this );
 	}
 
 	/**
@@ -2174,7 +2174,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return float
 	 */
 	public function get_line_tax( $item ) {
-		return apply_filters( 'woocommerce_order_amount_line_tax', is_callable( array( $item, 'get_total_tax' ) ) ? wc_round_tax_total( $item->get_total_tax() ) : 0, $item, $this );
+		return (float)apply_filters( 'woocommerce_order_amount_line_tax', is_callable( array( $item, 'get_total_tax' ) ) ? wc_round_tax_total( $item->get_total_tax() ) : 0, $item, $this );
 	}
 
 	/**
