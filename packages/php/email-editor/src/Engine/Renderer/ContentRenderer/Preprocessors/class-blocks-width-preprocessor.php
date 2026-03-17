@@ -22,11 +22,31 @@ class Blocks_Width_Preprocessor implements Preprocessor {
 	 * @return array
 	 */
 	public function preprocess( array $parsed_blocks, array $layout, array $styles ): array {
+		// Root padding is distributed to individual blocks by Spacing_Preprocessor,
+		// not applied on the outer container. Don't subtract it from block widths.
+		$styles['spacing']['padding']['left']  = '0px';
+		$styles['spacing']['padding']['right'] = '0px';
+
+		return $this->calculate_widths( $parsed_blocks, $layout, $styles );
+	}
+
+	/**
+	 * Recursively calculate block widths based on layout and parent padding.
+	 *
+	 * At the top level, root padding is zeroed out by preprocess() since it's
+	 * distributed to individual blocks. For nested blocks, the parent block's
+	 * own padding is subtracted from available width as expected.
+	 *
+	 * @param array $parsed_blocks Parsed blocks.
+	 * @param array $layout Layout settings.
+	 * @param array $styles Styles with padding from parent context.
+	 * @return array
+	 */
+	private function calculate_widths( array $parsed_blocks, array $layout, array $styles ): array {
 		foreach ( $parsed_blocks as $key => $block ) {
-			// Layout width is recalculated for each block because full-width blocks don't exclude padding.
 			$layout_width = $this->parse_number_from_string_with_pixels( $layout['contentSize'] );
 			$alignment    = $block['attrs']['align'] ?? null;
-			// Subtract padding from the block width if it's not full-width.
+			// Subtract parent padding from block width if not full-width.
 			if ( 'full' !== $alignment ) {
 				$layout_width -= $this->parse_number_from_string_with_pixels( $styles['spacing']['padding']['left'] ?? '0px' );
 				$layout_width -= $this->parse_number_from_string_with_pixels( $styles['spacing']['padding']['right'] ?? '0px' );
@@ -58,7 +78,7 @@ class Blocks_Width_Preprocessor implements Preprocessor {
 			$modified_styles['spacing']['padding']['right'] = $block['attrs']['style']['spacing']['padding']['right'] ?? '0px';
 
 			$block['email_attrs']['width'] = "{$width}px";
-			$block['innerBlocks']          = $this->preprocess( $block['innerBlocks'], $modified_layout, $modified_styles );
+			$block['innerBlocks']          = $this->calculate_widths( $block['innerBlocks'], $modified_layout, $modified_styles );
 			$parsed_blocks[ $key ]         = $block;
 		}
 		return $parsed_blocks;
