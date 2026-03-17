@@ -22,8 +22,10 @@ class Blocks_Width_Preprocessor implements Preprocessor {
 	 * @return array
 	 */
 	public function preprocess( array $parsed_blocks, array $layout, array $styles ): array {
-		// Root padding is distributed to individual blocks by Spacing_Preprocessor,
-		// not applied on the outer container. Don't subtract it from block widths.
+		// Root padding is distributed to individual blocks by Spacing_Preprocessor
+		// (which runs before this preprocessor). Zero it out here so we don't
+		// double-subtract: each block's width is reduced only if the block
+		// actually received root-padding-left/right in its email_attrs.
 		$styles['spacing']['padding']['left']  = '0px';
 		$styles['spacing']['padding']['right'] = '0px';
 
@@ -34,8 +36,9 @@ class Blocks_Width_Preprocessor implements Preprocessor {
 	 * Recursively calculate block widths based on layout and parent padding.
 	 *
 	 * At the top level, root padding is zeroed out by preprocess() since it's
-	 * distributed to individual blocks. For nested blocks, the parent block's
-	 * own padding is subtracted from available width as expected.
+	 * distributed to individual blocks. Each block that received root padding
+	 * from the Spacing_Preprocessor has its width reduced accordingly. For
+	 * nested blocks, the parent block's own padding is subtracted as expected.
 	 *
 	 * @param array $parsed_blocks Parsed blocks.
 	 * @param array $layout Layout settings.
@@ -50,6 +53,14 @@ class Blocks_Width_Preprocessor implements Preprocessor {
 			if ( 'full' !== $alignment ) {
 				$layout_width -= $this->parse_number_from_string_with_pixels( $styles['spacing']['padding']['left'] ?? '0px' );
 				$layout_width -= $this->parse_number_from_string_with_pixels( $styles['spacing']['padding']['right'] ?? '0px' );
+			}
+
+			// Subtract root padding for blocks that will receive it as CSS padding
+			// from Content_Renderer. This ensures block widths fit inside the
+			// root padding wrapper without overflow.
+			if ( 'full' !== $alignment ) {
+				$layout_width -= $this->parse_number_from_string_with_pixels( $block['email_attrs']['root-padding-left'] ?? '0px' );
+				$layout_width -= $this->parse_number_from_string_with_pixels( $block['email_attrs']['root-padding-right'] ?? '0px' );
 			}
 
 			$width_input = $block['attrs']['width'] ?? '100%';

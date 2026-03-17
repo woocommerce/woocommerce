@@ -338,7 +338,49 @@ class Blocks_Width_Preprocessor_Test extends \Email_Editor_Unit_Test {
 
 		$this->assertCount( 2, $result );
 		$this->assertEquals( '660px', $result[0]['email_attrs']['width'] ); // full width.
-		$this->assertEquals( '660px', $result[1]['email_attrs']['width'] ); // root padding not subtracted (distributed to blocks).
+		$this->assertEquals( '660px', $result[1]['email_attrs']['width'] ); // no root padding in email_attrs, full width.
+	}
+
+	/**
+	 * Test it subtracts root padding from block widths when set in email_attrs by Spacing_Preprocessor
+	 */
+	public function testItSubtractsRootPaddingFromEmailAttrs(): void {
+		$blocks = array(
+			// Block with root padding (set by Spacing_Preprocessor).
+			array(
+				'blockName'   => 'core/columns',
+				'attrs'       => array(),
+				'email_attrs' => array(
+					'root-padding-left'  => '10px',
+					'root-padding-right' => '10px',
+				),
+				'innerBlocks' => array(),
+			),
+			// Block without root padding (e.g., container that manages its own layout).
+			array(
+				'blockName'   => 'core/group',
+				'attrs'       => array(),
+				'innerBlocks' => array(),
+			),
+			// Full-width block with root padding should not be subtracted.
+			array(
+				'blockName'   => 'core/columns',
+				'attrs'       => array(
+					'align' => 'full',
+				),
+				'email_attrs' => array(
+					'root-padding-left'  => '10px',
+					'root-padding-right' => '10px',
+				),
+				'innerBlocks' => array(),
+			),
+		);
+		$result = $this->preprocessor->preprocess( $blocks, $this->layout, $this->styles );
+
+		$this->assertCount( 3, $result );
+		$this->assertEquals( '640px', $result[0]['email_attrs']['width'] ); // 660 - 10 - 10.
+		$this->assertEquals( '660px', $result[1]['email_attrs']['width'] ); // No root padding, full width.
+		$this->assertEquals( '660px', $result[2]['email_attrs']['width'] ); // Full-width, not subtracted.
 	}
 
 	/**

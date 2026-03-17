@@ -60,9 +60,9 @@ class Process_Manager {
 		Border_Style_Postprocessor $border_style_postprocessor
 	) {
 		$this->register_preprocessor( $cleanup_preprocessor );
+		$this->register_preprocessor( $spacing_preprocessor );
 		$this->register_preprocessor( $blocks_width_preprocessor );
 		$this->register_preprocessor( $typography_preprocessor );
-		$this->register_preprocessor( $spacing_preprocessor );
 		$this->register_preprocessor( $quote_preprocessor );
 		$this->register_postprocessor( $highlighting_postprocessor );
 		$this->register_postprocessor( $border_style_postprocessor );
