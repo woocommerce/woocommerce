@@ -1032,16 +1032,16 @@ class PluginsHelper {
 			$subscriptions,
 			$expired_subscriptions,
 			$total_expired_subscriptions,
-				array(
-					/* translators: 1) product name 3) URL to My Subscriptions page 4) Renew product price string */
-					'single_manage'                => __( 'Your subscription for <strong>%1$s</strong> expired. <a href="%3$s">%4$s</a> to continue receiving updates and streamlined support.', 'woocommerce' ),
-					/* translators: 1) product name 3) URL to My Subscriptions page 4) Renew product price string */
-					'multiple_manage'              => __( 'One of your subscriptions for <strong>%1$s</strong> has expired. <a href="%3$s">%4$s</a> to continue receiving updates and streamlined support.', 'woocommerce' ),
-					/* translators: 1) product name 3) URL to My Subscriptions page */
-					'multiple_manage_site_covered' => __( 'One of your subscriptions for <strong>%1$s</strong> has expired. This store is still covered by another active subscription.', 'woocommerce' ),
-					/* translators: 1) total expired subscriptions 2) URL to My Subscriptions page */
-					'different_subscriptions'      => __( 'You have <strong>%1$s Woo extension subscriptions</strong> that expired. <a href="%2$s">Renew</a> to continue receiving updates and streamlined support.', 'woocommerce' ),
-				),
+			array(
+				/* translators: 1) product name 3) URL to My Subscriptions page 4) Renew product price string */
+				'single_manage'                => __( 'Your subscription for <strong>%1$s</strong> expired. <a href="%3$s">%4$s</a> to continue receiving updates and streamlined support.', 'woocommerce' ),
+				/* translators: 1) product name 3) URL to My Subscriptions page 4) Renew product price string */
+				'multiple_manage'              => __( 'One of your subscriptions for <strong>%1$s</strong> has expired. <a href="%3$s">%4$s</a> to continue receiving updates and streamlined support.', 'woocommerce' ),
+				/* translators: 1) product name 3) URL to My Subscriptions page */
+				'multiple_manage_site_covered' => __( 'One of your subscriptions for <strong>%1$s</strong> has expired. This store is still covered by another active subscription.', 'woocommerce' ),
+				/* translators: 1) total expired subscriptions 2) URL to My Subscriptions page */
+				'different_subscriptions'      => __( 'You have <strong>%1$s Woo extension subscriptions</strong> that expired. <a href="%2$s">Renew</a> to continue receiving updates and streamlined support.', 'woocommerce' ),
+			),
 			'expired',
 		);
 
