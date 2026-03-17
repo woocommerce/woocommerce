@@ -115,7 +115,7 @@ The only options that are genuinely non-autoloaded in WooCommerce core are **per
 Known non-autoloaded per-entity patterns:
 
 | Entity type | Option key pattern | Example |
-|---|---|---|
+| --- | --- | --- |
 | Email classes | `woocommerce_{email_id}_settings` | `woocommerce_new_order_settings` |
 | Shipping methods | `woocommerce_{method_id}_settings` | `woocommerce_flat_rate_settings` |
 | Payment gateways | `woocommerce_{gateway_id}_settings` | `woocommerce_bacs_settings` |
@@ -123,7 +123,7 @@ Known non-autoloaded per-entity patterns:
 ### Coverage status (as of audited codebase)
 
 | Location | Pattern | Status |
-|---|---|---|
+| --- | --- | --- |
 | `includes/class-wc-emails.php` — `init_emails()` | array_map over email class list | ✅ covered |
 | `includes/class-wc-shipping.php` — `get_shipping_method_class_names()` | array_map over method ID list | ✅ covered |
 | `includes/class-wc-payment-gateways.php` — `init()` | gateway settings autoloaded (`WC_Settings_API` saves with `autoload='yes'`) — no priming needed | ✅ verified, skipped |
