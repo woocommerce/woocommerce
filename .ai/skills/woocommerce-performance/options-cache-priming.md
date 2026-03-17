@@ -83,7 +83,14 @@ Guard with `! empty()` when the list is dynamically built and may be empty. When
 
 Always use the comment `// Prime caches to reduce future queries.` directly above the call. When the call is guarded by `! empty()`, the comment sits inside the `if` block — not before it.
 
-Including autoloaded options in the prime call is harmless (they are already in the cache), but the real benefit is for non-autoloaded options such as per-email and per-shipping-method settings.
+The benefit of `wp_prime_option_caches` operates along two complementary dimensions — not binary logic:
+
+- **Existence**: options not yet written to the database are absent from `wp_load_alloptions()` even when flagged autoloaded. Each `get_option()` call for a missing key issues an individual SQL query. Priming batches those misses into one query upfront.
+- **Autoload state**: non-autoloaded options are never loaded at bootstrap regardless of whether they exist. Priming is the primary mechanism to avoid per-request queries for them.
+
+An autoloaded option that has already been saved gains nothing from priming (already in cache). The same option before it is first saved benefits from the existence check. Both dimensions apply independently — consider both when deciding whether to prime.
+
+For multisite contexts, use `wp_prime_network_option_caches( $network_id, $keys )` (available since WP 6.4) for network-scoped options.
 
 ---
 
@@ -108,33 +115,22 @@ High `get_option()` concentration alone is **not** a signal. These are common fa
 - **Feature flags and toggles** — `woocommerce_enable_ajax_add_to_cart`, `woocommerce_enable_checkout_login_reminder`, `woocommerce_tax_display_cart`, etc. All autoloaded.
 - **General store settings** — currency, weight unit, address fields, etc. All autoloaded.
 
-### Real targets — the `*_settings` per-entity pattern
+### The `*_settings` per-entity pattern
 
-Per-entity settings stored under `woocommerce_{id}_settings` are generally non-autoloaded when written directly via `update_option()` — as email classes (`includes/class-wc-emails.php` → `init()`) and shipping methods (`includes/class-wc-shipping.php` → `get_shipping_method_class_names()`) do. These are the real priming targets.
+All three entity types extend `WC_Settings_API`, which saves settings with `autoload='yes'`. Once saved, these options are already in cache. However, on a fresh install or before settings are first saved, they are absent from `wp_load_alloptions()` — each `get_option()` issues an individual query. Priming is justified here specifically for the existence dimension (batching those misses), particularly when looping over a large number of entities such as email classes.
 
-**Exception:** payment gateway settings are saved through `WC_Settings_API::process_admin_options()` with explicit `autoload='yes'`, making them autoloaded and therefore excluded from priming (see `includes/class-wc-payment-gateways.php` → `init()`).
-
-Known non-autoloaded per-entity patterns:
-
-| Entity type | Option key pattern | Example |
-| --- | --- | --- |
-| Email classes | `woocommerce_{email_id}_settings` | `woocommerce_new_order_settings` |
-| Shipping methods | `woocommerce_{method_id}_settings` | `woocommerce_flat_rate_settings` |
-
-### Coverage status (as of audited codebase)
+The four built-in payment gateways are a negligible count and are skipped.
 
 | Location | Pattern | Status |
 | --- | --- | --- |
-| `includes/class-wc-emails.php` — `init()` | array_map over email class list | ✅ covered |
-| `includes/class-wc-shipping.php` — `get_shipping_method_class_names()` | array_map over method ID list | ✅ covered |
-| `includes/class-wc-payment-gateways.php` — `init()` | gateway settings autoloaded (`WC_Settings_API` saves with `autoload='yes'`) — no priming needed | ✅ verified, skipped |
-
-Third-party gateways added via `apply_filters('woocommerce_payment_gateways', ...)` are also autoloaded by the same mechanism.
+| `includes/class-wc-emails.php` — `init()` | array_map over email class list | ✅ covered — batches miss queries on fresh/unconfigured installs |
+| `includes/class-wc-shipping.php` — `get_shipping_method_class_names()` | array_map over method ID list | ✅ covered — same rationale |
+| `includes/class-wc-payment-gateways.php` — `init()` | 4 built-in gateways — negligible count | ✅ verified, skipped |
 
 ### Workflow for gap analysis
 
 When asked to find missing `wp_prime_option_caches` opportunities:
 
 1. Search for multi-`get_option()` methods.
-2. Check whether the options are registered through the WooCommerce settings API (autoloaded → skip).
-3. Only flag methods reading two or more `woocommerce_{id}_settings`-style keys from a loop or known list without existing priming.
+2. Consider both dimensions: autoload state (non-autoloaded options benefit on every request) and existence (options not yet saved benefit on first use regardless of autoload flag).
+3. Flag loops or sequences reading multiple options where either dimension applies and no priming is present.
