@@ -54,6 +54,8 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Should return correct count, total, and average for a registered customer with multiple orders ($0: storage mode).
 	 * @dataProvider provider_storage_modes
+	 *
+	 * @param bool $hpos_enabled Whether HPOS is enabled.
 	 */
 	public function test_registered_customer_with_multiple_orders( bool $hpos_enabled ): void {
 		$this->toggle_cot_feature_and_usage( $hpos_enabled );
@@ -82,6 +84,8 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Should fetch data correctly for a guest customer matched by billing email ($0: storage mode).
 	 * @dataProvider provider_storage_modes
+	 *
+	 * @param bool $hpos_enabled Whether HPOS is enabled.
 	 */
 	public function test_guest_customer_by_email( bool $hpos_enabled ): void {
 		$this->toggle_cot_feature_and_usage( $hpos_enabled );
@@ -112,6 +116,8 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Should not count orders with excluded statuses like pending, cancelled, and failed ($0: storage mode).
 	 * @dataProvider provider_storage_modes
+	 *
+	 * @param bool $hpos_enabled Whether HPOS is enabled.
 	 */
 	public function test_excluded_statuses_not_counted( bool $hpos_enabled ): void {
 		$this->toggle_cot_feature_and_usage( $hpos_enabled );
@@ -164,6 +170,8 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Should show zero data for guest order with no billing email ($0: storage mode).
 	 * @dataProvider provider_storage_modes
+	 *
+	 * @param bool $hpos_enabled Whether HPOS is enabled.
 	 */
 	public function test_guest_with_no_email_shows_zero( bool $hpos_enabled ): void {
 		$this->toggle_cot_feature_and_usage( $hpos_enabled );
@@ -184,6 +192,8 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Should show zero data when no matching orders exist for the customer ($0: storage mode).
 	 * @dataProvider provider_storage_modes
+	 *
+	 * @param bool $hpos_enabled Whether HPOS is enabled.
 	 */
 	public function test_no_matching_orders_shows_zero( bool $hpos_enabled ): void {
 		$this->toggle_cot_feature_and_usage( $hpos_enabled );
