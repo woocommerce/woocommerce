@@ -893,7 +893,7 @@ class PluginsHelper {
 		}
 
 		foreach ( $subscriptions as $subscription ) {
-			if ( $product_id !== absint( $subscription['product_id'] ?? 0 ) ) {
+			if ( absint( $subscription['product_id'] ?? 0 ) !== $product_id ) {
 				continue;
 			}
 
