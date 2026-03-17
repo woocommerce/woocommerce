@@ -44,7 +44,7 @@ export type MutationQueueConfig< TState = unknown > = {
 	fetchHandler?: typeof fetch;
 	takeSnapshot: () => TState;
 	rollback: ( snapshot: TState ) => void;
-	commit: ( serverState: TState, snapshot: TState | null ) => void;
+	commit: ( serverState: TState ) => void;
 };
 
 type TrackedRequest< TState = unknown > = {
@@ -92,7 +92,7 @@ export function createMutationQueue< TState >(
 	// reconcile - Commits server state (or rolls back on total failure), notifies callers, resets the cycle
 	function reconcile() {
 		if ( lastServerState !== null ) {
-			commit( lastServerState, snapshot );
+			commit( lastServerState );
 		} else if ( snapshot !== null ) {
 			rollback( snapshot );
 		}
