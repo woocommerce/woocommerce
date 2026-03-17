@@ -96,6 +96,18 @@ class Content_Renderer {
 	private $backup_post_content_callback;
 
 	/**
+	 * Whether root padding was already applied in the first preprocessing pass.
+	 *
+	 * Template blocks are preprocessed first, and root padding is applied to
+	 * the template's root group. When user blocks inside post-content are
+	 * preprocessed in a second pass, root padding must be skipped to prevent
+	 * double application.
+	 *
+	 * @var bool
+	 */
+	private bool $root_padding_applied = false;
+
+	/**
 	 * CSS inliner
 	 *
 	 * @var Css_Inliner
@@ -215,6 +227,15 @@ class Content_Renderer {
 		// Pass the CSS variables map so preprocessors can resolve preset
 		// references (e.g. var:preset|spacing|20) in block attributes.
 		$styles['__variables_map'] = $this->theme_controller->get_variables_values_map();
+
+		// Second pass (user blocks inside post-content): root padding was
+		// already applied to the template group in the first pass. Remove
+		// it from styles so user blocks don't get double root padding.
+		if ( $this->root_padding_applied ) {
+			unset( $styles['spacing']['padding']['left'], $styles['spacing']['padding']['right'] );
+		} else {
+			$this->root_padding_applied = true;
+		}
 
 		return $this->process_manager->preprocess( $parsed_blocks, $layout, $styles );
 	}
@@ -357,6 +378,8 @@ class Content_Renderer {
 		remove_filter( 'render_block', array( $this, 'render_block' ) );
 		remove_filter( 'block_parser_class', array( $this, 'block_parser' ) );
 		remove_filter( 'woocommerce_email_blocks_renderer_parsed_blocks', array( $this, 'preprocess_parsed_blocks' ) );
+
+		$this->root_padding_applied = false;
 
 		// Restore the original core/post-content render callback.
 		// Note: We always restore it, even if it was null originally.
