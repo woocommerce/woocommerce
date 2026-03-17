@@ -6,6 +6,10 @@ sidebar_position: 2
 
 # Point Releases
 
+:::important
+The formal Point Release Request (PRR) issue template is not strictly required for all point release fixes. In practice, coordinating directly with the release lead is often sufficient to get fixes included in a point release. The rest of this document remains useful for understanding what types of fixes qualify for point releases and how to prepare them in the repository.
+:::
+
 ## What Are Point Releases?
 
 Point releases are patch releases that address specific issues without adding substantial new functionality. Point releases typically contain:
