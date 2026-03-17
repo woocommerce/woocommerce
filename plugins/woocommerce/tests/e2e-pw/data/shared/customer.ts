@@ -5,7 +5,7 @@
  * https://woocommerce.github.io/woocommerce-rest-api-docs/#customers
  * https://woocommerce.github.io/woocommerce-rest-api-docs/#orders
  */
-const customerBilling = {
+export const customerBilling = {
 	first_name: 'John',
 	last_name: 'Doe',
 	company: 'Automattic',
@@ -19,7 +19,7 @@ const customerBilling = {
 	email: 'john.doe@example.com',
 };
 
-const customerBillingSearchTest = {
+export const customerBillingSearchTest = {
 	first_name: 'Johnsearch',
 	last_name: 'Doesearch',
 	company: 'Automatticsearch',
@@ -40,7 +40,7 @@ const customerBillingSearchTest = {
  * https://woocommerce.github.io/woocommerce-rest-api-docs/#customers
  * https://woocommerce.github.io/woocommerce-rest-api-docs/#orders
  */
-const customerShipping = {
+export const customerShipping = {
 	first_name: 'Tim',
 	last_name: 'Clark',
 	company: 'Automattic',
@@ -53,7 +53,7 @@ const customerShipping = {
 	phone: '123456789',
 };
 
-const customerShippingSearchTest = {
+export const customerShippingSearchTest = {
 	first_name: 'Timsearch',
 	last_name: 'Clarksearch',
 	company: 'Automatticsearch',
@@ -64,11 +64,4 @@ const customerShippingSearchTest = {
 	state: 'NYsearch',
 	postcode: '14201search',
 	phone: '123456789search',
-};
-
-module.exports = {
-	customerBilling,
-	customerBillingSearchTest,
-	customerShipping,
-	customerShippingSearchTest,
 };

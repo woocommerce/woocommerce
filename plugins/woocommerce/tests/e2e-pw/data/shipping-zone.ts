@@ -14,10 +14,6 @@ const shippingZone = {
  * Constructs a default shipping zone object.
  *
  */
-const getShippingZoneExample = () => {
+export const getShippingZoneExample = () => {
 	return shippingZone;
-};
-
-module.exports = {
-	getShippingZoneExample,
 };
