@@ -2543,6 +2543,9 @@ if ( ! function_exists( 'woocommerce_cross_sell_display' ) ) {
 		$limit       = intval( apply_filters( 'woocommerce_cross_sells_total', $limit ) );
 		$cross_sells = $limit > 0 ? array_slice( $cross_sells, 0, $limit ) : $cross_sells;
 
+		// Prime caches to reduce future queries.
+		_prime_post_caches( array_filter( array_map( fn( $p ) => (int) $p->get_image_id(), $cross_sells ) ) );
+
 		wc_get_template(
 			'cart/cross-sells.php',
 			array(
