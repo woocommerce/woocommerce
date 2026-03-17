@@ -96,6 +96,17 @@ class Content_Renderer {
 	private $backup_post_content_callback;
 
 	/**
+	 * Effective content width for user blocks inside post-content.
+	 *
+	 * Set after the first preprocessing pass (template blocks) to the
+	 * post-content block's calculated width. Used as contentSize in the
+	 * second pass so user block widths account for template group padding.
+	 *
+	 * @var string|null
+	 */
+	private ?string $post_content_width = null;
+
+	/**
 	 * CSS inliner
 	 *
 	 * @var Css_Inliner
@@ -210,12 +221,58 @@ class Content_Renderer {
 	 */
 	public function preprocess_parsed_blocks( array $parsed_blocks ): array {
 		$styles = $this->theme_controller->get_styles();
+		$layout = $this->theme_controller->get_layout_settings();
 
 		// Pass the CSS variables map so preprocessors can resolve preset
 		// references (e.g. var:preset|spacing|20) in block attributes.
 		$styles['__variables_map'] = $this->theme_controller->get_variables_values_map();
 
-		return $this->process_manager->preprocess( $parsed_blocks, $this->theme_controller->get_layout_settings(), $styles );
+		// Second pass (user blocks inside post-content): use the effective
+		// content width from the first pass so user block widths account
+		// for template group padding. Root padding was already applied on
+		// the template group in the first pass, so remove it here to
+		// prevent double application.
+		if ( null !== $this->post_content_width ) {
+			$layout['contentSize'] = $this->post_content_width;
+			unset( $styles['spacing']['padding']['left'], $styles['spacing']['padding']['right'] );
+		}
+
+		$result = $this->process_manager->preprocess( $parsed_blocks, $layout, $styles );
+
+		// After the first pass (template blocks): find the post-content
+		// block's width and store it for the second pass.
+		if ( null === $this->post_content_width ) {
+			$this->post_content_width = $this->find_post_content_width( $result );
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Recursively find the post-content block's width in preprocessed blocks.
+	 *
+	 * @param array $blocks Preprocessed blocks.
+	 * @return string|null The post-content block's width or null if not found.
+	 */
+	private function find_post_content_width( array $blocks ): ?string {
+		$post_content_block_names = (array) apply_filters(
+			'woocommerce_email_editor_post_content_block_names',
+			array( 'core/post-content' )
+		);
+
+		foreach ( $blocks as $block ) {
+			$block_name = $block['blockName'] ?? '';
+			if ( in_array( $block_name, $post_content_block_names, true ) ) {
+				return $block['email_attrs']['width'] ?? null;
+			}
+			if ( ! empty( $block['innerBlocks'] ) ) {
+				$found = $this->find_post_content_width( $block['innerBlocks'] );
+				if ( null !== $found ) {
+					return $found;
+				}
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -356,6 +413,8 @@ class Content_Renderer {
 		remove_filter( 'render_block', array( $this, 'render_block' ) );
 		remove_filter( 'block_parser_class', array( $this, 'block_parser' ) );
 		remove_filter( 'woocommerce_email_blocks_renderer_parsed_blocks', array( $this, 'preprocess_parsed_blocks' ) );
+
+		$this->post_content_width = null;
 
 		// Restore the original core/post-content render callback.
 		// Note: We always restore it, even if it was null originally.
