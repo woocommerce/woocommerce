@@ -748,6 +748,7 @@ class BlockTemplateUtils {
 		if ( null === ( $request_level_cache[ $template_type ][ $theme ] ?? null ) ) {
 			$request_level_cache[ $template_type ][ $theme ] = array();
 			if ( ! empty( $ids[ $theme ] ) ) {
+				// Prime caches to reduce future queries.
 				_prime_post_caches( $ids[ $theme ], false, false );
 				$request_level_cache[ $template_type ][ $theme ] = array_filter( array_map( 'get_post', $ids[ $theme ] ) );
 			}

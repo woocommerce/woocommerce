@@ -339,7 +339,8 @@ class ProductQuery implements QueryClausesGenerator {
 	public function get_objects( $request ) {
 		$results = $this->get_results( $request );
 
-		if ( is_callable( '_prime_post_caches' ) ) {
+		if ( ! empty( $results['results'] ) ) {
+			// Prime caches to reduce future queries.
 			_prime_post_caches( $results['results'] );
 		}
 
