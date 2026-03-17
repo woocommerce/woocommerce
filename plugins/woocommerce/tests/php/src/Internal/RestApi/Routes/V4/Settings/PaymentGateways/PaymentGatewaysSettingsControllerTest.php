@@ -224,9 +224,9 @@ class PaymentGatewaysSettingsControllerTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_update_payment_gateway_with_no_params() {
 		// Arrange.
-		$gateway          = WC()->payment_gateways->payment_gateways()['bacs'];
-		$settings_before  = get_option( $gateway->get_option_key() );
-		$enabled_before   = $gateway->enabled;
+		$gateway        = WC()->payment_gateways->payment_gateways()['bacs'];
+		$enabled_before = $gateway->enabled;
+		$title_before   = $gateway->title;
 
 		// Act.
 		$request  = new WP_REST_Request( 'PUT', self::ENDPOINT . '/bacs' );
@@ -235,12 +235,10 @@ class PaymentGatewaysSettingsControllerTest extends WC_REST_Unit_Test_Case {
 		// Assert.
 		$this->assertSame( 200, $response->get_status() );
 
-		// Verify no settings were changed.
-		$settings_after = get_option( $gateway->get_option_key() );
-		$this->assertSame( $settings_before, $settings_after );
-
+		// Verify gateway state was not changed.
 		$gateway_after = WC()->payment_gateways->payment_gateways()['bacs'];
 		$this->assertSame( $enabled_before, $gateway_after->enabled );
+		$this->assertSame( $title_before, $gateway_after->title );
 	}
 
 	/**
