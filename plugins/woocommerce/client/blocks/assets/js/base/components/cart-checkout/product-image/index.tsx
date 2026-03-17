@@ -32,11 +32,10 @@ const ProductImage = ( {
 
 	// Use display width for sizes so the browser picks an appropriately
 	// sized source from the thumbnail srcset.
-	const sizesAttr = image.thumbnail_srcset
-		? width
-			? `${ width }px`
-			: '100px'
-		: undefined;
+	let sizesAttr;
+	if ( image.thumbnail_srcset ) {
+		sizesAttr = width ? `${ width }px` : '100px';
+	}
 
 	const imageProps = image.thumbnail
 		? {

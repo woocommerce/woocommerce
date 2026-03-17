@@ -26,18 +26,18 @@ class ImageAttachmentSchema extends AbstractSchema {
 	 */
 	public function get_properties() {
 		return [
-			'id'        => [
+			'id'               => [
 				'description' => __( 'Image ID.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => [ 'view', 'edit', 'embed' ],
 			],
-			'src'       => [
+			'src'              => [
 				'description' => __( 'Full size image URL.', 'woocommerce' ),
 				'type'        => 'string',
 				'format'      => 'uri',
 				'context'     => [ 'view', 'edit', 'embed' ],
 			],
-			'thumbnail' => [
+			'thumbnail'        => [
 				'description' => __( 'Thumbnail URL.', 'woocommerce' ),
 				'type'        => 'string',
 				'format'      => 'uri',
@@ -63,12 +63,12 @@ class ImageAttachmentSchema extends AbstractSchema {
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit', 'embed' ],
 			],
-			'name'      => [
+			'name'             => [
 				'description' => __( 'Image name.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit', 'embed' ],
 			],
-			'alt'       => [
+			'alt'              => [
 				'description' => __( 'Image alternative text.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit', 'embed' ],
