@@ -1,4 +1,4 @@
-Significance: Fix
-Type: Fix
+Significance: patch
+Type: fix
 
 Centralize cart notice diff logic inside mutation batcher commit hook, removing duplicated getInfoNoticesFromCartUpdates calls across cart actions.
