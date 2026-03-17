@@ -78,7 +78,9 @@ describe( 'SendButton', () => {
 		// Override applyFilters to simulate a filter that removes isDirty from disabled
 		applyFiltersMock.mockImplementation(
 			( hook: string, value: unknown, ...args: unknown[] ) => {
-				if ( hook === 'woocommerce_email_editor_send_button_disabled' ) {
+				if (
+					hook === 'woocommerce_email_editor_send_button_disabled'
+				) {
 					const flags = args[ 0 ] as {
 						hasEmptyContent: boolean;
 						isEmailSent: boolean;
