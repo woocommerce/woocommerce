@@ -48,6 +48,8 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 		$output = ob_get_clean();
 
 		$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*2\s*</', $output, 'Should show 2 orders for the customer' );
+		$this->assertMatchesRegularExpression( '/order-attribution-total-spend">\s*.*300/', $output, 'Should show total spend of 300' );
+		$this->assertMatchesRegularExpression( '/order-attribution-average-order-value">\s*.*150/', $output, 'Should show average order value of 150' );
 	}
 
 	/**
@@ -73,10 +75,12 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 		$output = ob_get_clean();
 
 		$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*2\s*</', $output, 'Should show 2 orders for the guest customer' );
+		$this->assertMatchesRegularExpression( '/order-attribution-total-spend">\s*.*100/', $output, 'Should show total spend of 100' );
+		$this->assertMatchesRegularExpression( '/order-attribution-average-order-value">\s*.*50/', $output, 'Should show average order value of 50' );
 	}
 
 	/**
-	 * @testdox Should not count orders with excluded statuses like cancelled and failed.
+	 * @testdox Should not count orders with excluded statuses like pending, cancelled, and failed.
 	 */
 	public function test_excluded_statuses_not_counted(): void {
 		$customer_id = $this->factory->user->create();
@@ -95,6 +99,11 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 		$order_failed->set_status( 'failed' );
 		$order_failed->set_total( 30 );
 		$order_failed->save();
+
+		$order_pending = WC_Helper_Order::create_order( $customer_id );
+		$order_pending->set_status( 'pending' );
+		$order_pending->set_total( 20 );
+		$order_pending->save();
 
 		ob_start();
 		$this->sut->output( $order_good );
@@ -117,6 +126,23 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 		$output = ob_get_clean();
 
 		$this->assertEmpty( $output, 'Should produce no output for auto-draft orders' );
+	}
+
+	/**
+	 * @testdox Should show zero data for guest order with no billing email.
+	 */
+	public function test_guest_with_no_email_shows_zero(): void {
+		$order = WC_Helper_Order::create_order( 0 );
+		$order->set_billing_email( '' );
+		$order->set_status( 'completed' );
+		$order->set_total( 50 );
+		$order->save();
+
+		ob_start();
+		$this->sut->output( $order );
+		$output = ob_get_clean();
+
+		$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*0\s*</', $output, 'Should show 0 orders for guest with no email' );
 	}
 
 	/**

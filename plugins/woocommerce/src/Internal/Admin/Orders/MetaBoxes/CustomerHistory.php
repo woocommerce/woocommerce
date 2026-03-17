@@ -103,7 +103,16 @@ class CustomerHistory {
 		}
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql is prepared above.
-		return $wpdb->get_row( $sql ) ?? (object) array(
+		$row = $wpdb->get_row( $sql );
+
+		if ( $wpdb->last_error ) {
+			wc_get_logger()->error(
+				sprintf( 'CustomerHistory: Failed to query HPOS order stats. DB error: %s', $wpdb->last_error ),
+				array( 'source' => 'customer-history' )
+			);
+		}
+
+		return $row ?? (object) array(
 			'orders_count' => 0,
 			'total_spend'  => 0,
 		);
@@ -132,10 +141,10 @@ class CustomerHistory {
 				FROM {$wpdb->posts} AS p
 				INNER JOIN {$wpdb->postmeta} AS meta_customer ON p.ID = meta_customer.post_id
 				INNER JOIN {$wpdb->postmeta} AS meta_total ON p.ID = meta_total.post_id
-				WHERE meta_customer.meta_key = '_customer_user' AND meta_customer.meta_value = %d
+				WHERE meta_customer.meta_key = '_customer_user' AND meta_customer.meta_value = %s
 				AND meta_total.meta_key = '_order_total'
 				AND p.post_type = 'shop_order' AND p.post_status NOT IN $excluded_statuses_sql",
-				$customer_id
+				(string) $customer_id
 			);
 		} elseif ( '' !== $billing_email ) {
 			$sql = $wpdb->prepare(
@@ -158,7 +167,16 @@ class CustomerHistory {
 		}
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql is prepared above.
-		return $wpdb->get_row( $sql ) ?? (object) array(
+		$row = $wpdb->get_row( $sql );
+
+		if ( $wpdb->last_error ) {
+			wc_get_logger()->error(
+				sprintf( 'CustomerHistory: Failed to query CPT order stats. DB error: %s', $wpdb->last_error ),
+				array( 'source' => 'customer-history' )
+			);
+		}
+
+		return $row ?? (object) array(
 			'orders_count' => 0,
 			'total_spend'  => 0,
 		);
@@ -178,6 +196,14 @@ class CustomerHistory {
 			$excluded_statuses = array( 'pending', 'failed', 'cancelled' );
 		}
 		$excluded_statuses = array_merge( array( 'auto-draft', 'trash' ), $excluded_statuses );
+
+		/**
+		 * Filter the list of excluded order statuses for analytics reports.
+		 *
+		 * @since 4.0.0
+		 * @param array $excluded_statuses Order statuses to exclude.
+		 */
+		$excluded_statuses = apply_filters( 'woocommerce_analytics_excluded_order_statuses', $excluded_statuses );
 
 		$prefixed = array_map(
 			function ( $status ) {
