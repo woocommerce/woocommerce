@@ -7,6 +7,7 @@ Covers identifying and eliminating redundant data store reads caused by calling 
 `WC_Order` accessors such as `get_items()`, `get_coupon_codes()`, `get_shipping_methods()`, and `get_fees()` use in-memory caching (`isset( $this->items[$group] )` in `abstract-wc-order.php`) — the SQL query is only issued once per request. However, the associated filter (e.g. `woocommerce_order_get_items`) is applied on **every call**, outside the cache guard.
 
 Extracting the result into a local variable:
+
 1. Prevents filters from firing multiple times — important for correctness if a filter has side effects.
 2. Eliminates repeated method call overhead (type coercion, group resolution, array merge).
 3. Makes the intent explicit and the code easier to read.
