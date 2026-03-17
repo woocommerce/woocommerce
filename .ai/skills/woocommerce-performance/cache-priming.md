@@ -128,5 +128,5 @@ Priming is only needed when starting from a raw list of IDs not loaded through `
 Pass `false` for the `$update_meta_cache` parameter when meta is being handled separately, to avoid double-priming:
 
 ```php
-_prime_post_caches( $order_ids, false, true ); // skip meta priming, include terms
+_prime_post_caches( $order_ids, true, false ); // skip meta priming, include terms
 ```
