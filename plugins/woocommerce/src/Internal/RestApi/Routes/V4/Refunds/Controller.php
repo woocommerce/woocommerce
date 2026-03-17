@@ -16,6 +16,7 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractController;
 use Automattic\WooCommerce\StoreApi\Utilities\Pagination;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Schema\RefundSchema;
+use Automattic\WooCommerce\Utilities\NumberUtil;
 use WP_Http;
 use WP_Error;
 use WC_Order_Refund;
@@ -309,13 +310,14 @@ class Controller extends AbstractController {
 
 			// Prevent under-refunding: amount cannot be less than calculated line items total.
 			// Over-refunding is allowed for goodwill/compensation scenarios.
-			if ( ! empty( $request['amount'] ) && $calculated_total > 0 && $refund_amount < $calculated_total ) {
+			if ( ! empty( $request['amount'] ) && $calculated_total > 0 && NumberUtil::round( (float) $refund_amount, wc_get_price_decimals() ) < NumberUtil::round( $calculated_total, wc_get_price_decimals() ) ) {
 				return $this->get_route_error_response(
 					'invalid_refund_amount',
 					sprintf(
-						/* translators: %s: calculated total from line items */
-						__( 'Refund amount cannot be less than the total of line items (%s).', 'woocommerce' ),
-						wc_format_decimal( $calculated_total, 2 )
+						/* translators: %1$s: refund amount, %2$s: calculated total from line items */
+						__( 'Refund amount (%1$s) cannot be less than the total of line items (%2$s).', 'woocommerce' ),
+						wc_format_decimal( $refund_amount, wc_get_price_decimals() ),
+						wc_format_decimal( $calculated_total, wc_get_price_decimals() )
 					)
 				);
 			}

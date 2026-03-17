@@ -1,7 +1,7 @@
 <?php
 
-use Automattic\WooCommerce\Internal\Fulfillments\Fulfillment;
-use Automattic\WooCommerce\Tests\Internal\Fulfillments\Helpers\FulfillmentsHelper;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
+use Automattic\WooCommerce\Tests\Admin\Features\Fulfillments\Helpers\FulfillmentsHelper;
 
 /**
  * Class WC_Emails_Tests.
@@ -70,7 +70,7 @@ class WC_Emails_Tests extends \WC_Unit_Test_Case {
 		// Ensure the FulfillmentsController is registered, which is necessary for the translation of meta keys.
 		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
 		$container  = wc_get_container();
-		$controller = $container->get( \Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsController::class );
+		$controller = $container->get( \Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsController::class );
 		$controller->register();
 		$controller->initialize_fulfillments();
 

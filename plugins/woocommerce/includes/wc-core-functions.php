@@ -68,6 +68,7 @@ add_filter( 'woocommerce_short_description', array( $GLOBALS['wp_embed'], 'run_s
  * @since 3.0.0
  * @param string $name  Constant name.
  * @param mixed  $value Value.
+ * @return void
  */
 function wc_maybe_define_constant( $name, $value ) {
 	if ( ! defined( $name ) ) {
@@ -240,6 +241,7 @@ function wc_get_path_define_tokens() {
  *
  * @param mixed  $slug Template slug.
  * @param string $name Template name (default: '').
+ * @return void
  */
 function wc_get_template_part( $slug, $name = '' ) {
 	$cache_key = sanitize_key( implode( '-', array( 'template-part', $slug, $name, Constants::get_constant( 'WC_VERSION' ) ) ) );
@@ -294,6 +296,7 @@ function wc_get_template_part( $slug, $name = '' ) {
  * @param array  $args          Arguments. (default: array).
  * @param string $template_path Template path. (default: '').
  * @param string $default_path  Default path. (default: '').
+ * @return void
  */
 function wc_get_template( $template_name, $args = array(), $template_path = '', $default_path = '' ) {
 	$cache_key = sanitize_key( implode( '-', array( 'template', $template_name, $template_path, $default_path, Constants::get_constant( 'WC_VERSION' ) ) ) );
@@ -439,6 +442,7 @@ function wc_locate_template( $template_name, $template_path = '', $default_path 
  * @since 4.3.0
  * @param string $cache_key Object cache key.
  * @param string $template Located template.
+ * @return void
  */
 function wc_set_template_cache( $cache_key, $template ) {
 	wp_cache_set( $cache_key, $template, 'woocommerce' );
@@ -457,6 +461,7 @@ function wc_set_template_cache( $cache_key, $template ) {
  * Clear the template cache.
  *
  * @since 4.3.0
+ * @return void
  */
 function wc_clear_template_cache() {
 	$cached_templates = wp_cache_get( 'cached_templates', 'woocommerce' );
@@ -473,6 +478,7 @@ function wc_clear_template_cache() {
  * Clear the system status theme info cache.
  *
  * @since 9.4.0
+ * @return void
  */
 function wc_clear_system_status_theme_info_cache() {
 	delete_transient( 'wc_system_status_theme_info' );
@@ -856,6 +862,7 @@ function wc_get_image_size( $image_size ) {
  * Queue some JavaScript code to be output in the footer.
  *
  * @param string $code Code.
+ * @return void
  *
  * @deprecated 10.4.0 Use wp_add_inline_script() instead.
  */
@@ -873,6 +880,8 @@ function wc_enqueue_js( $code ) {
 
 /**
  * Output any queued javascript code in the footer.
+ *
+ * @return void
  */
 function wc_print_js() {
 	global $wc_queued_js;
@@ -905,6 +914,7 @@ function wc_print_js() {
  * @param  integer $expire Expiry of the cookie.
  * @param  bool    $secure Whether the cookie should be served only over https.
  * @param  bool    $httponly Whether the cookie is only accessible over HTTP, not scripting languages like JavaScript. @since 3.6.0.
+ * @return void
  */
 function wc_setcookie( $name, $value, $expire = 0, $secure = false, $httponly = false ) {
 	/**
@@ -994,6 +1004,8 @@ function wc_get_page_children( $page_id ) {
 
 /**
  * Flushes rewrite rules when the shop page (or it's children) gets saved.
+ *
+ * @return void
  */
 function flush_rewrite_rules_on_shop_page_save() {
 	$screen    = get_current_screen();
@@ -1354,6 +1366,7 @@ function wc_array_cartesian( $input ) {
  * @since 2.5.0
  * @param string $type Types: start (default), commit, rollback.
  * @param bool   $force use of transactions.
+ * @return void
  */
 function wc_transaction_query( $type = 'start', $force = false ) {
 	global $wpdb;
@@ -1428,6 +1441,7 @@ function wc_get_checkout_url() {
  *
  * @since 1.5.7
  * @param string|object $shipping_method class name (string) or a class object.
+ * @return void
  */
 function woocommerce_register_shipping_method( $shipping_method ) {
 	WC()->shipping()->register_shipping_method( $shipping_method );
@@ -1486,6 +1500,7 @@ function wc_get_credit_card_type_label( $type ) {
  *
  * @param string $label Title of the page to return to.
  * @param string $url   URL of the page to return to.
+ * @return void
  */
 function wc_back_link( $label, $url ) {
 	echo '<small class="wc-admin-breadcrumb"><a href="' . esc_url( $url ) . '" aria-label="' . esc_attr( $label ) . '">&#x2934;&#xfe0e;</a></small>';
@@ -1497,6 +1512,7 @@ function wc_back_link( $label, $url ) {
  * @param string $title Title of the current page.
  * @param string $label Label of the page to return to.
  * @param string $url   URL of the page to return to.
+ * @return void
  */
 function wc_back_header( $title, $label, $url ) {
 	$arrow = is_rtl() ? 'dashicons-arrow-right-alt2' : 'dashicons-arrow-left-alt2';
@@ -1691,6 +1707,7 @@ function wc_get_shipping_method_count( $include_legacy = false, $enabled_only = 
  *
  * @since 2.6.0
  * @param int $limit Time limit.
+ * @return void
  */
 function wc_set_time_limit( $limit = 0 ) {
 	if ( function_exists( 'set_time_limit' ) && false === strpos( ini_get( 'disable_functions' ), 'set_time_limit' ) && ! ini_get( 'safe_mode' ) ) { // phpcs:ignore PHPCompatibility.IniDirectives.RemovedIniDirectives.safe_modeDeprecatedRemoved
@@ -1702,6 +1719,7 @@ function wc_set_time_limit( $limit = 0 ) {
  * Wrapper for nocache_headers which also disables page caching.
  *
  * @since 3.2.4
+ * @return void
  */
 function wc_nocache_headers() {
 	WC_Cache_Helper::set_nocache_constants();
@@ -1999,6 +2017,7 @@ function wc_get_logger() {
  * Trigger logging cleanup using the logging class.
  *
  * @since 3.4.0
+ * @return void
  */
 function wc_cleanup_logs() {
 	$logger = wc_get_logger();
@@ -2145,6 +2164,7 @@ function wc_get_permalink_structure() {
  * Switch WooCommerce to site language.
  *
  * @since 3.1.0
+ * @return void
  */
 function wc_switch_to_site_locale() {
 	global $wp_locale_switcher;
@@ -2164,6 +2184,7 @@ function wc_switch_to_site_locale() {
  * Switch WooCommerce language to original.
  *
  * @since 3.1.0
+ * @return void
  */
 function wc_restore_locale() {
 	global $wp_locale_switcher;
@@ -2382,6 +2403,7 @@ function wc_is_wp_default_theme_active() {
  * Cleans up session data - cron callback.
  *
  * @since 3.3.0
+ * @return void
  */
 function wc_cleanup_session_data() {
 	$session_class = apply_filters( 'woocommerce_session_handler', 'WC_Session_Handler' );

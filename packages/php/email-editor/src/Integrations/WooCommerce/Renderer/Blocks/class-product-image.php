@@ -271,7 +271,9 @@ class Product_Image extends Abstract_Product_Block_Renderer {
 			return $parsed_block;
 		}
 
-		$parsed_block['attrs']['width'] = $rendering_context->get_layout_width_without_padding();
+		// Use the email_attrs width if set (e.g., for multi-column layouts),
+		// otherwise fall back to the rendering context layout width.
+		$parsed_block['attrs']['width'] = $parsed_block['email_attrs']['width'];
 
 		return $parsed_block;
 	}
@@ -430,6 +432,12 @@ class Product_Image extends Abstract_Product_Block_Renderer {
 			'overflow'       => 'hidden',
 			'vertical-align' => 'top',
 		);
+
+		// Apply padding from block styles (e.g., padding-top, padding-bottom).
+		$padding_styles = Styles_Helper::get_block_styles( $parsed_block['attrs'] ?? array(), $rendering_context, array( 'spacing' ) );
+		if ( ! empty( $padding_styles['declarations'] ) ) {
+			$cell_styles = array_merge( $cell_styles, $padding_styles['declarations'] );
+		}
 
 		$align                     = $parsed_block['attrs']['align'] ?? 'left';
 		$cell_styles['text-align'] = $align;

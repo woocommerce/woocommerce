@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixes issue where actions for shipping extension in onboarding didn't display.

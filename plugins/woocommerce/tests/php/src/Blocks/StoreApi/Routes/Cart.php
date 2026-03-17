@@ -7,7 +7,9 @@ namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
 
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\ValidateSchema;
+use Automattic\WooCommerce\StoreApi\Authentication;
 use Automattic\WooCommerce\StoreApi\SessionHandler;
+use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
 use Automattic\WooCommerce\StoreApi\Utilities\JsonWebToken;
 use Spy_REST_Server;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
@@ -614,6 +616,84 @@ class Cart extends ControllerTestCase {
 	}
 
 	/**
+	 * Test Store API uses SessionHandler when Cart-Token is present via REQUEST_URI.
+	 */
+	public function test_store_api_uses_session_handler_for_cart_token() {
+		$customer_id = (string) wc()->session->get_customer_id();
+		$token       = CartTokenUtils::get_cart_token( $customer_id );
+
+		// Preserve globals.
+		$old_server = $_SERVER;
+
+		try {
+			// Simulate a Store API request with valid Cart-Token.
+			$_SERVER['REQUEST_URI']     = '/' . rest_get_url_prefix() . '/wc/store/v1/cart';
+			$_SERVER['HTTP_CART_TOKEN'] = $token;
+
+			$authentication = new Authentication();
+			$result         = $authentication->maybe_use_store_api_session_handler( 'WC_Session_Handler' );
+
+			$this->assertSame( SessionHandler::class, $result );
+		} finally {
+			// Restore globals.
+			$_SERVER = $old_server;
+		}
+	}
+
+	/**
+	 * Test Store API uses SessionHandler when rest_route GET parameter is present.
+	 */
+	public function test_rest_route_get_parameter_uses_store_api_session_handler() {
+		$customer_id = (string) wc()->session->get_customer_id();
+		$token       = CartTokenUtils::get_cart_token( $customer_id );
+
+		// Preserve globals.
+		$old_get    = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Test context.
+		$old_server = $_SERVER;
+
+		try {
+			// Simulate a Store API request via GET parameter with valid Cart-Token.
+			$_GET['rest_route']         = '/wc/store/v1/cart';
+			$_SERVER['HTTP_CART_TOKEN'] = $token;
+
+			$authentication = new Authentication();
+			$result         = $authentication->maybe_use_store_api_session_handler( 'WC_Session_Handler' );
+
+			$this->assertSame( SessionHandler::class, $result );
+		} finally {
+			// Restore globals.
+			$_GET    = $old_get;
+			$_SERVER = $old_server;
+		}
+	}
+
+	/**
+	 * Test non-Store API routes do not switch to Store API session handler.
+	 */
+	public function test_non_store_api_route_does_not_use_store_api_session_handler() {
+		$customer_id = (string) wc()->session->get_customer_id();
+		$token       = CartTokenUtils::get_cart_token( $customer_id );
+
+		// Preserve globals.
+		$old_server = $_SERVER;
+
+		try {
+			// Simulate a non-Store API request (even with valid Cart-Token).
+			$_SERVER['REQUEST_URI']     = '/' . rest_get_url_prefix() . '/wp/v2/posts';
+			$_SERVER['HTTP_CART_TOKEN'] = $token;
+
+			$authentication = new Authentication();
+			$result         = $authentication->maybe_use_store_api_session_handler( 'WC_Session_Handler' );
+
+			// Should return the default handler for non-Store API routes.
+			$this->assertSame( 'WC_Session_Handler', $result );
+		} finally {
+			// Restore globals.
+			$_SERVER = $old_server;
+		}
+	}
+
+	/**
 	 * Test that cart GET endpoint sends Cache-Control headers.
 	 */
 	public function test_cart_get_endpoint_cache_control_headers() {
@@ -1004,5 +1084,235 @@ class Cart extends ControllerTestCase {
 				'code' => 'woocommerce_rest_product_invalid_quantity',
 			)
 		);
+	}
+
+	/**
+	 * @testdox Should fire internal_woocommerce_cart_item_added_from_user_request when adding an item.
+	 */
+	public function test_add_item_fires_add_action(): void {
+		wc_empty_cart();
+
+		$captured_args = array();
+		$callback      = function ( $product_id, $quantity ) use ( &$captured_args ) {
+			$captured_args = array(
+				'product_id' => $product_id,
+				'quantity'   => $quantity,
+			);
+		};
+
+		add_action( 'internal_woocommerce_cart_item_added_from_user_request', $callback, 10, 2 );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/add-item' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'id'       => $this->products[0]->get_id(),
+				'quantity' => 2,
+			)
+		);
+
+		$this->assertAPIResponse( $request, 201 );
+
+		$this->assertNotEmpty( $captured_args, 'The add action should have been fired' );
+		$this->assertSame( $this->products[0]->get_id(), $captured_args['product_id'] );
+		$this->assertEquals( 2, $captured_args['quantity'] );
+
+		remove_action( 'internal_woocommerce_cart_item_added_from_user_request', $callback );
+	}
+
+	/**
+	 * @testdox Should fire internal_woocommerce_cart_item_added_from_user_request with default quantity of 1 when quantity is omitted.
+	 */
+	public function test_add_item_fires_add_action_when_quantity_omitted(): void {
+		wc_empty_cart();
+
+		$captured_args = array();
+		$callback      = function ( $product_id, $quantity ) use ( &$captured_args ) {
+			$captured_args = array(
+				'product_id' => $product_id,
+				'quantity'   => $quantity,
+			);
+		};
+
+		add_action( 'internal_woocommerce_cart_item_added_from_user_request', $callback, 10, 2 );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/add-item' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'id' => $this->products[0]->get_id(),
+			)
+		);
+
+		$this->assertAPIResponse( $request, 201 );
+
+		$this->assertNotEmpty( $captured_args, 'The add action should have been fired' );
+		$this->assertSame( $this->products[0]->get_id(), $captured_args['product_id'] );
+		$this->assertEquals( 1, $captured_args['quantity'] );
+
+		remove_action( 'internal_woocommerce_cart_item_added_from_user_request', $callback );
+	}
+
+	/**
+	 * @testdox Should fire internal_woocommerce_cart_item_updated_from_user_request when updating item quantity.
+	 */
+	public function test_update_item_fires_update_action(): void {
+		$captured_args = array();
+		// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		$callback = function ( $cart_item_key, $quantity, $old_quantity, $cart ) use ( &$captured_args ) {
+			$captured_args = compact( 'cart_item_key', 'quantity', 'old_quantity', 'cart' );
+		};
+
+		add_action( 'internal_woocommerce_cart_item_updated_from_user_request', $callback, 10, 4 );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/update-item' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'key'      => $this->keys[0],
+				'quantity' => 5,
+			)
+		);
+
+		$this->assertAPIResponse( $request, 200 );
+
+		$this->assertNotEmpty( $captured_args, 'The update action should have been fired' );
+		$this->assertSame( $this->keys[0], $captured_args['cart_item_key'] );
+		$this->assertEquals( 5, $captured_args['quantity'] );
+		$this->assertEquals( 2, $captured_args['old_quantity'] );
+		$this->assertInstanceOf( \WC_Cart::class, $captured_args['cart'] );
+
+		remove_action( 'internal_woocommerce_cart_item_updated_from_user_request', $callback );
+	}
+
+	/**
+	 * @testdox Should fire internal_woocommerce_cart_item_removed_from_user_request when removing a cart item.
+	 */
+	public function test_remove_item_fires_remove_action(): void {
+		$captured_args = array();
+		// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		$callback = function ( $cart_item_key, $cart ) use ( &$captured_args ) {
+			$captured_args = compact( 'cart_item_key', 'cart' );
+		};
+
+		add_action( 'internal_woocommerce_cart_item_removed_from_user_request', $callback, 10, 2 );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/remove-item' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'key' => $this->keys[0],
+			)
+		);
+
+		$this->assertAPIResponse( $request, 200 );
+
+		$this->assertNotEmpty( $captured_args, 'The remove action should have been fired' );
+		$this->assertSame( $this->keys[0], $captured_args['cart_item_key'] );
+		$this->assertInstanceOf( \WC_Cart::class, $captured_args['cart'] );
+
+		remove_action( 'internal_woocommerce_cart_item_removed_from_user_request', $callback );
+	}
+
+	/**
+	 * @testdox Should not fire internal_woocommerce_cart_item_updated_from_user_request when quantity is unchanged.
+	 */
+	public function test_update_item_with_same_quantity_does_not_fire_update_action(): void {
+		$action_fired = false;
+		$callback     = function () use ( &$action_fired ) {
+			$action_fired = true;
+		};
+
+		add_action( 'internal_woocommerce_cart_item_updated_from_user_request', $callback, 10, 4 );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/update-item' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'key'      => $this->keys[0],
+				'quantity' => 2,
+			)
+		);
+
+		$this->assertAPIResponse( $request, 200 );
+
+		$this->assertFalse( $action_fired, 'The update action should not fire when quantity is unchanged' );
+
+		remove_action( 'internal_woocommerce_cart_item_updated_from_user_request', $callback );
+	}
+
+	/**
+	 * @testdox Should fire internal_woocommerce_cart_item_added_from_user_request with the variation ID when adding a variable product.
+	 */
+	public function test_add_item_fires_add_action_with_variation_id(): void {
+		wc_empty_cart();
+
+		$fixtures  = new FixtureData();
+		$attribute = $fixtures->get_product_attribute( 'color', array( 'blue' ) );
+		$product   = $fixtures->get_variable_product(
+			array(
+				'name' => 'Test Variable Product',
+			),
+			array( $attribute )
+		);
+
+		$variation = new \WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array( 'pa_color' => 'blue' ) );
+		$variation->set_regular_price( 10 );
+		$variation->save();
+
+		$captured_args = array();
+		$callback      = function ( $product_id, $quantity ) use ( &$captured_args ) {
+			$captured_args = array(
+				'product_id' => $product_id,
+				'quantity'   => $quantity,
+			);
+		};
+
+		add_action( 'internal_woocommerce_cart_item_added_from_user_request', $callback, 10, 2 );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/add-item' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'id'       => $variation->get_id(),
+				'quantity' => 1,
+			)
+		);
+
+		$this->assertAPIResponse( $request, 201 );
+
+		$this->assertNotEmpty( $captured_args, 'The add action should have been fired' );
+		$this->assertSame( $variation->get_id(), $captured_args['product_id'], 'The product_id should be the variation ID, not the parent product ID' );
+		$this->assertEquals( 1, $captured_args['quantity'] );
+
+		remove_action( 'internal_woocommerce_cart_item_added_from_user_request', $callback );
+	}
+
+	/**
+	 * @testdox Should not fire internal_woocommerce_cart_item_updated_from_user_request when quantity is not set.
+	 */
+	public function test_update_item_without_quantity_does_not_fire_update_action(): void {
+		$action_fired = false;
+		$callback     = function () use ( &$action_fired ) {
+			$action_fired = true;
+		};
+
+		add_action( 'internal_woocommerce_cart_item_updated_from_user_request', $callback, 10, 4 );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/update-item' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'key' => $this->keys[0],
+			)
+		);
+
+		$this->assertAPIResponse( $request, 200 );
+
+		$this->assertFalse( $action_fired, 'The update action should not fire when quantity is not set' );
+
+		remove_action( 'internal_woocommerce_cart_item_updated_from_user_request', $callback );
 	}
 }

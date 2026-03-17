@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Stop autoloading `woocommerce_status_log_db_sources` option
