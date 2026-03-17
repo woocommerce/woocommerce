@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent hook accumulation in email editor Initializer by guarding against duplicate hook registration.
