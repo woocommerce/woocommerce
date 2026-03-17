@@ -95,6 +95,24 @@ describe( 'SendButton', () => {
 		expect( getByRole( 'button' ) ).not.toBeDisabled();
 	} );
 
+	it( 'should fall back to default when filter returns non-boolean', () => {
+		useEntitiesSavedStatesIsDirtyMock.mockReturnValue( { isDirty: true } );
+
+		applyFiltersMock.mockImplementation(
+			( hook: string, value: unknown ) => {
+				if (
+					hook === 'woocommerce_email_editor_send_button_disabled'
+				) {
+					return 'not-a-boolean';
+				}
+				return value;
+			}
+		);
+
+		const { getByRole } = render( <SendButton /> );
+		expect( getByRole( 'button' ) ).toBeDisabled();
+	} );
+
 	it( 'should be disabled if hasEmptyContent is true', () => {
 		mockStoreValues.hasEmptyContent = true;
 
