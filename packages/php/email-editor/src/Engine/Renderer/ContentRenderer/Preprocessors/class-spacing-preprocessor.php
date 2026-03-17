@@ -86,12 +86,13 @@ class Spacing_Preprocessor implements Preprocessor {
 			$is_root_level      = null === $parent_block;
 			$is_container       = in_array( $block_name, self::CONTAINER_BLOCKS, true );
 			$alignment          = $block['attrs']['align'] ?? null;
+			$has_zero_padding   = $this->has_zero_horizontal_padding( $block );
 			$has_own_padding    = $this->has_explicit_horizontal_padding( $block );
 			$wraps_post_content = $apply_root_padding && $is_container && ! $has_own_padding && $this->contains_post_content( $block );
-			$should_apply       = $apply_root_padding || ( $is_root_level && ! $is_container );
+			$should_apply       = $apply_root_padding || ( $is_root_level && ! $is_container ) || ( $is_root_level && $is_container && $has_own_padding );
 
 			$post_content_block_names = $this->get_post_content_block_names();
-			if ( $should_apply && ! $has_own_padding && 'full' !== $alignment && ! in_array( $block_name, $post_content_block_names, true ) && ! $wraps_post_content && ! empty( $root_padding ) ) {
+			if ( $should_apply && ! $has_zero_padding && 'full' !== $alignment && ! in_array( $block_name, $post_content_block_names, true ) && ! $wraps_post_content && ! empty( $root_padding ) ) {
 				$block['email_attrs']['root-padding-left']  = $root_padding['left'];
 				$block['email_attrs']['root-padding-right'] = $root_padding['right'];
 			}
@@ -163,8 +164,7 @@ class Spacing_Preprocessor implements Preprocessor {
 	 *
 	 * Explicit zero padding (0, 0px, 0em, etc.) signals that the block
 	 * intentionally wants edge-to-edge layout. Root padding should not
-	 * be added on top, and containers with zero padding should not
-	 * delegate root padding to their children.
+	 * be added on top.
 	 *
 	 * Non-zero padding (e.g. 20px) is internal content spacing and does
 	 * not affect root padding — both can coexist independently.
@@ -172,12 +172,26 @@ class Spacing_Preprocessor implements Preprocessor {
 	 * @param array $block The block to check.
 	 * @return bool True if the block explicitly sets zero horizontal padding.
 	 */
-	private function has_explicit_horizontal_padding( array $block ): bool {
+	private function has_zero_horizontal_padding( array $block ): bool {
 		$padding = $block['attrs']['style']['spacing']['padding'] ?? array();
 		$left    = $padding['left'] ?? null;
 		$right   = $padding['right'] ?? null;
 
 		return $this->is_zero_value( $left ) || $this->is_zero_value( $right );
+	}
+
+	/**
+	 * Checks whether a block explicitly defines any horizontal padding.
+	 *
+	 * Containers with explicit padding (any value) manage their own
+	 * layout and should stop delegating root padding to their children.
+	 *
+	 * @param array $block The block to check.
+	 * @return bool True if the block defines horizontal padding.
+	 */
+	private function has_explicit_horizontal_padding( array $block ): bool {
+		$padding = $block['attrs']['style']['spacing']['padding'] ?? array();
+		return isset( $padding['left'] ) || isset( $padding['right'] );
 	}
 
 	/**
