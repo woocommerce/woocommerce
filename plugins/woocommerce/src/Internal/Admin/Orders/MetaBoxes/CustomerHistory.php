@@ -101,12 +101,13 @@ class CustomerHistory {
 				'total_spend'  => 0,
 			);
 		}
-		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql is prepared above.
 		return $wpdb->get_row( $sql ) ?? (object) array(
 			'orders_count' => 0,
 			'total_spend'  => 0,
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
 
 	/**
@@ -153,12 +154,13 @@ class CustomerHistory {
 				'total_spend'  => 0,
 			);
 		}
-		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql is prepared above.
 		return $wpdb->get_row( $sql ) ?? (object) array(
 			'orders_count' => 0,
 			'total_spend'  => 0,
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
 
 	/**
