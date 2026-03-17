@@ -58,7 +58,6 @@ export type Store = {
 	actions: {
 		addNotice: ( notice: Notice ) => string;
 		removeNotice: ( noticeId: string | PointerEvent ) => void;
-		clearNotices: () => void;
 	};
 	callbacks: {
 		renderNoticeContent: () => void;
@@ -162,15 +161,6 @@ const { state } = store< Store >(
 				if ( index !== -1 ) {
 					notices.splice( index, 1 );
 				}
-			},
-
-			/**
-			 * Removes all current notices from the store.
-			 * Useful when re-initialising the notices list after a custom AJAX
-			 * navigation that replaces DOM content without a full page reload.
-			 */
-			clearNotices: () => {
-				state.notices.splice( 0 );
 			},
 		},
 		callbacks: {
