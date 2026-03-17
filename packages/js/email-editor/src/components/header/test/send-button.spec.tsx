@@ -93,6 +93,15 @@ describe( 'SendButton', () => {
 
 		const { getByRole } = render( <SendButton /> );
 		expect( getByRole( 'button' ) ).not.toBeDisabled();
+		expect( applyFiltersMock ).toHaveBeenCalledWith(
+			'woocommerce_email_editor_send_button_disabled',
+			true,
+			{
+				hasEmptyContent: false,
+				isEmailSent: false,
+				isDirty: true,
+			}
+		);
 	} );
 
 	it( 'should fall back to default when filter returns non-boolean', () => {
