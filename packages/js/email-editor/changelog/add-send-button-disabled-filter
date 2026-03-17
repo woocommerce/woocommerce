@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add `woocommerce_email_editor_send_button_disabled` filter to allow overriding the send button disabled state
