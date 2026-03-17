@@ -76,7 +76,7 @@ describe( 'SendButton', () => {
 		useEntitiesSavedStatesIsDirtyMock.mockReturnValue( { isDirty: true } );
 
 		// Override applyFilters to simulate a filter that removes isDirty from disabled
-		applyFiltersMock.mockImplementation(
+		applyFiltersMock.mockImplementationOnce(
 			( hook: string, value: unknown, ...args: unknown[] ) => {
 				if (
 					hook === 'woocommerce_email_editor_send_button_disabled'
@@ -107,7 +107,7 @@ describe( 'SendButton', () => {
 	it( 'should fall back to default when filter returns non-boolean', () => {
 		useEntitiesSavedStatesIsDirtyMock.mockReturnValue( { isDirty: true } );
 
-		applyFiltersMock.mockImplementation(
+		applyFiltersMock.mockImplementationOnce(
 			( hook: string, value: unknown ) => {
 				if (
 					hook === 'woocommerce_email_editor_send_button_disabled'
