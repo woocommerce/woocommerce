@@ -54,7 +54,7 @@ trait ProductItemTrait {
 					/**
 					 * Filters the variation option name for taxonomy attributes.
 					 *
-					 * @since 9.7.0
+					 * @since 10.7.0
 					 *
 					 * @internal Matches filter name in WooCommerce core.
 					 *
