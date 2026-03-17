@@ -26,7 +26,6 @@ import {
 	type MutationQueue,
 	type MutationResult,
 } from './mutation-batcher';
-import { doesCartItemMatchAttributes } from '../../utils/variations/does-cart-item-match-attributes';
 
 export type WooCommerceConfig = {
 	products?: {
@@ -104,11 +103,6 @@ export type Store = {
 		};
 		restUrl: string;
 		nonce: string;
-		findItemInCart: ( args: {
-			id: ClientCartItem[ 'id' ];
-			key?: ClientCartItem[ 'key' ];
-			variation?: ClientCartItem[ 'variation' ];
-		} ) => CartItem | OptimisticCartItem | undefined;
 		cart: Omit< Cart, 'items' > & {
 			items: ( OptimisticCartItem | CartItem )[];
 			totals: CartResponseTotals;
@@ -215,6 +209,40 @@ const getInfoNoticesFromCartUpdates = (
 	];
 };
 
+// Same as the one in /assets/js/base/utils/variations/does-cart-item-match-attributes.ts.
+const doesCartItemMatchAttributes = (
+	cartItem: OptimisticCartItem,
+	selectedAttributes: SelectedAttributes[]
+) => {
+	if (
+		! Array.isArray( cartItem.variation ) ||
+		! Array.isArray( selectedAttributes )
+	) {
+		return false;
+	}
+
+	if ( cartItem.variation.length !== selectedAttributes.length ) {
+		return false;
+	}
+
+	return cartItem.variation.every(
+		( {
+			// eslint-disable-next-line
+			raw_attribute,
+			value,
+		}: {
+			raw_attribute: string;
+			value: string;
+		} ) =>
+			selectedAttributes.some( ( item: SelectedAttributes ) => {
+				return (
+					item.attribute === raw_attribute &&
+					item.value.toLowerCase() === value?.toLowerCase()
+				);
+			} )
+	);
+};
+
 let pendingRefresh = false;
 let refreshTimeout = 3000;
 let resolveNonceReady: ( () => void ) | null = null;
@@ -247,40 +275,13 @@ let cartQueue: MutationQueue< Cart > | null = null;
 let cycleNotices: Notice[] | null = null;
 
 /**
- * Atomically read and clear the pending cycle notices.
- *
- * Must be called ONLY in the code path that is about to invoke
- * actions.updateNotices(). Actions with showCartUpdatesNotices: false
- * must NOT call this — leaving cycleNotices intact so a later visible
- * action in the same batch cycle can still consume them.
- *
- * Because JS is single-threaded, the first generator to reach an
- * updateNotices call-site takes ownership; all subsequent calls in the
- * same cycle receive [] and skip rendering.
- */
-function consumeCycleNotices(): Notice[] {
-	const notices = cycleNotices ?? [];
-	cycleNotices = null;
-	return notices;
-}
-
-/**
  * Send a cart request through the queue.
  *
- * When showCartUpdatesNotices is true (default), the returned result
- * includes the cycle notices and clears the shared cycleNotices state
- * atomically. When false, cycleNotices is left intact so a visible
- * action that runs later in the same batch cycle can still consume them.
- *
- * This preserves the #63560 contract: the diff runs exactly once per
- * cycle inside commit, and any action — including third-party ones —
- * that passes showCartUpdatesNotices: true automatically receives the
- * correct notices without replicating the diff logic.
+ * Handles optimistic updates, request queuing, and state reconciliation.
  */
 async function sendCartRequest(
 	stateRef: Store[ 'state' ],
-	options: MutationRequest< Cart >,
-	{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
+	options: MutationRequest< Cart >
 ): Promise< CartRequestResult > {
 	await isNonceReady;
 	// Lazily initialize queue on first use.
@@ -294,10 +295,10 @@ async function sendCartRequest(
 			rollback: ( snapshot ) => {
 				stateRef.cart = snapshot;
 			},
-			commit: ( serverState, _snapshot ) => {
+			commit: ( serverState ) => {
 				cycleNotices = [
 					...getInfoNoticesFromCartUpdates( stateRef.cart, serverState ),
-					...( serverState.errors ?? [] ).map( generateErrorNotice ),
+					...serverState.errors.map( generateErrorNotice ),
 				];
 				stateRef.cart = serverState;
 			},
@@ -311,12 +312,8 @@ async function sendCartRequest(
 	}
 
 	const result = await cartQueue.submit( options );
-
-	// Only consume notices if this action intends to render them.
-	// Silent actions (showCartUpdatesNotices: false) leave cycleNotices
-	// intact so a visible action in the same batch cycle can still pick
-	// them up — preventing accidental notice loss in mixed batches.
-	const notices = showCartUpdatesNotices ? consumeCycleNotices() : [];
+	const notices = cycleNotices ?? [];
+	cycleNotices = null;
 	return { ...result, notices };
 }
 
@@ -324,38 +321,6 @@ async function sendCartRequest(
 const { state, actions } = store< Store >(
 	'woocommerce',
 	{
-		state: {
-			findItemInCart( {
-				id,
-				key,
-				variation,
-			}: {
-				id: ClientCartItem[ 'id' ];
-				key?: ClientCartItem[ 'key' ];
-				variation?: ClientCartItem[ 'variation' ];
-			} ) {
-				return state.cart.items.find( ( cartItem ) => {
-					if ( key ) {
-						return key === cartItem.key;
-					}
-					if ( cartItem.type === 'variation' ) {
-						if (
-							id !== cartItem.id ||
-							! cartItem.variation ||
-							! variation ||
-							cartItem.variation.length !== variation.length
-						) {
-							return false;
-						}
-						return doesCartItemMatchAttributes(
-							cartItem,
-							variation
-						);
-					}
-					return id === cartItem.id;
-				} );
-			},
-		},
 		actions: {
 			*removeCartItem( key: string ): AsyncAction< void > {
 				// Track what changes we're making for the sync event.
@@ -404,10 +369,22 @@ const { state, actions } = store< Store >(
 				const a11yModulePromise = import( '@wordpress/a11y' );
 
 				// Find existing item
-				const existingItem = state.findItemInCart( {
-					id,
-					key,
-					variation,
+				const existingItem = state.cart.items.find( ( cartItem ) => {
+					if ( cartItem.type === 'variation' ) {
+						if (
+							id !== cartItem.id ||
+							! cartItem.variation ||
+							! variation ||
+							cartItem.variation.length !== variation.length
+						) {
+							return false;
+						}
+						return doesCartItemMatchAttributes(
+							cartItem,
+							variation
+						);
+					}
+					return key ? key === cartItem.key : id === cartItem.id;
 				} );
 
 				// Determine the target quantity.
@@ -492,9 +469,9 @@ const { state, actions } = store< Store >(
 								emitSyncEvent( { quantityChanges } );
 							}
 						},
-					}, { showCartUpdatesNotices } ) ) as TypeYield< typeof sendCartRequest >;
+					} ) ) as TypeYield< typeof sendCartRequest >;
 
-					if ( result.notices.length > 0 ) {
+					if ( showCartUpdatesNotices && result.notices.length > 0 ) {
 						yield actions.updateNotices( result.notices, true );
 					}
 
@@ -526,11 +503,9 @@ const { state, actions } = store< Store >(
 					// Submit each item through the batcher. They'll be
 					// collected into a single batch request automatically.
 					const promises = items.map( ( item, index ) => {
-						const existingItem = state.findItemInCart( {
-							id: item.id,
-							key: item.key,
-							variation: item.variation,
-						} );
+						const existingItem = state.cart.items.find(
+							( { id: productId } ) => item.id === productId
+						);
 
 						let quantity: number;
 						if ( typeof item.quantityToAdd === 'number' ) {
@@ -602,23 +577,14 @@ const { state, actions } = store< Store >(
 									}
 								},
 							} ),
-						},
-						// Silent — notices are consumed once below after
-						// Promise.allSettled, not per individual request.
-						{ showCartUpdatesNotices: false }
-						);
+						} );
 					} );
 
 					const results = ( yield Promise.allSettled(
 						promises
 					) ) as PromiseSettledResult< CartRequestResult >[];
 
-					// The last sendCartRequest in the batch has
-					// showCartUpdatesNotices: false, so cycleNotices is still
-					// intact here. Consume once for the whole batch cycle.
-					const batchNotices = consumeCycleNotices();
-
-					// firstSuccess is used for the a11y speak() call only.
+					// The first fulfilled result owns cycleNotices (consumed once by sendCartRequest).
 					const firstSuccess = results.find(
 						(
 							r
@@ -629,10 +595,10 @@ const { state, actions } = store< Store >(
 					if ( firstSuccess ) {
 						if (
 							showCartUpdatesNotices &&
-							batchNotices.length > 0
+							firstSuccess.value.notices.length > 0
 						) {
 							yield actions.updateNotices(
-								batchNotices,
+								firstSuccess.value.notices,
 								true
 							);
 						}
