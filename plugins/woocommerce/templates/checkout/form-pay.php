@@ -30,8 +30,9 @@ $totals = $order->get_order_item_totals(); // phpcs:ignore WordPress.WP.GlobalVa
 			</tr>
 		</thead>
 		<tbody>
-			<?php if ( count( $order->get_items() ) > 0 ) : ?>
-				<?php foreach ( $order->get_items() as $item_id => $item ) : ?>
+			<?php $order_items = $order->get_items(); ?>
+			<?php if ( count( $order_items ) > 0 ) : ?>
+				<?php foreach ( $order_items as $item_id => $item ) : ?>
 					<?php
 					if ( ! apply_filters( 'woocommerce_order_item_visible', true, $item ) ) {
 						continue;

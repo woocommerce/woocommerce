@@ -1040,8 +1040,9 @@ function wc_update_coupon_usage_counts( $order_id ) {
 		return;
 	}
 
-	if ( count( $order->get_coupon_codes() ) > 0 ) {
-		foreach ( $order->get_coupon_codes() as $code ) {
+	$coupon_codes = $order->get_coupon_codes();
+	if ( count( $coupon_codes ) > 0 ) {
+		foreach ( $coupon_codes as $code ) {
 			if ( StringUtil::is_null_or_whitespace( $code ) ) {
 				continue;
 			}
