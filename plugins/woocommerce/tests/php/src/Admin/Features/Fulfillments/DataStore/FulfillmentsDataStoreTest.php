@@ -113,6 +113,24 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 
 		$this->assertEquals( $fulfillment->get_date_fulfilled(), $read_fulfillment->get_date_fulfilled() );
 	}
+	
+	public function test_update_fulfilled_fulfillment_preserves_date_fulfilled() {
+		$fulfillment = new Fulfillment();
+		$fulfillment->set_entity_type( 'order-fulfillment' );
+		$fulfillment->set_entity_id( '123' );
+		$fulfillment->set_status( 'unfulfilled' );
+		$fulfillment->set_items( array( array( 'item_id' => 1, 'qty' => 2 ) ) );
+		$this->data_store->create( $fulfillment );
+		$fulfillment->set_status( 'fulfilled' );
+		$this->data_store->update( $fulfillment );
+		$original_date = $fulfillment->get_date_fulfilled();
+		$this->assertNotNull( $original_date );
+		$fulfillment->set_entity_id( '456' );
+		$this->data_store->update( $fulfillment );
+		$this->assertEquals( $original_date, $fulfillment->get_date_fulfilled() );
+		$read_fulfillment = new Fulfillment( $fulfillment->get_id() );
+		$this->assertEquals( $original_date, $read_fulfillment->get_date_fulfilled() );
+	}
 
 	/**
 	 * Tests the create method of the order fulfillment data store with invalid entity type.
