@@ -21,6 +21,7 @@ class CustomerHistory {
 	 * @return void
 	 */
 	public function output( WC_Order $order ): void {
+		// No history when adding a new order.
 		if ( 'auto-draft' === $order->get_status() ) {
 			return;
 		}
