@@ -47,7 +47,7 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 		$this->sut->output( $order1 );
 		$output = ob_get_clean();
 
-		$this->assertStringContainsString( '2', $output, 'Should show 2 orders for the customer' );
+		$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*2\s*</', $output, 'Should show 2 orders for the customer' );
 	}
 
 	/**
@@ -72,7 +72,7 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 		$this->sut->output( $order1 );
 		$output = ob_get_clean();
 
-		$this->assertStringContainsString( '2', $output, 'Should show 2 orders for the guest customer' );
+		$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*2\s*</', $output, 'Should show 2 orders for the guest customer' );
 	}
 
 	/**
@@ -134,6 +134,6 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 		$this->sut->output( $order );
 		$output = ob_get_clean();
 
-		$this->assertStringContainsString( '0', $output, 'Should show 0 orders when all are excluded' );
+		$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*0\s*</', $output, 'Should show 0 orders when all are excluded' );
 	}
 }

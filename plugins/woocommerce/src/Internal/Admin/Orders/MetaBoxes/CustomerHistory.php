@@ -143,7 +143,9 @@ class CustomerHistory {
 				FROM {$wpdb->posts} AS p
 				INNER JOIN {$wpdb->postmeta} AS meta_email ON p.ID = meta_email.post_id
 				INNER JOIN {$wpdb->postmeta} AS meta_total ON p.ID = meta_total.post_id
+				INNER JOIN {$wpdb->postmeta} AS meta_customer ON p.ID = meta_customer.post_id
 				WHERE meta_email.meta_key = '_billing_email' AND meta_email.meta_value = %s
+				AND meta_customer.meta_key = '_customer_user' AND meta_customer.meta_value = '0'
 				AND meta_total.meta_key = '_order_total'
 				AND p.post_type = 'shop_order' AND p.post_status NOT IN $excluded_statuses_sql",
 				$billing_email
@@ -172,6 +174,9 @@ class CustomerHistory {
 	 */
 	private function get_excluded_statuses_sql(): string {
 		$excluded_statuses = get_option( 'woocommerce_excluded_report_order_statuses', array( 'pending', 'failed', 'cancelled' ) );
+		if ( ! is_array( $excluded_statuses ) ) {
+			$excluded_statuses = array( 'pending', 'failed', 'cancelled' );
+		}
 		$excluded_statuses = array_merge( array( 'auto-draft', 'trash' ), $excluded_statuses );
 
 		$prefixed = array_map(
