@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fatal error: urldecode() receives array in wc_product_canonical_redirect() (PHP 8+)
