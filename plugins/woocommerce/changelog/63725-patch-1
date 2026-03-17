@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Ensure consistent float return type for order amount methods
