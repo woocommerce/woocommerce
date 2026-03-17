@@ -23,8 +23,6 @@ import type {
 	Context as AddToCartWithOptionsStoreContext,
 } from '../frontend';
 import {
-	normalizeAttributeName,
-	attributeNamesMatch,
 	getVariationAttributeValue,
 	findMatchingVariation,
 } from '../../../base/utils/variations/attribute-matching';
@@ -94,8 +92,7 @@ const isAttributeValueValid = ( {
 	// valid, that's why we subtract one from the total number of attributes to
 	// match.
 	const isCurrentAttributeSelected = selectedAttributes.some(
-		( selectedAttribute ) =>
-			attributeNamesMatch( selectedAttribute.attribute, attributeName )
+		( selectedAttribute ) => selectedAttribute.attribute === attributeName
 	);
 	const attributesToMatch = isCurrentAttributeSelected
 		? selectedAttributes.length - 1
@@ -144,10 +141,7 @@ const isAttributeValueValid = ( {
 				// selection.
 				if ( availableVariationAttributeValue === null ) {
 					if (
-						! attributeNamesMatch(
-							selectedAttribute.attribute,
-							attributeName
-						) ||
+						selectedAttribute.attribute !== attributeName ||
 						attributeValue === selectedAttribute.value
 					) {
 						return true;
@@ -238,7 +232,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 
 				return selectedAttributes.some( ( attrObject ) => {
 					return (
-						attributeNamesMatch( attrObject.attribute, name ) &&
+						attrObject.attribute === name &&
 						attrObject.value === option.value
 					);
 				} );
@@ -263,10 +257,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				const { selectedAttributes } = getContext< Context >();
 				const index = selectedAttributes.findIndex(
 					( selectedAttribute ) =>
-						attributeNamesMatch(
-							selectedAttribute.attribute,
-							attribute
-						)
+						selectedAttribute.attribute === attribute
 				);
 
 				if ( value === '' ) {
@@ -292,10 +283,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				const { selectedAttributes } = getContext< Context >();
 				const index = selectedAttributes.findIndex(
 					( selectedAttribute ) =>
-						attributeNamesMatch(
-							selectedAttribute.attribute,
-							attribute
-						)
+						selectedAttribute.attribute === attribute
 				);
 				if ( index >= 0 ) {
 					selectedAttributes.splice( index, 1 );
@@ -346,30 +334,19 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					return;
 				}
 
-				// Normalize included/excluded attributes to lowercase for comparison
-				// with Store API labels (e.g., "Color" vs "attribute_pa_color" → "color").
-				const normalizedIncluded = includedAttributes.map( ( attr ) =>
-					normalizeAttributeName( attr )
-				);
-				const normalizedExcluded = excludedAttributes.map( ( attr ) =>
-					normalizeAttributeName( attr )
-				);
-
 				const productAttributesAndOptions: Record< string, string[] > =
 					getProductAttributesAndOptions( product );
 				Object.entries( productAttributesAndOptions ).forEach(
 					( [ attribute, options ] ) => {
-						const attributeLower =
-							normalizeAttributeName( attribute );
 						if (
-							normalizedIncluded.length !== 0 &&
-							! normalizedIncluded.includes( attributeLower )
+							includedAttributes.length !== 0 &&
+							! includedAttributes.includes( attribute )
 						) {
 							return;
 						}
 						if (
-							normalizedExcluded.length !== 0 &&
-							normalizedExcluded.includes( attributeLower )
+							excludedAttributes.length !== 0 &&
+							excludedAttributes.includes( attribute )
 						) {
 							return;
 						}
@@ -386,9 +363,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 							// Find the matching context name by comparing normalized versions.
 							const contextName =
 								includedAttributes.find(
-									( attr ) =>
-										normalizeAttributeName( attr ) ===
-										attributeLower
+									( attr ) => attr === attribute
 								) || attribute;
 							actions.setAttribute( contextName, validOption );
 						}
