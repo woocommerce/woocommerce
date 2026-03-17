@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Orders\MetaBoxes;
 
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomerHistory;
+use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use WC_Helper_Order;
 use WC_Unit_Test_Case;
 
@@ -11,6 +12,7 @@ use WC_Unit_Test_Case;
  * Tests for the CustomerHistory class.
  */
 class CustomerHistoryTest extends WC_Unit_Test_Case {
+	use HPOSToggleTrait;
 
 	/**
 	 * The System Under Test.
@@ -24,13 +26,38 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		$this->setup_cot();
 		$this->sut = new CustomerHistory();
 	}
 
 	/**
-	 * @testdox Should return correct count, total, and average for a registered customer with multiple orders.
+	 * Tear down test fixtures.
 	 */
-	public function test_registered_customer_with_multiple_orders(): void {
+	public function tearDown(): void {
+		$this->clean_up_cot_setup();
+		parent::tearDown();
+	}
+
+	/**
+	 * Data provider for storage modes.
+	 *
+	 * @return array<string, array<bool>>
+	 */
+	public function provider_storage_modes(): array {
+		return array(
+			'HPOS' => array( true ),
+			'CPT'  => array( false ),
+		);
+	}
+
+	/**
+	 * @testdox Should return correct count, total, and average for a registered customer with multiple orders ($0: storage mode).
+	 * @dataProvider provider_storage_modes
+	 */
+	public function test_registered_customer_with_multiple_orders( bool $hpos_enabled ): void {
+		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+
 		$customer_id = $this->factory->user->create();
 
 		$order1 = WC_Helper_Order::create_order( $customer_id );
@@ -53,9 +80,12 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should fetch data correctly for a guest customer matched by billing email.
+	 * @testdox Should fetch data correctly for a guest customer matched by billing email ($0: storage mode).
+	 * @dataProvider provider_storage_modes
 	 */
-	public function test_guest_customer_by_email(): void {
+	public function test_guest_customer_by_email( bool $hpos_enabled ): void {
+		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+
 		$email = 'guest-test@example.com';
 
 		$order1 = WC_Helper_Order::create_order( 0 );
@@ -80,9 +110,12 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should not count orders with excluded statuses like pending, cancelled, and failed.
+	 * @testdox Should not count orders with excluded statuses like pending, cancelled, and failed ($0: storage mode).
+	 * @dataProvider provider_storage_modes
 	 */
-	public function test_excluded_statuses_not_counted(): void {
+	public function test_excluded_statuses_not_counted( bool $hpos_enabled ): void {
+		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+
 		$customer_id = $this->factory->user->create();
 
 		$order_good = WC_Helper_Order::create_order( $customer_id );
@@ -129,9 +162,12 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should show zero data for guest order with no billing email.
+	 * @testdox Should show zero data for guest order with no billing email ($0: storage mode).
+	 * @dataProvider provider_storage_modes
 	 */
-	public function test_guest_with_no_email_shows_zero(): void {
+	public function test_guest_with_no_email_shows_zero( bool $hpos_enabled ): void {
+		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+
 		$order = WC_Helper_Order::create_order( 0 );
 		$order->set_billing_email( '' );
 		$order->set_status( 'completed' );
@@ -146,9 +182,12 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should show zero data when no matching orders exist for the customer.
+	 * @testdox Should show zero data when no matching orders exist for the customer ($0: storage mode).
+	 * @dataProvider provider_storage_modes
 	 */
-	public function test_no_matching_orders_shows_zero(): void {
+	public function test_no_matching_orders_shows_zero( bool $hpos_enabled ): void {
+		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+
 		$customer_id = $this->factory->user->create();
 
 		$order = WC_Helper_Order::create_order( $customer_id );
