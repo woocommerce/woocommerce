@@ -34,7 +34,11 @@ export function SendButton() {
 		}
 	}
 
-	const isDisabled = hasEmptyContent || isEmailSent || isDirty;
+	const isDisabled = applyFilters(
+		'woocommerce_email_editor_send_button_disabled',
+		hasEmptyContent || isEmailSent || isDirty,
+		{ hasEmptyContent, isEmailSent, isDirty }
+	) as boolean;
 
 	const label = applyFilters(
 		'woocommerce_email_editor_send_button_label',
