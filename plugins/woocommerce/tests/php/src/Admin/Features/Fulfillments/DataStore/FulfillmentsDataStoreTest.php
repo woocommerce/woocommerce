@@ -44,6 +44,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 	 * Set up the test case.
 	 */
 	public function setUp(): void {
+		parent::setUp();
 		$this->data_store = wc_get_container()->get( FulfillmentsDataStore::class );
 	}
 
@@ -56,6 +57,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_order_fulfillment_meta" );
 		// Clean up the fulfillment table.
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_order_fulfillments" );
+		parent::tearDown();
 	}
 
 	/**
