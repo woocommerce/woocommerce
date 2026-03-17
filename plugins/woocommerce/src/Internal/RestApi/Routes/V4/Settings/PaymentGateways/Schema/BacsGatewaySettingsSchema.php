@@ -17,18 +17,80 @@ use WP_Error;
 /**
  * BacsGatewaySettingsSchema class.
  *
- * Extends AbstractPaymentGatewaySettingsSchema to handle BACS-specific settings.
+ * Extends AbstractPaymentGatewaySettingsSchema to handle BACS-specific settings
+ * with design-aligned field labels and descriptions.
  */
 class BacsGatewaySettingsSchema extends AbstractPaymentGatewaySettingsSchema {
+
 	/**
-	 * Get values for BACS-specific special fields.
+	 * Get custom groups for the BACS gateway.
+	 *
+	 * Provides design-aligned labels and descriptions, and separates
+	 * account details into its own group.
 	 *
 	 * @param WC_Payment_Gateway $gateway Gateway instance.
-	 * @return array
+	 * @return array Custom group structure.
 	 */
-	protected function get_special_field_values( WC_Payment_Gateway $gateway ): array {
+	protected function get_custom_groups_for_gateway( WC_Payment_Gateway $gateway ): array {
+		$gateway->init_form_fields();
+
+		$settings_group = array(
+			'title'       => __( 'Direct bank transfer settings', 'woocommerce' ),
+			'description' => __( 'Manage how Direct bank transfer appears at checkout and in order emails.', 'woocommerce' ),
+			'order'       => 1,
+			'fields'      => array(
+				array(
+					'id'    => 'enabled',
+					'label' => __( 'Enable/Disable', 'woocommerce' ),
+					'type'  => 'checkbox',
+					'desc'  => __( 'Enable Direct bank transfer at checkout', 'woocommerce' ),
+				),
+				array(
+					'id'    => 'title',
+					'label' => __( 'Checkout label', 'woocommerce' ),
+					'type'  => 'text',
+					'desc'  => __( 'Shown to customers on the payment methods list at checkout.', 'woocommerce' ),
+				),
+				array(
+					'id'    => 'description',
+					'label' => __( 'Checkout instructions', 'woocommerce' ),
+					'type'  => 'text',
+					'desc'  => __( 'Shown below the checkout label.', 'woocommerce' ),
+				),
+				array(
+					'id'    => 'order',
+					'label' => __( 'Order', 'woocommerce' ),
+					'type'  => 'number',
+					'desc'  => __( 'Determines the display order of payment gateways during checkout.', 'woocommerce' ),
+				),
+				array(
+					'id'    => 'instructions',
+					'label' => __( 'Order confirmation instructions', 'woocommerce' ),
+					'type'  => 'text',
+					'desc'  => __( 'Shown on the order confirmation page and in order emails.', 'woocommerce' ),
+				),
+			),
+		);
+
+		$field = $gateway->form_fields['account_details'] ?? array();
+
+		$account_details_group = array(
+			'title'       => __( 'Bank account details', 'woocommerce' ),
+			'description' => __( 'Manage the bank accounts customers can use to pay by bank transfer.', 'woocommerce' ),
+			'order'       => 2,
+			'fields'      => array(
+				array(
+					'id'    => 'account_details',
+					'label' => $field['title'] ?? __( 'Account details', 'woocommerce' ),
+					'type'  => 'array',
+					'desc'  => $field['description'] ?? __( 'Bank account details for direct bank transfer.', 'woocommerce' ),
+				),
+			),
+		);
+
 		return array(
-			'account_details' => get_option( 'woocommerce_bacs_accounts', array() ),
+			'settings'        => $settings_group,
+			'account_details' => $account_details_group,
 		);
 	}
 
@@ -51,6 +113,18 @@ class BacsGatewaySettingsSchema extends AbstractPaymentGatewaySettingsSchema {
 				'type'  => 'array',
 				'desc'  => $field['description'] ?? __( 'Bank account details for direct bank transfer.', 'woocommerce' ),
 			),
+		);
+	}
+
+	/**
+	 * Get values for BACS-specific special fields.
+	 *
+	 * @param WC_Payment_Gateway $gateway Gateway instance.
+	 * @return array
+	 */
+	protected function get_special_field_values( WC_Payment_Gateway $gateway ): array {
+		return array(
+			'account_details' => get_option( 'woocommerce_bacs_accounts', array() ),
 		);
 	}
 

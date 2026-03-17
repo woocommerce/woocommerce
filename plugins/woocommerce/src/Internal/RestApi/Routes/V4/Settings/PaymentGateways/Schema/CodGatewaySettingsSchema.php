@@ -12,17 +12,82 @@ namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\PaymentGate
 defined( 'ABSPATH' ) || exit;
 
 use WC_Data_Store;
+use WC_Payment_Gateway;
 use WC_Shipping_Zone;
 
 /**
  * CodGatewaySettingsSchema class.
  *
- * Extends AbstractPaymentGatewaySettingsSchema for Cash on Delivery payment gateway.
- *
- * Note: The COD gateway has enable_for_methods and enable_for_virtual fields
- * which are standard fields stored in gateway settings.
+ * Extends AbstractPaymentGatewaySettingsSchema for Cash on Delivery payment gateway
+ * with design-aligned field labels and descriptions.
  */
 class CodGatewaySettingsSchema extends AbstractPaymentGatewaySettingsSchema {
+
+	/**
+	 * Get custom groups for the COD gateway.
+	 *
+	 * Provides design-aligned labels and descriptions for the cash on delivery
+	 * settings form fields.
+	 *
+	 * @param WC_Payment_Gateway $gateway Gateway instance.
+	 * @return array Custom group structure.
+	 */
+	protected function get_custom_groups_for_gateway( WC_Payment_Gateway $gateway ): array {
+		$gateway->init_form_fields();
+
+		$group = array(
+			'title'       => __( 'Cash on delivery settings', 'woocommerce' ),
+			'description' => __( 'Manage how Cash on delivery appears at checkout and in order emails.', 'woocommerce' ),
+			'order'       => 1,
+			'fields'      => array(
+				array(
+					'id'    => 'enabled',
+					'label' => __( 'Enable/Disable', 'woocommerce' ),
+					'type'  => 'checkbox',
+					'desc'  => __( 'Enable Cash on delivery at checkout', 'woocommerce' ),
+				),
+				array(
+					'id'    => 'title',
+					'label' => __( 'Checkout label', 'woocommerce' ),
+					'type'  => 'text',
+					'desc'  => __( 'Shown to customers on the payment methods list at checkout.', 'woocommerce' ),
+				),
+				array(
+					'id'    => 'description',
+					'label' => __( 'Checkout instructions', 'woocommerce' ),
+					'type'  => 'text',
+					'desc'  => __( 'Shown below the checkout label.', 'woocommerce' ),
+				),
+				array(
+					'id'    => 'order',
+					'label' => __( 'Order', 'woocommerce' ),
+					'type'  => 'number',
+					'desc'  => __( 'Determines the display order of payment gateways during checkout.', 'woocommerce' ),
+				),
+				array(
+					'id'    => 'instructions',
+					'label' => __( 'Order confirmation instructions', 'woocommerce' ),
+					'type'  => 'text',
+					'desc'  => __( 'Shown on the order confirmation page and in order emails.', 'woocommerce' ),
+				),
+				array(
+					'id'      => 'enable_for_methods',
+					'label'   => __( 'Available for shipping methods', 'woocommerce' ),
+					'type'    => 'multiselect',
+					'desc'    => '',
+					'options' => $this->load_shipping_method_options(),
+				),
+				array(
+					'id'    => 'enable_for_virtual',
+					'label' => __( 'Accept for virtual orders', 'woocommerce' ),
+					'type'  => 'checkbox',
+					'desc'  => __( 'Accept COD if the order is virtual', 'woocommerce' ),
+				),
+			),
+		);
+
+		return array( 'settings' => $group );
+	}
 
 	/**
 	 * Get options for specific COD gateway fields.
