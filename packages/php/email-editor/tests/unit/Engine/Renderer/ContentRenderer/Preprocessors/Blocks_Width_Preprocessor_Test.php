@@ -259,12 +259,12 @@ class Blocks_Width_Preprocessor_Test extends \Email_Editor_Unit_Test {
 		$inner_blocks = $result[0]['innerBlocks'];
 
 		$this->assertCount( 3, $inner_blocks );
-		$this->assertEquals( '206.67px', $inner_blocks[0]['email_attrs']['width'] ); // 620 / 3 (rounded to 2dp)
-		$this->assertEquals( '207px', $inner_blocks[0]['innerBlocks'][0]['email_attrs']['width'] ); // round(206.67)
-		$this->assertEquals( '206.67px', $inner_blocks[1]['email_attrs']['width'] ); // 620 / 3 (rounded to 2dp)
-		$this->assertEquals( '207px', $inner_blocks[1]['innerBlocks'][0]['email_attrs']['width'] ); // round(206.67)
-		$this->assertEquals( '206.67px', $inner_blocks[2]['email_attrs']['width'] ); // 620 / 3 (rounded to 2dp)
-		$this->assertEquals( '207px', $inner_blocks[2]['innerBlocks'][0]['email_attrs']['width'] ); // round(206.67)
+		$this->assertEquals( '206.67px', $inner_blocks[0]['email_attrs']['width'] ); // 620 / 3 rounded to 2 decimal places.
+		$this->assertEquals( '207px', $inner_blocks[0]['innerBlocks'][0]['email_attrs']['width'] ); // Rounded to integer.
+		$this->assertEquals( '206.67px', $inner_blocks[1]['email_attrs']['width'] ); // 620 / 3 rounded to 2 decimal places.
+		$this->assertEquals( '207px', $inner_blocks[1]['innerBlocks'][0]['email_attrs']['width'] ); // Rounded to integer.
+		$this->assertEquals( '206.67px', $inner_blocks[2]['email_attrs']['width'] ); // 620 / 3 rounded to 2 decimal places.
+		$this->assertEquals( '207px', $inner_blocks[2]['innerBlocks'][0]['email_attrs']['width'] ); // Rounded to integer.
 	}
 
 	/**
