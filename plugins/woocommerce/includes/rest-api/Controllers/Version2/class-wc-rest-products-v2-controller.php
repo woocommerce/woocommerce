@@ -599,10 +599,11 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 */
 	protected function get_attribute_taxonomy_name( $slug, $product ) {
 		// Format slug so it matches attributes of the product.
-		$slug       = wc_attribute_taxonomy_slug( $slug );
-		$attributes = array_combine(
-			array_map( 'wc_sanitize_taxonomy_name', array_keys( $product->get_attributes() ) ),
-			array_values( $product->get_attributes() )
+		$slug               = wc_attribute_taxonomy_slug( $slug );
+		$product_attributes = $product->get_attributes();
+		$attributes         = array_combine(
+			array_map( 'wc_sanitize_taxonomy_name', array_keys( $product_attributes ) ),
+			array_values( $product_attributes )
 		);
 
 		$attribute = false;

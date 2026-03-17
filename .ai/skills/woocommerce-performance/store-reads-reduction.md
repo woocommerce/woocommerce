@@ -23,6 +23,11 @@ if ( ! empty( $order->get_items() ) ) {
     return;
 }
 foreach ( $order->get_items() as $item ) { ... }
+
+// Accessor re-invoked inside the loop body:
+foreach ( $order->get_items() as $item ) {
+    if ( count( $order->get_items() ) === 1 ) { ... } // store read on every iteration
+}
 ```
 
 **Correct pattern — extract once, reuse:**
@@ -52,4 +57,6 @@ An accessor qualifies for extraction when **all** of the following hold:
 | `get_fees()` | `WC_Order` | Delegates to `get_items( 'fee' )` |
 | `get_taxes()` | `WC_Order` | Delegates to `get_items( 'tax' )` |
 | `get_downloadable_items()` | `WC_Order` | Queries downloadable items from order items |
+| `get_attributes()` | `WC_Product` | Loads product attributes from data store; fires `woocommerce_product_get_attributes` |
+| `get_downloads()` | `WC_Product` | Loads downloadable files from data store |
 
