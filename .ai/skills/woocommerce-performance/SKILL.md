@@ -11,4 +11,4 @@ Use when writing or reviewing code that loads collections of post-based objects 
 
 ## Options Cache Priming — [options-cache-priming.md](options-cache-priming.md)
 
-Use when writing or reviewing code that reads multiple options in a loop or method. Covers `wp_prime_option_caches()` usage patterns for static key lists, derivable key patterns, and dynamically extracted key sets.
+Use when writing or reviewing code that reads multiple non-autoloaded options in a loop or method. Covers `wp_prime_option_caches()` usage patterns for static key lists, derivable key patterns, and dynamically extracted key sets (excluding autoloaded options, which are already in cache).
