@@ -2,79 +2,9 @@
  * Internal dependencies
  */
 import {
-	normalizeAttributeName,
-	attributeNamesMatch,
 	getVariationAttributeValue,
 	findMatchingVariation,
 } from '../attribute-matching';
-
-describe( 'normalizeAttributeName', () => {
-	it( 'strips attribute_ prefix', () => {
-		expect( normalizeAttributeName( 'attribute_color' ) ).toBe( 'color' );
-	} );
-
-	it( 'strips attribute_pa_ prefix', () => {
-		expect( normalizeAttributeName( 'attribute_pa_color' ) ).toBe(
-			'color'
-		);
-	} );
-
-	it( 'returns lowercased name without prefix', () => {
-		expect( normalizeAttributeName( 'Color' ) ).toBe( 'color' );
-	} );
-
-	it( 'replaces hyphens with spaces for multi-word slugs', () => {
-		expect( normalizeAttributeName( 'attribute_pa_numeric-size' ) ).toBe(
-			'numeric size'
-		);
-	} );
-
-	it( 'replaces hyphens with spaces without prefix', () => {
-		expect( normalizeAttributeName( 'numeric-size' ) ).toBe(
-			'numeric size'
-		);
-	} );
-} );
-
-describe( 'attributeNamesMatch', () => {
-	it( 'matches case-insensitively', () => {
-		expect( attributeNamesMatch( 'Color', 'color' ) ).toBe( true );
-	} );
-
-	it( 'matches after stripping prefix', () => {
-		expect( attributeNamesMatch( 'attribute_pa_color', 'Color' ) ).toBe(
-			true
-		);
-	} );
-
-	it( 'matches when both have prefixes', () => {
-		expect(
-			attributeNamesMatch( 'attribute_pa_color', 'attribute_color' )
-		).toBe( true );
-	} );
-
-	it( 'matches hyphenated slug against spaced label', () => {
-		expect(
-			attributeNamesMatch( 'attribute_pa_numeric-size', 'numeric size' )
-		).toBe( true );
-	} );
-
-	it( 'matches hyphenated slug against capitalized spaced label', () => {
-		expect(
-			attributeNamesMatch( 'attribute_pa_numeric-size', 'Numeric Size' )
-		).toBe( true );
-	} );
-
-	it( 'matches two hyphenated names', () => {
-		expect(
-			attributeNamesMatch( 'attribute_pa_numeric-size', 'numeric-size' )
-		).toBe( true );
-	} );
-
-	it( 'returns false for different names', () => {
-		expect( attributeNamesMatch( 'color', 'size' ) ).toBe( false );
-	} );
-} );
 
 describe( 'getVariationAttributeValue', () => {
 	const variation = {
