@@ -217,6 +217,33 @@ class PaymentGatewaysSettingsControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test updating a payment gateway with no parameters performs a no-op.
+	 *
+	 * All parameters are optional, so an empty PUT should succeed without
+	 * modifying any gateway settings.
+	 */
+	public function test_update_payment_gateway_with_no_params() {
+		// Arrange.
+		$gateway          = WC()->payment_gateways->payment_gateways()['bacs'];
+		$settings_before  = get_option( $gateway->get_option_key() );
+		$enabled_before   = $gateway->enabled;
+
+		// Act.
+		$request  = new WP_REST_Request( 'PUT', self::ENDPOINT . '/bacs' );
+		$response = $this->server->dispatch( $request );
+
+		// Assert.
+		$this->assertSame( 200, $response->get_status() );
+
+		// Verify no settings were changed.
+		$settings_after = get_option( $gateway->get_option_key() );
+		$this->assertSame( $settings_before, $settings_after );
+
+		$gateway_after = WC()->payment_gateways->payment_gateways()['bacs'];
+		$this->assertSame( $enabled_before, $gateway_after->enabled );
+	}
+
+	/**
 	 * Test updating a payment gateway with top-level enabled field.
 	 *
 	 * Core-data sends edits as top-level fields (matching the GET response shape)
