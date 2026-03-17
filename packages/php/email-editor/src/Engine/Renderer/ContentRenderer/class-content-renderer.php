@@ -211,6 +211,10 @@ class Content_Renderer {
 	public function preprocess_parsed_blocks( array $parsed_blocks ): array {
 		$styles = $this->theme_controller->get_styles();
 
+		// Pass the CSS variables map so preprocessors can resolve preset
+		// references (e.g. var:preset|spacing|20) in block attributes.
+		$styles['__variables_map'] = $this->theme_controller->get_variables_values_map();
+
 		return $this->process_manager->preprocess( $parsed_blocks, $this->theme_controller->get_layout_settings(), $styles );
 	}
 
