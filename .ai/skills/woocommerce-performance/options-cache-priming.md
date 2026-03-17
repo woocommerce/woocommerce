@@ -110,7 +110,9 @@ High `get_option()` concentration alone is **not** a signal. These are common fa
 
 ### Real targets — the `*_settings` per-entity pattern
 
-The only options that are genuinely non-autoloaded in WooCommerce core are **per-entity settings** stored under the key `woocommerce_{id}_settings`. These are written directly with `update_option()` by each entity class, not through the settings API, so they carry no `autoload` flag and default to WordPress's own default (`'yes'` in WP 6.0+, but historically `'no'` for options written without explicit autoload — in practice WooCommerce writes these without the third argument, so they use the WP default which prior to WP 6.0 was `false`).
+Per-entity settings stored under `woocommerce_{id}_settings` are generally non-autoloaded when written directly via `update_option()` — as email classes (`includes/class-wc-emails.php` → `init()`) and shipping methods (`includes/class-wc-shipping.php` → `get_shipping_method_class_names()`) do. These are the real priming targets.
+
+**Exception:** payment gateway settings are saved through `WC_Settings_API::process_admin_options()` with explicit `autoload='yes'`, making them autoloaded and therefore excluded from priming (see `includes/class-wc-payment-gateways.php` → `init()`).
 
 Known non-autoloaded per-entity patterns:
 
@@ -118,13 +120,12 @@ Known non-autoloaded per-entity patterns:
 | --- | --- | --- |
 | Email classes | `woocommerce_{email_id}_settings` | `woocommerce_new_order_settings` |
 | Shipping methods | `woocommerce_{method_id}_settings` | `woocommerce_flat_rate_settings` |
-| Payment gateways | `woocommerce_{gateway_id}_settings` | `woocommerce_bacs_settings` |
 
 ### Coverage status (as of audited codebase)
 
 | Location | Pattern | Status |
 | --- | --- | --- |
-| `includes/class-wc-emails.php` — `init_emails()` | array_map over email class list | ✅ covered |
+| `includes/class-wc-emails.php` — `init()` | array_map over email class list | ✅ covered |
 | `includes/class-wc-shipping.php` — `get_shipping_method_class_names()` | array_map over method ID list | ✅ covered |
 | `includes/class-wc-payment-gateways.php` — `init()` | gateway settings autoloaded (`WC_Settings_API` saves with `autoload='yes'`) — no priming needed | ✅ verified, skipped |
 
