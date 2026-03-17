@@ -2,8 +2,9 @@
  * External dependencies
  */
 import { defineConfig, devices } from '@playwright/test';
+import dotenv from 'dotenv';
 
-require( 'dotenv' ).config( { path: __dirname + '/.env' } );
+dotenv.config( { path: __dirname + '/.env' } );
 
 if ( ! process.env.BASE_URL ) {
 	process.env.BASE_URL =

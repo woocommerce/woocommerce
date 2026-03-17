@@ -1,12 +1,15 @@
-let config = require( '../../playwright.config.js' );
-const { tags } = require( '../../fixtures/fixtures' );
+/**
+ * Internal dependencies
+ */
+import defaultConfig, { setupProjects } from '../../playwright.config';
+import { tags } from '../../fixtures/fixtures';
 
 process.env.USE_WP_ENV = 'true';
 
-config = {
-	...config.default,
+const config = {
+	...defaultConfig,
 	projects: [
-		...config.setupProjects,
+		...setupProjects,
 		{
 			name: 'WooCommerce Shipping & Tax',
 			grep: new RegExp( tags.SERVICES ),
@@ -15,4 +18,4 @@ config = {
 	],
 };
 
-module.exports = config;
+export default config;
