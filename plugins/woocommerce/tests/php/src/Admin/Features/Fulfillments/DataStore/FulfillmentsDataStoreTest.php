@@ -951,7 +951,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 
 		$remaining = $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT COUNT(*) FROM {$wpdb->prefix}wc_order_fulfillments WHERE entity_type = %s AND entity_id = %d",
+				"SELECT COUNT(*) FROM {$wpdb->prefix}wc_order_fulfillments WHERE entity_type = %s AND entity_id = %s",
 				$entity_type,
 				$entity_id
 			)
@@ -1008,9 +1008,9 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 
 		$remaining = $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT COUNT(*) FROM {$wpdb->prefix}wc_order_fulfillments WHERE entity_type = %s AND entity_id = %d",
+				"SELECT COUNT(*) FROM {$wpdb->prefix}wc_order_fulfillments WHERE entity_type = %s AND entity_id = %s",
 				$entity_type,
-				200
+				'200'
 			)
 		);
 		$this->assertSame( '1', $remaining, 'Fulfillments for other entities should not be affected' );
