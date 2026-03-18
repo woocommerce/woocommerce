@@ -133,7 +133,7 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 	/**
 	 * Render the attribute options as pills.
 	 *
-	 * @param array     attributes Block attributes.
+	 * @param array     $attributes Block attributes.
 	 * @param string    $content Block content.
 	 * @param \WP_Block $block Block instance.
 	 * @return string The pills.
