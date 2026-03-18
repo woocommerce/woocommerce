@@ -237,7 +237,9 @@ class Content_Renderer {
 		if ( null !== $this->post_content_width ) {
 			$post_content_num = (float) str_replace( 'px', '', $this->post_content_width );
 			$content_size_num = (float) str_replace( 'px', '', $layout['contentSize'] );
-			if ( $post_content_num < $content_size_num ) {
+			// Use epsilon tolerance for floating-point comparison since width
+			// calculations involve round() and division that may produce imprecision.
+			if ( $post_content_num < $content_size_num - 0.01 ) {
 				unset( $styles['spacing']['padding']['left'], $styles['spacing']['padding']['right'] );
 			}
 		}
@@ -255,14 +257,17 @@ class Content_Renderer {
 	/**
 	 * Recursively find the post-content block's width in preprocessed blocks.
 	 *
-	 * @param array $blocks Preprocessed blocks.
+	 * @param array      $blocks Preprocessed blocks.
+	 * @param array|null $post_content_block_names Cached block names for recursion.
 	 * @return string|null The post-content block's width or null if not found.
 	 */
-	private function find_post_content_width( array $blocks ): ?string {
-		$post_content_block_names = (array) apply_filters(
-			'woocommerce_email_editor_post_content_block_names',
-			array( 'core/post-content' )
-		);
+	private function find_post_content_width( array $blocks, ?array $post_content_block_names = null ): ?string {
+		if ( null === $post_content_block_names ) {
+			$post_content_block_names = (array) apply_filters(
+				'woocommerce_email_editor_post_content_block_names',
+				array( 'core/post-content' )
+			);
+		}
 
 		foreach ( $blocks as $block ) {
 			$block_name = $block['blockName'] ?? '';
@@ -270,7 +275,7 @@ class Content_Renderer {
 				return $block['email_attrs']['width'] ?? null;
 			}
 			if ( ! empty( $block['innerBlocks'] ) ) {
-				$found = $this->find_post_content_width( $block['innerBlocks'] );
+				$found = $this->find_post_content_width( $block['innerBlocks'], $post_content_block_names );
 				if ( null !== $found ) {
 					return $found;
 				}

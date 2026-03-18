@@ -49,6 +49,13 @@ class Spacing_Preprocessor implements Preprocessor {
 	 * padding to their children instead of taking it themselves. This enables
 	 * alignfull blocks to skip root padding and span the full email width.
 	 *
+	 * Blocks fall into three categories for root padding:
+	 * - Zero padding (has_zero_padding): skip root padding entirely — edge-to-edge intent.
+	 * - Non-zero explicit padding (has_own_padding, !has_zero_padding): receive root padding
+	 *   on top of their own padding. Their own padding is internal content spacing; root
+	 *   padding ensures inset from the email edge. These blocks also stop delegation.
+	 * - No explicit padding: receive root padding if delegated, or delegate if a container.
+	 *
 	 * @param array      $parsed_blocks Parsed blocks.
 	 * @param string     $gap Gap.
 	 * @param array|null $parent_block Parent block.
