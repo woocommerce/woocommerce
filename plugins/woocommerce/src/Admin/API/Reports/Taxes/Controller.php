@@ -226,7 +226,7 @@ class Controller extends GenericController implements ExportableInterface {
 	 * @return array Key value pair of Column ID => Label.
 	 */
 	public function get_export_columns() {
-		return array(
+		$export_columns = array(
 			'tax_code'     => __( 'Tax code', 'woocommerce' ),
 			'rate'         => __( 'Rate', 'woocommerce' ),
 			'total_tax'    => __( 'Total tax', 'woocommerce' ),
@@ -234,6 +234,14 @@ class Controller extends GenericController implements ExportableInterface {
 			'shipping_tax' => __( 'Shipping tax', 'woocommerce' ),
 			'orders_count' => __( 'Orders', 'woocommerce' ),
 		);
+
+		/**
+		 * Filter to add or remove column names from the taxes report for export.
+		 *
+		 * @since 10.7.0
+		 * @param array $export_columns Key value pair of column ID and label.
+		 */
+		return apply_filters( 'woocommerce_report_taxes_export_columns', $export_columns );
 	}
 
 	/**
@@ -243,7 +251,7 @@ class Controller extends GenericController implements ExportableInterface {
 	 * @return array Key value pair of Column ID => Row Value.
 	 */
 	public function prepare_item_for_export( $item ) {
-		return array(
+		$export_item = array(
 			'tax_code'     => \WC_Tax::get_rate_code(
 				(object) array(
 					'tax_rate_id'       => $item['tax_rate_id'],
@@ -259,5 +267,15 @@ class Controller extends GenericController implements ExportableInterface {
 			'shipping_tax' => self::csv_number_format( $item['shipping_tax'] ),
 			'orders_count' => $item['orders_count'],
 		);
+
+		/**
+		 * Filter to prepare extra columns in the export item for the taxes
+		 * report.
+		 *
+		 * @since 10.7.0
+		 * @param array $export_item Key value pair of column ID and row value.
+		 * @param array $item        The original report item.
+		 */
+		return apply_filters( 'woocommerce_report_taxes_prepare_export_item', $export_item, $item );
 	}
 }

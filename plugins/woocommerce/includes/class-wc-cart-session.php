@@ -131,8 +131,8 @@ final class WC_Cart_Session {
 			$update_cart_session = true;
 		}
 
-		// Prime caches to reduce future queries.
-		if ( is_callable( '_prime_post_caches' ) ) {
+		if ( ! empty( $cart ) ) {
+			// Prime caches to reduce future queries.
 			_prime_post_caches( wp_list_pluck( $cart, 'product_id' ) );
 		}
 

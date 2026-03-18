@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix console warnings in the editor when using cart and checkout blocks.

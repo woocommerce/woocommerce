@@ -11,7 +11,7 @@ namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Fulfillments\Schema;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Internal\Fulfillments\Fulfillment;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractSchema;
 use WP_REST_Request;
 

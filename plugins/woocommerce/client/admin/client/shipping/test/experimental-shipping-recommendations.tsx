@@ -122,23 +122,27 @@ describe( 'ShippingRecommendations', () => {
 			expect( screen.queryByText( 'Packlink PRO' ) ).toBeInTheDocument();
 		} );
 
-		it( 'should show ShipStation and Packlink PRO for DE', () => {
+		it( 'should show only Packlink PRO for DE', () => {
 			mockSelectForCountry( 'DE' );
 			render( <ShippingRecommendations /> );
 
 			expect(
 				screen.queryByText( 'WooCommerce Shipping' )
 			).not.toBeInTheDocument();
-			expect( screen.queryByText( 'ShipStation' ) ).toBeInTheDocument();
+			expect(
+				screen.queryByText( 'ShipStation' )
+			).not.toBeInTheDocument();
 			expect( screen.queryByText( 'Packlink PRO' ) ).toBeInTheDocument();
 		} );
 
-		it( 'should show ShipStation and Packlink PRO for GB', () => {
+		it( 'should show only ShipStation for GB', () => {
 			mockSelectForCountry( 'GB' );
 			render( <ShippingRecommendations /> );
 
 			expect( screen.queryByText( 'ShipStation' ) ).toBeInTheDocument();
-			expect( screen.queryByText( 'Packlink PRO' ) ).toBeInTheDocument();
+			expect(
+				screen.queryByText( 'Packlink PRO' )
+			).not.toBeInTheDocument();
 		} );
 
 		it( 'should show only ShipStation for AU', () => {
@@ -158,7 +162,7 @@ describe( 'ShippingRecommendations', () => {
 			expect( screen.queryByText( 'ShipStation' ) ).toBeInTheDocument();
 		} );
 
-		it.each( [ 'ES', 'IT', 'NL', 'AT', 'BE' ] )(
+		it.each( [ 'ES', 'IT', 'NL', 'AT', 'BE', 'IE', 'PT' ] )(
 			'should show only Packlink PRO for %s',
 			( country ) => {
 				mockSelectForCountry( country );
@@ -218,10 +222,9 @@ describe( 'ShippingRecommendations', () => {
 		} );
 
 		it( 'should not show Packlink PRO when it is already active', () => {
-			mockSelectForCountry( 'DE', [ 'packlink-pro-shipping' ] );
+			mockSelectForCountry( 'FR', [ 'packlink-pro-shipping' ] );
 			render( <ShippingRecommendations /> );
 
-			expect( screen.queryByText( 'ShipStation' ) ).toBeInTheDocument();
 			expect(
 				screen.queryByText( 'Packlink PRO' )
 			).not.toBeInTheDocument();
@@ -258,6 +261,67 @@ describe( 'ShippingRecommendations', () => {
 			expect(
 				screen.queryByText( 'WooCommerce Shipping' )
 			).not.toBeInTheDocument();
+		} );
+	} );
+
+	describe( 'impression tracking', () => {
+		it( 'should fire shipping_partner_impression on mount for US', () => {
+			mockSelectForCountry( 'US' );
+			render( <ShippingRecommendations /> );
+
+			expect( recordEvent ).toHaveBeenCalledWith(
+				'shipping_partner_impression',
+				{
+					context: 'settings',
+					country: 'US',
+					plugins:
+						'woocommerce-shipping,woocommerce-shipstation-integration',
+				}
+			);
+		} );
+
+		it( 'should fire shipping_partner_impression with correct plugins for DE', () => {
+			( recordEvent as jest.Mock ).mockClear();
+			mockSelectForCountry( 'DE' );
+			render( <ShippingRecommendations /> );
+
+			expect( recordEvent ).toHaveBeenCalledWith(
+				'shipping_partner_impression',
+				{
+					context: 'settings',
+					country: 'DE',
+					plugins: 'packlink-pro-shipping',
+				}
+			);
+		} );
+
+		it( 'should not fire shipping_partner_impression for unsupported countries', () => {
+			( recordEvent as jest.Mock ).mockClear();
+			mockSelectForCountry( 'JP' );
+			render( <ShippingRecommendations /> );
+
+			expect( recordEvent ).not.toHaveBeenCalledWith(
+				'shipping_partner_impression',
+				expect.anything()
+			);
+		} );
+
+		it( 'should not fire shipping_partner_impression when selling digital products only', () => {
+			( recordEvent as jest.Mock ).mockClear();
+			( useSelect as jest.Mock ).mockImplementation( ( fn ) =>
+				fn( () => ( {
+					...defaultSelectReturn,
+					getProfileItems: () => ( {
+						product_types: [ 'downloads' ],
+					} ),
+				} ) )
+			);
+			render( <ShippingRecommendations /> );
+
+			expect( recordEvent ).not.toHaveBeenCalledWith(
+				'shipping_partner_impression',
+				expect.anything()
+			);
 		} );
 	} );
 
@@ -333,10 +397,12 @@ describe( 'ShippingRecommendations', () => {
 			userEvent.click( screen.getByText( 'Install' ) );
 
 			expect( recordEvent ).toHaveBeenCalledWith(
-				'settings_shipping_recommendation_setup_click',
+				'shipping_partner_click',
 				{
-					plugin: 'woocommerce-shipping',
-					action: 'install',
+					context: 'settings',
+					country: 'US',
+					plugins: 'woocommerce-shipping',
+					selected_plugin: 'woocommerce-shipping',
 				}
 			);
 			expect( installPluginsMock ).toHaveBeenCalledWith( [
@@ -367,10 +433,12 @@ describe( 'ShippingRecommendations', () => {
 			userEvent.click( screen.getByText( 'Install' ) );
 
 			expect( recordEvent ).toHaveBeenCalledWith(
-				'settings_shipping_recommendation_setup_click',
+				'shipping_partner_click',
 				{
-					plugin: 'woocommerce-shipstation-integration',
-					action: 'install',
+					context: 'settings',
+					country: 'CA',
+					plugins: 'woocommerce-shipstation-integration',
+					selected_plugin: 'woocommerce-shipstation-integration',
 				}
 			);
 			expect( installPluginsMock ).toHaveBeenCalledWith( [
@@ -401,10 +469,12 @@ describe( 'ShippingRecommendations', () => {
 			userEvent.click( screen.getByText( 'Install' ) );
 
 			expect( recordEvent ).toHaveBeenCalledWith(
-				'settings_shipping_recommendation_setup_click',
+				'shipping_partner_click',
 				{
-					plugin: 'packlink-pro-shipping',
-					action: 'install',
+					context: 'settings',
+					country: 'FR',
+					plugins: 'packlink-pro-shipping',
+					selected_plugin: 'packlink-pro-shipping',
 				}
 			);
 			expect( installPluginsMock ).toHaveBeenCalledWith( [
@@ -414,6 +484,144 @@ describe( 'ShippingRecommendations', () => {
 				expect( successNoticeMock ).toHaveBeenCalledWith(
 					'Packlink PRO is installed!',
 					expect.anything()
+				);
+			} );
+		} );
+	} );
+
+	describe( 'install result tracking', () => {
+		it( 'should fire shipping_partner_install with success on successful install', async () => {
+			( recordEvent as jest.Mock ).mockClear();
+			const installPluginsMock = jest.fn().mockResolvedValue( undefined );
+			( useDispatch as jest.Mock ).mockReturnValue( {
+				installAndActivatePlugins: jest
+					.fn()
+					.mockResolvedValue( undefined ),
+				installPlugins: installPluginsMock,
+				activatePlugins: jest.fn().mockResolvedValue( undefined ),
+				createSuccessNotice: jest.fn(),
+			} );
+			mockSelectForCountry( 'CA' );
+			render( <ShippingRecommendations /> );
+
+			userEvent.click( screen.getByText( 'Install' ) );
+
+			await waitFor( () => {
+				expect( recordEvent ).toHaveBeenCalledWith(
+					'shipping_partner_install',
+					{
+						context: 'settings',
+						country: 'CA',
+						plugins: 'woocommerce-shipstation-integration',
+						selected_plugin: 'woocommerce-shipstation-integration',
+						success: true,
+					}
+				);
+			} );
+		} );
+
+		it( 'should fire shipping_partner_install with failure on failed install', async () => {
+			( recordEvent as jest.Mock ).mockClear();
+			const installPluginsMock = jest.fn().mockRejectedValue( {
+				errors: { plugin: 'Install failed' },
+			} );
+			( useDispatch as jest.Mock ).mockReturnValue( {
+				installAndActivatePlugins: jest
+					.fn()
+					.mockResolvedValue( undefined ),
+				installPlugins: installPluginsMock,
+				activatePlugins: jest.fn().mockResolvedValue( undefined ),
+				createSuccessNotice: jest.fn(),
+			} );
+			mockSelectForCountry( 'CA' );
+			render( <ShippingRecommendations /> );
+
+			userEvent.click( screen.getByText( 'Install' ) );
+
+			await waitFor( () => {
+				expect( recordEvent ).toHaveBeenCalledWith(
+					'shipping_partner_install',
+					{
+						context: 'settings',
+						country: 'CA',
+						plugins: 'woocommerce-shipstation-integration',
+						selected_plugin: 'woocommerce-shipstation-integration',
+						success: false,
+					}
+				);
+			} );
+		} );
+	} );
+
+	describe( 'activate result tracking', () => {
+		it( 'should fire shipping_partner_activate with success on successful activation', async () => {
+			( recordEvent as jest.Mock ).mockClear();
+			const activatePluginsMock = jest
+				.fn()
+				.mockResolvedValue( undefined );
+			( useDispatch as jest.Mock ).mockReturnValue( {
+				installAndActivatePlugins: jest
+					.fn()
+					.mockResolvedValue( undefined ),
+				installPlugins: jest.fn().mockResolvedValue( undefined ),
+				activatePlugins: activatePluginsMock,
+				createSuccessNotice: jest.fn(),
+			} );
+			mockSelectForCountry( 'CA', [], {
+				getInstalledPlugins: () => [
+					'woocommerce-shipstation-integration',
+				],
+			} );
+			render( <ShippingRecommendations /> );
+
+			userEvent.click( screen.getByText( 'Activate' ) );
+
+			await waitFor( () => {
+				expect( recordEvent ).toHaveBeenCalledWith(
+					'shipping_partner_activate',
+					{
+						context: 'settings',
+						country: 'CA',
+						plugins: 'woocommerce-shipstation-integration',
+						selected_plugin: 'woocommerce-shipstation-integration',
+						success: true,
+					}
+				);
+			} );
+		} );
+
+		it( 'should fire shipping_partner_activate with failure on failed activation', async () => {
+			( recordEvent as jest.Mock ).mockClear();
+			const activatePluginsMock = jest.fn().mockRejectedValue( {
+				errors: { plugin: 'Activate failed' },
+			} );
+			( useDispatch as jest.Mock ).mockReturnValue( {
+				installAndActivatePlugins: jest
+					.fn()
+					.mockResolvedValue( undefined ),
+				installPlugins: jest.fn().mockResolvedValue( undefined ),
+				activatePlugins: activatePluginsMock,
+				createSuccessNotice: jest.fn(),
+			} );
+			mockSelectForCountry( 'CA', [], {
+				getInstalledPlugins: () => [
+					'woocommerce-shipstation-integration',
+				],
+			} );
+			render( <ShippingRecommendations /> );
+
+			userEvent.click( screen.getByText( 'Activate' ) );
+
+			await waitFor( () => {
+				expect( recordEvent ).toHaveBeenCalledWith(
+					'shipping_partner_activate',
+					{
+						context: 'settings',
+						country: 'CA',
+						plugins: 'woocommerce-shipstation-integration',
+						selected_plugin: 'woocommerce-shipstation-integration',
+						success: false,
+					}
 				);
 			} );
 		} );
@@ -480,10 +688,12 @@ describe( 'ShippingRecommendations', () => {
 			userEvent.click( screen.getByText( 'Activate' ) );
 
 			expect( recordEvent ).toHaveBeenCalledWith(
-				'settings_shipping_recommendation_setup_click',
+				'shipping_partner_click',
 				{
-					plugin: 'woocommerce-shipping',
-					action: 'activate',
+					context: 'settings',
+					country: 'US',
+					plugins: 'woocommerce-shipping',
+					selected_plugin: 'woocommerce-shipping',
 				}
 			);
 			expect( activatePluginsMock ).toHaveBeenCalledWith( [
@@ -520,10 +730,12 @@ describe( 'ShippingRecommendations', () => {
 			userEvent.click( screen.getByText( 'Activate' ) );
 
 			expect( recordEvent ).toHaveBeenCalledWith(
-				'settings_shipping_recommendation_setup_click',
+				'shipping_partner_click',
 				{
-					plugin: 'woocommerce-shipstation-integration',
-					action: 'activate',
+					context: 'settings',
+					country: 'CA',
+					plugins: 'woocommerce-shipstation-integration',
+					selected_plugin: 'woocommerce-shipstation-integration',
 				}
 			);
 			expect( activatePluginsMock ).toHaveBeenCalledWith( [
@@ -558,10 +770,12 @@ describe( 'ShippingRecommendations', () => {
 			userEvent.click( screen.getByText( 'Activate' ) );
 
 			expect( recordEvent ).toHaveBeenCalledWith(
-				'settings_shipping_recommendation_setup_click',
+				'shipping_partner_click',
 				{
-					plugin: 'packlink-pro-shipping',
-					action: 'activate',
+					context: 'settings',
+					country: 'FR',
+					plugins: 'packlink-pro-shipping',
+					selected_plugin: 'packlink-pro-shipping',
 				}
 			);
 			expect( activatePluginsMock ).toHaveBeenCalledWith( [

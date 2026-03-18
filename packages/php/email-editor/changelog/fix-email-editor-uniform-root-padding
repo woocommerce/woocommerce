@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Apply root horizontal padding uniformly to all blocks in the email rendering pipeline, fixing missing padding for blocks using render_email_callback without Abstract_Block_Renderer.
