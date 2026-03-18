@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add woocommerce_pre_refresh_order_count_cache filter to allow short-circuiting background cache refresh
