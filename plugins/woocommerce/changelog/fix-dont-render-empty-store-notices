@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Store Notices: Avoid rendering empty Store Notices container
