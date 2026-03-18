@@ -246,7 +246,7 @@ class DraftOrders {
 		$suffix = ' This is an indicator that something is filtering WooCommerce or WordPress queries and modifying the query parameters.';
 
 		// if count is greater than our expected batch size, then that's a problem.
-		if ( count( $order_results ) > 20 ) {
+		if ( count( $order_results ) > $expected_batch_size ) {
 			throw new Exception( 'There are an unexpected number of results returned from the query.' . $suffix );
 		}
 
