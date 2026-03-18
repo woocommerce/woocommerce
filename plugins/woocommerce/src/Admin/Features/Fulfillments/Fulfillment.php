@@ -267,6 +267,7 @@ class Fulfillment extends \WC_Data {
 	/**
 	 * Get the tracking number.
 	 *
+	 * @since 10.7.0
 	 * @return string|null Tracking number.
 	 */
 	public function get_tracking_number(): ?string {
@@ -282,6 +283,7 @@ class Fulfillment extends \WC_Data {
 	/**
 	 * Set the tracking number.
 	 *
+	 * @since 10.7.0
 	 * @param string $tracking_number Tracking number.
 	 */
 	public function set_tracking_number( string $tracking_number ): void {
@@ -290,7 +292,8 @@ class Fulfillment extends \WC_Data {
 
 	/**
 	 * Get the shipping provider.
-
+	 *
+	 * @since 10.7.0
 	 * @return string|null Shipping provider slug.
 	 */
 	public function get_shipping_provider(): ?string {
@@ -306,6 +309,7 @@ class Fulfillment extends \WC_Data {
 	/**
 	 * Set the shipping provider.
 	 *
+	 * @since 10.7.0
 	 * @param string $shipping_provider Shipping provider slug.
 	 */
 	public function set_shipping_provider( string $shipping_provider ): void {
@@ -314,7 +318,8 @@ class Fulfillment extends \WC_Data {
 
 	/**
 	 * Get the tracking URL.
-
+	 *
+	 * @since 10.7.0
 	 * @return string|null Tracking URL.
 	 */
 	public function get_tracking_url(): ?string {
@@ -330,6 +335,7 @@ class Fulfillment extends \WC_Data {
 	/**
 	 * Set the tracking URL.
 	 *
+	 * @since 10.7.0
 	 * @param string $tracking_url Tracking URL.
 	 */
 	public function set_tracking_url( string $tracking_url ): void {
