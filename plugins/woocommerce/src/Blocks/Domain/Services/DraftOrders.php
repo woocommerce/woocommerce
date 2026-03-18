@@ -181,7 +181,7 @@ class DraftOrders {
 		/**
 		 * Filters the number of draft orders deleted per batch during cleanup.
 		 *
-		 * @since 9.9.0
+		 * @since 10.7.0
 		 * @param int $batch_size Number of draft orders to delete per batch. Default 20.
 		 */
 		$batch_size = max( 1, (int) apply_filters( 'woocommerce_draft_order_batch_size', 20 ) );
