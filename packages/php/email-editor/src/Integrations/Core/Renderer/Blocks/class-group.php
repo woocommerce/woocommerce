@@ -95,8 +95,8 @@ class Group extends Abstract_Block_Renderer {
 	 * from applying its own horizontal padding (which has been distributed
 	 * per-block by the Spacing_Preprocessor).
 	 *
-	 * @param array{css: string, declarations: array<string, string>} $cell_styles The compiled cell styles.
-	 * @return array{css: string, declarations: array<string, string>} Styles with horizontal padding removed.
+	 * @param array $cell_styles The compiled cell styles from Styles_Helper::get_block_styles().
+	 * @return array Styles with horizontal padding removed.
 	 */
 	private function remove_horizontal_padding( array $cell_styles ): array {
 		unset(
