@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+get_product_variation_image_ids: fetch image ids directly from meta
