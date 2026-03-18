@@ -31,7 +31,7 @@ env:
 jobs:
   build-prep:
     name: Create changelog PR
-    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     permissions:
       contents: write
       pull-requests: write

@@ -2,6 +2,34 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.9.2](https://github.com/woocommerce/email-editor/releases/tag/2.9.2) - 2026-03-12 
+
+-   Patch - Add rich cards for WordPress embeds in emails with excerpt, site icon, and a performance cap of 5 per email. [#63542]
+-   Patch - Distribute root horizontal padding to individual block wrappers for future alignfull support. [#63359]
+
+## [2.9.1](https://github.com/woocommerce/email-editor/releases/tag/2.9.1) - 2026-03-08 
+
+-   Patch - Add woocommerce_email_editor_send_preview_email_subject filter to allow customizing the preview email subject. [#63504]
+-   Patch - Email Editor: consolidate redundant CSS inlining into a single pass for improved rendering performance. [#63454]
+
+## [2.9.0](https://github.com/woocommerce/email-editor/releases/tag/2.9.0) - 2026-02-23 
+
+-   Patch - Verify user can edit post in send preview email endpoint permission check [#63413]
+-   Minor - Removed enqueuing of custom RichText package that was needed for WordPress < 6.8 [#63289]
+
+## [2.8.1](https://github.com/woocommerce/email-editor/releases/tag/2.8.1) - 2026-02-20 
+
+-   Patch - Fix unbounded static cache memory leaks in vendor-prefixed CSS inlining dependencies (emogrifier and symfony/css-selector) for long-running processes. [#63365]
+
+## [2.8.0](https://github.com/woocommerce/email-editor/releases/tag/2.8.0) - 2026-02-17 
+
+-   Minor - Fix spacing issues in email editor product collection rendering. [#63177]
+
+## [2.7.0](https://github.com/woocommerce/email-editor/releases/tag/2.7.0) - 2026-02-12 
+
+-   Patch - Fix YouTube URL truncation in subscription emails when video IDs contain underscores. [#63252]
+-   Minor - Add two-column grid layout support for Product Collection block in email rendering. [#63122]
+
 ## [2.6.0](https://github.com/woocommerce/email-editor/releases/tag/2.6.0) - 2026-02-04 
 
 -   Minor - Add post_id parameter and action hook for context-aware personalization tags [#63103]

@@ -302,6 +302,64 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that calculate_refund_amount handles floating point precision correctly.
+	 *
+	 * Values like 43.20 + 19.20 can produce 62.400000000000006 in PHP due to IEEE 754
+	 * floating point representation. The method should round the result to avoid false
+	 * positives in under-refund validation.
+	 */
+	public function test_calculate_refund_amount_avoids_floating_point_errors() {
+		$line_items = array(
+			array(
+				'line_item_id' => '62',
+				'quantity'     => 2,
+				'refund_total' => '43.20',
+			),
+			array(
+				'line_item_id' => '63',
+				'quantity'     => 1,
+				'refund_total' => '19.20',
+			),
+		);
+
+		$result = $this->data_utils->calculate_refund_amount( $line_items );
+
+		// Without rounding, 43.20 + 19.20 = 62.400000000000006 in PHP.
+		// The method should return exactly 62.40.
+		$this->assertSame( 62.40, $result );
+	}
+
+	/**
+	 * Test that calculate_refund_amount includes tax totals.
+	 */
+	public function test_calculate_refund_amount_includes_tax() {
+		$line_items = array(
+			array(
+				'line_item_id' => '1',
+				'quantity'     => 1,
+				'refund_total' => '10.00',
+				'refund_tax'   => array(
+					array(
+						'id'           => 1,
+						'refund_total' => '1.50',
+					),
+				),
+			),
+		);
+
+		$result = $this->data_utils->calculate_refund_amount( $line_items );
+
+		$this->assertSame( 11.50, $result );
+	}
+
+	/**
+	 * Test that calculate_refund_amount returns null for empty line items.
+	 */
+	public function test_calculate_refund_amount_returns_null_for_empty() {
+		$this->assertNull( $this->data_utils->calculate_refund_amount( array() ) );
+	}
+
+	/**
 	 * Helper: Create an order with shipping that has tax rate IDs but zero tax amounts.
 	 *
 	 * This simulates the scenario where a tax rate exists but doesn't apply to shipping.

@@ -45,6 +45,13 @@ export function InnerEditor( {
 	postType: initialPostType,
 	settings,
 	contentRef,
+	customSavePanel,
+}: {
+	postId: number | string;
+	postType: string;
+	settings: Record< string, unknown >;
+	contentRef?: React.Ref< HTMLDivElement > | null;
+	customSavePanel?: React.ReactElement;
 } ) {
 	const {
 		currentPost,
@@ -100,7 +107,11 @@ export function InnerEditor( {
 		};
 	}, [] );
 
-	const { isFullScreenForced, displaySendEmailButton } = settings;
+	const {
+		isFullScreenForced,
+		displaySendEmailButton,
+		disableSnackbarNotices,
+	} = settings;
 
 	// @ts-expect-error Type is missing in @types/wordpress__editor
 	const { removeEditorPanel } = useDispatch( editorStore );
@@ -161,6 +172,7 @@ export function InnerEditor( {
 					templateId={ template && template.id }
 					contentRef={ contentRef }
 					styles={ styles } // This is needed for BC for Gutenberg below v22
+					customSavePanel={ customSavePanel }
 				>
 					<AutosaveMonitor />
 					<LocalAutosaveMonitor />
@@ -184,7 +196,11 @@ export function InnerEditor( {
 						<SettingsPanel />
 					) }
 					{ displaySendEmailButton && <PublishSave /> }
-					<EditorNotices />
+					<EditorNotices
+						disableSnackbarNotices={
+							disableSnackbarNotices as boolean | undefined
+						}
+					/>
 					<BlockCompatibilityWarnings />
 					<PluginArea scope="woocommerce-email-editor" />
 				</Editor>
