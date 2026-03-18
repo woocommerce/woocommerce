@@ -96,6 +96,16 @@ class InternalNotificationDispatcherTest extends WC_Unit_Test_Case {
 			$this->captured_request['blocking'],
 			'Request should be non-blocking'
 		);
+		$this->assertSame(
+			1,
+			$this->captured_request['timeout'],
+			'Request timeout should be 1 second'
+		);
+		$this->assertSame(
+			'application/json',
+			$this->captured_request['headers']['Content-Type'],
+			'Request Content-Type should be application/json'
+		);
 	}
 
 	/**

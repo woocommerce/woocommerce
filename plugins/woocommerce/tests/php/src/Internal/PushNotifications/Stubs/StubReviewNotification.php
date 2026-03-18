@@ -10,6 +10,9 @@ use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification
  * Stub notification with type 'store_review' for testing.
  */
 class StubReviewNotification extends Notification {
+	/** @var array<string, bool> */
+	private array $meta = array();
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -30,7 +33,7 @@ class StubReviewNotification extends Notification {
 	 * @param string $key The meta key.
 	 */
 	public function has_meta( string $key ): bool {
-		return false;
+		return isset( $this->meta[ $key ] );
 	}
 
 	/**
@@ -38,5 +41,7 @@ class StubReviewNotification extends Notification {
 	 *
 	 * @param string $key The meta key.
 	 */
-	public function write_meta( string $key ): void {}
+	public function write_meta( string $key ): void {
+		$this->meta[ $key ] = true;
+	}
 }
