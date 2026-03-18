@@ -259,9 +259,52 @@ class PaymentGatewaysSettingsControllerTest extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 		$this->assertTrue( $data['enabled'] );
 
-		// Verify the gateway is actually enabled.
-		$gateway = WC()->payment_gateways->payment_gateways()['bacs'];
-		$this->assertSame( 'yes', $gateway->enabled );
+		// Verify persisted state.
+		$saved_settings = get_option( 'woocommerce_bacs_settings' );
+		$this->assertSame( 'yes', $saved_settings['enabled'] );
+	}
+
+	/**
+	 * Test updating a payment gateway with top-level description field.
+	 */
+	public function test_update_payment_gateway_with_top_level_description() {
+		// Act.
+		$request = new WP_REST_Request( 'PUT', self::ENDPOINT . '/bacs' );
+		$request->set_param( 'description', 'Pay via bank transfer.' );
+		$response = $this->server->dispatch( $request );
+
+		// Assert.
+		$this->assertSame( 200, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertSame( 'Pay via bank transfer.', $data['description'] );
+
+		// Verify persisted state.
+		$saved_settings = get_option( 'woocommerce_bacs_settings' );
+		$this->assertSame( 'Pay via bank transfer.', $saved_settings['description'] );
+	}
+
+	/**
+	 * Test that legacy values.enabled with string 'yes' still works.
+	 *
+	 * Existing callers send enabled as 'yes'/'no' strings inside the values
+	 * parameter. This must remain supported for backwards compatibility.
+	 */
+	public function test_update_payment_gateway_with_legacy_yes_string() {
+		// Act.
+		$request = new WP_REST_Request( 'PUT', self::ENDPOINT . '/bacs' );
+		$request->set_param( 'values', array( 'enabled' => 'yes' ) );
+		$response = $this->server->dispatch( $request );
+
+		// Assert.
+		$this->assertSame( 200, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertTrue( $data['enabled'] );
+
+		// Verify persisted state.
+		$saved_settings = get_option( 'woocommerce_bacs_settings' );
+		$this->assertSame( 'yes', $saved_settings['enabled'] );
 	}
 
 	/**
