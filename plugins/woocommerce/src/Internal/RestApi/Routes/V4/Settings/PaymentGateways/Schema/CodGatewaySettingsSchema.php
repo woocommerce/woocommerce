@@ -33,8 +33,6 @@ class CodGatewaySettingsSchema extends AbstractPaymentGatewaySettingsSchema {
 	 * @return array Custom group structure.
 	 */
 	protected function get_custom_groups_for_gateway( WC_Payment_Gateway $gateway ): array {
-		$gateway->init_form_fields();
-
 		$group = array(
 			'title'       => __( 'Cash on delivery settings', 'woocommerce' ),
 			'description' => __( 'Manage how Cash on delivery appears at checkout and in order emails.', 'woocommerce' ),

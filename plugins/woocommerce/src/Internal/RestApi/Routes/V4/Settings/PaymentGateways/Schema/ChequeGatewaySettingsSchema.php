@@ -31,48 +31,42 @@ class ChequeGatewaySettingsSchema extends AbstractPaymentGatewaySettingsSchema {
 	 * @return array Custom group structure.
 	 */
 	protected function get_custom_groups_for_gateway( WC_Payment_Gateway $gateway ): array {
-		$gateway->init_form_fields();
-
 		$group = array(
 			'title'       => __( 'Check payment settings', 'woocommerce' ),
 			'description' => __( 'Manage how check payments appear at checkout and in order emails.', 'woocommerce' ),
 			'order'       => 1,
-			'fields'      => array(),
-		);
-
-		$group['fields'][] = array(
-			'id'    => 'enabled',
-			'label' => __( 'Enable/Disable', 'woocommerce' ),
-			'type'  => 'checkbox',
-			'desc'  => __( 'Enable check payments at checkout', 'woocommerce' ),
-		);
-
-		$group['fields'][] = array(
-			'id'    => 'title',
-			'label' => __( 'Checkout label', 'woocommerce' ),
-			'type'  => 'text',
-			'desc'  => __( 'Shown to customers on the payment methods list at checkout.', 'woocommerce' ),
-		);
-
-		$group['fields'][] = array(
-			'id'    => 'description',
-			'label' => __( 'Checkout instructions', 'woocommerce' ),
-			'type'  => 'text',
-			'desc'  => __( 'Shown below the checkout label.', 'woocommerce' ),
-		);
-
-		$group['fields'][] = array(
-			'id'    => 'order',
-			'label' => __( 'Order', 'woocommerce' ),
-			'type'  => 'number',
-			'desc'  => __( 'Determines the display order of payment gateways during checkout.', 'woocommerce' ),
-		);
-
-		$group['fields'][] = array(
-			'id'    => 'instructions',
-			'label' => __( 'Instructions shown after checkout', 'woocommerce' ),
-			'type'  => 'text',
-			'desc'  => __( 'Shown on the order confirmation page and in order emails.', 'woocommerce' ),
+			'fields'      => array(
+				array(
+					'id'    => 'enabled',
+					'label' => __( 'Enable/Disable', 'woocommerce' ),
+					'type'  => 'checkbox',
+					'desc'  => __( 'Enable check payments at checkout', 'woocommerce' ),
+				),
+				array(
+					'id'    => 'title',
+					'label' => __( 'Checkout label', 'woocommerce' ),
+					'type'  => 'text',
+					'desc'  => __( 'Shown to customers on the payment methods list at checkout.', 'woocommerce' ),
+				),
+				array(
+					'id'    => 'description',
+					'label' => __( 'Checkout instructions', 'woocommerce' ),
+					'type'  => 'text',
+					'desc'  => __( 'Shown below the checkout label.', 'woocommerce' ),
+				),
+				array(
+					'id'    => 'order',
+					'label' => __( 'Order', 'woocommerce' ),
+					'type'  => 'number',
+					'desc'  => __( 'Determines the display order of payment gateways during checkout.', 'woocommerce' ),
+				),
+				array(
+					'id'    => 'instructions',
+					'label' => __( 'Instructions shown after checkout', 'woocommerce' ),
+					'type'  => 'text',
+					'desc'  => __( 'Shown on the order confirmation page and in order emails.', 'woocommerce' ),
+				),
+			),
 		);
 
 		return array( 'settings' => $group );
