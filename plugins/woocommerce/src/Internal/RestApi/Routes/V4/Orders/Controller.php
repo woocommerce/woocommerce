@@ -319,6 +319,7 @@ class Controller extends AbstractController {
 		}
 		$product_ids = array_unique( array_filter( $product_ids ) );
 		if ( ! empty( $product_ids ) ) {
+			// Prime caches to reduce future queries.
 			_prime_post_caches( $product_ids, true, true );
 		}
 

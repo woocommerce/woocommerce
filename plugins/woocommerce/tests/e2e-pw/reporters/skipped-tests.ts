@@ -1,11 +1,16 @@
-require( '@playwright/test/reporter' );
+/**
+ * External dependencies
+ */
+import type { TestCase, TestResult } from '@playwright/test/reporter';
 
 class SkippedReporter {
+	skippedTests: string[];
+
 	constructor() {
 		this.skippedTests = [];
 	}
 
-	onTestEnd( testCase, testResult ) {
+	onTestEnd( testCase: TestCase, testResult: TestResult ) {
 		if (
 			testResult.status === 'skipped' &&
 			! testCase.location.file.includes( 'fixtures' )
@@ -27,4 +32,4 @@ class SkippedReporter {
 	}
 }
 
-module.exports = SkippedReporter;
+export default SkippedReporter;
