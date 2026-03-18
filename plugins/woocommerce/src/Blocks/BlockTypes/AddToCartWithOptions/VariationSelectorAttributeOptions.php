@@ -190,7 +190,7 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 					'id'              => $attribute_id,
 					'aria-labelledby' => $attribute_id . '_label',
 					'data-wp-context' => array(
-						'name'          => $attribute_slug,
+						'name'          => wc_attribute_label( $block->context['woocommerce/attributeName'] ),
 						'options'       => $attribute_terms,
 						'selectedValue' => $this->get_default_selected_attribute( $attribute_slug, $attribute_terms ),
 						'focused'       => '',
