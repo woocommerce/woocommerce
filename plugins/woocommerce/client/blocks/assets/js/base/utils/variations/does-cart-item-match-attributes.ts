@@ -47,8 +47,8 @@ export const doesCartItemMatchAttributes = (
 	return cartItem.variation.every( ( { attribute, value: termName } ) =>
 		selectedAttributes.some( ( selectedAttr: SelectedAttributes ) => {
 			// Find the term matching the cart item's value label.
-			const terms = productAttributes.find(
-				( attr ) => attribute === attr.name
+			const terms = productAttributes.find( ( attr ) =>
+				attributeNamesMatch( attribute, attr.name )
 			)?.terms;
 			const termSlug =
 				terms?.find( ( term ) => term.name === termName )?.slug ||
