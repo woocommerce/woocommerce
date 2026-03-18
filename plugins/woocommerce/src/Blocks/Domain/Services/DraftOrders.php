@@ -169,15 +169,22 @@ class DraftOrders {
 	}
 
 	/**
-	 * Delete draft orders older than a day in batches of 20.
+	 * Delete draft orders older than a day in configurable batches (default: 20).
 	 *
-	 * Ran on a daily cron schedule.
+	 * Ran on a daily cron schedule. Batch size is filterable via
+	 * `woocommerce_draft_order_batch_size`.
 	 *
 	 * @internal
 	 */
 	public function delete_expired_draft_orders() {
-		$count      = 0;
-		$batch_size = 20;
+		$count = 0;
+		/**
+		 * Filters the number of draft orders deleted per batch during cleanup.
+		 *
+		 * @since 9.9.0
+		 * @param int $batch_size Number of draft orders to delete per batch. Default 20.
+		 */
+		$batch_size = max( 1, (int) apply_filters( 'woocommerce_draft_order_batch_size', 20 ) );
 		$this->ensure_draft_status_registered();
 		$orders = wc_get_orders(
 			[
