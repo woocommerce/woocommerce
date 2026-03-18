@@ -141,9 +141,9 @@ class Blocks_Width_Preprocessor_Test extends \Email_Editor_Unit_Test {
 		$result = $this->preprocessor->preprocess( $blocks, $this->layout, $this->styles );
 		$result = $result[0];
 		$this->assertCount( 3, $result['innerBlocks'] );
-		$this->assertEquals( '211px', $result['innerBlocks'][0]['email_attrs']['width'] ); // (660 - 10 - 10) * 0.33
+		$this->assertEquals( '218px', $result['innerBlocks'][0]['email_attrs']['width'] ); // 660 * 0.33
 		$this->assertEquals( '100px', $result['innerBlocks'][1]['email_attrs']['width'] );
-		$this->assertEquals( '128px', $result['innerBlocks'][2]['email_attrs']['width'] ); // (660 - 10 - 10) * 0.2
+		$this->assertEquals( '132px', $result['innerBlocks'][2]['email_attrs']['width'] ); // 660 * 0.2
 	}
 
 	/**
@@ -204,10 +204,10 @@ class Blocks_Width_Preprocessor_Test extends \Email_Editor_Unit_Test {
 		$inner_blocks = $result[0]['innerBlocks'];
 
 		$this->assertCount( 2, $inner_blocks );
-		$this->assertEquals( '256px', $inner_blocks[0]['email_attrs']['width'] ); // (660 - 10 - 10) * 0.4
-		$this->assertEquals( '236px', $inner_blocks[0]['innerBlocks'][0]['email_attrs']['width'] ); // 256 - 10 - 10
-		$this->assertEquals( '384px', $inner_blocks[1]['email_attrs']['width'] ); // (660 - 10 - 10) * 0.6
-		$this->assertEquals( '344px', $inner_blocks[1]['innerBlocks'][0]['email_attrs']['width'] ); // 384 - 25 - 15
+		$this->assertEquals( '264px', $inner_blocks[0]['email_attrs']['width'] ); // 660 * 0.4
+		$this->assertEquals( '244px', $inner_blocks[0]['innerBlocks'][0]['email_attrs']['width'] ); // 264 - 10 - 10
+		$this->assertEquals( '396px', $inner_blocks[1]['email_attrs']['width'] ); // 660 * 0.6
+		$this->assertEquals( '356px', $inner_blocks[1]['innerBlocks'][0]['email_attrs']['width'] ); // 396 - 25 - 15
 	}
 
 	/**
@@ -259,12 +259,12 @@ class Blocks_Width_Preprocessor_Test extends \Email_Editor_Unit_Test {
 		$inner_blocks = $result[0]['innerBlocks'];
 
 		$this->assertCount( 3, $inner_blocks );
-		$this->assertEquals( '200px', $inner_blocks[0]['email_attrs']['width'] ); // (660 - 10 - 10) * 0.33
-		$this->assertEquals( '200px', $inner_blocks[0]['innerBlocks'][0]['email_attrs']['width'] );
-		$this->assertEquals( '200px', $inner_blocks[1]['email_attrs']['width'] ); // (660 - 10 - 10) * 0.33
-		$this->assertEquals( '200px', $inner_blocks[1]['innerBlocks'][0]['email_attrs']['width'] );
-		$this->assertEquals( '200px', $inner_blocks[2]['email_attrs']['width'] ); // (660 - 10 - 10) * 0.33
-		$this->assertEquals( '200px', $inner_blocks[2]['innerBlocks'][0]['email_attrs']['width'] );
+		$this->assertEquals( '206.67px', $inner_blocks[0]['email_attrs']['width'] ); // 620 / 3 rounded to 2 decimal places.
+		$this->assertEquals( '207px', $inner_blocks[0]['innerBlocks'][0]['email_attrs']['width'] ); // Rounded to integer.
+		$this->assertEquals( '206.67px', $inner_blocks[1]['email_attrs']['width'] ); // 620 / 3 rounded to 2 decimal places.
+		$this->assertEquals( '207px', $inner_blocks[1]['innerBlocks'][0]['email_attrs']['width'] ); // Rounded to integer.
+		$this->assertEquals( '206.67px', $inner_blocks[2]['email_attrs']['width'] ); // 620 / 3 rounded to 2 decimal places.
+		$this->assertEquals( '207px', $inner_blocks[2]['innerBlocks'][0]['email_attrs']['width'] ); // Rounded to integer.
 	}
 
 	/**
@@ -311,9 +311,9 @@ class Blocks_Width_Preprocessor_Test extends \Email_Editor_Unit_Test {
 		$inner_blocks = $result[0]['innerBlocks'];
 
 		$this->assertCount( 3, $inner_blocks );
-		$this->assertEquals( '200px', $inner_blocks[0]['email_attrs']['width'] ); // (620 - 10 - 10) * 0.3333
+		$this->assertEquals( '207px', $inner_blocks[0]['email_attrs']['width'] ); // 620 * 0.3333
 		$this->assertEquals( '200px', $inner_blocks[1]['email_attrs']['width'] ); // already defined.
-		$this->assertEquals( '200px', $inner_blocks[2]['email_attrs']['width'] ); // 600 -200 - 200
+		$this->assertEquals( '213px', $inner_blocks[2]['email_attrs']['width'] ); // 620 - 207 - 200
 	}
 
 	/**
@@ -338,7 +338,49 @@ class Blocks_Width_Preprocessor_Test extends \Email_Editor_Unit_Test {
 
 		$this->assertCount( 2, $result );
 		$this->assertEquals( '660px', $result[0]['email_attrs']['width'] ); // full width.
-		$this->assertEquals( '640px', $result[1]['email_attrs']['width'] ); // 660 - 10 - 10
+		$this->assertEquals( '660px', $result[1]['email_attrs']['width'] ); // no root padding in email_attrs, full width.
+	}
+
+	/**
+	 * Test it subtracts root padding from block widths when set in email_attrs by Spacing_Preprocessor
+	 */
+	public function testItSubtractsRootPaddingFromEmailAttrs(): void {
+		$blocks = array(
+			// Block with root padding (set by Spacing_Preprocessor).
+			array(
+				'blockName'   => 'core/columns',
+				'attrs'       => array(),
+				'email_attrs' => array(
+					'root-padding-left'  => '10px',
+					'root-padding-right' => '10px',
+				),
+				'innerBlocks' => array(),
+			),
+			// Block without root padding (e.g., container that manages its own layout).
+			array(
+				'blockName'   => 'core/group',
+				'attrs'       => array(),
+				'innerBlocks' => array(),
+			),
+			// Full-width block with root padding should not be subtracted.
+			array(
+				'blockName'   => 'core/columns',
+				'attrs'       => array(
+					'align' => 'full',
+				),
+				'email_attrs' => array(
+					'root-padding-left'  => '10px',
+					'root-padding-right' => '10px',
+				),
+				'innerBlocks' => array(),
+			),
+		);
+		$result = $this->preprocessor->preprocess( $blocks, $this->layout, $this->styles );
+
+		$this->assertCount( 3, $result );
+		$this->assertEquals( '640px', $result[0]['email_attrs']['width'] ); // 660 - 10 - 10.
+		$this->assertEquals( '660px', $result[1]['email_attrs']['width'] ); // No root padding, full width.
+		$this->assertEquals( '660px', $result[2]['email_attrs']['width'] ); // Full-width, not subtracted.
 	}
 
 	/**
@@ -409,8 +451,8 @@ class Blocks_Width_Preprocessor_Test extends \Email_Editor_Unit_Test {
 		$result = $this->preprocessor->preprocess( $blocks, $this->layout, $this->styles );
 		$this->assertCount( 3, $result[0]['innerBlocks'] );
 		$this->assertEquals( '140px', $result[0]['innerBlocks'][0]['email_attrs']['width'] );
-		$this->assertEquals( '220px', $result[0]['innerBlocks'][1]['email_attrs']['width'] );
-		$this->assertEquals( '240px', $result[0]['innerBlocks'][2]['email_attrs']['width'] );
+		$this->assertEquals( '230px', $result[0]['innerBlocks'][1]['email_attrs']['width'] );
+		$this->assertEquals( '250px', $result[0]['innerBlocks'][2]['email_attrs']['width'] );
 
 		$blocks = array(
 			array(
@@ -444,7 +486,7 @@ class Blocks_Width_Preprocessor_Test extends \Email_Editor_Unit_Test {
 		$result = $this->preprocessor->preprocess( $blocks, $this->layout, $this->styles );
 		$this->assertCount( 2, $result[0]['innerBlocks'] );
 		$this->assertEquals( '140px', $result[0]['innerBlocks'][0]['email_attrs']['width'] );
-		$this->assertEquals( '500px', $result[0]['innerBlocks'][1]['email_attrs']['width'] );
+		$this->assertEquals( '520px', $result[0]['innerBlocks'][1]['email_attrs']['width'] );
 	}
 
 	/**
@@ -532,12 +574,12 @@ class Blocks_Width_Preprocessor_Test extends \Email_Editor_Unit_Test {
 		$result = $this->preprocessor->preprocess( $blocks, $this->layout, $this->styles );
 		$this->assertCount( 3, $result[0]['innerBlocks'] );
 		$this->assertEquals( '140px', $result[0]['innerBlocks'][0]['email_attrs']['width'] );
-		$this->assertEquals( '185px', $result[0]['innerBlocks'][1]['email_attrs']['width'] );
-		$this->assertEquals( '255px', $result[0]['innerBlocks'][2]['email_attrs']['width'] );
+		$this->assertEquals( '195px', $result[0]['innerBlocks'][1]['email_attrs']['width'] );
+		$this->assertEquals( '265px', $result[0]['innerBlocks'][2]['email_attrs']['width'] );
 		$image_block = $result[0]['innerBlocks'][1]['innerBlocks'][0];
-		$this->assertEquals( '185px', $image_block['email_attrs']['width'] );
+		$this->assertEquals( '195px', $image_block['email_attrs']['width'] );
 		$image_block = $result[0]['innerBlocks'][2]['innerBlocks'][0];
-		$this->assertEquals( '215px', $image_block['email_attrs']['width'] );
+		$this->assertEquals( '225px', $image_block['email_attrs']['width'] );
 	}
 
 	/**

@@ -158,8 +158,9 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertStringContainsString( 'font-family: Test Font Family;', $style );
 		$this->assertStringContainsString( 'padding-top: 3px;', $style );
 		$this->assertStringContainsString( 'padding-bottom: 4px;', $style );
-		$this->assertStringContainsString( 'padding-left: 2px;', $style );
-		$this->assertStringContainsString( 'padding-right: 1px;', $style );
+		// Horizontal padding is now distributed to individual block wrappers via Spacing_Preprocessor.
+		$this->assertStringNotContainsString( 'padding-left:', $style );
+		$this->assertStringNotContainsString( 'padding-right:', $style );
 		$this->assertStringContainsString( 'max-width: 660px;', $style );
 	}
 

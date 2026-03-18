@@ -22,7 +22,7 @@ class NewOrderNotificationTest extends WC_Unit_Test_Case {
 		$payload = $notification->to_payload();
 
 		$this->assertArrayHasKey( 'type', $payload );
-		$this->assertArrayHasKey( 'blog_id', $payload );
+		$this->assertArrayHasKey( 'timestamp', $payload );
 		$this->assertArrayHasKey( 'resource_id', $payload );
 		$this->assertArrayHasKey( 'title', $payload );
 		$this->assertArrayHasKey( 'format', $payload['title'] );

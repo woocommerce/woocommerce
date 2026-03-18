@@ -17,13 +17,14 @@ import {
 	applyCheckoutFilter,
 	productPriceValidation,
 } from '@woocommerce/blocks-checkout';
-import Dinero from 'dinero.js';
 import { forwardRef, useMemo } from '@wordpress/element';
 import type { CartItem } from '@woocommerce/types';
 import { objectHasProp, Currency } from '@woocommerce/types';
 import { getSetting } from '@woocommerce/settings';
 import { Icon, trash } from '@wordpress/icons';
 import { calculateSaleAmount } from '@woocommerce/base-utils';
+import { dinero, transformScale, toSnapshot, type Dinero } from 'dinero.js';
+import { USD } from 'dinero.js/currencies'; // USD is used as a placeholder currency for arithmetic; actual formatting is handled elsewhere.
 
 /**
  * Internal dependencies
@@ -41,10 +42,11 @@ import ProductSaleBadge from '../product-sale-badge';
  * @return {number} Amount with new minor unit precision.
  */
 const getAmountFromRawPrice = (
-	priceObject: Dinero.Dinero,
+	priceObject: Dinero< number >,
 	currency: Currency
 ) => {
-	return priceObject.convertPrecision( currency.minorUnit ).getAmount();
+	return toSnapshot( transformScale( priceObject, currency.minorUnit ) )
+		.amount;
 };
 
 interface CartLineItemRowProps {
@@ -137,13 +139,15 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 			arg,
 		} );
 
-		const regularAmountSingle = Dinero( {
+		const regularAmountSingle = dinero( {
 			amount: parseInt( prices.raw_prices.regular_price, 10 ),
-			precision: prices.raw_prices.precision,
+			currency: USD,
+			scale: prices.raw_prices.precision,
 		} );
-		const purchaseAmountSingle = Dinero( {
+		const purchaseAmountSingle = dinero( {
 			amount: parseInt( prices.raw_prices.price, 10 ),
-			precision: prices.raw_prices.precision,
+			currency: USD,
+			scale: prices.raw_prices.precision,
 		} );
 		const saleAmountSingle = calculateSaleAmount(
 			prices,
@@ -154,9 +158,10 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 		if ( getSetting( 'displayCartPricesIncludingTax', false ) ) {
 			lineSubtotal += parseInt( totals.line_subtotal_tax, 10 );
 		}
-		const subtotalPrice = Dinero( {
+		const subtotalPrice = dinero( {
 			amount: lineSubtotal,
-			precision: totalsCurrency.minorUnit,
+			currency: USD,
+			scale: totalsCurrency.minorUnit,
 		} );
 
 		const firstImage = images.length ? images[ 0 ] : {};
@@ -337,7 +342,7 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 						<ProductPrice
 							currency={ totalsCurrency }
 							format={ productPriceFormat }
-							price={ subtotalPrice.getAmount() }
+							price={ toSnapshot( subtotalPrice ).amount }
 						/>
 
 						<ProductSaleBadge
