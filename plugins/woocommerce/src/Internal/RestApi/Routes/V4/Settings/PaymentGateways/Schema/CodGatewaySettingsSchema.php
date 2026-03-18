@@ -27,61 +27,62 @@ class CodGatewaySettingsSchema extends AbstractPaymentGatewaySettingsSchema {
 	 * Get custom groups for the COD gateway.
 	 *
 	 * Provides design-aligned labels and descriptions for the cash on delivery
-	 * settings form fields.
+	 * settings form fields. Derives fields from the gateway's form_fields
+	 * to preserve any extension-injected settings.
 	 *
 	 * @param WC_Payment_Gateway $gateway Gateway instance.
 	 * @return array Custom group structure.
 	 */
 	protected function get_custom_groups_for_gateway( WC_Payment_Gateway $gateway ): array {
+		$gateway->init_form_fields();
+
+		// Design-aligned overrides for core fields.
+		$core_field_overrides = array(
+			'enabled'            => array(
+				'label' => __( 'Enable/Disable', 'woocommerce' ),
+				'type'  => 'checkbox',
+				'desc'  => __( 'Enable Cash on delivery at checkout', 'woocommerce' ),
+			),
+			'title'              => array(
+				'label' => __( 'Checkout label', 'woocommerce' ),
+				'type'  => 'text',
+				'desc'  => __( 'Shown to customers on the payment methods list at checkout.', 'woocommerce' ),
+			),
+			'description'        => array(
+				'label' => __( 'Checkout instructions', 'woocommerce' ),
+				'type'  => 'text',
+				'desc'  => __( 'Shown below the checkout label.', 'woocommerce' ),
+			),
+			'order'              => array(
+				'label' => __( 'Order', 'woocommerce' ),
+				'type'  => 'number',
+				'desc'  => __( 'Determines the display order of payment gateways during checkout.', 'woocommerce' ),
+			),
+			'instructions'       => array(
+				'label' => __( 'Order confirmation instructions', 'woocommerce' ),
+				'type'  => 'text',
+				'desc'  => __( 'Shown on the order confirmation page and in order emails.', 'woocommerce' ),
+			),
+			'enable_for_methods' => array(
+				'label'   => __( 'Available for shipping methods', 'woocommerce' ),
+				'type'    => 'multiselect',
+				'desc'    => '',
+				'options' => $this->load_shipping_method_options(),
+			),
+			'enable_for_virtual' => array(
+				'label' => __( 'Accept for virtual orders', 'woocommerce' ),
+				'type'  => 'checkbox',
+				'desc'  => __( 'Accept COD if the order is virtual', 'woocommerce' ),
+			),
+		);
+
+		$fields = $this->build_fields_from_form_fields( $gateway, $core_field_overrides );
+
 		$group = array(
 			'title'       => __( 'Cash on delivery settings', 'woocommerce' ),
 			'description' => __( 'Manage how Cash on delivery appears at checkout and in order emails.', 'woocommerce' ),
 			'order'       => 1,
-			'fields'      => array(
-				array(
-					'id'    => 'enabled',
-					'label' => __( 'Enable/Disable', 'woocommerce' ),
-					'type'  => 'checkbox',
-					'desc'  => __( 'Enable Cash on delivery at checkout', 'woocommerce' ),
-				),
-				array(
-					'id'    => 'title',
-					'label' => __( 'Checkout label', 'woocommerce' ),
-					'type'  => 'text',
-					'desc'  => __( 'Shown to customers on the payment methods list at checkout.', 'woocommerce' ),
-				),
-				array(
-					'id'    => 'description',
-					'label' => __( 'Checkout instructions', 'woocommerce' ),
-					'type'  => 'text',
-					'desc'  => __( 'Shown below the checkout label.', 'woocommerce' ),
-				),
-				array(
-					'id'    => 'order',
-					'label' => __( 'Order', 'woocommerce' ),
-					'type'  => 'number',
-					'desc'  => __( 'Determines the display order of payment gateways during checkout.', 'woocommerce' ),
-				),
-				array(
-					'id'    => 'instructions',
-					'label' => __( 'Order confirmation instructions', 'woocommerce' ),
-					'type'  => 'text',
-					'desc'  => __( 'Shown on the order confirmation page and in order emails.', 'woocommerce' ),
-				),
-				array(
-					'id'      => 'enable_for_methods',
-					'label'   => __( 'Available for shipping methods', 'woocommerce' ),
-					'type'    => 'multiselect',
-					'desc'    => '',
-					'options' => $this->load_shipping_method_options(),
-				),
-				array(
-					'id'    => 'enable_for_virtual',
-					'label' => __( 'Accept for virtual orders', 'woocommerce' ),
-					'type'  => 'checkbox',
-					'desc'  => __( 'Accept COD if the order is virtual', 'woocommerce' ),
-				),
-			),
+			'fields'      => $fields,
 		);
 
 		return array( 'settings' => $group );

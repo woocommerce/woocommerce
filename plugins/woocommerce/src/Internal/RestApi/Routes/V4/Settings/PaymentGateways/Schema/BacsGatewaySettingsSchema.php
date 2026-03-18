@@ -26,7 +26,8 @@ class BacsGatewaySettingsSchema extends AbstractPaymentGatewaySettingsSchema {
 	 * Get custom groups for the BACS gateway.
 	 *
 	 * Provides design-aligned labels and descriptions, and separates
-	 * account details into its own group.
+	 * account details into its own group. Derives fields from the gateway's
+	 * form_fields to preserve any extension-injected settings.
 	 *
 	 * @param WC_Payment_Gateway $gateway Gateway instance.
 	 * @return array Custom group structure.
@@ -34,42 +35,43 @@ class BacsGatewaySettingsSchema extends AbstractPaymentGatewaySettingsSchema {
 	protected function get_custom_groups_for_gateway( WC_Payment_Gateway $gateway ): array {
 		$gateway->init_form_fields();
 
+		// Design-aligned overrides for core fields.
+		$core_field_overrides = array(
+			'enabled'      => array(
+				'label' => __( 'Enable/Disable', 'woocommerce' ),
+				'type'  => 'checkbox',
+				'desc'  => __( 'Enable Direct bank transfer at checkout', 'woocommerce' ),
+			),
+			'title'        => array(
+				'label' => __( 'Checkout label', 'woocommerce' ),
+				'type'  => 'text',
+				'desc'  => __( 'Shown to customers on the payment methods list at checkout.', 'woocommerce' ),
+			),
+			'description'  => array(
+				'label' => __( 'Checkout instructions', 'woocommerce' ),
+				'type'  => 'text',
+				'desc'  => __( 'Shown below the checkout label.', 'woocommerce' ),
+			),
+			'order'        => array(
+				'label' => __( 'Order', 'woocommerce' ),
+				'type'  => 'number',
+				'desc'  => __( 'Determines the display order of payment gateways during checkout.', 'woocommerce' ),
+			),
+			'instructions' => array(
+				'label' => __( 'Order confirmation instructions', 'woocommerce' ),
+				'type'  => 'text',
+				'desc'  => __( 'Shown on the order confirmation page and in order emails.', 'woocommerce' ),
+			),
+		);
+
+		// account_details is handled in a separate group, skip it in the main fields.
+		$fields = $this->build_fields_from_form_fields( $gateway, $core_field_overrides, array( 'account_details' ) );
+
 		$settings_group = array(
 			'title'       => __( 'Direct bank transfer settings', 'woocommerce' ),
 			'description' => __( 'Manage how Direct bank transfer appears at checkout and in order emails.', 'woocommerce' ),
 			'order'       => 1,
-			'fields'      => array(
-				array(
-					'id'    => 'enabled',
-					'label' => __( 'Enable/Disable', 'woocommerce' ),
-					'type'  => 'checkbox',
-					'desc'  => __( 'Enable Direct bank transfer at checkout', 'woocommerce' ),
-				),
-				array(
-					'id'    => 'title',
-					'label' => __( 'Checkout label', 'woocommerce' ),
-					'type'  => 'text',
-					'desc'  => __( 'Shown to customers on the payment methods list at checkout.', 'woocommerce' ),
-				),
-				array(
-					'id'    => 'description',
-					'label' => __( 'Checkout instructions', 'woocommerce' ),
-					'type'  => 'text',
-					'desc'  => __( 'Shown below the checkout label.', 'woocommerce' ),
-				),
-				array(
-					'id'    => 'order',
-					'label' => __( 'Order', 'woocommerce' ),
-					'type'  => 'number',
-					'desc'  => __( 'Determines the display order of payment gateways during checkout.', 'woocommerce' ),
-				),
-				array(
-					'id'    => 'instructions',
-					'label' => __( 'Order confirmation instructions', 'woocommerce' ),
-					'type'  => 'text',
-					'desc'  => __( 'Shown on the order confirmation page and in order emails.', 'woocommerce' ),
-				),
-			),
+			'fields'      => $fields,
 		);
 
 		$field = $gateway->form_fields['account_details'] ?? array();
