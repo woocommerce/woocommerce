@@ -355,7 +355,7 @@ class PushTokensDataStore {
 		foreach ( $post_ids as $post_id ) {
 			try {
 				$tokens[] = $this->read( (int) $post_id );
-			} catch ( Exception $e ) {
+			} catch ( WC_Data_Exception $e ) {
 				wc_get_logger()->warning(
 					'Skipping malformed push token during role-based query.',
 					array(
