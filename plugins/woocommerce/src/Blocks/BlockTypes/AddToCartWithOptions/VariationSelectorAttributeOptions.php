@@ -25,9 +25,9 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 	/**
 	 * Render the block.
 	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content Block content.
-	 * @param WP_Block $block Block instance.
+	 * @param array     $attributes Block attributes.
+	 * @param string    $content Block content.
+	 * @param \WP_Block $block Block instance.
 	 * @return string Rendered block output.
 	 */
 	protected function render( $attributes, $content, $block ): string {
@@ -133,9 +133,9 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 	/**
 	 * Render the attribute options as pills.
 	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content Block content.
-	 * @param WP_Block $block Block instance.
+	 * @param array     attributes Block attributes.
+	 * @param string    $content Block content.
+	 * @param \WP_Block $block Block instance.
 	 * @return string The pills.
 	 */
 	protected function render_pills( $attributes, $content, $block ) {
@@ -206,9 +206,9 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 	/**
 	 * Render the attribute options as a dropdown.
 	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content Block content.
-	 * @param WP_Block $block Block instance.
+	 * @param array     $attributes Block attributes.
+	 * @param string    $content Block content.
+	 * @param \WP_Block $block Block instance.
 	 * @return string The dropdown.
 	 */
 	protected function render_dropdown( $attributes, $content, $block ) {
