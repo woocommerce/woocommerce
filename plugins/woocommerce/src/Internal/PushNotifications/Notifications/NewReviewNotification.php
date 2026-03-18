@@ -79,13 +79,13 @@ class NewReviewNotification extends Notification {
 	 * {@inheritDoc}
 	 */
 	public function has_meta( string $key ): bool {
-		return ! empty( get_comment_meta( $this->get_resource_id(), $key, true ) );
+		return WC()->call_function( 'metadata_exists', 'comment', $this->get_resource_id(), $key );
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public function write_meta( string $key ): void {
-		update_comment_meta( $this->get_resource_id(), $key, (string) time() );
+		WC()->call_function( 'update_comment_meta', $this->get_resource_id(), $key, (string) time() );
 	}
 }

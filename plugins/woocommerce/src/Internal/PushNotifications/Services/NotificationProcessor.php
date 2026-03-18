@@ -18,7 +18,7 @@ use Exception;
  * Used by three callers:
  * 1. PushNotificationRestController — loopback endpoint (is_retry: false)
  * 2. ActionScheduler safety net — fallback when shutdown didn't fire (is_retry: true)
- * 3. NotificationRetryHandler (PR 5) — retry for failed sends (is_retry: true)
+ * 3. NotificationRetryHandler — retry for failed sends (is_retry: true)
  *
  * @since 10.7.0
  */
@@ -126,6 +126,10 @@ class NotificationProcessor {
 			PushNotifications::ROLES_WITH_PUSH_NOTIFICATIONS_ENABLED
 		);
 
+		/**
+		 * There are no recipients to send to. We don't want to retry as this
+		 * isn't a 'recoverable error', so mark as sent and return.
+		 */
 		if ( empty( $tokens ) ) {
 			$notification->write_meta( self::SENT_META_KEY );
 			return true;
@@ -133,29 +137,26 @@ class NotificationProcessor {
 
 		$result = $this->dispatcher->dispatch( $notification, $tokens );
 
-		if ( $result['success'] ) {
+		if ( ! empty( $result['success'] ) ) {
 			$notification->write_meta( self::SENT_META_KEY );
 			return true;
 		}
 
 		/**
-		 * Next PR will replace this log with retry scheduling via
-		 * NotificationRetryHandler.
+		 * Retry scheduling will be added here when NotificationRetryHandler is
+		 * added.
 		 */
-		wc_get_logger()->error(
-			sprintf(
-				'Push notification delivery failed (type=%s, resource_id=%d).',
-				$notification->get_type(),
-				$notification->get_resource_id()
-			),
-			array( 'source' => PushNotifications::FEATURE_NAME )
-		);
 
 		return false;
 	}
 
 	/**
-	 * ActionScheduler callback for the safety net job.
+	 * ActionScheduler callback for the safety net job. This will be scheduled
+	 * for 60 seconds in the future when a notification is added to the
+	 * `PendingNotificationStore`. If the initial send succeeds, or fails and is
+	 * able to schedule a retry, this action will be unscheduled. If the initial
+	 * send does not occur, or fails and cannot schedule a retry (e.g. out of
+	 * memory, retry scheduling error) then this safety net will run.
 	 *
 	 * @param string $type        The notification type.
 	 * @param int    $resource_id The resource ID.
