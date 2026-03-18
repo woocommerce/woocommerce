@@ -85,7 +85,7 @@ class NewOrderNotification extends Notification {
 	 */
 	public function has_meta( string $key ): bool {
 		$order = wc_get_order( $this->get_resource_id() );
-		return $order instanceof WC_Order && ! empty( $order->get_meta( $key ) );
+		return $order instanceof WC_Order && $order->meta_exists( $key );
 	}
 
 	/**

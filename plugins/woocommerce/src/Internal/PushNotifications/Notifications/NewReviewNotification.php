@@ -70,7 +70,7 @@ class NewReviewNotification extends Notification {
 	 * @param string $key The meta key.
 	 */
 	public function has_meta( string $key ): bool {
-		return ! empty( get_comment_meta( $this->get_resource_id(), $key, true ) );
+		return metadata_exists( 'comment', $this->get_resource_id(), $key );
 	}
 
 	/**
