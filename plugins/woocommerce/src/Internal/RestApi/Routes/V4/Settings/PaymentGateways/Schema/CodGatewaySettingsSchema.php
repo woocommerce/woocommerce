@@ -88,21 +88,6 @@ class CodGatewaySettingsSchema extends AbstractPaymentGatewaySettingsSchema {
 	}
 
 	/**
-	 * Get options for specific COD gateway fields.
-	 *
-	 * @param string $field_id Field ID.
-	 * @return array Field options.
-	 */
-	protected function get_field_options( string $field_id ): array {
-		switch ( $field_id ) {
-			case 'enable_for_methods':
-				return $this->load_shipping_method_options();
-			default:
-				return array();
-		}
-	}
-
-	/**
 	 * Load all shipping method options for the enable_for_methods field.
 	 *
 	 * This method replicates the logic from WC_Gateway_COD::load_shipping_method_options()
