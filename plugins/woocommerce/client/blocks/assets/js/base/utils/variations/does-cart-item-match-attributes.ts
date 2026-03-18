@@ -50,9 +50,9 @@ export const doesCartItemMatchAttributes = (
 			const terms = productAttributes.find(
 				( attr ) => attribute === attr.name
 			)?.terms;
-			const termSlug = terms?.find(
-				( term ) => term.name === termName
-			)?.slug;
+			const termSlug =
+				terms?.find( ( term ) => term.name === termName )?.slug ||
+				termName; // Fallback to termName if no matching term is found.
 			return (
 				attributeNamesMatch( selectedAttr.attribute, attribute ) &&
 				selectedAttr.value.toLowerCase() === termSlug?.toLowerCase()
