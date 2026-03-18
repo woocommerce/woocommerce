@@ -96,16 +96,17 @@ class Content_Renderer {
 	private $backup_post_content_callback;
 
 	/**
-	 * Whether root padding was already applied in the first preprocessing pass.
+	 * Post-content block's calculated width from the first preprocessing pass.
 	 *
-	 * Template blocks are preprocessed first, and root padding is applied to
-	 * the template's root group. When user blocks inside post-content are
-	 * preprocessed in a second pass, root padding must be skipped to prevent
-	 * double application.
+	 * When this is narrower than contentSize, it means root padding was applied
+	 * to a container above post-content. In that case, the second preprocessing
+	 * pass (user blocks) must skip root padding to prevent double application.
+	 * When equal to contentSize, the template delegates root padding and user
+	 * blocks should receive it directly.
 	 *
-	 * @var bool
+	 * @var string|null
 	 */
-	private bool $root_padding_applied = false;
+	private ?string $post_content_width = null;
 
 	/**
 	 * CSS inliner
@@ -228,16 +229,54 @@ class Content_Renderer {
 		// references (e.g. var:preset|spacing|20) in block attributes.
 		$styles['__variables_map'] = $this->theme_controller->get_variables_values_map();
 
-		// Second pass (user blocks inside post-content): root padding was
-		// already applied to the template group in the first pass. Remove
-		// it from styles so user blocks don't get double root padding.
-		if ( $this->root_padding_applied ) {
-			unset( $styles['spacing']['padding']['left'], $styles['spacing']['padding']['right'] );
-		} else {
-			$this->root_padding_applied = true;
+		// Second pass (user blocks inside post-content): if root padding was
+		// applied to a container above post-content in the first pass (indicated
+		// by post_content_width < contentSize), remove root padding from styles
+		// to prevent double application. If the template delegates root padding
+		// (post_content_width == contentSize), keep it for user blocks.
+		if ( null !== $this->post_content_width ) {
+			$post_content_num = (float) str_replace( 'px', '', $this->post_content_width );
+			$content_size_num = (float) str_replace( 'px', '', $layout['contentSize'] );
+			if ( $post_content_num < $content_size_num ) {
+				unset( $styles['spacing']['padding']['left'], $styles['spacing']['padding']['right'] );
+			}
 		}
 
-		return $this->process_manager->preprocess( $parsed_blocks, $layout, $styles );
+		$result = $this->process_manager->preprocess( $parsed_blocks, $layout, $styles );
+
+		// After the first pass: find the post-content block's width.
+		if ( null === $this->post_content_width ) {
+			$this->post_content_width = $this->find_post_content_width( $result );
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Recursively find the post-content block's width in preprocessed blocks.
+	 *
+	 * @param array $blocks Preprocessed blocks.
+	 * @return string|null The post-content block's width or null if not found.
+	 */
+	private function find_post_content_width( array $blocks ): ?string {
+		$post_content_block_names = (array) apply_filters(
+			'woocommerce_email_editor_post_content_block_names',
+			array( 'core/post-content' )
+		);
+
+		foreach ( $blocks as $block ) {
+			$block_name = $block['blockName'] ?? '';
+			if ( in_array( $block_name, $post_content_block_names, true ) ) {
+				return $block['email_attrs']['width'] ?? null;
+			}
+			if ( ! empty( $block['innerBlocks'] ) ) {
+				$found = $this->find_post_content_width( $block['innerBlocks'] );
+				if ( null !== $found ) {
+					return $found;
+				}
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -379,7 +418,7 @@ class Content_Renderer {
 		remove_filter( 'block_parser_class', array( $this, 'block_parser' ) );
 		remove_filter( 'woocommerce_email_blocks_renderer_parsed_blocks', array( $this, 'preprocess_parsed_blocks' ) );
 
-		$this->root_padding_applied = false;
+		$this->post_content_width = null;
 
 		// Restore the original core/post-content render callback.
 		// Note: We always restore it, even if it was null originally.
