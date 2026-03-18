@@ -376,28 +376,15 @@ test.describe( 'Add to Cart + Options Block', () => {
 		await expect( page.getByText( '1 in cart' ) ).toBeVisible();
 	} );
 
-	test.describe( 'custom attribute slugs', () => {
+	test( 'allows adding variable products with custom attribute slugs', async ( {
+		page,
+		pageObject,
+		editor,
+	} ) => {
 		let attrId: string | undefined;
 		let productId: string | undefined;
 
-		test.afterAll( async () => {
-			if ( productId ) {
-				await wpCLI(
-					`wc product delete "${ productId }" --force=true --user=1`
-				);
-			}
-			if ( attrId ) {
-				await wpCLI(
-					`wc product_attribute delete ${ attrId } --user=1`
-				);
-			}
-		} );
-
-		test( 'allows adding variable products with custom attribute slugs', async ( {
-			page,
-			pageObject,
-			editor,
-		} ) => {
+		try {
 			// Create a global attribute where the slug intentionally differs from the name.
 			const attrOutput = await wpCLI(
 				`wc product_attribute create --name="Taille" --slug="custom-taille" --user=1`
@@ -427,9 +414,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 					]
 				) }'`
 			);
-			productId = prodOutput.stdout.match(
-				/product\s+(\d+)/
-			)?.[ 1 ];
+			productId = prodOutput.stdout.match( /product\s+(\d+)/ )?.[ 1 ];
 
 			// Create a single "Any" variation (empty attributes = matches all terms).
 			await wpCLI(
@@ -459,7 +444,18 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await expect( addToCartButton ).not.toBeDisabled();
 			await addToCartButton.click();
 			await expect( page.getByText( '1 in cart' ) ).toBeVisible();
-		} );
+		} finally {
+			if ( productId ) {
+				await wpCLI(
+					`wc product delete "${ productId }" --force=true --user=1`
+				);
+			}
+			if ( attrId ) {
+				await wpCLI(
+					`wc product_attribute delete ${ attrId } --user=1`
+				);
+			}
+		}
 	} );
 
 	test( 'allows adding grouped products to cart', async ( {
