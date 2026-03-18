@@ -733,6 +733,47 @@ class AddressProviderControllerTest extends MockeryTestCase {
 	}
 
 	/**
+	 * Test that errors are logged when a provider class cannot be instantiated.
+	 */
+	public function test_logs_error_for_uninstantiable_provider_class() {
+		$provider_class_name = get_class(
+			new class( 'provider-id', 'Provider Name' ) extends WC_Address_Provider {
+				/**
+				 * Constructor.
+				 *
+				 * @param string $id Provider ID.
+				 * @param string $name Provider name.
+				 */
+				public function __construct( string $id, string $name ) {
+					$this->id   = $id;
+					$this->name = $name;
+				}
+			}
+		);
+
+		add_filter(
+			'woocommerce_address_providers',
+			function () use ( $provider_class_name ) {
+				return array( $provider_class_name );
+			}
+		);
+
+		$this->mock_logger
+			->expects( $this->once() )
+			->method( 'error' )
+			->with(
+				$this->stringContains( 'Unable to instantiate address provider class "' . $provider_class_name . '":' ),
+				array( 'context' => 'address_provider_service' )
+			);
+
+		$this->sut = new AddressProviderController();
+		$this->sut->init();
+
+		$providers = $this->sut->get_providers();
+		$this->assertEmpty( $providers );
+	}
+
+	/**
 	 * Test that errors are logged for invalid provider instances.
 	 */
 	public function test_logs_error_for_invalid_provider_instance() {

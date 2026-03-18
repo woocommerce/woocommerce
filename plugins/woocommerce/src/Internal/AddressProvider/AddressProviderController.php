@@ -88,7 +88,21 @@ class AddressProviderController {
 
 		foreach ( $provider_items as $provider_item ) {
 			if ( is_string( $provider_item ) && class_exists( $provider_item ) ) {
-				$provider_item = new $provider_item();
+				try {
+					$provider_item = new $provider_item();
+				} catch ( \Throwable $e ) {
+					$logger->error(
+						sprintf(
+							'Unable to instantiate address provider class "%1$s": %2$s',
+							$provider_item,
+							$e->getMessage()
+						),
+						array(
+							'context' => 'address_provider_service',
+						)
+					);
+					continue;
+				}
 			}
 
 			// Providers need to be valid and extend WC_Address_Provider.
