@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Apply `woocommerce_variation_option_name` filter in ProductItemTrait, allowing third-parties to optionally add relevant information to variation option names.
