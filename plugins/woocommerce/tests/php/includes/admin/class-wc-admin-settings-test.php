@@ -49,10 +49,14 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should strip HTML tags from password field values.
+	 * @testdox Should preserve HTML-like characters in password field values.
+	 *
+	 * Password fields use minimal sanitization (trim + stripslashes only) to avoid corrupting
+	 * passwords and API keys, matching WC_Settings_API::validate_password_field(). Characters
+	 * like '<' and '>' are valid in secrets and must not be stripped or escaped.
 	 */
-	public function test_save_fields_strips_html_tags_from_password_fields(): void {
-		$option_name                   = 'test_password_html_strip';
+	public function test_save_fields_preserves_html_like_chars_in_password_fields(): void {
+		$option_name                   = 'test_password_html_preserve';
 		$this->option_names_to_clean[] = $option_name;
 		$options                       = array(
 			array(
@@ -66,7 +70,32 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 
 		WC_Admin_Settings::save_fields( $options, $data );
 
-		$this->assertSame( 'boldsecret%E0pass', get_option( $option_name ), 'HTML tags should be stripped but percent sequences preserved' );
+		$this->assertSame( '<b>bold</b>secret%E0pass', get_option( $option_name ), 'HTML-like characters should be preserved in password fields' );
+	}
+
+	/**
+	 * @testdox Should preserve a lone '<' in password field values without truncation.
+	 *
+	 * PHP's strip_tags() treats a lone '<' as the start of a malformed HTML tag and drops
+	 * everything from the '<' onward (e.g. "abc<def" becomes "abc"). Password fields must
+	 * not use strip_tags() or wp_strip_all_tags() for this reason.
+	 */
+	public function test_save_fields_preserves_lone_less_than_in_password_fields(): void {
+		$option_name                   = 'test_password_lone_lt';
+		$this->option_names_to_clean[] = $option_name;
+		$options                       = array(
+			array(
+				'id'   => $option_name,
+				'type' => 'password',
+			),
+		);
+		$data                          = array(
+			$option_name => 'pass<word123',
+		);
+
+		WC_Admin_Settings::save_fields( $options, $data );
+
+		$this->assertSame( 'pass<word123', get_option( $option_name ), 'A lone < must not truncate the password' );
 	}
 
 	/**

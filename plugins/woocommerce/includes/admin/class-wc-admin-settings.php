@@ -988,7 +988,12 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 					case 'password':
 						// Preserve null so the option is skipped (not overwritten) when the field is absent from POST data.
 						// Guard against non-string values (e.g. arrays from crafted POST data) to avoid TypeError.
-						$value = is_string( $raw_value ) ? wp_strip_all_tags( $raw_value ) : null;
+						// No aggressive sanitization to avoid corrupting passwords and API keys — matches
+						// WC_Settings_API::validate_password_field(). Using wp_strip_all_tags() here would
+						// truncate values containing a literal '<' (e.g. "abc<def" becomes "abc") because
+						// PHP's strip_tags() treats the '<' as the start of a malformed HTML tag.
+						// stripslashes() undoes WordPress's magic quotes added to $_POST data.
+						$value = is_string( $raw_value ) ? trim( stripslashes( $raw_value ) ) : null;
 						break;
 					default:
 						$value = wc_clean( $raw_value );
