@@ -95,7 +95,9 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 	 */
 	public function test_save_fields_does_not_overwrite_missing_password_field(): void {
 		$option_name                   = 'test_password_missing';
+		$other_option                  = 'test_other_field';
 		$this->option_names_to_clean[] = $option_name;
+		$this->option_names_to_clean[] = $other_option;
 		$original_password             = 'existing%25secret';
 		update_option( $option_name, $original_password );
 
@@ -104,13 +106,39 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 				'id'   => $option_name,
 				'type' => 'password',
 			),
+			array(
+				'id'   => $other_option,
+				'type' => 'text',
+			),
 		);
-		// $data intentionally omits $option_name to simulate a missing field.
-		$data = array();
+		// $data includes another field but intentionally omits the password field.
+		$data = array( $other_option => 'some value' );
 
 		WC_Admin_Settings::save_fields( $options, $data );
 
 		$this->assertSame( $original_password, get_option( $option_name ), 'Existing password should not be overwritten when field is absent from POST data' );
+	}
+
+	/**
+	 * @testdox Should ignore array values for password fields and preserve the existing option.
+	 */
+	public function test_save_fields_ignores_array_value_for_password_field(): void {
+		$option_name                   = 'test_password_array_injection';
+		$this->option_names_to_clean[] = $option_name;
+		$original_password             = 'existing_secret';
+		update_option( $option_name, $original_password );
+
+		$options = array(
+			array(
+				'id'   => $option_name,
+				'type' => 'password',
+			),
+		);
+		$data    = array( $option_name => array( 'injected' ) );
+
+		WC_Admin_Settings::save_fields( $options, $data );
+
+		$this->assertSame( $original_password, get_option( $option_name ), 'Array values should be rejected and existing password preserved' );
 	}
 
 	/**
