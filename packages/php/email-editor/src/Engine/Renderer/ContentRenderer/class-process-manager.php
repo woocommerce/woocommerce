@@ -75,8 +75,8 @@ class Process_Manager {
 	/**
 	 * Method to preprocess blocks
 	 *
-	 * @param array                                                                                                             $parsed_blocks Parsed blocks.
-	 * @param array{contentSize: string, wideSize?: string, allowEditing?: bool, allowCustomContentAndWideSize?: bool}          $layout Layout.
+	 * @param array                                                                                                               $parsed_blocks Parsed blocks.
+	 * @param array{contentSize: string, wideSize?: string, allowEditing?: bool, allowCustomContentAndWideSize?: bool}            $layout Layout.
 	 * @param array{spacing: array{padding: array{bottom: string, left?: string, right?: string, top: string}, blockGap: string}} $styles Styles.
 	 * @return array
 	 */
