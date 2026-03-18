@@ -664,6 +664,32 @@ class PaymentGatewaysSettingsControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should coerce a numeric JSON value for a password field to string instead of blanking it.
+	 *
+	 * json_decode() returns an int when the client sends a bare number (e.g. a 6-digit PIN).
+	 * The sanitizer must not silently clear numeric-only secrets.
+	 */
+	public function test_update_payment_gateway_coerces_numeric_password_to_string() {
+		// Arrange — WP REST API delivers the value as an int after JSON decoding.
+		$request = new WP_REST_Request( 'PUT', self::ENDPOINT . '/mock_password' );
+		$request->set_param(
+			'values',
+			array(
+				'api_password' => 123456,
+			)
+		);
+
+		// Act.
+		$response = $this->server->dispatch( $request );
+
+		// Assert.
+		$this->assertSame( 200, $response->get_status() );
+
+		$gateway = WC()->payment_gateways->payment_gateways()['mock_password'];
+		$this->assertSame( '123456', $gateway->settings['api_password'], 'Numeric password value should be coerced to string, not blanked' );
+	}
+
+	/**
 	 * Test that COD gateway enable_for_methods field has options populated.
 	 */
 	public function test_cod_gateway_enable_for_methods_has_options() {

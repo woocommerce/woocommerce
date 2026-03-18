@@ -559,8 +559,9 @@ abstract class AbstractPaymentGatewaySettingsSchema extends AbstractSchema {
 				// WC_Settings_API::validate_password_field(). Using wp_strip_all_tags() here would
 				// truncate values containing a literal '<' (e.g. "abc<def" becomes "abc") because
 				// PHP's strip_tags() treats the '<' as the start of a malformed HTML tag.
-				// Guard against non-string values (null, arrays) from malformed requests.
-				return is_string( $value ) ? trim( $value ) : '';
+				// Guard against non-scalar values (arrays, objects, null) from malformed requests.
+				// Scalars (int, float, bool) are coerced to string to preserve numeric PINs/API keys.
+				return is_scalar( $value ) ? trim( (string) $value ) : '';
 
 			case 'color':
 				return sanitize_text_field( $value );
