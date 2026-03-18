@@ -70,7 +70,9 @@ class OrderCountCacheService {
 		 * Return true to skip the flush + COUNT(*) query entirely. The caller is
 		 * responsible for ensuring counts remain accurate when skipping.
 		 *
+		 * @hook woocommerce_pre_refresh_order_count_cache
 		 * @since 10.7.0
+		 * @return bool Whether to skip the refresh.
 		 * @param bool            $skip       Whether to skip the refresh. Default false.
 		 * @param string          $order_type The order type being refreshed (e.g. 'shop_order').
 		 * @param OrderCountCache $cache      The cache instance.
