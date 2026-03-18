@@ -60,6 +60,7 @@ class ChequeGatewaySettingsSchema extends AbstractPaymentGatewaySettingsSchema {
 					'type'  => 'number',
 					'desc'  => __( 'Determines the display order of payment gateways during checkout.', 'woocommerce' ),
 				),
+				// Intentionally differs from BACS/COD ("Order confirmation instructions") per design spec.
 				array(
 					'id'    => 'instructions',
 					'label' => __( 'Instructions shown after checkout', 'woocommerce' ),
