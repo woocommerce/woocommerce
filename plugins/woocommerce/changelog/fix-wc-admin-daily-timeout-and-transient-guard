@@ -1,4 +1,4 @@
 Significance: patch
-Type: tweak
+Type: performance
 
 Add 3s timeout to DataSourcePoller HTTP calls and skip redundant remote fetches in wc_admin_daily when transients are fresh.
