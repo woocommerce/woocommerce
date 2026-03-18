@@ -112,15 +112,23 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 		$this->assertArrayHasKey( 'margin-top', $nested_column_second_item['email_attrs'] );
 		$this->assertEquals( '10px', $nested_column_second_item['email_attrs']['margin-top'] );
 
-		// Root-level blocks should have root padding.
-		$this->assertEquals( '10px', $first_columns['email_attrs']['padding-left'] );
-		$this->assertEquals( '10px', $first_columns['email_attrs']['padding-right'] );
-		$this->assertEquals( '10px', $second_columns['email_attrs']['padding-left'] );
-		$this->assertEquals( '10px', $second_columns['email_attrs']['padding-right'] );
+		// Root-level blocks should have root padding (new keys).
+		$this->assertEquals( '10px', $first_columns['email_attrs']['root-padding-left'] );
+		$this->assertEquals( '10px', $first_columns['email_attrs']['root-padding-right'] );
+		$this->assertEquals( '10px', $second_columns['email_attrs']['root-padding-left'] );
+		$this->assertEquals( '10px', $second_columns['email_attrs']['root-padding-right'] );
+
+		// Legacy padding keys should not be present.
+		$this->assertArrayNotHasKey( 'padding-left', $first_columns['email_attrs'] );
+		$this->assertArrayNotHasKey( 'padding-right', $first_columns['email_attrs'] );
+		$this->assertArrayNotHasKey( 'padding-left', $second_columns['email_attrs'] );
+		$this->assertArrayNotHasKey( 'padding-right', $second_columns['email_attrs'] );
 
 		// Nested blocks should not have root padding.
-		$this->assertArrayNotHasKey( 'padding-right', $nested_column_first_item['email_attrs'] );
-		$this->assertArrayNotHasKey( 'padding-right', $nested_column_second_item['email_attrs'] );
+		$this->assertArrayNotHasKey( 'root-padding-left', $nested_column_first_item['email_attrs'] );
+		$this->assertArrayNotHasKey( 'root-padding-right', $nested_column_first_item['email_attrs'] );
+		$this->assertArrayNotHasKey( 'root-padding-left', $nested_column_second_item['email_attrs'] );
+		$this->assertArrayNotHasKey( 'root-padding-right', $nested_column_second_item['email_attrs'] );
 	}
 
 	/**
@@ -283,14 +291,14 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 		$second_child = $post_content['innerBlocks'][1];
 
 		// core/post-content itself should NOT get root padding (it's a pass-through).
-		$this->assertArrayNotHasKey( 'padding-left', $post_content['email_attrs'] );
-		$this->assertArrayNotHasKey( 'padding-right', $post_content['email_attrs'] );
+		$this->assertArrayNotHasKey( 'root-padding-left', $post_content['email_attrs'] );
+		$this->assertArrayNotHasKey( 'root-padding-right', $post_content['email_attrs'] );
 
 		// Direct children of post-content should get root padding.
-		$this->assertEquals( '10px', $first_child['email_attrs']['padding-left'] );
-		$this->assertEquals( '10px', $first_child['email_attrs']['padding-right'] );
-		$this->assertEquals( '10px', $second_child['email_attrs']['padding-left'] );
-		$this->assertEquals( '10px', $second_child['email_attrs']['padding-right'] );
+		$this->assertEquals( '10px', $first_child['email_attrs']['root-padding-left'] );
+		$this->assertEquals( '10px', $first_child['email_attrs']['root-padding-right'] );
+		$this->assertEquals( '10px', $second_child['email_attrs']['root-padding-left'] );
+		$this->assertEquals( '10px', $second_child['email_attrs']['root-padding-right'] );
 	}
 
 	/**
@@ -329,18 +337,18 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 		$second_child = $post_content['innerBlocks'][1];
 
 		// Root-level group is a container — it does NOT get root padding itself.
-		$this->assertArrayNotHasKey( 'padding-left', $group['email_attrs'] );
-		$this->assertArrayNotHasKey( 'padding-right', $group['email_attrs'] );
+		$this->assertArrayNotHasKey( 'root-padding-left', $group['email_attrs'] );
+		$this->assertArrayNotHasKey( 'root-padding-right', $group['email_attrs'] );
 
 		// Nested post-content should NOT get root padding (post-content never gets padding).
-		$this->assertArrayNotHasKey( 'padding-left', $post_content['email_attrs'] );
-		$this->assertArrayNotHasKey( 'padding-right', $post_content['email_attrs'] );
+		$this->assertArrayNotHasKey( 'root-padding-left', $post_content['email_attrs'] );
+		$this->assertArrayNotHasKey( 'root-padding-right', $post_content['email_attrs'] );
 
 		// Children of post-content inside root group SHOULD get padding (delegation chain).
-		$this->assertEquals( '10px', $first_child['email_attrs']['padding-left'] );
-		$this->assertEquals( '10px', $first_child['email_attrs']['padding-right'] );
-		$this->assertEquals( '10px', $second_child['email_attrs']['padding-left'] );
-		$this->assertEquals( '10px', $second_child['email_attrs']['padding-right'] );
+		$this->assertEquals( '10px', $first_child['email_attrs']['root-padding-left'] );
+		$this->assertEquals( '10px', $first_child['email_attrs']['root-padding-right'] );
+		$this->assertEquals( '10px', $second_child['email_attrs']['root-padding-left'] );
+		$this->assertEquals( '10px', $second_child['email_attrs']['root-padding-right'] );
 	}
 
 	/**
@@ -391,24 +399,24 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 		$footer_group  = $root_group['innerBlocks'][2];
 
 		// Root group: no padding (root container delegates).
-		$this->assertArrayNotHasKey( 'padding-left', $root_group['email_attrs'] );
-		$this->assertArrayNotHasKey( 'padding-right', $root_group['email_attrs'] );
+		$this->assertArrayNotHasKey( 'root-padding-left', $root_group['email_attrs'] );
+		$this->assertArrayNotHasKey( 'root-padding-right', $root_group['email_attrs'] );
 
 		// Site title: gets root padding (non-container, receives delegation).
-		$this->assertEquals( '10px', $site_title['email_attrs']['padding-left'] );
-		$this->assertEquals( '10px', $site_title['email_attrs']['padding-right'] );
+		$this->assertEquals( '10px', $site_title['email_attrs']['root-padding-left'] );
+		$this->assertEquals( '10px', $site_title['email_attrs']['root-padding-right'] );
 
 		// Content group: transparent (wraps post-content, delegates further).
-		$this->assertArrayNotHasKey( 'padding-left', $content_group['email_attrs'] );
-		$this->assertArrayNotHasKey( 'padding-right', $content_group['email_attrs'] );
+		$this->assertArrayNotHasKey( 'root-padding-left', $content_group['email_attrs'] );
+		$this->assertArrayNotHasKey( 'root-padding-right', $content_group['email_attrs'] );
 
 		// Post-content: no padding (post-content never gets padding).
-		$this->assertArrayNotHasKey( 'padding-left', $post_content['email_attrs'] );
-		$this->assertArrayNotHasKey( 'padding-right', $post_content['email_attrs'] );
+		$this->assertArrayNotHasKey( 'root-padding-left', $post_content['email_attrs'] );
+		$this->assertArrayNotHasKey( 'root-padding-right', $post_content['email_attrs'] );
 
 		// Footer group: gets root padding (doesn't wrap post-content).
-		$this->assertEquals( '10px', $footer_group['email_attrs']['padding-left'] );
-		$this->assertEquals( '10px', $footer_group['email_attrs']['padding-right'] );
+		$this->assertEquals( '10px', $footer_group['email_attrs']['root-padding-left'] );
+		$this->assertEquals( '10px', $footer_group['email_attrs']['root-padding-right'] );
 	}
 
 	/**
@@ -455,14 +463,18 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 		$user_block   = $post_content['innerBlocks'][0];
 
 		// All container groups in the chain should be transparent (no padding).
-		$this->assertArrayNotHasKey( 'padding-left', $root_group['email_attrs'] );
-		$this->assertArrayNotHasKey( 'padding-left', $middle_group['email_attrs'] );
-		$this->assertArrayNotHasKey( 'padding-left', $inner_group['email_attrs'] );
-		$this->assertArrayNotHasKey( 'padding-left', $post_content['email_attrs'] );
+		$this->assertArrayNotHasKey( 'root-padding-left', $root_group['email_attrs'] );
+		$this->assertArrayNotHasKey( 'root-padding-right', $root_group['email_attrs'] );
+		$this->assertArrayNotHasKey( 'root-padding-left', $middle_group['email_attrs'] );
+		$this->assertArrayNotHasKey( 'root-padding-right', $middle_group['email_attrs'] );
+		$this->assertArrayNotHasKey( 'root-padding-left', $inner_group['email_attrs'] );
+		$this->assertArrayNotHasKey( 'root-padding-right', $inner_group['email_attrs'] );
+		$this->assertArrayNotHasKey( 'root-padding-left', $post_content['email_attrs'] );
+		$this->assertArrayNotHasKey( 'root-padding-right', $post_content['email_attrs'] );
 
 		// User block inside post-content should get root padding.
-		$this->assertEquals( '10px', $user_block['email_attrs']['padding-left'] );
-		$this->assertEquals( '10px', $user_block['email_attrs']['padding-right'] );
+		$this->assertEquals( '10px', $user_block['email_attrs']['root-padding-left'] );
+		$this->assertEquals( '10px', $user_block['email_attrs']['root-padding-right'] );
 	}
 
 	/**
@@ -494,16 +506,16 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 		$normal_child    = $root_group['innerBlocks'][1];
 
 		// Root-level group is a container — it does NOT get root padding itself.
-		$this->assertArrayNotHasKey( 'padding-left', $root_group['email_attrs'] );
-		$this->assertArrayNotHasKey( 'padding-right', $root_group['email_attrs'] );
+		$this->assertArrayNotHasKey( 'root-padding-left', $root_group['email_attrs'] );
+		$this->assertArrayNotHasKey( 'root-padding-right', $root_group['email_attrs'] );
 
 		// Alignfull child should NOT get root padding (skipped for full-width).
-		$this->assertArrayNotHasKey( 'padding-left', $alignfull_child['email_attrs'] );
-		$this->assertArrayNotHasKey( 'padding-right', $alignfull_child['email_attrs'] );
+		$this->assertArrayNotHasKey( 'root-padding-left', $alignfull_child['email_attrs'] );
+		$this->assertArrayNotHasKey( 'root-padding-right', $alignfull_child['email_attrs'] );
 
 		// Normal child should get root padding.
-		$this->assertEquals( '10px', $normal_child['email_attrs']['padding-left'] );
-		$this->assertEquals( '10px', $normal_child['email_attrs']['padding-right'] );
+		$this->assertEquals( '10px', $normal_child['email_attrs']['root-padding-left'] );
+		$this->assertEquals( '10px', $normal_child['email_attrs']['root-padding-right'] );
 	}
 
 	/**
@@ -542,22 +554,22 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 		$deeply_nested    = $nested_group['innerBlocks'][0];
 
 		// Root-level group is a container — it does NOT get root padding itself.
-		$this->assertArrayNotHasKey( 'padding-left', $root_group['email_attrs'] );
-		$this->assertArrayNotHasKey( 'padding-right', $root_group['email_attrs'] );
+		$this->assertArrayNotHasKey( 'root-padding-left', $root_group['email_attrs'] );
+		$this->assertArrayNotHasKey( 'root-padding-right', $root_group['email_attrs'] );
 
 		// Direct children of root group SHOULD get root padding.
-		$this->assertEquals( '10px', $nested_paragraph['email_attrs']['padding-left'] );
-		$this->assertEquals( '10px', $nested_paragraph['email_attrs']['padding-right'] );
-		$this->assertEquals( '10px', $nested_group['email_attrs']['padding-left'] );
-		$this->assertEquals( '10px', $nested_group['email_attrs']['padding-right'] );
+		$this->assertEquals( '10px', $nested_paragraph['email_attrs']['root-padding-left'] );
+		$this->assertEquals( '10px', $nested_paragraph['email_attrs']['root-padding-right'] );
+		$this->assertEquals( '10px', $nested_group['email_attrs']['root-padding-left'] );
+		$this->assertEquals( '10px', $nested_group['email_attrs']['root-padding-right'] );
 
 		// Deeply nested blocks should NOT get root padding.
-		$this->assertArrayNotHasKey( 'padding-left', $deeply_nested['email_attrs'] );
-		$this->assertArrayNotHasKey( 'padding-right', $deeply_nested['email_attrs'] );
+		$this->assertArrayNotHasKey( 'root-padding-left', $deeply_nested['email_attrs'] );
+		$this->assertArrayNotHasKey( 'root-padding-right', $deeply_nested['email_attrs'] );
 	}
 
 	/**
-	 * Test blocks with explicit horizontal padding skip root padding
+	 * Test blocks with explicit zero padding skip root padding, but non-zero padding does not
 	 */
 	public function testItSkipsRootPaddingForBlocksWithExplicitPadding(): void {
 		$blocks = array(
@@ -642,24 +654,26 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 		$plain_paragraph = $root_group['innerBlocks'][3];
 
 		// Banner group (0px padding): skips root padding, children don't get delegation.
-		$this->assertArrayNotHasKey( 'padding-left', $banner_group['email_attrs'] );
-		$this->assertArrayNotHasKey( 'padding-right', $banner_group['email_attrs'] );
-		$this->assertArrayNotHasKey( 'padding-left', $banner_child['email_attrs'] );
-		$this->assertArrayNotHasKey( 'padding-right', $banner_child['email_attrs'] );
+		$this->assertArrayNotHasKey( 'root-padding-left', $banner_group['email_attrs'] );
+		$this->assertArrayNotHasKey( 'root-padding-right', $banner_group['email_attrs'] );
+		$this->assertArrayNotHasKey( 'root-padding-left', $banner_child['email_attrs'] );
+		$this->assertArrayNotHasKey( 'root-padding-right', $banner_child['email_attrs'] );
 
 		// Columns (0px padding): skips root padding.
-		$this->assertArrayNotHasKey( 'padding-left', $columns['email_attrs'] );
-		$this->assertArrayNotHasKey( 'padding-right', $columns['email_attrs'] );
+		$this->assertArrayNotHasKey( 'root-padding-left', $columns['email_attrs'] );
+		$this->assertArrayNotHasKey( 'root-padding-right', $columns['email_attrs'] );
 
-		// Padded group (40px): skips root padding, children don't get delegation.
-		$this->assertArrayNotHasKey( 'padding-left', $padded_group['email_attrs'] );
-		$this->assertArrayNotHasKey( 'padding-right', $padded_group['email_attrs'] );
-		$this->assertArrayNotHasKey( 'padding-left', $padded_child['email_attrs'] );
-		$this->assertArrayNotHasKey( 'padding-right', $padded_child['email_attrs'] );
+		// Padded group (40px): non-zero padding does NOT skip root padding.
+		// The group gets root padding (its own 40px is internal content spacing).
+		$this->assertEquals( '10px', $padded_group['email_attrs']['root-padding-left'] );
+		$this->assertEquals( '10px', $padded_group['email_attrs']['root-padding-right'] );
+		// Children of a non-zero padded group still get delegation.
+		$this->assertArrayNotHasKey( 'root-padding-left', $padded_child['email_attrs'] );
+		$this->assertArrayNotHasKey( 'root-padding-right', $padded_child['email_attrs'] );
 
 		// Plain paragraph (no explicit padding): gets root padding.
-		$this->assertEquals( '10px', $plain_paragraph['email_attrs']['padding-left'] );
-		$this->assertEquals( '10px', $plain_paragraph['email_attrs']['padding-right'] );
+		$this->assertEquals( '10px', $plain_paragraph['email_attrs']['root-padding-left'] );
+		$this->assertEquals( '10px', $plain_paragraph['email_attrs']['root-padding-right'] );
 	}
 
 	/**
