@@ -14,6 +14,13 @@ namespace Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Pre
  */
 class Spacing_Preprocessor implements Preprocessor {
 	/**
+	 * Cached post-content block names to avoid repeated apply_filters calls.
+	 *
+	 * @var string[]|null
+	 */
+	private ?array $post_content_block_names = null;
+
+	/**
 	 * Preprocesses the parsed blocks.
 	 *
 	 * @param array $parsed_blocks Parsed blocks.
@@ -129,10 +136,13 @@ class Spacing_Preprocessor implements Preprocessor {
 	 * @return string[]
 	 */
 	private function get_post_content_block_names(): array {
-		return (array) apply_filters(
-			'woocommerce_email_editor_post_content_block_names',
-			array( 'core/post-content' )
-		);
+		if ( null === $this->post_content_block_names ) {
+			$this->post_content_block_names = (array) apply_filters(
+				'woocommerce_email_editor_post_content_block_names',
+				array( 'core/post-content' )
+			);
+		}
+		return $this->post_content_block_names;
 	}
 
 	/**

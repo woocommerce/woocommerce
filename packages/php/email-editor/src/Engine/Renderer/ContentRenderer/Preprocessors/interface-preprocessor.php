@@ -17,7 +17,7 @@ interface Preprocessor {
 	 *
 	 * @param array                                                                                                             $parsed_blocks Parsed blocks of the email.
 	 * @param array{contentSize: string, wideSize?: string, allowEditing?: bool, allowCustomContentAndWideSize?: bool}          $layout Layout of the email.
-	 * @param array{spacing: array{padding: array{bottom: string, left: string, right: string, top: string}, blockGap: string}} $styles Styles of the email.
+	 * @param array{spacing: array{padding: array{bottom: string, left?: string, right?: string, top: string}, blockGap: string}} $styles Styles of the email.
 	 * @return array
 	 */
 	public function preprocess( array $parsed_blocks, array $layout, array $styles ): array;
