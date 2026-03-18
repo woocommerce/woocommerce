@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Add `woocommerce_pre_refresh_order_count_cache` filter to allow short-circuiting the scheduled background order count cache refresh.
