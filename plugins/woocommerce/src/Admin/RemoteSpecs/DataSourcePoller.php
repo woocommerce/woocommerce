@@ -226,6 +226,7 @@ abstract class DataSourcePoller {
 				$url
 			),
 			array(
+				'timeout'    => 3,
 				'user-agent' => 'WooCommerce/' . WC_VERSION . '; ' . home_url( '/' ),
 			)
 		);

@@ -8,7 +8,6 @@ namespace Automattic\WooCommerce\Internal\Admin;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\Admin\RemoteInboxNotifications\RemoteInboxNotificationsDataSourcePoller;
 use Automattic\WooCommerce\Admin\RemoteInboxNotifications\RemoteInboxNotificationsEngine;
 use Automattic\WooCommerce\Internal\Admin\Notes\CustomizeStoreWithBlocks;
 use Automattic\WooCommerce\Internal\Admin\Notes\CustomizingProductCatalog;
@@ -143,7 +142,6 @@ class Events {
 		$this->possibly_refresh_data_source_pollers();
 
 		if ( $this->is_remote_inbox_notifications_enabled() ) {
-			RemoteInboxNotificationsDataSourcePoller::get_instance()->read_specs_from_data_sources();
 			RemoteInboxNotificationsEngine::run();
 		}
 
@@ -261,11 +259,11 @@ class Events {
 		$completed_tasks = get_option( 'woocommerce_task_list_tracked_completed_tasks', array() );
 
 		if ( ! in_array( 'payments', $completed_tasks, true ) && ! in_array( 'woocommerce-payments', $completed_tasks, true ) ) {
-			PaymentGatewaySuggestionsDataSourcePoller::get_instance()->read_specs_from_data_sources();
+			PaymentGatewaySuggestionsDataSourcePoller::get_instance()->get_specs_from_data_sources();
 		}
 
 		if ( ! in_array( 'store_details', $completed_tasks, true ) && ! in_array( 'marketing', $completed_tasks, true ) ) {
-			RemoteFreeExtensionsDataSourcePoller::get_instance()->read_specs_from_data_sources();
+			RemoteFreeExtensionsDataSourcePoller::get_instance()->get_specs_from_data_sources();
 		}
 	}
 }
