@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add woocommerce_draft_order_batch_size filter to make draft order cleanup batch size configurable
