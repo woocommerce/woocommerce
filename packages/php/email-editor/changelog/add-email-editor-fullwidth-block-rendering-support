@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add rendering support for full-width blocks to break out of template group padding in emails, distributing container padding per-block so alignfull blocks can span the full contentSize.
