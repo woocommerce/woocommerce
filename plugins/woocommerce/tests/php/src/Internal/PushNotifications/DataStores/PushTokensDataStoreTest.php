@@ -774,9 +774,9 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$data_store->create(
 			array(
 				'user_id'       => $admin_id,
-				'token'         => 'valid_token_' . wp_rand(),
+				'token'         => 'valid_token',
 				'platform'      => PushToken::PLATFORM_APPLE,
-				'device_uuid'   => 'valid-device-' . wp_rand(),
+				'device_uuid'   => 'valid-device',
 				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
 				'device_locale' => 'en_US',
 				'metadata'      => array( 'app_version' => '1.0' ),
@@ -786,6 +786,7 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$tokens = $data_store->get_tokens_for_roles( array( 'administrator' ) );
 
 		$this->assertCount( 1, $tokens );
+		$this->assertSame( 'valid-device', $tokens[0]->get_device_uuid() );
 	}
 
 	/**
@@ -799,9 +800,9 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$data_store->create(
 			array(
 				'user_id'       => $admin_id,
-				'token'         => 'admin_token_' . wp_rand(),
+				'token'         => 'admin_token',
 				'platform'      => PushToken::PLATFORM_APPLE,
-				'device_uuid'   => 'admin-device-' . wp_rand(),
+				'device_uuid'   => 'admin-device',
 				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
 				'device_locale' => 'en_US',
 				'metadata'      => array( 'app_version' => '1.0' ),
@@ -811,18 +812,21 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$data_store->create(
 			array(
 				'user_id'       => $manager_id,
-				'token'         => 'manager_token_' . wp_rand(),
+				'token'         => 'manager_token',
 				'platform'      => PushToken::PLATFORM_APPLE,
-				'device_uuid'   => 'manager-device-' . wp_rand(),
+				'device_uuid'   => 'manager-device',
 				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
 				'device_locale' => 'en_US',
 				'metadata'      => array( 'app_version' => '1.0' ),
 			)
 		);
 
-		$tokens = $data_store->get_tokens_for_roles( array( 'administrator', 'shop_manager' ) );
+		$tokens     = $data_store->get_tokens_for_roles( array( 'administrator', 'shop_manager' ) );
+		$device_ids = array_map( fn ( PushToken $t ) => $t->get_device_uuid(), $tokens );
 
 		$this->assertCount( 2, $tokens );
+		$this->assertContains( 'admin-device', $device_ids );
+		$this->assertContains( 'manager-device', $device_ids );
 	}
 
 	/**
