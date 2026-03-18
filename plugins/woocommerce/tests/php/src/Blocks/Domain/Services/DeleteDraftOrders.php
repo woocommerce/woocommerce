@@ -136,9 +136,11 @@ class DeleteDraftOrders extends TestCase {
 
 		$sample_results = function ( $results, $args ) {
 			if ( isset( $args['status'] ) && DraftOrders::DB_STATUS === $args['status'] ) {
-				$orders = array_fill( 0, 50, new WC_Order() );
-				foreach ( $orders as $order ) {
+				$orders = array();
+				for ( $i = 0; $i < 50; $i++ ) {
+					$order = new WC_Order();
 					$order->set_status( DraftOrders::STATUS );
+					$orders[] = $order;
 				}
 				return $orders;
 			}
