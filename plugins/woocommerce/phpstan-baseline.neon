@@ -9931,12 +9931,6 @@ parameters:
 			path: includes/class-wc-cart-session.php
 
 		-
-			message: '#^Call to function is_callable\(\) with ''_prime_post_caches'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: includes/class-wc-cart-session.php
-
-		-
 			message: '#^Cannot call method get_id\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
 			count: 3
@@ -14218,12 +14212,6 @@ parameters:
 			message: '#^Call to an undefined method object\:\:sync_variation_names\(\)\.$#'
 			identifier: method.notFound
 			count: 1
-			path: includes/class-wc-product-variable.php
-
-		-
-			message: '#^Call to function is_callable\(\) with ''_prime_post_caches'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 2
 			path: includes/class-wc-product-variable.php
 
 		-
@@ -32250,12 +32238,6 @@ parameters:
 		-
 			message: '#^Action callback returns bool but should not return anything\.$#'
 			identifier: return.void
-			count: 1
-			path: includes/shortcodes/class-wc-shortcode-products.php
-
-		-
-			message: '#^Call to function is_callable\(\) with ''_prime_post_caches'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
 			count: 1
 			path: includes/shortcodes/class-wc-shortcode-products.php
 
@@ -50782,12 +50764,6 @@ parameters:
 			path: src/Blocks/Assets/Api.php
 
 		-
-			message: '#^Call to function is_callable\(\) with ''_prime_post_caches'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Blocks/Assets/AssetDataRegistry.php
-
-		-
 			message: '#^Class Automattic\\WooCommerce\\Blocks\\Assets\\Api referenced with incorrect case\: Automattic\\WooCommerce\\Blocks\\Assets\\API\.$#'
 			identifier: class.nameCase
 			count: 1
@@ -51336,12 +51312,6 @@ parameters:
 		-
 			message: '#^@param array \$data does not accept actual type of parameter\: object\{permalink\: string, image\: string, title\: string, rating\: string, price\: string, badge\: string, button\: string\}&stdClass\.$#'
 			identifier: parameter.phpDocType
-			count: 1
-			path: src/Blocks/BlockTypes/AbstractProductGrid.php
-
-		-
-			message: '#^Call to function is_callable\(\) with ''_prime_post_caches'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
 			count: 1
 			path: src/Blocks/BlockTypes/AbstractProductGrid.php
 
@@ -65925,19 +65895,13 @@ parameters:
 		-
 			message: '#^Cannot call method add_order_note\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
-			count: 2
+			count: 1
 			path: src/Internal/Orders/OrderActionsRestController.php
 
 		-
 			message: '#^Cannot call method get_billing_email\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
-			count: 4
-			path: src/Internal/Orders/OrderActionsRestController.php
-
-		-
-			message: '#^Cannot call method get_id\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 7
+			count: 2
 			path: src/Internal/Orders/OrderActionsRestController.php
 
 		-
@@ -65997,17 +65961,11 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$order of method Automattic\\WooCommerce\\Internal\\Orders\\OrderActionsRestController\:\:get_available_email_templates\(\) expects WC_Order, WC_Order\|WC_Order_Refund\|false given\.$#'
 			identifier: argument.type
-			count: 2
+			count: 1
 			path: src/Internal/Orders/OrderActionsRestController.php
 
 		-
 			message: '#^Parameter \#1 \$order of method Automattic\\WooCommerce\\Internal\\Orders\\OrderActionsRestController\:\:maybe_update_billing_email\(\) expects WC_Order, WC_Order\|WC_Order_Refund\|false given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Internal/Orders/OrderActionsRestController.php
-
-		-
-			message: '#^Parameter \#1 \$order of method Automattic\\WooCommerce\\Internal\\Orders\\OrderActionsRestController\:\:order_is_partially_refunded\(\) expects WC_Order, WC_Order\|WC_Order_Refund\|false given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Internal/Orders/OrderActionsRestController.php
@@ -71047,18 +71005,6 @@ parameters:
 			path: src/Internal/StockNotifications/Emails/EmailActionController.php
 
 		-
-			message: '#^Call to an undefined method WC_Session\:\:has_session\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: src/Internal/StockNotifications/Emails/EmailActionController.php
-
-		-
-			message: '#^Call to an undefined method WC_Session\:\:set_customer_session_cookie\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: src/Internal/StockNotifications/Emails/EmailActionController.php
-
-		-
 			message: '#^Cannot call method get_meta\(\) on Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|true\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -74545,12 +74491,6 @@ parameters:
 			path: src/StoreApi/SessionHandler.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\StoreApi\\SessionHandler\:\:save_data\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/StoreApi/SessionHandler.php
-
-		-
 			message: '#^Property Automattic\\WooCommerce\\StoreApi\\SessionHandler\:\:\$token \(string\) does not accept array\|string\.$#'
 			identifier: assign.propertyType
 			count: 1
@@ -75286,12 +75226,6 @@ parameters:
 			message: '#^Call to an undefined method WC_Query\:\:get\(\)\.$#'
 			identifier: method.notFound
 			count: 4
-			path: src/StoreApi/Utilities/ProductQuery.php
-
-		-
-			message: '#^Call to function is_callable\(\) with ''_prime_post_caches'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
 			path: src/StoreApi/Utilities/ProductQuery.php
 
 		-

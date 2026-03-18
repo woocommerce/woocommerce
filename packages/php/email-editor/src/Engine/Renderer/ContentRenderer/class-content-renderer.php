@@ -13,9 +13,11 @@ use Automattic\WooCommerce\EmailEditor\Engine\Renderer\Css_Inliner;
 use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Fallback;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Post_Content;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 use WP_Block_Template;
 use WP_Block_Type_Registry;
 use WP_Post;
+use WP_Style_Engine;
 
 /**
  * Class Content_Renderer
@@ -92,6 +94,19 @@ class Content_Renderer {
 	 * @var callable|null
 	 */
 	private $backup_post_content_callback;
+
+	/**
+	 * Post-content block's calculated width from the first preprocessing pass.
+	 *
+	 * When this is narrower than contentSize, it means root padding was applied
+	 * to a container above post-content. In that case, the second preprocessing
+	 * pass (user blocks) must skip root padding to prevent double application.
+	 * When equal to contentSize, the template delegates root padding and user
+	 * blocks should receive it directly.
+	 *
+	 * @var string|null
+	 */
+	private ?string $post_content_width = null;
 
 	/**
 	 * CSS inliner
@@ -208,8 +223,65 @@ class Content_Renderer {
 	 */
 	public function preprocess_parsed_blocks( array $parsed_blocks ): array {
 		$styles = $this->theme_controller->get_styles();
+		$layout = $this->theme_controller->get_layout_settings();
 
-		return $this->process_manager->preprocess( $parsed_blocks, $this->theme_controller->get_layout_settings(), $styles );
+		// Pass the CSS variables map so preprocessors can resolve preset
+		// references (e.g. var:preset|spacing|20) in block attributes.
+		$styles['__variables_map'] = $this->theme_controller->get_variables_values_map();
+
+		// Second pass (user blocks inside post-content): if root padding was
+		// applied to a container above post-content in the first pass (indicated
+		// by post_content_width < contentSize), remove root padding from styles
+		// to prevent double application. If the template delegates root padding
+		// (post_content_width == contentSize), keep it for user blocks.
+		if ( null !== $this->post_content_width ) {
+			$post_content_num = (float) str_replace( 'px', '', $this->post_content_width );
+			$content_size_num = (float) str_replace( 'px', '', $layout['contentSize'] );
+			// Use epsilon tolerance for floating-point comparison since width
+			// calculations involve round() and division that may produce imprecision.
+			if ( $post_content_num < $content_size_num - 0.01 ) {
+				unset( $styles['spacing']['padding']['left'], $styles['spacing']['padding']['right'] );
+			}
+		}
+
+		$result = $this->process_manager->preprocess( $parsed_blocks, $layout, $styles );
+
+		// After the first pass: find the post-content block's width.
+		if ( null === $this->post_content_width ) {
+			$this->post_content_width = $this->find_post_content_width( $result );
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Recursively find the post-content block's width in preprocessed blocks.
+	 *
+	 * @param array      $blocks Preprocessed blocks.
+	 * @param array|null $post_content_block_names Cached block names for recursion.
+	 * @return string|null The post-content block's width or null if not found.
+	 */
+	private function find_post_content_width( array $blocks, ?array $post_content_block_names = null ): ?string {
+		if ( null === $post_content_block_names ) {
+			$post_content_block_names = (array) apply_filters(
+				'woocommerce_email_editor_post_content_block_names',
+				array( 'core/post-content' )
+			);
+		}
+
+		foreach ( $blocks as $block ) {
+			$block_name = $block['blockName'] ?? '';
+			if ( in_array( $block_name, $post_content_block_names, true ) ) {
+				return $block['email_attrs']['width'] ?? null;
+			}
+			if ( ! empty( $block['innerBlocks'] ) ) {
+				$found = $this->find_post_content_width( $block['innerBlocks'], $post_content_block_names );
+				if ( null !== $found ) {
+					return $found;
+				}
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -246,9 +318,10 @@ class Content_Renderer {
 		$context = new Rendering_Context( $this->theme_controller->get_theme(), $email_context );
 
 		$block_type = $this->block_type_registry->get_registered( $parsed_block['blockName'] );
+		$result     = null;
 		try {
 			if ( $block_type && isset( $block_type->render_email_callback ) && is_callable( $block_type->render_email_callback ) ) {
-				return call_user_func( $block_type->render_email_callback, $block_content, $parsed_block, $context );
+				$result = call_user_func( $block_type->render_email_callback, $block_content, $parsed_block, $context );
 			}
 		} catch ( \Exception $error ) {
 			$this->logger->error(
@@ -264,7 +337,58 @@ class Content_Renderer {
 			return $block_content;
 		}
 
-		return $this->fallback_renderer->render( $block_content, $parsed_block, $context );
+		if ( null === $result ) {
+			$result = $this->fallback_renderer->render( $block_content, $parsed_block, $context );
+		}
+
+		return $this->add_root_horizontal_padding( $result, $parsed_block['email_attrs'] ?? array() );
+	}
+
+	/**
+	 * Wrap block output with root horizontal padding.
+	 *
+	 * Root padding is distributed by the Spacing_Preprocessor from the outer
+	 * email container to individual blocks. This method applies it uniformly
+	 * to all blocks regardless of whether they use Abstract_Block_Renderer
+	 * or a custom render_email_callback.
+	 *
+	 * @param string $content The rendered block content.
+	 * @param array  $email_attrs The email attributes from the parsed block.
+	 * @return string The content wrapped with horizontal padding, or unchanged if no root padding.
+	 */
+	private function add_root_horizontal_padding( string $content, array $email_attrs ): string {
+		$css_attrs = array();
+		if ( isset( $email_attrs['root-padding-left'] ) ) {
+			$css_attrs['padding-left'] = $email_attrs['root-padding-left'];
+		}
+		if ( isset( $email_attrs['root-padding-right'] ) ) {
+			$css_attrs['padding-right'] = $email_attrs['root-padding-right'];
+		}
+		if ( empty( $css_attrs ) ) {
+			return $content;
+		}
+
+		$padding_style = WP_Style_Engine::compile_css( $css_attrs, '' );
+		if ( empty( $padding_style ) ) {
+			return $content;
+		}
+
+		$table_attrs = array(
+			'align' => 'left',
+			'width' => '100%',
+		);
+
+		$cell_attrs = array(
+			'style' => $padding_style,
+		);
+
+		$div_content = sprintf(
+			'<div class="email-root-padding" style="%1$s">%2$s</div>',
+			esc_attr( $padding_style ),
+			$content
+		);
+
+		return Table_Wrapper_Helper::render_outlook_table_wrapper( $div_content, $table_attrs, $cell_attrs );
 	}
 
 	/**
@@ -298,6 +422,8 @@ class Content_Renderer {
 		remove_filter( 'render_block', array( $this, 'render_block' ) );
 		remove_filter( 'block_parser_class', array( $this, 'block_parser' ) );
 		remove_filter( 'woocommerce_email_blocks_renderer_parsed_blocks', array( $this, 'preprocess_parsed_blocks' ) );
+
+		$this->post_content_width = null;
 
 		// Restore the original core/post-content render callback.
 		// Note: We always restore it, even if it was null originally.

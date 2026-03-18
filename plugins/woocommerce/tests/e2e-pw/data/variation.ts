@@ -20,10 +20,6 @@ const variation = {
 	],
 };
 
-const getVariationExample = () => {
+export const getVariationExample = () => {
 	return variation;
-};
-
-module.exports = {
-	getVariationExample,
 };

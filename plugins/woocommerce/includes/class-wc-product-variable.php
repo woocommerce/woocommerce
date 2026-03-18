@@ -329,7 +329,8 @@ class WC_Product_Variable extends WC_Product {
 		$hide_out_of_stock_items = ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) );
 		$available_variations    = array();
 
-		if ( is_callable( '_prime_post_caches' ) ) {
+		if ( ! empty( $variation_ids ) ) {
+			// Prime caches to reduce future queries.
 			_prime_post_caches( $variation_ids );
 		}
 
@@ -380,7 +381,8 @@ class WC_Product_Variable extends WC_Product {
 	public function has_purchasable_variations() {
 		$variation_ids = $this->get_children();
 
-		if ( is_callable( '_prime_post_caches' ) ) {
+		if ( ! empty( $variation_ids ) ) {
+			// Prime caches to reduce future queries.
 			_prime_post_caches( $variation_ids );
 		}
 

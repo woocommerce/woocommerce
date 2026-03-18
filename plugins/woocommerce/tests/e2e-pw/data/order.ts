@@ -1,8 +1,11 @@
-const { customerBilling, customerShipping } = require( './shared' );
-const {
+/**
+ * Internal dependencies
+ */
+import { customerBilling, customerShipping } from './shared';
+import {
 	customerBillingSearchTest,
 	customerShippingSearchTest,
-} = require( './shared/customer' );
+} from './shared/customer';
 
 /**
  * A basic order.
@@ -11,7 +14,7 @@ const {
  *
  * https://woocommerce.github.io/woocommerce-rest-api-docs/#order-properties
  */
-const order = {
+export const order = {
 	payment_method: '',
 	payment_method_title: '',
 	status: 'pending',
@@ -59,7 +62,7 @@ const couponLines = {
  *
  * @return {Object} Sample Order payload.
  */
-const getOrderExample = () => {
+export const getOrderExample = () => {
 	const orderExample = {
 		id: 0,
 		payment_method: 'cod',
@@ -79,7 +82,7 @@ const getOrderExample = () => {
 	return orderExample;
 };
 
-const getOrderExampleSearchTest = () => {
+export const getOrderExampleSearchTest = () => {
 	const orderExampleSearchTest = {
 		id: 0,
 		payment_method: 'cod',
@@ -97,14 +100,4 @@ const getOrderExampleSearchTest = () => {
 		coupon_lines: [ couponLines ],
 	};
 	return orderExampleSearchTest;
-};
-
-module.exports = {
-	order,
-	productLineItems,
-	shippingLines,
-	feeLines,
-	couponLines,
-	getOrderExample,
-	getOrderExampleSearchTest,
 };

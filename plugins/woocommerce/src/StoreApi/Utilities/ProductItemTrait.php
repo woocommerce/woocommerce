@@ -50,7 +50,21 @@ trait ProductItemTrait {
 				// If this is a term slug, get the term's nice name.
 				$term = get_term_by( 'slug', $value, $taxonomy );
 				if ( ! is_wp_error( $term ) && $term && $term->name ) {
-					$value = $term->name;
+
+					/**
+					 * Filters the variation option name for taxonomy attributes.
+					 *
+					 * @since 10.7.0
+					 *
+					 * @internal Matches filter name in WooCommerce core.
+					 *
+					 * @param string      $name     The term name to display.
+					 * @param \WP_Term    $term     Term object.
+					 * @param string      $taxonomy Taxonomy name.
+					 * @param \WC_Product $product  Product data.
+					 * @return string
+					 */
+					$value = apply_filters( 'woocommerce_variation_option_name', $term->name, $term, $taxonomy, $product );
 				}
 				$label = wc_attribute_label( $taxonomy );
 			} else {
