@@ -128,7 +128,7 @@ class DeleteDraftOrders extends TestCase {
 	 */
 	public function test_custom_batch_size_filter_allows_larger_results() {
 		add_filter(
-			'woocommerce_draft_order_batch_size',
+			'woocommerce_delete_expired_draft_orders_batch_size',
 			function () {
 				return 50;
 			}
@@ -149,7 +149,7 @@ class DeleteDraftOrders extends TestCase {
 		$this->assertNull( $this->caught_exception, 'No exception should be thrown when batch size filter allows more results.' );
 		$this->unset_mock_results_for_wc_query( $sample_results );
 
-		remove_all_filters( 'woocommerce_draft_order_batch_size' );
+		remove_all_filters( 'woocommerce_delete_expired_draft_orders_batch_size' );
 	}
 
 	public function test_greater_than_batch_results_error() {
