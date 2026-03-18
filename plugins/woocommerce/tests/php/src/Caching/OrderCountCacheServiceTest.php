@@ -146,6 +146,42 @@ class OrderCountCacheServiceTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that refresh cache is skipped when the pre-refresh filter returns true.
+	 */
+	public function test_refresh_cache_skipped_when_filter_returns_true() {
+		// Arrange - set a stale value so we can detect whether a refresh occurred.
+		$count         = OrderUtil::get_count_for_type( 'shop_order' );
+		$pending_count = $count[ OrderInternalStatus::PENDING ];
+		$this->order_cache->set( 'shop_order', OrderInternalStatus::PENDING, $pending_count + 10 );
+
+		$received_order_type = null;
+		$received_cache      = null;
+
+		add_filter(
+			'woocommerce_pre_refresh_order_count_cache',
+			function ( $skip, $order_type, $cache ) use ( &$received_order_type, &$received_cache ) {
+				unset( $skip ); // Avoid parameter not used PHPCS errors.
+				$received_order_type = $order_type;
+				$received_cache      = $cache;
+				return true;
+			},
+			10,
+			3
+		);
+
+		// Act.
+		$order_count_cache_service = wc_get_container()->get( OrderCountCacheService::class );
+		$order_count_cache_service->refresh_cache( 'shop_order' );
+
+		// Assert - the stale value must still be present (no flush or re-count happened).
+		$this->assertSame( $pending_count + 10, $this->order_cache->get( 'shop_order', array( OrderInternalStatus::PENDING ) )[ OrderInternalStatus::PENDING ] );
+		$this->assertSame( 'shop_order', $received_order_type );
+		$this->assertInstanceOf( OrderCountCache::class, $received_cache );
+
+		remove_all_filters( 'woocommerce_pre_refresh_order_count_cache' );
+	}
+
+	/**
 	 * Test that refresh cache works.
 	 */
 	public function test_refresh_cache() {
