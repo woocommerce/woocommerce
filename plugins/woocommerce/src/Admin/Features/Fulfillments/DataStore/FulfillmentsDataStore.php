@@ -639,9 +639,7 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 	public function delete_by_entity( string $entity_type, string $entity_id ): int {
 		global $wpdb;
 
-		if ( false === $wpdb->query( 'START TRANSACTION' ) ) {
-			throw new \RuntimeException( 'Failed to start transaction: ' . esc_html( $wpdb->last_error ) );
-		}
+		wc_transaction_query( 'start' );
 
 		try {
 			// Delete metadata for all fulfillments belonging to this entity.
@@ -672,9 +670,9 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 				throw new \RuntimeException( 'Failed to delete fulfillment records: ' . $wpdb->last_error );
 			}
 
-			$wpdb->query( 'COMMIT' );
+			wc_transaction_query( 'commit' );
 		} catch ( \Throwable $e ) {
-			$wpdb->query( 'ROLLBACK' );
+			wc_transaction_query( 'rollback' );
 			throw $e;
 		}
 
