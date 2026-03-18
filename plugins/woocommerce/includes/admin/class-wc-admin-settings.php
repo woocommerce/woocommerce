@@ -992,8 +992,8 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						// WC_Settings_API::validate_password_field(). Using wp_strip_all_tags() here would
 						// truncate values containing a literal '<' (e.g. "abc<def" becomes "abc") because
 						// PHP's strip_tags() treats the '<' as the start of a malformed HTML tag.
-						// stripslashes() undoes WordPress's magic quotes added to $_POST data.
-						$value = is_string( $raw_value ) ? trim( stripslashes( $raw_value ) ) : null;
+						// Note: $raw_value is already wp_unslash()ed (line 946/949), so no stripslashes() needed.
+						$value = is_string( $raw_value ) ? trim( $raw_value ) : null;
 						break;
 					default:
 						$value = wc_clean( $raw_value );

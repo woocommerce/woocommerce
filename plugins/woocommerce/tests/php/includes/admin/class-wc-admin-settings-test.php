@@ -99,6 +99,35 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should preserve literal backslashes in password field values.
+	 *
+	 * $raw_value is already wp_unslash()ed before reaching the password case,
+	 * so no additional stripslashes() should be applied — doing so would strip
+	 * legitimate backslashes from API keys and secrets.
+	 */
+	public function test_save_fields_preserves_backslashes_in_password_fields(): void {
+		$option_name                   = 'test_password_backslash';
+		$this->option_names_to_clean[] = $option_name;
+		$password                      = 'abc\\def';
+		$options                       = array(
+			array(
+				'id'   => $option_name,
+				'type' => 'password',
+			),
+		);
+		// save_fields() calls wp_unslash() on $data values, matching how it handles $_POST.
+		// WordPress adds magic quotes to $_POST via wp_magic_quotes(), so we must wp_slash()
+		// to simulate real form submission — otherwise wp_unslash() eats real backslashes.
+		$data = array(
+			$option_name => wp_slash( $password ),
+		);
+
+		WC_Admin_Settings::save_fields( $options, $data );
+
+		$this->assertSame( $password, get_option( $option_name ), 'Literal backslashes must not be stripped from passwords' );
+	}
+
+	/**
 	 * @testdox Should trim whitespace from password field values.
 	 */
 	public function test_save_fields_trims_whitespace_from_password_fields(): void {
