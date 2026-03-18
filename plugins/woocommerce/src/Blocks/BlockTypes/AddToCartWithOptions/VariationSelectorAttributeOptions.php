@@ -264,7 +264,7 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 					'class'              => 'wc-block-add-to-cart-with-options-variation-selector-attribute-options__dropdown',
 					'id'                 => $attribute_id,
 					'data-wp-context'    => array(
-						'name'          => $attribute_slug,
+						'name'          => wc_attribute_label( $block->context['woocommerce/attributeName'] ),
 						'options'       => $attribute_terms,
 						'selectedValue' => $selected_attribute,
 						'autoselect'    => $autoselect,
