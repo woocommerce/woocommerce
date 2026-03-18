@@ -1857,7 +1857,27 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		$is_vat_exempt = apply_filters( 'woocommerce_order_is_vat_exempt', 'yes' === $this->get_meta( 'is_vat_exempt' ), $this );
 
-		// Trigger tax recalculation for all items.
+		if (
+			wc_prices_include_tax() &&
+			/**
+			 * Filters whether to adjust product prices for non-base tax locations.
+			 *
+			 * @since 10.7.0
+			 *
+			 * @param bool $adjust_non_base_location_prices True by default.
+			 */
+			! apply_filters( 'woocommerce_adjust_non_base_location_prices', true )
+		) {
+			$calculate_tax_for = array(
+				'country'            => WC()->countries->get_base_country(),
+				'state'              => WC()->countries->get_base_state(),
+				'postcode'           => WC()->countries->get_base_postcode(),
+				'city'               => WC()->countries->get_base_city(),
+				'prices_include_tax' => true,
+				'adjust_item_total'  => true,
+
+			);
+		}
 		foreach ( $this->get_items( array( 'line_item', 'fee' ) ) as $item_id => $item ) {
 			if ( ! $is_vat_exempt ) {
 				$item->calculate_taxes( $calculate_tax_for );
@@ -2026,6 +2046,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		if ( $and_taxes ) {
 			$this->calculate_taxes();
 		}
+
+		// Re-read cart totals after calculate_taxes(). 
+		// Item totals may have been adjusted (e.g. when woocommerce_adjust_non_base_location_prices is false and prices include tax).
+		$cart_subtotal = $this->get_cart_subtotal_for_order();
+		$cart_total    = (float) $this->get_cart_total_for_order();
 
 		// Sum taxes again so we can work out how much tax was discounted. This uses original values, not those possibly rounded to 2dp.
 		foreach ( $this->get_items() as $item ) {
