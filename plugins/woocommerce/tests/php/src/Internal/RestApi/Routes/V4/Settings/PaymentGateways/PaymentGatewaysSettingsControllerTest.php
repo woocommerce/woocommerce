@@ -587,9 +587,13 @@ class PaymentGatewaysSettingsControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should strip HTML tags from password fields while preserving percent-encoded characters.
+	 * @testdox Should preserve HTML-like characters in password fields.
+	 *
+	 * Password fields use minimal sanitization (trim only) to avoid corrupting
+	 * passwords and API keys, matching WC_Settings_API::validate_password_field().
+	 * Characters like '<' and '>' are valid in secrets and must not be stripped.
 	 */
-	public function test_update_payment_gateway_strips_html_from_password_fields() {
+	public function test_update_payment_gateway_preserves_html_like_chars_in_password_fields() {
 		// Arrange.
 		$request = new WP_REST_Request( 'PUT', self::ENDPOINT . '/mock_password' );
 		$request->set_param(
@@ -606,7 +610,34 @@ class PaymentGatewaysSettingsControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 200, $response->get_status() );
 
 		$gateway = WC()->payment_gateways->payment_gateways()['mock_password'];
-		$this->assertSame( 'boldsecret%E0pass', $gateway->settings['api_password'], 'HTML tags should be stripped but percent sequences preserved' );
+		$this->assertSame( '<b>bold</b>secret%E0pass', $gateway->settings['api_password'], 'HTML-like characters should be preserved in password fields' );
+	}
+
+	/**
+	 * @testdox Should preserve a lone '<' in password field values without truncation.
+	 *
+	 * PHP's strip_tags() treats a lone '<' as the start of a malformed HTML tag and drops
+	 * everything from the '<' onward (e.g. "abc<def" becomes "abc"). Password fields must
+	 * not use strip_tags() or wp_strip_all_tags() for this reason.
+	 */
+	public function test_update_payment_gateway_preserves_lone_less_than_in_password_fields() {
+		// Arrange.
+		$request = new WP_REST_Request( 'PUT', self::ENDPOINT . '/mock_password' );
+		$request->set_param(
+			'values',
+			array(
+				'api_password' => 'pass<word123',
+			)
+		);
+
+		// Act.
+		$response = $this->server->dispatch( $request );
+
+		// Assert.
+		$this->assertSame( 200, $response->get_status() );
+
+		$gateway = WC()->payment_gateways->payment_gateways()['mock_password'];
+		$this->assertSame( 'pass<word123', $gateway->settings['api_password'], 'A lone < must not truncate the password' );
 	}
 
 	/**

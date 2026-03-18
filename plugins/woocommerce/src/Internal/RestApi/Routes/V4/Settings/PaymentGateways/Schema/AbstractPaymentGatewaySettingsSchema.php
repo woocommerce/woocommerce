@@ -555,7 +555,11 @@ abstract class AbstractPaymentGatewaySettingsSchema extends AbstractSchema {
 				return sanitize_email( $value );
 
 			case 'password':
-				return wp_strip_all_tags( trim( $value ) );
+				// No aggressive sanitization to avoid corrupting passwords and API keys — matches
+				// WC_Settings_API::validate_password_field(). Using wp_strip_all_tags() here would
+				// truncate values containing a literal '<' (e.g. "abc<def" becomes "abc") because
+				// PHP's strip_tags() treats the '<' as the start of a malformed HTML tag.
+				return trim( $value );
 
 			case 'color':
 				return sanitize_text_field( $value );
