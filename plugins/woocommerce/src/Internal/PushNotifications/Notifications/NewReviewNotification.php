@@ -70,7 +70,7 @@ class NewReviewNotification extends Notification {
 	 * @param string $key The meta key.
 	 */
 	public function has_meta( string $key ): bool {
-		return metadata_exists( 'comment', $this->get_resource_id(), $key );
+		return WC()->call_function( 'metadata_exists', 'comment', $this->get_resource_id(), $key );
 	}
 
 	/**
@@ -79,6 +79,6 @@ class NewReviewNotification extends Notification {
 	 * @param string $key The meta key.
 	 */
 	public function write_meta( string $key ): void {
-		update_comment_meta( $this->get_resource_id(), $key, (string) time() );
+		WC()->call_function( 'update_comment_meta', $this->get_resource_id(), $key, (string) time() );
 	}
 }
