@@ -95,28 +95,6 @@ class BacsGatewaySettingsSchema extends AbstractPaymentGatewaySettingsSchema {
 	}
 
 	/**
-	 * Get field schemas for BACS-specific special fields.
-	 *
-	 * @param WC_Payment_Gateway $gateway Gateway instance.
-	 * @return array
-	 */
-	protected function get_special_field_schemas( WC_Payment_Gateway $gateway ): array {
-		$gateway->init_form_fields();
-
-		// Start with information from the gateway's form_fields if available.
-		$field = $gateway->form_fields['account_details'] ?? array();
-
-		return array(
-			array(
-				'id'    => 'account_details',
-				'label' => $field['title'] ?? __( 'Account details', 'woocommerce' ),
-				'type'  => 'array',
-				'desc'  => $field['description'] ?? __( 'Bank account details for direct bank transfer.', 'woocommerce' ),
-			),
-		);
-	}
-
-	/**
 	 * Get values for BACS-specific special fields.
 	 *
 	 * @param WC_Payment_Gateway $gateway Gateway instance.
