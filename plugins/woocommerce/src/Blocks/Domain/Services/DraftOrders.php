@@ -181,6 +181,9 @@ class DraftOrders {
 		/**
 		 * Filters the number of draft orders deleted per batch during cleanup.
 		 *
+		 * Increasing this value can help improve deletion throughput for high-volume or busy stores
+		 * when the cleanup task cannot keep up with the draft orders backlog.
+		 *
 		 * @since 10.7.0
 		 * @param int $batch_size Number of draft orders to delete per batch. Default 20.
 		 */
