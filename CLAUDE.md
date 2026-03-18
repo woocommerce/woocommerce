@@ -79,6 +79,7 @@ plugins/woocommerce/
 
 - Current version in `includes/class-woocommerce.php` → `$version` property
 - Used for `@since` annotations (remove `-dev` suffix)
+- When changing template files (PHP files used to display UI on the front-end) the version in their header should be updated to the current version, without the `-dev` suffix.
 
 ## Development Workflow
 

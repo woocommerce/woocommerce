@@ -75,6 +75,7 @@ class WC_Product_Grouped_Data_Store_CPT extends WC_Product_Data_Store_CPT implem
 
 		$child_ids = $product->get_children( 'edit' );
 		if ( ! empty( $child_ids ) ) {
+			// Prime caches to reduce future queries.
 			_prime_post_caches( $child_ids );
 			foreach ( $child_ids as $child_id ) {
 				$child = wc_get_product( $child_id );
