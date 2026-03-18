@@ -15,11 +15,6 @@ defined( 'ABSPATH' ) || exit;
  */
 class NewReviewNotification extends Notification {
 	/**
-	 * The notification type identifier.
-	 */
-	const TYPE = 'store_review';
-
-	/**
 	 * Creates a new review notification.
 	 *
 	 * @param int $comment_id The comment ID.
@@ -27,7 +22,14 @@ class NewReviewNotification extends Notification {
 	 * @since 10.7.0
 	 */
 	public function __construct( int $comment_id ) {
-		parent::__construct( self::TYPE, $comment_id );
+		parent::__construct( $comment_id );
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public static function get_type(): string {
+		return 'store_review';
 	}
 
 	/**
@@ -47,7 +49,7 @@ class NewReviewNotification extends Notification {
 		}
 
 		return array(
-			'type'        => self::TYPE,
+			'type'        => $this->get_type(),
 			// This represents the time the notification was triggered, so we can monitor age of notification at delivery.
 			'timestamp'   => gmdate( 'c' ),
 			'resource_id' => $this->get_resource_id(),
@@ -71,5 +73,19 @@ class NewReviewNotification extends Notification {
 				'comment_id' => $this->get_resource_id(),
 			),
 		);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public function has_meta( string $key ): bool {
+		return ! empty( get_comment_meta( $this->get_resource_id(), $key, true ) );
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public function write_meta( string $key ): void {
+		update_comment_meta( $this->get_resource_id(), $key, (string) time() );
 	}
 }
