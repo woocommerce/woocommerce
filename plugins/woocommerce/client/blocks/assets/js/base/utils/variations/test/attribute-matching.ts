@@ -19,8 +19,20 @@ describe( 'normalizeAttributeName', () => {
 		);
 	} );
 
-	it( 'returns unchanged name without prefix', () => {
-		expect( normalizeAttributeName( 'Color' ) ).toBe( 'Color' );
+	it( 'returns lowercased name without prefix', () => {
+		expect( normalizeAttributeName( 'Color' ) ).toBe( 'color' );
+	} );
+
+	it( 'replaces hyphens with spaces for multi-word slugs', () => {
+		expect( normalizeAttributeName( 'attribute_pa_numeric-size' ) ).toBe(
+			'numeric size'
+		);
+	} );
+
+	it( 'replaces hyphens with spaces without prefix', () => {
+		expect( normalizeAttributeName( 'numeric-size' ) ).toBe(
+			'numeric size'
+		);
 	} );
 } );
 
@@ -38,6 +50,24 @@ describe( 'attributeNamesMatch', () => {
 	it( 'matches when both have prefixes', () => {
 		expect(
 			attributeNamesMatch( 'attribute_pa_color', 'attribute_color' )
+		).toBe( true );
+	} );
+
+	it( 'matches hyphenated slug against spaced label', () => {
+		expect(
+			attributeNamesMatch( 'attribute_pa_numeric-size', 'numeric size' )
+		).toBe( true );
+	} );
+
+	it( 'matches hyphenated slug against capitalized spaced label', () => {
+		expect(
+			attributeNamesMatch( 'attribute_pa_numeric-size', 'Numeric Size' )
+		).toBe( true );
+	} );
+
+	it( 'matches two hyphenated names', () => {
+		expect(
+			attributeNamesMatch( 'attribute_pa_numeric-size', 'numeric-size' )
 		).toBe( true );
 	} );
 
@@ -77,6 +107,45 @@ describe( 'getVariationAttributeValue', () => {
 		expect(
 			getVariationAttributeValue( variation, 'material' )
 		).toBeUndefined();
+	} );
+
+	describe( 'multi-word attribute names', () => {
+		const variationWithSpaces = {
+			id: 456,
+			attributes: [ { name: 'numeric size', value: '42' } ],
+		};
+
+		const variationWithHyphens = {
+			id: 789,
+			attributes: [ { name: 'numeric-size', value: '44' } ],
+		};
+
+		it( 'finds value when slug has hyphens and Store API has spaces', () => {
+			expect(
+				getVariationAttributeValue(
+					variationWithSpaces,
+					'attribute_pa_numeric-size'
+				)
+			).toBe( '42' );
+		} );
+
+		it( 'finds value when both use hyphens', () => {
+			expect(
+				getVariationAttributeValue(
+					variationWithHyphens,
+					'attribute_pa_numeric-size'
+				)
+			).toBe( '44' );
+		} );
+
+		it( 'finds value when both use spaces', () => {
+			expect(
+				getVariationAttributeValue(
+					variationWithSpaces,
+					'numeric size'
+				)
+			).toBe( '42' );
+		} );
 	} );
 } );
 
@@ -149,6 +218,54 @@ describe( 'findMatchingVariation', () => {
 		).toBeNull();
 	} );
 
+	describe( 'multi-word attribute names', () => {
+		const productWithMultiWord = {
+			id: 3,
+			type: 'variable',
+			variations: [
+				{
+					id: 301,
+					attributes: [
+						{ name: 'Color', value: 'Blue' },
+						{ name: 'numeric size', value: '42' },
+					],
+				},
+				{
+					id: 302,
+					attributes: [
+						{ name: 'Color', value: 'Red' },
+						{ name: 'numeric size', value: '44' },
+					],
+				},
+			],
+		};
+
+		it( 'matches when selected attributes use hyphenated slugs', () => {
+			const result = findMatchingVariation( productWithMultiWord, [
+				{ attribute: 'attribute_pa_color', value: 'Blue' },
+				{ attribute: 'attribute_pa_numeric-size', value: '42' },
+			] );
+			expect( result?.id ).toBe( 301 );
+		} );
+
+		it( 'matches when Store API uses hyphens instead of spaces', () => {
+			const productWithHyphens = {
+				id: 4,
+				type: 'variable',
+				variations: [
+					{
+						id: 401,
+						attributes: [ { name: 'numeric-size', value: '42' } ],
+					},
+				],
+			};
+			const result = findMatchingVariation( productWithHyphens, [
+				{ attribute: 'attribute_pa_numeric-size', value: '42' },
+			] );
+			expect( result?.id ).toBe( 401 );
+		} );
+	} );
+
 	describe( 'Any attribute handling', () => {
 		const productWithAny = {
 			id: 2,
@@ -157,7 +274,7 @@ describe( 'findMatchingVariation', () => {
 				{
 					id: 201,
 					attributes: [
-						{ name: 'Color', value: '' }, // "Any" color
+						{ name: 'Color', value: null }, // "Any" color
 						{ name: 'Size', value: 'Small' },
 					],
 				},
@@ -165,7 +282,7 @@ describe( 'findMatchingVariation', () => {
 					id: 202,
 					attributes: [
 						{ name: 'Color', value: 'Blue' },
-						{ name: 'Size', value: '' }, // "Any" size
+						{ name: 'Size', value: null }, // "Any" size
 					],
 				},
 			],
@@ -183,9 +300,9 @@ describe( 'findMatchingVariation', () => {
 			expect( result?.id ).toBe( 201 );
 		} );
 
-		it( 'does not match "Any" attribute when selected value is empty', () => {
+		it( 'does not match "Any" attribute when selected value is null', () => {
 			const selectedAttributes = [
-				{ attribute: 'Color', value: '' },
+				{ attribute: 'Color', value: null },
 				{ attribute: 'Size', value: 'Small' },
 			];
 			expect(

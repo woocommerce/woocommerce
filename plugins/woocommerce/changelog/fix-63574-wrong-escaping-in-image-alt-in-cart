@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Wrong escaping of "&" character in product name in img alt tag in cart and checkout pages

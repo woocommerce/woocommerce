@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent "Order again" button showing on order confirmation page

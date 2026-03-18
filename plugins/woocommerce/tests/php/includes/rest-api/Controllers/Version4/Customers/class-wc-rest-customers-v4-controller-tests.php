@@ -926,6 +926,37 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test creating customer without username or password succeeds regardless of store settings.
+	 *
+	 * Store settings like woocommerce_registration_generate_username and
+	 * woocommerce_registration_generate_password should not affect this admin API.
+	 * Username and password should always be optional and auto-generated when not provided.
+	 */
+	public function test_create_customer_without_username_or_password(): void {
+		// Disable auto-generation in store settings (simulates the problematic configuration).
+		update_option( 'woocommerce_registration_generate_username', 'no' );
+		update_option( 'woocommerce_registration_generate_password', 'no' );
+
+		$customer_data = array(
+			'email'      => 'nousernameorpassword@example.com',
+			'first_name' => 'Test',
+			'last_name'  => 'User',
+		);
+
+		$request = new WP_REST_Request( 'POST', '/wc/v4/customers' );
+		$request->set_body_params( $customer_data );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 201, $response->get_status() );
+
+		$response_data = $response->get_data();
+		$this->assertNotEmpty( $response_data['username'] );
+		$this->assertEquals( 'nousernameorpassword@example.com', $response_data['email'] );
+
+		$this->created_customers[] = $response_data['id'];
+	}
+
+	/**
 	 * Test comprehensive value validation for all customer fields.
 	 */
 	public function test_comprehensive_value_validation(): void {

@@ -482,7 +482,7 @@ class DefaultFreeExtensions {
 				'is_visible'     => array(
 					array(
 						'type'      => 'base_location_country',
-						'value'     => array( 'CA', 'DE', 'GB', 'AU', 'NZ' ),
+						'value'     => array( 'CA', 'GB', 'AU', 'NZ' ),
 						'operation' => 'in',
 					),
 				),
@@ -495,7 +495,7 @@ class DefaultFreeExtensions {
 				'is_visible'     => array(
 					array(
 						'type'      => 'base_location_country',
-						'value'     => array( 'FR', 'ES', 'IT', 'NL', 'AT', 'BE' ),
+						'value'     => array( 'FR', 'ES', 'IT', 'DE', 'NL', 'AT', 'BE', 'IE', 'PT' ),
 						'operation' => 'in',
 					),
 				),

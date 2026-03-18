@@ -11,6 +11,7 @@ import { useEffect, useRef, useMemo } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';
 import fastDeepEqual from 'fast-deep-equal/es6';
+import { useIsEmailEditor } from '@woocommerce/email-editor';
 
 /**
  * Internal dependencies
@@ -78,6 +79,8 @@ const ProductCollectionContent = ( {
 		location,
 		isUsingReferencePreviewMode,
 	} = props;
+
+	const isEmailEditor = useIsEmailEditor();
 
 	useSetPreviewState( {
 		setPreviewState,
@@ -164,7 +167,7 @@ const ProductCollectionContent = ( {
 	return (
 		<div { ...blockProps }>
 			{ attributes.__privatePreviewState?.isPreview &&
-				props.isSelected && (
+				( isEmailEditor || props.isSelected ) && (
 					<Button
 						variant="primary"
 						size="small"
