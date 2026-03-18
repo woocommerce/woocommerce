@@ -10,7 +10,7 @@
 /**
  * A simple, physical product.
  */
-const simpleProduct = {
+export const simpleProduct = {
 	name: 'A Simple Product',
 	regular_price: '25',
 	description: 'Description for this simple product.',
@@ -20,7 +20,7 @@ const simpleProduct = {
 /**
  * A virtual product
  */
-const virtualProduct = {
+export const virtualProduct = {
 	name: 'A Virtual Product',
 	regular_price: '10',
 	virtual: true,
@@ -29,7 +29,7 @@ const virtualProduct = {
 /**
  * A variable product
  */
-const variableProduct = {
+export const variableProduct = {
 	name: 'A Variable Product',
 	type: 'variable',
 	attributes: [
@@ -57,7 +57,7 @@ const variableProduct = {
 /**
  * External product example
  */
-const externalProduct = {
+export const externalProduct = {
 	name: 'An External Product',
 	regular_price: '1.00',
 	type: 'external',
@@ -66,15 +66,7 @@ const externalProduct = {
 /**
  * Grouped product example
  */
-const groupedProduct = {
+export const groupedProduct = {
 	name: 'A Grouped Product',
 	type: 'grouped',
-};
-
-module.exports = {
-	simpleProduct,
-	virtualProduct,
-	variableProduct,
-	externalProduct,
-	groupedProduct,
 };

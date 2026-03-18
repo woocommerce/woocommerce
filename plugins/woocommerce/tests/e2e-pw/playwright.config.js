@@ -50,14 +50,14 @@ const reporter = [
 		},
 	],
 	[
-		`${ TESTS_ROOT_PATH }/reporters/environment-reporter.js`,
+		`${ TESTS_ROOT_PATH }/reporters/environment-reporter.ts`,
 		{ outputFolder: `${ TESTS_ROOT_PATH }/test-results/allure-results` },
 	],
 ];
 
 if ( process.env.CI ) {
 	reporter.push( [ 'buildkite-test-collector/playwright/reporter' ] );
-	reporter.push( [ `${ TESTS_ROOT_PATH }/reporters/skipped-tests.js` ] );
+	reporter.push( [ `${ TESTS_ROOT_PATH }/reporters/skipped-tests.ts` ] );
 	reporter.push( [
 		'junit',
 		{
