@@ -1,0 +1,38 @@
+<?php
+
+declare( strict_types = 1 );
+
+namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Stubs;
+
+use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
+
+/**
+ * Stub notification with type 'store_review' for testing.
+ */
+class StubReviewNotification extends Notification {
+	/**
+	 * {@inheritDoc}
+	 */
+	public static function get_type(): string {
+		return 'store_review';
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public function to_payload(): ?array {
+		return array( 'test' => true );
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public function has_meta( string $key ): bool {
+		return false;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public function write_meta( string $key ): void {}
+}

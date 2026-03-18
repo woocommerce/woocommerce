@@ -291,8 +291,15 @@ class WpcomNotificationDispatcherTest extends WC_Unit_Test_Case {
 			 * @param array|null $payload The payload to return.
 			 */
 			public function __construct( ?array $payload ) {
-				parent::__construct( 'store_order', 1 );
+				parent::__construct( 1 );
 				$this->test_payload = $payload;
+			}
+
+			/**
+			 * {@inheritDoc}
+			 */
+			public static function get_type(): string {
+				return 'store_order';
 			}
 
 			/**
@@ -301,6 +308,18 @@ class WpcomNotificationDispatcherTest extends WC_Unit_Test_Case {
 			public function to_payload(): ?array {
 				return $this->test_payload;
 			}
+
+			/**
+			 * {@inheritDoc}
+			 */
+			public function has_meta( string $key ): bool {
+				return false;
+			}
+
+			/**
+			 * {@inheritDoc}
+			 */
+			public function write_meta( string $key ): void {}
 		};
 	}
 

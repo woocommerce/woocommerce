@@ -15,12 +15,6 @@ defined( 'ABSPATH' ) || exit;
  */
 class NewOrderNotification extends Notification {
 	/**
-	 * The notification type identifier, this should match the subtype or type
-	 * (if there isn't a subtype) values attributed to notes in WordPress.com.
-	 */
-	const TYPE = 'store_order';
-
-	/**
 	 * The icon to use in the notification.
 	 */
 	const ICON = 'https://s.wp.com/wp-content/mu-plugins/notes/images/update-payment-2x.png';
@@ -38,7 +32,14 @@ class NewOrderNotification extends Notification {
 	 * @since 10.7.0
 	 */
 	public function __construct( int $order_id ) {
-		parent::__construct( self::TYPE, $order_id );
+		parent::__construct( $order_id );
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public static function get_type(): string {
+		return 'store_order';
 	}
 
 	/**
@@ -58,7 +59,7 @@ class NewOrderNotification extends Notification {
 		}
 
 		return array(
-			'type'        => self::TYPE,
+			'type'        => $this->get_type(),
 			'icon'        => self::ICON,
 			// This represents the time the notification was triggered, so we can monitor age of notification at delivery.
 			'timestamp'   => gmdate( 'c' ),
@@ -86,5 +87,25 @@ class NewOrderNotification extends Notification {
 				'order_id' => $this->get_resource_id(),
 			),
 		);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public function has_meta( string $key ): bool {
+		$order = wc_get_order( $this->get_resource_id() );
+		return $order instanceof WC_Order && ! empty( $order->get_meta( $key ) );
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public function write_meta( string $key ): void {
+		$order = wc_get_order( $this->get_resource_id() );
+
+		if ( $order instanceof WC_Order ) {
+			$order->update_meta_data( $key, (string) time() );
+			$order->save_meta_data();
+		}
 	}
 }
