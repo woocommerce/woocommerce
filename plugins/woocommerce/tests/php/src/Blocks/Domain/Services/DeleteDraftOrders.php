@@ -123,11 +123,19 @@ class DeleteDraftOrders extends TestCase {
 		$this->assertEquals( 1, (int) $wpdb->get_var( "SELECT COUNT(ID) from $wpdb->posts posts WHERE posts.post_status = 'wc-on-hold'" ) );
 	}
 
+	/**
+	 * Test that a custom batch size filter allows more than the default 20 results without error.
+	 */
 	public function test_custom_batch_size_filter_allows_larger_results() {
-		add_filter( 'woocommerce_draft_order_batch_size', function() { return 50; } );
+		add_filter(
+			'woocommerce_draft_order_batch_size',
+			function () {
+				return 50;
+			}
+		);
 
-		$sample_results = function( $results, $args ) {
-			if ( isset( $args[ 'status' ] ) && DraftOrders::DB_STATUS === $args[ 'status' ] ) {
+		$sample_results = function ( $results, $args ) {
+			if ( isset( $args['status'] ) && DraftOrders::DB_STATUS === $args['status'] ) {
 				$orders = array_fill( 0, 50, new WC_Order() );
 				foreach ( $orders as $order ) {
 					$order->set_status( DraftOrders::STATUS );
