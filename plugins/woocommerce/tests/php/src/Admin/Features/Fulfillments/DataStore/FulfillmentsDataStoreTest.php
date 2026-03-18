@@ -911,7 +911,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 	public function test_delete_by_entity(): void {
 		global $wpdb;
 
-		$entity_id   = 999;
+		$entity_id   = '999';
 		$entity_type = 'order-fulfillment';
 
 		$fulfillment1 = new Fulfillment();
@@ -1004,7 +1004,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 		);
 		$fulfillment_to_keep->save();
 
-		$this->data_store->delete_by_entity( $entity_type, 100 );
+		$this->data_store->delete_by_entity( $entity_type, '100' );
 
 		$remaining = $wpdb->get_var(
 			$wpdb->prepare(
@@ -1020,7 +1020,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 	 * @testdox Should return zero when no fulfillments exist for the entity.
 	 */
 	public function test_delete_by_entity_returns_zero_when_no_records(): void {
-		$rows_deleted = $this->data_store->delete_by_entity( 'order-fulfillment', 12345 );
+		$rows_deleted = $this->data_store->delete_by_entity( 'order-fulfillment', '12345' );
 
 		$this->assertSame( 0, $rows_deleted );
 	}

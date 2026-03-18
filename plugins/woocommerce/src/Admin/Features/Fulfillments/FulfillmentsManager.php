@@ -87,18 +87,18 @@ class FulfillmentsManager {
 	 * @param int $order_id The ID of the order being deleted.
 	 */
 	public function delete_order_fulfillments( int $order_id ): void {
-		if ( ! OrderUtil::is_order( $order_id, wc_get_order_types() ) ) {
-			return;
-		}
-
 		try {
+			if ( ! OrderUtil::is_order( $order_id, wc_get_order_types() ) ) {
+				return;
+			}
+
 			/**
 			 * Fulfillments data store.
 			 *
 			 * @var \Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDataStore $fulfillments_data_store
 			 */
 			$fulfillments_data_store = \WC_Data_Store::load( 'order-fulfillment' );
-			$fulfillments_data_store->delete_by_entity( WC_Order::class, $order_id );
+			$fulfillments_data_store->delete_by_entity( WC_Order::class, (string) $order_id );
 		} catch ( \Throwable $e ) {
 			wc_get_logger()->error(
 				sprintf( 'Failed to delete fulfillments for order %d: %s', $order_id, $e->getMessage() ),
