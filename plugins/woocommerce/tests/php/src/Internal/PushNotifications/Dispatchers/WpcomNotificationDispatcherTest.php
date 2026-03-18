@@ -311,6 +311,8 @@ class WpcomNotificationDispatcherTest extends WC_Unit_Test_Case {
 
 			/**
 			 * {@inheritDoc}
+			 *
+			 * @param string $key The meta key.
 			 */
 			public function has_meta( string $key ): bool {
 				return false;
@@ -318,6 +320,8 @@ class WpcomNotificationDispatcherTest extends WC_Unit_Test_Case {
 
 			/**
 			 * {@inheritDoc}
+			 *
+			 * @param string $key The meta key.
 			 */
 			public function write_meta( string $key ): void {}
 		};

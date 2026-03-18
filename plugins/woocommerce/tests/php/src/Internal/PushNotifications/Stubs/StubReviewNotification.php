@@ -26,6 +26,8 @@ class StubReviewNotification extends Notification {
 
 	/**
 	 * {@inheritDoc}
+	 *
+	 * @param string $key The meta key.
 	 */
 	public function has_meta( string $key ): bool {
 		return false;
@@ -33,6 +35,8 @@ class StubReviewNotification extends Notification {
 
 	/**
 	 * {@inheritDoc}
+	 *
+	 * @param string $key The meta key.
 	 */
 	public function write_meta( string $key ): void {}
 }

@@ -25,17 +25,6 @@ class NewOrderNotification extends Notification {
 	const EMOJI_LIST = array( '🎉', '🎊', '🥳', '👏', '🙌' );
 
 	/**
-	 * Creates a new order notification.
-	 *
-	 * @param int $order_id The order ID.
-	 *
-	 * @since 10.7.0
-	 */
-	public function __construct( int $order_id ) {
-		parent::__construct( $order_id );
-	}
-
-	/**
 	 * {@inheritDoc}
 	 */
 	public static function get_type(): string {
@@ -91,6 +80,8 @@ class NewOrderNotification extends Notification {
 
 	/**
 	 * {@inheritDoc}
+	 *
+	 * @param string $key The meta key.
 	 */
 	public function has_meta( string $key ): bool {
 		$order = wc_get_order( $this->get_resource_id() );
@@ -99,6 +90,8 @@ class NewOrderNotification extends Notification {
 
 	/**
 	 * {@inheritDoc}
+	 *
+	 * @param string $key The meta key.
 	 */
 	public function write_meta( string $key ): void {
 		$order = wc_get_order( $this->get_resource_id() );

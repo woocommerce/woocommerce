@@ -15,17 +15,6 @@ defined( 'ABSPATH' ) || exit;
  */
 class NewReviewNotification extends Notification {
 	/**
-	 * Creates a new review notification.
-	 *
-	 * @param int $comment_id The comment ID.
-	 *
-	 * @since 10.7.0
-	 */
-	public function __construct( int $comment_id ) {
-		parent::__construct( $comment_id );
-	}
-
-	/**
 	 * {@inheritDoc}
 	 */
 	public static function get_type(): string {
@@ -77,6 +66,8 @@ class NewReviewNotification extends Notification {
 
 	/**
 	 * {@inheritDoc}
+	 *
+	 * @param string $key The meta key.
 	 */
 	public function has_meta( string $key ): bool {
 		return ! empty( get_comment_meta( $this->get_resource_id(), $key, true ) );
@@ -84,6 +75,8 @@ class NewReviewNotification extends Notification {
 
 	/**
 	 * {@inheritDoc}
+	 *
+	 * @param string $key The meta key.
 	 */
 	public function write_meta( string $key ): void {
 		update_comment_meta( $this->get_resource_id(), $key, (string) time() );
