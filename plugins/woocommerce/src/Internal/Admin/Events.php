@@ -251,7 +251,8 @@ class Events {
 	}
 
 	/**
-	 *   Refresh transient for the following DataSourcePollers on wc_admin_daily cron job.
+	 *   Prime or fetch specs for the following DataSourcePollers on the wc_admin_daily cron job
+	 *   when their related transients are missing or expired:
 	 *   - PaymentGatewaySuggestionsDataSourcePoller
 	 *   - RemoteFreeExtensionsDataSourcePoller
 	 */
