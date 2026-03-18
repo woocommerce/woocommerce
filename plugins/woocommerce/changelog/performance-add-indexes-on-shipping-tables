@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Added the missing shipping tables indexes to improve the performance of cart and checkout workflows for complex shipping configurations.

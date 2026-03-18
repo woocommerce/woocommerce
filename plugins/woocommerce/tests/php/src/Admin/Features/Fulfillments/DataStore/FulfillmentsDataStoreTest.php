@@ -44,6 +44,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 	 * Set up the test case.
 	 */
 	public function setUp(): void {
+		parent::setUp();
 		$this->data_store = wc_get_container()->get( FulfillmentsDataStore::class );
 	}
 
@@ -56,6 +57,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_order_fulfillment_meta" );
 		// Clean up the fulfillment table.
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_order_fulfillments" );
+		parent::tearDown();
 	}
 
 	/**
@@ -82,6 +84,74 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 		$this->data_store->create( $fulfillment );
 		$this->assertFulfillmentRecordInDB( $fulfillment );
 		$this->assertFulfillmentMetaInDB( $fulfillment );
+	}
+
+	/**
+	 * Tests that creating a fulfilled fulfillment sets the date_fulfilled metadata
+	 * consistently between the object and the database.
+	 */
+	public function test_create_fulfilled_fulfillment_sets_date_fulfilled() {
+		$fulfillment = new Fulfillment();
+		$fulfillment->set_entity_type( 'order-fulfillment' );
+		$fulfillment->set_entity_id( '123' );
+		$fulfillment->set_status( 'fulfilled' );
+		$fulfillment->set_items(
+			array(
+				array(
+					'item_id' => 1,
+					'qty'     => 2,
+				),
+			)
+		);
+
+		$this->data_store->create( $fulfillment );
+
+		$this->assertNotNull( $fulfillment->get_id() );
+		$this->assertTrue( $fulfillment->get_is_fulfilled() );
+		$this->assertNotNull( $fulfillment->get_date_fulfilled() );
+
+		// Read back from DB and verify the date_fulfilled matches.
+		$read_fulfillment = new Fulfillment( $fulfillment->get_id() );
+
+		$this->assertEquals( $fulfillment->get_date_fulfilled(), $read_fulfillment->get_date_fulfilled() );
+	}
+
+	/**
+	 * Tests that updating a fulfilled fulfillment preserves the original date_fulfilled value
+	 * and does not change it to the current time.
+	 */
+	public function test_update_fulfilled_fulfillment_preserves_date_fulfilled() {
+		$fulfillment = new Fulfillment();
+		$fulfillment->set_entity_type( 'order-fulfillment' );
+		$fulfillment->set_entity_id( '123' );
+		$fulfillment->set_status( 'unfulfilled' );
+		$fulfillment->set_items(
+			array(
+				array(
+					'item_id' => 1,
+					'qty'     => 2,
+				),
+			)
+		);
+		$this->data_store->create( $fulfillment );
+
+		// Mark as fulfilled and save.
+		$fulfillment->set_status( 'fulfilled' );
+		$this->data_store->update( $fulfillment );
+		$this->assertNotNull( $fulfillment->get_date_fulfilled() );
+
+		// Set a known fixed date_fulfilled to make the assertion deterministic.
+		$fixed_date = '2025-01-15 10:30:00';
+		$fulfillment->set_date_fulfilled( $fixed_date );
+		$fulfillment->set_entity_id( '456' );
+		$this->data_store->update( $fulfillment );
+
+		// Verify in-memory value is preserved.
+		$this->assertEquals( $fixed_date, $fulfillment->get_date_fulfilled() );
+
+		// Verify persisted value matches after reloading from DB.
+		$read_fulfillment = new Fulfillment( $fulfillment->get_id() );
+		$this->assertEquals( $fixed_date, $read_fulfillment->get_date_fulfilled() );
 	}
 
 	/**
@@ -700,7 +770,6 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 		$fulfillment->set_status( 'unfulfilled' );
 		$fulfillment->set_items( $items );
 		$fulfillment->save();
-		$fulfillment->save_meta_data();
 
 		$this->assertNotEquals( 0, $fulfillment->get_id() );
 
