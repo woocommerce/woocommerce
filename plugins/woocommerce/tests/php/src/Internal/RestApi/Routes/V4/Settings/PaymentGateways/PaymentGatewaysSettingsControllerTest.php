@@ -45,16 +45,8 @@ class PaymentGatewaysSettingsControllerTest extends WC_REST_Unit_Test_Case {
 		$this->store_admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $this->store_admin_id );
 
-		// Register the mock password gateway so it's available via WC()->payment_gateways.
-		add_filter(
-			'woocommerce_payment_gateways',
-			function ( $gateways ) {
-				$gateways[] = WCGatewayMockPassword::class;
-				return $gateways;
-			}
-		);
-		// Force re-initialization of gateways to pick up the mock.
-		WC()->payment_gateways()->init();
+		// Inject the mock gateway directly — avoids filter pollution and a second init() call.
+		WC()->payment_gateways()->payment_gateways[] = new WCGatewayMockPassword();
 
 		$this->sut = new Controller();
 		$this->sut->register_routes();
