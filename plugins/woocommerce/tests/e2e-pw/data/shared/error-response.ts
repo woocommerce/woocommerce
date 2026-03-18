@@ -3,12 +3,10 @@
  *
  * https://woocommerce.github.io/woocommerce-rest-api-docs/#errors
  */
-const errorResponse = {
+export const errorResponse = {
 	code: '',
 	message: '',
 	data: {
 		status: 400,
 	},
 };
-
-module.exports = { errorResponse };

@@ -184,7 +184,8 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 		$order        = OrderHelper::create_order( get_current_user_id(), $product );
 		$this->assertEmpty( $order->get_meta( '_fulfillment_status' ) );
 
-		$fulfillments[] = FulfillmentsHelper::create_fulfillment(
+		$create_count_before = did_action( 'woocommerce_fulfillment_after_create' );
+		$fulfillments[]      = FulfillmentsHelper::create_fulfillment(
 			array(
 				'entity_type'  => WC_Order::class,
 				'entity_id'    => $order->get_id(),
@@ -200,19 +201,21 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 				),
 			)
 		);
-		$this->assertTrue( did_action( 'woocommerce_fulfillment_after_create' ) > 0 );
+		$this->assertGreaterThan( $create_count_before, did_action( 'woocommerce_fulfillment_after_create' ) );
 		$order = wc_get_order( $order->get_id() );
 		$this->assertEquals( 'unfulfilled', $order->get_meta( '_fulfillment_status', true ) );
 
+		$update_count_before = did_action( 'woocommerce_fulfillment_after_update' );
 		$fulfillments[0]->set_status( 'fulfilled' );
 		$fulfillments[0]->save();
 
-		$this->assertTrue( did_action( 'woocommerce_fulfillment_after_update' ) > 0 );
+		$this->assertGreaterThan( $update_count_before, did_action( 'woocommerce_fulfillment_after_update' ) );
 		$order = wc_get_order( $order->get_id() );
 		$this->assertEquals( 'partially_fulfilled', $order->get_meta( '_fulfillment_status' ) );
 
+		$delete_count_before = did_action( 'woocommerce_fulfillment_after_delete' );
 		$fulfillments[0]->delete();
-		$this->assertTrue( did_action( 'woocommerce_fulfillment_after_delete' ) > 0 );
+		$this->assertGreaterThan( $delete_count_before, did_action( 'woocommerce_fulfillment_after_delete' ) );
 		$order = wc_get_order( $order->get_id() );
 		$this->assertEquals( '', $order->get_meta( '_fulfillment_status' ) );
 	}

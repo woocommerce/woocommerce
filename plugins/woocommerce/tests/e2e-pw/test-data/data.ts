@@ -10,7 +10,7 @@ const {
 	USE_WP_ENV,
 } = process.env;
 
-const admin = {
+export const admin = {
 	username: ADMIN_USER ?? 'admin',
 	password: ADMIN_PASSWORD ?? 'password',
 	email:
@@ -20,7 +20,7 @@ const admin = {
 			: 'admin@woocommercecoree2etestsuite.com' ),
 };
 
-const customer = {
+export const customer = {
 	username: CUSTOMER_USER ?? 'customer',
 	password: CUSTOMER_PASSWORD ?? 'password',
 	email: CUSTOMER_USER_EMAIL ?? 'customer@woocommercecoree2etestsuite.com',
@@ -51,7 +51,7 @@ const customer = {
 	},
 };
 
-const storeDetails = {
+export const storeDetails = {
 	us: {
 		store: {
 			address: 'addr1',
@@ -113,10 +113,4 @@ const storeDetails = {
 			downloadable: 'Downloads',
 		},
 	},
-};
-
-module.exports = {
-	storeDetails,
-	admin,
-	customer,
 };

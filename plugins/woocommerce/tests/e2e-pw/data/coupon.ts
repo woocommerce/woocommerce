@@ -6,7 +6,7 @@
  * https://woocommerce.github.io/woocommerce-rest-api-docs/#coupons
  *
  */
-const coupon = {
+export const coupon = {
 	code: '10off',
 	amount: '10',
 	discount_type: 'percent',
@@ -26,8 +26,4 @@ const coupon = {
 	minimum_amount: '100.00',
 	maximum_amount: '',
 	email_restrictions: [],
-};
-
-module.exports = {
-	coupon,
 };
