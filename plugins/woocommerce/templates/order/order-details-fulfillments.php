@@ -12,13 +12,12 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 10.1.0
+ * @version 10.7.0
  *
  * @var bool $show_downloads Controls whether the downloads table should be rendered.
  */
 
-use Automattic\WooCommerce\Internal\DataStores\Fulfillments\FulfillmentsDataStore;
-use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentUtils;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentUtils;
 
  // phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
 
@@ -61,7 +60,7 @@ if ( $show_downloads ) {
 
 	<table class="woocommerce-table woocommerce-table--order-details shop_table order_details">
 	<?php
-	$fulfillments_data_store = wc_get_container()->get( FulfillmentsDataStore::class );
+	$fulfillments_data_store = \WC_Data_Store::load( 'order-fulfillment' );
 	$fulfillments            = $fulfillments_data_store->read_fulfillments( WC_Order::class, (string) $order->get_id() );
 
 	if ( FulfillmentUtils::has_pending_items( $order, $fulfillments ) ) {

@@ -595,4 +595,125 @@ class PaymentsTest extends WC_Unit_Test_Case {
 		// Assert.
 		$this->assertTrue( $result );
 	}
+
+	/**
+	 * Test that new gateways are placed above offline PMs when offline group is last.
+	 */
+	public function test_get_payment_providers_new_gateway_above_offline_pms() {
+		// Arrange.
+		$location = 'US';
+
+		$gateways = array(
+			new FakePaymentGateway( 'gateway1', array( 'plugin_slug' => 'plugin1' ) ),
+			new FakePaymentGateway( 'stripe', array( 'plugin_slug' => 'woocommerce-gateway-stripe' ) ),
+			// The offline PMs.
+			new FakePaymentGateway( WC_Gateway_BACS::ID, array( 'plugin_slug' => 'woocommerce' ) ),
+			new FakePaymentGateway( WC_Gateway_Cheque::ID, array( 'plugin_slug' => 'woocommerce' ) ),
+			new FakePaymentGateway( WC_Gateway_COD::ID, array( 'plugin_slug' => 'woocommerce' ) ),
+		);
+		$this->mock_providers
+			->expects( $this->atLeastOnce() )
+			->method( 'get_payment_gateways' )
+			->willReturn( $gateways );
+
+		// Order map has gateway1 and offline group, but NOT 'stripe'.
+		$this->mock_providers
+			->expects( $this->any() )
+			->method( 'get_order_map' )
+			->willReturn(
+				array(
+					'gateway1'            => 0,
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 1,
+					WC_Gateway_BACS::ID   => 2,
+					WC_Gateway_Cheque::ID => 3,
+					WC_Gateway_COD::ID    => 4,
+				)
+			);
+
+		// Pass through the order map unchanged.
+		$this->mock_providers
+			->expects( $this->any() )
+			->method( 'enhance_order_map' )
+			->willReturnArgument( 0 );
+
+		$this->mock_providers
+			->expects( $this->any() )
+			->method( 'get_extension_suggestions' )
+			->with( $location )
+			->willReturn( array() );
+
+		// Act.
+		$data = $this->sut->get_payment_providers( $location );
+
+		// Assert: stripe should appear between gateway1 and the offline group in the final sorted output.
+		$provider_ids        = array_column( $data, 'id' );
+		$stripe_index        = array_search( 'stripe', $provider_ids, true );
+		$gateway1_index      = array_search( 'gateway1', $provider_ids, true );
+		$offline_group_index = array_search( PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP, $provider_ids, true );
+
+		$this->assertNotFalse( $stripe_index, 'stripe should be in the providers list' );
+		$this->assertNotFalse( $offline_group_index, 'offline group should be in the providers list' );
+		$this->assertGreaterThan( $gateway1_index, $stripe_index, 'stripe should be after gateway1' );
+		$this->assertLessThan( $offline_group_index, $stripe_index, 'stripe should be before the offline group' );
+	}
+
+	/**
+	 * Test that new gateways are placed at end when offline group is NOT last (custom ordering).
+	 */
+	public function test_get_payment_providers_new_gateway_at_end_custom_ordering() {
+		// Arrange.
+		$location = 'US';
+
+		$gateways = array(
+			new FakePaymentGateway( 'gateway1', array( 'plugin_slug' => 'plugin1' ) ),
+			new FakePaymentGateway( 'stripe', array( 'plugin_slug' => 'woocommerce-gateway-stripe' ) ),
+			// The offline PMs.
+			new FakePaymentGateway( WC_Gateway_BACS::ID, array( 'plugin_slug' => 'woocommerce' ) ),
+			new FakePaymentGateway( WC_Gateway_Cheque::ID, array( 'plugin_slug' => 'woocommerce' ) ),
+			new FakePaymentGateway( WC_Gateway_COD::ID, array( 'plugin_slug' => 'woocommerce' ) ),
+		);
+		$this->mock_providers
+			->expects( $this->atLeastOnce() )
+			->method( 'get_payment_gateways' )
+			->willReturn( $gateways );
+
+		// Custom ordering: offline group is NOT last (gateway1 is after it).
+		$this->mock_providers
+			->expects( $this->any() )
+			->method( 'get_order_map' )
+			->willReturn(
+				array(
+					PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP => 0,
+					WC_Gateway_BACS::ID   => 1,
+					WC_Gateway_Cheque::ID => 2,
+					WC_Gateway_COD::ID    => 3,
+					'gateway1'            => 4,
+				)
+			);
+
+		// Pass through the order map unchanged.
+		$this->mock_providers
+			->expects( $this->any() )
+			->method( 'enhance_order_map' )
+			->willReturnArgument( 0 );
+
+		$this->mock_providers
+			->expects( $this->any() )
+			->method( 'get_extension_suggestions' )
+			->with( $location )
+			->willReturn( array() );
+
+		// Act.
+		$data = $this->sut->get_payment_providers( $location );
+
+		// Assert: stripe should be at the end — after all existing gateways (custom ordering fallback).
+		$provider_ids   = array_column( $data, 'id' );
+		$stripe_index   = array_search( 'stripe', $provider_ids, true );
+		$gateway1_index = array_search( 'gateway1', $provider_ids, true );
+
+		$this->assertNotFalse( $stripe_index, 'stripe should be in the providers list' );
+		$this->assertGreaterThan( $gateway1_index, $stripe_index, 'stripe should be after gateway1' );
+		// Stripe should be the last non-offline-PM provider.
+		$this->assertSame( count( $provider_ids ) - 1, $stripe_index, 'stripe should be the last provider' );
+	}
 }

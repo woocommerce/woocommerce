@@ -344,7 +344,7 @@ class CartSchema extends AbstractSchema {
 		$cross_sells    = array();
 		$cross_sell_ids = $cart->get_cross_sells();
 		if ( ! empty( $cross_sell_ids ) ) {
-			// Optimization note: priming reduces the number of SQLs required to populate the product objects.
+			// Prime caches to reduce future queries.
 			_prime_post_caches( $cross_sell_ids );
 			$cross_sells = array_filter( array_map( 'wc_get_product', $cross_sell_ids ), 'wc_products_array_filter_visible' );
 		}

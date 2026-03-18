@@ -36,6 +36,10 @@ const PacklinkItem = ( {
 		};
 
 		recordEvent( 'shipping_partner_click', trackingBase );
+		recordEvent( 'settings_shipping_recommendation_setup_click', {
+			plugin: PACKLINK_PLUGIN_SLUG,
+			action: isPluginInstalled ? 'activate' : 'install',
+		} );
 
 		const action = isPluginInstalled ? onActivateClick : onInstallClick;
 		const eventName = isPluginInstalled
