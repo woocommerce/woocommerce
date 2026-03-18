@@ -4,6 +4,7 @@
 import { defineConfig, devices } from '@playwright/test';
 import dotenv from 'dotenv';
 
+// __dirname is not natively available in ESM, but Playwright's config loader shims it.
 dotenv.config( { path: __dirname + '/.env' } );
 
 if ( ! process.env.BASE_URL ) {
