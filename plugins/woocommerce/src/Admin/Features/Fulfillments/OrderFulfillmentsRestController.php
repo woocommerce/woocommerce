@@ -303,7 +303,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 				WP_Http::BAD_REQUEST
 			);
 		} catch ( \Exception $e ) {
-			FulfillmentsTracker::track_fulfillment_validation_error( 'create', $e->getCode(), $this->check_request_source( $request ) );
+			FulfillmentsTracker::track_fulfillment_validation_error( 'create', (string) $e->getCode(), $this->check_request_source( $request ) );
 			return $this->prepare_error_response(
 				$e->getCode(),
 				$e->getMessage(),
@@ -443,7 +443,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 			);
 		} catch ( \Exception $e ) {
 			$action = 'update';
-			FulfillmentsTracker::track_fulfillment_validation_error( $action, $e->getCode(), $this->check_request_source( $request ) );
+			FulfillmentsTracker::track_fulfillment_validation_error( $action, (string) $e->getCode(), $this->check_request_source( $request ) );
 			return $this->prepare_error_response(
 				$e->getCode(),
 				$e->getMessage(),
@@ -488,7 +488,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 				WP_Http::BAD_REQUEST
 			);
 		} catch ( \Exception $e ) {
-			FulfillmentsTracker::track_fulfillment_validation_error( 'delete', $e->getCode(), $this->check_request_source( $request ) );
+			FulfillmentsTracker::track_fulfillment_validation_error( 'delete', (string) $e->getCode(), $this->check_request_source( $request ) );
 			return $this->prepare_error_response(
 				$e->getCode(),
 				$e->getMessage(),
