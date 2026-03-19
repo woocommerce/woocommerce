@@ -145,7 +145,8 @@ const { actions, state } = store<
 	AddToCartWithOptionsStore &
 		Partial< GroupedProductAddToCartWithOptionsStore > &
 		Partial< VariableProductAddToCartWithOptionsStore >
->(
+>( 'woocommerce/add-to-cart-with-options', {}, { lock: universalLock } );
+store(
 	'woocommerce/add-to-cart-with-options',
 	{
 		state: {
