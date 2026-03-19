@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails\Block
- * @version 10.6.0
+ * @version 10.7.0
  */
 
 use Automattic\WooCommerce\Internal\EmailEditor\BlockEmailRenderer;
@@ -55,6 +55,6 @@ printf( esc_html__( 'Your order from %s has been partially refunded.', 'woocomme
 <!-- wp:paragraph {"align":"center"} -->
 <p class="has-text-align-center"><?php
 /* translators: %s: Store admin email */
-printf( esc_html__( 'If you need any help with your order, please contact us at %s', 'woocommerce' ), '<!--[woocommerce/store-email]-->' );
+printf( esc_html__( 'Thanks again! If you need any help with your order, please contact us at %s.', 'woocommerce' ), '<!--[woocommerce/store-email]-->' );
 ?></p>
 <!-- /wp:paragraph -->

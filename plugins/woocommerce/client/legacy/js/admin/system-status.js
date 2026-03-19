@@ -66,7 +66,11 @@ jQuery( function ( $ ) {
 							the_value = temp_line;
 						}
 
-						report = report + '' + the_name + ': ' + the_value + '\n';
+						if ( the_name || the_value ) {
+							report = report + '' + the_name + ': ' + the_value + '\n';
+						} else {
+							report = report + '\n';
+						}
 					});
 				}
 			});

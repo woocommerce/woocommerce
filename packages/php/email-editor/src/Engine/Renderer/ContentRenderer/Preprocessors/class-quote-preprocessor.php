@@ -15,9 +15,9 @@ class Quote_Preprocessor implements Preprocessor {
 	/**
 	 * Method to preprocess the content before rendering
 	 *
-	 * @param array                                                                                                             $parsed_blocks Parsed blocks of the email.
-	 * @param array{contentSize: string}                                                                                        $layout Layout of the email.
-	 * @param array{spacing: array{padding: array{bottom: string, left: string, right: string, top: string}, blockGap: string}} $styles Styles of the email.
+	 * @param array                                                                                                               $parsed_blocks Parsed blocks of the email.
+	 * @param array{contentSize: string}                                                                                          $layout Layout of the email.
+	 * @param array{spacing: array{padding: array{bottom: string, left?: string, right?: string, top: string}, blockGap: string}} $styles Styles of the email.
 	 * @return array
 	 */
 	public function preprocess( array $parsed_blocks, array $layout, array $styles ): array {

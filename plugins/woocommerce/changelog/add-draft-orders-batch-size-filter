@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add woocommerce_delete_expired_draft_orders_batch_size filter to make draft order cleanup batch size configurable

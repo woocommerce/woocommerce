@@ -54,7 +54,6 @@ class ShippingPartnerSuggestions extends \WC_REST_Data_Controller {
 				'schema' => array( $this, 'get_suggestions_schema' ),
 			)
 		);
-
 	}
 
 	/**
@@ -154,45 +153,54 @@ class ShippingPartnerSuggestions extends \WC_REST_Data_Controller {
 				),
 			),
 			'properties' => array(
-				'name'              => array(
+				'name'                    => array(
 					'description' => __( 'Plugin name.', 'woocommerce' ),
 					'type'        => 'string',
 					'required'    => true,
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'slug'              => array(
+				'slug'                    => array(
 					'description' => __( 'Plugin slug used in https://wordpress.org/plugins/{slug}.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'layout_row'        => $layout_def,
-				'layout_column'     => $layout_def,
-				'description'       => array(
+				'layout_row'              => $layout_def,
+				'layout_column'           => $layout_def,
+				'description'             => array(
 					'description' => __( 'Description', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'learn_more_link'   => array(
+				'learn_more_link'         => array(
 					'description' => __( 'Learn more link .', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'is_visible'        => array(
+				'is_visible'              => array(
 					'description' => __( 'Suggestion visibility.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'available_layouts' => array(
+				'available_layouts'       => array(
 					'description' => __( 'Available layouts -- single, dual, or both', 'woocommerce' ),
 					'type'        => 'array',
 					'items'       => array(
 						'type' => 'string',
 						'enum' => array( 'row', 'column' ),
+					),
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'countries_where_primary' => array(
+					'description' => __( 'Countries where this partner should appear first.', 'woocommerce' ),
+					'type'        => 'array',
+					'items'       => array(
+						'type' => 'string',
 					),
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
