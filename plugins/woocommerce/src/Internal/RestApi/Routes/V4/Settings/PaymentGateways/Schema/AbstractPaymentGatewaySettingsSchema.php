@@ -235,6 +235,8 @@ abstract class AbstractPaymentGatewaySettingsSchema extends AbstractSchema {
 	 * @return array
 	 */
 	private function get_groups( WC_Payment_Gateway $gateway ): array {
+		$gateway->init_form_fields();
+
 		// Check if gateway has custom grouping.
 		$custom_groups = $this->get_custom_groups_for_gateway( $gateway );
 		if ( ! empty( $custom_groups ) ) {
@@ -264,8 +266,6 @@ abstract class AbstractPaymentGatewaySettingsSchema extends AbstractSchema {
 	 * @return array
 	 */
 	private function get_default_group( WC_Payment_Gateway $gateway ): array {
-		$gateway->init_form_fields();
-
 		$group = array(
 			'title'       => __( 'Settings', 'woocommerce' ),
 			'description' => '',

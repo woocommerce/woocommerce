@@ -34,8 +34,6 @@ class CodGatewaySettingsSchema extends AbstractPaymentGatewaySettingsSchema {
 	 * @return array Custom group structure.
 	 */
 	protected function get_custom_groups_for_gateway( WC_Payment_Gateway $gateway ): array {
-		$gateway->init_form_fields();
-
 		// Design-aligned overrides for core fields.
 		$core_field_overrides = array(
 			'enabled'            => array(
