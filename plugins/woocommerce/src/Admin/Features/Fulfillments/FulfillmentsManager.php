@@ -89,11 +89,11 @@ class FulfillmentsManager {
 				function () use ( $email_id ) {
 					FulfillmentsTracker::track_fulfillment_email_template_customized( $email_id );
 				}
-      );
-    }
-  }
- 
-  /**
+			);
+		}
+	}
+
+	/**
 	 * Initialize order deletion hooks.
 	 *
 	 * Registers hooks to clean up fulfillment records when an order is permanently deleted.
