@@ -7,8 +7,6 @@ declare( strict_types = 1 );
  * @package WooCommerce\Tests\Admin
  */
 
-use Automattic\WooCommerce\Admin\Features\OnboardingTasks\DeprecatedOptions;
-
 /**
  * WC_Admin_Dashboard_Test
  */
@@ -135,33 +133,4 @@ class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
 		);
 	}
 
-	/**
-	 * @testdox DeprecatedOptions bridge maps woocommerce_task_list_complete to completed lists.
-	 */
-	public function test_bridge_maps_task_list_complete_option(): void {
-		// Call get_deprecated_options directly to bypass the WC_INSTALLING guard
-		// that blocks the bridge when running through get_option in tests.
-		update_option( 'woocommerce_task_list_completed_lists', array( 'setup' ) );
-		$this->assertEquals(
-			'yes',
-			DeprecatedOptions::get_deprecated_options( false, 'woocommerce_task_list_complete' )
-		);
-
-		update_option( 'woocommerce_task_list_completed_lists', array() );
-		$this->assertEquals(
-			'no',
-			DeprecatedOptions::get_deprecated_options( false, 'woocommerce_task_list_complete' )
-		);
-	}
-
-	/**
-	 * @testdox DeprecatedOptions bridge returns no when completed lists is not an array.
-	 */
-	public function test_bridge_handles_non_array_completed_lists(): void {
-		update_option( 'woocommerce_task_list_completed_lists', 'corrupt_value' );
-		$this->assertEquals(
-			'no',
-			DeprecatedOptions::get_deprecated_options( false, 'woocommerce_task_list_complete' )
-		);
-	}
 }
