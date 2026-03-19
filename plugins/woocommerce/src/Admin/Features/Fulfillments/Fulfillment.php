@@ -272,11 +272,14 @@ class Fulfillment extends \WC_Data {
 	 * @return int Total quantity of items in the fulfillment.
 	 */
 	public function get_item_count(): int {
-		$items = $this->get_items();
 		return array_reduce(
-			$items,
-			function ( int $carry, array $item ) {
-				return $carry + (int) $item['qty'];
+			$this->get_items(),
+			static function ( int $carry, $item ): int {
+				if ( ! is_array( $item ) || ! isset( $item['qty'] ) || ! is_numeric( $item['qty'] ) ) {
+					return $carry;
+				}
+
+				return $carry + max( 0, (int) $item['qty'] );
 			},
 			0
 		);

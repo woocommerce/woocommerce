@@ -467,10 +467,10 @@ class FulfillmentsRenderer {
 		if ( isset( $_GET['fulfillment_status'] ) && ! empty( $_GET['fulfillment_status'] ) ) {
 			// phpcs:ignore WordPress.Security.NonceVerification
 			$fulfillment_status = sanitize_text_field( wp_unslash( $_GET['fulfillment_status'] ) );
-			FulfillmentsTracker::track_fulfillment_filter_used( 'fulfillment_status', $fulfillment_status );
 
 			// Ensure the fulfillment status is one of the allowed values.
 			if ( FulfillmentUtils::is_valid_order_fulfillment_status( $fulfillment_status ) ) {
+				FulfillmentsTracker::track_fulfillment_filter_used( 'fulfillment_status', $fulfillment_status );
 				$meta_query = FulfillmentUtils::get_order_fulfillment_status_meta_query( $fulfillment_status );
 				if ( ! empty( $meta_query ) ) {
 					if ( ! isset( $args['meta_query'] ) ) {
@@ -499,6 +499,7 @@ class FulfillmentsRenderer {
 			$status = sanitize_text_field( wp_unslash( $_GET['fulfillment_status'] ) ); // phpcs:ignore WordPress.Security.NonceVerification
 			// Ensure the fulfillment status is one of the allowed values.
 			if ( FulfillmentUtils::is_valid_order_fulfillment_status( $status ) ) {
+				FulfillmentsTracker::track_fulfillment_filter_used( 'fulfillment_status', $status );
 				$query->set(
 					'meta_query',
 					'no_fulfillments' === $status ?

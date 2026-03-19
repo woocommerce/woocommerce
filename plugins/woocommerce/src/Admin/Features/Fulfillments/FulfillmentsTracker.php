@@ -73,7 +73,7 @@ class FulfillmentsTracker {
 	 * @param string $source           The source of the fulfillment ("fulfillments_modal", "bulk_action", or "api").
 	 * @param string $initial_status   The initial status of the fulfillment ("draft" or "fulfilled").
 	 * @param string $fulfillment_type Whether all remaining items were included ("full" or "partial").
-	 * @param int    $item_count       Number of unique line items in the fulfillment.
+	 * @param int    $item_count       Total quantity of items in the fulfillment (sum of item quantities).
 	 * @param int    $total_quantity   Total quantity of all items in the order.
 	 * @param bool   $notification_sent Whether the customer notification was requested.
 	 *

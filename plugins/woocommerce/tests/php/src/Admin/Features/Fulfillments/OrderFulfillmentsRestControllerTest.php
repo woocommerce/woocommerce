@@ -1970,7 +1970,7 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 						),
 						array(
 							'id'    => 0,
-							'key'   => '_shipment_provider',
+							'key'   => '_shipping_provider',
 							'value' => 'ups',
 						),
 						array(
@@ -1996,7 +1996,7 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		$meta_keys = array_column( $fulfillment['meta_data'], 'key' );
 		$this->assertContains( '_tracking_number', $meta_keys, 'Fulfillment should have tracking number metadata' );
-		$this->assertContains( '_shipment_provider', $meta_keys, 'Fulfillment should have shipment provider metadata' );
+		$this->assertContains( '_shipping_provider', $meta_keys, 'Fulfillment should have shipping provider metadata' );
 		$this->assertContains( '_tracking_url', $meta_keys, 'Fulfillment should have tracking URL metadata' );
 
 		wp_set_current_user( 0 );

@@ -16,7 +16,9 @@ function FulfillmentsController() {
 	const [ isOpen, setIsOpen ] = useState( false );
 	const [ orderId, setOrderId ] = useState< number | null >( null );
 	const query = getQuery();
-	const isOrderDetailsPage = query.hasOwnProperty( 'id' );
+	const isOrderDetailsPage =
+		Object.prototype.hasOwnProperty.call( query, 'id' ) ||
+		Object.prototype.hasOwnProperty.call( query, 'post' );
 
 	const deselectOrderRow = useCallback( () => {
 		document.querySelectorAll( '.type-shop_order' ).forEach( ( row ) => {
