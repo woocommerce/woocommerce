@@ -410,9 +410,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 				]
 			) }'`
 		);
-		const productId = prodOutput.stdout.match(
-			/product\s+(\d+)/
-		)?.[ 1 ];
+		const productId = prodOutput.stdout.match( /product\s+(\d+)/ )?.[ 1 ];
 
 		// Create a single "Any" variation (empty attributes = matches all terms).
 		await wpCLI(
