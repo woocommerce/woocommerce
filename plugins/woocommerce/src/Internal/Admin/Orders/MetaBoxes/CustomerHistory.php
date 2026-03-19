@@ -37,16 +37,20 @@ class CustomerHistory {
 	 *
 	 * @param WC_Order $order The order object.
 	 *
-	 * @return array Order count, total spend, and average order value.
+	 * @return array{orders_count: int, total_spend: float, avg_order_value: float} Order count, total spend, and average order value.
 	 */
 	private function get_customer_history( WC_Order $order ): array {
 		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
 			$customer_id   = $order->get_customer_id();
 			$billing_email = $order->get_billing_email();
-			$result = $this->query_hpos( $customer_id, $billing_email );
+			$result        = $this->query_hpos( $customer_id, $billing_email );
 		} elseif ( method_exists( $order, 'get_report_customer_id' ) ) {
 			$result = $this->query_cpt( $order->get_report_customer_id() );
 		} else {
+			wc_get_logger()->warning(
+				'CustomerHistory: Order object does not have get_report_customer_id method.',
+				array( 'source' => 'customer-history' )
+			);
 			$result = (object) array(
 				'orders_count' => 0,
 				'total_spend'  => 0,
@@ -74,11 +78,18 @@ class CustomerHistory {
 	private function query_hpos( int $customer_id, string $billing_email ): object {
 		global $wpdb;
 
+		$default = (object) array(
+			'orders_count' => 0,
+			'total_spend'  => 0,
+		);
+
 		$excluded_statuses_sql = $this->get_excluded_statuses_sql();
 		$orders_table          = OrdersTableDataStore::get_orders_table_name();
 
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$row = null;
+
 		if ( $customer_id > 0 ) {
+					// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$sql = $wpdb->prepare(
 				"SELECT COUNT(*) AS orders_count,
 					COALESCE( SUM( filtered.total_amount ), 0 ) + COALESCE( SUM( r.refund_total ), 0 ) AS total_spend
@@ -101,6 +112,18 @@ class CustomerHistory {
 				$orders_table,
 				$customer_id
 			);
+
+			if ( null !== $sql ) {
+				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql is prepared above.
+				$row = $wpdb->get_row( $sql );
+
+				if ( $wpdb->last_error ) {
+					wc_get_logger()->error(
+						sprintf( 'CustomerHistory: Failed to query HPOS order stats for customer_id=%d. DB error: %s', $customer_id, $wpdb->last_error ),
+						array( 'source' => 'customer-history' )
+					);
+				}
+			}
 		} elseif ( '' !== $billing_email ) {
 			$addresses_table = OrdersTableDataStore::get_addresses_table_name();
 			$sql             = $wpdb->prepare(
@@ -129,32 +152,27 @@ class CustomerHistory {
 				$addresses_table,
 				$billing_email
 			);
-		} else {
-			return (object) array(
-				'orders_count' => 0,
-				'total_spend'  => 0,
-			);
+
+			if ( null !== $sql ) {
+				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql is prepared above.
+				$row = $wpdb->get_row( $sql );
+
+				if ( $wpdb->last_error ) {
+					wc_get_logger()->error(
+						sprintf( 'CustomerHistory: Failed to query HPOS order stats for email=%s. DB error: %s', $billing_email, $wpdb->last_error ),
+						array( 'source' => 'customer-history' )
+					);
+				}
+			}
 		}
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql is prepared above.
-		$row = $wpdb->get_row( $sql );
-
-		if ( $wpdb->last_error ) {
-			wc_get_logger()->error(
-				sprintf( 'CustomerHistory: Failed to query HPOS order stats. DB error: %s', $wpdb->last_error ),
-				array( 'source' => 'customer-history' )
-			);
-		}
-
-		return $row ?? (object) array(
-			'orders_count' => 0,
-			'total_spend'  => 0,
-		);
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		return $row ?? $default;
 	}
 
 	/**
-	 * Query customer order stats from analytics-backed CPT data.
+	 * Query customer order stats via the Analytics Customers report (legacy fallback when HPOS is not active).
 	 *
 	 * @param int $customer_report_id The reports customer ID.
 	 *
@@ -181,9 +199,11 @@ class CustomerHistory {
 	/**
 	 * Get the SQL fragment for excluded order statuses.
 	 *
-	 * @return string SQL IN clause contents, e.g. ( 'wc-pending', 'wc-failed', ... ).
+	 * @return string SQL IN clause, e.g. ( 'auto-draft','trash','wc-pending','wc-failed',... ). Always includes auto-draft and trash without wc- prefix.
 	 */
 	private function get_excluded_statuses_sql(): string {
+		global $wpdb;
+
 		$excluded_statuses = get_option( 'woocommerce_excluded_report_order_statuses', array( 'pending', 'failed', 'cancelled' ) );
 		if ( ! is_array( $excluded_statuses ) ) {
 			$excluded_statuses = array( 'pending', 'failed', 'cancelled' );
@@ -191,13 +211,13 @@ class CustomerHistory {
 		$excluded_statuses = array_merge( array( 'auto-draft', 'trash' ), $excluded_statuses );
 
 		/**
-		 * Filter the list of excluded order statuses for analytics reports.
+		 * Filter the list of excluded order statuses for customer history and analytics reports.
 		 *
 		 * @since 4.0.0
 		 * @param array $excluded_statuses Order statuses to exclude.
 		 */
 		$excluded_statuses = apply_filters( 'woocommerce_analytics_excluded_order_statuses', $excluded_statuses );
-		if ( ! is_array( $excluded_statuses ) ) {
+		if ( ! is_array( $excluded_statuses ) || empty( $excluded_statuses ) ) {
 			$excluded_statuses = array( 'auto-draft', 'trash', 'pending', 'failed', 'cancelled' );
 		}
 
@@ -209,6 +229,9 @@ class CustomerHistory {
 			$excluded_statuses
 		);
 
-		return "( '" . implode( "','", array_map( 'esc_sql', $prefixed ) ) . "' )";
+		$placeholders = implode( ',', array_fill( 0, count( $prefixed ), '%s' ) );
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $placeholders is a safe string of %s tokens.
+		return $wpdb->prepare( "( $placeholders )", $prefixed );
 	}
 }

@@ -63,8 +63,8 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 		$output = ob_get_clean();
 
 		$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*2\s*</', $output, 'Should show 2 orders for the customer' );
-		$this->assertMatchesRegularExpression( '/order-attribution-total-spend">\s*.*300/', $output, 'Should show total spend of 300' );
-		$this->assertMatchesRegularExpression( '/order-attribution-average-order-value">\s*.*150/', $output, 'Should show average order value of 150' );
+		$this->assertMatchesRegularExpression( '/order-attribution-total-spend">\s*.*300\.00/', $output, 'Should show total spend of 300' );
+		$this->assertMatchesRegularExpression( '/order-attribution-average-order-value">\s*.*150\.00/', $output, 'Should show average order value of 150' );
 	}
 
 	/**
@@ -92,8 +92,8 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 		$output = ob_get_clean();
 
 		$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*2\s*</', $output, 'Should show 2 orders for the guest customer' );
-		$this->assertMatchesRegularExpression( '/order-attribution-total-spend">\s*.*100/', $output, 'Should show total spend of 100' );
-		$this->assertMatchesRegularExpression( '/order-attribution-average-order-value">\s*.*50/', $output, 'Should show average order value of 50' );
+		$this->assertMatchesRegularExpression( '/order-attribution-total-spend">\s*.*100\.00/', $output, 'Should show total spend of 100' );
+		$this->assertMatchesRegularExpression( '/order-attribution-average-order-value">\s*.*50\.00/', $output, 'Should show average order value of 50' );
 	}
 
 	/**
@@ -130,6 +130,7 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( 'order-attribution-total-orders', $output );
 		$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*1\s*</', $output, 'Should only count the completed order' );
+		$this->assertMatchesRegularExpression( '/order-attribution-total-spend">\s*.*100\.00/', $output, 'Should only sum spend from the completed order' );
 	}
 
 	/**
@@ -212,8 +213,8 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 		$output = ob_get_clean();
 
 		$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*1\s*</', $output, 'Should still count 1 order after partial refund' );
-		$this->assertMatchesRegularExpression( '/order-attribution-total-spend">\s*.*150/', $output, 'Should show net spend of 150 after 50 refund' );
-		$this->assertMatchesRegularExpression( '/order-attribution-average-order-value">\s*.*150/', $output, 'Should show average of 150 after partial refund' );
+		$this->assertMatchesRegularExpression( '/order-attribution-total-spend">\s*.*150\.00/', $output, 'Should show net spend of 150 after 50 refund' );
+		$this->assertMatchesRegularExpression( '/order-attribution-average-order-value">\s*.*150\.00/', $output, 'Should show average of 150 after partial refund' );
 	}
 
 	/**
@@ -247,8 +248,8 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 		$output = ob_get_clean();
 
 		$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*2\s*</', $output, 'Should still count 2 orders after full refund' );
-		$this->assertMatchesRegularExpression( '/order-attribution-total-spend">\s*.*200/', $output, 'Should show net spend of 200 after full refund of first order' );
-		$this->assertMatchesRegularExpression( '/order-attribution-average-order-value">\s*.*100/', $output, 'Should show average of 100 (200 net / 2 orders)' );
+		$this->assertMatchesRegularExpression( '/order-attribution-total-spend">\s*.*200\.00/', $output, 'Should show net spend of 200 after full refund of first order' );
+		$this->assertMatchesRegularExpression( '/order-attribution-average-order-value">\s*.*100\.00/', $output, 'Should show average of 100 (200 net / 2 orders)' );
 	}
 
 	/**
@@ -278,7 +279,88 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 		$output = ob_get_clean();
 
 		$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*1\s*</', $output, 'Should still count 1 order after guest refund' );
-		$this->assertMatchesRegularExpression( '/order-attribution-total-spend">\s*.*70/', $output, 'Should show net spend of 70 after 30 refund on guest order' );
+		$this->assertMatchesRegularExpression( '/order-attribution-total-spend">\s*.*70\.00/', $output, 'Should show net spend of 70 after 30 refund on guest order' );
+	}
+
+	/**
+	 * @testdox Should only count orders for the specific registered customer, not other customers (HPOS).
+	 */
+	public function test_registered_customer_isolation(): void {
+		$this->toggle_cot_feature_and_usage( true );
+
+		$customer_a = $this->factory->user->create();
+		$customer_b = $this->factory->user->create();
+
+		$order_a = WC_Helper_Order::create_order( $customer_a );
+		$order_a->set_status( 'completed' );
+		$order_a->set_total( 100 );
+		$order_a->save();
+
+		$order_b1 = WC_Helper_Order::create_order( $customer_b );
+		$order_b1->set_status( 'completed' );
+		$order_b1->set_total( 200 );
+		$order_b1->save();
+
+		$order_b2 = WC_Helper_Order::create_order( $customer_b );
+		$order_b2->set_status( 'completed' );
+		$order_b2->set_total( 300 );
+		$order_b2->save();
+
+		ob_start();
+		$this->sut->output( $order_a );
+		$output_a = ob_get_clean();
+
+		$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*1\s*</', $output_a, 'Customer A should see only their 1 order' );
+		$this->assertMatchesRegularExpression( '/order-attribution-total-spend">\s*.*100\.00/', $output_a, 'Customer A should see total spend of 100' );
+
+		ob_start();
+		$this->sut->output( $order_b1 );
+		$output_b = ob_get_clean();
+
+		$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*2\s*</', $output_b, 'Customer B should see their 2 orders' );
+		$this->assertMatchesRegularExpression( '/order-attribution-total-spend">\s*.*500\.00/', $output_b, 'Customer B should see total spend of 500' );
+	}
+
+	/**
+	 * @testdox Should only count orders for the specific guest email, not other guest emails (HPOS).
+	 */
+	public function test_guest_customer_email_isolation(): void {
+		$this->toggle_cot_feature_and_usage( true );
+
+		$email_a = 'guest-a@example.com';
+		$email_b = 'guest-b@example.com';
+
+		$order_a = WC_Helper_Order::create_order( 0 );
+		$order_a->set_billing_email( $email_a );
+		$order_a->set_status( 'completed' );
+		$order_a->set_total( 50 );
+		$order_a->save();
+
+		$order_b1 = WC_Helper_Order::create_order( 0 );
+		$order_b1->set_billing_email( $email_b );
+		$order_b1->set_status( 'completed' );
+		$order_b1->set_total( 75 );
+		$order_b1->save();
+
+		$order_b2 = WC_Helper_Order::create_order( 0 );
+		$order_b2->set_billing_email( $email_b );
+		$order_b2->set_status( 'completed' );
+		$order_b2->set_total( 125 );
+		$order_b2->save();
+
+		ob_start();
+		$this->sut->output( $order_a );
+		$output_a = ob_get_clean();
+
+		$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*1\s*</', $output_a, 'Guest A should see only their 1 order' );
+		$this->assertMatchesRegularExpression( '/order-attribution-total-spend">\s*.*50\.00/', $output_a, 'Guest A should see total spend of 50' );
+
+		ob_start();
+		$this->sut->output( $order_b1 );
+		$output_b = ob_get_clean();
+
+		$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*2\s*</', $output_b, 'Guest B should see their 2 orders' );
+		$this->assertMatchesRegularExpression( '/order-attribution-total-spend">\s*.*200\.00/', $output_b, 'Guest B should see total spend of 200' );
 	}
 
 	/**
