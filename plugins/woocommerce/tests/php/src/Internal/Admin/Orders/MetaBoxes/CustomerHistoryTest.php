@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Orders\MetaBoxes;
 
+use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomerHistory;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use WC_Helper_Order;
@@ -364,10 +365,16 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox CPT fallback should render the metabox with zero data when analytics data is unavailable.
+	 * @testdox CPT fallback should render correct customer history from analytics tables.
 	 */
-	public function test_cpt_fallback_renders_with_zero_data(): void {
+	public function test_cpt_fallback_renders_with_analytics_data(): void {
 		$this->toggle_cot_feature_and_usage( false );
+
+		\WC_Helper_Reports::reset_stats_dbs();
+
+		// Register the Override\Order class so wc_get_order() returns an instance
+		// with get_report_customer_id(), which the CPT path requires.
+		\Automattic\WooCommerce\Admin\Overrides\Order::add_filters();
 
 		$customer_id = $this->factory->user->create();
 
@@ -376,11 +383,19 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 		$order->set_total( 100 );
 		$order->save();
 
+		OrdersStatsDataStore::sync_order( $order->get_id() );
+
+		// Re-fetch with Override class so output() takes the CPT path.
+		$override_order = wc_get_order( $order->get_id() );
+
 		ob_start();
-		$this->sut->output( $order );
+		$this->sut->output( $override_order );
 		$output = ob_get_clean();
 
+		remove_filter( 'woocommerce_order_class', array( \Automattic\WooCommerce\Admin\Overrides\Order::class, 'order_class_name' ) );
+
 		$this->assertStringContainsString( 'order-attribution-total-orders', $output, 'Should render the metabox template' );
-		$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*0\s*</', $output, 'Should show 0 orders when analytics data is not available' );
+		$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*1\s*</', $output, 'Should show 1 order from analytics data' );
+		$this->assertMatchesRegularExpression( '/order-attribution-total-spend">\s*.*100\.00/', $output, 'Should show total spend of 100' );
 	}
 }
