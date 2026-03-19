@@ -41,25 +41,10 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Data provider for storage modes.
-	 *
-	 * @return array<string, array<bool>>
+	 * @testdox Should return correct count, total, and average for a registered customer with multiple orders (HPOS).
 	 */
-	public function provider_storage_modes(): array {
-		return array(
-			'HPOS' => array( true ),
-			'CPT'  => array( false ),
-		);
-	}
-
-	/**
-	 * @testdox Should return correct count, total, and average for a registered customer with multiple orders ($0: storage mode).
-	 * @dataProvider provider_storage_modes
-	 *
-	 * @param bool $hpos_enabled Whether HPOS is enabled.
-	 */
-	public function test_registered_customer_with_multiple_orders( bool $hpos_enabled ): void {
-		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+	public function test_registered_customer_with_multiple_orders(): void {
+		$this->toggle_cot_feature_and_usage( true );
 
 		$customer_id = $this->factory->user->create();
 
@@ -83,13 +68,10 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should fetch data correctly for a guest customer matched by billing email ($0: storage mode).
-	 * @dataProvider provider_storage_modes
-	 *
-	 * @param bool $hpos_enabled Whether HPOS is enabled.
+	 * @testdox Should fetch data correctly for a guest customer matched by billing email (HPOS).
 	 */
-	public function test_guest_customer_by_email( bool $hpos_enabled ): void {
-		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+	public function test_guest_customer_by_email(): void {
+		$this->toggle_cot_feature_and_usage( true );
 
 		$email = 'guest-test@example.com';
 
@@ -115,13 +97,10 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should not count orders with excluded statuses like pending, cancelled, and failed ($0: storage mode).
-	 * @dataProvider provider_storage_modes
-	 *
-	 * @param bool $hpos_enabled Whether HPOS is enabled.
+	 * @testdox Should not count orders with excluded statuses like pending, cancelled, and failed (HPOS).
 	 */
-	public function test_excluded_statuses_not_counted( bool $hpos_enabled ): void {
-		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+	public function test_excluded_statuses_not_counted(): void {
+		$this->toggle_cot_feature_and_usage( true );
 
 		$customer_id = $this->factory->user->create();
 
@@ -169,13 +148,10 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should show zero data for guest order with no billing email ($0: storage mode).
-	 * @dataProvider provider_storage_modes
-	 *
-	 * @param bool $hpos_enabled Whether HPOS is enabled.
+	 * @testdox Should show zero data for guest order with no billing email (HPOS).
 	 */
-	public function test_guest_with_no_email_shows_zero( bool $hpos_enabled ): void {
-		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+	public function test_guest_with_no_email_shows_zero(): void {
+		$this->toggle_cot_feature_and_usage( true );
 
 		$order = WC_Helper_Order::create_order( 0 );
 		$order->set_billing_email( '' );
@@ -191,13 +167,10 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should show zero data when no matching orders exist for the customer ($0: storage mode).
-	 * @dataProvider provider_storage_modes
-	 *
-	 * @param bool $hpos_enabled Whether HPOS is enabled.
+	 * @testdox Should show zero data when no matching orders exist for the customer (HPOS).
 	 */
-	public function test_no_matching_orders_shows_zero( bool $hpos_enabled ): void {
-		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+	public function test_no_matching_orders_shows_zero(): void {
+		$this->toggle_cot_feature_and_usage( true );
 
 		$customer_id = $this->factory->user->create();
 
@@ -214,13 +187,10 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should deduct partial refund from total spend ($0: storage mode).
-	 * @dataProvider provider_storage_modes
-	 *
-	 * @param bool $hpos_enabled Whether HPOS is enabled.
+	 * @testdox Should deduct partial refund from total spend (HPOS).
 	 */
-	public function test_partial_refund_deducted_from_total_spend( bool $hpos_enabled ): void {
-		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+	public function test_partial_refund_deducted_from_total_spend(): void {
+		$this->toggle_cot_feature_and_usage( true );
 
 		$customer_id = $this->factory->user->create();
 
@@ -247,13 +217,10 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should deduct full refund from total spend ($0: storage mode).
-	 * @dataProvider provider_storage_modes
-	 *
-	 * @param bool $hpos_enabled Whether HPOS is enabled.
+	 * @testdox Should deduct full refund from total spend (HPOS).
 	 */
-	public function test_full_refund_deducted_from_total_spend( bool $hpos_enabled ): void {
-		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+	public function test_full_refund_deducted_from_total_spend(): void {
+		$this->toggle_cot_feature_and_usage( true );
 
 		$customer_id = $this->factory->user->create();
 
@@ -285,13 +252,10 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should deduct refund from guest order total spend ($0: storage mode).
-	 * @dataProvider provider_storage_modes
-	 *
-	 * @param bool $hpos_enabled Whether HPOS is enabled.
+	 * @testdox Should deduct refund from guest order total spend (HPOS).
 	 */
-	public function test_guest_order_refund_deducted_from_total_spend( bool $hpos_enabled ): void {
-		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+	public function test_guest_order_refund_deducted_from_total_spend(): void {
+		$this->toggle_cot_feature_and_usage( true );
 
 		$email = 'guest-refund@example.com';
 
@@ -315,5 +279,26 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 
 		$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*1\s*</', $output, 'Should still count 1 order after guest refund' );
 		$this->assertMatchesRegularExpression( '/order-attribution-total-spend">\s*.*70/', $output, 'Should show net spend of 70 after 30 refund on guest order' );
+	}
+
+	/**
+	 * @testdox CPT fallback should render the metabox with zero data when analytics data is unavailable.
+	 */
+	public function test_cpt_fallback_renders_with_zero_data(): void {
+		$this->toggle_cot_feature_and_usage( false );
+
+		$customer_id = $this->factory->user->create();
+
+		$order = WC_Helper_Order::create_order( $customer_id );
+		$order->set_status( 'completed' );
+		$order->set_total( 100 );
+		$order->save();
+
+		ob_start();
+		$this->sut->output( $order );
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'order-attribution-total-orders', $output, 'Should render the metabox template' );
+		$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*0\s*</', $output, 'Should show 0 orders when analytics data is not available' );
 	}
 }

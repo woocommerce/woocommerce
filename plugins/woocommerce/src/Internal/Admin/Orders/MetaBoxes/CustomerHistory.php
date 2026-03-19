@@ -35,15 +35,23 @@ class CustomerHistory {
 	/**
 	 * Get the order history for the customer.
 	 *
+	 * @param WC_Order $order The order object.
+	 *
 	 * @return array Order count, total spend, and average order value.
 	 */
 	private function get_customer_history( WC_Order $order ): array {
-		$customer_id   = $order->get_customer_id();
-		$billing_email = $order->get_billing_email();
-
-		$result = OrderUtil::custom_orders_table_usage_is_enabled()
-			? $this->query_hpos( $customer_id, $billing_email )
-			: $this->query_cpt( $order->get_report_customer_id() );
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$customer_id   = $order->get_customer_id();
+			$billing_email = $order->get_billing_email();
+			$result = $this->query_hpos( $customer_id, $billing_email );
+		} elseif ( method_exists( $order, 'get_report_customer_id' ) ) {
+			$result = $this->query_cpt( $order->get_report_customer_id() );
+		} else {
+			$result = (object) array(
+				'orders_count' => 0,
+				'total_spend'  => 0,
+			);
+		}
 
 		$orders_count = (int) ( $result->orders_count ?? 0 );
 		$total_spend  = (float) ( $result->total_spend ?? 0 );
@@ -80,13 +88,12 @@ class CustomerHistory {
 					WHERE customer_id = %d AND type = 'shop_order' AND status NOT IN $excluded_statuses_sql
 				) AS filtered
 				LEFT JOIN (
-					SELECT parent_order_id, SUM( total_amount ) AS refund_total
-					FROM %i
-					WHERE type = 'shop_order_refund'
-						AND parent_order_id IN (
-							SELECT id FROM %i WHERE customer_id = %d AND type = 'shop_order' AND status NOT IN $excluded_statuses_sql
-						)
-					GROUP BY parent_order_id
+					SELECT rp.parent_order_id, SUM( rp.total_amount ) AS refund_total
+					FROM %i AS rp
+					INNER JOIN %i AS co ON rp.parent_order_id = co.id
+					WHERE rp.type = 'shop_order_refund'
+						AND co.customer_id = %d AND co.type = 'shop_order' AND co.status NOT IN $excluded_statuses_sql
+					GROUP BY rp.parent_order_id
 				) AS r ON filtered.id = r.parent_order_id",
 				$orders_table,
 				$customer_id,
@@ -106,15 +113,13 @@ class CustomerHistory {
 					WHERE o.customer_id = 0 AND a.email = %s AND o.type = 'shop_order' AND o.status NOT IN $excluded_statuses_sql
 				) AS filtered
 				LEFT JOIN (
-					SELECT parent_order_id, SUM( total_amount ) AS refund_total
-					FROM %i
-					WHERE type = 'shop_order_refund'
-						AND parent_order_id IN (
-							SELECT o2.id FROM %i AS o2
-							INNER JOIN %i AS a2 ON o2.id = a2.order_id AND a2.address_type = 'billing'
-							WHERE o2.customer_id = 0 AND a2.email = %s AND o2.type = 'shop_order' AND o2.status NOT IN $excluded_statuses_sql
-						)
-					GROUP BY parent_order_id
+					SELECT rp.parent_order_id, SUM( rp.total_amount ) AS refund_total
+					FROM %i AS rp
+					INNER JOIN %i AS co ON rp.parent_order_id = co.id
+					INNER JOIN %i AS ca ON co.id = ca.order_id AND ca.address_type = 'billing'
+					WHERE rp.type = 'shop_order_refund'
+						AND co.customer_id = 0 AND ca.email = %s AND co.type = 'shop_order' AND co.status NOT IN $excluded_statuses_sql
+					GROUP BY rp.parent_order_id
 				) AS r ON filtered.id = r.parent_order_id",
 				$orders_table,
 				$addresses_table,
