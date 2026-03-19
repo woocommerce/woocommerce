@@ -76,8 +76,8 @@ class DeprecatedOptions {
 						$completed = array_diff( $completed, array( 'setup' ) );
 						update_option( 'woocommerce_task_list_completed_lists', array_values( $completed ), true );
 					}
+					delete_option( 'woocommerce_task_list_complete' );
 				}
-				delete_option( 'woocommerce_task_list_complete' );
 				return $old_value;
 			case 'woocommerce_task_list_hidden':
 				$task_list = TaskLists::get_list( 'setup' );
