@@ -283,12 +283,8 @@ const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
 // Todo: export this store once the store is public.
-const { state, actions } = store< Store >(
-	'woocommerce',
-	{},
-	{ lock: universalLock }
-);
-store< Store >(
+const { state } = store< Store >( 'woocommerce', {}, { lock: universalLock } );
+const { actions } = store< Store >(
 	'woocommerce',
 	{
 		state: {
