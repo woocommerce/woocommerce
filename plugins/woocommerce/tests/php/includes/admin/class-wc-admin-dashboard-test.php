@@ -44,10 +44,6 @@ class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
 			)
 		);
 		wp_set_current_user( $this->admin_user );
-
-		// Register the deprecated options bridge so tests exercise the actual code path.
-		DeprecatedOptions::init();
-
 		$this->sut = new WC_Admin_Dashboard();
 	}
 
@@ -61,10 +57,6 @@ class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
 		delete_option( 'woocommerce_task_list_complete' );
 		remove_all_filters( 'pre_option_woocommerce_task_list_complete' );
 		remove_all_filters( 'pre_option_woocommerce_task_list_hidden' );
-		remove_all_filters( 'pre_option_woocommerce_extended_task_list_hidden' );
-		remove_all_filters( 'pre_update_option_woocommerce_task_list_complete' );
-		remove_all_filters( 'pre_update_option_woocommerce_task_list_hidden' );
-		remove_all_filters( 'pre_update_option_woocommerce_extended_task_list_hidden' );
 
 		parent::tearDown();
 	}
@@ -82,10 +74,12 @@ class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Widget shows when task list is complete via the DeprecatedOptions bridge.
+	 * @testdox Widget shows when task list is complete.
 	 */
 	public function test_widget_shows_when_task_list_complete(): void {
-		update_option( 'woocommerce_task_list_completed_lists', array( 'setup' ) );
+		// Uses pre_option filter because WC_INSTALLING is true in test env,
+		// which causes the DeprecatedOptions bridge to bail out.
+		add_filter( 'pre_option_woocommerce_task_list_complete', fn() => 'yes' );
 
 		$this->assertTrue(
 			$this->invoke_should_display_widget( $this->sut ),
@@ -94,10 +88,10 @@ class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Widget shows when task list is hidden via the DeprecatedOptions bridge.
+	 * @testdox Widget shows when task list is hidden.
 	 */
 	public function test_widget_shows_when_task_list_hidden(): void {
-		update_option( 'woocommerce_task_list_hidden_lists', array( 'setup' ) );
+		add_filter( 'pre_option_woocommerce_task_list_hidden', fn() => 'yes' );
 
 		$this->assertTrue(
 			$this->invoke_should_display_widget( $this->sut ),
@@ -122,7 +116,7 @@ class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
 	 * @testdox Widget does not show without proper capabilities.
 	 */
 	public function test_widget_does_not_show_without_capabilities(): void {
-		update_option( 'woocommerce_task_list_completed_lists', array( 'setup' ) );
+		add_filter( 'pre_option_woocommerce_task_list_complete', fn() => 'yes' );
 
 		$password   = wp_generate_password( 8, false, false );
 		$subscriber = wp_insert_user(
@@ -145,11 +139,19 @@ class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
 	 * @testdox DeprecatedOptions bridge maps woocommerce_task_list_complete to completed lists.
 	 */
 	public function test_bridge_maps_task_list_complete_option(): void {
+		// Call get_deprecated_options directly to bypass the WC_INSTALLING guard
+		// that blocks the bridge when running through get_option in tests.
 		update_option( 'woocommerce_task_list_completed_lists', array( 'setup' ) );
-		$this->assertEquals( 'yes', get_option( 'woocommerce_task_list_complete' ) );
+		$this->assertEquals(
+			'yes',
+			DeprecatedOptions::get_deprecated_options( false, 'woocommerce_task_list_complete' )
+		);
 
 		update_option( 'woocommerce_task_list_completed_lists', array() );
-		$this->assertEquals( 'no', get_option( 'woocommerce_task_list_complete' ) );
+		$this->assertEquals(
+			'no',
+			DeprecatedOptions::get_deprecated_options( false, 'woocommerce_task_list_complete' )
+		);
 	}
 
 	/**
@@ -157,6 +159,9 @@ class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
 	 */
 	public function test_bridge_handles_non_array_completed_lists(): void {
 		update_option( 'woocommerce_task_list_completed_lists', 'corrupt_value' );
-		$this->assertEquals( 'no', get_option( 'woocommerce_task_list_complete' ) );
+		$this->assertEquals(
+			'no',
+			DeprecatedOptions::get_deprecated_options( false, 'woocommerce_task_list_complete' )
+		);
 	}
 }
