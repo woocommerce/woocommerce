@@ -55,7 +55,7 @@ class OrderLogsDeletionProcessor implements BatchProcessorInterface {
 	 *
 	 * @param CustomOrdersTableController $hpos_controller The instance of CustomOrdersTableController to use.
 	 * @param LegacyProxy                 $legacy_proxy The instance of LegacyProxy to use.
-	 * @param OrderLogsCleanupHelper    $order_logs_cleanup_helper The instance of OrderLogsCleanupHelper to use.
+	 * @param OrderLogsCleanupHelper      $order_logs_cleanup_helper The instance of OrderLogsCleanupHelper to use.
 	 *
 	 * @internal
 	 */
@@ -65,7 +65,7 @@ class OrderLogsDeletionProcessor implements BatchProcessorInterface {
 			$this->cpt_in_use = \WC_Order_Data_Store_CPT::class === \WC_Data_Store::load( 'order' )->get_current_class_name();
 		}
 
-		$this->legacy_proxy                = $legacy_proxy;
+		$this->legacy_proxy              = $legacy_proxy;
 		$this->order_logs_cleanup_helper = $order_logs_cleanup_helper;
 	}
 

@@ -102,7 +102,6 @@ class OrderLogsCleanupHelper {
 
 		// Old log files are those that are older than the given max age.
 		$this->cleanup_old_log_files( $max_age );
-
 	}
 
 	/**
@@ -234,7 +233,7 @@ class OrderLogsCleanupHelper {
 		$id_placeholders = implode( ',', array_fill( 0, count( $order_ids ), '%d' ) );
 
 		foreach ( $tables as $table_config ) {
-			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 			$wpdb->query(
 				$wpdb->prepare(
 					"DELETE FROM {$table_config['table']}
@@ -243,7 +242,7 @@ class OrderLogsCleanupHelper {
 					array_merge( $order_ids, array( '_debug_log_source', '_debug_log_source_pending_deletion' ) )
 				)
 			);
-			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 		}
 	}
 }
