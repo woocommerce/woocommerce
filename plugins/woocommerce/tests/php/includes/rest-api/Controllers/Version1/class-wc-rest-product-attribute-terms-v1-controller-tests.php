@@ -1,4 +1,10 @@
 <?php
+/**
+ * Product attribute terms controller tests for V1 REST API.
+ *
+ * @package WooCommerce\Tests\RestApi
+ */
+
 declare( strict_types = 1 );
 
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
@@ -8,12 +14,14 @@ use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
  */
 class WC_REST_Product_Attribute_Terms_V1_Controller_Tests extends WC_REST_Unit_Test_Case {
 	/**
-	 * @var int Admin user id.
+	 * Admin user ID.
+	 *
+	 * @var int
 	 */
 	private $admin_id;
 
 	/**
-	 * Test setup.
+	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
@@ -21,6 +29,8 @@ class WC_REST_Product_Attribute_Terms_V1_Controller_Tests extends WC_REST_Unit_T
 	}
 
 	/**
+	 * Test that the item schema contains expected properties.
+	 *
 	 * @testdox Product attribute terms item schema contains expected properties.
 	 */
 	public function test_get_item_schema() {
@@ -42,6 +52,8 @@ class WC_REST_Product_Attribute_Terms_V1_Controller_Tests extends WC_REST_Unit_T
 	}
 
 	/**
+	 * Test that creating a term with an empty slug succeeds.
+	 *
 	 * @testdox Creating a product attribute term with an empty slug succeeds.
 	 */
 	public function test_create_with_empty_slug() {
@@ -63,6 +75,8 @@ class WC_REST_Product_Attribute_Terms_V1_Controller_Tests extends WC_REST_Unit_T
 	}
 
 	/**
+	 * Test that creating a term stores menu_order under the correct meta key.
+	 *
 	 * @testdox Creating a term via REST API stores menu_order under the 'order' meta key.
 	 */
 	public function test_menu_order_writes_to_correct_meta_key() {
@@ -75,7 +89,7 @@ class WC_REST_Product_Attribute_Terms_V1_Controller_Tests extends WC_REST_Unit_T
 				'order_by' => 'menu_order',
 			)
 		);
-		$taxonomy = wc_attribute_taxonomy_name( 'test-size' );
+		$taxonomy     = wc_attribute_taxonomy_name( 'test-size' );
 		register_taxonomy( $taxonomy, array( 'product' ) );
 
 		$request = new WP_REST_Request( 'POST', '/wc/v1/products/attributes/' . $attribute_id . '/terms' );
@@ -98,6 +112,8 @@ class WC_REST_Product_Attribute_Terms_V1_Controller_Tests extends WC_REST_Unit_T
 	}
 
 	/**
+	 * Test that updating menu_order updates the correct meta key.
+	 *
 	 * @testdox Updating menu_order via REST API updates the 'order' meta key.
 	 */
 	public function test_menu_order_update_writes_to_correct_meta_key() {
@@ -110,7 +126,7 @@ class WC_REST_Product_Attribute_Terms_V1_Controller_Tests extends WC_REST_Unit_T
 				'order_by' => 'menu_order',
 			)
 		);
-		$taxonomy = wc_attribute_taxonomy_name( 'test-weight' );
+		$taxonomy     = wc_attribute_taxonomy_name( 'test-weight' );
 		register_taxonomy( $taxonomy, array( 'product' ) );
 
 		$term = wp_insert_term( 'Medium', $taxonomy, array( 'slug' => 'medium' ) );
@@ -129,6 +145,8 @@ class WC_REST_Product_Attribute_Terms_V1_Controller_Tests extends WC_REST_Unit_T
 	}
 
 	/**
+	 * Test that reading menu_order returns the value from the correct meta key.
+	 *
 	 * @testdox Reading menu_order via GET returns value from the 'order' meta key.
 	 */
 	public function test_menu_order_read_uses_correct_meta_key() {
@@ -141,7 +159,7 @@ class WC_REST_Product_Attribute_Terms_V1_Controller_Tests extends WC_REST_Unit_T
 				'order_by' => 'menu_order',
 			)
 		);
-		$taxonomy = wc_attribute_taxonomy_name( 'test-material' );
+		$taxonomy     = wc_attribute_taxonomy_name( 'test-material' );
 		register_taxonomy( $taxonomy, array( 'product' ) );
 
 		$term = wp_insert_term( 'Cotton', $taxonomy, array( 'slug' => 'cotton' ) );
@@ -158,6 +176,8 @@ class WC_REST_Product_Attribute_Terms_V1_Controller_Tests extends WC_REST_Unit_T
 	}
 
 	/**
+	 * Test that updating a term without menu_order preserves existing order.
+	 *
 	 * @testdox Updating a term without menu_order does not overwrite existing order.
 	 */
 	public function test_update_without_menu_order_preserves_existing_order() {
@@ -170,7 +190,7 @@ class WC_REST_Product_Attribute_Terms_V1_Controller_Tests extends WC_REST_Unit_T
 				'order_by' => 'menu_order',
 			)
 		);
-		$taxonomy = wc_attribute_taxonomy_name( 'test-style' );
+		$taxonomy     = wc_attribute_taxonomy_name( 'test-style' );
 		register_taxonomy( $taxonomy, array( 'product' ) );
 
 		$term = wp_insert_term( 'Casual', $taxonomy, array( 'slug' => 'casual' ) );
