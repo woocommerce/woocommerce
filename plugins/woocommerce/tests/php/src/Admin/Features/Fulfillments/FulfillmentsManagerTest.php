@@ -329,7 +329,7 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 
 		$fulfillments_before = $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT COUNT(*) FROM {$wpdb->prefix}wc_order_fulfillments WHERE entity_type = %s AND entity_id = %d",
+				"SELECT COUNT(*) FROM {$wpdb->prefix}wc_order_fulfillments WHERE entity_type = %s AND entity_id = %s",
 				WC_Order::class,
 				$order_id
 			)
