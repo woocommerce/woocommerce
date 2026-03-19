@@ -152,7 +152,7 @@ class CustomerHistory {
 
 		if ( $wpdb->last_error ) {
 			wc_get_logger()->error(
-				sprintf( 'CustomerHistory: Failed to query HPOS order stats for customer_id=%d, email=%s. DB error: %s', $customer_id, $billing_email, $wpdb->last_error ),
+				sprintf( 'CustomerHistory: Failed to query HPOS order stats for customer_id=%d. DB error: %s', $customer_id, $wpdb->last_error ),
 				array( 'source' => 'customer-history' )
 			);
 		}
