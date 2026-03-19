@@ -380,7 +380,13 @@ test.describe( 'Add to Cart + Options Block', () => {
 		page,
 		pageObject,
 		editor,
+		wpCoreVersion,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip(
+			wpCoreVersion < 6.9,
+			'This test requires WordPress 6.9 or later'
+		);
 		// Create a global attribute where the slug intentionally differs from the name.
 		const attrOutput = await wpCLI(
 			`wc product_attribute create --name="Taille" --slug="custom-taille" --user=1`
