@@ -383,7 +383,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 	} ) => {
 		// Create a global attribute where the slug intentionally differs from the name.
 		const attrOutput = await wpCLI(
-			`wc product_attribute create --name="Taille" --slug="custom-taille" --user=1`
+			`wc product_attribute create --name="Taille" --slug="custom-waist" --user=1`
 		);
 		const attrId = attrOutput.stdout.match(
 			/product_attribute\s+(\d+)/
@@ -391,10 +391,10 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		// Create terms with custom slugs that also differ from the names.
 		await wpCLI(
-			`wc product_attribute_term create ${ attrId } --name="Petit" --slug="custom-petit" --user=1`
+			`wc product_attribute_term create ${ attrId } --name="Petit" --slug="s-m" --user=1`
 		);
 		await wpCLI(
-			`wc product_attribute_term create ${ attrId } --name="Grand" --slug="custom-grand" --user=1`
+			`wc product_attribute_term create ${ attrId } --name="Grand" --slug="m-l" --user=1`
 		);
 
 		// Create a variable product using the global attribute.
