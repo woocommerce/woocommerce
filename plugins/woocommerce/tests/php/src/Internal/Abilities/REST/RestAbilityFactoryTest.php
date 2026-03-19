@@ -551,9 +551,9 @@ class RestAbilityFactoryTest extends WC_Unit_Test_Case {
 	// ── Nested required boolean conversion ──
 
 	/**
-	 * @testdox Should remove boolean required from nested properties.
+	 * @testdox Should lift boolean required from nested properties to parent required array.
 	 */
-	public function test_removes_nested_boolean_required(): void {
+	public function test_lifts_nested_boolean_required_to_parent_array(): void {
 		$args = array(
 			'gift_cards' => array(
 				'type'  => 'array',
@@ -575,11 +575,14 @@ class RestAbilityFactoryTest extends WC_Unit_Test_Case {
 
 		$schema = $this->invoke_sanitize_args_to_schema( $args );
 
-		$code_prop = $schema['properties']['gift_cards']['items']['properties']['code'];
-		$this->assertArrayNotHasKey( 'required', $code_prop, 'Boolean required should be removed from nested properties' );
+		$items = $schema['properties']['gift_cards']['items'];
 
-		$amount_prop = $schema['properties']['gift_cards']['items']['properties']['amount'];
-		$this->assertArrayNotHasKey( 'required', $amount_prop, 'Boolean required should be removed from nested properties' );
+		$this->assertArrayNotHasKey( 'required', $items['properties']['code'], 'Boolean required should be removed from property' );
+		$this->assertArrayNotHasKey( 'required', $items['properties']['amount'], 'Boolean required should be removed from property' );
+
+		$this->assertArrayHasKey( 'required', $items, 'Parent object should have required array' );
+		$this->assertContains( 'code', $items['required'], 'code should be in parent required array' );
+		$this->assertNotContains( 'amount', $items['required'], 'amount should not be in parent required array' );
 	}
 
 	// ── Realistic scenario ──

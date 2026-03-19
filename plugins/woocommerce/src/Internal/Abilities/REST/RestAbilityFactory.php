@@ -263,6 +263,19 @@ class RestAbilityFactory {
 		}
 
 		if ( isset( $schema['properties'] ) && is_array( $schema['properties'] ) ) {
+			// Collect required fields from nested boolean 'required' before sanitizing.
+			$required = array();
+			foreach ( $schema['properties'] as $key => $property ) {
+				if ( is_array( $property ) && isset( $property['required'] ) && true === $property['required'] ) {
+					$required[] = $key;
+				}
+			}
+			if ( ! empty( $required ) ) {
+				$schema['required'] = isset( $schema['required'] ) && is_array( $schema['required'] )
+					? array_values( array_unique( array_merge( $schema['required'], $required ) ) )
+					: $required;
+			}
+
 			$schema['properties'] = self::sanitize_schema_properties( $schema['properties'] );
 		}
 
