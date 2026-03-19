@@ -170,7 +170,7 @@ abstract class AbstractPaymentGatewaySettingsSchema extends AbstractSchema {
 				'type'    => array(
 					'description' => __( 'Setting field type.', 'woocommerce' ),
 					'type'        => 'string',
-					'enum'        => array( 'text', 'number', 'select', 'multiselect', 'checkbox' ),
+					'enum'        => array( 'text', 'number', 'select', 'multiselect', 'checkbox', 'array' ),
 					'context'     => array( 'view', 'edit' ),
 				),
 				'options' => array(

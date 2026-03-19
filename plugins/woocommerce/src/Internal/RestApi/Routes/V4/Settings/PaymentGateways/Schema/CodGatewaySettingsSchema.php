@@ -24,6 +24,13 @@ use WC_Shipping_Zone;
 class CodGatewaySettingsSchema extends AbstractPaymentGatewaySettingsSchema {
 
 	/**
+	 * Cached shipping method options.
+	 *
+	 * @var ?array
+	 */
+	private ?array $shipping_method_options = null;
+
+	/**
 	 * Get custom groups for the COD gateway.
 	 *
 	 * Provides design-aligned labels and descriptions for the cash on delivery
@@ -95,6 +102,10 @@ class CodGatewaySettingsSchema extends AbstractPaymentGatewaySettingsSchema {
 	 * @return array Nested array of shipping method options.
 	 */
 	private function load_shipping_method_options(): array {
+		if ( null !== $this->shipping_method_options ) {
+			return $this->shipping_method_options;
+		}
+
 		$data_store = WC_Data_Store::load( 'shipping-zone' );
 		$raw_zones  = $data_store->get_zones();
 		$zones      = array();
@@ -135,6 +146,8 @@ class CodGatewaySettingsSchema extends AbstractPaymentGatewaySettingsSchema {
 				}
 			}
 		}
+
+		$this->shipping_method_options = $options;
 
 		return $options;
 	}
