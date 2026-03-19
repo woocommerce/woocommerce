@@ -277,9 +277,9 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 			FulfillmentsTracker::track_fulfillment_creation(
 				$this->check_request_source( $request ),
 				$fulfillment->get_is_fulfilled() ? 'fulfilled' : 'draft',
-				$fulfillment->get_item_count() === $order->get_item_count() ? 'full' : 'partial',
+				$fulfillment->get_item_count() === (int) $order->get_item_count() ? 'full' : 'partial',
 				$fulfillment->get_item_count(),
-				$order->get_item_count(),
+				(int) $order->get_item_count(),
 				$notify_customer
 			);
 
@@ -378,7 +378,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 		try {
 			$fulfillment     = new Fulfillment( $fulfillment_id );
 			$previous_state  = $fulfillment->get_is_fulfilled();
-			$previous_status = $fulfillment->get_status();
+			$previous_status = $fulfillment->get_status() ?? 'unfulfilled';
 			$this->validate_fulfillment( $fulfillment, $fulfillment_id, $order_id );
 
 			$fulfillment->set_props( $request->get_json_params() );
@@ -434,14 +434,16 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 				}
 			}
 		} catch ( ApiException $ex ) {
-			FulfillmentsTracker::track_fulfillment_validation_error( ! $previous_state && $next_state ? 'fulfill' : 'update', $ex->getErrorCode(), $this->check_request_source( $request ) );
+			$action = 'update';
+			FulfillmentsTracker::track_fulfillment_validation_error( $action, $ex->getErrorCode(), $this->check_request_source( $request ) );
 			return $this->prepare_error_response(
 				$ex->getErrorCode(),
 				$ex->getMessage(),
 				WP_Http::BAD_REQUEST
 			);
 		} catch ( \Exception $e ) {
-			FulfillmentsTracker::track_fulfillment_validation_error( ! $previous_state && $next_state ? 'fulfill' : 'update', $e->getCode(), $this->check_request_source( $request ) );
+			$action = 'update';
+			FulfillmentsTracker::track_fulfillment_validation_error( $action, $e->getCode(), $this->check_request_source( $request ) );
 			return $this->prepare_error_response(
 				$e->getCode(),
 				$e->getMessage(),
@@ -475,7 +477,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 			FulfillmentsTracker::track_fulfillment_deletion(
 				$this->check_request_source( $request ),
 				$fulfillment_id,
-				$fulfillment->get_status(),
+				$fulfillment->get_status() ?? 'unfulfilled',
 				$notify_customer
 			);
 		} catch ( ApiException $ex ) {
@@ -1226,6 +1228,8 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 	 * @param WP_REST_Request $request The request object.
 	 *
 	 * @return string The request source identifier.
+	 *
+	 * @phpstan-ignore-next-line missingType.generics
 	 */
 	protected function check_request_source( WP_REST_Request $request ): string {
 		// Check for a custom header.
@@ -1245,6 +1249,8 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 	 *
 	 * @param Fulfillment     $fulfillment The fulfillment object (after save).
 	 * @param WP_REST_Request $request     The original request.
+	 *
+	 * @phpstan-ignore-next-line missingType.generics
 	 */
 	private function maybe_track_tracking_added( Fulfillment $fulfillment, WP_REST_Request $request ): void {
 		$tracking_number = $fulfillment->get_tracking_number();
