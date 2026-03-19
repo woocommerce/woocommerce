@@ -37,9 +37,9 @@ function FulfillmentsController() {
 		( id: number ) => {
 			setOrderId( id );
 			setIsOpen( true );
-			recordEvent( 'woocommerce_fulfillment_drawer_open', {
+			recordEvent( 'fulfillment_modal_opened', {
 				source: isOrderDetailsPage
-					? 'order_details_page'
+					? 'order_detail_page'
 					: 'orders_list',
 				order_id: id,
 			} );

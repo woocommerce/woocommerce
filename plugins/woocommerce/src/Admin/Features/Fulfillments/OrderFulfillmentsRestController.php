@@ -283,6 +283,9 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 				$notify_customer
 			);
 
+			// Track if tracking information was added with this new fulfillment.
+			$this->maybe_track_tracking_added( $fulfillment, $request );
+
 			if ( $fulfillment->get_is_fulfilled() && $notify_customer ) {
 				/**
 				 * Trigger the fulfillment created notification on creating a fulfilled fulfillment.
@@ -407,6 +410,9 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 				$changed_fields,
 				$notify_customer
 			);
+
+			// Track if tracking information was added or changed in this update.
+			$this->maybe_track_tracking_added( $fulfillment, $request );
 
 			if ( $notify_customer ) {
 				if ( ! $previous_state && $next_state ) {
@@ -1228,5 +1234,40 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 		}
 
 		return 'api'; // Default to API if no specific source is identified.
+	}
+
+	/**
+	 * Track fulfillment_tracking_added if the fulfillment contains tracking information.
+	 *
+	 * Checks if a tracking number is present on the fulfillment after save. If so, determines
+	 * the entry method from the shipping option meta and provider selection, then fires the
+	 * fulfillment_tracking_added event.
+	 *
+	 * @param Fulfillment     $fulfillment The fulfillment object (after save).
+	 * @param WP_REST_Request $request     The original request.
+	 */
+	private function maybe_track_tracking_added( Fulfillment $fulfillment, WP_REST_Request $request ): void {
+		$tracking_number = $fulfillment->get_tracking_number();
+		if ( empty( $tracking_number ) ) {
+			return;
+		}
+
+		$source            = $this->check_request_source( $request );
+		$shipping_option   = $fulfillment->get_meta( '_shipping_option', true );
+		$shipping_option   = ! empty( $shipping_option ) ? $shipping_option : '';
+		$shipment_provider = $fulfillment->get_shipping_provider();
+		$shipment_provider = ! empty( $shipment_provider ) ? $shipment_provider : '';
+		$provider_name     = $fulfillment->get_meta( '_provider_name', true );
+		$provider_name     = ! empty( $provider_name ) ? $provider_name : '';
+		$is_custom         = 'other' === $shipment_provider;
+
+		$entry_method = FulfillmentsTracker::determine_tracking_entry_method( $source, $shipping_option, $shipment_provider );
+
+		FulfillmentsTracker::track_fulfillment_tracking_added(
+			$fulfillment->get_id(),
+			$entry_method,
+			$is_custom ? $provider_name : $shipment_provider,
+			$is_custom
+		);
 	}
 }
