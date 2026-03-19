@@ -37,8 +37,6 @@ class CustomerHistory {
 	/**
 	 * Get the order history for the customer by querying actual order data.
 	 *
-	 * @since 10.7.0
-	 *
 	 * @param int    $customer_id   The customer user ID (0 for guests).
 	 * @param string $billing_email The billing email address (used for guest lookup).
 	 *
@@ -61,8 +59,6 @@ class CustomerHistory {
 
 	/**
 	 * Query customer order stats from HPOS tables.
-	 *
-	 * @since 10.7.0
 	 *
 	 * @param int    $customer_id   The customer user ID.
 	 * @param string $billing_email The billing email address.
@@ -121,8 +117,6 @@ class CustomerHistory {
 
 	/**
 	 * Query customer order stats from CPT tables.
-	 *
-	 * @since 10.7.0
 	 *
 	 * @param int    $customer_id   The customer user ID.
 	 * @param string $billing_email The billing email address.
@@ -185,8 +179,6 @@ class CustomerHistory {
 
 	/**
 	 * Get the SQL fragment for excluded order statuses.
-	 *
-	 * @since 10.7.0
 	 *
 	 * @return string SQL IN clause contents, e.g. ( 'wc-pending', 'wc-failed', ... ).
 	 */
