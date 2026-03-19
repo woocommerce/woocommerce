@@ -577,6 +577,37 @@ class WC_Query {
 	}
 
 	/**
+	 * Check whether the current search query contains at least one positive (non-exclusion) term.
+	 *
+	 * WordPress relevance ordering requires positive search terms to build a valid ORDER BY clause.
+	 * Searches that are empty or contain only exclusion terms (e.g. "-condebug") produce no positive
+	 * terms, which results in invalid SQL when relevance ordering is used.
+	 *
+	 * @since 10.7.0
+	 * @return bool
+	 */
+	private function has_positive_search_terms() {
+		$search = get_query_var( 's' );
+
+		if ( ! is_string( $search ) ) {
+			return false;
+		}
+
+		$search = trim( $search );
+
+		if ( '' === $search ) {
+			return false;
+		}
+
+		// Check if the search consists entirely of exclusion terms (prefixed with -).
+		if ( preg_match( '/^\s*(?:(?:-"[^"]*+"|-\S+)\s*)+$/', $search ) ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
 	 * Returns an array of arguments for ordering products based on the selected values.
 	 *
 	 * @param string $orderby Order by param.
@@ -598,7 +629,7 @@ class WC_Query {
 			}
 
 			if ( ! $orderby_value ) {
-				if ( is_search() ) {
+				if ( is_search() && $this->has_positive_search_terms() ) {
 					$orderby_value = 'relevance';
 				} else {
 					$orderby_value = apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby', 'menu_order' ) );

@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 
 /**
  * Tests for WC_Query.
@@ -76,5 +77,70 @@ class WC_Query_Test extends \WC_Unit_Test_Case {
 		update_option( 'show_on_front', $default_show_on_front );
 		update_option( 'page_on_front', $default_page_on_front );
 		wp_delete_post( $shop_page_id, true );
+	}
+
+	/**
+	 * @testdox Ordering args should use relevance for searches with positive terms.
+	 */
+	public function test_get_catalog_ordering_args_uses_relevance_for_normal_search(): void {
+		$sut = new WC_Query();
+
+		$this->go_to( '/?s=shirt&post_type=product' );
+
+		$result = $sut->get_catalog_ordering_args();
+
+		$this->assertSame( 'relevance', $result['orderby'], 'Normal search should use relevance ordering' );
+	}
+
+	/**
+	 * @testdox Ordering args should fall back to default ordering for exclusion-only searches.
+	 */
+	public function test_get_catalog_ordering_args_falls_back_for_exclusion_only_search(): void {
+		$sut = new WC_Query();
+
+		$this->go_to( '/?s=-condebug&post_type=product' );
+
+		$result = $sut->get_catalog_ordering_args();
+
+		$this->assertNotEquals( 'relevance', $result['orderby'], 'Exclusion-only search should not use relevance ordering' );
+	}
+
+	/**
+	 * @testdox Ordering args should fall back to default ordering for empty searches.
+	 */
+	public function test_get_catalog_ordering_args_falls_back_for_empty_search(): void {
+		$sut = new WC_Query();
+
+		$this->go_to( '/?s=&post_type=product' );
+
+		$result = $sut->get_catalog_ordering_args();
+
+		$this->assertNotEquals( 'relevance', $result['orderby'], 'Empty search should not use relevance ordering' );
+	}
+
+	/**
+	 * @testdox Ordering args should fall back for searches with multiple exclusion terms.
+	 */
+	public function test_get_catalog_ordering_args_falls_back_for_multiple_exclusion_terms(): void {
+		$sut = new WC_Query();
+
+		$this->go_to( '/?s=-foo+-bar&post_type=product' );
+
+		$result = $sut->get_catalog_ordering_args();
+
+		$this->assertNotEquals( 'relevance', $result['orderby'], 'Multiple exclusion terms should not use relevance ordering' );
+	}
+
+	/**
+	 * @testdox Ordering args should use relevance when search has both positive and exclusion terms.
+	 */
+	public function test_get_catalog_ordering_args_uses_relevance_for_mixed_search(): void {
+		$sut = new WC_Query();
+
+		$this->go_to( '/?s=shirt+-condebug&post_type=product' );
+
+		$result = $sut->get_catalog_ordering_args();
+
+		$this->assertSame( 'relevance', $result['orderby'], 'Mixed search with positive terms should use relevance ordering' );
 	}
 }
