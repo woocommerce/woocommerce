@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes;
 
+use Automattic\WooCommerce\Admin\API\Reports\Customers\Query as CustomersQuery;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Order;
@@ -26,26 +27,23 @@ class CustomerHistory {
 			return;
 		}
 
-		$customer_id   = $order->get_customer_id();
-		$billing_email = $order->get_billing_email();
-
-		$customer_history = $this->get_customer_history_from_orders( $customer_id, $billing_email );
+		$customer_history = $this->get_customer_history( $order );
 
 		wc_get_template( 'order/customer-history.php', $customer_history );
 	}
 
 	/**
-	 * Get the order history for the customer by querying actual order data.
-	 *
-	 * @param int    $customer_id   The customer user ID (0 for guests).
-	 * @param string $billing_email The billing email address (used for guest lookup).
+	 * Get the order history for the customer.
 	 *
 	 * @return array Order count, total spend, and average order value.
 	 */
-	private function get_customer_history_from_orders( int $customer_id, string $billing_email ): array {
+	private function get_customer_history( WC_Order $order ): array {
+		$customer_id   = $order->get_customer_id();
+		$billing_email = $order->get_billing_email();
+
 		$result = OrderUtil::custom_orders_table_usage_is_enabled()
 			? $this->query_hpos( $customer_id, $billing_email )
-			: $this->query_cpt( $customer_id, $billing_email );
+			: $this->query_cpt( $order->get_report_customer_id() );
 
 		$orders_count = (int) ( $result->orders_count ?? 0 );
 		$total_spend  = (float) ( $result->total_spend ?? 0 );
@@ -151,103 +149,28 @@ class CustomerHistory {
 	}
 
 	/**
-	 * Query customer order stats from CPT tables.
+	 * Query customer order stats from analytics-backed CPT data.
 	 *
-	 * @param int    $customer_id   The customer user ID.
-	 * @param string $billing_email The billing email address.
+	 * @param int $customer_report_id The reports customer ID.
 	 *
 	 * @return object Object with orders_count and total_spend properties.
 	 */
-	private function query_cpt( int $customer_id, string $billing_email ): object {
-		global $wpdb;
-
-		$excluded_statuses_sql = $this->get_excluded_statuses_sql();
-
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		if ( $customer_id > 0 ) {
-			$sql = $wpdb->prepare(
-				"SELECT COUNT(*) AS orders_count,
-					COALESCE( SUM( filtered.order_total ), 0 ) - COALESCE( SUM( r.refund_total ), 0 ) AS total_spend
-				FROM (
-					SELECT p.ID, meta_total.meta_value AS order_total
-					FROM {$wpdb->posts} AS p
-					INNER JOIN {$wpdb->postmeta} AS meta_customer ON p.ID = meta_customer.post_id
-					INNER JOIN {$wpdb->postmeta} AS meta_total ON p.ID = meta_total.post_id
-					WHERE meta_customer.meta_key = '_customer_user' AND meta_customer.meta_value = %s
-					AND meta_total.meta_key = '_order_total'
-					AND p.post_type = 'shop_order' AND p.post_status NOT IN $excluded_statuses_sql
-				) AS filtered
-				LEFT JOIN (
-					SELECT rp.post_parent, SUM( rm.meta_value ) AS refund_total
-					FROM {$wpdb->posts} AS rp
-					INNER JOIN {$wpdb->postmeta} AS rm ON rp.ID = rm.post_id AND rm.meta_key = '_refund_amount'
-					WHERE rp.post_type = 'shop_order_refund'
-						AND rp.post_parent IN (
-							SELECT p2.ID FROM {$wpdb->posts} AS p2
-							INNER JOIN {$wpdb->postmeta} AS mc2 ON p2.ID = mc2.post_id
-							WHERE mc2.meta_key = '_customer_user' AND mc2.meta_value = %s
-							AND p2.post_type = 'shop_order' AND p2.post_status NOT IN $excluded_statuses_sql
-						)
-					GROUP BY rp.post_parent
-				) AS r ON filtered.ID = r.post_parent",
-				(string) $customer_id,
-				(string) $customer_id
-			);
-		} elseif ( '' !== $billing_email ) {
-			$sql = $wpdb->prepare(
-				"SELECT COUNT(*) AS orders_count,
-					COALESCE( SUM( filtered.order_total ), 0 ) - COALESCE( SUM( r.refund_total ), 0 ) AS total_spend
-				FROM (
-					SELECT p.ID, meta_total.meta_value AS order_total
-					FROM {$wpdb->posts} AS p
-					INNER JOIN {$wpdb->postmeta} AS meta_email ON p.ID = meta_email.post_id
-					INNER JOIN {$wpdb->postmeta} AS meta_total ON p.ID = meta_total.post_id
-					INNER JOIN {$wpdb->postmeta} AS meta_customer ON p.ID = meta_customer.post_id
-					WHERE meta_email.meta_key = '_billing_email' AND meta_email.meta_value = %s
-					AND meta_customer.meta_key = '_customer_user' AND meta_customer.meta_value = '0'
-					AND meta_total.meta_key = '_order_total'
-					AND p.post_type = 'shop_order' AND p.post_status NOT IN $excluded_statuses_sql
-				) AS filtered
-				LEFT JOIN (
-					SELECT rp.post_parent, SUM( rm.meta_value ) AS refund_total
-					FROM {$wpdb->posts} AS rp
-					INNER JOIN {$wpdb->postmeta} AS rm ON rp.ID = rm.post_id AND rm.meta_key = '_refund_amount'
-					WHERE rp.post_type = 'shop_order_refund'
-						AND rp.post_parent IN (
-							SELECT p2.ID FROM {$wpdb->posts} AS p2
-							INNER JOIN {$wpdb->postmeta} AS me2 ON p2.ID = me2.post_id
-							INNER JOIN {$wpdb->postmeta} AS mc2 ON p2.ID = mc2.post_id
-							WHERE me2.meta_key = '_billing_email' AND me2.meta_value = %s
-							AND mc2.meta_key = '_customer_user' AND mc2.meta_value = '0'
-							AND p2.post_type = 'shop_order' AND p2.post_status NOT IN $excluded_statuses_sql
-						)
-					GROUP BY rp.post_parent
-				) AS r ON filtered.ID = r.post_parent",
-				$billing_email,
-				$billing_email
-			);
-		} else {
-			return (object) array(
-				'orders_count' => 0,
-				'total_spend'  => 0,
-			);
-		}
-
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql is prepared above.
-		$row = $wpdb->get_row( $sql );
-
-		if ( $wpdb->last_error ) {
-			wc_get_logger()->error(
-				sprintf( 'CustomerHistory: Failed to query CPT order stats. DB error: %s', $wpdb->last_error ),
-				array( 'source' => 'customer-history' )
-			);
-		}
-
-		return $row ?? (object) array(
-			'orders_count' => 0,
-			'total_spend'  => 0,
+	private function query_cpt( int $customer_report_id ): object {
+		$args = array(
+			'customers'    => array( $customer_report_id ),
+			// If unset, these params have default values that affect the results.
+			'order_after'  => null,
+			'order_before' => null,
 		);
-		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		$customers_query = new CustomersQuery( $args );
+		$customer_data   = $customers_query->get_data();
+		$customer_row    = $customer_data->data[0] ?? null;
+
+		return (object) array(
+			'orders_count' => $customer_row['orders_count'] ?? 0,
+			'total_spend'  => $customer_row['total_spend'] ?? 0,
+		);
 	}
 
 	/**
