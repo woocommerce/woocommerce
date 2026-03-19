@@ -86,10 +86,10 @@ class CustomerHistory {
 		$excluded_statuses_sql = $this->get_excluded_statuses_sql();
 		$orders_table          = OrdersTableDataStore::get_orders_table_name();
 
-		$row = null;
+		$sql = null;
 
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		if ( $customer_id > 0 ) {
-					// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$sql = $wpdb->prepare(
 				"SELECT COUNT(*) AS orders_count,
 					COALESCE( SUM( filtered.total_amount ), 0 ) + COALESCE( SUM( r.refund_total ), 0 ) AS total_spend
@@ -112,18 +112,6 @@ class CustomerHistory {
 				$orders_table,
 				$customer_id
 			);
-
-			if ( null !== $sql ) {
-				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql is prepared above.
-				$row = $wpdb->get_row( $sql );
-
-				if ( $wpdb->last_error ) {
-					wc_get_logger()->error(
-						sprintf( 'CustomerHistory: Failed to query HPOS order stats for customer_id=%d. DB error: %s', $customer_id, $wpdb->last_error ),
-						array( 'source' => 'customer-history' )
-					);
-				}
-			}
 		} elseif ( '' !== $billing_email ) {
 			$addresses_table = OrdersTableDataStore::get_addresses_table_name();
 			$sql             = $wpdb->prepare(
@@ -152,21 +140,22 @@ class CustomerHistory {
 				$addresses_table,
 				$billing_email
 			);
+		}
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
-			if ( null !== $sql ) {
-				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql is prepared above.
-				$row = $wpdb->get_row( $sql );
-
-				if ( $wpdb->last_error ) {
-					wc_get_logger()->error(
-						sprintf( 'CustomerHistory: Failed to query HPOS order stats for email=%s. DB error: %s', $billing_email, $wpdb->last_error ),
-						array( 'source' => 'customer-history' )
-					);
-				}
-			}
+		if ( null === $sql ) {
+			return $default;
 		}
 
-		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- $sql is prepared above.
+		$row = $wpdb->get_row( $sql );
+
+		if ( $wpdb->last_error ) {
+			wc_get_logger()->error(
+				sprintf( 'CustomerHistory: Failed to query HPOS order stats for customer_id=%d, email=%s. DB error: %s', $customer_id, $billing_email, $wpdb->last_error ),
+				array( 'source' => 'customer-history' )
+			);
+		}
 
 		return $row ?? $default;
 	}
