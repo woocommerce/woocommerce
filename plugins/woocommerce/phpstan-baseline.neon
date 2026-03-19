@@ -56986,12 +56986,6 @@ parameters:
 			path: src/Caches/OrderCountCache.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Caches\\OrderCountCache\:\:get\(\) should return array\<int\> but returns null\.$#'
-			identifier: return.type
-			count: 2
-			path: src/Caches/OrderCountCache.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Caches\\OrderCountCache\:\:increment\(\) should return int but returns int\|false\.$#'
 			identifier: return.type
 			count: 1
