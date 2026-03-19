@@ -4,7 +4,6 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Logging;
 
-use Automattic\WooCommerce\Internal\Admin\Logging\Settings;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use WC_Logger;
@@ -112,29 +111,27 @@ class OrderLogsCleanupHelper {
 	 * @param int $max_age Maximum age in seconds before a file is eligible for deletion.
 	 */
 	private function cleanup_old_log_files( int $max_age ): void {
-		$log_dir = Settings::get_log_directory( false );
-
-		if ( ! is_dir( $log_dir ) ) {
+		if ( \Automattic\WooCommerce\Utilities\LoggingUtil::get_default_handler() !== \Automattic\WooCommerce\Internal\Admin\Logging\LogHandlerFileV2::class ) {
 			return;
 		}
 
-		$files   = glob( $log_dir . 'place-order-debug-*.log' );
-		$cutoff  = time() - $max_age;
-		$deleted = 0;
+		$file_controller = wc_get_container()->get( \Automattic\WooCommerce\Internal\Admin\Logging\FileV2\FileController::class );
+		$files           = $file_controller->get_files(
+			array(
+				'source'      => 'place-order-debug',
+				'date_filter' => 'modified',
+				'date_start'  => 1,
+				'date_end'    => time() - $max_age,
+				'per_page'    => self::MAX_FILES_PER_RUN,
+			)
+		);
 
 		if ( ! is_array( $files ) ) {
 			return;
 		}
 
 		foreach ( $files as $file ) {
-			if ( $deleted >= self::MAX_FILES_PER_RUN ) {
-				break;
-			}
-
-			if ( is_file( $file ) && filemtime( $file ) < $cutoff ) {
-				unlink( $file );
-				++$deleted;
-			}
+			$file->delete();
 		}
 	}
 
