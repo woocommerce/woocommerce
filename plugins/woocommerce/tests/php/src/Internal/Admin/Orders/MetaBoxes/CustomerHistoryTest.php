@@ -35,6 +35,7 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
+		remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		$this->clean_up_cot_setup();
 		parent::tearDown();
 	}
