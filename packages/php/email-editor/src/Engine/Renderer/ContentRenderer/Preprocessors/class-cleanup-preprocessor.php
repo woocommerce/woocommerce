@@ -15,9 +15,9 @@ class Cleanup_Preprocessor implements Preprocessor {
 	/**
 	 * Method to preprocess the content before rendering
 	 *
-	 * @param array                                                                                                             $parsed_blocks Parsed blocks of the email.
-	 * @param array{contentSize: string}                                                                                        $layout Layout of the email.
-	 * @param array{spacing: array{padding: array{bottom: string, left: string, right: string, top: string}, blockGap: string}} $styles Styles of the email.
+	 * @param array                                                                                                               $parsed_blocks Parsed blocks of the email.
+	 * @param array{contentSize: string}                                                                                          $layout Layout of the email.
+	 * @param array{spacing: array{padding: array{bottom: string, left?: string, right?: string, top: string}, blockGap: string}} $styles Styles of the email.
 	 * @return array
 	 */
 	public function preprocess( array $parsed_blocks, array $layout, array $styles ): array {
@@ -25,7 +25,7 @@ class Cleanup_Preprocessor implements Preprocessor {
 			// https://core.trac.wordpress.org/ticket/45312
 			// \WP_Block_Parser::parse_blocks() sometimes add a block with name null that can cause unexpected spaces in rendered content
 			// This behavior was reported as an issue, but it was closed as won't fix.
-			if ( null === $block['blockName'] ) {
+			if ( null === $block['blockName'] && '' === trim( $block['innerHTML'] ?? '' ) ) {
 				unset( $parsed_blocks[ $key ] );
 			}
 		}

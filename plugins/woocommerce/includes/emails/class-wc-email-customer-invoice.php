@@ -52,6 +52,11 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 				: __( 'Order detail emails can be sent to customers containing their order information and payment links.', 'woocommerce' );
 
 			$this->manual = true;
+
+			if ( $this->block_email_editor_enabled ) {
+				$this->title       = __( 'Payment request', 'woocommerce' );
+				$this->description = __( 'Manually send customers an email to review their order and complete payment.', 'woocommerce' );
+			}
 		}
 
 		/**
@@ -254,6 +259,9 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 			if ( FeaturesUtil::feature_is_enabled( 'email_improvements' ) ) {
 				$this->form_fields['cc']  = $this->get_cc_field();
 				$this->form_fields['bcc'] = $this->get_bcc_field();
+			}
+			if ( $this->block_email_editor_enabled ) {
+				$this->form_fields['preheader'] = $this->get_preheader_field();
 			}
 		}
 	}

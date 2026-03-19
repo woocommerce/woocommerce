@@ -3,7 +3,7 @@
  *
  * @param {string} version
  * @param {{ github: Octokit, context: { repo: { owner: string, repo: string } } }} options
- * @returns {Promise<string>} The previous version.
+ * @returns {Promise<string> | null} The previous version.
  */
 const findPreviousVersion = async ( version, { github, context } ) => {
   if ( version.endsWith( '-dev' ) || version.endsWith( '-beta.1' ) ) {
@@ -40,7 +40,7 @@ const findPreviousVersion = async ( version, { github, context } ) => {
   );
 
   if ( 0 === allTags.length) {
-    throw new Error( `Cannot determine previous version for '${ version }'.` );
+    return null;
   }
 
   // Insert current version in array when necessary.
@@ -167,6 +167,11 @@ const run = async ( currentRef, { github, context } ) => {
 
   // Previous version.
   const previousRef = await findPreviousVersion( version, { github, context } );
+  if ( ! previousRef ) {
+    console.log( `No previous version for '${ version }'. Skipping db updates check.` );
+    return;
+  }
+
   const previousFile = await readFileFromRef( previousRef, 'plugins/woocommerce/includes/class-wc-install.php', { github, context } );
   const previousDbUpdates = readDbUpdatesFromString( previousFile );
 

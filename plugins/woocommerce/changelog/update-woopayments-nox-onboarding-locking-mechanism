@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Update the WooPayments onboarding locking mechanism to include an expiration and auto-unlock.

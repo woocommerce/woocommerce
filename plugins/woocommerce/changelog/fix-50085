@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Correctly handle deleted meta in legacy > HPOS sync.

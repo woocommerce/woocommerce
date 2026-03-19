@@ -12,7 +12,7 @@ import DownloadsReportTable from './table';
 import getSelectedChart from '../../../lib/get-selected-chart';
 import ReportChart from '../../components/report-chart';
 import ReportSummary from '../../components/report-summary';
-import ReportFilters from '../../components/report-filters';
+import { ReportHeader } from '../../components/report-header';
 
 export default class DownloadsReport extends Component {
 	render() {
@@ -20,7 +20,7 @@ export default class DownloadsReport extends Component {
 
 		return (
 			<Fragment>
-				<ReportFilters
+				<ReportHeader
 					query={ query }
 					path={ path }
 					filters={ filters }

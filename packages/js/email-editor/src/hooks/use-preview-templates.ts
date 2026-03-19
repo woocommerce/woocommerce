@@ -97,12 +97,13 @@ function generateTemplateContent(
 }
 
 export function usePreviewTemplates(
-	customEmailContent = ''
+	customEmailContent = '',
+	includeRecentPosts = true
 ): [ TemplatePreview[], TemplatePreview[], boolean ] {
 	const { templates, patterns, emailPosts, hasEmailPosts } = useSelect(
 		( select ) => {
 			const rawEmailPosts =
-				customEmailContent !== 'swap'
+				includeRecentPosts && customEmailContent !== 'swap'
 					? select( storeName ).getSentEmailEditorPosts()
 					: undefined;
 
@@ -114,7 +115,7 @@ export function usePreviewTemplates(
 				hasEmailPosts: !! ( rawEmailPosts && rawEmailPosts?.length ),
 			};
 		},
-		[ customEmailContent ]
+		[ customEmailContent, includeRecentPosts ]
 	);
 
 	const allTemplates = useMemo( () => {
@@ -153,9 +154,10 @@ export function usePreviewTemplates(
 						slug: template.slug,
 						// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 						previewContentParsed: parsedTemplate,
-						emailParsed: contentPattern.blocks,
+						emailParsed:
+							contentPattern.emailBlocks ?? contentPattern.blocks,
 						template,
-						category: 'basic', // TODO: This will be updated once template category is implemented
+						category: contentPattern.categories?.[ 0 ],
 						type: template.type,
 						displayName: contentPattern.title
 							? `${ template.title.rendered } - ${ contentPattern.title }`

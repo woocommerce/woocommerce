@@ -11,6 +11,7 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController;
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
+use Automattic\WooCommerce\Internal\Caches\ProductCacheController;
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonAdminBarBadge;
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonCacheInvalidator;
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonRequestHandler;
@@ -23,7 +24,6 @@ use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as ProductDownloadDirectories;
 use Automattic\WooCommerce\Internal\ProductImage\MatchImageBySKU;
-use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use Automattic\WooCommerce\Internal\RestockRefundedItemsAdjuster;
 use Automattic\WooCommerce\Internal\Settings\OptionSanitizer;
 use Automattic\WooCommerce\Internal\Utilities\LegacyRestApiStub;
@@ -31,9 +31,12 @@ use Automattic\WooCommerce\Internal\Utilities\WebhookUtil;
 use Automattic\WooCommerce\Internal\Admin\EmailImprovements\EmailImprovements;
 use Automattic\WooCommerce\Internal\Admin\Marketplace;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
-use Automattic\WooCommerce\Utilities\{LoggingUtil, RestApiUtil, TimeUtil};
+use Automattic\WooCommerce\Utilities\{LoggingUtil, TimeUtil};
 use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
 use Automattic\WooCommerce\Caches\OrderCountCacheService;
+use Automattic\WooCommerce\Internal\Caches\ProductVersionStringInvalidator;
+use Automattic\WooCommerce\Internal\Caches\OrdersVersionStringInvalidator;
+use Automattic\WooCommerce\Internal\Caches\TaxRateVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
 use Automattic\Jetpack\Constants;
 
@@ -49,7 +52,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '10.4.0-dev';
+	public $version = '10.7.0-dev';
 
 	/**
 	 * WooCommerce Schema version.
@@ -168,6 +171,8 @@ final class WooCommerce {
 	 * Cloning is forbidden.
 	 *
 	 * @since 2.1
+	 *
+	 * @return void
 	 */
 	public function __clone() {
 		wc_doing_it_wrong( __FUNCTION__, __( 'Cloning is forbidden.', 'woocommerce' ), '2.1' );
@@ -177,6 +182,8 @@ final class WooCommerce {
 	 * Unserializing instances of this class is forbidden.
 	 *
 	 * @since 2.1
+	 *
+	 * @return void
 	 */
 	public function __wakeup() {
 		wc_doing_it_wrong( __FUNCTION__, __( 'Unserializing instances of this class is forbidden.', 'woocommerce' ), '2.1' );
@@ -214,6 +221,8 @@ final class WooCommerce {
 	 * @param string $key Property name.
 	 * @param mixed  $value Property value.
 	 * @throws Exception Attempt to access a property that's private or protected.
+	 *
+	 * @return void
 	 */
 	public function __set( string $key, $value ) {
 		if ( 'api' === $key ) {
@@ -263,6 +272,8 @@ final class WooCommerce {
 	 * the load order. See #21524 for details.
 	 *
 	 * @since 3.6.0
+	 *
+	 * @return void
 	 */
 	public function on_plugins_loaded() {
 		/**
@@ -295,6 +306,8 @@ final class WooCommerce {
 	 * Hook into actions and filters.
 	 *
 	 * @since 2.3
+	 *
+	 * @return void
 	 */
 	private function init_hooks() {
 		register_activation_hook( WC_PLUGIN_FILE, array( 'WC_Install', 'install' ) );
@@ -343,6 +356,7 @@ final class WooCommerce {
 		$container->get( MatchImageBySKU::class );
 		$container->get( RestockRefundedItemsAdjuster::class );
 		$container->get( CustomOrdersTableController::class );
+		$container->get( ProductCacheController::class );
 		$container->get( OptionSanitizer::class );
 		$container->get( BatchProcessingController::class );
 		$container->get( FeaturesController::class );
@@ -357,6 +371,9 @@ final class WooCommerce {
 		$container->get( AddressProviderController::class );
 		$container->get( AbilitiesRegistry::class );
 		$container->get( MCPAdapterProvider::class );
+		$container->get( ProductVersionStringInvalidator::class );
+		$container->get( OrdersVersionStringInvalidator::class );
+		$container->get( TaxRateVersionStringInvalidator::class );
 
 		// Feature flags.
 		if ( Constants::is_true( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) ) {
@@ -375,7 +392,11 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Utilities\LegacyRestApiStub::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Email\EmailStyleSync::class )->register();
-		$container->get( Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsController::class )->register();
+		$container->get( Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsController::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\Admin\Agentic\AgenticController::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\ProductFeed\ProductFeed::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\PushNotifications\PushNotifications::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\Orders\PointOfSaleEmailHandler::class )->register();
 
 		// Classes inheriting from RestApiControllerBase.
 		$container->get( Automattic\WooCommerce\Internal\ReceiptRendering\ReceiptRenderingRestController::class )->register();
@@ -388,6 +409,9 @@ final class WooCommerce {
 
 		$container->get( Automattic\WooCommerce\Internal\ProductFilters\MainQueryController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ProductFilters\CacheController::class )->register();
+
+		// Integration point between legacy reports and orders APIs (the reports caches invalidation focused).
+		\WC_Admin_Reports::register_orders_hook_handlers();
 	}
 
 	/**
@@ -397,6 +421,8 @@ final class WooCommerce {
 	 *
 	 * This will no longer be used. The more flexible add_woocommerce_remote_variant
 	 * below will be used instead.
+	 *
+	 * @return void
 	 */
 	public function add_woocommerce_inbox_variant() {
 		$config_name = 'woocommerce_inbox_variant_assignment';
@@ -408,6 +434,8 @@ final class WooCommerce {
 	/**
 	 * Add woocommerce_remote_variant_assignment used to determine cohort
 	 * or group assignment for Remote Spec Engines.
+	 *
+	 * @return void
 	 */
 	public function add_woocommerce_remote_variant() {
 		$config_name = 'woocommerce_remote_variant_assignment';
@@ -420,6 +448,8 @@ final class WooCommerce {
 	 * Ensures fatal errors are logged so they can be picked up in the status report.
 	 *
 	 * @since 3.2.0
+	 *
+	 * @return void
 	 */
 	public function log_errors() {
 		$error = error_get_last();
@@ -465,6 +495,11 @@ final class WooCommerce {
 
 	/**
 	 * Define WC Constants.
+	 *
+	 * IMPORTANT: When adding new constants here, also add them to
+	 * php-stubs/wc-constants.php for PHPStan static analysis.
+	 *
+	 * @return void
 	 */
 	private function define_constants() {
 		$this->define( 'WC_ABSPATH', dirname( WC_PLUGIN_FILE ) . '/' );
@@ -509,6 +544,8 @@ final class WooCommerce {
 
 	/**
 	 * Register custom tables within $wpdb object.
+	 *
+	 * @return void
 	 */
 	private function define_tables() {
 		global $wpdb;
@@ -523,8 +560,10 @@ final class WooCommerce {
 		);
 
 		foreach ( $tables as $name => $table ) {
-			$wpdb->$name    = $wpdb->prefix . $table;
-			$wpdb->tables[] = $table;
+			$wpdb->$name = $wpdb->prefix . $table;
+			if ( ! in_array( $table, $wpdb->tables, true ) ) {
+				$wpdb->tables[] = $table;
+			}
 		}
 	}
 
@@ -533,6 +572,8 @@ final class WooCommerce {
 	 *
 	 * @param string      $name  Constant name.
 	 * @param string|bool $value Constant value.
+	 *
+	 * @return void
 	 */
 	private function define( $name, $value ) {
 		if ( ! defined( $name ) ) {
@@ -580,6 +621,8 @@ final class WooCommerce {
 
 	/**
 	 * Load REST API.
+	 *
+	 * @return void
 	 */
 	public function load_rest_api() {
 		\Automattic\WooCommerce\RestApi\Server::instance()->init();
@@ -601,11 +644,15 @@ final class WooCommerce {
 				return defined( 'DOING_CRON' );
 			case 'frontend':
 				return ( ! is_admin() || defined( 'DOING_AJAX' ) ) && ! defined( 'DOING_CRON' ) && ! $this->is_rest_api_request();
+			default:
+				return false;
 		}
 	}
 
 	/**
 	 * Include required core files used in admin and on the frontend.
+	 *
+	 * @return void
 	 */
 	public function includes() {
 		/**
@@ -790,6 +837,8 @@ final class WooCommerce {
 	 * Include classes for theme support.
 	 *
 	 * @since 3.3.0
+	 *
+	 * @return void
 	 */
 	private function theme_support_includes() {
 		if ( wc_is_wp_default_theme_active() ) {
@@ -839,6 +888,8 @@ final class WooCommerce {
 
 	/**
 	 * Include required frontend files.
+	 *
+	 * @return void
 	 */
 	public function frontend_includes() {
 		include_once WC_ABSPATH . 'includes/wc-cart-functions.php';
@@ -857,6 +908,8 @@ final class WooCommerce {
 
 	/**
 	 * Function used to Init WooCommerce Template Functions - This makes them pluggable by plugins and themes.
+	 *
+	 * @return void
 	 */
 	public function include_template_functions() {
 		include_once WC_ABSPATH . 'includes/wc-template-functions.php';
@@ -864,6 +917,8 @@ final class WooCommerce {
 
 	/**
 	 * Init WooCommerce when WordPress Initialises.
+	 *
+	 * @return void
 	 */
 	public function init() {
 		// See the comment inside FeaturesController::__construct.
@@ -907,6 +962,8 @@ final class WooCommerce {
 	 * Locales found in:
 	 *      - WP_LANG_DIR/woocommerce/woocommerce-LOCALE.mo
 	 *      - WP_LANG_DIR/plugins/woocommerce-LOCALE.mo
+	 *
+	 * @return void
 	 */
 	public function load_plugin_textdomain() {
 		/**
@@ -928,6 +985,8 @@ final class WooCommerce {
 
 	/**
 	 * Ensure theme and server variable compatibility and setup image sizes.
+	 *
+	 * @return void
 	 */
 	public function setup_environment() {
 		/**
@@ -942,6 +1001,8 @@ final class WooCommerce {
 
 	/**
 	 * Ensure post thumbnail support is turned on.
+	 *
+	 * @return void
 	 */
 	private function add_thumbnail_support() {
 		if ( ! current_theme_supports( 'post-thumbnails' ) ) {
@@ -963,6 +1024,8 @@ final class WooCommerce {
 	 * woocommerce_single - Used on single product pages for the main image.
 	 *
 	 * @since 2.3
+	 *
+	 * @return void
 	 */
 	public function add_image_sizes() {
 		$thumbnail         = wc_get_image_size( 'thumbnail' );
@@ -1047,6 +1110,8 @@ final class WooCommerce {
 	 * Load & enqueue active webhooks.
 	 *
 	 * @since 2.2
+	 *
+	 * @return void
 	 */
 	private function load_webhooks() {
 
@@ -1115,7 +1180,8 @@ final class WooCommerce {
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
 	public function robots_txt( $output ) {
-		$path = ( ! empty( $site_url['path'] ) ) ? $site_url['path'] : '';
+		$site_url = wp_parse_url( site_url() );
+		$path     = ( ! empty( $site_url['path'] ) ) ? $site_url['path'] : '';
 
 		$lines       = preg_split( '/\r\n|\r|\n/', $output );
 		$agent_index = array_search( 'User-agent: *', $lines, true );
@@ -1144,6 +1210,8 @@ final class WooCommerce {
 
 	/**
 	 * Set tablenames inside WPDB object.
+	 *
+	 * @return void
 	 */
 	public function wpdb_table_fix() {
 		$this->define_tables();
@@ -1154,6 +1222,8 @@ final class WooCommerce {
 	 *
 	 * @since 3.6.0
 	 * @param string $filename The filename of the activated plugin.
+	 *
+	 * @return void
 	 */
 	public function activated_plugin( $filename ) {
 		include_once __DIR__ . '/admin/helper/class-wc-helper.php';
@@ -1170,6 +1240,8 @@ final class WooCommerce {
 	 *
 	 * @since 3.6.0
 	 * @param string $filename The filename of the deactivated plugin.
+	 *
+	 * @return void
 	 */
 	public function deactivated_plugin( $filename ) {
 		include_once __DIR__ . '/admin/helper/class-wc-helper.php';
@@ -1345,6 +1417,8 @@ final class WooCommerce {
 	 * @since 9.0.0
 	 *
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 *
+	 * @return void
 	 */
 	public function register_wp_admin_settings() {
 		$pages = WC_Admin_Settings::get_settings_pages();
@@ -1520,6 +1594,8 @@ final class WooCommerce {
 
 	/**
 	 * Register recurring actions.
+	 *
+	 * @return void
 	 */
 	public function register_recurring_actions() {
 		// Remove any unwrapped actions that may have been scheduled before scheduling the new wrapped ones.
@@ -1535,6 +1611,9 @@ final class WooCommerce {
 
 		// Schedule daily sales event at midnight tomorrow.
 		$scheduled_sales_time = strtotime( '00:00 tomorrow ' . $offset_hours );
+		if ( false === $scheduled_sales_time ) {
+			$scheduled_sales_time = strtotime( '00:00 tomorrow' );
+		}
 
 		as_schedule_recurring_action( $scheduled_sales_time, DAY_IN_SECONDS, 'woocommerce_scheduled_sales', array(), 'woocommerce', true );
 
@@ -1553,7 +1632,13 @@ final class WooCommerce {
 		}
 
 		$tomorrow_3am = strtotime( 'tomorrow 03:00 am ' . $offset_hours );
+		if ( false === $tomorrow_3am ) {
+			$tomorrow_3am = strtotime( 'tomorrow 03:00 am' );
+		}
 		$tomorrow_6am = strtotime( 'tomorrow 06:00 am ' . $offset_hours );
+		if ( false === $tomorrow_6am ) {
+			$tomorrow_6am = strtotime( 'tomorrow 06:00 am' );
+		}
 
 		// Delay the first run of `woocommerce_cleanup_personal_data` by 10 seconds
 		// so it doesn't occur in the same request. WooCommerce Admin also schedules
@@ -1630,6 +1715,8 @@ final class WooCommerce {
 	 *
 	 * @internal
 	 * @see https://github.com/woocommerce/woocommerce/issues/58364
+	 *
+	 * @return void
 	 */
 	public function init_customizer() {
 		global $pagenow;

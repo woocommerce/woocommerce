@@ -39,7 +39,10 @@ import {
 } from './shipping-providers/partners';
 import { TermsOfService } from '~/task-lists/components/terms-of-service';
 import { TrackedLink } from '~/components/tracked-link/tracked-link';
-import { isFeatureEnabled } from '~/utils/features';
+
+export const hasInstallableSlug = ( shippingMethod ) =>
+	typeof shippingMethod?.slug === 'string' &&
+	shippingMethod.slug.trim().length > 0;
 
 export class Shipping extends Component {
 	constructor( props ) {
@@ -62,6 +65,7 @@ export class Shipping extends Component {
 
 		this.storeLocationCompleted = false;
 		this.shippingPartners = props.shippingPartners;
+		this.impressionFired = false;
 
 		this.jetpackAuthRedirectUrl = getAdminLink( 'admin.php?page=wc-admin' );
 	}
@@ -133,6 +137,58 @@ export class Shipping extends Component {
 		this.setState( { isPending: false, shippingZones } );
 	}
 
+	getShippingPartnerTrackingProps() {
+		const { countryCode, shippingPartners = [] } = this.props;
+		const pluginSlugs = shippingPartners
+			.map( ( partner ) => partner.slug )
+			.filter(
+				( slug ) => typeof slug === 'string' && slug.trim().length > 0
+			)
+			.join( ',' );
+		return {
+			context: 'tasklist',
+			country: countryCode,
+			plugins: pluginSlugs,
+		};
+	}
+
+	recordInstallAndActivateEvents( selectedPlugin, success ) {
+		const trackingBase = {
+			...this.getShippingPartnerTrackingProps(),
+			selected_plugin: selectedPlugin,
+		};
+
+		if ( success ) {
+			recordEvent( 'shipping_partner_install', {
+				...trackingBase,
+				success: true,
+			} );
+			recordEvent( 'shipping_partner_activate', {
+				...trackingBase,
+				success: true,
+			} );
+		} else {
+			const { installedPlugins = [] } = this.props;
+			const wasInstalled = installedPlugins.includes( selectedPlugin );
+
+			if ( wasInstalled ) {
+				recordEvent( 'shipping_partner_install', {
+					...trackingBase,
+					success: true,
+				} );
+				recordEvent( 'shipping_partner_activate', {
+					...trackingBase,
+					success: false,
+				} );
+			} else {
+				recordEvent( 'shipping_partner_install', {
+					...trackingBase,
+					success: false,
+				} );
+			}
+		}
+	}
+
 	componentDidUpdate( prevProps, prevState ) {
 		const { countryCode, countryName, settings } = this.props;
 		const {
@@ -151,6 +207,21 @@ export class Shipping extends Component {
 			this.setState( { isPending: true } );
 			if ( countryName ) {
 				this.fetchShippingZones();
+			}
+		}
+
+		if (
+			step === 'label_printing' &&
+			prevState.step !== 'label_printing' &&
+			! this.impressionFired
+		) {
+			const { shippingPartners = [] } = this.props;
+			if ( shippingPartners.length > 0 ) {
+				recordEvent(
+					'shipping_partner_impression',
+					this.getShippingPartnerTrackingProps()
+				);
+				this.impressionFired = true;
 			}
 		}
 
@@ -207,9 +278,11 @@ export class Shipping extends Component {
 		} = this.props;
 		const pluginsToPromote = shippingPartners;
 
-		const pluginsToActivate = pluginsToPromote.map( ( pluginToPromote ) => {
-			return pluginToPromote.slug;
-		} );
+		const pluginsToActivate = pluginsToPromote
+			.map( ( pluginToPromote ) => pluginToPromote.slug )
+			.filter(
+				( slug ) => typeof slug === 'string' && slug.trim().length > 0
+			);
 
 		const onShippingPluginInstalltionSkip = () => {
 			recordEvent( 'tasklist_shipping_label_printing', {
@@ -352,11 +425,25 @@ export class Shipping extends Component {
 										plugins_to_activate: pluginsToActivate,
 									}
 								);
+								this.recordInstallAndActivateEvents(
+									pluginsToActivate[ 0 ],
+									true
+								);
 								this.completeStep();
 							} }
-							onError={ ( errors, response ) =>
-								createNoticesFromResponse( response )
-							}
+							onError={ ( errors, response ) => {
+								createNoticesFromResponse( response );
+								this.recordInstallAndActivateEvents(
+									pluginsToActivate[ 0 ],
+									false
+								);
+							} }
+							onClick={ () => {
+								recordEvent( 'shipping_partner_click', {
+									...this.getShippingPartnerTrackingProps(),
+									selected_plugin: pluginsToActivate[ 0 ],
+								} );
+							} }
 							onSkip={ () => {
 								recordEvent(
 									'tasklist_shipping_label_printing',
@@ -373,7 +460,7 @@ export class Shipping extends Component {
 						/>
 					</>
 				),
-				visible: pluginsToActivate.length,
+				visible: pluginsToPromote.length,
 			},
 
 			// Only needed for WooCommerce Shipping
@@ -486,17 +573,35 @@ export class Shipping extends Component {
 																			pluginsForPartner,
 																	}
 																);
+																this.recordInstallAndActivateEvents(
+																	shippingMethod.slug,
+																	true
+																);
 																invalidateResolutionForStoreSelector();
 																this.completeStep();
 															} }
 															onError={ (
 																errors,
 																response
-															) =>
+															) => {
 																createNoticesFromResponse(
 																	response
-																)
-															}
+																);
+																this.recordInstallAndActivateEvents(
+																	shippingMethod.slug,
+																	false
+																);
+															} }
+															onClick={ () => {
+																recordEvent(
+																	'shipping_partner_click',
+																	{
+																		...this.getShippingPartnerTrackingProps(),
+																		selected_plugin:
+																			shippingMethod.slug,
+																	}
+																);
+															} }
 															installText={ __(
 																'Install and enable',
 																'woocommerce'
@@ -527,7 +632,9 @@ export class Shipping extends Component {
 								</div>
 							) }
 							{ pluginsToPromote.length === 1 &&
-								pluginsToPromote[ 0 ].slug === undefined && ( // if it doesn't have a slug we just show a download button
+								! hasInstallableSlug(
+									pluginsToPromote[ 0 ]
+								) && ( // if it doesn't have a slug we just show a download button
 									<a
 										href={
 											pluginsToPromote[ 0 ]
@@ -542,7 +649,7 @@ export class Shipping extends Component {
 									</a>
 								) }
 							{ pluginsToPromote.length === 1 &&
-							pluginsToPromote[ 0 ].slug ? (
+							hasInstallableSlug( pluginsToPromote[ 0 ] ) ? (
 								<>
 									{ ! isJetpackConnected &&
 										pluginsToPromote[ 0 ].slug ===
@@ -567,14 +674,33 @@ export class Shipping extends Component {
 														pluginsToActivate,
 												}
 											);
+											this.recordInstallAndActivateEvents(
+												pluginsToPromote[ 0 ]?.slug,
+												true
+											);
 											invalidateResolutionForStoreSelector();
 											this.completeStep();
 										} }
-										onError={ ( errors, response ) =>
+										onError={ ( errors, response ) => {
 											createNoticesFromResponse(
 												response
-											)
-										}
+											);
+											this.recordInstallAndActivateEvents(
+												pluginsToPromote[ 0 ]?.slug,
+												false
+											);
+										} }
+										onClick={ () => {
+											recordEvent(
+												'shipping_partner_click',
+												{
+													...this.getShippingPartnerTrackingProps(),
+													selected_plugin:
+														pluginsToPromote[ 0 ]
+															?.slug,
+												}
+											);
+										} }
 										onSkip={
 											onShippingPluginInstalltionSkip
 										}
@@ -666,18 +792,10 @@ export class Shipping extends Component {
 						'woocommerce'
 					) }
 					eventName="tasklist_shipping_visit_marketplace_click"
-					targetUrl={
-						isFeatureEnabled( 'marketplace' )
-							? getAdminLink(
-									'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=shipping-delivery-and-fulfillment'
-							  )
-							: 'https://woocommerce.com/product-category/woocommerce-extensions/shipping-delivery-and-fulfillment/'
-					}
-					linkType={
-						isFeatureEnabled( 'marketplace' )
-							? 'wc-admin'
-							: 'external'
-					}
+					targetUrl={ getAdminLink(
+						'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=shipping-delivery-and-fulfillment'
+					) }
+					linkType="wc-admin"
 				/>
 			</div>
 		);
@@ -688,7 +806,8 @@ const ShippingWrapper = compose(
 	withSelect( ( select ) => {
 		const { getSettings, isUpdateSettingsRequesting } =
 			select( settingsStore );
-		const { getActivePlugins, isJetpackConnected } = select( pluginsStore );
+		const { getActivePlugins, getInstalledPlugins, isJetpackConnected } =
+			select( pluginsStore );
 		const { getCountry } = select( COUNTRIES_STORE_NAME );
 
 		const { general: settings = {} } = getSettings( 'general' );
@@ -702,6 +821,7 @@ const ShippingWrapper = compose(
 		const country = countryCode ? getCountry( countryCode ) : null;
 		const countryName = country ? country.name : null;
 		const activePlugins = getActivePlugins();
+		const installedPlugins = getInstalledPlugins();
 
 		return {
 			countryCode,
@@ -709,6 +829,7 @@ const ShippingWrapper = compose(
 			isUpdateSettingsRequesting: isUpdateSettingsRequesting( 'general' ),
 			settings,
 			activePlugins,
+			installedPlugins,
 			isJetpackConnected: isJetpackConnected(),
 			shippingPartners,
 		};

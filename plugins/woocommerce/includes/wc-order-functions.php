@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
+use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
@@ -26,7 +27,7 @@ defined( 'ABSPATH' ) || exit;
  * This function should be used for order retrieval so that when we move to
  * custom tables, functions still work.
  *
- * Args and usage: https://github.com/woocommerce/woocommerce/wiki/wc_get_orders-and-WC_Order_Query
+ * Args and usage: https://developer.woocommerce.com/docs/extensions/core-concepts/wc-get-orders/
  *
  * @since  2.6.0
  * @param  array $args Array of args (above).
@@ -83,7 +84,7 @@ function wc_get_orders( $args ) {
  *
  * @param mixed $the_order       Post object or post ID of the order.
  *
- * @return bool|WC_Order|WC_Order_Refund
+ * @return false|WC_Order|WC_Order_Refund
  */
 function wc_get_order( $the_order = false ) {
 	if ( ! did_action( 'woocommerce_after_register_post_type' ) ) {
@@ -98,7 +99,7 @@ function wc_get_order( $the_order = false ) {
  *
  * @since 2.2
  * @used-by WC_Order::set_status
- * @return array
+ * @return array<string,string>
  */
 function wc_get_order_statuses() {
 	$order_statuses = array(
@@ -472,8 +473,9 @@ function wc_downloadable_product_permissions( $order_id, $force = false ) {
 		return;
 	}
 
-	if ( count( $order->get_items() ) > 0 ) {
-		foreach ( $order->get_items() as $item ) {
+	$line_items = $order->get_items();
+	if ( count( $line_items ) > 0 ) {
+		foreach ( $line_items as $item ) {
 			$product = $item->get_product();
 
 			if ( $product && $product->exists() && $product->is_downloadable() ) {
@@ -498,32 +500,32 @@ add_action( 'woocommerce_order_status_processing', 'wc_downloadable_product_perm
  * @param int|WC_Order $order Order instance or ID.
  */
 function wc_delete_shop_order_transients( $order = 0 ) {
-	if ( is_numeric( $order ) ) {
+	if ( $order && is_numeric( $order ) ) {
 		$order = wc_get_order( $order );
-	}
-	$reports             = WC_Admin_Reports::get_reports();
-	$transients_to_clear = array(
-		'wc_admin_report',
-	);
-
-	foreach ( $reports as $report_group ) {
-		foreach ( $report_group['reports'] as $report_key => $report ) {
-			$transients_to_clear[] = 'wc_report_' . $report_key;
-		}
-	}
-
-	foreach ( $transients_to_clear as $transient ) {
-		delete_transient( $transient );
 	}
 
 	// Clear customer's order related caches.
-	if ( is_a( $order, 'WC_Order' ) ) {
+	$order_id = 0;
+	if ( $order && is_a( $order, 'WC_Order' ) ) {
 		$order_id = $order->get_id();
-		Users::delete_site_user_meta( $order->get_customer_id(), 'wc_money_spent' );
-		Users::delete_site_user_meta( $order->get_customer_id(), 'wc_order_count' );
-		Users::delete_site_user_meta( $order->get_customer_id(), 'wc_last_order' );
-	} else {
-		$order_id = 0;
+
+		$customer_id = $order->get_customer_id();
+		if ( $customer_id ) {
+			// Optimization note: the function is fired multiple times during order persistence lifecycle, and by
+			// verifying that metas carry non-empty values we ensure no repetitive attempts dropping the metas.
+			$metas_to_purge = array_filter(
+				array(
+					is_numeric( Users::get_site_user_meta( $customer_id, 'wc_order_count' ) ) ? 'wc_order_count' : '',
+					is_numeric( Users::get_site_user_meta( $customer_id, 'wc_last_order' ) ) ? 'wc_last_order' : '',
+					is_numeric( Users::get_site_user_meta( $customer_id, 'wc_money_spent' ) ) ? 'wc_money_spent' : '',
+				)
+			);
+			if ( ! empty( $metas_to_purge ) ) {
+				foreach ( $metas_to_purge as $meta ) {
+					Users::delete_site_user_meta( $customer_id, $meta );
+				}
+			}
+		}
 	}
 
 	// Increments the transient version to invalidate cache.
@@ -681,9 +683,9 @@ function wc_create_refund( $args = array() ) {
 
 			// delete downloads that were refunded using order and product id, if present.
 			if ( ! empty( $refunded_order_and_products ) ) {
+				$download_data_store = WC_Data_Store::load( 'customer-download' );
 				foreach ( $refunded_order_and_products as $refunded_order_and_product ) {
-					$download_data_store = WC_Data_Store::load( 'customer-download' );
-					$downloads           = $download_data_store->get_downloads( $refunded_order_and_product );
+					$downloads = $download_data_store->get_downloads( $refunded_order_and_product );
 					if ( ! empty( $downloads ) ) {
 						foreach ( $downloads as $download ) {
 							$download_data_store->delete_by_id( $download->get_id() );
@@ -851,7 +853,7 @@ function wc_restock_refunded_items( $order, $refunded_line_items ) {
 		 */
 		$restock_note = apply_filters( 'woocommerce_refund_restock_note', $restock_note, $old_stock, $new_stock, $order, $product );
 
-		$order->add_order_note( $restock_note );
+		$order->add_order_note( $restock_note, false, false, array( 'note_group' => OrderNoteGroup::PRODUCT_STOCK ) );
 
 		$item->save();
 
@@ -921,7 +923,7 @@ function wc_order_fully_refunded( $order_id ) {
 	);
 	wc_restore_locale();
 
-	$order->add_order_note( __( 'Order status set to refunded. To return funds to the customer you will need to issue a refund through your payment gateway.', 'woocommerce' ) );
+	$order->add_order_note( __( 'Order status set to refunded. To return funds to the customer you will need to issue a refund through your payment gateway.', 'woocommerce' ), false, false, array( 'note_group' => OrderNoteGroup::ORDER_UPDATE ) );
 }
 add_action( 'woocommerce_order_status_refunded', 'wc_order_fully_refunded' );
 
@@ -963,12 +965,12 @@ function wc_update_total_sales_counts( $order_id ) {
 
 	$operation = $recorded_sales && $reflected_order ? 'decrease' : 'increase';
 
-	if ( count( $order->get_items() ) > 0 ) {
-		foreach ( $order->get_items() as $item ) {
+	$line_items = $order->get_items();
+	if ( count( $line_items ) > 0 ) {
+		$data_store = WC_Data_Store::load( 'product' );
+		foreach ( $line_items as $item ) {
 			$product_id = $item->get_product_id();
-
 			if ( $product_id ) {
-				$data_store = WC_Data_Store::load( 'product' );
 				$data_store->update_product_sales( $product_id, absint( $item->get_quantity() ), $operation );
 			}
 		}
@@ -1117,7 +1119,26 @@ function wc_cancel_unpaid_orders() {
 		foreach ( $unpaid_orders as $unpaid_order ) {
 			$order = wc_get_order( $unpaid_order );
 
-			if ( apply_filters( 'woocommerce_cancel_unpaid_order', 'checkout' === $order->get_created_via(), $order ) ) {
+			if ( ! $order instanceof WC_Order ) {
+				continue;
+			}
+
+			/**
+			 * Filters whether an unpaid order should be automatically cancelled.
+			 *
+			 * By default, only orders created via customer-facing checkout (classic checkout
+			 * or checkout block) are automatically cancelled. Orders created through other
+			 * means (admin, REST API, plugins) are not cancelled.
+			 *
+			 * @since 2.0.3
+			 * @since 10.6.0 Added 'store-api' to the list of order sources that are automatically cancelled.
+			 *
+			 * @param bool     $should_cancel Whether the unpaid order should be cancelled.
+			 *                                 Default is true for orders created via 'checkout'
+			 *                                 or 'store-api', false otherwise.
+			 * @param WC_Order $order          The unpaid order object.
+			 */
+			if ( apply_filters( 'woocommerce_cancel_unpaid_order', in_array( $order->get_created_via(), array( 'checkout', 'store-api' ), true ), $order ) ) {
 				$order->update_status( OrderStatus::CANCELLED, __( 'Unpaid order cancelled - time limit reached.', 'woocommerce' ) );
 			}
 		}

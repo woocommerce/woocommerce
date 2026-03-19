@@ -61,6 +61,18 @@ class BlockUtils {
 		}
 
 		await singleProductBlock.getByText( 'Done' ).click();
+
+		// Switch to the non-blockified Add to Cart with Options block
+		const addToCartWithOptionsBlock = await this.editor.getBlockByName(
+			'woocommerce/add-to-cart-with-options'
+		);
+		await this.editor.selectBlocks( addToCartWithOptionsBlock );
+
+		await this.page
+			.getByRole( 'button', {
+				name: 'Switch back',
+			} )
+			.click();
 	}
 
 	async enableStepperMode() {
@@ -158,6 +170,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		editor,
 		requestUtils,
 		blockUtils,
+		wpCoreVersion,
 	} ) => {
 		// Add to Cart with Options in the Site Editor is only available as
 		// inner block of the Single Product Block except for the Single Product
@@ -174,7 +187,16 @@ test.describe( `${ blockData.name } Block`, () => {
 			canvas: 'edit',
 		} );
 
-		await expect( editor.canvas.getByText( 'placeholder' ) ).toBeVisible();
+		// TODO: WP 7.0 compat - Custom HTML block content is inside an iframe
+		// since WP 7.0. Simplify when WP 7.0 is the minimum supported version.
+		const placeholderLocator =
+			wpCoreVersion >= 7
+				? editor.canvas
+						.frameLocator( 'iframe' )
+						.getByText( 'placeholder' )
+				: editor.canvas.getByText( 'placeholder' );
+
+		await expect( placeholderLocator ).toBeVisible();
 
 		await editor.insertBlock( { name: 'woocommerce/single-product' } );
 
@@ -196,6 +218,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		admin,
 		editor,
 		requestUtils,
+		wpCoreVersion,
 	} ) => {
 		const template = await requestUtils.createTemplate( 'wp_template', {
 			slug: 'single-product',
@@ -209,7 +232,16 @@ test.describe( `${ blockData.name } Block`, () => {
 			canvas: 'edit',
 		} );
 
-		await expect( editor.canvas.getByText( 'placeholder' ) ).toBeVisible();
+		// TODO: WP 7.0 compat - Custom HTML block content is inside an iframe
+		// since WP 7.0. Simplify when WP 7.0 is the minimum supported version.
+		const placeholderLocator =
+			wpCoreVersion >= 7
+				? editor.canvas
+						.frameLocator( 'iframe' )
+						.getByText( 'placeholder' )
+				: editor.canvas.getByText( 'placeholder' );
+
+		await expect( placeholderLocator ).toBeVisible();
 
 		await editor.insertBlock( { name: blockData.slug } );
 
@@ -295,7 +327,7 @@ test.describe( `${ blockData.name } Block`, () => {
 			await editor.publishAndVisitPost();
 
 			const minusButton = page.getByLabel( `Reduce quantity` );
-			const plusButton = page.getByLabel( `Increase quantity ` );
+			const plusButton = page.getByLabel( `Increase quantity` );
 
 			await expect( minusButton ).toBeHidden();
 			await expect( plusButton ).toBeHidden();
@@ -319,7 +351,7 @@ test.describe( `${ blockData.name } Block`, () => {
 			await editor.publishAndVisitPost();
 
 			const minusButton = page.getByLabel( `Reduce quantity` );
-			const plusButton = page.getByLabel( `Increase quantity ` );
+			const plusButton = page.getByLabel( `Increase quantity` );
 
 			await expect( minusButton ).toBeHidden();
 			await expect( plusButton ).toBeHidden();
@@ -507,7 +539,7 @@ test.describe( `${ blockData.name } Block`, () => {
 
 		await page
 			.getByRole( 'button', {
-				name: 'Upgrade to the Add to Cart + Options block',
+				name: 'Use the Add to Cart + Options block',
 			} )
 			.click();
 

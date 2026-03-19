@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Migrate the Add To Cart with Options block to fetch product data via the @wordpress/core-data package.

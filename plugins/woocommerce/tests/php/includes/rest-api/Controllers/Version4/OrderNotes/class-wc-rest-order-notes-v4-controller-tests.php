@@ -1,14 +1,12 @@
-<?php // phpcs:ignore Generic.PHP.RequireStrictTypes.MissingDeclaration
+<?php
+declare( strict_types=1 );
 
-use Automattic\WooCommerce\Enums\OrderStatus;
-use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
-
-use Automattic\WooCommerce\RestApi\Routes\V4\OrderNotes\Controller as OrderNotesController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\OrderNotes\Controller as OrderNotesController;
 
 /**
- * class Automattic\WooCommerce\RestApi\Routes\V4\OrderNotes\Controller tests.
+ * class Automattic\WooCommerce\Internal\RestApi\Routes\V4\OrderNotes\Controller tests.
  * Order Notes Controller tests for V4 REST API.
  */
 class WC_REST_Order_Notes_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
@@ -70,10 +68,10 @@ class WC_REST_Order_Notes_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		parent::setUp();
 
 		// Create schema instance with dependency injection.
-		$order_note_schema = new \Automattic\WooCommerce\RestApi\Routes\V4\OrderNotes\Schema\OrderNoteSchema();
+		$order_note_schema = new \Automattic\WooCommerce\Internal\RestApi\Routes\V4\OrderNotes\Schema\OrderNoteSchema();
 
 		// Create utils instance.
-		$collection_query = new \Automattic\WooCommerce\RestApi\Routes\V4\OrderNotes\CollectionQuery();
+		$collection_query = new \Automattic\WooCommerce\Internal\RestApi\Routes\V4\OrderNotes\CollectionQuery();
 
 		$this->endpoint = new OrderNotesController();
 		$this->endpoint->init( $order_note_schema, $collection_query );
@@ -387,6 +385,29 @@ class WC_REST_Order_Notes_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 
 		$this->assertEquals( 401, $response->get_status() );
+	}
+
+	/**
+	 * Test that order note content is sanitized to prevent XSS.
+	 */
+	public function test_create_item_sanitizes_note_content() {
+		$order = OrderHelper::create_order( $this->user );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v4/order-notes' );
+		$request->set_body_params(
+			array(
+				'order_id' => $order->get_id(),
+				'note'     => '<script>alert("xss")</script>Safe content<b>bold</b>',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 201, $response->get_status() );
+		$this->assertStringNotContainsString( '<script>', $data['note'] );
+		$this->assertStringContainsString( 'Safe content', $data['note'] );
+		$this->assertStringContainsString( '<b>bold</b>', $data['note'] );
 	}
 
 	/**

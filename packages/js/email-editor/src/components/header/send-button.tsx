@@ -34,7 +34,16 @@ export function SendButton() {
 		}
 	}
 
-	const isDisabled = hasEmptyContent || isEmailSent || isDirty;
+	const defaultIsDisabled = hasEmptyContent || isEmailSent || isDirty;
+	const filteredIsDisabled = applyFilters(
+		'woocommerce_email_editor_send_button_disabled',
+		defaultIsDisabled,
+		{ hasEmptyContent, isEmailSent, isDirty }
+	);
+	const isDisabled =
+		typeof filteredIsDisabled === 'boolean'
+			? filteredIsDisabled
+			: defaultIsDisabled;
 
 	const label = applyFilters(
 		'woocommerce_email_editor_send_button_label',

@@ -7,6 +7,7 @@ import {
 	getElement,
 	withScope,
 	getConfig,
+	withSyncEvent,
 } from '@wordpress/interactivity';
 import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
 import type { WooCommerceConfig } from '@woocommerce/stores/woocommerce/cart';
@@ -59,7 +60,7 @@ const scrollImageIntoView = ( imageId: number ) => {
 		return;
 	}
 
-	// Find the scrollable container for the large image gallery
+	// Find the scrollable container for the viewer gallery
 	const scrollableContainer = galleryContainer.querySelector(
 		'.wc-block-product-gallery-large-image__container'
 	);
@@ -244,32 +245,28 @@ const productGallery = {
 
 			actions.selectImage( newImageIndex );
 		},
-		onSelectedLargeImageKeyDown: ( event: KeyboardEvent ) => {
-			if (
-				event.code === 'Enter' ||
-				event.code === 'Space' ||
-				event.code === 'NumpadEnter'
-			) {
-				if ( event.code === 'Space' ) {
+		onViewerImageKeyDown: ( event: KeyboardEvent ) => {
+			if ( event.key === 'Enter' || event.key === ' ' ) {
+				if ( event.key === ' ' ) {
 					event.preventDefault();
 				}
 				actions.openDialog();
 			}
 
-			if ( event.code === 'ArrowRight' ) {
+			if ( event.key === 'ArrowRight' ) {
 				actions.selectNextImage();
 			}
 
-			if ( event.code === 'ArrowLeft' ) {
+			if ( event.key === 'ArrowLeft' ) {
 				actions.selectPreviousImage();
 			}
 		},
 		onDialogKeyDown: ( event: KeyboardEvent ) => {
-			if ( event.code === 'Escape' ) {
+			if ( event.key === 'Escape' ) {
 				actions.closeDialog();
 			}
 
-			if ( event.code === 'Tab' ) {
+			if ( event.key === 'Tab' ) {
 				const focusableElementsSelectors =
 					'a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
@@ -312,13 +309,14 @@ const productGallery = {
 				}
 			}
 		},
-		openDialog: () => {
+		openDialog: withSyncEvent( ( event?: Event ) => {
+			event?.preventDefault();
 			const context = getContext();
 			context.isDialogOpen = true;
 			document.body.classList.add(
 				'wc-block-product-gallery-dialog-open'
 			);
-		},
+		} ),
 		closeDialog: () => {
 			const context = getContext();
 			context.isDialogOpen = false;
@@ -383,12 +381,12 @@ const productGallery = {
 			context.thumbnailsOverflow = overflowState;
 		},
 		onArrowsKeyDown: ( event: KeyboardEvent ) => {
-			if ( event.code === 'ArrowRight' ) {
+			if ( event.key === 'ArrowRight' ) {
 				event.preventDefault();
 				actions.selectNextImage();
 			}
 
-			if ( event.code === 'ArrowLeft' ) {
+			if ( event.key === 'ArrowLeft' ) {
 				event.preventDefault();
 				actions.selectPreviousImage();
 			}
@@ -526,11 +524,17 @@ const productGallery = {
 					`[data-image-id="${ selectedImageId }"]`
 				);
 
-				if ( selectedImage instanceof HTMLElement ) {
-					selectedImage.scrollIntoView( {
-						behavior: 'auto',
-						block: 'center',
-					} );
+				if (
+					selectedImage instanceof HTMLElement &&
+					selectedImage.parentNode instanceof HTMLElement
+				) {
+					// We're doing this manually because scrollIntoView caused layout shifts resulting in buggy
+					// dialog layout.
+					selectedImage.parentNode.scrollTop =
+						selectedImage.offsetTop +
+						selectedImage.offsetHeight / 2 -
+						dialogRef.offsetHeight / 2 -
+						32; // Arbitrary value for the header height.
 				}
 			}
 		},

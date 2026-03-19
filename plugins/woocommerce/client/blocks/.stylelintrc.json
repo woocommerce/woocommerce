@@ -9,6 +9,10 @@
 		"no-duplicate-selectors": null,
 		"rule-empty-line-before": null,
 		"selector-class-pattern": null,
-		"value-keyword-case": null
+		"value-keyword-case": null,
+		"length-zero-no-unit": [
+			true,
+			{ "ignoreFunctions": [ "calc", "var" ] }
+		]
 	}
 }

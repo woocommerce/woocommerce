@@ -19,7 +19,7 @@ use Exception;
 use WC_Abstract_Order;
 use WC_Data;
 use WC_Order;
-use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentUtils;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentUtils;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -43,6 +43,14 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * @var array
 	 */
 	private static $backfilling_order_ids = array();
+
+	/**
+	 * Keep track of order IDs (as keys) that are being synced on read. This is used to prevent backfilling to posts of an order being updated
+	 * from posts.
+	 *
+	 * @var array
+	 */
+	private static $sync_on_read_order_ids = array();
 
 	/**
 	 * Data stored in meta keys, but not considered "meta" for an order.
@@ -102,6 +110,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		'_download_permissions_granted',
 		'_order_stock_reduced',
 		'_new_order_email_sent',
+		'_cogs_total_value',
 	);
 
 	/**
@@ -1030,90 +1039,17 @@ WHERE
 	}
 
 	/**
-	 * Get the total tax refunded.
+	 * Returns a prepared SQL JOIN clause for finding refund orders belonging to a given parent order.
 	 *
-	 * @param WC_Order $order Order object.
+	 * Overrides the CPT version to use the HPOS orders table.
 	 *
-	 * @return float
+	 * @since 10.7.0
+	 * @param int $order_id Parent order ID.
+	 * @return string Prepared SQL JOIN fragment.
 	 */
-	public function get_total_tax_refunded( $order ) {
+	protected function get_refund_orders_join_clause( int $order_id ): string {
 		global $wpdb;
-
-		$order_table = self::get_orders_table_name();
-
-		$total = $wpdb->get_var(
-			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $order_table is hardcoded.
-			$wpdb->prepare(
-				"SELECT SUM( order_itemmeta.meta_value )
-				FROM {$wpdb->prefix}woocommerce_order_itemmeta AS order_itemmeta
-				INNER JOIN $order_table AS orders ON ( orders.type = 'shop_order_refund' AND orders.parent_order_id = %d )
-				INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON ( order_items.order_id = orders.id AND order_items.order_item_type = 'tax' )
-				WHERE order_itemmeta.order_item_id = order_items.order_item_id
-				AND order_itemmeta.meta_key IN ('tax_amount', 'shipping_tax_amount')",
-				$order->get_id(),
-			)
-		) ?? 0;
-		// phpcs:enable
-
-		return abs( $total );
-	}
-
-	/**
-	 * Get the total shipping tax refunded.
-	 *
-	 * @param WC_Order $order Order object.
-	 *
-	 * @since 10.2.0
-	 * @return float
-	 */
-	public function get_total_shipping_tax_refunded( $order ) {
-		global $wpdb;
-
-		$order_table = self::get_orders_table_name();
-
-		$total = $wpdb->get_var(
-			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $order_table is hardcoded.
-			$wpdb->prepare(
-				"SELECT SUM( order_itemmeta.meta_value )
-				FROM {$wpdb->prefix}woocommerce_order_itemmeta AS order_itemmeta
-				INNER JOIN $order_table AS orders ON ( orders.type = 'shop_order_refund' AND orders.parent_order_id = %d )
-				INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON ( order_items.order_id = orders.id AND order_items.order_item_type = 'tax' )
-				WHERE order_itemmeta.order_item_id = order_items.order_item_id
-				AND order_itemmeta.meta_key = 'shipping_tax_amount'",
-				$order->get_id()
-			)
-		) ?? 0;
-		// phpcs:enable
-
-		return abs( $total );
-	}
-
-	/**
-	 * Get the total shipping refunded.
-	 *
-	 * @param  WC_Order $order Order object.
-	 * @return float
-	 */
-	public function get_total_shipping_refunded( $order ) {
-		global $wpdb;
-
-		$order_table = self::get_orders_table_name();
-
-		$total = $wpdb->get_var(
-			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $order_table is hardcoded.
-			$wpdb->prepare(
-				"SELECT SUM( order_itemmeta.meta_value )
-				FROM {$wpdb->prefix}woocommerce_order_itemmeta AS order_itemmeta
-				INNER JOIN $order_table AS orders ON ( orders.type = 'shop_order_refund' AND orders.parent_order_id = %d )
-				INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON ( order_items.order_id = orders.id AND order_items.order_item_type = 'shipping' )
-				WHERE order_itemmeta.order_item_id = order_items.order_item_id
-				AND order_itemmeta.meta_key IN ('cost')",
-				$order->get_id()
-			)
-		) ?? 0;
-		// phpcs:enable
-
-		return abs( $total );
+		return $wpdb->prepare( '%i AS refunds ON ( refunds.type = %s AND refunds.parent_order_id = %d )', self::get_orders_table_name(), 'shop_order_refund', $order_id );
 	}
 
 	/**
@@ -1353,21 +1289,39 @@ WHERE
 			return;
 		}
 
-		$data_sync_enabled = $data_synchronizer->data_sync_is_enabled();
+		$data_sync_enabled = $data_synchronizer->data_sync_is_enabled()
+			&& ! doing_action( 'woocommerce_deliver_webhook_async' )
+			&& ! doing_action( 'wc-admin_import_orders' );
+
 		if ( $data_sync_enabled ) {
 			/**
-			 * Allow opportunity to disable sync on read, while keeping sync on write enabled. This adds another step as a large shop progresses from full sync to no sync with HPOS authoritative.
-			 * This filter is only executed if data sync is enabled from settings in the first place as it's meant to be a step between full sync -> no sync, rather than be a control for enabling just the sync on read. Sync on read without sync on write is problematic as any update will reset on the next read, but sync on write without sync on read is fine.
+			 * Filters whether to sync order data from posts on read.
 			 *
-			 * @param bool $read_on_sync_enabled Whether to sync on read.
+			 * Defaults to false because sync-on-read can be dangerous when HPOS is
+			 * authoritative and running correctly, as it allows the posts data store
+			 * to override HPOS data.
+			 *
+			 * @param bool $sync_on_read_enabled Whether to sync on read.
 			 *
 			 * @since 8.1.0
 			 */
-			$data_sync_enabled = apply_filters( 'woocommerce_hpos_enable_sync_on_read', $data_sync_enabled );
+			$data_sync_enabled = apply_filters( 'woocommerce_hpos_enable_sync_on_read', false );
 		}
 
 		$load_posts_for = array_diff( $order_ids, array_merge( self::$reading_order_ids, self::$backfilling_order_ids ) );
-		$post_orders    = $data_sync_enabled ? $this->get_post_orders_for_ids( array_intersect_key( $orders, array_flip( $load_posts_for ) ) ) : array();
+
+		$post_orders = array();
+		if ( $data_sync_enabled ) {
+			global $wpdb;
+
+			// Exclude orders that do not exist in the posts table.
+			if ( $load_posts_for ) {
+				$order_ids_placeholder = implode( ', ', array_fill( 0, count( $load_posts_for ), '%d' ) );
+				$load_posts_for        = array_map( 'absint', $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE ID IN ( $order_ids_placeholder )", ...$load_posts_for ) ) ); // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			}
+
+			$post_orders = $this->get_post_orders_for_ids( array_intersect_key( $orders, array_flip( $load_posts_for ) ) );
+		}
 
 		$cogs_is_enabled = $this->cogs_is_enabled();
 
@@ -1377,11 +1331,11 @@ WHERE
 
 			$this->init_order_record( $order, $order_id, $order_data );
 
-			if ( $order->has_cogs() && $cogs_is_enabled ) {
-				$this->read_cogs_data( $order );
+			if ( $cogs_is_enabled && $order->has_cogs() ) {
+				$this->read_cogs_data( $order, $order_data->meta_data );
 			}
 
-			if ( $data_sync_enabled && $this->should_sync_order( $order ) && isset( $post_orders[ $order_id ] ) ) {
+			if ( $data_sync_enabled && isset( $post_orders[ $order_id ] ) && $this->should_sync_order( $order ) ) {
 				self::$reading_order_ids[] = $order_id;
 				$this->maybe_sync_order( $order, $post_orders[ $order->get_id() ] );
 			}
@@ -1391,11 +1345,12 @@ WHERE
 	/**
 	 * Read the Cost of Goods Sold value for a given order from the database, if available, and apply it to the order.
 	 *
-	 * @param \WC_Abstract_Order $order The order to get the COGS value for.
+	 * @param \WC_Abstract_Order                          $order     The order to get the COGS value for.
+	 * @param object{meta_key:string,meta_value:string}[] $meta_data The original meta-data fetched for the order.
 	 */
-	private function read_cogs_data( WC_Abstract_Order $order ) {
-		$meta_entry = $this->data_store_meta->get_metadata_by_key( $order, '_cogs_total_value' );
-		$cogs_value = false === $meta_entry ? 0 : (float) current( $meta_entry )->meta_value;
+	private function read_cogs_data( WC_Abstract_Order $order, array $meta_data ) {
+		$meta_entry = array_filter( $meta_data, fn( object $meta ) => '_cogs_total_value' === $meta->meta_key );
+		$cogs_value = array() === $meta_entry ? 0 : (float) current( $meta_entry )->meta_value;
 
 		/**
 		 * Filter to customize the Cost of Goods Sold value that gets loaded for a given order.
@@ -1523,19 +1478,33 @@ WHERE
 	 * @param array $orders    List of orders mapped by $order_id.
 	 *
 	 * @return array List of posts.
+	 *
+	 * @throws \Exception If no CPT data store is found for an order.
 	 */
 	private function get_post_orders_for_ids( array $orders ): array {
 		$order_ids = array_keys( $orders );
-		// We have to bust meta cache, otherwise we will just get the meta cached by OrderTableDataStore.
 		foreach ( $order_ids as $order_id ) {
+			// Exclude orders where the CPT version is a placeholder post.
+			$post_type = get_post_type( $order_id );
+			if ( ! $post_type || DataSynchronizer::PLACEHOLDER_ORDER_POST_TYPE === $post_type ) {
+				unset( $orders[ $order_id ] );
+				continue;
+			}
+
+			// We have to bust meta cache, otherwise we will just get the meta cached by OrderTableDataStore.
 			wp_cache_delete( WC_Order::generate_meta_cache_key( $order_id, 'orders' ), 'orders' );
 		}
 
 		$cpt_stores       = array();
 		$cpt_store_orders = array();
 		foreach ( $orders as $order_id => $order ) {
-			$table_data_store     = $order->get_data_store();
-			$cpt_data_store       = $table_data_store->get_cpt_data_store_instance();
+			$table_data_store = $order->get_data_store();
+			$cpt_data_store   = $table_data_store->get_cpt_data_store_instance();
+
+			if ( ! $cpt_data_store ) {
+				throw new \Exception( sprintf( 'No CPT data store found for order %d.', absint( $order_id ) ) );
+			}
+
 			$cpt_store_class_name = get_class( $cpt_data_store );
 			if ( ! isset( $cpt_stores[ $cpt_store_class_name ] ) ) {
 				$cpt_stores[ $cpt_store_class_name ]       = $cpt_data_store;
@@ -1649,12 +1618,12 @@ WHERE
 			$new_diff      = ArrayUtil::deep_assoc_array_diff( $order1_values, $order2_values );
 			if ( ! empty( $new_diff ) && $sync ) {
 				if ( count( $order2_values ) > 1 ) {
-					$sync && $order1->delete_meta_data( $key );
+					$order1->delete_meta_data( $key );
 					foreach ( $order2_values as $post_order_value ) {
-						$sync && $order1->add_meta_data( $key, $post_order_value, false );
+						$order1->add_meta_data( $key, $post_order_value, false );
 					}
 				} else {
-					$sync && $order1->update_meta_data( $key, $order2_values[0] );
+					$order1->update_meta_data( $key, $order2_values[0] );
 				}
 				$diff[ $key ] = $new_diff;
 				unset( $order2_meta_by_key[ $key ] );
@@ -1683,12 +1652,24 @@ WHERE
 	 * @return void
 	 */
 	private function migrate_post_record( \WC_Abstract_Order &$order, \WC_Abstract_Order $post_order ): void {
+		self::$sync_on_read_order_ids[ $order->get_id() ] = true;
+
 		$diff                 = $this->migrate_meta_data_from_post_order( $order, $post_order );
 		$post_order_base_data = $post_order->get_base_data();
 		foreach ( $post_order_base_data as $key => $value ) {
+			// Skip migrating cogs_total_value if the HPOS order has a valid value and the CPT order has 0.
+			// This prevents overwriting valid COGS data with recalculated zero values during sync-on-read.
+			if ( 'cogs_total_value' === $key && $order->has_cogs() && $this->cogs_is_enabled() ) {
+				$hpos_cogs = $order->get_cogs_total_value( 'edit' );
+				if ( 0.0 !== $hpos_cogs && 0.0 === (float) $value ) {
+					continue;
+				}
+			}
 			$this->set_order_prop( $order, $key, $value );
 		}
 		$this->persist_updates( $order, false );
+
+		unset( self::$sync_on_read_order_ids[ $order->get_id() ] );
 
 		/**
 		 * Fired when an HPOS order is updated from its corresponding post record on read due to a difference in the data.
@@ -1710,7 +1691,10 @@ WHERE
 	protected function set_order_props_from_data( &$order, $order_data ) {
 		foreach ( $this->get_all_order_column_mappings() as $table_name => $column_mapping ) {
 			foreach ( $column_mapping as $column_name => $prop_details ) {
-				if ( ! isset( $prop_details['name'] ) ) {
+				if ( ! isset( $prop_details['name'] ) || ! is_string( $prop_details['name'] ) ) {
+					continue;
+				}
+				if ( ! property_exists( $order_data, $prop_details['name'] ) ) {
 					continue;
 				}
 				$prop_value = $order_data->{$prop_details['name']};
@@ -2083,7 +2067,7 @@ FROM $order_meta_table
 		$this->set_custom_taxonomies( $order, $default_taxonomies );
 
 		if ( $order->has_cogs() && $this->cogs_is_enabled() ) {
-			$this->save_cogs_data( $order );
+			$this->save_cogs_data( $order, ! $only_changes || array_key_exists( 'cogs_total_value', $changes ) );
 		}
 
 		$this->clear_cached_data( array( $order->get_id() ) );
@@ -2092,10 +2076,11 @@ FROM $order_meta_table
 	/**
 	 * Save the Cost of Goods Sold value of a given order to the database.
 	 *
-	 * @param WC_Abstract_Order $order The order to save the COGS value for.
+	 * @param WC_Abstract_Order $order              The order to save the COGS value for.
+	 * @param bool              $cogs_value_changed Whether the CoGS value was changed through the order object API.
 	 */
-	private function save_cogs_data( WC_Abstract_Order $order ) {
-		$cogs_value = $order->get_cogs_total_value();
+	private function save_cogs_data( WC_Abstract_Order $order, bool $cogs_value_changed ): void {
+		$cogs_value_original = $order->get_cogs_total_value();
 
 		/**
 		 * Filter to customize the Cost of Goods Sold value that gets saved for a given order,
@@ -2103,29 +2088,31 @@ FROM $order_meta_table
 		 *
 		 * @since 9.5.0
 		 *
-		 * @param float|null $cogs_value The value to be written to the database. If returned as null, nothing will be written.
-		 * @param WC_Abstract_Order $item The order for which the value is being saved.
+		 * @param float             $cogs_value The value to be written to the database. If returned as null, nothing will be written.
+		 * @param WC_Abstract_Order $order      The order for which the value is being saved.
 		 */
-		$cogs_value = apply_filters( 'woocommerce_save_order_cogs_value', $cogs_value, $order );
-		if ( is_null( $cogs_value ) ) {
+		$cogs_value = apply_filters( 'woocommerce_save_order_cogs_value', $cogs_value_original, $order );
+		if ( null === $cogs_value ) {
 			return;
 		}
 
-		$existing_meta = $this->data_store_meta->get_metadata_by_key( $order, '_cogs_total_value' );
-
-		if ( 0.0 === $cogs_value && $existing_meta ) {
-			$existing_meta = current( $existing_meta );
-			$this->data_store_meta->delete_meta( $order, $existing_meta );
-		} elseif ( $existing_meta ) {
+		$sync_meta = $cogs_value_changed || $cogs_value_original !== (float) $cogs_value;
+		if ( $sync_meta ) {
+			$existing_meta = $this->data_store_meta->get_metadata_by_key( $order, '_cogs_total_value' );
+			if ( 0.0 === $cogs_value && $existing_meta ) {
+				$existing_meta = current( $existing_meta );
+				$this->data_store_meta->delete_meta( $order, $existing_meta );
+			} elseif ( $existing_meta ) {
 				$existing_meta        = current( $existing_meta );
 				$existing_meta->key   = '_cogs_total_value';
 				$existing_meta->value = $cogs_value;
 				$this->data_store_meta->update_meta( $order, $existing_meta );
-		} else {
-			$meta        = new \WC_Meta_Data();
-			$meta->key   = '_cogs_total_value';
-			$meta->value = $cogs_value;
-			$this->data_store_meta->add_meta( $order, $meta );
+			} else {
+				$meta        = new \WC_Meta_Data();
+				$meta->key   = '_cogs_total_value';
+				$meta->value = $cogs_value;
+				$this->data_store_meta->add_meta( $order, $meta );
+			}
 		}
 	}
 
@@ -2517,6 +2504,7 @@ FROM $order_meta_table
 					$order_id
 				)
 			);
+			clean_post_cache( $order_id );
 		} else {
 			// phpcs:disable WordPress.DB.SlowDBQuery
 			$wpdb->insert(
@@ -2842,7 +2830,11 @@ FROM $order_meta_table
 
 		// Fetch changes.
 		$changes = $order->get_changes();
-		$this->persist_updates( $order );
+
+		// Does not make much sense to backfill to posts an order being sync-on-read from posts.
+		$should_backfill = ! isset( self::$sync_on_read_order_ids[ $order->get_id() ] );
+
+		$this->persist_updates( $order, $should_backfill );
 
 		// Update download permissions if necessary.
 		if ( array_key_exists( 'billing_email', $changes ) || array_key_exists( 'customer_id', $changes ) ) {
@@ -3100,6 +3092,15 @@ FROM $order_meta_table
 			$query_vars['meta_query'][] = FulfillmentUtils::get_order_fulfillment_status_meta_query( $query_vars['fulfillment_status'] );
 		}
 
+		/**
+		 * Filter the query args before executing the query.
+		 *
+		 * @param array $query_vars The query vars.
+		 * @return array
+		 * @since 10.4.0
+		 */
+		$query_vars = apply_filters( 'woocommerce_orders_table_datastore_get_orders_query', $query_vars, $this );
+
 		try {
 			$query = new OrdersTableQuery( $query_vars );
 		} catch ( \Exception $e ) {
@@ -3114,6 +3115,7 @@ FROM $order_meta_table
 			$orders = $query->orders;
 		} else {
 			$orders = WC()->order_factory->get_orders( $query->orders );
+			$this->prime_caches_for_orders( $query->orders, $query_vars );
 		}
 
 		if ( isset( $query_vars['paginate'] ) && $query_vars['paginate'] ) {
@@ -3128,6 +3130,89 @@ FROM $order_meta_table
 	}
 
 	//phpcs:enable Squiz.Commenting, Generic.Commenting
+
+	/**
+	 * Prime caches for a collection of orders. Reduces N+1 queries when iterating over order results.
+	 *
+	 * @param array $order_ids  List of order IDs to prime caches for.
+	 * @param array $query_vars Original query arguments.
+	 * @return void
+	 */
+	public function prime_caches_for_orders( array $order_ids, array $query_vars ): void {
+		$this->prime_order_item_caches_for_orders( $order_ids, $query_vars );
+
+		// The following priming methods only apply to shop_order queries.
+		$order_type = $query_vars['type'] ?? $query_vars['post_type'] ?? '';
+		$order_type = is_array( $order_type ) ? $order_type : array( $order_type );
+		if ( ! in_array( 'shop_order', $order_type, true ) ) {
+			return;
+		}
+
+		$this->prime_refund_caches_for_orders( $order_ids, $query_vars );
+		$this->prime_refund_total_caches_for_orders( $order_ids, $query_vars );
+		$this->prime_needs_processing_transients( $order_ids, $query_vars );
+	}
+
+	/**
+	 * Returns a prepared SQL JOIN clause for finding refund orders belonging to multiple parent orders.
+	 *
+	 * Overrides the CPT version to use the HPOS orders table.
+	 *
+	 * @since 10.7.0
+	 * @param array $order_ids List of order IDs.
+	 * @return string Prepared SQL JOIN fragment.
+	 */
+	protected function get_refund_orders_batch_join_clause( array $order_ids ): string {
+		global $wpdb;
+		$id_list = implode( ', ', array_map( 'absint', $order_ids ) );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $id_list is sanitized via absint above.
+		return $wpdb->prepare( "%i AS refunds ON ( refunds.type = %s AND refunds.parent_order_id IN ( $id_list ) )", self::get_orders_table_name(), 'shop_order_refund' );
+	}
+
+	/**
+	 * Returns the column name on the refund table alias (`refunds`) that holds the parent order ID.
+	 *
+	 * @since 10.7.0
+	 * @return string Column reference.
+	 */
+	protected function get_refund_parent_column(): string {
+		return 'refunds.parent_order_id';
+	}
+
+	/**
+	 * Query total refunded amounts per order in a batch.
+	 *
+	 * Overrides the CPT version to read directly from the HPOS orders table
+	 * rather than joining postmeta.
+	 *
+	 * @since 10.7.0
+	 * @param array $order_ids List of order IDs.
+	 * @return array<int, float> Map of order_id => refund total.
+	 */
+	protected function get_batch_refund_totals( array $order_ids ): array {
+		global $wpdb;
+
+		$id_list = implode( ', ', array_map( 'absint', $order_ids ) );
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $id_list is sanitized via absint above.
+		$refund_totals = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT parent_order_id AS order_id, SUM( total_amount ) AS total
+				FROM %i
+				WHERE type = 'shop_order_refund' AND parent_order_id IN ( $id_list )
+				GROUP BY parent_order_id",
+				self::get_orders_table_name()
+			)
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		$totals_by_order = array();
+		foreach ( $refund_totals as $row ) {
+			$totals_by_order[ $row->order_id ] = -1 * floatval( $row->total );
+		}
+
+		return $totals_by_order;
+	}
 
 	/**
 	 * Get the SQL needed to create all the tables needed for the custom orders table feature.
@@ -3171,6 +3256,7 @@ CREATE TABLE $orders_table_name (
 	KEY status (status),
 	KEY date_created (date_created_gmt),
 	KEY customer_id_billing_email (customer_id, billing_email({$composite_customer_id_email_length})),
+	KEY customer_id_status (customer_id, status),
 	KEY billing_email (billing_email($max_index_length)),
 	KEY type_status_date (type, status, date_created_gmt),
 	KEY parent_order_id (parent_order_id),
@@ -3279,6 +3365,7 @@ CREATE TABLE $meta_table (
 					array( '%d', '%s', '%s' )
 				);
 				wp_cache_delete( $object->get_id(), 'post_meta' );
+				/** @var \WC_Logger_Interface $logger */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 				$logger = wc_get_container()->get( LegacyProxy::class )->call_function( 'wc_get_logger' );
 				$logger->warning( sprintf( 'encountered an order meta value of type __PHP_Incomplete_Class during `delete_meta` in order with ID %d: "%s"', $object->get_id(), var_export( $meta_value, true ) ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_export
 			} else {
@@ -3376,6 +3463,7 @@ CREATE TABLE $meta_table (
 
 		$should_save =
 			$order->get_id() > 0
+			&& ! isset( self::$sync_on_read_order_ids[ $order->get_id() ] )
 			&& $order->get_date_modified() < $current_date_time && empty( $order->get_changes() )
 			&& ( ! is_object( $meta ) || ! in_array( $meta->key, $this->ephemeral_meta_keys, true ) );
 

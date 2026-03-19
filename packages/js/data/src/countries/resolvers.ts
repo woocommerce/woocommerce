@@ -3,7 +3,6 @@
  */
 import { apiFetch, select } from '@wordpress/data-controls';
 import { controls } from '@wordpress/data';
-import { DispatchFromMap } from '@automattic/data-stores';
 
 /**
  * Internal dependencies
@@ -15,6 +14,7 @@ import {
 	getCountriesSuccess,
 	getCountriesError,
 } from './actions';
+import { DispatchFromMap } from '../types';
 import { NAMESPACE } from '../constants';
 import { Locales, Country, GeolocationResponse } from './types';
 import { STORE_NAME } from './constants';

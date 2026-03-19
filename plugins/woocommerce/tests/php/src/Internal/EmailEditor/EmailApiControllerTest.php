@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\EmailEditor;
 
 use Automattic\WooCommerce\Internal\EmailEditor\EmailApiController;
 use Automattic\WooCommerce\Internal\EmailEditor\Integration;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsGenerator;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsManager;
 
 require_once 'EmailStub.php';
@@ -60,7 +61,7 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		parent::tearDown();
-		delete_option( 'woocommerce_feature_block_email_editor_enabled' );
+		update_option( 'woocommerce_feature_block_email_editor_enabled', 'no' );
 		delete_option( 'woocommerce_' . $this->email_type . '_settings' );
 	}
 
@@ -88,7 +89,7 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 	 * Test that the email data is returned correctly for a supported email type.
 	 */
 	public function test_get_email_data_returns_email_data_for_supported_type(): void {
-		// Set up a WC_Email mock and inject it into the controller's emails array.
+		// Set up a WC_Email mock.
 		$mock_email     = $this->createMock( \WC_Email::class );
 		$mock_email->id = $this->email_type;
 		$mock_email->method( 'get_option' )->willReturnMap(
@@ -108,14 +109,17 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 				'recipient' => array(),
 			)
 		);
-		// Inject the mock into the controller.
-		$reflection  = new \ReflectionClass( $this->email_api_controller );
-		$emails_prop = $reflection->getProperty( 'emails' );
-		$emails_prop->setAccessible( true );
-		$emails_prop->setValue( $this->email_api_controller, array( $mock_email ) );
+
+		// Create a partial mock of the controller to override get_emails().
+		$controller = $this->getMockBuilder( EmailApiController::class )
+			->onlyMethods( array( 'get_emails' ) )
+			->getMock();
+		$controller->method( 'get_emails' )
+			->willReturn( array( $mock_email ) );
+		$controller->init();
 
 		$post_data = array( 'id' => $this->email_post->ID );
-		$result    = $this->email_api_controller->get_email_data( $post_data );
+		$result    = $controller->get_email_data( $post_data );
 		$this->assertEquals( 'Test Subject', $result['subject'] );
 		$this->assertEquals( 'Default Subject', $result['default_subject'] );
 		$this->assertEquals( 'Test Preheader', $result['preheader'] );
@@ -130,11 +134,13 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 		// Set up a real WC_Email instance for testing.
 		$email = new EmailStub();
 
-		// Inject the email into the controller.
-		$reflection  = new \ReflectionClass( $this->email_api_controller );
-		$emails_prop = $reflection->getProperty( 'emails' );
-		$emails_prop->setAccessible( true );
-		$emails_prop->setValue( $this->email_api_controller, array( $email ) );
+		// Create a partial mock of the controller to override get_emails().
+		$controller = $this->getMockBuilder( EmailApiController::class )
+			->onlyMethods( array( 'get_emails' ) )
+			->getMock();
+		$controller->method( 'get_emails' )
+			->willReturn( array( $email ) );
+		$controller->init();
 
 		$data = array(
 			'subject'   => 'Updated Subject',
@@ -143,7 +149,7 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 			'cc'        => 'cc@example.com',
 			'bcc'       => 'bcc@example.com',
 		);
-		$this->email_api_controller->save_email_data( $data, $this->email_post );
+		$controller->save_email_data( $data, $this->email_post );
 		$option = get_option( 'woocommerce_' . $this->email_type . '_settings' );
 		$this->assertEquals( 'Updated Subject', $option['subject'] );
 		$this->assertEquals( 'Updated Preheader', $option['preheader'] );
@@ -223,13 +229,17 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 			// No 'recipient' key here.
 			)
 		);
-		$reflection  = new \ReflectionClass( $this->email_api_controller );
-		$emails_prop = $reflection->getProperty( 'emails' );
-		$emails_prop->setAccessible( true );
-		$emails_prop->setValue( $this->email_api_controller, array( $mock_email ) );
+
+		// Create a partial mock of the controller to override get_emails().
+		$controller = $this->getMockBuilder( EmailApiController::class )
+			->onlyMethods( array( 'get_emails' ) )
+			->getMock();
+		$controller->method( 'get_emails' )
+			->willReturn( array( $mock_email ) );
+		$controller->init();
 
 		$post_data = array( 'id' => $this->email_post->ID );
-		$result    = $this->email_api_controller->get_email_data( $post_data );
+		$result    = $controller->get_email_data( $post_data );
 		$this->assertNull( $result['recipient'] );
 	}
 
@@ -240,11 +250,13 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 		// Set up a real WC_Email instance for testing.
 		$email = new EmailStub();
 
-		// Inject the email into the controller.
-		$reflection  = new \ReflectionClass( $this->email_api_controller );
-		$emails_prop = $reflection->getProperty( 'emails' );
-		$emails_prop->setAccessible( true );
-		$emails_prop->setValue( $this->email_api_controller, array( $email ) );
+		// Create a partial mock of the controller to override get_emails().
+		$controller = $this->getMockBuilder( EmailApiController::class )
+			->onlyMethods( array( 'get_emails' ) )
+			->getMock();
+		$controller->method( 'get_emails' )
+			->willReturn( array( $email ) );
+		$controller->init();
 
 		// Save new email data.
 		$data = array(
@@ -254,11 +266,11 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 			'cc'        => 'immediate-cc@example.com',
 			'bcc'       => 'immediate-bcc@example.com',
 		);
-		$this->email_api_controller->save_email_data( $data, $this->email_post );
+		$controller->save_email_data( $data, $this->email_post );
 
 		// Immediately retrieve the data.
 		$post_data = array( 'id' => $this->email_post->ID );
-		$result    = $this->email_api_controller->get_email_data( $post_data );
+		$result    = $controller->get_email_data( $post_data );
 
 		// Verify that the retrieved data matches what was saved.
 		$this->assertEquals( 'Immediately Updated Subject', $result['subject'] );
@@ -268,5 +280,62 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( 'immediate-bcc@example.com', $result['bcc'] );
 		$this->assertEquals( $this->email_type, $result['email_type'] );
 		$this->assertEquals( 'Default Subject', $result['default_subject'] );
+	}
+
+	/**
+	 * @testdox Should return 404 when post ID has no associated email type.
+	 */
+	public function test_get_default_content_response_returns_404_for_unknown_post(): void {
+		$unassociated_post = $this->factory()->post->create_and_get(
+			array(
+				'post_title'  => 'Unknown Email',
+				'post_name'   => 'unknown_email',
+				'post_type'   => Integration::EMAIL_POST_TYPE,
+				'post_status' => 'draft',
+			)
+		);
+
+		$request = new \WP_REST_Request( 'GET', '/woocommerce-email-editor/v1/emails/' . $unassociated_post->ID . '/default-content' );
+		$request->set_param( 'id', $unassociated_post->ID );
+
+		$result = $this->email_api_controller->get_default_content_response( $request );
+
+		$this->assertInstanceOf( \WP_Error::class, $result );
+		$this->assertSame( 'woocommerce_email_not_found', $result->get_error_code() );
+		$this->assertSame( 404, $result->get_error_data()['status'] );
+	}
+
+	/**
+	 * @testdox Should return default content for a valid email post.
+	 */
+	public function test_get_default_content_response_returns_content_for_valid_post(): void {
+		$mock_email     = $this->createMock( \WC_Email::class );
+		$mock_email->id = $this->email_type;
+
+		$mock_generator = $this->createMock( WCTransactionalEmailPostsGenerator::class );
+		$mock_generator->method( 'get_email_template' )
+			->willReturn( '<!-- wp:paragraph --><p>Default content</p><!-- /wp:paragraph -->' );
+
+		$controller = $this->getMockBuilder( EmailApiController::class )
+			->onlyMethods( array( 'get_emails' ) )
+			->getMock();
+		$controller->method( 'get_emails' )
+			->willReturn( array( $mock_email ) );
+		$controller->init();
+
+		$reflection = new \ReflectionClass( EmailApiController::class );
+		$property   = $reflection->getProperty( 'posts_generator' );
+		$property->setAccessible( true );
+		$property->setValue( $controller, $mock_generator );
+
+		$request = new \WP_REST_Request( 'GET', '/woocommerce-email-editor/v1/emails/' . $this->email_post->ID . '/default-content' );
+		$request->set_param( 'id', $this->email_post->ID );
+
+		$result = $controller->get_default_content_response( $request );
+
+		$this->assertInstanceOf( \WP_REST_Response::class, $result );
+		$this->assertSame( 200, $result->get_status() );
+		$this->assertArrayHasKey( 'content', $result->get_data() );
+		$this->assertSame( '<!-- wp:paragraph --><p>Default content</p><!-- /wp:paragraph -->', $result->get_data()['content'] );
 	}
 }

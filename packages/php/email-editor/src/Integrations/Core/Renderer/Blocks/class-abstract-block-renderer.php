@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Block_Renderer;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Dom_Document_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 use WP_Style_Engine;
@@ -40,15 +41,41 @@ abstract class Abstract_Block_Renderer implements Block_Renderer {
 	}
 
 	/**
-	 * Add a spacer around the block.
+	 * Extract inner content from a wrapper element.
+	 *
+	 * Removes the outer wrapper element (e.g., div) and returns only the inner HTML content.
+	 * This is useful when you need to strip the wrapper and use only the inner content.
+	 *
+	 * @param string $block_content Block content with wrapper element.
+	 * @param string $tag_name      Tag name of the wrapper element (default: 'div').
+	 * @return string Inner content without the wrapper element, or original content if wrapper not found.
+	 */
+	protected function get_inner_content( string $block_content, string $tag_name = 'div' ): string {
+		$dom_helper = new Dom_Document_Helper( $block_content );
+		$element    = $dom_helper->find_element( $tag_name );
+
+		return $element ? $dom_helper->get_element_inner_html( $element ) : $block_content;
+	}
+
+	/**
+	 * Add a spacer around the block for vertical spacing (margin-top).
+	 *
+	 * Horizontal root padding is applied uniformly by Content_Renderer::render_block()
+	 * so that all blocks — including those using render_email_callback without
+	 * Abstract_Block_Renderer — receive consistent padding.
 	 *
 	 * @param string $content The block content.
 	 * @param array  $email_attrs The email attributes.
 	 * @return string
 	 */
 	protected function add_spacer( $content, $email_attrs ): string {
-		$gap_style     = WP_Style_Engine::compile_css( array_intersect_key( $email_attrs, array_flip( array( 'margin-top' ) ) ), '' ) ?? '';
-		$padding_style = WP_Style_Engine::compile_css( array_intersect_key( $email_attrs, array_flip( array( 'padding-left', 'padding-right' ) ) ), '' ) ?? '';
+		// Filter out empty margin-top values to prevent malformed CSS output.
+		$margin_top_attrs = array_intersect_key( $email_attrs, array_flip( array( 'margin-top' ) ) );
+		if ( isset( $margin_top_attrs['margin-top'] ) && '' === trim( $margin_top_attrs['margin-top'] ) ) {
+			$margin_top_attrs = array();
+		}
+
+		$gap_style = WP_Style_Engine::compile_css( $margin_top_attrs, '' ) ?? '';
 
 		$table_attrs = array(
 			'align' => 'left',
@@ -56,18 +83,13 @@ abstract class Abstract_Block_Renderer implements Block_Renderer {
 			'style' => $gap_style,
 		);
 
-		$cell_attrs = array(
-			'style' => $padding_style,
-		);
-
 		$div_content = sprintf(
-			'<div class="email-block-layout" style="%1$s %2$s">%3$s</div>',
+			'<div class="email-block-layout" style="%1$s">%2$s</div>',
 			esc_attr( $gap_style ),
-			esc_attr( $padding_style ),
 			$content
 		);
 
-		return Table_Wrapper_Helper::render_outlook_table_wrapper( $div_content, $table_attrs, $cell_attrs );
+		return Table_Wrapper_Helper::render_outlook_table_wrapper( $div_content, $table_attrs );
 	}
 
 	/**

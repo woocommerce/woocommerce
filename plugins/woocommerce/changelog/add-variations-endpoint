@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add new `/wc/v3/variations` endpoint for Point of Sale (POS) incremental sync based on `/wc/v3/products/$id/variations` implementation.

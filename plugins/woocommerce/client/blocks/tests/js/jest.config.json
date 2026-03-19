@@ -36,6 +36,7 @@
 		"@woocommerce/resource-previews": "assets/js/previews",
 		"@woocommerce/shared-context": "assets/js/shared/context",
 		"@woocommerce/shared-hocs": "assets/js/shared/hocs",
+		"@woocommerce/blocks-test-utils/(.*)$": "tests/utils/$1",
 		"@woocommerce/blocks-test-utils": "tests/utils",
 		"@woocommerce/types": "assets/js/types",
 		"@woocommerce/utils": "assets/js/utils",
@@ -64,6 +65,9 @@
 	"transform": {
 		"^.+\\.(js|ts|tsx)$": "<rootDir>/tests/js/scripts/babel-transformer.js"
 	},
+	"transformIgnorePatterns": [
+		"/node_modules/(?!\\.pnpm/dinero\\.js|dinero\\.js)"
+	],
 	"verbose": true,
 	"cacheDirectory": "<rootDir>/../../node_modules/.cache/jest",
 	"testEnvironment": "jest-fixed-jsdom"

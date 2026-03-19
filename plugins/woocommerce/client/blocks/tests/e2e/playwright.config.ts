@@ -23,7 +23,6 @@ const config: PlaywrightTestConfig = {
 	reporter: process.env.CI
 		? [
 				[ 'list' ],
-				[ './flaky-tests-reporter.ts' ],
 				[
 					'allure-playwright',
 					{
@@ -31,11 +30,30 @@ const config: PlaywrightTestConfig = {
 					},
 				],
 				[ 'buildkite-test-collector/playwright/reporter' ],
+				[
+					'junit',
+					{
+						outputFile: `${ __dirname }/artifacts/test-results/results.xml`,
+						stripANSIControlSequences: true,
+						includeProjectInTestName: true,
+					},
+				],
+				[
+					'playwright-ctrf-json-reporter',
+					{
+						outputDir: `${ __dirname }/artifacts/test-results`,
+						outputFile: `ctrf-report-${ Date.now() }.json`,
+						branchName: process.env.GITHUB_REF_NAME || '',
+						commit: process.env.GITHUB_SHA || '',
+						appName: 'woocommerce-blocks',
+						repositoryName: process.env.GITHUB_REPOSITORY || '',
+					},
+				],
 		  ]
 		: 'list',
 	use: {
 		baseURL: BASE_URL,
-		screenshot: 'only-on-failure',
+		screenshot: { mode: 'only-on-failure', fullPage: true },
 		trace:
 			/^https?:\/\/localhost/.test( BASE_URL ) || ! CI
 				? 'retain-on-first-failure'

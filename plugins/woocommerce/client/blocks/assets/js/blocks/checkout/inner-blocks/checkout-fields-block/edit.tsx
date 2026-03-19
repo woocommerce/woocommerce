@@ -17,6 +17,7 @@ import {
 } from '../../../cart-checkout-shared';
 import './style.scss';
 import { AddressFieldControls } from '../../address-field-controls';
+
 export const Edit = ( {
 	clientId,
 	attributes,
@@ -24,7 +25,6 @@ export const Edit = ( {
 	clientId: string;
 	attributes: {
 		className?: string;
-		isPreview?: boolean;
 	};
 } ): JSX.Element => {
 	const blockProps = useBlockProps( {

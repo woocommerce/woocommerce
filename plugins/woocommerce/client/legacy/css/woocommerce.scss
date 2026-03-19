@@ -942,11 +942,12 @@ p.demo_store,
 	}
 
 	table.shop_table {
-		border: 1px solid rgba(0, 0, 0, 0.1);
+		border: 1px solid color-mix(in srgb, currentColor 20%, transparent);
 		margin: 0 -1px 24px 0;
 		text-align: left;
 		width: 100%;
 		border-collapse: separate;
+		border-spacing: 0;
 		border-radius: 5px;
 
 		th {
@@ -956,7 +957,7 @@ p.demo_store,
 		}
 
 		td {
-			border-top: 1px solid rgba(0, 0, 0, 0.1);
+			border-top: 1px solid color-mix(in srgb, currentColor 20%, transparent);
 			padding: 9px 12px;
 			vertical-align: middle;
 			line-height: 1.5em;
@@ -981,7 +982,7 @@ p.demo_store,
 		tfoot th,
 		tbody th {
 			font-weight: 700;
-			border-top: 1px solid rgba(0, 0, 0, 0.1);
+			border-top: 1px solid color-mix(in srgb, currentColor 20%, transparent);
 		}
 	}
 
@@ -2083,6 +2084,16 @@ p.demo_store,
 				}
 			}
 
+			// PayPal logo in payment methods list on classic checkout page, more specific selector for precedence over general theme styles.
+			li.payment_method_paypal {
+				img {
+					max-height: 24px;
+					vertical-align: middle;
+					float: right;
+					margin: 0;
+				}
+			}
+
 			li:not(.woocommerce-notice) {
 				@include clearfix;
 			}
@@ -2226,8 +2237,9 @@ p.demo_store,
 			}
 
 			img {
-				max-height: 52px;
+				max-height: 24px;
 				vertical-align: middle;
+				float: right;
 			}
 		}
 	}
@@ -2327,4 +2339,14 @@ body:not(.search-results) .twentysixteen .entry-summary {
 .twentysixteen .price ins {
 	background: inherit;
 	color: inherit;
+}
+
+/**
+ * Hides default button when a gateway with custom "place order" button is selected.
+ * This applies to checkout, order-pay, and add-payment-method pages.
+ *
+ * @since 10.6.0
+ */
+form.has-custom-place-order-button #place_order {
+	display: none !important;
 }

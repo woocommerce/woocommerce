@@ -34,6 +34,8 @@ test.describe( 'Template customization', () => {
 				canvas: 'edit',
 			} );
 
+			await editor.canvas.locator( 'body' ).waitFor( { timeout: 20000 } );
+
 			await editor.insertBlock( {
 				name: 'core/paragraph',
 				attributes: { content: userText },
@@ -91,6 +93,10 @@ test.describe( 'Template customization', () => {
 					canvas: 'edit',
 				} );
 
+				await editor.canvas
+					.locator( 'body' )
+					.waitFor( { timeout: 20000 } );
+
 				await editor.insertBlock( {
 					name: 'core/paragraph',
 					attributes: {
@@ -115,9 +121,11 @@ test.describe( 'Template customization', () => {
 				await admin.visitSiteEditor( {
 					postType: testData.templateType,
 				} );
+
 				await editor.revertTemplate( {
 					templateName: testData.fallbackTemplate?.templateName || '',
 				} );
+
 				await testData.visitPage( {
 					admin,
 					editor,
@@ -154,6 +162,8 @@ test.describe( 'Template customization', () => {
 				canvas: 'edit',
 			} );
 
+			await editor.canvas.locator( 'body' ).waitFor( { timeout: 20000 } );
+
 			await editor.insertBlock( {
 				name: 'core/paragraph',
 				attributes: { content: woocommerceTemplateUserText },
@@ -172,6 +182,8 @@ test.describe( 'Template customization', () => {
 				postType: testData.templateType,
 				canvas: 'edit',
 			} );
+
+			await editor.canvas.locator( 'body' ).waitFor( { timeout: 20000 } );
 
 			await editor.insertBlock( {
 				name: 'core/paragraph',

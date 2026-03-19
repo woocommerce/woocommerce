@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Settings\Utils;
 use Automattic\WooCommerce\Internal\Logging\SafeGlobalFunctionProxy;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Throwable;
 use WC_HTTPS;
 use WC_Payment_Gateway;
@@ -37,6 +38,22 @@ class PaymentGateway {
 	const PAYMENT_METHOD_CATEGORY_SECONDARY = 'secondary';
 
 	/**
+	 * The LegacyProxy instance.
+	 *
+	 * @var LegacyProxy
+	 */
+	protected LegacyProxy $proxy;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param LegacyProxy $proxy The LegacyProxy instance.
+	 */
+	public function __construct( LegacyProxy $proxy ) {
+		$this->proxy = $proxy;
+	}
+
+	/**
 	 * Extract the payment gateway provider details from the object.
 	 *
 	 * @param WC_Payment_Gateway $gateway      The payment gateway object.
@@ -48,6 +65,8 @@ class PaymentGateway {
 	 * @return array The payment gateway provider details.
 	 */
 	public function get_details( WC_Payment_Gateway $gateway, int $order = 0, string $country_code = '' ): array {
+		$onboarding_supported = $this->is_onboarding_supported( $gateway, $country_code ) ?? true; // Assume supported if unknown.
+
 		return array(
 			'id'          => $gateway->id,
 			'_order'      => $order,
@@ -55,6 +74,7 @@ class PaymentGateway {
 			'description' => $this->get_description( $gateway ),
 			'icon'        => $this->get_icon( $gateway ),
 			'supports'    => $this->get_supports_list( $gateway ),
+			'links'       => $this->get_provider_links( $gateway, $country_code ),
 			'state'       => array(
 				'enabled'           => $this->is_enabled( $gateway ),
 				'account_connected' => $this->is_account_connected( $gateway ),
@@ -72,9 +92,13 @@ class PaymentGateway {
 			'onboarding'  => array(
 				'type'                        => self::ONBOARDING_TYPE_EXTERNAL,
 				'state'                       => array(
+					'supported' => $onboarding_supported,
 					'started'   => $this->is_onboarding_started( $gateway ),
 					'completed' => $this->is_onboarding_completed( $gateway ),
 					'test_mode' => $this->is_in_test_mode_onboarding( $gateway ),
+				),
+				'messages'                    => array(
+					'not_supported' => ! $onboarding_supported ? $this->get_onboarding_not_supported_message( $gateway, $country_code ) : null,
 				),
 				'_links'                      => array(
 					'onboard' => array(
@@ -218,6 +242,124 @@ class PaymentGateway {
 
 		// Ensure the list contains unique values and re-indexed.
 		return array_values( array_unique( $sanitized_list ) );
+	}
+
+	/**
+	 * Get the provider links list.
+	 *
+	 * These are contextual, in general external links aimed to help the user learn more about the payment provider and
+	 * reach out for help.
+	 *
+	 * Each link is an associative array with '_type' and 'url' keys.
+	 * The type is a string indicating the type of link, e.g., 'documentation', 'support', 'pricing', etc.
+	 * The only accepted types are the ones documented in the PaymentsProviders::LINK_TYPE_* constants.
+	 *
+	 * Example:
+	 *   array(
+	 *     array(
+	 *       '_type' => 'documentation',
+	 *       'url'   => 'https://example.com/docs',
+	 *     ),
+	 *     array(
+	 *       '_type' => 'support',
+	 *       'url'   => 'https://example.com/support',
+	 *     ),
+	 *   );
+	 *
+	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
+	 * @param string             $country_code    Optional. The country code for which the providers are being requested.
+	 *                                            This should be an ISO 3166-1 alpha-2 country code.
+	 *                                            If invalid, it will be ignored.
+	 *
+	 * @return array The provider links list. Empty array if none are available or an error occurs.
+	 */
+	public function get_provider_links( WC_Payment_Gateway $payment_gateway, string $country_code = '' ): array {
+		$country_code = strtoupper( sanitize_text_field( $country_code ) );
+		// Validate the country code format - expect ISO 3166-1 alpha-2.
+		// Empty country code is valid (parameter is optional), so only validate non-empty values.
+		if ( '' !== $country_code && ( strlen( $country_code ) !== 2 || ! ctype_upper( $country_code ) ) ) {
+			// Log so we can investigate non-empty invalid country codes.
+			SafeGlobalFunctionProxy::wc_get_logger()->debug(
+				'Received invalid country code when getting provider links. Ignoring it.',
+				array(
+					'gateway' => $payment_gateway->id,
+					'source'  => 'settings-payments',
+					'country' => $country_code,
+				)
+			);
+
+			$country_code = '';
+		}
+
+		$provider_links = array();
+
+		try {
+			// Try to get the links list from the payment gateway if it provides such method.
+			if ( method_exists( $payment_gateway, 'get_provider_links' ) &&
+				is_callable( array( $payment_gateway, 'get_provider_links' ) ) ) {
+
+					$provider_links = call_user_func(
+						array( $payment_gateway, 'get_provider_links' ),
+						$country_code
+					);
+
+				// Validate and normalize the links list.
+				$accepted_types  = array(
+					PaymentsProviders::LINK_TYPE_ABOUT,
+					PaymentsProviders::LINK_TYPE_DOCS,
+					PaymentsProviders::LINK_TYPE_SUPPORT,
+					PaymentsProviders::LINK_TYPE_PRICING,
+					PaymentsProviders::LINK_TYPE_TERMS,
+				);
+				$validated_links = array();
+				if ( is_array( $provider_links ) ) {
+					foreach ( $provider_links as $link ) {
+						if ( ! is_array( $link ) ) {
+							continue;
+						}
+
+						$type = ( isset( $link['_type'] ) && is_scalar( $link['_type'] ) ) ? sanitize_key( (string) $link['_type'] ) : '';
+						if ( empty( $type ) || ! in_array( $type, $accepted_types, true ) ) {
+							continue;
+						}
+						if ( empty( $link['url'] ) || ! is_string( $link['url'] ) || ! wc_is_valid_url( $link['url'] ) ) {
+							continue;
+						}
+
+						$url = sanitize_url( $link['url'] );
+
+						// Create a unique key for deduplication (type + URL).
+						$link_key = $type . '|' . $url;
+
+						// Skip if we already have this exact link.
+						if ( isset( $validated_links[ $link_key ] ) ) {
+							continue;
+						}
+
+						$validated_links[ $link_key ] = array(
+							'_type' => $type,
+							'url'   => $url,
+						);
+					}
+				}
+
+				$provider_links = array_values( $validated_links );
+			}
+		} catch ( Throwable $e ) {
+			// Do nothing but log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->debug(
+				'Failed to get provider links: ' . $e->getMessage(),
+				array(
+					'gateway'   => $payment_gateway->id,
+					'source'    => 'settings-payments',
+					'exception' => $e,
+				)
+			);
+
+			return array();
+		}
+
+		return $provider_links;
 	}
 
 	/**
@@ -391,11 +533,11 @@ class PaymentGateway {
 	 */
 	public function is_account_connected( WC_Payment_Gateway $payment_gateway ): bool {
 		try {
-			if ( is_callable( array( $payment_gateway, 'is_account_connected' ) ) ) {
+			if ( method_exists( $payment_gateway, 'is_account_connected' ) && is_callable( array( $payment_gateway, 'is_account_connected' ) ) ) {
 				return wc_string_to_bool( $payment_gateway->is_account_connected() );
 			}
 
-			if ( is_callable( array( $payment_gateway, 'is_connected' ) ) ) {
+			if ( method_exists( $payment_gateway, 'is_connected' ) && is_callable( array( $payment_gateway, 'is_connected' ) ) ) {
 				return wc_string_to_bool( $payment_gateway->is_connected() );
 			}
 		} catch ( Throwable $e ) {
@@ -415,6 +557,92 @@ class PaymentGateway {
 	}
 
 	/**
+	 * Check if the payment gateway supports the current store state for onboarding.
+	 *
+	 * Most of the time the current business location should be the main factor, but could also
+	 * consider other store settings like currency.
+	 *
+	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
+	 * @param string             $country_code    Optional. The country code for which to check.
+	 *                                            This should be an ISO 3166-1 alpha-2 country code.
+	 *
+	 * @return bool|null True if the payment gateway supports onboarding, false otherwise.
+	 *                   If the payment gateway does not provide the information,
+	 *                   we will return null to indicate that we don't know.
+	 */
+	public function is_onboarding_supported( WC_Payment_Gateway $payment_gateway, string $country_code = '' ): ?bool {
+		try {
+			if ( method_exists( $payment_gateway, 'is_onboarding_supported' ) &&
+				is_callable( array( $payment_gateway, 'is_onboarding_supported' ) ) ) {
+
+				// Call with positional argument; normalize to bool|null.
+				$result = call_user_func( array( $payment_gateway, 'is_onboarding_supported' ), $country_code );
+				// Preserve null to indicate "unknown" state.
+				if ( is_null( $result ) ) {
+					return null;
+				}
+				if ( is_bool( $result ) ) {
+					return $result;
+				}
+				return filter_var( $result, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+			}
+		} catch ( Throwable $e ) {
+			// Do nothing but log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->debug(
+				'Failed to determine if gateway supports onboarding: ' . $e->getMessage(),
+				array(
+					'gateway'   => $payment_gateway->id,
+					'country'   => $country_code,
+					'source'    => 'settings-payments',
+					'exception' => $e,
+				)
+			);
+		}
+
+		// If we reach here, just assume that we don't know if the gateway supports onboarding.
+		return null;
+	}
+
+	/**
+	 * Get the message to show when the payment gateway does not support onboarding.
+	 *
+	 * @see self::is_onboarding_supported()
+	 *
+	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
+	 * @param string             $country_code    Optional. The country code for which to check.
+	 *                                            This should be an ISO 3166-1 alpha-2 country code.
+	 *
+	 * @return string|null The message to show when the payment gateway does not support onboarding,
+	 *                     or null if no specific message should be provided.
+	 */
+	public function get_onboarding_not_supported_message( WC_Payment_Gateway $payment_gateway, string $country_code = '' ): ?string {
+		try {
+			if ( method_exists( $payment_gateway, 'get_onboarding_not_supported_message' ) &&
+				is_callable( array( $payment_gateway, 'get_onboarding_not_supported_message' ) ) ) {
+
+				$message = call_user_func( array( $payment_gateway, 'get_onboarding_not_supported_message' ), $country_code, );
+				if ( is_string( $message ) && ! empty( $message ) ) {
+					return sanitize_textarea_field( trim( $message ) );
+				}
+			}
+		} catch ( Throwable $e ) {
+			// Do nothing but log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->debug(
+				'Failed to determine the gateway onboarding not supported message: ' . $e->getMessage(),
+				array(
+					'gateway'   => $payment_gateway->id,
+					'country'   => $country_code,
+					'source'    => 'settings-payments',
+					'exception' => $e,
+				)
+			);
+		}
+
+		// If we reach here, just assume that no specific message should be provided.
+		return null;
+	}
+
+	/**
 	 * Check if the payment gateway has started the onboarding process.
 	 *
 	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
@@ -425,7 +653,7 @@ class PaymentGateway {
 	 */
 	public function is_onboarding_started( WC_Payment_Gateway $payment_gateway ): bool {
 		try {
-			if ( is_callable( array( $payment_gateway, 'is_onboarding_started' ) ) ) {
+			if ( method_exists( $payment_gateway, 'is_onboarding_started' ) && is_callable( array( $payment_gateway, 'is_onboarding_started' ) ) ) {
 				return wc_string_to_bool( $payment_gateway->is_onboarding_started() );
 			}
 		} catch ( Throwable $e ) {
@@ -460,12 +688,12 @@ class PaymentGateway {
 		}
 
 		try {
-			if ( is_callable( array( $payment_gateway, 'is_onboarding_completed' ) ) ) {
+			if ( method_exists( $payment_gateway, 'is_onboarding_completed' ) && is_callable( array( $payment_gateway, 'is_onboarding_completed' ) ) ) {
 				return wc_string_to_bool( $payment_gateway->is_onboarding_completed() );
 			}
 
 			// Note: This is what WooPayments provides, but it should become standard.
-			if ( is_callable( array( $payment_gateway, 'is_account_partially_onboarded' ) ) ) {
+			if ( method_exists( $payment_gateway, 'is_account_partially_onboarded' ) && is_callable( array( $payment_gateway, 'is_account_partially_onboarded' ) ) ) {
 				return ! wc_string_to_bool( $payment_gateway->is_account_partially_onboarded() );
 			}
 		} catch ( Throwable $e ) {
@@ -497,10 +725,10 @@ class PaymentGateway {
 	public function is_in_test_mode_onboarding( WC_Payment_Gateway $payment_gateway ): bool {
 		try {
 			// Try various gateway methods to check if the payment gateway is in test mode onboarding.
-			if ( is_callable( array( $payment_gateway, 'is_test_mode_onboarding' ) ) ) {
+			if ( method_exists( $payment_gateway, 'is_test_mode_onboarding' ) && is_callable( array( $payment_gateway, 'is_test_mode_onboarding' ) ) ) {
 				return wc_string_to_bool( $payment_gateway->is_test_mode_onboarding() );
 			}
-			if ( is_callable( array( $payment_gateway, 'is_in_test_mode_onboarding' ) ) ) {
+			if ( method_exists( $payment_gateway, 'is_in_test_mode_onboarding' ) && is_callable( array( $payment_gateway, 'is_in_test_mode_onboarding' ) ) ) {
 				return wc_string_to_bool( $payment_gateway->is_in_test_mode_onboarding() );
 			}
 		} catch ( Throwable $e ) {
@@ -527,7 +755,7 @@ class PaymentGateway {
 	 */
 	public function get_settings_url( WC_Payment_Gateway $payment_gateway ): string {
 		try {
-			if ( is_callable( array( $payment_gateway, 'get_settings_url' ) ) ) {
+			if ( method_exists( $payment_gateway, 'get_settings_url' ) && is_callable( array( $payment_gateway, 'get_settings_url' ) ) ) {
 				$url = trim( (string) $payment_gateway->get_settings_url() );
 				if ( ! empty( $url ) && ! wc_is_valid_url( $url ) ) {
 					// Back-compat: normalize common relative admin URLs.
@@ -584,7 +812,7 @@ class PaymentGateway {
 	 */
 	public function get_onboarding_url( WC_Payment_Gateway $payment_gateway, string $return_url = '' ): string {
 		try {
-			if ( is_callable( array( $payment_gateway, 'get_connection_url' ) ) ) {
+			if ( method_exists( $payment_gateway, 'get_connection_url' ) && is_callable( array( $payment_gateway, 'get_connection_url' ) ) ) {
 				// If we received no return URL, we will set the WC Payments Settings page as the return URL.
 				$return_url = ! empty( $return_url ) ? $return_url : admin_url( 'admin.php?page=wc-settings&tab=checkout&from=' . Payments::FROM_PROVIDER_ONBOARDING );
 
@@ -743,16 +971,15 @@ class PaymentGateway {
 	 */
 	public function get_recommended_payment_methods( WC_Payment_Gateway $payment_gateway, string $country_code = '' ): array {
 		// Bail if the payment gateway does not implement the method.
-		if ( ! is_callable( array( $payment_gateway, 'get_recommended_payment_methods' ) ) ) {
+		if ( ! method_exists( $payment_gateway, 'get_recommended_payment_methods' ) ||
+			! is_callable( array( $payment_gateway, 'get_recommended_payment_methods' ) ) ) {
+
 			return array();
 		}
 
 		try {
 			// Get the "raw" recommended payment methods from the payment gateway.
-			$recommended_pms = call_user_func_array(
-				array( $payment_gateway, 'get_recommended_payment_methods' ),
-				array( 'country_code' => $country_code ),
-			);
+			$recommended_pms = call_user_func( array( $payment_gateway, 'get_recommended_payment_methods' ), $country_code );
 			if ( ! is_array( $recommended_pms ) ) {
 				// Bail if the recommended payment methods are not an array.
 				return array();
@@ -763,6 +990,7 @@ class PaymentGateway {
 				'Failed to get recommended payment methods: ' . $e->getMessage(),
 				array(
 					'gateway'   => $payment_gateway->id,
+					'country'   => $country_code,
 					'source'    => 'settings-payments',
 					'exception' => $e,
 				)

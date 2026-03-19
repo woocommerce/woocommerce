@@ -12,8 +12,9 @@ This guide shows how extensions can add custom email notifications that integrat
 
 1. **Extend `WC_Email`** – Create a custom email class for your notification by extending the core WooCommerce email class.
 2. **Register with `woocommerce_email_classes`** – Add your new email class to WooCommerce so it appears in the admin email settings.
-3. **Create a block template** – Design a block-based template to ensure your email works seamlessly with the WooCommerce Email Editor.
-4. **Set up triggers** – Define when and under what conditions your custom email should be sent (for example, after a specific user action or event).
+3. **Register the email with the block editor** – Register your email ID with the `woocommerce_transactional_emails_for_block_editor` filter to enable block editor support.
+4. **Create a block template** – Design a block-based template to ensure your email works seamlessly with the WooCommerce Email Editor.
+5. **Set up triggers** – Define when and under what conditions your custom email should be sent (for example, after a specific user action or event).
 
 ## 1. Create email class
 
@@ -28,8 +29,9 @@ class YourPlugin_Custom_Email extends WC_Email {
         $this->customer_email = true;
         $this->email_group    = 'your-plugin';
 
-        $this->template_html  = 'templates/emails/your-custom-email.php';
-        $this->template_plain = 'templates/emails/plain/your-custom-email.php';
+        $this->template_html  = 'emails/your-custom-email.php';
+        $this->template_plain = 'emails/plain/your-custom-email.php';
+        $this->template_base  = plugin_dir_path( __FILE__ ) . 'templates/';
 
         parent::__construct();
     }
@@ -92,7 +94,7 @@ function your_plugin_add_email_class( $email_classes ) {
 }
 add_filter( 'woocommerce_email_classes', 'your_plugin_add_email_class' );
 
-// Add the custom email group.
+// Add the custom email group. This is only necessary if email_group is not set on the WC_Email class.
 function your_plugin_add_email_group( $email_groups ) {
     $email_groups['your-plugin'] = __( 'Your Plugin', 'your-plugin' );
     return $email_groups;
@@ -100,11 +102,97 @@ function your_plugin_add_email_group( $email_groups ) {
 add_filter( 'woocommerce_email_groups', 'your_plugin_add_email_group' );
 ```
 
-## 3. Create block template
+## 3. Register the email with the block editor
+
+Third-party extensions need to explicitly opt their emails into block editor support. This is done by registering your email ID with the `woocommerce_transactional_emails_for_block_editor` filter:
+
+```php
+/**
+ * Register custom transactional emails for the block editor.
+ *
+ * @param array $emails Array of email IDs.
+ * @return array Modified array of email IDs.
+ */
+function your_plugin_register_transactional_emails_for_block_editor( $emails ) {
+    $emails[] = 'your_plugin_custom_email';
+    return $emails;
+}
+add_filter( 'woocommerce_transactional_emails_for_block_editor', 'your_plugin_register_transactional_emails_for_block_editor' );
+```
+
+**Important:** Without this step, your email may still appear in the email list, but it will not use the email editor, as explicit opt-in is required from third-party developers.
+
+**Note:** For third-party extensions, WooCommerce will not create an email post unless you opt-in using the `woocommerce_transactional_emails_for_block_editor` filter.
+
+**Development tip:** WooCommerce caches email post-generation with a transient. When testing or developing, delete the transient `wc_email_editor_initial_templates_generated` to force post-generation.
+
+### Customizing email template post generation
+
+You can modify the email template post data before it's created using the `woocommerce_email_content_post_data` filter. This allows you to customize the post title, content, meta, or any other post data during template generation.
+
+**Filter details:**
+
+| Property   | Value                                                                   |
+| ---------- | ----------------------------------------------------------------------- |
+| Hook name  | `woocommerce_email_content_post_data`                                   |
+| Since      | 10.5.0                                                                  |
+| Parameters | `$post_data` (array), `$email_type` (string), `$email_data` (\WC_Email) |
+| Returns    | array                                                                   |
+
+**Parameters:**
+
+-   `$post_data` _(array)_ – The post data array that will be passed to `wp_insert_post()`. Contains keys like `post_type`, `post_status`, `post_title`, `post_content`, `post_excerpt`, `post_name`, and `meta_input`.
+-   `$email_type` _(string)_ – The email type identifier (e.g., 'customer_processing_order').
+-   `$email_data` _(\WC_Email)_ – The WooCommerce email object.
+
+**Return value:**
+
+Return the modified post data array. This array will be used to create the email template post.
+
+#### Example: Modifying email template post data
+
+```php
+/**
+ * Customize email template post data during generation.
+ *
+ * @param array     $post_data  The post data array.
+ * @param string    $email_type The email type identifier.
+ * @param \WC_Email $email_data The WooCommerce email object.
+ * @return array Modified post data.
+ */
+function your_plugin_customize_email_template_post( $post_data, $email_type, $email_data ) {
+    // Modify the post title for specific email types.
+    if ( 'customer_processing_order' === $email_type ) {
+        $post_data['post_title'] = __( 'Custom Processing Order Email', 'your-plugin' );
+    }
+
+    // Modify the post content (block template HTML).
+    $post_data['post_content'] = str_replace(
+        'default content',
+        'custom content',
+        $post_data['post_content']
+    );
+
+    // Add custom meta data.
+    $post_data['meta_input']['custom_meta_key'] = 'custom_value';
+
+    return $post_data;
+}
+add_filter( 'woocommerce_email_content_post_data', 'your_plugin_customize_email_template_post', 10, 3 );
+```
+
+**Important notes:**
+
+-   You can modify any valid `wp_insert_post()` parameter (`post_title`, `post_content`, `post_excerpt`, `post_status`, `post_name`, `meta_input`, etc.).
+-   Always return the modified `$post_data` array.
+-   When modifying `post_content`, ensure valid block markup is maintained.
+-   The filter runs for all email types; check `$email_type` to target specific emails.
+
+## 4. Create the initial block template
 
 Create `templates/emails/block/your-custom-email.php`:
 
-**Note:** Block templates are the modern approach for email editor integration. However, WooCommerce maintains backward compatibility with traditional email templates. If you don't provide a block template, WooCommerce will fall back to your traditional `template_html` and `template_plain` files defined in your email class. These properties are intended to be used in the `get_content_html` and `get_content_plain` methods to load the corresponding template files. This ensures your emails continue to work even without block template support.
+**Template base property:** Make sure to set the `$template_base` property in your email class constructor to point to your plugin's template directory. This allows WooCommerce to properly locate and load your block template files. The block template filename is expected to match the plain template, but using the `block` directory instead of `plain`.
 
 ```php
 <?php
@@ -125,45 +213,38 @@ defined( 'ABSPATH' ) || exit;
 <!-- /wp:woocommerce/email-content -->
 ```
 
+Pro tip: If you use a custom path for your email templates, set the block template path using the `template_block` property on the email class.
+
 **Email content placeholder:**
 
 The `BlockEmailRenderer::WOO_EMAIL_CONTENT_PLACEHOLDER` is a special placeholder that gets replaced with the main email content when the email is rendered. This placeholder is essential for integrating with WooCommerce's email system and allows the email editor to inject the core email content (like order details, customer information, etc.) into your custom template.
 
-When WooCommerce processes your email template, it replaces this placeholder with the appropriate email content based on the email type and context, ensuring your custom template works seamlessly with WooCommerce's email system.
+By default, WooCommerce uses the [general block email template](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/templates/emails/block/general-block-email.php) to generate the content that replaces this placeholder. When WooCommerce processes your email template, it replaces this placeholder with the appropriate email content based on the email type and context.
 
-**Register the template:**
+If your email needs to use different content, you have two options:
 
-You need to register your block template with the email editor so it can be used for editing. This connects your template file to your email class:
+**Using custom block content template:**
 
-```php
-function your_plugin_register_email_templates( $templates_registry ) {
-    $template = new \Automattic\WooCommerce\EmailEditor\Engine\Templates\Template(
-        // Template prefix (your plugin slug)
-        'your-plugin',
-        // Template slug (unique identifier)
-        'your-custom-email-template',
-        // Display title in editor
-        __( 'Custom Email Template', 'your-plugin' ),
-        // Description
-        __( 'Custom Email Template description', 'your-plugin' ),
-        // Template content
-        '<!-- wp:paragraph -->
-<p>Custom Email Template</p>
-<!-- /wp:paragraph -->
+1. **Set a custom template**: Set the `$template_block_content` property in your email class constructor to point to a custom template for the block content:
 
-<!-- wp:post-content {"lock":{"move":true,"remove":false},"layout":{"type":"default"}} /-->' ,
-        // Email post types this template can be used for
-        array( 'woo_email' )
-    );
+    ```php
+    $this->template_block_content = 'emails/block/custom-content.php';
+    ```
 
-    $templates_registry->register( $template );
+2. **Implement custom logic**: Implement the `get_block_editor_email_template_content` method in your email class to provide custom logic for generating the content:
 
-    return $templates_registry;
-}
-add_filter( 'woocommerce_email_editor_register_templates', 'your_plugin_register_email_templates' );
-```
+    ```php
+    public function get_block_editor_email_template_content() {
+        return '<!-- wp:paragraph -->
+    <p>Your custom block template content here</p>
+    <!-- /wp:paragraph -->';
+    }
+    ```
 
-## 4. Set Up Triggers
+**Using action hook:**
+You can use the action hook `woocommerce_email_general_block_email` to execute additional actions within the content template.
+
+## 5. Set Up Triggers
 
 **Set up when your email should be sent** by hooking into WordPress actions. You can trigger emails on WooCommerce events or your own custom actions:
 
@@ -284,9 +365,97 @@ function your_plugin_get_custom_field_value( $context, $args = array() ) {
 add_filter( 'woocommerce_email_editor_register_personalization_tags', 'your_plugin_register_personalization_tags' );
 ```
 
-**Usage in templates:** Use `<!--[your-plugin/custom-field]-->` in your block template, and they will be replaced with the values returned by your callback functions.
+**Usage in templates:** Use `<!--[your-plugin/custom-field]-->` in your block template, and it will be replaced with the value returned by your callback function.
 
 To learn more about personalization tags, please see the [personalization tags documentation](https://github.com/woocommerce/woocommerce/blob/trunk/packages/php/email-editor/docs/personalization-tags.md) in the `woocommerce/email-editor` package.
+
+### Providing custom context for personalization tags
+
+Use the `woocommerce_email_editor_integration_personalizer_context_data` filter to provide custom context data to your personalization tags. This is useful when your extension needs to pass additional data (such as subscription details, loyalty points, or custom order metadata) that your personalization tag callbacks can access.
+
+**Filter details:**
+
+| Property   | Value                                                            |
+| ---------- | ---------------------------------------------------------------- |
+| Hook name  | `woocommerce_email_editor_integration_personalizer_context_data` |
+| Since      | 10.5.0                                                           |
+| Parameters | `$context` (array), `$email` (\WC_Email)                         |
+| Returns    | array                                                            |
+
+**Parameters:**
+
+-   `$context` _(array)_ – The existing context data array. This may already contain data from WooCommerce core or other extensions.
+-   `$email` _(\WC_Email)_ – The WooCommerce email object being processed. You can use this to access the email ID, recipient, and the object associated with the email (such as an order or customer).
+
+**Return value:**
+
+Return an array of custom context data along with Woo core context data. This array will be accessible to all personalization tag callbacks through the `$context` parameter.
+
+#### Example: Adding subscription data to context
+
+```php
+/**
+ * Add subscription-related context data for personalization tags.
+ *
+ * @param array     $context The existing context data.
+ * @param \WC_Email $email   The WooCommerce email object.
+ * @return array Modified context data.
+ */
+function your_plugin_add_subscription_context( $context, $email ) {
+    // Only add context for subscription-related emails.
+    if ( strpos( $email->id, 'subscription' ) === false ) {
+        return $context;
+    }
+
+    // Get the order from the email object.
+    $order = $email->object instanceof WC_Order ? $email->object : null;
+
+    if ( ! $order ) {
+        return $context;
+    }
+
+    // Add your custom subscription data to context.
+    $context['subscription_id']       = $order->get_meta( '_subscription_id' );
+    $context['subscription_end_date'] = $order->get_meta( '_subscription_end_date' );
+    $context['renewal_count']         = (int) $order->get_meta( '_renewal_count' );
+
+    return $context;
+}
+add_filter( 'woocommerce_email_editor_integration_personalizer_context_data', 'your_plugin_add_subscription_context', 10, 2 );
+```
+
+#### Example: Using custom context in a personalization tag callback
+
+Once you've added custom data to the context, your personalization tag callbacks can access it:
+
+```php
+/**
+ * Personalization tag callback that uses custom context data.
+ *
+ * @param array $context The context data (includes your custom data).
+ * @param array $args    Optional attributes passed to the tag.
+ * @return string The personalized value.
+ */
+function your_plugin_get_subscription_end_date( $context, $args = array() ) {
+    // Access the custom context data you added via the filter.
+    $end_date = $context['subscription_end_date'] ?? '';
+
+    if ( empty( $end_date ) ) {
+        return __( 'N/A', 'your-plugin' );
+    }
+
+    // Format the date according to site settings.
+    return date_i18n( get_option( 'date_format' ), strtotime( $end_date ) );
+}
+```
+
+**Important notes:**
+
+-   The filter is called during email personalization, so your context data is available when personalization tags are processed.
+-   Always check if the email type is relevant before adding context data to avoid unnecessary processing.
+-   Use unique keys for your context data to prevent conflicts with WooCommerce core or other extensions.
+-   The `$email->object` property typically contains the main object associated with the email (e.g., `WC_Order` for order emails, `WP_User` for user-related emails).
+-   When using context data in personalization tags, ensure proper escaping based on the output context (e.g., `esc_html()`, `esc_attr()`, `esc_url()`).
 
 ## Complete example
 
@@ -302,8 +471,10 @@ class YourPlugin_Loyalty_Welcome_Email extends WC_Email {
         $this->customer_email = true;
         $this->email_group    = 'loyalty';
 
-        $this->template_html  = 'templates/emails/loyalty-welcome.php';
-        $this->template_plain = 'templates/emails/plain/loyalty-welcome.php';
+        $this->template_html  = 'emails/loyalty-welcome.php';
+        $this->template_plain = 'emails/plain/loyalty-welcome.php';
+        $this->template_block = 'emails/block/loyalty-welcome.php';
+        $this->template_base  = plugin_dir_path( __FILE__ ) . 'templates/';
 
         parent::__construct();
     }
@@ -379,19 +550,10 @@ add_filter( 'woocommerce_email_groups', function( $email_groups ) {
     return $email_groups;
 } );
 
-// Register block template for the email editor
-add_filter( 'woocommerce_email_editor_register_templates', function( $registry ) {
-    $template = new \Automattic\WooCommerce\EmailEditor\Engine\Templates\Template(
-        'your-plugin',
-        'loyalty-welcome',
-        __( 'Loyalty Welcome Email', 'your-plugin' ),
-        __( 'Welcome email for new loyalty program members', 'your-plugin' ),
-        file_get_contents( plugin_dir_path( __FILE__ ) . 'templates/emails/block/loyalty-welcome.html' ),
-        array( 'woo_email' )
-    );
-    $registry->register( $template );
-
-    return $registry;
+// Register the email with the block editor.
+add_filter( 'woocommerce_transactional_emails_for_block_editor', function( $emails ) {
+    $emails[] = 'loyalty_welcome_email';
+    return $emails;
 } );
 
 // Set up trigger - when to send the email
@@ -406,8 +568,9 @@ add_action( 'your_plugin_customer_joined_loyalty', function( $customer_id, $poin
 **How it works:**
 
 1. **Email registration** makes your email appear in **WooCommerce > Settings > Emails**
-2. **Template registration** allows you to register additional email templates for use and editing in the block editor
-3. **Trigger setup** automatically sends the email when a customer joins your loyalty program
+2. **Block editor registration** enables your email to work with the WooCommerce Email Editor
+3. **Template registration** allows you to register additional email templates for use and editing in the block editor
+4. **Trigger setup** automatically sends the email when a customer joins your loyalty program
 
 ## Best practices
 
@@ -419,13 +582,15 @@ add_action( 'your_plugin_customer_joined_loyalty', function( $customer_id, $poin
 
 ## Troubleshooting
 
--   **Email not in admin?**  
+-   **Email not in admin?**
     Double-check that your email class is registered with the `woocommerce_email_classes` filter and that the class name is correct.
--   **Template not loading?**  
-    Make sure the template file path is correct and that you’ve registered it with the email editor.
--   **Tags not working?**  
+-   **Email not using the block template or email editor?**
+    Ensure you have registered your email ID with the `woocommerce_transactional_emails_for_block_editor` filter.
+-   **Template not loading?**
+    Make sure the template file path is correct and that you have registered it with the email editor.
+-   **Tags not working?**
     Confirm that your personalization tag callbacks are registered and returning the expected values.
--   **Email not sending?**  
+-   **Email not sending?**
     Check that the email is enabled in WooCommerce settings and that your trigger action is firing as expected.
 
 ---

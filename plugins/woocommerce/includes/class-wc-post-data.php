@@ -33,12 +33,17 @@ class WC_Post_Data {
 
 	/**
 	 * Hook in methods.
+	 *
+	 * @return void
 	 */
 	public static function init() {
+		add_action( 'clean_post_cache', array( __CLASS__, 'invalidate_products_last_modified' ), 10, 2 );
+		add_action( 'clean_post_cache', array( __CLASS__, 'invalidate_db_block_templates_cache' ), 10, 2 );
 		add_filter( 'post_type_link', array( __CLASS__, 'variation_post_link' ), 10, 2 );
 		add_action( 'shutdown', array( __CLASS__, 'do_deferred_product_sync' ), 10 );
 		add_action( 'set_object_terms', array( __CLASS__, 'force_default_term' ), 10, 5 );
 		add_action( 'set_object_terms', array( __CLASS__, 'delete_product_query_transients' ) );
+		add_action( 'set_object_terms', array( __CLASS__, 'recount_terms_for_product_visibility_change' ), 10, 6 );
 		add_action( 'deleted_term_relationships', array( __CLASS__, 'delete_product_query_transients' ) );
 		add_action( 'woocommerce_product_set_stock_status', array( __CLASS__, 'delete_product_query_transients' ) );
 		add_action( 'woocommerce_product_set_visibility', array( __CLASS__, 'delete_product_query_transients' ) );
@@ -102,6 +107,8 @@ class WC_Post_Data {
 
 	/**
 	 * Sync products queued to sync.
+	 *
+	 * @return void
 	 */
 	public static function do_deferred_product_sync() {
 		global $wc_deferred_product_sync;
@@ -116,6 +123,8 @@ class WC_Post_Data {
 	 * Sync a product.
 	 *
 	 * @param int $product_id Product ID.
+	 *
+	 * @return void
 	 */
 	public static function deferred_product_sync( $product_id ) {
 		$product = wc_get_product( $product_id );
@@ -131,6 +140,8 @@ class WC_Post_Data {
 	 * @param string  $new_status New status.
 	 * @param string  $old_status Old status.
 	 * @param WP_Post $post       Post data.
+	 *
+	 * @return void
 	 */
 	public static function transition_post_status( $new_status, $old_status, $post ) {
 		if ( ( ProductStatus::PUBLISH === $new_status || ProductStatus::PUBLISH === $old_status ) && in_array( $post->post_type, array( 'product', 'product_variation' ), true ) ) {
@@ -140,9 +151,51 @@ class WC_Post_Data {
 
 	/**
 	 * Delete product view transients when needed e.g. when post status changes, or visibility/stock status is modified.
+	 *
+	 * @return void
 	 */
 	public static function delete_product_query_transients() {
 		WC_Cache_Helper::get_transient_version( 'product_query', true );
+	}
+
+	/**
+	 * Invalidate the cached products last modified timestamp when a product post cache is cleaned.
+	 *
+	 * This does not use wp_cache_set_last_changed() because the cached value is exposed to
+	 * clients via the Last-Modified HTTP header for collection cache invalidation. WordPress
+	 * core's last_changed pattern auto-seeds with the current time on cache miss, which is
+	 * acceptable for opaque cache-key salts but would force all clients to unnecessarily
+	 * invalidate their local caches. Instead, invalidating the cache here allows the read side
+	 * in ProductQuery::get_last_modified() to fall back to the DB and re-seed with the real
+	 * last modification time.
+	 *
+	 * @since 10.6.0
+	 *
+	 * @param int     $post_id Post ID.
+	 * @param WP_Post $post    Post object.
+	 */
+	public static function invalidate_products_last_modified( $post_id, $post ): void {
+		if ( $post instanceof WP_Post && in_array( $post->post_type, array( 'product', 'product_variation' ), true ) ) {
+			wp_cache_delete( 'last_modified', 'wc_products' );
+		}
+	}
+
+	/**
+	 * Invalidates cache entries related to fetching block templates from DB. Please reference to
+	 * `Utils\BlockTemplateUtils::get_block_templates_from_db` for further details.
+	 *
+	 * @param int      $post_id Post ID.
+	 * @param \WP_Post $post    Post object.
+	 *
+	 * @internal
+	 * @since 10.7.0
+	 *
+	 * @return void
+	 */
+	public static function invalidate_db_block_templates_cache( $post_id, $post ): void {
+		if ( $post instanceof \WP_Post && in_array( $post->post_type, array( 'wp_template_part', 'wp_template' ), true ) ) {
+			wp_cache_delete( $post->post_type . '-ids', 'woocommerce_blocks' );
+		}
 	}
 
 	/**
@@ -153,6 +206,8 @@ class WC_Post_Data {
 	 * @param WC_Product $product Product data.
 	 * @param string     $from    Origin type.
 	 * @param string     $to      New type.
+	 *
+	 * @return void
 	 */
 	public static function product_type_changed( $product, $from, $to ) {
 		/**
@@ -178,6 +233,8 @@ class WC_Post_Data {
 	 * @param  int    $term_id  Term ID.
 	 * @param  int    $tt_id    Term taxonomy ID.
 	 * @param  string $taxonomy Taxonomy slug.
+	 *
+	 * @return void
 	 */
 	public static function edit_term( $term_id, $tt_id, $taxonomy ) {
 		if ( strpos( $taxonomy, 'pa_' ) === 0 ) {
@@ -193,6 +250,8 @@ class WC_Post_Data {
 	 * @param  int    $term_id  Term ID.
 	 * @param  int    $tt_id    Term taxonomy ID.
 	 * @param  string $taxonomy Taxonomy slug.
+	 *
+	 * @return void
 	 */
 	public static function edited_term( $term_id, $tt_id, $taxonomy ) {
 		if ( ! is_null( self::$editing_term ) && strpos( $taxonomy, 'pa_' ) === 0 ) {
@@ -323,6 +382,8 @@ class WC_Post_Data {
 	 * @since 9.8.0
 	 *
 	 * @param mixed $id ID of post being deleted.
+	 *
+	 * @return void
 	 */
 	public static function delete_post_data( $id ) {
 		$container = wc_get_container();
@@ -367,6 +428,8 @@ class WC_Post_Data {
 	 * Removes variations etc. belonging to a deleted post, and clears transients, if the user has permission.
 	 *
 	 * @param mixed $id ID of post being deleted.
+	 *
+	 * @return void
 	 */
 	public static function delete_post( $id ) {
 		$container = wc_get_container();
@@ -381,6 +444,8 @@ class WC_Post_Data {
 	 * Trash post.
 	 *
 	 * @param mixed $id Post ID.
+	 *
+	 * @return void
 	 */
 	public static function trash_post( $id ) {
 		if ( ! $id ) {
@@ -415,6 +480,8 @@ class WC_Post_Data {
 	 * Untrash post.
 	 *
 	 * @param mixed $id Post ID.
+	 *
+	 * @return void
 	 */
 	public static function untrash_post( $id ) {
 		if ( ! $id ) {
@@ -451,6 +518,8 @@ class WC_Post_Data {
 	 * Clear global unique id if it's not unique.
 	 *
 	 * @param mixed $id Post ID.
+	 *
+	 * @return void
 	 */
 	private static function clear_global_unique_id_if_necessary( $id ) {
 		$product = wc_get_product( $id );
@@ -475,6 +544,8 @@ class WC_Post_Data {
 	 *
 	 * @since 3.2.0
 	 * @param int $order_id Order ID.
+	 *
+	 * @return void
 	 */
 	public static function before_delete_order( $order_id ) {
 		if ( OrderUtil::is_order( $order_id, wc_get_order_types() ) ) {
@@ -509,6 +580,8 @@ class WC_Post_Data {
 	 * Remove item meta on permanent deletion.
 	 *
 	 * @param int $postid Post ID.
+	 *
+	 * @return void
 	 */
 	public static function delete_order_items( $postid ) {
 		global $wpdb;
@@ -533,6 +606,8 @@ class WC_Post_Data {
 	 * Remove downloadable permissions on permanent order deletion.
 	 *
 	 * @param int $postid Post ID.
+	 *
+	 * @return void
 	 */
 	public static function delete_order_downloadable_permissions( $postid ) {
 		if ( OrderUtil::is_order( $postid, wc_get_order_types() ) ) {
@@ -552,6 +627,8 @@ class WC_Post_Data {
 	 * @param  int    $object_id  Object ID.
 	 * @param  string $meta_key   Meta key.
 	 * @param  mixed  $meta_value Meta value.
+	 *
+	 * @return void
 	 */
 	public static function flush_object_meta_cache( $meta_id, $object_id, $meta_key, $meta_value ) {
 		WC_Cache_Helper::invalidate_cache_group( 'object_' . $object_id );
@@ -566,6 +643,8 @@ class WC_Post_Data {
 	 * @param array  $tt_ids    Term ids array.
 	 * @param string $taxonomy  Taxonomy name.
 	 * @param bool   $append    Are we appending or setting terms.
+	 *
+	 * @return void
 	 */
 	public static function force_default_term( $object_id, $terms, $tt_ids, $taxonomy, $append ) {
 		if ( ! $append && 'product_cat' === $taxonomy && empty( $tt_ids ) && 'product' === get_post_type( $object_id ) ) {
@@ -575,6 +654,52 @@ class WC_Post_Data {
 			if ( $default_term && ! in_array( $default_term, $tt_ids, true ) ) {
 				wp_set_post_terms( $object_id, array( $default_term ), 'product_cat', true );
 			}
+		}
+	}
+
+	/**
+	 * Recounts product terms when product visibility changes affect catalog display.
+	 *
+	 * @param int    $object_id   The object ID.
+	 * @param array  $terms       An array of object terms.
+	 * @param array  $tt_ids      An array of term taxonomy IDs.
+	 * @param string $taxonomy    Taxonomy slug.
+	 * @param bool   $append      Whether to append new terms to the old terms.
+	 * @param array  $old_tt_ids  The old array of term taxonomy IDs.
+	 *
+	 * @since 10.4.0
+	 *
+	 * @return void
+	 */
+	public static function recount_terms_for_product_visibility_change( $object_id, $terms, $tt_ids, $taxonomy, $append, $old_tt_ids ) {
+		if ( 'product_visibility' !== $taxonomy ) {
+			return;
+		}
+
+		if ( $append ) {
+			$modified_tt_ids = $tt_ids;
+		} else {
+			$modified_tt_ids = array_merge( array_diff( $tt_ids, $old_tt_ids ), array_diff( $old_tt_ids, $tt_ids ) );
+		}
+
+		if ( empty( $modified_tt_ids ) ) {
+			return;
+		}
+
+		// Despite the name, wc_get_product_visibility_term_ids() actually returns an associative array with term_taxonomy_ids.
+		$visibility_tt_ids = wc_get_product_visibility_term_ids();
+
+		$tt_ids_modifying_term_counts = array();
+		if ( ! empty( $visibility_tt_ids['exclude-from-catalog'] ) ) {
+			$tt_ids_modifying_term_counts[] = $visibility_tt_ids['exclude-from-catalog'];
+		}
+
+		if ( ! empty( $visibility_tt_ids['outofstock'] ) && 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
+			$tt_ids_modifying_term_counts[] = $visibility_tt_ids['outofstock'];
+		}
+
+		if ( ! empty( array_intersect( $modified_tt_ids, $tt_ids_modifying_term_counts ) ) ) {
+			_wc_recount_terms_by_product( $object_id );
 		}
 	}
 
@@ -604,6 +729,8 @@ class WC_Post_Data {
 	 * @param  string $meta_key   Meta key.
 	 * @param  mixed  $meta_value Meta value.
 	 * @deprecated    3.3
+	 *
+	 * @return void
 	 */
 	public static function sync_product_stock_status( $meta_id, $object_id, $meta_key, $meta_value ) {}
 
@@ -614,6 +741,8 @@ class WC_Post_Data {
 	 * @param int   $product_id   Product ID.
 	 * @param int   $variation_id Variation ID. Optional product variation identifier.
 	 * @param array $downloads    Newly set files.
+	 *
+	 * @return void
 	 */
 	public static function process_product_file_download_paths( $product_id, $variation_id, $downloads ) {
 		wc_deprecated_function( __FUNCTION__, '3.3' );
@@ -629,6 +758,8 @@ class WC_Post_Data {
 	 * @param string $taxonomy   Taxonomy slug.
 	 * @param mixed  $append     Whether to append new terms to the old terms.
 	 * @param array  $old_tt_ids Old array of term taxonomy IDs.
+	 *
+	 * @return void
 	 */
 	public static function set_object_terms( $object_id, $terms, $tt_ids, $taxonomy, $append, $old_tt_ids ) {
 		if ( in_array( get_post_type( $object_id ), array( 'product', 'product_variation' ), true ) ) {
@@ -641,6 +772,8 @@ class WC_Post_Data {
 	 *
 	 * @since 10.2.0
 	 * @param array $variation_ids Array of variation IDs.
+	 *
+	 * @return void
 	 */
 	private static function regenerate_variation_summaries( $variation_ids ) {
 		if ( empty( $variation_ids ) ) {
@@ -659,6 +792,8 @@ class WC_Post_Data {
 	 *
 	 * @since 10.2.0
 	 * @param int $variation_id Variation ID.
+	 *
+	 * @return void
 	 */
 	public static function regenerate_variation_attribute_summary( $variation_id ) {
 		global $wpdb;
@@ -722,6 +857,8 @@ class WC_Post_Data {
 	 * @param int    $attribute_id Attribute ID.
 	 * @param string $attribute    Attribute name.
 	 * @param string $old_slug     Old attribute slug.
+	 *
+	 * @return void
 	 */
 	public static function handle_global_attribute_updated( $attribute_id, $attribute, $old_slug ) {
 		// We use this trigger for both updates and deletions of global attributes.
@@ -780,6 +917,8 @@ class WC_Post_Data {
 	 *
 	 * @since 10.2.0
 	 * @param string $taxonomy Attribute taxonomy.
+	 *
+	 * @return void
 	 */
 	public static function regenerate_attribute_variation_summaries( $taxonomy ) {
 		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_query
@@ -805,6 +944,8 @@ class WC_Post_Data {
 	 *
 	 * @since 10.2.0
 	 * @param WC_Product $product The variable product whose attributes were updated.
+	 *
+	 * @return void
 	 */
 	public static function on_product_attributes_updated( $product ) {
 		if ( $product->is_type( 'variable' ) ) {
@@ -847,6 +988,8 @@ class WC_Post_Data {
 	 *
 	 * @since 10.2.0
 	 * @param int $product_id Variable product ID.
+	 *
+	 * @return void
 	 */
 	public static function regenerate_product_variation_summaries( $product_id ) {
 		$product = wc_get_product( $product_id );
@@ -864,6 +1007,8 @@ class WC_Post_Data {
 	 * @param int    $term_id  Term ID.
 	 * @param int    $tt_id    Term taxonomy ID.
 	 * @param string $taxonomy Taxonomy slug.
+	 *
+	 * @return void
 	 */
 	public static function handle_attribute_term_updated( $term_id, $tt_id, $taxonomy ) {
 		if ( strpos( $taxonomy, 'pa_' ) !== 0 ) {
@@ -917,6 +1062,8 @@ class WC_Post_Data {
 	 * @param int     $tt_id    Term taxonomy ID.
 	 * @param string  $taxonomy Taxonomy slug.
 	 * @param WP_Term $deleted_term Copy of the already-deleted term.
+	 *
+	 * @return void
 	 */
 	public static function handle_attribute_term_deleted( $term_id, $tt_id, $taxonomy, $deleted_term ) {
 		if ( strpos( $taxonomy, 'pa_' ) !== 0 ) {
@@ -995,6 +1142,8 @@ class WC_Post_Data {
 	 * @since 10.2.0
 	 * @param string $taxonomy Taxonomy slug.
 	 * @param string $term_slug Term slug.
+	 *
+	 * @return void
 	 */
 	public static function regenerate_term_variation_summaries( $taxonomy, $term_slug ) {
 		global $wpdb;

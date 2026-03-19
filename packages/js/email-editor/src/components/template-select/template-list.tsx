@@ -64,7 +64,9 @@ function TemplateListBox( {
 		styles.reduce( ( acc, style ) => {
 			return acc + ( style.css ?? '' );
 		}, '' ) +
-		`.is-root-container { width: ${ layout.contentSize }; margin: 0 auto; }`;
+		`.is-root-container { width: ${
+			layout?.contentSize || '660px'
+		}; margin: 0 auto; }`;
 
 	if ( selectedCategory === 'recent' && templates.length === 0 ) {
 		return <TemplateNoResults />;
@@ -137,9 +139,11 @@ export function TemplateList( {
 }: Props ) {
 	const filteredTemplates = useMemo(
 		() =>
-			templates.filter(
-				( template ) => template.category === selectedCategory
-			),
+			selectedCategory !== null && selectedCategory !== undefined
+				? templates.filter(
+						( template ) => template.category === selectedCategory
+				  )
+				: templates,
 		[ selectedCategory, templates ]
 	);
 

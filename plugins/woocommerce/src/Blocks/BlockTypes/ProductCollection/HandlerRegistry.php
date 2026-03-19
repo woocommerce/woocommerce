@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection;
 
+use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use InvalidArgumentException;
 
 /**
@@ -77,6 +78,18 @@ class HandlerRegistry {
 			'woocommerce/product-collection/by-tag',
 			function ( $collection_args, $common_query_values, $query ) {
 				// For Products by Tag collection, if no tag is selected, we should return an empty result set.
+				if ( empty( $query['taxonomies_query'] ) ) {
+					return array(
+						'post__in' => array( -1 ),
+					);
+				}
+			}
+		);
+
+		$this->register_collection_handlers(
+			'woocommerce/product-collection/by-brand',
+			function ( $collection_args, $common_query_values, $query ) {
+				// For Products by Brand collection, if no brand is selected, we should return an empty result set.
 				if ( empty( $query['taxonomies_query'] ) ) {
 					return array(
 						'post__in' => array( -1 ),
@@ -330,6 +343,55 @@ class HandlerRegistry {
 				return $collection_args;
 			}
 		);
+
+		// Best-sellers and new-arrivals: register preview_query only.
+		// These collections handle their main queries via JS/REST, but need
+		// a preview fallback to show recent products in the email editor
+		// when the store has no best-sellers or new arrivals yet.
+		// The build_query callback is a no-op that returns an empty array
+		// so merge_queries() has nothing extra to merge.
+		$noop_build_query = function () {
+			return array();
+		};
+
+		$this->register_collection_handlers(
+			'woocommerce/product-collection/best-sellers',
+			$noop_build_query,
+			null,
+			null,
+			function () {
+				return $this->get_recent_product_ids_query();
+			}
+		);
+
+		$this->register_collection_handlers(
+			'woocommerce/product-collection/new-arrivals',
+			$noop_build_query,
+			null,
+			null,
+			function () {
+				return $this->get_recent_product_ids_query();
+			}
+		);
+
+		$this->register_collection_handlers(
+			'woocommerce/product-collection/cart-contents',
+			function ( $collection_args ) {
+				$cart_product_ids = $collection_args['cartProductIds'] ?? null;
+				if ( empty( $cart_product_ids ) ) {
+					return array( 'post__in' => array( -1 ) );
+				}
+				return array( 'post__in' => $cart_product_ids );
+			},
+			function ( $collection_args, $query ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+				$collection_args['cartProductIds'] = $this->get_cart_product_ids( $collection_args, null );
+				return $collection_args;
+			},
+			function ( $collection_args, $query, $request ) {
+				$collection_args['cartProductIds'] = $this->get_cart_product_ids( $collection_args, $request );
+				return $collection_args;
+			}
+		);
 		return $this->collection_handler_store;
 	}
 
@@ -377,5 +439,73 @@ class HandlerRegistry {
 			);
 		}
 		return $product_references;
+	}
+
+	/**
+	 * Get a query that returns the most recent published products.
+	 * Used as a fallback for preview mode when the specific collection query
+	 * might return no results (e.g., no best sellers yet in a new store).
+	 *
+	 * @return array Query args to show recent products.
+	 */
+	private function get_recent_product_ids_query() {
+		$recent_product_ids = wc_get_products(
+			array(
+				'status'  => 'publish',
+				'orderby' => 'date',
+				'order'   => 'DESC',
+				'limit'   => 10,
+				'return'  => 'ids',
+			)
+		);
+
+		return array(
+			'post__in' => ! empty( $recent_product_ids ) ? $recent_product_ids : array( -1 ),
+		);
+	}
+
+	/**
+	 * Get cart product IDs from various sources.
+	 * Handles loading cart products from location context or request params.
+	 *
+	 * @param array                 $collection_args Collection arguments with location context.
+	 * @param \WP_REST_Request|null $request         Optional REST request for editor context.
+	 * @return array<int> The product IDs from the cart. Returns recent products for preview in editor context only.
+	 */
+	private function get_cart_product_ids( $collection_args, $request = null ) {
+		$location = $collection_args['productCollectionLocation'] ?? array();
+
+		if ( $request ) {
+			$user_id    = $request->get_param( 'userId' ) ? absint( $request->get_param( 'userId' ) ) : null;
+			$user_email = $request->get_param( 'userEmail' ) ? sanitize_email( $request->get_param( 'userEmail' ) ) : null;
+			if ( $user_id || $user_email ) {
+				$cart_ids = CartCheckoutUtils::get_cart_product_ids_for_user( $user_id, $user_email );
+				if ( ! empty( $cart_ids ) ) {
+					return $cart_ids;
+				}
+			}
+			// In editor context (REST request), show sample products for preview when cart is empty.
+			$recent_product_ids = wc_get_products(
+				array(
+					'status'  => 'publish',
+					'orderby' => 'date',
+					'order'   => 'DESC',
+					'limit'   => 3,
+					'return'  => 'ids',
+				)
+			);
+			return ! empty( $recent_product_ids ) ? $recent_product_ids : array();
+		}
+
+		if ( isset( $location['type'] ) && 'cart' === $location['type'] ) {
+			$user_id    = isset( $location['sourceData']['userId'] ) ? absint( $location['sourceData']['userId'] ) : null;
+			$user_email = isset( $location['sourceData']['userEmail'] ) ? sanitize_email( $location['sourceData']['userEmail'] ) : null;
+			if ( $user_id || $user_email ) {
+				return CartCheckoutUtils::get_cart_product_ids_for_user( $user_id, $user_email );
+			}
+		}
+
+		// In frontend/email context, return empty array when no cart is found.
+		return array();
 	}
 }

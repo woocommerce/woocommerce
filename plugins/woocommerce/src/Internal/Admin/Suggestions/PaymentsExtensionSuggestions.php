@@ -7,6 +7,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 use Automattic\WooCommerce\Internal\Utilities\ArrayUtil;
 
 /**
@@ -60,6 +61,7 @@ class PaymentsExtensionSuggestions {
 	const RAPYD             = 'rapyd';
 	const PAYPAL_BRAINTREE  = 'paypal_braintree';
 	const VISA              = 'visa_as';
+	const NGENIUS           = 'ngenius';
 
 	/*
 	 * The extension types.
@@ -78,17 +80,6 @@ class PaymentsExtensionSuggestions {
 	 * This will inform how we handle the extension installation and activation.
 	 */
 	const PLUGIN_TYPE_WPORG = 'wporg';
-
-	/*
-	 * The extension link types.
-	 *
-	 * These are hints for the UI to determine if and how to display the link.
-	 */
-	const LINK_TYPE_PRICING = 'pricing';
-	const LINK_TYPE_ABOUT   = 'about';
-	const LINK_TYPE_TERMS   = 'terms';
-	const LINK_TYPE_DOCS    = 'documentation';
-	const LINK_TYPE_SUPPORT = 'support';
 
 	/*
 	 * Extension tags.
@@ -163,11 +154,11 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://squareup.com/ca/en/pricing',
 						),
 						array(
-							'_type' => self::LINK_TYPE_TERMS,
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 							'url'   => 'https://squareup.com/ca/en/legal/general/ua',
 						),
 					),
@@ -178,7 +169,7 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://gocardless.com/en-ca/pricing/',
 						),
 					),
@@ -191,11 +182,11 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://www.klarna.com/ca/business/',
 						),
 						array(
-							'_type' => self::LINK_TYPE_TERMS,
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 							'url'   => 'https://www.klarna.com/ca/legal/',
 						),
 					),
@@ -243,11 +234,11 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://squareup.com/gb/en/pricing',
 						),
 						array(
-							'_type' => self::LINK_TYPE_TERMS,
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 							'url'   => 'https://squareup.com/gb/en/legal/general/ua',
 						),
 					),
@@ -261,11 +252,11 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://www.klarna.com/uk/business/payment-methods/',
 						),
 						array(
-							'_type' => self::LINK_TYPE_TERMS,
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 							'url'   => 'https://www.klarna.com/uk/terms-and-conditions/',
 						),
 					),
@@ -277,11 +268,11 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://www.affirm.com/en-gb/business',
 						),
 						array(
-							'_type' => self::LINK_TYPE_TERMS,
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 							'url'   => 'https://www.affirm.com/en-gb/terms',
 						),
 					),
@@ -292,11 +283,11 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://www.klarna.com/uk/business/payment-methods/',
 						),
 						array(
-							'_type' => self::LINK_TYPE_TERMS,
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 							'url'   => 'https://www.klarna.com/uk/terms-and-conditions/',
 						),
 					),
@@ -350,7 +341,7 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://gocardless.com/en-ie/pricing/',
 						),
 					),
@@ -360,11 +351,11 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://www.klarna.com/at/verkaeufer/',
 						),
 						array(
-							'_type' => self::LINK_TYPE_TERMS,
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 							'url'   => 'https://www.klarna.com/at/agb/',
 						),
 					),
@@ -377,11 +368,11 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://www.klarna.com/at/verkaeufer/',
 						),
 						array(
-							'_type' => self::LINK_TYPE_TERMS,
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 							'url'   => 'https://www.klarna.com/at/agb/',
 						),
 					),
@@ -407,7 +398,7 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://gocardless.com/en-ie/pricing/',
 						),
 					),
@@ -419,11 +410,11 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://www.klarna.com/be/fr/entreprise/',
 						),
 						array(
-							'_type' => self::LINK_TYPE_TERMS,
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 							'url'   => 'https://www.klarna.com/be/fr/conditions-generales/',
 						),
 					),
@@ -469,7 +460,7 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://gocardless.com/en-ie/pricing/',
 						),
 					),
@@ -488,7 +479,7 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://gocardless.com/en-ie/pricing/',
 						),
 					),
@@ -509,11 +500,11 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://www.klarna.com/cz/firmy/',
 						),
 						array(
-							'_type' => self::LINK_TYPE_TERMS,
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 							'url'   => 'https://www.klarna.com/cz/obchodni-podminky/',
 						),
 					),
@@ -531,7 +522,7 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://gocardless.com/da-dk/priser/',
 						),
 					),
@@ -541,11 +532,11 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://www.klarna.com/dk/erhverv/',
 						),
 						array(
-							'_type' => self::LINK_TYPE_TERMS,
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 							'url'   => 'https://www.klarna.com/dk/vilkar/',
 						),
 					),
@@ -558,11 +549,11 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://www.klarna.com/dk/erhverv/',
 						),
 						array(
-							'_type' => self::LINK_TYPE_TERMS,
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 							'url'   => 'https://www.klarna.com/dk/vilkar/',
 						),
 					),
@@ -579,7 +570,7 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://gocardless.com/en-ie/pricing/',
 						),
 					),
@@ -598,7 +589,7 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://gocardless.com/en-ie/pricing/',
 						),
 					),
@@ -608,11 +599,11 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://www.klarna.com/fi/yritys/',
 						),
 						array(
-							'_type' => self::LINK_TYPE_TERMS,
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 							'url'   => 'https://www.klarna.com/fi/ehdot/',
 						),
 					),
@@ -624,11 +615,11 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://www.klarna.com/fi/yritys/',
 						),
 						array(
-							'_type' => self::LINK_TYPE_TERMS,
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 							'url'   => 'https://www.klarna.com/fi/ehdot/',
 						),
 					),
@@ -652,11 +643,11 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://squareup.com/fr/fr/pricing',
 						),
 						array(
-							'_type' => self::LINK_TYPE_TERMS,
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 							'url'   => 'https://squareup.com/fr/fr/legal/general/ua',
 						),
 					),
@@ -670,7 +661,7 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://gocardless.com/fr-fr/tarifs/',
 						),
 					),
@@ -682,11 +673,11 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://www.klarna.com/fr/entreprise/',
 						),
 						array(
-							'_type' => self::LINK_TYPE_TERMS,
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 							'url'   => 'https://www.klarna.com/fr/legal/',
 						),
 					),
@@ -727,7 +718,7 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://gocardless.com/de-de/preise/',
 						),
 					),
@@ -737,11 +728,11 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://www.klarna.com/de/verkaeufer/',
 						),
 						array(
-							'_type' => self::LINK_TYPE_TERMS,
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 							'url'   => 'https://www.klarna.com/de/agb/',
 						),
 					),
@@ -754,11 +745,11 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://www.klarna.com/de/verkaeufer/',
 						),
 						array(
-							'_type' => self::LINK_TYPE_TERMS,
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 							'url'   => 'https://www.klarna.com/de/agb/',
 						),
 					),
@@ -777,11 +768,11 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://www.klarna.com/gr/business/',
 						),
 						array(
-							'_type' => self::LINK_TYPE_TERMS,
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 							'url'   => 'https://www.klarna.com/gr/oroi-kai-proypotheseis/',
 						),
 					),
@@ -824,11 +815,11 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://www.klarna.com/hu/uzlet/',
 						),
 						array(
-							'_type' => self::LINK_TYPE_TERMS,
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 							'url'   => 'https://www.klarna.com/hu/jogi-informaciok/',
 						),
 					),
@@ -856,11 +847,11 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://squareup.com/ie/en/pricing',
 						),
 						array(
-							'_type' => self::LINK_TYPE_TERMS,
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 							'url'   => 'https://squareup.com/ie/en/legal/general/ua',
 						),
 					),
@@ -876,11 +867,11 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://www.klarna.com/ie/business/',
 						),
 						array(
-							'_type' => self::LINK_TYPE_TERMS,
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 							'url'   => 'https://www.klarna.com/ie/terms-and-conditions/',
 						),
 					),
@@ -908,11 +899,11 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://www.klarna.com/it/aziende/',
 						),
 						array(
-							'_type' => self::LINK_TYPE_TERMS,
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 							'url'   => 'https://www.klarna.com/it/legal/',
 						),
 					),
@@ -1012,11 +1003,11 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://www.klarna.com/nl/zakelijk/',
 						),
 						array(
-							'_type' => self::LINK_TYPE_TERMS,
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 							'url'   => 'https://www.klarna.com/nl/voorwaarden/',
 						),
 					),
@@ -1028,11 +1019,11 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://www.klarna.com/nl/zakelijk/',
 						),
 						array(
-							'_type' => self::LINK_TYPE_TERMS,
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 							'url'   => 'https://www.klarna.com/nl/voorwaarden/',
 						),
 					),
@@ -1056,11 +1047,11 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://www.klarna.com/no/bedrift/',
 						),
 						array(
-							'_type' => self::LINK_TYPE_TERMS,
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 							'url'   => 'https://www.klarna.com/no/vilkar/',
 						),
 					),
@@ -1072,11 +1063,11 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://www.klarna.com/no/bedrift/',
 						),
 						array(
-							'_type' => self::LINK_TYPE_TERMS,
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 							'url'   => 'https://www.klarna.com/no/vilkar/',
 						),
 					),
@@ -1096,11 +1087,11 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://www.klarna.com/pl/biznes/',
 						),
 						array(
-							'_type' => self::LINK_TYPE_TERMS,
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 							'url'   => 'https://www.klarna.com/pl/zasady-i-warunki/',
 						),
 					),
@@ -1121,11 +1112,11 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://www.klarna.com/pt/empresa/',
 						),
 						array(
-							'_type' => self::LINK_TYPE_TERMS,
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 							'url'   => 'https://www.klarna.com/pt/termos-e-condicoes/',
 						),
 					),
@@ -1144,11 +1135,11 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://www.klarna.com/ro/companii/',
 						),
 						array(
-							'_type' => self::LINK_TYPE_TERMS,
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 							'url'   => 'https://www.klarna.com/ro/aspecte-juridice/',
 						),
 					),
@@ -1194,11 +1185,11 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://www.klarna.com/sk/',
 						),
 						array(
-							'_type' => self::LINK_TYPE_TERMS,
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 							'url'   => 'https://www.klarna.com/sk/zmluvne-podmienky/',
 						),
 					),
@@ -1221,11 +1212,11 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://squareup.com/es/es/pricing',
 						),
 						array(
-							'_type' => self::LINK_TYPE_TERMS,
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 							'url'   => 'https://squareup.com/es/es/legal/general/ua',
 						),
 					),
@@ -1242,11 +1233,11 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://www.klarna.com/es/empresa/',
 						),
 						array(
-							'_type' => self::LINK_TYPE_TERMS,
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 							'url'   => 'https://www.klarna.com/es/legal/',
 						),
 					),
@@ -1271,11 +1262,11 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://www.klarna.com/international/enterprise/',
 						),
 						array(
-							'_type' => self::LINK_TYPE_TERMS,
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 							'url'   => 'https://www.klarna.com/se/villkor/',
 						),
 					),
@@ -1297,11 +1288,11 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://www.klarna.com/ch/fr/entreprise/',
 						),
 						array(
-							'_type' => self::LINK_TYPE_TERMS,
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 							'url'   => 'https://www.klarna.com/ch/fr/conditions-generales-de-vente/',
 						),
 					),
@@ -1576,11 +1567,11 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://www.klarna.com/mx/negocios/',
 						),
 						array(
-							'_type' => self::LINK_TYPE_TERMS,
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 							'url'   => 'https://www.klarna.com/mx/terminos-y-condiciones/',
 						),
 					),
@@ -1746,11 +1737,11 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://squareup.com/au/en/pricing',
 						),
 						array(
-							'_type' => self::LINK_TYPE_TERMS,
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 							'url'   => 'https://squareup.com/au/en/legal/general/ua',
 						),
 					),
@@ -1763,7 +1754,7 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://gocardless.com/en-au/pricing/',
 						),
 					),
@@ -1776,11 +1767,11 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://www.klarna.com/au/business/',
 						),
 						array(
-							'_type' => self::LINK_TYPE_TERMS,
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 							'url'   => 'https://www.klarna.com/au/legal/',
 						),
 					),
@@ -1913,11 +1904,11 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://squareup.com/jp/ja/pricing',
 						),
 						array(
-							'_type' => self::LINK_TYPE_TERMS,
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 							'url'   => 'https://squareup.com/jp/ja/legal/general/ua',
 						),
 					),
@@ -2025,11 +2016,11 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://eway.io/nz/online-payments/#pricing',
 						),
 						array(
-							'_type' => self::LINK_TYPE_TERMS,
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 							'url'   => 'https://eway.io/docs/eWAY-Terms-and-Conditions-NZ.pdf',
 						),
 					),
@@ -2043,11 +2034,11 @@ class PaymentsExtensionSuggestions {
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
-							'_type' => self::LINK_TYPE_PRICING,
+							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://www.klarna.com/nz/business/',
 						),
 						array(
-							'_type' => self::LINK_TYPE_TERMS,
+							'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 							'url'   => 'https://www.klarna.com/nz/legal/',
 						),
 					),
@@ -2592,13 +2583,13 @@ class PaymentsExtensionSuggestions {
 			),
 		),
 		'ZA' => array(
-			self::PAYFAST => array(
+			self::PAYSTACK => array(
 				'_append' => array(
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
 			self::PAYPAL_FULL_STACK,
-			self::PAYSTACK,
+			self::PAYFAST,
 			self::VISA,
 			self::PAYPAL_WALLET,
 		),
@@ -2721,6 +2712,7 @@ class PaymentsExtensionSuggestions {
 				),
 			),
 			self::PAYPAL_FULL_STACK,
+			self::NGENIUS,
 			self::PAYPAL_WALLET,
 		),
 		'KZ' => array(
@@ -2797,6 +2789,7 @@ class PaymentsExtensionSuggestions {
 			),
 			self::PAYPAL_FULL_STACK,
 			self::VISA,
+			self::NGENIUS,
 			self::PAYPAL_WALLET,
 		),
 		'SD' => array(
@@ -2827,6 +2820,7 @@ class PaymentsExtensionSuggestions {
 			self::PAYONEER,
 			self::PAYMOB,
 			self::VISA,
+			self::NGENIUS,
 			self::PAYPAL_WALLET,
 		),
 		'UZ' => array(
@@ -3265,23 +3259,23 @@ class PaymentsExtensionSuggestions {
 				),
 				'links'       => array(
 					array(
-						'_type' => self::LINK_TYPE_PRICING,
+						'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 						'url'   => 'https://www.airwallex.com/pricing',
 					),
 					array(
-						'_type' => self::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'https://woocommerce.com/products/airwallexpayments/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_TERMS,
+						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 						'url'   => 'https://www.airwallex.com/terms/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_DOCS,
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
 						'url'   => 'https://www.airwallex.com/docs/payments__plugins__woocommerce__install-the-woocommerce-plugin',
 					),
 					array(
-						'_type' => self::LINK_TYPE_SUPPORT,
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
 						'url'   => 'https://help.airwallex.com/',
 					),
 				),
@@ -3297,19 +3291,19 @@ class PaymentsExtensionSuggestions {
 				),
 				'links'       => array(
 					array(
-						'_type' => self::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'https://woocommerce.com/products/antom-payments/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_TERMS,
+						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 						'url'   => 'https://global.alipay.com/docs/ac/Platform/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_DOCS,
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
 						'url'   => 'https://woocommerce.com/document/antom-payment/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_SUPPORT,
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
 						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=antom-payments',
 					),
 				),
@@ -3326,15 +3320,15 @@ class PaymentsExtensionSuggestions {
 				),
 				'links'       => array(
 					array(
-						'_type' => self::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'https://woocommerce.com/products/mercado-pago-checkout/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_DOCS,
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
 						'url'   => 'https://woocommerce.com/document/mercado-pago/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_SUPPORT,
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
 						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=mercado-pago-checkout',
 					),
 				),
@@ -3351,23 +3345,23 @@ class PaymentsExtensionSuggestions {
 				),
 				'links'       => array(
 					array(
-						'_type' => self::LINK_TYPE_PRICING,
+						'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 						'url'   => 'https://www.mollie.com/pricing',
 					),
 					array(
-						'_type' => self::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'https://woocommerce.com/products/mollie-payments-for-woocommerce/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_TERMS,
+						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 						'url'   => 'https://www.mollie.com/user-agreement',
 					),
 					array(
-						'_type' => self::LINK_TYPE_DOCS,
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
 						'url'   => 'https://woocommerce.com/document/mollie-payments-for-woocommerce/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_SUPPORT,
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
 						'url'   => 'https://discord.com/invite/mollie',
 					),
 				),
@@ -3384,23 +3378,23 @@ class PaymentsExtensionSuggestions {
 				),
 				'links'       => array(
 					array(
-						'_type' => self::LINK_TYPE_PRICING,
+						'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 						'url'   => 'https://payfast.io/fees/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'https://woocommerce.com/products/payfast-payment-gateway/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_TERMS,
+						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 						'url'   => 'https://payfast.io/legal/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_DOCS,
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
 						'url'   => 'https://woocommerce.com/document/payfast-payment-gateway/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_SUPPORT,
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
 						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=payfast-payment-gateway',
 					),
 				),
@@ -3417,23 +3411,23 @@ class PaymentsExtensionSuggestions {
 				),
 				'links'       => array(
 					array(
-						'_type' => self::LINK_TYPE_PRICING,
+						'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 						'url'   => 'https://paymob.com/en/pricing',
 					),
 					array(
-						'_type' => self::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'https://woocommerce.com/products/paymob/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_TERMS,
+						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 						'url'   => 'https://paymob.com/en/policy',
 					),
 					array(
-						'_type' => self::LINK_TYPE_DOCS,
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
 						'url'   => 'https://woocommerce.com/document/paymob-for-woocommerce/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_SUPPORT,
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
 						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=paymob',
 					),
 				),
@@ -3450,23 +3444,23 @@ class PaymentsExtensionSuggestions {
 				),
 				'links'       => array(
 					array(
-						'_type' => self::LINK_TYPE_PRICING,
+						'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 						'url'   => 'https://www.paypal.com/webapps/mpp/merchant-fees',
 					),
 					array(
-						'_type' => self::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'https://woocommerce.com/products/woocommerce-paypal-payments/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_TERMS,
+						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 						'url'   => 'https://www.paypal.com/legalhub/home',
 					),
 					array(
-						'_type' => self::LINK_TYPE_DOCS,
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
 						'url'   => 'https://woocommerce.com/document/woocommerce-paypal-payments/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_SUPPORT,
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
 						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=woocommerce-paypal-payments',
 					),
 				),
@@ -3484,23 +3478,23 @@ class PaymentsExtensionSuggestions {
 				),
 				'links'       => array(
 					array(
-						'_type' => self::LINK_TYPE_PRICING,
+						'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 						'url'   => 'https://www.paypal.com/webapps/mpp/merchant-fees#advanced_cd_payments',
 					),
 					array(
-						'_type' => self::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'https://woocommerce.com/products/woocommerce-paypal-payments/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_TERMS,
+						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 						'url'   => 'https://www.paypal.com/legalhub/home',
 					),
 					array(
-						'_type' => self::LINK_TYPE_DOCS,
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
 						'url'   => 'https://woocommerce.com/document/woocommerce-paypal-payments/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_SUPPORT,
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
 						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=woocommerce-paypal-payments',
 					),
 				),
@@ -3518,23 +3512,23 @@ class PaymentsExtensionSuggestions {
 				),
 				'links'       => array(
 					array(
-						'_type' => self::LINK_TYPE_PRICING,
+						'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 						'url'   => 'https://www.payoneer.com/about/pricing/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'https://woocommerce.com/products/payoneer-checkout/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_TERMS,
+						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 						'url'   => 'https://www.payoneer.com/legal-agreements/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_DOCS,
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
 						'url'   => 'https://checkoutdocs.payoneer.com/docs/about-woocommerce-integration',
 					),
 					array(
-						'_type' => self::LINK_TYPE_SUPPORT,
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
 						'url'   => 'https://checkoutdocs.payoneer.com/docs/troubleshoot-woocommerce',
 					),
 				),
@@ -3551,23 +3545,23 @@ class PaymentsExtensionSuggestions {
 				),
 				'links'       => array(
 					array(
-						'_type' => self::LINK_TYPE_PRICING,
+						'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 						'url'   => 'https://paystack.com/pricing',
 					),
 					array(
-						'_type' => self::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'https://woocommerce.com/products/paystack/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_TERMS,
+						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 						'url'   => 'https://paystack.com/terms',
 					),
 					array(
-						'_type' => self::LINK_TYPE_DOCS,
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
 						'url'   => 'https://woocommerce.com/document/paystack/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_SUPPORT,
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
 						'url'   => 'https://support.paystack.com/en/articles/2130754',
 					),
 				),
@@ -3583,23 +3577,23 @@ class PaymentsExtensionSuggestions {
 				),
 				'links'       => array(
 					array(
-						'_type' => self::LINK_TYPE_PRICING,
+						'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 						'url'   => 'https://www.paytrail.com/en/pricing',
 					),
 					array(
-						'_type' => self::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'https://woocommerce.com/products/paytrail/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_TERMS,
+						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 						'url'   => 'https://www.paytrail.com/en/terms-conditions',
 					),
 					array(
-						'_type' => self::LINK_TYPE_DOCS,
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
 						'url'   => 'https://woocommerce.com/document/paytrail-for-woocommerce/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_SUPPORT,
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
 						'url'   => 'https://www.paytrail.com/en/customer-service#merchants',
 					),
 				),
@@ -3616,23 +3610,23 @@ class PaymentsExtensionSuggestions {
 				),
 				'links'       => array(
 					array(
-						'_type' => self::LINK_TYPE_PRICING,
+						'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 						'url'   => 'https://payu.in/pricing/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'https://woocommerce.com/products/payu-india/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_TERMS,
+						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 						'url'   => 'https://payu.in/payu-terms-and-conditions/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_DOCS,
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
 						'url'   => 'https://payu.in/plugins/payment-gateway-for-woocommerce-plugin',
 					),
 					array(
-						'_type' => self::LINK_TYPE_SUPPORT,
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
 						'url'   => 'https://help.payu.in/',
 					),
 				),
@@ -3649,23 +3643,23 @@ class PaymentsExtensionSuggestions {
 				),
 				'links'       => array(
 					array(
-						'_type' => self::LINK_TYPE_PRICING,
+						'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 						'url'   => 'https://razorpay.com/pricing/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'https://woocommerce.com/products/razorpay-for-woocommerce/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_TERMS,
+						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 						'url'   => 'https://razorpay.com/terms/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_DOCS,
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
 						'url'   => 'https://razorpay.com/docs/payment-gateway/ecommerce-plugins/woocommerce/woocommerce-pg/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_SUPPORT,
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
 						'url'   => 'https://razorpay.com/support/',
 					),
 				),
@@ -3682,23 +3676,23 @@ class PaymentsExtensionSuggestions {
 				),
 				'links'       => array(
 					array(
-						'_type' => self::LINK_TYPE_PRICING,
+						'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 						'url'   => 'https://squareup.com/pricing',
 					),
 					array(
-						'_type' => self::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'https://woocommerce.com/products/square/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_TERMS,
+						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 						'url'   => 'https://squareup.com/legal/general/ua',
 					),
 					array(
-						'_type' => self::LINK_TYPE_DOCS,
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
 						'url'   => 'https://woocommerce.com/document/woocommerce-square/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_SUPPORT,
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
 						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=square',
 					),
 				),
@@ -3716,23 +3710,23 @@ class PaymentsExtensionSuggestions {
 				),
 				'links'       => array(
 					array(
-						'_type' => self::LINK_TYPE_PRICING,
+						'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 						'url'   => 'https://stripe.com/pricing',
 					),
 					array(
-						'_type' => self::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'https://woocommerce.com/products/stripe/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_TERMS,
+						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 						'url'   => 'https://stripe.com/legal/connect-account',
 					),
 					array(
-						'_type' => self::LINK_TYPE_DOCS,
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
 						'url'   => 'https://woocommerce.com/document/stripe',
 					),
 					array(
-						'_type' => self::LINK_TYPE_SUPPORT,
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
 						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=stripe',
 					),
 				),
@@ -3749,23 +3743,23 @@ class PaymentsExtensionSuggestions {
 				),
 				'links'       => array(
 					array(
-						'_type' => self::LINK_TYPE_PRICING,
+						'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 						'url'   => 'https://tilopay.com/tarifas',
 					),
 					array(
-						'_type' => self::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'https://tilopay.com/tilopay-checkout',
 					),
 					array(
-						'_type' => self::LINK_TYPE_TERMS,
+						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 						'url'   => 'https://tilopay.com/terminos-condiciones',
 					),
 					array(
-						'_type' => self::LINK_TYPE_DOCS,
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
 						'url'   => 'https://tilopay.com/documentacion/plataforma-woocommerce',
 					),
 					array(
-						'_type' => self::LINK_TYPE_SUPPORT,
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
 						'url'   => 'https://cst.support.tilopay.com/servicedesk/customer/portals',
 					),
 				),
@@ -3782,23 +3776,23 @@ class PaymentsExtensionSuggestions {
 				),
 				'links'       => array(
 					array(
-						'_type' => self::LINK_TYPE_PRICING,
+						'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 						'url'   => 'https://www.viva.com/pricing',
 					),
 					array(
-						'_type' => self::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'https://woocommerce.com/products/viva-com-smart-for-woocommerce/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_TERMS,
+						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 						'url'   => 'https://www.viva.com/terms-portal',
 					),
 					array(
-						'_type' => self::LINK_TYPE_DOCS,
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
 						'url'   => 'https://woocommerce.com/document/viva-com-smart-for-woocommerce/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_SUPPORT,
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
 						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=viva-com-smart-for-woocommerce',
 					),
 				),
@@ -3815,23 +3809,23 @@ class PaymentsExtensionSuggestions {
 				),
 				'links'       => array(
 					array(
-						'_type' => self::LINK_TYPE_PRICING,
+						'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 						'url'   => 'https://woocommerce.com/document/woopayments/fees-and-debits/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'https://woocommerce.com/payments/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_TERMS,
+						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 						'url'   => 'https://woocommerce.com/document/woopayments/our-policies/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_DOCS,
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
 						'url'   => 'https://woocommerce.com/document/woopayments/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_SUPPORT,
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
 						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=woopayments',
 					),
 				),
@@ -3849,23 +3843,23 @@ class PaymentsExtensionSuggestions {
 				),
 				'links'       => array(
 					array(
-						'_type' => self::LINK_TYPE_PRICING,
+						'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 						'url'   => 'https://pay.amazon.com/help/201212280',
 					),
 					array(
-						'_type' => self::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'https://woocommerce.com/products/pay-with-amazon/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_TERMS,
+						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 						'url'   => 'https://pay.amazon.com/help/201212430',
 					),
 					array(
-						'_type' => self::LINK_TYPE_DOCS,
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
 						'url'   => 'https://woocommerce.com/document/amazon-payments-advanced/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_SUPPORT,
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
 						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=pay-with-amazon',
 					),
 				),
@@ -3883,23 +3877,23 @@ class PaymentsExtensionSuggestions {
 				),
 				'links'       => array(
 					array(
-						'_type' => self::LINK_TYPE_PRICING,
+						'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 						'url'   => 'https://www.affirm.com/business',
 					),
 					array(
-						'_type' => self::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'https://woocommerce.com/products/woocommerce-gateway-affirm/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_TERMS,
+						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 						'url'   => 'https://www.affirm.com/terms',
 					),
 					array(
-						'_type' => self::LINK_TYPE_DOCS,
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
 						'url'   => 'https://woocommerce.com/document/woocommerce-gateway-affirm/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_SUPPORT,
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
 						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=woocommerce-gateway-affirm',
 					),
 				),
@@ -3917,23 +3911,23 @@ class PaymentsExtensionSuggestions {
 				),
 				'links'       => array(
 					array(
-						'_type' => self::LINK_TYPE_PRICING,
+						'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 						'url'   => 'https://www.afterpay.com/for-retailers',
 					),
 					array(
-						'_type' => self::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'https://woocommerce.com/products/afterpay/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_TERMS,
+						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 						'url'   => 'https://www.afterpay.com/terms-of-service',
 					),
 					array(
-						'_type' => self::LINK_TYPE_DOCS,
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
 						'url'   => 'https://woocommerce.com/document/afterpay/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_SUPPORT,
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
 						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=afterpay',
 					),
 				),
@@ -3949,23 +3943,23 @@ class PaymentsExtensionSuggestions {
 				),
 				'links'       => array(
 					array(
-						'_type' => self::LINK_TYPE_PRICING,
+						'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 						'url'   => 'https://www.clearpay.co.uk/en-GB/for-retailers',
 					),
 					array(
-						'_type' => self::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'https://woocommerce.com/products/clearpay/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_TERMS,
+						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 						'url'   => 'https://www.clearpay.co.uk/terms-of-service',
 					),
 					array(
-						'_type' => self::LINK_TYPE_DOCS,
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
 						'url'   => 'https://woocommerce.com/document/clearpay/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_SUPPORT,
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
 						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=clearpay',
 					),
 				),
@@ -3982,23 +3976,23 @@ class PaymentsExtensionSuggestions {
 				),
 				'links'       => array(
 					array(
-						'_type' => self::LINK_TYPE_PRICING,
+						'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 						'url'   => 'https://www.klarna.com/us/business/payment-methods/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'https://woocommerce.com/products/klarna-payments/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_TERMS,
+						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 						'url'   => 'https://www.klarna.com/us/legal/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_DOCS,
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
 						'url'   => 'https://woocommerce.com/document/klarna-payments/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_SUPPORT,
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
 						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=klarna-payments',
 					),
 				),
@@ -4014,23 +4008,23 @@ class PaymentsExtensionSuggestions {
 				),
 				'links'       => array(
 					array(
-						'_type' => self::LINK_TYPE_PRICING,
+						'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 						'url'   => 'https://www.klarna.com/us/business/payment-methods/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'https://woocommerce.com/products/klarna-checkout/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_TERMS,
+						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 						'url'   => 'https://www.klarna.com/us/legal/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_DOCS,
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
 						'url'   => 'https://woocommerce.com/document/klarna-checkout/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_SUPPORT,
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
 						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=klarna-checkout',
 					),
 				),
@@ -4046,23 +4040,23 @@ class PaymentsExtensionSuggestions {
 				),
 				'links'       => array(
 					array(
-						'_type' => self::LINK_TYPE_PRICING,
+						'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 						'url'   => 'https://www.hel.io/pricing',
 					),
 					array(
-						'_type' => self::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'https://woocommerce.com/products/helio-pay/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_TERMS,
+						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 						'url'   => 'https://info.docs.hel.io/terms-of-service',
 					),
 					array(
-						'_type' => self::LINK_TYPE_DOCS,
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
 						'url'   => 'https://woocommerce.com/document/helio-pay/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_SUPPORT,
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
 						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=helio-pay',
 					),
 				),
@@ -4078,23 +4072,23 @@ class PaymentsExtensionSuggestions {
 				),
 				'links'       => array(
 					array(
-						'_type' => self::LINK_TYPE_PRICING,
+						'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 						'url'   => 'https://monei.com/pricing/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'https://monei.com/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_TERMS,
+						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 						'url'   => 'https://monei.com/legal-notice/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_DOCS,
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
 						'url'   => 'https://support.monei.com/hc/en-us/articles/360017801677-Get-started-with-MONEI',
 					),
 					array(
-						'_type' => self::LINK_TYPE_SUPPORT,
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
 						'url'   => 'https://support.monei.com/hc/en-us/requests/new',
 					),
 				),
@@ -4110,23 +4104,23 @@ class PaymentsExtensionSuggestions {
 				),
 				'links'       => array(
 					array(
-						'_type' => self::LINK_TYPE_PRICING,
+						'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 						'url'   => 'https://www.eway.com.au/online-payments/#pricing',
 					),
 					array(
-						'_type' => self::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'https://woocommerce.com/products/eway/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_TERMS,
+						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 						'url'   => 'https://www.eway.com.au/docs/eWAY-Terms-and-Conditions-AU.pdf',
 					),
 					array(
-						'_type' => self::LINK_TYPE_DOCS,
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
 						'url'   => 'https://woocommerce.com/document/eway/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_SUPPORT,
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
 						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=eway',
 					),
 				),
@@ -4142,16 +4136,36 @@ class PaymentsExtensionSuggestions {
 				),
 				'links'       => array(
 					array(
-						'_type' => self::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'https://woocommerce.com/products/visa-acceptance-solutions/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_DOCS,
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
 						'url'   => 'https://woocommerce.com/document/visa-acceptance-solutions/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_SUPPORT,
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
 						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=visa-acceptance-solutions',
+					),
+				),
+			),
+			self::NGENIUS           => array(
+				'_type'       => self::TYPE_PSP,
+				'title'       => esc_html__( 'N-Genius Online by Network', 'woocommerce' ),
+				'description' => esc_html__( 'Power your business with N-Genius Online—smart, secure, and built for the future', 'woocommerce' ),
+				'icon'        => plugins_url( 'assets/images/onboarding/icons/ngenius.svg', WC_PLUGIN_FILE ),
+				'plugin'      => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'ngenius',
+				),
+				'links'       => array(
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
+						'url'   => 'https://woocommerce.com/products/ngenius/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+						'url'   => 'https://woocommerce.com/document/ngenius/',
 					),
 				),
 			),
@@ -4166,23 +4180,23 @@ class PaymentsExtensionSuggestions {
 				),
 				'links'       => array(
 					array(
-						'_type' => self::LINK_TYPE_PRICING,
+						'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 						'url'   => 'https://gocardless.com/pricing/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'https://woocommerce.com/products/gocardless/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_TERMS,
+						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 						'url'   => 'https://gocardless.com/legal/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_DOCS,
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
 						'url'   => 'https://woocommerce.com/document/gocardless/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_SUPPORT,
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
 						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=gocardless',
 					),
 				),
@@ -4198,19 +4212,19 @@ class PaymentsExtensionSuggestions {
 				),
 				'links'       => array(
 					array(
-						'_type' => self::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'https://woocommerce.com/products/nexi-checkout/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_TERMS,
+						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
 						'url'   => 'https://support.nets.eu/document/nets-easy-general-terms-and-conditions-2022',
 					),
 					array(
-						'_type' => self::LINK_TYPE_DOCS,
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
 						'url'   => 'https://woocommerce.com/document/nexi-checkout/',
 					),
 					array(
-						'_type' => self::LINK_TYPE_SUPPORT,
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
 						'url'   => 'https://developer.nexigroup.com/nexi-checkout/en-EU/support/',
 					),
 				),

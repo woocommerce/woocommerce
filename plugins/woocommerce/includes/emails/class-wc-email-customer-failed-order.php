@@ -30,7 +30,7 @@ if ( ! class_exists( 'WC_Email_Customer_Failed_Order', false ) ) :
 			$this->id             = 'customer_failed_order';
 			$this->customer_email = true;
 			$this->title          = __( 'Failed order', 'woocommerce' );
-			$this->email_group    = 'order-exceptions';
+			$this->email_group    = 'order-changes';
 			$this->template_html  = 'emails/customer-failed-order.php';
 			$this->template_plain = 'emails/plain/customer-failed-order.php';
 			$this->placeholders   = array(
@@ -48,6 +48,11 @@ if ( ! class_exists( 'WC_Email_Customer_Failed_Order', false ) ) :
 			$this->description = $this->email_improvements_enabled
 				? __( 'Receive an email notification when an order that was processing or on hold fails', 'woocommerce' )
 				: __( 'Order failed emails are sent to customers when their orders are marked as failed.', 'woocommerce' );
+
+			if ( $this->block_email_editor_enabled ) {
+				$this->title       = __( 'Order failed', 'woocommerce' );
+				$this->description = __( 'Notifies customers when their order has failed.', 'woocommerce' );
+			}
 		}
 
 		/**

@@ -54,6 +54,8 @@ const WidthOptionsControl = ( {
 			isShownByDefault
 		>
 			<ToggleGroupControl
+				__next40pxDefaultSize
+				__nextHasNoMarginBottom
 				label={ __( 'Width', 'woocommerce' ) }
 				value={ widthType }
 				help={ getHelpText( widthType ) }
@@ -71,6 +73,7 @@ const WidthOptionsControl = ( {
 			</ToggleGroupControl>
 			{ widthType === WidthOptions.FIXED && (
 				<UnitControl
+					__next40pxDefaultSize
 					onChange={ ( value: string ) => {
 						setAttributes( {
 							dimensions: {

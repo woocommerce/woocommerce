@@ -2,7 +2,7 @@
 	"name": "@woocommerce/plugin-woocommerce",
 	"private": true,
 	"title": "WooCommerce",
-	"version": "10.4.0",
+	"version": "10.7.0",
 	"homepage": "https://woocommerce.com/",
 	"repository": {
 		"type": "git",
@@ -23,6 +23,7 @@
 		"build:project:copy-assets:blueprint": "rsync -avhW --checksum --delete --quiet ../../packages/php/blueprint/src/ packages/blueprint/src",
 		"build:project:actualize-translation-domains": "wireit",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
+		"update:php": "XDEBUG_MODE=off composer update --quiet",
 		"env:destroy": "pnpm wp-env destroy",
 		"env:dev": "pnpm wp-env start --update",
 		"env:down": "pnpm wp-env stop",
@@ -48,6 +49,8 @@
 		"lint:php:changes:branch": "composer run-script lint-branch",
 		"lint:php:changes:staged": "composer run-script lint-staged",
 		"lint:php:fix": "composer run-script phpcbf",
+		"phpstan": "composer run-script phpstan",
+		"phpstan:baseline": "composer run-script phpstan:baseline",
 		"make:collection": "pnpm exec wc-api-tests make:collection",
 		"makepot": "XDEBUG_MODE=off composer run-script makepot",
 		"test": "pnpm test:unit",
@@ -67,9 +70,10 @@
 		"ci:legacy-minicart-flag-off": "node ./bin/set-legacy-minicart-flag.js && php bin/generate-feature-config.php",
 		"test:e2e:legacy-mini-cart": "pnpm ci:legacy-minicart-flag-off && pnpm test:e2e:default --project=legacy-mini-cart",
 		"test:e2e:blocks:legacy-mini-cart": "pnpm ci:legacy-minicart-flag-off && pnpm --filter='@woocommerce/block-library' test:e2e:legacy-mini-cart",
+		"test:e2e:paypal-standard": "pnpm test:e2e:default --project=paypal-standard",
 		"test:php:legacy-mini-cart": "pnpm ci:legacy-minicart-flag-off && pnpm test:php:env",
 		"test:env:start": "pnpm env:test",
-		"test:perf": "./tests/performance/bin/k6 run ./tests/performance/tests/gh-action-pr-requests.js",
+		"test:perf": "./tests/performance/bin/k6 run ./tests/performance/tests/main.js",
 		"test:perf:ci-setup": "pnpm test:perf:install-k6 && pnpm env:perf",
 		"test:perf:install-k6": "bash ./tests/performance/bin/install-k6.sh",
 		"test:php": "sh ./client/blocks/bin/copy-blocks-json.sh && ./vendor/bin/phpunit -c ./phpunit.xml",
@@ -117,7 +121,7 @@
 			},
 			"tests": [
 				{
-					"name": "PHP: 8.4 WP: latest",
+					"name": "PHP: 8.5 WP: latest",
 					"testType": "unit:php",
 					"command": "test:php:env",
 					"shardingArguments": [
@@ -134,20 +138,20 @@
 						"phpunit.xml"
 					],
 					"testEnv": {
-						"start": "env:test",
+						"start": "env:test --debug",
 						"config": {
-							"phpVersion": "8.4",
+							"phpVersion": "8.5",
 							"wpVersion": "latest"
 						}
 					},
 					"events": [
 						"pull_request",
 						"push",
-						"php-unit-php-8.4-wp-latest"
+						"php-unit-php-8.5-wp-latest"
 					]
 				},
 				{
-					"name": "PHP: 8.4 WP: latest - Legacy MiniCart",
+					"name": "PHP: 8.5 WP: latest - Legacy MiniCart",
 					"testType": "unit:php",
 					"command": "test:php:legacy-mini-cart",
 					"shardingArguments": [
@@ -164,9 +168,9 @@
 						"phpunit.xml"
 					],
 					"testEnv": {
-						"start": "env:test",
+						"start": "env:test --debug",
 						"config": {
-							"phpVersion": "8.4",
+							"phpVersion": "8.5",
 							"wpVersion": "latest"
 						}
 					},
@@ -193,7 +197,7 @@
 						"phpunit.xml"
 					],
 					"testEnv": {
-						"start": "env:test",
+						"start": "env:test --debug",
 						"config": {
 							"phpVersion": "7.4",
 							"wpVersion": "latest-1"
@@ -206,7 +210,8 @@
 					]
 				},
 				{
-					"name": "PHP: 7.4 WP: prerelease",
+					"name": "PHP: 7.4 WP: pre-release",
+					"optional": true,
 					"testType": "unit:php",
 					"command": "test:php:env",
 					"shardingArguments": [
@@ -215,15 +220,13 @@
 					],
 					"onlyForDependencies": [],
 					"changes": [
-						"client/admin/config/*.json",
-						"composer.json",
-						"composer.lock",
-						"**/*.php",
-						".wp-env.json",
+						"tests/legacy/**",
+						"tests/php/**",
+						"tests/unit-tests/**",
 						"phpunit.xml"
 					],
 					"testEnv": {
-						"start": "env:test",
+						"start": "env:test --debug",
 						"config": {
 							"phpVersion": "7.4",
 							"wpVersion": "prerelease"
@@ -241,7 +244,7 @@
 					"optional": true,
 					"changes": [],
 					"testEnv": {
-						"start": "env:test"
+						"start": "env:test --debug"
 					},
 					"events": [
 						"nightly-checks",
@@ -275,7 +278,7 @@
 						"uninstall.php"
 					],
 					"testEnv": {
-						"start": "env:test"
+						"start": "env:test --debug"
 					},
 					"events": [
 						"pull_request",
@@ -293,9 +296,7 @@
 					"name": "Core e2e tests - Legacy MiniCart",
 					"testType": "e2e",
 					"command": "test:e2e:legacy-mini-cart",
-					"shardingArguments": [
-						"--shard=1/1"
-					],
+					"shardingArguments": [],
 					"changes": [
 						"client/admin/config/*.json",
 						"composer.json",
@@ -311,7 +312,7 @@
 						"uninstall.php"
 					],
 					"testEnv": {
-						"start": "env:test"
+						"start": "env:test --debug"
 					},
 					"events": [
 						"pull_request",
@@ -328,10 +329,8 @@
 					"testType": "e2e",
 					"command": "test:e2e:gb-stable",
 					"shardingArguments": [
-						"--shard=1/4",
-						"--shard=2/4",
-						"--shard=3/4",
-						"--shard=4/4"
+						"--shard=1/2",
+						"--shard=2/2"
 					],
 					"changes": [
 						"tests/e2e-pw/**"
@@ -346,7 +345,7 @@
 						"core-e2e-gutenberg"
 					],
 					"testEnv": {
-						"start": "env:test"
+						"start": "env:test --debug"
 					},
 					"report": {
 						"resultsBlobName": "gutenberg-stable-e2e-report",
@@ -359,10 +358,8 @@
 					"testType": "e2e",
 					"command": "test:e2e:gb-nightly",
 					"shardingArguments": [
-						"--shard=1/4",
-						"--shard=2/4",
-						"--shard=3/4",
-						"--shard=4/4"
+						"--shard=1/2",
+						"--shard=2/2"
 					],
 					"changes": [
 						"tests/e2e-pw/**"
@@ -376,7 +373,7 @@
 						"core-e2e-gutenberg"
 					],
 					"testEnv": {
-						"start": "env:test"
+						"start": "env:test --debug"
 					},
 					"report": {
 						"resultsBlobName": "gutenberg-nightly-e2e-report",
@@ -402,7 +399,7 @@
 						"core-e2e-hpos-disabled"
 					],
 					"testEnv": {
-						"start": "env:test"
+						"start": "env:test --debug"
 					},
 					"report": {
 						"resultsBlobName": "core-e2e-reports-hpos-disabled",
@@ -411,7 +408,7 @@
 					}
 				},
 				{
-					"name": "Core e2e tests - PHP 8.4",
+					"name": "Core e2e tests - PHP 8.5",
 					"testType": "e2e",
 					"command": "test:e2e",
 					"shardingArguments": [
@@ -428,19 +425,19 @@
 						"@woocommerce/e2e-utils-playwright"
 					],
 					"testEnv": {
-						"start": "env:test",
+						"start": "env:test --debug",
 						"config": {
-							"phpVersion": "8.4"
+							"phpVersion": "8.5"
 						}
 					},
 					"events": [
 						"pull_request",
 						"nightly-checks",
 						"release-checks",
-						"core-e2e-php-8.4"
+						"core-e2e-php-8.5"
 					],
 					"report": {
-						"resultsBlobName": "core-e2e-report-php-8.4",
+						"resultsBlobName": "core-e2e-report-php-8.5",
 						"resultsPath": "tests/e2e-pw/test-results",
 						"allure": true
 					}
@@ -463,7 +460,7 @@
 						"@woocommerce/e2e-utils-playwright"
 					],
 					"testEnv": {
-						"start": "env:test",
+						"start": "env:test --debug",
 						"config": {
 							"wpVersion": "latest-1"
 						}
@@ -482,6 +479,7 @@
 				},
 				{
 					"name": "Core e2e tests - WP pre-release",
+					"optional": true,
 					"testType": "e2e",
 					"command": "test:e2e",
 					"shardingArguments": [
@@ -498,7 +496,7 @@
 						"@woocommerce/e2e-utils-playwright"
 					],
 					"testEnv": {
-						"start": "env:test",
+						"start": "env:test --debug",
 						"config": {
 							"wpVersion": "prerelease"
 						}
@@ -536,7 +534,7 @@
 					],
 					"onlyForDependencies": [],
 					"testEnv": {
-						"start": "env:test"
+						"start": "env:test --debug"
 					},
 					"events": [
 						"pull_request",
@@ -574,7 +572,7 @@
 						"core-api-hpos-disabled"
 					],
 					"testEnv": {
-						"start": "env:test"
+						"start": "env:test --debug"
 					},
 					"report": {
 						"resultsBlobName": "core-api-report-hpos-disabled",
@@ -583,7 +581,7 @@
 					}
 				},
 				{
-					"name": "PHP: 8.4 WP: latest (HPOS:off)",
+					"name": "PHP: 8.5 WP: latest (HPOS:off)",
 					"testType": "unit:php",
 					"command": "test:php:env:hpos-off",
 					"shardingArguments": [
@@ -600,16 +598,16 @@
 						"phpunit.xml"
 					],
 					"testEnv": {
-						"start": "env:test",
+						"start": "env:test --debug",
 						"config": {
-							"phpVersion": "8.4",
+							"phpVersion": "8.5",
 							"wpVersion": "latest"
 						}
 					},
 					"events": [
 						"pull_request",
 						"push",
-						"php-unit-php-8.4-wp-latest-hpos-off"
+						"php-unit-php-8.5-wp-latest-hpos-off"
 					]
 				},
 				{
@@ -637,7 +635,7 @@
 						"core-api-object-cache"
 					],
 					"testEnv": {
-						"start": "env:test"
+						"start": "env:test --debug"
 					},
 					"report": {
 						"resultsBlobName": "core-api-report-object-cache",
@@ -667,7 +665,7 @@
 					"name": "Metrics",
 					"testType": "performance",
 					"command": "test:metrics:ci",
-					"optional": false,
+					"optional": true,
 					"changes": [
 						"composer.json",
 						"composer.lock",
@@ -685,7 +683,7 @@
 						"@woocommerce/classic-assets"
 					],
 					"testEnv": {
-						"start": "env:test"
+						"start": "env:perf"
 					},
 					"events": [
 						"push",
@@ -772,6 +770,7 @@
 				},
 				{
 					"name": "Blocks e2e tests - WP pre-release",
+					"optional": true,
 					"testType": "e2e",
 					"command": "test:e2e:blocks",
 					"shardingArguments": [
@@ -787,11 +786,9 @@
 						"--shard=10/10"
 					],
 					"changes": [
-						"src/Blocks/**",
-						"templates/**",
-						"patterns/**",
 						"client/blocks/tests/e2e/**"
 					],
+					"onlyForDependencies": [],
 					"testEnv": {
 						"start": "env:start:blocks",
 						"config": {
@@ -829,6 +826,7 @@
 					"changes": [
 						"client/blocks/tests/e2e/**"
 					],
+					"onlyForDependencies": [],
 					"testEnv": {
 						"start": "env:start:blocks",
 						"config": {
@@ -876,6 +874,31 @@
 						"resultsPath": "tests/e2e-pw/test-results",
 						"allure": true
 					}
+				},
+				{
+					"name": "Core e2e tests - PayPal Standard",
+					"testType": "e2e",
+					"command": "test:e2e:paypal-standard",
+					"shardingArguments": [],
+					"changes": [
+						"includes/gateways/paypal/**/*.php",
+						"src/Gateways/PayPal/**/*.php",
+						"tests/e2e-pw/tests/paypal/**"
+					],
+					"events": [
+						"pull_request",
+						"push",
+						"release-checks",
+						"core-e2e"
+					],
+					"testEnv": {
+						"start": "env:test --debug"
+					},
+					"report": {
+						"resultsBlobName": "core-e2e-report",
+						"resultsPath": "tests/e2e-pw/test-results",
+						"allure": true
+					}
 				}
 			]
 		}
@@ -885,7 +908,7 @@
 		"@babel/core": "7.25.7",
 		"@babel/preset-env": "7.25.7",
 		"@faker-js/faker": "^9.3.0",
-		"@playwright/test": "^1.50.1",
+		"@playwright/test": "^1.57.0",
 		"@typescript-eslint/eslint-plugin": "^5.62.0",
 		"@typescript-eslint/experimental-utils": "^5.62.0",
 		"@typescript-eslint/parser": "^5.62.0",
@@ -893,7 +916,7 @@
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@wordpress/browserslist-config": "next",
 		"@wordpress/e2e-test-utils-playwright": "wp-6.8",
-		"@wordpress/env": "10.17.0",
+		"@wordpress/env": "11.0.1-next.v.20260206T143.0",
 		"@wordpress/scripts": "30.6.0",
 		"@wordpress/stylelint-config": "^21.36.0",
 		"allure-commandline": "^2.32.2",
@@ -909,6 +932,7 @@
 		"eslint-plugin-playwright": "0.22.1",
 		"jest": "29.5.x",
 		"nodemon": "^3.0.2",
+		"playwright-ctrf-json-reporter": "0.0.27",
 		"prettier": "npm:wp-prettier@^2.8.5",
 		"rimraf": "5.0.5",
 		"stylelint": "^14.16.1",
@@ -961,6 +985,9 @@
 				"node_modules/@woocommerce/admin-library/build",
 				"node_modules/@woocommerce/block-library/build",
 				"node_modules/@woocommerce/classic-assets/build",
+				"node_modules/@woocommerce/e2e-utils-playwright/build",
+				"node_modules/@woocommerce/e2e-utils-playwright/build-module",
+				"node_modules/@woocommerce/e2e-utils-playwright/build-types",
 				"node_modules/@woocommerce/eslint-plugin/configs",
 				"node_modules/@woocommerce/eslint-plugin/rules",
 				"node_modules/@woocommerce/eslint-plugin/index.js"

@@ -44,7 +44,7 @@ function wc_log_order_step( string $message, ?array $context = null, bool $final
 			return; // Whenever the method is called without a started logging session, it will be ignored.
 		}
 
-		static $logger, $order_uid, $order_uid_short, $store_url;
+		static $order_uid, $order_uid_short, $store_url;
 		static $steps = array(); // Static array to store the messages and validate against unique messages before clearing the log.
 
 		// Generate a static place order unique ID for logging purposes. When this is called multiple times in the same request,
@@ -67,10 +67,8 @@ function wc_log_order_step( string $message, ?array $context = null, bool $final
 			$order->save();
 		}
 
-		if ( ! $logger ) {
-			// Use a static logger instance to avoid unnecessary instantiations.
-			$logger = new WC_Logger( null, WC_Log_Levels::DEBUG );
-		}
+		// Use the global logger instance which respects site's logging configuration.
+		$logger = wc_get_logger();
 
 		if ( ! is_null( error_get_last() ) ) {
 			$context['last_error'] = error_get_last();
@@ -89,7 +87,9 @@ function wc_log_order_step( string $message, ?array $context = null, bool $final
 			if ( $order && ( count( array_unique( $steps ) ) === count( $steps ) ) ) {
 				$order->delete_meta_data( '_debug_log_source' );
 				if ( OrderUtil::unknown_orders_data_store_in_use() ) {
-					$logger->clear( $context['source'] );
+					if ( $logger instanceof WC_Logger ) {
+						$logger->clear( $context['source'] );
+					}
 					$order->save();
 				} else {
 					$order->add_meta_data( '_debug_log_source_pending_deletion', $context['source'], true );

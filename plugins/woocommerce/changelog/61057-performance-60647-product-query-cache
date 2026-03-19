@@ -1,4 +1,0 @@
-Significance: minor
-Type: performance
-
-Add cache priming to `ProductQuery::get_objects`

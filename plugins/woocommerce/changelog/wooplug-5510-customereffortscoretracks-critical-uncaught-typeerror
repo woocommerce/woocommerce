@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Update Customer Effort Score track queue logic to avoid PHP errors around wrong type coming from wp_options.

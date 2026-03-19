@@ -33,7 +33,7 @@ import {
 } from '../../config.js';
 import {
 	htmlRequestHeader,
-	jsonRequestHeader,
+	jsonAPIRequestHeader,
 	allRequestHeader,
 	commonRequestHeaders,
 	commonGetRequestHeaders,
@@ -43,8 +43,7 @@ import {
 import { checkResponse } from '../../utils.js';
 
 export function checkoutGuest() {
-	let woocommerce_process_checkout_nonce_guest;
-	let update_order_review_nonce_guest;
+	let storeApiNonce;
 
 	group( 'Proceed to checkout', function () {
 		const requestHeaders = Object.assign(
@@ -61,98 +60,123 @@ export function checkoutGuest() {
 		} );
 		checkResponse( response, 200, {
 			title: `Checkout – ${ STORE_NAME }`,
-			body: 'class="checkout woocommerce-checkout"',
+			body: 'wp-block-woocommerce-checkout',
 			footer: FOOTER_TEXT,
 		} );
 
-		// Correlate nonce values for use in subsequent requests.
-		woocommerce_process_checkout_nonce_guest = response
-			.html()
-			.find( 'input[name=woocommerce-process-checkout-nonce]' )
-			.first()
-			.attr( 'value' );
-		update_order_review_nonce_guest = findBetween(
-			response.body,
-			'update_order_review_nonce":"',
-			'","apply_coupon_nonce'
-		);
-
-		const requestHeadersPost = Object.assign(
-			{},
-			allRequestHeader,
-			commonRequestHeaders,
-			commonPostRequestHeaders,
-			commonNonStandardHeaders
-		);
-
-		const updateResponse = http.post(
-			`${ base_url }/?wc-ajax=update_order_review`,
-			{
-				security: `${ update_order_review_nonce_guest }`,
-				payment_method: `${ payment_method }`,
-				country: `${ addresses_guest_billing_country }`,
-				state: `${ addresses_guest_billing_state }`,
-				postcode: `${ addresses_guest_billing_postcode }`,
-				city: `${ addresses_guest_billing_city }`,
-				address: `${ addresses_guest_billing_address_1 }`,
-				address_2: `${ addresses_guest_billing_address_2 }`,
-				s_country: `${ addresses_guest_billing_country }`,
-				s_state: `${ addresses_guest_billing_state }`,
-				s_postcode: `${ addresses_guest_billing_postcode }`,
-				s_city: `${ addresses_guest_billing_city }`,
-				s_address: `${ addresses_guest_billing_address_1 }`,
-				s_address_2: `${ addresses_guest_billing_address_2 }`,
-				has_full_address: 'true',
-			},
-			{
-				headers: requestHeadersPost,
-				tags: { name: 'Shopper - wc-ajax=update_order_review' },
-			}
-		);
-		check( updateResponse, {
-			'is status 200': ( r ) => r.status === 200,
-		} );
+		// Extract Store API nonce for checkout request.
+		storeApiNonce = findBetween( response.body, "storeApiNonce: '", "'" );
+		if ( ! storeApiNonce ) {
+			storeApiNonce = findBetween(
+				response.body,
+				'storeApiNonce":"',
+				'"'
+			);
+		}
 	} );
 
 	sleep( randomIntBetween( `${ think_time_min }`, `${ think_time_max }` ) );
 
-	group( 'Place Order', function () {
+	group( 'Update customer billing address via Store API', function () {
 		const requestHeaders = Object.assign(
 			{},
-			jsonRequestHeader,
+			{ 'content-type': 'application/json', Nonce: storeApiNonce },
+			jsonAPIRequestHeader,
 			commonRequestHeaders,
 			commonPostRequestHeaders,
 			commonNonStandardHeaders
 		);
 
 		const response = http.post(
-			`${ base_url }/?wc-ajax=checkout`,
-			{
-				billing_first_name: `${ addresses_guest_billing_first_name }`,
-				billing_last_name: `${ addresses_guest_billing_last_name }`,
-				billing_company: `${ addresses_guest_billing_company }`,
-				billing_country: `${ addresses_guest_billing_country }`,
-				billing_address_1: `${ addresses_guest_billing_address_1 }`,
-				billing_address_2: `${ addresses_guest_billing_address_2 }`,
-				billing_city: `${ addresses_guest_billing_city }`,
-				billing_state: `${ addresses_guest_billing_state }`,
-				billing_postcode: `${ addresses_guest_billing_postcode }`,
-				billing_phone: `${ addresses_guest_billing_phone }`,
-				billing_email: `${ addresses_guest_billing_email }`,
-				order_comments: '',
-				payment_method: `${ payment_method }`,
-				'woocommerce-process-checkout-nonce': `${ woocommerce_process_checkout_nonce_guest }`,
-				_wp_http_referer: '%2F%3Fwc-ajax%3Dupdate_order_review',
-			},
+			`${ base_url }/wp-json/wc/store/v1/cart/update-customer`,
+			JSON.stringify( {
+				billing_address: {
+					first_name: addresses_guest_billing_first_name,
+					last_name: addresses_guest_billing_last_name,
+					company: addresses_guest_billing_company,
+					address_1: addresses_guest_billing_address_1,
+					address_2: addresses_guest_billing_address_2,
+					city: addresses_guest_billing_city,
+					state: addresses_guest_billing_state,
+					postcode: addresses_guest_billing_postcode,
+					country: addresses_guest_billing_country,
+					email: addresses_guest_billing_email,
+					phone: addresses_guest_billing_phone,
+				},
+				shipping_address: {
+					first_name: addresses_guest_billing_first_name,
+					last_name: addresses_guest_billing_last_name,
+					company: addresses_guest_billing_company,
+					address_1: addresses_guest_billing_address_1,
+					address_2: addresses_guest_billing_address_2,
+					city: addresses_guest_billing_city,
+					state: addresses_guest_billing_state,
+					postcode: addresses_guest_billing_postcode,
+					country: addresses_guest_billing_country,
+				},
+			} ),
 			{
 				headers: requestHeaders,
-				tags: { name: 'Shopper - wc-ajax=checkout' },
+				tags: { name: 'Shopper - Store API update-customer' },
 			}
 		);
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
-			'body contains: order-received': ( r ) =>
-				r.body.includes( 'order-received' ),
+		} );
+	} );
+
+	sleep( randomIntBetween( `${ think_time_min }`, `${ think_time_max }` ) );
+
+	group( 'Place Order via Store API', function () {
+		const requestHeaders = Object.assign(
+			{},
+			{ 'content-type': 'application/json', Nonce: storeApiNonce },
+			jsonAPIRequestHeader,
+			commonRequestHeaders,
+			commonPostRequestHeaders,
+			commonNonStandardHeaders
+		);
+
+		const response = http.post(
+			`${ base_url }/wp-json/wc/store/v1/checkout`,
+			JSON.stringify( {
+				billing_address: {
+					first_name: addresses_guest_billing_first_name,
+					last_name: addresses_guest_billing_last_name,
+					company: addresses_guest_billing_company,
+					address_1: addresses_guest_billing_address_1,
+					address_2: addresses_guest_billing_address_2,
+					city: addresses_guest_billing_city,
+					state: addresses_guest_billing_state,
+					postcode: addresses_guest_billing_postcode,
+					country: addresses_guest_billing_country,
+					email: addresses_guest_billing_email,
+					phone: addresses_guest_billing_phone,
+				},
+				shipping_address: {
+					first_name: addresses_guest_billing_first_name,
+					last_name: addresses_guest_billing_last_name,
+					company: addresses_guest_billing_company,
+					address_1: addresses_guest_billing_address_1,
+					address_2: addresses_guest_billing_address_2,
+					city: addresses_guest_billing_city,
+					state: addresses_guest_billing_state,
+					postcode: addresses_guest_billing_postcode,
+					country: addresses_guest_billing_country,
+				},
+				payment_method,
+			} ),
+			{
+				headers: requestHeaders,
+				tags: { name: 'Shopper - Store API checkout' },
+			}
+		);
+		check( response, {
+			'is status 200': ( r ) => r.status === 200,
+			'body contains: order_id': ( r ) => {
+				const data = r.json();
+				return data && data.order_id > 0;
+			},
 		} );
 	} );
 

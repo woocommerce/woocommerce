@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails\Block
- * @version 10.2.0
+ * @version 10.6.0
  */
 
 use Automattic\WooCommerce\Internal\EmailEditor\BlockEmailRenderer;
@@ -26,7 +26,7 @@ defined( 'ABSPATH' ) || exit;
 <!-- wp:heading -->
 <h2 class="wp-block-heading"><?php
 /* translators: %s: order number */
-printf( esc_html__( 'Order cancelled: #%s,', 'woocommerce' ), '<!--[woocommerce/order-number]-->' );
+printf( esc_html__( 'Canceled order: #%s,', 'woocommerce' ), '<!--[woocommerce/order-number]-->' );
 ?></h2>
 <!-- /wp:heading -->
 
@@ -42,6 +42,6 @@ printf( esc_html__( 'Order cancelled: #%s,', 'woocommerce' ), '<!--[woocommerce/
 <div class="wp-block-woocommerce-email-content"> <?php echo esc_html( BlockEmailRenderer::WOO_EMAIL_CONTENT_PLACEHOLDER ); ?> </div>
 <!-- /wp:woocommerce/email-content -->
 
-<!-- wp:paragraph -->
-<p> <?php echo esc_html__( 'Thanks for reading.', 'woocommerce' ); ?> </p>
+<!-- wp:paragraph {"align":"center"} -->
+<p class="has-text-align-center"> <?php echo esc_html__( 'Thanks for reading.', 'woocommerce' ); ?> </p>
 <!-- /wp:paragraph -->

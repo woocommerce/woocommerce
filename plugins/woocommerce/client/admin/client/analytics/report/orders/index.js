@@ -13,7 +13,7 @@ import getSelectedChart from '../../../lib/get-selected-chart';
 import OrdersReportTable from './table';
 import ReportChart from '../../components/report-chart';
 import ReportSummary from '../../components/report-summary';
-import ReportFilters from '../../components/report-filters';
+import { ReportHeader } from '../../components/report-header';
 import { ReportDateTour } from '~/guided-tours/report-date-tour';
 
 export default class OrdersReport extends Component {
@@ -22,7 +22,7 @@ export default class OrdersReport extends Component {
 
 		return (
 			<Fragment>
-				<ReportFilters
+				<ReportHeader
 					query={ query }
 					path={ path }
 					filters={ filters }

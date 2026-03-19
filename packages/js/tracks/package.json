@@ -1,11 +1,11 @@
 {
 	"name": "@woocommerce/tracks",
-	"version": "1.4.0",
+	"version": "1.5.0",
 	"description": "WooCommerce user event tracking utilities for Automattic based projects.",
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
 	"engines": {
-		"node": "^20.11.1"
+		"node": ">=20.11.1"
 	},
 	"keywords": [
 		"wordpress",
@@ -41,6 +41,7 @@
 		"build:project:cjs": "wireit",
 		"build:project:esm": "wireit",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
+		"update:php": "XDEBUG_MODE=off composer update --quiet",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:js": "eslint src --fix",
