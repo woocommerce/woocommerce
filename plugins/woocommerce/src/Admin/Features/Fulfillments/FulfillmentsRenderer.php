@@ -175,7 +175,7 @@ class FulfillmentsRenderer {
 	private function render_shipment_provider_column_row_data( WC_Order $order, array $fulfillments ) {
 		$providers = array();
 		foreach ( $fulfillments as $fulfillment ) {
-			$providers[] = $fulfillment->get_meta( '_shipment_provider' ) ?? null;
+			$providers[] = $fulfillment->get_shipping_provider();
 		}
 
 		$providers = array_filter(
