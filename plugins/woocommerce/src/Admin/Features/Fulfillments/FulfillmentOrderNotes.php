@@ -323,17 +323,17 @@ class FulfillmentOrderNotes {
 	 * @return string The formatted tracking information, or empty string if no tracking number is present.
 	 */
 	private function format_tracking( Fulfillment $fulfillment ): string {
-		$tracking_number   = $fulfillment->get_meta( '_tracking_number', true );
-		$shipping_provider = $fulfillment->get_meta( '_shipping_provider', true );
-		$tracking_url      = $fulfillment->get_meta( '_tracking_url', true );
+		$tracking_number   = $fulfillment->get_tracking_number();
+		$shipping_provider = $fulfillment->get_shipping_provider();
+		$tracking_url      = $fulfillment->get_tracking_url();
 
-		if ( ! is_string( $tracking_number ) || '' === $tracking_number ) {
+		if ( null === $tracking_number ) {
 			return '';
 		}
 
 		$parts = array( $tracking_number );
 
-		if ( is_string( $shipping_provider ) && '' !== $shipping_provider ) {
+		if ( null !== $shipping_provider ) {
 			$parts[] = sprintf(
 				/* translators: %s: shipping provider name */
 				__( 'Provider: %s', 'woocommerce' ),
@@ -341,7 +341,7 @@ class FulfillmentOrderNotes {
 			);
 		}
 
-		if ( is_string( $tracking_url ) && '' !== $tracking_url ) {
+		if ( null !== $tracking_url ) {
 			$parts[] = sprintf(
 				/* translators: %s: tracking URL */
 				__( 'URL: %s', 'woocommerce' ),
