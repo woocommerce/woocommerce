@@ -154,7 +154,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	public function get_data() {
 		// Ensure used_by is populated before the raw data array is returned, since
 		// parent::get_data() reads $this->data directly and bypasses get_used_by().
-		$this->get_used_by();
+		$this->get_used_by( 'edit' );
 		$data = parent::get_data();
 		if ( '' === $data['minimum_amount'] ) {
 			$data['minimum_amount'] = '0';
