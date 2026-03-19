@@ -718,6 +718,10 @@ class PaymentGatewaysSettingsControllerTest extends WC_REST_Unit_Test_Case {
 
 		$gateway = WC()->payment_gateways->payment_gateways()['mock_password'];
 		$this->assertSame( $password, $gateway->settings['api_password'], 'Password with %Ec sequence should be preserved' );
+
+		// Verify DB persistence — the value that reached the database must also be intact.
+		$stored = get_option( 'woocommerce_mock_password_settings', array() );
+		$this->assertSame( $password, $stored['api_password'] ?? null, 'Password should be persisted to database without corruption' );
 	}
 
 	/**
@@ -745,6 +749,10 @@ class PaymentGatewaysSettingsControllerTest extends WC_REST_Unit_Test_Case {
 
 		$gateway = WC()->payment_gateways->payment_gateways()['mock_password'];
 		$this->assertSame( '<b>bold</b>secret%E0pass', $gateway->settings['api_password'], 'HTML-like characters should be preserved in password fields' );
+
+		// Verify DB persistence.
+		$stored = get_option( 'woocommerce_mock_password_settings', array() );
+		$this->assertSame( '<b>bold</b>secret%E0pass', $stored['api_password'] ?? null, 'Password should be persisted to database without corruption' );
 	}
 
 	/**
@@ -772,6 +780,10 @@ class PaymentGatewaysSettingsControllerTest extends WC_REST_Unit_Test_Case {
 
 		$gateway = WC()->payment_gateways->payment_gateways()['mock_password'];
 		$this->assertSame( 'pass<word123', $gateway->settings['api_password'], 'A lone < must not truncate the password' );
+
+		// Verify DB persistence.
+		$stored = get_option( 'woocommerce_mock_password_settings', array() );
+		$this->assertSame( 'pass<word123', $stored['api_password'] ?? null, 'Password should be persisted to database without corruption' );
 	}
 
 	/**
@@ -795,6 +807,10 @@ class PaymentGatewaysSettingsControllerTest extends WC_REST_Unit_Test_Case {
 
 		$gateway = WC()->payment_gateways->payment_gateways()['mock_password'];
 		$this->assertSame( 'my%20password', $gateway->settings['api_password'], 'Password should be trimmed but percent sequences preserved' );
+
+		// Verify DB persistence.
+		$stored = get_option( 'woocommerce_mock_password_settings', array() );
+		$this->assertSame( 'my%20password', $stored['api_password'] ?? null, 'Password should be persisted to database without corruption' );
 	}
 
 	/**
@@ -821,6 +837,10 @@ class PaymentGatewaysSettingsControllerTest extends WC_REST_Unit_Test_Case {
 
 		$gateway = WC()->payment_gateways->payment_gateways()['mock_password'];
 		$this->assertSame( '123456', $gateway->settings['api_password'], 'Numeric password value should be coerced to string, not blanked' );
+
+		// Verify DB persistence.
+		$stored = get_option( 'woocommerce_mock_password_settings', array() );
+		$this->assertSame( '123456', $stored['api_password'] ?? null, 'Password should be persisted to database without corruption' );
 	}
 
 	/**
