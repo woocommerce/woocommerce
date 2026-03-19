@@ -72,14 +72,14 @@ class FulfillmentsTrackerTest extends WC_Unit_Test_Case {
 	 */
 	public function entry_method_data_provider(): array {
 		return array(
-			'API with tracking-number'       => array( 'api', 'tracking-number', 'usps', 'api' ),
-			'API with manual-entry'          => array( 'api', 'manual-entry', 'fedex', 'api' ),
-			'API with manual-entry other'    => array( 'api', 'manual-entry', 'other', 'api' ),
-			'UI auto lookup with DHL'        => array( 'fulfillments_modal', 'tracking-number', 'dhl', 'ui_auto_lookup' ),
-			'UI manual select with UPS'      => array( 'fulfillments_modal', 'manual-entry', 'ups', 'ui_manual_select' ),
-			'UI manual custom provider'      => array( 'fulfillments_modal', 'manual-entry', 'other', 'ui_manual_custom' ),
-			'UI no-info falls back to api'   => array( 'fulfillments_modal', 'no-info', '', 'api' ),
-			'Unknown source falls back'      => array( 'bulk_action', 'tracking-number', 'usps', 'api' ),
+			'API with tracking-number'     => array( 'api', 'tracking-number', 'usps', 'api' ),
+			'API with manual-entry'        => array( 'api', 'manual-entry', 'fedex', 'api' ),
+			'API with manual-entry other'  => array( 'api', 'manual-entry', 'other', 'api' ),
+			'UI auto lookup with DHL'      => array( 'fulfillments_modal', 'tracking-number', 'dhl', 'ui_auto_lookup' ),
+			'UI manual select with UPS'    => array( 'fulfillments_modal', 'manual-entry', 'ups', 'ui_manual_select' ),
+			'UI manual custom provider'    => array( 'fulfillments_modal', 'manual-entry', 'other', 'ui_manual_custom' ),
+			'UI no-info falls back to api' => array( 'fulfillments_modal', 'no-info', '', 'api' ),
+			'Unknown source falls back'    => array( 'bulk_action', 'tracking-number', 'usps', 'api' ),
 		);
 	}
 
