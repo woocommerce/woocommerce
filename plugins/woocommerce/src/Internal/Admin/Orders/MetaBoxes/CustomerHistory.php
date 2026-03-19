@@ -196,6 +196,9 @@ class CustomerHistory {
 		 * @param array $excluded_statuses Order statuses to exclude.
 		 */
 		$excluded_statuses = apply_filters( 'woocommerce_analytics_excluded_order_statuses', $excluded_statuses );
+		if ( ! is_array( $excluded_statuses ) ) {
+			$excluded_statuses = array( 'auto-draft', 'trash', 'pending', 'failed', 'cancelled' );
+		}
 
 		$prefixed = array_map(
 			function ( $status ) {
