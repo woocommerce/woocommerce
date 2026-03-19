@@ -32,13 +32,15 @@ const COUNTRY_EXTENSIONS_MAP: Record< string, ExtensionId[] > = {
 	FR: [ 'packlink' ],
 	ES: [ 'packlink' ],
 	IT: [ 'packlink' ],
-	DE: [ 'shipstation', 'packlink' ],
-	GB: [ 'shipstation', 'packlink' ],
+	DE: [ 'packlink' ],
+	GB: [ 'shipstation' ],
 	NL: [ 'packlink' ],
 	AT: [ 'packlink' ],
 	BE: [ 'packlink' ],
 	AU: [ 'shipstation' ],
 	NZ: [ 'shipstation' ],
+	IE: [ 'packlink' ],
+	PT: [ 'packlink' ],
 };
 
 const EXTENSION_PLUGIN_SLUGS: Record< ExtensionId, string > = {

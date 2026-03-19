@@ -190,11 +190,11 @@ class CartControllerTests extends TestCase {
 
 		$packages = $class->get_shipping_packages( false );
 
-		$this->assertNotEmpty( $packages, 'Should have at least one shipping package.' );
+		$this->assertCount( 1, $packages, 'Should have one shipping package.' );
 		$this->assertArrayHasKey( 'package_id', $packages[0], 'Package should have package_id.' );
 		$this->assertArrayHasKey( 'package_name', $packages[0], 'Package should have package_name.' );
 		$this->assertEquals( 0, $packages[0]['package_id'], 'First package should have package_id of 0 (array key).' );
-		$this->assertStringContainsString( 'Shipment 1', $packages[0]['package_name'], 'First package should have package_name containing "Shipment 1".' );
+		$this->assertSame( 'Shipment', $packages[0]['package_name'], 'Single package should have package_name of "Shipment".' );
 	}
 
 	/**

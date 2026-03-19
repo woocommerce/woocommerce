@@ -59,7 +59,6 @@ export const Edit = ( {
 		showReturnToCart,
 		showRateAfterTaxName,
 		cartPageId,
-		isPreview = false,
 		showFormStepNumbers = false,
 		hasDarkControls = false,
 	} = attributes;
@@ -132,7 +131,6 @@ export const Edit = ( {
 				/>
 			</InspectorControls>
 			<EditorProvider
-				isPreview={ !! isPreview }
 				previewData={ {
 					previewCart,
 					previewSavedPaymentMethods,
