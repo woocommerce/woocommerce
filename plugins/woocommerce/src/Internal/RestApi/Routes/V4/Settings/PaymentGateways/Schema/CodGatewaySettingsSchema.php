@@ -99,6 +99,10 @@ class CodGatewaySettingsSchema extends AbstractPaymentGatewaySettingsSchema {
 	 * This method replicates the logic from WC_Gateway_COD::load_shipping_method_options()
 	 * to provide shipping method options for the REST API without relying on the gateway class.
 	 *
+	 * Unlike the original, the is_accessing_settings() guard is intentionally omitted:
+	 * the REST API endpoint always needs options populated, and the instance-level cache
+	 * prevents redundant computation within a single request.
+	 *
 	 * @return array Nested array of shipping method options.
 	 */
 	private function load_shipping_method_options(): array {
