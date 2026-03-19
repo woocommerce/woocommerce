@@ -1,4 +1,4 @@
 Significance: patch
 Type: add
-Comment: Implement telemetry for fulfillments entity feature adoption and usage
 
+Add telemetry for fulfillment feature adoption and usage tracking
