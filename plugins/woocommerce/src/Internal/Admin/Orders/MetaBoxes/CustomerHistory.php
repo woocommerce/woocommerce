@@ -74,19 +74,54 @@ class CustomerHistory {
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		if ( $customer_id > 0 ) {
 			$sql = $wpdb->prepare(
-				"SELECT COUNT(*) AS orders_count, COALESCE( SUM( total_amount ), 0 ) AS total_spend
-				FROM %i
-				WHERE customer_id = %d AND type = 'shop_order' AND status NOT IN $excluded_statuses_sql",
+				"SELECT COUNT(*) AS orders_count,
+					COALESCE( SUM( filtered.total_amount ), 0 ) + COALESCE( SUM( r.refund_total ), 0 ) AS total_spend
+				FROM (
+					SELECT id, total_amount
+					FROM %i
+					WHERE customer_id = %d AND type = 'shop_order' AND status NOT IN $excluded_statuses_sql
+				) AS filtered
+				LEFT JOIN (
+					SELECT parent_order_id, SUM( total_amount ) AS refund_total
+					FROM %i
+					WHERE type = 'shop_order_refund'
+						AND parent_order_id IN (
+							SELECT id FROM %i WHERE customer_id = %d AND type = 'shop_order' AND status NOT IN $excluded_statuses_sql
+						)
+					GROUP BY parent_order_id
+				) AS r ON filtered.id = r.parent_order_id",
+				$orders_table,
+				$customer_id,
+				$orders_table,
 				$orders_table,
 				$customer_id
 			);
 		} elseif ( '' !== $billing_email ) {
 			$addresses_table = OrdersTableDataStore::get_addresses_table_name();
 			$sql             = $wpdb->prepare(
-				"SELECT COUNT(*) AS orders_count, COALESCE( SUM( o.total_amount ), 0 ) AS total_spend
-				FROM %i AS o
-				INNER JOIN %i AS a ON o.id = a.order_id AND a.address_type = 'billing'
-				WHERE o.customer_id = 0 AND a.email = %s AND o.type = 'shop_order' AND o.status NOT IN $excluded_statuses_sql",
+				"SELECT COUNT(*) AS orders_count,
+					COALESCE( SUM( filtered.total_amount ), 0 ) + COALESCE( SUM( r.refund_total ), 0 ) AS total_spend
+				FROM (
+					SELECT o.id, o.total_amount
+					FROM %i AS o
+					INNER JOIN %i AS a ON o.id = a.order_id AND a.address_type = 'billing'
+					WHERE o.customer_id = 0 AND a.email = %s AND o.type = 'shop_order' AND o.status NOT IN $excluded_statuses_sql
+				) AS filtered
+				LEFT JOIN (
+					SELECT parent_order_id, SUM( total_amount ) AS refund_total
+					FROM %i
+					WHERE type = 'shop_order_refund'
+						AND parent_order_id IN (
+							SELECT o2.id FROM %i AS o2
+							INNER JOIN %i AS a2 ON o2.id = a2.order_id AND a2.address_type = 'billing'
+							WHERE o2.customer_id = 0 AND a2.email = %s AND o2.type = 'shop_order' AND o2.status NOT IN $excluded_statuses_sql
+						)
+					GROUP BY parent_order_id
+				) AS r ON filtered.id = r.parent_order_id",
+				$orders_table,
+				$addresses_table,
+				$billing_email,
+				$orders_table,
 				$orders_table,
 				$addresses_table,
 				$billing_email
@@ -131,26 +166,64 @@ class CustomerHistory {
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		if ( $customer_id > 0 ) {
 			$sql = $wpdb->prepare(
-				"SELECT COUNT(*) AS orders_count, COALESCE( SUM( meta_total.meta_value ), 0 ) AS total_spend
-				FROM {$wpdb->posts} AS p
-				INNER JOIN {$wpdb->postmeta} AS meta_customer ON p.ID = meta_customer.post_id
-				INNER JOIN {$wpdb->postmeta} AS meta_total ON p.ID = meta_total.post_id
-				WHERE meta_customer.meta_key = '_customer_user' AND meta_customer.meta_value = %s
-				AND meta_total.meta_key = '_order_total'
-				AND p.post_type = 'shop_order' AND p.post_status NOT IN $excluded_statuses_sql",
+				"SELECT COUNT(*) AS orders_count,
+					COALESCE( SUM( filtered.order_total ), 0 ) - COALESCE( SUM( r.refund_total ), 0 ) AS total_spend
+				FROM (
+					SELECT p.ID, meta_total.meta_value AS order_total
+					FROM {$wpdb->posts} AS p
+					INNER JOIN {$wpdb->postmeta} AS meta_customer ON p.ID = meta_customer.post_id
+					INNER JOIN {$wpdb->postmeta} AS meta_total ON p.ID = meta_total.post_id
+					WHERE meta_customer.meta_key = '_customer_user' AND meta_customer.meta_value = %s
+					AND meta_total.meta_key = '_order_total'
+					AND p.post_type = 'shop_order' AND p.post_status NOT IN $excluded_statuses_sql
+				) AS filtered
+				LEFT JOIN (
+					SELECT rp.post_parent, SUM( rm.meta_value ) AS refund_total
+					FROM {$wpdb->posts} AS rp
+					INNER JOIN {$wpdb->postmeta} AS rm ON rp.ID = rm.post_id AND rm.meta_key = '_refund_amount'
+					WHERE rp.post_type = 'shop_order_refund'
+						AND rp.post_parent IN (
+							SELECT p2.ID FROM {$wpdb->posts} AS p2
+							INNER JOIN {$wpdb->postmeta} AS mc2 ON p2.ID = mc2.post_id
+							WHERE mc2.meta_key = '_customer_user' AND mc2.meta_value = %s
+							AND p2.post_type = 'shop_order' AND p2.post_status NOT IN $excluded_statuses_sql
+						)
+					GROUP BY rp.post_parent
+				) AS r ON filtered.ID = r.post_parent",
+				(string) $customer_id,
 				(string) $customer_id
 			);
 		} elseif ( '' !== $billing_email ) {
 			$sql = $wpdb->prepare(
-				"SELECT COUNT(*) AS orders_count, COALESCE( SUM( meta_total.meta_value ), 0 ) AS total_spend
-				FROM {$wpdb->posts} AS p
-				INNER JOIN {$wpdb->postmeta} AS meta_email ON p.ID = meta_email.post_id
-				INNER JOIN {$wpdb->postmeta} AS meta_total ON p.ID = meta_total.post_id
-				INNER JOIN {$wpdb->postmeta} AS meta_customer ON p.ID = meta_customer.post_id
-				WHERE meta_email.meta_key = '_billing_email' AND meta_email.meta_value = %s
-				AND meta_customer.meta_key = '_customer_user' AND meta_customer.meta_value = '0'
-				AND meta_total.meta_key = '_order_total'
-				AND p.post_type = 'shop_order' AND p.post_status NOT IN $excluded_statuses_sql",
+				"SELECT COUNT(*) AS orders_count,
+					COALESCE( SUM( filtered.order_total ), 0 ) - COALESCE( SUM( r.refund_total ), 0 ) AS total_spend
+				FROM (
+					SELECT p.ID, meta_total.meta_value AS order_total
+					FROM {$wpdb->posts} AS p
+					INNER JOIN {$wpdb->postmeta} AS meta_email ON p.ID = meta_email.post_id
+					INNER JOIN {$wpdb->postmeta} AS meta_total ON p.ID = meta_total.post_id
+					INNER JOIN {$wpdb->postmeta} AS meta_customer ON p.ID = meta_customer.post_id
+					WHERE meta_email.meta_key = '_billing_email' AND meta_email.meta_value = %s
+					AND meta_customer.meta_key = '_customer_user' AND meta_customer.meta_value = '0'
+					AND meta_total.meta_key = '_order_total'
+					AND p.post_type = 'shop_order' AND p.post_status NOT IN $excluded_statuses_sql
+				) AS filtered
+				LEFT JOIN (
+					SELECT rp.post_parent, SUM( rm.meta_value ) AS refund_total
+					FROM {$wpdb->posts} AS rp
+					INNER JOIN {$wpdb->postmeta} AS rm ON rp.ID = rm.post_id AND rm.meta_key = '_refund_amount'
+					WHERE rp.post_type = 'shop_order_refund'
+						AND rp.post_parent IN (
+							SELECT p2.ID FROM {$wpdb->posts} AS p2
+							INNER JOIN {$wpdb->postmeta} AS me2 ON p2.ID = me2.post_id
+							INNER JOIN {$wpdb->postmeta} AS mc2 ON p2.ID = mc2.post_id
+							WHERE me2.meta_key = '_billing_email' AND me2.meta_value = %s
+							AND mc2.meta_key = '_customer_user' AND mc2.meta_value = '0'
+							AND p2.post_type = 'shop_order' AND p2.post_status NOT IN $excluded_statuses_sql
+						)
+					GROUP BY rp.post_parent
+				) AS r ON filtered.ID = r.post_parent",
+				$billing_email,
 				$billing_email
 			);
 		} else {

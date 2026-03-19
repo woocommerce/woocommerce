@@ -35,8 +35,8 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		$this->clean_up_cot_setup();
+		remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		parent::tearDown();
 	}
 
@@ -211,5 +211,109 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 		$output = ob_get_clean();
 
 		$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*0\s*</', $output, 'Should show 0 orders when all are excluded' );
+	}
+
+	/**
+	 * @testdox Should deduct partial refund from total spend ($0: storage mode).
+	 * @dataProvider provider_storage_modes
+	 *
+	 * @param bool $hpos_enabled Whether HPOS is enabled.
+	 */
+	public function test_partial_refund_deducted_from_total_spend( bool $hpos_enabled ): void {
+		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+
+		$customer_id = $this->factory->user->create();
+
+		$order = WC_Helper_Order::create_order( $customer_id );
+		$order->set_status( 'completed' );
+		$order->set_total( 200 );
+		$order->save();
+
+		wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 50,
+				'reason'   => 'Partial refund test',
+			)
+		);
+
+		ob_start();
+		$this->sut->output( $order );
+		$output = ob_get_clean();
+
+		$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*1\s*</', $output, 'Should still count 1 order after partial refund' );
+		$this->assertMatchesRegularExpression( '/order-attribution-total-spend">\s*.*150/', $output, 'Should show net spend of 150 after 50 refund' );
+		$this->assertMatchesRegularExpression( '/order-attribution-average-order-value">\s*.*150/', $output, 'Should show average of 150 after partial refund' );
+	}
+
+	/**
+	 * @testdox Should deduct full refund from total spend ($0: storage mode).
+	 * @dataProvider provider_storage_modes
+	 *
+	 * @param bool $hpos_enabled Whether HPOS is enabled.
+	 */
+	public function test_full_refund_deducted_from_total_spend( bool $hpos_enabled ): void {
+		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+
+		$customer_id = $this->factory->user->create();
+
+		$order1 = WC_Helper_Order::create_order( $customer_id );
+		$order1->set_status( 'completed' );
+		$order1->set_total( 100 );
+		$order1->save();
+
+		$order2 = WC_Helper_Order::create_order( $customer_id );
+		$order2->set_status( 'completed' );
+		$order2->set_total( 200 );
+		$order2->save();
+
+		wc_create_refund(
+			array(
+				'order_id' => $order1->get_id(),
+				'amount'   => 100,
+				'reason'   => 'Full refund test',
+			)
+		);
+
+		ob_start();
+		$this->sut->output( $order1 );
+		$output = ob_get_clean();
+
+		$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*2\s*</', $output, 'Should still count 2 orders after full refund' );
+		$this->assertMatchesRegularExpression( '/order-attribution-total-spend">\s*.*200/', $output, 'Should show net spend of 200 after full refund of first order' );
+		$this->assertMatchesRegularExpression( '/order-attribution-average-order-value">\s*.*100/', $output, 'Should show average of 100 (200 net / 2 orders)' );
+	}
+
+	/**
+	 * @testdox Should deduct refund from guest order total spend ($0: storage mode).
+	 * @dataProvider provider_storage_modes
+	 *
+	 * @param bool $hpos_enabled Whether HPOS is enabled.
+	 */
+	public function test_guest_order_refund_deducted_from_total_spend( bool $hpos_enabled ): void {
+		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+
+		$email = 'guest-refund@example.com';
+
+		$order = WC_Helper_Order::create_order( 0 );
+		$order->set_billing_email( $email );
+		$order->set_status( 'completed' );
+		$order->set_total( 100 );
+		$order->save();
+
+		wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 30,
+				'reason'   => 'Guest partial refund test',
+			)
+		);
+
+		ob_start();
+		$this->sut->output( $order );
+		$output = ob_get_clean();
+
+		$this->assertMatchesRegularExpression( '/order-attribution-total-orders">\s*1\s*</', $output, 'Should still count 1 order after guest refund' );
+		$this->assertMatchesRegularExpression( '/order-attribution-total-spend">\s*.*70/', $output, 'Should show net spend of 70 after 30 refund on guest order' );
 	}
 }
