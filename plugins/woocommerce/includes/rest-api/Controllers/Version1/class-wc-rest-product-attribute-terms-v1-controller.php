@@ -176,7 +176,9 @@ class WC_REST_Product_Attribute_Terms_V1_Controller extends WC_REST_Terms_Contro
 	protected function update_term_meta_fields( $term, $request ) {
 		$id = (int) $term->term_id;
 
-		update_term_meta( $id, 'order', $request['menu_order'] );
+		if ( isset( $request['menu_order'] ) ) {
+			update_term_meta( $id, 'order', $request['menu_order'] );
+		}
 
 		return true;
 	}
