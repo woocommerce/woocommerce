@@ -44,7 +44,9 @@ abstract class Notification {
 	}
 
 	/**
-	 * Returns the notification type identifier.
+	 * Returns he notification type identifier, this should match the subtype or
+	 * type (if there isn't a subtype) values attributed to notes in
+	 * WordPress.com.
 	 *
 	 * @return string
 	 *

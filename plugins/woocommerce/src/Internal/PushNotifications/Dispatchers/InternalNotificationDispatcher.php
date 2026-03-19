@@ -66,9 +66,9 @@ class InternalNotificationDispatcher {
 		);
 
 		/**
-		 * The request is non-blocking so the response is not meaningful. If the
-		 * loopback fails, the ActionScheduler safety net will pick up unsent
-		 * notifications after 60 seconds.
+		 * The request is non-blocking so the response is not handled anywhere.
+		 * If the request fails, the ActionScheduler safety net will pick up
+		 * unsent notifications after 60 seconds.
 		 */
 		wp_remote_post(
 			rest_url( self::SEND_ENDPOINT ),
