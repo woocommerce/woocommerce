@@ -7,6 +7,7 @@ import '../../test/__mocks__/setup-shared-mocks';
 import { render, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { useSelect } from '@wordpress/data';
+import { applyFilters } from '@wordpress/hooks';
 import {
 	// @ts-expect-error -- It is not exported yet.
 	useEntitiesSavedStatesIsDirty,
@@ -31,6 +32,7 @@ const useSelectMock = useSelect as jest.Mock;
 const useEntitiesSavedStatesIsDirtyMock =
 	useEntitiesSavedStatesIsDirty as jest.Mock;
 const recordEventMock = recordEvent as jest.Mock;
+const applyFiltersMock = applyFilters as jest.Mock;
 
 const mockStoreValues = {
 	hasEmptyContent: false,
@@ -66,6 +68,56 @@ describe( 'SendButton', () => {
 
 	it( 'should be disabled if isDirty is true', () => {
 		useEntitiesSavedStatesIsDirtyMock.mockReturnValue( { isDirty: true } );
+		const { getByRole } = render( <SendButton /> );
+		expect( getByRole( 'button' ) ).toBeDisabled();
+	} );
+
+	it( 'should allow the disabled state to be overridden via filter', () => {
+		useEntitiesSavedStatesIsDirtyMock.mockReturnValue( { isDirty: true } );
+
+		// Override applyFilters to simulate a filter that removes isDirty from disabled
+		applyFiltersMock.mockImplementationOnce(
+			( hook: string, value: unknown, ...args: unknown[] ) => {
+				if (
+					hook === 'woocommerce_email_editor_send_button_disabled'
+				) {
+					const flags = args[ 0 ] as {
+						hasEmptyContent: boolean;
+						isEmailSent: boolean;
+					};
+					return flags.hasEmptyContent || flags.isEmailSent;
+				}
+				return value;
+			}
+		);
+
+		const { getByRole } = render( <SendButton /> );
+		expect( getByRole( 'button' ) ).not.toBeDisabled();
+		expect( applyFiltersMock ).toHaveBeenCalledWith(
+			'woocommerce_email_editor_send_button_disabled',
+			true,
+			{
+				hasEmptyContent: false,
+				isEmailSent: false,
+				isDirty: true,
+			}
+		);
+	} );
+
+	it( 'should fall back to default when filter returns non-boolean', () => {
+		useEntitiesSavedStatesIsDirtyMock.mockReturnValue( { isDirty: true } );
+
+		applyFiltersMock.mockImplementationOnce(
+			( hook: string, value: unknown ) => {
+				if (
+					hook === 'woocommerce_email_editor_send_button_disabled'
+				) {
+					return 'not-a-boolean';
+				}
+				return value;
+			}
+		);
+
 		const { getByRole } = render( <SendButton /> );
 		expect( getByRole( 'button' ) ).toBeDisabled();
 	} );

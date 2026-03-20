@@ -184,7 +184,8 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 		$order        = OrderHelper::create_order( get_current_user_id(), $product );
 		$this->assertEmpty( $order->get_meta( '_fulfillment_status' ) );
 
-		$fulfillments[] = FulfillmentsHelper::create_fulfillment(
+		$create_count_before = did_action( 'woocommerce_fulfillment_after_create' );
+		$fulfillments[]      = FulfillmentsHelper::create_fulfillment(
 			array(
 				'entity_type'  => WC_Order::class,
 				'entity_id'    => $order->get_id(),
@@ -200,19 +201,21 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 				),
 			)
 		);
-		$this->assertTrue( did_action( 'woocommerce_fulfillment_after_create' ) > 0 );
+		$this->assertGreaterThan( $create_count_before, did_action( 'woocommerce_fulfillment_after_create' ) );
 		$order = wc_get_order( $order->get_id() );
 		$this->assertEquals( 'unfulfilled', $order->get_meta( '_fulfillment_status', true ) );
 
+		$update_count_before = did_action( 'woocommerce_fulfillment_after_update' );
 		$fulfillments[0]->set_status( 'fulfilled' );
 		$fulfillments[0]->save();
 
-		$this->assertTrue( did_action( 'woocommerce_fulfillment_after_update' ) > 0 );
+		$this->assertGreaterThan( $update_count_before, did_action( 'woocommerce_fulfillment_after_update' ) );
 		$order = wc_get_order( $order->get_id() );
 		$this->assertEquals( 'partially_fulfilled', $order->get_meta( '_fulfillment_status' ) );
 
+		$delete_count_before = did_action( 'woocommerce_fulfillment_after_delete' );
 		$fulfillments[0]->delete();
-		$this->assertTrue( did_action( 'woocommerce_fulfillment_after_delete' ) > 0 );
+		$this->assertGreaterThan( $delete_count_before, did_action( 'woocommerce_fulfillment_after_delete' ) );
 		$order = wc_get_order( $order->get_id() );
 		$this->assertEquals( '', $order->get_meta( '_fulfillment_status' ) );
 	}
@@ -287,6 +290,62 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 		// Test with a valid tracking number.
 		$parsed_number = $this->manager->try_parse_tracking_number( $tracking_number, 'US', 'CA' );
 		$this->assertEquals( array(), $parsed_number );
+	}
+
+	/**
+	 * @testdox Should register order deletion hooks.
+	 */
+	public function test_order_deletion_hooks_registered(): void {
+		$this->assertNotFalse( has_action( 'woocommerce_before_delete_order', array( $this->manager, 'delete_order_fulfillments' ) ) );
+		$this->assertNotFalse( has_action( 'before_delete_post', array( $this->manager, 'delete_order_fulfillments' ) ) );
+	}
+
+	/**
+	 * @testdox Should delete fulfillments when an order is permanently deleted.
+	 */
+	public function test_delete_order_fulfillments_on_order_deletion(): void {
+		global $wpdb;
+
+		$product = \WC_Helper_Product::create_simple_product();
+		$order   = OrderHelper::create_order( get_current_user_id(), $product );
+
+		FulfillmentsHelper::create_fulfillment(
+			array(
+				'entity_type' => WC_Order::class,
+				'entity_id'   => $order->get_id(),
+				'status'      => 'unfulfilled',
+			),
+			array(
+				'_items' => array(
+					array(
+						'item_id' => 1,
+						'qty'     => 1,
+					),
+				),
+			)
+		);
+
+		$order_id = $order->get_id();
+
+		$fulfillments_before = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->prefix}wc_order_fulfillments WHERE entity_type = %s AND entity_id = %s",
+				WC_Order::class,
+				$order_id
+			)
+		);
+		$this->assertSame( '1', $fulfillments_before, 'Fulfillment should exist before deletion' );
+
+		$order->delete( true );
+
+		$fulfillments_after = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->prefix}wc_order_fulfillments WHERE entity_type = %s AND entity_id = %d",
+				WC_Order::class,
+				$order_id
+			)
+		);
+		$this->assertSame( '0', $fulfillments_after, 'Fulfillments should be deleted after order deletion' );
 	}
 
 	/**

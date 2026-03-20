@@ -9931,12 +9931,6 @@ parameters:
 			path: includes/class-wc-cart-session.php
 
 		-
-			message: '#^Call to function is_callable\(\) with ''_prime_post_caches'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: includes/class-wc-cart-session.php
-
-		-
 			message: '#^Cannot call method get_id\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
 			count: 3
@@ -14221,12 +14215,6 @@ parameters:
 			path: includes/class-wc-product-variable.php
 
 		-
-			message: '#^Call to function is_callable\(\) with ''_prime_post_caches'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 2
-			path: includes/class-wc-product-variable.php
-
-		-
 			message: '#^Method WC_Product_Variable\:\:get_available_variations\(\) should return array\<array\|WC_Product_Variation\> but returns list\<array\|bool\|WC_Product\>\.$#'
 			identifier: return.type
 			count: 1
@@ -16615,18 +16603,6 @@ parameters:
 			path: includes/class-woocommerce.php
 
 		-
-			message: '#^Undefined variable\: \$site_url$#'
-			identifier: variable.undefined
-			count: 1
-			path: includes/class-woocommerce.php
-
-		-
-			message: '#^Variable \$site_url in empty\(\) is never defined\.$#'
-			identifier: empty.variable
-			count: 1
-			path: includes/class-woocommerce.php
-
-		-
 			message: '#^Call to method display_items\(\) on an unknown class WP_CLI\\Formatter\.$#'
 			identifier: class.notFound
 			count: 1
@@ -17731,12 +17707,6 @@ parameters:
 			path: includes/data-stores/class-wc-order-data-store-cpt.php
 
 		-
-			message: '#^Cannot access offset non\-falsy\-string on array\|bool\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: includes/data-stores/class-wc-order-data-store-cpt.php
-
-		-
 			message: '#^Cannot access offset string on array\|bool\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
@@ -17785,19 +17755,7 @@ parameters:
 			path: includes/data-stores/class-wc-order-data-store-cpt.php
 
 		-
-			message: '#^Method WC_Order_Data_Store_CPT\:\:prime_caches_for_orders\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/data-stores/class-wc-order-data-store-cpt.php
-
-		-
 			message: '#^Method WC_Order_Data_Store_CPT\:\:prime_raw_meta_cache_for_orders\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/data-stores/class-wc-order-data-store-cpt.php
-
-		-
-			message: '#^Method WC_Order_Data_Store_CPT\:\:prime_refund_caches_for_order\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: includes/data-stores/class-wc-order-data-store-cpt.php
@@ -17881,12 +17839,6 @@ parameters:
 			path: includes/data-stores/class-wc-order-data-store-cpt.php
 
 		-
-			message: '#^Parameter \#1 \$input of function array_reduce expects array\<WC_Order\>, array\<WC_Order\>\|stdClass given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/data-stores/class-wc-order-data-store-cpt.php
-
-		-
 			message: '#^Parameter \#1 \$post_id of function get_post_meta expects int, bool\|int given\.$#'
 			identifier: argument.type
 			count: 5
@@ -17912,12 +17864,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#2 \$array of function implode expects array\<string\>, array\<array\|string\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/data-stores/class-wc-order-data-store-cpt.php
-
-		-
-			message: '#^Parameter \#2 \$callback of function array_reduce expects callable\(mixed, WC_Order\)\: mixed, Closure\(mixed, WC_Order_Refund\)\: mixed given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/data-stores/class-wc-order-data-store-cpt.php
@@ -32262,12 +32208,6 @@ parameters:
 		-
 			message: '#^Action callback returns bool but should not return anything\.$#'
 			identifier: return.void
-			count: 1
-			path: includes/shortcodes/class-wc-shortcode-products.php
-
-		-
-			message: '#^Call to function is_callable\(\) with ''_prime_post_caches'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
 			count: 1
 			path: includes/shortcodes/class-wc-shortcode-products.php
 
@@ -47236,42 +47176,6 @@ parameters:
 			path: src/Admin/Features/OnboardingTasks/DeprecatedExtendedTask.php
 
 		-
-			message: '#^Action callback returns string but should not return anything\.$#'
-			identifier: return.void
-			count: 2
-			path: src/Admin/Features/OnboardingTasks/DeprecatedOptions.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\DeprecatedOptions\:\:get_deprecated_options\(\) should return string but return statement is missing\.$#'
-			identifier: return.missing
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/DeprecatedOptions.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\DeprecatedOptions\:\:init\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/DeprecatedOptions.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\DeprecatedOptions\:\:update_deprecated_options\(\) should return string but empty return statement found\.$#'
-			identifier: return.empty
-			count: 2
-			path: src/Admin/Features/OnboardingTasks/DeprecatedOptions.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\DeprecatedOptions\:\:update_deprecated_options\(\) should return string but return statement is missing\.$#'
-			identifier: return.missing
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/DeprecatedOptions.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\DeprecatedOptions\:\:update_deprecated_options\(\) should return string but returns false\.$#'
-			identifier: return.type
-			count: 2
-			path: src/Admin/Features/OnboardingTasks/DeprecatedOptions.php
-
-		-
 			message: '#^Cannot call method is_connected\(\) on class\-string\|object\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -50794,12 +50698,6 @@ parameters:
 			path: src/Blocks/Assets/Api.php
 
 		-
-			message: '#^Call to function is_callable\(\) with ''_prime_post_caches'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Blocks/Assets/AssetDataRegistry.php
-
-		-
 			message: '#^Class Automattic\\WooCommerce\\Blocks\\Assets\\Api referenced with incorrect case\: Automattic\\WooCommerce\\Blocks\\Assets\\API\.$#'
 			identifier: class.nameCase
 			count: 1
@@ -51352,12 +51250,6 @@ parameters:
 			path: src/Blocks/BlockTypes/AbstractProductGrid.php
 
 		-
-			message: '#^Call to function is_callable\(\) with ''_prime_post_caches'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Blocks/BlockTypes/AbstractProductGrid.php
-
-		-
 			message: '#^Call to method get_average_rating\(\) on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WC_Product\.$#'
 			identifier: class.notFound
 			count: 1
@@ -51764,30 +51656,6 @@ parameters:
 			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/AddToCartWithOptions/VariationSelectorAttributeName.php
-
-		-
-			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 10
-			path: src/Blocks/BlockTypes/AddToCartWithOptions/VariationSelectorAttributeOptions.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\VariationSelectorAttributeOptions\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/AddToCartWithOptions/VariationSelectorAttributeOptions.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\VariationSelectorAttributeOptions\:\:render_dropdown\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/AddToCartWithOptions/VariationSelectorAttributeOptions.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\VariationSelectorAttributeOptions\:\:render_pills\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/AddToCartWithOptions/VariationSelectorAttributeOptions.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AllProducts\:\:enqueue_data\(\) has no return type specified\.$#'
@@ -65937,19 +65805,13 @@ parameters:
 		-
 			message: '#^Cannot call method add_order_note\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
-			count: 2
+			count: 1
 			path: src/Internal/Orders/OrderActionsRestController.php
 
 		-
 			message: '#^Cannot call method get_billing_email\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
-			count: 4
-			path: src/Internal/Orders/OrderActionsRestController.php
-
-		-
-			message: '#^Cannot call method get_id\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 7
+			count: 2
 			path: src/Internal/Orders/OrderActionsRestController.php
 
 		-
@@ -66009,17 +65871,11 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$order of method Automattic\\WooCommerce\\Internal\\Orders\\OrderActionsRestController\:\:get_available_email_templates\(\) expects WC_Order, WC_Order\|WC_Order_Refund\|false given\.$#'
 			identifier: argument.type
-			count: 2
+			count: 1
 			path: src/Internal/Orders/OrderActionsRestController.php
 
 		-
 			message: '#^Parameter \#1 \$order of method Automattic\\WooCommerce\\Internal\\Orders\\OrderActionsRestController\:\:maybe_update_billing_email\(\) expects WC_Order, WC_Order\|WC_Order_Refund\|false given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Internal/Orders/OrderActionsRestController.php
-
-		-
-			message: '#^Parameter \#1 \$order of method Automattic\\WooCommerce\\Internal\\Orders\\OrderActionsRestController\:\:order_is_partially_refunded\(\) expects WC_Order, WC_Order\|WC_Order_Refund\|false given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Internal/Orders/OrderActionsRestController.php
@@ -71059,18 +70915,6 @@ parameters:
 			path: src/Internal/StockNotifications/Emails/EmailActionController.php
 
 		-
-			message: '#^Call to an undefined method WC_Session\:\:has_session\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: src/Internal/StockNotifications/Emails/EmailActionController.php
-
-		-
-			message: '#^Call to an undefined method WC_Session\:\:set_customer_session_cookie\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: src/Internal/StockNotifications/Emails/EmailActionController.php
-
-		-
 			message: '#^Cannot call method get_meta\(\) on Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|true\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -74557,12 +74401,6 @@ parameters:
 			path: src/StoreApi/SessionHandler.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\StoreApi\\SessionHandler\:\:save_data\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/StoreApi/SessionHandler.php
-
-		-
 			message: '#^Property Automattic\\WooCommerce\\StoreApi\\SessionHandler\:\:\$token \(string\) does not accept array\|string\.$#'
 			identifier: assign.propertyType
 			count: 1
@@ -75298,12 +75136,6 @@ parameters:
 			message: '#^Call to an undefined method WC_Query\:\:get\(\)\.$#'
 			identifier: method.notFound
 			count: 4
-			path: src/StoreApi/Utilities/ProductQuery.php
-
-		-
-			message: '#^Call to function is_callable\(\) with ''_prime_post_caches'' will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
 			path: src/StoreApi/Utilities/ProductQuery.php
 
 		-

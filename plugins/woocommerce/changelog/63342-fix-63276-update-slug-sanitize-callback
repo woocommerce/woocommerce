@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Update slug sanitize callback to use sanitize_slug
