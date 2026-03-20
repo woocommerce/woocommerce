@@ -3,7 +3,9 @@
  */
 import { decodeEntities } from '@wordpress/html-entities';
 import { type RecommendedPaymentMethod } from '@woocommerce/data';
-import { ExternalLink, Notice, ToggleControl } from '@wordpress/components';
+import { ExternalLink, ToggleControl } from '@wordpress/components';
+import { info as infoIcon } from '@wordpress/icons';
+import { Icon } from '@wordpress/components';
 import { useRef } from '@wordpress/element';
 
 /**
@@ -194,11 +196,12 @@ export const PaymentMethodListItem = ( {
 			{ method.notice?.message &&
 				( paymentMethodsState[ method.id ] ?? false ) && (
 					<div
-						className="woocommerce-list__item-notice-warning"
+						className="woocommerce-list__item-notice-info"
 						data-testid="payment-method-notice-warning"
 					>
-						<Notice status="info" isDismissible={ false }>
-							<span>{ method.notice.message }</span>
+						<Icon icon={ infoIcon } size={ 24 } />
+						<p>
+							{ method.notice.message }
 							{ method.notice.link_url &&
 								method.notice.link_text && (
 									<>
@@ -210,7 +213,7 @@ export const PaymentMethodListItem = ( {
 										</ExternalLink>
 									</>
 								) }
-						</Notice>
+						</p>
 					</div>
 				) }
 		</div>
