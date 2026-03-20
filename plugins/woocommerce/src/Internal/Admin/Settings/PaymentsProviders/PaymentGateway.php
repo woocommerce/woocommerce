@@ -1075,6 +1075,12 @@ class PaymentGateway {
 			'description' => '',
 			'icon'        => '',
 			'category'    => self::PAYMENT_METHOD_CATEGORY_PRIMARY, // Default to primary.
+			'notice'      => array(
+				'badge'     => '',
+				'message'   => '',
+				'link_text' => '',
+				'link_url'  => '',
+			),
 		);
 
 		// If the payment method has a description, sanitize it before use.
@@ -1107,6 +1113,42 @@ class PaymentGateway {
 		if ( ! empty( $recommended_pm['category'] ) &&
 			in_array( $recommended_pm['category'], array( self::PAYMENT_METHOD_CATEGORY_PRIMARY, self::PAYMENT_METHOD_CATEGORY_SECONDARY ), true ) ) {
 			$standard_details['category'] = $recommended_pm['category'];
+		}
+
+		// If the payment method has a notice, sanitize and use its fields.
+		if ( ! empty( $recommended_pm['notice'] ) && is_array( $recommended_pm['notice'] ) ) {
+			$notice = $recommended_pm['notice'];
+
+			if ( ! empty( $notice['badge'] ) ) {
+				$standard_details['notice']['badge'] = sanitize_text_field( $notice['badge'] );
+			}
+
+			if ( ! empty( $notice['message'] ) ) {
+				$message = (string) $notice['message'];
+				// Allow basic stylistic HTML tags in the message, similar to description handling.
+				if ( preg_match( '/<[^>]+>/', $message ) ) {
+					$allowed_tags = wp_kses_allowed_html( 'data' );
+					$allowed_tags = array_merge(
+						$allowed_tags,
+						array(
+							'a' => array(
+								'href'   => true,
+								'target' => true,
+							),
+						)
+					);
+					$message      = wp_kses( $message, $allowed_tags );
+				}
+				$standard_details['notice']['message'] = $message;
+			}
+
+			if ( ! empty( $notice['link_text'] ) ) {
+				$standard_details['notice']['link_text'] = sanitize_text_field( $notice['link_text'] );
+			}
+
+			if ( ! empty( $notice['link_url'] ) && wc_is_valid_url( $notice['link_url'] ) ) {
+				$standard_details['notice']['link_url'] = sanitize_url( $notice['link_url'] );
+			}
 		}
 
 		return $standard_details;
