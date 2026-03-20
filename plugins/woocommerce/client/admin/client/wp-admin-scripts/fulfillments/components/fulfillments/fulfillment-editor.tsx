@@ -133,11 +133,6 @@ export default function FulfillmentEditor( {
 				role="button"
 				tabIndex={ 0 }
 				aria-expanded={ expanded }
-				aria-label={
-					expanded
-						? __( 'Collapse fulfillment details', 'woocommerce' )
-						: __( 'Expand fulfillment details', 'woocommerce' )
-				}
 			>
 				<h3>
 					{
