@@ -263,6 +263,20 @@
 	padding: 0 48px 12px;
 
 	.components-notice {
+		width: 100%;
 		margin: 0;
+		padding: 12px;
+		background-color: #f5f9fd;
+		border: 1px solid #9fbcdd;
+		border-left: 1px solid #9fbcdd;
+		border-radius: 8px;
+		box-shadow: none;
+
+		.components-notice__content {
+			margin: 0;
+			font-size: 13px;
+			line-height: 20px;
+			color: #001758;
+		}
 	}
 }
