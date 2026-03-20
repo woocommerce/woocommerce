@@ -23,7 +23,8 @@ const productDataStore = store< {
 	actions: {
 		setVariationId: ( variationId: number | null ) => void;
 	};
-} >(
+} >( 'woocommerce/product-data', {}, { lock: universalLock } );
+store(
 	'woocommerce/product-data',
 	{
 		state: {
