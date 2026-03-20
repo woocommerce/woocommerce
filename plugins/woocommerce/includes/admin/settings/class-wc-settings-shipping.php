@@ -61,7 +61,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 		);
 
 		if ( FeaturesUtil::feature_is_enabled( 'fulfillments' ) ) {
-			$sections['providers'] = __( 'Shipping providers', 'woocommerce' );
+			$sections['fulfillment-providers'] = __( 'Shipping providers', 'woocommerce' );
 		}
 
 		if ( ! $this->wc_is_installing() ) {
@@ -189,7 +189,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 		} elseif ( 'classes' === $current_section ) {
 			$hide_save_button = true;
 			$this->output_shipping_class_screen();
-		} elseif ( 'providers' === $current_section && FeaturesUtil::feature_is_enabled( 'fulfillments' ) ) {
+		} elseif ( 'fulfillment-providers' === $current_section && FeaturesUtil::feature_is_enabled( 'fulfillments' ) ) {
 			$hide_save_button = true;
 			$this->output_shipping_providers_screen();
 		} else {
@@ -220,7 +220,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			case 'classes':
 				$this->do_update_options_action();
 				break;
-			case 'providers':
+			case 'fulfillment-providers':
 				if ( FeaturesUtil::feature_is_enabled( 'fulfillments' ) ) {
 					$this->do_update_options_action();
 				}

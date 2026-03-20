@@ -3877,6 +3877,15 @@ class WC_AJAX {
 				if ( isset( $data['newRow'] ) ) {
 					continue;
 				}
+				$term_to_delete = get_term( $term_id, $taxonomy );
+				if ( $term_to_delete instanceof \WP_Term && self::is_shipping_provider_in_use( $term_to_delete->slug ) ) {
+					$reserved_slug_error = sprintf(
+						/* translators: %s: provider name */
+						__( 'Cannot delete "%s" because it is used by existing fulfillments. Remove all fulfillments using this provider first.', 'woocommerce' ),
+						$term_to_delete->name
+					);
+					continue;
+				}
 				wp_delete_term( $term_id, $taxonomy );
 				continue;
 			}
@@ -3902,19 +3911,25 @@ class WC_AJAX {
 			}
 
 			// Validate tracking URL template: must be a valid http/https URL.
-			$tracking_url_template = '';
-			if ( isset( $data['tracking_url_template'] ) && is_string( $data['tracking_url_template'] ) && '' !== $data['tracking_url_template'] ) {
-				// Replace __PLACEHOLDER__ for validation, then sanitize the original.
-				$testable_url = str_replace( '__PLACEHOLDER__', 'test', $data['tracking_url_template'] );
-				if ( filter_var( $testable_url, FILTER_VALIDATE_URL ) && preg_match( '#^https?://#i', $testable_url ) ) {
-					$tracking_url_template = esc_url_raw( $data['tracking_url_template'], array( 'http', 'https' ) );
+			// null means "not submitted" (preserve existing), empty string means "clear".
+			$tracking_url_template = null;
+			if ( isset( $data['tracking_url_template'] ) && is_string( $data['tracking_url_template'] ) ) {
+				if ( '' === $data['tracking_url_template'] ) {
+					$tracking_url_template = '';
+				} else {
+					$testable_url = str_replace( '__PLACEHOLDER__', 'test', $data['tracking_url_template'] );
+					if ( filter_var( $testable_url, FILTER_VALIDATE_URL ) && preg_match( '#^https?://#i', $testable_url ) ) {
+						$tracking_url_template = esc_url_raw( $data['tracking_url_template'], array( 'http', 'https' ) );
+					}
 				}
 			}
 
 			// Validate icon URL: must be a valid http/https URL.
-			$icon_url = '';
-			if ( isset( $data['icon'] ) && is_string( $data['icon'] ) && '' !== $data['icon'] ) {
-				if ( filter_var( $data['icon'], FILTER_VALIDATE_URL ) && preg_match( '#^https?://#i', $data['icon'] ) ) {
+			$icon_url = null;
+			if ( isset( $data['icon'] ) && is_string( $data['icon'] ) ) {
+				if ( '' === $data['icon'] ) {
+					$icon_url = '';
+				} elseif ( filter_var( $data['icon'], FILTER_VALIDATE_URL ) && preg_match( '#^https?://#i', $data['icon'] ) ) {
 					$icon_url = esc_url_raw( $data['icon'], array( 'http', 'https' ) );
 				}
 			}
@@ -3951,8 +3966,12 @@ class WC_AJAX {
 			}
 
 			if ( $term_id ) {
-				update_term_meta( $term_id, 'tracking_url_template', $tracking_url_template );
-				update_term_meta( $term_id, 'icon', $icon_url );
+				if ( null !== $tracking_url_template ) {
+					update_term_meta( $term_id, 'tracking_url_template', $tracking_url_template );
+				}
+				if ( null !== $icon_url ) {
+					update_term_meta( $term_id, 'icon', $icon_url );
+				}
 			}
 		}
 
@@ -3987,6 +4006,38 @@ class WC_AJAX {
 		wp_send_json_success(
 			$response
 		);
+	}
+
+	/**
+	 * Check if a shipping provider slug is referenced by any fulfillment record.
+	 *
+	 * @since 10.7.0
+	 *
+	 * @param string $provider_slug The provider slug to check.
+	 * @return bool True if the provider is in use.
+	 */
+	private static function is_shipping_provider_in_use( string $provider_slug ): bool {
+		global $wpdb;
+
+		$fulfillments_table = $wpdb->prefix . 'wc_order_fulfillments';
+		$meta_table         = $wpdb->prefix . 'wc_order_fulfillment_meta';
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$count = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$fulfillments_table} f
+				INNER JOIN {$meta_table} m ON f.fulfillment_id = m.fulfillment_id
+				WHERE m.meta_key = '_shipping_provider'
+				AND m.meta_value = %s
+				AND f.date_deleted IS NULL
+				AND m.date_deleted IS NULL
+				LIMIT 1",
+				$provider_slug
+			)
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		);
+
+		return (int) $count > 0;
 	}
 
 	/**
