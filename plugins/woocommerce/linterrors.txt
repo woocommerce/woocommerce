@@ -1,0 +1,1002 @@
+DEPRECATED: Passing an array of values to a property using a comma-separated string
+was deprecated in PHP_CodeSniffer 3.3.0. Support will be removed in PHPCS 4.0.0.
+The deprecated syntax was used for property "customSanitizingFunctions"
+for sniff "WordPress.Security.ValidatedSanitizedInput".
+Pass array values via <element [key="..." ]value="..."> nodes instead.
+DEPRECATED: Passing an array of values to a property using a comma-separated string
+was deprecated in PHP_CodeSniffer 3.3.0. Support will be removed in PHPCS 4.0.0.
+The deprecated syntax was used for property "customEscapingFunctions"
+for sniff "WordPress.Security.EscapeOutput".
+Pass array values via <element [key="..." ]value="..."> nodes instead.
+
+EEEEEEEE 8 / 8 (100%)
+
+
+
+FILE: src/Api/Enums/Coupons/DiscountType.php
+------------------------------------------------------------------------------------------------------------------------
+FOUND 8 ERRORS AFFECTING 4 LINES
+------------------------------------------------------------------------------------------------------------------------
+  9 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+  9 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 11 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 11 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 14 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 14 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 17 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 17 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+------------------------------------------------------------------------------------------------------------------------
+PHPCBF CAN FIX THE 8 MARKED SNIFF VIOLATIONS AUTOMATICALLY
+------------------------------------------------------------------------------------------------------------------------
+
+
+FILE: src/Api/Attributes/PublicAccess.php
+------------------------------------------------------------------------------------------------------------------------
+FOUND 2 ERRORS AFFECTING 1 LINE
+------------------------------------------------------------------------------------------------------------------------
+ 17 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 17 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+------------------------------------------------------------------------------------------------------------------------
+PHPCBF CAN FIX THE 2 MARKED SNIFF VIOLATIONS AUTOMATICALLY
+------------------------------------------------------------------------------------------------------------------------
+
+
+FILE: src/Api/Attributes/ArrayOf.php
+----------------------------------------------------------------------------------------------------
+FOUND 1 ERROR AFFECTING 1 LINE
+----------------------------------------------------------------------------------------------------
+ 21 | ERROR | Missing short description in doc comment (Generic.Commenting.DocComment.MissingShort)
+----------------------------------------------------------------------------------------------------
+
+
+FILE: src/Api/Attributes/RequiredCapability.php
+------------------------------------------------------------------------------------------------------------------------
+FOUND 3 ERRORS AFFECTING 2 LINES
+------------------------------------------------------------------------------------------------------------------------
+ 19 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 19 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 21 | ERROR | [ ] Missing short description in doc comment (Generic.Commenting.DocComment.MissingShort)
+------------------------------------------------------------------------------------------------------------------------
+PHPCBF CAN FIX THE 2 MARKED SNIFF VIOLATIONS AUTOMATICALLY
+------------------------------------------------------------------------------------------------------------------------
+
+
+FILE: src/Api/Pagination/PaginationParams.php
+------------------------------------------------------------------------------------------------------------------------
+FOUND 9 ERRORS AFFECTING 5 LINES
+------------------------------------------------------------------------------------------------------------------------
+ 18 | ERROR | [ ] Missing doc comment for function __construct() (Squiz.Commenting.FunctionComment.Missing)
+ 19 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 19 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 21 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 21 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 23 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 23 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 25 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 25 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+------------------------------------------------------------------------------------------------------------------------
+PHPCBF CAN FIX THE 8 MARKED SNIFF VIOLATIONS AUTOMATICALLY
+------------------------------------------------------------------------------------------------------------------------
+
+
+FILE: src/Api/AuthorizationException.php
+------------------------------------------------------------------------------------------------------------
+FOUND 2 ERRORS AFFECTING 2 LINES
+------------------------------------------------------------------------------------------------------------
+ 14 | ERROR | [ ] Missing doc comment for function __construct() (Squiz.Commenting.FunctionComment.Missing)
+ 18 | ERROR | [x] Short array syntax is not allowed (Universal.Arrays.DisallowShortArraySyntax.Found)
+------------------------------------------------------------------------------------------------------------
+PHPCBF CAN FIX THE 1 MARKED SNIFF VIOLATIONS AUTOMATICALLY
+------------------------------------------------------------------------------------------------------------
+
+
+FILE: src/Api/Attributes/Name.php
+----------------------------------------------------------------------------------------------------
+FOUND 1 ERROR AFFECTING 1 LINE
+----------------------------------------------------------------------------------------------------
+ 18 | ERROR | Missing short description in doc comment (Generic.Commenting.DocComment.MissingShort)
+----------------------------------------------------------------------------------------------------
+
+
+FILE: src/Api/Pagination/Edge.php
+---------------------------------------------------------------------------------------------
+FOUND 3 ERRORS AFFECTING 3 LINES
+---------------------------------------------------------------------------------------------
+  7 | ERROR | Missing doc comment for class Edge (Squiz.Commenting.ClassComment.Missing)
+  8 | ERROR | Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 10 | ERROR | Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+---------------------------------------------------------------------------------------------
+
+
+FILE: src/Api/Attributes/Description.php
+----------------------------------------------------------------------------------------------------
+FOUND 1 ERROR AFFECTING 1 LINE
+----------------------------------------------------------------------------------------------------
+ 18 | ERROR | Missing short description in doc comment (Generic.Commenting.DocComment.MissingShort)
+----------------------------------------------------------------------------------------------------
+
+
+FILE: src/Api/Attributes/ConnectionOf.php
+----------------------------------------------------------------------------------------------------
+FOUND 1 ERROR AFFECTING 1 LINE
+----------------------------------------------------------------------------------------------------
+ 19 | ERROR | Missing short description in doc comment (Generic.Commenting.DocComment.MissingShort)
+----------------------------------------------------------------------------------------------------
+
+
+FILE: src/Api/Types/Coupons/DeleteCouponResult.php
+------------------------------------------------------------------------------------------------------------------------
+FOUND 9 ERRORS AFFECTING 6 LINES
+------------------------------------------------------------------------------------------------------------------------
+  9 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+  9 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 10 | ERROR | [ ] Missing doc comment for class DeleteCouponResult (Squiz.Commenting.ClassComment.Missing)
+ 11 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 11 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 12 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 14 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 14 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 15 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+------------------------------------------------------------------------------------------------------------------------
+PHPCBF CAN FIX THE 6 MARKED SNIFF VIOLATIONS AUTOMATICALLY
+------------------------------------------------------------------------------------------------------------------------
+
+
+FILE: src/Api/Queries/Coupons/CouponMapper.php
+------------------------------------------------------------------------------------------------------------------------
+FOUND 2 ERRORS AND 23 WARNINGS AFFECTING 24 LINES
+------------------------------------------------------------------------------------------------------------------------
+ 19 | ERROR   | [ ] Method name "fromWcCoupon" in class CouponMapper is not in snake case format, try "from_wc_coupon"
+    |         |     (WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid)
+ 19 | ERROR   | [ ] Missing doc comment for function fromWcCoupon() (Squiz.Commenting.FunctionComment.Missing)
+ 22 | WARNING | [x] Equals sign not aligned with surrounding assignments; expected 26 spaces but found 25 spaces
+    |         |     (Generic.Formatting.MultipleStatementAlignment.NotSameWarning)
+ 23 | WARNING | [x] Equals sign not aligned with surrounding assignments; expected 24 spaces but found 23 spaces
+    |         |     (Generic.Formatting.MultipleStatementAlignment.NotSameWarning)
+ 24 | WARNING | [x] Equals sign not aligned with surrounding assignments; expected 17 spaces but found 16 spaces
+    |         |     (Generic.Formatting.MultipleStatementAlignment.NotSameWarning)
+ 25 | WARNING | [x] Equals sign not aligned with surrounding assignments; expected 15 spaces but found 14 spaces
+    |         |     (Generic.Formatting.MultipleStatementAlignment.NotSameWarning)
+ 26 | WARNING | [x] Equals sign not aligned with surrounding assignments; expected 22 spaces but found 21 spaces
+    |         |     (Generic.Formatting.MultipleStatementAlignment.NotSameWarning)
+ 27 | WARNING | [x] Equals sign not aligned with surrounding assignments; expected 22 spaces but found 21 spaces
+    |         |     (Generic.Formatting.MultipleStatementAlignment.NotSameWarning)
+ 28 | WARNING | [x] Equals sign not aligned with surrounding assignments; expected 16 spaces but found 15 spaces
+    |         |     (Generic.Formatting.MultipleStatementAlignment.NotSameWarning)
+ 29 | WARNING | [x] Equals sign not aligned with surrounding assignments; expected 15 spaces but found 14 spaces
+    |         |     (Generic.Formatting.MultipleStatementAlignment.NotSameWarning)
+ 30 | WARNING | [x] Equals sign not aligned with surrounding assignments; expected 16 spaces but found 15 spaces
+    |         |     (Generic.Formatting.MultipleStatementAlignment.NotSameWarning)
+ 31 | WARNING | [x] Equals sign not aligned with surrounding assignments; expected 17 spaces but found 16 spaces
+    |         |     (Generic.Formatting.MultipleStatementAlignment.NotSameWarning)
+ 32 | WARNING | [x] Equals sign not aligned with surrounding assignments; expected 14 spaces but found 13 spaces
+    |         |     (Generic.Formatting.MultipleStatementAlignment.NotSameWarning)
+ 33 | WARNING | [x] Equals sign not aligned with surrounding assignments; expected 17 spaces but found 16 spaces
+    |         |     (Generic.Formatting.MultipleStatementAlignment.NotSameWarning)
+ 34 | WARNING | [x] Equals sign not aligned with surrounding assignments; expected 8 spaces but found 7 spaces
+    |         |     (Generic.Formatting.MultipleStatementAlignment.NotSameWarning)
+ 35 | WARNING | [x] Equals sign not aligned with surrounding assignments; expected 17 spaces but found 16 spaces
+    |         |     (Generic.Formatting.MultipleStatementAlignment.NotSameWarning)
+ 36 | WARNING | [x] Equals sign not aligned with surrounding assignments; expected 8 spaces but found 7 spaces
+    |         |     (Generic.Formatting.MultipleStatementAlignment.NotSameWarning)
+ 37 | WARNING | [x] Equals sign not aligned with surrounding assignments; expected 6 spaces but found 5 spaces
+    |         |     (Generic.Formatting.MultipleStatementAlignment.NotSameWarning)
+ 38 | WARNING | [x] Equals sign not aligned with surrounding assignments; expected 15 spaces but found 14 spaces
+    |         |     (Generic.Formatting.MultipleStatementAlignment.NotSameWarning)
+ 39 | WARNING | [x] Equals sign not aligned with surrounding assignments; expected 10 spaces but found 9 spaces
+    |         |     (Generic.Formatting.MultipleStatementAlignment.NotSameWarning)
+ 41 | WARNING | [x] Equals sign not aligned with surrounding assignments; expected 10 spaces but found 9 spaces
+    |         |     (Generic.Formatting.MultipleStatementAlignment.NotSameWarning)
+ 42 | WARNING | [x] Equals sign not aligned with surrounding assignments; expected 14 spaces but found 13 spaces
+    |         |     (Generic.Formatting.MultipleStatementAlignment.NotSameWarning)
+ 43 | WARNING | [x] Equals sign not aligned with surrounding assignments; expected 14 spaces but found 13 spaces
+    |         |     (Generic.Formatting.MultipleStatementAlignment.NotSameWarning)
+ 44 | WARNING | [x] Equals sign not aligned with surrounding assignments; expected 10 spaces but found 9 spaces
+    |         |     (Generic.Formatting.MultipleStatementAlignment.NotSameWarning)
+ 45 | WARNING | [x] Equals sign not aligned with surrounding assignments; expected 21 spaces but found 20 spaces
+    |         |     (Generic.Formatting.MultipleStatementAlignment.NotSameWarning)
+------------------------------------------------------------------------------------------------------------------------
+PHPCBF CAN FIX THE 23 MARKED SNIFF VIOLATIONS AUTOMATICALLY
+------------------------------------------------------------------------------------------------------------------------
+
+
+FILE: src/Api/Pagination/Connection.php
+----------------------------------------------------------------------------------------------------
+FOUND 5 ERRORS AFFECTING 5 LINES
+----------------------------------------------------------------------------------------------------
+  7 | ERROR | Missing doc comment for class Connection (Squiz.Commenting.ClassComment.Missing)
+  8 | ERROR | Missing short description in doc comment (Generic.Commenting.DocComment.MissingShort)
+ 11 | ERROR | Missing short description in doc comment (Generic.Commenting.DocComment.MissingShort)
+ 14 | ERROR | Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 16 | ERROR | Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+----------------------------------------------------------------------------------------------------
+
+
+FILE: src/Api/Attributes/Unroll.php
+------------------------------------------------------------------------------------------------------------------------
+FOUND 2 ERRORS AFFECTING 1 LINE
+------------------------------------------------------------------------------------------------------------------------
+ 23 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 23 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+------------------------------------------------------------------------------------------------------------------------
+PHPCBF CAN FIX THE 2 MARKED SNIFF VIOLATIONS AUTOMATICALLY
+------------------------------------------------------------------------------------------------------------------------
+
+
+FILE: src/Api/Attributes/ParameterDescription.php
+------------------------------------------------------------------------------------------------------------------------
+FOUND 3 ERRORS AFFECTING 2 LINES
+------------------------------------------------------------------------------------------------------------------------
+ 17 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 17 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 19 | ERROR | [ ] Missing short description in doc comment (Generic.Commenting.DocComment.MissingShort)
+------------------------------------------------------------------------------------------------------------------------
+PHPCBF CAN FIX THE 2 MARKED SNIFF VIOLATIONS AUTOMATICALLY
+------------------------------------------------------------------------------------------------------------------------
+
+
+FILE: src/Api/Attributes/ScalarType.php
+----------------------------------------------------------------------------------------------------
+FOUND 1 ERROR AFFECTING 1 LINE
+----------------------------------------------------------------------------------------------------
+ 21 | ERROR | Missing short description in doc comment (Generic.Commenting.DocComment.MissingShort)
+----------------------------------------------------------------------------------------------------
+
+
+FILE: src/Api/Mutations/Coupons/CreateCoupon.php
+------------------------------------------------------------------------------------------------------------------------
+FOUND 26 ERRORS AFFECTING 23 LINES
+------------------------------------------------------------------------------------------------------------------------
+ 13 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 13 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 14 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 14 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 15 | ERROR | [ ] Missing doc comment for class CreateCoupon (Squiz.Commenting.ClassComment.Missing)
+ 16 | ERROR | [ ] Missing doc comment for function execute() (Squiz.Commenting.FunctionComment.Missing)
+ 17 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 17 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 23 | ERROR | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+ 26 | ERROR | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+ 29 | ERROR | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+ 32 | ERROR | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+ 35 | ERROR | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+ 38 | ERROR | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+ 41 | ERROR | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+ 44 | ERROR | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+ 47 | ERROR | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+ 50 | ERROR | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+ 53 | ERROR | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+ 56 | ERROR | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+ 59 | ERROR | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+ 62 | ERROR | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+ 65 | ERROR | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+ 68 | ERROR | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+ 71 | ERROR | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+ 74 | ERROR | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+------------------------------------------------------------------------------------------------------------------------
+PHPCBF CAN FIX THE 6 MARKED SNIFF VIOLATIONS AUTOMATICALLY
+------------------------------------------------------------------------------------------------------------------------
+
+
+FILE: src/Api/Pagination/PageInfo.php
+---------------------------------------------------------------------------------------------
+FOUND 5 ERRORS AFFECTING 5 LINES
+---------------------------------------------------------------------------------------------
+  7 | ERROR | Missing doc comment for class PageInfo (Squiz.Commenting.ClassComment.Missing)
+  8 | ERROR | Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 10 | ERROR | Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 12 | ERROR | Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 14 | ERROR | Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+---------------------------------------------------------------------------------------------
+
+
+FILE: src/Api/Attributes/Deprecated.php
+----------------------------------------------------------------------------------------------------
+FOUND 1 ERROR AFFECTING 1 LINE
+----------------------------------------------------------------------------------------------------
+ 18 | ERROR | Missing short description in doc comment (Generic.Commenting.DocComment.MissingShort)
+----------------------------------------------------------------------------------------------------
+
+
+FILE: src/Api/Attributes/Parameter.php
+------------------------------------------------------------------------------------------------------------------------
+FOUND 5 ERRORS AND 2 WARNINGS AFFECTING 6 LINES
+------------------------------------------------------------------------------------------------------------------------
+ 17 | ERROR   | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |         |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 17 | ERROR   | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |         |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 19 | ERROR   | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 21 | ERROR   | [ ] Missing short description in doc comment (Generic.Commenting.DocComment.MissingShort)
+ 36 | WARNING | [ ] It is recommended not to use reserved keyword "array" as function parameter name. Found: $array
+    |         |     (Universal.NamingConventions.NoReservedKeywordParameterNames.arrayFound)
+ 37 | WARNING | [ ] It is recommended not to use reserved keyword "default" as function parameter name. Found: $default
+    |         |     (Universal.NamingConventions.NoReservedKeywordParameterNames.defaultFound)
+ 44 | ERROR   | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+------------------------------------------------------------------------------------------------------------------------
+PHPCBF CAN FIX THE 2 MARKED SNIFF VIOLATIONS AUTOMATICALLY
+------------------------------------------------------------------------------------------------------------------------
+
+
+FILE: src/Api/Queries/Coupons/GetCoupon.php
+------------------------------------------------------------------------------------------------------------------------
+FOUND 14 ERRORS AND 1 WARNING AFFECTING 9 LINES
+------------------------------------------------------------------------------------------------------------------------
+ 13 | ERROR   | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |         |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 13 | ERROR   | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |         |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 14 | ERROR   | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |         |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 14 | ERROR   | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |         |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 15 | WARNING | [ ] This comment is 84% valid code; is this commented out code? (Squiz.PHP.CommentedOutCode.Found)
+ 15 | ERROR   | [x] No space found before comment text; expected "// #[RequiredCapability('manage_woocommerce')]" but
+    |         |     found "//#[RequiredCapability('manage_woocommerce')]"
+    |         |     (Squiz.Commenting.InlineComment.NoSpaceBefore)
+ 17 | ERROR   | [ ] You must use "/**" style comments for a class comment (Squiz.Commenting.ClassComment.WrongStyle)
+ 18 | ERROR   | [ ] Missing doc comment for function execute() (Squiz.Commenting.FunctionComment.Missing)
+ 19 | ERROR   | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |         |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 19 | ERROR   | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |         |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 21 | ERROR   | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |         |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 21 | ERROR   | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |         |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 24 | ERROR   | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+ 24 | ERROR   | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+ 36 | ERROR   | [x] Expected 1 blank line at end of file; 2 found (PSR2.Files.EndFileNewline.TooMany)
+------------------------------------------------------------------------------------------------------------------------
+PHPCBF CAN FIX THE 10 MARKED SNIFF VIOLATIONS AUTOMATICALLY
+------------------------------------------------------------------------------------------------------------------------
+
+
+FILE: src/Api/InputTypes/Coupons/CreateCouponInput.php
+------------------------------------------------------------------------------------------------------------------------
+FOUND 70 ERRORS AFFECTING 45 LINES
+------------------------------------------------------------------------------------------------------------------------
+ 12 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 12 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 13 | ERROR | [ ] Missing doc comment for class CreateCouponInput (Squiz.Commenting.ClassComment.Missing)
+ 14 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 14 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 15 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 17 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 17 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 18 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 20 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 20 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 21 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 23 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 23 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 24 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 26 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 26 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 27 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 29 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 29 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 30 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 32 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 32 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 33 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 35 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 35 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 36 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 36 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 37 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 39 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 39 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 40 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 40 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 41 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 43 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 43 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 44 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 46 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 46 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 47 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 49 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 49 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 50 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 52 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 52 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 53 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 55 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 55 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 56 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 56 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 57 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 59 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 59 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 60 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 60 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 61 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 63 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 63 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 64 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 66 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 66 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 67 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 69 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 69 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 70 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 72 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 72 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 73 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 73 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 74 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+------------------------------------------------------------------------------------------------------------------------
+PHPCBF CAN FIX THE 50 MARKED SNIFF VIOLATIONS AUTOMATICALLY
+------------------------------------------------------------------------------------------------------------------------
+
+
+FILE: src/Api/Mutations/Coupons/DeleteCoupon.php
+------------------------------------------------------------------------------------------------------------------------
+FOUND 10 ERRORS AFFECTING 6 LINES
+------------------------------------------------------------------------------------------------------------------------
+ 12 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 12 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 13 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 13 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 14 | ERROR | [ ] Missing doc comment for class DeleteCoupon (Squiz.Commenting.ClassComment.Missing)
+ 15 | ERROR | [ ] Missing doc comment for function execute() (Squiz.Commenting.FunctionComment.Missing)
+ 16 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 16 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 18 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 18 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+------------------------------------------------------------------------------------------------------------------------
+PHPCBF CAN FIX THE 8 MARKED SNIFF VIOLATIONS AUTOMATICALLY
+------------------------------------------------------------------------------------------------------------------------
+
+
+FILE: src/Api/Types/Coupons/Coupon.php
+------------------------------------------------------------------------------------------------------------------------
+FOUND 93 ERRORS AFFECTING 59 LINES
+------------------------------------------------------------------------------------------------------------------------
+ 14 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 14 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 15 | ERROR | [ ] Missing doc comment for class Coupon (Squiz.Commenting.ClassComment.Missing)
+ 16 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 16 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 17 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 19 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 19 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 20 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 22 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 22 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 23 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 25 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 25 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 26 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 28 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 28 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 29 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 31 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 31 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 32 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 34 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 34 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 35 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 35 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 36 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 38 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 38 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 39 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 39 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 40 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 42 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 42 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 43 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 43 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 44 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 46 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 46 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 47 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 49 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 49 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 50 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 52 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 52 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 53 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 53 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 54 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 56 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 56 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 57 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 57 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 58 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 60 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 60 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 61 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 63 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 63 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 64 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 66 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 66 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 67 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 69 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 69 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 70 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 72 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 72 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 73 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 73 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 74 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 76 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 76 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 77 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 77 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 78 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 80 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 80 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 81 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 83 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 83 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 84 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 86 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 86 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 87 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 89 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 89 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 90 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 90 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 91 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 93 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 93 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 94 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 94 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 95 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+------------------------------------------------------------------------------------------------------------------------
+PHPCBF CAN FIX THE 68 MARKED SNIFF VIOLATIONS AUTOMATICALLY
+------------------------------------------------------------------------------------------------------------------------
+
+
+FILE: src/Api/Scalars/DateTime.php
+------------------------------------------------------------------------------------------------------------------------
+FOUND 5 ERRORS AFFECTING 4 LINES
+------------------------------------------------------------------------------------------------------------------------
+  9 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+  9 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 10 | ERROR | [ ] Missing doc comment for class DateTime (Squiz.Commenting.ClassComment.Missing)
+ 11 | ERROR | [ ] Doc comment for parameter "$value" missing (Squiz.Commenting.FunctionComment.MissingParamTag)
+ 21 | ERROR | [ ] Doc comment for parameter "$value" missing (Squiz.Commenting.FunctionComment.MissingParamTag)
+------------------------------------------------------------------------------------------------------------------------
+PHPCBF CAN FIX THE 2 MARKED SNIFF VIOLATIONS AUTOMATICALLY
+------------------------------------------------------------------------------------------------------------------------
+
+
+FILE: src/Api/InputTypes/Coupons/UpdateCouponInput.php
+------------------------------------------------------------------------------------------------------------------------
+FOUND 70 ERRORS AFFECTING 45 LINES
+------------------------------------------------------------------------------------------------------------------------
+ 12 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 12 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 13 | ERROR | [ ] Missing doc comment for class UpdateCouponInput (Squiz.Commenting.ClassComment.Missing)
+ 14 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 14 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 15 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 17 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 17 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 18 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 20 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 20 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 21 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 23 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 23 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 24 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 26 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 26 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 27 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 29 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 29 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 30 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 32 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 32 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 33 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 35 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 35 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 36 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 36 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 37 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 39 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 39 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 40 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 40 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 41 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 43 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 43 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 44 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 46 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 46 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 47 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 49 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 49 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 50 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 52 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 52 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 53 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 55 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 55 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 56 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 56 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 57 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 59 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 59 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 60 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 60 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 61 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 63 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 63 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 64 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 66 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 66 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 67 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 69 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 69 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 70 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+ 72 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 72 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 73 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 73 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 74 | ERROR | [ ] Missing member variable doc comment (Squiz.Commenting.VariableComment.Missing)
+------------------------------------------------------------------------------------------------------------------------
+PHPCBF CAN FIX THE 50 MARKED SNIFF VIOLATIONS AUTOMATICALLY
+------------------------------------------------------------------------------------------------------------------------
+
+
+FILE: src/Api/Mutations/Coupons/UpdateCoupon.php
+------------------------------------------------------------------------------------------------------------------------
+FOUND 29 ERRORS AFFECTING 25 LINES
+------------------------------------------------------------------------------------------------------------------------
+ 14 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 14 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 15 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 15 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 16 | ERROR | [ ] Missing doc comment for class UpdateCoupon (Squiz.Commenting.ClassComment.Missing)
+ 17 | ERROR | [ ] Missing doc comment for function execute() (Squiz.Commenting.FunctionComment.Missing)
+ 18 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 18 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 20 | ERROR | [x] Expected 1 spaces after opening parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+ 20 | ERROR | [x] Expected 1 spaces before closing parenthesis; 0 found
+    |       |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+ 29 | ERROR | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+ 32 | ERROR | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+ 35 | ERROR | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+ 38 | ERROR | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+ 41 | ERROR | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+ 44 | ERROR | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+ 47 | ERROR | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+ 50 | ERROR | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+ 53 | ERROR | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+ 56 | ERROR | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+ 59 | ERROR | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+ 62 | ERROR | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+ 65 | ERROR | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+ 68 | ERROR | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+ 71 | ERROR | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+ 74 | ERROR | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+ 77 | ERROR | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+ 80 | ERROR | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+ 83 | ERROR | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+------------------------------------------------------------------------------------------------------------------------
+PHPCBF CAN FIX THE 8 MARKED SNIFF VIOLATIONS AUTOMATICALLY
+------------------------------------------------------------------------------------------------------------------------
+
+
+FILE: src/Api/Queries/Coupons/ListCoupons.php
+------------------------------------------------------------------------------------------------------------------------
+FOUND 25 ERRORS AND 15 WARNINGS AFFECTING 27 LINES
+------------------------------------------------------------------------------------------------------------------------
+  19 | ERROR   | [x] Expected 1 spaces after opening parenthesis; 0 found
+     |         |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+  19 | ERROR   | [x] Expected 1 spaces before closing parenthesis; 0 found
+     |         |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+  20 | ERROR   | [x] Expected 1 spaces after opening parenthesis; 0 found
+     |         |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+  20 | ERROR   | [x] Expected 1 spaces before closing parenthesis; 0 found
+     |         |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+  21 | WARNING | [ ] This comment is 84% valid code; is this commented out code? (Squiz.PHP.CommentedOutCode.Found)
+  21 | ERROR   | [x] No space found before comment text; expected "// #[RequiredCapability('manage_woocommerce')]" but
+     |         |     found "//#[RequiredCapability('manage_woocommerce')]"
+     |         |     (Squiz.Commenting.InlineComment.NoSpaceBefore)
+  23 | ERROR   | [ ] You must use "/**" style comments for a class comment (Squiz.Commenting.ClassComment.WrongStyle)
+  24 | ERROR   | [x] Expected 1 spaces after opening parenthesis; 0 found
+     |         |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+  24 | ERROR   | [x] Expected 1 spaces before closing parenthesis; 0 found
+     |         |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+  25 | ERROR   | [ ] Missing doc comment for function execute() (Squiz.Commenting.FunctionComment.Missing)
+  27 | ERROR   | [x] Expected 1 spaces after opening parenthesis; 0 found
+     |         |     (PEAR.Functions.FunctionCallSignature.SpaceAfterOpenBracket)
+  27 | ERROR   | [x] Expected 1 spaces before closing parenthesis; 0 found
+     |         |     (PEAR.Functions.FunctionCallSignature.SpaceBeforeCloseBracket)
+  38 | ERROR   | [ ] Inline comments must end in full-stops, exclamation marks, or question marks
+     |         |     (Squiz.Commenting.InlineComment.InvalidEndChar)
+  38 | ERROR   | [x] Comments may not appear after statements (Squiz.Commenting.PostStatementComment.Found)
+  40 | ERROR   | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+  44 | ERROR   | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+  45 | WARNING | [x] Equals sign not aligned with surrounding assignments; expected 12 spaces but found 1 space
+     |         |     (Generic.Formatting.MultipleStatementAlignment.NotSameWarning)
+  45 | WARNING | [ ] base64_decode() can be used to obfuscate code which is strongly discouraged. Please verify that
+     |         |     the function is used for benign reasons.
+     |         |     (WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode)
+  49 | ERROR   | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+  50 | WARNING | [x] Equals sign not aligned with surrounding assignments; expected 11 spaces but found 1 space
+     |         |     (Generic.Formatting.MultipleStatementAlignment.NotSameWarning)
+  50 | WARNING | [ ] base64_decode() can be used to obfuscate code which is strongly discouraged. Please verify that
+     |         |     the function is used for benign reasons.
+     |         |     (WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode)
+  55 | WARNING | [x] Equals sign not aligned with surrounding assignments; expected 2 spaces but found 1 space
+     |         |     (Generic.Formatting.MultipleStatementAlignment.NotSameWarning)
+  70 | ERROR   | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+  74 | ERROR   | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+  75 | WARNING | [x] Equals sign not aligned with surrounding assignments; expected 25 spaces but found 1 space
+     |         |     (Generic.Formatting.MultipleStatementAlignment.NotSameWarning)
+  75 | WARNING | [ ] base64_decode() can be used to obfuscate code which is strongly discouraged. Please verify that
+     |         |     the function is used for benign reasons.
+     |         |     (WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode)
+  76 | ERROR   | [x] Comments may not appear after statements (Squiz.Commenting.PostStatementComment.Found)
+  87 | ERROR   | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+  88 | WARNING | [x] Equals sign not aligned with surrounding assignments; expected 8 spaces but found 1 space
+     |         |     (Generic.Formatting.MultipleStatementAlignment.NotSameWarning)
+  88 | WARNING | [ ] base64_decode() can be used to obfuscate code which is strongly discouraged. Please verify that
+     |         |     the function is used for benign reasons.
+     |         |     (WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode)
+ 114 | ERROR   | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+ 126 | WARNING | [ ] base64_encode() can be used to obfuscate code which is strongly discouraged. Please verify that
+     |         |     the function is used for benign reasons.
+     |         |     (WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode)
+ 133 | WARNING | [x] Equals sign not aligned with surrounding assignments; expected 20 spaces but found 19 spaces
+     |         |     (Generic.Formatting.MultipleStatementAlignment.NotSameWarning)
+ 134 | WARNING | [x] Equals sign not aligned with surrounding assignments; expected 5 spaces but found 4 spaces
+     |         |     (Generic.Formatting.MultipleStatementAlignment.NotSameWarning)
+ 134 | ERROR   | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+ 134 | ERROR   | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+ 135 | ERROR   | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+ 135 | ERROR   | [ ] Use Yoda Condition checks, you must. (WordPress.PHP.YodaConditions.NotYoda)
+ 136 | WARNING | [x] Equals sign not aligned with surrounding assignments; expected 6 spaces but found 5 spaces
+     |         |     (Generic.Formatting.MultipleStatementAlignment.NotSameWarning)
+ 137 | WARNING | [x] Equals sign not aligned with surrounding assignments; expected 8 spaces but found 7 spaces
+     |         |     (Generic.Formatting.MultipleStatementAlignment.NotSameWarning)
+------------------------------------------------------------------------------------------------------------------------
+PHPCBF CAN FIX THE 20 MARKED SNIFF VIOLATIONS AUTOMATICALLY
+------------------------------------------------------------------------------------------------------------------------
+
+
+FILE: src/Api/ApiException.php
+--------------------------------------------------------------------------------------------------------------
+FOUND 6 ERRORS AFFECTING 6 LINES
+--------------------------------------------------------------------------------------------------------------
+  7 | ERROR | [ ] Missing doc comment for class ApiException (Squiz.Commenting.ClassComment.Missing)
+  8 | ERROR | [ ] Missing doc comment for function __construct() (Squiz.Commenting.FunctionComment.Missing)
+ 11 | ERROR | [x] Short array syntax is not allowed (Universal.Arrays.DisallowShortArraySyntax.Found)
+ 18 | ERROR | [ ] Missing doc comment for function getErrorCode() (Squiz.Commenting.FunctionComment.Missing)
+ 22 | ERROR | [ ] Missing doc comment for function getExtensions() (Squiz.Commenting.FunctionComment.Missing)
+ 26 | ERROR | [ ] Missing doc comment for function getStatusCode() (Squiz.Commenting.FunctionComment.Missing)
+--------------------------------------------------------------------------------------------------------------
+PHPCBF CAN FIX THE 1 MARKED SNIFF VIOLATIONS AUTOMATICALLY
+--------------------------------------------------------------------------------------------------------------
+
+Time: 503ms; Memory: 18MB
+

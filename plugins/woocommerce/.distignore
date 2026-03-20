@@ -48,3 +48,4 @@ webpack.config.js
 phpstan.neon
 phpstan-baseline.neon
 /php-stubs/
+/src/Internal/Api/DesignTime/
