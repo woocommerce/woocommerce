@@ -434,16 +434,14 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 				}
 			}
 		} catch ( ApiException $ex ) {
-			$action = 'update';
-			FulfillmentsTracker::track_fulfillment_validation_error( $action, $ex->getErrorCode(), $this->check_request_source( $request ) );
+			FulfillmentsTracker::track_fulfillment_validation_error( 'update', $ex->getErrorCode(), $this->check_request_source( $request ) );
 			return $this->prepare_error_response(
 				$ex->getErrorCode(),
 				$ex->getMessage(),
 				WP_Http::BAD_REQUEST
 			);
 		} catch ( \Exception $e ) {
-			$action = 'update';
-			FulfillmentsTracker::track_fulfillment_validation_error( $action, (string) $e->getCode(), $this->check_request_source( $request ) );
+			FulfillmentsTracker::track_fulfillment_validation_error( 'update', (string) $e->getCode(), $this->check_request_source( $request ) );
 			return $this->prepare_error_response(
 				$e->getCode(),
 				$e->getMessage(),
@@ -473,11 +471,12 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 		try {
 			$fulfillment = new Fulfillment( $fulfillment_id );
 			$this->validate_fulfillment( $fulfillment, $fulfillment_id, $order_id );
+			$status = $fulfillment->get_status() ?? 'unfulfilled';
 			$fulfillment->delete();
 			FulfillmentsTracker::track_fulfillment_deletion(
 				$this->check_request_source( $request ),
 				$fulfillment_id,
-				$fulfillment->get_status() ?? 'unfulfilled',
+				$status,
 				$notify_customer
 			);
 		} catch ( ApiException $ex ) {

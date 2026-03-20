@@ -269,6 +269,7 @@ class Fulfillment extends \WC_Data {
 	 *
 	 * This method calculates the total quantity of items in the fulfillment.
 	 *
+	 * @since 10.7.0
 	 * @return int Total quantity of items in the fulfillment.
 	 */
 	public function get_item_count(): int {
