@@ -109,14 +109,27 @@ class Content_Renderer {
 	private ?string $post_content_width = null;
 
 	/**
-	 * Container padding from the template group wrapping post-content.
+	 * Container padding from template group(s) wrapping post-content.
 	 *
-	 * Stored during the first preprocessing pass and passed to user blocks
-	 * in the second pass so they receive the container padding per-block.
+	 * Accumulated from all suppressed containers in the ancestor chain
+	 * during the first preprocessing pass. Passed to user blocks in the
+	 * second pass so they receive the combined container padding per-block.
 	 *
 	 * @var array{left?: string, right?: string}
 	 */
 	private array $container_padding = array();
+
+	/**
+	 * Whether root padding was absorbed by a root-level container.
+	 *
+	 * When a root-level group has its own padding and wraps post-content,
+	 * its padding subsumes the theme's root padding (they represent the
+	 * same visual inset). In this case, root padding should not be applied
+	 * separately in the second preprocessing pass.
+	 *
+	 * @var bool
+	 */
+	private bool $root_padding_absorbed = false;
 
 	/**
 	 * CSS inliner
@@ -239,17 +252,21 @@ class Content_Renderer {
 		// references (e.g. var:preset|spacing|20) in block attributes.
 		$styles['__variables_map'] = $this->theme_controller->get_variables_values_map();
 
-		// Second pass (user blocks inside post-content): if root padding was
-		// applied to a container above post-content in the first pass (indicated
-		// by post_content_width < contentSize), remove root padding from styles
-		// to prevent double application. If the template delegates root padding
-		// (post_content_width == contentSize), keep it for user blocks.
+		// Second pass (user blocks inside post-content): determine whether
+		// root padding should be removed to prevent double application.
+		//
+		// Root padding is removed when a root-level container absorbed it
+		// (its own padding subsumes root padding), or when post_content_width
+		// is less than contentSize (root padding applied to a container above
+		// post-content in the first pass).
 		if ( null !== $this->post_content_width ) {
-			$post_content_num = (float) str_replace( 'px', '', $this->post_content_width );
-			$content_size_num = (float) str_replace( 'px', '', $layout['contentSize'] );
-			// Use epsilon tolerance for floating-point comparison since width
-			// calculations involve round() and division that may produce imprecision.
-			if ( $post_content_num < $content_size_num - 0.01 ) {
+			$should_remove_root_padding = $this->root_padding_absorbed;
+			if ( ! $should_remove_root_padding ) {
+				$post_content_num           = (float) str_replace( 'px', '', $this->post_content_width );
+				$content_size_num           = (float) str_replace( 'px', '', $layout['contentSize'] );
+				$should_remove_root_padding = $post_content_num < $content_size_num - 0.01;
+			}
+			if ( $should_remove_root_padding ) {
 				unset( $styles['spacing']['padding']['left'], $styles['spacing']['padding']['right'] );
 			}
 
@@ -262,10 +279,12 @@ class Content_Renderer {
 
 		$result = $this->process_manager->preprocess( $parsed_blocks, $layout, $styles );
 
-		// After the first pass: find the post-content block's width and container padding.
+		// After the first pass: find the post-content block's width, container
+		// padding, and whether root padding was absorbed by a root-level container.
 		if ( null === $this->post_content_width ) {
-			$this->post_content_width = $this->find_post_content_width( $result );
-			$this->container_padding  = $this->find_container_padding( $result );
+			$this->post_content_width    = $this->find_post_content_width( $result );
+			$this->container_padding     = $this->find_container_padding( $result );
+			$this->root_padding_absorbed = $this->has_root_level_suppress( $result );
 		}
 
 		return $result;
@@ -302,40 +321,87 @@ class Content_Renderer {
 	}
 
 	/**
-	 * Find the container padding from blocks with suppress-horizontal-padding flag.
+	 * Find and accumulate container padding from all suppressed containers.
 	 *
-	 * Searches the preprocessed template blocks for a container that wraps
-	 * post-content and had its horizontal padding distributed per-block.
+	 * Searches the preprocessed template blocks for containers in the
+	 * ancestor chain to post-content that had their horizontal padding
+	 * distributed per-block. When multiple nested containers are suppressed
+	 * (e.g. root group 20px → content group 10px → post-content), their
+	 * padding values are summed (20 + 10 = 30px).
 	 *
 	 * @param array $blocks Preprocessed blocks.
-	 * @return array{left?: string, right?: string} Container padding values, or empty array.
+	 * @return array{left?: string, right?: string} Accumulated container padding values, or empty array.
 	 */
 	private function find_container_padding( array $blocks ): array {
 		$variables_map = $this->theme_controller->get_variables_values_map();
+		return $this->accumulate_container_padding( $blocks, $variables_map );
+	}
 
+	/**
+	 * Recursively accumulate container padding from suppressed blocks.
+	 *
+	 * Walks the block tree depth-first, summing padding from each suppressed
+	 * container encountered along the path to post-content.
+	 *
+	 * @param array $blocks Blocks to search.
+	 * @param array $variables_map CSS variable names to resolved values.
+	 * @return array{left?: string, right?: string} Accumulated padding, or empty array.
+	 */
+	private function accumulate_container_padding( array $blocks, array $variables_map ): array {
 		foreach ( $blocks as $block ) {
 			$email_attrs = $block['email_attrs'] ?? array();
+			$accumulated = array();
+
+			// If this block has suppress, add its padding to the accumulator.
 			if ( ! empty( $email_attrs['suppress-horizontal-padding'] ) ) {
 				$padding = $block['attrs']['style']['spacing']['padding'] ?? array();
-				$result  = array();
 				if ( isset( $padding['left'] ) && is_string( $padding['left'] ) ) {
-					$result['left'] = $this->resolve_preset_padding( $padding['left'], $variables_map );
+					$accumulated['left'] = $this->resolve_preset_padding( $padding['left'], $variables_map );
 				}
 				if ( isset( $padding['right'] ) && is_string( $padding['right'] ) ) {
-					$result['right'] = $this->resolve_preset_padding( $padding['right'], $variables_map );
-				}
-				if ( ! empty( $result ) ) {
-					return $result;
+					$accumulated['right'] = $this->resolve_preset_padding( $padding['right'], $variables_map );
 				}
 			}
+
+			// Continue into inner blocks to find more suppressed containers.
 			if ( ! empty( $block['innerBlocks'] ) ) {
-				$found = $this->find_container_padding( $block['innerBlocks'] );
-				if ( ! empty( $found ) ) {
-					return $found;
+				$inner = $this->accumulate_container_padding( $block['innerBlocks'], $variables_map );
+				if ( ! empty( $inner ) ) {
+					$accumulated['left']  = $this->sum_padding_values(
+						$accumulated['left'] ?? null,
+						$inner['left'] ?? null
+					) . 'px';
+					$accumulated['right'] = $this->sum_padding_values(
+						$accumulated['right'] ?? null,
+						$inner['right'] ?? null
+					) . 'px';
 				}
+			}
+
+			if ( ! empty( $accumulated ) ) {
+				return $accumulated;
 			}
 		}
 		return array();
+	}
+
+	/**
+	 * Check whether any root-level block has suppress-horizontal-padding.
+	 *
+	 * When a root-level container has its own padding and wraps post-content,
+	 * its padding subsumes the theme's root padding. The second preprocessing
+	 * pass should not apply root padding separately.
+	 *
+	 * @param array $blocks Preprocessed blocks.
+	 * @return bool True if a root-level block absorbs root padding.
+	 */
+	private function has_root_level_suppress( array $blocks ): bool {
+		foreach ( $blocks as $block ) {
+			if ( ! empty( $block['email_attrs']['suppress-horizontal-padding'] ) ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -459,17 +525,21 @@ class Content_Renderer {
 	/**
 	 * Sum two CSS pixel padding values.
 	 *
-	 * @param string|null $value1 First padding value (e.g., '20px').
-	 * @param string|null $value2 Second padding value (e.g., '10px').
+	 * Values may be pixel strings (e.g. '20px') or preset references
+	 * (e.g. 'var:preset|spacing|20') which are resolved before summing.
+	 *
+	 * @param string|null $value1 First padding value.
+	 * @param string|null $value2 Second padding value.
 	 * @return float The sum in pixels.
 	 */
 	private function sum_padding_values( ?string $value1, ?string $value2 ): float {
-		$sum = 0.0;
+		$variables_map = $this->theme_controller->get_variables_values_map();
+		$sum           = 0.0;
 		if ( null !== $value1 ) {
-			$sum += (float) str_replace( 'px', '', $value1 );
+			$sum += (float) str_replace( 'px', '', $this->resolve_preset_padding( $value1, $variables_map ) );
 		}
 		if ( null !== $value2 ) {
-			$sum += (float) str_replace( 'px', '', $value2 );
+			$sum += (float) str_replace( 'px', '', $this->resolve_preset_padding( $value2, $variables_map ) );
 		}
 		return $sum;
 	}
@@ -525,8 +595,9 @@ class Content_Renderer {
 		remove_filter( 'block_parser_class', array( $this, 'block_parser' ) );
 		remove_filter( 'woocommerce_email_blocks_renderer_parsed_blocks', array( $this, 'preprocess_parsed_blocks' ) );
 
-		$this->post_content_width = null;
-		$this->container_padding  = array();
+		$this->post_content_width    = null;
+		$this->container_padding     = array();
+		$this->root_padding_absorbed = false;
 
 		// Restore the original core/post-content render callback.
 		// Note: We always restore it, even if it was null originally.
