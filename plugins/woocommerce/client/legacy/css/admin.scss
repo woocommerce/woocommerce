@@ -8289,8 +8289,8 @@ table.bar_chart {
 	// Select2 single: match WP 7.0 native select height (40px).
 	.select2-container {
 		.select2-selection--single {
-			height: 40px;
-			border-radius: 2px;
+			height: 40px; // Match WP 7.0 native select height.
+			border-radius: 2px; // Match WP 7.0 native select border-radius.
 
 			.select2-selection__rendered {
 				line-height: 38px;
@@ -8306,7 +8306,7 @@ table.bar_chart {
 			height: 38px;
 
 			.select2-selection__rendered li {
-				margin-top: 0;
+				margin-top: 0; // Prevent extra spacing inside multi-select.
 			}
 		}
 
@@ -8354,6 +8354,7 @@ table.bar_chart {
 		}
 	}
 
+	// Order actions button margin causes overflow with WP 7.0 sizing.
 	#poststuff #woocommerce-order-actions .inside button {
 		margin: 0;
 	}
@@ -8407,15 +8408,16 @@ table.bar_chart {
 		}
 
 		input[type="number"] {
-			padding-right: 0;
+			padding-right: 0; // Keep stepper controls flush right.
 		}
 
 		.dimensions_field .wrap {
-			width: 55%;
-			border-radius: 2px;
+			width: 55%; // Wider to compensate for increased padding.
+			border-radius: 2px; // Match WP 7.0 input border-radius.
 		}
 	}
 
+	// Variable product selects need more height to accommodate WP 7.0 padding.
 	#variable_product_options .form-row select {
 		height: 50px;
 	}
@@ -8429,11 +8431,11 @@ table.bar_chart {
 .wc-wp-version-gte-70.post-type-product .tablenav,
 .wc-wp-version-gte-70.post-type-shop_order .tablenav {
 	.select2-container {
-		margin-top: 0;
+		margin-top: 0; // Align with other tablenav elements.
 	}
 
 	.select2-container .select2-selection--single {
-		height: 32px;
+		height: 32px; // WP 7.0 tablenav uses compact 32px, not 40px.
 
 		.select2-selection__rendered {
 			line-height: 30px;
