@@ -141,10 +141,6 @@
 			text-decoration: none;
 			white-space: nowrap;
 
-			&:only-child {
-				padding: var(--wc-customer-account-dropdown-padding-block);
-			}
-
 			&:hover,
 			&:focus {
 				background: var(--wc-customer-account-dropdown-item-hover-bg);
