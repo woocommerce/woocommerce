@@ -9,7 +9,7 @@ import {
 	useState,
 	useMemo,
 } from '@wordpress/element';
-import { addFilter, applyFilters } from '@wordpress/hooks';
+import { addFilter, applyFilters, hasFilter } from '@wordpress/hooks';
 import { store as editorStore } from '@wordpress/editor';
 import { useMergeRefs } from '@wordpress/compose';
 import '@wordpress/format-library'; // Enables text formatting capabilities
@@ -105,6 +105,11 @@ function Editor( {
  * yet fully support it, so we temporarily opt out by clearing sync providers.
  */
 function disableCollab() {
+	if (
+		hasFilter( 'sync.providers', 'woocommerce/email-editor/disable-collab' )
+	) {
+		return;
+	}
 	addFilter(
 		'sync.providers',
 		'woocommerce/email-editor/disable-collab',
