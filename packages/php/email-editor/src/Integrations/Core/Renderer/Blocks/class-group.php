@@ -99,18 +99,16 @@ class Group extends Abstract_Block_Renderer {
 	 * @return array Styles with horizontal padding removed.
 	 */
 	private function remove_horizontal_padding( array $cell_styles ): array {
+		if ( ! isset( $cell_styles['declarations'] ) || ! is_array( $cell_styles['declarations'] ) ) {
+			return $cell_styles;
+		}
+
 		unset(
 			$cell_styles['declarations']['padding-left'],
 			$cell_styles['declarations']['padding-right']
 		);
 
 		// Rebuild CSS string from remaining declarations.
-		$css_parts = array();
-		foreach ( $cell_styles['declarations'] as $prop => $value ) {
-			$css_parts[] = $prop . ':' . $value;
-		}
-		$cell_styles['css'] = implode( ';', $css_parts );
-
-		return $cell_styles;
+		return Styles_Helper::extend_block_styles( $cell_styles, array() );
 	}
 }

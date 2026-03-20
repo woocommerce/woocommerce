@@ -311,16 +311,18 @@ class Content_Renderer {
 	 * @return array{left?: string, right?: string} Container padding values, or empty array.
 	 */
 	private function find_container_padding( array $blocks ): array {
+		$variables_map = $this->theme_controller->get_variables_values_map();
+
 		foreach ( $blocks as $block ) {
 			$email_attrs = $block['email_attrs'] ?? array();
 			if ( ! empty( $email_attrs['suppress-horizontal-padding'] ) ) {
 				$padding = $block['attrs']['style']['spacing']['padding'] ?? array();
 				$result  = array();
 				if ( isset( $padding['left'] ) && is_string( $padding['left'] ) ) {
-					$result['left'] = $padding['left'];
+					$result['left'] = $this->resolve_preset_padding( $padding['left'], $variables_map );
 				}
 				if ( isset( $padding['right'] ) && is_string( $padding['right'] ) ) {
-					$result['right'] = $padding['right'];
+					$result['right'] = $this->resolve_preset_padding( $padding['right'], $variables_map );
 				}
 				if ( ! empty( $result ) ) {
 					return $result;
@@ -470,6 +472,25 @@ class Content_Renderer {
 			$sum += (float) str_replace( 'px', '', $value2 );
 		}
 		return $sum;
+	}
+
+	/**
+	 * Resolve a CSS value that may contain a preset variable reference.
+	 *
+	 * Block attributes store padding as preset references like
+	 * "var:preset|spacing|20" which resolve to actual pixel values.
+	 *
+	 * @param string $value The CSS value, possibly a preset reference.
+	 * @param array  $variables_map Map of CSS variable names to resolved values.
+	 * @return string The resolved value (e.g. "8px") or the original value.
+	 */
+	private function resolve_preset_padding( string $value, array $variables_map ): string {
+		if ( strpos( $value, 'var:preset|' ) !== 0 ) {
+			return $value;
+		}
+
+		$css_var_name = '--wp--' . str_replace( '|', '--', str_replace( 'var:', '', $value ) );
+		return $variables_map[ $css_var_name ] ?? $value;
 	}
 
 	/**

@@ -271,6 +271,9 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertArrayHasKey( 'container-padding-right', $second_result[0]['email_attrs'] );
 		$this->assertEquals( '20px', $second_result[0]['email_attrs']['container-padding-left'] );
 		$this->assertEquals( '20px', $second_result[0]['email_attrs']['container-padding-right'] );
+
+		// Width should account for both root and container padding.
+		$this->assertArrayHasKey( 'width', $second_result[0]['email_attrs'] );
 	}
 
 	/**
@@ -370,6 +373,38 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertEquals( '<p>full width content</p>', $result );
 		$this->assertStringNotContainsString( 'email-root-padding', $result );
 		\WP_Block_Type_Registry::get_instance()->unregister( 'test/alignfull-block' );
+	}
+
+	/**
+	 * Test render_block applies asymmetric combined padding correctly
+	 */
+	public function testItAppliesAsymmetricCombinedPadding(): void {
+		register_block_type(
+			'test/asymmetric-padding-block',
+			array(
+				'render_email_callback' => function () {
+					return '<p>asymmetric</p>';
+				},
+			)
+		);
+
+		$result = $this->renderer->render_block(
+			'content',
+			array(
+				'blockName'   => 'test/asymmetric-padding-block',
+				'email_attrs' => array(
+					'root-padding-left'       => '10px',
+					'root-padding-right'      => '15px',
+					'container-padding-left'  => '20px',
+					'container-padding-right' => '25px',
+				),
+			)
+		);
+
+		// Combined: left = 10 + 20 = 30px, right = 15 + 25 = 40px.
+		$this->assertStringContainsString( 'padding-left:30px', $result );
+		$this->assertStringContainsString( 'padding-right:40px', $result );
+		\WP_Block_Type_Registry::get_instance()->unregister( 'test/asymmetric-padding-block' );
 	}
 
 	/**

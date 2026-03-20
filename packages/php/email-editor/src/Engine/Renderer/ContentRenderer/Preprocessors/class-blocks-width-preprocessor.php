@@ -63,8 +63,9 @@ class Blocks_Width_Preprocessor implements Preprocessor {
 			if ( 'full' !== $alignment ) {
 				$layout_width -= $this->parse_number_from_string_with_pixels( $block['email_attrs']['root-padding-left'] ?? '0px' );
 				$layout_width -= $this->parse_number_from_string_with_pixels( $block['email_attrs']['root-padding-right'] ?? '0px' );
-				$layout_width -= $this->parse_number_from_string_with_pixels( $block['email_attrs']['container-padding-left'] ?? '0px' );
-				$layout_width -= $this->parse_number_from_string_with_pixels( $block['email_attrs']['container-padding-right'] ?? '0px' );
+				// Container padding may be preset references (var:preset|spacing|20).
+				$layout_width -= $this->parse_number_from_string_with_pixels( $this->resolve_preset_value( $block['email_attrs']['container-padding-left'] ?? '0px', $variables_map ) );
+				$layout_width -= $this->parse_number_from_string_with_pixels( $this->resolve_preset_value( $block['email_attrs']['container-padding-right'] ?? '0px', $variables_map ) );
 			}
 
 			// Resolve block padding — may be preset references like var:preset|spacing|20.
