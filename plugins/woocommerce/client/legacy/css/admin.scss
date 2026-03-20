@@ -8421,6 +8421,11 @@ table.bar_chart {
 	#variable_product_options .form-row select {
 		height: 50px;
 	}
+
+	// Variable product low stock row: clear preceding floats to prevent vertical stretching.
+	#variable_product_options .form-row[class*="variable_low_stock_amount"] {
+		clear: both;
+	}
 }
 
 // Tablenav: WP 7.0 tablenav uses compact 32px sizing for native selects.
