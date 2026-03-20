@@ -555,9 +555,9 @@ class MiniCart extends AbstractBlock {
 			wp_interactivity_state(
 				$this->get_full_block_name(),
 				array(
-					'isOpen'             => false,
-					'totalItemsInCart'   => $cart_item_count,
-					'shouldShowTaxLabel' => $cart->get_cart_contents_tax() > 0,
+					'isOpen'                 => false,
+					'totalItemsInCart'       => $cart_item_count,
+					'shouldShowTaxLabel'     => $cart->get_cart_contents_tax() > 0,
 					'badgeIsVisible'         => $badge_is_visible,
 					'hasBadgeColorAttribute' => ! empty( $product_count_color ),
 					'formattedSubtotal'      => $formatted_subtotal,
