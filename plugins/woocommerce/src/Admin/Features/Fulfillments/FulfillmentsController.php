@@ -89,8 +89,6 @@ class FulfillmentsController {
 
 	/**
 	 * Register the custom shipping providers taxonomy.
-	 *
-	 * @since 10.7.0
 	 */
 	private function register_custom_shipping_providers_taxonomy(): void {
 		if ( taxonomy_exists( 'wc_fulfillment_shipping_provider' ) ) {

@@ -3859,8 +3859,10 @@ class WC_AJAX {
 			wp_die();
 		}
 
-		$taxonomy = 'wc_fulfillment_shipping_provider';
-		$changes  = wp_unslash( $_POST['changes'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$taxonomy            = 'wc_fulfillment_shipping_provider';
+		$changes             = wp_unslash( $_POST['changes'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$built_in_keys       = array_keys( \Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentUtils::get_shipping_providers_object() );
+		$reserved_slug_error = '';
 
 		foreach ( $changes as $term_id => $data ) {
 			$term_id = absint( $term_id );
@@ -3879,8 +3881,36 @@ class WC_AJAX {
 				$update_args['name'] = wc_clean( $data['name'] );
 			}
 
-			if ( isset( $data['slug'] ) ) {
-				$update_args['slug'] = wc_clean( $data['slug'] );
+			// Validate and set slug only on new rows. Slug is immutable after creation.
+			if ( isset( $data['newRow'] ) && isset( $data['slug'] ) && '' !== $data['slug'] ) {
+				$candidate_slug = sanitize_title( wc_clean( $data['slug'] ) );
+				if ( in_array( $candidate_slug, $built_in_keys, true ) ) {
+					$reserved_slug_error = sprintf(
+						/* translators: %s: slug value */
+						__( 'The slug "%s" is already used by a built-in shipping provider. Please choose a different slug.', 'woocommerce' ),
+						$candidate_slug
+					);
+					continue;
+				}
+				$update_args['slug'] = $candidate_slug;
+			}
+
+			// Validate tracking URL template.
+			$tracking_url_template = '';
+			if ( isset( $data['tracking_url_template'] ) && '' !== $data['tracking_url_template'] ) {
+				$raw_url = wc_clean( $data['tracking_url_template'] );
+				if ( filter_var( str_replace( '__PLACEHOLDER__', 'test', $raw_url ), FILTER_VALIDATE_URL ) ) {
+					$tracking_url_template = $raw_url;
+				}
+			}
+
+			// Validate icon URL.
+			$icon_url = '';
+			if ( isset( $data['icon'] ) && '' !== $data['icon'] ) {
+				$raw_icon = wc_clean( $data['icon'] );
+				if ( filter_var( $raw_icon, FILTER_VALIDATE_URL ) ) {
+					$icon_url = $raw_icon;
+				}
 			}
 
 			if ( isset( $data['newRow'] ) ) {
@@ -3888,19 +3918,31 @@ class WC_AJAX {
 				if ( empty( $update_args['name'] ) ) {
 					continue;
 				}
+
 				$inserted_term = wp_insert_term( $update_args['name'], $taxonomy, $update_args );
-				$term_id       = is_wp_error( $inserted_term ) ? 0 : $inserted_term['term_id'];
+				if ( is_wp_error( $inserted_term ) ) {
+					continue;
+				}
+				$term_id = $inserted_term['term_id'];
+
+				// Verify auto-generated slug doesn't collide with built-in keys.
+				$new_term = get_term( $term_id, $taxonomy );
+				if ( $new_term && in_array( $new_term->slug, $built_in_keys, true ) ) {
+					wp_delete_term( $term_id, $taxonomy );
+					$reserved_slug_error = sprintf(
+						/* translators: %s: provider name */
+						__( 'Could not create provider "%s" because its auto-generated slug conflicts with a built-in shipping provider. Please specify a different slug.', 'woocommerce' ),
+						$update_args['name']
+					);
+					continue;
+				}
 			} else {
 				wp_update_term( $term_id, $taxonomy, $update_args );
 			}
 
 			if ( $term_id ) {
-				if ( isset( $data['tracking_url_template'] ) ) {
-					update_term_meta( $term_id, 'tracking_url_template', esc_url_raw( $data['tracking_url_template'] ) );
-				}
-				if ( isset( $data['icon'] ) ) {
-					update_term_meta( $term_id, 'icon', esc_url_raw( $data['icon'] ) );
-				}
+				update_term_meta( $term_id, 'tracking_url_template', $tracking_url_template );
+				update_term_meta( $term_id, 'icon', $icon_url );
 			}
 		}
 
@@ -3924,10 +3966,16 @@ class WC_AJAX {
 			}
 		}
 
+		$response = array(
+			'shipping_providers' => $shipping_providers,
+		);
+
+		if ( ! empty( $reserved_slug_error ) ) {
+			$response['error'] = $reserved_slug_error;
+		}
+
 		wp_send_json_success(
-			array(
-				'shipping_providers' => $shipping_providers,
-			)
+			$response
 		);
 	}
 

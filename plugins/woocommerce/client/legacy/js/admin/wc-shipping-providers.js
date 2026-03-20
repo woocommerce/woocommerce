@@ -15,14 +15,20 @@
 			// Backbone model
 			ShippingProvider       = Backbone.Model.extend({
 				save: function( changes ) {
-					$.post( ajaxurl + ( ajaxurl.indexOf( '?' ) > 0 ? '&' : '?' ) + 'action=woocommerce_shipping_providers_save_changes', {
-						wc_shipping_providers_nonce : data.wc_shipping_providers_nonce,
-						changes,
-					}, this.onSaveResponse, 'json' );
-				},
-				onSaveResponse: function( response, textStatus ) {
-					if ( 'success' === textStatus ) {
+					var self = this;
+					$.ajax({
+						url: ajaxurl + ( ajaxurl.indexOf( '?' ) > 0 ? '&' : '?' ) + 'action=woocommerce_shipping_providers_save_changes',
+						type: 'POST',
+						data: {
+							wc_shipping_providers_nonce : data.wc_shipping_providers_nonce,
+							changes: changes,
+						},
+						dataType: 'json'
+					}).done( function( response ) {
 						if ( response.success ) {
+							if ( response.data.error ) {
+								window.alert( response.data.error );
+							}
 							shippingProvider.set( 'providers', response.data.shipping_providers );
 							shippingProvider.trigger( 'saved:providers' );
 						} else if ( response.data ) {
@@ -30,8 +36,11 @@
 						} else {
 							window.alert( data.strings.save_failed );
 						}
-					}
-					shippingProviderView.unblock();
+					}).fail( function() {
+						window.alert( data.strings.save_failed );
+					}).always( function() {
+						shippingProviderView.unblock();
+					});
 				}
 			} ),
 
@@ -129,16 +138,16 @@
 						} );
 					}
 				},
-				validateFormArguments: function( element, target, data ) {
+				validateFormArguments: function( element, target, formData ) {
 					const requiredFields = [ 'name' ];
-					const formIsComplete = Object.keys( data ).every( key => {
-						if ( ! requiredFields.includes( key ) ) {
+					const formIsComplete = Object.keys( formData ).every( function( key ) {
+						if ( requiredFields.indexOf( key ) === -1 ) {
 							return true;
 						}
-						if ( Array.isArray( data[ key ] ) ) {
-							return data[ key ].length && !!data[ key ][ 0 ];
+						if ( Array.isArray( formData[ key ] ) ) {
+							return formData[ key ].length && !!formData[ key ][ 0 ];
 						}
-						return !!data[ key ];
+						return !!formData[ key ];
 					} );
 					const createButton = document.getElementById( 'btn-ok' );
 					createButton.disabled = ! formIsComplete;
@@ -164,6 +173,11 @@
 						const model =  event.data.view.model;
 						const providers = _.indexBy( model.get( 'providers' ), 'term_id' );
 						const rowData = providers[ term_id ];
+
+						// Make slug read-only when editing an existing provider.
+						if ( rowData && rowData.action === 'edit' ) {
+							$('.wc-backbone-modal-content').find( 'input[name="slug"]' ).prop( 'readonly', true );
+						}
 
 						if ( rowData ) {
 							$('.wc-backbone-modal-content').find( 'select' ).each( function() {

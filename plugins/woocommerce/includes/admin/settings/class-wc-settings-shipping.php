@@ -8,6 +8,7 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -54,11 +55,14 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	 */
 	protected function get_own_sections() {
 		$sections = array(
-			''          => __( 'Shipping zones', 'woocommerce' ),
-			'options'   => __( 'Shipping settings', 'woocommerce' ),
-			'classes'   => __( 'Classes', 'woocommerce' ),
-			'providers' => __( 'Shipping providers', 'woocommerce' ),
+			''        => __( 'Shipping zones', 'woocommerce' ),
+			'options' => __( 'Shipping settings', 'woocommerce' ),
+			'classes' => __( 'Classes', 'woocommerce' ),
 		);
+
+		if ( FeaturesUtil::feature_is_enabled( 'fulfillments' ) ) {
+			$sections['providers'] = __( 'Shipping providers', 'woocommerce' );
+		}
 
 		if ( ! $this->wc_is_installing() ) {
 			// Load shipping methods so we can show any global options they may have.
