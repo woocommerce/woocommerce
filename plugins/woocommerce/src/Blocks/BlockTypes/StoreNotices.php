@@ -41,7 +41,7 @@ class StoreNotices extends AbstractBlock {
 		woocommerce_output_all_notices();
 		$notices = ob_get_clean();
 
-		if ( ! $notices || '<div class="woocommerce-notices-wrapper"></div>' === $notices ) {
+		if ( ! $notices || '' === trim( wp_strip_all_tags( $notices ) ) ) {
 			return;
 		}
 
