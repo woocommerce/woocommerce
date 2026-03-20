@@ -41,9 +41,11 @@ const FulfillmentDrawer: React.FC< Props > = ( {
 
 				// Focus the drawer container itself after it's fully rendered
 				// This allows natural scrolling and keyboard navigation within
-				setTimeout( () => {
-					drawerElement.focus();
-				}, 100 );
+				requestAnimationFrame( () => {
+					requestAnimationFrame( () => {
+						drawerElement.focus();
+					} );
+				} );
 			}
 		} else if ( previousFocusRef.current ) {
 			// Restore focus to the previously focused element

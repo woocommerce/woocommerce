@@ -127,24 +127,20 @@ describe( 'UpdateButton component', () => {
 	} );
 
 	describe( 'Accessibility', () => {
-		it( 'should have proper ARIA label when not executing', () => {
+		it( 'should not have redundant aria-label overriding visible text', () => {
 			render( <UpdateButton setError={ setError } /> );
 
 			const button = screen.getByRole( 'button' );
-			expect( button ).toHaveAttribute(
-				'aria-label',
-				'Update fulfillment with changes'
-			);
+			expect( button ).not.toHaveAttribute( 'aria-label' );
 		} );
 
-		it( 'should have aria-describedby attribute', () => {
+		it( 'should have aria-describedby with unique prefix', () => {
 			render( <UpdateButton setError={ setError } /> );
 
 			const button = screen.getByRole( 'button' );
-			expect( button ).toHaveAttribute(
-				'aria-describedby',
-				'update-button-description'
-			);
+			expect(
+				button.getAttribute( 'aria-describedby' )
+			).toMatch( /^update-button-description/ );
 		} );
 
 		it( 'should have hidden description for screen readers', () => {
@@ -154,14 +150,13 @@ describe( 'UpdateButton component', () => {
 				'Applies changes to the existing fulfillment'
 			);
 			expect( description ).toBeInTheDocument();
-			expect( description ).toHaveAttribute(
-				'id',
-				'update-button-description'
-			);
+			expect(
+				description.getAttribute( 'id' )
+			).toMatch( /^update-button-description/ );
 			expect( description ).toHaveClass( 'screen-reader-text' );
 		} );
 
-		it( 'should update ARIA label and button text when executing', () => {
+		it( 'should update button text when executing', () => {
 			const mockUpdateFulfillment = jest.fn(
 				() => new Promise( ( resolve ) => setTimeout( resolve, 100 ) )
 			);
@@ -174,12 +169,8 @@ describe( 'UpdateButton component', () => {
 
 			fireEvent.click( button );
 
-			// Check that the button text and aria-label update during execution
+			// Check that the button text updates during execution
 			expect( screen.getByText( 'Updating…' ) ).toBeInTheDocument();
-			expect( button ).toHaveAttribute(
-				'aria-label',
-				'Updating fulfillment, please wait'
-			);
 			expect( button ).toBeDisabled();
 		} );
 

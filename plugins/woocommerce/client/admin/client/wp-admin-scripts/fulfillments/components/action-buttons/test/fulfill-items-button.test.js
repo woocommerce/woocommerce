@@ -109,24 +109,20 @@ describe( 'FulfillItemsButton component', () => {
 	} );
 
 	describe( 'Accessibility', () => {
-		it( 'should have proper ARIA label when not executing', () => {
+		it( 'should not have redundant aria-label overriding visible text', () => {
 			render( <FulfillItemsButton setError={ setError } /> );
 
 			const button = screen.getByRole( 'button' );
-			expect( button ).toHaveAttribute(
-				'aria-label',
-				'Mark selected items as fulfilled'
-			);
+			expect( button ).not.toHaveAttribute( 'aria-label' );
 		} );
 
-		it( 'should have aria-describedby attribute', () => {
+		it( 'should have aria-describedby with unique prefix', () => {
 			render( <FulfillItemsButton setError={ setError } /> );
 
 			const button = screen.getByRole( 'button' );
-			expect( button ).toHaveAttribute(
-				'aria-describedby',
-				'fulfill-items-description'
-			);
+			expect(
+				button.getAttribute( 'aria-describedby' )
+			).toMatch( /^fulfill-items-description/ );
 		} );
 
 		it( 'should have aria-live attribute for status updates', () => {
@@ -143,14 +139,13 @@ describe( 'FulfillItemsButton component', () => {
 				'Marks the selected items as fulfilled and updates their status'
 			);
 			expect( description ).toBeInTheDocument();
-			expect( description ).toHaveAttribute(
-				'id',
-				'fulfill-items-description'
-			);
+			expect(
+				description.getAttribute( 'id' )
+			).toMatch( /^fulfill-items-description/ );
 			expect( description ).toHaveClass( 'screen-reader-text' );
 		} );
 
-		it( 'should update ARIA label and button text when executing', () => {
+		it( 'should update button text when executing', () => {
 			const mockSaveFulfillment = jest.fn(
 				() => new Promise( ( resolve ) => setTimeout( resolve, 100 ) )
 			);
@@ -185,12 +180,8 @@ describe( 'FulfillItemsButton component', () => {
 
 			fireEvent.click( button );
 
-			// Check that the button text and aria-label update during execution
+			// Check that the button text updates during execution
 			expect( screen.getByText( 'Fulfilling…' ) ).toBeInTheDocument();
-			expect( button ).toHaveAttribute(
-				'aria-label',
-				'Fulfilling items, please wait'
-			);
 			expect( button ).toBeDisabled();
 		} );
 

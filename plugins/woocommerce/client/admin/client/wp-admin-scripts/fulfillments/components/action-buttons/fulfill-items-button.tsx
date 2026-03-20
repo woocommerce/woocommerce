@@ -5,6 +5,7 @@ import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { useDispatch, select } from '@wordpress/data';
 import { useState } from 'react';
+import { useInstanceId } from '@wordpress/compose';
 
 /**
  * Internal dependencies
@@ -26,6 +27,10 @@ export default function FulfillItemsButton( {
 	const { order, fulfillment, notifyCustomer } = useFulfillmentContext();
 	const [ isExecuting, setIsExecuting ] = useState( false );
 	const { saveFulfillment } = useDispatch( FulfillmentStore );
+	const descriptionId = useInstanceId(
+		FulfillItemsButton,
+		'fulfill-items-description'
+	) as string;
 
 	const handleFulfillItems = async () => {
 		setError( null );
@@ -56,29 +61,26 @@ export default function FulfillItemsButton( {
 	};
 
 	return (
-		<Button
-			variant="primary"
-			onClick={ handleFulfillItems }
-			__next40pxDefaultSize
-			isBusy={ isExecuting }
-			disabled={ isExecuting }
-			aria-label={
-				isExecuting
-					? __( 'Fulfilling items, please wait', 'woocommerce' )
-					: __( 'Mark selected items as fulfilled', 'woocommerce' )
-			}
-			aria-describedby="fulfill-items-description"
-			aria-live="polite"
-		>
-			{ isExecuting
-				? __( 'Fulfilling…', 'woocommerce' )
-				: __( 'Fulfill items', 'woocommerce' ) }
-			<span id="fulfill-items-description" className="screen-reader-text">
+		<>
+			<Button
+				variant="primary"
+				onClick={ handleFulfillItems }
+				__next40pxDefaultSize
+				isBusy={ isExecuting }
+				disabled={ isExecuting }
+				aria-describedby={ descriptionId }
+				aria-live="polite"
+			>
+				{ isExecuting
+					? __( 'Fulfilling…', 'woocommerce' )
+					: __( 'Fulfill items', 'woocommerce' ) }
+			</Button>
+			<span id={ descriptionId } className="screen-reader-text">
 				{ __(
 					'Marks the selected items as fulfilled and updates their status',
 					'woocommerce'
 				) }
 			</span>
-		</Button>
+		</>
 	);
 }

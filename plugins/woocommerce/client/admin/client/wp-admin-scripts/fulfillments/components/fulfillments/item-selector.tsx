@@ -184,10 +184,7 @@ export default function ItemSelector( { editMode }: ItemSelectorProps ) {
 							__nextHasNoMarginBottom
 						/>
 					) }
-					<div
-						className="woocommerce-fulfillment-item-bulk-select__label"
-						aria-live="polite"
-					>
+					<div className="woocommerce-fulfillment-item-bulk-select__label">
 						{ sprintf(
 							/* translators: %s: number of selected items */
 							_n(

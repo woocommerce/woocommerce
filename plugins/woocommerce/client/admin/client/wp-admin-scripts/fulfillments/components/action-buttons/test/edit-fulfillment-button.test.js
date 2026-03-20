@@ -23,24 +23,20 @@ describe( 'EditFulfillmentButton component', () => {
 	} );
 
 	describe( 'Accessibility', () => {
-		it( 'should have proper ARIA label', () => {
+		it( 'should not have redundant aria-label overriding visible text', () => {
 			render( <EditFulfillmentButton onClick={ () => {} } /> );
 
 			const button = screen.getByRole( 'button' );
-			expect( button ).toHaveAttribute(
-				'aria-label',
-				'Edit fulfillment details'
-			);
+			expect( button ).not.toHaveAttribute( 'aria-label' );
 		} );
 
-		it( 'should have aria-describedby attribute', () => {
+		it( 'should have aria-describedby with unique prefix', () => {
 			render( <EditFulfillmentButton onClick={ () => {} } /> );
 
 			const button = screen.getByRole( 'button' );
-			expect( button ).toHaveAttribute(
-				'aria-describedby',
-				'edit-fulfillment-description'
-			);
+			expect(
+				button.getAttribute( 'aria-describedby' )
+			).toMatch( /^edit-fulfillment-description/ );
 		} );
 
 		it( 'should have hidden description for screen readers', () => {
@@ -50,10 +46,9 @@ describe( 'EditFulfillmentButton component', () => {
 				'Opens the fulfillment editor to modify fulfillment details'
 			);
 			expect( description ).toBeInTheDocument();
-			expect( description ).toHaveAttribute(
-				'id',
-				'edit-fulfillment-description'
-			);
+			expect(
+				description.getAttribute( 'id' )
+			).toMatch( /^edit-fulfillment-description/ );
 			expect( description ).toHaveClass( 'screen-reader-text' );
 		} );
 

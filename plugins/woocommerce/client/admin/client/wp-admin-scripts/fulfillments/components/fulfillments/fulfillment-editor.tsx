@@ -73,19 +73,19 @@ export default function FulfillmentEditor( {
 	// Focus management when entering edit mode
 	useEffect( () => {
 		if ( isEditing && expanded && contentRef.current ) {
-			// Small delay to ensure content is rendered
-			setTimeout( () => {
-				if ( contentRef.current ) {
+			const content = contentRef.current;
+			requestAnimationFrame( () => {
+				requestAnimationFrame( () => {
 					// Look for the first interactive element in edit mode
-					const firstEditable = contentRef.current.querySelector(
+					const firstEditable = content.querySelector(
 						'input:not([disabled]), button:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])'
 					) as HTMLElement;
 
 					if ( firstEditable ) {
 						firstEditable.focus();
 					}
-				}
-			}, 100 );
+				} );
+			} );
 		}
 	}, [ isEditing, expanded ] );
 

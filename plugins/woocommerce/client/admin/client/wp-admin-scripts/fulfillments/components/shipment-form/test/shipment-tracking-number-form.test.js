@@ -4,6 +4,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import apiFetch from '@wordpress/api-fetch';
+import { speak } from '@wordpress/a11y';
 
 /**
  * Internal dependencies
@@ -12,6 +13,10 @@ import '../../../test-helper/global-mock';
 import ShipmentTrackingNumberForm from '../shipment-tracking-number-form';
 import { useShipmentFormContext } from '../../../context/shipment-form-context';
 import { SHIPMENT_OPTION_MANUAL_ENTRY } from '../../../data/constants';
+
+jest.mock( '@wordpress/a11y', () => ( {
+	speak: jest.fn(),
+} ) );
 
 jest.mock( '../../../context/shipment-form-context', () => ( {
 	useShipmentFormContext: jest.fn(),
@@ -397,5 +402,116 @@ describe( 'ShipmentTrackingNumberForm', () => {
 		expect(
 			screen.queryByText( 'Not your provider?' )
 		).not.toBeInTheDocument();
+	} );
+
+	describe( 'speak() announcements', () => {
+		it( 'should announce success on valid tracking number lookup', async () => {
+			mockContext.trackingNumber = '';
+			mockContext.shipmentProvider = '';
+			apiFetch.mockResolvedValueOnce( {
+				tracking_number: '1Z12345E0291980793',
+				shipping_provider: 'ups',
+				tracking_url:
+					'https://www.ups.com/track?tracknum=1Z12345E0291980793',
+			} );
+
+			render( <ShipmentTrackingNumberForm /> );
+			const input = screen.getByPlaceholderText(
+				'Enter tracking number'
+			);
+			fireEvent.change( input, {
+				target: { value: '1Z12345E0291980793' },
+			} );
+			fireEvent.click( screen.getByText( 'Find info' ) );
+
+			await waitFor( () => {
+				expect( speak ).toHaveBeenCalledWith(
+					'Tracking information found successfully.',
+					'polite'
+				);
+			} );
+		} );
+
+		it( 'should announce error on invalid tracking number lookup', async () => {
+			mockContext.trackingNumber = '';
+			mockContext.shipmentProvider = '';
+			apiFetch.mockResolvedValueOnce( {} );
+
+			render( <ShipmentTrackingNumberForm /> );
+			const input = screen.getByPlaceholderText(
+				'Enter tracking number'
+			);
+			fireEvent.change( input, { target: { value: 'invalid' } } );
+			fireEvent.click( screen.getByText( 'Find info' ) );
+
+			await waitFor( () => {
+				expect( speak ).toHaveBeenCalledWith(
+					'No information found for this tracking number. Check the number or enter the details manually.',
+					'assertive'
+				);
+			} );
+		} );
+
+		it( 'should announce error on API failure', async () => {
+			mockContext.trackingNumber = '';
+			mockContext.shipmentProvider = '';
+			apiFetch.mockRejectedValueOnce( new Error( 'Network error' ) );
+
+			render( <ShipmentTrackingNumberForm /> );
+			const input = screen.getByPlaceholderText(
+				'Enter tracking number'
+			);
+			fireEvent.change( input, { target: { value: '12345' } } );
+			fireEvent.click( screen.getByText( 'Find info' ) );
+
+			await waitFor( () => {
+				expect( speak ).toHaveBeenCalledWith(
+					'Failed to fetch shipment information.',
+					'assertive'
+				);
+			} );
+		} );
+
+		it( 'should announce when switching to manual provider selection', async () => {
+			mockContext.trackingNumber = '';
+			mockContext.shipmentProvider = '';
+			apiFetch.mockResolvedValueOnce( {
+				tracking_number: '1234567890123456',
+				shipping_provider: 'ups',
+				tracking_url:
+					'https://www.ups.com/track?tracknum=1234567890123456',
+				possibilities: {
+					ups: { url: 'https://ups.com', ambiguity_score: 70 },
+					fedex: { url: 'https://fedex.com', ambiguity_score: 75 },
+				},
+			} );
+
+			render( <ShipmentTrackingNumberForm /> );
+			const input = screen.getByPlaceholderText(
+				'Enter tracking number'
+			);
+			fireEvent.change( input, {
+				target: { value: '1234567890123456' },
+			} );
+			fireEvent.click( screen.getByText( 'Find info' ) );
+
+			await waitFor( () => {
+				expect(
+					screen.getByText( 'Not your provider?' )
+				).toBeInTheDocument();
+			} );
+
+			// Clear speak mock from the lookup call
+			speak.mockClear();
+
+			fireEvent.click(
+				screen.getByText( 'Select your provider manually' )
+			);
+
+			expect( speak ).toHaveBeenCalledWith(
+				'Switched to manual provider selection.',
+				'polite'
+			);
+		} );
 	} );
 } );

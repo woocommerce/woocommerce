@@ -5,6 +5,7 @@ import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { useDispatch, select } from '@wordpress/data';
 import { useState } from 'react';
+import { useInstanceId } from '@wordpress/compose';
 
 /**
  * Internal dependencies
@@ -26,6 +27,10 @@ export default function SaveAsDraftButton( {
 	const { order, fulfillment, notifyCustomer } = useFulfillmentContext();
 	const [ isExecuting, setIsExecuting ] = useState( false );
 	const { saveFulfillment } = useDispatch( FulfillmentStore );
+	const descriptionId = useInstanceId(
+		SaveAsDraftButton,
+		'save-draft-description'
+	) as string;
 
 	const handleFulfillItems = async () => {
 		setError( null );
@@ -49,28 +54,25 @@ export default function SaveAsDraftButton( {
 	};
 
 	return (
-		<Button
-			variant="secondary"
-			onClick={ handleFulfillItems }
-			__next40pxDefaultSize
-			isBusy={ isExecuting }
-			disabled={ isExecuting }
-			aria-label={
-				isExecuting
-					? __( 'Saving draft, please wait', 'woocommerce' )
-					: __( 'Save fulfillment as draft', 'woocommerce' )
-			}
-			aria-describedby="save-draft-description"
-		>
-			{ isExecuting
-				? __( 'Saving…', 'woocommerce' )
-				: __( 'Save as draft', 'woocommerce' ) }
-			<span id="save-draft-description" className="screen-reader-text">
+		<>
+			<Button
+				variant="secondary"
+				onClick={ handleFulfillItems }
+				__next40pxDefaultSize
+				isBusy={ isExecuting }
+				disabled={ isExecuting }
+				aria-describedby={ descriptionId }
+			>
+				{ isExecuting
+					? __( 'Saving…', 'woocommerce' )
+					: __( 'Save as draft', 'woocommerce' ) }
+			</Button>
+			<span id={ descriptionId } className="screen-reader-text">
 				{ __(
 					'Saves the fulfillment without marking items as fulfilled',
 					'woocommerce'
 				) }
 			</span>
-		</Button>
+		</>
 	);
 }

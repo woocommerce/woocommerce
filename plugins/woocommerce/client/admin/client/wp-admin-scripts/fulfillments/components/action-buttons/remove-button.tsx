@@ -5,6 +5,7 @@ import { Button, Modal } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { useDispatch, select } from '@wordpress/data';
 import { useState } from 'react';
+import { useInstanceId } from '@wordpress/compose';
 
 /**
  * Internal dependencies
@@ -24,6 +25,10 @@ export default function RemoveButton( {
 	const { order, fulfillment, notifyCustomer } = useFulfillmentContext();
 	const [ isExecuting, setIsExecuting ] = useState< boolean >( false );
 	const { deleteFulfillment } = useDispatch( FulfillmentStore );
+	const descriptionId = useInstanceId(
+		RemoveButton,
+		'remove-button-description'
+	) as string;
 
 	const [ isOpen, setOpen ] = useState( false );
 	const openModal = () => setOpen( true );
@@ -68,30 +73,16 @@ export default function RemoveButton( {
 				onClick={ handleRemoveButtonClick }
 				isBusy={ isExecuting }
 				__next40pxDefaultSize
-				aria-label={
-					isExecuting
-						? __(
-								'Removing fulfillment, please wait',
-								'woocommerce'
-						  )
-						: __( 'Remove this fulfillment', 'woocommerce' )
-				}
-				aria-describedby="remove-button-description"
+				aria-describedby={ descriptionId }
 				disabled={ isExecuting }
 			>
 				{ isExecuting
 					? __( 'Removing…', 'woocommerce' )
 					: __( 'Remove', 'woocommerce' ) }
-				<span
-					id="remove-button-description"
-					className="screen-reader-text"
-				>
-					{ __(
-						'Deletes this fulfillment permanently',
-						'woocommerce'
-					) }
-				</span>
 			</Button>
+			<span id={ descriptionId } className="screen-reader-text">
+				{ __( 'Deletes this fulfillment permanently', 'woocommerce' ) }
+			</span>
 			{ isOpen && (
 				<Modal
 					title={ __( 'Remove fulfillment', 'woocommerce' ) }
@@ -128,17 +119,6 @@ export default function RemoveButton( {
 							isBusy={ isExecuting }
 							__next40pxDefaultSize
 							disabled={ isExecuting }
-							aria-label={
-								isExecuting
-									? __(
-											'Removing fulfillment, please wait',
-											'woocommerce'
-									  )
-									: __(
-											'Confirm removal of fulfillment',
-											'woocommerce'
-									  )
-							}
 						>
 							{ isExecuting
 								? __( 'Removing…', 'woocommerce' )

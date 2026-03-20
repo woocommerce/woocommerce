@@ -23,24 +23,20 @@ describe( 'CancelLink component', () => {
 	} );
 
 	describe( 'Accessibility', () => {
-		it( 'should have proper ARIA label', () => {
+		it( 'should not have redundant aria-label overriding visible text', () => {
 			render( <CancelLink onClick={ () => {} } /> );
 
 			const button = screen.getByRole( 'button' );
-			expect( button ).toHaveAttribute(
-				'aria-label',
-				'Cancel current action and return to previous state'
-			);
+			expect( button ).not.toHaveAttribute( 'aria-label' );
 		} );
 
-		it( 'should have aria-describedby attribute', () => {
+		it( 'should have aria-describedby with unique prefix', () => {
 			render( <CancelLink onClick={ () => {} } /> );
 
 			const button = screen.getByRole( 'button' );
-			expect( button ).toHaveAttribute(
-				'aria-describedby',
-				'cancel-link-description'
-			);
+			expect(
+				button.getAttribute( 'aria-describedby' )
+			).toMatch( /^cancel-link-description/ );
 		} );
 
 		it( 'should have hidden description for screen readers', () => {
@@ -50,10 +46,9 @@ describe( 'CancelLink component', () => {
 				'Cancels the current operation without saving changes'
 			);
 			expect( description ).toBeInTheDocument();
-			expect( description ).toHaveAttribute(
-				'id',
-				'cancel-link-description'
-			);
+			expect(
+				description.getAttribute( 'id' )
+			).toMatch( /^cancel-link-description/ );
 			expect( description ).toHaveClass( 'screen-reader-text' );
 		} );
 

@@ -40,7 +40,13 @@ jest.mock( '../fulfillment-drawer-body', () => {
 
 jest.mock( '../../../fulfillments/new-fulfillment-form', () => {
 	return function MockForm() {
-		return <div data-testid="new-fulfillment-form">Form</div>;
+		return (
+			<div data-testid="new-fulfillment-form">
+				<button data-testid="first-button">First</button>
+				<input data-testid="middle-input" type="text" />
+				<button data-testid="last-button">Last</button>
+			</div>
+		);
 	};
 } );
 
@@ -59,6 +65,18 @@ describe( 'FulfillmentDrawer Accessibility', () => {
 
 	beforeEach( () => {
 		jest.clearAllMocks();
+
+		// Mock requestAnimationFrame for focus management tests
+		jest.spyOn( window, 'requestAnimationFrame' ).mockImplementation(
+			( cb ) => {
+				cb( 0 );
+				return 0;
+			}
+		);
+	} );
+
+	afterEach( () => {
+		window.requestAnimationFrame.mockRestore();
 	} );
 
 	it( 'should have proper ARIA attributes when open', () => {
@@ -131,5 +149,59 @@ describe( 'FulfillmentDrawer Accessibility', () => {
 
 		// Clean up
 		document.body.style.overflow = originalBodyOverflow;
+	} );
+
+	describe( 'Focus trapping', () => {
+		it( 'should wrap focus from last to first element on Tab', () => {
+			render( <FulfillmentDrawer { ...defaultProps } /> );
+
+			const lastButton = screen.getByTestId( 'last-button' );
+			lastButton.focus();
+
+			fireEvent.keyDown( document, { key: 'Tab' } );
+
+			// The close button is the first focusable element in the drawer
+			const closeButton = screen.getByLabelText(
+				'Close fulfillment drawer'
+			);
+			expect( document.activeElement ).toBe( closeButton );
+		} );
+
+		it( 'should wrap focus from first to last element on Shift+Tab', () => {
+			render( <FulfillmentDrawer { ...defaultProps } /> );
+
+			const closeButton = screen.getByLabelText(
+				'Close fulfillment drawer'
+			);
+			closeButton.focus();
+
+			fireEvent.keyDown( document, { key: 'Tab', shiftKey: true } );
+
+			const lastButton = screen.getByTestId( 'last-button' );
+			expect( document.activeElement ).toBe( lastButton );
+		} );
+	} );
+
+	describe( 'Focus restoration', () => {
+		it( 'should restore focus to previously focused element when drawer closes', () => {
+			const triggerButton = document.createElement( 'button' );
+			triggerButton.textContent = 'Open Drawer';
+			document.body.appendChild( triggerButton );
+			triggerButton.focus();
+
+			const { rerender } = render(
+				<FulfillmentDrawer { ...defaultProps } isOpen={ true } />
+			);
+
+			// Close the drawer
+			rerender(
+				<FulfillmentDrawer { ...defaultProps } isOpen={ false } />
+			);
+
+			expect( document.activeElement ).toBe( triggerButton );
+
+			// Clean up
+			document.body.removeChild( triggerButton );
+		} );
 	} );
 } );
