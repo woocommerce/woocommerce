@@ -8371,6 +8371,20 @@ table.bar_chart {
 			float: left;
 		}
 	}
+
+	// Product data panel labels: vertically center with taller WP 7.0 inputs.
+	.woocommerce_options_panel p.form-field label,
+	.woocommerce_options_panel fieldset.form-field label,
+	.woocommerce_options_panel fieldset.form-field legend {
+		padding-top: 8px;
+	}
+
+	// Search box select: match WP 7.0 compact search-box sizing (32px).
+	.search-box select {
+		min-height: 32px;
+		line-height: 2.14285714; /* 30px for 32px height */
+		padding: 0 24px 0 8px;
+	}
 }
 
 // Tablenav: WP 7.0 tablenav uses compact 32px sizing for native selects.
