@@ -622,6 +622,64 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 	}
 
 	/**
+	 * Hard-delete all fulfillment records (and their metadata) for a given entity.
+	 *
+	 * This is used when an order is permanently deleted to prevent orphaned rows.
+	 *
+	 * @since 10.7.0
+	 *
+	 * @param string $entity_type The entity type (e.g. 'WC_Order').
+	 * @param string $entity_id   The entity ID.
+	 *
+	 * @return int The number of fulfillment records deleted.
+	 *
+	 * @throws \RuntimeException If a database query fails.
+	 * @throws \Throwable If the deletion fails.
+	 */
+	public function delete_by_entity( string $entity_type, string $entity_id ): int {
+		global $wpdb;
+
+		wc_transaction_query( 'start' );
+
+		try {
+			// Delete metadata for all fulfillments belonging to this entity.
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table names are safe.
+			$result = $wpdb->query(
+				$wpdb->prepare(
+					"DELETE m FROM {$wpdb->prefix}wc_order_fulfillment_meta m INNER JOIN {$wpdb->prefix}wc_order_fulfillments f ON m.fulfillment_id = f.fulfillment_id WHERE f.entity_type = %s AND f.entity_id = %s",
+					$entity_type,
+					$entity_id
+				)
+			);
+
+			if ( false === $result ) {
+				throw new \RuntimeException( 'Failed to delete fulfillment metadata: ' . $wpdb->last_error );
+			}
+
+			// Delete the fulfillment records themselves.
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is safe.
+			$rows_deleted = $wpdb->query(
+				$wpdb->prepare(
+					"DELETE FROM {$wpdb->prefix}wc_order_fulfillments WHERE entity_type = %s AND entity_id = %s",
+					$entity_type,
+					$entity_id
+				)
+			);
+
+			if ( false === $rows_deleted ) {
+				throw new \RuntimeException( 'Failed to delete fulfillment records: ' . $wpdb->last_error );
+			}
+
+			wc_transaction_query( 'commit' );
+		} catch ( \Throwable $e ) {
+			wc_transaction_query( 'rollback' );
+			throw $e;
+		}
+
+		return (int) $rows_deleted;
+	}
+
+	/**
 	 * Method to validate the items in a fulfillment.
 	 *
 	 * @param Fulfillment $data The fulfillment object to validate.

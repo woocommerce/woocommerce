@@ -904,4 +904,124 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 			$this->assertEquals( $meta_value, json_decode( reset( $record )->meta_value, true ) );
 		}
 	}
+
+	/**
+	 * @testdox Should hard-delete all fulfillment records and metadata for a given entity.
+	 */
+	public function test_delete_by_entity(): void {
+		global $wpdb;
+
+		$entity_id   = '999';
+		$entity_type = 'order-fulfillment';
+
+		$fulfillment1 = new Fulfillment();
+		$fulfillment1->set_entity_type( $entity_type );
+		$fulfillment1->set_entity_id( (string) $entity_id );
+		$fulfillment1->set_status( 'unfulfilled' );
+		$fulfillment1->set_items(
+			array(
+				array(
+					'item_id' => 1,
+					'qty'     => 2,
+				),
+			)
+		);
+		$fulfillment1->save();
+
+		$fulfillment2 = new Fulfillment();
+		$fulfillment2->set_entity_type( $entity_type );
+		$fulfillment2->set_entity_id( (string) $entity_id );
+		$fulfillment2->set_status( 'fulfilled' );
+		$fulfillment2->set_items(
+			array(
+				array(
+					'item_id' => 3,
+					'qty'     => 1,
+				),
+			)
+		);
+		$fulfillment2->save();
+
+		$this->assertGreaterThan( 0, $fulfillment1->get_id() );
+		$this->assertGreaterThan( 0, $fulfillment2->get_id() );
+
+		$rows_deleted = $this->data_store->delete_by_entity( $entity_type, $entity_id );
+
+		$this->assertSame( 2, $rows_deleted, 'Should have deleted 2 fulfillment records' );
+
+		$remaining = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->prefix}wc_order_fulfillments WHERE entity_type = %s AND entity_id = %s",
+				$entity_type,
+				$entity_id
+			)
+		);
+		$this->assertSame( '0', $remaining, 'No fulfillment records should remain' );
+
+		$remaining_meta = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->prefix}wc_order_fulfillment_meta WHERE fulfillment_id IN (%d, %d)",
+				$fulfillment1->get_id(),
+				$fulfillment2->get_id()
+			)
+		);
+		$this->assertSame( '0', $remaining_meta, 'No fulfillment metadata should remain' );
+	}
+
+	/**
+	 * @testdox Should not affect fulfillments belonging to other entities.
+	 */
+	public function test_delete_by_entity_does_not_affect_other_entities(): void {
+		global $wpdb;
+
+		$entity_type = 'order-fulfillment';
+
+		$fulfillment_to_delete = new Fulfillment();
+		$fulfillment_to_delete->set_entity_type( $entity_type );
+		$fulfillment_to_delete->set_entity_id( '100' );
+		$fulfillment_to_delete->set_status( 'unfulfilled' );
+		$fulfillment_to_delete->set_items(
+			array(
+				array(
+					'item_id' => 1,
+					'qty'     => 1,
+				),
+			)
+		);
+		$fulfillment_to_delete->save();
+
+		$fulfillment_to_keep = new Fulfillment();
+		$fulfillment_to_keep->set_entity_type( $entity_type );
+		$fulfillment_to_keep->set_entity_id( '200' );
+		$fulfillment_to_keep->set_status( 'unfulfilled' );
+		$fulfillment_to_keep->set_items(
+			array(
+				array(
+					'item_id' => 2,
+					'qty'     => 1,
+				),
+			)
+		);
+		$fulfillment_to_keep->save();
+
+		$this->data_store->delete_by_entity( $entity_type, '100' );
+
+		$remaining = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->prefix}wc_order_fulfillments WHERE entity_type = %s AND entity_id = %s",
+				$entity_type,
+				'200'
+			)
+		);
+		$this->assertSame( '1', $remaining, 'Fulfillments for other entities should not be affected' );
+	}
+
+	/**
+	 * @testdox Should return zero when no fulfillments exist for the entity.
+	 */
+	public function test_delete_by_entity_returns_zero_when_no_records(): void {
+		$rows_deleted = $this->data_store->delete_by_entity( 'order-fulfillment', '12345' );
+
+		$this->assertSame( 0, $rows_deleted );
+	}
 }
