@@ -400,7 +400,7 @@ function wc_product_canonical_redirect(): void {
 	$specified_category_slug = get_query_var( 'product_cat' );
 	$specified_category_slug = is_array( $specified_category_slug ) ? '' : urldecode( (string) $specified_category_slug );
 
-	if ( $specified_category_slug === '' ) {
+	if ( '' === $specified_category_slug ) {
 		return;
 	}
 
