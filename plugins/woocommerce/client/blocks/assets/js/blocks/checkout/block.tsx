@@ -27,6 +27,7 @@ import CheckoutOrderError from './checkout-order-error';
 import { LOGIN_TO_CHECKOUT_URL, isLoginRequired, reloadPage } from './utils';
 import type { Attributes } from './types';
 import { CheckoutBlockContext } from './context';
+import { IncompatibleExtensionsFrontendNotice } from '../cart-checkout-shared/incompatible-extensions-notice';
 
 const MustLoginPrompt = () => {
 	return (
@@ -165,6 +166,7 @@ const Block = ( {
 			<StoreNoticesContainer
 				context={ [ noticeContexts.CHECKOUT, noticeContexts.CART ] }
 			/>
+			<IncompatibleExtensionsFrontendNotice block="woocommerce/checkout" />
 			{ /* SlotFillProvider need to be defined before CheckoutProvider so fills have the SlotFill context ready when they mount. */ }
 			<SlotFillProvider>
 				<CheckoutProvider>

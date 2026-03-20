@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Remove unnecessary `calculate_totals()` call from `DELETE /wc/store/v1/cart/coupons`. The result was never used since the endpoint returns an empty response body.
