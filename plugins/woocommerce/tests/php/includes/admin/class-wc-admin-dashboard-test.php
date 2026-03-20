@@ -132,5 +132,4 @@ class WC_Admin_Dashboard_Test extends WC_Unit_Test_Case {
 			'Widget should not display for users without proper capabilities'
 		);
 	}
-
 }
