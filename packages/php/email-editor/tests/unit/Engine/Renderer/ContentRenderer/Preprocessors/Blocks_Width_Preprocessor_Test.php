@@ -583,6 +583,54 @@ class Blocks_Width_Preprocessor_Test extends \Email_Editor_Unit_Test {
 	}
 
 	/**
+	 * Test it subtracts container padding from block widths
+	 */
+	public function testItSubtractsContainerPaddingFromEmailAttrs(): void {
+		$blocks = array(
+			// Block with both root and container padding.
+			array(
+				'blockName'   => 'core/paragraph',
+				'attrs'       => array(),
+				'email_attrs' => array(
+					'root-padding-left'       => '10px',
+					'root-padding-right'      => '10px',
+					'container-padding-left'  => '20px',
+					'container-padding-right' => '20px',
+				),
+				'innerBlocks' => array(),
+			),
+			// Alignfull block: container padding should NOT be subtracted.
+			array(
+				'blockName'   => 'core/group',
+				'attrs'       => array(
+					'align' => 'full',
+				),
+				'email_attrs' => array(),
+				'innerBlocks' => array(),
+			),
+			// Block with only container padding.
+			array(
+				'blockName'   => 'core/paragraph',
+				'attrs'       => array(),
+				'email_attrs' => array(
+					'container-padding-left'  => '15px',
+					'container-padding-right' => '15px',
+				),
+				'innerBlocks' => array(),
+			),
+		);
+		$result = $this->preprocessor->preprocess( $blocks, $this->layout, $this->styles );
+
+		$this->assertCount( 3, $result );
+		// 660 - 10 - 10 (root) - 20 - 20 (container) = 600.
+		$this->assertEquals( '600px', $result[0]['email_attrs']['width'] );
+		// Full-width: 660px (nothing subtracted).
+		$this->assertEquals( '660px', $result[1]['email_attrs']['width'] );
+		// 660 - 15 - 15 (container only) = 630.
+		$this->assertEquals( '630px', $result[2]['email_attrs']['width'] );
+	}
+
+	/**
 	 * Test it handles non-string width values
 	 */
 	public function testItHandlesNonStringWidthValues(): void {
