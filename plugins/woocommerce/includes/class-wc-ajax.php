@@ -3895,21 +3895,21 @@ class WC_AJAX {
 				$update_args['slug'] = $candidate_slug;
 			}
 
-			// Validate tracking URL template.
+			// Validate tracking URL template: must be a valid http/https URL.
 			$tracking_url_template = '';
 			if ( isset( $data['tracking_url_template'] ) && is_string( $data['tracking_url_template'] ) && '' !== $data['tracking_url_template'] ) {
-				$raw_url = wc_clean( $data['tracking_url_template'] );
-				if ( is_string( $raw_url ) && filter_var( str_replace( '__PLACEHOLDER__', 'test', $raw_url ), FILTER_VALIDATE_URL ) ) {
-					$tracking_url_template = $raw_url;
+				// Replace __PLACEHOLDER__ for validation, then sanitize the original.
+				$testable_url = str_replace( '__PLACEHOLDER__', 'test', $data['tracking_url_template'] );
+				if ( filter_var( $testable_url, FILTER_VALIDATE_URL ) && preg_match( '#^https?://#i', $testable_url ) ) {
+					$tracking_url_template = esc_url_raw( $data['tracking_url_template'], array( 'http', 'https' ) );
 				}
 			}
 
-			// Validate icon URL.
+			// Validate icon URL: must be a valid http/https URL.
 			$icon_url = '';
 			if ( isset( $data['icon'] ) && is_string( $data['icon'] ) && '' !== $data['icon'] ) {
-				$raw_icon = wc_clean( $data['icon'] );
-				if ( is_string( $raw_icon ) && filter_var( $raw_icon, FILTER_VALIDATE_URL ) ) {
-					$icon_url = $raw_icon;
+				if ( filter_var( $data['icon'], FILTER_VALIDATE_URL ) && preg_match( '#^https?://#i', $data['icon'] ) ) {
+					$icon_url = esc_url_raw( $data['icon'], array( 'http', 'https' ) );
 				}
 			}
 
