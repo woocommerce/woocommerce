@@ -138,9 +138,9 @@ describe( 'UpdateButton component', () => {
 			render( <UpdateButton setError={ setError } /> );
 
 			const button = screen.getByRole( 'button' );
-			expect(
-				button.getAttribute( 'aria-describedby' )
-			).toMatch( /^update-button-description/ );
+			expect( button.getAttribute( 'aria-describedby' ) ).toMatch(
+				/^update-button-description/
+			);
 		} );
 
 		it( 'should have hidden description for screen readers', () => {
@@ -150,9 +150,9 @@ describe( 'UpdateButton component', () => {
 				'Applies changes to the existing fulfillment'
 			);
 			expect( description ).toBeInTheDocument();
-			expect(
-				description.getAttribute( 'id' )
-			).toMatch( /^update-button-description/ );
+			expect( description.getAttribute( 'id' ) ).toMatch(
+				/^update-button-description/
+			);
 			expect( description ).toHaveClass( 'screen-reader-text' );
 		} );
 
@@ -179,7 +179,7 @@ describe( 'UpdateButton component', () => {
 
 			const button = screen.getByRole( 'button' );
 			button.focus();
-			expect( document.activeElement ).toBe( button );
+			expect( button.ownerDocument.activeElement ).toBe( button );
 		} );
 	} );
 } );

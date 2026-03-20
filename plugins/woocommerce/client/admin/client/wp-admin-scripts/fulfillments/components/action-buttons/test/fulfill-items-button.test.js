@@ -120,9 +120,9 @@ describe( 'FulfillItemsButton component', () => {
 			render( <FulfillItemsButton setError={ setError } /> );
 
 			const button = screen.getByRole( 'button' );
-			expect(
-				button.getAttribute( 'aria-describedby' )
-			).toMatch( /^fulfill-items-description/ );
+			expect( button.getAttribute( 'aria-describedby' ) ).toMatch(
+				/^fulfill-items-description/
+			);
 		} );
 
 		it( 'should have aria-live attribute for status updates', () => {
@@ -139,9 +139,9 @@ describe( 'FulfillItemsButton component', () => {
 				'Marks the selected items as fulfilled and updates their status'
 			);
 			expect( description ).toBeInTheDocument();
-			expect(
-				description.getAttribute( 'id' )
-			).toMatch( /^fulfill-items-description/ );
+			expect( description.getAttribute( 'id' ) ).toMatch(
+				/^fulfill-items-description/
+			);
 			expect( description ).toHaveClass( 'screen-reader-text' );
 		} );
 
@@ -190,7 +190,7 @@ describe( 'FulfillItemsButton component', () => {
 
 			const button = screen.getByRole( 'button' );
 			button.focus();
-			expect( document.activeElement ).toBe( button );
+			expect( button.ownerDocument.activeElement ).toBe( button );
 		} );
 	} );
 } );

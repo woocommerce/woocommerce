@@ -134,9 +134,9 @@ describe( 'SaveAsDraftButton component', () => {
 			render( <SaveAsDraftButton setError={ setError } /> );
 
 			const button = screen.getByRole( 'button' );
-			expect(
-				button.getAttribute( 'aria-describedby' )
-			).toMatch( /^save-draft-description/ );
+			expect( button.getAttribute( 'aria-describedby' ) ).toMatch(
+				/^save-draft-description/
+			);
 		} );
 
 		it( 'should have hidden description for screen readers', () => {
@@ -146,9 +146,9 @@ describe( 'SaveAsDraftButton component', () => {
 				'Saves the fulfillment without marking items as fulfilled'
 			);
 			expect( description ).toBeInTheDocument();
-			expect(
-				description.getAttribute( 'id' )
-			).toMatch( /^save-draft-description/ );
+			expect( description.getAttribute( 'id' ) ).toMatch(
+				/^save-draft-description/
+			);
 			expect( description ).toHaveClass( 'screen-reader-text' );
 		} );
 
@@ -175,7 +175,7 @@ describe( 'SaveAsDraftButton component', () => {
 
 			const button = screen.getByRole( 'button' );
 			button.focus();
-			expect( document.activeElement ).toBe( button );
+			expect( button.ownerDocument.activeElement ).toBe( button );
 		} );
 	} );
 } );

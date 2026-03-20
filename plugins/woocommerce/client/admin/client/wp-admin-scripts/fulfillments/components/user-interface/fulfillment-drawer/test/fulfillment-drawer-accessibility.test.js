@@ -164,7 +164,9 @@ describe( 'FulfillmentDrawer Accessibility', () => {
 			const closeButton = screen.getByLabelText(
 				'Close fulfillment drawer'
 			);
-			expect( document.activeElement ).toBe( closeButton );
+			expect( closeButton.ownerDocument.activeElement ).toBe(
+				closeButton
+			);
 		} );
 
 		it( 'should wrap focus from first to last element on Shift+Tab', () => {
@@ -178,7 +180,7 @@ describe( 'FulfillmentDrawer Accessibility', () => {
 			fireEvent.keyDown( document, { key: 'Tab', shiftKey: true } );
 
 			const lastButton = screen.getByTestId( 'last-button' );
-			expect( document.activeElement ).toBe( lastButton );
+			expect( lastButton.ownerDocument.activeElement ).toBe( lastButton );
 		} );
 	} );
 
@@ -198,7 +200,9 @@ describe( 'FulfillmentDrawer Accessibility', () => {
 				<FulfillmentDrawer { ...defaultProps } isOpen={ false } />
 			);
 
-			expect( document.activeElement ).toBe( triggerButton );
+			expect( triggerButton.ownerDocument.activeElement ).toBe(
+				triggerButton
+			);
 
 			// Clean up
 			document.body.removeChild( triggerButton );

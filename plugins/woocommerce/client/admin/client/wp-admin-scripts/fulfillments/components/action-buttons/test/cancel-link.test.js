@@ -34,9 +34,9 @@ describe( 'CancelLink component', () => {
 			render( <CancelLink onClick={ () => {} } /> );
 
 			const button = screen.getByRole( 'button' );
-			expect(
-				button.getAttribute( 'aria-describedby' )
-			).toMatch( /^cancel-link-description/ );
+			expect( button.getAttribute( 'aria-describedby' ) ).toMatch(
+				/^cancel-link-description/
+			);
 		} );
 
 		it( 'should have hidden description for screen readers', () => {
@@ -46,9 +46,9 @@ describe( 'CancelLink component', () => {
 				'Cancels the current operation without saving changes'
 			);
 			expect( description ).toBeInTheDocument();
-			expect(
-				description.getAttribute( 'id' )
-			).toMatch( /^cancel-link-description/ );
+			expect( description.getAttribute( 'id' ) ).toMatch(
+				/^cancel-link-description/
+			);
 			expect( description ).toHaveClass( 'screen-reader-text' );
 		} );
 
@@ -58,7 +58,7 @@ describe( 'CancelLink component', () => {
 
 			const button = screen.getByRole( 'button' );
 			button.focus();
-			expect( document.activeElement ).toBe( button );
+			expect( button.ownerDocument.activeElement ).toBe( button );
 		} );
 
 		it( 'should have correct styling for flex layout', () => {

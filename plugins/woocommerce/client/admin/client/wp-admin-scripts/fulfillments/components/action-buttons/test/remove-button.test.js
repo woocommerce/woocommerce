@@ -204,9 +204,9 @@ describe( 'RemoveButton component', () => {
 			render( <RemoveButton setError={ setError } /> );
 
 			const button = screen.getByRole( 'button' );
-			expect(
-				button.getAttribute( 'aria-describedby' )
-			).toMatch( /^remove-button-description/ );
+			expect( button.getAttribute( 'aria-describedby' ) ).toMatch(
+				/^remove-button-description/
+			);
 		} );
 
 		it( 'should have hidden description for screen readers', () => {
@@ -216,9 +216,9 @@ describe( 'RemoveButton component', () => {
 				'Deletes this fulfillment permanently'
 			);
 			expect( description ).toBeInTheDocument();
-			expect(
-				description.getAttribute( 'id' )
-			).toMatch( /^remove-button-description/ );
+			expect( description.getAttribute( 'id' ) ).toMatch(
+				/^remove-button-description/
+			);
 			expect( description ).toHaveClass( 'screen-reader-text' );
 		} );
 

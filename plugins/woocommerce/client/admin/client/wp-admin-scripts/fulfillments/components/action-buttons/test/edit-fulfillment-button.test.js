@@ -34,9 +34,9 @@ describe( 'EditFulfillmentButton component', () => {
 			render( <EditFulfillmentButton onClick={ () => {} } /> );
 
 			const button = screen.getByRole( 'button' );
-			expect(
-				button.getAttribute( 'aria-describedby' )
-			).toMatch( /^edit-fulfillment-description/ );
+			expect( button.getAttribute( 'aria-describedby' ) ).toMatch(
+				/^edit-fulfillment-description/
+			);
 		} );
 
 		it( 'should have hidden description for screen readers', () => {
@@ -46,9 +46,9 @@ describe( 'EditFulfillmentButton component', () => {
 				'Opens the fulfillment editor to modify fulfillment details'
 			);
 			expect( description ).toBeInTheDocument();
-			expect(
-				description.getAttribute( 'id' )
-			).toMatch( /^edit-fulfillment-description/ );
+			expect( description.getAttribute( 'id' ) ).toMatch(
+				/^edit-fulfillment-description/
+			);
 			expect( description ).toHaveClass( 'screen-reader-text' );
 		} );
 
@@ -58,7 +58,7 @@ describe( 'EditFulfillmentButton component', () => {
 
 			const button = screen.getByRole( 'button' );
 			button.focus();
-			expect( document.activeElement ).toBe( button );
+			expect( button.ownerDocument.activeElement ).toBe( button );
 		} );
 	} );
 } );
