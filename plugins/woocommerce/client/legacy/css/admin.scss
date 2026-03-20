@@ -8415,6 +8415,10 @@ table.bar_chart {
 			border-radius: 2px;
 		}
 	}
+
+	#variable_product_options .form-row select {
+		height: 50px;
+	}
 }
 
 // Tablenav: WP 7.0 tablenav uses compact 32px sizing for native selects.
