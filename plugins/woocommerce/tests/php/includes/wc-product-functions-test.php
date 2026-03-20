@@ -652,194 +652,141 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Product canonical redirect is skipped for non-product requests.
-	 */
-	public function test_wc_product_canonical_redirect_skips_non_product_requests() {
-		$this->go_to( home_url( '/' ) );
+     * Helper to run wc_product_canonical_redirect() under wp_redirect guard.
+     */
+    private function with_wc_product_canonical_redirect_guard( callable $callback ) {
+        $redirect_attempted = false;
+        $redirected_to      = '';
+        $redirect_status    = 0;
 
-		$redirect_attempted = false;
-		$redirect_callback  = function () use ( &$redirect_attempted ) {
-			$redirect_attempted = true;
-			throw new \WPAjaxDieContinueException();
-		};
+        $redirect_callback = function ( $location = '', $status = 302 ) use ( &$redirect_attempted, &$redirected_to, &$redirect_status ) {
+            $redirect_attempted = true;
+            $redirected_to      = $location;
+            $redirect_status    = $status;
+            throw new \WPAjaxDieContinueException();
+        };
 
-		add_filter( 'wp_redirect', $redirect_callback, 10, 2 );
+        add_filter( 'wp_redirect', $redirect_callback, 10, 2 );
 
-		try {
-			wc_product_canonical_redirect();
-		} catch ( \WPAjaxDieContinueException $e ) {
-			$this->fail( 'Redirect should not have been triggered for non-product requests.' );
-		} finally {
-			remove_filter( 'wp_redirect', $redirect_callback, 10, 2 );
-		}
+        try {
+            $callback();
+        } catch ( \WPAjaxDieContinueException $e ) {
+            // Expected for redirects, or failure path to be asserted.
+        } finally {
+            remove_filter( 'wp_redirect', $redirect_callback, 10, 2 );
+        }
 
-		$this->assertFalse( $redirect_attempted );
-	}
+        return array( $redirect_attempted, $redirected_to, $redirect_status );
+    }
 
-	/**
-	 * @testdox Product canonical redirect ignores invalid non-string product_cat query var.
-	 */
-	public function test_wc_product_canonical_redirect_ignores_invalid_product_cat_query_var() {
-		$product = WC_Helper_Product::create_simple_product();
-		$this->go_to( get_permalink( $product->get_id() ) );
+    /**
+     * @testdox Product canonical redirect is skipped for non-product requests.
+     */
+    public function test_wc_product_canonical_redirect_skips_non_product_requests() {
+        $this->go_to( home_url( '/' ) );
 
-		// Force non-string query var to cover the guard condition.
-		set_query_var( 'product_cat', array() );
+        list( $redirect_attempted ) = $this->with_wc_product_canonical_redirect_guard( 'wc_product_canonical_redirect' );
 
-		$redirect_attempted = false;
-		$redirect_callback  = function () use ( &$redirect_attempted ) {
-			$redirect_attempted = true;
-			throw new \WPAjaxDieContinueException();
-		};
+        $this->assertFalse( $redirect_attempted );
+    }
 
-		add_filter( 'wp_redirect', $redirect_callback, 10, 2 );
+    /**
+     * @testdox Product canonical redirect ignores invalid non-string product_cat query var.
+     */
+    public function test_wc_product_canonical_redirect_ignores_invalid_product_cat_query_var() {
+        $product = WC_Helper_Product::create_simple_product();
+        $this->go_to( get_permalink( $product->get_id() ) );
 
-		try {
-			wc_product_canonical_redirect();
-		} catch ( \WPAjaxDieContinueException $e ) {
-			$this->fail( 'Redirect should not have been triggered when product_cat query var is not a string.' );
-		} finally {
-			remove_filter( 'wp_redirect', $redirect_callback, 10, 2 );
-		}
+        // Force non-string query var to cover the guard condition.
+        set_query_var( 'product_cat', array() );
 
-		$this->assertFalse( $redirect_attempted );
+        list( $redirect_attempted ) = $this->with_wc_product_canonical_redirect_guard( 'wc_product_canonical_redirect' );
 
-		WC_Helper_Product::delete_product( $product->get_id() );
-	}
+        $this->assertFalse( $redirect_attempted );
 
-	/**
-	 * @testdox Product canonical redirect skips redirect when requested product_cat equals expected slug.
-	 */
-	public function test_wc_product_canonical_redirect_ignores_matching_category_slug() {
-		$category = wp_insert_term( 'Matching Category', 'product_cat' );
-		$product  = WC_Helper_Product::create_simple_product();
-		wp_set_object_terms( $product->get_id(), (int) $category['term_id'], 'product_cat' );
-		$product->save();
+        WC_Helper_Product::delete_product( $product->get_id() );
+    }
 
-		$this->go_to( add_query_arg( 'product_cat', get_term( $category['term_id'], 'product_cat' )->slug, get_permalink( $product->get_id() ) ) );
+    /**
+     * @testdox Product canonical redirect skips redirect when requested product_cat equals expected slug.
+     */
+    public function test_wc_product_canonical_redirect_ignores_matching_category_slug() {
+        $category = wp_insert_term( 'Matching Category', 'product_cat' );
+        $product  = WC_Helper_Product::create_simple_product();
+        wp_set_object_terms( $product->get_id(), (int) $category['term_id'], 'product_cat' );
+        $product->save();
 
-		$redirect_attempted = false;
-		$redirect_callback  = function () use ( &$redirect_attempted ) {
-			$redirect_attempted = true;
-			throw new \WPAjaxDieContinueException();
-		};
+        $this->go_to( add_query_arg( 'product_cat', get_term( $category['term_id'], 'product_cat' )->slug, get_permalink( $product->get_id() ) ) );
 
-		add_filter( 'wp_redirect', $redirect_callback, 10, 2 );
+        list( $redirect_attempted ) = $this->with_wc_product_canonical_redirect_guard( 'wc_product_canonical_redirect' );
 
-		try {
-			wc_product_canonical_redirect();
-		} catch ( \WPAjaxDieContinueException $e ) {
-			$this->fail( 'Redirect should not have been triggered when requested category slug matches expected category slug.' );
-		} finally {
-			remove_filter( 'wp_redirect', $redirect_callback, 10, 2 );
-		}
+        $this->assertFalse( $redirect_attempted );
 
-		$this->assertFalse( $redirect_attempted );
+        WC_Helper_Product::delete_product( $product->get_id() );
+        wp_delete_term( $category['term_id'], 'product_cat' );
+    }
 
-		WC_Helper_Product::delete_product( $product->get_id() );
-		wp_delete_term( $category['term_id'], 'product_cat' );
-	}
+    /**
+     * @testdox Product canonical redirect sends 301 when requested category slug differs from expected.
+     */
+    public function test_wc_product_canonical_redirect_redirects_when_category_slug_mismatch() {
+        $category = wp_insert_term( 'Redirect Category', 'product_cat' );
+        $product  = WC_Helper_Product::create_simple_product();
+        wp_set_object_terms( $product->get_id(), (int) $category['term_id'], 'product_cat' );
+        $product->save();
 
-	/**
-	 * @testdox Product canonical redirect sends 301 when requested category slug differs from expected.
-	 */
-	public function test_wc_product_canonical_redirect_redirects_when_category_slug_mismatch() {
-		$category = wp_insert_term( 'Redirect Category', 'product_cat' );
-		$product  = WC_Helper_Product::create_simple_product();
-		wp_set_object_terms( $product->get_id(), (int) $category['term_id'], 'product_cat' );
-		$product->save();
+        $query_args = array(
+            'product_cat' => 'wrong-slug',
+            'foo'         => 'bar',
+        );
 
-		$query_args = array(
-			'product_cat' => 'wrong-slug',
-			'foo'         => 'bar',
-		);
+        $this->go_to( add_query_arg( $query_args, get_permalink( $product->get_id() ) ) );
 
-		$this->go_to( add_query_arg( $query_args, get_permalink( $product->get_id() ) ) );
+        list( $redirect_attempted, $redirected_to, $redirected_code ) = $this->with_wc_product_canonical_redirect_guard( 'wc_product_canonical_redirect' );
 
-		$redirected_to    = '';
-		$redirected_code  = 0;
-		$redirect_callback = function ( $location, $status ) use ( &$redirected_to, &$redirected_code ) {
-			$redirected_to   = $location;
-			$redirected_code = $status;
-			throw new \WPAjaxDieContinueException();
-		};
+        $this->assertTrue( $redirect_attempted );
+        $this->assertSame( 301, $redirected_code );
+        $this->assertStringContainsString( wc_get_product( $product->get_id() )->get_permalink(), $redirected_to );
+        $this->assertStringContainsString( 'foo=bar', $redirected_to );
 
-		add_filter( 'wp_redirect', $redirect_callback, 10, 2 );
+        WC_Helper_Product::delete_product( $product->get_id() );
+        wp_delete_term( $category['term_id'], 'product_cat' );
+    }
 
-		try {
-			wc_product_canonical_redirect();
-		} catch ( \WPAjaxDieContinueException $e ) {
-			// Expected to stop execution before exit().
-		} finally {
-			remove_filter( 'wp_redirect', $redirect_callback, 10, 2 );
-		}
+    /**
+     * @testdox Product canonical redirect ignores empty product_cat query value.
+     */
+    public function test_wc_product_canonical_redirect_ignores_empty_product_cat_slug() {
+        $product = WC_Helper_Product::create_simple_product();
+        $this->go_to( add_query_arg( 'product_cat', '', get_permalink( $product->get_id() ) ) );
 
-		$this->assertSame( 301, $redirected_code );
-		$this->assertStringContainsString( wc_get_product( $product->get_id() )->get_permalink(), $redirected_to );
-		$this->assertStringContainsString( 'foo=bar', $redirected_to );
+        list( $redirect_attempted ) = $this->with_wc_product_canonical_redirect_guard( 'wc_product_canonical_redirect' );
 
-		WC_Helper_Product::delete_product( $product->get_id() );
-		wp_delete_term( $category['term_id'], 'product_cat' );
-	}
+        $this->assertFalse( $redirect_attempted );
 
-	/**
-	 * @testdox Product canonical redirect ignores empty product_cat query value.
-	 */
-	public function test_wc_product_canonical_redirect_ignores_empty_product_cat_slug() {
-		$product = WC_Helper_Product::create_simple_product();
-		$this->go_to( add_query_arg( 'product_cat', '', get_permalink( $product->get_id() ) ) );
+        WC_Helper_Product::delete_product( $product->get_id() );
+    }
 
-		$redirect_attempted = false;
-		$redirect_callback  = function () use ( &$redirect_attempted ) {
-			$redirect_attempted = true;
-			throw new \WPAjaxDieContinueException();
-		};
+    /**
+     * @testdox Product canonical redirect skips when global wp_rewrite is not WP_Rewrite.
+     */
+    public function test_wc_product_canonical_redirect_skips_when_wp_rewrite_not_valid() {
+        global $wp_rewrite;
 
-		add_filter( 'wp_redirect', $redirect_callback, 10, 2 );
+        $product = WC_Helper_Product::create_simple_product();
+        $this->go_to( get_permalink( $product->get_id() ) );
 
-		try {
-			wc_product_canonical_redirect();
-		} catch ( \WPAjaxDieContinueException $e ) {
-			$this->fail( 'Redirect should not be triggered when product_cat is empty.' );
-		} finally {
-			remove_filter( 'wp_redirect', $redirect_callback, 10, 2 );
-		}
+        $old_wp_rewrite = $wp_rewrite;
+        $wp_rewrite     = null;
 
-		$this->assertFalse( $redirect_attempted );
+        try {
+            list( $redirect_attempted ) = $this->with_wc_product_canonical_redirect_guard( 'wc_product_canonical_redirect' );
 
-		WC_Helper_Product::delete_product( $product->get_id() );
-	}
+            $this->assertFalse( $redirect_attempted );
+        } finally {
+            $wp_rewrite = $old_wp_rewrite;
+        }
 
-	/**
-	 * @testdox Product canonical redirect skips when global wp_rewrite is not WP_Rewrite.
-	 */
-	public function test_wc_product_canonical_redirect_skips_when_wp_rewrite_not_valid() {
-		global $wp_rewrite;
-
-		$product = WC_Helper_Product::create_simple_product();
-		$this->go_to( get_permalink( $product->get_id() ) );
-
-		$old_wp_rewrite      = $wp_rewrite;
-		$wp_rewrite          = null;
-		$redirect_attempted = false;
-		$redirect_callback  = function () use ( &$redirect_attempted ) {
-			$redirect_attempted = true;
-			throw new \WPAjaxDieContinueException();
-		};
-
-		add_filter( 'wp_redirect', $redirect_callback, 10, 2 );
-
-		try {
-			wc_product_canonical_redirect();
-		} catch ( \WPAjaxDieContinueException $e ) {
-			$this->fail( 'Redirect should not be triggered when wp_rewrite is not a WP_Rewrite instance.' );
-		} finally {
-			$wp_rewrite = $old_wp_rewrite;
-			remove_filter( 'wp_redirect', $redirect_callback, 10, 2 );
-		}
-
-		$this->assertFalse( $redirect_attempted );
-
-		WC_Helper_Product::delete_product( $product->get_id() );
-	}
+        WC_Helper_Product::delete_product( $product->get_id() );
+    }
 }
