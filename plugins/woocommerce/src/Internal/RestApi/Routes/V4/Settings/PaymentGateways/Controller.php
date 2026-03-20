@@ -14,6 +14,7 @@ namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\PaymentGate
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\PaymentGateways\Schema\AbstractPaymentGatewaySettingsSchema;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\PaymentGateways\Schema\BacsGatewaySettingsSchema;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\PaymentGateways\Schema\ChequeGatewaySettingsSchema;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\PaymentGateways\Schema\CodGatewaySettingsSchema;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\PaymentGateways\Schema\PaymentGatewaySettingsSchema;
 use WC_Payment_Gateway;
@@ -185,6 +186,8 @@ class Controller extends AbstractController {
 		switch ( $gateway_id ) {
 			case 'bacs':
 				return new BacsGatewaySettingsSchema();
+			case 'cheque':
+				return new ChequeGatewaySettingsSchema();
 			case 'cod':
 				return new CodGatewaySettingsSchema();
 			default:
