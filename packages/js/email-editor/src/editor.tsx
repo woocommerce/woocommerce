@@ -110,6 +110,11 @@ function disableCollab() {
 	) {
 		return;
 	}
+
+	if ( window._wpCollaborationEnabled ) {
+		window._wpCollaborationEnabled = false;
+	}
+
 	addFilter(
 		'sync.providers',
 		'woocommerce/email-editor/disable-collab',
