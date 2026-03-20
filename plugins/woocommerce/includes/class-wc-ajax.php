@@ -211,6 +211,7 @@ class WC_AJAX {
 			'shipping_zone_methods_save_changes',
 			'shipping_zone_methods_save_settings',
 			'shipping_classes_save_changes',
+			'shipping_providers_save_changes',
 			'toggle_gateway_enabled',
 			'load_status_widget',
 			'load_recent_reviews_widget',
@@ -3833,6 +3834,99 @@ class WC_AJAX {
 		wp_send_json_success(
 			array(
 				'shipping_classes' => $wc_shipping->get_shipping_classes(),
+			)
+		);
+	}
+
+	/**
+	 * Handle AJAX save for custom shipping providers (taxonomy-based).
+	 *
+	 * @since 10.7.0
+	 */
+	public static function shipping_providers_save_changes() {
+		if ( ! isset( $_POST['wc_shipping_providers_nonce'], $_POST['changes'] ) ) {
+			wp_send_json_error( 'missing_fields' );
+			wp_die();
+		}
+
+		if ( ! wp_verify_nonce( wp_unslash( $_POST['wc_shipping_providers_nonce'] ), 'wc_shipping_providers_nonce' ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			wp_send_json_error( 'bad_nonce' );
+			wp_die();
+		}
+
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			wp_send_json_error( 'missing_capabilities' );
+			wp_die();
+		}
+
+		$taxonomy = 'wc_fulfillment_shipping_provider';
+		$changes  = wp_unslash( $_POST['changes'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+		foreach ( $changes as $term_id => $data ) {
+			$term_id = absint( $term_id );
+
+			if ( isset( $data['deleted'] ) ) {
+				if ( isset( $data['newRow'] ) ) {
+					continue;
+				}
+				wp_delete_term( $term_id, $taxonomy );
+				continue;
+			}
+
+			$update_args = array();
+
+			if ( isset( $data['name'] ) ) {
+				$update_args['name'] = wc_clean( $data['name'] );
+			}
+
+			if ( isset( $data['slug'] ) ) {
+				$update_args['slug'] = wc_clean( $data['slug'] );
+			}
+
+			if ( isset( $data['newRow'] ) ) {
+				$update_args = array_filter( $update_args );
+				if ( empty( $update_args['name'] ) ) {
+					continue;
+				}
+				$inserted_term = wp_insert_term( $update_args['name'], $taxonomy, $update_args );
+				$term_id       = is_wp_error( $inserted_term ) ? 0 : $inserted_term['term_id'];
+			} else {
+				wp_update_term( $term_id, $taxonomy, $update_args );
+			}
+
+			if ( $term_id ) {
+				if ( isset( $data['tracking_url_template'] ) ) {
+					update_term_meta( $term_id, 'tracking_url_template', esc_url_raw( $data['tracking_url_template'] ) );
+				}
+				if ( isset( $data['icon'] ) ) {
+					update_term_meta( $term_id, 'icon', esc_url_raw( $data['icon'] ) );
+				}
+			}
+		}
+
+		$terms              = get_terms(
+			array(
+				'taxonomy'   => $taxonomy,
+				'hide_empty' => false,
+			)
+		);
+		$shipping_providers = array();
+
+		if ( ! is_wp_error( $terms ) ) {
+			foreach ( $terms as $term ) {
+				$shipping_providers[] = array(
+					'term_id'               => $term->term_id,
+					'name'                  => $term->name,
+					'slug'                  => $term->slug,
+					'tracking_url_template' => get_term_meta( $term->term_id, 'tracking_url_template', true ),
+					'icon'                  => get_term_meta( $term->term_id, 'icon', true ),
+				);
+			}
+		}
+
+		wp_send_json_success(
+			array(
+				'shipping_providers' => $shipping_providers,
 			)
 		);
 	}
