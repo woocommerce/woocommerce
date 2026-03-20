@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add custom shipping providers settings UI and shipping provider filter for the orders list.
