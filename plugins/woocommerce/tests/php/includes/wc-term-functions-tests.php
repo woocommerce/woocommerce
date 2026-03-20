@@ -212,15 +212,9 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 			)
 		);
 
-		$featured_ids = array_map(
-			function ( $product ) {
-				return $product->get_id();
-			},
-			$featured_products
-		);
+		$featured_ids = array_map( fn( $product ) => $product->get_id(), $featured_products );
 
-		$this->assertContains( $featured_product->get_id(), $featured_ids );
-		$this->assertNotContains( $regular_product->get_id(), $featured_ids );
+		$this->assertSame( array( $featured_product->get_id() ), $featured_ids );
 
 		$featured_product->delete();
 		$regular_product->delete();
