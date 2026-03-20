@@ -43,8 +43,9 @@
 			align-items: center;
 			justify-content: center;
 
-			&:focus:not(:disabled) {
-				box-shadow: 0 0 0 var(--wp-admin-border-width-focus, 2px) var(--wp-admin-theme-color, #007cba);
+			&:focus {
+				outline: none;
+				box-shadow: none;
 			}
 		}
 	}
