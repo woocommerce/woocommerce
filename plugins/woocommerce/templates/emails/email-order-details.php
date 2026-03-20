@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 10.4.0
+ * @version 10.7.0
  */
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -22,10 +22,18 @@ defined( 'ABSPATH' ) || exit;
 $text_align = is_rtl() ? 'right' : 'left';
 
 $email_improvements_enabled = FeaturesUtil::feature_is_enabled( 'email_improvements' );
-$heading_class              = $email_improvements_enabled ? 'email-order-detail-heading' : '';
-$order_table_class          = $email_improvements_enabled ? 'email-order-details' : '';
-$order_total_text_align     = $email_improvements_enabled ? 'right' : 'left';
-$order_quantity_text_align  = $email_improvements_enabled ? 'right' : 'left';
+$block_email_editor_enabled = FeaturesUtil::feature_is_enabled( 'block_email_editor' );
+/**
+ * Filter whether to display the section divider in the email body.
+ *
+ * @since 10.6.0
+ * @param bool $display_section_divider Whether to display the section divider. Default true.
+ */
+$display_section_divider   = (bool) apply_filters( 'woocommerce_email_body_display_section_divider', true );
+$heading_class             = $email_improvements_enabled ? 'email-order-detail-heading' : '';
+$order_table_class         = $email_improvements_enabled ? 'email-order-details' : '';
+$order_total_text_align    = $email_improvements_enabled ? 'right' : 'left';
+$order_quantity_text_align = $email_improvements_enabled ? 'right' : 'left';
 
 if ( $email_improvements_enabled ) {
 	add_filter( 'woocommerce_order_shipping_to_display_shipped_via', '__return_false' );
@@ -48,7 +56,7 @@ do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plai
 		echo wp_kses_post( __( 'Order summary', 'woocommerce' ) );
 	}
 	if ( $sent_to_admin ) {
-		$before = '<a class="link" href="' . esc_url( $order->get_edit_order_url() ) . '">';
+		$before = '<a class="link" href="' . esc_url( $order->get_edit_order_url() ) . '"' . ( $block_email_editor_enabled ? ' style="text-decoration: none;"' : '' ) . '>';
 		$after  = '</a>';
 	} else {
 		$before = '';
@@ -72,6 +80,7 @@ do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plai
 
 <div style="margin-bottom: <?php echo $email_improvements_enabled ? '24px' : '40px'; ?>;">
 	<table class="td font-family <?php echo esc_attr( $order_table_class ); ?>" cellspacing="0" cellpadding="6" style="width: 100%;" border="1">
+		<?php if ( ! $block_email_editor_enabled ) : ?>
 		<thead>
 			<tr>
 				<th class="td" scope="col" style="text-align:<?php echo esc_attr( $text_align ); ?>;"><?php esc_html_e( 'Product', 'woocommerce' ); ?></th>
@@ -79,6 +88,7 @@ do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plai
 				<th class="td" scope="col" style="text-align:<?php echo esc_attr( $order_total_text_align ); ?>;"><?php esc_html_e( 'Price', 'woocommerce' ); ?></th>
 			</tr>
 		</thead>
+		<?php endif; ?>
 		<tbody>
 			<?php
 			$image_size = $email_improvements_enabled ? 48 : 32;
@@ -95,6 +105,9 @@ do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plai
 			?>
 		</tbody>
 	</table>
+	<?php if ( $display_section_divider ) : ?>
+		<hr style="border: 0; border-top: 1px solid #1E1E1E; border-top-color: rgba(30, 30, 30, 0.2); margin: 20px 0;">
+	<?php endif; ?>
 	<table class="td font-family <?php echo esc_attr( $order_table_class ); ?>" cellspacing="0" cellpadding="6" style="width: 100%;" border="1">
 		<?php
 		$item_totals       = $order->get_order_item_totals();
@@ -131,6 +144,9 @@ do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plai
 		?>
 	</table>
 	<?php if ( $order->get_customer_note() && $email_improvements_enabled ) { ?>
+		<?php if ( $display_section_divider ) : ?>
+			<hr style="border: 0; border-top: 1px solid #1E1E1E; border-top-color: rgba(30, 30, 30, 0.2); margin: 20px 0;">
+		<?php endif; ?>
 		<table class="td font-family <?php echo esc_attr( $order_table_class ); ?>" cellspacing="0" cellpadding="6" style="width: 100%;" border="1" role="presentation">
 			<tr class="order-customer-note">
 				<td class="td text-align-left">

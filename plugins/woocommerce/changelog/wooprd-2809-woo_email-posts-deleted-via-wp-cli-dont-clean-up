@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Make sure that woocommerce_email_templates_*_post_id options are properly deleted when woo_email posts are removed in non-admin environments, such as WP-CLI.

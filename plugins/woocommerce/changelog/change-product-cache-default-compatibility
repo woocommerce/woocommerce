@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Change Cache Product Objects feature default plugin compatibility to COMPATIBLE so extensions that haven't explicitly declared compatibility are no longer shown as incompatible.

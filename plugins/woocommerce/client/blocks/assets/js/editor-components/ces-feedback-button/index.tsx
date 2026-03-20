@@ -95,6 +95,7 @@ export const CesFeedbackButton = ( {
 					return (
 						<div>
 							<TextareaControl
+								__nextHasNoMarginBottom
 								label={ feedbackLabel }
 								value={
 									extraFieldsValues.feedback_comment || ''
@@ -108,6 +109,8 @@ export const CesFeedbackButton = ( {
 								placeholder={ feedbackPlaceholder }
 							/>
 							<TextControl
+								__next40pxDefaultSize
+								__nextHasNoMarginBottom
 								label={ emailLabel }
 								type="email"
 								value={ extraFieldsValues.email || '' }

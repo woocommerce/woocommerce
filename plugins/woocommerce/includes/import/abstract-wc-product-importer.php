@@ -414,7 +414,17 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 						$attribute_object->set_position( $position );
 						$attribute_object->set_visible( $is_visible );
 						$attribute_object->set_variation( $is_variation );
-						$attributes[] = $attribute_object;
+
+						/**
+						 * Filter product attribute after initialization.
+						 *
+						 * @since 10.6.0
+						 *
+						 * @param WC_Product_Attribute $attribute_object  The attribute object.
+						 * @param array                $attribute         The attribute data.
+						 * @param WC_Product           $product           The product object.
+						 */
+						$attributes[] = apply_filters( 'woocommerce_product_importer_read_attribute', $attribute_object, $attribute, $product );
 					}
 				} elseif ( isset( $attribute['value'] ) ) {
 					// Check for default attributes and set "is_variation".
@@ -429,7 +439,9 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 					$attribute_object->set_position( $position );
 					$attribute_object->set_visible( $is_visible );
 					$attribute_object->set_variation( $is_variation );
-					$attributes[] = $attribute_object;
+
+					// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- see same filter in the 'if' block.
+					$attributes[] = apply_filters( 'woocommerce_product_importer_read_attribute', $attribute_object, $attribute, $product );
 				}
 			}
 
@@ -485,7 +497,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 				}
 
 				if ( $attribute_id ) {
-					$attribute_name = wc_attribute_taxonomy_name_by_id( $attribute_id );
+					$attribute_name = sanitize_title( wc_attribute_taxonomy_name_by_id( $attribute_id ) );
 				} else {
 					$attribute_name = sanitize_title( $attribute['name'] );
 				}
@@ -499,7 +511,8 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 				if ( $parent_attributes[ $attribute_name ]->is_taxonomy() ) {
 					// If dealing with a taxonomy, we need to get the slug from the name posted to the API.
-					$term = get_term_by( 'name', $attribute_value, $attribute_name );
+					$taxonomy_name = $parent_attributes[ $attribute_name ]->get_name();
+					$term          = get_term_by( 'name', $attribute_value, $taxonomy_name );
 
 					if ( $term && ! is_wp_error( $term ) ) {
 						$attribute_value = $term->slug;
@@ -535,7 +548,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			}
 
 			if ( $attribute_id ) {
-				$attribute_name = wc_attribute_taxonomy_name_by_id( $attribute_id );
+				$attribute_name = sanitize_title( wc_attribute_taxonomy_name_by_id( $attribute_id ) );
 			} else {
 				$attribute_name = sanitize_title( $attribute['name'] );
 			}

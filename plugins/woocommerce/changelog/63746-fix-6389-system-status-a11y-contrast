@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix insufficient color contrast for status indicators on the System Status page to meet WCAG 2.2 AA requirements.

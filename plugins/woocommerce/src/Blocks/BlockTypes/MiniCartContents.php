@@ -66,7 +66,8 @@ class MiniCartContents extends AbstractBlock {
 	protected function render_experimental_iapi_mini_cart_contents( $attributes, $content, $block ) {
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
-				'data-wp-interactive' => 'woocommerce/mini-cart-contents',
+				'data-wp-interactive'             => 'woocommerce/mini-cart-contents',
+				'data-wp-style--background-color' => 'woocommerce/mini-cart::state.contentsBackgroundColor',
 			)
 		);
 

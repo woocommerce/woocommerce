@@ -27,6 +27,67 @@ const test = base.extend< { productCollectionPage: ProductCollectionPage } >( {
 } );
 
 test.describe( 'Shopper → Notices', () => {
+	// This test only applies to the iAPI mini cart which supports SSR.
+	// The legacy React mini cart is entirely client-side rendered.
+	if ( config.features[ 'experimental-iapi-mini-cart' ] ) {
+		test( 'Shopper sees SSR error notice in mini cart when product goes out of stock', async ( {
+			page,
+			browser,
+			frontendUtils,
+		} ) => {
+			const productName = 'Limited Stock Product';
+
+			// Create a product with only 1 in stock.
+			const result = await wpCLI(
+				`wc product create --name="${ productName }" --regular_price=10 --manage_stock=true --stock_quantity=1 --user=admin --porcelain`
+			);
+			// Extract just the numeric ID from output (npm adds prefix lines to stdout).
+			const productId = result.stdout.match( /^\d+$/m )?.[ 0 ];
+			if ( ! productId ) {
+				throw new Error(
+					`Failed to extract product ID from wpCLI output: ${ result.stdout }`
+				);
+			}
+
+			await frontendUtils.emptyCart();
+			await frontendUtils.goToShop();
+			await frontendUtils.addToCart( productName );
+
+			// Set product to out of stock while it's in cart.
+			await wpCLI(
+				`wc product update ${ productId } --stock_quantity=0 --in_stock=false --user=admin`
+			);
+
+			// Get the current URL to revisit with JS disabled.
+			const currentUrl = page.url();
+
+			// Create a new context with JavaScript disabled to verify SSR output.
+			const noJsContext = await browser.newContext( {
+				javaScriptEnabled: false,
+			} );
+
+			try {
+				const noJsPage = await noJsContext.newPage();
+
+				// Copy cookies to maintain cart session.
+				const cookies = await page.context().cookies();
+				await noJsContext.addCookies( cookies );
+
+				await noJsPage.goto( currentUrl );
+
+				// Verify error notice banner is rendered in SSR output (not client-side JS).
+				// Note: The notice text content contains HTML and is rendered client-side via
+				// data-wp-init callback, so we only verify the banner structure exists in SSR.
+				const miniCartNotice = noJsPage.locator(
+					'.wp-block-woocommerce-filled-mini-cart-contents-block .wc-block-components-notice-banner'
+				);
+				await expect( miniCartNotice ).toBeVisible();
+			} finally {
+				await noJsContext.close();
+			}
+		} );
+	}
+
 	test( 'Shopper can add item to cart, and will not see a notice in the mini cart', async ( {
 		page,
 		editor,

@@ -346,6 +346,15 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 			return;
 		}
 
+		// Skip test orders (e.g., WCPay test mode) from analytics.
+		if ( self::is_test_order( $order ) ) {
+			wc_get_logger()->debug(
+				sprintf( 'Skipping test order #%d from analytics import.', $order_id ),
+				array( 'source' => 'wc-analytics-order-import' )
+			);
+			return;
+		}
+
 		$results = array(
 			OrdersStatsDataStore::sync_order( $order_id ),
 			ProductsDataStore::sync_order_products( $order_id ),
@@ -381,6 +390,9 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	 */
 	public static function schedule_recurring_batch_processor() {
 		$action_hook = self::get_action( self::PROCESS_PENDING_ORDERS_BATCH_ACTION );
+		if ( null === $action_hook ) {
+			return;
+		}
 		// The most efficient way to check for an existing action is to use `as_has_scheduled_action`, but in unusual
 		// cases where another plugin has loaded a very old version of Action Scheduler, it may not be available to us.
 		$has_scheduled_action = function_exists( 'as_has_scheduled_action' ) ? 'as_has_scheduled_action' : 'as_next_scheduled_action';
@@ -390,7 +402,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 
 		$interval = self::get_import_interval();
 
-		as_schedule_recurring_action( time(), $interval, $action_hook, array(), static::$group, true );
+		as_schedule_recurring_action( time(), $interval, $action_hook, array(), static::$group ?? '', true );
 	}
 
 	/**
@@ -412,7 +424,9 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 		if ( 'yes' === $old_value && 'no' === $new_value ) {
 			// Unschedule the recurring batch processor.
 			$action_hook = self::get_action( self::PROCESS_PENDING_ORDERS_BATCH_ACTION );
-			as_unschedule_all_actions( $action_hook, array(), static::$group );
+			if ( null !== $action_hook ) {
+				as_unschedule_all_actions( $action_hook, array(), static::$group ?? '' );
+			}
 
 			// Schedule an immediate catchup batch to process all orders up to now.
 			// This ensures no orders are missed during the transition.
@@ -677,6 +691,48 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 				$limit
 			)
 		);
+	}
+
+	/**
+	 * Check if an order is a test order that should be excluded from analytics.
+	 *
+	 * For refunds, the parent order is checked instead, since refunds do not
+	 * carry the test mode metadata directly.
+	 *
+	 * @param \WC_Abstract_Order $order Order object.
+	 * @return bool
+	 *
+	 * @since 10.7.0
+	 */
+	public static function is_test_order( $order ) {
+		if ( ! $order instanceof \WC_Abstract_Order ) {
+			return false;
+		}
+
+		// For refunds, check the parent order.
+		$check_order = $order;
+		if ( 'shop_order_refund' === $order->get_type() ) {
+			$check_order = wc_get_order( $order->get_parent_id() );
+			if ( ! $check_order instanceof \WC_Abstract_Order ) {
+				return false;
+			}
+		}
+
+		$is_test = 'test' === $check_order->get_meta( '_wcpay_mode' );
+
+		/**
+		 * Filter whether an order is a test order excluded from analytics.
+		 *
+		 * Use this filter to customize test order detection beyond the default
+		 * WCPay test mode check, e.g., to exclude orders from other payment
+		 * gateways' test/sandbox modes.
+		 *
+		 * @param bool               $is_test Whether the order is a test order.
+		 * @param \WC_Abstract_Order $order   The order being checked (for refunds, this is the parent order).
+		 *
+		 * @since 10.7.0
+		 */
+		return apply_filters( 'woocommerce_analytics_is_test_order', $is_test, $check_order );
 	}
 
 	/**

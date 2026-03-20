@@ -258,7 +258,7 @@ abstract class AbstractSchema {
 
 		return [
 			'type'        => 'object',
-			'context'     => [ 'view', 'edit' ],
+			'context'     => [ 'view', 'edit', 'embed' ],
 			'arg_options' => [
 				'default'           => $defaults,
 				'validate_callback' => $this->get_recursive_validate_callback( $extended_schema ),
@@ -329,43 +329,43 @@ abstract class AbstractSchema {
 			'currency_code'               => [
 				'description' => __( 'Currency code (in ISO format) for returned prices.', 'woocommerce' ),
 				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
+				'context'     => [ 'view', 'edit', 'embed' ],
 				'readonly'    => true,
 			],
 			'currency_symbol'             => [
 				'description' => __( 'Currency symbol for the currency which can be used to format returned prices.', 'woocommerce' ),
 				'type'        => 'string',
-				'context'     => [ 'view', 'edit' ],
+				'context'     => [ 'view', 'edit', 'embed' ],
 				'readonly'    => true,
 			],
 			'currency_minor_unit'         => [
 				'description' => __( 'Currency minor unit (number of digits after the decimal separator) for returned prices.', 'woocommerce' ),
 				'type'        => 'integer',
-				'context'     => [ 'view', 'edit' ],
+				'context'     => [ 'view', 'edit', 'embed' ],
 				'readonly'    => true,
 			],
 			'currency_decimal_separator'  => array(
 				'description' => __( 'Decimal separator for the currency which can be used to format returned prices.', 'woocommerce' ),
 				'type'        => 'string',
-				'context'     => array( 'view', 'edit' ),
+				'context'     => array( 'view', 'edit', 'embed' ),
 				'readonly'    => true,
 			),
 			'currency_thousand_separator' => array(
 				'description' => __( 'Thousand separator for the currency which can be used to format returned prices.', 'woocommerce' ),
 				'type'        => 'string',
-				'context'     => array( 'view', 'edit' ),
+				'context'     => array( 'view', 'edit', 'embed' ),
 				'readonly'    => true,
 			),
 			'currency_prefix'             => array(
 				'description' => __( 'Price prefix for the currency which can be used to format returned prices.', 'woocommerce' ),
 				'type'        => 'string',
-				'context'     => array( 'view', 'edit' ),
+				'context'     => array( 'view', 'edit', 'embed' ),
 				'readonly'    => true,
 			),
 			'currency_suffix'             => array(
 				'description' => __( 'Price prefix for the currency which can be used to format returned prices.', 'woocommerce' ),
 				'type'        => 'string',
-				'context'     => array( 'view', 'edit' ),
+				'context'     => array( 'view', 'edit', 'embed' ),
 				'readonly'    => true,
 			),
 		];

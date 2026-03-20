@@ -52,7 +52,8 @@
 			border-color: $input-border-dark;
 			color: $input-text-dark;
 			&:focus {
-				border-color: currentColor;
+				color: $input-text-dark;
+				border: 1.5px solid currentColor;
 			}
 		}
 
@@ -63,7 +64,8 @@
 
 	.wc-blocks-components-select__label {
 		@include reset-typography();
-		@include font-small-locked;
+		font-size: 13px;
+		line-height: 1.4;
 		position: absolute;
 		top: $gap-smallest * 1.5;
 		left: $gap-smaller * 1.25;

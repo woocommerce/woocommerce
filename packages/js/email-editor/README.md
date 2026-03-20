@@ -18,7 +18,10 @@ window.WooCommerceEmailEditor = {
     current_post_type: '', // The post type of the current post
     current_post_id: '', // The ID of the current post
     current_wp_user_email: '', // The email of the current user
-    editor_settings: {}, // The block editor settings
+    editor_settings: {
+        // Standard block editor settings, plus email-editor-specific options.
+        // See the "Editor settings" section below for available options.
+    },
     editor_theme: {}, // The block editor theme
     user_theme_post_id: '', // The ID of the user theme post
     urls: {
@@ -38,6 +41,171 @@ The `initializeEditor` function accepts a single parameter:
 -   `htmlId` (required): The ID of the HTML element where the editor will be mounted
 
 Make sure to set up the required data on `window.WooCommerceEmailEditor` before calling `initializeEditor`.
+
+### Editor settings
+
+The `editor_settings` object (or `config.editorSettings` when using `ExperimentalEmailEditor`) accepts all standard WordPress block editor settings plus the following email-editor-specific options:
+
+| Setting                  | Type      | Default | Description                                                                                                                                                          |
+| ------------------------ | --------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `isFullScreenForced`     | `boolean` | `false` | When `true`, the editor is always rendered in fullscreen mode and the user cannot toggle it off. The "More menu" is hidden and a back button is shown in the header. |
+| `displaySendEmailButton` | `boolean` | `false` | When `true`, a "Send" button is displayed in the editor header, allowing users to publish/send the email directly from the editor.                                   |
+| `disableSnackbarNotices` | `boolean` | `false` | When `true`, the editor does not render its own snackbar notices. Pinned and validation notices are unaffected.                                                      |
+
+## Exports
+
+### Components
+
+#### `ExperimentalEmailEditor`
+
+A React component alternative to `initializeEditor`. Renders the email editor inline instead of mounting it to a DOM element by ID. Accepts a `config` prop directly, removing the need for `window.WooCommerceEmailEditor`. Cleans up global editor settings on unmount.
+
+> **Note:** This component is experimental and its API is subject to change.
+
+```jsx
+import { ExperimentalEmailEditor } from '@woocommerce/email-editor';
+
+<ExperimentalEmailEditor
+    postId="123"
+    postType="email"
+    config={ {
+        editorSettings: {
+            // Standard block editor settings, plus email-editor-specific
+            // options. See the "Editor settings" section for details.
+        },
+        theme: {
+            /* ... */
+        },
+        urls: { listings: '/emails', back: '/' },
+        userEmail: 'user@example.com',
+        globalStylesPostId: 456,
+    } }
+/>;
+```
+
+#### `SendPreviewEmail`
+
+A modal component for sending test emails. Provides email validation, sending status feedback, error handling, and success confirmation. Integrates with the email editor store to manage modal state.
+
+> Requires the store to be initialized via `createStore()`, `initializeEditor`, or `ExperimentalEmailEditor`.
+
+```jsx
+import { createStore, SendPreviewEmail } from '@woocommerce/email-editor';
+
+createStore();
+// ...
+<SendPreviewEmail />;
+```
+
+#### `RichTextWithButton`
+
+A WordPress `RichText` input enhanced with a button for inserting personalization tags (e.g., customer name, order details) into email content.
+
+> Requires the store to be initialized via `createStore()`, `initializeEditor`, or `ExperimentalEmailEditor`.
+
+```jsx
+import { createStore, RichTextWithButton } from '@woocommerce/email-editor';
+
+createStore();
+// ...
+<RichTextWithButton
+    label="Email Subject"
+    placeholder="Enter email subject..."
+    attributeName="subject"
+    attributeValue={ currentSubject }
+    updateProperty={ ( name, value ) => setEmailProperty( name, value ) }
+/>;
+```
+
+### Hooks
+
+#### `useIsEmailEditor`
+
+Returns `true` when the current context is the email editor. Checks the email editor store and compares the current post ID/type against the editor's configuration. Returns `false` if the store is not initialized.
+
+> Requires the store to be initialized for meaningful results.
+
+```js
+import { createStore, useIsEmailEditor } from '@woocommerce/email-editor';
+
+createStore();
+// ...
+const isEmailEditor = useIsEmailEditor();
+```
+
+#### `usePreviewTemplates`
+
+Generates preview data for email templates by merging template layouts with content. Optionally includes recent email posts.
+
+> Requires the store to be initialized.
+
+```js
+import { createStore, usePreviewTemplates } from '@woocommerce/email-editor';
+
+createStore();
+// ...
+const [ templates, recentPosts, hasRecentPosts ] = usePreviewTemplates();
+```
+
+#### `useEmailCss`
+
+Generates complete CSS styles for the email editor by merging editor theme settings, user customizations, and layout configurations.
+
+> Requires the store to be initialized.
+
+```js
+import { createStore, useEmailCss } from '@woocommerce/email-editor';
+
+createStore();
+// ...
+const [ styles ] = useEmailCss();
+```
+
+### Store
+
+#### `storeName`
+
+The store identifier: `'email-editor/editor'`. Use with `@wordpress/data` `select()` and `dispatch()` calls.
+
+#### `createStore`
+
+Registers the email editor Redux store with `@wordpress/data`. Safe to call multiple times; returns the existing store if already registered.
+
+```js
+import { createStore } from '@woocommerce/email-editor';
+
+createStore();
+```
+
+### Event tracking
+
+#### `recordEvent`, `recordEventOnce`, `debouncedRecordEvent`
+
+Analytics tracking utilities. Events are prefixed with `email_editor_events_` and only recorded when tracking is enabled. `recordEventOnce` deduplicates per session. `debouncedRecordEvent` waits 700ms to batch rapid actions.
+
+```js
+import {
+    recordEvent,
+    recordEventOnce,
+    debouncedRecordEvent,
+} from '@woocommerce/email-editor';
+
+recordEvent( 'button_clicked', { buttonType: 'save' } );
+recordEventOnce( 'editor_loaded' );
+debouncedRecordEvent( 'content_typed', { length: 42 } );
+```
+
+#### `isEventTrackingEnabled`
+
+Returns whether event tracking is currently enabled.
+
+```js
+import { isEventTrackingEnabled } from '@woocommerce/email-editor';
+
+if ( isEventTrackingEnabled() ) {
+    // perform tracking work
+}
+```
 
 ## Workflow Commands
 
@@ -67,13 +235,6 @@ pnpm run test:js                            # runs JS component test using Jest
 
 ### Dependencies
 
-#### Rich-text
-
-The **Personalization tags** feature relies on the `@wordpress/rich-text` package, which is included in both the Gutenberg plugin and WordPress core.
-To ensure the correct functionality of the Email Editor and its features, you must use **at least version 7.14.0** of the `@wordpress/rich-text` package.
-The required minimum version of this package is stored in the assets directory.
-If your WordPress installation does not use the Gutenberg plugin or does not include the required version, replace the existing `@wordpress/rich-text` package with the one provided in the assets directory.
-
 #### Global Styles Engine
 
 A of 1.4.3 the email editor package depends on `@wordpress/global-styles-engine`, which is **not enqueued by WordPress core**. Unlike most `@wordpress/*` packages, this package is not available globally in WordPress environments and must be bundled.
@@ -90,8 +251,8 @@ new DependencyExtractionWebpackPlugin( {
             return null;
         }
         // ... handle other dependencies
-    }
-} )
+    },
+} );
 ```
 
 ### Email Editor
@@ -157,6 +318,7 @@ We may add, update and delete any of them.
 | `woocommerce_email_editor_wrap_editor_component`                   | `JSX.Element` Editor                                  | `JSX.Element` Editor                       | The main editor component. Custom component can wrap the editor and provide additional functionality                           |
 | `woocommerce_email_editor_send_button_label`                       | `string` 'Send'                                       | `string` 'Send' (default)                  | Email editor send button label. The `Send` text can be updated using this filter                                               |
 | `woocommerce_email_editor_send_action_callback`                    | `function` sendAction                                 | `function` sendAction                      | Action to perform when the Send button is clicked                                                                              |
+| `woocommerce_email_editor_send_button_disabled`                    | `boolean` isDisabled, `object` flags                  | `boolean` isDisabled                       | Override the send button disabled state. The flags object contains `hasEmptyContent`, `isEmailSent`, and `isDirty` booleans    |
 | `woocommerce_email_editor_content_validation_rules`                | `array` rules                                         | `EmailContentValidationRule[]` rules       | Email editor content validation rules. The validation is done on `send button` click and revalidated on `save draft`           |
 | `woocommerce_email_editor_check_sending_method_configuration_link` | `string` link                                         | `string` link                              | Edit or remove the sending configuration link message                                                                          |
 | `woocommerce_email_editor_setting_sidebar_extension_component`     | `JSX.Element` RichTextWithButton                      | `JSX.Element` Sidebar extension component  | Add components to the Email settings sidebar                                                                                   |

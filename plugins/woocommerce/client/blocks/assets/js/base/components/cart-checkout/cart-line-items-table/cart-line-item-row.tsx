@@ -17,18 +17,20 @@ import {
 	applyCheckoutFilter,
 	productPriceValidation,
 } from '@woocommerce/blocks-checkout';
-import Dinero from 'dinero.js';
 import { forwardRef, useMemo } from '@wordpress/element';
 import type { CartItem } from '@woocommerce/types';
 import { objectHasProp, Currency } from '@woocommerce/types';
 import { getSetting } from '@woocommerce/settings';
+import { Icon, trash } from '@wordpress/icons';
+import { calculateSaleAmount } from '@woocommerce/base-utils';
+import { dinero, transformScale, toSnapshot, type Dinero } from 'dinero.js';
+import { USD } from 'dinero.js/currencies'; // USD is used as a placeholder currency for arithmetic; actual formatting is handled elsewhere.
 
 /**
  * Internal dependencies
  */
 import ProductBackorderBadge from '../product-backorder-badge';
 import ProductImage from '../product-image';
-import ProductLowStockBadge from '../product-low-stock-badge';
 import ProductMetadata from '../product-metadata';
 import ProductSaleBadge from '../product-sale-badge';
 
@@ -40,10 +42,11 @@ import ProductSaleBadge from '../product-sale-badge';
  * @return {number} Amount with new minor unit precision.
  */
 const getAmountFromRawPrice = (
-	priceObject: Dinero.Dinero,
+	priceObject: Dinero< number >,
 	currency: Currency
 ) => {
-	return priceObject.convertPrecision( currency.minorUnit ).getAmount();
+	return toSnapshot( transformScale( priceObject, currency.minorUnit ) )
+		.amount;
 };
 
 interface CartLineItemRowProps {
@@ -67,7 +70,6 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 			catalog_visibility: catalogVisibility = 'visible',
 			short_description: shortDescription = '',
 			description: fullDescription = '',
-			low_stock_remaining: lowStockRemaining = null,
 			show_backorder_badge: showBackorderBadge = false,
 			quantity_limits: quantityLimits = {
 				minimum: 1,
@@ -137,25 +139,29 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 			arg,
 		} );
 
-		const regularAmountSingle = Dinero( {
+		const regularAmountSingle = dinero( {
 			amount: parseInt( prices.raw_prices.regular_price, 10 ),
-			precision: prices.raw_prices.precision,
+			currency: USD,
+			scale: prices.raw_prices.precision,
 		} );
-		const purchaseAmountSingle = Dinero( {
+		const purchaseAmountSingle = dinero( {
 			amount: parseInt( prices.raw_prices.price, 10 ),
-			precision: prices.raw_prices.precision,
+			currency: USD,
+			scale: prices.raw_prices.precision,
 		} );
-		const saleAmountSingle =
-			regularAmountSingle.subtract( purchaseAmountSingle );
-		const saleAmount = saleAmountSingle.multiply( quantity );
+		const saleAmountSingle = calculateSaleAmount(
+			prices,
+			priceCurrency.minorUnit
+		);
 		const totalsCurrency = getCurrencyFromPriceResponse( totals );
 		let lineSubtotal = parseInt( totals.line_subtotal, 10 );
 		if ( getSetting( 'displayCartPricesIncludingTax', false ) ) {
 			lineSubtotal += parseInt( totals.line_subtotal_tax, 10 );
 		}
-		const subtotalPrice = Dinero( {
+		const subtotalPrice = dinero( {
 			amount: lineSubtotal,
-			precision: totalsCurrency.minorUnit,
+			currency: USD,
+			scale: totalsCurrency.minorUnit,
 		} );
 
 		const firstImage = images.length ? images[ 0 ] : {};
@@ -203,6 +209,7 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 
 		return (
 			<tr
+				data-cart-item-key={ lineItem.key }
 				className={ clsx(
 					'wc-block-cart-items__row',
 					cartItemClassNameFilter,
@@ -244,15 +251,7 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 							name={ name }
 							permalink={ permalink }
 						/>
-						{ showBackorderBadge ? (
-							<ProductBackorderBadge />
-						) : (
-							!! lowStockRemaining && (
-								<ProductLowStockBadge
-									lowStockRemaining={ lowStockRemaining }
-								/>
-							)
-						) }
+						{ showBackorderBadge && <ProductBackorderBadge /> }
 
 						<div className="wc-block-cart-item__prices">
 							<ProductPrice
@@ -268,15 +267,6 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 								format={ subtotalPriceFormat }
 							/>
 						</div>
-
-						<ProductSaleBadge
-							currency={ priceCurrency }
-							saleAmount={ getAmountFromRawPrice(
-								saleAmountSingle,
-								priceCurrency
-							) }
-							format={ saleBadgePriceFormat }
-						/>
 
 						<ProductMetadata
 							shortDescription={ shortDescription }
@@ -341,7 +331,7 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 									} }
 									disabled={ isPendingDelete }
 								>
-									{ __( 'Remove item', 'woocommerce' ) }
+									<Icon icon={ trash } size={ 24 } />
 								</button>
 							) }
 						</div>
@@ -352,19 +342,14 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 						<ProductPrice
 							currency={ totalsCurrency }
 							format={ productPriceFormat }
-							price={ subtotalPrice.getAmount() }
+							price={ toSnapshot( subtotalPrice ).amount }
 						/>
 
-						{ quantity > 1 && (
-							<ProductSaleBadge
-								currency={ priceCurrency }
-								saleAmount={ getAmountFromRawPrice(
-									saleAmount,
-									priceCurrency
-								) }
-								format={ saleBadgePriceFormat }
-							/>
-						) }
+						<ProductSaleBadge
+							currency={ priceCurrency }
+							saleAmount={ saleAmountSingle * quantity }
+							format={ saleBadgePriceFormat }
+						/>
 					</div>
 				</td>
 			</tr>

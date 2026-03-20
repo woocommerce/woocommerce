@@ -124,6 +124,9 @@
 			"@woocommerce/stores/woocommerce/product-data": [
 				"assets/js/base/stores/woocommerce/product-data"
 			],
+			"@woocommerce/stores/woocommerce/products": [
+				"assets/js/base/stores/woocommerce/products"
+			],
 			"@woocommerce/type-defs/*": [
 				"assets/js/types/type-defs/*"
 			],
@@ -153,6 +156,9 @@
 			],
 			"@woocommerce/sanitize": [
 				"node_modules/@woocommerce/sanitize/src/index.ts"
+			],
+			"dinero.js/currencies": [
+				"node_modules/dinero.js/dist/esm/currencies/index.d.ts"
 			],
 		}
 	}
