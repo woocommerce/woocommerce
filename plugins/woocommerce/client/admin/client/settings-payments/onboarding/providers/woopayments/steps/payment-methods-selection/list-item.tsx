@@ -136,6 +136,14 @@ export const PaymentMethodListItem = ( {
 							<div className="woocommerce-list__item-text">
 								<span className="woocommerce-list__item-title">
 									{ method.title }
+									{ method.notice?.badge && (
+										<span
+											className="woocommerce-list__item-notice-badge"
+											data-testid="payment-method-notice-badge"
+										>
+											{ method.notice.badge }
+										</span>
+									) }
 								</span>
 								<span
 									className="woocommerce-list__item-content"
@@ -196,6 +204,8 @@ export const PaymentMethodListItem = ( {
 				( paymentMethodsState[ method.id ] ?? false ) && (
 					<div
 						className="woocommerce-list__item-notice-info"
+						role="status"
+						aria-live="polite"
 						data-testid="payment-method-notice-warning"
 					>
 						<Icon icon={ infoIcon } size={ 24 } />

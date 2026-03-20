@@ -1146,7 +1146,7 @@ class PaymentGateway {
 				$standard_details['notice']['link_text'] = sanitize_text_field( $notice['link_text'] );
 			}
 
-			if ( ! empty( $notice['link_url'] ) && wc_is_valid_url( $notice['link_url'] ) ) {
+			if ( ! empty( $notice['link_url'] ) && is_string( $notice['link_url'] ) && wc_is_valid_url( $notice['link_url'] ) ) {
 				$standard_details['notice']['link_url'] = sanitize_url( $notice['link_url'] );
 			}
 		}

@@ -179,8 +179,8 @@ describe( 'PaymentMethodListItem', () => {
 			);
 
 			expect(
-				screen.getAllByText( 'Warning message.' ).length
-			).toBeGreaterThan( 0 );
+				screen.getByText( 'Warning message.' )
+			).toBeInTheDocument();
 			expect(
 				screen.queryByRole( 'link', { name: /click here/i } )
 			).not.toBeInTheDocument();
