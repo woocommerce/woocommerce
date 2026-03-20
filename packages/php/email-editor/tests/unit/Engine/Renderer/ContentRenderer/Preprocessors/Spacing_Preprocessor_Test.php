@@ -733,10 +733,9 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 		$this->assertArrayNotHasKey( 'container-padding-left', $post_content['email_attrs'] );
 		$this->assertArrayNotHasKey( 'container-padding-right', $post_content['email_attrs'] );
 
-		// Normal paragraph should get container padding only (root padding is
-		// subsumed by the root-level container's own padding).
-		$this->assertArrayNotHasKey( 'root-padding-left', $paragraph['email_attrs'] );
-		$this->assertArrayNotHasKey( 'root-padding-right', $paragraph['email_attrs'] );
+		// Normal paragraph should get both root and container padding.
+		$this->assertEquals( '10px', $paragraph['email_attrs']['root-padding-left'] );
+		$this->assertEquals( '10px', $paragraph['email_attrs']['root-padding-right'] );
 		$this->assertEquals( '20px', $paragraph['email_attrs']['container-padding-left'] );
 		$this->assertEquals( '20px', $paragraph['email_attrs']['container-padding-right'] );
 
@@ -797,97 +796,6 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 		// Paragraph inside post-content should get container padding.
 		$this->assertEquals( '25px', $paragraph['email_attrs']['container-padding-left'] );
 		$this->assertEquals( '25px', $paragraph['email_attrs']['container-padding-right'] );
-	}
-
-	/**
-	 * Test nested groups (root 20px → content 10px → post-content) accumulate container padding
-	 * and subsume root padding.
-	 */
-	public function testItAccumulatesContainerPaddingFromNestedGroups(): void {
-		$blocks = array(
-			array(
-				'blockName'   => 'core/group',
-				'attrs'       => array(
-					'style' => array(
-						'spacing' => array(
-							'padding' => array(
-								'left'  => '20px',
-								'right' => '20px',
-							),
-						),
-					),
-				),
-				'innerBlocks' => array(
-					array(
-						'blockName'   => 'core/paragraph',
-						'attrs'       => array(),
-						'innerBlocks' => array(),
-					),
-					array(
-						'blockName'   => 'core/group',
-						'attrs'       => array(
-							'style' => array(
-								'spacing' => array(
-									'padding' => array(
-										'left'  => '10px',
-										'right' => '10px',
-									),
-								),
-							),
-						),
-						'innerBlocks' => array(
-							array(
-								'blockName'   => 'core/post-content',
-								'attrs'       => array(),
-								'innerBlocks' => array(
-									array(
-										'blockName'   => 'core/paragraph',
-										'attrs'       => array(),
-										'innerBlocks' => array(),
-									),
-									array(
-										'blockName'   => 'core/group',
-										'attrs'       => array( 'align' => 'full' ),
-										'innerBlocks' => array(),
-									),
-								),
-							),
-						),
-					),
-				),
-			),
-		);
-
-		$result        = $this->preprocessor->preprocess( $blocks, $this->layout, $this->styles );
-		$root_group    = $result[0];
-		$site_title    = $root_group['innerBlocks'][0];
-		$content_group = $root_group['innerBlocks'][1];
-		$post_content  = $content_group['innerBlocks'][0];
-		$user_para     = $post_content['innerBlocks'][0];
-		$user_full     = $post_content['innerBlocks'][1];
-
-		// Both groups should have suppress-horizontal-padding.
-		$this->assertTrue( $root_group['email_attrs']['suppress-horizontal-padding'] );
-		$this->assertTrue( $content_group['email_attrs']['suppress-horizontal-padding'] );
-
-		// Root group subsumed root padding — site-title should get
-		// only container padding (20px from root group), no root padding.
-		$this->assertArrayNotHasKey( 'root-padding-left', $site_title['email_attrs'] );
-		$this->assertArrayNotHasKey( 'root-padding-right', $site_title['email_attrs'] );
-		$this->assertEquals( '20px', $site_title['email_attrs']['container-padding-left'] );
-		$this->assertEquals( '20px', $site_title['email_attrs']['container-padding-right'] );
-
-		// User paragraph inside post-content: container padding from
-		// inner group (10px) only — root group's 20px was replaced
-		// during recursion. No root padding (subsumed).
-		$this->assertArrayNotHasKey( 'root-padding-left', $user_para['email_attrs'] );
-		$this->assertArrayNotHasKey( 'root-padding-right', $user_para['email_attrs'] );
-		$this->assertEquals( '10px', $user_para['email_attrs']['container-padding-left'] );
-		$this->assertEquals( '10px', $user_para['email_attrs']['container-padding-right'] );
-
-		// Alignfull block skips everything.
-		$this->assertArrayNotHasKey( 'root-padding-left', $user_full['email_attrs'] );
-		$this->assertArrayNotHasKey( 'container-padding-left', $user_full['email_attrs'] );
 	}
 
 	/**

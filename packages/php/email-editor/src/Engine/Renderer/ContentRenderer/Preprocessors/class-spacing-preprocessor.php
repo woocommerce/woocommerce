@@ -167,7 +167,6 @@ class Spacing_Preprocessor implements Preprocessor {
 			// manage their own layout.
 			$children_apply         = false;
 			$children_container_pad = $container_padding;
-			$children_root_padding  = $root_padding;
 			if ( $is_root_level && $is_container && ! $has_own_padding ) {
 				$children_apply = true;
 			} elseif ( $apply_root_padding && in_array( $block_name, $post_content_block_names, true ) ) {
@@ -196,15 +195,9 @@ class Spacing_Preprocessor implements Preprocessor {
 				// This container also should not receive root padding itself
 				// (it delegates everything to children).
 				unset( $block['email_attrs']['root-padding-left'], $block['email_attrs']['root-padding-right'] );
-
-				// Root padding is subsumed by this container's own padding —
-				// they represent the same visual inset from the email edge.
-				// Children should not receive root padding separately on top
-				// of the container padding.
-				$children_root_padding = array();
 			}
 
-			$block['innerBlocks']  = $this->add_block_gaps( $block['innerBlocks'] ?? array(), $gap, $block, $children_root_padding, $children_apply, $children_container_pad );
+			$block['innerBlocks']  = $this->add_block_gaps( $block['innerBlocks'] ?? array(), $gap, $block, $root_padding, $children_apply, $children_container_pad );
 			$parsed_blocks[ $key ] = $block;
 		}
 

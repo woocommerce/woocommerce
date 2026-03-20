@@ -262,18 +262,17 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 
 		$second_result = $this->renderer->preprocess_parsed_blocks( $user_blocks );
 
-		// User blocks should NOT have root padding — it is subsumed by the
-		// root-level container's own padding (they represent the same inset).
-		$this->assertArrayNotHasKey( 'root-padding-left', $second_result[0]['email_attrs'] );
-		$this->assertArrayNotHasKey( 'root-padding-right', $second_result[0]['email_attrs'] );
+		// User blocks should have root padding (delegated, not absorbed).
+		$this->assertArrayHasKey( 'root-padding-left', $second_result[0]['email_attrs'] );
+		$this->assertArrayHasKey( 'root-padding-right', $second_result[0]['email_attrs'] );
 
-		// User blocks should have container padding from the template group.
+		// User blocks should also have container padding from the template group.
 		$this->assertArrayHasKey( 'container-padding-left', $second_result[0]['email_attrs'] );
 		$this->assertArrayHasKey( 'container-padding-right', $second_result[0]['email_attrs'] );
 		$this->assertEquals( '20px', $second_result[0]['email_attrs']['container-padding-left'] );
 		$this->assertEquals( '20px', $second_result[0]['email_attrs']['container-padding-right'] );
 
-		// Width should account for container padding.
+		// Width should account for both root and container padding.
 		$this->assertArrayHasKey( 'width', $second_result[0]['email_attrs'] );
 	}
 
@@ -314,131 +313,6 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		// User blocks SHOULD have root padding (template delegated, not absorbed).
 		$this->assertArrayHasKey( 'root-padding-left', $second_result[0]['email_attrs'] );
 		$this->assertArrayHasKey( 'root-padding-right', $second_result[0]['email_attrs'] );
-	}
-
-	/**
-	 * Test nested groups accumulate container padding and subsume root padding
-	 * (root group 20px → content group 10px → post-content = 30px total).
-	 */
-	public function testItAccumulatesContainerPaddingFromNestedGroups(): void {
-		// First pass: nested groups wrapping post-content.
-		$template_blocks = array(
-			array(
-				'blockName'   => 'core/group',
-				'attrs'       => array(
-					'style' => array(
-						'spacing' => array(
-							'padding' => array(
-								'left'  => '20px',
-								'right' => '20px',
-							),
-						),
-					),
-				),
-				'innerBlocks' => array(
-					array(
-						'blockName'   => 'core/group',
-						'attrs'       => array(
-							'style' => array(
-								'spacing' => array(
-									'padding' => array(
-										'left'  => '10px',
-										'right' => '10px',
-									),
-								),
-							),
-						),
-						'innerBlocks' => array(
-							array(
-								'blockName'   => 'core/post-content',
-								'attrs'       => array(),
-								'innerBlocks' => array(),
-							),
-						),
-					),
-				),
-			),
-		);
-
-		$this->renderer->preprocess_parsed_blocks( $template_blocks );
-
-		// Second pass: user blocks.
-		$user_blocks = array(
-			array(
-				'blockName'   => 'core/paragraph',
-				'attrs'       => array(),
-				'innerBlocks' => array(),
-			),
-		);
-
-		$second_result = $this->renderer->preprocess_parsed_blocks( $user_blocks );
-
-		// Root padding should be subsumed (root-level container has own padding).
-		$this->assertArrayNotHasKey( 'root-padding-left', $second_result[0]['email_attrs'] );
-		$this->assertArrayNotHasKey( 'root-padding-right', $second_result[0]['email_attrs'] );
-
-		// Container padding should be accumulated: 20px + 10px = 30px.
-		$this->assertArrayHasKey( 'container-padding-left', $second_result[0]['email_attrs'] );
-		$this->assertEquals( '30px', $second_result[0]['email_attrs']['container-padding-left'] );
-		$this->assertEquals( '30px', $second_result[0]['email_attrs']['container-padding-right'] );
-	}
-
-	/**
-	 * Test non-root container padding preserves root padding
-	 * (root group no padding → content group 10px → post-content).
-	 */
-	public function testItPreservesRootPaddingWithNonRootContainer(): void {
-		// First pass: root group without padding, inner group with padding.
-		$template_blocks = array(
-			array(
-				'blockName'   => 'core/group',
-				'attrs'       => array(),
-				'innerBlocks' => array(
-					array(
-						'blockName'   => 'core/group',
-						'attrs'       => array(
-							'style' => array(
-								'spacing' => array(
-									'padding' => array(
-										'left'  => '10px',
-										'right' => '10px',
-									),
-								),
-							),
-						),
-						'innerBlocks' => array(
-							array(
-								'blockName'   => 'core/post-content',
-								'attrs'       => array(),
-								'innerBlocks' => array(),
-							),
-						),
-					),
-				),
-			),
-		);
-
-		$this->renderer->preprocess_parsed_blocks( $template_blocks );
-
-		// Second pass: user blocks.
-		$user_blocks = array(
-			array(
-				'blockName'   => 'core/paragraph',
-				'attrs'       => array(),
-				'innerBlocks' => array(),
-			),
-		);
-
-		$second_result = $this->renderer->preprocess_parsed_blocks( $user_blocks );
-
-		// Root padding should be preserved (root group has no own padding).
-		$this->assertArrayHasKey( 'root-padding-left', $second_result[0]['email_attrs'] );
-		$this->assertArrayHasKey( 'root-padding-right', $second_result[0]['email_attrs'] );
-
-		// Container padding should be from the inner group (10px).
-		$this->assertArrayHasKey( 'container-padding-left', $second_result[0]['email_attrs'] );
-		$this->assertEquals( '10px', $second_result[0]['email_attrs']['container-padding-left'] );
-		$this->assertEquals( '10px', $second_result[0]['email_attrs']['container-padding-right'] );
 	}
 
 	/**
