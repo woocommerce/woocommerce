@@ -28,6 +28,7 @@
 			&__item {
 				padding: 2 * $gap-smaller 4 * $gap-smaller;
 				border-color: $gray-100;
+				flex-wrap: wrap;
 
 				&:hover {
 					background-color: $white;
@@ -258,6 +259,7 @@
 }
 
 .woocommerce-list__item-notice-warning {
+	flex-basis: 100%;
 	padding: 0 48px 12px;
 
 	.components-notice {
