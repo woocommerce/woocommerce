@@ -652,14 +652,17 @@ class FulfillmentsRenderer {
 
 			if ( empty( $known_keys ) ) {
 				$results = $wpdb->get_col(
-					"SELECT DISTINCT f.entity_id
-					FROM {$fulfillments_table} f
-					INNER JOIN {$meta_table} m ON f.fulfillment_id = m.fulfillment_id
-					WHERE m.meta_key = '_shipping_provider'
-					AND m.meta_value IS NOT NULL
-					AND m.meta_value != ''
-					AND f.date_deleted IS NULL
-					AND m.date_deleted IS NULL"
+					$wpdb->prepare(
+						"SELECT DISTINCT f.entity_id
+						FROM {$fulfillments_table} f
+						INNER JOIN {$meta_table} m ON f.fulfillment_id = m.fulfillment_id
+						WHERE m.meta_key = %s
+						AND m.meta_value IS NOT NULL
+						AND m.meta_value != ''
+						AND f.date_deleted IS NULL
+						AND m.date_deleted IS NULL",
+						'_shipping_provider'
+					)
 				);
 			} else {
 				$placeholders = implode( ',', array_fill( 0, count( $known_keys ), '%s' ) );
