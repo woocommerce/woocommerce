@@ -25,7 +25,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 <table class="wc-shipping-classes widefat">
 	<thead>
 		<tr>
-			<?php foreach ( $shipping_provider_columns as $class => $heading ) : ?>
+			<?php foreach ( $shipping_provider_columns as $class => $heading ) : // @phpstan-ignore variable.undefined ?>
 				<th class="<?php echo esc_attr( $class ); ?>"><?php echo esc_html( $heading ); ?></th>
 			<?php endforeach; ?>
 			<th />
