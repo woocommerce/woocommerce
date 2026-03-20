@@ -4039,9 +4039,9 @@ class WC_AJAX {
 		$meta_table         = $wpdb->prefix . 'wc_order_fulfillment_meta';
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$count = $wpdb->get_var(
+		$exists = $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT COUNT(*) FROM {$fulfillments_table} f
+				"SELECT 1 FROM {$fulfillments_table} f
 				INNER JOIN {$meta_table} m ON f.fulfillment_id = m.fulfillment_id
 				WHERE m.meta_key = '_shipping_provider'
 				AND m.meta_value = %s
@@ -4053,7 +4053,7 @@ class WC_AJAX {
 			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		);
 
-		return (int) $count > 0;
+		return null !== $exists;
 	}
 
 	/**
