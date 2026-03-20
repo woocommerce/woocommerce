@@ -3,7 +3,7 @@
  */
 import { decodeEntities } from '@wordpress/html-entities';
 import { type RecommendedPaymentMethod } from '@woocommerce/data';
-import { ToggleControl } from '@wordpress/components';
+import { ExternalLink, Notice, ToggleControl } from '@wordpress/components';
 import { useRef } from '@wordpress/element';
 
 /**
@@ -103,6 +103,14 @@ export const PaymentMethodListItem = ( {
 						<div className="woocommerce-list__item-text">
 							<span className="woocommerce-list__item-title">
 								{ method.title }
+								{ method.notice?.badge && (
+									<span
+										className="woocommerce-list__item-notice-badge"
+										data-testid="payment-method-notice-badge"
+									>
+										{ method.notice.badge }
+									</span>
+								) }
 							</span>
 							<span
 								className="woocommerce-list__item-content"
@@ -183,6 +191,28 @@ export const PaymentMethodListItem = ( {
 					</div>
 				</div>
 			</div>
+			{ method.notice?.message &&
+				( paymentMethodsState[ method.id ] ?? false ) && (
+					<div
+						className="woocommerce-list__item-notice-warning"
+						data-testid="payment-method-notice-warning"
+					>
+						<Notice status="warning" isDismissible={ false }>
+							<span>{ method.notice.message }</span>
+							{ method.notice.link_url &&
+								method.notice.link_text && (
+									<>
+										{ ' ' }
+										<ExternalLink
+											href={ method.notice.link_url }
+										>
+											{ method.notice.link_text }
+										</ExternalLink>
+									</>
+								) }
+						</Notice>
+					</div>
+				) }
 		</div>
 	);
 };
