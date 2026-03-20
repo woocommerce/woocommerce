@@ -8,7 +8,7 @@
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Utilities\OrderUtil;
-use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentUtils;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentUtils;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -451,54 +451,6 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		);
 
 		return floatval( $total );
-	}
-
-	/**
-	 * Get the total tax refunded.
-	 *
-	 * @param  WC_Order $order Order object.
-	 * @return float
-	 */
-	public function get_total_tax_refunded( $order ) {
-		global $wpdb;
-
-		$total = $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT SUM( order_itemmeta.meta_value )
-				FROM {$wpdb->prefix}woocommerce_order_itemmeta AS order_itemmeta
-				INNER JOIN $wpdb->posts AS posts ON ( posts.post_type = 'shop_order_refund' AND posts.post_parent = %d )
-				INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON ( order_items.order_id = posts.ID AND order_items.order_item_type = 'tax' )
-				WHERE order_itemmeta.order_item_id = order_items.order_item_id
-				AND order_itemmeta.meta_key IN ('tax_amount', 'shipping_tax_amount')",
-				$order->get_id()
-			)
-		) ?? 0;
-
-		return abs( $total );
-	}
-
-	/**
-	 * Get the total shipping refunded.
-	 *
-	 * @param  WC_Order $order Order object.
-	 * @return float
-	 */
-	public function get_total_shipping_refunded( $order ) {
-		global $wpdb;
-
-		$total = $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT SUM( order_itemmeta.meta_value )
-				FROM {$wpdb->prefix}woocommerce_order_itemmeta AS order_itemmeta
-				INNER JOIN $wpdb->posts AS posts ON ( posts.post_type = 'shop_order_refund' AND posts.post_parent = %d )
-				INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON ( order_items.order_id = posts.ID AND order_items.order_item_type = 'shipping' )
-				WHERE order_itemmeta.order_item_id = order_items.order_item_id
-				AND order_itemmeta.meta_key IN ('cost')",
-				$order->get_id()
-			)
-		) ?? 0;
-
-		return abs( $total );
 	}
 
 	/**
@@ -1214,69 +1166,22 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 *
 	 * @param array $order_ids List of order IDS to prime caches for.
 	 * @param array $query_vars Original query arguments.
+	 * @return void
 	 */
 	public function prime_caches_for_orders( $order_ids, $query_vars ) {
-		// Lets do some cache hydrations so that we don't have to fetch data from DB for every order.
 		$this->prime_raw_meta_cache_for_orders( $order_ids, $query_vars );
-		$this->prime_refund_caches_for_order( $order_ids, $query_vars );
 		$this->prime_order_item_caches_for_orders( $order_ids, $query_vars );
-	}
 
-	/**
-	 * Prime refund cache for orders.
-	 *
-	 * @param array $order_ids  Order Ids to prime cache for.
-	 * @param array $query_vars Query vars for the query.
-	 */
-	private function prime_refund_caches_for_order( $order_ids, $query_vars ) {
-		if ( ! isset( $query_vars['type'] ) || ! ( 'shop_order' === $query_vars['type'] ) ) {
-			return;
-		}
-		if ( isset( $query_vars['fields'] ) && 'all' !== $query_vars['fields'] ) {
-			if ( is_array( $query_vars['fields'] ) && ! in_array( 'refunds', $query_vars['fields'], true ) ) {
-				return;
-			}
-		}
-		$cache_keys_mapping = array();
-		foreach ( $order_ids as $order_id ) {
-			$cache_keys_mapping[ $order_id ] = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refunds' . $order_id;
-		}
-		$non_cached_ids = array();
-		$cache_values   = wc_cache_get_multiple( array_values( $cache_keys_mapping ), 'orders' );
-		foreach ( $order_ids as $order_id ) {
-			if ( false === $cache_values[ $cache_keys_mapping[ $order_id ] ] ) {
-				$non_cached_ids[] = $order_id;
-			}
-		}
-		if ( empty( $non_cached_ids ) ) {
+		// The following priming methods only apply to shop_order queries.
+		$order_type = $query_vars['type'] ?? $query_vars['post_type'] ?? '';
+		$order_type = is_array( $order_type ) ? $order_type : array( $order_type );
+		if ( ! in_array( 'shop_order', $order_type, true ) ) {
 			return;
 		}
 
-		$refunds       = wc_get_orders(
-			array(
-				'type'            => 'shop_order_refund',
-				'post_parent__in' => $non_cached_ids,
-				'limit'           => - 1,
-			)
-		);
-		$order_refunds = array_reduce(
-			$refunds,
-			function ( $order_refunds_array, WC_Order_Refund $refund ) {
-				if ( ! isset( $order_refunds_array[ $refund->get_parent_id() ] ) ) {
-					$order_refunds_array[ $refund->get_parent_id() ] = array();
-				}
-				$order_refunds_array[ $refund->get_parent_id() ][] = $refund;
-				return $order_refunds_array;
-			},
-			array()
-		);
-		foreach ( $non_cached_ids as $order_id ) {
-			$refunds = array();
-			if ( isset( $order_refunds[ $order_id ] ) ) {
-				$refunds = $order_refunds[ $order_id ];
-			}
-			wp_cache_set( $cache_keys_mapping[ $order_id ], $refunds, 'orders' );
-		}
+		$this->prime_refund_caches_for_orders( $order_ids, $query_vars );
+		$this->prime_refund_total_caches_for_orders( $order_ids, $query_vars );
+		$this->prime_needs_processing_transients( $order_ids, $query_vars );
 	}
 
 	/**
@@ -1318,17 +1223,13 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 				ORDER BY post_id"
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		);
-		$raw_meta_data_collection = array_reduce(
-			$raw_meta_data_array,
-			function ( $collection, $raw_meta_data ) {
-				if ( ! isset( $collection[ $raw_meta_data->object_id ] ) ) {
-					$collection[ $raw_meta_data->object_id ] = array();
-				}
-				$collection[ $raw_meta_data->object_id ][] = $raw_meta_data;
-				return $collection;
-			},
-			array()
-		);
+		$raw_meta_data_collection = array();
+		foreach ( $raw_meta_data_array as $raw_meta_data ) {
+			if ( ! isset( $raw_meta_data_collection[ $raw_meta_data->object_id ] ) ) {
+				$raw_meta_data_collection[ $raw_meta_data->object_id ] = array();
+			}
+			$raw_meta_data_collection[ $raw_meta_data->object_id ][] = $raw_meta_data;
+		}
 		WC_Order::prime_raw_meta_data_cache( $raw_meta_data_collection, 'orders' );
 	}
 

@@ -60,9 +60,12 @@ class Process_Manager {
 		Border_Style_Postprocessor $border_style_postprocessor
 	) {
 		$this->register_preprocessor( $cleanup_preprocessor );
+		// Spacing must run before Width: it sets root-padding-left/right in
+		// email_attrs, which the Width preprocessor reads to subtract root
+		// padding only from blocks that actually receive it.
+		$this->register_preprocessor( $spacing_preprocessor );
 		$this->register_preprocessor( $blocks_width_preprocessor );
 		$this->register_preprocessor( $typography_preprocessor );
-		$this->register_preprocessor( $spacing_preprocessor );
 		$this->register_preprocessor( $quote_preprocessor );
 		$this->register_postprocessor( $highlighting_postprocessor );
 		$this->register_postprocessor( $border_style_postprocessor );
@@ -72,9 +75,9 @@ class Process_Manager {
 	/**
 	 * Method to preprocess blocks
 	 *
-	 * @param array                                                                                                             $parsed_blocks Parsed blocks.
-	 * @param array{contentSize: string, wideSize?: string, allowEditing?: bool, allowCustomContentAndWideSize?: bool}          $layout Layout.
-	 * @param array{spacing: array{padding: array{bottom: string, left: string, right: string, top: string}, blockGap: string}} $styles Styles.
+	 * @param array                                                                                                               $parsed_blocks Parsed blocks.
+	 * @param array{contentSize: string, wideSize?: string, allowEditing?: bool, allowCustomContentAndWideSize?: bool}            $layout Layout.
+	 * @param array{spacing: array{padding: array{bottom: string, left?: string, right?: string, top: string}, blockGap: string}} $styles Styles.
 	 * @return array
 	 */
 	public function preprocess( array $parsed_blocks, array $layout, array $styles ): array {

@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Removed enqueuing of custom RichText package that was needed for WordPress < 6.8

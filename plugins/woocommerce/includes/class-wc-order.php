@@ -2192,7 +2192,7 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * Utilizes object cache to store refunds to avoid extra DB calls.
 	 *
-	 * @see WC_Order_Data_Store_CPT::prime_refund_caches_for_order()
+	 * @see Abstract_WC_Order_Data_Store_CPT::prime_refund_caches_for_orders()
 	 * @since 2.2
 	 *
 	 * @return WC_Order_Refund[]

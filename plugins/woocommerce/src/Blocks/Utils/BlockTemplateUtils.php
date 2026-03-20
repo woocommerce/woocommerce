@@ -247,8 +247,8 @@ class BlockTemplateUtils {
 		$template->area           = self::get_block_template_area( $template->slug, $template_type );
 
 		/*
-		* Run the block hooks algorithm introduced in WP 6.4 on the template content.
-		*/
+		 * Run the block hooks algorithm introduced in WP 6.4 on the template content.
+		 */
 		if ( function_exists( 'inject_ignored_hooked_blocks_metadata_attributes' ) ) {
 			$before_block_visitor = '_inject_theme_attribute_in_template_part_block';
 			$after_block_visitor  = null;
@@ -328,10 +328,10 @@ class BlockTemplateUtils {
 		);
 
 		/*
-		* This may return the blockified directory for wp_templates.
-		* At the moment every template file has a corresponding blockified file.
-		* If we decide to add a new template file that doesn't, we will need to update this logic.
-		*/
+		 * This may return the blockified directory for `wp_templates`.
+		 * At the moment every template file has a corresponding blockified file.
+		 * If we decide to add a new template file that doesn't, we will need to update this logic.
+		 */
 		$directory = self::get_templates_directory( $template_type );
 
 		$path_list = array_map(
@@ -714,32 +714,60 @@ class BlockTemplateUtils {
 	 * @return \WP_Block_Template[] An array of found templates.
 	 */
 	public static function get_block_templates_from_db( $slugs = array(), $template_type = 'wp_template' ) {
-		$check_query_args = array(
-			'post_type'      => $template_type,
-			'posts_per_page' => -1,
-			'no_found_rows'  => true,
-			'tax_query'      => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
-				array(
-					'taxonomy' => 'wp_theme',
-					'field'    => 'name',
-					'terms'    => array( self::DEPRECATED_PLUGIN_SLUG, self::PLUGIN_SLUG, get_stylesheet() ),
-				),
-			),
-		);
+		static $request_level_cache = array();
 
-		if ( is_array( $slugs ) && count( $slugs ) > 0 ) {
-			$check_query_args['post_name__in'] = $slugs;
+		// Optimization note: first query, which optimized for fetching IDs, to minimize temporary/filesort overhead.
+		$theme = get_stylesheet();
+		$ids   = wp_cache_get( $template_type . '-ids', 'woocommerce_blocks' );
+		if ( ! isset( $ids[ $theme ] ) ) {
+			$ids = false === $ids ? array() : $ids;
+			// 'post__not_in' directs the query to use the `type_status_date` index on the posts table. Omitting this may
+			// impact index usage on some systems and result in `Using join buffer (flat, BNL join)`.
+			// As the table grows, the number of template type entries stays small, which helps maintain strong query performance.
+			$ids[ $theme ] = ( new \WP_Query(
+				array(
+					'post_type'      => $template_type,
+					'post__not_in'   => array( 0 ),
+					'posts_per_page' => -1,
+					'fields'         => 'ids',
+					'tax_query'      => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+						array(
+							'taxonomy' => 'wp_theme',
+							'field'    => 'name',
+							'terms'    => array( self::DEPRECATED_PLUGIN_SLUG, self::PLUGIN_SLUG, $theme ),
+						),
+					),
+				)
+			) )->posts;
+			// 12 hours is half of default nonce lifetime, if out of sync, templates operating with nonce will keep running.
+			wp_cache_set( $template_type . '-ids', $ids, 'woocommerce_blocks', 12 * HOUR_IN_SECONDS );
+			$request_level_cache[ $template_type ][ $theme ] = null;
 		}
 
-		$check_query         = new \WP_Query( $check_query_args );
-		$saved_woo_templates = $check_query->posts;
+		// Optimization note: second query, which optimized for fetching templates data with caches priming API.
+		if ( null === ( $request_level_cache[ $template_type ][ $theme ] ?? null ) ) {
+			$request_level_cache[ $template_type ][ $theme ] = array();
+			if ( ! empty( $ids[ $theme ] ) ) {
+				// Prime caches to reduce future queries.
+				_prime_post_caches( $ids[ $theme ], false, false );
+				$request_level_cache[ $template_type ][ $theme ] = array_filter( array_map( 'get_post', $ids[ $theme ] ) );
+			}
+		}
 
-		return array_map(
-			function ( $saved_woo_template ) {
-				return self::build_template_result_from_post( $saved_woo_template );
-			},
-			$saved_woo_templates
-		);
+		// Optimization note: populate template objects; optimized for subsequent calls, without spawning consequent SQLs.
+		$saved_templates = $request_level_cache[ $template_type ][ $theme ];
+		if ( ! empty( $saved_templates ) && is_array( $slugs ) && array() !== $slugs ) {
+			$slugs           = array_map( 'sanitize_title', $slugs );
+			$saved_templates = array_filter( $saved_templates, fn( $template ) => in_array( $template->post_name, $slugs, true ) );
+		}
+		if ( ! empty( $saved_templates ) ) {
+			$block_templates = array_map( fn( $template ) => self::build_template_result_from_post( $template ), $saved_templates );
+			$block_templates = array_values( array_filter( $block_templates, fn( $template ) => $template instanceof \WP_Block_Template ) );
+
+			return $block_templates;
+		}
+
+		return array();
 	}
 
 	/**

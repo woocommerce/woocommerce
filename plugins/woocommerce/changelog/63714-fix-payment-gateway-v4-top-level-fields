@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Accept top-level enabled, title, description, and order fields in the v4 payment gateway settings PUT endpoint. This aligns the PUT shape with the GET response, enabling @wordpress/core-data to track dirty state correctly. The values parameter remains supported for backwards compatibility.
