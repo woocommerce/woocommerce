@@ -8336,6 +8336,30 @@ table.bar_chart {
 	.wc-action-button-group .wc-action-button {
 		min-height: 0 !important;
 	}
+
+	// Order actions: select + button overflow container due to WP 7.0 select margins.
+	.order_actions #actions select {
+		width: calc(100% - 32px);
+	}
+
+	// Order actions reload button: icon line-height must match WP 7.0 button height.
+	.button.wc-reload {
+		&::after {
+			line-height: 40px;
+		}
+	}
+
+	#poststuff #woocommerce-order-actions .inside button {
+		margin: 0;
+	}
+
+	// Order date hour/minute inputs: WP 7.0 padding pushes stepper controls inward.
+	#order_data .order_data_column .form-field-wide {
+		input.hour,
+		input.minute {
+			padding-right: 0;
+		}
+	}
 }
 
 // Tablenav: WP 7.0 tablenav uses compact 32px sizing for native selects.
