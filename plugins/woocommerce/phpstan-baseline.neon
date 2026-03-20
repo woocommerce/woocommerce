@@ -17707,12 +17707,6 @@ parameters:
 			path: includes/data-stores/class-wc-order-data-store-cpt.php
 
 		-
-			message: '#^Cannot access offset non\-falsy\-string on array\|bool\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: includes/data-stores/class-wc-order-data-store-cpt.php
-
-		-
 			message: '#^Cannot access offset string on array\|bool\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
@@ -17761,19 +17755,7 @@ parameters:
 			path: includes/data-stores/class-wc-order-data-store-cpt.php
 
 		-
-			message: '#^Method WC_Order_Data_Store_CPT\:\:prime_caches_for_orders\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/data-stores/class-wc-order-data-store-cpt.php
-
-		-
 			message: '#^Method WC_Order_Data_Store_CPT\:\:prime_raw_meta_cache_for_orders\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/data-stores/class-wc-order-data-store-cpt.php
-
-		-
-			message: '#^Method WC_Order_Data_Store_CPT\:\:prime_refund_caches_for_order\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: includes/data-stores/class-wc-order-data-store-cpt.php
@@ -17857,12 +17839,6 @@ parameters:
 			path: includes/data-stores/class-wc-order-data-store-cpt.php
 
 		-
-			message: '#^Parameter \#1 \$input of function array_reduce expects array\<WC_Order\>, array\<WC_Order\>\|stdClass given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/data-stores/class-wc-order-data-store-cpt.php
-
-		-
 			message: '#^Parameter \#1 \$post_id of function get_post_meta expects int, bool\|int given\.$#'
 			identifier: argument.type
 			count: 5
@@ -17888,12 +17864,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#2 \$array of function implode expects array\<string\>, array\<array\|string\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/data-stores/class-wc-order-data-store-cpt.php
-
-		-
-			message: '#^Parameter \#2 \$callback of function array_reduce expects callable\(mixed, WC_Order\)\: mixed, Closure\(mixed, WC_Order_Refund\)\: mixed given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/data-stores/class-wc-order-data-store-cpt.php

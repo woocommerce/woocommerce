@@ -209,9 +209,9 @@ class FulfillmentUtils {
 	 */
 	public static function get_tracking_info_html( Fulfillment $fulfillment ): string {
 		$tracking_html   = '';
-		$tracking_url    = $fulfillment->get_meta( '_tracking_url', true );
-		$tracking_number = $fulfillment->get_meta( '_tracking_number', true );
-		if ( ! empty( $tracking_url ) && ! empty( $tracking_number ) ) {
+		$tracking_url    = $fulfillment->get_tracking_url();
+		$tracking_number = $fulfillment->get_tracking_number();
+		if ( null !== $tracking_url && null !== $tracking_number ) {
 			$tracking_html .= '<a href="' . esc_url( $tracking_url ) . '" target="_blank" rel="noopener noreferrer">';
 			$tracking_html .= esc_html( $tracking_number );
 			$tracking_html .= '</a>';

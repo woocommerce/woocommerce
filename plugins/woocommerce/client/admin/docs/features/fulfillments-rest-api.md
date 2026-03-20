@@ -652,6 +652,8 @@ Metadata objects have the following structure:
 -   `_is_locked` - Whether the fulfillment is locked for merchant modification
 -   `_lock_message` - What to show as the lock message for a locked fulfillment
 
+**Note:** The tracking number, shipping provider, and tracking URL metadata keys have typed convenience methods on the `Fulfillment` object: `get_tracking_number()` / `set_tracking_number()`, `get_shipping_provider()` / `set_shipping_provider()`, and `get_tracking_url()` / `set_tracking_url()`. These are recommended over direct `get_meta()` / `update_meta_data()` calls for better type safety and IDE autocompletion.
+
 ### Items Structure
 
 The `_items` metadata must be an array of objects with the following structure:
