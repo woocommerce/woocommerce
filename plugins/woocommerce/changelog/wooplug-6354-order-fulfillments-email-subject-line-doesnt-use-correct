@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix fulfillment created email subject and heading to use correct plural form when shipment contains multiple items.
