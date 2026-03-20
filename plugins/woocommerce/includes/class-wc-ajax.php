@@ -3844,6 +3844,11 @@ class WC_AJAX {
 	 * @since 10.7.0
 	 */
 	public static function shipping_providers_save_changes(): void {
+		if ( ! \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'fulfillments' ) ) {
+			wp_send_json_error( 'feature_disabled' );
+			wp_die();
+		}
+
 		if ( ! isset( $_POST['wc_shipping_providers_nonce'], $_POST['changes'] ) ) {
 			wp_send_json_error( 'missing_fields' );
 			wp_die();
