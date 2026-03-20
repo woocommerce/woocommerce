@@ -4,6 +4,7 @@
 import { Button, ExternalLink, Flex, TextControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { useEffect, useRef, useState } from 'react';
+import { useInstanceId } from '@wordpress/compose';
 import { isEmpty } from 'lodash';
 import apiFetch from '@wordpress/api-fetch';
 import { speak } from '@wordpress/a11y';
@@ -58,6 +59,18 @@ export default function ShipmentTrackingNumberForm() {
 	const [ isLoading, setIsLoading ] = useState( false );
 	const inputRef = useRef< HTMLInputElement >( null );
 	const { order } = useFulfillmentContext();
+	const trackingNumberErrorId = useInstanceId(
+		ShipmentTrackingNumberForm,
+		'tracking-number-error'
+	) as string;
+	const findingStatusId = useInstanceId(
+		ShipmentTrackingNumberForm,
+		'finding-status'
+	) as string;
+	const providerAmbiguityNoticeId = useInstanceId(
+		ShipmentTrackingNumberForm,
+		'provider-ambiguity-notice'
+	) as string;
 	const {
 		trackingNumber,
 		setTrackingNumber,
@@ -200,7 +213,7 @@ export default function ShipmentTrackingNumberForm() {
 							} }
 							aria-invalid={ !! error }
 							aria-describedby={
-								error ? 'tracking-number-error' : undefined
+								error ? trackingNumberErrorId : undefined
 							}
 							autoComplete="off"
 							__next40pxDefaultSize
@@ -220,13 +233,13 @@ export default function ShipmentTrackingNumberForm() {
 							isBusy={ isLoading }
 							onClick={ handleTrackingNumberLookup }
 							aria-describedby={
-								isLoading ? 'finding-status' : undefined
+								isLoading ? findingStatusId : undefined
 							}
 							__next40pxDefaultSize
 						/>
 						{ isLoading && (
 							<span
-								id="finding-status"
+								id={ findingStatusId }
 								className="screen-reader-text"
 							>
 								{ __(
@@ -292,7 +305,7 @@ export default function ShipmentTrackingNumberForm() {
 							<Flex direction={ 'column' } gap={ 0 }>
 								<p
 									className="woocommerce-fulfillment-description"
-									id="provider-ambiguity-notice"
+									id={ providerAmbiguityNoticeId }
 								>
 									{ __(
 										'Not your provider?',
@@ -315,7 +328,9 @@ export default function ShipmentTrackingNumberForm() {
 											'polite'
 										);
 									} }
-									aria-describedby="provider-ambiguity-notice"
+									aria-describedby={
+										providerAmbiguityNoticeId
+									}
 								>
 									{ __(
 										'Select your provider manually',
@@ -344,11 +359,7 @@ export default function ShipmentTrackingNumberForm() {
 				</>
 			) }
 			{ error && (
-				<div
-					id="tracking-number-error"
-					role="alert"
-					aria-live="assertive"
-				>
+				<div id={ trackingNumberErrorId } role="alert">
 					<ErrorLabel error={ error } />
 				</div>
 			) }

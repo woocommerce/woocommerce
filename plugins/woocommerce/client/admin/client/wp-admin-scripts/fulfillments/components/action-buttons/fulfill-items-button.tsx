@@ -69,7 +69,6 @@ export default function FulfillItemsButton( {
 				isBusy={ isExecuting }
 				disabled={ isExecuting }
 				aria-describedby={ descriptionId }
-				aria-live="polite"
 			>
 				{ isExecuting
 					? __( 'Fulfilling…', 'woocommerce' )

@@ -32,6 +32,8 @@ const FulfillmentDrawer: React.FC< Props > = ( {
 
 	// Focus management when drawer opens/closes
 	useEffect( () => {
+		let rafId1: number;
+		let rafId2: number;
 		if ( isOpen ) {
 			const drawerElement = drawerRef.current;
 			if ( drawerElement ) {
@@ -41,16 +43,22 @@ const FulfillmentDrawer: React.FC< Props > = ( {
 
 				// Focus the drawer container itself after it's fully rendered
 				// This allows natural scrolling and keyboard navigation within
-				requestAnimationFrame( () => {
-					requestAnimationFrame( () => {
-						drawerElement.focus();
+				rafId1 = requestAnimationFrame( () => {
+					rafId2 = requestAnimationFrame( () => {
+						if ( drawerElement ) {
+							drawerElement.focus();
+						}
 					} );
 				} );
 			}
-		} else if ( previousFocusRef.current ) {
+		} else if ( previousFocusRef.current?.isConnected ) {
 			// Restore focus to the previously focused element
 			previousFocusRef.current.focus();
 		}
+		return () => {
+			cancelAnimationFrame( rafId1 );
+			cancelAnimationFrame( rafId2 );
+		};
 	}, [ isOpen ] );
 
 	// Handle keyboard navigation: Escape to close and focus trapping

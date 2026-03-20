@@ -125,11 +125,11 @@ describe( 'FulfillItemsButton component', () => {
 			);
 		} );
 
-		it( 'should have aria-live attribute for status updates', () => {
+		it( 'should not have redundant aria-live on button element', () => {
 			render( <FulfillItemsButton setError={ setError } /> );
 
 			const button = screen.getByRole( 'button' );
-			expect( button ).toHaveAttribute( 'aria-live', 'polite' );
+			expect( button ).not.toHaveAttribute( 'aria-live' );
 		} );
 
 		it( 'should have hidden description for screen readers', () => {

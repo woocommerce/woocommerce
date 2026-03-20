@@ -2,6 +2,7 @@
  * External dependencies
  */
 import moment from 'moment';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -39,7 +40,10 @@ export default function FulfillmentsDrawerHeader( {
 							setOpenSection( 'order' );
 							onClose();
 						} }
-						aria-label="Close fulfillment drawer"
+						aria-label={ __(
+							'Close fulfillment drawer',
+							'woocommerce'
+						) }
 					>
 						×
 					</button>

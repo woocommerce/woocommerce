@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { createRef, useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { ToggleControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
@@ -22,7 +22,7 @@ export default function CustomerNotificationBox( {
 	type: 'fulfill' | 'update' | 'remove';
 } ) {
 	const { notifyCustomer, setNotifyCustomer } = useFulfillmentContext();
-	const toggleRef = createRef< HTMLInputElement >();
+	const toggleRef = useRef< HTMLInputElement >( null );
 
 	const headerStrings = useMemo( () => {
 		return {
@@ -56,7 +56,7 @@ export default function CustomerNotificationBox( {
 			toggleRef.current.ariaDescription =
 				contentStrings[ type ] || contentStrings.fulfill;
 		}
-	}, [ type, toggleRef, contentStrings, headerStrings ] );
+	}, [ type, contentStrings, headerStrings ] );
 
 	return (
 		<FulfillmentCard

@@ -40,9 +40,9 @@
 			align-items: center;
 			justify-content: center;
 
-			&:focus {
-				outline: none;
-				box-shadow: none;
+			&:focus-visible {
+				outline: 2px solid var(--wp-admin-theme-color, #007cba);
+				outline-offset: -2px;
 			}
 		}
 	}
@@ -181,9 +181,9 @@
 			align-items: center;
 			justify-content: center;
 
-			&:focus {
-				outline: none;
-				box-shadow: none;
+			&:focus-visible {
+				outline: 2px solid var(--wp-admin-theme-color, #007cba);
+				outline-offset: -2px;
 			}
 
 			svg {
@@ -296,9 +296,9 @@
 				align-items: center;
 				justify-content: center;
 
-				&:focus {
-					outline: none;
-					box-shadow: none;
+				&:focus-visible {
+					outline: 2px solid var(--wp-admin-theme-color, #007cba);
+					outline-offset: -2px;
 				}
 			}
 		}

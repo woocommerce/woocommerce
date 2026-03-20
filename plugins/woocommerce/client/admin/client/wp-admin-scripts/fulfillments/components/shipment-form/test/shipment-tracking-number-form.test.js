@@ -124,15 +124,12 @@ describe( 'ShipmentTrackingNumberForm', () => {
 			const errorContainer = screen.getByRole( 'alert' );
 			expect( errorContainer ).toBeInTheDocument();
 			// eslint-disable-next-line testing-library/no-wait-for-multiple-assertions
-			expect( errorContainer ).toHaveAttribute(
-				'id',
-				'tracking-number-error'
+			expect( errorContainer.getAttribute( 'id' ) ).toMatch(
+				/^tracking-number-error/
 			);
+			// role="alert" implicitly sets aria-live="assertive", so explicit aria-live should not be present
 			// eslint-disable-next-line testing-library/no-wait-for-multiple-assertions
-			expect( errorContainer ).toHaveAttribute(
-				'aria-live',
-				'assertive'
-			);
+			expect( errorContainer ).not.toHaveAttribute( 'aria-live' );
 
 			// Check that the error message is within the error label component
 			const errorLabel = screen.getByText(

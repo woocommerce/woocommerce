@@ -72,10 +72,12 @@ export default function FulfillmentEditor( {
 
 	// Focus management when entering edit mode
 	useEffect( () => {
+		let rafId1: number;
+		let rafId2: number;
 		if ( isEditing && expanded && contentRef.current ) {
 			const content = contentRef.current;
-			requestAnimationFrame( () => {
-				requestAnimationFrame( () => {
+			rafId1 = requestAnimationFrame( () => {
+				rafId2 = requestAnimationFrame( () => {
 					// Look for the first interactive element in edit mode
 					const firstEditable = content.querySelector(
 						'input:not([disabled]), button:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])'
@@ -87,6 +89,10 @@ export default function FulfillmentEditor( {
 				} );
 			} );
 		}
+		return () => {
+			cancelAnimationFrame( rafId1 );
+			cancelAnimationFrame( rafId2 );
+		};
 	}, [ isEditing, expanded ] );
 
 	const handleChevronClick = () => {

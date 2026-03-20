@@ -67,16 +67,22 @@ describe( 'FulfillmentDrawer Accessibility', () => {
 		jest.clearAllMocks();
 
 		// Mock requestAnimationFrame for focus management tests
+		let rafCounter = 0;
 		jest.spyOn( window, 'requestAnimationFrame' ).mockImplementation(
 			( cb ) => {
+				const id = ++rafCounter;
 				cb( 0 );
-				return 0;
+				return id;
 			}
+		);
+		jest.spyOn( window, 'cancelAnimationFrame' ).mockImplementation(
+			() => {}
 		);
 	} );
 
 	afterEach( () => {
 		window.requestAnimationFrame.mockRestore();
+		window.cancelAnimationFrame.mockRestore();
 	} );
 
 	it( 'should have proper ARIA attributes when open', () => {
@@ -206,6 +212,30 @@ describe( 'FulfillmentDrawer Accessibility', () => {
 
 			// Clean up
 			document.body.removeChild( triggerButton );
+		} );
+
+		it( 'should not restore focus if previously focused element is disconnected', () => {
+			const triggerButton = document.createElement( 'button' );
+			triggerButton.textContent = 'Open Drawer';
+			document.body.appendChild( triggerButton );
+			triggerButton.focus();
+
+			const { rerender } = render(
+				<FulfillmentDrawer { ...defaultProps } isOpen={ true } />
+			);
+
+			// Remove the trigger button from DOM while drawer is open
+			document.body.removeChild( triggerButton );
+
+			// Close the drawer
+			rerender(
+				<FulfillmentDrawer { ...defaultProps } isOpen={ false } />
+			);
+
+			// Focus should NOT be on the disconnected element
+			expect( triggerButton.ownerDocument.activeElement ).not.toBe(
+				triggerButton
+			);
 		} );
 	} );
 } );
