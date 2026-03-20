@@ -3843,7 +3843,7 @@ class WC_AJAX {
 	 *
 	 * @since 10.7.0
 	 */
-	public static function shipping_providers_save_changes() {
+	public static function shipping_providers_save_changes(): void {
 		if ( ! isset( $_POST['wc_shipping_providers_nonce'], $_POST['changes'] ) ) {
 			wp_send_json_error( 'missing_fields' );
 			wp_die();
@@ -3877,13 +3877,13 @@ class WC_AJAX {
 
 			$update_args = array();
 
-			if ( isset( $data['name'] ) ) {
-				$update_args['name'] = wc_clean( $data['name'] );
+			if ( isset( $data['name'] ) && is_string( $data['name'] ) ) {
+				$update_args['name'] = sanitize_text_field( $data['name'] );
 			}
 
 			// Validate and set slug only on new rows. Slug is immutable after creation.
-			if ( isset( $data['newRow'] ) && isset( $data['slug'] ) && '' !== $data['slug'] ) {
-				$candidate_slug = sanitize_title( wc_clean( $data['slug'] ) );
+			if ( isset( $data['newRow'] ) && isset( $data['slug'] ) && is_string( $data['slug'] ) && '' !== $data['slug'] ) {
+				$candidate_slug = sanitize_title( $data['slug'] );
 				if ( in_array( $candidate_slug, $built_in_keys, true ) ) {
 					$reserved_slug_error = sprintf(
 						/* translators: %s: slug value */
@@ -3897,29 +3897,30 @@ class WC_AJAX {
 
 			// Validate tracking URL template.
 			$tracking_url_template = '';
-			if ( isset( $data['tracking_url_template'] ) && '' !== $data['tracking_url_template'] ) {
+			if ( isset( $data['tracking_url_template'] ) && is_string( $data['tracking_url_template'] ) && '' !== $data['tracking_url_template'] ) {
 				$raw_url = wc_clean( $data['tracking_url_template'] );
-				if ( filter_var( str_replace( '__PLACEHOLDER__', 'test', $raw_url ), FILTER_VALIDATE_URL ) ) {
+				if ( is_string( $raw_url ) && filter_var( str_replace( '__PLACEHOLDER__', 'test', $raw_url ), FILTER_VALIDATE_URL ) ) {
 					$tracking_url_template = $raw_url;
 				}
 			}
 
 			// Validate icon URL.
 			$icon_url = '';
-			if ( isset( $data['icon'] ) && '' !== $data['icon'] ) {
+			if ( isset( $data['icon'] ) && is_string( $data['icon'] ) && '' !== $data['icon'] ) {
 				$raw_icon = wc_clean( $data['icon'] );
-				if ( filter_var( $raw_icon, FILTER_VALIDATE_URL ) ) {
+				if ( is_string( $raw_icon ) && filter_var( $raw_icon, FILTER_VALIDATE_URL ) ) {
 					$icon_url = $raw_icon;
 				}
 			}
 
 			if ( isset( $data['newRow'] ) ) {
-				$update_args = array_filter( $update_args );
-				if ( empty( $update_args['name'] ) ) {
+				$provider_name = strval( $update_args['name'] ?? '' );
+				$update_args   = array_filter( $update_args );
+				if ( empty( $provider_name ) ) {
 					continue;
 				}
 
-				$inserted_term = wp_insert_term( $update_args['name'], $taxonomy, $update_args );
+				$inserted_term = wp_insert_term( $provider_name, $taxonomy, $update_args );
 				if ( is_wp_error( $inserted_term ) ) {
 					continue;
 				}
@@ -3927,12 +3928,15 @@ class WC_AJAX {
 
 				// Verify auto-generated slug doesn't collide with built-in keys.
 				$new_term = get_term( $term_id, $taxonomy );
-				if ( $new_term && in_array( $new_term->slug, $built_in_keys, true ) ) {
+				if ( ! $new_term instanceof \WP_Term ) {
+					continue;
+				}
+				if ( in_array( $new_term->slug, $built_in_keys, true ) ) {
 					wp_delete_term( $term_id, $taxonomy );
 					$reserved_slug_error = sprintf(
 						/* translators: %s: provider name */
 						__( 'Could not create provider "%s" because its auto-generated slug conflicts with a built-in shipping provider. Please specify a different slug.', 'woocommerce' ),
-						$update_args['name']
+						$provider_name
 					);
 					continue;
 				}

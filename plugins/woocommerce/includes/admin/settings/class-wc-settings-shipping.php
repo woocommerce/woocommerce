@@ -475,7 +475,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 	 *
 	 * @since 10.7.0
 	 */
-	protected function output_shipping_providers_screen() {
+	protected function output_shipping_providers_screen(): void {
 		$providers = get_terms(
 			array(
 				'taxonomy'   => 'wc_fulfillment_shipping_provider',
