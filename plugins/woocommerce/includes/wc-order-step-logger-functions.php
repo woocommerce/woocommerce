@@ -164,14 +164,3 @@ function extract_order_safe_data( WC_Order $order ) {
 
 	return $order_data;
 }
-
-/**
- * Clean up place-order debug log files and associated order meta.
- *
- * @internal This function is intended for internal use only.
- * @since 10.7.0
- */
-function wc_cleanup_order_debug_logs(): void {
-	wc_get_container()->get( \Automattic\WooCommerce\Internal\Logging\OrderLogsCleanupHelper::class )->cleanup();
-}
-add_action( 'woocommerce_cleanup_logs', 'wc_cleanup_order_debug_logs' );
