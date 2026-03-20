@@ -2,6 +2,12 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.10.0](https://github.com/woocommerce/email-editor/releases/tag/2.10.0) - 2026-03-20 
+
+-   Patch - Apply root horizontal padding uniformly to all blocks in the email rendering pipeline, fixing missing padding for blocks using render_email_callback without Abstract_Block_Renderer. [#63682]
+-   Patch - Prevent hook accumulation in email editor Initializer by guarding against duplicate hook registration. [#63666]
+-   Minor - Add rendering support for full-width blocks to break out of template group padding in emails, distributing container padding per-block so alignfull blocks can span the full contentSize. [#63752]
+
 ## [2.9.2](https://github.com/woocommerce/email-editor/releases/tag/2.9.2) - 2026-03-12 
 
 -   Patch - Add rich cards for WordPress embeds in emails with excerpt, site icon, and a performance cap of 5 per email. [#63542]
