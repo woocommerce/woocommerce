@@ -47176,42 +47176,6 @@ parameters:
 			path: src/Admin/Features/OnboardingTasks/DeprecatedExtendedTask.php
 
 		-
-			message: '#^Action callback returns string but should not return anything\.$#'
-			identifier: return.void
-			count: 2
-			path: src/Admin/Features/OnboardingTasks/DeprecatedOptions.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\DeprecatedOptions\:\:get_deprecated_options\(\) should return string but return statement is missing\.$#'
-			identifier: return.missing
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/DeprecatedOptions.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\DeprecatedOptions\:\:init\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/DeprecatedOptions.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\DeprecatedOptions\:\:update_deprecated_options\(\) should return string but empty return statement found\.$#'
-			identifier: return.empty
-			count: 2
-			path: src/Admin/Features/OnboardingTasks/DeprecatedOptions.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\DeprecatedOptions\:\:update_deprecated_options\(\) should return string but return statement is missing\.$#'
-			identifier: return.missing
-			count: 1
-			path: src/Admin/Features/OnboardingTasks/DeprecatedOptions.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\DeprecatedOptions\:\:update_deprecated_options\(\) should return string but returns false\.$#'
-			identifier: return.type
-			count: 2
-			path: src/Admin/Features/OnboardingTasks/DeprecatedOptions.php
-
-		-
 			message: '#^Cannot call method is_connected\(\) on class\-string\|object\.$#'
 			identifier: method.nonObject
 			count: 1
