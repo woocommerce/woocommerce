@@ -5,6 +5,8 @@
  * @package WooCommerce\Admin\Shipping
  */
 
+declare( strict_types = 1 );
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -105,6 +107,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 									<?php echo esc_html( $heading ); ?>
 								</div>
 								<?php
+								/**
+								 * Fires for custom columns in the shipping providers configure modal.
+								 *
+								 * @since 10.7.0
+								 */
 								do_action( 'woocommerce_shipping_providers_column_' . $class );
 								break;
 						}
@@ -156,6 +163,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<?php
 					break;
 				default:
+					/**
+					 * Fires for custom columns in the shipping providers table row.
+					 *
+					 * @since 10.7.0
+					 */
 					do_action( 'woocommerce_shipping_providers_column_' . $class );
 					break;
 			}
