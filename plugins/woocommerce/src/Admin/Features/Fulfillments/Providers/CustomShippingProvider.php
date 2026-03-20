@@ -49,9 +49,9 @@ class CustomShippingProvider extends AbstractShippingProvider {
 	 * @param string $tracking_url_template The tracking URL template.
 	 */
 	public function __construct( string $key, string $name, string $icon, string $tracking_url_template ) {
-		$this->key                  = $key;
-		$this->name                 = $name;
-		$this->icon                 = $icon;
+		$this->key                   = $key;
+		$this->name                  = $name;
+		$this->icon                  = $icon;
 		$this->tracking_url_template = $tracking_url_template;
 	}
 

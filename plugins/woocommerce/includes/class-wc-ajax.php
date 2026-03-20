@@ -3846,26 +3846,27 @@ class WC_AJAX {
 	public static function shipping_providers_save_changes(): void {
 		if ( ! \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'fulfillments' ) ) {
 			wp_send_json_error( 'feature_disabled' );
-			wp_die();
 		}
 
 		if ( ! isset( $_POST['wc_shipping_providers_nonce'], $_POST['changes'] ) ) {
 			wp_send_json_error( 'missing_fields' );
-			wp_die();
 		}
 
 		if ( ! wp_verify_nonce( wp_unslash( $_POST['wc_shipping_providers_nonce'] ), 'wc_shipping_providers_nonce' ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			wp_send_json_error( 'bad_nonce' );
-			wp_die();
 		}
 
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
 			wp_send_json_error( 'missing_capabilities' );
-			wp_die();
 		}
 
-		$taxonomy            = 'wc_fulfillment_shipping_provider';
-		$changes             = wp_unslash( $_POST['changes'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$taxonomy = 'wc_fulfillment_shipping_provider';
+		$changes  = wp_unslash( $_POST['changes'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+		if ( ! is_array( $changes ) ) {
+			wp_send_json_error( 'invalid_changes' );
+		}
+
 		$built_in_keys       = array_keys( \Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentUtils::get_shipping_providers_object() );
 		$reserved_slug_error = '';
 
