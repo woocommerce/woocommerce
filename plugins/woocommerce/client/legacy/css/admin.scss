@@ -8360,6 +8360,17 @@ table.bar_chart {
 			padding-right: 0;
 		}
 	}
+
+	// Publish box: WP 7.0 flex-row breaks layout when #duplicate-action is present.
+	// Revert to block + float to stack copy/trash links on the left, button on the right.
+	#major-publishing-actions {
+		display: block;
+		overflow: hidden;
+
+		#delete-action {
+			float: left;
+		}
+	}
 }
 
 // Tablenav: WP 7.0 tablenav uses compact 32px sizing for native selects.
