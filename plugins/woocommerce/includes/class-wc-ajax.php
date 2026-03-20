@@ -3867,7 +3867,19 @@ class WC_AJAX {
 			wp_send_json_error( 'invalid_changes' );
 		}
 
-		$built_in_keys       = array_keys( \Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentUtils::get_shipping_providers_object() );
+		// Collect only built-in provider keys (class-based, not custom taxonomy providers).
+		$all_providers = \Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentUtils::get_shipping_providers();
+		$built_in_keys = array();
+		foreach ( $all_providers as $provider ) {
+			if ( is_string( $provider ) && class_exists( $provider ) && is_subclass_of( $provider, \Automattic\WooCommerce\Admin\Features\Fulfillments\Providers\AbstractShippingProvider::class ) ) {
+				try {
+					$instance        = wc_get_container()->get( $provider );
+					$built_in_keys[] = $instance->get_key();
+				} catch ( \Throwable $e ) {
+					continue;
+				}
+			}
+		}
 		$reserved_slug_error = '';
 
 		foreach ( $changes as $term_id => $data ) {
@@ -3962,7 +3974,11 @@ class WC_AJAX {
 					continue;
 				}
 			} else {
-				wp_update_term( $term_id, $taxonomy, $update_args );
+				$update_result = wp_update_term( $term_id, $taxonomy, $update_args );
+				if ( is_wp_error( $update_result ) ) {
+					$reserved_slug_error = $update_result->get_error_message();
+					continue;
+				}
 			}
 
 			if ( $term_id ) {
