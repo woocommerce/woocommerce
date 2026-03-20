@@ -2,6 +2,7 @@
  * External dependencies
  */
 import React, { useEffect, useRef } from 'react';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -90,9 +91,12 @@ const FulfillmentDrawer: React.FC< Props > = ( {
 				const activeElement = drawerElement.ownerDocument
 					.activeElement as HTMLElement;
 
-				// Shift+Tab: If focus is on first element, move to last
+				// Shift+Tab: If focus is on first element or the drawer panel itself, move to last
 				if ( event.shiftKey ) {
-					if ( activeElement === firstElement ) {
+					if (
+						activeElement === firstElement ||
+						activeElement === drawerElement
+					) {
 						event.preventDefault();
 						lastElement?.focus();
 					}
@@ -133,6 +137,7 @@ const FulfillmentDrawer: React.FC< Props > = ( {
 					].join( ' ' ) }
 					role="dialog"
 					aria-modal="true"
+					aria-label={ __( 'Fulfillment drawer', 'woocommerce' ) }
 					aria-labelledby="fulfillment-drawer-header"
 					aria-hidden={ ! isOpen }
 					tabIndex={ -1 }

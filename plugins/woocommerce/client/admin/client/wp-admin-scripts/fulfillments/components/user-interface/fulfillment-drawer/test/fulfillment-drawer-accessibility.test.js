@@ -94,6 +94,7 @@ describe( 'FulfillmentDrawer Accessibility', () => {
 			'aria-labelledby',
 			'fulfillment-drawer-header'
 		);
+		expect( dialog ).toHaveAttribute( 'aria-label', 'Fulfillment drawer' );
 		expect( dialog ).toHaveAttribute( 'aria-hidden', 'false' );
 	} );
 
@@ -182,6 +183,19 @@ describe( 'FulfillmentDrawer Accessibility', () => {
 				'Close fulfillment drawer'
 			);
 			closeButton.focus();
+
+			fireEvent.keyDown( document, { key: 'Tab', shiftKey: true } );
+
+			const lastButton = screen.getByTestId( 'last-button' );
+			expect( lastButton.ownerDocument.activeElement ).toBe( lastButton );
+		} );
+
+		it( 'should wrap focus from drawer panel to last element on Shift+Tab', () => {
+			render( <FulfillmentDrawer { ...defaultProps } /> );
+
+			// The drawer panel itself gets focus when opened
+			const dialog = screen.getByRole( 'dialog' );
+			dialog.focus();
 
 			fireEvent.keyDown( document, { key: 'Tab', shiftKey: true } );
 
