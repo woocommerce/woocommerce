@@ -8402,6 +8402,10 @@ table.bar_chart {
 			width: 55%;
 		}
 
+		input[type="number"] {
+			padding-right: 0;
+		}
+
 		.dimensions_field .wrap {
 			width: 55%;
 			border-radius: 2px;
