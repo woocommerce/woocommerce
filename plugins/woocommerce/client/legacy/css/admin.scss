@@ -8309,6 +8309,33 @@ table.bar_chart {
 			min-height: 38px;
 		}
 	}
+
+	// Table action icon buttons: prevent WP 7.0 min-height from stretching them.
+	.widefat {
+		.column-wc_actions {
+			a.button {
+				min-height: 0 !important;
+				line-height: 1 !important;
+
+				&::after {
+					line-height: 1.85;
+					margin-top: 0;
+				}
+			}
+		}
+	}
+
+	// Order preview action buttons.
+	.wc-order-preview footer {
+		.button.button-large {
+			min-height: 0;
+		}
+	}
+
+	// Action button groups.
+	.wc-action-button-group .wc-action-button {
+		min-height: 0 !important;
+	}
 }
 
 // Tablenav: WP 7.0 tablenav uses compact 32px sizing for native selects.
