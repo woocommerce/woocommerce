@@ -3,9 +3,8 @@
  */
 import { decodeEntities } from '@wordpress/html-entities';
 import { type RecommendedPaymentMethod } from '@woocommerce/data';
-import { ExternalLink, ToggleControl } from '@wordpress/components';
+import { ExternalLink, Icon, ToggleControl } from '@wordpress/components';
 import { info as infoIcon } from '@wordpress/icons';
-import { Icon } from '@wordpress/components';
 import { useRef } from '@wordpress/element';
 
 /**
