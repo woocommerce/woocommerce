@@ -87,13 +87,22 @@ if ( ! class_exists( 'WC_Email_Customer_Fulfillment_Created', false ) ) :
 		}
 
 		/**
-		 * Get the number of items in the fulfillment.
+		 * Get the total quantity of items in the fulfillment.
 		 *
-		 * @since 10.7.0
 		 * @return int
 		 */
 		private function get_fulfillment_item_count() {
-			return $this->fulfillment ? count( $this->fulfillment->get_items() ) : 1;
+			if ( ! $this->fulfillment ) {
+				return 1;
+			}
+
+			return array_reduce(
+				$this->fulfillment->get_items(),
+				function ( int $carry, array $item ) {
+					return $carry + (int) $item['qty'];
+				},
+				0
+			);
 		}
 
 		/**

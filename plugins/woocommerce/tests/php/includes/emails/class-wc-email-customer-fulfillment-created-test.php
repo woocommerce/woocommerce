@@ -134,6 +134,55 @@ class WC_Email_Customer_Fulfillment_Created_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Default subject uses plural form when one item has multiple quantity.
+	 */
+	public function test_default_subject_plural_for_single_item_multiple_qty(): void {
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+
+		$fulfillment = new Fulfillment();
+		$fulfillment->set_items(
+			array(
+				array(
+					'item_id' => 1,
+					'qty'     => 3,
+				),
+			)
+		);
+
+		$this->sut = new WC_Email_Customer_Fulfillment_Created();
+		$this->sut->trigger( $order->get_id(), $fulfillment, $order );
+
+		$subject = $this->sut->get_default_subject();
+
+		$this->assertStringContainsString( 'Items', $subject, 'Subject should use plural form when single item has qty > 1' );
+		$this->assertStringNotContainsString( 'An item', $subject, 'Subject should not contain singular form when single item has qty > 1' );
+	}
+
+	/**
+	 * @testdox Default heading uses plural form when one item has multiple quantity.
+	 */
+	public function test_default_heading_plural_for_single_item_multiple_qty(): void {
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+
+		$fulfillment = new Fulfillment();
+		$fulfillment->set_items(
+			array(
+				array(
+					'item_id' => 1,
+					'qty'     => 2,
+				),
+			)
+		);
+
+		$this->sut = new WC_Email_Customer_Fulfillment_Created();
+		$this->sut->trigger( $order->get_id(), $fulfillment, $order );
+
+		$heading = $this->sut->get_default_heading();
+
+		$this->assertStringContainsString( 'Your items are on the way!', $heading, 'Heading should use plural form when single item has qty > 1' );
+	}
+
+	/**
 	 * @testdox Default subject uses singular form when no fulfillment is set.
 	 */
 	public function test_default_subject_singular_when_no_fulfillment(): void {
