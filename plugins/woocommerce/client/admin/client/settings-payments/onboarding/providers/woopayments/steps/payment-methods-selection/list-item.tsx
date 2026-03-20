@@ -197,7 +197,7 @@ export const PaymentMethodListItem = ( {
 						className="woocommerce-list__item-notice-warning"
 						data-testid="payment-method-notice-warning"
 					>
-						<Notice status="warning" isDismissible={ false }>
+						<Notice status="info" isDismissible={ false }>
 							<span>{ method.notice.message }</span>
 							{ method.notice.link_url &&
 								method.notice.link_text && (
