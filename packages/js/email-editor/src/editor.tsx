@@ -9,7 +9,7 @@ import {
 	useState,
 	useMemo,
 } from '@wordpress/element';
-import { applyFilters } from '@wordpress/hooks';
+import { addFilter, applyFilters } from '@wordpress/hooks';
 import { store as editorStore } from '@wordpress/editor';
 import { useMergeRefs } from '@wordpress/compose';
 import '@wordpress/format-library'; // Enables text formatting capabilities
@@ -100,7 +100,21 @@ function Editor( {
 	);
 }
 
+/**
+ * WordPress 7.0 introduces Real-time Collaboration. The email editor does not
+ * yet fully support it, so we temporarily opt out by clearing sync providers.
+ */
+function disableCollab() {
+	addFilter(
+		'sync.providers',
+		'woocommerce/email-editor/disable-collab',
+		() => [],
+		1000
+	);
+}
+
 function onInit() {
+	disableCollab();
 	initEventCollector();
 	initStoreTracking();
 	initDomTracking();
