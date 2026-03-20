@@ -746,8 +746,8 @@ p.demo_store,
 						}
 					}
 
-					&.no-avatar .comment-text {
-						margin-left: 0;
+					.comment_container.no-avatar .comment-text {
+  							margin-left: 0;
 					}
 				}
 
