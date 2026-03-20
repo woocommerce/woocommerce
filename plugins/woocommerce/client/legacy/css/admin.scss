@@ -8379,6 +8379,11 @@ table.bar_chart {
 		padding-top: 8px;
 	}
 
+	// Help tips: vertically center with taller WP 7.0 inputs.
+	.woocommerce_options_panel .form-field .woocommerce-help-tip {
+		margin-top: 12px;
+	}
+
 	// Search box select: match WP 7.0 compact search-box sizing (32px).
 	.search-box select {
 		min-height: 32px;
