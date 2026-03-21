@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Button } from '@wordpress/components';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export const SearchIcon = () => (
 	<svg
@@ -70,11 +70,23 @@ export const EnvelopeIcon = () => (
 
 export const CopyIcon = ( { copyText }: { copyText: string } ) => {
 	const [ copied, setCopied ] = useState( false );
+	const timeoutRef = useRef< ReturnType< typeof setTimeout > >();
+
+	useEffect( () => {
+		return () => {
+			if ( timeoutRef.current ) {
+				clearTimeout( timeoutRef.current );
+			}
+		};
+	}, [] );
 
 	const handleCopy = () => {
 		navigator.clipboard.writeText( copyText );
 		setCopied( true );
-		setTimeout( () => setCopied( false ), 2000 );
+		if ( timeoutRef.current ) {
+			clearTimeout( timeoutRef.current );
+		}
+		timeoutRef.current = setTimeout( () => setCopied( false ), 2000 );
 	};
 
 	return (

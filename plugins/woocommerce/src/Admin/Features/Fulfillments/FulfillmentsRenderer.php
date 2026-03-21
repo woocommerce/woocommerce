@@ -158,7 +158,7 @@ class FulfillmentsRenderer {
 			);
 		}
 
-		echo '<mark class="fulfillment-status fulfillments-trigger" style="background-color:' . esc_attr( $status_props['background_color'] ) . '; color: ' . esc_attr( $status_props['text_color'] ) . '; cursor: pointer;" data-order-id="' . esc_attr( (string) $order->get_id() ) . '"><span>' . esc_html( $status_props['label'] ) . '</span></mark>';
+		echo '<mark class="fulfillment-status fulfillments-trigger" style="background-color:' . esc_attr( $status_props['background_color'] ) . '; color: ' . esc_attr( $status_props['text_color'] ) . '; cursor: pointer;" role="button" tabindex="0" data-order-id="' . esc_attr( (string) $order->get_id() ) . '"><span>' . esc_html( $status_props['label'] ) . '</span></mark>';
 		echo "<a href='#' class='fulfillments-trigger' data-order-id='" . esc_attr( $order->get_id() ) . "' title='" . esc_attr__( 'View Fulfillments', 'woocommerce' ) . "'>
 			<svg width='16' height='16' viewBox='0 0 12 14' xmlns='http://www.w3.org/2000/svg'>
 				<path d='M11.8333 2.83301L9.33329 0.333008L2.24996 7.41634L1.41663 10.7497L4.74996 9.91634L11.8333 2.83301ZM5.99996 12.4163H0.166626V13.6663H5.99996V12.4163Z' />
@@ -175,22 +175,19 @@ class FulfillmentsRenderer {
 	private function render_shipment_provider_column_row_data( WC_Order $order, array $fulfillments ) {
 		$providers = array();
 		foreach ( $fulfillments as $fulfillment ) {
-			$providers[] = $fulfillment->get_meta( '_shipment_provider' ) ?? null;
-		}
-
-		$providers = array_filter(
-			$providers,
-			function ( $provider ) {
-				return ! empty( $provider );
+			$provider = $fulfillment->get_meta( '_shipment_provider' );
+			if ( ! empty( $provider ) ) {
+				$providers[ $provider ] = $fulfillment;
 			}
-		);
+		}
 
 		if ( count( $providers ) > 1 ) {
 			echo '<span>' . esc_html__( 'Multiple providers', 'woocommerce' ) . '</span>';
 		} elseif ( 1 === count( $providers ) ) {
-			$provider_key           = array_shift( $providers );
+			$provider_key           = array_key_first( $providers );
+			$provider_fulfillment   = $providers[ $provider_key ];
 			$known_providers        = FulfillmentUtils::get_shipping_providers_object();
-			$provider_name_meta     = $fulfillments[0]->get_meta( '_provider_name' );
+			$provider_name_meta     = $provider_fulfillment->get_meta( '_provider_name' );
 			$provider_display_label = $known_providers[ $provider_key ]['label']
 				?? ( ! empty( $provider_name_meta ) ? $provider_name_meta : $provider_key );
 			echo '<span>' . esc_html( $provider_display_label ) . '</span>';

@@ -110,6 +110,9 @@ export const FulfillmentDrawerProvider = ( {
 			setOpenSection(
 				'fulfillment-' + fulfillments[ fulfillments.length - 1 ].id
 			);
+		} else {
+			// No fulfillments data yet or empty, collapse all.
+			setOpenSection( '' );
 		}
 	}, [ orderId, fulfillments, order, refunds ] );
 

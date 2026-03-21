@@ -57,20 +57,18 @@ describe( 'FulfillmentCard', () => {
 		expect( screen.queryByText( 'Child content' ) ).not.toBeInTheDocument();
 	} );
 
-	it( 'renders children if initialState is open (collapsable)', () => {
+	it( 'renders children if initialState is expanded (collapsable)', () => {
 		render(
 			<FulfillmentCard
 				header={ <h1>Header</h1> }
 				isCollapsable
-				initialState="open"
+				initialState="expanded"
 			>
 				<p>Child content</p>
 			</FulfillmentCard>
 		);
 
-		const header = screen.getByRole( 'button' );
-		// Children may not be visible by default, so click to expand
-		fireEvent.click( header );
+		// Children should be visible immediately when initialState is expanded
 		expect( screen.getByText( 'Child content' ) ).toBeInTheDocument();
 	} );
 
