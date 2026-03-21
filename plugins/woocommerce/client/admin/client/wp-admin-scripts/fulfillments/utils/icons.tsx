@@ -81,12 +81,22 @@ export const CopyIcon = ( { copyText }: { copyText: string } ) => {
 	}, [] );
 
 	const handleCopy = () => {
-		navigator.clipboard.writeText( copyText );
-		setCopied( true );
-		if ( timeoutRef.current ) {
-			clearTimeout( timeoutRef.current );
-		}
-		timeoutRef.current = setTimeout( () => setCopied( false ), 2000 );
+		navigator.clipboard.writeText( copyText ).then(
+			() => {
+				setCopied( true );
+				if ( timeoutRef.current ) {
+					clearTimeout( timeoutRef.current );
+				}
+				timeoutRef.current = setTimeout(
+					() => setCopied( false ),
+					2000
+				);
+			},
+			( err ) => {
+				// eslint-disable-next-line no-console
+				console.error( 'Failed to copy to clipboard:', err );
+			}
+		);
 	};
 
 	return (
