@@ -219,7 +219,7 @@ class FulfillmentsRenderer {
 		} elseif ( 1 === count( $tracking ) ) {
 			$entry = $tracking[0];
 			if ( ! empty( $entry['url'] ) ) {
-				echo '<a href="' . esc_url( $entry['url'] ) . '" target="_blank" rel="noopener noreferrer" style="color: #2f2f2f;">' . esc_html( $entry['number'] ) . '</a>';
+				echo '<a href="' . esc_url( $entry['url'] ) . '" target="_blank" rel="noopener noreferrer" style="text-decoration: underline; color: #2f2f2f;">' . esc_html( $entry['number'] ) . '</a>';
 			} else {
 				echo '<span>' . esc_html( $entry['number'] ) . '</span>';
 			}
