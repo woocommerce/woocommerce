@@ -44,6 +44,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 	 * Set up the test case.
 	 */
 	public function setUp(): void {
+		parent::setUp();
 		$this->data_store = wc_get_container()->get( FulfillmentsDataStore::class );
 	}
 
@@ -56,6 +57,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_order_fulfillment_meta" );
 		// Clean up the fulfillment table.
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_order_fulfillments" );
+		parent::tearDown();
 	}
 
 	/**
@@ -82,6 +84,74 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 		$this->data_store->create( $fulfillment );
 		$this->assertFulfillmentRecordInDB( $fulfillment );
 		$this->assertFulfillmentMetaInDB( $fulfillment );
+	}
+
+	/**
+	 * Tests that creating a fulfilled fulfillment sets the date_fulfilled metadata
+	 * consistently between the object and the database.
+	 */
+	public function test_create_fulfilled_fulfillment_sets_date_fulfilled() {
+		$fulfillment = new Fulfillment();
+		$fulfillment->set_entity_type( 'order-fulfillment' );
+		$fulfillment->set_entity_id( '123' );
+		$fulfillment->set_status( 'fulfilled' );
+		$fulfillment->set_items(
+			array(
+				array(
+					'item_id' => 1,
+					'qty'     => 2,
+				),
+			)
+		);
+
+		$this->data_store->create( $fulfillment );
+
+		$this->assertNotNull( $fulfillment->get_id() );
+		$this->assertTrue( $fulfillment->get_is_fulfilled() );
+		$this->assertNotNull( $fulfillment->get_date_fulfilled() );
+
+		// Read back from DB and verify the date_fulfilled matches.
+		$read_fulfillment = new Fulfillment( $fulfillment->get_id() );
+
+		$this->assertEquals( $fulfillment->get_date_fulfilled(), $read_fulfillment->get_date_fulfilled() );
+	}
+
+	/**
+	 * Tests that updating a fulfilled fulfillment preserves the original date_fulfilled value
+	 * and does not change it to the current time.
+	 */
+	public function test_update_fulfilled_fulfillment_preserves_date_fulfilled() {
+		$fulfillment = new Fulfillment();
+		$fulfillment->set_entity_type( 'order-fulfillment' );
+		$fulfillment->set_entity_id( '123' );
+		$fulfillment->set_status( 'unfulfilled' );
+		$fulfillment->set_items(
+			array(
+				array(
+					'item_id' => 1,
+					'qty'     => 2,
+				),
+			)
+		);
+		$this->data_store->create( $fulfillment );
+
+		// Mark as fulfilled and save.
+		$fulfillment->set_status( 'fulfilled' );
+		$this->data_store->update( $fulfillment );
+		$this->assertNotNull( $fulfillment->get_date_fulfilled() );
+
+		// Set a known fixed date_fulfilled to make the assertion deterministic.
+		$fixed_date = '2025-01-15 10:30:00';
+		$fulfillment->set_date_fulfilled( $fixed_date );
+		$fulfillment->set_entity_id( '456' );
+		$this->data_store->update( $fulfillment );
+
+		// Verify in-memory value is preserved.
+		$this->assertEquals( $fixed_date, $fulfillment->get_date_fulfilled() );
+
+		// Verify persisted value matches after reloading from DB.
+		$read_fulfillment = new Fulfillment( $fulfillment->get_id() );
+		$this->assertEquals( $fixed_date, $read_fulfillment->get_date_fulfilled() );
 	}
 
 	/**
@@ -700,7 +770,6 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 		$fulfillment->set_status( 'unfulfilled' );
 		$fulfillment->set_items( $items );
 		$fulfillment->save();
-		$fulfillment->save_meta_data();
 
 		$this->assertNotEquals( 0, $fulfillment->get_id() );
 
@@ -834,5 +903,125 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 			$this->assertNotEmpty( $record, "$meta_key is empty" );
 			$this->assertEquals( $meta_value, json_decode( reset( $record )->meta_value, true ) );
 		}
+	}
+
+	/**
+	 * @testdox Should hard-delete all fulfillment records and metadata for a given entity.
+	 */
+	public function test_delete_by_entity(): void {
+		global $wpdb;
+
+		$entity_id   = '999';
+		$entity_type = 'order-fulfillment';
+
+		$fulfillment1 = new Fulfillment();
+		$fulfillment1->set_entity_type( $entity_type );
+		$fulfillment1->set_entity_id( (string) $entity_id );
+		$fulfillment1->set_status( 'unfulfilled' );
+		$fulfillment1->set_items(
+			array(
+				array(
+					'item_id' => 1,
+					'qty'     => 2,
+				),
+			)
+		);
+		$fulfillment1->save();
+
+		$fulfillment2 = new Fulfillment();
+		$fulfillment2->set_entity_type( $entity_type );
+		$fulfillment2->set_entity_id( (string) $entity_id );
+		$fulfillment2->set_status( 'fulfilled' );
+		$fulfillment2->set_items(
+			array(
+				array(
+					'item_id' => 3,
+					'qty'     => 1,
+				),
+			)
+		);
+		$fulfillment2->save();
+
+		$this->assertGreaterThan( 0, $fulfillment1->get_id() );
+		$this->assertGreaterThan( 0, $fulfillment2->get_id() );
+
+		$rows_deleted = $this->data_store->delete_by_entity( $entity_type, $entity_id );
+
+		$this->assertSame( 2, $rows_deleted, 'Should have deleted 2 fulfillment records' );
+
+		$remaining = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->prefix}wc_order_fulfillments WHERE entity_type = %s AND entity_id = %s",
+				$entity_type,
+				$entity_id
+			)
+		);
+		$this->assertSame( '0', $remaining, 'No fulfillment records should remain' );
+
+		$remaining_meta = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->prefix}wc_order_fulfillment_meta WHERE fulfillment_id IN (%d, %d)",
+				$fulfillment1->get_id(),
+				$fulfillment2->get_id()
+			)
+		);
+		$this->assertSame( '0', $remaining_meta, 'No fulfillment metadata should remain' );
+	}
+
+	/**
+	 * @testdox Should not affect fulfillments belonging to other entities.
+	 */
+	public function test_delete_by_entity_does_not_affect_other_entities(): void {
+		global $wpdb;
+
+		$entity_type = 'order-fulfillment';
+
+		$fulfillment_to_delete = new Fulfillment();
+		$fulfillment_to_delete->set_entity_type( $entity_type );
+		$fulfillment_to_delete->set_entity_id( '100' );
+		$fulfillment_to_delete->set_status( 'unfulfilled' );
+		$fulfillment_to_delete->set_items(
+			array(
+				array(
+					'item_id' => 1,
+					'qty'     => 1,
+				),
+			)
+		);
+		$fulfillment_to_delete->save();
+
+		$fulfillment_to_keep = new Fulfillment();
+		$fulfillment_to_keep->set_entity_type( $entity_type );
+		$fulfillment_to_keep->set_entity_id( '200' );
+		$fulfillment_to_keep->set_status( 'unfulfilled' );
+		$fulfillment_to_keep->set_items(
+			array(
+				array(
+					'item_id' => 2,
+					'qty'     => 1,
+				),
+			)
+		);
+		$fulfillment_to_keep->save();
+
+		$this->data_store->delete_by_entity( $entity_type, '100' );
+
+		$remaining = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->prefix}wc_order_fulfillments WHERE entity_type = %s AND entity_id = %s",
+				$entity_type,
+				'200'
+			)
+		);
+		$this->assertSame( '1', $remaining, 'Fulfillments for other entities should not be affected' );
+	}
+
+	/**
+	 * @testdox Should return zero when no fulfillments exist for the entity.
+	 */
+	public function test_delete_by_entity_returns_zero_when_no_records(): void {
+		$rows_deleted = $this->data_store->delete_by_entity( 'order-fulfillment', '12345' );
+
+		$this->assertSame( 0, $rows_deleted );
 	}
 }

@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Prime order item meta caches during HPOS order queries to eliminate N+1 queries in REST API serialization.
