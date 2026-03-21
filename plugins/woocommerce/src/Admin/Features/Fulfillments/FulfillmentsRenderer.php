@@ -205,20 +205,24 @@ class FulfillmentsRenderer {
 	private function render_shipment_tracking_column_row_data( WC_Order $order, array $fulfillments ) {
 		$tracking = array();
 		foreach ( $fulfillments as $fulfillment ) {
-			$tracking[] = $fulfillment->get_tracking_number();
-		}
-
-		$tracking = array_filter(
-			$tracking,
-			function ( $provider ) {
-				return ! empty( $provider );
+			$number = $fulfillment->get_tracking_number();
+			if ( ! empty( $number ) ) {
+				$tracking[] = array(
+					'number' => $number,
+					'url'    => $fulfillment->get_tracking_url(),
+				);
 			}
-		);
+		}
 
 		if ( count( $tracking ) > 1 ) {
 			echo '<span>' . esc_html__( 'Multiple trackings', 'woocommerce' ) . '</span>';
 		} elseif ( 1 === count( $tracking ) ) {
-			echo '<span>' . esc_html( array_shift( $tracking ) ) . '</span>';
+			$entry = $tracking[0];
+			if ( ! empty( $entry['url'] ) ) {
+				echo '<a href="' . esc_url( $entry['url'] ) . '" target="_blank" rel="noopener noreferrer" style="color: #2f2f2f;">' . esc_html( $entry['number'] ) . '</a>';
+			} else {
+				echo '<span>' . esc_html( $entry['number'] ) . '</span>';
+			}
 		} else {
 			echo '<span>--</span>';
 		}
