@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Button, Icon } from '@wordpress/components';
+import { Icon } from '@wordpress/components';
 import React, { ReactNode, useState } from 'react';
 
 /**
@@ -25,25 +25,40 @@ export default function FulfillmentCard( {
 	const [ isOpen, setIsOpen ] = useState( initialState === 'expanded' );
 	const hasChildren = React.Children.toArray( children ).length > 0;
 
+	const handleToggle = () => setIsOpen( ! isOpen );
+	const handleKeyUp = ( e: React.KeyboardEvent ) => {
+		if ( e.key === 'Enter' || e.key === ' ' ) {
+			e.preventDefault();
+			handleToggle();
+		}
+	};
+
 	return (
 		<div
 			className={ `woocommerce-fulfillment-card woocommerce-fulfillment-card__size-${ size }` }
 		>
-			<div className="woocommerce-fulfillment-card__header">
+			<div
+				className={ [
+					'woocommerce-fulfillment-card__header',
+					isCollapsable
+						? 'woocommerce-fulfillment-card__header--clickable'
+						: '',
+				].join( ' ' ) }
+				{ ...( isCollapsable
+					? {
+							onClick: handleToggle,
+							onKeyUp: handleKeyUp,
+							role: 'button',
+							tabIndex: 0,
+					  }
+					: {} ) }
+			>
 				{ header }
 				{ isCollapsable && (
-					<Button
-						__next40pxDefaultSize
-						size="small"
-						onClick={ () => setIsOpen( ! isOpen ) }
-					>
-						<Icon
-							icon={
-								isOpen ? 'arrow-up-alt2' : 'arrow-down-alt2'
-							}
-							size={ 16 }
-						/>
-					</Button>
+					<Icon
+						icon={ isOpen ? 'arrow-up-alt2' : 'arrow-down-alt2' }
+						size={ 16 }
+					/>
 				) }
 			</div>
 			{ isOpen && hasChildren && (

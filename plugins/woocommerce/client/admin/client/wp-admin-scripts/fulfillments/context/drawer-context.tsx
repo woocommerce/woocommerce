@@ -106,8 +106,10 @@ export const FulfillmentDrawerProvider = ( {
 			setOpenSection( 'fulfillment-' + fulfillments[ 0 ].id );
 		} else {
 			// If there are no pending items and multiple fulfillments,
-			// collapse all.
-			setOpenSection( '' );
+			// open the latest fulfillment.
+			setOpenSection(
+				'fulfillment-' + fulfillments[ fulfillments.length - 1 ].id
+			);
 		}
 	}, [ orderId, fulfillments, order, refunds ] );
 

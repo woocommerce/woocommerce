@@ -140,4 +140,30 @@ describe( 'ShipmentManualEntryForm', () => {
 		fireEvent.change( combobox, { target: { value: 'unknown-provider' } } );
 		expect( mockContext.setTrackingUrl ).toHaveBeenCalledWith( '' );
 	} );
+
+	it( 'updates tracking URL when tracking number changes and provider is selected', () => {
+		mockContext.shipmentProvider = 'ups';
+		render( <ShipmentManualEntryForm /> );
+		const input = screen.getByPlaceholderText( 'Enter tracking number' );
+		fireEvent.change( input, { target: { value: 'NEWTRACK123' } } );
+		expect( mockContext.setTrackingUrl ).toHaveBeenCalledWith(
+			'https://www.ups.com/track?loc=en_US&tracknum=NEWTRACK123'
+		);
+	} );
+
+	it( 'does not update tracking URL when tracking number changes and provider is "other"', () => {
+		mockContext.shipmentProvider = 'other';
+		render( <ShipmentManualEntryForm /> );
+		const input = screen.getByPlaceholderText( 'Enter tracking number' );
+		fireEvent.change( input, { target: { value: 'NEWTRACK123' } } );
+		expect( mockContext.setTrackingUrl ).not.toHaveBeenCalled();
+	} );
+
+	it( 'does not update tracking URL when tracking number changes and no provider is selected', () => {
+		mockContext.shipmentProvider = '';
+		render( <ShipmentManualEntryForm /> );
+		const input = screen.getByPlaceholderText( 'Enter tracking number' );
+		fireEvent.change( input, { target: { value: 'NEWTRACK123' } } );
+		expect( mockContext.setTrackingUrl ).not.toHaveBeenCalled();
+	} );
 } );
