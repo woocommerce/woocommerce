@@ -175,21 +175,25 @@ class FulfillmentsRenderer {
 	private function render_shipment_provider_column_row_data( WC_Order $order, array $fulfillments ) {
 		$providers = array();
 		foreach ( $fulfillments as $fulfillment ) {
-			$provider = $fulfillment->get_meta( '_shipment_provider' );
+			$provider = $fulfillment->get_shipping_provider();
 			if ( ! empty( $provider ) ) {
-				$providers[ $provider ] = $fulfillment;
+				$provider_name     = $fulfillment->get_meta( '_provider_name' );
+				$key               = 'other' === $provider && ! empty( $provider_name )
+					? $provider . '::' . $provider_name
+					: $provider;
+				$providers[ $key ] = $fulfillment;
 			}
 		}
 
 		if ( count( $providers ) > 1 ) {
 			echo '<span>' . esc_html__( 'Multiple providers', 'woocommerce' ) . '</span>';
 		} elseif ( 1 === count( $providers ) ) {
-			$provider_key           = array_key_first( $providers );
-			$provider_fulfillment   = $providers[ $provider_key ];
+			$provider_fulfillment   = reset( $providers );
+			$provider_slug          = $provider_fulfillment->get_shipping_provider();
 			$known_providers        = FulfillmentUtils::get_shipping_providers_object();
 			$provider_name_meta     = $provider_fulfillment->get_meta( '_provider_name' );
-			$provider_display_label = $known_providers[ $provider_key ]['label']
-				?? ( ! empty( $provider_name_meta ) ? $provider_name_meta : $provider_key );
+			$provider_display_label = $known_providers[ $provider_slug ]['label']
+				?? ( ! empty( $provider_name_meta ) ? $provider_name_meta : $provider_slug );
 			echo '<span>' . esc_html( $provider_display_label ) . '</span>';
 		} else {
 			echo '<span>--</span>';

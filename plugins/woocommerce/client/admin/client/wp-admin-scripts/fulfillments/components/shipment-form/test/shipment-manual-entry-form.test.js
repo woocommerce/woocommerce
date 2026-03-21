@@ -36,20 +36,22 @@ jest.mock( '@wordpress/components', () => ( {
 	),
 } ) );
 
+const createMockContext = () => ( {
+	trackingNumber: '',
+	setTrackingNumber: jest.fn(),
+	shipmentProvider: '',
+	setShipmentProvider: jest.fn(),
+	providerName: '',
+	setProviderName: jest.fn(),
+	trackingUrl: '',
+	setTrackingUrl: jest.fn(),
+} );
+
 describe( 'ShipmentManualEntryForm', () => {
-	const mockContext = {
-		trackingNumber: '',
-		setTrackingNumber: jest.fn(),
-		shipmentProvider: '',
-		setShipmentProvider: jest.fn(),
-		providerName: '',
-		setProviderName: jest.fn(),
-		trackingUrl: '',
-		setTrackingUrl: jest.fn(),
-	};
+	let mockContext;
 
 	beforeEach( () => {
-		jest.clearAllMocks();
+		mockContext = createMockContext();
 		useShipmentFormContext.mockReturnValue( mockContext );
 	} );
 
