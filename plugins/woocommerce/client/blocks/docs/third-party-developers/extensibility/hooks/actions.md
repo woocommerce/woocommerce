@@ -434,7 +434,6 @@ This hook fires after customer accounts are created and passes the customer data
 
 
 - [StoreApi/Routes/V1/Checkout.php](../../../../../../../woocommerce/src/StoreApi/Routes/V1/Checkout.php)
-- [StoreApi/Routes/V1/Checkout.php](../../../../../../../woocommerce/src/StoreApi/Routes/V1/Checkout.php)
 
 ---
 
