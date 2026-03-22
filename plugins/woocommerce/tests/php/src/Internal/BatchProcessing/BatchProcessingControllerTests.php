@@ -51,6 +51,21 @@ class BatchProcessingControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The same processor is not enqueued more than once.
+	 */
+	public function test_enqueue_processor_does_not_duplicate_entries() {
+		$processor_class_name = get_class( $this->test_process );
+
+		$this->sut->enqueue_processor( $processor_class_name );
+		$this->sut->enqueue_processor( $processor_class_name );
+
+		$this->assertEquals(
+			array( $processor_class_name ),
+			get_option( BatchProcessingController::ENQUEUED_PROCESSORS_OPTION_NAME )
+		);
+	}
+
+	/**
 	 * @testdox 'remove_processor' dequeues and unschedules a processor, but the watchdog is kept alive if more processors are still enqueued.
 	 */
 	public function test_remove_processor_when_others_are_still_enqueued() {
