@@ -376,6 +376,72 @@ test.describe( 'Add to Cart + Options Block', () => {
 		await expect( page.getByText( '1 in cart' ) ).toBeVisible();
 	} );
 
+	test( 'allows adding variable products with custom attribute slugs', async ( {
+		page,
+		pageObject,
+		editor,
+	} ) => {
+		// Create a global attribute where the slug intentionally differs from the name.
+		const attrOutput = await wpCLI(
+			`wc product_attribute create --name="Taille" --slug="custom-waist" --user=1`
+		);
+		const attrId = attrOutput.stdout.match(
+			/product_attribute\s+(\d+)/
+		)?.[ 1 ];
+
+		// Create terms with custom slugs that also differ from the names.
+		await wpCLI(
+			`wc product_attribute_term create ${ attrId } --name="Petit" --slug="s-m" --user=1`
+		);
+		await wpCLI(
+			`wc product_attribute_term create ${ attrId } --name="Grand" --slug="m-l" --user=1`
+		);
+
+		// Create a variable product using the global attribute.
+		const prodOutput = await wpCLI(
+			`wc product create --user=1 --slug="custom-slug-variable" --name="Custom Slug Variable" --type="variable" --attributes='${ JSON.stringify(
+				[
+					{
+						id: Number( attrId ),
+						visible: true,
+						variation: true,
+						options: [ 'Petit', 'Grand' ],
+					},
+				]
+			) }'`
+		);
+		const productId = prodOutput.stdout.match( /product\s+(\d+)/ )?.[ 1 ];
+
+		// Create a single "Any" variation (empty attributes = matches all terms).
+		await wpCLI(
+			`wc product_variation create "${ productId }" --user=1 --regular_price="19.99" --attributes='[]'`
+		);
+
+		await pageObject.updateSingleProductTemplate();
+
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
+
+		await page.goto( '/product/custom-slug-variable/' );
+
+		// Verify the pills show term names (not slugs).
+		const petitOption = page.locator( 'label:has-text("Petit")' );
+		const grandOption = page.locator( 'label:has-text("Grand")' );
+		const addToCartButton = page.getByRole( 'button', {
+			name: 'Add to cart',
+			exact: true,
+		} );
+
+		await expect( petitOption ).not.toBeDisabled();
+		await expect( grandOption ).not.toBeDisabled();
+
+		await petitOption.click();
+		await expect( addToCartButton ).not.toBeDisabled();
+		await addToCartButton.click();
+		await expect( page.getByText( '1 in cart' ) ).toBeVisible();
+	} );
+
 	test( 'allows adding grouped products to cart', async ( {
 		page,
 		pageObject,
