@@ -37222,12 +37222,6 @@ parameters:
 			path: includes/wccom-site/installation/installation-steps/class-wc-wccom-site-installation-step-get-product-info.php
 
 		-
-			message: '#^Cannot access offset ''destination'' on array\|WP_Error\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: includes/wccom-site/installation/installation-steps/class-wc-wccom-site-installation-step-move-product.php
-
-		-
 			message: '#^Method WC_WCCOM_Site_Installation_Step_Move_Product\:\:run\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1

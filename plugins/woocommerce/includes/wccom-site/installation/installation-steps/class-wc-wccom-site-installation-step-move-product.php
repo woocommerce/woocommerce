@@ -70,7 +70,7 @@ class WC_WCCOM_Site_Installation_Step_Move_Product implements WC_WCCOM_Site_Inst
 		}
 
 		if ( is_wp_error( $result ) ) {
-			throw new Installer_Error( Installer_Error_Codes::INSTALLATION_FAILED, $result->get_error_message() ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Error code constant is not user-facing output.
+			throw new Installer_Error( Installer_Error_Codes::INSTALLATION_FAILED, esc_html( $result->get_error_message() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Installer_Error_Codes constant is a static string, not unescaped output.
 		}
 
 		$this->state->set_installed_path( $result['destination'] );
