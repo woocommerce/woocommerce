@@ -796,6 +796,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 			return 'no' === $legacy_value;
 		}
 
-		return 'yes' === self::SCHEDULED_IMPORT_OPTION_DEFAULT_VALUE;
+		// Neither option exists — use the default (not scheduled).
+		return false;
 	}
 }
