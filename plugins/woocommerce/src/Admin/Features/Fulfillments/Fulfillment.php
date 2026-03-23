@@ -135,8 +135,10 @@ class Fulfillment extends \WC_Data {
 	 * Merge changes with data, clear changes, and refresh the meta snapshot.
 	 *
 	 * @since 10.7.0
+	 *
+	 * @return void
 	 */
-	public function apply_changes() {
+	public function apply_changes(): void {
 		parent::apply_changes();
 		$this->snapshot_meta();
 	}
