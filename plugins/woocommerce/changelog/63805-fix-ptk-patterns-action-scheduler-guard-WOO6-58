@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Restore function_exists guard in PTKPatternsStore to prevent fatal errors when an older Action Scheduler version is loaded by another plugin.
