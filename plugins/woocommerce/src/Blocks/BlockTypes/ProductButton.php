@@ -135,7 +135,7 @@ class ProductButton extends AbstractBlock {
 			 * @param number $default_quantity The default quantity.
 			 * @param number $product_id The product id.
 			 */
-			$default_quantity = apply_filters( 'woocommerce_add_to_cart_quantity', $default_quantity, $product->get_id() );
+			$default_quantity = apply_filters( 'woocommerce_add_to_cart_quantity', $default_quantity, $product->get_id(), 0 );
 		}
 
 		$add_to_cart_text = null !== $product->add_to_cart_text() ? $product->add_to_cart_text() : __( 'Add to cart', 'woocommerce' );
