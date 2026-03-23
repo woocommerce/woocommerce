@@ -8281,6 +8281,14 @@ table.bar_chart {
 	}
 }
 
+.wc-wp-version-gte-70 {
+	// Colour picker swatch: match WP 7.0 input height (40px).
+	.woocommerce table.form-table .colorpickpreview {
+		height: 40px;
+		width: 40px;
+	}
+}
+
 /**
  * WP 7.0+ compatibility.
  * WP 7.0 increased default form element sizing from 30px to 40px min-height.
