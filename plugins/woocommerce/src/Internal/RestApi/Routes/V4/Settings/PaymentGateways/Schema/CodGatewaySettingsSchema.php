@@ -71,7 +71,7 @@ class CodGatewaySettingsSchema extends AbstractPaymentGatewaySettingsSchema {
 			'enable_for_methods' => array(
 				'label'   => __( 'Available for shipping methods', 'woocommerce' ),
 				'type'    => 'multiselect',
-				'desc'    => '',
+				'desc'    => __( 'Choose which shipping methods support Cash on delivery.', 'woocommerce' ),
 				'options' => $this->load_shipping_method_options(),
 			),
 			'enable_for_virtual' => array(
