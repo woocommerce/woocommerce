@@ -27,11 +27,12 @@ class Flex_Layout_Renderer {
 		$flex_gap        = $theme_styles['spacing']['blockGap'] ?? '0px';
 		$flex_gap_number = Styles_Helper::parse_value( $flex_gap );
 
-		$margin_top = $parsed_block['email_attrs']['margin-top'] ?? '0px';
-		$justify    = $parsed_block['attrs']['layout']['justifyContent'] ?? 'left';
-		$styles     = wp_style_engine_get_styles( $parsed_block['attrs']['style'] ?? array() )['css'] ?? '';
-		$styles    .= 'margin-top: ' . $margin_top . ';';
-		$styles    .= 'text-align: ' . $justify;
+		$justify = $parsed_block['attrs']['layout']['justifyContent'] ?? 'left';
+		$styles  = wp_style_engine_get_styles( $parsed_block['attrs']['style'] ?? array() )['css'] ?? '';
+		if ( '' !== $styles ) {
+			$styles .= ';';
+		}
+		$styles .= 'text-align: ' . $justify;
 
 		// MS Outlook doesn't support style attribute in divs so we conditionally wrap the buttons in a table and repeat styles.
 		$output_html = sprintf(

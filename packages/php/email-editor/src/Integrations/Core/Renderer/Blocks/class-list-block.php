@@ -45,20 +45,9 @@ class List_Block extends Abstract_Block_Renderer {
 			$block_content = $html->get_updated_html();
 		}
 
-		$wrapper_style = \WP_Style_Engine::compile_css(
-			array(
-				'margin-top' => $parsed_block['email_attrs']['margin-top'] ?? '0px',
-			),
-			''
-		);
-
 		// \WP_HTML_Tag_Processor escapes the content, so we have to replace it back
 		$block_content = str_replace( '&#039;', "'", $block_content );
 
-		return sprintf(
-			'<div style="%1$s">%2$s</div>',
-			esc_attr( $wrapper_style ),
-			$block_content
-		);
+		return $block_content;
 	}
 }
