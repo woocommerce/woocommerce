@@ -294,7 +294,7 @@ class AdvancedFilters extends Component {
 					</Text>
 				</CardHeader>
 				{ !! activeFilters.length && (
-					<CardBody size={ null }>
+					<CardBody size="none">
 						<ul
 							className="woocommerce-filters-advanced__list"
 							ref={ this.filterListRef }
