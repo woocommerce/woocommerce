@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix oversized pagination select field on orders and products list pages for WordPress 7.0.

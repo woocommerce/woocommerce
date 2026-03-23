@@ -409,7 +409,7 @@ class WC_Admin {
 	 * @return string
 	 */
 	public function include_admin_body_class( $classes ) {
-		if ( in_array( array( 'wc-wp-version-gte-53', 'wc-wp-version-gte-55' ), explode( ' ', $classes ), true ) ) {
+		if ( in_array( array( 'wc-wp-version-gte-53', 'wc-wp-version-gte-55', 'wc-wp-version-gte-70' ), explode( ' ', $classes ), true ) ) {
 			return $classes;
 		}
 
@@ -425,6 +425,11 @@ class WC_Admin {
 		// Add WP 5.5+ compatibility class.
 		if ( $raw_version && version_compare( $version, '5.5', '>=' ) ) {
 			$classes .= ' wc-wp-version-gte-55';
+		}
+
+		// Add WP 7.0+ compatibility class.
+		if ( $raw_version && version_compare( $version, '7.0', '>=' ) ) {
+			$classes .= ' wc-wp-version-gte-70';
 		}
 
 		return $classes;

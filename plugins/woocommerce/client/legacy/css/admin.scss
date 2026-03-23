@@ -8282,6 +8282,22 @@ table.bar_chart {
 }
 
 /**
+ * WP 7.0+ compatibility.
+ * WP 7.0 increased default form element min-height from 30px to 40px.
+ * Native <select> elements in the tablenav pagination area need to be
+ * constrained to the compact 32px sizing used by the tablenav.
+ */
+.wc-wp-version-gte-70.woocommerce_page_wc-orders .tablenav,
+.wc-wp-version-gte-70.post-type-product .tablenav,
+.wc-wp-version-gte-70.post-type-shop_order .tablenav {
+	select {
+		min-height: 32px;
+		height: 32px;
+		line-height: 2;
+	}
+}
+
+/**
   * Select2 colors for built-in admin color themes.
   */
 .wp-admin {
