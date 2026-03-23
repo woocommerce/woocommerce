@@ -8282,6 +8282,19 @@ table.bar_chart {
 }
 
 /**
+ * WP 7.0+ compatibility — settings page label alignment.
+ * WP 7.0 increased form element min-height from 30px to 40px,
+ * causing labels in table.form-table th to sit too high relative
+ * to their adjacent fields. Increase th padding-top to vertically
+ * centre the label text with the taller fields.
+ */
+.wc-wp-version-gte-70 {
+	.woocommerce table.form-table th {
+		padding-top: 25px;
+	}
+}
+
+/**
   * Select2 colors for built-in admin color themes.
   */
 .wp-admin {
