@@ -555,16 +555,11 @@ abstract class AbstractPaymentGatewaySettingsSchema extends AbstractSchema {
 				return sanitize_email( $value );
 
 			case 'password':
-				// No aggressive sanitization to avoid corrupting passwords and API keys.
-				// stripslashes() is intentionally omitted: WC_Settings_API::validate_password_field()
-				// calls it to undo WordPress's add_magic_quotes() on form POST data, but REST JSON
-				// input is never magic-quote-escaped — stripping slashes here would corrupt passwords
-				// containing literal backslashes.
-				// wp_strip_all_tags() is also avoided: PHP's strip_tags() treats a lone '<' as the
-				// start of a malformed HTML tag and silently drops everything from that point onward
-				// (e.g. "abc<def" becomes "abc"), which would corrupt passwords containing '<'.
-				// Guard against non-scalar values (arrays, objects, null) from malformed requests.
-				// Scalars (int, float, bool) are coerced to string to preserve numeric PINs/API keys.
+				// Only trim — no stripslashes() (REST JSON is not magic-quote-escaped),
+				// no wp_strip_all_tags() or wc_clean() which would corrupt passwords
+				// containing '<', backslashes, or percent-like sequences.
+				// Non-scalar values (arrays, objects, null) from malformed requests → empty string.
+				// Scalars coerced to string to preserve numeric PINs/API keys.
 				return is_scalar( $value ) ? trim( (string) $value ) : '';
 
 			case 'color':
