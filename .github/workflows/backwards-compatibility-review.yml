@@ -112,4 +112,4 @@ jobs:
             6. Submit the review using: gh api "repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews" -X POST --input bc_review_payload.json
 
           claude_args: >
-            --allowedTools "Write,Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}:*),Bash(git show:*),Bash(git diff:*),Bash(git ls-files:*),Bash(git grep:*)"
+            --allowedTools "Write,Bash(gh pr diff *),Bash(gh pr view *),Bash(gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }} *),Bash(git show *),Bash(git diff *),Bash(git ls-files *),Bash(git grep *)"
