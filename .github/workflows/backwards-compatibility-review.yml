@@ -19,7 +19,6 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-      id-token: write
 
     steps:
       - name: Checkout repository
@@ -28,7 +27,7 @@ jobs:
           fetch-depth: 0
 
       - name: PR Review with Progress Tracking (inline-only)
-        uses: anthropics/claude-code-action@v1
+        uses: anthropics/claude-code-action@64c7a0ef71df67b14cb4471f4d9c8565c61042bf # v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           prompt: |
@@ -113,4 +112,4 @@ jobs:
             6. Submit the review using: gh api "repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews" -X POST --input bc_review_payload.json
 
           claude_args: >
-            --allowedTools "Write,Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh api:*),Bash(git show:*),Bash(git diff:*),Bash(git ls-files:*),Bash(git grep:*)"
+            --allowedTools "Write,Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}:*),Bash(git show:*),Bash(git diff:*),Bash(git ls-files:*),Bash(git grep:*)"

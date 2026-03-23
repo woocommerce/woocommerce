@@ -26,7 +26,7 @@ jobs:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           claude_args: >
-            --allowedTools "Bash(gh pr diff *),Bash(gh pr view *)"
+            --allowedTools "Bash(gh pr diff:*),Bash(gh pr view:*)"
             --json-schema '{"type":"object","properties":{"needs_docs":{"type":"boolean"},"confidence":{"type":"string","enum":["high","medium","low"]},"reason":{"type":"string"}},"required":["needs_docs","confidence","reason"]}'
           prompt: |
             Docs update detection for WooCommerce
