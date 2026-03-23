@@ -324,6 +324,7 @@ class WC_Install {
 		),
 		'10.7.0' => array(
 			'wc_update_1070_disable_hpos_sync_on_read',
+			'wc_update_1070_migrate_analytics_import_option',
 		),
 	);
 
