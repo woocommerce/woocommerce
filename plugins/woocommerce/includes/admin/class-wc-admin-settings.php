@@ -986,13 +986,11 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						$value = wc_parse_relative_date_option( $raw_value );
 						break;
 					case 'password':
-						// Preserve null so the option is skipped (not overwritten) when the field is absent from POST data.
-						// Guard against non-string values (e.g. arrays from crafted POST data) to avoid TypeError.
-						// No aggressive sanitization to avoid corrupting passwords and API keys — matches
-						// WC_Settings_API::validate_password_field(). Using wp_strip_all_tags() here would
-						// truncate values containing a literal '<' (e.g. "abc<def" becomes "abc") because
-						// PHP's strip_tags() treats the '<' as the start of a malformed HTML tag.
-						// Note: $raw_value is already wp_unslash()ed (line 946/949), so no stripslashes() needed.
+						// Non-string or absent → null so the option is skipped, not overwritten.
+						// Only trim — no wp_strip_all_tags() or wc_clean() which would corrupt
+						// passwords containing '<' or percent-like sequences.
+						// $raw_value is already wp_unslash()ed upstream, so no stripslashes() needed.
+						// Matches WC_Settings_API::validate_password_field() behavior.
 						$value = is_string( $raw_value ) ? trim( $raw_value ) : null;
 						break;
 					default:
