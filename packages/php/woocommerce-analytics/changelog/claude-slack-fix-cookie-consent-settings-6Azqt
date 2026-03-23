@@ -1,0 +1,4 @@
+Significance: patch
+Type: fixed
+
+Disable batched analytics requests when a SOCKS proxy is configured, falling back to wp_remote_get() which respects WP_PROXY_* settings.
