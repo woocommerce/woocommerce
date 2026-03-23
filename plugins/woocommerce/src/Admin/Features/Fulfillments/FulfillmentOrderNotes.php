@@ -324,7 +324,7 @@ class FulfillmentOrderNotes {
 	 */
 	private function format_tracking( Fulfillment $fulfillment ): string {
 		$tracking_number   = $fulfillment->get_tracking_number();
-		$shipping_provider = $fulfillment->get_shipping_provider();
+		$shipping_provider = $fulfillment->get_shipment_provider();
 		$tracking_url      = $fulfillment->get_tracking_url();
 
 		if ( null === $tracking_number ) {

@@ -398,13 +398,13 @@ class Fulfillment extends \WC_Data {
 	}
 
 	/**
-	 * Get the shipping provider.
+	 * Get the shipment provider.
 	 *
 	 * @since 10.7.0
-	 * @return string|null Shipping provider slug.
+	 * @return string|null Shipment provider slug.
 	 */
-	public function get_shipping_provider(): ?string {
-		$value = $this->get_meta( '_shipping_provider', true );
+	public function get_shipment_provider(): ?string {
+		$value = $this->get_meta( '_shipment_provider', true );
 		if ( ! is_scalar( $value ) ) {
 			return null;
 		}
@@ -414,13 +414,13 @@ class Fulfillment extends \WC_Data {
 	}
 
 	/**
-	 * Set the shipping provider.
+	 * Set the shipment provider.
 	 *
 	 * @since 10.7.0
-	 * @param string $shipping_provider Shipping provider slug.
+	 * @param string $shipment_provider Shipment provider slug.
 	 */
-	public function set_shipping_provider( string $shipping_provider ): void {
-		$this->update_meta_data( '_shipping_provider', $shipping_provider );
+	public function set_shipment_provider( string $shipment_provider ): void {
+		$this->update_meta_data( '_shipment_provider', $shipment_provider );
 	}
 
 	/**

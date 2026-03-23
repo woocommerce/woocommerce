@@ -288,15 +288,15 @@ class FulfillmentTest extends \WC_Unit_Test_Case {
 
 		$reloaded = new Fulfillment( $fulfillment->get_id() );
 		$reloaded->set_tracking_number( '1Z999AA10123456784' );
-		$reloaded->set_shipping_provider( 'ups' );
+		$reloaded->set_shipment_provider( 'ups' );
 
 		$changes = $reloaded->get_changes();
 
 		$this->assertArrayHasKey( 'meta_data', $changes );
 		$this->assertArrayHasKey( '_tracking_number', $changes['meta_data'] );
 		$this->assertSame( '1Z999AA10123456784', $changes['meta_data']['_tracking_number'] );
-		$this->assertArrayHasKey( '_shipping_provider', $changes['meta_data'] );
-		$this->assertSame( 'ups', $changes['meta_data']['_shipping_provider'] );
+		$this->assertArrayHasKey( '_shipment_provider', $changes['meta_data'] );
+		$this->assertSame( 'ups', $changes['meta_data']['_shipment_provider'] );
 	}
 
 	/**

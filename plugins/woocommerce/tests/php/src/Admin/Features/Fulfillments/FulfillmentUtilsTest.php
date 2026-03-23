@@ -101,7 +101,7 @@ class FulfillmentUtilsTest extends \WC_Unit_Test_Case {
 						'qty'     => 1,
 					),
 				),
-				'_shipping_provider' => 'usps',
+				'_shipment_provider' => 'usps',
 				'_provider_name'     => 'USPS',
 			)
 		);
@@ -124,7 +124,7 @@ class FulfillmentUtilsTest extends \WC_Unit_Test_Case {
 						'qty'     => 1,
 					),
 				),
-				'_shipping_provider' => 'other',
+				'_shipment_provider' => 'other',
 				'_provider_name'     => 'My Custom Carrier',
 			)
 		);

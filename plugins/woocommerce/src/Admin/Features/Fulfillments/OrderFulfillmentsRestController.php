@@ -1243,7 +1243,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 	 * Track fulfillment_tracking_added if tracking information was added or changed.
 	 *
 	 * For new fulfillments ($changes is empty), fires whenever a tracking number is present.
-	 * For updates, only fires when tracking-related meta (_tracking_number, _shipping_provider,
+	 * For updates, only fires when tracking-related meta (_tracking_number, _shipment_provider,
 	 * or _tracking_url) actually changed.
 	 *
 	 * @param Fulfillment     $fulfillment The fulfillment object (after save).
@@ -1262,7 +1262,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 		if ( ! empty( $changes ) ) {
 			$meta_changes     = $changes['meta_data'] ?? array();
 			$tracking_changed = array_key_exists( '_tracking_number', $meta_changes )
-				|| array_key_exists( '_shipping_provider', $meta_changes )
+				|| array_key_exists( '_shipment_provider', $meta_changes )
 				|| array_key_exists( '_tracking_url', $meta_changes );
 			if ( ! $tracking_changed ) {
 				return;
@@ -1272,7 +1272,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 		$source            = $this->check_request_source( $request );
 		$shipping_option   = $fulfillment->get_meta( '_shipping_option', true );
 		$shipping_option   = ! empty( $shipping_option ) ? $shipping_option : '';
-		$shipment_provider = $fulfillment->get_shipping_provider() ?? '';
+		$shipment_provider = $fulfillment->get_shipment_provider() ?? '';
 		$is_custom         = 'other' === $shipment_provider;
 
 		$entry_method      = FulfillmentsTracker::determine_tracking_entry_method( $source, $shipping_option );

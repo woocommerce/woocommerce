@@ -58,7 +58,7 @@ Fired after a fulfillment is successfully updated in the database.
 **Parameters:**
 
 -   `$data` (Fulfillment) - The updated fulfillment object
--   `$changes` (array) - The changes that were applied, as returned by `Fulfillment::get_changes()` before save. Core data properties (e.g. `status`, `is_fulfilled`) sit at the top level; meta-based changes (e.g. `_tracking_number`, `_shipping_provider`, `_items`) are nested under the `meta_data` key.
+-   `$changes` (array) - The changes that were applied, as returned by `Fulfillment::get_changes()` before save. Core data properties (e.g. `status`, `is_fulfilled`) sit at the top level; meta-based changes (e.g. `_tracking_number`, `_shipment_provider`, `_items`) are nested under the `meta_data` key.
 -   `$previous_status` (string) - The fulfillment status before the update (e.g. `'unfulfilled'`)
 
 **Purpose:** Allows plugins to perform actions after a fulfillment is updated. All core data and metadata changes are included in `$changes`.
