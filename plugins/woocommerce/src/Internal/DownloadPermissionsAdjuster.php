@@ -44,6 +44,7 @@ class DownloadPermissionsAdjuster {
 			return;
 		}
 
+		_prime_post_caches( $children_ids );
 		$are_any_children_downloadable = false;
 		foreach ( $children_ids as $child_id ) {
 			$child = wc_get_product( $child_id );
@@ -111,6 +112,7 @@ class DownloadPermissionsAdjuster {
 			return;
 		}
 
+		// _prime_post_caches( $children_ids );
 		$children_with_downloads = array();
 		foreach ( $children_ids as $child_id ) {
 			$child = wc_get_product( $child_id );
