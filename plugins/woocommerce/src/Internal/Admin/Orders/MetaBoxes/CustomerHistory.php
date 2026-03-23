@@ -90,20 +90,23 @@ class CustomerHistory {
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		if ( $customer_id > 0 ) {
+			$status_filter    = $excluded_statuses_sql ? "AND status NOT IN $excluded_statuses_sql" : '';
+			$co_status_filter = $excluded_statuses_sql ? "AND co.status NOT IN $excluded_statuses_sql" : '';
+
 			$sql = $wpdb->prepare(
 				"SELECT COUNT(*) AS orders_count,
 					COALESCE( SUM( filtered.total_amount ), 0 ) + COALESCE( SUM( r.refund_total ), 0 ) AS total_spend
 				FROM (
 					SELECT id, total_amount
 					FROM %i
-					WHERE customer_id = %d AND type = 'shop_order' AND status NOT IN $excluded_statuses_sql
+					WHERE customer_id = %d AND type = 'shop_order' $status_filter
 				) AS filtered
 				LEFT JOIN (
 					SELECT rp.parent_order_id, SUM( rp.total_amount ) AS refund_total
 					FROM %i AS rp
 					INNER JOIN %i AS co ON rp.parent_order_id = co.id
 					WHERE rp.type = 'shop_order_refund'
-						AND co.customer_id = %d AND co.type = 'shop_order' AND co.status NOT IN $excluded_statuses_sql
+						AND co.customer_id = %d AND co.type = 'shop_order' $co_status_filter
 					GROUP BY rp.parent_order_id
 				) AS r ON filtered.id = r.parent_order_id",
 				$orders_table,
@@ -113,15 +116,18 @@ class CustomerHistory {
 				$customer_id
 			);
 		} elseif ( '' !== $billing_email ) {
-			$addresses_table = OrdersTableDataStore::get_addresses_table_name();
-			$sql             = $wpdb->prepare(
+			$addresses_table  = OrdersTableDataStore::get_addresses_table_name();
+			$o_status_filter  = $excluded_statuses_sql ? "AND o.status NOT IN $excluded_statuses_sql" : '';
+			$co_status_filter = $excluded_statuses_sql ? "AND co.status NOT IN $excluded_statuses_sql" : '';
+
+			$sql = $wpdb->prepare(
 				"SELECT COUNT(*) AS orders_count,
 					COALESCE( SUM( filtered.total_amount ), 0 ) + COALESCE( SUM( r.refund_total ), 0 ) AS total_spend
 				FROM (
 					SELECT o.id, o.total_amount
 					FROM %i AS o
 					INNER JOIN %i AS a ON o.id = a.order_id AND a.address_type = 'billing'
-					WHERE o.customer_id = 0 AND a.email = %s AND o.type = 'shop_order' AND o.status NOT IN $excluded_statuses_sql
+					WHERE o.customer_id = 0 AND a.email = %s AND o.type = 'shop_order' $o_status_filter
 				) AS filtered
 				LEFT JOIN (
 					SELECT rp.parent_order_id, SUM( rp.total_amount ) AS refund_total
@@ -129,7 +135,7 @@ class CustomerHistory {
 					INNER JOIN %i AS co ON rp.parent_order_id = co.id
 					INNER JOIN %i AS ca ON co.id = ca.order_id AND ca.address_type = 'billing'
 					WHERE rp.type = 'shop_order_refund'
-						AND co.customer_id = 0 AND ca.email = %s AND co.type = 'shop_order' AND co.status NOT IN $excluded_statuses_sql
+						AND co.customer_id = 0 AND ca.email = %s AND co.type = 'shop_order' $co_status_filter
 					GROUP BY rp.parent_order_id
 				) AS r ON filtered.id = r.parent_order_id",
 				$orders_table,
@@ -188,7 +194,7 @@ class CustomerHistory {
 	/**
 	 * Get the SQL fragment for excluded order statuses.
 	 *
-	 * @return string SQL IN clause, e.g. ( 'auto-draft','trash','wc-pending','wc-failed',... ), or ( '' ) if no statuses are excluded.
+	 * @return string SQL IN clause, e.g. ( 'auto-draft','trash','wc-pending','wc-failed',... ), or empty string if no statuses are excluded.
 	 */
 	private function get_excluded_statuses_sql(): string {
 		global $wpdb;
@@ -211,7 +217,7 @@ class CustomerHistory {
 		}
 
 		if ( empty( $excluded_statuses ) ) {
-			return "( '' )";
+			return '';
 		}
 
 		$prefixed = array_map(
