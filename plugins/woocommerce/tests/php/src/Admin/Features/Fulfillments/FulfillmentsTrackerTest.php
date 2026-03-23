@@ -15,7 +15,7 @@ class FulfillmentsTrackerTest extends WC_Unit_Test_Case {
 	 * @testdox determine_tracking_entry_method returns api when source is api.
 	 */
 	public function test_determine_entry_method_returns_api_for_api_source(): void {
-		$result = FulfillmentsTracker::determine_tracking_entry_method( 'api', 'tracking-number', 'usps' );
+		$result = FulfillmentsTracker::determine_tracking_entry_method( 'api', 'tracking-number' );
 
 		$this->assertSame( 'api', $result, 'API source should always return api entry method' );
 	}
@@ -24,34 +24,25 @@ class FulfillmentsTrackerTest extends WC_Unit_Test_Case {
 	 * @testdox determine_tracking_entry_method returns ui_auto_lookup for tracking-number option from UI.
 	 */
 	public function test_determine_entry_method_returns_ui_auto_lookup(): void {
-		$result = FulfillmentsTracker::determine_tracking_entry_method( 'fulfillments_modal', 'tracking-number', 'usps' );
+		$result = FulfillmentsTracker::determine_tracking_entry_method( 'fulfillments_modal', 'tracking-number' );
 
 		$this->assertSame( 'ui_auto_lookup', $result, 'tracking-number option from modal should return ui_auto_lookup' );
 	}
 
 	/**
-	 * @testdox determine_tracking_entry_method returns ui_manual_select for manual-entry with known provider.
+	 * @testdox determine_tracking_entry_method returns ui_manual for manual-entry from UI.
 	 */
-	public function test_determine_entry_method_returns_ui_manual_select(): void {
-		$result = FulfillmentsTracker::determine_tracking_entry_method( 'fulfillments_modal', 'manual-entry', 'fedex' );
+	public function test_determine_entry_method_returns_ui_manual(): void {
+		$result = FulfillmentsTracker::determine_tracking_entry_method( 'fulfillments_modal', 'manual-entry' );
 
-		$this->assertSame( 'ui_manual_select', $result, 'manual-entry with known provider should return ui_manual_select' );
-	}
-
-	/**
-	 * @testdox determine_tracking_entry_method returns ui_manual_custom for manual-entry with other provider.
-	 */
-	public function test_determine_entry_method_returns_ui_manual_custom(): void {
-		$result = FulfillmentsTracker::determine_tracking_entry_method( 'fulfillments_modal', 'manual-entry', 'other' );
-
-		$this->assertSame( 'ui_manual_custom', $result, 'manual-entry with other provider should return ui_manual_custom' );
+		$this->assertSame( 'ui_manual', $result, 'manual-entry from modal should return ui_manual' );
 	}
 
 	/**
 	 * @testdox determine_tracking_entry_method returns api for unknown shipping option from UI.
 	 */
 	public function test_determine_entry_method_returns_api_for_unknown_option(): void {
-		$result = FulfillmentsTracker::determine_tracking_entry_method( 'fulfillments_modal', 'no-info', 'usps' );
+		$result = FulfillmentsTracker::determine_tracking_entry_method( 'fulfillments_modal', 'no-info' );
 
 		$this->assertSame( 'api', $result, 'Unknown shipping option from modal should fall back to api' );
 	}
@@ -60,7 +51,7 @@ class FulfillmentsTrackerTest extends WC_Unit_Test_Case {
 	 * @testdox determine_tracking_entry_method returns api for empty shipping option from UI.
 	 */
 	public function test_determine_entry_method_returns_api_for_empty_option(): void {
-		$result = FulfillmentsTracker::determine_tracking_entry_method( 'fulfillments_modal', '', '' );
+		$result = FulfillmentsTracker::determine_tracking_entry_method( 'fulfillments_modal', '' );
 
 		$this->assertSame( 'api', $result, 'Empty shipping option from modal should fall back to api' );
 	}
@@ -68,18 +59,16 @@ class FulfillmentsTrackerTest extends WC_Unit_Test_Case {
 	/**
 	 * Data provider for entry method scenarios.
 	 *
-	 * @return array<string, array{string, string, string, string}>
+	 * @return array<string, array{string, string, string}>
 	 */
 	public function entry_method_data_provider(): array {
 		return array(
-			'API with tracking-number'     => array( 'api', 'tracking-number', 'usps', 'api' ),
-			'API with manual-entry'        => array( 'api', 'manual-entry', 'fedex', 'api' ),
-			'API with manual-entry other'  => array( 'api', 'manual-entry', 'other', 'api' ),
-			'UI auto lookup with DHL'      => array( 'fulfillments_modal', 'tracking-number', 'dhl', 'ui_auto_lookup' ),
-			'UI manual select with UPS'    => array( 'fulfillments_modal', 'manual-entry', 'ups', 'ui_manual_select' ),
-			'UI manual custom provider'    => array( 'fulfillments_modal', 'manual-entry', 'other', 'ui_manual_custom' ),
-			'UI no-info falls back to api' => array( 'fulfillments_modal', 'no-info', '', 'api' ),
-			'Unknown source falls back'    => array( 'bulk_action', 'tracking-number', 'usps', 'api' ),
+			'API with tracking-number'     => array( 'api', 'tracking-number', 'api' ),
+			'API with manual-entry'        => array( 'api', 'manual-entry', 'api' ),
+			'UI auto lookup'               => array( 'fulfillments_modal', 'tracking-number', 'ui_auto_lookup' ),
+			'UI manual entry'              => array( 'fulfillments_modal', 'manual-entry', 'ui_manual' ),
+			'UI no-info falls back to api' => array( 'fulfillments_modal', 'no-info', 'api' ),
+			'Unknown source falls back'    => array( 'bulk_action', 'tracking-number', 'api' ),
 		);
 	}
 
@@ -88,13 +77,12 @@ class FulfillmentsTrackerTest extends WC_Unit_Test_Case {
 	 *
 	 * @dataProvider entry_method_data_provider
 	 *
-	 * @param string $source            The request source.
-	 * @param string $shipping_option   The shipping option.
-	 * @param string $shipment_provider The provider key.
-	 * @param string $expected          The expected entry method.
+	 * @param string $source          The request source.
+	 * @param string $shipping_option The shipping option.
+	 * @param string $expected        The expected entry method.
 	 */
-	public function test_determine_entry_method_data_provider( string $source, string $shipping_option, string $shipment_provider, string $expected ): void {
-		$result = FulfillmentsTracker::determine_tracking_entry_method( $source, $shipping_option, $shipment_provider );
+	public function test_determine_entry_method_data_provider( string $source, string $shipping_option, string $expected ): void {
+		$result = FulfillmentsTracker::determine_tracking_entry_method( $source, $shipping_option );
 
 		$this->assertSame( $expected, $result );
 	}

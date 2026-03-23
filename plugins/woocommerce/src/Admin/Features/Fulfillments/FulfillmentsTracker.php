@@ -35,7 +35,7 @@ use WC_Tracks;
  * 5. Friction / Errors:
  *    - fulfillment_validation_error : A create/update/delete action fails validation.      (REST controller)
  *
- * @since 10.1.0
+ * @since 10.7.0
  */
 class FulfillmentsTracker {
 
@@ -48,6 +48,8 @@ class FulfillmentsTracker {
 	 *
 	 * Tracked from: Frontend (JS recordEvent).
 	 * Measures: Feature discoverability and adoption.
+	 *
+	 * @since 10.7.0
 	 *
 	 * @param string $source  Where the modal was opened from ("orders_list" or "order_detail_page").
 	 * @param int    $order_id The ID of the order being viewed.
@@ -70,13 +72,14 @@ class FulfillmentsTracker {
 	 * Tracked from: OrderFulfillmentsRestController::create_fulfillment().
 	 * Measures: Core adoption; whether merchants create full vs. partial shipments.
 	 *
+	 * @since 10.7.0
+	 *
 	 * @param string $source           The source of the fulfillment ("fulfillments_modal", "bulk_action", or "api").
 	 * @param string $initial_status   The initial status of the fulfillment ("draft" or "fulfilled").
 	 * @param string $fulfillment_type Whether all remaining items were included ("full" or "partial").
 	 * @param int    $item_count       Total quantity of items in the fulfillment (sum of item quantities).
 	 * @param int    $total_quantity   Total quantity of all items in the order.
 	 * @param bool   $notification_sent Whether the customer notification was requested.
-	 *
 	 * @return void
 	 */
 	public static function track_fulfillment_creation( string $source, string $initial_status, string $fulfillment_type, int $item_count, int $total_quantity, bool $notification_sent ): void {
@@ -99,10 +102,14 @@ class FulfillmentsTracker {
 	 * Tracked from: OrderFulfillmentsRestController::update_fulfillment().
 	 * Measures: How often merchants modify fulfillments and which fields change most.
 	 *
+	 * @since 10.7.0
+	 *
 	 * @param string $source            The source of the update ("fulfillments_modal" or "api").
 	 * @param int    $fulfillment_id    The ID of the fulfillment being updated.
 	 * @param string $original_status   The status before the update ("draft" or "fulfilled").
-	 * @param array  $changed_fields    List of fields that were modified (e.g., ['items', 'tracking_number']).
+	 * @param array  $changed_fields    The changes as returned by Fulfillment::get_changes(). Core data
+	 *                                  props (e.g. 'status') at top level, meta changes under 'meta_data'.
+	 *                                  Serialized as JSON by WC_Tracks.
 	 * @param bool   $notification_sent Whether a customer re-notification was requested.
 	 *
 	 * @return void
@@ -125,6 +132,8 @@ class FulfillmentsTracker {
 	 *
 	 * Tracked from: OrderFulfillmentsRestController::delete_fulfillment().
 	 * Measures: How often merchants remove fulfillments and at what stage.
+	 *
+	 * @since 10.7.0
 	 *
 	 * @param string $source              The source of the deletion ("fulfillments_modal" or "api").
 	 * @param int    $fulfillment_id      The ID of the fulfillment being deleted.
@@ -158,6 +167,8 @@ class FulfillmentsTracker {
 	 *           identify the most frequently added custom carriers, informing the roadmap for
 	 *           expanding native carrier support.
 	 *
+	 * @since 10.7.0
+	 *
 	 * @param int    $fulfillment_id    The ID of the fulfillment to which tracking was added.
 	 * @param string $entry_method      How the tracking was added ("ui_auto_lookup", "ui_manual_select", "ui_manual_custom", or "api").
 	 * @param string $provider_name     The name/key of the shipping provider (e.g., "usps", "fedex").
@@ -184,6 +195,8 @@ class FulfillmentsTracker {
 	 * Measures: Effectiveness of auto-detection. A high failure rate indicates the need to improve
 	 *           carrier detection logic. The url_generated flag checks if a functional tracking URL
 	 *           was constructed (a success requires both provider identification AND URL generation).
+	 *
+	 * @since 10.7.0
 	 *
 	 * @param string $lookup_status       The lookup result ("success" or "not_found").
 	 * @param string $provider_identified The standardized carrier name identified (e.g., "usps"). Empty if not found.
@@ -212,6 +225,8 @@ class FulfillmentsTracker {
 	 * Tracked from: FulfillmentsRenderer::handle_fulfillment_bulk_actions().
 	 * Measures: Whether merchants use the time-saving bulk-fulfill feature.
 	 *
+	 * @since 10.7.0
+	 *
 	 * @param string $action      The action performed ("fulfill_orders" or "unfulfill_orders").
 	 * @param int    $order_count The number of orders selected for the bulk action.
 	 *
@@ -232,6 +247,8 @@ class FulfillmentsTracker {
 	 *
 	 * Tracked from: FulfillmentsRenderer::filter_orders_list_table_query().
 	 * Measures: Whether merchants use fulfillment filters and which values they filter by most.
+	 *
+	 * @since 10.7.0
 	 *
 	 * @param string $filter_by    The filter field ("fulfillment_status" or "shipping_provider").
 	 * @param string $filter_value The specific value selected (e.g., "partially_fulfilled", "usps").
@@ -258,6 +275,8 @@ class FulfillmentsTracker {
 	 * Tracked from: OrderFulfillmentsRestController (create, update, and delete flows).
 	 * Measures: Whether the communication loop is being closed; how often merchants notify customers.
 	 *
+	 * @since 10.7.0
+	 *
 	 * @param string $trigger_action The action that triggered the notification ("fulfillment_created", "fulfillment_updated", or "fulfillment_deleted").
 	 * @param int    $fulfillment_id The ID of the fulfillment.
 	 * @param int    $order_id       The ID of the associated order.
@@ -281,6 +300,8 @@ class FulfillmentsTracker {
 	 * Tracked from: FulfillmentsManager (hooked to woocommerce_update_options_email_{id}).
 	 * Measures: Whether merchants customize fulfillment email templates.
 	 *
+	 * @since 10.7.0
+	 *
 	 * @param string $template_name The email template ID that was customized (e.g., "customer_fulfillment_created").
 	 *
 	 * @return void
@@ -303,6 +324,8 @@ class FulfillmentsTracker {
 	 *
 	 * Tracked from: OrderFulfillmentsRestController (create, update, and delete flows).
 	 * Measures: Where users encounter errors; helps proactively identify bugs and UX problems.
+	 *
+	 * @since 10.7.0
 	 *
 	 * @param string $action_attempted The action that was attempted ("create", "update", "delete", or "fulfill").
 	 * @param string $error_code       The error code from the exception.
@@ -328,20 +351,22 @@ class FulfillmentsTracker {
 	/**
 	 * Determine the tracking entry method from the request source and fulfillment meta data.
 	 *
-	 * Maps the shipping option meta value and provider selection to the standardized entry_method
-	 * values expected by the fulfillment_tracking_added event:
-	 *   - "ui_auto_lookup"   : Tracking number was auto-detected via the lookup API.
-	 *   - "ui_manual_select" : Merchant manually selected a known provider from the dropdown.
-	 *   - "ui_manual_custom" : Merchant manually entered a custom (non-native) provider.
-	 *   - "api"              : Tracking was added via the REST API (not through the UI).
+	 * Maps the shipping option meta value to the standardized entry_method values expected
+	 * by the fulfillment_tracking_added event. Whether the provider is custom or native is
+	 * tracked separately via the is_custom_provider property on the event.
 	 *
-	 * @param string $source            The request source ("fulfillments_modal" or "api").
-	 * @param string $shipping_option   The shipping option meta value ("tracking-number", "manual-entry", or "no-info").
-	 * @param string $shipment_provider The provider key (e.g., "usps", "other").
+	 *   - "ui_auto_lookup" : Tracking number was auto-detected via the lookup API.
+	 *   - "ui_manual"      : Merchant manually selected or entered a provider.
+	 *   - "api"            : Tracking was added via the REST API (not through the UI).
+	 *
+	 * @since 10.7.0
+	 *
+	 * @param string $source          The request source ("fulfillments_modal" or "api").
+	 * @param string $shipping_option The shipping option meta value ("tracking-number", "manual-entry", or "no-info").
 	 *
 	 * @return string The entry method identifier.
 	 */
-	public static function determine_tracking_entry_method( string $source, string $shipping_option, string $shipment_provider ): string {
+	public static function determine_tracking_entry_method( string $source, string $shipping_option ): string {
 		if ( 'fulfillments_modal' !== $source ) {
 			return 'api';
 		}
@@ -351,7 +376,7 @@ class FulfillmentsTracker {
 		}
 
 		if ( 'manual-entry' === $shipping_option ) {
-			return 'other' === $shipment_provider ? 'ui_manual_custom' : 'ui_manual_select';
+			return 'ui_manual';
 		}
 
 		return 'api';

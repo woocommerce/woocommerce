@@ -412,7 +412,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 			);
 
 			// Track if tracking information was added or changed in this update.
-			$this->maybe_track_tracking_added( $fulfillment, $request );
+			$this->maybe_track_tracking_added( $fulfillment, $request, $changed_fields );
 
 			if ( $notify_customer ) {
 				if ( ! $previous_state && $next_state ) {
@@ -1240,38 +1240,48 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 	}
 
 	/**
-	 * Track fulfillment_tracking_added if the fulfillment contains tracking information.
+	 * Track fulfillment_tracking_added if tracking information was added or changed.
 	 *
-	 * Checks if a tracking number is present on the fulfillment after save. If so, determines
-	 * the entry method from the shipping option meta and provider selection, then fires the
-	 * fulfillment_tracking_added event.
+	 * For new fulfillments ($changes is empty), fires whenever a tracking number is present.
+	 * For updates, only fires when tracking-related meta (_tracking_number, _shipping_provider,
+	 * or _tracking_url) actually changed.
 	 *
 	 * @param Fulfillment     $fulfillment The fulfillment object (after save).
 	 * @param WP_REST_Request $request     The original request.
+	 * @param array           $changes     The changes from Fulfillment::get_changes(), empty for creates.
 	 *
 	 * @phpstan-ignore-next-line missingType.generics
 	 */
-	private function maybe_track_tracking_added( Fulfillment $fulfillment, WP_REST_Request $request ): void {
+	private function maybe_track_tracking_added( Fulfillment $fulfillment, WP_REST_Request $request, array $changes = array() ): void {
 		$tracking_number = $fulfillment->get_tracking_number();
 		if ( empty( $tracking_number ) ) {
 			return;
 		}
 
+		// For updates, only track when tracking-related meta actually changed.
+		if ( ! empty( $changes ) ) {
+			$meta_changes     = $changes['meta_data'] ?? array();
+			$tracking_changed = array_key_exists( '_tracking_number', $meta_changes )
+				|| array_key_exists( '_shipping_provider', $meta_changes )
+				|| array_key_exists( '_tracking_url', $meta_changes );
+			if ( ! $tracking_changed ) {
+				return;
+			}
+		}
+
 		$source            = $this->check_request_source( $request );
 		$shipping_option   = $fulfillment->get_meta( '_shipping_option', true );
 		$shipping_option   = ! empty( $shipping_option ) ? $shipping_option : '';
-		$shipment_provider = $fulfillment->get_shipping_provider();
-		$shipment_provider = ! empty( $shipment_provider ) ? $shipment_provider : '';
-		$provider_name     = $fulfillment->get_meta( '_provider_name', true );
-		$provider_name     = ! empty( $provider_name ) ? $provider_name : '';
+		$shipment_provider = $fulfillment->get_shipping_provider() ?? '';
 		$is_custom         = 'other' === $shipment_provider;
 
-		$entry_method = FulfillmentsTracker::determine_tracking_entry_method( $source, $shipping_option, $shipment_provider );
+		$entry_method      = FulfillmentsTracker::determine_tracking_entry_method( $source, $shipping_option );
+		$resolved_provider = FulfillmentUtils::resolve_provider_name( $fulfillment );
 
 		FulfillmentsTracker::track_fulfillment_tracking_added(
 			$fulfillment->get_id(),
 			$entry_method,
-			$is_custom ? $provider_name : $shipment_provider,
+			$resolved_provider,
 			$is_custom
 		);
 	}
