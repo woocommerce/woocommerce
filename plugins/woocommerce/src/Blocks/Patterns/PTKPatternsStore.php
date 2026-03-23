@@ -113,6 +113,10 @@ class PTKPatternsStore {
 	 * @return void
 	 */
 	private function schedule_action_if_not_pending( $action ) {
+		if ( ! function_exists( 'as_has_scheduled_action' ) ) {
+			return;
+		}
+
 		if ( as_has_scheduled_action( $action, array(), 'woocommerce' ) ) {
 			return;
 		}
