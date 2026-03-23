@@ -1,13 +1,16 @@
-let config = require( '../../playwright.config.js' );
-const { tags } = require( '../../fixtures/fixtures' );
+/**
+ * Internal dependencies
+ */
+import defaultConfig, { setupProjects } from '../../playwright.config';
+import { tags } from '../../fixtures/fixtures';
 
 process.env.USE_WP_ENV = 'true';
 process.env.DISABLE_HPOS = '1';
 
-config = {
-	...config.default,
+const config = {
+	...defaultConfig,
 	projects: [
-		...config.setupProjects,
+		...setupProjects,
 		{
 			name: 'e2e-hpos-disabled',
 			grep: new RegExp( tags.HPOS ),
@@ -21,4 +24,4 @@ config = {
 	],
 };
 
-module.exports = config;
+export default config;

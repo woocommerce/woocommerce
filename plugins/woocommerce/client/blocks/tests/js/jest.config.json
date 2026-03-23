@@ -42,6 +42,7 @@
 		"@woocommerce/utils": "assets/js/utils",
 		"@woocommerce/test-utils/msw": "tests/js/config/msw-setup.js",
 		"@woocommerce/entities": "assets/js/entities",
+		"@woocommerce/stores/(.*)$": "assets/js/base/stores/$1",
 		"^react$": "<rootDir>/node_modules/react",
 		"^react-dom$": "<rootDir>/node_modules/react-dom",
 		"^(.+)/build-module/(.*)$": "$1/build/$2"

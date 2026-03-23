@@ -119,7 +119,7 @@ add_action( 'woocommerce_fulfillment_created_notification', 'send_sms_notificati
 
 function send_sms_notification( $order_id, $fulfillment, $order ) {
     $phone = $order->get_billing_phone();
-    $tracking = $fulfillment->get_meta( '_tracking_number', true );
+    $tracking = $fulfillment->get_tracking_number();
 
     if ( $phone && $tracking ) {
         // Send SMS notification
@@ -278,7 +278,7 @@ Called after the fulfillment items table in emails.
 add_action( 'woocommerce_email_after_fulfillment_table', 'add_tracking_info', 10, 5 );
 
 function add_tracking_info( $order, $fulfillment, $sent_to_admin, $plain_text, $email ) {
-    $tracking = $fulfillment->get_meta( '_tracking_number', true );
+    $tracking = $fulfillment->get_tracking_number();
     if ( $tracking ) {
         echo '<p>Track your package: ' . esc_html( $tracking ) . '</p>';
     }
