@@ -1,4 +1,4 @@
 Significance: patch
-Type: add
+Type: enhancement
 
-Fix: woocommerce_add_to_cart_quantity filter now receives $variation_id, $variation, and $cart_item_data arguments.
+Fix: woocommerce_add_to_cart_quantity filter now receives $variation_id.
