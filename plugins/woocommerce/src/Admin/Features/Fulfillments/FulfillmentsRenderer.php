@@ -203,7 +203,7 @@ class FulfillmentsRenderer {
 	private function render_shipment_tracking_column_row_data( WC_Order $order, array $fulfillments ) {
 		$tracking = array();
 		foreach ( $fulfillments as $fulfillment ) {
-			$tracking[] = $fulfillment->get_meta( '_tracking_number' ) ?? null;
+			$tracking[] = $fulfillment->get_tracking_number();
 		}
 
 		$tracking = array_filter(

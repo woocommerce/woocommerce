@@ -217,16 +217,158 @@ class PaymentGatewaysSettingsControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test updating a payment gateway without values parameter.
+	 * Test updating a payment gateway with no parameters performs a no-op.
+	 *
+	 * All parameters are optional, so an empty PUT should succeed without
+	 * modifying any gateway settings.
 	 */
-	public function test_update_payment_gateway_missing_values() {
+	public function test_update_payment_gateway_with_no_params() {
+		// Arrange.
+		$gateway        = WC()->payment_gateways->payment_gateways()['bacs'];
+		$enabled_before = $gateway->enabled;
+		$title_before   = $gateway->title;
+
 		// Act.
 		$request  = new WP_REST_Request( 'PUT', self::ENDPOINT . '/bacs' );
 		$response = $this->server->dispatch( $request );
 
 		// Assert.
-		$this->assertSame( 400, $response->get_status() );
-		$this->assertSame( 'rest_missing_callback_param', $response->get_data()['code'] );
+		$this->assertSame( 200, $response->get_status() );
+
+		// Verify gateway state was not changed.
+		$gateway_after = WC()->payment_gateways->payment_gateways()['bacs'];
+		$this->assertSame( $enabled_before, $gateway_after->enabled );
+		$this->assertSame( $title_before, $gateway_after->title );
+	}
+
+	/**
+	 * Test updating a payment gateway with top-level enabled field.
+	 *
+	 * Core-data sends edits as top-level fields (matching the GET response shape)
+	 * rather than nested under the values parameter.
+	 */
+	public function test_update_payment_gateway_with_top_level_enabled() {
+		// Act.
+		$request = new WP_REST_Request( 'PUT', self::ENDPOINT . '/bacs' );
+		$request->set_param( 'enabled', true );
+		$response = $this->server->dispatch( $request );
+
+		// Assert.
+		$this->assertSame( 200, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertTrue( $data['enabled'] );
+
+		// Verify persisted state.
+		$saved_settings = get_option( 'woocommerce_bacs_settings' );
+		$this->assertSame( 'yes', $saved_settings['enabled'] );
+	}
+
+	/**
+	 * Test updating a payment gateway with top-level description field.
+	 */
+	public function test_update_payment_gateway_with_top_level_description() {
+		// Act.
+		$request = new WP_REST_Request( 'PUT', self::ENDPOINT . '/bacs' );
+		$request->set_param( 'description', 'Pay via bank transfer.' );
+		$response = $this->server->dispatch( $request );
+
+		// Assert.
+		$this->assertSame( 200, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertSame( 'Pay via bank transfer.', $data['description'] );
+
+		// Verify persisted state.
+		$saved_settings = get_option( 'woocommerce_bacs_settings' );
+		$this->assertSame( 'Pay via bank transfer.', $saved_settings['description'] );
+	}
+
+	/**
+	 * Test that legacy values.enabled with string 'yes' still works.
+	 *
+	 * Existing callers send enabled as 'yes'/'no' strings inside the values
+	 * parameter. This must remain supported for backwards compatibility.
+	 */
+	public function test_update_payment_gateway_with_legacy_yes_string() {
+		// Act.
+		$request = new WP_REST_Request( 'PUT', self::ENDPOINT . '/bacs' );
+		$request->set_param( 'values', array( 'enabled' => 'yes' ) );
+		$response = $this->server->dispatch( $request );
+
+		// Assert.
+		$this->assertSame( 200, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertTrue( $data['enabled'] );
+
+		// Verify persisted state.
+		$saved_settings = get_option( 'woocommerce_bacs_settings' );
+		$this->assertSame( 'yes', $saved_settings['enabled'] );
+	}
+
+	/**
+	 * Test that top-level fields take precedence over values.
+	 */
+	public function test_top_level_fields_take_precedence_over_values() {
+		// Act - send enabled=true at top level and enabled=false in values.
+		$request = new WP_REST_Request( 'PUT', self::ENDPOINT . '/bacs' );
+		$request->set_param( 'enabled', true );
+		$request->set_param( 'values', array( 'enabled' => false ) );
+		$response = $this->server->dispatch( $request );
+
+		// Assert - top-level should win.
+		$this->assertSame( 200, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertTrue( $data['enabled'] );
+
+		// Verify persisted state matches top-level value.
+		$saved_settings = get_option( 'woocommerce_bacs_settings' );
+		$this->assertSame( 'yes', $saved_settings['enabled'] );
+	}
+
+	/**
+	 * Test updating a payment gateway with top-level title field.
+	 */
+	public function test_update_payment_gateway_with_top_level_title() {
+		// Act.
+		$request = new WP_REST_Request( 'PUT', self::ENDPOINT . '/bacs' );
+		$request->set_param( 'title', 'Wire Transfer' );
+		$response = $this->server->dispatch( $request );
+
+		// Assert.
+		$this->assertSame( 200, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertSame( 'Wire Transfer', $data['title'] );
+
+		// Verify persisted state.
+		$saved_settings = get_option( 'woocommerce_bacs_settings' );
+		$this->assertSame( 'Wire Transfer', $saved_settings['title'] );
+	}
+
+	/**
+	 * Test updating a payment gateway with top-level order field.
+	 */
+	public function test_update_payment_gateway_with_top_level_order() {
+		// Arrange.
+		delete_option( 'woocommerce_gateway_order' );
+
+		// Act.
+		$request = new WP_REST_Request( 'PUT', self::ENDPOINT . '/bacs' );
+		$request->set_param( 'order', 3 );
+		$response = $this->server->dispatch( $request );
+
+		// Assert.
+		$this->assertSame( 200, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertSame( 3, $data['order'] );
+
+		// Verify persisted state.
+		$gateway_order = get_option( 'woocommerce_gateway_order' );
+		$this->assertSame( 3, $gateway_order['bacs'] );
 	}
 
 	/**
