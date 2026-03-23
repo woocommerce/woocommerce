@@ -57,17 +57,24 @@ class Blocks_Width_Preprocessor implements Preprocessor {
 				$layout_width -= $this->parse_number_from_string_with_pixels( $styles['spacing']['padding']['right'] ?? '0px' );
 			}
 
-			// Subtract root padding for blocks that will receive it as CSS padding
-			// from Content_Renderer. This ensures block widths fit inside the
-			// root padding wrapper without overflow.
+			// Subtract root padding and container padding for blocks that will
+			// receive them as CSS padding from Content_Renderer. This ensures
+			// block widths fit inside the padding wrapper without overflow.
 			if ( 'full' !== $alignment ) {
 				$layout_width -= $this->parse_number_from_string_with_pixels( $block['email_attrs']['root-padding-left'] ?? '0px' );
 				$layout_width -= $this->parse_number_from_string_with_pixels( $block['email_attrs']['root-padding-right'] ?? '0px' );
+				// Container padding may be preset references (var:preset|spacing|20).
+				$layout_width -= $this->parse_number_from_string_with_pixels( $this->resolve_preset_value( $block['email_attrs']['container-padding-left'] ?? '0px', $variables_map ) );
+				$layout_width -= $this->parse_number_from_string_with_pixels( $this->resolve_preset_value( $block['email_attrs']['container-padding-right'] ?? '0px', $variables_map ) );
 			}
 
 			// Resolve block padding — may be preset references like var:preset|spacing|20.
-			$block_padding_left  = $this->resolve_preset_value( $block['attrs']['style']['spacing']['padding']['left'] ?? '0px', $variables_map );
-			$block_padding_right = $this->resolve_preset_value( $block['attrs']['style']['spacing']['padding']['right'] ?? '0px', $variables_map );
+			// When suppress-horizontal-padding is set, the block's horizontal padding
+			// has been distributed per-block by the Spacing_Preprocessor. Zero it out
+			// so children get the full available width.
+			$suppress_h_padding  = ! empty( $block['email_attrs']['suppress-horizontal-padding'] );
+			$block_padding_left  = $suppress_h_padding ? '0px' : $this->resolve_preset_value( $block['attrs']['style']['spacing']['padding']['left'] ?? '0px', $variables_map );
+			$block_padding_right = $suppress_h_padding ? '0px' : $this->resolve_preset_value( $block['attrs']['style']['spacing']['padding']['right'] ?? '0px', $variables_map );
 
 			$width_input = $block['attrs']['width'] ?? '100%';
 			// Currently we support only % and px units in case only the number is provided we assume it's %

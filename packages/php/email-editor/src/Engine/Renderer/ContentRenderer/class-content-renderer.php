@@ -109,6 +109,16 @@ class Content_Renderer {
 	private ?string $post_content_width = null;
 
 	/**
+	 * Container padding from the template group wrapping post-content.
+	 *
+	 * Stored during the first preprocessing pass and passed to user blocks
+	 * in the second pass so they receive the container padding per-block.
+	 *
+	 * @var array{left?: string, right?: string}
+	 */
+	private array $container_padding = array();
+
+	/**
 	 * CSS inliner
 	 *
 	 * @var Css_Inliner
@@ -242,13 +252,20 @@ class Content_Renderer {
 			if ( $post_content_num < $content_size_num - 0.01 ) {
 				unset( $styles['spacing']['padding']['left'], $styles['spacing']['padding']['right'] );
 			}
+
+			// Pass container padding from the first pass so the
+			// Spacing_Preprocessor can distribute it to user blocks.
+			if ( ! empty( $this->container_padding ) ) {
+				$styles['__container_padding'] = $this->container_padding;
+			}
 		}
 
 		$result = $this->process_manager->preprocess( $parsed_blocks, $layout, $styles );
 
-		// After the first pass: find the post-content block's width.
+		// After the first pass: find the post-content block's width and container padding.
 		if ( null === $this->post_content_width ) {
 			$this->post_content_width = $this->find_post_content_width( $result );
+			$this->container_padding  = $this->find_container_padding( $result );
 		}
 
 		return $result;
@@ -282,6 +299,43 @@ class Content_Renderer {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Find the container padding from blocks with suppress-horizontal-padding flag.
+	 *
+	 * Searches the preprocessed template blocks for a container that wraps
+	 * post-content and had its horizontal padding distributed per-block.
+	 *
+	 * @param array $blocks Preprocessed blocks.
+	 * @return array{left?: string, right?: string} Container padding values, or empty array.
+	 */
+	private function find_container_padding( array $blocks ): array {
+		$variables_map = $this->theme_controller->get_variables_values_map();
+
+		foreach ( $blocks as $block ) {
+			$email_attrs = $block['email_attrs'] ?? array();
+			if ( ! empty( $email_attrs['suppress-horizontal-padding'] ) ) {
+				$padding = $block['attrs']['style']['spacing']['padding'] ?? array();
+				$result  = array();
+				if ( isset( $padding['left'] ) && is_string( $padding['left'] ) ) {
+					$result['left'] = $this->resolve_preset_padding( $padding['left'], $variables_map );
+				}
+				if ( isset( $padding['right'] ) && is_string( $padding['right'] ) ) {
+					$result['right'] = $this->resolve_preset_padding( $padding['right'], $variables_map );
+				}
+				if ( ! empty( $result ) ) {
+					return $result;
+				}
+			}
+			if ( ! empty( $block['innerBlocks'] ) ) {
+				$found = $this->find_container_padding( $block['innerBlocks'] );
+				if ( ! empty( $found ) ) {
+					return $found;
+				}
+			}
+		}
+		return array();
 	}
 
 	/**
@@ -345,24 +399,35 @@ class Content_Renderer {
 	}
 
 	/**
-	 * Wrap block output with root horizontal padding.
+	 * Wrap block output with horizontal padding (root + container).
 	 *
 	 * Root padding is distributed by the Spacing_Preprocessor from the outer
-	 * email container to individual blocks. This method applies it uniformly
-	 * to all blocks regardless of whether they use Abstract_Block_Renderer
-	 * or a custom render_email_callback.
+	 * email container to individual blocks. Container padding comes from
+	 * template groups wrapping post-content. Both are combined into a single
+	 * CSS padding wrapper. This method applies padding uniformly to all blocks
+	 * regardless of whether they use Abstract_Block_Renderer or a custom
+	 * render_email_callback.
 	 *
 	 * @param string $content The rendered block content.
 	 * @param array  $email_attrs The email attributes from the parsed block.
-	 * @return string The content wrapped with horizontal padding, or unchanged if no root padding.
+	 * @return string The content wrapped with horizontal padding, or unchanged if no padding.
 	 */
 	private function add_root_horizontal_padding( string $content, array $email_attrs ): string {
+		$padding_left  = $this->sum_padding_values(
+			$email_attrs['root-padding-left'] ?? null,
+			$email_attrs['container-padding-left'] ?? null
+		);
+		$padding_right = $this->sum_padding_values(
+			$email_attrs['root-padding-right'] ?? null,
+			$email_attrs['container-padding-right'] ?? null
+		);
+
 		$css_attrs = array();
-		if ( isset( $email_attrs['root-padding-left'] ) ) {
-			$css_attrs['padding-left'] = $email_attrs['root-padding-left'];
+		if ( $padding_left > 0 ) {
+			$css_attrs['padding-left'] = $padding_left . 'px';
 		}
-		if ( isset( $email_attrs['root-padding-right'] ) ) {
-			$css_attrs['padding-right'] = $email_attrs['root-padding-right'];
+		if ( $padding_right > 0 ) {
+			$css_attrs['padding-right'] = $padding_right . 'px';
 		}
 		if ( empty( $css_attrs ) ) {
 			return $content;
@@ -389,6 +454,43 @@ class Content_Renderer {
 		);
 
 		return Table_Wrapper_Helper::render_outlook_table_wrapper( $div_content, $table_attrs, $cell_attrs );
+	}
+
+	/**
+	 * Sum two CSS pixel padding values.
+	 *
+	 * @param string|null $value1 First padding value (e.g., '20px').
+	 * @param string|null $value2 Second padding value (e.g., '10px').
+	 * @return float The sum in pixels.
+	 */
+	private function sum_padding_values( ?string $value1, ?string $value2 ): float {
+		$sum = 0.0;
+		if ( null !== $value1 ) {
+			$sum += (float) str_replace( 'px', '', $value1 );
+		}
+		if ( null !== $value2 ) {
+			$sum += (float) str_replace( 'px', '', $value2 );
+		}
+		return $sum;
+	}
+
+	/**
+	 * Resolve a CSS value that may contain a preset variable reference.
+	 *
+	 * Block attributes store padding as preset references like
+	 * "var:preset|spacing|20" which resolve to actual pixel values.
+	 *
+	 * @param string $value The CSS value, possibly a preset reference.
+	 * @param array  $variables_map Map of CSS variable names to resolved values.
+	 * @return string The resolved value (e.g. "8px") or the original value.
+	 */
+	private function resolve_preset_padding( string $value, array $variables_map ): string {
+		if ( strpos( $value, 'var:preset|' ) !== 0 ) {
+			return $value;
+		}
+
+		$css_var_name = '--wp--' . str_replace( '|', '--', str_replace( 'var:', '', $value ) );
+		return $variables_map[ $css_var_name ] ?? $value;
 	}
 
 	/**
@@ -424,6 +526,7 @@ class Content_Renderer {
 		remove_filter( 'woocommerce_email_blocks_renderer_parsed_blocks', array( $this, 'preprocess_parsed_blocks' ) );
 
 		$this->post_content_width = null;
+		$this->container_padding  = array();
 
 		// Restore the original core/post-content render callback.
 		// Note: We always restore it, even if it was null originally.

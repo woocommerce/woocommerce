@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add smaller image options for product images in srcset to reduce bandwidth/load time on cart/checkout pages
