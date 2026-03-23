@@ -3427,11 +3427,11 @@ function wc_update_1070_disable_hpos_sync_on_read(): void {
  * migration was added. Stores that had opted into scheduled imports (legacy
  * value 'no') silently reverted to immediate imports on upgrade.
  *
- * @since 10.7.0
+ * @since 10.8.0
  *
  * @return void
  */
-function wc_update_1070_migrate_analytics_import_option(): void {
+function wc_update_1080_migrate_analytics_import_option(): void {
 	$legacy_option = 'woocommerce_analytics_immediate_import';
 	$new_option    = 'woocommerce_analytics_scheduled_import';
 

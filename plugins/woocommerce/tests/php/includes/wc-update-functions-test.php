@@ -280,7 +280,7 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		delete_option( 'woocommerce_analytics_scheduled_import' );
 		update_option( 'woocommerce_analytics_immediate_import', 'no' );
 
-		wc_update_1070_migrate_analytics_import_option();
+		wc_update_1080_migrate_analytics_import_option();
 
 		$this->assertSame( 'yes', get_option( 'woocommerce_analytics_scheduled_import' ) );
 		$this->assertFalse( get_option( 'woocommerce_analytics_immediate_import' ) );
@@ -293,7 +293,7 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		delete_option( 'woocommerce_analytics_scheduled_import' );
 		update_option( 'woocommerce_analytics_immediate_import', 'yes' );
 
-		wc_update_1070_migrate_analytics_import_option();
+		wc_update_1080_migrate_analytics_import_option();
 
 		$this->assertSame( 'no', get_option( 'woocommerce_analytics_scheduled_import' ) );
 		$this->assertFalse( get_option( 'woocommerce_analytics_immediate_import' ) );
@@ -306,7 +306,7 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		delete_option( 'woocommerce_analytics_immediate_import' );
 		delete_option( 'woocommerce_analytics_scheduled_import' );
 
-		wc_update_1070_migrate_analytics_import_option();
+		wc_update_1080_migrate_analytics_import_option();
 
 		$this->assertFalse( get_option( 'woocommerce_analytics_scheduled_import' ) );
 	}
@@ -318,7 +318,7 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_analytics_scheduled_import', 'yes' );
 		update_option( 'woocommerce_analytics_immediate_import', 'yes' );
 
-		wc_update_1070_migrate_analytics_import_option();
+		wc_update_1080_migrate_analytics_import_option();
 
 		$this->assertSame( 'yes', get_option( 'woocommerce_analytics_scheduled_import' ) );
 		$this->assertFalse( get_option( 'woocommerce_analytics_immediate_import' ) );
