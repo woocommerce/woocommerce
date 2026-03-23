@@ -8281,6 +8281,13 @@ table.bar_chart {
 	}
 }
 
+.wc-wp-version-gte-70 {
+	.woocommerce_options_panel select {
+		height: 40px;
+		line-height: 2;
+	}
+}
+
 /**
   * Select2 colors for built-in admin color themes.
   */

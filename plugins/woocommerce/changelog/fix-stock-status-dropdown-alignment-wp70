@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix stock status dropdown text vertical alignment on WP 7.0 by setting consistent height and line-height for native selects in the product data panel.
