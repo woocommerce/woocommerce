@@ -677,6 +677,205 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 	}
 
 	/**
+	 * Test root-level group with own padding wrapping post-content distributes container padding
+	 */
+	public function testItDistributesContainerPaddingFromRootGroupWrappingPostContent(): void {
+		$blocks = array(
+			array(
+				'blockName'   => 'core/group',
+				'attrs'       => array(
+					'style' => array(
+						'spacing' => array(
+							'padding' => array(
+								'left'   => '20px',
+								'right'  => '20px',
+								'top'    => '15px',
+								'bottom' => '15px',
+							),
+						),
+					),
+				),
+				'innerBlocks' => array(
+					array(
+						'blockName'   => 'core/post-content',
+						'attrs'       => array(),
+						'innerBlocks' => array(
+							array(
+								'blockName'   => 'core/paragraph',
+								'attrs'       => array(),
+								'innerBlocks' => array(),
+							),
+							array(
+								'blockName'   => 'core/group',
+								'attrs'       => array( 'align' => 'full' ),
+								'innerBlocks' => array(),
+							),
+						),
+					),
+				),
+			),
+		);
+
+		$result       = $this->preprocessor->preprocess( $blocks, $this->layout, $this->styles );
+		$root_group   = $result[0];
+		$post_content = $root_group['innerBlocks'][0];
+		$paragraph    = $post_content['innerBlocks'][0];
+		$alignfull    = $post_content['innerBlocks'][1];
+
+		// Root group should have suppress-horizontal-padding flag.
+		$this->assertTrue( $root_group['email_attrs']['suppress-horizontal-padding'] );
+
+		// Root group should NOT have root padding (delegates everything).
+		$this->assertArrayNotHasKey( 'root-padding-left', $root_group['email_attrs'] );
+		$this->assertArrayNotHasKey( 'root-padding-right', $root_group['email_attrs'] );
+
+		// Post-content should not get container padding (it's a pass-through).
+		$this->assertArrayNotHasKey( 'container-padding-left', $post_content['email_attrs'] );
+		$this->assertArrayNotHasKey( 'container-padding-right', $post_content['email_attrs'] );
+
+		// Normal paragraph should get both root and container padding.
+		$this->assertEquals( '10px', $paragraph['email_attrs']['root-padding-left'] );
+		$this->assertEquals( '10px', $paragraph['email_attrs']['root-padding-right'] );
+		$this->assertEquals( '20px', $paragraph['email_attrs']['container-padding-left'] );
+		$this->assertEquals( '20px', $paragraph['email_attrs']['container-padding-right'] );
+
+		// Alignfull block should skip BOTH root and container padding.
+		$this->assertArrayNotHasKey( 'root-padding-left', $alignfull['email_attrs'] );
+		$this->assertArrayNotHasKey( 'root-padding-right', $alignfull['email_attrs'] );
+		$this->assertArrayNotHasKey( 'container-padding-left', $alignfull['email_attrs'] );
+		$this->assertArrayNotHasKey( 'container-padding-right', $alignfull['email_attrs'] );
+	}
+
+	/**
+	 * Test container padding is distributed from nested group wrapping post-content
+	 */
+	public function testItDistributesContainerPaddingFromNestedGroupWrappingPostContent(): void {
+		$blocks = array(
+			array(
+				'blockName'   => 'core/group',
+				'attrs'       => array(),
+				'innerBlocks' => array(
+					array(
+						'blockName'   => 'core/group',
+						'attrs'       => array(
+							'style' => array(
+								'spacing' => array(
+									'padding' => array(
+										'left'  => '25px',
+										'right' => '25px',
+									),
+								),
+							),
+						),
+						'innerBlocks' => array(
+							array(
+								'blockName'   => 'core/post-content',
+								'attrs'       => array(),
+								'innerBlocks' => array(
+									array(
+										'blockName'   => 'core/paragraph',
+										'attrs'       => array(),
+										'innerBlocks' => array(),
+									),
+								),
+							),
+						),
+					),
+				),
+			),
+		);
+
+		$result        = $this->preprocessor->preprocess( $blocks, $this->layout, $this->styles );
+		$root_group    = $result[0];
+		$content_group = $root_group['innerBlocks'][0];
+		$paragraph     = $content_group['innerBlocks'][0]['innerBlocks'][0];
+
+		// Content group wrapping post-content should have suppress flag.
+		$this->assertTrue( $content_group['email_attrs']['suppress-horizontal-padding'] );
+
+		// Paragraph inside post-content should get container padding.
+		$this->assertEquals( '25px', $paragraph['email_attrs']['container-padding-left'] );
+		$this->assertEquals( '25px', $paragraph['email_attrs']['container-padding-right'] );
+	}
+
+	/**
+	 * Test container padding is passed from styles (second pass) to user blocks
+	 */
+	public function testItAppliesContainerPaddingFromStyles(): void {
+		$styles                        = $this->styles;
+		$styles['__container_padding'] = array(
+			'left'  => '20px',
+			'right' => '20px',
+		);
+
+		// Simulate second pass: user blocks at top level (as post-content renders them).
+		$blocks = array(
+			array(
+				'blockName'   => 'core/paragraph',
+				'attrs'       => array(),
+				'innerBlocks' => array(),
+			),
+			array(
+				'blockName'   => 'core/group',
+				'attrs'       => array( 'align' => 'full' ),
+				'innerBlocks' => array(),
+			),
+		);
+
+		$result    = $this->preprocessor->preprocess( $blocks, $this->layout, $styles );
+		$paragraph = $result[0];
+		$alignfull = $result[1];
+
+		// Normal block gets container padding.
+		$this->assertEquals( '20px', $paragraph['email_attrs']['container-padding-left'] );
+		$this->assertEquals( '20px', $paragraph['email_attrs']['container-padding-right'] );
+
+		// Alignfull block skips container padding.
+		$this->assertArrayNotHasKey( 'container-padding-left', $alignfull['email_attrs'] );
+		$this->assertArrayNotHasKey( 'container-padding-right', $alignfull['email_attrs'] );
+	}
+
+	/**
+	 * Test template group without own padding does NOT set container padding
+	 */
+	public function testItDoesNotSetContainerPaddingWhenGroupHasNoPadding(): void {
+		$blocks = array(
+			array(
+				'blockName'   => 'core/group',
+				'attrs'       => array(),
+				'innerBlocks' => array(
+					array(
+						'blockName'   => 'core/post-content',
+						'attrs'       => array(),
+						'innerBlocks' => array(
+							array(
+								'blockName'   => 'core/paragraph',
+								'attrs'       => array(),
+								'innerBlocks' => array(),
+							),
+						),
+					),
+				),
+			),
+		);
+
+		$result    = $this->preprocessor->preprocess( $blocks, $this->layout, $this->styles );
+		$group     = $result[0];
+		$paragraph = $group['innerBlocks'][0]['innerBlocks'][0];
+
+		// Group should NOT have suppress flag.
+		$this->assertArrayNotHasKey( 'suppress-horizontal-padding', $group['email_attrs'] );
+
+		// Paragraph should NOT have container padding.
+		$this->assertArrayNotHasKey( 'container-padding-left', $paragraph['email_attrs'] );
+		$this->assertArrayNotHasKey( 'container-padding-right', $paragraph['email_attrs'] );
+
+		// Paragraph should still get root padding.
+		$this->assertEquals( '10px', $paragraph['email_attrs']['root-padding-left'] );
+		$this->assertEquals( '10px', $paragraph['email_attrs']['root-padding-right'] );
+	}
+
+	/**
 	 * Test it rejects malicious values in blockGap
 	 */
 	public function testItRejectsMaliciousBlockGapValues(): void {
