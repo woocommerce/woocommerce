@@ -9468,73 +9468,42 @@ body.woocommerce-settings-payments-section_legacy {
  * causing action button rows to wrap/stack at ~1200px viewports.
  */
 .wc-wp-version-gte-70 {
-	@media screen and (max-width: 1280px) {
-		// Order actions meta box: select + apply button overflow at narrow widths.
-		.order_actions #actions {
-			select {
-				width: calc(100% - 40px);
+	@media screen and (max-width: 1200px) {
+		// Order items meta box: reduce button padding to prevent wrapping prematurely.
+		#woocommerce-order-items .wc-order-data-row {
+			.button {
+				padding-left: 8px;
+				padding-right: 8px;
+			}
+		}
+
+		// Refund action buttons: switch to flex layout so long labels wrap gracefully.
+		#woocommerce-order-items .refund-actions {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 4px;
+			align-items: center;
+
+			.button,
+			.cancel-action {
+				float: none;
 			}
 
 			.button {
-				width: 32px;
+				margin: 0;
+				font-size: 12px;
+			}
+
+			.cancel-action {
+				margin-right: auto;
+				order: -1;
+			}
+
+			.clear {
+				display: none;
 			}
 		}
 
-		// Order items meta box: action button row wraps prematurely.
-		#woocommerce-order-items .wc-order-data-row {
-			.add-items {
-				display: flex;
-				flex-wrap: wrap;
-				gap: 4px;
-				align-items: center;
 
-				.button {
-					float: none;
-					margin-right: 0;
-					min-height: 30px;
-					line-height: 28px;
-					padding: 0 8px;
-					font-size: 12px;
-				}
-
-				.button-primary {
-					float: none;
-				}
-			}
-
-			// Refund action buttons: prevent wrapping of long button labels.
-			.refund-actions {
-				display: flex;
-				flex-wrap: wrap;
-				gap: 4px;
-				align-items: center;
-
-				.button {
-					float: none;
-					margin-left: 0;
-					min-height: 30px;
-					line-height: 28px;
-					padding: 0 8px;
-					font-size: 12px;
-				}
-
-				.cancel-action {
-					float: none;
-					margin-right: auto;
-					order: -1;
-				}
-
-				.clear {
-					display: none;
-				}
-			}
-		}
-
-		// Order actions meta box: save/delete row.
-		.order_actions li.wide {
-			#delete-action {
-				line-height: 40px;
-			}
-		}
 	}
 }
