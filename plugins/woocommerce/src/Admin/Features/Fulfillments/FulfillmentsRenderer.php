@@ -175,7 +175,7 @@ class FulfillmentsRenderer {
 	private function render_shipment_provider_column_row_data( WC_Order $order, array $fulfillments ) {
 		$providers = array();
 		foreach ( $fulfillments as $fulfillment ) {
-			$providers[] = $fulfillment->get_meta( '_shipment_provider' ) ?? null;
+			$providers[] = $fulfillment->get_shipment_provider();
 		}
 
 		$providers = array_filter(
@@ -256,6 +256,7 @@ class FulfillmentsRenderer {
 	 */
 	public function handle_fulfillment_bulk_actions( $redirect_to, $action, $post_ids ) {
 		if ( 'fulfill' === $action ) {
+			FulfillmentsTracker::track_fulfillment_bulk_action_used( 'fulfill_orders', count( $post_ids ) );
 			foreach ( $post_ids as $post_id ) {
 				$order = wc_get_order( $post_id );
 				if ( ! $order ) {
@@ -469,6 +470,10 @@ class FulfillmentsRenderer {
 
 			// Ensure the fulfillment status is one of the allowed values.
 			if ( FulfillmentUtils::is_valid_order_fulfillment_status( $fulfillment_status ) ) {
+				// Only track when the filter is explicitly submitted, not on pagination/refresh.
+				if ( isset( $_GET['filter_action'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+					FulfillmentsTracker::track_fulfillment_filter_used( 'fulfillment_status', $fulfillment_status );
+				}
 				$meta_query = FulfillmentUtils::get_order_fulfillment_status_meta_query( $fulfillment_status );
 				if ( ! empty( $meta_query ) ) {
 					if ( ! isset( $args['meta_query'] ) ) {
@@ -497,6 +502,10 @@ class FulfillmentsRenderer {
 			$status = sanitize_text_field( wp_unslash( $_GET['fulfillment_status'] ) ); // phpcs:ignore WordPress.Security.NonceVerification
 			// Ensure the fulfillment status is one of the allowed values.
 			if ( FulfillmentUtils::is_valid_order_fulfillment_status( $status ) ) {
+				// Only track when the filter is explicitly submitted, not on pagination/refresh.
+				if ( isset( $_GET['filter_action'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+					FulfillmentsTracker::track_fulfillment_filter_used( 'fulfillment_status', $status );
+				}
 				$query->set(
 					'meta_query',
 					'no_fulfillments' === $status ?
