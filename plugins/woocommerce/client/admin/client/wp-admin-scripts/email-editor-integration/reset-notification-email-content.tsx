@@ -42,7 +42,7 @@ const getResetNotificationEmailContentAction = () => {
 	 */
 	const resetNotificationEmailContent = {
 		id: 'reset-notification-email-content',
-		label: __( 'Reset content to default', 'woocommerce' ),
+		label: __( 'Reset', 'woocommerce' ),
 		supportsBulk: false,
 		icon: backup,
 		isEligible( item: PostWithPermissions ) {
