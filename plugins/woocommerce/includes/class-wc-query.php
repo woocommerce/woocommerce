@@ -587,10 +587,9 @@ class WC_Query {
 	 * term parsing (splitting on spaces, commas, and +) and respects the
 	 * wp_query_search_exclusion_prefix filter.
 	 *
-	 * @since 10.8.0
 	 * @return bool
 	 */
-	private function has_positive_search_terms() {
+	private function has_positive_search_terms(): bool {
 		$search_string = get_query_var( 's' );
 		$search_string = is_array( $search_string ) ? '' : trim( (string) $search_string );
 
@@ -607,15 +606,12 @@ class WC_Query {
 		}
 
 		/** This filter is documented in wp-includes/class-wp-query.php */
-		$exclusion_prefix = apply_filters( 'wp_query_search_exclusion_prefix', '-' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
-		$exclusion_prefix = is_string( $exclusion_prefix ) ? $exclusion_prefix : '';
+		$exclusion_prefix = (string) apply_filters( 'wp_query_search_exclusion_prefix', '-' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
 
 		if ( '' !== $exclusion_prefix ) {
 			$search_terms = array_filter(
 				$search_terms,
-				static function ( $term ) use ( $exclusion_prefix ) {
-					return ! str_starts_with( $term, $exclusion_prefix );
-				}
+				static fn( $term ) => ! str_starts_with( $term, $exclusion_prefix )
 			);
 		}
 

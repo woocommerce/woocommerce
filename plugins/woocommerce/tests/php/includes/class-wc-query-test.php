@@ -80,94 +80,38 @@ class WC_Query_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Ordering args should use relevance for searches with positive terms.
+	 * Data provider for search ordering tests.
+	 *
+	 * @return array[] Each entry: [ search query string, whether relevance ordering is expected, description ].
 	 */
-	public function test_get_catalog_ordering_args_uses_relevance_for_normal_search(): void {
-		$sut = new WC_Query();
-
-		$this->go_to( '/?s=shirt&post_type=product' );
-
-		$result = $sut->get_catalog_ordering_args();
-
-		$this->assertSame( 'relevance', $result['orderby'], 'Normal search should use relevance ordering' );
+	public function data_provider_search_ordering(): array {
+		return array(
+			'normal search'              => array( 'shirt', true, 'Normal search should use relevance ordering' ),
+			'exclusion-only search'      => array( '-condebug', false, 'Exclusion-only search should not use relevance ordering' ),
+			'empty search'               => array( '', false, 'Empty search should not use relevance ordering' ),
+			'multiple exclusion terms'   => array( '-foo+-bar', false, 'Multiple exclusion terms should not use relevance ordering' ),
+			'mixed positive + exclusion' => array( 'shirt+-condebug', true, 'Mixed search with positive terms should use relevance ordering' ),
+			'bare dash'                  => array( '-', false, 'Bare dash search should not use relevance ordering' ),
+			'comma-separated mixed'      => array( '-foo,bar', true, 'Comma-separated search with positive terms should use relevance ordering' ),
+		);
 	}
 
 	/**
-	 * @testdox Ordering args should fall back to default ordering for exclusion-only searches.
+	 * @testdox Ordering args: $description.
+	 * @dataProvider data_provider_search_ordering
 	 */
-	public function test_get_catalog_ordering_args_falls_back_for_exclusion_only_search(): void {
+	public function test_get_catalog_ordering_args_search_ordering( string $search, bool $expect_relevance, string $description ): void {
 		$sut = new WC_Query();
 
-		$this->go_to( '/?s=-condebug&post_type=product' );
+		$this->go_to( '/?s=' . rawurlencode( $search ) . '&post_type=product' );
 
 		$result = $sut->get_catalog_ordering_args();
 
-		$this->assertNotEquals( 'relevance', $result['orderby'], 'Exclusion-only search should not use relevance ordering' );
-	}
-
-	/**
-	 * @testdox Ordering args should fall back to default ordering for empty searches.
-	 */
-	public function test_get_catalog_ordering_args_falls_back_for_empty_search(): void {
-		$sut = new WC_Query();
-
-		$this->go_to( '/?s=&post_type=product' );
-
-		$result = $sut->get_catalog_ordering_args();
-
-		$this->assertNotEquals( 'relevance', $result['orderby'], 'Empty search should not use relevance ordering' );
-	}
-
-	/**
-	 * @testdox Ordering args should fall back for searches with multiple exclusion terms.
-	 */
-	public function test_get_catalog_ordering_args_falls_back_for_multiple_exclusion_terms(): void {
-		$sut = new WC_Query();
-
-		$this->go_to( '/?s=-foo+-bar&post_type=product' );
-
-		$result = $sut->get_catalog_ordering_args();
-
-		$this->assertNotEquals( 'relevance', $result['orderby'], 'Multiple exclusion terms should not use relevance ordering' );
-	}
-
-	/**
-	 * @testdox Ordering args should use relevance when search has both positive and exclusion terms.
-	 */
-	public function test_get_catalog_ordering_args_uses_relevance_for_mixed_search(): void {
-		$sut = new WC_Query();
-
-		$this->go_to( '/?s=shirt+-condebug&post_type=product' );
-
-		$result = $sut->get_catalog_ordering_args();
-
-		$this->assertSame( 'relevance', $result['orderby'], 'Mixed search with positive terms should use relevance ordering' );
-	}
-
-	/**
-	 * @testdox Ordering args should fall back for a bare dash search.
-	 */
-	public function test_get_catalog_ordering_args_falls_back_for_bare_dash_search(): void {
-		$sut = new WC_Query();
-
-		$this->go_to( '/?s=-&post_type=product' );
-
-		$result = $sut->get_catalog_ordering_args();
-
-		$this->assertNotEquals( 'relevance', $result['orderby'], 'Bare dash search should not use relevance ordering' );
-	}
-
-	/**
-	 * @testdox Ordering args should use relevance for comma-separated searches with positive terms.
-	 */
-	public function test_get_catalog_ordering_args_uses_relevance_for_comma_separated_mixed_search(): void {
-		$sut = new WC_Query();
-
-		$this->go_to( '/?s=-foo,bar&post_type=product' );
-
-		$result = $sut->get_catalog_ordering_args();
-
-		$this->assertSame( 'relevance', $result['orderby'], 'Comma-separated search with positive terms should use relevance ordering' );
+		if ( $expect_relevance ) {
+			$this->assertSame( 'relevance', $result['orderby'], $description );
+		} else {
+			$this->assertNotEquals( 'relevance', $result['orderby'], $description );
+		}
 	}
 
 	/**
