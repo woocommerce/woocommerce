@@ -741,16 +741,11 @@ class RequestTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( 1, $capture_api_call_count, 'Expected capture_auth API to be called once' );
 		// Verify order note was added.
 		$order = wc_get_order( $order->get_id() );
-		$notes = wc_get_order_notes(
-			array(
-				'order_id' => $order->get_id(),
-				'limit'    => 1,
-			)
-		);
+		$note  = wc_get_last_order_note( $order->get_id() );
 
-		$this->assertNotEmpty( $notes );
-		$this->assertStringContainsString( 'PayPal capture authorized payment failed', $notes[0]->content );
-		$this->assertStringContainsString( $debug_id, $notes[0]->content );
+		$this->assertNotNull( $note );
+		$this->assertStringContainsString( 'PayPal capture authorized payment failed', $note->content );
+		$this->assertStringContainsString( $debug_id, $note->content );
 		// Verify capture ID was not set.
 		$this->assertEmpty( $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_CAPTURE_ID, true ) );
 		// Verify status was not updated.
@@ -792,16 +787,11 @@ class RequestTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( 1, $capture_api_call_count, 'Expected capture_auth API to be called once' );
 		// Verify order note was added with authorization ID message.
 		$order = wc_get_order( $order->get_id() );
-		$notes = wc_get_order_notes(
-			array(
-				'order_id' => $order->get_id(),
-				'limit'    => 1,
-			)
-		);
+		$note  = wc_get_last_order_note( $order->get_id() );
 
-		$this->assertNotEmpty( $notes );
-		$this->assertStringContainsString( 'PayPal capture authorized payment failed', $notes[0]->content );
-		$this->assertStringContainsString( 'Authorization ID: ' . $authorization_id . ' not found', $notes[0]->content );
+		$this->assertNotNull( $note );
+		$this->assertStringContainsString( 'PayPal capture authorized payment failed', $note->content );
+		$this->assertStringContainsString( 'Authorization ID: ' . $authorization_id . ' not found', $note->content );
 		// Verify authorization_checked flag was set.
 		$this->assertEquals( 'yes', $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_AUTHORIZATION_CHECKED, true ), 'Expected _paypal_authorization_checked flag to be set to yes' );
 		// Verify capture ID was not set.
@@ -846,15 +836,10 @@ class RequestTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( 1, $capture_api_call_count, 'Expected capture_auth API to be called once' );
 		// Verify order note was added.
 		$order = wc_get_order( $order->get_id() );
-		$notes = wc_get_order_notes(
-			array(
-				'order_id' => $order->get_id(),
-				'limit'    => 1,
-			)
-		);
+		$note  = wc_get_last_order_note( $order->get_id() );
 
-		$this->assertNotEmpty( $notes );
-		$this->assertStringContainsString( 'PayPal capture authorized payment failed', $notes[0]->content );
+		$this->assertNotNull( $note );
+		$this->assertStringContainsString( 'PayPal capture authorized payment failed', $note->content );
 	}
 
 	/**

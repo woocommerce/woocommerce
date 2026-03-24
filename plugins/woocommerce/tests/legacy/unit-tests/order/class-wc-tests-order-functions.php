@@ -1873,6 +1873,34 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test wc_get_last_order_note().
+	 *
+	 * @since 10.8.0
+	 */
+	public function test_wc_get_last_order_note() {
+		$order = WC_Helper_Order::create_order();
+		$order->add_order_note( 'First note' );
+		$order->add_order_note( 'Second note' );
+		$order->add_order_note( 'Last internal note' );
+		$order->add_order_note( 'Last customer note', 1 );
+
+		$note = wc_get_last_order_note( $order->get_id() );
+		$this->assertNotNull( $note );
+		$this->assertEquals( 'Last customer note', $note->content );
+
+		$note = wc_get_last_order_note( $order->get_id(), 'customer' );
+		$this->assertNotNull( $note );
+		$this->assertEquals( 'Last customer note', $note->content );
+
+		$note = wc_get_last_order_note( $order->get_id(), 'internal' );
+		$this->assertNotNull( $note );
+		$this->assertEquals( 'Last internal note', $note->content );
+
+		$empty_order = WC_Helper_Order::create_order();
+		$this->assertNull( wc_get_last_order_note( $empty_order->get_id() ) );
+	}
+
+	/**
 	 * Test wc_create_order_note().
 	 *
 	 * @since 3.2.0

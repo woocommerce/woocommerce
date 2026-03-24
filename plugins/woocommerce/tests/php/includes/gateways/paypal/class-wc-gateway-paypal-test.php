@@ -46,9 +46,8 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 		// reset error.
 		remove_filter( 'pre_http_request', array( $this, '__return_paypal_error' ) );
 
-		$order_notes = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
-		$latest_note = current( $order_notes );
-		$this->assertStringContainsString( $this->error_message_26960, $latest_note->content );
+		$note = wc_get_last_order_note( $order->get_id() );
+		$this->assertStringContainsString( $this->error_message_26960, $note->content );
 	}
 
 	/**
