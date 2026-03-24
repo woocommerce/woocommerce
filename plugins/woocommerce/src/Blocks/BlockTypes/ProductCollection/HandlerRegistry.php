@@ -270,13 +270,10 @@ class HandlerRegistry {
 
 				$collection_args['upsellsProductReferences'] = array( $product_reference );
 
-				// Use client-provided relationship IDs for live preview of unsaved changes.
-				$edited_relationships = $request->get_param( 'editedProductRelationships' );
-				if ( ! empty( $edited_relationships ) ) {
-					$relationships = json_decode( $edited_relationships, true );
-					if ( is_array( $relationships ) && isset( $relationships['upsell_ids'] ) && is_array( $relationships['upsell_ids'] ) ) {
-						$collection_args['resolvedProductIds'] = array_map( 'absint', $relationships['upsell_ids'] );
-					}
+				// Use client-provided upsell IDs for live preview of unsaved changes.
+				$edited_upsell_ids = $request->get_param( 'editedUpsellIds' );
+				if ( is_array( $edited_upsell_ids ) ) {
+					$collection_args['resolvedProductIds'] = array_map( 'absint', $edited_upsell_ids );
 				}
 
 				return $collection_args;
@@ -373,13 +370,10 @@ class HandlerRegistry {
 
 				$collection_args['crossSellsProductReferences'] = array( $product_reference );
 
-				// Use client-provided relationship IDs for live preview of unsaved changes.
-				$edited_relationships = $request->get_param( 'editedProductRelationships' );
-				if ( ! empty( $edited_relationships ) ) {
-					$relationships = json_decode( $edited_relationships, true );
-					if ( is_array( $relationships ) && isset( $relationships['cross_sell_ids'] ) && is_array( $relationships['cross_sell_ids'] ) ) {
-						$collection_args['resolvedProductIds'] = array_map( 'absint', $relationships['cross_sell_ids'] );
-					}
+				// Use client-provided cross-sell IDs for live preview of unsaved changes.
+				$edited_cross_sell_ids = $request->get_param( 'editedCrossSellIds' );
+				if ( is_array( $edited_cross_sell_ids ) ) {
+					$collection_args['resolvedProductIds'] = array_map( 'absint', $edited_cross_sell_ids );
 				}
 
 				return $collection_args;

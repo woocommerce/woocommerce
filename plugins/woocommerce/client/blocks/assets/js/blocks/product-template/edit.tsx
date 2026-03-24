@@ -358,9 +358,8 @@ const ProductTemplateEdit = (
 			}
 			// Read edited product entity to get unsaved relationship data
 			// for live preview of upsells/cross-sells collections.
-			let editedProductRelationships:
-				| Record< string, number[] >
-				| undefined;
+			let editedUpsellIds: number[] | undefined;
+			let editedCrossSellIds: number[] | undefined;
 			if ( productIdForRelationships ) {
 				const editedProduct = getEditedEntityRecord(
 					'postType',
@@ -368,23 +367,12 @@ const ProductTemplateEdit = (
 					productIdForRelationships
 				) as Record< string, unknown > | undefined;
 				if ( editedProduct ) {
-					const upsellIds = editedProduct.upsell_ids as
+					editedUpsellIds = editedProduct.upsell_ids as
 						| number[]
 						| undefined;
-					const crossSellIds = editedProduct.cross_sell_ids as
+					editedCrossSellIds = editedProduct.cross_sell_ids as
 						| number[]
 						| undefined;
-					if ( upsellIds || crossSellIds ) {
-						editedProductRelationships = {};
-						if ( upsellIds ) {
-							editedProductRelationships.upsell_ids =
-								upsellIds;
-						}
-						if ( crossSellIds ) {
-							editedProductRelationships.cross_sell_ids =
-								crossSellIds;
-						}
-					}
 				}
 			}
 
@@ -395,10 +383,11 @@ const ProductTemplateEdit = (
 					productCollectionLocation: location,
 					productCollectionQueryContext,
 					previewState: __privateProductCollectionPreviewState,
-					...( editedProductRelationships && {
-						editedProductRelationships: JSON.stringify(
-							editedProductRelationships
-						),
+					...( editedUpsellIds && {
+						editedUpsellIds,
+					} ),
+					...( editedCrossSellIds && {
+						editedCrossSellIds,
 					} ),
 					/**
 					 * Use value of "Out of stock visibility" setting to determine

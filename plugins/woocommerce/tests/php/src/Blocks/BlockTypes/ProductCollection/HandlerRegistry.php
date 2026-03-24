@@ -290,10 +290,7 @@ class HandlerRegistry extends \WP_UnitTestCase {
 				'collection' => 'woocommerce/product-collection/upsells',
 			)
 		);
-		$request->set_param(
-			'editedProductRelationships',
-			wp_json_encode( array( 'upsell_ids' => $client_upsell_ids ) )
-		);
+		$request->set_param( 'editedUpsellIds', $client_upsell_ids );
 
 		$result = $this->block_instance->update_rest_query_in_editor( array(), $request );
 
@@ -319,7 +316,7 @@ class HandlerRegistry extends \WP_UnitTestCase {
 				'collection' => 'woocommerce/product-collection/upsells',
 			)
 		);
-		// No editedProductRelationships param set.
+		// No editedUpsellIds param set.
 
 		$result = $this->block_instance->update_rest_query_in_editor( array(), $request );
 
@@ -346,10 +343,7 @@ class HandlerRegistry extends \WP_UnitTestCase {
 				'collection' => 'woocommerce/product-collection/cross-sells',
 			)
 		);
-		$request->set_param(
-			'editedProductRelationships',
-			wp_json_encode( array( 'cross_sell_ids' => $client_cross_sell_ids ) )
-		);
+		$request->set_param( 'editedCrossSellIds', $client_cross_sell_ids );
 
 		$result = $this->block_instance->update_rest_query_in_editor( array(), $request );
 
@@ -399,10 +393,7 @@ class HandlerRegistry extends \WP_UnitTestCase {
 				'collection' => 'woocommerce/product-collection/cross-sells',
 			)
 		);
-		$request->set_param(
-			'editedProductRelationships',
-			wp_json_encode( array( 'cross_sell_ids' => array( $product_id, 10, 20 ) ) )
-		);
+		$request->set_param( 'editedCrossSellIds', array( $product_id, 10, 20 ) );
 
 		$result = $this->block_instance->update_rest_query_in_editor( array(), $request );
 
@@ -427,10 +418,7 @@ class HandlerRegistry extends \WP_UnitTestCase {
 				'collection' => 'woocommerce/product-collection/upsells',
 			)
 		);
-		$request->set_param(
-			'editedProductRelationships',
-			wp_json_encode( array( 'upsell_ids' => array() ) )
-		);
+		$request->set_param( 'editedUpsellIds', array() );
 
 		$result = $this->block_instance->update_rest_query_in_editor( array(), $request );
 
@@ -455,10 +443,7 @@ class HandlerRegistry extends \WP_UnitTestCase {
 				'collection' => 'woocommerce/product-collection/cross-sells',
 			)
 		);
-		$request->set_param(
-			'editedProductRelationships',
-			wp_json_encode( array( 'cross_sell_ids' => array() ) )
-		);
+		$request->set_param( 'editedCrossSellIds', array() );
 
 		$result = $this->block_instance->update_rest_query_in_editor( array(), $request );
 
@@ -485,10 +470,7 @@ class HandlerRegistry extends \WP_UnitTestCase {
 			)
 		);
 		// Include the product itself in the upsell IDs — should be excluded.
-		$request->set_param(
-			'editedProductRelationships',
-			wp_json_encode( array( 'upsell_ids' => array( $product_id, 10, 20 ) ) )
-		);
+		$request->set_param( 'editedUpsellIds', array( $product_id, 10, 20 ) );
 
 		$result = $this->block_instance->update_rest_query_in_editor( array(), $request );
 
@@ -524,10 +506,7 @@ class HandlerRegistry extends \WP_UnitTestCase {
 				),
 			)
 		);
-		$request->set_param(
-			'editedProductRelationships',
-			wp_json_encode( array( 'upsell_ids' => $client_upsell_ids ) )
-		);
+		$request->set_param( 'editedUpsellIds', $client_upsell_ids );
 
 		$result = $this->block_instance->update_rest_query_in_editor( array(), $request );
 
@@ -562,10 +541,7 @@ class HandlerRegistry extends \WP_UnitTestCase {
 				),
 			)
 		);
-		$request->set_param(
-			'editedProductRelationships',
-			wp_json_encode( array( 'cross_sell_ids' => $client_cross_sell_ids ) )
-		);
+		$request->set_param( 'editedCrossSellIds', $client_cross_sell_ids );
 
 		$result = $this->block_instance->update_rest_query_in_editor( array(), $request );
 
