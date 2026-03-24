@@ -398,9 +398,9 @@ function wc_product_canonical_redirect(): void {
 
 	// In the event we are dealing with ugly permalinks, this will be empty.
 	$specified_category_slug = get_query_var( 'product_cat' );
-	$specified_category_slug = urldecode( $specified_category_slug );
+	$specified_category_slug = is_array( $specified_category_slug ) ? '' : urldecode( (string) $specified_category_slug );
 
-	if ( ! is_string( $specified_category_slug ) || strlen( $specified_category_slug ) < 1 ) {
+	if ( '' === $specified_category_slug ) {
 		return;
 	}
 
