@@ -257,8 +257,18 @@ const ProductTemplateEdit = (
 		queryContextIncludes: queryContextIncludesWithDefaults,
 	} );
 
-	const productReference = ( restQueryArgs as Record< string, unknown > )
-		.productReference as number | undefined;
+	// Determine the product ID for reading edited entity data.
+	// productReference is set explicitly; otherwise fall back to location context
+	// (e.g., inside single-product block where postId provides the product ID).
+	const productReferenceFromQuery = ( restQueryArgs as Record<
+		string,
+		unknown
+	> ).productReference as number | undefined;
+	const productIdForRelationships =
+		productReferenceFromQuery ||
+		( location?.type === 'product'
+			? ( location.sourceData as { productId?: number } )?.productId
+			: undefined );
 
 	const { products, isInSingleProductBlock, blocks } = useSelect(
 		( select ) => {
@@ -351,11 +361,11 @@ const ProductTemplateEdit = (
 			let editedProductRelationships:
 				| Record< string, number[] >
 				| undefined;
-			if ( productReference ) {
+			if ( productIdForRelationships ) {
 				const editedProduct = getEditedEntityRecord(
 					'postType',
 					'product',
-					productReference
+					productIdForRelationships
 				) as Record< string, unknown > | undefined;
 				if ( editedProduct ) {
 					const upsellIds = editedProduct.upsell_ids as
@@ -424,7 +434,7 @@ const ProductTemplateEdit = (
 			productCollectionQueryContext,
 			loopShopPerPage,
 			__privateProductCollectionPreviewState,
-			productReference,
+			productIdForRelationships,
 		]
 	);
 	const blockContexts = useMemo(

@@ -497,6 +497,83 @@ class HandlerRegistry extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Tests upsells with edited relationships via location context (no productReference).
+	 * This is the flow used inside the single-product block editor.
+	 */
+	public function test_collection_upsells_edited_relationships_via_location() {
+		$client_upsell_ids = array( 10, 20, 30 );
+
+		$test_product = WC_Helper_Product::create_simple_product( false );
+		$test_product->set_upsell_ids( array( 99, 100 ) );
+		$test_product->save();
+
+		// No productReference param — product ID comes from location context.
+		$request = Utils::build_request();
+		$request->set_param(
+			'productCollectionQueryContext',
+			array(
+				'collection' => 'woocommerce/product-collection/upsells',
+			)
+		);
+		$request->set_param(
+			'productCollectionLocation',
+			array(
+				'type'       => 'product',
+				'sourceData' => array(
+					'productId' => $test_product->get_id(),
+				),
+			)
+		);
+		$request->set_param(
+			'editedProductRelationships',
+			wp_json_encode( array( 'upsell_ids' => $client_upsell_ids ) )
+		);
+
+		$result = $this->block_instance->update_rest_query_in_editor( array(), $request );
+
+		// Should use client-provided IDs even without explicit productReference.
+		$this->assertEqualsCanonicalizing( $client_upsell_ids, $result['post__in'] );
+	}
+
+	/**
+	 * Tests cross-sells with edited relationships via location context (no productReference).
+	 */
+	public function test_collection_cross_sells_edited_relationships_via_location() {
+		$client_cross_sell_ids = array( 10, 20, 30 );
+
+		$test_product = WC_Helper_Product::create_simple_product( false );
+		$test_product->set_cross_sell_ids( array( 99, 100 ) );
+		$test_product->save();
+
+		// No productReference param — product ID comes from location context.
+		$request = Utils::build_request();
+		$request->set_param(
+			'productCollectionQueryContext',
+			array(
+				'collection' => 'woocommerce/product-collection/cross-sells',
+			)
+		);
+		$request->set_param(
+			'productCollectionLocation',
+			array(
+				'type'       => 'product',
+				'sourceData' => array(
+					'productId' => $test_product->get_id(),
+				),
+			)
+		);
+		$request->set_param(
+			'editedProductRelationships',
+			wp_json_encode( array( 'cross_sell_ids' => $client_cross_sell_ids ) )
+		);
+
+		$result = $this->block_instance->update_rest_query_in_editor( array(), $request );
+
+		// Should use client-provided IDs even without explicit productReference.
+		$this->assertEqualsCanonicalizing( $client_cross_sell_ids, $result['post__in'] );
+	}
+
+	/**
 	 * Tests that the hand-picked collection handler works with empty product selection.
 	 */
 	public function test_collection_hand_picked_empty() {
