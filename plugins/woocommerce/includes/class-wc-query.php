@@ -607,7 +607,7 @@ class WC_Query {
 		}
 
 		/** This filter is documented in wp-includes/class-wp-query.php */
-		$exclusion_prefix = apply_filters( 'wp_query_search_exclusion_prefix', '-' );
+		$exclusion_prefix = apply_filters( 'wp_query_search_exclusion_prefix', '-' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
 
 		if ( '' !== $exclusion_prefix ) {
 			$search_terms = array_filter(
