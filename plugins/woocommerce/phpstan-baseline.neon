@@ -5899,6 +5899,12 @@ parameters:
 			path: includes/admin/meta-boxes/views/html-order-fee.php
 
 		-
+			message: '#^Variable \$cogs_is_enabled might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: includes/admin/meta-boxes/views/html-order-fee.php
+
+		-
 			message: '#^Variable \$order might not be defined\.$#'
 			identifier: variable.undefined
 			count: 7
@@ -5906,12 +5912,6 @@ parameters:
 
 		-
 			message: '#^Variable \$order_taxes might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: includes/admin/meta-boxes/views/html-order-fee.php
-
-		-
-			message: '#^Variable \$cogs_is_enabled might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1
 			path: includes/admin/meta-boxes/views/html-order-fee.php
@@ -6085,13 +6085,13 @@ parameters:
 			path: includes/admin/meta-boxes/views/html-order-refund.php
 
 		-
-			message: '#^Variable \$order_taxes might not be defined\.$#'
+			message: '#^Variable \$cogs_is_enabled might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1
 			path: includes/admin/meta-boxes/views/html-order-refund.php
 
 		-
-			message: '#^Variable \$cogs_is_enabled might not be defined\.$#'
+			message: '#^Variable \$order_taxes might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1
 			path: includes/admin/meta-boxes/views/html-order-refund.php
@@ -35651,12 +35651,6 @@ parameters:
 
 		-
 			message: '#^Call to function is_array\(\) with array\<mixed\> will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: includes/wc-product-functions.php
-
-		-
-			message: '#^Call to function is_string\(\) with string will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
 			count: 1
 			path: includes/wc-product-functions.php
