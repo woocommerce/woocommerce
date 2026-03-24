@@ -41,7 +41,7 @@ class NewOrderNotification extends Notification {
 		}
 
 		return array(
-			'type'        => $this->get_type(),
+			'type'        => $this->type,
 			'icon'        => self::ICON,
 			// This represents the time the notification was triggered, so we can monitor age of notification at delivery.
 			'timestamp'   => gmdate( 'c' ),

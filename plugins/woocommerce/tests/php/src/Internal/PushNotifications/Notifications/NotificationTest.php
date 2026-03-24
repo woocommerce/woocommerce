@@ -17,12 +17,12 @@ use WC_Unit_Test_Case;
  */
 class NotificationTest extends WC_Unit_Test_Case {
 	/**
-	 * @testdox Should store and return the notification type.
+	 * @testdox Should derive the notification type from the NOTIFICATION_CLASSES map.
 	 */
-	public function test_get_type(): void {
+	public function test_type_is_derived_from_map(): void {
 		$notification = new StubOrderNotification( 42 );
 
-		$this->assertSame( 'store_order', $notification->get_type() );
+		$this->assertSame( 'store_order', $notification->to_array()['type'] );
 	}
 
 	/**

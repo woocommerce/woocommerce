@@ -72,7 +72,7 @@ class WpcomNotificationDispatcher {
 			wc_get_logger()->error(
 				sprintf(
 					'Cannot send push notification: resource no longer exists (type=%s, resource_id=%d).',
-					$notification->get_type(),
+					get_class( $notification ),
 					$notification->get_resource_id()
 				),
 				array( 'source' => PushNotifications::FEATURE_NAME )

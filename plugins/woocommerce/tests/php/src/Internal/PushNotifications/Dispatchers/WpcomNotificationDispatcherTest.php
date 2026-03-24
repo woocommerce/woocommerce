@@ -291,6 +291,7 @@ class WpcomNotificationDispatcherTest extends WC_Unit_Test_Case {
 			 * @param array|null $payload The payload to return.
 			 */
 			public function __construct( ?array $payload ) {
+				$this->type = 'store_order';
 				parent::__construct( 1 );
 				$this->test_payload = $payload;
 			}

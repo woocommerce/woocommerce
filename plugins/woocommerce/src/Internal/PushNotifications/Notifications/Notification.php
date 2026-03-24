@@ -34,7 +34,7 @@ abstract class Notification {
 	 *
 	 * @var string
 	 */
-	private string $type;
+	protected string $type;
 
 	/**
 	 * The ID of the resource this notification is about (e.g. order ID, comment
@@ -59,32 +59,17 @@ abstract class Notification {
 			throw new InvalidArgumentException( 'Notification resource_id must be positive.' );
 		}
 
-		foreach ( self::NOTIFICATION_CLASSES as $notification_type => $class ) {
-			if ( is_a( static::class, $class, true ) ) {
-				$resolved_type = $notification_type;
-				break;
+		if ( ! isset( $this->type ) ) {
+			$class_to_type_map = array_flip( self::NOTIFICATION_CLASSES );
+
+			if ( ! isset( $class_to_type_map[ static::class ] ) ) {
+				throw new LogicException( sprintf( 'Notification class %s is not registered.', static::class ) );
 			}
+
+			$this->type = $class_to_type_map[ static::class ];
 		}
 
-		if ( empty( $resolved_type ) ) {
-			throw new LogicException( sprintf( 'Notification class %s is not registered.', static::class ) );
-		}
-
-		$this->type        = $resolved_type;
 		$this->resource_id = $resource_id;
-	}
-
-	/**
-	 * Returns the notification type identifier, this should match the subtype
-	 * or type (if there isn't a subtype) values attributed to notes in
-	 * WordPress.com.
-	 *
-	 * @return string
-	 *
-	 * @since 10.7.0
-	 */
-	public function get_type(): string {
-		return $this->type;
 	}
 
 	/**
@@ -127,7 +112,7 @@ abstract class Notification {
 	 */
 	public function to_array(): array {
 		return array(
-			'type'        => $this->get_type(),
+			'type'        => $this->type,
 			'resource_id' => $this->resource_id,
 		);
 	}
@@ -165,7 +150,7 @@ abstract class Notification {
 	 * @since 10.7.0
 	 */
 	public function get_identifier(): string {
-		return sprintf( '%s_%s_%s', get_current_blog_id(), $this->get_type(), $this->resource_id );
+		return sprintf( '%s_%s_%s', get_current_blog_id(), $this->type, $this->resource_id );
 	}
 
 	/**

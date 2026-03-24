@@ -41,7 +41,7 @@ class NewOrderNotificationTest extends WC_Unit_Test_Case {
 	public function test_type_is_store_order(): void {
 		$notification = new NewOrderNotification( 1 );
 
-		$this->assertSame( 'store_order', $notification->get_type() );
+		$this->assertSame( 'store_order', $notification->to_array()['type'] );
 	}
 
 	/**
