@@ -17,7 +17,7 @@ class StoreAlertsPlaceholder extends Component {
 					className
 				) }
 				aria-hidden
-				size={ null }
+				size="none"
 			>
 				<CardHeader isBorderless>
 					<span className="is-placeholder" />
