@@ -342,6 +342,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 		 * @param WC_Order              $order       The order object.
 		 * @return string The formatted quantity display with unit price.
 		 *
+		 * @since 10.7.0
 		 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
 		 */
 		public function format_quantity_with_unit_price( $qty_display, $item, $order ) {
