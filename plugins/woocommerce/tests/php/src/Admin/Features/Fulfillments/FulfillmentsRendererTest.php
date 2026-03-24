@@ -90,7 +90,7 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 		$fulfillment->set_entity_id( (string) $order->get_id() );
 		$fulfillment->set_tracking_number( '123456789' );
 		$fulfillment->set_tracking_url( 'https://example.com/track/123456789' );
-		$fulfillment->set_shipping_provider( 'UPS' );
+		$fulfillment->set_shipment_provider( 'UPS' );
 		$fulfillment->set_items(
 			array(
 				array(

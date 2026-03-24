@@ -175,7 +175,7 @@ class FulfillmentsRenderer {
 	private function render_shipment_provider_column_row_data( WC_Order $order, array $fulfillments ) {
 		$providers = array();
 		foreach ( $fulfillments as $fulfillment ) {
-			$provider = $fulfillment->get_shipping_provider();
+			$provider = $fulfillment->get_shipment_provider();
 			if ( ! empty( $provider ) ) {
 				$provider_name     = $fulfillment->get_meta( '_provider_name' );
 				$key               = 'other' === $provider && ! empty( $provider_name )
@@ -189,7 +189,7 @@ class FulfillmentsRenderer {
 			echo '<span>' . esc_html__( 'Multiple providers', 'woocommerce' ) . '</span>';
 		} elseif ( 1 === count( $providers ) ) {
 			$provider_fulfillment   = reset( $providers );
-			$provider_slug          = $provider_fulfillment->get_shipping_provider();
+			$provider_slug          = $provider_fulfillment->get_shipment_provider();
 			$known_providers        = FulfillmentUtils::get_shipping_providers_object();
 			$provider_name_meta     = $provider_fulfillment->get_meta( '_provider_name' );
 			$provider_display_label = $known_providers[ $provider_slug ]['label']
@@ -266,6 +266,7 @@ class FulfillmentsRenderer {
 	 */
 	public function handle_fulfillment_bulk_actions( $redirect_to, $action, $post_ids ) {
 		if ( 'fulfill' === $action ) {
+			FulfillmentsTracker::track_fulfillment_bulk_action_used( 'fulfill_orders', count( $post_ids ) );
 			foreach ( $post_ids as $post_id ) {
 				$order = wc_get_order( $post_id );
 				if ( ! $order ) {
@@ -479,6 +480,10 @@ class FulfillmentsRenderer {
 
 			// Ensure the fulfillment status is one of the allowed values.
 			if ( FulfillmentUtils::is_valid_order_fulfillment_status( $fulfillment_status ) ) {
+				// Only track when the filter is explicitly submitted, not on pagination/refresh.
+				if ( isset( $_GET['filter_action'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+					FulfillmentsTracker::track_fulfillment_filter_used( 'fulfillment_status', $fulfillment_status );
+				}
 				$meta_query = FulfillmentUtils::get_order_fulfillment_status_meta_query( $fulfillment_status );
 				if ( ! empty( $meta_query ) ) {
 					if ( ! isset( $args['meta_query'] ) ) {
@@ -507,6 +512,10 @@ class FulfillmentsRenderer {
 			$status = sanitize_text_field( wp_unslash( $_GET['fulfillment_status'] ) ); // phpcs:ignore WordPress.Security.NonceVerification
 			// Ensure the fulfillment status is one of the allowed values.
 			if ( FulfillmentUtils::is_valid_order_fulfillment_status( $status ) ) {
+				// Only track when the filter is explicitly submitted, not on pagination/refresh.
+				if ( isset( $_GET['filter_action'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+					FulfillmentsTracker::track_fulfillment_filter_used( 'fulfillment_status', $status );
+				}
 				$query->set(
 					'meta_query',
 					'no_fulfillments' === $status ?

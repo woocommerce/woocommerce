@@ -615,6 +615,13 @@ abstract class AbstractPaymentGatewaySettingsSchema extends AbstractSchema {
 				return sanitize_email( $value );
 
 			case 'password':
+				// Only trim — no stripslashes() (REST JSON is not magic-quote-escaped),
+				// no wp_strip_all_tags() or wc_clean() which would corrupt passwords
+				// containing '<', backslashes, or percent-like sequences.
+				// Non-scalar values (arrays, objects, null) from malformed requests → empty string.
+				// Scalars coerced to string to preserve numeric PINs/API keys.
+				return is_scalar( $value ) ? trim( (string) $value ) : '';
+
 			case 'color':
 				return sanitize_text_field( $value );
 
