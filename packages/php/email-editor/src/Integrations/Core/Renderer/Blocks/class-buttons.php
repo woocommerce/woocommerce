@@ -60,6 +60,14 @@ class Buttons extends Abstract_Block_Renderer {
 		return $this->add_spacer( $content, $email_attrs );
 	}
 
+	/**
+	 * Renders the block content.
+	 *
+	 * @param string            $block_content Block content.
+	 * @param array             $parsed_block Parsed block.
+	 * @param Rendering_Context $rendering_context Rendering context.
+	 * @return string
+	 */
 	protected function render_content( $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
 		// Ignore font size set on the buttons block.
 		// We rely on TypographyPreprocessor to set the font size on the buttons.
