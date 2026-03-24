@@ -15,13 +15,6 @@ defined( 'ABSPATH' ) || exit;
  */
 class NewReviewNotification extends Notification {
 	/**
-	 * {@inheritDoc}
-	 */
-	public static function get_type(): string {
-		return 'store_review';
-	}
-
-	/**
 	 * Returns the WPCOM-ready payload for this notification.
 	 *
 	 * Returns null if the comment no longer exists.

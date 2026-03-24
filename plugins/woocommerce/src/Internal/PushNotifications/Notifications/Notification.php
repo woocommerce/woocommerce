@@ -4,8 +4,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\PushNotifications\Notifications;
 
-use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use InvalidArgumentException;
+use LogicException;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -18,6 +18,24 @@ defined( 'ABSPATH' ) || exit;
  * @since 10.7.0
  */
 abstract class Notification {
+	/**
+	 * Map of notification type identifiers to their corresponding subclass.
+	 *
+	 * @var array<string, class-string<Notification>>
+	 */
+	const NOTIFICATION_CLASSES = array(
+		'store_order'  => NewOrderNotification::class,
+		'store_review' => NewReviewNotification::class,
+	);
+
+	/**
+	 * The notification type identifier, derived from the NOTIFICATION_CLASSES
+	 * map.
+	 *
+	 * @var string
+	 */
+	private string $type;
+
 	/**
 	 * The ID of the resource this notification is about (e.g. order ID, comment
 	 * ID).
@@ -32,6 +50,7 @@ abstract class Notification {
 	 * @param int $resource_id The resource ID.
 	 *
 	 * @throws InvalidArgumentException If the resource ID is invalid.
+	 * @throws LogicException If the subclass is not registered in NOTIFICATION_CLASSES.
 	 *
 	 * @since 10.7.0
 	 */
@@ -40,19 +59,33 @@ abstract class Notification {
 			throw new InvalidArgumentException( 'Notification resource_id must be positive.' );
 		}
 
+		foreach ( self::NOTIFICATION_CLASSES as $notification_type => $class ) {
+			if ( is_a( static::class, $class, true ) ) {
+				$resolved_type = $notification_type;
+				break;
+			}
+		}
+
+		if ( empty( $resolved_type ) ) {
+			throw new LogicException( sprintf( 'Notification class %s is not registered.', static::class ) );
+		}
+
+		$this->type        = $resolved_type;
 		$this->resource_id = $resource_id;
 	}
 
 	/**
-	 * Returns he notification type identifier, this should match the subtype or
-	 * type (if there isn't a subtype) values attributed to notes in
+	 * Returns the notification type identifier, this should match the subtype
+	 * or type (if there isn't a subtype) values attributed to notes in
 	 * WordPress.com.
 	 *
 	 * @return string
 	 *
 	 * @since 10.7.0
 	 */
-	abstract public static function get_type(): string;
+	public function get_type(): string {
+		return $this->type;
+	}
 
 	/**
 	 * Returns the WPCOM-ready payload for this notification.
@@ -113,14 +146,14 @@ abstract class Notification {
 		$type        = $data['type'] ?? '';
 		$resource_id = (int) ( $data['resource_id'] ?? 0 );
 
-		foreach ( PushNotifications::NOTIFICATION_CLASSES as $class ) {
-			if ( $class::get_type() === $type ) {
-				return new $class( $resource_id );
-			}
+		$class = self::NOTIFICATION_CLASSES[ $type ] ?? null;
+
+		if ( ! $class ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+			throw new InvalidArgumentException( sprintf( 'Unknown notification type: %s', $type ) );
 		}
 
-		// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
-		throw new InvalidArgumentException( sprintf( 'Unknown notification type: %s', $type ) );
+		return new $class( $resource_id );
 	}
 
 	/**

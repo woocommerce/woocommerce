@@ -4,21 +4,14 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Stubs;
 
-use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
+use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewOrderNotification;
 
 /**
  * Stub notification with type 'store_order' for testing.
  */
-class StubOrderNotification extends Notification {
+class StubOrderNotification extends NewOrderNotification {
 	/** @var array<string, bool> */
 	private array $meta = array();
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public static function get_type(): string {
-		return 'store_order';
-	}
 
 	/**
 	 * {@inheritDoc}

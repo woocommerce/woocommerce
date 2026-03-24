@@ -25,13 +25,6 @@ class NewOrderNotification extends Notification {
 	const EMOJI_LIST = array( '🎉', '🎊', '🥳', '👏', '🙌' );
 
 	/**
-	 * {@inheritDoc}
-	 */
-	public static function get_type(): string {
-		return 'store_order';
-	}
-
-	/**
 	 * Returns the WPCOM-ready payload for this notification.
 	 *
 	 * Returns null if the order no longer exists.

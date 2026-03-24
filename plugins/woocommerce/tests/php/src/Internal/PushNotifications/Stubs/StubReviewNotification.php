@@ -4,21 +4,14 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Stubs;
 
-use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
+use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewReviewNotification;
 
 /**
  * Stub notification with type 'store_review' for testing.
  */
-class StubReviewNotification extends Notification {
+class StubReviewNotification extends NewReviewNotification {
 	/** @var array<string, bool> */
 	private array $meta = array();
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public static function get_type(): string {
-		return 'store_review';
-	}
 
 	/**
 	 * {@inheritDoc}

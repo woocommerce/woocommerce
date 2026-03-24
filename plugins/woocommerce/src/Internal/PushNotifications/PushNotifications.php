@@ -9,8 +9,6 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\Jetpack\Connection\Manager as JetpackConnectionManager;
 use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushTokenRestController;
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
-use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewOrderNotification;
-use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewReviewNotification;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\PendingNotificationStore;
 use Automattic\WooCommerce\Internal\PushNotifications\Triggers\NewOrderNotificationTrigger;
 use Automattic\WooCommerce\Internal\PushNotifications\Triggers\NewReviewNotificationTrigger;
@@ -40,17 +38,6 @@ class PushNotifications {
 	const ROLES_WITH_PUSH_NOTIFICATIONS_ENABLED = array(
 		'administrator',
 		'shop_manager',
-	);
-
-	/**
-	 * Notification subclasses used by Notification::from_array() to resolve
-	 * types.
-	 *
-	 * @var array<class-string<\Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification>>
-	 */
-	const NOTIFICATION_CLASSES = array(
-		NewOrderNotification::class,
-		NewReviewNotification::class,
 	);
 
 	/**
