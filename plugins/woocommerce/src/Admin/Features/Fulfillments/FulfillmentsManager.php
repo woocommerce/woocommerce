@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Admin\Features\Fulfillments;
 
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Providers\AbstractShippingProvider;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Order;
 use WC_Order_Refund;
 
@@ -37,6 +38,8 @@ class FulfillmentsManager {
 
 		$this->init_fulfillment_status_hooks();
 		$this->init_refund_hooks();
+		$this->init_email_template_tracking_hooks();
+		$this->init_order_deletion_hooks();
 
 		if ( ! $this->fulfillment_order_notes ) {
 			$this->fulfillment_order_notes = wc_get_container()->get( FulfillmentOrderNotes::class );
@@ -65,6 +68,67 @@ class FulfillmentsManager {
 	private function init_refund_hooks() {
 		add_action( 'woocommerce_refund_created', array( $this, 'update_fulfillments_after_refund' ), 10, 1 );
 		add_action( 'woocommerce_delete_order_refund', array( $this, 'update_fulfillment_status_after_refund_deleted' ), 10, 1 );
+	}
+
+	/**
+	 * Initialize hooks to track when fulfillment email templates are customized.
+	 *
+	 * Hooks into the WooCommerce email settings save action for each fulfillment email type
+	 * so we can track when merchants customize these templates.
+	 */
+	private function init_email_template_tracking_hooks(): void {
+		$fulfillment_email_ids = array(
+			'customer_fulfillment_created',
+			'customer_fulfillment_updated',
+			'customer_fulfillment_deleted',
+		);
+
+		foreach ( $fulfillment_email_ids as $email_id ) {
+			add_action(
+				'woocommerce_update_options_email_' . $email_id,
+				function () use ( $email_id ) {
+					FulfillmentsTracker::track_fulfillment_email_template_customized( $email_id );
+				}
+			);
+		}
+	}
+
+	/**
+	 * Initialize order deletion hooks.
+	 *
+	 * Registers hooks to clean up fulfillment records when an order is permanently deleted.
+	 */
+	private function init_order_deletion_hooks(): void {
+		add_action( 'woocommerce_before_delete_order', array( $this, 'delete_order_fulfillments' ), 10, 1 );
+		add_action( 'before_delete_post', array( $this, 'delete_order_fulfillments' ), 10, 1 );
+	}
+
+	/**
+	 * Delete all fulfillment records for an order that is being permanently deleted.
+	 *
+	 * @since 10.7.0
+	 *
+	 * @param int $order_id The ID of the order being deleted.
+	 */
+	public function delete_order_fulfillments( int $order_id ): void {
+		try {
+			if ( ! OrderUtil::is_order( $order_id, wc_get_order_types() ) ) {
+				return;
+			}
+
+			/**
+			 * Fulfillments data store.
+			 *
+			 * @var \Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDataStore $fulfillments_data_store
+			 */
+			$fulfillments_data_store = \WC_Data_Store::load( 'order-fulfillment' );
+			$fulfillments_data_store->delete_by_entity( WC_Order::class, (string) $order_id );
+		} catch ( \Throwable $e ) {
+			wc_get_logger()->error(
+				sprintf( 'Failed to delete fulfillments for order %d: %s', $order_id, $e->getMessage() ),
+				array( 'source' => 'fulfillments' )
+			);
+		}
 	}
 
 	/**
@@ -441,6 +505,14 @@ class FulfillmentsManager {
 			$possibilities            = $results;
 			$results                  = $this->get_best_parsing_result( $results, $tracking_number );
 			$results['possibilities'] = $possibilities; // Include all possibilities for reference.
+		}
+
+		if ( isset( $results['shipping_provider'] ) ) {
+			// Record the tracking lookup attempt with url_generated indicating if a tracking URL was constructed.
+			FulfillmentsTracker::track_fulfillment_tracking_lookup_attempt( 'success', $results['shipping_provider'], ! empty( $results['tracking_url'] ) );
+		} else {
+			// If no provider could parse the tracking number, record a failure.
+			FulfillmentsTracker::track_fulfillment_tracking_lookup_attempt( 'not_found', '', false );
 		}
 
 		return $results;

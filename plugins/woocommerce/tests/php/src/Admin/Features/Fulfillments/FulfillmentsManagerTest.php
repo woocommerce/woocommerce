@@ -293,6 +293,62 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should register order deletion hooks.
+	 */
+	public function test_order_deletion_hooks_registered(): void {
+		$this->assertNotFalse( has_action( 'woocommerce_before_delete_order', array( $this->manager, 'delete_order_fulfillments' ) ) );
+		$this->assertNotFalse( has_action( 'before_delete_post', array( $this->manager, 'delete_order_fulfillments' ) ) );
+	}
+
+	/**
+	 * @testdox Should delete fulfillments when an order is permanently deleted.
+	 */
+	public function test_delete_order_fulfillments_on_order_deletion(): void {
+		global $wpdb;
+
+		$product = \WC_Helper_Product::create_simple_product();
+		$order   = OrderHelper::create_order( get_current_user_id(), $product );
+
+		FulfillmentsHelper::create_fulfillment(
+			array(
+				'entity_type' => WC_Order::class,
+				'entity_id'   => $order->get_id(),
+				'status'      => 'unfulfilled',
+			),
+			array(
+				'_items' => array(
+					array(
+						'item_id' => 1,
+						'qty'     => 1,
+					),
+				),
+			)
+		);
+
+		$order_id = $order->get_id();
+
+		$fulfillments_before = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->prefix}wc_order_fulfillments WHERE entity_type = %s AND entity_id = %s",
+				WC_Order::class,
+				$order_id
+			)
+		);
+		$this->assertSame( '1', $fulfillments_before, 'Fulfillment should exist before deletion' );
+
+		$order->delete( true );
+
+		$fulfillments_after = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->prefix}wc_order_fulfillments WHERE entity_type = %s AND entity_id = %d",
+				WC_Order::class,
+				$order_id
+			)
+		);
+		$this->assertSame( '0', $fulfillments_after, 'Fulfillments should be deleted after order deletion' );
+	}
+
+	/**
 	 * Test tracking number parsing without any shipping providers.
 	 */
 	public function test_try_parse_tracking_number_no_providers() {
@@ -301,13 +357,31 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 		add_filter(
 			'woocommerce_fulfillment_shipping_providers',
 			function ( $providers ) {
-				$providers = array();
-				return $providers;
+				unset( $providers );
+				return array();
 			}
 		);
 
 		// Test with a valid tracking number.
 		$parsed_number = $this->manager->try_parse_tracking_number( $tracking_number, 'US', 'CA' );
 		$this->assertEquals( array(), $parsed_number );
+	}
+
+	/**
+	 * @testdox Email template tracking hooks are registered for all fulfillment email types.
+	 */
+	public function test_email_template_tracking_hooks_are_registered(): void {
+		$email_ids = array(
+			'customer_fulfillment_created',
+			'customer_fulfillment_updated',
+			'customer_fulfillment_deleted',
+		);
+
+		foreach ( $email_ids as $email_id ) {
+			$this->assertNotFalse(
+				has_action( 'woocommerce_update_options_email_' . $email_id ),
+				"Tracking hook should be registered for woocommerce_update_options_email_{$email_id}"
+			);
+		}
 	}
 }

@@ -1891,4 +1891,164 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		wp_set_current_user( $current_user->ID );
 	}
+
+	/**
+	 * @testdox maybe_track_tracking_added method exists on the controller.
+	 */
+	public function test_maybe_track_tracking_added_method_exists(): void {
+		$reflection = new \ReflectionClass( OrderFulfillmentsRestController::class );
+		$this->assertTrue(
+			$reflection->hasMethod( 'maybe_track_tracking_added' ),
+			'maybe_track_tracking_added method should exist on OrderFulfillmentsRestController'
+		);
+
+		$method = $reflection->getMethod( 'maybe_track_tracking_added' );
+		$this->assertTrue( $method->isPrivate(), 'maybe_track_tracking_added should be private' );
+	}
+
+	/**
+	 * @testdox check_request_source returns fulfillments_modal when UI header is present.
+	 */
+	public function test_check_request_source_returns_modal_for_ui_header(): void {
+		$reflection = new \ReflectionClass( OrderFulfillmentsRestController::class );
+		$method     = $reflection->getMethod( 'check_request_source' );
+		$method->setAccessible( true );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/1/fulfillments' );
+		$request->set_header( 'X-WC-Fulfillments-UI', 'true' );
+
+		$result = $method->invoke( $this->controller, $request );
+		$this->assertSame( 'fulfillments_modal', $result );
+	}
+
+	/**
+	 * @testdox check_request_source returns api when no UI header is present.
+	 */
+	public function test_check_request_source_returns_api_without_ui_header(): void {
+		$reflection = new \ReflectionClass( OrderFulfillmentsRestController::class );
+		$method     = $reflection->getMethod( 'check_request_source' );
+		$method->setAccessible( true );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/1/fulfillments' );
+
+		$result = $method->invoke( $this->controller, $request );
+		$this->assertSame( 'api', $result );
+	}
+
+	/**
+	 * @testdox Creating a fulfillment with tracking info succeeds and includes tracking metadata.
+	 */
+	public function test_create_fulfillment_with_tracking_info_succeeds(): void {
+		$order = WC_Helper_Order::create_order( get_current_user_id() );
+		$this->assertInstanceOf( WC_Order::class, $order );
+
+		wp_set_current_user( 1 );
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() . '/fulfillments' );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'entity_type'  => WC_Order::class,
+					'entity_id'    => '' . $order->get_id(),
+					'status'       => 'fulfilled',
+					'is_fulfilled' => true,
+					'meta_data'    => array(
+						array(
+							'id'    => 0,
+							'key'   => '_items',
+							'value' => array(
+								array(
+									'item_id' => 1,
+									'qty'     => 1,
+								),
+							),
+						),
+						array(
+							'id'    => 0,
+							'key'   => '_tracking_number',
+							'value' => '1Z999AA10123456784',
+						),
+						array(
+							'id'    => 0,
+							'key'   => '_shipment_provider',
+							'value' => 'ups',
+						),
+						array(
+							'id'    => 0,
+							'key'   => '_tracking_url',
+							'value' => 'https://www.ups.com/track?tracknum=1Z999AA10123456784',
+						),
+						array(
+							'id'    => 0,
+							'key'   => '_shipping_option',
+							'value' => 'tracking-number',
+						),
+					),
+				)
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::CREATED, $response->get_status() );
+		$fulfillment = $response->get_data();
+		$this->assertIsArray( $fulfillment );
+		$this->assertArrayHasKey( 'id', $fulfillment );
+
+		$meta_keys = array_column( $fulfillment['meta_data'], 'key' );
+		$this->assertContains( '_tracking_number', $meta_keys, 'Fulfillment should have tracking number metadata' );
+		$this->assertContains( '_shipment_provider', $meta_keys, 'Fulfillment should have shipping provider metadata' );
+		$this->assertContains( '_tracking_url', $meta_keys, 'Fulfillment should have tracking URL metadata' );
+
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * @testdox Creating a fulfillment without tracking info succeeds without tracking metadata.
+	 */
+	public function test_create_fulfillment_without_tracking_info_succeeds(): void {
+		$order = WC_Helper_Order::create_order( get_current_user_id() );
+		$this->assertInstanceOf( WC_Order::class, $order );
+
+		wp_set_current_user( 1 );
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() . '/fulfillments' );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'entity_type'  => WC_Order::class,
+					'entity_id'    => '' . $order->get_id(),
+					'status'       => 'unfulfilled',
+					'is_fulfilled' => false,
+					'meta_data'    => array(
+						array(
+							'id'    => 0,
+							'key'   => '_items',
+							'value' => array(
+								array(
+									'item_id' => 1,
+									'qty'     => 1,
+								),
+							),
+						),
+						array(
+							'id'    => 0,
+							'key'   => '_shipping_option',
+							'value' => 'no-info',
+						),
+					),
+				)
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::CREATED, $response->get_status() );
+		$fulfillment = $response->get_data();
+		$this->assertIsArray( $fulfillment );
+		$this->assertArrayHasKey( 'id', $fulfillment );
+
+		$meta_keys = array_column( $fulfillment['meta_data'], 'key' );
+		$this->assertNotContains( '_tracking_number', $meta_keys, 'Fulfillment without tracking should not have tracking number metadata' );
+
+		wp_set_current_user( 0 );
+	}
 }
