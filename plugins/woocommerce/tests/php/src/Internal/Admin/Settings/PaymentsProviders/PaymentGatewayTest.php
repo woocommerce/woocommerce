@@ -187,8 +187,10 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 							'icon'        => '', // The icon with an invalid URL is ignored.
 							'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_PRIMARY,
 							'notice'      => array(
-								'badge'   => '',
-								'message' => '',
+								'badge'     => '',
+								'message'   => '',
+								'link_text' => '',
+								'link_url'  => '',
 							),
 						),
 						array(
@@ -201,8 +203,10 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 							'icon'        => 'https://example.com/card-icon.png',
 							'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_PRIMARY,
 							'notice'      => array(
-								'badge'   => '',
-								'message' => '',
+								'badge'     => '',
+								'message'   => '',
+								'link_text' => '',
+								'link_url'  => '',
 							),
 						),
 						array(
@@ -215,8 +219,10 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 							'icon'        => '',
 							'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_PRIMARY,
 							'notice'      => array(
-								'badge'   => '',
-								'message' => '',
+								'badge'     => '',
+								'message'   => '',
+								'link_text' => '',
+								'link_url'  => '',
 							),
 						),
 						array(
@@ -229,8 +235,10 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 							'icon'        => '',
 							'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_SECONDARY,
 							'notice'      => array(
-								'badge'   => '',
-								'message' => '',
+								'badge'     => '',
+								'message'   => '',
+								'link_text' => '',
+								'link_url'  => '',
 							),
 						),
 					),
@@ -1915,8 +1923,10 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 					'icon'        => 'https://example.com/icon.png',
 					'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_SECONDARY,
 					'notice'      => array(
-						'badge'   => '',
-						'message' => '',
+						'badge'     => '',
+						'message'   => '',
+						'link_text' => '',
+						'link_url'  => '',
 					),
 				),
 				array(
@@ -1929,8 +1939,10 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 					'icon'        => 'https://example.com/card-icon.png',
 					'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_PRIMARY,
 					'notice'      => array(
-						'badge'   => '',
-						'message' => '',
+						'badge'     => '',
+						'message'   => '',
+						'link_text' => '',
+						'link_url'  => '',
 					),
 				),
 			),
@@ -1987,8 +1999,10 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 					// No icon.
 					'icon'        => '',
 					'notice'      => array(
-						'badge'   => '',
-						'message' => '',
+						'badge'     => '',
+						'message'   => '',
+						'link_text' => '',
+						'link_url'  => '',
 					),
 				),
 			),
@@ -2021,8 +2035,10 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 						'title'   => 'Przelewy24',
 						'enabled' => false,
 						'notice'  => array(
-							'badge'   => 'Additional verification required',
-							'message' => 'Przelewy24 has strict requirements.',
+							'badge'     => 'Additional verification required',
+							'message'   => 'Przelewy24 has strict requirements.',
+							'link_text' => 'Review requirements',
+							'link_url'  => 'https://woocommerce.com/document/woopayments/payment-methods/local-payment-methods/#p24-additional-requirements',
 						),
 					),
 				),
@@ -2035,6 +2051,11 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'notice', $result[0] );
 		$this->assertSame( 'Additional verification required', $result[0]['notice']['badge'] );
 		$this->assertSame( 'Przelewy24 has strict requirements.', $result[0]['notice']['message'] );
+		$this->assertSame( 'Review requirements', $result[0]['notice']['link_text'] );
+		$this->assertSame(
+			'https://woocommerce.com/document/woopayments/payment-methods/local-payment-methods/#p24-additional-requirements',
+			$result[0]['notice']['link_url']
+		);
 	}
 
 	/**
@@ -2059,6 +2080,8 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'notice', $result[0] );
 		$this->assertSame( '', $result[0]['notice']['badge'] );
 		$this->assertSame( '', $result[0]['notice']['message'] );
+		$this->assertSame( '', $result[0]['notice']['link_text'] );
+		$this->assertSame( '', $result[0]['notice']['link_url'] );
 	}
 
 	/**
@@ -2073,8 +2096,10 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 						'id'     => 'p24',
 						'title'  => 'Przelewy24',
 						'notice' => array(
-							'badge'   => '<script>alert("xss")</script>Badge text',
-							'message' => '<b>Bold</b> message with <script>xss</script>',
+							'badge'     => '<script>alert("xss")</script>Badge text',
+							'message'   => '<b>Bold</b> message with <script>xss</script>',
+							'link_text' => '<em>Link</em> text',
+							'link_url'  => 'javascript:alert(1)',
 						),
 					),
 				),
@@ -2084,12 +2109,15 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 		$result = $this->sut->get_recommended_payment_methods( $fake_gateway );
 
 		$this->assertCount( 1, $result );
-		// Badge uses sanitize_text_field() which calls wp_strip_all_tags()
+		// Badge and link_text use sanitize_text_field() which calls wp_strip_all_tags()
 		// which removes <script> blocks entirely (tag + content).
 		$this->assertSame( 'Badge text', $result[0]['notice']['badge'] );
+		$this->assertSame( 'Link text', $result[0]['notice']['link_text'] );
 		// Message uses wp_kses() which strips disallowed TAGS but keeps their text content.
 		// So <b> survives (allowed), <script> tags are stripped but "xss" text remains.
 		$this->assertSame( '<b>Bold</b> message with xss', trim( $result[0]['notice']['message'] ) );
+		// javascript: URLs should be sanitized away by wc_is_valid_url().
+		$this->assertSame( '', $result[0]['notice']['link_url'] );
 	}
 
 	/**
