@@ -97,9 +97,9 @@ class Flex_Layout_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * Test it does not apply margin-top from email_attrs to avoid duplication with add_spacer().
+	 * Test it applies margin-top from email_attrs on the inner div for Gmail compatibility.
 	 */
-	public function testItDoesNotApplyMarginTop(): void {
+	public function testItAppliesMarginTopFromEmailAttrs(): void {
 		$parsed_block = array(
 			'innerBlocks' => array(
 				array(
@@ -112,7 +112,7 @@ class Flex_Layout_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 			),
 		);
 		$output       = $this->renderer->render_inner_blocks_in_layout( $parsed_block, $this->rendering_context );
-		$this->assertStringNotContainsString( 'margin-top', $output );
+		$this->assertStringContainsString( 'margin-top: 16px', $output );
 	}
 
 	/**

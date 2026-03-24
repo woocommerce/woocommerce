@@ -17,6 +17,25 @@ use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
  */
 class List_Block extends Abstract_Block_Renderer {
 	/**
+	 * Render the block.
+	 *
+	 * render_content() applies margin-top on its inner wrapper div where Gmail
+	 * preserves it. Strip margin-top from email_attrs so add_spacer() doesn't
+	 * apply it again on the outer wrapper (which Gmail ignores).
+	 *
+	 * @param string            $block_content The block content.
+	 * @param array             $parsed_block The parsed block.
+	 * @param Rendering_Context $rendering_context The rendering context.
+	 * @return string
+	 */
+	public function render( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
+		$content     = $this->render_content( $block_content, $parsed_block, $rendering_context );
+		$email_attrs = $parsed_block['email_attrs'] ?? array();
+		unset( $email_attrs['margin-top'] );
+		return $this->add_spacer( $content, $email_attrs );
+	}
+
+	/**
 	 * Renders the block content
 	 *
 	 * @param string            $block_content Block content.
@@ -45,9 +64,20 @@ class List_Block extends Abstract_Block_Renderer {
 			$block_content = $html->get_updated_html();
 		}
 
+		$wrapper_style = \WP_Style_Engine::compile_css(
+			array(
+				'margin-top' => $parsed_block['email_attrs']['margin-top'] ?? '0px',
+			),
+			''
+		);
+
 		// \WP_HTML_Tag_Processor escapes the content, so we have to replace it back
 		$block_content = str_replace( '&#039;', "'", $block_content );
 
-		return $block_content;
+		return sprintf(
+			'<div style="%1$s">%2$s</div>',
+			esc_attr( $wrapper_style ),
+			$block_content
+		);
 	}
 }
