@@ -35,7 +35,7 @@ permissions: {}
 
 jobs:
     build:
-        if: github.repository_owner == 'woocommerce' && github.event.pull_request.user.login != 'github-actions[bot]'
+        if: github.repository_owner == 'woocommerce' && github.event.pull_request.draft == false && github.event.pull_request.user.login != 'github-actions[bot]'
         runs-on: ubuntu-latest
         permissions:
             contents: write
