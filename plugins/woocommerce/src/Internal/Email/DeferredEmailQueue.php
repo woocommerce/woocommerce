@@ -96,7 +96,14 @@ final class DeferredEmailQueue {
 			if ( ! is_array( $callback ) || ! isset( $callback['filter'], $callback['args'] ) || ! is_string( $callback['filter'] ) || ! is_array( $callback['args'] ) ) {
 				continue;
 			}
-			\WC_Emails::send_queued_transactional_email( $callback['filter'], $callback['args'] );
+			try {
+				\WC_Emails::send_queued_transactional_email( $callback['filter'], $callback['args'] );
+			} catch ( \Throwable $e ) {
+				wc_get_logger()->error(
+					sprintf( 'Deferred email failed for %s: %s', $callback['filter'], $e->getMessage() ),
+					array( 'source' => 'deferred-emails' )
+				);
+			}
 		}
 	}
 }
