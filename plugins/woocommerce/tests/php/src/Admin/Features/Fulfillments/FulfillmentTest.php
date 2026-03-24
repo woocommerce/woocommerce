@@ -240,6 +240,159 @@ class FulfillmentTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox get_changes returns empty array when nothing is modified on a persisted fulfillment.
+	 */
+	public function test_get_changes_returns_empty_when_nothing_changed(): void {
+		$fulfillment = FulfillmentsHelper::create_fulfillment(
+			array(
+				'entity_id' => 123,
+			)
+		);
+
+		$reloaded = new Fulfillment( $fulfillment->get_id() );
+
+		$this->assertEmpty( $reloaded->get_changes(), 'A freshly loaded fulfillment should have no changes' );
+	}
+
+	/**
+	 * @testdox get_changes detects core data property changes via set_prop.
+	 */
+	public function test_get_changes_detects_core_data_changes(): void {
+		$fulfillment = FulfillmentsHelper::create_fulfillment(
+			array(
+				'entity_id' => 123,
+				'status'    => 'unfulfilled',
+			)
+		);
+
+		$reloaded = new Fulfillment( $fulfillment->get_id() );
+		$reloaded->set_status( 'fulfilled' );
+
+		$changes = $reloaded->get_changes();
+
+		$this->assertArrayHasKey( 'status', $changes );
+		$this->assertSame( 'fulfilled', $changes['status'] );
+		$this->assertArrayHasKey( 'is_fulfilled', $changes );
+		$this->assertTrue( $changes['is_fulfilled'] );
+	}
+
+	/**
+	 * @testdox get_changes detects meta-based field changes under the meta_data key.
+	 */
+	public function test_get_changes_detects_meta_changes(): void {
+		$fulfillment = FulfillmentsHelper::create_fulfillment(
+			array(
+				'entity_id' => 123,
+			)
+		);
+
+		$reloaded = new Fulfillment( $fulfillment->get_id() );
+		$reloaded->set_tracking_number( '1Z999AA10123456784' );
+		$reloaded->set_shipment_provider( 'ups' );
+
+		$changes = $reloaded->get_changes();
+
+		$this->assertArrayHasKey( 'meta_data', $changes );
+		$this->assertArrayHasKey( '_tracking_number', $changes['meta_data'] );
+		$this->assertSame( '1Z999AA10123456784', $changes['meta_data']['_tracking_number'] );
+		$this->assertArrayHasKey( '_shipment_provider', $changes['meta_data'] );
+		$this->assertSame( 'ups', $changes['meta_data']['_shipment_provider'] );
+	}
+
+	/**
+	 * @testdox get_changes detects both core data and meta changes together.
+	 */
+	public function test_get_changes_detects_core_and_meta_changes_together(): void {
+		$fulfillment = FulfillmentsHelper::create_fulfillment(
+			array(
+				'entity_id' => 123,
+				'status'    => 'unfulfilled',
+			)
+		);
+
+		$reloaded = new Fulfillment( $fulfillment->get_id() );
+		$reloaded->set_status( 'fulfilled' );
+		$reloaded->set_tracking_number( 'TRACK123' );
+
+		$changes = $reloaded->get_changes();
+
+		$this->assertArrayHasKey( 'status', $changes, 'Core data change should be at top level' );
+		$this->assertArrayHasKey( 'meta_data', $changes, 'Meta changes should be under meta_data key' );
+		$this->assertArrayHasKey( '_tracking_number', $changes['meta_data'] );
+	}
+
+	/**
+	 * @testdox get_changes detects custom metadata changes added via update_meta_data.
+	 */
+	public function test_get_changes_detects_custom_meta_changes(): void {
+		$fulfillment = FulfillmentsHelper::create_fulfillment(
+			array(
+				'entity_id' => 123,
+			)
+		);
+
+		$reloaded = new Fulfillment( $fulfillment->get_id() );
+		$reloaded->update_meta_data( '_custom_field', 'custom_value' );
+
+		$changes = $reloaded->get_changes();
+
+		$this->assertArrayHasKey( 'meta_data', $changes );
+		$this->assertArrayHasKey( '_custom_field', $changes['meta_data'] );
+		$this->assertSame( 'custom_value', $changes['meta_data']['_custom_field'] );
+	}
+
+	/**
+	 * @testdox get_changes detects deleted metadata.
+	 */
+	public function test_get_changes_detects_deleted_meta(): void {
+		$fulfillment = FulfillmentsHelper::create_fulfillment(
+			array(
+				'entity_id' => 123,
+			),
+			array(
+				'_custom_key' => 'some_value',
+				'_items'      => array(
+					array(
+						'item_id' => 1,
+						'qty'     => 1,
+					),
+				),
+			)
+		);
+
+		$reloaded = new Fulfillment( $fulfillment->get_id() );
+		$reloaded->delete_meta_data( '_custom_key' );
+
+		$changes = $reloaded->get_changes();
+
+		$this->assertArrayHasKey( 'meta_data', $changes );
+		$this->assertArrayHasKey( '_custom_key', $changes['meta_data'] );
+		$this->assertNull( $changes['meta_data']['_custom_key'] );
+	}
+
+	/**
+	 * @testdox apply_changes resets change tracking so get_changes returns empty.
+	 */
+	public function test_apply_changes_resets_change_tracking(): void {
+		$fulfillment = FulfillmentsHelper::create_fulfillment(
+			array(
+				'entity_id' => 123,
+				'status'    => 'unfulfilled',
+			)
+		);
+
+		$reloaded = new Fulfillment( $fulfillment->get_id() );
+		$reloaded->set_status( 'fulfilled' );
+		$reloaded->set_tracking_number( 'TRACK123' );
+
+		$this->assertNotEmpty( $reloaded->get_changes(), 'Should have changes before apply_changes' );
+
+		$reloaded->save();
+
+		$this->assertEmpty( $reloaded->get_changes(), 'Should have no changes after save' );
+	}
+
+	/**
 	 * Test that the fulfillment status is validated correctly, and the fallback doesn't change is_fulfilled flag.
 	 */
 	public function test_fulfillment_status_validation() {
