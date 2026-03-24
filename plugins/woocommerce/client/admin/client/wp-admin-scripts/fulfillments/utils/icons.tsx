@@ -80,7 +80,8 @@ export const CopyIcon = ( { copyText }: { copyText: string } ) => {
 		};
 	}, [] );
 
-	const handleCopy = () => {
+	const handleCopy = ( event: React.MouseEvent ) => {
+		event.stopPropagation();
 		navigator.clipboard.writeText( copyText ).then(
 			() => {
 				setCopied( true );
