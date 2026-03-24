@@ -34,14 +34,6 @@ class Buttons extends Abstract_Block_Renderer {
 	}
 
 	/**
-	 * Renders the block content.
-	 *
-	 * @param string            $block_content Block content.
-	 * @param array             $parsed_block Parsed block.
-	 * @param Rendering_Context $rendering_context Rendering context.
-	 * @return string
-	 */
-	/**
 	 * Render the block.
 	 *
 	 * Flex_Layout_Renderer applies margin-top on its inner div/td where Gmail
