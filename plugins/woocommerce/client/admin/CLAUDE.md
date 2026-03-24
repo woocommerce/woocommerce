@@ -405,8 +405,20 @@ Coverage reports help identify untested code paths.
 
 ## Troubleshooting
 
-- **Clear Jest cache**: `pnpm run test:js -- --clearCache`
-- **Clean build**: `rm -rf build/ && pnpm install`
+**Tests failing:**
+
+- Clear Jest cache: `pnpm run test:js -- --clearCache`
+- Check types: `pnpm run ts:check`
+- Ensure dependencies installed: `pnpm install`
+
+**Build failures:**
+
+- Clean build: `rm -rf build/ && pnpm install`
+
+**Module not found errors:**
+
+- Check if package is in `dependencies` or `devDependencies`
+- Internal packages use `workspace:*` — run `pnpm install` after adding
 
 ## Additional Resources
 
