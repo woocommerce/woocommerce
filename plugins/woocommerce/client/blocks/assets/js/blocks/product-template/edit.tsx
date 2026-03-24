@@ -257,6 +257,9 @@ const ProductTemplateEdit = (
 		queryContextIncludes: queryContextIncludesWithDefaults,
 	} );
 
+	const productReference = ( restQueryArgs as Record< string, unknown > )
+		.productReference as number | undefined;
+
 	const { products, isInSingleProductBlock, blocks } = useSelect(
 		( select ) => {
 			const { getEntityRecords, getEditedEntityRecord, getTaxonomies } =
@@ -343,6 +346,38 @@ const ProductTemplateEdit = (
 				query.orderby = orderProperties.orderby;
 				query.order = orderProperties.order;
 			}
+			// Read edited product entity to get unsaved relationship data
+			// for live preview of upsells/cross-sells collections.
+			let editedProductRelationships:
+				| Record< string, number[] >
+				| undefined;
+			if ( productReference ) {
+				const editedProduct = getEditedEntityRecord(
+					'postType',
+					'product',
+					productReference
+				) as Record< string, unknown > | undefined;
+				if ( editedProduct ) {
+					const upsellIds = editedProduct.upsell_ids as
+						| number[]
+						| undefined;
+					const crossSellIds = editedProduct.cross_sell_ids as
+						| number[]
+						| undefined;
+					if ( upsellIds || crossSellIds ) {
+						editedProductRelationships = {};
+						if ( upsellIds ) {
+							editedProductRelationships.upsell_ids =
+								upsellIds;
+						}
+						if ( crossSellIds ) {
+							editedProductRelationships.cross_sell_ids =
+								crossSellIds;
+						}
+					}
+				}
+			}
+
 			return {
 				products: getEntityRecords( 'postType', postType, {
 					...query,
@@ -350,6 +385,11 @@ const ProductTemplateEdit = (
 					productCollectionLocation: location,
 					productCollectionQueryContext,
 					previewState: __privateProductCollectionPreviewState,
+					...( editedProductRelationships && {
+						editedProductRelationships: JSON.stringify(
+							editedProductRelationships
+						),
+					} ),
 					/**
 					 * Use value of "Out of stock visibility" setting to determine
 					 * which stock statuses to include if inherit query
@@ -384,6 +424,7 @@ const ProductTemplateEdit = (
 			productCollectionQueryContext,
 			loopShopPerPage,
 			__privateProductCollectionPreviewState,
+			productReference,
 		]
 	);
 	const blockContexts = useMemo(

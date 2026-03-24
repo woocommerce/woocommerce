@@ -190,6 +190,17 @@ class HandlerRegistry {
 		$this->register_collection_handlers(
 			'woocommerce/product-collection/upsells',
 			function ( $collection_args ) {
+				// Use client-provided resolved IDs when available (live preview of unsaved changes).
+				if ( ! empty( $collection_args['resolvedProductIds'] ) ) {
+					$resolved_ids      = array_map( 'absint', $collection_args['resolvedProductIds'] );
+					$product_reference = $collection_args['upsellsProductReferences'] ?? array();
+					$upsells           = array_diff( array_unique( $resolved_ids ), $product_reference );
+
+					return array(
+						'post__in' => empty( $upsells ) ? array( -1 ) : array_values( $upsells ),
+					);
+				}
+
 				$product_reference = $collection_args['upsellsProductReferences'] ?? null;
 				// No products should be shown if no upsells product reference is set.
 				if ( empty( $product_reference ) ) {
@@ -258,6 +269,16 @@ class HandlerRegistry {
 				}
 
 				$collection_args['upsellsProductReferences'] = array( $product_reference );
+
+				// Use client-provided relationship IDs for live preview of unsaved changes.
+				$edited_relationships = $request->get_param( 'editedProductRelationships' );
+				if ( ! empty( $edited_relationships ) ) {
+					$relationships = json_decode( $edited_relationships, true );
+					if ( is_array( $relationships ) && isset( $relationships['upsell_ids'] ) && is_array( $relationships['upsell_ids'] ) ) {
+						$collection_args['resolvedProductIds'] = array_map( 'absint', $relationships['upsell_ids'] );
+					}
+				}
+
 				return $collection_args;
 			}
 		);
@@ -265,6 +286,17 @@ class HandlerRegistry {
 		$this->register_collection_handlers(
 			'woocommerce/product-collection/cross-sells',
 			function ( $collection_args ) {
+				// Use client-provided resolved IDs when available (live preview of unsaved changes).
+				if ( ! empty( $collection_args['resolvedProductIds'] ) ) {
+					$resolved_ids      = array_map( 'absint', $collection_args['resolvedProductIds'] );
+					$product_reference = $collection_args['crossSellsProductReferences'] ?? array();
+					$cross_sells       = array_diff( array_unique( $resolved_ids ), $product_reference );
+
+					return array(
+						'post__in' => empty( $cross_sells ) ? array( -1 ) : array_values( $cross_sells ),
+					);
+				}
+
 				$product_reference = $collection_args['crossSellsProductReferences'] ?? null;
 				// No products should be shown if no cross-sells product reference is set.
 				if ( empty( $product_reference ) ) {
@@ -340,6 +372,16 @@ class HandlerRegistry {
 				}
 
 				$collection_args['crossSellsProductReferences'] = array( $product_reference );
+
+				// Use client-provided relationship IDs for live preview of unsaved changes.
+				$edited_relationships = $request->get_param( 'editedProductRelationships' );
+				if ( ! empty( $edited_relationships ) ) {
+					$relationships = json_decode( $edited_relationships, true );
+					if ( is_array( $relationships ) && isset( $relationships['cross_sell_ids'] ) && is_array( $relationships['cross_sell_ids'] ) ) {
+						$collection_args['resolvedProductIds'] = array_map( 'absint', $relationships['cross_sell_ids'] );
+					}
+				}
+
 				return $collection_args;
 			}
 		);
