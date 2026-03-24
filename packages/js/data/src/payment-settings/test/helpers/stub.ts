@@ -107,6 +107,8 @@ export const providersStub: PaymentsProvider[] = [
 					notice: {
 						badge: '',
 						message: '',
+						link_text: '',
+						link_url: '',
 					},
 				},
 				{
@@ -123,6 +125,8 @@ export const providersStub: PaymentsProvider[] = [
 					notice: {
 						badge: '',
 						message: '',
+						link_text: '',
+						link_url: '',
 					},
 				},
 			],
