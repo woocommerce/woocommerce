@@ -583,28 +583,42 @@ class WC_Query {
 	 * Searches that are empty or contain only exclusion terms (e.g. "-condebug") produce no positive
 	 * terms, which results in invalid SQL when relevance ordering is used.
 	 *
+	 * This method delegates tokenization to WP_Query so it correctly handles WordPress's search
+	 * term parsing (splitting on spaces, commas, and +) and respects the
+	 * wp_query_search_exclusion_prefix filter.
+	 *
 	 * @since 10.7.0
 	 * @return bool
 	 */
 	private function has_positive_search_terms() {
-		$search = get_query_var( 's' );
+		$search_string = get_query_var( 's' );
+		$search_string = is_array( $search_string ) ? '' : trim( (string) $search_string );
 
-		if ( ! is_string( $search ) ) {
+		if ( '' === $search_string ) {
 			return false;
 		}
 
-		$search = trim( $search );
+		// Use WP_Query to parse search terms using core's tokenization rules.
+		$search_query = new \WP_Query( array( 's' => $search_string ) );
+		$search_terms = $search_query->query_vars['search_terms'] ?? array();
 
-		if ( '' === $search ) {
+		if ( empty( $search_terms ) ) {
 			return false;
 		}
 
-		// Check if the search consists entirely of exclusion terms (prefixed with -).
-		if ( preg_match( '/^\s*(?:(?:-"[^"]*+"|-\S+)\s*)+$/', $search ) ) {
-			return false;
+		/** This filter is documented in wp-includes/class-wp-query.php */
+		$exclusion_prefix = apply_filters( 'wp_query_search_exclusion_prefix', '-' );
+
+		if ( '' !== $exclusion_prefix ) {
+			$search_terms = array_filter(
+				$search_terms,
+				static function ( $term ) use ( $exclusion_prefix ) {
+					return ! str_starts_with( $term, $exclusion_prefix );
+				}
+			);
 		}
 
-		return true;
+		return ! empty( $search_terms );
 	}
 
 	/**

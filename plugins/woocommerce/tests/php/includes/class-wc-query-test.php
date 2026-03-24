@@ -143,4 +143,50 @@ class WC_Query_Test extends \WC_Unit_Test_Case {
 
 		$this->assertSame( 'relevance', $result['orderby'], 'Mixed search with positive terms should use relevance ordering' );
 	}
+
+	/**
+	 * @testdox Ordering args should fall back for a bare dash search.
+	 */
+	public function test_get_catalog_ordering_args_falls_back_for_bare_dash_search(): void {
+		$sut = new WC_Query();
+
+		$this->go_to( '/?s=-&post_type=product' );
+
+		$result = $sut->get_catalog_ordering_args();
+
+		$this->assertNotEquals( 'relevance', $result['orderby'], 'Bare dash search should not use relevance ordering' );
+	}
+
+	/**
+	 * @testdox Ordering args should use relevance for comma-separated searches with positive terms.
+	 */
+	public function test_get_catalog_ordering_args_uses_relevance_for_comma_separated_mixed_search(): void {
+		$sut = new WC_Query();
+
+		$this->go_to( '/?s=-foo,bar&post_type=product' );
+
+		$result = $sut->get_catalog_ordering_args();
+
+		$this->assertSame( 'relevance', $result['orderby'], 'Comma-separated search with positive terms should use relevance ordering' );
+	}
+
+	/**
+	 * @testdox Ordering args should respect the wp_query_search_exclusion_prefix filter.
+	 */
+	public function test_get_catalog_ordering_args_respects_custom_exclusion_prefix(): void {
+		$sut = new WC_Query();
+
+		$custom_prefix = static function () {
+			return '!';
+		};
+		add_filter( 'wp_query_search_exclusion_prefix', $custom_prefix );
+
+		$this->go_to( '/?s=!foo&post_type=product' );
+
+		$result = $sut->get_catalog_ordering_args();
+
+		remove_filter( 'wp_query_search_exclusion_prefix', $custom_prefix );
+
+		$this->assertNotEquals( 'relevance', $result['orderby'], 'Exclusion-only search with custom prefix should not use relevance ordering' );
+	}
 }
