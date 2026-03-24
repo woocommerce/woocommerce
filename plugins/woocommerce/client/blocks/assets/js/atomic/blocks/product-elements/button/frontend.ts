@@ -143,7 +143,6 @@ const productButtonStore = {
 	},
 	actions: {
 		*addCartItem(): Generator< unknown, void > {
-			const context = getContext< Context >();
 			const product =
 				productContextState.selectedVariation ||
 				productContextState.product;
@@ -161,6 +160,8 @@ const productButtonStore = {
 				{},
 				{ lock: universalLock }
 			);
+
+			const context = getContext< Context >();
 
 			// Pass quantityToAdd as a delta. The cart store will add this
 			// to the current quantity, ensuring rapid clicks compound correctly.

@@ -60,13 +60,10 @@ store< QuantitySelectorStore >(
 					return true;
 				}
 
-				return (
-					product.is_in_stock && ! product.sold_individually
-				);
+				return product.is_in_stock && ! product.sold_individually;
 			},
 			get allowsDecrease() {
 				const { quantity } = addToCartWithOptionsStore.state;
-				const { allowZero } = getContext< Context >();
 
 				const product =
 					productContextState.selectedVariation ||
@@ -80,6 +77,7 @@ store< QuantitySelectorStore >(
 
 				const currentQuantity = quantity[ id ] || 0;
 
+				const { allowZero } = getContext< Context >();
 				return (
 					( allowZero && currentQuantity > 0 ) ||
 					currentQuantity - addToCart.multiple_of >= addToCart.minimum
@@ -100,7 +98,9 @@ store< QuantitySelectorStore >(
 
 				const currentQuantity = quantity[ id ] || 0;
 
-				return currentQuantity + addToCart.multiple_of <= addToCart.maximum;
+				return (
+					currentQuantity + addToCart.multiple_of <= addToCart.maximum
+				);
 			},
 			get inputQuantity(): number {
 				const product =
@@ -135,11 +135,11 @@ store< QuantitySelectorStore >(
 
 				const currentValue = Number( inputElement.value ) || 0;
 				const { id: productId, add_to_cart: addToCart } = product;
-				const { minimum, maximum, multiple_of } = addToCart;
+				const { minimum, maximum, multiple_of: multipleOf } = addToCart;
 
 				const newValue = Math.max(
 					minimum,
-					Math.min( maximum, currentValue + multiple_of )
+					Math.min( maximum, currentValue + multipleOf )
 				);
 
 				addToCartWithOptionsStore.actions.setQuantity(
@@ -148,8 +148,7 @@ store< QuantitySelectorStore >(
 				);
 			},
 			decreaseQuantity: () => {
-				const { allowZero, inputElement } =
-					getContext< Context >();
+				const { allowZero, inputElement } = getContext< Context >();
 
 				if ( ! ( inputElement instanceof HTMLInputElement ) ) {
 					return;
@@ -165,13 +164,20 @@ store< QuantitySelectorStore >(
 
 				const currentValue = Number( inputElement.value ) || 0;
 				const { id: productId, add_to_cart: addToCart } = product;
-				const { minimum, maximum, multiple_of } = addToCart;
+				const { minimum, maximum, multiple_of: multipleOf } = addToCart;
 
-				let newValue = currentValue - multiple_of;
-				if ( allowZero && newValue < minimum && currentValue === minimum ) {
+				let newValue = currentValue - multipleOf;
+				if (
+					allowZero &&
+					newValue < minimum &&
+					currentValue === minimum
+				) {
 					newValue = 0;
 				} else {
-					newValue = Math.min( maximum, Math.max( minimum, newValue ) );
+					newValue = Math.min(
+						maximum,
+						Math.max( minimum, newValue )
+					);
 				}
 
 				if ( newValue !== currentValue ) {
@@ -185,8 +191,7 @@ store< QuantitySelectorStore >(
 			// the change event isn't triggered in invalid numbers (ie: writing
 			// letters) if the current value is already invalid or an empty string.
 			handleQuantityBlur: () => {
-				const { allowZero, inputElement } =
-					getContext< Context >();
+				const { allowZero, inputElement } = getContext< Context >();
 
 				const product =
 					productContextState.selectedVariation ||
@@ -213,7 +218,8 @@ store< QuantitySelectorStore >(
 				// In other product types, we reset inputs to `minimum` if they
 				// are 0 or NaN.
 				const value = inputElement?.valueAsNumber ?? NaN;
-				const newValue = ! isNaN( value ) && value > 0 ? value : addToCart.minimum;
+				const newValue =
+					! isNaN( value ) && value > 0 ? value : addToCart.minimum;
 
 				addToCartWithOptionsStore.actions.setQuantity(
 					productId,

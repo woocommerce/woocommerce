@@ -116,9 +116,7 @@ describe( 'getProduct', () => {
 
 			const result = mockRegisteredStore!.state.getProduct( {
 				id: 1,
-				selectedAttributes: [
-					{ attribute: 'Color', value: 'red' },
-				],
+				selectedAttributes: [ { attribute: 'Color', value: 'red' } ],
 			} );
 			expect( result ).toBe( variation );
 		} );
@@ -138,9 +136,7 @@ describe( 'getProduct', () => {
 
 			const result = mockRegisteredStore!.state.getProduct( {
 				id: 1,
-				selectedAttributes: [
-					{ attribute: 'Color', value: 'red' },
-				],
+				selectedAttributes: [ { attribute: 'Color', value: 'red' } ],
 			} );
 			expect( result ).toBeNull();
 		} );
@@ -160,9 +156,7 @@ describe( 'getProduct', () => {
 
 			const result = mockRegisteredStore!.state.getProduct( {
 				id: 1,
-				selectedAttributes: [
-					{ attribute: 'Color', value: 'blue' },
-				],
+				selectedAttributes: [ { attribute: 'Color', value: 'blue' } ],
 			} );
 			expect( result ).toBeNull();
 		} );

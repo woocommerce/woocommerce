@@ -144,7 +144,9 @@ const { actions, state } = store<
 
 				if (
 					value === 0 ||
-					( product && ( value < product.add_to_cart.minimum || value > product.add_to_cart.maximum ) )
+					( product &&
+						( value < product.add_to_cart.minimum ||
+							value > product.add_to_cart.maximum ) )
 				) {
 					const { errorMessages } = getConfig();
 
@@ -276,8 +278,6 @@ const { actions, state } = store<
 				// woocommerce store is public.
 				yield import( '@woocommerce/stores/woocommerce/cart' );
 
-				const { selectedAttributes } = getContext< Context >();
-
 				const product =
 					productContextState.selectedVariation ||
 					productContextState.product;
@@ -291,7 +291,8 @@ const { actions, state } = store<
 					return;
 				}
 
-				const { quantity } = getContext< Context >();
+				const { quantity, selectedAttributes } =
+					getContext< Context >();
 
 				const { actions: wooActions } = store< WooCommerce >(
 					'woocommerce',
