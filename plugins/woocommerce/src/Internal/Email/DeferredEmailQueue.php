@@ -44,7 +44,7 @@ final class DeferredEmailQueue {
 	 *
 	 * @internal
 	 */
-	final public function init(): void {
+	public function init(): void {
 		add_action( self::AS_HOOK, array( $this, 'send_queued_transactional_emails' ) );
 	}
 
