@@ -409,22 +409,27 @@ class WC_Admin {
 	 * @return string
 	 */
 	public function include_admin_body_class( $classes ) {
-		if ( in_array( array( 'wc-wp-version-gte-53', 'wc-wp-version-gte-55' ), explode( ' ', $classes ), true ) ) {
+		$raw_version = get_bloginfo( 'version' );
+
+		if ( ! $raw_version ) {
 			return $classes;
 		}
 
-		$raw_version   = get_bloginfo( 'version' );
 		$version_parts = explode( '-', $raw_version );
 		$version       = count( $version_parts ) > 1 ? $version_parts[0] : $raw_version;
+		$class_list    = explode( ' ', $classes );
 
-		// Add WP 5.3+ compatibility class.
-		if ( $raw_version && version_compare( $version, '5.3', '>=' ) ) {
-			$classes .= ' wc-wp-version-gte-53';
-		}
+		// WP version compatibility classes.
+		$version_classes = array(
+			'5.3' => 'wc-wp-version-gte-53',
+			'5.5' => 'wc-wp-version-gte-55',
+			'7.0' => 'wc-wp-version-gte-70',
+		);
 
-		// Add WP 5.5+ compatibility class.
-		if ( $raw_version && version_compare( $version, '5.5', '>=' ) ) {
-			$classes .= ' wc-wp-version-gte-55';
+		foreach ( $version_classes as $min_version => $class_name ) {
+			if ( ! in_array( $class_name, $class_list, true ) && version_compare( $version, $min_version, '>=' ) ) {
+				$classes .= ' ' . $class_name;
+			}
 		}
 
 		return $classes;
