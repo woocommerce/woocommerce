@@ -1,0 +1,8 @@
+{
+	"label": "v1",
+	"position": 5,
+	"link": {
+		"type": "generated-index",
+		"title": "REST API v1"
+	}
+}
