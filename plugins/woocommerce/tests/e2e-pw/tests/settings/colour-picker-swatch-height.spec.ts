@@ -37,6 +37,8 @@ test.describe( 'Colour picker swatch height on Email settings', () => {
 		expect( swatchBox.height ).toBe( 40 );
 
 		// Swatch height should match the input height (within 2px tolerance for borders).
-		expect( Math.abs( swatchBox.height - inputBox.height ) ).toBeLessThanOrEqual( 2 );
+		expect(
+			Math.abs( swatchBox.height - inputBox.height )
+		).toBeLessThanOrEqual( 2 );
 	} );
 } );

@@ -8286,6 +8286,8 @@ table.bar_chart {
 	.woocommerce table.form-table .colorpickpreview {
 		height: 40px;
 		width: 40px;
+		border: none;
+		box-sizing: border-box;
 	}
 }
 
