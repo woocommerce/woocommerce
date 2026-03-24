@@ -177,20 +177,20 @@ const { actions, state } = store<
 
 					idsToUpdate.forEach( ( id ) => {
 						if ( isValueNaN ) {
-							// Null the value first before setting the real value to ensure that
-							// a signal update happens.
-							context.quantity[ Number( id ) ] = null;
+							// Modify the value first before setting the real
+							// value to ensure that a signal update happens.
+							context.quantity[ Number( id ) ] = NaN;
 						}
 
 						context.quantity[ Number( id ) ] = value;
 					} );
 				} else {
 					if ( isValueNaN ) {
-						// Null the value first before setting the real value to ensure that
-						// a signal update happens.
+						// Modify the value first before setting the real value
+						// to ensure that a signal update happens.
 						context.quantity = {
 							...context.quantity,
-							[ productId ]: null,
+							[ productId ]: NaN,
 						};
 					}
 
