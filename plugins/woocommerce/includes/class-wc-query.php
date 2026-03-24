@@ -587,7 +587,7 @@ class WC_Query {
 	 * term parsing (splitting on spaces, commas, and +) and respects the
 	 * wp_query_search_exclusion_prefix filter.
 	 *
-	 * @since 10.7.0
+	 * @since 10.8.0
 	 * @return bool
 	 */
 	private function has_positive_search_terms() {
