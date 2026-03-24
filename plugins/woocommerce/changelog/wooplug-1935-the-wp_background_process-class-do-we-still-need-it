@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Migrate deferred transactional email sending from WC_Background_Emailer to Action Scheduler.

@@ -16,6 +16,8 @@ if ( ! class_exists( 'WC_Background_Process', false ) ) {
 
 /**
  * WC_Background_Emailer Class.
+ *
+ * @deprecated 10.8.0 Use Automattic\WooCommerce\Internal\Email\DeferredEmailQueue instead.
  */
 class WC_Background_Emailer extends WC_Background_Process {
 
