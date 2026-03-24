@@ -38,8 +38,6 @@ describe( 'PaymentMethodListItem', () => {
 				notice: {
 					badge: 'Verification required',
 					message: '',
-					link_text: '',
-					link_url: '',
 				},
 			} );
 
@@ -57,8 +55,6 @@ describe( 'PaymentMethodListItem', () => {
 				notice: {
 					badge: '',
 					message: 'Some warning.',
-					link_text: '',
-					link_url: '',
 				},
 			} );
 
@@ -85,14 +81,13 @@ describe( 'PaymentMethodListItem', () => {
 	} );
 
 	describe( 'Warning notice', () => {
-		it( 'renders a warning notice when method is enabled and notice.message is set', () => {
+		it( 'renders a warning notice with HTML message when method is enabled', () => {
 			const method = createMethod( {
 				id: 'p24',
 				notice: {
 					badge: 'Verification required',
-					message: 'Strict requirements apply.',
-					link_text: 'Review requirements',
-					link_url: 'https://example.com/docs',
+					message:
+						'Strict requirements apply. <a href="https://example.com/docs" target="_blank" rel="noreferrer noopener">Review requirements</a>',
 				},
 			} );
 
@@ -105,10 +100,9 @@ describe( 'PaymentMethodListItem', () => {
 			);
 
 			expect(
-				screen.getByText( 'Strict requirements apply.' )
-			).toBeInTheDocument();
-			expect(
-				screen.getByRole( 'link', { name: /review requirements/i } )
+				screen.getByRole( 'link', {
+					name: /review requirements/i,
+				} )
 			).toHaveAttribute( 'href', 'https://example.com/docs' );
 		} );
 
@@ -118,8 +112,6 @@ describe( 'PaymentMethodListItem', () => {
 				notice: {
 					badge: 'Verification required',
 					message: 'Strict requirements apply.',
-					link_text: 'Review requirements',
-					link_url: 'https://example.com/docs',
 				},
 			} );
 
@@ -132,7 +124,7 @@ describe( 'PaymentMethodListItem', () => {
 			);
 
 			expect(
-				screen.queryByText( 'Strict requirements apply.' )
+				screen.queryByTestId( 'payment-method-notice-warning' )
 			).not.toBeInTheDocument();
 		} );
 
@@ -141,8 +133,6 @@ describe( 'PaymentMethodListItem', () => {
 				notice: {
 					badge: 'Verification required',
 					message: '',
-					link_text: '',
-					link_url: '',
 				},
 			} );
 
@@ -159,14 +149,12 @@ describe( 'PaymentMethodListItem', () => {
 			).not.toBeInTheDocument();
 		} );
 
-		it( 'renders notice without link when link_url is empty', () => {
+		it( 'renders notice with plain text message', () => {
 			const method = createMethod( {
 				id: 'p24',
 				notice: {
 					badge: '',
 					message: 'Warning message.',
-					link_text: 'Click here',
-					link_url: '',
 				},
 			} );
 
@@ -181,9 +169,6 @@ describe( 'PaymentMethodListItem', () => {
 			expect(
 				screen.getByText( 'Warning message.' )
 			).toBeInTheDocument();
-			expect(
-				screen.queryByRole( 'link', { name: /click here/i } )
-			).not.toBeInTheDocument();
 		} );
 	} );
 } );

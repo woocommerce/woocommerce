@@ -3,7 +3,7 @@
  */
 import { decodeEntities } from '@wordpress/html-entities';
 import { type RecommendedPaymentMethod } from '@woocommerce/data';
-import { ExternalLink, Icon, ToggleControl } from '@wordpress/components';
+import { Icon, ToggleControl } from '@wordpress/components';
 import { info as infoIcon } from '@wordpress/icons';
 import { useRef } from '@wordpress/element';
 
@@ -209,20 +209,12 @@ export const PaymentMethodListItem = ( {
 						data-testid="payment-method-notice-warning"
 					>
 						<Icon icon={ infoIcon } size={ 24 } />
-						<p>
-							{ method.notice.message }
-							{ method.notice.link_url &&
-								method.notice.link_text && (
-									<>
-										{ ' ' }
-										<ExternalLink
-											href={ method.notice.link_url }
-										>
-											{ method.notice.link_text }
-										</ExternalLink>
-									</>
-								) }
-						</p>
+						<p
+							// eslint-disable-next-line react/no-danger -- This string is sanitized by the PaymentGateway class via wp_kses.
+							dangerouslySetInnerHTML={ sanitizeHTML(
+								decodeEntities( method.notice.message )
+							) }
+						/>
 					</div>
 				) }
 		</div>

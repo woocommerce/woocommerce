@@ -70,8 +70,6 @@ export type RecommendedPaymentMethod = {
 	notice?: {
 		badge: string;
 		message: string;
-		link_text: string;
-		link_url: string;
 	};
 };
 

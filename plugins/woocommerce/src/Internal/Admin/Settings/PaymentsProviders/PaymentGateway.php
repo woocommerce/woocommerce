@@ -1076,10 +1076,8 @@ class PaymentGateway {
 			'icon'        => '',
 			'category'    => self::PAYMENT_METHOD_CATEGORY_PRIMARY, // Default to primary.
 			'notice'      => array(
-				'badge'     => '',
-				'message'   => '',
-				'link_text' => '',
-				'link_url'  => '',
+				'badge'   => '',
+				'message' => '',
 			),
 		);
 
@@ -1140,14 +1138,6 @@ class PaymentGateway {
 					$message      = wp_kses( $message, $allowed_tags );
 				}
 				$standard_details['notice']['message'] = $message;
-			}
-
-			if ( ! empty( $notice['link_text'] ) ) {
-				$standard_details['notice']['link_text'] = sanitize_text_field( $notice['link_text'] );
-			}
-
-			if ( ! empty( $notice['link_url'] ) && is_string( $notice['link_url'] ) && wc_is_valid_url( $notice['link_url'] ) ) {
-				$standard_details['notice']['link_url'] = sanitize_url( $notice['link_url'] );
 			}
 		}
 

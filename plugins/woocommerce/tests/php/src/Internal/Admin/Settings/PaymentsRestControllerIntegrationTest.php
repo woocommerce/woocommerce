@@ -793,10 +793,8 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 					'description' => 'Accepts all major credit and debit cards',
 					'icon'        => 'https://example.com/card-icon.png',
 					'notice'      => array(
-						'badge'     => '',
-						'message'   => '',
-						'link_text' => '',
-						'link_url'  => '',
+						'badge'   => '',
+						'message' => '',
 					),
 				),
 				array(
@@ -808,10 +806,8 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 					'description' => 'WooPay express checkout',
 					'icon'        => 'https://example.com/woopay-icon.png',
 					'notice'      => array(
-						'badge'     => '',
-						'message'   => '',
-						'link_text' => '',
-						'link_url'  => '',
+						'badge'   => '',
+						'message' => '',
 					),
 				),
 			),
@@ -985,10 +981,8 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 					'description' => 'Accepts all major credit and debit cards',
 					'icon'        => 'https://example.com/card-icon.png',
 					'notice'      => array(
-						'badge'     => '',
-						'message'   => '',
-						'link_text' => '',
-						'link_url'  => '',
+						'badge'   => '',
+						'message' => '',
 					),
 				),
 				array(
@@ -1000,10 +994,8 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 					'description' => 'WooPay express checkout',
 					'icon'        => 'https://example.com/woopay-icon.png',
 					'notice'      => array(
-						'badge'     => '',
-						'message'   => '',
-						'link_text' => '',
-						'link_url'  => '',
+						'badge'   => '',
+						'message' => '',
 					),
 				),
 			),

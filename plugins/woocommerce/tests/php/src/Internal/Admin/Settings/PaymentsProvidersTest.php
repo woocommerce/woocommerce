@@ -779,10 +779,8 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 					'icon'        => '', // The icon with an invalid URL is ignored.
 					'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_PRIMARY,
 					'notice'      => array(
-						'badge'     => '',
-						'message'   => '',
-						'link_text' => '',
-						'link_url'  => '',
+						'badge'   => '',
+						'message' => '',
 					),
 				),
 				array(
@@ -795,10 +793,8 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 					'icon'        => 'https://example.com/card-icon.png',
 					'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_PRIMARY,
 					'notice'      => array(
-						'badge'     => '',
-						'message'   => '',
-						'link_text' => '',
-						'link_url'  => '',
+						'badge'   => '',
+						'message' => '',
 					),
 				),
 				array(
@@ -811,10 +807,8 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 					'icon'        => '',
 					'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_PRIMARY,
 					'notice'      => array(
-						'badge'     => '',
-						'message'   => '',
-						'link_text' => '',
-						'link_url'  => '',
+						'badge'   => '',
+						'message' => '',
 					),
 				),
 				array(
@@ -827,10 +821,8 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 					'icon'        => '',
 					'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_SECONDARY,
 					'notice'      => array(
-						'badge'     => '',
-						'message'   => '',
-						'link_text' => '',
-						'link_url'  => '',
+						'badge'   => '',
+						'message' => '',
 					),
 				),
 			),
