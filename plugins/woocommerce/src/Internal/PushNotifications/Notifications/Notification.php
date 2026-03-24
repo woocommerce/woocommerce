@@ -5,7 +5,6 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\PushNotifications\Notifications;
 
 use InvalidArgumentException;
-use LogicException;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -50,7 +49,6 @@ abstract class Notification {
 	 * @param int $resource_id The resource ID.
 	 *
 	 * @throws InvalidArgumentException If the resource ID is invalid.
-	 * @throws LogicException If the subclass is not registered in NOTIFICATION_CLASSES.
 	 *
 	 * @since 10.7.0
 	 */
@@ -59,18 +57,19 @@ abstract class Notification {
 			throw new InvalidArgumentException( 'Notification resource_id must be positive.' );
 		}
 
-		if ( ! isset( $this->type ) ) {
-			$class_to_type_map = array_flip( self::NOTIFICATION_CLASSES );
-
-			if ( ! isset( $class_to_type_map[ static::class ] ) ) {
-				throw new LogicException( sprintf( 'Notification class %s is not registered.', static::class ) );
-			}
-
-			$this->type = $class_to_type_map[ static::class ];
-		}
-
 		$this->resource_id = $resource_id;
 	}
+
+	/**
+	 * Returns the notification type identifier, this should match the subtype
+	 * or type (if there isn't a subtype) values attributed to notes in
+	 * WordPress.com.
+	 *
+	 * @return string
+	 *
+	 * @since 10.7.0
+	 */
+	abstract public function get_type(): string;
 
 	/**
 	 * Returns the WPCOM-ready payload for this notification.
@@ -112,7 +111,7 @@ abstract class Notification {
 	 */
 	public function to_array(): array {
 		return array(
-			'type'        => $this->type,
+			'type'        => $this->get_type(),
 			'resource_id' => $this->resource_id,
 		);
 	}
@@ -150,7 +149,7 @@ abstract class Notification {
 	 * @since 10.7.0
 	 */
 	public function get_identifier(): string {
-		return sprintf( '%s_%s_%s', get_current_blog_id(), $this->type, $this->resource_id );
+		return sprintf( '%s_%s_%s', get_current_blog_id(), $this->get_type(), $this->resource_id );
 	}
 
 	/**

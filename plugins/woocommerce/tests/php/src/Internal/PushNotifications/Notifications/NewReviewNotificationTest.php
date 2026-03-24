@@ -41,7 +41,7 @@ class NewReviewNotificationTest extends WC_Unit_Test_Case {
 	public function test_type_is_store_review(): void {
 		$notification = new NewReviewNotification( 1 );
 
-		$this->assertSame( 'store_review', $notification->to_array()['type'] );
+		$this->assertSame( 'store_review', $notification->get_type() );
 	}
 
 	/**

@@ -15,6 +15,18 @@ defined( 'ABSPATH' ) || exit;
  */
 class NewReviewNotification extends Notification {
 	/**
+	 * The notification type identifier for new reviews.
+	 */
+	const TYPE = 'store_review';
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public function get_type(): string {
+		return self::TYPE;
+	}
+
+	/**
 	 * Returns the WPCOM-ready payload for this notification.
 	 *
 	 * Returns null if the comment no longer exists.
@@ -31,7 +43,7 @@ class NewReviewNotification extends Notification {
 		}
 
 		return array(
-			'type'        => $this->type,
+			'type'        => $this->get_type(),
 			// This represents the time the notification was triggered, so we can monitor age of notification at delivery.
 			'timestamp'   => gmdate( 'c' ),
 			'resource_id' => $this->get_resource_id(),
