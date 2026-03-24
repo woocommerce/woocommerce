@@ -8282,6 +8282,177 @@ table.bar_chart {
 }
 
 /**
+ * WP 7.0+ compatibility.
+ * WP 7.0 increased default form element sizing from 30px to 40px min-height.
+ */
+.wc-wp-version-gte-70 {
+	// Select2 single: match WP 7.0 native select height (40px).
+	.select2-container {
+		.select2-selection--single {
+			height: 40px; // Match WP 7.0 native select height.
+			border-radius: 2px; // Match WP 7.0 native select border-radius.
+
+			.select2-selection__rendered {
+				line-height: 38px;
+			}
+
+			.select2-selection__arrow {
+				height: 38px;
+			}
+		}
+
+		.select2-selection--multiple {
+			min-height: 40px;
+			height: 38px;
+
+			.select2-selection__rendered li {
+				margin-top: 0; // Prevent extra spacing inside multi-select.
+			}
+		}
+
+		.select2-search--inline .select2-search__field {
+			min-height: 38px;
+		}
+	}
+
+	// Table action icon buttons: prevent WP 7.0 min-height from stretching them.
+	.widefat {
+		.column-wc_actions {
+			a.button {
+				min-height: 0 !important;
+				line-height: 1 !important;
+
+				&::after {
+					line-height: 1.85;
+					margin-top: 0;
+				}
+			}
+		}
+	}
+
+	// Order preview action buttons.
+	.wc-order-preview footer {
+		.button.button-large {
+			min-height: 0;
+		}
+	}
+
+	// Action button groups.
+	.wc-action-button-group .wc-action-button {
+		min-height: 0 !important;
+	}
+
+	// Order actions: select + button overflow container due to WP 7.0 select margins.
+	.order_actions #actions select {
+		width: calc(100% - 32px);
+	}
+
+	// Order actions reload button: icon line-height must match WP 7.0 button height.
+	.button.wc-reload {
+		&::after {
+			line-height: 40px;
+		}
+	}
+
+	// Order actions button margin causes overflow with WP 7.0 sizing.
+	#poststuff #woocommerce-order-actions .inside button {
+		margin: 0;
+	}
+
+	// Order date hour/minute inputs: WP 7.0 padding pushes stepper controls inward.
+	#order_data .order_data_column .form-field-wide {
+		input.hour,
+		input.minute {
+			padding-right: 0;
+		}
+	}
+
+	// Publish box: WP 7.0 flex-row breaks layout when #duplicate-action is present.
+	// Revert to block + float to stack copy/trash links on the left, button on the right.
+	#major-publishing-actions {
+		display: block;
+		overflow: hidden;
+
+		#delete-action {
+			float: left;
+		}
+	}
+
+	// Product data panel labels: vertically center with taller WP 7.0 inputs.
+	.woocommerce_options_panel p.form-field label,
+	.woocommerce_options_panel fieldset.form-field label,
+	.woocommerce_options_panel fieldset.form-field legend {
+		padding-top: 8px;
+	}
+
+	// Help tips: vertically center with taller WP 7.0 inputs.
+	.woocommerce_options_panel .form-field .woocommerce-help-tip {
+		margin-top: 12px;
+	}
+
+	// Search box select: match WP 7.0 compact search-box sizing (32px).
+	.search-box select {
+		min-height: 32px;
+		line-height: 2.14285714; /* 30px for 32px height */
+		padding: 0 24px 0 8px;
+	}
+
+	// Short inputs are wider to compensate for WP 7.0 increased padding.
+	.woocommerce_options_panel {
+		.short,
+		input[type="text"].short,
+		input[type="number"].short,
+		input[type="email"].short,
+		input[type="password"].short {
+			width: 55%;
+		}
+
+		input[type="number"] {
+			padding-right: 0; // Keep stepper controls flush right.
+		}
+
+		.dimensions_field .wrap {
+			width: 55%; // Wider to compensate for increased padding.
+			border-radius: 2px; // Match WP 7.0 input border-radius.
+		}
+	}
+
+	// Variable product selects need more height to accommodate WP 7.0 padding.
+	#variable_product_options .form-row select {
+		height: 50px;
+	}
+
+	// Variable product low stock row: clear preceding floats to prevent vertical stretching.
+	#variable_product_options .form-row[class*="variable_low_stock_amount"] {
+		clear: both;
+	}
+}
+
+// Tablenav: WP 7.0 tablenav uses compact 32px sizing for native selects.
+// Match Select2 to 32px here (not the global 40px).
+// These page classes are on the body alongside wc-wp-version-gte-70, so use compound selectors.
+.wc-wp-version-gte-70.woocommerce_page_wc-customer-stock-notifications .tablenav,
+.wc-wp-version-gte-70.woocommerce_page_wc-orders .tablenav,
+.wc-wp-version-gte-70.post-type-product .tablenav,
+.wc-wp-version-gte-70.post-type-shop_order .tablenav {
+	.select2-container {
+		margin-top: 0; // Align with other tablenav elements.
+	}
+
+	.select2-container .select2-selection--single {
+		height: 32px; // WP 7.0 tablenav uses compact 32px, not 40px.
+
+		.select2-selection__rendered {
+			line-height: 30px;
+		}
+
+		.select2-selection__arrow {
+			height: 30px;
+		}
+	}
+}
+
+/**
   * Select2 colors for built-in admin color themes.
   */
 .wp-admin {
