@@ -119,8 +119,10 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 							<td data-wp-context='{ "isImageHidden": false }' class="wc-block-cart-item__image" aria-hidden="true">
 								<img
 									data-wp-bind--hidden="!state.isProductHiddenFromCatalog"
-									data-wp-bind--src="state.itemThumbnail" 
+									data-wp-bind--src="state.itemThumbnail"
 									data-wp-bind--alt="state.cartItemName"
+									data-wp-bind--srcset="state.itemSrcset"
+									data-wp-bind--sizes="state.itemSizes"
 									data-wp-on--error="actions.hideImage"
 								>
 								<a data-wp-bind--hidden="state.isProductHiddenFromCatalog" data-wp-bind--href="state.cartItem.permalink" tabindex="-1">
@@ -128,6 +130,8 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 										data-wp-bind--hidden="context.isImageHidden"
 										data-wp-bind--src="state.itemThumbnail"
 										data-wp-bind--alt="state.cartItemName"
+										data-wp-bind--srcset="state.itemSrcset"
+										data-wp-bind--sizes="state.itemSizes"
 										data-wp-on--error="actions.hideImage"
 									>	
 								</a>

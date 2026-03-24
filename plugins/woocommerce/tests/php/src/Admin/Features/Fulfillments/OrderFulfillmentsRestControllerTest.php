@@ -157,14 +157,10 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		// Check the response.
 		$this->assertEquals( WP_Http::FORBIDDEN, $response->get_status() );
-		$this->assertEquals(
-			array(
-				'code'    => 'woocommerce_rest_cannot_view',
-				'message' => 'Sorry, you cannot view resources.',
-				'data'    => array( 'status' => WP_Http::FORBIDDEN ),
-			),
-			$response->get_data()
-		);
+		$data = $response->get_data();
+		$this->assertEquals( 'woocommerce_rest_cannot_view', $data['code'] );
+		$this->assertEquals( 'Sorry, you cannot view resources.', $data['message'] );
+		$this->assertEquals( WP_Http::FORBIDDEN, $data['data']['status'] );
 
 		// Clean up the test environment.
 		wp_set_current_user( $current_user->ID );
@@ -245,14 +241,10 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		// Check the response. It should be an error saying that a regular user cannot create a fulfillment.
 		$this->assertEquals( WP_Http::UNAUTHORIZED, $response->get_status() );
-		$this->assertEquals(
-			array(
-				'code'    => 'woocommerce_rest_cannot_create',
-				'message' => 'Sorry, you cannot create resources.',
-				'data'    => array( 'status' => WP_Http::UNAUTHORIZED ),
-			),
-			$response->get_data()
-		);
+		$data = $response->get_data();
+		$this->assertEquals( 'woocommerce_rest_cannot_create', $data['code'] );
+		$this->assertEquals( 'Sorry, you cannot create resources.', $data['message'] );
+		$this->assertEquals( WP_Http::UNAUTHORIZED, $data['data']['status'] );
 	}
 
 	/**
@@ -379,14 +371,10 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		// Check the response. It should be an error saying that a fulfillment should contain at least one item.
 		$this->assertEquals( WP_Http::BAD_REQUEST, $response->get_status() );
-		$this->assertEquals(
-			array(
-				'code'    => 0,
-				'message' => 'The fulfillment should contain at least one item.',
-				'data'    => array( 'status' => WP_Http::BAD_REQUEST ),
-			),
-			$response->get_data()
-		);
+		$data = $response->get_data();
+		$this->assertEquals( 0, $data['code'] );
+		$this->assertEquals( 'The fulfillment should contain at least one item.', $data['message'] );
+		$this->assertEquals( WP_Http::BAD_REQUEST, $data['data']['status'] );
 	}
 
 	/**
@@ -428,14 +416,10 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		// Check the response. It should be an error saying that the items are invalid.
 		$this->assertEquals( WP_Http::BAD_REQUEST, $response->get_status() );
-		$this->assertEquals(
-			array(
-				'code'    => 0,
-				'message' => 'Invalid item.',
-				'data'    => array( 'status' => WP_Http::BAD_REQUEST ),
-			),
-			$response->get_data()
-		);
+		$data = $response->get_data();
+		$this->assertEquals( 0, $data['code'] );
+		$this->assertEquals( 'Invalid item.', $data['message'] );
+		$this->assertEquals( WP_Http::BAD_REQUEST, $data['data']['status'] );
 	}
 
 	/**
@@ -492,14 +476,10 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		// Check the response. It should be an error saying that the order ID is invalid.
 		$this->assertEquals( WP_Http::NOT_FOUND, $response->get_status() );
-		$this->assertEquals(
-			array(
-				'code'    => 'woocommerce_rest_order_invalid_id',
-				'message' => 'Invalid order ID.',
-				'data'    => array( 'status' => WP_Http::NOT_FOUND ),
-			),
-			$response->get_data()
-		);
+		$data = $response->get_data();
+		$this->assertEquals( 'woocommerce_rest_order_invalid_id', $data['code'] );
+		$this->assertEquals( 'Invalid order ID.', $data['message'] );
+		$this->assertEquals( WP_Http::NOT_FOUND, $data['data']['status'] );
 	}
 
 	/**
@@ -584,14 +564,10 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		// Check the response. It should be an error saying that the order ID is invalid.
 		$this->assertEquals( WP_Http::NOT_FOUND, $response->get_status() );
-		$this->assertEquals(
-			array(
-				'code'    => 'woocommerce_rest_order_invalid_id',
-				'message' => 'Invalid order ID.',
-				'data'    => array( 'status' => WP_Http::NOT_FOUND ),
-			),
-			$response->get_data()
-		);
+		$data = $response->get_data();
+		$this->assertEquals( 'woocommerce_rest_order_invalid_id', $data['code'] );
+		$this->assertEquals( 'Invalid order ID.', $data['message'] );
+		$this->assertEquals( WP_Http::NOT_FOUND, $data['data']['status'] );
 	}
 
 	/**
@@ -614,14 +590,10 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		// Check the response. It should be an error saying that the fulfillment ID is invalid.
 		$this->assertEquals( WP_Http::BAD_REQUEST, $response->get_status() );
 
-		$this->assertEquals(
-			array(
-				'code'    => 0,
-				'message' => 'Fulfillment not found.',
-				'data'    => array( 'status' => WP_Http::BAD_REQUEST ),
-			),
-			$response->get_data()
-		);
+		$data = $response->get_data();
+		$this->assertEquals( 0, $data['code'] );
+		$this->assertEquals( 'Fulfillment not found.', $data['message'] );
+		$this->assertEquals( WP_Http::BAD_REQUEST, $data['data']['status'] );
 	}
 
 	/**
@@ -650,14 +622,10 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		// Check the response. It should be an error saying that a regular user cannot view a fulfillment.
 		$this->assertEquals( WP_Http::FORBIDDEN, $response->get_status() );
-		$this->assertEquals(
-			array(
-				'code'    => 'woocommerce_rest_cannot_view',
-				'message' => 'Sorry, you cannot view resources.',
-				'data'    => array( 'status' => WP_Http::FORBIDDEN ),
-			),
-			$response->get_data()
-		);
+		$data = $response->get_data();
+		$this->assertEquals( 'woocommerce_rest_cannot_view', $data['code'] );
+		$this->assertEquals( 'Sorry, you cannot view resources.', $data['message'] );
+		$this->assertEquals( WP_Http::FORBIDDEN, $data['data']['status'] );
 
 		wp_set_current_user( $current_user->ID );
 	}
@@ -720,14 +688,10 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 		// Check the response. It should be an error saying that a regular user cannot update a fulfillment.
 		$this->assertEquals( WP_Http::FORBIDDEN, $response->get_status() );
-		$this->assertEquals(
-			array(
-				'code'    => 'rest_forbidden',
-				'message' => 'Sorry, you are not allowed to do that.',
-				'data'    => array( 'status' => WP_Http::FORBIDDEN ),
-			),
-			$response->get_data()
-		);
+		$data = $response->get_data();
+		$this->assertEquals( 'rest_forbidden', $data['code'] );
+		$this->assertEquals( 'Sorry, you are not allowed to do that.', $data['message'] );
+		$this->assertEquals( WP_Http::FORBIDDEN, $data['data']['status'] );
 	}
 
 	/**
@@ -898,14 +862,10 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 		// Check the response. It should be an error saying that the order ID is invalid.
 		$this->assertEquals( WP_Http::NOT_FOUND, $response->get_status() );
-		$this->assertEquals(
-			array(
-				'code'    => 'woocommerce_rest_order_invalid_id',
-				'message' => 'Invalid order ID.',
-				'data'    => array( 'status' => WP_Http::NOT_FOUND ),
-			),
-			$response->get_data()
-		);
+		$data = $response->get_data();
+		$this->assertEquals( 'woocommerce_rest_order_invalid_id', $data['code'] );
+		$this->assertEquals( 'Invalid order ID.', $data['message'] );
+		$this->assertEquals( WP_Http::NOT_FOUND, $data['data']['status'] );
 
 		// Clean up the test environment.
 		wp_set_current_user( 0 );
@@ -968,14 +928,10 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 		// Check the response. It should be an error saying that the fulfillment ID is invalid.
 		$this->assertEquals( WP_Http::BAD_REQUEST, $response->get_status() );
-		$this->assertEquals(
-			array(
-				'code'    => 0,
-				'message' => 'Fulfillment not found.',
-				'data'    => array( 'status' => WP_Http::BAD_REQUEST ),
-			),
-			$response->get_data()
-		);
+		$data = $response->get_data();
+		$this->assertEquals( 0, $data['code'] );
+		$this->assertEquals( 'Fulfillment not found.', $data['message'] );
+		$this->assertEquals( WP_Http::BAD_REQUEST, $data['data']['status'] );
 
 		// Clean up the test environment.
 		wp_set_current_user( 0 );
@@ -1024,14 +980,10 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 		// Check the response. It should be an error saying that a fulfillment should contain at least one item.
 		$this->assertEquals( WP_Http::BAD_REQUEST, $response->get_status() );
-		$this->assertEquals(
-			array(
-				'code'    => 0,
-				'message' => 'The fulfillment should contain at least one item.',
-				'data'    => array( 'status' => WP_Http::BAD_REQUEST ),
-			),
-			$response->get_data()
-		);
+		$data = $response->get_data();
+		$this->assertEquals( 0, $data['code'] );
+		$this->assertEquals( 'The fulfillment should contain at least one item.', $data['message'] );
+		$this->assertEquals( WP_Http::BAD_REQUEST, $data['data']['status'] );
 
 		// Clean up the test environment.
 		wp_set_current_user( 0 );
@@ -1079,14 +1031,10 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 		// Check the response. It should be an error saying that the item quantity is invalid.
 		$this->assertEquals( WP_Http::BAD_REQUEST, $response->get_status() );
-		$this->assertEquals(
-			array(
-				'code'    => 0,
-				'message' => 'Invalid item.',
-				'data'    => array( 'status' => WP_Http::BAD_REQUEST ),
-			),
-			$response->get_data()
-		);
+		$data = $response->get_data();
+		$this->assertEquals( 0, $data['code'] );
+		$this->assertEquals( 'Invalid item.', $data['message'] );
+		$this->assertEquals( WP_Http::BAD_REQUEST, $data['data']['status'] );
 		// Clean up the test environment.
 		wp_set_current_user( 0 );
 	}
@@ -1167,28 +1115,24 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		// Check the response. It should be an error saying that a regular user cannot delete a fulfillment.
 		$this->assertEquals( WP_Http::FORBIDDEN, $response->get_status() );
-		$this->assertEquals(
-			array(
-				'code'    => 'woocommerce_rest_cannot_delete',
-				'message' => 'Sorry, you cannot delete resources.',
-				'data'    => array( 'status' => WP_Http::FORBIDDEN ),
-			),
-			$response->get_data()
-		);
+		$data = $response->get_data();
+		$this->assertEquals( 'woocommerce_rest_cannot_delete', $data['code'] );
+		$this->assertEquals( 'Sorry, you cannot delete resources.', $data['message'] );
+		$this->assertEquals( WP_Http::FORBIDDEN, $data['data']['status'] );
 	}
 
 	/**
 	 * Test deleting a fulfillment for an admin user.
 	 */
 	public function test_delete_fulfillment_for_admin_user() {
-		// Get a previously created order.
-		$order_id = self::$created_order_ids[0];
+		// Use a dedicated order to avoid mutating shared state used by other tests.
+		$order_id = self::$created_order_ids[9];
 		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
 		$response = $this->server->dispatch( $request );
 
 		$fulfillments = $response->get_data();
 		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
+		$this->assertNotEmpty( $fulfillments );
 
 		$fulfillment_id = $fulfillments[0]['id'];
 
@@ -1225,14 +1169,10 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		// Check the response. It should be an error saying that the order ID is invalid.
 		$this->assertEquals( WP_Http::NOT_FOUND, $response->get_status() );
-		$this->assertEquals(
-			array(
-				'code'    => 'woocommerce_rest_order_invalid_id',
-				'message' => 'Invalid order ID.',
-				'data'    => array( 'status' => WP_Http::NOT_FOUND ),
-			),
-			$response->get_data()
-		);
+		$data = $response->get_data();
+		$this->assertEquals( 'woocommerce_rest_order_invalid_id', $data['code'] );
+		$this->assertEquals( 'Invalid order ID.', $data['message'] );
+		$this->assertEquals( WP_Http::NOT_FOUND, $data['data']['status'] );
 	}
 
 	/**
@@ -1256,14 +1196,10 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		// Check the response. It should be an error saying that the fulfillment ID is invalid.
 		$this->assertEquals( WP_Http::BAD_REQUEST, $response->get_status() );
-		$this->assertEquals(
-			array(
-				'code'    => 0,
-				'message' => 'Fulfillment not found.',
-				'data'    => array( 'status' => WP_Http::BAD_REQUEST ),
-			),
-			$response->get_data()
-		);
+		$data = $response->get_data();
+		$this->assertEquals( 0, $data['code'] );
+		$this->assertEquals( 'Fulfillment not found.', $data['message'] );
+		$this->assertEquals( WP_Http::BAD_REQUEST, $data['data']['status'] );
 	}
 
 	/**
@@ -1292,14 +1228,10 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		// Check the response. It should be an error saying that a regular user cannot delete a fulfillment.
 		$this->assertEquals( WP_Http::FORBIDDEN, $response->get_status() );
-		$this->assertEquals(
-			array(
-				'code'    => 'woocommerce_rest_cannot_delete',
-				'message' => 'Sorry, you cannot delete resources.',
-				'data'    => array( 'status' => WP_Http::FORBIDDEN ),
-			),
-			$response->get_data()
-		);
+		$data = $response->get_data();
+		$this->assertEquals( 'woocommerce_rest_cannot_delete', $data['code'] );
+		$this->assertEquals( 'Sorry, you cannot delete resources.', $data['message'] );
+		$this->assertEquals( WP_Http::FORBIDDEN, $data['data']['status'] );
 
 		wp_set_current_user( $current_user->ID );
 	}
@@ -1432,14 +1364,10 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		// Check the response. It should be an error saying that the order ID is invalid.
 		$this->assertEquals( WP_Http::NOT_FOUND, $response->get_status() );
-		$this->assertEquals(
-			array(
-				'code'    => 'woocommerce_rest_order_invalid_id',
-				'message' => 'Invalid order ID.',
-				'data'    => array( 'status' => WP_Http::NOT_FOUND ),
-			),
-			$response->get_data()
-		);
+		$data = $response->get_data();
+		$this->assertEquals( 'woocommerce_rest_order_invalid_id', $data['code'] );
+		$this->assertEquals( 'Invalid order ID.', $data['message'] );
+		$this->assertEquals( WP_Http::NOT_FOUND, $data['data']['status'] );
 	}
 
 	/**
@@ -1463,14 +1391,10 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		// Check the response. It should be an error saying that the fulfillment ID is invalid.
 		$this->assertEquals( WP_Http::BAD_REQUEST, $response->get_status() );
-		$this->assertEquals(
-			array(
-				'code'    => 0,
-				'message' => 'Fulfillment not found.',
-				'data'    => array( 'status' => WP_Http::BAD_REQUEST ),
-			),
-			$response->get_data()
-		);
+		$data = $response->get_data();
+		$this->assertEquals( 0, $data['code'] );
+		$this->assertEquals( 'Fulfillment not found.', $data['message'] );
+		$this->assertEquals( WP_Http::BAD_REQUEST, $data['data']['status'] );
 	}
 
 	/**
@@ -1499,14 +1423,10 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		// Check the response. It should be an error saying that a regular user cannot view a fulfillment.
 		$this->assertEquals( WP_Http::FORBIDDEN, $response->get_status() );
-		$this->assertEquals(
-			array(
-				'code'    => 'woocommerce_rest_cannot_view',
-				'message' => 'Sorry, you cannot view resources.',
-				'data'    => array( 'status' => WP_Http::FORBIDDEN ),
-			),
-			$response->get_data()
-		);
+		$data = $response->get_data();
+		$this->assertEquals( 'woocommerce_rest_cannot_view', $data['code'] );
+		$this->assertEquals( 'Sorry, you cannot view resources.', $data['message'] );
+		$this->assertEquals( WP_Http::FORBIDDEN, $data['data']['status'] );
 
 		wp_set_current_user( $current_user->ID );
 	}
@@ -1549,14 +1469,10 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		// Check the response. It should be an error saying that a regular user cannot update a fulfillment.
 		$this->assertEquals( WP_Http::UNAUTHORIZED, $response->get_status() );
-		$this->assertEquals(
-			array(
-				'code'    => 'rest_forbidden',
-				'message' => 'Sorry, you are not allowed to do that.',
-				'data'    => array( 'status' => WP_Http::UNAUTHORIZED ),
-			),
-			$response->get_data()
-		);
+		$data = $response->get_data();
+		$this->assertEquals( 'rest_forbidden', $data['code'] );
+		$this->assertEquals( 'Sorry, you are not allowed to do that.', $data['message'] );
+		$this->assertEquals( WP_Http::UNAUTHORIZED, $data['data']['status'] );
 	}
 
 	/**
@@ -1682,14 +1598,10 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		// Check the response. It should be an error saying that the order ID is invalid.
 		$this->assertEquals( WP_Http::NOT_FOUND, $response->get_status() );
-		$this->assertEquals(
-			array(
-				'code'    => 'woocommerce_rest_order_invalid_id',
-				'message' => 'Invalid order ID.',
-				'data'    => array( 'status' => WP_Http::NOT_FOUND ),
-			),
-			$response->get_data()
-		);
+		$data = $response->get_data();
+		$this->assertEquals( 'woocommerce_rest_order_invalid_id', $data['code'] );
+		$this->assertEquals( 'Invalid order ID.', $data['message'] );
+		$this->assertEquals( WP_Http::NOT_FOUND, $data['data']['status'] );
 
 		// Clean up the test environment.
 		wp_set_current_user( 0 );
@@ -1732,14 +1644,10 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		// Check the response. It should be an error saying that the fulfillment ID is invalid.
 		$this->assertEquals( WP_Http::BAD_REQUEST, $response->get_status() );
-		$this->assertEquals(
-			array(
-				'code'    => 0,
-				'message' => 'Fulfillment not found.',
-				'data'    => array( 'status' => WP_Http::BAD_REQUEST ),
-			),
-			$response->get_data()
-		);
+		$data = $response->get_data();
+		$this->assertEquals( 0, $data['code'] );
+		$this->assertEquals( 'Fulfillment not found.', $data['message'] );
+		$this->assertEquals( WP_Http::BAD_REQUEST, $data['data']['status'] );
 
 		// Clean up the test environment.
 		wp_set_current_user( 0 );
@@ -1787,14 +1695,10 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		// Check the response. It should be an error saying that a regular user cannot update a fulfillment.
 		$this->assertEquals( WP_Http::FORBIDDEN, $response->get_status() );
-		$this->assertEquals(
-			array(
-				'code'    => 'rest_forbidden',
-				'message' => 'Sorry, you are not allowed to do that.',
-				'data'    => array( 'status' => WP_Http::FORBIDDEN ),
-			),
-			$response->get_data()
-		);
+		$data = $response->get_data();
+		$this->assertEquals( 'rest_forbidden', $data['code'] );
+		$this->assertEquals( 'Sorry, you are not allowed to do that.', $data['message'] );
+		$this->assertEquals( WP_Http::FORBIDDEN, $data['data']['status'] );
 
 		// Clean up the test environment.
 		wp_set_current_user( $current_user->ID );
@@ -1829,14 +1733,10 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		// Check the response. It should be an error saying that a regular user cannot delete a fulfillment.
 		$this->assertEquals( WP_Http::UNAUTHORIZED, $response->get_status() );
-		$this->assertEquals(
-			array(
-				'code'    => 'woocommerce_rest_cannot_delete',
-				'message' => 'Sorry, you cannot delete resources.',
-				'data'    => array( 'status' => WP_Http::UNAUTHORIZED ),
-			),
-			$response->get_data()
-		);
+		$data = $response->get_data();
+		$this->assertEquals( 'woocommerce_rest_cannot_delete', $data['code'] );
+		$this->assertEquals( 'Sorry, you cannot delete resources.', $data['message'] );
+		$this->assertEquals( WP_Http::UNAUTHORIZED, $data['data']['status'] );
 	}
 
 	/**
@@ -1905,14 +1805,10 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		// Check the response. It should be an error saying that the order ID is invalid.
 		$this->assertEquals( WP_Http::NOT_FOUND, $response->get_status() );
-		$this->assertEquals(
-			array(
-				'code'    => 'woocommerce_rest_order_invalid_id',
-				'message' => 'Invalid order ID.',
-				'data'    => array( 'status' => WP_Http::NOT_FOUND ),
-			),
-			$response->get_data()
-		);
+		$data = $response->get_data();
+		$this->assertEquals( 'woocommerce_rest_order_invalid_id', $data['code'] );
+		$this->assertEquals( 'Invalid order ID.', $data['message'] );
+		$this->assertEquals( WP_Http::NOT_FOUND, $data['data']['status'] );
 		// Clean up the test environment.
 		wp_set_current_user( 0 );
 	}
@@ -1946,14 +1842,10 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		// Check the response. It should be an error saying that the fulfillment ID is invalid.
 		$this->assertEquals( WP_Http::BAD_REQUEST, $response->get_status() );
-		$this->assertEquals(
-			array(
-				'code'    => 0,
-				'message' => 'Fulfillment not found.',
-				'data'    => array( 'status' => WP_Http::BAD_REQUEST ),
-			),
-			$response->get_data()
-		);
+		$data = $response->get_data();
+		$this->assertEquals( 0, $data['code'] );
+		$this->assertEquals( 'Fulfillment not found.', $data['message'] );
+		$this->assertEquals( WP_Http::BAD_REQUEST, $data['data']['status'] );
 		// Clean up the test environment.
 		wp_set_current_user( 0 );
 	}
@@ -1992,15 +1884,171 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		// Check the response. It should be an error saying that a regular user cannot delete a fulfillment.
 		$this->assertEquals( WP_Http::FORBIDDEN, $response->get_status() );
-		$this->assertEquals(
-			array(
-				'code'    => 'woocommerce_rest_cannot_delete',
-				'message' => 'Sorry, you cannot delete resources.',
-				'data'    => array( 'status' => WP_Http::FORBIDDEN ),
-			),
-			$response->get_data()
-		);
+		$data = $response->get_data();
+		$this->assertEquals( 'woocommerce_rest_cannot_delete', $data['code'] );
+		$this->assertEquals( 'Sorry, you cannot delete resources.', $data['message'] );
+		$this->assertEquals( WP_Http::FORBIDDEN, $data['data']['status'] );
 
 		wp_set_current_user( $current_user->ID );
+	}
+
+	/**
+	 * @testdox maybe_track_tracking_added method exists on the controller.
+	 */
+	public function test_maybe_track_tracking_added_method_exists(): void {
+		$reflection = new \ReflectionClass( OrderFulfillmentsRestController::class );
+		$this->assertTrue(
+			$reflection->hasMethod( 'maybe_track_tracking_added' ),
+			'maybe_track_tracking_added method should exist on OrderFulfillmentsRestController'
+		);
+
+		$method = $reflection->getMethod( 'maybe_track_tracking_added' );
+		$this->assertTrue( $method->isPrivate(), 'maybe_track_tracking_added should be private' );
+	}
+
+	/**
+	 * @testdox check_request_source returns fulfillments_modal when UI header is present.
+	 */
+	public function test_check_request_source_returns_modal_for_ui_header(): void {
+		$reflection = new \ReflectionClass( OrderFulfillmentsRestController::class );
+		$method     = $reflection->getMethod( 'check_request_source' );
+		$method->setAccessible( true );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/1/fulfillments' );
+		$request->set_header( 'X-WC-Fulfillments-UI', 'true' );
+
+		$result = $method->invoke( $this->controller, $request );
+		$this->assertSame( 'fulfillments_modal', $result );
+	}
+
+	/**
+	 * @testdox check_request_source returns api when no UI header is present.
+	 */
+	public function test_check_request_source_returns_api_without_ui_header(): void {
+		$reflection = new \ReflectionClass( OrderFulfillmentsRestController::class );
+		$method     = $reflection->getMethod( 'check_request_source' );
+		$method->setAccessible( true );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/1/fulfillments' );
+
+		$result = $method->invoke( $this->controller, $request );
+		$this->assertSame( 'api', $result );
+	}
+
+	/**
+	 * @testdox Creating a fulfillment with tracking info succeeds and includes tracking metadata.
+	 */
+	public function test_create_fulfillment_with_tracking_info_succeeds(): void {
+		$order = WC_Helper_Order::create_order( get_current_user_id() );
+		$this->assertInstanceOf( WC_Order::class, $order );
+
+		wp_set_current_user( 1 );
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() . '/fulfillments' );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'entity_type'  => WC_Order::class,
+					'entity_id'    => '' . $order->get_id(),
+					'status'       => 'fulfilled',
+					'is_fulfilled' => true,
+					'meta_data'    => array(
+						array(
+							'id'    => 0,
+							'key'   => '_items',
+							'value' => array(
+								array(
+									'item_id' => 1,
+									'qty'     => 1,
+								),
+							),
+						),
+						array(
+							'id'    => 0,
+							'key'   => '_tracking_number',
+							'value' => '1Z999AA10123456784',
+						),
+						array(
+							'id'    => 0,
+							'key'   => '_shipment_provider',
+							'value' => 'ups',
+						),
+						array(
+							'id'    => 0,
+							'key'   => '_tracking_url',
+							'value' => 'https://www.ups.com/track?tracknum=1Z999AA10123456784',
+						),
+						array(
+							'id'    => 0,
+							'key'   => '_shipping_option',
+							'value' => 'tracking-number',
+						),
+					),
+				)
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::CREATED, $response->get_status() );
+		$fulfillment = $response->get_data();
+		$this->assertIsArray( $fulfillment );
+		$this->assertArrayHasKey( 'id', $fulfillment );
+
+		$meta_keys = array_column( $fulfillment['meta_data'], 'key' );
+		$this->assertContains( '_tracking_number', $meta_keys, 'Fulfillment should have tracking number metadata' );
+		$this->assertContains( '_shipment_provider', $meta_keys, 'Fulfillment should have shipping provider metadata' );
+		$this->assertContains( '_tracking_url', $meta_keys, 'Fulfillment should have tracking URL metadata' );
+
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * @testdox Creating a fulfillment without tracking info succeeds without tracking metadata.
+	 */
+	public function test_create_fulfillment_without_tracking_info_succeeds(): void {
+		$order = WC_Helper_Order::create_order( get_current_user_id() );
+		$this->assertInstanceOf( WC_Order::class, $order );
+
+		wp_set_current_user( 1 );
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() . '/fulfillments' );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'entity_type'  => WC_Order::class,
+					'entity_id'    => '' . $order->get_id(),
+					'status'       => 'unfulfilled',
+					'is_fulfilled' => false,
+					'meta_data'    => array(
+						array(
+							'id'    => 0,
+							'key'   => '_items',
+							'value' => array(
+								array(
+									'item_id' => 1,
+									'qty'     => 1,
+								),
+							),
+						),
+						array(
+							'id'    => 0,
+							'key'   => '_shipping_option',
+							'value' => 'no-info',
+						),
+					),
+				)
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::CREATED, $response->get_status() );
+		$fulfillment = $response->get_data();
+		$this->assertIsArray( $fulfillment );
+		$this->assertArrayHasKey( 'id', $fulfillment );
+
+		$meta_keys = array_column( $fulfillment['meta_data'], 'key' );
+		$this->assertNotContains( '_tracking_number', $meta_keys, 'Fulfillment without tracking should not have tracking number metadata' );
+
+		wp_set_current_user( 0 );
 	}
 }

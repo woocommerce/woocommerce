@@ -1039,90 +1039,17 @@ WHERE
 	}
 
 	/**
-	 * Get the total tax refunded.
+	 * Returns a prepared SQL JOIN clause for finding refund orders belonging to a given parent order.
 	 *
-	 * @param WC_Order $order Order object.
+	 * Overrides the CPT version to use the HPOS orders table.
 	 *
-	 * @return float
+	 * @since 10.7.0
+	 * @param int $order_id Parent order ID.
+	 * @return string Prepared SQL JOIN fragment.
 	 */
-	public function get_total_tax_refunded( $order ) {
+	protected function get_refund_orders_join_clause( int $order_id ): string {
 		global $wpdb;
-
-		$order_table = self::get_orders_table_name();
-
-		$total = $wpdb->get_var(
-			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $order_table is hardcoded.
-			$wpdb->prepare(
-				"SELECT SUM( order_itemmeta.meta_value )
-				FROM {$wpdb->prefix}woocommerce_order_itemmeta AS order_itemmeta
-				INNER JOIN $order_table AS orders ON ( orders.type = 'shop_order_refund' AND orders.parent_order_id = %d )
-				INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON ( order_items.order_id = orders.id AND order_items.order_item_type = 'tax' )
-				WHERE order_itemmeta.order_item_id = order_items.order_item_id
-				AND order_itemmeta.meta_key IN ('tax_amount', 'shipping_tax_amount')",
-				$order->get_id(),
-			)
-		) ?? 0;
-		// phpcs:enable
-
-		return abs( $total );
-	}
-
-	/**
-	 * Get the total shipping tax refunded.
-	 *
-	 * @param WC_Order $order Order object.
-	 *
-	 * @since 10.2.0
-	 * @return float
-	 */
-	public function get_total_shipping_tax_refunded( $order ) {
-		global $wpdb;
-
-		$order_table = self::get_orders_table_name();
-
-		$total = $wpdb->get_var(
-			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $order_table is hardcoded.
-			$wpdb->prepare(
-				"SELECT SUM( order_itemmeta.meta_value )
-				FROM {$wpdb->prefix}woocommerce_order_itemmeta AS order_itemmeta
-				INNER JOIN $order_table AS orders ON ( orders.type = 'shop_order_refund' AND orders.parent_order_id = %d )
-				INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON ( order_items.order_id = orders.id AND order_items.order_item_type = 'tax' )
-				WHERE order_itemmeta.order_item_id = order_items.order_item_id
-				AND order_itemmeta.meta_key = 'shipping_tax_amount'",
-				$order->get_id()
-			)
-		) ?? 0;
-		// phpcs:enable
-
-		return abs( $total );
-	}
-
-	/**
-	 * Get the total shipping refunded.
-	 *
-	 * @param  WC_Order $order Order object.
-	 * @return float
-	 */
-	public function get_total_shipping_refunded( $order ) {
-		global $wpdb;
-
-		$order_table = self::get_orders_table_name();
-
-		$total = $wpdb->get_var(
-			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $order_table is hardcoded.
-			$wpdb->prepare(
-				"SELECT SUM( order_itemmeta.meta_value )
-				FROM {$wpdb->prefix}woocommerce_order_itemmeta AS order_itemmeta
-				INNER JOIN $order_table AS orders ON ( orders.type = 'shop_order_refund' AND orders.parent_order_id = %d )
-				INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON ( order_items.order_id = orders.id AND order_items.order_item_type = 'shipping' )
-				WHERE order_itemmeta.order_item_id = order_items.order_item_id
-				AND order_itemmeta.meta_key IN ('cost')",
-				$order->get_id()
-			)
-		) ?? 0;
-		// phpcs:enable
-
-		return abs( $total );
+		return $wpdb->prepare( '%i AS refunds ON ( refunds.type = %s AND refunds.parent_order_id = %d )', self::get_orders_table_name(), 'shop_order_refund', $order_id );
 	}
 
 	/**
@@ -3188,6 +3115,7 @@ FROM $order_meta_table
 			$orders = $query->orders;
 		} else {
 			$orders = WC()->order_factory->get_orders( $query->orders );
+			$this->prime_caches_for_orders( $query->orders, $query_vars );
 		}
 
 		if ( isset( $query_vars['paginate'] ) && $query_vars['paginate'] ) {
@@ -3202,6 +3130,89 @@ FROM $order_meta_table
 	}
 
 	//phpcs:enable Squiz.Commenting, Generic.Commenting
+
+	/**
+	 * Prime caches for a collection of orders. Reduces N+1 queries when iterating over order results.
+	 *
+	 * @param array $order_ids  List of order IDs to prime caches for.
+	 * @param array $query_vars Original query arguments.
+	 * @return void
+	 */
+	public function prime_caches_for_orders( array $order_ids, array $query_vars ): void {
+		$this->prime_order_item_caches_for_orders( $order_ids, $query_vars );
+
+		// The following priming methods only apply to shop_order queries.
+		$order_type = $query_vars['type'] ?? $query_vars['post_type'] ?? '';
+		$order_type = is_array( $order_type ) ? $order_type : array( $order_type );
+		if ( ! in_array( 'shop_order', $order_type, true ) ) {
+			return;
+		}
+
+		$this->prime_refund_caches_for_orders( $order_ids, $query_vars );
+		$this->prime_refund_total_caches_for_orders( $order_ids, $query_vars );
+		$this->prime_needs_processing_transients( $order_ids, $query_vars );
+	}
+
+	/**
+	 * Returns a prepared SQL JOIN clause for finding refund orders belonging to multiple parent orders.
+	 *
+	 * Overrides the CPT version to use the HPOS orders table.
+	 *
+	 * @since 10.7.0
+	 * @param array $order_ids List of order IDs.
+	 * @return string Prepared SQL JOIN fragment.
+	 */
+	protected function get_refund_orders_batch_join_clause( array $order_ids ): string {
+		global $wpdb;
+		$id_list = implode( ', ', array_map( 'absint', $order_ids ) );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $id_list is sanitized via absint above.
+		return $wpdb->prepare( "%i AS refunds ON ( refunds.type = %s AND refunds.parent_order_id IN ( $id_list ) )", self::get_orders_table_name(), 'shop_order_refund' );
+	}
+
+	/**
+	 * Returns the column name on the refund table alias (`refunds`) that holds the parent order ID.
+	 *
+	 * @since 10.7.0
+	 * @return string Column reference.
+	 */
+	protected function get_refund_parent_column(): string {
+		return 'refunds.parent_order_id';
+	}
+
+	/**
+	 * Query total refunded amounts per order in a batch.
+	 *
+	 * Overrides the CPT version to read directly from the HPOS orders table
+	 * rather than joining postmeta.
+	 *
+	 * @since 10.7.0
+	 * @param array $order_ids List of order IDs.
+	 * @return array<int, float> Map of order_id => refund total.
+	 */
+	protected function get_batch_refund_totals( array $order_ids ): array {
+		global $wpdb;
+
+		$id_list = implode( ', ', array_map( 'absint', $order_ids ) );
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $id_list is sanitized via absint above.
+		$refund_totals = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT parent_order_id AS order_id, SUM( total_amount ) AS total
+				FROM %i
+				WHERE type = 'shop_order_refund' AND parent_order_id IN ( $id_list )
+				GROUP BY parent_order_id",
+				self::get_orders_table_name()
+			)
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		$totals_by_order = array();
+		foreach ( $refund_totals as $row ) {
+			$totals_by_order[ $row->order_id ] = -1 * floatval( $row->total );
+		}
+
+		return $totals_by_order;
+	}
 
 	/**
 	 * Get the SQL needed to create all the tables needed for the custom orders table feature.
