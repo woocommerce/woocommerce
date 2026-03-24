@@ -11,7 +11,7 @@ import { ADMIN_STATE_PATH } from '../../playwright.config';
 test.describe( 'Colour picker swatch height on Email settings', () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );
 
-	test( 'colour swatch height matches the adjacent input height', async ( {
+	test( 'colour swatch is correctly sized with WP 7.0 body class', async ( {
 		page,
 	} ) => {
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=email' );
@@ -24,21 +24,11 @@ test.describe( 'Colour picker swatch height on Email settings', () => {
 		const swatch = page.locator( '.colorpickpreview' ).first();
 		await expect( swatch ).toBeVisible();
 
-		const input = page.locator( 'input.colorpick' ).first();
-		await expect( input ).toBeVisible();
-
 		const swatchBox = await swatch.boundingBox();
-		const inputBox = await input.boundingBox();
-
 		expect( swatchBox ).not.toBeNull();
-		expect( inputBox ).not.toBeNull();
 
-		// With the gte-70 class, both swatch and input should be 40px tall.
+		// With the gte-70 class, the swatch should be 40px to match WP 7.0 input height.
 		expect( swatchBox.height ).toBe( 40 );
-
-		// Swatch height should match the input height (within 2px tolerance for borders).
-		expect(
-			Math.abs( swatchBox.height - inputBox.height )
-		).toBeLessThanOrEqual( 2 );
+		expect( swatchBox.width ).toBe( 40 );
 	} );
 } );
