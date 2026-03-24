@@ -226,7 +226,13 @@ abstract class DataSourcePoller {
 				$url
 			),
 			array(
-				'timeout'    => 3,
+				/**
+				 * Filters the HTTP timeout (in seconds) used when fetching remote specs data sources.
+				 *
+				 * @since 10.7.0
+				 * @param int $timeout Timeout in seconds. Default 3.
+				 */
+				'timeout'    => apply_filters( 'woocommerce_data_source_poller_timeout', 3 ),
 				'user-agent' => 'WooCommerce/' . WC_VERSION . '; ' . home_url( '/' ),
 			)
 		);
