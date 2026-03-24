@@ -169,7 +169,7 @@ const getResetNotificationEmailContentAction = () => {
 							disabled={ isBusy }
 							__next40pxDefaultSize
 						>
-							{ __( 'Reset to default', 'woocommerce' ) }
+							{ __( 'Reset', 'woocommerce' ) }
 						</Button>
 					</HStack>
 				</VStack>
