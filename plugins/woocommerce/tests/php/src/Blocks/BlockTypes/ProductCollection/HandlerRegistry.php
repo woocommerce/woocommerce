@@ -358,6 +358,115 @@ class HandlerRegistry extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Tests that the cross-sells handler falls back to DB when no client-provided IDs.
+	 */
+	public function test_collection_cross_sells_falls_back_without_edited_relationships() {
+		$db_cross_sell_ids = array( 2, 3, 4 );
+		$test_product      = WC_Helper_Product::create_simple_product( false );
+		$test_product->set_cross_sell_ids( $db_cross_sell_ids );
+		$test_product->save();
+
+		$request = Utils::build_request(
+			array( 'productReference' => $test_product->get_id() )
+		);
+		$request->set_param(
+			'productCollectionQueryContext',
+			array(
+				'collection' => 'woocommerce/product-collection/cross-sells',
+			)
+		);
+
+		$result = $this->block_instance->update_rest_query_in_editor( array(), $request );
+
+		$this->assertEqualsCanonicalizing( $db_cross_sell_ids, $result['post__in'] );
+	}
+
+	/**
+	 * Tests that the cross-sells handler excludes the product reference from resolved IDs.
+	 */
+	public function test_collection_cross_sells_edited_relationships_excludes_self() {
+		$test_product = WC_Helper_Product::create_simple_product( false );
+		$test_product->save();
+
+		$product_id = $test_product->get_id();
+
+		$request = Utils::build_request(
+			array( 'productReference' => $product_id )
+		);
+		$request->set_param(
+			'productCollectionQueryContext',
+			array(
+				'collection' => 'woocommerce/product-collection/cross-sells',
+			)
+		);
+		$request->set_param(
+			'editedProductRelationships',
+			wp_json_encode( array( 'cross_sell_ids' => array( $product_id, 10, 20 ) ) )
+		);
+
+		$result = $this->block_instance->update_rest_query_in_editor( array(), $request );
+
+		$this->assertEqualsCanonicalizing( array( 10, 20 ), $result['post__in'] );
+		$this->assertNotContains( $product_id, $result['post__in'] );
+	}
+
+	/**
+	 * Tests that empty edited upsell_ids results in no products (not DB fallback).
+	 */
+	public function test_collection_upsells_edited_empty_array_shows_nothing() {
+		$test_product = WC_Helper_Product::create_simple_product( false );
+		$test_product->set_upsell_ids( array( 2, 3, 4 ) );
+		$test_product->save();
+
+		$request = Utils::build_request(
+			array( 'productReference' => $test_product->get_id() )
+		);
+		$request->set_param(
+			'productCollectionQueryContext',
+			array(
+				'collection' => 'woocommerce/product-collection/upsells',
+			)
+		);
+		$request->set_param(
+			'editedProductRelationships',
+			wp_json_encode( array( 'upsell_ids' => array() ) )
+		);
+
+		$result = $this->block_instance->update_rest_query_in_editor( array(), $request );
+
+		// Empty array means user cleared all upsells — should show nothing, not DB data.
+		$this->assertSame( array( -1 ), $result['post__in'] );
+	}
+
+	/**
+	 * Tests that empty edited cross_sell_ids results in no products (not DB fallback).
+	 */
+	public function test_collection_cross_sells_edited_empty_array_shows_nothing() {
+		$test_product = WC_Helper_Product::create_simple_product( false );
+		$test_product->set_cross_sell_ids( array( 2, 3, 4 ) );
+		$test_product->save();
+
+		$request = Utils::build_request(
+			array( 'productReference' => $test_product->get_id() )
+		);
+		$request->set_param(
+			'productCollectionQueryContext',
+			array(
+				'collection' => 'woocommerce/product-collection/cross-sells',
+			)
+		);
+		$request->set_param(
+			'editedProductRelationships',
+			wp_json_encode( array( 'cross_sell_ids' => array() ) )
+		);
+
+		$result = $this->block_instance->update_rest_query_in_editor( array(), $request );
+
+		// Empty array means user cleared all cross-sells — should show nothing, not DB data.
+		$this->assertSame( array( -1 ), $result['post__in'] );
+	}
+
+	/**
 	 * Tests that the upsells handler excludes the product reference from resolved IDs.
 	 */
 	public function test_collection_upsells_edited_relationships_excludes_self() {

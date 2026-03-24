@@ -191,7 +191,7 @@ class HandlerRegistry {
 			'woocommerce/product-collection/upsells',
 			function ( $collection_args ) {
 				// Use client-provided resolved IDs when available (live preview of unsaved changes).
-				if ( ! empty( $collection_args['resolvedProductIds'] ) ) {
+				if ( isset( $collection_args['resolvedProductIds'] ) ) {
 					$resolved_ids      = array_map( 'absint', $collection_args['resolvedProductIds'] );
 					$product_reference = $collection_args['upsellsProductReferences'] ?? array();
 					$upsells           = array_diff( array_unique( $resolved_ids ), $product_reference );
@@ -287,7 +287,7 @@ class HandlerRegistry {
 			'woocommerce/product-collection/cross-sells',
 			function ( $collection_args ) {
 				// Use client-provided resolved IDs when available (live preview of unsaved changes).
-				if ( ! empty( $collection_args['resolvedProductIds'] ) ) {
+				if ( isset( $collection_args['resolvedProductIds'] ) ) {
 					$resolved_ids      = array_map( 'absint', $collection_args['resolvedProductIds'] );
 					$product_reference = $collection_args['crossSellsProductReferences'] ?? array();
 					$cross_sells       = array_diff( array_unique( $resolved_ids ), $product_reference );
