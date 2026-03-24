@@ -90,6 +90,9 @@ class WC_REST_Paypal_Webhooks_Controller extends WC_REST_Controller {
 			return new WP_REST_Response( array( 'message' => 'Webhook processed successfully' ), 200 );
 		} catch ( Exception $e ) {
 			return new WP_REST_Response( array( 'error' => $e->getMessage() ), 500 );
+		} catch ( \Throwable $e ) {
+			WC_Gateway_Paypal::log( 'Error processing webhook: ' . $e->getMessage() );
+			return new WP_REST_Response( array( 'error' => $e->getMessage() ), 500 );
 		}
 	}
 }
