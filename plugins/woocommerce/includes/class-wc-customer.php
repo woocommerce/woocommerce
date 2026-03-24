@@ -8,6 +8,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Enums\TaxBasedOn;
+
 require_once __DIR__ . '/legacy/class-wc-legacy-customer.php';
 
 /**
@@ -187,15 +189,15 @@ class WC_Customer extends WC_Legacy_Customer {
 
 		// Check shipping method at this point to see if we need special handling.
 		if ( true === apply_filters( 'woocommerce_apply_base_tax_for_local_pickup', true ) && count( array_intersect( wc_get_chosen_shipping_method_ids(), apply_filters( 'woocommerce_local_pickup_methods', array( 'legacy_local_pickup', 'local_pickup' ) ) ) ) > 0 ) {
-			$tax_based_on = 'base';
+			$tax_based_on = TaxBasedOn::BASE;
 		}
 
-		if ( 'base' === $tax_based_on ) {
+		if ( TaxBasedOn::BASE === $tax_based_on ) {
 			$country  = WC()->countries->get_base_country();
 			$state    = WC()->countries->get_base_state();
 			$postcode = WC()->countries->get_base_postcode();
 			$city     = WC()->countries->get_base_city();
-		} elseif ( 'billing' === $tax_based_on ) {
+		} elseif ( TaxBasedOn::BILLING === $tax_based_on ) {
 			$country  = $this->get_billing_country();
 			$state    = $this->get_billing_state();
 			$postcode = $this->get_billing_postcode();

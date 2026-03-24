@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add TaxBasedOn enum class for the possible values of the `woocommerce_tax_based_on` option and use it across the codebase.
