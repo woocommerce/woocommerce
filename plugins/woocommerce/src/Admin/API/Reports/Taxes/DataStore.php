@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
 use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
+use Automattic\WooCommerce\Enums\OrderItemType;
 
 /**
  * API\Reports\Taxes\DataStore.
@@ -117,7 +118,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$this->subquery->add_sql_clause( 'join', "JOIN {$wpdb->prefix}wc_order_stats ON {$table_name}.order_id = {$wpdb->prefix}wc_order_stats.order_id" );
 		}
 
-		$this->subquery->add_sql_clause( 'join', "JOIN {$wpdb->prefix}woocommerce_order_items ON {$table_name}.order_id = {$wpdb->prefix}woocommerce_order_items.order_id AND {$wpdb->prefix}woocommerce_order_items.order_item_type = 'tax'" );
+		$this->subquery->add_sql_clause( 'join', "JOIN {$wpdb->prefix}woocommerce_order_items ON {$table_name}.order_id = {$wpdb->prefix}woocommerce_order_items.order_id AND {$wpdb->prefix}woocommerce_order_items.order_item_type = '" . OrderItemType::TAX . "'" );
 		$this->subquery->add_sql_clause( 'join', "JOIN {$wpdb->prefix}woocommerce_order_itemmeta itemmeta_rate_id ON itemmeta_rate_id.order_item_id = {$wpdb->prefix}woocommerce_order_items.order_item_id AND itemmeta_rate_id.meta_key = 'rate_id'" );
 		$this->subquery->add_sql_clause( 'join', "JOIN {$wpdb->prefix}woocommerce_order_itemmeta itemmeta_rate_percent ON itemmeta_rate_percent.order_item_id = {$wpdb->prefix}woocommerce_order_items.order_item_id AND itemmeta_rate_percent.meta_key = 'rate_percent'" );
 	}
@@ -274,7 +275,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			return -1;
 		}
 
-		$tax_items   = $order->get_items( 'tax' );
+		$tax_items   = $order->get_items( OrderItemType::TAX );
 		$num_updated = 0;
 
 		foreach ( $tax_items as $tax_item ) {

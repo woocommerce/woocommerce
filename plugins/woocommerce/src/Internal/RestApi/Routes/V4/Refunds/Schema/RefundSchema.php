@@ -12,6 +12,7 @@ namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Schema;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractSchema;
+use Automattic\WooCommerce\Enums\OrderItemType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema\OrderItemSchema;
@@ -342,9 +343,9 @@ class RefundSchema extends AbstractSchema {
 
 		if ( in_array( 'line_items', $include_fields, true ) ) {
 			$data['line_items'] = array_merge(
-				$this->get_line_items_response( $refund->get_items( 'line_item' ), $request ),
-				$this->get_line_items_response( $refund->get_items( 'fee' ), $request ),
-				$this->get_line_items_response( $refund->get_items( 'shipping' ), $request ),
+				$this->get_line_items_response( $refund->get_items( OrderItemType::LINE_ITEM ), $request ),
+				$this->get_line_items_response( $refund->get_items( OrderItemType::FEE ), $request ),
+				$this->get_line_items_response( $refund->get_items( OrderItemType::SHIPPING ), $request ),
 			);
 		}
 

@@ -16,6 +16,7 @@ use WP_REST_Request;
 use WP_Http;
 use WP_Error;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractCollectionQuery;
+use Automattic\WooCommerce\Enums\OrderItemType;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Order_Query;
@@ -244,10 +245,11 @@ class CollectionQuery extends AbstractCollectionQuery {
 
 			$order_ids = $wpdb->get_col(
 				$wpdb->prepare(
-					"SELECT order_id FROM %i WHERE order_item_id IN ( SELECT order_item_id FROM %i WHERE meta_key = '_product_id' AND meta_value = %d ) AND order_item_type = 'line_item'",
+					"SELECT order_id FROM %i WHERE order_item_id IN ( SELECT order_item_id FROM %i WHERE meta_key = '_product_id' AND meta_value = %d ) AND order_item_type = %s",
 					$wpdb->prefix . 'woocommerce_order_items',
 					$wpdb->prefix . 'woocommerce_order_itemmeta',
-					$request['product']
+					$request['product'],
+					OrderItemType::LINE_ITEM
 				)
 			);
 

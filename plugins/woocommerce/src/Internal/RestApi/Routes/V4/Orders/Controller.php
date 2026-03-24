@@ -14,6 +14,7 @@ namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractController;
+use Automattic\WooCommerce\Enums\OrderItemType;
 use Automattic\WooCommerce\StoreApi\Utilities\Pagination;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema\OrderSchema;
 use WP_Http;
@@ -310,7 +311,7 @@ class Controller extends AbstractController {
 		// Prime product caches to avoid N+1 queries during serialization.
 		$product_ids = array();
 		foreach ( $results['results'] as $order ) {
-			foreach ( $order->get_items( 'line_item' ) as $item ) {
+			foreach ( $order->get_items( OrderItemType::LINE_ITEM ) as $item ) {
 				if ( $item instanceof \WC_Order_Item_Product ) {
 					$product_ids[] = $item->get_product_id();
 					$product_ids[] = $item->get_variation_id();
