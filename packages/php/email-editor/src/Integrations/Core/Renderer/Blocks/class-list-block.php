@@ -19,9 +19,9 @@ class List_Block extends Abstract_Block_Renderer {
 	/**
 	 * Render the block.
 	 *
-	 * render_content() applies margin-top on its inner wrapper div where Gmail
-	 * preserves it. Strip margin-top from email_attrs so add_spacer() doesn't
-	 * apply it again on the outer wrapper (which Gmail ignores).
+	 * The render_content() method applies margin-top on its inner wrapper div
+	 * where Gmail preserves it. Strip margin-top from email_attrs so
+	 * add_spacer() doesn't apply it again on the outer wrapper.
 	 *
 	 * @param string            $block_content The block content.
 	 * @param array             $parsed_block The parsed block.
