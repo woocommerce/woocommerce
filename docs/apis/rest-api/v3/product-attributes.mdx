@@ -441,9 +441,9 @@ This API helps you delete a product attribute.
 DELETE /wp-json/wc/v3/products/attributes/<id>
 ```
 
-<aside class="warning">
-	This also will delete all terms from the selected attribute.
-</aside>
+:::warning
+This also will delete all terms from the selected attribute.
+:::
 
 <Tabs>
   <TabItem value="curl" label="cURL">
@@ -527,10 +527,10 @@ woocommerce.delete("products/attributes/1", force: true).parsed_response
 
 This API helps you to batch create, update and delete multiple product attributes.
 
-<aside class="notice">
-	Note: By default it's limited to up to 100 objects to be created, updated or
+:::note
+Note: By default it's limited to up to 100 objects to be created, updated or
 	deleted.
-</aside>
+:::
 
 ### HTTP request
 
