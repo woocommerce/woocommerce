@@ -191,6 +191,43 @@ class DeferredEmailQueueTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A throwing callback does not prevent subsequent emails from being sent.
+	 */
+	public function test_send_queued_transactional_emails_continues_after_exception(): void {
+		$sent = array();
+
+		add_filter(
+			'woocommerce_allow_send_queued_transactional_email',
+			function ( $allow, $filter ) use ( &$sent ) {
+				unset( $allow );
+				if ( 'woocommerce_order_status_completed' === $filter ) {
+					throw new \RuntimeException( 'Simulated failure' );
+				}
+				$sent[] = $filter;
+				return false;
+			},
+			10,
+			2
+		);
+
+		$batch = array(
+			array(
+				'filter' => 'woocommerce_order_status_completed',
+				'args'   => array( 1 ),
+			),
+			array(
+				'filter' => 'woocommerce_new_customer_note',
+				'args'   => array( 2 ),
+			),
+		);
+
+		$this->sut->send_queued_transactional_emails( $batch );
+
+		$this->assertCount( 1, $sent, 'Second callback should still be processed after first throws' );
+		$this->assertSame( 'woocommerce_new_customer_note', $sent[0] );
+	}
+
+	/**
 	 * @testdox Processing handles non-array input gracefully without errors.
 	 */
 	public function test_send_queued_transactional_emails_handles_non_array(): void {
