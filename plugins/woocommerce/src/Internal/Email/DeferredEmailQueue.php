@@ -44,7 +44,7 @@ final class DeferredEmailQueue {
 	 *
 	 * @internal
 	 */
-	public function init(): void {
+	final public function init(): void { // phpcs:ignore Generic.CodeAnalysis.UnnecessaryFinalModifier.Found
 		add_action( self::AS_HOOK, array( $this, 'send_queued_transactional_emails' ) );
 	}
 
