@@ -357,13 +357,31 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 		add_filter(
 			'woocommerce_fulfillment_shipping_providers',
 			function ( $providers ) {
-				$providers = array();
-				return $providers;
+				unset( $providers );
+				return array();
 			}
 		);
 
 		// Test with a valid tracking number.
 		$parsed_number = $this->manager->try_parse_tracking_number( $tracking_number, 'US', 'CA' );
 		$this->assertEquals( array(), $parsed_number );
+	}
+
+	/**
+	 * @testdox Email template tracking hooks are registered for all fulfillment email types.
+	 */
+	public function test_email_template_tracking_hooks_are_registered(): void {
+		$email_ids = array(
+			'customer_fulfillment_created',
+			'customer_fulfillment_updated',
+			'customer_fulfillment_deleted',
+		);
+
+		foreach ( $email_ids as $email_id ) {
+			$this->assertNotFalse(
+				has_action( 'woocommerce_update_options_email_' . $email_id ),
+				"Tracking hook should be registered for woocommerce_update_options_email_{$email_id}"
+			);
+		}
 	}
 }
