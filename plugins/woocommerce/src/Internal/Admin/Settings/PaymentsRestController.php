@@ -1029,7 +1029,7 @@ class PaymentsRestController extends RestApiControllerBase {
 											),
 											'message'   => array(
 												'type'     => 'string',
-												'description' => esc_html__( 'Warning message displayed when the payment method is enabled. Can contain basic HTML.', 'woocommerce' ),
+												'description' => esc_html__( 'Warning message displayed when the payment method is enabled. Plain text only.', 'woocommerce' ),
 												'context'  => array( 'view', 'edit' ),
 												'readonly' => true,
 											),

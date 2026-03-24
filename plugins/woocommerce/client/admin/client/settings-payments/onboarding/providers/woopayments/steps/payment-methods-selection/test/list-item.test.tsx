@@ -4,6 +4,11 @@
 import { render, screen } from '@testing-library/react';
 import { type RecommendedPaymentMethod } from '@woocommerce/data';
 
+const mockSpeak = jest.fn();
+jest.mock( '@wordpress/a11y', () => ( {
+	speak: ( ...args: unknown[] ) => mockSpeak( ...args ),
+} ) );
+
 /**
  * Internal dependencies
  */
@@ -157,6 +162,42 @@ describe( 'PaymentMethodListItem', () => {
 			expect(
 				screen.queryByTestId( 'payment-method-notice-warning' )
 			).not.toBeInTheDocument();
+		} );
+
+		it( 'shows notice after rerender with enabled state', () => {
+			const method = createMethod( {
+				id: 'p24',
+				notice: {
+					badge: 'Verification required',
+					message: 'Strict requirements apply.',
+					link_text: '',
+					link_url: '',
+				},
+			} );
+
+			const { rerender } = render(
+				<PaymentMethodListItem
+					{ ...defaultProps }
+					method={ method }
+					paymentMethodsState={ { p24: false } }
+				/>
+			);
+
+			expect(
+				screen.queryByTestId( 'payment-method-notice-warning' )
+			).not.toBeInTheDocument();
+
+			rerender(
+				<PaymentMethodListItem
+					{ ...defaultProps }
+					method={ method }
+					paymentMethodsState={ { p24: true } }
+				/>
+			);
+
+			expect(
+				screen.getByTestId( 'payment-method-notice-warning' )
+			).toBeInTheDocument();
 		} );
 
 		it( 'renders notice without link when link_url is empty', () => {

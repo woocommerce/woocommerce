@@ -5,7 +5,8 @@ import { decodeEntities } from '@wordpress/html-entities';
 import { type RecommendedPaymentMethod } from '@woocommerce/data';
 import { ExternalLink, Icon, ToggleControl } from '@wordpress/components';
 import { info as infoIcon } from '@wordpress/icons';
-import { useRef } from '@wordpress/element';
+import { useEffect, useRef } from '@wordpress/element';
+import { speak } from '@wordpress/a11y';
 
 /**
  * Internal dependencies
@@ -80,6 +81,14 @@ export const PaymentMethodListItem = ( {
 			: shouldRenderInMainListRef.current ?? false;
 
 	const shouldRender = isExpanded || baseVisibility;
+
+	// Announce notice to screen readers when the method is toggled on.
+	const isEnabled = paymentMethodsState[ method.id ] ?? false;
+	useEffect( () => {
+		if ( isEnabled && method.notice?.message ) {
+			speak( method.notice.message, 'polite' );
+		}
+	}, [ isEnabled, method.notice?.message ] );
 
 	if ( ! shouldRender ) {
 		return null;
@@ -204,8 +213,6 @@ export const PaymentMethodListItem = ( {
 				( paymentMethodsState[ method.id ] ?? false ) && (
 					<div
 						className="woocommerce-list__item-notice-info"
-						role="status"
-						aria-live="polite"
 						data-testid="payment-method-notice-warning"
 					>
 						<Icon icon={ infoIcon } size={ 24 } />

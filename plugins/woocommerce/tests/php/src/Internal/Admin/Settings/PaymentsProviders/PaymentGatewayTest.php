@@ -2109,13 +2109,11 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 		$result = $this->sut->get_recommended_payment_methods( $fake_gateway );
 
 		$this->assertCount( 1, $result );
-		// Badge and link_text use sanitize_text_field() which calls wp_strip_all_tags()
-		// which removes <script> blocks entirely (tag + content).
+		// All text fields use sanitize_text_field() which calls wp_strip_all_tags()
+		// which removes all HTML tags and their content for script tags.
 		$this->assertSame( 'Badge text', $result[0]['notice']['badge'] );
 		$this->assertSame( 'Link text', $result[0]['notice']['link_text'] );
-		// Message uses wp_kses() which strips disallowed TAGS but keeps their text content.
-		// So <b> survives (allowed), <script> tags are stripped but "xss" text remains.
-		$this->assertSame( '<b>Bold</b> message with xss', trim( $result[0]['notice']['message'] ) );
+		$this->assertSame( 'Bold message with', $result[0]['notice']['message'] );
 		// javascript: URLs should be sanitized away by wc_is_valid_url().
 		$this->assertSame( '', $result[0]['notice']['link_url'] );
 	}

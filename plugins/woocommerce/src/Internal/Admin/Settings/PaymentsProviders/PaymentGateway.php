@@ -1124,22 +1124,7 @@ class PaymentGateway {
 			}
 
 			if ( ! empty( $notice['message'] ) ) {
-				$message = (string) $notice['message'];
-				// Allow basic stylistic HTML tags in the message, similar to description handling.
-				if ( preg_match( '/<[^>]+>/', $message ) ) {
-					$allowed_tags = wp_kses_allowed_html( 'data' );
-					$allowed_tags = array_merge(
-						$allowed_tags,
-						array(
-							'a' => array(
-								'href'   => true,
-								'target' => true,
-							),
-						)
-					);
-					$message      = wp_kses( $message, $allowed_tags );
-				}
-				$standard_details['notice']['message'] = $message;
+				$standard_details['notice']['message'] = sanitize_text_field( $notice['message'] );
 			}
 
 			if ( ! empty( $notice['link_text'] ) ) {
