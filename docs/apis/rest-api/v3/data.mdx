@@ -124,8 +124,8 @@ woocommerce.get("data").parsed_response
 
 | Attribute     | Type   | Description                                                          |
 | ------------- | ------ | -------------------------------------------------------------------- |
-| `slug`        | string | Data resource ID. <i class="label label-info">read-only</i>          |
-| `description` | string | Data resource description. <i class="label label-info">read-only</i> |
+| `slug`        | string | Data resource ID. `READ-ONLY`          |
+| `description` | string | Data resource description. `READ-ONLY` |
 
 ## List all continents
 
@@ -301,31 +301,31 @@ woocommerce.get("data/continents").parsed_response
 
 | Attribute   | Type   | Description                                                                                                                                              |
 | ----------- | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `code`      | string | 2 character continent code. <i class="label label-info">read-only</i>                                                                                    |
-| `name`      | string | Full name of continent. <i class="label label-info">read-only</i>                                                                                        |
-| `countries` | array  | List of countries on this continent. See [Continents - Countries properties](#continents---countries-properties) <i class="label label-info">read-only</i> |
+| `code`      | string | 2 character continent code. `READ-ONLY`                                                                                    |
+| `name`      | string | Full name of continent. `READ-ONLY`                                                                                        |
+| `countries` | array  | List of countries on this continent. See [Continents - Countries properties](#continents---countries-properties) `READ-ONLY` |
 
 ##### Continents - Countries properties
 
 | Attribute        | Type    | Description                                                                                                                                                         |
 | ---------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `code`           | string  | ISO3166 alpha-2 country code. <i class="label label-info">read-only</i>                                                                                             |
-| `currency_code`  | string  | Default ISO4127 alpha-3 currency code for the country. <i class="label label-info">read-only</i>                                                                    |
-| `currency_pos`   | string  | Currency symbol position for this country. <i class="label label-info">read-only</i>                                                                                |
-| `decimal_sep`    | string  | Decimal separator for displayed prices for this country. <i class="label label-info">read-only</i>                                                                  |
-| `dimension_unit` | string  | The unit lengths are defined in for this country. <i class="label label-info">read-only</i>                                                                         |
-| `name`           | string  | Full name of country. <i class="label label-info">read-only</i>                                                                                                     |
-| `num_decimals`   | integer | Number of decimal points shown in displayed prices for this country. <i class="label label-info">read-only</i>                                                      |
-| `states`         | array   | List of states in this country. See [Continents - Countries - States properties](#continents---countries---states-properties) <i class="label label-info">read-only</i> |
-| `thousand_sep`   | string  | Thousands separator for displayed prices in this country. <i class="label label-info">read-only</i>                                                                 |
-| `weight_unit`    | string  | The unit weights are defined in for this country. <i class="label label-info">read-only</i>                                                                         |
+| `code`           | string  | ISO3166 alpha-2 country code. `READ-ONLY`                                                                                             |
+| `currency_code`  | string  | Default ISO4127 alpha-3 currency code for the country. `READ-ONLY`                                                                    |
+| `currency_pos`   | string  | Currency symbol position for this country. `READ-ONLY`                                                                                |
+| `decimal_sep`    | string  | Decimal separator for displayed prices for this country. `READ-ONLY`                                                                  |
+| `dimension_unit` | string  | The unit lengths are defined in for this country. `READ-ONLY`                                                                         |
+| `name`           | string  | Full name of country. `READ-ONLY`                                                                                                     |
+| `num_decimals`   | integer | Number of decimal points shown in displayed prices for this country. `READ-ONLY`                                                      |
+| `states`         | array   | List of states in this country. See [Continents - Countries - States properties](#continents---countries---states-properties) `READ-ONLY` |
+| `thousand_sep`   | string  | Thousands separator for displayed prices in this country. `READ-ONLY`                                                                 |
+| `weight_unit`    | string  | The unit weights are defined in for this country. `READ-ONLY`                                                                         |
 
 ##### Continents - Countries - States properties
 
 | Attribute | Type   | Description                                                   |
 | --------- | ------ | ------------------------------------------------------------- |
-| `code`    | string | State code. <i class="label label-info">read-only</i>         |
-| `name`    | string | Full name of state. <i class="label label-info">read-only</i> |
+| `code`    | string | State code. `READ-ONLY`         |
+| `name`    | string | Full name of state. `READ-ONLY` |
 
 ## Retrieve continent data
 
@@ -868,16 +868,16 @@ woocommerce.get("data/countries").parsed_response
 
 | Attribute | Type   | Description                                                                                                                                 |
 | --------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `code`    | string | ISO3166 alpha-2 country code. <i class="label label-info">read-only</i>                                                                     |
-| `name`    | string | Full name of country. <i class="label label-info">read-only</i>                                                                             |
-| `states`  | array  | List of states in this country. See [Countries - States properties](#countries---states-properties) <i class="label label-info">read-only</i> |
+| `code`    | string | ISO3166 alpha-2 country code. `READ-ONLY`                                                                     |
+| `name`    | string | Full name of country. `READ-ONLY`                                                                             |
+| `states`  | array  | List of states in this country. See [Countries - States properties](#countries---states-properties) `READ-ONLY` |
 
 ##### Countries - States properties
 
 | Attribute | Type   | Description                                                   |
 | --------- | ------ | ------------------------------------------------------------- |
-| `code`    | string | State code. <i class="label label-info">read-only</i>         |
-| `name`    | string | Full name of state. <i class="label label-info">read-only</i> |
+| `code`    | string | State code. `READ-ONLY`         |
+| `name`    | string | Full name of state. `READ-ONLY` |
 
 ## Retrieve country data
 
@@ -1190,9 +1190,9 @@ woocommerce.get("data/currencies").parsed_response
 
 | Attribute | Type   | Description                                                      |
 | --------- | ------ | ---------------------------------------------------------------- |
-| `code`    | string | ISO4217 currency code. <i class="label label-info">read-only</i> |
-| `name`    | string | Full name of currency. <i class="label label-info">read-only</i> |
-| `symbol`  | string | Currency symbol. <i class="label label-info">read-only</i>       |
+| `code`    | string | ISO4217 currency code. `READ-ONLY` |
+| `name`    | string | Full name of currency. `READ-ONLY` |
+| `symbol`  | string | Currency symbol. `READ-ONLY`       |
 
 ## Retrieve currency data
 

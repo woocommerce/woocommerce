@@ -12,108 +12,108 @@ The orders API allows you to create, view, update, and delete individual, or a b
 ## Order properties
 |       Attribute        |    Type   |                                                                             Description                                                                              |
 |------------------------|-----------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `id`                   | integer   | Unique identifier for the resource. <i class="label label-info">read-only</i>                                                                                        |
+| `id`                   | integer   | Unique identifier for the resource. `READ-ONLY`                                                                                        |
 | `parent_id`            | integer   | Parent order ID.                                                                                                                                                     |
 | `status`               | string    | Order status. Default is `pending`. Options (plugins may include new status): `pending`, `processing`, `on-hold`, `completed`, `cancelled`, `refunded` and `failed`. |
-| `order_key`            | string    | Order key. <i class="label label-info">read-only</i>                                                                                                                 |
-| `number`               | string    | Order number. <i class="label label-info">read-only</i>                                                                                                              |
+| `order_key`            | string    | Order key. `READ-ONLY`                                                                                                                 |
+| `number`               | string    | Order number. `READ-ONLY`                                                                                                              |
 | `currency`             | string    | Currency the order was created with, in ISO format, e.g `USD`. Default is the current store currency.                                                                |
-| `version`              | string    | Version of WooCommerce when the order was made. <i class="label label-info">read-only</i>                                                                            |
-| `prices_include_tax`   | boolean   | Shows if the prices included tax during checkout. <i class="label label-info">read-only</i>                                                                          |
-| `date_created`         | date-time | The date the order was created, in the site's timezone. <i class="label label-info">read-only</i>                                                                    |
-| `date_modified`        | date-time | The date the order was last modified, in the site's timezone. <i class="label label-info">read-only</i>                                                              |
+| `version`              | string    | Version of WooCommerce when the order was made. `READ-ONLY`                                                                            |
+| `prices_include_tax`   | boolean   | Shows if the prices included tax during checkout. `READ-ONLY`                                                                          |
+| `date_created`         | date-time | The date the order was created, in the site's timezone. `READ-ONLY`                                                                    |
+| `date_modified`        | date-time | The date the order was last modified, in the site's timezone. `READ-ONLY`                                                              |
 | `customer_id`          | integer   | User ID who owns the order. Use `0` for guests. Default is `0`.                                                                                                      |
-| `discount_total`       | string    | Total discount amount for the order. <i class="label label-info">read-only</i>                                                                                       |
-| `discount_tax`         | string    | Total discount tax amount for the order. <i class="label label-info">read-only</i>                                                                                   |
-| `shipping_total`       | string    | Total shipping amount for the order. <i class="label label-info">read-only</i>                                                                                       |
-| `shipping_tax`         | string    | Total shipping tax amount for the order. <i class="label label-info">read-only</i>                                                                                   |
-| `cart_tax`             | string    | Sum of line item taxes only. <i class="label label-info">read-only</i>                                                                                               |
-| `total`                | string    | Grand total. <i class="label label-info">read-only</i>                                                                                                               |
-| `total_tax`            | string    | Sum of all taxes. <i class="label label-info">read-only</i>                                                                                                          |
+| `discount_total`       | string    | Total discount amount for the order. `READ-ONLY`                                                                                       |
+| `discount_tax`         | string    | Total discount tax amount for the order. `READ-ONLY`                                                                                   |
+| `shipping_total`       | string    | Total shipping amount for the order. `READ-ONLY`                                                                                       |
+| `shipping_tax`         | string    | Total shipping tax amount for the order. `READ-ONLY`                                                                                   |
+| `cart_tax`             | string    | Sum of line item taxes only. `READ-ONLY`                                                                                               |
+| `total`                | string    | Grand total. `READ-ONLY`                                                                                                               |
+| `total_tax`            | string    | Sum of all taxes. `READ-ONLY`                                                                                                          |
 | `billing`              | object    | Billing address. See [Customer Billing Address properties](#billing-address-properties).                                                                             |
 | `shipping`             | object    | Shipping address. See [Customer Shipping Address properties](#shipping-address-properties).                                                                          |
 | `payment_method`       | string    | Payment method ID.                                                                                                                                                   |
 | `payment_method_title` | string    | Payment method title.                                                                                                                                                |
-| `set_paid`             | boolean   | Define if the order is paid. It will set the status to processing and reduce stock items. Default is `false`. <i class="label label-info">write-only</i>             |
+| `set_paid`             | boolean   | Define if the order is paid. It will set the status to processing and reduce stock items. Default is `false`. `WRITE-ONLY`             |
 | `transaction_id`       | string    | Unique transaction ID. In write-mode only is available if `set_paid` is `true`.                                                                                      |
-| `customer_ip_address`  | string    | Customer's IP address. <i class="label label-info">read-only</i>                                                                                                     |
-| `customer_user_agent`  | string    | User agent of the customer. <i class="label label-info">read-only</i>                                                                                                |
-| `created_via`          | string    | Shows where the order was created. <i class="label label-info">read-only</i>                                                                                         |
+| `customer_ip_address`  | string    | Customer's IP address. `READ-ONLY`                                                                                                     |
+| `customer_user_agent`  | string    | User agent of the customer. `READ-ONLY`                                                                                                |
+| `created_via`          | string    | Shows where the order was created. `READ-ONLY`                                                                                         |
 | `customer_note`        | string    | Note left by customer during checkout.                                                                                                                               |
-| `date_completed`       | date-time | The date the order was completed, in the site's timezone. <i class="label label-info">read-only</i>                                                                  |
-| `date_paid`            | date-time | The date the order has been paid, in the site's timezone. <i class="label label-info">read-only</i>                                                                  |
-| `cart_hash`            | string    | MD5 hash of cart items to ensure orders are not modified. <i class="label label-info">read-only</i>                                                                  |
+| `date_completed`       | date-time | The date the order was completed, in the site's timezone. `READ-ONLY`                                                                  |
+| `date_paid`            | date-time | The date the order has been paid, in the site's timezone. `READ-ONLY`                                                                  |
+| `cart_hash`            | string    | MD5 hash of cart items to ensure orders are not modified. `READ-ONLY`                                                                  |
 | `line_items`           | array     | Line items data. See [Line Items properties](#line-item-properties).                                                                                                 |
-| `tax_lines`            | array     | Tax lines data. See [Tax Lines properties](#tax-line-properties). <i class="label label-info">read-only</i>                                                          |
+| `tax_lines`            | array     | Tax lines data. See [Tax Lines properties](#tax-line-properties). `READ-ONLY`                                                          |
 | `shipping_lines`       | array     | Shipping lines data. See [Shipping Lines properties](#shipping-line-properties).                                                                                     |
 | `fee_lines`            | array     | Fee lines data. See [Fee Lines Properties](#fee-line-properties).                                                                                                    |
 | `coupon_lines`         | array     | Coupons line data. See [Coupon Lines properties](#coupon-line-properties).                                                                                           |
-| `refunds`              | array     | List of refunds. See [Refunds Lines properties](#refunds-line-properties). <i class="label label-info">read-only</i>                                                 |
+| `refunds`              | array     | List of refunds. See [Refunds Lines properties](#refunds-line-properties). `READ-ONLY`                                                 |
 
 ### Line item properties
 |   Attribute    |   Type  |                                          Description                                           |
 |----------------|---------|------------------------------------------------------------------------------------------------|
-| `id`           | integer | Item ID. <i class="label label-info">read-only</i>                                             |
-| `name`         | string  | Product name. <i class="label label-info">read-only</i>                                        |
-| `sku`          | string  | Product SKU. <i class="label label-info">read-only</i>                                         |
+| `id`           | integer | Item ID. `READ-ONLY`                                             |
+| `name`         | string  | Product name. `READ-ONLY`                                        |
+| `sku`          | string  | Product SKU. `READ-ONLY`                                         |
 | `product_id`   | integer | Product ID.                                                                                    |
 | `variation_id` | integer | Variation ID, if applicable.                                                                   |
 | `quantity`     | integer | Quantity ordered.                                                                              |
-| `tax_class`    | string  | Tax class of product. <i class="label label-info">read-only</i>                                |
-| `price`        | string  | Product price. <i class="label label-info">read-only</i>                                       |
+| `tax_class`    | string  | Tax class of product. `READ-ONLY`                                |
+| `price`        | string  | Product price. `READ-ONLY`                                       |
 | `subtotal`     | string  | Line subtotal (before discounts).                                                              |
 | `subtotal_tax` | string  | Line subtotal tax (before discounts).                                                          |
 | `total`        | string  | Line total (after discounts).                                                                  |
 | `total_tax`    | string  | Line total tax (after discounts).                                                              |
-| `taxes`        | array   | Line taxes with `id`, `total` and `subtotal`. <i class="label label-info">read-only</i>    |
-| `meta`         | array   | Line item meta data with `key`, `label` and `value`. <i class="label label-info">read-only</i> |
+| `taxes`        | array   | Line taxes with `id`, `total` and `subtotal`. `READ-ONLY`    |
+| `meta`         | array   | Line item meta data with `key`, `label` and `value`. `READ-ONLY` |
 
 ### Tax line properties
 |      Attribute       |   Type  |                                                             Description                                                             |
 |----------------------|---------|-------------------------------------------------------------------------------------------------------------------------------------|
-| `id`                 | integer | Item ID. <i class="label label-info">read-only</i>                                                                                  |
-| `rate_code`          | string  | Tax rate code. <i class="label label-info">read-only</i>                                                                            |
-| `rate_id`            | string  | Tax rate ID. <i class="label label-info">read-only</i>                                                                              |
-| `label`              | string  | Tax rate label. <i class="label label-info">read-only</i>                                                                           |
-| `compound`           | boolean | Show if is a compound tax rate. Compound tax rates are applied on top of other tax rates. <i class="label label-info">read-only</i> |
-| `tax_total`          | string  | Tax total (not including shipping taxes). <i class="label label-info">read-only</i>                                                 |
-| `shipping_tax_total` | string  | Shipping tax total. <i class="label label-info">read-only</i>                                                                       |
+| `id`                 | integer | Item ID. `READ-ONLY`                                                                                  |
+| `rate_code`          | string  | Tax rate code. `READ-ONLY`                                                                            |
+| `rate_id`            | string  | Tax rate ID. `READ-ONLY`                                                                              |
+| `label`              | string  | Tax rate label. `READ-ONLY`                                                                           |
+| `compound`           | boolean | Show if is a compound tax rate. Compound tax rates are applied on top of other tax rates. `READ-ONLY` |
+| `tax_total`          | string  | Tax total (not including shipping taxes). `READ-ONLY`                                                 |
+| `shipping_tax_total` | string  | Shipping tax total. `READ-ONLY`                                                                       |
 
 ### Shipping line properties
 |   Attribute    |   Type  |                                 Description                                 |
 |----------------|---------|-----------------------------------------------------------------------------|
-| `id`           | integer | Item ID. <i class="label label-info">read-only</i>                          |
+| `id`           | integer | Item ID. `READ-ONLY`                          |
 | `method_title` | string  | Shipping method name.                                                       |
-| `method_id`    | string  | Shipping method ID. <i class="label label-info">required</i>                |
+| `method_id`    | string  | Shipping method ID. `REQUIRED`                |
 | `total`        | string  | Line total (after discounts).                                               |
-| `total_tax`    | string  | Line total tax (after discounts). <i class="label label-info">read-only</i> |
-| `taxes`        | array   | Line taxes with `id` and `total`. <i class="label label-info">read-only</i> |
+| `total_tax`    | string  | Line total tax (after discounts). `READ-ONLY` |
+| `taxes`        | array   | Line taxes with `id` and `total`. `READ-ONLY` |
 
 ### Fee line properties
 |  Attribute   |   Type  |                                       Description                                       |
 |--------------|---------|-----------------------------------------------------------------------------------------|
-| `id`         | integer | Item ID. <i class="label label-info">read-only</i>                                      |
-| `name`       | string  | Fee name. <i class="label label-info">required</i>                                      |
-| `tax_class`  | string  | Tax class. <i class="label label-info">required if the fee is taxable</i>               |
+| `id`         | integer | Item ID. `READ-ONLY`                                      |
+| `name`       | string  | Fee name. `REQUIRED`                                      |
+| `tax_class`  | string  | Tax class. `REQUIRED IF THE FEE IS TAXABLE`               |
 | `tax_status` | string  | Tax status of fee. Set to `taxable` if need apply taxes.                                |
 | `total`      | string  | Line total (after discounts).                                                           |
 | `total_tax`  | string  | Line total tax (after discounts).                                                       |
-| `taxes`      | array   | Line taxes with `id`, `total` and `subtotal`. <i class="label label-info">read-only</i> |
+| `taxes`      | array   | Line taxes with `id`, `total` and `subtotal`. `READ-ONLY` |
 
 ### Coupon line properties
 |   Attribute    |   Type  |                          Description                          |
 |----------------|---------|---------------------------------------------------------------|
-| `id`           | integer | Item ID. <i class="label label-info">read-only</i>            |
-| `code`         | string  | Coupon code. <i class="label label-info">required</i>         |
-| `discount`     | string  | Discount total. <i class="label label-info">required</i>      |
-| `discount_tax` | string  | Discount total tax. <i class="label label-info">read-only</i> |
+| `id`           | integer | Item ID. `READ-ONLY`            |
+| `code`         | string  | Coupon code. `REQUIRED`         |
+| `discount`     | string  | Discount total. `REQUIRED`      |
+| `discount_tax` | string  | Discount total tax. `READ-ONLY` |
 
 ### Refund line properties
 | Attribute |   Type  |                       Description                        |
 |-----------|---------|----------------------------------------------------------|
-| `id`      | integer | Refund ID. <i class="label label-info">read-only</i>     |
-| `reason`  | string  | Refund reason. <i class="label label-info">read-only</i> |
-| `total`   | string  | Refund total. <i class="label label-info">read-only</i>  |
+| `id`      | integer | Refund ID. `READ-ONLY`     |
+| `reason`  | string  | Refund reason. `READ-ONLY` |
+| `total`   | string  | Refund total. `READ-ONLY`  |
 
 ## Create an order
 This API helps you to create a new order.

@@ -12,22 +12,22 @@ The product categories API allows you to create, view, update, and delete indivi
 ## Product category properties
 |   Attribute   |   Type  |                                                   Description                                                   |
 |---------------|---------|-----------------------------------------------------------------------------------------------------------------|
-| `id`          | integer | Unique identifier for the resource. <i class="label label-info">read-only</i>                                   |
-| `name`        | string  | Category name. <i class="label label-info">required</i>                                                         |
+| `id`          | integer | Unique identifier for the resource. `READ-ONLY`                                   |
+| `name`        | string  | Category name. `REQUIRED`                                                         |
 | `slug`        | string  | An alphanumeric identifier for the resource unique to its type.                                                 |
 | `parent`      | integer | The id for the parent of the resource.                                                                          |
 | `description` | string  | HTML description of the resource.                                                                               |
 | `display`     | string  | Category archive display type. Default is `default`. Options: `default`, `products`, `subcategories` and `both` |
 | `image`       | array   | Image data. See [Category Image properties](#category-image-properties)                                         |
 | `menu_order`  | integer | Menu order, used to custom sort the resource.                                                                   |
-| `count`       | integer | Number of published products for the resource. <i class="label label-info">read-only</i>                        |
+| `count`       | integer | Number of published products for the resource. `READ-ONLY`                        |
 
 ### Category Image properties
 |    Attribute    |    Type   |                                               Description                                               |
 |-----------------|-----------|---------------------------------------------------------------------------------------------------------|
 | `id`            | integer   | Image ID (attachment ID). In write-mode used to attach pre-existing images.                             |
-| `date_created`  | date-time | The date the image was created, in the site's timezone. <i class="label label-info">read-only</i>       |
-| `date_modified` | date-time | The date the image was last modified, in the site's timezone. <i class="label label-info">read-only</i> |
+| `date_created`  | date-time | The date the image was created, in the site's timezone. `READ-ONLY`       |
+| `date_modified` | date-time | The date the image was last modified, in the site's timezone. `READ-ONLY` |
 | `src`           | string    | Image URL. In write-mode used to upload new images.                                                     |
 | `title`         | string    | Image name.                                                                                             |
 | `alt`           | string    | Image alternative text.                                                                                 |

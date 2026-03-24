@@ -12,24 +12,24 @@ The product variations API allows you to create, view, update, and delete indivi
 ## Product variation properties
 | Attribute               | Type      | Description                                                                                                         |
 |-------------------------|-----------|---------------------------------------------------------------------------------------------------------------------|
-| `id`                    | integer   | Unique identifier for the resource. <i class="label label-info">read-only</i>                                       |
-| `date_created`          | date-time | The date the variation was created, in the site's timezone. <i class="label label-info">read-only</i>               |
-| `date_created_gmt`      | date-time | The date the variation was created, as GMT. <i class="label label-info">read-only</i>                               |
-| `date_modified`         | date-time | The date the variation was last modified, in the site's timezone. <i class="label label-info">read-only</i>         |
-| `date_modified_gmt`     | date-time | The date the variation was last modified, as GMT. <i class="label label-info">read-only</i>                         |
+| `id`                    | integer   | Unique identifier for the resource. `READ-ONLY`                                       |
+| `date_created`          | date-time | The date the variation was created, in the site's timezone. `READ-ONLY`               |
+| `date_created_gmt`      | date-time | The date the variation was created, as GMT. `READ-ONLY`                               |
+| `date_modified`         | date-time | The date the variation was last modified, in the site's timezone. `READ-ONLY`         |
+| `date_modified_gmt`     | date-time | The date the variation was last modified, as GMT. `READ-ONLY`                         |
 | `description`           | string    | Variation description.                                                                                              |
-| `permalink`             | string    | Variation URL. <i class="label label-info">read-only</i>                                                            |
+| `permalink`             | string    | Variation URL. `READ-ONLY`                                                            |
 | `sku`                   | string    | Unique identifier.                                                                                                  |
-| `price`                 | string    | Current variation price. <i class="label label-info">read-only</i>                                                  |
+| `price`                 | string    | Current variation price. `READ-ONLY`                                                  |
 | `regular_price`         | string    | Variation regular price.                                                                                            |
 | `sale_price`            | string    | Variation sale price.                                                                                               |
 | `date_on_sale_from`     | date-time | Start date of sale price, in the site's timezone.                                                                   |
 | `date_on_sale_from_gmt` | date-time | Start date of sale price, as GMT.                                                                                   |
 | `date_on_sale_to`       | date-time | End date of sale price, in the site's timezone.                                                                     |
 | `date_on_sale_to_gmt`   | date-time | End date of sale price, as GMT.                                                                                     |
-| `on_sale`               | boolean   | Shows if the variation is on sale. <i class="label label-info">read-only</i>                                        |
+| `on_sale`               | boolean   | Shows if the variation is on sale. `READ-ONLY`                                        |
 | `visible`               | boolean   | Define if the attribute is visible on the "Additional information" tab in the product's page. Default is `true`.    |
-| `purchasable`           | boolean   | Shows if the variation can be bought. <i class="label label-info">read-only</i>                                     |
+| `purchasable`           | boolean   | Shows if the variation can be bought. `READ-ONLY`                                     |
 | `virtual`               | boolean   | If the variation is virtual. Default is `false`.                                                                    |
 | `downloadable`          | boolean   | If the variation is downloadable. Default is `false`.                                                               |
 | `downloads`             | array     | List of downloadable files. See [Product variation - Downloads properties](#product-variation-downloads-properties) |
@@ -41,12 +41,12 @@ The product variations API allows you to create, view, update, and delete indivi
 | `stock_quantity`        | integer   | Stock quantity.                                                                                                     |
 | `in_stock`              | boolean   | Controls whether or not the variation is listed as "in stock" or "out of stock" on the frontend. Default is `true`. |
 | `backorders`            | string    | If managing stock, this controls if backorders are allowed. Options: `no`, `notify` and `yes`. Default is `no`.     |
-| `backorders_allowed`    | boolean   | Shows if backorders are allowed. <i class="label label-info">read-only</i>                                          |
-| `backordered`           | boolean   | Shows if the variation is on backordered. <i class="label label-info">read-only</i>                                 |
+| `backorders_allowed`    | boolean   | Shows if backorders are allowed. `READ-ONLY`                                          |
+| `backordered`           | boolean   | Shows if the variation is on backordered. `READ-ONLY`                                 |
 | `weight`                | string    | Variation weight.                                                                                                   |
 | `dimensions`            | object    | Variation dimensions. See [Product variation - Dimensions properties](#product-variation-dimensions-properties)     |
 | `shipping_class`        | string    | Shipping class slug.                                                                                                |
-| `shipping_class_id`     | string    | Shipping class ID. <i class="label label-info">read-only</i>                                                        |
+| `shipping_class_id`     | string    | Shipping class ID. `READ-ONLY`                                                        |
 | `image`                 | object    | Variation image data. See [Product variation - Image properties](#product-variation-image-properties)               |
 | `attributes`            | array     | List of attributes. See [Product variation - Attributes properties](#product-variation-attributes-properties)       |
 | `menu_order`            | integer   | Menu order, used to custom sort products.                                                                           |
@@ -70,10 +70,10 @@ The product variations API allows you to create, view, update, and delete indivi
 | Attribute           | Type      | Description                                                                                             |
 |---------------------|-----------|---------------------------------------------------------------------------------------------------------|
 | `id`                | integer   | Image ID.                                                                                               |
-| `date_created`      | date-time | The date the image was created, in the site's timezone. <i class="label label-info">read-only</i>       |
-| `date_created_gmt`  | date-time | The date the image was created, as GMT. <i class="label label-info">read-only</i>                       |
-| `date_modified`     | date-time | The date the image was last modified, in the site's timezone. <i class="label label-info">read-only</i> |
-| `date_modified_gmt` | date-time | The date the image was last modified, as GMT. <i class="label label-info">read-only</i>                 |
+| `date_created`      | date-time | The date the image was created, in the site's timezone. `READ-ONLY`       |
+| `date_created_gmt`  | date-time | The date the image was created, as GMT. `READ-ONLY`                       |
+| `date_modified`     | date-time | The date the image was last modified, in the site's timezone. `READ-ONLY` |
+| `date_modified_gmt` | date-time | The date the image was last modified, as GMT. `READ-ONLY`                 |
 | `src`               | string    | Image URL.                                                                                              |
 | `name`              | string    | Image name.                                                                                             |
 | `alt`               | string    | Image alternative text.                                                                                 |
@@ -89,7 +89,7 @@ The product variations API allows you to create, view, update, and delete indivi
 ### Product variation - Meta data properties
 | Attribute | Type    | Description                                        |
 |-----------|---------|----------------------------------------------------|
-| `id`      | integer | Meta ID. <i class="label label-info">read-only</i> |
+| `id`      | integer | Meta ID. `READ-ONLY` |
 | `key`     | string  | Meta key.                                          |
 | `value`   | string  | Meta value.                                        |
 

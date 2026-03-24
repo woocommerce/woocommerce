@@ -12,12 +12,12 @@ The product attribute terms API allows you to create, view, update, and delete i
 ## Product attribute term properties
 | Attribute     | Type    | Description                                                                              |
 | ------------- | ------- | ---------------------------------------------------------------------------------------- |
-| `id`          | integer | Unique identifier for the resource. <i class="label label-info">read-only</i>            |
-| `name`        | string  | Term name. <i class="label label-info">mandatory</i>                                     |
+| `id`          | integer | Unique identifier for the resource. `READ-ONLY`            |
+| `name`        | string  | Term name. `MANDATORY`                                     |
 | `slug`        | string  | An alphanumeric identifier for the resource unique to its type.                          |
 | `description` | string  | HTML description of the resource.                                                        |
 | `menu_order`  | integer | Menu order, used to custom sort the resource.                                            |
-| `count`       | integer | Number of published products for the resource. <i class="label label-info">read-only</i> |
+| `count`       | integer | Number of published products for the resource. `READ-ONLY` |
 
 ## Create an attribute term
 This API helps you to create a new product attribute term.

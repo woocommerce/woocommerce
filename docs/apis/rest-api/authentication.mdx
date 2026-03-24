@@ -50,11 +50,11 @@ This endpoint works exclusively for users to generate API keys and facilitate in
 
 |   Parameter    |  Type  |                                                                                  Description                                                                                  |
 |----------------|--------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `app_name`     | string | Your APP name <i class="label label-info">mandatory</i>                                                                                                                       |
-| `scope`        | string | Level of access. Available: `read`, `write` and `read_write` <i class="label label-info">mandatory</i>                                                                        |
-| `user_id`      | string | User ID in your APP. For your internal reference, used when the user is redirected back to your APP. NOT THE USER ID IN WOOCOMMERCE <i class="label label-info">mandatory</i> |
-| `return_url`   | string | URL the user will be redirected to after authentication <i class="label label-info">mandatory</i>                                                                             |
-| `callback_url` | string | URL that will receive the generated API key. Note: this URL should be over **HTTPS** <i class="label label-info">mandatory</i>                                                |
+| `app_name`     | string | Your APP name `MANDATORY`                                                                                                                       |
+| `scope`        | string | Level of access. Available: `read`, `write` and `read_write` `MANDATORY`                                                                        |
+| `user_id`      | string | User ID in your APP. For your internal reference, used when the user is redirected back to your APP. NOT THE USER ID IN WOOCOMMERCE `MANDATORY` |
+| `return_url`   | string | URL the user will be redirected to after authentication `MANDATORY`                                                                             |
+| `callback_url` | string | URL that will receive the generated API key. Note: this URL should be over **HTTPS** `MANDATORY`                                                |
 
 #### Creating an authentication endpoint URL
 

@@ -12,13 +12,13 @@ The system status tools API allows you to view and run tools from system status.
 ## System status tool properties
 | Attribute     | Type    | Description                                                                                                         |
 | ------------- | ------- | ------------------------------------------------------------------------------------------------------------------- |
-| `id`          | string  | A unique identifier for the tool. <i class="label label-info">read-only</i>                                         |
-| `name`        | string  | Tool name. <i class="label label-info">read-only</i>                                                                |
-| `action`      | string  | What running the tool will do. <i class="label label-info">read-only</i>                                            |
-| `description` | string  | Tool description. <i class="label label-info">read-only</i>                                                         |
-| `success`     | boolean | Did the tool run successfully? <i class="label label-info">read-only</i> <i class="label label-info">write-only</i> |
-| `message`     | string  | Tool return message. <i class="label label-info">read-only</i> <i class="label label-info">write-only</i>           |
-| `confirm`     | boolean | Confirm execution of the tool. Default is `false`. <i class="label label-info">write-only</i>                       |
+| `id`          | string  | A unique identifier for the tool. `READ-ONLY`                                         |
+| `name`        | string  | Tool name. `READ-ONLY`                                                                |
+| `action`      | string  | What running the tool will do. `READ-ONLY`                                            |
+| `description` | string  | Tool description. `READ-ONLY`                                                         |
+| `success`     | boolean | Did the tool run successfully? `READ-ONLY` `WRITE-ONLY` |
+| `message`     | string  | Tool return message. `READ-ONLY` `WRITE-ONLY`           |
+| `confirm`     | boolean | Confirm execution of the tool. Default is `false`. `WRITE-ONLY`                       |
 
 ## Retrieve a tool from system status
 This API lets you retrieve and view a specific tool from system status by ID.

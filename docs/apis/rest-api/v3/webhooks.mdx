@@ -67,19 +67,19 @@ You can find the Webhooks interface going to "WooCommerce" > "Settings" > "Advan
 
 | Attribute           | Type      | Description                                                                                                                                                 |
 | ------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `id`                | integer   | Unique identifier for the resource. <i class="label label-info">read-only</i>                                                                               |
+| `id`                | integer   | Unique identifier for the resource. `READ-ONLY`                                                                               |
 | `name`              | string    | A friendly name for the webhook.                                                                                                                            |
 | `status`            | string    | Webhook status. Options: `active`, `paused` and `disabled`. Default is `active`.                                                                            |
-| `topic`             | string    | Webhook topic. <i class="label label-info">mandatory</i>                                                                                                    |
-| `resource`          | string    | Webhook resource. <i class="label label-info">read-only</i>                                                                                                 |
-| `event`             | string    | Webhook event. <i class="label label-info">read-only</i>                                                                                                    |
-| `hooks`             | array     | WooCommerce action names associated with the webhook. <i class="label label-info">read-only</i>                                                             |
-| `delivery_url`      | string    | The URL where the webhook payload is delivered. <i class="label label-info">read-only</i> <i class="label label-info">mandatory</i>                         |
-| `secret`            | string    | Secret key used to generate a hash of the delivered webhook and provided in the request headers. This will default is a MD5 hash from the current user's ID | username if not provided. <i class="label label-info">write-only</i> <i class="label label-info">mandatory</i> |
-| `date_created`      | date-time | The date the webhook was created, in the site's timezone. <i class="label label-info">read-only</i>                                                         |
-| `date_created_gmt`  | date-time | The date the webhook was created, as GMT. <i class="label label-info">read-only</i>                                                                         |
-| `date_modified`     | date-time | The date the webhook was last modified, in the site's timezone. <i class="label label-info">read-only</i>                                                   |
-| `date_modified_gmt` | date-time | The date the webhook was last modified, as GMT. <i class="label label-info">read-only</i>                                                                   |
+| `topic`             | string    | Webhook topic. `MANDATORY`                                                                                                    |
+| `resource`          | string    | Webhook resource. `READ-ONLY`                                                                                                 |
+| `event`             | string    | Webhook event. `READ-ONLY`                                                                                                    |
+| `hooks`             | array     | WooCommerce action names associated with the webhook. `READ-ONLY`                                                             |
+| `delivery_url`      | string    | The URL where the webhook payload is delivered. `READ-ONLY` `MANDATORY`                         |
+| `secret`            | string    | Secret key used to generate a hash of the delivered webhook and provided in the request headers. This will default is a MD5 hash from the current user's ID | username if not provided. `WRITE-ONLY` `MANDATORY` |
+| `date_created`      | date-time | The date the webhook was created, in the site's timezone. `READ-ONLY`                                                         |
+| `date_created_gmt`  | date-time | The date the webhook was created, as GMT. `READ-ONLY`                                                                         |
+| `date_modified`     | date-time | The date the webhook was last modified, in the site's timezone. `READ-ONLY`                                                   |
+| `date_modified_gmt` | date-time | The date the webhook was last modified, as GMT. `READ-ONLY`                                                                   |
 
 ## Create a webhook
 

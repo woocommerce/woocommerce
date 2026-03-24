@@ -12,23 +12,23 @@ The customer API allows you to create, view, update, and delete individual, or a
 ## Customer properties
 | Attribute            | Type      | Description                                                                                                |
 | -------------------- | --------- | ---------------------------------------------------------------------------------------------------------- |
-| `id`                 | integer   | Unique identifier for the resource. <i class="label label-info">read-only</i>                              |
-| `date_created`       | date-time | The date the customer was created, in the site's timezone. <i class="label label-info">read-only</i>       |
-| `date_created_gmt`   | date-time | The date the order was created, as GMT. <i class="label label-info">read-only</i>                          |
-| `date_modified`      | date-time | The date the customer was last modified, in the site's timezone. <i class="label label-info">read-only</i> |
-| `date_modified_gmt`  | date-time | The date the customer was last modified, as GMT. <i class="label label-info">read-only</i>                 |
-| `email`              | string    | The email address for the customer. <i class="label label-info">mandatory</i>                              |
+| `id`                 | integer   | Unique identifier for the resource. `READ-ONLY`                              |
+| `date_created`       | date-time | The date the customer was created, in the site's timezone. `READ-ONLY`       |
+| `date_created_gmt`   | date-time | The date the order was created, as GMT. `READ-ONLY`                          |
+| `date_modified`      | date-time | The date the customer was last modified, in the site's timezone. `READ-ONLY` |
+| `date_modified_gmt`  | date-time | The date the customer was last modified, as GMT. `READ-ONLY`                 |
+| `email`              | string    | The email address for the customer. `MANDATORY`                              |
 | `first_name`         | string    | Customer first name.                                                                                       |
 | `last_name`          | string    | Customer last name.                                                                                        |
-| `role`               | string    | Customer role. <i class="label label-info">read-only</i>                                                   |
+| `role`               | string    | Customer role. `READ-ONLY`                                                   |
 | `username`           | string    | Customer login name.                                                                                       |
-| `password`           | string    | Customer password. <i class="label label-info">write-only</i>                                              |
+| `password`           | string    | Customer password. `WRITE-ONLY`                                              |
 | `billing`            | object    | List of billing address data. See [Customer - Billing properties](#customer-billing-properties)            |
 | `shipping`           | object    | List of shipping address data. See [Customer - Shipping properties](#customer-shipping-properties)         |
-| `is_paying_customer` | bool      | Is the customer a paying customer? <i class="label label-info">read-only</i>                               |
-| `orders_count`       | integer   | Quantity of orders made by the customer. <i class="label label-info">read-only</i>                         |
-| `total_spent`        | string    | Total amount spent. <i class="label label-info">read-only</i>                                              |
-| `avatar_url`         | string    | Avatar URL. <i class="label label-info">read-only</i>                                                      |
+| `is_paying_customer` | bool      | Is the customer a paying customer? `READ-ONLY`                               |
+| `orders_count`       | integer   | Quantity of orders made by the customer. `READ-ONLY`                         |
+| `total_spent`        | string    | Total amount spent. `READ-ONLY`                                              |
+| `avatar_url`         | string    | Avatar URL. `READ-ONLY`                                                      |
 | `meta_data`          | array     | Meta data. See [Customer - Meta data properties](#customer-meta-data-properties)                           |
 
 ### Customer - Billing properties
@@ -62,7 +62,7 @@ The customer API allows you to create, view, update, and delete individual, or a
 ### Customer - Meta data properties
 | Attribute | Type    | Description                                        |
 | --------- | ------- | -------------------------------------------------- |
-| `id`      | integer | Meta ID. <i class="label label-info">read-only</i> |
+| `id`      | integer | Meta ID. `READ-ONLY` |
 | `key`     | string  | Meta key.                                          |
 | `value`   | string  | Meta value.                                        |
 
@@ -1675,20 +1675,20 @@ woocommerce.get("customers/26/downloads").parsed_response
 ### Customer downloads properties
 | Attribute             | Type    | Description                                                                                                                               |
 | --------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `download_id`         | string  | Download ID (MD5). <i class="label label-info">read-only</i>                                                                              |
-| `download_url`        | string  | Download file URL. <i class="label label-info">read-only</i>                                                                              |
-| `product_id`          | integer | Downloadable product ID. <i class="label label-info">read-only</i>                                                                        |
-| `product_name`        | string  | Product name. <i class="label label-info">read-only</i>                                                                                   |
-| `download_name`       | string  | Downloadable file name. <i class="label label-info">read-only</i>                                                                         |
-| `order_id`            | integer | Order ID. <i class="label label-info">read-only</i>                                                                                       |
-| `order_key`           | string  | Order key. <i class="label label-info">read-only</i>                                                                                      |
-| `downloads_remaining` | string  | Number of downloads remaining. <i class="label label-info">read-only</i>                                                                  |
-| `access_expires`      | string  | The date when download access expires, in the site's timezone. <i class="label label-info">read-only</i>                                  |
-| `access_expires_gmt`  | string  | The date when download access expires, as GMT. <i class="label label-info">read-only</i>                                                  |
-| `file`                | object  | File details. <i class="label label-info">read-only</i> See [Customers downloads - File properties](#customers-downloads-file-properties) |
+| `download_id`         | string  | Download ID (MD5). `READ-ONLY`                                                                              |
+| `download_url`        | string  | Download file URL. `READ-ONLY`                                                                              |
+| `product_id`          | integer | Downloadable product ID. `READ-ONLY`                                                                        |
+| `product_name`        | string  | Product name. `READ-ONLY`                                                                                   |
+| `download_name`       | string  | Downloadable file name. `READ-ONLY`                                                                         |
+| `order_id`            | integer | Order ID. `READ-ONLY`                                                                                       |
+| `order_key`           | string  | Order key. `READ-ONLY`                                                                                      |
+| `downloads_remaining` | string  | Number of downloads remaining. `READ-ONLY`                                                                  |
+| `access_expires`      | string  | The date when download access expires, in the site's timezone. `READ-ONLY`                                  |
+| `access_expires_gmt`  | string  | The date when download access expires, as GMT. `READ-ONLY`                                                  |
+| `file`                | object  | File details. `READ-ONLY` See [Customers downloads - File properties](#customers-downloads-file-properties) |
 
 #### Customer downloads - File properties
 | Attribute | Type   | Description                                          |
 | --------- | ------ | ---------------------------------------------------- |
-| `name`    | string | File name. <i class="label label-info">read-only</i> |
-| `file`    | string | File URL. <i class="label label-info">read-only</i>  |
+| `name`    | string | File name. `READ-ONLY` |
+| `file`    | string | File URL. `READ-ONLY`  |

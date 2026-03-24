@@ -12,15 +12,15 @@ The coupons API allows you to create, view, update, and delete individual, or a 
 ## Coupon properties
 |           Attribute           |    Type   |                                                                      Description                                                                      |
 |-------------------------------|-----------|-------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `id`                          | integer   | Unique identifier for the object. <i class="label label-info">read-only</i>                                                                           |
-| `code`                        | string    | Coupon code. <i class="label label-info">mandatory</i>                                                                                                |
-| `date_created`                | date-time | The date the coupon was created, in the site's timezone. <i class="label label-info">read-only</i>                                                    |
-| `date_modified`               | date-time | The date the coupon was last modified, in the site's timezone. <i class="label label-info">read-only</i>                                              |
+| `id`                          | integer   | Unique identifier for the object. `READ-ONLY`                                                                           |
+| `code`                        | string    | Coupon code. `MANDATORY`                                                                                                |
+| `date_created`                | date-time | The date the coupon was created, in the site's timezone. `READ-ONLY`                                                    |
+| `date_modified`               | date-time | The date the coupon was last modified, in the site's timezone. `READ-ONLY`                                              |
 | `description`                 | string    | Coupon description.                                                                                                                                   |
 | `discount_type`               | string    | Determines the type of discount that will be applied. Options: `fixed_cart`, `percent`, `fixed_product` and `percent_product`. Default: `fixed_cart`. |
 | `amount`                      | string    | The amount of discount.                                                                                                                               |
 | `expiry_date`                 | string    | UTC DateTime when the coupon expires.                                                                                                                 |
-| `usage_count`                 | integer   | Number of times the coupon has been used already. <i class="label label-info">read-only</i>                                                           |
+| `usage_count`                 | integer   | Number of times the coupon has been used already. `READ-ONLY`                                                           |
 | `individual_use`              | boolean   | Whether coupon can only be used individually.                                                                                                         |
 | `product_ids`                 | array     | List of product ID's the coupon can be used on.                                                                                                       |
 | `exclude_product_ids`         | array     | List of product ID's the coupon cannot be used on.                                                                                                    |
@@ -34,7 +34,7 @@ The coupons API allows you to create, view, update, and delete individual, or a 
 | `minimum_amount`              | string    | Minimum order amount that needs to be in the cart before coupon applies.                                                                              |
 | `maximum_amount`              | string    | Maximum order amount allowed when using the coupon.                                                                                                   |
 | `email_restrictions`          | array     | List of email addresses that can use this coupon.                                                                                                     |
-| `used_by`                     | array     | List of user IDs who have used the coupon. <i class="label label-info">read-only</i>                                                                  |
+| `used_by`                     | array     | List of user IDs who have used the coupon. `READ-ONLY`                                                                  |
 
 ## Create a coupon
 This API helps you to create a new coupon.

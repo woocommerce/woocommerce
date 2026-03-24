@@ -12,92 +12,92 @@ The system status API allows you to view all system status items.
 ## System status properties
 | Attribute        | Type   | Description                                                                                                                                |
 | ---------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `environment`    | object | Environment. See [System status - Environment properties](#system-status-environment-properties) <i class="label label-info">read-only</i> |
-| `database`       | object | Database. See [System status - Database properties](#system-status-database-properties) <i class="label label-info">read-only</i>          |
-| `active_plugins` | array  | Active plugins. <i class="label label-info">read-only</i>                                                                                  |
-| `theme`          | object | Theme. See [System status - Theme properties](#system-status-theme-properties) <i class="label label-info">read-only</i>                   |
-| `settings`       | object | Settings. See [System status - Settings properties](#system-status-settings-properties) <i class="label label-info">read-only</i>          |
-| `security`       | object | Security. See [System status - Security properties](#system-status-security-properties) <i class="label label-info">read-only</i>          |
-| `pages`          | array  | WooCommerce pages. <i class="label label-info">read-only</i>                                                                               |
+| `environment`    | object | Environment. See [System status - Environment properties](#system-status-environment-properties) `READ-ONLY` |
+| `database`       | object | Database. See [System status - Database properties](#system-status-database-properties) `READ-ONLY`          |
+| `active_plugins` | array  | Active plugins. `READ-ONLY`                                                                                  |
+| `theme`          | object | Theme. See [System status - Theme properties](#system-status-theme-properties) `READ-ONLY`                   |
+| `settings`       | object | Settings. See [System status - Settings properties](#system-status-settings-properties) `READ-ONLY`          |
+| `security`       | object | Security. See [System status - Security properties](#system-status-security-properties) `READ-ONLY`          |
+| `pages`          | array  | WooCommerce pages. `READ-ONLY`                                                                               |
 
 ### System status - Environment properties
 | Attribute                   | Type    | Description                                                                |
 | --------------------------- | ------- | -------------------------------------------------------------------------- |
-| `home_url`                  | string  | Home URL. <i class="label label-info">read-only</i>                        |
-| `site_url`                  | string  | Site URL. <i class="label label-info">read-only</i>                        |
-| `wc_version`                | string  | WooCommerce version. <i class="label label-info">read-only</i>             |
-| `log_directory`             | string  | Log directory. <i class="label label-info">read-only</i>                   |
-| `log_directory_writable`    | boolean | Is log directory writable? <i class="label label-info">read-only</i>       |
-| `wp_version`                | string  | WordPress version. <i class="label label-info">read-only</i>               |
-| `wp_multisite`              | boolean | Is WordPress multisite? <i class="label label-info">read-only</i>          |
-| `wp_memory_limit`           | integer | WordPress memory limit. <i class="label label-info">read-only</i>          |
-| `wp_debug_mode`             | boolean | Is WordPress debug mode active? <i class="label label-info">read-only</i>  |
-| `wp_cron`                   | boolean | Are WordPress cron jobs enabled? <i class="label label-info">read-only</i> |
-| `wp_environment_type`       | string  | WordPress environment type. <i class="label label-info">read-only</i>      |
-| `language`                  | string  | WordPress language. <i class="label label-info">read-only</i>              |
-| `server_info`               | string  | Server info. <i class="label label-info">read-only</i>                     |
-| `php_version`               | string  | PHP version. <i class="label label-info">read-only</i>                     |
-| `php_post_max_size`         | integer | PHP post max size. <i class="label label-info">read-only</i>               |
-| `php_max_execution_time`    | integer | PHP max execution time. <i class="label label-info">read-only</i>          |
-| `php_max_input_vars`        | integer | PHP max input vars. <i class="label label-info">read-only</i>              |
-| `curl_version`              | string  | cURL version. <i class="label label-info">read-only</i>                    |
-| `suhosin_installed`         | boolean | Is SUHOSIN installed? <i class="label label-info">read-only</i>            |
-| `max_upload_size`           | integer | Max upload size. <i class="label label-info">read-only</i>                 |
-| `mysql_version`             | string  | MySQL version. <i class="label label-info">read-only</i>                   |
-| `default_timezone`          | string  | Default timezone. <i class="label label-info">read-only</i>                |
-| `fsockopen_or_curl_enabled` | boolean | Is fsockopen/cURL enabled? <i class="label label-info">read-only</i>       |
-| `soapclient_enabled`        | boolean | Is SoapClient class enabled? <i class="label label-info">read-only</i>     |
-| `domdocument_enabled`       | boolean | Is DomDocument class enabled? <i class="label label-info">read-only</i>    |
-| `gzip_enabled`              | boolean | Is GZip enabled? <i class="label label-info">read-only</i>                 |
-| `mbstring_enabled`          | boolean | Is mbstring enabled? <i class="label label-info">read-only</i>             |
-| `remote_post_successful`    | boolean | Remote POST successful? <i class="label label-info">read-only</i>          |
-| `remote_post_response`      | string  | Remote POST response. <i class="label label-info">read-only</i>            |
-| `remote_get_successful`     | boolean | Remote GET successful? <i class="label label-info">read-only</i>           |
-| `remote_get_response`       | string  | Remote GET response. <i class="label label-info">read-only</i>             |
+| `home_url`                  | string  | Home URL. `READ-ONLY`                        |
+| `site_url`                  | string  | Site URL. `READ-ONLY`                        |
+| `wc_version`                | string  | WooCommerce version. `READ-ONLY`             |
+| `log_directory`             | string  | Log directory. `READ-ONLY`                   |
+| `log_directory_writable`    | boolean | Is log directory writable? `READ-ONLY`       |
+| `wp_version`                | string  | WordPress version. `READ-ONLY`               |
+| `wp_multisite`              | boolean | Is WordPress multisite? `READ-ONLY`          |
+| `wp_memory_limit`           | integer | WordPress memory limit. `READ-ONLY`          |
+| `wp_debug_mode`             | boolean | Is WordPress debug mode active? `READ-ONLY`  |
+| `wp_cron`                   | boolean | Are WordPress cron jobs enabled? `READ-ONLY` |
+| `wp_environment_type`       | string  | WordPress environment type. `READ-ONLY`      |
+| `language`                  | string  | WordPress language. `READ-ONLY`              |
+| `server_info`               | string  | Server info. `READ-ONLY`                     |
+| `php_version`               | string  | PHP version. `READ-ONLY`                     |
+| `php_post_max_size`         | integer | PHP post max size. `READ-ONLY`               |
+| `php_max_execution_time`    | integer | PHP max execution time. `READ-ONLY`          |
+| `php_max_input_vars`        | integer | PHP max input vars. `READ-ONLY`              |
+| `curl_version`              | string  | cURL version. `READ-ONLY`                    |
+| `suhosin_installed`         | boolean | Is SUHOSIN installed? `READ-ONLY`            |
+| `max_upload_size`           | integer | Max upload size. `READ-ONLY`                 |
+| `mysql_version`             | string  | MySQL version. `READ-ONLY`                   |
+| `default_timezone`          | string  | Default timezone. `READ-ONLY`                |
+| `fsockopen_or_curl_enabled` | boolean | Is fsockopen/cURL enabled? `READ-ONLY`       |
+| `soapclient_enabled`        | boolean | Is SoapClient class enabled? `READ-ONLY`     |
+| `domdocument_enabled`       | boolean | Is DomDocument class enabled? `READ-ONLY`    |
+| `gzip_enabled`              | boolean | Is GZip enabled? `READ-ONLY`                 |
+| `mbstring_enabled`          | boolean | Is mbstring enabled? `READ-ONLY`             |
+| `remote_post_successful`    | boolean | Remote POST successful? `READ-ONLY`          |
+| `remote_post_response`      | string  | Remote POST response. `READ-ONLY`            |
+| `remote_get_successful`     | boolean | Remote GET successful? `READ-ONLY`           |
+| `remote_get_response`       | string  | Remote GET response. `READ-ONLY`             |
 
 ### System status - Database properties
 | Attribute                | Type   | Description                                                       |
 | ------------------------ | ------ | ----------------------------------------------------------------- |
-| `wc_database_version`    | string | WC database version. <i class="label label-info">read-only</i>    |
-| `database_prefix`        | string | Database prefix. <i class="label label-info">read-only</i>        |
-| `maxmind_geoip_database` | string | MaxMind GeoIP database. <i class="label label-info">read-only</i> |
-| `database_tables`        | array  | Database tables. <i class="label label-info">read-only</i>        |
+| `wc_database_version`    | string | WC database version. `READ-ONLY`    |
+| `database_prefix`        | string | Database prefix. `READ-ONLY`        |
+| `maxmind_geoip_database` | string | MaxMind GeoIP database. `READ-ONLY` |
+| `database_tables`        | array  | Database tables. `READ-ONLY`        |
 
 ### System status - Theme properties
 | Attribute                 | Type    | Description                                                                           |
 | ------------------------- | ------- | ------------------------------------------------------------------------------------- |
-| `name`                    | string  | Theme name. <i class="label label-info">read-only</i>                                 |
-| `version`                 | string  | Theme version. <i class="label label-info">read-only</i>                              |
-| `version_latest`          | string  | Latest version of theme. <i class="label label-info">read-only</i>                    |
-| `author_url`              | string  | Theme author URL. <i class="label label-info">read-only</i>                           |
-| `is_child_theme`          | boolean | Is this theme a child theme? <i class="label label-info">read-only</i>                |
-| `has_woocommerce_support` | boolean | Does the theme declare WooCommerce support? <i class="label label-info">read-only</i> |
-| `has_woocommerce_file`    | boolean | Does the theme have a woocommerce.php file? <i class="label label-info">read-only</i> |
-| `has_outdated_templates`  | boolean | Does this theme have outdated templates? <i class="label label-info">read-only</i>    |
-| `overrides`               | array   | Template overrides. <i class="label label-info">read-only</i>                         |
-| `parent_name`             | string  | Parent theme name. <i class="label label-info">read-only</i>                          |
-| `parent_version`          | string  | Parent theme version. <i class="label label-info">read-only</i>                       |
-| `parent_author_url`       | string  | Parent theme author URL. <i class="label label-info">read-only</i>                    |
+| `name`                    | string  | Theme name. `READ-ONLY`                                 |
+| `version`                 | string  | Theme version. `READ-ONLY`                              |
+| `version_latest`          | string  | Latest version of theme. `READ-ONLY`                    |
+| `author_url`              | string  | Theme author URL. `READ-ONLY`                           |
+| `is_child_theme`          | boolean | Is this theme a child theme? `READ-ONLY`                |
+| `has_woocommerce_support` | boolean | Does the theme declare WooCommerce support? `READ-ONLY` |
+| `has_woocommerce_file`    | boolean | Does the theme have a woocommerce.php file? `READ-ONLY` |
+| `has_outdated_templates`  | boolean | Does this theme have outdated templates? `READ-ONLY`    |
+| `overrides`               | array   | Template overrides. `READ-ONLY`                         |
+| `parent_name`             | string  | Parent theme name. `READ-ONLY`                          |
+| `parent_version`          | string  | Parent theme version. `READ-ONLY`                       |
+| `parent_author_url`       | string  | Parent theme author URL. `READ-ONLY`                    |
 
 ### System status - Settings properties
 | Attribute             | Type    | Description                                                                          |
 | --------------------- | ------- | ------------------------------------------------------------------------------------ |
-| `api_enabled`         | boolean | REST API enabled? <i class="label label-info">read-only</i>                          |
-| `force_ssl`           | boolean | SSL forced? <i class="label label-info">read-only</i>                                |
-| `currency`            | string  | Currency. <i class="label label-info">read-only</i>                                  |
-| `currency_symbol`     | string  | Currency symbol. <i class="label label-info">read-only</i>                           |
-| `currency_position`   | string  | Currency position. <i class="label label-info">read-only</i>                         |
-| `thousand_separator`  | string  | Thousand separator. <i class="label label-info">read-only</i>                        |
-| `decimal_separator`   | string  | Decimal separator. <i class="label label-info">read-only</i>                         |
-| `number_of_decimals`  | integer | Number of decimals. <i class="label label-info">read-only</i>                        |
-| `geolocation_enabled` | boolean | Geolocation enabled? <i class="label label-info">read-only</i>                       |
-| `taxonomies`          | array   | Taxonomy terms for product/order statuses. <i class="label label-info">read-only</i> |
+| `api_enabled`         | boolean | REST API enabled? `READ-ONLY`                          |
+| `force_ssl`           | boolean | SSL forced? `READ-ONLY`                                |
+| `currency`            | string  | Currency. `READ-ONLY`                                  |
+| `currency_symbol`     | string  | Currency symbol. `READ-ONLY`                           |
+| `currency_position`   | string  | Currency position. `READ-ONLY`                         |
+| `thousand_separator`  | string  | Thousand separator. `READ-ONLY`                        |
+| `decimal_separator`   | string  | Decimal separator. `READ-ONLY`                         |
+| `number_of_decimals`  | integer | Number of decimals. `READ-ONLY`                        |
+| `geolocation_enabled` | boolean | Geolocation enabled? `READ-ONLY`                       |
+| `taxonomies`          | array   | Taxonomy terms for product/order statuses. `READ-ONLY` |
 
 ### System status - Security properties
 | Attribute           | Type    | Description                                                                       |
 | ------------------- | ------- | --------------------------------------------------------------------------------- |
-| `secure_connection` | boolean | Is the connection to your store secure? <i class="label label-info">read-only</i> |
-| `hide_errors`       | boolean | Hide errors from visitors? <i class="label label-info">read-only</i>              |
+| `secure_connection` | boolean | Is the connection to your store secure? `READ-ONLY` |
+| `hide_errors`       | boolean | Hide errors from visitors? `READ-ONLY`              |
 
 ## List all system status items
 This API helps you to view all the system status items.

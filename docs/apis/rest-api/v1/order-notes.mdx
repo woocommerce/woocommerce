@@ -13,9 +13,9 @@ Order notes are added by administrators and programmatically to store data about
 ## Order note properties
 |    Attribute    |    Type   |                                                     Description                                                     |
 |-----------------|-----------|---------------------------------------------------------------------------------------------------------------------|
-| `id`            | integer   | Unique identifier for the resource. <i class="label label-info">read-only</i>                                       |
-| `date_created`  | date-time | The date the order note was created, in the site's timezone. <i class="label label-info">read-only</i>              |
-| `note`          | string    | Order note. <i class="label label-info">required</i>                                                                |
+| `id`            | integer   | Unique identifier for the resource. `READ-ONLY`                                       |
+| `date_created`  | date-time | The date the order note was created, in the site's timezone. `READ-ONLY`              |
+| `note`          | string    | Order note. `REQUIRED`                                                                |
 | `customer_note` | boolean   | Shows/define if the note is only for reference or for the customer (the user will be notified). Default is `false`. |
 
 ## Create an order note

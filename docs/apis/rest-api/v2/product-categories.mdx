@@ -12,24 +12,24 @@ The product categories API allows you to create, view, update, and delete indivi
 ## Product category properties
 | Attribute     | Type    | Description                                                                                                      |
 | ------------- | ------- | ---------------------------------------------------------------------------------------------------------------- |
-| `id`          | integer | Unique identifier for the resource. <i class="label label-info">read-only</i>                                    |
-| `name`        | string  | Category name. <i class="label label-info">mandatory</i>                                                         |
+| `id`          | integer | Unique identifier for the resource. `READ-ONLY`                                    |
+| `name`        | string  | Category name. `MANDATORY`                                                         |
 | `slug`        | string  | An alphanumeric identifier for the resource unique to its type.                                                  |
 | `parent`      | integer | The ID for the parent of the resource.                                                                           |
 | `description` | string  | HTML description of the resource.                                                                                |
 | `display`     | string  | Category archive display type. Options: `default`, `products`, `subcategories` and `both`. Default is `default`. |
 | `image`       | object  | Image data. See [Product category - Image properties](#product-category-image-properties)                        |
 | `menu_order`  | integer | Menu order, used to custom sort the resource.                                                                    |
-| `count`       | integer | Number of published products for the resource. <i class="label label-info">read-only</i>                         |
+| `count`       | integer | Number of published products for the resource. `READ-ONLY`                         |
 
 ### Product category - Image properties
 | Attribute           | Type      | Description                                                                                             |
 | ------------------- | --------- | ------------------------------------------------------------------------------------------------------- |
 | `id`                | integer   | Image ID.                                                                                               |
-| `date_created`      | date-time | The date the image was created, in the site's timezone. <i class="label label-info">read-only</i>       |
-| `date_created_gmt`  | date-time | The date the image was created, as GMT <i class="label label-info">read-only</i>                        |
-| `date_modified`     | date-time | The date the image was last modified, in the site's timezone. <i class="label label-info">read-only</i> |
-| `date_modified_gmt` | date-time | The date the image was last modified, as GMT. <i class="label label-info">read-only</i>                 |
+| `date_created`      | date-time | The date the image was created, in the site's timezone. `READ-ONLY`       |
+| `date_created_gmt`  | date-time | The date the image was created, as GMT `READ-ONLY`                        |
+| `date_modified`     | date-time | The date the image was last modified, in the site's timezone. `READ-ONLY` |
+| `date_modified_gmt` | date-time | The date the image was last modified, as GMT. `READ-ONLY`                 |
 | `src`               | string    | Image URL.                                                                                              |
 | `title`             | string    | Image name.                                                                                             |
 | `alt`               | string    | Image alternative text.                                                                                 |

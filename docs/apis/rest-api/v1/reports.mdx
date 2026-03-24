@@ -221,17 +221,17 @@ woocommerce.get("reports/sales", query).parsed_response
 #### Sales report properties
 |      Attribute      |   Type  |                              Description                              |
 |---------------------|---------|-----------------------------------------------------------------------|
-| `total_sales`       | string  | Gross sales in the period. <i class="label label-info">read-only</i>  |
-| `net_sales`         | string  | Net sales in the period. <i class="label label-info">read-only</i>    |
-| `average_sales`     | string  | Average net daily sales. <i class="label label-info">read-only</i>    |
-| `total_orders`      | integer | Total of orders placed. <i class="label label-info">read-only</i>     |
-| `total_items`       | integer | Total of items purchased. <i class="label label-info">read-only</i>   |
-| `total_tax`         | string  | Total charged for taxes. <i class="label label-info">read-only</i>    |
-| `total_shipping`    | string  | Total charged for shipping. <i class="label label-info">read-only</i> |
-| `total_refunds`     | number  | Total of refunded orders. <i class="label label-info">read-only</i>   |
-| `total_discount`    | integer | Total of coupons used. <i class="label label-info">read-only</i>      |
-| `totals_grouped_by` | string  | Group type. <i class="label label-info">read-only</i>                 |
-| `totals`            | array   | Totals. <i class="label label-info">read-only</i>                     |
+| `total_sales`       | string  | Gross sales in the period. `READ-ONLY`  |
+| `net_sales`         | string  | Net sales in the period. `READ-ONLY`    |
+| `average_sales`     | string  | Average net daily sales. `READ-ONLY`    |
+| `total_orders`      | integer | Total of orders placed. `READ-ONLY`     |
+| `total_items`       | integer | Total of items purchased. `READ-ONLY`   |
+| `total_tax`         | string  | Total charged for taxes. `READ-ONLY`    |
+| `total_shipping`    | string  | Total charged for shipping. `READ-ONLY` |
+| `total_refunds`     | number  | Total of refunded orders. `READ-ONLY`   |
+| `total_discount`    | integer | Total of coupons used. `READ-ONLY`      |
+| `totals_grouped_by` | string  | Group type. `READ-ONLY`                 |
+| `totals`            | array   | Totals. `READ-ONLY`                     |
 
 #### Available parameters
 | Parameter  |  Type  |                                                    Description                                                    |
@@ -351,9 +351,9 @@ woocommerce.get("reports/top_sellers", query).parsed_response
 #### Top sellers report properties
 |      Attribute      |   Type  |                              Description                              |
 |---------------------|---------|-----------------------------------------------------------------------|
-| `title`             | string  | Product title. <i class="label label-info">read-only</i>              |
-| `product_id`        | integer | Product ID. <i class="label label-info">read-only</i>                 |
-| `quantity`          | integer | Total number of purchases. <i class="label label-info">read-only</i>  |
+| `title`             | string  | Product title. `READ-ONLY`              |
+| `product_id`        | integer | Product ID. `READ-ONLY`                 |
+| `quantity`          | integer | Total number of purchases. `READ-ONLY`  |
 
 #### Available parameters
 | Parameter  |  Type  |                                                    Description                                                    |

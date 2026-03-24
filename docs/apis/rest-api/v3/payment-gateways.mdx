@@ -14,28 +14,28 @@ The payment gateways API allows you to view, and update individual payment gatew
 
 | Attribute            | Type    | Description                                                                                                 |
 | -------------------- | ------- | ----------------------------------------------------------------------------------------------------------- |
-| `id`                 | string  | Payment gateway ID. <i class="label label-info">read-only</i>                                               |
+| `id`                 | string  | Payment gateway ID. `READ-ONLY`                                               |
 | `title`              | string  | Payment gateway title on checkout.                                                                          |
 | `description`        | string  | Payment gateway description on checkout.                                                                    |
 | `order`              | integer | Payment gateway sort order.                                                                                 |
 | `enabled`            | boolean | Payment gateway enabled status.                                                                             |
-| `method_title`       | string  | Payment gateway method title. <i class="label label-info">read-only</i>                                     |
-| `method_description` | string  | Payment gateway method description. <i class="label label-info">read-only</i>                               |
-| `method_supports`    | array   | Supported features for this payment gateway. <i class="label label-info">read-only</i>                      |
+| `method_title`       | string  | Payment gateway method title. `READ-ONLY`                                     |
+| `method_description` | string  | Payment gateway method description. `READ-ONLY`                               |
+| `method_supports`    | array   | Supported features for this payment gateway. `READ-ONLY`                      |
 | `settings`           | object  | Payment gateway settings. See [Payment gateway - Settings properties](#payment-gateway---settings-properties) |
 
 ### Payment gateway - Settings properties
 
 | Attribute     | Type   | Description                                                                                                                                                                                     |
 | ------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `id`          | string | A unique identifier for the setting. <i class="label label-info">read-only</i>                                                                                                                  |
-| `label`       | string | A human readable label for the setting used in interfaces. <i class="label label-info">read-only</i>                                                                                            |
-| `description` | string | A human readable description for the setting used in interfaces. <i class="label label-info">read-only</i>                                                                                      |
-| `type`        | string | Type of setting. Options: `text`, `email`, `number`, `color`, `password`, `textarea`, `select`, `multiselect`, `radio`, `image_width` and `checkbox`. <i class="label label-info">read-only</i> |
+| `id`          | string | A unique identifier for the setting. `READ-ONLY`                                                                                                                  |
+| `label`       | string | A human readable label for the setting used in interfaces. `READ-ONLY`                                                                                            |
+| `description` | string | A human readable description for the setting used in interfaces. `READ-ONLY`                                                                                      |
+| `type`        | string | Type of setting. Options: `text`, `email`, `number`, `color`, `password`, `textarea`, `select`, `multiselect`, `radio`, `image_width` and `checkbox`. `READ-ONLY` |
 | `value`       | string | Setting value.                                                                                                                                                                                  |
-| `default`     | string | Default value for the setting. <i class="label label-info">read-only</i>                                                                                                                        |
-| `tip`         | string | Additional help text shown to the user about the setting. <i class="label label-info">read-only</i>                                                                                             |
-| `placeholder` | string | Placeholder text to be displayed in text inputs. <i class="label label-info">read-only</i>                                                                                                      |
+| `default`     | string | Default value for the setting. `READ-ONLY`                                                                                                                        |
+| `tip`         | string | Additional help text shown to the user about the setting. `READ-ONLY`                                                                                             |
+| `placeholder` | string | Placeholder text to be displayed in text inputs. `READ-ONLY`                                                                                                      |
 
 ## Retrieve a payment gateway
 

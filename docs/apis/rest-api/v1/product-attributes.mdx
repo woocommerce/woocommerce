@@ -12,8 +12,8 @@ The product attributes API allows you to create, view, update, and delete indivi
 ## Product attribute properties
 |   Attribute    |   Type  |                                                Description                                                |
 |----------------|---------|-----------------------------------------------------------------------------------------------------------|
-| `id`           | integer | Unique identifier for the resource. <i class="label label-info">read-only</i>                             |
-| `name`         | string  | Attribute name. <i class="label label-info">required</i>                                                  |
+| `id`           | integer | Unique identifier for the resource. `READ-ONLY`                             |
+| `name`         | string  | Attribute name. `REQUIRED`                                                  |
 | `slug`         | string  | An alphanumeric identifier for the resource unique to its type.                                           |
 | `type`         | string  | Type of attribute. Default is `select`. Options: `select` and `text` (some plugins can include new types) |
 | `order_by`     | string  | Default sort order. Default is `menu_order`. Options: `menu_order`, `name`, `name_num` and `id`.          |

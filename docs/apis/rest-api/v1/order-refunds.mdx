@@ -12,29 +12,29 @@ The refunds API allows you to create, view, and delete individual refunds.
 ## Refund properties
 |   Attribute    |    Type   |                                               Description                                                |
 |----------------|-----------|----------------------------------------------------------------------------------------------------------|
-| `id`           | integer   | Unique identifier for the resource. <i class="label label-info">read-only</i>                            |
-| `date_created` | date-time | The date the order refund was created, in the site's timezone. <i class="label label-info">read-only</i> |
-| `amount`       | string    | Refund amount. <i class="label label-info">required</i>                                                  |
+| `id`           | integer   | Unique identifier for the resource. `READ-ONLY`                            |
+| `date_created` | date-time | The date the order refund was created, in the site's timezone. `READ-ONLY` |
+| `amount`       | string    | Refund amount. `REQUIRED`                                                  |
 | `reason`       | string    | Reason for refund.                                                                                       |
 | `line_items`   | array     | Line items data. See [Refunds Line Items properties](#refund-line-item-properties).                    |
 
 ### Refund line item properties
 |   Attribute    |   Type  |                                          Description                                           |
 |----------------|---------|------------------------------------------------------------------------------------------------|
-| `id`           | integer | Item ID. <i class="label label-info">read-only</i>                                             |
-| `name`         | string  | Product name. <i class="label label-info">read-only</i>                                        |
-| `sku`          | string  | Product SKU. <i class="label label-info">read-only</i>                                         |
+| `id`           | integer | Item ID. `READ-ONLY`                                             |
+| `name`         | string  | Product name. `READ-ONLY`                                        |
+| `sku`          | string  | Product SKU. `READ-ONLY`                                         |
 | `product_id`   | integer | Product ID.                                                                                    |
 | `variation_id` | integer | Variation ID, if applicable.                                                                   |
 | `quantity`     | integer | Quantity ordered.                                                                              |
-| `tax_class`    | string  | Tax class of product. <i class="label label-info">read-only</i>                                |
-| `price`        | string  | Product price. <i class="label label-info">read-only</i>                                       |
+| `tax_class`    | string  | Tax class of product. `READ-ONLY`                                |
+| `price`        | string  | Product price. `READ-ONLY`                                       |
 | `subtotal`     | string  | Line subtotal (before discounts).                                                              |
 | `subtotal_tax` | string  | Line subtotal tax (before discounts).                                                          |
 | `total`        | string  | Line total (after discounts).                                                                  |
 | `total_tax`    | string  | Line total tax (after discounts).                                                              |
-| `taxes`        | array   | Line total tax with `id`, `total` and `subtotal`. <i class="label label-info">read-only</i>    |
-| `meta`         | array   | Line item meta data with `key`, `label` and `value`. <i class="label label-info">read-only</i> |
+| `taxes`        | array   | Line total tax with `id`, `total` and `subtotal`. `READ-ONLY`    |
+| `meta`         | array   | Line item meta data with `key`, `label` and `value`. `READ-ONLY` |
 
 ## Create a refund
 This API helps you to create a new refund for an order.

@@ -62,44 +62,44 @@ You can find the Webhooks interface going to "WooCommerce" > "Settings" > "API" 
 ## Webhook properties
 |    Attribute    |    Type   |                                                                                     Description                                                                                      |
 |-----------------|-----------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `id`            | integer   | Unique identifier for the resource. <i class="label label-info">read-only</i>                                                                                                        |
+| `id`            | integer   | Unique identifier for the resource. `READ-ONLY`                                                                                                        |
 | `name`          | string    | A friendly name for the webhook. Default is `Webhook created on <date>`.                                                                                                             |
 | `status`        | string    | Webhook status. Default is `active`. Options `active` (delivers payload), `paused` (does not deliver), or `disabled` (does not deliver due delivery failures).                       |
-| `topic`         | string    | Webhook topic, e.g. `coupon.updated`. [See the complete list](#topics). <i class="label label-info">required</i>                                                                     |
-| `resource`      | string    | Webhook resource, e.g. `coupon` <i class="label label-info">read-only</i>                                                                                                            |
-| `event`         | string    | Webhook event, e.g. `updated` <i class="label label-info">read-only</i>                                                                                                              |
-| `hooks`         | array     | WooCommerce action names associated with the webhook. <i class="label label-info">read-only</i>                                                                                      |
-| `delivery_url`  | string    | The URL where the webhook payload is delivered. <i class="label label-info">required</i>                                                                                             |
-| `secret`        | string    | Secret key used to generate a hash of the delivered webhook and provided in the request headers. <i class="label label-info">required</i> <i class="label label-info">write-only</i> |
-| `date_created`  | date-time | UTC DateTime when the webhook was created <i class="label label-info">read-only</i>                                                                                                  |
-| `date_modified` | date-time | UTC DateTime when the webhook was last updated <i class="label label-info">read-only</i>                                                                                             |
+| `topic`         | string    | Webhook topic, e.g. `coupon.updated`. [See the complete list](#topics). `REQUIRED`                                                                     |
+| `resource`      | string    | Webhook resource, e.g. `coupon` `READ-ONLY`                                                                                                            |
+| `event`         | string    | Webhook event, e.g. `updated` `READ-ONLY`                                                                                                              |
+| `hooks`         | array     | WooCommerce action names associated with the webhook. `READ-ONLY`                                                                                      |
+| `delivery_url`  | string    | The URL where the webhook payload is delivered. `REQUIRED`                                                                                             |
+| `secret`        | string    | Secret key used to generate a hash of the delivered webhook and provided in the request headers. `REQUIRED` `WRITE-ONLY` |
+| `date_created`  | date-time | UTC DateTime when the webhook was created `READ-ONLY`                                                                                                  |
+| `date_modified` | date-time | UTC DateTime when the webhook was last updated `READ-ONLY`                                                                                             |
 
 ### Webhooks delivery properties
 |     Attribute      |    Type   |                                                                Description                                                                 |
 |--------------------|-----------|--------------------------------------------------------------------------------------------------------------------------------------------|
-| `id`               | integer   | Unique identifier for the resource. <i class="label label-info">read-only</i>                                                              |
-| `duration`         | string    | The delivery duration, in seconds. <i class="label label-info">read-only</i>                                                               |
-| `summary`          | string    | A friendly summary of the response including the HTTP response code, message, and body. <i class="label label-info">read-only</i>          |
-| `request_url`      | string    | The URL where the webhook was delivered. <i class="label label-info">read-only</i>                                                         |
-| `request_headers`  | array     | Request headers. See [Request Headers Attributes](#request-header-properties) for more details. <i class="label label-info">read-only</i>  |
-| `request_body`     | string    | Request body. <i class="label label-info">read-only</i>                                                                                    |
-| `response_code`    | string    | The HTTP response code from the receiving server. <i class="label label-info">read-only</i>                                                |
-| `response_message` | string    | The HTTP response message from the receiving server. <i class="label label-info">read-only</i>                                             |
-| `response_headers` | array     | Array of the response headers from the receiving server. <i class="label label-info">read-only</i>                                         |
-| `response_body`    | string    | The response body from the receiving server. <i class="label label-info">read-only</i>                                                     |
-| `date_created`     | date-time | The date the webhook delivery was logged, in the site's timezone. <i class="label label-info">read-only</i>                                |
+| `id`               | integer   | Unique identifier for the resource. `READ-ONLY`                                                              |
+| `duration`         | string    | The delivery duration, in seconds. `READ-ONLY`                                                               |
+| `summary`          | string    | A friendly summary of the response including the HTTP response code, message, and body. `READ-ONLY`          |
+| `request_url`      | string    | The URL where the webhook was delivered. `READ-ONLY`                                                         |
+| `request_headers`  | array     | Request headers. See [Request Headers Attributes](#request-header-properties) for more details. `READ-ONLY`  |
+| `request_body`     | string    | Request body. `READ-ONLY`                                                                                    |
+| `response_code`    | string    | The HTTP response code from the receiving server. `READ-ONLY`                                                |
+| `response_message` | string    | The HTTP response message from the receiving server. `READ-ONLY`                                             |
+| `response_headers` | array     | Array of the response headers from the receiving server. `READ-ONLY`                                         |
+| `response_body`    | string    | The response body from the receiving server. `READ-ONLY`                                                     |
+| `date_created`     | date-time | The date the webhook delivery was logged, in the site's timezone. `READ-ONLY`                                |
 
 #### Request header properties
 |         Attribute          |   Type  |                                                              Description                                                              |
 |----------------------------|---------|---------------------------------------------------------------------------------------------------------------------------------------|
-| `User-Agent`               | string  | The request user agent, default is "WooCommerce/\{version\} Hookshot (WordPress/\{version\})". <i class="label label-info">read-only</i>  |
-| `Content-Type`             | string  | The request content-type, default is "application/json". <i class="label label-info">read-only</i>                                    |
-| `X-WC-Webhook-Topic`       | string  | The webhook topic. <i class="label label-info">read-only</i>                                                                          |
-| `X-WC-Webhook-Resource`    | string  | The webhook resource. <i class="label label-info">read-only</i>                                                                       |
-| `X-WC-Webhook-Event`       | string  | The webhook event. <i class="label label-info">read-only</i>                                                                          |
-| `X-WC-Webhook-Signature`   | string  | A base64 encoded HMAC-SHA256 hash of the payload. <i class="label label-info">read-only</i>                                           |
-| `X-WC-Webhook-ID`          | integer | The webhook's ID. <i class="label label-info">read-only</i>                                                                           |
-| `X-WC-Webhook-Delivery-ID` | integer | The delivery ID. <i class="label label-info">read-only</i>                                                                            |
+| `User-Agent`               | string  | The request user agent, default is "WooCommerce/\{version\} Hookshot (WordPress/\{version\})". `READ-ONLY`  |
+| `Content-Type`             | string  | The request content-type, default is "application/json". `READ-ONLY`                                    |
+| `X-WC-Webhook-Topic`       | string  | The webhook topic. `READ-ONLY`                                                                          |
+| `X-WC-Webhook-Resource`    | string  | The webhook resource. `READ-ONLY`                                                                       |
+| `X-WC-Webhook-Event`       | string  | The webhook event. `READ-ONLY`                                                                          |
+| `X-WC-Webhook-Signature`   | string  | A base64 encoded HMAC-SHA256 hash of the payload. `READ-ONLY`                                           |
+| `X-WC-Webhook-ID`          | integer | The webhook's ID. `READ-ONLY`                                                                           |
+| `X-WC-Webhook-Delivery-ID` | integer | The delivery ID. `READ-ONLY`                                                                            |
 
 ## Create a webhook
 This API helps you to create a new webhook.
