@@ -213,7 +213,7 @@ export const PaymentMethodListItem = ( {
 				( paymentMethodsState[ method.id ] ?? false ) && (
 					<div
 						className="woocommerce-list__item-notice-info"
-						data-testid="payment-method-notice-warning"
+						data-testid="payment-method-notice-info"
 					>
 						<Icon icon={ infoIcon } size={ 24 } />
 						<p>

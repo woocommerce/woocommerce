@@ -37,6 +37,10 @@ const defaultProps = {
 };
 
 describe( 'PaymentMethodListItem', () => {
+	beforeEach( () => {
+		jest.clearAllMocks();
+	} );
+
 	describe( 'Notice badge', () => {
 		it( 'renders a badge chip when notice.badge is set', () => {
 			const method = createMethod( {
@@ -160,7 +164,7 @@ describe( 'PaymentMethodListItem', () => {
 			);
 
 			expect(
-				screen.queryByTestId( 'payment-method-notice-warning' )
+				screen.queryByTestId( 'payment-method-notice-info' )
 			).not.toBeInTheDocument();
 		} );
 
@@ -184,7 +188,7 @@ describe( 'PaymentMethodListItem', () => {
 			);
 
 			expect(
-				screen.queryByTestId( 'payment-method-notice-warning' )
+				screen.queryByTestId( 'payment-method-notice-info' )
 			).not.toBeInTheDocument();
 
 			rerender(
@@ -196,7 +200,7 @@ describe( 'PaymentMethodListItem', () => {
 			);
 
 			expect(
-				screen.getByTestId( 'payment-method-notice-warning' )
+				screen.getByTestId( 'payment-method-notice-info' )
 			).toBeInTheDocument();
 		} );
 
