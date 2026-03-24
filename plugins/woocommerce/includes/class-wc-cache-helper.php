@@ -6,6 +6,7 @@
  */
 
 use Automattic\WooCommerce\Caching\CacheNameSpaceTrait;
+use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -183,7 +184,7 @@ class WC_Cache_Helper {
 	 * This prevents caching of the wrong data for this request.
 	 */
 	public static function geolocation_ajax_redirect() {
-		if ( 'geolocation_ajax' === get_option( 'woocommerce_default_customer_address' ) && ! is_checkout() && ! is_cart() && ! is_account_page() && ! is_robots() && ! wp_doing_ajax() && empty( $_POST ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		if ( DefaultCustomerAddress::GEOLOCATION_AJAX === get_option( 'woocommerce_default_customer_address' ) && ! is_checkout() && ! is_cart() && ! is_account_page() && ! is_robots() && ! wp_doing_ajax() && empty( $_POST ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
 			$location_hash = self::geolocation_ajax_get_location_hash();
 			$current_hash  = isset( $_GET['v'] ) ? wc_clean( wp_unslash( $_GET['v'] ) ) : ''; // WPCS: sanitization ok, input var ok, CSRF ok.
 			if ( empty( $current_hash ) || $current_hash !== $location_hash ) {
@@ -219,7 +220,7 @@ class WC_Cache_Helper {
 	 *    ensuring we update the cookie any time the billing country is changed.
 	 */
 	public static function update_geolocation_hash() {
-		if ( 'geolocation_ajax' === get_option( 'woocommerce_default_customer_address' ) ) {
+		if ( DefaultCustomerAddress::GEOLOCATION_AJAX === get_option( 'woocommerce_default_customer_address' ) ) {
 			wc_setcookie( 'woocommerce_geo_hash', static::geolocation_ajax_get_location_hash(), time() + HOUR_IN_SECONDS );
 		}
 	}
