@@ -99,6 +99,10 @@ class WC_Query_Test extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox Ordering args: $description.
 	 * @dataProvider data_provider_search_ordering
+	 *
+	 * @param string $search           The search query string.
+	 * @param bool   $expect_relevance Whether relevance ordering is expected.
+	 * @param string $description      Test case description.
 	 */
 	public function test_get_catalog_ordering_args_search_ordering( string $search, bool $expect_relevance, string $description ): void {
 		$sut = new WC_Query();
