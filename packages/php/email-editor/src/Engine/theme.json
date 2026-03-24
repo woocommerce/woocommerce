@@ -14,7 +14,7 @@
     },
     "layout": {
       "contentSize": "660px",
-      "wideSize": "",
+      "wideSize": "660px",
       "allowEditing": false,
       "allowCustomContentAndWideSize": false
     },
