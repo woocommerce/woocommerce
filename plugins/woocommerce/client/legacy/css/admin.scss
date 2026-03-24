@@ -9461,3 +9461,49 @@ body.woocommerce-settings-payments-section_legacy {
 		background: #f0f0f1;
 	}
 }
+
+/**
+ * WP 7.0+ responsive fixes for order meta box buttons.
+ * WP 7.0 increased default button min-height from 30px to 40px,
+ * causing action button rows to wrap/stack at ~1200px viewports.
+ */
+.wc-wp-version-gte-70 {
+	@media screen and (max-width: 1200px) {
+		// Order items meta box: reduce button padding to prevent wrapping prematurely.
+		#woocommerce-order-items .wc-order-data-row {
+			.button {
+				padding-left: 8px;
+				padding-right: 8px;
+			}
+		}
+
+		// Refund action buttons: switch to flex layout so long labels wrap gracefully.
+		#woocommerce-order-items .refund-actions {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 4px;
+			align-items: center;
+
+			.button,
+			.cancel-action {
+				float: none;
+			}
+
+			.button {
+				margin: 0;
+				font-size: 12px;
+			}
+
+			.cancel-action {
+				margin-right: auto;
+				order: -1;
+			}
+
+			.clear {
+				display: none;
+			}
+		}
+
+
+	}
+}
