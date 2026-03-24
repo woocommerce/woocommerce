@@ -8281,6 +8281,45 @@ table.bar_chart {
 	}
 }
 
+.wc-wp-version-gte-70 {
+	#woocommerce-product-data,
+	#woocommerce-coupon-data {
+		.woocommerce_options_panel .form-field {
+			label,
+			legend {
+				padding-top: 8px;
+			}
+
+			.woocommerce-help-tip {
+				margin-top: 12px;
+			}
+
+			&:has(> .checkbox) label {
+				padding-top: 0;
+			}
+		}
+	}
+
+	.select2-container {
+		.select2-selection--single {
+			height: 40px;
+			border-radius: 2px;
+
+			.select2-selection__rendered {
+				line-height: 38px;
+			}
+
+			.select2-selection__arrow {
+				height: 38px;
+			}
+		}
+
+		.select2-selection--multiple {
+			border-radius: 2px;
+		}
+	}
+}
+
 /**
   * Select2 colors for built-in admin color themes.
   */
