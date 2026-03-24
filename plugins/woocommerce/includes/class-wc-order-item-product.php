@@ -472,6 +472,8 @@ class WC_Order_Item_Product extends WC_Order_Item {
 			 */
 			return apply_filters( 'woocommerce_get_item_downloads', $files, $this, $order );
 		}
+
+		return $files;
 	}
 
 	/**
