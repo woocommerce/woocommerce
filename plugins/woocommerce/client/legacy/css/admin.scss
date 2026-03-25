@@ -8433,6 +8433,32 @@ table.bar_chart {
 	#variable_product_options .form-row[class*="variable_low_stock_amount"] {
 		clear: both;
 	}
+
+	#poststuff #woocommerce-order-notes .inside button {
+		margin: 0 1px 1px;
+	}
+
+	@media screen and (max-width: 850px), screen and (min-width: 931px) {
+		#woocommerce-order-downloads .buttons button {
+			margin: 0;
+		}
+	}
+
+	// 782px breakpoint, when the admin sidebar is hidden.
+	@media screen and (max-width: 782px) {
+		// Make buttons match the now taller selects.
+		#poststuff #woocommerce-order-actions .inside button {
+			height: 42px;
+
+			&::after {
+				line-height: 40px;
+			}
+		}
+
+		#poststuff #woocommerce-order-notes .inside button {
+			line-height: 40px;
+		}
+	}
 }
 
 // Tablenav: WP 7.0 tablenav uses compact 32px sizing for native selects.
