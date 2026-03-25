@@ -598,7 +598,7 @@ class WC_Query {
 		}
 
 		// Use WP_Query to parse search terms using core's tokenization rules.
-		$search_query = new class ( array( 's' => $search_string ) ) extends \WP_Query {
+		$search_query = new class( array( 's' => $search_string ) ) extends \WP_Query {
 			/**
 			 * This constructor is overridden to prevent a database query while still enabling access to search term parsing routines.
 			 *
