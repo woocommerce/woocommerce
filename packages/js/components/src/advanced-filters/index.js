@@ -147,6 +147,7 @@ class AdvancedFilters extends Component {
 		return createInterpolateElement( config.title, {
 			select: (
 				<SelectControl
+					__next40pxDefaultSize
 					className="woocommerce-filters-advanced__title-select"
 					options={ matches }
 					value={ match }
