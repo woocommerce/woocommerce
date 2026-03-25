@@ -170,7 +170,8 @@
 		border-radius: 3px;
 		padding: 10px 10px 10px 30px;
 		width: 100%;
-		@include font-size( 13 );
+		font-size: 13px;
+		line-height: 2;
 
 		&::placeholder {
 			color: $gray-700;
