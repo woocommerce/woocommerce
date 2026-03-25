@@ -1,0 +1,68 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "woocommerce/product-text-field",
+    "title": "Product text field",
+    "category": "woocommerce",
+    "description": "A text field for use in the product editor.",
+    "keywords": [
+        "products",
+        "text"
+    ],
+    "textdomain": "default",
+    "attributes": {
+        "label": {
+            "type": "string",
+            "role": "content"
+        },
+        "property": {
+            "type": "string"
+        },
+        "placeholder": {
+            "type": "string"
+        },
+        "help": {
+            "type": "string"
+        },
+        "tooltip": {
+            "type": "string"
+        },
+        "suffix": {
+            "type": "object"
+        },
+        "type": {
+            "type": "object"
+        },
+        "required": {
+            "type": "object"
+        },
+        "pattern": {
+            "type": "object"
+        },
+        "minLength": {
+            "type": "object"
+        },
+        "maxLength": {
+            "type": "object"
+        },
+        "min": {
+            "type": "object"
+        },
+        "max": {
+            "type": "object"
+        }
+    },
+    "supports": {
+        "align": false,
+        "html": false,
+        "multiple": true,
+        "reusable": false,
+        "inserter": false,
+        "lock": false,
+        "__experimentalToolbar": false
+    },
+    "editorStyle": "file:./editor.css",
+    "usesContext": [
+        "postType"
+    ]
+}

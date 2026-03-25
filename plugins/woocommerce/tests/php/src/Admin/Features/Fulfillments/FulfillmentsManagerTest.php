@@ -184,7 +184,8 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 		$order        = OrderHelper::create_order( get_current_user_id(), $product );
 		$this->assertEmpty( $order->get_meta( '_fulfillment_status' ) );
 
-		$fulfillments[] = FulfillmentsHelper::create_fulfillment(
+		$create_count_before = did_action( 'woocommerce_fulfillment_after_create' );
+		$fulfillments[]      = FulfillmentsHelper::create_fulfillment(
 			array(
 				'entity_type'  => WC_Order::class,
 				'entity_id'    => $order->get_id(),
@@ -200,19 +201,21 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 				),
 			)
 		);
-		$this->assertTrue( did_action( 'woocommerce_fulfillment_after_create' ) > 0 );
+		$this->assertGreaterThan( $create_count_before, did_action( 'woocommerce_fulfillment_after_create' ) );
 		$order = wc_get_order( $order->get_id() );
 		$this->assertEquals( 'unfulfilled', $order->get_meta( '_fulfillment_status', true ) );
 
+		$update_count_before = did_action( 'woocommerce_fulfillment_after_update' );
 		$fulfillments[0]->set_status( 'fulfilled' );
 		$fulfillments[0]->save();
 
-		$this->assertTrue( did_action( 'woocommerce_fulfillment_after_update' ) > 0 );
+		$this->assertGreaterThan( $update_count_before, did_action( 'woocommerce_fulfillment_after_update' ) );
 		$order = wc_get_order( $order->get_id() );
 		$this->assertEquals( 'partially_fulfilled', $order->get_meta( '_fulfillment_status' ) );
 
+		$delete_count_before = did_action( 'woocommerce_fulfillment_after_delete' );
 		$fulfillments[0]->delete();
-		$this->assertTrue( did_action( 'woocommerce_fulfillment_after_delete' ) > 0 );
+		$this->assertGreaterThan( $delete_count_before, did_action( 'woocommerce_fulfillment_after_delete' ) );
 		$order = wc_get_order( $order->get_id() );
 		$this->assertEquals( '', $order->get_meta( '_fulfillment_status' ) );
 	}
@@ -326,7 +329,7 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 
 		$fulfillments_before = $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT COUNT(*) FROM {$wpdb->prefix}wc_order_fulfillments WHERE entity_type = %s AND entity_id = %d",
+				"SELECT COUNT(*) FROM {$wpdb->prefix}wc_order_fulfillments WHERE entity_type = %s AND entity_id = %s",
 				WC_Order::class,
 				$order_id
 			)
@@ -354,13 +357,31 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 		add_filter(
 			'woocommerce_fulfillment_shipping_providers',
 			function ( $providers ) {
-				$providers = array();
-				return $providers;
+				unset( $providers );
+				return array();
 			}
 		);
 
 		// Test with a valid tracking number.
 		$parsed_number = $this->manager->try_parse_tracking_number( $tracking_number, 'US', 'CA' );
 		$this->assertEquals( array(), $parsed_number );
+	}
+
+	/**
+	 * @testdox Email template tracking hooks are registered for all fulfillment email types.
+	 */
+	public function test_email_template_tracking_hooks_are_registered(): void {
+		$email_ids = array(
+			'customer_fulfillment_created',
+			'customer_fulfillment_updated',
+			'customer_fulfillment_deleted',
+		);
+
+		foreach ( $email_ids as $email_id ) {
+			$this->assertNotFalse(
+				has_action( 'woocommerce_update_options_email_' . $email_id ),
+				"Tracking hook should be registered for woocommerce_update_options_email_{$email_id}"
+			);
+		}
 	}
 }

@@ -1,0 +1,1 @@
+"use strict";(globalThis.webpackChunkwebpackWcBlocksCartCheckoutFrontendJsonp=globalThis.webpackChunkwebpackWcBlocksCartCheckoutFrontendJsonp||[]).push([[169],{344:(c,a,e)=>{e.r(a),e.d(a,{default:()=>t});var s=e(4921),n=e(790);const t=({children:c,className:a})=>(0,n.jsx)("div",{className:(0,s.A)(a,"wc-block-mini-cart__items"),tabIndex:-1,children:c})}}]);

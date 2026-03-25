@@ -1,0 +1,17 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "woocommerce/product-gallery-large-image",
+	"title": "Viewer",
+	"description": "Container for the current gallery image, navigation buttons, zoom functionality and more.",
+	"category": "woocommerce",
+	"keywords": [ "WooCommerce" ],
+	"usesContext": [ "postId", "hoverZoom", "fullScreenOnClick" ],
+	"supports": {
+		"interactivity": true
+	},
+	"textdomain": "woocommerce",
+	"ancestor": [ "woocommerce/product-gallery" ],
+	"viewScriptModule": "woocommerce/product-gallery-large-image",
+	"editorStyle": "file:../woocommerce/product-gallery-large-image-editor.css"
+}

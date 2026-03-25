@@ -1,0 +1,1 @@
+function round(a,e,r){var _,c,s,t;if(e|=0,s=(a*=_=Math.pow(10,e))%1==.5*(t=a>0|-(a<0)),c=Math.floor(a),s)switch(r){case"2":case"PHP_ROUND_HALF_DOWN":a=c+(t<0);break;case"3":case"PHP_ROUND_HALF_EVEN":a=c+c%2*t;break;case"4":case"PHP_ROUND_HALF_ODD":a=c+!(c%2);break;default:a=c+(t>0)}return(s?a:Math.round(a))/_}

@@ -1,0 +1,85 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "woocommerce/product-text-area-field",
+	"title": "Product textarea block",
+	"category": "woocommerce",
+	"description": "A text-area field for use in the product editor.",
+	"keywords": [
+		"textarea",
+		"rich-text"
+	],
+	"textdomain": "default",
+	"attributes": {
+		"property": {
+			"type": "string"
+		},
+		"label": {
+			"type": "string",
+			"role": "content"
+		},
+		"placeholder": {
+			"type": "string"
+		},
+		"help": {
+			"type": "string"
+		},
+		"required": {
+			"type": "string"
+		},
+		"tooltip": {
+			"type": "string"
+		},
+		"disabled": {
+			"type": "boolean"
+		},
+		"align": {
+			"type": "string",
+			"enum": [
+				"left",
+				"center",
+				"right",
+				"justify"
+			]
+		},
+		"mode": {
+			"type": "string",
+			"enum": [
+				"plain-text",
+				"rich-text"
+			],
+			"default": "rich-text"
+		},
+		"allowedFormats": {
+			"type": "array",
+			"default": [
+				"core/bold",
+				"core/code",
+				"core/italic",
+				"core/link",
+				"core/strikethrough",
+				"core/underline",
+				"core/text-color",
+				"core/subscript",
+				"core/superscript",
+				"core/unknown"
+			]
+		},
+		"direction": {
+			"type": "string",
+			"enum": [
+				"ltr",
+				"rtl"
+			]
+		}
+	},
+	"supports": {
+		"align": false,
+		"html": false,
+		"multiple": true,
+		"reusable": false,
+		"inserter": false,
+		"lock": false,
+		"__experimentalToolbar": true
+	}
+}

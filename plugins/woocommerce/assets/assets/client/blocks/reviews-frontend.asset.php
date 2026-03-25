@@ -1,0 +1,1 @@
+<?php return array('dependencies' => array('wc-blocks-frontend-vendors', 'react-jsx-runtime', 'wc-blocks-components', 'wc-sanitize', 'wc-settings', 'wp-a11y', 'wp-api-fetch', 'wp-element', 'wp-html-entities', 'wp-i18n', 'wp-is-shallow-equal', 'wp-polyfill'), 'version' => 'ca0ecd857aa9d4e0272d');

@@ -113,6 +113,10 @@ const publicActions = {
 					),
 					method: 'POST',
 					data: fulfillment,
+					headers: {
+						'Content-Type': 'application/json',
+						'X-WC-Fulfillments-UI': 'true',
+					},
 				} );
 				if ( ! saved.id ) {
 					throw new Error( 'Fulfillment ID is missing in response' );
@@ -157,6 +161,10 @@ const publicActions = {
 					),
 					method: 'PUT',
 					data: fulfillment,
+					headers: {
+						'Content-Type': 'application/json',
+						'X-WC-Fulfillments-UI': 'true',
+					},
 				} );
 				if ( ! updated.id ) {
 					throw new Error( 'Fulfillment ID is missing in response' );
@@ -187,6 +195,10 @@ const publicActions = {
 						{ notify_customer: notifyCustomer }
 					),
 					method: 'DELETE',
+					headers: {
+						'Content-Type': 'application/json',
+						'X-WC-Fulfillments-UI': 'true',
+					},
 				} );
 				dispatch.deleteFulfillmentRecord( orderId, fulfillmentId );
 			} catch ( error: unknown ) {

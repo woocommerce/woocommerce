@@ -338,6 +338,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 				$variation_ids = $product->get_visible_children();
 
 				if ( ! empty( $variation_ids ) ) {
+					// Prime caches to reduce future queries.
 					_prime_post_caches( $variation_ids );
 				}
 

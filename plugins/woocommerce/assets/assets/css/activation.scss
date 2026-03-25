@@ -1,0 +1,55 @@
+/**
+ * activation.scss
+ * Styles applied to elements displayed on activation
+ */
+
+/**
+ * Styling begins
+ */
+div.woocommerce-message {
+	overflow: hidden;
+	position: relative;
+
+	&.updated {
+		border-left-color: var(--wp-admin-theme-color, #720EEC) !important;
+	}
+}
+
+p.woocommerce-actions,
+.woocommerce-message {
+
+	a.woocommerce-message-close {
+		position: static;
+		float: right;
+		top: 0;
+		right: 0;
+		padding: 0 15px 10px 28px;
+		margin-top: -10px;
+		font-size: 13px;
+		line-height: 1.23076923;
+		text-decoration: none;
+
+		&::before {
+			position: relative;
+			top: 18px;
+			left: -20px;
+			transition: all 0.1s ease-in-out;
+		}
+	}
+
+	.button-primary,
+	.button-secondary {
+		text-decoration: none !important;
+	}
+
+	.twitter-share-button {
+		margin-top: -3px;
+		margin-left: 3px;
+		vertical-align: middle;
+	}
+}
+
+p.woocommerce-actions,
+.woocommerce-about-text {
+	margin-bottom: 1em !important;
+}

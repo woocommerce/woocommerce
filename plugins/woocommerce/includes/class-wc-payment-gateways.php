@@ -91,6 +91,8 @@ class WC_Payment_Gateways {
 		// Filter.
 		$load_gateways = apply_filters( 'woocommerce_payment_gateways', $load_gateways );
 
+		// No wp_prime_option_caches needed: gateway settings are autoloaded (WC_Settings_API saves with autoload='yes').
+
 		// Get sort order option.
 		$ordering  = (array) get_option( 'woocommerce_gateway_order' );
 		$order_end = 999;
