@@ -56,6 +56,8 @@ describe( 'UpdateButton component', () => {
 					},
 				],
 			},
+			customerNote: '',
+			setCustomerNote: jest.fn(),
 		} );
 	} );
 
@@ -95,6 +97,8 @@ describe( 'UpdateButton component', () => {
 			order: { id: 123 },
 			fulfillment: mockFulfillment,
 			notifyCustomer: true,
+			customerNote: 'Test note',
+			setCustomerNote: jest.fn(),
 		} );
 
 		render( <UpdateButton setError={ setError } /> );
@@ -103,7 +107,8 @@ describe( 'UpdateButton component', () => {
 		expect( await mockUpdateFulfillment ).toHaveBeenCalledWith(
 			123,
 			mockFulfillment,
-			true
+			true,
+			'Test note'
 		);
 	} );
 
@@ -116,6 +121,8 @@ describe( 'UpdateButton component', () => {
 		useFulfillmentContext.mockReturnValue( {
 			order: { id: 123 },
 			fulfillment: undefined,
+			customerNote: '',
+			setCustomerNote: jest.fn(),
 		} );
 
 		render( <UpdateButton setError={ setError } /> );
