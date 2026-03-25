@@ -194,7 +194,9 @@
 
 					event.preventDefault();
 
-					if ( ! window.confirm( data.strings.delete_confirmation || 'Are you sure you want to delete this shipping provider?' ) ) {
+					var confirmMsg = data.strings.delete_confirmation ||
+						'Are you sure you want to delete this shipping provider?';
+					if ( ! window.confirm( confirmMsg ) ) {
 						return;
 					}
 
