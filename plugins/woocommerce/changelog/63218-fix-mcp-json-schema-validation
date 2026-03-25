@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix invalid JSON Schema in MCP tool definitions: convert date-time type to proper string+format, deduplicate enum values, handle mixed/action/unrecognized types, normalize array types, recursively sanitize nested schemas, sanitize output schemas, and strip boolean required from nested properties.

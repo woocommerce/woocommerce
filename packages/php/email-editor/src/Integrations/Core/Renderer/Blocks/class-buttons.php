@@ -34,6 +34,25 @@ class Buttons extends Abstract_Block_Renderer {
 	}
 
 	/**
+	 * Render the block.
+	 *
+	 * Flex_Layout_Renderer applies margin-top on its inner div/td where Gmail
+	 * preserves it. Strip margin-top from email_attrs so add_spacer() doesn't
+	 * apply it again on the outer wrapper (which Gmail ignores).
+	 *
+	 * @param string            $block_content The block content.
+	 * @param array             $parsed_block The parsed block.
+	 * @param Rendering_Context $rendering_context The rendering context.
+	 * @return string
+	 */
+	public function render( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
+		$content     = $this->render_content( $block_content, $parsed_block, $rendering_context );
+		$email_attrs = $parsed_block['email_attrs'] ?? array();
+		unset( $email_attrs['margin-top'] );
+		return $this->add_spacer( $content, $email_attrs );
+	}
+
+	/**
 	 * Renders the block content.
 	 *
 	 * @param string            $block_content Block content.
