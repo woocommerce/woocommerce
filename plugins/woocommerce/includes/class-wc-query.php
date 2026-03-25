@@ -605,7 +605,7 @@ class WC_Query {
 			 * @param string|array $query URL query string or array of vars.
 			 */
 			public function __construct( $query = '' ) {
-				$this->query_vars = $query;
+				$this->query_vars = (array) $query;
 				$this->parse_search( $this->query_vars );
 			}
 		};
