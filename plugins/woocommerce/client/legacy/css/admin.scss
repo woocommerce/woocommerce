@@ -8343,8 +8343,15 @@ table.bar_chart {
 	}
 
 	// Order actions: select + button overflow container due to WP 7.0 select margins.
-	.order_actions #actions select {
-		width: calc(100% - 32px);
+	.order_actions {
+		#actions select {
+			width: calc(100% - 32px);
+		}
+
+		// Move to trash: make sure it aligns better vertically with 7.0's increased button height.
+		#delete-action {
+			line-height: 35px;
+		}
 	}
 
 	// Order actions reload button: icon line-height must match WP 7.0 button height.
