@@ -335,7 +335,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 		$order_id        = (int) $request->get_param( 'order_id' );
 		$fulfillment_id  = (int) $request->get_param( 'fulfillment_id' );
 		$notify_customer = (bool) $request->get_param( 'notify_customer' );
-		$customer_note   = (string) $request->get_param( 'customer_note' );
+		$customer_note   = sanitize_textarea_field( wp_unslash( (string) $request->get_param( 'customer_note' ) ) );
 
 		// Update the fulfillment for the order.
 		try {
@@ -373,6 +373,11 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 				} elseif ( $next_state ) {
 					/**
 					 * Trigger the fulfillment updated notification on updating a fulfillment.
+					 *
+					 * @param int         $order_id      The order ID.
+					 * @param Fulfillment $fulfillment   The fulfillment object.
+					 * @param WC_Order    $order         The order object.
+					 * @param string      $customer_note Optional customer note from the merchant.
 					 *
 					 * @since 10.1.0
 					 */
@@ -751,13 +756,6 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 				'required'    => false,
 				'context'     => array( 'view', 'edit' ),
 			),
-			'customer_note'   => array(
-				'description' => __( 'A note from the merchant to include in the customer notification email.', 'woocommerce' ),
-				'type'        => 'string',
-				'default'     => '',
-				'required'    => false,
-				'context'     => array( 'edit' ),
-			),
 		);
 	}
 
@@ -1088,7 +1086,17 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 					'required'    => false,
 					'context'     => array( 'view', 'edit' ),
 				),
-			)
+			),
+			! $is_create ? array(
+				'customer_note' => array(
+					'description'       => __( 'A note from the merchant to include in the customer notification email.', 'woocommerce' ),
+					'type'              => 'string',
+					'default'           => '',
+					'required'          => false,
+					'sanitize_callback' => 'sanitize_textarea_field',
+					'context'           => array( 'edit' ),
+				),
+			) : array()
 		);
 	}
 

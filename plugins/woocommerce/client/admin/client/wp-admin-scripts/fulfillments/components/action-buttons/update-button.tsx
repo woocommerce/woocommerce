@@ -23,7 +23,7 @@ export default function UpdateButton( {
 	setError: ( message: string | null ) => void;
 } ) {
 	const { setIsEditing } = useFulfillmentDrawerContext();
-	const { order, fulfillment, notifyCustomer, customerNote } = useFulfillmentContext();
+	const { order, fulfillment, notifyCustomer, customerNote, setCustomerNote } = useFulfillmentContext();
 	const { updateFulfillment } = useDispatch( FulfillmentStore );
 	const [ isExecuting, setIsExecuting ] = useState< boolean >( false );
 
@@ -49,6 +49,7 @@ export default function UpdateButton( {
 		if ( error ) {
 			setError( error );
 		} else {
+			setCustomerNote( '' );
 			refreshOrderFulfillmentStatus( order.id );
 			setIsEditing( false );
 		}

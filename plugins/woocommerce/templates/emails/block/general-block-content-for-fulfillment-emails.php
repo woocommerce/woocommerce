@@ -20,7 +20,7 @@ if ( ! isset( $order, $fulfillment ) ) {
 	return;
 }
 
-if ( isset( $customer_note ) && '' !== $customer_note ) {
+if ( ! empty( $customer_note ) ) {
 	echo '<p><strong>' . esc_html__( 'Note from the store:', 'woocommerce' ) . '</strong></p>';
 	echo wp_kses_post( wpautop( wptexturize( $customer_note ) ) );
 }

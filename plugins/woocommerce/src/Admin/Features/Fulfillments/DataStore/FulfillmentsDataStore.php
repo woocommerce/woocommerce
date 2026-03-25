@@ -272,7 +272,7 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 			 * @param array       $old_state     Snapshot of tracked property values before the update.
 			 *
 			 * @since 10.1.0
-			 * @since 10.7.0 Added $changed_props and $old_state parameters.
+			 * @since 10.8.0 Added $changed_props and $old_state parameters.
 			 */
 			do_action( 'woocommerce_fulfillment_after_update', $data, $changed_props, $old_state );
 		}
@@ -634,7 +634,7 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 	 *
 	 * This is used when an order is permanently deleted to prevent orphaned rows.
 	 *
-	 * @since 10.7.0
+	 * @since 10.8.0
 	 *
 	 * @param string $entity_type The entity type (e.g. 'WC_Order').
 	 * @param int    $entity_id   The entity ID.
@@ -642,7 +642,7 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 	 * @return int The number of fulfillment records deleted.
 	 *
 	 * @throws \RuntimeException If a database query fails.
-	 * @throws \Throwable If the deletion fails.
+	 * @throws \Throwable Re-thrown after rolling back the transaction.
 	 */
 	public function delete_by_entity( string $entity_type, int $entity_id ): int {
 		global $wpdb;

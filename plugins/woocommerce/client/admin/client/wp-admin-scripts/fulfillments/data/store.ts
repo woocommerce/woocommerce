@@ -150,13 +150,13 @@ const publicActions = {
 				const updated = await apiFetch< Fulfillment >( {
 					path: addQueryArgs(
 						`/wc/v3/orders/${ orderId }/fulfillments/${ fulfillment.id }`,
-						{ notify_customer: notifyCustomer }
+						{
+							notify_customer: notifyCustomer,
+							customer_note: customerNote,
+						}
 					),
 					method: 'PUT',
-					data: {
-						...fulfillment,
-						customer_note: customerNote,
-					},
+					data: fulfillment,
 				} );
 				if ( ! updated.id ) {
 					throw new Error( 'Fulfillment ID is missing in response' );
