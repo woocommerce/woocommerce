@@ -545,6 +545,28 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should catch and log exception when safety net receives an unknown type.
+	 */
+	public function test_handle_safety_net_logs_error_for_unknown_type(): void {
+		$mock_logger = $this->getMockBuilder( 'WC_Logger_Interface' )->getMock();
+		$mock_logger->expects( $this->once() )
+			->method( 'error' )
+			->with(
+				$this->stringContains( 'Safety net failed:' ),
+				$this->equalTo( array( 'source' => PushNotifications::FEATURE_NAME ) )
+			);
+
+		$logger_override = fn () => $mock_logger;
+		add_filter( 'woocommerce_logging_class', $logger_override );
+
+		$this->dispatcher->expects( $this->never() )->method( 'dispatch' );
+
+		$this->sut->handle_safety_net( 'unknown_type', 1 );
+
+		remove_filter( 'woocommerce_logging_class', $logger_override );
+	}
+
+	/**
 	 * @testdox Should skip dispatch when the order total is below the user's min_amount threshold.
 	 */
 	public function test_process_skips_dispatch_when_order_below_min_amount(): void {
