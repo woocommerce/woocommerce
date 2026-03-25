@@ -6,6 +6,7 @@
 namespace Automattic\WooCommerce\Checkout\Helpers;
 
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
+use Automattic\WooCommerce\Enums\OrderItemType;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 
@@ -93,7 +94,7 @@ final class ReserveStock {
 			$items = array_filter(
 				$order->get_items(),
 				function ( $item ) {
-					return $item->is_type( 'line_item' ) && $item->get_product() instanceof \WC_Product && $item->get_quantity() > 0;
+					return $item->is_type( OrderItemType::LINE_ITEM ) && $item->get_product() instanceof \WC_Product && $item->get_quantity() > 0;
 				}
 			);
 			$rows  = array();

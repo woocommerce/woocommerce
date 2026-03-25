@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection;
 
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
+use Automattic\WooCommerce\Enums\OrderItemType;
 use InvalidArgumentException;
 
 /**
@@ -434,7 +435,7 @@ class HandlerRegistry {
 					function ( $item ) {
 						return $item->get_product_id();
 					},
-					$order->get_items( 'line_item' )
+					$order->get_items( OrderItemType::LINE_ITEM )
 				)
 			);
 		}
