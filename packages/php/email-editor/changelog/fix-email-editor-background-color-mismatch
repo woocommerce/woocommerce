@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix background color mismatch between layout and template group when per-block padding distribution is active
