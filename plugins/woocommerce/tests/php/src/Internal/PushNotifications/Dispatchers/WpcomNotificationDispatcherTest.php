@@ -277,48 +277,19 @@ class WpcomNotificationDispatcherTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Creates a concrete Notification instance for testing.
+	 * Creates a mock Notification instance for testing.
 	 *
 	 * @param array|null $payload The payload to return from to_payload().
 	 * @return NewOrderNotification
 	 */
 	private function create_notification( ?array $payload = array( 'test' => true ) ): NewOrderNotification {
-		return new class( $payload ) extends NewOrderNotification {
-			/** @var array|null */
-			private ?array $test_payload;
+		$mock = $this->getMockBuilder( NewOrderNotification::class )
+			->setConstructorArgs( array( 1 ) )
+			->onlyMethods( array( 'to_payload', 'has_meta', 'write_meta' ) )
+			->getMock();
+		$mock->method( 'to_payload' )->willReturn( $payload );
 
-			/**
-			 * @param array|null $payload The payload to return.
-			 */
-			public function __construct( ?array $payload ) {
-				$this->type = 'store_order';
-				parent::__construct( 1 );
-				$this->test_payload = $payload;
-			}
-
-			/**
-			 * {@inheritDoc}
-			 */
-			public function to_payload(): ?array {
-				return $this->test_payload;
-			}
-
-			/**
-			 * {@inheritDoc}
-			 *
-			 * @param string $key The meta key.
-			 */
-			public function has_meta( string $key ): bool {
-				return false;
-			}
-
-			/**
-			 * {@inheritDoc}
-			 *
-			 * @param string $key The meta key.
-			 */
-			public function write_meta( string $key ): void {}
-		};
+		return $mock;
 	}
 
 	/**

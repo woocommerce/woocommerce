@@ -14,14 +14,6 @@ class StubReviewNotification extends NewReviewNotification {
 	private array $meta = array();
 
 	/**
-	 * @param int $resource_id The resource ID.
-	 */
-	public function __construct( int $resource_id ) {
-		$this->type = 'store_review';
-		parent::__construct( $resource_id );
-	}
-
-	/**
 	 * {@inheritDoc}
 	 */
 	public function to_payload(): ?array {

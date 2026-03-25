@@ -28,14 +28,6 @@ abstract class Notification {
 	);
 
 	/**
-	 * The notification type identifier, derived from the NOTIFICATION_CLASSES
-	 * map.
-	 *
-	 * @var string
-	 */
-	protected string $type;
-
-	/**
 	 * The ID of the resource this notification is about (e.g. order ID, comment
 	 * ID).
 	 *

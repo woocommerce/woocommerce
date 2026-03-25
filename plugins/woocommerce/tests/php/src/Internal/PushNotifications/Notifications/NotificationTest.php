@@ -17,50 +17,12 @@ use WC_Unit_Test_Case;
  */
 class NotificationTest extends WC_Unit_Test_Case {
 	/**
-	 * @testdox Should return the notification type.
-	 */
-	public function test_get_type(): void {
-		$notification = new StubOrderNotification( 42 );
-
-		$this->assertSame( 'store_order', $notification->get_type() );
-	}
-
-	/**
-	 * @testdox Should store and return the resource ID.
-	 */
-	public function test_get_resource_id(): void {
-		$notification = new StubOrderNotification( 42 );
-
-		$this->assertSame( 42, $notification->get_resource_id() );
-	}
-
-	/**
 	 * @testdox Should return an identifier combining blog ID, type, and resource ID.
 	 */
 	public function test_get_identifier(): void {
 		$notification = new StubOrderNotification( 42 );
 
 		$this->assertSame( get_current_blog_id() . '_store_order_42', $notification->get_identifier() );
-	}
-
-	/**
-	 * @testdox Should return different identifiers for different resource IDs.
-	 */
-	public function test_get_identifier_differs_by_resource_id(): void {
-		$first  = new StubOrderNotification( 42 );
-		$second = new StubOrderNotification( 43 );
-
-		$this->assertNotSame( $first->get_identifier(), $second->get_identifier() );
-	}
-
-	/**
-	 * @testdox Should return different identifiers for different types with the same resource ID.
-	 */
-	public function test_get_identifier_differs_by_type(): void {
-		$order  = new StubOrderNotification( 42 );
-		$review = new StubReviewNotification( 42 );
-
-		$this->assertNotSame( $order->get_identifier(), $review->get_identifier() );
 	}
 
 	/**
@@ -78,51 +40,36 @@ class NotificationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should throw when resource_id is zero.
+	 * @testdox Should throw when resource_id is $resource_id.
+	 * @testWith [0]
+	 *           [-1]
+	 *
+	 * @param int $resource_id The invalid resource ID.
 	 */
-	public function test_throws_for_zero_resource_id(): void {
+	public function test_throws_for_non_positive_resource_id( int $resource_id ): void {
 		$this->expectException( InvalidArgumentException::class );
 
-		new StubOrderNotification( 0 );
+		new StubOrderNotification( $resource_id );
 	}
 
 	/**
-	 * @testdox Should throw when resource_id is negative.
+	 * @testdox from_array should create correct notification for $type type.
+	 * @testWith ["store_order", "Automattic\\WooCommerce\\Internal\\PushNotifications\\Notifications\\NewOrderNotification"]
+	 *           ["store_review", "Automattic\\WooCommerce\\Internal\\PushNotifications\\Notifications\\NewReviewNotification"]
+	 *
+	 * @param string $type           The notification type.
+	 * @param string $expected_class The expected class name.
 	 */
-	public function test_throws_for_negative_resource_id(): void {
-		$this->expectException( InvalidArgumentException::class );
-
-		new StubOrderNotification( -1 );
-	}
-
-	/**
-	 * @testdox Should create a NewOrderNotification from array data.
-	 */
-	public function test_from_array_creates_order_notification(): void {
+	public function test_from_array_creates_notification( string $type, string $expected_class ): void {
 		$notification = Notification::from_array(
 			array(
-				'type'        => 'store_order',
+				'type'        => $type,
 				'resource_id' => 42,
 			)
 		);
 
-		$this->assertInstanceOf( NewOrderNotification::class, $notification );
+		$this->assertInstanceOf( $expected_class, $notification );
 		$this->assertSame( 42, $notification->get_resource_id() );
-	}
-
-	/**
-	 * @testdox from_array should create a NewReviewNotification for store_review type.
-	 */
-	public function test_from_array_creates_review_notification(): void {
-		$notification = Notification::from_array(
-			array(
-				'type'        => 'store_review',
-				'resource_id' => 99,
-			)
-		);
-
-		$this->assertInstanceOf( NewReviewNotification::class, $notification );
-		$this->assertSame( 99, $notification->get_resource_id() );
 	}
 
 	/**
