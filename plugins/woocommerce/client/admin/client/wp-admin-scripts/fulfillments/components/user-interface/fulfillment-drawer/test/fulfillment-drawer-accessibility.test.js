@@ -94,7 +94,7 @@ describe( 'FulfillmentDrawer Accessibility', () => {
 			'aria-labelledby',
 			'fulfillment-drawer-header'
 		);
-		expect( dialog ).toHaveAttribute( 'aria-label', 'Fulfillment drawer' );
+		expect( dialog ).not.toHaveAttribute( 'aria-label' );
 		expect( dialog ).toHaveAttribute( 'aria-hidden', 'false' );
 	} );
 
