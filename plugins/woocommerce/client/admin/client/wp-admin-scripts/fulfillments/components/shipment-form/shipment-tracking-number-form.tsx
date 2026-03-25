@@ -148,6 +148,8 @@ export default function ShipmentTrackingNumberForm() {
 			);
 			speak( successMessage, 'polite' );
 		} catch ( err ) {
+			// eslint-disable-next-line no-console
+			console.error( 'Tracking number lookup failed:', err );
 			const errorMessage = __(
 				'Failed to fetch shipment information.',
 				'woocommerce'

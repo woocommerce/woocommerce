@@ -2,7 +2,6 @@
  * External dependencies
  */
 import React, { useEffect, useRef } from 'react';
-import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -79,7 +78,7 @@ const FulfillmentDrawer: React.FC< Props > = ( {
 				if ( ! drawerElement ) return;
 
 				const focusableElements = drawerElement.querySelectorAll(
-					'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+					'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])'
 				);
 
 				if ( focusableElements.length === 0 ) return;
@@ -137,7 +136,6 @@ const FulfillmentDrawer: React.FC< Props > = ( {
 					].join( ' ' ) }
 					role="dialog"
 					aria-modal="true"
-					aria-label={ __( 'Fulfillment drawer', 'woocommerce' ) }
 					aria-labelledby="fulfillment-drawer-header"
 					aria-hidden={ ! isOpen }
 					tabIndex={ -1 }

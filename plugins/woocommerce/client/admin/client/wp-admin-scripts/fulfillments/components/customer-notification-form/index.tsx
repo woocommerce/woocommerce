@@ -49,14 +49,15 @@ export default function CustomerNotificationBox( {
 		};
 	}, [] );
 
+	const descriptionId = 'notification-description';
+
 	useEffect( () => {
 		if ( toggleRef.current ) {
 			toggleRef.current.ariaLabel =
 				headerStrings[ type ] || headerStrings.fulfill;
-			toggleRef.current.ariaDescription =
-				contentStrings[ type ] || contentStrings.fulfill;
+			toggleRef.current.setAttribute( 'aria-describedby', descriptionId );
 		}
-	}, [ type, contentStrings, headerStrings ] );
+	}, [ type, headerStrings ] );
 
 	return (
 		<FulfillmentCard
@@ -79,7 +80,10 @@ export default function CustomerNotificationBox( {
 				</>
 			}
 		>
-			<p className="woocommerce-fulfillment-description">
+			<p
+				id={ descriptionId }
+				className="woocommerce-fulfillment-description"
+			>
 				{ contentStrings[ type ] || contentStrings.fulfill }
 			</p>
 		</FulfillmentCard>
