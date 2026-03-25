@@ -3901,7 +3901,12 @@ class WC_AJAX {
 					);
 					continue;
 				}
-				wp_delete_term( $term_id, $taxonomy );
+				$delete_result = wp_delete_term( $term_id, $taxonomy );
+				if ( is_wp_error( $delete_result ) || false === $delete_result ) {
+					$reserved_slug_error = is_wp_error( $delete_result )
+						? $delete_result->get_error_message()
+						: __( 'Failed to delete the shipping provider.', 'woocommerce' );
+				}
 				continue;
 			}
 
@@ -3935,6 +3940,8 @@ class WC_AJAX {
 					$testable_url = str_replace( '__PLACEHOLDER__', 'test', $data['tracking_url_template'] );
 					if ( filter_var( $testable_url, FILTER_VALIDATE_URL ) && preg_match( '#^https?://#i', $testable_url ) ) {
 						$tracking_url_template = esc_url_raw( $data['tracking_url_template'], array( 'http', 'https' ) );
+					} else {
+						$reserved_slug_error = __( 'The tracking URL template must be a valid HTTP or HTTPS URL.', 'woocommerce' );
 					}
 				}
 			}
@@ -3946,6 +3953,8 @@ class WC_AJAX {
 					$icon_url = '';
 				} elseif ( filter_var( $data['icon'], FILTER_VALIDATE_URL ) && preg_match( '#^https?://#i', $data['icon'] ) ) {
 					$icon_url = esc_url_raw( $data['icon'], array( 'http', 'https' ) );
+				} else {
+					$reserved_slug_error = __( 'The icon URL must be a valid HTTP or HTTPS URL.', 'woocommerce' );
 				}
 			}
 
@@ -3958,6 +3967,7 @@ class WC_AJAX {
 
 				$inserted_term = wp_insert_term( $provider_name, $taxonomy, $update_args );
 				if ( is_wp_error( $inserted_term ) ) {
+					$reserved_slug_error = $inserted_term->get_error_message();
 					continue;
 				}
 				$term_id = $inserted_term['term_id'];
@@ -4055,6 +4065,11 @@ class WC_AJAX {
 			)
 		);
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		// Fail safe: assume in use if the query itself failed.
+		if ( $wpdb->last_error ) {
+			return true;
+		}
 
 		return null !== $exists;
 	}

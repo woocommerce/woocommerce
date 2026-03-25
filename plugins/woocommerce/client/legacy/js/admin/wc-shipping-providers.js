@@ -175,7 +175,7 @@
 						const rowData = providers[ term_id ];
 
 						// Make slug read-only when editing an existing provider.
-						if ( rowData && rowData.action === 'edit' ) {
+						if ( rowData ) {
 							$('.wc-backbone-modal-content').find( 'input[name="slug"]' ).prop( 'readonly', true );
 						}
 
@@ -193,6 +193,10 @@
 						term_id = $( this ).closest('tr').data('id');
 
 					event.preventDefault();
+
+					if ( ! window.confirm( data.strings.delete_confirmation || 'Are you sure you want to delete this shipping provider?' ) ) {
+						return;
+					}
 
 					view.block();
 

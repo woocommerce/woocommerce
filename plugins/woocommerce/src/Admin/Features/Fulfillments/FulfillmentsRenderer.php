@@ -636,6 +636,13 @@ class FulfillmentsRenderer {
 		if ( empty( $order_ids ) ) {
 			$query->set( 'post__in', array( 0 ) );
 		} else {
+			$existing = $query->get( 'post__in' );
+			if ( ! empty( $existing ) && is_array( $existing ) ) {
+				$order_ids = array_intersect( $existing, $order_ids );
+				if ( empty( $order_ids ) ) {
+					$order_ids = array( 0 );
+				}
+			}
 			$query->set( 'post__in', $order_ids );
 		}
 	}

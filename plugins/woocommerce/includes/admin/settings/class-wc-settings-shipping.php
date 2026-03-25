@@ -518,6 +518,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 				'strings'                     => array(
 					'unload_confirmation_msg' => __( 'Your changed data will be lost if you leave this page without saving.', 'woocommerce' ),
 					'save_failed'             => __( 'Your changes were not saved. Please retry.', 'woocommerce' ),
+					'delete_confirmation'     => __( 'Are you sure you want to delete this shipping provider?', 'woocommerce' ),
 				),
 			)
 		);
