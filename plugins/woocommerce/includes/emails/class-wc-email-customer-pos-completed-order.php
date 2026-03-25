@@ -278,7 +278,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 		private function add_pos_customizations() {
 			// Add unit price display: in the quantity column with email improvements, or below the product name without.
 			if ( $this->email_improvements_enabled ) {
-				add_filter( 'woocommerce_email_order_items_quantity_display', array( $this, 'format_quantity_with_unit_price' ), 10, 3 );
+				add_filter( 'woocommerce_email_order_item_quantity_display', array( $this, 'format_quantity_with_unit_price' ), 10, 3 );
 			} else {
 				add_action( 'woocommerce_order_item_meta_start', array( $this, 'add_unit_price' ), 10, 3 );
 			}
@@ -293,7 +293,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 		 */
 		private function remove_pos_customizations() {
 			// Remove actions and filters after generating content to avoid affecting other emails.
-			remove_filter( 'woocommerce_email_order_items_quantity_display', array( $this, 'format_quantity_with_unit_price' ), 10 );
+			remove_filter( 'woocommerce_email_order_item_quantity_display', array( $this, 'format_quantity_with_unit_price' ), 10 );
 			remove_action( 'woocommerce_order_item_meta_start', array( $this, 'add_unit_price' ), 10 );
 			remove_filter( 'woocommerce_get_order_item_totals', array( $this, 'order_item_totals' ), 10 );
 			remove_filter( 'woocommerce_email_footer_text', array( $this, 'replace_footer_placeholders' ), 1 );

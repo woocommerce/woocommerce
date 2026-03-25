@@ -64,7 +64,7 @@ foreach ( $items as $item_id => $item ) :
 			 *
 			 * @since 10.7.0
 			 */
-			$qty_display   = apply_filters( 'woocommerce_email_order_items_quantity_display', $qty_display, $item, $order );
+			$qty_display   = apply_filters( 'woocommerce_email_order_item_quantity_display', $qty_display, $item, $order );
 			$product_name .= ' ' . $qty_display;
 			echo wp_kses_post( str_pad( wp_kses_post( $product_name ), 40 ) );
 			echo ' ';
@@ -106,7 +106,7 @@ foreach ( $items as $item_id => $item ) :
 			 *
 			 * @since 10.7.0
 			 */
-			$qty_display = apply_filters( 'woocommerce_email_order_items_quantity_display', $qty_display, $item, $order );
+			$qty_display = apply_filters( 'woocommerce_email_order_item_quantity_display', $qty_display, $item, $order );
 			echo ' ' . $qty_display;
 			echo ' = ' . $order->get_formatted_line_subtotal( $item ) . "\n";
 			// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped

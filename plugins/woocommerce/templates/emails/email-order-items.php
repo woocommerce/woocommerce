@@ -205,7 +205,7 @@ foreach ( $items as $item_id => $item ) :
 			/**
 			 * Filter the email order item quantity display.
 			 *
-			 * @param int                   $quantity Item quantity.
+			 * @param string                $quantity Item quantity.
 			 * @param WC_Order_Item_Product $item     Item object.
 			 *
 			 * @since 2.4.0
@@ -222,7 +222,7 @@ foreach ( $items as $item_id => $item ) :
 			 *
 			 * @since 10.7.0
 			 */
-			echo wp_kses_post( apply_filters( 'woocommerce_email_order_items_quantity_display', $qty_display, $item, $order ) );
+			echo wp_kses_post( apply_filters( 'woocommerce_email_order_item_quantity_display', $qty_display, $item, $order ) );
 			?>
 		</td>
 		<td class="td font-family text-align-<?php echo esc_attr( $price_text_align ); ?>" style="vertical-align:middle;">
