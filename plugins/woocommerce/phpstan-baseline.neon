@@ -5899,6 +5899,12 @@ parameters:
 			path: includes/admin/meta-boxes/views/html-order-fee.php
 
 		-
+			message: '#^Variable \$cogs_is_enabled might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: includes/admin/meta-boxes/views/html-order-fee.php
+
+		-
 			message: '#^Variable \$order might not be defined\.$#'
 			identifier: variable.undefined
 			count: 7
@@ -5906,12 +5912,6 @@ parameters:
 
 		-
 			message: '#^Variable \$order_taxes might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: includes/admin/meta-boxes/views/html-order-fee.php
-
-		-
-			message: '#^Variable \$cogs_is_enabled might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1
 			path: includes/admin/meta-boxes/views/html-order-fee.php
@@ -6085,13 +6085,13 @@ parameters:
 			path: includes/admin/meta-boxes/views/html-order-refund.php
 
 		-
-			message: '#^Variable \$order_taxes might not be defined\.$#'
+			message: '#^Variable \$cogs_is_enabled might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1
 			path: includes/admin/meta-boxes/views/html-order-refund.php
 
 		-
-			message: '#^Variable \$cogs_is_enabled might not be defined\.$#'
+			message: '#^Variable \$order_taxes might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1
 			path: includes/admin/meta-boxes/views/html-order-refund.php
@@ -35650,12 +35650,6 @@ parameters:
 			path: includes/wc-product-functions.php
 
 		-
-			message: '#^Call to function is_string\(\) with string will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: includes/wc-product-functions.php
-
-		-
 			message: '#^Cannot access property \$slug on WP_Error\|WP_Term\|null\.$#'
 			identifier: property.nonObject
 			count: 2
@@ -37214,12 +37208,6 @@ parameters:
 			identifier: assign.propertyType
 			count: 1
 			path: includes/wccom-site/installation/installation-steps/class-wc-wccom-site-installation-step-get-product-info.php
-
-		-
-			message: '#^Cannot access offset ''destination'' on array\|WP_Error\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: includes/wccom-site/installation/installation-steps/class-wc-wccom-site-installation-step-move-product.php
 
 		-
 			message: '#^Method WC_WCCOM_Site_Installation_Step_Move_Product\:\:run\(\) has no return type specified\.$#'
@@ -56887,12 +56875,6 @@ parameters:
 			message: '#^Method Automattic\\WooCommerce\\Caches\\OrderCountCache\:\:decrement\(\) should return int but returns int\|false\.$#'
 			identifier: return.type
 			count: 1
-			path: src/Caches/OrderCountCache.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Caches\\OrderCountCache\:\:get\(\) should return array\<int\> but returns null\.$#'
-			identifier: return.type
-			count: 2
 			path: src/Caches/OrderCountCache.php
 
 		-

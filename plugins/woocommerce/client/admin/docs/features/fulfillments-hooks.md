@@ -53,23 +53,29 @@ function update_inventory_system( $fulfillment ) {
 
 Fired after a fulfillment is successfully updated in the database.
 
-**File:** `src/Admin/Features/Fulfillments/DataStore/FulfillmentsDataStore.php:262`
+**File:** `src/Admin/Features/Fulfillments/DataStore/FulfillmentsDataStore.php`
 
 **Parameters:**
 
 -   `$data` (Fulfillment) - The updated fulfillment object
--   `$changed_props` (array) - List of tracked property keys that changed (e.g. `'status'`, `'items'`, `'_tracking_number'`, `'_tracking_url'`, `'_shipping_provider'`)
--   `$old_state` (array) - Snapshot of tracked property values before the update
+-   `$changes` (array) - The changes that were applied, as returned by `Fulfillment::get_changes()` before save. Core data properties (e.g. `status`, `is_fulfilled`) sit at the top level; meta-based changes (e.g. `_tracking_number`, `_shipment_provider`, `_items`) are nested under the `meta_data` key.
+-   `$previous_status` (string) - The fulfillment status before the update (e.g. `'unfulfilled'`)
 
-**Purpose:** Allows plugins to perform actions after a fulfillment is updated. Only tracked properties (status, items, tracking number, tracking URL, shipping provider) are compared; changes to other metadata do not appear in `$changed_props`.
+**Purpose:** Allows plugins to perform actions after a fulfillment is updated. All core data and metadata changes are included in `$changes`.
 
 ```php
 add_action( 'woocommerce_fulfillment_after_update', 'sync_fulfillment_changes', 10, 3 );
 
-function sync_fulfillment_changes( $fulfillment, $changed_props, $old_state ) {
-    // Only sync when tracking info changes
-    if ( in_array( '_tracking_number', $changed_props, true ) ) {
+function sync_fulfillment_changes( $fulfillment, $changes, $previous_status ) {
+    // Check if tracking info changed
+    $meta_changes = $changes['meta_data'] ?? array();
+    if ( array_key_exists( '_tracking_number', $meta_changes ) ) {
         // Sync tracking to external service
+    }
+
+    // Check if status changed
+    if ( array_key_exists( 'status', $changes ) ) {
+        // Status changed from $previous_status to $changes['status']
     }
 }
 ```

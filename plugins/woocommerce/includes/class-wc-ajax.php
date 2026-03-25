@@ -1867,6 +1867,7 @@ class WC_AJAX {
 		$data_store = WC_Data_Store::load( 'product' );
 		$ids        = $data_store->search_products( $term, 'downloadable', true, false, $limit );
 
+		_prime_post_caches( $ids );
 		$product_objects = array_filter( array_map( 'wc_get_product', $ids ), 'wc_products_array_filter_readable' );
 		$products        = array();
 

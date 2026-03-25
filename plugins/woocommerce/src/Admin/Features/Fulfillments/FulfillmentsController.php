@@ -93,8 +93,11 @@ class FulfillmentsController {
 		global $wpdb;
 
 		if ( get_option( 'woocommerce_fulfillments_db_tables_created', false ) ) {
-			// The tables already exist, no need to create them again.
-			return;
+			// Verify the tables actually exist (the option may be stale after DB resets in tests).
+			$table_exists = $wpdb->get_var( "SHOW TABLES LIKE '{$wpdb->prefix}wc_order_fulfillments'" );
+			if ( $table_exists ) {
+				return;
+			}
 		}
 
 		// Drop the tables if they exist, to ensure a clean slate.
