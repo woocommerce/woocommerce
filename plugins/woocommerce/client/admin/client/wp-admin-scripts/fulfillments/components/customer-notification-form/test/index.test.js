@@ -1,8 +1,7 @@
 /**
  * External dependencies
  */
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render, screen, fireEvent } from '@testing-library/react';
 
 /**
  * Internal dependencies
@@ -52,16 +51,16 @@ jest.mock( '@wordpress/components', () => ( {
 	),
 	TextareaControl: ( props ) => (
 		<div data-testid="textarea-control">
-			<label>
-				{ props.label }
-				<textarea
-					data-testid="customer-note-input"
-					value={ props.value }
-					onChange={ ( e ) => props.onChange( e.target.value ) }
-					placeholder={ props.placeholder }
-					rows={ props.rows }
-				/>
-			</label>
+			{ /* eslint-disable-next-line jsx-a11y/label-has-associated-control */ }
+			<label htmlFor="customer-note">{ props.label }</label>
+			<textarea
+				id="customer-note"
+				data-testid="customer-note-input"
+				value={ props.value }
+				onChange={ ( e ) => props.onChange( e.target.value ) }
+				placeholder={ props.placeholder }
+				rows={ props.rows }
+			/>
 		</div>
 	),
 } ) );
@@ -148,14 +147,12 @@ describe( 'CustomerNotificationBox component', () => {
 		).not.toBeInTheDocument();
 	} );
 
-	it( 'should call setCustomerNote when textarea value changes', async () => {
-		const user = userEvent.setup();
-
+	it( 'should call setCustomerNote when textarea value changes', () => {
 		render( <CustomerNotificationBox type="update" /> );
 
 		const textarea = screen.getByTestId( 'customer-note-input' );
-		await user.type( textarea, 'a' );
+		fireEvent.change( textarea, { target: { value: 'Test note' } } );
 
-		expect( setCustomerNote ).toHaveBeenCalledWith( 'a' );
+		expect( setCustomerNote ).toHaveBeenCalledWith( 'Test note' );
 	} );
 } );
