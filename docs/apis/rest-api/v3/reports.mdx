@@ -14,8 +14,6 @@ The reports API allows you to view all types of reports available.
 
 This API lets you retrieve and view a simple list of available reports.
 
-### HTTP request
-
 ```http
 GET /wp-json/wc/v3/reports
 ```
@@ -63,9 +61,7 @@ woocommerce.get("reports").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 [
@@ -232,11 +228,12 @@ woocommerce.get("reports").parsed_response
 ]
 ```
 
+  </TabItem>
+</Tabs>
+
 ## Retrieve sales report
 
 This API lets you retrieve and view a sales report.
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v3/reports/sales
@@ -300,9 +297,7 @@ woocommerce.get("reports/sales", query).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 [
@@ -349,6 +344,9 @@ woocommerce.get("reports/sales", query).parsed_response
 ]
 ```
 
+  </TabItem>
+</Tabs>
+
 #### Sales report properties
 
 | Attribute           | Type    | Description                                                           |
@@ -377,8 +375,6 @@ woocommerce.get("reports/sales", query).parsed_response
 ## Retrieve top sellers report
 
 This API lets you retrieve and view a list of top sellers report.
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v3/reports/top_sellers
@@ -439,9 +435,7 @@ woocommerce.get("reports/top_sellers", query).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 [
@@ -482,6 +476,9 @@ woocommerce.get("reports/top_sellers", query).parsed_response
 ]
 ```
 
+  </TabItem>
+</Tabs>
+
 #### Top sellers report properties
 
 | Attribute    | Type    | Description                                                          |
@@ -502,8 +499,6 @@ woocommerce.get("reports/top_sellers", query).parsed_response
 ## Retrieve coupons totals
 
 This API lets you retrieve and view coupons totals report.
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v3/reports/coupons/totals
@@ -554,9 +549,7 @@ woocommerce.get("reports/coupons/totals").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 [
@@ -578,6 +571,9 @@ woocommerce.get("reports/coupons/totals").parsed_response
 ]
 ```
 
+  </TabItem>
+</Tabs>
+
 #### Coupons totals properties
 
 | Attribute | Type   | Description                                                                            |
@@ -589,8 +585,6 @@ woocommerce.get("reports/coupons/totals").parsed_response
 ## Retrieve customers totals
 
 This API lets you retrieve and view customers totals report.
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v3/reports/customers/totals
@@ -641,9 +635,7 @@ woocommerce.get("reports/customers/totals").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 [
@@ -660,6 +652,9 @@ woocommerce.get("reports/customers/totals").parsed_response
 ]
 ```
 
+  </TabItem>
+</Tabs>
+
 #### Customers totals properties
 
 | Attribute | Type   | Description                                                                            |
@@ -671,8 +666,6 @@ woocommerce.get("reports/customers/totals").parsed_response
 ## Retrieve orders totals
 
 This API lets you retrieve and view orders totals report.
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v3/reports/orders/totals
@@ -723,9 +716,7 @@ woocommerce.get("reports/orders/totals").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 [
@@ -767,6 +758,9 @@ woocommerce.get("reports/orders/totals").parsed_response
 ]
 ```
 
+  </TabItem>
+</Tabs>
+
 #### Orders totals properties
 
 | Attribute | Type   | Description                                                                            |
@@ -778,8 +772,6 @@ woocommerce.get("reports/orders/totals").parsed_response
 ## Retrieve products totals
 
 This API lets you retrieve and view products totals report.
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v3/reports/products/totals
@@ -830,9 +822,7 @@ woocommerce.get("reports/products/totals").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 [
@@ -859,6 +849,9 @@ woocommerce.get("reports/products/totals").parsed_response
 ]
 ```
 
+  </TabItem>
+</Tabs>
+
 #### Products totals properties
 
 | Attribute | Type   | Description                                                                            |
@@ -870,8 +863,6 @@ woocommerce.get("reports/products/totals").parsed_response
 ## Retrieve reviews totals
 
 This API lets you retrieve and view reviews totals report.
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v3/reports/reviews/totals
@@ -922,9 +913,7 @@ woocommerce.get("reports/reviews/totals").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 [
@@ -955,6 +944,9 @@ woocommerce.get("reports/reviews/totals").parsed_response
 	}
 ]
 ```
+
+  </TabItem>
+</Tabs>
 
 #### Reviews totals properties
 

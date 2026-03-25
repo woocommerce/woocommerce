@@ -104,13 +104,9 @@ The product variations API allows you to create, view, update, and delete indivi
 
 This API helps you to create a new product variation.
 
-### HTTP request
-
 ```http
 POST /wp-json/wc/v3/products/<product_id>/variations
 ```
-
-### JSON response example
 
 <Tabs>
   <TabItem value="curl" label="cURL">
@@ -222,9 +218,7 @@ woocommerce.post("products/22/variations", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -306,11 +300,12 @@ woocommerce.post("products/22/variations", data).parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 ## Retrieve a product variation
 
 This API lets you retrieve and view a specific product variation by ID.
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v3/products/<product_id>/variations/<id>
@@ -359,9 +354,7 @@ woocommerce.get("products/22/variations/732").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -443,11 +436,12 @@ woocommerce.get("products/22/variations/732").parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 ## List all product variations
 
 This API helps you to view all the product variations.
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v3/products/<product_id>/variations
@@ -496,9 +490,7 @@ woocommerce.get("products/22/variations").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 [
@@ -659,6 +651,9 @@ woocommerce.get("products/22/variations").parsed_response
 ]
 ```
 
+  </TabItem>
+</Tabs>
+
 #### Available parameters
 
 | Parameter        | Type    | Description                                                                                                                                                                                                                                                                 |
@@ -693,8 +688,6 @@ woocommerce.get("products/22/variations").parsed_response
 ## Update a product variation
 
 This API lets you make changes to a product variation.
-
-### HTTP request
 
 ```http
 PUT /wp-json/wc/v3/products/<product_id>/variations/<id>
@@ -765,9 +758,7 @@ woocommerce.put("products/22/variations/733", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -849,11 +840,12 @@ woocommerce.put("products/22/variations/733", data).parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 ## Delete a product variation
 
 This API helps you delete a product variation.
-
-### HTTP request
 
 ```http
 DELETE /wp-json/wc/v3/products/<product_id>/variations/<id>
@@ -904,9 +896,7 @@ woocommerce.delete("products/22/variations/733", force: true).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -988,6 +978,9 @@ woocommerce.delete("products/22/variations/733", force: true).parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 #### Available parameters
 
 | Parameter | Type   | Description                                                   |
@@ -1002,8 +995,6 @@ This API helps you to batch create, update and delete multiple product variation
 Note: By default it's limited to up to 100 objects to be created, updated or
 	deleted.
 :::
-
-### HTTP request
 
 ```http
 POST /wp-json/wc/v3/products/<product_id>/variations/batch
@@ -1212,9 +1203,7 @@ woocommerce.post("products/22/variations/batch", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -1534,3 +1523,6 @@ woocommerce.post("products/22/variations/batch", data).parsed_response
 	]
 }
 ```
+
+  </TabItem>
+</Tabs>

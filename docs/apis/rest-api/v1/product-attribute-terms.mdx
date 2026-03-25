@@ -22,8 +22,6 @@ The product attribute terms API allows you to create, view, update, and delete i
 ## Create an attribute term
 This API helps you to create a new product attribute term.
 
-### HTTP request
-
 ```http
 POST /wp-json/wc/v1/products/attributes/<attribute_id>/terms
 ```
@@ -93,9 +91,7 @@ woocommerce.post("products/attributes/2/terms", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -120,10 +116,11 @@ woocommerce.post("products/attributes/2/terms", data).parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 ## Retrieve an attribute term
 This API lets you retrieve a product attribute term by ID.
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v1/products/attributes/<attribute_id>/terms/<id>
@@ -172,9 +169,7 @@ woocommerce.get("products/attributes/2/terms/23").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -199,10 +194,11 @@ woocommerce.get("products/attributes/2/terms/23").parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 ## List all attribute terms
 This API lets you retrieve all terms from a product attribute.
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v1/products/attributes/<attribute_id>/terms
@@ -251,9 +247,7 @@ woocommerce.get("products/attributes/2/terms").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 [
@@ -400,6 +394,9 @@ woocommerce.get("products/attributes/2/terms").parsed_response
 ]
 ```
 
+  </TabItem>
+</Tabs>
+
 #### Available parameters
 |  Parameter   |   Type  |                                                                Description                                                                 |
 |--------------|---------|--------------------------------------------------------------------------------------------------------------------------------------------|
@@ -418,8 +415,6 @@ woocommerce.get("products/attributes/2/terms").parsed_response
 
 ## Update an attribute term
 This API lets you make changes to a product attribute term.
-
-### HTTP request
 
 ```http
 PUT /wp-json/wc/v1/products/attributes/<attribute_id>/terms/<id>
@@ -490,9 +485,7 @@ woocommerce.put("products/attributes/2/terms/23", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -517,10 +510,11 @@ woocommerce.put("products/attributes/2/terms/23", data).parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 ## Delete an attribute term
 This API helps you delete a product attribute term.
-
-### HTTP request
 
 ```http
 DELETE /wp-json/wc/v1/products/attributes/<attribute_id>/terms/<id>
@@ -571,9 +565,7 @@ woocommerce.delete("products/attributes/2/terms/23", force: true).parsed_respons
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -598,6 +590,9 @@ woocommerce.delete("products/attributes/2/terms/23", force: true).parsed_respons
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 #### Available parameters
 | Parameter |  Type  |                          Description                          |
 |-----------|--------|---------------------------------------------------------------|
@@ -609,8 +604,6 @@ This API helps you to batch create, update and delete multiple product attribute
 :::note
 Note: By default it's limited to up to 100 objects to be created, updated or deleted.
 :::
-
-### HTTP request
 
 ```http
 POST /wp-json/wc/v1/products/attributes/<attribute_id>/terms/batch
@@ -766,9 +759,7 @@ woocommerce.post("products/attributes/2/terms/batch", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -880,3 +871,6 @@ woocommerce.post("products/attributes/2/terms/batch", data).parsed_response
   ]
 }
 ```
+
+  </TabItem>
+</Tabs>

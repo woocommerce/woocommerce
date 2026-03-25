@@ -40,13 +40,9 @@ The shipping zone methods API allows you to create, view, update, and delete ind
 
 This API helps you to create a new shipping method to a shipping zone.
 
-### HTTP request
-
 ```http
 POST /wp-json/wc/v3/shipping/zones/<id>/methods
 ```
-
-### JSON response example
 
 <Tabs>
   <TabItem value="curl" label="cURL">
@@ -113,9 +109,7 @@ woocommerce.post("shipping/zones/5/methods", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -236,11 +230,12 @@ woocommerce.post("shipping/zones/5/methods", data).parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 ## Retrieve a shipping method from a shipping zone
 
 This API lets you retrieve and view a specific shipping method from a shipping zone by ID.
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v3/shipping/zones/<zone_id>/methods/<id>
@@ -289,9 +284,7 @@ woocommerce.get("shipping/zones/5/methods/26").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -412,11 +405,12 @@ woocommerce.get("shipping/zones/5/methods/26").parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 ## List all shipping methods from a shipping zone
 
 This API helps you to view all the shipping methods from a shipping zone.
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v3/shipping/zones/<id>/methods
@@ -465,9 +459,7 @@ woocommerce.get("shipping/zones/5/methods").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 [
@@ -655,11 +647,12 @@ woocommerce.get("shipping/zones/5/methods").parsed_response
 ]
 ```
 
+  </TabItem>
+</Tabs>
+
 ## Update a shipping method of a shipping zone
 
 This API lets you make changes to a shipping method of a shipping zone.
-
-### HTTP request
 
 ```http
 PUT /wp-json/wc/v3/shipping/zones/<zone_id>/methods/<id>
@@ -740,9 +733,7 @@ woocommerce.put("shipping/zones/5/methods/26", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -863,11 +854,12 @@ woocommerce.put("shipping/zones/5/methods/26", data).parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 ## Delete a shipping method from a shipping zone
 
 This API helps you delete a shipping method from a shipping zone.
-
-### HTTP request
 
 ```http
 DELETE /wp-json/wc/v3/shipping/zones/<zone_id>/methods/<id>
@@ -918,9 +910,7 @@ woocommerce.delete("shipping/zones/5/methods/26", force: true).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -1040,6 +1030,9 @@ woocommerce.delete("shipping/zones/5/methods/26", force: true).parsed_response
 	}
 }
 ```
+
+  </TabItem>
+</Tabs>
 
 #### Available parameters
 

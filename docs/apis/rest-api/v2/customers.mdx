@@ -69,8 +69,6 @@ The customer API allows you to create, view, update, and delete individual, or a
 ## Create a customer
 This API helps you to create a new customer.
 
-### HTTP request
-
 ```http
 POST /wp-json/wc/v2/customers
 ```
@@ -275,9 +273,7 @@ woocommerce.post("customers", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -335,10 +331,11 @@ woocommerce.post("customers", data).parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 ## Retrieve a customer
 This API lets you retrieve and view a specific customer by ID.
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v2/customers/<id>
@@ -387,9 +384,7 @@ woocommerce.get("customers/25").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -447,10 +442,11 @@ woocommerce.get("customers/25").parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 ## List all customers
 This API helps you to view all the customers.
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v2/customers
@@ -499,9 +495,7 @@ woocommerce.get("customers").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 [
@@ -614,6 +608,9 @@ woocommerce.get("customers").parsed_response
 ]
 ```
 
+  </TabItem>
+</Tabs>
+
 #### Available parameters
 | Parameter  | Type    | Description                                                                                                                                                                                 |
 | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -631,8 +628,6 @@ woocommerce.get("customers").parsed_response
 
 ## Update a customer
 This API lets you make changes to a customer.
-
-### HTTP request
 
 ```http
 PUT /wp-json/wc/v2/customers/<id>
@@ -733,9 +728,7 @@ woocommerce.put("customers/25", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -793,10 +786,11 @@ woocommerce.put("customers/25", data).parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 ## Delete a customer
 This API helps you delete a customer.
-
-### HTTP request
 
 ```http
 DELETE /wp-json/wc/v2/customers/<id>
@@ -847,9 +841,7 @@ woocommerce.delete("customers/25", force: true).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -907,6 +899,9 @@ woocommerce.delete("customers/25", force: true).parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 #### Available parameters
 | Parameter  |   Type  |                          Description                          |
 |------------|---------|---------------------------------------------------------------|
@@ -919,8 +914,6 @@ This API helps you to batch create, update and delete multiple customers.
 :::note
 Note: By default it's limited to up to 100 objects to be created, updated or deleted.
 :::
-
-### HTTP request
 
 ```http
 POST /wp-json/wc/v2/customers/batch
@@ -1351,9 +1344,7 @@ woocommerce.post("customers/batch", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -1578,10 +1569,11 @@ woocommerce.post("customers/batch", data).parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 ## Retrieve customer downloads
 This API lets you retrieve customer downloads permissions.
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v2/customers/<id>/downloads
@@ -1630,9 +1622,7 @@ woocommerce.get("customers/26/downloads").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 [
@@ -1672,6 +1662,9 @@ woocommerce.get("customers/26/downloads").parsed_response
 ]
 ```
 
+  </TabItem>
+</Tabs>
+
 ### Customer downloads properties
 | Attribute             | Type    | Description                                                                                                                               |
 | --------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
@@ -1687,7 +1680,7 @@ woocommerce.get("customers/26/downloads").parsed_response
 | `access_expires_gmt`  | string  | The date when download access expires, as GMT. `READ-ONLY`                                                  |
 | `file`                | object  | File details. `READ-ONLY` See [Customers downloads - File properties](#customers-downloads-file-properties) |
 
-#### Customer downloads - File properties
+### Customer downloads - File properties
 | Attribute | Type   | Description                                          |
 | --------- | ------ | ---------------------------------------------------- |
 | `name`    | string | File name. `READ-ONLY` |

@@ -19,13 +19,9 @@ The shipping zones API allows you to create, view, update, and delete individual
 ## Create a shipping zone
 This API helps you to create a new shipping zone.
 
-### HTTP request
-
 ```http
 POST /wp-json/wc/v2/shipping/zones
 ```
-
-### JSON response example
 
 <Tabs>
   <TabItem value="curl" label="cURL">
@@ -92,9 +88,7 @@ woocommerce.post("shipping/zones", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -121,10 +115,11 @@ woocommerce.post("shipping/zones", data).parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 ## Retrieve a shipping zone
 This API lets you retrieve and view a specific shipping zone by ID.
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v2/shipping/zones/<id>
@@ -173,9 +168,7 @@ woocommerce.get("shipping/zones/5").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -202,10 +195,11 @@ woocommerce.get("shipping/zones/5").parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 ## List all shipping zones
 This API helps you to view all the shipping zones.
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v2/shipping/zones
@@ -254,9 +248,7 @@ woocommerce.get("shipping/zones").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 [
@@ -307,10 +299,11 @@ woocommerce.get("shipping/zones").parsed_response
 ]
 ```
 
+  </TabItem>
+</Tabs>
+
 ## Update a shipping zone
 This API lets you make changes to a shipping zone.
-
-### HTTP request
 
 ```http
 PUT /wp-json/wc/v2/shipping/zones/<id>
@@ -381,9 +374,7 @@ woocommerce.put("shipping/zones/5", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -410,10 +401,11 @@ woocommerce.put("shipping/zones/5", data).parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 ## Delete a shipping zone
 This API helps you delete a shipping zone.
-
-### HTTP request
 
 ```http
 DELETE /wp-json/wc/v2/shipping/zones/<id>
@@ -464,9 +456,7 @@ woocommerce.delete("shipping/zones/5", force: true).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -492,6 +482,9 @@ woocommerce.delete("shipping/zones/5", force: true).parsed_response
   }
 }
 ```
+
+  </TabItem>
+</Tabs>
 
 #### Available parameters
 | Parameter |  Type  |                          Description                          |

@@ -37,8 +37,6 @@ The product categories API allows you to create, view, update, and delete indivi
 ## Create a product category
 This API helps you to create a new product category.
 
-### HTTP request
-
 ```http
 POST /wp-json/wc/v2/products/categories
 ```
@@ -125,9 +123,7 @@ woocommerce.post("products/categories", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -164,10 +160,11 @@ woocommerce.post("products/categories", data).parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 ## Retrieve a product category
 This API lets you retrieve a product category by ID.
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v2/products/categories/<id>
@@ -216,9 +213,7 @@ woocommerce.get("products/categories/9").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -255,10 +250,11 @@ woocommerce.get("products/categories/9").parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 ## List all product categories
 This API lets you retrieve all product categories.
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v2/products/categories
@@ -307,9 +303,7 @@ woocommerce.get("products/categories").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 [
@@ -506,6 +500,9 @@ woocommerce.get("products/categories").parsed_response
 ]
 ```
 
+  </TabItem>
+</Tabs>
+
 #### Available parameters
 | Parameter    | Type    | Description                                                                                                                                  |
 | ------------ | ------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -524,8 +521,6 @@ woocommerce.get("products/categories").parsed_response
 
 ## Update a product category
 This API lets you make changes to a product category.
-
-### HTTP request
 
 ```http
 PUT /wp-json/wc/v2/products/categories/<id>
@@ -596,9 +591,7 @@ woocommerce.put("products/categories/9", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -635,10 +628,11 @@ woocommerce.put("products/categories/9", data).parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 ## Delete a product category
 This API helps you delete a product category.
-
-### HTTP request
 
 ```http
 DELETE /wp-json/wc/v2/products/categories/<id>
@@ -689,9 +683,7 @@ woocommerce.delete("products/categories/9", force: true).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -728,6 +720,9 @@ woocommerce.delete("products/categories/9", force: true).parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 #### Available parameters
 | Parameter |  Type  |                          Description                          |
 |-----------|--------|---------------------------------------------------------------|
@@ -739,8 +734,6 @@ This API helps you to batch create, update and delete multiple product categorie
 :::note
 Note: By default it's limited to up to 100 objects to be created, updated or deleted.
 :::
-
-### HTTP request
 
 ```http
 POST /wp-json/wc/v2/products/categories/batch
@@ -896,9 +889,7 @@ woocommerce.post("products/categories/batch", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -1035,3 +1026,6 @@ woocommerce.post("products/categories/batch", data).parsed_response
   ]
 }
 ```
+
+  </TabItem>
+</Tabs>

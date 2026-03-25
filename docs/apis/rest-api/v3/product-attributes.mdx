@@ -25,8 +25,6 @@ The product attributes API allows you to create, view, update, and delete indivi
 
 This API helps you to create a new product attribute.
 
-### HTTP request
-
 ```http
 POST /wp-json/wc/v3/products/attributes
 ```
@@ -116,9 +114,7 @@ woocommerce.post("products/attributes", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -142,6 +138,9 @@ woocommerce.post("products/attributes", data).parsed_response
 	}
 }
 ```
+
+  </TabItem>
+</Tabs>
 
 ## Retrieve a product attribute
 
@@ -194,9 +193,7 @@ woocommerce.get("products/attributes/1").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -221,11 +218,12 @@ woocommerce.get("products/attributes/1").parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 ## List all product attributes
 
 This API helps you to view all the product attributes.
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v3/products/attributes
@@ -274,9 +272,7 @@ woocommerce.get("products/attributes").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 [
@@ -323,6 +319,9 @@ woocommerce.get("products/attributes").parsed_response
 ]
 ```
 
+  </TabItem>
+</Tabs>
+
 #### Available parameters
 
 | Parameter | Type   | Description                                                                                                                  |
@@ -332,8 +331,6 @@ woocommerce.get("products/attributes").parsed_response
 ## Update a product attribute
 
 This API lets you make changes to a product attribute.
-
-### HTTP request
 
 ```http
 PUT /wp-json/wc/v3/products/attributes/<id>
@@ -404,9 +401,7 @@ woocommerce.put("products/attributes/1", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -431,11 +426,12 @@ woocommerce.put("products/attributes/1", data).parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 ## Delete a product attribute
 
 This API helps you delete a product attribute.
-
-### HTTP request
 
 ```http
 DELETE /wp-json/wc/v3/products/attributes/<id>
@@ -490,9 +486,7 @@ woocommerce.delete("products/attributes/1", force: true).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -517,6 +511,9 @@ woocommerce.delete("products/attributes/1", force: true).parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 #### Available parameters
 
 | Parameter | Type   | Description                                                   |
@@ -531,8 +528,6 @@ This API helps you to batch create, update and delete multiple product attribute
 Note: By default it's limited to up to 100 objects to be created, updated or
 	deleted.
 :::
-
-### HTTP request
 
 ```http
 POST /wp-json/wc/v3/products/attributes/batch
@@ -681,9 +676,7 @@ woocommerce.post("products/attributes/batch", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -775,3 +768,6 @@ woocommerce.post("products/attributes/batch", data).parsed_response
 	]
 }
 ```
+
+  </TabItem>
+</Tabs>

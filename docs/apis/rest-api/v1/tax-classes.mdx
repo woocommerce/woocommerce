@@ -18,8 +18,6 @@ The tax classes API allows you to create, view, and delete individual tax classe
 ## Create a tax class
 This API helps you to create a new tax class.
 
-### HTTP request
-
 ```http
 POST /wp-json/wc/v1/taxes/classes
 ```
@@ -89,9 +87,7 @@ woocommerce.post("taxes/classes", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -107,10 +103,11 @@ woocommerce.post("taxes/classes", data).parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 ## List all tax classes
 This API helps you to view all tax classes.
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v1/taxes/classes
@@ -159,9 +156,7 @@ woocommerce.get("taxes/classes").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 [
@@ -201,14 +196,15 @@ woocommerce.get("taxes/classes").parsed_response
 ]
 ```
 
+  </TabItem>
+</Tabs>
+
 ## Delete a tax class
 This API helps you delete a tax class.
 
 :::warning
 This also will delete all tax rates from the selected class.
 :::
-
-### HTTP request
 
 ```http
 DELETE /wp-json/wc/v1/taxes/classes/<slug>
@@ -259,9 +255,7 @@ woocommerce.delete("taxes/classes/zero-rate", force: true).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -276,6 +270,9 @@ woocommerce.delete("taxes/classes/zero-rate", force: true).parsed_response
   }
 }
 ```
+
+  </TabItem>
+</Tabs>
 
 #### Available parameters
 | Parameter |  Type  |                          Description                          |

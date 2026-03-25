@@ -23,8 +23,6 @@ The system status tools API allows you to view and run tools from system status.
 ## Retrieve a tool from system status
 This API lets you retrieve and view a specific tool from system status by ID.
 
-### HTTP request
-
 ```http
 GET /wp-json/wc/v2/system_status/tools/<id>
 ```
@@ -72,9 +70,7 @@ woocommerce.get("system_status/tools/clear_transients").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -97,10 +93,11 @@ woocommerce.get("system_status/tools/clear_transients").parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 ## List all tools from system status
 This API helps you to view all tools from system status.
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v2/system_status/tools
@@ -149,9 +146,7 @@ woocommerce.get("system_status/tools").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 [
@@ -464,10 +459,11 @@ woocommerce.get("system_status/tools").parsed_response
 ]
 ```
 
+  </TabItem>
+</Tabs>
+
 ## Run a tool from system status
 This API lets you run a tool from system status.
-
-### HTTP request
 
 ```http
 PUT /wp-json/wc/v2/system_status/tools/<id>
@@ -538,9 +534,7 @@ woocommerce.put("system_status/tools/clear_transients", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -564,3 +558,6 @@ woocommerce.put("system_status/tools/clear_transients", data).parsed_response
   }
 }
 ```
+
+  </TabItem>
+</Tabs>

@@ -22,8 +22,6 @@ All properties are the same as those in the [order refunds endpoint](../order-re
 
 This API lets you retrieve and view refunds from your store, regardless of which order they are associated with.
 
-### HTTP request
-
 ```http
 GET /wp-json/wc/v3/refunds
 ```
@@ -71,9 +69,7 @@ woocommerce.get("refunds").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 [
@@ -160,6 +156,9 @@ woocommerce.get("refunds").parsed_response
 	}
 ]
 ```
+
+  </TabItem>
+</Tabs>
 
 #### Available parameters
 

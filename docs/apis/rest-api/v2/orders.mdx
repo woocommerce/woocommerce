@@ -174,8 +174,6 @@ The orders API allows you to create, view, update, and delete individual, or a b
 ## Create an order
 This API helps you to create a new order.
 
-### HTTP request
-
 ```http
 POST /wp-json/wc/v2/orders
 ```
@@ -457,9 +455,7 @@ woocommerce.post("orders", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -624,10 +620,11 @@ woocommerce.post("orders", data).parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 ## Retrieve an order
 This API lets you retrieve and view a specific order.
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v2/orders/<id>
@@ -676,9 +673,7 @@ woocommerce.get("orders/727").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -843,6 +838,9 @@ woocommerce.get("orders/727").parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 #### Available parameters
 | Parameter |  Type  |                    Description                    |
 |-----------|--------|---------------------------------------------------|
@@ -850,8 +848,6 @@ woocommerce.get("orders/727").parsed_response
 
 ## List all orders
 This API helps you to view all the orders.
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v2/orders
@@ -900,9 +896,7 @@ woocommerce.get("orders").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 [
@@ -1222,6 +1216,9 @@ woocommerce.get("orders").parsed_response
 ]
 ```
 
+  </TabItem>
+</Tabs>
+
 #### Available parameters
 | Parameter        | Type    | Description                                                                                                                                                                     |
 | ---------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -1248,8 +1245,6 @@ woocommerce.get("orders").parsed_response
 This API lets you make changes to an order.
 
 ### HTTP Request
-### HTTP request
-
 ```http
 PUT /wp-json/wc/v2/orders/<id>
 ```
@@ -1319,9 +1314,7 @@ woocommerce.put("orders/727", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -1491,10 +1484,11 @@ woocommerce.put("orders/727", data).parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 ## Delete an order
 This API helps you delete an order.
-
-### HTTP request
 
 ```http
 DELETE /wp-json/wc/v2/orders/<id>
@@ -1545,9 +1539,7 @@ woocommerce.delete("orders/727", force: true).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -1717,6 +1709,9 @@ woocommerce.delete("orders/727", force: true).parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 #### Available parameters
 | Parameter |  Type  |                               Description                               |
 |-----------|--------|-------------------------------------------------------------------------|
@@ -1728,8 +1723,6 @@ This API helps you to batch create, update and delete multiple orders.
 :::note
 Note: By default it's limited to up to 100 objects to be created, updated or deleted.
 :::
-
-### HTTP request
 
 ```http
 POST /wp-json/wc/v2/orders/batch
@@ -2320,9 +2313,7 @@ woocommerce.post("orders/batch", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -2994,3 +2985,6 @@ woocommerce.post("orders/batch", data).parsed_response
   ]
 }
 ```
+
+  </TabItem>
+</Tabs>

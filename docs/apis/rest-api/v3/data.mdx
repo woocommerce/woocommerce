@@ -14,8 +14,6 @@ The data API allows you to view all types of data available.
 
 This API lets you retrieve and view a simple list of available data endpoints.
 
-### HTTP request
-
 ```http
 GET /wp-json/wc/v3/data
 ```
@@ -63,9 +61,7 @@ woocommerce.get("data").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 [
@@ -120,6 +116,9 @@ woocommerce.get("data").parsed_response
 ]
 ```
 
+  </TabItem>
+</Tabs>
+
 #### Data properties
 
 | Attribute     | Type   | Description                                                          |
@@ -130,8 +129,6 @@ woocommerce.get("data").parsed_response
 ## List all continents
 
 This API helps you to view all the continents.
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v3/data/continents
@@ -182,9 +179,7 @@ woocommerce.get("data/continents").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 [
@@ -297,6 +292,9 @@ woocommerce.get("data/continents").parsed_response
 ]
 ```
 
+  </TabItem>
+</Tabs>
+
 #### Continents properties
 
 | Attribute   | Type   | Description                                                                                                                                              |
@@ -330,8 +328,6 @@ woocommerce.get("data/continents").parsed_response
 ## Retrieve continent data
 
 This API lets you retrieve and view a continent data.
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v3/data/continents/<location>
@@ -382,9 +378,7 @@ woocommerce.get("data/continents/eu").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -562,6 +556,9 @@ woocommerce.get("data/continents/eu").parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 #### Continent properties
 
 See [list of continents properties](#continents-properties).
@@ -569,8 +566,6 @@ See [list of continents properties](#continents-properties).
 ## List all countries
 
 This API helps you to view all the countries.
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v3/data/countries
@@ -621,9 +616,7 @@ woocommerce.get("data/countries").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 [
@@ -864,6 +857,9 @@ woocommerce.get("data/countries").parsed_response
 ]
 ```
 
+  </TabItem>
+</Tabs>
+
 #### Countries properties
 
 | Attribute | Type   | Description                                                                                                                                 |
@@ -882,8 +878,6 @@ woocommerce.get("data/countries").parsed_response
 ## Retrieve country data
 
 This API lets you retrieve and view a country data.
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v3/data/countries/<location>
@@ -934,9 +928,7 @@ woocommerce.get("data/countries/br").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -1067,6 +1059,9 @@ woocommerce.get("data/countries/br").parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 #### Country properties
 
 See [list of countries properties](#countries-properties).
@@ -1074,8 +1069,6 @@ See [list of countries properties](#countries-properties).
 ## List all currencies
 
 This API helps you to view all the currencies.
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v3/data/currencies
@@ -1126,9 +1119,7 @@ woocommerce.get("data/currencies").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 [
@@ -1186,6 +1177,9 @@ woocommerce.get("data/currencies").parsed_response
 ]
 ```
 
+  </TabItem>
+</Tabs>
+
 #### Currencies properties
 
 | Attribute | Type   | Description                                                      |
@@ -1197,8 +1191,6 @@ woocommerce.get("data/currencies").parsed_response
 ## Retrieve currency data
 
 This API lets you retrieve and view a currency data.
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v3/data/currencies/<currency>
@@ -1249,9 +1241,7 @@ woocommerce.get("data/currencies/brl").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -1273,6 +1263,9 @@ woocommerce.get("data/currencies/brl").parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 #### Currency properties
 
 See [list of currencies properties](#currencies-properties).
@@ -1280,8 +1273,6 @@ See [list of currencies properties](#currencies-properties).
 ## Retrieve current currency
 
 This API lets you retrieve and view store's current currency data.
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v3/data/currencies/current
@@ -1332,9 +1323,7 @@ woocommerce.get("data/currencies/current").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -1355,6 +1344,9 @@ woocommerce.get("data/currencies/current").parsed_response
 	}
 }
 ```
+
+  </TabItem>
+</Tabs>
 
 #### Currency properties
 

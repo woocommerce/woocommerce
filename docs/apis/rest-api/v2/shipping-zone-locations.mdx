@@ -18,8 +18,6 @@ The shipping zone locations API allows you to view and batch update locations of
 ## List all locations of a shipping zone
 This API helps you to view all the locations of a shipping zone.
 
-### HTTP request
-
 ```http
 GET /wp-json/wc/v2/shipping/zones/<id>/locations
 ```
@@ -67,9 +65,7 @@ woocommerce.get("shipping/zones/5/locations").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 [
@@ -92,10 +88,11 @@ woocommerce.get("shipping/zones/5/locations").parsed_response
 ]
 ```
 
+  </TabItem>
+</Tabs>
+
 ## Update a locations of a shipping zone
 This API lets you make changes to locations of a shipping zone.
-
-### HTTP request
 
 ```http
 PUT /wp-json/wc/v2/shipping/zones/<id>/locations
@@ -201,9 +198,7 @@ woocommerce.put("shipping/zones/5/locations", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 [
@@ -241,3 +236,6 @@ woocommerce.put("shipping/zones/5/locations", data).parsed_response
   }
 ]
 ```
+
+  </TabItem>
+</Tabs>

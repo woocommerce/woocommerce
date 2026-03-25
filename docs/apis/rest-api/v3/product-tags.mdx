@@ -24,8 +24,6 @@ The product tags API allows you to create, view, update, and delete individual, 
 
 This API helps you to create a new product tag.
 
-### HTTP request
-
 ```http
 POST /wp-json/wc/v3/products/tags
 ```
@@ -97,9 +95,7 @@ woocommerce.post("products/tags", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -122,6 +118,9 @@ woocommerce.post("products/tags", data).parsed_response
 	}
 }
 ```
+
+  </TabItem>
+</Tabs>
 
 ## Retrieve a product tag
 
@@ -174,9 +173,7 @@ woocommerce.get("products/tags/34").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -199,6 +196,9 @@ woocommerce.get("products/tags/34").parsed_response
 	}
 }
 ```
+
+  </TabItem>
+</Tabs>
 
 ## List all product tags
 
@@ -251,9 +251,7 @@ woocommerce.get("products/tags").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 [
@@ -298,6 +296,9 @@ woocommerce.get("products/tags").parsed_response
 ]
 ```
 
+  </TabItem>
+</Tabs>
+
 #### Available parameters
 
 | Parameter    | Type    | Description                                                                                                                                  |
@@ -318,8 +319,6 @@ woocommerce.get("products/tags").parsed_response
 ## Update a product tag
 
 This API lets you make changes to a product tag.
-
-### HTTP request
 
 ```http
 PUT /wp-json/wc/v3/products/tags/<id>
@@ -390,9 +389,7 @@ woocommerce.put("products/tags/34", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -416,11 +413,12 @@ woocommerce.put("products/tags/34", data).parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 ## Delete a product tag
 
 This API helps you delete a product tag.
-
-### HTTP request
 
 ```http
 DELETE /wp-json/wc/v3/products/tags/<id>
@@ -471,9 +469,7 @@ woocommerce.delete("products/tags/34", force: true).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -497,6 +493,9 @@ woocommerce.delete("products/tags/34", force: true).parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 #### Available parameters
 
 | Parameter | Type   | Description                                                   |
@@ -511,8 +510,6 @@ This API helps you to batch create, update and delete multiple product tags.
 Note: By default it's limited to up to 100 objects to be created, updated or
 	deleted.
 :::
-
-### HTTP request
 
 ```http
 POST /wp-json/wc/v3/products/tags/batch
@@ -661,9 +658,7 @@ woocommerce.post("products/tags/batch", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -751,3 +746,6 @@ woocommerce.post("products/tags/batch", data).parsed_response
 	]
 }
 ```
+
+  </TabItem>
+</Tabs>

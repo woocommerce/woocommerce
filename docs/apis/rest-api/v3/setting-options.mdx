@@ -27,8 +27,6 @@ import TabItem from '@theme/TabItem';
 
 This API lets you retrieve and view a specific setting option.
 
-### HTTP request
-
 ```http
 GET /wp-json/wc/v3/settings/<group_id>/<id>
 ```
@@ -76,9 +74,7 @@ woocommerce.get("settings/general/woocommerce_allowed_countries").parsed_respons
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -110,11 +106,12 @@ woocommerce.get("settings/general/woocommerce_allowed_countries").parsed_respons
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 ## List all setting options
 
 This API helps you to view all the setting options.
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v3/settings/<id>
@@ -163,9 +160,7 @@ woocommerce.get("settings/general").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 [
@@ -1399,11 +1394,12 @@ woocommerce.get("settings/general").parsed_response
 ]
 ```
 
+  </TabItem>
+</Tabs>
+
 ## Update a setting option
 
 This API lets you make changes to a setting option.
-
-### HTTP request
 
 ```http
 PUT /wp-json/wc/v3/settings/<group_id>/<id>
@@ -1474,9 +1470,7 @@ woocommerce.put("settings/general/woocommerce_allowed_countries", data).parsed_r
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -1507,6 +1501,9 @@ woocommerce.put("settings/general/woocommerce_allowed_countries", data).parsed_r
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 ## Batch update setting options
 
 This API helps you to batch update multiple setting options.
@@ -1515,8 +1512,6 @@ This API helps you to batch update multiple setting options.
 Note: By default it's limited to up to 100 objects to be created, updated or
 	deleted.
 :::
-
-### HTTP request
 
 ```http
 POST /wp-json/wc/v3/settings/<id>/batch
@@ -1710,9 +1705,7 @@ woocommerce.post("products/22/settings/general/batch", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -1950,3 +1943,6 @@ woocommerce.post("products/22/settings/general/batch", data).parsed_response
 	]
 }
 ```
+
+  </TabItem>
+</Tabs>

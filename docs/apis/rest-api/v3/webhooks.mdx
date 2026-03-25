@@ -85,8 +85,6 @@ You can find the Webhooks interface going to "WooCommerce" > "Settings" > "Advan
 
 This API helps you to create a new webhook.
 
-### HTTP request
-
 ```http
 POST /wp-json/wc/v3/webhooks
 ```
@@ -166,9 +164,7 @@ woocommerce.post("webhooks", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -204,11 +200,12 @@ woocommerce.post("webhooks", data).parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 ## Retrieve a webhook
 
 This API lets you retrieve and view a specific webhook.
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v3/webhooks/<id>
@@ -257,9 +254,7 @@ woocommerce.get("webhooks/142").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -295,11 +290,12 @@ woocommerce.get("webhooks/142").parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 ## List all webhooks
 
 This API helps you to view all the webhooks.
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v3/webhooks
@@ -348,9 +344,7 @@ woocommerce.get("webhooks").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 [
@@ -418,6 +412,9 @@ woocommerce.get("webhooks").parsed_response
 ]
 ```
 
+  </TabItem>
+</Tabs>
+
 #### Available parameters
 
 | Parameter       | Type    | Description                                                                                                                   |
@@ -439,8 +436,6 @@ woocommerce.get("webhooks").parsed_response
 ## Update a webhook
 
 This API lets you make changes to a webhook.
-
-### HTTP request
 
 ```http
 PUT /wp-json/wc/v3/webhooks/<id>
@@ -511,9 +506,7 @@ woocommerce.put("webhooks/142", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -549,11 +542,12 @@ woocommerce.put("webhooks/142", data).parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 ## Delete a webhook
 
 This API helps you delete a webhook.
-
-### HTTP request
 
 ```http
 DELETE /wp-json/wc/v3/webhooks/<id>
@@ -602,9 +596,7 @@ woocommerce.delete("webhooks/142").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -640,6 +632,9 @@ woocommerce.delete("webhooks/142").parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 #### Available parameters
 
 | Parameter | Type   | Description                                                                |
@@ -654,8 +649,6 @@ This API helps you to batch create, update and delete multiple webhooks.
 Note: By default it's limited to up to 100 objects to be created, updated or
 	deleted.
 :::
-
-### HTTP request
 
 ```http
 POST /wp-json/wc/v3/webhooks/batch
@@ -794,9 +787,7 @@ woocommerce.post("webhooks/batch", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -891,3 +882,6 @@ woocommerce.post("webhooks/batch", data).parsed_response
 	]
 }
 ```
+
+  </TabItem>
+</Tabs>

@@ -29,8 +29,6 @@ The product reviews API allows you to create, view, update, and delete individua
 
 This API helps you to create a new product review.
 
-### HTTP request
-
 ```http
 POST /wp-json/wc/v3/products/reviews
 ```
@@ -122,9 +120,7 @@ woocommerce.post("products/reviews", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -162,6 +158,9 @@ woocommerce.post("products/reviews", data).parsed_response
 	}
 }
 ```
+
+  </TabItem>
+</Tabs>
 
 ## Retrieve a product review
 
@@ -214,9 +213,7 @@ woocommerce.get("products/reviews/22").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -254,6 +251,9 @@ woocommerce.get("products/reviews/22").parsed_response
 	}
 }
 ```
+
+  </TabItem>
+</Tabs>
 
 ## List all product reviews
 
@@ -306,9 +306,7 @@ woocommerce.get("products/reviews").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 [
@@ -389,6 +387,9 @@ woocommerce.get("products/reviews").parsed_response
 ]
 ```
 
+  </TabItem>
+</Tabs>
+
 #### Available parameters
 
 | Parameter          | Type    | Description                                                                                                                            |
@@ -414,8 +415,6 @@ woocommerce.get("products/reviews").parsed_response
 ## Update a product review
 
 This API lets you make changes to a product review.
-
-### HTTP request
 
 ```http
 PUT /wp-json/wc/v3/products/reviews/<id>
@@ -486,9 +485,7 @@ woocommerce.put("products/reviews/20", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -533,11 +530,12 @@ woocommerce.put("products/reviews/20", data).parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 ## Delete a product review
 
 This API helps you delete a product review.
-
-### HTTP request
 
 ```http
 DELETE /wp-json/wc/v3/products/reviews/<id>
@@ -588,9 +586,7 @@ woocommerce.delete("products/reviews/20", force: true).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -615,6 +611,9 @@ woocommerce.delete("products/reviews/20", force: true).parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 #### Available parameters
 
 | Parameter | Type   | Description                                                   |
@@ -629,8 +628,6 @@ This API helps you to batch create, update and delete multiple product reviews.
 Note: By default it's limited to up to 100 objects to be created, updated or
 	deleted.
 :::
-
-### HTTP request
 
 ```http
 POST /wp-json/wc/v3/products/reviews/batch
@@ -824,9 +821,7 @@ woocommerce.post("products/reviews/batch", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -960,3 +955,6 @@ woocommerce.post("products/reviews/batch", data).parsed_response
 	]
 }
 ```
+
+  </TabItem>
+</Tabs>

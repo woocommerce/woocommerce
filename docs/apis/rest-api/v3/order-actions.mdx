@@ -16,8 +16,6 @@ _Note: currently only some actions are available, other actions will be introduc
 
 This endpoint allows you to trigger an email to the customer with the details of their order. In case the order doesn't yet have a billing email set, you can specify an email recipient. However, if the order does have an existing billing email, this will return an error, unless you also specify that the existing email should be overwritten by using the `force_email_update` parameter.
 
-### HTTP request
-
 ```http
 POST /wp-json/wc/v3/orders/<id>/actions/send_order_details
 ```
@@ -91,15 +89,16 @@ woocommerce.post("orders/723/actions/send_order_details", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
 	"message": "Billing email updated to somebody@example.com. Order details sent to somebody@example.com, via REST API."
 }
 ```
+
+  </TabItem>
+</Tabs>
 
 ```json
 {
@@ -114,8 +113,6 @@ woocommerce.post("orders/723/actions/send_order_details", data).parsed_response
 ## Send order notification email to customer
 
 This endpoint allows you to trigger an email to a customer about the status of their order. This is similar to the [`send_order_details`](#send-order-details-to-customer) endpoint, but allows you to specify which email template to send, based on which email templates are relevant to the order. For example, an order that is on hold has the `customer_on_hold_order` template available. A completed order that also has a partial refund has both the `customer_completed_order` and `customer_refunded_order` templates available. Specifying the `customer_invoice` template is the same as using the `send_order_details` endpoint.
-
-### HTTP request
 
 ```http
 POST /wp-json/wc/v3/orders/<id>/actions/send_email
@@ -195,15 +192,16 @@ woocommerce.post("orders/723/actions/send_email", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
 	"message": "Billing email updated to somebody@example.com. Email template &quot;Completed order&quot; sent to somebody@example.com, via REST API."
 }
 ```
+
+  </TabItem>
+</Tabs>
 
 ```json
 {
@@ -218,8 +216,6 @@ woocommerce.post("orders/723/actions/send_email", data).parsed_response
 ## Get available email templates for an order
 
 This endpoint allows you to retrieve a list of email templates that are available for the specified order. You can also get this data embedded in the response for the [`orders` endpoint](../orders#list-all-orders).
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v3/orders/<id>/actions/email_templates
@@ -270,9 +266,7 @@ woocommerce.post("orders/723/actions/email_templates").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 [
@@ -288,3 +282,6 @@ woocommerce.post("orders/723/actions/email_templates").parsed_response
 	}
 ]
 ```
+
+  </TabItem>
+</Tabs>

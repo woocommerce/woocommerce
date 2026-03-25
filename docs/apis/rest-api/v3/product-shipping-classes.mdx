@@ -24,8 +24,6 @@ The product shipping class API allows you to create, view, update, and delete in
 
 This API helps you to create a new product shipping class.
 
-### HTTP request
-
 ```http
 POST /wp-json/wc/v3/products/shipping_classes
 ```
@@ -97,9 +95,7 @@ woocommerce.post("products/shipping_classes", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -122,6 +118,9 @@ woocommerce.post("products/shipping_classes", data).parsed_response
 	}
 }
 ```
+
+  </TabItem>
+</Tabs>
 
 ## Retrieve a shipping class
 
@@ -174,9 +173,7 @@ woocommerce.get("products/shipping_classes/32").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -199,6 +196,9 @@ woocommerce.get("products/shipping_classes/32").parsed_response
 	}
 }
 ```
+
+  </TabItem>
+</Tabs>
 
 ## List all shipping classes
 
@@ -251,9 +251,7 @@ woocommerce.get("products/shipping_classes").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 [
@@ -298,6 +296,9 @@ woocommerce.get("products/shipping_classes").parsed_response
 ]
 ```
 
+  </TabItem>
+</Tabs>
+
 #### Available parameters
 
 | Parameter    | Type    | Description                                                                                                                                  |
@@ -318,8 +319,6 @@ woocommerce.get("products/shipping_classes").parsed_response
 ## Update a shipping class
 
 This API lets you make changes to a product shipping class.
-
-### HTTP request
 
 ```http
 PUT /wp-json/wc/v3/products/shipping_classes/<id>
@@ -390,9 +389,7 @@ woocommerce.put("products/shipping_classes/32", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -416,11 +413,12 @@ woocommerce.put("products/shipping_classes/32", data).parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 ## Delete a shipping class
 
 This API helps you delete a product shipping class.
-
-### HTTP request
 
 ```http
 DELETE /wp-json/wc/v3/products/shipping_classes/<id>
@@ -471,9 +469,7 @@ woocommerce.delete("products/shipping_classes/32", force: true).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -497,6 +493,9 @@ woocommerce.delete("products/shipping_classes/32", force: true).parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 #### Available parameters
 
 | Parameter | Type   | Description                                                   |
@@ -511,8 +510,6 @@ This API helps you to batch create, update and delete multiple product shipping 
 Note: By default it's limited to up to 100 objects to be created, updated or
 	deleted.
 :::
-
-### HTTP request
 
 ```http
 POST /wp-json/wc/v3/products/shipping_classes/batch
@@ -661,9 +658,7 @@ woocommerce.post("products/shipping_classes/batch", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -751,3 +746,6 @@ woocommerce.post("products/shipping_classes/batch", data).parsed_response
 	]
 }
 ```
+
+  </TabItem>
+</Tabs>

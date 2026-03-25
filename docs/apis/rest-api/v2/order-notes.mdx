@@ -22,8 +22,6 @@ Order notes are added by administrators and programmatically to store data about
 ## Create an order note
 This API helps you to create a new note for an order.
 
-### HTTP request
-
 ```http
 POST /wp-json/wc/v2/orders/<id>/notes
 ```
@@ -93,9 +91,7 @@ woocommerce.post("orders/723/notes", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -124,10 +120,11 @@ woocommerce.post("orders/723/notes", data).parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 ## Retrieve an order note
 This API lets you retrieve and view a specific note from an order.
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v2/orders/<id>/notes/<note_id>
@@ -176,9 +173,7 @@ woocommerce.get("orders/723/notes/281").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -207,10 +202,11 @@ woocommerce.get("orders/723/notes/281").parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 ## List all order notes
 This API helps you to view all the notes from an order.
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v2/orders/<id>/notes
@@ -259,9 +255,7 @@ woocommerce.get("orders/723/notes").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 [
@@ -340,6 +334,9 @@ woocommerce.get("orders/723/notes").parsed_response
 ]
 ```
 
+  </TabItem>
+</Tabs>
+
 #### Available parameters
 | Parameter  | Type    | Description                                                                                                                  |
 | ---------- | ------- | ---------------------------------------------------------------------------------------------------------------------------- |
@@ -348,8 +345,6 @@ woocommerce.get("orders/723/notes").parsed_response
 
 ## Delete an order note
 This API helps you delete an order note.
-
-### HTTP request
 
 ```http
 DELETE /wp-json/wc/v2/orders/<id>/notes/<note_id>
@@ -400,9 +395,7 @@ woocommerce.delete("orders/723/notes/281", force: true).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -430,6 +423,9 @@ woocommerce.delete("orders/723/notes/281", force: true).parsed_response
   }
 }
 ```
+
+  </TabItem>
+</Tabs>
 #### Available parameters
 | Parameter |  Type  |                          Description                          |
 |-----------|--------|---------------------------------------------------------------|

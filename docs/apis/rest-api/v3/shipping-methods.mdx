@@ -22,8 +22,6 @@ The shipping methods API allows you to view individual shipping methods.
 
 This API lets you retrieve and view a specific shipping method.
 
-### HTTP request
-
 ```http
 GET /wp-json/wc/v3/shipping_methods/<id>
 ```
@@ -71,9 +69,7 @@ woocommerce.get("shipping_methods/flat_rate").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -95,11 +91,12 @@ woocommerce.get("shipping_methods/flat_rate").parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 ## List all shipping methods
 
 This API helps you to view all the shipping methods.
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v3/shipping_methods
@@ -148,9 +145,7 @@ woocommerce.get("shipping_methods").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 [
@@ -207,3 +202,6 @@ woocommerce.get("shipping_methods").parsed_response
 	}
 ]
 ```
+
+  </TabItem>
+</Tabs>

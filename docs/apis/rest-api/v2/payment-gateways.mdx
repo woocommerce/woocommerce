@@ -36,8 +36,6 @@ The payment gateways API allows you to view, and update individual payment gatew
 ## Retrieve a payment gateway
 This API lets you retrieve and view a specific payment gateway.
 
-### HTTP request
-
 ```http
 GET /wp-json/wc/v2/payment_gateways/<id>
 ```
@@ -85,9 +83,7 @@ woocommerce.get("payment_gateways/bacs").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -135,10 +131,11 @@ woocommerce.get("payment_gateways/bacs").parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 ## List all payment gateways
 This API helps you to view all the payment gateways.
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v2/payment_gateways
@@ -187,9 +184,7 @@ woocommerce.get("payment_gateways").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 [
@@ -527,10 +522,11 @@ woocommerce.get("payment_gateways").parsed_response
 ]
 ```
 
+  </TabItem>
+</Tabs>
+
 ## Update a payment gateway
 This API lets you make changes to a payment gateway.
-
-### HTTP request
 
 ```http
 PUT /wp-json/wc/v2/payment_gateways/<id>
@@ -601,9 +597,7 @@ woocommerce.put("payment_gateways/bacs", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -650,3 +644,6 @@ woocommerce.put("payment_gateways/bacs", data).parsed_response
   }
 }
 ```
+
+  </TabItem>
+</Tabs>

@@ -28,8 +28,6 @@ The taxes API allows you to create, view, update, and delete individual tax rate
 ## Create a tax rate
 This API helps you to create a new tax rate.
 
-### HTTP request
-
 ```http
 POST /wp-json/wc/v1/taxes
 ```
@@ -119,9 +117,7 @@ woocommerce.post("taxes", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -152,10 +148,11 @@ woocommerce.post("taxes", data).parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 ## Retrieve a tax rate
 This API lets you retrieve and view a specific tax rate by ID.
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v1/taxes/<id>
@@ -204,9 +201,7 @@ woocommerce.get("taxes/72").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -237,10 +232,11 @@ woocommerce.get("taxes/72").parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 ## List all tax rates
 This API helps you to view all the tax rates.
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v1/taxes
@@ -289,9 +285,7 @@ woocommerce.get("taxes").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 [
@@ -558,6 +552,9 @@ woocommerce.get("taxes").parsed_response
 ]
 ```
 
+  </TabItem>
+</Tabs>
+
 #### Available parameters
 | Parameter  |   Type  |                                                                Description                                                                 |
 |------------|---------|--------------------------------------------------------------------------------------------------------------------------------------------|
@@ -571,8 +568,6 @@ woocommerce.get("taxes").parsed_response
 
 ## Update a tax rate
 This API lets you make changes to a tax rate.
-
-### HTTP request
 
 ```http
 PUT /wp-json/wc/v1/taxes/<id>
@@ -643,9 +638,7 @@ woocommerce.put("taxes/72", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -676,10 +669,11 @@ woocommerce.put("taxes/72", data).parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 ## Delete a tax rate
 This API helps you delete a tax rate.
-
-### HTTP request
 
 ```http
 DELETE /wp-json/wc/v1/taxes/<id>
@@ -730,9 +724,7 @@ woocommerce.delete("taxes/72", force: true).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -763,6 +755,9 @@ woocommerce.delete("taxes/72", force: true).parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 #### Available parameters
 | Parameter |  Type  |                          Description                          |
 |-----------|--------|---------------------------------------------------------------|
@@ -774,8 +769,6 @@ This API helps you to batch create, update and delete multiple tax rates.
 :::note
 Note: By default it's limited to up to 100 objects to be created, updated or deleted.
 :::
-
-### HTTP request
 
 ```http
 POST /wp-json/wc/v1/taxes/batch
@@ -2773,9 +2766,7 @@ woocommerce.post("taxes/batch", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -4031,3 +4022,6 @@ woocommerce.post("taxes/batch", data).parsed_response
   ]
 }
 ```
+
+  </TabItem>
+</Tabs>

@@ -12,8 +12,6 @@ The reports API allows you to view all types of reports available.
 ## List all reports
 This API lets you retrieve and view a simple list of available reports.
 
-### HTTP request
-
 ```http
 GET /wp-json/wc/v2/reports
 ```
@@ -61,9 +59,7 @@ woocommerce.get("reports").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 [
@@ -102,10 +98,11 @@ woocommerce.get("reports").parsed_response
 ]
 ```
 
+  </TabItem>
+</Tabs>
+
 ## Retrieve sales report
 This API lets you retrieve and view a sales report.
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v2/reports/sales
@@ -169,9 +166,7 @@ woocommerce.get("reports/sales", query).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 [
@@ -218,6 +213,9 @@ woocommerce.get("reports/sales", query).parsed_response
 ]
 ```
 
+  </TabItem>
+</Tabs>
+
 #### Sales report properties
 |      Attribute      |   Type  |                              Description                              |
 |---------------------|---------|-----------------------------------------------------------------------|
@@ -243,8 +241,6 @@ woocommerce.get("reports/sales", query).parsed_response
 
 ## Retrieve top sellers report
 This API lets you retrieve and view a list of top sellers report.
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v2/reports/top_sellers
@@ -305,9 +301,7 @@ woocommerce.get("reports/top_sellers", query).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 [
@@ -347,6 +341,9 @@ woocommerce.get("reports/top_sellers", query).parsed_response
   }
 ]
 ```
+
+  </TabItem>
+</Tabs>
 
 #### Top sellers report properties
 |      Attribute      |   Type  |                              Description                              |

@@ -106,8 +106,6 @@ The order refunds API allows you to create, view, and delete individual refunds,
 
 This API helps you to create a new refund for an order.
 
-### HTTP request
-
 ```http
 POST /wp-json/wc/v3/orders/<id>/refunds
 ```
@@ -236,9 +234,7 @@ woocommerce.post("orders/723/refunds", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -271,6 +267,9 @@ woocommerce.post("orders/723/refunds", data).parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 #### Line item parameters
 
 | Parameter      | Type    | Description                                                                |
@@ -289,8 +288,6 @@ woocommerce.post("orders/723/refunds", data).parsed_response
 ## Retrieve a refund
 
 This API lets you retrieve and view a specific refund from an order.
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v3/orders/<id>/refunds/<refund_id>
@@ -339,9 +336,7 @@ woocommerce.get("orders/723/refunds/726").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -374,6 +369,9 @@ woocommerce.get("orders/723/refunds/726").parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 #### Available parameters
 
 | Parameter | Type   | Description                                       |
@@ -385,8 +383,6 @@ woocommerce.get("orders/723/refunds/726").parsed_response
 This API helps you to view all the refunds from an order.
 
 Note: To view a list of refunds from your store, regardless of order, check out the [refunds endpoint](../refunds).
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v3/orders/<id>/refunds
@@ -435,9 +431,7 @@ woocommerce.get("orders/723/refunds").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 [
@@ -523,6 +517,9 @@ woocommerce.get("orders/723/refunds").parsed_response
 ]
 ```
 
+  </TabItem>
+</Tabs>
+
 #### Available parameters
 
 | Parameter        | Type    | Description                                                                                                                  |
@@ -546,8 +543,6 @@ woocommerce.get("orders/723/refunds").parsed_response
 ## Delete a refund
 
 This API helps you delete an order refund.
-
-### HTTP request
 
 ```http
 DELETE /wp-json/wc/v3/orders/<id>/refunds/<refund_id>
@@ -598,9 +593,7 @@ woocommerce.delete("orders/723/refunds/726", force: true).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -632,6 +625,9 @@ woocommerce.delete("orders/723/refunds/726", force: true).parsed_response
 	}
 }
 ```
+
+  </TabItem>
+</Tabs>
 
 #### Available parameters
 

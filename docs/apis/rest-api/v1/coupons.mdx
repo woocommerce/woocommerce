@@ -39,8 +39,6 @@ The coupons API allows you to create, view, update, and delete individual, or a 
 ## Create a coupon
 This API helps you to create a new coupon.
 
-### HTTP request
-
 ```http
 POST /wp-json/wc/v1/coupons
 ```
@@ -136,9 +134,7 @@ woocommerce.post("coupons", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -180,10 +176,11 @@ woocommerce.post("coupons", data).parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 ## Retrieve a coupon
 This API lets you retrieve and view a specific coupon by ID.
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v1/coupons/<id>
@@ -232,9 +229,7 @@ woocommerce.get("coupons/113").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -276,10 +271,11 @@ woocommerce.get("coupons/113").parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 ## List all coupons
 This API helps you to list all the coupons that have been created.
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v1/coupons
@@ -328,9 +324,7 @@ woocommerce.get("coupons").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 [
@@ -411,6 +405,9 @@ woocommerce.get("coupons").parsed_response
 ]
 ```
 
+  </TabItem>
+</Tabs>
+
 #### Available parameters
 | Parameter       |   Type  |                                                  Description                                                  |
 |-----------------|---------|---------------------------------------------------------------------------------------------------------------|
@@ -430,8 +427,6 @@ woocommerce.get("coupons").parsed_response
 
 ## Update a coupon
 This API lets you make changes to a coupon.
-
-### HTTP request
 
 ```http
 PUT /wp-json/wc/v1/coupons/<id>
@@ -502,9 +497,7 @@ woocommerce.put("coupons/113", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -546,10 +539,11 @@ woocommerce.put("coupons/113", data).parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 ## Delete a coupon
 This API helps you delete a coupon.
-
-### HTTP request
 
 ```http
 DELETE /wp-json/wc/v1/coupons/<id>
@@ -600,9 +594,7 @@ woocommerce.delete("coupons/113", force: true).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -644,6 +636,9 @@ woocommerce.delete("coupons/113", force: true).parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 #### Available parameters
 | Parameter |  Type  |                               Description                                |
 |-----------|--------|--------------------------------------------------------------------------|
@@ -655,8 +650,6 @@ This API helps you to batch create, update and delete multiple coupons.
 :::note
 Note: By default it's limited to up to 100 objects to be created, updated or deleted.
 :::
-
-### HTTP request
 
 ```http
 POST /wp-json/wc/v1/coupons/batch
@@ -857,9 +850,7 @@ woocommerce.post("customers/batch", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -1019,3 +1010,6 @@ woocommerce.post("customers/batch", data).parsed_response
   ]
 }
 ```
+
+  </TabItem>
+</Tabs>

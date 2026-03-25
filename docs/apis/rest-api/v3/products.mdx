@@ -166,8 +166,6 @@ The products API allows you to create, view, update, and delete individual, or a
 
 This API helps you to create a new product.
 
-### HTTP request
-
 ```http
 POST /wp-json/wc/v3/products
 ```
@@ -341,9 +339,7 @@ woocommerce.post("products", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -462,6 +458,9 @@ woocommerce.post("products", data).parsed_response
 	}
 }
 ```
+
+  </TabItem>
+</Tabs>
 
 > Example of how to create a `variable` product with global and non-global attributes:
 
@@ -811,9 +810,7 @@ woocommerce.post("products", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -981,11 +978,12 @@ woocommerce.post("products", data).parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 ## Retrieve a product
 
 This API lets you retrieve and view a specific product by ID.
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v3/products/<id>
@@ -1034,9 +1032,7 @@ woocommerce.get("products/794").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -1156,11 +1152,12 @@ woocommerce.get("products/794").parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 ## List all products
 
 This API helps you to view all the products.
-
-### HTTP request
 
 ```http
 GET /wp-json/wc/v3/products
@@ -1209,9 +1206,7 @@ woocommerce.get("products").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 [
@@ -1496,6 +1491,9 @@ woocommerce.get("products").parsed_response
 ]
 ```
 
+  </TabItem>
+</Tabs>
+
 #### Available parameters
 
 | Parameter         | Type    | Description                                                                                                                                                                                                                                                                                          |
@@ -1542,8 +1540,6 @@ woocommerce.get("products").parsed_response
 ## Duplicate product
 
 This API helps you to duplicate a product.
-
-### HTTP request
 
 ```http
 POST /wp-json/wc/v3/products/<product_id>/duplicate
@@ -1592,9 +1588,7 @@ woocommerce.post("products/2/duplicate").parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -1661,11 +1655,12 @@ woocommerce.post("products/2/duplicate").parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 ## Update a product
 
 This API lets you make changes to a product.
-
-### HTTP request
 
 ```http
 PUT /wp-json/wc/v3/products/<id>
@@ -1736,9 +1731,7 @@ woocommerce.put("products/794", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -1858,11 +1851,12 @@ woocommerce.put("products/794", data).parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 ## Delete a product
 
 This API helps you delete a product.
-
-### HTTP request
 
 ```http
 DELETE /wp-json/wc/v3/products/<id>
@@ -1913,9 +1907,7 @@ woocommerce.delete("products/794", force: true).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -2035,6 +2027,9 @@ woocommerce.delete("products/794", force: true).parsed_response
 }
 ```
 
+  </TabItem>
+</Tabs>
+
 #### Available parameters
 
 | Parameter | Type   | Description                                                               |
@@ -2049,8 +2044,6 @@ This API helps you to batch create, update and delete multiple products.
 Note: By default it's limited to up to 100 objects to be created, updated or
 	deleted.
 :::
-
-### HTTP request
 
 ```http
 POST /wp-json/wc/v3/products/batch
@@ -2471,9 +2464,7 @@ woocommerce.post("products/batch", data).parsed_response
 ```
 
   </TabItem>
-</Tabs>
-
-### JSON response example
+  <TabItem value="response" label="JSON Response">
 
 ```json
 {
@@ -2989,3 +2980,6 @@ woocommerce.post("products/batch", data).parsed_response
 	]
 }
 ```
+
+  </TabItem>
+</Tabs>
