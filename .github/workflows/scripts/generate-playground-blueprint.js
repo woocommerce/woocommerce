@@ -16,7 +16,7 @@ const generateWordpressPlaygroundBlueprint = ( runId, prNumber ) => {
 		steps: [
 			{
 				step: 'installPlugin',
-				pluginZipFile: {
+				pluginData: {
 					resource: 'url',
 					url: `https://playground.wordpress.net/plugin-proxy.php?org=woocommerce&repo=woocommerce&workflow=Build%20Live%20Branch&artifact=plugins-${ runId }&pr=${ prNumber }`,
 				},
@@ -26,9 +26,9 @@ const generateWordpressPlaygroundBlueprint = ( runId, prNumber ) => {
 			},
 			{
 				step: 'installPlugin',
-				pluginZipFile: {
+				pluginData: {
 					resource: 'url',
-					url: `https://github-proxy.com/https://github.com/woocommerce/woocommerce/releases/download/wc-beta-tester-2.3.1/woocommerce-beta-tester.zip`,
+					url: 'https://github.com/woocommerce/woocommerce/releases/download/wc-beta-tester-3.0.0/woocommerce-beta-tester.zip',
 				},
 				options: {
 					activate: true,
@@ -80,7 +80,7 @@ async function run( { github, context, core } ) {
 		context.issue.number
 	);
 
-	const url = `https://wordpress-playground.atomicsites.blog/#${ JSON.stringify(
+	const url = `https://playground.wordpress.net/#${ JSON.stringify(
 		defaultSchema
 	) }`;
 
