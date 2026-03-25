@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewReviewNot
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
 use WC_Helper_Product;
+use WC_Logger_Interface;
 use WC_Unit_Test_Case;
 
 /**
@@ -281,7 +282,7 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 	 * @testdox Should catch and log exception when safety net receives an unknown type.
 	 */
 	public function test_handle_safety_net_logs_error_for_unknown_type(): void {
-		$mock_logger = $this->getMockBuilder( 'WC_Logger_Interface' )->getMock();
+		$mock_logger = $this->createMock( WC_Logger_Interface::class );
 		$mock_logger->expects( $this->once() )
 			->method( 'error' )
 			->with(
