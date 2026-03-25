@@ -8,7 +8,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails\Block
- * @version 10.5.0
+ * @version 10.8.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -18,6 +18,11 @@ defined( 'ABSPATH' ) || exit;
 
 if ( ! isset( $order, $fulfillment ) ) {
 	return;
+}
+
+if ( isset( $customer_note ) && '' !== $customer_note ) {
+	echo '<p><strong>' . esc_html__( 'Note from the store:', 'woocommerce' ) . '</strong></p>';
+	echo wp_kses_post( wpautop( wptexturize( $customer_note ) ) );
 }
 
 /**

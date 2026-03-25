@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails\HTML
- * @version 10.4.0
+ * @version 10.8.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -32,6 +32,17 @@ do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 	<p><?php echo esc_html__( 'Some details of your shipment have recently been updated. This may include tracking information, item contents, or delivery status.', 'woocommerce' ); ?></p>
 	<p><?php echo esc_html__( 'Here’s the latest info we have:', 'woocommerce' ); ?></p>
 </div>
+
+<?php if ( ! empty( $customer_note ) ) : ?>
+<table border="0" cellpadding="0" cellspacing="0" width="100%" role="presentation">
+	<tr>
+		<td class="email-additional-content" style="padding: 16px 0;">
+			<p><strong><?php echo esc_html__( 'Note from the store:', 'woocommerce' ); ?></strong></p>
+			<?php echo wp_kses_post( wpautop( wptexturize( $customer_note ) ) ); ?>
+		</td>
+	</tr>
+</table>
+<?php endif; ?>
 
 <?php
 

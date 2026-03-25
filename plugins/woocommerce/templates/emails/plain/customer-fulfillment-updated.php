@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails\Plain
- * @version 10.1.0
+ * @version 10.8.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -24,6 +24,11 @@ echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 /* translators: %s: Customer first name */
 echo esc_html__( 'Some details of your shipment have recently been updated. This may include tracking information, item contents, or delivery status.', 'woocommerce' ) . "\n\n";
 echo esc_html__( 'Here’s the latest info we have:', 'woocommerce' ) . "\n\n";
+
+if ( ! empty( $customer_note ) ) {
+	echo esc_html__( 'Note from the store:', 'woocommerce' ) . "\n";
+	echo esc_html( wp_strip_all_tags( wptexturize( $customer_note ) ) ) . "\n\n";
+}
 
 /**
  * Display fulfillment details.

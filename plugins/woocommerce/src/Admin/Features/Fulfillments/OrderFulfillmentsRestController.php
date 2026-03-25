@@ -335,6 +335,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 		$order_id        = (int) $request->get_param( 'order_id' );
 		$fulfillment_id  = (int) $request->get_param( 'fulfillment_id' );
 		$notify_customer = (bool) $request->get_param( 'notify_customer' );
+		$customer_note   = (string) $request->get_param( 'customer_note' );
 
 		// Update the fulfillment for the order.
 		try {
@@ -375,7 +376,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 					 *
 					 * @since 10.1.0
 					 */
-					do_action( 'woocommerce_fulfillment_updated_notification', $order_id, $fulfillment, wc_get_order( $order_id ) );
+					do_action( 'woocommerce_fulfillment_updated_notification', $order_id, $fulfillment, wc_get_order( $order_id ), $customer_note );
 				}
 			}
 		} catch ( ApiException $ex ) {
@@ -749,6 +750,13 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 				'default'     => false,
 				'required'    => false,
 				'context'     => array( 'view', 'edit' ),
+			),
+			'customer_note'   => array(
+				'description' => __( 'A note from the merchant to include in the customer notification email.', 'woocommerce' ),
+				'type'        => 'string',
+				'default'     => '',
+				'required'    => false,
+				'context'     => array( 'edit' ),
 			),
 		);
 	}

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { ToggleControl } from '@wordpress/components';
+import { TextareaControl, ToggleControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -20,7 +20,7 @@ export default function CustomerNotificationBox( {
 }: {
 	type: 'fulfill' | 'update' | 'remove';
 } ) {
-	const { notifyCustomer, setNotifyCustomer } = useFulfillmentContext();
+	const { notifyCustomer, setNotifyCustomer, customerNote, setCustomerNote } = useFulfillmentContext();
 
 	const headerStrings = {
 		fulfill: __( 'Fulfillment notification', 'woocommerce' ),
@@ -63,9 +63,26 @@ export default function CustomerNotificationBox( {
 				</>
 			}
 		>
-			<p className="woocommerce-fulfillment-description">
-				{ contentStrings[ type ] || contentStrings.fulfill }
-			</p>
+			<div style={ { flexDirection: 'column', width: '100%' } }>
+				<p className="woocommerce-fulfillment-description">
+					{ contentStrings[ type ] || contentStrings.fulfill }
+				</p>
+				{ type === 'update' && notifyCustomer && (
+					<div style={ { marginTop: '16px' } }>
+						<TextareaControl
+							__nextHasNoMarginBottom
+							label={ __( 'Customer note', 'woocommerce' ) }
+							placeholder={ __(
+								'Add a note for the customer (optional)',
+								'woocommerce'
+							) }
+							value={ customerNote }
+							onChange={ ( value ) => setCustomerNote( value ) }
+							rows={ 3 }
+						/>
+					</div>
+				) }
+			</div>
 		</FulfillmentCard>
 	);
 }
