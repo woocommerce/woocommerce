@@ -428,10 +428,10 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 					/**
 					 * Trigger the fulfillment updated notification on updating a fulfillment.
 					 *
-					 * @param int         $order_id      The order ID.
-					 * @param Fulfillment $fulfillment   The fulfillment object.
-					 * @param WC_Order    $order         The order object.
-					 * @param string      $customer_note Optional customer note from the merchant.
+					 * @param int                        $order_id      The order ID.
+					 * @param Fulfillment                $fulfillment   The fulfillment object.
+					 * @param WC_Order|WC_Order_Refund|false $order     The order object.
+					 * @param string                     $customer_note Optional customer note from the merchant.
 					 *
 					 * @since 10.1.0
 					 */
