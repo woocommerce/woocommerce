@@ -244,6 +244,66 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Lookup table is refreshed when scheduled sale starts.
+	 */
+	public function test_wc_scheduled_sales_sale_start_updates_lookup_table(): void {
+		global $wpdb;
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_price( 100 );
+		$product->set_regular_price( 100 );
+		$product->set_sale_price( 50 );
+		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', time() + 10 ) );
+		$product->save();
+
+		// Bypass product after save hook to prevent price change on save.
+		update_post_meta( $product->get_id(), '_sale_price_dates_from', time() - 5 );
+
+		$lookup_before = $wpdb->get_row(
+			$wpdb->prepare( "SELECT onsale, min_price, max_price FROM {$wpdb->prefix}wc_product_meta_lookup WHERE product_id = %d", $product->get_id() )
+		);
+		$this->assertEquals( 0, (int) $lookup_before->onsale, 'Product should not be on sale before scheduled sale starts' );
+
+		wc_scheduled_sales();
+
+		$lookup_after = $wpdb->get_row(
+			$wpdb->prepare( "SELECT onsale, min_price, max_price FROM {$wpdb->prefix}wc_product_meta_lookup WHERE product_id = %d", $product->get_id() )
+		);
+		$this->assertEquals( 1, (int) $lookup_after->onsale, 'Lookup table onsale flag should be updated after sale starts' );
+		$this->assertEquals( 50, (float) $lookup_after->min_price, 'Lookup table min_price should reflect sale price' );
+	}
+
+	/**
+	 * @testdox Lookup table is refreshed when scheduled sale ends.
+	 */
+	public function test_wc_scheduled_sales_sale_end_updates_lookup_table(): void {
+		global $wpdb;
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_price( 50 );
+		$product->set_regular_price( 100 );
+		$product->set_sale_price( 50 );
+		$product->set_date_on_sale_to( gmdate( 'Y-m-d H:i:s', time() + 10 ) );
+		$product->save();
+
+		// Bypass product after save hook to prevent price change on save.
+		update_post_meta( $product->get_id(), '_sale_price_dates_to', time() - 5 );
+
+		$lookup_before = $wpdb->get_row(
+			$wpdb->prepare( "SELECT onsale, min_price, max_price FROM {$wpdb->prefix}wc_product_meta_lookup WHERE product_id = %d", $product->get_id() )
+		);
+		$this->assertEquals( 1, (int) $lookup_before->onsale, 'Product should be on sale before scheduled sale ends' );
+
+		wc_scheduled_sales();
+
+		$lookup_after = $wpdb->get_row(
+			$wpdb->prepare( "SELECT onsale, min_price, max_price FROM {$wpdb->prefix}wc_product_meta_lookup WHERE product_id = %d", $product->get_id() )
+		);
+		$this->assertEquals( 0, (int) $lookup_after->onsale, 'Lookup table onsale flag should be updated after sale ends' );
+		$this->assertEquals( 100, (float) $lookup_after->min_price, 'Lookup table min_price should reflect regular price' );
+	}
+
+	/**
 	 * @testDox Action Scheduler events are scheduled when product with sale dates is saved.
 	 */
 	public function test_wc_schedule_product_sale_events_on_save() {
