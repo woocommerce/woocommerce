@@ -29,9 +29,10 @@ class Spacing_Preprocessor implements Preprocessor {
 	 * @return array
 	 */
 	public function preprocess( array $parsed_blocks, array $layout, array $styles ): array {
-		$root_padding      = $this->get_root_padding( $styles );
-		$container_padding = $styles['__container_padding'] ?? array();
-		$parsed_blocks     = $this->add_block_gaps( $parsed_blocks, $styles['spacing']['blockGap'] ?? '', null, $root_padding, false, $container_padding );
+		$root_padding               = $this->get_root_padding( $styles );
+		$container_padding          = $styles['__container_padding'] ?? array();
+		$container_background_color = $styles['__container_background_color'] ?? null;
+		$parsed_blocks              = $this->add_block_gaps( $parsed_blocks, $styles['spacing']['blockGap'] ?? '', null, $root_padding, false, $container_padding, $container_background_color );
 		return $parsed_blocks;
 	}
 
@@ -95,15 +96,16 @@ class Spacing_Preprocessor implements Preprocessor {
 	 *   padding ensures inset from the email edge. These blocks also stop delegation.
 	 * - No explicit padding: receive root padding if delegated, or delegate if a container.
 	 *
-	 * @param array      $parsed_blocks Parsed blocks.
-	 * @param string     $gap Gap.
-	 * @param array|null $parent_block Parent block.
-	 * @param array      $root_padding Root horizontal padding with 'left' and 'right' keys.
-	 * @param bool       $apply_root_padding Whether this block should receive root padding (delegated by parent container).
-	 * @param array      $container_padding Container horizontal padding with 'left' and 'right' keys.
+	 * @param array       $parsed_blocks Parsed blocks.
+	 * @param string      $gap Gap.
+	 * @param array|null  $parent_block Parent block.
+	 * @param array       $root_padding Root horizontal padding with 'left' and 'right' keys.
+	 * @param bool        $apply_root_padding Whether this block should receive root padding (delegated by parent container).
+	 * @param array       $container_padding Container horizontal padding with 'left' and 'right' keys.
+	 * @param string|null $container_background_color Background color from the container group.
 	 * @return array
 	 */
-	private function add_block_gaps( array $parsed_blocks, string $gap = '', $parent_block = null, array $root_padding = array(), bool $apply_root_padding = false, array $container_padding = array() ): array {
+	private function add_block_gaps( array $parsed_blocks, string $gap = '', $parent_block = null, array $root_padding = array(), bool $apply_root_padding = false, array $container_padding = array(), ?string $container_background_color = null ): array {
 		foreach ( $parsed_blocks as $key => $block ) {
 			$block_name        = $block['blockName'] ?? '';
 			$parent_block_name = $parent_block['blockName'] ?? '';
@@ -156,6 +158,12 @@ class Spacing_Preprocessor implements Preprocessor {
 			if ( $should_apply && ! $has_zero_padding && 'full' !== $alignment && ! in_array( $block_name, $post_content_block_names, true ) && ! $wraps_post_content && ! empty( $container_padding ) ) {
 				$block['email_attrs']['container-padding-left']  = $container_padding['left'];
 				$block['email_attrs']['container-padding-right'] = $container_padding['right'];
+
+				// Pass the container's background color so the padding wrapper
+				// matches the group's background visually.
+				if ( is_string( $container_background_color ) && '' !== $container_background_color ) {
+					$block['email_attrs']['container-background-color'] = $container_background_color;
+				}
 			}
 
 			// Determine whether children should receive root padding delegation.
@@ -167,6 +175,7 @@ class Spacing_Preprocessor implements Preprocessor {
 			// manage their own layout.
 			$children_apply         = false;
 			$children_container_pad = $container_padding;
+			$children_container_bg  = $container_background_color;
 			if ( $is_root_level && $is_container && ! $has_own_padding ) {
 				$children_apply = true;
 			} elseif ( $apply_root_padding && in_array( $block_name, $post_content_block_names, true ) ) {
@@ -180,6 +189,7 @@ class Spacing_Preprocessor implements Preprocessor {
 				$block_padding = $this->get_block_horizontal_padding( $block );
 				if ( ! empty( $block_padding ) ) {
 					$children_container_pad                              = $block_padding;
+					$children_container_bg                               = $this->get_block_background_color( $block );
 					$block['email_attrs']['suppress-horizontal-padding'] = true;
 				}
 			} elseif ( $is_root_level && $is_container && $has_own_padding && ! $has_zero_padding && $this->contains_post_content( $block ) ) {
@@ -189,6 +199,7 @@ class Spacing_Preprocessor implements Preprocessor {
 				$block_padding  = $this->get_block_horizontal_padding( $block );
 				if ( ! empty( $block_padding ) ) {
 					$children_container_pad                              = $block_padding;
+					$children_container_bg                               = $this->get_block_background_color( $block );
 					$block['email_attrs']['suppress-horizontal-padding'] = true;
 				}
 
@@ -197,7 +208,7 @@ class Spacing_Preprocessor implements Preprocessor {
 				unset( $block['email_attrs']['root-padding-left'], $block['email_attrs']['root-padding-right'] );
 			}
 
-			$block['innerBlocks']  = $this->add_block_gaps( $block['innerBlocks'] ?? array(), $gap, $block, $root_padding, $children_apply, $children_container_pad );
+			$block['innerBlocks']  = $this->add_block_gaps( $block['innerBlocks'] ?? array(), $gap, $block, $root_padding, $children_apply, $children_container_pad, $children_container_bg );
 			$parsed_blocks[ $key ] = $block;
 		}
 
@@ -244,6 +255,24 @@ class Spacing_Preprocessor implements Preprocessor {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Extract a block's background color from its attributes.
+	 *
+	 * Returns the inline background color value. Preset slugs (backgroundColor
+	 * attribute) require the theme variables map for resolution, which is
+	 * handled by Content_Renderer::find_container_background_color() instead.
+	 *
+	 * @param array $block The block to extract background color from.
+	 * @return string|null The inline background color value, or null if not set.
+	 */
+	private function get_block_background_color( array $block ): ?string {
+		$inline_bg = $block['attrs']['style']['color']['background'] ?? null;
+		if ( is_string( $inline_bg ) && '' !== $inline_bg ) {
+			return $inline_bg;
+		}
+		return null;
 	}
 
 	/**

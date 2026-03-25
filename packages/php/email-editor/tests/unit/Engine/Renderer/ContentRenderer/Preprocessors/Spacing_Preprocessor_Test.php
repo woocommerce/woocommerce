@@ -912,4 +912,138 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 		// Should not have padding-left due to malicious value.
 		$this->assertArrayNotHasKey( 'padding-left', $second_column['email_attrs'] );
 	}
+
+	/**
+	 * Test container background color is distributed alongside container padding (inline color)
+	 */
+	public function testItDistributesContainerBackgroundColorFromRootGroup(): void {
+		$blocks = array(
+			array(
+				'blockName'   => 'core/group',
+				'attrs'       => array(
+					'style' => array(
+						'spacing' => array(
+							'padding' => array(
+								'left'   => '20px',
+								'right'  => '20px',
+								'top'    => '15px',
+								'bottom' => '15px',
+							),
+						),
+						'color'   => array(
+							'background' => '#333333',
+						),
+					),
+				),
+				'innerBlocks' => array(
+					array(
+						'blockName'   => 'core/post-content',
+						'attrs'       => array(),
+						'innerBlocks' => array(
+							array(
+								'blockName'   => 'core/paragraph',
+								'attrs'       => array(),
+								'innerBlocks' => array(),
+							),
+							array(
+								'blockName'   => 'core/group',
+								'attrs'       => array( 'align' => 'full' ),
+								'innerBlocks' => array(),
+							),
+						),
+					),
+				),
+			),
+		);
+
+		$result    = $this->preprocessor->preprocess( $blocks, $this->layout, $this->styles );
+		$paragraph = $result[0]['innerBlocks'][0]['innerBlocks'][0];
+		$alignfull = $result[0]['innerBlocks'][0]['innerBlocks'][1];
+
+		// Normal paragraph gets container background color.
+		$this->assertEquals( '#333333', $paragraph['email_attrs']['container-background-color'] );
+
+		// Alignfull block does NOT get container background color.
+		$this->assertArrayNotHasKey( 'container-background-color', $alignfull['email_attrs'] );
+	}
+
+	/**
+	 * Test container background color is passed from styles (second pass) to user blocks
+	 */
+	public function testItAppliesContainerBackgroundColorFromStyles(): void {
+		$styles                               = $this->styles;
+		$styles['__container_padding']        = array(
+			'left'  => '20px',
+			'right' => '20px',
+		);
+		$styles['__container_background_color'] = '#444444';
+
+		$blocks = array(
+			array(
+				'blockName'   => 'core/paragraph',
+				'attrs'       => array(),
+				'innerBlocks' => array(),
+			),
+			array(
+				'blockName'   => 'core/group',
+				'attrs'       => array( 'align' => 'full' ),
+				'innerBlocks' => array(),
+			),
+		);
+
+		$result    = $this->preprocessor->preprocess( $blocks, $this->layout, $styles );
+		$paragraph = $result[0];
+		$alignfull = $result[1];
+
+		// Normal block gets container background color.
+		$this->assertEquals( '#444444', $paragraph['email_attrs']['container-background-color'] );
+
+		// Alignfull block does NOT get container background color.
+		$this->assertArrayNotHasKey( 'container-background-color', $alignfull['email_attrs'] );
+	}
+
+	/**
+	 * Test no container background color when group has no background set
+	 */
+	public function testItDoesNotSetContainerBackgroundColorWhenGroupHasNoBackground(): void {
+		$blocks = array(
+			array(
+				'blockName'   => 'core/group',
+				'attrs'       => array(
+					'style' => array(
+						'spacing' => array(
+							'padding' => array(
+								'left'   => '20px',
+								'right'  => '20px',
+								'top'    => '15px',
+								'bottom' => '15px',
+							),
+						),
+					),
+				),
+				'innerBlocks' => array(
+					array(
+						'blockName'   => 'core/post-content',
+						'attrs'       => array(),
+						'innerBlocks' => array(
+							array(
+								'blockName'   => 'core/paragraph',
+								'attrs'       => array(),
+								'innerBlocks' => array(),
+							),
+						),
+					),
+				),
+			),
+		);
+
+		$result    = $this->preprocessor->preprocess( $blocks, $this->layout, $this->styles );
+		$paragraph = $result[0]['innerBlocks'][0]['innerBlocks'][0];
+
+		// Paragraph should still get container padding.
+		$this->assertEquals( '20px', $paragraph['email_attrs']['container-padding-left'] );
+
+		// But no container background color.
+		$this->assertArrayNotHasKey( 'container-background-color', $paragraph['email_attrs'] );
+	}
 }

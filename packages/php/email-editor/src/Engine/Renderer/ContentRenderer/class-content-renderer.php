@@ -119,6 +119,18 @@ class Content_Renderer {
 	private array $container_padding = array();
 
 	/**
+	 * Background color from the template group wrapping post-content.
+	 *
+	 * When per-block padding distribution is active (suppress-horizontal-padding),
+	 * the group's horizontal padding area no longer shows the group's background.
+	 * This color is passed to user blocks so the email-root-padding wrapper can
+	 * apply it, keeping the visual result consistent.
+	 *
+	 * @var string|null
+	 */
+	private ?string $container_background_color = null;
+
+	/**
 	 * CSS inliner
 	 *
 	 * @var Css_Inliner
@@ -253,19 +265,24 @@ class Content_Renderer {
 				unset( $styles['spacing']['padding']['left'], $styles['spacing']['padding']['right'] );
 			}
 
-			// Pass container padding from the first pass so the
-			// Spacing_Preprocessor can distribute it to user blocks.
+			// Pass container padding and background color from the first pass
+			// so the Spacing_Preprocessor can distribute them to user blocks.
 			if ( ! empty( $this->container_padding ) ) {
 				$styles['__container_padding'] = $this->container_padding;
+			}
+			if ( null !== $this->container_background_color ) {
+				$styles['__container_background_color'] = $this->container_background_color;
 			}
 		}
 
 		$result = $this->process_manager->preprocess( $parsed_blocks, $layout, $styles );
 
-		// After the first pass: find the post-content block's width and container padding.
+		// After the first pass: find the post-content block's width, container padding,
+		// and container background color.
 		if ( null === $this->post_content_width ) {
-			$this->post_content_width = $this->find_post_content_width( $result );
-			$this->container_padding  = $this->find_container_padding( $result );
+			$this->post_content_width         = $this->find_post_content_width( $result );
+			$this->container_padding          = $this->find_container_padding( $result );
+			$this->container_background_color = $this->find_container_background_color( $result );
 		}
 
 		return $result;
@@ -336,6 +353,49 @@ class Content_Renderer {
 			}
 		}
 		return array();
+	}
+
+	/**
+	 * Find the background color from the container with suppress-horizontal-padding.
+	 *
+	 * When a template group distributes its horizontal padding per-block, the
+	 * padding wrappers need the group's background color so the padding area
+	 * matches visually.
+	 *
+	 * @param array $blocks Preprocessed blocks.
+	 * @return string|null The resolved background color or null if not found.
+	 */
+	private function find_container_background_color( array $blocks ): ?string {
+		$variables_map = $this->theme_controller->get_variables_values_map();
+
+		foreach ( $blocks as $block ) {
+			$email_attrs = $block['email_attrs'] ?? array();
+			if ( ! empty( $email_attrs['suppress-horizontal-padding'] ) ) {
+				$attrs = $block['attrs'] ?? array();
+
+				// Check for inline background color first.
+				$inline_bg = $attrs['style']['color']['background'] ?? null;
+				if ( is_string( $inline_bg ) && '' !== $inline_bg ) {
+					return $inline_bg;
+				}
+
+				// Check for preset backgroundColor slug.
+				$bg_slug = $attrs['backgroundColor'] ?? null;
+				if ( is_string( $bg_slug ) && '' !== $bg_slug ) {
+					$css_var_name = '--wp--preset--color--' . $bg_slug;
+					return $variables_map[ $css_var_name ] ?? null;
+				}
+
+				return null;
+			}
+			if ( ! empty( $block['innerBlocks'] ) ) {
+				$found = $this->find_container_background_color( $block['innerBlocks'] );
+				if ( null !== $found ) {
+					return $found;
+				}
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -433,6 +493,13 @@ class Content_Renderer {
 			return $content;
 		}
 
+		// When container padding is present, apply the container's background
+		// color so the padding area matches the group's background visually.
+		$container_bg = $email_attrs['container-background-color'] ?? null;
+		if ( is_string( $container_bg ) && '' !== $container_bg ) {
+			$css_attrs['background-color'] = $container_bg;
+		}
+
 		$padding_style = WP_Style_Engine::compile_css( $css_attrs, '' );
 		if ( empty( $padding_style ) ) {
 			return $content;
@@ -525,8 +592,9 @@ class Content_Renderer {
 		remove_filter( 'block_parser_class', array( $this, 'block_parser' ) );
 		remove_filter( 'woocommerce_email_blocks_renderer_parsed_blocks', array( $this, 'preprocess_parsed_blocks' ) );
 
-		$this->post_content_width = null;
-		$this->container_padding  = array();
+		$this->post_content_width         = null;
+		$this->container_padding          = array();
+		$this->container_background_color = null;
 
 		// Restore the original core/post-content render callback.
 		// Note: We always restore it, even if it was null originally.
