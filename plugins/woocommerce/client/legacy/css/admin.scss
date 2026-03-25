@@ -8483,6 +8483,13 @@ table.bar_chart {
 			height: 30px;
 		}
 	}
+
+	// Current page in pagination gets smaller than surrounding buttons at 782px breakpoint.
+	@media screen and (max-width: 782px) {
+		#current-page-selector {
+			height: 44px;
+		}
+	}
 }
 
 /**
