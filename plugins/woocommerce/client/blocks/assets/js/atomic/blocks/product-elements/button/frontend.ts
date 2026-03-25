@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { store, getContext, useLayoutEffect } from '@wordpress/interactivity';
+import '@woocommerce/stores/woocommerce/product-context';
 import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
 import type { ProductContextStore } from '@woocommerce/stores/woocommerce/product-context';
 
