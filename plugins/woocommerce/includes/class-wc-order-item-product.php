@@ -473,7 +473,13 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		 * @param WC_Order_Item_Product $item  The order item product object.
 		 * @param WC_Order              $order The order object.
 		 */
-		return apply_filters( 'woocommerce_get_item_downloads', $files, $this, $order );
+		$files = apply_filters( 'woocommerce_get_item_downloads', $files, $this, $order );
+
+		if ( ! is_array( $files ) ) {
+			return array();
+		}
+
+		return $files;
 	}
 
 	/**
