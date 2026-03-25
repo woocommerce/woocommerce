@@ -315,7 +315,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @param string $context If the context is view, the value will be formatted for display. This keeps it compatible with pre-3.2 versions.
 	 * @return float|string
 	 */
-	public function get_total( $context = 'view' ) {
+	public function get_total( int $context ) {
 		$total = apply_filters( 'woocommerce_cart_' . __FUNCTION__, $this->get_totals_var( 'total' ) );
 		return 'view' === $context ? apply_filters( 'woocommerce_cart_total', wc_price( $total ) ) : $total;
 	}
