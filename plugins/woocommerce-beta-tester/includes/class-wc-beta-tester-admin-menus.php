@@ -169,7 +169,7 @@ Copy and paste the system status report from **WooCommerce > System Status** in 
 
 		if ( false === $ssr ) {
 			// When running WC 3.6 or greater it is necessary to manually load the REST API classes.
-			if ( ! did_action( 'rest_api_init' ) ) {
+			if ( ! did_action( 'rest_api_init' ) && is_callable( array( WC()->api, 'rest_api_includes' ) ) ) {
 				WC()->api->rest_api_includes();
 			}
 
