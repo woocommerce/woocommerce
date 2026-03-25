@@ -26,7 +26,7 @@ class NotificationProcessor {
 	/**
 	 * ActionScheduler group for push notification jobs.
 	 */
-	const ACTION_GROUP = 'wc-push-notifications';
+	const ACTION_SCHEDULER_GROUP = 'wc-push-notifications';
 
 	/**
 	 * Safety net delay in seconds.

@@ -32,11 +32,6 @@ class PushNotifications {
 	const FEATURE_NAME = 'push_notifications';
 
 	/**
-	 * ActionScheduler group for all push notification jobs.
-	 */
-	const ACTION_SCHEDULER_GROUP = 'wc-push-notifications';
-
-	/**
 	 * Roles that can receive push notifications.
 	 *
 	 * This will be used to gate functionality access to just these roles.

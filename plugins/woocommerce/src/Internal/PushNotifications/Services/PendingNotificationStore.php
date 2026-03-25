@@ -126,7 +126,7 @@ class PendingNotificationStore {
 				'type'        => $notification->get_type(),
 				'resource_id' => $notification->get_resource_id(),
 			),
-			NotificationProcessor::ACTION_GROUP
+			NotificationProcessor::ACTION_SCHEDULER_GROUP
 		);
 	}
 

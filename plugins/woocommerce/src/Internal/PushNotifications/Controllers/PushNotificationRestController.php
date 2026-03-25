@@ -125,7 +125,7 @@ class PushNotificationRestController {
 			);
 		}
 
-		$token = str_replace( 'Bearer ', '', $header );
+		$token = preg_replace( '/^\s*Bearer\s+/i', '', $header );
 
 		if ( ! JsonWebToken::validate( $token, wp_salt( 'auth' ) ) ) {
 			return new WP_Error(
@@ -147,7 +147,7 @@ class PushNotificationRestController {
 
 		$body_hash = hash( 'sha256', $request->get_body() );
 
-		if ( ! isset( $parts->payload->body_hash ) || $body_hash !== $parts->payload->body_hash ) {
+		if ( ! isset( $parts->payload->body_hash ) || ! hash_equals( (string) $parts->payload->body_hash, $body_hash ) ) {
 			return new WP_Error(
 				'woocommerce_rest_unauthorized',
 				'Body hash mismatch.',
