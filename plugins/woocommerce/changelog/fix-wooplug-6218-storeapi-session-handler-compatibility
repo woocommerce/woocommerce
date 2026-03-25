@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add missing session methods to StoreApi SessionHandler for compatibility with WC_Session_Handler.

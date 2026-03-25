@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Prime product caches and add targetHints to REST API v4 orders endpoint to reduce N+1 queries during serialization.

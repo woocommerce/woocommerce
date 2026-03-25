@@ -308,7 +308,7 @@ class WC_Emails {
 			$emails['WC_Email_Customer_Fulfillment_Deleted'] = __DIR__ . '/emails/class-wc-email-customer-fulfillment-deleted.php';
 		}
 
-		// Preload the options which will be used when emails are getting initialized in the loop below (reduces the number of SQL-queries).
+		// Prime caches to reduce future queries.
 		wp_prime_option_caches(
 			array_map(
 				fn( string $class_name ) => sprintf( 'woocommerce_%s_settings', strtolower( str_replace( 'WC_Email_', '', $class_name ) ) ),

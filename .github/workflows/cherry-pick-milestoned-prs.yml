@@ -55,6 +55,13 @@ jobs:
               return;
             }
 
+            // If this PR is itself a cherry-pick, extract the source branch so we can
+            // avoid cherry-picking back to the branch it originally came from.
+            const sourceMatch = body.match(/^<!--\s*cherry-pick-source-branch:\s*(.+?)\s*-->$/m);
+            if ( sourceMatch ) {
+              core.setOutput( 'source_branch', sourceMatch[1] );
+            }
+
             core.setOutput( 'should_cherry_pick', ${{ ! contains(github.event.pull_request.labels.*.name, 'Release') }} ? 'true' : 'false' );
 
       # Extract base version from milestone (e.g., 9.9 from 9.9.0)
@@ -75,10 +82,12 @@ jobs:
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
         env:
           BASE_VERSION: ${{ steps.extract-version.outputs.base_version }}
+          SOURCE_BRANCH: ${{ steps.check-cherry-pick.outputs.source_branch }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const baseVersion = process.env.BASE_VERSION;
+            const sourceBranch = process.env.SOURCE_BRANCH || '';
             const [majorStr, minorStr] = baseVersion.split('.');
             let major = parseInt(majorStr, 10);
             let minor = parseInt(minorStr, 10);
@@ -111,8 +120,10 @@ jobs:
             const nextBranch = `release/${nextMajor}.${nextMinor}`;
             const nextExists = await branchExists(nextBranch);
 
-            core.setOutput('milestoned_branch', milestonedExists ? milestonedBranch : '');
-            core.setOutput('next_branch', nextExists ? nextBranch : '');
+            // Skip branches that match the source branch to avoid cherry-pick loops
+            // (e.g., a PR cherry-picked from release/9.8 to trunk should not be cherry-picked back to release/9.8)
+            core.setOutput('milestoned_branch', (milestonedExists && milestonedBranch !== sourceBranch) ? milestonedBranch : '');
+            core.setOutput('next_branch', (nextExists && nextBranch !== sourceBranch) ? nextBranch : '');
 
   # Cherry-pick to milestoned branch
   cherry-pick-milestoned:

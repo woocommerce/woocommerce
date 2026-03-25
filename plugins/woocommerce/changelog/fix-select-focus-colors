@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Make select focused state consistent with other input types

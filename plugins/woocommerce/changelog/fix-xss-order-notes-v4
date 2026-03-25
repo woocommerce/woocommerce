@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent stored XSS on order notes added via REST API v4

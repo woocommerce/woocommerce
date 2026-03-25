@@ -1312,6 +1312,7 @@ class WC_AJAX {
 
 			$order_taxes      = $order->get_taxes();
 			$shipping_methods = WC()->shipping() ? WC()->shipping()->load_shipping_methods() : array();
+			$cogs_is_enabled  = wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled();
 
 			// Add new shipping.
 			$item = new WC_Order_Item_Shipping();
@@ -1866,6 +1867,7 @@ class WC_AJAX {
 		$data_store = WC_Data_Store::load( 'product' );
 		$ids        = $data_store->search_products( $term, 'downloadable', true, false, $limit );
 
+		_prime_post_caches( $ids );
 		$product_objects = array_filter( array_map( 'wc_get_product', $ids ), 'wc_products_array_filter_readable' );
 		$products        = array();
 
