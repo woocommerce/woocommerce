@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 /**
  * Internal dependencies
@@ -23,16 +24,21 @@ jest.mock( '../../../utils/icons', () => ( {
 	EnvelopeIcon: () => <div data-testid="envelope-icon" />,
 } ) );
 
-const setValue = jest.fn();
+const setNotifyCustomer = jest.fn();
+const setCustomerNote = jest.fn();
 
-jest.mock( '../../../context/fulfillment-context', () => ( {
-	useFulfillmentContext: jest.fn( () => ( {
-		notifyCustomer: true,
-		setNotifyCustomer: setValue,
-	} ) ),
+const mockUseFulfillmentContext = jest.fn( () => ( {
+	notifyCustomer: true,
+	setNotifyCustomer,
+	customerNote: '',
+	setCustomerNote,
 } ) );
 
-// Mock ToggleControl to make testing easier
+jest.mock( '../../../context/fulfillment-context', () => ( {
+	useFulfillmentContext: ( ...args ) => mockUseFulfillmentContext( ...args ),
+} ) );
+
+// Mock ToggleControl and TextareaControl to make testing easier
 jest.mock( '@wordpress/components', () => ( {
 	ToggleControl: ( props ) => (
 		<div data-testid="toggle-control">
@@ -44,9 +50,33 @@ jest.mock( '@wordpress/components', () => ( {
 			/>
 		</div>
 	),
+	TextareaControl: ( props ) => (
+		<div data-testid="textarea-control">
+			<label>
+				{ props.label }
+				<textarea
+					data-testid="customer-note-input"
+					value={ props.value }
+					onChange={ ( e ) => props.onChange( e.target.value ) }
+					placeholder={ props.placeholder }
+					rows={ props.rows }
+				/>
+			</label>
+		</div>
+	),
 } ) );
 
 describe( 'CustomerNotificationBox component', () => {
+	beforeEach( () => {
+		jest.clearAllMocks();
+		mockUseFulfillmentContext.mockReturnValue( {
+			notifyCustomer: true,
+			setNotifyCustomer,
+			customerNote: '',
+			setCustomerNote,
+		} );
+	} );
+
 	it( 'should render the component with proper title', () => {
 		render( <CustomerNotificationBox type="fulfill" /> );
 
@@ -68,15 +98,15 @@ describe( 'CustomerNotificationBox component', () => {
 		).toBeInTheDocument();
 	} );
 
-	it( 'should call setValue with the correct value when toggle is changed', () => {
+	it( 'should call setNotifyCustomer with the correct value when toggle is changed', () => {
 		render( <CustomerNotificationBox type="fulfill" /> );
 
 		// Find and click the toggle input
 		const toggleInput = screen.getByTestId( 'toggle-input' );
 		toggleInput.click();
 
-		// Check that setValue was called with true (toggling from true -> false)
-		expect( setValue ).toHaveBeenCalledWith( false );
+		// Check that setNotifyCustomer was called with true (toggling from true -> false)
+		expect( setNotifyCustomer ).toHaveBeenCalledWith( false );
 	} );
 
 	it( 'should render with toggle in correct state based on value prop', () => {
@@ -85,5 +115,47 @@ describe( 'CustomerNotificationBox component', () => {
 		// Verify toggle is checked
 		const toggleInput = screen.getByTestId( 'toggle-input' );
 		expect( toggleInput.checked ).toBe( true );
+	} );
+
+	it( 'should show textarea when type is update and notifyCustomer is true', () => {
+		render( <CustomerNotificationBox type="update" /> );
+
+		expect(
+			screen.getByTestId( 'customer-note-input' )
+		).toBeInTheDocument();
+	} );
+
+	it( 'should hide textarea when type is fulfill', () => {
+		render( <CustomerNotificationBox type="fulfill" /> );
+
+		expect(
+			screen.queryByTestId( 'customer-note-input' )
+		).not.toBeInTheDocument();
+	} );
+
+	it( 'should hide textarea when type is update but notifyCustomer is false', () => {
+		mockUseFulfillmentContext.mockReturnValue( {
+			notifyCustomer: false,
+			setNotifyCustomer,
+			customerNote: '',
+			setCustomerNote,
+		} );
+
+		render( <CustomerNotificationBox type="update" /> );
+
+		expect(
+			screen.queryByTestId( 'customer-note-input' )
+		).not.toBeInTheDocument();
+	} );
+
+	it( 'should call setCustomerNote when textarea value changes', async () => {
+		const user = userEvent.setup();
+
+		render( <CustomerNotificationBox type="update" /> );
+
+		const textarea = screen.getByTestId( 'customer-note-input' );
+		await user.type( textarea, 'a' );
+
+		expect( setCustomerNote ).toHaveBeenCalledWith( 'a' );
 	} );
 } );

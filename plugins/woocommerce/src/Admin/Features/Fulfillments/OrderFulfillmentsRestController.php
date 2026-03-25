@@ -362,7 +362,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 		$order_id        = (int) $request->get_param( 'order_id' );
 		$fulfillment_id  = (int) $request->get_param( 'fulfillment_id' );
 		$notify_customer = (bool) $request->get_param( 'notify_customer' );
-		$customer_note   = sanitize_textarea_field( wp_unslash( (string) $request->get_param( 'customer_note' ) ) );
+		$customer_note   = (string) $request->get_param( 'customer_note' );
 
 		$order = wc_get_order( $order_id );
 		if ( ! $order ) {

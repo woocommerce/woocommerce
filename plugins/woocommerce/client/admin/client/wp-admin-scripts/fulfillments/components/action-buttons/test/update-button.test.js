@@ -112,6 +112,47 @@ describe( 'UpdateButton component', () => {
 		);
 	} );
 
+	it( 'should pass empty customer note when notifyCustomer is false', async () => {
+		const mockUpdateFulfillment = jest.fn( () => Promise.resolve() );
+		useDispatch.mockReturnValue( {
+			updateFulfillment: mockUpdateFulfillment,
+		} );
+
+		const mockFulfillment = {
+			id: 456,
+			meta_data: [
+				{
+					id: 1,
+					key: '_items',
+					value: [
+						{
+							id: 1,
+							name: 'Item 1',
+							quantity: 2,
+						},
+					],
+				},
+			],
+		};
+		useFulfillmentContext.mockReturnValue( {
+			order: { id: 123 },
+			fulfillment: mockFulfillment,
+			notifyCustomer: false,
+			customerNote: 'This note should not be sent',
+			setCustomerNote: jest.fn(),
+		} );
+
+		render( <UpdateButton setError={ setError } /> );
+		fireEvent.click( screen.getByText( 'Update' ) );
+
+		expect( await mockUpdateFulfillment ).toHaveBeenCalledWith(
+			123,
+			mockFulfillment,
+			false,
+			''
+		);
+	} );
+
 	it( 'should not call updateFulfillment when fulfillment is undefined', () => {
 		const mockUpdateFulfillment = jest.fn();
 		useDispatch.mockReturnValue( {

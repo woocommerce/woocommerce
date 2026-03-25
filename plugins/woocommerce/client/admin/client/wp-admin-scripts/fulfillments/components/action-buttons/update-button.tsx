@@ -54,7 +54,7 @@ export default function UpdateButton( {
 			order.id,
 			fulfillment,
 			notifyCustomer,
-			customerNote
+			notifyCustomer ? customerNote : ''
 		);
 		const error = select( FulfillmentStore ).getError( order.id );
 		if ( error ) {

@@ -64,12 +64,12 @@ export default function CustomerNotificationBox( {
 				</>
 			}
 		>
-			<div style={ { flexDirection: 'column', width: '100%' } }>
+			<div className="woocommerce-fulfillment-notification-content">
 				<p className="woocommerce-fulfillment-description">
 					{ contentStrings[ type ] || contentStrings.fulfill }
 				</p>
 				{ type === 'update' && notifyCustomer && (
-					<div style={ { marginTop: '16px' } }>
+					<div className="woocommerce-fulfillment-customer-note">
 						<TextareaControl
 							__nextHasNoMarginBottom
 							label={ __( 'Customer note', 'woocommerce' ) }

@@ -154,13 +154,13 @@ const publicActions = {
 				const updated = await apiFetch< Fulfillment >( {
 					path: addQueryArgs(
 						`/wc/v3/orders/${ orderId }/fulfillments/${ fulfillment.id }`,
-						{
-							notify_customer: notifyCustomer,
-							customer_note: customerNote,
-						}
+						{ notify_customer: notifyCustomer }
 					),
 					method: 'PUT',
-					data: fulfillment,
+					data: {
+						...fulfillment,
+						customer_note: customerNote,
+					},
 					headers: {
 						'Content-Type': 'application/json',
 						'X-WC-Fulfillments-UI': 'true',
