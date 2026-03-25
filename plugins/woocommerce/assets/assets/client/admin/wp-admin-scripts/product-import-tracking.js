@@ -1,1 +1,0 @@
-(()=>{"use strict";const o=window.wc.customerEffortScore,t=window.wc.navigation,r="import_products";(()=>{const c=(0,t.getQuery)();"product_importer"===c.page&&("done"!==c.step?(0,o.addExitPage)(r):(0,o.removeExitPage)(r))})(),(window.wc=window.wc||{}).productImportTracking={}})();
