@@ -65,7 +65,12 @@ class InternalNotificationDispatcher {
 			wp_salt( 'auth' )
 		);
 
-		$response = wp_remote_post(
+		/**
+		 * The request is non-blocking so the response is not handled anywhere.
+		 * If the request fails, the ActionScheduler safety net will pick up
+		 * unsent notifications after 60 seconds.
+		 */
+		wp_remote_post(
 			rest_url( self::SEND_ENDPOINT ),
 			array(
 				'blocking' => false,
@@ -77,12 +82,5 @@ class InternalNotificationDispatcher {
 				'body'     => $body,
 			)
 		);
-
-		if ( is_wp_error( $response ) ) {
-			wc_get_logger()->error(
-				sprintf( 'Loopback dispatch failed: %s', $response->get_error_message() ),
-				array( 'source' => PushNotifications::FEATURE_NAME )
-			);
-		}
 	}
 }
