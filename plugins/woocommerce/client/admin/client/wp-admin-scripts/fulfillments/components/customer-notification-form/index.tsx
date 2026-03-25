@@ -20,7 +20,8 @@ export default function CustomerNotificationBox( {
 }: {
 	type: 'fulfill' | 'update' | 'remove';
 } ) {
-	const { notifyCustomer, setNotifyCustomer, customerNote, setCustomerNote } = useFulfillmentContext();
+	const { notifyCustomer, setNotifyCustomer, customerNote, setCustomerNote } =
+		useFulfillmentContext();
 
 	const headerStrings = {
 		fulfill: __( 'Fulfillment notification', 'woocommerce' ),
