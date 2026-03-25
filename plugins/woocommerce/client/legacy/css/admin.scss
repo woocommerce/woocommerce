@@ -8497,35 +8497,34 @@ table.bar_chart {
 			}
 		}
 	}
-}
 
-// Tablenav: WP 7.0 tablenav uses compact 32px sizing for native selects.
-// Match Select2 to 32px here (not the global 40px).
-// These page classes are on the body alongside wc-wp-version-gte-70, so use compound selectors.
-.wc-wp-version-gte-70.woocommerce_page_wc-customer-stock-notifications .tablenav,
-.wc-wp-version-gte-70.woocommerce_page_wc-orders .tablenav,
-.wc-wp-version-gte-70.post-type-product .tablenav,
-.wc-wp-version-gte-70.post-type-shop_order .tablenav {
-	.select2-container {
-		margin-top: 0; // Align with other tablenav elements.
-	}
-
-	.select2-container .select2-selection--single {
-		height: 32px; // WP 7.0 tablenav uses compact 32px, not 40px.
-
-		.select2-selection__rendered {
-			line-height: 30px;
+	// Tablenav: WP 7.0 tablenav uses compact 32px sizing for native selects.
+	// Match Select2 to 32px here (not the global 40px).
+	&.woocommerce_page_wc-customer-stock-notifications .tablenav,
+	&.woocommerce_page_wc-orders .tablenav,
+	&.post-type-product .tablenav,
+	&.post-type-shop_order .tablenav {
+		.select2-container {
+			margin-top: 0; // Align with other tablenav elements.
 		}
 
-		.select2-selection__arrow {
-			height: 30px;
-		}
-	}
+		.select2-container .select2-selection--single {
+			height: 32px; // WP 7.0 tablenav uses compact 32px, not 40px.
 
-	// Current page in pagination gets smaller than surrounding buttons at 782px breakpoint.
-	@media screen and (max-width: 782px) {
-		#current-page-selector {
-			height: 44px;
+			.select2-selection__rendered {
+				line-height: 30px;
+			}
+
+			.select2-selection__arrow {
+				height: 30px;
+			}
+		}
+
+		// Current page in pagination gets smaller than surrounding buttons at 782px breakpoint.
+		@media screen and (max-width: 782px) {
+			#current-page-selector {
+				height: 44px;
+			}
 		}
 	}
 }
