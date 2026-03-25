@@ -92,12 +92,13 @@ class FulfillmentOrderNotes {
 	 * tracking number, tracking URL, shipping provider). If the status
 	 * changed, a dedicated status change note is added instead.
 	 *
-	 * @param Fulfillment $fulfillment   The fulfillment object.
-	 * @param array       $changed_props List of tracked property keys that changed.
-	 * @param array       $old_state     Snapshot of tracked property values before the update.
+	 * @param Fulfillment $fulfillment     The fulfillment object (post-update).
+	 * @param array       $changes         Changes as returned by Fulfillment::get_changes() before
+	 *                                     save. Core data props at top level, meta under 'meta_data'.
+	 * @param string      $previous_status The fulfillment status before the update.
 	 */
-	public function add_fulfillment_updated_note( Fulfillment $fulfillment, array $changed_props = array(), array $old_state = array() ): void {
-		if ( empty( $changed_props ) ) {
+	public function add_fulfillment_updated_note( Fulfillment $fulfillment, array $changes = array(), string $previous_status = 'unfulfilled' ): void {
+		if ( empty( $changes ) ) {
 			return;
 		}
 
@@ -107,10 +108,9 @@ class FulfillmentOrderNotes {
 		}
 
 		// If status changed, add a dedicated status change note.
-		if ( in_array( 'status', $changed_props, true ) ) {
-			$old_status = $old_state['status'] ?? 'unfulfilled';
-			$new_status = $fulfillment->get_status() ?? 'unfulfilled';
-			$this->add_fulfillment_status_changed_note( $fulfillment, $order, $old_status, $new_status );
+		if ( array_key_exists( 'status', $changes ) ) {
+			$new_status = $changes['status'] ?? 'unfulfilled';
+			$this->add_fulfillment_status_changed_note( $fulfillment, $order, $previous_status, $new_status );
 			return;
 		}
 
@@ -324,7 +324,7 @@ class FulfillmentOrderNotes {
 	 */
 	private function format_tracking( Fulfillment $fulfillment ): string {
 		$tracking_number   = $fulfillment->get_tracking_number();
-		$shipping_provider = $fulfillment->get_shipping_provider();
+		$shipping_provider = $fulfillment->get_shipment_provider();
 		$tracking_url      = $fulfillment->get_tracking_url();
 
 		if ( null === $tracking_number ) {
