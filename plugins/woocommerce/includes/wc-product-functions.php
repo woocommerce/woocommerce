@@ -398,9 +398,9 @@ function wc_product_canonical_redirect(): void {
 
 	// In the event we are dealing with ugly permalinks, this will be empty.
 	$specified_category_slug = get_query_var( 'product_cat' );
-	$specified_category_slug = urldecode( $specified_category_slug );
+	$specified_category_slug = is_array( $specified_category_slug ) ? '' : urldecode( (string) $specified_category_slug );
 
-	if ( ! is_string( $specified_category_slug ) || strlen( $specified_category_slug ) < 1 ) {
+	if ( '' === $specified_category_slug ) {
 		return;
 	}
 
@@ -796,6 +796,7 @@ function wc_scheduled_sales() {
 	// Sales which are due to start.
 	$product_ids = $data_store->get_starting_sales();
 	if ( $product_ids ) {
+		_prime_post_caches( $product_ids );
 		$must_refresh_transient = true;
 		do_action( 'wc_before_products_starting_sales', $product_ids );
 
@@ -817,6 +818,7 @@ function wc_scheduled_sales() {
 	// Sales which are due to end.
 	$product_ids = $data_store->get_ending_sales();
 	if ( $product_ids ) {
+		_prime_post_caches( $product_ids );
 		$must_refresh_transient = true;
 		do_action( 'wc_before_products_ending_sales', $product_ids );
 

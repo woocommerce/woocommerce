@@ -5,8 +5,9 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Dispatchers;
 
 use Automattic\WooCommerce\Internal\PushNotifications\Dispatchers\InternalNotificationDispatcher;
-use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
 use Automattic\WooCommerce\StoreApi\Utilities\JsonWebToken;
+use Automattic\WooCommerce\Tests\Internal\PushNotifications\Stubs\StubOrderNotification;
+use Automattic\WooCommerce\Tests\Internal\PushNotifications\Stubs\StubReviewNotification;
 use WC_Unit_Test_Case;
 
 /**
@@ -82,7 +83,7 @@ class InternalNotificationDispatcherTest extends WC_Unit_Test_Case {
 	 * @testdox Should fire a non-blocking POST to the send endpoint URL.
 	 */
 	public function test_dispatch_fires_non_blocking_post_to_send_endpoint(): void {
-		$notifications = array( $this->create_notification( 'store_order', 1 ) );
+		$notifications = array( new StubOrderNotification( 1 ) );
 
 		$this->sut->dispatch( $notifications );
 
@@ -95,13 +96,23 @@ class InternalNotificationDispatcherTest extends WC_Unit_Test_Case {
 			$this->captured_request['blocking'],
 			'Request should be non-blocking'
 		);
+		$this->assertSame(
+			1,
+			$this->captured_request['timeout'],
+			'Request timeout should be 1 second'
+		);
+		$this->assertSame(
+			'application/json',
+			$this->captured_request['headers']['Content-Type'],
+			'Request Content-Type should be application/json'
+		);
 	}
 
 	/**
 	 * @testdox Should include a valid JWT with correct claims and body hash.
 	 */
 	public function test_dispatch_includes_valid_jwt_with_correct_claims(): void {
-		$notifications = array( $this->create_notification( 'store_order', 1 ) );
+		$notifications = array( new StubOrderNotification( 1 ) );
 
 		$this->sut->dispatch( $notifications );
 
@@ -130,8 +141,8 @@ class InternalNotificationDispatcherTest extends WC_Unit_Test_Case {
 	 */
 	public function test_dispatch_body_contains_encoded_notifications(): void {
 		$notifications = array(
-			$this->create_notification( 'store_order', 10 ),
-			$this->create_notification( 'store_review', 20 ),
+			new StubOrderNotification( 10 ),
+			new StubReviewNotification( 20 ),
 		);
 
 		$this->sut->dispatch( $notifications );
@@ -153,23 +164,5 @@ class InternalNotificationDispatcherTest extends WC_Unit_Test_Case {
 		$this->sut->dispatch( array() );
 
 		$this->assertNull( $this->captured_url, 'No HTTP request should be made for empty notifications' );
-	}
-
-	/**
-	 * Creates a concrete Notification instance for testing.
-	 *
-	 * @param string $type        The notification type.
-	 * @param int    $resource_id The resource ID.
-	 * @return Notification
-	 */
-	private function create_notification( string $type, int $resource_id ): Notification {
-		return new class( $type, $resource_id ) extends Notification {
-			/**
-			 * {@inheritDoc}
-			 */
-			public function to_payload(): ?array {
-				return array( 'test' => true );
-			}
-		};
 	}
 }

@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add design-aligned grouped settings schemas for offline payment gateways (cheque, BACS, COD) in the v4 settings API.

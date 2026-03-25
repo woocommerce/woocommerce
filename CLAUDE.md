@@ -105,6 +105,16 @@ composer exec -- phpstan analyse path/to/modified/File.php --memory-limit=2G
 
 PHPStan failures often indicate the need to update the baseline file (`phpstan-baseline.neon`). If your fix resolves a previously baselined error, remove the corresponding entry from the baseline.
 
+### Pre-push Checks
+
+**Before pushing**, run the branch-level lint to catch issues across all commits on the branch (e.g. alignment warnings that per-file linting misses):
+
+```sh
+pnpm --filter=@woocommerce/plugin-woocommerce lint:changes:branch
+```
+
+This compares the full branch diff against trunk and runs `phpcs-changed` on it. Fix any warnings before pushing.
+
 **NEVER create a PR without changelog entries.** Each package modified in the monorepo requires its own changelog entry. Run for each affected package:
 
 ```sh

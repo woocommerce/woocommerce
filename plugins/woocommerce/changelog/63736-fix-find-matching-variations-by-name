@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix variable products not working when name is different than the slug

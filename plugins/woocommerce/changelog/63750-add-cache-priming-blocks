@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Reduce SQL queries on legacy product grid blocks, Product Gallery, and Product Button by adding missing "_prime_post_caches()" calls to batch-load post data.

@@ -157,6 +157,9 @@
 			"@woocommerce/sanitize": [
 				"node_modules/@woocommerce/sanitize/src/index.ts"
 			],
+			"dinero.js/currencies": [
+				"node_modules/dinero.js/dist/esm/currencies/index.d.ts"
+			],
 		}
 	}
 }

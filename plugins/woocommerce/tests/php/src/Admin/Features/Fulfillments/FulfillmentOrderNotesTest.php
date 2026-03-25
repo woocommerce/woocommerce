@@ -219,7 +219,7 @@ class FulfillmentOrderNotesTest extends \WC_Unit_Test_Case {
 					),
 				),
 				'_tracking_number'   => 'TRACK123456',
-				'_shipping_provider' => 'fedex',
+				'_shipment_provider' => 'fedex',
 			)
 		);
 
@@ -305,7 +305,7 @@ class FulfillmentOrderNotesTest extends \WC_Unit_Test_Case {
 
 		// Update with tracking info (non-status change).
 		$fulfillment->update_meta_data( '_tracking_number', 'UPS999' );
-		$fulfillment->update_meta_data( '_shipping_provider', 'ups' );
+		$fulfillment->update_meta_data( '_shipment_provider', 'ups' );
 		$fulfillment->update_meta_data( '_tracking_url', 'https://ups.com/track/UPS999' );
 		$fulfillment->save();
 
