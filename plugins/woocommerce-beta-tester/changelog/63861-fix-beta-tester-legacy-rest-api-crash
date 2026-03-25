@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix crash when generating system status report due to removed rest_api_includes method.
