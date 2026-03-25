@@ -31,9 +31,6 @@ class PendingNotificationStore {
 	 * The dispatcher that will be used to send notifications on shutdown.
 	 *
 	 * @var InternalNotificationDispatcher
-	 *
-	 * @phpstan-ignore property.onlyWritten (this will be read when the loopback
-	 * controller is added)
 	 */
 	private InternalNotificationDispatcher $dispatcher;
 
@@ -102,6 +99,8 @@ class PendingNotificationStore {
 
 		$this->pending[ $key ] = $notification;
 
+		$this->schedule_safety_net( $notification );
+
 		if ( ! $this->shutdown_registered ) {
 			add_action( 'shutdown', array( $this, 'dispatch_all' ) );
 			$this->shutdown_registered = true;
@@ -109,7 +108,30 @@ class PendingNotificationStore {
 	}
 
 	/**
-	 * Dispatches all pending notifications via the loopback endpoint.
+	 * Schedules an ActionScheduler safety net job for the notification.
+	 *
+	 * If the shutdown hook never fires (OOM, SIGKILL, etc.), this job
+	 * guarantees the notification is still processed.
+	 *
+	 * @param Notification $notification The notification to schedule.
+	 * @return void
+	 *
+	 * @since 10.7.0
+	 */
+	private function schedule_safety_net( Notification $notification ): void {
+		as_schedule_single_action(
+			time() + NotificationProcessor::SAFETY_NET_DELAY,
+			NotificationProcessor::SAFETY_NET_HOOK,
+			array(
+				'type'        => $notification->get_type(),
+				'resource_id' => $notification->get_resource_id(),
+			),
+			NotificationProcessor::ACTION_GROUP
+		);
+	}
+
+	/**
+	 * Dispatches all pending notifications via InternalNotificationDispatcher.
 	 *
 	 * Called on shutdown. Sends all pending notifications through the
 	 * InternalNotificationDispatcher, then clears the store.
@@ -123,21 +145,8 @@ class PendingNotificationStore {
 			return;
 		}
 
-		/**
-		 * Fires when pending push notifications are ready to be dispatched.
-		 *
-		 * @param Notification[] $notifications The notifications to dispatch.
-		 *
-		 * @since 10.7.0
-		 *
-		 * The call to dispatch the notifications will go here when the
-		 * receiving controller has been added.
-		 */
+		$this->dispatcher->dispatch( array_values( $this->pending ) );
 
-		/**
-		 * Store is single-use per request lifecycle, so disable it and clear
-		 * pending notifications.
-		 */
 		$this->enabled = false;
 		$this->pending = array();
 	}
