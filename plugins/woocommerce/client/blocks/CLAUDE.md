@@ -160,7 +160,7 @@ Block scripts are only enqueued when the block is actually rendered on the page,
 Packages in `packages/` and core modules are built as webpack externals, exposed on `window.wc`. The mapping lives in `bin/webpack-helpers.js` (`wcDepMap`):
 
 | Import | Global | Script handle |
-|--------|--------|---------------|
+| ------ | ------ | ------------- |
 | `@woocommerce/blocks-checkout` | `wc.blocksCheckout` | `wc-blocks-checkout` |
 | `@woocommerce/blocks-checkout-events` | `wc.blocksCheckoutEvents` | `wc-blocks-checkout-events` |
 | `@woocommerce/blocks-components` | `wc.blocksComponents` | `wc-blocks-components` |
