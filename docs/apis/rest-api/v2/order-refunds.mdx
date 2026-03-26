@@ -18,8 +18,8 @@ The refunds API allows you to create, view, and delete individual refunds.
 | `amount`           | string    | Refund amount.                                                                                                                   |
 | `reason`           | string    | Reason for refund.                                                                                                               |
 | `refunded_by`      | integer   | User ID of user who created the refund.                                                                                          |
-| `meta_data`        | array     | Meta data. See [Order refund - Meta data properties](#order-refund-meta-data-properties)                                         |
-| `line_items`       | array     | Line items data. See [Order refund - Line items properties](#order-refund-line-items-properties)                                 |
+| `meta_data`        | array     | Meta data. See [Order refund - Meta data properties](#order-refund---meta-data-properties)                                         |
+| `line_items`       | array     | Line items data. See [Order refund - Line items properties](#order-refund---line-items-properties)                                 |
 | `api_refund`       | boolean   | When true, the payment gateway API is used to generate the refund. Default is `true`. `WRITE-ONLY` |
 
 ### Order refund - Meta data properties
@@ -42,8 +42,8 @@ The refunds API allows you to create, view, and delete individual refunds.
 | `subtotal_tax` | string  | Line subtotal tax (before discounts). `READ-ONLY`                                                                 |
 | `total`        | string  | Line total (after discounts).                                                                                                                   |
 | `total_tax`    | string  | Line total tax (after discounts). `READ-ONLY`                                                                     |
-| `taxes`        | array   | Line taxes. See [Order refund line item - Taxes properties](#order-refund-line-item-taxes-properties) `READ-ONLY` |
-| `meta_data`    | array   | Meta data. See [Order refund - Meta data properties](#order-refund-meta-data-properties)                                                        |
+| `taxes`        | array   | Line taxes. See [Order refund line item - Taxes properties](#order-refund-line-item---taxes-properties) `READ-ONLY` |
+| `meta_data`    | array   | Meta data. See [Order refund - Meta data properties](#order-refund---meta-data-properties)                                                        |
 | `sku`          | string  | Product SKU. `READ-ONLY`                                                                                          |
 | `price`        | string  | Product price. `READ-ONLY`                                                                                        |
 

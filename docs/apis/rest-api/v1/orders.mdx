@@ -48,7 +48,35 @@ The orders API allows you to create, view, update, and delete individual, or a b
 | `shipping_lines`       | array     | Shipping lines data. See [Shipping Lines properties](#shipping-line-properties).                                                                                     |
 | `fee_lines`            | array     | Fee lines data. See [Fee Lines Properties](#fee-line-properties).                                                                                                    |
 | `coupon_lines`         | array     | Coupons line data. See [Coupon Lines properties](#coupon-line-properties).                                                                                           |
-| `refunds`              | array     | List of refunds. See [Refunds Lines properties](#refunds-line-properties). `READ-ONLY`                                                 |
+| `refunds`              | array     | List of refunds. See [Refund line properties](#refund-line-properties). `READ-ONLY`                                                 |
+
+### Billing address properties
+| Attribute    | Type   | Description                                          |
+| ------------ | ------ | ---------------------------------------------------- |
+| `first_name` | string | First name.                                          |
+| `last_name`  | string | Last name.                                           |
+| `company`    | string | Company name.                                        |
+| `address_1`  | string | Address line 1.                                      |
+| `address_2`  | string | Address line 2.                                      |
+| `city`       | string | City name.                                           |
+| `state`      | string | ISO code or name of the state, province or district. |
+| `postcode`   | string | Postal code.                                         |
+| `country`    | string | ISO code of the country.                             |
+| `email`      | string | Email address.                                       |
+| `phone`      | string | Phone number.                                        |
+
+### Shipping address properties
+| Attribute    | Type   | Description                                          |
+| ------------ | ------ | ---------------------------------------------------- |
+| `first_name` | string | First name.                                          |
+| `last_name`  | string | Last name.                                           |
+| `company`    | string | Company name.                                        |
+| `address_1`  | string | Address line 1.                                      |
+| `address_2`  | string | Address line 2.                                      |
+| `city`       | string | City name.                                           |
+| `state`      | string | ISO code or name of the state, province or district. |
+| `postcode`   | string | Postal code.                                         |
+| `country`    | string | ISO code of the country.                             |
 
 ### Line item properties
 |   Attribute    |   Type  |                                          Description                                           |
