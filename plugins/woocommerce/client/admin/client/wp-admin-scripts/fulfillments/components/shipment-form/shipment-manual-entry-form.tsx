@@ -10,7 +10,7 @@ import { __ } from '@wordpress/i18n';
  */
 import { useShipmentFormContext } from '../../context/shipment-form-context';
 import ShipmentProviders from '../../data/shipment-providers';
-import { SearchIcon } from '../../utils/icons';
+import { SearchIcon, TruckIcon } from '../../utils/icons';
 
 const ShippingProviderListItem = ( {
 	item,
@@ -25,11 +25,13 @@ const ShippingProviderListItem = ( {
 					item.value,
 			].join( ' ' ) }
 		>
-			{ item.icon && (
-				<div className="woocommerce-fulfillment-shipping-provider-list-item-icon">
-					<img src={ item.icon } alt="" aria-hidden="true" />
-				</div>
-			) }
+			<div className="woocommerce-fulfillment-shipping-provider-list-item-icon">
+				{ item.icon ? (
+					<img src={ item.icon } alt={ item.label } />
+				) : (
+					<TruckIcon />
+				) }
+			</div>
 			<div className="woocommerce-fulfillment-shipping-provider-list-item-label">
 				{ item.label }
 			</div>
