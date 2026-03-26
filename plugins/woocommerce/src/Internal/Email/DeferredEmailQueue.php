@@ -50,6 +50,8 @@ final class DeferredEmailQueue {
 	 * @internal
 	 */
 	final public function init(): void { // phpcs:ignore Generic.CodeAnalysis.UnnecessaryFinalModifier.Found
+		// Registered unconditionally so previously-scheduled AS jobs can still
+		// be processed even if the feature is later disabled.
 		add_action( self::AS_HOOK, array( $this, 'send_queued_transactional_emails' ) );
 	}
 
@@ -94,7 +96,8 @@ final class DeferredEmailQueue {
 			\WC()->queue()->add( self::AS_HOOK, array( $chunk ), self::AS_GROUP );
 		}
 
-		$this->queue = array();
+		$this->queue              = array();
+		$this->shutdown_registered = false;
 	}
 
 	/**
