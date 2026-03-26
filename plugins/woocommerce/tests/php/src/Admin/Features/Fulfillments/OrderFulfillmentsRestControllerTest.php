@@ -2069,15 +2069,11 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		);
 
 		$captured_note = null;
-		add_action(
-			'woocommerce_fulfillment_updated_notification',
-			function ( $order_id, $fulfillment_obj, $order_obj, $customer_note ) use ( &$captured_note ) {
-				unset( $order_id, $fulfillment_obj, $order_obj );
-				$captured_note = $customer_note;
-			},
-			10,
-			4
-		);
+		$callback      = function ( $order_id, $fulfillment_obj, $order_obj, $customer_note ) use ( &$captured_note ) {
+			unset( $order_id, $fulfillment_obj, $order_obj );
+			$captured_note = $customer_note;
+		};
+		add_action( 'woocommerce_fulfillment_updated_notification', $callback, 10, 4 );
 
 		wp_set_current_user( 1 );
 		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() . '/fulfillments/' . $fulfillment->get_id() );
@@ -2112,7 +2108,7 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertStringNotContainsString( '<script>', $captured_note, 'Script tags should be stripped by sanitize_textarea_field' );
 		$this->assertStringContainsString( 'Hello customer!', $captured_note, 'Legitimate note text should be preserved' );
 
-		remove_all_actions( 'woocommerce_fulfillment_updated_notification' );
+		remove_action( 'woocommerce_fulfillment_updated_notification', $callback, 10 );
 		wp_set_current_user( 0 );
 	}
 
@@ -2133,15 +2129,11 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		);
 
 		$captured_note = null;
-		add_action(
-			'woocommerce_fulfillment_updated_notification',
-			function ( $order_id, $fulfillment_obj, $order_obj, $customer_note ) use ( &$captured_note ) {
-				unset( $order_id, $fulfillment_obj, $order_obj );
-				$captured_note = $customer_note;
-			},
-			10,
-			4
-		);
+		$callback      = function ( $order_id, $fulfillment_obj, $order_obj, $customer_note ) use ( &$captured_note ) {
+			unset( $order_id, $fulfillment_obj, $order_obj );
+			$captured_note = $customer_note;
+		};
+		add_action( 'woocommerce_fulfillment_updated_notification', $callback, 10, 4 );
 
 		wp_set_current_user( 1 );
 		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() . '/fulfillments/' . $fulfillment->get_id() );
@@ -2174,7 +2166,7 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertNotNull( $captured_note, 'Notification hook should have been fired' );
 		$this->assertSame( '', $captured_note, 'Customer note should be empty when not provided' );
 
-		remove_all_actions( 'woocommerce_fulfillment_updated_notification' );
+		remove_action( 'woocommerce_fulfillment_updated_notification', $callback, 10 );
 		wp_set_current_user( 0 );
 	}
 
@@ -2195,12 +2187,10 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		);
 
 		$hook_fired = false;
-		add_action(
-			'woocommerce_fulfillment_updated_notification',
-			function () use ( &$hook_fired ) {
-				$hook_fired = true;
-			}
-		);
+		$callback   = function () use ( &$hook_fired ) {
+			$hook_fired = true;
+		};
+		add_action( 'woocommerce_fulfillment_updated_notification', $callback );
 
 		wp_set_current_user( 1 );
 		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() . '/fulfillments/' . $fulfillment->get_id() );
@@ -2233,7 +2223,7 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( WP_Http::OK, $response->get_status(), 'Update should succeed' );
 		$this->assertFalse( $hook_fired, 'Notification hook should not fire when notify_customer is false' );
 
-		remove_all_actions( 'woocommerce_fulfillment_updated_notification' );
+		remove_action( 'woocommerce_fulfillment_updated_notification', $callback );
 		wp_set_current_user( 0 );
 	}
 }

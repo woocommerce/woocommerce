@@ -261,7 +261,7 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 			 * @param string      $previous_status The fulfillment status before the update.
 			 *
 			 * @since 10.1.0
-			 * @since 10.8.0 Added $changes and $previous_status parameters.
+			 * @since 10.7.0 Added $changes and $previous_status parameters.
 			 */
 			do_action( 'woocommerce_fulfillment_after_update', $data, $changes, $previous_status );
 		}
