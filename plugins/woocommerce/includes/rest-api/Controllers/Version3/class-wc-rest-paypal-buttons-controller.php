@@ -155,8 +155,8 @@ class WC_REST_Paypal_Buttons_Controller extends WC_REST_Controller {
 		if ( isset( $paypal_order['localized_error_message'] ) ) {
 			return new WP_REST_Response(
 				array(
-					'error' => 'Failed to create PayPal order', // keep this key for backward compatibility
-					'error_message' => $paypal_order['localized_error_message']
+					'error'         => 'Failed to create PayPal order', // keep this key for backward compatibility.
+					'error_message' => $paypal_order['localized_error_message'],
 				),
 				400
 			);
@@ -165,8 +165,8 @@ class WC_REST_Paypal_Buttons_Controller extends WC_REST_Controller {
 		if ( ! $paypal_order || empty( $paypal_order['id'] ) ) {
 			return new WP_REST_Response(
 				array(
-					'error' => 'Failed to create PayPal order', // keep this key for backward compatibility
-					'error_message' => 'Failed to create PayPal order'
+					'error'         => 'Failed to create PayPal order', // keep this key for backward compatibility.
+					'error_message' => 'Failed to create PayPal order',
 				),
 				400
 			);
