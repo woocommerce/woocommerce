@@ -1,0 +1,29 @@
+name: Agent Experience Evaluation
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Claude Code
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Evaluate Agent Experience
+        uses: Automattic/jetpack/projects/github-actions/agent-experience-eval@add/agent-experience-eval
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+
+      - name: Upload evaluation artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: agent-experience-eval
+          path: agent-experience-eval.json
+          retention-days: 30
