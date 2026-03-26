@@ -12841,12 +12841,6 @@ parameters:
 			path: includes/class-wc-order-item-product.php
 
 		-
-			message: '#^Method WC_Order_Item_Product\:\:get_item_downloads\(\) should return array but return statement is missing\.$#'
-			identifier: return.missing
-			count: 1
-			path: includes/class-wc-order-item-product.php
-
-		-
 			message: '#^Method WC_Order_Item_Product\:\:set_backorder_meta\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -37216,12 +37210,6 @@ parameters:
 			path: includes/wccom-site/installation/installation-steps/class-wc-wccom-site-installation-step-get-product-info.php
 
 		-
-			message: '#^Cannot access offset ''destination'' on array\|WP_Error\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: includes/wccom-site/installation/installation-steps/class-wc-wccom-site-installation-step-move-product.php
-
-		-
 			message: '#^Method WC_WCCOM_Site_Installation_Step_Move_Product\:\:run\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -56887,12 +56875,6 @@ parameters:
 			message: '#^Method Automattic\\WooCommerce\\Caches\\OrderCountCache\:\:decrement\(\) should return int but returns int\|false\.$#'
 			identifier: return.type
 			count: 1
-			path: src/Caches/OrderCountCache.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Caches\\OrderCountCache\:\:get\(\) should return array\<int\> but returns null\.$#'
-			identifier: return.type
-			count: 2
 			path: src/Caches/OrderCountCache.php
 
 		-
