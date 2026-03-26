@@ -154,7 +154,7 @@ foreach ( $items as $item_id => $item ) :
 			 */
 			$quantity = apply_filters( 'woocommerce_email_order_item_quantity', $qty_display, $item->item );
 			if ( '' !== $quantity ) {
-				echo '&times; ' . wp_kses_post( $quantity );
+				echo '&times;' . wp_kses_post( $quantity );
 			}
 			?>
 		</td>
