@@ -56,6 +56,8 @@ describe( 'UpdateButton component', () => {
 					},
 				],
 			},
+			notifyCustomer: true,
+			setNotifyCustomer: jest.fn(),
 			customerNote: '',
 			setCustomerNote: jest.fn(),
 		} );
