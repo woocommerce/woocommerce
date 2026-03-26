@@ -55,9 +55,8 @@ Use the PR template from the dynamic context above.
 Use a simplified body with only these sections:
 - **Submission Review Guidelines**: Keep as-is from template.
 - **Changes proposed**: 2-3 sentences. Lead with WHY, then WHAT.
-- **Changelog**: "Does not require" `[x]` — explain that changes are not plugin-affecting.
 
-Skip Screenshots, Testing instructions, Testing done, and Milestone sections entirely.
+Skip Screenshots, Testing instructions, Testing done, Milestone, and Changelog sections entirely.
 
 #### Plugin-affecting changes
 
