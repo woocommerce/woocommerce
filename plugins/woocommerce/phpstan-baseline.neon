@@ -5899,6 +5899,12 @@ parameters:
 			path: includes/admin/meta-boxes/views/html-order-fee.php
 
 		-
+			message: '#^Variable \$cogs_is_enabled might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: includes/admin/meta-boxes/views/html-order-fee.php
+
+		-
 			message: '#^Variable \$order might not be defined\.$#'
 			identifier: variable.undefined
 			count: 7
@@ -5906,12 +5912,6 @@ parameters:
 
 		-
 			message: '#^Variable \$order_taxes might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: includes/admin/meta-boxes/views/html-order-fee.php
-
-		-
-			message: '#^Variable \$cogs_is_enabled might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1
 			path: includes/admin/meta-boxes/views/html-order-fee.php
@@ -6085,13 +6085,13 @@ parameters:
 			path: includes/admin/meta-boxes/views/html-order-refund.php
 
 		-
-			message: '#^Variable \$order_taxes might not be defined\.$#'
+			message: '#^Variable \$cogs_is_enabled might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1
 			path: includes/admin/meta-boxes/views/html-order-refund.php
 
 		-
-			message: '#^Variable \$cogs_is_enabled might not be defined\.$#'
+			message: '#^Variable \$order_taxes might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1
 			path: includes/admin/meta-boxes/views/html-order-refund.php
@@ -12837,12 +12837,6 @@ parameters:
 		-
 			message: '#^Cannot call method is_on_backorder\(\) on WC_Product\|true\.$#'
 			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-order-item-product.php
-
-		-
-			message: '#^Method WC_Order_Item_Product\:\:get_item_downloads\(\) should return array but return statement is missing\.$#'
-			identifier: return.missing
 			count: 1
 			path: includes/class-wc-order-item-product.php
 
@@ -35656,12 +35650,6 @@ parameters:
 			path: includes/wc-product-functions.php
 
 		-
-			message: '#^Call to function is_string\(\) with string will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: includes/wc-product-functions.php
-
-		-
 			message: '#^Cannot access property \$slug on WP_Error\|WP_Term\|null\.$#'
 			identifier: property.nonObject
 			count: 2
@@ -37220,12 +37208,6 @@ parameters:
 			identifier: assign.propertyType
 			count: 1
 			path: includes/wccom-site/installation/installation-steps/class-wc-wccom-site-installation-step-get-product-info.php
-
-		-
-			message: '#^Cannot access offset ''destination'' on array\|WP_Error\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: includes/wccom-site/installation/installation-steps/class-wc-wccom-site-installation-step-move-product.php
 
 		-
 			message: '#^Method WC_WCCOM_Site_Installation_Step_Move_Product\:\:run\(\) has no return type specified\.$#'
@@ -56896,12 +56878,6 @@ parameters:
 			path: src/Caches/OrderCountCache.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Caches\\OrderCountCache\:\:get\(\) should return array\<int\> but returns null\.$#'
-			identifier: return.type
-			count: 2
-			path: src/Caches/OrderCountCache.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Caches\\OrderCountCache\:\:increment\(\) should return int but returns int\|false\.$#'
 			identifier: return.type
 			count: 1
@@ -68479,43 +68455,7 @@ parameters:
 			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
 
 		-
-			message: '#^Call to method set_id\(\) on an unknown class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\WC_Product_Attribute\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
 			message: '#^Call to method set_image_id\(\) on an unknown class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\WC_Product\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
-			message: '#^Call to method set_name\(\) on an unknown class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\WC_Product_Attribute\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
-			message: '#^Call to method set_options\(\) on an unknown class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\WC_Product_Attribute\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
-			message: '#^Call to method set_position\(\) on an unknown class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\WC_Product_Attribute\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
-			message: '#^Call to method set_variation\(\) on an unknown class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\WC_Product_Attribute\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
-			message: '#^Call to method set_visible\(\) on an unknown class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\WC_Product_Attribute\.$#'
 			identifier: class.notFound
 			count: 2
 			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
@@ -68635,24 +68575,6 @@ parameters:
 			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
 
 		-
-			message: '#^Instantiated class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\WC_Product_Attribute not found\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
-			message: '#^Instantiated class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\WC_Product_Simple not found\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
-			message: '#^Instantiated class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\WC_REST_Exception not found\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\Controller\:\:create_item\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
 			count: 1
@@ -68721,12 +68643,6 @@ parameters:
 		-
 			message: '#^PHPDoc tag @extends has invalid value \(WC_REST_Products_V2_Controller\)\: Unexpected token "\\n ", expected ''\<'' at offset 88 on line 4$#'
 			identifier: phpDoc.parseError
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
-			message: '#^PHPDoc tag @throws with type Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\WC_REST_Exception is not subtype of Throwable$#'
-			identifier: throws.notThrowable
 			count: 1
 			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
 
@@ -68839,6 +68755,30 @@ parameters:
 			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
 
 		-
+			message: '#^Parameter \#1 \$value of method WC_Product_Attribute\:\:set_name\(\) expects string, array\|string given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
+
+		-
+			message: '#^Parameter \#1 \$value of method WC_Product_Attribute\:\:set_position\(\) expects int, string given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
+
+		-
+			message: '#^Parameter \#1 \$value of method WC_Product_Attribute\:\:set_variation\(\) expects bool, int given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
+
+		-
+			message: '#^Parameter \#1 \$value of method WC_Product_Attribute\:\:set_visible\(\) expects bool, int given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
+
+		-
 			message: '#^Parameter \#2 \$callback of function array_filter expects \(callable\(string\)\: bool\)\|null, ''strlen'' given\.$#'
 			identifier: argument.type
 			count: 1
@@ -68920,12 +68860,6 @@ parameters:
 			message: '#^Parameter \$request of method Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\Controller\:\:set_cogs_info_in_product_object\(\) has invalid type Automattic\\WooCommerce\\Internal\\CostOfGoodsSold\\WP_Rest_Request\.$#'
 			identifier: class.notFound
 			count: 1
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
-			message: '#^Throwing object of an unknown class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\WC_REST_Exception\.$#'
-			identifier: class.notFound
-			count: 2
 			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
 
 		-

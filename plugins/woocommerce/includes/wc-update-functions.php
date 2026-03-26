@@ -3418,3 +3418,44 @@ function wc_update_1070_disable_hpos_sync_on_read(): void {
 
 	WC_Admin_Notices::add_notice( 'hpos_sync_on_read_disabled' );
 }
+
+/**
+ * Migrate the legacy analytics immediate import option to the renamed scheduled import option.
+ *
+ * In 10.5.0, `woocommerce_analytics_immediate_import` was renamed to
+ * `woocommerce_analytics_scheduled_import` with inverted semantics, but no
+ * migration was added. Stores that had opted into scheduled imports (legacy
+ * value 'no') silently reverted to immediate imports on upgrade.
+ *
+ * @since 10.8.0
+ *
+ * @return void
+ */
+function wc_update_1080_migrate_analytics_import_option(): void {
+	$legacy_option = 'woocommerce_analytics_immediate_import';
+	$new_option    = 'woocommerce_analytics_scheduled_import';
+
+	$legacy_value = get_option( $legacy_option, false );
+
+	// Nothing to migrate if the legacy option was never set.
+	if ( false === $legacy_value ) {
+		return;
+	}
+
+	// If the new option already exists, just clean up the legacy option.
+	if ( false !== get_option( $new_option, false ) ) {
+		delete_option( $legacy_option );
+		return;
+	}
+
+	// Invert the semantics: legacy 'yes' (immediate) = new 'no' (not scheduled),
+	// legacy 'no' (not immediate) = new 'yes' (scheduled).
+	$new_value = 'no' === $legacy_value ? 'yes' : 'no';
+
+	// Only delete the legacy option if the new option was written successfully.
+	// On failure, the runtime fallback in is_scheduled_import_enabled() can
+	// still read the legacy option to preserve the store's preference.
+	if ( add_option( $new_option, $new_value ) ) {
+		delete_option( $legacy_option );
+	}
+}

@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
 use Automattic\WooCommerce\Tests\Admin\Features\Fulfillments\Helpers\FulfillmentsHelper;
@@ -68,6 +69,8 @@ class WC_Emails_Tests extends \WC_Unit_Test_Case {
 	 */
 	public function test_fulfillment_meta() {
 		// Ensure the FulfillmentsController is registered, which is necessary for the translation of meta keys.
+		// Delete the DB tables flag to force recreation in case another test class left stale state.
+		delete_option( 'woocommerce_fulfillments_db_tables_created' );
 		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
 		$container  = wc_get_container();
 		$controller = $container->get( \Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsController::class );

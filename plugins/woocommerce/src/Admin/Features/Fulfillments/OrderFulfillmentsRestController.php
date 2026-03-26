@@ -251,6 +251,19 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 	public function create_fulfillment( WP_REST_Request $request ) {
 		$order_id        = (int) $request->get_param( 'order_id' );
 		$notify_customer = (bool) $request->get_param( 'notify_customer' );
+
+		$order = wc_get_order( $order_id );
+
+		if ( ! $order ) {
+			// If the order does not exist, return an error.
+			FulfillmentsTracker::track_fulfillment_validation_error( 'create', 'woocommerce_rest_order_invalid_id', $this->check_request_source( $request ) );
+			return $this->prepare_error_response(
+				'woocommerce_rest_order_invalid_id',
+				esc_html__( 'Invalid order ID.', 'woocommerce' ),
+				WP_Http::NOT_FOUND
+			);
+		}
+
 		// Create a new fulfillment.
 		try {
 			$fulfillment = new Fulfillment();
@@ -261,6 +274,18 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 
 			$fulfillment->save();
 
+			FulfillmentsTracker::track_fulfillment_creation(
+				$this->check_request_source( $request ),
+				$fulfillment->get_is_fulfilled() ? 'fulfilled' : 'draft',
+				$fulfillment->get_item_count() === (int) $order->get_item_count() ? 'full' : 'partial',
+				$fulfillment->get_item_count(),
+				(int) $order->get_item_count(),
+				$notify_customer
+			);
+
+			// Track if tracking information was added with this new fulfillment.
+			$this->maybe_track_tracking_added( $fulfillment, $request );
+
 			if ( $fulfillment->get_is_fulfilled() && $notify_customer ) {
 				/**
 				 * Trigger the fulfillment created notification on creating a fulfilled fulfillment.
@@ -268,15 +293,17 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 				 * @since 10.1.0
 				 */
 				do_action( 'woocommerce_fulfillment_created_notification', $order_id, $fulfillment, wc_get_order( $order_id ) );
+				FulfillmentsTracker::track_fulfillment_notification_sent( 'fulfillment_created', $fulfillment->get_id(), $order_id );
 			}
 		} catch ( ApiException $ex ) {
+			FulfillmentsTracker::track_fulfillment_validation_error( 'create', $ex->getErrorCode(), $this->check_request_source( $request ) );
 			return $this->prepare_error_response(
 				$ex->getErrorCode(),
 				$ex->getMessage(),
 				WP_Http::BAD_REQUEST
 			);
-
-		} catch ( \Throwable $e ) {
+		} catch ( \Exception $e ) {
+			FulfillmentsTracker::track_fulfillment_validation_error( 'create', (string) $e->getCode(), $this->check_request_source( $request ) );
 			return $this->prepare_error_response(
 				$e->getCode(),
 				$e->getMessage(),
@@ -336,10 +363,22 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 		$fulfillment_id  = (int) $request->get_param( 'fulfillment_id' );
 		$notify_customer = (bool) $request->get_param( 'notify_customer' );
 
+		$order = wc_get_order( $order_id );
+		if ( ! $order ) {
+			// If the order does not exist, return an error.
+			FulfillmentsTracker::track_fulfillment_validation_error( 'update', 'woocommerce_rest_order_invalid_id', $this->check_request_source( $request ) );
+			return $this->prepare_error_response(
+				'woocommerce_rest_order_invalid_id',
+				esc_html__( 'Invalid order ID.', 'woocommerce' ),
+				WP_Http::NOT_FOUND
+			);
+		}
+
 		// Update the fulfillment for the order.
 		try {
-			$fulfillment    = new Fulfillment( $fulfillment_id );
-			$previous_state = $fulfillment->get_is_fulfilled();
+			$fulfillment     = new Fulfillment( $fulfillment_id );
+			$previous_state  = $fulfillment->get_is_fulfilled();
+			$previous_status = $fulfillment->get_status() ?? 'unfulfilled';
 			$this->validate_fulfillment( $fulfillment, $fulfillment_id, $order_id );
 
 			$fulfillment->set_props( $request->get_json_params() );
@@ -359,7 +398,21 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 					}
 				}
 			}
+
+			$changed_fields = $fulfillment->get_changes();
+
 			$fulfillment->save();
+
+			FulfillmentsTracker::track_fulfillment_update(
+				$this->check_request_source( $request ),
+				$fulfillment->get_id(),
+				$previous_status,
+				$changed_fields,
+				$notify_customer
+			);
+
+			// Track if tracking information was added or changed in this update.
+			$this->maybe_track_tracking_added( $fulfillment, $request, $changed_fields );
 
 			if ( $notify_customer ) {
 				if ( ! $previous_state && $next_state ) {
@@ -369,6 +422,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 					 * @since 10.1.0
 					 */
 					do_action( 'woocommerce_fulfillment_created_notification', $order_id, $fulfillment, wc_get_order( $order_id ) );
+					FulfillmentsTracker::track_fulfillment_notification_sent( 'fulfillment_created', $fulfillment->get_id(), $order_id );
 				} elseif ( $next_state ) {
 					/**
 					 * Trigger the fulfillment updated notification on updating a fulfillment.
@@ -376,15 +430,18 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 					 * @since 10.1.0
 					 */
 					do_action( 'woocommerce_fulfillment_updated_notification', $order_id, $fulfillment, wc_get_order( $order_id ) );
+					FulfillmentsTracker::track_fulfillment_notification_sent( 'fulfillment_updated', $fulfillment->get_id(), $order_id );
 				}
 			}
 		} catch ( ApiException $ex ) {
+			FulfillmentsTracker::track_fulfillment_validation_error( 'update', $ex->getErrorCode(), $this->check_request_source( $request ) );
 			return $this->prepare_error_response(
 				$ex->getErrorCode(),
 				$ex->getMessage(),
 				WP_Http::BAD_REQUEST
 			);
-		} catch ( \Throwable $e ) {
+		} catch ( \Exception $e ) {
+			FulfillmentsTracker::track_fulfillment_validation_error( 'update', (string) $e->getCode(), $this->check_request_source( $request ) );
 			return $this->prepare_error_response(
 				$e->getCode(),
 				$e->getMessage(),
@@ -414,14 +471,23 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 		try {
 			$fulfillment = new Fulfillment( $fulfillment_id );
 			$this->validate_fulfillment( $fulfillment, $fulfillment_id, $order_id );
+			$status = $fulfillment->get_status() ?? 'unfulfilled';
 			$fulfillment->delete();
+			FulfillmentsTracker::track_fulfillment_deletion(
+				$this->check_request_source( $request ),
+				$fulfillment_id,
+				$status,
+				$notify_customer
+			);
 		} catch ( ApiException $ex ) {
+			FulfillmentsTracker::track_fulfillment_validation_error( 'delete', $ex->getErrorCode(), $this->check_request_source( $request ) );
 			return $this->prepare_error_response(
 				$ex->getErrorCode(),
 				$ex->getMessage(),
 				WP_Http::BAD_REQUEST
 			);
-		} catch ( \Throwable $e ) {
+		} catch ( \Exception $e ) {
+			FulfillmentsTracker::track_fulfillment_validation_error( 'delete', (string) $e->getCode(), $this->check_request_source( $request ) );
 			return $this->prepare_error_response(
 				$e->getCode(),
 				$e->getMessage(),
@@ -436,7 +502,9 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 			 * @since 10.1.0
 			 */
 			do_action( 'woocommerce_fulfillment_deleted_notification', $order_id, $fulfillment, wc_get_order( $order_id ) );
+			FulfillmentsTracker::track_fulfillment_notification_sent( 'fulfillment_deleted', $fulfillment_id, $order_id );
 		}
+
 		return new WP_REST_Response(
 			array(
 				'message' => __( 'Fulfillment deleted successfully.', 'woocommerce' ),
@@ -1151,5 +1219,70 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 		if ( $fulfillment->get_id() !== $fulfillment_id || $fulfillment->get_entity_type() !== WC_Order::class || $fulfillment->get_entity_id() !== "$order_id" ) {
 			throw new \Exception( esc_html__( 'Invalid fulfillment ID.', 'woocommerce' ) );
 		}
+	}
+
+	/**
+	 * Check the request source by inspecting headers or parameters.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 *
+	 * @return string The request source identifier.
+	 *
+	 * @phpstan-ignore-next-line missingType.generics
+	 */
+	protected function check_request_source( WP_REST_Request $request ): string {
+		// Check for a custom header.
+		if ( $request->get_header( 'X-WC-Fulfillments-UI' ) ) {
+			return 'fulfillments_modal';
+		}
+
+		return 'api'; // Default to API if no specific source is identified.
+	}
+
+	/**
+	 * Track fulfillment_tracking_added if tracking information was added or changed.
+	 *
+	 * For new fulfillments ($changes is empty), fires whenever a tracking number is present.
+	 * For updates, only fires when tracking-related meta (_tracking_number, _shipment_provider,
+	 * or _tracking_url) actually changed.
+	 *
+	 * @param Fulfillment     $fulfillment The fulfillment object (after save).
+	 * @param WP_REST_Request $request     The original request.
+	 * @param array           $changes     The changes from Fulfillment::get_changes(), empty for creates.
+	 *
+	 * @phpstan-ignore-next-line missingType.generics
+	 */
+	private function maybe_track_tracking_added( Fulfillment $fulfillment, WP_REST_Request $request, array $changes = array() ): void {
+		$tracking_number = $fulfillment->get_tracking_number();
+		if ( empty( $tracking_number ) ) {
+			return;
+		}
+
+		// For updates, only track when tracking-related meta actually changed.
+		if ( ! empty( $changes ) ) {
+			$meta_changes     = $changes['meta_data'] ?? array();
+			$tracking_changed = array_key_exists( '_tracking_number', $meta_changes )
+				|| array_key_exists( '_shipment_provider', $meta_changes )
+				|| array_key_exists( '_tracking_url', $meta_changes );
+			if ( ! $tracking_changed ) {
+				return;
+			}
+		}
+
+		$source            = $this->check_request_source( $request );
+		$shipping_option   = $fulfillment->get_meta( '_shipping_option', true );
+		$shipping_option   = ! empty( $shipping_option ) ? $shipping_option : '';
+		$shipment_provider = $fulfillment->get_shipment_provider() ?? '';
+		$is_custom         = 'other' === $shipment_provider;
+
+		$entry_method      = FulfillmentsTracker::determine_tracking_entry_method( $source, $shipping_option );
+		$resolved_provider = FulfillmentUtils::resolve_provider_name( $fulfillment );
+
+		FulfillmentsTracker::track_fulfillment_tracking_added(
+			$fulfillment->get_id(),
+			$entry_method,
+			$resolved_provider,
+			$is_custom
+		);
 	}
 }
