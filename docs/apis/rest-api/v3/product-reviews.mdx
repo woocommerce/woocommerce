@@ -455,7 +455,7 @@ WooCommerce.put( 'products/reviews/20', data )
 ```php
 <?php
 $data = [
-    'rating': 5
+    'rating' => 5
 ];
 
 print_r($woocommerce->put('products/reviews/20', $data));
@@ -637,7 +637,7 @@ POST /wp-json/wc/v3/products/reviews/batch
   <TabItem value="curl" label="cURL">
 
 ```shell
-curl -X POST https://example.com//wp-json/wc/v3/products/reviews/batch \
+curl -X POST https://example.com/wp-json/wc/v3/products/reviews/batch \
 	-u consumer_key:consumer_secret \
 	-H "Content-Type: application/json" \
 	-d '{
@@ -808,7 +808,7 @@ data = {
   update: [
     {
       id: 7,
-      reviewer: "John Doe"
+      reviewer: "John Doe",
       reviewer_email: "john.doe@example.com"
     }
   ],

@@ -446,14 +446,14 @@ woocommerce.get("webhooks").parsed_response
 This API lets you make changes to a webhook.
 
 ```http
-PUT /wp-json/wc/v1/webhook/<id>
+PUT /wp-json/wc/v1/webhooks/<id>
 ```
 
 <Tabs>
   <TabItem value="curl" label="cURL">
 
 ```shell
-curl -X PUT https://example.com/wp-json/wc/v1/webhook/142 \
+curl -X PUT https://example.com/wp-json/wc/v1/webhooks/142 \
 	-u consumer_key:consumer_secret \
 	-H "Content-Type: application/json" \
 	-d '{
@@ -641,7 +641,7 @@ woocommerce.delete("webhooks/142").parsed_response
 #### Available parameters
 | Parameter |  Type  |                                Description                                 |
 |-----------|--------|----------------------------------------------------------------------------|
-| `force`   | string | Use `true` whether to permanently delete the webhook, Defaults is `false`. |
+| `force`   | boolean | Whether to permanently delete the webhook. Default is `false`. |
 
 ## Batch update webhooks
 This API helps you to batch create, update and delete multiple webhooks.
@@ -658,7 +658,7 @@ POST /wp-json/wc/v1/webhooks/batch
   <TabItem value="curl" label="cURL">
 
 ```shell
-curl -X POST https://example.com//wp-json/wc/v1/webhooks/batch \
+curl -X POST https://example.com/wp-json/wc/v1/webhooks/batch \
 	-u consumer_key:consumer_secret \
 	-H "Content-Type: application/json" \
 	-d '{
