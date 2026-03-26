@@ -8,6 +8,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\PushNotifications\Dispatchers\InternalNotificationDispatcher;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
+use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
 
 /**
  * Store that collects notifications during a request and dispatches them all on
