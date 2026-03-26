@@ -51700,12 +51700,6 @@ parameters:
 			path: src/Blocks/BlockTypes/AddToCartWithOptions/Utils.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\Utils\:\:add_quantity_steppers\(\) should return string but returns string\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockTypes/AddToCartWithOptions/Utils.php
-
-		-
 			message: '#^Parameter \#1 \$haystack of function strpos expects string, string\|true\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -51713,12 +51707,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$query of method WP_HTML_Tag_Processor\:\:next_tag\(\) expects array\{tag_name\?\: string\|null, match_offset\?\: int\|null, class_name\?\: string\|null, tag_closers\?\: string\|null\}\|null, ''input'' given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/AddToCartWithOptions/Utils.php
-
-		-
-			message: '#^Parameter \#3 \$subject of function preg_replace_callback expects array\<float\|int\|string\>\|string, string\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/AddToCartWithOptions/Utils.php
