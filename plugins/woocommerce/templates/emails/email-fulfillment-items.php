@@ -145,7 +145,6 @@ foreach ( $items as $item_id => $item ) :
 		</td>
 		<td class="td font-family text-align-<?php echo esc_attr( $price_text_align ); ?>" style="vertical-align:middle;">
 			<?php
-			echo '&times;';
 			$qty         = $item->qty;
 			$qty_display = esc_html( $qty );
 			/**
@@ -153,7 +152,10 @@ foreach ( $items as $item_id => $item ) :
 			 *
 			 * @since 2.4.0
 			 */
-			echo wp_kses_post( apply_filters( 'woocommerce_email_order_item_quantity', $qty_display, $item->item ) );
+			$quantity = wp_kses_post( apply_filters( 'woocommerce_email_order_item_quantity', $qty_display, $item->item ) );
+			if ( $quantity !== '' ) {
+				echo '&times; ' . $quantity;
+			}
 			?>
 		</td>
 		<td class="td font-family text-align-<?php echo esc_attr( $price_text_align ); ?>" style="vertical-align:middle;">

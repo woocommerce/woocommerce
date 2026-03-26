@@ -193,7 +193,6 @@ foreach ( $items as $item_id => $item ) :
 		</td>
 		<td class="td font-family text-align-<?php echo esc_attr( $price_text_align ); ?>" style="vertical-align:middle;">
 			<?php
-			echo $email_improvements_enabled ? '&times;' : '';
 			$qty          = $item->get_quantity();
 			$refunded_qty = $order->get_qty_refunded_for_item( $item_id );
 
@@ -202,7 +201,11 @@ foreach ( $items as $item_id => $item ) :
 			} else {
 				$qty_display = esc_html( $qty );
 			}
-			echo wp_kses_post( apply_filters( 'woocommerce_email_order_item_quantity', $qty_display, $item ) );
+			$quantity = wp_kses_post( apply_filters( 'woocommerce_email_order_item_quantity', $qty_display, $item ) );
+			if ( $quantity !== '' ) {
+				$quantity_prefix = $email_improvements_enabled ? '&times;' : '';
+				echo $quantity_prefix . $quantity;
+			}
 			?>
 		</td>
 		<td class="td font-family text-align-<?php echo esc_attr( $price_text_align ); ?>" style="vertical-align:middle;">
