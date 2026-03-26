@@ -40,8 +40,9 @@ describe( 'FulfillmentCard', () => {
 			</FulfillmentCard>
 		);
 
-		const header =
-			screen.getByText( 'Header' ).closest( '[role="button"]' );
+		const header = screen
+			.getByText( 'Header' )
+			.closest( '[role="button"]' );
 		expect( screen.queryByText( 'Child content' ) ).not.toBeInTheDocument();
 
 		fireEvent.click( header );
@@ -102,8 +103,9 @@ describe( 'FulfillmentCard', () => {
 			</FulfillmentCard>
 		);
 
-		const header =
-			screen.getByText( 'Header' ).closest( '[role="button"]' );
+		const header = screen
+			.getByText( 'Header' )
+			.closest( '[role="button"]' );
 		expect( screen.queryByText( 'Child content' ) ).not.toBeInTheDocument();
 
 		fireEvent.keyUp( header, { key: 'Enter' } );
