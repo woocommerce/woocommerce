@@ -517,7 +517,6 @@ class Request {
 			$this->authorize_or_capture_payment( $order, $action_url, $action, true );
 		} catch ( PayPalStandardException $e ) {
 			\WC_Gateway_Paypal::log( $e->getMessage() );
-			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			throw $e;
 		}
 	}
