@@ -77,7 +77,9 @@ class Request {
 	 * @param array    $js_sdk_params Extra parameters for a PayPal JS SDK (Buttons) request.
 	 * @return array|null
 	 *
-	 * @phpcs:ignore Squiz.Commenting.FunctionCommentThrowTag.Missing -- As we wrap the throw in a try/catch.
+	 * @throws \Throwable If an unexpected upstream error occurs.
+	 *
+	 * @phpcs:ignore Squiz.Commenting.FunctionCommentThrowTag.Missing -- Ignore the throw tag for PayPalStandardException as we wrap the throw in a try/catch.
 	 */
 	public function create_paypal_order(
 		WC_Order $order,
@@ -235,7 +237,9 @@ class Request {
 	 * @param bool          $is_retry Whether the payment is being retried.
 	 * @return void
 	 *
-	 * @phpcs:ignore Squiz.Commenting.FunctionCommentThrowTag.Missing -- As we wrap the throw in a try/catch.
+	 * @throws \Throwable If an unexpected upstream error occurs.
+	 *
+	 * @phpcs:ignore Squiz.Commenting.FunctionCommentThrowTag.Missing -- Ignore the throw tag for PayPalStandardException as we wrap the throw in a try/catch.
 	 */
 	public function authorize_or_capture_payment( ?WC_Order $order, ?string $action_url, string $action = PayPalConstants::PAYMENT_ACTION_CAPTURE, bool $is_retry = false ): void {
 		if ( ! $order ) {
@@ -332,7 +336,9 @@ class Request {
 	 * @param WC_Order|null $order Order object.
 	 * @return void
 	 *
-	 * @phpcs:ignore Squiz.Commenting.FunctionCommentThrowTag.Missing -- As we wrap the throw in a try/catch.
+	 * @throws \Throwable If an unexpected upstream error occurs.
+	 *
+	 * @phpcs:ignore Squiz.Commenting.FunctionCommentThrowTag.Missing -- Ignore the throw tag for PayPalStandardException as we wrap the throw in a try/catch.
 	 */
 	public function capture_authorized_payment( ?WC_Order $order ): void {
 		if ( ! $order ) {
@@ -460,7 +466,9 @@ class Request {
 	 * @param string   $action The action.
 	 * @return void
 	 *
-	 * @phpcs:ignore Squiz.Commenting.FunctionCommentThrowTag.Missing -- As we wrap the throw in a try/catch.
+	 * @throws \Throwable If an unexpected upstream error occurs.
+	 *
+	 * @phpcs:ignore Squiz.Commenting.FunctionCommentThrowTag.Missing -- Ignore the throw tag for PayPalStandardException as we wrap the throw in a try/catch.
 	 */
 	private function handle_duplicate_invoice_id( WC_Order $order, string $paypal_order_id, string $action_url, string $action ): void {
 		$new_invoice_id = $this->generate_paypal_invoice_id_with_unique_suffix( $order );
@@ -1166,7 +1174,9 @@ class Request {
 	 *
 	 * @return string|null The PayPal client-id, or null if the request fails.
 	 *
-	 * @phpcs:ignore Squiz.Commenting.FunctionCommentThrowTag.Missing -- As we wrap the throw in a try/catch.
+	 * @throws \Throwable If an unexpected upstream error occurs.
+	 *
+	 * @phpcs:ignore Squiz.Commenting.FunctionCommentThrowTag.Missing -- Ignore the throw tag for PayPalStandardException as we wrap the throw in a try/catch.
 	 */
 	public function fetch_paypal_client_id(): ?string {
 		try {
