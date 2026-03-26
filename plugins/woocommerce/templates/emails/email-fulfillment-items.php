@@ -152,9 +152,9 @@ foreach ( $items as $item_id => $item ) :
 			 *
 			 * @since 2.4.0
 			 */
-			$quantity = wp_kses_post( apply_filters( 'woocommerce_email_order_item_quantity', $qty_display, $item->item ) );
-			if ( $quantity !== '' ) {
-				echo '&times; ' . $quantity;
+			$quantity = apply_filters( 'woocommerce_email_order_item_quantity', $qty_display, $item->item );
+			if ( '' !== $quantity ) {
+				echo '&times; ' . wp_kses_post( $quantity );
 			}
 			?>
 		</td>

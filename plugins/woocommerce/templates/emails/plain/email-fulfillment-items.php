@@ -61,7 +61,7 @@ foreach ( $items as $item_id => $item ) :
 		 * @param WC_Order_Item $item     Item object.
 		 */
 		$quantity = apply_filters( 'woocommerce_email_order_item_quantity', $item->qty, $item->item );
-		if ( $quantity !== '' ) {
+		if ( '' !== $quantity ) {
 			$product_name .= ' × ' . $quantity;
 		}
 		echo wp_kses_post( str_pad( wp_kses_post( $product_name ), 40 ) );

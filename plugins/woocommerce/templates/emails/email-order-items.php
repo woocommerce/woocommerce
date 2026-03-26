@@ -201,10 +201,18 @@ foreach ( $items as $item_id => $item ) :
 			} else {
 				$qty_display = esc_html( $qty );
 			}
-			$quantity = wp_kses_post( apply_filters( 'woocommerce_email_order_item_quantity', $qty_display, $item ) );
-			if ( $quantity !== '' ) {
+			/**
+			 * Email Order Item Quantity hook.
+			 *
+			 * @since 2.4.0
+			 * @param string        $qty_display Item quantity.
+			 * @param WC_Order_Item $item        Item object.
+			 * @return string
+			 */
+			$quantity = apply_filters( 'woocommerce_email_order_item_quantity', $qty_display, $item );
+			if ( '' !== $quantity ) {
 				$quantity_prefix = $email_improvements_enabled ? '&times;' : '';
-				echo $quantity_prefix . $quantity;
+				echo wp_kses_post( $quantity_prefix . $quantity );
 			}
 			?>
 		</td>
