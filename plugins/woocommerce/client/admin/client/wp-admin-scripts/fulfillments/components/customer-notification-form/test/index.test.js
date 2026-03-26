@@ -104,7 +104,7 @@ describe( 'CustomerNotificationBox component', () => {
 		const toggleInput = screen.getByTestId( 'toggle-input' );
 		toggleInput.click();
 
-		// Check that setNotifyCustomer was called with true (toggling from true -> false)
+		// Check that setNotifyCustomer was called with false (toggling from true -> false)
 		expect( setNotifyCustomer ).toHaveBeenCalledWith( false );
 	} );
 

@@ -362,7 +362,8 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 		$order_id        = (int) $request->get_param( 'order_id' );
 		$fulfillment_id  = (int) $request->get_param( 'fulfillment_id' );
 		$notify_customer = (bool) $request->get_param( 'notify_customer' );
-		$customer_note   = (string) $request->get_param( 'customer_note' );
+		$customer_note_raw = $request->get_param( 'customer_note' );
+		$customer_note     = is_string( $customer_note_raw ) ? sanitize_textarea_field( $customer_note_raw ) : '';
 
 		$order = wc_get_order( $order_id );
 		if ( ! $order ) {
@@ -434,8 +435,9 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 					 * @param string                     $customer_note Optional customer note from the merchant.
 					 *
 					 * @since 10.1.0
+					 * @since 10.8.0 Added $customer_note parameter.
 					 */
-					do_action( 'woocommerce_fulfillment_updated_notification', $order_id, $fulfillment, wc_get_order( $order_id ), $customer_note );
+					do_action( 'woocommerce_fulfillment_updated_notification', $order_id, $fulfillment, $order, $customer_note );
 					FulfillmentsTracker::track_fulfillment_notification_sent( 'fulfillment_updated', $fulfillment->get_id(), $order_id );
 				}
 			}

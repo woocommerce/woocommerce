@@ -25,9 +25,10 @@ echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 echo esc_html__( 'Some details of your shipment have recently been updated. This may include tracking information, item contents, or delivery status.', 'woocommerce' ) . "\n\n";
 echo esc_html__( 'Here’s the latest info we have:', 'woocommerce' ) . "\n\n";
 
-if ( ! empty( $customer_note ) ) {
+$customer_note_text = is_scalar( $customer_note ?? null ) ? trim( (string) $customer_note ) : '';
+if ( '' !== $customer_note_text ) {
 	echo esc_html__( 'Note from the store:', 'woocommerce' ) . "\n";
-	echo esc_html( wp_strip_all_tags( wptexturize( $customer_note ) ) ) . "\n\n";
+	echo esc_html( wp_strip_all_tags( wptexturize( $customer_note_text ) ) ) . "\n\n";
 }
 
 /**

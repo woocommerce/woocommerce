@@ -20,9 +20,10 @@ if ( ! isset( $order, $fulfillment ) ) {
 	return;
 }
 
-if ( ! empty( $customer_note ?? '' ) ) {
+$customer_note_text = is_scalar( $customer_note ?? null ) ? trim( (string) $customer_note ) : '';
+if ( '' !== $customer_note_text ) {
 	echo '<p><strong>' . esc_html__( 'Note from the store:', 'woocommerce' ) . '</strong></p>';
-	echo wp_kses_post( wpautop( wptexturize( $customer_note ) ) );
+	echo wp_kses_post( wpautop( wptexturize( $customer_note_text ) ) );
 }
 
 /**

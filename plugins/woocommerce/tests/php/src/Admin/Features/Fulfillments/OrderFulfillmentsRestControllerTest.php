@@ -2051,4 +2051,189 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		wp_set_current_user( 0 );
 	}
+
+	/**
+	 * @testdox Should accept customer_note in update request and forward sanitized value to notification hook.
+	 */
+	public function test_update_fulfillment_with_customer_note_fires_notification_with_sanitized_note(): void {
+		$order = WC_Helper_Order::create_order( get_current_user_id() );
+		$this->assertInstanceOf( WC_Order::class, $order );
+
+		$fulfillment = FulfillmentsHelper::create_fulfillment(
+			array(
+				'entity_type'  => WC_Order::class,
+				'entity_id'    => $order->get_id(),
+				'status'       => 'fulfilled',
+				'is_fulfilled' => true,
+			)
+		);
+
+		$captured_note = null;
+		add_action(
+			'woocommerce_fulfillment_updated_notification',
+			function ( $order_id, $fulfillment_obj, $order_obj, $customer_note ) use ( &$captured_note ) {
+				unset( $order_id, $fulfillment_obj, $order_obj );
+				$captured_note = $customer_note;
+			},
+			10,
+			4
+		);
+
+		wp_set_current_user( 1 );
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() . '/fulfillments/' . $fulfillment->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'status'          => 'fulfilled',
+					'is_fulfilled'    => true,
+					'notify_customer' => true,
+					'customer_note'   => "Hello customer!\n<script>alert('xss')</script>",
+					'meta_data'       => array(
+						array(
+							'id'    => 0,
+							'key'   => '_items',
+							'value' => array(
+								array(
+									'item_id' => 1,
+									'qty'     => 1,
+								),
+							),
+						),
+					),
+				)
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::OK, $response->get_status(), 'Update with customer_note should succeed' );
+		$this->assertNotNull( $captured_note, 'Notification hook should have been fired with customer_note' );
+		$this->assertStringNotContainsString( '<script>', $captured_note, 'Script tags should be stripped by sanitize_textarea_field' );
+		$this->assertStringContainsString( 'Hello customer!', $captured_note, 'Legitimate note text should be preserved' );
+
+		remove_all_actions( 'woocommerce_fulfillment_updated_notification' );
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * @testdox Should fire notification with empty customer_note when parameter is omitted.
+	 */
+	public function test_update_fulfillment_without_customer_note_fires_notification_with_empty_note(): void {
+		$order = WC_Helper_Order::create_order( get_current_user_id() );
+		$this->assertInstanceOf( WC_Order::class, $order );
+
+		$fulfillment = FulfillmentsHelper::create_fulfillment(
+			array(
+				'entity_type'  => WC_Order::class,
+				'entity_id'    => $order->get_id(),
+				'status'       => 'fulfilled',
+				'is_fulfilled' => true,
+			)
+		);
+
+		$captured_note = null;
+		add_action(
+			'woocommerce_fulfillment_updated_notification',
+			function ( $order_id, $fulfillment_obj, $order_obj, $customer_note ) use ( &$captured_note ) {
+				unset( $order_id, $fulfillment_obj, $order_obj );
+				$captured_note = $customer_note;
+			},
+			10,
+			4
+		);
+
+		wp_set_current_user( 1 );
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() . '/fulfillments/' . $fulfillment->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'status'          => 'fulfilled',
+					'is_fulfilled'    => true,
+					'notify_customer' => true,
+					'meta_data'       => array(
+						array(
+							'id'    => 0,
+							'key'   => '_items',
+							'value' => array(
+								array(
+									'item_id' => 1,
+									'qty'     => 1,
+								),
+							),
+						),
+					),
+				)
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::OK, $response->get_status(), 'Update without customer_note should succeed' );
+		$this->assertNotNull( $captured_note, 'Notification hook should have been fired' );
+		$this->assertSame( '', $captured_note, 'Customer note should be empty when not provided' );
+
+		remove_all_actions( 'woocommerce_fulfillment_updated_notification' );
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * @testdox Should not fire notification hook when notify_customer is false even with customer_note.
+	 */
+	public function test_update_fulfillment_with_note_but_no_notification_does_not_fire_hook(): void {
+		$order = WC_Helper_Order::create_order( get_current_user_id() );
+		$this->assertInstanceOf( WC_Order::class, $order );
+
+		$fulfillment = FulfillmentsHelper::create_fulfillment(
+			array(
+				'entity_type'  => WC_Order::class,
+				'entity_id'    => $order->get_id(),
+				'status'       => 'fulfilled',
+				'is_fulfilled' => true,
+			)
+		);
+
+		$hook_fired = false;
+		add_action(
+			'woocommerce_fulfillment_updated_notification',
+			function () use ( &$hook_fired ) {
+				$hook_fired = true;
+			}
+		);
+
+		wp_set_current_user( 1 );
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() . '/fulfillments/' . $fulfillment->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'status'          => 'fulfilled',
+					'is_fulfilled'    => true,
+					'notify_customer' => false,
+					'customer_note'   => 'This should not be sent',
+					'meta_data'       => array(
+						array(
+							'id'    => 0,
+							'key'   => '_items',
+							'value' => array(
+								array(
+									'item_id' => 1,
+									'qty'     => 1,
+								),
+							),
+						),
+					),
+				)
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::OK, $response->get_status(), 'Update should succeed' );
+		$this->assertFalse( $hook_fired, 'Notification hook should not fire when notify_customer is false' );
+
+		remove_all_actions( 'woocommerce_fulfillment_updated_notification' );
+		wp_set_current_user( 0 );
+	}
 }
