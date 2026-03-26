@@ -105,10 +105,10 @@ class WebhookHandler {
 			// Authorize or capture the payment after approval.
 			$paypal_intent = $event['resource']['intent'] ?? null;
 			$action        = PayPalConstants::INTENT_CAPTURE === $paypal_intent ? PayPalConstants::PAYMENT_ACTION_CAPTURE : PayPalConstants::PAYMENT_ACTION_AUTHORIZE;
-			
-			$links = $event['resource']['links'] ?? [];
+
+			$links = $event['resource']['links'] ?? array();
 			if ( ! is_array( $links ) ) {
-				$links = [];
+				$links = array();
 			}
 
 			$this->authorize_or_capture_payment( $order, $links, $action );
