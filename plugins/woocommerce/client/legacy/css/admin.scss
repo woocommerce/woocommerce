@@ -8343,8 +8343,15 @@ table.bar_chart {
 	}
 
 	// Order actions: select + button overflow container due to WP 7.0 select margins.
-	.order_actions #actions select {
-		width: calc(100% - 32px);
+	.order_actions {
+		#actions select {
+			width: calc(100% - 32px);
+		}
+
+		// Move to trash: make sure it aligns better vertically with 7.0's increased button height.
+		#delete-action {
+			line-height: 35px;
+		}
 	}
 
 	// Order actions reload button: icon line-height must match WP 7.0 button height.
@@ -8426,28 +8433,98 @@ table.bar_chart {
 	#variable_product_options .form-row[class*="variable_low_stock_amount"] {
 		clear: both;
 	}
-}
 
-// Tablenav: WP 7.0 tablenav uses compact 32px sizing for native selects.
-// Match Select2 to 32px here (not the global 40px).
-// These page classes are on the body alongside wc-wp-version-gte-70, so use compound selectors.
-.wc-wp-version-gte-70.woocommerce_page_wc-customer-stock-notifications .tablenav,
-.wc-wp-version-gte-70.woocommerce_page_wc-orders .tablenav,
-.wc-wp-version-gte-70.post-type-product .tablenav,
-.wc-wp-version-gte-70.post-type-shop_order .tablenav {
-	.select2-container {
-		margin-top: 0; // Align with other tablenav elements.
+	#poststuff #woocommerce-order-notes .inside button {
+		margin: 0 1px 1px;
 	}
 
-	.select2-container .select2-selection--single {
-		height: 32px; // WP 7.0 tablenav uses compact 32px, not 40px.
+	@media screen and (max-width: 850px), screen and (min-width: 931px) {
+		#woocommerce-order-downloads .buttons button {
+			margin: 0;
+		}
+	}
 
-		.select2-selection__rendered {
-			line-height: 30px;
+	// 782px breakpoint, when the admin sidebar is hidden.
+	@media screen and (max-width: 782px) {
+		// Make buttons match the now taller selects.
+		#poststuff #woocommerce-order-actions .inside button {
+			height: 42px;
+
+			&::after {
+				line-height: 40px;
+			}
 		}
 
-		.select2-selection__arrow {
-			height: 30px;
+		#poststuff #woocommerce-order-notes .inside button {
+			line-height: 40px;
+		}
+	}
+
+	// Action button rows wrap/stack at ~1200px viewports.
+	@media screen and (max-width: 1200px) {
+		// Order items meta box: reduce button padding to prevent wrapping prematurely.
+		#woocommerce-order-items .wc-order-data-row {
+			.button {
+				padding-left: 8px;
+				padding-right: 8px;
+			}
+		}
+
+		// Refund action buttons: switch to flex layout so long labels wrap gracefully.
+		#woocommerce-order-items .refund-actions {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 4px;
+			align-items: center;
+
+			.button,
+			.cancel-action {
+				float: none;
+			}
+
+			.button {
+				margin: 0;
+				font-size: 12px;
+			}
+
+			.cancel-action {
+				margin-right: auto;
+				order: -1;
+			}
+
+			.clear {
+				display: none;
+			}
+		}
+	}
+
+	// Tablenav: WP 7.0 tablenav uses compact 32px sizing for native selects.
+	// Match Select2 to 32px here (not the global 40px).
+	&.woocommerce_page_wc-customer-stock-notifications .tablenav,
+	&.woocommerce_page_wc-orders .tablenav,
+	&.post-type-product .tablenav,
+	&.post-type-shop_order .tablenav {
+		.select2-container {
+			margin-top: 0; // Align with other tablenav elements.
+		}
+
+		.select2-container .select2-selection--single {
+			height: 32px; // WP 7.0 tablenav uses compact 32px, not 40px.
+
+			.select2-selection__rendered {
+				line-height: 30px;
+			}
+
+			.select2-selection__arrow {
+				height: 30px;
+			}
+		}
+
+		// Current page in pagination gets smaller than surrounding buttons at 782px breakpoint.
+		@media screen and (max-width: 782px) {
+			#current-page-selector {
+				height: 44px;
+			}
 		}
 	}
 }
@@ -9462,48 +9539,4 @@ body.woocommerce-settings-payments-section_legacy {
 	}
 }
 
-/**
- * WP 7.0+ responsive fixes for order meta box buttons.
- * WP 7.0 increased default button min-height from 30px to 40px,
- * causing action button rows to wrap/stack at ~1200px viewports.
- */
-.wc-wp-version-gte-70 {
-	@media screen and (max-width: 1200px) {
-		// Order items meta box: reduce button padding to prevent wrapping prematurely.
-		#woocommerce-order-items .wc-order-data-row {
-			.button {
-				padding-left: 8px;
-				padding-right: 8px;
-			}
-		}
 
-		// Refund action buttons: switch to flex layout so long labels wrap gracefully.
-		#woocommerce-order-items .refund-actions {
-			display: flex;
-			flex-wrap: wrap;
-			gap: 4px;
-			align-items: center;
-
-			.button,
-			.cancel-action {
-				float: none;
-			}
-
-			.button {
-				margin: 0;
-				font-size: 12px;
-			}
-
-			.cancel-action {
-				margin-right: auto;
-				order: -1;
-			}
-
-			.clear {
-				display: none;
-			}
-		}
-
-
-	}
-}
