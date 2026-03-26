@@ -24,6 +24,7 @@ jest.mock( '../../../context/shipment-form-context', () => ( {
 
 jest.mock( '../../../utils/icons', () => ( {
 	EditIcon: () => <span data-testid="edit-icon" />,
+	TruckIcon: () => <span data-testid="truck-icon" />,
 } ) );
 
 jest.mock( '@wordpress/api-fetch' );
