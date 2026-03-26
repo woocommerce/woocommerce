@@ -42,7 +42,7 @@ class PayPalStandardException extends \Exception {
 	 */
 	public function get_localized_message(): string {
 		if ( ! empty( $this->localized_message ) ) {
-			return $this->localized_message;
+			return esc_html( $this->localized_message );
 		}
 		return __( 'PayPal order creation failed. Please try again.', 'woocommerce' );
 	}
