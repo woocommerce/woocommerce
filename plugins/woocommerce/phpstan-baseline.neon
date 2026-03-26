@@ -12841,12 +12841,6 @@ parameters:
 			path: includes/class-wc-order-item-product.php
 
 		-
-			message: '#^Method WC_Order_Item_Product\:\:get_item_downloads\(\) should return array but return statement is missing\.$#'
-			identifier: return.missing
-			count: 1
-			path: includes/class-wc-order-item-product.php
-
-		-
 			message: '#^Method WC_Order_Item_Product\:\:set_backorder_meta\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1

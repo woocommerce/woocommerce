@@ -272,4 +272,55 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		// Verify the actions were removed.
 		$this->assertFalse( as_has_scheduled_action( 'fetch_patterns' ), 'fetch_patterns action should be removed after update' );
 	}
+
+	/**
+	 * @testdox Migration converts legacy 'no' (not immediate) to new 'yes' (scheduled).
+	 */
+	public function test_migrate_analytics_import_option_legacy_no_becomes_yes(): void {
+		delete_option( 'woocommerce_analytics_scheduled_import' );
+		update_option( 'woocommerce_analytics_immediate_import', 'no' );
+
+		wc_update_1080_migrate_analytics_import_option();
+
+		$this->assertSame( 'yes', get_option( 'woocommerce_analytics_scheduled_import' ) );
+		$this->assertFalse( get_option( 'woocommerce_analytics_immediate_import' ) );
+	}
+
+	/**
+	 * @testdox Migration converts legacy 'yes' (immediate) to new 'no' (not scheduled).
+	 */
+	public function test_migrate_analytics_import_option_legacy_yes_becomes_no(): void {
+		delete_option( 'woocommerce_analytics_scheduled_import' );
+		update_option( 'woocommerce_analytics_immediate_import', 'yes' );
+
+		wc_update_1080_migrate_analytics_import_option();
+
+		$this->assertSame( 'no', get_option( 'woocommerce_analytics_scheduled_import' ) );
+		$this->assertFalse( get_option( 'woocommerce_analytics_immediate_import' ) );
+	}
+
+	/**
+	 * @testdox Migration does nothing when legacy option is absent.
+	 */
+	public function test_migrate_analytics_import_option_no_legacy_option(): void {
+		delete_option( 'woocommerce_analytics_immediate_import' );
+		delete_option( 'woocommerce_analytics_scheduled_import' );
+
+		wc_update_1080_migrate_analytics_import_option();
+
+		$this->assertFalse( get_option( 'woocommerce_analytics_scheduled_import' ) );
+	}
+
+	/**
+	 * @testdox Migration preserves existing new option and deletes legacy.
+	 */
+	public function test_migrate_analytics_import_option_new_option_already_exists(): void {
+		update_option( 'woocommerce_analytics_scheduled_import', 'yes' );
+		update_option( 'woocommerce_analytics_immediate_import', 'yes' );
+
+		wc_update_1080_migrate_analytics_import_option();
+
+		$this->assertSame( 'yes', get_option( 'woocommerce_analytics_scheduled_import' ) );
+		$this->assertFalse( get_option( 'woocommerce_analytics_immediate_import' ) );
+	}
 }
