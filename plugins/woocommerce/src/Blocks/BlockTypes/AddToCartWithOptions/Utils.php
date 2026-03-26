@@ -61,7 +61,7 @@ class Utils {
 			},
 			$new_html ?? ''
 		);
-		return $new_html;
+		return $new_html ?? '';
 	}
 
 	/**
