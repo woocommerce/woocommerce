@@ -120,13 +120,19 @@ class PendingNotificationStore {
 	 * @since 10.7.0
 	 */
 	private function schedule_safety_net( Notification $notification ): void {
+		$args = array(
+			'type'        => $notification->get_type(),
+			'resource_id' => $notification->get_resource_id(),
+		);
+
+		if ( as_has_scheduled_action( NotificationProcessor::SAFETY_NET_HOOK, $args, NotificationProcessor::ACTION_SCHEDULER_GROUP ) ) {
+			return;
+		}
+
 		as_schedule_single_action(
 			time() + NotificationProcessor::SAFETY_NET_DELAY,
 			NotificationProcessor::SAFETY_NET_HOOK,
-			array(
-				'type'        => $notification->get_type(),
-				'resource_id' => $notification->get_resource_id(),
-			),
+			$args,
 			NotificationProcessor::ACTION_SCHEDULER_GROUP
 		);
 	}
