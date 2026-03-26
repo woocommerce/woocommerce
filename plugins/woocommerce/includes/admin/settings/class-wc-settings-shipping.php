@@ -8,6 +8,7 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -58,6 +59,10 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			'options' => __( 'Shipping settings', 'woocommerce' ),
 			'classes' => __( 'Classes', 'woocommerce' ),
 		);
+
+		if ( FeaturesUtil::feature_is_enabled( 'fulfillments' ) ) {
+			$sections['fulfillment-providers'] = __( 'Shipping providers', 'woocommerce' );
+		}
 
 		if ( ! $this->wc_is_installing() ) {
 			// Load shipping methods so we can show any global options they may have.
@@ -184,6 +189,9 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 		} elseif ( 'classes' === $current_section ) {
 			$hide_save_button = true;
 			$this->output_shipping_class_screen();
+		} elseif ( 'fulfillment-providers' === $current_section && FeaturesUtil::feature_is_enabled( 'fulfillments' ) ) {
+			$hide_save_button = true;
+			$this->output_shipping_providers_screen();
 		} else {
 			$is_shipping_method = false;
 			foreach ( $shipping_methods as $method ) {
@@ -211,6 +219,11 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 				break;
 			case 'classes':
 				$this->do_update_options_action();
+				break;
+			case 'fulfillment-providers':
+				if ( FeaturesUtil::feature_is_enabled( 'fulfillments' ) ) {
+					$this->do_update_options_action();
+				}
 				break;
 			case '':
 				break;
@@ -357,7 +370,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 		);
 		wp_enqueue_script( 'wc-shipping-zone-methods' );
 
-		include_once dirname( __FILE__ ) . '/views/html-admin-page-shipping-zone-methods.php';
+		include_once __DIR__ . '/views/html-admin-page-shipping-zone-methods.php';
 	}
 
 	/**
@@ -387,7 +400,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 		);
 		wp_enqueue_script( 'wc-shipping-zones' );
 
-		include_once dirname( __FILE__ ) . '/views/html-admin-page-shipping-zones.php';
+		include_once __DIR__ . '/views/html-admin-page-shipping-zones.php';
 	}
 
 	/**
@@ -420,7 +433,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			$shipping_method->display_errors();
 		}
 
-		include_once dirname( __FILE__ ) . '/views/html-admin-page-shipping-zones-instance.php';
+		include_once __DIR__ . '/views/html-admin-page-shipping-zones-instance.php';
 	}
 
 	/**
@@ -458,7 +471,67 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			)
 		);
 
-		include_once dirname( __FILE__ ) . '/views/html-admin-page-shipping-classes.php';
+		include_once __DIR__ . '/views/html-admin-page-shipping-classes.php';
+	}
+
+	/**
+	 * Handles output of the shipping providers settings screen.
+	 *
+	 * @since 10.7.0
+	 */
+	protected function output_shipping_providers_screen(): void {
+		$providers = get_terms(
+			array(
+				'taxonomy'   => 'wc_fulfillment_shipping_provider',
+				'hide_empty' => false,
+			)
+		);
+
+		if ( is_wp_error( $providers ) ) {
+			$providers = array();
+		}
+
+		$shipping_providers = array();
+		foreach ( $providers as $provider ) {
+			$shipping_providers[] = array(
+				'term_id'               => $provider->term_id,
+				'name'                  => $provider->name,
+				'slug'                  => $provider->slug,
+				'tracking_url_template' => get_term_meta( $provider->term_id, 'tracking_url_template', true ),
+				'icon'                  => get_term_meta( $provider->term_id, 'icon', true ),
+			);
+		}
+
+		wp_localize_script(
+			'wc-shipping-providers',
+			'shippingProvidersLocalizeScript',
+			array(
+				'providers'                   => $shipping_providers,
+				'default_shipping_provider'   => array(
+					'term_id'               => 0,
+					'name'                  => '',
+					'slug'                  => '',
+					'tracking_url_template' => '',
+					'icon'                  => '',
+				),
+				'wc_shipping_providers_nonce' => wp_create_nonce( 'wc_shipping_providers_nonce' ),
+				'strings'                     => array(
+					'unload_confirmation_msg' => __( 'Your changed data will be lost if you leave this page without saving.', 'woocommerce' ),
+					'save_failed'             => __( 'Your changes were not saved. Please retry.', 'woocommerce' ),
+					'delete_confirmation'     => __( 'Are you sure you want to delete this shipping provider?', 'woocommerce' ),
+				),
+			)
+		);
+		wp_enqueue_script( 'wc-shipping-providers' );
+
+		$shipping_provider_columns = array(
+			'wc-shipping-provider-name'                  => __( 'Name', 'woocommerce' ),
+			'wc-shipping-provider-slug'                  => __( 'Slug', 'woocommerce' ),
+			'wc-shipping-provider-tracking-url-template' => __( 'Tracking URL template', 'woocommerce' ),
+			'wc-shipping-provider-icon'                  => __( 'Icon URL', 'woocommerce' ),
+		);
+
+		include_once __DIR__ . '/views/html-admin-page-shipping-providers.php';
 	}
 }
 

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix older PayPal Standard orders failing shipping callbacks when the request has no token by checking for token meta before validating the token parameter.

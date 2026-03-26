@@ -75,6 +75,9 @@ class FulfillmentsController {
 		// Create the database tables if they do not exist.
 		$this->maybe_create_db_tables();
 
+		// Register the custom shipping providers taxonomy.
+		$this->register_custom_shipping_providers_taxonomy();
+
 		// Register the classes that this controller provides.
 		foreach ( $this->provides as $class ) {
 			$class = $container->get( $class );
@@ -82,6 +85,37 @@ class FulfillmentsController {
 				$class->register();
 			}
 		}
+	}
+
+	/**
+	 * Register the custom shipping providers taxonomy.
+	 */
+	private function register_custom_shipping_providers_taxonomy(): void {
+		if ( taxonomy_exists( 'wc_fulfillment_shipping_provider' ) ) {
+			return;
+		}
+
+		register_taxonomy(
+			'wc_fulfillment_shipping_provider',
+			array(),
+			array(
+				'labels'            => array(
+					'name'          => __( 'Shipping providers', 'woocommerce' ),
+					'singular_name' => __( 'Shipping provider', 'woocommerce' ),
+					'add_new_item'  => __( 'Add new shipping provider', 'woocommerce' ),
+					'edit_item'     => __( 'Edit shipping provider', 'woocommerce' ),
+				),
+				'public'            => false,
+				'show_ui'           => false,
+				'hierarchical'      => false,
+				'show_in_rest'      => false,
+				'show_admin_column' => false, // phpcs:ignore WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+				'show_in_nav_menus' => false, // phpcs:ignore WordPress.Arrays.MultipleStatementAlignment.DoubleArrowNotAligned
+				'show_tagcloud'     => false,
+				'query_var'         => false,
+				'rewrite'           => false,
+			)
+		);
 	}
 
 	/**
