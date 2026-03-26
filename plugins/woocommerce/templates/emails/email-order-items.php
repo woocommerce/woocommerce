@@ -205,8 +205,8 @@ foreach ( $items as $item_id => $item ) :
 			 * Email Order Item Quantity hook.
 			 *
 			 * @since 2.4.0
-			 * @param string        $qty_display Item quantity.
-			 * @param WC_Order_Item $item        Item object.
+			 * @param string                $qty_display Item quantity.
+			 * @param WC_Order_Item_Product $item        Item object.
 			 * @return string
 			 */
 			$quantity = apply_filters( 'woocommerce_email_order_item_quantity', $qty_display, $item );
