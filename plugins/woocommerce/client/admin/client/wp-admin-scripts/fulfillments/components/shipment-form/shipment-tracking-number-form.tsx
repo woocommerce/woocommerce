@@ -15,7 +15,7 @@ import { addQueryArgs } from '@wordpress/url';
  */
 import { useShipmentFormContext } from '../../context/shipment-form-context';
 import ErrorLabel from '../user-interface/error-label';
-import { EditIcon } from '../../utils/icons';
+import { EditIcon, TruckIcon } from '../../utils/icons';
 import { findShipmentProviderName } from '../../utils/fulfillment-utils';
 import ShipmentProviders from '../../data/shipment-providers';
 import { useFulfillmentContext } from '../../context/fulfillment-context';
@@ -35,18 +35,21 @@ interface TrackingNumberParsingResponse {
 
 const ShipmentProviderIcon = ( { providerKey }: { providerKey: string } ) => {
 	const provider = ShipmentProviders.find( ( p ) => p.value === providerKey );
-	const icon = provider?.icon;
-	if ( ! provider || ! icon ) {
+	if ( ! provider ) {
 		return null;
 	}
 
 	return (
 		<div className="woocommerce-fulfillment-shipment-provider-icon">
-			<img
-				src={ icon }
-				alt={ `${ provider.label } shipping provider logo` }
-				key={ providerKey }
-			/>
+			{ provider.icon ? (
+				<img
+					src={ provider.icon }
+					alt={ provider.label }
+					key={ providerKey }
+				/>
+			) : (
+				<TruckIcon />
+			) }
 		</div>
 	);
 };

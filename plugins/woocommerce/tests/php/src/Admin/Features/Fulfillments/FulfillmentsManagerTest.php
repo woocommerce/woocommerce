@@ -349,6 +349,58 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should register the custom shipping providers filter hook.
+	 */
+	public function test_custom_shipping_providers_hook_registered(): void {
+		$this->assertNotFalse( has_filter( 'woocommerce_fulfillment_shipping_providers', array( $this->manager, 'get_custom_shipping_providers' ) ) );
+	}
+
+	/**
+	 * @testdox Should load custom shipping providers from the taxonomy into the providers list.
+	 */
+	public function test_get_custom_shipping_providers_loads_taxonomy_terms(): void {
+		if ( ! taxonomy_exists( 'wc_fulfillment_shipping_provider' ) ) {
+			register_taxonomy( 'wc_fulfillment_shipping_provider', array() );
+		}
+
+		$term = wp_insert_term( 'Test Custom Provider', 'wc_fulfillment_shipping_provider', array( 'slug' => 'test-custom-provider' ) );
+		$this->assertNotWPError( $term );
+
+		update_term_meta( $term['term_id'], 'tracking_url_template', 'https://example.com/track?id=__PLACEHOLDER__' );
+		update_term_meta( $term['term_id'], 'icon', 'https://example.com/icon.png' );
+
+		$providers = $this->manager->get_custom_shipping_providers( array() );
+
+		$this->assertNotEmpty( $providers );
+
+		$found = false;
+		foreach ( $providers as $provider ) {
+			if ( $provider instanceof \Automattic\WooCommerce\Admin\Features\Fulfillments\Providers\CustomShippingProvider && 'test-custom-provider' === $provider->get_key() ) {
+				$found = true;
+				$this->assertSame( 'Test Custom Provider', $provider->get_name() );
+				$this->assertSame( 'https://example.com/icon.png', $provider->get_icon() );
+				$this->assertSame( 'https://example.com/track?id=ABC123', $provider->get_tracking_url( 'ABC123' ) );
+				break;
+			}
+		}
+
+		$this->assertTrue( $found, 'Custom provider should be loaded from taxonomy' );
+
+		wp_delete_term( $term['term_id'], 'wc_fulfillment_shipping_provider' );
+	}
+
+	/**
+	 * @testdox Should return existing providers when no custom providers exist.
+	 */
+	public function test_get_custom_shipping_providers_returns_existing_when_no_terms(): void {
+		$existing = array( 'some_provider' );
+
+		$result = $this->manager->get_custom_shipping_providers( $existing );
+
+		$this->assertContains( 'some_provider', $result );
+	}
+
+	/**
 	 * Test tracking number parsing without any shipping providers.
 	 */
 	public function test_try_parse_tracking_number_no_providers() {
