@@ -359,9 +359,9 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 	 * @return WP_REST_Response The updated fulfillment, or an error if the request fails.
 	 */
 	public function update_fulfillment( WP_REST_Request $request ): WP_REST_Response {
-		$order_id        = (int) $request->get_param( 'order_id' );
-		$fulfillment_id  = (int) $request->get_param( 'fulfillment_id' );
-		$notify_customer = (bool) $request->get_param( 'notify_customer' );
+		$order_id          = (int) $request->get_param( 'order_id' );
+		$fulfillment_id    = (int) $request->get_param( 'fulfillment_id' );
+		$notify_customer   = (bool) $request->get_param( 'notify_customer' );
 		$customer_note_raw = $request->get_param( 'customer_note' );
 		$customer_note     = is_string( $customer_note_raw ) ? $customer_note_raw : '';
 
