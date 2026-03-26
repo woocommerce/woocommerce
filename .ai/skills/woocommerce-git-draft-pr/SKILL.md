@@ -29,7 +29,7 @@ From the dynamic context above (read full diffs only if the stat summary is ambi
 - **Significance**: Patch (most common), Minor (new features), Major (breaking — rare)
 - **Bug fix?** Look for issue refs in commits/branch name (e.g., `#12345`, `fix/issue-12345`)
 - **UI changes?** Changes in `client/`, `templates/`, CSS/SCSS, JSX/TSX
-- **Plugin-affecting?** Code shipped to users = yes. CI/CD, workflows, tooling, docs = no. This drives changelog and milestone decisions.
+- **Plugin-affecting?** Code shipped to users = yes. CI/CD, workflows, tooling, docs = no. This drives changelog, milestone, and PR body complexity — non-plugin PRs use a simplified body (see Step 3).
 
 ### 2. Gather Context from User
 
@@ -48,14 +48,27 @@ Use the PR template from the dynamic context above.
 - Optional area prefix: `[Email Editor] Fix double margin-top in flex layout`
 - No `fix:`/`feat:` prefixes. No Linear ticket refs — Linear is internal, PRs are public.
 
-**Body** — fill in each template section:
+**Body** — depends on whether the change is plugin-affecting:
+
+#### Non-plugin changes (CI/CD, tooling, docs, `.ai/skills/`, workflows)
+
+Use a simplified body with only these sections:
+- **Submission Review Guidelines**: Keep as-is from template.
+- **Changes proposed**: 2-3 sentences. Lead with WHY, then WHAT.
+- **Changelog**: "Does not require" `[x]` — explain that changes are not plugin-affecting.
+
+Skip Screenshots, Testing instructions, Testing done, and Milestone sections entirely.
+
+#### Plugin-affecting changes
+
+Use the full template:
 - **Submission Review Guidelines**: Keep as-is from template.
 - **Changes proposed**: 2-3 sentences. Lead with WHY, then WHAT. No filler ("This PR addresses..."). Include `Closes #1234.` if applicable. For bugs: `Bug introduced in PR #XXXX.` (omit this line entirely if not a bug fix).
 - **Screenshots**: Remove section if no UI changes. For UI changes, use Chrome DevTools MCP to capture screenshots if available; otherwise remind user to add them before marking ready.
 - **Testing instructions**: Concrete numbered steps with expected outcomes. Ask user to verify before finalizing. Each step must be actionable — don't reference links that won't exist yet.
 - **Testing done**: Ask user what testing they've performed.
-- **Milestone**: Check auto-assign `[x]` if plugin-affecting. Leave unchecked for CI/tooling/docs.
-- **Changelog**: If changelogs already in diff → "does not require" (created manually). If not plugin-affecting → "does not require" (explain why). Otherwise → "Automatically create" `[x]` with Significance, Type, and a user-facing Message.
+- **Milestone**: Check auto-assign `[x]` if plugin-affecting.
+- **Changelog**: If changelogs already in diff → "does not require" (created manually). Otherwise → "Automatically create" `[x]` with Significance, Type, and a user-facing Message.
 
 Strip all HTML comments (`<!-- -->`) and unfilled placeholder lines (e.g., `Closes # .`, `Bug introduced in PR # .`) from output.
 
@@ -79,5 +92,5 @@ Output the PR URL. If UI changes need screenshots, remind the user.
 
 - No Co-Authored-By lines or self-attribution
 - Never commit code — pushing is fine
-- Preserve the PR template section headings exactly
+- Preserve the PR template section headings exactly (for plugin-affecting PRs)
 - Changelog checkboxes must match CI automation format
