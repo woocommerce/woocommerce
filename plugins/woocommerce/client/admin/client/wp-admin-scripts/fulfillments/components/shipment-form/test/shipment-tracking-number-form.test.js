@@ -1,8 +1,10 @@
 /**
  * External dependencies
  */
+import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import apiFetch from '@wordpress/api-fetch';
+import { speak } from '@wordpress/a11y';
 
 /**
  * Internal dependencies
@@ -11,6 +13,10 @@ import '../../../test-helper/global-mock';
 import ShipmentTrackingNumberForm from '../shipment-tracking-number-form';
 import { useShipmentFormContext } from '../../../context/shipment-form-context';
 import { SHIPMENT_OPTION_MANUAL_ENTRY } from '../../../data/constants';
+
+jest.mock( '@wordpress/a11y', () => ( {
+	speak: jest.fn(),
+} ) );
 
 jest.mock( '../../../context/shipment-form-context', () => ( {
 	useShipmentFormContext: jest.fn(),
@@ -24,16 +30,19 @@ jest.mock( '@wordpress/api-fetch' );
 
 jest.mock( '@wordpress/components', () => ( {
 	...jest.requireActual( '@wordpress/components' ),
-	TextControl: ( { value, onChange, placeholder, onKeyDown } ) => (
-		<div data-testid="text-control">
-			<input
-				type="text"
-				value={ value }
-				placeholder={ placeholder }
-				onChange={ ( e ) => onChange( e.target.value ) }
-				onKeyDown={ onKeyDown }
-			/>
-		</div>
+	TextControl: React.forwardRef(
+		( { value, onChange, placeholder, onKeyDown }, ref ) => (
+			<div data-testid="text-control">
+				<input
+					ref={ ref }
+					type="text"
+					value={ value }
+					placeholder={ placeholder }
+					onChange={ ( e ) => onChange( e.target.value ) }
+					onKeyDown={ onKeyDown }
+				/>
+			</div>
+		)
 	),
 } ) );
 
@@ -111,11 +120,24 @@ describe( 'ShipmentTrackingNumberForm', () => {
 		fireEvent.change( input, { target: { value: 'invalid' } } );
 		fireEvent.click( screen.getByText( 'Find info' ) );
 		await waitFor( () => {
-			expect(
-				screen.getByText(
-					'No information found for this tracking number. Check the number or enter the details manually.'
-				)
-			).toBeInTheDocument();
+			// Check for the error container with proper ARIA attributes
+			const errorContainer = screen.getByRole( 'alert' );
+			expect( errorContainer ).toBeInTheDocument();
+			// eslint-disable-next-line testing-library/no-wait-for-multiple-assertions
+			expect( errorContainer.getAttribute( 'id' ) ).toMatch(
+				/^tracking-number-error/
+			);
+			// role="alert" implicitly sets aria-live="assertive", so explicit aria-live should not be present
+			// eslint-disable-next-line testing-library/no-wait-for-multiple-assertions
+			expect( errorContainer ).not.toHaveAttribute( 'aria-live' );
+
+			// Check that the error message is within the error label component
+			const errorLabel = screen.getByText(
+				'No information found for this tracking number. Check the number or enter the details manually.',
+				{ selector: '.woocommerce-fulfillment-error-label__text' }
+			);
+			// eslint-disable-next-line testing-library/no-wait-for-multiple-assertions
+			expect( errorLabel ).toBeInTheDocument();
 		} );
 	} );
 
@@ -167,14 +189,35 @@ describe( 'ShipmentTrackingNumberForm', () => {
 	it( 'switches to edit mode when tracking number is clicked', () => {
 		mockContext.trackingNumber = '1Z12345E0291980793';
 		render( <ShipmentTrackingNumberForm /> );
-		const trackingNumberSpan = screen.getByRole( 'button', {
-			name: '1Z12345E0291980793',
-		} );
-		fireEvent.click( trackingNumberSpan );
+		const editElements = screen.getAllByLabelText( 'Edit tracking number' );
+		fireEvent.click( editElements[ 0 ] ); // Click the first element (span)
 
 		expect(
 			screen.getByPlaceholderText( 'Enter tracking number' )
 		).toBeInTheDocument();
+	} );
+
+	it( 'focuses input when tracking number label is clicked', () => {
+		mockContext.trackingNumber = '1Z12345E0291980793';
+		const { container } = render( <ShipmentTrackingNumberForm /> );
+
+		const trackingNumberSpan = screen.getAllByLabelText(
+			'Edit tracking number'
+		)[ 0 ];
+		fireEvent.click( trackingNumberSpan );
+
+		const input = container.querySelector( 'input' );
+		expect( input ).toHaveFocus();
+	} );
+
+	it( 'focuses input when edit button is clicked', () => {
+		mockContext.trackingNumber = '1Z12345E0291980793';
+		const { container } = render( <ShipmentTrackingNumberForm /> );
+
+		fireEvent.click( screen.getByTestId( 'edit-icon' ) );
+
+		const input = container.querySelector( 'input' );
+		expect( input ).toHaveFocus();
 	} );
 
 	it( 'shows ambiguous provider message when possibilities have low confidence scores', async () => {
@@ -356,5 +399,116 @@ describe( 'ShipmentTrackingNumberForm', () => {
 		expect(
 			screen.queryByText( 'Not your provider?' )
 		).not.toBeInTheDocument();
+	} );
+
+	describe( 'speak() announcements', () => {
+		it( 'should announce success on valid tracking number lookup', async () => {
+			mockContext.trackingNumber = '';
+			mockContext.shipmentProvider = '';
+			apiFetch.mockResolvedValueOnce( {
+				tracking_number: '1Z12345E0291980793',
+				shipping_provider: 'ups',
+				tracking_url:
+					'https://www.ups.com/track?tracknum=1Z12345E0291980793',
+			} );
+
+			render( <ShipmentTrackingNumberForm /> );
+			const input = screen.getByPlaceholderText(
+				'Enter tracking number'
+			);
+			fireEvent.change( input, {
+				target: { value: '1Z12345E0291980793' },
+			} );
+			fireEvent.click( screen.getByText( 'Find info' ) );
+
+			await waitFor( () => {
+				expect( speak ).toHaveBeenCalledWith(
+					'Tracking information found successfully.',
+					'polite'
+				);
+			} );
+		} );
+
+		it( 'should announce error on invalid tracking number lookup', async () => {
+			mockContext.trackingNumber = '';
+			mockContext.shipmentProvider = '';
+			apiFetch.mockResolvedValueOnce( {} );
+
+			render( <ShipmentTrackingNumberForm /> );
+			const input = screen.getByPlaceholderText(
+				'Enter tracking number'
+			);
+			fireEvent.change( input, { target: { value: 'invalid' } } );
+			fireEvent.click( screen.getByText( 'Find info' ) );
+
+			await waitFor( () => {
+				expect( speak ).toHaveBeenCalledWith(
+					'No information found for this tracking number. Check the number or enter the details manually.',
+					'assertive'
+				);
+			} );
+		} );
+
+		it( 'should announce error on API failure', async () => {
+			mockContext.trackingNumber = '';
+			mockContext.shipmentProvider = '';
+			apiFetch.mockRejectedValueOnce( new Error( 'Network error' ) );
+
+			render( <ShipmentTrackingNumberForm /> );
+			const input = screen.getByPlaceholderText(
+				'Enter tracking number'
+			);
+			fireEvent.change( input, { target: { value: '12345' } } );
+			fireEvent.click( screen.getByText( 'Find info' ) );
+
+			await waitFor( () => {
+				expect( speak ).toHaveBeenCalledWith(
+					'Failed to fetch shipment information.',
+					'assertive'
+				);
+			} );
+		} );
+
+		it( 'should announce when switching to manual provider selection', async () => {
+			mockContext.trackingNumber = '';
+			mockContext.shipmentProvider = '';
+			apiFetch.mockResolvedValueOnce( {
+				tracking_number: '1234567890123456',
+				shipping_provider: 'ups',
+				tracking_url:
+					'https://www.ups.com/track?tracknum=1234567890123456',
+				possibilities: {
+					ups: { url: 'https://ups.com', ambiguity_score: 70 },
+					fedex: { url: 'https://fedex.com', ambiguity_score: 75 },
+				},
+			} );
+
+			render( <ShipmentTrackingNumberForm /> );
+			const input = screen.getByPlaceholderText(
+				'Enter tracking number'
+			);
+			fireEvent.change( input, {
+				target: { value: '1234567890123456' },
+			} );
+			fireEvent.click( screen.getByText( 'Find info' ) );
+
+			await waitFor( () => {
+				expect(
+					screen.getByText( 'Not your provider?' )
+				).toBeInTheDocument();
+			} );
+
+			// Clear speak mock from the lookup call
+			speak.mockClear();
+
+			fireEvent.click(
+				screen.getByText( 'Select your provider manually' )
+			);
+
+			expect( speak ).toHaveBeenCalledWith(
+				'Switched to manual provider selection.',
+				'polite'
+			);
+		} );
 	} );
 } );
