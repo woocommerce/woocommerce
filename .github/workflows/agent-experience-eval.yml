@@ -1,6 +1,9 @@
 name: Agent Experience Evaluation
 
 on:
+  pull_request: # TODO: Remove after initial testing
+    paths:
+      - '.github/workflows/agent-experience-eval.yml'
   workflow_dispatch: {}
 
 permissions:
