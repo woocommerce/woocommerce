@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 
 /**
@@ -39,16 +40,17 @@ jest.mock( '../../../context/fulfillment-context', () => ( {
 
 // Mock ToggleControl and TextareaControl to make testing easier
 jest.mock( '@wordpress/components', () => ( {
-	ToggleControl: ( props ) => (
+	ToggleControl: React.forwardRef( ( props, ref ) => (
 		<div data-testid="toggle-control">
 			<input
+				ref={ ref }
 				type="checkbox"
 				checked={ props.checked }
 				onChange={ () => props.onChange( ! props.checked ) }
 				data-testid="toggle-input"
 			/>
 		</div>
-	),
+	) ),
 	TextareaControl: ( props ) => (
 		<div data-testid="textarea-control">
 			{ /* eslint-disable-next-line jsx-a11y/label-has-associated-control */ }

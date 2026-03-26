@@ -16,6 +16,7 @@ jest.mock( '../../../context/shipment-form-context', () => ( {
 
 jest.mock( '../../../utils/icons', () => ( {
 	SearchIcon: () => <span data-testid="search-icon" />,
+	TruckIcon: () => <span data-testid="truck-icon" />,
 } ) );
 
 jest.mock( '@wordpress/components', () => ( {

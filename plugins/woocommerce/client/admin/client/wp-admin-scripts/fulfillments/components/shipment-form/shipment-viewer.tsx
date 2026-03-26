@@ -52,9 +52,9 @@ export default function ShipmentViewer() {
 			header={
 				isShipmentInformationProvided ? (
 					<>
-						{ shipmentProviderObject ? (
+						{ shipmentProviderObject?.icon ? (
 							<img
-								src={ shipmentProviderObject.icon || '' }
+								src={ shipmentProviderObject.icon }
 								alt={ shipmentProviderObject.label || '' }
 							/>
 						) : (

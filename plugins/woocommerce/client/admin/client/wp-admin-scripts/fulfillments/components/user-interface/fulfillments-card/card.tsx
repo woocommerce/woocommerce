@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { Button, Icon } from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
 import React, { ReactNode, useState } from 'react';
 
 /**
@@ -36,6 +37,12 @@ export default function FulfillmentCard( {
 						__next40pxDefaultSize
 						size="small"
 						onClick={ () => setIsOpen( ! isOpen ) }
+						aria-label={
+							isOpen
+								? __( 'Collapse section', 'woocommerce' )
+								: __( 'Expand section', 'woocommerce' )
+						}
+						aria-expanded={ isOpen }
 					>
 						<Icon
 							icon={
