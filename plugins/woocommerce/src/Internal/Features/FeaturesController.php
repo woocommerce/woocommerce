@@ -435,7 +435,6 @@ class FeaturesController {
 					'Send transactional emails asynchronously via Action Scheduler instead of during the current request.',
 					'woocommerce'
 				),
-				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'enabled_by_default'           => false,
 				'is_experimental'              => false,

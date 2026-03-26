@@ -39,6 +39,7 @@ class DeferredEmailQueueTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		remove_all_filters( 'woocommerce_queue_class' );
 		remove_all_filters( 'woocommerce_allow_send_queued_transactional_email' );
+		remove_all_filters( 'woocommerce_deferred_email_chunk_size' );
 		remove_all_actions( 'woocommerce_send_queued_transactional_emails' );
 		$this->reset_queue_singleton();
 		parent::tearDown();
@@ -108,6 +109,30 @@ class DeferredEmailQueueTest extends WC_Unit_Test_Case {
 		$queue = $this->get_test_queue();
 
 		$this->assertSame( 'woocommerce-emails', $queue->actions[0]['group'] );
+	}
+
+	/**
+	 * @testdox Dispatch splits the queue into chunks when it exceeds the chunk size.
+	 */
+	public function test_dispatch_chunks_large_queue(): void {
+		add_filter(
+			'woocommerce_deferred_email_chunk_size',
+			function () {
+				return 2;
+			}
+		);
+
+		$this->sut->push( 'woocommerce_order_status_completed', array( 1 ) );
+		$this->sut->push( 'woocommerce_new_customer_note', array( 2 ) );
+		$this->sut->push( 'woocommerce_created_customer', array( 3 ) );
+
+		$this->sut->dispatch();
+
+		$queue = $this->get_test_queue();
+
+		$this->assertCount( 2, $queue->actions, 'Should schedule two AS actions for 3 emails with chunk size 2' );
+		$this->assertCount( 2, $queue->actions[0]['args'][0], 'First chunk should have 2 emails' );
+		$this->assertCount( 1, $queue->actions[1]['args'][0], 'Second chunk should have 1 email' );
 	}
 
 	/**

@@ -26,6 +26,11 @@ final class DeferredEmailQueue {
 	private const AS_GROUP = 'woocommerce-emails';
 
 	/**
+	 * Default number of emails per Action Scheduler job.
+	 */
+	private const DEFAULT_CHUNK_SIZE = 10;
+
+	/**
 	 * Queue of email callbacks collected during the current request.
 	 *
 	 * @var array<int, array{filter: string, args: array}>
@@ -76,7 +81,19 @@ final class DeferredEmailQueue {
 			return;
 		}
 
-		\WC()->queue()->add( self::AS_HOOK, array( $this->queue ), self::AS_GROUP );
+		/**
+		 * Filter the number of emails per Action Scheduler job.
+		 *
+		 * @since 10.8.0
+		 * @param int $chunk_size Number of emails per batch. Default 10.
+		 */
+		$chunk_size = max( 1, (int) apply_filters( 'woocommerce_deferred_email_chunk_size', self::DEFAULT_CHUNK_SIZE ) );
+		$chunks     = array_chunk( $this->queue, $chunk_size );
+
+		foreach ( $chunks as $chunk ) {
+			\WC()->queue()->add( self::AS_HOOK, array( $chunk ), self::AS_GROUP );
+		}
+
 		$this->queue = array();
 	}
 
