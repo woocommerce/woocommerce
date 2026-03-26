@@ -125,7 +125,7 @@ class PushNotificationRestController {
 			);
 		}
 
-		$token = preg_replace( '/^\s*Bearer\s+/i', '', $header );
+		$token = (string) preg_replace( '/^\s*Bearer\s+/i', '', $header );
 
 		if ( ! JsonWebToken::validate( $token, wp_salt( 'auth' ) ) ) {
 			return new WP_Error(
