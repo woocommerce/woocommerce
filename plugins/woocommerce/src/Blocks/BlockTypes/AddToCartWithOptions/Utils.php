@@ -47,8 +47,8 @@ class Utils {
 			$pattern,
 			function ( $matches ) use ( $product_name ) {
 				/* translators: %s refers to the item name in the cart. */
-				$minus_aria = esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) );
-				return $matches[1] . '<button aria-label="' . $minus_aria . '" type="button" data-wp-on--click="actions.decreaseQuantity" data-wp-bind--disabled="!state.allowsDecrease" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">−</button>';
+				$plus_aria = esc_attr( sprintf( __( 'Increase quantity of %s', 'woocommerce' ), $product_name ) );
+				return $matches[1] . '<button aria-label="' . $plus_aria . '" type="button" data-wp-on--click="actions.increaseQuantity" data-wp-bind--disabled="!state.allowsIncrease" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">+</button>';
 			},
 			$quantity_html
 		);
@@ -56,8 +56,8 @@ class Utils {
 			$pattern,
 			function ( $matches ) use ( $product_name ) {
 				/* translators: %s refers to the item name in the cart. */
-				$plus_aria = esc_attr( sprintf( __( 'Increase quantity of %s', 'woocommerce' ), $product_name ) );
-				return $matches[1] . '<button aria-label="' . $plus_aria . '" type="button" data-wp-on--click="actions.increaseQuantity" data-wp-bind--disabled="!state.allowsIncrease" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">+</button>';
+				$minus_aria = esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) );
+				return $matches[1] . '<button aria-label="' . $minus_aria . '" type="button" data-wp-on--click="actions.decreaseQuantity" data-wp-bind--disabled="!state.allowsDecrease" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">−</button>';
 			},
 			$new_html
 		);
