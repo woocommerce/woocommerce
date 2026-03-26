@@ -5,8 +5,8 @@
 WooCommerce is a WordPress e-commerce plugin organized as a monorepo with:
 
 - **Backend**: PHP in `plugins/woocommerce/` (PSR-4, WordPress standards)
-- **Admin Client**: React/TypeScript in `client/admin/`
-- **Payment Settings**: Specialized module in `client/admin/client/settings-payments/`
+- **Admin Client**: React/TypeScript in `plugins/woocommerce/client/admin/`
+- **Payment Settings**: Specialized React/TypeScript module in `plugins/woocommerce/client/admin/client/settings-payments/`
 
 ## Navigation Guide
 
@@ -57,8 +57,8 @@ plugins/woocommerce/
 
 **Modern vs Legacy Code:**
 
-- `src/` - Modern PHP with dependency injection, PSR-4 autoloading
-- `includes/` - Legacy WordPress patterns, modify only when necessary
+- `plugins/woocommerce/src/` - Modern PHP with dependency injection, PSR-4 autoloading
+- `plugins/woocommerce/includes/` - Legacy WordPress patterns, modify only when necessary
 
 **Namespace:**
 
@@ -67,12 +67,12 @@ plugins/woocommerce/
 
 **Dependency Injection:**
 
-- Classes in `src/` use DI container (`$container->get()`)
+- Classes in `plugins/woocommerce/src/` use DI container (`$container->get()`)
 - Dependencies injected via `init()` method
 
 **Version Management:**
 
-- Current version in `includes/class-woocommerce.php` → `$version` property
+- Current version in `plugins/woocommerce/includes/class-woocommerce.php` → `$version` property
 - Used for `@since` annotations (remove `-dev` suffix)
 - When changing template files (PHP files used to display UI on the front-end) the version in their header should be updated to the current version, without the `-dev` suffix.
 
@@ -149,7 +149,7 @@ For detailed test commands, see `woocommerce-dev-cycle` skill.
 ## Known Constraints
 
 - `includes/` directory changes should be minimal (legacy code)
-- All new backend code goes in `src/Internal/` by default
+- All new backend code goes in `plugins/woocommerce/src/Internal/` by default
 - Never create standalone functions (always use class methods)
 - Tests require Docker environment
 
@@ -192,7 +192,7 @@ This is part of the WooCommerce monorepo:
 
 ## Historical Context
 
-**Why two code styles?** The `includes/` directory predates modern PHP practices. New code uses PSR-4 and dependency injection in `src/`.
+**Why two code styles?** The `plugins/woocommerce/includes/` directory predates modern PHP practices. New code uses PSR-4 and dependency injection in `plugins/woocommerce/src/`.
 
 **Why DI container?** Improves testability and maintainability compared to legacy global state patterns.
 
