@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Adds a fallback path to the plugin file during plugin activation step. Prevents `unknown_filename` error when trying to activate a plugin during the auto-installation flow.

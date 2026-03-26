@@ -5,8 +5,9 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Services;
 
 use Automattic\WooCommerce\Internal\PushNotifications\Dispatchers\InternalNotificationDispatcher;
-use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\PendingNotificationStore;
+use Automattic\WooCommerce\Tests\Internal\PushNotifications\Stubs\StubOrderNotification;
+use Automattic\WooCommerce\Tests\Internal\PushNotifications\Stubs\StubReviewNotification;
 use WC_Unit_Test_Case;
 
 /**
@@ -46,9 +47,7 @@ class PendingNotificationStoreTest extends WC_Unit_Test_Case {
 	 * @testdox Should add a notification to the store.
 	 */
 	public function test_add_stores_notification(): void {
-		$notification = $this->create_notification( 'store_order', 42 );
-
-		$this->store->add( $notification );
+		$this->store->add( new StubOrderNotification( 42 ) );
 
 		$this->assertSame( 1, $this->store->count() );
 	}
@@ -57,11 +56,8 @@ class PendingNotificationStoreTest extends WC_Unit_Test_Case {
 	 * @testdox Should deduplicate notifications with the same type and resource ID.
 	 */
 	public function test_add_deduplicates_same_type_and_resource(): void {
-		$first  = $this->create_notification( 'store_order', 42 );
-		$second = $this->create_notification( 'store_order', 42 );
-
-		$this->store->add( $first );
-		$this->store->add( $second );
+		$this->store->add( new StubOrderNotification( 42 ) );
+		$this->store->add( new StubOrderNotification( 42 ) );
 
 		$this->assertSame( 1, $this->store->count() );
 	}
@@ -70,11 +66,8 @@ class PendingNotificationStoreTest extends WC_Unit_Test_Case {
 	 * @testdox Should store notifications with different types separately.
 	 */
 	public function test_add_allows_different_types_for_same_resource(): void {
-		$order  = $this->create_notification( 'store_order', 42 );
-		$review = $this->create_notification( 'store_review', 42 );
-
-		$this->store->add( $order );
-		$this->store->add( $review );
+		$this->store->add( new StubOrderNotification( 42 ) );
+		$this->store->add( new StubReviewNotification( 42 ) );
 
 		$this->assertSame( 2, $this->store->count() );
 	}
@@ -83,11 +76,8 @@ class PendingNotificationStoreTest extends WC_Unit_Test_Case {
 	 * @testdox Should store notifications with different resource IDs separately.
 	 */
 	public function test_add_allows_same_type_for_different_resources(): void {
-		$order_1 = $this->create_notification( 'store_order', 42 );
-		$order_2 = $this->create_notification( 'store_order', 43 );
-
-		$this->store->add( $order_1 );
-		$this->store->add( $order_2 );
+		$this->store->add( new StubOrderNotification( 42 ) );
+		$this->store->add( new StubOrderNotification( 43 ) );
 
 		$this->assertSame( 2, $this->store->count() );
 	}
@@ -100,7 +90,7 @@ class PendingNotificationStoreTest extends WC_Unit_Test_Case {
 		$store      = new PendingNotificationStore();
 		$store->init( $dispatcher );
 
-		$store->add( $this->create_notification( 'store_order', 42 ) );
+		$store->add( new StubOrderNotification( 42 ) );
 
 		$this->assertSame( 0, $store->count() );
 	}
@@ -109,9 +99,9 @@ class PendingNotificationStoreTest extends WC_Unit_Test_Case {
 	 * @testdox Should register shutdown hook only once regardless of how many notifications are added.
 	 */
 	public function test_add_registers_shutdown_hook_once(): void {
-		$this->store->add( $this->create_notification( 'store_order', 1 ) );
-		$this->store->add( $this->create_notification( 'store_order', 2 ) );
-		$this->store->add( $this->create_notification( 'store_order', 3 ) );
+		$this->store->add( new StubOrderNotification( 1 ) );
+		$this->store->add( new StubOrderNotification( 2 ) );
+		$this->store->add( new StubOrderNotification( 3 ) );
 
 		$hook_count = 0;
 
@@ -134,7 +124,7 @@ class PendingNotificationStoreTest extends WC_Unit_Test_Case {
 	 * @testdox Should clear pending notifications after dispatch.
 	 */
 	public function test_dispatch_all_clears_store(): void {
-		$this->store->add( $this->create_notification( 'store_order', 1 ) );
+		$this->store->add( new StubOrderNotification( 1 ) );
 
 		$this->store->dispatch_all();
 
@@ -145,33 +135,13 @@ class PendingNotificationStoreTest extends WC_Unit_Test_Case {
 	 * @testdox Should return all pending notifications via get_all.
 	 */
 	public function test_get_all_returns_pending_notifications(): void {
-		$this->store->add( $this->create_notification( 'store_order', 1 ) );
-		$this->store->add( $this->create_notification( 'store_review', 2 ) );
+		$this->store->add( new StubOrderNotification( 1 ) );
+		$this->store->add( new StubReviewNotification( 2 ) );
 
 		$all = $this->store->get_all();
 
 		$this->assertCount( 2, $all );
 		$this->assertSame( 1, $all[0]->get_resource_id() );
 		$this->assertSame( 2, $all[1]->get_resource_id() );
-	}
-
-	/**
-	 * Creates a concrete Notification instance for testing.
-	 *
-	 * @param string $type        The notification type.
-	 * @param int    $resource_id The resource ID.
-	 * @return Notification
-	 */
-	private function create_notification( string $type, int $resource_id ): Notification {
-		return new class( $type, $resource_id ) extends Notification {
-			/**
-			 * Returns a test payload.
-			 *
-			 * @return array|null
-			 */
-			public function to_payload(): ?array {
-				return array( 'test' => true );
-			}
-		};
 	}
 }

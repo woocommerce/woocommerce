@@ -343,14 +343,30 @@ class CartSchema extends AbstractSchema {
 		// Get visible cross sells products.
 		$cross_sells    = array();
 		$cross_sell_ids = $cart->get_cross_sells();
+		$image_ids      = array();
 		if ( ! empty( $cross_sell_ids ) ) {
 			// Prime caches to reduce future queries.
 			_prime_post_caches( $cross_sell_ids );
 			$cross_sells = array_filter( array_map( 'wc_get_product', $cross_sell_ids ), 'wc_products_array_filter_visible' );
+			/** @var \WC_Product[] $cross_sells */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
+			// Identify which images need priming.
+			$image_ids[] = array_values( array_filter( array_map( static fn( $product ) => (int) $product->get_image_id(), $cross_sells ) ) );
+		}
+
+		$cart_all_items  = $cart->get_cart();
+		$cart_line_items = array_filter( $cart_all_items, static fn( $item ) => ( $item['data'] ?? null ) instanceof \WC_Product );
+		if ( ! empty( $cart_line_items ) ) {
+			// Identify which images need priming.
+			$image_ids[] = array_values( array_filter( array_map( static fn( $item ) => (int) $item['data']->get_image_id(), $cart_line_items ) ) );
+		}
+
+		if ( ! empty( $image_ids ) ) {
+			// Prime caches to reduce future queries.
+			_prime_post_caches( array_unique( array_merge( ...$image_ids ) ) );
 		}
 
 		return [
-			'items'                   => $this->get_item_responses_from_schema( $this->item_schema, $cart->get_cart() ),
+			'items'                   => $this->get_item_responses_from_schema( $this->item_schema, $cart_all_items ),
 			'coupons'                 => $this->get_item_responses_from_schema( $this->coupon_schema, $cart->get_applied_coupons() ),
 			'fees'                    => $this->get_item_responses_from_schema( $this->fee_schema, $cart->get_fees() ),
 			'totals'                  => (object) $this->prepare_currency_response( $this->get_totals( $cart ) ),

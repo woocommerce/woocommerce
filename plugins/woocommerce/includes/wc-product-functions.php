@@ -796,6 +796,7 @@ function wc_scheduled_sales() {
 	// Sales which are due to start.
 	$product_ids = $data_store->get_starting_sales();
 	if ( $product_ids ) {
+		_prime_post_caches( $product_ids );
 		$must_refresh_transient = true;
 		do_action( 'wc_before_products_starting_sales', $product_ids );
 
@@ -817,6 +818,7 @@ function wc_scheduled_sales() {
 	// Sales which are due to end.
 	$product_ids = $data_store->get_ending_sales();
 	if ( $product_ids ) {
+		_prime_post_caches( $product_ids );
 		$must_refresh_transient = true;
 		do_action( 'wc_before_products_ending_sales', $product_ids );
 
