@@ -9,6 +9,9 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import FulfillmentCard from '../card';
 
 jest.mock( '@wordpress/components', () => ( {
+	Button: ( { children, ...props } ) => (
+		<button { ...props }>{ children }</button>
+	),
 	Icon: ( { icon } ) => <span data-testid="icon">{ icon }</span>,
 } ) );
 
@@ -23,8 +26,10 @@ describe( 'FulfillmentCard', () => {
 		expect( screen.getByText( 'Header' ) ).toBeInTheDocument();
 		// Children should not be visible by default for collapsable
 		expect( screen.queryByText( 'Child content' ) ).not.toBeInTheDocument();
-		// Click header to expand
-		fireEvent.click( screen.getByRole( 'button' ) );
+		// Click the header div (role="button") to expand
+		fireEvent.click(
+			screen.getByText( 'Header' ).closest( '[role="button"]' )
+		);
 		expect( screen.getByText( 'Child content' ) ).toBeInTheDocument();
 	} );
 
@@ -35,7 +40,8 @@ describe( 'FulfillmentCard', () => {
 			</FulfillmentCard>
 		);
 
-		const header = screen.getByRole( 'button' );
+		const header =
+			screen.getByText( 'Header' ).closest( '[role="button"]' );
 		expect( screen.queryByText( 'Child content' ) ).not.toBeInTheDocument();
 
 		fireEvent.click( header );
@@ -83,7 +89,9 @@ describe( 'FulfillmentCard', () => {
 			</FulfillmentCard>
 		);
 
-		expect( screen.getByRole( 'button' ) ).toBeInTheDocument();
+		expect(
+			screen.getByText( 'Header' ).closest( '[role="button"]' )
+		).toBeInTheDocument();
 		expect( screen.queryByText( 'Child content' ) ).not.toBeInTheDocument();
 	} );
 
@@ -94,7 +102,8 @@ describe( 'FulfillmentCard', () => {
 			</FulfillmentCard>
 		);
 
-		const header = screen.getByRole( 'button' );
+		const header =
+			screen.getByText( 'Header' ).closest( '[role="button"]' );
 		expect( screen.queryByText( 'Child content' ) ).not.toBeInTheDocument();
 
 		fireEvent.keyUp( header, { key: 'Enter' } );
