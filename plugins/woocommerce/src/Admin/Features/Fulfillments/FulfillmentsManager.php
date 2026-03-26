@@ -113,7 +113,7 @@ class FulfillmentsManager {
 	 * Does nothing if the given ID does not correspond to a valid order type.
 	 * Exceptions are caught and logged; this method never throws.
 	 *
-	 * @since 10.8.0
+	 * @since 10.7.0
 	 *
 	 * @param int $order_id The ID of the order being deleted.
 	 */

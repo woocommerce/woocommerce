@@ -572,7 +572,7 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 	 *
 	 * This is used when an order is permanently deleted to prevent orphaned rows.
 	 *
-	 * @since 10.8.0
+	 * @since 10.7.0
 	 *
 	 * @param string $entity_type The entity type (e.g. 'WC_Order').
 	 * @param string $entity_id   The entity ID.
