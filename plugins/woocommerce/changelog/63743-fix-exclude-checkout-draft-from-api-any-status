@@ -1,4 +1,4 @@
 Significance: minor
 Type: update
 
-Exclude checkout-draft orders from default REST API order queries (status=any). API consumers that rely on checkout-draft orders appearing in unfiltered order listings will need to explicitly request them via `status=checkout-draft`.
+Exclude checkout-draft orders from unfiltered order queries (status=any or unspecified). This affects the REST API (GET /wc/v3/orders with no status filter), direct HPOS queries via OrdersTableQuery, and WP_Query-based queries on post-table stores. Consumers relying on checkout-draft orders appearing in unfiltered results must explicitly request them via `status=checkout-draft`.

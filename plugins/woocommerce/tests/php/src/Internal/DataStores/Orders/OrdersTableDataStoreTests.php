@@ -722,7 +722,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$order_checkout_draft->set_status( 'checkout-draft' );
 		$order_checkout_draft->save();
 
-		// Test 'status' => 'any' - should return only valid WooCommerce statuses, excluding statuses with exclude_from_search (checkout-draft) and internal WordPress statuses (auto-draft).
+		// Test 'status' => 'any' - should return only valid WooCommerce statuses, excluding statuses with exclude_from_search=true (checkout-draft, auto-draft).
 		$query = new OrdersTableQuery( array( 'status' => 'any' ) );
 		$this->assertEquals( 3, count( $query->orders ), "status='any' should return only merchant-facing WooCommerce statuses" );
 		$this->assertContains( $order_pending->get_id(), $query->orders, "status='any' should include pending orders" );
