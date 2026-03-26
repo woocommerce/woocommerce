@@ -341,4 +341,4 @@ Check **WooCommerce → Status → Logs** for entries with source `woocommerce-m
 - [WordPress MCP Adapter Repository](https://github.com/WordPress/mcp-adapter)
 - [WooCommerce MCP Demo Plugin](https://github.com/woocommerce/wc-mcp-ability)
 - [Model Context Protocol Specification](https://modelcontextprotocol.io/)
-- [WooCommerce REST API Documentation](https://woocommerce.github.io/woocommerce-rest-api-docs/)
+- [WooCommerce REST API Documentation](/docs/apis/rest-api/)

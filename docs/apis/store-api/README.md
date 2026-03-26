@@ -29,7 +29,7 @@ Possible uses of the Store API include:
 * All API responses return JSON-formatted data.
 * Data returned from the API is reflective of the current user (customer). Customer sessions in WooCommerce are cookie-based.
 * Store API cannot be used to look up other customers and orders by ID; only data belonging to the current user.
-* Likewise, Store API cannot be used to write store data e.g. settings. For more extensive access, use the authenticated [WC REST API.](https://woocommerce.github.io/woocommerce-rest-api-docs/#introduction)
+* Likewise, Store API cannot be used to write store data e.g. settings. For more extensive access, use the authenticated [WC REST API.](/docs/apis/rest-api/)
 * Endpoints that do allow writes, for example, updating the current customer address, require a [nonce-token](https://developer.wordpress.org/plugins/security/nonces/).
 * Store API is render-target agnostic and should not make assumptions about where content will be displayed. For example, returning HTML would be discouraged unless the data type itself is HTML.
 
@@ -157,7 +157,7 @@ If new schema is required, and any of the following statements are true, choose 
 * The data is related to a resource, but not technically part of it
 * The data is difficult to query (performance wise) or has a very narrow or niche use-case
 
-If the data is sensitive (for example, a core setting that should be private), or not related to the current user (for example, looking up an order by order ID), [choose to use the authenticated WC REST API](https://woocommerce.github.io/woocommerce-rest-api-docs/#introduction).
+If the data is sensitive (for example, a core setting that should be private), or not related to the current user (for example, looking up an order by order ID), [choose to use the authenticated WC REST API](/docs/apis/rest-api/).
 
 If you're looking to add _new routes and endpoints_, rather than extending the Store API _schema_, extending the Store API is not necessary. You can instead utilize core WordPress functionality to create new routes, choosing to use the same pattern of Store API if you wish. See:
 
