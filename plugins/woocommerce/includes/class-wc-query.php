@@ -453,7 +453,6 @@ class WC_Query {
 		return $posts;
 	}
 
-
 	/**
 	 * Pre_get_posts above may adjust the main query to add WooCommerce logic. When this query is done, we need to ensure
 	 * all custom filters are removed.
