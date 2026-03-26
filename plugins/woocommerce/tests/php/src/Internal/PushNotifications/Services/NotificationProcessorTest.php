@@ -276,5 +276,4 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 
 		$this->assertNotEmpty( $order->get_meta( NotificationProcessor::SENT_META_KEY ) );
 	}
-
 }
