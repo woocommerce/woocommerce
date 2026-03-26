@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { useEffect, useMemo, useRef } from 'react';
 import { ToggleControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
@@ -21,27 +22,42 @@ export default function CustomerNotificationBox( {
 	type: 'fulfill' | 'update' | 'remove';
 } ) {
 	const { notifyCustomer, setNotifyCustomer } = useFulfillmentContext();
+	const toggleRef = useRef< HTMLInputElement >( null );
 
-	const headerStrings = {
-		fulfill: __( 'Fulfillment notification', 'woocommerce' ),
-		remove: __( 'Removal update', 'woocommerce' ),
-		update: __( 'Update notification', 'woocommerce' ),
-	};
+	const headerStrings = useMemo( () => {
+		return {
+			fulfill: __( 'Fulfillment notification', 'woocommerce' ),
+			remove: __( 'Removal update', 'woocommerce' ),
+			update: __( 'Update notification', 'woocommerce' ),
+		};
+	}, [] );
 
-	const contentStrings = {
-		fulfill: __(
-			'Automatically send an email to the customer when the selected items are fulfilled.',
-			'woocommerce'
-		),
-		remove: __(
-			'Automatically send an email to the customer notifying that the fulfillment is cancelled.',
-			'woocommerce'
-		),
-		update: __(
-			'Automatically send an email to the customer when the fulfillment is updated.',
-			'woocommerce'
-		),
-	};
+	const contentStrings = useMemo( () => {
+		return {
+			fulfill: __(
+				'Automatically send an email to the customer when the selected items are fulfilled.',
+				'woocommerce'
+			),
+			remove: __(
+				'Automatically send an email to the customer notifying that the fulfillment is cancelled.',
+				'woocommerce'
+			),
+			update: __(
+				'Automatically send an email to the customer when the fulfillment is updated.',
+				'woocommerce'
+			),
+		};
+	}, [] );
+
+	const descriptionId = 'notification-description';
+
+	useEffect( () => {
+		if ( toggleRef.current ) {
+			toggleRef.current.ariaLabel =
+				headerStrings[ type ] || headerStrings.fulfill;
+			toggleRef.current.setAttribute( 'aria-describedby', descriptionId );
+		}
+	}, [ type, headerStrings ] );
 
 	return (
 		<FulfillmentCard
@@ -55,7 +71,8 @@ export default function CustomerNotificationBox( {
 					<ToggleControl
 						__nextHasNoMarginBottom
 						checked={ notifyCustomer }
-						label={ null }
+						label={ '' }
+						ref={ toggleRef }
 						onChange={ ( checked ) => {
 							setNotifyCustomer( checked );
 						} }
@@ -63,7 +80,10 @@ export default function CustomerNotificationBox( {
 				</>
 			}
 		>
-			<p className="woocommerce-fulfillment-description">
+			<p
+				id={ descriptionId }
+				className="woocommerce-fulfillment-description"
+			>
 				{ contentStrings[ type ] || contentStrings.fulfill }
 			</p>
 		</FulfillmentCard>

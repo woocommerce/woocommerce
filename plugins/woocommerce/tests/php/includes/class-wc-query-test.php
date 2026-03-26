@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 
 /**
  * Tests for WC_Query.
@@ -76,5 +77,64 @@ class WC_Query_Test extends \WC_Unit_Test_Case {
 		update_option( 'show_on_front', $default_show_on_front );
 		update_option( 'page_on_front', $default_page_on_front );
 		wp_delete_post( $shop_page_id, true );
+	}
+
+	/**
+	 * Data provider for search ordering tests.
+	 *
+	 * @return array[] Each entry: [ search query string, whether relevance ordering is expected, description ].
+	 */
+	public function data_provider_search_ordering(): array {
+		return array(
+			'normal search'              => array( 'shirt', true, 'Normal search should use relevance ordering' ),
+			'exclusion-only search'      => array( '-condebug', false, 'Exclusion-only search should not use relevance ordering' ),
+			'empty search'               => array( '', false, 'Empty search should not use relevance ordering' ),
+			'multiple exclusion terms'   => array( '-foo+-bar', false, 'Multiple exclusion terms should not use relevance ordering' ),
+			'mixed positive + exclusion' => array( 'shirt+-condebug', true, 'Mixed search with positive terms should use relevance ordering' ),
+			'bare dash'                  => array( '-', false, 'Bare dash search should not use relevance ordering' ),
+			'comma-separated mixed'      => array( '-foo,bar', true, 'Comma-separated search with positive terms should use relevance ordering' ),
+		);
+	}
+
+	/**
+	 * @testdox Ordering args: $description.
+	 * @dataProvider data_provider_search_ordering
+	 *
+	 * @param string $search           The search query string.
+	 * @param bool   $expect_relevance Whether relevance ordering is expected.
+	 * @param string $description      Test case description.
+	 */
+	public function test_get_catalog_ordering_args_search_ordering( string $search, bool $expect_relevance, string $description ): void {
+		$sut = new WC_Query();
+
+		$this->go_to( '/?s=' . rawurlencode( $search ) . '&post_type=product' );
+
+		$result = $sut->get_catalog_ordering_args();
+
+		if ( $expect_relevance ) {
+			$this->assertSame( 'relevance', $result['orderby'], $description );
+		} else {
+			$this->assertNotEquals( 'relevance', $result['orderby'], $description );
+		}
+	}
+
+	/**
+	 * @testdox Ordering args should respect the wp_query_search_exclusion_prefix filter.
+	 */
+	public function test_get_catalog_ordering_args_respects_custom_exclusion_prefix(): void {
+		$sut = new WC_Query();
+
+		$custom_prefix = static function () {
+			return '!';
+		};
+		add_filter( 'wp_query_search_exclusion_prefix', $custom_prefix );
+
+		$this->go_to( '/?s=!foo&post_type=product' );
+
+		$result = $sut->get_catalog_ordering_args();
+
+		remove_filter( 'wp_query_search_exclusion_prefix', $custom_prefix );
+
+		$this->assertNotEquals( 'relevance', $result['orderby'], 'Exclusion-only search with custom prefix should not use relevance ordering' );
 	}
 }
