@@ -1,4 +1,4 @@
 Significance: patch
-Type: update
+Type: fix
 
 Prevent empty quantity output markers in order email templates.
