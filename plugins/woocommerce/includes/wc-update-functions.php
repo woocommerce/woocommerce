@@ -3478,6 +3478,7 @@ function wc_update_1080_slim_orders_meta_key_index(): void {
 	$table_name = $wpdb->prefix . 'wc_orders_meta';
 	$index_name = 'meta_key_value';
 
+	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
 	$index = $wpdb->get_row(
 		$wpdb->prepare(
 			'SHOW INDEX FROM ' . $table_name . ' WHERE Key_name = %s AND Column_name = %s',
@@ -3485,6 +3486,7 @@ function wc_update_1080_slim_orders_meta_key_index(): void {
 			'meta_value'
 		)
 	);
+	// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 
 	if ( is_null( $index ) ) {
 		return;
