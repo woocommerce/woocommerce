@@ -90,6 +90,9 @@ abstract class AbstractSchema {
 	protected function remove_arg_options( $properties ) {
 		return array_map(
 			function( $property ) {
+				if ( ! is_array( $property ) ) {
+					return $property;
+				}
 				if ( isset( $property['properties'] ) ) {
 					$property['properties'] = $this->remove_arg_options( $property['properties'] );
 				} elseif ( isset( $property['items']['properties'] ) ) {
