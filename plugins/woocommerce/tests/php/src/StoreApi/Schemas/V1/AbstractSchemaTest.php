@@ -8,7 +8,6 @@ use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
 use WC_Unit_Test_Case;
 use ReflectionClass;
-use ReflectionMethod;
 
 /**
  * Tests for the AbstractSchema class.
