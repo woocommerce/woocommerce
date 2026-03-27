@@ -96,7 +96,7 @@ final class DeferredEmailQueue {
 			\WC()->queue()->add( self::AS_HOOK, array( $chunk ), self::AS_GROUP );
 		}
 
-		$this->queue              = array();
+		$this->queue               = array();
 		$this->shutdown_registered = false;
 	}
 
