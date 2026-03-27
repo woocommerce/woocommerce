@@ -388,6 +388,29 @@ class WC_REST_Order_Notes_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that order note content is sanitized to prevent XSS.
+	 */
+	public function test_create_item_sanitizes_note_content() {
+		$order = OrderHelper::create_order( $this->user );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v4/order-notes' );
+		$request->set_body_params(
+			array(
+				'order_id' => $order->get_id(),
+				'note'     => '<script>alert("xss")</script>Safe content<b>bold</b>',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 201, $response->get_status() );
+		$this->assertStringNotContainsString( '<script>', $data['note'] );
+		$this->assertStringContainsString( 'Safe content', $data['note'] );
+		$this->assertStringContainsString( '<b>bold</b>', $data['note'] );
+	}
+
+	/**
 	 * Test deleting order note without permission.
 	 */
 	public function test_delete_item_without_permission() {

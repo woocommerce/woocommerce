@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Improved cache warmup for the `woocommerce_refresh_order_count_cache` action to increase efficiency.

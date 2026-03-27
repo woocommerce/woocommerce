@@ -181,8 +181,8 @@ const TableCard: React.VFC< TableCardProps > = ( {
 				) }
 			</CardHeader>
 			{ /* Ignoring the error to make it backward compatible for now. */ }
-			{ /* @ts-expect-error: size must be one of small, medium, largel, xSmall, extraSmall. */ }
-			<CardBody size={ null }>
+			{ /* @ts-expect-error: size must be one of none, small, medium, largel, xSmall, extraSmall. */ }
+			<CardBody size="none">
 				{ tablePreface && (
 					<div className="woocommerce-table__preface">
 						{ tablePreface }

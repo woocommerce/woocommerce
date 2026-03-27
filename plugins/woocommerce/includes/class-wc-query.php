@@ -436,6 +436,22 @@ class WC_Query {
 		return $posts;
 	}
 
+	/**
+	 * Prime featured image caches for product queries to avoid individual
+	 * queries during rendering.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @param array    $posts Posts from WP Query.
+	 * @param WP_Query $query Current query.
+	 * @return array
+	 */
+	public function prime_thumbnail_caches( $posts, $query ) {
+		if ( 'product_query' === $query->get( 'wc_query' ) ) {
+			update_post_thumbnail_cache( $query );
+		}
+		return $posts;
+	}
 
 	/**
 	 * Pre_get_posts above may adjust the main query to add WooCommerce logic. When this query is done, we need to ensure
@@ -539,6 +555,7 @@ class WC_Query {
 		// Additional hooks to change WP Query.
 		add_filter( 'posts_clauses', array( $this, 'product_query_post_clauses' ), 10, 2 );
 		add_filter( 'the_posts', array( $this, 'handle_get_posts' ), 10, 2 );
+		add_filter( 'the_posts', array( $this, 'prime_thumbnail_caches' ), 10, 2 );
 
 		do_action( 'woocommerce_product_query', $q, $this );
 	}
@@ -577,6 +594,59 @@ class WC_Query {
 	}
 
 	/**
+	 * Check whether the current search query contains at least one positive (non-exclusion) term.
+	 *
+	 * WordPress relevance ordering requires positive search terms to build a valid ORDER BY clause.
+	 * Searches that are empty or contain only exclusion terms (e.g. "-condebug") produce no positive
+	 * terms, which results in invalid SQL when relevance ordering is used.
+	 *
+	 * This method delegates tokenization to WP_Query so it correctly handles WordPress's search
+	 * term parsing (splitting on spaces, commas, and +) and respects the
+	 * wp_query_search_exclusion_prefix filter.
+	 *
+	 * @return bool
+	 */
+	private function has_positive_search_terms(): bool {
+		$search_string = get_query_var( 's' );
+		$search_string = is_array( $search_string ) ? '' : trim( (string) $search_string );
+
+		if ( '' === $search_string ) {
+			return false;
+		}
+
+		// Use WP_Query to parse search terms using core's tokenization rules.
+		$search_query = new class( array( 's' => $search_string ) ) extends \WP_Query {
+			/**
+			 * This constructor is overridden to avoid triggering a database query while allowing access to search term parsing routines.
+			 * Using public query APIs such as the `parse_query` method leads to test regressions, so an anonymous class approach is used instead.
+			 *
+			 * @param string|array $query URL query string or array of vars.
+			 */
+			public function __construct( $query = '' ) {
+				$this->query_vars = (array) $query;
+				$this->parse_search( $this->query_vars );
+			}
+		};
+		$search_terms = $search_query->query_vars['search_terms'] ?? array();
+
+		if ( empty( $search_terms ) ) {
+			return false;
+		}
+
+		/** This filter is documented in wp-includes/class-wp-query.php */
+		$exclusion_prefix = (string) apply_filters( 'wp_query_search_exclusion_prefix', '-' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
+
+		if ( '' !== $exclusion_prefix ) {
+			$search_terms = array_filter(
+				$search_terms,
+				static fn( $term ) => ! str_starts_with( $term, $exclusion_prefix )
+			);
+		}
+
+		return ! empty( $search_terms );
+	}
+
+	/**
 	 * Returns an array of arguments for ordering products based on the selected values.
 	 *
 	 * @param string $orderby Order by param.
@@ -598,7 +668,7 @@ class WC_Query {
 			}
 
 			if ( ! $orderby_value ) {
-				if ( is_search() ) {
+				if ( is_search() && $this->has_positive_search_terms() ) {
 					$orderby_value = 'relevance';
 				} else {
 					$orderby_value = apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby', 'menu_order' ) );

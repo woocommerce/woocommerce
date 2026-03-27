@@ -273,4 +273,19 @@ describe( 'FulfillmentEditor', () => {
 			screen.getByText( 'This fulfillment is locked.' )
 		).toBeInTheDocument();
 	} );
+
+	it( 'should render content when expanded', () => {
+		render( <FulfillmentEditor { ...mockProps } expanded={ true } /> );
+
+		// Verify expanded content is rendered
+		expect(
+			screen.getByTestId( 'edit-fulfillment-button' )
+		).toBeInTheDocument();
+		expect(
+			screen.getByTestId( 'fulfill-items-button' )
+		).toBeInTheDocument();
+
+		// Verify the component renders without errors when expanded
+		expect( screen.getByText( 'Fulfillment #1' ) ).toBeInTheDocument();
+	} );
 } );

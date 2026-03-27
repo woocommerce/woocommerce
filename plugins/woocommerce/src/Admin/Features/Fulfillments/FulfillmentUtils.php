@@ -209,9 +209,9 @@ class FulfillmentUtils {
 	 */
 	public static function get_tracking_info_html( Fulfillment $fulfillment ): string {
 		$tracking_html   = '';
-		$tracking_url    = $fulfillment->get_meta( '_tracking_url', true );
-		$tracking_number = $fulfillment->get_meta( '_tracking_number', true );
-		if ( ! empty( $tracking_url ) && ! empty( $tracking_number ) ) {
+		$tracking_url    = $fulfillment->get_tracking_url();
+		$tracking_number = $fulfillment->get_tracking_number();
+		if ( null !== $tracking_url && null !== $tracking_number ) {
 			$tracking_html .= '<a href="' . esc_url( $tracking_url ) . '" target="_blank" rel="noopener noreferrer">';
 			$tracking_html .= esc_html( $tracking_number );
 			$tracking_html .= '</a>';
@@ -728,5 +728,31 @@ class FulfillmentUtils {
 			$check = 0;
 		}
 		return intval( $tracking_number[11] ) === $check;
+	}
+
+	/**
+	 * Resolve the provider name for a fulfillment.
+	 *
+	 * For custom providers ("other"), the display name from _provider_name meta is used.
+	 * For known providers, the slug from _shipment_provider meta is preferred, but the
+	 * display name is used as a fallback when the slug is empty (e.g., when auto-lookup
+	 * identified the provider but did not set the slug).
+	 *
+	 * @since 10.7.0
+	 *
+	 * @param Fulfillment $fulfillment The fulfillment object.
+	 *
+	 * @return string The resolved provider name.
+	 */
+	public static function resolve_provider_name( Fulfillment $fulfillment ): string {
+		$shipment_provider = $fulfillment->get_shipment_provider() ?? '';
+		$provider_name     = $fulfillment->get_meta( '_provider_name', true );
+		$provider_name     = ! empty( $provider_name ) ? (string) $provider_name : '';
+
+		if ( 'other' === $shipment_provider ) {
+			return $provider_name;
+		}
+
+		return ! empty( $shipment_provider ) ? $shipment_provider : $provider_name;
 	}
 }
