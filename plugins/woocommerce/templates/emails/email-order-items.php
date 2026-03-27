@@ -12,7 +12,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 10.7.0
+ * @version 10.8.0
  */
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -220,7 +220,7 @@ foreach ( $items as $item_id => $item ) :
 			 * @param WC_Order_Item_Product $item        The order item.
 			 * @param WC_Order              $order       The order object.
 			 *
-			 * @since 10.7.0
+			 * @since 10.8.0
 			 */
 			echo wp_kses_post( apply_filters( 'woocommerce_email_order_item_quantity_display', $qty_display, $item, $order ) );
 			?>
