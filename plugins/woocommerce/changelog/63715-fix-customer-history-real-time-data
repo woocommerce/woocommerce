@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix CustomerHistory metabox to query real-time order data (HPOS) instead of analytics tables, ensuring accurate customer order count and spend data regardless of analytics sync status.

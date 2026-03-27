@@ -101,6 +101,20 @@ class List_Block_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test it does not double margin-top between render_content() and add_spacer().
+	 */
+	public function testItDoesNotDoubleMarginTop(): void {
+		$parsed_list                = $this->parsed_list;
+		$parsed_list['email_attrs'] = array(
+			'margin-top' => '20px',
+		);
+		$rendered                   = $this->list_renderer->render( '<ul><li>Item 1</li></ul>', $parsed_list, $this->rendering_context );
+		$this->assertStringContainsString( 'margin-top:20px', $rendered );
+		// The inner wrapper div has margin-top, but the outer email-block-layout should not.
+		$this->assertStringNotContainsString( 'email-block-layout" style="margin-top', $rendered );
+	}
+
+	/**
 	 * Test it preserves custom set colors
 	 */
 	public function testItPreservesCustomSetColors(): void {

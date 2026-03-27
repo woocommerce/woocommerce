@@ -8282,6 +8282,254 @@ table.bar_chart {
 }
 
 /**
+ * WP 7.0+ compatibility.
+ * WP 7.0 increased default form element sizing from 30px to 40px min-height.
+ */
+.wc-wp-version-gte-70 {
+	// Select2 single: match WP 7.0 native select height (40px).
+	.select2-container {
+		.select2-selection--single {
+			height: 40px; // Match WP 7.0 native select height.
+			border-radius: 2px; // Match WP 7.0 native select border-radius.
+
+			.select2-selection__rendered {
+				line-height: 38px;
+			}
+
+			.select2-selection__arrow {
+				height: 38px;
+			}
+		}
+
+		.select2-selection--multiple {
+			min-height: 40px;
+			height: 38px;
+
+			.select2-selection__rendered li {
+				margin-top: 0; // Prevent extra spacing inside multi-select.
+			}
+		}
+
+		.select2-search--inline .select2-search__field {
+			min-height: 38px;
+		}
+	}
+
+	// Table action icon buttons: prevent WP 7.0 min-height from stretching them.
+	.widefat {
+		.column-wc_actions {
+			a.button {
+				min-height: 0 !important;
+				line-height: 1 !important;
+
+				&::after {
+					line-height: 1.85;
+					margin-top: 0;
+				}
+			}
+		}
+	}
+
+	// Order preview action buttons.
+	.wc-order-preview footer {
+		.button.button-large {
+			min-height: 0;
+		}
+	}
+
+	// Action button groups.
+	.wc-action-button-group .wc-action-button {
+		min-height: 0 !important;
+	}
+
+	// Order actions: select + button overflow container due to WP 7.0 select margins.
+	.order_actions {
+		#actions select {
+			width: calc(100% - 32px);
+		}
+
+		// Move to trash: make sure it aligns better vertically with 7.0's increased button height.
+		#delete-action {
+			line-height: 35px;
+		}
+	}
+
+	// Order actions reload button: icon line-height must match WP 7.0 button height.
+	.button.wc-reload {
+		&::after {
+			line-height: 40px;
+		}
+	}
+
+	// Order actions button margin causes overflow with WP 7.0 sizing.
+	#poststuff #woocommerce-order-actions .inside button {
+		margin: 0;
+	}
+
+	// Order date hour/minute inputs: WP 7.0 padding pushes stepper controls inward.
+	#order_data .order_data_column .form-field-wide {
+		input.hour,
+		input.minute {
+			padding-right: 0;
+		}
+	}
+
+	// Publish box: WP 7.0 flex-row breaks layout when #duplicate-action is present.
+	// Revert to block + float to stack copy/trash links on the left, button on the right.
+	#major-publishing-actions {
+		display: block;
+		overflow: hidden;
+
+		#delete-action {
+			float: left;
+		}
+	}
+
+	// Product data panel labels: vertically center with taller WP 7.0 inputs.
+	.woocommerce_options_panel p.form-field label,
+	.woocommerce_options_panel fieldset.form-field label,
+	.woocommerce_options_panel fieldset.form-field legend {
+		padding-top: 8px;
+	}
+
+	// Help tips: vertically center with taller WP 7.0 inputs.
+	.woocommerce_options_panel .form-field .woocommerce-help-tip {
+		margin-top: 12px;
+	}
+
+	// Search box select: match WP 7.0 compact search-box sizing (32px).
+	.search-box select {
+		min-height: 32px;
+		line-height: 2.14285714; /* 30px for 32px height */
+		padding: 0 24px 0 8px;
+	}
+
+	// Short inputs are wider to compensate for WP 7.0 increased padding.
+	.woocommerce_options_panel {
+		.short,
+		input[type="text"].short,
+		input[type="number"].short,
+		input[type="email"].short,
+		input[type="password"].short {
+			width: 55%;
+		}
+
+		input[type="number"] {
+			padding-right: 0; // Keep stepper controls flush right.
+		}
+
+		.dimensions_field .wrap {
+			width: 55%; // Wider to compensate for increased padding.
+			border-radius: 2px; // Match WP 7.0 input border-radius.
+		}
+	}
+
+	// Variable product selects need more height to accommodate WP 7.0 padding.
+	#variable_product_options .form-row select {
+		height: 50px;
+	}
+
+	// Variable product low stock row: clear preceding floats to prevent vertical stretching.
+	#variable_product_options .form-row[class*="variable_low_stock_amount"] {
+		clear: both;
+	}
+
+	#poststuff #woocommerce-order-notes .inside button {
+		margin: 0 1px 1px;
+	}
+
+	@media screen and (max-width: 850px), screen and (min-width: 931px) {
+		#woocommerce-order-downloads .buttons button {
+			margin: 0;
+		}
+	}
+
+	// 782px breakpoint, when the admin sidebar is hidden.
+	@media screen and (max-width: 782px) {
+		// Make buttons match the now taller selects.
+		#poststuff #woocommerce-order-actions .inside button {
+			height: 42px;
+
+			&::after {
+				line-height: 40px;
+			}
+		}
+
+		#poststuff #woocommerce-order-notes .inside button {
+			line-height: 40px;
+		}
+	}
+
+	// Action button rows wrap/stack at ~1200px viewports.
+	@media screen and (max-width: 1200px) {
+		// Order items meta box: reduce button padding to prevent wrapping prematurely.
+		#woocommerce-order-items .wc-order-data-row {
+			.button {
+				padding-left: 8px;
+				padding-right: 8px;
+			}
+		}
+
+		// Refund action buttons: switch to flex layout so long labels wrap gracefully.
+		#woocommerce-order-items .refund-actions {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 4px;
+			align-items: center;
+
+			.button,
+			.cancel-action {
+				float: none;
+			}
+
+			.button {
+				margin: 0;
+				font-size: 12px;
+			}
+
+			.cancel-action {
+				margin-right: auto;
+				order: -1;
+			}
+
+			.clear {
+				display: none;
+			}
+		}
+	}
+
+	// Tablenav: WP 7.0 tablenav uses compact 32px sizing for native selects.
+	// Match Select2 to 32px here (not the global 40px).
+	&.woocommerce_page_wc-customer-stock-notifications .tablenav,
+	&.woocommerce_page_wc-orders .tablenav,
+	&.post-type-product .tablenav,
+	&.post-type-shop_order .tablenav {
+		.select2-container {
+			margin-top: 0; // Align with other tablenav elements.
+		}
+
+		.select2-container .select2-selection--single {
+			height: 32px; // WP 7.0 tablenav uses compact 32px, not 40px.
+
+			.select2-selection__rendered {
+				line-height: 30px;
+			}
+
+			.select2-selection__arrow {
+				height: 30px;
+			}
+		}
+
+		// Current page in pagination gets smaller than surrounding buttons at 782px breakpoint.
+		@media screen and (max-width: 782px) {
+			#current-page-selector {
+				height: 44px;
+			}
+		}
+	}
+}
+
+/**
   * Select2 colors for built-in admin color themes.
   */
 .wp-admin {
@@ -9290,3 +9538,5 @@ body.woocommerce-settings-payments-section_legacy {
 		background: #f0f0f1;
 	}
 }
+
+

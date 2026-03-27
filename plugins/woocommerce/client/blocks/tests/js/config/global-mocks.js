@@ -368,3 +368,12 @@ if ( ! window.DOMRect ) {
 jest.mock( 'client-zip', () => ( {
 	downloadZip: jest.fn(),
 } ) );
+
+/**
+ * Mock isEditor to return false by default in tests, since the core/editor
+ * store may be registered in the test environment without an actual editor
+ * context. Individual tests can override this mock if needed.
+ */
+jest.mock( '../../../assets/js/data/utils/is-editor', () => ( {
+	isEditor: jest.fn().mockReturnValue( false ),
+} ) );
