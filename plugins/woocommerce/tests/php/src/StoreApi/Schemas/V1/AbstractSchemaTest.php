@@ -39,13 +39,6 @@ class AbstractSchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tear down test fixtures.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-	}
-
-	/**
 	 * @testdox Should remove arg_options from properties array.
 	 */
 	public function test_removes_arg_options_from_properties(): void {
