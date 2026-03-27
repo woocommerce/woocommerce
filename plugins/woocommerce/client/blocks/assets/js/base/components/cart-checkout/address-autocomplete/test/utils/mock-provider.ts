@@ -4,6 +4,10 @@
  * Returns deterministic results and exposes jest spies on all methods
  * so tests can assert on search/select calls.
  */
+
+/**
+ * External dependencies
+ */
 import type { ClientAddressAutocompleteProvider } from '@woocommerce/types';
 
 export const MOCK_PROVIDER_ID = 'mock-test-provider';
