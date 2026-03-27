@@ -30,11 +30,6 @@ The `.ai/skills/` directory contains procedural HOW-TO instructions:
 - **`woocommerce-git`** - Guidelines for git and GitHub operations
 - **`woocommerce-email-editor`** - Email editor development setup and Mailpit configuration
 
-**CRITICAL:** After reading a skill, check if a personal skill override file exists at
-`~/.ai/skills/{skill-name}-personal/SKILL.md` and apply it too. For example, for the
-`woocommerce-backend-dev` skill, check for `~/.ai/skills/woocommerce-backend-dev-personal/SKILL.md`.
-**Personal override skills take precedence over project-level skills in case of conflict**.
-
 ## Project Architecture
 
 ### Directory Structure
