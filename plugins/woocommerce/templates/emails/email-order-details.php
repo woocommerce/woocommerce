@@ -50,29 +50,38 @@ if ( $email_improvements_enabled ) {
  */
 do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plain_text, $email ); ?>
 
-<h2 class="<?php echo esc_attr( $heading_class ); ?>">
-	<?php
-	if ( $email_improvements_enabled ) {
-		/**
-		 * Filter the heading text shown in the order details section of emails.
-		 *
-		 * @since 10.8.0
-		 * @param string   $heading The heading text.
-		 * @param WC_Order $order   Order object.
-		 * @param WC_Email $email   Email object.
-		 */
-		$order_details_heading = apply_filters( 'woocommerce_email_order_details_heading', __( 'Order summary', 'woocommerce' ), $order, $email );
-		echo wp_kses_post( $order_details_heading );
-	}
+<?php
+$order_details_heading = '';
+if ( $email_improvements_enabled ) {
 	/**
-	 * Filter whether to display the order number in the order details heading of emails.
+	 * Filter the heading text shown in the order details section of emails.
 	 *
 	 * @since 10.8.0
-	 * @param bool     $display Whether to display the order number. Default true.
+	 * @param string   $heading The heading text.
 	 * @param WC_Order $order   Order object.
 	 * @param WC_Email $email   Email object.
 	 */
-	if ( apply_filters( 'woocommerce_email_display_order_number', true, $order, $email ) ) {
+	$order_details_heading = apply_filters( 'woocommerce_email_order_details_heading', __( 'Order summary', 'woocommerce' ), $order, $email );
+}
+
+/**
+ * Filter whether to display the order number in the order details heading of emails.
+ *
+ * @since 10.8.0
+ * @param bool     $display Whether to display the order number. Default true.
+ * @param WC_Order $order   Order object.
+ * @param WC_Email $email   Email object.
+ */
+$display_order_number = apply_filters( 'woocommerce_email_display_order_number', true, $order, $email );
+
+if ( $order_details_heading || $display_order_number ) :
+?>
+<h2 class="<?php echo esc_attr( $heading_class ); ?>">
+	<?php
+	if ( $order_details_heading ) {
+		echo wp_kses_post( $order_details_heading );
+	}
+	if ( $display_order_number ) {
 		if ( $sent_to_admin ) {
 			$before = '<a class="link" href="' . esc_url( $order->get_edit_order_url() ) . '"' . ( $block_email_editor_enabled ? ' style="text-decoration: none;"' : '' ) . '>';
 			$after  = '</a>';
@@ -96,6 +105,7 @@ do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plai
 	}
 	?>
 </h2>
+<?php endif; ?>
 
 <div style="margin-bottom: <?php echo $email_improvements_enabled ? '24px' : '40px'; ?>;">
 	<table class="td font-family <?php echo esc_attr( $order_table_class ); ?>" cellspacing="0" cellpadding="6" style="width: 100%;" border="1">
