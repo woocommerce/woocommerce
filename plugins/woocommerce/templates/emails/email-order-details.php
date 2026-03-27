@@ -90,7 +90,12 @@ if ( $order_details_heading || $display_order_number ) :
 				$after  = '';
 			}
 			if ( $email_improvements_enabled ) {
-				echo '<br><span>';
+				// Only output <br> when both a heading and order number are shown; otherwise, avoid leading line break.
+				if ( $order_details_heading ) {
+					echo '<br><span>';
+				} else {
+					echo '<span>';
+				}
 			}
 			/* translators: %s: Order ID. */
 			$order_number_string = __( '[Order #%s]', 'woocommerce' );
