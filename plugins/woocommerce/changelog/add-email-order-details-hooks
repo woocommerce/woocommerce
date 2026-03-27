@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add woocommerce_email_order_details_heading and woocommerce_email_display_order_number filters to the email order details template.
