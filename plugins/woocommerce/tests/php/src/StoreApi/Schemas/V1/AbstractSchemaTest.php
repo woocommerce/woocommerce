@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\StoreApi\Schemas\V1;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractSchema;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
+use Automattic\WooCommerce\StoreApi\Formatters;
 use WC_Unit_Test_Case;
 use ReflectionClass;
 
@@ -29,7 +30,8 @@ class AbstractSchemaTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		$extend     = $this->createMock( ExtendSchema::class );
+		$formatters = new Formatters();
+		$extend     = new ExtendSchema( $formatters );
 		$controller = $this->createMock( SchemaController::class );
 
 		$this->sut = $this->getMockForAbstractClass(
