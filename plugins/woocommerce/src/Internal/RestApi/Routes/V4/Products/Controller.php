@@ -41,6 +41,20 @@ class Controller extends WC_REST_Products_V2_Controller {
 	use CogsAwareRestControllerTrait;
 
 	/**
+	 * Fields stripped from the response for users without product management capabilities
+	 * (e.g. authors who can view published products via the edit_posts fallback).
+	 *
+	 * @since 10.8.0
+	 */
+	private const SENSITIVE_FIELDS = array(
+		'downloads',
+		'download_limit',
+		'download_expiry',
+		'purchase_note',
+		'cost_of_goods_sold',
+	);
+
+	/**
 	 * Endpoint namespace.
 	 *
 	 * @var string
@@ -2273,6 +2287,14 @@ class Controller extends WC_REST_Products_V2_Controller {
 			'text'        => $object_data->add_to_cart_text(),
 			'single_text' => $object_data->single_add_to_cart_text(),
 		);
+
+		$post_type_object = get_post_type_object( 'product' );
+		if ( $post_type_object instanceof \WP_Post_Type && ! current_user_can( $post_type_object->cap->read_private_posts ) ) {
+			foreach ( self::SENSITIVE_FIELDS as $field ) {
+				unset( $data[ $field ] );
+			}
+		}
+
 		return $data;
 	}
 
