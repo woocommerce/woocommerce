@@ -13,6 +13,7 @@ import { SendMagicLinkButton, SendMagicLinkStates } from './';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { MobileAppInstallationInfo } from '../components/MobileAppInstallationInfo';
 import { MobileAppLoginInfo } from '../components/MobileAppLoginInfo';
+import { QRDirectLoginCode } from '../components/QRDirectLoginCode';
 
 export const MobileAppLoginStepper = ( {
 	step,
@@ -66,38 +67,26 @@ export const MobileAppLoginStepper = ( {
 					content: <></>,
 				},
 			] );
-		} else if ( step === 'second' ) {
+		} else if ( step === ‘second’ ) {
 			if (
 				isJetpackPluginInstalled &&
 				wordpressAccountEmailAddress !== undefined
 			) {
 				setStepsToDisplay( [
 					{
-						key: 'first',
-						label: __( 'App installed', 'woocommerce' ),
-						description: '',
+						key: ‘first’,
+						label: __( ‘App installed’, ‘woocommerce’ ),
+						description: ‘’,
 						content: <></>,
 					},
 					{
-						key: 'second',
-						label: 'Sign into the app',
-						description: sprintf(
-							/* translators: Reflecting to the user that the magic link has been sent to their WordPress account email address */
-							__(
-								'We’ll send a magic link to %s. Open it on your smartphone or tablet to sign into your store instantly.',
-								'woocommerce'
-							),
-							wordpressAccountEmailAddress
+						key: ‘second’,
+						label: __( ‘Sign into the app’, ‘woocommerce’ ),
+						description: __(
+							‘Scan the QR code below with your phone to sign in instantly — no password needed.’,
+							‘woocommerce’
 						),
-						content: (
-							<SendMagicLinkButton
-								isFetching={
-									sendMagicLinkStatus ===
-									SendMagicLinkStates.FETCHING
-								}
-								onClickHandler={ sendMagicLinkHandler }
-							/>
-						),
+						content: <QRDirectLoginCode />,
 					},
 				] );
 			} else {
