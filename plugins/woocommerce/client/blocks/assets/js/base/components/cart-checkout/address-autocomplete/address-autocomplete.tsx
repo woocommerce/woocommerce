@@ -150,19 +150,6 @@ export const AddressAutocomplete = ( {
 	const autofillDetectedRef = useRef( false );
 	const searchGenerationRef = useRef( 0 );
 
-	// Shared helper: mark that the user is actively typing, with an
-	// auto-reset after TYPING_RESET_MS. Used by both the native input
-	// listener (primary) and the keydown handler (fallback).
-	const markUserTyping = () => {
-		userIsTypingRef.current = true;
-		if ( typingTimeoutRef.current ) {
-			clearTimeout( typingTimeoutRef.current );
-		}
-		typingTimeoutRef.current = setTimeout( () => {
-			userIsTypingRef.current = false;
-		}, TYPING_RESET_MS );
-	};
-
 	// Trigger search when searchValue changes
 	useEffect( () => {
 		if (
@@ -313,8 +300,15 @@ export const AddressAutocomplete = ( {
 				inputType === 'deleteContentForward'
 			) {
 				// These inputTypes indicate direct user interaction (typing,
-				// IME composition, backspace/delete).
-				markUserTyping();
+				// IME composition, backspace/delete). Set the typing flag so
+				// that addressChangeHandler allows the search.
+				userIsTypingRef.current = true;
+				if ( typingTimeoutRef.current ) {
+					clearTimeout( typingTimeoutRef.current );
+				}
+				typingTimeoutRef.current = setTimeout( () => {
+					userIsTypingRef.current = false;
+				}, TYPING_RESET_MS );
 			}
 		};
 
@@ -354,19 +348,6 @@ export const AddressAutocomplete = ( {
 	const handleKeyDown = (
 		event: React.KeyboardEvent< HTMLInputElement >
 	) => {
-		// Fallback keyboard tracking for browsers that don't reliably set
-		// inputType on native input events. The native input listener is the
-		// primary signal; this ensures typing is still detected when inputType
-		// is unavailable.
-		if (
-			event.key.length === 1 ||
-			event.key === 'Backspace' ||
-			event.key === 'Delete' ||
-			event.key === 'Process' // IME composition key
-		) {
-			markUserTyping();
-		}
-
 		if ( suggestions.length === 0 ) {
 			return;
 		}
