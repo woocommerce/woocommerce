@@ -5,9 +5,9 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Dispatchers;
 
 use Automattic\WooCommerce\Internal\PushNotifications\Dispatchers\InternalNotificationDispatcher;
+use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewOrderNotification;
+use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewReviewNotification;
 use Automattic\WooCommerce\StoreApi\Utilities\JsonWebToken;
-use Automattic\WooCommerce\Tests\Internal\PushNotifications\Stubs\StubOrderNotification;
-use Automattic\WooCommerce\Tests\Internal\PushNotifications\Stubs\StubReviewNotification;
 use WC_Unit_Test_Case;
 
 /**
@@ -83,7 +83,7 @@ class InternalNotificationDispatcherTest extends WC_Unit_Test_Case {
 	 * @testdox Should fire a non-blocking POST to the send endpoint URL.
 	 */
 	public function test_dispatch_fires_non_blocking_post_to_send_endpoint(): void {
-		$notifications = array( new StubOrderNotification( 1 ) );
+		$notifications = array( $this->create_order_mock( 1 ) );
 
 		$this->sut->dispatch( $notifications );
 
@@ -112,7 +112,7 @@ class InternalNotificationDispatcherTest extends WC_Unit_Test_Case {
 	 * @testdox Should include a valid JWT with correct claims and body hash.
 	 */
 	public function test_dispatch_includes_valid_jwt_with_correct_claims(): void {
-		$notifications = array( new StubOrderNotification( 1 ) );
+		$notifications = array( $this->create_order_mock( 1 ) );
 
 		$this->sut->dispatch( $notifications );
 
@@ -141,8 +141,8 @@ class InternalNotificationDispatcherTest extends WC_Unit_Test_Case {
 	 */
 	public function test_dispatch_body_contains_encoded_notifications(): void {
 		$notifications = array(
-			new StubOrderNotification( 10 ),
-			new StubReviewNotification( 20 ),
+			$this->create_order_mock( 10 ),
+			$this->create_review_mock( 20 ),
 		);
 
 		$this->sut->dispatch( $notifications );
@@ -164,5 +164,31 @@ class InternalNotificationDispatcherTest extends WC_Unit_Test_Case {
 		$this->sut->dispatch( array() );
 
 		$this->assertNull( $this->captured_url, 'No HTTP request should be made for empty notifications' );
+	}
+
+	/**
+	 * Creates a mock NewOrderNotification that avoids database calls.
+	 *
+	 * @param int $resource_id The resource ID.
+	 * @return NewOrderNotification
+	 */
+	private function create_order_mock( int $resource_id ): NewOrderNotification {
+		return $this->getMockBuilder( NewOrderNotification::class )
+			->setConstructorArgs( array( $resource_id ) )
+			->onlyMethods( array( 'to_payload', 'has_meta', 'write_meta' ) )
+			->getMock();
+	}
+
+	/**
+	 * Creates a mock NewReviewNotification that avoids database calls.
+	 *
+	 * @param int $resource_id The resource ID.
+	 * @return NewReviewNotification
+	 */
+	private function create_review_mock( int $resource_id ): NewReviewNotification {
+		return $this->getMockBuilder( NewReviewNotification::class )
+			->setConstructorArgs( array( $resource_id ) )
+			->onlyMethods( array( 'to_payload', 'has_meta', 'write_meta' ) )
+			->getMock();
 	}
 }

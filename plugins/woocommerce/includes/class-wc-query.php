@@ -436,6 +436,22 @@ class WC_Query {
 		return $posts;
 	}
 
+	/**
+	 * Prime featured image caches for product queries to avoid individual
+	 * queries during rendering.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @param array    $posts Posts from WP Query.
+	 * @param WP_Query $query Current query.
+	 * @return array
+	 */
+	public function prime_thumbnail_caches( $posts, $query ) {
+		if ( 'product_query' === $query->get( 'wc_query' ) ) {
+			update_post_thumbnail_cache( $query );
+		}
+		return $posts;
+	}
 
 	/**
 	 * Pre_get_posts above may adjust the main query to add WooCommerce logic. When this query is done, we need to ensure
@@ -539,6 +555,7 @@ class WC_Query {
 		// Additional hooks to change WP Query.
 		add_filter( 'posts_clauses', array( $this, 'product_query_post_clauses' ), 10, 2 );
 		add_filter( 'the_posts', array( $this, 'handle_get_posts' ), 10, 2 );
+		add_filter( 'the_posts', array( $this, 'prime_thumbnail_caches' ), 10, 2 );
 
 		do_action( 'woocommerce_product_query', $q, $this );
 	}

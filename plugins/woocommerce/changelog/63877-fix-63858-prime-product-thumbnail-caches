@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Prime featured image caches on product archive pages to reduce SQL queries during rendering.
