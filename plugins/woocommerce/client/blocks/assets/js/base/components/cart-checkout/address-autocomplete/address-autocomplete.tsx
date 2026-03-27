@@ -292,22 +292,12 @@ export const AddressAutocomplete = ( {
 			const { inputType } = inputEvent;
 
 			if ( inputType === 'insertReplacementText' ) {
+				// Browser autofill (Chrome/Firefox). Flag it so
+				// addressChangeHandler suppresses the search.
 				autofillDetectedRef.current = true;
-			} else if (
-				inputType === 'insertText' ||
-				inputType === 'insertCompositionText' ||
-				inputType === 'insertFromPaste' ||
-				inputType === 'insertFromDrop' ||
-				inputType === 'deleteContentBackward' ||
-				inputType === 'deleteContentForward' ||
-				inputType === 'deleteByCut' ||
-				inputType === 'historyUndo' ||
-				inputType === 'historyRedo'
-			) {
-				// These inputTypes indicate direct user interaction (typing,
-				// IME composition, paste, drag-drop, cut, undo/redo,
-				// backspace/delete). Set the typing flag so that
-				// addressChangeHandler allows the search.
+			} else if ( inputType ) {
+				// Any other known inputType is user-initiated (typing,
+				// paste, drag-drop, IME, undo/redo, etc.).
 				userIsTypingRef.current = true;
 				if ( typingTimeoutRef.current ) {
 					clearTimeout( typingTimeoutRef.current );
