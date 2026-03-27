@@ -48,11 +48,11 @@ class FulfillmentsController {
 			return $data_stores;
 		}
 
-		$container           = wc_get_container();
-		$features_controller = $container->get( FeaturesController::class );
-
-		// If fulfillments feature is not enabled, don't register the data store.
-		if ( ! $features_controller->feature_is_enabled( 'fulfillments' ) ) {
+		// Check the option directly instead of using FeaturesController::feature_is_enabled()
+		// because the woocommerce_data_stores filter can fire before the 'init' action
+		// (e.g. from WC Payments during 'plugins_loaded'), and feature_is_enabled() would
+		// trigger translation loading too early, causing _load_textdomain_just_in_time warnings.
+		if ( 'yes' !== get_option( 'woocommerce_feature_fulfillments_enabled', 'no' ) ) {
 			return $data_stores;
 		}
 
