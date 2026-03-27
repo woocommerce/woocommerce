@@ -593,12 +593,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 				return;
 			}
 		}
-		$cache_keys     = array_map(
-			function ( $order_id ) {
-				return 'order-items-' . $order_id;
-			},
-			$order_ids
-		);
+		$cache_keys     = array_map( static fn( $order_id ) => 'order-items-' . $order_id, $order_ids );
 		$cache_values   = wc_cache_get_multiple( $cache_keys, 'orders' );
 		$non_cached_ids = array();
 		foreach ( $order_ids as $order_id ) {
@@ -658,7 +653,35 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 				$raw_meta_data_collection[ $raw_meta_data->object_id ][] = $raw_meta_data;
 			}
 			\WC_Order_Item::prime_raw_meta_data_cache( $raw_meta_data_collection, 'order-items' );
+
+			$this->prime_product_post_caches_for_order_items( $order_items, $raw_meta_data_collection );
 		}
+	}
+
+	/**
+	 * Primes post caches for products which are referenced in line items with 'line_item' type.
+	 *
+	 * Although the product data store can be replaced, maintaining the posts table connection, as with HPOS, is necessary
+	 * for products to function properly. We can therefore prime the post cache directly without compromising store isolation.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @param array<int,object{order_item_id:int, order_item_type:string}>    $line_items_all           Line item entries.
+	 * @param array<int,array<int,object{meta_key:string, meta_value:mixed}>> $raw_meta_data_collection Meta-entries grouped by line item id.
+	 * @return void
+	 */
+	private function prime_product_post_caches_for_order_items( array $line_items_all, array $raw_meta_data_collection ): void {
+		$product_ids = array();
+		foreach ( $line_items_all as $line_item ) {
+			if ( 'line_item' === $line_item->order_item_type ) {
+				foreach ( $raw_meta_data_collection[ $line_item->order_item_id ] ?? array() as $meta ) {
+					if ( ( '_variation_id' === $meta->meta_key || '_product_id' === $meta->meta_key ) && $meta->meta_value > 0 ) {
+						$product_ids[] = (int) $meta->meta_value;
+					}
+				}
+			}
+		}
+		_prime_post_caches( array_unique( $product_ids ) );
 	}
 
 	/**
@@ -736,19 +759,14 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 * object cache for all transient option names in a single query, we
 	 * eliminate the N+1.
 	 *
+	 * @since 10.7.0
+	 * @deprecated 10.8.0 `\WC_Order::needs_processing` method no longer uses transients.
+	 *
 	 * @param array $order_ids  Order IDs to prime cache for.
 	 * @param array $query_vars Query vars for the query.
 	 * @return void
-	 * @since 10.7.0
 	 */
 	protected function prime_needs_processing_transients( $order_ids, $query_vars ) {
-		$option_names = array();
-		foreach ( $order_ids as $order_id ) {
-			$option_names[] = '_transient_wc_order_' . $order_id . '_needs_processing';
-			$option_names[] = '_transient_timeout_wc_order_' . $order_id . '_needs_processing';
-		}
-
-		wp_prime_option_caches( $option_names );
 	}
 
 	/**
