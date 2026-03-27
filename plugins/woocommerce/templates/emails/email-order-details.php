@@ -72,7 +72,7 @@ if ( $email_improvements_enabled ) {
  * @param WC_Order $order   Order object.
  * @param WC_Email $email   Email object.
  */
-$display_order_number = apply_filters( 'woocommerce_email_display_order_number', true, $order, $email );
+$display_order_number = (bool) apply_filters( 'woocommerce_email_display_order_number', true, $order, $email );
 
 if ( $order_details_heading || $display_order_number ) :
 	?>
