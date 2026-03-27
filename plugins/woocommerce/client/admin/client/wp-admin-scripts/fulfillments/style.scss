@@ -457,6 +457,7 @@ tr.type-shop_order.is-selected {
 	gap: 12px;
 	.fulfillments-trigger {
 		margin-left: -8px;
+		cursor: pointer !important;
 		svg {
 			fill: #949494;
 		}

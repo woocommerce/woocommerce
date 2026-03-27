@@ -70,6 +70,21 @@ export default function ShipmentManualEntryForm() {
 						value={ trackingNumber }
 						onChange={ ( value: string ) => {
 							setTrackingNumber( value );
+							if (
+								shipmentProvider &&
+								shipmentProvider !== 'other'
+							) {
+								setTrackingUrl(
+									(
+										window.wcFulfillmentSettings.providers[
+											shipmentProvider
+										]?.url ?? ''
+									).replace(
+										/__placeholder__/i,
+										encodeURIComponent( value )
+									)
+								);
+							}
 						} }
 						__next40pxDefaultSize
 						__nextHasNoMarginBottom
