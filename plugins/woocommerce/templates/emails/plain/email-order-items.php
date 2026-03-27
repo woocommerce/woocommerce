@@ -86,7 +86,7 @@ foreach ( $items as $item_id => $item ) :
 			 */
 			$quantity = apply_filters( 'woocommerce_email_order_item_quantity', $item->get_quantity(), $item );
 			if ( '' !== $quantity ) {
-				echo ' X ' . $quantity;
+				echo ' × ' . $quantity;
 			}
 			echo ' = ' . $order->get_formatted_line_subtotal( $item ) . "\n";
 			// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
