@@ -54,18 +54,16 @@ wpData.useSelect.mockImplementation(
 	} )
 );
 
-wpData.useDispatch.mockImplementation(
-	( store: StoreDescriptor | string ) => {
-		if ( store === cartStore || store === 'wc/store/cart' ) {
-			return {
-				...jest.requireActual( '@wordpress/data' ).useDispatch( store ),
-				setShippingAddress: jest.fn(),
-				setBillingAddress: jest.fn(),
-			};
-		}
-		return jest.requireActual( '@wordpress/data' ).useDispatch( store );
+wpData.useDispatch.mockImplementation( ( store: StoreDescriptor | string ) => {
+	if ( store === cartStore || store === 'wc/store/cart' ) {
+		return {
+			...jest.requireActual( '@wordpress/data' ).useDispatch( store ),
+			setShippingAddress: jest.fn(),
+			setBillingAddress: jest.fn(),
+		};
 	}
-);
+	return jest.requireActual( '@wordpress/data' ).useDispatch( store );
+} );
 
 jest.mock( '@woocommerce/settings', () => ( {
 	...jest.requireActual( '@woocommerce/settings' ),
@@ -165,9 +163,7 @@ describe( 'Browser autofill vs user typing — WOOPLUG-6341', () => {
 
 	it( 'should NOT trigger search when browser autofill fires insertReplacementText', async () => {
 		render( <TestAddressField /> );
-		const input = screen.getByLabelText(
-			'Address 1'
-		) as HTMLInputElement;
+		const input = screen.getByLabelText( 'Address 1' ) as HTMLInputElement;
 
 		// Simulate browser autofill: dispatch a native input event with
 		// inputType "insertReplacementText", which is what Chrome/Firefox
@@ -190,9 +186,7 @@ describe( 'Browser autofill vs user typing — WOOPLUG-6341', () => {
 
 	it( 'should NOT trigger search when value changes without keyboard input (fallback detection)', async () => {
 		render( <TestAddressField /> );
-		const input = screen.getByLabelText(
-			'Address 1'
-		) as HTMLInputElement;
+		const input = screen.getByLabelText( 'Address 1' ) as HTMLInputElement;
 
 		// Simulate a programmatic value change with no inputType and no
 		// preceding keydown — e.g. a password manager or extension that
@@ -215,9 +209,7 @@ describe( 'Browser autofill vs user typing — WOOPLUG-6341', () => {
 
 	it( 'should discard search results when :-webkit-autofill is detected (Safari Contacts)', async () => {
 		render( <TestAddressField /> );
-		const input = screen.getByLabelText(
-			'Address 1'
-		) as HTMLInputElement;
+		const input = screen.getByLabelText( 'Address 1' ) as HTMLInputElement;
 
 		// Safari Contacts fills character-by-character with insertText events
 		// (indistinguishable from typing). A search may fire, but by the time
@@ -247,7 +239,9 @@ describe( 'Browser autofill vs user typing — WOOPLUG-6341', () => {
 		// But because :-webkit-autofill matched when results came back,
 		// no suggestions should be visible.
 		expect(
-			document.querySelector( '.wc-block-components-address-autocomplete-suggestions' )
+			document.querySelector(
+				'.wc-block-components-address-autocomplete-suggestions'
+			)
 		).toBeNull();
 
 		// Restore original matches.
