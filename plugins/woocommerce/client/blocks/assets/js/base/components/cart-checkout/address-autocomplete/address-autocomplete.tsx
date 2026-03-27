@@ -296,12 +296,18 @@ export const AddressAutocomplete = ( {
 			} else if (
 				inputType === 'insertText' ||
 				inputType === 'insertCompositionText' ||
+				inputType === 'insertFromPaste' ||
+				inputType === 'insertFromDrop' ||
 				inputType === 'deleteContentBackward' ||
-				inputType === 'deleteContentForward'
+				inputType === 'deleteContentForward' ||
+				inputType === 'deleteByCut' ||
+				inputType === 'historyUndo' ||
+				inputType === 'historyRedo'
 			) {
 				// These inputTypes indicate direct user interaction (typing,
-				// IME composition, backspace/delete). Set the typing flag so
-				// that addressChangeHandler allows the search.
+				// IME composition, paste, drag-drop, cut, undo/redo,
+				// backspace/delete). Set the typing flag so that
+				// addressChangeHandler allows the search.
 				userIsTypingRef.current = true;
 				if ( typingTimeoutRef.current ) {
 					clearTimeout( typingTimeoutRef.current );
@@ -331,6 +337,8 @@ export const AddressAutocomplete = ( {
 		// (Chrome/Firefox fire "insertReplacementText" for autofill).
 		if ( autofillDetectedRef.current ) {
 			autofillDetectedRef.current = false;
+			setSearchValue( '' );
+			setSuggestions( [] );
 			return;
 		}
 
