@@ -75,37 +75,39 @@ if ( $email_improvements_enabled ) {
 $display_order_number = apply_filters( 'woocommerce_email_display_order_number', true, $order, $email );
 
 if ( $order_details_heading || $display_order_number ) :
-?>
-<h2 class="<?php echo esc_attr( $heading_class ); ?>">
-	<?php
-	if ( $order_details_heading ) {
-		echo wp_kses_post( $order_details_heading );
-	}
-	if ( $display_order_number ) {
-		if ( $sent_to_admin ) {
-			$before = '<a class="link" href="' . esc_url( $order->get_edit_order_url() ) . '"' . ( $block_email_editor_enabled ? ' style="text-decoration: none;"' : '' ) . '>';
-			$after  = '</a>';
-		} else {
-			$before = '';
-			$after  = '';
-		}
-		if ( $email_improvements_enabled ) {
-			echo '<br><span>';
-		}
-		/* translators: %s: Order ID. */
-		$order_number_string = __( '[Order #%s]', 'woocommerce' );
-		if ( $email_improvements_enabled ) {
-			/* translators: %s: Order ID. */
-			$order_number_string = __( 'Order #%s', 'woocommerce' );
-		}
-		echo wp_kses_post( $before . sprintf( $order_number_string . $after . ' (<time datetime="%s">%s</time>)', $order->get_order_number(), $order->get_date_created()->format( 'c' ), wc_format_datetime( $order->get_date_created() ) ) );
-		if ( $email_improvements_enabled ) {
-			echo '</span>';
-		}
-	}
 	?>
-</h2>
-<?php endif; ?>
+	<h2 class="<?php echo esc_attr( $heading_class ); ?>">
+		<?php
+		if ( $order_details_heading ) {
+			echo wp_kses_post( $order_details_heading );
+		}
+		if ( $display_order_number ) {
+			if ( $sent_to_admin ) {
+				$before = '<a class="link" href="' . esc_url( $order->get_edit_order_url() ) . '"' . ( $block_email_editor_enabled ? ' style="text-decoration: none;"' : '' ) . '>';
+				$after  = '</a>';
+			} else {
+				$before = '';
+				$after  = '';
+			}
+			if ( $email_improvements_enabled ) {
+				echo '<br><span>';
+			}
+			/* translators: %s: Order ID. */
+			$order_number_string = __( '[Order #%s]', 'woocommerce' );
+			if ( $email_improvements_enabled ) {
+				/* translators: %s: Order ID. */
+				$order_number_string = __( 'Order #%s', 'woocommerce' );
+			}
+			echo wp_kses_post( $before . sprintf( $order_number_string . $after . ' (<time datetime="%s">%s</time>)', $order->get_order_number(), $order->get_date_created()->format( 'c' ), wc_format_datetime( $order->get_date_created() ) ) );
+			if ( $email_improvements_enabled ) {
+				echo '</span>';
+			}
+		}
+		?>
+	</h2>
+	<?php
+endif;
+?>
 
 <div style="margin-bottom: <?php echo $email_improvements_enabled ? '24px' : '40px'; ?>;">
 	<table class="td font-family <?php echo esc_attr( $order_table_class ); ?>" cellspacing="0" cellpadding="6" style="width: 100%;" border="1">
