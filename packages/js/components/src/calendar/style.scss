@@ -171,7 +171,7 @@
 		padding: 0px 10px 0px 30px;
 		width: 100%;
 		@include font-size( 13 );
-		line-height: 2;
+		min-height: 40px;
 
 		&::placeholder {
 			color: $gray-700;
