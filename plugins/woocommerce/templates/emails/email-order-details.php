@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 10.7.0
+ * @version 10.8.0
  */
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -53,27 +53,46 @@ do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plai
 <h2 class="<?php echo esc_attr( $heading_class ); ?>">
 	<?php
 	if ( $email_improvements_enabled ) {
-		echo wp_kses_post( __( 'Order summary', 'woocommerce' ) );
+		/**
+		 * Filter the heading text shown in the order details section of emails.
+		 *
+		 * @since 10.8.0
+		 * @param string   $heading The heading text.
+		 * @param WC_Order $order   Order object.
+		 * @param WC_Email $email   Email object.
+		 */
+		$order_details_heading = apply_filters( 'woocommerce_email_order_details_heading', __( 'Order summary', 'woocommerce' ), $order, $email );
+		echo wp_kses_post( $order_details_heading );
 	}
-	if ( $sent_to_admin ) {
-		$before = '<a class="link" href="' . esc_url( $order->get_edit_order_url() ) . '"' . ( $block_email_editor_enabled ? ' style="text-decoration: none;"' : '' ) . '>';
-		$after  = '</a>';
-	} else {
-		$before = '';
-		$after  = '';
-	}
-	if ( $email_improvements_enabled ) {
-		echo '<br><span>';
-	}
-	/* translators: %s: Order ID. */
-	$order_number_string = __( '[Order #%s]', 'woocommerce' );
-	if ( $email_improvements_enabled ) {
+	/**
+	 * Filter whether to display the order number in the order details heading of emails.
+	 *
+	 * @since 10.8.0
+	 * @param bool     $display Whether to display the order number. Default true.
+	 * @param WC_Order $order   Order object.
+	 * @param WC_Email $email   Email object.
+	 */
+	if ( apply_filters( 'woocommerce_email_display_order_number', true, $order, $email ) ) {
+		if ( $sent_to_admin ) {
+			$before = '<a class="link" href="' . esc_url( $order->get_edit_order_url() ) . '"' . ( $block_email_editor_enabled ? ' style="text-decoration: none;"' : '' ) . '>';
+			$after  = '</a>';
+		} else {
+			$before = '';
+			$after  = '';
+		}
+		if ( $email_improvements_enabled ) {
+			echo '<br><span>';
+		}
 		/* translators: %s: Order ID. */
-		$order_number_string = __( 'Order #%s', 'woocommerce' );
-	}
-	echo wp_kses_post( $before . sprintf( $order_number_string . $after . ' (<time datetime="%s">%s</time>)', $order->get_order_number(), $order->get_date_created()->format( 'c' ), wc_format_datetime( $order->get_date_created() ) ) );
-	if ( $email_improvements_enabled ) {
-		echo '</span>';
+		$order_number_string = __( '[Order #%s]', 'woocommerce' );
+		if ( $email_improvements_enabled ) {
+			/* translators: %s: Order ID. */
+			$order_number_string = __( 'Order #%s', 'woocommerce' );
+		}
+		echo wp_kses_post( $before . sprintf( $order_number_string . $after . ' (<time datetime="%s">%s</time>)', $order->get_order_number(), $order->get_date_created()->format( 'c' ), wc_format_datetime( $order->get_date_created() ) ) );
+		if ( $email_improvements_enabled ) {
+			echo '</span>';
+		}
 	}
 	?>
 </h2>
