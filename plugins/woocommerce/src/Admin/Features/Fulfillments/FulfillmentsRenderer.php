@@ -64,14 +64,18 @@ class FulfillmentsRenderer {
 			add_filter( 'handle_bulk_actions-woocommerce_page_wc-orders', array( $this, 'handle_fulfillment_bulk_actions' ), 10, 3 );
 			// For custom orders table, we need to filter the query to include fulfillment status.
 			add_action( 'woocommerce_order_list_table_restrict_manage_orders', array( $this, 'render_fulfillment_filters' ) );
+			add_action( 'woocommerce_order_list_table_restrict_manage_orders', array( $this, 'render_shipping_provider_filter' ) );
 			add_filter( 'woocommerce_order_query_args', array( $this, 'filter_orders_list_table_query' ), 10, 1 );
+			add_filter( 'woocommerce_order_list_table_prepare_items_query_args', array( $this, 'filter_orders_by_shipping_provider' ), 10, 1 );
 		} else {
 			// For legacy orders table, we need to add the bulk actions to the legacy orders table.
 			add_filter( 'bulk_actions-edit-shop_order', array( $this, 'define_fulfillment_bulk_actions' ) );
 			add_filter( 'handle_bulk_actions-edit-shop_order', array( $this, 'handle_fulfillment_bulk_actions' ), 10, 3 );
 			// For legacy orders table, we need to filter the query to include fulfillment status.
 			add_action( 'restrict_manage_posts', array( $this, 'render_fulfillment_filters_legacy' ) );
+			add_action( 'restrict_manage_posts', array( $this, 'render_shipping_provider_filter_legacy' ) );
 			add_action( 'pre_get_posts', array( $this, 'filter_legacy_orders_list_query' ) );
+			add_action( 'pre_get_posts', array( $this, 'filter_legacy_orders_by_shipping_provider' ) );
 		}
 	}
 
@@ -526,6 +530,190 @@ class FulfillmentsRenderer {
 				);
 			}
 		}
+	}
+
+	/**
+	 * Render the shipping provider filter dropdown in the orders table.
+	 *
+	 * @since 10.7.0
+	 */
+	public function render_shipping_provider_filter(): void {
+		if ( ! self::should_render_fulfillment_drawer() ) {
+			return;
+		}
+
+		$providers = FulfillmentUtils::get_shipping_providers_object();
+
+		// This is a read-only filter on the admin orders table, so nonce verification is not required.
+		// phpcs:ignore WordPress.Security.NonceVerification
+		$selected_provider = isset( $_GET['shipping_provider'] ) ? sanitize_text_field( wp_unslash( $_GET['shipping_provider'] ) ) : '';
+		?>
+		<select id="shipping-provider-filter" name="shipping_provider">
+			<option value="" <?php selected( $selected_provider, '' ); ?>><?php esc_html_e( 'Filter by shipping provider', 'woocommerce' ); ?></option>
+			<?php foreach ( $providers as $key => $provider ) : ?>
+				<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $selected_provider, $key ); ?>>
+					<?php echo esc_html( $provider['label'] ?? '' ); ?>
+				</option>
+			<?php endforeach; ?>
+			<option value="__other__" <?php selected( $selected_provider, '__other__' ); ?>><?php esc_html_e( 'Other', 'woocommerce' ); ?></option>
+		</select>
+		<?php
+	}
+
+	/**
+	 * Render the shipping provider filter in the legacy orders table.
+	 *
+	 * @since 10.7.0
+	 */
+	public function render_shipping_provider_filter_legacy(): void {
+		global $typenow;
+
+		if ( 'shop_order' !== $typenow ) {
+			return;
+		}
+
+		$this->render_shipping_provider_filter();
+	}
+
+	/**
+	 * Filter orders by shipping provider for the HPOS orders list.
+	 *
+	 * @since 10.7.0
+	 *
+	 * @param array $args The query arguments for the orders list.
+	 * @return array The modified query arguments.
+	 */
+	public function filter_orders_by_shipping_provider( $args ) {
+		// This is a read-only filter on the admin orders table, so nonce verification is not required.
+		// phpcs:ignore WordPress.Security.NonceVerification
+		if ( ! isset( $_GET['shipping_provider'] ) || empty( $_GET['shipping_provider'] ) ) {
+			return $args;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification
+		$shipping_provider = sanitize_text_field( wp_unslash( $_GET['shipping_provider'] ) );
+		$order_ids         = $this->get_order_ids_by_shipping_provider( $shipping_provider );
+
+		if ( empty( $order_ids ) ) {
+			$args['post__in'] = array( 0 );
+		} elseif ( isset( $args['post__in'] ) && is_array( $args['post__in'] ) ) {
+			$args['post__in'] = array_intersect( $args['post__in'], $order_ids );
+			if ( empty( $args['post__in'] ) ) {
+				$args['post__in'] = array( 0 );
+			}
+		} else {
+			$args['post__in'] = $order_ids;
+		}
+
+		return $args;
+	}
+
+	/**
+	 * Filter legacy orders by shipping provider.
+	 *
+	 * @since 10.7.0
+	 *
+	 * @param \WP_Query $query The WP_Query object.
+	 */
+	public function filter_legacy_orders_by_shipping_provider( $query ): void {
+		if (
+			! is_admin()
+			|| ! $query->is_main_query()
+			|| 'shop_order' !== $query->get( 'post_type' )
+			// This is a read-only filter on the admin orders table, so nonce verification is not required.
+			// phpcs:ignore WordPress.Security.NonceVerification
+			|| ! isset( $_GET['shipping_provider'] )
+			// phpcs:ignore WordPress.Security.NonceVerification
+			|| empty( $_GET['shipping_provider'] )
+		) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification
+		$shipping_provider = sanitize_text_field( wp_unslash( $_GET['shipping_provider'] ) );
+		$order_ids         = $this->get_order_ids_by_shipping_provider( $shipping_provider );
+
+		if ( empty( $order_ids ) ) {
+			$query->set( 'post__in', array( 0 ) );
+		} else {
+			$existing = $query->get( 'post__in' );
+			if ( ! empty( $existing ) && is_array( $existing ) ) {
+				$order_ids = array_intersect( $existing, $order_ids );
+				if ( empty( $order_ids ) ) {
+					$order_ids = array( 0 );
+				}
+			}
+			$query->set( 'post__in', $order_ids );
+		}
+	}
+
+	/**
+	 * Get order IDs that have fulfillments with a specific shipping provider.
+	 *
+	 * @since 10.7.0
+	 *
+	 * @param string $shipping_provider The shipping provider key to filter by.
+	 * @return array Array of order IDs.
+	 */
+	private function get_order_ids_by_shipping_provider( string $shipping_provider ): array {
+		global $wpdb;
+
+		$fulfillments_table = $wpdb->prefix . 'wc_order_fulfillments';
+		$meta_table         = $wpdb->prefix . 'wc_order_fulfillment_meta';
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		if ( '__other__' === $shipping_provider ) {
+			$known_providers = FulfillmentUtils::get_shipping_providers_object();
+			$known_keys      = array_keys( $known_providers );
+
+			if ( empty( $known_keys ) ) {
+				$results = $wpdb->get_col(
+					$wpdb->prepare(
+						"SELECT DISTINCT f.entity_id
+						FROM {$fulfillments_table} f
+						INNER JOIN {$meta_table} m ON f.fulfillment_id = m.fulfillment_id
+						WHERE m.meta_key = %s
+						AND m.meta_value IS NOT NULL
+						AND m.meta_value != ''
+						AND f.date_deleted IS NULL
+						AND m.date_deleted IS NULL",
+						'_shipping_provider'
+					)
+				);
+			} else {
+				$placeholders = implode( ',', array_fill( 0, count( $known_keys ), '%s' ) );
+				$results      = $wpdb->get_col(
+					$wpdb->prepare(
+						"SELECT DISTINCT f.entity_id
+						FROM {$fulfillments_table} f
+						INNER JOIN {$meta_table} m ON f.fulfillment_id = m.fulfillment_id
+						WHERE m.meta_key = '_shipping_provider'
+						AND m.meta_value NOT IN ({$placeholders})
+						AND m.meta_value IS NOT NULL
+						AND m.meta_value != ''
+						AND f.date_deleted IS NULL
+						AND m.date_deleted IS NULL",
+						...$known_keys
+					)
+				);
+			}
+		} else {
+			$results = $wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT DISTINCT f.entity_id
+					FROM {$fulfillments_table} f
+					INNER JOIN {$meta_table} m ON f.fulfillment_id = m.fulfillment_id
+					WHERE m.meta_key = '_shipping_provider'
+					AND m.meta_value = %s
+					AND f.date_deleted IS NULL
+					AND m.date_deleted IS NULL",
+					$shipping_provider
+				)
+			);
+		}
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+
+		return array_map( 'absint', $results );
 	}
 
 	/**
