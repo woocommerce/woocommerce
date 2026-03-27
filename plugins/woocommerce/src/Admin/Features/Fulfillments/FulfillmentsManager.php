@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Admin\Features\Fulfillments;
 
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Providers\AbstractShippingProvider;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\Providers\CustomShippingProvider;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Order;
 use WC_Order_Refund;
@@ -33,6 +34,7 @@ class FulfillmentsManager {
 	 */
 	public function register() {
 		add_filter( 'woocommerce_fulfillment_shipping_providers', array( $this, 'get_initial_shipping_providers' ), 10, 1 );
+		add_filter( 'woocommerce_fulfillment_shipping_providers', array( $this, 'get_custom_shipping_providers' ), 20, 1 );
 		add_filter( 'woocommerce_fulfillment_translate_meta_key', array( $this, 'translate_fulfillment_meta_key' ), 10, 1 );
 		add_filter( 'woocommerce_fulfillment_parse_tracking_number', array( $this, 'try_parse_tracking_number' ), 10, 3 );
 
@@ -178,6 +180,49 @@ class FulfillmentsManager {
 		);
 
 		ksort( $shipping_providers );
+
+		return $shipping_providers;
+	}
+
+	/**
+	 * Load custom shipping providers from the wc_fulfillment_shipping_provider taxonomy.
+	 *
+	 * @since 10.7.0
+	 *
+	 * @param array $shipping_providers The current list of shipping providers.
+	 * @return array The modified list of shipping providers with custom providers appended.
+	 */
+	public function get_custom_shipping_providers( $shipping_providers ) {
+		if ( ! is_array( $shipping_providers ) ) {
+			$shipping_providers = array();
+		}
+
+		if ( ! taxonomy_exists( 'wc_fulfillment_shipping_provider' ) ) {
+			return $shipping_providers;
+		}
+
+		$terms = get_terms(
+			array(
+				'taxonomy'   => 'wc_fulfillment_shipping_provider',
+				'hide_empty' => false,
+			)
+		);
+
+		if ( is_wp_error( $terms ) || empty( $terms ) ) {
+			return $shipping_providers;
+		}
+
+		foreach ( $terms as $term ) {
+			$icon                  = get_term_meta( $term->term_id, 'icon', true );
+			$tracking_url_template = get_term_meta( $term->term_id, 'tracking_url_template', true );
+
+			$shipping_providers[] = new CustomShippingProvider(
+				$term->slug,
+				$term->name,
+				is_string( $icon ) ? $icon : '',
+				is_string( $tracking_url_template ) ? $tracking_url_template : ''
+			);
+		}
 
 		return $shipping_providers;
 	}

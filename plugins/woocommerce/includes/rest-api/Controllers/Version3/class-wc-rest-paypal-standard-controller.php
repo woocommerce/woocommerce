@@ -75,11 +75,6 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 	 * @return bool True if the request is valid, false otherwise.
 	 */
 	public function validate_shipping_callback_request( WP_REST_Request $request ) { // phpcs:ignore Squiz.Commenting.FunctionComment.IncorrectTypeHint
-		$token = $request->get_param( 'token' );
-		if ( empty( $token ) ) {
-			return false;
-		}
-
 		$purchase_units = $request->get_param( 'purchase_units' );
 		if ( empty( $purchase_units ) || empty( $purchase_units[0]['custom_id'] ) ) {
 			return false;
@@ -95,6 +90,12 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 		// This is done to prevent orders created before the shipping callback token feature was introduced from being blocked from updating their shipping details.
 		if ( ! $order->meta_exists( PayPalConstants::PAYPAL_ORDER_META_SHIPPING_CALLBACK_TOKEN ) ) {
 			return true;
+		}
+
+		// Validate the token.
+		$token = $request->get_param( 'token' );
+		if ( empty( $token ) ) {
+			return false;
 		}
 
 		$shipping_callback_token = $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_SHIPPING_CALLBACK_TOKEN, true );
