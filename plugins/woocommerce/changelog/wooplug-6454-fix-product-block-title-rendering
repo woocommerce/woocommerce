@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix Product Block title rendering current page/post title instead of product title on frontend when used in regular post content.
