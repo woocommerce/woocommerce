@@ -96,10 +96,10 @@ The v4 controller adds top-level fulfillment routes and a provider registry endp
 | `POST` | `/wp-json/wc/v4/fulfillments` | Create a fulfillment using `entity_type` and `entity_id` in the request body. |
 | `GET` | `/wp-json/wc/v4/fulfillments/{fulfillment_id}` | Retrieve one fulfillment. |
 | `PUT` | `/wp-json/wc/v4/fulfillments/{fulfillment_id}` | Update one fulfillment. |
-| `DELETE` | `/wp-json/wc/v4/fulfillments/{fulfillment_id}` | Delete one fulfillment. |
+| `DELETE` | `/wp-json/wc/v4/fulfillments/{fulfillment_id}` | Soft-delete one fulfillment (marks it as deleted via `date_deleted`). |
 | `GET` | `/wp-json/wc/v4/fulfillments/providers` | Retrieve the shipping provider registry used by the feature. |
 
-For order-backed fulfillments, the v4 controller delegates the CRUD behavior to the v3 order controller. That means the response shape, validation rules, customer notification behavior, and hook execution stay aligned across both namespaces.
+For order-backed fulfillments, the v4 controller delegates the CRUD behavior to the v3 order controller. That means the response shape, validation rules, customer notification behavior, and hook execution stay aligned across both namespaces. The v4 `DELETE` route uses the same soft-delete behavior as v3, updating `date_deleted` instead of permanently removing the fulfillment.
 
 ### Create a v4 fulfillment
 
