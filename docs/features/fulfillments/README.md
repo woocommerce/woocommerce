@@ -235,37 +235,41 @@ function create_fulfillment_for_order( $order_id, $items, $tracking_number = '' 
 To extend fulfillment functionality, you can register custom shipping providers:
 
 ```php
-class MyCustomShippingProvider extends AbstractShippingProvider {
+use Automattic\WooCommerce\Admin\Features\Fulfillments\Providers\AbstractShippingProvider;
+
+class My_Custom_Shipping_Provider extends AbstractShippingProvider {
     public function get_key(): string {
-        return 'my_custom_provider';
+        return 'my-custom-provider';
     }
 
     public function get_name(): string {
         return 'My Custom Provider';
     }
 
+    public function get_icon(): string {
+        return 'https://example.com/my-carrier-icon.svg';
+    }
+
+    public function get_tracking_url( string $tracking_number ): string {
+        return 'https://mycarrier.com/track/' . rawurlencode( $tracking_number );
+    }
+
     public function try_parse_tracking_number( string $tracking_number, string $shipping_from, string $shipping_to ): ?array {
-        // Custom tracking number validation logic
-        if ( $this->validate_tracking_format( $tracking_number ) ) {
+        if ( 1 === preg_match( '/^MC[0-9]{10}$/', $tracking_number ) ) {
             return [
-                'url' => "https://mycarrier.com/track/{$tracking_number}",
+                'url'             => $this->get_tracking_url( $tracking_number ),
                 'ambiguity_score' => 100,
             ];
         }
         return null;
     }
-
-    private function validate_tracking_format( string $tracking_number ): bool {
-        // Your validation logic here
-        return preg_match( '/^MC[0-9]{10}$/', $tracking_number );
-    }
 }
 
-// Attach your custom shipping provider
+// Register your custom shipping provider.
 add_filter( 'woocommerce_fulfillment_shipping_providers', function( $providers ) {
-    $providers['my_custom_shipping_provider'] = MyCustomShippingProvider::class;
+    $providers[] = My_Custom_Shipping_Provider::class;
     return $providers;
-});
+} );
 ```
 
 ## Frontend integration

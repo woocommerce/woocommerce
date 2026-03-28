@@ -38,11 +38,12 @@ The v3 create and update routes accept the fulfillment state in the request body
 | Field | Type | Notes |
 | --- | --- | --- |
 | `status` | string | A registered fulfillment status slug. |
-| `is_fulfilled` | boolean | Whether the fulfillment is fulfilled. The status helper will keep these values in sync. |
 | `meta_data` | array | Array of metadata objects with `key`, `value`, and optional `id`. |
 | `notify_customer` | boolean | Query parameter used on create, update, and delete requests. |
 
-The `meta_data` array usually carries `_items`, `_tracking_number`, `_shipping_provider`, and `_tracking_url`.
+The `meta_data` array usually carries `_items`, `_tracking_number`, `_shipment_provider`, and `_tracking_url`.
+
+> **Note**: `is_fulfilled` is a **read-only** response field. It is derived automatically from `status` by WooCommerce and cannot be set directly in requests.
 
 ### Create a fulfillment
 
@@ -53,7 +54,6 @@ Authorization: Basic base64(consumer_key:consumer_secret)
 
 {
   "status": "fulfilled",
-  "is_fulfilled": true,
   "meta_data": [
     {
       "key": "_items",
@@ -69,7 +69,7 @@ Authorization: Basic base64(consumer_key:consumer_secret)
       "value": "1Z999AA1234567890"
     },
     {
-      "key": "_shipping_provider",
+      "key": "_shipment_provider",
       "value": "ups"
     },
     {
