@@ -163,7 +163,7 @@ $fulfillment->set_items( $items );
 
 // Add metadata using inherited methods (keys prefixed with _ are private)
 $fulfillment->add_meta_data( '_tracking_number', '1Z999AA1234567890' );
-$fulfillment->add_meta_data( '_shipping_provider', 'ups' );
+$fulfillment->set_shipment_provider( 'ups' );
 $fulfillment->add_meta_data( 'custom_public_note', 'Handle with care' );
 
 // Save the fulfillment
