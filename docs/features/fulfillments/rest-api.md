@@ -155,7 +155,7 @@ Both REST surfaces return a fulfillment resource with the same core fields.
   "entity_id": "123",
   "status": "fulfilled",
   "is_fulfilled": true,
-  "date_updated": "2026-03-28 15:00:00",
+  "date_updated": "2026-03-28T15:00:00",
   "date_deleted": null,
   "meta_data": [
     {
