@@ -184,8 +184,8 @@ $existing->update_meta_data( '_tracking_number', '1Z999BB1234567890' );
 $existing->delete_meta_data( 'custom_notes' ); // Remove metadata
 
 // Check if specific metadata exists
-if ( $existing->meta_exists( '_shipping_provider' ) ) {
-    $provider = $existing->get_meta( '_shipping_provider' );
+if ( $existing->meta_exists( '_shipment_provider' ) ) {
+    $provider = $existing->get_meta( '_shipment_provider' );
 }
 
 // Lock/unlock fulfillment
