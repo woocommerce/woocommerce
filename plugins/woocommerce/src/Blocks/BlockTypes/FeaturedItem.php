@@ -108,26 +108,29 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 	 * @param array $context Block context.
 	 */
 	protected function replace_post_for_featured_item_inner_block( $block, &$context ) {
-		if ( $this->featured_item_inner_blocks_names ) {
-			$block_name = end( $this->featured_item_inner_blocks_names );
+		if ( ! $this->featured_item_inner_blocks_names || ! isset( $block['blockName'] ) ) {
+			return;
+		}
 
-			if ( $block_name === $block['blockName'] ) {
-				array_pop( $this->featured_item_inner_blocks_names );
+		$block_name = $block['blockName'];
+		$key        = array_search( $block_name, $this->featured_item_inner_blocks_names, true );
 
-				// Handle core blocks that need global post manipulation.
-				if ( 'core/post-excerpt' === $block_name || 'core/post-title' === $block_name ) {
-					global $post;
-					$post = get_post( $this->featured_item_id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		if ( false !== $key ) {
+			unset( $this->featured_item_inner_blocks_names[ $key ] );
 
-					if ( $post instanceof \WP_Post ) {
-						setup_postdata( $post );
-					}
+			// Handle core blocks that need global post manipulation.
+			if ( 'core/post-excerpt' === $block_name || 'core/post-title' === $block_name ) {
+				global $post;
+				$post = get_post( $this->featured_item_id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+				if ( $post instanceof \WP_Post ) {
+					setup_postdata( $post );
 				}
-
-				$context['postId']   = $this->featured_item_id;
-				$context['postType'] = 'product';
-				$this->current_item  = wc_get_product( $this->featured_item_id );
 			}
+
+			$context['postId']   = $this->featured_item_id;
+			$context['postType'] = 'product';
+			$this->current_item  = wc_get_product( $this->featured_item_id );
 		}
 	}
 

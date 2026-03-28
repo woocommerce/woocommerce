@@ -132,33 +132,36 @@ class SingleProduct extends AbstractBlock {
 	 * @param array $context Block context.
 	 */
 	protected function replace_post_for_single_product_inner_block( $block, &$context ) {
-		if ( $this->single_product_inner_blocks_names ) {
-			$block_name = end( $this->single_product_inner_blocks_names );
+		if ( ! $this->single_product_inner_blocks_names || ! isset( $block['blockName'] ) ) {
+			return;
+		}
 
-			if ( $block_name === $block['blockName'] ) {
-				array_pop( $this->single_product_inner_blocks_names );
-				/**
-				 * This is a temporary fix to ensure the Post Title and Excerpt blocks work as expected
-				 * until Gutenberg versions 15.2 and 15.6 are included in the core of WordPress.
-				 *
-				 * Important: the original post data is restored in the restore_global_post method.
-				 *
-				 * @see https://github.com/WordPress/gutenberg/pull/48001
-				 * @see https://github.com/WordPress/gutenberg/pull/49495
-				 */
-				if ( 'core/post-excerpt' === $block_name || 'core/post-title' === $block_name ) {
-					global $post;
-					// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-					$post = get_post( $this->product_id );
+		$block_name = $block['blockName'];
+		$key        = array_search( $block_name, $this->single_product_inner_blocks_names, true );
 
-					if ( $post instanceof \WP_Post ) {
-						setup_postdata( $post );
-					}
+		if ( false !== $key ) {
+			unset( $this->single_product_inner_blocks_names[ $key ] );
+			/**
+			 * This is a temporary fix to ensure the Post Title and Excerpt blocks work as expected
+			 * until Gutenberg versions 15.2 and 15.6 are included in the core of WordPress.
+			 *
+			 * Important: the original post data is restored in the restore_global_post method.
+			 *
+			 * @see https://github.com/WordPress/gutenberg/pull/48001
+			 * @see https://github.com/WordPress/gutenberg/pull/49495
+			 */
+			if ( 'core/post-excerpt' === $block_name || 'core/post-title' === $block_name ) {
+				global $post;
+				// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+				$post = get_post( $this->product_id );
+
+				if ( $post instanceof \WP_Post ) {
+					setup_postdata( $post );
 				}
-
-				$context['postId']        = $this->product_id;
-				$context['singleProduct'] = true;
 			}
+
+			$context['postId']        = $this->product_id;
+			$context['singleProduct'] = true;
 		}
 	}
 
