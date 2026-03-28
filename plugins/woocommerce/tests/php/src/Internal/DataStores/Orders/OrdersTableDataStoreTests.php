@@ -4110,4 +4110,36 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->assertCount( 1, $fresh_order->get_items(), 'Order should have items from DB.' );
 		$this->assertTrue( $fresh_order->needs_processing(), 'Order with physical product should need processing.' );
 	}
+
+	/**
+	 * Verifies that needs_processing caching functions as intended.
+	 */
+	public function test_needs_processing_caching_correctness(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->save();
+
+		$order = new WC_Order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 10,
+				'total'    => 10,
+			)
+		);
+		$order->add_item( $item );
+		$order->save();
+		$order_id = $order->get_id();
+
+		$this->assertTrue( $order->needs_processing() );
+		$this->assertSame( 1, wp_cache_get( 'order-needs-processing-' . $order_id, 'orders' ) );
+
+		wp_cache_set( 'order-needs-processing-' . $order_id, 0, 'orders' );
+		$this->assertFalse( $order->needs_processing() );
+		$this->assertSame( 0, wp_cache_get( 'order-needs-processing-' . $order_id, 'orders' ) );
+
+		$order->delete();
+		$product->delete();
+	}
 }
