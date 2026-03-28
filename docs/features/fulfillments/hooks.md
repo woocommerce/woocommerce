@@ -90,12 +90,11 @@ These filters change how WooCommerce calculates fulfillment state and resolves s
 
 ```php
 add_filter( 'woocommerce_fulfillment_shipping_providers', function( $providers ) {
-    $providers['my-carrier'] = array(
-        'label' => 'My Carrier',
-        'icon'  => 'https://example.com/icon.svg',
-        'value' => 'my-carrier',
-        'url'   => 'https://example.com/track/{tracking_number}',
-    );
+    // Option 1: Register a provider class name
+    $providers['my-carrier'] = 'My_Carrier_Provider';
+
+    // Option 2: Register a provider instance
+    $providers['my-carrier-alt'] = new My_Carrier_Provider();
 
     return $providers;
 } );

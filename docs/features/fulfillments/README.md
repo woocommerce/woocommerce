@@ -62,7 +62,7 @@ The associated metadata table stores the fulfillment payload that developers usu
 | --- | --- |
 | `_items` | Array of line item allocations, each with an `item_id` and `qty`. |
 | `_tracking_number` | Carrier tracking number. |
-| `_shipment_provider` | Provider slug used to build tracking links and UI labels. |
+| `_shipping_provider` | Provider slug used to build tracking links and UI labels. |
 | `_tracking_url` | Explicit tracking URL when a provider template is not enough. |
 | `_date_fulfilled` | Timestamp set when a fulfillment transitions to a fulfilled state. |
 | `_is_locked` | Internal flag used to prevent edits in specific workflows. |
@@ -163,7 +163,7 @@ $fulfillment->set_items( $items );
 
 // Add metadata using inherited methods (keys prefixed with _ are private)
 $fulfillment->add_meta_data( '_tracking_number', '1Z999AA1234567890' );
-$fulfillment->add_meta_data( '_shipment_provider', 'ups' );
+$fulfillment->add_meta_data( '_shipping_provider', 'ups' );
 $fulfillment->add_meta_data( 'custom_public_note', 'Handle with care' );
 
 // Save the fulfillment
@@ -184,8 +184,8 @@ $existing->update_meta_data( '_tracking_number', '1Z999BB1234567890' );
 $existing->delete_meta_data( 'custom_notes' ); // Remove metadata
 
 // Check if specific metadata exists
-if ( $existing->meta_exists( '_shipment_provider' ) ) {
-    $provider = $existing->get_meta( '_shipment_provider' );
+if ( $existing->meta_exists( '_shipping_provider' ) ) {
+    $provider = $existing->get_meta( '_shipping_provider' );
 }
 
 // Lock/unlock fulfillment

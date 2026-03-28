@@ -42,7 +42,7 @@ The v3 create and update routes accept the fulfillment state in the request body
 | `meta_data` | array | Array of metadata objects with `key`, `value`, and optional `id`. |
 | `notify_customer` | boolean | Query parameter used on create, update, and delete requests. |
 
-The `meta_data` array usually carries `_items`, `_tracking_number`, `_shipment_provider`, and `_tracking_url`.
+The `meta_data` array usually carries `_items`, `_tracking_number`, `_shipping_provider`, and `_tracking_url`.
 
 ### Create a fulfillment
 
@@ -69,7 +69,7 @@ Authorization: Basic base64(consumer_key:consumer_secret)
       "value": "1Z999AA1234567890"
     },
     {
-      "key": "_shipment_provider",
+      "key": "_shipping_provider",
       "value": "ups"
     },
     {
