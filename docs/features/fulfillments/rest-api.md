@@ -28,7 +28,7 @@ The v3 controller exposes order-scoped routes under the standard WooCommerce RES
 | `DELETE` | `/wp-json/wc/v3/orders/{order_id}/fulfillments/{fulfillment_id}` | Soft-delete one fulfillment. |
 | `GET` | `/wp-json/wc/v3/orders/{order_id}/fulfillments/{fulfillment_id}/metadata` | Read raw fulfillment metadata. |
 | `PUT` | `/wp-json/wc/v3/orders/{order_id}/fulfillments/{fulfillment_id}/metadata` | Replace fulfillment metadata values. |
-| `DELETE` | `/wp-json/wc/v3/orders/{order_id}/fulfillments/{fulfillment_id}/metadata` | Delete a metadata key. |
+| `DELETE` | `/wp-json/wc/v3/orders/{order_id}/fulfillments/{fulfillment_id}/metadata?meta_key={meta_key}` | Delete a metadata key identified by the `meta_key` query parameter. |
 | `GET` | `/wp-json/wc/v3/orders/{order_id}/fulfillments/lookup?tracking_number={tracking_number}` | Parse a tracking number and return provider-specific details when available. |
 
 ### Request fields
