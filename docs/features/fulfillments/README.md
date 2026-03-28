@@ -62,7 +62,7 @@ The associated metadata table stores the fulfillment payload that developers usu
 | --- | --- |
 | `_items` | Array of line item allocations, each with an `item_id` and `qty`. |
 | `_tracking_number` | Carrier tracking number. |
-| `_shipping_provider` | Provider slug used to build tracking links and UI labels. |
+| `_shipment_provider` | Provider slug used to build tracking links and UI labels. |
 | `_tracking_url` | Explicit tracking URL when a provider template is not enough. |
 | `_date_fulfilled` | Timestamp set when a fulfillment transitions to a fulfilled state. |
 | `_is_locked` | Internal flag used to prevent edits in specific workflows. |
