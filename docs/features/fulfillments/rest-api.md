@@ -112,7 +112,6 @@ Authorization: Basic base64(consumer_key:consumer_secret)
   "entity_type": "WC_Order",
   "entity_id": 123,
   "status": "fulfilled",
-  "is_fulfilled": true,
   "meta_data": [
     {
       "key": "_items",
