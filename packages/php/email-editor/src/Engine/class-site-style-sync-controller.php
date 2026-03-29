@@ -435,6 +435,7 @@ class Site_Style_Sync_Controller {
 		// Map common web fonts to email-safe alternatives.
 		$font_map = array(
 			'helvetica' => $email_safe_fonts['arial'], // Arial fallback.
+			'inter'     => $email_safe_fonts['inter'], // Inter with Arial fallback.
 			'times'     => $email_safe_fonts['georgia'], // Georgia fallback.
 			'courier'   => $email_safe_fonts['courier-new'], // Courier New.
 			'trebuchet' => $email_safe_fonts['trebuchet-ms'],

@@ -255,7 +255,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 					array(
 						'title'     => __( 'Font family', 'woocommerce' ),
 						'id'        => 'woocommerce_email_font_family',
-						'default'   => 'Inter',
+						'default'   => 'Helvetica',
 						'type'      => 'email_font_family',
 						'row_class' => $email_improvements_enabled ? '' : 'disabled',
 					),

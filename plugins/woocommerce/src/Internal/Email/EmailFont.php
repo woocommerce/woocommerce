@@ -25,7 +25,6 @@ class EmailFont {
 		'Courier New'     => "'Courier New', Courier, 'Lucida Sans Typewriter', 'Lucida Typewriter', monospace",
 		'Georgia'         => "Georgia, Times, 'Times New Roman', serif",
 		'Helvetica'       => "'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif",
-		'Inter'           => "Inter, 'Helvetica Neue', Arial, sans-serif",
 		'Lucida'          => "'Lucida Sans Unicode', 'Lucida Grande', sans-serif",
 		'Tahoma'          => 'Tahoma, Verdana, Segoe, sans-serif',
 		'Times New Roman' => "'Times New Roman', Times, Baskerville, Georgia, serif",
