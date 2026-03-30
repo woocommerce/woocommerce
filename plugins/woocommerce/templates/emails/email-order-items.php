@@ -211,7 +211,10 @@ foreach ( $items as $item_id => $item ) :
 			 * @since 2.4.0
 			 */
 			$qty_display = apply_filters( 'woocommerce_email_order_item_quantity', $qty_display, $item );
-			$qty_display = ( $email_improvements_enabled ? '&times;&nbsp;' : '' ) . $qty_display;
+      if ( '' !== $qty_display ) {
+        $quantity_prefix = $email_improvements_enabled ? '&times;&nbsp;' : '';
+			  $qty_display = $quantity_prefix . $qty_display;
+      }
 
 			/**
 			 * Filters the complete quantity cell display in order emails.

@@ -2124,7 +2124,8 @@ CREATE TABLE {$wpdb->prefix}wc_reserved_stock (
 	`stock_quantity` double NOT NULL DEFAULT 0,
 	`timestamp` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
 	`expires` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-	PRIMARY KEY  (`order_id`, `product_id`)
+	PRIMARY KEY  (`order_id`, `product_id`),
+	KEY product_id_expires (product_id, expires)
 ) $collate;
 CREATE TABLE {$wpdb->prefix}wc_rate_limits (
   rate_limit_id bigint(20) unsigned NOT NULL AUTO_INCREMENT,

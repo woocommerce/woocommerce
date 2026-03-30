@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix a bug with the Store Email personalization tag that caused it to always return the admin email instead of using the `get_from_address` method from the email object context

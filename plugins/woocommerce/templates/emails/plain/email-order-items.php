@@ -52,8 +52,11 @@ foreach ( $items as $item_id => $item ) :
 			 * @param int           $quantity Item quantity.
 			 * @param WC_Order_Item $item     Item object.
 			 */
+
 			$qty_display = apply_filters( 'woocommerce_email_order_item_quantity', $item->get_quantity(), $item );
-			$qty_display = '× ' . $qty_display;
+      if ( '' !== $qty_display ) {
+			  $qty_display = '× ' . $qty_display;
+      }
 
 			/**
 			 * Filters the complete quantity cell display in order emails.
@@ -66,6 +69,7 @@ foreach ( $items as $item_id => $item ) :
 			 */
 			$qty_display   = apply_filters( 'woocommerce_email_order_item_quantity_display', $qty_display, $item, $order );
 			$product_name .= ' ' . $qty_display;
+
 			echo wp_kses_post( str_pad( wp_kses_post( $product_name ), 40 ) );
 			echo ' ';
 			echo esc_html( str_pad( wp_kses( $order->get_formatted_line_subtotal( $item ), array() ), 20, ' ', STR_PAD_LEFT ) ) . "\n";
@@ -94,8 +98,11 @@ foreach ( $items as $item_id => $item ) :
 			 * @param int           $quantity Item quantity.
 			 * @param WC_Order_Item $item     Item object.
 			 */
+
 			$qty_display = apply_filters( 'woocommerce_email_order_item_quantity', $item->get_quantity(), $item );
-			$qty_display = 'X ' . $qty_display;
+			if ( '' !== $qty_display ) {
+        $qty_display = '× ' . $qty_display;
+      }
 
 			/**
 			 * Filters the complete quantity cell display in order emails.

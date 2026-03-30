@@ -1,4 +1,5 @@
 interface Window {
+	_wpCollaborationEnabled?: boolean;
 	WooCommerceEmailEditor: {
 		current_wp_user_email: string;
 		user_theme_post_id: number;
