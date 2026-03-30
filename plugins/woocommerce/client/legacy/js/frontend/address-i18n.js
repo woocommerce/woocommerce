@@ -91,13 +91,18 @@ jQuery( function( $ ) {
 					field.data( 'priority', fieldLocale.priority );
 				}
 
-				// Hidden fields.
-				if ( 'state' !== key ) {
-					if ( typeof fieldLocale.hidden !== 'undefined' && true === fieldLocale.hidden ) {
-						field.hide().find( ':input' ).val( '' );
-					} else {
-						field.show();
-					}
+				// Hidden fields. When country is hidden, set to the store
+				// base country instead of clearing — it drives locale
+				// resolution for all other fields.
+				if ( true === fieldLocale.hidden ) {
+					field.hide().find( ':input' ).val(
+						'country' === key ? wc_address_i18n_params.base_country : ''
+					);
+				} else if ( 'state' !== key ) {
+					// State field visibility is managed by country-select.js
+					// (swaps between select/input/hidden based on country
+					// states), so only show non-state fields here.
+					field.show();
 				}
 
 				// Class changes.
@@ -106,6 +111,13 @@ jQuery( function( $ ) {
 					field.addClass( fieldLocale.class.join( ' ' ) );
 				}
 			});
+
+			// Hide the shipping calculator toggle if all its fields are hidden.
+			var $calculator = thisform.closest( '.woocommerce-shipping-calculator' );
+			if ( $calculator.length ) {
+				var $visibleFields = $calculator.find( '.form-row:visible' );
+				$calculator.find( '.shipping-calculator-button' ).toggle( $visibleFields.length > 0 );
+			}
 
 			var fieldsets = $(
 				'.woocommerce-billing-fields__field-wrapper,' +
