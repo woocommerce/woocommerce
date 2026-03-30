@@ -1298,6 +1298,12 @@ class PaymentsProviders {
 		// We discriminate between offline payment methods and gateways.
 		$gateway_details['_type'] = $this->is_offline_payment_method( $payment_gateway->id ) ? self::TYPE_OFFLINE_PM : self::TYPE_GATEWAY;
 
+		// Offline payment methods don't have extension suggestions or incentives.
+		// Skip the suggestion matching to avoid unnecessary processing.
+		if ( self::TYPE_OFFLINE_PM === $gateway_details['_type'] ) {
+			return $gateway_details;
+		}
+
 		$plugin_slug = $gateway_details['plugin']['slug'];
 		// The payment gateway plugin might use a non-standard directory name.
 		// Try to normalize it to the common slug to avoid false negatives when matching.
