@@ -4,6 +4,7 @@
 import prepareFormFields from '@woocommerce/base-components/cart-checkout/form/prepare-form-fields';
 import {
 	ADDRESS_FORM_KEYS,
+	BASE_COUNTRY,
 	COUNTRIES,
 	STATES,
 } from '@woocommerce/block-settings';
@@ -68,7 +69,7 @@ export const emptyHiddenAddressFields = <
 
 	addressForm.forEach( ( { key, hidden } ) => {
 		if ( hidden === true && isValidAddressKey( key, address ) ) {
-			newAddress[ key ] = '';
+			newAddress[ key ] = key === 'country' ? BASE_COUNTRY : '';
 		}
 	} );
 
