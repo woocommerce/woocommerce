@@ -33,20 +33,6 @@
 			width: 100%;
 			justify-content: center;
 		}
-
-		&_or-divider {
-			text-align: center;
-			display: flex;
-			width: 100%;
-			align-items: center;
-			color: $gray-700;
-			gap: $gap-small;
-
-			hr {
-				width: 100%;
-				border-top: 1px solid $gray-200;
-			}
-		}
 	}
 
 	&__learn-more {
