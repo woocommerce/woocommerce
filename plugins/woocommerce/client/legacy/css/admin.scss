@@ -8286,6 +8286,22 @@ table.bar_chart {
  * WP 7.0 increased default form element sizing from 30px to 40px min-height.
  */
 .wc-wp-version-gte-70 {
+<<<<<<< HEAD
+=======
+	// Settings page labels: vertically centre with taller WP 7.0 fields.
+	.woocommerce table.form-table th {
+		padding-top: 25px;
+	}
+
+	// Colour picker swatch: match WP 7.0 input height (40px).
+	.woocommerce table.form-table .colorpickpreview {
+		height: 40px;
+		width: 40px;
+		border-radius: 2px;
+		box-sizing: border-box;
+	}
+
+>>>>>>> 7bed1ec366 ([WOOPRD-3157] Fix labels not vertically aligned on settings pages on WP 7.0 (#63812))
 	// Select2 single: match WP 7.0 native select height (40px).
 	.select2-container {
 		.select2-selection--single {
