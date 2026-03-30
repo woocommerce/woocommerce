@@ -1,4 +1,4 @@
-Significance: patch
-Type: enhancement
+Significance: minor
+Type: update
 
-Improve payments onboarding screen with clearer messaging about activation requirements and separate cards for activate vs test payment options.
+Update copy on the activate payments step in NOX
