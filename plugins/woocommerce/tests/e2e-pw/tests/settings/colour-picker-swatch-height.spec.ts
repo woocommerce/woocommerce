@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../../fixtures/fixtures';
 
 /**
  * Internal dependencies
@@ -25,7 +25,9 @@ test.describe( 'Colour picker swatch height on Email settings', () => {
 		await expect( swatch ).toBeVisible();
 
 		const swatchBox = await swatch.boundingBox();
-		expect( swatchBox ).not.toBeNull();
+		if ( ! swatchBox ) {
+			throw new Error( 'Could not get bounding box for swatch' );
+		}
 
 		// With the gte-70 class, the swatch should be 40px to match WP 7.0 input height.
 		expect( swatchBox.height ).toBe( 40 );
