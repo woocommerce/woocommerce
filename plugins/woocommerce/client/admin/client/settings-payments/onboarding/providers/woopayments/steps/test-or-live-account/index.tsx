@@ -50,16 +50,6 @@ const TestOrLiveAccountStep = () => {
 								'woocommerce'
 							) }
 						</h1>
-						<div className="woocommerce-woopayments-modal__content__item">
-							<div className="woocommerce-woopayments-modal__content__item__description">
-								<p>
-									{ __(
-										'Activate payments to accept real orders and process transactions.',
-										'woocommerce'
-									) }
-								</p>
-							</div>
-						</div>
 						{ currentStep?.errors &&
 							currentStep.errors.length > 0 && (
 								<Notice
