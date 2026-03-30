@@ -114,7 +114,7 @@ Use `_prime_post_caches()` only when no such native argument exists on the data 
 
 By the time an explicit `_prime_post_caches()` runs after collecting IDs from a `get_items()` loop, all product post caches are already warm on both CPT and HPOS backends.
 
-**Canonical redundant example** (`src/Internal/RestApi/Routes/V4/Orders/Controller.php:310-323`, removable):
+**Example**:
 
 ```php
 // Prime product caches to avoid N+1 queries during serialization.
