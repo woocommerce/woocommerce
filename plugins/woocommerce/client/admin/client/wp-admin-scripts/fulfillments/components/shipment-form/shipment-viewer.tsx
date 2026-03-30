@@ -92,6 +92,7 @@ export default function ShipmentViewer() {
 						{
 							label: __( 'Tracking URL', 'woocommerce' ),
 							value: trackingUrl,
+							href: trackingUrl || undefined,
 						},
 					] }
 				/>

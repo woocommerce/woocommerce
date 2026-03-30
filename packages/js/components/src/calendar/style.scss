@@ -168,9 +168,10 @@
 	.woocommerce-calendar__input-text {
 		color: $gray-700;
 		border-radius: 3px;
-		padding: 10px 10px 10px 30px;
+		padding: 0 10px 0 30px;
 		width: 100%;
 		@include font-size( 13 );
+		min-height: 40px;
 
 		&::placeholder {
 			color: $gray-700;
