@@ -4,7 +4,8 @@
 import React, { useState } from 'react';
 import { __ } from '@wordpress/i18n';
 import interpolateComponents from '@automattic/interpolate-components';
-import { Button, Notice } from '@wordpress/components';
+import { Button, Notice, Icon } from '@wordpress/components';
+import { check } from '@wordpress/icons';
 import { Link } from '@woocommerce/components';
 import apiFetch from '@wordpress/api-fetch';
 
@@ -97,25 +98,60 @@ const TestOrLiveAccountStep = () => {
 										) }
 									</h3>
 									<div>
-										{ interpolateComponents( {
-											mixedString: __(
-												'Provide some additional details about your business to process real transactions. {{link}}Learn more{{/link}}',
-												'woocommerce'
-											),
-											components: {
-												link: (
-													<Link
-														href="https://woocommerce.com/document/woopayments/startup-guide/#sign-up-process"
-														target="_blank"
-														rel="noreferrer"
-														type="external"
-													/>
-												),
-											},
-										} ) }
+										{ __(
+											"To start processing real transactions, you'll need to verify your identity and business details.",
+											'woocommerce'
+										) }
 									</div>
 								</div>
 							</div>
+							<ul
+								className="woocommerce-payments-test-or-live-account-step__checklist"
+								aria-label={ __(
+									'What you will need',
+									'woocommerce'
+								) }
+							>
+								<li>
+									<Icon
+										icon={ check }
+										size={ 20 }
+										aria-hidden="true"
+									/>
+									<span>
+										{ __(
+											"Government-issued ID (passport or driver's license)",
+											'woocommerce'
+										) }
+									</span>
+								</li>
+								<li>
+									<Icon
+										icon={ check }
+										size={ 20 }
+										aria-hidden="true"
+									/>
+									<span>
+										{ __(
+											'Tax ID or employer identification number',
+											'woocommerce'
+										) }
+									</span>
+								</li>
+								<li>
+									<Icon
+										icon={ check }
+										size={ 20 }
+										aria-hidden="true"
+									/>
+									<span>
+										{ __(
+											'Bank account details for deposits',
+											'woocommerce'
+										) }
+									</span>
+								</li>
+							</ul>
 							<Button
 								variant="primary"
 								onClick={ () => {
@@ -216,7 +252,7 @@ const TestOrLiveAccountStep = () => {
 										<div className="woocommerce-woopayments-modal__content__item-flex__description">
 											<h3>
 												{ __(
-													'Test payments first, activate later',
+													'Not ready? Set up your store first',
 													'woocommerce'
 												) }
 											</h3>
@@ -224,7 +260,7 @@ const TestOrLiveAccountStep = () => {
 												<p>
 													{ interpolateComponents( {
 														mixedString: __(
-															"A test account will be created for you to {{link}}test payments on your store{{/link}}. You'll need to activate payments later to process real transactions.",
+															'Use test mode to configure your store and {{link}}try test payments{{/link}} without providing business details. You can activate real payments anytime.',
 															'woocommerce'
 														),
 														components: {

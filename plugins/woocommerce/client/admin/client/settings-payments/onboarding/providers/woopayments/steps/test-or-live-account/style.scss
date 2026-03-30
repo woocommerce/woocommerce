@@ -49,6 +49,29 @@
 		}
 	}
 
+	&__checklist {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		gap: $gap-smaller;
+
+		li {
+			display: flex;
+			align-items: flex-start;
+			gap: $gap-smaller;
+			font-size: 13px;
+			line-height: 20px;
+			color: $gray-700;
+
+			.components-icon {
+				fill: var(--wp-components-color-accent, var(--wp-admin-theme-color, #3858e9));
+				flex-shrink: 0;
+			}
+		}
+	}
+
 	&__success-whats-next {
 		display: flex;
 		flex-direction: column;
