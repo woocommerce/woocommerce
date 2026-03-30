@@ -185,6 +185,11 @@
           "name": "Pacifico",
           "slug": "pacifico",
           "fontFamily": "Pacifico, 'Arial Narrow', Arial, sans-serif"
+        },
+        {
+          "name": "Inter",
+          "slug": "inter",
+          "fontFamily": "Inter, 'Helvetica Neue', Arial, sans-serif"
         }
       ],
       "fontSizes": [
@@ -232,7 +237,7 @@
       "text": "#1e1e1e"
     },
     "typography": {
-      "fontFamily": "Arial, 'Helvetica Neue', Helvetica, sans-serif",
+      "fontFamily": "Inter, 'Helvetica Neue', Arial, sans-serif",
       "fontSize": "16px",
       "fontWeight": "400",
       "fontStyle": "normal",
@@ -244,7 +249,6 @@
     "elements": {
       "heading": {
         "typography": {
-          "fontFamily": "Arial, 'Helvetica Neue', Helvetica, sans-serif",
           "fontWeight": "400",
           "fontStyle": "normal",
           "lineHeight": "1.2"
