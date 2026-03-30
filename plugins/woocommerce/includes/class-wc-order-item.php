@@ -249,8 +249,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 			return false;
 		}
 
-		$adjust_total = ! empty( $calculate_tax_for['adjust_item_total'] );
-		$inc_tax      = $adjust_total && ! empty( $calculate_tax_for['prices_include_tax'] );
+		$inc_tax = ! empty( $calculate_tax_for['prices_include_tax'] );
 
 		if ( '0' !== $this->get_tax_class() && ProductTaxStatus::TAXABLE === $this->get_tax_status() && wc_tax_enabled() ) {
 			$calculate_tax_for['tax_class'] = $this->get_tax_class();
@@ -266,15 +265,8 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 					)
 				);
 
-				if ( $adjust_total && method_exists( $this, 'set_total' ) && method_exists( $this, 'set_subtotal' ) ) {
-					$this->set_subtotal( $this->get_subtotal() - array_sum( $subtotal_taxes ) );
-					$this->set_total( $this->get_total() - array_sum( $taxes ) );
-				}
 			} else {
 				$this->set_taxes( array( 'total' => $taxes ) );
-				if ( $adjust_total && method_exists( $this, 'set_total' ) ) {
-					$this->set_total( $this->get_total() - array_sum( $taxes ) );
-				}
 			}
 		} else {
 			$this->set_taxes( false );
