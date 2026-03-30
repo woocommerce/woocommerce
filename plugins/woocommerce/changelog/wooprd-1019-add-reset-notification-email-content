@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add reset notification email content action to the email editor, allowing users to reset email content to the original plugin-distributed state.
