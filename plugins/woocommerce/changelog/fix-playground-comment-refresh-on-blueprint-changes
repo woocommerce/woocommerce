@@ -1,4 +1,4 @@
 Significance: patch
 Type: dev
 
-Update Playground preview workflow to refresh comment when blueprint script changes.
+Fix workflow path filters to correctly re-run when workflow files change.
