@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix PayPal Standard webhook handling for invalid links.

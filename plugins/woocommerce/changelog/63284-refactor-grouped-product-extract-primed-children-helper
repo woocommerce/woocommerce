@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Extract "get_primed_visible_children()" helper in "WC_Product_Grouped".

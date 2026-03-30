@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix extra padding on analytics tables, dashboard charts, leaderboards, and store alerts on WordPress 7.0 by setting Card/CardBody size to "none".
