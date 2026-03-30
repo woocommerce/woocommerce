@@ -17,9 +17,83 @@ use WP_Error;
 /**
  * BacsGatewaySettingsSchema class.
  *
- * Extends AbstractPaymentGatewaySettingsSchema to handle BACS-specific settings.
+ * Extends AbstractPaymentGatewaySettingsSchema to handle BACS-specific settings
+ * with design-aligned field labels and descriptions.
  */
 class BacsGatewaySettingsSchema extends AbstractPaymentGatewaySettingsSchema {
+
+	/**
+	 * Get custom groups for the BACS gateway.
+	 *
+	 * Provides design-aligned labels and descriptions, and separates
+	 * account details into its own group. Derives fields from the gateway's
+	 * form_fields to preserve any extension-injected settings.
+	 *
+	 * @param WC_Payment_Gateway $gateway Gateway instance.
+	 * @return array Custom group structure.
+	 */
+	protected function get_custom_groups_for_gateway( WC_Payment_Gateway $gateway ): array {
+		// Design-aligned overrides for core fields.
+		$core_field_overrides = array(
+			'enabled'      => array(
+				'label' => __( 'Enable/Disable', 'woocommerce' ),
+				'type'  => 'checkbox',
+				'desc'  => __( 'Enable Direct bank transfer at checkout', 'woocommerce' ),
+			),
+			'title'        => array(
+				'label' => __( 'Checkout label', 'woocommerce' ),
+				'type'  => 'text',
+				'desc'  => __( 'Shown to customers on the payment methods list at checkout.', 'woocommerce' ),
+			),
+			'description'  => array(
+				'label' => __( 'Checkout instructions', 'woocommerce' ),
+				'type'  => 'text',
+				'desc'  => __( 'Shown below the checkout label.', 'woocommerce' ),
+			),
+			'order'        => array(
+				'label' => __( 'Order', 'woocommerce' ),
+				'type'  => 'number',
+				'desc'  => __( 'Determines the display order of payment gateways during checkout.', 'woocommerce' ),
+			),
+			'instructions' => array(
+				'label' => __( 'Order confirmation instructions', 'woocommerce' ),
+				'type'  => 'text',
+				'desc'  => __( 'Shown on the order confirmation page and in order emails.', 'woocommerce' ),
+			),
+		);
+
+		// account_details is handled in a separate group, skip it in the main fields.
+		$fields = $this->build_fields_from_form_fields( $gateway, $core_field_overrides, array( 'account_details' ) );
+
+		$settings_group = array(
+			'title'       => __( 'Direct bank transfer settings', 'woocommerce' ),
+			'description' => __( 'Manage how Direct bank transfer appears at checkout and in order emails.', 'woocommerce' ),
+			'order'       => 1,
+			'fields'      => $fields,
+		);
+
+		$field = $gateway->form_fields['account_details'] ?? array();
+
+		$account_details_group = array(
+			'title'       => __( 'Bank account details', 'woocommerce' ),
+			'description' => __( 'Manage the bank accounts customers can use to pay by bank transfer.', 'woocommerce' ),
+			'order'       => 2,
+			'fields'      => array(
+				array(
+					'id'    => 'account_details',
+					'label' => $field['title'] ?? __( 'Account details', 'woocommerce' ),
+					'type'  => 'array',
+					'desc'  => $field['description'] ?? __( 'Bank account details for direct bank transfer.', 'woocommerce' ),
+				),
+			),
+		);
+
+		return array(
+			'settings'        => $settings_group,
+			'account_details' => $account_details_group,
+		);
+	}
+
 	/**
 	 * Get values for BACS-specific special fields.
 	 *
@@ -29,28 +103,6 @@ class BacsGatewaySettingsSchema extends AbstractPaymentGatewaySettingsSchema {
 	protected function get_special_field_values( WC_Payment_Gateway $gateway ): array {
 		return array(
 			'account_details' => get_option( 'woocommerce_bacs_accounts', array() ),
-		);
-	}
-
-	/**
-	 * Get field schemas for BACS-specific special fields.
-	 *
-	 * @param WC_Payment_Gateway $gateway Gateway instance.
-	 * @return array
-	 */
-	protected function get_special_field_schemas( WC_Payment_Gateway $gateway ): array {
-		$gateway->init_form_fields();
-
-		// Start with information from the gateway's form_fields if available.
-		$field = $gateway->form_fields['account_details'] ?? array();
-
-		return array(
-			array(
-				'id'    => 'account_details',
-				'label' => $field['title'] ?? __( 'Account details', 'woocommerce' ),
-				'type'  => 'array',
-				'desc'  => $field['description'] ?? __( 'Bank account details for direct bank transfer.', 'woocommerce' ),
-			),
 		);
 	}
 
