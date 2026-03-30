@@ -135,9 +135,11 @@ class SingleProduct extends AbstractBlock {
 		if ( $this->single_product_inner_blocks_names ) {
 			// Find the block index in $this->single_product_inner_blocks_names
 			// starting from the end.
-			$block_index = count( $this->single_product_inner_blocks_names ) - array_search( $block['blockName'], array_reverse( $this->single_product_inner_blocks_names ), true ) - 1;
+			$block_index_reversed = array_search( $block['blockName'], array_reverse( $this->single_product_inner_blocks_names ), true );
 
-			if ( $block_index ) {
+			if ( false !== $block_index_reversed ) {
+				$block_index = count( $this->single_product_inner_blocks_names ) - (int) $block_index_reversed - 1;
+
 				$block_name = $block['blockName'];
 
 				// Remove all blocks after the current one. In some cases, like

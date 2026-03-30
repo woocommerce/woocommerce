@@ -163,7 +163,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 		$p->set_attribute( 'data-wp-on--touchmove', 'actions.onTouchMove' );
 		$p->set_attribute( 'data-wp-on--touchend', 'actions.onTouchEnd' );
 
-		if ( 0 === $index && ( empty( $context['singleProduct'] ) || ! $context['singleProduct'] ) ) {
+		if ( 0 === $index && empty( $context['singleProduct'] ) ) {
 			$p->set_attribute( 'fetchpriority', 'high' );
 			$p->set_attribute( 'loading', 'eager' );
 		} else {
