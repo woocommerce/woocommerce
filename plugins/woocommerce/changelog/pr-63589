@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Fix undefined site_url variable in robots_txt

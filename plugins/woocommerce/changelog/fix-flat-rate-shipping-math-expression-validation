@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix math expressions being rejected in the flat rate shipping cost field
