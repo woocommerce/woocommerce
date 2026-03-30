@@ -249,7 +249,6 @@
     "elements": {
       "heading": {
         "typography": {
-          "fontFamily": "Inter, 'Helvetica Neue', Arial, sans-serif",
           "fontWeight": "400",
           "fontStyle": "normal",
           "lineHeight": "1.2"
