@@ -12,7 +12,7 @@ import {
 import { useCheckoutAddress } from '@woocommerce/base-context';
 import { usePrevious, useShallowEqual } from '@woocommerce/base-hooks';
 import { validationStore } from '@woocommerce/block-data';
-import { BASE_COUNTRY } from '@woocommerce/block-settings';
+import { getHiddenFieldValue } from '@woocommerce/base-utils/address';
 import {
 	CheckboxControl,
 	ValidatedCheckboxControl,
@@ -201,14 +201,15 @@ const Form = <
 		if ( fastDeepEqual( previousFormFields, formFields ) ) {
 			return;
 		}
+		const hiddenFields = formFields.filter( ( field ) => field.hidden );
+		if ( hiddenFields.length === 0 ) {
+			return;
+		}
 		const hiddenFieldValues = Object.fromEntries(
-			formFields
-				.filter( ( field ) => field.hidden )
-				.map( ( field ) =>
-					field.key === 'country'
-						? [ field.key, BASE_COUNTRY ]
-						: [ field.key, '' ]
-				)
+			hiddenFields.map( ( field ) => [
+				field.key,
+				getHiddenFieldValue( field.key ),
+			] )
 		);
 		const newValues = {
 			...values,
