@@ -1,4 +1,0 @@
-Significance: patch
-Type: fixed
-
-Fixed store_admin property always reporting 0 for admin users in REST API tracking requests.
