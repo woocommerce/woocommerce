@@ -31,11 +31,6 @@ The `.ai/skills/` directory contains procedural HOW-TO instructions:
 - **`woocommerce-email-editor`** - Email editor development setup and Mailpit configuration
 - **`woocommerce-performance`** - Performance guardrails. **Invoke when writing or reviewing PHP code.**
 
-**CRITICAL:** After reading a skill, check if a personal skill override file exists at
-`~/.ai/skills/{skill-name}-personal/SKILL.md` and apply it too. For example, for the
-`woocommerce-backend-dev` skill, check for `~/.ai/skills/woocommerce-backend-dev-personal/SKILL.md`.
-**Personal override skills take precedence over project-level skills in case of conflict**.
-
 ## Project Architecture
 
 ### Directory Structure
