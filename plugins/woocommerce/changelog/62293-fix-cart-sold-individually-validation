@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fixed sold individually validation on shortcode cart and checkout pages. Products marked as "Sold Individually" after being added to cart now have quantity automatically reduced to 1 with correct totals calculation.

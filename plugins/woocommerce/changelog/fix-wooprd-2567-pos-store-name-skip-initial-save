@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Skip initial save of POS store name setting so emails use the current site name instead of the stale "My WordPress Site" default.

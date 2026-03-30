@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix misaligned order rows on the edit order screen when Cost of Goods Sold is enabled.
