@@ -77,6 +77,7 @@ jQuery( function ( $ ) {
 
 			var localeHiddenCount = 0;
 			var localeFieldCount = 0;
+			var countryChanged = null;
 
 			$.each( locale_fields, function ( key, value ) {
 				var field = thisform.find( value ),
@@ -142,14 +143,20 @@ jQuery( function ( $ ) {
 				// base country instead of clearing — it drives locale
 				// resolution for all other fields.
 				if ( true === fieldLocale.hidden ) {
-					field
-						.hide()
-						.find( ':input' )
-						.val(
-							'country' === key
-								? wc_address_i18n_params.base_country
-								: ''
-						);
+					var $input = field.hide().find( ':input' );
+					var newVal =
+						'country' === key
+							? wc_address_i18n_params.base_country
+							: '';
+					if ( 'country' === key && $input.val() !== newVal ) {
+						$input.val( newVal );
+						// Defer: re-trigger after the loop so
+						// country-select.js re-fires the event with
+						// the correct country for state required/label.
+						countryChanged = $input;
+					} else {
+						$input.val( newVal );
+					}
 					localeHiddenCount++;
 				} else if ( 'state' !== key ) {
 					// State field visibility is managed by country-select.js
@@ -166,6 +173,16 @@ jQuery( function ( $ ) {
 					field.addClass( fieldLocale.class.join( ' ' ) );
 				}
 			} );
+
+			// If the hidden-country value was changed to the store base
+			// country, re-trigger change so country-select.js re-fires
+			// country_to_state_changing with the correct country. This
+			// ensures state required/label/visibility is resolved against
+			// the base country locale rather than the initial value.
+			if ( countryChanged ) {
+				countryChanged.trigger( 'change' );
+				return; // The re-triggered event will re-run this handler.
+			}
 
 			// Hide the shipping calculator toggle if all its fields are
 			// locale-hidden. We track counts during the loop above rather
