@@ -133,17 +133,18 @@ class SingleProduct extends AbstractBlock {
 	 */
 	protected function replace_post_for_single_product_inner_block( $block, &$context ) {
 		if ( $this->single_product_inner_blocks_names ) {
-			$block_inside_single_product = array_filter(
-				$this->single_product_inner_blocks_names,
-				function ( $inner_block_name ) use ( $block ) {
-					return $inner_block_name === $block['blockName'];
-				}
-			);
+			// Find the block index in $this->single_product_inner_blocks_names
+			// starting from the end.
+			$block_index = count( $this->single_product_inner_blocks_names ) - array_search( $block['blockName'], array_reverse( $this->single_product_inner_blocks_names ), true ) - 1;
 
-			if ( $block_inside_single_product ) {
+			if ( $block_index ) {
 				$block_name = $block['blockName'];
 
-				array_pop( $this->single_product_inner_blocks_names );
+				// Remove all blocks after the current one. In some cases, like
+				// in the Product Gallery block, inner blocks are rendered
+				// directly by the parent block, so we need to skip them.
+				$this->single_product_inner_blocks_names = array_slice( $this->single_product_inner_blocks_names, 0, $block_index );
+
 				/**
 				 * This is a temporary fix to ensure the Post Title and Excerpt blocks work as expected
 				 * until Gutenberg versions 15.2 and 15.6 are included in the core of WordPress.
