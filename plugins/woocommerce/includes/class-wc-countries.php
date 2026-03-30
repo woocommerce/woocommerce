@@ -838,7 +838,20 @@ class WC_Countries {
 				'autocomplete' => 'postal-code',
 				'priority'     => 90,
 			),
+			'phone'      => array(
+				'label'        => __( 'Phone', 'woocommerce' ),
+				'required'     => 'required' === CartCheckoutUtils::get_phone_field_visibility(),
+				'type'         => 'tel',
+				'class'        => array( 'form-row-wide' ),
+				'validate'     => array( 'phone' ),
+				'autocomplete' => 'tel',
+				'priority'     => 100,
+			),
 		);
+
+		if ( 'hidden' === CartCheckoutUtils::get_phone_field_visibility() ) {
+			unset( $fields['phone'] );
+		}
 
 		if ( 'hidden' === CartCheckoutUtils::get_company_field_visibility() ) {
 			unset( $fields['company'] );
