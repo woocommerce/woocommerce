@@ -1,4 +1,0 @@
-Significance: minor
-Type: enhancement
-
-Use the configured email subject from WC_Email settings when sending preview emails instead of the raw post title.

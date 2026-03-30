@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add formatted_weight and formatted_dimensions to Store API ProductSchema
