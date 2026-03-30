@@ -2029,7 +2029,9 @@ if ( ! function_exists( 'woocommerce_grouped_add_to_cart' ) ) {
 			return;
 		}
 
-		$products = array_filter( array_map( 'wc_get_product', $product->get_children() ), 'wc_products_array_filter_visible_grouped' );
+		$child_ids = $product->get_children();
+		_prime_post_caches( $child_ids );
+		$products = array_filter( array_map( 'wc_get_product', $child_ids ), 'wc_products_array_filter_visible_grouped' );
 
 		if ( $products ) {
 			wc_get_template(

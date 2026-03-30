@@ -4,7 +4,11 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Logging;
 
+use Automattic\WooCommerce\Internal\Admin\Logging\FileV2\FileController;
+use Automattic\WooCommerce\Internal\Admin\Logging\LogHandlerFileV2;
+use Automattic\WooCommerce\Internal\Admin\Logging\Settings;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
+use Automattic\WooCommerce\Internal\Logging\OrderLogsCleanupHelper;
 use Automattic\WooCommerce\Internal\Logging\OrderLogsDeletionProcessor;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
@@ -12,9 +16,9 @@ use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Testing\Tools\TestingContainer;
 
 /**
- * Tests for the OrderLogsDeletionProcessor class.
+ * Tests for the OrderLogsDeletionProcessor and OrderLogsCleanupHelper classes.
  */
-class OrderLogsDeletionProcessorTest extends \WC_Unit_Test_Case {
+class OrderLogsCleanupTest extends \WC_Unit_Test_Case {
 	use HPOSToggleTrait;
 
 	/**
@@ -37,6 +41,13 @@ class OrderLogsDeletionProcessorTest extends \WC_Unit_Test_Case {
 	 * @var OrderLogsDeletionProcessor
 	 */
 	private OrderLogsDeletionProcessor $sut;
+
+	/**
+	 * The cleanup helper instance.
+	 *
+	 * @var OrderLogsCleanupHelper
+	 */
+	private OrderLogsCleanupHelper $sut_cleanup_helper;
 
 	/**
 	 * The DI container to use.
@@ -97,8 +108,13 @@ class OrderLogsDeletionProcessorTest extends \WC_Unit_Test_Case {
 		global $wpdb;
 		$wpdb->delete( $wpdb->prefix . 'wc_orders_meta', array( 'meta_key' => '_debug_log_source_pending_deletion' ) );
 		$wpdb->delete( $wpdb->postmeta, array( 'meta_key' => '_debug_log_source_pending_deletion' ) );
+		$wpdb->delete( $wpdb->prefix . 'wc_orders_meta', array( 'meta_key' => '_debug_log_source' ) );
+		$wpdb->delete( $wpdb->postmeta, array( 'meta_key' => '_debug_log_source' ) );
 
-		$this->sut = $this->container->get( OrderLogsDeletionProcessor::class );
+		self::delete_all_log_files();
+
+		$this->sut                = $this->container->get( OrderLogsDeletionProcessor::class );
+		$this->sut_cleanup_helper = $this->container->get( OrderLogsCleanupHelper::class );
 
 		$this->register_legacy_proxy_function_mocks(
 			array(
@@ -114,6 +130,7 @@ class OrderLogsDeletionProcessorTest extends \WC_Unit_Test_Case {
 	 * Runs after each test.
 	 */
 	public function tearDown(): void {
+		self::delete_all_log_files();
 		parent::tearDown();
 		if ( $this->data_store_filter_callback ) {
 				remove_filter( 'woocommerce_order_data_store', $this->data_store_filter_callback, 99999 );
@@ -442,6 +459,81 @@ class OrderLogsDeletionProcessorTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox cleanup() deletes old place-order-debug log files whose modification date is at least 3 days in the past, but keeps recent ones.
+	 */
+	public function test_cleanup_deletes_old_log_files_but_keeps_recent_ones(): void {
+		$handler         = new LogHandlerFileV2();
+		$file_controller = wc_get_container()->get( FileController::class );
+
+		$handler->handle( time(), 'debug', 'old log entry', array( 'source' => 'place-order-debug-old' ) );
+		$handler->handle( time(), 'debug', 'recent log entry', array( 'source' => 'place-order-debug-recent' ) );
+
+		$old_files = $file_controller->get_files( array( 'source' => 'place-order-debug-old' ) );
+		$this->assertCount( 1, $old_files );
+
+		// Backdate the "old" file's modification time to 4 days ago.
+		touch( $old_files[0]->get_path(), time() - 4 * DAY_IN_SECONDS ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_touch
+
+		$recent_files = $file_controller->get_files( array( 'source' => 'place-order-debug-recent' ) );
+		$this->assertCount( 1, $recent_files );
+
+		$this->sut_cleanup_helper->cleanup();
+
+		$this->assertCount( 0, $file_controller->get_files( array( 'source' => 'place-order-debug-old' ) ) );
+		$this->assertCount( 1, $file_controller->get_files( array( 'source' => 'place-order-debug-recent' ) ) );
+	}
+
+	/**
+	 * @testdox cleanup() does not touch orders that have _debug_log_source_pending_deletion meta (handled by the batch processor) even if older than 3 days.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $with_hpos Test with HPOS active or not.
+	 */
+	public function test_cleanup_does_not_touch_orders_with_pending_deletion_meta( bool $with_hpos ): void {
+		$this->setup_hpos_and_reset_container( $with_hpos );
+
+		$order = OrderHelper::create_order();
+		$order->set_date_created( strtotime( '-5 days' ) );
+		$order->add_meta_data( '_debug_log_source_pending_deletion', 'place-order-debug-batch', true );
+		$order->save();
+
+		$this->sut_cleanup_helper->cleanup();
+
+		$this->assertEquals( 1, $this->sut->get_total_pending_count() );
+	}
+
+	/**
+	 * @testdox cleanup() deletes _debug_log_source meta only from orders older than 3 days and leaves recent ones untouched.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $with_hpos Test with HPOS active or not.
+	 */
+	public function test_cleanup_deletes_stale_debug_log_source_meta_only_when_old( bool $with_hpos ): void {
+		$this->setup_hpos_and_reset_container( $with_hpos );
+
+		$old_order = OrderHelper::create_order();
+		$old_order->set_date_created( strtotime( '-5 days' ) );
+		$old_order->add_meta_data( '_debug_log_source', 'place-order-debug-stale', true );
+		$old_order->save();
+
+		$recent_order = OrderHelper::create_order();
+		$recent_order->add_meta_data( '_debug_log_source', 'place-order-debug-fresh', true );
+		$recent_order->save();
+
+		$this->sut_cleanup_helper->cleanup();
+
+		$old_order_reloaded = wc_get_order( $old_order->get_id() );
+		$this->assertEmpty( $old_order_reloaded->get_meta( '_debug_log_source' ) );
+
+		$recent_order_reloaded = wc_get_order( $recent_order->get_id() );
+		$this->assertEquals( 'place-order-debug-fresh', $recent_order_reloaded->get_meta( '_debug_log_source' ) );
+	}
+
+	/**
 	 * Initialize HPOS and reset the DI container resolutions
 	 * (resetting the container is needed because the tested class checks for HPOS activation
 	 * only once when the DI container first retrieves it).
@@ -451,6 +543,24 @@ class OrderLogsDeletionProcessorTest extends \WC_Unit_Test_Case {
 	private function setup_hpos_and_reset_container( bool $enable_hpos ) {
 		$this->toggle_cot_feature_and_usage( $enable_hpos );
 		$this->container->reset_all_resolved();
-		$this->sut = $this->container->get( OrderLogsDeletionProcessor::class );
+		$this->sut                = $this->container->get( OrderLogsDeletionProcessor::class );
+		$this->sut_cleanup_helper = $this->container->get( OrderLogsCleanupHelper::class );
+	}
+
+	/**
+	 * Delete all place-order-debug log files using the FileV2 controller.
+	 */
+	private static function delete_all_log_files(): void {
+		$file_controller = wc_get_container()->get( FileController::class );
+		$files           = $file_controller->get_files(
+			array(
+				'source'   => 'place-order-debug',
+				'per_page' => 1000,
+			)
+		);
+
+		if ( is_array( $files ) && ! empty( $files ) ) {
+			$file_controller->delete_files( array_map( fn( $file ) => $file->get_file_id(), $files ) );
+		}
 	}
 }
