@@ -76,6 +76,7 @@ const renderIntervalSelector = ( {
 	return (
 		<SelectControl
 			__next40pxDefaultSize
+			__nextHasNoMarginBottom
 			className="woocommerce-chart__interval-select"
 			value={ chartInterval }
 			options={ allowedIntervals.map( ( allowedInterval ) => ( {
