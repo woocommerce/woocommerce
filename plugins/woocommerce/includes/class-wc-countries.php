@@ -766,6 +766,8 @@ class WC_Countries {
 			$address_2_placeholder = $address_2_label;
 		}
 
+		$phone_visibility = CartCheckoutUtils::get_phone_field_visibility();
+
 		$fields = array(
 			'first_name' => array(
 				'label'        => __( 'First name', 'woocommerce' ),
@@ -840,7 +842,7 @@ class WC_Countries {
 			),
 			'phone'      => array(
 				'label'        => __( 'Phone', 'woocommerce' ),
-				'required'     => 'required' === CartCheckoutUtils::get_phone_field_visibility(),
+				'required'     => 'required' === $phone_visibility,
 				'type'         => 'tel',
 				'class'        => array( 'form-row-wide' ),
 				'validate'     => array( 'phone' ),
@@ -849,7 +851,7 @@ class WC_Countries {
 			),
 		);
 
-		if ( 'hidden' === CartCheckoutUtils::get_phone_field_visibility() ) {
+		if ( 'hidden' === $phone_visibility ) {
 			unset( $fields['phone'] );
 		}
 

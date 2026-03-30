@@ -148,14 +148,14 @@ jQuery( function ( $ ) {
 						'country' === key
 							? wc_address_i18n_params.base_country
 							: '';
-					if ( 'country' === key && $input.val() !== newVal ) {
-						$input.val( newVal );
-						// Defer: re-trigger after the loop so
-						// country-select.js re-fires the event with
-						// the correct country for state required/label.
+					var prevVal = $input.val();
+					$input.val( newVal );
+					// When country value changes, defer a re-trigger
+					// after the loop so country-select.js re-fires the
+					// event with the correct country for state
+					// required/label resolution.
+					if ( 'country' === key && prevVal !== newVal ) {
 						countryChanged = $input;
-					} else {
-						$input.val( newVal );
 					}
 					localeHiddenCount++;
 				} else if ( 'state' !== key ) {
