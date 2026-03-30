@@ -37,12 +37,6 @@ test.describe( 'Checkout Block → Locale hides country and address fields', () 
 		await frontendUtils.goToCheckout();
 	} );
 
-	test.afterEach( async ( { requestUtils } ) => {
-		await requestUtils.deactivatePlugin(
-			'woocommerce-blocks-test-locale-hide-country'
-		);
-	} );
-
 	test( 'Hidden address fields are not visible and country is not shown', async ( {
 		page,
 	} ) => {
