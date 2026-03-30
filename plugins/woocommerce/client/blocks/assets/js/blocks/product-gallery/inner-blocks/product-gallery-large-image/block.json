@@ -6,7 +6,7 @@
 	"description": "Container for the current gallery image, navigation buttons, zoom functionality and more.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
-	"usesContext": [ "postId", "hoverZoom", "fullScreenOnClick" ],
+	"usesContext": [ "postId", "hoverZoom", "fullScreenOnClick", "singleProduct" ],
 	"supports": {
 		"interactivity": true
 	},
