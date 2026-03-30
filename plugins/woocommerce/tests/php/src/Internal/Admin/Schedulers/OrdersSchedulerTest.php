@@ -4,6 +4,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Schedulers;
 
 use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
+use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
 use WC_Unit_Test_Case;
 use Automattic\WooCommerce\Admin\Features\Features;
 
@@ -34,6 +35,7 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 		delete_option( OrdersScheduler::LAST_PROCESSED_ORDER_DATE_OPTION );
 		delete_option( OrdersScheduler::LAST_PROCESSED_ORDER_ID_OPTION );
 		delete_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION );
+		delete_option( OrdersScheduler::LEGACY_IMMEDIATE_IMPORT_OPTION );
 
 		// Clean up any scheduled actions.
 		$this->clear_scheduled_batch_processor();
@@ -202,6 +204,242 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 			$scheduled_time,
 			as_next_scheduled_action( $action_hook ),
 			'Batch processor should remain scheduled when option stays as scheduled import'
+		);
+	}
+
+	/**
+	 * @testdox Should identify order with _wcpay_mode test as a test order.
+	 */
+	public function test_is_test_order_with_wcpay_test_mode(): void {
+		$order = \WC_Helper_Order::create_order();
+		$order->update_meta_data( '_wcpay_mode', 'test' );
+		$order->save();
+
+		$this->assertTrue( OrdersScheduler::is_test_order( $order ) );
+	}
+
+	/**
+	 * @testdox Should not identify a normal order as a test order.
+	 */
+	public function test_is_test_order_with_normal_order(): void {
+		$order = \WC_Helper_Order::create_order();
+
+		$this->assertFalse( OrdersScheduler::is_test_order( $order ) );
+	}
+
+	/**
+	 * @testdox Should not identify an order with _wcpay_mode live as a test order.
+	 */
+	public function test_is_test_order_with_wcpay_live_mode(): void {
+		$order = \WC_Helper_Order::create_order();
+		$order->update_meta_data( '_wcpay_mode', 'live' );
+		$order->save();
+
+		$this->assertFalse( OrdersScheduler::is_test_order( $order ) );
+	}
+
+	/**
+	 * @testdox Should identify a refund of a test order as a test order.
+	 */
+	public function test_is_test_order_with_refund_of_test_order(): void {
+		$order = \WC_Helper_Order::create_order();
+		$order->update_meta_data( '_wcpay_mode', 'test' );
+		$order->save();
+
+		$refund = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 10,
+				'reason'   => 'Test refund',
+			)
+		);
+
+		$this->assertTrue( OrdersScheduler::is_test_order( $refund ) );
+	}
+
+	/**
+	 * @testdox Should not identify a refund of a normal order as a test order.
+	 */
+	public function test_is_test_order_with_refund_of_normal_order(): void {
+		$order = \WC_Helper_Order::create_order();
+
+		$refund = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 10,
+				'reason'   => 'Test refund',
+			)
+		);
+
+		$this->assertFalse( OrdersScheduler::is_test_order( $refund ) );
+	}
+
+	/**
+	 * @testdox Should allow the woocommerce_analytics_is_test_order filter to mark a normal order as a test order.
+	 */
+	public function test_is_test_order_filter_can_override(): void {
+		$order = \WC_Helper_Order::create_order();
+
+		// Order has no _wcpay_mode meta, so default is false.
+		$this->assertFalse( OrdersScheduler::is_test_order( $order ) );
+
+		// Override via filter to mark it as test.
+		add_filter( 'woocommerce_analytics_is_test_order', '__return_true' );
+
+		$this->assertTrue( OrdersScheduler::is_test_order( $order ) );
+
+		remove_filter( 'woocommerce_analytics_is_test_order', '__return_true' );
+	}
+
+	/**
+	 * @testdox Should allow the woocommerce_analytics_is_test_order filter to include a test order in analytics.
+	 */
+	public function test_is_test_order_filter_can_allow_test_order(): void {
+		$order = \WC_Helper_Order::create_order();
+		$order->update_meta_data( '_wcpay_mode', 'test' );
+		$order->save();
+
+		// Default is true because _wcpay_mode is 'test'.
+		$this->assertTrue( OrdersScheduler::is_test_order( $order ) );
+
+		// Override via filter to allow it.
+		add_filter( 'woocommerce_analytics_is_test_order', '__return_false' );
+
+		$this->assertFalse( OrdersScheduler::is_test_order( $order ) );
+
+		remove_filter( 'woocommerce_analytics_is_test_order', '__return_false' );
+	}
+
+	/**
+	 * @testdox Should return false for a refund whose parent order has been deleted.
+	 */
+	public function test_is_test_order_with_orphaned_refund(): void {
+		$order = \WC_Helper_Order::create_order();
+		$order->update_meta_data( '_wcpay_mode', 'test' );
+		$order->save();
+
+		$refund = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 10,
+				'reason'   => 'Test refund',
+			)
+		);
+
+		// Delete the parent order to create an orphaned refund.
+		$order->delete( true );
+
+		$this->assertFalse( OrdersScheduler::is_test_order( $refund ) );
+	}
+
+	/**
+	 * @testdox Should pass the parent order to the filter when checking a refund.
+	 */
+	public function test_is_test_order_filter_receives_parent_order_for_refund(): void {
+		$order = \WC_Helper_Order::create_order();
+		$order->save();
+
+		$refund = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 10,
+				'reason'   => 'Test refund',
+			)
+		);
+
+		$received_order  = null;
+		$filter_callback = function ( $is_test, $filter_order ) use ( &$received_order ) {
+			$received_order = $filter_order;
+			return $is_test;
+		};
+		add_filter( 'woocommerce_analytics_is_test_order', $filter_callback, 10, 2 );
+
+		OrdersScheduler::is_test_order( $refund );
+
+		$this->assertNotNull( $received_order );
+		$this->assertEquals( $order->get_id(), $received_order->get_id() );
+
+		remove_filter( 'woocommerce_analytics_is_test_order', $filter_callback );
+	}
+
+	/**
+	 * @testdox Should return -1 from DataStore update when given a test order.
+	 */
+	public function test_datastore_update_skips_test_order(): void {
+		$order = \WC_Helper_Order::create_order();
+		$order->update_meta_data( '_wcpay_mode', 'test' );
+		$order->save();
+
+		$result = OrdersStatsDataStore::update( $order );
+
+		$this->assertSame( -1, $result );
+	}
+
+	/**
+	 * @testdox Should return -1 from DataStore sync_order when given a test order ID.
+	 */
+	public function test_datastore_sync_order_skips_test_order(): void {
+		$order = \WC_Helper_Order::create_order();
+		$order->update_meta_data( '_wcpay_mode', 'test' );
+		$order->save();
+
+		$result = OrdersStatsDataStore::sync_order( $order->get_id() );
+
+		$this->assertSame( -1, $result );
+	}
+
+	/**
+	 * @testdox is_scheduled_import_enabled falls back to legacy option when new option is absent.
+	 */
+	public function test_is_scheduled_import_enabled_falls_back_to_legacy_option(): void {
+		// Simulate a pre-10.5.0 store that opted into scheduled imports (legacy 'no' = not immediate = scheduled).
+		delete_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION );
+		update_option( OrdersScheduler::LEGACY_IMMEDIATE_IMPORT_OPTION, 'no' );
+
+		$reflection = new \ReflectionClass( OrdersScheduler::class );
+		$method     = $reflection->getMethod( 'is_scheduled_import_enabled' );
+		$method->setAccessible( true );
+
+		$this->assertTrue(
+			$method->invoke( null ),
+			'Legacy option "no" (not immediate) should be interpreted as scheduled import enabled'
+		);
+	}
+
+	/**
+	 * @testdox is_scheduled_import_enabled falls back to legacy option 'yes' correctly.
+	 */
+	public function test_is_scheduled_import_enabled_falls_back_to_legacy_option_yes(): void {
+		// Simulate a pre-10.5.0 store with default immediate import (legacy 'yes' = immediate = not scheduled).
+		delete_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION );
+		update_option( OrdersScheduler::LEGACY_IMMEDIATE_IMPORT_OPTION, 'yes' );
+
+		$reflection = new \ReflectionClass( OrdersScheduler::class );
+		$method     = $reflection->getMethod( 'is_scheduled_import_enabled' );
+		$method->setAccessible( true );
+
+		$this->assertFalse(
+			$method->invoke( null ),
+			'Legacy option "yes" (immediate) should be interpreted as scheduled import disabled'
+		);
+	}
+
+	/**
+	 * @testdox is_scheduled_import_enabled prefers new option over legacy option when they conflict.
+	 */
+	public function test_is_scheduled_import_enabled_prefers_new_option(): void {
+		// New option says "not scheduled", legacy says "scheduled" (inverted 'no' = scheduled).
+		// If the new option takes precedence, result should be false.
+		update_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION, 'no' );
+		update_option( OrdersScheduler::LEGACY_IMMEDIATE_IMPORT_OPTION, 'no' );
+
+		$reflection = new \ReflectionClass( OrdersScheduler::class );
+		$method     = $reflection->getMethod( 'is_scheduled_import_enabled' );
+		$method->setAccessible( true );
+
+		$this->assertFalse(
+			$method->invoke( null ),
+			'New option "no" should take precedence over legacy option "no" (which would mean scheduled)'
 		);
 	}
 

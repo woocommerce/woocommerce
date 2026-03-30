@@ -25,9 +25,9 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 	/**
 	 * Render the block.
 	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content Block content.
-	 * @param WP_Block $block Block instance.
+	 * @param array     $attributes Block attributes.
+	 * @param string    $content Block content.
+	 * @param \WP_Block $block Block instance.
 	 * @return string Rendered block output.
 	 */
 	protected function render( $attributes, $content, $block ): string {
@@ -133,9 +133,9 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 	/**
 	 * Render the attribute options as pills.
 	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content Block content.
-	 * @param WP_Block $block Block instance.
+	 * @param array     $attributes Block attributes.
+	 * @param string    $content Block content.
+	 * @param \WP_Block $block Block instance.
 	 * @return string The pills.
 	 */
 	protected function render_pills( $attributes, $content, $block ) {
@@ -190,7 +190,7 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 					'id'              => $attribute_id,
 					'aria-labelledby' => $attribute_id . '_label',
 					'data-wp-context' => array(
-						'name'          => $attribute_slug,
+						'name'          => wc_attribute_label( $block->context['woocommerce/attributeName'] ),
 						'options'       => $attribute_terms,
 						'selectedValue' => $this->get_default_selected_attribute( $attribute_slug, $attribute_terms ),
 						'focused'       => '',
@@ -206,9 +206,9 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 	/**
 	 * Render the attribute options as a dropdown.
 	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content Block content.
-	 * @param WP_Block $block Block instance.
+	 * @param array     $attributes Block attributes.
+	 * @param string    $content Block content.
+	 * @param \WP_Block $block Block instance.
 	 * @return string The dropdown.
 	 */
 	protected function render_dropdown( $attributes, $content, $block ) {
@@ -264,7 +264,7 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 					'class'              => 'wc-block-add-to-cart-with-options-variation-selector-attribute-options__dropdown',
 					'id'                 => $attribute_id,
 					'data-wp-context'    => array(
-						'name'          => $attribute_slug,
+						'name'          => wc_attribute_label( $block->context['woocommerce/attributeName'] ),
 						'options'       => $attribute_terms,
 						'selectedValue' => $selected_attribute,
 						'autoselect'    => $autoselect,

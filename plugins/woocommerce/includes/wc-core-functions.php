@@ -11,6 +11,7 @@
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
+use Automattic\WooCommerce\Internal\Logging\OrderLogsCleanupHelper;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -2025,6 +2026,8 @@ function wc_cleanup_logs() {
 	if ( is_callable( array( $logger, 'clear_expired_logs' ) ) ) {
 		$logger->clear_expired_logs();
 	}
+
+	wc_get_container()->get( OrderLogsCleanupHelper::class )->cleanup();
 }
 add_action( 'woocommerce_cleanup_logs', 'wc_cleanup_logs' );
 

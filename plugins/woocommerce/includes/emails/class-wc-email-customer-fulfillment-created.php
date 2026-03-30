@@ -5,7 +5,7 @@
  * @package WooCommerce\Emails
  */
 
-use Automattic\WooCommerce\Internal\Fulfillments\Fulfillment;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -87,12 +87,35 @@ if ( ! class_exists( 'WC_Email_Customer_Fulfillment_Created', false ) ) :
 		}
 
 		/**
+		 * Get the total quantity of items in the fulfillment.
+		 *
+		 * @return int
+		 */
+		private function get_fulfillment_item_count() {
+			if ( ! $this->fulfillment ) {
+				return 1;
+			}
+
+			return array_reduce(
+				$this->fulfillment->get_items(),
+				function ( int $carry, array $item ) {
+					return $carry + (int) $item['qty'];
+				},
+				0
+			);
+		}
+
+		/**
 		 * Get email subject.
 		 *
 		 * @since  3.1.0
+		 * @since  10.7.0 Added plural form for multi-item fulfillments.
 		 * @return string
 		 */
 		public function get_default_subject() {
+			if ( $this->get_fulfillment_item_count() > 1 ) {
+				return __( 'Items from {site_title} order {order_number} have been fulfilled!', 'woocommerce' );
+			}
 			return __( 'An item from {site_title} order {order_number} has been fulfilled!', 'woocommerce' );
 		}
 
@@ -100,9 +123,13 @@ if ( ! class_exists( 'WC_Email_Customer_Fulfillment_Created', false ) ) :
 		 * Get email heading.
 		 *
 		 * @since  3.1.0
+		 * @since  10.7.0 Added plural form for multi-item fulfillments.
 		 * @return string
 		 */
 		public function get_default_heading() {
+			if ( $this->get_fulfillment_item_count() > 1 ) {
+				return __( 'Your items are on the way!', 'woocommerce' );
+			}
 			return __( 'Your item is on the way!', 'woocommerce' );
 		}
 

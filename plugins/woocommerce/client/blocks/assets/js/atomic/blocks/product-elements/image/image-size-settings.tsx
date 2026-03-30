@@ -82,6 +82,7 @@ export const ImageSizeSettings = ( {
 			label={ __( 'Image size', 'woocommerce' ) }
 		>
 			<UnitControl
+				__next40pxDefaultSize
 				label={ __( 'Height', 'woocommerce' ) }
 				onChange={ ( value: string ) => {
 					setAttributes( { height: value } );
@@ -90,6 +91,7 @@ export const ImageSizeSettings = ( {
 				units={ sizeUnits }
 			/>
 			<UnitControl
+				__next40pxDefaultSize
 				label={ __( 'Width', 'woocommerce' ) }
 				onChange={ ( value: string ) => {
 					setAttributes( { width: value } );
@@ -103,6 +105,8 @@ export const ImageSizeSettings = ( {
 					label={ __( 'Scale', 'woocommerce' ) }
 				>
 					<ToggleGroupControl
+						__next40pxDefaultSize
+						__nextHasNoMarginBottom
 						label={ __( 'Scale', 'woocommerce' ) }
 						value={ scale }
 						help={ scaleHelp[ scale ] }
