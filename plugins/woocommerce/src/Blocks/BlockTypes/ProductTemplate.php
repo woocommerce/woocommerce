@@ -194,6 +194,6 @@ class ProductTemplate extends AbstractBlock {
 		if ( ! empty( $metadata['name'] ) && 'woocommerce/product-template' === $metadata['name'] ) {
 			$settings['skip_inner_blocks'] = true;
 		}
-			return $settings;
+		return $settings;
 	}
 }

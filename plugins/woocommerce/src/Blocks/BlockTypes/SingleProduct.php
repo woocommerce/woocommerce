@@ -133,9 +133,16 @@ class SingleProduct extends AbstractBlock {
 	 */
 	protected function replace_post_for_single_product_inner_block( $block, &$context ) {
 		if ( $this->single_product_inner_blocks_names ) {
-			$block_name = end( $this->single_product_inner_blocks_names );
+			$block_inside_single_product = array_filter(
+				$this->single_product_inner_blocks_names,
+				function ( $inner_block_name ) use ( $block ) {
+					return $inner_block_name === $block['blockName'];
+				}
+			);
 
-			if ( $block_name === $block['blockName'] ) {
+			if ( $block_inside_single_product ) {
+				$block_name = $block['blockName'];
+
 				array_pop( $this->single_product_inner_blocks_names );
 				/**
 				 * This is a temporary fix to ensure the Post Title and Excerpt blocks work as expected
