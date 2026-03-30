@@ -1124,7 +1124,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 	public function test_get_payment_gateway_details_skips_suggestion_matching_for_offline_pms() {
 		// Arrange.
 		$fake_gateway = new FakePaymentGateway(
-			'bacs',
+			WC_Gateway_BACS::ID,
 			array(
 				'enabled'            => true,
 				'title'              => 'Direct bank transfer',
