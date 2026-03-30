@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix template overrides with missing version headers being incorrectly flagged as outdated, and render overrides as individual rows in the System Status report for improved readability.

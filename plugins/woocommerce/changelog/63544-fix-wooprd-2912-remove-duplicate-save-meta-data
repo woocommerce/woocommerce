@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix duplicate "Fulfillment updated" order notes caused by redundant save_meta_data() call in OrderFulfillmentsRestController.

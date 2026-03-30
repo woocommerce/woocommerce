@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix PHP "Undefined property" warnings in `set_order_props_from_data` when HPOS Data Caching is enabled and cached objects have missing properties.

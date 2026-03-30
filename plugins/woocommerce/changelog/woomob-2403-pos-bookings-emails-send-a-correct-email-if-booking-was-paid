@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add server-side auto-selection of email template when template_id is omitted in send_email endpoint.

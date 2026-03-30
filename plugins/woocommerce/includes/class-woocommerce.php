@@ -1661,7 +1661,7 @@ final class WooCommerce {
 
 		as_schedule_recurring_action( $tomorrow_3am, DAY_IN_SECONDS, 'woocommerce_cleanup_rate_limits_wrapper', array(), 'woocommerce', true );
 
-		as_schedule_recurring_action( time(), DAY_IN_SECONDS, 'wc_admin_daily_wrapper', array(), 'woocommerce', true );
+		as_schedule_recurring_action( $tomorrow_3am, DAY_IN_SECONDS, 'wc_admin_daily_wrapper', array(), 'woocommerce', true );
 
 		// Note: this is potentially redundant when the core package exists.
 		as_schedule_single_action( time() + 10, 'generate_category_lookup_table_wrapper', array(), 'woocommerce', true );
