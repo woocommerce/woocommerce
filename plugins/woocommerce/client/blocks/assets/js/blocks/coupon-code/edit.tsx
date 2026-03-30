@@ -25,6 +25,14 @@ interface Coupon {
 	code: string;
 }
 
+const DEFAULT_COUPON_STATUSES = [
+	'draft',
+	'future',
+	'pending',
+	'private',
+	'publish',
+] as const;
+
 /**
  * Edit component for the Coupon Code block.
  *
@@ -90,10 +98,16 @@ export default function Edit( props: BlockEditProps ): JSX.Element {
 		setIsLoading( true );
 		abortControllerRef.current = new AbortController();
 
+		const params = new URLSearchParams( {
+			per_page: '20',
+			search,
+		} );
+		DEFAULT_COUPON_STATUSES.forEach( ( status ) => {
+			params.append( 'status[]', status );
+		} );
+
 		apiFetch< Coupon[] >( {
-			path: `/wc/v3/coupons?per_page=20&search=${ encodeURIComponent(
-				search
-			) }`,
+			path: `/wc/v3/coupons?${ params.toString() }`,
 			signal: abortControllerRef.current.signal,
 		} )
 			.then( ( results ) => {
