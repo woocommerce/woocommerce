@@ -65,7 +65,12 @@ class AddToCartWithOptions extends AbstractBlock {
 			$rendered_product = wc_get_product( $product_id );
 
 			if ( $rendered_product instanceof \WC_Product ) {
-				$template_part_path = $this->get_template_part_path( $rendered_product->get_type() );
+				$product_type       = $rendered_product->get_type();
+				$template_part_path = $this->get_template_part_path(
+					ProductType::VARIATION === $product_type
+						? ProductType::SIMPLE
+						: $product_type
+				);
 
 				if ( is_string( $template_part_path ) && '' !== $template_part_path && file_exists( $template_part_path ) ) {
 					wp_enqueue_script_module( 'woocommerce/add-to-cart-with-options' );
