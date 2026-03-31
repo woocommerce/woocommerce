@@ -3,16 +3,13 @@
  */
 import { __ } from '@wordpress/i18n';
 import { addFilter } from '@wordpress/hooks';
-import {
-	store as blockEditorStore,
-	InspectorControls,
-} from '@wordpress/block-editor';
+import { InspectorControls } from '@wordpress/block-editor';
 import {
 	createBlock,
 	type BlockEditProps,
 	type BlockInstance,
 } from '@wordpress/blocks';
-import { select, dispatch } from '@wordpress/data';
+import { useDispatch, useRegistry } from '@wordpress/data';
 import {
 	createInterpolateElement,
 	type ComponentType,
@@ -36,6 +33,9 @@ const isProductSummaryBlockVariation = ( props: BlockInstance ) => {
 };
 
 const UpgradeNotice = ( { clientId }: { clientId: string } ) => {
+	const registry = useRegistry();
+	const { replaceBlock } = useDispatch( 'core/block-editor' );
+
 	const notice = createInterpolateElement(
 		__(
 			"There's <strongText /> with important fixes and brand new features.",
@@ -53,12 +53,10 @@ const UpgradeNotice = ( { clientId }: { clientId: string } ) => {
 	const buttonLabel = __( 'Upgrade now (just this block)', 'woocommerce' );
 
 	const handleClick = () => {
-		const blocks =
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore No types for this exist yet.
-			select( blockEditorStore ).getBlocksByClientId( clientId );
+		const { getBlocksByClientId } = registry.select( 'core/block-editor' );
+		const blocks = getBlocksByClientId( clientId );
 
-		if ( blocks.length ) {
+		if ( blocks?.length && blocks[ 0 ] ) {
 			const currentBlock = blocks[ 0 ];
 			const {
 				excerptLength,
@@ -71,12 +69,7 @@ const UpgradeNotice = ( { clientId }: { clientId: string } ) => {
 				'woocommerce/product-summary',
 				restAttributes
 			);
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore No types for this exist yet.
-			dispatch( blockEditorStore ).replaceBlock(
-				clientId,
-				productSummaryBlock
-			);
+			replaceBlock( clientId, productSummaryBlock );
 		}
 	};
 
