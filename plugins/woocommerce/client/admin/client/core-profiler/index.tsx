@@ -148,9 +148,9 @@ const handleTrackingOption = assign( {
 	} ) => event.output !== 'no',
 } );
 
-const getStoreNameOption = fromPromise( async () => {
+const getStoreNameOption = fromPromise( () => {
 	const value = getSetting( 'siteTitle', '' );
-	return typeof value === 'string' ? value : '';
+	return Promise.resolve( typeof value === 'string' ? value : '' );
 } );
 
 const handleStoreNameOption = assign( {
