@@ -148,6 +148,8 @@ const handleTrackingOption = assign( {
 	} ) => event.output !== 'no',
 } );
 
+// Reading synchronously from wcSettings, but wrapped in fromPromise because
+// xstate's invoke with onDone/onError requires a promise-based actor.
 const getStoreNameOption = fromPromise( () => {
 	const value = getSetting( 'siteTitle', '' );
 	return Promise.resolve( typeof value === 'string' ? value : '' );
