@@ -66,17 +66,19 @@ const getSupportedCoreLocaleProps = (
 };
 
 /**
- * Country cannot be hidden via locale because it is the lookup key for all
- * other locale overrides — hiding it creates a chicken-and-egg problem.
- * Merchants who sell to a single country should use the "Sell to specific
- * countries" setting instead.
+ * Country cannot be hidden or optional via locale because it is the lookup
+ * key for all other locale overrides. Merchants who sell to a single country
+ * should use the "Sell to specific countries" setting instead.
  */
-const stripCountryHidden = ( field: Partial< Field > ): Partial< Field > => {
+const enforceCountryLocale = ( field: Partial< Field > ): Partial< Field > => {
+	const enforced: Partial< Field > = {};
 	if ( field.hidden ) {
-		const { hidden, ...rest } = field;
-		return rest;
+		enforced.hidden = undefined;
 	}
-	return field;
+	if ( field.required === false ) {
+		enforced.required = true;
+	}
+	return { ...field, ...enforced };
 };
 
 /**
@@ -127,7 +129,7 @@ const prepareFormFields = (
 					: {};
 			const localeConfig =
 				field === 'country'
-					? stripCountryHidden( rawLocaleConfig )
+					? enforceCountryLocale( rawLocaleConfig )
 					: rawLocaleConfig;
 
 			return {

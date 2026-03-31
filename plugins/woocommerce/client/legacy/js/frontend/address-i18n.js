@@ -126,8 +126,11 @@ jQuery( function ( $ ) {
 						.text( fieldLocale.label );
 				}
 
-				// Required.
-				if ( typeof fieldLocale.required !== 'undefined' ) {
+				// Required. Country is always required — it is the
+				// lookup key for locale resolution and cannot be optional.
+				if ( 'country' === key ) {
+					field_is_required( field, true );
+				} else if ( typeof fieldLocale.required !== 'undefined' ) {
 					field_is_required( field, fieldLocale.required );
 				} else {
 					field_is_required( field, false );
