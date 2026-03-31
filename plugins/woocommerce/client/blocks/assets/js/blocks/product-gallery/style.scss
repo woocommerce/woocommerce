@@ -57,19 +57,14 @@ $dialog-padding: 20px;
 
 	}
 
-	&:not(.wc-block-woocommerce-product-gallery-large-image__image--full-screen-on-click) :where(.wc-block-components-product-image > a)  {
-		cursor: default;
-	}
-
 	:where(.wc-block-woocommerce-product-gallery-large-image__image) {
 		display: block;
 		position: relative;
 		transition: all 0.1s linear;
 		z-index: 1;
 
-		// Keep the order in this way. The hoverZoom class should override the full-screen-on-click class when both are applied.
-		&:where(.wc-block-woocommerce-product-gallery-large-image__image--full-screen-on-click) {
-			cursor: pointer;
+		&:where(:not(.wc-block-woocommerce-product-gallery-large-image__image--full-screen-on-click)) {
+			cursor: default;
 		}
 
 		&:where(.wc-block-woocommerce-product-gallery-large-image__image--hoverZoom) {
