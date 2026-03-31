@@ -10,7 +10,7 @@ const getInputElementFromEvent = (
 	const target = event.target as HTMLButtonElement;
 
 	const inputElement = target.parentElement?.querySelector(
-		'.input-text.qty.text'
+		'.wc-block-components-quantity-selector__input'
 	) as HTMLInputElement | null | undefined;
 
 	return inputElement;
