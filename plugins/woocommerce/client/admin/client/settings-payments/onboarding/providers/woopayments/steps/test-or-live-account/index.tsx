@@ -50,16 +50,6 @@ const TestOrLiveAccountStep = () => {
 								'woocommerce'
 							) }
 						</h1>
-						<div className="woocommerce-woopayments-modal__content__item">
-							<div className="woocommerce-woopayments-modal__content__item__description">
-								<p>
-									{ __(
-										'Activate payments to accept real orders and process transactions.',
-										'woocommerce'
-									) }
-								</p>
-							</div>
-						</div>
 						{ currentStep?.errors &&
 							currentStep.errors.length > 0 && (
 								<Notice
@@ -92,27 +82,15 @@ const TestOrLiveAccountStep = () => {
 								<div className="woocommerce-woopayments-modal__content__item-flex__description">
 									<h3>
 										{ __(
-											'Activate real payments',
+											'Activate payments in two easy steps',
 											'woocommerce'
 										) }
 									</h3>
 									<div>
-										{ interpolateComponents( {
-											mixedString: __(
-												'Provide some additional details about your business to process real transactions. {{link}}Learn more{{/link}}',
-												'woocommerce'
-											),
-											components: {
-												link: (
-													<Link
-														href="https://woocommerce.com/document/woopayments/startup-guide/#sign-up-process"
-														target="_blank"
-														rel="noreferrer"
-														type="external"
-													/>
-												),
-											},
-										} ) }
+										{ __(
+											'Answer a few questions and verify your business details with our payments partner, including owner, address, and bank information.',
+											'woocommerce'
+										) }
 									</div>
 								</div>
 							</div>
@@ -190,70 +168,74 @@ const TestOrLiveAccountStep = () => {
 								isBusy={ isContinueButtonLoading }
 								disabled={ isContinueButtonLoading }
 							>
-								{ __(
-									'Start accepting payments',
+								{ __( 'Activate payments', 'woocommerce' ) }
+							</Button>
+							<Link
+								className="woocommerce-payments-test-or-live-account-step__learn-more"
+								href="https://woocommerce.com/document/woopayments/startup-guide/#sign-up-process"
+								target="_blank"
+								rel="noreferrer"
+								type="external"
+								aria-label={ __(
+									'Learn more about the WooPayments sign-up process (opens in a new tab)',
 									'woocommerce'
 								) }
-							</Button>
+							>
+								{ __( 'Learn more', 'woocommerce' ) }
+							</Link>
+						</div>
 
-							{ canCreateTestAccount && (
-								<>
-									<div className="woocommerce-payments-test-or-live-account-step__success_content_or-divider">
-										<hr />
-										{ __( 'OR', 'woocommerce' ) }
-										<hr />
-									</div>
-
-									<div className="woocommerce-woopayments-modal__content__item-flex">
-										<img
-											src={
-												WC_ASSET_URL +
-												'images/icons/post-list.svg'
-											}
-											alt=""
-											role="presentation"
-										/>
-										<div className="woocommerce-woopayments-modal__content__item-flex__description">
-											<h3>
-												{ __(
-													'Test payments first, activate later',
-													'woocommerce'
-												) }
-											</h3>
-											<div>
-												<p>
-													{ interpolateComponents( {
-														mixedString: __(
-															"A test account will be created for you to {{link}}test payments on your store{{/link}}. You'll need to activate payments later to process real transactions.",
-															'woocommerce'
+						{ canCreateTestAccount && (
+							<div className="woocommerce-payments-test-or-live-account-step__success-whats-next">
+								<div className="woocommerce-woopayments-modal__content__item-flex">
+									<img
+										src={
+											WC_ASSET_URL +
+											'images/icons/post-list.svg'
+										}
+										alt=""
+										role="presentation"
+									/>
+									<div className="woocommerce-woopayments-modal__content__item-flex__description">
+										<h3>
+											{ __(
+												'Test payments first, activate later',
+												'woocommerce'
+											) }
+										</h3>
+										<div>
+											<p>
+												{ interpolateComponents( {
+													mixedString: __(
+														"A test account will be created for you to {{link}}test payments on your store{{/link}}. You'll still need to activate payments later to process real transactions.",
+														'woocommerce'
+													),
+													components: {
+														link: (
+															<Link
+																href="https://woocommerce.com/document/woopayments/testing-and-troubleshooting/test-accounts/"
+																target="_blank"
+																rel="noreferrer"
+																type="external"
+															/>
 														),
-														components: {
-															link: (
-																<Link
-																	href="https://woocommerce.com/document/woopayments/testing-and-troubleshooting/test-accounts/"
-																	target="_blank"
-																	rel="noreferrer"
-																	type="external"
-																/>
-															),
-														},
-													} ) }
-												</p>
-											</div>
+													},
+												} ) }
+											</p>
 										</div>
 									</div>
-									<Button
-										variant="secondary"
-										disabled={ isContinueButtonLoading }
-										onClick={ () => {
-											navigateToNextStep();
-										} }
-									>
-										{ __( 'Test payments', 'woocommerce' ) }
-									</Button>
-								</>
-							) }
-						</div>
+								</div>
+								<Button
+									variant="secondary"
+									disabled={ isContinueButtonLoading }
+									onClick={ () => {
+										navigateToNextStep();
+									} }
+								>
+									{ __( 'Test payments', 'woocommerce' ) }
+								</Button>
+							</div>
+						) }
 					</div>
 				</div>
 			</div>

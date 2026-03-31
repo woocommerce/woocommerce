@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix insufficient colour contrast in Dashboard Status widget link text to meet WCAG 2.2 AA requirements.

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix Customers Reports advanced filters (email, username, name) by consolidating autocompleter customer IDs into customers/customers_exclude params in the Controller, and add customers_exclude support.
