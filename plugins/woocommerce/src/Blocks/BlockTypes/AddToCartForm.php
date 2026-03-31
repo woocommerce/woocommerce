@@ -82,21 +82,21 @@ class AddToCartForm extends AbstractBlock {
 			$pattern,
 			function ( $matches ) use ( $product_name ) {
 				/* translators: %s refers to the item name in the cart. */
-				$minus_aria = esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) );
-				return $matches[1] . '<button aria-label="' . $minus_aria . '" type="button" data-wp-on--click="actions.removeQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">−</button>';
+				$plus_aria = esc_attr( sprintf( __( 'Increase quantity of %s', 'woocommerce' ), $product_name ) );
+				return $matches[1] . '<button aria-label="' . $plus_aria . '" type="button" data-wp-on--click="actions.addQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">+</button>';
 			},
-			$product_html
+			$product_html ?? ''
 		);
 		$new_html = preg_replace_callback(
 			$pattern,
 			function ( $matches ) use ( $product_name ) {
 				/* translators: %s refers to the item name in the cart. */
-				$plus_aria = esc_attr( sprintf( __( 'Increase quantity of %s', 'woocommerce' ), $product_name ) );
-				return $matches[1] . '<button aria-label="' . $plus_aria . '" type="button" data-wp-on--click="actions.addQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">+</button>';
+				$minus_aria = esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) );
+				return $matches[1] . '<button aria-label="' . $minus_aria . '" type="button" data-wp-on--click="actions.removeQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">−</button>';
 			},
-			$new_html
+			$new_html ?? ''
 		);
-		return $new_html;
+		return $new_html ?? '';
 	}
 
 	/**
