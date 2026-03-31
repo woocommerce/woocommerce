@@ -57,6 +57,10 @@ $dialog-padding: 20px;
 
 	}
 
+	&:not(.wc-block-woocommerce-product-gallery-large-image__image--full-screen-on-click) :where(.wc-block-components-product-image > a)  {
+		cursor: default;
+	}
+
 	:where(.wc-block-woocommerce-product-gallery-large-image__image) {
 		display: block;
 		position: relative;
