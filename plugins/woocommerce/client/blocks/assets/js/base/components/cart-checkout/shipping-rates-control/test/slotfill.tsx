@@ -2,11 +2,7 @@
  * External dependencies
  */
 import { render, screen } from '@testing-library/react';
-import {
-	useStoreCart,
-	useEditorContext,
-	useShippingData,
-} from '@woocommerce/base-context';
+import { useStoreCart } from '@woocommerce/base-context';
 
 /**
  * Internal dependencies
@@ -26,9 +22,7 @@ jest.mock( '@woocommerce/base-hooks', () => ( {
 	usePrevious: jest.fn(),
 } ) );
 
-const mockSlotRender = jest.fn( () => (
-	<div data-testid="shipping-slot" />
-) );
+const mockSlotRender = jest.fn( () => <div data-testid="shipping-slot" /> );
 jest.mock( '@woocommerce/blocks-checkout', () => {
 	const MockFill = ( { children }: { children: React.ReactNode } ) => (
 		<>{ children }</>
@@ -62,9 +56,7 @@ describe( 'ShippingRatesControl slot rendering', () => {
 	it( 'renders ExperimentalOrderShippingPackages.Slot with correct props when not loading', () => {
 		render( <ShippingRatesControl { ...defaultProps } /> );
 
-		expect(
-			screen.getByTestId( 'shipping-slot' )
-		).toBeInTheDocument();
+		expect( screen.getByTestId( 'shipping-slot' ) ).toBeInTheDocument();
 
 		expect( mockSlotRender ).toHaveBeenCalledWith(
 			expect.objectContaining( {

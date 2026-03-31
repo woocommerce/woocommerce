@@ -7,7 +7,7 @@ import { screen } from '@testing-library/react';
  * Internal dependencies
  */
 import ExperimentalDiscountsMeta from '..';
-import { renderSlotFill, getFillProps } from '../../../slot/test/test-utils';
+import { renderSlotFill, getFillProps } from '../../../slot/test-utils';
 
 const defaultSlotProps = {
 	extensions: {},

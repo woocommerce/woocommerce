@@ -18,9 +18,7 @@ jest.mock( '@woocommerce/base-context/hooks', () => ( {
 	useOrderSummaryLoadingState: jest.fn( () => ( { isLoading: false } ) ),
 } ) );
 
-const mockSlotRender = jest.fn( () => (
-	<div data-testid="discount-slot" />
-) );
+const mockSlotRender = jest.fn( () => <div data-testid="discount-slot" /> );
 jest.mock( '@woocommerce/blocks-checkout', () => {
 	const MockFill = ( { children }: { children: React.ReactNode } ) => (
 		<>{ children }</>

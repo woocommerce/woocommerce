@@ -2,10 +2,7 @@
  * External dependencies
  */
 import { render } from '@testing-library/react';
-
-// It is very important to import this directly from the build module to avoid introducing side-effects.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars -- Provider is used as JSX.
-import { Provider as SlotFillProvider } from 'wordpress-components-slotfill/build-module/slot-fill';
+import { Provider as SlotFillProvider } from 'wordpress-components-slotfill/build-module/slot-fill'; // eslint-disable-line @typescript-eslint/no-unused-vars -- Provider is used as JSX.
 
 type SlotFillComponent = {
 	( props: { children: React.ReactNode } ): JSX.Element;

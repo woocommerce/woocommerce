@@ -7,7 +7,7 @@ import { screen } from '@testing-library/react';
  * Internal dependencies
  */
 import ExperimentalOrderLocalPickupPackages from '..';
-import { renderSlotFill, getFillProps } from '../../../slot/test/test-utils';
+import { renderSlotFill, getFillProps } from '../../../slot/test-utils';
 
 describe( 'ExperimentalOrderLocalPickupPackages', () => {
 	const defaultSlotProps = {
@@ -37,10 +37,12 @@ describe( 'ExperimentalOrderLocalPickupPackages', () => {
 		const components = { PickupOption: () => null };
 		const renderPickupLocation = jest.fn();
 
-		const fillProps = getFillProps(
-			ExperimentalOrderLocalPickupPackages,
-			{ extensions, cart, components, renderPickupLocation }
-		);
+		const fillProps = getFillProps( ExperimentalOrderLocalPickupPackages, {
+			extensions,
+			cart,
+			components,
+			renderPickupLocation,
+		} );
 
 		expect( fillProps ).toEqual(
 			expect.objectContaining( {

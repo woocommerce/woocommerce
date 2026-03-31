@@ -7,7 +7,7 @@ import { screen } from '@testing-library/react';
  * Internal dependencies
  */
 import ExperimentalOrderShippingPackages from '..';
-import { renderSlotFill, getFillProps } from '../../../slot/test/test-utils';
+import { renderSlotFill, getFillProps } from '../../../slot/test-utils';
 
 describe( 'ExperimentalOrderShippingPackages', () => {
 	const defaultSlotProps = {
