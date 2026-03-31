@@ -86,14 +86,17 @@ class Settings_Controller {
 	/**
 	 * Returns the layout settings for the email editor.
 	 *
-	 * @return array{contentSize: string, wideSize: string}
+	 * @return array{contentSize: string, wideSize?: string}
 	 */
 	public function get_layout(): array {
 		$layout_settings = $this->theme_controller->get_layout_settings();
-		return array(
+		$layout          = array(
 			'contentSize' => $layout_settings['contentSize'],
-			'wideSize'    => $layout_settings['wideSize'],
 		);
+		if ( isset( $layout_settings['wideSize'] ) ) {
+			$layout['wideSize'] = $layout_settings['wideSize'];
+		}
+		return $layout;
 	}
 
 	/**
