@@ -260,10 +260,9 @@ const ProductTemplateEdit = (
 	// Determine the product ID for reading edited entity data.
 	// productReference is set explicitly; otherwise fall back to location context
 	// (e.g., inside single-product block where postId provides the product ID).
-	const productReferenceFromQuery = ( restQueryArgs as Record<
-		string,
-		unknown
-	> ).productReference as number | undefined;
+	const productReferenceFromQuery = (
+		restQueryArgs as Record< string, unknown >
+	 ).productReference as number | undefined;
 	const productIdForRelationships =
 		productReferenceFromQuery ||
 		( location?.type === 'product'
