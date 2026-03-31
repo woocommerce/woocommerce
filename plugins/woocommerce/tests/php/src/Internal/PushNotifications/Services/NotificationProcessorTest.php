@@ -176,7 +176,7 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should return false on dispatch failure.
+	 * @testdox Should return false and not write sent meta on dispatch failure.
 	 */
 	public function test_process_returns_false_on_failure(): void {
 		$this->dispatcher->method( 'dispatch' )->willReturn(
@@ -190,25 +190,7 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 		$result       = $this->sut->process( $notification );
 
 		$this->assertFalse( $result );
-	}
-
-	/**
-	 * @testdox Should not write sent meta on dispatch failure.
-	 */
-	public function test_process_does_not_write_sent_meta_on_failure(): void {
-		$this->dispatcher->method( 'dispatch' )->willReturn(
-			array(
-				'success'     => false,
-				'retry_after' => null,
-			)
-		);
-
-		$notification = new NewOrderNotification( $this->order_id );
-		$this->sut->process( $notification );
-
-		$order = wc_get_order( $this->order_id );
-
-		$this->assertEmpty( $order->get_meta( NotificationProcessor::SENT_META_KEY ) );
+		$this->assertFalse( $notification->has_meta( NotificationProcessor::SENT_META_KEY ) );
 	}
 
 	/**
