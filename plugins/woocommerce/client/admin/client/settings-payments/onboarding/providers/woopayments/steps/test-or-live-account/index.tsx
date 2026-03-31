@@ -176,6 +176,10 @@ const TestOrLiveAccountStep = () => {
 								target="_blank"
 								rel="noreferrer"
 								type="external"
+								aria-label={ __(
+									'Learn more about the WooPayments sign-up process (opens in a new tab)',
+									'woocommerce'
+								) }
 							>
 								{ __( 'Learn more', 'woocommerce' ) }
 							</Link>
