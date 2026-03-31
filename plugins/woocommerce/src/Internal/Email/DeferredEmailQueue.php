@@ -7,8 +7,8 @@ namespace Automattic\WooCommerce\Internal\Email;
 /**
  * Handles deferred transactional email sending via Action Scheduler.
  *
- * Collects email callbacks during a request and dispatches them as a single
- * batched Action Scheduler action on shutdown, replacing the legacy
+ * Collects email callbacks during a request and dispatches each one as an
+ * individual Action Scheduler action on shutdown, replacing the legacy
  * WC_Background_Emailer approach.
  *
  * @since 10.8.0
@@ -16,19 +16,14 @@ namespace Automattic\WooCommerce\Internal\Email;
 final class DeferredEmailQueue {
 
 	/**
-	 * Action Scheduler hook for processing queued emails.
+	 * Action Scheduler hook for processing a queued email.
 	 */
-	private const AS_HOOK = 'woocommerce_send_queued_transactional_emails';
+	private const AS_HOOK = 'woocommerce_send_queued_transactional_email';
 
 	/**
 	 * Action Scheduler group for email actions.
 	 */
 	private const AS_GROUP = 'woocommerce-emails';
-
-	/**
-	 * Default number of emails per Action Scheduler job.
-	 */
-	private const DEFAULT_CHUNK_SIZE = 10;
 
 	/**
 	 * Queue of email callbacks collected during the current request.
@@ -52,7 +47,7 @@ final class DeferredEmailQueue {
 	final public function init(): void { // phpcs:ignore Generic.CodeAnalysis.UnnecessaryFinalModifier.Found
 		// Registered unconditionally so previously-scheduled AS jobs can still
 		// be processed even if the feature is later disabled.
-		add_action( self::AS_HOOK, array( $this, 'send_queued_transactional_emails' ) );
+		add_action( self::AS_HOOK, array( $this, 'send_queued_transactional_email' ), 10, 2 );
 	}
 
 	/**
@@ -76,6 +71,9 @@ final class DeferredEmailQueue {
 	/**
 	 * Dispatch queued emails via Action Scheduler on shutdown.
 	 *
+	 * Each email is scheduled as an individual AS action for atomic
+	 * processing and per-email failure isolation.
+	 *
 	 * @internal
 	 */
 	public function dispatch(): void {
@@ -83,17 +81,8 @@ final class DeferredEmailQueue {
 			return;
 		}
 
-		/**
-		 * Filter the number of emails per Action Scheduler job.
-		 *
-		 * @since 10.8.0
-		 * @param int $chunk_size Number of emails per batch. Default 10.
-		 */
-		$chunk_size = max( 1, (int) apply_filters( 'woocommerce_deferred_email_chunk_size', self::DEFAULT_CHUNK_SIZE ) );
-		$chunks     = array_chunk( $this->queue, $chunk_size );
-
-		foreach ( $chunks as $chunk ) {
-			\WC()->queue()->add( self::AS_HOOK, array( $chunk ), self::AS_GROUP );
+		foreach ( $this->queue as $item ) {
+			\WC()->queue()->add( self::AS_HOOK, array( $item['filter'], $item['args'] ), self::AS_GROUP );
 		}
 
 		$this->queue               = array();
@@ -101,29 +90,18 @@ final class DeferredEmailQueue {
 	}
 
 	/**
-	 * Process a batch of queued transactional emails from Action Scheduler.
+	 * Process a single queued transactional email from Action Scheduler.
 	 *
 	 * @internal
 	 *
-	 * @param mixed $queue The batch of email callbacks to process.
+	 * @param mixed $filter The action hook name.
+	 * @param mixed $args   The arguments for the email callback.
 	 */
-	public function send_queued_transactional_emails( $queue ): void {
-		if ( ! is_array( $queue ) ) {
+	public function send_queued_transactional_email( $filter, $args ): void {
+		if ( ! is_string( $filter ) || ! is_array( $args ) ) {
 			return;
 		}
 
-		foreach ( $queue as $callback ) {
-			if ( ! is_array( $callback ) || ! isset( $callback['filter'], $callback['args'] ) || ! is_string( $callback['filter'] ) || ! is_array( $callback['args'] ) ) {
-				continue;
-			}
-			try {
-				\WC_Emails::send_queued_transactional_email( $callback['filter'], $callback['args'] );
-			} catch ( \Throwable $e ) {
-				wc_get_logger()->error(
-					sprintf( 'Deferred email failed for %s: %s', $callback['filter'], $e->getMessage() ),
-					array( 'source' => 'deferred-emails' )
-				);
-			}
-		}
+		\WC_Emails::send_queued_transactional_email( $filter, $args );
 	}
 }

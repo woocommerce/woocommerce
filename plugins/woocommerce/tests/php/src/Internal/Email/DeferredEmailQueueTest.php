@@ -39,16 +39,15 @@ class DeferredEmailQueueTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		remove_all_filters( 'woocommerce_queue_class' );
 		remove_all_filters( 'woocommerce_allow_send_queued_transactional_email' );
-		remove_all_filters( 'woocommerce_deferred_email_chunk_size' );
-		remove_all_actions( 'woocommerce_send_queued_transactional_emails' );
+		remove_all_actions( 'woocommerce_send_queued_transactional_email' );
 		$this->reset_queue_singleton();
 		parent::tearDown();
 	}
 
 	/**
-	 * @testdox Push collects email callbacks and dispatch schedules a single AS action for the batch.
+	 * @testdox Push and dispatch schedules one AS action per email.
 	 */
-	public function test_push_and_dispatch_schedules_batch(): void {
+	public function test_push_and_dispatch_schedules_per_email(): void {
 		$this->sut->push( 'woocommerce_order_status_completed', array( 123 ) );
 		$this->sut->push( 'woocommerce_new_customer_note', array( 456, 'note' ) );
 
@@ -56,9 +55,9 @@ class DeferredEmailQueueTest extends WC_Unit_Test_Case {
 
 		$queue = $this->get_test_queue();
 
-		$this->assertCount( 1, $queue->actions, 'Should schedule exactly one AS action for the batch' );
-		$this->assertSame( 'woocommerce_send_queued_transactional_emails', $queue->actions[0]['hook'] );
-		$this->assertCount( 2, $queue->actions[0]['args'][0], 'Batch should contain two email callbacks' );
+		$this->assertCount( 2, $queue->actions, 'Should schedule one AS action per email' );
+		$this->assertSame( 'woocommerce_send_queued_transactional_email', $queue->actions[0]['hook'] );
+		$this->assertSame( 'woocommerce_send_queued_transactional_email', $queue->actions[1]['hook'] );
 	}
 
 	/**
@@ -92,15 +91,15 @@ class DeferredEmailQueueTest extends WC_Unit_Test_Case {
 		$this->sut->push( 'woocommerce_order_status_pending_to_processing', array( 42, 'extra' ) );
 		$this->sut->dispatch();
 
-		$queue = $this->get_test_queue();
-		$batch = $queue->actions[0]['args'][0];
+		$queue  = $this->get_test_queue();
+		$action = $queue->actions[0];
 
-		$this->assertSame( 'woocommerce_order_status_pending_to_processing', $batch[0]['filter'] );
-		$this->assertSame( array( 42, 'extra' ), $batch[0]['args'] );
+		$this->assertSame( 'woocommerce_order_status_pending_to_processing', $action['args'][0] );
+		$this->assertSame( array( 42, 'extra' ), $action['args'][1] );
 	}
 
 	/**
-	 * @testdox Dispatch assigns the woocommerce-emails group to the scheduled action.
+	 * @testdox Dispatch assigns the woocommerce-emails group to scheduled actions.
 	 */
 	public function test_dispatch_uses_correct_group(): void {
 		$this->sut->push( 'woocommerce_order_status_completed', array( 1 ) );
@@ -112,33 +111,9 @@ class DeferredEmailQueueTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Dispatch splits the queue into chunks when it exceeds the chunk size.
+	 * @testdox Processing calls WC_Emails::send_queued_transactional_email with the correct filter and args.
 	 */
-	public function test_dispatch_chunks_large_queue(): void {
-		add_filter(
-			'woocommerce_deferred_email_chunk_size',
-			function () {
-				return 2;
-			}
-		);
-
-		$this->sut->push( 'woocommerce_order_status_completed', array( 1 ) );
-		$this->sut->push( 'woocommerce_new_customer_note', array( 2 ) );
-		$this->sut->push( 'woocommerce_created_customer', array( 3 ) );
-
-		$this->sut->dispatch();
-
-		$queue = $this->get_test_queue();
-
-		$this->assertCount( 2, $queue->actions, 'Should schedule two AS actions for 3 emails with chunk size 2' );
-		$this->assertCount( 2, $queue->actions[0]['args'][0], 'First chunk should have 2 emails' );
-		$this->assertCount( 1, $queue->actions[1]['args'][0], 'Second chunk should have 1 email' );
-	}
-
-	/**
-	 * @testdox Processing a batch calls send_queued_transactional_email for each valid callback.
-	 */
-	public function test_send_queued_transactional_emails_processes_valid_callbacks(): void {
+	public function test_send_queued_transactional_email_processes_callback(): void {
 		$sent = array();
 
 		add_filter(
@@ -155,30 +130,17 @@ class DeferredEmailQueueTest extends WC_Unit_Test_Case {
 			3
 		);
 
-		$batch = array(
-			array(
-				'filter' => 'woocommerce_order_status_completed',
-				'args'   => array( 100 ),
-			),
-			array(
-				'filter' => 'woocommerce_new_customer_note',
-				'args'   => array( 200 ),
-			),
-		);
+		$this->sut->send_queued_transactional_email( 'woocommerce_order_status_completed', array( 100 ) );
 
-		$this->sut->send_queued_transactional_emails( $batch );
-
-		$this->assertCount( 2, $sent, 'Should process both email callbacks' );
+		$this->assertCount( 1, $sent, 'Should process the email callback' );
 		$this->assertSame( 'woocommerce_order_status_completed', $sent[0]['filter'] );
 		$this->assertSame( array( 100 ), $sent[0]['args'] );
-		$this->assertSame( 'woocommerce_new_customer_note', $sent[1]['filter'] );
-		$this->assertSame( array( 200 ), $sent[1]['args'] );
 	}
 
 	/**
-	 * @testdox Processing skips malformed callbacks in the batch.
+	 * @testdox Processing skips invalid input types gracefully.
 	 */
-	public function test_send_queued_transactional_emails_skips_malformed(): void {
+	public function test_send_queued_transactional_email_skips_invalid_input(): void {
 		$sent = array();
 
 		add_filter(
@@ -192,75 +154,25 @@ class DeferredEmailQueueTest extends WC_Unit_Test_Case {
 			2
 		);
 
-		$batch = array(
-			'not-an-array',
-			array( 'missing_filter_key' => true ),
-			array(
-				'filter' => 123,
-				'args'   => array(),
-			),
-			array(
-				'filter' => 'valid_hook',
-				'args'   => 'not-array',
-			),
-			array(
-				'filter' => 'woocommerce_order_status_completed',
-				'args'   => array( 1 ),
-			),
-		);
+		$this->sut->send_queued_transactional_email( 123, array() );
+		$this->sut->send_queued_transactional_email( 'valid_hook', 'not-array' );
 
-		$this->sut->send_queued_transactional_emails( $batch );
-
-		$this->assertCount( 1, $sent, 'Should only process the one valid callback' );
-		$this->assertSame( 'woocommerce_order_status_completed', $sent[0] );
+		$this->assertEmpty( $sent, 'Should not process callbacks with invalid types' );
 	}
 
 	/**
-	 * @testdox A throwing callback does not prevent subsequent emails from being sent.
+	 * @testdox Push can be called again after dispatch to queue new emails.
 	 */
-	public function test_send_queued_transactional_emails_continues_after_exception(): void {
-		$sent = array();
+	public function test_push_after_dispatch_queues_new_emails(): void {
+		$this->sut->push( 'woocommerce_order_status_completed', array( 1 ) );
+		$this->sut->dispatch();
 
-		add_filter(
-			'woocommerce_allow_send_queued_transactional_email',
-			function ( $allow, $filter ) use ( &$sent ) {
-				unset( $allow );
-				if ( 'woocommerce_order_status_completed' === $filter ) {
-					throw new \RuntimeException( 'Simulated failure' );
-				}
-				$sent[] = $filter;
-				return false;
-			},
-			10,
-			2
-		);
+		$this->sut->push( 'woocommerce_new_customer_note', array( 2 ) );
+		$this->sut->dispatch();
 
-		$batch = array(
-			array(
-				'filter' => 'woocommerce_order_status_completed',
-				'args'   => array( 1 ),
-			),
-			array(
-				'filter' => 'woocommerce_new_customer_note',
-				'args'   => array( 2 ),
-			),
-		);
+		$queue = $this->get_test_queue();
 
-		$this->sut->send_queued_transactional_emails( $batch );
-
-		$this->assertCount( 1, $sent, 'Second callback should still be processed after first throws' );
-		$this->assertSame( 'woocommerce_new_customer_note', $sent[0] );
-	}
-
-	/**
-	 * @testdox Processing handles non-array input gracefully without errors.
-	 */
-	public function test_send_queued_transactional_emails_handles_non_array(): void {
-		$this->sut->send_queued_transactional_emails( 'not-an-array' );
-		$this->sut->send_queued_transactional_emails( null );
-		$this->sut->send_queued_transactional_emails( 42 );
-
-		$this->assertTrue( true, 'Should not throw for non-array input' );
+		$this->assertCount( 2, $queue->actions, 'Should schedule actions from both dispatch cycles' );
 	}
 
 	/**
