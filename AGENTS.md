@@ -29,6 +29,7 @@ The `.ai/skills/` directory contains procedural HOW-TO instructions:
 - **`woocommerce-markdown`** - Markdown writing and editing guidelines
 - **`woocommerce-git`** - Guidelines for git and GitHub operations
 - **`woocommerce-email-editor`** - Email editor development setup and Mailpit configuration
+- **`woocommerce-performance`** - Performance guardrails. **Invoke when writing or reviewing PHP code.**
 
 ## Project Architecture
 

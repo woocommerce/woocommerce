@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Skip unnecessary extension suggestion lookup for offline payment methods in enhance_payment_gateway_details().

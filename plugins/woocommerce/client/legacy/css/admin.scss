@@ -8286,6 +8286,11 @@ table.bar_chart {
  * WP 7.0 increased default form element sizing from 30px to 40px min-height.
  */
 .wc-wp-version-gte-70 {
+	// Settings page labels: vertically centre with taller WP 7.0 fields.
+	.woocommerce table.form-table th {
+		padding-top: 25px;
+	}
+
 	// Colour picker swatch: match WP 7.0 input height (40px).
 	.woocommerce table.form-table .colorpickpreview {
 		height: 40px;

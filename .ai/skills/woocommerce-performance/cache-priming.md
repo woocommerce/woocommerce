@@ -102,7 +102,42 @@ Use `_prime_post_caches()` only when no such native argument exists on the data 
 
 ---
 
-### 6. Do not prime after WP_Query — it already handles caching
+### 6. Do not prime product post caches when iterating order line items — already handled by get_items() and batch priming
+
+**Apply when:** A loop collects product IDs from order line items (via `get_items()` or `get_items( 'line_item' )`) and then calls `_prime_post_caches()` on those IDs.
+
+**Why it is wrong:** Two independent mechanisms already cover this, and both fire before any explicit priming could add value:
+
+1. **Batch path** — when orders are loaded via a query (CPT or HPOS data store), the data store calls `prime_caches_for_orders()` → `prime_order_item_caches_for_orders()` → `prime_product_post_caches_for_order_items()`, which primes all `_product_id` and `_variation_id` values from raw item meta in a single `_prime_post_caches()` call before the caller ever touches the order objects.
+
+2. **Lazy-load path** — `WC_Abstract_Order::get_items()` primes product post caches on first item load per order (`abstract-wc-order.php`, inside the `if ( ! isset( $this->items[ $group ] ) )` branch for `line_item` type).
+
+By the time an explicit `_prime_post_caches()` runs after collecting IDs from a `get_items()` loop, all product post caches are already warm on both CPT and HPOS backends.
+
+**Example**:
+
+```php
+// Prime product caches to avoid N+1 queries during serialization.
+$product_ids = array();
+foreach ( $results['results'] as $order ) {
+    foreach ( $order->get_items( 'line_item' ) as $item ) {
+        if ( $item instanceof \WC_Order_Item_Product ) {
+            $product_ids[] = $item->get_product_id();
+            $product_ids[] = $item->get_variation_id();
+        }
+    }
+}
+$product_ids = array_unique( array_filter( $product_ids ) );
+if ( ! empty( $product_ids ) ) {
+    _prime_post_caches( $product_ids, true, true );
+}
+```
+
+**Recognition pattern:** any block that (a) loops over orders, (b) calls `get_items()` or `get_items( 'line_item' )` inside that loop, and (c) collects `get_product_id()` / `get_variation_id()` values to feed into a subsequent `_prime_post_caches()` call. The entire collect-and-prime block is dead code and can be deleted.
+
+---
+
+### 7. Do not prime after WP_Query — it already handles caching
 
 **Apply when:** Code runs `WP_Query::query()` (or `new WP_Query(...)`) and then calls `_prime_post_caches()` on the returned value.
 

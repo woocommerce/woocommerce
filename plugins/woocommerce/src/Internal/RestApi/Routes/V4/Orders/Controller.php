@@ -307,21 +307,6 @@ class Controller extends AbstractController {
 		$results    = $this->collection_query->get_query_results( $query_args, $request );
 		$items      = array();
 
-		// Prime product caches to avoid N+1 queries during serialization.
-		$product_ids = array();
-		foreach ( $results['results'] as $order ) {
-			foreach ( $order->get_items( 'line_item' ) as $item ) {
-				if ( $item instanceof \WC_Order_Item_Product ) {
-					$product_ids[] = $item->get_product_id();
-					$product_ids[] = $item->get_variation_id();
-				}
-			}
-		}
-		$product_ids = array_unique( array_filter( $product_ids ) );
-		if ( ! empty( $product_ids ) ) {
-			_prime_post_caches( $product_ids, true, true );
-		}
-
 		foreach ( $results['results'] as $result ) {
 			$items[] = $this->prepare_response_for_collection( $this->prepare_item_for_response( $result, $request ) );
 		}
