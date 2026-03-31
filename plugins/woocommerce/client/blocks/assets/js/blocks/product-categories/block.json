@@ -43,6 +43,10 @@
 			"type": "boolean",
 			"default": true
 		},
+		"parentCategoryId": {
+			"type": "number",
+			"default": 0
+		},
 		"showChildrenOnly": {
 			"type": "boolean",
 			"default": false

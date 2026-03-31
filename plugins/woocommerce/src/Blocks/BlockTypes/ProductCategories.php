@@ -27,6 +27,7 @@ class ProductCategories extends AbstractDynamicBlock {
 		'hasEmpty'         => false,
 		'isDropdown'       => false,
 		'isHierarchical'   => true,
+		'parentCategoryId' => 0,
 		'showChildrenOnly' => false,
 	);
 
@@ -46,6 +47,7 @@ class ProductCategories extends AbstractDynamicBlock {
 				'hasEmpty'         => $this->get_schema_boolean( false ),
 				'isDropdown'       => $this->get_schema_boolean( false ),
 				'isHierarchical'   => $this->get_schema_boolean( true ),
+				'parentCategoryId' => $this->get_schema_number( 0 ),
 				'showChildrenOnly' => $this->get_schema_boolean( false ),
 				'textColor'        => $this->get_schema_string(),
 				'fontSize'         => $this->get_schema_string(),
@@ -132,30 +134,21 @@ class ProductCategories extends AbstractDynamicBlock {
 	 * @return array
 	 */
 	protected function get_categories( $attributes ) {
-		$hierarchical  = wc_string_to_bool( $attributes['isHierarchical'] );
-		$children_only = wc_string_to_bool( $attributes['showChildrenOnly'] ) && is_product_category();
+		$hierarchical      = wc_string_to_bool( $attributes['isHierarchical'] );
+		$children_only     = wc_string_to_bool( $attributes['showChildrenOnly'] ) && is_product_category();
+		$parent_category   = absint( $attributes['parentCategoryId'] ?? 0 );
+		$root_category_id  = $children_only ? get_queried_object_id() : $parent_category;
+		$categories_args   = [
+			'hide_empty'   => ! $attributes['hasEmpty'],
+			'pad_counts'   => true,
+			'hierarchical' => true,
+		];
 
-		if ( $children_only ) {
-			$term_id    = get_queried_object_id();
-			$categories = get_terms(
-				'product_cat',
-				[
-					'hide_empty'   => ! $attributes['hasEmpty'],
-					'pad_counts'   => true,
-					'hierarchical' => true,
-					'child_of'     => $term_id,
-				]
-			);
-		} else {
-			$categories = get_terms(
-				'product_cat',
-				[
-					'hide_empty'   => ! $attributes['hasEmpty'],
-					'pad_counts'   => true,
-					'hierarchical' => true,
-				]
-			);
+		if ( $root_category_id > 0 ) {
+			$categories_args['child_of'] = $root_category_id;
 		}
+
+		$categories = get_terms( 'product_cat', $categories_args );
 
 		if ( ! is_array( $categories ) || empty( $categories ) ) {
 			return [];
@@ -170,17 +163,27 @@ class ProductCategories extends AbstractDynamicBlock {
 				}
 			);
 		}
-		return $hierarchical ? $this->build_category_tree( $categories, $children_only ) : $categories;
+
+		if ( ! $hierarchical && $root_category_id > 0 ) {
+			$categories = wp_list_filter(
+				$categories,
+				array(
+					'parent' => $root_category_id,
+				)
+			);
+		}
+
+		return $hierarchical ? $this->build_category_tree( $categories, $root_category_id ) : $categories;
 	}
 
 	/**
 	 * Build hierarchical tree of categories.
 	 *
 	 * @param array $categories List of terms.
-	 * @param bool  $children_only Is the block rendering only the children of the current category.
+	 * @param int   $root_category_id Root category ID for the rendered tree.
 	 * @return array
 	 */
-	protected function build_category_tree( $categories, $children_only ) {
+	protected function build_category_tree( $categories, $root_category_id = 0 ) {
 		$categories_by_parent = [];
 
 		foreach ( $categories as $category ) {
@@ -190,9 +193,8 @@ class ProductCategories extends AbstractDynamicBlock {
 			$categories_by_parent[ 'cat-' . $category->parent ][] = $category;
 		}
 
-		$parent_id = $children_only ? get_queried_object_id() : 0;
-		$tree      = $categories_by_parent[ 'cat-' . $parent_id ]; // these are top level categories. So all parents.
-		unset( $categories_by_parent[ 'cat-' . $parent_id ] );
+		$tree = $categories_by_parent[ 'cat-' . $root_category_id ] ?? [];
+		unset( $categories_by_parent[ 'cat-' . $root_category_id ] );
 
 		foreach ( $tree as $category ) {
 			if ( ! empty( $categories_by_parent[ 'cat-' . $category->term_id ] ) ) {

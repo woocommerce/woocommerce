@@ -7,7 +7,10 @@ import ServerSideRender from '@wordpress/server-side-render';
 import { Icon, listView } from '@wordpress/icons';
 import { isSiteEditorPage, isWidgetEditorPage } from '@woocommerce/utils';
 import { useSelect } from '@wordpress/data';
+import ProductCategoryControl from '@woocommerce/editor-components/product-category-control';
+import type { ProductCategoryResponseItem } from '@woocommerce/types';
 import {
+	BaseControl,
 	Disabled,
 	PanelBody,
 	ToggleControl,
@@ -65,6 +68,7 @@ const ProductCategoriesBlock = ( {
 			hasEmpty,
 			isDropdown,
 			isHierarchical,
+			parentCategoryId,
 			showChildrenOnly,
 		} = attributes;
 
@@ -141,6 +145,35 @@ const ProductCategoriesBlock = ( {
 							setAttributes( { hasEmpty: ! hasEmpty } )
 						}
 					/>
+					<BaseControl
+						label={ __( 'Parent category', 'woocommerce' ) }
+						help={ __(
+							'Show the children of a specific category on any page.',
+							'woocommerce'
+						) }
+					>
+						<ProductCategoryControl
+							selected={
+								parentCategoryId ? [ parentCategoryId ] : []
+							}
+							onChange={ (
+								value: ProductCategoryResponseItem[] = []
+							) => {
+								const selectedParentCategoryId = value[ 0 ]
+									? value[ 0 ].id
+									: 0;
+
+								setAttributes( {
+									parentCategoryId: selectedParentCategoryId,
+									showChildrenOnly: selectedParentCategoryId
+										? false
+										: showChildrenOnly,
+								} );
+							} }
+							isCompact
+							isSingle
+						/>
+					</BaseControl>
 					{ ( isSiteEditor || isWidgetEditor ) && (
 						<ToggleControl
 							label={ __(
@@ -148,12 +181,16 @@ const ProductCategoriesBlock = ( {
 								'woocommerce'
 							) }
 							help={ __(
-								'This will affect product category pages',
+								parentCategoryId
+									? 'Clear the selected parent category to use the current product category instead.'
+									: 'This will affect product category pages',
 								'woocommerce'
 							) }
 							checked={ showChildrenOnly }
+							disabled={ parentCategoryId > 0 }
 							onChange={ () =>
 								setAttributes( {
+									parentCategoryId: 0,
 									showChildrenOnly: ! showChildrenOnly,
 								} )
 							}
