@@ -116,8 +116,6 @@ export const COUNTRY_LOCALE = Object.fromEntries(
 	} )
 );
 
-export const BASE_COUNTRY = getSetting< string >( 'baseCountry', '' );
-
 const defaultFieldsLocations: FieldsLocations = {
 	address: [
 		'first_name',

@@ -712,7 +712,6 @@ class WC_Frontend_Scripts {
 				$params = array(
 					'locale'             => wp_json_encode( WC()->countries->get_country_locale(), JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ),
 					'locale_fields'      => wp_json_encode( WC()->countries->get_country_locale_field_selectors(), JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ),
-					'base_country'       => WC()->countries->get_base_country(),
 					'i18n_required_text' => esc_attr__( 'required', 'woocommerce' ),
 					'i18n_optional_text' => esc_html__( 'optional', 'woocommerce' ),
 				);

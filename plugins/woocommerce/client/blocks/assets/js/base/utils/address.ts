@@ -4,7 +4,6 @@
 import prepareFormFields from '@woocommerce/base-components/cart-checkout/form/prepare-form-fields';
 import {
 	ADDRESS_FORM_KEYS,
-	BASE_COUNTRY,
 	COUNTRIES,
 	STATES,
 } from '@woocommerce/block-settings';
@@ -25,14 +24,6 @@ import { decodeEntities } from '@wordpress/html-entities';
 
 export const addressFieldsForShippingRates: AddressFieldsForShippingRatesType =
 	[ 'state', 'country', 'postcode', 'city' ];
-
-/**
- * Returns the default value for a hidden address field. Country fields use
- * the store's base country so that locale resolution continues to work;
- * all other fields are cleared.
- */
-export const getHiddenFieldValue = ( key: string ): string =>
-	key === 'country' ? BASE_COUNTRY : '';
 
 /**
  * Compare two addresses and see if they are the same.
@@ -77,7 +68,7 @@ export const emptyHiddenAddressFields = <
 
 	addressForm.forEach( ( { key, hidden } ) => {
 		if ( hidden === true && isValidAddressKey( key, address ) ) {
-			newAddress[ key ] = getHiddenFieldValue( key );
+			newAddress[ key ] = '';
 		}
 	} );
 

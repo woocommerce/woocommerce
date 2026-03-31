@@ -19,7 +19,7 @@ const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
 	},
 } );
 
-test.describe( 'Checkout Block → Locale hides country and address fields', () => {
+test.describe( 'Checkout Block → Locale hides address fields but not country', () => {
 	test.use( { storageState: guestFile } );
 
 	test.beforeEach( async ( { requestUtils, frontendUtils } ) => {
@@ -37,7 +37,7 @@ test.describe( 'Checkout Block → Locale hides country and address fields', () 
 		await frontendUtils.goToCheckout();
 	} );
 
-	test( 'Hidden address fields are not visible and country is not shown', async ( {
+	test( 'Country remains visible even when locale tries to hide it', async ( {
 		page,
 	} ) => {
 		const shippingForm = page.getByRole( 'group', {
@@ -46,12 +46,13 @@ test.describe( 'Checkout Block → Locale hides country and address fields', () 
 
 		await expect( shippingForm ).toBeVisible();
 
-		// Country field should be hidden.
+		// Country field should remain visible — locale hidden is ignored
+		// because country is the lookup key for locale resolution.
 		await expect(
 			shippingForm.getByLabel( 'Country/Region' )
-		).toBeHidden();
+		).toBeVisible();
 
-		// Other locale-hidden fields should also be hidden.
+		// Other locale-hidden fields should be hidden.
 		await expect( shippingForm.getByLabel( 'City' ) ).toBeHidden();
 		await expect(
 			shippingForm.getByLabel( 'Address', { exact: true } )
@@ -63,7 +64,7 @@ test.describe( 'Checkout Block → Locale hides country and address fields', () 
 		await expect( shippingForm.getByLabel( 'Last name' ) ).toBeVisible();
 	} );
 
-	test( 'Can complete checkout with hidden country using store base country', async ( {
+	test( 'Can complete checkout with locale-hidden address fields', async ( {
 		page,
 		checkoutPageObject,
 	} ) => {
@@ -73,7 +74,7 @@ test.describe( 'Checkout Block → Locale hides country and address fields', () 
 
 		await expect( shippingForm ).toBeVisible();
 
-		// Fill only the visible fields (name + email).
+		// Fill the visible fields (name, email, and country).
 		await page
 			.getByLabel( 'Email address' )
 			.fill( 'test-locale@example.com' );

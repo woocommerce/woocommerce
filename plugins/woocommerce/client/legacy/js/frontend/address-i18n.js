@@ -77,7 +77,6 @@ jQuery( function ( $ ) {
 
 			var localeHiddenCount = 0;
 			var localeFieldCount = 0;
-			var countryChanged = null;
 
 			$.each( locale_fields, function ( key, value ) {
 				var field = thisform.find( value ),
@@ -139,24 +138,12 @@ jQuery( function ( $ ) {
 					field.data( 'priority', fieldLocale.priority );
 				}
 
-				// Hidden fields. When country is hidden, set to the store
-				// base country instead of clearing — it drives locale
-				// resolution for all other fields.
-				if ( true === fieldLocale.hidden ) {
-					var $input = field.hide().find( ':input' );
-					var newVal =
-						'country' === key
-							? wc_address_i18n_params.base_country
-							: '';
-					var prevVal = $input.val();
-					$input.val( newVal );
-					// When country value changes, defer a re-trigger
-					// after the loop so country-select.js re-fires the
-					// event with the correct country for state
-					// required/label resolution.
-					if ( 'country' === key && prevVal !== newVal ) {
-						countryChanged = $input;
-					}
+				// Hidden fields. Country is excluded because it is the
+				// lookup key for locale resolution — hiding it creates a
+				// chicken-and-egg problem. Merchants who sell to a single
+				// country should use "Sell to specific countries" instead.
+				if ( true === fieldLocale.hidden && 'country' !== key ) {
+					field.hide().find( ':input' ).val( '' );
 					localeHiddenCount++;
 				} else if ( 'state' !== key ) {
 					// State field visibility is managed by country-select.js
@@ -173,16 +160,6 @@ jQuery( function ( $ ) {
 					field.addClass( fieldLocale.class.join( ' ' ) );
 				}
 			} );
-
-			// If the hidden-country value was changed to the store base
-			// country, re-trigger change so country-select.js re-fires
-			// country_to_state_changing with the correct country. This
-			// ensures state required/label/visibility is resolved against
-			// the base country locale rather than the initial value.
-			if ( countryChanged ) {
-				countryChanged.trigger( 'change' );
-				return; // The re-triggered event will re-run this handler.
-			}
 
 			// Hide the shipping calculator toggle if all its fields are
 			// locale-hidden. We track counts during the loop above rather

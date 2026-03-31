@@ -12,7 +12,6 @@ import {
 import { useCheckoutAddress } from '@woocommerce/base-context';
 import { usePrevious, useShallowEqual } from '@woocommerce/base-hooks';
 import { validationStore } from '@woocommerce/block-data';
-import { getHiddenFieldValue } from '@woocommerce/base-utils/address';
 import {
 	CheckboxControl,
 	ValidatedCheckboxControl,
@@ -193,10 +192,6 @@ const Form = <
 	] );
 
 	// Clear values for hidden fields when fields change.
-	// When the country field is hidden via locale, it is set to the store's
-	// base country instead of being cleared. Country is the key used to
-	// resolve locale overrides for all other fields—clearing it would break
-	// locale resolution and cause all fields to revert to their defaults.
 	useEffect( () => {
 		if ( fastDeepEqual( previousFormFields, formFields ) ) {
 			return;
@@ -206,10 +201,7 @@ const Form = <
 			return;
 		}
 		const hiddenFieldValues = Object.fromEntries(
-			hiddenFields.map( ( field ) => [
-				field.key,
-				getHiddenFieldValue( field.key ),
-			] )
+			hiddenFields.map( ( field ) => [ field.key, '' ] )
 		);
 		const newValues = {
 			...values,
