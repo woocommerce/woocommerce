@@ -139,6 +139,7 @@ class NotificationProcessor {
 
 		if ( ! empty( $result['success'] ) ) {
 			$notification->write_meta( self::SENT_META_KEY );
+			$notification->delete_meta( self::CLAIMED_META_KEY );
 			return true;
 		}
 

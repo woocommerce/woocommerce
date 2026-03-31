@@ -77,7 +77,7 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should return true and write sent meta on successful dispatch.
+	 * @testdox Should return true, write sent meta, and clean up claimed meta on successful dispatch.
 	 */
 	public function test_process_writes_sent_meta_on_success(): void {
 		$this->dispatcher->method( 'dispatch' )->willReturn(
@@ -95,6 +95,7 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 		$order = wc_get_order( $this->order_id );
 
 		$this->assertNotEmpty( $order->get_meta( NotificationProcessor::SENT_META_KEY ) );
+		$this->assertFalse( $notification->has_meta( NotificationProcessor::CLAIMED_META_KEY ) );
 	}
 
 	/**
@@ -171,6 +172,7 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 		$result       = $this->sut->process( $notification, true );
 
 		$this->assertTrue( $result );
+		$this->assertFalse( $notification->has_meta( NotificationProcessor::CLAIMED_META_KEY ) );
 	}
 
 	/**
@@ -257,6 +259,7 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 		$this->sut->process( $notification );
 
 		$this->assertNotEmpty( get_comment_meta( $comment_id, NotificationProcessor::SENT_META_KEY, true ) );
+		$this->assertFalse( $notification->has_meta( NotificationProcessor::CLAIMED_META_KEY ) );
 	}
 
 	/**
