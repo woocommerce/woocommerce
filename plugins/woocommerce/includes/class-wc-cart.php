@@ -1146,7 +1146,16 @@ class WC_Cart extends WC_Legacy_Cart {
 			}
 
 			$product_data = wc_get_product( $variation_id ? $variation_id : $product_id );
-			$quantity     = apply_filters( 'woocommerce_add_to_cart_quantity', $quantity, $product_id, $variation_id );
+
+			/**
+			 * Filters the change the quantity to add to cart.
+			 *
+			 * @since 3.1.0
+			 * @param number $default_quantity The default quantity.
+			 * @param number $product_id The product id.
+			 * @param number $variation_id     The variation ID.
+			 */
+			$quantity = apply_filters( 'woocommerce_add_to_cart_quantity', $quantity, $product_id, $variation_id );
 
 			if ( $quantity <= 0 || ! $product_data || ProductStatus::TRASH === $product_data->get_status() ) {
 				return false;
