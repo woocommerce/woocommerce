@@ -23,10 +23,10 @@ const getInputData = ( event: HTMLElementEvent< HTMLButtonElement > ) => {
 		return;
 	}
 
-	const parsedValue = parseInt( inputElement.value, 10 );
-	const parsedMinValue = parseInt( inputElement.min, 10 );
-	const parsedMaxValue = parseInt( inputElement.max, 10 );
-	const parsedStep = parseInt( inputElement.step, 10 );
+	const parsedValue = parseFloat( inputElement.value );
+	const parsedMinValue = parseFloat( inputElement.min );
+	const parsedMaxValue = parseFloat( inputElement.max );
+	const parsedStep = parseFloat( inputElement.step );
 
 	const currentValue = isNaN( parsedValue ) ? 0 : parsedValue;
 	const minValue = isNaN( parsedMinValue ) ? 1 : parsedMinValue;
