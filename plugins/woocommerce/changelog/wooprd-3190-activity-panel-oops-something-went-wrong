@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Prevent Activity panel abbreviated notification SlotFill from triggering repeated re-renders by creating the slot at module scope.
