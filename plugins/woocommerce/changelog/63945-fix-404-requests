@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix 404 requests for category-title and category-description block frontend scripts
