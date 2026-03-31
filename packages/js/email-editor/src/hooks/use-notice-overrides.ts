@@ -77,6 +77,14 @@ function getStoreName( namespace: string | { name: string } ): string {
  */
 export function useNoticeOverrides(): void {
 	useEffect( () => {
+		const getNoticesWithOverrides = createSelector(
+			( notices: Notice[] ) => applyOverridesToNotices( notices ),
+			( notices: Notice[] ) => [ notices ]
+		);
+
+		let cachedSelectors: Record< string, unknown > | null = null;
+		let lastOriginalSelectors: Record< string, unknown > | null = null;
+
 		let originalSelect: ( namespace: string | { name: string } ) => unknown;
 
 		use( ( registry: { select: ( ...args: unknown[] ) => unknown } ) => {
@@ -98,19 +106,18 @@ export function useNoticeOverrides(): void {
 						return selectors;
 					}
 
-					const getNoticesWithOverrides = createSelector(
-						( notices: Notice[] ) =>
-							applyOverridesToNotices( notices ),
-						( notices: Notice[] ) => [ notices ]
-					);
+					if ( selectors !== lastOriginalSelectors ) {
+						lastOriginalSelectors = selectors;
+						cachedSelectors = {
+							...selectors,
+							getNotices: ( context?: string ) =>
+								getNoticesWithOverrides(
+									originalGetNotices( context )
+								),
+						};
+					}
 
-					return {
-						...selectors,
-						getNotices: ( context?: string ) =>
-							getNoticesWithOverrides(
-								originalGetNotices( context )
-							),
-					};
+					return cachedSelectors;
 				},
 			};
 		} );
