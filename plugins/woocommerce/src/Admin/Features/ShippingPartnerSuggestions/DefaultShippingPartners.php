@@ -212,10 +212,10 @@ class DefaultShippingPartners {
 				),
 				'learn_more_link'         => 'https://wordpress.org/plugins/packlink-pro-shipping/',
 				'is_visible'              => array(
-					self::get_rules_for_countries( array( 'FR', 'DE', 'ES', 'IT', 'NL', 'AT', 'BE' ) ),
+					self::get_rules_for_countries( array( 'FR', 'DE', 'ES', 'IT', 'NL', 'AT', 'BE', 'IE', 'PT' ) ),
 				),
 				'available_layouts'       => array( 'row', 'column' ),
-				'countries_where_primary' => array( 'FR', 'DE', 'ES', 'IT', 'NL', 'AT', 'BE' ),
+				'countries_where_primary' => array( 'FR', 'DE', 'ES', 'IT', 'NL', 'AT', 'BE', 'IE', 'PT' ),
 			),
 			array(
 				'id'                      => 'woocommerce-shipping',

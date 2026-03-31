@@ -1,8 +1,9 @@
 /**
  * External dependencies
  */
-import Dinero from 'dinero.js';
 import type { CartItem } from '@woocommerce/types';
+import { dinero, subtract, transformScale, toSnapshot } from 'dinero.js';
+import { USD } from 'dinero.js/currencies'; // USD is used as a placeholder currency for arithmetic; actual formatting is handled elsewhere.
 
 /**
  * Calculate the per-unit sale amount from raw prices.
@@ -20,18 +21,19 @@ export function calculateSaleAmount(
 			? parseInt( prices.raw_prices.precision, 10 )
 			: prices.raw_prices.precision;
 
-	const regular = Dinero( {
+	const regular = dinero( {
 		amount: parseInt( prices.raw_prices.regular_price, 10 ),
-		precision: rawPrecision,
+		currency: USD,
+		scale: rawPrecision,
 	} );
 
-	const purchase = Dinero( {
+	const purchase = dinero( {
 		amount: parseInt( prices.raw_prices.price, 10 ),
-		precision: rawPrecision,
+		currency: USD,
+		scale: rawPrecision,
 	} );
 
-	return regular
-		.subtract( purchase )
-		.convertPrecision( targetPrecision )
-		.getAmount();
+	return toSnapshot(
+		transformScale( subtract( regular, purchase ), targetPrecision )
+	).amount;
 }

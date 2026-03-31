@@ -83,6 +83,7 @@ class Setting extends Component {
 			case 'select':
 				return (
 					<SelectControl
+						__next40pxDefaultSize
 						options={ options }
 						value={ value }
 						onChange={ ( newValue ) =>

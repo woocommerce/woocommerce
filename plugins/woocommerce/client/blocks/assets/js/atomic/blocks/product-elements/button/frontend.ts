@@ -8,8 +8,10 @@ import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-d
 /**
  * Internal dependencies
  */
-import { doesCartItemMatchAttributes } from '../../../../base/utils/variations/does-cart-item-match-attributes';
-import type { AddToCartWithOptionsStore } from '../../../../blocks/add-to-cart-with-options/frontend';
+import type {
+	Context as AddToCartWithOptionsContext,
+	AddToCartWithOptionsStore,
+} from '../../../../blocks/add-to-cart-with-options/frontend';
 
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
@@ -63,32 +65,16 @@ const { state: productDataState } = store< ProductDataStore >(
 const productButtonStore = {
 	state: {
 		get quantity(): number {
-			const products = wooState.cart?.items.filter(
-				( item ) => item.id === state.productId
+			const formContext = getContext< AddToCartWithOptionsContext >(
+				'woocommerce/add-to-cart-with-options'
 			);
 
-			if ( products.length === 0 ) {
-				return 0;
-			}
+			const item = wooState.findItemInCart( {
+				id: state.productId,
+				variation: formContext?.selectedAttributes,
+			} );
 
-			// Return the product quantity when the item is a non-variable product.
-			if ( products[ 0 ]?.type !== 'variation' ) {
-				return products.reduce(
-					( acc, item ) => acc + item.quantity,
-					0
-				);
-			}
-
-			const selectedAttributes =
-				addToCartWithOptionsState?.selectedAttributes;
-			const selectedVariableProducts = products.filter( ( item ) =>
-				doesCartItemMatchAttributes( item, selectedAttributes )
-			);
-
-			return selectedVariableProducts.reduce(
-				( acc, item ) => acc + item.quantity,
-				0
-			);
+			return item?.quantity ?? 0;
 		},
 		get slideInAnimation() {
 			const { animationStatus } = getContext< Context >();
@@ -121,9 +107,9 @@ const productButtonStore = {
 			if ( productType === 'grouped' ) {
 				const groupedProductIdsInCart = groupedProductIds?.map(
 					( productId ) => {
-						const product = wooState.cart?.items.find(
-							( item ) => item.id === productId
-						);
+						const product = wooState.findItemInCart( {
+							id: productId,
+						} );
 						return product?.quantity || 0;
 					}
 				);

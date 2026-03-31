@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Register fulfillments data store via WC_Data_Store for extensibility, allowing extensions to provide custom data store implementations.

@@ -141,11 +141,12 @@ export type AddToCartWithOptionsStore = {
 	};
 };
 
-const { actions, state } = store<
+const { state } = store<
 	AddToCartWithOptionsStore &
 		Partial< GroupedProductAddToCartWithOptionsStore > &
 		Partial< VariableProductAddToCartWithOptionsStore >
->(
+>( 'woocommerce/add-to-cart-with-options', {}, { lock: universalLock } );
+const { actions } = store(
 	'woocommerce/add-to-cart-with-options',
 	{
 		state: {
