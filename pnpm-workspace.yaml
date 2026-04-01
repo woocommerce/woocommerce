@@ -31,10 +31,11 @@ minimumReleaseAgeExclude:
     - '@wordpress/*'
 
 # Require explicit approval for dependency build scripts (postinstall, etc).
-# Only msw is allowed to run scripts (copies service worker file).
+# msw copies its service worker file, and fs-ext needs a native build for wp-env.
 # All other deps with lifecycle scripts are implicitly blocked.
 onlyBuiltDependencies:
     - msw
+    - fs-ext
 
 # Block odd protocols (git+ssh, etc.) in transitive dependencies.
 # DISABLED: @wordpress/interactivity uses a git-hosted fork (via .pnpmfile.cjs readPackage hook)
