@@ -4,6 +4,10 @@
 import { store } from '@wordpress/interactivity';
 import { HTMLElementEvent } from '@woocommerce/types';
 
+// Stores are locked to prevent 3PD usage until the API is stable.
+const universalLock =
+	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
+
 const getInputElementFromEvent = (
 	event: HTMLElementEvent< HTMLButtonElement >
 ) => {
@@ -67,41 +71,51 @@ const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
 
 // Note: this store is also used by the Add to Cart + Options block when
 // rendering third party product types that don't use block template parts.
-store( 'woocommerce/add-to-cart-form', {
-	state: {
-		get allowsIncrease() {
-			return true;
+store(
+	'woocommerce/add-to-cart-form',
+	{
+		state: {
+			get allowsIncrease() {
+				return true;
+			},
+			get allowsDecrease() {
+				return true;
+			},
 		},
-		get allowsDecrease() {
-			return true;
+		actions: {
+			increaseQuantity: (
+				event: HTMLElementEvent< HTMLButtonElement >
+			) => {
+				const inputData = getInputData( event );
+				if ( ! inputData ) {
+					return;
+				}
+				const { currentValue, maxValue, step, inputElement } =
+					inputData;
+				const newValue = currentValue + step;
+
+				if ( maxValue === undefined || newValue <= maxValue ) {
+					inputElement.value = roundToStep( newValue, step );
+					dispatchChangeEvent( inputElement );
+				}
+			},
+			decreaseQuantity: (
+				event: HTMLElementEvent< HTMLButtonElement >
+			) => {
+				const inputData = getInputData( event );
+				if ( ! inputData ) {
+					return;
+				}
+				const { currentValue, minValue, step, inputElement } =
+					inputData;
+				const newValue = currentValue - step;
+
+				if ( newValue >= minValue ) {
+					inputElement.value = roundToStep( newValue, step );
+					dispatchChangeEvent( inputElement );
+				}
+			},
 		},
 	},
-	actions: {
-		increaseQuantity: ( event: HTMLElementEvent< HTMLButtonElement > ) => {
-			const inputData = getInputData( event );
-			if ( ! inputData ) {
-				return;
-			}
-			const { currentValue, maxValue, step, inputElement } = inputData;
-			const newValue = currentValue + step;
-
-			if ( maxValue === undefined || newValue <= maxValue ) {
-				inputElement.value = roundToStep( newValue, step );
-				dispatchChangeEvent( inputElement );
-			}
-		},
-		decreaseQuantity: ( event: HTMLElementEvent< HTMLButtonElement > ) => {
-			const inputData = getInputData( event );
-			if ( ! inputData ) {
-				return;
-			}
-			const { currentValue, minValue, step, inputElement } = inputData;
-			const newValue = currentValue - step;
-
-			if ( newValue >= minValue ) {
-				inputElement.value = roundToStep( newValue, step );
-				dispatchChangeEvent( inputElement );
-			}
-		},
-	},
-} );
+	{ lock: universalLock }
+);
