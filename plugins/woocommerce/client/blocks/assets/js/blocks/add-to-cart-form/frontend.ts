@@ -46,6 +46,19 @@ const getInputData = ( event: HTMLElementEvent< HTMLButtonElement > ) => {
 	};
 };
 
+const roundDecimals = (
+	value: number,
+	min: number,
+	max: number,
+	step: number
+): string => {
+	const stepDecimals = ( step.toString().split( '.' )[ 1 ] || '' ).length;
+	const minDecimals = ( min.toString().split( '.' )[ 1 ] || '' ).length;
+	const maxDecimals = ( max.toString().split( '.' )[ 1 ] || '' ).length;
+	const decimals = Math.max( stepDecimals, minDecimals, maxDecimals );
+	return value.toFixed( decimals );
+};
+
 /**
  * Manually dispatches a 'change' event on the quantity input element.
  *
@@ -58,11 +71,6 @@ const getInputData = ( event: HTMLElementEvent< HTMLButtonElement > ) => {
  *
  * @param inputElement - The quantity input element to dispatch the event on.
  */
-const roundToStep = ( value: number, step: number ): string => {
-	const decimals = ( step.toString().split( '.' )[ 1 ] || '' ).length;
-	return value.toFixed( decimals );
-};
-
 const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
 	const event = new Event( 'change', { bubbles: true } );
 
@@ -90,12 +98,17 @@ store(
 				if ( ! inputData ) {
 					return;
 				}
-				const { currentValue, maxValue, step, inputElement } =
+				const { currentValue, minValue, maxValue, step, inputElement } =
 					inputData;
 				const newValue = currentValue + step;
 
 				if ( maxValue === undefined || newValue <= maxValue ) {
-					inputElement.value = roundToStep( newValue, step );
+					inputElement.value = roundDecimals(
+						newValue,
+						minValue,
+						maxValue ?? Infinity,
+						step
+					);
 					dispatchChangeEvent( inputElement );
 				}
 			},
@@ -106,12 +119,17 @@ store(
 				if ( ! inputData ) {
 					return;
 				}
-				const { currentValue, minValue, step, inputElement } =
+				const { currentValue, minValue, maxValue, step, inputElement } =
 					inputData;
 				const newValue = currentValue - step;
 
 				if ( newValue >= minValue ) {
-					inputElement.value = roundToStep( newValue, step );
+					inputElement.value = roundDecimals(
+						newValue,
+						minValue,
+						maxValue ?? Infinity,
+						step
+					);
 					dispatchChangeEvent( inputElement );
 				}
 			},
