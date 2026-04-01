@@ -3,7 +3,6 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
-use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 
 /**
@@ -28,11 +27,6 @@ class CatalogSorting extends AbstractBlock {
 	 * @return string | void Rendered block output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		// Load shared state for isBlockTheme detection.
-		BlocksSharedState::load_store_config(
-			'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce'
-		);
-
 		ob_start();
 		woocommerce_catalog_ordering( $attributes );
 		$catalog_sorting = ob_get_clean();
