@@ -387,7 +387,9 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 			if ( isset( $request->get_json_params()['meta_data'] ) && is_array( $request->get_json_params()['meta_data'] ) ) {
 				// Update the meta data keys that exist in the request.
 				foreach ( $request->get_json_params()['meta_data'] as $meta ) {
-					$fulfillment->update_meta_data( $meta['key'], $meta['value'], $meta['id'] ?? 0 );
+					if ( isset( $meta['key'] ) ) {
+						$fulfillment->update_meta_data( $meta['key'], $meta['value'] ?? null, $meta['id'] ?? 0 );
+					}
 				}
 
 				// Remove the meta data keys that don't exist in the request, by matching their keys.
@@ -560,7 +562,9 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 
 			// Update the meta data keys that exist in the request.
 			foreach ( $request->get_json_params()['meta_data'] as $meta ) {
-				$fulfillment->update_meta_data( $meta['key'], $meta['value'], $meta['id'] ?? 0 );
+				if ( isset( $meta['key'] ) ) {
+					$fulfillment->update_meta_data( $meta['key'], $meta['value'] ?? null, $meta['id'] ?? 0 );
+				}
 			}
 
 			// Remove the meta data keys that don't exist in the request, by matching their keys.

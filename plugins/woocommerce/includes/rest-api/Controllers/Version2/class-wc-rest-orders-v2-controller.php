@@ -908,8 +908,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		if ( ! empty( $posted['meta_data'] ) && is_array( $posted['meta_data'] ) ) {
 			foreach ( $posted['meta_data'] as $meta ) {
 				if ( isset( $meta['key'] ) ) {
-					$value = isset( $meta['value'] ) ? $meta['value'] : null;
-					$item->update_meta_data( $meta['key'], $value, isset( $meta['id'] ) ? $meta['id'] : '' );
+					$item->update_meta_data( $meta['key'], $meta['value'] ?? null, $meta['id'] ?? '' );
 				}
 			}
 		}

@@ -391,7 +391,9 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		// Meta data.
 		if ( is_array( $request['meta_data'] ) ) {
 			foreach ( $request['meta_data'] as $meta ) {
-				$variation->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
+				if ( isset( $meta['key'] ) ) {
+					$variation->update_meta_data( $meta['key'], $meta['value'] ?? null, $meta['id'] ?? '' );
+				}
 			}
 		}
 

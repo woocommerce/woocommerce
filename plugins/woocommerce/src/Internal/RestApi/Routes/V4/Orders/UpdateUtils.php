@@ -147,7 +147,9 @@ class UpdateUtils {
 	 */
 	protected function update_meta_data( WC_Order $order, array $meta_data ) {
 		foreach ( $meta_data as $meta ) {
-			$order->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
+			if ( isset( $meta['key'] ) ) {
+				$order->update_meta_data( $meta['key'], $meta['value'] ?? null, $meta['id'] ?? '' );
+			}
 		}
 	}
 

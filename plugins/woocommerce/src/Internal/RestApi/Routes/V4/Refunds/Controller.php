@@ -343,7 +343,9 @@ class Controller extends AbstractController {
 
 			if ( ! empty( $request['meta_data'] ) && is_array( $request['meta_data'] ) ) {
 				foreach ( $request['meta_data'] as $meta ) {
-					$refund->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
+					if ( isset( $meta['key'] ) ) {
+						$refund->update_meta_data( $meta['key'], $meta['value'] ?? null, $meta['id'] ?? '' );
+					}
 				}
 				$refund->save_meta_data();
 			}

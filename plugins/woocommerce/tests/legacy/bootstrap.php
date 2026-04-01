@@ -298,6 +298,7 @@ class WC_Unit_Tests_Bootstrap {
 		require_once dirname( $this->tests_dir ) . '/php/helpers/HPOSToggleTrait.php';
 		require_once dirname( $this->tests_dir ) . '/php/helpers/SerializingCacheTrait.php';
 		require_once dirname( $this->tests_dir ) . '/php/helpers/LoggerSpyTrait.php';
+		require_once dirname( $this->tests_dir ) . '/php/helpers/MetaDataAssertionTrait.php';
 	}
 
 	/**
