@@ -12,14 +12,12 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 10.7.0
+ * @version 10.8.0
  */
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
-
-$text_align = is_rtl() ? 'right' : 'left';
 
 $email_improvements_enabled = FeaturesUtil::feature_is_enabled( 'email_improvements' );
 $block_email_editor_enabled = FeaturesUtil::feature_is_enabled( 'block_email_editor' );
@@ -83,9 +81,9 @@ do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plai
 		<?php if ( ! $block_email_editor_enabled ) : ?>
 		<thead>
 			<tr>
-				<th class="td" scope="col" style="text-align:<?php echo esc_attr( $text_align ); ?>;"><?php esc_html_e( 'Product', 'woocommerce' ); ?></th>
-				<th class="td" scope="col" style="text-align:<?php echo esc_attr( $order_quantity_text_align ); ?>;"><?php esc_html_e( 'Quantity', 'woocommerce' ); ?></th>
-				<th class="td" scope="col" style="text-align:<?php echo esc_attr( $order_total_text_align ); ?>;"><?php esc_html_e( 'Price', 'woocommerce' ); ?></th>
+				<th class="td text-align-left" scope="col"><?php esc_html_e( 'Product', 'woocommerce' ); ?></th>
+				<th class="td text-align-<?php echo esc_attr( $order_quantity_text_align ); ?>" scope="col"><?php esc_html_e( 'Quantity', 'woocommerce' ); ?></th>
+				<th class="td text-align-<?php echo esc_attr( $order_total_text_align ); ?>" scope="col"><?php esc_html_e( 'Price', 'woocommerce' ); ?></th>
 			</tr>
 		</thead>
 		<?php endif; ?>
