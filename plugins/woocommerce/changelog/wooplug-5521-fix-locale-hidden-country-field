@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Fix address fields reverting to defaults when country field is hidden via woocommerce_get_country_locale filter. When country is hidden, its value is now set to the store base country instead of being cleared, preserving locale resolution for all other fields. Also fixes state and phone fields not being hidden in classic checkout, and hides shipping calculator toggle when all fields are hidden.
+Fix locale filter breaking address forms when hiding fields. Country is now enforced as always visible and required since it is the lookup key for locale resolution. Also fixes state field not being hideable by locale in classic checkout, and fixes address card displaying stale values for hidden fields.
