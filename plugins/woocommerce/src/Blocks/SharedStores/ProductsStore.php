@@ -45,6 +45,13 @@ class ProductsStore {
 	private static array $product_variations = array();
 
 	/**
+	 * Parent product IDs whose variations have already been loaded.
+	 *
+	 * @var array<int, true>
+	 */
+	private static array $loaded_variation_parents = array();
+
+	/**
 	 * Check that the consent statement was passed.
 	 *
 	 * @param string $consent_statement The consent statement string.
@@ -168,7 +175,17 @@ class ProductsStore {
 	public static function load_variations( string $consent_statement, int $parent_id ): array {
 		self::check_consent( $consent_statement );
 
+		// Skip loading if variations for this parent have already been loaded.
+		if ( isset( self::$loaded_variation_parents[ $parent_id ] ) ) {
+			return array_filter(
+				self::$product_variations,
+				fn( $variation ) => ( $variation['parent'] ?? 0 ) === $parent_id
+			);
+		}
+
 		$response = Package::container()->get( Hydration::class )->get_rest_api_response_data( '/wc/store/v1/products?parent[]=' . $parent_id . '&type=variation' );
+
+		self::$loaded_variation_parents[ $parent_id ] = true;
 
 		if ( empty( $response['body'] ) ) {
 			return array();
