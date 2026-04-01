@@ -165,6 +165,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 
 		if ( 0 === $index ) {
 			$p->set_attribute( 'fetchpriority', 'high' );
+			$p->set_attribute( 'loading', 'eager' );
 		} else {
 			$p->set_attribute( 'fetchpriority', 'low' );
 			$p->set_attribute( 'loading', 'lazy' );
