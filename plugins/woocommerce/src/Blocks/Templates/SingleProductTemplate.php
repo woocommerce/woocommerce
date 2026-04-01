@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Templates;
 
+use Automattic\WooCommerce\Blocks\SharedStores\ProductsStore;
 use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplateCompatibility;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 
@@ -84,6 +85,16 @@ class SingleProductTemplate extends AbstractTemplate {
 
 			$product = wc_get_product( $post->ID );
 			if ( $product ) {
+				$consent = 'I acknowledge that using experimental APIs means my theme or plugin will inevitably break in the next version of WooCommerce';
+
+				// Load the product data into the products store so derived
+				// state closures can resolve it during server-side rendering.
+				ProductsStore::load_product( $consent, $product->get_id() );
+
+				// Keep the existing product-data store hydrated so current
+				// consumers (add-to-cart-with-options, variation-selector)
+				// continue to work. This will be removed when consumers are
+				// migrated to product-context.
 				wp_interactivity_state(
 					'woocommerce/product-data',
 					array(
@@ -91,6 +102,43 @@ class SingleProductTemplate extends AbstractTemplate {
 							'productId'   => $product->get_id(),
 							'variationId' => null,
 						),
+					)
+				);
+
+				// Register the product-context store state. The derived state
+				// closures (product, selectedVariation) mirror the JS getters
+				// so that directives referencing state.product resolve during
+				// SSR. If more call sites need to register these closures,
+				// consider extracting them into a shared helper.
+				wp_interactivity_state(
+					'woocommerce/product-context',
+					array(
+						'productId'         => $product->get_id(),
+						'variationId'       => null,
+						'product'           => function () {
+							$context    = wp_interactivity_get_context();
+							$state      = wp_interactivity_state( 'woocommerce/product-context' );
+							$product_id = ! empty( $context ) ? $context['productId'] : ( $state['productId'] ?? null );
+
+							if ( ! $product_id ) {
+								return null;
+							}
+
+							$products_state = wp_interactivity_state( 'woocommerce/products' );
+							return $products_state['products'][ $product_id ] ?? null;
+						},
+						'selectedVariation' => function () {
+							$context      = wp_interactivity_get_context();
+							$state        = wp_interactivity_state( 'woocommerce/product-context' );
+							$variation_id = ! empty( $context ) ? $context['variationId'] : ( $state['variationId'] ?? null );
+
+							if ( ! $variation_id ) {
+								return null;
+							}
+
+							$products_state = wp_interactivity_state( 'woocommerce/products' );
+							return $products_state['productVariations'][ $variation_id ] ?? null;
+						},
 					)
 				);
 			}

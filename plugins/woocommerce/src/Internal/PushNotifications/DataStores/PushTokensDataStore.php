@@ -303,6 +303,73 @@ class PushTokensDataStore {
 	}
 
 	/**
+	 * Returns all push tokens belonging to users with the given roles.
+	 *
+	 * @param string[] $roles The roles to query tokens for.
+	 * @return PushToken[]
+	 *
+	 * @since 10.7.0
+	 */
+	public function get_tokens_for_roles( array $roles ): array {
+		if ( empty( $roles ) ) {
+			return array();
+		}
+
+		$user_ids = get_users(
+			array(
+				'role__in' => $roles,
+				'fields'   => 'ID',
+			)
+		);
+
+		if ( empty( $user_ids ) ) {
+			return array();
+		}
+
+		$query = new WP_Query(
+			array(
+				'post_type'      => PushToken::POST_TYPE,
+				'post_status'    => 'private',
+				'author__in'     => $user_ids,
+				'posts_per_page' => -1,
+				'fields'         => 'ids',
+			)
+		);
+
+		/**
+		 * Typehint for PHPStan, specifies these are IDs and not instances of
+		 * WP_Post.
+		 *
+		 * @var int[] $post_ids
+		 */
+		$post_ids = $query->posts;
+
+		if ( empty( $post_ids ) ) {
+			return array();
+		}
+
+		update_meta_cache( 'post', $post_ids );
+
+		$tokens = array();
+
+		foreach ( $post_ids as $post_id ) {
+			try {
+				$tokens[] = $this->read( (int) $post_id );
+			} catch ( WC_Data_Exception $e ) {
+				wc_get_logger()->warning(
+					'Skipping malformed push token during role-based query.',
+					array(
+						'token_id' => $post_id,
+						'error'    => $e->getMessage(),
+					)
+				);
+			}
+		}
+
+		return $tokens;
+	}
+
+	/**
 	 * Returns an associative array of post meta as key => value pairs for the
 	 * keys defined in SUPPORTED_META; missing keys return null. Use
 	 * `update_meta_cache` with `get_post_meta` to allow reading the meta as

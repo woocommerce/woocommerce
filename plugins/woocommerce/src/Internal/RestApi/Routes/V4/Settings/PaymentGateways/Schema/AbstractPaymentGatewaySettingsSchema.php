@@ -170,7 +170,7 @@ abstract class AbstractPaymentGatewaySettingsSchema extends AbstractSchema {
 				'type'    => array(
 					'description' => __( 'Setting field type.', 'woocommerce' ),
 					'type'        => 'string',
-					'enum'        => array( 'text', 'number', 'select', 'multiselect', 'checkbox' ),
+					'enum'        => array( 'text', 'number', 'select', 'multiselect', 'checkbox', 'array' ),
 					'context'     => array( 'view', 'edit' ),
 				),
 				'options' => array(
@@ -235,6 +235,8 @@ abstract class AbstractPaymentGatewaySettingsSchema extends AbstractSchema {
 	 * @return array
 	 */
 	private function get_groups( WC_Payment_Gateway $gateway ): array {
+		$gateway->init_form_fields();
+
 		// Check if gateway has custom grouping.
 		$custom_groups = $this->get_custom_groups_for_gateway( $gateway );
 		if ( ! empty( $custom_groups ) ) {
@@ -264,8 +266,6 @@ abstract class AbstractPaymentGatewaySettingsSchema extends AbstractSchema {
 	 * @return array
 	 */
 	private function get_default_group( WC_Payment_Gateway $gateway ): array {
-		$gateway->init_form_fields();
-
 		$group = array(
 			'title'       => __( 'Settings', 'woocommerce' ),
 			'description' => '',
@@ -385,6 +385,66 @@ abstract class AbstractPaymentGatewaySettingsSchema extends AbstractSchema {
 	 */
 	protected function get_field_options( string $field_id ): array {
 		return array();
+	}
+
+	/**
+	 * Build fields array from gateway form_fields with design-aligned overrides.
+	 *
+	 * Iterates the gateway's form_fields to build the schema fields list.
+	 * Known core fields use the provided overrides for labels and descriptions.
+	 * Extension-injected fields are preserved and transformed to schema format.
+	 * The 'order' field (display position) is always appended as it does not
+	 * come from form_fields.
+	 *
+	 * @param WC_Payment_Gateway $gateway              Gateway instance.
+	 * @param array              $core_field_overrides  Map of field_id => array( 'label', 'type', 'desc' ).
+	 * @param array              $skip_field_ids        Field IDs to skip (e.g., special fields handled elsewhere).
+	 * @return array Schema fields list.
+	 */
+	protected function build_fields_from_form_fields( WC_Payment_Gateway $gateway, array $core_field_overrides, array $skip_field_ids = array() ): array {
+		$fields = array();
+
+		// Add core fields in the order defined by overrides first.
+		foreach ( $core_field_overrides as $field_id => $override ) {
+			// The 'order' field is synthetic (not in form_fields), always add it from overrides.
+			if ( 'order' === $field_id ) {
+				$fields[] = array_merge( array( 'id' => $field_id ), $override );
+				continue;
+			}
+
+			if ( ! isset( $gateway->form_fields[ $field_id ] ) ) {
+				continue;
+			}
+
+			$field        = $gateway->form_fields[ $field_id ];
+			$schema_field = array_merge( array( 'id' => $field_id ), $override );
+
+			// Preserve options from form_fields for select/multiselect fields.
+			if ( in_array( $schema_field['type'] ?? '', array( 'select', 'multiselect' ), true ) && ! isset( $schema_field['options'] ) ) {
+				if ( ! empty( $field['options'] ) ) {
+					$schema_field['options'] = $field['options'];
+				}
+			}
+
+			$fields[] = $schema_field;
+		}
+
+		// Append any extension-injected fields not in core overrides or skip list.
+		foreach ( $gateway->form_fields as $field_id => $field ) {
+			$field_type = $field['type'] ?? '';
+
+			// Skip non-data fields, already-handled core fields, and explicitly skipped fields.
+			if ( in_array( $field_type, array( 'title', 'sectionend' ), true ) ||
+				isset( $core_field_overrides[ $field_id ] ) ||
+				in_array( $field_id, $skip_field_ids, true ) ||
+				$this->is_special_field( $field_id ) ) {
+				continue;
+			}
+
+			$fields[] = $this->transform_field_to_schema( $field_id, $field, $gateway );
+		}
+
+		return $fields;
 	}
 
 	/**
@@ -555,6 +615,13 @@ abstract class AbstractPaymentGatewaySettingsSchema extends AbstractSchema {
 				return sanitize_email( $value );
 
 			case 'password':
+				// Only trim — no stripslashes() (REST JSON is not magic-quote-escaped),
+				// no wp_strip_all_tags() or wc_clean() which would corrupt passwords
+				// containing '<', backslashes, or percent-like sequences.
+				// Non-scalar values (arrays, objects, null) from malformed requests → empty string.
+				// Scalars coerced to string to preserve numeric PINs/API keys.
+				return is_scalar( $value ) ? trim( (string) $value ) : '';
+
 			case 'color':
 				return sanitize_text_field( $value );
 

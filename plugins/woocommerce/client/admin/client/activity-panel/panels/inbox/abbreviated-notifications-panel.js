@@ -28,6 +28,9 @@ const REVIEWS_PANEL_ID = 'reviews-panel';
 const STOCK_PANEL_ID = 'stock-panel';
 
 export const ABBREVIATED_NOTIFICATION_SLOT_NAME = 'AbbreviatedNotification';
+const { Slot: AbbreviatedNotificationSlot } = createSlotFill(
+	ABBREVIATED_NOTIFICATION_SLOT_NAME
+);
 
 export const AbbreviatedNotificationsPanel = ( { thingsToDoNextCount } ) => {
 	const {
@@ -46,7 +49,7 @@ export const AbbreviatedNotificationsPanel = ( { thingsToDoNextCount } ) => {
 			isSetupTaskListHidden: ! isTaskListVisible( 'setup' ),
 			isExtendedTaskListHidden: ! isTaskListVisible( 'extended' ),
 		};
-	} );
+	}, [] );
 
 	const trackAbbreviatedCardClick = ( name ) => {
 		recordEvent( 'activity_panel_click', {
@@ -54,7 +57,6 @@ export const AbbreviatedNotificationsPanel = ( { thingsToDoNextCount } ) => {
 		} );
 	};
 
-	const { Slot } = createSlotFill( ABBREVIATED_NOTIFICATION_SLOT_NAME );
 	const isWCAdminPage = isWCAdmin();
 
 	return (
@@ -161,7 +163,7 @@ export const AbbreviatedNotificationsPanel = ( { thingsToDoNextCount } ) => {
 					</Text>
 				</AbbreviatedCard>
 			) }
-			{ ! isExtendedTaskListHidden && <Slot /> }
+			{ ! isExtendedTaskListHidden && <AbbreviatedNotificationSlot /> }
 		</div>
 	);
 };
