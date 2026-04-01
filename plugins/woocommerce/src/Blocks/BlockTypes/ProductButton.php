@@ -172,6 +172,7 @@ class ProductButton extends AbstractBlock {
 
 			if ( $product->is_type( ProductType::EXTERNAL ) ) {
 				$attributes['target'] = '_blank';
+				$attributes['rel']    = 'nofollow noopener noreferrer';
 			}
 		}
 
