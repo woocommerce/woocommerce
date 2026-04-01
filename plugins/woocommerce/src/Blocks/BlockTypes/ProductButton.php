@@ -166,8 +166,9 @@ class ProductButton extends AbstractBlock {
 
 		if ( 'a' === $html_element ) {
 			$attributes = array(
-				'href' => esc_url( $product->add_to_cart_url() ),
-				'rel'  => 'nofollow',
+				'href'   => esc_url( $product->add_to_cart_url() ),
+				'rel'    => 'nofollow',
+				'target' => '_blank',
 			);
 		}
 
