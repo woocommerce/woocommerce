@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Implement request batching/queueing for cart operations to fix multiple issues with state resolution in the cart UI.

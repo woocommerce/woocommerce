@@ -105,13 +105,18 @@ export async function accessTheEmailEditor(
 ) {
 	await page.goto( '/wp-admin/admin.php?page=wc-settings&tab=email' );
 	const theRow = page.getByRole( 'row', {
-		name: new RegExp( emailTitle ),
+		name: emailTitle,
 	} );
+	await theRow
+		.getByRole( 'button', { name: 'Actions', exact: true } )
+		.waitFor( { timeout: 20000 } );
 	await theRow
 		.getByRole( 'button', { name: 'Actions', exact: true } )
 		.click();
 	await page.getByRole( 'menuitem', { name: 'Edit', exact: true } ).click();
-	await expect( page.locator( '#woocommerce-email-editor' ) ).toBeVisible();
+	await expect( page.locator( '#woocommerce-email-editor' ) ).toBeVisible( {
+		timeout: 20000,
+	} );
 }
 
 export async function ensureEmailEditorSettingsPanelIsOpened( page: Page ) {

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Ensure Store API cart sessions restore correctly for rest_route requests with Cart-Token.

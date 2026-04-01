@@ -150,13 +150,19 @@ class WC_Admin_Tests_OnboardingTasks_Task_Shipping extends WC_Unit_Test_Case {
 	 */
 	public function data_provider_can_view_eligible_countries() {
 		return array(
-			array( 'AU' ),
+			array( 'US' ),
 			array( 'CA' ),
+			array( 'AU' ),
+			array( 'NZ' ),
+			array( 'SG' ),
+			array( 'HK' ),
 			array( 'GB' ),
 			array( 'ES' ),
 			array( 'IT' ),
 			array( 'DE' ),
 			array( 'FR' ),
+			array( 'MX' ),
+			array( 'CO' ),
 			array( 'CL' ),
 			array( 'AR' ),
 			array( 'PE' ),
@@ -166,6 +172,8 @@ class WC_Admin_Tests_OnboardingTasks_Task_Shipping extends WC_Unit_Test_Case {
 			array( 'NL' ),
 			array( 'AT' ),
 			array( 'BE' ),
+			array( 'IE' ),
+			array( 'PT' ),
 		);
 	}
 }

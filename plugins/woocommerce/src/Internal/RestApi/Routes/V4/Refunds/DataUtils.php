@@ -147,7 +147,7 @@ class DataUtils {
 			}
 		}
 
-		return $amount;
+		return (float) NumberUtil::round( $amount, wc_get_price_decimals() );
 	}
 
 	/**

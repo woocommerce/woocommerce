@@ -907,11 +907,13 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 */
 	public function valid_locales_provider(): array {
 		return array(
-			'English US'   => array( 'en_US' ),
-			'French'       => array( 'fr_FR' ),
-			'Chinese'      => array( 'zh_CN' ),
-			'Portuguese'   => array( 'pt_BR' ),
-			'Three-letter' => array( 'ast_ES' ),
+			'English US'                  => array( 'en_US' ),
+			'French'                      => array( 'fr_FR' ),
+			'Chinese'                     => array( 'zh_CN' ),
+			'Portuguese'                  => array( 'pt_BR' ),
+			'Three-letter with region'    => array( 'rup_MK' ),
+			'Two-letter without region'   => array( 'ja' ),
+			'Three-letter without region' => array( 'ast' ),
 		);
 	}
 
@@ -922,12 +924,13 @@ class PushTokenValidatorTest extends WC_Unit_Test_Case {
 	 */
 	public function invalid_locales_provider(): array {
 		return array(
-			'no underscore'    => array( 'enUS' ),
-			'lowercase region' => array( 'en_gb' ),
-			'uppercase lang'   => array( 'EN_US' ),
-			'just language'    => array( 'en' ),
-			'with hyphen'      => array( 'en-US' ),
-			'too long lang'    => array( 'engl_US' ),
+			'no underscore'       => array( 'enUS' ),
+			'lowercase region'    => array( 'en_gb' ),
+			'uppercase lang'      => array( 'EN_US' ),
+			'single char'         => array( 'e' ),
+			'with hyphen'         => array( 'en-US' ),
+			'too long lang'       => array( 'engl_US' ),
+			'trailing underscore' => array( 'en_' ),
 		);
 	}
 

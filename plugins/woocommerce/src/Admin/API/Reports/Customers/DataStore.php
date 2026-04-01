@@ -309,29 +309,25 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$having_clauses = array();
 
 		$exact_match_params = array(
-			'name',
-			'username',
-			'email',
-			'country',
+			'name'     => "CONCAT_WS( ' ', {$customer_lookup_table}.first_name, {$customer_lookup_table}.last_name )",
+			'username' => "{$customer_lookup_table}.username",
+			'email'    => "{$customer_lookup_table}.email",
+			'country'  => "{$customer_lookup_table}.country",
 		);
 
-		foreach ( $exact_match_params as $exact_match_param ) {
+		foreach ( $exact_match_params as $exact_match_param => $column_expression ) {
 			if ( ! empty( $query_args[ $exact_match_param . '_includes' ] ) ) {
 				$exact_match_arguments         = $query_args[ $exact_match_param . '_includes' ];
 				$exact_match_arguments_escaped = array_map( 'esc_sql', explode( ',', $exact_match_arguments ) );
 				$included                      = implode( "','", $exact_match_arguments_escaped );
-				// 'country_includes' is a list of country codes, the others will be a list of customer ids.
-				$table_column    = 'country' === $exact_match_param ? $exact_match_param : 'customer_id';
-				$where_clauses[] = "{$customer_lookup_table}.{$table_column} IN ('{$included}')";
+				$where_clauses[]               = "{$column_expression} IN ('{$included}')";
 			}
 
 			if ( ! empty( $query_args[ $exact_match_param . '_excludes' ] ) ) {
 				$exact_match_arguments         = $query_args[ $exact_match_param . '_excludes' ];
 				$exact_match_arguments_escaped = array_map( 'esc_sql', explode( ',', $exact_match_arguments ) );
 				$excluded                      = implode( "','", $exact_match_arguments_escaped );
-				// 'country_includes' is a list of country codes, the others will be a list of customer ids.
-				$table_column    = 'country' === $exact_match_param ? $exact_match_param : 'customer_id';
-				$where_clauses[] = "{$customer_lookup_table}.{$table_column} NOT IN ('{$excluded}')";
+				$where_clauses[]               = "{$column_expression} NOT IN ('{$excluded}')";
 			}
 		}
 
@@ -384,6 +380,12 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		if ( ! empty( $query_args['customers'] ) ) {
 			$included_customers = $this->get_filtered_ids( $query_args, 'customers' );
 			$where_clauses[]    = "{$customer_lookup_table}.customer_id IN ({$included_customers})";
+		}
+
+		// Allow a list of customer IDs to be excluded.
+		if ( ! empty( $query_args['customers_exclude'] ) ) {
+			$excluded_customers = $this->get_filtered_ids( $query_args, 'customers_exclude' );
+			$where_clauses[]    = "{$customer_lookup_table}.customer_id NOT IN ({$excluded_customers})";
 		}
 
 		// Allow a list of user IDs to be specified.
@@ -931,6 +933,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 */
 	public static function update_registered_customer_via_last_active( $meta_id, $user_id, $meta_key ) {
 		if ( 'wc_last_active' === $meta_key ) {
+			// Optimization note related to guarded updates in `wc_update_user_last_active`: the meta update will trigger
+			// this method execution. We evaluated adding `! doing_action( 'wp' )` here, but the performance gain lays
+			// in the micro-optimization area while exposing the Analytics to certain edge-cases.
 			self::update_registered_customer( $user_id );
 		}
 	}

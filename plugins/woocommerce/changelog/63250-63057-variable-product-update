@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fixes a bug where updating the stock count from the dashboard for a variable product changed its product type back to a simple product and removed all variations.

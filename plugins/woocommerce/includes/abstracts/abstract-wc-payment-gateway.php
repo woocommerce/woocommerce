@@ -340,10 +340,15 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	/**
 	 * Check if the gateway is available for use.
 	 *
+	 * @since 10.7.0 Added early return when gateway is disabled.
 	 * @return bool
 	 */
 	public function is_available() {
-		$is_available = ( 'yes' === $this->enabled );
+		if ( 'yes' !== $this->enabled ) {
+			return false;
+		}
+
+		$is_available = true;
 
 		if ( WC()->cart && 0 < $this->get_order_total() && 0 < $this->max_amount && $this->max_amount < $this->get_order_total() ) {
 			$is_available = false;

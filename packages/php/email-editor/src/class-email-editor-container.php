@@ -217,6 +217,7 @@ class Email_Editor_Container {
 					new Email_Css_Inliner(),
 					$container->get( Theme_Controller::class ),
 					$container->get( Personalization_Tags_Registry::class ),
+					$container->get( Process_Manager::class ),
 				);
 			}
 		);

@@ -145,7 +145,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 			$p->set_attribute( 'tabindex', '-1' );
 		} else {
 			/**
-			 * If we can't find and <a> tag, we're at then end of the document.
+			 * If we can't find and <a> tag, we're at the end of the document.
 			 * We need to reinitialize the processor instance to search for <img> tag.
 			 */
 			$p = new \WP_HTML_Tag_Processor( $image_html );

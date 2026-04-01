@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { useDispatch } from '@wordpress/data';
 
 /**
@@ -100,11 +100,13 @@ describe( 'UpdateButton component', () => {
 		render( <UpdateButton setError={ setError } /> );
 		fireEvent.click( screen.getByText( 'Update' ) );
 
-		expect( await mockUpdateFulfillment ).toHaveBeenCalledWith(
-			123,
-			mockFulfillment,
-			true
-		);
+		await waitFor( () => {
+			expect( mockUpdateFulfillment ).toHaveBeenCalledWith(
+				123,
+				mockFulfillment,
+				true
+			);
+		} );
 	} );
 
 	it( 'should not call updateFulfillment when fulfillment is undefined', () => {
@@ -122,5 +124,62 @@ describe( 'UpdateButton component', () => {
 		fireEvent.click( screen.getByText( 'Update' ) );
 
 		expect( mockUpdateFulfillment ).not.toHaveBeenCalled();
+	} );
+
+	describe( 'Accessibility', () => {
+		it( 'should not have redundant aria-label overriding visible text', () => {
+			render( <UpdateButton setError={ setError } /> );
+
+			const button = screen.getByRole( 'button' );
+			expect( button ).not.toHaveAttribute( 'aria-label' );
+		} );
+
+		it( 'should have aria-describedby with unique prefix', () => {
+			render( <UpdateButton setError={ setError } /> );
+
+			const button = screen.getByRole( 'button' );
+			expect( button.getAttribute( 'aria-describedby' ) ).toMatch(
+				/^update-button-description/
+			);
+		} );
+
+		it( 'should have hidden description for screen readers', () => {
+			render( <UpdateButton setError={ setError } /> );
+
+			const description = screen.getByText(
+				'Applies changes to the existing fulfillment'
+			);
+			expect( description ).toBeInTheDocument();
+			expect( description.getAttribute( 'id' ) ).toMatch(
+				/^update-button-description/
+			);
+			expect( description ).toHaveClass( 'screen-reader-text' );
+		} );
+
+		it( 'should update button text when executing', () => {
+			const mockUpdateFulfillment = jest.fn(
+				() => new Promise( ( resolve ) => setTimeout( resolve, 100 ) )
+			);
+			useDispatch.mockReturnValue( {
+				updateFulfillment: mockUpdateFulfillment,
+			} );
+
+			render( <UpdateButton setError={ setError } /> );
+			const button = screen.getByRole( 'button' );
+
+			fireEvent.click( button );
+
+			// Check that the button text updates during execution
+			expect( screen.getByText( 'Updating…' ) ).toBeInTheDocument();
+			expect( button ).toBeDisabled();
+		} );
+
+		it( 'should be keyboard accessible', () => {
+			render( <UpdateButton setError={ setError } /> );
+
+			const button = screen.getByRole( 'button' );
+			button.focus();
+			expect( button.ownerDocument.activeElement ).toBe( button );
+		} );
 	} );
 } );

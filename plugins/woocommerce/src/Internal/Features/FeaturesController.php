@@ -429,6 +429,16 @@ class FeaturesController {
 					},
 				),
 			),
+			'deferred_transactional_emails'      => array(
+				'name'                         => __( 'Deferred emails', 'woocommerce' ),
+				'description'                  => __(
+					'Send transactional emails asynchronously via Action Scheduler instead of during the current request.',
+					'woocommerce'
+				),
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+				'enabled_by_default'           => false,
+				'is_experimental'              => false,
+			),
 			'email_improvements'                 => array(
 				'name'                         => __( 'Email improvements', 'woocommerce' ),
 				'description'                  => __(
