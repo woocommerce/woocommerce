@@ -18,6 +18,11 @@ defined( 'ABSPATH' ) || exit;
 				<?php
 				$product_ids = $product_object->is_type( ProductType::GROUPED ) ? $product_object->get_children( 'edit' ) : array();
 
+				if ( ! empty( $product_ids ) ) {
+					// Prime caches to reduce future queries.
+					_prime_post_caches( $product_ids );
+				}
+
 				foreach ( $product_ids as $product_id ) {
 					$product = wc_get_product( $product_id );
 					if ( is_object( $product ) ) {
@@ -36,6 +41,11 @@ defined( 'ABSPATH' ) || exit;
 				<?php
 				$product_ids = $product_object->get_upsell_ids( 'edit' );
 
+				if ( ! empty( $product_ids ) ) {
+					// Prime caches to reduce future queries.
+					_prime_post_caches( $product_ids );
+				}
+
 				foreach ( $product_ids as $product_id ) {
 					$product = wc_get_product( $product_id );
 					if ( is_object( $product ) ) {
@@ -51,6 +61,11 @@ defined( 'ABSPATH' ) || exit;
 			<select class="wc-product-search" multiple="multiple" style="width: 50%;" id="crosssell_ids" name="crosssell_ids[]" data-placeholder="<?php esc_attr_e( 'Search for a product&hellip;', 'woocommerce' ); ?>" data-action="woocommerce_json_search_products_and_variations" data-exclude="<?php echo intval( $post->ID ); ?>">
 				<?php
 				$product_ids = $product_object->get_cross_sell_ids( 'edit' );
+
+				if ( ! empty( $product_ids ) ) {
+					// Prime caches to reduce future queries.
+					_prime_post_caches( $product_ids );
+				}
 
 				foreach ( $product_ids as $product_id ) {
 					$product = wc_get_product( $product_id );

@@ -5,6 +5,7 @@
  * @package WooCommerce\Emails
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Email\OrderPriceFormatter;
 use Automattic\WooCommerce\Internal\Orders\PointOfSaleOrderUtil;
 use Automattic\WooCommerce\Internal\Settings\PointOfSaleDefaultSettings;
@@ -455,6 +456,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 			add_action( 'woocommerce_order_fully_refunded_notification', array( $this, 'auto_trigger' ), 10, 2 );
 			add_action( 'woocommerce_order_partially_refunded_notification', array( $this, 'auto_trigger' ), 10, 2 );
 			add_filter( 'woocommerce_rest_order_actions_email_valid_template_classes', array( $this, 'add_to_valid_template_classes' ), 10, 2 );
+			add_filter( 'woocommerce_rest_order_actions_email_preferred_template_ids', array( $this, 'add_to_preferred_template_ids' ), 10, 2 );
 			add_action( 'woocommerce_rest_order_actions_email_send', array( $this, 'trigger' ), 10, 2 );
 		}
 
@@ -469,14 +471,52 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 		 * @since 10.6.0
 		 */
 		public function add_to_valid_template_classes( $valid_template_classes, $order ) {
-			if ( 0 === count( $order->get_refunds() ) ) {
-				return $valid_template_classes;
-			}
-			if ( ! PointOfSaleOrderUtil::is_order_paid_at_pos( $order ) ) {
+			if ( ! $this->is_available_for_order( $order ) ) {
 				return $valid_template_classes;
 			}
 			$valid_template_classes[] = get_class( $this );
 			return $valid_template_classes;
+		}
+
+		/**
+		 * Prepend this template to the preferred template IDs for POS-paid orders.
+		 *
+		 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
+		 *
+		 * @param array    $preferred_template_ids Ordered array of template IDs.
+		 * @param WC_Order $order                  The order.
+		 * @return array Modified array of template IDs.
+		 *
+		 * @since 10.7.0
+		 */
+		public function add_to_preferred_template_ids( $preferred_template_ids, $order ) {
+			if ( ! $this->is_preferred_for_order( $order ) ) {
+				return $preferred_template_ids;
+			}
+			array_unshift( $preferred_template_ids, $this->id );
+			return $preferred_template_ids;
+		}
+
+		/**
+		 * Check if this email template is available (can be manually selected) for the given order.
+		 *
+		 * @param WC_Order $order The order.
+		 * @return bool
+		 */
+		private function is_available_for_order( $order ): bool {
+			return PointOfSaleOrderUtil::is_order_paid_at_pos( $order )
+				&& ( OrderStatus::REFUNDED === $order->get_status( 'edit' ) || 0 !== count( $order->get_refunds() ) );
+		}
+
+		/**
+		 * Check if this email template is preferred (auto-selected) for the given order.
+		 *
+		 * @param WC_Order $order The order.
+		 * @return bool
+		 */
+		private function is_preferred_for_order( $order ): bool {
+			return PointOfSaleOrderUtil::is_order_paid_at_pos( $order )
+				&& OrderStatus::REFUNDED === $order->get_status( 'edit' );
 		}
 
 		/**

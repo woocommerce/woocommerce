@@ -594,6 +594,18 @@ const { state: cartItemState } = store(
 				);
 			},
 
+			get itemSrcset(): string {
+				return (
+					cartItemState.cartItem.images[ 0 ]?.thumbnail_srcset || ''
+				);
+			},
+
+			get itemSizes(): string {
+				return cartItemState.cartItem.images[ 0 ]?.thumbnail_srcset
+					? '64px'
+					: '';
+			},
+
 			get priceWithoutDiscount(): string {
 				const { raw_prices: rawPrices } = cartItemState.cartItem.prices;
 				const priceWithoutDiscount = scalePrice( {

@@ -2,17 +2,18 @@ name: 'CI'
 on:
   pull_request:
   push:
-    paths-ignore:
-      - 'docs/**'
-      - '**/changelog/**'
-      - '.cursor/**'
-      - '**/*.md'
-      - '**/changelog.txt'
-      - '.gitignore'
-      - '.coderabbit.yml'
-      - 'CODEOWNERS'
-      - '.github/**'
-      - '!.github/workflows/ci.yml'
+    paths:
+      - '**'
+      - '!docs/**'
+      - '!**/changelog/**'
+      - '!.cursor/**'
+      - '!**/*.md'
+      - '!**/changelog.txt'
+      - '!.gitignore'
+      - '!.coderabbit.yml'
+      - '!CODEOWNERS'
+      - '!.github/**'
+      - '.github/workflows/ci.yml'
     branches:
       - 'trunk'
       - 'release/*'

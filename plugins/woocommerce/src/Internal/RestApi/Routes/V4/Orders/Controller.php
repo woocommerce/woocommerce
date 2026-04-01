@@ -202,7 +202,8 @@ class Controller extends AbstractController {
 	protected function prepare_links( $item, WP_REST_Request $request, WP_REST_Response $response ): array {
 		$links = array(
 			'self'            => array(
-				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $item->get_id() ) ),
+				'href'        => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $item->get_id() ) ),
+				'targetHints' => array( 'allow' => current_user_can( 'edit_shop_orders' ) ? array( 'GET', 'PUT', 'POST', 'PATCH', 'DELETE' ) : array( 'GET' ) ),
 			),
 			'collection'      => array(
 				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ),

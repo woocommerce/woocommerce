@@ -25,11 +25,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Interface, FulfillmentsDataStoreInterface {
 
 	/**
-	 * Tracked meta keys for detecting meaningful fulfillment property changes.
-	 */
-	private const TRACKED_META_KEYS = array( '_tracking_number', '_tracking_url', '_shipping_provider' );
-
-	/**
 	 * Method to create a new fulfillment in the database.
 	 *
 	 * @param Fulfillment $data The fulfillment object to create.
@@ -104,11 +99,6 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 
 		$data->set_id( $data_id );
 
-		// If the fulfillment is fulfilled, set the fulfilled date.
-		if ( $data->get_is_fulfilled() ) {
-			$data->set_date_fulfilled( current_time( 'mysql' ) );
-		}
-
 		// Save the metadata for the fulfillment to the database.
 		$data->save_meta_data();
 
@@ -167,6 +157,7 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 		$data->set_id( (int) $fulfillment_data['fulfillment_id'] );
 		$data->read_meta_data( true );
 		$data->set_object_read( true );
+		$data->snapshot_meta();
 	}
 
 	/**
@@ -192,9 +183,6 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 		}
 
 		$this->validate_items( $data );
-
-		// Snapshot tracked properties before the update so we can detect changes.
-		$old_state = $this->snapshot_tracked_state( $data_id );
 
 		/**
 		 * Filter to modify the fulfillment data before it is updated.
@@ -226,6 +214,13 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 
 		global $wpdb;
 
+		// Capture changes and previous status before set_date_updated (which always
+		// changes) and before apply_changes resets the tracking.
+		$changes         = $data->get_changes();
+		$previous_status = $data->get_data()['status'] ?? 'unfulfilled';
+
+		$data->set_date_updated( current_time( 'mysql' ) );
+
 		$wpdb->update(
 			$wpdb->prefix . 'wc_order_fulfillments',
 			array(
@@ -233,7 +228,7 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 				'entity_id'    => $data->get_entity_id(),
 				'status'       => $data->get_status(),
 				'is_fulfilled' => $data->get_is_fulfilled() ? 1 : 0,
-				'date_updated' => current_time( 'mysql' ),
+				'date_updated' => $data->get_date_updated(),
 				'date_deleted' => $data->get_date_deleted(),
 			),
 			array(
@@ -249,11 +244,6 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 			throw new \Exception( esc_html__( 'Failed to update fulfillment.', 'woocommerce' ) );
 		}
 
-		// If the fulfillment is fulfilled, set the fulfilled date.
-		if ( $data->get_is_fulfilled() && ! $data->meta_exists( '_fulfilled_date' ) ) {
-			$data->set_date_fulfilled( current_time( 'mysql' ) );
-		}
-
 		// Update the metadata for the fulfillment.
 		$data->save_meta_data();
 		$data->apply_changes();
@@ -261,20 +251,19 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 		$data->set_object_read( true );
 
 		if ( ! doing_action( 'woocommerce_fulfillment_after_update' ) ) {
-			$changed_props = $this->compute_changed_props( $data, $old_state );
-
 			/**
 			 * Action to perform after a fulfillment is updated.
 			 *
-			 * @param Fulfillment $data          The fulfillment object that was updated.
-			 * @param array       $changed_props List of tracked property keys that changed
-			 *                                   (e.g. 'status', 'items', '_tracking_number').
-			 * @param array       $old_state     Snapshot of tracked property values before the update.
+			 * @param Fulfillment $data            The fulfillment object that was updated.
+			 * @param array       $changes         The changes that were applied, as returned by
+			 *                                     Fulfillment::get_changes() before save. Core data
+			 *                                     props at top level, meta changes under 'meta_data'.
+			 * @param string      $previous_status The fulfillment status before the update.
 			 *
 			 * @since 10.1.0
-			 * @since 10.7.0 Added $changed_props and $old_state parameters.
+			 * @since 10.7.0 Added $changes and $previous_status parameters.
 			 */
-			do_action( 'woocommerce_fulfillment_after_update', $data, $changed_props, $old_state );
+			do_action( 'woocommerce_fulfillment_after_update', $data, $changes, $previous_status );
 		}
 
 		if ( $is_fulfill_action && ! doing_action( 'woocommerce_fulfillment_after_fulfill' ) ) {
@@ -287,58 +276,6 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 			 */
 			do_action( 'woocommerce_fulfillment_after_fulfill', $data );
 		}
-	}
-
-	/**
-	 * Snapshot tracked properties of a fulfillment from the database.
-	 *
-	 * @param int $fulfillment_id The fulfillment ID.
-	 * @return array The snapshot of tracked property values.
-	 */
-	private function snapshot_tracked_state( int $fulfillment_id ): array {
-		$old = new Fulfillment( (string) $fulfillment_id );
-
-		$state = array(
-			'status' => $old->get_status() ?? 'unfulfilled',
-			'items'  => $old->get_items(),
-		);
-
-		foreach ( self::TRACKED_META_KEYS as $key ) {
-			$value         = $old->get_meta( $key, true );
-			$state[ $key ] = is_string( $value ) ? $value : '';
-		}
-
-		return $state;
-	}
-
-	/**
-	 * Compute which tracked properties changed between the old state and the updated fulfillment.
-	 *
-	 * @param Fulfillment $fulfillment The updated fulfillment object.
-	 * @param array       $old_state   The previous state snapshot.
-	 * @return array List of changed property keys (e.g. 'status', 'items', '_tracking_number').
-	 */
-	private function compute_changed_props( Fulfillment $fulfillment, array $old_state ): array {
-		$changed = array();
-
-		$new_status = $fulfillment->get_status() ?? 'unfulfilled';
-		if ( $new_status !== $old_state['status'] ) {
-			$changed[] = 'status';
-		}
-
-		if ( $fulfillment->get_items() !== $old_state['items'] ) {
-			$changed[] = 'items';
-		}
-
-		foreach ( self::TRACKED_META_KEYS as $key ) {
-			$new_value = $fulfillment->get_meta( $key, true );
-			$new_value = is_string( $new_value ) ? $new_value : '';
-			if ( $new_value !== $old_state[ $key ] ) {
-				$changed[] = $key;
-			}
-		}
-
-		return $changed;
 	}
 
 	/**
@@ -622,11 +559,70 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 
 			// Read the metadata for the fulfillment.
 			$fulfillment->read_meta_data( true );
+			$fulfillment->snapshot_meta();
 
 			$fulfillments[] = $fulfillment;
 		}
 
 		return $fulfillments;
+	}
+
+	/**
+	 * Hard-delete all fulfillment records (and their metadata) for a given entity.
+	 *
+	 * This is used when an order is permanently deleted to prevent orphaned rows.
+	 *
+	 * @since 10.7.0
+	 *
+	 * @param string $entity_type The entity type (e.g. 'WC_Order').
+	 * @param string $entity_id   The entity ID.
+	 *
+	 * @return int The number of fulfillment records deleted.
+	 *
+	 * @throws \RuntimeException If a database query fails.
+	 * @throws \Throwable If the deletion fails.
+	 */
+	public function delete_by_entity( string $entity_type, string $entity_id ): int {
+		global $wpdb;
+
+		wc_transaction_query( 'start' );
+
+		try {
+			// Delete metadata for all fulfillments belonging to this entity.
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table names are safe.
+			$result = $wpdb->query(
+				$wpdb->prepare(
+					"DELETE m FROM {$wpdb->prefix}wc_order_fulfillment_meta m INNER JOIN {$wpdb->prefix}wc_order_fulfillments f ON m.fulfillment_id = f.fulfillment_id WHERE f.entity_type = %s AND f.entity_id = %s",
+					$entity_type,
+					$entity_id
+				)
+			);
+
+			if ( false === $result ) {
+				throw new \RuntimeException( 'Failed to delete fulfillment metadata: ' . $wpdb->last_error );
+			}
+
+			// Delete the fulfillment records themselves.
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is safe.
+			$rows_deleted = $wpdb->query(
+				$wpdb->prepare(
+					"DELETE FROM {$wpdb->prefix}wc_order_fulfillments WHERE entity_type = %s AND entity_id = %s",
+					$entity_type,
+					$entity_id
+				)
+			);
+
+			if ( false === $rows_deleted ) {
+				throw new \RuntimeException( 'Failed to delete fulfillment records: ' . $wpdb->last_error );
+			}
+
+			wc_transaction_query( 'commit' );
+		} catch ( \Throwable $e ) {
+			wc_transaction_query( 'rollback' );
+			throw $e;
+		}
+
+		return (int) $rows_deleted;
 	}
 
 	/**

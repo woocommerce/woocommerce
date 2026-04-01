@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixes "Additional Information" tab content being cut off on mobile devices.

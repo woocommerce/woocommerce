@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Add weight and dimensions to Store API ProductSchema / Products endpoint.
