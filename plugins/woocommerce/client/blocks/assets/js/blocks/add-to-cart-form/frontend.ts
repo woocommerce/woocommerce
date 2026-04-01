@@ -54,6 +54,11 @@ const getInputData = ( event: HTMLElementEvent< HTMLButtonElement > ) => {
  *
  * @param inputElement - The quantity input element to dispatch the event on.
  */
+const roundToStep = ( value: number, step: number ): string => {
+	const decimals = ( step.toString().split( '.' )[ 1 ] || '' ).length;
+	return value.toFixed( decimals );
+};
+
 const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
 	const event = new Event( 'change', { bubbles: true } );
 
@@ -81,7 +86,7 @@ store( 'woocommerce/add-to-cart-form', {
 			const newValue = currentValue + step;
 
 			if ( maxValue === undefined || newValue <= maxValue ) {
-				inputElement.value = newValue.toString();
+				inputElement.value = roundToStep( newValue, step );
 				dispatchChangeEvent( inputElement );
 			}
 		},
@@ -94,7 +99,7 @@ store( 'woocommerce/add-to-cart-form', {
 			const newValue = currentValue - step;
 
 			if ( newValue >= minValue ) {
-				inputElement.value = newValue.toString();
+				inputElement.value = roundToStep( newValue, step );
 				dispatchChangeEvent( inputElement );
 			}
 		},
