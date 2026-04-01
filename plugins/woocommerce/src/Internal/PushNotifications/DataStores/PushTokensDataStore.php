@@ -24,12 +24,13 @@ use WP_Query;
  */
 class PushTokensDataStore {
 	/**
-	 * In-memory cache keyed by method name and arguments. Avoids repeated
-	 * DB queries within the same request.
+	 * In-memory cache for get_tokens_for_roles() results, keyed by the
+	 * comma-joined role list. Avoids repeated DB queries within the same
+	 * PHP request.
 	 *
-	 * @var array<string, mixed>
+	 * @var array<string, PushToken[]>
 	 */
-	private array $cache = array();
+	private array $tokens_by_roles_cache = array();
 
 	const SUPPORTED_META = array(
 		'origin',
@@ -323,64 +324,66 @@ class PushTokensDataStore {
 			return array();
 		}
 
-		return $this->remember(
-			__FUNCTION__,
-			$roles,
-			function () use ( $roles ): array {
-				$user_ids = get_users(
-					array(
-						'role__in' => $roles,
-						'fields'   => 'ID',
-					)
-				);
+		$cache_key = implode( ',', $roles );
 
-				if ( empty( $user_ids ) ) {
-					return array();
-				}
+		if ( isset( $this->tokens_by_roles_cache[ $cache_key ] ) ) {
+			return $this->tokens_by_roles_cache[ $cache_key ];
+		}
 
-				$query = new WP_Query(
-					array(
-						'post_type'      => PushToken::POST_TYPE,
-						'post_status'    => 'private',
-						'author__in'     => $user_ids,
-						'posts_per_page' => -1,
-						'fields'         => 'ids',
-					)
-				);
-
-				/**
-				 * Typehint for PHPStan, specifies these are IDs and not instances of
-				 * WP_Post.
-				 *
-				 * @var int[] $post_ids
-				 */
-				$post_ids = $query->posts;
-
-				if ( empty( $post_ids ) ) {
-					return array();
-				}
-
-				update_meta_cache( 'post', $post_ids );
-
-				$tokens = array();
-
-				foreach ( $post_ids as $post_id ) {
-					try {
-						$tokens[] = $this->read( (int) $post_id );
-					} catch ( WC_Data_Exception $e ) {
-						wc_get_logger()->warning(
-							'Skipping malformed push token during role-based query.',
-							array(
-								'token_id' => $post_id,
-								'error'    => $e->getMessage(),
-							)
-						);
-					}
-				}
-
-				return $tokens;
-			}
+		$user_ids = get_users(
+			array(
+				'role__in' => $roles,
+				'fields'   => 'ID',
+			)
 		);
+
+		if ( empty( $user_ids ) ) {
+			return array();
+		}
+
+		$query = new WP_Query(
+			array(
+				'post_type'      => PushToken::POST_TYPE,
+				'post_status'    => 'private',
+				'author__in'     => $user_ids,
+				'posts_per_page' => -1,
+				'fields'         => 'ids',
+			)
+		);
+
+		/**
+		 * Typehint for PHPStan, specifies these are IDs and not instances of
+		 * WP_Post.
+		 *
+		 * @var int[] $post_ids
+		 */
+		$post_ids = $query->posts;
+
+		if ( empty( $post_ids ) ) {
+			return array();
+		}
+
+		update_meta_cache( 'post', $post_ids );
+
+		$tokens = array();
+
+		foreach ( $post_ids as $post_id ) {
+			try {
+				$tokens[] = $this->read( (int) $post_id );
+			} catch ( WC_Data_Exception $e ) {
+				wc_get_logger()->warning(
+					'Skipping malformed push token during role-based query.',
+					array(
+						'token_id' => $post_id,
+						'error'    => $e->getMessage(),
+					)
+				);
+			}
+		}
+
+		$this->tokens_by_roles_cache[ $cache_key ] = $tokens;
+
+		return $tokens;
 	}
 
 	/**
@@ -428,27 +431,5 @@ class PushTokensDataStore {
 			),
 			fn ( $value ) => null !== $value && '' !== $value
 		);
-	}
-
-	/**
-	 * Returns an in-memory cached result for the given method and arguments,
-	 * or executes the callback and caches its return value. The cache lives
-	 * only for the duration of the current PHP request.
-	 *
-	 * @param string   $method   The calling method name (use __FUNCTION__).
-	 * @param mixed    $args     The arguments that distinguish this call.
-	 * @param callable $callback The callback to execute on a cache miss.
-	 * @return mixed
-	 *
-	 * @since 10.8.0
-	 */
-	private function remember( string $method, $args, callable $callback ) {
-		$key = $method . ':' . wp_json_encode( $args );
-
-		if ( ! array_key_exists( $key, $this->cache ) ) {
-			$this->cache[ $key ] = $callback();
-		}
-
-		return $this->cache[ $key ];
 	}
 }
