@@ -667,7 +667,7 @@ class WC_Structured_Data {
 		if ( wc_tax_enabled() ) {
 			$markup['priceSpecification']['valueAddedTaxIncluded'] = wc_prices_include_tax();
 		}
-		$markup['billingAddress']     = array(
+		$markup['billingAddress']  = array(
 			'@type'           => 'PostalAddress',
 			'name'            => $order->get_formatted_billing_full_name(),
 			'streetAddress'   => $order->get_billing_address_1(),
@@ -678,16 +678,16 @@ class WC_Structured_Data {
 			'email'           => $order->get_billing_email(),
 			'telephone'       => $order->get_billing_phone(),
 		);
-		$markup['customer']           = array(
+		$markup['customer']        = array(
 			'@type' => 'Person',
 			'name'  => $order->get_formatted_billing_full_name(),
 		);
-		$markup['merchant']           = array(
+		$markup['merchant']        = array(
 			'@type' => 'Organization',
 			'name'  => $shop_name,
 			'url'   => $shop_url,
 		);
-		$markup['potentialAction']    = array(
+		$markup['potentialAction'] = array(
 			'@type'  => 'ViewAction',
 			'name'   => 'View Order',
 			'url'    => $order_url,
