@@ -92,7 +92,7 @@ class ProductTemplate extends AbstractBlock {
 
 			// Get an instance of the current Post Template block.
 			$block_instance = $block->parsed_block;
-			$product_id     = get_the_ID();
+			$product_id     = (int) get_the_ID();
 
 			// Set the block name to one that does not correspond to an existing registered block.
 			// This ensures that for the inner instances of the Post Template block, we do not render any block supports.
