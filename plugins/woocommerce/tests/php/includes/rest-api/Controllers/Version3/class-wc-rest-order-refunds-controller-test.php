@@ -3,8 +3,12 @@
 /**
  * Class WC_REST_Order_Refunds_Controller_Test.
  */
+
 use Automattic\WooCommerce\Tests\Helpers\MetaDataAssertionTrait;
 
+/**
+ * Tests for the V3 Order Refunds REST API controller.
+ */
 class WC_REST_Order_Refunds_Controller_Test extends WC_REST_Unit_Test_Case {
 	use MetaDataAssertionTrait;
 

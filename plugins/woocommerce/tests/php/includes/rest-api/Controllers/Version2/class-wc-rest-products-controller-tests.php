@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Tests\Helpers\MetaDataAssertionTrait;
  */
 class WC_REST_Products_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 	use MetaDataAssertionTrait;
+
 	/**
 	 * @var WC_Product_Simple[]
 	 */

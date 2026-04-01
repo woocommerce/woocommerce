@@ -4,8 +4,12 @@
  * class WC_REST_Coupons_Controller_Tests.
  * Coupons Controller tests for V3 REST API.
  */
+
 use Automattic\WooCommerce\Tests\Helpers\MetaDataAssertionTrait;
 
+/**
+ * Coupons Controller tests for V3 REST API.
+ */
 class WC_REST_Coupons_Controller_Tests extends WC_REST_Unit_Test_Case {
 	use MetaDataAssertionTrait;
 

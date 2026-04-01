@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Helpers;
 
@@ -39,11 +40,11 @@ trait MetaDataAssertionTrait {
 	 * - Entries without a key are not processed.
 	 * - Entries with a missing value behave the same as passing null explicitly.
 	 *
-	 * @param WC_Data $object The object whose meta data to check.
+	 * @param WC_Data $wc_data The object whose meta data to check.
 	 */
-	private function assert_incomplete_meta_data_handled_correctly( WC_Data $object ): void {
+	private function assert_incomplete_meta_data_handled_correctly( WC_Data $wc_data ): void {
 		$meta_by_key = array();
-		foreach ( $object->get_meta_data() as $meta ) {
+		foreach ( $wc_data->get_meta_data() as $meta ) {
 			$meta_by_key[ $meta->key ] = $meta->value;
 		}
 
