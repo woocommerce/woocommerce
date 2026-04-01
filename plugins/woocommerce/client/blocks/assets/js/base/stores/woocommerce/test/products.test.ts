@@ -36,14 +36,14 @@ jest.mock(
 	{ virtual: true }
 );
 
-describe( 'getProduct', () => {
+describe( 'findProductVariation', () => {
 	beforeEach( () => {
 		mockRegisteredStore = null;
 		jest.isolateModules( () => require( '../products' ) );
 	} );
 
 	it( 'returns null when product is not in store', () => {
-		const result = mockRegisteredStore!.state.getProduct( { id: 999 } );
+		const result = mockRegisteredStore!.state.findProductVariation( { id: 999 } );
 		expect( result ).toBeNull();
 	} );
 
@@ -54,7 +54,7 @@ describe( 'getProduct', () => {
 		} as ProductResponseItem;
 		mockRegisteredStore!.state.products[ 1 ] = product;
 
-		const result = mockRegisteredStore!.state.getProduct( { id: 1 } );
+		const result = mockRegisteredStore!.state.findProductVariation( { id: 1 } );
 		expect( result ).toBe( product );
 	} );
 
@@ -71,7 +71,7 @@ describe( 'getProduct', () => {
 		} as ProductResponseItem;
 		mockRegisteredStore!.state.products[ 1 ] = product;
 
-		const result = mockRegisteredStore!.state.getProduct( { id: 1 } );
+		const result = mockRegisteredStore!.state.findProductVariation( { id: 1 } );
 		expect( result ).toBe( product );
 	} );
 
@@ -88,7 +88,7 @@ describe( 'getProduct', () => {
 		} as ProductResponseItem;
 		mockRegisteredStore!.state.products[ 1 ] = product;
 
-		const result = mockRegisteredStore!.state.getProduct( {
+		const result = mockRegisteredStore!.state.findProductVariation( {
 			id: 1,
 			selectedAttributes: [],
 		} );
@@ -114,7 +114,7 @@ describe( 'getProduct', () => {
 			mockRegisteredStore!.state.products[ 1 ] = product;
 			mockRegisteredStore!.state.productVariations[ 10 ] = variation;
 
-			const result = mockRegisteredStore!.state.getProduct( {
+			const result = mockRegisteredStore!.state.findProductVariation( {
 				id: 1,
 				selectedAttributes: [ { attribute: 'Color', value: 'red' } ],
 			} );
@@ -134,7 +134,7 @@ describe( 'getProduct', () => {
 			} as ProductResponseItem;
 			mockRegisteredStore!.state.products[ 1 ] = product;
 
-			const result = mockRegisteredStore!.state.getProduct( {
+			const result = mockRegisteredStore!.state.findProductVariation( {
 				id: 1,
 				selectedAttributes: [ { attribute: 'Color', value: 'red' } ],
 			} );
@@ -154,7 +154,7 @@ describe( 'getProduct', () => {
 			} as ProductResponseItem;
 			mockRegisteredStore!.state.products[ 1 ] = product;
 
-			const result = mockRegisteredStore!.state.getProduct( {
+			const result = mockRegisteredStore!.state.findProductVariation( {
 				id: 1,
 				selectedAttributes: [ { attribute: 'Color', value: 'blue' } ],
 			} );

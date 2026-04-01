@@ -29,7 +29,7 @@ export type ProductsStoreState = {
 	 * Look up a product by ID, resolving to the matching variation for
 	 * variable products when selectedAttributes are provided.
 	 */
-	getProduct: ( args: {
+	findProductVariation: ( args: {
 		id: number;
 		selectedAttributes?: SelectedAttributes[];
 	} ) => ProductResponseItem | null;
@@ -63,7 +63,7 @@ const { state: productsState } = store< ProductsStore >(
 		state: {
 			products: {},
 			productVariations: {},
-			getProduct( {
+			findProductVariation( {
 				id,
 				selectedAttributes,
 			}: {
