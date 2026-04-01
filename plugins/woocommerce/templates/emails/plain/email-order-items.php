@@ -52,11 +52,10 @@ foreach ( $items as $item_id => $item ) :
 			 * @param int           $quantity Item quantity.
 			 * @param WC_Order_Item $item     Item object.
 			 */
-
 			$qty_display = apply_filters( 'woocommerce_email_order_item_quantity', $item->get_quantity(), $item );
-      if ( '' !== $qty_display ) {
-			  $qty_display = '× ' . $qty_display;
-      }
+			if ( '' !== $qty_display ) {
+				$qty_display = '× ' . $qty_display;
+			}
 
 			/**
 			 * Filters the complete quantity cell display in order emails.
@@ -98,11 +97,10 @@ foreach ( $items as $item_id => $item ) :
 			 * @param int           $quantity Item quantity.
 			 * @param WC_Order_Item $item     Item object.
 			 */
-
 			$qty_display = apply_filters( 'woocommerce_email_order_item_quantity', $item->get_quantity(), $item );
 			if ( '' !== $qty_display ) {
-        $qty_display = '× ' . $qty_display;
-      }
+				$qty_display = '× ' . $qty_display;
+			}
 
 			/**
 			 * Filters the complete quantity cell display in order emails.
