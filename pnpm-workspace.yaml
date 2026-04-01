@@ -27,6 +27,7 @@ publicHoistPattern:
 
 # Quality of life tweaks (migrated from .npmrc)
 updateNotifier: false
+confirmModulesPurge: false
 modulesCacheMaxAge: 20160  # two weeks in minutes
 childConcurrency: 8
 
