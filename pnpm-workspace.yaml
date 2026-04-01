@@ -75,7 +75,3 @@ trustPolicyExclude:
     - semver@6.3.1
     # Lost provenance attestation in this version (dep of @types/node).
     - undici-types@6.19.8
-
-# Warn if node_modules is outdated (don't auto-install — it overflows
-# execSync buffers in CI's monorepo-utils buildProjectGraph).
-verifyDepsBeforeRun: warn
