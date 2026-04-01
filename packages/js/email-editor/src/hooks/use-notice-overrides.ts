@@ -71,20 +71,17 @@ function getStoreName( namespace: string | { name: string } ): string {
 	return typeof namespace === 'object' ? namespace.name : namespace;
 }
 
+const getNoticesWithOverrides = createSelector(
+	( notices: Notice[] ) => applyOverridesToNotices( notices ),
+	( notices: Notice[] ) => [ notices ]
+);
+
 /**
  * Applies notice overrides when the email editor is mounted and restores
  * the original select when it unmounts.
  */
 export function useNoticeOverrides(): void {
 	useEffect( () => {
-		const getNoticesWithOverrides = createSelector(
-			( notices: Notice[] ) => applyOverridesToNotices( notices ),
-			( notices: Notice[] ) => [ notices ]
-		);
-
-		let cachedSelectors: Record< string, unknown > | null = null;
-		let lastOriginalSelectors: Record< string, unknown > | null = null;
-
 		let originalSelect: ( namespace: string | { name: string } ) => unknown;
 
 		use( ( registry: { select: ( ...args: unknown[] ) => unknown } ) => {
@@ -106,18 +103,13 @@ export function useNoticeOverrides(): void {
 						return selectors;
 					}
 
-					if ( selectors !== lastOriginalSelectors ) {
-						lastOriginalSelectors = selectors;
-						cachedSelectors = {
-							...selectors,
-							getNotices: ( context?: string ) =>
-								getNoticesWithOverrides(
-									originalGetNotices( context )
-								),
-						};
-					}
-
-					return cachedSelectors;
+					return {
+						...selectors,
+						getNotices: ( context?: string ) =>
+							getNoticesWithOverrides(
+								originalGetNotices( context )
+							),
+					};
 				},
 			};
 		} );

@@ -73,18 +73,6 @@ describe( 'useNoticeOverrides — memoized selector stability', () => {
 		return { pluginResult, originalSelect, originalGetNotices };
 	}
 
-	it( 'returns the same selectors object reference on repeated calls with the same underlying selectors', () => {
-		const notices = [ makeNotice() ];
-		const { pluginResult, originalSelect } = buildSelectOverride( notices );
-
-		const first = pluginResult.select( 'core/notices' );
-		const second = pluginResult.select( 'core/notices' );
-
-		expect( first ).toBe( second );
-		// originalSelect was called once per `select()` invocation
-		expect( originalSelect ).toHaveBeenCalledTimes( 2 );
-	} );
-
 	it( 'getNotices returns the same array reference when notices input is unchanged', () => {
 		const notices = [ makeNotice() ];
 		const { pluginResult } = buildSelectOverride( notices );
