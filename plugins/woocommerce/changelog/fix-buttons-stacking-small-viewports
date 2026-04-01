@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix order meta box action buttons stacking poorly on smaller viewports (~1200px) with WordPress 7.0.

@@ -11,6 +11,7 @@
 declare( strict_types = 1 );
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Email\DeferredEmailQueue;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Enums\ProductType;
@@ -39,11 +40,12 @@ class WC_Emails {
 	protected static $instance = null;
 
 	/**
-	 * Background emailer class.
+	 * Deferred email queue instance.
 	 *
-	 * @var WC_Background_Emailer
+	 * @since 10.8.0
+	 * @var DeferredEmailQueue|null
 	 */
-	protected static $background_emailer = null;
+	protected static $deferred_queue = null;
 
 	/**
 	 * Main WC_Emails Instance.
@@ -123,14 +125,16 @@ class WC_Emails {
 			)
 		);
 
+		$defer_default = FeaturesUtil::feature_is_enabled( 'deferred_transactional_emails' );
+
 		/**
 		 * Filter whether to defer transactional emails.
 		 *
 		 * @since 3.0.0
 		 * @param bool $defer Whether to defer transactional emails.
 		 */
-		if ( apply_filters( 'woocommerce_defer_transactional_emails', false ) ) {
-			self::$background_emailer = new WC_Background_Emailer();
+		if ( apply_filters( 'woocommerce_defer_transactional_emails', $defer_default ) ) {
+			self::$deferred_queue = wc_get_container()->get( DeferredEmailQueue::class );
 
 			foreach ( $email_actions as $action ) {
 				add_action( $action, array( __CLASS__, 'queue_transactional_email' ), 10, 10 );
@@ -150,13 +154,8 @@ class WC_Emails {
 	 * @return void
 	 */
 	public static function queue_transactional_email( ...$args ) {
-		if ( is_a( self::$background_emailer, 'WC_Background_Emailer' ) ) {
-			self::$background_emailer->push_to_queue(
-				array(
-					'filter' => current_filter(),
-					'args'   => func_get_args(),
-				)
-			);
+		if ( self::$deferred_queue instanceof DeferredEmailQueue ) {
+			self::$deferred_queue->push( current_filter(), $args );
 		} else {
 			self::send_transactional_email( ...$args );
 		}

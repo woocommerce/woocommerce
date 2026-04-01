@@ -1,4 +1,0 @@
-Significance: minor
-Type: performance
-
-Performance: reduced the number of SQL queries required to persist a draft order during checkout (with CoGS enabled).
