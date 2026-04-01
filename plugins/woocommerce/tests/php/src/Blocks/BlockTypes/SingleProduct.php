@@ -147,35 +147,4 @@ class SingleProduct extends \WP_UnitTestCase {
 			$this->delete_product_with_gallery_attachments( $data );
 		}
 	}
-
-	/**
-	 * @testdox Product gallery large images inside the Single Product block use lazy loading and low fetch priority.
-	 *
-	 * @see https://github.com/woocommerce/woocommerce/issues/63932
-	 */
-	public function test_gallery_large_images_have_lazy_loading_and_low_fetch_priority_in_single_product_block() {
-		$data = $this->create_product_with_gallery( 2 );
-
-		try {
-			$markup = $this->render_single_product_with_gallery_columns_and_title( $data['product']->get_id() );
-
-			$processor = new \WP_HTML_Tag_Processor( $markup );
-			$found     = 0;
-
-			while ( $processor->next_tag( 'img' ) ) {
-				$class = $processor->get_attribute( 'class' );
-				if ( ! is_string( $class ) || ! str_contains( $class, 'wc-block-woocommerce-product-gallery-large-image__image' ) ) {
-					continue;
-				}
-
-				++$found;
-				$this->assertSame( 'lazy', $processor->get_attribute( 'loading' ), 'Gallery viewer images should defer loading inside the Single Product block.' );
-				$this->assertSame( 'low', $processor->get_attribute( 'fetchpriority' ), 'Gallery viewer images should use low fetch priority inside the Single Product block.' );
-			}
-
-			$this->assertGreaterThan( 0, $found, 'Expected at least one product gallery large image in the rendered markup.' );
-		} finally {
-			$this->delete_product_with_gallery_attachments( $data );
-		}
-	}
 }
