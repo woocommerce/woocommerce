@@ -25,6 +25,7 @@ export * from './read-more';
 export * from './reviews';
 export * from './select';
 export * from './sidebar-layout';
+export * from './skeleton';
 export * from './snackbar-list';
 export * from './state-input';
 export * from './summary';
