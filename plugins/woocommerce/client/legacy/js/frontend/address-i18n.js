@@ -1,95 +1,60 @@
 /*global wc_address_i18n_params */
-jQuery( function ( $ ) {
+jQuery( function( $ ) {
+
 	// wc_address_i18n_params is required to continue, ensure the object exists
 	if ( typeof wc_address_i18n_params === 'undefined' ) {
 		return false;
 	}
 
-	var locale_json = wc_address_i18n_params.locale.replace( /&quot;/g, '"' ),
-		locale = JSON.parse( locale_json );
+	var locale_json = wc_address_i18n_params.locale.replace( /&quot;/g, '"' ), locale = JSON.parse( locale_json );
 
 	function field_is_required( field, is_required ) {
 		if ( is_required ) {
 			field.find( 'label .optional' ).remove();
 			field.addClass( 'validate-required' );
 
-			if (
-				field.find( 'label .required[aria-hidden="true"]' ).length === 0
-			) {
-				field
-					.find( 'label' )
-					.append(
-						'&nbsp;<span class="required" aria-hidden="true">*</span>'
-					);
+			if ( field.find( 'label .required[aria-hidden="true"]' ).length === 0 ) {
+				field.find( 'label' ).append(
+					'&nbsp;<span class="required" aria-hidden="true">*</span>'
+				);
 			}
 		} else {
 			field.find( 'label .required' ).remove();
-			field.removeClass(
-				'validate-required woocommerce-invalid woocommerce-invalid-required-field'
-			);
+			field.removeClass( 'validate-required woocommerce-invalid woocommerce-invalid-required-field' );
 
 			if ( field.find( 'label .optional' ).length === 0 ) {
-				field
-					.find( 'label' )
-					.append(
-						'&nbsp;<span class="optional">(' +
-							wc_address_i18n_params.i18n_optional_text +
-							')</span>'
-					);
+				field.find( 'label' ).append( '&nbsp;<span class="optional">(' + wc_address_i18n_params.i18n_optional_text + ')</span>' );
 			}
 		}
 	}
 
 	// Handle locale
 	$( document.body )
-		.on( 'country_to_state_changing', function ( event, country, wrapper ) {
-			var thisform = wrapper,
-				thislocale;
+		.on( 'country_to_state_changing', function( event, country, wrapper ) {
+			var thisform = wrapper, thislocale;
 
 			if ( typeof locale[ country ] !== 'undefined' ) {
 				thislocale = locale[ country ];
 			} else {
-				thislocale = locale[ 'default' ];
+				thislocale = locale['default'];
 			}
 
-			var $postcodefield = thisform.find(
-					'#billing_postcode_field, #shipping_postcode_field, #calc_shipping_postcode_field'
-				),
-				$cityfield = thisform.find(
-					'#billing_city_field, #shipping_city_field, #calc_shipping_city_field'
-				),
-				$statefield = thisform.find(
-					'#billing_state_field, #shipping_state_field, #calc_shipping_state_field'
-				);
+			var $postcodefield = thisform.find( '#billing_postcode_field, #shipping_postcode_field, #calc_shipping_postcode_field' ),
+				$cityfield     = thisform.find( '#billing_city_field, #shipping_city_field, #calc_shipping_city_field' ),
+				$statefield    = thisform.find( '#billing_state_field, #shipping_state_field, #calc_shipping_state_field' );
 
 			if ( ! $postcodefield.attr( 'data-o_class' ) ) {
-				$postcodefield.attr(
-					'data-o_class',
-					$postcodefield.attr( 'class' )
-				);
+				$postcodefield.attr( 'data-o_class', $postcodefield.attr( 'class' ) );
 				$cityfield.attr( 'data-o_class', $cityfield.attr( 'class' ) );
 				$statefield.attr( 'data-o_class', $statefield.attr( 'class' ) );
 			}
 
-			var locale_fields = JSON.parse(
-				wc_address_i18n_params.locale_fields
-			);
+			var locale_fields = JSON.parse( wc_address_i18n_params.locale_fields );
 
-			var localeHiddenCount = 0;
-			var localeFieldCount = 0;
+			$.each( locale_fields, function( key, value ) {
 
-			$.each( locale_fields, function ( key, value ) {
-				var field = thisform.find( value ),
-					fieldLocale = $.extend(
-						true,
-						{},
-						locale[ 'default' ][ key ],
-						thislocale[ key ]
-					);
-
-				if ( field.length ) {
-					localeFieldCount++;
-				}
+				var field       = thisform.find( value ),
+					fieldLocale = $.extend( true, {}, locale['default'][ key ], thislocale[ key ] );
 
 				// Labels.
 				if ( typeof fieldLocale.label !== 'undefined' ) {
@@ -98,15 +63,9 @@ jQuery( function ( $ ) {
 
 				// Placeholders.
 				if ( typeof fieldLocale.placeholder !== 'undefined' ) {
-					field
-						.find( ':input' )
-						.attr( 'placeholder', fieldLocale.placeholder );
-					field
-						.find( ':input' )
-						.attr( 'data-placeholder', fieldLocale.placeholder );
-					field
-						.find( '.select2-selection__placeholder' )
-						.text( fieldLocale.placeholder );
+					field.find( ':input' ).attr( 'placeholder', fieldLocale.placeholder );
+					field.find( ':input' ).attr( 'data-placeholder', fieldLocale.placeholder );
+					field.find( '.select2-selection__placeholder' ).text( fieldLocale.placeholder );
 				}
 
 				// Use the i18n label as a placeholder if there is no label element and no i18n placeholder.
@@ -115,22 +74,13 @@ jQuery( function ( $ ) {
 					typeof fieldLocale.label !== 'undefined' &&
 					! field.find( 'label:not(.screen-reader-text)' ).length
 				) {
-					field
-						.find( ':input' )
-						.attr( 'placeholder', fieldLocale.label );
-					field
-						.find( ':input' )
-						.attr( 'data-placeholder', fieldLocale.label );
-					field
-						.find( '.select2-selection__placeholder' )
-						.text( fieldLocale.label );
+					field.find( ':input' ).attr( 'placeholder', fieldLocale.label );
+					field.find( ':input' ).attr( 'data-placeholder', fieldLocale.label );
+					field.find( '.select2-selection__placeholder' ).text( fieldLocale.label );
 				}
 
-				// Required. Country is always required — it is the
-				// lookup key for locale resolution and cannot be optional.
-				if ( 'country' === key ) {
-					field_is_required( field, true );
-				} else if ( typeof fieldLocale.required !== 'undefined' ) {
+				// Required.
+				if ( typeof fieldLocale.required !== 'undefined' ) {
 					field_is_required( field, fieldLocale.required );
 				} else {
 					field_is_required( field, false );
@@ -141,69 +91,44 @@ jQuery( function ( $ ) {
 					field.data( 'priority', fieldLocale.priority );
 				}
 
-				// Hidden fields. Country is excluded because it is the
-				// lookup key for locale resolution — hiding it creates a
-				// chicken-and-egg problem. Merchants who sell to a single
-				// country should use "Sell to specific countries" instead.
-				if ( true === fieldLocale.hidden && 'country' !== key ) {
+				// Hidden fields. State visibility (show) is managed by
+				// country-select.js, but locale can still hide it.
+				if ( true === fieldLocale.hidden ) {
 					field.hide().find( ':input' ).val( '' );
-					localeHiddenCount++;
 				} else if ( 'state' !== key ) {
-					// State field visibility is managed by country-select.js
-					// (swaps between select/input/hidden based on country
-					// states), so only show non-state fields here.
 					field.show();
 				}
 
 				// Class changes.
 				if ( Array.isArray( fieldLocale.class ) ) {
-					field.removeClass(
-						'form-row-first form-row-last form-row-wide'
-					);
+					field.removeClass( 'form-row-first form-row-last form-row-wide' );
 					field.addClass( fieldLocale.class.join( ' ' ) );
 				}
-			} );
-
-			// Hide the shipping calculator toggle if all its fields are
-			// locale-hidden. We track counts during the loop above rather
-			// than using :visible, because the calculator form starts
-			// collapsed (display:none) which makes all rows report as
-			// not visible regardless of locale.
-			var $calculator = thisform.closest(
-				'.woocommerce-shipping-calculator'
-			);
-			if ( $calculator.length ) {
-				var hasVisibleFields =
-					localeFieldCount > 0 &&
-					localeHiddenCount < localeFieldCount;
-				$calculator
-					.find( '.shipping-calculator-button' )
-					.toggle( hasVisibleFields );
-			}
+			});
 
 			var fieldsets = $(
 				'.woocommerce-billing-fields__field-wrapper,' +
-					'.woocommerce-shipping-fields__field-wrapper,' +
-					'.woocommerce-address-fields__field-wrapper,' +
-					'.woocommerce-additional-fields__field-wrapper .woocommerce-account-fields'
+				'.woocommerce-shipping-fields__field-wrapper,' +
+				'.woocommerce-address-fields__field-wrapper,' +
+				'.woocommerce-additional-fields__field-wrapper .woocommerce-account-fields'
 			);
 
-			fieldsets.each( function ( index, fieldset ) {
-				var rows = $( fieldset ).find( '.form-row' );
+			fieldsets.each( function( index, fieldset ) {
+				var rows    = $( fieldset ).find( '.form-row' );
 				var wrapper = rows.first().parent();
 
 				// Before sorting, ensure all fields have a priority for bW compatibility.
 				var last_priority = 0;
 
-				rows.each( function () {
+				rows.each( function() {
 					if ( ! $( this ).data( 'priority' ) ) {
-						$( this ).data( 'priority', last_priority + 1 );
+							$( this ).data( 'priority', last_priority + 1 );
 					}
 					last_priority = $( this ).data( 'priority' );
 				} );
 
 				// Sort the fields.
-				rows.sort( function ( a, b ) {
+				rows.sort( function( a, b ) {
 					var asort = parseInt( $( a ).data( 'priority' ), 10 ),
 						bsort = parseInt( $( b ).data( 'priority' ), 10 );
 
@@ -214,10 +139,10 @@ jQuery( function ( $ ) {
 						return -1;
 					}
 					return 0;
-				} );
+				});
 
 				rows.detach().appendTo( wrapper );
-			} );
-		} )
+			});
+		})
 		.trigger( 'wc_address_i18n_ready' );
-} );
+});

@@ -66,22 +66,6 @@ const getSupportedCoreLocaleProps = (
 };
 
 /**
- * Country cannot be hidden or optional via locale because it is the lookup
- * key for all other locale overrides. Merchants who sell to a single country
- * should use the "Sell to specific countries" setting instead.
- */
-const enforceCountryLocale = ( field: Partial< Field > ): Partial< Field > => {
-	const enforced: Partial< Field > = {};
-	if ( field.hidden ) {
-		enforced.hidden = undefined;
-	}
-	if ( field.required === false ) {
-		enforced.required = true;
-	}
-	return { ...field, ...enforced };
-};
-
-/**
  * COUNTRY_LOCALE is locale data from WooCommerce countries class. This doesn't match the shape of the new field data blocks uses,
  * but we can import part of it to set which fields are required.
  *
@@ -123,14 +107,10 @@ const prepareFormFields = (
 				defaultFields && field in defaultFields
 					? defaultFields[ field ]
 					: {};
-			const rawLocaleConfig =
+			const localeConfig =
 				localeConfigs && field in localeConfigs
 					? localeConfigs[ field ]
 					: {};
-			const localeConfig =
-				field === 'country'
-					? enforceCountryLocale( rawLocaleConfig )
-					: rawLocaleConfig;
 
 			return {
 				key: field,

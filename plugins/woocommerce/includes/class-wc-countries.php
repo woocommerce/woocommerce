@@ -1721,6 +1721,16 @@ class WC_Countries {
 
 			$this->locale['default']                   = apply_filters( 'woocommerce_get_country_locale_base', $this->locale['default'] );
 			$this->locale[ $this->get_base_country() ] = apply_filters( 'woocommerce_get_country_locale_base', $this->locale[ $this->get_base_country() ] );
+
+			// Country cannot be hidden or optional via locale — it is the lookup key for locale resolution.
+			// Merchants who sell to a single country should use "Sell to specific countries" instead.
+			foreach ( $this->locale as &$locale_entry ) {
+				if ( isset( $locale_entry['country'] ) ) {
+					$locale_entry['country']['hidden']   = false;
+					$locale_entry['country']['required'] = true;
+				}
+			}
+			unset( $locale_entry );
 		}
 
 		return $this->locale;

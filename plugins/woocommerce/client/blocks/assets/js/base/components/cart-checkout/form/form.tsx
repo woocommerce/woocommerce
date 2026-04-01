@@ -196,16 +196,13 @@ const Form = <
 		if ( fastDeepEqual( previousFormFields, formFields ) ) {
 			return;
 		}
-		const hiddenFields = formFields.filter( ( field ) => field.hidden );
-		if ( hiddenFields.length === 0 ) {
-			return;
-		}
-		const hiddenFieldValues = Object.fromEntries(
-			hiddenFields.map( ( field ) => [ field.key, '' ] )
-		);
 		const newValues = {
 			...values,
-			...hiddenFieldValues,
+			...Object.fromEntries(
+				formFields
+					.filter( ( field ) => field.hidden )
+					.map( ( field ) => [ field.key, '' ] )
+			),
 		};
 		if ( ! isShallowEqual( values, newValues ) ) {
 			onChange( newValues );
