@@ -58,7 +58,7 @@
 		"@wordpress/notices": "wp-6.6"
 	},
 	"peerDependencies": {
-		"@wordpress/data": "wp-6.6",
+		"@wordpress/data": "^10.0.2",
 		"lodash": "^4.17.0",
 		"react": "18.3.x",
 		"react-dom": "18.3.x"

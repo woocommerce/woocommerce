@@ -226,7 +226,7 @@
 		"wireit": "0.14.12"
 	},
 	"peerDependencies": {
-		"@wordpress/data": "wp-6.6"
+		"@wordpress/data": "^10.0.2"
 	},
 	"engines": {
 		"node": "^20.11.1"
@@ -328,6 +328,7 @@
 				"node_modules/@woocommerce/email-editor/build-module",
 				"node_modules/@woocommerce/email-editor/build-style",
 				"node_modules/@woocommerce/email-editor/build-types",
+				"node_modules/@woocommerce/email-editor/assets",
 				"node_modules/@woocommerce/eslint-plugin/configs",
 				"node_modules/@woocommerce/eslint-plugin/rules",
 				"node_modules/@woocommerce/eslint-plugin/index.js",
