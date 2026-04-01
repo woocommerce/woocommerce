@@ -1,7 +1,8 @@
 /**
  * WooCommerce Block Patterns Smoke Test — Browser Console Snippet
  *
- * Usage: Open a page in the block editor, paste this into the browser console, and run it.
+ * Usage: Open a page in the Site Editor, paste this into the browser console, and run it.
+ *        Make sure the console context is set to "top" (not the iframe).
  * All registered WooCommerce block patterns will be inserted with heading separators.
  */
 ( async () => {
@@ -16,12 +17,12 @@
 		return;
 	}
 
-	// Filter to WooCommerce patterns (name starts with "woocommerce-blocks/" or "woocommerce/").
+	// Filter to WooCommerce patterns by category (matches the editor's "WooCommerce" sidebar count).
+	// PTK patterns use the "woo-commerce" category but may not have a "woocommerce/" name prefix.
 	// Exclude email-specific patterns (not meant for page content).
 	const wooPatterns = allPatterns.filter(
 		( p ) =>
-			( p.name.startsWith( 'woocommerce-blocks/' ) ||
-				p.name.startsWith( 'woocommerce/' ) ) &&
+			p.categories?.includes( 'woo-commerce' ) &&
 			! p.name.includes( 'email' )
 	);
 
@@ -34,10 +35,10 @@
 
 	const blocksToInsert = [];
 
-	for ( const pattern of wooPatterns ) {
-		// Add a separator heading with the pattern name.
+	wooPatterns.forEach( ( pattern, index ) => {
+		// Add a separator heading with the pattern number and name.
 		const headingMarkup = `<!-- wp:heading {"level":2,"style":{"color":{"background":"#7f54b3","text":"#ffffff"},"spacing":{"padding":{"top":"10px","bottom":"10px","left":"15px","right":"15px"}}}} -->
-<h2 class="wp-block-heading has-text-color has-background" style="color:#ffffff;background-color:#7f54b3;padding-top:10px;padding-right:15px;padding-bottom:10px;padding-left:15px">${ pattern.name }</h2>
+<h2 class="wp-block-heading has-text-color has-background" style="color:#ffffff;background-color:#7f54b3;padding-top:10px;padding-right:15px;padding-bottom:10px;padding-left:15px">${ index + 1 }/${ wooPatterns.length } — ${ pattern.name }</h2>
 <!-- /wp:heading -->`;
 
 		const headingBlocks = parse( headingMarkup );
@@ -60,7 +61,7 @@
 <div style="height:40px" aria-hidden="true" class="wp-block-spacer"></div>
 <!-- /wp:spacer -->`;
 		blocksToInsert.push( ...parse( spacerMarkup ) );
-	}
+	} );
 
 	// Insert all blocks at the end of the editor.
 	dispatch( 'core/block-editor' ).insertBlocks( blocksToInsert );
