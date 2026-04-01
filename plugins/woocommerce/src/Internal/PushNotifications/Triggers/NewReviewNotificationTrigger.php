@@ -17,24 +17,6 @@ defined( 'ABSPATH' ) || exit;
  */
 class NewReviewNotificationTrigger {
 	/**
-	 * The pending notification store.
-	 *
-	 * @var PendingNotificationStore
-	 */
-	private PendingNotificationStore $store;
-
-	/**
-	 * Constructs the trigger.
-	 *
-	 * @param PendingNotificationStore $store The notification store.
-	 *
-	 * @since 10.7.0
-	 */
-	public function __construct( PendingNotificationStore $store ) {
-		$this->store = $store;
-	}
-
-	/**
 	 * Registers WordPress hooks for review events.
 	 *
 	 * @return void
@@ -71,7 +53,7 @@ class NewReviewNotificationTrigger {
 			return;
 		}
 
-		$this->store->add(
+		wc_get_container()->get( PendingNotificationStore::class )->add(
 			new NewReviewNotification( $comment_id )
 		);
 	}

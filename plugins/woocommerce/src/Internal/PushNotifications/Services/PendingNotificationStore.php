@@ -6,12 +6,13 @@ namespace Automattic\WooCommerce\Internal\PushNotifications\Services;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\PushNotifications\Dispatchers\InternalNotificationDispatcher;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
 
 /**
  * Store that collects notifications during a request and dispatches them all on
- * on shutdown. Should be accessed from the container (`wc_get_container`) to
- * ensure store is shared by all usage.
+ * shutdown via the InternalNotificationDispatcher. Should be accessed from the
+ * container (`wc_get_container`) to ensure store is shared by all usage.
  *
  * Notifications are keyed by `{type}_{resource_id}` (with blog ID from
  * `get_current_blog_id()`) to prevent duplicates within a single request.
@@ -27,6 +28,16 @@ class PendingNotificationStore {
 	private bool $enabled = false;
 
 	/**
+	 * The dispatcher that will be used to send notifications on shutdown.
+	 *
+	 * @var InternalNotificationDispatcher
+	 *
+	 * @phpstan-ignore property.onlyWritten (this will be read when the loopback
+	 * controller is added)
+	 */
+	private InternalNotificationDispatcher $dispatcher;
+
+	/**
 	 * Pending notifications keyed by identifier.
 	 *
 	 * @var array<string, Notification>
@@ -39,6 +50,19 @@ class PendingNotificationStore {
 	 * @var bool
 	 */
 	private bool $shutdown_registered = false;
+
+	/**
+	 * Initialize dependencies.
+	 *
+	 * @internal
+	 *
+	 * @param InternalNotificationDispatcher $dispatcher The dispatcher to use on shutdown.
+	 *
+	 * @since 10.7.0
+	 */
+	final public function init( InternalNotificationDispatcher $dispatcher ): void {
+		$this->dispatcher = $dispatcher;
+	}
 
 	/**
 	 * Enables the store so it accepts notifications.
@@ -85,10 +109,10 @@ class PendingNotificationStore {
 	}
 
 	/**
-	 * Dispatches all pending notifications by firing an action hook.
+	 * Dispatches all pending notifications via the loopback endpoint.
 	 *
-	 * Called on shutdown. Fires the `wc_push_notifications_dispatch` action
-	 * with the array of pending notifications, then clears the store.
+	 * Called on shutdown. Sends all pending notifications through the
+	 * InternalNotificationDispatcher, then clears the store.
 	 *
 	 * @return void
 	 *
@@ -99,8 +123,6 @@ class PendingNotificationStore {
 			return;
 		}
 
-		$notifications = array_values( $this->pending );
-
 		/**
 		 * Fires when pending push notifications are ready to be dispatched.
 		 *
@@ -108,7 +130,8 @@ class PendingNotificationStore {
 		 *
 		 * @since 10.7.0
 		 *
-		 * The call to dispatch the notifications will go here.
+		 * The call to dispatch the notifications will go here when the
+		 * receiving controller has been added.
 		 */
 
 		/**

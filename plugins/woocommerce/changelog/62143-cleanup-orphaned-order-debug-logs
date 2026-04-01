@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add periodic cleanup for place-order debug log files and dangling order meta that the existing batch processor doesn't cover.

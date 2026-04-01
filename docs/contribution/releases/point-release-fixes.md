@@ -6,6 +6,10 @@ sidebar_position: 4
 
 # Point Release Requests in WooCommerce
 
+:::important
+The formal Point Release Request (PRR) issue template is not strictly required for all point release fixes. In practice, coordinating directly with the release lead is often sufficient to get fixes included in a point release. The rest of this document remains useful for understanding what types of fixes qualify for point releases and how to prepare them in the repository.
+:::
+
 Point releases address critical issues discovered in already-shipped WooCommerce versions. These are patch releases (e.g., 9.9.0 → 9.9.1) that contain only essential fixes for production environments.
 
 Note that this process applies only to ALREADY-RELEASED VERSIONS that are in customer production environments.

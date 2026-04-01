@@ -244,6 +244,66 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Lookup table is refreshed when scheduled sale starts.
+	 */
+	public function test_wc_scheduled_sales_sale_start_updates_lookup_table(): void {
+		global $wpdb;
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_price( 100 );
+		$product->set_regular_price( 100 );
+		$product->set_sale_price( 50 );
+		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', time() + 10 ) );
+		$product->save();
+
+		// Bypass product after save hook to prevent price change on save.
+		update_post_meta( $product->get_id(), '_sale_price_dates_from', time() - 5 );
+
+		$lookup_before = $wpdb->get_row(
+			$wpdb->prepare( "SELECT onsale, min_price, max_price FROM {$wpdb->prefix}wc_product_meta_lookup WHERE product_id = %d", $product->get_id() )
+		);
+		$this->assertEquals( 0, (int) $lookup_before->onsale, 'Product should not be on sale before scheduled sale starts' );
+
+		wc_scheduled_sales();
+
+		$lookup_after = $wpdb->get_row(
+			$wpdb->prepare( "SELECT onsale, min_price, max_price FROM {$wpdb->prefix}wc_product_meta_lookup WHERE product_id = %d", $product->get_id() )
+		);
+		$this->assertEquals( 1, (int) $lookup_after->onsale, 'Lookup table onsale flag should be updated after sale starts' );
+		$this->assertEquals( 50, (float) $lookup_after->min_price, 'Lookup table min_price should reflect sale price' );
+	}
+
+	/**
+	 * @testdox Lookup table is refreshed when scheduled sale ends.
+	 */
+	public function test_wc_scheduled_sales_sale_end_updates_lookup_table(): void {
+		global $wpdb;
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_price( 50 );
+		$product->set_regular_price( 100 );
+		$product->set_sale_price( 50 );
+		$product->set_date_on_sale_to( gmdate( 'Y-m-d H:i:s', time() + 10 ) );
+		$product->save();
+
+		// Bypass product after save hook to prevent price change on save.
+		update_post_meta( $product->get_id(), '_sale_price_dates_to', time() - 5 );
+
+		$lookup_before = $wpdb->get_row(
+			$wpdb->prepare( "SELECT onsale, min_price, max_price FROM {$wpdb->prefix}wc_product_meta_lookup WHERE product_id = %d", $product->get_id() )
+		);
+		$this->assertEquals( 1, (int) $lookup_before->onsale, 'Product should be on sale before scheduled sale ends' );
+
+		wc_scheduled_sales();
+
+		$lookup_after = $wpdb->get_row(
+			$wpdb->prepare( "SELECT onsale, min_price, max_price FROM {$wpdb->prefix}wc_product_meta_lookup WHERE product_id = %d", $product->get_id() )
+		);
+		$this->assertEquals( 0, (int) $lookup_after->onsale, 'Lookup table onsale flag should be updated after sale ends' );
+		$this->assertEquals( 100, (float) $lookup_after->min_price, 'Lookup table min_price should reflect regular price' );
+	}
+
+	/**
 	 * @testDox Action Scheduler events are scheduled when product with sale dates is saved.
 	 */
 	public function test_wc_schedule_product_sale_events_on_save() {
@@ -649,5 +709,146 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 			wp_delete_term( $category2_term['term_id'], 'product_cat' );
 			wp_delete_term( $category1_term['term_id'], 'product_cat' );
 		}
+	}
+
+	/**
+	 * Helper to run wc_product_canonical_redirect() under wp_redirect guard.
+	 *
+	 * @param callable $callback The callback that triggers wc_product_canonical_redirect() when executed.
+	 */
+	private function with_wc_product_canonical_redirect_guard( callable $callback ) {
+		$redirect_attempted = false;
+		$redirected_to      = '';
+		$redirect_status    = 0;
+
+		$redirect_callback = function ( $location = '', $status = 302 ) use ( &$redirect_attempted, &$redirected_to, &$redirect_status ) {
+			$redirect_attempted = true;
+			$redirected_to      = $location;
+			$redirect_status    = $status;
+			throw new \WPAjaxDieContinueException();
+		};
+
+		add_filter( 'wp_redirect', $redirect_callback, 10, 2 );
+
+		try {
+			$callback();
+		} catch ( \WPAjaxDieContinueException $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+			// Expected for redirects, or failure path to be asserted.
+		} finally {
+			remove_filter( 'wp_redirect', $redirect_callback, 10, 2 );
+		}
+
+		return array( $redirect_attempted, $redirected_to, $redirect_status );
+	}
+
+	/**
+	 * @testdox Product canonical redirect is skipped for non-product requests.
+	 */
+	public function test_wc_product_canonical_redirect_skips_non_product_requests() {
+		$this->go_to( home_url( '/' ) );
+
+		list( $redirect_attempted ) = $this->with_wc_product_canonical_redirect_guard( 'wc_product_canonical_redirect' );
+
+		$this->assertFalse( $redirect_attempted );
+	}
+
+	/**
+	 * @testdox Product canonical redirect ignores invalid non-string product_cat query var.
+	 */
+	public function test_wc_product_canonical_redirect_ignores_invalid_product_cat_query_var() {
+		$product = WC_Helper_Product::create_simple_product();
+		$this->go_to( get_permalink( $product->get_id() ) );
+
+		// Force non-string query var to cover the guard condition.
+		set_query_var( 'product_cat', array() );
+
+		list( $redirect_attempted ) = $this->with_wc_product_canonical_redirect_guard( 'wc_product_canonical_redirect' );
+
+		$this->assertFalse( $redirect_attempted );
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
+	 * @testdox Product canonical redirect skips redirect when requested product_cat equals expected slug.
+	 */
+	public function test_wc_product_canonical_redirect_ignores_matching_category_slug() {
+		$category = wp_insert_term( 'Matching Category', 'product_cat' );
+		$product  = WC_Helper_Product::create_simple_product();
+		wp_set_object_terms( $product->get_id(), (int) $category['term_id'], 'product_cat' );
+		$product->save();
+
+		$this->go_to( add_query_arg( 'product_cat', get_term( $category['term_id'], 'product_cat' )->slug, get_permalink( $product->get_id() ) ) );
+
+		list( $redirect_attempted ) = $this->with_wc_product_canonical_redirect_guard( 'wc_product_canonical_redirect' );
+
+		$this->assertFalse( $redirect_attempted );
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+		wp_delete_term( $category['term_id'], 'product_cat' );
+	}
+
+	/**
+	 * @testdox Product canonical redirect sends 301 when requested category slug differs from expected.
+	 */
+	public function test_wc_product_canonical_redirect_redirects_when_category_slug_mismatch() {
+		$category = wp_insert_term( 'Redirect Category', 'product_cat' );
+		$product  = WC_Helper_Product::create_simple_product();
+		wp_set_object_terms( $product->get_id(), (int) $category['term_id'], 'product_cat' );
+		$product->save();
+
+		$query_args = array(
+			'product_cat' => 'wrong-slug',
+			'foo'         => 'bar',
+		);
+
+		$this->go_to( add_query_arg( $query_args, get_permalink( $product->get_id() ) ) );
+
+		list( $redirect_attempted, $redirected_to, $redirected_code ) = $this->with_wc_product_canonical_redirect_guard( 'wc_product_canonical_redirect' );
+
+		$this->assertTrue( $redirect_attempted );
+		$this->assertSame( 301, $redirected_code );
+		$this->assertStringContainsString( wc_get_product( $product->get_id() )->get_permalink(), $redirected_to );
+		$this->assertStringContainsString( 'foo=bar', $redirected_to );
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+		wp_delete_term( $category['term_id'], 'product_cat' );
+	}
+
+	/**
+	 * @testdox Product canonical redirect ignores empty product_cat query value.
+	 */
+	public function test_wc_product_canonical_redirect_ignores_empty_product_cat_slug() {
+		$product = WC_Helper_Product::create_simple_product();
+		$this->go_to( add_query_arg( 'product_cat', '', get_permalink( $product->get_id() ) ) );
+
+		list( $redirect_attempted ) = $this->with_wc_product_canonical_redirect_guard( 'wc_product_canonical_redirect' );
+
+		$this->assertFalse( $redirect_attempted );
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
+	 * @testdox Product canonical redirect skips when global wp_rewrite is not WP_Rewrite.
+	 */
+	public function test_wc_product_canonical_redirect_skips_when_wp_rewrite_not_valid() {
+		global $wp_rewrite;
+
+		$product = WC_Helper_Product::create_simple_product();
+		$this->go_to( get_permalink( $product->get_id() ) );
+
+		$old_wp_rewrite = $wp_rewrite;
+		$wp_rewrite     = null; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		try {
+			list( $redirect_attempted ) = $this->with_wc_product_canonical_redirect_guard( 'wc_product_canonical_redirect' );
+
+			$this->assertFalse( $redirect_attempted );
+		} finally {
+			$wp_rewrite = $old_wp_rewrite; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		}
+
+		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 }

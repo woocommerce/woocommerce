@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+A new index has been added to the `wc_reserved_stock` table to maintain stock reservation performance during peak sales events.

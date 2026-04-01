@@ -325,6 +325,9 @@ class WC_Install {
 		'10.7.0' => array(
 			'wc_update_1070_disable_hpos_sync_on_read',
 		),
+		'10.8.0' => array(
+			'wc_update_1080_migrate_analytics_import_option',
+		),
 	);
 
 	/**
@@ -2004,7 +2007,8 @@ CREATE TABLE {$wpdb->prefix}woocommerce_shipping_zones (
   zone_id bigint(20) unsigned NOT NULL auto_increment,
   zone_name varchar(200) NOT NULL,
   zone_order bigint(20) unsigned NOT NULL,
-  PRIMARY KEY  (zone_id)
+  PRIMARY KEY  (zone_id),
+  KEY zone_order_id (zone_order, zone_id)
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_shipping_zone_locations (
   location_id bigint(20) unsigned NOT NULL auto_increment,
@@ -2021,7 +2025,9 @@ CREATE TABLE {$wpdb->prefix}woocommerce_shipping_zone_methods (
   method_id varchar(200) NOT NULL,
   method_order bigint(20) unsigned NOT NULL,
   is_enabled tinyint(1) NOT NULL DEFAULT '1',
-  PRIMARY KEY  (instance_id)
+  PRIMARY KEY  (instance_id),
+  KEY zone_id (zone_id),
+  KEY method_id (method_id(20))
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_payment_tokens (
   token_id bigint(20) unsigned NOT NULL auto_increment,
@@ -2118,7 +2124,8 @@ CREATE TABLE {$wpdb->prefix}wc_reserved_stock (
 	`stock_quantity` double NOT NULL DEFAULT 0,
 	`timestamp` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
 	`expires` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-	PRIMARY KEY  (`order_id`, `product_id`)
+	PRIMARY KEY  (`order_id`, `product_id`),
+	KEY product_id_expires (product_id, expires)
 ) $collate;
 CREATE TABLE {$wpdb->prefix}wc_rate_limits (
   rate_limit_id bigint(20) unsigned NOT NULL AUTO_INCREMENT,

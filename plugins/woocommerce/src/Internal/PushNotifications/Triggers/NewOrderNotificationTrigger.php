@@ -42,24 +42,6 @@ class NewOrderNotificationTrigger {
 	);
 
 	/**
-	 * The pending notification store.
-	 *
-	 * @var PendingNotificationStore
-	 */
-	private PendingNotificationStore $pending_notification_store;
-
-	/**
-	 * Constructs the trigger.
-	 *
-	 * @param PendingNotificationStore $pending_notification_store The notification store.
-	 *
-	 * @since 10.7.0
-	 */
-	public function __construct( PendingNotificationStore $pending_notification_store ) {
-		$this->pending_notification_store = $pending_notification_store;
-	}
-
-	/**
 	 * Registers WordPress hooks for order events.
 	 *
 	 * @return void
@@ -85,7 +67,7 @@ class NewOrderNotificationTrigger {
 			return;
 		}
 
-		$this->pending_notification_store->add(
+		wc_get_container()->get( PendingNotificationStore::class )->add(
 			new NewOrderNotification( $order_id )
 		);
 	}
@@ -116,7 +98,7 @@ class NewOrderNotificationTrigger {
 			return;
 		}
 
-		$this->pending_notification_store->add(
+		wc_get_container()->get( PendingNotificationStore::class )->add(
 			new NewOrderNotification( $order_id )
 		);
 	}
