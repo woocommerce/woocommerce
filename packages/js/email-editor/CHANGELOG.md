@@ -2,6 +2,20 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.0](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.10.0) - 2026-03-18 
+
+-   Minor - Add `woocommerce_email_editor_send_button_disabled` filter to allow overriding the send button disabled state [#63722]
+
+## [1.9.0](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.9.0) - 2026-03-12 
+
+-   Minor - Add emailBlocks getter to pattern enhancement for inserting dynamic email content blocks [#63612]
+-   Minor - Export registerEntityAction, unregisterEntityAction and PostWithPermissions from the email editor package public API. [#63558]
+
+## [1.8.0](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.8.0) - 2026-03-02 
+
+-   Minor - Removed custom RichText package, which was needed for WordPress < 6.8 [#63289]
+-   Minor - Rework snackbar notices by using the `EditorSnackbars` component from `@wordpress/editor` to render notices, removing the `email-editor` context snackbar notices renderer, and adding a `disableSnackbarNotices` setting to the email editor component [#63451]
+
 ## [1.7.1](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.7.1) - 2026-02-20 
 
 -   Patch - Export EditTemplateModal and SelectTemplateModal from the email editor package for extensibility. [#63374]

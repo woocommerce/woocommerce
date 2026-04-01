@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add ShipStation and Packlink as shipping extension options in the Core Profiler for supported countries (ShipStation: CA, DE, GB, AU, NZ; Packlink: FR, ES, IT, NL, AT, BE).

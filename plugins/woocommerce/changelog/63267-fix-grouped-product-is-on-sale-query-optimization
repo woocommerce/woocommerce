@@ -1,4 +1,0 @@
-Significance: minor
-Type: performance
-
-Avoid extra queries in group product pages by priming the post cache.

@@ -37,7 +37,44 @@ class ShippingPartnerSuggestions extends RemoteSpecsEngine {
 			ShippingPartnerSuggestionsDataSourcePoller::get_instance()->set_specs_transient( array( $locale => $specs_to_save ), 3 * HOUR_IN_SECONDS );
 		}
 
-		return $specs_to_return;
+		return self::sort_by_primary( $specs_to_return );
+	}
+
+	/**
+	 * Sort suggestions so that partners whose countries_where_primary list contains the
+	 * current store country appear first.
+	 *
+	 * @param array $suggestions Suggestions to sort.
+	 * @return array Sorted suggestions.
+	 */
+	private static function sort_by_primary( array $suggestions ) {
+		$country = wc_get_base_location()['country'] ?? '';
+
+		// Attach original indices to preserve input order for equal-priority items
+		// (usort is not stable on PHP < 8.0).
+		$indexed = array_map(
+			function ( $item, $idx ) {
+				return array( $item, $idx );
+			},
+			$suggestions,
+			array_keys( $suggestions )
+		);
+
+		usort(
+			$indexed,
+			function ( $a, $b ) use ( $country ) {
+				$a_primary = isset( $a[0]->countries_where_primary ) && is_array( $a[0]->countries_where_primary ) && in_array( $country, $a[0]->countries_where_primary, true );
+				$b_primary = isset( $b[0]->countries_where_primary ) && is_array( $b[0]->countries_where_primary ) && in_array( $country, $b[0]->countries_where_primary, true );
+
+				if ( $a_primary === $b_primary ) {
+					return $a[1] - $b[1];
+				}
+
+				return $a_primary ? -1 : 1;
+			}
+		);
+
+		return array_column( $indexed, 0 );
 	}
 
 	/**

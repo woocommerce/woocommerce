@@ -21,6 +21,19 @@
 			"isBanned": true
 		},
 		{
+			"label": "Allow @woocommerce/tracks to support Node.js v22+",
+			"dependencies": [
+				"node"
+			],
+			"dependencyTypes": [
+				"engines"
+			],
+			"pinVersion": ">=20.11.1",
+			"packages": [
+				"@woocommerce/tracks"
+			]
+		},
+		{
 			"dependencies": [
 				"node"
 			],

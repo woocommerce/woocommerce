@@ -109,7 +109,7 @@ class PushTokenRestController extends RestApiControllerBase {
 				'device_uuid'   => $request->get_param( 'device_uuid' ),
 				'origin'        => $request->get_param( 'origin' ),
 				'device_locale' => $request->get_param( 'device_locale' ),
-				'metadata'      => $request->get_param( 'metadata' ),
+				'metadata'      => $request->get_param( 'metadata' ) ?? array(),
 			);
 
 			$data_store = wc_get_container()->get( PushTokensDataStore::class );

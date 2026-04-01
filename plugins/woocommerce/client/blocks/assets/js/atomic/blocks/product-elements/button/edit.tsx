@@ -15,8 +15,10 @@ import { ProductQueryContext as Context } from '@woocommerce/blocks/product-quer
 import { useProduct } from '@woocommerce/entities';
 import {
 	Disabled,
-	Button,
-	ButtonGroup,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToggleGroupControl as ToggleGroupControl,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanel as ToolsPanel,
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
@@ -40,14 +42,6 @@ function WidthPanel( {
 	selectedWidth: number | undefined;
 	setAttributes: ( attributes: BlockAttributes ) => void;
 } ) {
-	function handleChange( newWidth: number ) {
-		// Check if we are toggling the width off
-		const width = selectedWidth === newWidth ? undefined : newWidth;
-
-		// Update attributes.
-		setAttributes( { width } );
-	}
-
 	return (
 		<ToolsPanel
 			label={ __( 'Width settings', 'woocommerce' ) }
@@ -63,24 +57,25 @@ function WidthPanel( {
 				}
 				isShownByDefault
 			>
-				<ButtonGroup aria-label={ __( 'Button width', 'woocommerce' ) }>
-					{ [ 25, 50, 75, 100 ].map( ( widthValue ) => {
-						return (
-							<Button
-								key={ widthValue }
-								isSmall
-								variant={
-									widthValue === selectedWidth
-										? 'primary'
-										: undefined
-								}
-								onClick={ () => handleChange( widthValue ) }
-							>
-								{ widthValue }%
-							</Button>
-						);
-					} ) }
-				</ButtonGroup>
+				<ToggleGroupControl
+					__next40pxDefaultSize
+					__nextHasNoMarginBottom
+					hideLabelFromVision
+					label={ __( 'Button width', 'woocommerce' ) }
+					value={ selectedWidth }
+					isDeselectable
+					onChange={ ( value?: number ) =>
+						setAttributes( { width: value } )
+					}
+				>
+					{ [ 25, 50, 75, 100 ].map( ( widthValue ) => (
+						<ToggleGroupControlOption
+							key={ widthValue }
+							value={ widthValue }
+							label={ `${ widthValue }%` }
+						/>
+					) ) }
+				</ToggleGroupControl>
 			</ToolsPanelItem>
 		</ToolsPanel>
 	);

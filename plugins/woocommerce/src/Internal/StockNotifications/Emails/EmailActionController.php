@@ -81,9 +81,8 @@ class EmailActionController {
 			$notification->set_date_confirmed( time() );
 			$notification->save();
 
-			// We need session for notices to work.
-			if ( ! WC()->session->has_session() ) {
-				// Generate a random customer ID.
+			// We need a cookie-based session for notices to work on frontend pages.
+			if ( WC()->session instanceof \WC_Session_Handler && ! WC()->session->has_session() ) {
 				WC()->session->set_customer_session_cookie( true );
 			}
 
@@ -119,9 +118,8 @@ class EmailActionController {
 			$notification->set_date_cancelled( time() );
 			$notification->save();
 
-			// We need session for notices to work.
-			if ( ! WC()->session->has_session() ) {
-				// Generate a random customer ID.
+			// We need a cookie-based session for notices to work on frontend pages.
+			if ( WC()->session instanceof \WC_Session_Handler && ! WC()->session->has_session() ) {
 				WC()->session->set_customer_session_cookie( true );
 			}
 
