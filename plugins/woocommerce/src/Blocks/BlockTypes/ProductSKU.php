@@ -68,9 +68,8 @@ class ProductSKU extends AbstractBlock {
 			return '';
 		}
 
-		$is_descendant_of_product_collection       = isset( $block->context['query']['isProductCollectionBlock'] );
-		$is_descendant_of_grouped_product_selector = isset( $block->context['isDescendantOfGroupedProductSelector'] );
-		$is_interactive                            = ! $is_descendant_of_product_collection && ! $is_descendant_of_grouped_product_selector && $product->is_type( ProductType::VARIABLE );
+		$is_descendant_of_product_collection = isset( $block->context['query']['isProductCollectionBlock'] );
+		$is_interactive                      = ! $is_descendant_of_product_collection && $product->is_type( ProductType::VARIABLE );
 
 		if ( $is_interactive ) {
 			$variations                = $product->get_available_variations( 'objects' );
