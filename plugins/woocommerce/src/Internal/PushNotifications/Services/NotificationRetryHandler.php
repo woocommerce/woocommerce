@@ -123,7 +123,15 @@ class NotificationRetryHandler {
 					'resource_id' => $resource_id,
 				)
 			);
+		} catch ( Exception $e ) {
+			wc_get_logger()->error(
+				sprintf( 'Retry failed: %s', $e->getMessage() ),
+				array( 'source' => PushNotifications::FEATURE_NAME )
+			);
+			return;
+		}
 
+		try {
 			wc_get_container()->get( NotificationProcessor::class )->process(
 				$notification,
 				true,
@@ -134,6 +142,7 @@ class NotificationRetryHandler {
 				sprintf( 'Retry failed: %s', $e->getMessage() ),
 				array( 'source' => PushNotifications::FEATURE_NAME )
 			);
+			$this->schedule( $notification, null, $attempt );
 		}
 	}
 }

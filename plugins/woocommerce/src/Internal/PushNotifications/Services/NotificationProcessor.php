@@ -170,6 +170,7 @@ class NotificationProcessor {
 		 */
 		if ( empty( $tokens ) ) {
 			$notification->write_meta( self::SENT_META_KEY );
+			$this->cancel_safety_net( $notification );
 			return true;
 		}
 
@@ -245,7 +246,7 @@ class NotificationProcessor {
 	 * @since 10.9.0
 	 */
 	private function cancel_safety_net( Notification $notification ): void {
-		as_unschedule_action(
+		as_unschedule_all_actions(
 			self::SAFETY_NET_HOOK,
 			array(
 				'type'        => $notification->get_type(),
@@ -282,13 +283,22 @@ class NotificationProcessor {
 			) + $extra;
 
 			$notification = Notification::from_array( $data );
+		} catch ( Exception $e ) {
+			wc_get_logger()->error(
+				sprintf( 'Safety net failed: %s', $e->getMessage() ),
+				array( 'source' => PushNotifications::FEATURE_NAME )
+			);
+			return;
+		}
 
+		try {
 			$this->process( $notification, true );
 		} catch ( Exception $e ) {
 			wc_get_logger()->error(
 				sprintf( 'Safety net failed: %s', $e->getMessage() ),
 				array( 'source' => PushNotifications::FEATURE_NAME )
 			);
+			$this->retry_handler->schedule( $notification, null, 0 );
 		}
 	}
 }

@@ -139,7 +139,8 @@ class PendingNotificationStore {
 			time() + NotificationProcessor::SAFETY_NET_DELAY,
 			NotificationProcessor::SAFETY_NET_HOOK,
 			$args,
-			NotificationProcessor::ACTION_SCHEDULER_GROUP
+			NotificationProcessor::ACTION_SCHEDULER_GROUP,
+			true
 		);
 	}
 
