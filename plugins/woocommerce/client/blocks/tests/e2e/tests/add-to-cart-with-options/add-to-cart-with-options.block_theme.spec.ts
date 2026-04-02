@@ -36,7 +36,8 @@ const test = base.extend< {
 } );
 
 test.describe( 'Add to Cart + Options Block', () => {
-	test( 'allows switching to 3rd-party product types', async ( {
+	test( 'allows adding 3rd-party product types to cart when using PHP templates', async ( {
+		page,
 		pageObject,
 		editor,
 		requestUtils,
@@ -44,15 +45,44 @@ test.describe( 'Add to Cart + Options Block', () => {
 		await requestUtils.activatePlugin(
 			'woocommerce-blocks-test-custom-product-type'
 		);
-
-		await pageObject.updateSingleProductTemplate();
-		await pageObject.switchProductType( 'Custom Product Type' );
-
-		const block = editor.canvas.getByLabel(
-			`Block: ${ pageObject.BLOCK_NAME }`
+		const cliOutput = await wpCLI(
+			`wc product create --slug="custom-product" --name="Custom Product" --type="custom" --regular_price=10 --user=1`
 		);
-		const skeleton = block.locator( '.wc-block-components-skeleton' );
-		await expect( skeleton ).toBeVisible();
+		const customProductId = cliOutput.stdout.match( /\d+/g )?.pop();
+
+		await test.step( 'allows switching to 3rd-party product types in the editor', async () => {
+			await pageObject.updateSingleProductTemplate();
+			await pageObject.switchProductType( 'Custom Product Type' );
+
+			const block = editor.canvas.getByLabel(
+				`Block: ${ pageObject.BLOCK_NAME }`
+			);
+			const skeleton = block.locator( '.wc-block-components-skeleton' );
+			await expect( skeleton ).toBeVisible();
+
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
+		} );
+
+		await test.step( 'allows interacting with the form in the frontend', async () => {
+			await page.goto( `/?p=${ customProductId }` );
+			const quantityInput = page.getByLabel( 'Product quantity' );
+
+			await expect( quantityInput ).toHaveValue( '1' );
+			await page
+				.getByLabel( 'Increase quantity of Custom Product' )
+				.click();
+
+			await expect( quantityInput ).toHaveValue( '2' );
+			await page.getByRole( 'button', { name: 'Add to cart' } ).click();
+
+			await expect(
+				page
+					.getByRole( 'alert' )
+					.getByText( /have been added to your cart/i )
+			).toBeVisible();
+		} );
 	} );
 
 	test( 'allows adding simple products to cart', async ( {
