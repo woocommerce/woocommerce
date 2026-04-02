@@ -8522,6 +8522,15 @@ table.bar_chart {
 			}
 		}
 	}
+
+	// WP 7.0 sets display:flex, width:24px, height:24px on .notice-dismiss.
+	// Reset these so the floated .woocommerce-message-close layout still works.
+	.woocommerce-message a.woocommerce-message-close {
+		display: inline;
+		width: auto;
+		height: auto;
+		color: #1e1e1e;
+	}
 }
 
 /**
