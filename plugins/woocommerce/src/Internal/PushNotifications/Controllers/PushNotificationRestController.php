@@ -75,8 +75,8 @@ class PushNotificationRestController {
 	public function create( WP_REST_Request $request ) {
 		wc_set_time_limit( 30 );
 
-		$body          = json_decode( $request->get_body(), true );
-		$notifications = is_array( $body ) ? ( $body['notifications'] ?? array() ) : array();
+		$body             = json_decode( $request->get_body(), true );
+		$notifications    = is_array( $body ) ? ( $body['notifications'] ?? array() ) : array();
 		$success_response = new WP_REST_Response( array( 'success' => true ), WP_Http::OK );
 
 		if ( empty( $notifications ) || ! is_array( $notifications ) ) {

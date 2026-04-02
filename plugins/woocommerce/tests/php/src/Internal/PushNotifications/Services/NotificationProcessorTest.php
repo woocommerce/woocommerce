@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Internal\PushNotifications\Notifications\StockNotific
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationPreferencesService;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
+use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationRetryHandler;
 use WC_Helper_Product;
 use WC_Logger_Interface;
 use WC_Unit_Test_Case;
@@ -52,6 +53,13 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 	private $preferences_service;
 
 	/**
+	 * Mock retry handler.
+	 *
+	 * @var NotificationRetryHandler
+	 */
+	private $retry_handler;
+
+	/**
 	 * A test order ID.
 	 *
 	 * @var int
@@ -67,10 +75,11 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 		$this->dispatcher          = $this->createMock( WpcomNotificationDispatcher::class );
 		$this->data_store          = $this->createMock( PushTokensDataStore::class );
 		$this->preferences_service = $this->createMock( NotificationPreferencesService::class );
+		$this->retry_handler       = $this->createMock( NotificationRetryHandler::class );
 		$this->order_id            = wc_create_order( array( 'status' => 'processing' ) )->get_id();
 
 		$this->sut = new NotificationProcessor();
-		$this->sut->init( $this->dispatcher, $this->data_store, $this->preferences_service );
+		$this->sut->init( $this->dispatcher, $this->data_store, $this->preferences_service, $this->retry_handler );
 
 		// By default every user has every notification type enabled, so existing
 		// tests behave as before. Per-user/per-type filtering is exercised in
@@ -234,7 +243,7 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 		$this->dispatcher->expects( $this->never() )->method( 'dispatch' );
 
 		$sut = new NotificationProcessor();
-		$sut->init( $this->dispatcher, $data_store, $this->preferences_service );
+		$sut->init( $this->dispatcher, $data_store, $this->preferences_service, $this->retry_handler );
 
 		$notification = new NewOrderNotification( $this->order_id );
 		$result       = $sut->process( $notification );
@@ -261,7 +270,7 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 		$this->dispatcher->expects( $this->never() )->method( 'dispatch' );
 
 		$sut = new NotificationProcessor();
-		$sut->init( $this->dispatcher, $this->data_store, $preferences_service );
+		$sut->init( $this->dispatcher, $this->data_store, $preferences_service, $this->retry_handler );
 
 		$notification = new NewOrderNotification( $this->order_id );
 		$result       = $sut->process( $notification );
@@ -332,7 +341,7 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 			);
 
 		$sut = new NotificationProcessor();
-		$sut->init( $this->dispatcher, $data_store, $preferences_service );
+		$sut->init( $this->dispatcher, $data_store, $preferences_service, $this->retry_handler );
 
 		$notification = new NewOrderNotification( $this->order_id );
 		$result       = $sut->process( $notification );
@@ -363,7 +372,7 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 			);
 
 		$sut = new NotificationProcessor();
-		$sut->init( $this->dispatcher, $this->data_store, $preferences_service );
+		$sut->init( $this->dispatcher, $this->data_store, $preferences_service, $this->retry_handler );
 
 		// store_order is enabled — should dispatch.
 		$order_notification = new NewOrderNotification( $this->order_id );
@@ -443,7 +452,7 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 			);
 
 		$sut = new NotificationProcessor();
-		$sut->init( $this->dispatcher, $data_store, $preferences_service );
+		$sut->init( $this->dispatcher, $data_store, $preferences_service, $this->retry_handler );
 
 		$this->assertTrue( $sut->process( new NewOrderNotification( $this->order_id ) ) );
 	}
@@ -491,7 +500,7 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 		$this->dispatcher->expects( $this->never() )->method( 'dispatch' );
 
 		$sut = new NotificationProcessor();
-		$sut->init( $this->dispatcher, $this->data_store, $preferences_service );
+		$sut->init( $this->dispatcher, $this->data_store, $preferences_service, $this->retry_handler );
 
 		$result = $sut->process( $notification );
 
@@ -546,6 +555,143 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should schedule retry via handler on dispatch failure.
+	 */
+	public function test_process_schedules_retry_on_failure(): void {
+		$this->dispatcher->method( 'dispatch' )->willReturn(
+			array(
+				'success'     => false,
+				'retry_after' => 120,
+			)
+		);
+
+		$this->retry_handler->expects( $this->once() )
+			->method( 'schedule' )
+			->with(
+				$this->isInstanceOf( NewOrderNotification::class ),
+				$this->equalTo( 120 ),
+				$this->equalTo( 0 )
+			);
+
+		$notification = new NewOrderNotification( $this->order_id );
+		$this->sut->process( $notification );
+	}
+
+	/**
+	 * @testdox Should pass attempt number through to retry handler on failure.
+	 */
+	public function test_process_passes_attempt_to_retry_handler(): void {
+		$this->dispatcher->method( 'dispatch' )->willReturn(
+			array(
+				'success'     => false,
+				'retry_after' => null,
+			)
+		);
+
+		$this->retry_handler->expects( $this->once() )
+			->method( 'schedule' )
+			->with(
+				$this->anything(),
+				$this->anything(),
+				$this->equalTo( 3 )
+			);
+
+		$notification = new NewOrderNotification( $this->order_id );
+		$this->sut->process( $notification, true, 3 );
+	}
+
+	/**
+	 * @testdox Should cancel safety net after successful dispatch.
+	 */
+	public function test_process_cancels_safety_net_on_success(): void {
+		$this->dispatcher->method( 'dispatch' )->willReturn(
+			array(
+				'success'     => true,
+				'retry_after' => null,
+			)
+		);
+
+		$notification = new NewOrderNotification( $this->order_id );
+
+		as_schedule_single_action(
+			time() + NotificationProcessor::SAFETY_NET_DELAY,
+			NotificationProcessor::SAFETY_NET_HOOK,
+			array(
+				'type'        => $notification->get_type(),
+				'resource_id' => $this->order_id,
+			),
+			NotificationProcessor::ACTION_SCHEDULER_GROUP
+		);
+
+		$this->sut->process( $notification );
+
+		$scheduled = as_next_scheduled_action(
+			NotificationProcessor::SAFETY_NET_HOOK,
+			array(
+				'type'        => 'store_order',
+				'resource_id' => $this->order_id,
+			),
+			NotificationProcessor::ACTION_SCHEDULER_GROUP
+		);
+
+		$this->assertFalse( $scheduled, 'Safety net should be cancelled after successful send.' );
+	}
+
+	/**
+	 * @testdox Should cancel safety net after failed dispatch with retry scheduled.
+	 */
+	public function test_process_cancels_safety_net_on_failure(): void {
+		$this->dispatcher->method( 'dispatch' )->willReturn(
+			array(
+				'success'     => false,
+				'retry_after' => null,
+			)
+		);
+
+		$notification = new NewOrderNotification( $this->order_id );
+
+		as_schedule_single_action(
+			time() + NotificationProcessor::SAFETY_NET_DELAY,
+			NotificationProcessor::SAFETY_NET_HOOK,
+			array(
+				'type'        => $notification->get_type(),
+				'resource_id' => $this->order_id,
+			),
+			NotificationProcessor::ACTION_SCHEDULER_GROUP
+		);
+
+		$this->sut->process( $notification );
+
+		$scheduled = as_next_scheduled_action(
+			NotificationProcessor::SAFETY_NET_HOOK,
+			array(
+				'type'        => 'store_order',
+				'resource_id' => $this->order_id,
+			),
+			NotificationProcessor::ACTION_SCHEDULER_GROUP
+		);
+
+		$this->assertFalse( $scheduled, 'Safety net should be cancelled when retry is scheduled.' );
+	}
+
+	/**
+	 * @testdox Should not schedule retry on successful dispatch.
+	 */
+	public function test_process_does_not_retry_on_success(): void {
+		$this->dispatcher->method( 'dispatch' )->willReturn(
+			array(
+				'success'     => true,
+				'retry_after' => null,
+			)
+		);
+
+		$this->retry_handler->expects( $this->never() )->method( 'schedule' );
+
+		$notification = new NewOrderNotification( $this->order_id );
+		$this->sut->process( $notification );
+	}
+
+	/**
 	 * @testdox Should catch and log exception when safety net receives an unknown type.
 	 */
 	public function test_handle_safety_net_logs_error_for_unknown_type(): void {
@@ -589,7 +735,7 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 		$this->dispatcher->expects( $this->never() )->method( 'dispatch' );
 
 		$sut = new NotificationProcessor();
-		$sut->init( $this->dispatcher, $this->data_store, $preferences_service );
+		$sut->init( $this->dispatcher, $this->data_store, $preferences_service, $this->retry_handler );
 
 		$notification = new NewOrderNotification( $order->get_id() );
 		$result       = $sut->process( $notification );
@@ -625,7 +771,7 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 		$this->dispatcher->expects( $this->never() )->method( 'dispatch' );
 
 		$sut = new NotificationProcessor();
-		$sut->init( $this->dispatcher, $this->data_store, $preferences_service );
+		$sut->init( $this->dispatcher, $this->data_store, $preferences_service, $this->retry_handler );
 
 		$notification = new NewReviewNotification( $comment_id );
 		$result       = $sut->process( $notification );
