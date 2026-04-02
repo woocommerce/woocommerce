@@ -118,8 +118,31 @@ export const Suggestions = ( {
 					className="woocommerce-address-autocomplete-branding"
 					dangerouslySetInnerHTML={ {
 						__html: sanitizeHTML( branding, {
-							tags: [ 'a', 'b', 'em', 'i', 'strong', 'p', 'br', 'abbr', 'img', 'span' ],
-							attr: [ 'target', 'href', 'rel', 'name', 'download', 'title', 'src', 'alt', 'style', 'width', 'height' ],
+							tags: [
+								'a',
+								'b',
+								'em',
+								'i',
+								'strong',
+								'p',
+								'br',
+								'abbr',
+								'img',
+								'span',
+							],
+							attr: [
+								'target',
+								'href',
+								'rel',
+								'name',
+								'download',
+								'title',
+								'src',
+								'alt',
+								'style',
+								'width',
+								'height',
+							],
 						} ),
 					} }
 				/>
