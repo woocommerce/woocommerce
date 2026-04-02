@@ -1561,6 +1561,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		$child_ids = $product->get_children();
 		if ( ! empty( $child_ids ) ) {
+			// Prime caches to reduce future queries.
 			_prime_post_caches( $child_ids );
 			// Get existing variations so we don't create duplicates.
 			foreach ( $child_ids as $child_id ) {

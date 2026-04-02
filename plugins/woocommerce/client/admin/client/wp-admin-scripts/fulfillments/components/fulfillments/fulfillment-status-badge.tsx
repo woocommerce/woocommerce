@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { __ } from '@wordpress/i18n';
+
+/**
  * Internal dependencies
  */
 import { Fulfillment } from '../../data/types';
@@ -23,6 +28,10 @@ export default function FulfillmentStatusBadge( {
 				backgroundColor: fulfillmentStatus.background_color,
 				color: fulfillmentStatus.text_color,
 			} }
+			role="status"
+			aria-label={ `${ __( 'Fulfillment status:', 'woocommerce' ) } ${
+				fulfillmentStatus.label
+			}` }
 		>
 			{ fulfillmentStatus.label }
 		</div>

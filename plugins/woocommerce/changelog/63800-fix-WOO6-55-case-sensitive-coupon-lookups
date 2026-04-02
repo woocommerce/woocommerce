@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Restore case-insensitive coupon lookups on databases with case-sensitive collations.

@@ -278,9 +278,13 @@ async function sendCartRequest(
 
 	return cartQueue.submit( options );
 }
+// Stores are locked to prevent 3PD usage until the API is stable.
+const universalLock =
+	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
 // Todo: export this store once the store is public.
-const { state, actions } = store< Store >(
+const { state } = store< Store >( 'woocommerce', {}, { lock: universalLock } );
+const { actions } = store< Store >(
 	'woocommerce',
 	{
 		state: {
@@ -796,7 +800,7 @@ const { state, actions } = store< Store >(
 			},
 		},
 	},
-	{ lock: true }
+	{ lock: universalLock }
 );
 
 // Trigger initial cart refresh.

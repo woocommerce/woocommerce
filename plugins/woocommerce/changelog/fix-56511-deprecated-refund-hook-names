@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix incorrect new hook names in deprecated filter hooks mapping for order refund amount and reason.

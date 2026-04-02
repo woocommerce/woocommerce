@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 
 use Automattic\WooCommerce\Admin\Notes\Note;
 
@@ -127,7 +128,6 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 		WC_Install::delete_obsolete_notes();
 
 		$this->assertEmpty( $data_store->get_notes_with_name( $note_name ) );
-
 	}
 
 	/**
@@ -354,6 +354,9 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_order_stats_schema_does_not_include_fulfillment_status_for_new_install_without_fulfillments_feature_enabled(): void {
+		// Ensure the fulfillments feature is disabled (a prior test class may have enabled it).
+		delete_option( 'woocommerce_feature_fulfillments_enabled' );
+
 		// Mock is_new_install to return true.
 		$version = null;
 		$shop_id = null;

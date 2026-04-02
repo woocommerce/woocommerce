@@ -1092,6 +1092,138 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 	}
 
 	/**
+	 * Data provider for quoted font family tests.
+	 *
+	 * @return array Test cases with input font family and expected output.
+	 */
+	public function quoted_font_family_data_provider(): array {
+		return array(
+			'double-quoted Inter with fallback'   => array(
+				'"Inter", sans-serif',
+				"Inter, 'Helvetica Neue', Arial, sans-serif",
+			),
+			'double-quoted Arial with fallback'   => array(
+				'"Arial", sans-serif',
+				"Arial, 'Helvetica Neue', Helvetica, sans-serif",
+			),
+			'double-quoted Georgia'               => array(
+				'"Georgia", serif',
+				"Georgia, Times, 'Times New Roman', serif",
+			),
+			'single-quoted Inter with fallback'   => array(
+				"'Inter', sans-serif",
+				"Inter, 'Helvetica Neue', Arial, sans-serif",
+			),
+			'single-quoted Courier New'           => array(
+				"'Courier New', monospace",
+				"'Courier New', Courier, 'Lucida Sans Typewriter', 'Lucida Typewriter', monospace",
+			),
+			'unquoted Inter with fallback'        => array(
+				'Inter, sans-serif',
+				"Inter, 'Helvetica Neue', Arial, sans-serif",
+			),
+			'double-quoted Roboto with fallback'  => array(
+				'"Roboto", sans-serif',
+				"roboto, 'helvetica neue', helvetica, arial, sans-serif",
+			),
+			'double-quoted unknown font defaults' => array(
+				'"SomeCustomFont", sans-serif',
+				"Arial, 'Helvetica Neue', Helvetica, sans-serif",
+			),
+		);
+	}
+
+	/**
+	 * Test convert_to_email_safe_font with quoted font names.
+	 *
+	 * @testdox Should correctly resolve font family when name is wrapped in quotes.
+	 * @dataProvider quoted_font_family_data_provider
+	 *
+	 * @param string $input_font    The input font family string (potentially quoted).
+	 * @param string $expected_font The expected email-safe font family output.
+	 */
+	public function test_convert_to_email_safe_font_with_quoted_names( string $input_font, string $expected_font ): void {
+		$reflection = new \ReflectionClass( $this->controller );
+		$method     = $reflection->getMethod( 'convert_to_email_safe_font' );
+		$method->setAccessible( true );
+
+		$result = $method->invoke( $this->controller, $input_font );
+		$this->assertEquals( $expected_font, $result, "Font family '$input_font' should resolve to '$expected_font'" );
+	}
+
+	/**
+	 * Test quoted font family resolution through full sync path.
+	 *
+	 * @testdox Should resolve quoted font family through full typography sync path.
+	 */
+	public function test_sync_site_styles_with_quoted_font_family(): void {
+		$mock_theme_data = array(
+			'version'  => 3,
+			'settings' => array(),
+			'styles'   => array(
+				'typography' => array(
+					'fontFamily' => '"Inter", sans-serif',
+					'fontSize'   => '16px',
+				),
+			),
+		);
+
+		$mock_theme = new WP_Theme_JSON( $mock_theme_data );
+
+		$reflection          = new \ReflectionClass( $this->controller );
+		$site_theme_property = $reflection->getProperty( 'site_theme' );
+		$site_theme_property->setAccessible( true );
+		$site_theme_property->setValue( $this->controller, $mock_theme );
+
+		$synced_data = $this->controller->sync_site_styles();
+
+		$this->assertArrayHasKey( 'typography', $synced_data['styles'] );
+		$this->assertEquals(
+			"Inter, 'Helvetica Neue', Arial, sans-serif",
+			$synced_data['styles']['typography']['fontFamily'],
+			'Quoted "Inter" font family should resolve to the Inter email-safe font, not Arial'
+		);
+	}
+
+	/**
+	 * Test quoted font family resolution in element heading styles.
+	 *
+	 * @testdox Should resolve quoted font family in element heading styles.
+	 */
+	public function test_element_styles_with_quoted_font_family(): void {
+		$mock_theme_data = array(
+			'version'  => 3,
+			'settings' => array(),
+			'styles'   => array(
+				'elements' => array(
+					'heading' => array(
+						'typography' => array(
+							'fontFamily' => '"Inter", sans-serif',
+							'fontSize'   => '24px',
+						),
+					),
+				),
+			),
+		);
+
+		$mock_theme = new WP_Theme_JSON( $mock_theme_data );
+
+		$reflection          = new \ReflectionClass( $this->controller );
+		$site_theme_property = $reflection->getProperty( 'site_theme' );
+		$site_theme_property->setAccessible( true );
+		$site_theme_property->setValue( $this->controller, $mock_theme );
+
+		$synced_data = $this->controller->sync_site_styles();
+
+		$this->assertArrayHasKey( 'elements', $synced_data['styles'] );
+		$this->assertEquals(
+			"Inter, 'Helvetica Neue', Arial, sans-serif",
+			$synced_data['styles']['elements']['heading']['typography']['fontFamily'],
+			'Quoted "Inter" in heading element should resolve to the Inter email-safe font'
+		);
+	}
+
+	/**
 	 * Test already-valid px values don't use fallback.
 	 */
 	public function test_valid_px_values_dont_use_fallback(): void {
