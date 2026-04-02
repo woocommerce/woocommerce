@@ -338,7 +338,8 @@ class PushTokensDataStore {
 		);
 
 		if ( empty( $user_ids ) ) {
-			return array();
+			$this->tokens_by_roles_cache[ $cache_key ] = array();
+			return $this->tokens_by_roles_cache[ $cache_key ];
 		}
 
 		$query = new WP_Query(
@@ -360,7 +361,8 @@ class PushTokensDataStore {
 		$post_ids = $query->posts;
 
 		if ( empty( $post_ids ) ) {
-			return array();
+			$this->tokens_by_roles_cache[ $cache_key ] = array();
+			return $this->tokens_by_roles_cache[ $cache_key ];
 		}
 
 		update_meta_cache( 'post', $post_ids );
