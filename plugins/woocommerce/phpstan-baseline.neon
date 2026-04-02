@@ -53733,17 +53733,6 @@ parameters:
 			count: 1
 			path: src/Blocks/BlockTypes/ProductFilterAttribute.php
 
-		-
-			message: '#^Cannot access property \$name on stdClass\|null\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: src/Blocks/BlockTypes/ProductFilterAttribute.php
-
-		-
-			message: '#^Cannot access property \$slug on stdClass\|null\.$#'
-			identifier: property.nonObject
-			count: 5
-			path: src/Blocks/BlockTypes/ProductFilterAttribute.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilterAttribute\:\:delete_default_attribute_id_transient\(\) has no return type specified\.$#'
