@@ -379,7 +379,13 @@ function transformFile( { sourceText, filePath, packageName, typesDir, entryPoin
 
 function generate( outputDir ) {
 	for ( const pkg of PACKAGES ) {
-		const sourceDir = resolvePackageTypesDir( pkg.name, pkg.typesDir, pkg.dtPackage );
+		let sourceDir;
+		try {
+			sourceDir = resolvePackageTypesDir( pkg.name, pkg.typesDir, pkg.dtPackage );
+		} catch {
+			console.warn( `Skipping ${ pkg.name }: package not found` );
+			continue;
+		}
 		const allFiles = collectDtsFiles( sourceDir );
 		const pkgOutputDir = join( outputDir, pkg.name );
 
@@ -428,7 +434,7 @@ function applyPatch( patchFile ) {
 
 	try {
 		execSync(
-			`git apply "${ patchFile }"`,
+			`git apply --allow-empty "${ patchFile }"`,
 			{ cwd: PKG_ROOT, stdio: 'pipe' }
 		);
 		console.log( `Applied patch: ${ relative( PKG_ROOT, patchFile ) }` );
