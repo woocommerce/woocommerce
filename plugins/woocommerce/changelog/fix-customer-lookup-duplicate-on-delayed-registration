@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix duplicate wc_customer_lookup rows when a guest registers via delayed account creation on the order confirmation page.
