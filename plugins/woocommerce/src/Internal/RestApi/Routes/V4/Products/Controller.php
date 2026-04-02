@@ -47,11 +47,12 @@ class Controller extends WC_REST_Products_V2_Controller {
 	 * @since 10.8.0
 	 */
 	private const SENSITIVE_FIELDS = array(
+		'cost_of_goods_sold',
 		'downloads',
 		'download_limit',
 		'download_expiry',
+		'meta_data',
 		'purchase_note',
-		'cost_of_goods_sold',
 	);
 
 	/**
