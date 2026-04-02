@@ -162,7 +162,7 @@ class FulfillmentsRenderer {
 			);
 		}
 
-		echo '<mark class="fulfillment-status" style="background-color:' . esc_attr( $status_props['background_color'] ) . '; color: ' . esc_attr( $status_props['text_color'] ) . '"><span>' . esc_html( $status_props['label'] ) . '</span></mark>';
+		echo '<mark class="fulfillment-status fulfillments-trigger" style="background-color:' . esc_attr( $status_props['background_color'] ) . '; color: ' . esc_attr( $status_props['text_color'] ) . ';" role="button" tabindex="0" data-order-id="' . esc_attr( (string) $order->get_id() ) . '"><span>' . esc_html( $status_props['label'] ) . '</span></mark>';
 		echo "<a href='#' class='fulfillments-trigger' data-order-id='" . esc_attr( $order->get_id() ) . "' title='" . esc_attr__( 'View Fulfillments', 'woocommerce' ) . "'>
 			<svg width='16' height='16' viewBox='0 0 12 14' xmlns='http://www.w3.org/2000/svg'>
 				<path d='M11.8333 2.83301L9.33329 0.333008L2.24996 7.41634L1.41663 10.7497L4.74996 9.91634L11.8333 2.83301ZM5.99996 12.4163H0.166626V13.6663H5.99996V12.4163Z' />
@@ -179,20 +179,26 @@ class FulfillmentsRenderer {
 	private function render_shipment_provider_column_row_data( WC_Order $order, array $fulfillments ) {
 		$providers = array();
 		foreach ( $fulfillments as $fulfillment ) {
-			$providers[] = $fulfillment->get_shipment_provider();
-		}
-
-		$providers = array_filter(
-			$providers,
-			function ( $provider ) {
-				return ! empty( $provider );
+			$provider = $fulfillment->get_shipment_provider();
+			if ( ! empty( $provider ) ) {
+				$provider_name     = $fulfillment->get_meta( '_provider_name' );
+				$key               = 'other' === $provider && ! empty( $provider_name )
+					? $provider . '::' . $provider_name
+					: $provider;
+				$providers[ $key ] = $fulfillment;
 			}
-		);
+		}
 
 		if ( count( $providers ) > 1 ) {
 			echo '<span>' . esc_html__( 'Multiple providers', 'woocommerce' ) . '</span>';
 		} elseif ( 1 === count( $providers ) ) {
-			echo '<span>' . esc_html( array_shift( $providers ) ) . '</span>';
+			$provider_fulfillment   = reset( $providers );
+			$provider_slug          = $provider_fulfillment->get_shipment_provider();
+			$known_providers        = FulfillmentUtils::get_shipping_providers_object();
+			$provider_name_meta     = $provider_fulfillment->get_meta( '_provider_name' );
+			$provider_display_label = $known_providers[ $provider_slug ]['label']
+				?? ( ! empty( $provider_name_meta ) ? $provider_name_meta : $provider_slug );
+			echo '<span>' . esc_html( $provider_display_label ) . '</span>';
 		} else {
 			echo '<span>--</span>';
 		}
@@ -207,20 +213,24 @@ class FulfillmentsRenderer {
 	private function render_shipment_tracking_column_row_data( WC_Order $order, array $fulfillments ) {
 		$tracking = array();
 		foreach ( $fulfillments as $fulfillment ) {
-			$tracking[] = $fulfillment->get_tracking_number();
-		}
-
-		$tracking = array_filter(
-			$tracking,
-			function ( $provider ) {
-				return ! empty( $provider );
+			$number = $fulfillment->get_tracking_number();
+			if ( ! empty( $number ) ) {
+				$tracking[] = array(
+					'number' => $number,
+					'url'    => $fulfillment->get_tracking_url(),
+				);
 			}
-		);
+		}
 
 		if ( count( $tracking ) > 1 ) {
 			echo '<span>' . esc_html__( 'Multiple trackings', 'woocommerce' ) . '</span>';
 		} elseif ( 1 === count( $tracking ) ) {
-			echo '<span>' . esc_html( array_shift( $tracking ) ) . '</span>';
+			$entry = $tracking[0];
+			if ( ! empty( $entry['url'] ) ) {
+				echo '<a href="' . esc_url( $entry['url'] ) . '" target="_blank" rel="noopener noreferrer" style="text-decoration: underline; color: #2f2f2f;">' . esc_html( $entry['number'] ) . '</a>';
+			} else {
+				echo '<span>' . esc_html( $entry['number'] ) . '</span>';
+			}
 		} else {
 			echo '<span>--</span>';
 		}

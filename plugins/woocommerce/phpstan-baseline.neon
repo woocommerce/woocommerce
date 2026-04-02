@@ -51376,12 +51376,6 @@ parameters:
 			path: src/Blocks/BlockTypes/AddToCartForm.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartForm\:\:add_steppers\(\) should return string but returns string\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockTypes/AddToCartForm.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartForm\:\:enqueue_assets\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -51401,12 +51395,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#3 \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AbstractBlock\:\:enqueue_assets\(\) expects WP_Block, Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/AddToCartForm.php
-
-		-
-			message: '#^Parameter \#3 \$subject of function preg_replace expects array\<float\|int\|string\>\|string, string\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/AddToCartForm.php
@@ -51592,12 +51580,6 @@ parameters:
 			path: src/Blocks/BlockTypes/AddToCartWithOptions/Utils.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\Utils\:\:add_quantity_steppers\(\) should return string but returns string\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockTypes/AddToCartWithOptions/Utils.php
-
-		-
 			message: '#^Parameter \#1 \$haystack of function strpos expects string, string\|true\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -51605,12 +51587,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$query of method WP_HTML_Tag_Processor\:\:next_tag\(\) expects array\{tag_name\?\: string\|null, match_offset\?\: int\|null, class_name\?\: string\|null, tag_closers\?\: string\|null\}\|null, ''input'' given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/AddToCartWithOptions/Utils.php
-
-		-
-			message: '#^Parameter \#3 \$subject of function preg_replace expects array\<float\|int\|string\>\|string, string\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/AddToCartWithOptions/Utils.php

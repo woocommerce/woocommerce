@@ -1116,6 +1116,43 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that get_payment_gateway_details skips suggestion matching for offline payment methods.
+	 *
+	 * Offline PMs (BACS, COD, Cheque) don't have extension suggestions or incentives.
+	 * The suggestion lookup should be skipped entirely for them.
+	 */
+	public function test_get_payment_gateway_details_skips_suggestion_matching_for_offline_pms() {
+		// Arrange.
+		$fake_gateway = new FakePaymentGateway(
+			WC_Gateway_BACS::ID,
+			array(
+				'enabled'            => true,
+				'title'              => 'Direct bank transfer',
+				'method_title'       => 'Direct bank transfer',
+				'description'        => 'Make your payment directly into our bank account.',
+				'method_description' => 'Take payments in person via BACS.',
+				'plugin_slug'        => 'woocommerce',
+				'plugin_file'        => 'woocommerce/woocommerce.php',
+			),
+		);
+
+		// The suggestion service should never be called for offline PMs.
+		$this->mock_extension_suggestions
+			->expects( $this->never() )
+			->method( 'get_by_plugin_slug' );
+
+		// Act.
+		$gateway_details = $this->sut->get_payment_gateway_details( $fake_gateway, 0, 'US' );
+
+		// Assert that the gateway is correctly identified as an offline PM.
+		$this->assertSame( PaymentsProviders::TYPE_OFFLINE_PM, $gateway_details['_type'] );
+
+		// Assert that no suggestion-derived fields are present.
+		$this->assertArrayNotHasKey( '_suggestion_id', $gateway_details );
+		$this->assertArrayNotHasKey( '_incentive', $gateway_details );
+	}
+
+	/**
 	 * Test getting the plugin slug of a payment gateway instance.
 	 */
 	public function test_get_payment_gateway_plugin_slug() {

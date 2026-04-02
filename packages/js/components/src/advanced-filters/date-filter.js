@@ -231,6 +231,7 @@ class DateFilter extends Component {
 			title: <span className={ className } />,
 			rule: (
 				<SelectControl
+					__next40pxDefaultSize
 					className={ clsx(
 						className,
 						'woocommerce-filters-advanced__rule'

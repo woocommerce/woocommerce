@@ -1862,16 +1862,15 @@ class WC_Order extends WC_Abstract_Order {
 	 * Orders which only contain virtual, downloadable items do not need admin
 	 * intervention.
 	 *
-	 * Uses a transient so these calls are not repeated multiple times, and because
-	 * once the order is processed this code/transient does not need to persist.
-	 *
+	 * @since 10.8.0 the method no longer uses transients.
 	 * @since 3.0.0
+	 *
 	 * @return bool
 	 */
 	public function needs_processing() {
-		$transient_name   = 'wc_order_' . $this->get_id() . '_needs_processing';
-		$needs_processing = get_transient( $transient_name );
-
+		$order_id         = $this->get_id();
+		$cache_key        = 'order-needs-processing-' . $order_id;
+		$needs_processing = wp_cache_get( $cache_key, 'orders' );
 		if ( false === $needs_processing ) {
 			$needs_processing = 0;
 
@@ -1880,22 +1879,30 @@ class WC_Order extends WC_Abstract_Order {
 				foreach ( $line_items as $item ) {
 					if ( $item->is_type( 'line_item' ) ) {
 						$product = $item->get_product();
-
-						if ( ! $product ) {
-							continue;
-						}
-
-						$virtual_downloadable_item = $product->is_downloadable() && $product->is_virtual();
-
-						if ( apply_filters( 'woocommerce_order_item_needs_processing', ! $virtual_downloadable_item, $product, $this->get_id() ) ) {
-							$needs_processing = 1;
-							break;
+						if ( $product ) {
+							$virtual_downloadable_item = $product->is_downloadable() && $product->is_virtual();
+							/**
+							 * Filters whether an order line item requires processing. By default, only
+							 * virtual downloadable items do not require processing; all other items do.
+							 *
+							 * @since 2.7.0
+							 *
+							 * @param bool        $needs_processing
+							 * @param \WC_Product $product
+							 * @param int         $order_id
+							 * @return bool
+							 */
+							$custom_needs_processing = (bool) apply_filters( 'woocommerce_order_item_needs_processing', ! $virtual_downloadable_item, $product, $order_id );
+							if ( $custom_needs_processing ) {
+								$needs_processing = 1;
+								break;
+							}
 						}
 					}
 				}
 			}
 
-			set_transient( $transient_name, $needs_processing, DAY_IN_SECONDS );
+			wp_cache_set( $cache_key, $needs_processing, 'orders', DAY_IN_SECONDS );
 		}
 
 		return 1 === absint( $needs_processing );

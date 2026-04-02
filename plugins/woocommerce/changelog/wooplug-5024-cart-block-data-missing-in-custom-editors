@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix Cart and Checkout block editor detection for post-new.php and other custom editor contexts.

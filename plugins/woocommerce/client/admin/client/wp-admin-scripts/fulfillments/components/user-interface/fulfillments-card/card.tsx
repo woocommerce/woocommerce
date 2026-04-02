@@ -26,11 +26,34 @@ export default function FulfillmentCard( {
 	const [ isOpen, setIsOpen ] = useState( initialState === 'expanded' );
 	const hasChildren = React.Children.toArray( children ).length > 0;
 
+	const handleToggle = () => setIsOpen( ! isOpen );
+	const handleKeyUp = ( e: React.KeyboardEvent ) => {
+		if ( e.key === 'Enter' || e.key === ' ' ) {
+			e.preventDefault();
+			handleToggle();
+		}
+	};
+
 	return (
 		<div
 			className={ `woocommerce-fulfillment-card woocommerce-fulfillment-card__size-${ size }` }
 		>
-			<div className="woocommerce-fulfillment-card__header">
+			<div
+				className={ [
+					'woocommerce-fulfillment-card__header',
+					isCollapsable
+						? 'woocommerce-fulfillment-card__header--clickable'
+						: '',
+				].join( ' ' ) }
+				{ ...( isCollapsable
+					? {
+							onClick: handleToggle,
+							onKeyUp: handleKeyUp,
+							role: 'button',
+							tabIndex: 0,
+					  }
+					: {} ) }
+			>
 				{ header }
 				{ isCollapsable && (
 					<Button
