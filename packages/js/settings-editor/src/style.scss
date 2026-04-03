@@ -14,12 +14,6 @@
 // Import form controls styles
 @import "./form-controls/style.scss";
 
-.woocommerce-settings-header {
-	&.woocommerce-site-page-header.woocommerce-settings-header--has-tabs {
-		border-bottom: none;
-	}
-}
-
 .woocommerce-settings-section-tabs {
 	.components-tab-panel__tabs {
 		border-bottom: 1px solid #f0f0f0;
