@@ -14,7 +14,6 @@ import {
 	ApiFetchError,
 	RegisteredChannel as APIRegisteredChannel,
 } from '~/marketing/data-multichannel/types';
-import { Selectors } from '~/marketing/data-multichannel/selectors';
 
 type UseRegisteredChannels = {
 	loading: boolean;
@@ -70,7 +69,7 @@ export const useRegisteredChannels = (): UseRegisteredChannels => {
 		( select ) => {
 			const { hasFinishedResolution, getRegisteredChannels } = select(
 				STORE_KEY
-			) as Selectors;
+			);
 			const state = getRegisteredChannels();
 
 			return {
