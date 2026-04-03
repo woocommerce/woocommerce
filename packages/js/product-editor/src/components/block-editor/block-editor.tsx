@@ -108,6 +108,7 @@ export function BlockEditor( {
 	}, [] );
 
 	useEffect( () => {
+		// @ts-expect-error @wordpress/keyboard-shortcuts store is not fully typed.
 		const { registerShortcut } = dispatch( keyboardShortcutsStore );
 		if ( registerShortcut ) {
 			registerShortcut( {
@@ -216,15 +217,7 @@ export function BlockEditor( {
 
 	// Pull the product templates from the store.
 	const productForms = useSelect(
-		(
-			sel: ( key: string ) => {
-				getEntityRecords: (
-					kind: string,
-					name: string,
-					query: Record< string, unknown >
-				) => ProductFormPostProps[] | undefined;
-			}
-		) => {
+		( sel ) => {
 			return (
 				sel( 'core' ).getEntityRecords( 'postType', 'product_form', {
 					per_page: -1,
@@ -347,11 +340,7 @@ export function BlockEditor( {
 
 	// Check if the Modal editor is open from the store.
 	const isModalEditorOpen = useSelect(
-		(
-			selectCore: ( key: typeof wooProductEditorUiStore ) => {
-				isModalEditorOpen: () => boolean | undefined;
-			}
-		) => {
+		( selectCore ) => {
 			return selectCore( wooProductEditorUiStore ).isModalEditorOpen();
 		},
 		[]

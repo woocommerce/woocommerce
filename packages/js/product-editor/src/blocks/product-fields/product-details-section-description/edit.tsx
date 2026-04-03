@@ -106,15 +106,7 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 
 	// Pull the product templates from the store.
 	const productFormPosts = useSelect(
-		(
-			sel: ( key: string ) => {
-				getEntityRecords: (
-					kind: string,
-					name: string,
-					query: Record< string, unknown >
-				) => ProductFormPostProps[] | undefined;
-			}
-		) => {
+		( sel ) => {
 			// Do not fetch product form posts if the feature is not enabled.
 			if ( ! isProductFormTemplateSystemEnabled() ) {
 				return [];
