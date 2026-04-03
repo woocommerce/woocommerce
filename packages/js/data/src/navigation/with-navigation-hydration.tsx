@@ -12,8 +12,6 @@ import deprecated from '@wordpress/deprecated';
  */
 import { STORE_NAME } from './constants';
 import { MenuItem } from './types';
-import { SelectFromMap, WPDataSelectors } from '../types';
-import * as selectors from './selectors';
 
 /**
  * Higher-order component used to hydrate navigation data.
@@ -29,11 +27,7 @@ export const withNavigationHydration = ( data: { menuItems: MenuItem[] } ) =>
 		( OriginalComponent ) => ( props ) => {
 			deprecated( 'withNavigationHydration', {} );
 			const shouldHydrate = useSelect(
-				(
-					select: (
-						key: typeof STORE_NAME
-					) => SelectFromMap< typeof selectors > & WPDataSelectors
-				) => {
+				( select ) => {
 					if ( ! data ) {
 						return;
 					}

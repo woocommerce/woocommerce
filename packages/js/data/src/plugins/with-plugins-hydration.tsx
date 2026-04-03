@@ -10,8 +10,6 @@ import { createElement, useEffect } from '@wordpress/element';
  * Internal dependencies
  */
 import { STORE_NAME } from './constants';
-import * as selectors from './selectors';
-import { SelectFromMap, WPDataSelectors } from '../types';
 
 type PluginHydrationData = {
 	installedPlugins: string[];
@@ -25,11 +23,7 @@ export const withPluginsHydration = ( data: PluginHydrationData ) =>
 	>(
 		( OriginalComponent ) => ( props ) => {
 			const shouldHydrate = useSelect(
-				(
-					select: (
-						key: typeof STORE_NAME
-					) => SelectFromMap< typeof selectors > & WPDataSelectors
-				) => {
+				( select ) => {
 					if ( ! data ) {
 						return;
 					}
