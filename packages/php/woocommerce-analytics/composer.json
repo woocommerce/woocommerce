@@ -1,21 +1,20 @@
 {
 	"name": "automattic/woocommerce-analytics",
 	"description": "Enhanced analytics for WooCommerce users.",
-	"type": "jetpack-library",
+	"type": "library",
 	"license": "GPL-2.0-or-later",
 	"require": {
-		"php": ">=7.2",
-		"automattic/jetpack-assets": "@dev",
-		"automattic/jetpack-connection": "@dev",
-		"automattic/jetpack-constants": "@dev",
-		"automattic/jetpack-device-detection": "@dev",
-		"automattic/block-delimiter": "@dev"
+		"php": ">=7.4",
+		"automattic/jetpack-assets": "^4.3",
+		"automattic/jetpack-connection": "^8.1",
+		"automattic/jetpack-constants": "^3.0",
+		"automattic/jetpack-device-detection": "^3.4",
+		"automattic/block-delimiter": "^0.3"
 	},
 	"require-dev": {
 		"yoast/phpunit-polyfills": "^4.0.0",
-		"automattic/jetpack-changelogger": "@dev",
-		"automattic/jetpack-test-environment": "@dev",
-		"automattic/phpunit-select-config": "@dev"
+		"automattic/phpunit-select-config": "^1.0",
+		"automattic/wordbless": "^0.5"
 	},
 	"autoload": {
 		"classmap": [
@@ -23,6 +22,8 @@
 		]
 	},
 	"scripts": {
+		"post-install-cmd": "WorDBless\\Composer\\InstallDropin::copy",
+		"post-update-cmd": "WorDBless\\Composer\\InstallDropin::copy",
 		"phpunit": [
 			"phpunit-select-config phpunit.#.xml.dist --colors=always"
 		],
@@ -39,26 +40,14 @@
 			"pnpm run build"
 		]
 	},
-	"repositories": [
-		{
-			"type": "path",
-			"url": "../../packages/*",
-			"options": {
-				"monorepo": true
-			}
+	"config": {
+		"allow-plugins": {
+			"roots/wordpress-core-installer": true
 		}
-	],
+	},
 	"minimum-stability": "dev",
 	"prefer-stable": true,
 	"extra": {
-		"mirror-repo": "Automattic/woocommerce-analytics",
-		"changelogger": {
-			"link-template": "https://github.com/Automattic/woocommerce-analytics/compare/v${old}...v${new}"
-		},
-		"autotagger": true,
-		"branch-alias": {
-			"dev-trunk": "0.16.x-dev"
-		},
 		"textdomain": "woocommerce-analytics",
 		"version-constants": {
 			"::PACKAGE_VERSION": "src/class-woocommerce-analytics.php"
