@@ -8316,9 +8316,8 @@ table.bar_chart {
 
 		.select2-selection--multiple {
 			min-height: 40px;
-			height: 38px;
 
-			.select2-selection__rendered li {
+			.select2-selection__rendered li:not(:first-child) {
 				margin-top: 0; // Prevent extra spacing inside multi-select.
 			}
 		}
