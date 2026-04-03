@@ -105,21 +105,18 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 		useState< ProductTemplate >();
 
 	// Pull the product templates from the store.
-	const productFormPosts = useSelect(
-		( sel ) => {
-			// Do not fetch product form posts if the feature is not enabled.
-			if ( ! isProductFormTemplateSystemEnabled() ) {
-				return [];
-			}
+	const productFormPosts = useSelect( ( sel ) => {
+		// Do not fetch product form posts if the feature is not enabled.
+		if ( ! isProductFormTemplateSystemEnabled() ) {
+			return [];
+		}
 
-			return (
-				sel( 'core' ).getEntityRecords( 'postType', 'product_form', {
-					per_page: -1,
-				} ) || []
-			);
-		},
-		[]
-	) as ProductFormPostProps[];
+		return (
+			sel( 'core' ).getEntityRecords( 'postType', 'product_form', {
+				per_page: -1,
+			} ) || []
+		);
+	}, [] ) as ProductFormPostProps[];
 
 	const { isSaving } = useSelect(
 		( select ) => {

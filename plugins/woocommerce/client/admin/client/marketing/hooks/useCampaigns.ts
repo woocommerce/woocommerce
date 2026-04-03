@@ -34,9 +34,7 @@ export const useCampaigns = ( page = 1, perPage = 5 ): UseCampaignsType => {
 
 	return useSelect(
 		( select ) => {
-			const { hasFinishedResolution, getCampaigns } = select(
-				STORE_KEY
-			);
+			const { hasFinishedResolution, getCampaigns } = select( STORE_KEY );
 			const { campaignsPage, meta } = getCampaigns( page, perPage );
 
 			const convert = ( campaign: APICampaign ): Campaign => {

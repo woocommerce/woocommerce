@@ -42,9 +42,8 @@ export const useCampaignTypes = (): UseCampaignTypes => {
 
 	return useSelect(
 		( select ) => {
-			const { hasFinishedResolution, getCampaignTypes } = select(
-				STORE_KEY
-			);
+			const { hasFinishedResolution, getCampaignTypes } =
+				select( STORE_KEY );
 			const campaignTypesState = getCampaignTypes();
 
 			return {

@@ -26,21 +26,18 @@ export const withNavigationHydration = ( data: { menuItems: MenuItem[] } ) =>
 	>(
 		( OriginalComponent ) => ( props ) => {
 			deprecated( 'withNavigationHydration', {} );
-			const shouldHydrate = useSelect(
-				( select ) => {
-					if ( ! data ) {
-						return;
-					}
+			const shouldHydrate = useSelect( ( select ) => {
+				if ( ! data ) {
+					return;
+				}
 
-					const { isResolving, hasFinishedResolution } =
-						select( STORE_NAME );
-					return (
-						! isResolving( 'getMenuItems' ) &&
-						! hasFinishedResolution( 'getMenuItems' )
-					);
-				},
-				[]
-			);
+				const { isResolving, hasFinishedResolution } =
+					select( STORE_NAME );
+				return (
+					! isResolving( 'getMenuItems' ) &&
+					! hasFinishedResolution( 'getMenuItems' )
+				);
+			}, [] );
 
 			const { startResolution, finishResolution, setMenuItems } =
 				useDispatch( STORE_NAME );

@@ -67,9 +67,8 @@ export const useRegisteredChannels = (): UseRegisteredChannels => {
 
 	return useSelect(
 		( select ) => {
-			const { hasFinishedResolution, getRegisteredChannels } = select(
-				STORE_KEY
-			);
+			const { hasFinishedResolution, getRegisteredChannels } =
+				select( STORE_KEY );
 			const state = getRegisteredChannels();
 
 			return {

@@ -18,9 +18,8 @@ type UseRecommendedChannels = {
 
 export const useRecommendedChannels = (): UseRecommendedChannels => {
 	return useSelect( ( select ) => {
-		const { hasFinishedResolution, getRecommendedChannels } = select(
-			STORE_KEY
-		);
+		const { hasFinishedResolution, getRecommendedChannels } =
+			select( STORE_KEY );
 		const { data, error } = getRecommendedChannels() as {
 			data?: RecommendedChannel[];
 			error?: unknown;

@@ -52,9 +52,9 @@ const PaymentRecommendations = () => {
 			return {
 				installedPaymentGateway:
 					installingGatewayId &&
-					select(
-						PAYMENT_GATEWAYS_STORE_NAME
-					).getPaymentGateway( installingGatewayId ),
+					select( PAYMENT_GATEWAYS_STORE_NAME ).getPaymentGateway(
+						installingGatewayId
+					),
 				installedPaymentGateways: select( PAYMENT_GATEWAYS_STORE_NAME )
 					.getPaymentGateways()
 					.reduce(

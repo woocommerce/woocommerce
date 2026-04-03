@@ -22,21 +22,18 @@ export const withPluginsHydration = ( data: PluginHydrationData ) =>
 		React.ComponentType< Record< string, unknown > >
 	>(
 		( OriginalComponent ) => ( props ) => {
-			const shouldHydrate = useSelect(
-				( select ) => {
-					if ( ! data ) {
-						return;
-					}
+			const shouldHydrate = useSelect( ( select ) => {
+				if ( ! data ) {
+					return;
+				}
 
-					const { isResolving, hasFinishedResolution } =
-						select( STORE_NAME );
-					return (
-						! isResolving( 'getActivePlugins', [] ) &&
-						! hasFinishedResolution( 'getActivePlugins', [] )
-					);
-				},
-				[]
-			);
+				const { isResolving, hasFinishedResolution } =
+					select( STORE_NAME );
+				return (
+					! isResolving( 'getActivePlugins', [] ) &&
+					! hasFinishedResolution( 'getActivePlugins', [] )
+				);
+			}, [] );
 
 			const {
 				startResolution,

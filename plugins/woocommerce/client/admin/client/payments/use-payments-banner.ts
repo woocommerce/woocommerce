@@ -30,9 +30,9 @@ export const usePaymentsBanner = () => {
 					'getPaymentGatewaySuggestions',
 					[]
 				) &&
-				select(
-					PAYMENT_GATEWAYS_STORE_NAME
-				).hasFinishedResolution( 'getPaymentGateways' ),
+				select( PAYMENT_GATEWAYS_STORE_NAME ).hasFinishedResolution(
+					'getPaymentGateways'
+				),
 		};
 	}, [] );
 
