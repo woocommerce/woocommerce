@@ -61,13 +61,30 @@ export const receiveCart =
 		// Get the new cart data before showing updates.
 		const newCart = select.getCartData();
 
+		const cartItemsPendingDelete = select.getItemsPendingDelete();
+
 		notifyQuantityChanges( {
 			oldCart,
 			newCart,
 			cartItemsPendingQuantity: select.getItemsPendingQuantityUpdate(),
-			cartItemsPendingDelete: select.getItemsPendingDelete(),
+			cartItemsPendingDelete,
 			productsPendingAdd: select.getProductsPendingAdd(),
 		} );
+
+		// Clear pending delete status for items no longer in the cart.
+		// This handles cases where removing one item causes dependent items
+		// to also be removed server-side (e.g., bundled product children
+		// removed when their parent bundle is deleted).
+		if ( cartItemsPendingDelete.length > 0 ) {
+			const newCartItemKeys = new Set(
+				newCart.items.map( ( item ) => item.key )
+			);
+			cartItemsPendingDelete.forEach( ( key ) => {
+				if ( ! newCartItemKeys.has( key ) ) {
+					dispatch.itemIsPendingDelete( key, false );
+				}
+			} );
+		}
 
 		updateCartErrorNotices( newCart.errors, oldCartErrors );
 		dispatch.setErrorData( null );
