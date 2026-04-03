@@ -20,7 +20,11 @@
 		"clean": "rm -rf build/",
 		"test": "jest --passWithNoTests",
 		"test-coverage": "pnpm run test --coverage",
+		"test:php": "composer test-php",
+		"test:php:ci": "pnpm test:php",
+		"build:ci": "pnpm run typecheck && pnpm run build-production",
 		"typecheck": "tsc --noEmit",
+		"postinstall": "XDEBUG_MODE=off composer install --quiet",
 		"watch": "pnpm build --watch"
 	},
 	"dependencies": {
@@ -40,5 +44,45 @@
 		"typescript": "5.7.x",
 		"webpack": "5.97.x",
 		"webpack-cli": "5.1.x"
+	},
+	"config": {
+		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": [
+					"src/**/*.php"
+				]
+			},
+			"tests": [
+				{
+					"name": "PHP: 8.1 WP: latest",
+					"testType": "unit:php",
+					"command": "test:php:ci",
+					"changes": [
+						"composer.json",
+						"composer.lock",
+						"**/*.php"
+					],
+					"events": [
+						"pull_request",
+						"push"
+					]
+				},
+				{
+					"name": "JS build and typecheck",
+					"command": "build:ci",
+					"changes": [
+						"package.json",
+						"src/client/**/*.ts",
+						"tsconfig.json",
+						"webpack.config.js"
+					],
+					"events": [
+						"pull_request",
+						"push"
+					]
+				}
+			]
+		}
 	}
 }

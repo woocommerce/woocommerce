@@ -6,9 +6,9 @@ Enhanced analytics package for WooCommerce stores with comprehensive frontend tr
 
 ### Key Features
 
-- **Comprehensive Event Tracking**: 25+ predefined events covering e-commerce, navigation, and user interactions
-- **Session Management**: Intelligent session tracking and user engagement metrics
-- **Proxy Tracking**: Optional proxy-based tracking for enhanced privacy and performance
+-   **Comprehensive Event Tracking**: 25+ predefined events covering e-commerce, navigation, and user interactions
+-   **Session Management**: Intelligent session tracking and user engagement metrics
+-   **Proxy Tracking**: Optional proxy-based tracking for enhanced privacy and performance
 
 ## Installation & Setup
 
@@ -31,19 +31,26 @@ add_action(
 
 The package only starts tracking when:
 
-- WooCommerce 3.0 or higher is active and installed
-- Jetpack is connected
-- In site page context (not admin, ajax, xmlrpc, login, feed, cli, etc.)
+-   WooCommerce 3.0 or higher is active and installed
+-   Jetpack is connected (Phase 1 requirement — will be decoupled in Phase 2)
+-   In site page context (not admin, ajax, xmlrpc, login, feed, cli, etc.)
 
 ### Requirements
 
-- WordPress 5.0+
-- WooCommerce 3.0+
-- PHP 7.4+
+-   WordPress 5.0+
+-   WooCommerce 3.0+
+-   PHP 7.4+
 
 ### Package Installation
 
-If you plan on using this package in your WordPress plugin, we recommend using [Jetpack Autoloader](https://packagist.org/packages/automattic/jetpack-autoloader) as your autoloader for maximum interoperability.
+This package lives in the WooCommerce monorepo at `packages/php/woocommerce-analytics/`.
+It is included as a Composer dependency of the WooCommerce plugin — no separate installation is needed.
+
+For standalone use outside the monorepo, add to your `composer.json`:
+
+```bash
+composer require automattic/woocommerce-analytics
+```
 
 ## Configuration
 
@@ -122,37 +129,37 @@ When WP Consent API is not available, the package defaults to allowing all track
 
 The **Recording Method** column shows how each event is processed:
 
-- **`JS`** - Pure client-side events recorded directly by JavaScript without server involvement
-- **`PHP → JS Queue`** - Server-side events that are queued during page generation and passed to frontend for transmission
-- **`PHP (Immediate)`** - Server-side events sent immediately when triggered via WordPress hooks/actions
+-   **`JS`** - Pure client-side events recorded directly by JavaScript without server involvement
+-   **`PHP → JS Queue`** - Server-side events that are queued during page generation and passed to frontend for transmission
+-   **`PHP (Immediate)`** - Server-side events sent immediately when triggered via WordPress hooks/actions
 
 ### Event Properties
 
 Each event includes contextual data such as:
 
-- **Product Information**: ID, name, price, categories, SKU
-- **Cart Details**: Item quantities, totals, currency
-- **User Data**: Customer ID (when available and permitted)
-- **Session Information**: Session ID, engagement metrics
-- **Page Context**: URL, referrer, breadcrumbs
-- **Store Data**: Order ID, payment method, shipping info
+-   **Product Information**: ID, name, price, categories, SKU
+-   **Cart Details**: Item quantities, totals, currency
+-   **User Data**: Customer ID (when available and permitted)
+-   **Session Information**: Session ID, engagement metrics
+-   **Page Context**: URL, referrer, breadcrumbs
+-   **Store Data**: Order ID, payment method, shipping info
 
 ## Architecture
 
 ### PHP Backend
 
-- **`Woocommerce_Analytics`** - Main initialization class
-- **`Universal`** - Core tracking logic and WooCommerce hooks
-- **`My_Account`** - Account-specific event tracking
-- **`WC_Analytics_Tracking`** - Event queuing and processing
-- **`Features`** - Feature flag management
+-   **`Woocommerce_Analytics`** - Main initialization class
+-   **`Universal`** - Core tracking logic and WooCommerce hooks
+-   **`My_Account`** - Account-specific event tracking
+-   **`WC_Analytics_Tracking`** - Event queuing and processing
+-   **`Features`** - Feature flag management
 
 ### Frontend
 
-- **`Analytics`** - Main client-side analytics class
-- **`SessionManager`** - Session tracking and management
-- **`ApiClient`** - REST API communication for proxy tracking
-- **Event Listeners** - Page-specific event handlers
+-   **`Analytics`** - Main client-side analytics class
+-   **`SessionManager`** - Session tracking and management
+-   **`ApiClient`** - REST API communication for proxy tracking
+-   **Event Listeners** - Page-specific event handlers
 
 ### Data Flow
 
@@ -182,30 +189,34 @@ The package uses a hierarchical approach to identify users for analytics:
 
 1. **`tk_ai` Cookie**: Primary method using Tracks anonymous identifier cookie
 2. **IP-based ID** (when proxy tracking enabled): Generates visitor ID from:
-   - Daily rotating salt (privacy-focused, changes daily)
-   - Domain name
-   - User IP address
-   - User agent string
-   - Creates SHA256 hash (16-char substring) for anonymous but consistent identification
+    - Daily rotating salt (privacy-focused, changes daily)
+    - Domain name
+    - User IP address
+    - User agent string
+    - Creates SHA256 hash (16-char substring) for anonymous but consistent identification
 3. If no `tk_ai` cookie and proxy tracking disabled: `null` (no visitor tracking)
 
 **Session Management:**
 
-- Session cookies (`woocommerceanalytics_session`) expire after 30 minutes or at midnight UTC (whichever comes first)
-- Used for tracking user journey within a session (separate from user identification)
-- Contains session ID, landing page, and engagement status
+-   Session cookies (`woocommerceanalytics_session`) expire after 30 minutes or at midnight UTC (whichever comes first)
+-   Used for tracking user journey within a session (separate from user identification)
+-   Contains session ID, landing page, and engagement status
 
 ## Development
 
-```bash
-# Build the client-side JavaScript
-pnpm run build
+This package is part of the [WooCommerce monorepo](https://github.com/woocommerce/woocommerce).
 
-# Development watch mode
+```bash
+# From the monorepo root
+pnpm --filter=@automattic/woocommerce-analytics run build
+pnpm --filter=@automattic/woocommerce-analytics run typecheck
+
+# Or from within packages/php/woocommerce-analytics/
+pnpm run build
 pnpm run watch
 ```
 
-See [package.json](./package.json) for more commands.
+See [package.json](./package.json) for all available commands.
 
 ## Advanced Topics
 
@@ -213,23 +224,23 @@ See [package.json](./package.json) for more commands.
 
 When proxy tracking is enabled:
 
-- Events are sent to a local WordPress REST API endpoint to improve event delivery reliability
-- Server-side event validation and processing
+-   Events are sent to a local WordPress REST API endpoint to improve event delivery reliability
+-   Server-side event validation and processing
 
 #### API Endpoint
 
-- **URL**: `/wp-json/woocommerce-analytics/v1/track`
-- **Method**: POST
-- **Permission**: No authentication required
-- **Content-Type**: `application/json`
+-   **URL**: `/wp-json/woocommerce-analytics/v1/track`
+-   **Method**: POST
+-   **Permission**: No authentication required
+-   **Content-Type**: `application/json`
 
 #### Performance Optimizations
 
 **Client-Side Batching Logic:**
 
-- Events queued until batch size (10 events) or debounce delay (1s) reached
-- Immediate flush on page unload (`beforeunload`, `pagehide` events)
-- Failed events automatically re-queued for retry
+-   Events queued until batch size (10 events) or debounce delay (1s) reached
+-   Immediate flush on page unload (`beforeunload`, `pagehide` events)
+-   Failed events automatically re-queued for retry
 
 **Server-Side Optimizations:**
 
