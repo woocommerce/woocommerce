@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix 429 rate-limit responses from woocommerce.com being cached for 12 hours in WC_Helper_Updater, causing persistent admin error banners. The client now respects the Retry-After header and retries after the correct window.
