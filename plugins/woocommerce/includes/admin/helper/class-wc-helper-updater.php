@@ -696,7 +696,21 @@ class WC_Helper_Updater {
 			);
 		}
 
-		if ( wp_remote_retrieve_response_code( $request ) !== 200 ) {
+		$response_code = wp_remote_retrieve_response_code( $request );
+
+		if ( 429 === $response_code ) {
+			$retry_after      = (int) wp_remote_retrieve_header( $request, 'retry-after' );
+			$cache_ttl        = $retry_after > 0 ? $retry_after : 15 * MINUTE_IN_SECONDS;
+			$data['errors'][] = 'rate-limited';
+			set_transient( $cache_key, $data, $cache_ttl );
+			wc_get_logger()->warning(
+				sprintf( 'Update check rate limited; retrying after %d seconds.', $cache_ttl ),
+				array( 'source' => 'wc-helper-updater' )
+			);
+			return array();
+		}
+
+		if ( 200 !== $response_code ) {
 			$data['errors'][] = 'http-error';
 		} else {
 			$data['products'] = json_decode( wp_remote_retrieve_body( $request ), true );
