@@ -270,6 +270,7 @@ function refresh_sorted_by_live_region() {
 	}
 
 	var text = sorted_by_live_region.innerHTML;
+	sorted_by_live_region.setAttribute( 'role', 'alert' );
 	sorted_by_live_region.setAttribute( 'aria-hidden', 'true' );
 
 	var sorted_by_live_region_id = setTimeout( function () {
