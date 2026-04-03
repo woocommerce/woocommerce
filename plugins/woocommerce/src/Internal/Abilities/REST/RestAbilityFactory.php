@@ -157,6 +157,13 @@ class RestAbilityFactory {
 	}
 
 	/**
+	 * Valid JSON Schema types.
+	 *
+	 * @var array
+	 */
+	private static $valid_types = array( 'string', 'number', 'integer', 'boolean', 'object', 'array', 'null' );
+
+	/**
 	 * Sanitize WordPress REST args to valid JSON Schema format.
 	 *
 	 * Converts WordPress REST API argument arrays to JSON Schema by:
@@ -164,6 +171,9 @@ class RestAbilityFactory {
 	 * - Converting 'required' from boolean-per-field to array-of-names
 	 * - Removing WordPress-specific non-schema fields
 	 * - Preserving valid JSON Schema properties
+	 * - Converting invalid types (date-time, mixed, action) to valid JSON Schema
+	 * - Recursively sanitizing nested properties and items
+	 * - Deduplicating enum values
 	 *
 	 * @param array $args WordPress REST API arguments array.
 	 * @return array Valid JSON Schema object.
@@ -175,9 +185,9 @@ class RestAbilityFactory {
 		foreach ( $args as $key => $arg ) {
 			$property = array();
 
-			// Copy valid JSON Schema fields.
+			// Copy valid JSON Schema fields, normalizing types.
 			if ( isset( $arg['type'] ) ) {
-				$property['type'] = $arg['type'];
+				$property = self::normalize_type( $property, $arg['type'] );
 			}
 			if ( isset( $arg['description'] ) ) {
 				$property['description'] = $arg['description'];
@@ -186,10 +196,10 @@ class RestAbilityFactory {
 				$property['default'] = $arg['default'];
 			}
 			if ( isset( $arg['enum'] ) ) {
-				$property['enum'] = array_values( $arg['enum'] );
+				$property['enum'] = self::dedupe_enum( $arg['enum'] );
 			}
 			if ( isset( $arg['items'] ) ) {
-				$property['items'] = $arg['items'];
+				$property['items'] = self::sanitize_schema( $arg['items'] );
 			}
 			if ( isset( $arg['minimum'] ) ) {
 				$property['minimum'] = $arg['minimum'];
@@ -197,11 +207,11 @@ class RestAbilityFactory {
 			if ( isset( $arg['maximum'] ) ) {
 				$property['maximum'] = $arg['maximum'];
 			}
-			if ( isset( $arg['format'] ) ) {
+			if ( isset( $arg['format'] ) && ! isset( $property['format'] ) ) {
 				$property['format'] = $arg['format'];
 			}
 			if ( isset( $arg['properties'] ) ) {
-				$property['properties'] = $arg['properties'];
+				$property['properties'] = self::sanitize_schema_properties( $arg['properties'] );
 			}
 
 			// Convert readonly to readOnly (JSON Schema format).
@@ -230,6 +240,152 @@ class RestAbilityFactory {
 	}
 
 	/**
+	 * Recursively sanitize a JSON Schema node.
+	 *
+	 * Fixes invalid types, deduplicates enums, and recurses into
+	 * nested properties and items.
+	 *
+	 * @param array $schema A JSON Schema node.
+	 * @return array Sanitized schema node.
+	 */
+	private static function sanitize_schema( array $schema ): array {
+		if ( isset( $schema['type'] ) ) {
+			$schema = self::normalize_type( $schema, $schema['type'] );
+		}
+
+		if ( isset( $schema['enum'] ) ) {
+			$schema['enum'] = self::dedupe_enum( $schema['enum'] );
+		}
+
+		// Remove WordPress-style boolean 'required' — JSON Schema requires an array.
+		if ( isset( $schema['required'] ) && is_bool( $schema['required'] ) ) {
+			unset( $schema['required'] );
+		}
+
+		if ( isset( $schema['properties'] ) && is_array( $schema['properties'] ) ) {
+			// Collect required fields from nested boolean 'required' before sanitizing.
+			$required = array();
+			foreach ( $schema['properties'] as $key => $property ) {
+				if ( is_array( $property ) && isset( $property['required'] ) && true === $property['required'] ) {
+					$required[] = $key;
+				}
+			}
+			if ( ! empty( $required ) ) {
+				$schema['required'] = isset( $schema['required'] ) && is_array( $schema['required'] )
+					? array_values( array_unique( array_merge( $schema['required'], $required ) ) )
+					: $required;
+			}
+
+			$schema['properties'] = self::sanitize_schema_properties( $schema['properties'] );
+		}
+
+		if ( isset( $schema['items'] ) && is_array( $schema['items'] ) ) {
+			$schema['items'] = self::sanitize_schema( $schema['items'] );
+		}
+
+		return $schema;
+	}
+
+	/**
+	 * Sanitize a map of JSON Schema properties.
+	 *
+	 * @param array $properties Map of property name to schema.
+	 * @return array Sanitized properties map.
+	 */
+	private static function sanitize_schema_properties( array $properties ): array {
+		foreach ( $properties as $key => $property ) {
+			if ( is_array( $property ) ) {
+				$properties[ $key ] = self::sanitize_schema( $property );
+			}
+		}
+		return $properties;
+	}
+
+	/**
+	 * Normalize a schema type value.
+	 *
+	 * Handles both string types ('string', 'date-time', etc.) and
+	 * array types (['string', 'null']) used for nullable fields.
+	 *
+	 * @param array        $schema The schema node being built.
+	 * @param string|array $type   The type value to normalize.
+	 * @return array Schema with normalized type (or type removed if all invalid).
+	 */
+	private static function normalize_type( array $schema, $type ): array {
+		if ( is_string( $type ) ) {
+			if ( 'date-time' === $type ) {
+				$schema['type'] = 'string';
+				if ( ! isset( $schema['format'] ) ) {
+					$schema['format'] = 'date-time';
+				}
+			} elseif ( 'action' === $type ) {
+				$schema['type'] = 'object';
+			} elseif ( in_array( $type, self::$valid_types, true ) ) {
+				$schema['type'] = $type;
+			} else {
+				unset( $schema['type'] );
+			}
+			return $schema;
+		}
+
+		if ( is_array( $type ) ) {
+			$normalized = array();
+			foreach ( $type as $single ) {
+				if ( ! is_string( $single ) ) {
+					continue;
+				}
+				if ( 'date-time' === $single ) {
+					$single = 'string';
+					if ( ! isset( $schema['format'] ) ) {
+						$schema['format'] = 'date-time';
+					}
+				} elseif ( 'action' === $single ) {
+					$single = 'object';
+				} elseif ( ! in_array( $single, self::$valid_types, true ) ) {
+					continue;
+				}
+				$normalized[] = $single;
+			}
+			$normalized = array_values( array_unique( $normalized ) );
+			if ( empty( $normalized ) ) {
+				unset( $schema['type'] );
+			} elseif ( 1 === count( $normalized ) ) {
+				$schema['type'] = $normalized[0];
+			} else {
+				$schema['type'] = $normalized;
+			}
+			return $schema;
+		}
+
+		// Non-string, non-array type — remove it.
+		unset( $schema['type'] );
+		return $schema;
+	}
+
+	/**
+	 * Remove duplicate enum values while preserving order.
+	 *
+	 * Uses JSON encoding for fingerprinting to correctly handle
+	 * mixed scalar types (1 vs '1'), nulls, and complex values (arrays).
+	 *
+	 * @param array $values Enum values.
+	 * @return array Deduplicated enum values.
+	 */
+	private static function dedupe_enum( array $values ): array {
+		$seen   = array();
+		$unique = array();
+		foreach ( $values as $value ) {
+			$fingerprint = wp_json_encode( $value );
+			if ( isset( $seen[ $fingerprint ] ) ) {
+				continue;
+			}
+			$seen[ $fingerprint ] = true;
+			$unique[]             = $value;
+		}
+		return $unique;
+	}
+
+	/**
 	 * Get output schema for operation.
 	 *
 	 * @param object $controller REST controller instance.
@@ -238,7 +394,7 @@ class RestAbilityFactory {
 	 */
 	private static function get_output_schema( $controller, string $operation ): array {
 		if ( method_exists( $controller, 'get_item_schema' ) ) {
-			$schema = $controller->get_item_schema();
+			$schema = self::sanitize_schema( $controller->get_item_schema() );
 
 			if ( 'list' === $operation ) {
 				// For list operations, return object wrapping array of items.

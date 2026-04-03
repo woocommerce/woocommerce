@@ -35,6 +35,14 @@ class OrderActionsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->user['shop_manager'] = $this->factory->user->create( array( 'role' => 'shop_manager' ) );
 		$this->user['customer']     = $this->factory->user->create( array( 'role' => 'customer' ) );
+
+		// Load and instantiate POS email classes to register their filter hooks.
+		// WP_UnitTestCase restores hooks between tests, so this must run each setUp().
+		$bootstrap = \WC_Unit_Tests_Bootstrap::instance();
+		require_once $bootstrap->plugin_dir . '/includes/emails/class-wc-email-customer-pos-completed-order.php';
+		require_once $bootstrap->plugin_dir . '/includes/emails/class-wc-email-customer-pos-refunded-order.php';
+		new \WC_Email_Customer_POS_Completed_Order();
+		new \WC_Email_Customer_POS_Refunded_Order();
 	}
 
 	/**
@@ -57,6 +65,23 @@ class OrderActionsRestControllerTest extends WC_REST_Unit_Test_Case {
 						'qty' => 1,
 					),
 				),
+			)
+		);
+	}
+
+	/**
+	 * Create a full refund for an order.
+	 *
+	 * @param \WC_Order $order The order to create a refund for.
+	 *
+	 * @return void
+	 * @throws \Exception Throws Exception if refund creation fails.
+	 */
+	private function do_full_refund( \WC_Order $order ): void {
+		wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => $order->get_total(),
 			)
 		);
 	}
@@ -302,10 +327,269 @@ class OrderActionsRestControllerTest extends WC_REST_Unit_Test_Case {
 				),
 			),
 		);
+		yield 'auto-select completed order' => array(
+			'shop_manager',
+			array(),
+			array(
+				'template_id' => '',
+			),
+			array(
+				'status'  => 200,
+				'message' => 'Email template &quot;Completed order&quot; sent to customer@example.org.',
+				'notes'   => array(
+					'Email template &quot;Completed order&quot; sent to customer@example.org.',
+				),
+			),
+		);
+		yield 'auto-select refunded order' => array(
+			'shop_manager',
+			array(
+				'status'      => 'refunded',
+				'full_refund' => true,
+			),
+			array(
+				'template_id' => '',
+			),
+			array(
+				'status'  => 200,
+				'message' => 'Email template &quot;Refunded order&quot; sent to customer@example.org.',
+				'notes'   => array(
+					'Email template &quot;Refunded order&quot; sent to customer@example.org.',
+				),
+			),
+		);
+		yield 'auto-select partially refunded order' => array(
+			'shop_manager',
+			array(
+				'partial_refund' => true,
+			),
+			array(
+				'template_id' => '',
+			),
+			array(
+				'status'  => 200,
+				'message' => 'Email template &quot;Completed order&quot; sent to customer@example.org.',
+				'notes'   => array(
+					'Email template &quot;Completed order&quot; sent to customer@example.org.',
+				),
+			),
+		);
+		yield 'auto-select failed order' => array(
+			'shop_manager',
+			array(
+				'status' => 'failed',
+			),
+			array(
+				'template_id' => '',
+			),
+			array(
+				'status'  => 200,
+				'message' => 'Email template &quot;Failed order&quot; sent to customer@example.org.',
+				'notes'   => array(
+					'Email template &quot;Failed order&quot; sent to customer@example.org.',
+				),
+			),
+		);
+		yield 'auto-select on-hold order' => array(
+			'shop_manager',
+			array(
+				'status' => 'on-hold',
+			),
+			array(
+				'template_id' => '',
+			),
+			array(
+				'status'  => 200,
+				'message' => 'Email template &quot;Order on-hold&quot; sent to customer@example.org.',
+				'notes'   => array(
+					'Email template &quot;Order on-hold&quot; sent to customer@example.org.',
+				),
+			),
+		);
+		yield 'auto-select processing order' => array(
+			'shop_manager',
+			array(
+				'status' => 'processing',
+			),
+			array(
+				'template_id' => '',
+			),
+			array(
+				'status'  => 200,
+				'message' => 'Email template &quot;Processing order&quot; sent to customer@example.org.',
+				'notes'   => array(
+					'Email template &quot;Processing order&quot; sent to customer@example.org.',
+				),
+			),
+		);
+		yield 'auto-select pending order gets invoice' => array(
+			'shop_manager',
+			array(
+				'status' => 'pending',
+			),
+			array(
+				'template_id' => '',
+			),
+			array(
+				'status'  => 200,
+				'message' => 'Order details sent to customer@example.org.',
+				'notes'   => array(
+					'Order details sent to customer@example.org.',
+				),
+			),
+		);
+		yield 'auto-select POS failed order' => array(
+			'shop_manager',
+			array(
+				'created_via' => 'pos-rest-api',
+				'status'      => 'failed',
+			),
+			array(
+				'template_id' => '',
+			),
+			array(
+				'status'  => 200,
+				'message' => 'Email template &quot;Failed order&quot; sent to customer@example.org.',
+				'notes'   => array(
+					'Email template &quot;Failed order&quot; sent to customer@example.org.',
+				),
+			),
+		);
+		yield 'auto-select POS on-hold order' => array(
+			'shop_manager',
+			array(
+				'created_via' => 'pos-rest-api',
+				'status'      => 'on-hold',
+			),
+			array(
+				'template_id' => '',
+			),
+			array(
+				'status'  => 200,
+				'message' => 'Email template &quot;Order on-hold&quot; sent to customer@example.org.',
+				'notes'   => array(
+					'Email template &quot;Order on-hold&quot; sent to customer@example.org.',
+				),
+			),
+		);
+		yield 'auto-select POS completed order' => array(
+			'shop_manager',
+			array(
+				'created_via' => 'pos-rest-api',
+			),
+			array(
+				'template_id' => '',
+			),
+			array(
+				'status'  => 200,
+				'message' => 'Email template &quot;POS completed order&quot; sent to customer@example.org.',
+				'notes'   => array(
+					'Email template &quot;POS completed order&quot; sent to customer@example.org.',
+				),
+			),
+		);
+		yield 'auto-select POS refunded order without refund records' => array(
+			'shop_manager',
+			array(
+				'created_via' => 'pos-rest-api',
+				'status'      => 'refunded',
+			),
+			array(
+				'template_id' => '',
+			),
+			array(
+				'status'  => 200,
+				'message' => 'Email template &quot;POS refunded order&quot; sent to customer@example.org.',
+				'notes'   => array(
+					'Email template &quot;POS refunded order&quot; sent to customer@example.org.',
+				),
+			),
+		);
+		yield 'auto-select POS refunded order' => array(
+			'shop_manager',
+			array(
+				'created_via' => 'pos-rest-api',
+				'status'      => 'refunded',
+				'full_refund' => true,
+			),
+			array(
+				'template_id' => '',
+			),
+			array(
+				'status'  => 200,
+				'message' => 'Email template &quot;POS refunded order&quot; sent to customer@example.org.',
+				'notes'   => array(
+					'Email template &quot;POS refunded order&quot; sent to customer@example.org.',
+				),
+			),
+		);
+		yield 'auto-select POS partially refunded order' => array(
+			'shop_manager',
+			array(
+				'created_via'    => 'pos-rest-api',
+				'partial_refund' => true,
+			),
+			array(
+				'template_id' => '',
+			),
+			array(
+				'status'  => 200,
+				'message' => 'Email template &quot;POS completed order&quot; sent to customer@example.org.',
+				'notes'   => array(
+					'Email template &quot;POS completed order&quot; sent to customer@example.org.',
+				),
+			),
+		);
+		yield 'auto-select no billing email' => array(
+			'shop_manager',
+			array(
+				'billing_email' => '',
+			),
+			array(
+				'template_id' => '',
+			),
+			array(
+				'status'  => 400,
+				'message' => 'Order does not have an email address.',
+				'notes'   => array(),
+			),
+		);
+		yield 'auto-select auto-draft order' => array(
+			'shop_manager',
+			array(
+				'status' => 'auto-draft',
+			),
+			array(
+				'template_id' => '',
+			),
+			array(
+				'status'  => 400,
+				'message' => 'No email template is available for this order.',
+				'notes'   => array(),
+			),
+		);
+		yield 'auto-select with email param' => array(
+			'shop_manager',
+			array(
+				'billing_email' => '',
+			),
+			array(
+				'template_id' => '',
+				'email'       => 'another@example.org',
+			),
+			array(
+				'status'  => 200,
+				'message' => 'Billing email updated to another@example.org. Email template &quot;Completed order&quot; sent to another@example.org.',
+				'notes'   => array(
+					'Billing email updated to another@example.org.',
+					'Email template &quot;Completed order&quot; sent to another@example.org.',
+				),
+			),
+		);
 	}
 
 	/**
-	 * Test the wc/v3/orders/{id}/actions/send_email endpoint.
+	 * @testdox Test the wc/v3/orders/{id}/actions/send_email endpoint.
 	 *
 	 * @dataProvider provide_data_for_send_email
 	 *
@@ -321,6 +605,8 @@ class OrderActionsRestControllerTest extends WC_REST_Unit_Test_Case {
 			'billing_email'  => 'customer@example.org',
 			'status'         => 'completed',
 			'partial_refund' => false,
+			'full_refund'    => false,
+			'created_via'    => null,
 		);
 		$order_props    = wp_parse_args( $order_props, $order_defaults );
 
@@ -336,8 +622,15 @@ class OrderActionsRestControllerTest extends WC_REST_Unit_Test_Case {
 			$order = WC_Helper_Order::create_order();
 			$this->do_partial_refund( $order );
 		}
+		if ( true === $order_props['full_refund'] ) {
+			$order = WC_Helper_Order::create_order();
+			$this->do_full_refund( $order );
+		}
 
 		$order->set_billing_email( $order_props['billing_email'] );
+		if ( ! is_null( $order_props['created_via'] ) ) {
+			$order->set_created_via( $order_props['created_via'] );
+		}
 		$order->set_status( $order_props['status'] );
 		$order->save();
 
@@ -345,7 +638,9 @@ class OrderActionsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() . '/actions/send_email' );
 		$request->add_header( 'User-Agent', 'some app' );
-		$request->set_param( 'template_id', $request_params['template_id'] );
+		if ( ! empty( $request_params['template_id'] ) ) {
+			$request->set_param( 'template_id', $request_params['template_id'] );
+		}
 		if ( ! empty( $request_params['email'] ) ) {
 			$request->set_param( 'email', $request_params['email'] );
 		}
@@ -366,6 +661,37 @@ class OrderActionsRestControllerTest extends WC_REST_Unit_Test_Case {
 		foreach ( $result['notes'] as $note ) {
 			$this->assertContains( $note, $notes_content );
 		}
+	}
+
+	/**
+	 * @testdox The preferred template IDs filter hook overrides default template auto-selection.
+	 */
+	public function test_send_email_auto_select_respects_preferred_template_ids_filter() {
+		$order = WC_Helper_Order::create_order();
+		$order->set_billing_email( 'customer@example.org' );
+		$order->set_status( 'completed' );
+		$this->do_partial_refund( $order );
+		$order->save();
+
+		wp_set_current_user( $this->user['shop_manager'] );
+
+		// Override preferred template IDs to prefer invoice over the status-specific template.
+		$override_preferred_ids = function () {
+			return array( 'customer_invoice', 'customer_completed_order' );
+		};
+		add_filter( 'woocommerce_rest_order_actions_email_preferred_template_ids', $override_preferred_ids );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() . '/actions/send_email' );
+		$request->add_header( 'User-Agent', 'some app' );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertStringContainsString( 'Order details sent to', $data['message'] );
+
+		remove_filter( 'woocommerce_rest_order_actions_email_preferred_template_ids', $override_preferred_ids );
 	}
 
 	/**

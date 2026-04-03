@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix add to cart not working on stale nonces on cached pages

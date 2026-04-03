@@ -20,7 +20,7 @@ concurrency:
 jobs:
   get-and-validate-release-asset:
     name: Get intended release details
-    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     permissions:
       contents: write # Required to fetch draft releases for some reason. See https://github.com/cli/cli/issues/9076#issuecomment-2146148572.
     outputs:
@@ -158,7 +158,7 @@ jobs:
 
   commit:
     name: Commit release to WordPress.org
-    runs-on: blacksmith-2vcpu-ubuntu-2404
+    runs-on: ubuntu-latest
     needs: [get-and-validate-release-asset]
     if: ${{ github.repository == 'woocommerce/woocommerce' }}
     permissions:

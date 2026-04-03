@@ -3,7 +3,7 @@
 	"title": "WooCommerce Monorepo",
 	"description": "Monorepo for the WooCommerce ecosystem",
 	"homepage": "https://woocommerce.com/",
-	"packageManager": "pnpm@9.15.0",
+	"packageManager": "pnpm@10.33.0",
 	"engines": {
 		"node": "^20.11.1"
 	},

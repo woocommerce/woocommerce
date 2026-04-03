@@ -58,7 +58,11 @@ abstract class Abstract_Block_Renderer implements Block_Renderer {
 	}
 
 	/**
-	 * Add a spacer around the block.
+	 * Add a spacer around the block for vertical spacing (margin-top).
+	 *
+	 * Horizontal root padding is applied uniformly by Content_Renderer::render_block()
+	 * so that all blocks — including those using render_email_callback without
+	 * Abstract_Block_Renderer — receive consistent padding.
 	 *
 	 * @param string $content The block content.
 	 * @param array  $email_attrs The email attributes.
@@ -71,8 +75,7 @@ abstract class Abstract_Block_Renderer implements Block_Renderer {
 			$margin_top_attrs = array();
 		}
 
-		$gap_style     = WP_Style_Engine::compile_css( $margin_top_attrs, '' ) ?? '';
-		$padding_style = WP_Style_Engine::compile_css( array_intersect_key( $email_attrs, array_flip( array( 'padding-left', 'padding-right' ) ) ), '' ) ?? '';
+		$gap_style = WP_Style_Engine::compile_css( $margin_top_attrs, '' ) ?? '';
 
 		$table_attrs = array(
 			'align' => 'left',
@@ -80,18 +83,13 @@ abstract class Abstract_Block_Renderer implements Block_Renderer {
 			'style' => $gap_style,
 		);
 
-		$cell_attrs = array(
-			'style' => $padding_style,
-		);
-
 		$div_content = sprintf(
-			'<div class="email-block-layout" style="%1$s %2$s">%3$s</div>',
+			'<div class="email-block-layout" style="%1$s">%2$s</div>',
 			esc_attr( $gap_style ),
-			esc_attr( $padding_style ),
 			$content
 		);
 
-		return Table_Wrapper_Helper::render_outlook_table_wrapper( $div_content, $table_attrs, $cell_attrs );
+		return Table_Wrapper_Helper::render_outlook_table_wrapper( $div_content, $table_attrs );
 	}
 
 	/**

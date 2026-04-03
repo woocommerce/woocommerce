@@ -774,6 +774,15 @@ class WC_Cart extends WC_Legacy_Cart {
 			$return = false;
 		}
 
+		$result = $this->check_cart_item_sold_individually();
+
+		if ( is_wp_error( $result ) ) {
+			foreach ( $result->get_error_messages() as $message ) {
+				wc_add_notice( $message, 'error' );
+			}
+			$return = false;
+		}
+
 		$result = $this->check_cart_item_stock();
 
 		if ( is_wp_error( $result ) ) {
@@ -818,6 +827,41 @@ class WC_Cart extends WC_Legacy_Cart {
 		}
 
 		return $return;
+	}
+
+	/**
+	 * Looks through cart items and ensures sold individually products have quantity of 1.
+	 *
+	 * @since 10.7.0
+	 * @return bool|WP_Error
+	 */
+	public function check_cart_item_sold_individually() {
+		$errors = new WP_Error();
+
+		foreach ( $this->get_cart() as $cart_item_key => $values ) {
+			$product = $values['data'];
+
+			if ( ! $product || ! $product->exists() ) {
+				continue;
+			}
+
+			$product_id       = $values['variation_id'] ? $values['variation_id'] : $values['product_id'];
+			$product_to_check = wc_get_product( $product_id );
+
+			if ( ! $product_to_check || ! $product_to_check->exists() ) {
+				continue;
+			}
+
+			if ( $product_to_check->is_sold_individually() && $values['quantity'] > 1 ) {
+				// Re-fetch and overwrite to reflect product changes made after item was added to cart.
+				$this->cart_contents[ $cart_item_key ]['data'] = $product_to_check;
+				$this->set_quantity( $cart_item_key, 1, false );
+				/* translators: %s: product name */
+				$errors->add( 'sold-individually', sprintf( __( 'You can only have 1 %s in your cart.', 'woocommerce' ), $product_to_check->get_name() ) );
+			}
+		}
+
+		return $errors->has_errors() ? $errors : true;
 	}
 
 	/**
@@ -1663,7 +1707,7 @@ class WC_Cart extends WC_Legacy_Cart {
 		$index = 1;
 		foreach ( $shipping_packages as $key => $package ) {
 			$shipping_packages[ $key ]['package_id']   = $package['package_id'] ?? $key;
-			$shipping_packages[ $key ]['package_name'] = $this->get_shipping_package_name( $shipping_packages[ $key ], $index );
+			$shipping_packages[ $key ]['package_name'] = $this->get_shipping_package_name( $shipping_packages[ $key ], $index, count( $shipping_packages ) );
 			++$index;
 		}
 
@@ -1675,9 +1719,24 @@ class WC_Cart extends WC_Legacy_Cart {
 	 *
 	 * @param array $package Shipping package data.
 	 * @param int   $index Package number.
+	 * @param int   $total_packages Total number of packages.
 	 * @return string
 	 */
-	private function get_shipping_package_name( $package, $index ) {
+	private function get_shipping_package_name( $package, $index, $total_packages ) {
+
+		$shipping_package_name = _x( 'Shipment', 'shipping packages', 'woocommerce' );
+
+		/**
+		 * If there are multiple packages, use the index to show the package number.
+		 */
+		if ( 1 !== $total_packages ) {
+			$shipping_package_name = sprintf(
+				/* translators: %d: shipping package number. */
+				_x( 'Shipment %d', 'shipping packages', 'woocommerce' ),
+				$index
+			);
+		}
+
 		/**
 		 * Filters the shipping package name.
 		 *
@@ -1685,17 +1744,15 @@ class WC_Cart extends WC_Legacy_Cart {
 		 * @param string $shipping_package_name Shipping package name.
 		 * @param string $package_id Shipping package ID.
 		 * @param array $package Shipping package from WooCommerce.
+		 * @param int $total_packages Total number of shipping packages.
 		 * @return string Shipping package name.
 		 */
 		return apply_filters(
 			'woocommerce_shipping_package_name',
-			sprintf(
-				/* translators: %d: shipping package number */
-				_x( 'Shipment %d', 'shipping packages', 'woocommerce' ),
-				$index
-			),
+			$shipping_package_name,
 			$package['package_id'],
-			$package
+			$package,
+			$total_packages
 		);
 	}
 
