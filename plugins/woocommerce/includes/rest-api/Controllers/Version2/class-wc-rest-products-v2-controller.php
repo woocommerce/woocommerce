@@ -518,7 +518,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 *
 	 * @return array
 	 */
-	protected function get_images( $product ) {
+	protected function get_images( $product, $image_size = 'full' ) {
 		$images         = array();
 		$attachment_ids = array();
 
@@ -537,7 +537,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 				continue;
 			}
 
-			$attachment = wp_get_attachment_image_src( $attachment_id, 'full' );
+			$attachment = wp_get_attachment_image_src( $attachment_id, $image_size );
 			if ( ! is_array( $attachment ) ) {
 				continue;
 			}
@@ -998,7 +998,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 					$base_data['tags'] = $this->get_taxonomy_terms( $product, 'tag' );
 					break;
 				case 'images':
-					$base_data['images'] = $this->get_images( $product );
+					$base_data['images'] = $this->get_images( $product, $request['image_size'] ?? 'full' );
 					break;
 				case 'attributes':
 					$base_data['attributes'] = $this->get_attributes( $product );
@@ -2572,6 +2572,13 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 				'type' => 'string',
 			),
 			'sanitize_callback' => 'wp_parse_list',
+		);
+		$params['image_size']   = array(
+			'description'       => __( 'Image size to return. Accepts any registered WordPress image size.', 'woocommerce' ),
+			'type'              => 'string',
+			'default'           => 'full',
+			'sanitize_callback' => 'sanitize_text_field',
+			'validate_callback' => 'rest_validate_request_arg',
 		);
 
 		return $params;
