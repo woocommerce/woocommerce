@@ -162,7 +162,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	 * @param WC_Product|WC_Product_Variation $product Product instance.
 	 * @return array
 	 */
-	protected function get_images( $product ) {
+	protected function get_images( $product, $image_size = 'full' ) {
 		$images         = array();
 		$attachment_ids = array();
 
@@ -181,7 +181,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 				continue;
 			}
 
-			$attachment = wp_get_attachment_image_src( $attachment_id, 'full' );
+			$attachment = wp_get_attachment_image_src( $attachment_id, $image_size );
 
 			if ( ! is_array( $attachment ) ) {
 				continue;
