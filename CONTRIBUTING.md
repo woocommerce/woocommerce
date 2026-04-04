@@ -5,9 +5,9 @@ This is a quick reference for common commands used during development. For broad
 ## Tooling
 
 - [NVM](https://github.com/nvm-sh/nvm#installing-and-updating) (recommended for Node version management)
-- [Node.js](https://nodejs.org/) ^20.11.1
-- [PNPM](https://pnpm.io/installation) 9.15.0
-- [PHP](https://www.php.net/manual/en/install.php) 7.4+
+- [Node.js](https://nodejs.org/)
+- [PNPM](https://pnpm.io/installation)
+- [PHP](https://www.php.net/manual/en/install.php)
 - [Composer](https://getcomposer.org/doc/00-intro.md)
 - [Docker](https://docs.docker.com/get-docker/) (for running tests and local environments)
 
@@ -19,9 +19,7 @@ A POSIX-compliant OS (Linux, macOS) is assumed. On Windows, use [WSL](https://le
 # Use the pinned Node version from .nvmrc
 nvm install
 # Install JS and PHP dependencies
-pnpm install --frozen-lockfile
-# Build all plugins, packages, and tools
-pnpm build
+pnpm install
 ```
 
 ## Monorepo filtering
@@ -116,9 +114,10 @@ pnpm --filter='@woocommerce/plugin-woocommerce' lint:php:fix -- path/to/file.php
 pnpm --filter='@woocommerce/plugin-woocommerce' lint:lang:js
 ```
 
-PHPStan (from `plugins/woocommerce`):
+PHPStan:
 
 ```sh
+cd plugins/woocommerce
 composer exec -- phpstan analyse path/to/File.php --memory-limit=2G
 ```
 
@@ -133,25 +132,9 @@ Every PR that changes code in a project requires a changelog entry:
 pnpm --filter='@woocommerce/plugin-woocommerce' changelog add
 ```
 
-Replace `@woocommerce/plugin-woocommerce` with the relevant package name if your changes affect a different project. You will be prompted to select:
+Replace `@woocommerce/plugin-woocommerce` with the relevant package name if your changes affect a different project.
 
-- **Significance**: Patch (bug fixes, minor tweaks), Minor (new features, enhancements), or Major (breaking changes)
-- **Type**: Fix, Add, Update, Dev, Tweak, Performance, or Enhancement
-
-Keep the entry message concise — describe the change from a user's perspective (e.g. "Fix shipping tax rate calculation for international orders") rather than implementation details.
-
-## Submitting a pull request
-
-1. [Fork](https://docs.github.com/en/get-started/quickstart/fork-a-repo) the repository and create a branch (e.g. `fix/12345-description` or `feature/description`).
-2. Make your changes and write appropriate tests.
-3. Run linting and tests locally before pushing.
-4. Create a changelog entry for each affected project.
-5. Push and [open a pull request](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests) against `trunk`.
-6. Fill out the [PR template](.github/PULL_REQUEST_TEMPLATE.md) with testing instructions and changelog details.
-
-For bug fixes, reference the PR that introduced the bug: `Bug introduced in PR #XXXXX.`
-
-See [Git Conventions](https://developer.woocommerce.com/docs/contribution/contributing/woocommerce-git-flow/) for branching and release conventions.
+For the full PR workflow, changelog conventions, and coding guidelines, see [Contributing to WooCommerce](.github/CONTRIBUTING.md) and the [contribution docs](https://developer.woocommerce.com/docs/contribution/contributing/).
 
 ## Repository structure
 
