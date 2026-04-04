@@ -522,6 +522,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 * Get the images for a product or product variation.
 	 *
 	 * @param WC_Product|WC_Product_Variation $product Product instance.
+	 * @param string                          $image_size WordPress registered image size. Default 'full'.
 	 *
 	 * @return array
 	 */
