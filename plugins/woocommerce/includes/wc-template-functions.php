@@ -810,7 +810,7 @@ function wc_query_string_form_fields( $values = null, $exclude = array(), $curre
 			// Convert the full-stops, pluses and spaces back and add to values array.
 			foreach ( $parsed_query_string as $key => $value ) {
 				$new_key            = str_replace( array_values( $replace_chars ), array_keys( $replace_chars ), $key );
-				$new_value          = str_replace( array_values( $replace_chars ), array_keys( $replace_chars ), $value );
+				$new_value          = is_array( $value ) ? $value : str_replace( array_values( $replace_chars ), array_keys( $replace_chars ), $value );
 				$values[ $new_key ] = $new_value;
 			}
 		}
