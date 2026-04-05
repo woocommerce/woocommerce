@@ -5,7 +5,7 @@ sidebar_label: REST API
 
 # Order fulfillments REST API
 
-WooCommerce exposes order fulfillments through two related REST surfaces. The v3 controller uses order-scoped routes, while the v4 controller adds top-level fulfillment resources and a provider registry endpoint. Both surfaces depend on the fulfillments feature flag being enabled.
+WooCommerce exposes order fulfillments through the REST API v3 controller, which uses order-scoped routes. This surface depends on the fulfillments feature flag being enabled.
 
 ## Permissions
 
@@ -86,66 +86,9 @@ When a v3 update request includes a `meta_data` array, WooCommerce treats the su
 
 The same replacement behavior applies to the dedicated metadata update endpoint.
 
-## WooCommerce REST API v4
-
-The v4 controller adds top-level fulfillment routes and a provider registry endpoint.
-
-| Method | Route | Purpose |
-| --- | --- | --- |
-| `GET` | `/wp-json/wc/v4/fulfillments?order_id={order_id}` | List all fulfillments for an order. |
-| `POST` | `/wp-json/wc/v4/fulfillments` | Create a fulfillment using `entity_type` and `entity_id` in the request body. |
-| `GET` | `/wp-json/wc/v4/fulfillments/{fulfillment_id}` | Retrieve one fulfillment. |
-| `PUT` | `/wp-json/wc/v4/fulfillments/{fulfillment_id}` | Update one fulfillment. |
-| `DELETE` | `/wp-json/wc/v4/fulfillments/{fulfillment_id}` | Soft-delete one fulfillment (marks it as deleted via `date_deleted`). |
-| `GET` | `/wp-json/wc/v4/fulfillments/providers` | Retrieve the shipping provider registry used by the feature. |
-
-For order-backed fulfillments, the v4 controller delegates the CRUD behavior to the v3 order controller. That means the response shape, validation rules, customer notification behavior, and hook execution stay aligned across both namespaces. The v4 `DELETE` route uses the same soft-delete behavior as v3, updating `date_deleted` instead of permanently removing the fulfillment.
-
-### Create a v4 fulfillment
-
-```http
-POST /wp-json/wc/v4/fulfillments
-Content-Type: application/json
-Authorization: Basic base64(consumer_key:consumer_secret)
-
-{
-  "entity_type": "WC_Order",
-  "entity_id": 123,
-  "status": "fulfilled",
-  "meta_data": [
-    {
-      "key": "_items",
-      "value": [
-        {
-          "item_id": 456,
-          "qty": 2
-        }
-      ]
-    },
-    {
-      "key": "_tracking_number",
-      "value": "1Z999AA1234567890"
-    }
-  ]
-}
-```
-
-### Provider registry response
-
-The v4 providers endpoint returns an object keyed by provider slug. Each provider object includes the fields below.
-
-| Field | Description |
-| --- | --- |
-| `label` | Human-readable provider name. |
-| `icon` | Icon URL used by the admin UI. |
-| `value` | Provider slug. |
-| `url` | Tracking URL template. |
-
-Extensions can filter that response with `woocommerce_rest_prepare_fulfillments_providers`.
-
 ## Response shape
 
-Both REST surfaces return a fulfillment resource with the same core fields.
+The REST API returns a fulfillment resource with the following core fields.
 
 ```json
 {

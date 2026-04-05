@@ -19,6 +19,7 @@ The fulfillment system is built with several key components working together to 
 - **FulfillmentsManager**: Core manager class handling lifecycle hooks and business logic for fulfillment operations.
 - **Fulfillment**: The main data object representing a fulfillment with methods for accessing and modifying fulfillment state.
 - **FulfillmentsDataStore**: Data persistence layer that handles reading and writing fulfillment data to the custom database tables.
+- **FulfillmentsSettings**: Handles WooCommerce settings integration including auto-fulfill options and the shipping providers admin page.
 - **OrderFulfillmentsRestController**: REST API endpoints for v3 order-scoped routes, allowing client access to fulfillments under the `/wp-json/wc/v3/orders/{order_id}/fulfillments` namespace.
 
 ### Frontend components
@@ -114,6 +115,14 @@ The items array contains objects with at least `item_id` (the order line item ID
 - `get_lock_message()`: Get lock message
 - `set_locked( $locked, $message )`: Set lock status and optional message
 
+**What locking means**: A locked fulfillment cannot be edited by merchants through the WooCommerce admin UI. Extensions use locking to communicate that a fulfillment is being managed externally and should not be modified manually. Common use cases include:
+
+- Marking fulfillments created or updated automatically by a 3rd-party shipping integration as read-only.
+- Preventing further edits once a fulfillment has been handed off to a carrier and confirmed.
+- Enforcing immutability for fulfillments in specific custom statuses that your extension controls.
+
+When `set_locked( true, 'Managed by MyShipping plugin' )` is called, the optional message is shown in the admin UI to explain why the fulfillment cannot be edited.
+
 #### Data access
 
 - `get_order()`: Get the `WC_Order` object associated with this fulfillment (works when entity type is an order)
@@ -128,6 +137,20 @@ The items array contains objects with at least `item_id` (the order line item ID
 - `get_changes()`: Get data that has been changed since the last save
 - `apply_changes()`: Apply changes and mark the object as clean
 
+#### Tracking and shipping convenience methods
+
+New in 10.7.0, the `Fulfillment` class provides convenience methods for the most common tracking-related metadata keys:
+
+- `get_tracking_number()`: Get the carrier tracking number (`_tracking_number` meta)
+- `set_tracking_number( $tracking_number )`: Set the carrier tracking number
+- `get_shipment_provider()`: Get the shipment provider slug (`_shipment_provider` meta)
+- `set_shipment_provider( $shipment_provider )`: Set the shipment provider slug
+- `get_tracking_url()`: Get the explicit tracking URL (`_tracking_url` meta)
+- `set_tracking_url( $tracking_url )`: Set the explicit tracking URL
+- `get_item_count()`: Get the total quantity of items across all item allocations
+
+These methods are equivalent to calling the corresponding `get_meta()` / `update_meta_data()` methods directly, but provide type safety and a cleaner API.
+
 #### Metadata management
 
 The Fulfillment class inherits standard WC_Data metadata methods:
@@ -141,6 +164,8 @@ The Fulfillment class inherits standard WC_Data metadata methods:
 - `delete_meta_data_by_mid( $meta_id )`: Delete metadata by ID
 - `set_meta_data( $data )`: Set all metadata from array
 - `save_meta_data()`: Save metadata changes to database
+
+**Private vs public metadata**: Metadata keys prefixed with an underscore (`_`) are considered private/internal and are not displayed in the admin UI. Keys without an underscore prefix are treated as public metadata and are shown to the merchant in the fulfillment section below the tracking number field. The label for public keys can be customized using the `woocommerce_fulfillment_meta_key_translations` and `woocommerce_fulfillment_translate_meta_key` filters.
 
 #### Usage examples
 
@@ -161,9 +186,11 @@ $items = [
 ];
 $fulfillment->set_items( $items );
 
-// Add metadata using inherited methods (keys prefixed with _ are private)
-$fulfillment->add_meta_data( '_tracking_number', '1Z999AA1234567890' );
+// Set tracking information using convenience methods (available since 10.7.0)
+$fulfillment->set_tracking_number( '1Z999AA1234567890' );
 $fulfillment->set_shipment_provider( 'ups' );
+
+// Add public metadata (shown in the admin UI below the tracking number)
 $fulfillment->add_meta_data( 'custom_public_note', 'Handle with care' );
 
 // Save the fulfillment
@@ -179,9 +206,14 @@ $existing = new Fulfillment( 456 );
 $all_data = $existing->get_data(); // Get all data as array
 $changes = $existing->get_changes(); // Get unsaved changes
 
-// Update metadata
-$existing->update_meta_data( '_tracking_number', '1Z999BB1234567890' );
+// Update tracking using convenience methods (available since 10.7.0)
+$existing->set_tracking_number( '1Z999BB1234567890' );
+$existing->set_shipment_provider( 'fedex' );
+$existing->save();
+
+// Or update arbitrary metadata directly
 $existing->delete_meta_data( 'custom_notes' ); // Remove metadata
+$existing->save();
 
 // Check if specific metadata exists
 if ( $existing->meta_exists( '_shipment_provider' ) ) {
@@ -203,9 +235,6 @@ if ( $order instanceof WC_Order ) {
 // Delete a fulfillment
 $existing->delete(); // Soft delete
 $existing->delete( true ); // Force delete (permanent)
-
-// Don't forget to save after making changes
-$existing->save();
 ```
 
 **Creating a fulfillment programmatically:**
@@ -220,9 +249,9 @@ function create_fulfillment_for_order( $order_id, $items, $tracking_number = '' 
     // Add items
     $fulfillment->set_items( $items );
 
-    // Add tracking if provided
+    // Add tracking if provided (using convenience method available since 10.7.0)
     if ( ! empty( $tracking_number ) ) {
-        $fulfillment->add_meta_data( '_tracking_number', $tracking_number );
+        $fulfillment->set_tracking_number( $tracking_number );
     }
 
     $fulfillment->save();
@@ -232,7 +261,15 @@ function create_fulfillment_for_order( $order_id, $items, $tracking_number = '' 
 
 **Custom shipping provider:**
 
-To extend fulfillment functionality, you can register custom shipping providers:
+To extend fulfillment functionality, you can register custom shipping providers in two ways.
+
+**Option 1: Via the admin UI**
+
+Navigate to **WooCommerce → Settings → Shipping → Shipping providers** to add a provider name, icon, and tracking URL template through the admin interface. Providers added this way appear immediately in the fulfillment tracking provider selector.
+
+> **Note**: Providers added through the UI do not support automatic tracking number parsing. If you need to detect a specific tracking number format and auto-select the correct provider, you must register the provider in code (Option 2) and implement `try_parse_tracking_number()`.
+
+**Option 2: Via code (supports tracking number parsing)**
 
 ```php
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Providers\AbstractShippingProvider;
@@ -321,13 +358,13 @@ When working with the fulfillments feature, follow these guidelines to ensure ro
 
 ## REST API and hooks
 
-WooCommerce exposes order fulfillments through both the classic order-scoped REST API routes and the newer v4 fulfillment routes.
+WooCommerce exposes order fulfillments through order-scoped REST API v3 routes.
 
 - Use the [REST API reference](./rest-api.md) for endpoint shapes, permissions, and example payloads.
 - Use the [hooks reference](./hooks.md) for lifecycle filters, notification actions, provider filters, and email template hooks.
 
 ## Shipping providers and tracking lookups
 
-WooCommerce ships with a provider registry that powers the admin UI and tracking link generation. Developers can extend that registry with filters or consume it through the v4 providers endpoint.
+WooCommerce ships with a provider registry that powers the admin UI and tracking link generation. Developers can extend that registry with filters (see [Custom shipping provider](#custom-shipping-provider) above) or through the **WooCommerce → Settings → Shipping → Shipping providers** admin page.
 
 The feature also exposes a tracking lookup route that runs the `woocommerce_fulfillment_parse_tracking_number` filter with the store base country and the order shipping country. That makes it possible to normalize tracking numbers or infer the correct provider without modifying the REST controller.

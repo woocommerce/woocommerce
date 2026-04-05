@@ -9,19 +9,24 @@ WooCommerce exposes lifecycle hooks, status filters, provider filters, notificat
 
 ## Data lifecycle filters
 
-These filters run before WooCommerce persists fulfillment changes.
+These filters run before WooCommerce persists fulfillment changes. Each filter receives the `Fulfillment` object and must return it (optionally modified). To **cancel the operation** — for example, to enforce a validation rule — throw a `FulfillmentException` inside the callback. The exception message is surfaced to the caller as an error response.
 
 | Hook | Purpose |
 | --- | --- |
-| `woocommerce_fulfillment_before_create` | Modify a `Fulfillment` object before it is inserted into the database. |
+| `woocommerce_fulfillment_before_create` | Modify a `Fulfillment` object before it is inserted into the database. Throw a `FulfillmentException` to block creation. |
 | `woocommerce_fulfillment_before_fulfill` | Modify a `Fulfillment` object immediately before it transitions into a fulfilled state during create or update operations. |
-| `woocommerce_fulfillment_before_update` | Modify a `Fulfillment` object before changes are written to the database. |
-| `woocommerce_fulfillment_before_delete` | Modify a `Fulfillment` object before WooCommerce soft-deletes it. |
+| `woocommerce_fulfillment_before_update` | Modify a `Fulfillment` object before changes are written to the database. Throw a `FulfillmentException` to block the update. |
+| `woocommerce_fulfillment_before_delete` | Modify a `Fulfillment` object before WooCommerce soft-deletes it. Throw a `FulfillmentException` to block deletion. |
 
 ```php
+use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentException;
+
+// Require a tracking number before a fulfillment can be created in fulfilled status.
 add_filter( 'woocommerce_fulfillment_before_create', function( $fulfillment ) {
-    if ( ! $fulfillment->get_tracking_number() ) {
-        $fulfillment->set_status( 'unfulfilled' );
+    if ( $fulfillment->get_is_fulfilled() && ! $fulfillment->get_tracking_number() ) {
+        throw new FulfillmentException(
+            __( 'A tracking number is required to create a fulfilled fulfillment.', 'my-plugin' )
+        );
     }
 
     return $fulfillment;
@@ -123,11 +128,3 @@ The fulfillment email templates expose the standard extension points below.
 | `woocommerce_email_before_fulfillment_table` | `WC_Order $order`, `Fulfillment $fulfillment`, `bool $sent_to_admin`, `bool $plain_text`, `WC_Email $email` | Inject content before the fulfillment items table. |
 | `woocommerce_email_after_fulfillment_table` | `WC_Order $order`, `Fulfillment $fulfillment`, `bool $sent_to_admin`, `bool $plain_text`, `WC_Email $email` | Inject content after the fulfillment items table. |
 | `woocommerce_email_fulfillment_items_args` | Template arguments array | Customize how fulfillment line items are rendered in the email templates. |
-
-## REST-specific filter
-
-The v4 providers endpoint exposes one additional filter.
-
-| Hook | Purpose |
-| --- | --- |
-| `woocommerce_rest_prepare_fulfillments_providers` | Filter the provider payload returned by `/wp-json/wc/v4/fulfillments/providers`. Each provider must return `label`, `icon`, `value`, and `url`. |
