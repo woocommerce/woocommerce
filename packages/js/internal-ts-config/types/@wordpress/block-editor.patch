@@ -1,0 +1,85 @@
+diff -ruN a/types/@wordpress/block-editor/index.d.ts b/types/@wordpress/block-editor/index.d.ts
+--- a/types/@wordpress/block-editor/index.d.ts
++++ b/types/@wordpress/block-editor/index.d.ts
+@@ -6,9 +6,26 @@
+ /// <reference path="./store/selectors.d.ts" />
+ /// <reference path="./utils/index.d.ts" />
+ 
++/**
++ * DT types are already curried (no state parameter), so we add a fake state param
++ * to match the expected ReduxStoreConfig selector shape, which gets curried away.
++ */
++type WithState< Selectors > = {
++	[ K in keyof Selectors ]: Selectors[ K ] extends (
++		...args: infer A
++	) => infer R
++		? ( state: unknown, ...args: A ) => R
++		: Selectors[ K ];
++};
++
+ declare module '@wordpress/block-editor' {
+ 	import { BlockIconNormalized } from "@wordpress/blocks";
+-	import { dispatch, select, StoreDescriptor } from "@wordpress/data";
++	import type * as blockEditorActions from '@wordpress/block-editor/store/actions';
++	import type * as blockEditorSelectors from '@wordpress/block-editor/store/selectors';
++	import type {
++		StoreDescriptor,
++		ReduxStoreConfig,
++	} from '@wordpress/data/build-types/types';
+ 
+ 	export * from "@wordpress/block-editor/components";
+ 	export * from "@wordpress/block-editor/hooks";
+@@ -16,13 +33,16 @@
+ 	export { SETTINGS_DEFAULTS } from "@wordpress/block-editor/store/defaults";
+ 	export * from "@wordpress/block-editor/utils";
+ 
+-	declare module "@wordpress/data" {
+-	    function dispatch(key: "core/block-editor"): typeof import("@wordpress/block-editor/store/actions");
+-	    function select(key: "core/block-editor"): typeof import("@wordpress/block-editor/store/selectors");
+-	}
++	type BlockEditorConfig = ReduxStoreConfig<
++		unknown,
++		{
++			[ K in keyof typeof blockEditorActions ]: ( typeof blockEditorActions )[ K ];
++		},
++		WithState< typeof blockEditorSelectors >
++	>;
+ 
+-	export interface BlockEditorStoreDescriptor extends StoreDescriptor {
+-	    name: "core/block-editor";
++	export interface BlockEditorStoreDescriptor extends StoreDescriptor< BlockEditorConfig > {
++		name: "core/block-editor";
+ 	}
+ 
+ 	export const store: BlockEditorStoreDescriptor;
+@@ -222,5 +242,30 @@
+ 	     * @defaultValue `"Add title"`
+ 	     */
+ 	    titlePlaceholder: string;
++	}
++}
++
++declare module '@wordpress/data/build-types/types' {
++	import type * as blockEditorActions from '@wordpress/block-editor/store/actions';
++	import type * as blockEditorSelectors from '@wordpress/block-editor/store/selectors';
++	import type {
++		StoreDescriptor,
++		ReduxStoreConfig,
++	} from '@wordpress/data/build-types/types';
++
++	type BlockEditorConfig = ReduxStoreConfig<
++		unknown,
++		{
++			[ K in keyof typeof blockEditorActions ]: ( typeof blockEditorActions )[ K ];
++		},
++		WithState< typeof blockEditorSelectors >
++	>;
++
++	interface BlockEditorStoreDescriptor extends StoreDescriptor< BlockEditorConfig > {
++		name: "core/block-editor";
++	}
++
++	interface StoreRegistry {
++		'core/block-editor': BlockEditorStoreDescriptor;
+ 	}
+ }

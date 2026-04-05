@@ -157,4 +157,4 @@ export type SettingEdit = {
 /**
  * Represents an object of setting IDs and their values
  */
-export type SettingsEditObject = Record< string, SettingEdit >;
+export type SettingsEditObject = Record< string, SettingValue >;

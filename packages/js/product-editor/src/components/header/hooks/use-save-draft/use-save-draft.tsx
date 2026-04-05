@@ -44,7 +44,6 @@ export function useSaveDraft( {
 			// @ts-ignore
 			const { hasEditsForEntityRecord, isSavingEntityRecord } =
 				select( 'core' );
-			// @ts-expect-error Selector is not typed
 			const isSaving = isSavingEntityRecord(
 				'postType',
 				productType,
@@ -53,7 +52,6 @@ export function useSaveDraft( {
 
 			return {
 				isDisabled: isSaving,
-				// @ts-expect-error Selector is not typed
 				hasEdits: hasEditsForEntityRecord(
 					'postType',
 					productType,
