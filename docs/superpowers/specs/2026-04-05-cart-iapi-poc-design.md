@@ -25,7 +25,7 @@ Existing IAPI infrastructure in WooCommerce:
 
 When the `experimental-iapi-cart` feature flag is **enabled**:
 
-1. **PHP** (`ProceedToCheckoutBlock.php`): Renders the button as server-side HTML with `data-wp-interactive="woocommerce/proceed-to-checkout"` directives. Sets context via `wp_interactivity_data_wp_context()` with `checkoutUrl` and `buttonLabel`. Includes a sentinel `<div>` for the sticky intersection observer. Enqueues script module instead of traditional script.
+1. **PHP** (`ProceedToCheckoutBlock.php`): Renders the button as server-side HTML with `data-wp-interactive="woocommerce/proceed-to-checkout"` directives. Sets context via `wp_interactivity_data_wp_context()` with `checkoutUrl` and `buttonLabel`. Includes a sentinel `<div>` for the sticky intersection observer. Enqueues script module via `wp_enqueue_script_module()`. The `iapi-frontend.ts` file is built as a script module by the existing `webpack-config-interactive-blocks.js` config (same build pipeline as mini-cart and add-to-cart-with-options IAPI blocks).
 
 2. **React pass-through component**: Registered via `registerCheckoutBlock()` so `renderInnerBlocks()` finds the block. Renders a single `<div ref={...}>` that preserves the server-rendered IAPI HTML. React sees one opaque container and won't re-render into it. This component also bridges the `CartEventsProvider` context — it calls `useCartEventsContext()` and is available because the parent Cart block's React tree still wraps everything.
 
@@ -56,14 +56,14 @@ Store namespace: `woocommerce/proceed-to-checkout` (locked, private).
 - `isLoading` — toggled on click, reset on pageshow
 
 **State (derived):**
-- `isDisabled` — reads from the shared `woocommerce` store's cart state
+- `isDisabled` — the shared `woocommerce` IAPI store does not currently expose `cartIsLoading` or `isCalculating` flags (those live in React `@wordpress/data` stores). For the POC, we add an `isProcessing` boolean to the shared `woocommerce` store that is set `true` while the mutation batcher has pending requests. This gives the IAPI proceed-to-checkout block a signal to disable the button during cart operations.
 
 **Actions:**
-- `*handleClick` — generator function. Calls `emitWithAbort()` on the cart event emitter. If any observer returns error/fail, aborts. Otherwise sets `isLoading = true` and navigates via `window.location.href`.
+- `*handleClick` — generator function. Calls `emitWithAbort()` on the cart event emitter. If any observer returns error/fail, aborts. Otherwise sets `isLoading = true` and navigates. The button renders as an `<a>` tag with `href` (preserving anchor semantics for middle-click/cmd-click). The click handler uses `data-wp-on--click` which calls `event.preventDefault()` first, runs observers, then navigates via `window.location.href` on success — same pattern as the current React implementation.
 
 **Callbacks:**
 - `onPageShow` — listens for browser `pageshow` event to reset `isLoading` (Safari back-button fix)
-- `initStickyObserver` — sets up `IntersectionObserver` on a sentinel element to toggle sticky class on mobile viewports
+- `initStickyObserver` — sets up `IntersectionObserver` on a sentinel element to toggle sticky class on mobile viewports. Also computes `document.body` background color and applies it as inline style on the sticky container (matching current React behavior).
 
 ### 4. Feature Flag
 
@@ -94,13 +94,14 @@ Registered in the same system as `experimental-iapi-mini-cart`. Controls:
 | `assets/js/blocks/cart/inner-blocks/proceed-to-checkout-block/frontend.tsx` | Swap to pass-through component when IAPI flag enabled |
 | `assets/js/blocks/cart/inner-blocks/register-components.ts` | Register pass-through variant |
 | `src/Blocks/BlockTypes/ProceedToCheckoutBlock.php` | Add IAPI render path behind feature flag |
-| Feature flag registration (location TBD — `Bootstrap.php` or similar) | Register `experimental-iapi-cart` flag |
+| Feature flag registration (same location as `experimental-iapi-mini-cart`: `includes/react-admin/feature-config.php` and `client/admin/config/core.json`) | Register `experimental-iapi-cart` flag |
+| `base/stores/woocommerce/cart.ts` | Add `isProcessing` state derived from mutation batcher |
 
 ### Unchanged Files
 
 - `block.json`, `edit.tsx`, `attributes.tsx`, `constants.tsx` — editor side unchanged
 - Cart block parent (`block.js`, `frontend.js`) — no changes
-- Shared `woocommerce` cart store (`base/stores/woocommerce/cart.ts`) — already has needed state
+- `block.json` for proceed-to-checkout — no changes to block metadata
 
 ## Success Criteria
 
@@ -118,6 +119,6 @@ With `experimental-iapi-cart` enabled:
 Items explicitly deferred from this POC:
 
 - **`applyCheckoutFilter` support**: The React-side checkout filter registry (`proceedToCheckoutButtonLabel`, `proceedToCheckoutButtonLink`) is not available in IAPI. Needs either a PHP-side filter or new IAPI-compatible filter mechanism. Will address after POC validates.
-- **Approach B bridge layer**: Syncing `cartIsLoading`, `isCalculating` from React context into IAPI state. Needed when converting more inner blocks that depend on richer Cart context.
+- **Approach B bridge layer**: Syncing richer React Cart context (e.g., `isCalculating` from the checkout store) into IAPI state. Becomes relevant when converting inner blocks that depend on checkout-specific state beyond what the shared `woocommerce` store provides.
 - **Full Cart migration**: Converting all 17 remaining inner blocks and the parent Cart block to IAPI, eliminating React entirely (following the mini-cart precedent).
 - **Cart events emitter as canonical API**: After full migration, the React hook becomes a permanent thin wrapper over the emitter. Non-React extensions get first-class access.
