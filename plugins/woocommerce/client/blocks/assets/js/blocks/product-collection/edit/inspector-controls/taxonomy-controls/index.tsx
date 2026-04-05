@@ -5,6 +5,10 @@ import { Taxonomy } from '@wordpress/core-data/src/entity-types';
 import { useMemo } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
+import ProductCategoryControl from '@woocommerce/editor-components/product-category-control';
+import ProductTagControl from '@woocommerce/editor-components/product-tag-control';
+import ProductBrandControl from '@woocommerce/editor-components/product-brand-control';
+import type { SearchListItem } from '@woocommerce/editor-components/search-list-control/types';
 import {
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanelItem as ToolsPanelItem,
@@ -81,14 +85,55 @@ function TaxonomyControls( {
 		const termIds = taxQuery?.[ slug ] || [];
 		const handleChange = createHandleChange( slug );
 
-		return (
-			<TaxonomyItem
-				key={ slug }
-				taxonomy={ taxonomy }
-				termIds={ termIds }
-				onChange={ handleChange }
-			/>
-		);
+		// Adapter for SearchListControl-based components that return SearchListItem[]
+		const handleSearchListChange = ( items: SearchListItem[] ) => {
+			const ids = items.map( ( { id } ) => Number( id ) );
+			handleChange( ids );
+		};
+
+		// Use dedicated controls for known taxonomies
+		switch ( slug ) {
+			case 'product_cat':
+				return (
+					<ProductCategoryControl
+						key={ slug }
+						selected={ termIds }
+						onChange={ handleSearchListChange }
+						isCompact={ true }
+						type="token"
+					/>
+				);
+			case 'product_tag':
+				return (
+					<ProductTagControl
+						key={ slug }
+						selected={ termIds }
+						onChange={ handleSearchListChange }
+						isCompact={ true }
+						type="token"
+					/>
+				);
+			case 'product_brand':
+				return (
+					<ProductBrandControl
+						key={ slug }
+						selected={ termIds }
+						onChange={ handleSearchListChange }
+						isCompact={ true }
+						type="token"
+					/>
+				);
+			default:
+				// Fallback to FormTokenField for unknown taxonomies (e.g., attributes)
+				return (
+					<TaxonomyItem
+						key={ slug }
+						taxonomy={ taxonomy }
+						termIds={ termIds }
+						onChange={ handleChange }
+					/>
+				);
+		}
 	};
 
 	const createTaxonomyToolsPanelItem = ( taxonomy: Taxonomy ) => {

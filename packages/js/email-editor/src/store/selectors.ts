@@ -33,14 +33,40 @@ function getContentFromEntity( entity ): string {
 	return '';
 }
 
-const patternsWithParsedBlocks = new WeakMap();
-function enhancePatternWithParsedBlocks( pattern ) {
+type PatternWithContent = {
+	content: string;
+	emailContent?: string;
+	categories?: string[];
+	[ key: string ]: unknown;
+};
+
+type EnhancedPattern = PatternWithContent & {
+	readonly blocks: BlockInstance[];
+	readonly emailBlocks: BlockInstance[] | null;
+};
+
+const patternsWithParsedBlocks = new WeakMap<
+	PatternWithContent,
+	EnhancedPattern
+>();
+function enhancePatternWithParsedBlocks(
+	pattern: PatternWithContent
+): EnhancedPattern {
 	let enhancedPattern = patternsWithParsedBlocks.get( pattern );
 	if ( ! enhancedPattern ) {
 		enhancedPattern = {
 			...pattern,
 			get blocks() {
 				return parse( pattern.content );
+			},
+			// emailContent is an optional property that integrations (e.g. MailPoet)
+			// may add to patterns via REST API filters. It contains dynamic blocks
+			// (e.g. product-collection) for editor insertion, while `content` holds
+			// static HTML for template picker previews.
+			get emailBlocks() {
+				return pattern.emailContent
+					? parse( pattern.emailContent )
+					: null;
 			},
 		};
 		patternsWithParsedBlocks.set( pattern, enhancedPattern );
@@ -322,21 +348,34 @@ export const getGlobalEmailStylesPost = createRegistrySelector(
 /**
  * Retrieves the email templates.
  */
-export const getEmailTemplates = createRegistrySelector( ( select ) => () => {
+export const getEmailTemplates = createRegistrySelector( ( select ) => {
 	const postType = select( storeName ).getEmailPostType();
-	return (
-		select( coreDataStore )
-			.getEntityRecords( 'postType', 'wp_template', {
-				per_page: -1,
-				post_type: postType,
-				context: 'view',
-			} )
-			// We still need to filter the templates because, in some cases, the API also returns custom templates
-			// ignoring the post_type filter in the query
-			?.filter( ( template ) =>
-				// @ts-expect-error Missing property in type
-				template.post_types.includes( postType )
-			)
+
+	return createSelector(
+		() =>
+			select( coreDataStore )
+				.getEntityRecords( 'postType', 'wp_template', {
+					per_page: -1,
+					post_type: postType,
+					context: 'view',
+				} )
+				// We still need to filter the templates because, in some cases, the API also returns custom templates
+				// ignoring the post_type filter in the query
+				?.filter( ( template ) =>
+					// @ts-expect-error Missing property in type
+					template.post_types.includes( postType )
+				),
+		() => [
+			select( coreDataStore ).getEntityRecords(
+				'postType',
+				'wp_template',
+				{
+					per_page: -1,
+					post_type: postType,
+					context: 'view',
+				}
+			),
+		]
 	);
 } );
 
@@ -367,13 +406,21 @@ export function getPreviewState( state: State ): State[ 'preview' ] {
 
 export const getPersonalizationTagsList = createRegistrySelector(
 	( select ) => () => {
+		const postId = select( storeName ).getEmailPostId();
+		const queryParams: Record< string, unknown > = {
+			context: 'view',
+			per_page: -1,
+		};
+
+		// Include post_id for context-aware tag filtering (e.g., automation emails)
+		if ( postId ) {
+			queryParams.post_id = postId;
+		}
+
 		const tags = ( select( coreDataStore ).getEntityRecords(
 			PERSONALIZATION_TAG_ENTITY.kind,
 			PERSONALIZATION_TAG_ENTITY.name,
-			{
-				context: 'view',
-				per_page: -1,
-			}
+			queryParams
 		) || [] ) as PersonalizationTag[];
 
 		const postType = select( storeName ).getEmailPostType();

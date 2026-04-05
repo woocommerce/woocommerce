@@ -8,7 +8,7 @@ import { apiFetch } from '@wordpress/data-controls';
 /**
  * Internal dependencies
  */
-import { storeName } from './constants';
+import { storeName, PERSONALIZATION_TAG_ENTITY } from './constants';
 import {
 	SendingPreviewStatus,
 	State,
@@ -33,18 +33,47 @@ export function updateSendPreviewEmail( toEmail: string ) {
 	} as const;
 }
 
-export function setEmailPost( postId: number | string, postType: string ) {
-	if ( ! postId || ! postType ) {
-		throw new Error(
-			'setEmailPost requires valid postId and postType parameters'
-		);
-	}
+export const setEmailPost =
+	( postId: number | string, postType: string ) =>
+	async ( { dispatch } ) => {
+		if ( ! postId || ! postType ) {
+			throw new Error(
+				'setEmailPost requires valid postId and postType parameters'
+			);
+		}
 
-	return {
-		type: 'SET_EMAIL_POST',
-		state: { postId, postType } as Partial< State >,
-	} as const;
-}
+		dispatch( {
+			type: 'SET_EMAIL_POST',
+			state: { postId, postType } as Partial< State >,
+		} );
+	};
+
+/**
+ * Invalidates the personalization tags cache to force a refetch.
+ * Call this when the tags need to be refreshed (e.g., after changing automation triggers).
+ */
+export const invalidatePersonalizationTagsCache =
+	() =>
+	async ( { registry } ) => {
+		// Get the current post ID to build the exact query params
+		const postId = registry.select( storeName ).getEmailPostId();
+		const queryParams: Record< string, unknown > = {
+			context: 'view',
+			per_page: -1,
+		};
+		if ( postId ) {
+			queryParams.post_id = postId;
+		}
+
+		// Invalidate the resolution for this specific query
+		registry
+			.dispatch( coreDataStore )
+			.invalidateResolution( 'getEntityRecords', [
+				PERSONALIZATION_TAG_ENTITY.kind,
+				PERSONALIZATION_TAG_ENTITY.name,
+				queryParams,
+			] );
+	};
 
 export function setEmailPostType( postType: string ) {
 	if ( ! postType ) {

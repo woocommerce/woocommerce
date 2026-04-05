@@ -134,16 +134,13 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 	} ) => {
 		await pageObject.createNewPostAndInsertBlock();
 
-		const filterName = 'Product categories';
 		await pageObject.addFilter( 'Show product categories' );
-		await pageObject.setFilterComboboxValue( filterName, [ 'Clothing' ] );
-		await expect( pageObject.productTitles ).toHaveText( [
-			'Logo Collection',
-		] );
+		await pageObject.checkTaxonomyTerm( 'categories', 'Clothing' );
+		await expect( pageObject.products ).toHaveCount( 8 );
 
-		await pageObject.setFilterComboboxValue( filterName, [
-			'Accessories',
-		] );
+		// Switch to Accessories
+		await pageObject.uncheckTaxonomyTerm( 'categories', 'Clothing' );
+		await pageObject.checkTaxonomyTerm( 'categories', 'Accessories' );
 		const accessoriesProductNames = [
 			'Beanie',
 			'Beanie with Logo',
@@ -174,11 +171,8 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 	} ) => {
 		await pageObject.createNewPostAndInsertBlock();
 
-		const filterName = 'Product tags';
 		await pageObject.addFilter( 'Show product tags' );
-		await pageObject.setFilterComboboxValue( filterName, [
-			'Recommended',
-		] );
+		await pageObject.checkTaxonomyTerm( 'tags', 'Recommended' );
 		await expect( pageObject.productTitles ).toHaveText( [
 			'Beanie',
 			'Hoodie',
@@ -186,6 +180,27 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 
 		await pageObject.publishAndGoToFrontend();
 		await expect( pageObject.productTitles ).toHaveText( [
+			'Beanie',
+			'Hoodie',
+		] );
+	} );
+
+	test( 'Products can be filtered based on brands.', async ( {
+		pageObject,
+	} ) => {
+		await pageObject.createNewPostAndInsertBlock();
+
+		await pageObject.addFilter( 'Show Brands' );
+		await pageObject.checkTaxonomyTerm( 'brands', 'WooCommerce' );
+		await expect( pageObject.productTitles ).toHaveText( [
+			'Album',
+			'Beanie',
+			'Hoodie',
+		] );
+
+		await pageObject.publishAndGoToFrontend();
+		await expect( pageObject.productTitles ).toHaveText( [
+			'Album',
 			'Beanie',
 			'Hoodie',
 		] );
@@ -646,9 +661,7 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 			await expect( pageObject.products ).toHaveCount( 9 );
 
 			await pageObject.addFilter( 'Show product categories' );
-			await pageObject.setFilterComboboxValue( 'Product categories', [
-				'Music',
-			] );
+			await pageObject.checkTaxonomyTerm( 'categories', 'Music' );
 
 			const productCollectionBlock = await editor.getBlockByName(
 				'woocommerce/product-collection'

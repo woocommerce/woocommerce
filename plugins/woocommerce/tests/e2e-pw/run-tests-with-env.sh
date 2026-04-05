@@ -67,7 +67,17 @@ title
 title "Running tests with environment: '$envName'"
 title
 
-configFile="$SCRIPT_PATH/envs/$envName/playwright.config.js"
+configFileTs="$SCRIPT_PATH/envs/$envName/playwright.config.ts"
+configFileJs="$SCRIPT_PATH/envs/$envName/playwright.config.js"
+
+if [ -f "$configFileTs" ]; then
+	configFile="$configFileTs"
+elif [ -f "$configFileJs" ]; then
+	configFile="$configFileJs"
+else
+	echo "No Playwright config found for environment '$envName' (expected .ts or .js)." >&2
+	exit 1
+fi
 echo "Using config file: $configFile"
 echo "Arguments: $*"
 title

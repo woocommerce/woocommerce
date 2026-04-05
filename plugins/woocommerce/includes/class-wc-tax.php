@@ -82,7 +82,20 @@ class WC_Tax {
 	 * @return array
 	 */
 	public static function calc_shipping_tax( $price, $rates ) {
-		$taxes = self::calc_exclusive_tax( $price, $rates );
+		/**
+		 * Filter to control if shipping prices include tax.
+		 *
+		 * @since 10.6.0
+		 * @param bool $shipping_prices_include_tax True if shipping cost is gross (includes tax), false if net. Default false.
+		 */
+		$shipping_prices_include_tax = wc_string_to_bool( apply_filters( 'woocommerce_shipping_prices_include_tax', false ) );
+
+		if ( $shipping_prices_include_tax ) {
+			$taxes = self::calc_inclusive_tax( $price, $rates );
+		} else {
+			$taxes = self::calc_exclusive_tax( $price, $rates );
+		}
+
 		return apply_filters( 'woocommerce_calc_shipping_tax', $taxes, $price, $rates );
 	}
 

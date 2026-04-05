@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Utilities\NumberUtil;
 use WP_Error;
 use WC_Order;
 use WC_Tax;
@@ -51,7 +52,14 @@ class DataUtils {
 				$original_item = $order->get_item( $line_item['line_item_id'] );
 				if ( $original_item ) {
 					$original_taxes = $original_item->get_taxes();
-					$tax_ids        = array_keys( $original_taxes['total'] ?? array() );
+					// Filter to only include tax IDs that have non-zero amounts.
+					$tax_totals = array_filter(
+						$original_taxes['total'] ?? array(),
+						function ( $amount ) {
+							return is_numeric( $amount ) && $amount > 0;
+						}
+					);
+					$tax_ids    = array_keys( $tax_totals );
 
 					if ( ! empty( $tax_ids ) ) {
 						$tax_rates = $this->build_tax_rates_array( $order, $tax_ids );
@@ -62,13 +70,23 @@ class DataUtils {
 							$tax_rates
 						);
 
+						// Round extracted taxes to display precision to match how original taxes were stored.
+						// This prevents rounding errors where internal precision (6DP) differs from storage precision (2DP).
+						$price_decimals   = wc_get_price_decimals();
+						$calculated_taxes = array_map(
+							function ( $tax ) use ( $price_decimals ) {
+								return NumberUtil::round( $tax, $price_decimals );
+							},
+							$calculated_taxes
+						);
+
 						$line_item['refund_tax'] = $this->convert_proportional_taxes_to_schema_format(
 							$calculated_taxes
 						);
 
 						// Subtract extracted tax from refund_total to get the amount excluding tax.
 						$total_tax                 = array_sum( $calculated_taxes );
-						$line_item['refund_total'] = $line_item['refund_total'] - $total_tax;
+						$line_item['refund_total'] = NumberUtil::round( $line_item['refund_total'] - $total_tax, $price_decimals );
 					}
 				}
 			}
@@ -129,7 +147,7 @@ class DataUtils {
 			}
 		}
 
-		return $amount;
+		return (float) NumberUtil::round( $amount, wc_get_price_decimals() );
 	}
 
 	/**

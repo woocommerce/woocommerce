@@ -4,6 +4,7 @@
 import React, { useCallback, useLayoutEffect, useState } from 'react';
 import { createRoot } from '@wordpress/element';
 import { getQuery } from '@woocommerce/navigation';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -14,6 +15,10 @@ import FulfillmentDrawer from './components/user-interface/fulfillment-drawer/fu
 function FulfillmentsController() {
 	const [ isOpen, setIsOpen ] = useState( false );
 	const [ orderId, setOrderId ] = useState< number | null >( null );
+	const query = getQuery();
+	const isOrderDetailsPage =
+		Object.prototype.hasOwnProperty.call( query, 'id' ) ||
+		Object.prototype.hasOwnProperty.call( query, 'post' );
 
 	const deselectOrderRow = useCallback( () => {
 		document.querySelectorAll( '.type-shop_order' ).forEach( ( row ) => {
@@ -30,6 +35,20 @@ function FulfillmentsController() {
 		[ deselectOrderRow ]
 	);
 
+	const openFulfillmentDrawer = useCallback(
+		( id: number ) => {
+			setOrderId( id );
+			setIsOpen( true );
+			recordEvent( 'fulfillment_modal_opened', {
+				source: isOrderDetailsPage
+					? 'order_detail_page'
+					: 'orders_list',
+				order_id: id,
+			} );
+		},
+		[ setOrderId, setIsOpen, isOrderDetailsPage ]
+	);
+
 	useLayoutEffect( () => {
 		const handleClick = ( e: Event ) => {
 			const target = e.target as HTMLElement;
@@ -42,8 +61,7 @@ function FulfillmentsController() {
 					e.preventDefault();
 					e.stopPropagation();
 					selectOrderRow( button );
-					setOrderId( id );
-					setIsOpen( true );
+					openFulfillmentDrawer( id );
 				}
 			}
 		};
@@ -53,10 +71,7 @@ function FulfillmentsController() {
 		return () => {
 			document.body.removeEventListener( 'click', handleClick );
 		};
-	}, [ selectOrderRow ] );
-
-	const query = getQuery();
-	const isOrderDetailsPage = query.hasOwnProperty( 'id' );
+	}, [ selectOrderRow, openFulfillmentDrawer ] );
 
 	return (
 		<FulfillmentDrawer

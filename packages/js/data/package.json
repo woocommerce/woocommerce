@@ -96,8 +96,8 @@
 		"wireit": "0.14.12"
 	},
 	"peerDependencies": {
-		"@wordpress/data": "wp-6.6",
-		"@wordpress/core-data": "wp-6.6",
+		"@wordpress/data": "^10.0.2",
+		"@wordpress/core-data": "^7.0.7",
 		"moment": "^2.18.1",
 		"react": "18.3.x",
 		"react-dom": "18.3.x"

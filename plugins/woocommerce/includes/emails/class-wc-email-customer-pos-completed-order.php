@@ -9,6 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Email\OrderPriceFormatter;
 use Automattic\WooCommerce\Internal\Orders\PointOfSaleOrderUtil;
 use Automattic\WooCommerce\Internal\Settings\PointOfSaleDefaultSettings;
@@ -66,6 +67,8 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 		 *
 		 * @param int    $order_id The order ID.
 		 * @param string $template_id The email template ID.
+		 *
+		 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
 		 */
 		public function trigger( $order_id, $template_id ) {
 			if ( $this->id !== $template_id ) {
@@ -191,11 +194,30 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 		}
 
 		/**
+		 * Auto-trigger this email when a POS-paid order is completed.
+		 *
+		 * @param int            $order_id The order ID.
+		 * @param WC_Order|false $order    The order object.
+		 *
+		 * @internal
+		 * @since 10.6.0
+		 */
+		public function auto_trigger( $order_id, $order = false ): void {
+			if ( ! $order instanceof WC_Order ) {
+				$order = wc_get_order( $order_id );
+			}
+			if ( ! $order instanceof WC_Order || ! PointOfSaleOrderUtil::is_order_paid_at_pos( $order ) ) {
+				return;
+			}
+			$this->trigger( $order_id, $this->id );
+		}
+
+		/**
 		 * Enable order email actions for POS orders.
 		 */
 		private function enable_order_email_actions_for_pos_orders() {
+			add_action( 'woocommerce_order_status_completed_notification', array( $this, 'auto_trigger' ), 10, 2 );
 			$this->enable_email_template_for_pos_orders();
-			// Enable send email when requested.
 			add_action( 'woocommerce_rest_order_actions_email_send', array( $this, 'trigger' ), 10, 2 );
 		}
 
@@ -308,6 +330,8 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 		 * @param int      $item_id       Order item ID.
 		 * @param array    $item          Order item data.
 		 * @param WC_Order $order         Order object.
+		 *
+		 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
 		 */
 		public function add_unit_price( $item_id, $item, $order ) {
 			$unit_price = OrderPriceFormatter::get_formatted_item_subtotal( $order, $item, get_option( 'woocommerce_tax_display_cart' ) );
@@ -321,6 +345,8 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 		 * @param WC_Order $order      Order object.
 		 * @param string   $tax_display Tax display.
 		 * @return array Modified array of total rows.
+		 *
+		 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
 		 */
 		public function order_item_totals( $total_rows, $order, $tax_display ) {
 			$cash_payment_change_due_amount = $order->get_meta( '_cash_change_amount', true );
@@ -358,21 +384,55 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 		 */
 		private function enable_email_template_for_pos_orders() {
 			add_filter( 'woocommerce_rest_order_actions_email_valid_template_classes', array( $this, 'add_to_valid_template_classes' ), 10, 2 );
+			add_filter( 'woocommerce_rest_order_actions_email_preferred_template_ids', array( $this, 'add_to_preferred_template_ids' ), 10, 2 );
 		}
 
 		/**
-		 * Add this email template to the list of valid templates for POS orders.
+		 * Add this email template to the list of valid templates for POS-paid orders.
 		 *
 		 * @param array    $valid_template_classes Array of valid template class names.
 		 * @param WC_Order $order                  The order.
 		 * @return array Modified array of valid template class names.
+		 *
+		 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
+		 * @since 10.6.0
 		 */
 		public function add_to_valid_template_classes( $valid_template_classes, $order ) {
-			if ( ! PointOfSaleOrderUtil::is_pos_order( $order ) ) {
+			if ( ! $this->is_applicable_for_order( $order ) ) {
 				return $valid_template_classes;
 			}
 			$valid_template_classes[] = get_class( $this );
 			return $valid_template_classes;
+		}
+
+		/**
+		 * Prepend this template to the preferred template IDs for POS-paid orders.
+		 *
+		 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
+		 *
+		 * @param array    $preferred_template_ids Ordered array of template IDs.
+		 * @param WC_Order $order                  The order.
+		 * @return array Modified array of template IDs.
+		 *
+		 * @since 10.7.0
+		 */
+		public function add_to_preferred_template_ids( $preferred_template_ids, $order ) {
+			if ( ! $this->is_applicable_for_order( $order ) ) {
+				return $preferred_template_ids;
+			}
+			array_unshift( $preferred_template_ids, $this->id );
+			return $preferred_template_ids;
+		}
+
+		/**
+		 * Check if this email template is applicable for the given order.
+		 *
+		 * @param WC_Order $order The order.
+		 * @return bool
+		 */
+		private function is_applicable_for_order( $order ): bool {
+			return PointOfSaleOrderUtil::is_order_paid_at_pos( $order )
+				&& OrderStatus::COMPLETED === $order->get_status( 'edit' );
 		}
 
 		/**

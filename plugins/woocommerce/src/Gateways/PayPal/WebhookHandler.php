@@ -85,6 +85,11 @@ class WebhookHandler {
 		if ( PayPalConstants::STATUS_APPROVED === $status ) {
 			\WC_Gateway_Paypal::log( 'PayPal payment approved. Order ID: ' . $order->get_id() );
 			$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_STATUS, $status );
+			// Clear the shipping callback token by setting it to an empty string.
+			// This is done to prevent the token from being used again for the same order.
+			// We are not deleting the meta key as we use the existence of the meta key to determine if the token was ever generated for this order.
+			$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_SHIPPING_CALLBACK_TOKEN, '' );
+			$order->save();
 			$order->add_order_note(
 				sprintf(
 					/* translators: %1$s: PayPal order ID */
@@ -99,8 +104,13 @@ class WebhookHandler {
 
 			// Authorize or capture the payment after approval.
 			$paypal_intent = $event['resource']['intent'] ?? null;
-			$links         = $event['resource']['links'] ?? null;
 			$action        = PayPalConstants::INTENT_CAPTURE === $paypal_intent ? PayPalConstants::PAYMENT_ACTION_CAPTURE : PayPalConstants::PAYMENT_ACTION_AUTHORIZE;
+
+			$links = $event['resource']['links'] ?? array();
+			if ( ! is_array( $links ) ) {
+				$links = array();
+			}
+
 			$this->authorize_or_capture_payment( $order, $links, $action );
 		} else {
 			// This is unexpected for a CHECKOUT.ORDER.APPROVED event.

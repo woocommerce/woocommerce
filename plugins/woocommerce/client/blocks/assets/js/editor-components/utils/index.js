@@ -192,6 +192,31 @@ export const getCategory = ( categoryId ) => {
 };
 
 /**
+ * Get a promise that resolves to a list of brand objects from the Store API.
+ *
+ * @param {Object} queryArgs Query args to pass in.
+ */
+export const getBrands = ( queryArgs ) => {
+	return apiFetch( {
+		path: addQueryArgs( `wc/store/v1/products/brands`, {
+			per_page: 0,
+			...queryArgs,
+		} ),
+	} );
+};
+
+/**
+ * Get a promise that resolves to a brand object from the API.
+ *
+ * @param {number} brandId Id of the brand to retrieve.
+ */
+export const getBrand = ( brandId ) => {
+	return apiFetch( {
+		path: `wc/store/v1/products/brands/${ brandId }`,
+	} );
+};
+
+/**
  * Get a promise that resolves to a list of variation objects from the Store API
  * and the total number of variations.
  *

@@ -5,6 +5,7 @@ import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { useDispatch, select } from '@wordpress/data';
 import { useState } from 'react';
+import { useInstanceId } from '@wordpress/compose';
 
 /**
  * Internal dependencies
@@ -26,6 +27,10 @@ export default function UpdateButton( {
 	const { order, fulfillment, notifyCustomer } = useFulfillmentContext();
 	const { updateFulfillment } = useDispatch( FulfillmentStore );
 	const [ isExecuting, setIsExecuting ] = useState< boolean >( false );
+	const descriptionId = useInstanceId(
+		UpdateButton,
+		'update-button-description'
+	) as string;
 
 	const handleUpdateFulfillment = async () => {
 		if ( ! fulfillment || ! order ) {
@@ -56,14 +61,25 @@ export default function UpdateButton( {
 	};
 
 	return (
-		<Button
-			variant="primary"
-			onClick={ handleUpdateFulfillment }
-			disabled={ isExecuting }
-			isBusy={ isExecuting }
-			__next40pxDefaultSize
-		>
-			{ __( 'Update', 'woocommerce' ) }
-		</Button>
+		<>
+			<Button
+				variant="primary"
+				onClick={ handleUpdateFulfillment }
+				disabled={ isExecuting }
+				isBusy={ isExecuting }
+				__next40pxDefaultSize
+				aria-describedby={ descriptionId }
+			>
+				{ isExecuting
+					? __( 'Updating…', 'woocommerce' )
+					: __( 'Update', 'woocommerce' ) }
+			</Button>
+			<span id={ descriptionId } className="screen-reader-text">
+				{ __(
+					'Applies changes to the existing fulfillment',
+					'woocommerce'
+				) }
+			</span>
+		</>
 	);
 }

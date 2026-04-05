@@ -88,6 +88,47 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 		parent::initialize();
 
 		add_filter( 'woocommerce_blocks_product_filters_selected_items', array( $this, 'prepare_selected_filters' ), 10, 2 );
+
+		// Register REST field for menu_order on sortable taxonomies.
+		$this->register_taxonomy_menu_order_rest_field();
+	}
+
+	/**
+	 * Register a REST field to expose the menu_order meta for sortable taxonomies.
+	 * This allows the editor to display terms in menu order.
+	 */
+	private function register_taxonomy_menu_order_rest_field(): void {
+		/**
+		 * Filters the list of taxonomies that support custom ordering. Filter was introduced long
+		 * ago is only documented in 10.6.0.
+		 *
+		 * First instance in plugins/woocommerce/includes/admin/class-wc-admin-assets.php.
+		 *
+		 * @since 1.0
+		 *
+		 * @param array $sortable_taxonomies List of taxonomy slugs that support custom ordering.
+		 * @return array List of taxonomy slugs that support custom ordering.
+		 */
+		$sortable_taxonomies = apply_filters( 'woocommerce_sortable_taxonomies', array( 'product_cat' ) );
+
+		foreach ( $sortable_taxonomies as $taxonomy ) {
+			register_rest_field(
+				$taxonomy,
+				'menu_order',
+				array(
+					'get_callback' => function ( $term ) {
+						$menu_order = get_term_meta( $term['id'], 'order', true );
+						return is_numeric( $menu_order ) ? (int) $menu_order : 0;
+					},
+					'schema'       => array(
+						'description' => __( 'Menu order, used to custom sort the term.', 'woocommerce' ),
+						'type'        => 'integer',
+						'context'     => array( 'view', 'edit' ),
+						'readonly'    => true,
+					),
+				)
+			);
+		}
 	}
 
 	/**
@@ -102,6 +143,22 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 
 		if ( is_admin() ) {
 			$this->asset_data_registry->add( 'filterableProductTaxonomies', $this->get_taxonomies() );
+			// Expose sortable taxonomies so the editor can show/hide "Menu order" option.
+			$this->asset_data_registry->add(
+				'sortableTaxonomies',
+				/**
+				 * Filters the list of taxonomies that support custom ordering. Filter was introduced long
+				 * ago is only documented in 10.6.0.
+				 *
+				 * First instance in plugins/woocommerce/includes/admin/class-wc-admin-assets.php.
+				 *
+				 * @since 1.0
+				 *
+				 * @param array $sortable_taxonomies List of taxonomy slugs that support custom ordering.
+				 * @return array List of taxonomy slugs that support custom ordering.
+				 */
+				apply_filters( 'woocommerce_sortable_taxonomies', array( 'product_cat' ) )
+			);
 		}
 	}
 
@@ -267,6 +324,21 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 
 			if ( is_wp_error( $terms ) || empty( $terms ) ) {
 				return array();
+			}
+
+			// Add menu_order to flat terms for sorting.
+			if ( 'menu_order' === $orderby ) {
+				// Prime term meta cache in single query to avoid N+1.
+				update_termmeta_cache( wp_list_pluck( $terms, 'term_id' ) );
+				$terms = array_map(
+					function ( $term ) {
+						$term               = (array) $term;
+						$menu_order         = get_term_meta( $term['term_id'], 'order', true );
+						$term['menu_order'] = is_numeric( $menu_order ) ? (int) $menu_order : 0;
+						return (object) $term;
+					},
+					$terms
+				);
 			}
 
 			return $this->sort_terms_by_criteria( $terms, $orderby, $order, $taxonomy_counts );
@@ -449,7 +521,7 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 	}
 
 	/**
-	 * Sort terms by the specified criteria (name or count).
+	 * Sort terms by the specified criteria (name, count, or menu_order).
 	 *
 	 * @param array  $terms           Array of term objects to sort.
 	 * @param string $orderby         Sort field (name, count, menu_order).
@@ -470,6 +542,16 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 						$count_a    = $taxonomy_counts[ $a->term_id ] ?? 0;
 						$count_b    = $taxonomy_counts[ $b->term_id ] ?? 0;
 						$comparison = $count_a <=> $count_b;
+						break;
+
+					case 'menu_order':
+						$order_a    = $a->menu_order ?? 0;
+						$order_b    = $b->menu_order ?? 0;
+						$comparison = $order_a <=> $order_b;
+						// Secondary sort by name when menu_order is equal.
+						if ( 0 === $comparison ) {
+							$comparison = strcasecmp( $a->name, $b->name );
+						}
 						break;
 
 					case 'name':

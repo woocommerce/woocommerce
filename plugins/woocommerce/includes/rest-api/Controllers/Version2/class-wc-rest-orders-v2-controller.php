@@ -294,21 +294,10 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 
 		// Add additional applied coupon information.
 		if ( $item instanceof WC_Order_Item_Coupon ) {
-			$temp_coupon = new WC_Coupon();
-			$coupon_info = $item->get_meta( 'coupon_info', true );
-			if ( $coupon_info ) {
-				$temp_coupon->set_short_info( $coupon_info );
-			} else {
-				$coupon_meta = $item->get_meta( 'coupon_data', true );
-				if ( $coupon_meta ) {
-					$temp_coupon->set_props( (array) $coupon_meta );
-
-				}
-			}
-
-			$data['discount_type']  = $temp_coupon->get_discount_type();
-			$data['nominal_amount'] = (float) $temp_coupon->get_amount();
-			$data['free_shipping']  = $temp_coupon->get_free_shipping();
+			$coupon                 = WC_Coupon::from_order_item( $item );
+			$data['discount_type']  = $coupon->get_discount_type();
+			$data['nominal_amount'] = (float) $coupon->get_amount();
+			$data['free_shipping']  = $coupon->get_free_shipping();
 		}
 
 		$data['meta_data'] = array_map(
@@ -437,9 +426,10 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 					$data['refunds'] = array();
 					foreach ( $order->get_refunds() as $refund ) {
 						$data['refunds'][] = array(
-							'id'     => $refund->get_id(),
-							'reason' => $refund->get_reason() ? $refund->get_reason() : '',
-							'total'  => '-' . wc_format_decimal( $refund->get_amount(), $this->request['dp'] ),
+							'id'        => $refund->get_id(),
+							'reason'    => $refund->get_reason() ? $refund->get_reason() : '',
+							'total'     => '-' . wc_format_decimal( $refund->get_amount(), $this->request['dp'] ),
+							'total_tax' => wc_format_decimal( (float) $refund->get_total_tax(), $this->request['dp'] ),
 						);
 					}
 					break;
@@ -1254,7 +1244,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 					'readonly'    => true,
 				),
 				'total'                => array(
-					'description' => __( 'Grand total.', 'woocommerce' ),
+					'description' => __( 'Grand total, including tax.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -1266,7 +1256,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 					'readonly'    => true,
 				),
 				'prices_include_tax'   => array(
-					'description' => __( 'True the prices included tax during checkout.', 'woocommerce' ),
+					'description' => __( 'Whether prices included tax during checkout.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -1527,7 +1517,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 								'context'     => array( 'view', 'edit' ),
 							),
 							'subtotal'         => array(
-								'description' => __( 'Line subtotal (before discounts).', 'woocommerce' ),
+								'description' => __( 'Line subtotal, excluding tax (before discounts).', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 							),
@@ -1538,7 +1528,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 								'readonly'    => true,
 							),
 							'total'            => array(
-								'description' => __( 'Line total (after discounts).', 'woocommerce' ),
+								'description' => __( 'Line total, excluding tax (after discounts).', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 							),
@@ -1758,12 +1748,12 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 								'context'     => array( 'view', 'edit' ),
 							),
 							'total'        => array(
-								'description' => __( 'Line total (after discounts).', 'woocommerce' ),
+								'description' => __( 'Shipping total, excluding tax.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'total_tax'    => array(
-								'description' => __( 'Line total tax (after discounts).', 'woocommerce' ),
+								'description' => __( 'Shipping total tax.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
@@ -1850,12 +1840,12 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 								'enum'        => array( 'taxable', 'none' ),
 							),
 							'total'      => array(
-								'description' => __( 'Line total (after discounts).', 'woocommerce' ),
+								'description' => __( 'Fee total, excluding tax.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'total_tax'  => array(
-								'description' => __( 'Line total tax (after discounts).', 'woocommerce' ),
+								'description' => __( 'Fee total tax.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
@@ -2002,20 +1992,26 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 					'items'       => array(
 						'type'       => 'object',
 						'properties' => array(
-							'id'     => array(
+							'id'        => array(
 								'description' => __( 'Refund ID.', 'woocommerce' ),
 								'type'        => 'integer',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
-							'reason' => array(
+							'reason'    => array(
 								'description' => __( 'Refund reason.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
-							'total'  => array(
-								'description' => __( 'Refund total.', 'woocommerce' ),
+							'total'     => array(
+								'description' => __( 'Refund total, including tax.', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => array( 'view', 'edit' ),
+								'readonly'    => true,
+							),
+							'total_tax' => array(
+								'description' => __( 'Refund total tax.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,

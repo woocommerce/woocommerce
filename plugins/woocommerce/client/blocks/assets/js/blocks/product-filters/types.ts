@@ -27,6 +27,7 @@ export type FilterOptionItem = (
 	id?: number;
 	parent?: number;
 	depth?: number;
+	menuOrder?: number;
 };
 
 export type FilterBlockContext = {

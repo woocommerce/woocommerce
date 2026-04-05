@@ -109,7 +109,7 @@ class WC_REST_Product_Shipping_Classes_V1_Controller extends WC_REST_Terms_Contr
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'arg_options' => array(
-						'sanitize_callback' => 'sanitize_title',
+						'sanitize_callback' => array( $this, 'sanitize_slug' ),
 					),
 				),
 				'description' => array(

@@ -4,4 +4,7 @@ export {
 	getFieldLabel,
 } from './get-validity-message-for-input';
 export { default as isPostcode } from './is-postcode';
-export { productPriceValidation } from './validate-filter';
+export {
+	productPriceScreenReaderValidation,
+	productPriceValidation,
+} from './validate-filter';

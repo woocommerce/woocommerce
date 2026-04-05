@@ -139,6 +139,8 @@ class WC_Admin_Tests_Install extends WP_UnitTestCase {
 	 */
 	public function test_options_are_set() {
 		delete_transient( 'wc_installing' );
+		delete_option( 'wc_installing' );
+
 		WC_Install::install();
 
 		$options = array(
@@ -157,6 +159,8 @@ class WC_Admin_Tests_Install extends WP_UnitTestCase {
 	 */
 	public function test_woocommerce_admin_installed_action() {
 		delete_transient( 'wc_installing' );
+		delete_option( 'wc_installing' );
+
 		WC_Install::install();
 		$this->assertTrue( did_action( 'woocommerce_admin_installed' ) > 0 );
 	}
@@ -229,6 +233,8 @@ class WC_Admin_Tests_Install extends WP_UnitTestCase {
 	 */
 	public function test_migrate_options() {
 		delete_transient( 'wc_installing' );
+		delete_option( 'wc_installing' );
+
 		WC_Install::install();
 		$this->assertTrue( defined( 'WC_ADMIN_MIGRATING_OPTIONS' ) );
 		$migrated_options = array(

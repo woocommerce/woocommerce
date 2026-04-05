@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         WooCommerce Live Branches
 // @namespace    https://wordpress.com/
-// @version      1.1.1
+// @version      1.2.0
 // @description  Adds links to PRs pointing to Jurassic Ninja sites for live-testing a changeset
 // @grant        GM_xmlhttpRequest
 // @connect      jurassic.ninja
@@ -62,6 +62,55 @@
 		return m && m[ 1 ] ? decodeURIComponent( m[ 1 ] ) : null;
 	}
 
+	/**
+	 * Determine PR data from GitHub's embedded JSON.
+	 *
+	 * @return {object|null} Data with currentBranch and branchStatus, or null.
+	 */
+	function getPRDataFromEmbeddedJson() {
+		const el = document.querySelector(
+			'[data-target="react-app.embeddedData"]'
+		);
+		if ( ! el ) {
+			return null;
+		}
+		try {
+			const data = JSON.parse( el.textContent );
+			const pr =
+				data?.payload?.pullRequestsLayoutRoute?.pullRequest;
+			if ( pr?.headBranch && pr?.state ) {
+				return {
+					currentBranch: pr.headBranch,
+					branchStatus: pr.state,
+					headRepoOwner: pr.headRepositoryOwnerLogin || '',
+					isDraft: !! pr.isDraft,
+				};
+			}
+		} catch ( e ) {
+			// Fall through to legacy method.
+		}
+		return null;
+	}
+
+	/**
+	 * Determine PR data from legacy DOM selectors.
+	 *
+	 * @return {object|null} Data with currentBranch and branchStatus, or null.
+	 */
+	function getPRDataFromDom() {
+		const currentBranch = $( '.head-ref:first' ).text().trim();
+		if ( ! currentBranch ) {
+			return null;
+		}
+		const branchStatus = $( '.gh-header-meta .State' )
+			.text()
+			.trim();
+		if ( ! branchStatus ) {
+			return null;
+		}
+		return { currentBranch, branchStatus, headRepoOwner: '', isDraft: false };
+	}
+
 	/** Function. */
 	function doit() {
 		const markdownBody =
@@ -75,12 +124,23 @@
 		}
 
 		const host = 'https://jurassic.ninja';
-		const currentBranch = jQuery( '.head-ref:first' ).text();
-		const branchIsForked = currentBranch.includes( ':' );
-		const branchStatus = $( '.gh-header-meta .State' ).text().trim();
 		const repo = determineRepo();
+		const prData =
+			getPRDataFromEmbeddedJson() ?? getPRDataFromDom();
+		if ( ! prData ) {
+			appendHtml(
+				markdownBody,
+				'<p><strong>Failed to find PR data. The WooCommerce Live Branches script may need updating.</strong></p>'
+			);
+			return;
+		}
+		const { currentBranch, branchStatus } = prData;
+		const branchIsForked = prData.headRepoOwner
+			? prData.headRepoOwner !==
+				( repo ? repo.split( '/' )[ 0 ] : '' )
+			: currentBranch.includes( ':' );
 
-		if ( branchStatus === 'Merged' ) {
+		if ( branchStatus === 'MERGED' || branchStatus === 'Merged' ) {
 			const contents = `
 				<p><strong>This branch is already merged.</strong></p>
 				<p><a target="_blank" rel="nofollow noopener" href="${ getLink() }">
@@ -88,7 +148,11 @@
 				</a></p>
 			`;
 			appendHtml( markdownBody, contents );
-		} else if ( branchStatus === 'Draft' ) {
+		} else if (
+			branchStatus === 'Draft' ||
+			prData.isDraft ||
+			document.querySelector( '[data-status="draft"]' )
+		) {
 			appendHtml(
 				markdownBody,
 				'<p><strong>This branch is a draft. You can open live branches only from open pull requests.</strong></p>'
@@ -350,9 +414,7 @@
 			$el.append( liveBranches );
 			liveBranches
 				.find( 'input[type=checkbox]' )
-				.each( () =>
-					this.addEventListener( 'change', onInputChanged )
-				);
+				.on( 'change', onInputChanged );
 		}
 
 		/**

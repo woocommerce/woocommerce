@@ -13,6 +13,7 @@ export enum ProductCollectionUIStatesInEditor {
 	COLLECTION_PICKER = 'collection_chooser',
 	PRODUCT_REFERENCE_PICKER = 'product_context_picker',
 	HAND_PICKED_PRODUCTS_PICKER = 'hand_picked_products_picker',
+	TAXONOMY_PICKER = 'taxonomy_picker',
 	VALID_WITH_PREVIEW = 'uses_reference_preview_mode',
 	VALID = 'valid',
 	DELETED_PRODUCT_REFERENCE = 'deleted_product_reference',

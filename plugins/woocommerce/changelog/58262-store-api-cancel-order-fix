@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Fix auto-cancellation for unpaid checkout block orders

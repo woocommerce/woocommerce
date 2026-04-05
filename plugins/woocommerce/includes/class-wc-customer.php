@@ -67,14 +67,14 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Stores if user is VAT exempt for this session.
 	 *
-	 * @var string
+	 * @var bool
 	 */
 	protected $is_vat_exempt = false;
 
 	/**
 	 * Stores if user has calculated shipping in this session.
 	 *
-	 * @var string
+	 * @var bool
 	 */
 	protected $calculated_shipping = false;
 
@@ -171,7 +171,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * Return this customer's avatar.
 	 *
 	 * @since 3.0.0
-	 * @return string
+	 * @return string|false
 	 */
 	public function get_avatar_url() {
 		return get_avatar_url( $this->get_email() );
@@ -363,6 +363,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * Set if customer has tax exemption.
 	 *
 	 * @param bool $is_vat_exempt If is vat exempt.
+	 * @return void
 	 */
 	public function set_is_vat_exempt( $is_vat_exempt ) {
 		$this->is_vat_exempt = wc_string_to_bool( $is_vat_exempt );
@@ -372,6 +373,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * Calculated shipping?
 	 *
 	 * @param bool $calculated If shipping is calculated.
+	 * @return void
 	 */
 	public function set_calculated_shipping( $calculated = true ) {
 		$this->calculated_shipping = wc_string_to_bool( $calculated );
@@ -382,6 +384,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 *
 	 * @since 3.0.0
 	 * @param string $password Password.
+	 * @return void
 	 */
 	public function set_password( $password ) {
 		$this->password = $password;
@@ -838,6 +841,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 *
 	 * @since 3.0.0
 	 * @param string $username Username.
+	 * @return void
 	 */
 	public function set_username( $username ) {
 		$this->set_prop( 'username', $username );
@@ -848,6 +852,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 *
 	 * @since 3.0.0
 	 * @param string $value Email.
+	 * @return void
 	 */
 	public function set_email( $value ) {
 		if ( $value && ! is_email( (string) $value ) ) {
@@ -861,6 +866,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 *
 	 * @since 3.0.0
 	 * @param string $first_name First name.
+	 * @return void
 	 */
 	public function set_first_name( $first_name ) {
 		$this->set_prop( 'first_name', $first_name );
@@ -871,6 +877,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 *
 	 * @since 3.0.0
 	 * @param string $last_name Last name.
+	 * @return void
 	 */
 	public function set_last_name( $last_name ) {
 		$this->set_prop( 'last_name', $last_name );
@@ -881,6 +888,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 *
 	 * @since 3.1.0
 	 * @param string $display_name Display name.
+	 * @return void
 	 */
 	public function set_display_name( $display_name ) {
 		/* translators: 1: first name 2: last name */
@@ -892,6 +900,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 *
 	 * @since 3.0.0
 	 * @param mixed $role User role.
+	 * @return void
 	 */
 	public function set_role( $role ) {
 		global $wp_roles;
@@ -907,6 +916,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 *
 	 * @since  3.0.0
 	 * @param  string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if their is no date.
+	 * @return void
 	 */
 	public function set_date_created( $date = null ) {
 		$this->set_date_prop( 'date_created', $date );
@@ -917,6 +927,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 *
 	 * @since  3.0.0
 	 * @param  string|integer|null $date UTC timestamp, or ISO 8601 DateTime. If the DateTime string has no timezone or offset, WordPress site timezone will be assumed. Null if their is no date.
+	 * @return void
 	 */
 	public function set_date_modified( $date = null ) {
 		$this->set_date_prop( 'date_modified', $date );
@@ -926,6 +937,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * Set customer address to match shop base address.
 	 *
 	 * @since 3.0.0
+	 * @return void
 	 */
 	public function set_billing_address_to_base() {
 		$base = wc_get_customer_default_location();
@@ -936,6 +948,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * Set customer shipping address to base address.
 	 *
 	 * @since 3.0.0
+	 * @return void
 	 */
 	public function set_shipping_address_to_base() {
 		$base = wc_get_customer_default_location();
@@ -949,6 +962,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * @param string $state    State.
 	 * @param string $postcode Postcode.
 	 * @param string $city     City.
+	 * @return void
 	 */
 	public function set_billing_location( $country, $state = '', $postcode = '', $city = '' ) {
 		$address_data = $this->get_prop( 'billing', 'edit' );
@@ -970,6 +984,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * @param string $state    State.
 	 * @param string $postcode Postcode.
 	 * @param string $city     City.
+	 * @return void
 	 */
 	public function set_shipping_location( $country, $state = '', $postcode = '', $city = '' ) {
 		$address_data = $this->get_prop( 'shipping', 'edit' );
@@ -991,6 +1006,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * @param string $prop         Name of prop to set.
 	 * @param string $address_type Type of address; 'billing' or 'shipping'.
 	 * @param mixed  $value        Value of the prop.
+	 * @return void
 	 */
 	protected function set_address_prop( $prop, $address_type, $value ) {
 		if ( array_key_exists( $prop, $this->data[ $address_type ] ) ) {
@@ -1008,6 +1024,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * Set billing_first_name.
 	 *
 	 * @param string $value Billing first name.
+	 * @return void
 	 */
 	public function set_billing_first_name( $value ) {
 		$this->set_address_prop( 'first_name', 'billing', $value );
@@ -1017,6 +1034,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * Set billing_last_name.
 	 *
 	 * @param string $value Billing last name.
+	 * @return void
 	 */
 	public function set_billing_last_name( $value ) {
 		$this->set_address_prop( 'last_name', 'billing', $value );
@@ -1026,6 +1044,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * Set billing_company.
 	 *
 	 * @param string $value Billing company.
+	 * @return void
 	 */
 	public function set_billing_company( $value ) {
 		$this->set_address_prop( 'company', 'billing', $value );
@@ -1035,6 +1054,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * Set billing_address_1.
 	 *
 	 * @param string $value Billing address line 1.
+	 * @return void
 	 */
 	public function set_billing_address( $value ) {
 		$this->set_billing_address_1( $value );
@@ -1044,6 +1064,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * Set billing_address_1.
 	 *
 	 * @param string $value Billing address line 1.
+	 * @return void
 	 */
 	public function set_billing_address_1( $value ) {
 		$this->set_address_prop( 'address_1', 'billing', $value );
@@ -1053,6 +1074,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * Set billing_address_2.
 	 *
 	 * @param string $value Billing address line 2.
+	 * @return void
 	 */
 	public function set_billing_address_2( $value ) {
 		$this->set_address_prop( 'address_2', 'billing', $value );
@@ -1062,6 +1084,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * Set billing_city.
 	 *
 	 * @param string $value Billing city.
+	 * @return void
 	 */
 	public function set_billing_city( $value ) {
 		$this->set_address_prop( 'city', 'billing', $value );
@@ -1071,6 +1094,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * Set billing_state.
 	 *
 	 * @param string $value Billing state.
+	 * @return void
 	 */
 	public function set_billing_state( $value ) {
 		$this->set_address_prop( 'state', 'billing', $value );
@@ -1080,6 +1104,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * Set billing_postcode.
 	 *
 	 * @param string $value Billing postcode.
+	 * @return void
 	 */
 	public function set_billing_postcode( $value ) {
 		$this->set_address_prop( 'postcode', 'billing', $value );
@@ -1089,6 +1114,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * Set billing_country.
 	 *
 	 * @param string $value Billing country.
+	 * @return void
 	 */
 	public function set_billing_country( $value ) {
 		$this->set_address_prop( 'country', 'billing', $value );
@@ -1098,6 +1124,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * Set billing_email.
 	 *
 	 * @param string $value Billing email.
+	 * @return void
 	 */
 	public function set_billing_email( $value ) {
 		if ( $value && ! is_email( (string) $value ) ) {
@@ -1110,6 +1137,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * Set billing_phone.
 	 *
 	 * @param string $value Billing phone.
+	 * @return void
 	 */
 	public function set_billing_phone( $value ) {
 		$this->set_address_prop( 'phone', 'billing', $value );
@@ -1119,6 +1147,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * Set shipping_first_name.
 	 *
 	 * @param string $value Shipping first name.
+	 * @return void
 	 */
 	public function set_shipping_first_name( $value ) {
 		$this->set_address_prop( 'first_name', 'shipping', $value );
@@ -1128,6 +1157,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * Set shipping_last_name.
 	 *
 	 * @param string $value Shipping last name.
+	 * @return void
 	 */
 	public function set_shipping_last_name( $value ) {
 		$this->set_address_prop( 'last_name', 'shipping', $value );
@@ -1137,6 +1167,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * Set shipping_company.
 	 *
 	 * @param string $value Shipping company.
+	 * @return void
 	 */
 	public function set_shipping_company( $value ) {
 		$this->set_address_prop( 'company', 'shipping', $value );
@@ -1146,6 +1177,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * Set shipping_address_1.
 	 *
 	 * @param string $value Shipping address line 1.
+	 * @return void
 	 */
 	public function set_shipping_address( $value ) {
 		$this->set_shipping_address_1( $value );
@@ -1155,6 +1187,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * Set shipping_address_1.
 	 *
 	 * @param string $value Shipping address line 1.
+	 * @return void
 	 */
 	public function set_shipping_address_1( $value ) {
 		$this->set_address_prop( 'address_1', 'shipping', $value );
@@ -1164,6 +1197,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * Set shipping_address_2.
 	 *
 	 * @param string $value Shipping address line 2.
+	 * @return void
 	 */
 	public function set_shipping_address_2( $value ) {
 		$this->set_address_prop( 'address_2', 'shipping', $value );
@@ -1173,6 +1207,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * Set shipping_city.
 	 *
 	 * @param string $value Shipping city.
+	 * @return void
 	 */
 	public function set_shipping_city( $value ) {
 		$this->set_address_prop( 'city', 'shipping', $value );
@@ -1182,6 +1217,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * Set shipping_state.
 	 *
 	 * @param string $value Shipping state.
+	 * @return void
 	 */
 	public function set_shipping_state( $value ) {
 		$this->set_address_prop( 'state', 'shipping', $value );
@@ -1191,6 +1227,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * Set shipping_postcode.
 	 *
 	 * @param string $value Shipping postcode.
+	 * @return void
 	 */
 	public function set_shipping_postcode( $value ) {
 		$this->set_address_prop( 'postcode', 'shipping', $value );
@@ -1200,6 +1237,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * Set shipping_country.
 	 *
 	 * @param string $value Shipping country.
+	 * @return void
 	 */
 	public function set_shipping_country( $value ) {
 		$this->set_address_prop( 'country', 'shipping', $value );
@@ -1210,6 +1248,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 *
 	 * @since 5.6.0
 	 * @param string $value Shipping phone.
+	 * @return void
 	 */
 	public function set_shipping_phone( $value ) {
 		$this->set_address_prop( 'phone', 'shipping', $value );
@@ -1220,6 +1259,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	 *
 	 * @since 3.0.0
 	 * @param bool $is_paying_customer If is a paying customer.
+	 * @return void
 	 */
 	public function set_is_paying_customer( $is_paying_customer ) {
 		$this->set_prop( 'is_paying_customer', (bool) $is_paying_customer );

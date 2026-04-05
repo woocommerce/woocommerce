@@ -155,7 +155,8 @@ class Controller extends AbstractBlock {
 		if (
 			$is_product_collection_block &&
 			'woocommerce/product-collection' === $block_name &&
-			! $force_page_reload_global
+			! $force_page_reload_global &&
+			isset( $parsed_block['attrs']['queryId'] )
 		) {
 			$enhanced_query_stack[] = $parsed_block['attrs']['queryId'];
 
@@ -179,7 +180,7 @@ class Controller extends AbstractBlock {
 						return $content;
 					}
 
-					if ( isset( $dirty_enhanced_queries[ $block['attrs']['queryId'] ] ) ) {
+					if ( isset( $block['attrs']['queryId'] ) && isset( $dirty_enhanced_queries[ $block['attrs']['queryId'] ] ) ) {
 						wp_interactivity_config( 'core/router', array( 'clientNavigationDisabled' => true ) );
 						$dirty_enhanced_queries[ $block['attrs']['queryId'] ] = null;
 					}

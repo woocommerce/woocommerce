@@ -46,8 +46,10 @@
 
 	.wc-block-components-order-summary-item__image,
 	.wc-block-components-order-summary-item__description {
-		display: table-cell;
-		vertical-align: top;
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: $gap-smallest;
 	}
 
 	.wc-block-components-order-summary-item__image {
@@ -63,25 +65,27 @@
 	}
 
 	.wc-block-components-order-summary-item__quantity {
+		@include font-x-small-locked;
 		align-items: center;
-		background: #fff;
-		border: 2px solid;
-		border-radius: 1em;
-		box-shadow: 0 0 0 2px #fff;
-		border-color: $universal-border-light;
-		color: #000;
+		background: currentColor;
 		display: flex;
 		line-height: 1;
 		min-height: 20px;
-		padding: 0 0.4em;
 		position: absolute;
 		justify-content: center;
 		min-width: 20px;
+		border-radius: 20px;
 		right: 0;
 		top: 0;
 		transform: translate(50%, -50%);
 		white-space: nowrap;
 		z-index: 1;
+
+		// The span containing the text should be padded, not the quantity container itself.
+		span {
+			padding: 0 0.4em;
+			color: var(--wp--preset--color--background, #fff);
+		}
 	}
 
 	.wc-block-components-order-summary-item__description {
@@ -93,9 +97,38 @@
 
 		p,
 		.wc-block-components-product-metadata {
-			line-height: 1.375;
-			margin-top: $gap-smallest;
+			line-height: 1.4;
 		}
+	}
+
+	.wc-block-cart-item__prices {
+		display: flex;
+		flex-direction: row;
+		flex-wrap: wrap;
+		gap: $gap-smaller;
+		align-items: center;
+
+		> :empty {
+			display: none;
+		}
+	}
+
+	.wc-block-components-order-summary-item__individual-prices {
+		del {
+			margin-right: 0.5em;
+		}
+
+		ins {
+			display: inline-block;
+			margin-left: 0;
+		}
+	}
+
+	.wc-block-cart-item__total-price-and-sale-badge-wrapper {
+		display: flex;
+		flex-direction: column;
+		align-items: flex-end;
+		gap: $gap-smallest;
 	}
 
 	.wc-block-components-order-summary-item__total-price {

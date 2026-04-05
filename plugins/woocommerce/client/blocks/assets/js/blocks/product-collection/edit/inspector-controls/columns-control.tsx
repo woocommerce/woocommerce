@@ -23,7 +23,13 @@ const toggleHelp = __(
 	'woocommerce'
 );
 
-const ColumnsControl = ( props: DisplayLayoutControlProps ) => {
+interface ColumnsControlProps extends DisplayLayoutControlProps {
+	maxColumns?: number;
+	hideResponsiveToggle?: boolean;
+}
+
+const ColumnsControl = ( props: ColumnsControlProps ) => {
+	const { maxColumns, hideResponsiveToggle } = props;
 	const { type, columns, shrinkColumns } = props.displayLayout;
 	const showColumnsControl = type === 'flex';
 
@@ -44,13 +50,20 @@ const ColumnsControl = ( props: DisplayLayoutControlProps ) => {
 		} );
 	};
 
-	const onColumnsChange = ( value: number ) =>
+	const onColumnsChange = ( value?: number ) => {
+		if ( value === undefined ) {
+			return;
+		}
 		props.setAttributes( {
 			displayLayout: {
 				...props.displayLayout,
 				columns: value,
 			},
 		} );
+	};
+
+	const defaultMaxColumns = 6;
+	const effectiveMaxColumns = maxColumns ?? defaultMaxColumns;
 
 	return showColumnsControl ? (
 		<>
@@ -67,25 +80,27 @@ const ColumnsControl = ( props: DisplayLayoutControlProps ) => {
 					onChange={ onColumnsChange }
 					value={ columns }
 					min={ 1 }
-					max={ Math.max( 6, columns ) }
+					max={ Math.max( effectiveMaxColumns, columns ) }
 				/>
 			</ToolsPanelItem>
-			<ToolsPanelItem
-				label={ toggleLabel }
-				hasValue={ () =>
-					defaultLayout?.shrinkColumns !== shrinkColumns
-				}
-				isShownByDefault
-				onDeselect={ onPanelDeselect }
-			>
-				<ToggleControl
-					__nextHasNoMarginBottom
-					checked={ !! shrinkColumns }
+			{ ! hideResponsiveToggle && (
+				<ToolsPanelItem
 					label={ toggleLabel }
-					help={ toggleHelp }
-					onChange={ onShrinkColumnsToggleChange }
-				/>
-			</ToolsPanelItem>
+					hasValue={ () =>
+						defaultLayout?.shrinkColumns !== shrinkColumns
+					}
+					isShownByDefault
+					onDeselect={ onPanelDeselect }
+				>
+					<ToggleControl
+						__nextHasNoMarginBottom
+						checked={ !! shrinkColumns }
+						label={ toggleLabel }
+						help={ toggleHelp }
+						onChange={ onShrinkColumnsToggleChange }
+					/>
+				</ToolsPanelItem>
+			) }
 		</>
 	) : null;
 };
