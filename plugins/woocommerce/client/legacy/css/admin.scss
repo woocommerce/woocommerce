@@ -8316,10 +8316,13 @@ table.bar_chart {
 
 		.select2-selection--multiple {
 			min-height: 40px;
-			height: 38px;
 
-			.select2-selection__rendered li {
-				margin-top: 0; // Prevent extra spacing inside multi-select.
+			.select2-selection__rendered {
+				display: block;
+
+				.select2-search--inline {
+					margin: 0;
+				}
 			}
 		}
 
@@ -8396,18 +8399,6 @@ table.bar_chart {
 		#delete-action {
 			float: left;
 		}
-	}
-
-	// Product data panel labels: vertically center with taller WP 7.0 inputs.
-	.woocommerce_options_panel p.form-field label,
-	.woocommerce_options_panel fieldset.form-field label,
-	.woocommerce_options_panel fieldset.form-field legend {
-		padding-top: 8px;
-	}
-
-	// Help tips: vertically center with taller WP 7.0 inputs.
-	.woocommerce_options_panel .form-field .woocommerce-help-tip {
-		margin-top: 12px;
 	}
 
 	// Search box select: match WP 7.0 compact search-box sizing (32px).
