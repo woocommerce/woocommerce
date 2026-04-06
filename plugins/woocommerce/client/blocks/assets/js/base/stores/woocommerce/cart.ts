@@ -102,6 +102,7 @@ export type Store = {
 		};
 		restUrl: string;
 		nonce: string;
+		isProcessing: boolean;
 		findItemInCart: ( args: {
 			id: ClientCartItem[ 'id' ];
 			key?: ClientCartItem[ 'key' ];
@@ -288,6 +289,9 @@ const { actions } = store< Store >(
 	'woocommerce',
 	{
 		state: {
+			get isProcessing(): boolean {
+				return cartQueue?.getStatus().isProcessing ?? false;
+			},
 			findItemInCart( {
 				id,
 				key,
