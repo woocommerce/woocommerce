@@ -957,7 +957,8 @@ class WC_Checkout {
 				$errors->add( 'shipping', __( 'Please enter an address to continue.', 'woocommerce' ) );
 			} elseif ( ! in_array( $shipping_country, array_keys( WC()->countries->get_shipping_countries() ), true ) ) {
 				if ( WC()->countries->country_exists( $shipping_country ) ) {
-					$shipping_country_name = WC()->countries->get_countries()[ $shipping_country ];
+					$countries             = WC()->countries->get_countries();
+					$shipping_country_name = $countries[ $shipping_country ] ?? $shipping_country;
 					$errors->add(
 						'shipping',
 						sprintf(
