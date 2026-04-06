@@ -99,6 +99,7 @@ class ProceedToCheckoutBlock extends AbstractInnerBlock {
 			'<div
 				class="wc-block-cart__submit"
 				data-wp-interactive="woocommerce/proceed-to-checkout"
+				data-wp-init="callbacks.onPageShow"
 				%1$s
 			>
 				<div aria-hidden="true" style="height:0;overflow:hidden;position:relative" data-wp-init="callbacks.initStickyObserver"></div>
