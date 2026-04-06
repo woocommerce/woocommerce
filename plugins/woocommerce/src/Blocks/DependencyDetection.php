@@ -49,6 +49,7 @@ final class DependencyDetection {
 		'priceFormat'           => 'wc-price-format',
 		'blocksCheckout'        => 'wc-blocks-checkout',
 		'blocksCheckoutEvents'  => 'wc-blocks-checkout-events',
+		'blocksCartEvents'      => 'wc-blocks-cart-events',
 		'blocksComponents'      => 'wc-blocks-components',
 		'wcTypes'               => 'wc-types',
 		'sanitize'              => 'wc-sanitize',

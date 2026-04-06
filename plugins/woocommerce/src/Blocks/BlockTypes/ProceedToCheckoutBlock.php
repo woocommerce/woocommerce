@@ -71,6 +71,7 @@ class ProceedToCheckoutBlock extends AbstractInnerBlock {
 	 */
 	private function render_iapi( $attributes, $content, $block ) {
 		wp_enqueue_script_module( 'woocommerce/proceed-to-checkout' );
+		wp_enqueue_script( 'wc-blocks-cart-events' );
 
 		$consent = 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce';
 		BlocksSharedState::load_cart_state( $consent );
