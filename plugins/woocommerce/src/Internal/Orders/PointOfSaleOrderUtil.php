@@ -33,9 +33,8 @@ class PointOfSaleOrderUtil {
 	 *
 	 * An order is considered paid at POS if:
 	 * - It was created via the POS REST API, OR
-	 * - It was paid via card terminal (_wcpay_ipp_channel = mobile_pos), OR
-	 * - It was paid via Stripe card terminal (_stripe_ipp_channel = mobile_pos), OR
-	 * - It was paid via cash at POS (_cash_change_amount meta present).
+	 * - It was paid via card terminal, OR
+	 * - It was paid via cash at POS.
 	 *
 	 * @param WC_Abstract_Order $order Order instance.
 	 * @return bool
