@@ -1032,16 +1032,22 @@ describe( 'getChartTypeForQuery', () => {
 } );
 
 describe( 'getStoreTimeZoneMoment', () => {
+	let mockTz: jest.SpyInstance;
+	let utcOffset: jest.SpyInstance;
+
+	afterEach( () => {
+		mockTz?.mockRestore();
+		utcOffset?.mockRestore();
+	} );
+
 	it( 'should return the default moment when no timezone exists', () => {
-		const mockTz = jest.spyOn( momentTz, 'tz' );
-		const utcOffset = ( moment.prototype.utcOffset = jest.fn() );
+		mockTz = jest.spyOn( momentTz, 'tz' );
+		utcOffset = jest.spyOn( moment.prototype, 'utcOffset' );
 
 		expect( getStoreTimeZoneMoment() ).toHaveProperty( '_isAMomentObject' );
 
 		expect( mockTz ).not.toHaveBeenCalled();
 		expect( utcOffset ).not.toHaveBeenCalled();
-
-		mockTz.mockRestore();
 	} );
 
 	it( 'should use the timezone string when one is set', () => {
@@ -1049,15 +1055,13 @@ describe( 'getStoreTimeZoneMoment', () => {
 			timeZone: 'Asia/Taipei',
 		};
 
-		const mockTz = jest.spyOn( momentTz, 'tz' ).mockReturnValue( moment() );
-		const utcOffset = ( moment.prototype.utcOffset = jest.fn() );
+		mockTz = jest.spyOn( momentTz, 'tz' ).mockReturnValue( moment() );
+		utcOffset = jest.spyOn( moment.prototype, 'utcOffset' );
 
 		getStoreTimeZoneMoment();
 
 		expect( mockTz ).toHaveBeenCalledWith( 'Asia/Taipei' );
 		expect( utcOffset ).not.toHaveBeenCalled();
-
-		mockTz.mockRestore();
 	} );
 
 	it( 'should use the utc offset when it is set', () => {
@@ -1065,8 +1069,8 @@ describe( 'getStoreTimeZoneMoment', () => {
 			timeZone: '+06:00',
 		};
 
-		const mockTz = jest.spyOn( momentTz, 'tz' );
-		const utcOffset = ( moment.prototype.utcOffset = jest.fn() );
+		mockTz = jest.spyOn( momentTz, 'tz' );
+		utcOffset = jest.spyOn( moment.prototype, 'utcOffset' );
 
 		getStoreTimeZoneMoment();
 
@@ -1081,8 +1085,6 @@ describe( 'getStoreTimeZoneMoment', () => {
 
 		expect( mockTz ).not.toHaveBeenCalled();
 		expect( utcOffset ).toHaveBeenCalledWith( '-04:00' );
-
-		mockTz.mockRestore();
 	} );
 
 	it( 'should fall back to wcSettings.admin.timeZone when wcSettings.timeZone is not set', () => {
@@ -1092,15 +1094,13 @@ describe( 'getStoreTimeZoneMoment', () => {
 			},
 		};
 
-		const mockTz = jest.spyOn( momentTz, 'tz' ).mockReturnValue( moment() );
-		const utcOffset = ( moment.prototype.utcOffset = jest.fn() );
+		mockTz = jest.spyOn( momentTz, 'tz' ).mockReturnValue( moment() );
+		utcOffset = jest.spyOn( moment.prototype, 'utcOffset' );
 
 		getStoreTimeZoneMoment();
 
 		expect( mockTz ).toHaveBeenCalledWith( 'America/New_York' );
 		expect( utcOffset ).not.toHaveBeenCalled();
-
-		mockTz.mockRestore();
 	} );
 
 	it( 'should use wcSettings.admin.timeZone utc offset when wcSettings.timeZone is not set', () => {
@@ -1110,15 +1110,13 @@ describe( 'getStoreTimeZoneMoment', () => {
 			},
 		};
 
-		const mockTz = jest.spyOn( momentTz, 'tz' );
-		const utcOffset = ( moment.prototype.utcOffset = jest.fn() );
+		mockTz = jest.spyOn( momentTz, 'tz' );
+		utcOffset = jest.spyOn( moment.prototype, 'utcOffset' );
 
 		getStoreTimeZoneMoment();
 
 		expect( mockTz ).not.toHaveBeenCalled();
 		expect( utcOffset ).toHaveBeenCalledWith( '+05:00' );
-
-		mockTz.mockRestore();
 	} );
 
 	it( 'should prefer wcSettings.timeZone over wcSettings.admin.timeZone', () => {
@@ -1129,15 +1127,13 @@ describe( 'getStoreTimeZoneMoment', () => {
 			},
 		};
 
-		const mockTz = jest.spyOn( momentTz, 'tz' ).mockReturnValue( moment() );
-		const utcOffset = ( moment.prototype.utcOffset = jest.fn() );
+		mockTz = jest.spyOn( momentTz, 'tz' ).mockReturnValue( moment() );
+		utcOffset = jest.spyOn( moment.prototype, 'utcOffset' );
 
 		getStoreTimeZoneMoment();
 
 		expect( mockTz ).toHaveBeenCalledWith( 'Europe/London' );
 		expect( utcOffset ).not.toHaveBeenCalled();
-
-		mockTz.mockRestore();
 	} );
 
 	it( 'should use momentTz.tz() static function, not moment().tz() instance method', () => {
@@ -1157,13 +1153,12 @@ describe( 'getStoreTimeZoneMoment', () => {
 
 		// Mock momentTz.tz since its internals also use the shared prototype in tests.
 		// In production, momentTz's closure holds the original moment with .tz intact.
-		const mockTz = jest.spyOn( momentTz, 'tz' ).mockReturnValue( moment() );
+		mockTz = jest.spyOn( momentTz, 'tz' ).mockReturnValue( moment() );
 
 		try {
 			expect( () => getStoreTimeZoneMoment() ).not.toThrow();
 			expect( mockTz ).toHaveBeenCalledWith( 'Asia/Taipei' );
 		} finally {
-			mockTz.mockRestore();
 			moment.prototype.tz = originalTz;
 		}
 	} );
