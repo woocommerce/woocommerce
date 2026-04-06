@@ -1139,6 +1139,31 @@ describe( 'getStoreTimeZoneMoment', () => {
 
 		mockTz.mockRestore();
 	} );
+
+	it( 'should use momentTz.tz() static function, not moment().tz() instance method', () => {
+		// Regression test for plugin conflict where a third-party plugin
+		// clobbers window.moment, removing .tz() from new instances.
+		// The fix uses the bundled momentTz.tz() static function which
+		// operates on moment-timezone's closure reference, unaffected
+		// by the global being replaced.
+		global.window.wcSettings = {
+			timeZone: 'Asia/Taipei',
+		};
+
+		// Remove .tz from prototype to simulate clobbered moment instances.
+		const originalTz = moment.prototype.tz;
+		delete ( moment.prototype as any ).tz;
+
+		// Mock momentTz.tz since its internals also use the shared prototype in tests.
+		// In production, momentTz's closure holds the original moment with .tz intact.
+		const mockTz = jest.spyOn( momentTz, 'tz' ).mockReturnValue( moment() );
+
+		expect( () => getStoreTimeZoneMoment() ).not.toThrow();
+		expect( mockTz ).toHaveBeenCalledWith( 'Asia/Taipei' );
+
+		mockTz.mockRestore();
+		moment.prototype.tz = originalTz;
+	} );
 } );
 
 describe( 'getDateFormatsForIntervalPhp', () => {
