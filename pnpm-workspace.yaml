@@ -49,6 +49,8 @@ strictDepBuilds: true
 allowBuilds:
     msw: true
     fs-ext: true
+    fs-ext-extra-prebuilt: true
+    '@parcel/watcher': true
     # Explicitly denied — these deps have build scripts we don't need.
     '@swc/core': false
     core-js: false
@@ -58,6 +60,8 @@ allowBuilds:
     node-pty: false
     puppeteer-core: false
     yarn: false
+    unrs-resolver: false
+    aws-sdk: false
 
 # Block odd protocols (git+ssh, etc.) in transitive dependencies.
 # DISABLED: @wordpress/interactivity uses a git-hosted fork (via .pnpmfile.cjs readPackage hook)
@@ -68,22 +72,25 @@ blockExoticSubdeps: false
 # Prevent trust downgrades (e.g., replacing a signed version with unsigned).
 trustPolicy: no-downgrade
 trustPolicyExclude:
-    # oxc-resolver 11.2.0 bindings lost provenance attestation compared to earlier versions.
-    # These are platform-specific native bindings used by knip via oxc-resolver.
-    - '@oxc-resolver/binding-darwin-arm64@11.2.0'
-    - '@oxc-resolver/binding-darwin-x64@11.2.0'
-    - '@oxc-resolver/binding-freebsd-x64@11.2.0'
-    - '@oxc-resolver/binding-linux-arm64-gnu@11.2.0'
-    - '@oxc-resolver/binding-linux-arm64-musl@11.2.0'
-    - '@oxc-resolver/binding-linux-arm-gnueabihf@11.2.0'
-    - '@oxc-resolver/binding-linux-riscv64-gnu@11.2.0'
-    - '@oxc-resolver/binding-linux-s390x-gnu@11.2.0'
-    - '@oxc-resolver/binding-linux-x64-gnu@11.2.0'
-    - '@oxc-resolver/binding-linux-x64-musl@11.2.0'
-    - '@oxc-resolver/binding-wasm32-wasi@11.2.0'
-    - '@oxc-resolver/binding-win32-arm64-msvc@11.2.0'
-    - '@oxc-resolver/binding-win32-x64-msvc@11.2.0'
-    # Newer major has provenance but we're on an older one.
-    - semver@6.3.1
-    # Lost provenance attestation in this version (dep of @types/node).
-    - undici-types@6.19.8
+    # Release automations broke for a release (https://github.com/nodejs/undici/issues/4666)
+    - 'undici-types@6.21.0'
+    - 'undici@5.29.0'
+    # Backported security fixes (https://github.com/advisories/GHSA-c2qf-rxjj-qqgw)
+    - 'semver@5.7.2 || 6.3.1'
+    # Release automations broke for a release (https://github.com/paulmillr/chokidar/issues/1440)
+	# Likely released without signing on accident (https://github.com/paulmillr/chokidar/issues/1440)
+    - 'chokidar@3.5.3 || 4.0.3'
+    # Backport without provenance
+    - '@octokit/webhooks@12.3.2'
+    - '@octokit/plugin-paginate-rest@9.2.2'
+    - '@octokit/endpoint@9.0.6'
+	# Backport without provenance
+    - 'eslint-config-prettier@8.10.2'
+    # Backported without provenance
+    - 'css-declaration-sorter@6.4.1'
+    # Backported without provenance
+    - 'hosted-git-info@6.1.3'
+    # Backported without provenance
+    - 'detect-port@1.6.1'
+    # Backported without provenance (https://github.com/reduxjs/reselect/issues/752)
+    - 'reselect@5.1.1'
