@@ -14,7 +14,8 @@
 	"require-dev": {
 		"yoast/phpunit-polyfills": "^4.0.0",
 		"automattic/phpunit-select-config": "^1.0",
-		"automattic/wordbless": "^0.5"
+		"automattic/wordbless": "^0.5",
+		"woocommerce/woocommerce-sniffs": "1.0.0"
 	},
 	"autoload": {
 		"classmap": [
@@ -38,11 +39,18 @@
 		],
 		"build-development": [
 			"pnpm run build"
+		],
+		"phpcs": [
+			"phpcs -s -p"
+		],
+		"phpcbf": [
+			"phpcbf -p"
 		]
 	},
 	"config": {
 		"allow-plugins": {
-			"roots/wordpress-core-installer": true
+			"roots/wordpress-core-installer": true,
+			"dealerdirect/phpcodesniffer-composer-installer": true
 		},
 		"platform": {
 			"php": "7.4"

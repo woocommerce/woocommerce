@@ -16,6 +16,7 @@
 	"author": "Automattic",
 	"scripts": {
 		"build": "pnpm run clean && webpack",
+		"build:composer-package": "bash tasks/build-package.sh",
 		"build-production": "NODE_ENV=production BABEL_ENV=production pnpm run build",
 		"clean": "rm -rf build/",
 		"test": "jest --passWithNoTests",
@@ -47,12 +48,6 @@
 	},
 	"config": {
 		"ci": {
-			"lint": {
-				"command": "lint",
-				"changes": [
-					"src/**/*.php"
-				]
-			},
 			"tests": [
 				{
 					"name": "PHP: 8.1 WP: latest",
