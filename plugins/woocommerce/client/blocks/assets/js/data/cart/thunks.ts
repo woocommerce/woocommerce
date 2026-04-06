@@ -32,6 +32,7 @@ import {
 } from './notify-quantity-changes';
 import { updateCartErrorNotices } from './notify-errors';
 import { apiFetchWithHeaders } from '../shared-controls';
+import { isObject } from '../../types/type-guards/object';
 import {
 	getIsCustomerDataDirty,
 	setIsCustomerDataDirty,
@@ -141,11 +142,7 @@ export const applyExtensionCartUpdate =
 			} );
 			// Determine which addresses should be overwritten in the store.
 			const raw = args.overwriteDirtyCustomerData;
-			const isPlainObject =
-				typeof raw === 'object' &&
-				raw !== null &&
-				! Array.isArray( raw );
-			const overwrite = isPlainObject
+			const overwrite = isObject( raw )
 				? {
 						shipping_address: raw.shipping_address === true,
 						billing_address: raw.billing_address === true,

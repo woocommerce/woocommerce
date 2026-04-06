@@ -520,6 +520,25 @@ describe( 'applyExtensionCartUpdate', () => {
 		} );
 	} );
 
+	it( 'should strip both addresses when object has explicit false flags', async () => {
+		mockGetIsCustomerDataDirty.mockReturnValue( true );
+		const dispatch = createMockDispatch();
+
+		await applyExtensionCartUpdate( {
+			namespace: 'test',
+			data: {},
+			overwriteDirtyCustomerData: {
+				shipping_address: false,
+				billing_address: false,
+			},
+		} )( { dispatch } as never );
+
+		const received = dispatch.receiveCart.mock.calls[ 0 ][ 0 ];
+		expect( received ).not.toHaveProperty( 'shipping_address' );
+		expect( received ).not.toHaveProperty( 'billing_address' );
+		expect( received ).toHaveProperty( 'totals' );
+	} );
+
 	it( 'should overwrite specified address even when customer data is not dirty', async () => {
 		mockGetIsCustomerDataDirty.mockReturnValue( false );
 		const dispatch = createMockDispatch();
