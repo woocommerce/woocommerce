@@ -16,8 +16,11 @@ type CartEventsEmitter = {
 };
 
 const getCartEventsEmitter = (): CartEventsEmitter =>
-	( window as unknown as { wc: { blocksCartEvents: CartEventsEmitter } } ).wc
-		.blocksCartEvents;
+	(
+		window as unknown as {
+			wc: { blocksCartEvents: { cartEventsEmitter: CartEventsEmitter } };
+		}
+	).wc.blocksCartEvents.cartEventsEmitter;
 
 const CART_EVENTS = {
 	PROCEED_TO_CHECKOUT: 'cart_proceed_to_checkout',
