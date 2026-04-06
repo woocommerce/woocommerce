@@ -259,17 +259,17 @@ function create_fulfillment_for_order( $order_id, $items, $tracking_number = '' 
 }
 ```
 
-**Custom shipping provider:**
+### Custom shipping provider
 
 To extend fulfillment functionality, you can register custom shipping providers in two ways.
 
-**Option 1: Via the admin UI**
+#### Option 1: Via the admin UI
 
 Navigate to **WooCommerce → Settings → Shipping → Shipping providers** to add a provider name, icon, and tracking URL template through the admin interface. Providers added this way appear immediately in the fulfillment tracking provider selector.
 
 > **Note**: Providers added through the UI do not support automatic tracking number parsing. If you need to detect a specific tracking number format and auto-select the correct provider, you must register the provider in code (Option 2) and implement `try_parse_tracking_number()`.
 
-**Option 2: Via code (supports tracking number parsing)**
+#### Option 2: Via code (supports tracking number parsing)
 
 ```php
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Providers\AbstractShippingProvider;
