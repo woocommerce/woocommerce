@@ -2,12 +2,42 @@
  * External dependencies
  */
 import { store, getContext, getElement } from '@wordpress/interactivity';
-import { isErrorResponse } from '@woocommerce/types';
+/**
+ * The cart events emitter is loaded as a traditional script and exposed
+ * on window.wc.blocksCartEvents. We access it at runtime rather than
+ * importing from source to avoid pulling @woocommerce/types into the
+ * script module build.
+ */
+type CartEventsEmitter = {
+	emitWithAbort: (
+		eventName: string,
+		data: unknown
+	) => Promise< Array< { type: string } > >;
+};
+
+const getCartEventsEmitter = (): CartEventsEmitter =>
+	( window as unknown as { wc: { blocksCartEvents: CartEventsEmitter } } ).wc
+		.blocksCartEvents;
+
+const CART_EVENTS = {
+	PROCEED_TO_CHECKOUT: 'cart_proceed_to_checkout',
+} as const;
 
 /**
- * Internal dependencies
+ * Check if an observer response is an error type.
+ * Inlined to avoid importing @woocommerce/types (not available in script modules).
  */
-import { cartEventsEmitter, CART_EVENTS } from '../../../../events/cart-events';
+const isErrorOrFailResponse = ( response: unknown ): boolean => {
+	if (
+		typeof response !== 'object' ||
+		response === null ||
+		! ( 'type' in response )
+	) {
+		return false;
+	}
+	const type = ( response as { type: string } ).type;
+	return type === 'error' || type === 'failure';
+};
 
 type WooCommerce = {
 	state: {
@@ -73,14 +103,14 @@ const { state: ptcState } = store< ProceedToCheckoutStore >(
 				}
 
 				// Dispatch proceed-to-checkout event. Observers can abort.
-				const responses: Awaited<
-					ReturnType< typeof cartEventsEmitter.emitWithAbort >
-				> = yield cartEventsEmitter.emitWithAbort(
+				const emitter = getCartEventsEmitter();
+				const responses: Array< { type: string } > =
+					yield emitter.emitWithAbort(
 					CART_EVENTS.PROCEED_TO_CHECKOUT,
 					null
 				);
 
-				if ( responses.some( isErrorResponse ) ) {
+				if ( responses.some( isErrorOrFailResponse ) ) {
 					return;
 				}
 

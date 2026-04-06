@@ -7,8 +7,8 @@ import type { ObserverResponse } from '@woocommerce/types';
 /**
  * Internal dependencies
  */
-import { cartEventsEmitter, CART_EVENTS } from '../../../../events/cart-events';
-import type { EventListener } from '../../../../events/event-emitter';
+import { cartEventsEmitter, CART_EVENTS } from '../../../../../events/cart-events';
+import type { EventListener } from '../../../../../events/event-emitter';
 
 type CartEventsContextType = {
 	onProceedToCheckout: (
