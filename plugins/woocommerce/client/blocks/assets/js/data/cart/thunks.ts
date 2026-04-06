@@ -140,15 +140,20 @@ export const applyExtensionCartUpdate =
 				cache: 'no-store',
 			} );
 			// Determine which addresses should be overwritten in the store.
-			const overwrite =
-				typeof args.overwriteDirtyCustomerData === 'object'
-					? args.overwriteDirtyCustomerData
-					: {
-							shipping_address:
-								args.overwriteDirtyCustomerData === true,
-							billing_address:
-								args.overwriteDirtyCustomerData === true,
-					  };
+			const raw = args.overwriteDirtyCustomerData;
+			const isPlainObject =
+				typeof raw === 'object' &&
+				raw !== null &&
+				! Array.isArray( raw );
+			const overwrite = isPlainObject
+				? {
+						shipping_address: raw.shipping_address === true,
+						billing_address: raw.billing_address === true,
+				  }
+				: {
+						shipping_address: raw === true,
+						billing_address: raw === true,
+				  };
 
 			const isDirty = getIsCustomerDataDirty();
 
