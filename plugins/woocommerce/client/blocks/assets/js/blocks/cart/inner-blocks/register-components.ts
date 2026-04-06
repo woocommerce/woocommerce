@@ -72,10 +72,19 @@ registerCheckoutBlock( {
 	component: CartExpressPaymentFrontend,
 } );
 
-registerCheckoutBlock( {
-	metadata: metadata.PROCEED_TO_CHECKOUT,
-	component: ProceedToCheckoutFrontend,
-} );
+// When the IAPI flag is on, PHP renders data-wp-interactive markup.
+// Skip React registration so renderInnerBlocks preserves the server HTML
+// and the IAPI runtime can bind to it.
+if (
+	! document.querySelector(
+		'[data-wp-interactive="woocommerce/proceed-to-checkout"]'
+	)
+) {
+	registerCheckoutBlock( {
+		metadata: metadata.PROCEED_TO_CHECKOUT,
+		component: ProceedToCheckoutFrontend,
+	} );
+}
 
 registerCheckoutBlock( {
 	metadata: metadata.CART_ACCEPTED_PAYMENT_METHODS,
