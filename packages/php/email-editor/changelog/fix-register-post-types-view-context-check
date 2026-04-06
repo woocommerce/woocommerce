@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix `register_post_types_to_api()` to verify view context availability before skipping field registration on WordPress 7.0+
