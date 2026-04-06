@@ -30,6 +30,10 @@ const entries = {
 	// Experimental mini cart frontend modules, only enqueued when experimental-iapi-mini-cart feature flag is enabled.
 	'woocommerce/mini-cart': './assets/js/blocks/mini-cart/iapi-frontend.ts',
 
+	// Experimental proceed-to-checkout IAPI frontend, only enqueued when experimental-iapi-cart feature flag is enabled.
+	'woocommerce/proceed-to-checkout':
+		'./assets/js/blocks/cart/inner-blocks/proceed-to-checkout-block/iapi-frontend.ts',
+
 	// Product elements frontend module. Share by several blocks.
 	'woocommerce/product-elements':
 		'./assets/js/atomic/blocks/product-elements/frontend.ts',
