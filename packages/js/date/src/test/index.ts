@@ -2,6 +2,7 @@
  * External dependencies
  */
 import moment from 'moment';
+import momentTz from 'moment-timezone';
 import { format as formatDate } from '@wordpress/date';
 import { timeFormat as d3TimeFormat } from 'd3-time-format';
 /**
@@ -1032,13 +1033,15 @@ describe( 'getChartTypeForQuery', () => {
 
 describe( 'getStoreTimeZoneMoment', () => {
 	it( 'should return the default moment when no timezone exists', () => {
-		const mockTz = ( moment.prototype.tz = jest.fn() );
+		const mockTz = jest.spyOn( momentTz, 'tz' );
 		const utcOffset = ( moment.prototype.utcOffset = jest.fn() );
 
 		expect( getStoreTimeZoneMoment() ).toHaveProperty( '_isAMomentObject' );
 
 		expect( mockTz ).not.toHaveBeenCalled();
 		expect( utcOffset ).not.toHaveBeenCalled();
+
+		mockTz.mockRestore();
 	} );
 
 	it( 'should use the timezone string when one is set', () => {
@@ -1046,13 +1049,15 @@ describe( 'getStoreTimeZoneMoment', () => {
 			timeZone: 'Asia/Taipei',
 		};
 
-		const mockTz = ( moment.prototype.tz = jest.fn() );
+		const mockTz = jest.spyOn( momentTz, 'tz' ).mockReturnValue( moment() );
 		const utcOffset = ( moment.prototype.utcOffset = jest.fn() );
 
 		getStoreTimeZoneMoment();
 
 		expect( mockTz ).toHaveBeenCalledWith( 'Asia/Taipei' );
 		expect( utcOffset ).not.toHaveBeenCalled();
+
+		mockTz.mockRestore();
 	} );
 
 	it( 'should use the utc offset when it is set', () => {
@@ -1060,7 +1065,7 @@ describe( 'getStoreTimeZoneMoment', () => {
 			timeZone: '+06:00',
 		};
 
-		const mockTz = ( moment.prototype.tz = jest.fn() );
+		const mockTz = jest.spyOn( momentTz, 'tz' );
 		const utcOffset = ( moment.prototype.utcOffset = jest.fn() );
 
 		getStoreTimeZoneMoment();
@@ -1076,6 +1081,8 @@ describe( 'getStoreTimeZoneMoment', () => {
 
 		expect( mockTz ).not.toHaveBeenCalled();
 		expect( utcOffset ).toHaveBeenCalledWith( '-04:00' );
+
+		mockTz.mockRestore();
 	} );
 
 	it( 'should fall back to wcSettings.admin.timeZone when wcSettings.timeZone is not set', () => {
@@ -1085,13 +1092,15 @@ describe( 'getStoreTimeZoneMoment', () => {
 			},
 		};
 
-		const mockTz = ( moment.prototype.tz = jest.fn() );
+		const mockTz = jest.spyOn( momentTz, 'tz' ).mockReturnValue( moment() );
 		const utcOffset = ( moment.prototype.utcOffset = jest.fn() );
 
 		getStoreTimeZoneMoment();
 
 		expect( mockTz ).toHaveBeenCalledWith( 'America/New_York' );
 		expect( utcOffset ).not.toHaveBeenCalled();
+
+		mockTz.mockRestore();
 	} );
 
 	it( 'should use wcSettings.admin.timeZone utc offset when wcSettings.timeZone is not set', () => {
@@ -1101,13 +1110,15 @@ describe( 'getStoreTimeZoneMoment', () => {
 			},
 		};
 
-		const mockTz = ( moment.prototype.tz = jest.fn() );
+		const mockTz = jest.spyOn( momentTz, 'tz' );
 		const utcOffset = ( moment.prototype.utcOffset = jest.fn() );
 
 		getStoreTimeZoneMoment();
 
 		expect( mockTz ).not.toHaveBeenCalled();
 		expect( utcOffset ).toHaveBeenCalledWith( '+05:00' );
+
+		mockTz.mockRestore();
 	} );
 
 	it( 'should prefer wcSettings.timeZone over wcSettings.admin.timeZone', () => {
@@ -1118,13 +1129,15 @@ describe( 'getStoreTimeZoneMoment', () => {
 			},
 		};
 
-		const mockTz = ( moment.prototype.tz = jest.fn() );
+		const mockTz = jest.spyOn( momentTz, 'tz' ).mockReturnValue( moment() );
 		const utcOffset = ( moment.prototype.utcOffset = jest.fn() );
 
 		getStoreTimeZoneMoment();
 
 		expect( mockTz ).toHaveBeenCalledWith( 'Europe/London' );
 		expect( utcOffset ).not.toHaveBeenCalled();
+
+		mockTz.mockRestore();
 	} );
 } );
 
