@@ -117,6 +117,7 @@ class ProceedToCheckoutBlock extends AbstractInnerBlock {
 						data-wp-on--click="actions.handleClick"
 						href="%2$s"
 					>
+						<span class="wc-block-components-spinner" aria-hidden="true" data-wp-bind--hidden="!context.isLoading"></span>
 						<span class="wc-block-components-button__text" data-wp-text="context.buttonLabel">%3$s</span>
 					</a>
 				</div>
