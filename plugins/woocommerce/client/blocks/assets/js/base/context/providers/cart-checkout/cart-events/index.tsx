@@ -1,36 +1,26 @@
 /**
  * External dependencies
  */
-
-import {
-	createContext,
-	useContext,
-	useReducer,
-	useRef,
-	useEffect,
-} from '@wordpress/element';
+import { createContext, useContext } from '@wordpress/element';
+import type { ObserverResponse } from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
-import {
-	useEventEmitters,
-	reducer as emitReducer,
-	emitEventWithAbort,
-	EVENTS,
-} from './event-emit';
-import type { emitterCallback } from '../../../event-emit';
+import { cartEventsEmitter, CART_EVENTS } from '../../../../events/cart-events';
+import type { EventListener } from '../../../../events/event-emitter';
 
 type CartEventsContextType = {
-	// Used to register a callback that will fire when the cart has been processed and has an error.
-	onProceedToCheckout: ReturnType< typeof emitterCallback >;
-	// Used to register a callback that will fire when the cart has been processed and has an error.
-	dispatchOnProceedToCheckout: () => Promise< unknown[] >;
+	onProceedToCheckout: (
+		callback: EventListener,
+		priority?: number
+	) => () => void;
+	dispatchOnProceedToCheckout: () => Promise< ObserverResponse[] >;
 };
 
 const CartEventsContext = createContext< CartEventsContextType >( {
 	onProceedToCheckout: () => () => void null,
-	dispatchOnProceedToCheckout: () => new Promise( () => void null ),
+	dispatchOnProceedToCheckout: () => Promise.resolve( [] ),
 } );
 
 export const useCartEventsContext = () => {
@@ -38,40 +28,31 @@ export const useCartEventsContext = () => {
 };
 
 /**
- * Checkout Events provider
- * Emit Checkout events and provide access to Checkout event handlers
- *
- * @param {Object} props          Incoming props for the provider.
- * @param {Object} props.children The children being wrapped.
+ * Cart Events provider
+ * Delegates to the shared cartEventsEmitter so that both React hooks
+ * and Interactivity API stores share the same observer registry.
  */
 export const CartEventsProvider = ( {
 	children,
 }: {
 	children: React.ReactNode;
 } ): JSX.Element => {
-	const [ observers, observerDispatch ] = useReducer( emitReducer, {} );
-	const currentObservers = useRef( observers );
-	const { onProceedToCheckout } = useEventEmitters( observerDispatch );
-
-	// set observers on ref so it's always current.
-	useEffect( () => {
-		currentObservers.current = observers;
-	}, [ observers ] );
-
-	const dispatchOnProceedToCheckout = async () => {
-		return await emitEventWithAbort(
-			currentObservers.current,
-			EVENTS.PROCEED_TO_CHECKOUT,
-			null
-		);
+	const cartEventsValue: CartEventsContextType = {
+		onProceedToCheckout: ( callback: EventListener, priority = 10 ) =>
+			cartEventsEmitter.subscribe(
+				callback,
+				priority,
+				CART_EVENTS.PROCEED_TO_CHECKOUT
+			),
+		dispatchOnProceedToCheckout: () =>
+			cartEventsEmitter.emitWithAbort(
+				CART_EVENTS.PROCEED_TO_CHECKOUT,
+				null
+			),
 	};
 
-	const cartEvents = {
-		onProceedToCheckout,
-		dispatchOnProceedToCheckout,
-	};
 	return (
-		<CartEventsContext.Provider value={ cartEvents }>
+		<CartEventsContext.Provider value={ cartEventsValue }>
 			{ children }
 		</CartEventsContext.Provider>
 	);
