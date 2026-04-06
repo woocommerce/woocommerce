@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+A new index has been added to the wc_orders table to enhance order search performance by transaction ID.
