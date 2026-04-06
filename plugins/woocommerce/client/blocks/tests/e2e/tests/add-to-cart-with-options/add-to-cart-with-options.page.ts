@@ -109,6 +109,28 @@ class AddToCartWithOptionsPage {
 		await this.updateAddToCartWithOptionsBlock();
 	}
 
+	async switchToDropdownMode() {
+		await this.switchProductType( 'Variable product' );
+
+		await this.page.getByRole( 'tab', { name: 'Block' } ).click();
+
+		// Verify inner blocks have loaded.
+		await expect(
+			this.editor.canvas
+				.getByLabel(
+					'Block: Variation Selector: Attribute Options (Beta)'
+				)
+				.first()
+		).toBeVisible();
+
+		const attributeOptionsBlock = await this.editor.getBlockByName(
+			'woocommerce/add-to-cart-with-options-variation-selector-attribute-options'
+		);
+		await this.editor.selectBlocks( attributeOptionsBlock.first() );
+
+		await this.page.getByRole( 'radio', { name: 'Dropdown' } ).click();
+	}
+
 	async createPostWithProductBlock( product: string, variation?: string ) {
 		await this.admin.createNewPost();
 		await this.editor.insertBlock( { name: 'woocommerce/single-product' } );

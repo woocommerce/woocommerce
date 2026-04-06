@@ -453,23 +453,60 @@ test.describe( 'Add to Cart + Options Block', () => {
 			isOnlyCurrentEntityDirty: true,
 		} );
 
-		await page.goto( '/product/custom-slug-variable/' );
+		await test.step( 'when in pills mode', async () => {
+			await page.goto( '/product/custom-slug-variable/' );
 
-		// Verify the pills show term names (not slugs).
-		const petitOption = page.locator( 'label:has-text("Petit")' );
-		const grandOption = page.locator( 'label:has-text("Grand")' );
-		const addToCartButton = page.getByRole( 'button', {
-			name: 'Add to cart',
-			exact: true,
+			// Verify the pills show term names (not slugs).
+			const petitOption = page.locator( 'label:has-text("Petit")' );
+			const grandOption = page.locator( 'label:has-text("Grand")' );
+			const addToCartButton = page.getByRole( 'button', {
+				name: 'Add to cart',
+				exact: true,
+			} );
+
+			await expect( petitOption ).not.toBeDisabled();
+			await expect( grandOption ).not.toBeDisabled();
+
+			await petitOption.click();
+			await expect( addToCartButton ).not.toBeDisabled();
+			await addToCartButton.click();
+			await expect( page.getByText( '1 in cart' ) ).toBeVisible();
 		} );
 
-		await expect( petitOption ).not.toBeDisabled();
-		await expect( grandOption ).not.toBeDisabled();
+		await test.step( 'when in dropdown mode', async () => {
+			await pageObject.updateSingleProductTemplate();
 
-		await petitOption.click();
-		await expect( addToCartButton ).not.toBeDisabled();
-		await addToCartButton.click();
-		await expect( page.getByText( '1 in cart' ) ).toBeVisible();
+			await pageObject.switchToDropdownMode();
+
+			await editor.saveSiteEditorEntities();
+
+			await page.goto( '/product/custom-slug-variable/' );
+
+			const select = page.getByRole( 'combobox', {
+				name: 'Taille',
+				exact: true,
+			} );
+			const petitOption = page.getByRole( 'option', {
+				name: 'Petit',
+				exact: true,
+			} );
+			const grandOption = page.getByRole( 'option', {
+				name: 'Grand',
+				exact: true,
+			} );
+			const addToCartButton = page.getByRole( 'button', {
+				name: '1 in cart',
+				exact: true,
+			} );
+
+			await expect( petitOption ).not.toBeDisabled();
+			await expect( grandOption ).not.toBeDisabled();
+			await select.selectOption( { label: 'Petit' } );
+
+			await expect( addToCartButton ).not.toBeDisabled();
+			await addToCartButton.click();
+			await expect( page.getByText( '2 in cart' ) ).toBeVisible();
+		} );
 	} );
 
 	test( 'allows adding grouped products to cart', async ( {
@@ -769,25 +806,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 	} ) => {
 		await pageObject.updateSingleProductTemplate();
 
-		await pageObject.switchProductType( 'Variable product' );
-
-		await page.getByRole( 'tab', { name: 'Block' } ).click();
-
-		// Verify inner blocks have loaded.
-		await expect(
-			editor.canvas
-				.getByLabel(
-					'Block: Variation Selector: Attribute Options (Beta)'
-				)
-				.first()
-		).toBeVisible();
-
-		const attributeOptionsBlock = await editor.getBlockByName(
-			'woocommerce/add-to-cart-with-options-variation-selector-attribute-options'
-		);
-		await editor.selectBlocks( attributeOptionsBlock.first() );
-
-		await page.getByRole( 'radio', { name: 'Dropdown' } ).click();
+		await pageObject.switchToDropdownMode();
 
 		await editor.saveSiteEditorEntities();
 
