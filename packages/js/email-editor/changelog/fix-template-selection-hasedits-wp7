@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix template-select modal not appearing on WordPress 7.0 due to hasEdits() returning true on fresh posts
