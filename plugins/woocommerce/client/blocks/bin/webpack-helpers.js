@@ -11,6 +11,7 @@ const ASSET_CHECK = process.env.ASSET_CHECK === 'true';
 const wcDepMap = {
 	'@woocommerce/blocks-registry': [ 'wc', 'wcBlocksRegistry' ],
 	'@woocommerce/blocks-checkout-events': [ 'wc', 'blocksCheckoutEvents' ],
+	'@woocommerce/blocks-cart-events': [ 'wc', 'blocksCartEvents' ],
 	'@woocommerce/settings': [ 'wc', 'wcSettings' ],
 	'@woocommerce/block-data': [ 'wc', 'wcBlocksData' ],
 	'@woocommerce/data': [ 'wc', 'data' ],
@@ -34,6 +35,7 @@ const wcHandleMap = {
 	'@woocommerce/price-format': 'wc-price-format',
 	'@woocommerce/blocks-checkout': 'wc-blocks-checkout',
 	'@woocommerce/blocks-checkout-events': 'wc-blocks-checkout-events',
+	'@woocommerce/blocks-cart-events': 'wc-blocks-cart-events',
 	'@woocommerce/blocks-components': 'wc-blocks-components',
 	'@woocommerce/types': 'wc-types',
 	'@woocommerce/customer-effort-score': 'wc-customer-effort-score',
