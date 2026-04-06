@@ -144,8 +144,7 @@ class QueryBuilder {
 		$offset_raw   = $query['offset'] ?? 0;
 		$per_page_raw = $query['perPage'] ?? null;
 		$offset       = is_numeric( $offset_raw ) ? max( 0, (int) $offset_raw ) : 0;
-		$per_page     = is_numeric( $per_page_raw ) ? (int) $per_page_raw : 9;
-		$per_page     = $per_page > 0 ? $per_page : 9;
+		$per_page     = is_numeric( $per_page_raw ) ? max( 1, (int) $per_page_raw ) : 9;
 		$order        = $query['order'] ?? 'asc';
 		$search       = $query['search'] ?? '';
 
