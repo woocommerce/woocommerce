@@ -153,10 +153,8 @@ export const applyExtensionCartUpdate =
 			const isDirty = getIsCustomerDataDirty();
 
 			// Decide per-address: include it unless it's dirty and not being overwritten.
-			const includeShipping =
-				overwrite.shipping_address || ! isDirty;
-			const includeBilling =
-				overwrite.billing_address || ! isDirty;
+			const includeShipping = overwrite.shipping_address || ! isDirty;
+			const includeBilling = overwrite.billing_address || ! isDirty;
 
 			if ( ! includeShipping || ! includeBilling ) {
 				const {
@@ -170,12 +168,10 @@ export const applyExtensionCartUpdate =
 				};
 
 				if ( includeShipping ) {
-					cartToReceive.shipping_address =
-						response.shipping_address;
+					cartToReceive.shipping_address = response.shipping_address;
 				}
 				if ( includeBilling ) {
-					cartToReceive.billing_address =
-						response.billing_address;
+					cartToReceive.billing_address = response.billing_address;
 				}
 
 				dispatch.receiveCart( cartToReceive );
