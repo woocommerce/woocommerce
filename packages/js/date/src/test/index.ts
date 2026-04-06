@@ -1152,17 +1152,20 @@ describe( 'getStoreTimeZoneMoment', () => {
 
 		// Remove .tz from prototype to simulate clobbered moment instances.
 		const originalTz = moment.prototype.tz;
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any -- need to delete typed property to simulate clobbering
 		delete ( moment.prototype as any ).tz;
 
 		// Mock momentTz.tz since its internals also use the shared prototype in tests.
 		// In production, momentTz's closure holds the original moment with .tz intact.
 		const mockTz = jest.spyOn( momentTz, 'tz' ).mockReturnValue( moment() );
 
-		expect( () => getStoreTimeZoneMoment() ).not.toThrow();
-		expect( mockTz ).toHaveBeenCalledWith( 'Asia/Taipei' );
-
-		mockTz.mockRestore();
-		moment.prototype.tz = originalTz;
+		try {
+			expect( () => getStoreTimeZoneMoment() ).not.toThrow();
+			expect( mockTz ).toHaveBeenCalledWith( 'Asia/Taipei' );
+		} finally {
+			mockTz.mockRestore();
+			moment.prototype.tz = originalTz;
+		}
 	} );
 } );
 
