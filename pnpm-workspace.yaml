@@ -78,13 +78,13 @@ trustPolicyExclude:
     # Backported security fixes (https://github.com/advisories/GHSA-c2qf-rxjj-qqgw)
     - 'semver@5.7.2 || 6.3.1'
     # Release automations broke for a release (https://github.com/paulmillr/chokidar/issues/1440)
-	# Likely released without signing on accident (https://github.com/paulmillr/chokidar/issues/1440)
+    # Likely released without signing on accident (https://github.com/paulmillr/chokidar/issues/1440)
     - 'chokidar@3.5.3 || 4.0.3'
     # Backport without provenance
     - '@octokit/webhooks@12.3.2'
     - '@octokit/plugin-paginate-rest@9.2.2'
     - '@octokit/endpoint@9.0.6'
-	# Backport without provenance
+    # Backport without provenance
     - 'eslint-config-prettier@8.10.2'
     # Backported without provenance
     - 'css-declaration-sorter@6.4.1'
