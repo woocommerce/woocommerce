@@ -432,6 +432,22 @@ describe( 'applyExtensionCartUpdate', () => {
 		expect( received ).toHaveProperty( 'totals' );
 	} );
 
+	it( 'should strip both addresses when customer data is dirty and overwriteDirtyCustomerData is false', async () => {
+		mockGetIsCustomerDataDirty.mockReturnValue( true );
+		const dispatch = createMockDispatch();
+
+		await applyExtensionCartUpdate( {
+			namespace: 'test',
+			data: {},
+			overwriteDirtyCustomerData: false,
+		} )( { dispatch } as never );
+
+		const received = dispatch.receiveCart.mock.calls[ 0 ][ 0 ];
+		expect( received ).not.toHaveProperty( 'shipping_address' );
+		expect( received ).not.toHaveProperty( 'billing_address' );
+		expect( received ).toHaveProperty( 'totals' );
+	} );
+
 	it( 'should include both addresses when overwriteDirtyCustomerData is true', async () => {
 		mockGetIsCustomerDataDirty.mockReturnValue( true );
 		const dispatch = createMockDispatch();
