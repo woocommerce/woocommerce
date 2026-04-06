@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add Stripe IPP channel check to POS order identification for email suppression.
