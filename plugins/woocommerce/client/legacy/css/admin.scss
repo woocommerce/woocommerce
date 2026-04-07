@@ -8502,34 +8502,31 @@ table.bar_chart {
 		}
 	}
 
-	// Tablenav: WP 7.0 tablenav uses compact 32px sizing for native selects.
-	// Match Select2 to 32px here (not the global 40px).
+	// Current page in pagination gets smaller than surrounding buttons at 782px breakpoint.
 	&.woocommerce_page_wc-customer-stock-notifications .tablenav,
 	&.woocommerce_page_wc-orders .tablenav,
 	&.post-type-product .tablenav,
 	&.post-type-shop_order .tablenav {
-		.select2-container {
-			margin-top: 0; // Align with other tablenav elements.
-		}
-
-		.select2-container .select2-selection--single {
-			height: 32px; // WP 7.0 tablenav uses compact 32px, not 40px.
-
-			.select2-selection__rendered {
-				line-height: 30px;
-			}
-
-			.select2-selection__arrow {
-				height: 30px;
-			}
-		}
-
-		// Current page in pagination gets smaller than surrounding buttons at 782px breakpoint.
 		@media screen and (max-width: 782px) {
 			#current-page-selector {
 				height: 44px;
 			}
 		}
+	}
+
+	// .woocommerce-embed-page sets notice padding to 1px 12px, which is too small for WP 7.0's dismiss button positioning.
+	// Restore WP 7.0's padding so the dismiss button aligns correctly.
+	&.woocommerce-embed-page .notice {
+		padding: 8px 12px;
+	}
+
+	// WP 7.0 sets display:flex, width:24px, height:24px on .notice-dismiss.
+	// Reset these so the floated .woocommerce-message-close layout still works.
+	.woocommerce-message a.woocommerce-message-close {
+		display: inline;
+		width: auto;
+		height: auto;
+		color: #1e1e1e;
 	}
 }
 
@@ -8592,6 +8589,26 @@ table.bar_chart {
 		font-size: 14px;
 		vertical-align: middle;
 		margin: 1px 6px 4px 1px;
+	}
+}
+
+// Tablenav: WP 7.0 tablenav uses compact 32px sizing for native selects.
+// Match Select2 to 32px here (not the global 40px).
+.wc-wp-version-gte-70 .tablenav {
+	.select2-container {
+		margin-top: 0; // Align with other tablenav elements.
+	}
+
+	.select2-container .select2-selection--single {
+		height: 32px; // WP 7.0 tablenav uses compact 32px, not 40px.
+
+		.select2-selection__rendered {
+			line-height: 30px;
+		}
+
+		.select2-selection__arrow {
+			height: 30px;
+		}
 	}
 }
 
