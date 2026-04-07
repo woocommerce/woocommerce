@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Fix: taxes nor removed from variable product prices for VAT exempt customers
+Fix: taxes not removed from variable product prices for VAT-exempt customers
