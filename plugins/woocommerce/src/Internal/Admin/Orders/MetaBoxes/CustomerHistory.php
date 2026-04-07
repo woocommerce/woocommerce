@@ -61,10 +61,12 @@ class CustomerHistory {
 		$total_spend  = (float) ( $result->total_spend ?? 0 );
 
 		// Build a dynamic tooltip listing the excluded statuses by their translated labels.
+		// Internal statuses like auto-draft and trash are naturally filtered out here
+		// because they don't exist in wc_get_order_statuses().
 		$all_statuses    = wc_get_order_statuses();
 		$excluded_labels = array();
 		foreach ( $this->get_excluded_statuses() as $slug ) {
-			$prefixed = 'wc-' . sanitize_title( $slug );
+			$prefixed = 'wc-' . $slug;
 			if ( isset( $all_statuses[ $prefixed ] ) ) {
 				$excluded_labels[] = strtolower( $all_statuses[ $prefixed ] );
 			}
@@ -72,7 +74,7 @@ class CustomerHistory {
 
 		if ( ! empty( $excluded_labels ) ) {
 			$tooltip = sprintf(
-				/* translators: %s: comma-separated list of excluded order statuses, e.g. "pending payment, failed, and cancelled" */
+				/* translators: %s: localized list of order status names, e.g. "pending payment, failed, and cancelled" */
 				__( 'Total number of orders for this customer, excluding %s orders.', 'woocommerce' ),
 				wp_sprintf_l( '%l', $excluded_labels )
 			);

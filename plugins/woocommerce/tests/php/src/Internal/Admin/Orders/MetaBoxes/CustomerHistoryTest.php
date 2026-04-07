@@ -458,6 +458,30 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Tooltip should show generic message when all statuses are removed from exclusion.
+	 */
+	public function test_tooltip_shows_no_exclusion_message_when_all_statuses_removed(): void {
+		$this->toggle_cot_feature_and_usage( true );
+
+		add_filter( 'woocommerce_analytics_excluded_order_statuses', '__return_empty_array' );
+
+		$customer_id = $this->factory->user->create();
+
+		$order = WC_Helper_Order::create_order( $customer_id );
+		$order->set_status( 'completed' );
+		$order->save();
+
+		ob_start();
+		$this->sut->output( $order );
+		$output = ob_get_clean();
+
+		remove_filter( 'woocommerce_analytics_excluded_order_statuses', '__return_empty_array' );
+
+		$this->assertStringContainsString( 'Total number of orders for this customer.', $output, 'Tooltip should use the no-exclusions fallback string' );
+		$this->assertStringNotContainsString( 'excluding', $output, 'Tooltip should not mention "excluding"' );
+	}
+
+	/**
 	 * @testdox CPT fallback should render correct customer history from analytics tables.
 	 */
 	public function test_cpt_fallback_renders_with_analytics_data(): void {
