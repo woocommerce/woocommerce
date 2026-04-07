@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add to Cart + Options: Ensure attributes with spaces and special characters work well in dropdown mode
