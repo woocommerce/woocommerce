@@ -239,7 +239,7 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 	public function test_cap_filter_values_within_default_cap(): void {
 		$method = $this->get_cap_filter_values_method();
 
-		$result = $method->invoke( $this->sut, array( 'red', 'blue', 'green', 'yellow', 'orange' ), 'filter_color' );
+		$result = $method->invoke( $this->sut, 'red,blue,green,yellow,orange', 'filter_color' );
 
 		$this->assertCount( 5, $result );
 		$this->assertSame( array( 'red', 'blue', 'green', 'yellow', 'orange' ), $result );
@@ -251,7 +251,7 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 	public function test_cap_filter_values_truncates_excess(): void {
 		$method = $this->get_cap_filter_values_method();
 
-		$result = $method->invoke( $this->sut, array( 'red', 'blue', 'green', 'yellow', 'orange', 'pink' ), 'filter_color' );
+		$result = $method->invoke( $this->sut, 'red,blue,green,yellow,orange,pink', 'filter_color' );
 
 		$this->assertCount( 5, $result );
 		$this->assertSame( array( 'red', 'blue', 'green', 'yellow', 'orange' ), $result );
@@ -264,7 +264,7 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 		add_filter( 'woocommerce_product_filter_max_values_per_parameter', fn() => 2 );
 		$method = $this->get_cap_filter_values_method();
 
-		$result = $method->invoke( $this->sut, array( 'red', 'blue', 'green', 'yellow' ), 'filter_color' );
+		$result = $method->invoke( $this->sut, 'red,blue,green,yellow', 'filter_color' );
 
 		remove_all_filters( 'woocommerce_product_filter_max_values_per_parameter' );
 		$this->assertSame( array( 'red', 'blue' ), $result );
@@ -285,7 +285,7 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 			2
 		);
 		$method = $this->get_cap_filter_values_method();
-		$method->invoke( $this->sut, array( 'instock', 'outofstock', 'onbackorder', 'pending', 'draft', 'archived' ), 'filter_stock_status' );
+		$method->invoke( $this->sut, 'instock,outofstock,onbackorder,pending,draft,archived', 'filter_stock_status' );
 
 		remove_all_filters( 'woocommerce_product_filter_max_values_per_parameter' );
 		$this->assertSame( 'filter_stock_status', $received );
@@ -298,19 +298,30 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 		add_filter( 'woocommerce_product_filter_max_values_per_parameter', fn() => 0 );
 		$method = $this->get_cap_filter_values_method();
 
-		$result = $method->invoke( $this->sut, array( 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h' ), 'filter_color' );
+		$result = $method->invoke( $this->sut, 'a,b,c,d,e,f,g,h', 'filter_color' );
 
 		remove_all_filters( 'woocommerce_product_filter_max_values_per_parameter' );
 		$this->assertCount( 8, $result );
 	}
 
 	/**
-	 * @testdox Should return an empty array for an empty array.
+	 * @testdox Should normalise, de-duplicate, and not count duplicates toward the cap.
 	 */
-	public function test_cap_filter_values_empty_array(): void {
+	public function test_cap_filter_values_deduplicates_before_cap(): void {
 		$method = $this->get_cap_filter_values_method();
 
-		$result = $method->invoke( $this->sut, array(), 'filter_color' );
+		$result = $method->invoke( $this->sut, 'red,Red,RED,blue,green,yellow,orange', 'filter_color' );
+
+		$this->assertCount( 5, $result, 'Red/Red/RED collapse to one before the cap is applied' );
+	}
+
+	/**
+	 * @testdox Should return an empty array for an empty string.
+	 */
+	public function test_cap_filter_values_empty_string(): void {
+		$method = $this->get_cap_filter_values_method();
+
+		$result = $method->invoke( $this->sut, '', 'filter_color' );
 
 		$this->assertSame( array(), $result );
 	}

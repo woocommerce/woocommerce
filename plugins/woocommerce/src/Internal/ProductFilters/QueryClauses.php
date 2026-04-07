@@ -52,12 +52,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 	 */
 	public function add_query_clauses( array $args, \WP_Query $wp_query ): array {
 		if ( $wp_query->get( 'filter_stock_status' ) ) {
-			$stock_statuses = $this->cap_filter_values(
-				array_values( array_unique( array_filter( explode( ',', trim( $wp_query->get( 'filter_stock_status' ) ) ), fn( $v ) => '' !== $v ) ) ),
-				'filter_stock_status'
-			);
-
-			$args = $this->add_stock_clauses( $args, $stock_statuses );
+			$args = $this->add_stock_clauses( $args, $this->cap_filter_values( $wp_query->get( 'filter_stock_status' ), 'filter_stock_status' ) );
 		}
 
 		if ( $wp_query->get( 'min_price' ) || $wp_query->get( 'max_price' ) ) {
@@ -100,12 +95,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 		}
 
 		if ( $wp_query->get( 'filter_stock_status' ) ) {
-			$stock_statuses = $this->cap_filter_values(
-				array_values( array_unique( array_filter( explode( ',', trim( $wp_query->get( 'filter_stock_status' ) ) ), fn( $v ) => '' !== $v ) ) ),
-				'filter_stock_status'
-			);
-
-			$args = $this->add_stock_clauses( $args, $stock_statuses );
+			$args = $this->add_stock_clauses( $args, $this->cap_filter_values( $wp_query->get( 'filter_stock_status' ), 'filter_stock_status' ) );
 		}
 
 		$args = $this->add_taxonomy_clauses(
@@ -551,17 +541,25 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 	}
 
 	/**
-	 * Cap an already-normalised array of filter values.
+	 * Parse, normalise, de-duplicate, and cap a comma-separated filter value string.
 	 *
-	 * Callers are responsible for normalising (e.g. sanitize_title) and
-	 * de-duplicating before calling this method, so the cap is applied to
-	 * semantically-distinct values rather than raw tokens.
+	 * Applies sanitize_title to each token so the cap operates on semantically-
+	 * distinct values rather than raw tokens (e.g. "Red" and "red" count as one).
 	 *
-	 * @param array  $values Normalised, de-duplicated values.
-	 * @param string $param  The URL parameter name, passed to the filter hook.
+	 * @param string $raw   The raw comma-separated value string.
+	 * @param string $param The URL parameter name, passed to the filter hook.
 	 * @return array
 	 */
-	private function cap_filter_values( array $values, string $param ): array {
+	private function cap_filter_values( string $raw, string $param ): array {
+		$values = array_values(
+			array_unique(
+				array_filter(
+					array_map( 'sanitize_title', explode( ',', $raw ) ),
+					fn( $v ) => '' !== $v
+				)
+			)
+		);
+
 		if ( empty( $values ) ) {
 			return $values;
 		}
@@ -603,19 +601,14 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 			if ( 0 === strpos( $key, 'filter_' ) ) {
 				$attribute    = wc_sanitize_taxonomy_name( str_replace( 'filter_', '', $key ) );
 				$taxonomy     = wc_attribute_taxonomy_name( $attribute );
-				$filter_terms = ! empty( $value )
-					? $this->cap_filter_values(
-						array_values( array_unique( array_filter( array_map( 'sanitize_title', explode( ',', wc_clean( wp_unslash( $value ) ) ) ), fn( $v ) => '' !== $v ) ) ),
-						$key
-					)
-					: array();
+				$filter_terms = ! empty( $value ) ? $this->cap_filter_values( wc_clean( wp_unslash( $value ) ), $key ) : array();
 
 				if ( empty( $filter_terms ) || ! taxonomy_exists( $taxonomy ) || ! wc_attribute_taxonomy_id_by_name( $attribute ) ) {
 					continue;
 				}
 
 				$query_type                                   = ! empty( $query_vars[ 'query_type_' . $attribute ] ) && in_array( $query_vars[ 'query_type_' . $attribute ], array( 'and', 'or' ), true ) ? wc_clean( wp_unslash( $query_vars[ 'query_type_' . $attribute ] ) ) : '';
-				$chosen_attributes[ $taxonomy ]['terms']      = $filter_terms; // Already sanitize_title'd above.
+				$chosen_attributes[ $taxonomy ]['terms']      = $filter_terms;
 				$chosen_attributes[ $taxonomy ]['query_type'] = $query_type ? $query_type : 'and';
 			}
 		}
@@ -638,10 +631,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 
 		foreach ( $this->params->get_param( 'taxonomy' ) as $taxonomy => $param ) {
 			if ( isset( $query_vars[ $param ] ) && ! empty( trim( $query_vars[ $param ] ) ) ) {
-				$chosen_taxonomies[ $taxonomy ] = $this->cap_filter_values(
-					array_values( array_unique( array_filter( array_map( 'sanitize_title', explode( ',', (string) $query_vars[ $param ] ) ), fn( $v ) => '' !== $v ) ) ),
-					$param
-				);
+				$chosen_taxonomies[ $taxonomy ] = $this->cap_filter_values( (string) $query_vars[ $param ], $param );
 			}
 		}
 
