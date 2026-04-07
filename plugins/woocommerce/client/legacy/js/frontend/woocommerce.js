@@ -248,23 +248,21 @@ function focus_populate_live_region() {
 /**
  * Refresh the sorted by live region.
  *
- * Only runs when the page was loaded as a result of filtering
- * (query string present) and there is a legacy filter block on the page
- * (looking for .wc-blocks-filter-wrapper).
- * This avoids overwriting content managed by the Interactivity API.
+ * Skips when the Interactivity API product filters are present on the page,
+ * as those manage the result count updates themselves.
  */
 function refresh_sorted_by_live_region() {
 	var sorted_by_live_region = document.querySelector(
 		'.woocommerce-result-count'
 	);
-	var legacyFilterBlock = document.querySelector(
-		'.wc-blocks-filter-wrapper'
+	var hasInteractivityFilters = document.querySelector(
+		'[data-wp-interactive="woocommerce/product-filters"]'
 	);
 
 	if (
 		! sorted_by_live_region ||
 		! window.location.search ||
-		! legacyFilterBlock
+		hasInteractivityFilters
 	) {
 		return;
 	}
