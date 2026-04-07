@@ -556,7 +556,7 @@ class FilterData {
 				return false;
 			}
 
-			set_transient( CacheController::CACHE_ENTRY_COUNT_TRANSIENT, $count + 1, WEEK_IN_SECONDS );
+			set_transient( CacheController::CACHE_ENTRY_COUNT_TRANSIENT, $count + 1, DAY_IN_SECONDS );
 		}
 
 		$transient_version = WC_Cache_Helper::get_transient_version( CacheController::CACHE_GROUP );
