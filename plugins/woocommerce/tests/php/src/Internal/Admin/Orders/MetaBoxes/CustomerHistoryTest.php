@@ -365,6 +365,99 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Tooltip should list default excluded statuses (pending payment, failed, cancelled).
+	 */
+	public function test_tooltip_shows_default_excluded_statuses(): void {
+		$this->toggle_cot_feature_and_usage( true );
+
+		$customer_id = $this->factory->user->create();
+
+		$order = WC_Helper_Order::create_order( $customer_id );
+		$order->set_status( 'completed' );
+		$order->save();
+
+		ob_start();
+		$this->sut->output( $order );
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'pending payment', $output, 'Tooltip should mention "pending payment"' );
+		$this->assertStringContainsString( 'failed', $output, 'Tooltip should mention "failed"' );
+		$this->assertStringContainsString( 'cancelled', $output, 'Tooltip should mention "cancelled"' );
+	}
+
+	/**
+	 * @testdox Tooltip should reflect custom excluded statuses option.
+	 */
+	public function test_tooltip_reflects_custom_option(): void {
+		$this->toggle_cot_feature_and_usage( true );
+
+		update_option( 'woocommerce_excluded_report_order_statuses', array( 'cancelled' ) );
+
+		$customer_id = $this->factory->user->create();
+
+		$order = WC_Helper_Order::create_order( $customer_id );
+		$order->set_status( 'completed' );
+		$order->save();
+
+		ob_start();
+		$this->sut->output( $order );
+		$output = ob_get_clean();
+
+		delete_option( 'woocommerce_excluded_report_order_statuses' );
+
+		$this->assertStringContainsString( 'cancelled', $output, 'Tooltip should mention "cancelled"' );
+		$this->assertStringNotContainsString( 'pending payment', $output, 'Tooltip should not mention "pending payment"' );
+		$this->assertStringNotContainsString( 'failed', $output, 'Tooltip should not mention "failed"' );
+	}
+
+	/**
+	 * @testdox Tooltip should reflect statuses added via filter.
+	 */
+	public function test_tooltip_reflects_filter(): void {
+		$this->toggle_cot_feature_and_usage( true );
+
+		$add_on_hold = function ( $statuses ) {
+			$statuses[] = 'on-hold';
+			return $statuses;
+		};
+		add_filter( 'woocommerce_analytics_excluded_order_statuses', $add_on_hold );
+
+		$customer_id = $this->factory->user->create();
+
+		$order = WC_Helper_Order::create_order( $customer_id );
+		$order->set_status( 'completed' );
+		$order->save();
+
+		ob_start();
+		$this->sut->output( $order );
+		$output = ob_get_clean();
+
+		remove_filter( 'woocommerce_analytics_excluded_order_statuses', $add_on_hold );
+
+		$this->assertStringContainsString( 'on hold', $output, 'Tooltip should mention "on hold"' );
+	}
+
+	/**
+	 * @testdox Tooltip should not display internal statuses like auto-draft or trash.
+	 */
+	public function test_tooltip_excludes_internal_statuses(): void {
+		$this->toggle_cot_feature_and_usage( true );
+
+		$customer_id = $this->factory->user->create();
+
+		$order = WC_Helper_Order::create_order( $customer_id );
+		$order->set_status( 'completed' );
+		$order->save();
+
+		ob_start();
+		$this->sut->output( $order );
+		$output = ob_get_clean();
+
+		$this->assertStringNotContainsString( 'auto-draft', $output, 'Tooltip should not mention "auto-draft"' );
+		$this->assertStringNotContainsString( 'trash', $output, 'Tooltip should not mention "trash"' );
+	}
+
+	/**
 	 * @testdox CPT fallback should render correct customer history from analytics tables.
 	 */
 	public function test_cpt_fallback_renders_with_analytics_data(): void {

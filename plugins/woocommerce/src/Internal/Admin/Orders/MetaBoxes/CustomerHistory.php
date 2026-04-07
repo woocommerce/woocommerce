@@ -37,7 +37,7 @@ class CustomerHistory {
 	 *
 	 * @param WC_Order $order The order object.
 	 *
-	 * @return array{orders_count: int, total_spend: float, avg_order_value: float} Order count, total spend, and average order value.
+	 * @return array{orders_count: int, total_spend: float, avg_order_value: float, tooltip: string} Order count, total spend, average order value, and tooltip text.
 	 */
 	private function get_customer_history( WC_Order $order ): array {
 		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
@@ -60,10 +60,31 @@ class CustomerHistory {
 		$orders_count = (int) ( $result->orders_count ?? 0 );
 		$total_spend  = (float) ( $result->total_spend ?? 0 );
 
+		// Build a dynamic tooltip listing the excluded statuses by their translated labels.
+		$all_statuses    = wc_get_order_statuses();
+		$excluded_labels = array();
+		foreach ( $this->get_excluded_statuses() as $slug ) {
+			$prefixed = 'wc-' . sanitize_title( $slug );
+			if ( isset( $all_statuses[ $prefixed ] ) ) {
+				$excluded_labels[] = strtolower( $all_statuses[ $prefixed ] );
+			}
+		}
+
+		if ( ! empty( $excluded_labels ) ) {
+			$tooltip = sprintf(
+				/* translators: %s: comma-separated list of excluded order statuses, e.g. "pending payment, failed, and cancelled" */
+				__( 'Total number of orders for this customer, excluding %s orders, including the current one.', 'woocommerce' ),
+				wp_sprintf_l( '%l', $excluded_labels )
+			);
+		} else {
+			$tooltip = __( 'Total number of orders for this customer, including the current one.', 'woocommerce' );
+		}
+
 		return array(
 			'orders_count'    => $orders_count,
 			'total_spend'     => $total_spend,
 			'avg_order_value' => $orders_count > 0 ? $total_spend / $orders_count : 0,
+			'tooltip'         => $tooltip,
 		);
 	}
 
@@ -192,13 +213,11 @@ class CustomerHistory {
 	}
 
 	/**
-	 * Get the SQL fragment for excluded order statuses.
+	 * Get the list of excluded order statuses for customer history.
 	 *
-	 * @return string SQL IN clause, e.g. ( 'auto-draft','trash','wc-pending','wc-failed',... ), or empty string if no statuses are excluded.
+	 * @return string[] Excluded status slugs without wc- prefix (e.g. 'auto-draft', 'trash', 'pending', 'failed', 'cancelled').
 	 */
-	private function get_excluded_statuses_sql(): string {
-		global $wpdb;
-
+	private function get_excluded_statuses(): array {
 		$excluded_statuses = get_option( 'woocommerce_excluded_report_order_statuses', array( 'pending', 'failed', 'cancelled' ) );
 		if ( ! is_array( $excluded_statuses ) ) {
 			$excluded_statuses = array( 'pending', 'failed', 'cancelled' );
@@ -215,6 +234,19 @@ class CustomerHistory {
 		if ( ! is_array( $excluded_statuses ) ) {
 			$excluded_statuses = array( 'auto-draft', 'trash', 'pending', 'failed', 'cancelled' );
 		}
+
+		return $excluded_statuses;
+	}
+
+	/**
+	 * Get the SQL fragment for excluded order statuses.
+	 *
+	 * @return string SQL IN clause, e.g. ( 'auto-draft','trash','wc-pending','wc-failed',... ), or empty string if no statuses are excluded.
+	 */
+	private function get_excluded_statuses_sql(): string {
+		global $wpdb;
+
+		$excluded_statuses = $this->get_excluded_statuses();
 
 		if ( empty( $excluded_statuses ) ) {
 			return '';
