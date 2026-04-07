@@ -13,7 +13,6 @@
 	},
 	"require-dev": {
 		"yoast/phpunit-polyfills": "^4.0.0",
-		"automattic/phpunit-select-config": "^1.0",
 		"automattic/wordbless": "^0.5",
 		"woocommerce/woocommerce-sniffs": "1.0.0"
 	},
@@ -26,10 +25,10 @@
 		"post-install-cmd": "WorDBless\\Composer\\InstallDropin::copy",
 		"post-update-cmd": "WorDBless\\Composer\\InstallDropin::copy",
 		"phpunit": [
-			"phpunit-select-config phpunit.#.xml.dist --colors=always"
+			"phpunit --colors=always"
 		],
 		"test-coverage": [
-			"php -dpcov.directory=. ./vendor/bin/phpunit-select-config phpunit.#.xml.dist --coverage-php \"$COVERAGE_DIR/php.cov\""
+			"php -dpcov.directory=. ./vendor/bin/phpunit --coverage-php \"$COVERAGE_DIR/php.cov\""
 		],
 		"test-php": [
 			"@composer phpunit"
@@ -51,9 +50,6 @@
 		"allow-plugins": {
 			"roots/wordpress-core-installer": true,
 			"dealerdirect/phpcodesniffer-composer-installer": true
-		},
-		"platform": {
-			"php": "7.4"
 		}
 	},
 	"minimum-stability": "dev",
