@@ -178,15 +178,19 @@ class WC_Admin_Tests_Reports_Customer extends WC_Unit_Test_Case {
 
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
-		// Should have two rows — guest row is NOT merged for normal registration.
+		// The guest row must remain untouched: same customer_id, user_id still NULL.
+		// (update_registered_customer skips users with no orders, so no second row is
+		// inserted either — what we're guarding against here is the merge function
+		// silently claiming the guest row for an unverified registration.)
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT customer_id, user_id FROM {$wpdb->prefix}wc_customer_lookup WHERE email = %s",
-				$email
+				"SELECT customer_id, user_id FROM {$wpdb->prefix}wc_customer_lookup WHERE customer_id = %d",
+				$guest_customer_id
 			)
 		);
 
-		$this->assertCount( 2, $rows, 'Normal registration should not merge guest row.' );
+		$this->assertCount( 1, $rows, 'Guest row should still exist.' );
+		$this->assertNull( $rows[0]->user_id, 'Guest row user_id should remain NULL for normal registration.' );
 	}
 
 	/**
