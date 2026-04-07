@@ -1,0 +1,70 @@
+{
+	"name": "automattic/woocommerce-analytics",
+	"description": "Enhanced analytics for WooCommerce users.",
+	"type": "jetpack-library",
+	"license": "GPL-2.0-or-later",
+	"require": {
+		"php": ">=7.2",
+		"automattic/jetpack-assets": "@dev",
+		"automattic/jetpack-connection": "@dev",
+		"automattic/jetpack-constants": "@dev",
+		"automattic/jetpack-device-detection": "@dev",
+		"automattic/block-delimiter": "@dev"
+	},
+	"require-dev": {
+		"yoast/phpunit-polyfills": "^4.0.0",
+		"automattic/jetpack-changelogger": "@dev",
+		"automattic/jetpack-test-environment": "@dev",
+		"automattic/phpunit-select-config": "@dev"
+	},
+	"autoload": {
+		"classmap": [
+			"src/"
+		]
+	},
+	"scripts": {
+		"phpunit": [
+			"phpunit-select-config phpunit.#.xml.dist --colors=always"
+		],
+		"test-coverage": [
+			"php -dpcov.directory=. ./vendor/bin/phpunit-select-config phpunit.#.xml.dist --coverage-php \"$COVERAGE_DIR/php.cov\""
+		],
+		"test-php": [
+			"@composer phpunit"
+		],
+		"build-production": [
+			"pnpm run build-production"
+		],
+		"build-development": [
+			"pnpm run build"
+		]
+	},
+	"repositories": [
+		{
+			"type": "path",
+			"url": "../../packages/*",
+			"options": {
+				"monorepo": true
+			}
+		}
+	],
+	"minimum-stability": "dev",
+	"prefer-stable": true,
+	"extra": {
+		"mirror-repo": "Automattic/woocommerce-analytics",
+		"changelogger": {
+			"link-template": "https://github.com/Automattic/woocommerce-analytics/compare/v${old}...v${new}"
+		},
+		"autotagger": true,
+		"branch-alias": {
+			"dev-trunk": "0.16.x-dev"
+		},
+		"textdomain": "woocommerce-analytics",
+		"version-constants": {
+			"::PACKAGE_VERSION": "src/class-woocommerce-analytics.php"
+		}
+	},
+	"suggest": {
+		"automattic/jetpack-autoloader": "Allow for better interoperability with other plugins that use this package."
+	}
+}

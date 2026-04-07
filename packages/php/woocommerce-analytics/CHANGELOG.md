@@ -1,0 +1,370 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.16.3] - 2026-04-06
+### Changed
+- Update dependencies. [#46383]
+
+## [0.16.2] - 2026-03-30
+### Changed
+- Update package dependencies. [#47799]
+
+### Fixed
+- Ensure store_admin property reports 1 for admin users in REST API tracking requests. [#47731]
+
+## [0.16.1] - 2026-03-23
+### Changed
+- Update package dependencies. [#47684]
+
+### Fixed
+- Disable batched analytics requests when a SOCKS proxy is configured, falling back to wp_remote_get() which respects WP_PROXY_* settings. [#47707]
+
+## [0.16.0] - 2026-03-16
+### Changed
+- Handle proxy requests at MU plugin stage and exit early for faster response time. [#46757]
+- Update dependencies. [#47472]
+
+## [0.15.7] - 2026-03-09
+### Changed
+- Switch to Native TypeScript compiler based on Go. [#47375]
+
+### Fixed
+- Fix TypeScipt type errors detected by `tsgo`. [#47423]
+
+## [0.15.6] - 2026-02-26
+### Changed
+- Update package dependencies. [#47300]
+
+## [0.15.5] - 2026-02-23
+### Changed
+- Update package dependencies. [#47173]
+
+## [0.15.4] - 2026-02-16
+### Changed
+- Update package dependencies. [#47099]
+
+## [0.15.3] - 2026-02-10
+### Changed
+- Update package dependencies. [#47002]
+- Update tracking classes to work without WooCommerce dependency. [#46756]
+
+## [0.15.2] - 2026-02-02
+### Changed
+- Update package dependencies. [#46854]
+
+## [0.15.1] - 2026-01-26
+### Changed
+- Update dependencies. [#46383]
+
+## [0.15.0] - 2026-01-23
+### Added
+- Add woocommerce_analytics_auto_install_proxy_speed_module filter to control auto-installation of proxy speed module mu-plugin. [#46719]
+
+## [0.14.0] - 2026-01-19
+### Added
+- Add tablet device detection to the 'device' event property, distinguishing between mobile, tablet, and desktop devices. [#46631]
+
+### Changed
+- Update package dependencies. [#46647]
+
+## [0.13.4] - 2026-01-12
+### Changed
+- Update package dependencies. [#46456]
+
+### Fixed
+- Fix product_purchase event not tracking for shortcode checkout due to incorrect order ID type check. [#46467]
+
+## [0.13.3] - 2025-12-22
+### Changed
+- Update dependencies. [#46381]
+
+## [0.13.2] - 2025-12-15
+### Changed
+- Update dependencies. [#46271]
+
+## [0.13.1] - 2025-12-08
+### Fixed
+- Ensure proper flags are used with `json_encode()`. [#46092]
+
+## [0.13.0] - 2025-12-01
+### Changed
+- Added Beacon API support and replaced @wordpress/api-fetch with native fetch. [#45891]
+- Update package dependencies. [#46143]
+
+### Fixed
+- Fix proxy speed module installation using WP_Filesystem API with proper error handling. [#45801]
+
+## [0.12.2] - 2025-11-24
+### Fixed
+- Improve compatibility with old WooCommerce versions. [#46003]
+
+## [0.12.1] - 2025-11-19
+### Fixed
+- Fix compatibility issue with WooCommerce older than 9.7.0. [#45988]
+
+## [0.12.0] - 2025-11-17
+### Changed
+- Implement batched pixel requests for improved performance when sending tracking events. [#45869]
+- Update package dependencies. [#45915] [#45958]
+
+## [0.11.0] - 2025-11-03
+### Changed
+- Enable ClickHouse by default. [#45696] [#45723]
+- Update package dependencies. [#45652]
+
+### Fixed
+- Fix data handling with invalid prop names. [#45544]
+- Phan: Address PhanRedundantCondition, PhanRedundantArrayValuesCall, and PhanPluginRedundantAssignment violations. [#45681]
+- Set dynamic webpack public path for split assets. [#45654]
+
+## [0.10.1] - 2025-10-27
+### Changed
+- Enhance JSON encoding by adding `JSON_HEX_TAG` and `JSON_UNESCAPED_SLASHES` options. [#45393]
+- Ensure anonymous ID is set. [#45547]
+
+### Fixed
+- Fix call to undefined method `WC_Tracks::get_server_details()`. [#45394]
+- Use existing bot detection from Device Detection package to skip event recording in analytics tracking. [#45552]
+
+## [0.10.0] - 2025-10-02
+### Added
+- Implement WP Consent API Integration [#45323]
+
+### Changed
+- Update package dependencies. [#45334]
+
+## [0.9.2] - 2025-09-30
+### Fixed
+- Prevent PHP error when WC_Tracks class is not available. [#45330]
+- Prevent PHP warnings when array key is undefined. [#45330]
+
+## [0.9.1] - 2025-09-29
+### Changed
+- Internal updates.
+
+## [0.9.0] - 2025-09-25
+### Added
+- Add experimental API-based event tracking. [#45279]
+- Add IP-based visitor tracking as fallback when proxy tracking is enabled and cookies are unavailable. [#45279]
+- Add proxy speed module to enhance proxy API performance. [#45243]
+- Implement client-side analytics tracking. [#45268]
+
+### Changed
+- Update build scripts for production. [#45296]
+
+## [0.8.0] - 2025-09-22
+### Added
+- Implement on-site pixel API endpoint with POST support. [#45227]
+
+## [0.7.0] - 2025-09-19
+### Added
+- Add server-side tracking. [#45208]
+
+### Changed
+- Implement server-side direct event delivery. [#45209]
+
+## [0.6.2] - 2025-09-15
+### Changed
+- Internal updates.
+
+## [0.6.1] - 2025-09-01
+### Fixed
+- Fix duplicate product purchase events on order confirmation page. [#44973]
+
+## [0.6.0] - 2025-08-18
+### Changed
+- Replace URL-based landing page tracking with breadcrumb-based hierarchical page tracking. [#44789]
+
+### Fixed
+- Fix PHP warnings for `undefined` array keys and `null` object properties. [#44808]
+
+## [0.5.0] - 2025-08-13
+### Added
+- Add session engagement tracking. [#44729]
+- Track page views. [#44729]
+
+### Changed
+- Add clickhouse param to record events. [#44729]
+- Set expiration time for session cookie to 30 mins or midnight UTC. [#44729]
+
+### Fixed
+- Ensure update cart is triggered. [#44729]
+- Set woocommerceanalytics_session. [#44729]
+
+## [0.4.9] - 2025-08-04
+### Changed
+- Performance: Improve processing of blocks during Analytics gathering. [#44544]
+
+## [0.4.8] - 2025-06-16
+### Fixed
+- Prevent PHP warning in checkout view. [#43890]
+
+## [0.4.7] - 2025-05-05
+### Fixed
+- Catch PHP error if null param is errantly passed by third-party code. [#43346]
+
+## [0.4.6] - 2025-04-28
+### Changed
+- Internal updates.
+
+## [0.4.5] - 2025-03-24
+### Changed
+- Internal updates.
+
+## [0.4.4] - 2025-03-12
+### Changed
+- Internal updates.
+
+## [0.4.3] - 2025-03-10
+### Changed
+- Internal updates.
+
+## [0.4.2] - 2025-02-24
+### Changed
+- Update dependencies.
+
+## [0.4.1] - 2025-01-09
+### Fixed
+- Temporarily disable setcookie to avoid caching issues. [#40937]
+
+## [0.4.0] - 2025-01-06
+### Added
+- Add Search Event & landing Page support. [#40698]
+
+## [0.3.1] - 2024-12-25
+### Fixed
+- Fix fatal when WC()->cart returns null. [#40729]
+
+## [0.3.0] - 2024-12-23
+### Changed
+- Add common props, more events and bug fixing. [#40562]
+
+## [0.2.0] - 2024-11-18
+### Removed
+- General: Update minimum PHP version to 7.2. [#40147]
+
+## [0.1.13] - 2024-11-04
+### Added
+- Enable test coverage. [#39961]
+
+## [0.1.12] - 2024-10-29
+### Changed
+- Internal updates.
+
+## [0.1.11] - 2024-09-23
+### Changed
+- Update dependencies.
+
+## [0.1.10] - 2024-09-10
+### Fixed
+- Check whether `\WC_Install::STORE_ID_OPTION` is defined before attempting to use it, for compatibility with WooCommerce <8.4.0. [#39306]
+
+## [0.1.9] - 2024-09-09
+### Added
+- Add Store ID property in common woocommerce analytics  properties. [#38857]
+
+## [0.1.8] - 2024-08-26
+### Changed
+- Updated package dependencies. [#39004]
+
+## [0.1.7] - 2024-06-26
+### Removed
+- Remove use of `gutenberg_get_block_template()`. Its replacement has been in WP Core since 5.8. [#38015]
+
+## [0.1.6] - 2024-05-20
+### Fixed
+- Customer creation: avoid PHP warnings when other plugins hook into customer creation process and return malformed user data. [#37440]
+
+## [0.1.5] - 2024-05-06
+### Changed
+- Ensure the package can only be initialized once. [#37154]
+
+## [0.1.4] - 2024-04-15
+### Changed
+- Internal updates.
+
+## [0.1.3] - 2024-04-08
+### Fixed
+- Fixed a JavaScript error when accessing the Shortcode checkout with WooCommerce Analytics enable. [#36560]
+
+## [0.1.2] - 2024-03-25
+### Changed
+- Internal updates.
+
+## [0.1.1] - 2024-03-18
+### Changed
+- Internal updates.
+
+## 0.1.0 - 2024-03-12
+### Added
+- General: add main classes to the package. [#35756]
+- Initial version. [#35754]
+
+### Fixed
+- Avoid any issues when the package is loaded in an mu-plugin. [#36287]
+- Fix namespace issue with WooCommerce class reference. [#35857]
+- General: bail early when WooCommerce is not active. [#36278]
+
+[0.16.3]: https://github.com/Automattic/woocommerce-analytics/compare/v0.16.2...v0.16.3
+[0.16.2]: https://github.com/Automattic/woocommerce-analytics/compare/v0.16.1...v0.16.2
+[0.16.1]: https://github.com/Automattic/woocommerce-analytics/compare/v0.16.0...v0.16.1
+[0.16.0]: https://github.com/Automattic/woocommerce-analytics/compare/v0.15.7...v0.16.0
+[0.15.7]: https://github.com/Automattic/woocommerce-analytics/compare/v0.15.6...v0.15.7
+[0.15.6]: https://github.com/Automattic/woocommerce-analytics/compare/v0.15.5...v0.15.6
+[0.15.5]: https://github.com/Automattic/woocommerce-analytics/compare/v0.15.4...v0.15.5
+[0.15.4]: https://github.com/Automattic/woocommerce-analytics/compare/v0.15.3...v0.15.4
+[0.15.3]: https://github.com/Automattic/woocommerce-analytics/compare/v0.15.2...v0.15.3
+[0.15.2]: https://github.com/Automattic/woocommerce-analytics/compare/v0.15.1...v0.15.2
+[0.15.1]: https://github.com/Automattic/woocommerce-analytics/compare/v0.15.0...v0.15.1
+[0.15.0]: https://github.com/Automattic/woocommerce-analytics/compare/v0.14.0...v0.15.0
+[0.14.0]: https://github.com/Automattic/woocommerce-analytics/compare/v0.13.4...v0.14.0
+[0.13.4]: https://github.com/Automattic/woocommerce-analytics/compare/v0.13.3...v0.13.4
+[0.13.3]: https://github.com/Automattic/woocommerce-analytics/compare/v0.13.2...v0.13.3
+[0.13.2]: https://github.com/Automattic/woocommerce-analytics/compare/v0.13.1...v0.13.2
+[0.13.1]: https://github.com/Automattic/woocommerce-analytics/compare/v0.13.0...v0.13.1
+[0.13.0]: https://github.com/Automattic/woocommerce-analytics/compare/v0.12.2...v0.13.0
+[0.12.2]: https://github.com/Automattic/woocommerce-analytics/compare/v0.12.1...v0.12.2
+[0.12.1]: https://github.com/Automattic/woocommerce-analytics/compare/v0.12.0...v0.12.1
+[0.12.0]: https://github.com/Automattic/woocommerce-analytics/compare/v0.11.0...v0.12.0
+[0.11.0]: https://github.com/Automattic/woocommerce-analytics/compare/v0.10.1...v0.11.0
+[0.10.1]: https://github.com/Automattic/woocommerce-analytics/compare/v0.10.0...v0.10.1
+[0.10.0]: https://github.com/Automattic/woocommerce-analytics/compare/v0.9.2...v0.10.0
+[0.9.2]: https://github.com/Automattic/woocommerce-analytics/compare/v0.9.1...v0.9.2
+[0.9.1]: https://github.com/Automattic/woocommerce-analytics/compare/v0.9.0...v0.9.1
+[0.9.0]: https://github.com/Automattic/woocommerce-analytics/compare/v0.8.0...v0.9.0
+[0.8.0]: https://github.com/Automattic/woocommerce-analytics/compare/v0.7.0...v0.8.0
+[0.7.0]: https://github.com/Automattic/woocommerce-analytics/compare/v0.6.2...v0.7.0
+[0.6.2]: https://github.com/Automattic/woocommerce-analytics/compare/v0.6.1...v0.6.2
+[0.6.1]: https://github.com/Automattic/woocommerce-analytics/compare/v0.6.0...v0.6.1
+[0.6.0]: https://github.com/Automattic/woocommerce-analytics/compare/v0.5.0...v0.6.0
+[0.5.0]: https://github.com/Automattic/woocommerce-analytics/compare/v0.4.9...v0.5.0
+[0.4.9]: https://github.com/Automattic/woocommerce-analytics/compare/v0.4.8...v0.4.9
+[0.4.8]: https://github.com/Automattic/woocommerce-analytics/compare/v0.4.7...v0.4.8
+[0.4.7]: https://github.com/Automattic/woocommerce-analytics/compare/v0.4.6...v0.4.7
+[0.4.6]: https://github.com/Automattic/woocommerce-analytics/compare/v0.4.5...v0.4.6
+[0.4.5]: https://github.com/Automattic/woocommerce-analytics/compare/v0.4.4...v0.4.5
+[0.4.4]: https://github.com/Automattic/woocommerce-analytics/compare/v0.4.3...v0.4.4
+[0.4.3]: https://github.com/Automattic/woocommerce-analytics/compare/v0.4.2...v0.4.3
+[0.4.2]: https://github.com/Automattic/woocommerce-analytics/compare/v0.4.1...v0.4.2
+[0.4.1]: https://github.com/Automattic/woocommerce-analytics/compare/v0.4.0...v0.4.1
+[0.4.0]: https://github.com/Automattic/woocommerce-analytics/compare/v0.3.1...v0.4.0
+[0.3.1]: https://github.com/Automattic/woocommerce-analytics/compare/v0.3.0...v0.3.1
+[0.3.0]: https://github.com/Automattic/woocommerce-analytics/compare/v0.2.0...v0.3.0
+[0.2.0]: https://github.com/Automattic/woocommerce-analytics/compare/v0.1.13...v0.2.0
+[0.1.13]: https://github.com/Automattic/woocommerce-analytics/compare/v0.1.12...v0.1.13
+[0.1.12]: https://github.com/Automattic/woocommerce-analytics/compare/v0.1.11...v0.1.12
+[0.1.11]: https://github.com/Automattic/woocommerce-analytics/compare/v0.1.10...v0.1.11
+[0.1.10]: https://github.com/Automattic/woocommerce-analytics/compare/v0.1.9...v0.1.10
+[0.1.9]: https://github.com/Automattic/woocommerce-analytics/compare/v0.1.8...v0.1.9
+[0.1.8]: https://github.com/Automattic/woocommerce-analytics/compare/v0.1.7...v0.1.8
+[0.1.7]: https://github.com/Automattic/woocommerce-analytics/compare/v0.1.6...v0.1.7
+[0.1.6]: https://github.com/Automattic/woocommerce-analytics/compare/v0.1.5...v0.1.6
+[0.1.5]: https://github.com/Automattic/woocommerce-analytics/compare/v0.1.4...v0.1.5
+[0.1.4]: https://github.com/Automattic/woocommerce-analytics/compare/v0.1.3...v0.1.4
+[0.1.3]: https://github.com/Automattic/woocommerce-analytics/compare/v0.1.2...v0.1.3
+[0.1.2]: https://github.com/Automattic/woocommerce-analytics/compare/v0.1.1...v0.1.2
+[0.1.1]: https://github.com/Automattic/woocommerce-analytics/compare/v0.1.0...v0.1.1
