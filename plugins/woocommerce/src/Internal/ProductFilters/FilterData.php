@@ -521,7 +521,7 @@ class FilterData {
 	 * stored, preventing unbounded transient growth from bot enumeration.
 	 * The counter resets whenever the filter-data cache is invalidated.
 	 * The limit can be adjusted via the `woocommerce_product_filter_cache_max_entries`
-	 * filter.  Set it to 0 to disable the cap entirely.
+	 * filter. Set it to 0 to disable the cap entirely.
 	 *
 	 * @since 10.8.0 Cache-entry cap added.
 	 *
@@ -557,9 +557,9 @@ class FilterData {
 			}
 
 			// The counter only increments — it does not decrement when entries
-			// expire naturally.  The effective cap may therefore be reached
+			// expire naturally. The effective cap may therefore be reached
 			// before $max_entries live transients exist, making the limit
-			// slightly conservative.  This is intentional: accuracy here is
+			// slightly conservative. This is intentional: accuracy here is
 			// not worth the cost of tracking individual expirations.
 			set_transient( CacheController::CACHE_ENTRY_COUNT_TRANSIENT, $count + 1, DAY_IN_SECONDS );
 		}
