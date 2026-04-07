@@ -155,22 +155,15 @@ class ProductGallery extends AbstractBlock {
 			);
 
 			if ( $product->is_type( ProductType::VARIABLE ) ) {
-				$variations_data           = $product->get_available_variations();
+				$variations_data           = $product->get_available_variations( 'objects' );
 				$formatted_variations_data = array();
 				$has_variation_images      = false;
 				foreach ( $variations_data as $variation ) {
-					if (
-						empty( $variation['variation_id'] )
-						|| ! array_key_exists( 'image_id', $variation )
-					) {
-						continue;
-					}
-
-					$variation_image_id = (int) $variation['image_id'];
+					$variation_image_id = (int) $variation->get_image_id();
 					if ( $variation_image_id ) {
 						$has_variation_images = true;
 
-						$formatted_variations_data[ $variation['variation_id'] ] = array(
+						$formatted_variations_data[ $variation->get_id() ] = array(
 							'image_id' => $variation_image_id,
 						);
 					}

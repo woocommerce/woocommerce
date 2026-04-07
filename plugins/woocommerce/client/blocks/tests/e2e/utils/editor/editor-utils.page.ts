@@ -119,7 +119,7 @@ export class Editor extends CoreEditor {
 	 */
 	async searchTemplate( { templateName }: { templateName: string } ) {
 		const templateCards = this.page.locator(
-			'.dataviews-view-grid > .dataviews-view-grid__card'
+			'.dataviews-view-grid .dataviews-view-grid__card'
 		);
 		const templatesBeforeSearch = await templateCards.count();
 

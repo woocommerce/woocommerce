@@ -32,8 +32,6 @@ const templateSlugToTemplateMap: {
 export const useTracksLocation = ( templateSlug: string | undefined ) => {
 	const postType = useSelect( ( select ) => {
 		const editor = select( CORE_EDITOR_STORE );
-		// @ts-expect-error Type definitions are missing
-		// https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/wordpress__blocks/store/selectors.d.ts
 		return editor?.getCurrentPostType?.();
 	}, [] );
 

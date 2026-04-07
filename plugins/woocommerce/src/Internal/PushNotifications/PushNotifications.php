@@ -7,8 +7,13 @@ namespace Automattic\WooCommerce\Internal\PushNotifications;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\Jetpack\Connection\Manager as JetpackConnectionManager;
+use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushNotificationRestController;
 use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushTokenRestController;
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
+use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
+use Automattic\WooCommerce\Internal\PushNotifications\Services\PendingNotificationStore;
+use Automattic\WooCommerce\Internal\PushNotifications\Triggers\NewOrderNotificationTrigger;
+use Automattic\WooCommerce\Internal\PushNotifications\Triggers\NewReviewNotificationTrigger;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use WC_Logger;
@@ -69,9 +74,14 @@ class PushNotifications {
 
 		$this->register_post_types();
 
-		wc_get_container()->get( PushTokenRestController::class )->register();
+		wc_get_container()->get( PendingNotificationStore::class )->register();
 
-		// Library endpoints and scheduled tasks will be registered here.
+		( new PushTokenRestController() )->register();
+		( new PushNotificationRestController() )->register();
+		( new NewOrderNotificationTrigger() )->register();
+		( new NewReviewNotificationTrigger() )->register();
+
+		wc_get_container()->get( NotificationProcessor::class )->register();
 	}
 
 	/**

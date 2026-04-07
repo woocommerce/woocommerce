@@ -214,164 +214,175 @@ class WC_Frontend_Scripts {
 		$version = Constants::get_constant( 'WC_VERSION' );
 
 		$scripts = array(
-			'selectWoo'                  => array(
+			'selectWoo'                    => array(
 				'src'     => self::get_asset_url( 'assets/js/selectWoo/selectWoo.full' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
 				'version' => '1.0.9-wc.' . $version,
 			),
-			'wc-account-i18n'            => array(
+			'wc-account-i18n'              => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/account-i18n' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
 				'version' => $version,
 			),
-			'wc-add-payment-method'      => array(
+			'wc-add-payment-method'        => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/add-payment-method' . $suffix . '.js' ),
-				'deps'    => array( 'jquery', 'woocommerce' ),
+				'deps'    => array( 'jquery', 'woocommerce', 'wc-custom-place-order-button' ),
 				'version' => $version,
 			),
-			'wc-add-to-cart'             => array(
+			'wc-add-to-cart'               => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/add-to-cart' . $suffix . '.js' ),
 				'deps'    => array( 'jquery', 'wc-jquery-blockui' ),
 				'version' => $version,
 			),
-			'wc-add-to-cart-variation'   => array(
+			'wc-add-to-cart-variation'     => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/add-to-cart-variation' . $suffix . '.js' ),
 				'deps'    => array( 'jquery', 'wp-util', 'wc-jquery-blockui' ),
 				'version' => $version,
 			),
-			'wc-address-i18n'            => array(
+			'wc-address-i18n'              => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/address-i18n' . $suffix . '.js' ),
 				'deps'    => array( 'jquery', 'wc-country-select' ),
 				'version' => $version,
 			),
-			'wc-back-in-stock-form'      => array(
+			'wc-back-in-stock-form'        => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/back-in-stock-form' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
 				'version' => $version,
 			),
-			'wc-cart'                    => array(
+			'wc-cart'                      => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/cart' . $suffix . '.js' ),
 				'deps'    => array( 'jquery', 'woocommerce', 'wc-country-select', 'wc-address-i18n' ),
 				'version' => $version,
 			),
-			'wc-cart-fragments'          => array(
+			'wc-cart-fragments'            => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/cart-fragments' . $suffix . '.js' ),
 				'deps'    => array( 'jquery', 'wc-js-cookie' ),
 				'version' => $version,
 			),
-			'wc-checkout'                => array(
+			'wc-checkout'                  => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/checkout' . $suffix . '.js' ),
-				'deps'    => array( 'jquery', 'woocommerce', 'wc-country-select', 'wc-address-i18n' ),
+				'deps'    => array(
+					'jquery',
+					'woocommerce',
+					'wc-country-select',
+					'wc-address-i18n',
+					'wc-custom-place-order-button',
+				),
 				'version' => $version,
 			),
-			'wc-country-select'          => array(
+			'wc-country-select'            => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/country-select' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
 				'version' => $version,
 			),
-			'wc-credit-card-form'        => array(
+			'wc-credit-card-form'          => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/credit-card-form' . $suffix . '.js' ),
 				'deps'    => array( 'jquery', 'wc-jquery-payment' ),
 				'version' => $version,
 			),
-			'wc-dompurify'               => array(
+			'wc-custom-place-order-button' => array(
+				'src'     => self::get_asset_url( 'assets/js/frontend/utils/custom-place-order-button' . $suffix . '.js' ),
+				'deps'    => array( 'jquery' ),
+				'version' => $version,
+			),
+			'wc-dompurify'                 => array(
 				'src'     => self::get_asset_url( 'assets/js/dompurify/purify' . $suffix . '.js' ),
 				'deps'    => array(),
 				'version' => $version,
 			),
-			'wc-flexslider'              => array(
+			'wc-flexslider'                => array(
 				'src'           => self::get_asset_url( 'assets/js/flexslider/jquery.flexslider' . $suffix . '.js' ),
 				'deps'          => array( 'jquery' ),
 				'version'       => '2.7.2-wc.' . $version,
 				'legacy_handle' => 'flexslider',
 			),
-			'wc-geolocation'             => array(
+			'wc-geolocation'               => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/geolocation' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
 				'version' => $version,
 			),
-			'wc-jquery-blockui'          => array(
+			'wc-jquery-blockui'            => array(
 				'src'           => self::get_asset_url( 'assets/js/jquery-blockui/jquery.blockUI' . $suffix . '.js' ),
 				'deps'          => array( 'jquery' ),
 				'version'       => '2.7.0-wc.' . $version,
 				'legacy_handle' => 'jquery-blockui',
 			),
-			'wc-jquery-cookie'           => array(
+			'wc-jquery-cookie'             => array(
 				'src'           => self::get_asset_url( 'assets/js/jquery-cookie/jquery.cookie' . $suffix . '.js' ),
 				'deps'          => array( 'jquery' ),
 				'version'       => '1.4.1-wc.' . $version,
 				'legacy_handle' => 'jquery-cookie',
 			),
-			'wc-jquery-payment'          => array(
+			'wc-jquery-payment'            => array(
 				'src'           => self::get_asset_url( 'assets/js/jquery-payment/jquery.payment' . $suffix . '.js' ),
 				'deps'          => array( 'jquery' ),
 				'version'       => '3.0.0-wc.' . $version,
 				'legacy_handle' => 'jquery-payment',
 			),
-			'wc-jquery-tiptip'           => array(
+			'wc-jquery-tiptip'             => array(
 				'src'           => self::get_asset_url( 'assets/js/jquery-tiptip/jquery.tipTip' . $suffix . '.js' ),
 				'deps'          => array( 'jquery', 'wc-dompurify' ),
 				'version'       => $version,
 				'legacy_handle' => 'jquery-tiptip',
 			),
-			'wc-js-cookie'               => array(
+			'wc-js-cookie'                 => array(
 				'src'           => self::get_asset_url( 'assets/js/js-cookie/js.cookie' . $suffix . '.js' ),
 				'deps'          => array(),
 				'version'       => '2.1.4-wc.' . $version,
 				'legacy_handle' => 'js-cookie',
 			),
-			'wc-lost-password'           => array(
+			'wc-lost-password'             => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/lost-password' . $suffix . '.js' ),
 				'deps'    => array( 'jquery', 'woocommerce' ),
 				'version' => $version,
 			),
-			'wc-password-strength-meter' => array(
+			'wc-password-strength-meter'   => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/password-strength-meter' . $suffix . '.js' ),
 				'deps'    => array( 'jquery', 'password-strength-meter' ),
 				'version' => $version,
 			),
-			'wc-photoswipe'              => array(
+			'wc-photoswipe'                => array(
 				'src'           => self::get_asset_url( 'assets/js/photoswipe/photoswipe' . $suffix . '.js' ),
 				'deps'          => array(),
 				'version'       => '4.1.1-wc.' . $version,
 				'legacy_handle' => 'photoswipe',
 			),
-			'wc-photoswipe-ui-default'   => array(
+			'wc-photoswipe-ui-default'     => array(
 				'src'           => self::get_asset_url( 'assets/js/photoswipe/photoswipe-ui-default' . $suffix . '.js' ),
 				'deps'          => array( 'wc-photoswipe' ),
 				'version'       => '4.1.1-wc.' . $version,
 				'legacy_handle' => 'photoswipe-ui-default',
 			),
-			'wc-prettyPhoto'             => array( // deprecated.
+			'wc-prettyPhoto'               => array( // deprecated.
 				'src'           => self::get_asset_url( 'assets/js/prettyPhoto/jquery.prettyPhoto' . $suffix . '.js' ),
 				'deps'          => array( 'jquery' ),
 				'version'       => '3.1.6-wc.' . $version,
 				'legacy_handle' => 'prettyPhoto',
 			),
-			'wc-prettyPhoto-init'        => array( // deprecated.
+			'wc-prettyPhoto-init'          => array( // deprecated.
 				'src'           => self::get_asset_url( 'assets/js/prettyPhoto/jquery.prettyPhoto.init' . $suffix . '.js' ),
 				'deps'          => array( 'jquery', 'wc-prettyPhoto' ),
 				'version'       => $version,
 				'legacy_handle' => 'prettyPhoto-init',
 			),
-			'wc-select2'                 => array(
+			'wc-select2'                   => array(
 				'src'           => self::get_asset_url( 'assets/js/select2/select2.full' . $suffix . '.js' ),
 				'deps'          => array( 'jquery' ),
 				'version'       => '4.0.3-wc.' . $version,
 				'legacy_handle' => 'select2',
 			),
-			'wc-single-product'          => array(
+			'wc-single-product'            => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/single-product' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
 				'version' => $version,
 			),
-			'wc-zoom'                    => array(
+			'wc-zoom'                      => array(
 				'src'           => self::get_asset_url( 'assets/js/zoom/jquery.zoom' . $suffix . '.js' ),
 				'deps'          => array( 'jquery' ),
 				'version'       => '1.7.21-wc.' . $version,
 				'legacy_handle' => 'zoom',
 			),
-			'woocommerce'                => array(
+			'woocommerce'                  => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/woocommerce' . $suffix . '.js' ),
 				'deps'    => array( 'jquery', 'wc-jquery-blockui', 'wc-js-cookie' ),
 				'version' => $version,
@@ -667,6 +678,7 @@ class WC_Frontend_Scripts {
 					'debug_mode'                => Constants::is_true( 'WP_DEBUG' ),
 					/* translators: %s: Order history URL on My Account section */
 					'i18n_checkout_error'       => sprintf( esc_attr__( 'There was an error processing your order. Please check for any charges in your payment method and review your <a href="%s">order history</a> before placing the order again.', 'woocommerce' ), esc_url( wc_get_account_endpoint_url( 'orders' ) ) ),
+					'gateways_with_custom_place_order_button' => self::get_gateways_with_custom_place_order_button(),
 				);
 				break;
 			case 'wc-address-autocomplete-common':
@@ -732,6 +744,11 @@ class WC_Frontend_Scripts {
 					'cart_redirect_after_add' => get_option( 'woocommerce_cart_redirect_after_add' ),
 				);
 				break;
+			case 'wc-add-payment-method':
+				$params = array(
+					'gateways_with_custom_place_order_button' => self::get_gateways_with_custom_place_order_button(),
+				);
+				break;
 			case 'wc-add-to-cart-variation':
 				// We also need the wp.template for this script :).
 				wc_get_template( 'single-product/add-to-cart/variation.php' );
@@ -775,6 +792,31 @@ class WC_Frontend_Scripts {
 		$params = apply_filters_deprecated( $handle . '_params', array( $params ), '3.0.0', 'woocommerce_get_script_data' );
 
 		return apply_filters( 'woocommerce_get_script_data', $params, $handle );
+	}
+
+	/**
+	 * Get a list of payment gateway IDs that have custom place order buttons.
+	 *
+	 * @return array List of gateway IDs with custom place order buttons.
+	 */
+	private static function get_gateways_with_custom_place_order_button() {
+		$gateways_with_custom_button = array();
+
+		if ( ! WC()->payment_gateways() ) {
+			return $gateways_with_custom_button;
+		}
+
+		$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
+
+		foreach ( $available_gateways as $gateway ) {
+			// phpcs:ignore Squiz.PHP.CommentedOutCode.Found -- Type hint for PHPStan.
+			/* @var WC_Payment_Gateway $gateway */
+			if ( true === $gateway->has_custom_place_order_button ) {
+				$gateways_with_custom_button[] = $gateway->id;
+			}
+		}
+
+		return $gateways_with_custom_button;
 	}
 
 	/**

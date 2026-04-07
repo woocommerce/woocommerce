@@ -7,7 +7,6 @@ import {
 } from '@woocommerce/base-context/hooks';
 import { cloneElement, useCallback } from '@wordpress/element';
 import { useEditorContext } from '@woocommerce/base-context';
-import clsx from 'clsx';
 import { RadioControlAccordion } from '@woocommerce/blocks-components';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { getPaymentMethods } from '@woocommerce/blocks-registry';
@@ -29,7 +28,6 @@ const PaymentMethodOptions = () => {
 		activeSavedToken,
 		activePaymentMethod,
 		isExpressPaymentMethodActive,
-		savedPaymentMethods,
 		availablePaymentMethods,
 	} = useSelect( ( select ) => {
 		const store = select( paymentStore );
@@ -37,7 +35,6 @@ const PaymentMethodOptions = () => {
 			activeSavedToken: store.getActiveSavedToken(),
 			activePaymentMethod: store.getActivePaymentMethod(),
 			isExpressPaymentMethodActive: store.isExpressPaymentMethodActive(),
-			savedPaymentMethods: store.getSavedPaymentMethods(),
 			availablePaymentMethods: store.getAvailablePaymentMethods(),
 		};
 	} );
@@ -86,18 +83,10 @@ const PaymentMethodOptions = () => {
 		]
 	);
 
-	const isSinglePaymentMethod =
-		Object.keys( savedPaymentMethods ).length === 0 &&
-		Object.keys( availablePaymentMethods ).length === 1;
-
-	const singleOptionClass = clsx( {
-		'disable-radio-control': isSinglePaymentMethod,
-	} );
 	return isExpressPaymentMethodActive ? null : (
 		<RadioControlAccordion
 			highlightChecked={ true }
 			id={ 'wc-payment-method-options' }
-			className={ singleOptionClass }
 			selected={ activeSavedToken ? null : activePaymentMethod }
 			onChange={ onChange }
 			options={ options }

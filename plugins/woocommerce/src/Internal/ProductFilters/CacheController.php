@@ -50,6 +50,11 @@ class CacheController implements RegisterHooksInterface {
 		add_action( 'created_term', array( $this, 'clear_taxonomy_hierarchy_cache' ), 10, 3 );
 		add_action( 'edited_term', array( $this, 'clear_taxonomy_hierarchy_cache' ), 10, 3 );
 		add_action( 'delete_term', array( $this, 'clear_taxonomy_hierarchy_cache' ), 10, 3 );
+
+		// Clear taxonomy hierarchy cache when term meta (like 'order') is added or updated.
+		add_action( 'added_term_meta', array( $this, 'clear_taxonomy_hierarchy_cache_on_meta_update' ), 10, 4 );
+		add_action( 'updated_term_meta', array( $this, 'clear_taxonomy_hierarchy_cache_on_meta_update' ), 10, 4 );
+		add_action( 'deleted_term_meta', array( $this, 'clear_taxonomy_hierarchy_cache_on_meta_update' ), 10, 4 );
 	}
 
 	/**
@@ -72,6 +77,29 @@ class CacheController implements RegisterHooksInterface {
 		if ( is_taxonomy_hierarchical( $taxonomy ) ) {
 			$this->taxonomy_hierarchy_data->clear_cache( $taxonomy );
 		}
+	}
+
+	/**
+	 * Clear taxonomy hierarchy cache when term meta is updated.
+	 * This handles the case when categories are reordered (updates 'order' meta).
+	 *
+	 * @param int    $meta_id    Meta ID.
+	 * @param int    $term_id    Term ID.
+	 * @param string $meta_key   Meta key.
+	 * @param mixed  $meta_value Meta value.
+	 */
+	public function clear_taxonomy_hierarchy_cache_on_meta_update( $meta_id, $term_id, $meta_key, $meta_value ): void {
+		// Only clear cache when the 'order' meta key is updated (used for menu ordering).
+		if ( 'order' !== $meta_key ) {
+			return;
+		}
+
+		$term = get_term( $term_id );
+		if ( ! $term instanceof \WP_Term ) {
+			return;
+		}
+
+		$this->taxonomy_hierarchy_data->clear_cache( $term->taxonomy );
 	}
 
 	/**

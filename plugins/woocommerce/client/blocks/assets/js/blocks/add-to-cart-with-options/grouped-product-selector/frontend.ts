@@ -14,7 +14,7 @@ import type {
 	AddToCartWithOptionsStore,
 	Context as AddToCartWithOptionsStoreContext,
 } from '../frontend';
-import { getNewQuantity, getProductData } from '../frontend';
+import { getProductData } from '../frontend';
 
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
@@ -99,11 +99,6 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 						continue;
 					}
 
-					const newQuantity = getNewQuantity(
-						childProductId,
-						quantity[ childProductId ]
-					);
-
 					const productObject = getProductData(
 						Number( childProductId ),
 						selectedAttributes
@@ -115,7 +110,7 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 
 					addedItems.push( {
 						id: Number( childProductId ),
-						quantity: newQuantity,
+						quantityToAdd: quantity[ childProductId ],
 						variation: selectedAttributes,
 						type: productObject.type,
 					} );

@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Add caching for the currencies REST API endpoints

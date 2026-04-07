@@ -227,21 +227,6 @@ const productFiltersStore = {
 				return;
 			}
 
-			const sharedSettings = getConfig( 'woocommerce' );
-			const productFilterSettings = getConfig( BLOCK_NAME );
-			const isBlockTheme = sharedSettings?.isBlockTheme || false;
-			const isProductArchive =
-				productFilterSettings?.isProductArchive || false;
-			const needsRefreshForInteractivityAPI =
-				sharedSettings?.needsRefreshForInteractivityAPI || false;
-
-			if (
-				needsRefreshForInteractivityAPI ||
-				( ! isBlockTheme && isProductArchive )
-			) {
-				return ( window.location.href = url.href );
-			}
-
 			const routerModule: typeof import('@wordpress/interactivity-router') =
 				yield import( '@wordpress/interactivity-router' );
 

@@ -868,21 +868,20 @@ class ListTable extends WP_List_Table {
 	protected function get_months_filter_options(): array {
 		global $wpdb;
 
-		$orders_table   = esc_sql( OrdersTableDataStore::get_orders_table_name() );
+		$table_name     = OrdersTableDataStore::get_orders_table_name();
 		$min_max_months = $wpdb->get_row(
-			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is escaped above.
 			$wpdb->prepare(
-				"
-					SELECT MIN( t.date_created_gmt ) as min_date_gmt,
-					       MAX( t.date_created_gmt ) as max_date_gmt
-					FROM `{$orders_table}` t
-					WHERE type = %s
-					AND status != %s
-				",
+				"SELECT MIN(date_created_gmt) as min_date_gmt, MAX(date_created_gmt) as max_date_gmt
+				 FROM (
+					( SELECT date_created_gmt FROM %i WHERE type = %s AND status != 'trash' ORDER BY date_created_gmt DESC LIMIT 1 )
+					UNION ALL
+					( SELECT date_created_gmt FROM %i WHERE type = %s AND status != 'trash' ORDER BY date_created_gmt ASC LIMIT 1 )
+				 ) d",
+				$table_name,
 				$this->order_type,
-				OrderStatus::TRASH
+				$table_name,
+				$this->order_type
 			)
-			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		);
 
 		/**

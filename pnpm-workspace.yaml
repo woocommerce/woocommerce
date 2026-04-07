@@ -14,3 +14,76 @@ packages:
     - 'tools/release-posts'
     - 'tools/storybook'
     - 'tools/monorepo-utils'
+
+# Hoisting: restore pnpm 9 defaults that pnpm 10 removed.
+# pnpm 10 emptied public-hoist-pattern (was ['*eslint*', '*prettier*']).
+# Also hoist react/react-dom so phantom deps in @wordpress/* packages resolve
+# (e.g. @wordpress/dataviews imports react-dom/client without declaring it).
+publicHoistPattern:
+    - '*eslint*'
+    - '*prettier*'
+    - 'react'
+    - 'react-dom'
+
+# Quality of life tweaks (migrated from .npmrc)
+updateNotifier: false
+confirmModulesPurge: false
+modulesCacheMaxAge: 20160  # two weeks in minutes
+childConcurrency: 8
+
+# Supply chain security (pnpm 10)
+# Context: axios supply chain attack (2026-03-31) — malicious versions lived ~2-3hrs on npm.
+
+# Let new releases age 24 hours before installing.
+minimumReleaseAge: 1440
+minimumReleaseAgeExclude:
+    - '@automattic/*'
+    - '@woocommerce/*'
+    - '@wordpress/*'
+
+# Require explicit approval for dependency build scripts (postinstall, etc).
+# msw copies its service worker file, and fs-ext needs a native build for wp-env.
+# All other deps with lifecycle scripts are implicitly blocked.
+# Fail (non-zero exit) on unapproved build scripts instead of warning.
+strictDepBuilds: true
+allowBuilds:
+    msw: true
+    fs-ext: true
+    # Explicitly denied — these deps have build scripts we don't need.
+    '@swc/core': false
+    core-js: false
+    core-js-pure: false
+    esbuild: false
+    fsevents: false
+    node-pty: false
+    puppeteer-core: false
+    yarn: false
+
+# Block odd protocols (git+ssh, etc.) in transitive dependencies.
+# DISABLED: @wordpress/interactivity uses a git-hosted fork (via .pnpmfile.cjs readPackage hook)
+# for @wordpress/interactivity-router. pnpm has no exclude mechanism for blockExoticSubdeps.
+# TODO: Re-enable once the WooCommerce Gutenberg fork of @wordpress/interactivity is no longer needed.
+blockExoticSubdeps: false
+
+# Prevent trust downgrades (e.g., replacing a signed version with unsigned).
+trustPolicy: no-downgrade
+trustPolicyExclude:
+    # oxc-resolver 11.2.0 bindings lost provenance attestation compared to earlier versions.
+    # These are platform-specific native bindings used by knip via oxc-resolver.
+    - '@oxc-resolver/binding-darwin-arm64@11.2.0'
+    - '@oxc-resolver/binding-darwin-x64@11.2.0'
+    - '@oxc-resolver/binding-freebsd-x64@11.2.0'
+    - '@oxc-resolver/binding-linux-arm64-gnu@11.2.0'
+    - '@oxc-resolver/binding-linux-arm64-musl@11.2.0'
+    - '@oxc-resolver/binding-linux-arm-gnueabihf@11.2.0'
+    - '@oxc-resolver/binding-linux-riscv64-gnu@11.2.0'
+    - '@oxc-resolver/binding-linux-s390x-gnu@11.2.0'
+    - '@oxc-resolver/binding-linux-x64-gnu@11.2.0'
+    - '@oxc-resolver/binding-linux-x64-musl@11.2.0'
+    - '@oxc-resolver/binding-wasm32-wasi@11.2.0'
+    - '@oxc-resolver/binding-win32-arm64-msvc@11.2.0'
+    - '@oxc-resolver/binding-win32-x64-msvc@11.2.0'
+    # Newer major has provenance but we're on an older one.
+    - semver@6.3.1
+    # Lost provenance attestation in this version (dep of @types/node).
+    - undici-types@6.19.8

@@ -480,6 +480,7 @@ class DataSynchronizerTests extends \HposTestCase {
 		// Sync enabled and CPT authoritative.
 		update_option( $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, 'yes' );
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
+		add_filter( 'woocommerce_hpos_enable_sync_on_read', '__return_true' );
 
 		$order = OrderHelper::create_order();
 		$order->add_meta_data( 'foo', 'bar' );
@@ -503,6 +504,7 @@ class DataSynchronizerTests extends \HposTestCase {
 			'',
 			'Meta data deleted from the CPT datastore should also be deleted from the HPOS datastore.'
 		);
+		remove_all_filters( 'woocommerce_hpos_enable_sync_on_read' );
 	}
 
 	/**

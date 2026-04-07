@@ -19,6 +19,32 @@ use WP_REST_Request, WP_REST_Response, WP_REST_Server;
  */
 class OrderActionsRestController extends RestApiControllerBase {
 	/**
+	 * Maps order statuses to their corresponding email template class and ID.
+	 */
+	private const STATUS_TEMPLATE_MAP = array(
+		OrderStatus::COMPLETED  => array(
+			'class' => 'WC_Email_Customer_Completed_Order',
+			'id'    => 'customer_completed_order',
+		),
+		OrderStatus::FAILED     => array(
+			'class' => 'WC_Email_Customer_Failed_Order',
+			'id'    => 'customer_failed_order',
+		),
+		OrderStatus::ON_HOLD    => array(
+			'class' => 'WC_Email_Customer_On_Hold_Order',
+			'id'    => 'customer_on_hold_order',
+		),
+		OrderStatus::PROCESSING => array(
+			'class' => 'WC_Email_Customer_Processing_Order',
+			'id'    => 'customer_processing_order',
+		),
+		OrderStatus::REFUNDED   => array(
+			'class' => 'WC_Email_Customer_Refunded_Order',
+			'id'    => 'customer_refunded_order',
+		),
+	);
+
+	/**
 	 * Get the WooCommerce REST API namespace for the class.
 	 *
 	 * @return string
@@ -173,11 +199,11 @@ class OrderActionsRestController extends RestApiControllerBase {
 
 		if ( 'send_email' === $action_slug ) {
 			$args['template_id'] = array(
-				'description'       => __( 'The ID of the template to use for sending the email.', 'woocommerce' ),
+				'description'       => __( 'The email template to use. If omitted, the best template is auto-selected based on order status.', 'woocommerce' ),
 				'type'              => 'string',
 				'enum'              => $this->get_template_id_enum(),
 				'context'           => array( 'edit' ),
-				'required'          => true,
+				'required'          => false,
 				'validate_callback' => 'rest_validate_request_arg',
 			);
 		}
@@ -298,22 +324,8 @@ class OrderActionsRestController extends RestApiControllerBase {
 			$valid_template_classes[] = 'WC_Email_Customer_Refunded_Order';
 		}
 
-		switch ( $order_status ) {
-			case OrderStatus::COMPLETED:
-				$valid_template_classes[] = 'WC_Email_Customer_Completed_Order';
-				break;
-			case OrderStatus::FAILED:
-				$valid_template_classes[] = 'WC_Email_Customer_Failed_Order';
-				break;
-			case OrderStatus::ON_HOLD:
-				$valid_template_classes[] = 'WC_Email_Customer_On_Hold_Order';
-				break;
-			case OrderStatus::PROCESSING:
-				$valid_template_classes[] = 'WC_Email_Customer_Processing_Order';
-				break;
-			case OrderStatus::REFUNDED:
-				$valid_template_classes[] = 'WC_Email_Customer_Refunded_Order';
-				break;
+		if ( isset( self::STATUS_TEMPLATE_MAP[ $order_status ] ) ) {
+			$valid_template_classes[] = self::STATUS_TEMPLATE_MAP[ $order_status ]['class'];
 		}
 
 		/**
@@ -369,6 +381,80 @@ class OrderActionsRestController extends RestApiControllerBase {
 	}
 
 	/**
+	 * Select the best email template from available templates using priority ordering.
+	 *
+	 * @param WC_Order   $order               The order.
+	 * @param WC_Email[] $available_templates  Already-filtered available templates.
+	 *
+	 * @return WC_Email|null
+	 */
+	private function select_default_template( WC_Order $order, array $available_templates ): ?WC_Email {
+		if ( empty( $available_templates ) ) {
+			return null;
+		}
+
+		$default_preferred_ids = $this->get_default_preferred_template_ids( $order );
+
+		/**
+		 * Filter the preferred template IDs for auto-selecting an email template.
+		 *
+		 * Template IDs earlier in the array are preferred. Only templates that
+		 * are also in the available templates list will be considered.
+		 *
+		 * @since 10.7.0
+		 *
+		 * @param string[] $preferred_template_ids Ordered array of template IDs (most preferred first).
+		 * @param WC_Order $order                  The order.
+		 * @param string[] $available              The available template IDs for this order.
+		 */
+		$preferred_template_ids = apply_filters(
+			'woocommerce_rest_order_actions_email_preferred_template_ids',
+			$default_preferred_ids,
+			$order,
+			array_map( fn( $t ) => $t->id, $available_templates )
+		);
+
+		if ( ! is_array( $preferred_template_ids ) ) {
+			$preferred_template_ids = $default_preferred_ids;
+		}
+
+		$preferred_template_ids = array_filter( array_unique( $preferred_template_ids ), 'is_string' );
+
+		foreach ( $preferred_template_ids as $candidate_id ) {
+			$template = $this->get_email_template_by_id( $candidate_id, $available_templates );
+			if ( $template ) {
+				return $template;
+			}
+		}
+
+		// Last resort: first available template.
+		$first = reset( $available_templates );
+		return $first ? $first : null;
+	}
+
+	/**
+	 * Get the default preferred template IDs for auto-selection based on order status.
+	 *
+	 * @param WC_Order $order The order.
+	 *
+	 * @return string[]
+	 */
+	private function get_default_preferred_template_ids( WC_Order $order ): array {
+		$status                 = $order->get_status( 'edit' );
+		$preferred_template_ids = array();
+
+		// Status-specific template.
+		if ( isset( self::STATUS_TEMPLATE_MAP[ $status ] ) ) {
+			$preferred_template_ids[] = self::STATUS_TEMPLATE_MAP[ $status ]['id'];
+		}
+
+		// Generic fallback.
+		$preferred_template_ids[] = 'customer_invoice';
+
+		return $preferred_template_ids;
+	}
+
+	/**
 	 * Callback to run for GET wc/v3/orders/(?P<id>[\d]+)/actions/email_templates.
 	 *
 	 * @param WP_REST_Request $request The incoming HTTP REST request.
@@ -414,7 +500,12 @@ class OrderActionsRestController extends RestApiControllerBase {
 	 * @return array|WP_Error
 	 */
 	protected function send_email( WP_REST_Request $request ) {
-		$order       = wc_get_order( $request->get_param( 'id' ) );
+		$order = wc_get_order( $request->get_param( 'id' ) );
+
+		if ( ! $order instanceof WC_Order ) {
+			return new WP_Error( 'woocommerce_rest_not_found', __( 'Order not found.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
 		$email       = $request->get_param( 'email' );
 		$force       = wp_validate_boolean( $request->get_param( 'force_email_update' ) );
 		$template_id = $request->get_param( 'template_id' );
@@ -437,18 +528,33 @@ class OrderActionsRestController extends RestApiControllerBase {
 		}
 
 		$available_templates = $this->get_available_email_templates( $order );
-		$template            = $this->get_email_template_by_id( $template_id, $available_templates );
 
-		if ( is_null( $template ) ) {
-			return new WP_Error(
-				'woocommerce_rest_invalid_email_template',
-				sprintf(
-					// translators: %s is a string ID for an email template.
-					__( '%s is not a valid template for this order.', 'woocommerce' ),
-					esc_html( $template_id )
-				),
-				array( 'status' => 400 )
-			);
+		if ( empty( $template_id ) ) {
+			$template = $this->select_default_template( $order, $available_templates );
+
+			if ( is_null( $template ) ) {
+				return new WP_Error(
+					'woocommerce_rest_no_email_template',
+					__( 'No email template is available for this order.', 'woocommerce' ),
+					array( 'status' => 400 )
+				);
+			}
+
+			$template_id = $template->id;
+		} else {
+			$template = $this->get_email_template_by_id( $template_id, $available_templates );
+
+			if ( is_null( $template ) ) {
+				return new WP_Error(
+					'woocommerce_rest_invalid_email_template',
+					sprintf(
+						// translators: %s is a string ID for an email template.
+						__( '%s is not a valid template for this order.', 'woocommerce' ),
+						esc_html( $template_id )
+					),
+					array( 'status' => 400 )
+				);
+			}
 		}
 
 		switch ( $template_id ) {
@@ -470,6 +576,7 @@ class OrderActionsRestController extends RestApiControllerBase {
 				do_action( 'woocommerce_order_status_pending_to_processing_notification', $order->get_id(), $order );
 				break;
 			case 'customer_refunded_order':
+			case 'customer_pos_refunded_order':
 				if ( $this->order_is_partially_refunded( $order ) ) {
 					/** This action is documented in includes/class-wc-emails.php */
 					do_action( 'woocommerce_order_partially_refunded_notification', $order->get_id() );
@@ -511,7 +618,7 @@ class OrderActionsRestController extends RestApiControllerBase {
 		foreach ( $messages as $message ) {
 			$order->add_order_note(
 				$message,
-				false,
+				0,
 				true,
 				array(
 					'user_agent' => $user_agent ? $user_agent : 'REST API',
@@ -572,7 +679,7 @@ class OrderActionsRestController extends RestApiControllerBase {
 		foreach ( $messages as $message ) {
 			$order->add_order_note(
 				$message,
-				false,
+				0,
 				true,
 				array(
 					'user_agent' => $user_agent ? $user_agent : 'REST API',

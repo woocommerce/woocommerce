@@ -149,8 +149,8 @@ jobs:
 
           # Update PHP version requirements.
           sed -i "s/\* Requires PHP: [0-9.]*/\* Requires PHP: $required_php_version/" "woocommerce.php"
-          sed -i "s/Requires PHP: [0-9.]*/Requires PHP: $required_php_version/" "readme.txt"
-          sed -i "s/PHP [0-9.]\+ or greater is required/PHP $required_php_version or greater is required/" "readme.txt"
+          sed -i '1,/^== /{ s/Requires PHP: [0-9.]*/Requires PHP: '"$required_php_version"'/ }' "readme.txt"
+          sed -i '/^= Minimum Requirements =/,/^= /{ s/\* PHP [0-9.]\+ or greater is required/\* PHP '"$required_php_version"' or greater is required/ }' "readme.txt"
 
           # If this resulted in changes, create a commit and changelog entry for the PHP version update.
           if ! git diff --quiet; then
@@ -168,9 +168,9 @@ jobs:
 
           # Update WordPress version requirements.
           sed -i "s/\* Requires at least: [0-9.]*/\* Requires at least: $WP_REQUIRED_VERSION/" "woocommerce.php"
-          sed -i "s/Requires at least: [0-9.]*/Requires at least: $WP_REQUIRED_VERSION/" "readme.txt"
-          sed -i "s/Tested up to: [0-9.]*/Tested up to: $WP_VERSION/" "readme.txt"
-          sed -i "s/WordPress [0-9.]\+/WordPress $WP_REQUIRED_VERSION/" "readme.txt"
+          sed -i '1,/^== /{ s/Requires at least: [0-9.]*/Requires at least: '"$WP_REQUIRED_VERSION"'/ }' "readme.txt"
+          sed -i '1,/^== /{ s/Tested up to: [0-9.]*/Tested up to: '"$WP_VERSION"'/ }' "readme.txt"
+          sed -i '/^= Minimum Requirements =/,/^= /{ s/\* WordPress [0-9.]\+ or greater/\* WordPress '"$WP_REQUIRED_VERSION"' or greater/ }' "readme.txt"
 
           # Check for changes and exit early if none.
           if git diff --quiet; then

@@ -2,7 +2,7 @@
 /**
  * Class for parameter-based Product querying
  *
- * Args and usage: https://github.com/woocommerce/woocommerce/wiki/wc_get_products-and-WC_Product_Query
+ * Args and usage: https://developer.woocommerce.com/docs/extensions/core-concepts/wc-get-products/
  *
  * @package  WooCommerce\Classes
  * @version  3.2.0

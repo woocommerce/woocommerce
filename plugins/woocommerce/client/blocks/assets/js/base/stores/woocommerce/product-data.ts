@@ -3,6 +3,10 @@
  */
 import { getContext, store } from '@wordpress/interactivity';
 
+// Stores are locked to prevent 3PD usage until the API is stable.
+const universalLock =
+	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
+
 type ProductRef = {
 	productId: number;
 	variationId: number | null;
@@ -19,7 +23,8 @@ const productDataStore = store< {
 	actions: {
 		setVariationId: ( variationId: number | null ) => void;
 	};
-} >(
+} >( 'woocommerce/product-data', {}, { lock: universalLock } );
+store(
 	'woocommerce/product-data',
 	{
 		state: {
@@ -62,7 +67,7 @@ const productDataStore = store< {
 			},
 		},
 	},
-	{ lock: true }
+	{ lock: universalLock }
 );
 
 export type ProductDataStore = typeof productDataStore;
