@@ -259,11 +259,11 @@ test.describe( 'Shopper → Shipping', () => {
 			postcode: 'SW19 5AE',
 		} );
 
+		// With only one shipping rate, the radio button is hidden and the
+		// rate is displayed as plain text (has-single-option styling).
 		await expect(
-			checkoutPageObject.page.getByRole( 'radio', {
-				name: 'Flat rate Free',
-			} )
-		).toBeChecked();
+			checkoutPageObject.page.getByText( 'Flat rate' )
+		).toBeVisible();
 	} );
 
 	test( '7. With no shipping methods for the default location, no shipping methods for _any_ other location, local pickup enabled the shopper sees local pickup rates only', async ( {
@@ -309,11 +309,11 @@ test.describe( 'Shopper → Shipping', () => {
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();
 
+		// With only one pickup location, the radio button is hidden and the
+		// location is displayed as plain text (has-single-option styling).
 		await expect(
-			frontendUtils.page.getByRole( 'radio', {
-				name: 'Automattic, Inc. free 60 29th',
-			} )
-		).toBeChecked();
+			frontendUtils.page.getByText( 'Automattic, Inc.' )
+		).toBeVisible();
 
 		await expect(
 			frontendUtils.page.getByRole( 'radio', {
