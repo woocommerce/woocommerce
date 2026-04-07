@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\ProductFilters;
 
-use Automattic\WooCommerce\Internal\ProductFilters\FilterParamNormalizer;
 use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\QueryClausesGenerator;
 use Automattic\WooCommerce\Internal\ProductFilters\TaxonomyHierarchyData;
 use WC_Cache_Helper;
@@ -470,20 +469,11 @@ class FilterData {
 	/**
 	 * Get filter data transient key.
 	 *
-	 * Query vars are normalised before hashing so that logically equivalent
-	 * filter combinations (e.g. different orderings of the same values) map to
-	 * the same cache entry.
-	 *
-	 * @since 10.8.0 Query vars are normalised before hashing.
-	 *
-	 * @param array  $query_vars  The query arguments to calculate the filter data.
+	 * @param array  $query_vars   The query arguments to calculate the filter data.
 	 * @param string $filter_type The type of filter. Accepts price|stock|rating|attribute.
-	 * @param array  $extra       Some filter types require extra arguments for calculation, like attribute.
-	 * @return string
+	 * @param array  $extra        Some filter types require extra arguments for calculation, like attribute.
 	 */
 	private function get_transient_key( $query_vars, $filter_type, $extra = array() ) {
-		$query_vars = FilterParamNormalizer::normalize( $query_vars );
-
 		return sprintf(
 			'wc_%s_%s',
 			CacheController::CACHE_GROUP,
@@ -588,9 +578,8 @@ class FilterData {
 	 * @return string Comma-separated list of product IDs.
 	 */
 	private function get_cached_product_ids( array $query_vars ) {
-		$query_vars = FilterParamNormalizer::normalize( $query_vars );
-		$cache_key  = WC_Cache_Helper::get_cache_prefix( CacheController::CACHE_GROUP ) . md5( wp_json_encode( $query_vars ) );
-		$cache      = wp_cache_get( $cache_key );
+		$cache_key = WC_Cache_Helper::get_cache_prefix( CacheController::CACHE_GROUP ) . md5( wp_json_encode( $query_vars ) );
+		$cache     = wp_cache_get( $cache_key );
 
 		if ( $cache ) {
 			return $cache;
