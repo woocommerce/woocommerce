@@ -97,7 +97,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 		}
 
 		if ( $wp_query->get( 'filter_stock_status' ) ) {
-			$stock_statuses = array_filter( $this->cap_filter_values( trim( $wp_query->get( 'filter_stock_status' ) ), 'filter_stock_status' ) );
+			$stock_statuses = $this->cap_filter_values( trim( $wp_query->get( 'filter_stock_status' ) ), 'filter_stock_status' );
 
 			$args = $this->add_stock_clauses( $args, $stock_statuses );
 		}
