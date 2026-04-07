@@ -73,11 +73,11 @@ class CustomerHistory {
 		if ( ! empty( $excluded_labels ) ) {
 			$tooltip = sprintf(
 				/* translators: %s: comma-separated list of excluded order statuses, e.g. "pending payment, failed, and cancelled" */
-				__( 'Total number of orders for this customer, excluding %s orders, including the current one.', 'woocommerce' ),
+				__( 'Total number of orders for this customer, excluding %s orders.', 'woocommerce' ),
 				wp_sprintf_l( '%l', $excluded_labels )
 			);
 		} else {
-			$tooltip = __( 'Total number of orders for this customer, including the current one.', 'woocommerce' );
+			$tooltip = __( 'Total number of orders for this customer.', 'woocommerce' );
 		}
 
 		return array(
