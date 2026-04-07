@@ -179,9 +179,9 @@ class WC_Admin_Tests_Reports_Customer extends WC_Unit_Test_Case {
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		// The guest row must remain untouched: same customer_id, user_id still NULL.
-		// (update_registered_customer skips users with no orders, so no second row is
-		// inserted either — what we're guarding against here is the merge function
-		// silently claiming the guest row for an unverified registration.)
+		// update_registered_customer skips users with no orders, so no second row is
+		// inserted either. What we're guarding against here is the merge function
+		// silently claiming the guest row for an unverified registration.
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT customer_id, user_id FROM {$wpdb->prefix}wc_customer_lookup WHERE customer_id = %d",
