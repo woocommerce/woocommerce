@@ -1,4 +1,4 @@
 Significance: minor
 Type: enhancement
 
-Normalise product filter parameters before cache key generation and cap the number of cached filter combinations to prevent cache pollution from bot enumeration attacks.
+Cap cached filter combinations to limit transient growth from bot enumeration.
