@@ -556,6 +556,11 @@ class FilterData {
 				return false;
 			}
 
+			// The counter only increments — it does not decrement when entries
+			// expire naturally.  The effective cap may therefore be reached
+			// before $max_entries live transients exist, making the limit
+			// slightly conservative.  This is intentional: accuracy here is
+			// not worth the cost of tracking individual expirations.
 			set_transient( CacheController::CACHE_ENTRY_COUNT_TRANSIENT, $count + 1, DAY_IN_SECONDS );
 		}
 
