@@ -117,6 +117,9 @@ export const LocalPickupSelect = ( {
 		>
 			{ header }
 			<RadioControl
+				className={ clsx( {
+					'has-single-option': pickupLocations.length === 1,
+				} ) }
 				onChange={ onChange }
 				highlightChecked={ true }
 				selected={ selectedOption }

@@ -315,4 +315,63 @@ describe( 'PaymentMethods', () => {
 
 		act( () => resetMockSinglePaymentMethod() );
 	} );
+
+	test( 'should apply has-single-option class when only one payment method and no saved tokens', async () => {
+		act( () => {
+			registerMockSinglePaymentMethod();
+		} );
+
+		wpDataFunctions.dispatch( CART_STORE_KEY ).receiveCart( {
+			...previewCart,
+			payment_methods: [ 'cod' ],
+		} );
+
+		await waitFor( () => {
+			expect(
+				wpDataFunctions.select( paymentStore ).getActivePaymentMethod()
+			).toBe( 'cod' );
+		} );
+
+		render( <PaymentMethods /> );
+
+		await waitFor( () => {
+			const paymentMethodOptions = screen.queryByText(
+				/Payment method options/
+			);
+			expect( paymentMethodOptions ).not.toBeNull();
+		} );
+
+		expect(
+			screen.getByTestId( 'payment-method-options-class-name' )
+		).toHaveTextContent( 'has-single-option' );
+
+		act( () => resetMockSinglePaymentMethod() );
+	} );
+
+	test( 'should not apply has-single-option class when multiple payment methods are available', async () => {
+		act( () => {
+			registerMockPaymentMethods();
+		} );
+
+		await waitFor( () => {
+			expect(
+				wpDataFunctions.select( paymentStore ).getActivePaymentMethod()
+			).toBe( 'cod' );
+		} );
+
+		render( <PaymentMethods /> );
+
+		await waitFor( () => {
+			const paymentMethodOptions = screen.queryByText(
+				/Payment method options/
+			);
+			expect( paymentMethodOptions ).not.toBeNull();
+		} );
+
+		expect(
+			screen.getByTestId( 'payment-method-options-class-name' )
+		).not.toHaveTextContent( 'has-single-option' );
+
+		act( () => resetMockPaymentMethods() );
+	} );
 } );

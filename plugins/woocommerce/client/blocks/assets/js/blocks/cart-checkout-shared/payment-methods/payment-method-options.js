@@ -8,6 +8,7 @@ import {
 import { cloneElement, useCallback } from '@wordpress/element';
 import { useEditorContext } from '@woocommerce/base-context';
 import { RadioControlAccordion } from '@woocommerce/blocks-components';
+import clsx from 'clsx';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { getPaymentMethods } from '@woocommerce/blocks-registry';
 import { paymentStore } from '@woocommerce/block-data';
@@ -29,6 +30,7 @@ const PaymentMethodOptions = () => {
 		activePaymentMethod,
 		isExpressPaymentMethodActive,
 		availablePaymentMethods,
+		savedPaymentMethods,
 	} = useSelect( ( select ) => {
 		const store = select( paymentStore );
 		return {
@@ -36,6 +38,7 @@ const PaymentMethodOptions = () => {
 			activePaymentMethod: store.getActivePaymentMethod(),
 			isExpressPaymentMethodActive: store.isExpressPaymentMethodActive(),
 			availablePaymentMethods: store.getAvailablePaymentMethods(),
+			savedPaymentMethods: store.getSavedPaymentMethods(),
 		};
 	} );
 	const { __internalSetActivePaymentMethod } = useDispatch( paymentStore );
@@ -83,8 +86,14 @@ const PaymentMethodOptions = () => {
 		]
 	);
 
+	const hasSavedTokens = Object.keys( savedPaymentMethods ).length > 0;
+
 	return isExpressPaymentMethodActive ? null : (
 		<RadioControlAccordion
+			className={ clsx( {
+				'has-single-option':
+					options.length === 1 && ! hasSavedTokens,
+			} ) }
 			highlightChecked={ true }
 			id={ 'wc-payment-method-options' }
 			selected={ activeSavedToken ? null : activePaymentMethod }

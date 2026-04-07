@@ -255,6 +255,42 @@ describe( 'LocalPickupSelect', () => {
 		);
 	} );
 
+	it( 'Applies has-single-option class when there is only one pickup location', () => {
+		render(
+			<LocalPickupSelect
+				title="Package 1"
+				onChange={ jest.fn() }
+				selectedOption=""
+				pickupLocations={ [
+					generateShippingRate( {
+						rateId: '1',
+						name: 'Store 1',
+						instanceID: 1,
+						price: '0',
+					} ),
+				] }
+				packageCount={ 1 }
+				renderPickupLocation={ defaultRenderPickupLocation }
+			/>
+		);
+
+		expect(
+			document.querySelector(
+				'.wc-block-components-radio-control.has-single-option'
+			)
+		).toBeInTheDocument();
+	} );
+
+	it( 'Does not apply has-single-option class when there are multiple pickup locations', () => {
+		render( <TestComponent /> );
+
+		expect(
+			document.querySelector(
+				'.wc-block-components-radio-control.has-single-option'
+			)
+		).not.toBeInTheDocument();
+	} );
+
 	describe( 'packageData prop', () => {
 		it( 'Renders package name when multiple packages are present', () => {
 			const packageDataWithName = {

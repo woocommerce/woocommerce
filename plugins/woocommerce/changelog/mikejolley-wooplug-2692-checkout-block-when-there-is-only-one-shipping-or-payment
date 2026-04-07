@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Block checkout: hide radio button and use thinner border when only one shipping, pickup, or payment option is available.

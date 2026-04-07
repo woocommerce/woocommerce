@@ -106,6 +106,32 @@ $content-padding-left: calc($gap + 24px + $gap-smaller);
 	}
 }
 
+// When there is only one option and it shouldn't appear selectable (no
+// alternative to choose), the parent component adds has-single-option.
+.wc-block-components-radio-control.has-single-option {
+	label.wc-block-components-radio-control__option,
+	.wc-block-components-radio-control-accordion-option {
+		box-shadow: none;
+	}
+
+	.wc-block-components-radio-control__option {
+		padding-left: $gap;
+		cursor: default;
+	}
+
+	.wc-block-components-radio-control__input {
+		display: none;
+	}
+
+	// Reset the container ::after border so first/last-selected modifiers
+	// don't remove the top or bottom border.
+	&::after {
+		border: 1px solid $universal-border-light;
+		border-radius: $universal-border-radius;
+		margin: 0;
+	}
+}
+
 // extracted from the styles below to increase specificity
 .wc-block-components-radio-control .wc-block-components-radio-control__option {
 	margin: 0;

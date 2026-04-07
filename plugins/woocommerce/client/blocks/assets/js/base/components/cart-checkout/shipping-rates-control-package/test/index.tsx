@@ -117,6 +117,135 @@ test( 'changes rate selection locally and informs API about it', async () => {
 	expect( selectShippingRate ).toHaveBeenLastCalledWith( 'flat_rate:2', 0 );
 } );
 
+test( 'applies has-single-option class when highlightChecked is true and there is only one rate', async () => {
+	const singleRatePackage = generateShippingPackage( {
+		packageId: 0,
+		shippingRates: [
+			generateShippingRate( {
+				rateId: 'flat_rate:1',
+				name: 'Flat rate',
+				price: '1000',
+				instanceID: 1,
+			} ),
+		],
+	} );
+
+	( useShippingData as jest.Mock ).mockImplementation( () => {
+		return {
+			selectShippingRate: jest.fn(),
+			isSelectingRate: false,
+			shippingRates: [ singleRatePackage ],
+		};
+	} );
+
+	( useStoreCart as jest.Mock ).mockImplementation( () => {
+		return {
+			cartItems: [],
+		};
+	} );
+
+	render(
+		<ShippingRatesControlPackage
+			packageData={ singleRatePackage }
+			packageId={ singleRatePackage.package_id }
+			highlightChecked={ true }
+			noResultsMessage={
+				<span>No shipping rates available at the moment</span>
+			}
+		/>
+	);
+
+	await screen.findByText( 'Flat rate' );
+
+	expect(
+		document.querySelector(
+			'.wc-block-components-radio-control.has-single-option'
+		)
+	).toBeInTheDocument();
+} );
+
+test( 'does not apply has-single-option class when there are multiple rates', async () => {
+	( useShippingData as jest.Mock ).mockImplementation( () => {
+		return {
+			selectShippingRate: jest.fn(),
+			isSelectingRate: false,
+			shippingRates: [ testPackageData ],
+		};
+	} );
+
+	( useStoreCart as jest.Mock ).mockImplementation( () => {
+		return {
+			cartItems: [],
+		};
+	} );
+
+	render(
+		<ShippingRatesControlPackage
+			packageData={ testPackageData }
+			packageId={ testPackageData.package_id }
+			highlightChecked={ true }
+			noResultsMessage={
+				<span>No shipping rates available at the moment</span>
+			}
+		/>
+	);
+
+	await screen.findByRole( 'radio', { name: 'Flat rate $10.00' } );
+
+	expect(
+		document.querySelector(
+			'.wc-block-components-radio-control.has-single-option'
+		)
+	).not.toBeInTheDocument();
+} );
+
+test( 'does not apply has-single-option class when highlightChecked is false', async () => {
+	const singleRatePackage = generateShippingPackage( {
+		packageId: 0,
+		shippingRates: [
+			generateShippingRate( {
+				rateId: 'flat_rate:1',
+				name: 'Flat rate',
+				price: '1000',
+				instanceID: 1,
+			} ),
+		],
+	} );
+
+	( useShippingData as jest.Mock ).mockImplementation( () => {
+		return {
+			selectShippingRate: jest.fn(),
+			isSelectingRate: false,
+			shippingRates: [ singleRatePackage ],
+		};
+	} );
+
+	( useStoreCart as jest.Mock ).mockImplementation( () => {
+		return {
+			cartItems: [],
+		};
+	} );
+
+	render(
+		<ShippingRatesControlPackage
+			packageData={ singleRatePackage }
+			packageId={ singleRatePackage.package_id }
+			highlightChecked={ false }
+			noResultsMessage={
+				<span>No shipping rates available at the moment</span>
+			}
+		/>
+	);
+
+	await screen.findByText( 'Flat rate' );
+
+	expect(
+		document.querySelector(
+			'.wc-block-components-radio-control.has-single-option'
+		)
+	).not.toBeInTheDocument();
+} );
+
 test( 'upstream rate selection updates are properly reflected in local state', async () => {
 	const packageData = generateShippingPackage( {
 		packageId: 0,

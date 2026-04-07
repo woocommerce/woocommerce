@@ -3,6 +3,7 @@
  */
 import { useState, useEffect } from '@wordpress/element';
 import { RadioControl } from '@woocommerce/blocks-components';
+import clsx from 'clsx';
 import type { CartShippingPackageShippingRate } from '@woocommerce/types';
 
 /**
@@ -68,9 +69,14 @@ const PackageRates = ( {
 		return noResultsMessage;
 	}
 
+	const options = rates.map( renderOption );
+
 	return (
 		<RadioControl
-			className={ className }
+			className={ clsx( className, {
+				'has-single-option':
+					highlightChecked && options.length === 1,
+			} ) }
 			onChange={ ( value: string ) => {
 				setSelectedOption( value );
 				onSelectRate( value );
@@ -78,7 +84,7 @@ const PackageRates = ( {
 			highlightChecked={ highlightChecked }
 			disabled={ disabled }
 			selected={ selectedOption ?? '' }
-			options={ rates.map( renderOption ) }
+			options={ options }
 			descriptionStackingDirection="column"
 		/>
 	);
