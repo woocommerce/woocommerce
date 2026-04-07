@@ -552,7 +552,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 	 * @return array
 	 */
 	private function cap_filter_values( string $raw, string $param ): array {
-		$values = array_values( array_filter( explode( ',', $raw ) ) );
+		$values = array_values( array_filter( explode( ',', $raw ), fn( $v ) => '' !== $v ) );
 
 		if ( empty( $values ) ) {
 			return $values;
@@ -625,7 +625,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 
 		foreach ( $this->params->get_param( 'taxonomy' ) as $taxonomy => $param ) {
 			if ( isset( $query_vars[ $param ] ) && ! empty( trim( $query_vars[ $param ] ) ) ) {
-				$chosen_taxonomies[ $taxonomy ] = array_filter( array_map( 'sanitize_title', $this->cap_filter_values( (string) $query_vars[ $param ], $param ) ) );
+				$chosen_taxonomies[ $taxonomy ] = array_filter( array_map( 'sanitize_title', $this->cap_filter_values( (string) $query_vars[ $param ], $param ) ), fn( $v ) => '' !== $v );
 			}
 		}
 
