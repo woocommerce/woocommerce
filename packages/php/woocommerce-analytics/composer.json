@@ -54,9 +54,6 @@
 	},
 	"minimum-stability": "dev",
 	"prefer-stable": true,
-	"extra": {
-		"textdomain": "woocommerce-analytics"
-	},
 	"suggest": {
 		"automattic/jetpack-autoloader": "Allow for better interoperability with other plugins that use this package."
 	}
