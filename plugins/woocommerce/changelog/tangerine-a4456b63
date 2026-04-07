@@ -1,4 +1,4 @@
 Significance: minor
 Type: add
 
-SEO: Add opt-in noindex support for filtered archive pages via the woocommerce_noindex_filtered_pages filter, and disallow filter params in robots.txt defaults.
+SEO: Add opt-in noindex and robots.txt disallow support for filtered archive pages via woocommerce_noindex_filtered_pages and woocommerce_disallow_filter_params_in_robots_txt filters.

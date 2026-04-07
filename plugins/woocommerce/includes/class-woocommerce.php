@@ -1204,14 +1204,27 @@ final class WooCommerce {
 		$above[] = "Disallow: $path/wp-content/uploads/woocommerce_uploads/";
 		$above[] = 'Disallow: /*?add-to-cart=';
 		$above[] = 'Disallow: /*?*add-to-cart=';
-		$above[] = 'Disallow: /*?filter_*';
-		$above[] = 'Disallow: /*?*filter_*';
-		$above[] = 'Disallow: /*?rating_filter=*';
-		$above[] = 'Disallow: /*?*rating_filter=*';
-		$above[] = 'Disallow: /*?min_price=*';
-		$above[] = 'Disallow: /*?*min_price=*';
-		$above[] = 'Disallow: /*?max_price=*';
-		$above[] = 'Disallow: /*?*max_price=*';
+
+		/**
+		 * Filters whether filter query parameter URLs should be disallowed in robots.txt.
+		 *
+		 * Defaults to false to preserve existing behavior. Set to true to prevent crawlers
+		 * from following filtered archive URLs, reducing SEO bloat and limiting filter URL
+		 * enumeration by bots.
+		 *
+		 * @since 10.8.0
+		 * @param bool $disallow True to add Disallow rules for filter params, false to omit them.
+		 */
+		if ( apply_filters( 'woocommerce_disallow_filter_params_in_robots_txt', false ) ) {
+			$above[] = 'Disallow: /*?filter_*';
+			$above[] = 'Disallow: /*?*filter_*';
+			$above[] = 'Disallow: /*?rating_filter=*';
+			$above[] = 'Disallow: /*?*rating_filter=*';
+			$above[] = 'Disallow: /*?min_price=*';
+			$above[] = 'Disallow: /*?*min_price=*';
+			$above[] = 'Disallow: /*?max_price=*';
+			$above[] = 'Disallow: /*?*max_price=*';
+		}
 
 		$lines = array_merge( $above, $below );
 

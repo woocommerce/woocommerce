@@ -72,27 +72,43 @@ class WooCommerce_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should include filter param disallow rules in robots.txt output.
+	 * @testdox Should not include filter param disallow rules in robots.txt by default.
 	 */
-	public function test_robots_txt_includes_filter_disallow_rules(): void {
+	public function test_robots_txt_omits_filter_disallow_rules_by_default(): void {
 		$base = "User-agent: *\nDisallow: /wp-admin/\n";
 
 		$output = WC()->robots_txt( $base );
 
-		$this->assertStringContainsString( 'Disallow: /*?filter_*', $output, 'robots.txt should disallow filter_ params' );
-		$this->assertStringContainsString( 'Disallow: /*?*filter_*', $output, 'robots.txt should disallow filter_ params with prefix' );
-		$this->assertStringContainsString( 'Disallow: /*?rating_filter=*', $output, 'robots.txt should disallow rating_filter param' );
-		$this->assertStringContainsString( 'Disallow: /*?*rating_filter=*', $output, 'robots.txt should disallow rating_filter when not first param' );
-		$this->assertStringContainsString( 'Disallow: /*?min_price=*', $output, 'robots.txt should disallow min_price param' );
-		$this->assertStringContainsString( 'Disallow: /*?*min_price=*', $output, 'robots.txt should disallow min_price when not first param' );
-		$this->assertStringContainsString( 'Disallow: /*?max_price=*', $output, 'robots.txt should disallow max_price param' );
-		$this->assertStringContainsString( 'Disallow: /*?*max_price=*', $output, 'robots.txt should disallow max_price when not first param' );
+		$this->assertStringNotContainsString( 'Disallow: /*?filter_*', $output, 'robots.txt should not disallow filter params by default' );
+		$this->assertStringNotContainsString( 'Disallow: /*?min_price=*', $output, 'robots.txt should not disallow min_price by default' );
 	}
 
 	/**
-	 * @testdox Should include filter disallow rules inside the User-agent wildcard group.
+	 * @testdox Should include filter param disallow rules in robots.txt when opted in.
+	 */
+	public function test_robots_txt_includes_filter_disallow_rules_when_opted_in(): void {
+		add_filter( 'woocommerce_disallow_filter_params_in_robots_txt', '__return_true' );
+		$base = "User-agent: *\nDisallow: /wp-admin/\n";
+
+		$output = WC()->robots_txt( $base );
+
+		$this->assertStringContainsString( 'Disallow: /*?filter_*', $output );
+		$this->assertStringContainsString( 'Disallow: /*?*filter_*', $output );
+		$this->assertStringContainsString( 'Disallow: /*?rating_filter=*', $output );
+		$this->assertStringContainsString( 'Disallow: /*?*rating_filter=*', $output );
+		$this->assertStringContainsString( 'Disallow: /*?min_price=*', $output );
+		$this->assertStringContainsString( 'Disallow: /*?*min_price=*', $output );
+		$this->assertStringContainsString( 'Disallow: /*?max_price=*', $output );
+		$this->assertStringContainsString( 'Disallow: /*?*max_price=*', $output );
+
+		remove_all_filters( 'woocommerce_disallow_filter_params_in_robots_txt' );
+	}
+
+	/**
+	 * @testdox Should include filter disallow rules inside the User-agent wildcard group when opted in.
 	 */
 	public function test_robots_txt_filter_rules_inside_wildcard_group(): void {
+		add_filter( 'woocommerce_disallow_filter_params_in_robots_txt', '__return_true' );
 		$base = "User-agent: *\nDisallow: /wp-admin/\n";
 
 		$output = WC()->robots_txt( $base );
@@ -104,5 +120,7 @@ class WooCommerce_Test extends \WC_Unit_Test_Case {
 		$this->assertNotFalse( $agent_index, 'User-agent: * line should exist' );
 		$this->assertNotFalse( $filter_index, 'Disallow: /*?filter_* line should exist' );
 		$this->assertGreaterThan( $agent_index, $filter_index, 'Filter disallow rule should appear after User-agent: * directive' );
+
+		remove_all_filters( 'woocommerce_disallow_filter_params_in_robots_txt' );
 	}
 }
