@@ -175,7 +175,7 @@ class Theme_Controller {
 	/**
 	 * Get layout settings from the theme.
 	 *
-	 * @return array{contentSize: string, wideSize: string, allowEditing?: bool, allowCustomContentAndWideSize?: bool}
+	 * @return array{contentSize: string, wideSize?: string, allowEditing?: bool, allowCustomContentAndWideSize?: bool}
 	 */
 	public function get_layout_settings(): array {
 		return $this->get_theme()->get_settings()['layout'];

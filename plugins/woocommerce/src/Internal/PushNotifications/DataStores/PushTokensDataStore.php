@@ -23,6 +23,15 @@ use WP_Query;
  * @since 10.5.0
  */
 class PushTokensDataStore {
+	/**
+	 * In-memory cache for get_tokens_for_roles() results, keyed by the
+	 * comma-joined role list. Avoids repeated DB queries within the same
+	 * PHP request.
+	 *
+	 * @var array<string, PushToken[]>
+	 */
+	private array $tokens_by_roles_cache = array();
+
 	const SUPPORTED_META = array(
 		'origin',
 		'device_uuid',
@@ -315,6 +324,12 @@ class PushTokensDataStore {
 			return array();
 		}
 
+		$cache_key = implode( ',', $roles );
+
+		if ( isset( $this->tokens_by_roles_cache[ $cache_key ] ) ) {
+			return $this->tokens_by_roles_cache[ $cache_key ];
+		}
+
 		$user_ids = get_users(
 			array(
 				'role__in' => $roles,
@@ -323,7 +338,8 @@ class PushTokensDataStore {
 		);
 
 		if ( empty( $user_ids ) ) {
-			return array();
+			$this->tokens_by_roles_cache[ $cache_key ] = array();
+			return $this->tokens_by_roles_cache[ $cache_key ];
 		}
 
 		$query = new WP_Query(
@@ -345,7 +361,8 @@ class PushTokensDataStore {
 		$post_ids = $query->posts;
 
 		if ( empty( $post_ids ) ) {
-			return array();
+			$this->tokens_by_roles_cache[ $cache_key ] = array();
+			return $this->tokens_by_roles_cache[ $cache_key ];
 		}
 
 		update_meta_cache( 'post', $post_ids );
@@ -365,6 +382,8 @@ class PushTokensDataStore {
 				);
 			}
 		}
+
+		$this->tokens_by_roles_cache[ $cache_key ] = $tokens;
 
 		return $tokens;
 	}

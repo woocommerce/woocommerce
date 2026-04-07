@@ -18,11 +18,13 @@
 		},
 		"prefix": {
 			"type": "string",
-			"default": "SKU:"
+			"default": "SKU:",
+			"role": "content"
 		},
 		"suffix": {
 			"type": "string",
-			"default": ""
+			"default": "",
+			"role": "content"
 		}
 	},
 	"usesContext": [ "query", "queryId", "postId" ],

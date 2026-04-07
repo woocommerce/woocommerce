@@ -572,7 +572,7 @@ class Content_Renderer {
       }
       ',
 			$layout['contentSize'],
-			$layout['wideSize']
+			$layout['wideSize'] ?? $layout['contentSize']
 		);
 
 		// Get styles from theme.

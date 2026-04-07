@@ -475,3 +475,7 @@ export function getContentValidation(
 ): State[ 'contentValidation' ] {
 	return state.contentValidation;
 }
+
+export function isTemplateSelected( state: State ): boolean {
+	return state.templateSelected;
+}

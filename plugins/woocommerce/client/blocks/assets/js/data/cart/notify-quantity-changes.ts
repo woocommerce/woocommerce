@@ -153,7 +153,6 @@ export const notifyQuantityChanges = ( {
 		CART_STORE_KEY
 	) as CurriedSelectorsOf< CartStoreDescriptor >;
 	const isResolutionFinished =
-		// @ts-expect-error hasFinishedResolution is untyped.
 		selectors.hasFinishedResolution( 'getCartData' );
 	if ( ! isResolutionFinished ) {
 		return;
