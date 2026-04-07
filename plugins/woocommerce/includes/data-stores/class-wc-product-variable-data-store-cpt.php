@@ -563,10 +563,6 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			return false;
 		}
 
-		if ( ! empty( WC()->customer ) && WC()->customer->get_is_vat_exempt() ) {
-			return false;
-		}
-
 		return true;
 	}
 

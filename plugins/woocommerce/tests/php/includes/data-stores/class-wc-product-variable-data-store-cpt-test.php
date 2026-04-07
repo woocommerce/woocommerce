@@ -468,7 +468,6 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 * @testWith [false, true, true, false]
 	 *           [false, false, true, false]
 	 *           [true, true, false, false]
-	 *           [true, true, true, true]
 	 *
 	 * @param bool $tax_enabled Taxes enabled shop-wide or not.
 	 * @param bool $taxable_product Product is taxable or not.
@@ -512,16 +511,19 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	/**
 	 * @testdox read_prices does separate caching for prices for display and not for display when they are different.
 	 *
-	 * @testWith [true]
-	 *           [false]
+	 * @testWith [true, false]
+	 *           [false, false]
+	 *           [true, true]
+	 *           [false, true]
 	 *
 	 * @param bool $for_display Test getting prices for display or not for display.
+	 * @param bool $is_vat_exempt Whether the customer is VAT exempt.
 	 */
-	public function test_read_prices_cache_when_taxes_influence_price( bool $for_display ) {
+	public function test_read_prices_cache_when_taxes_influence_price( bool $for_display, bool $is_vat_exempt ) {
 		add_filter( 'wc_tax_enabled', '__return_true' );
 		add_filter( 'woocommerce_product_is_taxable', '__return_true' );
 		add_filter( 'woocommerce_matched_rates', array( $this, '__return_rates' ) );
-		WC()->customer->set_is_vat_exempt( false );
+		WC()->customer->set_is_vat_exempt( $is_vat_exempt );
 
 		$data_store     = new WC_Product_Variable_Data_Store_CPT();
 		$product        = WC_Helper_Product::create_variation_product();
