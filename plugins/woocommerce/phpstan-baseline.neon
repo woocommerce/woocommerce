@@ -66920,7 +66920,7 @@ parameters:
 			path: src/Internal/ProductFilters/QueryClauses.php
 
 		-
-			message: '#^Parameter \#1 \$raw of method Automattic\\WooCommerce\\Internal\\ProductFilters\\QueryClauses::cap_filter_values\(\) expects string, array\|string given\.$#'
+			message: '#^Parameter \#2 \$str of function explode expects string, array\|string given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Internal/ProductFilters/QueryClauses.php
