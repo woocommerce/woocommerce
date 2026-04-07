@@ -4307,7 +4307,7 @@ function wc_page_no_robots( $robots ) {
 	 * @since 10.8.0
 	 * @param bool $noindex True to add noindex to filtered archive pages, false to allow indexing.
 	 */
-	if ( apply_filters( 'woocommerce_noindex_filtered_pages', true ) && wc_has_product_filter_params() ) {
+	if ( apply_filters( 'woocommerce_noindex_filtered_pages', true ) && ( is_shop() || is_product_taxonomy() ) && wc_has_product_filter_params() ) {
 		return wp_robots_no_robots( $robots );
 	}
 

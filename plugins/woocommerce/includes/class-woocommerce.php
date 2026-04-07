@@ -1207,8 +1207,11 @@ final class WooCommerce {
 		$above[] = 'Disallow: /*?filter_*';
 		$above[] = 'Disallow: /*?*filter_*';
 		$above[] = 'Disallow: /*?rating_filter=*';
+		$above[] = 'Disallow: /*?*rating_filter=*';
 		$above[] = 'Disallow: /*?min_price=*';
+		$above[] = 'Disallow: /*?*min_price=*';
 		$above[] = 'Disallow: /*?max_price=*';
+		$above[] = 'Disallow: /*?*max_price=*';
 
 		$lines = array_merge( $above, $below );
 

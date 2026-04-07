@@ -82,8 +82,11 @@ class WooCommerce_Test extends \WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'Disallow: /*?filter_*', $output, 'robots.txt should disallow filter_ params' );
 		$this->assertStringContainsString( 'Disallow: /*?*filter_*', $output, 'robots.txt should disallow filter_ params with prefix' );
 		$this->assertStringContainsString( 'Disallow: /*?rating_filter=*', $output, 'robots.txt should disallow rating_filter param' );
+		$this->assertStringContainsString( 'Disallow: /*?*rating_filter=*', $output, 'robots.txt should disallow rating_filter when not first param' );
 		$this->assertStringContainsString( 'Disallow: /*?min_price=*', $output, 'robots.txt should disallow min_price param' );
+		$this->assertStringContainsString( 'Disallow: /*?*min_price=*', $output, 'robots.txt should disallow min_price when not first param' );
 		$this->assertStringContainsString( 'Disallow: /*?max_price=*', $output, 'robots.txt should disallow max_price param' );
+		$this->assertStringContainsString( 'Disallow: /*?*max_price=*', $output, 'robots.txt should disallow max_price when not first param' );
 	}
 
 	/**

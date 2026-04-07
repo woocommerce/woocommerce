@@ -14,19 +14,45 @@ class WC_Template_Functions_Test extends WC_Unit_Test_Case {
 	private $original_get;
 
 	/**
+	 * ID of the shop page created for archive tests.
+	 *
+	 * @var int
+	 */
+	private $shop_page_id;
+
+	/**
+	 * Original shop page option value.
+	 *
+	 * @var int|bool
+	 */
+	private $original_shop_page_id;
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 		$this->original_get = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+		$this->shop_page_id          = $this->factory->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+				'post_title'  => 'Shop',
+			)
+		);
+		$this->original_shop_page_id = get_option( 'woocommerce_shop_page_id' );
+		update_option( 'woocommerce_shop_page_id', $this->shop_page_id );
 	}
 
 	/**
-	 * Restore $_GET after each test.
+	 * Restore $_GET and shop page option after each test.
 	 */
 	public function tearDown(): void {
 		parent::tearDown();
 		$_GET = $this->original_get; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		update_option( 'woocommerce_shop_page_id', $this->original_shop_page_id );
+		wp_delete_post( $this->shop_page_id, true );
 		remove_all_filters( 'woocommerce_noindex_filtered_pages' );
 	}
 
@@ -93,21 +119,23 @@ class WC_Template_Functions_Test extends WC_Unit_Test_Case {
 	// -------------------------------------------------------------------------
 
 	/**
-	 * @testdox Should add noindex when filter params are present and feature is enabled.
+	 * @testdox Should add noindex when filter params are present on the shop page.
 	 */
-	public function test_page_no_robots_adds_noindex_for_filtered_pages(): void {
+	public function test_page_no_robots_adds_noindex_for_filtered_shop_page(): void {
+		$this->go_to( get_permalink( $this->shop_page_id ) );
 		$_GET = array( 'filter_color' => 'blue' ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		$result = wc_page_no_robots( array() );
 
-		$this->assertArrayHasKey( 'noindex', $result, 'noindex directive should be added for filtered pages' );
-		$this->assertTrue( $result['noindex'], 'noindex directive should be true for filtered pages' );
+		$this->assertArrayHasKey( 'noindex', $result, 'noindex directive should be added for filtered shop pages' );
+		$this->assertTrue( $result['noindex'], 'noindex directive should be true for filtered shop pages' );
 	}
 
 	/**
 	 * @testdox Should not add noindex when filter params are present but feature is disabled.
 	 */
 	public function test_page_no_robots_respects_disabled_filter(): void {
+		$this->go_to( get_permalink( $this->shop_page_id ) );
 		$_GET = array( 'filter_color' => 'blue' ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		add_filter( 'woocommerce_noindex_filtered_pages', '__return_false' );
 
@@ -117,9 +145,10 @@ class WC_Template_Functions_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should not add noindex when no filter params are present.
+	 * @testdox Should not add noindex when no filter params are present on the shop page.
 	 */
 	public function test_page_no_robots_does_not_add_noindex_without_filter_params(): void {
+		$this->go_to( get_permalink( $this->shop_page_id ) );
 		$_GET = array( 'orderby' => 'price' ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		$result = wc_page_no_robots( array() );
@@ -128,9 +157,22 @@ class WC_Template_Functions_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should add noindex when min_price param is present.
+	 * @testdox Should not add noindex when filter params are present but current page is not a product archive.
+	 */
+	public function test_page_no_robots_does_not_add_noindex_on_non_archive_pages(): void {
+		$this->go_to( home_url( '/' ) );
+		$_GET = array( 'min_price' => '10' ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+		$result = wc_page_no_robots( array() );
+
+		$this->assertArrayNotHasKey( 'noindex', $result, 'noindex should not be added on non-archive pages even with filter params' );
+	}
+
+	/**
+	 * @testdox Should add noindex when min_price param is present on the shop page.
 	 */
 	public function test_page_no_robots_adds_noindex_for_min_price(): void {
+		$this->go_to( get_permalink( $this->shop_page_id ) );
 		$_GET = array( 'min_price' => '10' ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		$result = wc_page_no_robots( array() );
@@ -139,9 +181,10 @@ class WC_Template_Functions_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should add noindex when max_price param is present.
+	 * @testdox Should add noindex when max_price param is present on the shop page.
 	 */
 	public function test_page_no_robots_adds_noindex_for_max_price(): void {
+		$this->go_to( get_permalink( $this->shop_page_id ) );
 		$_GET = array( 'max_price' => '100' ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		$result = wc_page_no_robots( array() );
@@ -150,9 +193,10 @@ class WC_Template_Functions_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should add noindex when rating_filter param is present.
+	 * @testdox Should add noindex when rating_filter param is present on the shop page.
 	 */
 	public function test_page_no_robots_adds_noindex_for_rating_filter(): void {
+		$this->go_to( get_permalink( $this->shop_page_id ) );
 		$_GET = array( 'rating_filter' => '4' ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		$result = wc_page_no_robots( array() );
