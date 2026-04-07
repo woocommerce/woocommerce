@@ -170,7 +170,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 10.7.0-beta.2 2026-XX-XX =
+= 10.7.0-beta.2 2026-04-07 =
 
 **WooCommerce**
 
@@ -234,6 +234,11 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Skip initial save of POS store name setting so emails use the current site name instead of the stale "My WordPress Site" default. [#63505](https://github.com/woocommerce/woocommerce/pull/63505)
 * Fix - Update slug sanitize callback to use sanitize_slug [#63342](https://github.com/woocommerce/woocommerce/pull/63342)
 * Fix - Wrong escaping of "&" character in product name in img alt tag in cart and checkout pages [#63637](https://github.com/woocommerce/woocommerce/pull/63637)
+* Fix - Add to Cart + Options: Ensure attributes with spaces and special characters work well in dropdown mode [#64037](https://github.com/woocommerce/woocommerce/pull/64037)
+* Fix - Fix Add to Cart button not visible when displaying a Single Product block with a variation with only one product left [#63947](https://github.com/woocommerce/woocommerce/pull/63947)
+* Fix - Fix cart shipping and totals stuck as loading when removing bundled products [#64000](https://github.com/woocommerce/woocommerce/pull/64000)
+* Fix - Fix issues when Product Gallery was used inside the Product block [#63976](https://github.com/woocommerce/woocommerce/pull/63976)
+* Fix - Fix settings page label vertical alignment on WordPress 7.0 where increased form element height caused labels to sit too high relative to their fields. [#63924](https://github.com/woocommerce/woocommerce/pull/63924)
 * Add - Add custom shipping providers settings UI and shipping provider filter for the orders list. [#63879](https://github.com/woocommerce/woocommerce/pull/63879)
 * Add - Add description for COD enable_for_methods field in v4 settings API. [#63767](https://github.com/woocommerce/woocommerce/pull/63767)
 * Add - Add design-aligned grouped settings schemas for offline payment gateways (cheque, BACS, COD) in the v4 settings API. [#63734](https://github.com/woocommerce/woocommerce/pull/63734)
@@ -267,6 +272,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Update - Standardize closing support text across all customer-facing block email templates. [#63463](https://github.com/woocommerce/woocommerce/pull/63463)
 * Update - Textarea inputs on Checkout will now have the correct placeholder colour on light themes [#63539](https://github.com/woocommerce/woocommerce/pull/63539)
 * Update - Update 'on hold' email copy in block email editor to be more neutral for services and virtual products. [#63496](https://github.com/woocommerce/woocommerce/pull/63496)
+* Update - Admin styling adjustments with WordPress 7.0 [#64027](https://github.com/woocommerce/woocommerce/pull/64027)
 * Dev - Convert e2e-pw API test files to TypeScript. [#63314](https://github.com/woocommerce/woocommerce/pull/63314)
 * Dev - Convert e2e-pw utils to TypeScript. [#63318](https://github.com/woocommerce/woocommerce/pull/63318)
 * Dev - Convert fixtures and utils of the e2e-pw directory to TypeScript. [#63315](https://github.com/woocommerce/woocommerce/pull/63315)
