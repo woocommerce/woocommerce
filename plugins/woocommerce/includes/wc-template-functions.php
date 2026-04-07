@@ -4301,9 +4301,47 @@ function wc_page_no_robots( $robots ) {
 		return wp_robots_no_robots( $robots );
 	}
 
+	/**
+	 * Filters whether filtered archive pages (e.g. ?filter_color=blue) should be marked noindex.
+	 *
+	 * @since 10.8.0
+	 * @param bool $noindex True to add noindex to filtered archive pages, false to allow indexing.
+	 */
+	if ( apply_filters( 'woocommerce_noindex_filtered_pages', true ) && wc_has_product_filter_params() ) {
+		return wp_robots_no_robots( $robots );
+	}
+
 	return $robots;
 }
 add_filter( 'wp_robots', 'wc_page_no_robots' );
+
+/**
+ * Check if the current request contains product filter query parameters.
+ *
+ * Returns true when any of the standard WooCommerce filter params are present:
+ * filter_*, rating_filter, min_price, max_price.
+ *
+ * @since 10.8.0
+ * @return bool
+ */
+function wc_has_product_filter_params() {
+	// phpcs:disable WordPress.Security.NonceVerification.Recommended
+	foreach ( array_keys( $_GET ) as $key ) {
+		if ( 0 === strpos( $key, 'filter_' ) ) {
+			return true;
+		}
+	}
+
+	$filter_params = array( 'rating_filter', 'min_price', 'max_price' );
+	foreach ( $filter_params as $param ) {
+		if ( isset( $_GET[ $param ] ) ) {
+			return true;
+		}
+	}
+	// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
+	return false;
+}
 
 /**
  * Get a slug identifying the current theme.

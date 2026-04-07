@@ -1169,7 +1169,7 @@ final class WooCommerce {
 	}
 
 	/**
-	 * Tell bots not to index some WooCommerce-created directories.
+	 * Tell bots not to index some WooCommerce-created directories and filter URLs.
 	 *
 	 * We try to detect the default "User-agent: *" added by WordPress and add our rules to that group, because
 	 * it's possible that some bots will only interpret the first group of rules if there are multiple groups with
@@ -1204,6 +1204,11 @@ final class WooCommerce {
 		$above[] = "Disallow: $path/wp-content/uploads/woocommerce_uploads/";
 		$above[] = 'Disallow: /*?add-to-cart=';
 		$above[] = 'Disallow: /*?*add-to-cart=';
+		$above[] = 'Disallow: /*?filter_*';
+		$above[] = 'Disallow: /*?*filter_*';
+		$above[] = 'Disallow: /*?rating_filter=*';
+		$above[] = 'Disallow: /*?min_price=*';
+		$above[] = 'Disallow: /*?max_price=*';
 
 		$lines = array_merge( $above, $below );
 

@@ -70,4 +70,36 @@ class WooCommerce_Test extends \WC_Unit_Test_Case {
 		$_SERVER['REQUEST_URI'] = '/wp-json/wc/v3/products';
 		$this->assertEquals( WC()->is_rest_api_request(), true );
 	}
+
+	/**
+	 * @testdox Should include filter param disallow rules in robots.txt output.
+	 */
+	public function test_robots_txt_includes_filter_disallow_rules(): void {
+		$base = "User-agent: *\nDisallow: /wp-admin/\n";
+
+		$output = WC()->robots_txt( $base );
+
+		$this->assertStringContainsString( 'Disallow: /*?filter_*', $output, 'robots.txt should disallow filter_ params' );
+		$this->assertStringContainsString( 'Disallow: /*?*filter_*', $output, 'robots.txt should disallow filter_ params with prefix' );
+		$this->assertStringContainsString( 'Disallow: /*?rating_filter=*', $output, 'robots.txt should disallow rating_filter param' );
+		$this->assertStringContainsString( 'Disallow: /*?min_price=*', $output, 'robots.txt should disallow min_price param' );
+		$this->assertStringContainsString( 'Disallow: /*?max_price=*', $output, 'robots.txt should disallow max_price param' );
+	}
+
+	/**
+	 * @testdox Should include filter disallow rules inside the User-agent wildcard group.
+	 */
+	public function test_robots_txt_filter_rules_inside_wildcard_group(): void {
+		$base = "User-agent: *\nDisallow: /wp-admin/\n";
+
+		$output = WC()->robots_txt( $base );
+		$lines  = explode( PHP_EOL, $output );
+
+		$agent_index  = array_search( 'User-agent: *', $lines, true );
+		$filter_index = array_search( 'Disallow: /*?filter_*', $lines, true );
+
+		$this->assertNotFalse( $agent_index, 'User-agent: * line should exist' );
+		$this->assertNotFalse( $filter_index, 'Disallow: /*?filter_* line should exist' );
+		$this->assertGreaterThan( $agent_index, $filter_index, 'Filter disallow rule should appear after User-agent: * directive' );
+	}
 }
