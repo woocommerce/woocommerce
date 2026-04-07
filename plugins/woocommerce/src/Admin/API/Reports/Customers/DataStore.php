@@ -127,7 +127,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @param int   $customer_id       New WP user ID.
 	 * @param array $new_customer_data Customer data including 'source'.
 	 */
-	public static function merge_guest_customer_on_delayed_account_creation( $customer_id, $new_customer_data ) {
+	public static function merge_guest_customer_on_delayed_account_creation( $customer_id, $new_customer_data ): void {
 		if ( empty( $new_customer_data['source'] ) || 'delayed-account-creation' !== $new_customer_data['source'] ) {
 			return;
 		}
