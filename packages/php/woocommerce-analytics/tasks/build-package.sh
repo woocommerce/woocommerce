@@ -62,8 +62,8 @@ cp "$PACKAGE_DIR/.gitattributes" "$DIST_DIR/"
 echo "Copying mirror GitHub workflows..."
 cp -r "$PACKAGE_DIR/tasks/mirror-github/." "$DIST_DIR/.github/"
 
-# Copy mirror-readme.md as README.md
-echo "Copying mirror-readme.md as README.md..."
-cp "$PACKAGE_DIR/tasks/mirror-readme.md" "$DIST_DIR/README.md"
+# Copy README.md
+echo "Copying README.md..."
+cp "$PACKAGE_DIR/README.md" "$DIST_DIR/README.md"
 
 echo "Build completed successfully!"
