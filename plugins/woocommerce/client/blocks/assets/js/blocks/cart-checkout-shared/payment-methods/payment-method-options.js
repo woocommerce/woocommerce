@@ -86,7 +86,9 @@ const PaymentMethodOptions = () => {
 		]
 	);
 
-	const hasSavedTokens = Object.keys( savedPaymentMethods ).length > 0;
+	const hasSavedTokens = Object.values( savedPaymentMethods ).some(
+		( methods ) => Array.isArray( methods ) && methods.length > 0
+	);
 
 	return isExpressPaymentMethodActive ? null : (
 		<RadioControlAccordion
