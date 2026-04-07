@@ -59,10 +59,7 @@
 	"minimum-stability": "dev",
 	"prefer-stable": true,
 	"extra": {
-		"textdomain": "woocommerce-analytics",
-		"version-constants": {
-			"::PACKAGE_VERSION": "src/class-woocommerce-analytics.php"
-		}
+		"textdomain": "woocommerce-analytics"
 	},
 	"suggest": {
 		"automattic/jetpack-autoloader": "Allow for better interoperability with other plugins that use this package."
