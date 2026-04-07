@@ -238,9 +238,7 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 				'data-wp-bind--disabled' => 'state.isOptionDisabled',
 				'data-wp-bind--hidden'   => 'hide' === $disabled_attributes_action ? 'state.isOptionDisabled' : null,
 				'data-wp-context'        => array(
-					'option'  => $attribute_term,
-					'name'    => $attribute_slug,
-					'options' => $attribute_terms,
+					'option' => $attribute_term,
 				),
 			);
 
