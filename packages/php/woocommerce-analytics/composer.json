@@ -1,10 +1,10 @@
 {
 	"name": "automattic/woocommerce-analytics",
 	"description": "Enhanced analytics for WooCommerce users.",
-	"type": "library",
+	"type": "jetpack-library",
 	"license": "GPL-2.0-or-later",
 	"require": {
-		"php": ">=7.4",
+		"php": ">=7.2",
 		"automattic/jetpack-assets": "^4.3",
 		"automattic/jetpack-connection": "^8.1",
 		"automattic/jetpack-constants": "^3.0",
