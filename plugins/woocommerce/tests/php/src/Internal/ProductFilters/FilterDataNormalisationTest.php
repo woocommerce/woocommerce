@@ -95,6 +95,25 @@ class FilterDataNormalisationTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Built-in taxonomy short-name params (categories, tags, brands) are normalised as sets.
+	 */
+	public function test_taxonomy_set_params_are_normalised(): void {
+		$a = $this->normalize( array( 'categories' => 'shirts,hats' ) );
+		$b = $this->normalize( array( 'categories' => 'hats,shirts' ) );
+
+		$this->assertSame( $a['categories'], $b['categories'] );
+		$this->assertSame( 'hats,shirts', $a['categories'] );
+
+		$a = $this->normalize( array( 'tags' => 'sale,new' ) );
+		$b = $this->normalize( array( 'tags' => 'new,sale' ) );
+		$this->assertSame( $a['tags'], $b['tags'] );
+
+		$a = $this->normalize( array( 'brands' => 'nike,adidas' ) );
+		$b = $this->normalize( array( 'brands' => 'adidas,nike' ) );
+		$this->assertSame( $a['brands'], $b['brands'] );
+	}
+
+	/**
 	 * @testdox rating_filter is treated the same as filter_ keys.
 	 */
 	public function test_rating_filter_is_normalised(): void {
