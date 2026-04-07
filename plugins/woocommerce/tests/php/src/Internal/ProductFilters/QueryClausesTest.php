@@ -232,4 +232,98 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 
 		$this->assertEqualsCanonicalizing( $expected_products_name, $received_products_name );
 	}
+
+	/**
+	 * @testdox Should not truncate values at or below the default cap of 5.
+	 */
+	public function test_cap_filter_values_within_default_cap(): void {
+		$method = $this->get_cap_filter_values_method();
+
+		$result = $method->invoke( $this->sut, 'red,blue,green,yellow,orange', 'filter_color' );
+
+		$this->assertCount( 5, $result );
+		$this->assertSame( array( 'red', 'blue', 'green', 'yellow', 'orange' ), $result );
+	}
+
+	/**
+	 * @testdox Should truncate values exceeding the default cap of 5.
+	 */
+	public function test_cap_filter_values_truncates_excess(): void {
+		$method = $this->get_cap_filter_values_method();
+
+		$result = $method->invoke( $this->sut, 'red,blue,green,yellow,orange,pink', 'filter_color' );
+
+		$this->assertCount( 5, $result );
+		$this->assertSame( array( 'red', 'blue', 'green', 'yellow', 'orange' ), $result );
+	}
+
+	/**
+	 * @testdox Should respect a custom cap from the filter hook.
+	 */
+	public function test_cap_filter_values_respects_custom_cap(): void {
+		add_filter( 'woocommerce_product_filter_max_values_per_parameter', fn() => 2 );
+		$method = $this->get_cap_filter_values_method();
+
+		$result = $method->invoke( $this->sut, 'red,blue,green,yellow', 'filter_color' );
+
+		remove_all_filters( 'woocommerce_product_filter_max_values_per_parameter' );
+		$this->assertSame( array( 'red', 'blue' ), $result );
+	}
+
+	/**
+	 * @testdox Should pass the parameter name to the filter hook.
+	 */
+	public function test_cap_filter_values_passes_param_name_to_hook(): void {
+		$received = null;
+		add_filter(
+			'woocommerce_product_filter_max_values_per_parameter',
+			function ( $max, $param ) use ( &$received ) {
+				$received = $param;
+				return $max;
+			},
+			10,
+			2
+		);
+		$method = $this->get_cap_filter_values_method();
+		$method->invoke( $this->sut, 'instock,outofstock,onbackorder,pending,draft,archived', 'filter_stock_status' );
+
+		remove_all_filters( 'woocommerce_product_filter_max_values_per_parameter' );
+		$this->assertSame( 'filter_stock_status', $received );
+	}
+
+	/**
+	 * @testdox Should disable the cap when the filter hook returns zero.
+	 */
+	public function test_cap_filter_values_disabled_when_hook_returns_zero(): void {
+		add_filter( 'woocommerce_product_filter_max_values_per_parameter', fn() => 0 );
+		$method = $this->get_cap_filter_values_method();
+
+		$result = $method->invoke( $this->sut, 'a,b,c,d,e,f,g,h', 'filter_color' );
+
+		remove_all_filters( 'woocommerce_product_filter_max_values_per_parameter' );
+		$this->assertCount( 8, $result );
+	}
+
+	/**
+	 * @testdox Should return an empty array for an empty string.
+	 */
+	public function test_cap_filter_values_empty_string(): void {
+		$method = $this->get_cap_filter_values_method();
+
+		$result = $method->invoke( $this->sut, '', 'filter_color' );
+
+		$this->assertSame( array(), $result );
+	}
+
+	/**
+	 * Get the private cap_filter_values method via reflection.
+	 *
+	 * @return \ReflectionMethod
+	 */
+	private function get_cap_filter_values_method(): \ReflectionMethod {
+		$reflection = new \ReflectionClass( $this->sut );
+		$method     = $reflection->getMethod( 'cap_filter_values' );
+		$method->setAccessible( true );
+		return $method;
+	}
 }

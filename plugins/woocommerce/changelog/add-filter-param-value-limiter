@@ -1,0 +1,4 @@
+Significance: minor
+Type: security
+
+Add server-side cap on the number of filter values per parameter to prevent bot-driven combinatorial query attacks on archive pages. The cap (default 5) is configurable via the `woocommerce_product_filter_max_values_per_parameter` filter.

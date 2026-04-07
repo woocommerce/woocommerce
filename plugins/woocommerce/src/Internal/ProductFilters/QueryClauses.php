@@ -52,8 +52,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 	 */
 	public function add_query_clauses( array $args, \WP_Query $wp_query ): array {
 		if ( $wp_query->get( 'filter_stock_status' ) ) {
-			$stock_statuses = trim( $wp_query->get( 'filter_stock_status' ) );
-			$stock_statuses = explode( ',', $stock_statuses );
+			$stock_statuses = $this->cap_filter_values( trim( $wp_query->get( 'filter_stock_status' ) ), 'filter_stock_status' );
 
 			$args = $this->add_stock_clauses( $args, $stock_statuses );
 		}
@@ -98,9 +97,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 		}
 
 		if ( $wp_query->get( 'filter_stock_status' ) ) {
-			$stock_statuses = trim( $wp_query->get( 'filter_stock_status' ) );
-			$stock_statuses = explode( ',', $stock_statuses );
-			$stock_statuses = array_filter( $stock_statuses );
+			$stock_statuses = array_filter( $this->cap_filter_values( trim( $wp_query->get( 'filter_stock_status' ) ), 'filter_stock_status' ) );
 
 			$args = $this->add_stock_clauses( $args, $stock_statuses );
 		}
@@ -548,6 +545,40 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 	}
 
 	/**
+	 * Split a comma-separated filter value string and cap the number of items.
+	 *
+	 * @param string $raw   The raw comma-separated value string.
+	 * @param string $param The URL parameter name, passed to the filter hook.
+	 * @return array
+	 */
+	private function cap_filter_values( string $raw, string $param ): array {
+		$values = array_values( array_filter( explode( ',', $raw ) ) );
+
+		if ( empty( $values ) ) {
+			return $values;
+		}
+
+		/**
+		 * Filters the maximum number of values allowed per filter parameter.
+		 *
+		 * Reduce this value to limit combinatorial query complexity from bots.
+		 * Set to 0 or a negative number to disable the cap entirely.
+		 *
+		 * @param int    $max_values Maximum number of values to allow. Default 5.
+		 * @param string $param      The URL parameter name (e.g. "filter_color", "filter_stock_status").
+		 *
+		 * @since 10.8.0
+		 */
+		$max_values = (int) apply_filters( 'woocommerce_product_filter_max_values_per_parameter', 5, $param );
+
+		if ( $max_values > 0 && count( $values ) > $max_values ) {
+			return array_slice( $values, 0, $max_values );
+		}
+
+		return $values;
+	}
+
+	/**
 	 * Get an array of attributes and terms selected from query arguments.
 	 *
 	 * @param array $query_vars The WP_Query arguments.
@@ -564,7 +595,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 			if ( 0 === strpos( $key, 'filter_' ) ) {
 				$attribute    = wc_sanitize_taxonomy_name( str_replace( 'filter_', '', $key ) );
 				$taxonomy     = wc_attribute_taxonomy_name( $attribute );
-				$filter_terms = ! empty( $value ) ? explode( ',', wc_clean( wp_unslash( $value ) ) ) : array();
+				$filter_terms = ! empty( $value ) ? $this->cap_filter_values( wc_clean( wp_unslash( $value ) ), $key ) : array();
 
 				if ( empty( $filter_terms ) || ! taxonomy_exists( $taxonomy ) || ! wc_attribute_taxonomy_id_by_name( $attribute ) ) {
 					continue;
@@ -594,7 +625,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 
 		foreach ( $this->params->get_param( 'taxonomy' ) as $taxonomy => $param ) {
 			if ( isset( $query_vars[ $param ] ) && ! empty( trim( $query_vars[ $param ] ) ) ) {
-				$chosen_taxonomies[ $taxonomy ] = array_filter( array_map( 'sanitize_title', explode( ',', $query_vars[ $param ] ) ) );
+				$chosen_taxonomies[ $taxonomy ] = array_filter( array_map( 'sanitize_title', $this->cap_filter_values( (string) $query_vars[ $param ], $param ) ) );
 			}
 		}
 
