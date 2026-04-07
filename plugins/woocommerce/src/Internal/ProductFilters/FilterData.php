@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\ProductFilters;
 
+use Automattic\WooCommerce\Internal\ProductFilters\FilterParamNormalizer;
 use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\QueryClausesGenerator;
 use Automattic\WooCommerce\Internal\ProductFilters\TaxonomyHierarchyData;
 use WC_Cache_Helper;
@@ -469,11 +470,20 @@ class FilterData {
 	/**
 	 * Get filter data transient key.
 	 *
-	 * @param array  $query_vars   The query arguments to calculate the filter data.
+	 * Query vars are normalised before hashing so that logically equivalent
+	 * filter combinations (e.g. different orderings of the same values) map to
+	 * the same cache entry.
+	 *
+	 * @since 10.8.0 Query vars are normalised before hashing.
+	 *
+	 * @param array  $query_vars  The query arguments to calculate the filter data.
 	 * @param string $filter_type The type of filter. Accepts price|stock|rating|attribute.
-	 * @param array  $extra        Some filter types require extra arguments for calculation, like attribute.
+	 * @param array  $extra       Some filter types require extra arguments for calculation, like attribute.
+	 * @return string
 	 */
 	private function get_transient_key( $query_vars, $filter_type, $extra = array() ) {
+		$query_vars = FilterParamNormalizer::normalize( $query_vars );
+
 		return sprintf(
 			'wc_%s_%s',
 			CacheController::CACHE_GROUP,
@@ -516,8 +526,16 @@ class FilterData {
 	/**
 	 * Set the cache with transient version to invalidate all at once when needed.
 	 *
+	 * When the number of cached filter combinations reaches the configured
+	 * maximum (default 1000), the oldest entry is evicted before the new one
+	 * is stored, preventing unbounded transient growth from bot enumeration.
+	 * The limit can be adjusted via the `woocommerce_product_filter_cache_max_entries`
+	 * filter.  Set it to 0 to disable the cap entirely.
+	 *
+	 * @since 10.8.0 Cache-entry cap added.
+	 *
 	 * @param string $key   Transient key.
-	 * @param mix    $value Value to set.
+	 * @param mixed  $value Value to set.
 	 *
 	 * @return bool True if the cache was set, false otherwise.
 	 */
@@ -526,15 +544,46 @@ class FilterData {
 			return false;
 		}
 
+		/**
+		 * Maximum number of unique filter-combination results to cache.
+		 *
+		 * When the limit is reached the oldest entry is evicted (LRU-style)
+		 * before the new one is stored.  Set to 0 to disable the cap.
+		 *
+		 * @hook woocommerce_product_filter_cache_max_entries
+		 * @since 10.8.0
+		 *
+		 * @param int $max_entries Maximum number of cache entries. Default 1000.
+		 * @return int
+		 */
+		$max_entries = (int) apply_filters( 'woocommerce_product_filter_cache_max_entries', 1000 );
+
+		if ( $max_entries > 0 ) {
+			$cache_keys = get_transient( CacheController::CACHE_KEYS_OPTION );
+			if ( ! is_array( $cache_keys ) ) {
+				$cache_keys = array();
+			}
+
+			if ( ! in_array( $key, $cache_keys, true ) ) {
+				// Evict oldest entries until we have room for one more.
+				$key_count = count( $cache_keys );
+				while ( $key_count >= $max_entries ) {
+					$oldest_key = array_shift( $cache_keys );
+					delete_transient( $oldest_key );
+					--$key_count;
+				}
+				$cache_keys[] = $key;
+				set_transient( CacheController::CACHE_KEYS_OPTION, $cache_keys, WEEK_IN_SECONDS );
+			}
+		}
+
 		$transient_version = WC_Cache_Helper::get_transient_version( CacheController::CACHE_GROUP );
 		$transient_value   = array(
 			'version' => $transient_version,
 			'value'   => $value,
 		);
 
-		$result = set_transient( $key, $transient_value, DAY_IN_SECONDS );
-
-		return $result;
+		return set_transient( $key, $transient_value, DAY_IN_SECONDS );
 	}
 
 	/**
@@ -547,8 +596,9 @@ class FilterData {
 	 * @return string Comma-separated list of product IDs.
 	 */
 	private function get_cached_product_ids( array $query_vars ) {
-		$cache_key = WC_Cache_Helper::get_cache_prefix( CacheController::CACHE_GROUP ) . md5( wp_json_encode( $query_vars ) );
-		$cache     = wp_cache_get( $cache_key );
+		$query_vars = FilterParamNormalizer::normalize( $query_vars );
+		$cache_key  = WC_Cache_Helper::get_cache_prefix( CacheController::CACHE_GROUP ) . md5( wp_json_encode( $query_vars ) );
+		$cache      = wp_cache_get( $cache_key );
 
 		if ( $cache ) {
 			return $cache;
