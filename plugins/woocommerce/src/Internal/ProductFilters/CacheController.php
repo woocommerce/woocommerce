@@ -18,12 +18,11 @@ class CacheController implements RegisterHooksInterface {
 	const CACHE_GROUP = 'filter_data';
 
 	/**
-	 * Transient key used to track the ordered list of cached filter-combination
-	 * transient keys (used to enforce the cache-entry cap).
+	 * Transient key for the integer counter used to enforce the cache-entry cap.
 	 *
 	 * @since 10.8.0
 	 */
-	const CACHE_KEYS_OPTION = 'wc_filter_data_cache_keys';
+	const CACHE_ENTRY_COUNT_TRANSIENT = 'wc_filter_data_entry_count';
 
 	/**
 	 * Instance of TaxonomyHierarchyData.
@@ -68,14 +67,14 @@ class CacheController implements RegisterHooksInterface {
 	/**
 	 * Invalidate all cache under filter data group.
 	 *
-	 * Also clears the cache-key tracking list so the entry cap starts fresh.
+	 * Also resets the entry-count counter so the cap starts fresh.
 	 *
-	 * @since 10.8.0 Clears CACHE_KEYS_OPTION on invalidation.
+	 * @since 10.8.0 Resets CACHE_ENTRY_COUNT_TRANSIENT on invalidation.
 	 */
 	public function invalidate_filter_data_cache(): void {
 		WC_Cache_Helper::get_transient_version( self::CACHE_GROUP, true );
 		WC_Cache_Helper::invalidate_cache_group( self::CACHE_GROUP );
-		delete_transient( self::CACHE_KEYS_OPTION );
+		delete_transient( self::CACHE_ENTRY_COUNT_TRANSIENT );
 	}
 
 	/**

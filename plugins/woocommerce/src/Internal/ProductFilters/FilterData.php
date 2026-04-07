@@ -527,8 +527,9 @@ class FilterData {
 	 * Set the cache with transient version to invalidate all at once when needed.
 	 *
 	 * When the number of cached filter combinations reaches the configured
-	 * maximum (default 1000), the oldest entry is evicted before the new one
-	 * is stored, preventing unbounded transient growth from bot enumeration.
+	 * maximum (default 1000), new combinations are silently skipped rather than
+	 * stored, preventing unbounded transient growth from bot enumeration.
+	 * The counter resets whenever the filter-data cache is invalidated.
 	 * The limit can be adjusted via the `woocommerce_product_filter_cache_max_entries`
 	 * filter.  Set it to 0 to disable the cap entirely.
 	 *
@@ -547,8 +548,8 @@ class FilterData {
 		/**
 		 * Maximum number of unique filter-combination results to cache.
 		 *
-		 * When the limit is reached the oldest entry is evicted (LRU-style)
-		 * before the new one is stored.  Set to 0 to disable the cap.
+		 * When the limit is reached, new combinations are skipped until the
+		 * cache is next invalidated.  Set to 0 to disable the cap.
 		 *
 		 * @hook woocommerce_product_filter_cache_max_entries
 		 * @since 10.8.0
@@ -559,22 +560,13 @@ class FilterData {
 		$max_entries = (int) apply_filters( 'woocommerce_product_filter_cache_max_entries', 1000 );
 
 		if ( $max_entries > 0 ) {
-			$cache_keys = get_transient( CacheController::CACHE_KEYS_OPTION );
-			if ( ! is_array( $cache_keys ) ) {
-				$cache_keys = array();
+			$count = (int) get_transient( CacheController::CACHE_ENTRY_COUNT_TRANSIENT );
+
+			if ( $count >= $max_entries ) {
+				return false;
 			}
 
-			if ( ! in_array( $key, $cache_keys, true ) ) {
-				// Evict oldest entries until we have room for one more.
-				$key_count = count( $cache_keys );
-				while ( $key_count >= $max_entries ) {
-					$oldest_key = array_shift( $cache_keys );
-					delete_transient( $oldest_key );
-					--$key_count;
-				}
-				$cache_keys[] = $key;
-				set_transient( CacheController::CACHE_KEYS_OPTION, $cache_keys, WEEK_IN_SECONDS );
-			}
+			set_transient( CacheController::CACHE_ENTRY_COUNT_TRANSIENT, $count + 1, WEEK_IN_SECONDS );
 		}
 
 		$transient_version = WC_Cache_Helper::get_transient_version( CacheController::CACHE_GROUP );
