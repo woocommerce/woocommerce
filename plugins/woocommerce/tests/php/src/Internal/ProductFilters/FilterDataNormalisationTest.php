@@ -199,4 +199,23 @@ class FilterDataNormalisationTest extends \WC_Unit_Test_Case {
 
 		$this->assertSame( array( 'red', 'blue' ), $result['filter_color'] );
 	}
+
+	/**
+	 * @testdox Empty tokens from malformed comma lists are removed.
+	 */
+	public function test_empty_tokens_are_removed(): void {
+		$result = $this->normalize( array( 'filter_color' => 'red,,blue,' ) );
+
+		$this->assertSame( 'blue,red', $result['filter_color'] );
+	}
+
+	/**
+	 * @testdox Duplicate tokens are deduplicated.
+	 */
+	public function test_duplicate_tokens_are_deduplicated(): void {
+		$a = $this->normalize( array( 'filter_color' => 'red,blue,red' ) );
+		$b = $this->normalize( array( 'filter_color' => 'blue,red' ) );
+
+		$this->assertSame( $a['filter_color'], $b['filter_color'] );
+	}
 }

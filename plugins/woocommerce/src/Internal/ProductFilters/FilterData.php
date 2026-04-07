@@ -521,6 +521,7 @@ class FilterData {
 			if ( str_starts_with( $key, 'filter_' ) || 'rating_filter' === $key || in_array( $key, $taxonomy_set_params, true ) ) {
 				$pieces = array_map( 'trim', explode( ',', $value ) );
 				$pieces = array_map( 'strtolower', $pieces );
+				$pieces = array_values( array_unique( array_filter( $pieces, static fn( string $p ): bool => '' !== $p ) ) );
 				sort( $pieces );
 				$query_vars[ $key ] = implode( ',', $pieces );
 			} elseif ( str_starts_with( $key, 'query_type_' ) ) {
