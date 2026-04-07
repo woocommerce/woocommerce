@@ -32,6 +32,13 @@ class NotificationRetryHandler {
 	const MAX_RETRIES = 4;
 
 	/**
+	 * Maximum retry delay in seconds (24 hours). If WPCOM requests a
+	 * Retry-After longer than this the notification is dropped — a push
+	 * notification arriving days late would be more confusing than helpful.
+	 */
+	const MAX_RETRY_DELAY = 86400;
+
+	/**
 	 * Backoff delays in seconds, indexed by attempt number (1-based).
 	 *
 	 * Attempt 1: 60s (1 minute)
@@ -73,9 +80,9 @@ class NotificationRetryHandler {
 	 * @since 10.8.0
 	 */
 	public function schedule( Notification $notification, ?int $retry_after, int $current_attempt ): void {
-		$next_attempt = $current_attempt + 1;
+		$next_attempt = max( 0, $current_attempt ) + 1;
 
-		if ( $next_attempt > self::MAX_RETRIES ) {
+		if ( $next_attempt > self::MAX_RETRIES || ! isset( self::BACKOFF_SCHEDULE[ $next_attempt ] ) ) {
 			wc_get_logger()->error(
 				sprintf(
 					'Push notification permanently failed after %d attempts (type=%s, resource_id=%d).',
@@ -89,6 +96,20 @@ class NotificationRetryHandler {
 		}
 
 		$delay = $retry_after ?? self::BACKOFF_SCHEDULE[ $next_attempt ];
+
+		if ( $delay > self::MAX_RETRY_DELAY ) {
+			wc_get_logger()->warning(
+				sprintf(
+					'Push notification dropped: retry delay %ds exceeds maximum %ds (type=%s, resource_id=%d).',
+					$delay,
+					self::MAX_RETRY_DELAY,
+					$notification->get_type(),
+					$notification->get_resource_id()
+				),
+				array( 'source' => PushNotifications::FEATURE_NAME )
+			);
+			return;
+		}
 
 		as_schedule_single_action(
 			time() + $delay,

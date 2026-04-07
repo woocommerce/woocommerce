@@ -128,6 +128,71 @@ class NotificationRetryHandlerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should clamp a negative current_attempt to zero and schedule attempt 1.
+	 */
+	public function test_schedule_clamps_negative_attempt(): void {
+		$notification = new NewOrderNotification( $this->order_id );
+
+		$this->sut->schedule( $notification, null, -3 );
+
+		$scheduled = as_next_scheduled_action(
+			NotificationRetryHandler::RETRY_HOOK,
+			array(
+				'type'        => 'store_order',
+				'resource_id' => $this->order_id,
+				'attempt'     => 1,
+			),
+			NotificationProcessor::ACTION_SCHEDULER_GROUP
+		);
+
+		$this->assertNotFalse( $scheduled, 'A retry action should be scheduled for attempt 1.' );
+		$this->assertEqualsWithDelta( time() + 60, $scheduled, 2, 'Retry should use the attempt-1 backoff delay.' );
+	}
+
+	/**
+	 * @testdox Should drop notification and log warning when retry delay exceeds the 24-hour cap.
+	 */
+	public function test_schedule_drops_notification_when_retry_after_exceeds_max(): void {
+		$notification = new NewOrderNotification( $this->order_id );
+
+		$this->sut->schedule( $notification, NotificationRetryHandler::MAX_RETRY_DELAY + 1, 0 );
+
+		$scheduled = as_next_scheduled_action(
+			NotificationRetryHandler::RETRY_HOOK,
+			array(
+				'type'        => 'store_order',
+				'resource_id' => $this->order_id,
+				'attempt'     => 1,
+			),
+			NotificationProcessor::ACTION_SCHEDULER_GROUP
+		);
+
+		$this->assertFalse( $scheduled, 'No retry should be scheduled when delay exceeds maximum.' );
+		$this->assertLogged( 'warning', 'retry delay', array( 'source' => PushNotifications::FEATURE_NAME ) );
+	}
+
+	/**
+	 * @testdox Should schedule retry when retry delay equals the 24-hour cap exactly.
+	 */
+	public function test_schedule_allows_retry_at_max_delay(): void {
+		$notification = new NewOrderNotification( $this->order_id );
+
+		$this->sut->schedule( $notification, NotificationRetryHandler::MAX_RETRY_DELAY, 0 );
+
+		$scheduled = as_next_scheduled_action(
+			NotificationRetryHandler::RETRY_HOOK,
+			array(
+				'type'        => 'store_order',
+				'resource_id' => $this->order_id,
+				'attempt'     => 1,
+			),
+			NotificationProcessor::ACTION_SCHEDULER_GROUP
+		);
+
+		$this->assertNotFalse( $scheduled, 'A retry should be scheduled when delay equals the maximum.' );
+	}
+
+	/**
 	 * @testdox Should delegate to NotificationProcessor with is_retry and attempt on retry callback.
 	 */
 	public function test_handle_retry_delegates_to_processor(): void {
