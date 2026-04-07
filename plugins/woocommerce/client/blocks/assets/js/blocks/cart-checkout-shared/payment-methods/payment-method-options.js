@@ -91,8 +91,7 @@ const PaymentMethodOptions = () => {
 	return isExpressPaymentMethodActive ? null : (
 		<RadioControlAccordion
 			className={ clsx( {
-				'has-single-option':
-					options.length === 1 && ! hasSavedTokens,
+				'has-single-option': options.length === 1 && ! hasSavedTokens,
 			} ) }
 			highlightChecked={ true }
 			id={ 'wc-payment-method-options' }

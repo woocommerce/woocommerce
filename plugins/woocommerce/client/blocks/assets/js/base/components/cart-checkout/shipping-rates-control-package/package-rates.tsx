@@ -74,8 +74,7 @@ const PackageRates = ( {
 	return (
 		<RadioControl
 			className={ clsx( className, {
-				'has-single-option':
-					highlightChecked && options.length === 1,
+				'has-single-option': highlightChecked && options.length === 1,
 			} ) }
 			onChange={ ( value: string ) => {
 				setSelectedOption( value );
