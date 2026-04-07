@@ -98,7 +98,8 @@ class NotificationRetryHandler {
 				'resource_id' => $notification->get_resource_id(),
 				'attempt'     => $next_attempt,
 			),
-			NotificationProcessor::ACTION_SCHEDULER_GROUP
+			NotificationProcessor::ACTION_SCHEDULER_GROUP,
+			true
 		);
 	}
 
