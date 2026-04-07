@@ -68,7 +68,7 @@ class CustomerHistory {
 		foreach ( $this->get_excluded_statuses() as $slug ) {
 			$prefixed = 'wc-' . $slug;
 			if ( isset( $all_statuses[ $prefixed ] ) ) {
-				$excluded_labels[] = strtolower( $all_statuses[ $prefixed ] );
+				$excluded_labels[] = mb_strtolower( $all_statuses[ $prefixed ] );
 			}
 		}
 
