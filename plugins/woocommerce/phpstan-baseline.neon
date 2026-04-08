@@ -65053,17 +65053,6 @@ parameters:
 			count: 1
 			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmails.php
 
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\EmailEditor\\WooContentProcessor\:\:prepare_css\(\) should return string but returns string\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Internal/EmailEditor/WooContentProcessor.php
-
-		-
-			message: '#^Parameter \#3 \$subject of function preg_replace expects array\<float\|int\|string\>\|string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/EmailEditor/WooContentProcessor.php
 
 		-
 			message: '#^@param string \$feature_id does not accept actual type of parameter\: int\<min, \-1\>\|int\<1, max\>\|non\-falsy\-string\.$#'
