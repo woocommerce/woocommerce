@@ -7,6 +7,7 @@ const { paramCase } = require( 'change-case' );
 const RemoveFilesPlugin = require( './remove-files-webpack-plugin' );
 const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
 const ProgressBarPlugin = require( 'progress-bar-webpack-plugin' );
+const isProductionBuild = process.env.NODE_ENV === 'production';
 const DependencyExtractionWebpackPlugin = require( '@wordpress/dependency-extraction-webpack-plugin' );
 const WebpackRTLPlugin = require( './webpack-rtl-plugin' );
 const CircularDependencyPlugin = require( 'circular-dependency-plugin' );
@@ -124,7 +125,7 @@ const getCoreConfig = ( options = {} ) => {
 			...getSharedPlugins( {
 				bundleAnalyzerReportTitle: 'Core',
 			} ),
-			new ProgressBarPlugin( getProgressBarPluginConfig( 'Core' ) ),
+			! isProductionBuild && new ProgressBarPlugin( getProgressBarPluginConfig( 'Core' ) ),
 		],
 		optimization: {
 			...sharedOptimizationConfig,
@@ -225,7 +226,7 @@ const getMainConfig = ( options = {} ) => {
 			...getSharedPlugins( {
 				bundleAnalyzerReportTitle: 'Main',
 			} ),
-			new ProgressBarPlugin( getProgressBarPluginConfig( 'Main' ) ),
+			! isProductionBuild && new ProgressBarPlugin( getProgressBarPluginConfig( 'Main' ) ),
 			/**
 			 * Ensure that logic of this CopyWebpackPlugin is kept in sync with the copy-block-json.sh script:
 			 * https://github.com/woocommerce/woocommerce/blob/7d72fb937907bf841aabe959642be524eb093803/plugins/woocommerce/client/blocks/bin/copy-blocks-json.sh
@@ -365,7 +366,7 @@ const getFrontConfig = ( options = {} ) => {
 			...getSharedPlugins( {
 				bundleAnalyzerReportTitle: 'Frontend',
 			} ),
-			new ProgressBarPlugin( getProgressBarPluginConfig( 'Frontend' ) ),
+			! isProductionBuild && new ProgressBarPlugin( getProgressBarPluginConfig( 'Frontend' ) ),
 			new AddSplitChunkDependencies(),
 		],
 		resolve: {
@@ -452,8 +453,7 @@ const getPaymentsConfig = ( options = {} ) => {
 			...getSharedPlugins( {
 				bundleAnalyzerReportTitle: 'Payment Method Extensions',
 			} ),
-			new ProgressBarPlugin(
-				getProgressBarPluginConfig( 'Payment Method Extensions' )
+			! isProductionBuild && new ProgressBarPlugin( getProgressBarPluginConfig( 'Payment Method Extensions' )
 			),
 		],
 		resolve: {
@@ -540,8 +540,7 @@ const getExtensionsConfig = ( options = {} ) => {
 			...getSharedPlugins( {
 				bundleAnalyzerReportTitle: 'Experimental Extensions',
 			} ),
-			new ProgressBarPlugin(
-				getProgressBarPluginConfig( 'Experimental Extensions' )
+			! isProductionBuild && new ProgressBarPlugin( getProgressBarPluginConfig( 'Experimental Extensions' )
 			),
 		],
 		resolve: {
@@ -628,8 +627,7 @@ const getSiteEditorConfig = ( options = {} ) => {
 			...getSharedPlugins( {
 				bundleAnalyzerReportTitle: 'Site Editor',
 			} ),
-			new ProgressBarPlugin(
-				getProgressBarPluginConfig( 'Site Editor' )
+			! isProductionBuild && new ProgressBarPlugin( getProgressBarPluginConfig( 'Site Editor' )
 			),
 		],
 		resolve: {
@@ -786,7 +784,7 @@ const getStylingConfig = ( options = {} ) => {
 		},
 		plugins: [
 			...getSharedPlugins( { bundleAnalyzerReportTitle: 'Styles' } ),
-			new ProgressBarPlugin( getProgressBarPluginConfig( 'Styles' ) ),
+			! isProductionBuild && new ProgressBarPlugin( getProgressBarPluginConfig( 'Styles' ) ),
 			new MiniCssExtractPlugin( {
 				filename: '[name].css',
 			} ),
@@ -913,8 +911,7 @@ const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
 			...getSharedPlugins( {
 				bundleAnalyzerReportTitle: 'Cart & Checkout Frontend',
 			} ),
-			new ProgressBarPlugin(
-				getProgressBarPluginConfig( 'Cart & Checkout Frontend' )
+			! isProductionBuild && new ProgressBarPlugin( getProgressBarPluginConfig( 'Cart & Checkout Frontend' )
 			),
 			new AddSplitChunkDependencies(),
 		],

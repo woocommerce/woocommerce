@@ -48,4 +48,34 @@ Wireit caches outputs and skips unchanged tasks, so **second builds are fast**. 
 - All existing entry points and outputs must be preserved
 
 ## What's Been Tried
-(Nothing yet — establishing baseline)
+
+### Wins (kept)
+1. **Remove ForkTsCheckerWebpackPlugin + Terser 2→1 passes** (95→87s): Type checker during build is redundant, 2 Terser passes wasteful
+2. **Webpack 5 filesystem cache for admin + blocks** (87→56s warm): Persists module graph across builds. Cold builds add ~14s, warm saves ~31s
+3. **Add --noCheck to ESM builds** (56→35s): ESM was doing full type checking while CJS had --noCheck. 24 packages updated
+4. **Fix package webpack cache logic** (35→34s): Cache type was inverted (memory in prod, filesystem in dev). Fixed to always filesystem
+
+### Dead Ends
+- tsc --incremental: Incompatible with clean:build (stale tsbuildinfo)
+- Unique webpack cache names: No benefit, webpack isolates by hash
+- Explicit TerserPlugin for admin: Worse with warm cache
+- Remove lodash from admin webpack: No measurable impact
+- NODE_OPTIONS V8 tuning: Too much memory overhead for 50+ processes
+- Remove CJS from wireit dependencies: CJS builds don't block critical path
+- Skip CJS builds entirely: Admin code imports from CJS build/ paths
+- Increase webpack parallelism: Already sufficient
+- Disable concatenateModules: Cached, no warm benefit, larger bundles
+
+### Additional Dead Ends (post-34s plateau)
+- Remove wireit dependencies from tsc builds: No improvement, tsc isn't the bottleneck with warm cache
+- Filter build to plugin deps only: Worse cold, same warm
+- V8 semi-space tuning: Too much memory for 50+ processes
+- Reduce webpack parallelism/concatenateModules: All cached
+
+### Key Insights
+- With warm webpack cache, all webpack config optimizations are irrelevant (cached)
+- Remaining 34s is dominated by: ~48 tsc invocations (2-3s each, chained), wireit orchestration, grunt legacy
+- Critical path: tsc dependency chain (5-6 levels deep) → webpack → copy steps
+- The deepest chain is: internal-ts-config → leaf packages → data/components → experimental → product-editor → settings-editor → admin-library
+- The remaining ~34s overhead is structural: pnpm/wireit process orchestration, file fingerprinting (~5800 source files), Node.js process startup for ~50 tasks
+- Further improvements would require replacing the build tooling (e.g., swc instead of tsc, turbopack instead of webpack, or a unified build script)
