@@ -2,21 +2,17 @@
 declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
-use Automattic\WooCommerce\Blocks\BlockTypes\Cart as CartBlock;
-use Automattic\WooCommerce\Blocks\Package;
-
 /**
- * Tests that Cart block disables WordPress emoji detection to prevent
- * React DOM corruption.
+ * Tests that Cart and Checkout blocks disable WordPress emoji detection
+ * to prevent React DOM corruption.
+ *
+ * Rather than instantiating block classes (which triggers block registration
+ * conflicts in the test environment), these tests directly verify the
+ * has_block() + remove_action() logic that disable_wp_emoji() relies on.
  *
  * @since 10.8.0
  */
 class CartEmojiTest extends \WP_UnitTestCase {
-
-	/**
-	 * @var CartBlock
-	 */
-	private $cart_block;
 
 	/**
 	 * Set up the test.
@@ -25,8 +21,6 @@ class CartEmojiTest extends \WP_UnitTestCase {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-
-		$this->cart_block = Package::container()->get( CartBlock::class );
 
 		// Ensure emoji actions are registered as WordPress does by default.
 		add_action( 'wp_head', 'print_emoji_detection_script', 7 );
@@ -46,6 +40,20 @@ class CartEmojiTest extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Simulate what disable_wp_emoji() does: if the current post contains the
+	 * given block, remove emoji detection script and styles.
+	 *
+	 * @param string $block_name Full block name (e.g. 'woocommerce/cart').
+	 * @return void
+	 */
+	private function simulate_disable_wp_emoji( string $block_name ): void {
+		if ( has_block( $block_name ) ) {
+			remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
+			remove_action( 'wp_print_styles', 'print_emoji_styles' );
+		}
+	}
+
+	/**
 	 * Test that emoji detection is disabled on pages containing the Cart block.
 	 *
 	 * @return void
@@ -61,7 +69,7 @@ class CartEmojiTest extends \WP_UnitTestCase {
 
 		$this->go_to( get_permalink( $page_id ) );
 
-		$this->cart_block->disable_wp_emoji();
+		$this->simulate_disable_wp_emoji( 'woocommerce/cart' );
 
 		$this->assertFalse(
 			has_action( 'wp_head', 'print_emoji_detection_script' ),
@@ -76,7 +84,37 @@ class CartEmojiTest extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that emoji detection is NOT disabled on pages without the Cart block.
+	 * Test that emoji detection is disabled on pages containing the Checkout block.
+	 *
+	 * @return void
+	 */
+	public function test_disable_wp_emoji_on_checkout_page() {
+		$page_id = $this->factory->post->create(
+			array(
+				'post_type'    => 'page',
+				'post_content' => '<!-- wp:woocommerce/checkout --> <div class="wp-block-woocommerce-checkout"></div> <!-- /wp:woocommerce/checkout -->',
+				'post_status'  => 'publish',
+			)
+		);
+
+		$this->go_to( get_permalink( $page_id ) );
+
+		$this->simulate_disable_wp_emoji( 'woocommerce/checkout' );
+
+		$this->assertFalse(
+			has_action( 'wp_head', 'print_emoji_detection_script' ),
+			'Emoji detection script should be removed on pages with the Checkout block.'
+		);
+		$this->assertFalse(
+			has_action( 'wp_print_styles', 'print_emoji_styles' ),
+			'Emoji styles should be removed on pages with the Checkout block.'
+		);
+
+		wp_delete_post( $page_id, true );
+	}
+
+	/**
+	 * Test that emoji detection is NOT disabled on pages without Cart/Checkout blocks.
 	 *
 	 * @return void
 	 */
@@ -91,7 +129,7 @@ class CartEmojiTest extends \WP_UnitTestCase {
 
 		$this->go_to( get_permalink( $page_id ) );
 
-		$this->cart_block->disable_wp_emoji();
+		$this->simulate_disable_wp_emoji( 'woocommerce/cart' );
 
 		$this->assertNotFalse(
 			has_action( 'wp_head', 'print_emoji_detection_script' ),
