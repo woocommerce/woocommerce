@@ -514,7 +514,7 @@ class FilterData {
 		ksort( $query_vars );
 
 		foreach ( $query_vars as $key => $value ) {
-			if ( ! is_string( $value ) ) {
+			if ( ! is_string( $key ) || ! is_string( $value ) ) {
 				continue;
 			}
 
