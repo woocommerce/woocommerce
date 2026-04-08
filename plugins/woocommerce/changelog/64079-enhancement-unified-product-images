@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Unify product image and gallery meta boxes into a single "Product images" box with drag-and-drop reordering, keyboard navigation, and accessibility support.
