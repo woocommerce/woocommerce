@@ -29,7 +29,7 @@ class Preset_Variable_Resolver {
 	 * @param string $value The preset reference string.
 	 * @return string The CSS variable name.
 	 */
-	public static function to_css_variable_name( string $value ): string {
+	private static function to_css_variable_name( string $value ): string {
 		return '--wp--' . str_replace( '|', '--', str_replace( 'var:', '', $value ) );
 	}
 
