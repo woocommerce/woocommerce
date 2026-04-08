@@ -568,7 +568,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	/**
 	 * Cache variable to store combined mapping with full operational data columns.
 	 *
-	 * @var array[][][]
+	 * @var array<string, array<string, array<string, string>>>|null
 	 */
 	private $all_order_column_mapping_for_cache;
 
@@ -594,12 +594,12 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * Return combined mappings for all order tables, always using the full set of operational
 	 * data columns defined in the base OrdersTableDataStore class. This ensures that cached
 	 * order data objects are complete regardless of which data store subclass populates the
-	 * cache, preventing cross-bleed when different data stores (orders, refunds, subscriptions)
+	 * cache, preventing cross-bled when different data stores (orders, refunds, subscriptions)
 	 * share the same cache group.
 	 *
 	 * @since 10.8.0
 	 *
-	 * @return array|\array[][][] Return combined mapping with full operational data columns.
+	 * @return array<string, array<string, array<string, string>>> Return combined mapping with full operational data columns.
 	 */
 	private function get_all_order_column_mappings_for_cache() {
 		if ( ! isset( $this->all_order_column_mapping_for_cache ) ) {
