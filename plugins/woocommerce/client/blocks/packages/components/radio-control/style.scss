@@ -120,7 +120,17 @@ $content-padding-left: calc($gap + 24px + $gap-smaller);
 	}
 
 	.wc-block-components-radio-control__input {
-		display: none;
+		// Visually hidden but remains in the accessibility tree so screen
+		// readers still announce the selected state.
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
 	}
 
 	// Reset the container ::after border so first/last-selected modifiers

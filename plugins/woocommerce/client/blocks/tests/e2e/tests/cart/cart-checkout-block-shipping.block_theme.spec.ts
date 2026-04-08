@@ -259,10 +259,14 @@ test.describe( 'Shopper → Shipping', () => {
 			postcode: 'SW19 5AE',
 		} );
 
-		// With only one shipping rate, the radio button is hidden and the
-		// rate is displayed as plain text (has-single-option styling).
+		// With only one shipping rate, the radio button is visually hidden
+		// (has-single-option styling) but remains in the accessibility tree.
 		await expect(
-			checkoutPageObject.page.getByText( 'Flat rate' )
+			checkoutPageObject.page
+				.getByLabel( 'Checkout' )
+				.locator(
+					'.wc-block-components-radio-control__label:has-text("Flat rate")'
+				)
 		).toBeVisible();
 	} );
 
@@ -309,10 +313,12 @@ test.describe( 'Shopper → Shipping', () => {
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();
 
-		// With only one pickup location, the radio button is hidden and the
-		// location is displayed as plain text (has-single-option styling).
+		// With only one pickup location, the radio button is visually hidden
+		// (has-single-option styling) but remains in the accessibility tree.
 		await expect(
-			frontendUtils.page.getByText( 'Automattic, Inc.' )
+			frontendUtils.page.locator(
+				'.wc-block-components-radio-control__label:has-text("Automattic, Inc.")'
+			)
 		).toBeVisible();
 
 		await expect(

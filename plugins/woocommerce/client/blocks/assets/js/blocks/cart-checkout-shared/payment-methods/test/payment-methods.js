@@ -374,4 +374,58 @@ describe( 'PaymentMethods', () => {
 
 		act( () => resetMockPaymentMethods() );
 	} );
+
+	test( 'should not apply has-single-option class when saved payment tokens exist', async () => {
+		const originalWpData = jest.requireActual( '@wordpress/data' );
+		const realStore = originalWpData.select( paymentStore );
+
+		// Spy on the real registry selector to simulate saved tokens.
+		const spy = jest
+			.spyOn( realStore, 'getSavedPaymentMethods' )
+			.mockReturnValue( {
+				cc: [
+					{
+						method: {
+							gateway: 'cod',
+							last4: '1234',
+							brand: 'Visa',
+						},
+						expires: '12/30',
+						is_default: true,
+						tokenId: 1,
+					},
+				],
+			} );
+
+		act( () => {
+			registerMockSinglePaymentMethod();
+		} );
+
+		wpDataFunctions.dispatch( CART_STORE_KEY ).receiveCart( {
+			...previewCart,
+			payment_methods: [ 'cod' ],
+		} );
+
+		await waitFor( () => {
+			expect(
+				wpDataFunctions.select( paymentStore ).getActivePaymentMethod()
+			).toBe( 'cod' );
+		} );
+
+		render( <PaymentMethods /> );
+
+		await waitFor( () => {
+			const paymentMethodOptions = screen.queryByText(
+				/Payment method options/
+			);
+			expect( paymentMethodOptions ).not.toBeNull();
+		} );
+
+		expect(
+			screen.getByTestId( 'payment-method-options-class-name' )
+		).not.toHaveTextContent( 'has-single-option' );
+
+		spy.mockRestore();
+		act( () => resetMockSinglePaymentMethod() );
+	} );
 } );
