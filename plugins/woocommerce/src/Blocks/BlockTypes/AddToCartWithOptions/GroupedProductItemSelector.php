@@ -88,7 +88,7 @@ class GroupedProductItemSelector extends AbstractBlock {
 
 		// Add interactive data attribute for the stepper functionality.
 		// Pass $set_product_context = true because each grouped product child needs its own
-		// product-context scope (the inherited context points to the grouped parent).
+		// products context scope (the inherited context points to the grouped parent).
 		$quantity_html = AddToCartWithOptionsUtils::make_quantity_input_interactive( $quantity_html, array(), array(), $context, true );
 
 		return $quantity_html;
@@ -149,7 +149,7 @@ class GroupedProductItemSelector extends AbstractBlock {
 				'productId'   => $product->get_id(),
 				'variationId' => null,
 			),
-			'woocommerce/product-context'
+			'woocommerce/products'
 		);
 		return '<input type="checkbox" name="' . esc_attr( 'quantity[' . $product->get_id() . ']' ) . '" value="1" class="wc-grouped-product-add-to-cart-checkbox" id="' . esc_attr( 'quantity_' . $product->get_id() ) . '" data-wp-interactive="woocommerce/add-to-cart-with-options-quantity-selector" data-wp-on--change="actions.handleQuantityCheckboxChange" ' . $product_context_directive . ' aria-label="' . esc_attr( $label ) . '"/>';
 	}

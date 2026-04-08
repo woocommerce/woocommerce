@@ -11,9 +11,9 @@ import type {
 	Store as WooCommerce,
 	SelectedAttributes,
 } from '@woocommerce/stores/woocommerce/cart';
-import '@woocommerce/stores/woocommerce/product-context';
 import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
-import type { ProductContextStore } from '@woocommerce/stores/woocommerce/product-context';
+import '@woocommerce/stores/woocommerce/products';
+import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 
 /**
  * Internal dependencies
@@ -57,8 +57,8 @@ const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-const { state: productContextState } = store< ProductContextStore >(
-	'woocommerce/product-context',
+const { state: productsState } = store< ProductsStore >(
+	'woocommerce/products',
 	{},
 	{ lock: universalLock }
 );
@@ -108,9 +108,7 @@ const { actions } = store< MergedAddToCartWithOptionsStores >(
 				return state.validationErrors.length === 0;
 			},
 			get allowsAddingToCart(): boolean {
-				const product =
-					productContextState.selectedVariation ||
-					productContextState.product;
+				const product = productsState.productInContext;
 
 				if ( ! product ) {
 					return false;
@@ -143,9 +141,7 @@ const { actions } = store< MergedAddToCartWithOptionsStores >(
 				}
 
 				// If selected quantity is invalid, add an error.
-				const product =
-					productContextState.selectedVariation ||
-					productContextState.product;
+				const product = productsState.productInContext;
 
 				if (
 					value === 0 ||
@@ -171,7 +167,7 @@ const { actions } = store< MergedAddToCartWithOptionsStores >(
 				const inputElement = quantitySelectorContext?.inputElement;
 				const isValueNaN = Number.isNaN( inputElement?.valueAsNumber );
 
-				const { product: productFromStore } = productContextState;
+				const { product: productFromStore } = productsState;
 				const variationIds =
 					productFromStore?.variations?.map( ( v ) => v.id ) ?? [];
 
@@ -205,7 +201,7 @@ const { actions } = store< MergedAddToCartWithOptionsStores >(
 					};
 				}
 
-				if ( productContextState.product?.type === 'grouped' ) {
+				if ( productsState.product?.type === 'grouped' ) {
 					actions.validateGroupedProductQuantity();
 				} else {
 					actions.validateQuantity( productId, value );
@@ -283,9 +279,7 @@ const { actions } = store< MergedAddToCartWithOptionsStores >(
 				// woocommerce store is public.
 				yield import( '@woocommerce/stores/woocommerce/cart' );
 
-				const product =
-					productContextState.selectedVariation ||
-					productContextState.product;
+				const product = productsState.productInContext;
 
 				if ( ! product ) {
 					return;

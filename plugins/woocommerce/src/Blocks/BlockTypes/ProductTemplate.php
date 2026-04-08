@@ -126,7 +126,7 @@ class ProductTemplate extends AbstractBlock {
 					'productId'   => $product_id,
 					'variationId' => null,
 				),
-				'woocommerce/product-context'
+				'woocommerce/products'
 			);
 
 			$li_directives = '

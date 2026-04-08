@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { store, getContext, getElement } from '@wordpress/interactivity';
-import type { ProductContextStore } from '@woocommerce/stores/woocommerce/product-context';
+import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 /**
  * Internal dependencies
  */
@@ -17,8 +17,8 @@ export type Context = {
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-const { state: productContextState } = store< ProductContextStore >(
-	'woocommerce/product-context',
+const { state: productsState } = store< ProductsStore >(
+	'woocommerce/products',
 	{},
 	{ lock: universalLock }
 );
@@ -52,9 +52,7 @@ store< QuantitySelectorStore >(
 	{
 		state: {
 			get allowsQuantityChange(): boolean {
-				const product =
-					productContextState.selectedVariation ||
-					productContextState.product;
+				const product = productsState.productInContext;
 
 				if ( ! product ) {
 					return true;
@@ -65,9 +63,7 @@ store< QuantitySelectorStore >(
 			get allowsDecrease() {
 				const { quantity } = addToCartWithOptionsStore.state;
 
-				const product =
-					productContextState.selectedVariation ||
-					productContextState.product;
+				const product = productsState.productInContext;
 
 				if ( ! product ) {
 					return true;
@@ -86,9 +82,7 @@ store< QuantitySelectorStore >(
 			get allowsIncrease() {
 				const { quantity } = addToCartWithOptionsStore.state;
 
-				const product =
-					productContextState.selectedVariation ||
-					productContextState.product;
+				const product = productsState.productInContext;
 
 				if ( ! product ) {
 					return true;
@@ -103,9 +97,7 @@ store< QuantitySelectorStore >(
 				);
 			},
 			get inputQuantity(): number {
-				const product =
-					productContextState.selectedVariation ||
-					productContextState.product;
+				const product = productsState.productInContext;
 
 				if ( ! product ) {
 					return 0;
@@ -125,9 +117,7 @@ store< QuantitySelectorStore >(
 					return;
 				}
 
-				const product =
-					productContextState.selectedVariation ||
-					productContextState.product;
+				const product = productsState.productInContext;
 
 				if ( ! product ) {
 					return;
@@ -154,9 +144,7 @@ store< QuantitySelectorStore >(
 					return;
 				}
 
-				const product =
-					productContextState.selectedVariation ||
-					productContextState.product;
+				const product = productsState.productInContext;
 
 				if ( ! product ) {
 					return;
@@ -193,9 +181,7 @@ store< QuantitySelectorStore >(
 			handleQuantityBlur: () => {
 				const { allowZero, inputElement } = getContext< Context >();
 
-				const product =
-					productContextState.selectedVariation ||
-					productContextState.product;
+				const product = productsState.productInContext;
 
 				if ( ! product ) {
 					return;
@@ -233,7 +219,7 @@ store< QuantitySelectorStore >(
 					return;
 				}
 
-				const { product } = productContextState;
+				const { product } = productsState;
 
 				if ( ! product ) {
 					return;

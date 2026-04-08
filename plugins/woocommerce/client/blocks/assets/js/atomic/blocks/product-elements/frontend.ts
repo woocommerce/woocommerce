@@ -2,8 +2,8 @@
  * External dependencies
  */
 import { getElement, store, getContext } from '@wordpress/interactivity';
-import '@woocommerce/stores/woocommerce/product-context';
-import type { ProductContextStore } from '@woocommerce/stores/woocommerce/product-context';
+import '@woocommerce/stores/woocommerce/products';
+import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 import type { ProductResponseItem } from '@woocommerce/types';
 import { sanitizeHTML } from '@woocommerce/sanitize';
 
@@ -11,8 +11,8 @@ import { sanitizeHTML } from '@woocommerce/sanitize';
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-const { state: productContextState } = store< ProductContextStore >(
-	'woocommerce/product-context',
+const { state: productsState } = store< ProductsStore >(
+	'woocommerce/products',
 	{},
 	{ lock: universalLock }
 );
@@ -50,7 +50,7 @@ store(
 		callbacks: {
 			updateValue: () => {
 				const element = getElement();
-				const product = productContextState.productInContext;
+				const product = productsState.productInContext;
 
 				if ( ! element.ref || ! product ) {
 					return;
