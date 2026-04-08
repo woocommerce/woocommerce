@@ -25,6 +25,7 @@ Verify from dynamic context: not on trunk (ask which branch if so), commits exis
 **Base branch**: use `release/*` if the branch was created from one, otherwise `trunk`.
 
 From the dynamic context above (read full diffs only if the stat summary is ambiguous), determine:
+
 - **Change type**: Fix, Add, Update, Dev, Tweak, Performance, or Enhancement
 - **Significance**: Patch (most common), Minor (new features), Major (breaking — rare)
 - **Bug fix?** Look for issue refs in commits/branch name (e.g., `#12345`, `fix/issue-12345`)
@@ -44,6 +45,7 @@ Extract issue/PR refs from commits and branch name. Ask the user (combine into o
 Use the PR template from the dynamic context above.
 
 **Title** (under 70 chars, verb-first — the repo convention):
+
 - `Fix <what was broken>`, `Add <what>`, or other verb (Restore, Bump, Prepare, etc.)
 - Optional area prefix: `[Email Editor] Fix double margin-top in flex layout`
 - No `fix:`/`feat:` prefixes. No Linear ticket refs — Linear is internal, PRs are public.
@@ -53,6 +55,7 @@ Use the PR template from the dynamic context above.
 #### Non-plugin changes (CI/CD, tooling, docs, `.ai/skills/`, workflows)
 
 Use a simplified body with only these sections:
+
 - **Submission Review Guidelines**: Keep as-is from template.
 - **Changes proposed**: 2-3 sentences. Lead with WHY, then WHAT.
 
@@ -61,6 +64,7 @@ Skip Screenshots, Testing instructions, Testing done, Milestone, and Changelog s
 #### Plugin-affecting changes
 
 Use the full template:
+
 - **Submission Review Guidelines**: Keep as-is from template.
 - **Changes proposed**: 2-3 sentences. Lead with WHY, then WHAT. No filler ("This PR addresses..."). Include `Closes #1234.` if applicable. For bugs: `Bug introduced in PR #XXXX.` (omit this line entirely if not a bug fix).
 - **Screenshots**: Remove section if no UI changes. For UI changes, use Chrome DevTools MCP to capture screenshots if available; otherwise remind user to add them before marking ready.

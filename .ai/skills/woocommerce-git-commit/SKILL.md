@@ -27,6 +27,7 @@ From the dynamic context above, determine what changed:
 ### 2. Decide Commit Grouping
 
 Default to a **single commit** unless changes are clearly unrelated. Split only when:
+
 - Changelog entries exist alongside source changes (changelog = separate commit)
 - Obviously independent changes are mixed (e.g., a bug fix AND an unrelated config change)
 
@@ -37,6 +38,7 @@ Two files changed for the same reason = one commit. Don't over-split.
 Use the current session context to understand what work was done and why. If motivation is still unclear after reviewing the diff and conversation, ask the user in a single question.
 
 **Format** — verb-first imperative, under 72 chars:
+
 - `Fix get_item_downloads() not always returning an array`
 - `Add cache priming to AJAX downloadable search`
 - `Update email editor reset action label for consistency`
@@ -55,7 +57,7 @@ If $ARGUMENTS is provided, use it as guidance for the commit message.
 
 Show the user each proposed commit:
 
-```
+```text
 Commit 1: Fix double margin-top in flex layout
   files: src/Blocks/EmailEditor/Layout.php
          src/Blocks/EmailEditor/styles.css
