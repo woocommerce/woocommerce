@@ -105,14 +105,18 @@ class PushTokenRestController extends RestApiControllerBase {
 	 *
 	 * @param WP_REST_Request $request The request object.
 	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
-	 * @return WP_REST_Response
+	 * @return WP_REST_Response|WP_Error
 	 */
-	public function index( WP_REST_Request $request ): WP_REST_Response {
-		$tokens = wc_get_container()
-			->get( PushTokensDataStore::class )
-			->get_tokens_for_roles(
-				PushNotifications::ROLES_WITH_PUSH_NOTIFICATIONS_ENABLED
-			);
+	public function index( WP_REST_Request $request ) {
+		try {
+			$tokens = wc_get_container()
+				->get( PushTokensDataStore::class )
+				->get_tokens_for_roles(
+					PushNotifications::ROLES_WITH_PUSH_NOTIFICATIONS_ENABLED
+				);
+		} catch ( Exception $e ) {
+			return $this->convert_exception_to_wp_error( $e );
+		}
 
 		return new WP_REST_Response(
 			array(
