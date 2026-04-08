@@ -8,6 +8,8 @@
 declare(strict_types = 1);
 namespace Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors;
 
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preset_Variable_Resolver;
+
 /**
  * This preprocessor is responsible for setting default spacing values for blocks.
  * In the early development phase, we are setting only margin-top for blocks that are not first or last in the columns block.
@@ -64,8 +66,8 @@ class Spacing_Preprocessor implements Preprocessor {
 
 		// Resolve preset variable references (e.g. "var:preset|spacing|20")
 		// to their pixel values so downstream consumers get usable CSS values.
-		$left  = $this->resolve_preset_value( $left, $variables_map );
-		$right = $this->resolve_preset_value( $right, $variables_map );
+		$left  = Preset_Variable_Resolver::resolve( $left, $variables_map );
+		$right = Preset_Variable_Resolver::resolve( $right, $variables_map );
 
 		if ( $this->is_zero_value( $left ) && $this->is_zero_value( $right ) ) {
 			return array();
@@ -336,25 +338,6 @@ class Spacing_Preprocessor implements Preprocessor {
 			'left'  => $left,
 			'right' => $right,
 		);
-	}
-
-	/**
-	 * Resolve a CSS value that may contain a preset variable reference.
-	 *
-	 * Block attributes store padding as preset references like
-	 * "var:preset|spacing|20" which resolve to actual pixel values.
-	 *
-	 * @param string $value The CSS value, possibly a preset reference.
-	 * @param array  $variables_map Map of CSS variable names to resolved values.
-	 * @return string The resolved value (e.g. "20px") or the original value.
-	 */
-	private function resolve_preset_value( string $value, array $variables_map ): string {
-		if ( empty( $variables_map ) || strpos( $value, 'var:preset|' ) !== 0 ) {
-			return $value;
-		}
-
-		$css_var_name = '--wp--' . str_replace( '|', '--', str_replace( 'var:', '', $value ) );
-		return $variables_map[ $css_var_name ] ?? $value;
 	}
 
 	/**
