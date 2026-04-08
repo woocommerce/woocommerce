@@ -15787,7 +15787,7 @@ parameters:
 			path: includes/class-wc-structured-data.php
 
 		-
-			message: '#^Offset ''price'' on array\{priceValidUntil\: string, availability\: ''https\://schema\.org…'', url\: mixed, seller\: array\{''@type''\: ''Organization'', name\: mixed, url\: mixed\}, ''@type''\: ''AggregateOffer'', lowPrice\: mixed, highPrice\: mixed, offerCount\: int\<0, max\>, \.\.\.\}\|array\{priceValidUntil\: string, availability\: ''https\://schema\.org…'', url\: mixed, seller\: array\{''@type''\: ''Organization'', name\: mixed, url\: mixed\}, ''@type''\: ''Offer'', priceSpecification\: array\{0\: array\{''@type''\: ''UnitPriceSpecificat…'', price\: mixed, priceCurrency\: mixed, valueAddedTaxIncluded\: bool, validThrough\: string, priceType\?\: ''https\://schema\.org…''\}, 1\?\: array\{''@type''\: ''UnitPriceSpecificat…'', price\: mixed, priceCurrency\: mixed, valueAddedTaxIncluded\: bool, validThrough\: string, priceType\?\: ''https\://schema\.org…''\}\}\} in empty\(\) does not exist\.$#'
+			message: '#^Offset ''price'' on array\{priceValidUntil\: string, availability\: ''https\://schema\.org…'', url\: mixed, seller\: array\{''@type''\: ''Organization'', name\: mixed, url\: mixed\}, ''@type''\: ''AggregateOffer'', lowPrice\: mixed, highPrice\: mixed, offerCount\: int\<0, max\>, \.\.\.\}\|array\{priceValidUntil\: string, availability\: ''https\://schema\.org…'', url\: mixed, seller\: array\{''@type''\: ''Organization'', name\: mixed, url\: mixed\}, ''@type''\: ''Offer'', priceSpecification\: array\{0\: array\{''@type''\: ''UnitPriceSpecificat…'', price\: mixed, priceCurrency\: mixed, validThrough\: string, valueAddedTaxIncluded\?\: bool, priceType\?\: ''https\://schema\.org…''\}, 1\?\: array\{''@type''\: ''UnitPriceSpecificat…'', price\: mixed, priceCurrency\: mixed, validThrough\: string, valueAddedTaxIncluded\?\: bool, priceType\?\: ''https\://schema\.org…''\}\}\} in empty\(\) does not exist\.$#'
 			identifier: empty.offset
 			count: 1
 			path: includes/class-wc-structured-data.php
@@ -53733,17 +53733,6 @@ parameters:
 			count: 1
 			path: src/Blocks/BlockTypes/ProductFilterAttribute.php
 
-		-
-			message: '#^Cannot access property \$name on stdClass\|null\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: src/Blocks/BlockTypes/ProductFilterAttribute.php
-
-		-
-			message: '#^Cannot access property \$slug on stdClass\|null\.$#'
-			identifier: property.nonObject
-			count: 5
-			path: src/Blocks/BlockTypes/ProductFilterAttribute.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilterAttribute\:\:delete_default_attribute_id_transient\(\) has no return type specified\.$#'

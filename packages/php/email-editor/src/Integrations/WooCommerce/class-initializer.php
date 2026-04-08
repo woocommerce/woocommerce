@@ -52,6 +52,11 @@ class Initializer {
 			$settings['render_email_callback'] = array( $this, 'render_block' );
 		}
 
+		// Enable full-width alignment support for the product image block.
+		if ( 'woocommerce/product-image' === $settings['name'] ) {
+			$settings['supports']['align'] = array( 'full' );
+		}
+
 		return $settings;
 	}
 

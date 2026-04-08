@@ -55,7 +55,6 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 	const { productTemplates, productTemplate: selectedProductTemplate } =
 		useSelect( ( select ) => {
 			const { getEditorSettings } = select( 'core/editor' );
-			// @ts-expect-error Selector is not typed
 			return getEditorSettings();
 		}, [] );
 
@@ -97,7 +96,6 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 	const rootClientId = useSelect(
 		( select ) => {
 			const { getBlockRootClientId } = select( 'core/block-editor' );
-			// @ts-expect-error Selector is not typed
 			return getBlockRootClientId( clientId );
 		},
 		[ clientId ]
@@ -107,29 +105,18 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 		useState< ProductTemplate >();
 
 	// Pull the product templates from the store.
-	const productFormPosts = useSelect(
-		(
-			sel: ( key: string ) => {
-				getEntityRecords: (
-					kind: string,
-					name: string,
-					query: Record< string, unknown >
-				) => ProductFormPostProps[] | undefined;
-			}
-		) => {
-			// Do not fetch product form posts if the feature is not enabled.
-			if ( ! isProductFormTemplateSystemEnabled() ) {
-				return [];
-			}
+	const productFormPosts = useSelect( ( sel ) => {
+		// Do not fetch product form posts if the feature is not enabled.
+		if ( ! isProductFormTemplateSystemEnabled() ) {
+			return [];
+		}
 
-			return (
-				sel( 'core' ).getEntityRecords( 'postType', 'product_form', {
-					per_page: -1,
-				} ) || []
-			);
-		},
-		[]
-	) as ProductFormPostProps[];
+		return (
+			sel( 'core' ).getEntityRecords( 'postType', 'product_form', {
+				per_page: -1,
+			} ) || []
+		);
+	}, [] ) as ProductFormPostProps[];
 
 	const { isSaving } = useSelect(
 		( select ) => {
@@ -138,7 +125,6 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 			const { isSavingEntityRecord } = select( 'core' );
 
 			return {
-				// @ts-expect-error Selector is not typed
 				isSaving: isSavingEntityRecord(
 					'postType',
 					'product',

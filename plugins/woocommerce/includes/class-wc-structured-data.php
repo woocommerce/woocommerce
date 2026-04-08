@@ -240,17 +240,18 @@ class WC_Structured_Data {
 				$variation_prices = $product->get_variation_prices( true );
 
 				if ( $lowest === $highest ) {
+					$unit_price_spec = array(
+						'@type'         => 'UnitPriceSpecification',
+						'price'         => wc_format_decimal( $lowest, wc_get_price_decimals() ),
+						'priceCurrency' => $currency,
+						'validThrough'  => $price_valid_until,
+					);
+					if ( wc_tax_enabled() ) {
+						$unit_price_spec['valueAddedTaxIncluded'] = 'incl' === get_option( 'woocommerce_tax_display_shop' );
+					}
 					$markup_offer = array(
 						'@type'              => 'Offer',
-						'priceSpecification' => array(
-							array(
-								'@type'                 => 'UnitPriceSpecification',
-								'price'                 => wc_format_decimal( $lowest, wc_get_price_decimals() ),
-								'priceCurrency'         => $currency,
-								'valueAddedTaxIncluded' => 'incl' === get_option( 'woocommerce_tax_display_shop' ),
-								'validThrough'          => $price_valid_until,
-							),
-						),
+						'priceSpecification' => array( $unit_price_spec ),
 					);
 				} else {
 					$markup_offer = array(
@@ -274,16 +275,17 @@ class WC_Structured_Data {
 							? gmdate( 'Y-m-d', $date_on_sale_to->getTimestamp() )
 							: null;
 
-						$markup_offer['priceSpecification'] = array(
-							array(
-								'@type'                 => 'UnitPriceSpecification',
-								'priceType'             => 'https://schema.org/SalePrice',
-								'price'                 => wc_format_decimal( $lowest_child_sale_price, wc_get_price_decimals() ),
-								'priceCurrency'         => $currency,
-								'valueAddedTaxIncluded' => 'incl' === get_option( 'woocommerce_tax_display_shop' ),
-								'validThrough'          => $sale_price_valid_until ?? $price_valid_until,
-							),
+						$sale_unit_price_spec = array(
+							'@type'         => 'UnitPriceSpecification',
+							'priceType'     => 'https://schema.org/SalePrice',
+							'price'         => wc_format_decimal( $lowest_child_sale_price, wc_get_price_decimals() ),
+							'priceCurrency' => $currency,
+							'validThrough'  => $sale_price_valid_until ?? $price_valid_until,
 						);
+						if ( wc_tax_enabled() ) {
+							$sale_unit_price_spec['valueAddedTaxIncluded'] = 'incl' === get_option( 'woocommerce_tax_display_shop' );
+						}
+						$markup_offer['priceSpecification'] = array( $sale_unit_price_spec );
 					}
 				}
 			} elseif ( $product->is_type( ProductType::GROUPED ) ) {
@@ -313,12 +315,14 @@ class WC_Structured_Data {
 				}
 
 				$unit_price_specification = array(
-					'@type'                 => 'UnitPriceSpecification',
-					'price'                 => wc_format_decimal( $min_price, wc_get_price_decimals() ),
-					'priceCurrency'         => $currency,
-					'valueAddedTaxIncluded' => 'incl' === $tax_display_mode,
-					'validThrough'          => $price_valid_until,
+					'@type'         => 'UnitPriceSpecification',
+					'price'         => wc_format_decimal( $min_price, wc_get_price_decimals() ),
+					'priceCurrency' => $currency,
+					'validThrough'  => $price_valid_until,
 				);
+				if ( wc_tax_enabled() ) {
+					$unit_price_specification['valueAddedTaxIncluded'] = 'incl' === $tax_display_mode;
+				}
 				if ( $product->is_on_sale() && $min_price !== $min_sale_price ) {
 					// `priceType` should only be specified in prices which are not the current offer.
 					// https://developers.google.com/search/docs/appearance/structured-data/merchant-listing#sale-pricing-example
@@ -338,16 +342,16 @@ class WC_Structured_Data {
 
 					// We add the sale price to the top of the array so it's the first offer.
 					// See https://github.com/woocommerce/woocommerce/issues/55043.
-					array_unshift(
-						$markup_offer['priceSpecification'],
-						array(
-							'@type'                 => 'UnitPriceSpecification',
-							'price'                 => wc_format_decimal( $min_sale_price, wc_get_price_decimals() ),
-							'priceCurrency'         => $currency,
-							'valueAddedTaxIncluded' => 'incl' === $tax_display_mode,
-							'validThrough'          => $sale_price_valid_until ?? $price_valid_until,
-						)
+					$grouped_sale_spec = array(
+						'@type'         => 'UnitPriceSpecification',
+						'price'         => wc_format_decimal( $min_sale_price, wc_get_price_decimals() ),
+						'priceCurrency' => $currency,
+						'validThrough'  => $sale_price_valid_until ?? $price_valid_until,
 					);
+					if ( wc_tax_enabled() ) {
+						$grouped_sale_spec['valueAddedTaxIncluded'] = 'incl' === $tax_display_mode;
+					}
+					array_unshift( $markup_offer['priceSpecification'], $grouped_sale_spec );
 				}
 			} else {
 				$tax_display_mode         = get_option( 'woocommerce_tax_display_shop' );
@@ -355,12 +359,14 @@ class WC_Structured_Data {
 					? wc_get_price_including_tax( $product, array( 'price' => $product->get_regular_price() ) )
 					: wc_get_price_excluding_tax( $product, array( 'price' => $product->get_regular_price() ) );
 				$unit_price_specification = array(
-					'@type'                 => 'UnitPriceSpecification',
-					'price'                 => wc_format_decimal( $regular_price, wc_get_price_decimals() ),
-					'priceCurrency'         => $currency,
-					'valueAddedTaxIncluded' => 'incl' === $tax_display_mode,
-					'validThrough'          => $price_valid_until,
+					'@type'         => 'UnitPriceSpecification',
+					'price'         => wc_format_decimal( $regular_price, wc_get_price_decimals() ),
+					'priceCurrency' => $currency,
+					'validThrough'  => $price_valid_until,
 				);
+				if ( wc_tax_enabled() ) {
+					$unit_price_specification['valueAddedTaxIncluded'] = 'incl' === $tax_display_mode;
+				}
 				if ( $product->is_on_sale() ) {
 					// `priceType` should only be specified in prices which are not the current offer.
 					// https://developers.google.com/search/docs/appearance/structured-data/merchant-listing#sale-pricing-example
@@ -383,16 +389,16 @@ class WC_Structured_Data {
 
 					// We add the sale price to the top of the array so it's the first offer.
 					// See https://github.com/woocommerce/woocommerce/issues/55043.
-					array_unshift(
-						$markup_offer['priceSpecification'],
-						array(
-							'@type'                 => 'UnitPriceSpecification',
-							'price'                 => wc_format_decimal( $sale_price, wc_get_price_decimals() ),
-							'priceCurrency'         => $currency,
-							'valueAddedTaxIncluded' => 'incl' === $tax_display_mode,
-							'validThrough'          => $sale_price_valid_until ?? $price_valid_until,
-						)
+					$simple_sale_spec = array(
+						'@type'         => 'UnitPriceSpecification',
+						'price'         => wc_format_decimal( $sale_price, wc_get_price_decimals() ),
+						'priceCurrency' => $currency,
+						'validThrough'  => $sale_price_valid_until ?? $price_valid_until,
 					);
+					if ( wc_tax_enabled() ) {
+						$simple_sale_spec['valueAddedTaxIncluded'] = 'incl' === $tax_display_mode;
+					}
+					array_unshift( $markup_offer['priceSpecification'], $simple_sale_spec );
 				}
 			}
 
@@ -655,11 +661,13 @@ class WC_Structured_Data {
 		$markup['price']              = $order->get_total();
 		$markup['priceCurrency']      = $order->get_currency();
 		$markup['priceSpecification'] = array(
-			'price'                 => $order->get_total(),
-			'priceCurrency'         => $order->get_currency(),
-			'valueAddedTaxIncluded' => 'true',
+			'price'         => $order->get_total(),
+			'priceCurrency' => $order->get_currency(),
 		);
-		$markup['billingAddress']     = array(
+		if ( wc_tax_enabled() ) {
+			$markup['priceSpecification']['valueAddedTaxIncluded'] = wc_prices_include_tax();
+		}
+		$markup['billingAddress']  = array(
 			'@type'           => 'PostalAddress',
 			'name'            => $order->get_formatted_billing_full_name(),
 			'streetAddress'   => $order->get_billing_address_1(),
@@ -670,16 +678,16 @@ class WC_Structured_Data {
 			'email'           => $order->get_billing_email(),
 			'telephone'       => $order->get_billing_phone(),
 		);
-		$markup['customer']           = array(
+		$markup['customer']        = array(
 			'@type' => 'Person',
 			'name'  => $order->get_formatted_billing_full_name(),
 		);
-		$markup['merchant']           = array(
+		$markup['merchant']        = array(
 			'@type' => 'Organization',
 			'name'  => $shop_name,
 			'url'   => $shop_url,
 		);
-		$markup['potentialAction']    = array(
+		$markup['potentialAction'] = array(
 			'@type'  => 'ViewAction',
 			'name'   => 'View Order',
 			'url'    => $order_url,

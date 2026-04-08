@@ -3,6 +3,7 @@
  */
 import { useEffect, useRef } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
+import type { MapSelect } from '@wordpress/data/build-types/types';
 
 const useInterval = (
 	callback: ( ...args: unknown[] ) => void,
@@ -26,10 +27,10 @@ const useInterval = (
 };
 
 export const useSelectWithRefresh = (
-	mapSelectToProps: Parameters< typeof useSelect >[ 0 ],
+	mapSelectToProps: MapSelect,
 	invalidationCallback: Parameters< typeof useInterval >[ 0 ],
 	interval: Parameters< typeof useInterval >[ 1 ],
-	dependencies: Parameters< typeof useSelect >[ 1 ]
+	dependencies?: unknown[]
 ) => {
 	const result = useSelect( mapSelectToProps, dependencies );
 	useInterval( invalidationCallback, interval );
