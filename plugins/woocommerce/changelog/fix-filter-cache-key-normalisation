@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Normalise filter query vars before hashing cache keys so equivalent filter combinations (e.g. filter_color=red,blue vs blue,red) share the same cache entry.
