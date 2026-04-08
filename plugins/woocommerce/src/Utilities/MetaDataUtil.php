@@ -62,7 +62,7 @@ class MetaDataUtil {
 	public static function normalize( array $meta_data, $default_id = '' ): array {
 		$normalized = array();
 		foreach ( $meta_data as $meta ) {
-			if ( isset( $meta['key'] ) ) {
+			if ( is_array( $meta ) && isset( $meta['key'] ) ) {
 				$normalized[] = array(
 					'key'   => $meta['key'],
 					'value' => $meta['value'] ?? null,
