@@ -4189,7 +4189,7 @@ class PaymentsExtensionSuggestions {
 				'icon'        => plugins_url( 'assets/images/onboarding/icons/mastercard.svg', WC_PLUGIN_FILE ),
 				'plugin'      => array(
 					'_type' => self::PLUGIN_TYPE_WPORG,
-					'slug'  => 'mastercard-merchant-cloud',
+					'slug'  => 'mastercard-merchant-cloud-for-woocommerce',
 				),
 				'links'       => array(
 					array(
