@@ -386,15 +386,18 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 			$next_state = $fulfillment->get_is_fulfilled();
 
 			if ( isset( $request->get_json_params()['meta_data'] ) ) {
-				$meta_data = $request->get_json_params()['meta_data'];
+				$meta_data       = $request->get_json_params()['meta_data'];
+				$normalized_keys = is_array( $meta_data ) ? array_column( MetaDataUtil::normalize( $meta_data, 0 ), 'key' ) : array();
 				MetaDataUtil::update( $meta_data, $fulfillment, 0 );
 
-				// Remove the meta data keys that don't exist in the request, by matching their keys.
-				$normalized_keys    = array_column( MetaDataUtil::normalize( $meta_data, 0 ), 'key' );
-				$existing_meta_data = $fulfillment->get_meta_data();
-				foreach ( $existing_meta_data as $meta ) {
-					if ( ! in_array( $meta->key, $normalized_keys, true ) ) {
-						$fulfillment->delete_meta_data( $meta->key );
+				// Remove meta keys not in the request. Skip if all entries were malformed
+				// (non-empty input but no valid keys), to avoid accidental data loss.
+				if ( empty( $meta_data ) || ! empty( $normalized_keys ) ) {
+					$existing_meta_data = $fulfillment->get_meta_data();
+					foreach ( $existing_meta_data as $meta ) {
+						if ( ! in_array( $meta->key, $normalized_keys, true ) ) {
+							$fulfillment->delete_meta_data( $meta->key );
+						}
 					}
 				}
 			}
@@ -559,15 +562,18 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 			$this->validate_fulfillment( $fulfillment, $fulfillment_id, $order_id );
 
 			// Update the meta data keys that exist in the request.
-			$meta_data = $request->get_json_params()['meta_data'];
+			$meta_data       = $request->get_json_params()['meta_data'];
+			$normalized_keys = is_array( $meta_data ) ? array_column( MetaDataUtil::normalize( $meta_data, 0 ), 'key' ) : array();
 			MetaDataUtil::update( $meta_data, $fulfillment, 0 );
 
-			// Remove the meta data keys that don't exist in the request, by matching their keys.
-			$normalized_keys    = array_column( MetaDataUtil::normalize( $meta_data, 0 ), 'key' );
-			$existing_meta_data = $fulfillment->get_meta_data();
-			foreach ( $existing_meta_data as $meta ) {
-				if ( ! in_array( $meta->key, $normalized_keys, true ) ) {
-					$fulfillment->delete_meta_data( $meta->key );
+			// Remove meta keys not in the request. Skip if all entries were malformed
+			// (non-empty input but no valid keys), to avoid accidental data loss.
+			if ( empty( $meta_data ) || ! empty( $normalized_keys ) ) {
+				$existing_meta_data = $fulfillment->get_meta_data();
+				foreach ( $existing_meta_data as $meta ) {
+					if ( ! in_array( $meta->key, $normalized_keys, true ) ) {
+						$fulfillment->delete_meta_data( $meta->key );
+					}
 				}
 			}
 			$fulfillment->save();
