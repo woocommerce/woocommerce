@@ -1437,10 +1437,15 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * @testdox Should reject WPCOM tokens endpoint without Jetpack blog token authentication.
 	 */
 	public function test_index_rejects_without_blog_token(): void {
-		$request  = new WP_REST_Request( 'GET', '/wc-push-notifications/push-tokens' );
-		$response = $this->server->dispatch( $request );
+		$this->mock_jetpack_connection_manager_is_connected();
 
-		$this->assertEquals( rest_authorization_required_code(), $response->get_status() );
+		$controller = new PushTokenRestController();
+		$request    = new WP_REST_Request( 'GET', '/wc-push-notifications/push-tokens' );
+
+		$result = $controller->authorize_as_from_wpcom( $request );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_rest_cannot_view', $result->get_error_code() );
 	}
 
 	/**

@@ -69,7 +69,7 @@ class PushTokenRestController extends RestApiControllerBase {
 			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'index' ),
+					'callback'            => fn ( WP_REST_Request $request ) => $this->run( $request, 'index' ),
 					'permission_callback' => array( $this, 'authorize_as_from_wpcom' ),
 				),
 				array(
