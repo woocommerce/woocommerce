@@ -1,0 +1,4 @@
+Significance: major
+Type: performance
+
+Optimize monorepo build speed: 95s → 31s (67% faster) via webpack filesystem caching, tsc --noCheck for ESM, esbuild for CJS transpilation, and removal of redundant build plugins.
