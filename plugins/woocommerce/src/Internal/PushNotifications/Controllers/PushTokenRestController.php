@@ -71,6 +71,25 @@ class PushTokenRestController extends RestApiControllerBase {
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => fn ( WP_REST_Request $request ) => $this->run( $request, 'index' ),
 					'permission_callback' => array( $this, 'authorize_as_from_wpcom' ),
+					'args'                => array(
+						'page'     => array(
+							'description'       => __( 'Current page of the collection.', 'woocommerce' ),
+							'type'              => 'integer',
+							'default'           => 1,
+							'minimum'           => 1,
+							'sanitize_callback' => 'absint',
+							'validate_callback' => 'rest_validate_request_arg',
+						),
+						'per_page' => array(
+							'description'       => __( 'Maximum number of items to be returned in result set.', 'woocommerce' ),
+							'type'              => 'integer',
+							'default'           => 10,
+							'minimum'           => 1,
+							'maximum'           => 100,
+							'sanitize_callback' => 'absint',
+							'validate_callback' => 'rest_validate_request_arg',
+						),
+					),
 				),
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
@@ -108,25 +127,35 @@ class PushTokenRestController extends RestApiControllerBase {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function index( WP_REST_Request $request ) {
+		$page     = (int) $request->get_param( 'page' );
+		$per_page = (int) $request->get_param( 'per_page' );
+
 		try {
-			$tokens = wc_get_container()
+			$result = wc_get_container()
 				->get( PushTokensDataStore::class )
 				->get_tokens_for_roles(
-					PushNotifications::ROLES_WITH_PUSH_NOTIFICATIONS_ENABLED
+					PushNotifications::ROLES_WITH_PUSH_NOTIFICATIONS_ENABLED,
+					$page,
+					$per_page
 				);
 		} catch ( Exception $e ) {
 			return $this->convert_exception_to_wp_error( $e );
 		}
 
-		return new WP_REST_Response(
+		$response = new WP_REST_Response(
 			array(
 				'tokens' => array_map(
 					fn ( $token ) => $token->to_wpcom_format(),
-					$tokens
+					$result['tokens']
 				),
 			),
 			WP_Http::OK
 		);
+
+		$response->header( 'X-WP-Total', (string) $result['total'] );
+		$response->header( 'X-WP-TotalPages', (string) $result['total_pages'] );
+
+		return $response;
 	}
 
 	/**
