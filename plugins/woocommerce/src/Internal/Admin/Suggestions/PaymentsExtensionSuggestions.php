@@ -62,6 +62,9 @@ class PaymentsExtensionSuggestions {
 	const PAYPAL_BRAINTREE  = 'paypal_braintree';
 	const VISA              = 'visa_as';
 	const NGENIUS           = 'ngenius';
+	const EVERGREEN         = 'evergreen';
+	const MASTERCARD        = 'mastercard';
+	const MYPOS             = 'mypos';
 
 	/*
 	 * The extension types.
@@ -2312,6 +2315,7 @@ class PaymentsExtensionSuggestions {
 			),
 		),
 		'EG' => array(
+			self::MASTERCARD,
 			self::PAYMOB => array(
 				'_append' => array(
 					'tags' => array( self::TAG_PREFERRED ),
@@ -2513,6 +2517,7 @@ class PaymentsExtensionSuggestions {
 			),
 		),
 		'NG' => array(
+			self::MASTERCARD,
 			self::PAYSTACK => array(
 				'_append' => array(
 					'tags' => array( self::TAG_PREFERRED ),
@@ -2583,6 +2588,7 @@ class PaymentsExtensionSuggestions {
 			),
 		),
 		'ZA' => array(
+			self::MASTERCARD,
 			self::PAYSTACK => array(
 				'_append' => array(
 					'tags' => array( self::TAG_PREFERRED ),
@@ -2666,6 +2672,7 @@ class PaymentsExtensionSuggestions {
 			),
 		),
 		'BH' => array(
+			self::MASTERCARD,
 			self::VISA => array(
 				'_append' => array(
 					'tags' => array( self::TAG_PREFERRED ),
@@ -2706,6 +2713,7 @@ class PaymentsExtensionSuggestions {
 			self::VISA,
 		),
 		'JO' => array(
+			self::MASTERCARD,
 			self::VISA => array(
 				'_append' => array(
 					'tags' => array( self::TAG_PREFERRED ),
@@ -2724,6 +2732,7 @@ class PaymentsExtensionSuggestions {
 			self::PAYPAL_FULL_STACK,
 		),
 		'KW' => array(
+			self::MASTERCARD,
 			self::VISA => array(
 				'_append' => array(
 					'tags' => array( self::TAG_PREFERRED ),
@@ -2757,6 +2766,7 @@ class PaymentsExtensionSuggestions {
 			self::PAYPAL_WALLET,
 		),
 		'PK' => array(
+			self::MASTERCARD,
 			self::PAYONEER => array(
 				'_append' => array(
 					'tags' => array( self::TAG_PREFERRED ),
@@ -2773,6 +2783,7 @@ class PaymentsExtensionSuggestions {
 			),
 		),
 		'QA' => array(
+			self::MASTERCARD,
 			self::VISA => array(
 				'_append' => array(
 					'tags' => array( self::TAG_PREFERRED ),
@@ -2782,6 +2793,7 @@ class PaymentsExtensionSuggestions {
 			self::PAYPAL_WALLET,
 		),
 		'SA' => array(
+			self::MASTERCARD,
 			self::PAYMOB => array(
 				'_append' => array(
 					'tags' => array( self::TAG_PREFERRED ),
@@ -2817,6 +2829,7 @@ class PaymentsExtensionSuggestions {
 			self::WOOPAYMENTS,
 			self::PAYPAL_FULL_STACK,
 			self::STRIPE,
+			self::MASTERCARD,
 			self::PAYONEER,
 			self::PAYMOB,
 			self::VISA,
@@ -4167,6 +4180,42 @@ class PaymentsExtensionSuggestions {
 						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
 						'url'   => 'https://woocommerce.com/document/ngenius/',
 					),
+				),
+			),
+			self::MASTERCARD        => array(
+				'_type'       => self::TYPE_PSP,
+				'title'       => esc_html__( 'Mastercard Merchant Cloud', 'woocommerce' ),
+				'description' => esc_html__( 'A seamless checkout with 35+ payment methods for global needs. Enjoy built-in security and simple integration for a smooth experience.', 'woocommerce' ),
+				'icon'        => plugins_url( 'assets/images/onboarding/icons/mastercard.svg', WC_PLUGIN_FILE ),
+				'plugin'      => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'mastercard-merchant-cloud',
+				),
+				'links'       => array(
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
+						'url'   => 'https://woocommerce.com/products/mastercard-merchant-cloud/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+						'url'   => 'https://woocommerce.com/document/mastercard-merchant-cloud/',
+					),
+				),
+			),
+			self::MYPOS             => array(
+				'_type'  => self::TYPE_PSP,
+				'icon'   => plugins_url( 'assets/images/onboarding/icons/mypos.svg', WC_PLUGIN_FILE ),
+				'plugin' => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'mypos-virtual-for-woocommerce',
+				),
+			),
+			self::EVERGREEN         => array(
+				'_type'  => self::TYPE_PSP,
+				'icon'   => plugins_url( 'assets/images/onboarding/icons/evergreen.svg', WC_PLUGIN_FILE ),
+				'plugin' => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'evergreen-payments-northwest-gateway-wc',
 				),
 			),
 			self::GOCARDLESS        => array(
