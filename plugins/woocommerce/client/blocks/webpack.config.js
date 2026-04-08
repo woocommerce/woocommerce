@@ -17,9 +17,17 @@ const interactivityBlocksConfig = require( './bin/webpack-config-interactive-blo
 const interactivityAPIConfig = require( './bin/webpack-config-interactivity.js' );
 const dependencyDetectionConfig = require( './bin/webpack-config-dependency-detection.js' );
 
+const path = require( 'path' );
+
 // Only options shared between all configs should be defined here.
 const sharedConfig = {
 	mode: NODE_ENV,
+	cache: {
+		type: 'filesystem',
+		buildDependencies: {
+			config: [ __filename, path.resolve( __dirname, 'bin/webpack-configs.js' ) ],
+		},
+	},
 	performance: {
 		hints: false,
 	},

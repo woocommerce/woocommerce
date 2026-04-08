@@ -90,6 +90,13 @@ require( 'fs-extra' ).ensureSymlinkSync(
 
 const webpackConfig = {
 	mode: NODE_ENV,
+	cache: {
+		type: 'filesystem',
+		buildDependencies: {
+			config: [ __filename ],
+		},
+		name: `wc-admin-${ NODE_ENV }`,
+	},
 	entry: getEntryPoints(),
 	output: {
 		filename: ( data ) => {
