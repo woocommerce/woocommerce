@@ -124,28 +124,6 @@ class ProductsStore {
 	}
 
 	/**
-	 * Sync the current product and variation data into interactivity state.
-	 *
-	 * @return void
-	 */
-	private static function update_state(): void {
-		$state = array();
-
-		if ( ! empty( self::$products ) ) {
-			$state['products'] = self::$products;
-		}
-
-		if ( ! empty( self::$product_variations ) ) {
-			$state['productVariations'] = self::$product_variations;
-		}
-
-		if ( ! empty( $state ) ) {
-			self::register_getters();
-			wp_interactivity_state( self::$store_namespace, $state );
-		}
-	}
-
-	/**
 	 * Load a product into state.
 	 *
 	 * @param string $consent_statement The consent statement string.
@@ -164,7 +142,11 @@ class ProductsStore {
 		$response = Package::container()->get( Hydration::class )->get_rest_api_response_data( '/wc/store/v1/products/' . $product_id );
 
 		self::$products[ $product_id ] = $response['body'] ?? array();
-		self::update_state();
+		self::register_getters();
+		wp_interactivity_state(
+			self::$store_namespace,
+			array( 'products' => array( $product_id => self::$products[ $product_id ] ) )
+		);
 
 		return self::$products[ $product_id ];
 	}
@@ -217,7 +199,11 @@ class ProductsStore {
 		// Use array_replace instead of array_merge to preserve numeric keys.
 		$keyed_products = array_column( $purchasable_products, null, 'id' );
 		self::$products = array_replace( self::$products, $keyed_products );
-		self::update_state();
+		self::register_getters();
+		wp_interactivity_state(
+			self::$store_namespace,
+			array( 'products' => $keyed_products )
+		);
 
 		return $keyed_products;
 	}
@@ -253,7 +239,11 @@ class ProductsStore {
 		// Use array_replace instead of array_merge to preserve numeric keys.
 		$keyed_variations         = array_column( $response['body'], null, 'id' );
 		self::$product_variations = array_replace( self::$product_variations, $keyed_variations );
-		self::update_state();
+		self::register_getters();
+		wp_interactivity_state(
+			self::$store_namespace,
+			array( 'productVariations' => $keyed_variations )
+		);
 
 		return $keyed_variations;
 	}
