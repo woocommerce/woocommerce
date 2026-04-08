@@ -3257,6 +3257,7 @@ CREATE TABLE $orders_table_name (
 	KEY customer_id_billing_email (customer_id, billing_email({$composite_customer_id_email_length})),
 	KEY customer_id_status (customer_id, status),
 	KEY billing_email (billing_email($max_index_length)),
+	KEY transaction_id (transaction_id(20)),
 	KEY type_status_date (type, status, date_created_gmt),
 	KEY parent_order_id (parent_order_id),
 	KEY date_updated (date_updated_gmt)
