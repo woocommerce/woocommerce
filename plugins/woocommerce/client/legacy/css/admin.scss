@@ -4514,6 +4514,11 @@ table.wc_shipping {
 		}
 	}
 
+	.wc-shipping-invalid-price-message ~ #wc-shipping-advanced-costs-help-text {
+		display: block;
+		margin-top: 30px;
+	}
+
 	.wc-backbone-modal-back-inactive {
 		display: none;
 	}

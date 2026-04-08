@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix is_checkout/is_cart cache poisoning causing 404 on checkout endpoints when called before main query is ready

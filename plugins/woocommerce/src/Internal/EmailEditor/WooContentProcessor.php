@@ -49,18 +49,33 @@ class WooContentProcessor {
 
 	/**
 	 * Filter CSS for the email.
-	 * The CSS was from email editor was already inlined.
-	 * The method hookes to woocommerce_email_styles and removes CSS rules that we don't want to apply to the email.
+	 * The CSS from the email editor was already inlined.
+	 * The method hooks to woocommerce_email_styles and removes CSS rules that we don't want to apply to the email.
 	 *
+	 * Typography properties (font-size, font-weight, line-height, letter-spacing) are stripped
+	 * because the email editor theme controls all typography via theme.json. Leaving these in
+	 * the WooCommerce CSS would override the editor's heading sizes and weights.
+	 *
+	 * @since 10.8.0
 	 * @param string $css CSS.
 	 * @return string
 	 */
 	public function prepare_css( string $css ): string {
 		remove_filter( 'woocommerce_email_styles', array( $this, 'prepare_css' ) );
-		// Remove color and font-family declarations from WooCommerce CSS.
-		$css = preg_replace( '/color\s*:\s*[^;]+;/', '', $css );
-		$css = preg_replace( '/font-family\s*:\s*[^;]+;/', '', $css );
-		return $css;
+		// Remove typography declarations from WooCommerce CSS.
+		// The email editor theme.json controls all typography; WC CSS would override it.
+		return (string) preg_replace(
+			array(
+				'/color\s*:\s*[^;]+;/',
+				'/font-family\s*:\s*[^;]+;/',
+				'/font-size\s*:\s*[^;]+;/',
+				'/font-weight\s*:\s*[^;]+;/',
+				'/line-height\s*:\s*[^;]+;/',
+				'/letter-spacing\s*:\s*[^;]+;/',
+			),
+			'',
+			$css
+		);
 	}
 
 	/**
@@ -87,8 +102,72 @@ class WooContentProcessor {
 		if ( empty( $woo_content ) ) {
 			return '';
 		}
-		$css = $this->theme_controller->get_stylesheet_for_rendering();
+		$css  = $this->theme_controller->get_stylesheet_for_rendering();
+		$css .= $this->get_woo_content_styles();
 		return $this->css_inliner->from_html( $woo_content )->inline_css( $css )->render();
+	}
+
+	/**
+	 * Get CSS styles specific to WooCommerce email content.
+	 *
+	 * These styles target WooCommerce-specific HTML classes in the order details,
+	 * totals, and other email content areas. They are needed because the WooCommerce
+	 * email CSS selectors (prefixed with #body_content) do not match in the block
+	 * email editor template structure.
+	 *
+	 * @since 10.8.0
+	 * @return string CSS styles.
+	 */
+	private function get_woo_content_styles(): string {
+		return '
+			.email-order-details td,
+			.email-order-details th {
+				padding: 8px 12px;
+			}
+			.email-order-details td:first-child,
+			.email-order-details th:first-child {
+				padding-left: 0;
+			}
+			.email-order-details td:last-child,
+			.email-order-details th:last-child {
+				padding-right: 0;
+			}
+			.order-item-data td {
+				border: 0;
+				padding: 0;
+				vertical-align: top;
+			}
+			.order-item-data img {
+				border-radius: 4px;
+			}
+			.order-totals th,
+			.order-totals td {
+				font-weight: 400;
+				padding-bottom: 5px;
+				padding-top: 5px;
+			}
+			.order-totals-total th {
+				font-weight: 700;
+			}
+			.order-totals-total td {
+				font-weight: 700;
+				font-size: 20px;
+			}
+			h2.email-order-detail-heading {
+				font-size: 20px;
+				font-weight: 700;
+				line-height: 1.6;
+			}
+			h2.email-order-detail-heading span {
+				font-size: 14px;
+				font-weight: 400;
+				color: #757575;
+			}
+			.email-order-item-meta {
+				font-size: 14px;
+				line-height: 1.4;
+			}
+		';
 	}
 
 	/**
