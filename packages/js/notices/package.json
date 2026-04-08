@@ -91,7 +91,7 @@
 	},
 	"wireit": {
 		"build:project:cjs": {
-			"command": "tsc --project tsconfig-cjs.json --noCheck",
+			"command": "bash ../../../tools/esbuild-cjs.sh",
 			"clean": "if-file-deleted",
 			"files": [
 				"tsconfig-cjs.json",

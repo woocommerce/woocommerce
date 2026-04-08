@@ -54,6 +54,7 @@ Wireit caches outputs and skips unchanged tasks, so **second builds are fast**. 
 2. **Webpack 5 filesystem cache for admin + blocks** (87→56s warm): Persists module graph across builds. Cold builds add ~14s, warm saves ~31s
 3. **Add --noCheck to ESM builds** (56→35s): ESM was doing full type checking while CJS had --noCheck. 24 packages updated
 4. **Fix package webpack cache logic** (35→34s): Cache type was inverted (memory in prod, filesystem in dev). Fixed to always filesystem
+5. **Disable ProgressBarPlugin in production builds** (34s stable): Removes unnecessary console output and chalk formatting in 9 blocks webpack configs
 
 ### Dead Ends
 - tsc --incremental: Incompatible with clean:build (stale tsbuildinfo)
@@ -67,10 +68,16 @@ Wireit caches outputs and skips unchanged tasks, so **second builds are fast**. 
 - Disable concatenateModules: Cached, no warm benefit, larger bundles
 
 ### Additional Dead Ends (post-34s plateau)
-- Remove wireit dependencies from tsc builds: No improvement, tsc isn't the bottleneck with warm cache
+- Remove wireit dependencies from tsc builds: No improvement, tsc isn't the bottleneck
 - Filter build to plugin deps only: Worse cold, same warm
 - V8 semi-space tuning: Too much memory for 50+ processes
 - Reduce webpack parallelism/concatenateModules: All cached
+- Split ESM into JS-only + types: 24 extra processes worse than per-task savings
+- Move declarations ESM→CJS: net zero on critical path
+- WIREIT_CACHE=none: same perf, breaks incremental builds
+- --reporter=append-only: worse performance
+- tsc --build mode: same speed as --project --noCheck
+- ProgressBarPlugin removal: marginal but keeps builds at 34s floor consistently
 
 ### Key Insights
 - With warm webpack cache, all webpack config optimizations are irrelevant (cached)
