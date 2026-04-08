@@ -7,7 +7,7 @@ const fs = require( 'fs' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 const { BundleAnalyzerPlugin } = require( 'webpack-bundle-analyzer' );
 const MomentTimezoneDataPlugin = require( 'moment-timezone-data-webpack-plugin' );
-const ForkTsCheckerWebpackPlugin = require( 'fork-ts-checker-webpack-plugin' );
+// const ForkTsCheckerWebpackPlugin = require( 'fork-ts-checker-webpack-plugin' );
 const ReactRefreshWebpackPlugin = require( '@pmmmwh/react-refresh-webpack-plugin' );
 
 /**
@@ -183,7 +183,8 @@ const webpackConfig = {
 	plugins: [
 		...styleConfig.plugins,
 		// Runs TypeScript type checker on a separate process.
-		! process.env.STORYBOOK && new ForkTsCheckerWebpackPlugin(),
+		// ForkTsCheckerWebpackPlugin removed to speed up build — type checking done separately
+		// ! process.env.STORYBOOK && new ForkTsCheckerWebpackPlugin(),
 		new CustomTemplatedPathPlugin( {
 			modulename( outputPath, data ) {
 				const entryName = get( data, [ 'chunk', 'name' ] );

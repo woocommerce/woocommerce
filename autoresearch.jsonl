@@ -1,1 +1,2 @@
 {"type":"config","name":"WooCommerce pnpm build speed optimization","metricName":"build_seconds","metricUnit":"s","bestDirection":"lower"}
+{"run":1,"commit":"0acb244","metric":95,"metrics":{},"status":"keep","description":"Baseline: clean build takes 95s","timestamp":1775651272884,"segment":0,"confidence":null,"iterationTokens":348,"asi":{"hypothesis":"baseline measurement","build_seconds":95,"note":"Full clean build with wireit cache cleared. Uses webpack for admin+blocks, tsc for ~25 packages, grunt for legacy."}}
