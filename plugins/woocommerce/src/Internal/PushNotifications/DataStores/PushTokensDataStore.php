@@ -25,10 +25,10 @@ use WP_Query;
 class PushTokensDataStore {
 	/**
 	 * In-memory cache for get_tokens_for_roles() results, keyed by the
-	 * comma-joined role list. Avoids repeated DB queries within the same
-	 * PHP request.
+	 * comma-joined role list (with optional pagination suffix). Avoids
+	 * repeated DB queries within the same PHP request.
 	 *
-	 * @var array<string, PushToken[]>
+	 * @var array<string, PushToken[]|array{tokens: PushToken[], total: int, total_pages: int}>
 	 */
 	private array $tokens_by_roles_cache = array();
 
@@ -326,9 +326,16 @@ class PushTokensDataStore {
 	 * @since 10.7.0
 	 */
 	public function get_tokens_for_roles( array $roles, ?int $page = null, ?int $per_page = null ) {
-		$paginate     = null !== $page && null !== $per_page;
-		$cache_key    = $paginate ? implode( ',', $roles ) . ":$page:$per_page" : implode( ',', $roles );
-		$empty_result = $paginate ? array( 'tokens' => array(), 'total' => 0, 'total_pages' => 0 ) : array();
+		$paginate  = null !== $page && null !== $per_page;
+		$cache_key = $paginate ? implode( ',', $roles ) . ":$page:$per_page" : implode( ',', $roles );
+
+		$empty_result = $paginate
+			? array(
+				'tokens'      => array(),
+				'total'       => 0,
+				'total_pages' => 0,
+			)
+			: array();
 
 		if ( empty( $roles ) ) {
 			return $empty_result;
@@ -399,9 +406,9 @@ class PushTokensDataStore {
 
 		$result = $paginate
 			? array(
-				'tokens' => $tokens,
-				'total' => (int) $query->found_posts,
-				'total_pages' => (int) $query->max_num_pages
+				'tokens'      => $tokens,
+				'total'       => (int) $query->found_posts,
+				'total_pages' => (int) $query->max_num_pages,
 			)
 			: $tokens;
 
