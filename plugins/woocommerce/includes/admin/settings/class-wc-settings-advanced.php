@@ -57,7 +57,6 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 		}
 
 		$sections['webhooks']        = __( 'Webhooks', 'woocommerce' );
-		$sections['legacy_api']      = __( 'Legacy API', 'woocommerce' );
 		$sections['woocommerce_com'] = __( 'WooCommerce.com', 'woocommerce' );
 
 		if ( FeaturesUtil::feature_is_enabled( 'blueprint' ) ) {
@@ -397,53 +396,6 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 			);
 
 		return apply_filters( 'woocommerce_com_integration_settings', $settings );
-	}
-
-	/**
-	 * Get settings for the legacy API section.
-	 *
-	 * @return array
-	 */
-	protected function get_settings_for_legacy_api_section() {
-		$legacy_api_setting_desc =
-			'yes' === get_option( 'woocommerce_api_enabled' ) ?
-			__( 'The legacy REST API is enabled', 'woocommerce' ) :
-			__( 'The legacy REST API is NOT enabled', 'woocommerce' );
-
-		$legacy_api_setting_tip =
-			WC()->legacy_rest_api_is_available() ?
-			__( 'ℹ️️ The WooCommerce Legacy REST API extension is installed and active.', 'woocommerce' ) :
-			sprintf(
-				/* translators: placeholders are URLs */
-				__( '⚠️ The WooCommerce Legacy REST API has been moved to <a target=”_blank” href="%1$s">a dedicated extension</a>. <b><a target=”_blank” href="%2$s">Learn more about this change</a></b>', 'woocommerce' ),
-				'https://wordpress.org/plugins/woocommerce-legacy-rest-api/',
-				'https://developer.woocommerce.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/'
-			);
-
-		$settings =
-			array(
-				array(
-					'title' => '',
-					'type'  => 'title',
-					'desc'  => '',
-					'id'    => 'legacy_api_options',
-				),
-				array(
-					'title'    => __( 'Legacy API', 'woocommerce' ),
-					'desc'     => $legacy_api_setting_desc,
-					'id'       => 'woocommerce_api_enabled',
-					'type'     => 'checkbox',
-					'default'  => 'no',
-					'disabled' => true,
-					'desc_tip' => $legacy_api_setting_tip,
-				),
-				array(
-					'type' => 'sectionend',
-					'id'   => 'legacy_api_options',
-				),
-			);
-
-		return apply_filters( 'woocommerce_settings_rest_api', $settings );
 	}
 
 	/**

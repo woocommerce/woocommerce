@@ -50,55 +50,6 @@ class WC_Admin_Tests_API_Plugins extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that installing a valid plugin works.
-	 */
-	public function test_install_plugin() {
-		wp_set_current_user( $this->user );
-
-		$request = new WP_REST_Request( 'POST', $this->endpoint . '/install' );
-		$request->set_query_params(
-			array(
-				'plugins' => 'woocommerce-legacy-rest-api',
-			)
-		);
-		$response = $this->server->dispatch( $request );
-
-		// TODO: This test should be skipped if WordPress.org's plugins API endpoint cannot be reached.
-
-		$data    = $response->get_data();
-		$plugins = get_plugins();
-
-		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( array( 'woocommerce-legacy-rest-api' ), $data['data']['installed'] );
-		$this->assertEquals( true, $data['success'] );
-		$this->assertArrayHasKey( 'woocommerce-legacy-rest-api/woocommerce-legacy-rest-api.php', $plugins );
-	}
-
-	/**
-	 * Test that scheduling a plugin install works.
-	 */
-	public function test_install_plugin_async() {
-		wp_set_current_user( $this->user );
-
-		$request = new WP_REST_Request( 'POST', $this->endpoint . '/install' );
-		$request->set_query_params(
-			array(
-				'async'   => true,
-				'plugins' => 'woocommerce-legacy-rest-api',
-			)
-		);
-		$response = $this->server->dispatch( $request );
-
-		// TODO: This test should be skipped if WordPress.org's plugins API endpoint cannot be reached.
-
-		$data    = $response->get_data();
-		$plugins = get_plugins();
-
-		$this->assertEquals( 200, $response->get_status() );
-		$this->assertArrayHasKey( 'job_id', $data['data'] );
-	}
-
-	/**
 	 * Test that installing with invalid params fails.
 	 */
 	public function test_install_invalid_plugins_param() {

@@ -574,12 +574,6 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 					'context'     => array( 'view' ),
 					'readonly'    => true,
 					'properties'  => array(
-						'api_enabled'                    => array(
-							'description' => __( 'Legacy REST API enabled?', 'woocommerce' ),
-							'type'        => 'boolean',
-							'context'     => array( 'view' ),
-							'readonly'    => true,
-						),
 						'force_ssl'                      => array(
 							'description' => __( 'SSL forced?', 'woocommerce' ),
 							'type'        => 'boolean',
@@ -1470,7 +1464,6 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 
 		// Return array of useful settings for debugging.
 		return array(
-			'api_enabled'                    => 'yes' === get_option( 'woocommerce_api_enabled' ),
 			'force_ssl'                      => 'yes' === get_option( 'woocommerce_force_ssl_checkout' ),
 			'currency'                       => get_woocommerce_currency(),
 			'currency_symbol'                => get_woocommerce_currency_symbol(),
