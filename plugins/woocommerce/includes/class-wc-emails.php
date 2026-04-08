@@ -393,6 +393,10 @@ class WC_Emails {
 	 * @return string       Email footer text with any replacements done.
 	 */
 	public function replace_placeholders( $text ) {
+		if ( ! is_string( $text ) ) {
+			$text = is_scalar( $text ) ? (string) $text : '';
+		}
+
 		$domain = wp_parse_url( home_url(), PHP_URL_HOST );
 
 		return str_replace(
