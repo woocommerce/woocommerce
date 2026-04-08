@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Lazy-load _used_by post meta in WC_Coupon to avoid loading all usage records into memory on construction.

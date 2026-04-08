@@ -1257,4 +1257,112 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$expected_final_cogs = $expected_order_cogs + $expected_refund_cogs;
 		$this->assertEquals( $expected_final_cogs, $order->get_cogs_total_value(), 'Order COGS should be reduced by refund amount' );
 	}
+
+	/**
+	 * @testdox CPT cache priming populates refund total and tax caches with correct values.
+	 */
+	public function test_prime_caches_for_orders_primes_refund_totals(): void {
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate'          => '20',
+				'tax_rate_name'     => 'tax',
+				'tax_rate_order'    => '1',
+				'tax_rate_shipping' => '1',
+			)
+		);
+
+		$rate = new WC_Shipping_Rate( 'flat_rate_shipping', 'Flat rate shipping', '10', array(), 'flat_rate' );
+		$item = new WC_Order_Item_Shipping();
+		$item->set_props(
+			array(
+				'method_title' => $rate->label,
+				'method_id'    => $rate->id,
+				'total'        => wc_format_decimal( $rate->cost ),
+				'taxes'        => $rate->taxes,
+			)
+		);
+
+		$order = WC_Helper_Order::create_order();
+		$order->add_item( $item );
+		$order->calculate_totals();
+		$order->save();
+
+		$product_item_id  = current( $order->get_items() )->get_id();
+		$shipping_item_id = current( $order->get_items( 'shipping' ) )->get_id();
+
+		wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					$product_item_id  => array(
+						'id'           => $product_item_id,
+						'qty'          => 1,
+						'refund_total' => 10,
+						'refund_tax'   => array( 1 => 2 ),
+					),
+					$shipping_item_id => array(
+						'id'           => $shipping_item_id,
+						'qty'          => 1,
+						'refund_total' => 10,
+						'refund_tax'   => array( 1 => 3 ),
+					),
+				),
+			)
+		);
+
+		wp_cache_flush();
+		WC_Cache_Helper::invalidate_cache_group( 'orders' );
+
+		$data_store = WC_Data_Store::load( 'order' );
+		$data_store->prime_caches_for_orders(
+			array( $order->get_id() ),
+			array(
+				'fields'    => 'all',
+				'post_type' => 'shop_order',
+			)
+		);
+
+		$cache_prefix = WC_Cache_Helper::get_cache_prefix( 'orders' );
+		$order_id     = $order->get_id();
+
+		$cached_total_refunded = wp_cache_get( $cache_prefix . 'total_refunded' . $order_id, 'orders' );
+		$cached_tax_refunded   = wp_cache_get( $cache_prefix . 'total_tax_refunded' . $order_id, 'orders' );
+
+		$this->assertNotFalse( $cached_total_refunded, 'Total refunded should be cached after priming' );
+		$this->assertNotFalse( $cached_tax_refunded, 'Total tax refunded should be cached after priming' );
+		$this->assertIsFloat( $cached_total_refunded, 'Cached total refunded should be a float' );
+		$this->assertEquals( 5.0, $cached_tax_refunded, 'Cached tax refunded should equal sum of product tax (2) + shipping tax (3)' );
+	}
+
+	/**
+	 * @testdox CPT cache priming populates order item meta caches so item access does not trigger additional queries.
+	 */
+	public function test_prime_caches_for_orders_primes_item_meta(): void {
+		$order = WC_Helper_Order::create_order();
+
+		wp_cache_flush();
+		WC_Cache_Helper::invalidate_cache_group( 'orders' );
+
+		$data_store = WC_Data_Store::load( 'order' );
+		$data_store->prime_caches_for_orders(
+			array( $order->get_id() ),
+			array(
+				'fields'    => 'all',
+				'post_type' => 'shop_order',
+			)
+		);
+
+		$reloaded_order = wc_get_order( $order->get_id() );
+		$items          = $reloaded_order->get_items();
+
+		$this->assertNotEmpty( $items, 'Order should have line items' );
+
+		foreach ( $items as $item ) {
+			$this->assertGreaterThan( 0, $item->get_product_id(), 'Item should have a product ID from cached meta' );
+		}
+	}
 }

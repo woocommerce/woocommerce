@@ -6,12 +6,14 @@ namespace Automattic\WooCommerce\Internal\PushNotifications\Services;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\PushNotifications\Dispatchers\InternalNotificationDispatcher;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
+use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
 
 /**
  * Store that collects notifications during a request and dispatches them all on
- * on shutdown. Should be accessed from the container (`wc_get_container`) to
- * ensure store is shared by all usage.
+ * shutdown via the InternalNotificationDispatcher. Should be accessed from the
+ * container (`wc_get_container`) to ensure store is shared by all usage.
  *
  * Notifications are keyed by `{type}_{resource_id}` (with blog ID from
  * `get_current_blog_id()`) to prevent duplicates within a single request.
@@ -27,6 +29,13 @@ class PendingNotificationStore {
 	private bool $enabled = false;
 
 	/**
+	 * The dispatcher that will be used to send notifications on shutdown.
+	 *
+	 * @var InternalNotificationDispatcher
+	 */
+	private InternalNotificationDispatcher $dispatcher;
+
+	/**
 	 * Pending notifications keyed by identifier.
 	 *
 	 * @var array<string, Notification>
@@ -39,6 +48,19 @@ class PendingNotificationStore {
 	 * @var bool
 	 */
 	private bool $shutdown_registered = false;
+
+	/**
+	 * Initialize dependencies.
+	 *
+	 * @internal
+	 *
+	 * @param InternalNotificationDispatcher $dispatcher The dispatcher to use on shutdown.
+	 *
+	 * @since 10.7.0
+	 */
+	final public function init( InternalNotificationDispatcher $dispatcher ): void {
+		$this->dispatcher = $dispatcher;
+	}
 
 	/**
 	 * Enables the store so it accepts notifications.
@@ -78,6 +100,8 @@ class PendingNotificationStore {
 
 		$this->pending[ $key ] = $notification;
 
+		$this->schedule_safety_net( $notification );
+
 		if ( ! $this->shutdown_registered ) {
 			add_action( 'shutdown', array( $this, 'dispatch_all' ) );
 			$this->shutdown_registered = true;
@@ -85,10 +109,39 @@ class PendingNotificationStore {
 	}
 
 	/**
-	 * Dispatches all pending notifications by firing an action hook.
+	 * Schedules an ActionScheduler safety net job for the notification.
 	 *
-	 * Called on shutdown. Fires the `wc_push_notifications_dispatch` action
-	 * with the array of pending notifications, then clears the store.
+	 * If the shutdown hook never fires (OOM, SIGKILL, etc.), this job
+	 * guarantees the notification is still processed.
+	 *
+	 * @param Notification $notification The notification to schedule.
+	 * @return void
+	 *
+	 * @since 10.7.0
+	 */
+	private function schedule_safety_net( Notification $notification ): void {
+		$args = array(
+			'type'        => $notification->get_type(),
+			'resource_id' => $notification->get_resource_id(),
+		);
+
+		if ( as_has_scheduled_action( NotificationProcessor::SAFETY_NET_HOOK, $args, NotificationProcessor::ACTION_SCHEDULER_GROUP ) ) {
+			return;
+		}
+
+		as_schedule_single_action(
+			time() + NotificationProcessor::SAFETY_NET_DELAY,
+			NotificationProcessor::SAFETY_NET_HOOK,
+			$args,
+			NotificationProcessor::ACTION_SCHEDULER_GROUP
+		);
+	}
+
+	/**
+	 * Dispatches all pending notifications via InternalNotificationDispatcher.
+	 *
+	 * Called on shutdown. Sends all pending notifications through the
+	 * InternalNotificationDispatcher, then clears the store.
 	 *
 	 * @return void
 	 *
@@ -99,22 +152,8 @@ class PendingNotificationStore {
 			return;
 		}
 
-		$notifications = array_values( $this->pending );
+		$this->dispatcher->dispatch( array_values( $this->pending ) );
 
-		/**
-		 * Fires when pending push notifications are ready to be dispatched.
-		 *
-		 * @param Notification[] $notifications The notifications to dispatch.
-		 *
-		 * @since 10.7.0
-		 *
-		 * The call to dispatch the notifications will go here.
-		 */
-
-		/**
-		 * Store is single-use per request lifecycle, so disable it and clear
-		 * pending notifications.
-		 */
 		$this->enabled = false;
 		$this->pending = array();
 	}

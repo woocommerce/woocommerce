@@ -9,15 +9,20 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
-use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentUtils;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentUtils;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
 use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
 use Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
+use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Admin\API\Reports\StatsDataStoreTrait;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
+use stdClass;
 use WC_Order;
+use WC_Order_Refund;
+use Automattic\WooCommerce\Admin\Overrides\Order;
+use Automattic\WooCommerce\Admin\Overrides\OrderRefund;
 
 /**
  * API\Reports\Orders\Stats\DataStore.
@@ -501,6 +506,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			return -1;
 		}
 
+		/**
+		 * The order instance to be synchronized.
+		 *
+		 * @var false|Order|OrderRefund $order Order instance (Override classes registered via OrdersScheduler::init()).
+		 */
 		$order = wc_get_order( $post_id );
 		if ( ! $order ) {
 			return -1;
@@ -512,7 +522,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Update the database with stats data.
 	 *
-	 * @param WC_Order|WC_Order_Refund $order Order or refund to update row for.
+	 * @param Order|OrderRefund $order Order or refund to update row for.
 	 * @return int|bool Returns -1 if order won't be processed, or a boolean indicating processing success.
 	 */
 	public static function update( $order ) {
@@ -520,6 +530,13 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$table_name = self::get_db_table_name();
 
 		if ( ! $order->get_id() || ! $order->get_date_created() ) {
+			return -1;
+		}
+
+		// Exclude test orders (e.g., WCPay test mode) from analytics stats.
+		// Defense-in-depth: also checked in OrdersScheduler::import(), but
+		// update() can be called directly outside of the import flow.
+		if ( OrdersScheduler::is_test_order( $order ) ) {
 			return -1;
 		}
 
@@ -568,7 +585,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		 * Filters order stats data.
 		 *
 		 * @param array $data Data written to order stats lookup table.
-		 * @param WC_Order $order  Order object.
+		 * @param Order|OrderRefund $order  Order object.
 		 *
 		 * @since 4.0.0
 		 */
@@ -653,7 +670,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Get number of items sold among all orders.
 	 *
-	 * @param WC_Order $order WC_Order object.
+	 * @param WC_Order|WC_Order_Refund $order WC_Order or WC_Order_Refund object.
 	 * @return int
 	 */
 	protected static function get_num_items_sold( $order ) {
@@ -670,7 +687,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Get the net amount from an order without shipping, tax, or refunds.
 	 *
-	 * @param WC_Order $order WC_Order object.
+	 * @param WC_Order|WC_Order_Refund $order WC_Order or WC_Order_Refund object.
 	 * @return float
 	 */
 	protected static function get_net_total( $order ) {

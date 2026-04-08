@@ -1389,7 +1389,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 
 					$core_version     = WC_Admin_Status::get_file_version( WC()->plugin_path() . '/templates/' . $core_file );
 					$override_version = WC_Admin_Status::get_file_version( $override_file );
-					if ( $core_version && ( empty( $override_version ) || version_compare( $override_version, $core_version, '<' ) ) ) {
+					if ( $core_version && '' !== $override_version && version_compare( $override_version, $core_version, '<' ) ) {
 						if ( ! $outdated_templates ) {
 							$outdated_templates = true;
 						}

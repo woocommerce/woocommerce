@@ -26,9 +26,6 @@ export const metadata: BlockConfiguration = {
 		multiple: false,
 	},
 	example: {
-		attributes: {
-			isPreview: true,
-		},
 		viewportWidth: 800,
 	},
 };

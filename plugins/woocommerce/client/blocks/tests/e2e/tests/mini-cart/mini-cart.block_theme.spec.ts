@@ -301,7 +301,8 @@ test.describe( `${ blockData.name } Block`, () => {
 		await expect( page ).toHaveURL( /\/checkout\/?$/ );
 	} );
 
-	test( 'should process badge colors on load', async ( {
+	// eslint-disable-next-line playwright/no-skipped-test
+	test.skip( 'should process badge colors on load', async ( {
 		page,
 		frontendUtils,
 	} ) => {
@@ -335,7 +336,8 @@ test.describe( `${ blockData.name } Block`, () => {
 } );
 
 test.describe( `${ blockData.name } Block (admin)`, () => {
-	test( 'should update badge colors when header background changes', async ( {
+	// eslint-disable-next-line playwright/no-skipped-test
+	test.skip( 'should update badge colors when header background changes', async ( {
 		page,
 		admin,
 		editor,

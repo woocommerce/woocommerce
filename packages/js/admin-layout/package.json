@@ -61,6 +61,7 @@
 		"@types/react": "18.3.x",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-style-build": "workspace:*",
+		"@woocommerce/internal-ts-config": "workspace:*",
 		"@wordpress/browserslist-config": "next",
 		"css-loader": "6.11.x",
 		"eslint": "^8.55.0",
@@ -166,7 +167,10 @@
 				"node_modules/@woocommerce/eslint-plugin/rules",
 				"node_modules/@woocommerce/eslint-plugin/index.js",
 				"node_modules/@woocommerce/internal-style-build/index.js",
-				"node_modules/@woocommerce/internal-style-build/abstracts"
+				"node_modules/@woocommerce/internal-style-build/abstracts",
+				"node_modules/@woocommerce/internal-ts-config/tsconfig.json",
+				"node_modules/@woocommerce/internal-ts-config/tsconfig-cjs.json",
+				"node_modules/@woocommerce/internal-ts-config/types"
 			]
 		}
 	}

@@ -11,7 +11,7 @@ use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Internal\Admin\Analytics;
-use Automattic\WooCommerce\Internal\Fulfillments\Fulfillment;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
 
 /**
  * Class WC_Admin_Tests_Reports_Orders_Stats
@@ -6522,7 +6522,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		try {
 			// Enable fulfillments feature.
-			$controller = wc_get_container()->get( \Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsController::class );
+			$controller = wc_get_container()->get( \Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsController::class );
 			$controller->register();
 			$controller->initialize_fulfillments();
 
