@@ -53,7 +53,7 @@ echo "Copying package metadata..."
 cp "$PACKAGE_DIR/composer.json" "$DIST_DIR/"
 cp "$PACKAGE_DIR/package.json" "$DIST_DIR/"
 cp "$PACKAGE_DIR/CHANGELOG.md" "$DIST_DIR/"
-cp "$PACKAGE_DIR/license.txt" "$DIST_DIR/LICENSE.txt"
+cp "$PACKAGE_DIR/LICENSE.txt" "$DIST_DIR/LICENSE.txt"
 cp "$PACKAGE_DIR/SECURITY.md" "$DIST_DIR/"
 
 cp "$PACKAGE_DIR/.gitattributes" "$DIST_DIR/"
