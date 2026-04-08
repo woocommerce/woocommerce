@@ -131,6 +131,11 @@ class PushTokenRestController extends RestApiControllerBase {
 		$per_page = (int) $request->get_param( 'per_page' );
 
 		try {
+			/**
+			 * Paginated result from get_tokens_for_roles.
+			 *
+			 * @var array{tokens: PushToken[], total: int, total_pages: int} $result
+			 */
 			$result = wc_get_container()
 				->get( PushTokensDataStore::class )
 				->get_tokens_for_roles(
