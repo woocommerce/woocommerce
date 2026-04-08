@@ -5551,7 +5551,8 @@ img.help_tip {
 		object-fit: cover;
 	}
 
-	// Remove button — hidden by default, visible on hover
+	// Remove button — hidden by default, visible on hover/focus.
+	// 24x24px meets WCAG 2.5.5 (AA) while avoiding accidental clicks during drag.
 	.wc-product-images__remove {
 		position: absolute;
 		top: 6px;
@@ -5588,17 +5589,9 @@ img.help_tip {
 		}
 	}
 
-	// Smaller remove button on gallery thumbnails
 	.wc-product-images__image--gallery .wc-product-images__remove {
-		top: 2px;
-		right: 2px;
-		width: 20px;
-		height: 20px;
-
-		svg {
-			width: 20px;
-			height: 20px;
-		}
+		top: 0;
+		right: 0;
 	}
 
 	.wc-product-images__image:hover .wc-product-images__remove,
