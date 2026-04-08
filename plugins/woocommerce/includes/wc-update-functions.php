@@ -3459,3 +3459,39 @@ function wc_update_1080_migrate_analytics_import_option(): void {
 		delete_option( $legacy_option );
 	}
 }
+
+/**
+ * Slim the `meta_key_value` index on `wc_orders_meta` by removing the `meta_value` column.
+ *
+ * The original composite index `(meta_key(100), meta_value(82))` overlaps heavily with
+ * `order_id_meta_key_meta_value` and the `meta_value` prefix adds significant storage
+ * overhead with negligible selectivity benefit. All core queries that use this index
+ * filter primarily by `meta_key`.
+ *
+ * @since 10.8.0
+ *
+ * @return void
+ */
+function wc_update_1080_slim_orders_meta_key_index(): void {
+	global $wpdb;
+
+	$table_name = $wpdb->prefix . 'wc_orders_meta';
+	$index_name = 'meta_key_value';
+
+	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+	$index = $wpdb->get_row(
+		$wpdb->prepare(
+			'SHOW INDEX FROM ' . $table_name . ' WHERE Key_name = %s AND Column_name = %s',
+			$index_name,
+			'meta_value'
+		)
+	);
+	// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
+
+	if ( is_null( $index ) ) {
+		return;
+	}
+
+	// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	$wpdb->query( "ALTER TABLE {$table_name} DROP INDEX {$index_name}, ADD INDEX {$index_name} (meta_key(100))" );
+}

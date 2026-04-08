@@ -223,11 +223,9 @@ export default function ProductList( {
 			const { getPostType, canUser } = select( coreStore );
 			const postTypeData:
 				| { labels: Record< string, string > }
-				// @ts-expect-error Selector is not typed
 				| undefined = getPostType( postType );
 			return {
 				labels: postTypeData?.labels,
-				// @ts-expect-error Selector is not typed
 				canCreateRecord: canUser( 'create', {
 					kind: 'postType',
 					name: postType,

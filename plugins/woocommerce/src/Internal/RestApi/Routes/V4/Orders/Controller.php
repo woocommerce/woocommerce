@@ -323,6 +323,7 @@ class Controller extends AbstractController {
 			_prime_post_caches( $product_ids, true, true );
 		}
 
+
 		foreach ( $results['results'] as $result ) {
 			$items[] = $this->prepare_response_for_collection( $this->prepare_item_for_response( $result, $request ) );
 		}
