@@ -5489,143 +5489,224 @@ img.help_tip {
 	width: 100%;
 }
 
-#postimagediv {
+#woocommerce-product-images {
+	> .postbox-header > .hndle {
+		justify-content: flex-start;
+
+		> .woocommerce-help-tip {
+			margin: 0 10px;
+		}
+	}
+
 	.inside {
+		margin: 0;
 		padding: 0;
+	}
+
+	.wc-product-images__list {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
 		margin: 0;
+		padding: 12px;
 	}
 
-	p {
-		margin: 0;
-		padding: 10px;
-	}
-
-	.image-added-detail {
-		border-top: 1px solid #dcdcde;
-		background-color: #f6f7f7;
-		color: #7f8388;
-		font-size: 12px;
-		margin-top: 4px;
-
-		.dashicons {
-			font-size: 13px;
-			width: 13px;
-			height: 13px;
-			margin: 3px 3px 0 0;
-		}
-
-		a {
-			text-decoration: none;
-		}
-	}
-
-	img {
+	// Featured (first) image — full width
+	.wc-product-images__image.wc-product-images__image--featured {
+		position: relative;
+		width: 100%;
+		aspect-ratio: 1 / 1;
 		border: 1px solid #d5d5d5;
-		max-width: 100%;
-	}
-}
 
-#woocommerce-product-images .inside {
-	margin: 0;
-	padding: 0;
-
-	.add_product_images {
-		padding: 0 12px 12px;
+		@include border-radius(4px);
+		overflow: hidden;
+		cursor: move;
+		box-sizing: border-box;
 	}
 
-	#product_images_container {
-		padding: 0 0 0 9px;
+	.wc-product-images__image--featured img {
+		display: block;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
 
-		ul {
-			@include clearfix();
-			margin: 0;
-			padding: 0;
+	// Gallery (small) images — 3 per row
+	.wc-product-images__image.wc-product-images__image--gallery {
+		position: relative;
+		width: calc((100% - 16px) / 3);
+		aspect-ratio: 1 / 1;
+		border: 1px solid #d5d5d5;
 
-			li.image,
-			li.add,
-			li.wc-metabox-sortable-placeholder {
-				width: 80px;
-				float: left;
-				cursor: move;
-				border: 1px solid #d5d5d5;
-				margin: 9px 9px 0 0;
-				background: #f7f7f7;
+		@include border-radius(4px);
+		overflow: hidden;
+		cursor: move;
+		box-sizing: border-box;
+	}
 
-				@include border-radius(2px);
-				position: relative;
-				box-sizing: border-box;
+	.wc-product-images__image--gallery img {
+		display: block;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
 
-				img {
-					width: 100%;
-					height: auto;
-					display: block;
-				}
-			}
+	// Remove button — hidden by default, visible on hover
+	.wc-product-images__remove {
+		position: absolute;
+		top: 6px;
+		right: 6px;
+		width: 24px;
+		height: 24px;
+		padding: 0;
+		border: none;
+		border-radius: 50%;
+		background: none;
+		cursor: pointer;
+		opacity: 0;
+		transition: opacity 0.15s ease;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 
-			li.wc-metabox-sortable-placeholder {
-				border: 3px dashed #ddd;
-				position: relative;
+		&::before {
+			content: '';
+			position: absolute;
+			width: 14px;
+			height: 14px;
+			border-radius: 50%;
+			background: #fff;
+			z-index: 0;
+		}
 
-				&::after {
-					@include icon_dashicons("\f161");
-					font-size: 2.618em;
-					line-height: 72px;
-					color: #ddd;
-				}
-			}
+		svg {
+			position: relative;
+			z-index: 1;
+			width: 24px;
+			height: 24px;
+			fill: #2c3338;
+		}
+	}
 
-			ul.actions {
-				position: absolute;
-				top: -8px;
-				right: -8px;
-				padding: 2px;
-				display: none;
+	// Smaller remove button on gallery thumbnails
+	.wc-product-images__image--gallery .wc-product-images__remove {
+		top: 2px;
+		right: 2px;
+		width: 20px;
+		height: 20px;
 
-				@media (max-width: 768px) {
-					display: block;
-				}
+		svg {
+			width: 20px;
+			height: 20px;
+		}
+	}
 
-				li {
-					float: right;
-					margin: 0 0 0 2px;
+	.wc-product-images__image:hover .wc-product-images__remove,
+	.wc-product-images__image:focus-within .wc-product-images__remove {
+		opacity: 1;
+	}
 
-					a {
-						width: 1em;
-						height: 1em;
-						margin: 0;
-						height: 0;
-						display: block;
-						overflow: hidden;
+	.wc-product-images__image:focus {
+		box-shadow: 0 0 0 var(--wp-admin-border-width-focus, 2px) var(--wp-admin-theme-color, #3858e9);
+		outline: none;
+	}
 
-						&.tips {
-							cursor: pointer;
-						}
-					}
+	// Hide original item while dragging
+	.wc-product-images__image--dragging {
+		opacity: 0 !important;
+		height: 0 !important;
+		min-height: 0 !important;
+		padding: 0 !important;
+		margin: 0 !important;
+		border: none !important;
+		overflow: hidden !important;
+	}
 
-					a.delete {
-						@include ir();
-						font-size: 1.4em;
+	// Drag placeholder
+	.wc-product-images__placeholder {
+		border: 1px dashed #757575;
 
-						&::before {
-							@include icon_dashicons("\f153");
-							color: #999;
-							background: #fff;
-							border-radius: 50%;
-							height: 1em;
-							width: 1em;
-							line-height: 1em;
-						}
+		@include border-radius(4px);
+		background: color-mix(in srgb, var(--wp-admin-theme-color, #3858e9) 4%, transparent);
+		box-sizing: border-box;
+	}
 
-						&:hover::before {
-							color: $red;
-						}
-					}
-				}
-			}
+	.wc-product-images__placeholder--featured {
+		width: 100% !important;
+	}
 
-			li:hover ul.actions {
-				display: block;
-			}
+	// Add-slot — always at end of list
+	.wc-product-images__add-slot {
+		border: 1px dashed #757575;
+
+		@include border-radius(4px);
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		box-sizing: border-box;
+		color: var(--wp-admin-theme-color, #3858e9);
+		transition: border-color 0.15s ease, background-color 0.15s ease;
+
+		&:hover {
+			border-color: var(--wp-admin-theme-color-darker-20, #135e96);
+			color: var(--wp-admin-theme-color-darker-20, #135e96);
+			background: color-mix(in srgb, var(--wp-admin-theme-color, #3858e9) 4%, transparent);
+		}
+
+		&:focus-visible {
+			box-shadow: 0 0 0 var(--wp-admin-border-width-focus, 2px) var(--wp-admin-theme-color, #3858e9);
+			outline: none;
+		}
+
+		svg {
+			fill: currentColor;
+			display: none;
+		}
+	}
+
+	// Empty state — full-width featured-size slot
+	.wc-product-images__add-slot--featured {
+		width: 100%;
+		aspect-ratio: 1 / 1;
+		flex-direction: column;
+		gap: 4px;
+	}
+
+	// Label only visible in empty state
+	.wc-product-images__add-label {
+		display: none;
+	}
+
+	.wc-product-images__add-slot--featured .wc-product-images__add-label {
+		display: block;
+		font-size: 13px;
+		line-height: 1.4;
+		color: inherit;
+	}
+
+	// Gallery-size slot when images exist
+	.wc-product-images__add-slot--gallery {
+		width: calc((100% - 16px) / 3);
+		aspect-ratio: 1 / 1;
+
+		.wc-product-images__add-label {
+			display: none;
+		}
+
+		svg {
+			display: block;
+			width: 20px;
+			height: 20px;
+		}
+	}
+
+	// Drag helper shadow
+	.wc-product-images__image.ui-sortable-helper {
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+
+		.wc-product-images__remove {
+			display: none;
 		}
 	}
 }

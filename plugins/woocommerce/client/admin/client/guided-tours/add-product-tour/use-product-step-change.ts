@@ -50,8 +50,9 @@ const getProductShortDescriptionValue = (
 
 const getProductImageValue = () => {
 	return (
-		document.querySelector< HTMLImageElement >( '#set-post-thumbnail img' )
-			?.src || ''
+		document.querySelector< HTMLImageElement >(
+			'#wc-product-images__list .wc-product-images__image:first-child img'
+		)?.src || ''
 	);
 };
 

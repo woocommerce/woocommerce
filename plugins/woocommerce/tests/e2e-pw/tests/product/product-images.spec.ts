@@ -13,7 +13,7 @@ import { ADMIN_STATE_PATH } from '../../playwright.config';
 async function addImageFromLibrary(
 	page: Page,
 	imageName: string,
-	actionButtonName: string
+	actionButtonName: string = 'Add to product'
 ) {
 	await page.getByRole( 'tab', { name: 'Media Library' } ).click();
 	await page.getByRole( 'searchbox', { name: 'Search' } ).fill( imageName );
@@ -98,19 +98,13 @@ test.describe( 'Products > Product Images', () => {
 		} );
 
 		await test.step( 'Set product image', async () => {
-			// TODO: WP 7.0 compat - WP 7.0 changed the featured image metabox link
-			// to a button. Simplify when WP 7.0 is the minimum supported version.
-			await page
-				.getByRole( 'link', { name: 'Set product image' } )
-				.or( page.getByRole( 'button', { name: 'Set product image' } ) )
-				.click();
-			await addImageFromLibrary( page, 'image-01', 'Set product image' );
+			await page.locator( '#wc-product-images__add-slot' ).click();
+			await addImageFromLibrary( page, 'image-01' );
 
-			// Wait for the product image thumbnail to be updated.
-			// Clicking the "Update" button before this happens will not update the image.
-			// Use src* (contains) instead of src$ (ends with) to match duplicated images, like image-01-1.png
 			await expect(
-				page.locator( '#set-post-thumbnail img[src*="image-01"]' )
+				page.locator(
+					'.wc-product-images__image--featured img[src*="image-01"]'
+				)
 			).toBeVisible();
 
 			await page
@@ -120,10 +114,8 @@ test.describe( 'Products > Product Images', () => {
 		} );
 
 		await test.step( 'Verify product image was set', async () => {
-			// Verify product was updated
 			await expect( page.getByText( 'Product updated.' ) ).toBeVisible();
 
-			// Verify image in store frontend
 			await page.goto( product.permalink );
 			await expect(
 				page.locator( `img.wp-post-image[src*="image-01"]` )
@@ -141,15 +133,23 @@ test.describe( 'Products > Product Images', () => {
 			);
 		} );
 
-		await test.step( 'Update product image', async () => {
-			await page.locator( '#set-post-thumbnail' ).click();
-			await addImageFromLibrary( page, 'image-02', 'Set product image' );
+		await test.step( 'Add a new image and remove the old one', async () => {
+			await page.locator( '#wc-product-images__add-slot' ).click();
+			await addImageFromLibrary( page, 'image-02' );
 
-			// Wait for the product image thumbnail to be updated.
-			// Clicking the "Update" button before this happens will not update the image.
-			// Use src* (contains) instead of src$ (ends with) to match duplicated images, like image-01-1.png
+			// Remove the original featured image.
+			await page
+				.locator( '.wc-product-images__image--featured' )
+				.hover();
+			await page
+				.locator( '.wc-product-images__image--featured .wc-product-images__remove' )
+				.click();
+
+			// The new image should now be featured.
 			await expect(
-				page.locator( '#set-post-thumbnail img[src*="image-02"]' )
+				page.locator(
+					'.wc-product-images__image--featured img[src*="image-02"]'
+				)
 			).toBeVisible();
 
 			await page
@@ -158,11 +158,9 @@ test.describe( 'Products > Product Images', () => {
 				.click();
 		} );
 
-		await test.step( 'Verify product image was set', async () => {
-			// Verify product was updated
+		await test.step( 'Verify product image was updated', async () => {
 			await expect( page.getByText( 'Product updated.' ) ).toBeVisible();
 
-			// Verify image in store frontend
 			await page.goto( productWithImage.permalink );
 			await expect(
 				page.locator( `img.wp-post-image[src*="image-02"]` )
@@ -181,21 +179,16 @@ test.describe( 'Products > Product Images', () => {
 		} );
 
 		await test.step( 'Remove product image', async () => {
-			// TODO: WP 7.0 compat - WP 7.0 changed the featured image metabox link
-			// to a button. Simplify when WP 7.0 is the minimum supported version.
 			await page
-				.getByRole( 'link', { name: 'Remove product image' } )
-				.or(
-					page.getByRole( 'button', {
-						name: 'Remove product image',
-					} )
-				)
+				.locator( '.wc-product-images__image--featured' )
+				.hover();
+			await page
+				.locator( '.wc-product-images__image--featured .wc-product-images__remove' )
 				.click();
+
 			await expect(
-				page.getByRole( 'link', { name: 'Set product image' } ).or(
-					page.getByRole( 'button', {
-						name: 'Set product image',
-					} )
+				page.locator(
+					'.wc-product-images__add-slot--featured'
 				)
 			).toBeVisible();
 
@@ -206,10 +199,8 @@ test.describe( 'Products > Product Images', () => {
 		} );
 
 		await test.step( 'Verify product image was removed', async () => {
-			// Verify product was updated
 			await expect( page.getByText( 'Product updated.' ) ).toBeVisible();
 
-			// Verify image in store frontend
 			await page.goto( productWithImage.permalink );
 			await expect(
 				page.getByAltText( 'Awaiting product image' )
@@ -230,27 +221,17 @@ test.describe( 'Products > Product Images', () => {
 		} );
 
 		await test.step( 'Add product gallery images', async () => {
-			const imageSelector = '#product_images_container img';
+			const imageSelector = '.wc-product-images__image';
 			let initialImagesCount = await page
 				.locator( imageSelector )
 				.count();
 
 			for ( const image of images ) {
 				await page
-					.getByRole( 'link', {
-						name: 'Add product gallery images',
-					} )
+					.locator( '#wc-product-images__add-slot' )
 					.click();
-				const dataId = await addImageFromLibrary(
-					page,
-					image,
-					'Add to gallery'
-				);
+				await addImageFromLibrary( page, image );
 
-				await expect(
-					page.locator( `li[data-attachment_id="${ dataId }"]` ),
-					'thumbnail should be visible'
-				).toBeVisible();
 				const currentImagesCount = await page
 					.locator( imageSelector )
 					.count();
@@ -268,14 +249,13 @@ test.describe( 'Products > Product Images', () => {
 		} );
 
 		await test.step( 'Verify product gallery', async () => {
-			// Verify gallery in store frontend
 			await page.goto( productWithImage.permalink );
 			await expect(
 				page
 					.locator( `.woocommerce-product-gallery ol img` )
 					.nth( images.length ),
 				'all gallery images should be visible'
-			).toBeVisible(); // +1 for the featured image
+			).toBeVisible();
 		} );
 	} );
 
@@ -291,18 +271,18 @@ test.describe( 'Products > Product Images', () => {
 			);
 		} );
 
-		await test.step( 'Remove images from product gallery', async () => {
-			const imageSelector = '#product_images_container img';
+		await test.step( 'Remove an image from product gallery', async () => {
+			const imageSelector = '.wc-product-images__image';
 			imagesCount = await page.locator( imageSelector ).count();
 
-			await page
-				.getByRole( 'link', {
-					name: 'Add product gallery images',
-				} )
-				.scrollIntoViewIfNeeded();
-
-			await page.locator( imageSelector ).first().hover();
-			await page.getByRole( 'link', { name: ' Delete' } ).click();
+			// Remove the first gallery image (second image overall).
+			const galleryImage = page
+				.locator( '.wc-product-images__image--gallery' )
+				.first();
+			await galleryImage.hover();
+			await galleryImage
+				.locator( '.wc-product-images__remove' )
+				.click();
 
 			await expect(
 				await page.locator( imageSelector ).count(),
@@ -316,7 +296,6 @@ test.describe( 'Products > Product Images', () => {
 		} );
 
 		await test.step( 'Verify product gallery', async () => {
-			// Verify gallery in store frontend
 			await page.goto( productWithGallery.permalink );
 			const selector = `.woocommerce-product-gallery ol img`;
 			await expect(

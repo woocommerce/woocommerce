@@ -118,18 +118,18 @@ const getTourConfig = ( {
 		},
 		{
 			referenceElements: {
-				desktop: '#postimagediv',
+				desktop: ‘#woocommerce-product-images’,
 			},
 			focusElement: {
-				desktop: '#set-post-thumbnail',
+				desktop: ‘#wc-product-images__add-slot’,
 			},
 			meta: {
-				name: 'product-image',
-				heading: __( 'Add your product image', 'woocommerce' ),
+				name: ‘product-image’,
+				heading: __( ‘Add your product images’, ‘woocommerce’ ),
 				descriptions: {
 					desktop: __(
-						'Upload an image to your product here. Ideally a JPEG or PNG about 600 px wide or bigger. This image will be shown in your store’s catalog.',
-						'woocommerce'
+						‘Upload images for your product here. Ideally JPEG or PNG files about 600 px wide or bigger. The first image will be used as the main product image in your store’s catalog.’,
+						‘woocommerce’
 					),
 				},
 			},
