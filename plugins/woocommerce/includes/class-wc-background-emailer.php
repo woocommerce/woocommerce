@@ -16,6 +16,8 @@ if ( ! class_exists( 'WC_Background_Process', false ) ) {
 
 /**
  * WC_Background_Emailer Class.
+ *
+ * @deprecated 10.8.0 Deferred emails now use Action Scheduler. No stable public replacement exists.
  */
 class WC_Background_Emailer extends WC_Background_Process {
 

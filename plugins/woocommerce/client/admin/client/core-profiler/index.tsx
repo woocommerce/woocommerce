@@ -16,7 +16,7 @@ import {
 import { useMachine, useSelector } from '@xstate5/react';
 import { useMemo } from '@wordpress/element';
 import { resolveSelect, dispatch } from '@wordpress/data';
-import { store as coreStore, Settings } from '@wordpress/core-data';
+import { store as coreStore } from '@wordpress/core-data';
 import {
 	updateQueryString,
 	getQuery,
@@ -39,7 +39,7 @@ import {
 } from '@woocommerce/data';
 import { initializeExPlat } from '@woocommerce/explat';
 import { CountryStateOption } from '@woocommerce/onboarding';
-import { getAdminLink } from '@woocommerce/settings';
+import { getAdminLink, getSetting } from '@woocommerce/settings';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -148,12 +148,12 @@ const handleTrackingOption = assign( {
 	} ) => event.output !== 'no',
 } );
 
-const getStoreNameOption = fromPromise( async () =>
-	resolveSelect( coreStore )
-		// @ts-expect-error getEntityRecord is not typed correctly in coreStore
-		.getEntityRecord( 'root', 'site' )
-		.then( ( site ) => ( site as Settings ).title )
-);
+// Reading synchronously from wcSettings, but wrapped in fromPromise because
+// xstate's invoke with onDone/onError requires a promise-based actor.
+const getStoreNameOption = fromPromise( () => {
+	const value = getSetting( 'siteTitle', '' );
+	return Promise.resolve( typeof value === 'string' ? value : '' );
+} );
 
 const handleStoreNameOption = assign( {
 	businessInfo: ( {

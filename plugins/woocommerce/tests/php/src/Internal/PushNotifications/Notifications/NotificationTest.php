@@ -7,8 +7,6 @@ namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Notifications;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewOrderNotification;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewReviewNotification;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
-use Automattic\WooCommerce\Tests\Internal\PushNotifications\Stubs\StubOrderNotification;
-use Automattic\WooCommerce\Tests\Internal\PushNotifications\Stubs\StubReviewNotification;
 use InvalidArgumentException;
 use WC_Unit_Test_Case;
 
@@ -20,7 +18,10 @@ class NotificationTest extends WC_Unit_Test_Case {
 	 * @testdox Should return an identifier combining blog ID, type, and resource ID.
 	 */
 	public function test_get_identifier(): void {
-		$notification = new StubOrderNotification( 42 );
+		$notification = $this->getMockBuilder( NewOrderNotification::class )
+			->setConstructorArgs( array( 42 ) )
+			->onlyMethods( array( 'to_payload', 'has_meta', 'write_meta' ) )
+			->getMock();
 
 		$this->assertSame( get_current_blog_id() . '_store_order_42', $notification->get_identifier() );
 	}
@@ -29,7 +30,10 @@ class NotificationTest extends WC_Unit_Test_Case {
 	 * @testdox Should return notification data as an array.
 	 */
 	public function test_to_array(): void {
-		$notification = new StubReviewNotification( 99 );
+		$notification = $this->getMockBuilder( NewReviewNotification::class )
+			->setConstructorArgs( array( 99 ) )
+			->onlyMethods( array( 'to_payload', 'has_meta', 'write_meta' ) )
+			->getMock();
 
 		$result = $notification->to_array();
 
@@ -49,7 +53,7 @@ class NotificationTest extends WC_Unit_Test_Case {
 	public function test_throws_for_non_positive_resource_id( int $resource_id ): void {
 		$this->expectException( InvalidArgumentException::class );
 
-		new StubOrderNotification( $resource_id );
+		new NewOrderNotification( $resource_id );
 	}
 
 	/**

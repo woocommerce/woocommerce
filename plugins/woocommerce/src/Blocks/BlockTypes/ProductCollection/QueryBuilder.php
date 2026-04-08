@@ -140,11 +140,13 @@ class QueryBuilder {
 	 * @param bool  $is_exclude_applied_filters Whether to exclude the applied filters or not.
 	 */
 	public function get_final_frontend_query( $collection_args, $query, $page = 1, $is_exclude_applied_filters = false ) {
-		$product_ids = $query['post__in'] ?? array();
-		$offset      = $query['offset'] ?? 0;
-		$per_page    = $query['perPage'] ?? 9;
-		$order       = $query['order'] ?? 'asc';
-		$search      = $query['search'] ?? '';
+		$product_ids  = $query['post__in'] ?? array();
+		$offset_raw   = $query['offset'] ?? 0;
+		$per_page_raw = $query['perPage'] ?? null;
+		$offset       = is_numeric( $offset_raw ) ? max( 0, (int) $offset_raw ) : 0;
+		$per_page     = is_numeric( $per_page_raw ) ? max( 1, (int) $per_page_raw ) : 9;
+		$order        = $query['order'] ?? 'asc';
+		$search       = $query['search'] ?? '';
 
 		$common_query_values = array(
 			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query

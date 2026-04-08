@@ -161,11 +161,12 @@ export function IframeEditor( {
 		} );
 	}, [] );
 
+	// @ts-expect-error @wordpress/block-editor store is not fully typed in this context.
 	const { clearSelectedBlock, updateSettings } =
 		useDispatch( blockEditorStore );
 
 	const parentEditorSettings = useSelect( ( select ) => {
-		// @ts-expect-error Selector is not typed
+		// @ts-expect-error @wordpress/block-editor store is not fully typed in this context.
 		return select( blockEditorStore ).getSettings();
 	}, [] );
 

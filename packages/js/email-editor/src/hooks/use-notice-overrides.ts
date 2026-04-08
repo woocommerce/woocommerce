@@ -71,6 +71,11 @@ function getStoreName( namespace: string | { name: string } ): string {
 	return typeof namespace === 'object' ? namespace.name : namespace;
 }
 
+const getNoticesWithOverrides = createSelector(
+	( notices: Notice[] ) => applyOverridesToNotices( notices ),
+	( notices: Notice[] ) => [ notices ]
+);
+
 /**
  * Applies notice overrides when the email editor is mounted and restores
  * the original select when it unmounts.
@@ -97,12 +102,6 @@ export function useNoticeOverrides(): void {
 					if ( ! originalGetNotices ) {
 						return selectors;
 					}
-
-					const getNoticesWithOverrides = createSelector(
-						( notices: Notice[] ) =>
-							applyOverridesToNotices( notices ),
-						( notices: Notice[] ) => [ notices ]
-					);
 
 					return {
 						...selectors,

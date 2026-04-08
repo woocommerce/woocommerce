@@ -215,6 +215,24 @@ const expectHasBlock = async ( blockName: string ) => {
 };
 
 describe( 'Add to Cart + Options block', () => {
+	// The wp-6.8 version of @wordpress/private-apis causes a deprecation
+	// warning for __unstableIsPreviewMode that fires non-deterministically
+	// during async block editor setup. Filter it from jest-console's spy
+	// before it checks for unexpected warnings.
+	afterEach( () => {
+		/* eslint-disable no-console */
+		( console.warn as jest.Mock ).mock.calls = (
+			console.warn as jest.Mock
+		 ).mock.calls.filter(
+			( [ firstArg ]: [ unknown ] ) =>
+				! (
+					typeof firstArg === 'string' &&
+					firstArg.includes( '__unstableIsPreviewMode' )
+				)
+		);
+		/* eslint-enable no-console */
+	} );
+
 	it( 'should render inner blocks for simple and external products', async () => {
 		await setup();
 		await expectHasBlock( 'Add to Cart + Options (Beta)' );

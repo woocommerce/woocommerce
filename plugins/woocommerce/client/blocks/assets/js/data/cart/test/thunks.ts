@@ -1,11 +1,19 @@
 /**
  * Internal dependencies
  */
-import { changeCartItemQuantity } from '../thunks';
+import { changeCartItemQuantity, receiveCart } from '../thunks';
 import { apiFetchWithHeaders } from '../../shared-controls';
 
 jest.mock( '../../shared-controls', () => ( {
 	apiFetchWithHeaders: jest.fn(),
+} ) );
+
+jest.mock( '../notify-quantity-changes', () => ( {
+	notifyQuantityChanges: jest.fn(),
+} ) );
+
+jest.mock( '../notify-errors', () => ( {
+	updateCartErrorNotices: jest.fn(),
 } ) );
 
 const mockApiFetchWithHeaders = apiFetchWithHeaders as jest.MockedFunction<
@@ -13,7 +21,7 @@ const mockApiFetchWithHeaders = apiFetchWithHeaders as jest.MockedFunction<
 >;
 
 describe( 'changeCartItemQuantity', () => {
-	const createMockDispatchAndSelect = (
+	const createChangeQuantityMocks = (
 		cartItems: Record< string, number >
 	) => {
 		const mockDispatch = {
@@ -39,7 +47,7 @@ describe( 'changeCartItemQuantity', () => {
 	} );
 
 	it( 'should not make API call if quantity is unchanged', async () => {
-		const { dispatch, select } = createMockDispatchAndSelect( {
+		const { dispatch, select } = createChangeQuantityMocks( {
 			'item-1': 5,
 		} );
 
@@ -53,7 +61,7 @@ describe( 'changeCartItemQuantity', () => {
 	} );
 
 	it( 'should make API call when quantity changes', async () => {
-		const { dispatch, select } = createMockDispatchAndSelect( {
+		const { dispatch, select } = createChangeQuantityMocks( {
 			'item-1': 1,
 		} );
 
@@ -225,7 +233,7 @@ describe( 'changeCartItemQuantity', () => {
 	} );
 
 	it( 'should handle API errors', async () => {
-		const { dispatch, select } = createMockDispatchAndSelect( {
+		const { dispatch, select } = createChangeQuantityMocks( {
 			'item-1': 1,
 		} );
 
@@ -245,5 +253,113 @@ describe( 'changeCartItemQuantity', () => {
 			'item-1',
 			false
 		);
+	} );
+} );
+
+describe( 'receiveCart', () => {
+	const createReceiveCartMocks = ( {
+		cartItems,
+		pendingDelete,
+	}: {
+		cartItems: Array< { key: string } >;
+		pendingDelete: string[];
+	} ) => {
+		let cartData = { items: cartItems, errors: [] as never[] };
+
+		const mockDispatch = {
+			setCartData: jest.fn( ( newCart ) => {
+				cartData = newCart;
+			} ),
+			itemIsPendingDelete: jest.fn(),
+			setErrorData: jest.fn(),
+		};
+
+		const mockSelect = {
+			getCartData: jest.fn( () => cartData ),
+			getCartErrors: jest.fn( () => [] ),
+			getItemsPendingDelete: jest.fn( () => pendingDelete ),
+			getItemsPendingQuantityUpdate: jest.fn( () => [] ),
+			getProductsPendingAdd: jest.fn( () => [] ),
+		};
+
+		return { dispatch: mockDispatch, select: mockSelect };
+	};
+
+	beforeEach( () => {
+		jest.clearAllMocks();
+	} );
+
+	it( 'should clear pending delete for items removed server-side (e.g. bundle children)', () => {
+		// Simulate: parent bundle "bundle-parent" was deleted by the user.
+		// Its children "bundle-child-1" and "bundle-child-2" were marked
+		// as pending delete by the extension but removed server-side
+		// when the parent was deleted.
+		const { dispatch, select } = createReceiveCartMocks( {
+			cartItems: [
+				{ key: 'bundle-parent' },
+				{ key: 'bundle-child-1' },
+				{ key: 'bundle-child-2' },
+				{ key: 'simple-product' },
+			],
+			pendingDelete: [
+				'bundle-parent',
+				'bundle-child-1',
+				'bundle-child-2',
+			],
+		} );
+
+		// The API response after removing the parent no longer contains
+		// the parent or its children — only the simple product remains.
+		receiveCart( {
+			items: [ { key: 'simple-product' } ],
+			errors: [],
+		} as never )( { dispatch, select } as never );
+
+		// All three pending-delete items are gone from the cart,
+		// so their pending status should be cleared.
+		expect( dispatch.itemIsPendingDelete ).toHaveBeenCalledWith(
+			'bundle-parent',
+			false
+		);
+		expect( dispatch.itemIsPendingDelete ).toHaveBeenCalledWith(
+			'bundle-child-1',
+			false
+		);
+		expect( dispatch.itemIsPendingDelete ).toHaveBeenCalledWith(
+			'bundle-child-2',
+			false
+		);
+		expect( dispatch.itemIsPendingDelete ).toHaveBeenCalledTimes( 3 );
+	} );
+
+	it( 'should not clear pending delete for items still in the cart', () => {
+		// An item is pending delete but still present in the response
+		// (e.g. the API call hasn't finished processing yet).
+		const { dispatch, select } = createReceiveCartMocks( {
+			cartItems: [ { key: 'item-1' }, { key: 'item-2' } ],
+			pendingDelete: [ 'item-1' ],
+		} );
+
+		receiveCart( {
+			items: [ { key: 'item-1' }, { key: 'item-2' } ],
+			errors: [],
+		} as never )( { dispatch, select } as never );
+
+		// item-1 is still in the cart, so pending delete should NOT be cleared.
+		expect( dispatch.itemIsPendingDelete ).not.toHaveBeenCalled();
+	} );
+
+	it( 'should handle empty pending delete list', () => {
+		const { dispatch, select } = createReceiveCartMocks( {
+			cartItems: [ { key: 'item-1' } ],
+			pendingDelete: [],
+		} );
+
+		receiveCart( {
+			items: [ { key: 'item-1' } ],
+			errors: [],
+		} as never )( { dispatch, select } as never );
+
+		expect( dispatch.itemIsPendingDelete ).not.toHaveBeenCalled();
 	} );
 } );
