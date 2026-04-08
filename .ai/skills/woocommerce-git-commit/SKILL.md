@@ -86,4 +86,4 @@ After all commits, show `git log --oneline -n <number of new commits>` to confir
 - No Co-Authored-By lines or self-attribution
 - Never push to remote
 - Never use `git add -A` or `git add .`
-- Do not run pre-commit lint/test checks — the dev-cycle skill handles that
+- Do not run pre-commit lint/test checks — the `woocommerce-dev-cycle` skill handles that. Linting should be run *before* invoking this skill, not after.
