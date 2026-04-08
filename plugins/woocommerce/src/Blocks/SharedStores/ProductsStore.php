@@ -52,6 +52,13 @@ class ProductsStore {
 	private static array $loaded_variation_parents = array();
 
 	/**
+	 * Whether the derived-state getters have been registered.
+	 *
+	 * @var bool
+	 */
+	private static bool $getters_registered = false;
+
+	/**
 	 * Check that the consent statement was passed.
 	 *
 	 * @param string $consent_statement The consent statement string.
@@ -67,11 +74,61 @@ class ProductsStore {
 	}
 
 	/**
-	 * Register the interactivity state if products have been loaded.
+	 * Register the derived-state getters once.
+	 *
+	 * These closures mirror the JS getters so that directives referencing
+	 * state.product / state.productInContext resolve during SSR. Because
+	 * they read from wp_interactivity_state() at call time, they only
+	 * need to be registered once regardless of how many products are added.
 	 *
 	 * @return void
 	 */
-	private static function register_state(): void {
+	private static function register_getters(): void {
+		if ( self::$getters_registered ) {
+			return;
+		}
+
+		self::$getters_registered = true;
+
+		wp_interactivity_state(
+			self::$store_namespace,
+			array(
+				'product'           => function () {
+					$context    = wp_interactivity_get_context();
+					$state      = wp_interactivity_state( self::$store_namespace );
+					$product_id = ! empty( $context ) ? $context['productId'] : ( $state['productId'] ?? null );
+
+					if ( ! $product_id ) {
+						return null;
+					}
+
+					return $state['products'][ $product_id ] ?? null;
+				},
+				'selectedVariation' => function () {
+					$context      = wp_interactivity_get_context();
+					$state        = wp_interactivity_state( self::$store_namespace );
+					$variation_id = ! empty( $context ) ? $context['variationId'] : ( $state['variationId'] ?? null );
+
+					if ( ! $variation_id ) {
+						return null;
+					}
+
+					return $state['productVariations'][ $variation_id ] ?? null;
+				},
+				'productInContext'  => function () {
+					$state = wp_interactivity_state( self::$store_namespace );
+					return $state['selectedVariation'] ?? $state['product'] ?? null;
+				},
+			)
+		);
+	}
+
+	/**
+	 * Sync the current product and variation data into interactivity state.
+	 *
+	 * @return void
+	 */
+	private static function update_state(): void {
 		$state = array();
 
 		if ( ! empty( self::$products ) ) {
@@ -83,6 +140,7 @@ class ProductsStore {
 		}
 
 		if ( ! empty( $state ) ) {
+			self::register_getters();
 			wp_interactivity_state( self::$store_namespace, $state );
 		}
 	}
@@ -106,7 +164,7 @@ class ProductsStore {
 		$response = Package::container()->get( Hydration::class )->get_rest_api_response_data( '/wc/store/v1/products/' . $product_id );
 
 		self::$products[ $product_id ] = $response['body'] ?? array();
-		self::register_state();
+		self::update_state();
 
 		return self::$products[ $product_id ];
 	}
@@ -159,7 +217,7 @@ class ProductsStore {
 		// Use array_replace instead of array_merge to preserve numeric keys.
 		$keyed_products = array_column( $purchasable_products, null, 'id' );
 		self::$products = array_replace( self::$products, $keyed_products );
-		self::register_state();
+		self::update_state();
 
 		return $keyed_products;
 	}
@@ -195,7 +253,7 @@ class ProductsStore {
 		// Use array_replace instead of array_merge to preserve numeric keys.
 		$keyed_variations         = array_column( $response['body'], null, 'id' );
 		self::$product_variations = array_replace( self::$product_variations, $keyed_variations );
-		self::register_state();
+		self::update_state();
 
 		return $keyed_variations;
 	}

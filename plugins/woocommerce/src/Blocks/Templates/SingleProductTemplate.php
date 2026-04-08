@@ -91,42 +91,14 @@ class SingleProductTemplate extends AbstractTemplate {
 				// state closures can resolve it during server-side rendering.
 				ProductsStore::load_product( $consent, $product->get_id() );
 
-				// Register product context state (productId, variationId, and
-				// derived closures) in the products store. The derived state
-				// closures (product, selectedVariation) mirror the JS getters
-				// so that directives referencing state.product resolve during
-				// SSR.
+				// Set the current product context. The derived state
+				// closures (product, selectedVariation, productInContext)
+				// are registered by ProductsStore::register_state().
 				wp_interactivity_state(
 					'woocommerce/products',
 					array(
-						'productId'         => $product->get_id(),
-						'variationId'       => null,
-						'product'           => function () {
-							$context    = wp_interactivity_get_context();
-							$state      = wp_interactivity_state( 'woocommerce/products' );
-							$product_id = ! empty( $context ) ? $context['productId'] : ( $state['productId'] ?? null );
-
-							if ( ! $product_id ) {
-								return null;
-							}
-
-							return $state['products'][ $product_id ] ?? null;
-						},
-						'selectedVariation' => function () {
-							$context      = wp_interactivity_get_context();
-							$state        = wp_interactivity_state( 'woocommerce/products' );
-							$variation_id = ! empty( $context ) ? $context['variationId'] : ( $state['variationId'] ?? null );
-
-							if ( ! $variation_id ) {
-								return null;
-							}
-
-							return $state['productVariations'][ $variation_id ] ?? null;
-						},
-						'productInContext'  => function () {
-							$state = wp_interactivity_state( 'woocommerce/products' );
-							return $state['selectedVariation'] ?? $state['product'] ?? null;
-						},
+						'productId'   => $product->get_id(),
+						'variationId' => null,
 					)
 				);
 			}
