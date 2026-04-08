@@ -116,8 +116,18 @@ class ProductsStore {
 					return $state['productVariations'][ $variation_id ] ?? null;
 				},
 				'productInContext'  => function () {
-					$state = wp_interactivity_state( self::$store_namespace );
-					return $state['selectedVariation'] ?? $state['product'] ?? null;
+					$state    = wp_interactivity_state( self::$store_namespace );
+					$selected = $state['selectedVariation'] instanceof \Closure
+						? $state['selectedVariation']()
+						: $state['selectedVariation'];
+
+					if ( $selected ) {
+						return $selected;
+					}
+
+					return $state['product'] instanceof \Closure
+						? $state['product']()
+						: $state['product'];
 				},
 			)
 		);
