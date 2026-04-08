@@ -132,7 +132,12 @@ class WC_Admin_Meta_Boxes {
 		// Products.
 		add_meta_box( 'postexcerpt', __( 'Product short description', 'woocommerce' ), 'WC_Meta_Box_Product_Short_Description::output', 'product', 'normal' );
 		add_meta_box( 'woocommerce-product-data', __( 'Product data', 'woocommerce' ), 'WC_Meta_Box_Product_Data::output', 'product', 'normal', 'high' );
-		add_meta_box( 'woocommerce-product-images', __( 'Product gallery', 'woocommerce' ), 'WC_Meta_Box_Product_Images::output', 'product', 'side', 'low' );
+		$product_images_tip = sprintf(
+			/* translators: %s: maximum upload file size */
+			__( 'For best results, upload JPEG or PNG files that are 1000 by 1000 pixels or larger. The first image will be used as the main product image. Maximum upload file size: %s.', 'woocommerce' ),
+			size_format( wp_max_upload_size() )
+		);
+		add_meta_box( 'woocommerce-product-images', __( 'Product images', 'woocommerce' ) . '<span class="woocommerce-help-tip" data-tip="' . esc_attr( $product_images_tip ) . '"></span>', 'WC_Meta_Box_Product_Images::output', 'product', 'side', 'low' );
 
 		// Orders.
 		foreach ( wc_get_order_types( 'order-meta-boxes' ) as $type ) {
@@ -153,17 +158,25 @@ class WC_Admin_Meta_Boxes {
 	 * Add default sort order for meta boxes on product page.
 	 */
 	public function add_product_boxes_sort_order() {
-		$current_value = get_user_meta( get_current_user_id(), 'meta-box-order_product', true );
+		$user_id       = get_current_user_id();
+		$current_value = get_user_meta( $user_id, 'meta-box-order_product', true );
 
 		if ( $current_value ) {
+			// Strip stale postimagediv reference from existing user ordering.
+			if ( is_array( $current_value ) && ! empty( $current_value['side'] ) && false !== strpos( $current_value['side'], 'postimagediv' ) ) {
+				$boxes                 = array_filter( array_map( 'trim', explode( ',', $current_value['side'] ) ) );
+				$boxes                 = array_values( array_diff( $boxes, array( 'postimagediv' ) ) );
+				$current_value['side'] = implode( ',', $boxes );
+				update_user_meta( $user_id, 'meta-box-order_product', $current_value );
+			}
 			return;
 		}
 
 		update_user_meta(
-			get_current_user_id(),
+			$user_id,
 			'meta-box-order_product',
 			array(
-				'side'     => 'submitdiv,postimagediv,woocommerce-product-images,product_catdiv,tagsdiv-product_tag',
+				'side'     => 'submitdiv,woocommerce-product-images,product_catdiv,tagsdiv-product_tag',
 				'normal'   => 'woocommerce-product-data,postcustom,slugdiv,postexcerpt',
 				'advanced' => '',
 			)
@@ -175,6 +188,7 @@ class WC_Admin_Meta_Boxes {
 	 */
 	public function remove_meta_boxes() {
 		remove_meta_box( 'postexcerpt', 'product', 'normal' );
+		remove_meta_box( 'postimagediv', 'product', 'side' );
 		remove_meta_box( 'product_shipping_classdiv', 'product', 'side' );
 		remove_meta_box( 'commentsdiv', 'product', 'normal' );
 		remove_meta_box( 'commentstatusdiv', 'product', 'side' );

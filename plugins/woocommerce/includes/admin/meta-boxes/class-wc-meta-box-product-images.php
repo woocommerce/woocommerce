@@ -13,7 +13,7 @@
 use Automattic\WooCommerce\Enums\ProductType;
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly
+	exit; // Exit if accessed directly.
 }
 
 /**
@@ -24,83 +24,86 @@ class WC_Meta_Box_Product_Images {
 	/**
 	 * Output the metabox.
 	 *
-	 * @param WP_Post $post
+	 * @param WP_Post $post Post object.
 	 */
 	public static function output( $post ) {
 		global $thepostid, $product_object;
 
 		$thepostid      = $post->ID;
 		$product_object = $thepostid ? wc_get_product( $thepostid ) : new WC_Product();
+		$all_ids        = $product_object ? $product_object->get_image_ids( 'edit' ) : array();
+
 		wp_nonce_field( 'woocommerce_save_data', 'woocommerce_meta_nonce' );
 		?>
-		<div id="product_images_container">
-			<ul class="product_images">
-				<?php
-				$product_image_gallery = $product_object->get_gallery_image_ids( 'edit' );
+		<div id="wc-product-images__list" class="wc-product-images__list<?php echo ! empty( $all_ids ) ? ' wc-product-images__list--has-images' : ''; ?>">
+			<?php
+			if ( ! empty( $all_ids ) ) {
+				foreach ( $all_ids as $index => $attachment_id ) {
+					$is_featured = ( 0 === $index );
+					$size        = $is_featured ? 'medium' : 'thumbnail';
+					$img         = wp_get_attachment_image( $attachment_id, $size );
 
-				$attachments         = array_filter( $product_image_gallery );
-				$update_meta         = false;
-				$updated_gallery_ids = array();
+					if ( empty( $img ) ) {
+						continue;
+					}
 
-				if ( ! empty( $attachments ) ) {
-					// Prime caches to reduce future queries.
-					_prime_post_caches( $attachments );
-
-					foreach ( $attachments as $attachment_id ) {
-						$attachment = wp_get_attachment_image( $attachment_id, 'thumbnail' );
-
-						// if attachment is empty skip.
-						if ( empty( $attachment ) ) {
-							$update_meta = true;
-							continue;
+					$modifier = $is_featured ? 'featured' : 'gallery';
+					?>
+					<div class="wc-product-images__image wc-product-images__image--<?php echo esc_attr( $modifier ); ?>" data-attachment-id="<?php echo esc_attr( (string) $attachment_id ); ?>" tabindex="0">
+						<?php echo $img; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+						<button type="button" class="wc-product-images__remove" tabindex="-1" aria-label="<?php esc_attr_e( 'Remove image', 'woocommerce' ); ?>"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 4c-4.4 0-8 3.6-8 8s3.6 8 8 8 8-3.6 8-8-3.6-8-8-8Zm3.8 10.7-1.1 1.1-2.7-2.7-2.7 2.7-1.1-1.1 2.7-2.7-2.7-2.7 1.1-1.1 2.7 2.7 2.7-2.7 1.1 1.1-2.7 2.7 2.7 2.7Z" /></svg></button>
+						<?php
+						if ( ! $is_featured ) {
+							/**
+							 * Fires after a product gallery item is rendered in the meta box.
+							 *
+							 * @param int $thepostid     The product post ID.
+							 * @param int $attachment_id The attachment ID.
+							 *
+							 * @since 2.4.0
+							 */
+							do_action( 'woocommerce_admin_after_product_gallery_item', $thepostid, $attachment_id );
 						}
 						?>
-						<li class="image" data-attachment_id="<?php echo esc_attr( $attachment_id ); ?>">
-							<?php echo $attachment; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-							<ul class="actions">
-								<li><a href="#" class="delete tips" data-tip="<?php esc_attr_e( 'Delete image', 'woocommerce' ); ?>"><?php esc_html_e( 'Delete', 'woocommerce' ); ?></a></li>
-							</ul>
-							<?php
-							// Allow for extra info to be exposed or extra action to be executed for this attachment.
-							do_action( 'woocommerce_admin_after_product_gallery_item', $thepostid, $attachment_id );
-							?>
-						</li>
-						<?php
-
-						// rebuild ids to be saved.
-						$updated_gallery_ids[] = $attachment_id;
-					}
-
-					// need to update product meta to set new gallery ids
-					if ( $update_meta ) {
-						update_post_meta( $post->ID, '_product_image_gallery', implode( ',', $updated_gallery_ids ) );
-					}
+					</div>
+					<?php
 				}
-				?>
-			</ul>
+			}
 
-			<input type="hidden" id="product_image_gallery" name="product_image_gallery" value="<?php echo esc_attr( implode( ',', $updated_gallery_ids ) ); ?>" />
-
+			$slot_modifier = empty( $all_ids ) ? 'featured' : 'gallery';
+			?>
+			<div id="wc-product-images__add-slot" class="wc-product-images__add-slot wc-product-images__add-slot--<?php echo esc_attr( $slot_modifier ); ?> hide-if-no-js" role="button" tabindex="0" aria-label="<?php esc_attr_e( 'Add product images', 'woocommerce' ); ?>">
+				<span class="wc-product-images__add-label"><?php esc_html_e( 'Add an image', 'woocommerce' ); ?></span>
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M11 12.5V17.5H12.5V12.5H17.5V11H12.5V6H11V11H6V12.5H11V12.5Z"/></svg>
+			</div>
 		</div>
-		<p class="add_product_images hide-if-no-js">
-			<a href="#" data-choose="<?php esc_attr_e( 'Add images to product gallery', 'woocommerce' ); ?>" data-update="<?php esc_attr_e( 'Add to gallery', 'woocommerce' ); ?>" data-delete="<?php esc_attr_e( 'Delete image', 'woocommerce' ); ?>" data-text="<?php esc_attr_e( 'Delete', 'woocommerce' ); ?>"><?php esc_html_e( 'Add product gallery images', 'woocommerce' ); ?></a>
-		</p>
+
+		<input type="hidden" id="wc_product_image_ids" name="wc_product_image_ids" value="<?php echo esc_attr( implode( ',', $all_ids ) ); ?>" />
+		<div id="wc-product-images__live-region" class="screen-reader-text" aria-live="polite"></div>
 		<?php
 	}
 
 	/**
 	 * Save meta box data.
 	 *
-	 * @param int     $post_id
-	 * @param WP_Post $post
+	 * @param int     $post_id Post ID.
+	 * @param WP_Post $post    Post object.
 	 */
 	public static function save( $post_id, $post ) {
-		$product_type   = empty( $_POST['product-type'] ) ? WC_Product_Factory::get_product_type( $post_id ) : sanitize_title( stripslashes( $_POST['product-type'] ) );
-		$classname      = WC_Product_Factory::get_product_classname( $post_id, $product_type ? $product_type : ProductType::SIMPLE );
-		$product        = new $classname( $post_id );
-		$attachment_ids = isset( $_POST['product_image_gallery'] ) ? array_filter( explode( ',', wc_clean( $_POST['product_image_gallery'] ) ) ) : array();
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Nonce verified in WC_Admin_Meta_Boxes::save_meta_boxes().
+		$product_type = empty( $_POST['product-type'] ) ? WC_Product_Factory::get_product_type( $post_id ) : sanitize_title( wp_unslash( $_POST['product-type'] ) );
+		$classname    = WC_Product_Factory::get_product_classname( $post_id, $product_type ? $product_type : ProductType::SIMPLE );
+		/**
+		 * Product instance.
+		 *
+		 * @var WC_Product $product
+		 */
+		$product   = new $classname( $post_id );
+		$raw_ids   = isset( $_POST['wc_product_image_ids'] ) ? wc_clean( wp_unslash( $_POST['wc_product_image_ids'] ) ) : '';
+		$image_ids = array_filter( array_map( 'absint', explode( ',', $raw_ids ) ) );
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
-		$product->set_gallery_image_ids( $attachment_ids );
+		$product->set_image_ids( $image_ids );
 		$product->save();
 	}
 }
