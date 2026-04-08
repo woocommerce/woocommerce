@@ -35,6 +35,15 @@ const focusTrigger = () => {
 	trigger?.focus();
 };
 
+// Pattern from other blocks to reliably set the background color from body.
+const getBodyBackgroundColor = (): string => {
+	const color = getComputedStyle( document.body ).backgroundColor;
+	if ( ! color || color === 'rgba(0, 0, 0, 0)' || color === 'transparent' ) {
+		return '#fff';
+	}
+	return color;
+};
+
 const updateDropdownPosition = (
 	context: CustomerAccountContext,
 	wrapper: HTMLElement
@@ -113,6 +122,10 @@ const { actions: privateActions } = store(
 				const wrapper = getWrapper();
 				if ( wrapper ) {
 					updateDropdownPosition( context, wrapper );
+					wrapper.style.setProperty(
+						'--wc-customer-account-dropdown-surface',
+						getBodyBackgroundColor()
+					);
 				}
 
 				context.isDropdownOpen = true;
