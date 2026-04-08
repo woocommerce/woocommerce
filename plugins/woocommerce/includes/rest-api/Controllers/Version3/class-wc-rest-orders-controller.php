@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+use Automattic\WooCommerce\Utilities\MetaDataUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -150,13 +151,7 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 						}
 						break;
 					case 'meta_data':
-						if ( is_array( $value ) ) {
-							foreach ( $value as $meta ) {
-								if ( isset( $meta['key'] ) ) {
-									$order->update_meta_data( $meta['key'], $meta['value'] ?? null, $meta['id'] ?? '' );
-								}
-							}
-						}
+						MetaDataUtil::update( $value, $order );
 						break;
 					default:
 						if ( is_callable( array( $order, "set_{$key}" ) ) ) {

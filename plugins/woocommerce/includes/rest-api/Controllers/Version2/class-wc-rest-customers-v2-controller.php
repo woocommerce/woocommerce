@@ -8,6 +8,8 @@
  * @since   2.6.0
  */
 
+use Automattic\WooCommerce\Utilities\MetaDataUtil;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -130,14 +132,14 @@ class WC_REST_Customers_V2_Controller extends WC_REST_Customers_V1_Controller {
 
 		// Meta data.
 		if ( isset( $request['meta_data'] ) ) {
-			if ( is_array( $request['meta_data'] ) ) {
-				foreach ( $request['meta_data'] as $meta ) {
-					if ( ! isset( $meta['key'] ) || is_protected_meta( $meta['key'], 'user' ) ) {
-						continue;
+			MetaDataUtil::update(
+				$request['meta_data'],
+				function ( $meta ) use ( $customer ) {
+					if ( ! is_protected_meta( $meta['key'], 'user' ) ) {
+						$customer->update_meta_data( $meta['key'], $meta['value'], $meta['id'] );
 					}
-					$customer->update_meta_data( $meta['key'], $meta['value'] ?? null, $meta['id'] ?? '' );
 				}
-			}
+			);
 		}
 	}
 

@@ -39,6 +39,35 @@ class UpdateUtilsTest extends WC_Unit_Test_Case {
 
 		$this->assert_incomplete_meta_data_handled_correctly( $order );
 	}
+
+	/**
+	 * @testdox Should skip meta entries where key is explicitly null.
+	 */
+	public function test_update_meta_data_with_explicit_null_key(): void {
+		$order = wc_create_order();
+
+		$this->sut->call_update_meta_data(
+			$order,
+			array(
+				array(
+					'key'   => null,
+					'value' => 'null_key_value',
+				),
+				array(
+					'key'   => 'valid_key',
+					'value' => 'valid_value',
+				),
+			)
+		);
+
+		$meta_by_key = array();
+		foreach ( $order->get_meta_data() as $meta ) {
+			$meta_by_key[ $meta->key ] = $meta->value;
+		}
+
+		$this->assertEquals( 'valid_value', $meta_by_key['valid_key'] ?? null, 'Valid entry should be saved' );
+		$this->assertArrayNotHasKey( '', $meta_by_key, 'Explicit null key should not create a meta data row' );
+	}
 }
 
 /**

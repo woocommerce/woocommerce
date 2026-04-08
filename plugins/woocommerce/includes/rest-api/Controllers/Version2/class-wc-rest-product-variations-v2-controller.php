@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Utilities\I18nUtil;
+use Automattic\WooCommerce\Utilities\MetaDataUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -561,13 +562,7 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 		}
 
 		// Meta data.
-		if ( is_array( $request['meta_data'] ) ) {
-			foreach ( $request['meta_data'] as $meta ) {
-				if ( isset( $meta['key'] ) ) {
-					$variation->update_meta_data( $meta['key'], $meta['value'] ?? null, $meta['id'] ?? '' );
-				}
-			}
-		}
+		MetaDataUtil::update( $request['meta_data'], $variation );
 
 		/**
 		 * Filters an object before it is inserted via the REST API.
