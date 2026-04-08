@@ -55,6 +55,7 @@ Wireit caches outputs and skips unchanged tasks, so **second builds are fast**. 
 3. **Add --noCheck to ESM builds** (56→35s): ESM was doing full type checking while CJS had --noCheck. 24 packages updated
 4. **Fix package webpack cache logic** (35→34s): Cache type was inverted (memory in prod, filesystem in dev). Fixed to always filesystem
 5. **Disable ProgressBarPlugin in production builds** (34s stable): Removes unnecessary console output and chalk formatting in 9 blocks webpack configs
+6. **Replace tsc with esbuild for CJS builds** (34→31s): Uses existing esbuild@0.18.20 transitive dep. 20-100x faster transpilation frees CPU for ESM builds
 
 ### Dead Ends
 - tsc --incremental: Incompatible with clean:build (stale tsbuildinfo)
@@ -78,6 +79,26 @@ Wireit caches outputs and skips unchanged tasks, so **second builds are fast**. 
 - --reporter=append-only: worse performance
 - tsc --build mode: same speed as --project --noCheck
 - ProgressBarPlugin removal: marginal but keeps builds at 34s floor consistently
+- esbuild for ESM builds: type-only re-exports break without isolatedModules
+- Split declarations from ESM for 5 critical packages: 5 extra processes offset savings
+- esbuild ESM + tsc emitDeclarationOnly: tsc declarations take 80% of full tsc time, so net savings negligible
+- esbuild ESM (JS-only) + separate types task for 17 packages: 17 extra processes offset instant ESM
+- Combine CJS+ESM into single wireit task (62→38): WORSE, lost CJS/ESM parallelism
+- Exclude unused packages via pnpm filter: filter resolution overhead > savings
+- Remove build tasks from unused packages: 4 fewer tasks out of 62 insufficient
+- Webpack snapshot timestamp mode: no measurable difference
+- Reduce admin/blocks webpack dependencyOutputs 111→47: within noise, risk of stale deps
+- --declarationMap false: only 0.2s savings on components (negligible)
+- --types [] (empty types array): zero effect despite reducing files parsed
+- tsc emit phase profiled: 65-70% of build time per package is pure emit (AST→JS/DTS), irreducible
+- Admin webpack resolve from src/ (bypass tsc): babel-loader has same type-only re-export issue as esbuild
+- **Universal blocker**: ANY tool that processes TS file-by-file (babel, esbuild, swc) fails on non-`export type` re-exports. Only tsc handles this correctly. This blocks ALL alternative transpiler approaches.
+- WIREIT_PARALLEL=infinity: default cpus*2=28 already sufficient for 62 tasks on 14 cores
+- WIREIT_LOGGER=quiet-ci: negligible logging overhead
+- WIREIT_MAX_OPEN_FILES=4096: file descriptor budget of 200 was not a bottleneck
+
+### Summary (54 experiments, 7 sessions)
+95s → 31s (67% faster). All practical optimization paths exhausted. The floor is set by tsc emit speed (65-70% of per-package time) and the isolatedModules incompatibility that prevents alternative transpilers.
 
 ### Key Insights
 - With warm webpack cache, all webpack config optimizations are irrelevant (cached)
@@ -86,3 +107,6 @@ Wireit caches outputs and skips unchanged tasks, so **second builds are fast**. 
 - The deepest chain is: internal-ts-config → leaf packages → data/components → experimental → product-editor → settings-editor → admin-library
 - The remaining ~34s overhead is structural: pnpm/wireit process orchestration, file fingerprinting (~5800 source files), Node.js process startup for ~50 tasks
 - Further improvements would require replacing the build tooling (e.g., swc instead of tsc, turbopack instead of webpack, or a unified build script)
+- esbuild is available as transitive dep and works for CJS, but NOT for ESM (type-only re-exports break)
+- Build time varies ±2s depending on system load; 31-35s range is normal
+- **tsc emit profiling**: components Emit=3.01s/4.29s total, product-editor Emit=2.10s/3.24s. The emit phase (generating JS + declarations from AST) is the irreducible floor — it's pure CPU work in the TypeScript compiler

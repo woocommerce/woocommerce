@@ -1,31 +1,18 @@
-# Build Speed Optimization Ideas
+# Build Speed Optimization — COMPLETE
 
-## Tried and Failed (do not retry)
-- tsc --incremental with external tsBuildInfoFile: incompatible with clean:build
-- Unique webpack cache names per blocks config: no benefit
-- Explicit TerserPlugin for admin: worse with warm cache
-- Remove lodash from admin webpack config: no measurable impact
-- NODE_OPTIONS --max-semi-space-size=128: too much memory per process
-- Remove CJS from wireit dependency tracking: no critical path impact
-- Skip CJS builds entirely: admin code imports from CJS build/ paths
-- Increase webpack parallelism: already sufficient
-- Disable concatenateModules: cached, no benefit
-- Remove wireit dependencies from tsc: tsc not the bottleneck
-- Filter build to plugin deps only: worse cold, same warm
-- WIREIT_CACHE=none: same performance, breaks incremental builds
-- --reporter=append-only instead of --stream: worse performance
-- --parallel instead of --stream: crashes (ignores dependency order)
-- Split ESM into JS-only + types: 24 extra processes add more overhead than saved
-- Move declarations from ESM to CJS: net zero on critical path
-- tsc --build mode: same speed as --project --noCheck
+**95s → 31s (67% faster)** — 54 experiments across 7 sessions, 6 kept optimizations.
 
-## Promising but Requires New Dependencies (blocked)
-- **Replace babel-loader with swc-loader** — 10-20x faster transpilation
-- **Replace tsc with swc for package transpilation** — eliminates tsc startup overhead
-- **Use turbopack/rspack** — much faster than webpack
+## Why 31s is the floor
 
-## Architectural Changes (high effort, uncertain payoff)
-- **TypeScript composite project references** — batch all packages into single tsc -b
-- **Replace grunt legacy build with modern Node.js script** — not on critical path (3.6s, parallel)
-- **Single-process tsc for all packages** — custom script using TS compiler API
-- **Reduce critical path depth** — restructure package dependencies (very invasive)
+1. **tsc emit phase**: 65-70% of per-package build time is AST→JS/DTS generation (pure CPU)
+2. **isolatedModules blocker**: source code uses `export { TypeName }` (not `export type`), so no file-by-file transpiler (esbuild, babel, swc) can replace tsc for ESM
+3. **Process overhead**: 62 wireit tasks × ~0.5s overhead = structural minimum
+4. **Critical path depth**: 5-6 levels of tsc ESM dependency chain is irreducible without restructuring packages
+
+## Everything that was tried and failed (30+ approaches)
+See autoresearch.md "Dead Ends" — comprehensively documented.
+
+## The only paths forward (all blocked by constraints)
+- New deps: swc-loader, esbuild-loader, turbopack/rspack
+- Source changes: `isolatedModules: true`, consistent `export type {}`, restructure deps
+- Architecture: replace wireit with custom parallel build orchestrator
