@@ -522,6 +522,7 @@ class FilterData {
 	 * @return bool True if the cache was set, false otherwise.
 	 */
 	private function set_cache( $key, $value ) {
+		return false;
 		if ( ! is_array( $value ) ) {
 			return false;
 		}
