@@ -420,6 +420,7 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 		$product->set_image_ids( array() );
 		$product->save();
 
+		$product = wc_get_product( $product->get_id() );
 		$this->assertEquals( 0, $product->get_image_id() );
 		$this->assertSame( array(), $product->get_gallery_image_ids() );
 	}
