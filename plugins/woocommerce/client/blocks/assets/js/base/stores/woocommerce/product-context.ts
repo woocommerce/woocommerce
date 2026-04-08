@@ -40,6 +40,15 @@ export type ProductContextStore = {
 		 * For simple/grouped products, this is always null.
 		 */
 		selectedVariation: ProductResponseItem | null;
+		/**
+		 * The resolved product for the current context. Returns the selected
+		 * variation if one exists, otherwise the main product.
+		 *
+		 * Blocks can bind directly to properties, e.g.:
+		 *   state.productInContext.stock_availability.text
+		 *   state.productInContext.sku
+		 */
+		productInContext: ProductResponseItem | null;
 	};
 };
 
@@ -73,6 +82,13 @@ const productContextStore = store< ProductContextStore >(
 				}
 				return (
 					productsStore.state.productVariations[ variationId ] ?? null
+				);
+			},
+
+			get productInContext(): ProductResponseItem | null {
+				return (
+					productContextStore.state.selectedVariation ||
+					productContextStore.state.product
 				);
 			},
 		},
