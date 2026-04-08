@@ -2,11 +2,8 @@
 declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
-use Automattic\WooCommerce\Blocks\Assets\Api;
 use Automattic\WooCommerce\Blocks\BlockTypes\Cart as CartBlock;
-use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
 use Automattic\WooCommerce\Blocks\Package;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\AssetDataRegistryMock;
 
 /**
  * Tests that Cart block disables WordPress emoji detection to prevent
@@ -26,13 +23,10 @@ class CartEmojiTest extends \WP_UnitTestCase {
 	 *
 	 * @return void
 	 */
-	protected function setUp(): void {
+	public function setUp(): void {
 		parent::setUp();
 
-		$asset_api            = Package::container()->get( API::class );
-		$registry             = new AssetDataRegistryMock( $asset_api );
-		$integration_registry = new IntegrationRegistry();
-		$this->cart_block     = new CartBlock( $asset_api, $registry, $integration_registry );
+		$this->cart_block = Package::container()->get( CartBlock::class );
 
 		// Ensure emoji actions are registered as WordPress does by default.
 		add_action( 'wp_head', 'print_emoji_detection_script', 7 );
@@ -44,7 +38,7 @@ class CartEmojiTest extends \WP_UnitTestCase {
 	 *
 	 * @return void
 	 */
-	protected function tearDown(): void {
+	public function tearDown(): void {
 		// Restore emoji actions.
 		add_action( 'wp_head', 'print_emoji_detection_script', 7 );
 		add_action( 'wp_print_styles', 'print_emoji_styles' );
