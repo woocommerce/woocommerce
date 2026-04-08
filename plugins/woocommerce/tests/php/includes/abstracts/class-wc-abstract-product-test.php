@@ -338,4 +338,89 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 		$product->set_cogs_value( 12.34 );
 		$this->assertEquals( 123.4, $product->get_cogs_value() );
 	}
+
+	/**
+	 * @testdox get_image_ids returns empty array when no images are set.
+	 */
+	public function test_get_image_ids_returns_empty_when_no_images(): void {
+		$product = new WC_Product_Simple();
+		$product->save();
+
+		$this->assertSame( array(), $product->get_image_ids() );
+	}
+
+	/**
+	 * @testdox get_image_ids returns featured image only when no gallery is set.
+	 */
+	public function test_get_image_ids_returns_featured_only(): void {
+		$product = new WC_Product_Simple();
+		$product->set_image_id( 42 );
+		$product->save();
+
+		$this->assertSame( array( 42 ), $product->get_image_ids() );
+	}
+
+	/**
+	 * @testdox get_image_ids returns featured image followed by gallery images.
+	 */
+	public function test_get_image_ids_returns_featured_and_gallery(): void {
+		$product = new WC_Product_Simple();
+		$product->set_image_id( 10 );
+		$product->set_gallery_image_ids( array( 20, 30 ) );
+		$product->save();
+
+		$this->assertSame( array( 10, 20, 30 ), $product->get_image_ids() );
+	}
+
+	/**
+	 * @testdox get_image_ids deduplicates when featured image appears in gallery.
+	 */
+	public function test_get_image_ids_deduplicates(): void {
+		$product = new WC_Product_Simple();
+		$product->set_image_id( 10 );
+		$product->set_gallery_image_ids( array( 10, 20, 30 ) );
+		$product->save();
+
+		$this->assertSame( array( 10, 20, 30 ), $product->get_image_ids() );
+	}
+
+	/**
+	 * @testdox set_image_ids sets featured image from first ID and gallery from the rest.
+	 */
+	public function test_set_image_ids_splits_correctly(): void {
+		$product = new WC_Product_Simple();
+		$product->set_image_ids( array( 10, 20, 30 ) );
+		$product->save();
+
+		$this->assertEquals( 10, $product->get_image_id() );
+		$this->assertSame( array( 20, 30 ), $product->get_gallery_image_ids() );
+	}
+
+	/**
+	 * @testdox set_image_ids with single ID sets featured only and empty gallery.
+	 */
+	public function test_set_image_ids_single_id(): void {
+		$product = new WC_Product_Simple();
+		$product->set_image_ids( array( 42 ) );
+		$product->save();
+
+		$this->assertEquals( 42, $product->get_image_id() );
+		$this->assertSame( array(), $product->get_gallery_image_ids() );
+	}
+
+	/**
+	 * @testdox set_image_ids with empty array clears both featured and gallery.
+	 */
+	public function test_set_image_ids_empty_clears_both(): void {
+		$product = new WC_Product_Simple();
+		$product->set_image_id( 10 );
+		$product->set_gallery_image_ids( array( 20, 30 ) );
+		$product->save();
+
+		$product->set_image_ids( array() );
+		$product->save();
+
+		$this->assertEquals( 0, $product->get_image_id() );
+		$this->assertSame( array(), $product->get_gallery_image_ids() );
+	}
 }
