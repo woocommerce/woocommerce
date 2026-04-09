@@ -3289,12 +3289,6 @@ parameters:
 			path: includes/admin/class-wc-admin-webhooks.php
 
 		-
-			message: '#^Method WC_Admin_Webhooks\:\:maybe_display_legacy_rest_api_warning\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/admin/class-wc-admin-webhooks.php
-
-		-
 			message: '#^Method WC_Admin_Webhooks\:\:notices\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
