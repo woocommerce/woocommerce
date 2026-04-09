@@ -211,6 +211,7 @@ class WC_AJAX {
 			'shipping_zone_methods_save_changes',
 			'shipping_zone_methods_save_settings',
 			'shipping_classes_save_changes',
+			'shipping_providers_save_changes',
 			'toggle_gateway_enabled',
 			'load_status_widget',
 			'load_recent_reviews_widget',
@@ -3836,6 +3837,242 @@ class WC_AJAX {
 				'shipping_classes' => $wc_shipping->get_shipping_classes(),
 			)
 		);
+	}
+
+	/**
+	 * Handle AJAX save for custom shipping providers (taxonomy-based).
+	 *
+	 * @since 10.7.0
+	 */
+	public static function shipping_providers_save_changes(): void {
+		if ( ! \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'fulfillments' ) ) {
+			wp_send_json_error( 'feature_disabled' );
+		}
+
+		if ( ! isset( $_POST['wc_shipping_providers_nonce'], $_POST['changes'] ) ) {
+			wp_send_json_error( 'missing_fields' );
+		}
+
+		if ( ! wp_verify_nonce( wp_unslash( $_POST['wc_shipping_providers_nonce'] ), 'wc_shipping_providers_nonce' ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			wp_send_json_error( 'bad_nonce' );
+		}
+
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			wp_send_json_error( 'missing_capabilities' );
+		}
+
+		$taxonomy = 'wc_fulfillment_shipping_provider';
+		$changes  = wp_unslash( $_POST['changes'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+		if ( ! is_array( $changes ) ) {
+			wp_send_json_error( 'invalid_changes' );
+		}
+
+		// Collect only built-in provider keys (class-based, not custom taxonomy providers).
+		$all_providers = \Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentUtils::get_shipping_providers();
+		$built_in_keys = array();
+		foreach ( $all_providers as $provider ) {
+			if ( is_string( $provider ) && class_exists( $provider ) && is_subclass_of( $provider, \Automattic\WooCommerce\Admin\Features\Fulfillments\Providers\AbstractShippingProvider::class ) ) {
+				try {
+					$instance        = wc_get_container()->get( $provider );
+					$built_in_keys[] = $instance->get_key();
+				} catch ( \Throwable $e ) {
+					continue;
+				}
+			}
+		}
+		$reserved_slug_error = '';
+
+		foreach ( $changes as $term_id => $data ) {
+			if ( ! is_numeric( $term_id ) && ! isset( $data['newRow'] ) ) {
+				continue;
+			}
+			$term_id = absint( $term_id );
+
+			if ( isset( $data['deleted'] ) ) {
+				if ( isset( $data['newRow'] ) ) {
+					continue;
+				}
+				$term_to_delete = get_term( $term_id, $taxonomy );
+				if ( $term_to_delete instanceof \WP_Term && self::is_shipping_provider_in_use( $term_to_delete->slug ) ) {
+					$reserved_slug_error = sprintf(
+						/* translators: %s: provider name */
+						__( 'Cannot delete "%s" because it is used by existing fulfillments. Remove all fulfillments using this provider first.', 'woocommerce' ),
+						$term_to_delete->name
+					);
+					continue;
+				}
+				$delete_result = wp_delete_term( $term_id, $taxonomy );
+				if ( is_wp_error( $delete_result ) || false === $delete_result ) {
+					$reserved_slug_error = is_wp_error( $delete_result )
+						? $delete_result->get_error_message()
+						: __( 'Failed to delete the shipping provider.', 'woocommerce' );
+				}
+				continue;
+			}
+
+			$update_args = array();
+
+			if ( isset( $data['name'] ) && is_string( $data['name'] ) ) {
+				$update_args['name'] = sanitize_text_field( $data['name'] );
+			}
+
+			// Validate and set slug only on new rows. Slug is immutable after creation.
+			if ( isset( $data['newRow'] ) && isset( $data['slug'] ) && is_string( $data['slug'] ) && '' !== $data['slug'] ) {
+				$candidate_slug = sanitize_title( $data['slug'] );
+				if ( in_array( $candidate_slug, $built_in_keys, true ) ) {
+					$reserved_slug_error = sprintf(
+						/* translators: %s: slug value */
+						__( 'The slug "%s" is already used by a built-in shipping provider. Please choose a different slug.', 'woocommerce' ),
+						$candidate_slug
+					);
+					continue;
+				}
+				$update_args['slug'] = $candidate_slug;
+			}
+
+			// Validate tracking URL template: must be a valid http/https URL.
+			// null means "not submitted" (preserve existing), empty string means "clear".
+			$tracking_url_template = null;
+			if ( isset( $data['tracking_url_template'] ) && is_string( $data['tracking_url_template'] ) ) {
+				if ( '' === $data['tracking_url_template'] ) {
+					$tracking_url_template = '';
+				} else {
+					$testable_url = str_replace( '__PLACEHOLDER__', 'test', $data['tracking_url_template'] );
+					if ( filter_var( $testable_url, FILTER_VALIDATE_URL ) && preg_match( '#^https?://#i', $testable_url ) ) {
+						$tracking_url_template = esc_url_raw( $data['tracking_url_template'], array( 'http', 'https' ) );
+					} else {
+						$reserved_slug_error = __( 'The tracking URL template must be a valid HTTP or HTTPS URL.', 'woocommerce' );
+					}
+				}
+			}
+
+			// Validate icon URL: must be a valid http/https URL.
+			$icon_url = null;
+			if ( isset( $data['icon'] ) && is_string( $data['icon'] ) ) {
+				if ( '' === $data['icon'] ) {
+					$icon_url = '';
+				} elseif ( filter_var( $data['icon'], FILTER_VALIDATE_URL ) && preg_match( '#^https?://#i', $data['icon'] ) ) {
+					$icon_url = esc_url_raw( $data['icon'], array( 'http', 'https' ) );
+				} else {
+					$reserved_slug_error = __( 'The icon URL must be a valid HTTP or HTTPS URL.', 'woocommerce' );
+				}
+			}
+
+			if ( isset( $data['newRow'] ) ) {
+				$provider_name = strval( $update_args['name'] ?? '' );
+				$update_args   = array_filter( $update_args );
+				if ( empty( $provider_name ) ) {
+					continue;
+				}
+
+				$inserted_term = wp_insert_term( $provider_name, $taxonomy, $update_args );
+				if ( is_wp_error( $inserted_term ) ) {
+					$reserved_slug_error = $inserted_term->get_error_message();
+					continue;
+				}
+				$term_id = $inserted_term['term_id'];
+
+				// Verify auto-generated slug doesn't collide with built-in keys.
+				$new_term = get_term( $term_id, $taxonomy );
+				if ( ! $new_term instanceof \WP_Term ) {
+					continue;
+				}
+				if ( in_array( $new_term->slug, $built_in_keys, true ) ) {
+					wp_delete_term( $term_id, $taxonomy );
+					$reserved_slug_error = sprintf(
+						/* translators: %s: provider name */
+						__( 'Could not create provider "%s" because its auto-generated slug conflicts with a built-in shipping provider. Please specify a different slug.', 'woocommerce' ),
+						$provider_name
+					);
+					continue;
+				}
+			} else {
+				$update_result = wp_update_term( $term_id, $taxonomy, $update_args );
+				if ( is_wp_error( $update_result ) ) {
+					$reserved_slug_error = $update_result->get_error_message();
+					continue;
+				}
+			}
+
+			if ( $term_id ) {
+				if ( null !== $tracking_url_template ) {
+					update_term_meta( $term_id, 'tracking_url_template', $tracking_url_template );
+				}
+				if ( null !== $icon_url ) {
+					update_term_meta( $term_id, 'icon', $icon_url );
+				}
+			}
+		}
+
+		$terms              = get_terms(
+			array(
+				'taxonomy'   => $taxonomy,
+				'hide_empty' => false,
+			)
+		);
+		$shipping_providers = array();
+
+		if ( ! is_wp_error( $terms ) ) {
+			foreach ( $terms as $term ) {
+				$shipping_providers[] = array(
+					'term_id'               => $term->term_id,
+					'name'                  => $term->name,
+					'slug'                  => $term->slug,
+					'tracking_url_template' => get_term_meta( $term->term_id, 'tracking_url_template', true ),
+					'icon'                  => get_term_meta( $term->term_id, 'icon', true ),
+				);
+			}
+		}
+
+		$response = array(
+			'shipping_providers' => $shipping_providers,
+		);
+
+		if ( ! empty( $reserved_slug_error ) ) {
+			$response['error'] = $reserved_slug_error;
+		}
+
+		wp_send_json_success(
+			$response
+		);
+	}
+
+	/**
+	 * Check if a shipping provider slug is referenced by any fulfillment record.
+	 *
+	 * @since 10.7.0
+	 *
+	 * @param string $provider_slug The provider slug to check.
+	 * @return bool True if the provider is in use.
+	 */
+	private static function is_shipping_provider_in_use( string $provider_slug ): bool {
+		global $wpdb;
+
+		$fulfillments_table = $wpdb->prefix . 'wc_order_fulfillments';
+		$meta_table         = $wpdb->prefix . 'wc_order_fulfillment_meta';
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$exists = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT 1 FROM {$fulfillments_table} f
+				INNER JOIN {$meta_table} m ON f.fulfillment_id = m.fulfillment_id
+				WHERE m.meta_key = '_shipping_provider'
+				AND m.meta_value = %s
+				AND f.date_deleted IS NULL
+				AND m.date_deleted IS NULL
+				LIMIT 1",
+				$provider_slug
+			)
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		// Fail safe: assume in use if the query itself failed.
+		if ( $wpdb->last_error ) {
+			return true;
+		}
+
+		return null !== $exists;
 	}
 
 	/**

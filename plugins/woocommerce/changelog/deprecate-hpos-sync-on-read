@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Disable HPOS sync-on-read by default and add admin notice for affected sites.

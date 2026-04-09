@@ -117,6 +117,8 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'Fulfilled', $output );
 		$this->assertStringContainsString( '123456789', $output );
 		$this->assertStringContainsString( 'UPS', $output );
+		$this->assertStringContainsString( '<mark class="fulfillment-status fulfillments-trigger"', $output );
+		$this->assertStringContainsString( 'data-order-id="' . $order->get_id() . '"', $output );
 		$this->assertStringContainsString( "<a href='#' class='fulfillments-trigger' data-order-id='" . $order->get_id() . "' title='" . esc_attr__( 'View Fulfillments', 'woocommerce' ) . "'>", $output );
 		$this->assertStringContainsString( '<svg ', $output );
 		$this->assertStringContainsString( '<path ', $output );

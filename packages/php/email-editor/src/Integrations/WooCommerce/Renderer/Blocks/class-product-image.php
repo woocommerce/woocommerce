@@ -266,6 +266,15 @@ class Product_Image extends Abstract_Product_Block_Renderer {
 			return $parsed_block;
 		}
 
+		$align = $parsed_block['attrs']['align'] ?? '';
+
+		// For full-width alignment, use the full layout content size (ignoring padding).
+		if ( 'full' === $align ) {
+			$layout_settings                = $rendering_context->get_theme_settings()['layout'] ?? array();
+			$parsed_block['attrs']['width'] = $layout_settings['contentSize'] ?? '100%';
+			return $parsed_block;
+		}
+
 		if ( ! isset( $parsed_block['email_attrs']['width'] ) ) {
 			$parsed_block['attrs']['width'] = '100%';
 			return $parsed_block;
@@ -420,8 +429,14 @@ class Product_Image extends Abstract_Product_Block_Renderer {
 	 */
 	private function apply_email_wrapper( string $image_html, array $parsed_block, Rendering_Context $rendering_context ): string {
 		$width         = $parsed_block['attrs']['width'] ?? '';
-		$wrapper_width = ( $width && '100%' !== $width ) ? $width : 'auto';
+		$align         = $parsed_block['attrs']['align'] ?? '';
+		$is_full       = 'full' === $align;
+		$wrapper_width = $is_full ? '100%' : ( ( $width && '100%' !== $width ) ? $width : 'auto' );
 		$image_height  = $this->extract_image_height( $image_html ) . 'px';
+
+		// Map block alignment to valid HTML/CSS alignment values.
+		// "full" is not a valid text-align or table align value.
+		$css_align = $is_full ? 'center' : ( $align ? $align : 'left' );
 
 		$wrapper_styles = array(
 			'border-collapse' => 'separate',
@@ -439,8 +454,7 @@ class Product_Image extends Abstract_Product_Block_Renderer {
 			$cell_styles = array_merge( $cell_styles, $padding_styles['declarations'] );
 		}
 
-		$align                     = $parsed_block['attrs']['align'] ?? 'left';
-		$cell_styles['text-align'] = $align;
+		$cell_styles['text-align'] = $css_align;
 
 		$outer_table_attrs = array(
 			'style' => \WP_Style_Engine::compile_css(
@@ -456,7 +470,7 @@ class Product_Image extends Abstract_Product_Block_Renderer {
 		);
 
 		$outer_cell_attrs = array(
-			'align' => $align,
+			'align' => $css_align,
 		);
 
 		$inner_table_attrs = array(

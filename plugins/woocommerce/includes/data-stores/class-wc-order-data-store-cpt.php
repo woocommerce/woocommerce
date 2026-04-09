@@ -1181,7 +1181,6 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 		$this->prime_refund_caches_for_orders( $order_ids, $query_vars );
 		$this->prime_refund_total_caches_for_orders( $order_ids, $query_vars );
-		$this->prime_needs_processing_transients( $order_ids, $query_vars );
 	}
 
 	/**

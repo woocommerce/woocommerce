@@ -778,6 +778,12 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 					'description' => 'WooPay express checkout',
 					'icon'        => '', // The icon with an invalid URL is ignored.
 					'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_PRIMARY,
+					'notice'      => array(
+						'badge'     => '',
+						'message'   => '',
+						'link_text' => '',
+						'link_url'  => '',
+					),
 				),
 				array(
 					'id'          => 'card',
@@ -788,6 +794,12 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 					'description' => '<strong>Accepts</strong> <b>all major</b><em>credit</em> and <a href="#" target="_blank">debit cards</a>.',
 					'icon'        => 'https://example.com/card-icon.png',
 					'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_PRIMARY,
+					'notice'      => array(
+						'badge'     => '',
+						'message'   => '',
+						'link_text' => '',
+						'link_url'  => '',
+					),
 				),
 				array(
 					'id'          => 'basic2',
@@ -798,6 +810,12 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 					'description' => '',
 					'icon'        => '',
 					'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_PRIMARY,
+					'notice'      => array(
+						'badge'     => '',
+						'message'   => '',
+						'link_text' => '',
+						'link_url'  => '',
+					),
 				),
 				array(
 					'id'          => 'basic',
@@ -808,6 +826,12 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 					'description' => '',
 					'icon'        => '',
 					'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_SECONDARY,
+					'notice'      => array(
+						'badge'     => '',
+						'message'   => '',
+						'link_text' => '',
+						'link_url'  => '',
+					),
 				),
 			),
 			$gateway_details['onboarding']['recommended_payment_methods']
@@ -1089,6 +1113,43 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		// And suggestion ID should be attached.
 		$this->assertArrayHasKey( '_suggestion_id', $gateway_details, 'Gateway details should have _suggestion_id' );
 		$this->assertSame( ExtensionSuggestions::PAYPAL_FULL_STACK, $gateway_details['_suggestion_id'], 'Suggestion ID should match' );
+	}
+
+	/**
+	 * Test that get_payment_gateway_details skips suggestion matching for offline payment methods.
+	 *
+	 * Offline PMs (BACS, COD, Cheque) don't have extension suggestions or incentives.
+	 * The suggestion lookup should be skipped entirely for them.
+	 */
+	public function test_get_payment_gateway_details_skips_suggestion_matching_for_offline_pms() {
+		// Arrange.
+		$fake_gateway = new FakePaymentGateway(
+			WC_Gateway_BACS::ID,
+			array(
+				'enabled'            => true,
+				'title'              => 'Direct bank transfer',
+				'method_title'       => 'Direct bank transfer',
+				'description'        => 'Make your payment directly into our bank account.',
+				'method_description' => 'Take payments in person via BACS.',
+				'plugin_slug'        => 'woocommerce',
+				'plugin_file'        => 'woocommerce/woocommerce.php',
+			),
+		);
+
+		// The suggestion service should never be called for offline PMs.
+		$this->mock_extension_suggestions
+			->expects( $this->never() )
+			->method( 'get_by_plugin_slug' );
+
+		// Act.
+		$gateway_details = $this->sut->get_payment_gateway_details( $fake_gateway, 0, 'US' );
+
+		// Assert that the gateway is correctly identified as an offline PM.
+		$this->assertSame( PaymentsProviders::TYPE_OFFLINE_PM, $gateway_details['_type'] );
+
+		// Assert that no suggestion-derived fields are present.
+		$this->assertArrayNotHasKey( '_suggestion_id', $gateway_details );
+		$this->assertArrayNotHasKey( '_incentive', $gateway_details );
 	}
 
 	/**

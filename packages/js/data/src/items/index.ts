@@ -44,3 +44,9 @@ declare module '@wordpress/data' {
 		key: typeof STORE_NAME | typeof store
 	): PromiseifySelectors< ItemsSelector >;
 }
+
+declare module '@wordpress/data' {
+	interface StoreRegistry {
+		[ STORE_NAME ]: typeof store;
+	}
+}

@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Add missing use statements for WC_Product_Simple, WC_REST_Exception, and WC_Product_Attribute in the namespaced V4 Products controller.
+
+

@@ -99,6 +99,101 @@ class WC_Admin_Tests_Reports_Customer extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that delayed account creation (order confirmation page) merges the
+	 * guest customer_lookup row instead of creating a duplicate.
+	 *
+	 * @covers \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore::merge_guest_customer_on_delayed_account_creation
+	 */
+	public function test_delayed_account_creation_merges_guest_row() {
+		global $wpdb;
+
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$email = 'guest-merge-test@example.com';
+
+		// Create a guest order.
+		$order = WC_Helper_Order::create_order( 0 );
+		$order->set_billing_email( $email );
+		$order->save();
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		// Verify guest row exists.
+		$guest_customer_id = \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore::get_guest_id_by_email( $email );
+		$this->assertNotFalse( $guest_customer_id, 'Guest customer row should exist after guest order.' );
+
+		// Register via delayed account creation (same source as the order confirmation page).
+		$user_id = wc_create_new_customer(
+			$email,
+			'',
+			'test_password',
+			array(
+				'first_name' => 'John',
+				'last_name'  => 'Doe',
+				'source'     => 'delayed-account-creation',
+			)
+		);
+		$this->assertNotWPError( $user_id );
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		// The guest row should have been updated in place, not duplicated.
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT customer_id, user_id FROM {$wpdb->prefix}wc_customer_lookup WHERE email = %s",
+				$email
+			)
+		);
+
+		$this->assertCount( 1, $rows, 'There should be exactly one customer_lookup row for this email.' );
+		$this->assertEquals( $guest_customer_id, (int) $rows[0]->customer_id, 'The original customer_id should be preserved.' );
+		$this->assertEquals( $user_id, (int) $rows[0]->user_id, 'The user_id should be updated to the new registered user.' );
+	}
+
+	/**
+	 * Test that normal (non-delayed) registration does NOT merge a guest row.
+	 *
+	 * @covers \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore::merge_guest_customer_on_delayed_account_creation
+	 */
+	public function test_normal_registration_does_not_merge_guest_row() {
+		global $wpdb;
+
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$email = 'normal-register-test@example.com';
+
+		// Create a guest order.
+		$order = WC_Helper_Order::create_order( 0 );
+		$order->set_billing_email( $email );
+		$order->save();
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$guest_customer_id = \Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore::get_guest_id_by_email( $email );
+		$this->assertNotFalse( $guest_customer_id, 'Guest customer row should exist.' );
+
+		// Register via normal flow (no source = no merge).
+		$user_id = wc_create_new_customer( $email, '', 'test_password' );
+		$this->assertNotWPError( $user_id );
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		// The guest row must remain untouched: same customer_id, user_id still NULL.
+		// update_registered_customer skips users with no orders, so no second row is
+		// inserted either. What we're guarding against here is the merge function
+		// silently claiming the guest row for an unverified registration.
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT customer_id, user_id FROM {$wpdb->prefix}wc_customer_lookup WHERE customer_id = %d",
+				$guest_customer_id
+			)
+		);
+
+		$this->assertCount( 1, $rows, 'Guest row should still exist.' );
+		$this->assertNull( $rows[0]->user_id, 'Guest row user_id should remain NULL for normal registration.' );
+	}
+
+	/**
 	 * Get a customer's record from the database.
 	 *
 	 * @param int $customer_id Analytics Customer ID (not WP User ID).

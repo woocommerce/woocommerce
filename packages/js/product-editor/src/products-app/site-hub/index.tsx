@@ -32,20 +32,13 @@ const SiteHub = memo(
 						select( 'core/edit-site' )
 					);
 
-					const {
-						getSite,
-						getUnstableBase, // Site index.
-					} = select( coreStore ) as {
-						getSite: () =>
-							| undefined
-							| { title: string; url: string };
-						getUnstableBase: () => { home: string };
-					};
-					const _site: undefined | { title: string; url: string } =
-						getSite();
-
-					const base: { home: string } | undefined =
-						getUnstableBase();
+					const coreSelectors = select( coreStore );
+					const _site = coreSelectors.getSite() as
+						| undefined
+						| { title: string; url: string };
+					const base = coreSelectors.getUnstableBase() as
+						| { home: string }
+						| undefined;
 					return {
 						dashboardLink:
 							getSettings().__experimentalDashboardLink ||

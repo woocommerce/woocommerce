@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Migrate deferred transactional email sending to Action Scheduler
