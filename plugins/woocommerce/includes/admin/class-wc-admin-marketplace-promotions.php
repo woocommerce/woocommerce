@@ -1,4 +1,6 @@
 <?php
+declare( strict_types = 1 );
+
 /**
  * Addons Page
  *
@@ -16,6 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Admin_Marketplace_Promotions {
 
 	const CRON_NAME           = 'woocommerce_marketplace_cron_fetch_promotions';
+	const RULE_BASED_FORMAT   = 'rule-based-promo-card';
 	const TRANSIENT_NAME      = 'woocommerce_marketplace_promotions_v2';
 	const TRANSIENT_LIFE_SPAN = DAY_IN_SECONDS;
 	const PROMOTIONS_API_URL  = 'https://woocommerce.com/wp-json/wccom-extensions/3.0/promotions';
@@ -52,9 +55,9 @@ class WC_Admin_Marketplace_Promotions {
 		add_action( self::CRON_NAME, array( __CLASS__, 'update_promotions' ) );
 
 		if (
-			defined( 'DOING_AJAX' ) && DOING_AJAX
-			|| defined( 'DOING_CRON' ) && DOING_CRON
-			|| defined( 'WP_CLI' ) && WP_CLI
+			( defined( 'DOING_AJAX' ) && DOING_AJAX )
+			|| ( defined( 'DOING_CRON' ) && DOING_CRON )
+			|| ( defined( 'WP_CLI' ) && WP_CLI )
 		) {
 			return;
 		}
@@ -117,8 +120,75 @@ class WC_Admin_Marketplace_Promotions {
 		}
 
 		$promotions = self::merge_promos( $promotions );
+		$promotions = self::resolve_rule_based_promotions( $promotions );
 
 		return self::filter_out_inactive_promotions( $promotions );
+	}
+
+	/**
+	 * Evaluate locally targeted promotions before they are exposed to JS.
+	 *
+	 * Supported stores convert matching rule-based promos into standard promo cards.
+	 * Unsupported stores ignore the custom format entirely.
+	 *
+	 * @param array $promotions Promotions data received from WCCOM.
+	 * @return array
+	 */
+	private static function resolve_rule_based_promotions( array $promotions ): array {
+		$resolved_promotions = array();
+
+		foreach ( $promotions as $promotion ) {
+			if ( ! is_array( $promotion ) ) {
+				$resolved_promotions[] = $promotion;
+				continue;
+			}
+
+			if ( self::RULE_BASED_FORMAT !== ( $promotion['format'] ?? '' ) ) {
+				$resolved_promotions[] = $promotion;
+				continue;
+			}
+
+			if ( ! self::promotion_rules_pass( $promotion['local_rules'] ?? array() ) ) {
+				continue;
+			}
+
+			unset( $promotion['local_rules'] );
+			$promotion['format']     = 'promo-card';
+			$resolved_promotions[] = $promotion;
+		}
+
+		return $resolved_promotions;
+	}
+
+	/**
+	 * Evaluate a set of rule arrays using the existing remote specs processors.
+	 *
+	 * @param mixed $rules Rule definitions from the promotions payload.
+	 * @return bool
+	 */
+	private static function promotion_rules_pass( $rules ): bool {
+		if ( ! is_array( $rules ) || empty( $rules ) ) {
+			return false;
+		}
+
+		$decoded_rules = json_decode( wp_json_encode( $rules ) );
+		if ( ! is_array( $decoded_rules ) || empty( $decoded_rules ) ) {
+			return false;
+		}
+
+		foreach ( $decoded_rules as $decoded_rule ) {
+			if ( ! is_object( $decoded_rule ) || empty( $decoded_rule->type ) ) {
+				return false;
+			}
+
+			$processor = \Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\GetRuleProcessor::get_processor( $decoded_rule->type );
+			if ( ! $processor->validate( $decoded_rule ) ) {
+				return false;
+			}
+		}
+
+		return ( new \Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\RuleEvaluator() )
+			->evaluate( $decoded_rules );
 	}
 
 	/**
@@ -253,7 +323,7 @@ class WC_Admin_Marketplace_Promotions {
 
 		return array_filter(
 			$promotions,
-			function( $promotion ) use ( $format ) {
+			function ( $promotion ) use ( $format ) {
 				return isset( $promotion['format'] ) && $format === $promotion['format'];
 			}
 		);
