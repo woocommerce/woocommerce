@@ -384,11 +384,11 @@ class HandlerRegistry {
 				return array( 'post__in' => $cart_product_ids );
 			},
 			function ( $collection_args, $query ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
-				$collection_args['cartProductIds'] = $this->get_cart_product_ids( $collection_args, null );
+				$collection_args['cartProductIds'] = $this->get_cart_product_ids( null );
 				return $collection_args;
 			},
 			function ( $collection_args, $query, $request ) {
-				$collection_args['cartProductIds'] = $this->get_cart_product_ids( $collection_args, $request );
+				$collection_args['cartProductIds'] = $this->get_cart_product_ids( $request );
 				return $collection_args;
 			}
 		);
@@ -468,11 +468,10 @@ class HandlerRegistry {
 	 * Get cart product IDs from various sources.
 	 * Handles loading cart products from location context or request params.
 	 *
-	 * @param array                 $collection_args Collection arguments with location context.
-	 * @param \WP_REST_Request|null $request         Optional REST request for editor context.
+	 * @param \WP_REST_Request|null $request Optional REST request for editor context.
 	 * @return array<int> The product IDs from the cart. Returns recent products for preview in editor context only.
 	 */
-	private function get_cart_product_ids( $collection_args, $request = null ) {
+	private function get_cart_product_ids( $request = null ) {
 		if ( $request ) {
 			// In editor context (REST request), show sample products for preview. Only emails to the customer show live data.
 			$recent_product_ids = wc_get_products(
