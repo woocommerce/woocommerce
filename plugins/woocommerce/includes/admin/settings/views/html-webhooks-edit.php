@@ -2,6 +2,8 @@
 /**
  * Admin View: Edit Webhooks
  *
+ * @var WC_Webhook $webhook Webhook object.
+ *
  * @package WooCommerce\Admin\Webhooks\Views
  */
 
@@ -146,8 +148,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 								?>
 							</option>
 						<?php endforeach; ?>
-						<?php if ( WC()->legacy_rest_api_is_available() ) : ?>
-							<option value="legacy_v3" <?php selected( 'legacy_v3', $webhook->get_api_version(), true ); ?>>
+						<?php if ( 'legacy_v3' === $webhook->get_api_version() && WC()->legacy_rest_api_is_available() ) : ?>
+							<option value="legacy_v3" selected="selected">
 								<?php esc_html_e( 'Legacy API v3 (deprecated)', 'woocommerce' ); ?>
 							</option>
 						<?php elseif ( ! in_array( $webhook->get_api_version(), wc_get_webhook_rest_api_versions(), true ) ) : ?>

@@ -240,7 +240,7 @@ class PluginUtil {
 
 			/**
 			 * Filter to modify the warning text that appears in the HPOS section of the features settings page
-			 * when both the Legacy REST API is active (via WooCommerce core or via the Legacy REST API plugin)
+			 * when the Legacy REST API plugin is active
 			 * and the orders table is in use as the primary data store for orders.
 			 *
 			 * @param string $legacy_api_and_hpos_incompatibility_warning_text Original warning text.

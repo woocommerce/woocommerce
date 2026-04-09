@@ -426,29 +426,33 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		$current_user = get_current_user_id();
 		wp_set_current_user( $this->get_user_id() );
 
-		$resource = $this->get_resource();
-		$event    = $this->get_event();
+		try {
+			$resource = $this->get_resource();
+			$event    = $this->get_event();
 
-		// If a resource has been deleted, just include the ID in the payload.
-		$payload = array(
-			'id' => $resource_id,
-		);
+			// If a resource has been deleted, just include the ID in the payload.
+			$payload = array(
+				'id' => $resource_id,
+			);
 
-		if ( 'deleted' !== $event ) {
-			if ( in_array( $this->get_api_version(), wc_get_webhook_rest_api_versions(), true ) ) {
-				$payload = $this->get_wp_api_payload( $resource, $resource_id, $event );
-			} elseif ( WC()->legacy_rest_api_is_available() ) {
-				wc_deprecated_function( 'Webhook delivery via the Legacy REST API', '9.0.0', 'editing the webhook to use a current API version' );
-				$payload = wc()->api->get_webhook_api_payload( $resource, $resource_id, $event );
-			} else {
-				throw new \Exception( esc_html__( 'Unsupported webhook API version. Please edit this webhook to use a current REST API version.', 'woocommerce' ) );
+			if ( 'deleted' !== $event ) {
+				$api_version = $this->get_api_version();
+
+				if ( in_array( $api_version, wc_get_webhook_rest_api_versions(), true ) ) {
+					$payload = $this->get_wp_api_payload( $resource, $resource_id, $event );
+				} elseif ( 'legacy_v3' === $api_version && WC()->legacy_rest_api_is_available() ) {
+					wc_deprecated_function( 'Webhook delivery via the Legacy REST API', '9.0.0', 'editing the webhook to use a current API version' );
+					$payload = wc()->api->get_webhook_api_payload( $resource, $resource_id, $event );
+				} else {
+					throw new \Exception( esc_html__( 'Unsupported webhook API version. Please edit this webhook to use a current REST API version.', 'woocommerce' ) );
+				}
 			}
+
+			return apply_filters( 'woocommerce_webhook_payload', $payload, $resource, $resource_id, $this->get_id() );
+		} finally {
+			// Restore the current user.
+			wp_set_current_user( $current_user );
 		}
-
-		// Restore the current user.
-		wp_set_current_user( $current_user );
-
-		return apply_filters( 'woocommerce_webhook_payload', $payload, $resource, $resource_id, $this->get_id() );
 	}
 
 	/**

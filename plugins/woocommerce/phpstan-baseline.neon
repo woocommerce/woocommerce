@@ -7945,9 +7945,9 @@ parameters:
 			path: includes/admin/settings/views/html-settings-tax.php
 
 		-
-			message: '#^Variable \$webhook might not be defined\.$#'
-			identifier: variable.undefined
-			count: 20
+			message: '#^Parameter \#1 \$text of function esc_attr expects string, int given\.$#'
+			identifier: argument.type
+			count: 1
 			path: includes/admin/settings/views/html-webhooks-edit.php
 
 		-

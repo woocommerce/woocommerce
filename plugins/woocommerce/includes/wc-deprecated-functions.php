@@ -1424,7 +1424,7 @@ function get_woocommerce_api_url( $path ) {
  * The extension itself toggles this option between `yes` and `no` depending on whether the extension is active or not, but since this is the only
  * way to enable or disable the legacy API now, all we actually need to do is detect if the extension is active.
  *
- * @return bool
+ * @return string 'yes' or 'no'.
  */
 add_filter( 'pre_option_woocommerce_api_enabled', function() {
 	return WC()->legacy_rest_api_is_available() ? 'yes' : 'no';
