@@ -416,6 +416,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 *
 	 * @param mixed $resource_id First hook argument, typically the resource ID.
 	 * @return mixed              Payload data.
+	 * @throws \Exception If the webhook uses an unsupported API version.
 	 * @since  2.2.0
 	 */
 	public function build_payload( $resource_id ) {
