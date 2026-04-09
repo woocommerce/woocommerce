@@ -384,12 +384,14 @@ class OrderController {
 
 			// If only local pickup is selected, we don't need to validate the shipping country.
 			if ( ! $selected_shipping_rates_are_all_local_pickup && ! $this->validate_allowed_country( $shipping_country, (array) wc()->countries->get_shipping_countries() ) ) {
+				$countries             = WC()->countries->get_countries();
+				$shipping_country_name = $countries[ $shipping_country ] ?? $shipping_country;
 				throw new RouteException(
 					'woocommerce_rest_invalid_address_country',
 					sprintf(
-						/* translators: %s country code. */
+						/* translators: %s country name. */
 						esc_html__( 'Sorry, we do not ship orders to the provided country (%s)', 'woocommerce' ),
-						esc_html( $shipping_country )
+						esc_html( $shipping_country_name )
 					),
 					400,
 					array(
@@ -400,12 +402,14 @@ class OrderController {
 		}
 
 		if ( ! $this->validate_allowed_country( $billing_country, (array) wc()->countries->get_allowed_countries() ) ) {
+			$countries            = WC()->countries->get_countries();
+			$billing_country_name = $countries[ $billing_country ] ?? $billing_country;
 			throw new RouteException(
 				'woocommerce_rest_invalid_address_country',
 				sprintf(
-					/* translators: %s country code. */
+					/* translators: %s country name. */
 					esc_html__( 'Sorry, we do not allow orders from the provided country (%s)', 'woocommerce' ),
-					esc_html( $billing_country )
+					esc_html( $billing_country_name )
 				),
 				400,
 				array(

@@ -74,13 +74,21 @@ class Utils {
 	public static function add_quantity_stepper_classes( $quantity_html ) {
 		$processor = new \WP_HTML_Tag_Processor( $quantity_html );
 
-		// Add classes to the form.
-		while ( $processor->next_tag( array( 'class_name' => 'quantity' ) ) ) {
-			$processor->add_class( 'wc-block-components-quantity-selector' );
-		}
+		while ( $processor->next_tag() ) {
+			if (
+				$processor->get_tag() === 'DIV' &&
+				$processor->has_class( 'quantity' )
+			) {
+				$processor->add_class( 'wc-block-components-quantity-selector' );
+			}
 
-		while ( $processor->next_tag( array( 'class_name' => 'input-text' ) ) ) {
-			$processor->add_class( 'wc-block-components-quantity-selector__input' );
+			if (
+				$processor->get_tag() === 'INPUT' &&
+				$processor->get_attribute( 'name' ) === 'quantity' &&
+				$processor->get_attribute( 'type' ) !== 'hidden'
+			) {
+				$processor->add_class( 'wc-block-components-quantity-selector__input' );
+			}
 		}
 
 		return $processor->get_updated_html();

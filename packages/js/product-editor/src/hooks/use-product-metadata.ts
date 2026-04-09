@@ -32,13 +32,11 @@ function useProductMetadata( options?: Options ) {
 			// @ts-ignore
 			const { getEditedEntityRecord, hasFinishedResolution } =
 				select( 'core' );
-			// @ts-expect-error Selector is not typed
-			const { meta_data: metadata }: Product = getEditedEntityRecord(
+			const { meta_data: metadata } = getEditedEntityRecord(
 				'postType',
 				postType,
 				id
-			);
-			// @ts-expect-error Selector is not typed
+			) as unknown as Product;
 			const isResolutionFinished = hasFinishedResolution(
 				'getEditedEntityRecord',
 				[ 'postType', postType, id ]

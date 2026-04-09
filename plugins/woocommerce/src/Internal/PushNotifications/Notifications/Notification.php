@@ -95,6 +95,16 @@ abstract class Notification {
 	abstract public function write_meta( string $key ): void;
 
 	/**
+	 * Deletes a meta key from this notification's resource.
+	 *
+	 * @param string $key The meta key.
+	 * @return void
+	 *
+	 * @since 10.8.0
+	 */
+	abstract public function delete_meta( string $key ): void;
+
+	/**
 	 * Returns the notification data as an array.
 	 *
 	 * @return array{type: string, resource_id: int}

@@ -7,6 +7,7 @@ import { createElement } from '@wordpress/element';
 import { arrowLeft, arrowRight, Icon } from '@wordpress/icons';
 import { useSelect } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
+import { ProductVariation } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -43,24 +44,20 @@ export function VariationSwitcherFooter( {
 	const { previousVariation, nextVariation } = useSelect(
 		( select ) => {
 			const { getEntityRecord } = select( 'core' );
+
+			const getVariation = ( id: number | null ) =>
+				id !== null
+					? ( getEntityRecord(
+							'postType',
+							'product_variation',
+							id
+					  ) as ProductVariation | undefined )
+					: undefined;
+
 			if ( numberOfVariations && numberOfVariations > 0 ) {
 				return {
-					previousVariation:
-						previousVariationId !== null &&
-						// @ts-expect-error Selector is not typed
-						getEntityRecord(
-							'postType',
-							'product_variation',
-							previousVariationId
-						),
-					nextVariation:
-						nextVariationId !== null &&
-						// @ts-expect-error Selector is not typed
-						getEntityRecord(
-							'postType',
-							'product_variation',
-							nextVariationId
-						),
+					previousVariation: getVariation( previousVariationId ),
+					nextVariation: getVariation( nextVariationId ),
 				};
 			}
 			return {};
