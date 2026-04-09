@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add DefaultCustomerAddress enum class for the possible values of the woocommerce_default_customer_address option and implement it across the codebase.
