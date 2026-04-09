@@ -38,6 +38,21 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 	private POSApprovalService $approval_service;
 
 	/**
+	 * Approval token extracted from the current request's POST body.
+	 * Set before capability checks so the filter can use it without touching $_REQUEST.
+	 *
+	 * @var string
+	 */
+	private string $current_approval_token = '';
+
+	/**
+	 * The order ID from the current request, for approval scope validation.
+	 *
+	 * @var int
+	 */
+	private int $current_order_id = 0;
+
+	/**
 	 * Initialize dependencies via the DI container.
 	 *
 	 * @internal
@@ -85,6 +100,7 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 		string $post_type
 	): bool {
 		if ( 'shop_order_refund' === $post_type && 'create' === $context ) {
+			$this->extract_approval_context_from_rest_request();
 			return $this->user_has_capability( 'woocommerce_refund_orders' );
 		}
 
@@ -113,6 +129,11 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 		$status = $request->get_param( 'status' );
 		if ( 'cancelled' !== $status ) {
 			return $order;
+		}
+
+		$this->current_approval_token = (string) $request->get_param( '_pos_approval' );
+		if ( method_exists( $order, 'get_id' ) ) {
+			$this->current_order_id = (int) $order->get_id();
 		}
 
 		if ( ! $this->user_has_capability( 'woocommerce_void_orders' ) ) {
@@ -151,18 +172,30 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 			return false;
 		}
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$token = isset( $_REQUEST['_pos_approval'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['_pos_approval'] ) ) : '';
-		if ( '' === $token ) {
+		if ( '' === $this->current_approval_token ) {
 			return false;
 		}
 
-		$approval_data = $this->approval_service->validate_and_consume( $token, $action );
+		$approval_data = $this->approval_service->validate_and_consume(
+			$this->current_approval_token,
+			$action
+		);
 		if ( false === $approval_data ) {
 			return false;
 		}
 
+		// Validate the approval is scoped to the correct order if applicable.
+		$approved_order_id = (int) ( $approval_data['context']['order_id'] ?? 0 );
+		if ( $approved_order_id > 0 && $this->current_order_id > 0
+			&& $approved_order_id !== $this->current_order_id
+		) {
+			return false;
+		}
+
 		$this->maybe_add_order_note( $approval_data, $capability, $user_id );
+
+		// Clear token after consumption to prevent reuse within the same request.
+		$this->current_approval_token = '';
 
 		return true;
 	}
@@ -214,6 +247,28 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 	 * @param string $capability The capability to check.
 	 * @return bool
 	 */
+	/**
+	 * Extract approval token and order context from the current REST request.
+	 *
+	 * Used by enforce_capabilities() which receives the permission filter
+	 * but not the WP_REST_Request. Reads from POST body only (never GET)
+	 * to prevent token leakage in query strings and server logs.
+	 *
+	 * @since 10.8.0
+	 */
+	private function extract_approval_context_from_rest_request(): void {
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$token = isset( $_POST['_pos_approval'] ) ? sanitize_text_field( wp_unslash( $_POST['_pos_approval'] ) ) : '';
+
+		$this->current_approval_token = $token;
+
+		// Extract order ID from the request URI (e.g., /orders/123/refunds).
+		$uri = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
+		if ( preg_match( '#/orders/(\d+)/#', $uri, $matches ) ) {
+			$this->current_order_id = (int) $matches[1];
+		}
+	}
+
 	private function user_has_capability( string $capability ): bool {
 		$user_id = get_current_user_id();
 		$has_cap = current_user_can( $capability );

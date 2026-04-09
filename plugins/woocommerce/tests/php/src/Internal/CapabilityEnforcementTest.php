@@ -372,11 +372,12 @@ class CapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 			array( 'order_id' => $order->get_id() )
 		);
 
-		$_REQUEST['_pos_approval'] = $token;
+		$_POST['_pos_approval']    = $token;
+		$_SERVER['REQUEST_URI']    = '/wp-json/wc/v3/orders/' . $order->get_id() . '/refunds';
 
 		$result = $this->sut->enforce_capabilities( true, 'create', 0, 'shop_order_refund' );
 
-		unset( $_REQUEST['_pos_approval'] );
+		unset( $_POST['_pos_approval'], $_SERVER['REQUEST_URI'] );
 
 		$this->assertTrue( $result );
 
@@ -397,11 +398,11 @@ class CapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 	public function test_user_cannot_refund_with_invalid_approval_token(): void {
 		wp_set_current_user( $this->limited_user_id );
 
-		$_REQUEST['_pos_approval'] = 'invalid-token-value';
+		$_POST['_pos_approval'] = 'invalid-token-value';
 
 		$result = $this->sut->enforce_capabilities( true, 'create', 0, 'shop_order_refund' );
 
-		unset( $_REQUEST['_pos_approval'] );
+		unset( $_POST['_pos_approval'] );
 
 		$this->assertFalse( $result );
 	}
