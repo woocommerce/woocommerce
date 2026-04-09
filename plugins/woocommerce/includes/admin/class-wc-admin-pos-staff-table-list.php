@@ -101,7 +101,7 @@ class WC_Admin_POS_Staff_Table_List extends WP_List_Table {
 	 * @return string
 	 */
 	public function column_role( $user ) {
-		return esc_html( $this->get_role_name( $user ) );
+		return esc_html( WC_Admin_POS_Staff::get_role_name( $user ) );
 	}
 
 	/**
@@ -139,26 +139,22 @@ class WC_Admin_POS_Staff_Table_List extends WP_List_Table {
 	public function prepare_items(): void {
 		$per_page              = 20;
 		$current_page          = $this->get_pagenum();
+		$offset                = ( $current_page - 1 ) * $per_page;
 		$this->_column_headers = array( $this->get_columns(), array(), $this->get_sortable_columns() );
 
-		$users = get_users(
-			array(
-				'orderby' => 'display_name',
-				'order'   => 'ASC',
-			)
+		$pos_roles = array( 'pos_cashier', 'pos_manager', 'administrator', 'shop_manager' );
+
+		$query_args = array(
+			'role__in' => $pos_roles,
+			'orderby'  => 'display_name',
+			'order'    => 'ASC',
+			'number'   => $per_page,
+			'offset'   => $offset,
 		);
 
-		$filtered = array();
-		foreach ( $users as $user ) {
-			// phpcs:ignore WordPress.WP.Capabilities.Unknown -- Registered in WC_Install::create_roles().
-			if ( user_can( $user->ID, 'woocommerce_pos_access' ) ) {
-				$filtered[] = $user;
-			}
-		}
-
-		$total       = count( $filtered );
-		$offset      = ( $current_page - 1 ) * $per_page;
-		$this->items = array_slice( $filtered, $offset, $per_page );
+		$user_query  = new \WP_User_Query( $query_args );
+		$this->items = $user_query->get_results();
+		$total       = $user_query->get_total();
 
 		$this->set_pagination_args(
 			array(
@@ -245,27 +241,5 @@ class WC_Admin_POS_Staff_Table_List extends WP_List_Table {
 		}
 
 		return $actions;
-	}
-
-	/**
-	 * Return a translated role name for a user.
-	 *
-	 * @since 10.8.0
-	 * @param WP_User $user User object.
-	 * @return string
-	 */
-	private function get_role_name( WP_User $user ): string {
-		$roles = (array) $user->roles;
-
-		if ( empty( $roles ) ) {
-			return '';
-		}
-
-		$wp_roles = wp_roles();
-		$first    = reset( $roles );
-
-		return isset( $wp_roles->role_names[ $first ] )
-			? translate_user_role( $wp_roles->role_names[ $first ] )
-			: $first;
 	}
 }

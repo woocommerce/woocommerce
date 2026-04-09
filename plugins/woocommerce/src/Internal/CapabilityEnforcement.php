@@ -23,13 +23,13 @@ use WP_REST_Server;
 class CapabilityEnforcement implements RegisterHooksInterface {
 
 	/**
-	 * Maps capabilities to their corresponding approval actions.
+	 * Capabilities that support approval-token overrides.
 	 *
-	 * @var array<string, string>
+	 * @var string[]
 	 */
-	private const CAPABILITY_ACTION_MAP = array(
-		'woocommerce_refund_orders' => 'woocommerce_refund_orders',
-		'woocommerce_void_orders'   => 'woocommerce_void_orders',
+	private const APPROVABLE_CAPABILITIES = array(
+		'woocommerce_refund_orders',
+		'woocommerce_void_orders',
 	);
 
 	/**
@@ -142,10 +142,6 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 			return current_user_can( 'woocommerce_adjust_stock' );
 		}
 
-		if ( ! $permission ) {
-			return false;
-		}
-
 		return $permission;
 	}
 
@@ -206,11 +202,15 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 	public function enforce_route_access( $response, array $handler, WP_REST_Request $request ) {
 		unset( $handler );
 
-		if ( ! is_user_logged_in() || ! current_user_can( 'woocommerce_pos_access' ) || current_user_can( 'manage_woocommerce' ) ) {
+		$route = $request->get_route();
+
+		if ( ! $this->is_blocked_user_route( $route ) && ! $this->is_report_route( $route ) ) {
 			return $response;
 		}
 
-		$route = $request->get_route();
+		if ( ! is_user_logged_in() || ! current_user_can( 'woocommerce_pos_access' ) || current_user_can( 'manage_woocommerce' ) ) {
+			return $response;
+		}
 
 		if ( $this->is_blocked_user_route( $route ) ) {
 			return new WP_Error(
@@ -220,7 +220,7 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 			);
 		}
 
-		if ( $this->is_report_route( $route ) && ! current_user_can( 'woocommerce_view_sales_reports' ) ) {
+		if ( ! current_user_can( 'woocommerce_view_sales_reports' ) ) {
 			return new WP_Error(
 				'woocommerce_rest_cannot_view',
 				__( 'Sorry, you cannot list resources.', 'woocommerce' ),
@@ -245,11 +245,11 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 	public function filter_sensitive_report_data( $response, WP_REST_Server $server, WP_REST_Request $request ) {
 		unset( $server );
 
-		if ( ! $response instanceof WP_REST_Response || current_user_can( 'woocommerce_view_financial_reports' ) ) {
+		if ( ! $response instanceof WP_REST_Response || ! $this->is_report_route( $request->get_route() ) ) {
 			return $response;
 		}
 
-		if ( ! $this->is_report_route( $request->get_route() ) ) {
+		if ( current_user_can( 'woocommerce_view_financial_reports' ) ) {
 			return $response;
 		}
 
@@ -298,8 +298,7 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 			return true;
 		}
 
-		$action = self::CAPABILITY_ACTION_MAP[ $capability ] ?? null;
-		if ( null === $action ) {
+		if ( ! in_array( $capability, self::APPROVABLE_CAPABILITIES, true ) ) {
 			return false;
 		}
 
@@ -309,7 +308,7 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 
 		$approval_data = $this->approval_service->validate_and_consume(
 			$this->current_approval_token,
-			$action
+			$capability
 		);
 		if ( false === $approval_data ) {
 			return false;

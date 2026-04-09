@@ -239,7 +239,7 @@ class WC_Admin_POS_Staff {
 	 * @param WP_User $user User object.
 	 * @return string
 	 */
-	private static function get_role_name( WP_User $user ): string {
+	public static function get_role_name( WP_User $user ): string {
 		$roles = (array) $user->roles;
 
 		if ( empty( $roles ) ) {

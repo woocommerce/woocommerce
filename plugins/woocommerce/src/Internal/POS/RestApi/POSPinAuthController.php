@@ -22,6 +22,8 @@ use WP_REST_Server;
  */
 class POSPinAuthController extends RestApiControllerBase implements RegisterHooksInterface {
 
+	use POSRequestTrait;
+
 	/**
 	 * @var POSPinService
 	 */
@@ -212,29 +214,5 @@ class POSPinAuthController extends RestApiControllerBase implements RegisterHook
 			__( 'The provided PIN is not valid.', 'woocommerce' ),
 			array( 'status' => 422 )
 		);
-	}
-
-	/**
-	 * Pad response time to a minimum of 500ms to prevent timing attacks.
-	 *
-	 * @since 10.8.0
-	 * @param float $start_time The microtime at request start.
-	 */
-	private function pad_response_time( float $start_time ): void {
-		$elapsed  = microtime( true ) - $start_time;
-		$min_time = 0.5;
-		if ( $elapsed < $min_time ) {
-			usleep( (int) ( ( $min_time - $elapsed ) * 1_000_000 ) );
-		}
-	}
-
-	/**
-	 * Get the client IP address from the request.
-	 *
-	 * @since 10.8.0
-	 * @return string
-	 */
-	private function get_client_ip(): string {
-		return sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0' ) );
 	}
 }

@@ -732,6 +732,130 @@ class CapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox POS cashiers cannot create products via the REST API.
+	 */
+	public function test_pos_cashier_cannot_create_products(): void {
+		wp_set_current_user( $this->limited_user_id );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products' );
+		$request->set_body_params(
+			array(
+				'name'          => 'Test Product',
+				'type'          => 'simple',
+				'regular_price' => '9.99',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertContains( $response->get_status(), array( 401, 403 ) );
+	}
+
+	/**
+	 * @testdox POS cashiers cannot delete products via the REST API.
+	 */
+	public function test_pos_cashier_cannot_delete_products(): void {
+		wp_set_current_user( $this->admin_id );
+		$product = WC_Helper_Product::create_simple_product();
+
+		wp_set_current_user( $this->limited_user_id );
+
+		$request = new WP_REST_Request( 'DELETE', '/wc/v3/products/' . $product->get_id() );
+		$request->set_param( 'force', true );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertContains( $response->get_status(), array( 401, 403 ) );
+	}
+
+	/**
+	 * @testdox POS cashiers cannot list coupons via the REST API.
+	 */
+	public function test_pos_cashier_cannot_list_coupons(): void {
+		wp_set_current_user( $this->limited_user_id );
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v3/coupons' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertContains( $response->get_status(), array( 401, 403 ) );
+	}
+
+	/**
+	 * @testdox POS managers cannot manage coupons via the REST API.
+	 */
+	public function test_pos_manager_cannot_manage_coupons(): void {
+		wp_set_current_user( $this->capable_user_id );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/coupons' );
+		$request->set_body_params(
+			array(
+				'code'          => 'test-coupon',
+				'discount_type' => 'percent',
+				'amount'        => '10',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertContains( $response->get_status(), array( 401, 403 ) );
+	}
+
+	/**
+	 * @testdox POS cashiers cannot access WooCommerce settings via the REST API.
+	 */
+	public function test_pos_cashier_cannot_access_wc_settings(): void {
+		wp_set_current_user( $this->limited_user_id );
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v3/settings' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertContains( $response->get_status(), array( 401, 403 ) );
+	}
+
+	/**
+	 * @testdox POS managers cannot access WooCommerce settings via the REST API.
+	 */
+	public function test_pos_manager_cannot_access_wc_settings(): void {
+		wp_set_current_user( $this->capable_user_id );
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v3/settings' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertContains( $response->get_status(), array( 401, 403 ) );
+	}
+
+	/**
+	 * @testdox POS managers cannot change user roles via the WordPress REST API.
+	 */
+	public function test_pos_manager_cannot_change_user_roles(): void {
+		wp_set_current_user( $this->capable_user_id );
+
+		$target_user_id = $this->factory->user->create( array( 'role' => 'pos_cashier' ) );
+
+		$request = new WP_REST_Request( 'PUT', '/wp/v2/users/' . $target_user_id );
+		$request->set_body_params(
+			array(
+				'roles' => array( 'administrator' ),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertContains( $response->get_status(), array( 401, 403 ) );
+	}
+
+	/**
+	 * @testdox POS cashiers cannot list application passwords via the WordPress REST API.
+	 */
+	public function test_pos_cashier_cannot_list_application_passwords(): void {
+		wp_set_current_user( $this->limited_user_id );
+
+		$request  = new WP_REST_Request( 'GET', '/wp/v2/users/' . $this->limited_user_id . '/application-passwords' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertContains( $response->get_status(), array( 401, 403 ) );
+	}
+
+	/**
 	 * @testdox register adds the woocommerce_rest_check_permissions filter.
 	 */
 	public function test_register_adds_permission_filter(): void {
