@@ -109,26 +109,58 @@ class AddToCartWithOptionsPage {
 		await this.updateAddToCartWithOptionsBlock();
 	}
 
-	async switchToDropdownMode() {
+	async setVariationSelectorAttributes( {
+		optionStyle,
+		autoselect,
+		disabledAttributesAction,
+	}: {
+		optionStyle?: 'pills' | 'dropdown';
+		autoselect?: boolean;
+		disabledAttributesAction?: 'disable' | 'hide';
+	} = {} ) {
+		const page = this.editor.page;
+
 		await this.switchProductType( 'Variable product' );
-
-		await this.page.getByRole( 'tab', { name: 'Block' } ).click();
-
-		// Verify inner blocks have loaded.
-		await expect(
-			this.editor.canvas
-				.getByLabel(
-					'Block: Variation Selector: Attribute Options (Beta)'
-				)
-				.first()
-		).toBeVisible();
-
-		const attributeOptionsBlock = await this.editor.getBlockByName(
-			'woocommerce/add-to-cart-with-options-variation-selector-attribute-options'
+		await page.getByRole( 'tab', { name: 'Block' } ).click();
+		const addToCartWithOptionsBlock = this.editor.canvas.getByLabel(
+			'Block: Add to Cart + Options'
 		);
-		await this.editor.selectBlocks( attributeOptionsBlock.first() );
+		await addToCartWithOptionsBlock.click();
+		await addToCartWithOptionsBlock
+			.getByLabel( 'Block: Variation Selector: Attribute Options' )
+			.first()
+			.click();
 
-		await this.page.getByRole( 'radio', { name: 'Dropdown' } ).click();
+		// Option style attribute.
+		if ( optionStyle === 'pills' || optionStyle === 'dropdown' ) {
+			const optionStyleInput = page.getByRole( 'radio', {
+				name: optionStyle,
+			} );
+			await optionStyleInput.click();
+		}
+
+		// Auto-select attribute.
+		if ( typeof autoselect === 'boolean' ) {
+			const autoselectInput = page.getByRole( 'checkbox', {
+				name: 'Auto-select when only one option is available',
+			} );
+			await autoselectInput.setChecked( autoselect );
+		}
+
+		// Invalid options attribute.
+		if (
+			disabledAttributesAction === 'disable' ||
+			disabledAttributesAction === 'hide'
+		) {
+			const invalidOptionsLabel =
+				disabledAttributesAction === 'disable'
+					? 'Grayed-out'
+					: 'Hidden';
+			const invalidOptionsRadio = page
+				.getByLabel( 'Invalid options' )
+				.getByRole( 'radio', { name: invalidOptionsLabel } );
+			await invalidOptionsRadio.click();
+		}
 	}
 
 	async createPostWithProductBlock( product: string, variation?: string ) {
@@ -157,31 +189,29 @@ class AddToCartWithOptionsPage {
 		await this.editor.publishAndVisitPost();
 	}
 
-	async selectVariationSelectorOptionsBlockAttribute(
+	async selectVariationSelectorOptions(
 		attributeName: string,
 		attributeValue: string,
-		optionStyle: 'Pills' | 'Dropdown'
+		optionStyle: 'pills' | 'dropdown'
 	) {
-		if ( optionStyle === 'Dropdown' ) {
+		if ( optionStyle === 'dropdown' ) {
 			await this.page
 				.getByLabel( attributeName )
 				.selectOption( attributeValue );
-			return;
-		}
-		if ( attributeValue !== '' ) {
+		} else if ( attributeValue !== '' ) {
 			await this.page
 				.getByLabel( attributeName )
 				.getByText( attributeValue )
 				.click();
-			return;
+		} else {
+			await this.page
+				.getByLabel( attributeName )
+				.locator( 'label:has(:checked)' )
+				.click();
 		}
-		await this.page
-			.getByLabel( attributeName )
-			.locator( 'label:has(:checked)' )
-			.click();
 	}
 
-	async expectSelectedAttributes(
+	async expectVariationSelectorAttributes(
 		productAttributes: {
 			name: string;
 			options: string[];
@@ -189,7 +219,7 @@ class AddToCartWithOptionsPage {
 			visible: boolean;
 		}[],
 		expectedValues: Record< string, string | RegExp > = {},
-		optionStyle: 'Pills' | 'Dropdown'
+		optionStyle: 'pills' | 'dropdown'
 	) {
 		for ( let {
 			name: attributeName,
@@ -198,7 +228,7 @@ class AddToCartWithOptionsPage {
 			const attributeNameLocator = this.page.getByLabel( attributeName, {
 				exact: true,
 			} );
-			if ( optionStyle === 'Dropdown' ) {
+			if ( optionStyle === 'dropdown' ) {
 				let expectedValue: string | RegExp;
 				if (
 					attributeName in expectedValues &&
