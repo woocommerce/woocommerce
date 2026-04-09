@@ -45,7 +45,7 @@ catalogs:
         '@wordpress/preferences': 4.19.4
         '@wordpress/primitives': 4.19.1
         '@wordpress/priority-queue': 3.19.1
-        '@wordpress/private-apis': 1.19.1
+        '@wordpress/private-apis': ^1.19.1
         '@wordpress/rich-text': 7.19.2
         '@wordpress/server-side-render': 5.19.4
         '@wordpress/url': 4.19.2
@@ -139,8 +139,7 @@ trustPolicyExclude:
     - '@oxc-resolver/binding-wasm32-wasi@11.2.0'
     - '@oxc-resolver/binding-win32-arm64-msvc@11.2.0'
     - '@oxc-resolver/binding-win32-x64-msvc@11.2.0'
-    # Newer major has provenance but we're on an older one.
-    - semver@6.3.1
+    - 'semver@5.7.2 || 6.3.1'
     # Lost provenance attestation in this version (dep of @types/node).
     - undici-types@6.19.8
     - reselect@5.1.1

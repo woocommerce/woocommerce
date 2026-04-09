@@ -70,6 +70,8 @@
 	"pnpm": {
 		"overrides": {
 			"@types/react": "18.3.x",
+			"@wordpress/data-controls>@wordpress/api-fetch": "catalog:wp-min",
+			"@wordpress/private-apis": "catalog:wp-min",
 			"react-resize-aware": "3.1.1"
 		},
 		"patchedDependencies": {
