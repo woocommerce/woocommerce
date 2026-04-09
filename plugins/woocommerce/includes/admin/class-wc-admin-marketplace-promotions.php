@@ -161,7 +161,10 @@ class WC_Admin_Marketplace_Promotions {
 	}
 
 	/**
-	 * Evaluate a set of rule arrays using the existing remote specs processors.
+	 * Evaluate local_rules using the WooCommerce Admin remote specs rule schema.
+	 *
+	 * WCCOM payloads must provide rules compatible with the existing Core rule
+	 * processors. Unknown or malformed rules fail closed.
 	 *
 	 * @param mixed $rules Rule definitions from the promotions payload.
 	 * @return bool
