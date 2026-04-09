@@ -603,6 +603,33 @@ export const selectShippingRate =
 
 		try {
 			dispatch.shippingRatesBeingSelected( true );
+
+			// Optimistically update the selected flag so the UI (labels, totals)
+			// reflects the new rate immediately without waiting for the API.
+			const currentRates = select.getShippingRates();
+			dispatch( {
+				type: 'SET_CART_DATA',
+				response: {
+					shippingRates: currentRates.map( ( pkg ) => {
+						if (
+							packageId !== null &&
+							pkg.package_id !== packageId
+						) {
+							return pkg;
+						}
+						return {
+							...pkg,
+							shipping_rates: pkg.shipping_rates.map(
+								( rate ) => ( {
+									...rate,
+									selected: rate.rate_id === rateId,
+								} )
+							),
+						};
+					} ),
+				},
+			} );
+
 			if ( abortController ) {
 				abortController.abort();
 			}
