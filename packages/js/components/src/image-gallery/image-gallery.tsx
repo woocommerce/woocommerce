@@ -10,11 +10,12 @@ import {
 	useMemo,
 } from '@wordpress/element';
 import clsx from 'clsx';
-import { MediaItem, MediaUpload } from '@wordpress/media-utils';
+import { MediaUpload } from '@wordpress/media-utils';
 
 /**
  * Internal dependencies
  */
+import type { MediaItem } from '../media-uploader/types';
 import { moveIndex } from '../sortable';
 import { ImageGalleryWrapper } from './image-gallery-wrapper';
 import { ImageGalleryToolbar } from './index';

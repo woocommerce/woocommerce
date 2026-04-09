@@ -11,11 +11,12 @@ import {
 	isValidElement,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { MediaItem, MediaUpload } from '@wordpress/media-utils';
+import { MediaUpload } from '@wordpress/media-utils';
 
 /**
  * Internal dependencies
  */
+import type { MediaItem } from '../media-uploader/types';
 import { MediaUploadComponentType } from './types';
 
 const POPOVER_PROPS = {
@@ -55,12 +56,12 @@ export function ImageGalleryToolbarDropdown( {
 				<>
 					<MenuGroup>
 						<MediaUploadComponent
-							onSelect={ ( media ) => {
-								onReplace( media as MediaItem );
+							onSelect={ ( media: MediaItem ) => {
+								onReplace( media );
 								onClose();
 							} }
 							allowedTypes={ [ 'image' ] }
-							render={ ( { open } ) => (
+							render={ ( { open }: { open: () => void } ) => (
 								<MenuItem
 									onClick={ () => {
 										open();

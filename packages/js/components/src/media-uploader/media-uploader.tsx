@@ -5,16 +5,19 @@ import { __ } from '@wordpress/i18n';
 import { Button, DropZone, FormFileUpload } from '@wordpress/components';
 import { Fragment, createElement } from 'react';
 import {
-	MediaItem,
 	MediaUpload,
 	uploadMedia as wpUploadMedia,
-	UploadMediaOptions,
 } from '@wordpress/media-utils';
 
 /**
  * Internal dependencies
  */
-import { ErrorType } from './types';
+import type {
+	ErrorType,
+	MediaItem,
+	MediaUploadComponentType,
+	UploadMediaOptions,
+} from './types';
 
 const DEFAULT_ALLOWED_MEDIA_TYPES = [ 'image' ];
 
@@ -28,9 +31,7 @@ type MediaUploaderProps = {
 	icon?: JSX.Element;
 	label?: string | JSX.Element;
 	maxUploadFileSize?: number;
-	MediaUploadComponent?: < T extends boolean = false >(
-		props: MediaUpload.Props< T >
-	) => JSX.Element;
+	MediaUploadComponent?: MediaUploadComponentType;
 	multipleSelect?: boolean | string;
 	value?: number | number[];
 	onSelect?: (
@@ -41,7 +42,7 @@ type MediaUploaderProps = {
 	onMediaGalleryOpen?: () => void;
 	onUpload?: ( files: MediaItem | MediaItem[] ) => void;
 	onFileUploadChange?: ( files: MediaItem | MediaItem[] ) => void;
-	uploadMedia?: ( options: UploadMediaOptions ) => Promise< void >;
+	uploadMedia?: ( options: UploadMediaOptions ) => void;
 	additionalData?: Record< string, unknown >;
 };
 
@@ -60,7 +61,9 @@ export const MediaUploader = ( {
 	onMediaGalleryOpen = () => null,
 	onUpload = () => null,
 	onSelect = () => null,
-	uploadMedia = wpUploadMedia,
+	uploadMedia = wpUploadMedia as unknown as (
+		options: UploadMediaOptions
+	) => void,
 	additionalData,
 }: MediaUploaderProps ) => {
 	const multiple = Boolean( multipleSelect );
@@ -72,7 +75,7 @@ export const MediaUploader = ( {
 			onChange={ ( { currentTarget } ) => {
 				uploadMedia( {
 					allowedTypes: allowedMediaTypes,
-					filesList: currentTarget.files as FileList,
+					filesList: Array.from( currentTarget.files ?? [] ),
 					maxUploadFileSize,
 					onError,
 					onFileChange( files ) {
@@ -107,9 +110,8 @@ export const MediaUploader = ( {
 							value={ value }
 							onSelect={ onSelect }
 							allowedTypes={ allowedMediaTypes }
-							// @ts-expect-error - TODO multiple also accepts string.
 							multiple={ multipleSelect }
-							render={ ( { open } ) =>
+							render={ ( { open }: { open: () => void } ) =>
 								buttonText || buttonProps ? (
 									<Button
 										variant="secondary"

@@ -3,7 +3,7 @@
  */
 import { createElement } from '@wordpress/element';
 import { chevronRight, chevronLeft, trash } from '@wordpress/icons';
-import { MediaItem, MediaUpload } from '@wordpress/media-utils';
+import { MediaUpload } from '@wordpress/media-utils';
 import { __ } from '@wordpress/i18n';
 import {
 	Toolbar,
@@ -15,6 +15,7 @@ import {
 /**
  * Internal dependencies
  */
+import type { MediaItem } from '../media-uploader/types';
 import { SortableHandle } from '../sortable';
 import { MediaUploadComponentType } from './types';
 import { ImageGalleryToolbarDropdown } from './image-gallery-toolbar-dropdown';
@@ -105,11 +106,11 @@ export const ImageGalleryToolbar = ( {
 					<ToolbarGroup className="woocommerce-image-gallery__toolbar-media">
 						<MediaUploadComponent
 							value={ value }
-							onSelect={ ( media ) =>
-								replaceItem( childIndex, media as MediaItem )
+							onSelect={ ( media: MediaItem ) =>
+								replaceItem( childIndex, media )
 							}
 							allowedTypes={ [ 'image' ] }
-							render={ ( { open } ) => (
+							render={ ( { open }: { open: () => void } ) => (
 								<ToolbarButton onClick={ open }>
 									{ __( 'Replace', 'woocommerce' ) }
 								</ToolbarButton>

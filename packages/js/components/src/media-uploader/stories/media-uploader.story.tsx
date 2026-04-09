@@ -3,7 +3,6 @@
  */
 import { createElement } from 'react';
 import { Notice } from '@wordpress/components';
-import { MediaItem } from '@wordpress/media-utils';
 import { useState } from '@wordpress/element';
 import { cloudUpload } from '@wordpress/icons';
 
@@ -11,10 +10,10 @@ import { cloudUpload } from '@wordpress/icons';
  * Internal dependencies
  */
 import { MediaUploader } from '../';
-import { File } from '../types';
+import type { MediaItem } from '../types';
 import { MockMediaUpload } from './mock-media-uploader';
 
-const ImageGallery = ( { images }: { images: File[] } ) => {
+const ImageGallery = ( { images }: { images: MediaItem[] } ) => {
 	return (
 		<div style={ { marginBottom: '16px' } }>
 			{ images.map( ( image, index ) => {
@@ -67,19 +66,29 @@ const mockUploadMedia = async ( { filesList, onFileChange } ) => {
 };
 
 export const Basic = () => {
-	const [ images, setImages ] = useState< File[] >( [] );
+	const [ images, setImages ] = useState< MediaItem[] >( [] );
 
 	return (
 		<>
 			<ImageGallery images={ images } />
 			<MediaUploader
 				MediaUploadComponent={ MockMediaUpload }
-				onSelect={ ( file ) => setImages( [ ...images, file ] ) }
+				onSelect={ ( file ) =>
+					setImages( [ ...images, file as MediaItem ] )
+				}
 				onError={ () => null }
 				onFileUploadChange={ ( files ) =>
-					setImages( [ ...images, ...files ] )
+					setImages( [
+						...images,
+						...( Array.isArray( files ) ? files : [ files ] ),
+					] )
 				}
-				onUpload={ ( files ) => setImages( [ ...images, ...files ] ) }
+				onUpload={ ( files ) =>
+					setImages( [
+						...images,
+						...( Array.isArray( files ) ? files : [ files ] ),
+					] )
+				}
 				uploadMedia={ mockUploadMedia }
 			/>
 		</>
@@ -87,7 +96,7 @@ export const Basic = () => {
 };
 
 export const DisabledDropZone = () => {
-	const [ images, setImages ] = useState< File[] >( [] );
+	const [ images, setImages ] = useState< MediaItem[] >( [] );
 
 	return (
 		<>
@@ -97,9 +106,14 @@ export const DisabledDropZone = () => {
 				label={ 'Click the button below to upload' }
 				MediaUploadComponent={ MockMediaUpload }
 				onFileUploadChange={ ( files ) =>
-					setImages( [ ...images, ...files ] )
+					setImages( [
+						...images,
+						...( Array.isArray( files ) ? files : [ files ] ),
+					] )
 				}
-				onSelect={ ( file ) => setImages( [ ...images, file ] ) }
+				onSelect={ ( file ) =>
+					setImages( [ ...images, file as MediaItem ] )
+				}
 				onError={ () => null }
 				uploadMedia={ mockUploadMedia }
 			/>
