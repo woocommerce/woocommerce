@@ -448,6 +448,15 @@ class WC_Webhook extends WC_Legacy_Webhook {
 				}
 			}
 
+			/**
+			 * Filters the webhook payload before delivery.
+			 *
+			 * @since 2.2.0
+			 * @param mixed  $payload     Payload data.
+			 * @param string $resource    Resource type (e.g. 'order').
+			 * @param mixed  $resource_id Resource ID.
+			 * @param int    $webhook_id  Webhook ID.
+			 */
 			return apply_filters( 'woocommerce_webhook_payload', $payload, $resource, $resource_id, $this->get_id() );
 		} finally {
 			// Restore the current user.
