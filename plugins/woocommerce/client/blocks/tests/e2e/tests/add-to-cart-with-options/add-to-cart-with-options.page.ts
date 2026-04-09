@@ -132,7 +132,7 @@ class AddToCartWithOptionsPage {
 			.click();
 
 		// Option style attribute.
-		if ( optionStyle === 'pills' || optionStyle === 'dropdown' ) {
+		if ( optionStyle ) {
 			const optionStyleInput = page.getByRole( 'radio', {
 				name: optionStyle,
 			} );
@@ -148,10 +148,7 @@ class AddToCartWithOptionsPage {
 		}
 
 		// Invalid options attribute.
-		if (
-			disabledAttributesAction === 'disable' ||
-			disabledAttributesAction === 'hide'
-		) {
+		if ( disabledAttributesAction ) {
 			const invalidOptionsLabel =
 				disabledAttributesAction === 'disable'
 					? 'Grayed-out'
@@ -241,7 +238,7 @@ class AddToCartWithOptionsPage {
 				await expect( attributeNameLocator ).toHaveValue(
 					expectedValue
 				);
-				return;
+				continue;
 			}
 			if (
 				attributeName in expectedValues &&

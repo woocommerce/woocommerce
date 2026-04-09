@@ -478,9 +478,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await pageObject.setVariationSelectorAttributes( {
 				optionStyle: 'dropdown',
 			} );
-			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: false,
-			} );
+			await editor.saveSiteEditorEntities();
 
 			await page.goto( '/product/custom-slug-variable/' );
 
@@ -810,9 +808,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 		await pageObject.setVariationSelectorAttributes( {
 			optionStyle: 'dropdown',
 		} );
-		await editor.saveSiteEditorEntities( {
-			isOnlyCurrentEntityDirty: false,
-		} );
+		await editor.saveSiteEditorEntities();
 
 		await page.goto( '/product/hoodie/' );
 
@@ -1480,9 +1476,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 					await pageObject.setVariationSelectorAttributes( {
 						optionStyle,
 					} );
-					await editor.saveSiteEditorEntities( {
-						isOnlyCurrentEntityDirty: false,
-					} );
+					await editor.saveSiteEditorEntities();
 				}
 
 				await test.step( `${ optionStyle }: Expect NOTHING to be auto-selected (on page load)`, async () => {
@@ -1518,9 +1512,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 						optionStyle,
 						autoselect: true,
 					} );
-					await editor.saveSiteEditorEntities( {
-						isOnlyCurrentEntityDirty: false,
-					} );
+					await editor.saveSiteEditorEntities();
 				} );
 
 				await test.step( `${ optionStyle }: Expect only the Type attribute to be auto-selected (on page load)`, async () => {
@@ -1590,9 +1582,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 						optionStyle,
 						disabledAttributesAction: 'hide',
 					} );
-					await editor.saveSiteEditorEntities( {
-						isOnlyCurrentEntityDirty: false,
-					} );
+					await editor.saveSiteEditorEntities();
 				} );
 				await test.step( `${ optionStyle }: Expect invalid options to be isabled (by prop) and hidden`, async () => {
 					await page.goto( productPermalink );
@@ -1634,9 +1624,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 							optionStyle,
 							disabledAttributesAction,
 						} );
-						await editor.saveSiteEditorEntities( {
-							isOnlyCurrentEntityDirty: false,
-						} );
+						await editor.saveSiteEditorEntities();
 					} );
 					await test.step( `disabledAttributesAction === ${ disabledAttributesAction }: Expect options to be properly auto-selected`, async () => {
 						await page.goto( productPermalink );
@@ -1689,9 +1677,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 				optionStyle: 'pills',
 				autoselect: true,
 			} );
-			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: false,
-			} );
+			await editor.saveSiteEditorEntities();
 
 			await test.step( 'Add the Blue/XL variation to cart', async () => {
 				await page.goto( productPermalink );
