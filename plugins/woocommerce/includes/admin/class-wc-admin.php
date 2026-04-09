@@ -75,6 +75,7 @@ class WC_Admin {
 		include_once __DIR__ . '/class-wc-admin-notices.php';
 		include_once __DIR__ . '/class-wc-admin-assets.php';
 		include_once __DIR__ . '/class-wc-admin-api-keys.php';
+		include_once __DIR__ . '/class-wc-admin-pos-staff.php';
 		include_once __DIR__ . '/class-wc-admin-webhooks.php';
 		include_once __DIR__ . '/class-wc-admin-pointers.php';
 		include_once __DIR__ . '/class-wc-admin-importers.php';
