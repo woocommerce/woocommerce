@@ -17,22 +17,28 @@ const interactivityBlocksConfig = require( './bin/webpack-config-interactive-blo
 const interactivityAPIConfig = require( './bin/webpack-config-interactivity.js' );
 const dependencyDetectionConfig = require( './bin/webpack-config-dependency-detection.js' );
 const path = require( 'path' );
-const isWatch = process.argv.includes( '--watch' );
+const isProduction = NODE_ENV === 'production';
+const isWatch = ! isProduction && process.argv.includes( '--watch' );
 
-// Only options shared between all configs should be defined here.
-const sharedConfig = {
-	mode: NODE_ENV,
-	cache: isWatch
+const getCacheConfig = ( name, configPaths = [] ) =>
+	isWatch
 		? false
 		: {
 				type: 'filesystem',
 				buildDependencies: {
 					config: [
 						__filename,
-						path.resolve( __dirname, 'bin/webpack-configs.js' ),
+						...configPaths.map( ( configPath ) =>
+							path.resolve( __dirname, configPath )
+						),
 					],
 				},
-		  },
+				name: `wc-blocks-${ name }-${ NODE_ENV }`,
+		  };
+
+// Only options shared between all configs should be defined here.
+const sharedConfig = {
+	mode: NODE_ENV,
 	performance: {
 		hints: false,
 	},
@@ -53,18 +59,23 @@ const sharedConfig = {
 
 const CartAndCheckoutFrontendConfig = {
 	...sharedConfig,
+	cache: getCacheConfig( 'cart-and-checkout-frontend', [
+		'bin/webpack-configs.js',
+	] ),
 	...getCartAndCheckoutFrontendConfig( { alias: getAlias() } ),
 };
 
 // Core config for shared libraries.
 const CoreConfig = {
 	...sharedConfig,
+	cache: getCacheConfig( 'core', [ 'bin/webpack-configs.js' ] ),
 	...getCoreConfig( { alias: getAlias() } ),
 };
 
 // Main Blocks config for registering Blocks and for the Editor.
 const MainConfig = {
 	...sharedConfig,
+	cache: getCacheConfig( 'main', [ 'bin/webpack-configs.js' ] ),
 	...getMainConfig( {
 		alias: getAlias(),
 	} ),
@@ -73,6 +84,7 @@ const MainConfig = {
 // Frontend config for scripts used in the store itself.
 const FrontendConfig = {
 	...sharedConfig,
+	cache: getCacheConfig( 'frontend', [ 'bin/webpack-configs.js' ] ),
 	...getFrontConfig( { alias: getAlias() } ),
 };
 
@@ -81,6 +93,7 @@ const FrontendConfig = {
  */
 const ExtensionsConfig = {
 	...sharedConfig,
+	cache: getCacheConfig( 'extensions', [ 'bin/webpack-configs.js' ] ),
 	...getExtensionsConfig( { alias: getAlias() } ),
 };
 
@@ -89,6 +102,7 @@ const ExtensionsConfig = {
  */
 const PaymentsConfig = {
 	...sharedConfig,
+	cache: getCacheConfig( 'payments', [ 'bin/webpack-configs.js' ] ),
 	...getPaymentsConfig( { alias: getAlias() } ),
 };
 
@@ -97,6 +111,7 @@ const PaymentsConfig = {
  */
 const StylingConfig = {
 	...sharedConfig,
+	cache: getCacheConfig( 'styling', [ 'bin/webpack-configs.js' ] ),
 	...getStylingConfig( { alias: getAlias() } ),
 };
 
@@ -105,16 +120,23 @@ const StylingConfig = {
  */
 const SiteEditorConfig = {
 	...sharedConfig,
+	cache: getCacheConfig( 'site-editor', [ 'bin/webpack-configs.js' ] ),
 	...getSiteEditorConfig( { alias: getAlias() } ),
 };
 
 const InteractivityBlocksConfig = {
 	...sharedConfig,
+	cache: getCacheConfig( 'interactivity-blocks', [
+		'bin/webpack-config-interactive-blocks.js',
+	] ),
 	...interactivityBlocksConfig,
 };
 
 const InteractivityAPIConfig = {
 	...sharedConfig,
+	cache: getCacheConfig( 'interactivity-api', [
+		'bin/webpack-config-interactivity.js',
+	] ),
 	...interactivityAPIConfig,
 };
 
@@ -124,6 +146,9 @@ const InteractivityAPIConfig = {
  */
 const DependencyDetectionConfig = {
 	...sharedConfig,
+	cache: getCacheConfig( 'dependency-detection', [
+		'bin/webpack-config-dependency-detection.js',
+	] ),
 	...dependencyDetectionConfig,
 };
 

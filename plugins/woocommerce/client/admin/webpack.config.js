@@ -24,7 +24,7 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 const WC_ADMIN_PHASE = process.env.WC_ADMIN_PHASE || 'development';
 const isHot = Boolean( process.env.HOT );
 const isProduction = NODE_ENV === 'production';
-const isWatch = process.argv.includes( '--watch' );
+const isWatch = ! isProduction && process.argv.includes( '--watch' );
 
 const getSubdirectoriesAt = ( searchPath ) => {
 	const dir = path.resolve( __dirname, searchPath );
