@@ -26,6 +26,7 @@ class WC_Admin_POS_Staff {
 	 */
 	public function __construct() {
 		add_action( 'admin_init', array( $this, 'actions' ) );
+		add_action( 'admin_head', array( $this, 'styles' ) );
 	}
 
 	/**
@@ -55,10 +56,12 @@ class WC_Admin_POS_Staff {
 			if ( $user_id && ! current_user_can( 'manage_woocommerce' ) ) {
 				wp_die( esc_html__( 'You do not have permission to manage POS staff.', 'woocommerce' ) );
 			}
+
 			self::edit_output( $user_id );
-		} else {
-			self::table_list_output();
+			return;
 		}
+
+		self::table_list_output();
 	}
 
 	/**
@@ -70,26 +73,28 @@ class WC_Admin_POS_Staff {
 		$staff_table = new WC_Admin_POS_Staff_Table_List();
 		$staff_table->prepare_items();
 
-		echo '<h2 class="wc-table-list-header">'
-			. esc_html__( 'POS Staff', 'woocommerce' )
-			. '</h2>';
+		$users_link = current_user_can( 'list_users' )
+			? '<a href="' . esc_url( admin_url( 'users.php' ) ) . '">' . esc_html__( 'Users', 'woocommerce' ) . '</a>'
+			: esc_html__( 'Users', 'woocommerce' );
 
-		if ( $staff_table->has_items() ) {
-			echo '<input type="hidden" name="page" value="wc-settings" />';
-			echo '<input type="hidden" name="tab" value="point-of-sale" />';
-			echo '<input type="hidden" name="section" value="staff" />';
-
-			$staff_table->display();
-		} else {
-			echo '<div class="woocommerce-BlankState">';
-			echo '<h2 class="woocommerce-BlankState-message">'
-				. esc_html__(
-					'No users with POS access were found. Assign the POS Cashier or POS Manager role to users to manage their PINs.',
-					'woocommerce'
-				)
-				. '</h2>';
-			echo '</div>';
-		}
+		echo '<div class="wc-pos-staff-page">';
+		echo '<h2 class="wc-table-list-header">' . esc_html__( 'Staff', 'woocommerce' ) . '</h2>';
+		echo '<p class="wc-pos-staff-description">';
+		echo wp_kses(
+			sprintf(
+				/* translators: %s: Users admin screen link. */
+				__( 'Set PINs for existing users with Point of Sale access. Roles are managed in %s.', 'woocommerce' ),
+				$users_link
+			),
+			array(
+				'a' => array(
+					'href' => array(),
+				),
+			)
+		);
+		echo '</p>';
+		$staff_table->display();
+		echo '</div>';
 	}
 
 	/**
@@ -98,7 +103,7 @@ class WC_Admin_POS_Staff {
 	 * @since 10.8.0
 	 * @param int $user_id User ID.
 	 */
-	private static function edit_output( $user_id ): void {
+	private static function edit_output( int $user_id ): void {
 		$user = get_userdata( $user_id );
 		if ( ! $user ) {
 			wp_die( esc_html__( 'Invalid user.', 'woocommerce' ) );
@@ -111,18 +116,11 @@ class WC_Admin_POS_Staff {
 
 		$pin_service = wc_get_container()->get( POSPinService::class );
 		$has_pin     = $pin_service->has_pin( $user_id );
-		$roles       = (array) $user->roles;
-		$role_name   = '';
+		$role_name   = self::get_role_name( $user );
 
-		if ( ! empty( $roles ) ) {
-			$wp_roles  = wp_roles();
-			$first     = reset( $roles );
-			$role_name = isset( $wp_roles->role_names[ $first ] )
-				? translate_user_role( $wp_roles->role_names[ $first ] )
-				: $first;
-		}
-
+		echo '<div class="wc-pos-staff-page">';
 		include __DIR__ . '/settings/views/html-pos-staff-edit.php';
+		echo '</div>';
 	}
 
 	/**
@@ -232,6 +230,85 @@ class WC_Admin_POS_Staff {
 			)
 		);
 		exit();
+	}
+
+	/**
+	 * Return a translated role name for a user.
+	 *
+	 * @since 10.8.0
+	 * @param WP_User $user User object.
+	 * @return string
+	 */
+	private static function get_role_name( WP_User $user ): string {
+		$roles = (array) $user->roles;
+
+		if ( empty( $roles ) ) {
+			return '';
+		}
+
+		$wp_roles = wp_roles();
+		$first    = reset( $roles );
+
+		return isset( $wp_roles->role_names[ $first ] )
+			? translate_user_role( $wp_roles->role_names[ $first ] )
+			: $first;
+	}
+
+	/**
+	 * Output scoped styles for the POS staff screen.
+	 *
+	 * @since 10.8.0
+	 */
+	public function styles(): void {
+		if ( ! $this->is_pos_staff_settings_page() ) {
+			return;
+		}
+		?>
+		<style>
+			.woocommerce #mainform > p.submit {
+				display: none !important;
+				margin: 0 !important;
+				padding: 0 !important;
+			}
+
+			.woocommerce .wc-pos-staff-page .wc-table-list-header {
+				margin-bottom: 0.2em;
+			}
+
+			.woocommerce .wc-pos-staff-page .wc-pos-staff-description {
+				margin: 0 0 8px;
+				color: #50575e;
+			}
+
+			.woocommerce .wc-pos-staff-page .column-pin_status {
+				width: 140px;
+			}
+
+			.woocommerce .wc-pos-staff-page .column-actions {
+				width: 160px;
+			}
+
+			.woocommerce .wc-pos-staff-page .wc-pos-staff-status {
+				color: #50575e;
+			}
+
+			.woocommerce .wc-pos-staff-page .wc-pos-staff-status--active {
+				color: #1d6b1d;
+				font-weight: 600;
+			}
+
+			.woocommerce .wc-pos-staff-page #pos-staff-fields input[type="password"] {
+				width: 100px;
+				min-width: 0;
+				font-variant-numeric: tabular-nums;
+			}
+
+			.woocommerce .wc-pos-staff-page #pos-staff-fields .submit {
+				margin: 0;
+				padding: 0;
+			}
+		</style>
+		<?php
 	}
 
 	/**

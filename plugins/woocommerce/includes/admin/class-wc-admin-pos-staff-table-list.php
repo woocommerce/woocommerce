@@ -53,7 +53,7 @@ class WC_Admin_POS_Staff_Table_List extends WP_List_Table {
 	 * @since 10.8.0
 	 */
 	public function no_items(): void {
-		esc_html_e( 'No POS staff found.', 'woocommerce' );
+		esc_html_e( 'No staff found.', 'woocommerce' );
 	}
 
 	/**
@@ -66,7 +66,7 @@ class WC_Admin_POS_Staff_Table_List extends WP_List_Table {
 		return array(
 			'user'       => __( 'User', 'woocommerce' ),
 			'role'       => __( 'Role', 'woocommerce' ),
-			'pin_status' => __( 'PIN status', 'woocommerce' ),
+			'pin_status' => __( 'PIN', 'woocommerce' ),
 			'actions'    => __( 'Actions', 'woocommerce' ),
 		);
 	}
@@ -79,13 +79,15 @@ class WC_Admin_POS_Staff_Table_List extends WP_List_Table {
 	 * @return string
 	 */
 	public function column_user( $user ) {
-		$edit_url = admin_url(
-			'admin.php?page=wc-settings&tab=point-of-sale&section=staff&edit-staff=' . $user->ID
-		);
-
-		$output  = '<strong><a href="' . esc_url( $edit_url ) . '">';
+		$output = '<strong>';
+		if ( current_user_can( 'edit_user', $user->ID ) ) {
+			$output .= '<a href="' . esc_url( add_query_arg( array( 'user_id' => $user->ID ), admin_url( 'user-edit.php' ) ) ) . '">';
+		}
 		$output .= esc_html( $user->display_name );
-		$output .= '</a></strong>';
+		if ( current_user_can( 'edit_user', $user->ID ) ) {
+			$output .= '</a>';
+		}
+		$output .= '</strong>';
 		$output .= '<br><span class="description">' . esc_html( $user->user_email ) . '</span>';
 
 		return $output;
@@ -99,19 +101,7 @@ class WC_Admin_POS_Staff_Table_List extends WP_List_Table {
 	 * @return string
 	 */
 	public function column_role( $user ) {
-		$roles = (array) $user->roles;
-
-		if ( empty( $roles ) ) {
-			return '';
-		}
-
-		$wp_roles  = wp_roles();
-		$first     = reset( $roles );
-		$role_name = isset( $wp_roles->role_names[ $first ] )
-			? translate_user_role( $wp_roles->role_names[ $first ] )
-			: $first;
-
-		return esc_html( $role_name );
+		return esc_html( $this->get_role_name( $user ) );
 	}
 
 	/**
@@ -123,11 +113,11 @@ class WC_Admin_POS_Staff_Table_List extends WP_List_Table {
 	 */
 	public function column_pin_status( $user ) {
 		if ( $this->pin_service->has_pin( $user->ID ) ) {
-			return '<mark class="yes"><span class="dashicons dashicons-yes-alt"></span> '
-				. esc_html__( 'Active', 'woocommerce' ) . '</mark>';
+			return '<span class="wc-pos-staff-status wc-pos-staff-status--active">'
+				. esc_html__( 'Active', 'woocommerce' ) . '</span>';
 		}
 
-		return '<mark class="no">&ndash;</mark> ' . esc_html__( 'Not set', 'woocommerce' );
+		return '<span class="wc-pos-staff-status">' . esc_html__( 'Not set', 'woocommerce' ) . '</span>';
 	}
 
 	/**
@@ -138,34 +128,7 @@ class WC_Admin_POS_Staff_Table_List extends WP_List_Table {
 	 * @return string
 	 */
 	public function column_actions( $user ) {
-		$edit_url = admin_url(
-			'admin.php?page=wc-settings&tab=point-of-sale&section=staff&edit-staff=' . $user->ID
-		);
-
-		$actions = array();
-
-		if ( $this->pin_service->has_pin( $user->ID ) ) {
-			$actions[] = '<a href="' . esc_url( $edit_url ) . '">'
-				. esc_html__( 'Reset PIN', 'woocommerce' ) . '</a>';
-
-			$remove_url = wp_nonce_url(
-				add_query_arg(
-					array(
-						'remove-pin' => $user->ID,
-					),
-					admin_url( 'admin.php?page=wc-settings&tab=point-of-sale&section=staff' )
-				),
-				'remove-pos-pin'
-			);
-
-			$actions[] = '<a class="submitdelete" href="' . esc_url( $remove_url ) . '">'
-				. esc_html__( 'Remove PIN', 'woocommerce' ) . '</a>';
-		} else {
-			$actions[] = '<a href="' . esc_url( $edit_url ) . '">'
-				. esc_html__( 'Set PIN', 'woocommerce' ) . '</a>';
-		}
-
-		return implode( ' | ', $actions );
+		return implode( ' | ', $this->get_row_actions( $user ) );
 	}
 
 	/**
@@ -174,8 +137,9 @@ class WC_Admin_POS_Staff_Table_List extends WP_List_Table {
 	 * @since 10.8.0
 	 */
 	public function prepare_items(): void {
-		$per_page     = 20;
-		$current_page = $this->get_pagenum();
+		$per_page              = 20;
+		$current_page          = $this->get_pagenum();
+		$this->_column_headers = array( $this->get_columns(), array(), $this->get_sortable_columns() );
 
 		$users = get_users(
 			array(
@@ -213,5 +177,95 @@ class WC_Admin_POS_Staff_Table_List extends WP_List_Table {
 	 */
 	protected function get_sortable_columns() {
 		return array();
+	}
+
+	/**
+	 * Generate table navigation markup.
+	 *
+	 * @since 10.8.0
+	 * @param 'top'|'bottom' $which The location of the navigation.
+	 */
+	protected function display_tablenav( $which ): void {
+		if ( 'top' === $which ) {
+			return;
+		}
+
+		if ( empty( $this->_pagination_args['total_pages'] ) || $this->_pagination_args['total_pages'] < 2 ) {
+			return;
+		}
+
+		echo '<div class="tablenav ' . esc_attr( $which ) . '">';
+		$this->pagination( $which );
+		echo '<br class="clear" />';
+		echo '</div>';
+	}
+
+	/**
+	 * Return row actions for a staff member.
+	 *
+	 * @since 10.8.0
+	 * @param WP_User $user User object.
+	 * @return array
+	 */
+	private function get_row_actions( WP_User $user ): array {
+		$edit_url = add_query_arg(
+			array(
+				'page'       => 'wc-settings',
+				'tab'        => 'point-of-sale',
+				'section'    => 'staff',
+				'edit-staff' => $user->ID,
+			),
+			admin_url( 'admin.php' )
+		);
+
+		$actions = array(
+			'<a href="' . esc_url( $edit_url ) . '">'
+				. ( $this->pin_service->has_pin( $user->ID )
+					? esc_html__( 'Reset PIN', 'woocommerce' )
+					: esc_html__( 'Set PIN', 'woocommerce' ) )
+				. '</a>',
+		);
+
+		if ( $this->pin_service->has_pin( $user->ID ) ) {
+			$remove_url = wp_nonce_url(
+				add_query_arg(
+					array(
+						'page'       => 'wc-settings',
+						'tab'        => 'point-of-sale',
+						'section'    => 'staff',
+						'remove-pin' => $user->ID,
+					),
+					admin_url( 'admin.php' )
+				),
+				'remove-pos-pin'
+			);
+
+			$actions[] = '<a class="submitdelete" href="' . esc_url( $remove_url ) . '">'
+				. esc_html__( 'Remove PIN', 'woocommerce' ) . '</a>';
+		}
+
+		return $actions;
+	}
+
+	/**
+	 * Return a translated role name for a user.
+	 *
+	 * @since 10.8.0
+	 * @param WP_User $user User object.
+	 * @return string
+	 */
+	private function get_role_name( WP_User $user ): string {
+		$roles = (array) $user->roles;
+
+		if ( empty( $roles ) ) {
+			return '';
+		}
+
+		$wp_roles = wp_roles();
+		$first    = reset( $roles );
+
+		return isset( $wp_roles->role_names[ $first ] )
+			? translate_user_role( $wp_roles->role_names[ $first ] )
+			: $first;
 	}
 }
