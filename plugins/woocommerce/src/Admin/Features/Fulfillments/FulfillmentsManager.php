@@ -507,7 +507,7 @@ class FulfillmentsManager {
 		$shipping_providers = FulfillmentUtils::get_shipping_providers();
 		$results            = array();
 		foreach ( $shipping_providers as $provider ) {
-			if ( class_exists( $provider ) && is_subclass_of( $provider, AbstractShippingProvider::class ) ) {
+			if ( is_string( $provider ) && class_exists( $provider ) && is_subclass_of( $provider, AbstractShippingProvider::class ) ) {
 				try {
 					/**
 					 * Instantiate the shipping provider class.
