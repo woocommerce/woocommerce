@@ -442,7 +442,7 @@ class Controller extends AbstractController {
 				'label' => $provider->get_name(),
 				'icon'  => $provider->get_icon(),
 				'value' => $provider->get_key(),
-				'url'   => $provider->get_tracking_url( '__PLACEHOLDER__' ),
+				'url'   => $provider->get_tracking_url( '__PLACEHOLDER__' ) ?? '',
 			);
 		}
 

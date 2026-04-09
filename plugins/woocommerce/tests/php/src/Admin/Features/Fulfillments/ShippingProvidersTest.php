@@ -49,6 +49,7 @@ class ShippingProvidersTest extends \WP_UnitTestCase {
 		$controller->initialize_fulfillments();
 
 		$shipping_providers = FulfillmentUtils::get_shipping_providers();
+		$this->assertNotEmpty( $shipping_providers, 'Expected at least one registered shipping provider.' );
 
 		foreach ( $shipping_providers as $key => $provider ) {
 			$this->assertInstanceOf(
