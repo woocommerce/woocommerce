@@ -405,6 +405,7 @@ final class WooCommerce {
 		// Classes inheriting from RestApiControllerBase.
 		$container->get( Automattic\WooCommerce\Internal\POS\RestApi\POSPinAuthController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\POS\RestApi\POSPinManageController::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\POS\RestApi\POSApprovalController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ReceiptRendering\ReceiptRenderingRestController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Orders\OrderActionsRestController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Orders\OrderStatusRestController::class )->register();
