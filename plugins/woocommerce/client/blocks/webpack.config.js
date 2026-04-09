@@ -17,27 +17,27 @@ const interactivityBlocksConfig = require( './bin/webpack-config-interactive-blo
 const interactivityAPIConfig = require( './bin/webpack-config-interactivity.js' );
 const dependencyDetectionConfig = require( './bin/webpack-config-dependency-detection.js' );
 const path = require( 'path' );
-const isProduction = NODE_ENV === 'production';
-const isWatch = ! isProduction && process.argv.includes( '--watch' );
+const isWatch =
+	NODE_ENV === 'development' && process.argv.includes( '--watch' );
 
 const getCacheConfig = ( name, configPaths = [] ) =>
-	isWatch
+	isWatch || process.env.CI
 		? { type: 'memory' }
 		: {
-				type: 'filesystem',
-				cacheDirectory: path.resolve(
-					__dirname,
-					`node_modules/.cache/webpack-${ name }`
-				),
-				buildDependencies: {
-					config: [
-						__filename,
-						...configPaths.map( ( configPath ) =>
-							path.resolve( __dirname, configPath )
-						),
-					],
-				},
-		  };
+			type: 'filesystem',
+			cacheDirectory: path.resolve(
+				__dirname,
+				`node_modules/.cache/webpack-${ name }`
+			),
+			buildDependencies: {
+				config: [
+					__filename,
+					...configPaths.map( ( configPath ) =>
+						path.resolve( __dirname, configPath )
+					),
+				],
+			},
+		};
 
 // Only options shared between all configs should be defined here.
 const sharedConfig = {
