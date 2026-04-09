@@ -1156,7 +1156,7 @@ function wc_update_user_last_active( $user_id ) {
  * @param string $domain       Text domain. Unique identifier for retrieving translated strings.
  * @return string
  */
-function wc_translate_user_roles( $translation, $text, $context, $domain ) {
+function wc_translate_user_roles( $translation, $text, $context, $domain ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed -- Kept for filter signature compatibility.
 	// translate_user_role() only accepts a second parameter starting in WP 5.2.
 	if ( version_compare( get_bloginfo( 'version' ), '5.2', '<' ) ) {
 		return $translation;
