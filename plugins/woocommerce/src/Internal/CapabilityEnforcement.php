@@ -7,6 +7,8 @@ use Automattic\WooCommerce\Internal\POS\Service\POSApprovalService;
 use WC_Data;
 use WP_Error;
 use WP_REST_Request;
+use WP_REST_Response;
+use WP_REST_Server;
 
 /**
  * Enforces WooCommerce capabilities on REST API endpoints.
@@ -53,6 +55,20 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 	private int $current_order_id = 0;
 
 	/**
+	 * The current REST route being evaluated.
+	 *
+	 * @var string
+	 */
+	private string $current_rest_route = '';
+
+	/**
+	 * The current REST request, captured before permission callbacks run.
+	 *
+	 * @var WP_REST_Request<array<string, mixed>>|null
+	 */
+	private ?WP_REST_Request $current_rest_request = null;
+
+	/**
 	 * Initialize dependencies via the DI container.
 	 *
 	 * @internal
@@ -77,6 +93,9 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 			3
 		);
 		add_filter( 'woocommerce_pos_capability_check', array( $this, 'check_approval_token' ), 10, 3 );
+		add_filter( 'rest_pre_dispatch', array( $this, 'capture_current_rest_route' ), 10, 3 );
+		add_filter( 'rest_request_before_callbacks', array( $this, 'enforce_route_access' ), 10, 3 );
+		add_filter( 'rest_post_dispatch', array( $this, 'filter_sensitive_report_data' ), 10, 3 );
 	}
 
 	/**
@@ -99,9 +118,28 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 		int $object_id,
 		string $post_type
 	): bool {
+		$route = $this->get_current_rest_route();
+
+		if ( $this->is_customer_route( $route ) ) {
+			return $this->current_user_can_access_customer_route( $context );
+		}
+
 		if ( 'shop_order_refund' === $post_type && 'create' === $context ) {
 			$this->extract_approval_context_from_rest_request();
 			return $this->user_has_capability( 'woocommerce_refund_orders' );
+		}
+
+		if ( ! $permission && 'shop_order' === $post_type && 'edit' === $context ) {
+			return current_user_can( 'edit_shop_orders' );
+		}
+
+		if (
+			! $permission
+			&& 'edit' === $context
+			&& in_array( $post_type, array( 'product', 'product_variation' ), true )
+			&& $this->is_stock_adjustment_request()
+		) {
+			return current_user_can( 'woocommerce_adjust_stock' );
 		}
 
 		if ( ! $permission ) {
@@ -123,6 +161,11 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 	 * @return WC_Data|WP_Error The order or WP_Error if capability check fails.
 	 */
 	public function enforce_cancel_capability( $order, WP_REST_Request $request, bool $creating ) {
+		$order_capability_error = $this->enforce_order_request_capabilities( $request );
+		if ( is_wp_error( $order_capability_error ) ) {
+			return $order_capability_error;
+		}
+
 		if ( $creating ) {
 			return $order;
 		}
@@ -146,6 +189,93 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 		}
 
 		return $order;
+	}
+
+	/**
+	 * Restrict non-POS routes and report access for POS-only users.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @param mixed           $response The pre-dispatch response.
+	 * @param array           $handler  Route handler data.
+	 * @param WP_REST_Request $request  Current request.
+	 * @phpstan-param array<string, mixed> $handler
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 * @return mixed
+	 */
+	public function enforce_route_access( $response, array $handler, WP_REST_Request $request ) {
+		unset( $handler );
+
+		if ( ! is_user_logged_in() || ! current_user_can( 'woocommerce_pos_access' ) || current_user_can( 'manage_woocommerce' ) ) {
+			return $response;
+		}
+
+		$route = $request->get_route();
+
+		if ( $this->is_blocked_user_route( $route ) ) {
+			return new WP_Error(
+				'woocommerce_rest_cannot_view',
+				__( 'Sorry, you cannot view this resource.', 'woocommerce' ),
+				array( 'status' => rest_authorization_required_code() )
+			);
+		}
+
+		if ( $this->is_report_route( $route ) && ! current_user_can( 'woocommerce_view_sales_reports' ) ) {
+			return new WP_Error(
+				'woocommerce_rest_cannot_view',
+				__( 'Sorry, you cannot list resources.', 'woocommerce' ),
+				array( 'status' => rest_authorization_required_code() )
+			);
+		}
+
+		return $response;
+	}
+
+	/**
+	 * Remove financial-only report fields for users without financial report access.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @param mixed           $response The REST response.
+	 * @param WP_REST_Server  $server   REST server instance.
+	 * @param WP_REST_Request $request  Current request.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 * @return mixed
+	 */
+	public function filter_sensitive_report_data( $response, WP_REST_Server $server, WP_REST_Request $request ) {
+		unset( $server );
+
+		if ( ! $response instanceof WP_REST_Response || current_user_can( 'woocommerce_view_financial_reports' ) ) {
+			return $response;
+		}
+
+		if ( ! $this->is_report_route( $request->get_route() ) ) {
+			return $response;
+		}
+
+		$response->set_data( $this->strip_financial_fields( $response->get_data() ) );
+
+		return $response;
+	}
+
+	/**
+	 * Capture the current route before endpoint permission callbacks run.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @param mixed           $result  The pre-dispatch response.
+	 * @param WP_REST_Server  $server  REST server instance.
+	 * @param WP_REST_Request $request Current request.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 * @return mixed
+	 */
+	public function capture_current_rest_route( $result, WP_REST_Server $server, WP_REST_Request $request ) {
+		unset( $server );
+
+		$this->current_rest_request = $request;
+		$this->current_rest_route = $request->get_route();
+
+		return $result;
 	}
 
 	/**
@@ -285,5 +415,310 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 		 * @param int    $user_id    The user ID.
 		 */
 		return (bool) apply_filters( 'woocommerce_pos_capability_check', $has_cap, $capability, $user_id );
+	}
+
+	/**
+	 * Enforce granular order request capabilities before the order is saved.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @param WP_REST_Request $request Current request.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 * @return true|WP_Error
+	 */
+	private function enforce_order_request_capabilities( WP_REST_Request $request ) {
+		if ( $this->request_has_coupon_changes( $request ) && ! $this->user_has_capability( 'woocommerce_apply_discounts' ) ) {
+			return new WP_Error(
+				'woocommerce_rest_cannot_apply_discounts',
+				__( 'Sorry, you are not allowed to apply discounts.', 'woocommerce' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		if ( $this->request_has_price_overrides( $request ) && ! $this->user_has_capability( 'woocommerce_override_prices' ) ) {
+			return new WP_Error(
+				'woocommerce_rest_cannot_override_prices',
+				__( 'Sorry, you are not allowed to override prices.', 'woocommerce' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		return true;
+	}
+
+	/**
+	 * Check whether the request contains coupon changes.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @param WP_REST_Request $request Current request.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 * @return bool
+	 */
+	private function request_has_coupon_changes( WP_REST_Request $request ): bool {
+		$coupon_lines = $request->get_param( 'coupon_lines' );
+
+		return is_array( $coupon_lines ) && ! empty( $coupon_lines );
+	}
+
+	/**
+	 * Check whether the request contains line-item price overrides.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @param WP_REST_Request $request Current request.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 * @return bool
+	 */
+	private function request_has_price_overrides( WP_REST_Request $request ): bool {
+		$line_items = $request->get_param( 'line_items' );
+
+		if ( ! is_array( $line_items ) ) {
+			return false;
+		}
+
+		foreach ( $line_items as $item ) {
+			if ( ! is_array( $item ) ) {
+				continue;
+			}
+
+			if ( array_key_exists( 'total', $item ) || array_key_exists( 'subtotal', $item ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Return the current REST route, if available.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @return string
+	 */
+	private function get_current_rest_route(): string {
+		if ( '' !== $this->current_rest_route ) {
+			return $this->current_rest_route;
+		}
+
+		if ( $this->current_rest_request instanceof WP_REST_Request ) {
+			return $this->current_rest_request->get_route();
+		}
+
+		$server = rest_get_server();
+		if ( ! $server || ! method_exists( $server, 'get_current_request' ) ) {
+			return $this->get_rest_route_from_request_uri();
+		}
+
+		$request = $server->get_current_request();
+
+		if ( $request instanceof WP_REST_Request ) {
+			return $request->get_route();
+		}
+
+		return $this->get_rest_route_from_request_uri();
+	}
+
+	/**
+	 * Check whether the current route is a customer REST API route.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @param string $route REST route.
+	 * @return bool
+	 */
+	private function is_customer_route( string $route ): bool {
+		return 1 === preg_match( '#^/wc/v[123]/customers(?:/|$)#', $route );
+	}
+
+	/**
+	 * Check whether the current route is a report or analytics route.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @param string $route REST route.
+	 * @return bool
+	 */
+	private function is_report_route( string $route ): bool {
+		return 1 === preg_match( '#^/(wc-analytics|wc-admin|wc/v[123]/reports)(?:/|$)#', $route );
+	}
+
+	/**
+	 * Check whether the route should be blocked for POS-only users.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @param string $route REST route.
+	 * @return bool
+	 */
+	private function is_blocked_user_route( string $route ): bool {
+		if ( '/wp/v2/users/me' === $route ) {
+			return false;
+		}
+
+		return 1 === preg_match( '#^/wp/v2/users(?:/\\d+)?$#', $route );
+	}
+
+	/**
+	 * Check whether the current user can access a customer route.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @param string $context Permission context.
+	 * @return bool
+	 */
+	private function current_user_can_access_customer_route( string $context ): bool {
+		if ( current_user_can( 'manage_woocommerce' ) ) {
+			return true;
+		}
+
+		if ( 'read' === $context ) {
+			return current_user_can( 'woocommerce_view_customer_data' );
+		}
+
+		if ( in_array( $context, array( 'create', 'edit', 'delete', 'batch' ), true ) ) {
+			return current_user_can( 'woocommerce_edit_customer_data' );
+		}
+
+		return false;
+	}
+
+	/**
+	 * Check whether the current request is a stock-only product update.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @return bool
+	 */
+	private function is_stock_adjustment_request(): bool {
+		$request = $this->current_rest_request;
+		if ( ! $request instanceof WP_REST_Request ) {
+			$server = rest_get_server();
+			if ( ! $server || ! method_exists( $server, 'get_current_request' ) ) {
+				return false;
+			}
+
+			$request = $server->get_current_request();
+		}
+
+		if ( ! $request instanceof WP_REST_Request ) {
+			return false;
+		}
+
+		if ( ! in_array( $request->get_method(), array( 'POST', 'PUT', 'PATCH' ), true ) ) {
+			return false;
+		}
+
+		$route = $request->get_route();
+		if ( 1 !== preg_match( '#^/wc/v[34]/products(?:/\\d+)?(?:/variations/\\d+)?$#', $route ) ) {
+			return false;
+		}
+
+		$params = $request->get_json_params();
+		if ( ! is_array( $params ) || empty( $params ) ) {
+			$params = $request->get_body_params();
+		}
+		if ( ! is_array( $params ) ) {
+			return false;
+		}
+
+		$allowed_keys = array(
+			'id',
+			'manage_stock',
+			'stock_quantity',
+			'stock_status',
+			'backorders',
+			'low_stock_amount',
+		);
+
+		$stock_keys_found = false;
+
+		foreach ( $params as $key => $value ) {
+			unset( $value );
+
+			if ( in_array( $key, array( 'manage_stock', 'stock_quantity', 'stock_status', 'backorders', 'low_stock_amount' ), true ) ) {
+				$stock_keys_found = true;
+			}
+
+			if ( ! in_array( $key, $allowed_keys, true ) ) {
+				return false;
+			}
+		}
+
+		return $stock_keys_found;
+	}
+
+	/**
+	 * Recursively remove financial-only fields from response data.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @param mixed $data Response data.
+	 * @return mixed
+	 */
+	private function strip_financial_fields( $data ) {
+		$blocked_keys = array(
+			'cost_of_goods_sold',
+			'cogs_total_value',
+			'total_cogs',
+			'gross_profit',
+			'gross_margin',
+			'net_profit',
+			'profit_margin',
+		);
+
+		if ( ! is_array( $data ) ) {
+			return $data;
+		}
+
+		foreach ( $blocked_keys as $key ) {
+			unset( $data[ $key ] );
+		}
+
+		foreach ( $data as $key => $value ) {
+			$data[ $key ] = $this->strip_financial_fields( $value );
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Parse the current REST route from REQUEST_URI when the REST server has not exposed it yet.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @return string
+	 */
+	private function get_rest_route_from_request_uri(): string {
+		$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : '';
+		if ( ! is_string( $request_uri ) || '' === $request_uri ) {
+			return '';
+		}
+
+		$parsed_request_uri = wp_parse_url( $request_uri );
+		if ( ! is_array( $parsed_request_uri ) ) {
+			return '';
+		}
+
+		if ( isset( $parsed_request_uri['query'] ) && is_string( $parsed_request_uri['query'] ) ) {
+			parse_str( $parsed_request_uri['query'], $query_args );
+			if ( isset( $query_args['rest_route'] ) && is_string( $query_args['rest_route'] ) ) {
+				return wp_unslash( $query_args['rest_route'] );
+			}
+		}
+
+		$path = isset( $parsed_request_uri['path'] ) && is_string( $parsed_request_uri['path'] ) ? rawurldecode( $parsed_request_uri['path'] ) : '';
+		if ( '' === $path ) {
+			return '';
+		}
+
+		$rest_prefix = '/' . rest_get_url_prefix() . '/';
+		$prefix_pos  = strpos( $path, $rest_prefix );
+		if ( false === $prefix_pos ) {
+			return '';
+		}
+
+		return '/' . ltrim( substr( $path, $prefix_pos + strlen( $rest_prefix ) ), '/' );
 	}
 }

@@ -6,8 +6,11 @@ namespace Automattic\WooCommerce\Tests\Internal;
 use Automattic\WooCommerce\Internal\CapabilityEnforcement;
 use Automattic\WooCommerce\Internal\POS\Service\POSApprovalService;
 use WC_Helper_Order;
+use WC_Helper_Product;
 use WC_Install;
 use WC_REST_Unit_Test_Case;
+use WP_REST_Request;
+use WP_REST_Response;
 
 /**
  * Tests for capability enforcement on REST API endpoints.
@@ -67,6 +70,9 @@ class CapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 		remove_all_filters( 'woocommerce_rest_check_permissions' );
 		remove_all_filters( 'woocommerce_pos_capability_check' );
 		remove_all_filters( 'woocommerce_rest_pre_insert_shop_order_object' );
+		remove_all_filters( 'rest_pre_dispatch' );
+		remove_all_filters( 'rest_request_before_callbacks' );
+		remove_all_filters( 'rest_post_dispatch' );
 		$this->reset_roles();
 		parent::tearDown();
 	}
@@ -276,6 +282,28 @@ class CapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A POS manager can cancel orders through the REST API.
+	 */
+	public function test_pos_manager_can_cancel_orders_via_rest_api(): void {
+		wp_set_current_user( $this->capable_user_id );
+
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( 'pending' );
+		$order->save();
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
+		$request->set_body_params(
+			array(
+				'status' => 'cancelled',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertNotSame( 403, $response->get_status() );
+	}
+
+	/**
 	 * @testdox Enforcement applies universally, not just to POS roles.
 	 */
 	public function test_enforcement_applies_to_any_user_without_cap(): void {
@@ -452,6 +480,258 @@ class CapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox POS-only users cannot list WordPress users outside the POS surface.
+	 */
+	public function test_pos_only_users_cannot_list_wordpress_users(): void {
+		wp_set_current_user( $this->capable_user_id );
+
+		$request  = new WP_REST_Request( 'GET', '/wp/v2/users' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 403, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_cannot_view', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox POS-only users can still read their own profile endpoint.
+	 */
+	public function test_pos_only_users_can_access_own_user_endpoint(): void {
+		wp_set_current_user( $this->capable_user_id );
+
+		$request  = new WP_REST_Request( 'GET', '/wp/v2/users/me' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertNotSame( 403, $response->get_status() );
+	}
+
+	/**
+	 * @testdox Cashiers can read customers but cannot edit them.
+	 */
+	public function test_cashier_customer_access_matches_pos_caps(): void {
+		wp_set_current_user( $this->limited_user_id );
+
+		$list_request  = new WP_REST_Request( 'GET', '/wc/v3/customers' );
+		$list_response = $this->server->dispatch( $list_request );
+
+		$this->assertSame( 200, $list_response->get_status() );
+
+		$edit_request = new WP_REST_Request( 'POST', '/wc/v3/customers' );
+		$edit_request->set_body_params(
+			array(
+				'email'      => 'cashier-created@example.com',
+				'first_name' => 'Cashier',
+				'last_name'  => 'Customer',
+				'username'   => 'cashier-created',
+			)
+		);
+
+		$edit_response = $this->server->dispatch( $edit_request );
+
+		$this->assertSame( 403, $edit_response->get_status() );
+	}
+
+	/**
+	 * @testdox POS managers can read and edit customers through the REST API.
+	 */
+	public function test_pos_manager_customer_access_matches_pos_caps(): void {
+		wp_set_current_user( $this->capable_user_id );
+
+		$list_request  = new WP_REST_Request( 'GET', '/wc/v3/customers' );
+		$list_response = $this->server->dispatch( $list_request );
+
+		$this->assertSame( 200, $list_response->get_status() );
+
+		$create_request = new WP_REST_Request( 'POST', '/wc/v3/customers' );
+		$create_request->set_body_params(
+			array(
+				'email'      => 'manager-created@example.com',
+				'first_name' => 'Manager',
+				'last_name'  => 'Customer',
+				'username'   => 'manager-created',
+			)
+		);
+
+		$create_response = $this->server->dispatch( $create_request );
+
+		$this->assertSame( 201, $create_response->get_status() );
+	}
+
+	/**
+	 * @testdox Cashiers cannot access sales reports without the dedicated capability.
+	 */
+	public function test_cashier_cannot_access_reports_without_sales_capability(): void {
+		wp_set_current_user( $this->limited_user_id );
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v3/reports' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 403, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_cannot_view', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Financial report fields are removed for users without financial report access.
+	 */
+	public function test_financial_report_fields_are_filtered_for_non_financial_users(): void {
+		wp_set_current_user( $this->capable_user_id );
+
+		$request  = new WP_REST_Request( 'GET', '/wc-analytics/reports/revenue/stats' );
+		$response = new WP_REST_Response(
+			array(
+				'total_sales'   => 20,
+				'gross_profit'  => 10,
+				'intervals'     => array(
+					array(
+						'subtotal'      => 15,
+						'profit_margin' => 0.5,
+					),
+				),
+			)
+		);
+
+		$filtered = $this->sut->filter_sensitive_report_data( $response, rest_get_server(), $request );
+		$data     = $filtered->get_data();
+
+		$this->assertArrayHasKey( 'total_sales', $data );
+		$this->assertArrayNotHasKey( 'gross_profit', $data );
+		$this->assertArrayNotHasKey( 'profit_margin', $data['intervals'][0] );
+	}
+
+	/**
+	 * @testdox Stock-only product updates are allowed with woocommerce_adjust_stock.
+	 */
+	public function test_stock_only_product_updates_are_allowed_with_adjust_stock_capability(): void {
+		$user_id = $this->factory->user->create( array( 'role' => 'pos_cashier' ) );
+		$user    = new \WP_User( $user_id );
+		$user->add_cap( 'woocommerce_adjust_stock' );
+
+		wp_set_current_user( $user_id );
+
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'   => true,
+				'stock_quantity' => 10,
+			)
+		);
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $product->get_id() );
+		$request->set_body_params(
+			array(
+				'manage_stock'   => true,
+				'stock_quantity' => 4,
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertNotSame( 403, $response->get_status() );
+		$this->assertSame( 4, wc_get_product( $product->get_id() )->get_stock_quantity() );
+	}
+
+	/**
+	 * @testdox Product edits beyond stock still require the normal product-edit permissions.
+	 */
+	public function test_non_stock_product_updates_still_require_product_edit_permissions(): void {
+		$user_id = $this->factory->user->create( array( 'role' => 'pos_cashier' ) );
+		$user    = new \WP_User( $user_id );
+		$user->add_cap( 'woocommerce_adjust_stock' );
+
+		wp_set_current_user( $user_id );
+
+		$product = WC_Helper_Product::create_simple_product();
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $product->get_id() );
+		$request->set_body_params(
+			array(
+				'name' => 'Changed product name',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 403, $response->get_status() );
+	}
+
+	/**
+	 * @testdox Cashiers cannot apply discounts without the dedicated capability.
+	 */
+	public function test_cashier_cannot_apply_discounts_without_capability(): void {
+		wp_set_current_user( $this->limited_user_id );
+		$order = $this->create_order_as_current_user( 'pending' );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
+		$request->set_body_params(
+			array(
+				'coupon_lines' => array(
+					array(
+						'code' => 'ten-off',
+					),
+				),
+			)
+		);
+
+		$result = $this->sut->enforce_cancel_capability( $order, $request, false );
+
+		$this->assertInstanceOf( \WP_Error::class, $result );
+		$this->assertSame( 'woocommerce_rest_cannot_apply_discounts', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Cashiers cannot override line-item prices without the dedicated capability.
+	 */
+	public function test_cashier_cannot_override_prices_without_capability(): void {
+		wp_set_current_user( $this->limited_user_id );
+		$order = $this->create_order_as_current_user( 'pending' );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
+		$request->set_body_params(
+			array(
+				'line_items' => array(
+					array(
+						'product_id' => 1,
+						'total'      => '1.00',
+					),
+				),
+			)
+		);
+
+		$result = $this->sut->enforce_cancel_capability( $order, $request, false );
+
+		$this->assertInstanceOf( \WP_Error::class, $result );
+		$this->assertSame( 'woocommerce_rest_cannot_override_prices', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Managers can update orders with discounts and price overrides.
+	 */
+	public function test_pos_manager_can_apply_discounts_and_override_prices(): void {
+		wp_set_current_user( $this->capable_user_id );
+		$order = $this->create_order_as_current_user( 'pending' );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
+		$request->set_body_params(
+			array(
+				'coupon_lines' => array(
+					array(
+						'code' => 'ten-off',
+					),
+				),
+				'line_items'   => array(
+					array(
+						'product_id' => 1,
+						'total'      => '1.00',
+					),
+				),
+			)
+		);
+
+		$result = $this->sut->enforce_cancel_capability( $order, $request, false );
+
+		$this->assertSame( $order, $result );
+	}
+
+	/**
 	 * @testdox register adds the woocommerce_rest_check_permissions filter.
 	 */
 	public function test_register_adds_permission_filter(): void {
@@ -476,6 +756,9 @@ class CapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 	public function test_register_adds_pre_insert_filter(): void {
 		remove_all_filters( 'woocommerce_rest_check_permissions' );
 		remove_all_filters( 'woocommerce_rest_pre_insert_shop_order_object' );
+		remove_all_filters( 'rest_pre_dispatch' );
+		remove_all_filters( 'rest_request_before_callbacks' );
+		remove_all_filters( 'rest_post_dispatch' );
 
 		$handler = new CapabilityEnforcement();
 		$handler->init( $this->approval_service );
@@ -487,8 +770,29 @@ class CapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 				array( $handler, 'enforce_cancel_capability' )
 			)
 		);
+		$this->assertNotFalse(
+			has_filter(
+				'rest_pre_dispatch',
+				array( $handler, 'capture_current_rest_route' )
+			)
+		);
+		$this->assertNotFalse(
+			has_filter(
+				'rest_request_before_callbacks',
+				array( $handler, 'enforce_route_access' )
+			)
+		);
+		$this->assertNotFalse(
+			has_filter(
+				'rest_post_dispatch',
+				array( $handler, 'filter_sensitive_report_data' )
+			)
+		);
 
 		remove_all_filters( 'woocommerce_rest_check_permissions' );
 		remove_all_filters( 'woocommerce_rest_pre_insert_shop_order_object' );
+		remove_all_filters( 'rest_pre_dispatch' );
+		remove_all_filters( 'rest_request_before_callbacks' );
+		remove_all_filters( 'rest_post_dispatch' );
 	}
 }
