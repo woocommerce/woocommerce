@@ -138,8 +138,8 @@ class POSPinAuthController extends RestApiControllerBase implements RegisterHook
 		$logger      = wc_get_logger();
 		$log_context = array( 'source' => 'woocommerce-pos' );
 
-		if ( ! $this->pin_service->validate_pin_format( $pin ) || $this->pin_service->is_pin_blocked( $pin ) ) {
-			$logger->warning( 'PIN authentication failed: invalid format or blocked PIN.', $log_context );
+		if ( ! $this->pin_service->validate_pin_format( $pin ) ) {
+			$logger->warning( 'PIN authentication failed: invalid PIN format.', $log_context );
 			$this->rate_limit_service->record_failure( $client_ip );
 			return $this->pin_error();
 		}

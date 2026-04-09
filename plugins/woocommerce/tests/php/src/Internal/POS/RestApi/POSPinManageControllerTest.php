@@ -238,9 +238,9 @@ class POSPinManageControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Setting a blocked PIN returns 422.
+	 * @testdox Setting a weak but valid PIN returns 200.
 	 */
-	public function test_setting_blocked_pin_returns_422(): void {
+	public function test_setting_weak_but_valid_pin_returns_200(): void {
 		wp_set_current_user( $this->shop_manager_id );
 
 		$request = new \WP_REST_Request( 'POST', self::MANAGE_ROUTE );
@@ -254,7 +254,8 @@ class POSPinManageControllerTest extends WC_REST_Unit_Test_Case {
 
 		$response = rest_do_request( $request );
 
-		$this->assertSame( 422, $response->get_status() );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertTrue( $this->pin_service->has_pin( $this->pos_cashier_id ) );
 	}
 
 	/**

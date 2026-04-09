@@ -18,65 +18,6 @@ class POSPinService {
 	const PIN_INDEX_META_KEY = '_woocommerce_pos_pin_index';
 
 	/**
-	 * Common PINs that cannot be assigned to POS users.
-	 *
-	 * @var string[]
-	 */
-	private const BLOCKED_PINS = array(
-		'0000',
-		'1111',
-		'2222',
-		'3333',
-		'4444',
-		'5555',
-		'6666',
-		'7777',
-		'8888',
-		'9999',
-		'1234',
-		'4321',
-		'1122',
-		'1212',
-		'2580',
-		'0001',
-		'0101',
-		'1010',
-		'1001',
-		'2345',
-		'3456',
-		'4567',
-		'5678',
-		'6789',
-		'7890',
-		'1313',
-		'1414',
-		'1515',
-		'1616',
-		'1717',
-		'1818',
-		'1919',
-		'2020',
-		'2121',
-		'2323',
-		'2525',
-		'1123',
-		'1235',
-		'1357',
-		'2468',
-		'0007',
-		'0011',
-		'0069',
-		'0911',
-		'1004',
-		'1776',
-		'2000',
-		'2001',
-		'5683',
-		'6969',
-		'7007',
-	);
-
-	/**
 	 * Validates that a PIN is 4-6 numeric digits.
 	 *
 	 * @since 10.8.0
@@ -85,17 +26,6 @@ class POSPinService {
 	 */
 	public function validate_pin_format( string $pin ): bool {
 		return 1 === preg_match( '/^\d{4,6}$/', $pin );
-	}
-
-	/**
-	 * Checks whether a PIN is in the blocked list.
-	 *
-	 * @since 10.8.0
-	 * @param string $pin The PIN to check.
-	 * @return bool
-	 */
-	public function is_pin_blocked( string $pin ): bool {
-		return in_array( $pin, self::BLOCKED_PINS, true );
 	}
 
 	/**
@@ -133,7 +63,7 @@ class POSPinService {
 	}
 
 	/**
-	 * Sets a PIN for a user after validating format, blocked list, and uniqueness.
+	 * Sets a PIN for a user after validating format and uniqueness.
 	 *
 	 * Returns true on success, or a WP_Error with a generic 'invalid_pin' code
 	 * for all failure types to prevent enumeration.
@@ -148,7 +78,7 @@ class POSPinService {
 			return $this->pin_error();
 		}
 
-		if ( ! $this->validate_pin_format( $pin ) || $this->is_pin_blocked( $pin ) ) {
+		if ( ! $this->validate_pin_format( $pin ) ) {
 			return $this->pin_error();
 		}
 

@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\POS\Service;
 
 use Automattic\WooCommerce\Internal\POS\Service\POSPinService;
+use WC_Install;
 use WC_Unit_Test_Case;
 
 /**
@@ -30,6 +31,7 @@ class POSPinServiceTest extends WC_Unit_Test_Case {
 
 	public function setUp(): void {
 		parent::setUp();
+		$this->reset_roles();
 		$this->service   = new POSPinService();
 		$this->user_id   = $this->factory->user->create( array( 'role' => 'pos_cashier' ) );
 		$this->user_id_2 = $this->factory->user->create( array( 'role' => 'pos_cashier' ) );
@@ -38,7 +40,18 @@ class POSPinServiceTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		wp_delete_user( $this->user_id );
 		wp_delete_user( $this->user_id_2 );
+		$this->reset_roles();
 		parent::tearDown();
+	}
+
+	/**
+	 * Remove and recreate all WC roles with a fresh WP_Roles instance.
+	 */
+	private function reset_roles(): void {
+		WC_Install::remove_roles();
+		WC_Install::create_roles();
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$GLOBALS['wp_roles'] = new \WP_Roles();
 	}
 
 	/**
@@ -102,32 +115,6 @@ class POSPinServiceTest extends WC_Unit_Test_Case {
 	 */
 	public function test_validate_pin_format_rejects_leading_space(): void {
 		$this->assertFalse( $this->service->validate_pin_format( ' 1234' ) );
-	}
-
-	/**
-	 * @testdox is_pin_blocked returns true for blocked PINs.
-	 */
-	public function test_is_pin_blocked_returns_true_for_blocked_pins(): void {
-		$blocked = array( '0000', '1234', '1111', '2580', '6969' );
-		foreach ( $blocked as $pin ) {
-			$this->assertTrue(
-				$this->service->is_pin_blocked( $pin ),
-				"PIN {$pin} should be blocked"
-			);
-		}
-	}
-
-	/**
-	 * @testdox is_pin_blocked returns false for normal PINs.
-	 */
-	public function test_is_pin_blocked_returns_false_for_normal_pins(): void {
-		$normal = array( '4829', '7362', '91053', '482910' );
-		foreach ( $normal as $pin ) {
-			$this->assertFalse(
-				$this->service->is_pin_blocked( $pin ),
-				"PIN {$pin} should not be blocked"
-			);
-		}
 	}
 
 	/**
@@ -199,17 +186,17 @@ class POSPinServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox set_pin rejects blocked PINs with generic error.
+	 * @testdox set_pin accepts weak but valid numeric PINs.
 	 */
-	public function test_set_pin_rejects_blocked_pin(): void {
+	public function test_set_pin_accepts_weak_numeric_pin(): void {
 		$result = $this->service->set_pin( $this->user_id, '1234' );
 
-		$this->assertInstanceOf( \WP_Error::class, $result );
-		$this->assertSame( 'invalid_pin', $result->get_error_code() );
+		$this->assertTrue( $result );
+		$this->assertTrue( $this->service->has_pin( $this->user_id ) );
 	}
 
 	/**
-	 * @testdox set_pin rejects invalid format with same generic error as blocked PINs.
+	 * @testdox set_pin rejects invalid format with a generic error.
 	 */
 	public function test_set_pin_rejects_invalid_format(): void {
 		$result = $this->service->set_pin( $this->user_id, '12' );
@@ -331,23 +318,16 @@ class POSPinServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox All error types use the same error code and message for anti-enumeration.
+	 * @testdox Remaining validation errors use the same error code and message for anti-enumeration.
 	 */
 	public function test_all_errors_use_same_code_and_message(): void {
 		$format_result = $this->service->set_pin( $this->user_id, '12' );
 		$this->assertSame( 'invalid_pin', $format_result->get_error_code() );
 
-		$blocked_result = $this->service->set_pin( $this->user_id, '1234' );
-		$this->assertSame( 'invalid_pin', $blocked_result->get_error_code() );
-
 		$this->service->set_pin( $this->user_id, '4829' );
 		$duplicate_result = $this->service->set_pin( $this->user_id_2, '4829' );
 		$this->assertSame( 'invalid_pin', $duplicate_result->get_error_code() );
 
-		$this->assertSame(
-			$format_result->get_error_message(),
-			$blocked_result->get_error_message()
-		);
 		$this->assertSame(
 			$format_result->get_error_message(),
 			$duplicate_result->get_error_message()
