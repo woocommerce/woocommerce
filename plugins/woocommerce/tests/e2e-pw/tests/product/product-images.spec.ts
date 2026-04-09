@@ -13,7 +13,7 @@ import { ADMIN_STATE_PATH } from '../../playwright.config';
 async function addImageFromLibrary(
 	page: Page,
 	imageName: string,
-	actionButtonName: string = 'Add to product'
+	actionButtonName = 'Add to product'
 ) {
 	await page.getByRole( 'tab', { name: 'Media Library' } ).click();
 	await page.getByRole( 'searchbox', { name: 'Search' } ).fill( imageName );
@@ -138,11 +138,11 @@ test.describe( 'Products > Product Images', () => {
 			await addImageFromLibrary( page, 'image-02' );
 
 			// Remove the original featured image.
+			await page.locator( '.wc-product-images__image--featured' ).hover();
 			await page
-				.locator( '.wc-product-images__image--featured' )
-				.hover();
-			await page
-				.locator( '.wc-product-images__image--featured .wc-product-images__remove' )
+				.locator(
+					'.wc-product-images__image--featured .wc-product-images__remove'
+				)
 				.click();
 
 			// The new image should now be featured.
@@ -179,17 +179,15 @@ test.describe( 'Products > Product Images', () => {
 		} );
 
 		await test.step( 'Remove product image', async () => {
+			await page.locator( '.wc-product-images__image--featured' ).hover();
 			await page
-				.locator( '.wc-product-images__image--featured' )
-				.hover();
-			await page
-				.locator( '.wc-product-images__image--featured .wc-product-images__remove' )
+				.locator(
+					'.wc-product-images__image--featured .wc-product-images__remove'
+				)
 				.click();
 
 			await expect(
-				page.locator(
-					'.wc-product-images__add-slot--featured'
-				)
+				page.locator( '.wc-product-images__add-slot--featured' )
 			).toBeVisible();
 
 			await page
@@ -227,9 +225,7 @@ test.describe( 'Products > Product Images', () => {
 				.count();
 
 			for ( const image of images ) {
-				await page
-					.locator( '#wc-product-images__add-slot' )
-					.click();
+				await page.locator( '#wc-product-images__add-slot' ).click();
 				await addImageFromLibrary( page, image );
 
 				const currentImagesCount = await page
@@ -280,9 +276,7 @@ test.describe( 'Products > Product Images', () => {
 				.locator( '.wc-product-images__image--gallery' )
 				.first();
 			await galleryImage.hover();
-			await galleryImage
-				.locator( '.wc-product-images__remove' )
-				.click();
+			await galleryImage.locator( '.wc-product-images__remove' ).click();
 
 			await expect(
 				await page.locator( imageSelector ).count(),
