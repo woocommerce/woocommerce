@@ -102,16 +102,21 @@ class POSRateLimitService {
 
 		++$data['attempts'];
 
+		$ttl = self::WINDOW_SECONDS;
+
 		foreach ( array_reverse( self::LOCKOUT_THRESHOLDS, true ) as $threshold => $duration ) {
 			if ( $data['attempts'] >= $threshold ) {
 				$data['lockout_until'] = -1 === $duration
 					? -1
 					: time() + $duration;
+				if ( -1 === $duration ) {
+					$ttl = YEAR_IN_SECONDS;
+				}
 				break;
 			}
 		}
 
-		set_transient( $key, $data, self::WINDOW_SECONDS );
+		set_transient( $key, $data, $ttl );
 	}
 
 	/**

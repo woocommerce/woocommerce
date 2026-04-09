@@ -368,20 +368,27 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 	 * Extract approval token and order context from the current REST request.
 	 *
 	 * Used by enforce_capabilities() which receives the permission filter
-	 * but not the WP_REST_Request. Reads from POST body only (never GET)
-	 * to prevent token leakage in query strings and server logs.
+	 * but not the WP_REST_Request directly. Prefers the captured REST request
+	 * when available, falling back to POST body to prevent token leakage.
 	 *
 	 * @since 10.8.0
 	 */
 	private function extract_approval_context_from_rest_request(): void {
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing
-		$token = isset( $_POST['_pos_approval'] ) ? sanitize_text_field( wp_unslash( $_POST['_pos_approval'] ) ) : '';
+		if ( $this->current_rest_request instanceof WP_REST_Request ) {
+			$this->current_approval_token = (string) $this->current_rest_request->get_param( '_pos_approval' );
+			$route = $this->current_rest_request->get_route();
+		} else {
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing
+			$this->current_approval_token = isset( $_POST['_pos_approval'] )
+				? sanitize_text_field( wp_unslash( $_POST['_pos_approval'] ) )
+				: '';
+			$route = isset( $_SERVER['REQUEST_URI'] )
+				? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) )
+				: '';
+		}
 
-		$this->current_approval_token = $token;
-
-		// Extract order ID from the request URI (e.g., /orders/123/refunds).
-		$uri = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
-		if ( preg_match( '#/orders/(\d+)/#', $uri, $matches ) ) {
+		// Extract order ID from the route (e.g., /orders/123/refunds).
+		if ( preg_match( '#/orders/(\d+)/#', $route, $matches ) ) {
 			$this->current_order_id = (int) $matches[1];
 		}
 	}
