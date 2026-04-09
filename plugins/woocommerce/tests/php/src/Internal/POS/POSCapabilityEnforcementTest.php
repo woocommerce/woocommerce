@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\POS;
 
 use Automattic\WooCommerce\Internal\POS\POSCapabilityEnforcement;
+use Automattic\WooCommerce\Internal\POS\Service\POSApprovalService;
 use WC_Helper_Order;
 use WC_Install;
 use WC_REST_Unit_Test_Case;
@@ -19,6 +20,11 @@ class POSCapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 	 * @var POSCapabilityEnforcement
 	 */
 	private $sut;
+
+	/**
+	 * @var POSApprovalService
+	 */
+	private POSApprovalService $approval_service;
 
 	/**
 	 * @var int
@@ -47,7 +53,10 @@ class POSCapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 		$this->pos_manager_id = $this->factory->user->create( array( 'role' => 'pos_manager' ) );
 		$this->admin_id       = $this->factory->user->create( array( 'role' => 'administrator' ) );
 
+		$this->approval_service = new POSApprovalService();
+
 		$this->sut = new POSCapabilityEnforcement();
+		$this->sut->init( $this->approval_service );
 		$this->sut->register();
 	}
 
@@ -384,6 +393,64 @@ class POSCapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox POS cashier can process a refund when providing a valid approval token via the filter.
+	 */
+	public function test_pos_cashier_can_refund_with_approval_token(): void {
+		wp_set_current_user( $this->pos_cashier_id );
+		$order = $this->create_order_as_current_user( 'completed' );
+
+		$token = $this->approval_service->create_approval(
+			$this->pos_manager_id,
+			'woocommerce_refund_orders',
+			array( 'order_id' => $order->get_id() )
+		);
+
+		$_REQUEST['_pos_approval'] = $token;
+
+		$result = $this->sut->enforce_pos_capabilities( true, 'create', 0, 'shop_order_refund' );
+
+		unset( $_REQUEST['_pos_approval'] );
+
+		$this->assertTrue( $result );
+
+		$notes = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
+		$found_note = false;
+		foreach ( $notes as $note ) {
+			if ( str_contains( $note->content, 'POS override' ) ) {
+				$found_note = true;
+				break;
+			}
+		}
+		$this->assertTrue( $found_note, 'An order note should be added when an approval token is consumed.' );
+	}
+
+	/**
+	 * @testdox POS cashier cannot refund with an invalid approval token.
+	 */
+	public function test_pos_cashier_cannot_refund_with_invalid_approval_token(): void {
+		wp_set_current_user( $this->pos_cashier_id );
+
+		$_REQUEST['_pos_approval'] = 'invalid-token-value';
+
+		$result = $this->sut->enforce_pos_capabilities( true, 'create', 0, 'shop_order_refund' );
+
+		unset( $_REQUEST['_pos_approval'] );
+
+		$this->assertFalse( $result );
+	}
+
+	/**
+	 * @testdox POS cashier cannot refund without an approval token.
+	 */
+	public function test_pos_cashier_cannot_refund_without_approval_token(): void {
+		wp_set_current_user( $this->pos_cashier_id );
+
+		$result = $this->sut->enforce_pos_capabilities( true, 'create', 0, 'shop_order_refund' );
+
+		$this->assertFalse( $result );
+	}
+
+	/**
 	 * @testdox enforce_pos_capabilities does not restrict non-refund contexts.
 	 */
 	public function test_enforce_pos_capabilities_allows_order_create(): void {
@@ -402,6 +469,7 @@ class POSCapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 		remove_all_filters( 'woocommerce_rest_pre_insert_shop_order_object' );
 
 		$handler = new POSCapabilityEnforcement();
+		$handler->init( $this->approval_service );
 		$handler->register();
 
 		$this->assertNotFalse(
@@ -420,6 +488,7 @@ class POSCapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 		remove_all_filters( 'woocommerce_rest_pre_insert_shop_order_object' );
 
 		$handler = new POSCapabilityEnforcement();
+		$handler->init( $this->approval_service );
 		$handler->register();
 
 		$this->assertNotFalse(

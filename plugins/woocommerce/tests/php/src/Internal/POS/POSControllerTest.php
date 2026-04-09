@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\POS;
 use Automattic\WooCommerce\Internal\POS\POSController;
 use Automattic\WooCommerce\Internal\POS\Service\POSSessionService;
 use WC_Unit_Test_Case;
+use WP_User;
 
 /**
  * Tests for POSController.
@@ -42,6 +43,8 @@ class POSControllerTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		remove_all_actions( POSController::CLEANUP_ACTION_HOOK );
+		remove_all_actions( 'application_password_did_authenticate' );
+		remove_all_filters( 'rest_authentication_errors' );
 		as_unschedule_all_actions( POSController::CLEANUP_ACTION_HOOK );
 		parent::tearDown();
 	}
@@ -106,5 +109,106 @@ class POSControllerTest extends WC_Unit_Test_Case {
 			->method( 'cleanup_stale_sessions' );
 
 		$this->sut->handle_cleanup();
+	}
+
+	/**
+	 * @testdox validate_pos_session touches session when session is valid.
+	 */
+	public function test_validate_pos_session_touches_valid_session(): void {
+		$this->sut->register();
+
+		$user = $this->createMock( WP_User::class );
+		$user->ID = 42;
+
+		$this->session_service_mock
+			->expects( $this->once() )
+			->method( 'is_session_valid' )
+			->with( 42 )
+			->willReturn( true );
+
+		$this->session_service_mock
+			->expects( $this->once() )
+			->method( 'touch_session' )
+			->with( 42 );
+
+		$app_password = array(
+			'name' => 'WooCommerce POS - register-1 - 2026-01-01 00:00:00',
+			'uuid' => 'test-uuid-123',
+		);
+
+		$this->sut->validate_pos_session( $user, $app_password );
+
+		$error = $this->sut->enforce_pos_session_error( null );
+		$this->assertNull( $error );
+	}
+
+	/**
+	 * @testdox validate_pos_session stores auth error when session is expired.
+	 */
+	public function test_validate_pos_session_rejects_expired_session(): void {
+		$this->sut->register();
+
+		$user = $this->createMock( WP_User::class );
+		$user->ID = 42;
+
+		$this->session_service_mock
+			->expects( $this->once() )
+			->method( 'is_session_valid' )
+			->with( 42 )
+			->willReturn( false );
+
+		$app_password = array(
+			'name' => 'WooCommerce POS - register-1 - 2026-01-01 00:00:00',
+			'uuid' => 'test-uuid-123',
+		);
+
+		$this->sut->validate_pos_session( $user, $app_password );
+
+		$error = $this->sut->enforce_pos_session_error( null );
+		$this->assertInstanceOf( \WP_Error::class, $error );
+		$this->assertSame( 'woocommerce_pos_session_expired', $error->get_error_code() );
+	}
+
+	/**
+	 * @testdox validate_pos_session ignores non-POS Application Passwords.
+	 */
+	public function test_validate_pos_session_ignores_non_pos_passwords(): void {
+		$this->sut->register();
+
+		$user = $this->createMock( WP_User::class );
+		$user->ID = 42;
+
+		$this->session_service_mock
+			->expects( $this->never() )
+			->method( 'is_session_valid' );
+
+		$app_password = array(
+			'name' => 'My Custom App',
+			'uuid' => 'test-uuid-456',
+		);
+
+		$this->sut->validate_pos_session( $user, $app_password );
+
+		$error = $this->sut->enforce_pos_session_error( null );
+		$this->assertNull( $error );
+	}
+
+	/**
+	 * @testdox register adds the application_password_did_authenticate action.
+	 */
+	public function test_register_hooks_session_validation(): void {
+		remove_all_actions( 'application_password_did_authenticate' );
+		remove_all_filters( 'rest_authentication_errors' );
+
+		$this->sut->register();
+
+		$this->assertSame(
+			10,
+			has_action( 'application_password_did_authenticate', array( $this->sut, 'validate_pos_session' ) )
+		);
+		$this->assertSame(
+			99,
+			has_filter( 'rest_authentication_errors', array( $this->sut, 'enforce_pos_session_error' ) )
+		);
 	}
 }

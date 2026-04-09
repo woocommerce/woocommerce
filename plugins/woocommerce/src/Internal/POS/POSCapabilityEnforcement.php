@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\POS;
 
+use Automattic\WooCommerce\Internal\POS\Service\POSApprovalService;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use WC_Data;
 use WP_Error;
@@ -22,6 +23,27 @@ class POSCapabilityEnforcement implements RegisterHooksInterface {
 
 	private const POS_ROLES = array( 'pos_cashier', 'pos_manager' );
 
+	private const CAPABILITY_ACTION_MAP = array(
+		'woocommerce_refund_orders' => 'woocommerce_refund_orders',
+		'woocommerce_void_orders'   => 'woocommerce_void_orders',
+	);
+
+	/**
+	 * @var POSApprovalService
+	 */
+	private POSApprovalService $approval_service;
+
+	/**
+	 * Initialize dependencies via the DI container.
+	 *
+	 * @internal
+	 * @since 10.8.0
+	 * @param POSApprovalService $approval_service Approval service instance.
+	 */
+	final public function init( POSApprovalService $approval_service ): void {
+		$this->approval_service = $approval_service;
+	}
+
 	/**
 	 * Register hooks and filters.
 	 *
@@ -35,6 +57,7 @@ class POSCapabilityEnforcement implements RegisterHooksInterface {
 			10,
 			3
 		);
+		add_filter( 'woocommerce_pos_capability_check', array( $this, 'check_approval_token' ), 10, 3 );
 	}
 
 	/**
@@ -52,16 +75,19 @@ class POSCapabilityEnforcement implements RegisterHooksInterface {
 	 * @return bool
 	 */
 	public function enforce_pos_capabilities( bool $permission, string $context, int $object_id, string $post_type ): bool {
-		if ( ! $permission ) {
-			return false;
-		}
-
 		if ( ! $this->is_current_user_pos_role() ) {
+			if ( ! $permission ) {
+				return false;
+			}
 			return $permission;
 		}
 
 		if ( 'shop_order_refund' === $post_type && 'create' === $context ) {
 			return $this->user_has_pos_capability( 'woocommerce_refund_orders' );
+		}
+
+		if ( ! $permission ) {
+			return false;
 		}
 
 		return $permission;
@@ -100,6 +126,83 @@ class POSCapabilityEnforcement implements RegisterHooksInterface {
 		}
 
 		return $order;
+	}
+
+	/**
+	 * Check if a valid approval token is present when a POS user lacks a capability.
+	 *
+	 * Hooks into the woocommerce_pos_capability_check filter. When the user does not
+	 * have the required capability, reads `_pos_approval` from the request and validates
+	 * the token via POSApprovalService. Adds an order note when the token is consumed
+	 * on an order-related action.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @param bool   $has_cap    Whether the user has the capability.
+	 * @param string $capability The capability being checked.
+	 * @param int    $user_id    The user ID.
+	 * @return bool
+	 */
+	public function check_approval_token( bool $has_cap, string $capability, int $user_id ): bool {
+		if ( $has_cap ) {
+			return true;
+		}
+
+		$action = self::CAPABILITY_ACTION_MAP[ $capability ] ?? null;
+		if ( null === $action ) {
+			return false;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$token = isset( $_REQUEST['_pos_approval'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['_pos_approval'] ) ) : '';
+		if ( '' === $token ) {
+			return false;
+		}
+
+		$approval_data = $this->approval_service->validate_and_consume( $token, $action );
+		if ( false === $approval_data ) {
+			return false;
+		}
+
+		$this->maybe_add_order_note( $approval_data, $capability, $user_id );
+
+		return true;
+	}
+
+	/**
+	 * Add an order note when an approval token is consumed for an order-related action.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @param array  $approval_data The approval data returned by POSApprovalService.
+	 * @param string $capability    The capability that was checked.
+	 * @param int    $user_id       The user performing the action.
+	 */
+	private function maybe_add_order_note( array $approval_data, string $capability, int $user_id ): void {
+		$order_id = $approval_data['context']['order_id'] ?? 0;
+		if ( empty( $order_id ) ) {
+			return;
+		}
+
+		$order = wc_get_order( (int) $order_id );
+		if ( ! $order instanceof \WC_Order ) {
+			return;
+		}
+
+		$approver = get_userdata( $approval_data['approver_id'] );
+		$approver_name = $approver ? $approver->display_name : (string) $approval_data['approver_id'];
+		$actor = get_userdata( $user_id );
+		$actor_name = $actor ? $actor->display_name : (string) $user_id;
+
+		$order->add_order_note(
+			sprintf(
+				/* translators: 1: capability name, 2: actor display name, 3: approver display name */
+				__( 'POS override: %1$s granted to %2$s, approved by %3$s.', 'woocommerce' ),
+				$capability,
+				$actor_name,
+				$approver_name
+			)
+		);
 	}
 
 	/**

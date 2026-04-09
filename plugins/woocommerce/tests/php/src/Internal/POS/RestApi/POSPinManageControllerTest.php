@@ -246,6 +246,113 @@ class POSPinManageControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 'invalid_pin', $data['code'] );
 	}
 
+	/**
+	 * @testdox Self-update PIN requires current_pin when user already has a PIN.
+	 */
+	public function test_self_update_pin_requires_current_pin(): void {
+		$this->pin_service->set_pin( $this->pos_cashier_id, '8472' );
+		wp_set_current_user( $this->pos_cashier_id );
+
+		$request = new \WP_REST_Request( 'POST', self::MANAGE_ROUTE );
+		$request->set_body_params(
+			array(
+				'action' => 'set',
+				'pin'    => '9753',
+			)
+		);
+
+		$response = rest_do_request( $request );
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_missing_current_pin', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Self-update PIN fails when current_pin is incorrect.
+	 */
+	public function test_self_update_pin_fails_with_wrong_current_pin(): void {
+		$this->pin_service->set_pin( $this->pos_cashier_id, '8472' );
+		wp_set_current_user( $this->pos_cashier_id );
+
+		$request = new \WP_REST_Request( 'POST', self::MANAGE_ROUTE );
+		$request->set_body_params(
+			array(
+				'action'      => 'set',
+				'pin'         => '9753',
+				'current_pin' => '0000',
+			)
+		);
+
+		$response = rest_do_request( $request );
+
+		$this->assertSame( 403, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_invalid_current_pin', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Self-update PIN succeeds when correct current_pin is provided.
+	 */
+	public function test_self_update_pin_succeeds_with_correct_current_pin(): void {
+		$this->pin_service->set_pin( $this->pos_cashier_id, '8472' );
+		wp_set_current_user( $this->pos_cashier_id );
+
+		$request = new \WP_REST_Request( 'POST', self::MANAGE_ROUTE );
+		$request->set_body_params(
+			array(
+				'action'      => 'set',
+				'pin'         => '9753',
+				'current_pin' => '8472',
+			)
+		);
+
+		$response = rest_do_request( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertTrue( $response->get_data()['success'] );
+	}
+
+	/**
+	 * @testdox First-time self PIN setup does not require current_pin.
+	 */
+	public function test_first_time_self_pin_setup_does_not_require_current_pin(): void {
+		wp_set_current_user( $this->pos_cashier_id );
+
+		$request = new \WP_REST_Request( 'POST', self::MANAGE_ROUTE );
+		$request->set_body_params(
+			array(
+				'action' => 'set',
+				'pin'    => '8472',
+			)
+		);
+
+		$response = rest_do_request( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertTrue( $response->get_data()['success'] );
+	}
+
+	/**
+	 * @testdox Manager setting PIN for another user does not require current_pin.
+	 */
+	public function test_manager_set_pin_for_other_does_not_require_current_pin(): void {
+		$this->pin_service->set_pin( $this->pos_cashier_id, '8472' );
+		wp_set_current_user( $this->pos_manager_id );
+
+		$request = new \WP_REST_Request( 'POST', self::MANAGE_ROUTE );
+		$request->set_body_params(
+			array(
+				'user_id' => $this->pos_cashier_id,
+				'action'  => 'set',
+				'pin'     => '9753',
+			)
+		);
+
+		$response = rest_do_request( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertTrue( $response->get_data()['success'] );
+	}
+
 	private function reset_roles(): void {
 		WC_Install::remove_roles();
 		WC_Install::create_roles();

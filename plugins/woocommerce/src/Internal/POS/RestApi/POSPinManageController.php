@@ -131,9 +131,12 @@ class POSPinManageController extends RestApiControllerBase implements RegisterHo
 	 * @return array|WP_Error
 	 */
 	protected function manage_pin( WP_REST_Request $request ) {
-		$target_user_id = $request->get_param( 'user_id' );
+		$target_user_id  = $request->get_param( 'user_id' );
+		$current_user_id = get_current_user_id();
+		$is_self_update  = empty( $target_user_id ) || (int) $target_user_id === $current_user_id;
+
 		if ( empty( $target_user_id ) ) {
-			$target_user_id = get_current_user_id();
+			$target_user_id = $current_user_id;
 		}
 		$target_user_id = (int) $target_user_id;
 
@@ -151,8 +154,8 @@ class POSPinManageController extends RestApiControllerBase implements RegisterHo
 		if ( 'delete' === $action ) {
 			$this->pin_service->delete_pin( $target_user_id );
 			$logger->info(
-				sprintf( 'POS PIN deleted for user %d by user %d.', $target_user_id, get_current_user_id() ),
-				array( 'source' => 'pos-pin-manage' )
+				sprintf( 'POS PIN deleted for user %d by user %d.', $target_user_id, $current_user_id ),
+				array( 'source' => 'woocommerce-pos' )
 			);
 			return array( 'success' => true );
 		}
@@ -166,6 +169,26 @@ class POSPinManageController extends RestApiControllerBase implements RegisterHo
 			);
 		}
 
+		if ( $is_self_update && $this->pin_service->has_pin( $target_user_id ) ) {
+			$current_pin = $request->get_param( 'current_pin' );
+			if ( empty( $current_pin ) ) {
+				return new WP_Error(
+					'woocommerce_rest_missing_current_pin',
+					__( 'Current PIN is required to update your own PIN.', 'woocommerce' ),
+					array( 'status' => 400 )
+				);
+			}
+
+			$hash = get_user_meta( $target_user_id, POSPinService::PIN_HASH_META_KEY, true );
+			if ( ! $hash || ! $this->pin_service->verify_pin( $current_pin, $hash ) ) {
+				return new WP_Error(
+					'woocommerce_rest_invalid_current_pin',
+					__( 'The current PIN is incorrect.', 'woocommerce' ),
+					array( 'status' => 403 )
+				);
+			}
+		}
+
 		$result = $this->pin_service->set_pin( $target_user_id, $pin );
 
 		if ( is_wp_error( $result ) ) {
@@ -177,8 +200,8 @@ class POSPinManageController extends RestApiControllerBase implements RegisterHo
 		}
 
 		$logger->info(
-			sprintf( 'POS PIN set for user %d by user %d.', $target_user_id, get_current_user_id() ),
-			array( 'source' => 'pos-pin-manage' )
+			sprintf( 'POS PIN set for user %d by user %d.', $target_user_id, $current_user_id ),
+			array( 'source' => 'woocommerce-pos' )
 		);
 
 		return array( 'success' => true );
@@ -248,8 +271,14 @@ class POSPinManageController extends RestApiControllerBase implements RegisterHo
 				'required'          => true,
 				'validate_callback' => 'rest_validate_request_arg',
 			),
-			'pin'     => array(
+			'pin'         => array(
 				'description'       => __( 'The PIN to set. Required for set action.', 'woocommerce' ),
+				'type'              => 'string',
+				'required'          => false,
+				'validate_callback' => 'rest_validate_request_arg',
+			),
+			'current_pin' => array(
+				'description'       => __( 'Current PIN. Required when updating your own PIN.', 'woocommerce' ),
 				'type'              => 'string',
 				'required'          => false,
 				'validate_callback' => 'rest_validate_request_arg',
