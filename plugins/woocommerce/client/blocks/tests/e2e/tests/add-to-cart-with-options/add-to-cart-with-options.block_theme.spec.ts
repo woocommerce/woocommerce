@@ -1592,7 +1592,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 					} );
 					await editor.saveSiteEditorEntities();
 				} );
-				await test.step( `${ optionStyle }: Expect invalid options to be isabled (by prop) and hidden`, async () => {
+				await test.step( `${ optionStyle }: Expect invalid options to be disabled (by prop) and hidden`, async () => {
 					await page.goto( productPermalink );
 
 					// By setting the Color to "Blue", the only possible Size remaining is "XL".
