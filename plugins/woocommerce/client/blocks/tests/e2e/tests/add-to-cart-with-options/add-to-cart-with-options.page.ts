@@ -122,14 +122,20 @@ class AddToCartWithOptionsPage {
 
 		await this.switchProductType( 'Variable product' );
 		await page.getByRole( 'tab', { name: 'Block' } ).click();
-		const addToCartWithOptionsBlock = this.editor.canvas.getByLabel(
-			'Block: Add to Cart + Options'
+
+		// Verify inner blocks have loaded.
+		await expect(
+			this.editor.canvas
+				.getByLabel(
+					'Block: Variation Selector: Attribute Options (Beta)'
+				)
+				.first()
+		).toBeVisible();
+
+		const attributeOptionsBlock = await this.editor.getBlockByName(
+			'woocommerce/add-to-cart-with-options-variation-selector-attribute-options'
 		);
-		await addToCartWithOptionsBlock.click();
-		await addToCartWithOptionsBlock
-			.getByLabel( 'Block: Variation Selector: Attribute Options' )
-			.first()
-			.click();
+		await this.editor.selectBlocks( attributeOptionsBlock.first() );
 
 		// Option style attribute.
 		if ( optionStyle ) {
