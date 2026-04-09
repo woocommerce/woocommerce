@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Reduce WooCommerce Blocks non-production build time by using a single Terser compression pass outside production.

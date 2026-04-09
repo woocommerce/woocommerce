@@ -13,6 +13,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema\OrderSchema;
+use Automattic\WooCommerce\Enums\OrderItemType;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
@@ -77,13 +78,13 @@ class UpdateUtils {
 			if ( 'billing' === $key || 'shipping' === $key ) {
 				$this->update_address( $order, $key, (array) $value );
 			} elseif ( 'coupon_lines' === $key ) {
-				$this->update_line_items( $order, (array) $value, 'coupon' );
+				$this->update_line_items( $order, (array) $value, OrderItemType::COUPON );
 			} elseif ( 'line_items' === $key ) {
-				$this->update_line_items( $order, (array) $value, 'line_item' );
+				$this->update_line_items( $order, (array) $value, OrderItemType::LINE_ITEM );
 			} elseif ( 'shipping_lines' === $key ) {
-				$this->update_line_items( $order, (array) $value, 'shipping' );
+				$this->update_line_items( $order, (array) $value, OrderItemType::SHIPPING );
 			} elseif ( 'fee_lines' === $key ) {
-				$this->update_line_items( $order, (array) $value, 'fee' );
+				$this->update_line_items( $order, (array) $value, OrderItemType::FEE );
 			} elseif ( 'meta_data' === $key ) {
 				$this->update_meta_data( $order, (array) $value );
 			} elseif ( is_callable( array( $order, "set_{$key}" ) ) ) {
@@ -159,8 +160,8 @@ class UpdateUtils {
 	 * @param array    $line_items The line items to update.
 	 * @param string   $line_items_type The type of line items to update.
 	 */
-	protected function update_line_items( WC_Order $order, array $line_items, string $line_items_type = 'line_item' ) {
-		if ( ! in_array( $line_items_type, array( 'line_item', 'shipping', 'fee', 'coupon' ), true ) ) {
+	protected function update_line_items( WC_Order $order, array $line_items, string $line_items_type = OrderItemType::LINE_ITEM ) {
+		if ( ! in_array( $line_items_type, array( OrderItemType::LINE_ITEM, OrderItemType::SHIPPING, OrderItemType::FEE, OrderItemType::COUPON ), true ) ) {
 			throw new WC_REST_Exception( 'woocommerce_rest_invalid_line_items_type', esc_html__( 'Invalid line items type.', 'woocommerce' ), 400 );
 		}
 
@@ -235,7 +236,7 @@ class UpdateUtils {
 		}
 
 		// Maybe update product stock quantity.
-		if ( 'line_item' === $line_items_type && in_array( $order->get_status(), array( OrderStatus::PROCESSING, OrderStatus::COMPLETED, OrderStatus::ON_HOLD ), true ) ) {
+		if ( OrderItemType::LINE_ITEM === $line_items_type && in_array( $order->get_status(), array( OrderStatus::PROCESSING, OrderStatus::COMPLETED, OrderStatus::ON_HOLD ), true ) ) {
 			require_once WC_ABSPATH . 'includes/admin/wc-admin-functions.php';
 			$changed_stock = wc_maybe_adjust_line_item_product_stock( $item );
 			if ( $changed_stock && ! is_wp_error( $changed_stock ) ) {
@@ -307,7 +308,7 @@ class UpdateUtils {
 			);
 		}
 
-		if ( 'line_item' === $line_items_type ) {
+		if ( OrderItemType::LINE_ITEM === $line_items_type ) {
 			require_once WC_ABSPATH . 'includes/admin/wc-admin-functions.php';
 			wc_maybe_adjust_line_item_product_stock( $item, 0 );
 		}
