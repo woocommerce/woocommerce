@@ -27,7 +27,7 @@ class WC_Settings_Point_Of_Sale extends WC_Settings_Page {
 	 */
 	public function __construct() {
 		$this->id    = 'point-of-sale';
-		$this->label = __( 'Point of Sale', 'woocommerce' );
+		$this->label = __( 'Point of sale', 'woocommerce' );
 
 		parent::__construct();
 		$this->notices();

@@ -83,7 +83,7 @@ class WC_Admin_POS_Staff {
 		echo wp_kses(
 			sprintf(
 				/* translators: %s: Users admin screen link. */
-				__( 'Set PINs for existing users with Point of Sale access. Roles are managed in %s.', 'woocommerce' ),
+				__( 'Set PINs for existing users with point of sale access. Change roles in %s.', 'woocommerce' ),
 				$users_link
 			),
 			array(
