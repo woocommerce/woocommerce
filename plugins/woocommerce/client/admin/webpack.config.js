@@ -24,6 +24,7 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 const WC_ADMIN_PHASE = process.env.WC_ADMIN_PHASE || 'development';
 const isHot = Boolean( process.env.HOT );
 const isProduction = NODE_ENV === 'production';
+const isWatch = process.argv.includes( '--watch' );
 
 const getSubdirectoriesAt = ( searchPath ) => {
 	const dir = path.resolve( __dirname, searchPath );
@@ -90,6 +91,15 @@ require( 'fs-extra' ).ensureSymlinkSync(
 
 const webpackConfig = {
 	mode: NODE_ENV,
+	cache: isWatch
+		? false
+		: {
+				type: 'filesystem',
+				buildDependencies: {
+					config: [ __filename ],
+				},
+				name: `wc-admin-${ NODE_ENV }`,
+		  },
 	entry: getEntryPoints(),
 	output: {
 		filename: ( data ) => {
