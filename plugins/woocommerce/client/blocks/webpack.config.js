@@ -22,9 +22,13 @@ const isWatch = ! isProduction && process.argv.includes( '--watch' );
 
 const getCacheConfig = ( name, configPaths = [] ) =>
 	isWatch
-		? false
+		? { type: 'memory' }
 		: {
 				type: 'filesystem',
+				cacheDirectory: path.resolve(
+					__dirname,
+					`node_modules/.cache/webpack-${ name }`
+				),
 				buildDependencies: {
 					config: [
 						__filename,
@@ -33,7 +37,6 @@ const getCacheConfig = ( name, configPaths = [] ) =>
 						),
 					],
 				},
-				name: `wc-blocks-${ name }-${ NODE_ENV }`,
 		  };
 
 // Only options shared between all configs should be defined here.
