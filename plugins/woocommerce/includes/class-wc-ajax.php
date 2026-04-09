@@ -4057,7 +4057,7 @@ class WC_AJAX {
 			$wpdb->prepare(
 				"SELECT 1 FROM {$fulfillments_table} f
 				INNER JOIN {$meta_table} m ON f.fulfillment_id = m.fulfillment_id
-				WHERE m.meta_key = '_shipping_provider'
+				WHERE m.meta_key = '_shipment_provider'
 				AND m.meta_value = %s
 				AND f.date_deleted IS NULL
 				AND m.date_deleted IS NULL
