@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Pass `tested` and `icons` fields from WooCommerce.com update-check API response into the `update_plugins` site transient, allowing WordPress to display compatibility info and extension icons on the Updates page.

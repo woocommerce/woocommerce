@@ -1,4 +1,0 @@
-Significance: patch
-Type: enhancement
-
-Improve fulfillment drawer accessibility: unique ARIA IDs, fix redundant aria-labels, eliminate double screen reader announcements, and replace setTimeout-based focus management with requestAnimationFrame
