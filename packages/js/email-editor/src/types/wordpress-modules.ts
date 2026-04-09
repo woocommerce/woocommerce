@@ -1,51 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- some general types in this file need to use "any"  */
-/* eslint-disable import/no-duplicates -- importing within multiple "declare module" blocks is OK  */
-/* eslint-disable @typescript-eslint/no-duplicate-imports -- importing within multiple "declare module" blocks is OK  */
+/* eslint-disable @typescript-eslint/no-unused-vars -- params in declare module type signatures are inherently unused  */
 
-declare module '@wordpress/block-editor' {
-	import * as blockEditorActions from '@wordpress/block-editor/store/actions';
-	import * as blockEditorSelectors from '@wordpress/block-editor/store/selectors';
-	import { StoreDescriptor as GenericStoreDescriptor } from '@wordpress/data/build-types/types';
-
-	export * from '@wordpress/block-editor/index';
-
-	export const store: {
-		name: 'core/block-editor';
-	} & GenericStoreDescriptor< {
-		reducer: () => unknown;
-		actions: typeof blockEditorActions;
-		selectors: typeof blockEditorSelectors;
-	} >;
-}
-
-declare module '@wordpress/editor' {
-	import { ComponentType } from 'react';
-	import * as editorActions from '@wordpress/editor/store/actions';
-	import * as editorSelectors from '@wordpress/editor/store/selectors';
-	import { StoreDescriptor as GenericStoreDescriptor } from '@wordpress/data/build-types/types';
-	import { PostPreviewButton as WPPostPreviewButton } from '@wordpress/editor/components';
-
-	export * from '@wordpress/editor/index';
-
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore - disable redeclaration error because it's a module declaration
-	export const store: { name: 'core/editor' } & GenericStoreDescriptor< {
-		reducer: () => unknown;
-		actions: typeof editorActions;
-		selectors: typeof editorSelectors;
-	} >;
-
-	export const PostPreviewButton: ComponentType<
-		WPPostPreviewButton.Props & {
-			className?: string;
-			role?: string;
-			textContent: JSX.Element;
-			onPreview: () => void;
-		}
-	>;
-}
-
-// there are no @types/wordpress__keyboard-shortcuts yet
+// there are no native types for @wordpress/keyboard-shortcuts yet
 declare module '@wordpress/keyboard-shortcuts' {
 	import { StoreDescriptor } from '@wordpress/data/build-types/types';
 
@@ -65,7 +21,7 @@ declare module '@wordpress/keyboard-shortcuts' {
 	export const useShortcut: any;
 }
 
-// there are no @types/wordpress__preferences yet
+// there are no native types for @wordpress/preferences yet
 declare module '@wordpress/preferences' {
 	import { StoreDescriptor } from '@wordpress/data/build-types/types';
 
@@ -78,7 +34,7 @@ declare module '@wordpress/preferences' {
 	export const PreferenceToggleMenuItem: any;
 }
 
-// Types in @types/wordpress__notices are outdated and build on top of @types/wordpress__data
+// Augment @wordpress/notices with richer action/selector types
 declare module '@wordpress/notices' {
 	import { StoreDescriptor } from '@wordpress/data/build-types/types';
 	import { NoticeProps } from '@wordpress/components/build-types/notice/types';
@@ -109,27 +65,4 @@ declare module '@wordpress/notices' {
 			removeNotice: ( id: string, context?: string ) => void;
 		};
 	} >;
-}
-
-declare module '@wordpress/core-data' {
-	import { BlockInstance } from '@wordpress/blocks/index';
-
-	export function useEntityBlockEditor(
-		kind: string,
-		name: string,
-		{
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
-			id: _id,
-		}?: {
-			id?: string | undefined;
-		}
-	): [
-		WPBlock[],
-		( blocks: BlockInstance[] ) => void,
-		( blocks: BlockInstance[] ) => void
-	];
-	export type WPBlock = any;
-
-	export * from '@wordpress/core-data/build-types';
 }
