@@ -268,7 +268,7 @@ class POSPinManageController extends RestApiControllerBase implements RegisterHo
 				'description'       => __( 'Action to perform: set or delete.', 'woocommerce' ),
 				'type'              => 'string',
 				'enum'              => array( 'set', 'delete' ),
-				'required'          => true,
+				'default'           => 'set',
 				'validate_callback' => 'rest_validate_request_arg',
 			),
 			'pin'         => array(
