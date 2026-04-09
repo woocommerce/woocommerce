@@ -5,7 +5,7 @@ sidebar_label: Email preview integration
 
 # Email Preview Integration
 
-{/* markdownlint-disable MD024 */}
+<!-- markdownlint-disable MD024 -->
 
 ## Overview
 
