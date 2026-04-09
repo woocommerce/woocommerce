@@ -7,6 +7,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\POS\Service\POSApprovalService;
 use Automattic\WooCommerce\Internal\POS\Service\POSPinService;
+use Automattic\WooCommerce\Internal\POS\Service\POSRateLimitService;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use Automattic\WooCommerce\Internal\RestApiControllerBase;
 use WP_Error;
@@ -32,17 +33,28 @@ class POSApprovalController extends RestApiControllerBase implements RegisterHoo
 	private POSApprovalService $approval_service;
 
 	/**
+	 * @var POSRateLimitService
+	 */
+	private POSRateLimitService $rate_limit_service;
+
+	/**
 	 * Initialize dependencies via the DI container.
 	 *
-	 * @param POSPinService      $pin_service      PIN service.
-	 * @param POSApprovalService $approval_service Approval service.
+	 * @param POSPinService       $pin_service        PIN service.
+	 * @param POSApprovalService  $approval_service   Approval service.
+	 * @param POSRateLimitService $rate_limit_service Rate limit service.
 	 *
 	 * @internal
 	 * @since 10.8.0
 	 */
-	final public function init( POSPinService $pin_service, POSApprovalService $approval_service ): void {
-		$this->pin_service      = $pin_service;
-		$this->approval_service = $approval_service;
+	final public function init(
+		POSPinService $pin_service,
+		POSApprovalService $approval_service,
+		POSRateLimitService $rate_limit_service
+	): void {
+		$this->pin_service        = $pin_service;
+		$this->approval_service   = $approval_service;
+		$this->rate_limit_service = $rate_limit_service;
 	}
 
 	/**
@@ -103,6 +115,31 @@ class POSApprovalController extends RestApiControllerBase implements RegisterHoo
 	 * @return array|WP_Error
 	 */
 	protected function approve_action( WP_REST_Request $request ) {
+		$start_time = microtime( true );
+
+		try {
+			return $this->do_approve_action( $request );
+		} finally {
+			$this->pad_response_time( $start_time );
+		}
+	}
+
+	/**
+	 * Internal approval logic.
+	 *
+	 * @since 10.8.0
+	 * @param WP_REST_Request $request The incoming request.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 * @return array|WP_Error
+	 */
+	private function do_approve_action( WP_REST_Request $request ) {
+		$client_ip   = $this->get_client_ip();
+		$rate_check  = $this->rate_limit_service->check_rate_limit( $client_ip );
+
+		if ( is_wp_error( $rate_check ) ) {
+			return $rate_check;
+		}
+
 		$pin             = $request->get_param( 'pin' );
 		$action          = $request->get_param( 'action' );
 		$context         = $request->get_param( 'context' ) ?? array();
@@ -114,6 +151,7 @@ class POSApprovalController extends RestApiControllerBase implements RegisterHoo
 
 		if ( ! $user_id ) {
 			$logger->warning( 'Approval failed: no user found for provided PIN.', $log_context );
+			$this->rate_limit_service->record_failure( $client_ip );
 			return $this->pin_error();
 		}
 
@@ -158,5 +196,29 @@ class POSApprovalController extends RestApiControllerBase implements RegisterHoo
 			__( 'The provided PIN is not valid.', 'woocommerce' ),
 			array( 'status' => 422 )
 		);
+	}
+
+	/**
+	 * Pad response time to a minimum of 500ms to prevent timing attacks.
+	 *
+	 * @since 10.8.0
+	 * @param float $start_time The microtime at request start.
+	 */
+	private function pad_response_time( float $start_time ): void {
+		$elapsed  = microtime( true ) - $start_time;
+		$min_time = 0.5;
+		if ( $elapsed < $min_time ) {
+			usleep( (int) ( ( $min_time - $elapsed ) * 1_000_000 ) );
+		}
+	}
+
+	/**
+	 * Get the client IP address from the request.
+	 *
+	 * @since 10.8.0
+	 * @return string
+	 */
+	private function get_client_ip(): string {
+		return sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0' ) );
 	}
 }
