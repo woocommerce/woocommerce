@@ -1550,9 +1550,17 @@ test.describe( 'Add to Cart + Options Block', () => {
 			} ) => {
 				await test.step( `${ optionStyle }: Set the disabledAttributesAction block attribute to "disable"`, async () => {
 					await pageObject.updateSingleProductTemplate();
-					await editor.saveSiteEditorEntities( {
-						isOnlyCurrentEntityDirty: true,
-					} );
+
+					if ( optionStyle === 'pills' ) {
+						await editor.saveSiteEditorEntities( {
+							isOnlyCurrentEntityDirty: true,
+						} );
+					} else {
+						await pageObject.setVariationSelectorAttributes( {
+							optionStyle,
+						} );
+						await editor.saveSiteEditorEntities();
+					}
 				} );
 				await test.step( `${ optionStyle }: Expect invalid options to be disabled (by prop) and visible`, async () => {
 					await page.goto( productPermalink );
