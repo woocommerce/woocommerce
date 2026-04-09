@@ -12,7 +12,7 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 
 module.exports = {
 	mode: NODE_ENV,
-	cache: {
+	cache: ( process.env.CI && { type: 'memory' } ) || {
 		type: 'filesystem',
 		cacheDirectory: path.resolve(
 			__dirname,
