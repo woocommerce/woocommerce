@@ -29,6 +29,9 @@ class POSSessionServiceTest extends WC_Unit_Test_Case {
 	 */
 	private int $user_id_2;
 
+	/**
+	 * Set up test fixtures.
+	 */
 	public function setUp(): void {
 		parent::setUp();
 
@@ -41,6 +44,9 @@ class POSSessionServiceTest extends WC_Unit_Test_Case {
 		$this->user_id_2 = $this->factory->user->create( array( 'role' => 'pos_cashier' ) );
 	}
 
+	/**
+	 * Tear down test fixtures.
+	 */
 	public function tearDown(): void {
 		if ( isset( $this->user_id ) ) {
 			$this->cleanup_app_passwords( $this->user_id );
@@ -71,14 +77,12 @@ class POSSessionServiceTest extends WC_Unit_Test_Case {
 	 * @testdox create_session sets session created and last active meta.
 	 */
 	public function test_create_session_sets_meta(): void {
-		$this->service->create_session( $this->user_id, 'register-1' );
+		$session  = $this->service->create_session( $this->user_id, 'register-1' );
+		$sessions = get_user_meta( $this->user_id, POSSessionService::META_SESSIONS, true );
 
-		$created     = get_user_meta( $this->user_id, '_woocommerce_pos_session_created', true );
-		$last_active = get_user_meta( $this->user_id, '_woocommerce_pos_session_last_active', true );
-
-		$this->assertNotEmpty( $created );
-		$this->assertNotEmpty( $last_active );
-		$this->assertSame( $created, $last_active );
+		$this->assertIsArray( $sessions );
+		$this->assertArrayHasKey( $session['uuid'], $sessions );
+		$this->assertSame( $sessions[ $session['uuid'] ]['created'], $sessions[ $session['uuid'] ]['last_active'] );
 	}
 
 	/**
@@ -123,59 +127,59 @@ class POSSessionServiceTest extends WC_Unit_Test_Case {
 	 * @testdox is_session_valid returns true for a fresh session.
 	 */
 	public function test_is_session_valid_returns_true_for_fresh_session(): void {
-		$this->service->create_session( $this->user_id, 'register-1' );
+		$session = $this->service->create_session( $this->user_id, 'register-1' );
 
-		$this->assertTrue( $this->service->is_session_valid( $this->user_id ) );
+		$this->assertTrue( $this->service->is_session_valid( $this->user_id, $session['uuid'] ) );
 	}
 
 	/**
 	 * @testdox is_session_valid returns false when absolute TTL is exceeded.
 	 */
 	public function test_is_session_valid_returns_false_when_ttl_exceeded(): void {
-		$this->service->create_session( $this->user_id, 'register-1' );
+		$session            = $this->service->create_session( $this->user_id, 'register-1' );
+		$sessions           = get_user_meta( $this->user_id, POSSessionService::META_SESSIONS, true );
+		$expired_time       = time() - 43201;
+		$sessions[ $session['uuid'] ]['created']     = $expired_time;
+		$sessions[ $session['uuid'] ]['last_active'] = time();
+		update_user_meta( $this->user_id, POSSessionService::META_SESSIONS, $sessions );
 
-		$expired_time = time() - 43201;
-		update_user_meta( $this->user_id, '_woocommerce_pos_session_created', $expired_time );
-		update_user_meta( $this->user_id, '_woocommerce_pos_session_last_active', time() );
-
-		$this->assertFalse( $this->service->is_session_valid( $this->user_id ) );
+		$this->assertFalse( $this->service->is_session_valid( $this->user_id, $session['uuid'] ) );
 	}
 
 	/**
 	 * @testdox is_session_valid returns false when idle timeout is exceeded.
 	 */
 	public function test_is_session_valid_returns_false_when_idle_timeout_exceeded(): void {
-		$this->service->create_session( $this->user_id, 'register-1' );
+		$session          = $this->service->create_session( $this->user_id, 'register-1' );
+		$sessions         = get_user_meta( $this->user_id, POSSessionService::META_SESSIONS, true );
+		$idle_time        = time() - 1801;
+		$sessions[ $session['uuid'] ]['last_active'] = $idle_time;
+		update_user_meta( $this->user_id, POSSessionService::META_SESSIONS, $sessions );
 
-		$idle_time = time() - 1801;
-		update_user_meta( $this->user_id, '_woocommerce_pos_session_last_active', $idle_time );
-
-		$this->assertFalse( $this->service->is_session_valid( $this->user_id ) );
+		$this->assertFalse( $this->service->is_session_valid( $this->user_id, $session['uuid'] ) );
 	}
 
 	/**
 	 * @testdox is_session_valid returns false when no session exists.
 	 */
 	public function test_is_session_valid_returns_false_when_no_session(): void {
-		$this->assertFalse( $this->service->is_session_valid( $this->user_id ) );
+		$this->assertFalse( $this->service->is_session_valid( $this->user_id, 'missing-session' ) );
 	}
 
 	/**
 	 * @testdox touch_session updates last active timestamp.
 	 */
 	public function test_touch_session_updates_last_active(): void {
-		$this->service->create_session( $this->user_id, 'register-1' );
+		$session                          = $this->service->create_session( $this->user_id, 'register-1' );
+		$sessions                         = get_user_meta( $this->user_id, POSSessionService::META_SESSIONS, true );
+		$old_last_active                  = time() - 60;
+		$sessions[ $session['uuid'] ]['last_active'] = $old_last_active;
+		update_user_meta( $this->user_id, POSSessionService::META_SESSIONS, $sessions );
 
-		$old_last_active = time() - 60;
-		update_user_meta( $this->user_id, '_woocommerce_pos_session_last_active', $old_last_active );
+		$this->service->touch_session( $this->user_id, $session['uuid'] );
 
-		$this->service->touch_session( $this->user_id );
-
-		$new_last_active = (int) get_user_meta(
-			$this->user_id,
-			'_woocommerce_pos_session_last_active',
-			true
-		);
+		$updated_sessions = get_user_meta( $this->user_id, POSSessionService::META_SESSIONS, true );
+		$new_last_active  = (int) $updated_sessions[ $session['uuid'] ]['last_active'];
 
 		$this->assertGreaterThan( $old_last_active, $new_last_active );
 	}
@@ -191,20 +195,19 @@ class POSSessionServiceTest extends WC_Unit_Test_Case {
 		$passwords = WP_Application_Passwords::get_user_application_passwords( $this->user_id );
 		$this->assertEmpty( $passwords );
 
-		$created     = get_user_meta( $this->user_id, '_woocommerce_pos_session_created', true );
-		$last_active = get_user_meta( $this->user_id, '_woocommerce_pos_session_last_active', true );
-		$this->assertEmpty( $created );
-		$this->assertEmpty( $last_active );
+		$sessions = get_user_meta( $this->user_id, POSSessionService::META_SESSIONS, true );
+		$this->assertEmpty( $sessions );
 	}
 
 	/**
 	 * @testdox cleanup_stale_sessions removes old sessions and passwords.
 	 */
 	public function test_cleanup_stale_sessions_removes_old_sessions(): void {
-		$this->service->create_session( $this->user_id, 'register-1' );
-
-		$old_time = time() - 86401;
-		update_user_meta( $this->user_id, '_woocommerce_pos_session_created', $old_time );
+		$session    = $this->service->create_session( $this->user_id, 'register-1' );
+		$sessions   = get_user_meta( $this->user_id, POSSessionService::META_SESSIONS, true );
+		$old_time   = time() - 86401;
+		$sessions[ $session['uuid'] ]['created'] = $old_time;
+		update_user_meta( $this->user_id, POSSessionService::META_SESSIONS, $sessions );
 
 		$this->service->cleanup_stale_sessions();
 
@@ -217,15 +220,15 @@ class POSSessionServiceTest extends WC_Unit_Test_Case {
 		);
 		$this->assertEmpty( $pos_passwords );
 
-		$created = get_user_meta( $this->user_id, '_woocommerce_pos_session_created', true );
-		$this->assertEmpty( $created );
+		$remaining_sessions = get_user_meta( $this->user_id, POSSessionService::META_SESSIONS, true );
+		$this->assertEmpty( $remaining_sessions );
 	}
 
 	/**
 	 * @testdox cleanup_stale_sessions does not remove fresh sessions.
 	 */
 	public function test_cleanup_stale_sessions_preserves_fresh_sessions(): void {
-		$this->service->create_session( $this->user_id, 'register-1' );
+		$session = $this->service->create_session( $this->user_id, 'register-1' );
 
 		$this->service->cleanup_stale_sessions();
 
@@ -238,8 +241,47 @@ class POSSessionServiceTest extends WC_Unit_Test_Case {
 		);
 		$this->assertNotEmpty( $pos_passwords );
 
-		$created = get_user_meta( $this->user_id, '_woocommerce_pos_session_created', true );
-		$this->assertNotEmpty( $created );
+		$sessions = get_user_meta( $this->user_id, POSSessionService::META_SESSIONS, true );
+		$this->assertArrayHasKey( $session['uuid'], $sessions );
+	}
+
+	/**
+	 * @testdox touch_session only updates the active session for the matching UUID.
+	 */
+	public function test_touch_session_only_updates_matching_uuid(): void {
+		$session_one = $this->service->create_session( $this->user_id, 'register-1' );
+		$session_two = $this->service->create_session( $this->user_id, 'register-2' );
+		$sessions    = get_user_meta( $this->user_id, POSSessionService::META_SESSIONS, true );
+
+		$sessions[ $session_one['uuid'] ]['last_active'] = time() - 120;
+		$sessions[ $session_two['uuid'] ]['last_active'] = time() - 240;
+		update_user_meta( $this->user_id, POSSessionService::META_SESSIONS, $sessions );
+
+		$this->service->touch_session( $this->user_id, $session_one['uuid'] );
+
+		$updated_sessions = get_user_meta( $this->user_id, POSSessionService::META_SESSIONS, true );
+		$this->assertGreaterThan(
+			$updated_sessions[ $session_two['uuid'] ]['last_active'],
+			$updated_sessions[ $session_one['uuid'] ]['last_active']
+		);
+	}
+
+	/**
+	 * @testdox cleanup_stale_sessions preserves fresh sessions for the same user.
+	 */
+	public function test_cleanup_stale_sessions_only_removes_stale_uuid(): void {
+		$stale_session = $this->service->create_session( $this->user_id, 'register-1' );
+		$fresh_session = $this->service->create_session( $this->user_id, 'register-2' );
+		$sessions      = get_user_meta( $this->user_id, POSSessionService::META_SESSIONS, true );
+
+		$sessions[ $stale_session['uuid'] ]['created'] = time() - 86401;
+		update_user_meta( $this->user_id, POSSessionService::META_SESSIONS, $sessions );
+
+		$this->service->cleanup_stale_sessions();
+
+		$updated_sessions = get_user_meta( $this->user_id, POSSessionService::META_SESSIONS, true );
+		$this->assertArrayNotHasKey( $stale_session['uuid'], $updated_sessions );
+		$this->assertArrayHasKey( $fresh_session['uuid'], $updated_sessions );
 	}
 
 	/**

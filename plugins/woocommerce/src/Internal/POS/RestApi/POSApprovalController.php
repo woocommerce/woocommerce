@@ -23,6 +23,16 @@ use WP_REST_Server;
 class POSApprovalController extends RestApiControllerBase implements RegisterHooksInterface {
 
 	/**
+	 * Actions that can be approved through manager override.
+	 *
+	 * @var string[]
+	 */
+	private const APPROVABLE_ACTIONS = array(
+		'woocommerce_refund_orders',
+		'woocommerce_void_orders',
+	);
+
+	/**
 	 * @var POSPinService
 	 */
 	private POSPinService $pin_service;
@@ -146,6 +156,25 @@ class POSApprovalController extends RestApiControllerBase implements RegisterHoo
 		$idempotency_key = $request->get_param( 'idempotency_key' );
 		$logger          = wc_get_logger();
 		$log_context     = array( 'source' => 'woocommerce-pos' );
+
+		if ( ! in_array( $action, self::APPROVABLE_ACTIONS, true ) ) {
+			return new WP_Error(
+				'woocommerce_pos_invalid_action',
+				__( 'The requested approval action is not supported.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$order_id = isset( $context['order_id'] ) ? absint( $context['order_id'] ) : 0;
+		if ( 0 === $order_id ) {
+			return new WP_Error(
+				'woocommerce_pos_missing_order_context',
+				__( 'An order ID is required for this approval.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$context['order_id'] = $order_id;
 
 		$user_id = $this->pin_service->lookup_user_by_pin( $pin );
 

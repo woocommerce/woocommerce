@@ -69,8 +69,9 @@ class POSApprovalControllerTest extends WC_REST_Unit_Test_Case {
 		$request = new \WP_REST_Request( 'POST', self::ROUTE );
 		$request->set_body_params(
 			array(
-				'pin'    => '7391',
-				'action' => 'woocommerce_refund_orders',
+				'pin'     => '7391',
+				'action'  => 'woocommerce_refund_orders',
+				'context' => array( 'order_id' => 42 ),
 			)
 		);
 
@@ -91,8 +92,9 @@ class POSApprovalControllerTest extends WC_REST_Unit_Test_Case {
 		$request = new \WP_REST_Request( 'POST', self::ROUTE );
 		$request->set_body_params(
 			array(
-				'pin'    => '7391',
-				'action' => 'woocommerce_refund_orders',
+				'pin'     => '7391',
+				'action'  => 'woocommerce_refund_orders',
+				'context' => array( 'order_id' => 42 ),
 			)
 		);
 
@@ -116,8 +118,9 @@ class POSApprovalControllerTest extends WC_REST_Unit_Test_Case {
 		$request = new \WP_REST_Request( 'POST', self::ROUTE );
 		$request->set_body_params(
 			array(
-				'pin'    => '8472',
-				'action' => 'woocommerce_refund_orders',
+				'pin'     => '8472',
+				'action'  => 'woocommerce_refund_orders',
+				'context' => array( 'order_id' => 42 ),
 			)
 		);
 
@@ -139,8 +142,9 @@ class POSApprovalControllerTest extends WC_REST_Unit_Test_Case {
 		$request = new \WP_REST_Request( 'POST', self::ROUTE );
 		$request->set_body_params(
 			array(
-				'pin'    => '9753',
-				'action' => 'woocommerce_refund_orders',
+				'pin'     => '9753',
+				'action'  => 'woocommerce_refund_orders',
+				'context' => array( 'order_id' => 42 ),
 			)
 		);
 
@@ -151,9 +155,9 @@ class POSApprovalControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Manager PIN but missing the specific action capability returns 403.
+	 * @testdox Unsupported capability strings are rejected before approval lookup.
 	 */
-	public function test_manager_without_specific_action_cap_returns_403(): void {
+	public function test_manager_without_specific_action_cap_returns_400(): void {
 		wp_set_current_user( $this->admin_id );
 
 		$request = new \WP_REST_Request( 'POST', self::ROUTE );
@@ -166,11 +170,49 @@ class POSApprovalControllerTest extends WC_REST_Unit_Test_Case {
 
 		$response = rest_do_request( $request );
 
-		$this->assertSame( 403, $response->get_status() );
-		$this->assertSame(
-			'The approver does not have permission for this action.',
-			$response->get_data()['message']
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'woocommerce_pos_invalid_action', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Unsupported approval actions return 400.
+	 */
+	public function test_unsupported_action_returns_400(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$request = new \WP_REST_Request( 'POST', self::ROUTE );
+		$request->set_body_params(
+			array(
+				'pin'     => '7391',
+				'action'  => 'woocommerce_apply_discounts',
+				'context' => array( 'order_id' => 42 ),
+			)
 		);
+
+		$response = rest_do_request( $request );
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'woocommerce_pos_invalid_action', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Order scoped approval requests require an order ID.
+	 */
+	public function test_missing_order_id_returns_400(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$request = new \WP_REST_Request( 'POST', self::ROUTE );
+		$request->set_body_params(
+			array(
+				'pin'    => '7391',
+				'action' => 'woocommerce_refund_orders',
+			)
+		);
+
+		$response = rest_do_request( $request );
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'woocommerce_pos_missing_order_context', $response->get_data()['code'] );
 	}
 
 	/**
@@ -182,8 +224,9 @@ class POSApprovalControllerTest extends WC_REST_Unit_Test_Case {
 		$request = new \WP_REST_Request( 'POST', self::ROUTE );
 		$request->set_body_params(
 			array(
-				'pin'    => '7391',
-				'action' => 'woocommerce_refund_orders',
+				'pin'     => '7391',
+				'action'  => 'woocommerce_refund_orders',
+				'context' => array( 'order_id' => 42 ),
 			)
 		);
 
@@ -202,8 +245,9 @@ class POSApprovalControllerTest extends WC_REST_Unit_Test_Case {
 		$request = new \WP_REST_Request( 'POST', self::ROUTE );
 		$request->set_body_params(
 			array(
-				'pin'    => '7391',
-				'action' => 'woocommerce_refund_orders',
+				'pin'     => '7391',
+				'action'  => 'woocommerce_refund_orders',
+				'context' => array( 'order_id' => 42 ),
 			)
 		);
 
@@ -223,6 +267,7 @@ class POSApprovalControllerTest extends WC_REST_Unit_Test_Case {
 		$params = array(
 			'pin'             => '7391',
 			'action'          => 'woocommerce_refund_orders',
+			'context'         => array( 'order_id' => 42 ),
 			'idempotency_key' => 'test-key-123',
 		);
 

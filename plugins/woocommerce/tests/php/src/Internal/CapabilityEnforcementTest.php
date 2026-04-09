@@ -408,6 +408,28 @@ class CapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A user cannot refund with an approval token that is missing order scope.
+	 */
+	public function test_user_cannot_refund_with_unscoped_approval_token(): void {
+		wp_set_current_user( $this->limited_user_id );
+
+		$token = $this->approval_service->create_approval(
+			$this->capable_user_id,
+			'woocommerce_refund_orders',
+			array()
+		);
+
+		$_POST['_pos_approval'] = $token;
+		$_SERVER['REQUEST_URI'] = '/wp-json/wc/v3/orders/123/refunds';
+
+		$result = $this->sut->enforce_capabilities( true, 'create', 0, 'shop_order_refund' );
+
+		unset( $_POST['_pos_approval'], $_SERVER['REQUEST_URI'] );
+
+		$this->assertFalse( $result );
+	}
+
+	/**
 	 * @testdox A user cannot refund without an approval token.
 	 */
 	public function test_user_cannot_refund_without_approval_token(): void {

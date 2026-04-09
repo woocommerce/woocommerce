@@ -123,13 +123,13 @@ class POSControllerTest extends WC_Unit_Test_Case {
 		$this->session_service_mock
 			->expects( $this->once() )
 			->method( 'is_session_valid' )
-			->with( 42 )
+			->with( 42, 'test-uuid-123' )
 			->willReturn( true );
 
 		$this->session_service_mock
 			->expects( $this->once() )
 			->method( 'touch_session' )
-			->with( 42 );
+			->with( 42, 'test-uuid-123' );
 
 		$app_password = array(
 			'name' => 'WooCommerce POS - register-1 - 2026-01-01 00:00:00',
@@ -154,7 +154,7 @@ class POSControllerTest extends WC_Unit_Test_Case {
 		$this->session_service_mock
 			->expects( $this->once() )
 			->method( 'is_session_valid' )
-			->with( 42 )
+			->with( 42, 'test-uuid-123' )
 			->willReturn( false );
 
 		$app_password = array(

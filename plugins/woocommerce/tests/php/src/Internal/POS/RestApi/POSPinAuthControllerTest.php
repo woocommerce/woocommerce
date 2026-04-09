@@ -35,6 +35,9 @@ class POSPinAuthControllerTest extends WC_REST_Unit_Test_Case {
 	 */
 	private int $cashier_id;
 
+	/**
+	 * Set up test fixtures.
+	 */
 	public function setUp(): void {
 		parent::setUp();
 
@@ -55,6 +58,9 @@ class POSPinAuthControllerTest extends WC_REST_Unit_Test_Case {
 		$controller->register_routes();
 	}
 
+	/**
+	 * Tear down test fixtures.
+	 */
 	public function tearDown(): void {
 		if ( isset( $this->cashier_id ) ) {
 			$this->cleanup_app_passwords( $this->cashier_id );
@@ -148,7 +154,8 @@ class POSPinAuthControllerTest extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $this->admin_id );
 
 		$customer_id = $this->factory->user->create( array( 'role' => 'customer' ) );
-		$this->pin_service->set_pin( $customer_id, '5937' );
+		update_user_meta( $customer_id, POSPinService::PIN_HASH_META_KEY, $this->pin_service->hash_pin( '5937' ) );
+		update_user_meta( $customer_id, POSPinService::PIN_INDEX_META_KEY, $this->pin_service->compute_pin_index( '5937' ) );
 
 		$request = new \WP_REST_Request( 'POST', self::ROUTE );
 		$request->set_body_params( array( 'pin' => '5937' ) );
@@ -204,6 +211,9 @@ class POSPinAuthControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( POSSessionService::DEFAULT_IDLE_TIMEOUT, $data['idle_timeout_seconds'] );
 	}
 
+	/**
+	 * Remove and recreate all WC roles.
+	 */
 	private function reset_roles(): void {
 		WC_Install::remove_roles();
 		WC_Install::create_roles();
@@ -211,6 +221,11 @@ class POSPinAuthControllerTest extends WC_REST_Unit_Test_Case {
 		$GLOBALS['wp_roles'] = new \WP_Roles();
 	}
 
+	/**
+	 * Remove all application passwords for a user.
+	 *
+	 * @param int $user_id The user ID.
+	 */
 	private function cleanup_app_passwords( int $user_id ): void {
 		if ( ! class_exists( 'WP_Application_Passwords' ) ) {
 			return;

@@ -15,8 +15,7 @@ use WP_Error;
  */
 class POSSessionService {
 
-	const META_SESSION_CREATED     = '_woocommerce_pos_session_created';
-	const META_SESSION_LAST_ACTIVE = '_woocommerce_pos_session_last_active';
+	const META_SESSIONS           = '_woocommerce_pos_sessions';
 	const APP_PASSWORD_PREFIX      = 'WooCommerce POS';
 	const DEFAULT_SESSION_TTL      = 43200;
 	const DEFAULT_IDLE_TIMEOUT     = 1800;
@@ -49,8 +48,13 @@ class POSSessionService {
 		$item     = $result[1];
 		$now      = time();
 
-		update_user_meta( $user_id, self::META_SESSION_CREATED, $now );
-		update_user_meta( $user_id, self::META_SESSION_LAST_ACTIVE, $now );
+		$sessions                  = $this->get_sessions( $user_id );
+		$sessions[ $item['uuid'] ] = array(
+			'created'     => $now,
+			'last_active' => $now,
+			'register_id' => $register_id,
+		);
+		update_user_meta( $user_id, self::META_SESSIONS, $sessions );
 
 		$ttl = (int) apply_filters( 'woocommerce_pos_session_ttl', self::DEFAULT_SESSION_TTL );
 
@@ -65,14 +69,14 @@ class POSSessionService {
 	 * Checks whether a user's POS session is still valid.
 	 *
 	 * @since 10.8.0
-	 * @param int $user_id The user ID.
+	 * @param int    $user_id The user ID.
+	 * @param string $uuid    The Application Password UUID.
 	 * @return bool
 	 */
-	public function is_session_valid( int $user_id ): bool {
-		$created     = get_user_meta( $user_id, self::META_SESSION_CREATED, true );
-		$last_active = get_user_meta( $user_id, self::META_SESSION_LAST_ACTIVE, true );
+	public function is_session_valid( int $user_id, string $uuid ): bool {
+		$session = $this->get_session( $user_id, $uuid );
 
-		if ( '' === $created || false === $created || '' === $last_active || false === $last_active ) {
+		if ( null === $session ) {
 			return false;
 		}
 
@@ -80,11 +84,11 @@ class POSSessionService {
 		$session_ttl  = (int) apply_filters( 'woocommerce_pos_session_ttl', self::DEFAULT_SESSION_TTL );
 		$idle_timeout = (int) apply_filters( 'woocommerce_pos_idle_timeout', self::DEFAULT_IDLE_TIMEOUT );
 
-		if ( ( $now - (int) $created ) > $session_ttl ) {
+		if ( ( $now - (int) $session['created'] ) > $session_ttl ) {
 			return false;
 		}
 
-		if ( ( $now - (int) $last_active ) > $idle_timeout ) {
+		if ( ( $now - (int) $session['last_active'] ) > $idle_timeout ) {
 			return false;
 		}
 
@@ -95,10 +99,17 @@ class POSSessionService {
 	 * Updates the last active timestamp for a user's session.
 	 *
 	 * @since 10.8.0
-	 * @param int $user_id The user ID.
+	 * @param int    $user_id The user ID.
+	 * @param string $uuid    The Application Password UUID.
 	 */
-	public function touch_session( int $user_id ): void {
-		update_user_meta( $user_id, self::META_SESSION_LAST_ACTIVE, time() );
+	public function touch_session( int $user_id, string $uuid ): void {
+		$sessions = $this->get_sessions( $user_id );
+		if ( ! isset( $sessions[ $uuid ] ) ) {
+			return;
+		}
+
+		$sessions[ $uuid ]['last_active'] = time();
+		update_user_meta( $user_id, self::META_SESSIONS, $sessions );
 	}
 
 	/**
@@ -110,8 +121,16 @@ class POSSessionService {
 	 */
 	public function revoke_session( int $user_id, string $uuid ): void {
 		WP_Application_Passwords::delete_application_password( $user_id, $uuid );
-		delete_user_meta( $user_id, self::META_SESSION_CREATED );
-		delete_user_meta( $user_id, self::META_SESSION_LAST_ACTIVE );
+
+		$sessions = $this->get_sessions( $user_id );
+		unset( $sessions[ $uuid ] );
+
+		if ( empty( $sessions ) ) {
+			delete_user_meta( $user_id, self::META_SESSIONS );
+			return;
+		}
+
+		update_user_meta( $user_id, self::META_SESSIONS, $sessions );
 	}
 
 	/**
@@ -122,7 +141,7 @@ class POSSessionService {
 	public function cleanup_stale_sessions(): void {
 		$users = get_users(
 			array(
-				'meta_key' => self::META_SESSION_CREATED, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'meta_key' => self::META_SESSIONS, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 				'fields'   => 'ID',
 			)
 		);
@@ -131,22 +150,41 @@ class POSSessionService {
 		$stale_threshold = 86400;
 
 		foreach ( $users as $user_id ) {
-			$created = (int) get_user_meta( $user_id, self::META_SESSION_CREATED, true );
-
-			if ( ( $now - $created ) <= $stale_threshold ) {
+			$user_id_int = (int) $user_id;
+			$sessions    = $this->get_sessions( $user_id_int );
+			if ( empty( $sessions ) ) {
 				continue;
 			}
 
-			$user_id_int = (int) $user_id;
-			$passwords   = WP_Application_Passwords::get_user_application_passwords( $user_id_int );
-			foreach ( $passwords as $pw ) {
-				if ( str_starts_with( $pw['name'], self::APP_PASSWORD_PREFIX ) ) {
-					WP_Application_Passwords::delete_application_password( $user_id_int, $pw['uuid'] );
+			$passwords    = WP_Application_Passwords::get_user_application_passwords( $user_id_int );
+			$active_uuids = array();
+			$did_change   = false;
+
+			foreach ( $sessions as $uuid => $session ) {
+				if ( ( $now - (int) $session['created'] ) <= $stale_threshold ) {
+					$active_uuids[ $uuid ] = $session;
+					continue;
+				}
+
+				$did_change = true;
+				foreach ( $passwords as $pw ) {
+					if ( $pw['uuid'] === $uuid && str_starts_with( $pw['name'], self::APP_PASSWORD_PREFIX ) ) {
+						WP_Application_Passwords::delete_application_password( $user_id_int, $pw['uuid'] );
+						break;
+					}
 				}
 			}
 
-			delete_user_meta( $user_id_int, self::META_SESSION_CREATED );
-			delete_user_meta( $user_id_int, self::META_SESSION_LAST_ACTIVE );
+			if ( ! $did_change ) {
+				continue;
+			}
+
+			if ( empty( $active_uuids ) ) {
+				delete_user_meta( $user_id_int, self::META_SESSIONS );
+				continue;
+			}
+
+			update_user_meta( $user_id_int, self::META_SESSIONS, $active_uuids );
 		}
 	}
 
@@ -162,8 +200,35 @@ class POSSessionService {
 
 		foreach ( $passwords as $pw ) {
 			if ( str_starts_with( $pw['name'], $prefix ) ) {
-				WP_Application_Passwords::delete_application_password( $user_id, $pw['uuid'] );
+				$this->revoke_session( $user_id, $pw['uuid'] );
 			}
 		}
+	}
+
+	/**
+	 * Return all POS sessions for a user.
+	 *
+	 * @param int $user_id The user ID.
+	 * @return array<string, array{created:int,last_active:int,register_id:string}>
+	 */
+	private function get_sessions( int $user_id ): array {
+		$sessions = get_user_meta( $user_id, self::META_SESSIONS, true );
+
+		return is_array( $sessions ) ? $sessions : array();
+	}
+
+	/**
+	 * Return a single POS session for a user.
+	 *
+	 * @param int    $user_id The user ID.
+	 * @param string $uuid    The application password UUID.
+	 * @return array{created:int,last_active:int,register_id:string}|null
+	 */
+	private function get_session( int $user_id, string $uuid ): ?array {
+		$sessions = $this->get_sessions( $user_id );
+
+		return isset( $sessions[ $uuid ] ) && is_array( $sessions[ $uuid ] )
+			? $sessions[ $uuid ]
+			: null;
 	}
 }

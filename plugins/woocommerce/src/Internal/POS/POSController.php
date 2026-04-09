@@ -5,7 +5,6 @@ namespace Automattic\WooCommerce\Internal\POS;
 
 use Automattic\WooCommerce\Internal\POS\Service\POSSessionService;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
-use WP_Application_Passwords;
 use WP_Error;
 use WP_User;
 
@@ -21,11 +20,15 @@ class POSController implements RegisterHooksInterface {
 	const CLEANUP_GROUP       = 'woocommerce-pos';
 
 	/**
+	 * Session service instance.
+	 *
 	 * @var POSSessionService
 	 */
 	private POSSessionService $session_service;
 
 	/**
+	 * Session auth error for expired POS credentials.
+	 *
 	 * @var WP_Error|null
 	 */
 	private ?WP_Error $session_auth_error = null;
@@ -102,8 +105,8 @@ class POSController implements RegisterHooksInterface {
 			return;
 		}
 
-		if ( ! $this->session_service->is_session_valid( $user->ID ) ) {
-			WP_Application_Passwords::delete_application_password( $user->ID, $app_password['uuid'] );
+		if ( ! $this->session_service->is_session_valid( $user->ID, $app_password['uuid'] ) ) {
+			$this->session_service->revoke_session( $user->ID, $app_password['uuid'] );
 
 			$this->session_auth_error = new WP_Error(
 				'woocommerce_pos_session_expired',
@@ -113,7 +116,7 @@ class POSController implements RegisterHooksInterface {
 			return;
 		}
 
-		$this->session_service->touch_session( $user->ID );
+		$this->session_service->touch_session( $user->ID, $app_password['uuid'] );
 	}
 
 	/**

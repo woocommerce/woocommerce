@@ -116,9 +116,10 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 	 *
 	 * @since 10.8.0
 	 *
-	 * @param WC_Data                       $order    The order object being updated.
-	 * @param WP_REST_Request<array<mixed>> $request  The request object.
-	 * @param bool                          $creating Whether this is a new order.
+	 * @param WC_Data         $order    The order object being updated.
+	 * @param WP_REST_Request $request  The request object.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 * @param bool            $creating Whether this is a new order.
 	 * @return WC_Data|WP_Error The order or WP_Error if capability check fails.
 	 */
 	public function enforce_cancel_capability( $order, WP_REST_Request $request, bool $creating ) {
@@ -186,9 +187,7 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 
 		// Validate the approval is scoped to the correct order if applicable.
 		$approved_order_id = (int) ( $approval_data['context']['order_id'] ?? 0 );
-		if ( $approved_order_id > 0 && $this->current_order_id > 0
-			&& $approved_order_id !== $this->current_order_id
-		) {
+		if ( $approved_order_id <= 0 || $this->current_order_id <= 0 || $approved_order_id !== $this->current_order_id ) {
 			return false;
 		}
 
@@ -237,17 +236,6 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Check whether the current user has a specific capability.
-	 *
-	 * Applies the woocommerce_pos_capability_check filter to allow
-	 * overrides (e.g. approval tokens).
-	 *
-	 * @since 10.8.0
-	 *
-	 * @param string $capability The capability to check.
-	 * @return bool
-	 */
-	/**
 	 * Extract approval token and order context from the current REST request.
 	 *
 	 * Used by enforce_capabilities() which receives the permission filter
@@ -269,6 +257,17 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 		}
 	}
 
+	/**
+	 * Check whether the current user has a specific capability.
+	 *
+	 * Applies the woocommerce_pos_capability_check filter to allow
+	 * temporary capability overrides.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @param string $capability The capability to check.
+	 * @return bool
+	 */
 	private function user_has_capability( string $capability ): bool {
 		$user_id = get_current_user_id();
 		$has_cap = current_user_can( $capability );

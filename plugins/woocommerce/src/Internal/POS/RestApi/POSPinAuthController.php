@@ -167,6 +167,7 @@ class POSPinAuthController extends RestApiControllerBase implements RegisterHook
 		if ( is_wp_error( $session ) ) {
 			throw new \Exception( $session->get_error_message() );
 		}
+		/** @var array{password: string, uuid: string, expires: int} $session */
 
 		$all_caps = $user->allcaps;
 		$woo_caps = array();
