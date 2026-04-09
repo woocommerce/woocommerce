@@ -22,6 +22,8 @@ class WC_Admin_Marketplace_Promotions_Test extends WC_Unit_Test_Case {
 	 * @testdox Eligible rule-based promotions are converted into promo cards.
 	 */
 	public function test_eligible_rule_based_promotions_are_converted_to_promo_cards(): void {
+		update_option( 'woocommerce_allow_tracking', 'yes' );
+
 		set_transient(
 			WC_Admin_Marketplace_Promotions::TRANSIENT_NAME,
 			array(
@@ -47,7 +49,17 @@ class WC_Admin_Marketplace_Promotions_Test extends WC_Unit_Test_Case {
 					'cta_link'      => 'https://woocommerce.com/products/automatewoo/',
 					'local_rules'   => array(
 						array(
-							'type' => 'pass',
+							'type'        => 'option',
+							'option_name' => 'woocommerce_allow_tracking',
+							'operation'   => '=',
+							'value'       => 'yes',
+						),
+						array(
+							'type'    => 'not',
+							'operand' => array(
+								'type'    => 'plugins_activated',
+								'plugins' => array( 'automatewoo/automatewoo.php' ),
+							),
 						),
 					),
 				),
@@ -128,6 +140,13 @@ class WC_Admin_Marketplace_Promotions_Test extends WC_Unit_Test_Case {
 							'option_name' => 'woocommerce_allow_tracking',
 							'operation'   => '=',
 							'value'       => 'yes',
+						),
+						array(
+							'type'    => 'not',
+							'operand' => array(
+								'type'    => 'plugins_activated',
+								'plugins' => array( 'automatewoo/automatewoo.php' ),
+							),
 						),
 					),
 				),
