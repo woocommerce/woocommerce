@@ -439,6 +439,8 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			} elseif ( WC()->legacy_rest_api_is_available() ) {
 				wc_deprecated_function( 'Webhook delivery via the Legacy REST API', '9.0.0', 'editing the webhook to use a current API version' );
 				$payload = wc()->api->get_webhook_api_payload( $resource, $resource_id, $event );
+			} else {
+				throw new \Exception( esc_html__( 'Unsupported webhook API version. Please edit this webhook to use a current REST API version.', 'woocommerce' ) );
 			}
 		}
 
