@@ -31,7 +31,7 @@
 		"build-types"
 	],
 	"dependencies": {
-		"@wordpress/i18n": "wp-6.6",
+		"@wordpress/i18n": "catalog:wp-min",
 		"peggy": "^3.0.2"
 	},
 	"publishConfig": {
