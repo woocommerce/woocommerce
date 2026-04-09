@@ -1482,7 +1482,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 				await test.step( `${ optionStyle }: Expect NOTHING to be auto-selected (on page load)`, async () => {
 					await page.goto( productPermalink );
 
-					await pageObject.expectVariationSelectorAttributes(
+					await pageObject.expectVariationSelectorOptions(
 						productAttributes,
 						{ Type: '', Color: '', Size: '' },
 						optionStyle
@@ -1499,7 +1499,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 					);
 
 					// Expect nothing to be auto-selected
-					await pageObject.expectVariationSelectorAttributes(
+					await pageObject.expectVariationSelectorOptions(
 						productAttributes,
 						{ Type: '', Color: 'Blue', Size: '' },
 						optionStyle
@@ -1519,7 +1519,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 					await page.goto( productPermalink );
 
 					// Expect the Type attribute to be auto-selected (on page load) to "T-shirt", the rest of the attributes should not be selected.
-					await pageObject.expectVariationSelectorAttributes(
+					await pageObject.expectVariationSelectorOptions(
 						productAttributes,
 						{ Type: 'T-shirt', Color: '', Size: '' },
 						optionStyle
@@ -1536,7 +1536,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 						optionStyle
 					);
 
-					await pageObject.expectVariationSelectorAttributes(
+					await pageObject.expectVariationSelectorOptions(
 						productAttributes,
 						{ Type: 'T-shirt', Color: 'Blue', Size: 'XL' },
 						optionStyle
@@ -1665,7 +1665,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 						// Color: Green
 						// Size: S
 
-						await pageObject.expectVariationSelectorAttributes(
+						await pageObject.expectVariationSelectorOptions(
 							productAttributes,
 							{ Type: 'T-shirt', Color: 'Green', Size: 'S' },
 							optionStyle
@@ -1698,7 +1698,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 				);
 
 				// Type and Size should auto-select to T-shirt and XL
-				await pageObject.expectVariationSelectorAttributes(
+				await pageObject.expectVariationSelectorOptions(
 					productAttributes,
 					{ Type: 'T-shirt', Color: 'Blue', Size: 'XL' },
 					'pills'

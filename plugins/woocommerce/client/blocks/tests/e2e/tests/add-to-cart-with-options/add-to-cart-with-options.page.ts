@@ -214,7 +214,7 @@ class AddToCartWithOptionsPage {
 		}
 	}
 
-	async expectVariationSelectorAttributes(
+	async expectVariationSelectorOptions(
 		productAttributes: {
 			name: string;
 			options: string[];
