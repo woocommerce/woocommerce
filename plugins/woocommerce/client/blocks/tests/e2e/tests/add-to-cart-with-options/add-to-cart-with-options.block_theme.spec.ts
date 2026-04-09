@@ -468,7 +468,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await expect( grandOption ).toBeEnabled();
 
 			await petitOption.click();
-			await expect( addToCartButton ).toBeEnabled();
+			await expect( addToCartButton ).not.toHaveClass( /\bdisabled\b/ );
 			await addToCartButton.click();
 			await expect( page.getByText( '1 in cart' ) ).toBeVisible();
 		} );
@@ -503,7 +503,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await expect( grandOption ).toBeEnabled();
 			await select.selectOption( { label: 'Petit' } );
 
-			await expect( addToCartButton ).toBeEnabled();
+			await expect( addToCartButton ).not.toHaveClass( /\bdisabled\b/ );
 			await addToCartButton.click();
 			await expect( page.getByText( '2 in cart' ) ).toBeVisible();
 		} );
