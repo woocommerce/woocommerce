@@ -1162,7 +1162,7 @@ function wc_translate_user_roles( $translation, $text, $context, $domain ) {
 		return $translation;
 	}
 
-	if ( 'User role' === $context && 'default' === $domain && in_array( $text, array( 'Shop manager', 'Customer' ), true ) ) {
+	if ( 'User role' === $context && in_array( $text, array( 'Shop manager', 'Customer' ), true ) ) {
 		return translate_user_role( $text, 'woocommerce' );
 	}
 
