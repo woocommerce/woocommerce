@@ -54,7 +54,7 @@
 	},
 	"dependencies": {
 		"@woocommerce/tracks": "workspace:*",
-		"@wordpress/hooks": "wp-6.6",
+		"@wordpress/hooks": "catalog:wp-min",
 		"debug": "^4.3.4",
 		"tracekit": "^0.4.6"
 	},
