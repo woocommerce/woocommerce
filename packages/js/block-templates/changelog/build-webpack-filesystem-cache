@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Improve warm production rebuild performance for block-templates by using webpack filesystem cache.

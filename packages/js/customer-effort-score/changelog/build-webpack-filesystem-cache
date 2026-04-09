@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Improve warm production rebuild performance for customer-effort-score by using webpack filesystem cache.
