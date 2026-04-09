@@ -6,7 +6,22 @@
  * @since   10.8.0
  */
 
+declare( strict_types = 1 );
+
 defined( 'ABSPATH' ) || exit;
+
+/*
+ * Template variables passed from WC_Admin_POS_Staff::edit_output().
+ *
+ * @var bool    $has_pin   Whether the user already has a PIN.
+ * @var int     $user_id   User ID.
+ * @var WP_User $user      User object.
+ * @var string  $role_name Translated role name.
+ */
+
+if ( ! isset( $has_pin, $user_id, $user, $role_name ) || ! $user instanceof WP_User ) {
+	return;
+}
 ?>
 
 <div id="pos-staff-fields" class="settings-panel">

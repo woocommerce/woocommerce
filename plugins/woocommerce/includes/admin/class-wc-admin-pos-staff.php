@@ -48,7 +48,7 @@ class WC_Admin_POS_Staff {
 	 *
 	 * @since 10.8.0
 	 */
-	public static function page_output() {
+	public static function page_output(): void {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( isset( $_GET['edit-staff'] ) ) {
 			$user_id = absint( $_GET['edit-staff'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -66,7 +66,7 @@ class WC_Admin_POS_Staff {
 	 *
 	 * @since 10.8.0
 	 */
-	private static function table_list_output() {
+	private static function table_list_output(): void {
 		$staff_table = new WC_Admin_POS_Staff_Table_List();
 		$staff_table->prepare_items();
 
@@ -98,17 +98,18 @@ class WC_Admin_POS_Staff {
 	 * @since 10.8.0
 	 * @param int $user_id User ID.
 	 */
-	private static function edit_output( $user_id ) {
+	private static function edit_output( $user_id ): void {
 		$user = get_userdata( $user_id );
 		if ( ! $user ) {
 			wp_die( esc_html__( 'Invalid user.', 'woocommerce' ) );
 		}
 
+		// phpcs:ignore WordPress.WP.Capabilities.Unknown -- Registered in WC_Install::create_roles().
 		if ( ! user_can( $user_id, 'woocommerce_pos_access' ) ) {
 			wp_die( esc_html__( 'This user does not have POS access.', 'woocommerce' ) );
 		}
 
-		$pin_service = new POSPinService();
+		$pin_service = wc_get_container()->get( POSPinService::class );
 		$has_pin     = $pin_service->has_pin( $user_id );
 		$roles       = (array) $user->roles;
 		$role_name   = '';
@@ -129,7 +130,7 @@ class WC_Admin_POS_Staff {
 	 *
 	 * @since 10.8.0
 	 */
-	public function actions() {
+	public function actions(): void {
 		if ( ! $this->is_pos_staff_settings_page() ) {
 			return;
 		}
@@ -150,7 +151,7 @@ class WC_Admin_POS_Staff {
 	 *
 	 * @since 10.8.0
 	 */
-	private function save() {
+	private function save(): void {
 		check_admin_referer( 'woocommerce-pos-staff-pin' );
 
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
@@ -160,6 +161,7 @@ class WC_Admin_POS_Staff {
 		$user_id = isset( $_POST['user_id'] ) ? absint( $_POST['user_id'] ) : 0;
 		$pin     = isset( $_POST['pos_pin'] ) ? sanitize_text_field( wp_unslash( $_POST['pos_pin'] ) ) : '';
 
+		// phpcs:ignore WordPress.WP.Capabilities.Unknown -- Registered in WC_Install::create_roles().
 		if ( ! $user_id || ! user_can( $user_id, 'woocommerce_pos_access' ) ) {
 			WC_Admin_Settings::add_error( __( 'Invalid user or user does not have POS access.', 'woocommerce' ) );
 			return;
@@ -170,7 +172,7 @@ class WC_Admin_POS_Staff {
 			return;
 		}
 
-		$pin_service = new POSPinService();
+		$pin_service = wc_get_container()->get( POSPinService::class );
 		$result      = $pin_service->set_pin( $user_id, $pin );
 
 		if ( is_wp_error( $result ) ) {
@@ -199,7 +201,7 @@ class WC_Admin_POS_Staff {
 	 *
 	 * @since 10.8.0
 	 */
-	private function remove_pin() {
+	private function remove_pin(): void {
 		check_admin_referer( 'remove-pos-pin' );
 
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
@@ -208,11 +210,12 @@ class WC_Admin_POS_Staff {
 
 		$user_id = isset( $_GET['remove-pin'] ) ? absint( $_GET['remove-pin'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
+		// phpcs:ignore WordPress.WP.Capabilities.Unknown -- Registered in WC_Install::create_roles().
 		if ( ! $user_id || ! user_can( $user_id, 'woocommerce_pos_access' ) ) {
 			wp_die( esc_html__( 'Invalid user or user does not have POS access.', 'woocommerce' ) );
 		}
 
-		$pin_service = new POSPinService();
+		$pin_service = wc_get_container()->get( POSPinService::class );
 		$pin_service->delete_pin( $user_id );
 
 		wp_safe_redirect(
@@ -236,7 +239,7 @@ class WC_Admin_POS_Staff {
 	 *
 	 * @since 10.8.0
 	 */
-	public static function notices() {
+	public static function notices(): void {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		if ( isset( $_GET['saved'] ) ) {
 			WC_Admin_Settings::add_message( __( 'PIN saved successfully.', 'woocommerce' ) );

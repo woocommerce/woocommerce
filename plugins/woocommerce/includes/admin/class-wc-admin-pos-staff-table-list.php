@@ -44,7 +44,7 @@ class WC_Admin_POS_Staff_Table_List extends WP_List_Table {
 			)
 		);
 
-		$this->pin_service = new POSPinService();
+		$this->pin_service = wc_get_container()->get( POSPinService::class );
 	}
 
 	/**
@@ -52,7 +52,7 @@ class WC_Admin_POS_Staff_Table_List extends WP_List_Table {
 	 *
 	 * @since 10.8.0
 	 */
-	public function no_items() {
+	public function no_items(): void {
 		esc_html_e( 'No POS staff found.', 'woocommerce' );
 	}
 
@@ -173,20 +173,20 @@ class WC_Admin_POS_Staff_Table_List extends WP_List_Table {
 	 *
 	 * @since 10.8.0
 	 */
-	public function prepare_items() {
+	public function prepare_items(): void {
 		$per_page     = 20;
 		$current_page = $this->get_pagenum();
 
 		$users = get_users(
 			array(
-				'role__in' => array( 'pos_cashier', 'pos_manager', 'administrator', 'shop_manager' ),
-				'orderby'  => 'display_name',
-				'order'    => 'ASC',
+				'orderby' => 'display_name',
+				'order'   => 'ASC',
 			)
 		);
 
 		$filtered = array();
 		foreach ( $users as $user ) {
+			// phpcs:ignore WordPress.WP.Capabilities.Unknown -- Registered in WC_Install::create_roles().
 			if ( user_can( $user->ID, 'woocommerce_pos_access' ) ) {
 				$filtered[] = $user;
 			}

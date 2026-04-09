@@ -27,6 +27,11 @@ class POSPinManageControllerTest extends WC_REST_Unit_Test_Case {
 	/**
 	 * @var int
 	 */
+	private int $shop_manager_id;
+
+	/**
+	 * @var int
+	 */
 	private int $pos_manager_id;
 
 	/**
@@ -44,6 +49,12 @@ class POSPinManageControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->reset_roles();
 
+		$this->shop_manager_id = $this->factory->user->create(
+			array(
+				'role'         => 'shop_manager',
+				'display_name' => 'Test Shop Manager',
+			)
+		);
 		$this->pos_manager_id  = $this->factory->user->create(
 			array(
 				'role'         => 'pos_manager',
@@ -72,6 +83,9 @@ class POSPinManageControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	public function tearDown(): void {
+		if ( isset( $this->shop_manager_id ) ) {
+			wp_delete_user( $this->shop_manager_id );
+		}
 		if ( isset( $this->pos_cashier_id ) ) {
 			$this->pin_service->delete_pin( $this->pos_cashier_id );
 			wp_delete_user( $this->pos_cashier_id );
@@ -89,10 +103,10 @@ class POSPinManageControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Manager can set PIN for cashier and receives 200 with success true.
+	 * @testdox Shop manager can set PIN for cashier and receives 200 with success true.
 	 */
-	public function test_manager_can_set_pin_for_cashier(): void {
-		wp_set_current_user( $this->pos_manager_id );
+	public function test_shop_manager_can_set_pin_for_cashier(): void {
+		wp_set_current_user( $this->shop_manager_id );
 
 		$request = new \WP_REST_Request( 'POST', self::MANAGE_ROUTE );
 		$request->set_body_params(
@@ -112,11 +126,11 @@ class POSPinManageControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Manager can delete PIN for cashier and receives 200 with success true.
+	 * @testdox Shop manager can delete PIN for cashier and receives 200 with success true.
 	 */
-	public function test_manager_can_delete_pin_for_cashier(): void {
+	public function test_shop_manager_can_delete_pin_for_cashier(): void {
 		$this->pin_service->set_pin( $this->pos_cashier_id, '8472' );
-		wp_set_current_user( $this->pos_manager_id );
+		wp_set_current_user( $this->shop_manager_id );
 
 		$request = new \WP_REST_Request( 'POST', self::MANAGE_ROUTE );
 		$request->set_body_params(
@@ -132,6 +146,26 @@ class POSPinManageControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 200, $response->get_status() );
 		$this->assertTrue( $data['success'] );
 		$this->assertFalse( $this->pin_service->has_pin( $this->pos_cashier_id ) );
+	}
+
+	/**
+	 * @testdox POS manager cannot set PIN for another user and gets 403.
+	 */
+	public function test_pos_manager_cannot_set_pin_for_another_user(): void {
+		wp_set_current_user( $this->pos_manager_id );
+
+		$request = new \WP_REST_Request( 'POST', self::MANAGE_ROUTE );
+		$request->set_body_params(
+			array(
+				'user_id' => $this->pos_cashier_id,
+				'action'  => 'set',
+				'pin'     => '8472',
+			)
+		);
+
+		$response = rest_do_request( $request );
+
+		$this->assertSame( 403, $response->get_status() );
 	}
 
 	/**
@@ -159,7 +193,7 @@ class POSPinManageControllerTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_pin_status_returns_pos_users_with_has_pin(): void {
 		$this->pin_service->set_pin( $this->pos_cashier_id, '8472' );
-		wp_set_current_user( $this->pos_manager_id );
+		wp_set_current_user( $this->shop_manager_id );
 
 		$request  = new \WP_REST_Request( 'GET', self::STATUS_ROUTE );
 		$response = rest_do_request( $request );
@@ -192,9 +226,9 @@ class POSPinManageControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox PIN status requires woocommerce_manage_pos_staff, cashier gets 403.
+	 * @testdox PIN status requires manage_woocommerce, cashier gets 403.
 	 */
-	public function test_pin_status_requires_manage_pos_staff(): void {
+	public function test_pin_status_requires_manage_woocommerce(): void {
 		wp_set_current_user( $this->pos_cashier_id );
 
 		$request  = new \WP_REST_Request( 'GET', self::STATUS_ROUTE );
@@ -207,7 +241,7 @@ class POSPinManageControllerTest extends WC_REST_Unit_Test_Case {
 	 * @testdox Setting a blocked PIN returns 422.
 	 */
 	public function test_setting_blocked_pin_returns_422(): void {
-		wp_set_current_user( $this->pos_manager_id );
+		wp_set_current_user( $this->shop_manager_id );
 
 		$request = new \WP_REST_Request( 'POST', self::MANAGE_ROUTE );
 		$request->set_body_params(
@@ -228,7 +262,7 @@ class POSPinManageControllerTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_setting_duplicate_pin_returns_422(): void {
 		$this->pin_service->set_pin( $this->pos_cashier_id, '8472' );
-		wp_set_current_user( $this->pos_manager_id );
+		wp_set_current_user( $this->shop_manager_id );
 
 		$request = new \WP_REST_Request( 'POST', self::MANAGE_ROUTE );
 		$request->set_body_params(
@@ -332,11 +366,11 @@ class POSPinManageControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Manager setting PIN for another user does not require current_pin.
+	 * @testdox Shop manager setting PIN for another user does not require current_pin.
 	 */
-	public function test_manager_set_pin_for_other_does_not_require_current_pin(): void {
+	public function test_shop_manager_set_pin_for_other_does_not_require_current_pin(): void {
 		$this->pin_service->set_pin( $this->pos_cashier_id, '8472' );
-		wp_set_current_user( $this->pos_manager_id );
+		wp_set_current_user( $this->shop_manager_id );
 
 		$request = new \WP_REST_Request( 'POST', self::MANAGE_ROUTE );
 		$request->set_body_params(

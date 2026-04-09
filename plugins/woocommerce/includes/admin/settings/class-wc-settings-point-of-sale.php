@@ -40,7 +40,7 @@ class WC_Settings_Point_Of_Sale extends WC_Settings_Page {
 	 *
 	 * @since 10.8.0
 	 */
-	private function notices() {
+	private function notices(): void {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( isset( $_GET['section'] ) && 'staff' === $_GET['section'] ) {
 			WC_Admin_POS_Staff::notices();
@@ -88,7 +88,7 @@ class WC_Settings_Point_Of_Sale extends WC_Settings_Page {
 	 *
 	 * @since 10.8.0
 	 */
-	public function output() {
+	public function output(): void {
 		global $current_section, $hide_save_button;
 
 		if ( 'staff' === $current_section ) {

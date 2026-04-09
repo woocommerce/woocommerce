@@ -27,7 +27,6 @@ class POSRolesTest extends WC_Unit_Test_Case {
 		'woocommerce_view_financial_reports',
 		'woocommerce_view_personal_sales',
 		'woocommerce_export_reports',
-		'woocommerce_manage_pos_staff',
 		'woocommerce_approve_overrides',
 		'woocommerce_view_customer_data',
 		'woocommerce_edit_customer_data',
@@ -111,7 +110,6 @@ class POSRolesTest extends WC_Unit_Test_Case {
 		$this->assertFalse( $role->has_cap( 'woocommerce_view_sales_reports' ), 'pos_cashier should not have woocommerce_view_sales_reports' );
 		$this->assertFalse( $role->has_cap( 'woocommerce_view_financial_reports' ), 'pos_cashier should not have woocommerce_view_financial_reports' );
 		$this->assertFalse( $role->has_cap( 'woocommerce_export_reports' ), 'pos_cashier should not have woocommerce_export_reports' );
-		$this->assertFalse( $role->has_cap( 'woocommerce_manage_pos_staff' ), 'pos_cashier should not have woocommerce_manage_pos_staff' );
 		$this->assertFalse( $role->has_cap( 'woocommerce_approve_overrides' ), 'pos_cashier should not have woocommerce_approve_overrides' );
 		$this->assertFalse( $role->has_cap( 'woocommerce_edit_customer_data' ), 'pos_cashier should not have woocommerce_edit_customer_data' );
 		$this->assertFalse( $role->has_cap( 'woocommerce_view_audit_logs' ), 'pos_cashier should not have woocommerce_view_audit_logs' );
@@ -164,7 +162,6 @@ class POSRolesTest extends WC_Unit_Test_Case {
 			'woocommerce_override_prices',
 			'woocommerce_view_sales_reports',
 			'woocommerce_view_personal_sales',
-			'woocommerce_manage_pos_staff',
 			'woocommerce_approve_overrides',
 			'woocommerce_view_customer_data',
 			'woocommerce_edit_customer_data',
@@ -277,11 +274,11 @@ class POSRolesTest extends WC_Unit_Test_Case {
 		$this->assertTrue( user_can( $cashier_user, 'woocommerce_pos_access' ) );
 		$this->assertTrue( user_can( $cashier_user, 'woocommerce_view_personal_sales' ) );
 		$this->assertFalse( user_can( $cashier_user, 'woocommerce_refund_orders' ) );
-		$this->assertFalse( user_can( $cashier_user, 'woocommerce_manage_pos_staff' ) );
 
 		$this->assertTrue( user_can( $manager_user, 'woocommerce_pos_access' ) );
 		$this->assertTrue( user_can( $manager_user, 'woocommerce_refund_orders' ) );
 		$this->assertTrue( user_can( $manager_user, 'woocommerce_approve_overrides' ) );
+		$this->assertFalse( user_can( $manager_user, 'woocommerce_manage_pos_staff' ) );
 		$this->assertFalse( user_can( $manager_user, 'woocommerce_view_financial_reports' ) );
 	}
 
@@ -292,7 +289,7 @@ class POSRolesTest extends WC_Unit_Test_Case {
 		$capabilities = WC_Install::get_core_capabilities();
 
 		$this->assertArrayHasKey( 'pos', $capabilities );
-		$this->assertCount( 16, $capabilities['pos'] );
+		$this->assertCount( 15, $capabilities['pos'] );
 
 		foreach ( $this->all_pos_caps as $cap ) {
 			$this->assertContains( $cap, $capabilities['pos'], "get_core_capabilities pos group should contain {$cap}" );

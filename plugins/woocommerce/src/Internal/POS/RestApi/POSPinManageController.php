@@ -105,7 +105,7 @@ class POSPinManageController extends RestApiControllerBase implements RegisterHo
 			return $this->check_permission( $request, 'woocommerce_pos_access' );
 		}
 
-		return $this->check_permission( $request, 'woocommerce_manage_pos_staff' );
+		return $this->check_permission( $request, 'manage_woocommerce' );
 	}
 
 	/**
@@ -118,7 +118,7 @@ class POSPinManageController extends RestApiControllerBase implements RegisterHo
 	 * @return bool|WP_Error
 	 */
 	private function check_status_permission( WP_REST_Request $request ) {
-		return $this->check_permission( $request, 'woocommerce_manage_pos_staff' );
+		return $this->check_permission( $request, 'manage_woocommerce' );
 	}
 
 	/**
@@ -221,10 +221,8 @@ class POSPinManageController extends RestApiControllerBase implements RegisterHo
 
 		$users = get_users(
 			array(
-				'meta_key'     => '',
-				'meta_value'   => '',
-				'meta_compare' => '',
-				'role__in'     => array( 'pos_cashier', 'pos_manager', 'administrator', 'shop_manager' ),
+				'orderby' => 'display_name',
+				'order'   => 'ASC',
 			)
 		);
 
