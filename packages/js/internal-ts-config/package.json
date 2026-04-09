@@ -29,9 +29,7 @@
 		"@wordpress/core-data": "7.19.6",
 		"@wordpress/data": "10.19.2",
 		"@wordpress/editor": "14.19.7",
-		"@wordpress/keyboard-shortcuts": "5.19.2",
 		"@wordpress/notices": "5.19.2",
-		"@wordpress/preferences": "4.19.4",
 		"eslint": "^8.55.0",
 		"typescript": "5.7.x",
 		"wireit": "0.14.12"
@@ -44,19 +42,13 @@
 				"types/@wordpress/block-editor.patch",
 				"types/@wordpress/core-data.patch",
 				"types/@wordpress/data.patch",
-				"types/@wordpress/editor.patch",
-				"types/@wordpress/keyboard-shortcuts.patch",
-				"types/@wordpress/notices.patch",
-				"types/@wordpress/preferences.patch"
+				"types/@wordpress/editor.patch"
 			],
 			"output": [
 				"types/@wordpress/block-editor/",
 				"types/@wordpress/core-data/",
 				"types/@wordpress/data/",
-				"types/@wordpress/editor/",
-				"types/@wordpress/keyboard-shortcuts/",
-				"types/@wordpress/notices/",
-				"types/@wordpress/preferences/"
+				"types/@wordpress/editor/"
 			],
 			"clean": "if-file-deleted"
 		},
