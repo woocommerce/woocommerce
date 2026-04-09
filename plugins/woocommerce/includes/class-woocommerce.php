@@ -400,8 +400,11 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\PushNotifications\PushNotifications::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Orders\PointOfSaleEmailHandler::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\POS\POSCapabilityEnforcement::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\POS\POSController::class )->register();
 
 		// Classes inheriting from RestApiControllerBase.
+		$container->get( Automattic\WooCommerce\Internal\POS\RestApi\POSPinAuthController::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\POS\RestApi\POSPinManageController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ReceiptRendering\ReceiptRenderingRestController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Orders\OrderActionsRestController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Orders\OrderStatusRestController::class )->register();
