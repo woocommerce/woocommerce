@@ -68443,12 +68443,6 @@ parameters:
 			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
 
 		-
-			message: '#^Call to method update_meta_data\(\) on an unknown class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\WC_Product\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
 			message: '#^Cannot access property \$public on WP_Post_Type\|null\.$#'
 			identifier: property.nonObject
 			count: 2
@@ -68780,6 +68774,12 @@ parameters:
 
 		-
 			message: '#^Parameter \#2 \$product of method Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\Controller\:\:set_cogs_info_in_product_object\(\) expects Automattic\\WooCommerce\\Internal\\CostOfGoodsSold\\WC_Product, Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\WC_Product\|WC_Product given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
+
+		-
+			message: '#^Parameter \#2 \$target of static method Automattic\\WooCommerce\\Utilities\\MetaDataUtil\:\:update\(\) expects \(callable\(\)\: mixed\)\|WC_Data, Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\WC_Product\|WC_Product given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Internal/RestApi/Routes/V4/Products/Controller.php

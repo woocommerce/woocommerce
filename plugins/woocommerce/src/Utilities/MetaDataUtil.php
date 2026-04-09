@@ -21,10 +21,10 @@ class MetaDataUtil {
 	 *
 	 * @since 10.8.0
 	 *
-	 * @param mixed           $meta_data  Raw meta data from the request (non-array values are ignored).
+	 * @param mixed            $meta_data  Raw meta data from the request (non-array values are ignored).
 	 * @param WC_Data|callable $target     A WC_Data object (calls update_meta_data directly) or a callback
 	 *                                     receiving each normalized entry as array{key: string, value: mixed, id: mixed}.
-	 * @param mixed           $default_id Default value for 'id' when not provided (default '').
+	 * @param mixed            $default_id Default value for 'id' when not provided (default '').
 	 *
 	 * @throws \InvalidArgumentException If $target is neither a WC_Data instance nor callable.
 	 */

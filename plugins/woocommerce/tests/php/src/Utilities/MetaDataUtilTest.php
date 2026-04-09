@@ -174,12 +174,18 @@ class MetaDataUtilTest extends WC_Unit_Test_Case {
 	public function test_update_ignores_non_array_meta_data(): void {
 		$called = false;
 
-		MetaDataUtil::update( null, function () use ( &$called ) {
-			$called = true;
-		} );
-		MetaDataUtil::update( 'string', function () use ( &$called ) {
-			$called = true;
-		} );
+		MetaDataUtil::update(
+			null,
+			function () use ( &$called ) {
+				$called = true;
+			}
+		);
+		MetaDataUtil::update(
+			'string',
+			function () use ( &$called ) {
+				$called = true;
+			}
+		);
 
 		$this->assertFalse( $called, 'Callback should not be called for non-array meta_data' );
 	}
