@@ -16,7 +16,7 @@ const sharedOptimizationConfig = {
 					comments: /translators:/i,
 				},
 				compress: {
-					passes: 2,
+					passes: 1,
 				},
 				mangle: {
 					reserved: [ '__', '_n', '_nx', '_x' ],
