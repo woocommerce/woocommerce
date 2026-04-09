@@ -65,8 +65,7 @@ const { state: productsState } = store< ProductsStore >(
 const productButtonStore = {
 	state: {
 		get quantity(): number {
-			const product =
-				productsState.productInContext;
+			const product = productsState.productInContext;
 
 			if ( ! product ) {
 				return 0;
@@ -143,8 +142,7 @@ const productButtonStore = {
 	},
 	actions: {
 		*addCartItem(): Generator< unknown, void > {
-			const product =
-				productsState.productInContext;
+			const product = productsState.productInContext;
 
 			if ( ! product ) {
 				return;

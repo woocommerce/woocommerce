@@ -163,16 +163,11 @@ const { state: productsState } = store< ProductsStore >(
 				if ( ! variationId ) {
 					return null;
 				}
-				return (
-					productsState.productVariations[ variationId ] ?? null
-				);
+				return productsState.productVariations[ variationId ] ?? null;
 			},
 
 			get productInContext(): ProductResponseItem | null {
-				return (
-					productsState.selectedVariation ||
-					productsState.product
-				);
+				return productsState.selectedVariation || productsState.product;
 			},
 		},
 	},
