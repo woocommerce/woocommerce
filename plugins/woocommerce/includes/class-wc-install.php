@@ -2437,7 +2437,6 @@ $stock_notifications_table_schema;
 				'woocommerce_pos_access'          => true,
 				'woocommerce_view_personal_sales' => true,
 				'woocommerce_view_customer_data'  => true,
-				'woocommerce_close_register'      => true,
 			)
 		);
 
@@ -2465,9 +2464,6 @@ $stock_notifications_table_schema;
 				'woocommerce_refund_orders'       => true,
 				'woocommerce_apply_discounts'     => true,
 				'woocommerce_override_prices'     => true,
-				'woocommerce_open_cash_drawer'    => true,
-				'woocommerce_manage_cash'         => true,
-				'woocommerce_close_register'      => true,
 				'woocommerce_view_sales_reports'  => true,
 				'woocommerce_view_personal_sales' => true,
 				'woocommerce_manage_pos_staff'    => true,
@@ -2538,9 +2534,6 @@ $stock_notifications_table_schema;
 			'woocommerce_refund_orders',
 			'woocommerce_apply_discounts',
 			'woocommerce_override_prices',
-			'woocommerce_open_cash_drawer',
-			'woocommerce_manage_cash',
-			'woocommerce_close_register',
 			'woocommerce_view_sales_reports',
 			'woocommerce_view_financial_reports',
 			'woocommerce_view_personal_sales',

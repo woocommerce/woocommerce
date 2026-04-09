@@ -1,23 +1,23 @@
 <?php
 declare( strict_types = 1 );
 
-namespace Automattic\WooCommerce\Tests\Internal\POS;
+namespace Automattic\WooCommerce\Tests\Internal;
 
-use Automattic\WooCommerce\Internal\POS\POSCapabilityEnforcement;
+use Automattic\WooCommerce\Internal\CapabilityEnforcement;
 use Automattic\WooCommerce\Internal\POS\Service\POSApprovalService;
 use WC_Helper_Order;
 use WC_Install;
 use WC_REST_Unit_Test_Case;
 
 /**
- * Tests for POS capability enforcement on REST API endpoints.
+ * Tests for capability enforcement on REST API endpoints.
  *
- * @covers \Automattic\WooCommerce\Internal\POS\POSCapabilityEnforcement
+ * @covers \Automattic\WooCommerce\Internal\CapabilityEnforcement
  */
-class POSCapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
+class CapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 
 	/**
-	 * @var POSCapabilityEnforcement
+	 * @var CapabilityEnforcement
 	 */
 	private $sut;
 
@@ -29,12 +29,12 @@ class POSCapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 	/**
 	 * @var int
 	 */
-	private $pos_cashier_id;
+	private $limited_user_id;
 
 	/**
 	 * @var int
 	 */
-	private $pos_manager_id;
+	private $capable_user_id;
 
 	/**
 	 * @var int
@@ -49,13 +49,13 @@ class POSCapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 
 		$this->reset_roles();
 
-		$this->pos_cashier_id = $this->factory->user->create( array( 'role' => 'pos_cashier' ) );
-		$this->pos_manager_id = $this->factory->user->create( array( 'role' => 'pos_manager' ) );
-		$this->admin_id       = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$this->limited_user_id = $this->factory->user->create( array( 'role' => 'pos_cashier' ) );
+		$this->capable_user_id = $this->factory->user->create( array( 'role' => 'pos_manager' ) );
+		$this->admin_id        = $this->factory->user->create( array( 'role' => 'administrator' ) );
 
 		$this->approval_service = new POSApprovalService();
 
-		$this->sut = new POSCapabilityEnforcement();
+		$this->sut = new CapabilityEnforcement();
 		$this->sut->init( $this->approval_service );
 		$this->sut->register();
 	}
@@ -95,10 +95,23 @@ class POSCapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox POS cashier can create orders via the REST API.
+	 * Create a user with order editing capabilities but without a specific capability.
+	 *
+	 * @param string $missing_cap The capability the user should lack.
+	 * @return int User ID.
 	 */
-	public function test_pos_cashier_can_create_orders(): void {
-		wp_set_current_user( $this->pos_cashier_id );
+	private function create_user_without_cap( string $missing_cap ): int {
+		$user_id = $this->factory->user->create( array( 'role' => 'pos_cashier' ) );
+		$user    = new \WP_User( $user_id );
+		$user->remove_cap( $missing_cap );
+		return $user_id;
+	}
+
+	/**
+	 * @testdox A user with edit_shop_orders can create orders via the REST API.
+	 */
+	public function test_user_with_order_caps_can_create_orders(): void {
+		wp_set_current_user( $this->limited_user_id );
 
 		$request = new \WP_REST_Request( 'POST', '/wc/v3/orders' );
 		$request->set_body_params(
@@ -113,10 +126,10 @@ class POSCapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox POS cashier cannot create refunds because they lack woocommerce_refund_orders.
+	 * @testdox A user without woocommerce_refund_orders cannot create refunds.
 	 */
-	public function test_pos_cashier_cannot_create_refunds(): void {
-		wp_set_current_user( $this->pos_cashier_id );
+	public function test_user_without_refund_cap_cannot_create_refunds(): void {
+		wp_set_current_user( $this->limited_user_id );
 		$order = $this->create_order_as_current_user( 'completed' );
 
 		$request = new \WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() . '/refunds' );
@@ -134,10 +147,10 @@ class POSCapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox POS manager can create refunds because they have woocommerce_refund_orders.
+	 * @testdox A user with woocommerce_refund_orders can create refunds.
 	 */
-	public function test_pos_manager_can_create_refunds(): void {
-		wp_set_current_user( $this->pos_manager_id );
+	public function test_user_with_refund_cap_can_create_refunds(): void {
+		wp_set_current_user( $this->capable_user_id );
 		$order = $this->create_order_as_current_user( 'completed' );
 
 		$request = new \WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() . '/refunds' );
@@ -155,10 +168,10 @@ class POSCapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox enforce_cancel_capability blocks cashier from cancelling orders.
+	 * @testdox enforce_cancel_capability blocks users without woocommerce_void_orders from cancelling.
 	 */
-	public function test_pos_cashier_cannot_cancel_orders(): void {
-		wp_set_current_user( $this->pos_cashier_id );
+	public function test_user_without_void_cap_cannot_cancel_orders(): void {
+		wp_set_current_user( $this->limited_user_id );
 		$order = $this->create_order_as_current_user( 'pending' );
 
 		$request = new \WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
@@ -171,10 +184,10 @@ class POSCapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox enforce_cancel_capability allows manager to cancel orders.
+	 * @testdox enforce_cancel_capability allows users with woocommerce_void_orders to cancel.
 	 */
-	public function test_pos_manager_can_cancel_orders(): void {
-		wp_set_current_user( $this->pos_manager_id );
+	public function test_user_with_void_cap_can_cancel_orders(): void {
+		wp_set_current_user( $this->capable_user_id );
 		$order = $this->create_order_as_current_user( 'pending' );
 
 		$request = new \WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
@@ -189,8 +202,8 @@ class POSCapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 	/**
 	 * @testdox enforce_cancel_capability does not restrict non-cancel status updates.
 	 */
-	public function test_pos_cashier_can_update_order_status_to_non_cancelled(): void {
-		wp_set_current_user( $this->pos_cashier_id );
+	public function test_user_can_update_order_status_to_non_cancelled(): void {
+		wp_set_current_user( $this->limited_user_id );
 		$order = $this->create_order_as_current_user( 'pending' );
 
 		$request = new \WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
@@ -205,7 +218,7 @@ class POSCapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 	 * @testdox enforce_cancel_capability skips check during order creation.
 	 */
 	public function test_enforce_cancel_capability_skips_on_create(): void {
-		wp_set_current_user( $this->pos_cashier_id );
+		wp_set_current_user( $this->limited_user_id );
 		$order = $this->create_order_as_current_user( 'pending' );
 
 		$request = new \WP_REST_Request( 'POST', '/wc/v3/orders' );
@@ -217,34 +230,7 @@ class POSCapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox enforce_cancel_capability does not affect admin users.
-	 */
-	public function test_enforce_cancel_capability_skips_non_pos_roles(): void {
-		wp_set_current_user( $this->admin_id );
-
-		$order = WC_Helper_Order::create_order();
-		$order->set_status( 'pending' );
-		$order->save();
-
-		$request = new \WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
-		$request->set_body_params( array( 'status' => 'cancelled' ) );
-
-		$result = $this->sut->enforce_cancel_capability( $order, $request, false );
-
-		$this->assertSame( $order, $result );
-	}
-
-	/**
-	 * @testdox POS cashier can view their own sales data via capability.
-	 */
-	public function test_pos_cashier_can_view_own_sales(): void {
-		$this->assertTrue(
-			user_can( $this->pos_cashier_id, 'woocommerce_view_personal_sales' )
-		);
-	}
-
-	/**
-	 * @testdox Administrator refund behavior is unchanged by POS enforcement.
+	 * @testdox Administrator can create refunds.
 	 */
 	public function test_administrator_can_create_refunds(): void {
 		wp_set_current_user( $this->admin_id );
@@ -268,7 +254,7 @@ class POSCapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Administrator can still cancel orders.
+	 * @testdox Administrator can cancel orders.
 	 */
 	public function test_administrator_can_cancel_orders(): void {
 		wp_set_current_user( $this->admin_id );
@@ -290,35 +276,27 @@ class POSCapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Enforcement does not apply to shop_manager users.
+	 * @testdox Enforcement applies universally, not just to POS roles.
 	 */
-	public function test_enforcement_only_applies_to_pos_roles(): void {
-		$shop_manager_id = $this->factory->user->create( array( 'role' => 'shop_manager' ) );
-		wp_set_current_user( $shop_manager_id );
+	public function test_enforcement_applies_to_any_user_without_cap(): void {
+		$editor_id = $this->factory->user->create( array( 'role' => 'editor' ) );
+		$user      = new \WP_User( $editor_id );
+		$user->add_cap( 'edit_shop_orders' );
+		$user->add_cap( 'publish_shop_orders' );
+		$user->add_cap( 'read_shop_order' );
 
-		$order = WC_Helper_Order::create_order();
-		$order->set_status( 'completed' );
-		$order->save();
+		wp_set_current_user( $editor_id );
 
-		$request = new \WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() . '/refunds' );
-		$request->set_body_params(
-			array(
-				'amount'     => '1.00',
-				'reason'     => 'Testing refund',
-				'api_refund' => false,
-			)
-		);
+		$result = $this->sut->enforce_capabilities( true, 'create', 0, 'shop_order_refund' );
 
-		$response = $this->server->dispatch( $request );
-
-		$this->assertNotSame( 403, $response->get_status() );
+		$this->assertFalse( $result );
 	}
 
 	/**
-	 * @testdox The woocommerce_pos_capability_check filter allows granting refund capability to cashier.
+	 * @testdox The woocommerce_pos_capability_check filter allows granting refund capability.
 	 */
 	public function test_capability_check_can_be_filtered(): void {
-		wp_set_current_user( $this->pos_cashier_id );
+		wp_set_current_user( $this->limited_user_id );
 		$order = $this->create_order_as_current_user( 'completed' );
 
 		add_filter(
@@ -349,71 +327,60 @@ class POSCapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox enforce_pos_capabilities returns false when permission is already false.
+	 * @testdox enforce_capabilities returns false when permission is already false.
 	 */
-	public function test_enforce_pos_capabilities_preserves_denial(): void {
-		wp_set_current_user( $this->pos_cashier_id );
+	public function test_enforce_capabilities_preserves_denial(): void {
+		wp_set_current_user( $this->limited_user_id );
 
-		$result = $this->sut->enforce_pos_capabilities( false, 'create', 0, 'shop_order_refund' );
+		$result = $this->sut->enforce_capabilities( false, 'create', 0, 'shop_order_refund' );
 
 		$this->assertFalse( $result );
 	}
 
 	/**
-	 * @testdox enforce_pos_capabilities skips check for non-POS roles.
+	 * @testdox enforce_capabilities denies refund creation for user without cap.
 	 */
-	public function test_enforce_pos_capabilities_skips_non_pos_roles(): void {
-		wp_set_current_user( $this->admin_id );
+	public function test_enforce_capabilities_denies_refund_without_cap(): void {
+		wp_set_current_user( $this->limited_user_id );
 
-		$result = $this->sut->enforce_pos_capabilities( true, 'create', 0, 'shop_order_refund' );
-
-		$this->assertTrue( $result );
-	}
-
-	/**
-	 * @testdox enforce_pos_capabilities denies refund creation for cashier.
-	 */
-	public function test_enforce_pos_capabilities_denies_cashier_refund(): void {
-		wp_set_current_user( $this->pos_cashier_id );
-
-		$result = $this->sut->enforce_pos_capabilities( true, 'create', 0, 'shop_order_refund' );
+		$result = $this->sut->enforce_capabilities( true, 'create', 0, 'shop_order_refund' );
 
 		$this->assertFalse( $result );
 	}
 
 	/**
-	 * @testdox enforce_pos_capabilities allows refund creation for manager.
+	 * @testdox enforce_capabilities allows refund creation for user with cap.
 	 */
-	public function test_enforce_pos_capabilities_allows_manager_refund(): void {
-		wp_set_current_user( $this->pos_manager_id );
+	public function test_enforce_capabilities_allows_refund_with_cap(): void {
+		wp_set_current_user( $this->capable_user_id );
 
-		$result = $this->sut->enforce_pos_capabilities( true, 'create', 0, 'shop_order_refund' );
+		$result = $this->sut->enforce_capabilities( true, 'create', 0, 'shop_order_refund' );
 
 		$this->assertTrue( $result );
 	}
 
 	/**
-	 * @testdox POS cashier can process a refund when providing a valid approval token via the filter.
+	 * @testdox A user can process a refund when providing a valid approval token via the filter.
 	 */
-	public function test_pos_cashier_can_refund_with_approval_token(): void {
-		wp_set_current_user( $this->pos_cashier_id );
+	public function test_user_can_refund_with_approval_token(): void {
+		wp_set_current_user( $this->limited_user_id );
 		$order = $this->create_order_as_current_user( 'completed' );
 
 		$token = $this->approval_service->create_approval(
-			$this->pos_manager_id,
+			$this->capable_user_id,
 			'woocommerce_refund_orders',
 			array( 'order_id' => $order->get_id() )
 		);
 
 		$_REQUEST['_pos_approval'] = $token;
 
-		$result = $this->sut->enforce_pos_capabilities( true, 'create', 0, 'shop_order_refund' );
+		$result = $this->sut->enforce_capabilities( true, 'create', 0, 'shop_order_refund' );
 
 		unset( $_REQUEST['_pos_approval'] );
 
 		$this->assertTrue( $result );
 
-		$notes = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
+		$notes      = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
 		$found_note = false;
 		foreach ( $notes as $note ) {
 			if ( str_contains( $note->content, 'POS override' ) ) {
@@ -425,14 +392,14 @@ class POSCapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox POS cashier cannot refund with an invalid approval token.
+	 * @testdox A user cannot refund with an invalid approval token.
 	 */
-	public function test_pos_cashier_cannot_refund_with_invalid_approval_token(): void {
-		wp_set_current_user( $this->pos_cashier_id );
+	public function test_user_cannot_refund_with_invalid_approval_token(): void {
+		wp_set_current_user( $this->limited_user_id );
 
 		$_REQUEST['_pos_approval'] = 'invalid-token-value';
 
-		$result = $this->sut->enforce_pos_capabilities( true, 'create', 0, 'shop_order_refund' );
+		$result = $this->sut->enforce_capabilities( true, 'create', 0, 'shop_order_refund' );
 
 		unset( $_REQUEST['_pos_approval'] );
 
@@ -440,23 +407,23 @@ class POSCapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox POS cashier cannot refund without an approval token.
+	 * @testdox A user cannot refund without an approval token.
 	 */
-	public function test_pos_cashier_cannot_refund_without_approval_token(): void {
-		wp_set_current_user( $this->pos_cashier_id );
+	public function test_user_cannot_refund_without_approval_token(): void {
+		wp_set_current_user( $this->limited_user_id );
 
-		$result = $this->sut->enforce_pos_capabilities( true, 'create', 0, 'shop_order_refund' );
+		$result = $this->sut->enforce_capabilities( true, 'create', 0, 'shop_order_refund' );
 
 		$this->assertFalse( $result );
 	}
 
 	/**
-	 * @testdox enforce_pos_capabilities does not restrict non-refund contexts.
+	 * @testdox enforce_capabilities does not restrict non-refund contexts.
 	 */
-	public function test_enforce_pos_capabilities_allows_order_create(): void {
-		wp_set_current_user( $this->pos_cashier_id );
+	public function test_enforce_capabilities_allows_order_create(): void {
+		wp_set_current_user( $this->limited_user_id );
 
-		$result = $this->sut->enforce_pos_capabilities( true, 'create', 0, 'shop_order' );
+		$result = $this->sut->enforce_capabilities( true, 'create', 0, 'shop_order' );
 
 		$this->assertTrue( $result );
 	}
@@ -468,12 +435,12 @@ class POSCapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 		remove_all_filters( 'woocommerce_rest_check_permissions' );
 		remove_all_filters( 'woocommerce_rest_pre_insert_shop_order_object' );
 
-		$handler = new POSCapabilityEnforcement();
+		$handler = new CapabilityEnforcement();
 		$handler->init( $this->approval_service );
 		$handler->register();
 
 		$this->assertNotFalse(
-			has_filter( 'woocommerce_rest_check_permissions', array( $handler, 'enforce_pos_capabilities' ) )
+			has_filter( 'woocommerce_rest_check_permissions', array( $handler, 'enforce_capabilities' ) )
 		);
 
 		remove_all_filters( 'woocommerce_rest_check_permissions' );
@@ -487,7 +454,7 @@ class POSCapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 		remove_all_filters( 'woocommerce_rest_check_permissions' );
 		remove_all_filters( 'woocommerce_rest_pre_insert_shop_order_object' );
 
-		$handler = new POSCapabilityEnforcement();
+		$handler = new CapabilityEnforcement();
 		$handler->init( $this->approval_service );
 		$handler->register();
 

@@ -1,34 +1,38 @@
 <?php
 declare( strict_types = 1 );
 
-namespace Automattic\WooCommerce\Internal\POS;
+namespace Automattic\WooCommerce\Internal;
 
 use Automattic\WooCommerce\Internal\POS\Service\POSApprovalService;
-use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use WC_Data;
 use WP_Error;
 use WP_REST_Request;
 
 /**
- * Enforces POS-specific capabilities on WooCommerce REST API endpoints.
+ * Enforces WooCommerce capabilities on REST API endpoints.
  *
- * POS roles (pos_cashier, pos_manager) have granular capabilities that need
- * to be checked in addition to the standard WordPress post-type capabilities.
- * This class hooks into REST API permission filters to add those checks.
+ * Hooks into REST API permission filters to check granular capabilities
+ * such as woocommerce_refund_orders and woocommerce_void_orders for any
+ * user, regardless of their role.
  *
  * @internal
  * @since 10.8.0
  */
-class POSCapabilityEnforcement implements RegisterHooksInterface {
+class CapabilityEnforcement implements RegisterHooksInterface {
 
-	private const POS_ROLES = array( 'pos_cashier', 'pos_manager' );
-
+	/**
+	 * Maps capabilities to their corresponding approval actions.
+	 *
+	 * @var array<string, string>
+	 */
 	private const CAPABILITY_ACTION_MAP = array(
 		'woocommerce_refund_orders' => 'woocommerce_refund_orders',
 		'woocommerce_void_orders'   => 'woocommerce_void_orders',
 	);
 
 	/**
+	 * Approval service instance.
+	 *
 	 * @var POSApprovalService
 	 */
 	private POSApprovalService $approval_service;
@@ -50,7 +54,7 @@ class POSCapabilityEnforcement implements RegisterHooksInterface {
 	 * @since 10.8.0
 	 */
 	public function register(): void {
-		add_filter( 'woocommerce_rest_check_permissions', array( $this, 'enforce_pos_capabilities' ), 10, 4 );
+		add_filter( 'woocommerce_rest_check_permissions', array( $this, 'enforce_capabilities' ), 10, 4 );
 		add_filter(
 			'woocommerce_rest_pre_insert_shop_order_object',
 			array( $this, 'enforce_cancel_capability' ),
@@ -61,10 +65,10 @@ class POSCapabilityEnforcement implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Enforce POS capabilities on REST API permission checks.
+	 * Enforce capabilities on REST API permission checks.
 	 *
 	 * Hooks into the woocommerce_rest_check_permissions filter to deny access
-	 * when POS role users attempt actions they lack capabilities for.
+	 * when users attempt actions they lack capabilities for.
 	 *
 	 * @since 10.8.0
 	 *
@@ -74,16 +78,14 @@ class POSCapabilityEnforcement implements RegisterHooksInterface {
 	 * @param string $post_type  Post type or object type.
 	 * @return bool
 	 */
-	public function enforce_pos_capabilities( bool $permission, string $context, int $object_id, string $post_type ): bool {
-		if ( ! $this->is_current_user_pos_role() ) {
-			if ( ! $permission ) {
-				return false;
-			}
-			return $permission;
-		}
-
+	public function enforce_capabilities(
+		bool $permission,
+		string $context,
+		int $object_id,
+		string $post_type
+	): bool {
 		if ( 'shop_order_refund' === $post_type && 'create' === $context ) {
-			return $this->user_has_pos_capability( 'woocommerce_refund_orders' );
+			return $this->user_has_capability( 'woocommerce_refund_orders' );
 		}
 
 		if ( ! $permission ) {
@@ -98,17 +100,13 @@ class POSCapabilityEnforcement implements RegisterHooksInterface {
 	 *
 	 * @since 10.8.0
 	 *
-	 * @param WC_Data                    $order    The order object being updated.
+	 * @param WC_Data                       $order    The order object being updated.
 	 * @param WP_REST_Request<array<mixed>> $request  The request object.
-	 * @param bool                       $creating Whether this is a new order.
+	 * @param bool                          $creating Whether this is a new order.
 	 * @return WC_Data|WP_Error The order or WP_Error if capability check fails.
 	 */
 	public function enforce_cancel_capability( $order, WP_REST_Request $request, bool $creating ) {
 		if ( $creating ) {
-			return $order;
-		}
-
-		if ( ! $this->is_current_user_pos_role() ) {
 			return $order;
 		}
 
@@ -117,7 +115,7 @@ class POSCapabilityEnforcement implements RegisterHooksInterface {
 			return $order;
 		}
 
-		if ( ! $this->user_has_pos_capability( 'woocommerce_void_orders' ) ) {
+		if ( ! $this->user_has_capability( 'woocommerce_void_orders' ) ) {
 			return new WP_Error(
 				'woocommerce_rest_cannot_cancel',
 				__( 'Sorry, you are not allowed to cancel orders.', 'woocommerce' ),
@@ -129,7 +127,7 @@ class POSCapabilityEnforcement implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Check if a valid approval token is present when a POS user lacks a capability.
+	 * Check if a valid approval token is present when a user lacks a capability.
 	 *
 	 * Hooks into the woocommerce_pos_capability_check filter. When the user does not
 	 * have the required capability, reads `_pos_approval` from the request and validates
@@ -189,10 +187,10 @@ class POSCapabilityEnforcement implements RegisterHooksInterface {
 			return;
 		}
 
-		$approver = get_userdata( $approval_data['approver_id'] );
+		$approver      = get_userdata( $approval_data['approver_id'] );
 		$approver_name = $approver ? $approver->display_name : (string) $approval_data['approver_id'];
-		$actor = get_userdata( $user_id );
-		$actor_name = $actor ? $actor->display_name : (string) $user_id;
+		$actor         = get_userdata( $user_id );
+		$actor_name    = $actor ? $actor->display_name : (string) $user_id;
 
 		$order->add_order_note(
 			sprintf(
@@ -206,40 +204,24 @@ class POSCapabilityEnforcement implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Check whether the current user has a POS role.
-	 *
-	 * @since 10.8.0
-	 *
-	 * @return bool
-	 */
-	private function is_current_user_pos_role(): bool {
-		$user = wp_get_current_user();
-		if ( ! $user->exists() ) {
-			return false;
-		}
-
-		return ! empty( array_intersect( self::POS_ROLES, (array) $user->roles ) );
-	}
-
-	/**
-	 * Check whether the current user has a specific POS capability.
+	 * Check whether the current user has a specific capability.
 	 *
 	 * Applies the woocommerce_pos_capability_check filter to allow
-	 * overrides (e.g. approval tokens in future tasks).
+	 * overrides (e.g. approval tokens).
 	 *
 	 * @since 10.8.0
 	 *
 	 * @param string $capability The capability to check.
 	 * @return bool
 	 */
-	private function user_has_pos_capability( string $capability ): bool {
+	private function user_has_capability( string $capability ): bool {
 		$user_id = get_current_user_id();
 		$has_cap = current_user_can( $capability );
 
 		/**
-		 * Filters whether a POS user has a specific capability.
+		 * Filters whether a user has a specific capability.
 		 *
-		 * This filter allows overriding POS capability checks, for example
+		 * This filter allows overriding capability checks, for example
 		 * to grant temporary elevated permissions via approval tokens.
 		 *
 		 * @since 10.8.0

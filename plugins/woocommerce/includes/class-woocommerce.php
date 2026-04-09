@@ -399,7 +399,7 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\ProductFeed\ProductFeed::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\PushNotifications\PushNotifications::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Orders\PointOfSaleEmailHandler::class )->register();
-		$container->get( Automattic\WooCommerce\Internal\POS\POSCapabilityEnforcement::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\CapabilityEnforcement::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\POS\POSController::class )->register();
 
 		// Classes inheriting from RestApiControllerBase.
