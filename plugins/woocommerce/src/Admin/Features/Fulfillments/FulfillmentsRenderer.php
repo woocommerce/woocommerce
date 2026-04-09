@@ -703,7 +703,7 @@ class FulfillmentsRenderer {
 						AND m.meta_value != ''
 						AND f.date_deleted IS NULL
 						AND m.date_deleted IS NULL",
-						...$known_keys
+						...array_map( 'wp_json_encode', $known_keys )
 					)
 				);
 			}
@@ -717,7 +717,7 @@ class FulfillmentsRenderer {
 					AND m.meta_value = %s
 					AND f.date_deleted IS NULL
 					AND m.date_deleted IS NULL",
-					$shipping_provider
+					wp_json_encode( $shipping_provider )
 				)
 			);
 		}

@@ -4062,7 +4062,7 @@ class WC_AJAX {
 				AND f.date_deleted IS NULL
 				AND m.date_deleted IS NULL
 				LIMIT 1",
-				$provider_slug
+				wp_json_encode( $provider_slug )
 			)
 		);
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
