@@ -2431,7 +2431,9 @@ $stock_notifications_table_schema;
 			'POS Cashier',
 			array(
 				'read'                            => true,
+				'edit_shop_order'                 => true,
 				'edit_shop_orders'                => true,
+				'edit_published_shop_orders'      => true,
 				'publish_shop_orders'             => true,
 				'read_shop_order'                 => true,
 				'woocommerce_pos_access'          => true,
@@ -2447,8 +2449,10 @@ $stock_notifications_table_schema;
 			array(
 				'read'                            => true,
 				'upload_files'                    => true,
+				'edit_shop_order'                 => true,
 				'edit_shop_orders'                => true,
 				'edit_others_shop_orders'         => true,
+				'edit_published_shop_orders'      => true,
 				'publish_shop_orders'             => true,
 				'read_shop_order'                 => true,
 				'read_private_shop_orders'        => true,

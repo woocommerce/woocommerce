@@ -78,7 +78,9 @@ class POSRolesTest extends WC_Unit_Test_Case {
 		$role = get_role( 'pos_cashier' );
 
 		$this->assertNotNull( $role, 'pos_cashier role should exist' );
+		$this->assertTrue( $role->has_cap( 'edit_shop_order' ), 'pos_cashier should have edit_shop_order' );
 		$this->assertTrue( $role->has_cap( 'edit_shop_orders' ), 'pos_cashier should have edit_shop_orders' );
+		$this->assertTrue( $role->has_cap( 'edit_published_shop_orders' ), 'pos_cashier should have edit_published_shop_orders' );
 		$this->assertTrue( $role->has_cap( 'publish_shop_orders' ), 'pos_cashier should have publish_shop_orders' );
 		$this->assertTrue( $role->has_cap( 'read_shop_order' ), 'pos_cashier should have read_shop_order' );
 	}
@@ -134,8 +136,10 @@ class POSRolesTest extends WC_Unit_Test_Case {
 		$role = get_role( 'pos_manager' );
 
 		$this->assertNotNull( $role, 'pos_manager role should exist' );
+		$this->assertTrue( $role->has_cap( 'edit_shop_order' ), 'pos_manager should have edit_shop_order' );
 		$this->assertTrue( $role->has_cap( 'edit_shop_orders' ), 'pos_manager should have edit_shop_orders' );
 		$this->assertTrue( $role->has_cap( 'edit_others_shop_orders' ), 'pos_manager should have edit_others_shop_orders' );
+		$this->assertTrue( $role->has_cap( 'edit_published_shop_orders' ), 'pos_manager should have edit_published_shop_orders' );
 		$this->assertTrue( $role->has_cap( 'publish_shop_orders' ), 'pos_manager should have publish_shop_orders' );
 		$this->assertTrue( $role->has_cap( 'read_shop_order' ), 'pos_manager should have read_shop_order' );
 		$this->assertTrue( $role->has_cap( 'read_private_shop_orders' ), 'pos_manager should have read_private_shop_orders' );
