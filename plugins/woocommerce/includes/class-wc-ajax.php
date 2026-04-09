@@ -3872,13 +3872,8 @@ class WC_AJAX {
 		$all_providers = \Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentUtils::get_shipping_providers();
 		$built_in_keys = array();
 		foreach ( $all_providers as $provider ) {
-			if ( is_string( $provider ) && class_exists( $provider ) && is_subclass_of( $provider, \Automattic\WooCommerce\Admin\Features\Fulfillments\Providers\AbstractShippingProvider::class ) ) {
-				try {
-					$instance        = wc_get_container()->get( $provider );
-					$built_in_keys[] = $instance->get_key();
-				} catch ( \Throwable $e ) {
-					continue;
-				}
+			if ( ! $provider instanceof \Automattic\WooCommerce\Admin\Features\Fulfillments\Providers\CustomShippingProvider ) {
+				$built_in_keys[] = $provider->get_key();
 			}
 		}
 		$reserved_slug_error = '';
