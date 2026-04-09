@@ -335,7 +335,7 @@ class ReceiptRenderingEngine {
 		foreach ( $order->get_fees() as $fee ) {
 			$name              = $fee->get_name();
 			$line_items_info[] = array(
-				'type'   => 'fee',
+				'type'   => OrderItemType::FEE,
 				'title'  => '' === $name ? __( 'Fee', 'woocommerce' ) : $name,
 				'amount' => wc_price( $fee->get_total(), $get_price_args ),
 			);
