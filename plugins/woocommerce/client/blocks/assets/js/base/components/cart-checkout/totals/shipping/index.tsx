@@ -38,10 +38,21 @@ export const TotalsShipping = ( {
 	const { isLoading } = useOrderSummaryLoadingState();
 	const shippingRates = shippingRatesProp ?? cartShippingRates;
 	const hasSelectedRates = hasSelectedShippingRate( shippingRates );
-	const rateNames = getSelectedShippingRateNames( shippingRates );
+
+	// Get the names of selected rates. When no rate is marked selected yet
+	// (e.g. during a Ship/Pickup toggle transition), fall back to the first
+	// available rate — this matches what the rates UI already displays.
+	let rateNames = getSelectedShippingRateNames( shippingRates );
+	if ( rateNames.length === 0 ) {
+		const firstName = shippingRates[ 0 ]?.shipping_rates[ 0 ]?.name;
+		if ( firstName ) {
+			rateNames = [ firstName ];
+		}
+	}
+
 	const hasMultipleRates = rateNames.length > 1;
-	const rowLabel =
-		! hasSelectedRates || hasMultipleRates ? label : rateNames[ 0 ];
+	const hasAnyRates = rateNames.length > 0;
+	const rowLabel = ! hasAnyRates || hasMultipleRates ? label : rateNames[ 0 ];
 
 	return (
 		<div className="wc-block-components-totals-shipping">
