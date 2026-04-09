@@ -7947,7 +7947,7 @@ parameters:
 		-
 			message: '#^Variable \$webhook might not be defined\.$#'
 			identifier: variable.undefined
-			count: 17
+			count: 20
 			path: includes/admin/settings/views/html-webhooks-edit.php
 
 		-
@@ -8027,18 +8027,6 @@ parameters:
 			identifier: variable.undefined
 			count: 1
 			path: includes/admin/views/html-admin-page-status-logs.php
-
-		-
-			message: '#^Access to private property WooCommerce\:\:\$api\.$#'
-			identifier: property.private
-			count: 1
-			path: includes/admin/views/html-admin-page-status-report.php
-
-		-
-			message: '#^Call to method get_rest_api_package_path\(\) on an unknown class WC_API\.$#'
-			identifier: class.notFound
-			count: 1
-			path: includes/admin/views/html-admin-page-status-report.php
 
 		-
 			message: '#^Calling self\:\:output_plugins_info\(\) outside of class scope\.$#'
