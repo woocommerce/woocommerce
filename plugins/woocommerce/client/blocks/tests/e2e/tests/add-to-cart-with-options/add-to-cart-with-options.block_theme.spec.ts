@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { test as base, expect, wpCLI, Editor } from '@woocommerce/e2e-utils';
+import { test as base, expect, wpCLI } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -464,11 +464,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 				exact: true,
 			} );
 
-			await expect( petitOption ).not.toBeDisabled();
-			await expect( grandOption ).not.toBeDisabled();
+			await expect( petitOption ).toBeEnabled();
+			await expect( grandOption ).toBeEnabled();
 
 			await petitOption.click();
-			await expect( addToCartButton ).not.toBeDisabled();
+			await expect( addToCartButton ).toBeEnabled();
 			await addToCartButton.click();
 			await expect( page.getByText( '1 in cart' ) ).toBeVisible();
 		} );
@@ -499,11 +499,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 				exact: true,
 			} );
 
-			await expect( petitOption ).not.toBeDisabled();
-			await expect( grandOption ).not.toBeDisabled();
+			await expect( petitOption ).toBeEnabled();
+			await expect( grandOption ).toBeEnabled();
 			await select.selectOption( { label: 'Petit' } );
 
-			await expect( addToCartButton ).not.toBeDisabled();
+			await expect( addToCartButton ).toBeEnabled();
 			await addToCartButton.click();
 			await expect( page.getByText( '2 in cart' ) ).toBeVisible();
 		} );
