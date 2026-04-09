@@ -10,12 +10,11 @@ import {
 	useMemo,
 } from '@wordpress/element';
 import clsx from 'clsx';
-import { MediaUpload } from '@wordpress/media-utils';
+import { type Attachment, MediaUpload } from '@wordpress/media-utils';
 
 /**
  * Internal dependencies
  */
-import type { MediaItem } from '../media-uploader/types';
 import { moveIndex } from '../sortable';
 import { ImageGalleryWrapper } from './image-gallery-wrapper';
 import { ImageGalleryToolbar } from './index';
@@ -30,7 +29,7 @@ export type ImageGalleryProps = {
 	} ) => void;
 	onReplace?: ( props: {
 		replaceIndex: number;
-		media: { id: number } & MediaItem;
+		media: { id: number } & Attachment;
 	} ) => void;
 	allowDragging?: boolean;
 	onSelectAsCover?: ( itemId: string | null ) => void;
@@ -125,7 +124,7 @@ export const ImageGallery = ( {
 					} }
 					replaceItem={ (
 						replaceIndex: number,
-						media: { id: number } & MediaItem
+						media: { id: number } & Attachment
 					) => {
 						onReplace( { replaceIndex, media } );
 					} }

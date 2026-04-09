@@ -1,54 +1,21 @@
 /**
- * External dependencies
- */
-import type { Attachment } from '@wordpress/media-utils';
-
-/**
- * A media item returned from the WordPress media library.
+ * Error type for media upload failures.
  *
- * Matches the old `MediaItem` from `@types/wordpress__media-utils`.
- * Uses the native `Attachment` type which provides the same renamed
- * fields (alt, caption, title, url) as the DT version.
+ * At runtime, WordPress's `uploadMedia` passes `UploadError` instances
+ * (extending `Error`) with `code`, `message`, and `file` properties.
  */
-export type MediaItem = Attachment;
-
-/**
- * Error codes that `uploadMedia` can produce.
- *
- * Matches the old `UploadMediaErrorCode` from `@types/wordpress__media-utils`.
- */
-export type UploadMediaErrorCode =
-	| 'MIME_TYPE_NOT_ALLOWED_FOR_USER'
-	| 'MIME_TYPE_NOT_SUPPORTED'
-	| 'SIZE_ABOVE_LIMIT'
-	| 'EMPTY_FILE'
-	| 'GENERAL';
-
 export type ErrorType = {
-	code: UploadMediaErrorCode;
+	code: string;
 	message: string;
 	file: File;
 };
 
 /**
- * Options for the `uploadMedia` function.
- *
- * Matches the old `UploadMediaOptions` from `@types/wordpress__media-utils`.
- */
-export interface UploadMediaOptions {
-	additionalData?: Record< string, unknown >;
-	allowedTypes?: string[];
-	filesList: ArrayLike< File >;
-	maxUploadFileSize?: number;
-	onError?: ( error: ErrorType ) => void;
-	onFileChange?: ( files: MediaItem[] ) => void;
-	wpAllowedMimeTypes?: Record< string, string >;
-}
-
-/**
  * Props for the MediaUpload component.
  *
- * Matches the old `MediaUpload.Props<T>` from `@types/wordpress__block-editor`.
+ * The native `MediaUpload` at wp-6.8 is typed as `Component<any>`.
+ * This interface preserves the typed prop surface from the old
+ * `@types/wordpress__block-editor` `MediaUpload.Props<T>`.
  */
 export interface MediaUploadProps< T extends boolean = false > {
 	addToGallery?: boolean;
@@ -74,7 +41,8 @@ export interface MediaUploadProps< T extends boolean = false > {
  * Accepts both class components (like the native MediaUpload) and
  * function components that match the MediaUploadProps shape.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export type MediaUploadComponentType = React.ComponentType<
 	MediaUploadProps< any >
 >;
+/* eslint-enable @typescript-eslint/no-explicit-any */

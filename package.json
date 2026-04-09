@@ -70,6 +70,9 @@
 	"pnpm": {
 		"overrides": {
 			"@types/react": "18.3.x",
+			"@typescript-eslint/eslint-plugin": "^5.62.0",
+			"@typescript-eslint/parser": "^5.62.0",
+			"eslint-plugin-jsdoc": "39.9.1",
 			"@wordpress/data-controls>@wordpress/api-fetch": "catalog:wp-min",
 			"@wordpress/private-apis": "catalog:wp-min",
 			"react-resize-aware": "3.1.1"

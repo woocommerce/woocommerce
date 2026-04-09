@@ -3,7 +3,7 @@
  */
 import { createElement } from '@wordpress/element';
 import { chevronRight, chevronLeft, trash } from '@wordpress/icons';
-import { MediaUpload } from '@wordpress/media-utils';
+import { type Attachment, MediaUpload } from '@wordpress/media-utils';
 import { __ } from '@wordpress/i18n';
 import {
 	Toolbar,
@@ -15,7 +15,6 @@ import {
 /**
  * Internal dependencies
  */
-import type { MediaItem } from '../media-uploader/types';
 import { SortableHandle } from '../sortable';
 import { MediaUploadComponentType } from './types';
 import { ImageGalleryToolbarDropdown } from './image-gallery-toolbar-dropdown';
@@ -28,7 +27,7 @@ export type ImageGalleryToolbarProps = {
 	removeItem: ( removeIndex: number ) => void;
 	replaceItem: (
 		replaceIndex: number,
-		media: { id: number } & MediaItem
+		media: { id: number } & Attachment
 	) => void;
 	setToolBarItem: ( key: string | null ) => void;
 	lastChild: boolean;
@@ -106,7 +105,7 @@ export const ImageGalleryToolbar = ( {
 					<ToolbarGroup className="woocommerce-image-gallery__toolbar-media">
 						<MediaUploadComponent
 							value={ value }
-							onSelect={ ( media: MediaItem ) =>
+							onSelect={ ( media: Attachment ) =>
 								replaceItem( childIndex, media )
 							}
 							allowedTypes={ [ 'image' ] }

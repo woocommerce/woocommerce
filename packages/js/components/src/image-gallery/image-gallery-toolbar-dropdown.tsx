@@ -11,12 +11,11 @@ import {
 	isValidElement,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { MediaUpload } from '@wordpress/media-utils';
+import { type Attachment, MediaUpload } from '@wordpress/media-utils';
 
 /**
  * Internal dependencies
  */
-import type { MediaItem } from '../media-uploader/types';
 import { MediaUploadComponentType } from './types';
 
 const POPOVER_PROPS = {
@@ -25,7 +24,7 @@ const POPOVER_PROPS = {
 };
 
 type ImageGalleryToolbarDropdownProps = {
-	onReplace: ( media: { id: number } & MediaItem ) => void;
+	onReplace: ( media: { id: number } & Attachment ) => void;
 	onRemove: () => void;
 	canRemove?: boolean;
 	removeBlockLabel?: string;
@@ -56,7 +55,7 @@ export function ImageGalleryToolbarDropdown( {
 				<>
 					<MenuGroup>
 						<MediaUploadComponent
-							onSelect={ ( media: MediaItem ) => {
+							onSelect={ ( media: Attachment ) => {
 								onReplace( media );
 								onClose();
 							} }

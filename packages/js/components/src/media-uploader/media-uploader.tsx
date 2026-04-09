@@ -5,6 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { Button, DropZone, FormFileUpload } from '@wordpress/components';
 import { Fragment, createElement } from 'react';
 import {
+	type Attachment,
 	MediaUpload,
 	uploadMedia as wpUploadMedia,
 } from '@wordpress/media-utils';
@@ -12,12 +13,7 @@ import {
 /**
  * Internal dependencies
  */
-import type {
-	ErrorType,
-	MediaItem,
-	MediaUploadComponentType,
-	UploadMediaOptions,
-} from './types';
+import type { ErrorType, MediaUploadComponentType } from './types';
 
 const DEFAULT_ALLOWED_MEDIA_TYPES = [ 'image' ];
 
@@ -36,13 +32,13 @@ type MediaUploaderProps = {
 	value?: number | number[];
 	onSelect?: (
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		value: ( { id: number } & { [ k: string ]: any } ) | MediaItem[]
+		value: ( { id: number } & { [ k: string ]: any } ) | Attachment[]
 	) => void;
 	onError?: MediaUploaderErrorCallback;
 	onMediaGalleryOpen?: () => void;
-	onUpload?: ( files: MediaItem | MediaItem[] ) => void;
-	onFileUploadChange?: ( files: MediaItem | MediaItem[] ) => void;
-	uploadMedia?: ( options: UploadMediaOptions ) => void;
+	onUpload?: ( files: Attachment | Attachment[] ) => void;
+	onFileUploadChange?: ( files: Attachment | Attachment[] ) => void;
+	uploadMedia?: typeof wpUploadMedia;
 	additionalData?: Record< string, unknown >;
 };
 
@@ -61,9 +57,7 @@ export const MediaUploader = ( {
 	onMediaGalleryOpen = () => null,
 	onUpload = () => null,
 	onSelect = () => null,
-	uploadMedia = wpUploadMedia as unknown as (
-		options: UploadMediaOptions
-	) => void,
+	uploadMedia = wpUploadMedia,
 	additionalData,
 }: MediaUploaderProps ) => {
 	const multiple = Boolean( multipleSelect );
@@ -77,9 +71,14 @@ export const MediaUploader = ( {
 					allowedTypes: allowedMediaTypes,
 					filesList: Array.from( currentTarget.files ?? [] ),
 					maxUploadFileSize,
-					onError,
+					// Runtime passes UploadError (with code + file), not plain Error.
+					onError: onError as unknown as ( error: Error ) => void,
 					onFileChange( files ) {
-						onFileUploadChange( multiple ? files : files[ 0 ] );
+						onFileUploadChange(
+							multiple
+								? ( files as Attachment[] )
+								: ( files as Attachment[] )[ 0 ]
+						);
 					},
 					additionalData,
 				} );
@@ -136,10 +135,17 @@ export const MediaUploader = ( {
 										allowedTypes: allowedMediaTypes,
 										filesList: droppedFiles,
 										maxUploadFileSize,
-										onError,
+										// Runtime passes UploadError (with code + file), not plain Error.
+										onError: onError as unknown as (
+											error: Error
+										) => void,
 										onFileChange( files ) {
 											onUpload(
-												multiple ? files : files[ 0 ]
+												multiple
+													? ( files as Attachment[] )
+													: (
+															files as Attachment[]
+													   )[ 0 ]
 											);
 										},
 										additionalData,
