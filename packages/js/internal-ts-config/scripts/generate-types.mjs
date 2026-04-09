@@ -39,7 +39,9 @@ const PACKAGE_NAMES = [
 	'@wordpress/core-data',
 	'@wordpress/data',
 	'@wordpress/editor',
+	'@wordpress/keyboard-shortcuts',
 	'@wordpress/notices',
+	'@wordpress/preferences',
 ];
 
 const PKG_ROOT = resolve( dirname( new URL( import.meta.url ).pathname ), '..' );
@@ -386,7 +388,14 @@ function generate( outputDir ) {
 			console.warn( `Skipping ${ pkg.name }: package not found` );
 			continue;
 		}
-		const allFiles = collectDtsFiles( sourceDir );
+
+		let allFiles;
+		try {
+			allFiles = collectDtsFiles( sourceDir );
+		} catch {
+			console.warn( `Skipping ${ pkg.name }: no type declarations found at ${ sourceDir }` );
+			continue;
+		}
 		const pkgOutputDir = join( outputDir, pkg.name );
 
 		// Clean output directory.

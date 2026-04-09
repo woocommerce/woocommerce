@@ -1,0 +1,21 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+declare module '@wordpress/preferences' {
+	import type { StoreDescriptor, ReduxStoreConfig } from '@wordpress/data/build-types/types';
+
+	export const store: { name: 'core/preferences' } & StoreDescriptor< ReduxStoreConfig<
+		unknown,
+		Record< string, never >,
+		{
+			get: < T >( state: unknown, scope: string, name: string ) => T;
+		}
+	> >;
+
+	export const PreferenceToggleMenuItem: any;
+}
+
+declare module '@wordpress/data/build-types/types' {
+	interface StoreRegistry {
+		'core/preferences': typeof import('@wordpress/preferences').store;
+	}
+}
