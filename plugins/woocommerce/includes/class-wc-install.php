@@ -2364,6 +2364,10 @@ $stock_notifications_table_schema;
 		_x( 'Customer', 'User role', 'woocommerce' );
 		/* translators: user role */
 		_x( 'Shop manager', 'User role', 'woocommerce' );
+		/* translators: user role */
+		_x( 'POS Cashier', 'User role', 'woocommerce' );
+		/* translators: user role */
+		_x( 'POS Manager', 'User role', 'woocommerce' );
 
 		// Customer role.
 		add_role(
@@ -2421,6 +2425,60 @@ $stock_notifications_table_schema;
 			)
 		);
 
+		// POS Cashier role.
+		add_role(
+			'pos_cashier',
+			'POS Cashier',
+			array(
+				'read'                            => true,
+				'edit_shop_orders'                => true,
+				'publish_shop_orders'             => true,
+				'read_shop_order'                 => true,
+				'woocommerce_pos_access'          => true,
+				'woocommerce_view_personal_sales' => true,
+				'woocommerce_view_customer_data'  => true,
+				'woocommerce_close_register'      => true,
+			)
+		);
+
+		// POS Manager role.
+		add_role(
+			'pos_manager',
+			'POS Manager',
+			array(
+				'read'                            => true,
+				'upload_files'                    => true,
+				'edit_shop_orders'                => true,
+				'edit_others_shop_orders'         => true,
+				'publish_shop_orders'             => true,
+				'read_shop_order'                 => true,
+				'read_private_shop_orders'        => true,
+				'create_customers'                => true,
+				'view_woocommerce_reports'        => true,
+				'edit_products'                   => true,
+				'edit_published_products'         => true,
+				'read_product'                    => true,
+				'read_private_products'           => true,
+				'woocommerce_pos_access'          => true,
+				'woocommerce_pos_manage_settings' => true,
+				'woocommerce_void_orders'         => true,
+				'woocommerce_refund_orders'       => true,
+				'woocommerce_apply_discounts'     => true,
+				'woocommerce_override_prices'     => true,
+				'woocommerce_open_cash_drawer'    => true,
+				'woocommerce_manage_cash'         => true,
+				'woocommerce_close_register'      => true,
+				'woocommerce_view_sales_reports'  => true,
+				'woocommerce_view_personal_sales' => true,
+				'woocommerce_manage_pos_staff'    => true,
+				'woocommerce_approve_overrides'   => true,
+				'woocommerce_view_customer_data'  => true,
+				'woocommerce_edit_customer_data'  => true,
+				'woocommerce_adjust_stock'        => true,
+				'woocommerce_view_audit_logs'     => true,
+			)
+		);
+
 		$capabilities = self::get_core_capabilities();
 
 		foreach ( $capabilities as $cap_group ) {
@@ -2473,6 +2531,28 @@ $stock_notifications_table_schema;
 			);
 		}
 
+		$capabilities['pos'] = array(
+			'woocommerce_pos_access',
+			'woocommerce_pos_manage_settings',
+			'woocommerce_void_orders',
+			'woocommerce_refund_orders',
+			'woocommerce_apply_discounts',
+			'woocommerce_override_prices',
+			'woocommerce_open_cash_drawer',
+			'woocommerce_manage_cash',
+			'woocommerce_close_register',
+			'woocommerce_view_sales_reports',
+			'woocommerce_view_financial_reports',
+			'woocommerce_view_personal_sales',
+			'woocommerce_export_reports',
+			'woocommerce_manage_pos_staff',
+			'woocommerce_approve_overrides',
+			'woocommerce_view_customer_data',
+			'woocommerce_edit_customer_data',
+			'woocommerce_view_audit_logs',
+			'woocommerce_adjust_stock',
+		);
+
 		return $capabilities;
 	}
 
@@ -2501,6 +2581,8 @@ $stock_notifications_table_schema;
 			}
 		}
 
+		remove_role( 'pos_cashier' );
+		remove_role( 'pos_manager' );
 		remove_role( 'customer' );
 		remove_role( 'shop_manager' );
 	}
