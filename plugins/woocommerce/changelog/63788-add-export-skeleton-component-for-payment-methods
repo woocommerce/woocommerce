@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Export Skeleton component via PaymentMethodInterface components prop for payment gateway extensions.

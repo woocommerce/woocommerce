@@ -23,6 +23,15 @@ use WP_Query;
  * @since 10.5.0
  */
 class PushTokensDataStore {
+	/**
+	 * In-memory cache for get_tokens_for_roles() results, keyed by the
+	 * comma-joined role list. Avoids repeated DB queries within the same
+	 * PHP request.
+	 *
+	 * @var array<string, PushToken[]>
+	 */
+	private array $tokens_by_roles_cache = array();
+
 	const SUPPORTED_META = array(
 		'origin',
 		'device_uuid',
@@ -300,6 +309,83 @@ class PushTokensDataStore {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Returns all push tokens belonging to users with the given roles.
+	 *
+	 * @param string[] $roles The roles to query tokens for.
+	 * @return PushToken[]
+	 *
+	 * @since 10.7.0
+	 */
+	public function get_tokens_for_roles( array $roles ): array {
+		if ( empty( $roles ) ) {
+			return array();
+		}
+
+		$cache_key = implode( ',', $roles );
+
+		if ( isset( $this->tokens_by_roles_cache[ $cache_key ] ) ) {
+			return $this->tokens_by_roles_cache[ $cache_key ];
+		}
+
+		$user_ids = get_users(
+			array(
+				'role__in' => $roles,
+				'fields'   => 'ID',
+			)
+		);
+
+		if ( empty( $user_ids ) ) {
+			$this->tokens_by_roles_cache[ $cache_key ] = array();
+			return $this->tokens_by_roles_cache[ $cache_key ];
+		}
+
+		$query = new WP_Query(
+			array(
+				'post_type'      => PushToken::POST_TYPE,
+				'post_status'    => 'private',
+				'author__in'     => $user_ids,
+				'posts_per_page' => -1,
+				'fields'         => 'ids',
+			)
+		);
+
+		/**
+		 * Typehint for PHPStan, specifies these are IDs and not instances of
+		 * WP_Post.
+		 *
+		 * @var int[] $post_ids
+		 */
+		$post_ids = $query->posts;
+
+		if ( empty( $post_ids ) ) {
+			$this->tokens_by_roles_cache[ $cache_key ] = array();
+			return $this->tokens_by_roles_cache[ $cache_key ];
+		}
+
+		update_meta_cache( 'post', $post_ids );
+
+		$tokens = array();
+
+		foreach ( $post_ids as $post_id ) {
+			try {
+				$tokens[] = $this->read( (int) $post_id );
+			} catch ( WC_Data_Exception $e ) {
+				wc_get_logger()->warning(
+					'Skipping malformed push token during role-based query.',
+					array(
+						'token_id' => $post_id,
+						'error'    => $e->getMessage(),
+					)
+				);
+			}
+		}
+
+		$this->tokens_by_roles_cache[ $cache_key ] = $tokens;
+
+		return $tokens;
 	}
 
 	/**

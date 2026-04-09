@@ -12,7 +12,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 10.7.0
+ * @version 10.8.0
  */
 
 use Automattic\WooCommerce\Internal\Email\EmailFont;
@@ -31,7 +31,7 @@ $body             = get_option( 'woocommerce_email_body_background_color' );
 $base             = get_option( 'woocommerce_email_base_color' );
 $text             = get_option( 'woocommerce_email_text_color' );
 $footer_text      = get_option( 'woocommerce_email_footer_text_color' );
-$header_alignment = get_option( 'woocommerce_email_header_alignment', $email_improvements_enabled ? 'left' : false );
+$header_alignment = get_option( 'woocommerce_email_header_alignment', $email_improvements_enabled ? ( is_rtl() ? 'right' : 'left' ) : false );
 $logo_image_width = get_option( 'woocommerce_email_header_image_width', '120' );
 $default_font     = 'Helvetica';
 $font_family      = $email_improvements_enabled ? get_option( 'woocommerce_email_font_family', $default_font ) : $default_font;

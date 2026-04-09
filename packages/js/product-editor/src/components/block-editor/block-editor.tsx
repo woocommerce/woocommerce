@@ -108,7 +108,7 @@ export function BlockEditor( {
 	}, [] );
 
 	useEffect( () => {
-		// @ts-expect-error Type definitions are missing
+		// @ts-expect-error @wordpress/keyboard-shortcuts store is not fully typed.
 		const { registerShortcut } = dispatch( keyboardShortcutsStore );
 		if ( registerShortcut ) {
 			registerShortcut( {
@@ -216,24 +216,13 @@ export function BlockEditor( {
 	);
 
 	// Pull the product templates from the store.
-	const productForms = useSelect(
-		(
-			sel: ( key: string ) => {
-				getEntityRecords: (
-					kind: string,
-					name: string,
-					query: Record< string, unknown >
-				) => ProductFormPostProps[] | undefined;
-			}
-		) => {
-			return (
-				sel( 'core' ).getEntityRecords( 'postType', 'product_form', {
-					per_page: -1,
-				} ) || []
-			);
-		},
-		[]
-	) as ProductFormPostProps[];
+	const productForms = useSelect( ( sel ) => {
+		return (
+			sel( 'core' ).getEntityRecords( 'postType', 'product_form', {
+				per_page: -1,
+			} ) || []
+		);
+	}, [] ) as ProductFormPostProps[];
 
 	// Set the default product form template ID.
 	useEffect( () => {
@@ -282,7 +271,7 @@ export function BlockEditor( {
 
 			const blockInstances = synchronizeBlocksWithTemplate(
 				[],
-				// @ts-expect-error Type definitions are missing
+				// @ts-expect-error layoutTemplate is not typed - it's a custom entity from useEntityRecord
 				layoutTemplate.blockTemplates
 			);
 
@@ -294,7 +283,6 @@ export function BlockEditor( {
 
 			onChange( editorTemplate, {} );
 
-			// @ts-expect-error Type definitions are missing
 			dispatch( 'core/editor' ).updateEditorSettings( {
 				...settings,
 				productTemplate,
@@ -348,16 +336,9 @@ export function BlockEditor( {
 	}, [] );
 
 	// Check if the Modal editor is open from the store.
-	const isModalEditorOpen = useSelect(
-		(
-			selectCore: ( key: typeof wooProductEditorUiStore ) => {
-				isModalEditorOpen: () => boolean | undefined;
-			}
-		) => {
-			return selectCore( wooProductEditorUiStore ).isModalEditorOpen();
-		},
-		[]
-	);
+	const isModalEditorOpen = useSelect( ( selectCore ) => {
+		return selectCore( wooProductEditorUiStore ).isModalEditorOpen();
+	}, [] );
 
 	if ( isEditorLoading ) {
 		return (

@@ -13,7 +13,6 @@ import {
 	PAYMENT_GATEWAYS_STORE_NAME,
 	pluginsStore,
 	Plugin,
-	type PaymentSelectors,
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { getAdminLink } from '@woocommerce/settings';
@@ -53,14 +52,10 @@ const PaymentRecommendations = () => {
 			return {
 				installedPaymentGateway:
 					installingGatewayId &&
-					(
-						select(
-							PAYMENT_GATEWAYS_STORE_NAME
-						) as PaymentSelectors
-					 ).getPaymentGateway( installingGatewayId ),
-				installedPaymentGateways: (
-					select( PAYMENT_GATEWAYS_STORE_NAME ) as PaymentSelectors
-				 )
+					select( PAYMENT_GATEWAYS_STORE_NAME ).getPaymentGateway(
+						installingGatewayId
+					),
+				installedPaymentGateways: select( PAYMENT_GATEWAYS_STORE_NAME )
 					.getPaymentGateways()
 					.reduce(
 						(

@@ -6629,6 +6629,9 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$fulfillment->set_status( $fulfillment_status );
 		$fulfillment->save();
 
+		// Re-fetch the order to pick up meta changes made by hooks during save,
+		// avoiding duplicate _fulfillment_status entries from separate instances.
+		$order = wc_get_order( $order->get_id() );
 		$order->update_meta_data( '_fulfillment_status', $fulfillment_status );
 		$order->save();
 

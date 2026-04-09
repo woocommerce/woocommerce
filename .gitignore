@@ -113,6 +113,9 @@ changes.json
 
 # Claude related files
 **/.claude/**/*.local.*
+.claude/docs/plans/
+.claude/docs/analysis/
+.claude/docs/research/
 CLAUDE.local.md
 
 # Cursor related files

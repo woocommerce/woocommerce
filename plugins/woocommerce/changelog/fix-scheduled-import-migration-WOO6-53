@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix scheduled import preference lost after analytics option rename in 10.5.0.

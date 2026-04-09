@@ -63,4 +63,4 @@ For peer to peer support, real-time announcements, and office hours, please [joi
 
 ## Contributing to WooCommerce
 
-As an open source project, we rely on community contributions to continue to improve WooCommerce. To contribute, please follow the pre-requisites above and visit our [Contributing to Woo](https://developer.woocommerce.com/docs/contribution/contributing/) doc for more links and contribution guidelines.
+As an open-source project, we rely on community contributions to continue to improve WooCommerce. To get started, check out our [Contributing guide](CONTRIBUTING.md) for a quick reference of common development commands, or visit the [Contributing to Woo](https://developer.woocommerce.com/docs/contribution/contributing/) docs for broader contribution guidelines.

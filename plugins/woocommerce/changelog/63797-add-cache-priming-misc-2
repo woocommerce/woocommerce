@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Add missing `_prime_post_caches()` calls in grouped product structured data, grouped product add-to-cart template, and download permissions adjuster to batch-load child product data to reduce individual database queries.
