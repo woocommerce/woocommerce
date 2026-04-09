@@ -46,7 +46,7 @@
 		"watch:build:project:esm": "wireit"
 	},
 	"dependencies": {
-		"@wordpress/create-block": "wp-6.6",
+		"@wordpress/create-block": "catalog:wp-min",
 		"chalk": "^4.1.2",
 		"change-case": "^4.1.2",
 		"commander": "^9.5.0",
