@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection;
 
-use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Enums\OrderItemType;
 use InvalidArgumentException;
 
@@ -474,8 +473,6 @@ class HandlerRegistry {
 	 * @return array<int> The product IDs from the cart. Returns recent products for preview in editor context only.
 	 */
 	private function get_cart_product_ids( $collection_args, $request = null ) {
-		$location = $collection_args['productCollectionLocation'] ?? array();
-
 		if ( $request ) {
 			// In editor context (REST request), show sample products for preview. Only emails to the customer show live data.
 			$recent_product_ids = wc_get_products(
@@ -488,14 +485,6 @@ class HandlerRegistry {
 				)
 			);
 			return ! empty( $recent_product_ids ) ? $recent_product_ids : array();
-		}
-
-		if ( isset( $location['type'] ) && 'cart' === $location['type'] ) {
-			$user_id    = isset( $location['sourceData']['userId'] ) ? absint( $location['sourceData']['userId'] ) : null;
-			$user_email = isset( $location['sourceData']['userEmail'] ) ? sanitize_email( $location['sourceData']['userEmail'] ) : null;
-			if ( $user_id || $user_email ) {
-				return CartCheckoutUtils::get_cart_product_ids_for_user( $user_id, $user_email );
-			}
 		}
 
 		// In frontend/email context, return empty array when no cart is found.
