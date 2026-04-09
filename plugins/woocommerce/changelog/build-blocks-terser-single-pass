@@ -1,4 +1,4 @@
-Significance: patch
-Type: performance
+Significance: minor
+Type: dev
 
-Reduce WooCommerce Blocks production build time by using a single Terser compression pass.
+Reduce WooCommerce Blocks non-production build time by using a single Terser compression pass outside production.
