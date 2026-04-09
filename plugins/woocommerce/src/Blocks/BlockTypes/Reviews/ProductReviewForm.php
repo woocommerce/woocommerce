@@ -48,7 +48,7 @@ class ProductReviewForm extends AbstractBlock {
 
 			if ( ! $is_user_logged_in ) {
 				$account_page_url = wc_get_page_permalink( 'myaccount' );
-				// translators: %1$s is the log in link, %2$s is the product title.
+				// translators: %1$s is the opening link tag, %2$s is the closing link tag.
 				$login_message = $account_page_url ? sprintf( esc_html__( '%1$sLog in%2$s', 'woocommerce' ), ' <a href="' . esc_url( $account_page_url ) . '">', '</a>' ) : '';
 				return '<p class="woocommerce-verification-required">' . $no_reviews_message . ' ' . esc_html__( 'Only logged in customers who have purchased this product may leave a review.', 'woocommerce' ) . $login_message . '</p>';
 			}
