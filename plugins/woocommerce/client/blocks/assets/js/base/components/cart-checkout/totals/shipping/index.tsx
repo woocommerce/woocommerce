@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { TotalsItem } from '@woocommerce/blocks-components';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
+import type { CartShippingRate } from '@woocommerce/types';
 import {
 	hasSelectedShippingRate,
 	getSelectedShippingRateNames,
@@ -24,15 +25,18 @@ export interface TotalShippingProps {
 	label?: string;
 	placeholder?: React.ReactNode;
 	collaterals?: React.ReactNode;
+	shippingRates?: CartShippingRate[];
 }
 
 export const TotalsShipping = ( {
 	label = __( 'Shipping', 'woocommerce' ),
 	placeholder = null,
 	collaterals = null,
+	shippingRates: shippingRatesProp,
 }: TotalShippingProps ): JSX.Element | null => {
-	const { cartTotals, shippingRates } = useStoreCart();
+	const { cartTotals, shippingRates: cartShippingRates } = useStoreCart();
 	const { isLoading } = useOrderSummaryLoadingState();
+	const shippingRates = shippingRatesProp ?? cartShippingRates;
 	const hasSelectedRates = hasSelectedShippingRate( shippingRates );
 	const rateNames = getSelectedShippingRateNames( shippingRates );
 	const hasMultipleRates = rateNames.length > 1;

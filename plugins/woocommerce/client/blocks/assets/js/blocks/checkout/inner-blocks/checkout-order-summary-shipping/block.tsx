@@ -28,17 +28,18 @@ const Block = ( {
 		return null;
 	}
 
-	const hasSelectedCollectionOnly = selectedRatesAreCollectable(
-		filterShippingRatesByPrefersCollection(
-			shippingRates,
-			prefersCollection ?? false
-		)
+	const filteredRates = filterShippingRatesByPrefersCollection(
+		shippingRates,
+		prefersCollection ?? false
 	);
+	const hasSelectedCollectionOnly =
+		selectedRatesAreCollectable( filteredRates );
 
 	const hasCompleteAddress = hasAllFieldsForShippingRates( shippingAddress );
 	return (
 		<TotalsWrapper className={ className }>
 			<TotalsShipping
+				shippingRates={ filteredRates }
 				label={
 					hasSelectedCollectionOnly
 						? __( 'Pickup', 'woocommerce' )
