@@ -76,7 +76,7 @@ if ( ! isset( $has_pin, $user_id, $user, $role_name ) || ! $user instanceof WP_U
 		</tbody>
 	</table>
 
-	<?php wp_nonce_field( 'woocommerce-pos-staff-pin' ); ?>
+	<?php wp_nonce_field( 'woocommerce-pos-staff-pin', 'woocommerce_pos_staff_nonce' ); ?>
 	<input type="hidden" name="user_id" value="<?php echo esc_attr( (string) $user_id ); ?>" />
 	<p class="submit">
 		<?php

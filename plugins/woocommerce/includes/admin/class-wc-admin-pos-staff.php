@@ -150,7 +150,7 @@ class WC_Admin_POS_Staff {
 	 * @since 10.8.0
 	 */
 	private function save(): void {
-		check_admin_referer( 'woocommerce-pos-staff-pin' );
+		check_admin_referer( 'woocommerce-pos-staff-pin', 'woocommerce_pos_staff_nonce' );
 
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
 			wp_die( esc_html__( 'You do not have permission to manage POS staff.', 'woocommerce' ) );
