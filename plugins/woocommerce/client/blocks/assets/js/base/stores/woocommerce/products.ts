@@ -11,9 +11,17 @@ import type { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
 import { findMatchingVariation } from '../../utils/variations/attribute-matching';
 
 /**
- * Per-element context set via data-wp-context on wrapper elements (e.g. the
- * SingleProduct block). When present, this takes precedence over the
- * server-hydrated state so that each product in a loop gets its own IDs.
+ * Per-element selection for the current product/variation.
+ *
+ * The "current" product can be set in two ways:
+ * - Globally, via `wp_interactivity_state( 'woocommerce/products', [ ... ] )`
+ *   (used by SingleProductTemplate — one product per page).
+ * - Per-element, via `data-wp-context="woocommerce/products::{ ... }"` on a
+ *   wrapper element (used by SingleProduct so each product in a loop gets
+ *   its own IDs).
+ *
+ * When present, per-element context takes precedence over the global state.
+ * See ./README.md for the full model and precedence rules.
  */
 type ProductContext = {
 	productId: number;
@@ -63,8 +71,10 @@ export type ProductsStoreState = {
 	 */
 	selectedVariation: ProductResponseItem | null;
 	/**
-	 * The resolved product for the current context. Returns the selected
-	 * variation if one exists, otherwise the main product.
+	 * The resolved product for the current context: `selectedVariation`
+	 * if one is set, otherwise the main `product`. This is the property
+	 * most blocks should bind to — use `product` / `selectedVariation`
+	 * explicitly only when the distinction matters.
 	 *
 	 * Blocks can bind directly to properties, e.g.:
 	 *   state.productInContext.stock_availability.text
@@ -87,15 +97,14 @@ const universalLock =
 /**
  * The woocommerce/products store.
  *
- * This store manages product data in Store API format for use with the
- * Interactivity API. Data is hydrated server-side via PHP ProductsStore.
- * Consumers access it via store() call with the namespace.
+ * Server-hydrated cache of product and variation data in Store API format
+ * (`ProductResponseItem`). PHP loaders populate `products` / `productVariations`;
+ * derived getters below resolve the "current" product from either global state
+ * or per-element context. These getters are mirrored in PHP
+ * (see ProductsStore::register_getters) so directive bindings like
+ * `state.productInContext.sku` resolve during SSR as well as on the client.
  *
- * State structure:
- * - products: Record<productId, ProductResponseItem>
- * - productVariations: Record<variationId, ProductResponseItem>
- * - productId / variationId: current product context
- * - product / selectedVariation / productInContext: derived state
+ * See ./README.md for the complete model, loaders, and consumer patterns.
  */
 const { state: productsState } = store< ProductsStore >(
 	'woocommerce/products',

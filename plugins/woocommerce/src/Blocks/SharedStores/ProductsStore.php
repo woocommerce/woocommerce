@@ -8,9 +8,24 @@ use Automattic\WooCommerce\Blocks\Package;
 use InvalidArgumentException;
 
 /**
- * Manages the registration of interactivity state that provides product data
- * to interactive blocks. This is shared store data that is not tied to one
- * specific block.
+ * Shared store that hydrates the `woocommerce/products` Interactivity API
+ * store with product and variation data in Store API format.
+ *
+ * The store exposes two planes:
+ * - Raw data (`products`, `productVariations`) populated by the `load_*`
+ *   methods below, each keyed by ID.
+ * - Selection (`productId`, `variationId`) — set by callers via
+ *   `wp_interactivity_state` (global) or `data-wp-context` (per-element) —
+ *   plus the derived getters (`product`, `selectedVariation`,
+ *   `productInContext`) registered by `register_getters()`.
+ *
+ * The derived getters are mirrored in the JS store
+ * (client/blocks/assets/js/base/stores/woocommerce/products.ts) so that
+ * directive bindings like `state.productInContext.sku` resolve during
+ * server-side rendering as well as on the client.
+ *
+ * See client/blocks/assets/js/base/stores/woocommerce/README.md for the
+ * full model and consumer examples.
  *
  * This is an experimental API and may change in future versions.
  */
@@ -76,10 +91,12 @@ class ProductsStore {
 	/**
 	 * Register the derived-state getters once.
 	 *
-	 * These closures mirror the JS getters so that directives referencing
-	 * state.product / state.productInContext resolve during SSR. Because
-	 * they read from wp_interactivity_state() at call time, they only
-	 * need to be registered once regardless of how many products are added.
+	 * These closures mirror the JS getters in
+	 * client/blocks/assets/js/base/stores/woocommerce/products.ts so that
+	 * directives referencing state.product / state.selectedVariation /
+	 * state.productInContext resolve during SSR. Because they read from
+	 * wp_interactivity_state() at call time, they only need to be
+	 * registered once regardless of how many products are added.
 	 *
 	 * @return void
 	 */
