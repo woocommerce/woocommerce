@@ -14,6 +14,7 @@ const ReactRefreshWebpackPlugin = require( '@pmmmwh/react-refresh-webpack-plugin
  * Internal dependencies
  */
 const CustomTemplatedPathPlugin = require( './bin/custom-templated-path-webpack-plugin' );
+const FilesystemCacheWarningsPlugin = require( './bin/filesystem-cache-warnings-webpack-plugin.js' );
 const UnminifyWebpackPlugin = require( './bin/unminify-webpack-plugin.js' );
 const {
 	webpackConfig: styleConfig,
@@ -190,23 +191,6 @@ const webpackConfig = {
 		},
 	},
 	plugins: [
-		// ExternalModule instances (wp.*, wc.* externals) are not serializable by webpack's PackFileCacheStrategy.
-		// Suppress here since ignoreWarnings only affects compilation warnings, not infrastructure logs.
-		{
-			apply( compiler ) {
-				compiler.hooks.infrastructureLog.tap(
-					'SuppressExternalModuleCacheWarning',
-					( name, type, args ) => {
-						if (
-							type === 'warn' &&
-							name === 'webpack.cache.PackFileCacheStrategy'
-						) {
-							return args[ 0 ]?.includes?.( 'ExternalModule' );
-						}
-					}
-				);
-			},
-		},
 		...styleConfig.plugins,
 		// Runs TypeScript type checker on a separate process.
 		! process.env.STORYBOOK && new ForkTsCheckerWebpackPlugin(),
@@ -303,6 +287,8 @@ const webpackConfig = {
 				test: /\.js($|\?)/i,
 				mainEntry: 'app/index.min.js',
 			} ),
+		// Suppress file system cache warnings (unsupported serialization related).
+		new FilesystemCacheWarningsPlugin(),
 	].filter( Boolean ),
 	optimization: {
 		minimize: NODE_ENV !== 'development',
