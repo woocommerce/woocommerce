@@ -1153,19 +1153,18 @@ function wc_update_user_last_active( $user_id ) {
  * @param string $translation  Translated text.
  * @param string $text         Text to translate.
  * @param string $context      Context information for the translators.
- * @param string $domain       Text domain. Unique identifier for retrieving translated strings.
  * @return string
  */
-function wc_translate_user_roles( $translation, $text, $context, $domain ) {
+function wc_translate_user_roles( $translation, $text, $context ) {
 	// translate_user_role() only accepts a second parameter starting in WP 5.2.
 	if ( version_compare( get_bloginfo( 'version' ), '5.2', '<' ) ) {
 		return $translation;
 	}
 
-	if ( 'User role' === $context && 'default' === $domain && in_array( $text, array( 'Shop manager', 'Customer' ), true ) ) {
+	if ( 'User role' === $context && in_array( $text, array( 'Shop manager', 'Customer' ), true ) ) {
 		return translate_user_role( $text, 'woocommerce' );
 	}
 
 	return $translation;
 }
-add_filter( 'gettext_with_context', 'wc_translate_user_roles', 10, 4 );
+add_filter( 'gettext_with_context_default', 'wc_translate_user_roles', 10, 3 );

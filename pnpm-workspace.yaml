@@ -26,10 +26,11 @@ publicHoistPattern:
     - 'react-dom'
 
 # Quality of life tweaks (migrated from .npmrc)
-updateNotifier: false
+childConcurrency: 8        # 5 by default
 confirmModulesPurge: false
 modulesCacheMaxAge: 20160  # two weeks in minutes
-childConcurrency: 8
+updateNotifier: false
+virtualStoreDirMaxLength: 60
 
 # Supply chain security (pnpm 10)
 # Context: axios supply chain attack (2026-03-31) — malicious versions lived ~2-3hrs on npm.

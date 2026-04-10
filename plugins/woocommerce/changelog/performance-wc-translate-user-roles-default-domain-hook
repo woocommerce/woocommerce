@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Limit wc_translate_user_roles() to the default-domain contextual gettext hook.
