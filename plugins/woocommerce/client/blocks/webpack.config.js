@@ -83,9 +83,7 @@ const CoreConfig = {
 const MainConfig = {
 	...sharedConfig,
 	cache: getCacheConfig( 'main', [] ),
-	...getMainConfig( {
-		alias: getAlias(),
-	} ),
+	...getMainConfig( { alias: getAlias() } ),
 };
 
 // Frontend config for scripts used in the store itself.
