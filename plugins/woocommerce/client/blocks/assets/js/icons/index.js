@@ -34,4 +34,5 @@ export { default as stacks } from './library/stacks';
 export { default as thumbUp } from './library/thumb-up';
 export { default as toggle } from './library/toggle';
 export { default as totals } from './library/totals';
+export { default as trash } from './library/trash';
 export { default as woo } from './library/woo';

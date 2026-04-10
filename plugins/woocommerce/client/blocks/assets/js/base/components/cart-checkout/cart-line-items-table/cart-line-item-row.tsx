@@ -21,7 +21,8 @@ import { forwardRef, useMemo } from '@wordpress/element';
 import type { CartItem } from '@woocommerce/types';
 import { objectHasProp, Currency } from '@woocommerce/types';
 import { getSetting } from '@woocommerce/settings';
-import { Icon, trash } from '@wordpress/icons';
+import { Icon } from '@wordpress/icons';
+import { trash } from '@woocommerce/icons';
 import { calculateSaleAmount } from '@woocommerce/base-utils';
 import { dinero, transformScale, toSnapshot, type Dinero } from 'dinero.js';
 import { USD } from 'dinero.js/currencies'; // USD is used as a placeholder currency for arithmetic; actual formatting is handled elsewhere.
