@@ -598,9 +598,13 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				$data['parent_id'] = $parent_order->get_id();
 				$data['status']    = self::normalize_order_status( $parent_order->get_status() );
 
-				$refund_type               = $order->get_meta( '_refund_type' );
-				$uses_new_full_refund_data = OrderUtil::uses_new_full_refund_data();
-				if ( 'full' === $refund_type && $uses_new_full_refund_data ) {
+				$refund_type                = $order->get_meta( '_refund_type' );
+				$uses_new_full_refund_data  = OrderUtil::uses_new_full_refund_data();
+				$use_parent_refund_amounts  = $uses_new_full_refund_data && (
+					'full' === $refund_type
+					|| self::should_split_full_refund_using_parent_order( $order, $parent_order )
+				);
+				if ( $use_parent_refund_amounts ) {
 					$data['num_items_sold'] = -1 * self::get_num_items_sold( $parent_order );
 					$data['tax_total']      = -1 * $parent_order->get_total_tax();
 					$data['net_total']      = -1 * self::get_net_total( $parent_order );
@@ -694,6 +698,33 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	protected static function get_net_total( $order ) {
 		$net_total = floatval( $order->get_total() ) - floatval( $order->get_total_tax() ) - floatval( $order->get_shipping_total() );
 		return (float) $net_total;
+	}
+
+	/**
+	 * Whether this refund is a single lump-sum refund for the full order (e.g. status set to refunded without line items).
+	 *
+	 * @param WC_Order_Refund $refund        Refund order.
+	 * @param WC_Order        $parent_order Parent order.
+	 * @return bool
+	 */
+	protected static function should_split_full_refund_using_parent_order( $refund, $parent_order ) {
+		if ( ! $parent_order instanceof WC_Order ) {
+			return false;
+		}
+
+		if ( self::get_num_items_sold( $refund ) > 0 ) {
+			return false;
+		}
+
+		$parent_refunds = $parent_order->get_refunds();
+		if ( 1 !== count( $parent_refunds ) ) {
+			return false;
+		}
+
+		$refund_total = wc_format_decimal( abs( (float) $refund->get_total() ) );
+		$order_total  = wc_format_decimal( (float) $parent_order->get_total() );
+
+		return $refund_total === $order_total;
 	}
 
 	/**
