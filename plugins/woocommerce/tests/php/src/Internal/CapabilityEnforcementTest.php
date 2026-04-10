@@ -458,6 +458,131 @@ class CapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A refund approval token cannot be used to cancel (void) an order.
+	 */
+	public function test_refund_token_cannot_be_used_to_cancel_order(): void {
+		wp_set_current_user( $this->limited_user_id );
+		$order = $this->create_order_as_current_user( 'processing' );
+
+		$token = $this->approval_service->create_approval(
+			$this->capable_user_id,
+			'woocommerce_refund_orders',
+			array( 'order_id' => $order->get_id() )
+		);
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
+		$request->set_body_params(
+			array(
+				'status'         => 'cancelled',
+				'_pos_approval'  => $token,
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 403, $response->get_status() );
+	}
+
+	/**
+	 * @testdox A refund approval token scoped to order A cannot be used on order B.
+	 */
+	public function test_refund_token_cannot_be_used_across_orders(): void {
+		wp_set_current_user( $this->limited_user_id );
+		$order_a = $this->create_order_as_current_user( 'completed' );
+		$order_b = $this->create_order_as_current_user( 'completed' );
+
+		$token = $this->approval_service->create_approval(
+			$this->capable_user_id,
+			'woocommerce_refund_orders',
+			array( 'order_id' => $order_a->get_id() )
+		);
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order_b->get_id() . '/refunds' );
+		$request->set_body_params(
+			array(
+				'amount'         => '1.00',
+				'reason'         => 'Testing cross-order token',
+				'api_refund'     => false,
+				'_pos_approval'  => $token,
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 403, $response->get_status() );
+	}
+
+	/**
+	 * @testdox An approval token is consumed after a single use and cannot be reused.
+	 */
+	public function test_approval_token_is_single_use(): void {
+		wp_set_current_user( $this->limited_user_id );
+		$order = $this->create_order_as_current_user( 'completed' );
+
+		$token = $this->approval_service->create_approval(
+			$this->capable_user_id,
+			'woocommerce_refund_orders',
+			array( 'order_id' => $order->get_id() )
+		);
+
+		$first_request = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() . '/refunds' );
+		$first_request->set_body_params(
+			array(
+				'amount'         => '1.00',
+				'reason'         => 'First refund',
+				'api_refund'     => false,
+				'_pos_approval'  => $token,
+			)
+		);
+
+		$first_response = $this->server->dispatch( $first_request );
+		$this->assertNotSame( 403, $first_response->get_status() );
+
+		$second_request = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() . '/refunds' );
+		$second_request->set_body_params(
+			array(
+				'amount'         => '1.00',
+				'reason'         => 'Second refund with same token',
+				'api_refund'     => false,
+				'_pos_approval'  => $token,
+			)
+		);
+
+		$second_response = $this->server->dispatch( $second_request );
+		$this->assertSame( 403, $second_response->get_status() );
+	}
+
+	/**
+	 * @testdox An expired (deleted) approval token is rejected.
+	 */
+	public function test_expired_approval_token_is_rejected(): void {
+		wp_set_current_user( $this->limited_user_id );
+		$order = $this->create_order_as_current_user( 'completed' );
+
+		$token = $this->approval_service->create_approval(
+			$this->capable_user_id,
+			'woocommerce_refund_orders',
+			array( 'order_id' => $order->get_id() )
+		);
+
+		delete_transient( '_wc_pos_approval_' . hash( 'sha256', $token ) );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() . '/refunds' );
+		$request->set_body_params(
+			array(
+				'amount'         => '1.00',
+				'reason'         => 'Refund with expired token',
+				'api_refund'     => false,
+				'_pos_approval'  => $token,
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 403, $response->get_status() );
+	}
+
+	/**
 	 * @testdox A user cannot refund without an approval token.
 	 */
 	public function test_user_cannot_refund_without_approval_token(): void {
