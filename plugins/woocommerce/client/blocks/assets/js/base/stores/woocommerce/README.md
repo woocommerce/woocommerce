@@ -4,22 +4,22 @@ This folder contains the Interactivity API (iAPI) stores that WooCommerce blocks
 
 Stores in this folder:
 
-- [`woocommerce/products`](#woocommerceproducts-store) — server-hydrated cache of product and variation data in Store API format.
-- `woocommerce/cart` — cart state and actions (with mutation batching for performance).
-- `woocommerce/product-data` — per-block product data used by legacy product blocks.
+-   [`woocommerce/products`](#woocommerceproducts-store) — server-populated cache of product and variation data in Store API format.
+-   `woocommerce/cart` — cart state and actions (with mutation batching for performance).
+-   `woocommerce/product-data` — per-block product data used by legacy product blocks.
 
 ---
 
 ## `woocommerce/products` store
 
-A locked, server-hydrated iAPI store that exposes WooCommerce products and variations in Store API format (`ProductResponseItem`) to interactive blocks. PHP loaders populate the raw data during render; JS and PHP derived getters expose the "current" product for the surrounding context so that directives like `data-wp-text="state.productInContext.sku"` resolve correctly on both the server (SSR) and the client.
+A locked, server-populated iAPI store that exposes WooCommerce products and variations in Store API format (`ProductResponseItem`) to interactive blocks. PHP loaders populate the raw data during render; JS and PHP derived getters expose the "current" product for the surrounding context so that directives like `data-wp-text="state.productInContext.sku"` resolve correctly on both the server (SSR) and the client.
 
 **Source files:**
 
-- JS: `plugins/woocommerce/client/blocks/assets/js/base/stores/woocommerce/products.ts`
-- PHP: `plugins/woocommerce/src/Blocks/SharedStores/ProductsStore.php`
-- PHP procedural wrappers: `plugins/woocommerce/includes/wc-interactivity-api-functions.php`
-- Behavioral tests: `plugins/woocommerce/client/blocks/assets/js/base/stores/woocommerce/test/products.test.ts`
+-   JS: `plugins/woocommerce/client/blocks/assets/js/base/stores/woocommerce/products.ts`
+-   PHP: `plugins/woocommerce/src/Blocks/SharedStores/ProductsStore.php`
+-   PHP procedural wrappers: `plugins/woocommerce/includes/wc-interactivity-api-functions.php`
+-   Behavioral tests: `plugins/woocommerce/client/blocks/assets/js/base/stores/woocommerce/test/products.test.ts`
 
 ### When to use it
 
@@ -31,7 +31,7 @@ Use this store when an interactive block needs to read product fields (price, SK
 PHP                                                  Client
 ┌───────────────────────────────────┐               ┌────────────────────────────┐
 │ ProductsStore::load_product()     │               │ store<ProductsStore>(      │
-│ ProductsStore::load_variations()  │   hydrates    │   'woocommerce/products'   │
+│ ProductsStore::load_variations()  │  populates    │   'woocommerce/products'   │
 │ ProductsStore::load_purchasable_  │──────────────▶│ )                          │
 │   child_products()                │               │                            │
 └────────────┬──────────────────────┘               │ state.products             │
@@ -47,29 +47,29 @@ PHP                                                  Client
  • Global: wp_interactivity_state(..., [        Directives bound in markup:
      'productId' => N, 'variationId' => null   data-wp-interactive="woocommerce/products"
    ])                                          data-wp-text="state.productInContext.sku"
- • Per-element: data-wp-context=
+ • Local context: data-wp-context=
      'woocommerce/products::{"productId":N}'
 ```
 
 Two planes:
 
 1. **Raw data** — `state.products` and `state.productVariations`, both keyed by ID. Populated from PHP.
-2. **Selection** — `state.productId` / `state.variationId` identify the "current" product/variation. Can be set globally via `wp_interactivity_state`, or per-element via `data-wp-context`. **Per-element context takes precedence over global state.**
+2. **Selection** — `state.productId` / `state.variationId` identify the "current" product/variation. Can be set globally via `wp_interactivity_state`, or via local context with `data-wp-context`. **Local context takes precedence over global state.**
 
 Derived getters mirror each other in JS (`products.ts`) and PHP (`ProductsStore::register_getters`) so that directive bindings resolve during SSR as well as on the client.
 
 ### State reference
 
-| Property | Type | Origin | Notes |
-| --- | --- | --- | --- |
-| `products` | `Record<number, ProductResponseItem>` | Hydrated from PHP | Keyed by product ID. |
-| `productVariations` | `Record<number, ProductResponseItem>` | Hydrated from PHP | Keyed by variation ID. |
-| `productId` | `number` | Hydrated / per-element context | Current product ID. |
-| `variationId` | `number \| null` | Hydrated / per-element context | Current variation ID, or `null`. |
-| `product` | `ProductResponseItem \| null` | Derived | The top-level product for the current context. Always the parent product, **never** a variation. |
-| `selectedVariation` | `ProductResponseItem \| null` | Derived | Currently selected variation, or `null` for simple/grouped/non-selected. |
-| `productInContext` | `ProductResponseItem \| null` | Derived | `selectedVariation ?? product`. Bind to this in the common case. |
-| `findProductVariation` | `({ id, selectedAttributes }) => ProductResponseItem \| null` | Function | Resolves a variable product + attributes to a concrete variation. |
+| Property               | Type                                                          | Origin                    | Notes                                                                                            |
+| ---------------------- | ------------------------------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------ |
+| `products`             | `Record<number, ProductResponseItem>`                         | Populated from PHP        | Keyed by product ID.                                                                             |
+| `productVariations`    | `Record<number, ProductResponseItem>`                         | Populated from PHP        | Keyed by variation ID.                                                                           |
+| `productId`            | `number`                                                      | Populated / local context | Current product ID.                                                                              |
+| `variationId`          | `number \| null`                                              | Populated / local context | Current variation ID, or `null`.                                                                 |
+| `product`              | `ProductResponseItem \| null`                                 | Derived                   | The top-level product for the current context. Always the parent product, **never** a variation. |
+| `selectedVariation`    | `ProductResponseItem \| null`                                 | Derived                   | Currently selected variation, or `null` for simple/grouped/non-selected.                         |
+| `productInContext`     | `ProductResponseItem \| null`                                 | Derived                   | `selectedVariation ?? product`. Bind to this in the common case.                                 |
+| `findProductVariation` | `({ id, selectedAttributes }) => ProductResponseItem \| null` | Function                  | Resolves a variable product + attributes to a concrete variation.                                |
 
 ### Populating state (PHP)
 
@@ -105,7 +105,7 @@ Use `wc_interactivity_api_load_variations( $consent, $parent_id )`. This fetches
 
 ### Setting the "current" product
 
-There are two ways to point the store at a specific product. **Per-element context always wins over global state.** Choose based on how the consuming block is rendered.
+There are two ways to point the store at a specific product. **Local context always wins over global state.** Choose based on how the consuming block is rendered.
 
 #### Globally (template-level)
 
@@ -132,7 +132,7 @@ if ( $product ) {
 }
 ```
 
-#### Per-element (block-level)
+#### Local context (block-level)
 
 Set `productId` / `variationId` on a wrapper element via `data-wp-context`. Use this whenever the same block type can appear multiple times on a page for different products (product loops, grouped product children, variations).
 
@@ -170,7 +170,7 @@ Once state is populated and a current product is set, blocks read from it either
 
 #### From PHP / directives (SSR)
 
-The derived getters are registered on the PHP side via `ProductsStore::register_getters()`, so bindings resolve during server render — no client hydration flash.
+The derived getters are registered on the PHP side via `ProductsStore::register_getters()`, so bindings resolve during server render — no client-side flash during hydration.
 
 From `ProductSKU.php`:
 
@@ -195,18 +195,18 @@ import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
-    'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
+	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
 const { state: productsState } = store< ProductsStore >(
-    'woocommerce/products',
-    {},
-    { lock: universalLock }
+	'woocommerce/products',
+	{},
+	{ lock: universalLock }
 );
 
 // Later, in a getter or action:
 const product = productsState.productInContext;
 if ( ! product ) {
-    return;
+	return;
 }
 // product.id, product.sku, product.prices.price, ...
 ```
@@ -219,23 +219,23 @@ From `base/utils/variations/does-cart-item-match-attributes.ts`:
 
 ```ts
 const { state: productsState } = store< ProductsStore >(
-    'woocommerce/products',
-    {},
-    { lock: universalLock }
+	'woocommerce/products',
+	{},
+	{ lock: universalLock }
 );
 
 const parentProductId = productsState.productVariations[ cartItem.id ]?.parent;
 const productAttributes =
-    productsState.products[ parentProductId ]?.attributes ?? [];
+	productsState.products[ parentProductId ]?.attributes ?? [];
 ```
 
 For variable products, `findProductVariation` returns `null` when no variation matches; for simple products it returns the product itself.
 
 ### Patterns and pitfalls
 
-- **Always load before you bind.** If `wc_interactivity_api_load_product` was never called for the current `productId`, `state.product` resolves to `null` and directive bindings silently render empty.
-- **Prefer `productInContext`** for "whatever is currently being shown". Use `product` / `selectedVariation` only when the distinction matters (e.g. rendering a variation-specific description vs. the parent title).
-- **`data-wp-context` is per-element.** Use it whenever the same block type can appear multiple times on a page for different products.
-- **Context beats state.** If a block is wrapped in a `data-wp-context="woocommerce/products::{ ... }"` element, its `productId` / `variationId` override any globally-set values for descendants of that element. See `test/products.test.ts` for the exact precedence rules — notably, a context that has `productId` but no `variationId` key does **not** fall back to the global `variationId`.
-- **Keep the consent string in sync.** The literal string is defined in `ProductsStore::$consent_statement` (PHP) and `universalLock` (JS). They are intentionally different (loaders vs. store lock); copy-paste from this README or the source files.
-- **Do not extend this store from third-party code.** It is `lock: true` and private by design; anything here can change or disappear without notice.
+-   **Always load before you bind.** If `wc_interactivity_api_load_product` was never called for the current `productId`, `state.product` resolves to `null` and directive bindings silently render empty.
+-   **Prefer `productInContext`** for "whatever is currently being shown". Use `product` / `selectedVariation` only when the distinction matters (e.g. rendering a variation-specific description vs. the parent title).
+-   **`data-wp-context` sets local context.** Use it whenever the same block type can appear multiple times on a page for different products.
+-   **Local context beats state.** If a block is wrapped in a `data-wp-context="woocommerce/products::{ ... }"` element, its `productId` / `variationId` override any globally-set values for descendants of that element. See `test/products.test.ts` for the exact precedence rules — notably, a context that has `productId` but no `variationId` key does **not** fall back to the global `variationId`.
+-   **Keep the consent string in sync.** The literal string is defined in `ProductsStore::$consent_statement` (PHP) and `universalLock` (JS). They are intentionally different (loaders vs. store lock); copy-paste from this README or the source files.
+-   **Do not extend this store from third-party code.** It is `lock: true` and private by design; anything here can change or disappear without notice.
