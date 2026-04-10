@@ -69,7 +69,7 @@ Authorization: Basic <base64_encoded_credentials>
             },
             {
                 "id": 3,
-                "key": "_shipping_provider",
+                "key": "_shipment_provider",
                 "value": "ups"
             }
         ]
@@ -124,7 +124,7 @@ Authorization: Basic <base64_encoded_credentials>
       "value": "1Z999AA1234567890"
     },
     {
-      "key": "_shipping_provider",
+      "key": "_shipment_provider",
       "value": "ups"
     },
     {
@@ -168,7 +168,7 @@ Authorization: Basic <base64_encoded_credentials>
         },
         {
             "id": 5,
-            "key": "_shipping_provider",
+            "key": "_shipment_provider",
             "value": "ups"
         },
         {
@@ -221,7 +221,7 @@ Authorization: Basic <base64_encoded_credentials>
         },
         {
             "id": 4,
-            "key": "_shipping_provider",
+            "key": "_shipment_provider",
             "value": "ups"
         }
     ]
@@ -277,7 +277,7 @@ Authorization: Basic <base64_encoded_credentials>
       "value": "1Z999AA1234567890"
     },
     {
-      "key": "_shipping_provider",
+      "key": "_shipment_provider",
       "value": "ups"
     },
     {
@@ -321,7 +321,7 @@ Authorization: Basic <base64_encoded_credentials>
         },
         {
             "id": 5,
-            "key": "_shipping_provider",
+            "key": "_shipment_provider",
             "value": "ups"
         },
         {
@@ -411,7 +411,7 @@ Authorization: Basic <base64_encoded_credentials>
     },
     {
         "id": 5,
-        "key": "_shipping_provider",
+        "key": "_shipment_provider",
         "value": "ups"
     },
     {
@@ -464,7 +464,7 @@ Authorization: Basic <base64_encoded_credentials>
         "value": "1Z999AA9876543210"
     },
     {
-        "key": "_shipping_provider",
+        "key": "_shipment_provider",
         "value": "fedex"
     },
     {
@@ -499,7 +499,7 @@ Authorization: Basic <base64_encoded_credentials>
     },
     {
         "id": 5,
-        "key": "_shipping_provider",
+        "key": "_shipment_provider",
         "value": "fedex"
     },
     {
@@ -647,12 +647,12 @@ Metadata objects have the following structure:
 ### Optional Private Metadata Keys
 
 -   `_tracking_number` - Shipment tracking number
--   `_shipping_provider` - Shipping provider key (ups, fedex, dhl, etc.)
+-   `_shipment_provider` - Shipment provider key (ups, fedex, dhl, etc.)
 -   `_tracking_url` - URL to track the shipment
 -   `_is_locked` - Whether the fulfillment is locked for merchant modification
 -   `_lock_message` - What to show as the lock message for a locked fulfillment
 
-**Note:** The tracking number, shipping provider, and tracking URL metadata keys have typed convenience methods on the `Fulfillment` object: `get_tracking_number()` / `set_tracking_number()`, `get_shipping_provider()` / `set_shipping_provider()`, and `get_tracking_url()` / `set_tracking_url()`. These are recommended over direct `get_meta()` / `update_meta_data()` calls for better type safety and IDE autocompletion.
+**Note:** The tracking number, shipping provider, and tracking URL metadata keys have typed convenience methods on the `Fulfillment` object: `get_tracking_number()` / `set_tracking_number()`, `get_shipment_provider()` / `set_shipment_provider()`, and `get_tracking_url()` / `set_tracking_url()`. These are recommended over direct `get_meta()` / `update_meta_data()` calls for better type safety and IDE autocompletion.
 
 ### Items Structure
 

@@ -26,7 +26,11 @@ use WP_REST_Response;
 use WP_Error;
 use WC_Admin_Duplicate_Product;
 use WC_REST_CRUD_Controller;
+use WC_Data_Store;
+use WC_Product_Attribute;
 use WC_Product_Factory;
+use WC_Product_Simple;
+use WC_REST_Exception;
 
 
 defined( 'ABSPATH' ) || exit;
@@ -2230,7 +2234,7 @@ class Controller extends WC_REST_Products_V2_Controller {
 		$exclude_ids = $request->get_param( 'exclude' );
 		$limit       = $request->get_param( 'limit' ) ? $request->get_param( 'limit' ) : 5;
 
-		$data_store = \WC_Data_Store::load( 'product' );
+		$data_store = WC_Data_Store::load( 'product' );
 		// @phpstan-ignore-next-line method.notFound
 		$this->suggested_products_ids = $data_store->get_related_products(
 			$categories,

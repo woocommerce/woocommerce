@@ -2,7 +2,8 @@
  * External dependencies
  */
 import { useContext, useState } from 'react';
-import { CheckboxControl, Icon } from '@wordpress/components';
+import { Button, CheckboxControl, Icon } from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
 import CurrencyFactory, {
 	CurrencyContext,
 	SymbolPosition,
@@ -90,19 +91,33 @@ export default function FulfillmentLineItem( {
 							} }
 							indeterminate={ isIndeterminate( item.id ) }
 							__nextHasNoMarginBottom
+							aria-label={ item.name }
 						/>
 					</div>
 				) }
 				{ editMode && quantity > 1 && (
-					<Icon
-						icon={
-							itemExpanded ? 'arrow-up-alt2' : 'arrow-down-alt2'
-						}
+					<Button
 						onClick={ () => {
 							setItemExpanded( ! itemExpanded );
 						} }
-						size={ 16 }
-					/>
+						aria-label={
+							itemExpanded
+								? __( 'Collapse item details', 'woocommerce' )
+								: __( 'Expand item details', 'woocommerce' )
+						}
+						aria-expanded={ itemExpanded }
+						className="woocommerce-fulfillment-item-expand-button"
+					>
+						<Icon
+							icon={
+								itemExpanded
+									? 'arrow-up-alt2'
+									: 'arrow-down-alt2'
+							}
+							aria-hidden="true"
+							size={ 16 }
+						/>
+					</Button>
 				) }
 				<div className="woocommerce-fulfillment-item-title">
 					<div className="woocommerce-fulfillment-item-image-container">
@@ -155,6 +170,9 @@ export default function FulfillmentLineItem( {
 										onChange={ ( value ) => {
 											toggleItem( item.id, index, value );
 										} }
+										aria-label={ `${ item.name } - item ${
+											index + 1
+										}` }
 										__nextHasNoMarginBottom
 									/>
 								</div>
@@ -163,7 +181,7 @@ export default function FulfillmentLineItem( {
 								<div className="woocommerce-fulfillment-item-image-container">
 									<img
 										src={ item.image.src }
-										alt={ item.name }
+										alt={ '' } // WCAG: gives redundant alt text alert, as item.name is already used in the title.
 										width={ 32 }
 										height={ 32 }
 										className="woocommerce-fulfillment-item-image"

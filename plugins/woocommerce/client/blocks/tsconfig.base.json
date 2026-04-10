@@ -121,6 +121,9 @@
 			"@woocommerce/stores/woocommerce/cart": [
 				"assets/js/base/stores/woocommerce/cart"
 			],
+			"@woocommerce/stores/woocommerce/product-context": [
+				"assets/js/base/stores/woocommerce/product-context"
+			],
 			"@woocommerce/stores/woocommerce/product-data": [
 				"assets/js/base/stores/woocommerce/product-data"
 			],

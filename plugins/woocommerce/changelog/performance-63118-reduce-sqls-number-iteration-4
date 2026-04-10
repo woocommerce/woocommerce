@@ -1,4 +1,0 @@
-Significance: minor
-Type: performance
-
-Customers: guarded updates of the last activity timestamp.

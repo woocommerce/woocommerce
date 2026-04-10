@@ -136,34 +136,26 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that the initial shipping providers can be extended.
+	 * Test that the initial shipping providers can be extended with an AbstractShippingProvider instance.
 	 */
 	public function test_extend_initial_shipping_providers() {
-		// Extend the shipping providers.
-		add_filter(
-			'woocommerce_fulfillment_shipping_providers',
-			function ( $providers ) {
-				$providers['custom_provider'] = array(
-					'label' => __( 'Custom Provider', 'woocommerce' ),
-					'icon'  => 'custom-icon',
-					'value' => 'custom_provider',
-				);
-				return $providers;
-			}
-		);
+		$mock_provider = new ShippingProviderMock();
 
-		/**
-		 * Filter to get initial shipping providers.
-		 *
-		 * @since 10.1.0
-		 */
-		$shipping_providers = apply_filters( 'woocommerce_fulfillment_shipping_providers', array() );
+		// Extend the shipping providers with an AbstractShippingProvider instance.
+		$filter = function ( $providers ) use ( $mock_provider ) {
+			$providers[] = $mock_provider;
+			return $providers;
+		};
+		add_filter( 'woocommerce_fulfillment_shipping_providers', $filter );
 
-		// Check if the custom provider is included.
-		$this->assertArrayHasKey( 'custom_provider', $shipping_providers );
-		$this->assertIsArray( $shipping_providers['custom_provider'] );
-		$this->assertArrayHasKey( 'label', $shipping_providers['custom_provider'] );
-		$this->assertEquals( __( 'Custom Provider', 'woocommerce' ), $shipping_providers['custom_provider']['label'] );
+		$shipping_providers = \Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentUtils::get_shipping_providers();
+
+		remove_filter( 'woocommerce_fulfillment_shipping_providers', $filter );
+
+		// Check if the mock provider is included, keyed by its key.
+		$this->assertArrayHasKey( $mock_provider->get_key(), $shipping_providers );
+		$this->assertInstanceOf( ShippingProviderMock::class, $shipping_providers[ $mock_provider->get_key() ] );
+		$this->assertEquals( 'Mock Shipping Provider', $shipping_providers[ $mock_provider->get_key() ]->get_name() );
 	}
 
 	/**
@@ -349,6 +341,58 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should register the custom shipping providers filter hook.
+	 */
+	public function test_custom_shipping_providers_hook_registered(): void {
+		$this->assertNotFalse( has_filter( 'woocommerce_fulfillment_shipping_providers', array( $this->manager, 'get_custom_shipping_providers' ) ) );
+	}
+
+	/**
+	 * @testdox Should load custom shipping providers from the taxonomy into the providers list.
+	 */
+	public function test_get_custom_shipping_providers_loads_taxonomy_terms(): void {
+		if ( ! taxonomy_exists( 'wc_fulfillment_shipping_provider' ) ) {
+			register_taxonomy( 'wc_fulfillment_shipping_provider', array() );
+		}
+
+		$term = wp_insert_term( 'Test Custom Provider', 'wc_fulfillment_shipping_provider', array( 'slug' => 'test-custom-provider' ) );
+		$this->assertNotWPError( $term );
+
+		update_term_meta( $term['term_id'], 'tracking_url_template', 'https://example.com/track?id=__PLACEHOLDER__' );
+		update_term_meta( $term['term_id'], 'icon', 'https://example.com/icon.png' );
+
+		$providers = $this->manager->get_custom_shipping_providers( array() );
+
+		$this->assertNotEmpty( $providers );
+
+		$found = false;
+		foreach ( $providers as $provider ) {
+			if ( $provider instanceof \Automattic\WooCommerce\Admin\Features\Fulfillments\Providers\CustomShippingProvider && 'test-custom-provider' === $provider->get_key() ) {
+				$found = true;
+				$this->assertSame( 'Test Custom Provider', $provider->get_name() );
+				$this->assertSame( 'https://example.com/icon.png', $provider->get_icon() );
+				$this->assertSame( 'https://example.com/track?id=ABC123', $provider->get_tracking_url( 'ABC123' ) );
+				break;
+			}
+		}
+
+		$this->assertTrue( $found, 'Custom provider should be loaded from taxonomy' );
+
+		wp_delete_term( $term['term_id'], 'wc_fulfillment_shipping_provider' );
+	}
+
+	/**
+	 * @testdox Should return existing providers when no custom providers exist.
+	 */
+	public function test_get_custom_shipping_providers_returns_existing_when_no_terms(): void {
+		$existing = array( 'some_provider' );
+
+		$result = $this->manager->get_custom_shipping_providers( $existing );
+
+		$this->assertContains( 'some_provider', $result );
+	}
+
+	/**
 	 * Test tracking number parsing without any shipping providers.
 	 */
 	public function test_try_parse_tracking_number_no_providers() {
@@ -357,13 +401,31 @@ class FulfillmentsManagerTest extends \WC_Unit_Test_Case {
 		add_filter(
 			'woocommerce_fulfillment_shipping_providers',
 			function ( $providers ) {
-				$providers = array();
-				return $providers;
+				unset( $providers );
+				return array();
 			}
 		);
 
 		// Test with a valid tracking number.
 		$parsed_number = $this->manager->try_parse_tracking_number( $tracking_number, 'US', 'CA' );
 		$this->assertEquals( array(), $parsed_number );
+	}
+
+	/**
+	 * @testdox Email template tracking hooks are registered for all fulfillment email types.
+	 */
+	public function test_email_template_tracking_hooks_are_registered(): void {
+		$email_ids = array(
+			'customer_fulfillment_created',
+			'customer_fulfillment_updated',
+			'customer_fulfillment_deleted',
+		);
+
+		foreach ( $email_ids as $email_id ) {
+			$this->assertNotFalse(
+				has_action( 'woocommerce_update_options_email_' . $email_id ),
+				"Tracking hook should be registered for woocommerce_update_options_email_{$email_id}"
+			);
+		}
 	}
 }

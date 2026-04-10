@@ -1,0 +1,78 @@
+diff -ruN a/types/@wordpress/editor/index.d.ts b/types/@wordpress/editor/index.d.ts
+--- a/types/@wordpress/editor/index.d.ts
++++ b/types/@wordpress/editor/index.d.ts
+@@ -3,25 +3,63 @@
+ /// <reference path="./store/selectors.d.ts" />
+ /// <reference path="./utils/index.d.ts" />
+ 
++/**
++ * DT types are already curried (no state parameter), so we add a fake state param
++ * to match the expected ReduxStoreConfig selector shape, which gets curried away.
++ */
++type WithState< Selectors > = {
++	[ K in keyof Selectors ]: Selectors[ K ] extends (
++		...args: infer A
++	) => infer R
++		? ( state: unknown, ...args: A ) => R
++		: Selectors[ K ];
++};
++
+ declare module '@wordpress/editor' {
+-	import { dispatch, select, StoreDescriptor } from "@wordpress/data";
++	import type * as editorActions from '@wordpress/editor/store/actions';
++	import type * as editorSelectors from '@wordpress/editor/store/selectors';
++	import type {
++		StoreDescriptor,
++		ReduxStoreConfig,
++	} from '@wordpress/data/build-types/types';
+ 
+ 	export { storeConfig, transformStyles } from "@wordpress/block-editor";
+ 
+-	declare module "@wordpress/data" {
+-	    function dispatch(key: "core/editor"): typeof import("@wordpress/editor/store/actions");
+-	    function select(key: "core/editor"): typeof import("@wordpress/editor/store/selectors");
+-	}
++	type EditorConfig = ReduxStoreConfig<
++		unknown,
++		{ [ K in keyof typeof editorActions ]: ( typeof editorActions )[ K ] },
++		WithState< typeof editorSelectors >
++	>;
+ 
+-	export interface EditorStoreDescriptor extends StoreDescriptor {
+-	    name: "core/editor";
++	export interface EditorStoreDescriptor extends StoreDescriptor< EditorConfig > {
++		name: "core/editor";
+ 	}
+ 
+-	// eslint-disable-next-line @definitelytyped/no-declare-current-package
+-	declare module "@wordpress/editor" {
+-	    const store: EditorStoreDescriptor;
+-	}
++	export const store: EditorStoreDescriptor;
+ 
+ 	export * from "@wordpress/editor/components";
+ 	export * from "@wordpress/editor/utils";
++}
++
++declare module '@wordpress/data/build-types/types' {
++	import type * as editorActions from '@wordpress/editor/store/actions';
++	import type * as editorSelectors from '@wordpress/editor/store/selectors';
++	import type {
++		StoreDescriptor,
++		ReduxStoreConfig,
++	} from '@wordpress/data/build-types/types';
++
++	type EditorConfig = ReduxStoreConfig<
++		unknown,
++		{ [ K in keyof typeof editorActions ]: ( typeof editorActions )[ K ] },
++		WithState< typeof editorSelectors >
++	>;
++
++	interface EditorStoreDescriptor extends StoreDescriptor< EditorConfig > {
++		name: "core/editor";
++	}
++
++	interface StoreRegistry {
++		'core/editor': EditorStoreDescriptor;
++	}
+ }

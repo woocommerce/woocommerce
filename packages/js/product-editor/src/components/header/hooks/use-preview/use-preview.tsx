@@ -45,7 +45,6 @@ export function usePreview( {
 			// @ts-ignore
 			const { hasEditsForEntityRecord, isSavingEntityRecord } =
 				select( 'core' );
-			// @ts-expect-error Selector is not typed
 			const isSaving = isSavingEntityRecord(
 				'postType',
 				productType,
@@ -54,7 +53,6 @@ export function usePreview( {
 
 			return {
 				isDisabled: isSaving,
-				// @ts-expect-error Selector is not typed
 				hasEdits: hasEditsForEntityRecord(
 					'postType',
 					productType,

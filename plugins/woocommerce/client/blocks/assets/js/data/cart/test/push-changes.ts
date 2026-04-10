@@ -3,7 +3,6 @@
  */
 import * as wpDataFunctions from '@wordpress/data';
 import { cartStore, validationStore } from '@woocommerce/block-data';
-import type { StoreDescriptor } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -100,7 +99,7 @@ async function resetToInitialAddressMock() {
 describe( 'pushChanges', () => {
 	beforeAll( () => {
 		wpDataFunctions.select.mockImplementation(
-			( storeNameOrDescriptor: StoreDescriptor | string ) => {
+			( storeNameOrDescriptor: unknown ) => {
 				if ( storeNameOrDescriptor === cartStore ) {
 					return {
 						...jest
@@ -126,7 +125,7 @@ describe( 'pushChanges', () => {
 			}
 		);
 		wpDataFunctions.dispatch.mockImplementation(
-			( storeNameOrDescriptor: StoreDescriptor | string ) => {
+			( storeNameOrDescriptor: unknown ) => {
 				if ( storeNameOrDescriptor === cartStore ) {
 					return {
 						...jest

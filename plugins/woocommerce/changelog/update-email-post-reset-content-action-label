@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Shorten the email editor reset action label from "Reset content to default" to "Reset" for consistency with site template resets and to reduce i18n overhead.

@@ -22,6 +22,30 @@ defined( 'ABSPATH' ) || exit;
  * @since 10.1.0
  */
 class Fulfillment extends \WC_Data {
+
+	/**
+	 * Core data for this object. Name/value pairs.
+	 *
+	 * @var array
+	 */
+	protected $data = array(
+		'id'           => 0,
+		'entity_type'  => null,
+		'entity_id'    => null,
+		'status'       => null,
+		'is_fulfilled' => false,
+		'date_updated' => null,
+		'date_deleted' => null,
+	);
+
+	/**
+	 * Snapshot of meta values taken after the object is read from the database.
+	 * Used by get_changes() to detect meta-based field changes.
+	 *
+	 * @var array<string, mixed>
+	 */
+	private $meta_snapshot = array();
+
 	/**
 	 * Fulfillment constructor. Loads fulfillment data.
 	 *
@@ -52,6 +76,74 @@ class Fulfillment extends \WC_Data {
 	}
 
 	/**
+	 * Capture a snapshot of all current meta values.
+	 *
+	 * Called by the data store after reading so that get_changes() can detect
+	 * meta modifications alongside core data property changes.
+	 *
+	 * @since 10.7.0
+	 */
+	public function snapshot_meta(): void {
+		$this->meta_snapshot = array();
+		foreach ( $this->get_meta_data() as $meta ) {
+			$this->meta_snapshot[ $meta->key ] = $meta->value;
+		}
+	}
+
+	/**
+	 * Return data changes including meta-based field changes.
+	 *
+	 * Core data props are tracked by set_prop(); meta-based fields are detected
+	 * by comparing current meta values against the snapshot taken on read.
+	 *
+	 * @since 10.7.0
+	 *
+	 * @return array
+	 */
+	public function get_changes(): array {
+		$changes = parent::get_changes();
+
+		$current_meta = array();
+		foreach ( $this->get_meta_data() as $meta ) {
+			$current_meta[ $meta->key ] = $meta->value;
+		}
+
+		$meta_changes = array();
+
+		// Detect changed or added meta.
+		foreach ( $current_meta as $key => $value ) {
+			if ( ! array_key_exists( $key, $this->meta_snapshot ) || $this->meta_snapshot[ $key ] !== $value ) {
+				$meta_changes[ $key ] = $value;
+			}
+		}
+
+		// Detect deleted meta.
+		foreach ( $this->meta_snapshot as $key => $value ) {
+			if ( ! array_key_exists( $key, $current_meta ) ) {
+				$meta_changes[ $key ] = null;
+			}
+		}
+
+		if ( ! empty( $meta_changes ) ) {
+			$changes['meta_data'] = $meta_changes;
+		}
+
+		return $changes;
+	}
+
+	/**
+	 * Merge changes with data, clear changes, and refresh the meta snapshot.
+	 *
+	 * @since 10.7.0
+	 *
+	 * @return void
+	 */
+	public function apply_changes(): void {
+		parent::apply_changes();
+		$this->snapshot_meta();
+	}
+
+	/**
 	 * Get the fulfillment ID.
 	 *
 	 * @return int Fulfillment ID.
@@ -76,7 +168,7 @@ class Fulfillment extends \WC_Data {
 	 * @return string|null Entity type.
 	 */
 	public function get_entity_type(): ?string {
-		return $this->data['entity_type'] ?? null;
+		return $this->get_prop( 'entity_type' );
 	}
 
 	/**
@@ -85,7 +177,7 @@ class Fulfillment extends \WC_Data {
 	 * @param class-string|null $entity_type Entity type.
 	 */
 	public function set_entity_type( ?string $entity_type ): void {
-		$this->data['entity_type'] = $entity_type;
+		$this->set_prop( 'entity_type', $entity_type );
 	}
 
 	/**
@@ -94,7 +186,7 @@ class Fulfillment extends \WC_Data {
 	 * @return string|null Entity ID.
 	 */
 	public function get_entity_id(): ?string {
-		return $this->data['entity_id'] ?? null;
+		return $this->get_prop( 'entity_id' );
 	}
 
 	/**
@@ -103,7 +195,7 @@ class Fulfillment extends \WC_Data {
 	 * @param string|null $entity_id Entity ID.
 	 */
 	public function set_entity_id( ?string $entity_id ): void {
-		$this->data['entity_id'] = $entity_id;
+		$this->set_prop( 'entity_id', $entity_id );
 	}
 
 	/**
@@ -123,8 +215,7 @@ class Fulfillment extends \WC_Data {
 		}
 		// Set the fulfillment status.
 		$this->set_is_fulfilled( $statuses[ $status ]['is_fulfilled'] ?? false );
-		// Set the status in the data array.
-		$this->data['status'] = $status;
+		$this->set_prop( 'status', $status );
 	}
 
 	/**
@@ -133,7 +224,7 @@ class Fulfillment extends \WC_Data {
 	 * @return string|null Fulfillment status.
 	 */
 	public function get_status(): ?string {
-		return $this->data['status'] ?? null;
+		return $this->get_prop( 'status' );
 	}
 
 	/**
@@ -144,7 +235,7 @@ class Fulfillment extends \WC_Data {
 	 *  @return void
 	 */
 	private function set_is_fulfilled( bool $is_fulfilled ): void {
-		$this->data['is_fulfilled'] = $is_fulfilled;
+		$this->set_prop( 'is_fulfilled', $is_fulfilled );
 	}
 
 	/**
@@ -153,7 +244,7 @@ class Fulfillment extends \WC_Data {
 	 * @return bool Whether the fulfillment is fulfilled.
 	 */
 	public function get_is_fulfilled(): bool {
-		return $this->data['is_fulfilled'] ?? false;
+		return (bool) $this->get_prop( 'is_fulfilled' );
 	}
 
 	/**
@@ -198,7 +289,7 @@ class Fulfillment extends \WC_Data {
 	 * @return string|null Date updated.
 	 */
 	public function get_date_updated(): ?string {
-		return $this->data['date_updated'] ?? null;
+		return $this->get_prop( 'date_updated' );
 	}
 
 	/**
@@ -207,7 +298,7 @@ class Fulfillment extends \WC_Data {
 	 * @param string|null $date_updated Date updated.
 	 */
 	public function set_date_updated( ?string $date_updated ): void {
-		$this->data['date_updated'] = $date_updated;
+		$this->set_prop( 'date_updated', $date_updated );
 	}
 
 	/**
@@ -232,7 +323,7 @@ class Fulfillment extends \WC_Data {
 	 * @return string|null Date deleted.
 	 */
 	public function get_date_deleted(): ?string {
-		return $this->data['date_deleted'] ?? null;
+		return $this->get_prop( 'date_deleted' );
 	}
 
 	/**
@@ -242,7 +333,7 @@ class Fulfillment extends \WC_Data {
 	 * @return void
 	 */
 	public function set_date_deleted( ?string $date_deleted ): void {
-		$this->data['date_deleted'] = $date_deleted;
+		$this->set_prop( 'date_deleted', $date_deleted );
 	}
 
 	/**
@@ -262,6 +353,24 @@ class Fulfillment extends \WC_Data {
 	 */
 	public function set_items( array $items ): void {
 		$this->update_meta_data( '_items', array_values( $items ) );
+	}
+
+	/**
+	 * Get the item count for the fulfillment.
+	 *
+	 * This method calculates the total quantity of items in the fulfillment.
+	 *
+	 * @since 10.7.0
+	 * @return int Total quantity of items in the fulfillment.
+	 */
+	public function get_item_count(): int {
+		return array_reduce(
+			$this->get_items(),
+			function ( int $carry, array $item ) {
+				return $carry + (int) $item['qty'];
+			},
+			0
+		);
 	}
 
 	/**
@@ -291,13 +400,13 @@ class Fulfillment extends \WC_Data {
 	}
 
 	/**
-	 * Get the shipping provider.
+	 * Get the shipment provider.
 	 *
 	 * @since 10.7.0
-	 * @return string|null Shipping provider slug.
+	 * @return string|null Shipment provider slug.
 	 */
-	public function get_shipping_provider(): ?string {
-		$value = $this->get_meta( '_shipping_provider', true );
+	public function get_shipment_provider(): ?string {
+		$value = $this->get_meta( '_shipment_provider', true );
 		if ( ! is_scalar( $value ) ) {
 			return null;
 		}
@@ -307,13 +416,13 @@ class Fulfillment extends \WC_Data {
 	}
 
 	/**
-	 * Set the shipping provider.
+	 * Set the shipment provider.
 	 *
 	 * @since 10.7.0
-	 * @param string $shipping_provider Shipping provider slug.
+	 * @param string $shipment_provider Shipment provider slug.
 	 */
-	public function set_shipping_provider( string $shipping_provider ): void {
-		$this->update_meta_data( '_shipping_provider', $shipping_provider );
+	public function set_shipment_provider( string $shipment_provider ): void {
+		$this->update_meta_data( '_shipment_provider', $shipment_provider );
 	}
 
 	/**

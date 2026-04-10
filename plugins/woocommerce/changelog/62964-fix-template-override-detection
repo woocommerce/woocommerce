@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix System Status template override detection to show actual runtime behavior, including plugin filter overrides.

@@ -761,4 +761,19 @@ class Products extends ControllerTestCase {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertCount( 0, $response->get_data() );
 	}
+
+	/**
+	 * @testdox Related query parameter returns 404 for non-existent product and does not create a transient.
+	 */
+	public function test_related_query_parameter_returns_404_for_nonexistent_product() {
+		$nonexistent_id = 999999999;
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_param( 'related', $nonexistent_id );
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertEquals( 404, $response->get_status() );
+		$this->assertFalse( get_transient( 'wc_related_' . $nonexistent_id ), 'No transient should be created for a non-existent product.' );
+	}
 }
