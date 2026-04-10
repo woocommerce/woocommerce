@@ -7,8 +7,7 @@
 	"supports": {
 		"align": true,
 		"color": {
-			"text": true,
-			"link": false
+			"text": true
 		},
 		"interactivity": true,
 		"typography": {
