@@ -224,12 +224,14 @@ class NotificationRetryHandlerTest extends WC_Unit_Test_Case {
 
 		$processor = new NotificationProcessor();
 		$processor->init( $dispatcher, $data_store, $retry_handler );
-		wc_get_container()->get( NotificationProcessor::class )->init( $dispatcher, $data_store, $retry_handler );
+		wc_get_container()->replace( NotificationProcessor::class, $processor );
 
 		$this->sut->handle_retry( 'store_order', $this->order_id, 2 );
 
 		$order = wc_get_order( $this->order_id );
 		$this->assertNotEmpty( $order->get_meta( NotificationProcessor::SENT_META_KEY ) );
+
+		$this->reset_container_replacements();
 	}
 
 	/**
