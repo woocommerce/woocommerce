@@ -12841,12 +12841,6 @@ parameters:
 			path: includes/class-wc-order-item-product.php
 
 		-
-			message: '#^Method WC_Order_Item_Product\:\:get_item_downloads\(\) should return array but return statement is missing\.$#'
-			identifier: return.missing
-			count: 1
-			path: includes/class-wc-order-item-product.php
-
-		-
 			message: '#^Method WC_Order_Item_Product\:\:set_backorder_meta\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -15793,7 +15787,7 @@ parameters:
 			path: includes/class-wc-structured-data.php
 
 		-
-			message: '#^Offset ''price'' on array\{priceValidUntil\: string, availability\: ''https\://schema\.org…'', url\: mixed, seller\: array\{''@type''\: ''Organization'', name\: mixed, url\: mixed\}, ''@type''\: ''AggregateOffer'', lowPrice\: mixed, highPrice\: mixed, offerCount\: int\<0, max\>, \.\.\.\}\|array\{priceValidUntil\: string, availability\: ''https\://schema\.org…'', url\: mixed, seller\: array\{''@type''\: ''Organization'', name\: mixed, url\: mixed\}, ''@type''\: ''Offer'', priceSpecification\: array\{0\: array\{''@type''\: ''UnitPriceSpecificat…'', price\: mixed, priceCurrency\: mixed, valueAddedTaxIncluded\: bool, validThrough\: string, priceType\?\: ''https\://schema\.org…''\}, 1\?\: array\{''@type''\: ''UnitPriceSpecificat…'', price\: mixed, priceCurrency\: mixed, valueAddedTaxIncluded\: bool, validThrough\: string, priceType\?\: ''https\://schema\.org…''\}\}\} in empty\(\) does not exist\.$#'
+			message: '#^Offset ''price'' on array\{priceValidUntil\: string, availability\: ''https\://schema\.org…'', url\: mixed, seller\: array\{''@type''\: ''Organization'', name\: mixed, url\: mixed\}, ''@type''\: ''AggregateOffer'', lowPrice\: mixed, highPrice\: mixed, offerCount\: int\<0, max\>, \.\.\.\}\|array\{priceValidUntil\: string, availability\: ''https\://schema\.org…'', url\: mixed, seller\: array\{''@type''\: ''Organization'', name\: mixed, url\: mixed\}, ''@type''\: ''Offer'', priceSpecification\: array\{0\: array\{''@type''\: ''UnitPriceSpecificat…'', price\: mixed, priceCurrency\: mixed, validThrough\: string, valueAddedTaxIncluded\?\: bool, priceType\?\: ''https\://schema\.org…''\}, 1\?\: array\{''@type''\: ''UnitPriceSpecificat…'', price\: mixed, priceCurrency\: mixed, validThrough\: string, valueAddedTaxIncluded\?\: bool, priceType\?\: ''https\://schema\.org…''\}\}\} in empty\(\) does not exist\.$#'
 			identifier: empty.offset
 			count: 1
 			path: includes/class-wc-structured-data.php
@@ -36904,12 +36898,6 @@ parameters:
 			path: includes/wc-user-functions.php
 
 		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(int\<min, \-1\>\|int\<1, max\>\|non\-falsy\-string\)\: mixed\)\|null, ''esc_sql'' given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/wc-user-functions.php
-
-		-
 			message: '#^Parameter \#1 \$object_or_class of function property_exists expects object\|string, WP_User\|false given\.$#'
 			identifier: argument.type
 			count: 1
@@ -37214,12 +37202,6 @@ parameters:
 			identifier: assign.propertyType
 			count: 1
 			path: includes/wccom-site/installation/installation-steps/class-wc-wccom-site-installation-step-get-product-info.php
-
-		-
-			message: '#^Cannot access offset ''destination'' on array\|WP_Error\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: includes/wccom-site/installation/installation-steps/class-wc-wccom-site-installation-step-move-product.php
 
 		-
 			message: '#^Method WC_WCCOM_Site_Installation_Step_Move_Product\:\:run\(\) has no return type specified\.$#'
@@ -46606,12 +46588,6 @@ parameters:
 			path: src/Admin/Features/Fulfillments/FulfillmentUtils.php
 
 		-
-			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Admin/Features/Fulfillments/FulfillmentUtils.php
-
-		-
 			message: '#^Cannot access offset int on array\|false\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
@@ -51388,12 +51364,6 @@ parameters:
 			path: src/Blocks/BlockTypes/AddToCartForm.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartForm\:\:add_steppers\(\) should return string but returns string\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockTypes/AddToCartForm.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartForm\:\:enqueue_assets\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -51413,12 +51383,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#3 \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AbstractBlock\:\:enqueue_assets\(\) expects WP_Block, Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/AddToCartForm.php
-
-		-
-			message: '#^Parameter \#3 \$subject of function preg_replace expects array\<float\|int\|string\>\|string, string\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/AddToCartForm.php
@@ -51604,12 +51568,6 @@ parameters:
 			path: src/Blocks/BlockTypes/AddToCartWithOptions/Utils.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\Utils\:\:add_quantity_steppers\(\) should return string but returns string\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockTypes/AddToCartWithOptions/Utils.php
-
-		-
 			message: '#^Parameter \#1 \$haystack of function strpos expects string, string\|true\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -51617,12 +51575,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$query of method WP_HTML_Tag_Processor\:\:next_tag\(\) expects array\{tag_name\?\: string\|null, match_offset\?\: int\|null, class_name\?\: string\|null, tag_closers\?\: string\|null\}\|null, ''input'' given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/AddToCartWithOptions/Utils.php
-
-		-
-			message: '#^Parameter \#3 \$subject of function preg_replace expects array\<float\|int\|string\>\|string, string\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/AddToCartWithOptions/Utils.php
@@ -53769,17 +53721,6 @@ parameters:
 			count: 1
 			path: src/Blocks/BlockTypes/ProductFilterAttribute.php
 
-		-
-			message: '#^Cannot access property \$name on stdClass\|null\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: src/Blocks/BlockTypes/ProductFilterAttribute.php
-
-		-
-			message: '#^Cannot access property \$slug on stdClass\|null\.$#'
-			identifier: property.nonObject
-			count: 5
-			path: src/Blocks/BlockTypes/ProductFilterAttribute.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilterAttribute\:\:delete_default_attribute_id_transient\(\) has no return type specified\.$#'
@@ -54706,12 +54647,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductResultsCount.php
 
 		-
-			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Blocks/BlockTypes/ProductSKU.php
-
-		-
 			message: '#^Call to an undefined method WC_Product\:\:get_available_variations\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -54726,12 +54661,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductSKU\:\:register_block_type_assets\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypes/ProductSKU.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductSKU\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/ProductSKU.php
 
@@ -56887,12 +56816,6 @@ parameters:
 			message: '#^Method Automattic\\WooCommerce\\Caches\\OrderCountCache\:\:decrement\(\) should return int but returns int\|false\.$#'
 			identifier: return.type
 			count: 1
-			path: src/Caches/OrderCountCache.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Caches\\OrderCountCache\:\:get\(\) should return array\<int\> but returns null\.$#'
-			identifier: return.type
-			count: 2
 			path: src/Caches/OrderCountCache.php
 
 		-
@@ -65112,17 +65035,6 @@ parameters:
 			count: 1
 			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmails.php
 
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\EmailEditor\\WooContentProcessor\:\:prepare_css\(\) should return string but returns string\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Internal/EmailEditor/WooContentProcessor.php
-
-		-
-			message: '#^Parameter \#3 \$subject of function preg_replace expects array\<float\|int\|string\>\|string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/EmailEditor/WooContentProcessor.php
 
 		-
 			message: '#^@param string \$feature_id does not accept actual type of parameter\: int\<min, \-1\>\|int\<1, max\>\|non\-falsy\-string\.$#'
@@ -68473,43 +68385,7 @@ parameters:
 			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
 
 		-
-			message: '#^Call to method set_id\(\) on an unknown class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\WC_Product_Attribute\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
 			message: '#^Call to method set_image_id\(\) on an unknown class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\WC_Product\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
-			message: '#^Call to method set_name\(\) on an unknown class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\WC_Product_Attribute\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
-			message: '#^Call to method set_options\(\) on an unknown class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\WC_Product_Attribute\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
-			message: '#^Call to method set_position\(\) on an unknown class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\WC_Product_Attribute\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
-			message: '#^Call to method set_variation\(\) on an unknown class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\WC_Product_Attribute\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
-			message: '#^Call to method set_visible\(\) on an unknown class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\WC_Product_Attribute\.$#'
 			identifier: class.notFound
 			count: 2
 			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
@@ -68629,24 +68505,6 @@ parameters:
 			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
 
 		-
-			message: '#^Instantiated class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\WC_Product_Attribute not found\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
-			message: '#^Instantiated class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\WC_Product_Simple not found\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
-			message: '#^Instantiated class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\WC_REST_Exception not found\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\Controller\:\:create_item\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
 			count: 1
@@ -68715,12 +68573,6 @@ parameters:
 		-
 			message: '#^PHPDoc tag @extends has invalid value \(WC_REST_Products_V2_Controller\)\: Unexpected token "\\n ", expected ''\<'' at offset 88 on line 4$#'
 			identifier: phpDoc.parseError
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
-			message: '#^PHPDoc tag @throws with type Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\WC_REST_Exception is not subtype of Throwable$#'
-			identifier: throws.notThrowable
 			count: 1
 			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
 
@@ -68833,6 +68685,30 @@ parameters:
 			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
 
 		-
+			message: '#^Parameter \#1 \$value of method WC_Product_Attribute\:\:set_name\(\) expects string, array\|string given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
+
+		-
+			message: '#^Parameter \#1 \$value of method WC_Product_Attribute\:\:set_position\(\) expects int, string given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
+
+		-
+			message: '#^Parameter \#1 \$value of method WC_Product_Attribute\:\:set_variation\(\) expects bool, int given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
+
+		-
+			message: '#^Parameter \#1 \$value of method WC_Product_Attribute\:\:set_visible\(\) expects bool, int given\.$#'
+			identifier: argument.type
+			count: 2
+			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
+
+		-
 			message: '#^Parameter \#2 \$callback of function array_filter expects \(callable\(string\)\: bool\)\|null, ''strlen'' given\.$#'
 			identifier: argument.type
 			count: 1
@@ -68914,12 +68790,6 @@ parameters:
 			message: '#^Parameter \$request of method Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\Controller\:\:set_cogs_info_in_product_object\(\) has invalid type Automattic\\WooCommerce\\Internal\\CostOfGoodsSold\\WP_Rest_Request\.$#'
 			identifier: class.notFound
 			count: 1
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
-			message: '#^Throwing object of an unknown class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\WC_REST_Exception\.$#'
-			identifier: class.notFound
-			count: 2
 			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
 
 		-

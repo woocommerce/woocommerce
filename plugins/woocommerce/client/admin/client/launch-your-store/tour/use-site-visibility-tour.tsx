@@ -22,7 +22,6 @@ export const useSiteVisibilityTour = () => {
 	 * It will be removed in WC 9.4.
 	 */
 	const hasUserDismissedTourMeta = useSelect( ( select ) => {
-		// @ts-expect-error Selector is not typed.
 		const currentUser = select( 'core' ).getCurrentUser();
 		if ( ! currentUser ) {
 			// If the user is not logged in, we don't want to show the tour.

@@ -53,3 +53,16 @@ p.woocommerce-actions,
 .woocommerce-about-text {
 	margin-bottom: 1em !important;
 }
+
+// WP 7.0 changed .notice-dismiss to display:flex, width:24px, height:24px.
+// Reset these so the floated .woocommerce-message-close layout still works and the X icon aligns.
+.wc-wp-version-gte-70 .woocommerce-message a.woocommerce-message-close {
+	display: inline;
+	width: auto;
+	height: auto;
+	color: #1e1e1e;
+
+	&::before {
+		top: 18px;
+	}
+}

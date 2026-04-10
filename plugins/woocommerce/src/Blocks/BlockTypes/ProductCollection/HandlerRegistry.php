@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection;
 
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
+use Automattic\WooCommerce\Enums\OrderItemType;
 use InvalidArgumentException;
 
 /**
@@ -434,7 +435,7 @@ class HandlerRegistry {
 					function ( $item ) {
 						return $item->get_product_id();
 					},
-					$order->get_items( 'line_item' )
+					$order->get_items( OrderItemType::LINE_ITEM )
 				)
 			);
 		}
@@ -476,15 +477,7 @@ class HandlerRegistry {
 		$location = $collection_args['productCollectionLocation'] ?? array();
 
 		if ( $request ) {
-			$user_id    = $request->get_param( 'userId' ) ? absint( $request->get_param( 'userId' ) ) : null;
-			$user_email = $request->get_param( 'userEmail' ) ? sanitize_email( $request->get_param( 'userEmail' ) ) : null;
-			if ( $user_id || $user_email ) {
-				$cart_ids = CartCheckoutUtils::get_cart_product_ids_for_user( $user_id, $user_email );
-				if ( ! empty( $cart_ids ) ) {
-					return $cart_ids;
-				}
-			}
-			// In editor context (REST request), show sample products for preview when cart is empty.
+			// In editor context (REST request), show sample products for preview. Only emails to the customer show live data.
 			$recent_product_ids = wc_get_products(
 				array(
 					'status'  => 'publish',

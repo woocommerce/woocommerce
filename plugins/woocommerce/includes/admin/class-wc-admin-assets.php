@@ -265,6 +265,12 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'version'      => $version,
 				),
 				array(
+					'handle'       => 'wc-shipping-providers',
+					'path'         => $plugin_url . '/assets/js/admin/wc-shipping-providers' . $suffix . '.js',
+					'dependencies' => array( 'jquery', 'wp-util', 'underscore', 'backbone', 'wc-backbone-modal' ),
+					'version'      => $version,
+				),
+				array(
 					'handle'       => 'wc-clipboard',
 					'path'         => $plugin_url . '/assets/js/admin/wc-clipboard' . $suffix . '.js',
 					'dependencies' => array( 'jquery' ),

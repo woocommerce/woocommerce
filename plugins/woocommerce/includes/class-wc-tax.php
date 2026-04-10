@@ -5,6 +5,7 @@
  * @package WooCommerce\Classes
  */
 
+use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
 use Automattic\WooCommerce\Enums\TaxBasedOn;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 
@@ -474,7 +475,7 @@ class WC_Tax {
 
 		if ( ! empty( $customer ) ) {
 			$location = $customer->get_taxable_address();
-		} elseif ( wc_prices_include_tax() || 'base' === get_option( 'woocommerce_default_customer_address' ) || TaxBasedOn::BASE === get_option( 'woocommerce_tax_based_on' ) ) {
+		} elseif ( wc_prices_include_tax() || DefaultCustomerAddress::BASE === get_option( 'woocommerce_default_customer_address' ) || TaxBasedOn::BASE === get_option( 'woocommerce_tax_based_on' ) ) {
 			$location = array(
 				WC()->countries->get_base_country(),
 				WC()->countries->get_base_state(),

@@ -65,12 +65,11 @@
 	justify-content: center;
 	margin: 0 0 0 auto;
 	min-height: 50px;
-	padding: 8px $gap 0 $gap;
+	padding: 0 $gap;
 
 	@include breakpoint( '<960px' ) {
 		width: 100%;
 		order: 1;
-		margin-top: -8px;
 		margin-left: 0;
 		padding-left: math.div($gap, 2);
 		border-right: 0;

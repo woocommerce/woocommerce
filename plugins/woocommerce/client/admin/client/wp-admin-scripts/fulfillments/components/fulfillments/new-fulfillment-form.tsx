@@ -3,7 +3,7 @@
  */
 import { useEffect, useMemo, useState } from 'react';
 import { __ } from '@wordpress/i18n';
-import { Button, Icon } from '@wordpress/components';
+import { Icon } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -87,14 +87,21 @@ const NewFulfillmentForm: React.FC = () => {
 				onKeyDown={ ( event ) => {
 					if ( fulfillments.length > 0 ) {
 						if ( event.key === 'Enter' || event.key === ' ' ) {
+							event.preventDefault();
 							setOpenSection(
 								openSection === 'order' ? '' : 'order'
 							);
 						}
 					}
 				} }
-				tabIndex={ 0 }
+				tabIndex={ fulfillments.length > 0 ? 0 : -1 }
 				role="button"
+				aria-expanded={ openSection === 'order' }
+				aria-label={
+					openSection === 'order'
+						? __( 'Collapse pending items', 'woocommerce' )
+						: __( 'Expand pending items', 'woocommerce' )
+				}
 			>
 				<h3>
 					{ fulfillments.length === 0
@@ -102,7 +109,7 @@ const NewFulfillmentForm: React.FC = () => {
 						: __( 'Pending Items', 'woocommerce' ) }
 				</h3>
 				{ fulfillments.length > 0 && (
-					<Button __next40pxDefaultSize size="small">
+					<div aria-hidden="true">
 						<Icon
 							icon={
 								openSection === 'order'
@@ -111,7 +118,7 @@ const NewFulfillmentForm: React.FC = () => {
 							}
 							size={ 16 }
 						/>
-					</Button>
+					</div>
 				) }
 			</div>
 			{ ! isEditing && openSection === 'order' && (

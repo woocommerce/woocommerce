@@ -111,6 +111,45 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		add_action( 'woocommerce_privacy_remove_order_personal_data', array( __CLASS__, 'anonymize_customer' ) );
 
 		add_action( 'woocommerce_analytics_delete_order_stats', array( __CLASS__, 'sync_on_order_delete' ), 15, 2 );
+
+		add_action( 'woocommerce_created_customer', array( __CLASS__, 'merge_guest_customer_on_delayed_account_creation' ), 5, 2 );
+	}
+
+	/**
+	 * When a customer registers via delayed account creation (order confirmation page),
+	 * merge the existing guest lookup row instead of creating a duplicate.
+	 *
+	 * This runs on woocommerce_created_customer at priority 5, before the analytics
+	 * hooks (woocommerce_new_customer) that call update_registered_customer(). It updates
+	 * the guest row's user_id so that update_registered_customer() finds it via
+	 * get_customer_id_by_user_id() and updates in place rather than inserting a new row.
+	 *
+	 * @param int   $customer_id       New WP user ID.
+	 * @param array $new_customer_data Customer data including 'source'.
+	 */
+	public static function merge_guest_customer_on_delayed_account_creation( $customer_id, $new_customer_data ): void {
+		if ( empty( $new_customer_data['source'] ) || 'delayed-account-creation' !== $new_customer_data['source'] ) {
+			return;
+		}
+
+		$email = $new_customer_data['user_email'] ?? '';
+		if ( empty( $email ) ) {
+			return;
+		}
+
+		$guest_customer_id = self::get_guest_id_by_email( $email );
+		if ( ! $guest_customer_id ) {
+			return;
+		}
+
+		global $wpdb;
+		$wpdb->update(
+			self::get_db_table_name(),
+			array( 'user_id' => $customer_id ),
+			array( 'customer_id' => $guest_customer_id ),
+			array( '%d' ),
+			array( '%d' )
+		);
 	}
 
 	/**
