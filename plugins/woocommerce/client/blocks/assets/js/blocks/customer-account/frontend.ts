@@ -35,7 +35,8 @@ const focusTrigger = () => {
 	trigger?.focus();
 };
 
-// Pattern from other blocks to reliably set the background color from body.
+// Fall back to the body background so the dropdown surface blends with the
+// current theme when no explicit background color is set on the block.
 const getBodyBackgroundColor = (): string => {
 	const color = getComputedStyle( document.body ).backgroundColor;
 	if ( ! color || color === 'rgba(0, 0, 0, 0)' || color === 'transparent' ) {

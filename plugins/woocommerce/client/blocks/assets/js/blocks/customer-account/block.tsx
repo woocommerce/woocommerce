@@ -81,6 +81,7 @@ export const CustomerAccountBlock = ( {
 	if ( hasDropdownNavigation ) {
 		return (
 			<button
+				type="button"
 				className="wc-block-customer-account__toggle"
 				{ ...ariaAttributes }
 			>
