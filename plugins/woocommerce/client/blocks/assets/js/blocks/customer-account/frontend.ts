@@ -35,9 +35,8 @@ const focusTrigger = () => {
 	trigger?.focus();
 };
 
-// Fall back to the body background so the dropdown surface blends with the
-// current theme when no explicit background color is set on the block.
-// Mini Cart uses the same approach (see mini-cart/utils/set-styles.ts).
+// Set the background color from body so it's reliable. Pattern used in other blocks too
+// e.g. Mini Cart (see mini-cart/utils/set-styles.ts).
 const getBodyBackgroundColor = (): string => {
 	const color = getComputedStyle( document.body ).backgroundColor;
 	if ( ! color || color === 'rgba(0, 0, 0, 0)' || color === 'transparent' ) {
