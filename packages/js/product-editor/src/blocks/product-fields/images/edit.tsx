@@ -9,7 +9,7 @@ import { useDispatch } from '@wordpress/data';
 import clsx from 'clsx';
 import { createElement, useState } from '@wordpress/element';
 import { Icon, trash } from '@wordpress/icons';
-import { MediaItem } from '@wordpress/media-utils';
+import type { Attachment } from '@wordpress/media-utils';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import {
 	MediaUploader,
@@ -88,7 +88,7 @@ export function ImageBlockEdit( {
 	}
 
 	function uploadHandler( eventName: string ) {
-		return function handleFileUpload( upload: MediaItem | MediaItem[] ) {
+		return function handleFileUpload( upload: Attachment | Attachment[] ) {
 			recordEvent( eventName );
 
 			if ( Array.isArray( upload ) ) {
@@ -96,7 +96,7 @@ export function ImageBlockEdit( {
 					.filter( ( image ) => image.id )
 					.map( ( image ) => ( {
 						id: image.id,
-						name: image.title,
+						name: image.title ?? '',
 						src: image.url,
 						alt: image.alt,
 					} ) );
@@ -107,22 +107,28 @@ export function ImageBlockEdit( {
 					] );
 				}
 			} else if ( upload.id ) {
-				setPropertyValue( mapUploadImageToImage( upload ) );
+				setPropertyValue(
+					mapUploadImageToImage( upload as unknown as UploadImage )
+				);
 			}
 		};
 	}
 
-	function handleSelect( selection: UploadImage | UploadImage[] ) {
+	function handleSelect( selection: Attachment | Attachment[] ) {
 		recordEvent( 'product_images_add_via_media_library' );
 
 		if ( Array.isArray( selection ) ) {
 			const images = selection
-				.map( mapUploadImageToImage )
+				.map( ( media ) =>
+					mapUploadImageToImage( media as unknown as UploadImage )
+				)
 				.filter( ( image ) => image !== null );
 
 			setPropertyValue( images as Image[] );
 		} else {
-			setPropertyValue( mapUploadImageToImage( selection ) );
+			setPropertyValue(
+				mapUploadImageToImage( selection as unknown as UploadImage )
+			);
 		}
 	}
 
@@ -158,7 +164,7 @@ export function ImageBlockEdit( {
 		media,
 	}: {
 		replaceIndex: number;
-		media: UploadImage;
+		media: Attachment;
 	} ) {
 		recordEvent( 'product_images_replace_image_button_click' );
 
@@ -168,14 +174,18 @@ export function ImageBlockEdit( {
 				return;
 			}
 
-			const image = mapUploadImageToImage( media );
+			const image = mapUploadImageToImage(
+				media as unknown as UploadImage
+			);
 			if ( image ) {
 				const newImages = [ ...propertyValue ];
 				newImages[ replaceIndex ] = image;
 				setPropertyValue( newImages );
 			}
 		} else {
-			setPropertyValue( mapUploadImageToImage( media ) );
+			setPropertyValue(
+				mapUploadImageToImage( media as unknown as UploadImage )
+			);
 		}
 	}
 
@@ -251,7 +261,12 @@ export function ImageBlockEdit( {
 										'product_images_media_gallery_open'
 									);
 								} }
-								onSelect={ handleSelect }
+								onSelect={
+									( ( value: unknown ) =>
+										handleSelect(
+											value as Attachment | Attachment[]
+										) ) as ( value: unknown ) => void
+								}
 								onUpload={ uploadHandler(
 									'product_images_add_via_drag_and_drop_upload'
 								) }

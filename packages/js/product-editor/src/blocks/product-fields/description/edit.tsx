@@ -15,9 +15,9 @@ import { useEntityProp } from '@wordpress/core-data';
 import { __ } from '@wordpress/i18n';
 import {
 	BlockControls,
-	// @ts-expect-error no exported member.
 	useInnerBlocksProps,
-	// @ts-expect-error no exported member.
+	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+	// @ts-ignore No types for this exist yet.
 	BlockPreview,
 } from '@wordpress/block-editor';
 

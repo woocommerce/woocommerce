@@ -162,7 +162,6 @@ export function Header( {
 				{ isVariation ? (
 					<div className="woocommerce-product-header__back">
 						<Tooltip
-							// @ts-expect-error className is missing in TS, should remove this when it is included.
 							className="woocommerce-product-header__back-tooltip"
 							text={ RETURN_TO_MAIN_PRODUCT }
 						>

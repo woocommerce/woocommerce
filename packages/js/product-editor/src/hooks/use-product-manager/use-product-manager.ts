@@ -122,11 +122,11 @@ export function useProductManager< T = Product >( postType: string ) {
 			const { deleteEntityRecord, saveEditedEntityRecord } =
 				dispatch( 'core' );
 
-			await saveEditedEntityRecord< T >( 'postType', postType, id, {
+			await saveEditedEntityRecord( 'postType', postType, id, {
 				throwOnError: true,
 			} );
 
-			const deletedProduct = await deleteEntityRecord< T >(
+			const deletedProduct = await deleteEntityRecord(
 				'postType',
 				postType,
 				id,

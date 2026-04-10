@@ -159,7 +159,7 @@ export function DownloadsMenuItem( {
 							multiple={ 'add' }
 							value={ downloadsIds }
 							onSelect={ handleMediaUploadSelect }
-							render={ ( { open } ) => (
+							render={ ( { open }: { open: () => void } ) => (
 								<MenuItem
 									onClick={ uploadFilesClickHandler( open ) }
 								>

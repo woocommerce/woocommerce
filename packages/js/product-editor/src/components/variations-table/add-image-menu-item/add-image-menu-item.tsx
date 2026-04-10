@@ -88,7 +88,7 @@ export function AddImageMenuItem( {
 			// @ts-ignore disabled prop exists
 			mode={ 'upload' }
 			multiple={ false }
-			render={ ( { open } ) => (
+			render={ ( { open }: { open: () => void } ) => (
 				<MenuItem onClick={ uploadFilesClickHandler( open ) }>
 					{ __( 'Add image', 'woocommerce' ) }
 				</MenuItem>

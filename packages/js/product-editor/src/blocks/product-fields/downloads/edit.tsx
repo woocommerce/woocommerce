@@ -11,7 +11,7 @@ import {
 	useState,
 } from '@wordpress/element';
 import { closeSmall } from '@wordpress/icons';
-import { MediaItem } from '@wordpress/media-utils';
+import type { Attachment } from '@wordpress/media-utils';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import {
 	ListItem,
@@ -105,7 +105,7 @@ export function DownloadBlockEdit( {
 		setShowManageDownloadLimitsModal( false );
 	}
 
-	function handleFileUpload( files: MediaItem | MediaItem[] ) {
+	function handleFileUpload( files: Attachment | Attachment[] ) {
 		if ( ! Array.isArray( files ) ) return;
 
 		const newFiles = files.filter(

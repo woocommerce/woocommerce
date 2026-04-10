@@ -41,7 +41,12 @@ export const ALIGNMENT_CONTROLS = [
 export default function AlignmentToolbarButton( {
 	align,
 	setAlignment,
-}: AlignmentControl ) {
+}: {
+	align?: string;
+	setAlignment: (
+		alignment: 'left' | 'center' | 'right' | 'justify' | undefined
+	) => void;
+} ) {
 	return (
 		<AlignmentControl
 			alignmentControls={ ALIGNMENT_CONTROLS }
