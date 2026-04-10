@@ -190,6 +190,23 @@ const webpackConfig = {
 		},
 	},
 	plugins: [
+		// ExternalModule instances (wp.*, wc.* externals) are not serializable by webpack's PackFileCacheStrategy.
+		// Suppress here since ignoreWarnings only affects compilation warnings, not infrastructure logs.
+		{
+			apply( compiler ) {
+				compiler.hooks.infrastructureLog.tap(
+					'SuppressExternalModuleCacheWarning',
+					( name, type, args ) => {
+						if (
+							type === 'warn' &&
+							name === 'webpack.cache.PackFileCacheStrategy'
+						) {
+							return args[ 0 ]?.includes?.( 'ExternalModule' );
+						}
+					}
+				);
+			},
+		},
 		...styleConfig.plugins,
 		// Runs TypeScript type checker on a separate process.
 		! process.env.STORYBOOK && new ForkTsCheckerWebpackPlugin(),
