@@ -171,9 +171,9 @@ class Controller extends AbstractBlock {
 				 * @param array    $block    The full block, including name and attributes.
 				 * @return string Returns the modified output of the query block.
 				 */
-				$render_product_collection_callback = static function ( $content, $block ) use ( &$enhanced_query_stack, &$dirty_enhanced_queries, &$render_product_collection_callback, $parsed_block ) {
+				$render_product_collection_callback = static function ( $content, $block ) use ( &$enhanced_query_stack, &$dirty_enhanced_queries, &$render_product_collection_callback ) {
 					$force_page_reload =
-						$parsed_block['attrs']['forcePageReload'] ?? false &&
+						$block['attrs']['forcePageReload'] ?? false &&
 						isset( $block['attrs']['queryId'] );
 
 					if ( $force_page_reload ) {
