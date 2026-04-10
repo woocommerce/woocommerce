@@ -171,6 +171,195 @@ describe( 'woocommerce/products store – product context derived state', () => 
 		} );
 	} );
 
+	describe( 'findProductVariation', () => {
+		it( 'returns null when product is not in the store', () => {
+			expect( mockRegisteredStore ).not.toBeNull();
+
+			const result = mockRegisteredStore!.state.findProductVariation( {
+				id: 999,
+			} );
+
+			expect( result ).toBeNull();
+		} );
+
+		it( 'returns the product itself for a simple product', () => {
+			expect( mockRegisteredStore ).not.toBeNull();
+
+			const simpleProduct = {
+				id: 1,
+				type: 'simple',
+			} as ProductResponseItem;
+			mockRegisteredStore!.state.products[ 1 ] = simpleProduct;
+
+			const result = mockRegisteredStore!.state.findProductVariation( {
+				id: 1,
+			} );
+
+			expect( result ).toBe( simpleProduct );
+		} );
+
+		it( 'returns the matched variation when selectedAttributes match and the variation is populated', () => {
+			expect( mockRegisteredStore ).not.toBeNull();
+
+			const variableProduct = {
+				id: 1,
+				type: 'variable',
+				variations: [
+					{
+						id: 10,
+						attributes: [ { name: 'Color', value: 'red' } ],
+					},
+				],
+			} as unknown as ProductResponseItem;
+			const populatedVariation = {
+				id: 10,
+				name: 'Red Variation',
+			} as ProductResponseItem;
+			mockRegisteredStore!.state.products[ 1 ] = variableProduct;
+			mockRegisteredStore!.state.productVariations[ 10 ] =
+				populatedVariation;
+
+			const result = mockRegisteredStore!.state.findProductVariation( {
+				id: 1,
+				selectedAttributes: [ { attribute: 'Color', value: 'red' } ],
+			} );
+
+			expect( result ).toBe( populatedVariation );
+		} );
+
+		it( 'returns null when attributes match but the variation is not populated', () => {
+			expect( mockRegisteredStore ).not.toBeNull();
+
+			const variableProduct = {
+				id: 1,
+				type: 'variable',
+				variations: [
+					{
+						id: 10,
+						attributes: [ { name: 'Color', value: 'red' } ],
+					},
+				],
+			} as unknown as ProductResponseItem;
+			mockRegisteredStore!.state.products[ 1 ] = variableProduct;
+			// productVariations intentionally empty.
+
+			const result = mockRegisteredStore!.state.findProductVariation( {
+				id: 1,
+				selectedAttributes: [ { attribute: 'Color', value: 'red' } ],
+			} );
+
+			expect( result ).toBeNull();
+		} );
+
+		it( 'returns the parent product when the product is variable and no attributes are selected', () => {
+			expect( mockRegisteredStore ).not.toBeNull();
+
+			const variableProduct = {
+				id: 1,
+				type: 'variable',
+				variations: [
+					{
+						id: 10,
+						attributes: [ { name: 'Color', value: 'red' } ],
+					},
+				],
+			} as unknown as ProductResponseItem;
+			mockRegisteredStore!.state.products[ 1 ] = variableProduct;
+
+			expect(
+				mockRegisteredStore!.state.findProductVariation( { id: 1 } )
+			).toBe( variableProduct );
+			expect(
+				mockRegisteredStore!.state.findProductVariation( {
+					id: 1,
+					selectedAttributes: [],
+				} )
+			).toBe( variableProduct );
+		} );
+
+		it( 'returns null when attributes do not match any variation', () => {
+			expect( mockRegisteredStore ).not.toBeNull();
+
+			const variableProduct = {
+				id: 1,
+				type: 'variable',
+				variations: [
+					{
+						id: 10,
+						attributes: [ { name: 'Color', value: 'red' } ],
+					},
+				],
+			} as unknown as ProductResponseItem;
+			mockRegisteredStore!.state.products[ 1 ] = variableProduct;
+			mockRegisteredStore!.state.productVariations[ 10 ] = {
+				id: 10,
+			} as ProductResponseItem;
+
+			const result = mockRegisteredStore!.state.findProductVariation( {
+				id: 1,
+				selectedAttributes: [ { attribute: 'Color', value: 'blue' } ],
+			} );
+
+			expect( result ).toBeNull();
+		} );
+	} );
+
+	describe( 'productInContext', () => {
+		it( 'returns product when variationId is null (simple product path)', () => {
+			expect( mockRegisteredStore ).not.toBeNull();
+
+			mockRegisteredStore!.state.productId = 42;
+			mockRegisteredStore!.state.variationId = null;
+
+			expect( mockRegisteredStore!.state.productInContext ).toBe(
+				mockProduct
+			);
+		} );
+
+		it( 'returns selectedVariation when variationId is set and populated', () => {
+			expect( mockRegisteredStore ).not.toBeNull();
+
+			mockRegisteredStore!.state.productId = 42;
+			mockRegisteredStore!.state.variationId = 99;
+
+			expect( mockRegisteredStore!.state.productInContext ).toBe(
+				mockVariation
+			);
+		} );
+
+		it( 'falls back to product when variation is missing from productVariations', () => {
+			expect( mockRegisteredStore ).not.toBeNull();
+
+			mockRegisteredStore!.state.productId = 42;
+			mockRegisteredStore!.state.variationId = 123;
+
+			expect( mockRegisteredStore!.state.productInContext ).toBe(
+				mockProduct
+			);
+		} );
+
+		it( 'returns null when neither product nor variation resolves', () => {
+			expect( mockRegisteredStore ).not.toBeNull();
+
+			mockRegisteredStore!.state.productId = 0;
+			mockRegisteredStore!.state.variationId = null;
+
+			expect( mockRegisteredStore!.state.productInContext ).toBeNull();
+		} );
+
+		it( 'honors local context over state IDs', () => {
+			expect( mockRegisteredStore ).not.toBeNull();
+
+			mockRegisteredStore!.state.productId = 1;
+			mockRegisteredStore!.state.variationId = null;
+			mockContext = { productId: 42, variationId: 99 };
+
+			expect( mockRegisteredStore!.state.productInContext ).toBe(
+				mockVariation
+			);
+		} );
+	} );
+
 	describe( 'Product block path (context without variationId)', () => {
 		it( 'product reads productId from context', () => {
 			expect( mockRegisteredStore ).not.toBeNull();
