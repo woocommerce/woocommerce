@@ -433,8 +433,9 @@ function applyPatch( patchFile ) {
 	}
 
 	try {
+		// Double `git apply` to gracefully handle older versions of git.
 		execSync(
-			`git apply --allow-empty "${ patchFile }"`,
+			`git apply --allow-empty "${ patchFile }" || git apply "${ patchFile }"`,
 			{ cwd: PKG_ROOT, stdio: 'pipe' }
 		);
 		console.log( `Applied patch: ${ relative( PKG_ROOT, patchFile ) }` );
