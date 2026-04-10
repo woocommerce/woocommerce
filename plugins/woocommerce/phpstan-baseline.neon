@@ -46588,12 +46588,6 @@ parameters:
 			path: src/Admin/Features/Fulfillments/FulfillmentUtils.php
 
 		-
-			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Admin/Features/Fulfillments/FulfillmentUtils.php
-
-		-
 			message: '#^Cannot access offset int on array\|false\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
