@@ -1,4 +1,4 @@
-Significance: patch
-Type: performance
+Significance: minor
+Type: dev
 
 Improve build time for experimental by using webpack filesystem cache.
