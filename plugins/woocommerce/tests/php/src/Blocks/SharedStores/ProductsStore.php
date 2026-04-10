@@ -14,10 +14,25 @@ use WC_Product_Grouped;
  */
 class ProductsStore extends \WP_UnitTestCase {
 
+	/**
+	 * Consent string required by the ProductsStore API.
+	 *
+	 * @var string
+	 */
 	protected $consent = 'I acknowledge that using experimental APIs means my theme or plugin will inevitably break in the next version of WooCommerce';
 
+	/**
+	 * The Interactivity API store namespace under test.
+	 *
+	 * @var string
+	 */
 	protected $store_namespace = 'woocommerce/products';
 
+	/**
+	 * Captured original Hydration registry entry for restoration in tearDown.
+	 *
+	 * @var mixed
+	 */
 	protected $original_hydration_registry_entry = null;
 
 	/**
@@ -31,24 +46,36 @@ class ProductsStore extends \WP_UnitTestCase {
 		parent::tearDown();
 	}
 
+	/**
+	 * Test that load_product throws without proper consent.
+	 */
 	public function test_load_product_throws_without_consent(): void {
 		$this->expectException( \InvalidArgumentException::class );
 
 		TestedProductsStore::load_product( 'nope', 123 );
 	}
 
+	/**
+	 * Test that load_variations throws without proper consent.
+	 */
 	public function test_load_variations_throws_without_consent(): void {
 		$this->expectException( \InvalidArgumentException::class );
 
 		TestedProductsStore::load_variations( 'nope', 123 );
 	}
 
+	/**
+	 * Test that load_purchasable_child_products throws without proper consent.
+	 */
 	public function test_load_purchasable_child_products_throws_without_consent(): void {
 		$this->expectException( \InvalidArgumentException::class );
 
 		TestedProductsStore::load_purchasable_child_products( 'nope', 123 );
 	}
 
+	/**
+	 * Test that load_product populates the interactivity state.
+	 */
 	public function test_load_product_populates_state(): void {
 		$product = WC_Helper_Product::create_simple_product();
 
@@ -64,6 +91,9 @@ class ProductsStore extends \WP_UnitTestCase {
 		$product->delete( true );
 	}
 
+	/**
+	 * Test that load_product is memoized per product ID.
+	 */
 	public function test_load_product_is_memoized_per_id(): void {
 		$product = WC_Helper_Product::create_simple_product();
 
@@ -85,6 +115,9 @@ class ProductsStore extends \WP_UnitTestCase {
 		$product->delete( true );
 	}
 
+	/**
+	 * Test that load_variations populates the interactivity state.
+	 */
 	public function test_load_variations_populates_state(): void {
 		$product       = WC_Helper_Product::create_variation_product();
 		$variation_ids = $product->get_children();
@@ -107,6 +140,9 @@ class ProductsStore extends \WP_UnitTestCase {
 		$product->delete( true );
 	}
 
+	/**
+	 * Test that load_variations is memoized per parent product.
+	 */
 	public function test_load_variations_is_memoized_per_parent(): void {
 		$product = WC_Helper_Product::create_variation_product();
 
@@ -142,11 +178,14 @@ class ProductsStore extends \WP_UnitTestCase {
 		$product->delete( true );
 	}
 
+	/**
+	 * Test that a second call to load_variations filters by parent.
+	 */
 	public function test_load_variations_second_call_filters_by_parent(): void {
-		$reflection   = new \ReflectionClass( TestedProductsStore::class );
-		$variations   = $reflection->getProperty( 'product_variations' );
+		$reflection = new \ReflectionClass( TestedProductsStore::class );
+		$variations = $reflection->getProperty( 'product_variations' );
 		$variations->setAccessible( true );
-		$loaded       = $reflection->getProperty( 'loaded_variation_parents' );
+		$loaded = $reflection->getProperty( 'loaded_variation_parents' );
 		$loaded->setAccessible( true );
 
 		$variations->setValue(
@@ -176,12 +215,18 @@ class ProductsStore extends \WP_UnitTestCase {
 		$this->assertArrayNotHasKey( 20, $result );
 	}
 
+	/**
+	 * Test that load_purchasable_child_products returns empty for a bogus ID.
+	 */
 	public function test_load_purchasable_child_products_returns_empty_for_bogus_id(): void {
 		$result = TestedProductsStore::load_purchasable_child_products( $this->consent, 999999999 );
 
 		$this->assertSame( array(), $result );
 	}
 
+	/**
+	 * Test that load_purchasable_child_products returns empty for a childless parent.
+	 */
 	public function test_load_purchasable_child_products_returns_empty_for_childless_parent(): void {
 		$grouped = new WC_Product_Grouped();
 		$grouped->set_name( 'Empty Grouped' );
@@ -194,6 +239,9 @@ class ProductsStore extends \WP_UnitTestCase {
 		$grouped->delete( true );
 	}
 
+	/**
+	 * Test that load_purchasable_child_products filters non-purchasable children.
+	 */
 	public function test_load_purchasable_child_products_filters_non_purchasable(): void {
 		$purchasable     = WC_Helper_Product::create_simple_product();
 		$non_purchasable = WC_Helper_Product::create_simple_product();
@@ -232,6 +280,9 @@ class ProductsStore extends \WP_UnitTestCase {
 		$non_purchasable->delete( true );
 	}
 
+	/**
+	 * Test that register_getters is idempotent.
+	 */
 	public function test_register_getters_is_idempotent(): void {
 		$product = WC_Helper_Product::create_simple_product();
 
@@ -260,6 +311,9 @@ class ProductsStore extends \WP_UnitTestCase {
 		$product->delete( true );
 	}
 
+	/**
+	 * Test that the product getter reads from state.
+	 */
 	public function test_product_getter_reads_from_state(): void {
 		$this->setExpectedIncorrectUsage( 'WP_Interactivity_API::get_context' );
 
@@ -284,6 +338,9 @@ class ProductsStore extends \WP_UnitTestCase {
 		$product->delete( true );
 	}
 
+	/**
+	 * Test that the selectedVariation getter reads from state.
+	 */
 	public function test_selected_variation_getter_reads_from_state(): void {
 		$this->setExpectedIncorrectUsage( 'WP_Interactivity_API::get_context' );
 
@@ -310,6 +367,9 @@ class ProductsStore extends \WP_UnitTestCase {
 		$product->delete( true );
 	}
 
+	/**
+	 * Test that productInContext unwraps closure selectedVariation.
+	 */
 	public function test_product_in_context_unwraps_closure_selected_variation(): void {
 		$this->setExpectedIncorrectUsage( 'WP_Interactivity_API::get_context' );
 
@@ -404,7 +464,7 @@ class ProductsStore extends \WP_UnitTestCase {
 			$this->original_hydration_registry_entry = $registry[ Hydration::class ] ?? false;
 		}
 
-		$shared_type_class = 'Automattic\\WooCommerce\\Blocks\\Registry\\SharedType';
+		$shared_type_class            = 'Automattic\\WooCommerce\\Blocks\\Registry\\SharedType';
 		$registry[ Hydration::class ] = new $shared_type_class(
 			function () use ( $fake ) {
 				return $fake;
