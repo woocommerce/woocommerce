@@ -480,13 +480,58 @@ class FilterData {
 			md5(
 				wp_json_encode(
 					array(
-						'query_vars'  => $query_vars,
+						'query_vars'  => $this->normalize_query_vars( $query_vars ),
 						'extra'       => $extra,
 						'filter_type' => $filter_type,
 					)
 				)
 			)
 		);
+	}
+
+	/**
+	 * Normalise query vars for cache key generation so that logically equivalent
+	 * filter combinations produce the same hash.
+	 *
+	 * Rules applied (cache key only – the original $query_vars are never modified):
+	 * - All keys are sorted alphabetically (ksort).
+	 * - Values for keys that start with "filter_", equal "rating_filter", or are
+	 *   built-in taxonomy short-names ("categories", "tags", "brands"):
+	 *   comma-separated items are trimmed, lower-cased, sorted, then re-joined.
+	 * - Values for keys that start with "query_type_": trimmed and lower-cased.
+	 * - Values for "min_price" / "max_price": trimmed.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @param array $query_vars Raw query vars.
+	 * @return array Normalised copy of $query_vars.
+	 */
+	private function normalize_query_vars( array $query_vars ): array {
+		// Built-in taxonomy filter params that are treated as unordered sets.
+		// See Params::get_taxonomy_params() for the source of these short names.
+		$taxonomy_set_params = array( 'categories', 'tags', 'brands' );
+
+		ksort( $query_vars );
+
+		foreach ( $query_vars as $key => $value ) {
+			if ( ! is_string( $key ) || ! is_string( $value ) ) {
+				continue;
+			}
+
+			if ( str_starts_with( $key, 'filter_' ) || 'rating_filter' === $key || in_array( $key, $taxonomy_set_params, true ) ) {
+				$pieces = array_map( 'trim', explode( ',', $value ) );
+				$pieces = array_map( 'strtolower', $pieces );
+				$pieces = array_values( array_unique( array_filter( $pieces, static fn( string $p ): bool => '' !== $p ) ) );
+				sort( $pieces );
+				$query_vars[ $key ] = implode( ',', $pieces );
+			} elseif ( str_starts_with( $key, 'query_type_' ) ) {
+				$query_vars[ $key ] = strtolower( trim( $value ) );
+			} elseif ( 'min_price' === $key || 'max_price' === $key ) {
+				$query_vars[ $key ] = trim( $value );
+			}
+		}
+
+		return $query_vars;
 	}
 
 	/**
@@ -547,7 +592,7 @@ class FilterData {
 	 * @return string Comma-separated list of product IDs.
 	 */
 	private function get_cached_product_ids( array $query_vars ) {
-		$cache_key = WC_Cache_Helper::get_cache_prefix( CacheController::CACHE_GROUP ) . md5( wp_json_encode( $query_vars ) );
+		$cache_key = WC_Cache_Helper::get_cache_prefix( CacheController::CACHE_GROUP ) . md5( wp_json_encode( $this->normalize_query_vars( $query_vars ) ) );
 		$cache     = wp_cache_get( $cache_key );
 
 		if ( $cache ) {

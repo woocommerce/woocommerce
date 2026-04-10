@@ -477,7 +477,11 @@
 			"isIgnored": true
 		},
 		{
-			"label": "@wordpress/* runtime-dependencies",
+			"label": "@wordpress/* runtime-dependencies (pnpm 10 requires valid semver in peerDependencies, so peer deps are excluded here)",
+			"dependencyTypes": [
+				"prod",
+				"dev"
+			],
 			"dependencies": [
 				"@wordpress/**"
 			],
