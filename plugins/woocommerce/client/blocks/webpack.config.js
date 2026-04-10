@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+const path = require( 'path' );
+
+/**
  * Internal dependencies
  */
 const { NODE_ENV, getAlias } = require( './bin/webpack-helpers.js' );
@@ -16,7 +21,6 @@ const {
 const interactivityBlocksConfig = require( './bin/webpack-config-interactive-blocks.js' );
 const interactivityAPIConfig = require( './bin/webpack-config-interactivity.js' );
 const dependencyDetectionConfig = require( './bin/webpack-config-dependency-detection.js' );
-const path = require( 'path' );
 const isWatch =
 	NODE_ENV === 'development' && process.argv.includes( '--watch' );
 
@@ -24,20 +28,21 @@ const getCacheConfig = ( name, configPaths = [] ) =>
 	isWatch || process.env.CI
 		? { type: 'memory' }
 		: {
-			type: 'filesystem',
-			cacheDirectory: path.resolve(
-				__dirname,
-				`node_modules/.cache/webpack-${ name }`
-			),
-			buildDependencies: {
-				config: [
-					__filename,
-					...configPaths.map( ( configPath ) =>
-						path.resolve( __dirname, configPath )
-					),
-				],
-			},
-		};
+				type: 'filesystem',
+				cacheDirectory: path.resolve(
+					__dirname,
+					`node_modules/.cache/webpack-${ name }`
+				),
+				buildDependencies: {
+					config: [
+						__filename,
+						path.resolve( __dirname, 'bin/webpack-helpers.js' ),
+						...configPaths.map( ( configPath ) =>
+							path.resolve( __dirname, configPath )
+						),
+					],
+				},
+		  };
 
 // Only options shared between all configs should be defined here.
 const sharedConfig = {
