@@ -160,25 +160,6 @@ export class Editor extends CoreEditor {
 			.waitFor();
 	}
 
-	async createTaxonomyTemplate( { templateName }: { templateName: string } ) {
-		await this.page
-			.getByRole( 'button', {
-				name: 'Add Template',
-			} )
-			.click();
-		await this.page
-			.getByRole( 'button', {
-				name: templateName,
-			} )
-			.click();
-		await this.page
-			.getByRole( 'button', {
-				name: 'For all items',
-			} )
-			.click();
-		await this.page.getByLabel( 'Fallback content' ).click();
-	}
-
 	async revertTemplate( { templateName }: { templateName: string } ) {
 		await this.searchTemplate( { templateName } );
 

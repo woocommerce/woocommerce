@@ -37,7 +37,7 @@ test.describe( 'Template customization', () => {
 					postType: 'wp_template',
 				} );
 
-				await editor.createTaxonomyTemplate( {
+				await editor.createTemplate( {
 					templateName: testData.templateName,
 				} );
 			} else {
