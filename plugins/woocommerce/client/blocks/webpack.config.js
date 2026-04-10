@@ -36,6 +36,7 @@ const getCacheConfig = ( name, configPaths = [] ) =>
 				buildDependencies: {
 					config: [
 						__filename,
+						path.resolve( __dirname, 'bin/webpack-configs.js' ),
 						path.resolve( __dirname, 'bin/webpack-helpers.js' ),
 						...configPaths.map( ( configPath ) =>
 							path.resolve( __dirname, configPath )
@@ -67,23 +68,21 @@ const sharedConfig = {
 
 const CartAndCheckoutFrontendConfig = {
 	...sharedConfig,
-	cache: getCacheConfig( 'cart-and-checkout-frontend', [
-		'bin/webpack-configs.js',
-	] ),
+	cache: getCacheConfig( 'cart-and-checkout-frontend', [] ),
 	...getCartAndCheckoutFrontendConfig( { alias: getAlias() } ),
 };
 
 // Core config for shared libraries.
 const CoreConfig = {
 	...sharedConfig,
-	cache: getCacheConfig( 'core', [ 'bin/webpack-configs.js' ] ),
+	cache: getCacheConfig( 'core', [] ),
 	...getCoreConfig( { alias: getAlias() } ),
 };
 
 // Main Blocks config for registering Blocks and for the Editor.
 const MainConfig = {
 	...sharedConfig,
-	cache: getCacheConfig( 'main', [ 'bin/webpack-configs.js' ] ),
+	cache: getCacheConfig( 'main', [] ),
 	...getMainConfig( {
 		alias: getAlias(),
 	} ),
@@ -92,7 +91,7 @@ const MainConfig = {
 // Frontend config for scripts used in the store itself.
 const FrontendConfig = {
 	...sharedConfig,
-	cache: getCacheConfig( 'frontend', [ 'bin/webpack-configs.js' ] ),
+	cache: getCacheConfig( 'frontend', [] ),
 	...getFrontConfig( { alias: getAlias() } ),
 };
 
@@ -101,7 +100,7 @@ const FrontendConfig = {
  */
 const ExtensionsConfig = {
 	...sharedConfig,
-	cache: getCacheConfig( 'extensions', [ 'bin/webpack-configs.js' ] ),
+	cache: getCacheConfig( 'extensions', [] ),
 	...getExtensionsConfig( { alias: getAlias() } ),
 };
 
@@ -110,7 +109,7 @@ const ExtensionsConfig = {
  */
 const PaymentsConfig = {
 	...sharedConfig,
-	cache: getCacheConfig( 'payments', [ 'bin/webpack-configs.js' ] ),
+	cache: getCacheConfig( 'payments', [] ),
 	...getPaymentsConfig( { alias: getAlias() } ),
 };
 
@@ -119,7 +118,7 @@ const PaymentsConfig = {
  */
 const StylingConfig = {
 	...sharedConfig,
-	cache: getCacheConfig( 'styling', [ 'bin/webpack-configs.js' ] ),
+	cache: getCacheConfig( 'styling', [] ),
 	...getStylingConfig( { alias: getAlias() } ),
 };
 
@@ -128,23 +127,19 @@ const StylingConfig = {
  */
 const SiteEditorConfig = {
 	...sharedConfig,
-	cache: getCacheConfig( 'site-editor', [ 'bin/webpack-configs.js' ] ),
+	cache: getCacheConfig( 'site-editor', [] ),
 	...getSiteEditorConfig( { alias: getAlias() } ),
 };
 
 const InteractivityBlocksConfig = {
 	...sharedConfig,
-	cache: getCacheConfig( 'interactivity-blocks', [
-		'bin/webpack-config-interactive-blocks.js',
-	] ),
+	cache: getCacheConfig( 'interactivity-blocks', [ 'bin/webpack-config-interactive-blocks.js' ] ),
 	...interactivityBlocksConfig,
 };
 
 const InteractivityAPIConfig = {
 	...sharedConfig,
-	cache: getCacheConfig( 'interactivity-api', [
-		'bin/webpack-config-interactivity.js',
-	] ),
+	cache: getCacheConfig( 'interactivity-api', [ 'bin/webpack-config-interactivity.js' ] ),
 	...interactivityAPIConfig,
 };
 
@@ -154,9 +149,7 @@ const InteractivityAPIConfig = {
  */
 const DependencyDetectionConfig = {
 	...sharedConfig,
-	cache: getCacheConfig( 'dependency-detection', [
-		'bin/webpack-config-dependency-detection.js',
-	] ),
+	cache: getCacheConfig( 'dependency-detection', [ 'bin/webpack-config-dependency-detection.js' ] ),
 	...dependencyDetectionConfig,
 };
 
