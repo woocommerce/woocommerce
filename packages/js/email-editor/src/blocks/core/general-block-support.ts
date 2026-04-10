@@ -60,15 +60,8 @@ function removeBlockStyles() {
 			// Skip block styles that are in the BLOCK_STYLES_TO_PRESERVE array
 			return;
 		}
-		const blockStyles = (
-			select( 'core/blocks' ) as {
-				getBlockStyles: ( name: string ) => Array< {
-					name: string;
-					label: string;
-					isDefault?: boolean;
-				} >;
-			}
-		 ).getBlockStyles( blockName );
+		const blockStyles =
+			select( 'core/blocks' ).getBlockStyles( blockName );
 		if ( ! Array.isArray( blockStyles ) || blockStyles?.length === 0 ) {
 			return;
 		}

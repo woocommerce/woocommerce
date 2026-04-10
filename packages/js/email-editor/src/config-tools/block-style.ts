@@ -27,15 +27,7 @@ export function unregisterBlockStyleForEmail(
 ): void {
 	// Try to preserve the style definition before unregistering
 	const currentStyles =
-		(
-			select( 'core/blocks' ) as {
-				getBlockStyles: ( name: string ) => Array< {
-					name: string;
-					label: string;
-					isDefault?: boolean;
-				} >;
-			}
-		 ).getBlockStyles( blockName ) || [];
+		select( 'core/blocks' ).getBlockStyles( blockName ) || [];
 	const found = currentStyles.find( ( s ) => s.name === styleName );
 	if ( found ) {
 		const list = preservedUnregisteredStyles.get( blockName ) || [];

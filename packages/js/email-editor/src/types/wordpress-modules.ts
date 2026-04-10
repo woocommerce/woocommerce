@@ -35,35 +35,15 @@ declare module '@wordpress/preferences' {
 	export const PreferenceToggleMenuItem: any;
 }
 
-// Augment @wordpress/notices with richer action/selector types
+// Augment @wordpress/notices with Notice type used by email-editor components.
+// The store itself is now properly typed via native types + internal-ts-config.
 declare module '@wordpress/notices' {
-	import { StoreDescriptor } from '@wordpress/data/build-types/types';
 	import { NoticeProps } from '@wordpress/components/build-types/notice/types';
 	import { WPNotice } from '@wordpress/notices/build-types/store/selectors';
 
-	export * from '@wordpress/notices';
-
-	type Notice = Omit< NoticeProps, 'children' > & {
+	export type Notice = Omit< NoticeProps, 'children' > & {
 		id: string;
 		content: WPNotice[ 'content' ];
 		type: WPNotice[ 'type' ];
 	};
-
-	export const store: { name: 'core/notices' } & StoreDescriptor< {
-		reducer: () => unknown;
-		actions: {
-			createSuccessNotice: ( content: string, options?: unknown ) => void;
-			createErrorNotice: ( content: string, options?: unknown ) => void;
-			removeNotice: ( id: string, context?: string ) => void;
-			createNotice: (
-				status: 'error' | 'info' | 'success' | 'warning' | undefined,
-				content: string,
-				options?: unknown
-			) => void;
-		};
-		selectors: {
-			getNotices: ( state?: unknown, context?: string ) => Notice[];
-			removeNotice: ( id: string, context?: string ) => void;
-		};
-	} >;
 }
