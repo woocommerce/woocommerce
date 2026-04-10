@@ -62,17 +62,17 @@ class POSPinServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox validate_pin_format accepts 5-digit PINs.
+	 * @testdox validate_pin_format rejects 5-digit PINs.
 	 */
-	public function test_validate_pin_format_accepts_5_digits(): void {
-		$this->assertTrue( $this->service->validate_pin_format( '48291' ) );
+	public function test_validate_pin_format_rejects_5_digits(): void {
+		$this->assertFalse( $this->service->validate_pin_format( '48291' ) );
 	}
 
 	/**
-	 * @testdox validate_pin_format accepts 6-digit PINs.
+	 * @testdox validate_pin_format rejects 6-digit PINs.
 	 */
-	public function test_validate_pin_format_accepts_6_digits(): void {
-		$this->assertTrue( $this->service->validate_pin_format( '482910' ) );
+	public function test_validate_pin_format_rejects_6_digits(): void {
+		$this->assertFalse( $this->service->validate_pin_format( '482910' ) );
 	}
 
 	/**

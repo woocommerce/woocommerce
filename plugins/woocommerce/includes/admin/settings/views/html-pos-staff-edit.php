@@ -66,11 +66,11 @@ if ( ! isset( $has_pin, $user_id, $user, $role_name ) || ! $user instanceof WP_U
 						pattern="[0-9]*"
 						inputmode="numeric"
 						minlength="4"
-						maxlength="6"
+						maxlength="4"
 						class="input-text"
 						autocomplete="off"
 					/>
-					<p class="description"><?php esc_html_e( 'Use 4 to 6 digits.', 'woocommerce' ); ?></p>
+					<p class="description"><?php esc_html_e( 'Enter exactly 4 digits.', 'woocommerce' ); ?></p>
 				</td>
 			</tr>
 		</tbody>

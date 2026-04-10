@@ -18,14 +18,14 @@ class POSPinService {
 	const PIN_INDEX_META_KEY = '_woocommerce_pos_pin_index';
 
 	/**
-	 * Validates that a PIN is 4-6 numeric digits.
+	 * Validates that a PIN is exactly 4 numeric digits.
 	 *
 	 * @since 10.8.0
 	 * @param string $pin The PIN to validate.
 	 * @return bool
 	 */
 	public function validate_pin_format( string $pin ): bool {
-		return 1 === preg_match( '/^\d{4,6}$/', $pin );
+		return 1 === preg_match( '/^\d{4}$/', $pin );
 	}
 
 	/**
