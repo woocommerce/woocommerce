@@ -18,13 +18,10 @@ defined( 'ABSPATH' ) || exit;
  * @return array
  */
 function wc_get_text_attributes( $raw_attributes ) {
-	if ( is_array( $raw_attributes ) ) {
-		$raw_attributes = implode( WC_DELIMITER, array_filter( $raw_attributes, 'is_scalar' ) );
-	}
 	if ( ! is_string( $raw_attributes ) ) {
 		return array();
 	}
-	return array_filter( array_map( 'trim', explode( WC_DELIMITER, html_entity_decode( $raw_attributes, ENT_QUOTES, get_bloginfo( 'charset' ) ) ) ), 'wc_get_text_attributes_filter_callback' );
+    return array_filter( array_map( 'trim', explode( WC_DELIMITER, html_entity_decode( $raw_attributes, ENT_QUOTES, get_bloginfo( 'charset' ) ) ) ), 'wc_get_text_attributes_filter_callback' );
 }
 
 /**
