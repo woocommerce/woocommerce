@@ -173,7 +173,7 @@ class Controller extends AbstractBlock {
 				 */
 				$render_product_collection_callback = static function ( $content, $block ) use ( &$enhanced_query_stack, &$dirty_enhanced_queries, &$render_product_collection_callback ) {
 					$force_page_reload =
-						$block['attrs']['forcePageReload'] ?? false &&
+						( $block['attrs']['forcePageReload'] ?? false ) &&
 						isset( $block['attrs']['queryId'] );
 
 					if ( $force_page_reload ) {
