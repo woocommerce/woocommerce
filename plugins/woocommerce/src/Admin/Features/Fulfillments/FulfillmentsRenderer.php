@@ -194,10 +194,11 @@ class FulfillmentsRenderer {
 		} elseif ( 1 === count( $providers ) ) {
 			$provider_fulfillment   = reset( $providers );
 			$provider_slug          = $provider_fulfillment->get_shipment_provider();
-			$known_providers        = FulfillmentUtils::get_shipping_providers_object();
+			$known_providers        = FulfillmentUtils::get_shipping_providers();
 			$provider_name_meta     = $provider_fulfillment->get_meta( '_provider_name' );
-			$provider_display_label = $known_providers[ $provider_slug ]['label']
-				?? ( ! empty( $provider_name_meta ) ? $provider_name_meta : $provider_slug );
+			$provider_display_label = isset( $known_providers[ $provider_slug ] )
+				? $known_providers[ $provider_slug ]->get_name()
+				: ( ! empty( $provider_name_meta ) ? $provider_name_meta : $provider_slug );
 			echo '<span>' . esc_html( $provider_display_label ) . '</span>';
 		} else {
 			echo '<span>--</span>';
@@ -423,8 +424,18 @@ class FulfillmentsRenderer {
 	 * @return void
 	 */
 	protected function load_fulfillments_js_settings() {
+		$providers_for_js = array();
+		foreach ( FulfillmentUtils::get_shipping_providers() as $provider ) {
+			$providers_for_js[ $provider->get_key() ] = array(
+				'label' => $provider->get_name(),
+				'icon'  => $provider->get_icon(),
+				'value' => $provider->get_key(),
+				'url'   => $provider->get_tracking_url( '__PLACEHOLDER__' ) ?? '',
+			);
+		}
+
 		$fulfillment_settings = array(
-			'providers'                  => FulfillmentUtils::get_shipping_providers_object(),
+			'providers'                  => $providers_for_js,
 			'currency_symbols'           => get_woocommerce_currency_symbols(),
 			'fulfillment_statuses'       => FulfillmentUtils::get_fulfillment_statuses(),
 			'order_fulfillment_statuses' => FulfillmentUtils::get_order_fulfillment_statuses(),
@@ -552,7 +563,7 @@ class FulfillmentsRenderer {
 			return;
 		}
 
-		$providers = FulfillmentUtils::get_shipping_providers_object();
+		$providers = FulfillmentUtils::get_shipping_providers();
 
 		// This is a read-only filter on the admin orders table, so nonce verification is not required.
 		// phpcs:ignore WordPress.Security.NonceVerification
@@ -560,9 +571,9 @@ class FulfillmentsRenderer {
 		?>
 		<select id="shipping-provider-filter" name="shipping_provider">
 			<option value="" <?php selected( $selected_provider, '' ); ?>><?php esc_html_e( 'Filter by shipping provider', 'woocommerce' ); ?></option>
-			<?php foreach ( $providers as $key => $provider ) : ?>
-				<option value="<?php echo esc_attr( $key ); ?>" <?php selected( $selected_provider, $key ); ?>>
-					<?php echo esc_html( $provider['label'] ?? '' ); ?>
+			<?php foreach ( $providers as $provider ) : ?>
+				<option value="<?php echo esc_attr( $provider->get_key() ); ?>" <?php selected( $selected_provider, $provider->get_key() ); ?>>
+					<?php echo esc_html( $provider->get_name() ); ?>
 				</option>
 			<?php endforeach; ?>
 			<option value="__other__" <?php selected( $selected_provider, '__other__' ); ?>><?php esc_html_e( 'Other', 'woocommerce' ); ?></option>
@@ -673,7 +684,7 @@ class FulfillmentsRenderer {
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 		if ( '__other__' === $shipping_provider ) {
-			$known_providers = FulfillmentUtils::get_shipping_providers_object();
+			$known_providers = FulfillmentUtils::get_shipping_providers();
 			$known_keys      = array_keys( $known_providers );
 
 			if ( empty( $known_keys ) ) {
