@@ -104,9 +104,13 @@ test.describe( 'Template customization', () => {
 				editor,
 				page,
 			} ) => {
+				const templateSlug =
+					testData.templateType === 'wp_template'
+						? BLOCK_THEME_SLUG
+						: 'woocommerce/woocommerce';
 				// Edit fallback template and verify changes are visible.
 				await admin.visitSiteEditor( {
-					postId: `woocommerce/woocommerce//${ testData.fallbackTemplate?.templatePath }`,
+					postId: `${ templateSlug }//${ testData.fallbackTemplate?.templatePath }`,
 					postType: testData.templateType,
 					canvas: 'edit',
 				} );
