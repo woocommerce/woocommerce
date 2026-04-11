@@ -61,6 +61,10 @@ class DataStoreTest extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_analytics_uses_old_full_refund_data', 'no' );
 
 		$order = WC_Helper_Order::create_order();
+		// Add cart tax so we assert tax and shipping are both stripped from net, not only shipping.
+		$order->set_cart_tax( 5.00 );
+		$order->set_total( 55.00 );
+		$order->save();
 		$order->update_status( 'completed' );
 
 		$remaining = (float) wc_format_decimal( $order->get_total() - $order->get_total_refunded() );
