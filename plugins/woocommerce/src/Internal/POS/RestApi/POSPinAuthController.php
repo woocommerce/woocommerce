@@ -164,6 +164,16 @@ class POSPinAuthController extends RestApiControllerBase implements RegisterHook
 			return $this->pin_error();
 		}
 
+		if ( ! wp_is_application_passwords_available() ) {
+			throw new \Exception(
+				esc_html__(
+					'Application Passwords are not available on this site. POS user switching requires Application Passwords to be enabled.',
+					'woocommerce'
+				),
+				501
+			);
+		}
+
 		$session = $this->session_service->create_session( $user_id, $register_id );
 
 		if ( is_wp_error( $session ) ) {
