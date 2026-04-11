@@ -14,6 +14,16 @@ diff -ruN a/types/@wordpress/core-data/dynamic-entities.d.ts b/types/@wordpress/
  	};
  	export declare let dynamicActions: SaveActions & DeleteActions;
  	export declare let dynamicSelectors: SingularGetters & PluralGetters;
+diff -ruN a/types/@wordpress/core-data/hooks/use-entity-prop.d.ts b/types/@wordpress/core-data/hooks/use-entity-prop.d.ts
+--- a/types/@wordpress/core-data/hooks/use-entity-prop.d.ts
++++ b/types/@wordpress/core-data/hooks/use-entity-prop.d.ts
+@@ -16,5 +16,5 @@
+ 	 * 							  information like `raw`, `rendered` and
+ 	 * 							  `protected` props.
+ 	 */
+-	export default function useEntityProp(kind: string, name: string, prop: string, _id?: number | string): [any, Function, any];
++	export default function useEntityProp<PropType>(kind: string, name: string, prop: string, _id?: number | string): [PropType, (value: PropType) => void, PropType];
+ }
 diff -ruN a/types/@wordpress/core-data/index.d.ts b/types/@wordpress/core-data/index.d.ts
 --- a/types/@wordpress/core-data/index.d.ts
 +++ b/types/@wordpress/core-data/index.d.ts
