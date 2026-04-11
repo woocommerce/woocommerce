@@ -92,16 +92,18 @@ require( 'fs-extra' ).ensureSymlinkSync(
 
 const webpackConfig = {
 	mode: NODE_ENV,
-	cache: ( ( isWatch || process.env.CI || process.env.HOT || process.env.STORYBOOK ) && { type: 'memory' } ) || {
-		type: 'filesystem',
-		cacheDirectory: path.resolve(
-			__dirname,
-			`node_modules/.cache/webpack-${ WC_ADMIN_PHASE }`
-		),
-		buildDependencies: {
-			config: [ __filename ],
-		},
-	},
+	cache: ( isWatch || process.env.CI || process.env.HOT || process.env.STORYBOOK )
+		? { type: 'memory' }
+		: {
+				type: 'filesystem',
+				cacheDirectory: path.resolve(
+					__dirname,
+					`node_modules/.cache/webpack-${ WC_ADMIN_PHASE }`
+				),
+				buildDependencies: {
+					config: [ __filename ],
+				},
+		  },
 	entry: getEntryPoints(),
 	output: {
 		filename: ( data ) => {
