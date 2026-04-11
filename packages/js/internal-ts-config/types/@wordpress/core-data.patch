@@ -212,3 +212,14 @@ diff -ruN a/types/@wordpress/core-data/index.d.ts b/types/@wordpress/core-data/i
  	}, {
  	    getAuthors(state: selectors.State, query?: selectors.GetRecordsHttpQuery): import("@wordpress/core-data/build-types/entity-types").User[];
  	    getCurrentUser(state: selectors.State): import("@wordpress/core-data/build-types/entity-types").User<"edit">;
+@@ -350,4 +350,10 @@
+ 	export * from "@wordpress/core-data/build-types/hooks";
+ 	export * from "@wordpress/core-data/build-types/private-apis";
+ 	import * as selectors from '@wordpress/core-data/build-types/selectors';
++}
++
++declare module '@wordpress/data' {
++	interface StoreRegistry {
++		'core': typeof import("@wordpress/core-data").store;
++	}
+ }

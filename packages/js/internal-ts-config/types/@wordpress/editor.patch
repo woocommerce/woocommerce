@@ -6,7 +6,7 @@ diff -ruN a/types/@wordpress/editor/index.d.ts b/types/@wordpress/editor/index.d
  	export { storeConfig, store } from "@wordpress/editor/build-types/store";
  }
 +
-+declare module '@wordpress/data/build-types/types' {
++declare module '@wordpress/data' {
 +	interface StoreRegistry {
 +		'core/editor': typeof import("@wordpress/editor/build-types/store").store;
 +	}

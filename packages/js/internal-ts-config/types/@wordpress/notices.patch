@@ -6,7 +6,7 @@ diff -ruN a/types/@wordpress/notices/index.d.ts b/types/@wordpress/notices/index
  	export { store } from "@wordpress/notices/build-types/store";
  }
 +
-+declare module '@wordpress/data/build-types/types' {
++declare module '@wordpress/data' {
 +	interface StoreRegistry {
 +		'core/notices': typeof import("@wordpress/notices/build-types/store").store;
 +	}

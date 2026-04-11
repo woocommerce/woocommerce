@@ -64,7 +64,7 @@ diff -ruN a/types/@wordpress/block-editor/index.d.ts b/types/@wordpress/block-ed
 +	}
 +}
 +
-+declare module '@wordpress/data/build-types/types' {
++declare module '@wordpress/data' {
 +	import type * as blockEditorActions from '@wordpress/block-editor/store/actions';
 +	import type * as blockEditorSelectors from '@wordpress/block-editor/store/selectors';
 +	import type {
