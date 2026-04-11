@@ -129,6 +129,10 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 			return $this->user_has_capability( 'woocommerce_refund_orders' );
 		}
 
+		// HPOS uses a shop_order_placehold post type whose map_meta_cap resolves
+		// to generic edit_posts instead of edit_shop_orders. POS roles have
+		// edit_shop_orders but not edit_posts, so the base permission check
+		// fails. Re-check against the WC-specific capability here.
 		if ( ! $permission && 'shop_order' === $post_type && 'edit' === $context ) {
 			return current_user_can( 'edit_shop_orders' );
 		}
@@ -535,7 +539,7 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 	 * @return bool
 	 */
 	private function is_customer_route( string $route ): bool {
-		return 1 === preg_match( '#^/wc/v[123]/customers(?:/|$)#', $route );
+		return 1 === preg_match( '#^/wc/v\d+/customers(?:/|$)#', $route );
 	}
 
 	/**
@@ -547,7 +551,7 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 	 * @return bool
 	 */
 	private function is_report_route( string $route ): bool {
-		return 1 === preg_match( '#^/(wc-analytics|wc-admin|wc/v[123]/reports)(?:/|$)#', $route );
+		return 1 === preg_match( '#^/(wc-analytics|wc-admin|wc/v\d+/reports)(?:/|$)#', $route );
 	}
 
 	/**
