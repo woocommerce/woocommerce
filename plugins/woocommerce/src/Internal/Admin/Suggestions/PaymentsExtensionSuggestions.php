@@ -62,6 +62,8 @@ class PaymentsExtensionSuggestions {
 	const PAYPAL_BRAINTREE  = 'paypal_braintree';
 	const VISA              = 'visa_as';
 	const NGENIUS           = 'ngenius';
+	const EVERGREEN         = 'evergreen';
+	const MYPOS             = 'mypos';
 
 	/*
 	 * The extension types.
@@ -4167,6 +4169,22 @@ class PaymentsExtensionSuggestions {
 						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
 						'url'   => 'https://woocommerce.com/document/ngenius/',
 					),
+				),
+			),
+			self::MYPOS             => array(
+				'_type'  => self::TYPE_PSP,
+				'icon'   => plugins_url( 'assets/images/onboarding/icons/mypos.svg', WC_PLUGIN_FILE ),
+				'plugin' => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'mypos-virtual-for-woocommerce',
+				),
+			),
+			self::EVERGREEN         => array(
+				'_type'  => self::TYPE_PSP,
+				// Evergreen does not have an icon on .org. Will be default for now.
+				'plugin' => array(
+					'_type' => self::PLUGIN_TYPE_WPORG,
+					'slug'  => 'evergreen-payments-northwest-gateway-wc',
 				),
 			),
 			self::GOCARDLESS        => array(
