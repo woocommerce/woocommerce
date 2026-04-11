@@ -21,6 +21,7 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Database\Migrations\MigrationHelper;
+use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Admin\Marketing\MarketingSpecs;
@@ -733,8 +734,8 @@ function wc_update_230_options() {
 	delete_metadata( 'user', 0, '_last_order', '', true );
 
 	// To prevent taxes being hidden when using a default 'no address' in a store with tax inc prices, set the woocommerce_default_customer_address to use the store base address by default.
-	if ( '' === get_option( 'woocommerce_default_customer_address', false ) && wc_prices_include_tax() ) {
-		update_option( 'woocommerce_default_customer_address', 'base' );
+	if ( DefaultCustomerAddress::NO_DEFAULT === get_option( 'woocommerce_default_customer_address', false ) && wc_prices_include_tax() ) {
+		update_option( 'woocommerce_default_customer_address', DefaultCustomerAddress::BASE );
 	}
 }
 
