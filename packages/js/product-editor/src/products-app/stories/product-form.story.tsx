@@ -49,14 +49,10 @@ export default {
 	component: ProductForm,
 };
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore - improve typing.
 const Template = ( args: unknown ) => <ProductForm { ...args } />;
 
 export const Default = Template.bind( {} );
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore - Improve typing.
 Default.args = {
 	productData: PRODUCTS_DATA[ 0 ],
 	fields: PRODUCT_FIELDS,

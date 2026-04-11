@@ -12,7 +12,6 @@ import {
 	EditorSnackbars,
 	privateApis as editorPrivateApis,
 } from '@wordpress/editor';
-// eslint-disable-next-line @woocommerce/dependency-group
 import {
 	__unstableMotion as motion,
 	__unstableAnimatePresence as AnimatePresence,

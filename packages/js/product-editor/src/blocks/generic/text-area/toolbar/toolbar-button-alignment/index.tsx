@@ -9,11 +9,7 @@ import {
 	alignLeft,
 	alignRight,
 } from '@wordpress/icons';
-import {
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore No types for this exist yet.
-	AlignmentControl,
-} from '@wordpress/block-editor';
+import { AlignmentControl } from '@wordpress/block-editor';
 
 export const ALIGNMENT_CONTROLS = [
 	{

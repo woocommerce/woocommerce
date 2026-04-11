@@ -16,8 +16,7 @@ import { __ } from '@wordpress/i18n';
 import {
 	BlockControls,
 	useInnerBlocksProps,
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore No types for this exist yet.
+	// @ts-expect-error BlockPreview is not exported from @wordpress/block-editor's public types.
 	BlockPreview,
 } from '@wordpress/block-editor';
 

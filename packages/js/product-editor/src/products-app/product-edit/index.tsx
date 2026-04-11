@@ -17,7 +17,6 @@ import {
 	FlexItem,
 	Button,
 } from '@wordpress/components';
-// eslint-disable-next-line @woocommerce/dependency-group
 import { privateApis as editorPrivateApis } from '@wordpress/editor';
 
 /**

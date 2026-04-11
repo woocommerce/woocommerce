@@ -55,6 +55,7 @@ export function DownloadsMenuItem( {
 		};
 
 		onChange(
+			// @ts-expect-error Inferred downloads shape doesn't match ProductVariation.downloads (see product-variations/types.ts).
 			selection.map( ( { id } ) => ( {
 				...partialVariation,
 				id,
