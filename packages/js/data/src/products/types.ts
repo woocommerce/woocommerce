@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Post } from '@wordpress/core-data';
+import { Context, Post } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
@@ -9,6 +9,13 @@ import { Post } from '@wordpress/core-data';
 import { ProductCategory } from '../product-categories/types';
 import { ProductTag } from '../product-tags/types';
 import { BaseQueryParams } from '../types';
+
+declare module '@wordpress/core-data' {
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	interface PerPackageEntityRecords< C extends Context > {
+		woocommerce: Product;
+	}
+}
 
 export type ProductType =
 	| 'simple'
