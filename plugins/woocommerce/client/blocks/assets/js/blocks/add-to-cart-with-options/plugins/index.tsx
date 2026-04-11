@@ -6,7 +6,6 @@ import { useSelect } from '@wordpress/data';
 import { SelectControl } from '@wordpress/components';
 import { recordEvent } from '@woocommerce/tracks';
 import {
-	// @ts-expect-error no exported member.
 	PluginDocumentSettingPanel,
 } from '@wordpress/editor';
 

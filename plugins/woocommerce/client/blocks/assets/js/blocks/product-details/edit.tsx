@@ -77,9 +77,8 @@ const Edit = ( {
 			const blockEditorSelect = select( blockEditorStore );
 
 			// Check if block is inner block of single product block
-			const singleProductParentBlocks = blockEditorSelect
-				// @ts-expect-error - getBlockParentsByBlockName is not typed
-				.getBlockParentsByBlockName(
+			const singleProductParentBlocks =
+				blockEditorSelect.getBlockParentsByBlockName(
 					clientId,
 					'woocommerce/single-product'
 				);
@@ -101,7 +100,6 @@ const Edit = ( {
 
 			const accordionClientId = select(
 				blockEditorStore
-				// @ts-expect-error - getBlockParentsByBlockName is not typed
 			).getBlockParentsByBlockName(
 				productSpecificationClientId ?? '',
 				'woocommerce/accordion-item'

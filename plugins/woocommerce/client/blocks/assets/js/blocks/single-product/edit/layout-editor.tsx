@@ -20,7 +20,6 @@ import {
 } from '@wordpress/block-editor';
 // eslint-disable-next-line @woocommerce/dependency-group
 import {
-	// @ts-expect-error Type definitions for this function are missing in Gutenberg
 	createBlocksFromInnerBlocksTemplate,
 } from '@wordpress/blocks';
 

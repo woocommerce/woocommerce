@@ -20,7 +20,6 @@ import { WP_REST_API_Category } from 'wp-types';
 import { useStyleProps } from '@woocommerce/base-hooks';
 import {
 	InnerBlocks,
-	// @ts-expect-error BlockContextProvider is not exported from @wordpress/block-editor
 	BlockContextProvider,
 } from '@wordpress/block-editor';
 

@@ -9,7 +9,6 @@ import {
 	Icon,
 	ToolbarGroup,
 
-	// @ts-expect-error no exported member.
 	ToolbarDropdownMenu,
 } from '@wordpress/components';
 
