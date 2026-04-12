@@ -28,6 +28,15 @@ import { Notice } from '../../components/notice';
 import { getTaxonomyLabel } from './utils';
 import { sortFilterOptions } from '../../utils/sort-filter-options';
 
+// Module-level stable references for the taxonomy-terms useSelect below.
+// Avoids allocating fresh objects on every selector invocation, which would
+// trip @wordpress/data's SCRIPT_DEBUG unstable-reference check.
+const EMPTY_TAXONOMY_TERMS: FilterOptionItem[] = [];
+const EMPTY_TAXONOMY_TERMS_RESULT = {
+	taxonomyTerms: EMPTY_TAXONOMY_TERMS,
+	isTermsLoading: false,
+};
+
 // Create hierarchical structure: parents followed by their children
 function createHierarchicalList(
 	terms: FilterOptionItem[],
@@ -103,7 +112,7 @@ const Edit = ( props: EditProps ) => {
 	const { taxonomyTerms, isTermsLoading } = useSelect(
 		( select ) => {
 			if ( isPreview || ! taxonomy ) {
-				return { taxonomyTerms: [], isTermsLoading: false };
+				return EMPTY_TAXONOMY_TERMS_RESULT;
 			}
 
 			const { getEntityRecords, hasFinishedResolution } =
@@ -117,7 +126,8 @@ const Edit = ( props: EditProps ) => {
 			};
 			return {
 				taxonomyTerms:
-					getEntityRecords( 'taxonomy', taxonomy, selectArgs ) || [],
+					getEntityRecords( 'taxonomy', taxonomy, selectArgs ) ||
+					EMPTY_TAXONOMY_TERMS,
 				isTermsLoading: ! hasFinishedResolution( 'getEntityRecords', [
 					'taxonomy',
 					taxonomy,

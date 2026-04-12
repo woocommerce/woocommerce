@@ -18,17 +18,42 @@ const singletonPackages = [
 	'@wordpress/data',
 	'@wordpress/blocks',
 	'@wordpress/keyboard-shortcuts',
+	// wp-6.8's block-editor uses registry selectors (`isSectionBlock`,
+	// `__unstableGetEditorMode`) whose `.registry` property is set at
+	// store-instantiation time. Multiple pnpm peer-context copies each bind
+	// to a different registry, causing `TypeError: Cannot read properties of
+	// undefined (reading 'select')` in any component rendering the block
+	// canvas. Forcing a single copy ensures all selectors share one binding.
+	'@wordpress/block-editor',
+	'@wordpress/editor',
+	'@wordpress/patterns',
 ];
 
 const rootDir = path.resolve( __dirname, '../../..' );
+
+// Resolve singleton packages starting from the workspace root, then falling
+// back to known transitive-dependency locations. This covers packages like
+// @wordpress/patterns that aren't direct deps of blocks but are pulled in by
+// @wordpress/editor.
+const singletonResolveBases = [
+	rootDir,
+	path.dirname(
+		require.resolve( '@wordpress/editor/package.json', {
+			paths: [ rootDir ],
+		} )
+	),
+];
 const singletonMap = {};
 for ( const pkg of singletonPackages ) {
-	try {
-		singletonMap[ pkg ] = require.resolve( pkg, {
-			paths: [ rootDir ],
-		} );
-	} catch ( e ) {
-		// Package not installed in this workspace — skip.
+	for ( const base of singletonResolveBases ) {
+		try {
+			singletonMap[ pkg ] = require.resolve( pkg, {
+				paths: [ base ],
+			} );
+			break;
+		} catch ( e ) {
+			// Try next base.
+		}
 	}
 }
 
@@ -37,26 +62,6 @@ module.exports = ( modulePath, options ) => {
 	// of where the requiring module lives (e.g. inside .pnpm).
 	if ( singletonMap[ modulePath ] ) {
 		return singletonMap[ modulePath ];
-	}
-
-	// Prevent transitive dependencies (e.g. @wordpress/patterns → @wordpress/block-editor@14.x)
-	// from pulling in incompatible versions of block-editor. When a package inside .pnpm
-	// tries to load @wordpress/block-editor, redirect to the workspace's version (13.x).
-	// This is necessary because pnpm 10 isolates transitive deps more strictly than pnpm 9,
-	// and @wordpress/block-library's dependency on @wordpress/patterns pulls in a much newer
-	// block-editor that crashes due to version mismatches.
-	if (
-		modulePath === '@wordpress/block-editor' &&
-		options.basedir &&
-		options.basedir.includes( '.pnpm' )
-	) {
-		try {
-			return require.resolve( '@wordpress/block-editor', {
-				paths: [ rootDir ],
-			} );
-		} catch ( e ) {
-			// Fall through to default resolution.
-		}
 	}
 
 	// Call the defaultResolver, so we leverage its cache, error handling, etc.
