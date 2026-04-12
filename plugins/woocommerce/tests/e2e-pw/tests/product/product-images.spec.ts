@@ -246,8 +246,11 @@ test.describe( 'Products > Product Images', () => {
 
 		await test.step( 'Verify product gallery', async () => {
 			await page.goto( productWithImage.permalink );
+			await page
+				.locator( '.flex-viewport' )
+				.waitFor( { state: 'attached' } );
 			const galleryImages = page.locator(
-				`.woocommerce-product-gallery__image img`
+				`.woocommerce-product-gallery__image:not(.clone) img`
 			);
 			await expect(
 				galleryImages,
@@ -293,8 +296,11 @@ test.describe( 'Products > Product Images', () => {
 
 		await test.step( 'Verify product gallery', async () => {
 			await page.goto( productWithGallery.permalink );
+			await page
+				.locator( '.flex-viewport' )
+				.waitFor( { state: 'attached' } );
 			const galleryImages = page.locator(
-				`.woocommerce-product-gallery__image img`
+				`.woocommerce-product-gallery__image:not(.clone) img`
 			);
 			await expect(
 				galleryImages,
