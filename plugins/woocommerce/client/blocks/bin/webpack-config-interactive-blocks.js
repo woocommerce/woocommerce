@@ -2,7 +2,6 @@
  * External dependencies
  */
 const path = require( 'path' );
-const DependencyExtractionWebpackPlugin = require( '@wordpress/dependency-extraction-webpack-plugin' );
 const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
 const WebpackRTLPlugin = require( './webpack-rtl-plugin' );
 const [
@@ -14,6 +13,7 @@ const RemoveFilesPlugin = require( './remove-files-webpack-plugin' );
 /**
  * Internal dependencies
  */
+const DependencyExtractionWebpackPlugin = require( '@woocommerce/dependency-extraction-webpack-plugin' );
 const FilesystemCacheWarningsPlugin = require( './filesystem-cache-warnings-webpack-plugin.js' );
 const { sharedOptimizationConfig } = require( './webpack-shared-config' );
 const {

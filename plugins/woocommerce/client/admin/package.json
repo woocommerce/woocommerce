@@ -17,6 +17,8 @@
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
 		"build:project:bundle": "wireit",
 		"build:project:feature-config": "php ../../bin/generate-feature-config.php",
+		"build:project:symlinks": "wireit",
+		"build:project:typescript-check": "wireit",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
 		"update:php": "XDEBUG_MODE=off composer update --quiet",
 		"example": "webpack --config docs/examples/extensions/examples.config.js",
@@ -280,12 +282,25 @@
 				"build"
 			],
 			"dependencies": [
+				"build:project:symlinks",
 				"dependencyOutputs"
+			]
+		},
+		"build:project:symlinks": {
+			"command": "node bin/xstate5-symlink.js"
+		},
+		"build:project:typescript-check": {
+			"command": "tsc --project tsconfig.json --incremental --tsBuildInfoFile ./node_modules/.cache/typescript/.tsbuildinfo",
+			"dependencies": [
+				"build:project:symlinks"
 			]
 		},
 		"watch:build:project:bundle": {
 			"command": "webpack --watch",
-			"service": true
+			"service": true,
+			"dependencies": [
+				"build:project:symlinks"
+			]
 		},
 		"dependencyOutputs": {
 			"allowUsuallyExcludedPaths": true,

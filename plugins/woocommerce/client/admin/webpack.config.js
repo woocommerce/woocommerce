@@ -14,7 +14,6 @@ const ReactRefreshWebpackPlugin = require( '@pmmmwh/react-refresh-webpack-plugin
  * Internal dependencies
  */
 const CustomTemplatedPathPlugin = require( './bin/custom-templated-path-webpack-plugin' );
-const FilesystemCacheWarningsPlugin = require( './bin/filesystem-cache-warnings-webpack-plugin.js' );
 const UnminifyWebpackPlugin = require( './bin/unminify-webpack-plugin.js' );
 const {
 	webpackConfig: styleConfig,
@@ -83,15 +82,11 @@ const getEntryPoints = () => {
 // WordPress.org’s translation infrastructure ignores files named “.min.js” so we need to name our JS files without min when releasing the plugin.
 const outputSuffix = WC_ADMIN_PHASE === 'core' ? '' : '.min';
 
-// Here we are patching a dependency, see https://github.com/woocommerce/woocommerce/pull/45548 for more details.
-// Should be revisited: using the dependency patching, but seems we need some codebase tweaks as it uses xstate 4/5 mix.
-require( 'fs-extra' ).ensureSymlinkSync(
-	path.join( __dirname, './node_modules/xstate5' ),
-	path.join( __dirname, './node_modules/@xstate5/react/node_modules/xstate' )
-);
-
 const webpackConfig = {
 	mode: NODE_ENV,
+	performance: {
+		hints: false,
+	},
 	cache: ( isWatch || process.env.CI || process.env.HOT || process.env.STORYBOOK )
 		? { type: 'memory' }
 		: {
@@ -101,7 +96,12 @@ const webpackConfig = {
 					`node_modules/.cache/webpack-${ WC_ADMIN_PHASE }`
 				),
 				buildDependencies: {
-					config: [ __filename ],
+					config: [
+						__filename,
+						require.resolve( './bin/custom-templated-path-webpack-plugin' ),
+						require.resolve( './bin/unminify-webpack-plugin' ),
+						require.resolve( '@woocommerce/dependency-extraction-webpack-plugin/src/index' ),
+					],
 				},
 		  },
 	entry: getEntryPoints(),
@@ -140,6 +140,9 @@ const webpackConfig = {
 				use: {
 					loader: 'babel-loader',
 					options: {
+						// Prevent babel.config.js (Jest/Node context) from merging into this browser build and duplicating presets.
+						configFile: false,
+						sourceType: 'unambiguous',
 						presets: [
 							'@wordpress/babel-preset-default',
 							[
@@ -151,7 +154,6 @@ const webpackConfig = {
 									useBuiltIns: 'usage',
 								},
 							],
-							[ '@babel/preset-typescript' ],
 						],
 						plugins: [
 							! isProduction &&
@@ -197,7 +199,7 @@ const webpackConfig = {
 	plugins: [
 		...styleConfig.plugins,
 		// Runs TypeScript type checker on a separate process.
-		! process.env.STORYBOOK && new ForkTsCheckerWebpackPlugin(),
+		! process.env.STORYBOOK && isWatch && new ForkTsCheckerWebpackPlugin(),
 		new CustomTemplatedPathPlugin( {
 			modulename( outputPath, data ) {
 				const entryName = get( data, [ 'chunk', 'name' ] );
@@ -291,8 +293,6 @@ const webpackConfig = {
 				test: /\.js($|\?)/i,
 				mainEntry: 'app/index.min.js',
 			} ),
-		// Suppress file system cache warnings (unsupported serialization related).
-		new FilesystemCacheWarningsPlugin(),
 	].filter( Boolean ),
 	optimization: {
 		minimize: NODE_ENV !== 'development',

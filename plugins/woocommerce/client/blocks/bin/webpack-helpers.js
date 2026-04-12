@@ -8,6 +8,9 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 const CHECK_CIRCULAR_DEPS = process.env.CHECK_CIRCULAR_DEPS || false;
 const ASSET_CHECK = process.env.ASSET_CHECK === 'true';
 
+// See also @woocommerce/dependency-extraction-webpack-plugin/assets/packages. It will backfill any missing
+// mapping here and any duplicates are because of switched between Woo and WordPress versions of the plugin.
+// As of 2026 it's Woo version to address pnpm peer dependencies related issues to support filesystem cache.
 const wcDepMap = {
 	'@woocommerce/blocks-registry': [ 'wc', 'wcBlocksRegistry' ],
 	'@woocommerce/blocks-checkout-events': [ 'wc', 'blocksCheckoutEvents' ],
@@ -23,7 +26,6 @@ const wcDepMap = {
 	'@woocommerce/customer-effort-score': [ 'wc', 'customerEffortScore' ],
 	'@woocommerce/sanitize': [ 'wc', 'sanitize' ],
 };
-
 const wcHandleMap = {
 	'@woocommerce/blocks-registry': 'wc-blocks-registry',
 	'@woocommerce/settings': 'wc-settings',
