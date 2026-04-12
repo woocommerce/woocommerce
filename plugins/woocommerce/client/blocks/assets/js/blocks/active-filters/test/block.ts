@@ -48,6 +48,10 @@ describe( 'Active Filters block', () => {
 			expect( filterList ).toHaveClass(
 				'wc-block-active-filters__list--chips'
 			);
+
+			// wp-6.8: upstream @wordpress/* deprecation warnings that we cannot
+			// opt out of without changing the visual output.
+			expect( console ).toHaveWarned();
 		} );
 	} );
 } );
