@@ -247,7 +247,7 @@ test.describe( 'Products > Product Images', () => {
 		await test.step( 'Verify product gallery', async () => {
 			await page.goto( productWithImage.permalink );
 			const galleryImages = page.locator(
-				`.woocommerce-product-gallery img`
+				`.woocommerce-product-gallery__image img`
 			);
 			await expect(
 				galleryImages,
@@ -294,7 +294,7 @@ test.describe( 'Products > Product Images', () => {
 		await test.step( 'Verify product gallery', async () => {
 			await page.goto( productWithGallery.permalink );
 			const galleryImages = page.locator(
-				`.woocommerce-product-gallery img`
+				`.woocommerce-product-gallery__image img`
 			);
 			await expect(
 				galleryImages,
