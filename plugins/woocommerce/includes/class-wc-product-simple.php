@@ -42,7 +42,7 @@ class WC_Product_Simple extends WC_Product {
 	 */
 	public function add_to_cart_url() {
 		$url = $this->is_purchasable() && $this->is_in_stock() ? remove_query_arg(
-			'added-to-cart',
+			array_diff(array_keys($_GET), array('add-to-cart')),
 			add_query_arg(
 				array(
 					'add-to-cart' => $this->get_id(),
