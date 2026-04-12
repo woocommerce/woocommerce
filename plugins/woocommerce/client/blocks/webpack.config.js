@@ -131,13 +131,17 @@ const SiteEditorConfig = {
 
 const InteractivityBlocksConfig = {
 	...sharedConfig,
-	cache: getCacheConfig( 'interactivity-blocks', [ 'bin/webpack-config-interactive-blocks.js' ] ),
+	cache: getCacheConfig( 'interactivity-blocks', [
+		'bin/webpack-config-interactive-blocks.js',
+	] ),
 	...interactivityBlocksConfig,
 };
 
 const InteractivityAPIConfig = {
 	...sharedConfig,
-	cache: getCacheConfig( 'interactivity-api', [ 'bin/webpack-config-interactivity.js' ] ),
+	cache: getCacheConfig( 'interactivity-api', [
+		'bin/webpack-config-interactivity.js',
+	] ),
 	...interactivityAPIConfig,
 };
 
@@ -147,7 +151,9 @@ const InteractivityAPIConfig = {
  */
 const DependencyDetectionConfig = {
 	...sharedConfig,
-	cache: getCacheConfig( 'dependency-detection', [ 'bin/webpack-config-dependency-detection.js' ] ),
+	cache: getCacheConfig( 'dependency-detection', [
+		'bin/webpack-config-dependency-detection.js',
+	] ),
 	...dependencyDetectionConfig,
 };
 
