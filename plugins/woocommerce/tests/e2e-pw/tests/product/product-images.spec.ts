@@ -246,12 +246,14 @@ test.describe( 'Products > Product Images', () => {
 
 		await test.step( 'Verify product gallery', async () => {
 			await page.goto( productWithImage.permalink );
+			const galleryImages = page.locator(
+				`.woocommerce-product-gallery img`
+			);
 			await expect(
-				page
-					.locator( `.woocommerce-product-gallery ol img` )
-					.nth( images.length ),
+				galleryImages,
 				'all gallery images should be visible'
-			).toBeVisible();
+			).toHaveCount( images.length + 1 );
+			await expect( galleryImages.first() ).toBeVisible();
 		} );
 	} );
 
@@ -291,15 +293,14 @@ test.describe( 'Products > Product Images', () => {
 
 		await test.step( 'Verify product gallery', async () => {
 			await page.goto( productWithGallery.permalink );
-			const selector = `.woocommerce-product-gallery ol img`;
+			const galleryImages = page.locator(
+				`.woocommerce-product-gallery img`
+			);
 			await expect(
-				page.locator( selector ).nth( imagesCount - 1 ),
-				'gallery images should be visible'
-			).toBeVisible();
-			await expect(
-				page.locator( selector ).nth( imagesCount ),
-				'one gallery image should not be visible'
-			).toBeHidden();
+				galleryImages,
+				'gallery should show remaining images after removing one'
+			).toHaveCount( imagesCount - 1 );
+			await expect( galleryImages.first() ).toBeVisible();
 		} );
 	} );
 } );
