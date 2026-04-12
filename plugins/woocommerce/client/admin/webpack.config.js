@@ -143,18 +143,7 @@ const webpackConfig = {
 						// Prevent babel.config.js (Jest/Node context) from merging into this browser build and duplicating presets.
 						configFile: false,
 						sourceType: 'unambiguous',
-						presets: [
-							'@wordpress/babel-preset-default',
-							[
-								'@babel/preset-env',
-								{
-									// Add polyfills such as Array.flat based on their usage in the code
-									// See https://github.com/woocommerce/woocommerce-admin/pull/6411/
-									corejs: '3',
-									useBuiltIns: 'usage',
-								},
-							],
-						],
+						presets: [ '@wordpress/babel-preset-default' ],
 						plugins: [
 							! isProduction &&
 								isHot &&

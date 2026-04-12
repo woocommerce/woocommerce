@@ -14,53 +14,28 @@ const StyleAssetPlugin = require( './style-asset-plugin' );
  */
 class RTLFilenameFixPlugin {
 	apply( compiler ) {
-		compiler.hooks.afterEmit.tap(
+		compiler.hooks.compilation.tap(
 			'RTLFilenameFixPlugin',
 			( compilation ) => {
-				// This runs after assets are emitted, so we use file system operations
-				const fs = require( 'fs' );
-				const nodePath = require( 'path' );
-
-				// Handle all chunks (including those from entrypoints and standalone chunks)
-				compilation.chunks.forEach( ( chunk ) => {
-					chunk.files.forEach( ( filename ) => {
-						if ( filename.match( /\.rtl\.css(\?|$)/ ) ) {
-							// Extract actual filename without query string for file operations
-							const actualFilename = filename.split( '?' )[ 0 ];
-							const oldPath = nodePath.join(
-								compilation.outputOptions.path,
-								actualFilename
-							);
-							const newPath = oldPath.replace(
-								'.rtl.css',
-								'-rtl.css'
-							);
-
-							if ( fs.existsSync( oldPath ) ) {
-								try {
-									// Copy to new filename
-									fs.copyFileSync( oldPath, newPath );
-									// Remove old file
-									fs.unlinkSync( oldPath );
-
-									// Update compilation records
-									const newFilename = filename.replace(
-										'.rtl.css',
-										'-rtl.css'
-									);
-									chunk.files.delete( filename );
-									chunk.files.add( newFilename );
-								} catch ( error ) {
-									// eslint-disable-next-line no-console
-									console.warn(
-										`RTL filename fix failed for ${ filename }:`,
-										error.message
-									);
-								}
+				compilation.hooks.processAssets.tap(
+					{
+						name: 'RTLFilenameFixPlugin',
+						stage: compiler.webpack.Compilation
+							.PROCESS_ASSETS_STAGE_OPTIMIZE_TRANSFER,
+					},
+					() => {
+						for ( const filename of Object.keys(
+							compilation.assets
+						) ) {
+							if ( filename.match( /\.rtl\.css(\?|$)/ ) ) {
+								compilation.renameAsset(
+									filename,
+									filename.replace( '.rtl.css', '-rtl.css' )
+								);
 							}
 						}
-					} );
-				} );
+					}
+				);
 			}
 		);
 	}
