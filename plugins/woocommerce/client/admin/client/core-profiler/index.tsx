@@ -1444,6 +1444,12 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 								actions: [ 'assignCurrentUser' ],
 							},
 						},
+						{
+							src: 'getStoreCountryOption',
+							onDone: {
+								actions: [ 'handleStoreCountryOption' ],
+							},
+						},
 					],
 					meta: {
 						progress: 70,
