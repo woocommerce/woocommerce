@@ -41,8 +41,12 @@ class WC_Product_Simple extends WC_Product {
 	 * @return string
 	 */
 	public function add_to_cart_url() {
+		$get_keys = array_map( 'sanitize_text_field', wp_unslash( $_GET ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$params   = array_keys( array_diff( $get_keys, array( 'add-to-cart' ) ) );
+
+		// Remove ALL existing query params except allowed ones.
 		$url = $this->is_purchasable() && $this->is_in_stock() ? remove_query_arg(
-			array_diff(array_keys($_GET), array('add-to-cart')),
+			$params,
 			add_query_arg(
 				array(
 					'add-to-cart' => $this->get_id(),
