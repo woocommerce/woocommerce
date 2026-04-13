@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Fix get_site_user_meta method to respect arguments passed to it.

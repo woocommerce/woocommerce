@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Add global identifier (GTIN/UPC/EAN/ISBN) support to admin product search.

@@ -706,4 +706,35 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			'Transient should not be set when validation fails'
 		);
 	}
+
+	/**
+	 * Tests `read_attributes` for handling metas migration due to sanitize_title BC breaks.
+	 */
+	public function test_read_attributes_addresses_bc_break_in_sanitize(): void {
+		$product    = WC_Helper_Product::create_variation_product();
+		$product_id = $product->get_id();
+		$child_ids  = array_values( $product->get_children() );
+
+		// Patch up the metas to match pre-BC state.
+		$attributes                      = get_post_meta( $product_id, '_product_attributes', true );
+		$attributes['Size/Size']         = $attributes['pa_size'];
+		$attributes['Size/Size']['name'] = 'Size/Size';
+		unset( $attributes['pa_size'] );
+		update_post_meta( $product_id, '_product_attributes', $attributes );
+		foreach ( $child_ids as $child_id ) {
+			update_post_meta( $child_id, 'attribute_Size/Size', get_post_meta( $child_id, 'attribute_pa_size', true ) );
+			delete_post_meta( $child_id, 'attribute_pa_size' );
+		}
+
+		// Reload the product object, so the migration is executed.
+		$product = wc_get_product( $product_id );
+
+		// Verify the migrated entries and cleanup.
+		$sizes = array( 'small', 'large', 'huge', 'huge', 'huge', 'huge' );
+		foreach ( $child_ids as $index => $child_id ) {
+			$this->assertSame( $sizes[ $index ], get_post_meta( $child_id, 'attribute_size-size', true ) );
+			$this->assertSame( $sizes[ $index ], get_post_meta( $child_id, 'attribute_Size/Size', true ) );
+		}
+		$product->delete();
+	}
 }

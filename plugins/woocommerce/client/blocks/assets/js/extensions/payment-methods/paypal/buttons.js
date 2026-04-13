@@ -22,7 +22,7 @@ import { __ } from '@wordpress/i18n';
  * @param {string}  [props.partnerAttributionId]
  * @param {string}  [props.pageType]
  * @param {boolean} [props.isProductPage]
- * @param {string} [props.appSwitchRequestOrigin]
+ * @param {string}  [props.appSwitchRequestOrigin]
  * @return {JSX.Element} The PayPal Buttons container component.
  */
 const PayPalButtonsContainer = ( {

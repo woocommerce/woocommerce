@@ -68,6 +68,42 @@ if ( ! class_exists( 'WC_Email_Customer_Partially_Refunded_Order', false ) ) :
 				)
 			);
 		}
+
+		/**
+		 * Get email subject.
+		 *
+		 * @return string
+		 */
+		public function get_subject() {
+			$subject = $this->get_option( 'subject_partial', $this->get_default_subject( true ) );
+			/**
+			 * Filter the email subject for customer refunded order.
+			 *
+			 * @param string $subject The email subject.
+			 * @param object|bool $order Order object.
+			 * @param WC_Email_Customer_Refunded_Order $email Email object.
+			 * @since 3.7.0
+			 */
+			$subject = apply_filters( 'woocommerce_email_subject_customer_refunded_order', $this->format_string( $subject ), $this->object, $this );
+			if ( $this->block_email_editor_enabled ) {
+				$subject = $this->personalizer->personalize_transactional_content( $subject, $this );
+			}
+			return $subject;
+		}
+
+		/**
+		 * Return the name of the option in the WP DB.
+		 *
+		 * @since 2.6.0
+		 * @return string
+		 */
+		public function get_option_key() {
+			$id = 'customer_refunded_order';
+			// we need to continue using the parent class's id because we want to maintain backwards compatibility
+			// and allow the parent class continue managing the settings options for this class.
+			// We can remove this once we have migrated all the settings options to this class.
+			return $this->plugin_id . $id . '_settings';
+		}
 	}
 
 endif;

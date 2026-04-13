@@ -133,13 +133,6 @@ describe( 'product filters interactivity store', () => {
 					if ( key === 'woocommerce/product-filters' ) {
 						return {
 							canonicalUrl,
-							isProductArchive: true,
-						};
-					}
-					if ( key === 'woocommerce' ) {
-						return {
-							isBlockTheme: true,
-							needsRefreshForInteractivityAPI: false,
 						};
 					}
 					return {};

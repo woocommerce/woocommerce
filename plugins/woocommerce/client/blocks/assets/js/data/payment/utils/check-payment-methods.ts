@@ -53,7 +53,6 @@ export const getCanMakePaymentArg = (): CanMakePaymentArgument => {
 		const cart = store.getCartData();
 		const cartErrors = store.getCartErrors();
 		const cartTotals = store.getCartTotals();
-		// @ts-expect-error `hasFinishedResolution` is not typed in @wordpress/data yet.
 		const cartIsLoading = ! store.hasFinishedResolution( 'getCartData' );
 		const isLoadingRates = store.isAddressFieldsForShippingRatesUpdating();
 		const selectedShippingMethods = deriveSelectedShippingRates(

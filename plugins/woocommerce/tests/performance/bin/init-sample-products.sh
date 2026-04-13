@@ -31,4 +31,8 @@ wp-env run tests-cli wp import wp-content/plugins/woocommerce/sample-data/sample
 # install Storefront
 wp-env run tests-cli wp theme install storefront --activate
 
+# reduce the impact of background activities on the testing setup
+wp-env run tests-cli wp config set DISABLE_WP_CRON true --raw --type=constant
+wp-env run tests-cli wp config set WP_HTTP_BLOCK_EXTERNAL true --raw --type=constant
+
 echo "Success! Your E2E Test Environment is now ready."

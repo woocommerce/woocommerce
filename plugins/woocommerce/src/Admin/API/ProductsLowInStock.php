@@ -290,8 +290,11 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 			$query_result->last_order_date = null;
 		}
 
+		$product_id   = (int) $query_result->ID;
+		$product_type = \WC_Product_Factory::get_product_type( $product_id );
+
 		return array(
-			'id'               => (int) $query_result->ID,
+			'id'               => $product_id,
 			'images'           => $query_result->images,
 			'attributes'       => $query_result->attributes,
 			'low_stock_amount' => $low_stock_amount,
@@ -299,7 +302,7 @@ final class ProductsLowInStock extends \WC_REST_Products_Controller {
 			'name'             => $query_result->post_title,
 			'parent_id'        => (int) $query_result->post_parent,
 			'stock_quantity'   => (int) $query_result->stock_quantity,
-			'type'             => 'product_variation' === $query_result->post_type ? ProductType::VARIATION : ProductType::SIMPLE,
+			'type'             => $product_type ? $product_type : ProductType::SIMPLE,
 		);
 	}
 

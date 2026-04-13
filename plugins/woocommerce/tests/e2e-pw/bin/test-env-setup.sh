@@ -30,9 +30,6 @@ wp-env run tests-cli wp plugin activate process-waiting-actions
 echo -e 'Activate Test Helper APIs utility plugin \n'
 wp-env run tests-cli wp plugin activate test-helper-apis
 
-echo -e 'Activate PayPal Standard plugin \n'
-wp-env run tests-cli wp option patch update woocommerce_paypal_settings _should_load 'yes'
-
 echo -e 'Install Plugin-check utility plugin \n'
 wp-env run tests-cli wp plugin install plugin-check --activate
 

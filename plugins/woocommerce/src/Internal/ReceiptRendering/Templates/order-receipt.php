@@ -49,7 +49,7 @@
 <?php if ( ! empty( $data['notes'] ) ) { ?>
 	<h3 id="order_notes_section_title"><?php echo strtoupper( $data['texts']['order_notes_section_title'] ); ?></h3>
 	<?php foreach ( $data['notes'] as $note ) { ?>
-		<p><?php echo $note; ?></p>
+		<p><?php echo wp_kses_post( $note ); ?></p>
 		<?php
 	}
 }

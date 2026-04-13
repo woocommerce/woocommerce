@@ -14,6 +14,7 @@
 		"@wordpress/core-data": "<rootDir>/node_modules/@wordpress/core-data",
 		"@wordpress/components": "<rootDir>/node_modules/@wordpress/components",
 		"@woocommerce/data": "<rootDir>/node_modules/@woocommerce/data/build",
+		"@woocommerce/sanitize": "<rootDir>/node_modules/@woocommerce/sanitize/src/index.ts",
 		"@woocommerce/atomic-blocks": "assets/js/atomic/blocks",
 		"@woocommerce/atomic-utils": "assets/js/atomic/utils",
 		"@woocommerce/icons": "assets/js/icons",
@@ -38,10 +39,12 @@
 		"@woocommerce/shared-hocs": "assets/js/shared/hocs",
 		"@woocommerce/blocks-test-utils/(.*)$": "tests/utils/$1",
 		"@woocommerce/blocks-test-utils": "tests/utils",
+		"@woocommerce/sanitize": "<rootDir>/node_modules/@woocommerce/sanitize/src",
 		"@woocommerce/types": "assets/js/types",
 		"@woocommerce/utils": "assets/js/utils",
 		"@woocommerce/test-utils/msw": "tests/js/config/msw-setup.js",
 		"@woocommerce/entities": "assets/js/entities",
+		"@woocommerce/stores/(.*)$": "assets/js/base/stores/$1",
 		"^react$": "<rootDir>/node_modules/react",
 		"^react-dom$": "<rootDir>/node_modules/react-dom",
 		"^(.+)/build-module/(.*)$": "$1/build/$2"
@@ -65,6 +68,9 @@
 	"transform": {
 		"^.+\\.(js|ts|tsx)$": "<rootDir>/tests/js/scripts/babel-transformer.js"
 	},
+	"transformIgnorePatterns": [
+		"/node_modules/(?!\\.pnpm/dinero\\.js|dinero\\.js)"
+	],
 	"verbose": true,
 	"cacheDirectory": "<rootDir>/../../node_modules/.cache/jest",
 	"testEnvironment": "jest-fixed-jsdom"

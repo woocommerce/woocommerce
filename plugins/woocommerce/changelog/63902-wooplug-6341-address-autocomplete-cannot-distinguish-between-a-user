@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix address autocomplete dropdown appearing after browser autofill on checkout

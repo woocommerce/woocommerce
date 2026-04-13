@@ -20,6 +20,7 @@ import { reloadPage } from '@woocommerce/blocks/checkout/utils';
  * Internal dependencies
  */
 import { CartBlockContext } from './context';
+import { IncompatibleExtensionsFrontendNotice } from '../cart-checkout-shared/incompatible-extensions-notice';
 import './style.scss';
 
 const Cart = ( { children, attributes = {} } ) => {
@@ -79,6 +80,7 @@ const Block = ( { attributes, children, scrollToTop } ) => (
 		showErrorMessage={ CURRENT_USER_IS_ADMIN }
 	>
 		<StoreNoticesContainer context={ noticeContexts.CART } />
+		<IncompatibleExtensionsFrontendNotice block="woocommerce/cart" />
 		<SlotFillProvider>
 			<CartProvider>
 				<CartEventsProvider>

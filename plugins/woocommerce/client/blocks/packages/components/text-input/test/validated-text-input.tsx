@@ -3,11 +3,9 @@
  */
 import { act, render, screen } from '@testing-library/react';
 import { validationStore } from '@woocommerce/block-data';
-import { dispatch, select, StoreDescriptor } from '@wordpress/data';
+import { dispatch, select, useDispatch } from '@wordpress/data';
 import userEvent from '@testing-library/user-event';
 import { useState } from '@wordpress/element';
-import * as wpData from '@wordpress/data';
-
 /**
  * Internal dependencies
  */
@@ -16,12 +14,18 @@ import ValidatedTextInput from '../validated-text-input';
 jest.mock( '@wordpress/data', () => ( {
 	__esModule: true,
 	...jest.requireActual( '@wordpress/data' ),
-	useDispatch: jest.fn().mockImplementation( ( args ) => {
-		return jest.requireActual( '@wordpress/data' ).useDispatch( args );
-	} ),
+	useDispatch: jest.fn(),
 } ) );
 
+const mockUseDispatch = useDispatch as jest.Mock;
+
 describe( 'ValidatedTextInput', () => {
+	beforeAll( () => {
+		mockUseDispatch.mockImplementation( ( args ) => {
+			return jest.requireActual( '@wordpress/data' ).useDispatch( args );
+		} );
+	} );
+
 	it( 'Removes related validation error on change', async () => {
 		const user = userEvent.setup();
 
@@ -218,7 +222,64 @@ describe( 'ValidatedTextInput', () => {
 			select( validationStore ).getValidationError( 'test-input' )
 		).toBe( undefined );
 	} );
-	it( 'Shows a custom error message for an invalid required input', async () => {
+	it( 'Shows validation error for non-empty invalid input on blur', async () => {
+		const user = userEvent.setup();
+		const TestComponent = () => {
+			const [ inputValue, setInputValue ] = useState( '' );
+			return (
+				<ValidatedTextInput
+					instanceId={ '5' }
+					id={ 'test-input' }
+					onChange={ ( value ) => setInputValue( value ) }
+					value={ inputValue }
+					label={ 'Test Input' }
+					type="email"
+				/>
+			);
+		};
+		render( <TestComponent /> );
+		const textInputElement = await screen.getByLabelText( 'Test Input' );
+
+		await act( async () => {
+			await user.type( textInputElement, 'invalid-email' );
+			textInputElement.blur();
+		} );
+
+		// Non-empty invalid fields SHOULD show validation errors on blur
+		expect(
+			screen.queryByText( 'Please enter a valid test input' )
+		).toBeInTheDocument();
+	} );
+	it( 'Shows validation error for pattern mismatch on blur', async () => {
+		const user = userEvent.setup();
+		const TestComponent = () => {
+			const [ inputValue, setInputValue ] = useState( '' );
+			return (
+				<ValidatedTextInput
+					instanceId={ '6' }
+					id={ 'pattern-input' }
+					onChange={ ( value ) => setInputValue( value ) }
+					value={ inputValue }
+					label={ 'Pattern Input' }
+					pattern="^[A-Za-z]+$"
+				/>
+			);
+		};
+		render( <TestComponent /> );
+		const textInputElement = await screen.getByLabelText( 'Pattern Input' );
+
+		await act( async () => {
+			await user.type( textInputElement, '123456' );
+			textInputElement.blur();
+		} );
+
+		// Non-empty invalid fields (pattern mismatch) SHOULD show validation errors on blur
+		const validationError =
+			select( validationStore ).getValidationError( 'pattern-input' );
+		expect( validationError ).not.toBeUndefined();
+		expect( validationError?.hidden ).toBe( false );
+	} );
+	it( 'Shows a custom error message for an invalid required input after form submission', async () => {
 		const user = userEvent.setup();
 		const TestComponent = () => {
 			const [ inputValue, setInputValue ] = useState( '' );
@@ -239,18 +300,51 @@ describe( 'ValidatedTextInput', () => {
 		await act( async () => {
 			await user.type( textInputElement, 'test' );
 			await user.clear( textInputElement );
-			await textInputElement.blur();
+			textInputElement.blur();
 		} );
 
-		await expect(
+		// Empty fields don't show validation errors on blur - they stay hidden
+		// until form submission (showAllValidationErrors is called)
+		expect(
 			screen.queryByText( 'Please enter a valid test input' )
-		).not.toBeNull();
+		).not.toBeInTheDocument();
+
+		// Add whitespace only to verify this also doesn't trigger validation error on blur.
+		await act( async () => {
+			await user.type( textInputElement, ' ' );
+			textInputElement.blur();
+		} );
+
+		// Empty fields, even whitespace don't show validation errors on blur.
+		expect(
+			screen.queryByText( 'Please enter a valid test input' )
+		).not.toBeInTheDocument();
+
+		// Simulate form submission which reveals all hidden validation errors
+		await act( () =>
+			dispatch( validationStore ).showAllValidationErrors()
+		);
+
+		expect(
+			screen.queryByText( 'Please enter a valid test input' )
+		).toBeInTheDocument();
+
+		// After submission, blurring the empty field should NOT hide the error
+		await act( async () => {
+			await user.click( textInputElement );
+			textInputElement.blur();
+		} );
+
+		expect(
+			screen.queryByText( 'Please enter a valid test input' )
+		).toBeInTheDocument();
 	} );
+
 	describe( 'correctly validates on mount', () => {
 		it( 'validates when focusOnMount is true and validateOnMount is not set', async () => {
 			const setValidationErrors = jest.fn();
-			wpData.useDispatch.mockImplementation(
-				( store: StoreDescriptor | string ) => {
+			mockUseDispatch.mockImplementation(
+				( store: string | { name: string } ) => {
 					if ( store === validationStore ) {
 						return {
 							...jest
@@ -293,8 +387,8 @@ describe( 'ValidatedTextInput', () => {
 		} );
 		it( 'validates when focusOnMount is false, regardless of validateOnMount value', async () => {
 			const setValidationErrors = jest.fn();
-			wpData.useDispatch.mockImplementation(
-				( store: StoreDescriptor | string ) => {
+			mockUseDispatch.mockImplementation(
+				( store: string | { name: string } ) => {
 					if ( store === validationStore ) {
 						return {
 							...jest
@@ -337,8 +431,8 @@ describe( 'ValidatedTextInput', () => {
 		} );
 		it( 'does not validate when validateOnMount is false and focusOnMount is true', async () => {
 			const setValidationErrors = jest.fn();
-			wpData.useDispatch.mockImplementation(
-				( store: StoreDescriptor | string ) => {
+			mockUseDispatch.mockImplementation(
+				( store: string | { name: string } ) => {
 					if ( store === validationStore ) {
 						return {
 							...jest

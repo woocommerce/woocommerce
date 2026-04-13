@@ -59,7 +59,7 @@ class ChartBlock extends Component {
 							{ selectedChart.label }
 						</Text>
 					</CardHeader>
-					<CardBody size={ null }>
+					<CardBody size="none">
 						<a
 							className="screen-reader-text"
 							href={ getAdminLink(

@@ -35,11 +35,11 @@ Keep the _[Release Troubleshooting & Recovery](/docs/contribution/releases/troub
 
 #### 2. Build the release package
 
-- [ ] Run workflow **[Release: Bump version number](https://github.com/woocommerce/woocommerce/actions/workflows/release-bump-version.yml)**: enter the release branch as _Release branch_ and choose the release type from the dropdown.
+- [ ] Run workflow **[Release: Bump version number](https://github.com/woocommerce/woocommerce/actions/workflows/release-bump-version.yml)**: enter the release main version (`x.y`) as _Release branch_ and choose the release type from the dropdown.
 - [ ] Review and merge the PR that was generated against the release branch.
 - [ ] Run workflow **[Release: Compile changelog](https://github.com/woocommerce/woocommerce/actions/workflows/release-compile-changelog.yml)**: enter the release main version (`x.y`) as _Version_ and leave _Release date_ empty, except when building the package ahead of schedule.
 - [ ] Review and merge the PRs that were generated: one against `trunk` and another one against the release branch. Both should be under the release milestone.
-- [ ] Run workflow **[Release: Build ZIP file](https://github.com/woocommerce/woocommerce/actions/workflows/release-build-zip-file.yml)** to build the asset and create the GitHub release: enter the release branch as _Release branch_ and check _Create GitHub release_.
+- [ ] Run workflow **[Release: Build ZIP file](https://github.com/woocommerce/woocommerce/actions/workflows/release-build-zip-file.yml)** to build the asset and create the GitHub release: enter the release main version (`x.y`) as _Release branch_ and check _Create GitHub release_.
 - [ ] Confirm that a draft release [was created in the repository](https://github.com/woocommerce/woocommerce/releases) with an attached `woocommerce.zip` asset.
 
 #### 3. Upload the release to WordPress.org
@@ -56,6 +56,7 @@ This step only applies to `rc` or stable (`x.y.0`  onwards) releases.
 :::
 
 - [ ] Follow the [guide to deploy to the staging environment](https://wp.me/PCYsg-18BQ) and monitor for 4 hours (RC) or 2 hours (stable) after deploy.
+- [ ] Create a thread in the releases Slack channel for monitoring and discussion of this release.
 
 ##### If a critical issue was detected while monitoring
 
@@ -70,7 +71,7 @@ This step only applies to `rc` or stable (`x.y.0`  onwards) releases.
 #### 6. Post-release tasks
 
 :::caution
-This step only applies to `rc` or stable (`x.y.0`  onwards) releases.
+This step only applies to stable (`x.y.0`  onwards) releases.
 :::
 
 - [ ] Wait at least 1 hour for all automations to complete and make sure to merge any follow-up PRs under the [release milestone](https://github.com/woocommerce/woocommerce/milestones/).

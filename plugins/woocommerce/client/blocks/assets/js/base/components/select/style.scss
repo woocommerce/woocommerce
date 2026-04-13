@@ -52,7 +52,8 @@
 			border-color: $input-border-dark;
 			color: $input-text-dark;
 			&:focus {
-				border-color: currentColor;
+				color: $input-text-dark;
+				border: 1.5px solid currentColor;
 			}
 		}
 

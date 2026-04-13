@@ -2,11 +2,12 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Icon, category, tag } from '@wordpress/icons';
+import { Icon, category, tag, store } from '@wordpress/icons';
 import { Placeholder, Button } from '@wordpress/components';
 import { useBlockProps } from '@wordpress/block-editor';
 import ProductTagControl from '@woocommerce/editor-components/product-tag-control';
 import ProductCategoryControl from '@woocommerce/editor-components/product-category-control';
+import ProductBrandControl from '@woocommerce/editor-components/product-brand-control';
 
 /**
  * Internal dependencies
@@ -31,6 +32,8 @@ export const getTaxonomySlugForCollection = (
 			return 'product_cat';
 		case CoreCollectionNames.BY_TAG:
 			return 'product_tag';
+		case CoreCollectionNames.BY_BRAND:
+			return 'product_brand';
 		default:
 			return null;
 	}
@@ -53,6 +56,11 @@ const getDescriptionForCollection = (
 				'Display a grid of products from your selected tags.',
 				'woocommerce'
 			);
+		case CoreCollectionNames.BY_BRAND:
+			return __(
+				'Display a grid of products from your selected brands.',
+				'woocommerce'
+			);
 		default:
 			return __(
 				'Select taxonomy terms to display products from.',
@@ -70,8 +78,9 @@ const getIconForCollection = ( collection: string | undefined ) => {
 			return category;
 		case CoreCollectionNames.BY_TAG:
 			return tag;
+		case CoreCollectionNames.BY_BRAND:
+			return store;
 		default:
-			// For brands and others, use category icon as fallback
 			return category;
 	}
 };
@@ -125,6 +134,18 @@ const TaxonomyPicker = ( props: TaxonomyPickerProps ) => {
 							const ids = value.map(
 								( { id }: { id: number | string } ) =>
 									Number( id )
+							);
+							handleTermChange( ids );
+						} }
+					/>
+				);
+			case CoreCollectionNames.BY_BRAND:
+				return (
+					<ProductBrandControl
+						selected={ selectedTermIds }
+						onChange={ ( value = [] ) => {
+							const ids = value.map(
+								( { id }: { id: number } ) => id
 							);
 							handleTermChange( ids );
 						} }

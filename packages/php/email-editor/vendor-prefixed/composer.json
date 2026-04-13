@@ -16,10 +16,12 @@
 	},
 	"scripts": {
 		"post-install-cmd": [
-			"\"../../../../plugins/woocommerce/vendor/bin/mozart\" compose"
+			"\"../../../../plugins/woocommerce/vendor/bin/mozart\" compose",
+			"php patches/patch-memory-leaks.php"
 		],
 		"post-update-cmd": [
-			"\"../../../../plugins/woocommerce/vendor/bin/mozart\" compose"
+			"\"../../../../plugins/woocommerce/vendor/bin/mozart\" compose",
+			"php patches/patch-memory-leaks.php"
 		]
 	},
 	"extra": {

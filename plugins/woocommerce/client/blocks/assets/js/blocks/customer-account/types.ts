@@ -1,6 +1,7 @@
 export interface Attributes {
 	className?: string;
 	displayStyle: DisplayStyle;
+	hasDropdownNavigation?: boolean;
 	iconStyle: IconStyle;
 	iconClass: string;
 }

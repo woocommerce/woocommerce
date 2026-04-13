@@ -46,6 +46,13 @@ const taxonomyCollections: {
 		termLabel: 'Recommended',
 		expectedProductCount: 2,
 	},
+	{
+		slug: 'productsByBrand',
+		name: 'Products by Brand',
+		termName: 'brands',
+		termLabel: 'WooCommerce',
+		expectedProductCount: 3,
+	},
 ];
 
 test.describe( 'Product Collection: Collection Pickers', () => {
