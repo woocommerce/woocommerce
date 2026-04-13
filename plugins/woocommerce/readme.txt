@@ -170,7 +170,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 10.7.0-rc.1 2026-XX-XX =
+= 10.7.0-rc.1 2026-04-13 =
 
 **WooCommerce**
 
@@ -239,6 +239,11 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Fix cart shipping and totals stuck as loading when removing bundled products [#64000](https://github.com/woocommerce/woocommerce/pull/64000)
 * Fix - Fix issues when Product Gallery was used inside the Product block [#63976](https://github.com/woocommerce/woocommerce/pull/63976)
 * Fix - Fix settings page label vertical alignment on WordPress 7.0 where increased form element height caused labels to sit too high relative to their fields. [#63924](https://github.com/woocommerce/woocommerce/pull/63924)
+* Fix - Fix entity-encoded HTML in `item_data` being incorrectly decoded during mini-cart rendering. [#64122](https://github.com/woocommerce/woocommerce/pull/64122)
+* Fix - Fix fatal error on Payments settings page when `woocommerce_gateway_order` option contains legacy integer keys. [#64061](https://github.com/woocommerce/woocommerce/pull/64061)
+* Fix - Fix inconsistent icon spacing in the customer account block header on mobile. [#64126](https://github.com/woocommerce/woocommerce/pull/64126)
+* Fix - Fix shipping provider filter on orders list using wrong meta key, causing no results to appear. [#64101](https://github.com/woocommerce/woocommerce/pull/64101)
+* Fix - Fix tracking number lookup breaking when custom shipping provider definitions contain non-string values. [#64075](https://github.com/woocommerce/woocommerce/pull/64075)
 * Add - Add custom shipping providers settings UI and shipping provider filter for the orders list. [#63879](https://github.com/woocommerce/woocommerce/pull/63879)
 * Add - Add description for COD enable_for_methods field in v4 settings API. [#63767](https://github.com/woocommerce/woocommerce/pull/63767)
 * Add - Add design-aligned grouped settings schemas for offline payment gateways (cheque, BACS, COD) in the v4 settings API. [#63734](https://github.com/woocommerce/woocommerce/pull/63734)
@@ -260,6 +265,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Add - Apply `woocommerce_variation_option_name` filter in ProductItemTrait, allowing third-parties to optionally add relevant information to variation option names. [#63673](https://github.com/woocommerce/woocommerce/pull/63673)
 * Add - Exclude WCPay test orders from analytics data to prevent test transactions from polluting reports. [#63550](https://github.com/woocommerce/woocommerce/pull/63550)
 * Add - Show preview products and placeholder cards in the email editor for product collection blocks when the store has no products [#63612](https://github.com/woocommerce/woocommerce/pull/63612)
+* Add - Add myPOS and Evergreen Payments as official payment partners. [#64097](https://github.com/woocommerce/woocommerce/pull/64097)
 * Update - Accept top-level enabled, title, description, and order fields in the v4 payment gateway settings PUT endpoint. This aligns the PUT shape with the GET response, enabling @wordpress/core-data to track dirty state correctly. The values parameter remains supported for backwards compatibility. [#63714](https://github.com/woocommerce/woocommerce/pull/63714)
 * Update - Add weight and dimensions to Store API ProductSchema / Products endpoint. [#63334](https://github.com/woocommerce/woocommerce/pull/63334)
 * Update - Change Cache Product Objects feature default plugin compatibility to COMPATIBLE so extensions that haven't explicitly declared compatibility are no longer shown as incompatible. [#63243](https://github.com/woocommerce/woocommerce/pull/63243)
@@ -280,6 +286,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Dev - Introduce end-to-end tests for PayPal Standard (enablement flow). [#63068](https://github.com/woocommerce/woocommerce/pull/63068)
 * Dev - Introduce end-to-end tests for PayPal Standard (Jetpack onboarding flow). [#62982](https://github.com/woocommerce/woocommerce/pull/62982)
 * Dev - Migrate dinero.js from v1.9.1 to v2.0.0 in WooCommerce Blocks. [#63543](https://github.com/woocommerce/woocommerce/pull/63543)
+* Dev - Consolidate get_shipping_providers and get_shipping_providers_object into a single method that always returns AbstractShippingProvider instances. [#64102](https://github.com/woocommerce/woocommerce/pull/64102)
 * Tweak - Add data-cart-item-key attribute to cart line item row block. [#63090](https://github.com/woocommerce/woocommerce/pull/63090)
 * Tweak - Fulfillment UI/UX minor tweaks: clickable card headers, reduced padding, copy confirmation, provider label resolution, and tracking URL auto-update. [#63899](https://github.com/woocommerce/woocommerce/pull/63899)
 * Tweak - Refine order notification email styling: adjust order summary layout and item alignment [#63306](https://github.com/woocommerce/woocommerce/pull/63306)
