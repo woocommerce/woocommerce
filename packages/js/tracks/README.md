@@ -38,6 +38,7 @@ This allows you to delay tracks events that would otherwise cause a race conditi
 For example, when we trigger `wcadmin_tasklist_appearance_continue_setup` we're simultaneously moving the user to a new page via
 `window.location`. This is an example of a race condition that should be avoided by enqueueing the event,
 and therefore running it on the next pageview.
+
 | Param | Type | Description |
 | --- | --- | --- |
 | eventName | `String` | The name of the event to record, don't include the `wcadmin_` prefix |

@@ -38,7 +38,7 @@ const product = { average_rating: 3.5 };
 
 Name | Type | Default | Description
 --- | --- | --- | ---
-`product` | Object | `null` | (required) A product object containing a `average_rating`. See https://woocommerce.github.io/woocommerce-rest-api-docs/#products
+`product` | Object | `null` | (required) A product object containing a `average_rating`. See <https://woocommerce.github.io/woocommerce-rest-api-docs/#products>
 
 
 ReviewRating
@@ -59,4 +59,4 @@ const review = { rating: 5 };
 
 Name | Type | Default | Description
 --- | --- | --- | ---
-`review` | Object | `null` | (required) A review object containing a `rating`. See https://woocommerce.github.io/woocommerce-rest-api-docs/#retrieve-product-reviews
+`review` | Object | `null` | (required) A review object containing a `rating`. See <https://woocommerce.github.io/woocommerce-rest-api-docs/#retrieve-product-reviews>

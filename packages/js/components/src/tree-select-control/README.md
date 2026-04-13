@@ -69,6 +69,7 @@ For the component `value` we only need to set the value for the children options
 In the `onChange` function only returns and array with the selected children `value` on it.
 
 So for example, if the options are like this
+
 ```jsx
 const options = [
        {
@@ -102,6 +103,7 @@ const options = [
 The component has an extra checkbox "All" as a root node allowing to select all the options.
 
 You can customize the label for it by just adding the prop `selectAllLabel` 
+
 ```jsx
 <TreeSelectControl
 options={ options }

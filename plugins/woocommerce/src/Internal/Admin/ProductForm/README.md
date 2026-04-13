@@ -3,7 +3,7 @@
 This folder contains helper classes to specifically extend the WooCommerce Admin product form.
 This will primarily be done through the `Form` class, under the `Automattic\WooCommerce\Internal\Admin\ProductForm` namespace.
 
-## Ex - Adding a new field:
+## Ex - Adding a new field
 
 ```php
 function add_product_form_field() {

@@ -602,7 +602,6 @@ When you're writing your rules, you're writing a partial schema for the document
 
 An example of the document object looks like this:
 
-{/* markdownlint-disable MD033 */}
 <details>
 	<summary>Document object</summary>
 

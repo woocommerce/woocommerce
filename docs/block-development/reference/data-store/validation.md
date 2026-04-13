@@ -179,8 +179,10 @@ store.clearValidationErrors( [
 	'terms-and-conditions',
 ] );
 ```
-{/* markdownlint-disable MD029 */}
+
+{/* markdownlint-disable MD029 _/}
 2. This will clear all validation errors.
+{/_ markdownlint-enable MD029 */}
 
 ```js
 const store = dispatch( validationStore );

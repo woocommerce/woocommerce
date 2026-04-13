@@ -27,5 +27,5 @@ Name | Type | Default | Description
 `width` | Number | `60` | The width of image to display
 `height` | Number | `60` | The height of image to display
 `className` | String | `''` | Additional CSS classes
-`product` | Object | `null` | Product or variation object. The image to display will be pulled from `product.images` or `variation.image`. See https://woocommerce.github.io/woocommerce-rest-api-docs/#product-properties and https://woocommerce.github.io/woocommerce-rest-api-docs/#product-variation-properties
+`product` | Object | `null` | Product or variation object. The image to display will be pulled from `product.images` or `variation.image`. See <https://woocommerce.github.io/woocommerce-rest-api-docs/#product-properties> and <https://woocommerce.github.io/woocommerce-rest-api-docs/#product-variation-properties>
 `alt` | String | `null` | Text to use as the image alt attribute

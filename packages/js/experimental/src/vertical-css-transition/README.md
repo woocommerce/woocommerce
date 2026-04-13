@@ -26,6 +26,7 @@ This is a wrapper to the [React CSSTransition](https://reactcommunity.org/react-
 ### Props
 
 Props extends the [CSSTransition props](https://reactcommunity.org/react-transition-group/css-transition#CSSTransition-props).
+
 Name | Type | Default | Description
 --- | --- | --- | ---
 `defaultStyle` | CSSProperties | `null` | Custom CSS properties for the transition component.
