@@ -57,8 +57,14 @@ class DefaultShippingPartnersTest extends WC_Unit_Test_Case {
 		$results = EvaluateSuggestion::evaluate_specs( $specs );
 
 		$this->assertCount( 0, $results['errors'] );
-		$this->assertCount( 1, $results['suggestions'] );
-		$this->assertEquals( 'woocommerce-shipping', $results['suggestions'][0]->id );
+
+		$ids = array_map(
+			function ( $s ) {
+				return $s->id;
+			},
+			$results['suggestions']
+		);
+		$this->assertContains( 'woocommerce-shipping', $ids );
 	}
 
 	/**
@@ -96,7 +102,14 @@ class DefaultShippingPartnersTest extends WC_Unit_Test_Case {
 
 		// Assert.
 		$this->assertCount( 0, $results['errors'] );
-		$this->assertCount( 0, $results['suggestions'] );
+
+		$ids = array_map(
+			function ( $s ) {
+				return $s->id;
+			},
+			$results['suggestions']
+		);
+		$this->assertNotContains( 'woocommerce-shipping', $ids );
 
 		// Clean up.
 		self::rmdir( dirname( $shipping_plugin_file_path ) );

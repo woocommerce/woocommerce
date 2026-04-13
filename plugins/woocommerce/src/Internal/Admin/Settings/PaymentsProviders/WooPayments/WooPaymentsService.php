@@ -738,12 +738,32 @@ class WooPaymentsService {
 			'context' => array(),
 		);
 
+		// Move all extra keys (not code, message, context) into the context.
+		$reserved_keys = array( 'code', 'message', 'context' );
+		foreach ( $error as $key => $value ) {
+			if ( ! in_array( $key, $reserved_keys, true ) ) {
+				$sanitized_error['context'][ $key ] = $value;
+			}
+		}
+
+		// Merge any existing context data.
 		if ( isset( $error['context'] ) && ( is_array( $error['context'] ) || is_object( $error['context'] ) ) ) {
 			// Make sure we are dealing with an array.
-			$sanitized_error['context'] = json_decode( wp_json_encode( $error['context'] ), true );
-			if ( ! is_array( $sanitized_error['context'] ) ) {
-				$sanitized_error['context'] = array();
+			$existing_context = json_decode( wp_json_encode( $error['context'] ), true );
+			if ( is_array( $existing_context ) ) {
+				$sanitized_error['context'] = array_merge( $sanitized_error['context'], $existing_context );
 			}
+		}
+
+		// Flatten any nested 'context' key (e.g., from WP_Error data that includes its own context).
+		// The nested context values take precedence over the top-level values.
+		if ( isset( $sanitized_error['context']['context'] ) && is_array( $sanitized_error['context']['context'] ) ) {
+			$nested_context = $sanitized_error['context']['context'];
+			unset( $sanitized_error['context']['context'] );
+			$sanitized_error['context'] = array_merge( $sanitized_error['context'], $nested_context );
+		}
+
+		if ( ! empty( $sanitized_error['context'] ) ) {
 
 			// Sanitize the context data.
 			// It can only contain strings or arrays of strings.
@@ -2031,6 +2051,44 @@ class WooPaymentsService {
 				}
 			}
 		}
+		// Standardize errors to be a list of arrays with `code`, `message`, and optional extra keys.
+		$standardized_errors = array();
+		// If the errors is not a list of errors or it has any of the reserved entries,
+		// treat it as a single error.
+		if ( ! is_array( $step_details['errors'] )
+			|| array_key_exists( 'code', $step_details['errors'] )
+			|| array_key_exists( 'message', $step_details['errors'] )
+			|| array_key_exists( 'context', $step_details['errors'] )
+		) {
+			$raw_errors = array( $step_details['errors'] );
+		} else {
+			$raw_errors = $step_details['errors'];
+		}
+
+		foreach ( $raw_errors as $error ) {
+			if ( $error instanceof \WP_Error ) {
+				$error = array(
+					'code'    => $error->get_error_code(),
+					'message' => $error->get_error_message(),
+					'context' => $error->get_error_data(),
+				);
+			} elseif ( is_array( $error ) ) {
+				if ( empty( $error['code'] ) ) {
+					$error['code'] = 'general_error';
+				}
+				if ( ! array_key_exists( 'message', $error ) ) {
+					$error['message'] = '';
+				}
+			} else {
+				$error = array(
+					'code'    => 'general_error',
+					'message' => (string) $error,
+				);
+			}
+
+			$standardized_errors[] = $this->sanitize_onboarding_step_error( $error );
+		}
+		$step_details['errors'] = $standardized_errors;
 
 		// Ensure that any step has the general actions.
 		if ( empty( $step_details['actions'] ) ) {

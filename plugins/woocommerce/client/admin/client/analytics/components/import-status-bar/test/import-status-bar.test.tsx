@@ -138,10 +138,12 @@ describe( 'ImportStatusBar', () => {
 
 		render( <ImportStatusBar /> );
 
+		// When busy, aria-label changes to "Analytics data import in progress"
 		const button = screen.getByRole( 'button', {
-			name: /Manually trigger analytics data import/i,
+			name: /Analytics data import in progress/i,
 		} );
 		expect( button ).toBeDisabled();
+		expect( button ).toHaveAttribute( 'aria-busy', 'true' );
 	} );
 
 	it( 'should disable button when isTriggeringImport is true', () => {
@@ -153,10 +155,12 @@ describe( 'ImportStatusBar', () => {
 
 		render( <ImportStatusBar /> );
 
+		// When busy, aria-label changes to "Analytics data import in progress"
 		const button = screen.getByRole( 'button', {
-			name: /Manually trigger analytics data import/i,
+			name: /Analytics data import in progress/i,
 		} );
 		expect( button ).toBeDisabled();
+		expect( button ).toHaveAttribute( 'aria-busy', 'true' );
 	} );
 
 	it( 'should trigger import on button click', async () => {

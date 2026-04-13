@@ -240,4 +240,181 @@ class OrderItemSchemaTest extends TestCase {
 		$order->delete( true );
 		$variable_product->delete( true );
 	}
+
+	/**
+	 * Test that variations with "Any" attributes return user-selected values.
+	 */
+	public function test_get_item_response_any_variation_returns_user_selected_values(): void {
+		$variable_product = new \WC_Product_Variable();
+		$variable_product->set_name( 'Test Variable Product' );
+
+		$attribute = new \WC_Product_Attribute();
+		$attribute->set_id( 0 );
+		$attribute->set_name( 'pa_size' );
+		$attribute->set_options( array( 'small', 'medium', 'large' ) );
+		$attribute->set_visible( true );
+		$attribute->set_variation( true );
+
+		$variable_product->set_attributes( array( $attribute ) );
+		$variable_product->save();
+
+		$variation = new \WC_Product_Variation();
+		$variation->set_parent_id( $variable_product->get_id() );
+		$variation->set_attributes( array( 'pa_size' => '' ) );
+		$variation->set_regular_price( '10.00' );
+		$variation->save();
+
+		$order = new \WC_Order();
+		$item  = new \WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product_id'   => $variable_product->get_id(),
+				'variation_id' => $variation->get_id(),
+				'quantity'     => 1,
+				'subtotal'     => '10.00',
+				'total'        => '10.00',
+				'name'         => $variation->get_name(),
+			)
+		);
+
+		$item->add_meta_data( 'pa_size', 'large', true );
+		$order->add_item( $item );
+		$order->save();
+
+		$result = $this->sut->get_item_response( $item );
+
+		$this->assertArrayHasKey( 'variation', $result );
+		$this->assertIsArray( $result['variation'] );
+		$this->assertNotEmpty( $result['variation'] );
+		$this->assertCount( 1, $result['variation'] );
+
+		$variation_data = $result['variation'][0];
+		$this->assertArrayHasKey( 'raw_attribute', $variation_data );
+		$this->assertArrayHasKey( 'attribute', $variation_data );
+		$this->assertArrayHasKey( 'value', $variation_data );
+		$this->assertEquals( 'attribute_pa_size', $variation_data['raw_attribute'] );
+		$this->assertEquals( 'size', $variation_data['attribute'] );
+		$this->assertEquals( 'large', $variation_data['value'] );
+
+		$order->delete( true );
+		$variation->delete( true );
+		$variable_product->delete( true );
+	}
+
+	/**
+	 * Test variations with mixed global and custom "Any" attributes.
+	 */
+	public function test_get_item_response_any_variation_with_mixed_attributes(): void {
+		$variable_product = new \WC_Product_Variable();
+		$variable_product->set_name( 'Test Variable Product with Mixed Attributes' );
+
+		$global_attribute = new \WC_Product_Attribute();
+		$global_attribute->set_id( 0 );
+		$global_attribute->set_name( 'pa_size' );
+		$global_attribute->set_options( array( 'small', 'medium', 'large' ) );
+		$global_attribute->set_visible( true );
+		$global_attribute->set_variation( true );
+
+		$custom_attribute = new \WC_Product_Attribute();
+		$custom_attribute->set_id( 0 );
+		$custom_attribute->set_name( 'color' );
+		$custom_attribute->set_options( array( 'red', 'blue', 'green' ) );
+		$custom_attribute->set_visible( true );
+		$custom_attribute->set_variation( true );
+
+		$variable_product->set_attributes( array( $global_attribute, $custom_attribute ) );
+		$variable_product->save();
+
+		$variation = new \WC_Product_Variation();
+		$variation->set_parent_id( $variable_product->get_id() );
+		$variation->set_attributes(
+			array(
+				'pa_size' => '',
+				'color'   => '',
+			)
+		);
+		$variation->set_regular_price( '15.00' );
+		$variation->save();
+
+		$order = new \WC_Order();
+		$item  = new \WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product_id'   => $variable_product->get_id(),
+				'variation_id' => $variation->get_id(),
+				'quantity'     => 1,
+				'subtotal'     => '15.00',
+				'total'        => '15.00',
+				'name'         => $variation->get_name(),
+			)
+		);
+
+		$item->add_meta_data( 'pa_size', 'large', true );
+		$item->add_meta_data( 'color', 'blue', true );
+		$order->add_item( $item );
+		$order->save();
+
+		$result = $this->sut->get_item_response( $item );
+
+		$this->assertArrayHasKey( 'variation', $result );
+		$this->assertIsArray( $result['variation'] );
+		$this->assertCount( 2, $result['variation'] );
+
+		$global_attr = null;
+		$custom_attr = null;
+		foreach ( $result['variation'] as $attr ) {
+			if ( 'attribute_pa_size' === $attr['raw_attribute'] ) {
+				$global_attr = $attr;
+			} elseif ( 'attribute_color' === $attr['raw_attribute'] ) {
+				$custom_attr = $attr;
+			}
+		}
+
+		$this->assertNotNull( $global_attr );
+		$this->assertEquals( 'attribute_pa_size', $global_attr['raw_attribute'] );
+		$this->assertEquals( 'size', $global_attr['attribute'] );
+		$this->assertEquals( 'large', $global_attr['value'] );
+
+		$this->assertNotNull( $custom_attr );
+		$this->assertEquals( 'attribute_color', $custom_attr['raw_attribute'] );
+		$this->assertEquals( 'color', $custom_attr['attribute'] );
+		$this->assertEquals( 'blue', $custom_attr['value'] );
+
+		$order->delete( true );
+		$variation->delete( true );
+		$variable_product->delete( true );
+	}
+
+	/**
+	 * Test that specific (non-Any) variations still work correctly.
+	 */
+	public function test_get_item_response_specific_variation_returns_correct_values(): void {
+		$variable_product = \WC_Helper_Product::create_variation_product();
+		$variations       = $variable_product->get_children();
+		$variation        = wc_get_product( $variations[0] );
+
+		$order = new \WC_Order();
+		$order->add_product( $variation, 1 );
+		$order->save();
+
+		$items = $order->get_items();
+		$item  = reset( $items );
+
+		$result = $this->sut->get_item_response( $item );
+
+		$this->assertArrayHasKey( 'variation', $result );
+		$this->assertIsArray( $result['variation'] );
+		$this->assertNotEmpty( $result['variation'] );
+
+		foreach ( $result['variation'] as $attr ) {
+			$this->assertArrayHasKey( 'raw_attribute', $attr );
+			$this->assertArrayHasKey( 'attribute', $attr );
+			$this->assertArrayHasKey( 'value', $attr );
+			$this->assertStringStartsWith( 'attribute_', $attr['raw_attribute'] );
+			$this->assertNotEmpty( $attr['value'] );
+		}
+
+		$order->delete( true );
+		$variable_product->delete( true );
+	}
 }

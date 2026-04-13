@@ -203,6 +203,11 @@ class FeaturesController {
 	 *                                                 Higher number = higher in the list. Defaults to 10.
 	 *     @type array   $setting                      The properties used by the Settings API to render the setting control on
 	 *                                                 the Features screen. See the Settings API for the schema of these props.
+	 *     @type string  $deprecated_since             The WooCommerce version since which this feature is deprecated.
+	 *                                                 When set, feature_is_enabled() will force feature value to the deprecated_value
+	 *                                                 instead of reading from the database.
+	 *     @type bool    $deprecated_value             The value to return for deprecated features when feature_is_enabled()
+	 *                                                 is called. Defaults to false.
 	 * }
 	 *
 	 * @return void
@@ -334,6 +339,8 @@ class FeaturesController {
 				'disable_ui'                   => true,
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+				'deprecated_since'             => '10.5.0',
+				'deprecated_value'             => true,
 			),
 			// Marked as a legacy feature to avoid compatibility checks, which aren't really relevant to this feature.
 			// https://github.com/woocommerce/woocommerce/pull/39701#discussion_r1376976959.
@@ -421,6 +428,16 @@ class FeaturesController {
 						return '';
 					},
 				),
+			),
+			'deferred_transactional_emails'      => array(
+				'name'                         => __( 'Deferred emails', 'woocommerce' ),
+				'description'                  => __(
+					'Send transactional emails asynchronously via Action Scheduler instead of during the current request.',
+					'woocommerce'
+				),
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+				'enabled_by_default'           => false,
+				'is_experimental'              => false,
 			),
 			'email_improvements'                 => array(
 				'name'                         => __( 'Email improvements', 'woocommerce' ),
@@ -556,7 +573,7 @@ class FeaturesController {
 				'enabled_by_default'           => false,
 				'is_experimental'              => true,
 				'disable_ui'                   => true,
-				'skip_compatibility_checks'    => true,
+				'skip_compatibility_checks'    => false,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
 			'rest_api_caching'                   => array(
@@ -579,22 +596,10 @@ class FeaturesController {
 					'[Performance] Speeds up your store by caching product objects during each request, preventing duplicate product loads. Can improve page load times on product-heavy pages.',
 					'woocommerce'
 				),
-				'default_plugin_compatibility' => FeaturePluginCompatibility::INCOMPATIBLE,
-				'enabled_by_default'           => false,
-				'is_experimental'              => true,
-				'disable_ui'                   => false,
-			),
-			'fraud_protection'                   => array(
-				'name'                         => __( 'Fraud protection', 'woocommerce' ),
-				'description'                  => __(
-					'Enable fraud protection features for your store.',
-					'woocommerce'
-				),
-				'enabled_by_default'           => false,
-				'disable_ui'                   => false,
-				'is_experimental'              => true,
-				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+				'enabled_by_default'           => false,
+				'is_experimental'              => true,
+				'disable_ui'                   => false,
 			),
 		);
 
@@ -740,7 +745,14 @@ class FeaturesController {
 
 		if ( $include_enabled_info ) {
 			foreach ( array_keys( $features ) as $feature_id ) {
-				$is_enabled                            = $this->feature_is_enabled( $feature_id );
+				$is_enabled = false;
+				// For deprecated features, use the deprecated_value directly without triggering the deprecation notice.
+				// The deprecation notice should only fire for external code checking feature status, not for internal listing.
+				if ( ! empty( $features[ $feature_id ]['deprecated_since'] ) ) {
+					$is_enabled = (bool) ( $features[ $feature_id ]['deprecated_value'] ?? false );
+				} else {
+					$is_enabled = $this->feature_is_enabled( $feature_id );
+				}
 				$features[ $feature_id ]['is_enabled'] = $is_enabled;
 			}
 		}
@@ -764,12 +776,12 @@ class FeaturesController {
 	 * @throws \InvalidArgumentException If the feature doesn't exist.
 	 */
 	public function get_default_plugin_compatibility( string $feature_id ): string {
-		$feature_definition = $this->get_feature_definitions()[ $feature_id ] ?? null;
-		if ( is_null( $feature_definition ) ) {
+		$feature = $this->get_feature_definition( $feature_id );
+		if ( null === $feature ) {
 			throw new \InvalidArgumentException( esc_html( "The WooCommerce feature '$feature_id' doesn't exist" ) );
 		}
 
-		$default_plugin_compatibility = $feature_definition['default_plugin_compatibility'] ?? FeaturePluginCompatibility::COMPATIBLE;
+		$default_plugin_compatibility = $feature['default_plugin_compatibility'] ?? FeaturePluginCompatibility::COMPATIBLE;
 
 		// Filter below is only fired for backwards compatibility with (now removed) get_plugins_are_incompatible_by_default().
 		/**
@@ -787,14 +799,36 @@ class FeaturesController {
 	}
 
 	/**
+	 * Get the definition array for a specific feature.
+	 *
+	 * @param string $feature_id Unique feature id.
+	 * @return array|null The feature definition array, or null if the feature doesn't exist.
+	 *
+	 * @since 10.5.0
+	 */
+	public function get_feature_definition( string $feature_id ): ?array {
+		return $this->get_feature_definitions()[ $feature_id ] ?? null;
+	}
+
+	/**
 	 * Check if a given feature is currently enabled.
+	 *
+	 * Note: This method does not log deprecation notices for deprecated features.
+	 * Deprecation logging is handled by FeaturesUtil::feature_is_enabled() which is the public API.
 	 *
 	 * @param  string $feature_id Unique feature id.
 	 * @return bool True if the feature is enabled, false if not or if the feature doesn't exist.
 	 */
 	public function feature_is_enabled( string $feature_id ): bool {
-		if ( ! $this->feature_exists( $feature_id ) ) {
+		$feature = $this->get_feature_definition( $feature_id );
+
+		if ( null === $feature ) {
 			return false;
+		}
+
+		// Handle deprecated features - return the backwards-compatible value.
+		if ( ! empty( $feature['deprecated_since'] ) ) {
+			return (bool) ( $feature['deprecated_value'] ?? false );
 		}
 
 		if ( $this->is_preview_email_improvements_enabled( $feature_id ) ) {
@@ -984,6 +1018,7 @@ class FeaturesController {
 		$this->verify_did_woocommerce_init( __FUNCTION__ );
 
 		$features = $this->get_feature_definitions();
+
 		if ( $enabled_features_only ) {
 			$features = array_filter(
 				$features,

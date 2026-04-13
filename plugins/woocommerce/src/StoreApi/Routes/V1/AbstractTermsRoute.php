@@ -38,7 +38,6 @@ abstract class AbstractTermsRoute extends AbstractRoute {
 			'description'       => __( 'Maximum number of items to be returned in result set. Defaults to no limit if left blank.', 'woocommerce' ),
 			'type'              => 'integer',
 			'minimum'           => 0,
-			'maximum'           => 100,
 			'sanitize_callback' => 'absint',
 			'validate_callback' => 'rest_validate_request_arg',
 		);

@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\EmailEditor;
 
 use Automattic\WooCommerce\Internal\EmailEditor\EmailApiController;
 use Automattic\WooCommerce\Internal\EmailEditor\Integration;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsGenerator;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsManager;
 
 require_once 'EmailStub.php';
@@ -279,5 +280,62 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( 'immediate-bcc@example.com', $result['bcc'] );
 		$this->assertEquals( $this->email_type, $result['email_type'] );
 		$this->assertEquals( 'Default Subject', $result['default_subject'] );
+	}
+
+	/**
+	 * @testdox Should return 404 when post ID has no associated email type.
+	 */
+	public function test_get_default_content_response_returns_404_for_unknown_post(): void {
+		$unassociated_post = $this->factory()->post->create_and_get(
+			array(
+				'post_title'  => 'Unknown Email',
+				'post_name'   => 'unknown_email',
+				'post_type'   => Integration::EMAIL_POST_TYPE,
+				'post_status' => 'draft',
+			)
+		);
+
+		$request = new \WP_REST_Request( 'GET', '/woocommerce-email-editor/v1/emails/' . $unassociated_post->ID . '/default-content' );
+		$request->set_param( 'id', $unassociated_post->ID );
+
+		$result = $this->email_api_controller->get_default_content_response( $request );
+
+		$this->assertInstanceOf( \WP_Error::class, $result );
+		$this->assertSame( 'woocommerce_email_not_found', $result->get_error_code() );
+		$this->assertSame( 404, $result->get_error_data()['status'] );
+	}
+
+	/**
+	 * @testdox Should return default content for a valid email post.
+	 */
+	public function test_get_default_content_response_returns_content_for_valid_post(): void {
+		$mock_email     = $this->createMock( \WC_Email::class );
+		$mock_email->id = $this->email_type;
+
+		$mock_generator = $this->createMock( WCTransactionalEmailPostsGenerator::class );
+		$mock_generator->method( 'get_email_template' )
+			->willReturn( '<!-- wp:paragraph --><p>Default content</p><!-- /wp:paragraph -->' );
+
+		$controller = $this->getMockBuilder( EmailApiController::class )
+			->onlyMethods( array( 'get_emails' ) )
+			->getMock();
+		$controller->method( 'get_emails' )
+			->willReturn( array( $mock_email ) );
+		$controller->init();
+
+		$reflection = new \ReflectionClass( EmailApiController::class );
+		$property   = $reflection->getProperty( 'posts_generator' );
+		$property->setAccessible( true );
+		$property->setValue( $controller, $mock_generator );
+
+		$request = new \WP_REST_Request( 'GET', '/woocommerce-email-editor/v1/emails/' . $this->email_post->ID . '/default-content' );
+		$request->set_param( 'id', $this->email_post->ID );
+
+		$result = $controller->get_default_content_response( $request );
+
+		$this->assertInstanceOf( \WP_REST_Response::class, $result );
+		$this->assertSame( 200, $result->get_status() );
+		$this->assertArrayHasKey( 'content', $result->get_data() );
+		$this->assertSame( '<!-- wp:paragraph --><p>Default content</p><!-- /wp:paragraph -->', $result->get_data()['content'] );
 	}
 }

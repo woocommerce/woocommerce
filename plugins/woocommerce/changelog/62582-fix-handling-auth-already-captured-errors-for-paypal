@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Handles authorization already captured errors on PayPal Standard by ignoring the error and properly setting the PayPal order status meta to `CAPTURED`.

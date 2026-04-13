@@ -1,6 +1,7 @@
 <?php
 declare( strict_types=1 );
 
+use Automattic\WooCommerce\Admin\API\Reports\Customers\Controller as CustomersController;
 use Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
 use Automattic\WooCommerce\Enums\OrderStatus;
 
@@ -638,5 +639,344 @@ class WC_Admin_Reports_Customers_Controller_Test extends WC_REST_Unit_Test_Case 
 			$this->assertEquals( 'US', $report['country'], 'All customers should be from US' );
 			$this->assertNotEquals( 'CA', $report['state'], 'No customers should be from CA state' );
 		}
+	}
+
+	/**
+	 * Test email_includes filters by email column.
+	 */
+	public function test_email_includes() {
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'email_includes' => 'customer1@example.com',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 1, $reports, 'Should return 1 customer matching the email' );
+		$this->assertEquals( 'customer1@example.com', $reports[0]['email'], 'Returned customer should have the matching email' );
+	}
+
+	/**
+	 * Test email_excludes filters by email column.
+	 */
+	public function test_email_excludes() {
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'email_excludes' => 'customer1@example.com,customer2@example.com,customer3@example.com',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 2, $reports, 'Should return 2 guest customers after excluding all registered customer emails' );
+		$emails = array_column( $reports, 'email' );
+		$this->assertNotContains( 'customer1@example.com', $emails, 'Excluded email should not appear' );
+		$this->assertNotContains( 'customer2@example.com', $emails, 'Excluded email should not appear' );
+		$this->assertNotContains( 'customer3@example.com', $emails, 'Excluded email should not appear' );
+	}
+
+	/**
+	 * Test username_includes filters by username column.
+	 */
+	public function test_username_includes() {
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'username_includes' => 'customer1',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 1, $reports, 'Should return 1 customer matching the username' );
+		$this->assertEquals( 'customer1', $reports[0]['username'], 'Returned customer should have the matching username' );
+	}
+
+	/**
+	 * Test username_excludes filters by username column.
+	 */
+	public function test_username_excludes() {
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'username_excludes' => 'customer1,customer2',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$usernames = array_column( $reports, 'username' );
+		$this->assertNotContains( 'customer1', $usernames, 'Excluded username should not appear' );
+		$this->assertNotContains( 'customer2', $usernames, 'Excluded username should not appear' );
+		$this->assertGreaterThanOrEqual( 3, count( $reports ), 'Should return at least 3 customers (customer3 + 2 guests)' );
+	}
+
+	/**
+	 * Test name_includes filters by name column.
+	 */
+	public function test_name_includes() {
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'name_includes' => 'John Doe',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 1, $reports, 'Should return 1 customer matching the name' );
+		$this->assertEquals( 'John Doe', $reports[0]['name'], 'Returned customer should have the matching name' );
+	}
+
+	/**
+	 * Test name_excludes filters by name column.
+	 */
+	public function test_name_excludes() {
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'name_excludes' => 'John Doe,Jane Smith',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$names = array_column( $reports, 'name' );
+		$this->assertNotContains( 'John Doe', $names, 'Excluded name should not appear' );
+		$this->assertNotContains( 'Jane Smith', $names, 'Excluded name should not appear' );
+		$this->assertGreaterThanOrEqual( 3, count( $reports ), 'Should return at least 3 customers (Bob Johnson + 2 guests)' );
+	}
+
+	/**
+	 * Test country_includes filters by country column.
+	 */
+	public function test_country_includes() {
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'country_includes' => 'CA',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 1, $reports, 'Should return 1 customer from CA' );
+		$this->assertEquals( 'CA', $reports[0]['country'], 'Returned customer should be from CA' );
+	}
+
+	/**
+	 * Test country_excludes filters by country column.
+	 */
+	public function test_country_excludes() {
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'country_excludes' => 'US',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 1, $reports, 'Should return 1 customer not from US' );
+		$this->assertEquals( 'CA', $reports[0]['country'], 'Returned customer should be from CA' );
+	}
+
+	/**
+	 * @testdox Should consolidate numeric name_includes IDs into customers param.
+	 */
+	public function test_name_includes_with_customer_ids(): void {
+		$customer_id = CustomersDataStore::get_customer_id_by_user_id( $this->registered_customers[0]->get_id() );
+
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'name_includes' => (string) $customer_id,
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 1, $reports, 'Should return 1 customer matching the customer ID' );
+		$this->assertEquals( 'John Doe', $reports[0]['name'], 'Returned customer should be John Doe' );
+	}
+
+	/**
+	 * @testdox Should consolidate numeric email_includes IDs into customers param.
+	 */
+	public function test_email_includes_with_customer_ids(): void {
+		$customer_id_1 = CustomersDataStore::get_customer_id_by_user_id( $this->registered_customers[0]->get_id() );
+		$customer_id_2 = CustomersDataStore::get_customer_id_by_user_id( $this->registered_customers[1]->get_id() );
+
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'email_includes' => "{$customer_id_1},{$customer_id_2}",
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 2, $reports, 'Should return 2 customers matching the customer IDs' );
+	}
+
+	/**
+	 * @testdox Should filter by customers_exclude param.
+	 */
+	public function test_customers_exclude(): void {
+		$customer_id_1 = CustomersDataStore::get_customer_id_by_user_id( $this->registered_customers[0]->get_id() );
+		$customer_id_2 = CustomersDataStore::get_customer_id_by_user_id( $this->registered_customers[1]->get_id() );
+
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'customers_exclude' => array( $customer_id_1, $customer_id_2 ),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$ids = array_column( $reports, 'id' );
+		$this->assertNotContains( $customer_id_1, $ids, 'Excluded customer ID should not appear' );
+		$this->assertNotContains( $customer_id_2, $ids, 'Excluded customer ID should not appear' );
+	}
+
+	/**
+	 * @testdox Should consolidate numeric exclude IDs into customers_exclude param.
+	 */
+	public function test_email_excludes_with_customer_ids(): void {
+		$customer_id = CustomersDataStore::get_customer_id_by_user_id( $this->registered_customers[0]->get_id() );
+
+		$request = new WP_REST_Request( 'GET', $this->endpoint );
+		$request->set_query_params(
+			array(
+				'email_excludes' => (string) $customer_id,
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$ids = array_column( $reports, 'id' );
+		$this->assertNotContains( $customer_id, $ids, 'Customer excluded by ID should not appear' );
+	}
+
+	/**
+	 * @testdox Should intersect include sets when match=all.
+	 */
+	public function test_consolidation_match_all_intersection(): void {
+		$customer_id_1 = CustomersDataStore::get_customer_id_by_user_id( $this->registered_customers[0]->get_id() );
+		$customer_id_2 = CustomersDataStore::get_customer_id_by_user_id( $this->registered_customers[1]->get_id() );
+
+		$args = CustomersController::consolidate_customer_id_filters(
+			array(
+				'match'             => 'all',
+				'name_includes'     => "{$customer_id_1},{$customer_id_2}",
+				'email_includes'    => (string) $customer_id_1,
+				'username_includes' => null,
+				'name_excludes'     => null,
+				'email_excludes'    => null,
+				'username_excludes' => null,
+			)
+		);
+
+		$this->assertEquals( array( $customer_id_1 ), $args['customers'], 'match=all should intersect include sets' );
+		$this->assertNull( $args['name_includes'], 'Consolidated param should be nulled' );
+		$this->assertNull( $args['email_includes'], 'Consolidated param should be nulled' );
+	}
+
+	/**
+	 * @testdox Should union include sets when match=any.
+	 */
+	public function test_consolidation_match_any_union(): void {
+		$customer_id_1 = CustomersDataStore::get_customer_id_by_user_id( $this->registered_customers[0]->get_id() );
+		$customer_id_2 = CustomersDataStore::get_customer_id_by_user_id( $this->registered_customers[1]->get_id() );
+
+		$args = CustomersController::consolidate_customer_id_filters(
+			array(
+				'match'             => 'any',
+				'name_includes'     => (string) $customer_id_1,
+				'email_includes'    => (string) $customer_id_2,
+				'username_includes' => null,
+				'name_excludes'     => null,
+				'email_excludes'    => null,
+				'username_excludes' => null,
+			)
+		);
+
+		$customers = $args['customers'];
+		sort( $customers );
+		$expected = array( $customer_id_1, $customer_id_2 );
+		sort( $expected );
+		$this->assertEquals( $expected, $customers, 'match=any should union include sets' );
+	}
+
+	/**
+	 * @testdox Should union exclude sets when match=all.
+	 */
+	public function test_consolidation_excludes_match_all(): void {
+		$args = CustomersController::consolidate_customer_id_filters(
+			array(
+				'match'             => 'all',
+				'name_includes'     => null,
+				'email_includes'    => null,
+				'username_includes' => null,
+				'name_excludes'     => '1,2',
+				'email_excludes'    => '2,3',
+				'username_excludes' => null,
+			)
+		);
+
+		$excluded = $args['customers_exclude'];
+		sort( $excluded );
+		$this->assertEquals( array( 1, 2, 3 ), $excluded, 'match=all should union exclude sets' );
+	}
+
+	/**
+	 * @testdox Should not consolidate non-numeric string values.
+	 */
+	public function test_string_values_not_consolidated(): void {
+		$args = CustomersController::consolidate_customer_id_filters(
+			array(
+				'match'             => 'all',
+				'name_includes'     => 'John Doe',
+				'email_includes'    => 'customer1@example.com',
+				'username_includes' => null,
+				'name_excludes'     => 'Jane Smith',
+				'email_excludes'    => null,
+				'username_excludes' => null,
+			)
+		);
+
+		$this->assertEquals( 'John Doe', $args['name_includes'], 'String name should not be consolidated' );
+		$this->assertEquals( 'customer1@example.com', $args['email_includes'], 'String email should not be consolidated' );
+		$this->assertEquals( 'Jane Smith', $args['name_excludes'], 'String name_excludes should not be consolidated' );
+		$this->assertArrayNotHasKey( 'customers', $args, 'customers should not be set for non-numeric values' );
+		$this->assertArrayNotHasKey( 'customers_exclude', $args, 'customers_exclude should not be set for non-numeric values' );
 	}
 }

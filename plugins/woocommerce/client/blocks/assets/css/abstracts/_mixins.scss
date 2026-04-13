@@ -19,19 +19,25 @@ $fontSizes: (
 }
 
 @mixin font-large-locked {
-	font-size: var(--wp--preset--font-size--medium, 22px);
-	line-height: 27px;
+	font-size: var(--wp--preset--font-size--large, 28px);
+	line-height: 1.4;
 }
 
-@mixin font-regular-locked {
-	font-size: var(--wp--preset--font-size--small, 14px);
-	line-height: 20px;
+@mixin font-medium-locked {
+	font-size: var(--wp--preset--font-size--medium, 22px);
+	line-height: 1.4;
 }
 
 @mixin font-small-locked {
-	font-size: 13px;
-	line-height: 16px;
+	font-size: var(--wp--preset--font-size--small, 14px);
+	line-height: 1.4;
 }
+
+@mixin font-x-small-locked {
+	font-size: var(--wp--preset--font-size--x-small, calc( var(--wp--preset--font-size--small, 14px) * 0.875 ) );
+	line-height: 1.4;
+}
+
 
 @mixin font-for-inputs-locked {
 	font-size: 16px;
@@ -393,7 +399,7 @@ $fontSizes: (
 }
 
 @mixin card-styles() {
-	@include font-regular-locked;
+	@include font-small-locked;
 	border: 1px solid $universal-border-light;
 	padding: $gap;
 	margin: 0;

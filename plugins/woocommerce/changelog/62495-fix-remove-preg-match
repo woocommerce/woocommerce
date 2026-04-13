@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix REST API V4 country/state validation to accept state codes with country prefixes (e.g., DE:DE-BY) for compatibility with V3 API format.

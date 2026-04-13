@@ -39,19 +39,28 @@ class CacheController implements RegisterHooksInterface {
 	 * Hook into actions and filters.
 	 */
 	public function register() {
-		add_action( 'woocommerce_after_product_object_save', array( $this, 'clear_filter_data_cache' ) );
-		add_action( 'woocommerce_delete_product_transients', array( $this, 'clear_filter_data_cache' ) );
+		if ( ! $this->need_cleanup() ) {
+			return;
+		}
+
+		add_action( 'woocommerce_after_product_object_save', array( $this, 'invalidate_filter_data_cache' ) );
+		add_action( 'woocommerce_delete_product_transients', array( $this, 'invalidate_filter_data_cache' ) );
 
 		// Clear taxonomy hierarchy cache when terms change.
 		add_action( 'created_term', array( $this, 'clear_taxonomy_hierarchy_cache' ), 10, 3 );
 		add_action( 'edited_term', array( $this, 'clear_taxonomy_hierarchy_cache' ), 10, 3 );
 		add_action( 'delete_term', array( $this, 'clear_taxonomy_hierarchy_cache' ), 10, 3 );
+
+		// Clear taxonomy hierarchy cache when term meta (like 'order') is added or updated.
+		add_action( 'added_term_meta', array( $this, 'clear_taxonomy_hierarchy_cache_on_meta_update' ), 10, 4 );
+		add_action( 'updated_term_meta', array( $this, 'clear_taxonomy_hierarchy_cache_on_meta_update' ), 10, 4 );
+		add_action( 'deleted_term_meta', array( $this, 'clear_taxonomy_hierarchy_cache_on_meta_update' ), 10, 4 );
 	}
 
 	/**
 	 * Invalidate all cache under filter data group.
 	 */
-	public function clear_filter_data_cache() {
+	public function invalidate_filter_data_cache(): void {
 		WC_Cache_Helper::get_transient_version( self::CACHE_GROUP, true );
 		WC_Cache_Helper::invalidate_cache_group( self::CACHE_GROUP );
 	}
@@ -68,5 +77,57 @@ class CacheController implements RegisterHooksInterface {
 		if ( is_taxonomy_hierarchical( $taxonomy ) ) {
 			$this->taxonomy_hierarchy_data->clear_cache( $taxonomy );
 		}
+	}
+
+	/**
+	 * Clear taxonomy hierarchy cache when term meta is updated.
+	 * This handles the case when categories are reordered (updates 'order' meta).
+	 *
+	 * @param int    $meta_id    Meta ID.
+	 * @param int    $term_id    Term ID.
+	 * @param string $meta_key   Meta key.
+	 * @param mixed  $meta_value Meta value.
+	 */
+	public function clear_taxonomy_hierarchy_cache_on_meta_update( $meta_id, $term_id, $meta_key, $meta_value ): void {
+		// Only clear cache when the 'order' meta key is updated (used for menu ordering).
+		if ( 'order' !== $meta_key ) {
+			return;
+		}
+
+		$term = get_term( $term_id );
+		if ( ! $term instanceof \WP_Term ) {
+			return;
+		}
+
+		$this->taxonomy_hierarchy_data->clear_cache( $term->taxonomy );
+	}
+
+	/**
+	 * Delete all filter data transients.
+	 */
+	public function delete_filter_data_transients(): void {
+		if ( ! $this->need_cleanup() ) {
+			return;
+		}
+
+		global $wpdb;
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s",
+				$wpdb->esc_like( '_transient_wc_filter_data_' ) . '%',
+				$wpdb->esc_like( '_transient_timeout_wc_filter_data_' ) . '%'
+			)
+		);
+	}
+
+	/**
+	 * Check if the filter data cache should be cleaned up.
+	 * If the cache group is not set, it means that the store is not using
+	 * the product filters and we don't need to register the hooks.
+	 *
+	 * @return bool
+	 */
+	public function need_cleanup() {
+		return ! empty( get_transient( self::CACHE_GROUP . '-transient-version' ) );
 	}
 }

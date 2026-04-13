@@ -1,5 +1,6 @@
 export * from './errors';
 export * from './address';
+export * from './calculate-sale-amount';
 export * from './shipping-rates';
 export * from './legacy-events';
 export * from './render-frontend';

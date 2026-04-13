@@ -54,7 +54,16 @@ class POSIntegration implements IntegrationInterface {
 	 */
 	public function get_product_feed_query_args(): array {
 		return array(
-			'type' => array( 'simple', 'variable', 'variation' ),
+			'type'      => array( 'simple', 'variable', 'variation' ),
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+			'tax_query' => array(
+				array(
+					'taxonomy' => 'pos_product_visibility',
+					'field'    => 'slug',
+					'terms'    => 'pos-hidden',
+					'operator' => 'NOT IN',
+				),
+			),
 		);
 	}
 
@@ -64,6 +73,7 @@ class POSIntegration implements IntegrationInterface {
 	public function register_hooks(): void {
 		add_action( 'rest_api_init', array( $this, 'rest_api_init' ) );
 		$this->container->get( AsyncGenerator::class )->register_hooks();
+		$this->container->get( POSProductVisibilitySync::class )->register_hooks();
 	}
 
 	/**

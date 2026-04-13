@@ -103,13 +103,6 @@
 		setTimeout( function () {
 			$form.trigger( 'check_variations' );
 			$form.trigger( 'wc_variation_form', self );
-
-			// For variable products, we disable the button by default to avoid
-			// shoppers submitting the form with invalid data. We remove the
-			// disabled attribute as soon as the script is loaded and let the
-			// script handle the button state.
-			// @see https://github.com/woocommerce/woocommerce/issues/62448
-			$form.find( '.single_add_to_cart_button' ).removeAttr( 'disabled' );
 			self.loading = false;
 		}, 100 );
 	};

@@ -51,6 +51,7 @@
 		flex: 1;
 		display: flex;
 		flex-direction: column;
+		gap: $gap-smallest;
 
 		.wc-block-components-shipping-rates-control__package-header:last-child {
 			margin-bottom: 0;
@@ -112,11 +113,11 @@
 }
 
 .wc-block-components-shipping-rates-control__package-title {
-	@include font-regular-locked;
+	@include font-small-locked;
 }
 
 .wc-block-components-shipping-rates-control__package-items {
-	@include font-small-locked;
+	@include font-x-small-locked;
 	display: inline-block;
 	list-style: none;
 	margin: 0;

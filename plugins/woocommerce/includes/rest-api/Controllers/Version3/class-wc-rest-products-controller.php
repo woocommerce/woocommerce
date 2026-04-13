@@ -95,7 +95,10 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => $this->with_cache(
 						array( $this, 'get_suggested_products' ),
-						array( 'endpoint_id' => 'get_suggested_products' )
+						array(
+							'endpoint_id'              => 'get_suggested_products',
+							'relevant_version_strings' => array( 'list_products' ),
+						)
 					),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => $this->get_suggested_products_collection_params(),
@@ -170,6 +173,11 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 		// Add gallery images.
 		$attachment_ids = array_merge( $attachment_ids, $product->get_gallery_image_ids() );
+
+		if ( ! empty( $attachment_ids ) ) {
+			// Prime caches to reduce future queries.
+			_prime_post_caches( $attachment_ids );
+		}
 
 		// Build image data.
 		foreach ( $attachment_ids as $attachment_id ) {
@@ -324,6 +332,16 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 				'field'    => 'name',
 				'terms'    => 'featured',
 				'operator' => true === $request['featured'] ? 'IN' : 'NOT IN',
+			);
+		}
+
+		// Filter by visibility in POS.
+		if ( true === $request['pos_products_only'] ) {
+			$args['tax_query'][] = array(
+				'taxonomy' => 'pos_product_visibility',
+				'field'    => 'slug',
+				'terms'    => 'pos-hidden',
+				'operator' => 'NOT IN',
 			);
 		}
 
@@ -1944,6 +1962,13 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			'description'       => __( 'Limit result set to virtual products.', 'woocommerce' ),
 			'type'              => 'boolean',
 			'sanitize_callback' => 'rest_sanitize_boolean',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
+		$params['pos_products_only'] = array(
+			'description'       => __( 'Limit result set to products visible in Point of Sale.', 'woocommerce' ),
+			'type'              => 'boolean',
+			'sanitize_callback' => 'wc_string_to_bool',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 

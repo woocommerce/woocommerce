@@ -32,7 +32,7 @@
 		margin-top: -$gap-large;
 		font-weight: 400;
 		line-height: $gap * 1.25;
-		@include font-regular-locked;
+		@include font-small-locked;
 	}
 	.wc-block-checkout__create-account {
 		margin-top: $gap !important;

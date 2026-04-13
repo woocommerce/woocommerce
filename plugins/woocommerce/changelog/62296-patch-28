@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-Comment: Replace esc_html_e() with esc_html__() to correctly return translatable string in li output
-

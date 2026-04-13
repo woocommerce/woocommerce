@@ -50,7 +50,7 @@ exports[`SearchListControl should render a search box and list of hierarchical o
             class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
+              class="components-base-control__field css-yj91it-StyledField ej5x27r3"
             >
               <label
                 class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
@@ -59,7 +59,7 @@ exports[`SearchListControl should render a search box and list of hierarchical o
                 Search for items
               </label>
               <input
-                class="components-text-control__input"
+                class="components-text-control__input is-next-40px-default-size"
                 id="inspector-text-control-11"
                 type="search"
                 value=""
@@ -210,7 +210,7 @@ exports[`SearchListControl should render a search box and list of hierarchical o
           class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
+            class="components-base-control__field css-yj91it-StyledField ej5x27r3"
           >
             <label
               class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
@@ -219,7 +219,7 @@ exports[`SearchListControl should render a search box and list of hierarchical o
               Search for items
             </label>
             <input
-              class="components-text-control__input"
+              class="components-text-control__input is-next-40px-default-size"
               id="inspector-text-control-11"
               type="search"
               value=""
@@ -451,7 +451,7 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
             class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
+              class="components-base-control__field css-yj91it-StyledField ej5x27r3"
             >
               <label
                 class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
@@ -460,7 +460,7 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
                 Search for items
               </label>
               <input
-                class="components-text-control__input"
+                class="components-text-control__input is-next-40px-default-size"
                 id="inspector-text-control-0"
                 type="search"
                 value=""
@@ -725,7 +725,7 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
           class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
+            class="components-base-control__field css-yj91it-StyledField ej5x27r3"
           >
             <label
               class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
@@ -734,7 +734,7 @@ exports[`SearchListControl should render a search box and list of options 1`] = 
               Search for items
             </label>
             <input
-              class="components-text-control__input"
+              class="components-text-control__input is-next-40px-default-size"
               id="inspector-text-control-0"
               type="search"
               value=""
@@ -1080,7 +1080,7 @@ exports[`SearchListControl should render a search box and list of options with a
             class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
+              class="components-base-control__field css-yj91it-StyledField ej5x27r3"
             >
               <label
                 class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
@@ -1089,7 +1089,7 @@ exports[`SearchListControl should render a search box and list of options with a
                 Search for items
               </label>
               <input
-                class="components-text-control__input"
+                class="components-text-control__input is-next-40px-default-size"
                 id="inspector-text-control-1"
                 type="search"
                 value=""
@@ -1354,7 +1354,7 @@ exports[`SearchListControl should render a search box and list of options with a
           class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
+            class="components-base-control__field css-yj91it-StyledField ej5x27r3"
           >
             <label
               class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
@@ -1363,7 +1363,7 @@ exports[`SearchListControl should render a search box and list of options with a
               Search for items
             </label>
             <input
-              class="components-text-control__input"
+              class="components-text-control__input is-next-40px-default-size"
               id="inspector-text-control-1"
               type="search"
               value=""
@@ -1709,7 +1709,7 @@ exports[`SearchListControl should render a search box and list of options, with 
             class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
+              class="components-base-control__field css-yj91it-StyledField ej5x27r3"
             >
               <label
                 class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
@@ -1718,7 +1718,7 @@ exports[`SearchListControl should render a search box and list of options, with 
                 Search for items
               </label>
               <input
-                class="components-text-control__input"
+                class="components-text-control__input is-next-40px-default-size"
                 id="inspector-text-control-10"
                 type="search"
                 value=""
@@ -1791,7 +1791,7 @@ exports[`SearchListControl should render a search box and list of options, with 
           class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
+            class="components-base-control__field css-yj91it-StyledField ej5x27r3"
           >
             <label
               class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
@@ -1800,7 +1800,7 @@ exports[`SearchListControl should render a search box and list of options, with 
               Search for items
             </label>
             <input
-              class="components-text-control__input"
+              class="components-text-control__input is-next-40px-default-size"
               id="inspector-text-control-10"
               type="search"
               value=""
@@ -1954,7 +1954,7 @@ exports[`SearchListControl should render a search box and list of options, with 
             class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
+              class="components-base-control__field css-yj91it-StyledField ej5x27r3"
             >
               <label
                 class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
@@ -1963,7 +1963,7 @@ exports[`SearchListControl should render a search box and list of options, with 
                 Testing search label
               </label>
               <input
-                class="components-text-control__input"
+                class="components-text-control__input is-next-40px-default-size"
                 id="inspector-text-control-9"
                 type="search"
                 value=""
@@ -2228,7 +2228,7 @@ exports[`SearchListControl should render a search box and list of options, with 
           class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
+            class="components-base-control__field css-yj91it-StyledField ej5x27r3"
           >
             <label
               class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
@@ -2237,7 +2237,7 @@ exports[`SearchListControl should render a search box and list of options, with 
               Testing search label
             </label>
             <input
-              class="components-text-control__input"
+              class="components-text-control__input is-next-40px-default-size"
               id="inspector-text-control-9"
               type="search"
               value=""
@@ -2583,7 +2583,7 @@ exports[`SearchListControl should render a search box and no options 1`] = `
             class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
+              class="components-base-control__field css-yj91it-StyledField ej5x27r3"
             >
               <label
                 class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
@@ -2592,7 +2592,7 @@ exports[`SearchListControl should render a search box and no options 1`] = `
                 Search for items
               </label>
               <input
-                class="components-text-control__input"
+                class="components-text-control__input is-next-40px-default-size"
                 id="inspector-text-control-4"
                 type="search"
                 value=""
@@ -2651,7 +2651,7 @@ exports[`SearchListControl should render a search box and no options 1`] = `
           class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
+            class="components-base-control__field css-yj91it-StyledField ej5x27r3"
           >
             <label
               class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
@@ -2660,7 +2660,7 @@ exports[`SearchListControl should render a search box and no options 1`] = `
               Search for items
             </label>
             <input
-              class="components-text-control__input"
+              class="components-text-control__input is-next-40px-default-size"
               id="inspector-text-control-4"
               type="search"
               value=""
@@ -2800,7 +2800,7 @@ exports[`SearchListControl should render a search box with a search term, and no
             class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
+              class="components-base-control__field css-yj91it-StyledField ej5x27r3"
             >
               <label
                 class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
@@ -2809,7 +2809,7 @@ exports[`SearchListControl should render a search box with a search term, and no
                 Search for items
               </label>
               <input
-                class="components-text-control__input"
+                class="components-text-control__input is-next-40px-default-size"
                 id="inspector-text-control-8"
                 type="search"
                 value=""
@@ -3074,7 +3074,7 @@ exports[`SearchListControl should render a search box with a search term, and no
           class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
+            class="components-base-control__field css-yj91it-StyledField ej5x27r3"
           >
             <label
               class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
@@ -3083,7 +3083,7 @@ exports[`SearchListControl should render a search box with a search term, and no
               Search for items
             </label>
             <input
-              class="components-text-control__input"
+              class="components-text-control__input is-next-40px-default-size"
               id="inspector-text-control-8"
               type="search"
               value=""
@@ -3429,7 +3429,7 @@ exports[`SearchListControl should render a search box with a search term, and on
             class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
+              class="components-base-control__field css-yj91it-StyledField ej5x27r3"
             >
               <label
                 class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
@@ -3438,7 +3438,7 @@ exports[`SearchListControl should render a search box with a search term, and on
                 Search for items
               </label>
               <input
-                class="components-text-control__input"
+                class="components-text-control__input is-next-40px-default-size"
                 id="inspector-text-control-5"
                 type="search"
                 value=""
@@ -3703,7 +3703,7 @@ exports[`SearchListControl should render a search box with a search term, and on
           class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
+            class="components-base-control__field css-yj91it-StyledField ej5x27r3"
           >
             <label
               class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
@@ -3712,7 +3712,7 @@ exports[`SearchListControl should render a search box with a search term, and on
               Search for items
             </label>
             <input
-              class="components-text-control__input"
+              class="components-text-control__input is-next-40px-default-size"
               id="inspector-text-control-5"
               type="search"
               value=""
@@ -4058,7 +4058,7 @@ exports[`SearchListControl should render a search box with a search term, and on
             class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
+              class="components-base-control__field css-yj91it-StyledField ej5x27r3"
             >
               <label
                 class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
@@ -4067,7 +4067,7 @@ exports[`SearchListControl should render a search box with a search term, and on
                 Search for items
               </label>
               <input
-                class="components-text-control__input"
+                class="components-text-control__input is-next-40px-default-size"
                 id="inspector-text-control-6"
                 type="search"
                 value="BeRrY"
@@ -4186,7 +4186,7 @@ exports[`SearchListControl should render a search box with a search term, and on
           class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
+            class="components-base-control__field css-yj91it-StyledField ej5x27r3"
           >
             <label
               class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
@@ -4195,7 +4195,7 @@ exports[`SearchListControl should render a search box with a search term, and on
               Search for items
             </label>
             <input
-              class="components-text-control__input"
+              class="components-text-control__input is-next-40px-default-size"
               id="inspector-text-control-6"
               type="search"
               value="BeRrY"
@@ -4446,7 +4446,7 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
             class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
+              class="components-base-control__field css-yj91it-StyledField ej5x27r3"
             >
               <label
                 class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
@@ -4455,7 +4455,7 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
                 Search for items
               </label>
               <input
-                class="components-text-control__input"
+                class="components-text-control__input is-next-40px-default-size"
                 id="inspector-text-control-2"
                 type="search"
                 value=""
@@ -4786,7 +4786,7 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
           class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
+            class="components-base-control__field css-yj91it-StyledField ej5x27r3"
           >
             <label
               class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
@@ -4795,7 +4795,7 @@ exports[`SearchListControl should render a search box, a list of options, and 1 
               Search for items
             </label>
             <input
-              class="components-text-control__input"
+              class="components-text-control__input is-next-40px-default-size"
               id="inspector-text-control-2"
               type="search"
               value=""
@@ -5249,7 +5249,7 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
             class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
           >
             <div
-              class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
+              class="components-base-control__field css-yj91it-StyledField ej5x27r3"
             >
               <label
                 class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
@@ -5258,7 +5258,7 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
                 Search for items
               </label>
               <input
-                class="components-text-control__input"
+                class="components-text-control__input is-next-40px-default-size"
                 id="inspector-text-control-3"
                 type="search"
                 value=""
@@ -5646,7 +5646,7 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
           class="components-base-control css-ij2po-Wrapper-boxSizingReset ej5x27r4"
         >
           <div
-            class="components-base-control__field css-10urnh1-StyledField-deprecatedMarginField ej5x27r3"
+            class="components-base-control__field css-yj91it-StyledField ej5x27r3"
           >
             <label
               class="components-base-control__label css-227y7a-StyledLabel-baseLabelTypography-labelStyles ej5x27r2"
@@ -5655,7 +5655,7 @@ exports[`SearchListControl should render a search box, a list of options, and 2 
               Search for items
             </label>
             <input
-              class="components-text-control__input"
+              class="components-text-control__input is-next-40px-default-size"
               id="inspector-text-control-3"
               type="search"
               value=""

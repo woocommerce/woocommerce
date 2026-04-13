@@ -9,7 +9,7 @@
  */
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
-use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
+use Automattic\WooCommerce\Internal\ProductFilters\CacheController;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -475,6 +475,9 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 				}
 
 				WC_Cache_Helper::get_transient_version( 'shipping', true );
+
+				wc_get_container()->get( CacheController::class )->delete_filter_data_transients();
+
 				$message = __( 'Product transients cleared', 'woocommerce' );
 				break;
 

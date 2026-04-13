@@ -17,6 +17,7 @@
     "typecheck": "tsc"
   },
   "dependencies": {
+    "@docsearch/core": "^4.5.2",
     "@docusaurus/core": "^3.9.2",
     "@docusaurus/faster": "^3.9.2",
     "@docusaurus/preset-classic": "^3.9.2",

@@ -173,15 +173,18 @@ export function getRangeLabel( after: moment.Moment, before: moment.Moment ) {
  * @return {string} - Datetime string.
  */
 export function getStoreTimeZoneMoment() {
-	if ( ! window.wcSettings || ! window.wcSettings.timeZone ) {
+	const timeZone =
+		window.wcSettings?.timeZone || window.wcSettings?.admin?.timeZone;
+
+	if ( typeof timeZone !== 'string' || timeZone.length === 0 ) {
 		return moment();
 	}
 
-	if ( [ '+', '-' ].includes( window.wcSettings.timeZone.charAt( 0 ) ) ) {
-		return moment().utcOffset( window.wcSettings.timeZone );
+	if ( [ '+', '-' ].includes( timeZone.charAt( 0 ) ) ) {
+		return moment().utcOffset( timeZone );
 	}
 
-	return ( moment() as momentTz.Moment ).tz( window.wcSettings.timeZone );
+	return ( moment() as momentTz.Moment ).tz( timeZone );
 }
 
 /**

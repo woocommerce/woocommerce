@@ -73,7 +73,6 @@ const TaxonomyItem = ( { taxonomy, termIds, onChange }: TaxonomyItemProps ) => {
 				return { existingTerms: [], isLoadingExistingTerms: false };
 			}
 
-			// @ts-expect-error hasFinishedResolution is untyped.
 			const { getEntityRecords, hasFinishedResolution } =
 				select( 'core' );
 
@@ -208,6 +207,8 @@ const TaxonomyItem = ( { taxonomy, termIds, onChange }: TaxonomyItemProps ) => {
 	return (
 		<div className="wc-block-editor-product-collection-inspector__taxonomy-control">
 			<FormTokenField
+				__next40pxDefaultSize
+				__nextHasNoMarginBottom
 				label={ taxonomy.name }
 				value={ existingTokens }
 				onInputChange={ handleSearch }

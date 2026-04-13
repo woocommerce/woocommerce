@@ -4,6 +4,7 @@
 import clsx from 'clsx';
 import {
 	useCheckoutSubmit,
+	usePaymentMethodInterface,
 	useStoreCart,
 } from '@woocommerce/base-context/hooks';
 import { check } from '@wordpress/icons';
@@ -14,6 +15,9 @@ import {
 	FormattedMonetaryAmount,
 	Spinner,
 } from '@woocommerce/blocks-components';
+import { useValidateCheckout } from '@woocommerce/blocks-checkout';
+import type { CustomPlaceOrderButtonComponent } from '@woocommerce/types';
+import { useEditorContext } from '@woocommerce/base-context';
 
 /**
  * Internal dependencies
@@ -25,6 +29,8 @@ interface PlaceOrderButtonProps {
 	fullWidth?: boolean;
 	showPrice?: boolean;
 	priceSeparator?: string;
+	// eslint-disable-next-line @typescript-eslint/naming-convention
+	CustomButtonComponent?: CustomPlaceOrderButtonComponent;
 }
 
 const PlaceOrderButton = ( {
@@ -32,6 +38,7 @@ const PlaceOrderButton = ( {
 	fullWidth = false,
 	showPrice = false,
 	priceSeparator = '·',
+	CustomButtonComponent,
 }: PlaceOrderButtonProps ): JSX.Element => {
 	const {
 		onSubmit,
@@ -41,8 +48,32 @@ const PlaceOrderButton = ( {
 		waitingForRedirect,
 	} = useCheckoutSubmit();
 
+	const paymentMethodInterface = usePaymentMethodInterface();
+	const validateCheckout = useValidateCheckout();
+	const { isEditor, isPreview = false } = useEditorContext();
+
 	const { cartTotals, cartIsLoading } = useStoreCart();
-	const totalsCurrency = getCurrencyFromPriceResponse( cartTotals );
+
+	// when provided, the `CustomButtonComponent` should take precedence over the default button.
+	if ( CustomButtonComponent ) {
+		return (
+			<CustomButtonComponent
+				waitingForProcessing={ waitingForProcessing }
+				waitingForRedirect={ waitingForRedirect }
+				disabled={
+					isCalculating ||
+					isDisabled ||
+					waitingForProcessing ||
+					waitingForRedirect ||
+					cartIsLoading
+				}
+				isEditor={ isEditor }
+				isPreview={ isPreview }
+				validate={ validateCheckout }
+				{ ...paymentMethodInterface }
+			/>
+		);
+	}
 
 	return (
 		<Button
@@ -94,7 +125,9 @@ const PlaceOrderButton = ( {
 						<div className="wc-block-components-checkout-place-order-button__price">
 							<FormattedMonetaryAmount
 								value={ cartTotals.total_price }
-								currency={ totalsCurrency }
+								currency={ getCurrencyFromPriceResponse(
+									cartTotals
+								) }
 							/>
 						</div>
 					</>

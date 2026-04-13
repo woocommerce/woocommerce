@@ -867,7 +867,7 @@ return array(
 		'SMN' => __( 'Semnan (سمنان)', 'woocommerce' ),
 		'FRS' => __( 'Fars (فارس)', 'woocommerce' ),
 		'QHM' => __( 'Qom (قم)', 'woocommerce' ),
-		'KRD' => __( 'Kurdistan / کردستان)', 'woocommerce' ),
+		'KRD' => __( 'Kurdistan (کردستان)', 'woocommerce' ),
 		'KBD' => __( 'Kohgiluyeh and BoyerAhmad (کهگیلوییه و بویراحمد)', 'woocommerce' ),
 		'GLS' => __( 'Golestan (گلستان)', 'woocommerce' ),
 		'GIL' => __( 'Gilan (گیلان)', 'woocommerce' ),

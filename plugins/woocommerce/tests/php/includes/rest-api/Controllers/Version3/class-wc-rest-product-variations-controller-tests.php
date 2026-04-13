@@ -774,4 +774,70 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_REST_Unit_Test_Case
 
 		$this->assertEmpty( $response->get_data() );
 	}
+
+	/**
+	 * Test `pos_products_only` filter returns only POS-visible variations when true.
+	 */
+	public function test_pos_products_only_true_returns_only_pos_visible_variations() {
+		$parent_product = WC_Helper_Product::create_variation_product();
+		$variations     = $parent_product->get_available_variations( 'objects' );
+
+		// Mark one variation as hidden from POS.
+		wp_set_object_terms( $variations[0]->get_id(), 'pos-hidden', 'pos_product_visibility' );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products/' . $parent_product->get_id() . '/variations' );
+		$request->set_param( 'pos_products_only', true );
+
+		$response      = $this->server->dispatch( $request );
+		$response_data = $response->get_data();
+		$variation_ids = wp_list_pluck( $response_data, 'id' );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertNotContains( $variations[0]->get_id(), $variation_ids );
+		$this->assertContains( $variations[1]->get_id(), $variation_ids );
+	}
+
+	/**
+	 * Test `pos_products_only` filter returns all variations when false.
+	 */
+	public function test_pos_products_only_false_returns_all_variations() {
+		$parent_product = WC_Helper_Product::create_variation_product();
+		$variations     = $parent_product->get_available_variations( 'objects' );
+
+		// Mark one variation as hidden from POS.
+		wp_set_object_terms( $variations[0]->get_id(), 'pos-hidden', 'pos_product_visibility' );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products/' . $parent_product->get_id() . '/variations' );
+		$request->set_param( 'pos_products_only', false );
+
+		$response      = $this->server->dispatch( $request );
+		$response_data = $response->get_data();
+		$variation_ids = wp_list_pluck( $response_data, 'id' );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertContains( $variations[0]->get_id(), $variation_ids );
+		$this->assertContains( $variations[1]->get_id(), $variation_ids );
+	}
+
+	/**
+	 * Test that omitting `pos_products_only` filter returns all variations regardless of POS visibility.
+	 */
+	public function test_pos_products_only_omitted_returns_all_variations() {
+		$parent_product = WC_Helper_Product::create_variation_product();
+		$variations     = $parent_product->get_available_variations( 'objects' );
+
+		// Mark one variation as hidden from POS.
+		wp_set_object_terms( $variations[0]->get_id(), 'pos-hidden', 'pos_product_visibility' );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products/' . $parent_product->get_id() . '/variations' );
+		// Do not set pos_products_only parameter.
+
+		$response      = $this->server->dispatch( $request );
+		$response_data = $response->get_data();
+		$variation_ids = wp_list_pluck( $response_data, 'id' );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertContains( $variations[0]->get_id(), $variation_ids );
+		$this->assertContains( $variations[1]->get_id(), $variation_ids );
+	}
 }

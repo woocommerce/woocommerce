@@ -139,9 +139,11 @@ export function TemplateList( {
 }: Props ) {
 	const filteredTemplates = useMemo(
 		() =>
-			templates.filter(
-				( template ) => template.category === selectedCategory
-			),
+			selectedCategory !== null && selectedCategory !== undefined
+				? templates.filter(
+						( template ) => template.category === selectedCategory
+				  )
+				: templates,
 		[ selectedCategory, templates ]
 	);
 

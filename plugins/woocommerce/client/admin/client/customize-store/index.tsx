@@ -24,7 +24,6 @@ import { chevronRight, chevronLeft } from '@wordpress/icons';
  */
 import { useFullScreen } from '~/utils';
 import { isWooExpress } from '~/utils/is-woo-express';
-import { isFeatureEnabled } from '~/utils/features';
 import { SiteHub } from './site-hub';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
 import { useDispatch, useSelect } from '@wordpress/data';
@@ -61,12 +60,9 @@ const CustomizeStoreController = () => {
 		if ( isWooExpress() ) {
 			return getAdminLink( 'themes.php' );
 		}
-		if ( isFeatureEnabled( 'marketplace' ) ) {
-			return getAdminLink(
-				'admin.php?page=wc-admin&tab=themes&path=%2Fextensions'
-			);
-		}
-		return 'https://woocommerce.com/product-category/themes/';
+		return getAdminLink(
+			'admin.php?page=wc-admin&tab=themes&path=%2Fextensions'
+		);
 	}, [] );
 
 	useEffect( () => {

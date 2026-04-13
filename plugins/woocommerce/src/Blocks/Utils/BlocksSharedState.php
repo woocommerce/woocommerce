@@ -24,7 +24,7 @@ class BlocksSharedState {
 	private static string $consent_statement = 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce';
 
 	/**
-	 * The namespace for the config.
+	 * The namespace for interactivity config and state.
 	 *
 	 * @var string
 	 */
@@ -87,7 +87,6 @@ class BlocksSharedState {
 
 		wp_interactivity_config( self::$settings_namespace, self::get_currency_data() );
 		wp_interactivity_config( self::$settings_namespace, self::get_locale_data() );
-		wp_interactivity_config( self::$settings_namespace, self::get_core_data() );
 	}
 
 	/**
@@ -114,27 +113,20 @@ class BlocksSharedState {
 				self::prevent_cache();
 			}
 
+			wp_interactivity_config(
+				self::$settings_namespace,
+				array( 'nonOptimisticProperties' => self::get_non_optimistic_properties() )
+			);
+
 			wp_interactivity_state(
-				'woocommerce',
+				self::$settings_namespace,
 				array(
 					'cart'     => self::$blocks_shared_cart_state,
-					'nonce'    => wp_create_nonce( 'wc_store_api' ),
 					'noticeId' => '',
 					'restUrl'  => get_rest_url(),
 				)
 			);
 		}
-	}
-
-	/**
-	 * Get core data to include in settings.
-	 *
-	 * @return array
-	 */
-	private static function get_core_data(): array {
-		return array(
-			'isBlockTheme' => wp_is_block_theme(),
-		);
 	}
 
 	/**
@@ -176,6 +168,28 @@ class BlocksSharedState {
 	}
 
 	/**
+	 * Get cart properties that cannot use optimistic UI on the frontend.
+	 *
+	 * Detects whether third-party code has registered callbacks on filters that
+	 * modify cart property values. When callbacks are present, the corresponding
+	 * property must use the server-computed value instead of a client-side
+	 * optimistic computation.
+	 *
+	 * `@return` string[] List of cart property paths (dot-delimited) that cannot be optimistic.
+	 *
+	 * @return string[] List of cart property paths (dot-delimited) that cannot be optimistic.
+	 */
+	private static function get_non_optimistic_properties(): array {
+		$properties = array();
+
+		if ( has_filter( 'woocommerce_cart_contents_count' ) ) {
+			$properties[] = 'cart.items_count';
+		}
+
+		return $properties;
+	}
+
+	/**
 	 * Load placeholder image into interactivity config.
 	 *
 	 * @param string $consent_statement The consent statement string.
@@ -189,5 +203,38 @@ class BlocksSharedState {
 			self::$settings_namespace,
 			array( 'placeholderImgSrc' => wc_placeholder_img_src() )
 		);
+	}
+
+	/**
+	 * Get cart errors formatted as notices for the store-notices interactivity store.
+	 *
+	 * Returns errors from the hydrated cart state in the format expected by
+	 * the store-notices store context.
+	 *
+	 * @param string $consent_statement The consent statement string.
+	 * @return array Array of notices with id, notice, type, and dismissible keys.
+	 * @throws InvalidArgumentException If consent statement doesn't match.
+	 */
+	public static function get_cart_error_notices( string $consent_statement ): array {
+		self::check_consent( $consent_statement );
+
+		// Ensure cart state is loaded so this method works independently.
+		if ( null === self::$blocks_shared_cart_state ) {
+			self::load_cart_state( $consent_statement );
+		}
+
+		$errors  = self::$blocks_shared_cart_state['errors'] ?? array();
+		$notices = array();
+
+		foreach ( $errors as $error ) {
+			$notices[] = array(
+				'id'          => wp_unique_id( 'store-notice-' ),
+				'notice'      => $error['message'] ?? '',
+				'type'        => 'error',
+				'dismissible' => true,
+			);
+		}
+
+		return $notices;
 	}
 }

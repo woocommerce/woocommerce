@@ -18,15 +18,17 @@ describe( 'ProductDetails', () => {
 
 		const { container } = render( <ProductDetails details={ details } /> );
 
-		// Should render as ul since there are multiple details
-		const list = container.querySelector(
-			'ul.wc-block-components-product-details'
+		// Should render as div
+		const wrapper = container.querySelector(
+			'div.wc-block-components-product-details'
 		);
-		expect( list ).toBeInTheDocument();
+		expect( wrapper ).toBeInTheDocument();
 
-		// Should have 3 list items
-		const listItems = container.querySelectorAll( 'li' );
-		expect( listItems ).toHaveLength( 3 );
+		// Should have 3 span items
+		const items = container.querySelectorAll(
+			'.wc-block-components-product-details > span'
+		);
+		expect( items ).toHaveLength( 3 );
 
 		// First item should have name and value
 		expect( screen.getByText( 'Lorem:' ) ).toBeInTheDocument();
@@ -37,7 +39,7 @@ describe( 'ProductDetails', () => {
 		expect( screen.getByText( 'IPSUM' ) ).toBeInTheDocument();
 
 		// Third item should only have value (no name)
-		const thirdItem = listItems[ 2 ];
+		const thirdItem = items[ 2 ];
 		expect(
 			thirdItem.querySelector(
 				'.wc-block-components-product-details__name'
@@ -59,18 +61,20 @@ describe( 'ProductDetails', () => {
 
 		const { container } = render( <ProductDetails details={ details } /> );
 
-		// Should render as ul since there are multiple visible details
-		const list = container.querySelector(
-			'ul.wc-block-components-product-details'
+		// Should render as div
+		const wrapper = container.querySelector(
+			'div.wc-block-components-product-details'
 		);
-		expect( list ).toBeInTheDocument();
+		expect( wrapper ).toBeInTheDocument();
 
 		// Should only have 2 items (hidden one filtered out)
-		const listItems = container.querySelectorAll( 'li' );
-		expect( listItems ).toHaveLength( 2 );
+		const items = container.querySelectorAll(
+			'.wc-block-components-product-details > span'
+		);
+		expect( items ).toHaveLength( 2 );
 
 		// Hidden item should not be rendered
-		expect( screen.queryByText( 'Lorem' ) ).not.toBeInTheDocument();
+		expect( screen.queryByText( 'Lorem:' ) ).not.toBeInTheDocument();
 
 		// Visible items should be rendered
 		expect( screen.getByText( 'LOREM:' ) ).toBeInTheDocument();
@@ -106,32 +110,52 @@ describe( 'ProductDetails', () => {
 		expect( container.firstChild ).toBeNull();
 	} );
 
-	test( 'should not render list if there is only one detail', () => {
+	test( 'should render separators between multiple details', () => {
+		const details = [
+			{ name: 'Color', value: 'Red' },
+			{ name: 'Size', value: 'Large' },
+			{ name: 'Material', value: 'Cotton' },
+		];
+
+		const { container } = render( <ProductDetails details={ details } /> );
+
+		const wrapper = container.querySelector(
+			'div.wc-block-components-product-details'
+		);
+
+		// Should have separators between items but not after last
+		expect( wrapper.textContent ).toBe(
+			'Color: Red / Size: Large / Material: Cotton'
+		);
+
+		// Separators should be hidden from screen readers
+		const separators = container.querySelectorAll( '[aria-hidden="true"]' );
+		expect( separators ).toHaveLength( 2 );
+	} );
+
+	test( 'should render single detail without separator', () => {
 		const details = [ { name: 'LOREM', value: 'Ipsum', display: 'IPSUM' } ];
 
 		const { container } = render( <ProductDetails details={ details } /> );
 
-		// Should render as div (not ul) since there's only one detail
-		const div = container.querySelector(
+		// Should render as div
+		const wrapper = container.querySelector(
 			'div.wc-block-components-product-details'
 		);
-		expect( div ).toBeInTheDocument();
+		expect( wrapper ).toBeInTheDocument();
 
-		// Should not render as ul
-		const list = container.querySelector(
-			'ul.wc-block-components-product-details'
+		// Should have one span item
+		const items = container.querySelectorAll(
+			'.wc-block-components-product-details > span'
 		);
-		expect( list ).not.toBeInTheDocument();
-
-		// Should have one child div
-		const childDivs = container.querySelectorAll(
-			'div.wc-block-components-product-details > div'
-		);
-		expect( childDivs ).toHaveLength( 1 );
+		expect( items ).toHaveLength( 1 );
 
 		// Should contain name and value
 		expect( screen.getByText( 'LOREM:' ) ).toBeInTheDocument();
 		expect( screen.getByText( 'IPSUM' ) ).toBeInTheDocument();
+
+		// Should not have separator (single item)
+		expect( items[ 0 ].textContent ).toBe( 'LOREM: IPSUM' );
 
 		// Should have proper CSS classes
 		expect(
@@ -154,9 +178,12 @@ describe( 'ProductDetails', () => {
 
 		const { container } = render( <ProductDetails details={ details } /> );
 
-		const listItems = container.querySelectorAll( 'li' );
-		expect( listItems[ 0 ].textContent ).toBe( 'Color: Red' );
-		expect( listItems[ 1 ].textContent ).toBe( 'Size: L' );
+		const items = container.querySelectorAll(
+			'.wc-block-components-product-details > span'
+		);
+		// First item has separator, last item does not
+		expect( items[ 0 ].textContent ).toBe( 'Color: Red / ' );
+		expect( items[ 1 ].textContent ).toBe( 'Size: L' );
 	} );
 
 	test( 'should apply correct CSS classes', () => {

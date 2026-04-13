@@ -22,7 +22,7 @@
 	},
 	"license": "GPL-2.0-or-later",
 	"devDependencies": {
-		"@wordpress/env": "10.32.0",
+		"@wordpress/env": "11.0.1-next.v.20260206T143.0",
 		"rimraf": "5.0.5"
 	},
 	"config": {

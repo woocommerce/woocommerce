@@ -9,10 +9,20 @@
 	gap: 6px;
 
 	&__label {
+		margin: 7px 0 0; // use same margin as filters to they align vertically
 		font-size: 13px;
 		line-height: 20px;
 		color: $gray-900;
 		font-weight: 400;
+	}
+
+	@media screen and ( max-width: $break-large ) {
+		gap: 5px;
+
+		&__label {
+			line-height: 18px;
+			margin-top: 5px;
+		}
 	}
 }
 
@@ -34,7 +44,11 @@
 
 
 		@media screen and ( max-width: $break-wide ) {
-			gap: 24px;
+			gap: $gap-large;
+		}
+
+		@media screen and ( max-width: $break-large ) {
+			gap: $gap;
 		}
 	}
 
@@ -56,6 +70,8 @@
 		font-size: 11px;
 		font-weight: 500;
 		line-height: 20px;
+		// Set a fixed width to prevent layout shift during loading
+		width: 88px;
 	}
 
 	.components-spinner {

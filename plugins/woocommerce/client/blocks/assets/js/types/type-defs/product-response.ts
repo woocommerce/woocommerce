@@ -86,6 +86,14 @@ export interface ProductResponseItem {
 		class: string;
 	};
 	sold_individually: boolean;
+	weight: string;
+	dimensions: {
+		length: string;
+		width: string;
+		height: string;
+	};
+	formatted_weight: string;
+	formatted_dimensions: string;
 	add_to_cart: {
 		text: string;
 		description: string;

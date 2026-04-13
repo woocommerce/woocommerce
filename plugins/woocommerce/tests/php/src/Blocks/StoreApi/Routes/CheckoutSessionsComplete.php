@@ -13,11 +13,14 @@ use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\SessionKey;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\StoreApi\RoutesController;
+use Automattic\WooCommerce\Tests\Internal\Admin\Agentic\AgenticTestHelpers;
 
 /**
  * CheckoutSessionsComplete Controller Tests.
  */
 class CheckoutSessionsComplete extends ControllerTestCase {
+	use AgenticTestHelpers;
+
 	/**
 	 * Products created for tests.
 	 *
@@ -31,13 +34,6 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 	 * @var MockAgenticPaymentGateway
 	 */
 	protected $mock_gateway;
-
-	/**
-	 * Test bearer token for authorization.
-	 *
-	 * @var string
-	 */
-	protected $test_bearer_token;
 
 	/**
 	 * Setup test product data. Called before every test.
@@ -57,17 +53,8 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 		// Enable the agentic_checkout feature.
 		update_option( 'woocommerce_feature_agentic_checkout_enabled', 'yes' );
 
-		// Set up registry with test bearer token for authorization.
-		$this->test_bearer_token = 'test_token_' . uniqid();
-		update_option(
-			'woocommerce_agentic_agent_registry',
-			array(
-				'openai' => array(
-					'bearer_token' => wp_hash_password( $this->test_bearer_token ),
-				),
-			),
-			false
-		);
+		// Set up Jetpack blog token authentication.
+		$this->mock_jetpack_blog_token_auth();
 
 		$fixtures = new FixtureData();
 		$fixtures->shipping_add_flat_rate();
@@ -105,7 +92,6 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 	protected function tearDown(): void {
 		parent::tearDown();
 		delete_option( 'woocommerce_feature_agentic_checkout_enabled' );
-		delete_option( 'woocommerce_agentic_agent_registry' );
 
 		// Clear session data.
 		WC()->session->set( SessionKey::CHOSEN_SHIPPING_METHODS, null );
@@ -113,6 +99,9 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 
 		// Reset customer state to clean state.
 		$this->reset_customer_state();
+
+		// Reset Jetpack auth state.
+		$this->reset_jetpack_auth_state();
 	}
 
 	/**
@@ -221,7 +210,6 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 	 */
 	private function create_session( $body_params ) {
 		$request = new \WP_REST_Request( 'POST', '/wc/agentic/v1/checkout_sessions' );
-		$request->set_header( 'Authorization', 'Bearer ' . $this->test_bearer_token );
 		$request->set_body_params( $body_params );
 		return rest_get_server()->dispatch( $request );
 	}
@@ -235,7 +223,6 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 	 */
 	private function update_session( $session_id, $body_params ) {
 		$request = new \WP_REST_Request( 'POST', '/wc/agentic/v1/checkout_sessions/' . $session_id );
-		$request->set_header( 'Authorization', 'Bearer ' . $this->test_bearer_token );
 		$request->set_body_params( $body_params );
 		return rest_get_server()->dispatch( $request );
 	}
@@ -249,7 +236,6 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 	 */
 	private function complete_session( $session_id, $body_params ) {
 		$request = new \WP_REST_Request( 'POST', '/wc/agentic/v1/checkout_sessions/' . $session_id . '/complete' );
-		$request->set_header( 'Authorization', 'Bearer ' . $this->test_bearer_token );
 		$request->set_body_params( $body_params );
 		return rest_get_server()->dispatch( $request );
 	}
@@ -757,6 +743,105 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 		$this->assertNotEmpty( $total_obj );
 		$total = reset( $total_obj );
 		$this->assertGreaterThan( 0, $total['amount'] );
+	}
+
+	/**
+	 * Test that completing a checkout session without Jetpack authentication fails.
+	 */
+	public function test_complete_session_without_jetpack_auth_fails() {
+		// Create a ready-for-payment session first with valid auth.
+		$create_response = $this->create_session(
+			$this->create_checkout_request(
+				array(
+					'fulfillment_address' => $this->get_test_address(),
+					'buyer'               => $this->get_test_buyer(),
+				)
+			)
+		);
+
+		$create_data        = $create_response->get_data();
+		$session_id         = $create_data['id'];
+		$shipping_method_id = $create_data['fulfillment_options'][0]['id'];
+
+		$this->update_session(
+			$session_id,
+			array(
+				'fulfillment_option_id' => $shipping_method_id,
+			)
+		);
+
+		// Clear Jetpack authentication to simulate unauthenticated request.
+		$this->mock_jetpack_auth_failure();
+
+		$request = new \WP_REST_Request( 'POST', '/wc/agentic/v1/checkout_sessions/' . $session_id . '/complete' );
+		$request->set_body_params(
+			array(
+				'payment_data' => $this->get_payment_data(),
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+
+		// Should return 401 error.
+		$this->assertEquals( 401, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertArrayHasKey( 'code', $data );
+		$this->assertEquals( 'rest_forbidden', $data['code'] );
+		$this->assertStringContainsString( 'Jetpack blog token', $data['message'] );
+	}
+
+	/**
+	 * Test that checkout completion works after Jetpack auth is re-established.
+	 */
+	public function test_complete_session_jetpack_auth_recovery() {
+		// Create a ready-for-payment session first with valid auth.
+		$create_response = $this->create_session(
+			$this->create_checkout_request(
+				array(
+					'fulfillment_address' => $this->get_test_address(),
+					'buyer'               => $this->get_test_buyer(),
+				)
+			)
+		);
+
+		$create_data        = $create_response->get_data();
+		$session_id         = $create_data['id'];
+		$shipping_method_id = $create_data['fulfillment_options'][0]['id'];
+
+		$this->update_session(
+			$session_id,
+			array(
+				'fulfillment_option_id' => $shipping_method_id,
+			)
+		);
+
+		// Clear Jetpack authentication - complete should fail.
+		$this->mock_jetpack_auth_failure();
+
+		$request = new \WP_REST_Request( 'POST', '/wc/agentic/v1/checkout_sessions/' . $session_id . '/complete' );
+		$request->set_body_params(
+			array(
+				'payment_data' => $this->get_payment_data(),
+			)
+		);
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertEquals( 401, $response->get_status() );
+
+		// Re-establish Jetpack authentication.
+		$this->mock_jetpack_blog_token_auth();
+
+		// Complete should now succeed.
+		$complete_response = $this->complete_session(
+			$session_id,
+			array(
+				'payment_data' => $this->get_payment_data(),
+			)
+		);
+
+		$this->assertEquals( 200, $complete_response->get_status() );
+		$complete_data = $complete_response->get_data();
+		$this->assertEquals( 'completed', $complete_data['status'] );
 	}
 }
 

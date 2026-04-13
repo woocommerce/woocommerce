@@ -13,12 +13,29 @@
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\Jetpack\Connection\Manager as Jetpack_Connection_Manager;
+use Automattic\WooCommerce\Gateways\PayPal\Buttons as PayPalButtons;
 use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
 use Automattic\WooCommerce\Gateways\PayPal\Helper as PayPalHelper;
 use Automattic\WooCommerce\Gateways\PayPal\Notices as PayPalNotices;
+use Automattic\WooCommerce\Gateways\PayPal\Request as PayPalRequest;
+use Automattic\WooCommerce\Gateways\PayPal\TransactAccountManager as PayPalTransactAccountManager;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
+}
+
+// Require the deprecated classes for backward compatibility.
+// This will be removed in 11.0.0.
+if ( ! class_exists( 'WC_Gateway_Paypal_Constants' ) ) {
+	require_once __DIR__ . '/includes/class-wc-gateway-paypal-constants.php';
+}
+
+if ( ! class_exists( 'WC_Gateway_Paypal_Helper' ) ) {
+	require_once __DIR__ . '/includes/class-wc-gateway-paypal-helper.php';
+}
+
+if ( ! class_exists( 'WC_Gateway_Paypal_Notices' ) ) {
+	require_once __DIR__ . '/includes/class-wc-gateway-paypal-notices.php';
 }
 
 if ( ! class_exists( 'WC_Gateway_Paypal_Buttons' ) ) {
@@ -168,8 +185,8 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		self::$log_enabled                  = $this->debug;
 
 		if ( $this->testmode ) {
-			/* translators: %s: Link to PayPal sandbox testing guide page */
-			$this->description .= '<br>' . sprintf( __( '<strong>Sandbox mode enabled</strong>. Only sandbox test accounts can be used. See the <a href="%s">PayPal Sandbox Testing Guide</a> for more details.', 'woocommerce' ), 'https://developer.paypal.com/tools/sandbox/' );
+			/* translators: 1: Link to PayPal sandbox testing guide page, 2: Link to PayPal info page */
+			$this->description .= '<br>' . sprintf( __( '<strong>Sandbox mode enabled</strong>. Only sandbox test accounts can be used. See the <a href="%1$s">PayPal Sandbox Testing Guide</a> for more details. <a href="%2$s" target="_blank">What is PayPal?</a>', 'woocommerce' ), 'https://developer.paypal.com/tools/sandbox/', esc_url( 'https://www.paypal.com/digital-wallet/how-paypal-works' ) );
 			$this->description  = trim( $this->description );
 		}
 
@@ -209,7 +226,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				// Hook for PayPal order responses to manage account restriction notices.
 				add_action( 'woocommerce_paypal_standard_order_created_response', array( $this, 'manage_account_restriction_status' ), 10, 3 );
 
-				$buttons = new WC_Gateway_Paypal_Buttons( $this );
+				$buttons = new PayPalButtons( $this );
 				if ( $buttons->is_enabled() && ! $this->needs_setup() ) {
 					add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 					add_filter( 'wp_script_attributes', array( $this, 'add_paypal_sdk_attributes' ) );
@@ -246,7 +263,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			return;
 		}
 
-		$paypal_order_id = $order->get_meta( '_paypal_order_id' );
+		$paypal_order_id = $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_ORDER_ID );
 		if ( empty( $paypal_order_id ) ) {
 			return;
 		}
@@ -261,21 +278,20 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		 * Once an attempt is made (meta exists), we skip to prevent repeated API calls on page reloads.
 		 * The webhook handler will always update the addresses.
 		 */
-		$addresses_update_attempted = $order->meta_exists( '_paypal_addresses_updated' );
+		$addresses_update_attempted = $order->meta_exists( PayPalConstants::PAYPAL_ORDER_META_ADDRESSES_UPDATED );
 		if ( $addresses_update_attempted ) {
 			return;
 		}
 
 		try {
-			include_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php';
-			$paypal_request       = new WC_Gateway_Paypal_Request( $this );
+			$paypal_request       = new PayPalRequest( $this );
 			$paypal_order_details = $paypal_request->get_paypal_order_details( $paypal_order_id );
 
 			// Update the addresses in the order with the addresses from the PayPal order details.
 			PayPalHelper::update_addresses_in_order( $order, $paypal_order_details );
 		} catch ( Exception $e ) {
 			self::log( 'Error updating addresses for order #' . $order_id . ': ' . $e->getMessage(), 'error' );
-			$order->update_meta_data( '_paypal_addresses_updated', 'no' );
+			$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_ADDRESSES_UPDATED, 'no' );
 			$order->save();
 		}
 	}
@@ -313,8 +329,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			return;
 		}
 
-		include_once __DIR__ . '/includes/class-wc-gateway-paypal-transact-account-manager.php';
-		$transact_account_manager = new WC_Gateway_Paypal_Transact_Account_Manager( $this );
+		$transact_account_manager = new PayPalTransactAccountManager( $this );
 		$transact_account_manager->do_onboarding();
 	}
 
@@ -380,7 +395,9 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			if ( empty( self::$log ) ) {
 				self::$log = wc_get_logger();
 			}
-			self::$log->clear( self::ID );
+			if ( self::$log instanceof WC_Logger ) {
+				self::$log->clear( self::ID );
+			}
 		}
 
 		// Trigger Transact onboarding when settings are saved.
@@ -397,19 +414,8 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @return string
 	 */
 	public function get_icon() {
-		// We need a base country for the link to work, bail if in the unlikely event no country is set.
-		$base_country = WC()->countries->get_base_country();
-		if ( empty( $base_country ) ) {
-			return '';
-		}
-		$icon_html = '';
-		$icon      = (array) $this->get_icon_image( $base_country );
-
-		foreach ( $icon as $i ) {
-			$icon_html .= '<img src="' . esc_attr( $i ) . '" alt="' . esc_attr__( 'PayPal acceptance mark', 'woocommerce' ) . '" />';
-		}
-
-		$icon_html .= sprintf( '<a href="%1$s" class="about_paypal" onclick="javascript:window.open(\'%1$s\',\'WIPaypal\',\'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=yes, resizable=yes, width=1060, height=700\'); return false;">' . esc_attr__( 'What is PayPal?', 'woocommerce' ) . '</a>', esc_url( $this->get_icon_url( $base_country ) ) );
+		$icon      = $this->get_paypal_icon_image();
+		$icon_html = '<img src="' . esc_attr( $icon ) . '" alt="' . esc_attr__( 'PayPal acceptance mark', 'woocommerce' ) . '" />';
 
 		return apply_filters( 'woocommerce_gateway_icon', $icon_html, $this->id );
 	}
@@ -435,12 +441,32 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	}
 
 	/**
+	 * Get PayPal icon image.
+	 *
+	 * @return string The PayPal icon image.
+	 */
+	protected function get_paypal_icon_image() {
+		$icon = WC_HTTPS::force_https_url( WC()->plugin_url() . '/assets/images/paypal.png' );
+
+		/**
+		 * Filters the PayPal icon image.
+		 *
+		 * @param string $icon The PayPal icon image.
+		 * @return string The PayPal icon image.
+		 * @since 10.6.0
+		 */
+		return apply_filters( 'woocommerce_paypal_icon', $icon );
+	}
+
+	/**
 	 * Get PayPal images for a country.
 	 *
 	 * @param string $country Country code.
 	 * @return array of image URLs
+	 * @deprecated 10.6.0 Use get_paypal_icon_image() instead.
 	 */
 	protected function get_icon_image( $country ) {
+		wc_deprecated_function( __METHOD__, '10.6.0', 'get_paypal_icon_image()' );
 		switch ( $country ) {
 			case 'US':
 			case 'NZ':
@@ -597,12 +623,15 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @throws Exception If the PayPal order creation fails.
 	 */
 	public function process_payment( $order_id ) {
-		include_once __DIR__ . '/includes/class-wc-gateway-paypal-request.php';
+		$order = wc_get_order( $order_id );
 
-		$order          = wc_get_order( $order_id );
-		$paypal_request = new WC_Gateway_Paypal_Request( $this );
+		if ( ! $order || ! $order instanceof WC_Order ) {
+			return array();
+		}
 
 		if ( $this->should_use_orders_v2() ) {
+			$paypal_request = new PayPalRequest( $this );
+
 			$paypal_order = $paypal_request->create_paypal_order( $order );
 			if ( ! $paypal_order || empty( $paypal_order['id'] ) || empty( $paypal_order['redirect_url'] ) ) {
 				throw new Exception(
@@ -612,7 +641,10 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 			$redirect_url = $paypal_order['redirect_url'];
 		} else {
-			$redirect_url = $paypal_request->get_request_url( $order, $this->testmode );
+			include_once __DIR__ . '/includes/class-wc-gateway-paypal-request.php';
+
+			$paypal_request = new WC_Gateway_Paypal_Request( $this );
+			$redirect_url   = $paypal_request->get_request_url( $order, $this->testmode );
 		}
 
 		return array(
@@ -697,7 +729,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 */
 	public function capture_payment( $order_id ) {
 		$order = wc_get_order( $order_id );
-		if ( ! $order ) {
+		if ( ! $order || ! $order instanceof WC_Order ) {
 			return;
 		}
 
@@ -707,17 +739,15 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		}
 
 		// If the order is authorized via legacy API, the '_paypal_status' meta will be 'pending'.
-		$is_authorized_via_legacy_api = 'pending' === $order->get_meta( '_paypal_status', true );
+		$is_authorized_via_legacy_api = 'pending' === $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_STATUS, true );
 
 		if ( $this->should_use_orders_v2() && ! $is_authorized_via_legacy_api ) {
-			include_once __DIR__ . '/includes/class-wc-gateway-paypal-request.php';
-
-			$paypal_request = new WC_Gateway_Paypal_Request( $this );
+			$paypal_request = new PayPalRequest( $this );
 			$paypal_request->capture_authorized_payment( $order );
 			return;
 		}
 
-		if ( 'pending' === $order->get_meta( '_paypal_status', true ) && $order->get_transaction_id() ) {
+		if ( 'pending' === $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_STATUS, true ) && $order->get_transaction_id() ) {
 			$this->init_api();
 			$result = WC_Gateway_Paypal_API_Handler::do_capture( $order );
 
@@ -736,7 +766,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 					case 'Completed':
 						/* translators: 1: Amount, 2: Authorization ID, 3: Transaction ID */
 						$order->add_order_note( sprintf( __( 'Payment of %1$s was captured - Auth ID: %2$s, Transaction ID: %3$s', 'woocommerce' ), $result->AMT, $result->AUTHORIZATIONID, $result->TRANSACTIONID ) );
-						$order->update_meta_data( '_paypal_status', $result->PAYMENTSTATUS );
+						$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_STATUS, $result->PAYMENTSTATUS );
 						$order->set_transaction_id( $result->TRANSACTIONID );
 						$order->save();
 						break;
@@ -779,7 +809,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		$version           = Constants::get_constant( 'WC_VERSION' );
 		$is_page_supported = is_checkout() || is_cart() || is_product();
-		$buttons           = new WC_Gateway_Paypal_Buttons( $this );
+		$buttons           = new PayPalButtons( $this );
 		$options           = $buttons->get_common_options();
 
 		if ( empty( $options['client-id'] ) || ! $is_page_supported ) {
@@ -820,7 +850,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 */
 	public function add_paypal_sdk_attributes( $attrs ) {
 		if ( 'paypal-standard-sdk-js' === $attrs['id'] ) {
-			$buttons   = new WC_Gateway_Paypal_Buttons( $this );
+			$buttons   = new PayPalButtons( $this );
 			$page_type = $buttons->get_page_type();
 
 			$attrs['data-page-type']              = $page_type;
@@ -948,8 +978,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		}
 
 		// We need merchant and provider accounts with Transact to be able to use the proxy.
-		include_once __DIR__ . '/includes/class-wc-gateway-paypal-transact-account-manager.php';
-		$transact_account_manager = new WC_Gateway_Paypal_Transact_Account_Manager( $this );
+		$transact_account_manager = new PayPalTransactAccountManager( $this );
 		$merchant_account_data    = $transact_account_manager->get_transact_account_data( 'merchant' );
 		if ( empty( $merchant_account_data ) ) {
 			return false;

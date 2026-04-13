@@ -3,6 +3,7 @@
  */
 import { Icon, mediaAndText } from '@wordpress/icons';
 import { getBlockMap } from '@woocommerce/atomic-utils';
+import { getSetting } from '@woocommerce/settings';
 import type { InnerBlockTemplate } from '@wordpress/blocks';
 
 /**
@@ -10,7 +11,6 @@ import type { InnerBlockTemplate } from '@wordpress/blocks';
  */
 import metadata from './block.json';
 import { VARIATION_NAME as PRODUCT_TITLE_VARIATION_NAME } from '../product-query/variations/elements/product-title';
-import { ImageSizing } from '../../atomic/blocks/product-elements/image/types';
 
 export const BLOCK_ICON = (
 	<Icon
@@ -24,30 +24,7 @@ export const DEFAULT_INNER_BLOCKS: InnerBlockTemplate[] = [
 		'core/columns',
 		{},
 		[
-			[
-				'core/column',
-				{},
-				[
-					[
-						'woocommerce/product-image',
-						{
-							// Keep the attribute as false explicitly because we're using the inner block template
-							// that includes the product-sale-badge block.
-							showSaleBadge: false,
-							isDescendentOfSingleProductBlock: true,
-							imageSizing: ImageSizing.SINGLE,
-						},
-						[
-							[
-								'woocommerce/product-sale-badge',
-								{
-									align: 'right',
-								},
-							],
-						],
-					],
-				],
-			],
+			[ 'core/column', {}, [ [ 'woocommerce/product-gallery' ] ] ],
 			[
 				'core/column',
 				{},
@@ -73,7 +50,11 @@ export const DEFAULT_INNER_BLOCKS: InnerBlockTemplate[] = [
 						'woocommerce/product-summary',
 						{ isDescendentOfSingleProductBlock: true },
 					],
-					[ 'woocommerce/add-to-cart-form' ],
+					[
+						getSetting( 'isBlockTheme', false )
+							? 'woocommerce/add-to-cart-with-options'
+							: 'woocommerce/add-to-cart-form',
+					],
 					[ 'woocommerce/product-meta' ],
 				],
 			],

@@ -5,6 +5,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Gateways\PayPal;
 
 use WC_Order;
+use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -17,6 +18,16 @@ defined( 'ABSPATH' ) || exit;
  * @since 10.5.0
  */
 class Helper {
+	/**
+	 * Check if a country code is supported by PayPal.
+	 *
+	 * @param string $country_code Country code.
+	 * @return bool True if the country is supported by PayPal, false otherwise.
+	 */
+	public static function is_country_supported_by_paypal( string $country_code ): bool {
+		return array_key_exists( $country_code, PayPalConstants::SUPPORTED_COUNTRIES );
+	}
+
 	/**
 	 * Check if the PayPal gateway is enabled.
 	 *
@@ -164,7 +175,7 @@ class Helper {
 		}
 
 		// Bail early if '_paypal_addresses_updated' is 'yes', meaning the addresses update already have been successful.
-		if ( 'yes' === $order->get_meta( '_paypal_addresses_updated', true ) ) {
+		if ( 'yes' === $order->get_meta( PayPalConstants::PAYPAL_ORDER_META_ADDRESSES_UPDATED, true ) ) {
 			return;
 		}
 
@@ -207,7 +218,7 @@ class Helper {
 			$order->set_billing_address_2( $billing_address['address_line_2'] ?? '' );
 		}
 
-		$order->update_meta_data( '_paypal_addresses_updated', 'yes' );
+		$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_ADDRESSES_UPDATED, 'yes' );
 		$order->save();
 	}
 }

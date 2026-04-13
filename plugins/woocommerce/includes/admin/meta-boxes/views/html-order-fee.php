@@ -27,6 +27,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 	<?php do_action( 'woocommerce_admin_order_item_values', null, $item, absint( $item_id ) ); ?>
 
+	<?php if ( $cogs_is_enabled ) : ?>
+	<td class="item_cost_of_goods"></td>
+	<?php endif; ?>
+
 	<td class="item_cost" width="1%">&nbsp;</td>
 	<td class="quantity" width="1%">&nbsp;</td>
 

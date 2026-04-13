@@ -664,4 +664,47 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		 */
 		return apply_filters( 'woocommerce_order_item_cogs_refunded_html', $html, $refunded_cost, $this, $order );
 	}
+
+	/**
+	 * Convert a legacy scalar tax value to array format.
+	 *
+	 * Legacy orders may have tax data stored as floats/strings
+	 * instead of arrays keyed by tax rate ID. This method attempts to infer the
+	 * appropriate tax rate ID from the order context.
+	 *
+	 * @since 10.5.0
+	 *
+	 * @param float|string   $value The legacy scalar tax value.
+	 * @param WC_Order|false $order The order object, or false/null if unavailable.
+	 * @return array Tax data as array, keyed by tax rate ID (or 0 if unknown).
+	 */
+	protected function convert_legacy_tax_value_to_array( $value, $order = null ) {
+		$rate_id = 0;
+
+		// Try to infer tax rate ID from order context.
+		$tax_items = $order ? $order->get_taxes() : array();
+		if ( ! empty( $tax_items ) ) {
+			// Use the first tax rate ID from the order as a best-effort match.
+			$first_tax_item = reset( $tax_items );
+			if ( $first_tax_item ) {
+				$rate_id = $first_tax_item->get_rate_id();
+			}
+		}
+
+		$converted = array( $rate_id => $value );
+
+		/**
+		 * Filter the converted legacy tax value.
+		 *
+		 * Allows plugins to customize how legacy scalar tax values are converted
+		 * to the expected array format.
+		 *
+		 * @since 10.5.0
+		 *
+		 * @param array        $converted The converted tax data array.
+		 * @param float|string $value     The original legacy scalar value.
+		 * @param WC_Order_Item $item     The order item being processed.
+		 */
+		return apply_filters( 'woocommerce_order_item_legacy_tax_conversion', $converted, $value, $this );
+	}
 }

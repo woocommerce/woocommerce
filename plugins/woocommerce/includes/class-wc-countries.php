@@ -464,7 +464,7 @@ class WC_Countries {
 	 */
 	public function countries_using_vat() {
 		wc_deprecated_function( 'countries_using_vat', '4.0', 'WC_Countries::get_vat_countries' );
-		$countries = array( 'AE', 'AL', 'AR', 'AZ', 'BB', 'BH', 'BO', 'BS', 'BY', 'CL', 'CO', 'EC', 'EG', 'ET', 'FJ', 'GH', 'GM', 'GT', 'IL', 'IR', 'KN', 'KR', 'KZ', 'LK', 'MD', 'ME', 'MK', 'MN', 'MU', 'MX', 'NA', 'NG', 'NP', 'PS', 'PY', 'RS', 'RU', 'RW', 'SA', 'SV', 'TH', 'TR', 'UA', 'UY', 'UZ', 'VE', 'VN', 'ZA' );
+		$countries = array( 'AE', 'AL', 'AR', 'AZ', 'BB', 'BH', 'BO', 'BS', 'BY', 'CL', 'CO', 'EC', 'EG', 'ET', 'FJ', 'FO', 'GH', 'GM', 'GT', 'IL', 'IR', 'IS', 'KN', 'KR', 'KZ', 'LK', 'MD', 'ME', 'MK', 'MN', 'MU', 'MX', 'NA', 'NG', 'NP', 'PS', 'PY', 'RS', 'RU', 'RW', 'SA', 'SV', 'TH', 'TR', 'UA', 'UY', 'UZ', 'VE', 'VN', 'ZA' );
 
 		return apply_filters( 'woocommerce_countries_using_vat', $countries );
 	}
@@ -477,7 +477,7 @@ class WC_Countries {
 	 */
 	public function get_vat_countries() {
 		$eu_countries  = $this->get_european_union_countries();
-		$vat_countries = array( 'AE', 'AL', 'AR', 'AZ', 'BB', 'BH', 'BO', 'BS', 'BY', 'CL', 'CO', 'EC', 'EG', 'ET', 'FJ', 'GB', 'GH', 'GM', 'GT', 'IL', 'IM', 'IR', 'KN', 'KR', 'KZ', 'LK', 'MC', 'MD', 'ME', 'MK', 'MN', 'MU', 'MX', 'NA', 'NG', 'NO', 'NP', 'PS', 'PY', 'RS', 'RU', 'RW', 'SA', 'SV', 'TH', 'TR', 'UA', 'UY', 'UZ', 'VE', 'VN', 'XK', 'ZA' );
+		$vat_countries = array( 'AE', 'AL', 'AR', 'AZ', 'BB', 'BH', 'BO', 'BS', 'BY', 'CL', 'CO', 'EC', 'EG', 'ET', 'FJ', 'FO', 'GB', 'GH', 'GM', 'GT', 'IL', 'IM', 'IR', 'IS', 'KN', 'KR', 'KZ', 'LK', 'MC', 'MD', 'ME', 'MK', 'MN', 'MU', 'MX', 'NA', 'NG', 'NO', 'NP', 'PS', 'PY', 'RS', 'RU', 'RW', 'SA', 'SV', 'TH', 'TR', 'UA', 'UY', 'UZ', 'VE', 'VN', 'XK', 'ZA' );
 
 		return apply_filters( 'woocommerce_vat_countries', array_merge( $eu_countries, $vat_countries ) );
 	}
@@ -838,7 +838,20 @@ class WC_Countries {
 				'autocomplete' => 'postal-code',
 				'priority'     => 90,
 			),
+			'phone'      => array(
+				'label'        => __( 'Phone', 'woocommerce' ),
+				'required'     => 'required' === CartCheckoutUtils::get_phone_field_visibility(),
+				'type'         => 'tel',
+				'class'        => array( 'form-row-wide' ),
+				'validate'     => array( 'phone' ),
+				'autocomplete' => 'tel',
+				'priority'     => 100,
+			),
 		);
+
+		if ( 'hidden' === CartCheckoutUtils::get_phone_field_visibility() ) {
+			unset( $fields['phone'] );
+		}
 
 		if ( 'hidden' === CartCheckoutUtils::get_company_field_visibility() ) {
 			unset( $fields['company'] );
@@ -867,6 +880,8 @@ class WC_Countries {
 			'state'     => '#billing_state_field, #shipping_state_field, #calc_shipping_state_field',
 			'postcode'  => '#billing_postcode_field, #shipping_postcode_field, #calc_shipping_postcode_field',
 			'city'      => '#billing_city_field, #shipping_city_field, #calc_shipping_city_field',
+			'country'   => '#billing_country_field, #shipping_country_field, #calc_shipping_country_field',
+			'phone'     => '#billing_phone_field, #shipping_phone_field',
 		);
 		return apply_filters( 'woocommerce_country_locale_field_selectors', $locale_fields );
 	}
@@ -1706,6 +1721,16 @@ class WC_Countries {
 
 			$this->locale['default']                   = apply_filters( 'woocommerce_get_country_locale_base', $this->locale['default'] );
 			$this->locale[ $this->get_base_country() ] = apply_filters( 'woocommerce_get_country_locale_base', $this->locale[ $this->get_base_country() ] );
+
+			// Country cannot be hidden or optional via locale — it is the lookup key for locale resolution.
+			// Merchants who sell to a single country should use "Sell to specific countries" instead.
+			foreach ( $this->locale as &$locale_entry ) {
+				if ( isset( $locale_entry['country'] ) ) {
+					$locale_entry['country']['hidden']   = false;
+					$locale_entry['country']['required'] = true;
+				}
+			}
+			unset( $locale_entry );
 		}
 
 		return $this->locale;

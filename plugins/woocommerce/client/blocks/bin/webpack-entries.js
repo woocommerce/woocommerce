@@ -12,9 +12,7 @@ const { scriptModuleEntries } = require( './webpack-interactivity-entries' );
 // block directory.
 const blocks = {
 	'active-filters': {},
-	'add-to-cart-form': {
-		customDir: 'product-elements/add-to-cart-form',
-	},
+	'add-to-cart-form': {},
 	'add-to-cart-with-options': {},
 	'add-to-cart-with-options-quantity-selector': {
 		customDir: 'add-to-cart-with-options/quantity-selector',

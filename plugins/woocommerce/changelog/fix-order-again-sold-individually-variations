@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Respect “Sold individually” for variable products in Order Again; normalize variation attributes, enforce qty=1, prevent duplicate variations; add unit test.

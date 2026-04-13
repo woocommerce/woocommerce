@@ -78,13 +78,11 @@ ul.woocommerce_stats {
 			box-sizing: border-box;
 			margin: 0;
 			border-top: 1px solid #ececec;
-			color: #aaa;
+			color: $subtext;
 
 			a {
 				display: block;
-				color: #aaa;
 				padding: 9px 12px;
-				transition: all ease 0.5s;
 				position: relative;
 				font-size: 12px;
 
@@ -105,16 +103,6 @@ ul.woocommerce_stats {
 					line-height: 1.2em;
 					font-weight: normal;
 					display: block;
-					color: #21759b;
-				}
-
-				&:hover {
-					color: #2ea2cc;
-
-					&::before,
-					strong {
-						color: #2ea2cc !important;
-					}
 				}
 
 				&::before {

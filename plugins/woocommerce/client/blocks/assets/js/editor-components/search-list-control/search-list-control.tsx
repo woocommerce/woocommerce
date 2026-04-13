@@ -342,6 +342,8 @@ export const SearchListControl = < T extends object = object >(
 			<div className="woocommerce-search-list__search">
 				{ type === 'text' ? (
 					<TextControl
+						__next40pxDefaultSize
+						__nextHasNoMarginBottom
 						label={ messages.search }
 						type="search"
 						value={ search }
@@ -349,6 +351,8 @@ export const SearchListControl = < T extends object = object >(
 					/>
 				) : (
 					<FormTokenField
+						__next40pxDefaultSize
+						__nextHasNoMarginBottom
 						disabled={ isLoading }
 						label={ messages.search }
 						onChange={ onRemoveToken }
