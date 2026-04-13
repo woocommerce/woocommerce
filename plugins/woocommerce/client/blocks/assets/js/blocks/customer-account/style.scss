@@ -16,10 +16,6 @@
 }
 
 :where(.wp-block-woocommerce-customer-account) {
-	--wc-customer-account-padding: var(
-		--wp--preset--spacing--20,
-		#{em($gap-smaller)}
-	);
 	--wc-customer-account-viewport-gutter: var(--wp--preset--spacing--20, 16px);
 	--wc-customer-account-dropdown-padding-inline: var(
 		--wp--preset--spacing--30,
@@ -57,7 +53,7 @@
 	font-size: inherit;
 	font-weight: inherit;
 	line-height: 1;
-	padding: var(--wc-customer-account-padding);
+	padding: em($gap-smaller);
 	text-decoration: none;
 	white-space: nowrap;
 
