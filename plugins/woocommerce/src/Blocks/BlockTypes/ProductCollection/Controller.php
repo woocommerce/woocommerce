@@ -149,7 +149,7 @@ class Controller extends AbstractBlock {
 		$block_name                  = $parsed_block['blockName'];
 		$is_product_collection_block = $parsed_block['attrs']['query']['isProductCollectionBlock'] ?? false;
 		$force_page_reload_global    =
-			$parsed_block['attrs']['forcePageReload'] ?? false &&
+			( $parsed_block['attrs']['forcePageReload'] ?? false ) &&
 			isset( $parsed_block['attrs']['queryId'] );
 
 		if (
