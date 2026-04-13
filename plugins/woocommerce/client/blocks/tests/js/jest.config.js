@@ -53,8 +53,7 @@ module.exports = {
 			'<rootDir>/node_modules/@wordpress/core-data/build/$1',
 
 		// WooCommerce workspace aliases
-		'@woocommerce/data':
-			'<rootDir>/node_modules/@woocommerce/data/build',
+		'@woocommerce/data': '<rootDir>/node_modules/@woocommerce/data/build',
 		'@woocommerce/sanitize':
 			'<rootDir>/node_modules/@woocommerce/sanitize/src/index.ts',
 		'@woocommerce/atomic-blocks': 'assets/js/atomic/blocks',
@@ -63,16 +62,14 @@ module.exports = {
 		'@woocommerce/settings': 'assets/js/settings/shared',
 		'@woocommerce/blocks/(.*)$': 'assets/js/blocks/$1',
 		'@woocommerce/block-settings': 'assets/js/settings/blocks',
-		'@woocommerce/editor-components(.*)$':
-			'assets/js/editor-components/$1',
+		'@woocommerce/editor-components(.*)$': 'assets/js/editor-components/$1',
 		'@woocommerce/blocks-registry': 'assets/js/blocks-registry',
 		'@woocommerce/blocks-checkout$': 'packages/checkout',
 		'@woocommerce/blocks-checkout-events': 'assets/js/events',
 		'@woocommerce/blocks-components': 'packages/components',
 		'@woocommerce/price-format': 'packages/prices',
 		'@woocommerce/block-hocs(.*)$': 'assets/js/hocs/$1',
-		'@woocommerce/base-components(.*)$':
-			'assets/js/base/components/$1',
+		'@woocommerce/base-components(.*)$': 'assets/js/base/components/$1',
 		'@woocommerce/base-context(.*)$': 'assets/js/base/context/$1',
 		'@woocommerce/base-hocs(.*)$': 'assets/js/base/hocs/$1',
 		'@woocommerce/base-hooks(.*)$': 'assets/js/base/hooks/$1',
@@ -109,8 +106,7 @@ module.exports = {
 	roots: [ '<rootDir>', '<rootDir>/../legacy/js' ],
 	resolver: '<rootDir>/tests/js/scripts/resolver.js',
 	transform: {
-		'^.+\\.(js|ts|tsx)$':
-			'<rootDir>/tests/js/scripts/babel-transformer.js',
+		'^.+\\.(js|ts|tsx)$': '<rootDir>/tests/js/scripts/babel-transformer.js',
 	},
 	transformIgnorePatterns: [
 		'/node_modules/(?!\\.pnpm/dinero\\.js|dinero\\.js)',
