@@ -128,6 +128,17 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * @since 3.0.0
 	 */
 	protected function read_product_data( &$product ) {
+		// Prime caches to reduce future queries.
+		$product_id = $product->get_id();
+		wp_prime_option_caches(
+			array(
+				'_transient_wc_var_prices_' . $product_id,
+				'_transient_timeout_wc_var_prices_' . $product_id,
+				'_transient_wc_product_children_' . $product_id,
+				'_transient_timeout_wc_product_children_' . $product_id,
+			)
+		);
+
 		parent::read_product_data( $product );
 
 		// Make sure data which does not apply to variables is unset.
