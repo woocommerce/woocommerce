@@ -142,12 +142,12 @@ $orders = wc_get_orders( $args );
 
 ### Pagination
 
-|Parameter|Description|
-|-|-|
-|**limit**|Accepts an integer: Maximum number of results to retrieve or `-1` for unlimited. Default: Site 'posts_per_page' setting.|
-|**paged**|Accepts an integer: Page of results to retrieve. Does nothing if 'offset' is used.|
-|**offset**|Accepts an integer: Amount to offset order results.|
-|**paginate**|Accepts a boolean: True for pagination, or false for not (default: false). If enabled, modifies the return results to give an object with fields: `orders` (array of found orders), `total` (number of found orders) and `max_num_pages` (total number of pages).|
+| Parameter | Description |
+| --- | --- |
+| **limit** | Accepts an integer: Maximum number of results to retrieve or `-1` for unlimited. Default: Site 'posts_per_page' setting. |
+| **paged** | Accepts an integer: Page of results to retrieve. Does nothing if 'offset' is used. |
+| **offset** | Accepts an integer: Amount to offset order results. |
+| **paginate** | Accepts a boolean: True for pagination, or false for not (default: false). If enabled, modifies the return results to give an object with fields: `orders` (array of found orders), `total` (number of found orders) and `max_num_pages` (total number of pages). |
 
 #### Examples
 
