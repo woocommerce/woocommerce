@@ -291,8 +291,14 @@
 		},
 		"build:project:typescript-check": {
 			"command": "tsc --project tsconfig.json --incremental --tsBuildInfoFile ./node_modules/.cache/typescript/.tsbuildinfo",
+			"files": [
+				"tsconfig.json",
+				"client/**/*.{js,jsx,ts,tsx}"
+			],
+			"output": [],
 			"dependencies": [
-				"build:project:symlinks"
+				"build:project:symlinks",
+				"dependencyOutputs"
 			]
 		},
 		"watch:build:project:bundle": {
