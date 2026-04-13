@@ -66,6 +66,7 @@
 		"@types/testing-library__jest-dom": "^5.14.9",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
+		"@woocommerce/internal-ts-config": "workspace:*",
 		"@wordpress/browserslist-config": "next",
 		"copy-webpack-plugin": "13.0.x",
 		"css-loader": "6.11.x",
@@ -154,7 +155,10 @@
 				"node_modules/@woocommerce/eslint-plugin/index.js",
 				"node_modules/@woocommerce/internal-js-tests/build",
 				"node_modules/@woocommerce/internal-js-tests/build-module",
-				"node_modules/@woocommerce/internal-js-tests/jest-preset.js"
+				"node_modules/@woocommerce/internal-js-tests/jest-preset.js",
+				"node_modules/@woocommerce/internal-ts-config/tsconfig.json",
+				"node_modules/@woocommerce/internal-ts-config/tsconfig-cjs.json",
+				"node_modules/@woocommerce/internal-ts-config/types"
 			]
 		}
 	}

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix double margin-top applied to buttons and list blocks in rendered emails.

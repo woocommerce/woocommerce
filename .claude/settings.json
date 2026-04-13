@@ -10,5 +10,18 @@
     ],
     "deny": [],
     "ask": []
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r \".tool_input.file_path // empty\" | { read -r f; if echo \"$f\" | grep -qE \"/(build|build-module|build-style|build-types|dist)/|[.]asset[.]php$\"; then printf '{\"decision\":\"block\",\"reason\":\"This is a generated/built file. Edit the source instead.\"}'; fi; }"
+          }
+        ]
+      }
+    ]
   }
 }

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix shipping provider filter on orders list using wrong meta key, causing no results to appear.

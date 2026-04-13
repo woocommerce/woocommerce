@@ -2,6 +2,12 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.11.0](https://github.com/woocommerce/email-editor/releases/tag/2.11.0) - 2026-04-06 
+
+-   Patch - Fix double margin-top applied to buttons and list blocks in rendered emails. [#63790]
+-   Patch - Fix `register_post_types_to_api()` to verify view context availability before skipping field registration on WordPress 7.0+ [#64023]
+-   Minor - Email Editor: update default font [#63622]
+
 ## [2.10.0](https://github.com/woocommerce/email-editor/releases/tag/2.10.0) - 2026-03-20 
 
 -   Patch - Apply root horizontal padding uniformly to all blocks in the email rendering pipeline, fixing missing padding for blocks using render_email_callback without Abstract_Block_Renderer. [#63682]

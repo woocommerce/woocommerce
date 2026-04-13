@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Modify the meta_key_value in wp_wc_orders_meta to only track the meta_key column

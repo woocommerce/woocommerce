@@ -1,5 +1,4 @@
 /* eslint-disable no-console */
-const inquirer = require( 'inquirer' );
 const fs = require( 'fs' );
 const childProcess = require( 'child_process' );
 const path = require( 'path' );
@@ -63,6 +62,7 @@ async function askForConfirmation(
 	isDefault = true,
 	abortMessage = 'Aborting.'
 ) {
+	const inquirer = require( 'inquirer' );
 	const { isReady } = await inquirer.prompt( [
 		{
 			type: 'confirm',
