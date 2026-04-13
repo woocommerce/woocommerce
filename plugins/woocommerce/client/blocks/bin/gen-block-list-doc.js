@@ -182,25 +182,26 @@ ${ blockjson.description || '' }
 - **Name:** ${ blockjson.name }
 - **Category:** ${ blockjson.category || '' }${
 		blockjson?.ancestor && blockjson.ancestor.length > 0
-			? `- **Ancestor:** ${ blockjson.ancestor?.join( ', ' ) }
-`
+			? `
+- **Ancestor:** ${ blockjson.ancestor?.join( ', ' ) }`
 			: ''
 	}${
 		blockjson?.parent && blockjson.parent.length > 0
-			? `- **Parent:** ${ blockjson.parent?.join( ', ' ) }
-`
+			? `
+- **Parent:** ${ blockjson.parent?.join( ', ' ) }`
 			: ''
 	}${
 		supportsList && supportsList.length > 0
-			? `- **Supports:** ${ supportsList.sort().join( ', ' ) }
-`
+			? `
+- **Supports:** ${ supportsList.sort().join( ', ' ) }`
 			: ''
 	}${
 		attributes && attributes.length > 0
-			? `- **Attributes:** ${ attributes.sort().join( ', ' ) }
-`
+			? `
+- **Attributes:** ${ attributes.sort().join( ', ' ) }`
 			: ''
-	}`;
+	}
+`;
 }
 
 function getFiles( dir, filesArray, fileExtension ) {

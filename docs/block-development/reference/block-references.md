@@ -14,7 +14,8 @@ This page lists the Woo blocks included in the package. (Incomplete as there are
 Display the average rating of a product
 
 - **Name:** woocommerce/product-average-rating
-- **Category:** woocommerce-product-elements- **Ancestor:** woocommerce/single-product
+- **Category:** woocommerce-product-elements
+- **Ancestor:** woocommerce/single-product
 - **Supports:** color (background, text), interactivity (clientNavigation), spacing (margin, padding), typography (fontSize)
 - **Attributes:** textAlign
 
@@ -23,7 +24,8 @@ Display the average rating of a product
 Display a call to action button which either adds the product to the cart, or links to the product page.
 
 - **Name:** woocommerce/product-button
-- **Category:** woocommerce-product-elements- **Ancestor:** woocommerce/all-products, woocommerce/single-product, core/post-template, woocommerce/product-template
+- **Category:** woocommerce-product-elements
+- **Ancestor:** woocommerce/all-products, woocommerce/single-product, core/post-template, woocommerce/product-template
 - **Supports:** align (full, wide), color (background, text, ~~link~~), email, interactivity, spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~
 - **Attributes:** isDescendentOfQueryLoop, isDescendentOfSingleProductBlock, productId, textAlign, width
 
@@ -32,7 +34,8 @@ Display a call to action button which either adds the product to the cart, or li
 Display the main product image.
 
 - **Name:** woocommerce/product-image
-- **Category:** woocommerce-product-elements- **Ancestor:** woocommerce/all-products, woocommerce/single-product, woocommerce/product-template, core/post-template
+- **Category:** woocommerce-product-elements
+- **Ancestor:** woocommerce/all-products, woocommerce/single-product, woocommerce/product-template, core/post-template
 - **Supports:** dimensions (aspectRatio), email, interactivity (clientNavigation), spacing (margin, padding), typography (fontSize), ~~html~~
 - **Attributes:** aspectRatio, height, imageSizing, isDescendentOfQueryLoop, isDescendentOfSingleProductBlock, productId, saleBadgeAlign, scale, showProductLink, showSaleBadge, width
 
@@ -41,7 +44,8 @@ Display the main product image.
 Display the price of a product.
 
 - **Name:** woocommerce/product-price
-- **Category:** woocommerce-product-elements- **Ancestor:** woocommerce/all-products, woocommerce/featured-product, woocommerce/single-product, woocommerce/product-template, core/post-template
+- **Category:** woocommerce-product-elements
+- **Ancestor:** woocommerce/all-products, woocommerce/featured-product, woocommerce/single-product, woocommerce/product-template, core/post-template
 - **Supports:** color (background, text, ~~link~~), email, interactivity, spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~
 - **Attributes:** isDescendentOfQueryLoop, isDescendentOfSingleProductBlock, isDescendentOfSingleProductTemplate, productId, textAlign
 
@@ -50,21 +54,24 @@ Display the price of a product.
 Display a product's images.
 
 - **Name:** woocommerce/product-image-gallery
-- **Category:** woocommerce-product-elements- **Supports:** align, interactivity (clientNavigation), ~~multiple~~
+- **Category:** woocommerce-product-elements
+- **Supports:** align, interactivity (clientNavigation), ~~multiple~~
 
 ## Product Meta - woocommerce/product-meta
 
 Display a product’s SKU, categories, tags, and more.
 
 - **Name:** woocommerce/product-meta
-- **Category:** woocommerce-product-elements- **Supports:** align, interactivity (clientNavigation), ~~reusable~~
+- **Category:** woocommerce-product-elements
+- **Supports:** align, interactivity (clientNavigation), ~~reusable~~
 
 ## Product Rating - woocommerce/product-rating
 
 Display the average rating of a product.
 
 - **Name:** woocommerce/product-rating
-- **Category:** woocommerce-product-elements- **Ancestor:** woocommerce/all-products, woocommerce/single-product, woocommerce/product-template, core/post-template
+- **Category:** woocommerce-product-elements
+- **Ancestor:** woocommerce/all-products, woocommerce/single-product, woocommerce/product-template, core/post-template
 - **Supports:** color (text, ~~background~~, ~~link~~), interactivity (clientNavigation), spacing (margin, padding), typography (fontSize)
 - **Attributes:** isDescendentOfQueryLoop, isDescendentOfSingleProductBlock, isDescendentOfSingleProductTemplate, productId, textAlign
 
@@ -73,7 +80,8 @@ Display the average rating of a product.
 Display the review count of a product
 
 - **Name:** woocommerce/product-rating-counter
-- **Category:** woocommerce-product-elements- **Ancestor:** woocommerce/single-product
+- **Category:** woocommerce-product-elements
+- **Ancestor:** woocommerce/single-product
 - **Supports:** color (link, ~~background~~, ~~text~~), interactivity (clientNavigation), spacing (margin, padding), typography (fontSize), ~~inserter~~
 - **Attributes:** isDescendentOfQueryLoop, isDescendentOfSingleProductBlock, isDescendentOfSingleProductTemplate, productId, textAlign
 
@@ -82,7 +90,8 @@ Display the review count of a product
 Display the average rating of a product with stars
 
 - **Name:** woocommerce/product-rating-stars
-- **Category:** woocommerce-product-elements- **Ancestor:** woocommerce/single-product
+- **Category:** woocommerce-product-elements
+- **Ancestor:** woocommerce/single-product
 - **Supports:** color (text, ~~background~~, ~~link~~), interactivity (clientNavigation), spacing (margin, padding), typography (fontSize), ~~inserter~~
 - **Attributes:** isDescendentOfQueryLoop, isDescendentOfSingleProductBlock, isDescendentOfSingleProductTemplate, productId, textAlign
 
@@ -91,14 +100,16 @@ Display the average rating of a product with stars
 Display related products.
 
 - **Name:** woocommerce/related-products
-- **Category:** woocommerce- **Supports:** align, interactivity (clientNavigation), ~~inserter~~, ~~reusable~~
+- **Category:** woocommerce
+- **Supports:** align, interactivity (clientNavigation), ~~inserter~~, ~~reusable~~
 
 ## On-Sale Badge - woocommerce/product-sale-badge
 
 Displays an on-sale badge if the product is on-sale.
 
 - **Name:** woocommerce/product-sale-badge
-- **Category:** woocommerce-product-elements- **Ancestor:** woocommerce/single-product, woocommerce/product-template, core/post-template, woocommerce/product-gallery
+- **Category:** woocommerce-product-elements
+- **Ancestor:** woocommerce/single-product, woocommerce/product-template, core/post-template, woocommerce/product-gallery
 - **Supports:** align, color (background, gradients, text, ~~link~~), email, interactivity (clientNavigation), spacing (margin), typography (fontSize, lineHeight), ~~html~~
 - **Attributes:** isDescendentOfQueryLoop, isDescendentOfSingleProductBlock, isDescendentOfSingleProductTemplate, productId
 
@@ -107,7 +118,8 @@ Displays an on-sale badge if the product is on-sale.
 Displays the SKU of a product.
 
 - **Name:** woocommerce/product-sku
-- **Category:** woocommerce-product-elements- **Ancestor:** woocommerce/product-meta, woocommerce/all-products, woocommerce/single-product, woocommerce/product-template, core/post-template
+- **Category:** woocommerce-product-elements
+- **Ancestor:** woocommerce/product-meta, woocommerce/all-products, woocommerce/single-product, woocommerce/product-template, core/post-template
 - **Supports:** color (background, text), interactivity (clientNavigation), spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~
 - **Attributes:** isDescendantOfAllProducts, prefix, productId, showProductSelector, suffix
 
@@ -116,7 +128,8 @@ Displays the SKU of a product.
 Let shoppers know when products are out of stock or on backorder. This block is hidden when products are in stock.
 
 - **Name:** woocommerce/product-stock-indicator
-- **Category:** woocommerce-product-elements- **Ancestor:** woocommerce/all-products, woocommerce/single-product, woocommerce/product-template, core/post-template
+- **Category:** woocommerce-product-elements
+- **Ancestor:** woocommerce/all-products, woocommerce/single-product, woocommerce/product-template, core/post-template
 - **Supports:** color (background, text), interactivity, spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~
 - **Attributes:** isDescendantOfAllProducts
 
@@ -125,7 +138,8 @@ Let shoppers know when products are out of stock or on backorder. This block is 
 Display a short description about a product.
 
 - **Name:** woocommerce/product-summary
-- **Category:** woocommerce-product-elements- **Ancestor:** woocommerce/all-products, woocommerce/featured-product, woocommerce/single-product, woocommerce/product-template, core/post-template
+- **Category:** woocommerce-product-elements
+- **Ancestor:** woocommerce/all-products, woocommerce/featured-product, woocommerce/single-product, woocommerce/product-template, core/post-template
 - **Supports:** color (background, link, text), interactivity (clientNavigation), spacing (margin, padding), typography (fontSize, lineHeight, textAlign)
 - **Attributes:** isDescendantOfAllProducts, isDescendentOfQueryLoop, isDescendentOfSingleProductBlock, isDescendentOfSingleProductTemplate, linkText, productId, showDescriptionIfEmpty, showLink, summaryLength
 
@@ -134,7 +148,8 @@ Display a short description about a product.
 Display the title of a product.
 
 - **Name:** woocommerce/product-title
-- **Category:** woocommerce-product-elements- **Ancestor:** woocommerce/all-products
+- **Category:** woocommerce-product-elements
+- **Ancestor:** woocommerce/all-products
 - **Supports:** color (background, gradients, text, ~~link~~), interactivity (~~clientNavigation~~), spacing (margin), typography (fontSize, lineHeight), ~~html~~
 - **Attributes:** align, headingLevel, linkTarget, productId, showProductLink
 
@@ -143,7 +158,8 @@ Display the title of a product.
 A group of headers and associated expandable content.
 
 - **Name:** woocommerce/accordion-group
-- **Category:** woocommerce- **Supports:** align (full, wide), background (backgroundImage, backgroundSize), color (background, gradient, text), interactivity, layout, shadow, spacing (blockGap, margin, padding), ~~html~~
+- **Category:** woocommerce
+- **Supports:** align (full, wide), background (backgroundImage, backgroundSize), color (background, gradient, text), interactivity, layout, shadow, spacing (blockGap, margin, padding), ~~html~~
 - **Attributes:** allowedBlocks, autoclose, iconPosition
 
 ## Accordion Header - woocommerce/accordion-header
@@ -151,7 +167,8 @@ A group of headers and associated expandable content.
 Accordion header.
 
 - **Name:** woocommerce/accordion-header
-- **Category:** woocommerce- **Parent:** woocommerce/accordion-item
+- **Category:** woocommerce
+- **Parent:** woocommerce/accordion-item
 - **Supports:** anchor, border, color (background, gradient, text), interactivity, layout, shadow, spacing (margin, padding), typography (fontSize, textAlign), ~~align~~
 - **Attributes:** icon, iconPosition, level, levelOptions, openByDefault, textAlignment, title
 
@@ -160,7 +177,8 @@ Accordion header.
 A single accordion that displays a header and expandable content.
 
 - **Name:** woocommerce/accordion-item
-- **Category:** woocommerce- **Parent:** woocommerce/accordion-group
+- **Category:** woocommerce
+- **Parent:** woocommerce/accordion-group
 - **Supports:** align (full, wide), color (background, gradient, text), interactivity, layout, shadow, spacing (blockGap, margin)
 - **Attributes:** openByDefault
 
@@ -169,7 +187,8 @@ A single accordion that displays a header and expandable content.
 Accordion Panel
 
 - **Name:** woocommerce/accordion-panel
-- **Category:** woocommerce- **Parent:** woocommerce/accordion-item
+- **Category:** woocommerce
+- **Parent:** woocommerce/accordion-item
 - **Supports:** border, color (background, gradient, text), interactivity, layout, shadow, spacing (blockGap, margin, padding), typography (fontSize, lineHeight)
 - **Attributes:** allowedBlocks, isSelected, openByDefault, templateLock
 
@@ -178,7 +197,8 @@ Accordion Panel
 Display the currently active filters.
 
 - **Name:** woocommerce/active-filters
-- **Category:** woocommerce- **Supports:** color (text, ~~background~~), interactivity (~~clientNavigation~~), ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~
+- **Category:** woocommerce
+- **Supports:** color (text, ~~background~~), interactivity (~~clientNavigation~~), ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~
 - **Attributes:** displayStyle, headingLevel
 
 ## Add to Cart with Options - woocommerce/add-to-cart-form
@@ -186,7 +206,8 @@ Display the currently active filters.
 Display a button that lets customers add a product to their cart. Use the added options to optimize for different product types.
 
 - **Name:** woocommerce/add-to-cart-form
-- **Category:** woocommerce-product-elements- **Supports:** interactivity
+- **Category:** woocommerce-product-elements
+- **Supports:** interactivity
 - **Attributes:** quantitySelectorStyle
 
 ## Add to Cart + Options (Beta) - woocommerce/add-to-cart-with-options
@@ -194,7 +215,8 @@ Display a button that lets customers add a product to their cart. Use the added 
 Use blocks to create an "Add to cart" area that's customized for different product types, such as variable and grouped. 
 
 - **Name:** woocommerce/add-to-cart-with-options
-- **Category:** woocommerce-product-elements- **Supports:** interactivity
+- **Category:** woocommerce-product-elements
+- **Supports:** interactivity
 - **Attributes:** isDescendantOfAddToCartWithOptions
 
 ## Grouped Product Selector (Beta) - woocommerce/add-to-cart-with-options-grouped-product-selector
@@ -202,7 +224,8 @@ Use blocks to create an "Add to cart" area that's customized for different produ
 Display a group of products that can be added to the cart.
 
 - **Name:** woocommerce/add-to-cart-with-options-grouped-product-selector
-- **Category:** woocommerce-product-elements- **Ancestor:** woocommerce/add-to-cart-with-options
+- **Category:** woocommerce-product-elements
+- **Ancestor:** woocommerce/add-to-cart-with-options
 - **Supports:** interactivity
 
 ## Grouped Product: Template (Beta) - woocommerce/add-to-cart-with-options-grouped-product-item
@@ -210,7 +233,8 @@ Display a group of products that can be added to the cart.
 A list item template that represents a child product within the Grouped Product Selector block.
 
 - **Name:** woocommerce/add-to-cart-with-options-grouped-product-item
-- **Category:** woocommerce-product-elements- **Ancestor:** woocommerce/add-to-cart-with-options-grouped-product-selector
+- **Category:** woocommerce-product-elements
+- **Ancestor:** woocommerce/add-to-cart-with-options-grouped-product-selector
 - **Supports:** interactivity, ~~inserter~~
 
 ## Grouped Product: Item Label (Beta) - woocommerce/add-to-cart-with-options-grouped-product-item-label
@@ -218,7 +242,8 @@ A list item template that represents a child product within the Grouped Product 
 Display the product title as a label or paragraph.
 
 - **Name:** woocommerce/add-to-cart-with-options-grouped-product-item-label
-- **Category:** woocommerce-product-elements- **Ancestor:** woocommerce/add-to-cart-with-options-grouped-product-item
+- **Category:** woocommerce-product-elements
+- **Ancestor:** woocommerce/add-to-cart-with-options-grouped-product-item
 - **Supports:** color (background, gradients, text), layout (selfStretch), spacing (blockGap, margin, padding), typography (fontSize, lineHeight, textAlign), ~~html~~
 
 ## Grouped Product: Item Selector (Beta) - woocommerce/add-to-cart-with-options-grouped-product-item-selector
@@ -226,7 +251,8 @@ Display the product title as a label or paragraph.
 Add a way of selecting a child product within the Grouped Product block. Depending on the type of product and its properties, this might be a button, a checkbox, or a link.
 
 - **Name:** woocommerce/add-to-cart-with-options-grouped-product-item-selector
-- **Category:** woocommerce-product-elements- **Ancestor:** woocommerce/add-to-cart-with-options-grouped-product-item
+- **Category:** woocommerce-product-elements
+- **Ancestor:** woocommerce/add-to-cart-with-options-grouped-product-item
 - **Supports:** interactivity, ~~inserter~~
 
 ## Product Quantity (Beta) - woocommerce/add-to-cart-with-options-quantity-selector
@@ -234,7 +260,8 @@ Add a way of selecting a child product within the Grouped Product block. Dependi
 Display an input field customers can use to select the number of products to add to their cart. 
 
 - **Name:** woocommerce/add-to-cart-with-options-quantity-selector
-- **Category:** woocommerce-product-elements- **Ancestor:** woocommerce/add-to-cart-with-options
+- **Category:** woocommerce-product-elements
+- **Ancestor:** woocommerce/add-to-cart-with-options
 - **Supports:** interactivity
 
 ## Variation Description (Beta) - woocommerce/add-to-cart-with-options-variation-description
@@ -242,7 +269,8 @@ Display an input field customers can use to select the number of products to add
 Displays the description of the selected variation.
 
 - **Name:** woocommerce/add-to-cart-with-options-variation-description
-- **Category:** woocommerce- **Ancestor:** woocommerce/add-to-cart-with-options
+- **Category:** woocommerce
+- **Ancestor:** woocommerce/add-to-cart-with-options
 - **Supports:** color (background, gradients, link, text), dimensions (minHeight), interactivity, spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~
 
 ## Variation Selector: Template (Beta) - woocommerce/add-to-cart-with-options-variation-selector-attribute
@@ -250,7 +278,8 @@ Displays the description of the selected variation.
 A template for attribute name and options that will be applied to all variable products with attributes.
 
 - **Name:** woocommerce/add-to-cart-with-options-variation-selector-attribute
-- **Category:** woocommerce-product-elements- **Ancestor:** woocommerce/add-to-cart-with-options-variation-selector
+- **Category:** woocommerce-product-elements
+- **Ancestor:** woocommerce/add-to-cart-with-options-variation-selector
 - **Supports:** interactivity, ~~inserter~~
 
 ## Variation Selector: Attribute Name (Beta) - woocommerce/add-to-cart-with-options-variation-selector-attribute-name
@@ -258,7 +287,8 @@ A template for attribute name and options that will be applied to all variable p
 Format the name of an attribute associated with a variable product.
 
 - **Name:** woocommerce/add-to-cart-with-options-variation-selector-attribute-name
-- **Category:** woocommerce-product-elements- **Ancestor:** woocommerce/add-to-cart-with-options-variation-selector-attribute
+- **Category:** woocommerce-product-elements
+- **Ancestor:** woocommerce/add-to-cart-with-options-variation-selector-attribute
 - **Supports:** color (background, gradients, text), interactivity, spacing (padding), typography (fontSize, lineHeight), ~~alignWide~~, ~~align~~, ~~inserter~~
 
 ## Variation Selector: Attribute Options (Beta) - woocommerce/add-to-cart-with-options-variation-selector-attribute-options
@@ -266,7 +296,8 @@ Format the name of an attribute associated with a variable product.
 Display the attribute options associated with a variable product.
 
 - **Name:** woocommerce/add-to-cart-with-options-variation-selector-attribute-options
-- **Category:** woocommerce-product-elements- **Ancestor:** woocommerce/add-to-cart-with-options-variation-selector-attribute
+- **Category:** woocommerce-product-elements
+- **Ancestor:** woocommerce/add-to-cart-with-options-variation-selector-attribute
 - **Supports:** interactivity, ~~inserter~~
 - **Attributes:** autoselect, disabledAttributesAction, optionStyle
 
@@ -275,7 +306,8 @@ Display the attribute options associated with a variable product.
 Display any product variations available to select from and add to cart.
 
 - **Name:** woocommerce/add-to-cart-with-options-variation-selector
-- **Category:** woocommerce-product-elements- **Ancestor:** woocommerce/add-to-cart-with-options
+- **Category:** woocommerce-product-elements
+- **Ancestor:** woocommerce/add-to-cart-with-options
 - **Supports:** interactivity
 
 ## Filter by Attribute Controls - woocommerce/attribute-filter
@@ -283,7 +315,8 @@ Display any product variations available to select from and add to cart.
 Enable customers to filter the product grid by selecting one or more attributes, such as color.
 
 - **Name:** woocommerce/attribute-filter
-- **Category:** woocommerce- **Supports:** color (text, ~~background~~), ~~html~~, ~~inserter~~, ~~interactivity~~, ~~lock~~
+- **Category:** woocommerce
+- **Supports:** color (text, ~~background~~), ~~html~~, ~~inserter~~, ~~interactivity~~, ~~lock~~
 - **Attributes:** attributeId, className, displayStyle, headingLevel, isPreview, queryType, selectType, showCounts, showFilterButton
 
 ## Store Breadcrumbs - woocommerce/breadcrumbs
@@ -291,7 +324,8 @@ Enable customers to filter the product grid by selecting one or more attributes,
 Enable customers to keep track of their location within the store and navigate back to parent pages.
 
 - **Name:** woocommerce/breadcrumbs
-- **Category:** woocommerce- **Supports:** align (full, wide), color (link, text, ~~background~~), interactivity (clientNavigation), typography (fontSize, lineHeight), ~~html~~
+- **Category:** woocommerce
+- **Supports:** align (full, wide), color (link, text, ~~background~~), interactivity (clientNavigation), typography (fontSize, lineHeight), ~~html~~
 - **Attributes:** align, contentJustification, fontSize
 
 ## Accepted Payment Methods - woocommerce/cart-accepted-payment-methods-block
@@ -299,7 +333,8 @@ Enable customers to keep track of their location within the store and navigate b
 Display accepted payment methods.
 
 - **Name:** woocommerce/cart-accepted-payment-methods-block
-- **Category:** woocommerce- **Parent:** woocommerce/cart-totals-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/cart-totals-block
 - **Supports:** inserter, ~~align~~, ~~html~~, ~~multiple~~, ~~reusable~~
 
 ## Cart Cross-Sells - woocommerce/cart-cross-sells-block
@@ -307,7 +342,8 @@ Display accepted payment methods.
 Shows the Cross-Sells block.
 
 - **Name:** woocommerce/cart-cross-sells-block
-- **Category:** woocommerce- **Parent:** woocommerce/cart-items-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/cart-items-block
 - **Supports:** ~~align~~, ~~html~~, ~~inserter~~, ~~multiple~~, ~~reusable~~
 
 ## Cart Cross-Sells Products - woocommerce/cart-cross-sells-products-block
@@ -315,7 +351,8 @@ Shows the Cross-Sells block.
 Shows the Cross-Sells products.
 
 - **Name:** woocommerce/cart-cross-sells-products-block
-- **Category:** woocommerce- **Parent:** woocommerce/cart-cross-sells-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/cart-cross-sells-block
 - **Supports:** email, ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** columns, lock
 
@@ -324,7 +361,8 @@ Shows the Cross-Sells products.
 Allow customers to breeze through with quick payment options.
 
 - **Name:** woocommerce/cart-express-payment-block
-- **Category:** woocommerce- **Parent:** woocommerce/cart-totals-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/cart-totals-block
 - **Supports:** ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** buttonBorderRadius, buttonHeight, lock, showButtonStyles
 
@@ -333,7 +371,8 @@ Allow customers to breeze through with quick payment options.
 Column containing cart items.
 
 - **Name:** woocommerce/cart-items-block
-- **Category:** woocommerce- **Parent:** woocommerce/filled-cart-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/filled-cart-block
 - **Supports:** ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** lock
 
@@ -342,7 +381,8 @@ Column containing cart items.
 Block containing current line items in Cart.
 
 - **Name:** woocommerce/cart-line-items-block
-- **Category:** woocommerce- **Parent:** woocommerce/cart-items-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/cart-items-block
 - **Supports:** ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** lock
 
@@ -351,7 +391,8 @@ Block containing current line items in Cart.
 Show customers a summary of their order.
 
 - **Name:** woocommerce/cart-order-summary-block
-- **Category:** woocommerce- **Parent:** woocommerce/cart-totals-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/cart-totals-block
 - **Supports:** ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** lock
 
@@ -360,7 +401,8 @@ Show customers a summary of their order.
 Shows the apply coupon form.
 
 - **Name:** woocommerce/cart-order-summary-coupon-form-block
-- **Category:** woocommerce- **Parent:** woocommerce/cart-order-summary-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/cart-order-summary-block
 - **Supports:** ~~align~~, ~~html~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** className, lock
 
@@ -369,7 +411,8 @@ Shows the apply coupon form.
 Shows the cart discount row.
 
 - **Name:** woocommerce/cart-order-summary-discount-block
-- **Category:** woocommerce- **Parent:** woocommerce/cart-order-summary-totals-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/cart-order-summary-totals-block
 - **Supports:** ~~align~~, ~~html~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** className, lock
 
@@ -378,7 +421,8 @@ Shows the cart discount row.
 Shows the cart fee row.
 
 - **Name:** woocommerce/cart-order-summary-fee-block
-- **Category:** woocommerce- **Parent:** woocommerce/cart-order-summary-totals-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/cart-order-summary-totals-block
 - **Supports:** ~~align~~, ~~html~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** className, lock
 
@@ -387,7 +431,8 @@ Shows the cart fee row.
 Shows the heading row.
 
 - **Name:** woocommerce/cart-order-summary-heading-block
-- **Category:** woocommerce- **Parent:** woocommerce/cart-order-summary-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/cart-order-summary-block
 - **Supports:** ~~align~~, ~~html~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** className, content, lock
 
@@ -396,7 +441,8 @@ Shows the heading row.
 Shows the cart shipping row.
 
 - **Name:** woocommerce/cart-order-summary-shipping-block
-- **Category:** woocommerce- **Parent:** woocommerce/cart-order-summary-totals-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/cart-order-summary-totals-block
 - **Supports:** ~~align~~, ~~html~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** lock
 
@@ -405,7 +451,8 @@ Shows the cart shipping row.
 Shows the cart subtotal row.
 
 - **Name:** woocommerce/cart-order-summary-subtotal-block
-- **Category:** woocommerce- **Parent:** woocommerce/cart-order-summary-totals-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/cart-order-summary-totals-block
 - **Supports:** ~~align~~, ~~html~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** className, lock
 
@@ -414,7 +461,8 @@ Shows the cart subtotal row.
 Shows the cart taxes row.
 
 - **Name:** woocommerce/cart-order-summary-taxes-block
-- **Category:** woocommerce- **Parent:** woocommerce/cart-order-summary-totals-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/cart-order-summary-totals-block
 - **Supports:** ~~align~~, ~~html~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** className, lock
 
@@ -423,7 +471,8 @@ Shows the cart taxes row.
 Shows the subtotal, fees, discounts, shipping and taxes.
 
 - **Name:** woocommerce/cart-order-summary-totals-block
-- **Category:** woocommerce- **Parent:** woocommerce/cart-order-summary-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/cart-order-summary-block
 - **Supports:** ~~align~~, ~~html~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** className, lock
 
@@ -432,7 +481,8 @@ Shows the subtotal, fees, discounts, shipping and taxes.
 Column containing the cart totals.
 
 - **Name:** woocommerce/cart-totals-block
-- **Category:** woocommerce- **Parent:** woocommerce/filled-cart-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/filled-cart-block
 - **Supports:** ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** checkbox, lock, text
 
@@ -441,7 +491,8 @@ Column containing the cart totals.
 Contains blocks that are displayed when the cart is empty.
 
 - **Name:** woocommerce/empty-cart-block
-- **Category:** woocommerce- **Parent:** woocommerce/cart
+- **Category:** woocommerce
+- **Parent:** woocommerce/cart
 - **Supports:** align (wide), ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** lock
 
@@ -450,7 +501,8 @@ Contains blocks that are displayed when the cart is empty.
 Contains blocks that are displayed when the cart contains products.
 
 - **Name:** woocommerce/filled-cart-block
-- **Category:** woocommerce- **Parent:** woocommerce/cart
+- **Category:** woocommerce
+- **Parent:** woocommerce/cart
 - **Supports:** align (wide), ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** lock
 
@@ -459,7 +511,8 @@ Contains blocks that are displayed when the cart contains products.
 Allow customers proceed to Checkout.
 
 - **Name:** woocommerce/proceed-to-checkout-block
-- **Category:** woocommerce- **Parent:** woocommerce/cart-totals-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/cart-totals-block
 - **Supports:** ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** lock
 
@@ -468,7 +521,8 @@ Allow customers proceed to Checkout.
 Display a link to the cart.
 
 - **Name:** woocommerce/cart-link
-- **Category:** woocommerce- **Supports:** color (background, link, ~~text~~), interactivity (clientNavigation), spacing (padding), typography (fontSize), ~~html~~, ~~multiple~~
+- **Category:** woocommerce
+- **Supports:** color (background, link, ~~text~~), interactivity (clientNavigation), spacing (padding), typography (fontSize), ~~html~~, ~~multiple~~
 - **Attributes:** cartIcon, content
 
 ## Catalog Sorting - woocommerce/catalog-sorting
@@ -476,7 +530,8 @@ Display a link to the cart.
 Enable customers to change the sorting order of the products.
 
 - **Name:** woocommerce/catalog-sorting
-- **Category:** woocommerce- **Supports:** color (text, ~~background~~), interactivity (clientNavigation), typography (fontSize)
+- **Category:** woocommerce
+- **Supports:** color (text, ~~background~~), interactivity (clientNavigation), typography (fontSize)
 - **Attributes:** fontSize, useLabel
 
 ## Product Category Description - woocommerce/category-description
@@ -484,7 +539,8 @@ Enable customers to change the sorting order of the products.
 Displays the current category description.
 
 - **Name:** woocommerce/category-description
-- **Category:** woocommerce- **Supports:** color (background, text), spacing (margin, padding), typography, ~~align~~, ~~html~~
+- **Category:** woocommerce
+- **Supports:** color (background, text), spacing (margin, padding), typography, ~~align~~, ~~html~~
 - **Attributes:** textAlign
 
 ## Product Category Title - woocommerce/category-title
@@ -492,7 +548,8 @@ Displays the current category description.
 Displays the current category title and lets permitted users edit it.
 
 - **Name:** woocommerce/category-title
-- **Category:** woocommerce- **Supports:** color (background, text), spacing (margin, padding), typography, ~~align~~, ~~html~~
+- **Category:** woocommerce
+- **Supports:** color (background, text), spacing (margin, padding), typography, ~~align~~, ~~html~~
 - **Attributes:** isLink, level, linkTarget, rel, textAlign
 
 ## Checkout - woocommerce/checkout
@@ -500,7 +557,8 @@ Displays the current category title and lets permitted users edit it.
 Display a checkout form so your customers can submit orders.
 
 - **Name:** woocommerce/checkout
-- **Category:** woocommerce- **Supports:** align (wide), ~~html~~, ~~multiple~~
+- **Category:** woocommerce
+- **Supports:** align (wide), ~~html~~, ~~multiple~~
 - **Attributes:** align, showFormStepNumbers
 
 ## Actions - woocommerce/checkout-actions-block
@@ -508,7 +566,8 @@ Display a checkout form so your customers can submit orders.
 Allow customers to place their order.
 
 - **Name:** woocommerce/checkout-actions-block
-- **Category:** woocommerce- **Parent:** woocommerce/checkout-fields-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/checkout-fields-block
 - **Supports:** ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** cartPageId, className, lock, priceSeparator, showReturnToCart
 
@@ -517,7 +576,8 @@ Allow customers to place their order.
 Render additional fields in the 'Additional information' location.
 
 - **Name:** woocommerce/checkout-additional-information-block
-- **Category:** woocommerce- **Parent:** woocommerce/checkout-fields-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/checkout-fields-block
 - **Supports:** ~~align~~, ~~html~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** className, lock
 
@@ -526,7 +586,8 @@ Render additional fields in the 'Additional information' location.
 Collect your customer's billing address.
 
 - **Name:** woocommerce/checkout-billing-address-block
-- **Category:** woocommerce- **Parent:** woocommerce/checkout-fields-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/checkout-fields-block
 - **Supports:** ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** lock
 
@@ -535,7 +596,8 @@ Collect your customer's billing address.
 Collect your customer's contact information.
 
 - **Name:** woocommerce/checkout-contact-information-block
-- **Category:** woocommerce- **Parent:** woocommerce/checkout-fields-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/checkout-fields-block
 - **Supports:** ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** lock
 
@@ -544,7 +606,8 @@ Collect your customer's contact information.
 Allow customers to breeze through with quick payment options.
 
 - **Name:** woocommerce/checkout-express-payment-block
-- **Category:** woocommerce- **Parent:** woocommerce/checkout-fields-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/checkout-fields-block
 - **Supports:** ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** buttonBorderRadius, buttonHeight, className, lock, showButtonStyles
 
@@ -553,7 +616,8 @@ Allow customers to breeze through with quick payment options.
 Column containing checkout address fields.
 
 - **Name:** woocommerce/checkout-fields-block
-- **Category:** woocommerce- **Parent:** woocommerce/checkout
+- **Category:** woocommerce
+- **Parent:** woocommerce/checkout
 - **Supports:** ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** className, lock
 
@@ -562,7 +626,8 @@ Column containing checkout address fields.
 Allow customers to add a note to their order.
 
 - **Name:** woocommerce/checkout-order-note-block
-- **Category:** woocommerce- **Parent:** woocommerce/checkout-fields-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/checkout-fields-block
 - **Supports:** ~~align~~, ~~html~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** className, lock
 
@@ -571,7 +636,8 @@ Allow customers to add a note to their order.
 Show customers a summary of their order.
 
 - **Name:** woocommerce/checkout-order-summary-block
-- **Category:** woocommerce- **Parent:** woocommerce/checkout-totals-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/checkout-totals-block
 - **Supports:** ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** lock
 
@@ -580,7 +646,8 @@ Show customers a summary of their order.
 Shows cart items.
 
 - **Name:** woocommerce/checkout-order-summary-cart-items-block
-- **Category:** woocommerce- **Parent:** woocommerce/checkout-order-summary-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/checkout-order-summary-block
 - **Supports:** ~~align~~, ~~html~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** className, disableProductDescriptions, lock
 
@@ -589,7 +656,8 @@ Shows cart items.
 Shows the apply coupon form.
 
 - **Name:** woocommerce/checkout-order-summary-coupon-form-block
-- **Category:** woocommerce- **Parent:** woocommerce/checkout-order-summary-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/checkout-order-summary-block
 - **Supports:** ~~align~~, ~~html~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** className, lock
 
@@ -598,7 +666,8 @@ Shows the apply coupon form.
 Shows the cart discount row.
 
 - **Name:** woocommerce/checkout-order-summary-discount-block
-- **Category:** woocommerce- **Parent:** woocommerce/checkout-order-summary-totals-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/checkout-order-summary-totals-block
 - **Supports:** ~~align~~, ~~html~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** className, lock
 
@@ -607,7 +676,8 @@ Shows the cart discount row.
 Shows the cart fee row.
 
 - **Name:** woocommerce/checkout-order-summary-fee-block
-- **Category:** woocommerce- **Parent:** woocommerce/checkout-order-summary-totals-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/checkout-order-summary-totals-block
 - **Supports:** ~~align~~, ~~html~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** className, lock
 
@@ -616,7 +686,8 @@ Shows the cart fee row.
 Shows the cart shipping row.
 
 - **Name:** woocommerce/checkout-order-summary-shipping-block
-- **Category:** woocommerce- **Parent:** woocommerce/checkout-order-summary-totals-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/checkout-order-summary-totals-block
 - **Supports:** ~~align~~, ~~html~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** lock
 
@@ -625,7 +696,8 @@ Shows the cart shipping row.
 Shows the cart subtotal row.
 
 - **Name:** woocommerce/checkout-order-summary-subtotal-block
-- **Category:** woocommerce- **Parent:** woocommerce/checkout-order-summary-totals-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/checkout-order-summary-totals-block
 - **Supports:** ~~align~~, ~~html~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** className, lock
 
@@ -634,7 +706,8 @@ Shows the cart subtotal row.
 Shows the cart taxes row.
 
 - **Name:** woocommerce/checkout-order-summary-taxes-block
-- **Category:** woocommerce- **Parent:** woocommerce/checkout-order-summary-totals-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/checkout-order-summary-totals-block
 - **Supports:** ~~align~~, ~~html~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** className, lock
 
@@ -643,7 +716,8 @@ Shows the cart taxes row.
 Shows the subtotal, fees, discounts, shipping and taxes.
 
 - **Name:** woocommerce/checkout-order-summary-totals-block
-- **Category:** woocommerce- **Parent:** woocommerce/checkout-order-summary-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/checkout-order-summary-block
 - **Supports:** ~~align~~, ~~html~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** className, lock
 
@@ -652,7 +726,8 @@ Shows the subtotal, fees, discounts, shipping and taxes.
 Payment options for your store.
 
 - **Name:** woocommerce/checkout-payment-block
-- **Category:** woocommerce- **Parent:** woocommerce/checkout-fields-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/checkout-fields-block
 - **Supports:** ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** lock
 
@@ -661,7 +736,8 @@ Payment options for your store.
 Shows local pickup locations.
 
 - **Name:** woocommerce/checkout-pickup-options-block
-- **Category:** woocommerce- **Parent:** woocommerce/checkout-fields-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/checkout-fields-block
 - **Supports:** ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** lock
 
@@ -670,7 +746,8 @@ Shows local pickup locations.
 Collect your customer's shipping address.
 
 - **Name:** woocommerce/checkout-shipping-address-block
-- **Category:** woocommerce- **Parent:** woocommerce/checkout-fields-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/checkout-fields-block
 - **Supports:** ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** lock
 
@@ -679,7 +756,8 @@ Collect your customer's shipping address.
 Select between shipping or local pickup.
 
 - **Name:** woocommerce/checkout-shipping-method-block
-- **Category:** woocommerce- **Parent:** woocommerce/checkout-fields-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/checkout-fields-block
 - **Supports:** ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** lock
 
@@ -688,7 +766,8 @@ Select between shipping or local pickup.
 Display shipping options and rates for your store.
 
 - **Name:** woocommerce/checkout-shipping-methods-block
-- **Category:** woocommerce- **Parent:** woocommerce/checkout-fields-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/checkout-fields-block
 - **Supports:** ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** lock
 
@@ -697,7 +776,8 @@ Display shipping options and rates for your store.
 Ensure that customers agree to your Terms & Conditions and Privacy Policy.
 
 - **Name:** woocommerce/checkout-terms-block
-- **Category:** woocommerce- **Parent:** woocommerce/checkout-fields-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/checkout-fields-block
 - **Supports:** ~~align~~, ~~html~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** checkbox, className, showSeparator, text
 
@@ -706,7 +786,8 @@ Ensure that customers agree to your Terms & Conditions and Privacy Policy.
 Column containing the checkout totals.
 
 - **Name:** woocommerce/checkout-totals-block
-- **Category:** woocommerce- **Parent:** woocommerce/checkout
+- **Category:** woocommerce
+- **Parent:** woocommerce/checkout
 - **Supports:** ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** checkbox, className, text
 
@@ -715,7 +796,8 @@ Column containing the checkout totals.
 Renders classic WooCommerce shortcodes.
 
 - **Name:** woocommerce/classic-shortcode
-- **Category:** woocommerce- **Supports:** align, inserter, interactivity (~~clientNavigation~~), ~~html~~, ~~multiple~~, ~~reusable~~
+- **Category:** woocommerce
+- **Supports:** align, inserter, interactivity (~~clientNavigation~~), ~~html~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** align, shortcode
 
 ## Coming Soon - woocommerce/coming-soon
@@ -723,7 +805,8 @@ Renders classic WooCommerce shortcodes.
 
 
 - **Name:** woocommerce/coming-soon
-- **Category:** woocommerce- **Supports:** color (background, text), ~~inserter~~
+- **Category:** woocommerce
+- **Supports:** color (background, text), ~~inserter~~
 - **Attributes:** color, comingSoonPatternId, storeOnly
 
 ## Coupon Code - woocommerce/coupon-code
@@ -731,7 +814,8 @@ Renders classic WooCommerce shortcodes.
 Include a coupon code to entice customers to make a purchase.
 
 - **Name:** woocommerce/coupon-code
-- **Category:** woocommerce- **Supports:** align, color (background, text), email, spacing (margin, padding), typography (fontSize), ~~html~~
+- **Category:** woocommerce
+- **Supports:** align, color (background, text), email, spacing (margin, padding), typography (fontSize), ~~html~~
 - **Attributes:** couponCode
 
 ## Customer account - woocommerce/customer-account
@@ -739,7 +823,8 @@ Include a coupon code to entice customers to make a purchase.
 A block that allows your customers to log in and out of their accounts in your store.
 
 - **Name:** woocommerce/customer-account
-- **Category:** woocommerce- **Supports:** align, color (background, text), interactivity, spacing (margin, padding), typography (fontSize)
+- **Category:** woocommerce
+- **Supports:** align, color (background, text), interactivity, spacing (margin, padding), typography (fontSize)
 - **Attributes:** displayStyle, hasDropdownNavigation, iconClass, iconStyle
 
 ## Email Content - woocommerce/email-content
@@ -747,7 +832,8 @@ A block that allows your customers to log in and out of their accounts in your s
 A placeholder block for email content.
 
 - **Name:** woocommerce/email-content
-- **Category:** woocommerce- **Supports:** email, ~~inserter~~
+- **Category:** woocommerce
+- **Supports:** email, ~~inserter~~
 - **Attributes:** emailType, postId
 
 ## Featured Category - woocommerce/featured-category
@@ -755,7 +841,8 @@ A placeholder block for email content.
 Visually highlight a product category and encourage prompt action.
 
 - **Name:** woocommerce/featured-category
-- **Category:** woocommerce- **Supports:** align (full, wide), ariaLabel, color (background, text), filter (duotone), interactivity (clientNavigation), spacing (padding), ~~html~~
+- **Category:** woocommerce
+- **Supports:** align (full, wide), ariaLabel, color (background, text), filter (duotone), interactivity (clientNavigation), spacing (padding), ~~html~~
 - **Attributes:** alt, categoryId, contentAlign, dimRatio, focalPoint, hasParallax, imageFit, isRepeated, linkText, mediaId, mediaSrc, minHeight, overlayColor, overlayGradient, previewCategory
 
 ## Featured Product - woocommerce/featured-product
@@ -763,7 +850,8 @@ Visually highlight a product category and encourage prompt action.
 Highlight a product or variation.
 
 - **Name:** woocommerce/featured-product
-- **Category:** woocommerce- **Supports:** align (full, wide), ariaLabel, color (background, text), filter (duotone), interactivity (clientNavigation), multiple, spacing (padding), ~~html~~
+- **Category:** woocommerce
+- **Supports:** align (full, wide), ariaLabel, color (background, text), filter (duotone), interactivity (clientNavigation), multiple, spacing (padding), ~~html~~
 - **Attributes:** alt, contentAlign, dimRatio, focalPoint, hasParallax, imageFit, isRepeated, linkText, mediaId, mediaSrc, minHeight, overlayColor, overlayGradient, previewProduct, productId
 
 ## Filter Block - woocommerce/filter-wrapper
@@ -771,7 +859,8 @@ Highlight a product or variation.
 
 
 - **Name:** woocommerce/filter-wrapper
-- **Category:** woocommerce- **Supports:** interactivity (~~clientNavigation~~), ~~inserter~~
+- **Category:** woocommerce
+- **Supports:** interactivity (~~clientNavigation~~), ~~inserter~~
 - **Attributes:** filterType, heading
 
 ## Hand-picked Products - woocommerce/handpicked-products
@@ -779,7 +868,8 @@ Highlight a product or variation.
 Display a selection of hand-picked products in a grid.
 
 - **Name:** woocommerce/handpicked-products
-- **Category:** woocommerce- **Supports:** align (full, wide), interactivity (~~clientNavigation~~), ~~html~~, ~~inserter~~
+- **Category:** woocommerce
+- **Supports:** align (full, wide), interactivity (~~clientNavigation~~), ~~html~~, ~~inserter~~
 - **Attributes:** align, alignButtons, columns, contentVisibility, isPreview, orderby, products
 
 ## Mini-Cart - woocommerce/mini-cart
@@ -787,7 +877,8 @@ Display a selection of hand-picked products in a grid.
 Display a button for shoppers to quickly view their cart.
 
 - **Name:** woocommerce/mini-cart
-- **Category:** woocommerce- **Supports:** spacing (margin, padding), typography (fontSize), ~~html~~, ~~multiple~~
+- **Category:** woocommerce
+- **Supports:** spacing (margin, padding), typography (fontSize), ~~html~~, ~~multiple~~
 - **Attributes:** addToCartBehaviour, cartAndCheckoutRenderStyle, hasHiddenPrice, iconColor, iconColorValue, miniCartIcon, onCartClickBehaviour, priceColor, priceColorValue, productCountColor, productCountColorValue, productCountVisibility
 
 ## Mini-Cart Contents - woocommerce/mini-cart-contents
@@ -795,7 +886,8 @@ Display a button for shoppers to quickly view their cart.
 Display a Mini-Cart widget.
 
 - **Name:** woocommerce/mini-cart-contents
-- **Category:** woocommerce- **Supports:** color (background, link, text), ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
+- **Category:** woocommerce
+- **Supports:** color (background, link, text), ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** lock, width
 
 ## Empty Mini-Cart view - woocommerce/empty-mini-cart-contents-block
@@ -803,7 +895,8 @@ Display a Mini-Cart widget.
 Blocks that are displayed when the Mini-Cart is empty.
 
 - **Name:** woocommerce/empty-mini-cart-contents-block
-- **Category:** woocommerce- **Parent:** woocommerce/mini-cart-contents
+- **Category:** woocommerce
+- **Parent:** woocommerce/mini-cart-contents
 - **Supports:** interactivity, ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** lock
 
@@ -812,7 +905,8 @@ Blocks that are displayed when the Mini-Cart is empty.
 Contains blocks that display the content of the Mini-Cart.
 
 - **Name:** woocommerce/filled-mini-cart-contents-block
-- **Category:** woocommerce- **Parent:** woocommerce/mini-cart-contents
+- **Category:** woocommerce
+- **Parent:** woocommerce/mini-cart-contents
 - **Supports:** interactivity, ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** lock
 
@@ -821,7 +915,8 @@ Contains blocks that display the content of the Mini-Cart.
 Block that displays the cart button when the Mini-Cart has products.
 
 - **Name:** woocommerce/mini-cart-cart-button-block
-- **Category:** woocommerce- **Parent:** woocommerce/mini-cart-footer-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/mini-cart-footer-block
 - **Supports:** color (background, text), inserter, interactivity (clientNavigation), ~~align~~, ~~html~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** cartButtonLabel, lock
 
@@ -830,7 +925,8 @@ Block that displays the cart button when the Mini-Cart has products.
 Block that displays the checkout button when the Mini-Cart has products.
 
 - **Name:** woocommerce/mini-cart-checkout-button-block
-- **Category:** woocommerce- **Parent:** woocommerce/mini-cart-footer-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/mini-cart-footer-block
 - **Supports:** color (background, text), inserter, interactivity (clientNavigation), ~~align~~, ~~html~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** checkoutButtonLabel, lock
 
@@ -839,7 +935,8 @@ Block that displays the checkout button when the Mini-Cart has products.
 Block that displays the footer of the Mini-Cart block.
 
 - **Name:** woocommerce/mini-cart-footer-block
-- **Category:** woocommerce- **Parent:** woocommerce/filled-mini-cart-contents-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/filled-mini-cart-contents-block
 - **Supports:** interactivity, ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** lock
 
@@ -848,7 +945,8 @@ Block that displays the footer of the Mini-Cart block.
 Contains the products table and other custom blocks of filled mini-cart.
 
 - **Name:** woocommerce/mini-cart-items-block
-- **Category:** woocommerce- **Parent:** woocommerce/filled-mini-cart-contents-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/filled-mini-cart-contents-block
 - **Supports:** interactivity (clientNavigation), ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** lock
 
@@ -857,7 +955,8 @@ Contains the products table and other custom blocks of filled mini-cart.
 Block that displays the products table of the Mini-Cart block.
 
 - **Name:** woocommerce/mini-cart-products-table-block
-- **Category:** woocommerce- **Parent:** woocommerce/mini-cart-items-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/mini-cart-items-block
 - **Supports:** interactivity, ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** lock
 
@@ -866,7 +965,8 @@ Block that displays the products table of the Mini-Cart block.
 Block that displays the shopping button when the Mini-Cart is empty.
 
 - **Name:** woocommerce/mini-cart-shopping-button-block
-- **Category:** woocommerce- **Parent:** woocommerce/empty-mini-cart-contents-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/empty-mini-cart-contents-block
 - **Supports:** color (background, text), inserter, interactivity (clientNavigation), ~~align~~, ~~html~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** lock, startShoppingButtonLabel
 
@@ -875,7 +975,8 @@ Block that displays the shopping button when the Mini-Cart is empty.
 Block that displays the title of the Mini-Cart block.
 
 - **Name:** woocommerce/mini-cart-title-block
-- **Category:** woocommerce- **Parent:** woocommerce/filled-mini-cart-contents-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/filled-mini-cart-contents-block
 - **Supports:** color (text, ~~background~~), interactivity (clientNavigation), typography (fontSize), ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** lock
 
@@ -884,7 +985,8 @@ Block that displays the title of the Mini-Cart block.
 Block that displays the items counter part of the Mini-Cart Title block.
 
 - **Name:** woocommerce/mini-cart-title-items-counter-block
-- **Category:** woocommerce- **Parent:** woocommerce/mini-cart-title-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/mini-cart-title-block
 - **Supports:** color (background, text), interactivity, spacing (padding), typography (fontSize), ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 
 ## Mini-Cart Title Label - woocommerce/mini-cart-title-label-block
@@ -892,7 +994,8 @@ Block that displays the items counter part of the Mini-Cart Title block.
 Block that displays the 'Your cart' part of the Mini-Cart Title block.
 
 - **Name:** woocommerce/mini-cart-title-label-block
-- **Category:** woocommerce- **Parent:** woocommerce/mini-cart-title-block
+- **Category:** woocommerce
+- **Parent:** woocommerce/mini-cart-title-block
 - **Supports:** color (background, text), interactivity (clientNavigation), spacing (padding), typography (fontSize), ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 - **Attributes:** label
 
@@ -901,7 +1004,8 @@ Block that displays the 'Your cart' part of the Mini-Cart Title block.
 Display next and previous buttons.
 
 - **Name:** woocommerce/product-gallery-large-image-next-previous
-- **Category:** woocommerce- **Ancestor:** woocommerce/product-gallery-large-image, woocommerce/product-collection
+- **Category:** woocommerce
+- **Ancestor:** woocommerce/product-gallery-large-image, woocommerce/product-collection
 - **Supports:** align, color (background, text), interactivity, layout (allowVerticalAlignment, default, ~~allowJustification~~, ~~allowOrientation~~), shadow, spacing (margin)
 
 ## Additional Field List - woocommerce/order-confirmation-additional-fields
@@ -909,7 +1013,8 @@ Display next and previous buttons.
 Display the list of additional field values from the current order.
 
 - **Name:** woocommerce/order-confirmation-additional-fields
-- **Category:** woocommerce- **Supports:** align (full, wide), spacing (margin, padding), ~~html~~, ~~multiple~~
+- **Category:** woocommerce
+- **Supports:** align (full, wide), spacing (margin, padding), ~~html~~, ~~multiple~~
 - **Attributes:** align, className
 
 ## Additional Fields - woocommerce/order-confirmation-additional-fields-wrapper
@@ -917,7 +1022,8 @@ Display the list of additional field values from the current order.
 Display additional checkout fields from the 'contact' and 'order' locations.
 
 - **Name:** woocommerce/order-confirmation-additional-fields-wrapper
-- **Category:** woocommerce- **Supports:** align (full, wide), spacing (margin, padding), ~~html~~, ~~multiple~~
+- **Category:** woocommerce
+- **Supports:** align (full, wide), spacing (margin, padding), ~~html~~, ~~multiple~~
 - **Attributes:** heading
 
 ## Additional Information - woocommerce/order-confirmation-additional-information
@@ -925,7 +1031,8 @@ Display additional checkout fields from the 'contact' and 'order' locations.
 Displays additional information provided by third-party extensions for the current order.
 
 - **Name:** woocommerce/order-confirmation-additional-information
-- **Category:** woocommerce- **Supports:** align (full, wide), spacing (margin, padding), ~~html~~, ~~multiple~~
+- **Category:** woocommerce
+- **Supports:** align (full, wide), spacing (margin, padding), ~~html~~, ~~multiple~~
 - **Attributes:** align, className
 
 ## Billing Address - woocommerce/order-confirmation-billing-address
@@ -933,7 +1040,8 @@ Displays additional information provided by third-party extensions for the curre
 Display the order confirmation billing address.
 
 - **Name:** woocommerce/order-confirmation-billing-address
-- **Category:** woocommerce- **Supports:** align (full, wide), color (background, text), spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~, ~~inserter~~, ~~multiple~~
+- **Category:** woocommerce
+- **Supports:** align (full, wide), color (background, text), spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~, ~~inserter~~, ~~multiple~~
 - **Attributes:** align
 
 ## Billing Address Section - woocommerce/order-confirmation-billing-wrapper
@@ -941,7 +1049,8 @@ Display the order confirmation billing address.
 Display the order confirmation billing section.
 
 - **Name:** woocommerce/order-confirmation-billing-wrapper
-- **Category:** woocommerce- **Supports:** align (full, wide), spacing (margin, padding), ~~html~~, ~~multiple~~
+- **Category:** woocommerce
+- **Supports:** align (full, wide), spacing (margin, padding), ~~html~~, ~~multiple~~
 - **Attributes:** heading
 
 ## Account Creation - woocommerce/order-confirmation-create-account
@@ -949,7 +1058,8 @@ Display the order confirmation billing section.
 Allow customers to create an account after their purchase.
 
 - **Name:** woocommerce/order-confirmation-create-account
-- **Category:** woocommerce- **Supports:** align (full, wide), color (background, button, text), spacing (margin, padding), ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~
+- **Category:** woocommerce
+- **Supports:** align (full, wide), color (background, button, text), spacing (margin, padding), ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~
 - **Attributes:** align, className, customerEmail, hasDarkControls, lock, nonceToken
 
 ## Order Downloads - woocommerce/order-confirmation-downloads
@@ -957,7 +1067,8 @@ Allow customers to create an account after their purchase.
 Display links to purchased downloads.
 
 - **Name:** woocommerce/order-confirmation-downloads
-- **Category:** woocommerce- **Supports:** align (full, wide), color (background, gradients, link, text), spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~, ~~multiple~~
+- **Category:** woocommerce
+- **Supports:** align (full, wide), color (background, gradients, link, text), spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~, ~~multiple~~
 - **Attributes:** align, className
 
 ## Downloads Section - woocommerce/order-confirmation-downloads-wrapper
@@ -965,7 +1076,8 @@ Display links to purchased downloads.
 Display the downloadable products section.
 
 - **Name:** woocommerce/order-confirmation-downloads-wrapper
-- **Category:** woocommerce- **Supports:** align (full, wide), spacing (margin, padding), ~~html~~, ~~multiple~~
+- **Category:** woocommerce
+- **Supports:** align (full, wide), spacing (margin, padding), ~~html~~, ~~multiple~~
 - **Attributes:** heading
 
 ## Shipping Address - woocommerce/order-confirmation-shipping-address
@@ -973,7 +1085,8 @@ Display the downloadable products section.
 Display the order confirmation shipping address.
 
 - **Name:** woocommerce/order-confirmation-shipping-address
-- **Category:** woocommerce- **Supports:** align (full, wide), color (background, text), spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~, ~~inserter~~, ~~multiple~~
+- **Category:** woocommerce
+- **Supports:** align (full, wide), color (background, text), spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~, ~~inserter~~, ~~multiple~~
 - **Attributes:** align
 
 ## Shipping Address Section - woocommerce/order-confirmation-shipping-wrapper
@@ -981,7 +1094,8 @@ Display the order confirmation shipping address.
 Display the order confirmation shipping section.
 
 - **Name:** woocommerce/order-confirmation-shipping-wrapper
-- **Category:** woocommerce- **Supports:** align (full, wide), spacing (margin, padding), ~~html~~, ~~multiple~~
+- **Category:** woocommerce
+- **Supports:** align (full, wide), spacing (margin, padding), ~~html~~, ~~multiple~~
 - **Attributes:** heading
 
 ## Order Status - woocommerce/order-confirmation-status
@@ -989,7 +1103,8 @@ Display the order confirmation shipping section.
 Display a "thank you" message, or a sentence regarding the current order status.
 
 - **Name:** woocommerce/order-confirmation-status
-- **Category:** woocommerce- **Supports:** align (full, wide), color (background, gradients, text), spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~, ~~multiple~~
+- **Category:** woocommerce
+- **Supports:** align (full, wide), color (background, gradients, text), spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~, ~~multiple~~
 - **Attributes:** align, className
 
 ## Order Summary - woocommerce/order-confirmation-summary
@@ -997,7 +1112,8 @@ Display a "thank you" message, or a sentence regarding the current order status.
 Display the order summary on the order confirmation page.
 
 - **Name:** woocommerce/order-confirmation-summary
-- **Category:** woocommerce- **Supports:** align (full, wide), color (background, gradients, text), spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~, ~~multiple~~
+- **Category:** woocommerce
+- **Supports:** align (full, wide), color (background, gradients, text), spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~, ~~multiple~~
 - **Attributes:** align, className
 
 ## Order Totals - woocommerce/order-confirmation-totals
@@ -1005,7 +1121,8 @@ Display the order summary on the order confirmation page.
 Display the items purchased and order totals.
 
 - **Name:** woocommerce/order-confirmation-totals
-- **Category:** woocommerce- **Supports:** align (full, wide), color (background, gradients, link, text), spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~, ~~multiple~~
+- **Category:** woocommerce
+- **Supports:** align (full, wide), color (background, gradients, link, text), spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~, ~~multiple~~
 - **Attributes:** align, className
 
 ## Order Totals Section - woocommerce/order-confirmation-totals-wrapper
@@ -1013,7 +1130,8 @@ Display the items purchased and order totals.
 Display the order details section.
 
 - **Name:** woocommerce/order-confirmation-totals-wrapper
-- **Category:** woocommerce- **Supports:** align (full, wide), spacing (margin, padding), ~~html~~, ~~multiple~~
+- **Category:** woocommerce
+- **Supports:** align (full, wide), spacing (margin, padding), ~~html~~, ~~multiple~~
 - **Attributes:** heading
 
 ## WooCommerce Page - woocommerce/page-content-wrapper
@@ -1021,7 +1139,8 @@ Display the order details section.
 Displays WooCommerce page content.
 
 - **Name:** woocommerce/page-content-wrapper
-- **Category:** woocommerce- **Supports:** ~~html~~, ~~inserter~~, ~~multiple~~
+- **Category:** woocommerce
+- **Supports:** ~~html~~, ~~inserter~~, ~~multiple~~
 - **Attributes:** page
 
 ## Payment Method Icons - woocommerce/payment-method-icons
@@ -1029,7 +1148,8 @@ Displays WooCommerce page content.
 Display icons for available payment methods.
 
 - **Name:** woocommerce/payment-method-icons
-- **Category:** woocommerce- **Supports:** spacing (margin, padding)
+- **Category:** woocommerce
+- **Supports:** spacing (margin, padding)
 - **Attributes:** numberOfIcons
 
 ## Filter by Price Controls - woocommerce/price-filter
@@ -1037,7 +1157,8 @@ Display icons for available payment methods.
 Enable customers to filter the product grid by choosing a price range.
 
 - **Name:** woocommerce/price-filter
-- **Category:** woocommerce- **Supports:** color (text, ~~background~~), interactivity (~~clientNavigation~~), ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~
+- **Category:** woocommerce
+- **Supports:** color (text, ~~background~~), interactivity (~~clientNavigation~~), ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~
 - **Attributes:** className, headingLevel, inlineInput, showFilterButton, showInputFields
 
 ## Best Selling Products - woocommerce/product-best-sellers
@@ -1045,7 +1166,8 @@ Enable customers to filter the product grid by choosing a price range.
 Display a grid of your all-time best selling products.
 
 - **Name:** woocommerce/product-best-sellers
-- **Category:** woocommerce- **Supports:** align (full, wide), interactivity (~~clientNavigation~~), ~~html~~, ~~inserter~~
+- **Category:** woocommerce
+- **Supports:** align (full, wide), interactivity (~~clientNavigation~~), ~~html~~, ~~inserter~~
 - **Attributes:** alignButtons, catOperator, categories, columns, contentVisibility, editMode, isPreview, orderby, rows, stockStatus
 
 ## Product Categories List - woocommerce/product-categories
@@ -1053,7 +1175,8 @@ Display a grid of your all-time best selling products.
 Show all product categories as a list or dropdown.
 
 - **Name:** woocommerce/product-categories
-- **Category:** woocommerce- **Supports:** align (full, wide), color (link, text, ~~background~~), interactivity (clientNavigation), typography (fontSize, lineHeight), ~~html~~
+- **Category:** woocommerce
+- **Supports:** align (full, wide), color (link, text, ~~background~~), interactivity (clientNavigation), typography (fontSize, lineHeight), ~~html~~
 - **Attributes:** align, hasCount, hasEmpty, hasImage, isDropdown, isHierarchical, showChildrenOnly
 
 ## Products by Category - woocommerce/product-category
@@ -1061,7 +1184,8 @@ Show all product categories as a list or dropdown.
 Display a grid of products from your selected categories.
 
 - **Name:** woocommerce/product-category
-- **Category:** woocommerce- **Supports:** align (full, wide), interactivity (~~clientNavigation~~), ~~html~~, ~~inserter~~
+- **Category:** woocommerce
+- **Supports:** align (full, wide), interactivity (~~clientNavigation~~), ~~html~~, ~~inserter~~
 - **Attributes:** alignButtons, catOperator, categories, columns, contentVisibility, editMode, isPreview, orderby, rows, stockStatus
 
 ## Product Collection - woocommerce/product-collection
@@ -1069,7 +1193,8 @@ Display a grid of products from your selected categories.
 Display a collection of products from your store.
 
 - **Name:** woocommerce/product-collection
-- **Category:** woocommerce- **Supports:** align (full, wide), anchor, email, interactivity, ~~html~~
+- **Category:** woocommerce
+- **Supports:** align (full, wide), anchor, email, interactivity, ~~html~~
 - **Attributes:** __privatePreviewState, collection, convertedFromProducts, dimensions, displayLayout, forcePageReload, hideControls, query, queryContextIncludes, queryId, tagName
 
 ## No results - woocommerce/product-collection-no-results
@@ -1077,7 +1202,8 @@ Display a collection of products from your store.
 The contents of this block will display when there are no products found.
 
 - **Name:** woocommerce/product-collection-no-results
-- **Category:** woocommerce- **Ancestor:** woocommerce/product-collection
+- **Category:** woocommerce
+- **Ancestor:** woocommerce/product-collection
 - **Supports:** align, color (background, gradients, link, text), email, interactivity (clientNavigation), typography (fontSize, lineHeight), ~~html~~, ~~reusable~~
 
 ## Product Description - woocommerce/product-description
@@ -1085,7 +1211,8 @@ The contents of this block will display when there are no products found.
 Displays the description of the product.
 
 - **Name:** woocommerce/product-description
-- **Category:** woocommerce- **Ancestor:** woocommerce/single-product, woocommerce/product-template, core/post-template
+- **Category:** woocommerce
+- **Ancestor:** woocommerce/single-product, woocommerce/product-template, core/post-template
 - **Supports:** align (full, wide), background (backgroundImage, backgroundSize), color (background, gradients, heading, link, text), dimensions (minHeight), interactivity (clientNavigation), layout, spacing (blockGap, margin, padding), typography (fontSize, lineHeight), ~~html~~
 
 ## Product Details - woocommerce/product-details
@@ -1093,7 +1220,8 @@ Displays the description of the product.
 Display a product's description, attributes, and reviews
 
 - **Name:** woocommerce/product-details
-- **Category:** woocommerce- **Supports:** align (full, wide), interactivity (clientNavigation)
+- **Category:** woocommerce
+- **Supports:** align (full, wide), interactivity (clientNavigation)
 - **Attributes:** align, hideTabTitle
 
 ## Product Filters - woocommerce/product-filters
@@ -1101,7 +1229,8 @@ Display a product's description, attributes, and reviews
 Let shoppers filter products displayed on the page.
 
 - **Name:** woocommerce/product-filters
-- **Category:** woocommerce- **Supports:** align, color (background, button, heading, text, ~~enableContrastChecker~~), inserter, interactivity, layout (default, ~~allowEditing~~), multiple, spacing (blockGap), typography (fontSize)
+- **Category:** woocommerce
+- **Supports:** align, color (background, button, heading, text, ~~enableContrastChecker~~), inserter, interactivity, layout (default, ~~allowEditing~~), multiple, spacing (blockGap), typography (fontSize)
 - **Attributes:** isPreview
 
 ## Active Filters - woocommerce/product-filter-active
@@ -1109,7 +1238,8 @@ Let shoppers filter products displayed on the page.
 Display the currently active filters.
 
 - **Name:** woocommerce/product-filter-active
-- **Category:** woocommerce- **Ancestor:** woocommerce/product-filters
+- **Category:** woocommerce
+- **Ancestor:** woocommerce/product-filters
 - **Supports:** interactivity, spacing (margin, padding, ~~blockGap~~)
 
 ## Attribute Filter - woocommerce/product-filter-attribute
@@ -1117,7 +1247,8 @@ Display the currently active filters.
 Enable customers to filter the product grid by selecting one or more attributes, such as color.
 
 - **Name:** woocommerce/product-filter-attribute
-- **Category:** woocommerce- **Ancestor:** woocommerce/product-filters
+- **Category:** woocommerce
+- **Ancestor:** woocommerce/product-filters
 - **Supports:** color (text, ~~background~~), interactivity, spacing (blockGap, margin, padding), typography (fontSize, lineHeight)
 - **Attributes:** attributeId, displayStyle, hideEmpty, isPreview, queryType, selectType, showCounts, sortOrder
 
@@ -1126,7 +1257,8 @@ Enable customers to filter the product grid by selecting one or more attributes,
 Display a list of filter options.
 
 - **Name:** woocommerce/product-filter-checkbox-list
-- **Category:** woocommerce- **Ancestor:** woocommerce/product-filter-attribute, woocommerce/product-filter-status, woocommerce/product-filter-taxonomy, woocommerce/product-filter-rating
+- **Category:** woocommerce
+- **Ancestor:** woocommerce/product-filter-attribute, woocommerce/product-filter-status, woocommerce/product-filter-taxonomy, woocommerce/product-filter-rating
 - **Supports:** interactivity
 - **Attributes:** customLabelElement, customOptionElement, customOptionElementBorder, customOptionElementSelected, labelElement, optionElement, optionElementBorder, optionElementSelected
 
@@ -1135,7 +1267,8 @@ Display a list of filter options.
 Display filter options as chips.
 
 - **Name:** woocommerce/product-filter-chips
-- **Category:** woocommerce- **Ancestor:** woocommerce/product-filter-attribute, woocommerce/product-filter-taxonomy, woocommerce/product-filter-status
+- **Category:** woocommerce
+- **Ancestor:** woocommerce/product-filter-attribute, woocommerce/product-filter-taxonomy, woocommerce/product-filter-status
 - **Supports:** interactivity
 - **Attributes:** chipBackground, chipBorder, chipText, customChipBackground, customChipBorder, customChipText, customSelectedChipBackground, customSelectedChipBorder, customSelectedChipText, selectedChipBackground, selectedChipBorder, selectedChipText
 
@@ -1144,7 +1277,8 @@ Display filter options as chips.
 Allows shoppers to clear active filters.
 
 - **Name:** woocommerce/product-filter-clear-button
-- **Category:** woocommerce- **Ancestor:** woocommerce/product-filter-active
+- **Category:** woocommerce
+- **Ancestor:** woocommerce/product-filter-active
 - **Supports:** inserter, interactivity
 
 ## Price Filter - woocommerce/product-filter-price
@@ -1152,7 +1286,8 @@ Allows shoppers to clear active filters.
 Let shoppers filter products by choosing a price range.
 
 - **Name:** woocommerce/product-filter-price
-- **Category:** woocommerce- **Ancestor:** woocommerce/product-filters
+- **Category:** woocommerce
+- **Ancestor:** woocommerce/product-filters
 - **Supports:** interactivity, ~~html~~
 
 ## Price Slider - woocommerce/product-filter-price-slider
@@ -1160,7 +1295,8 @@ Let shoppers filter products by choosing a price range.
 A slider helps shopper choose a price range.
 
 - **Name:** woocommerce/product-filter-price-slider
-- **Category:** woocommerce- **Ancestor:** woocommerce/product-filter-price
+- **Category:** woocommerce
+- **Ancestor:** woocommerce/product-filter-price
 - **Supports:** color (~~background~~, ~~enableContrastChecker~~, ~~text~~), interactivity, ~~html~~
 - **Attributes:** customSlider, customSliderHandle, customSliderHandleBorder, inlineInput, showInputFields, slider, sliderHandle, sliderHandleBorder
 
@@ -1169,7 +1305,8 @@ A slider helps shopper choose a price range.
 Enable customers to filter the product collection by rating.
 
 - **Name:** woocommerce/product-filter-rating
-- **Category:** woocommerce- **Ancestor:** woocommerce/product-filters
+- **Category:** woocommerce
+- **Ancestor:** woocommerce/product-filters
 - **Supports:** color (text, ~~background~~), interactivity
 - **Attributes:** className, isPreview, minRating, showCounts
 
@@ -1178,7 +1315,8 @@ Enable customers to filter the product collection by rating.
 Display removable active filters as chips.
 
 - **Name:** woocommerce/product-filter-removable-chips
-- **Category:** woocommerce- **Ancestor:** woocommerce/product-filter-active
+- **Category:** woocommerce
+- **Ancestor:** woocommerce/product-filter-active
 - **Supports:** interactivity, layout (default, ~~allowInheriting~~, ~~allowSwitching~~, ~~allowVerticalAlignment~~)
 - **Attributes:** chipBackground, chipBorder, chipText, customChipBackground, customChipBorder, customChipText
 
@@ -1187,7 +1325,8 @@ Display removable active filters as chips.
 Let shoppers filter products by choosing stock status.
 
 - **Name:** woocommerce/product-filter-status
-- **Category:** woocommerce- **Ancestor:** woocommerce/product-filters
+- **Category:** woocommerce
+- **Ancestor:** woocommerce/product-filters
 - **Supports:** color (text, ~~background~~), interactivity, spacing (blockGap, margin, padding), typography (fontSize, lineHeight), ~~html~~
 - **Attributes:** displayStyle, hideEmpty, isPreview, showCounts
 
@@ -1196,7 +1335,8 @@ Let shoppers filter products by choosing stock status.
 Enable customers to filter the product collection by selecting one or more taxonomy terms, such as categories, brands, or tags.
 
 - **Name:** woocommerce/product-filter-taxonomy
-- **Category:** woocommerce- **Ancestor:** woocommerce/product-filters
+- **Category:** woocommerce
+- **Ancestor:** woocommerce/product-filters
 - **Supports:** color (text, ~~background~~), interactivity, spacing (blockGap, margin, padding), typography (fontSize, lineHeight)
 - **Attributes:** displayStyle, hideEmpty, isPreview, showCounts, sortOrder, taxonomy
 
@@ -1205,7 +1345,8 @@ Enable customers to filter the product collection by selecting one or more taxon
 Showcase your products relevant images and media.
 
 - **Name:** woocommerce/product-gallery
-- **Category:** woocommerce- **Ancestor:** woocommerce/single-product
+- **Category:** woocommerce
+- **Ancestor:** woocommerce/single-product
 - **Supports:** align, email, interactivity, layout (allowEditing, allowOrientation, default, ~~allowJustification~~)
 - **Attributes:** fullScreenOnClick, hoverZoom
 
@@ -1214,7 +1355,8 @@ Showcase your products relevant images and media.
 Container for the current gallery image, navigation buttons, zoom functionality and more.
 
 - **Name:** woocommerce/product-gallery-large-image
-- **Category:** woocommerce- **Ancestor:** woocommerce/product-gallery
+- **Category:** woocommerce
+- **Ancestor:** woocommerce/product-gallery
 - **Supports:** interactivity
 
 ## Thumbnails - woocommerce/product-gallery-thumbnails
@@ -1222,7 +1364,8 @@ Container for the current gallery image, navigation buttons, zoom functionality 
 Display the Thumbnails of a product.
 
 - **Name:** woocommerce/product-gallery-thumbnails
-- **Category:** woocommerce- **Ancestor:** woocommerce/product-gallery
+- **Category:** woocommerce
+- **Ancestor:** woocommerce/product-gallery
 - **Supports:** interactivity, spacing (margin)
 - **Attributes:** activeThumbnailStyle, aspectRatio, thumbnailSize
 
@@ -1231,7 +1374,8 @@ Display the Thumbnails of a product.
 Display a grid of your newest products.
 
 - **Name:** woocommerce/product-new
-- **Category:** woocommerce- **Supports:** align (full, wide), interactivity (~~clientNavigation~~), ~~html~~, ~~inserter~~
+- **Category:** woocommerce
+- **Supports:** align (full, wide), interactivity (~~clientNavigation~~), ~~html~~, ~~inserter~~
 - **Attributes:** alignButtons, catOperator, categories, columns, contentVisibility, editMode, isPreview, orderby, rows, stockStatus
 
 ## On Sale Products - woocommerce/product-on-sale
@@ -1239,7 +1383,8 @@ Display a grid of your newest products.
 Display a grid of products currently on sale.
 
 - **Name:** woocommerce/product-on-sale
-- **Category:** woocommerce- **Supports:** align (full, wide), interactivity (~~clientNavigation~~), ~~html~~, ~~inserter~~
+- **Category:** woocommerce
+- **Supports:** align (full, wide), interactivity (~~clientNavigation~~), ~~html~~, ~~inserter~~
 - **Attributes:** alignButtons, catOperator, categories, columns, contentVisibility, isPreview, orderby, rows, stockStatus
 
 ## Product Results Count - woocommerce/product-results-count
@@ -1247,14 +1392,16 @@ Display a grid of products currently on sale.
 Display the number of products on the archive page or search result page.
 
 - **Name:** woocommerce/product-results-count
-- **Category:** woocommerce- **Supports:** color (text, ~~background~~), interactivity (clientNavigation), typography (fontSize)
+- **Category:** woocommerce
+- **Supports:** color (text, ~~background~~), interactivity (clientNavigation), typography (fontSize)
 
 ## Product Reviews - woocommerce/product-reviews
 
 Display a product's reviews
 
 - **Name:** woocommerce/product-reviews
-- **Category:** woocommerce- **Supports:** align (full, wide), color (background, gradients, heading, link, text), interactivity, spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~
+- **Category:** woocommerce
+- **Supports:** align (full, wide), color (background, gradients, heading, link, text), interactivity, spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~
 - **Attributes:** tagName
 
 ## Review Author Name - woocommerce/product-review-author-name
@@ -1262,7 +1409,8 @@ Display a product's reviews
 Displays the name of the author of the review.
 
 - **Name:** woocommerce/product-review-author-name
-- **Category:** woocommerce- **Ancestor:** woocommerce/product-reviews
+- **Category:** woocommerce
+- **Ancestor:** woocommerce/product-reviews
 - **Supports:** color (background, gradients, link, text), interactivity (clientNavigation), spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~
 - **Attributes:** isLink, linkTarget, textAlign
 
@@ -1271,7 +1419,8 @@ Displays the name of the author of the review.
 Displays the contents of a product review.
 
 - **Name:** woocommerce/product-review-content
-- **Category:** woocommerce- **Ancestor:** woocommerce/product-reviews
+- **Category:** woocommerce
+- **Ancestor:** woocommerce/product-reviews
 - **Supports:** color (background, gradients, link, text), spacing (padding), typography (fontSize, lineHeight), ~~html~~
 - **Attributes:** textAlign
 
@@ -1280,7 +1429,8 @@ Displays the contents of a product review.
 Displays the date on which the review was posted.
 
 - **Name:** woocommerce/product-review-date
-- **Category:** woocommerce- **Ancestor:** woocommerce/product-reviews
+- **Category:** woocommerce
+- **Ancestor:** woocommerce/product-reviews
 - **Supports:** color (background, gradients, link, text), interactivity (clientNavigation), spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~
 - **Attributes:** format, isLink
 
@@ -1289,7 +1439,8 @@ Displays the date on which the review was posted.
 Display a product's reviews form.
 
 - **Name:** woocommerce/product-review-form
-- **Category:** woocommerce- **Supports:** color (background, gradients, heading, link, text), interactivity, spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~
+- **Category:** woocommerce
+- **Supports:** color (background, gradients, heading, link, text), interactivity, spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~
 - **Attributes:** textAlign
 
 ## Review Rating - woocommerce/product-review-rating
@@ -1297,7 +1448,8 @@ Display a product's reviews form.
 Displays the rating of a product review.
 
 - **Name:** woocommerce/product-review-rating
-- **Category:** woocommerce- **Ancestor:** woocommerce/product-reviews
+- **Category:** woocommerce
+- **Ancestor:** woocommerce/product-reviews
 - **Supports:** color (background, gradients, text), interactivity (clientNavigation)
 - **Attributes:** textAlign
 
@@ -1306,7 +1458,8 @@ Displays the rating of a product review.
 Contains the block elements used to display product reviews, like the title, author, date, rating and more.
 
 - **Name:** woocommerce/product-review-template
-- **Category:** woocommerce- **Ancestor:** woocommerce/product-reviews
+- **Category:** woocommerce
+- **Ancestor:** woocommerce/product-reviews
 - **Supports:** align, interactivity (clientNavigation), spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~, ~~reusable~~
 
 ## Reviews Pagination - woocommerce/product-reviews-pagination
@@ -1314,7 +1467,8 @@ Contains the block elements used to display product reviews, like the title, aut
 Displays a paginated navigation to next/previous set of product reviews, when applicable.
 
 - **Name:** woocommerce/product-reviews-pagination
-- **Category:** woocommerce- **Ancestor:** woocommerce/product-reviews
+- **Category:** woocommerce
+- **Ancestor:** woocommerce/product-reviews
 - **Supports:** align, color (background, gradients, link, text), interactivity (clientNavigation), layout (default, ~~allowInheriting~~, ~~allowSwitching~~), typography (fontSize, lineHeight), ~~html~~, ~~reusable~~
 - **Attributes:** paginationArrow
 
@@ -1323,7 +1477,8 @@ Displays a paginated navigation to next/previous set of product reviews, when ap
 Displays the next product review's page link.
 
 - **Name:** woocommerce/product-reviews-pagination-next
-- **Category:** woocommerce- **Ancestor:** woocommerce/product-reviews-pagination
+- **Category:** woocommerce
+- **Ancestor:** woocommerce/product-reviews-pagination
 - **Supports:** color (background, gradients, ~~text~~), interactivity (clientNavigation), typography (fontSize, lineHeight), ~~html~~, ~~reusable~~
 - **Attributes:** label
 
@@ -1332,7 +1487,8 @@ Displays the next product review's page link.
 Displays a list of page numbers for product reviews pagination.
 
 - **Name:** woocommerce/product-reviews-pagination-numbers
-- **Category:** woocommerce- **Ancestor:** woocommerce/product-reviews-pagination
+- **Category:** woocommerce
+- **Ancestor:** woocommerce/product-reviews-pagination
 - **Supports:** color (background, gradients, ~~text~~), interactivity (clientNavigation), typography (fontSize, lineHeight), ~~html~~, ~~reusable~~
 
 ## Reviews Previous Page - woocommerce/product-reviews-pagination-previous
@@ -1340,7 +1496,8 @@ Displays a list of page numbers for product reviews pagination.
 Displays the previous product review's page link.
 
 - **Name:** woocommerce/product-reviews-pagination-previous
-- **Category:** woocommerce- **Ancestor:** woocommerce/product-reviews-pagination
+- **Category:** woocommerce
+- **Ancestor:** woocommerce/product-reviews-pagination
 - **Supports:** color (background, gradients, ~~text~~), interactivity (clientNavigation), typography (fontSize, lineHeight), ~~html~~, ~~reusable~~
 - **Attributes:** label
 
@@ -1349,7 +1506,8 @@ Displays the previous product review's page link.
 Displays a title with the number of reviews.
 
 - **Name:** woocommerce/product-reviews-title
-- **Category:** woocommerce- **Ancestor:** woocommerce/product-reviews
+- **Category:** woocommerce
+- **Ancestor:** woocommerce/product-reviews
 - **Supports:** align, color (background, gradients, text), interactivity (clientNavigation), spacing (margin, padding), typography (fontSize, lineHeight), ~~anchor~~, ~~html~~
 - **Attributes:** level, levelOptions, showProductTitle, showReviewsCount, textAlign
 
@@ -1358,7 +1516,8 @@ Displays a title with the number of reviews.
 Display product weight, dimensions, and attributes.
 
 - **Name:** woocommerce/product-specifications
-- **Category:** woocommerce- **Ancestor:** woocommerce/single-product, woocommerce/product-template, core/post-template
+- **Category:** woocommerce
+- **Ancestor:** woocommerce/single-product, woocommerce/product-template, core/post-template
 - **Supports:** align (full, wide), spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~
 - **Attributes:** showAttributes, showDimensions, showWeight
 
@@ -1367,7 +1526,8 @@ Display product weight, dimensions, and attributes.
 Display a grid of products with selected tags.
 
 - **Name:** woocommerce/product-tag
-- **Category:** woocommerce- **Supports:** align (full, wide), interactivity (~~clientNavigation~~), ~~html~~, ~~inserter~~
+- **Category:** woocommerce
+- **Supports:** align (full, wide), interactivity (~~clientNavigation~~), ~~html~~, ~~inserter~~
 - **Attributes:** alignButtons, columns, contentVisibility, isPreview, orderby, rows, stockStatus, tagOperator, tags
 
 ## Product Template - woocommerce/product-template
@@ -1375,14 +1535,16 @@ Display a grid of products with selected tags.
 Contains the block elements used to render a product.
 
 - **Name:** woocommerce/product-template
-- **Category:** woocommerce- **Supports:** align (full, wide), anchor, color (background, gradients, link, text), email, interactivity, layout (~~allowEditing~~, ~~allowInheriting~~, ~~allowSizingOnChildren~~, ~~allowSwitching~~, ~~allowVerticalAlignment~~), typography (fontSize, lineHeight), ~~html~~, ~~inserter~~, ~~reusable~~
+- **Category:** woocommerce
+- **Supports:** align (full, wide), anchor, color (background, gradients, link, text), email, interactivity, layout (~~allowEditing~~, ~~allowInheriting~~, ~~allowSizingOnChildren~~, ~~allowSwitching~~, ~~allowVerticalAlignment~~), typography (fontSize, lineHeight), ~~html~~, ~~inserter~~, ~~reusable~~
 
 ## Top Rated Products - woocommerce/product-top-rated
 
 Display a grid of your top rated products.
 
 - **Name:** woocommerce/product-top-rated
-- **Category:** woocommerce- **Supports:** align (full, wide), interactivity (~~clientNavigation~~), ~~html~~, ~~inserter~~
+- **Category:** woocommerce
+- **Supports:** align (full, wide), interactivity (~~clientNavigation~~), ~~html~~, ~~inserter~~
 - **Attributes:** alignButtons, catOperator, categories, columns, contentVisibility, editMode, isPreview, orderby, rows, stockStatus
 
 ## All Products - woocommerce/all-products
@@ -1390,7 +1552,8 @@ Display a grid of your top rated products.
 Display products from your store in a grid layout.
 
 - **Name:** woocommerce/all-products
-- **Category:** woocommerce- **Supports:** align (full, wide), interactivity (~~clientNavigation~~), ~~html~~, ~~inserter~~, ~~multiple~~
+- **Category:** woocommerce
+- **Supports:** align (full, wide), interactivity (~~clientNavigation~~), ~~html~~, ~~inserter~~, ~~multiple~~
 - **Attributes:** alignButtons, columns, contentVisibility, isPreview, layoutConfig, orderby, rows
 
 ## Products by Attribute - woocommerce/products-by-attribute
@@ -1398,7 +1561,8 @@ Display products from your store in a grid layout.
 Display a grid of products with selected attributes.
 
 - **Name:** woocommerce/products-by-attribute
-- **Category:** woocommerce- **Supports:** align (full, wide), interactivity (~~clientNavigation~~), ~~html~~, ~~inserter~~
+- **Category:** woocommerce
+- **Supports:** align (full, wide), interactivity (~~clientNavigation~~), ~~html~~, ~~inserter~~
 - **Attributes:** alignButtons, attrOperator, attributes, columns, contentVisibility, isPreview, orderby, rows, stockStatus
 
 ## Filter by Rating Controls - woocommerce/rating-filter
@@ -1406,7 +1570,8 @@ Display a grid of products with selected attributes.
 Enable customers to filter the product grid by rating.
 
 - **Name:** woocommerce/rating-filter
-- **Category:** woocommerce- **Supports:** color (background, button, text), interactivity (~~clientNavigation~~), ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~
+- **Category:** woocommerce
+- **Supports:** color (background, button, text), interactivity (~~clientNavigation~~), ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~
 - **Attributes:** className, displayStyle, isPreview, selectType, showCounts, showFilterButton
 
 ## All Reviews - woocommerce/all-reviews
@@ -1414,28 +1579,32 @@ Enable customers to filter the product grid by rating.
 Show a list of all product reviews.
 
 - **Name:** woocommerce/all-reviews
-- **Category:** woocommerce- **Supports:** color (text, ~~background~~), interactivity (clientNavigation), typography (fontSize), ~~html~~
+- **Category:** woocommerce
+- **Supports:** color (text, ~~background~~), interactivity (clientNavigation), typography (fontSize), ~~html~~
 
 ## Reviews by Category - woocommerce/reviews-by-category
 
 Show product reviews from specific categories.
 
 - **Name:** woocommerce/reviews-by-category
-- **Category:** woocommerce- **Supports:** color (text, ~~background~~), interactivity (clientNavigation), typography (fontSize), ~~html~~
+- **Category:** woocommerce
+- **Supports:** color (text, ~~background~~), interactivity (clientNavigation), typography (fontSize), ~~html~~
 
 ## Reviews by Product - woocommerce/reviews-by-product
 
 Display reviews for your products.
 
 - **Name:** woocommerce/reviews-by-product
-- **Category:** woocommerce- **Supports:** color (text, ~~background~~), interactivity (clientNavigation), typography (fontSize), ~~html~~
+- **Category:** woocommerce
+- **Supports:** color (text, ~~background~~), interactivity (clientNavigation), typography (fontSize), ~~html~~
 
 ## Product - woocommerce/single-product
 
 Display a single product of your choice with full control over its presentation.
 
 - **Name:** woocommerce/single-product
-- **Category:** woocommerce- **Supports:** align (full, wide), interactivity
+- **Category:** woocommerce
+- **Supports:** align (full, wide), interactivity
 - **Attributes:** isPreview, productId
 
 ## Filter by Stock Controls - woocommerce/stock-filter
@@ -1443,7 +1612,8 @@ Display a single product of your choice with full control over its presentation.
 Enable customers to filter the product grid by stock status.
 
 - **Name:** woocommerce/stock-filter
-- **Category:** woocommerce- **Supports:** color (background, button, text), interactivity (~~clientNavigation~~), ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~
+- **Category:** woocommerce
+- **Supports:** color (background, button, text), interactivity (~~clientNavigation~~), ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~
 - **Attributes:** className, displayStyle, headingLevel, isPreview, selectType, showCounts, showFilterButton
 
 ## Store Notices - woocommerce/store-notices
@@ -1451,7 +1621,8 @@ Enable customers to filter the product grid by stock status.
 Display shopper-facing notifications generated by WooCommerce or extensions.
 
 - **Name:** woocommerce/store-notices
-- **Category:** woocommerce- **Supports:** align (full, wide), interactivity (clientNavigation), ~~multiple~~
+- **Category:** woocommerce
+- **Supports:** align (full, wide), interactivity (clientNavigation), ~~multiple~~
 - **Attributes:** align
 
 {/* END Autogenerated - DO NOT EDIT */}
