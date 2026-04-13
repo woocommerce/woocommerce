@@ -219,7 +219,7 @@ store< QuantitySelectorStore >(
 					return;
 				}
 
-				const { product } = productsState;
+				const product = productsState.productInContext;
 
 				if ( ! product ) {
 					return;
