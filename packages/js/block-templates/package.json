@@ -192,6 +192,7 @@
 			"allowUsuallyExcludedPaths": true,
 			"files": [
 				"package.json",
+				"../../../pnpm-lock.yaml",
 				"node_modules/@woocommerce/expression-evaluation/build",
 				"node_modules/@woocommerce/expression-evaluation/build-module",
 				"node_modules/@woocommerce/expression-evaluation/build-types",

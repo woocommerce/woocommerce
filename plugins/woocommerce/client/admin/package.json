@@ -289,6 +289,7 @@
 			"allowUsuallyExcludedPaths": true,
 			"files": [
 				"package.json",
+				"../../../../pnpm-lock.yaml",
 				"node_modules/@woocommerce/sanitize/build",
 				"node_modules/@woocommerce/sanitize/build-module",
 				"node_modules/@woocommerce/sanitize/build-style",

@@ -267,6 +267,7 @@
 			"allowUsuallyExcludedPaths": true,
 			"files": [
 				"package.json",
+				"../../../pnpm-lock.yaml",
 				"node_modules/@woocommerce/csv-export/build",
 				"node_modules/@woocommerce/csv-export/build-module",
 				"node_modules/@woocommerce/csv-export/build-types",

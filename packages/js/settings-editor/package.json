@@ -233,6 +233,7 @@
 			"allowUsuallyExcludedPaths": true,
 			"files": [
 				"package.json",
+				"../../../pnpm-lock.yaml",
 				"node_modules/@woocommerce/product-editor/build",
 				"node_modules/@woocommerce/product-editor/build-module",
 				"node_modules/@woocommerce/product-editor/build-style",
