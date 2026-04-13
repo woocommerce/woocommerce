@@ -4,7 +4,7 @@ const QuantityStepper = () => {
 			<input
 				type="number"
 				value="1"
-				className="input-text qty text"
+				className="input-text qty text wc-block-components-quantity-selector__input"
 				readOnly
 			/>
 			<button className="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">
