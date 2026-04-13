@@ -46588,12 +46588,6 @@ parameters:
 			path: src/Admin/Features/Fulfillments/FulfillmentUtils.php
 
 		-
-			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Admin/Features/Fulfillments/FulfillmentUtils.php
-
-		-
 			message: '#^Cannot access offset int on array\|false\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
@@ -54653,12 +54647,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductResultsCount.php
 
 		-
-			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Blocks/BlockTypes/ProductSKU.php
-
-		-
 			message: '#^Call to an undefined method WC_Product\:\:get_available_variations\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -54673,12 +54661,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductSKU\:\:register_block_type_assets\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypes/ProductSKU.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductSKU\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/ProductSKU.php
 
