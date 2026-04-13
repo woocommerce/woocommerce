@@ -142,7 +142,7 @@ You’ll find a handful of scripts in `package.json` that performs the automated
 
 To find out more about how to run automated JavaScript tests, check out the documentation on [JavaScript Testing](javascript-testing.md).
 
-<!-- FEEDBACK -->
+{/* FEEDBACK */}
 
 ---
 
@@ -150,5 +150,5 @@ To find out more about how to run automated JavaScript tests, check out the docu
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./docs/contributors/getting-started.md)
 
-<!-- /FEEDBACK -->
+{/* /FEEDBACK */}
 

@@ -43,7 +43,7 @@ _All Products_ block was updated so prices follow the same layout as the other p
 }
 ```
 
-<!-- FEEDBACK -->
+{/* FEEDBACK */}
 
 ---
 
@@ -51,5 +51,5 @@ _All Products_ block was updated so prices follow the same layout as the other p
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./docs/designers/theming/product-grid-270.md)
 
-<!-- /FEEDBACK -->
+{/* /FEEDBACK */}
 

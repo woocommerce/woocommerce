@@ -135,7 +135,7 @@ The following tutorials from [developer.woo.com](https://developer.woocommerce.c
 -   [Integrating your Payment Method with Cart and Checkout Blocks](https://developer.woocommerce.com/2021/03/15/integrating-your-payment-method-with-cart-and-checkout-blocks/)
 -   [Exposing Payment Options in the Checkout Block](https://developer.woocommerce.com/2022/07/07/exposing-payment-options-in-the-checkout-block/)
 
-<!-- FEEDBACK -->
+{/* FEEDBACK */}
 
 ---
 
@@ -143,4 +143,4 @@ The following tutorials from [developer.woo.com](https://developer.woocommerce.c
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./docs/README.md)
 
-<!-- /FEEDBACK -->
+{/* /FEEDBACK */}

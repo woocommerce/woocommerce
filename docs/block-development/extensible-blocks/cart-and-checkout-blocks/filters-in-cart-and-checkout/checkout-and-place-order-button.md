@@ -212,7 +212,7 @@ registerCheckoutFilters( 'example-extension', {
 |:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
 |![Before applying the Place Order Button Label filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/aa6d9b65-4d56-45f7-8162-a6bbfe171250) |![After applying the Place Order Button Label filter](https://github.com/woocommerce/woocommerce-blocks/assets/3323310/a5cc2572-16e7-4781-a5ab-5d6cdced2ff6) |
 
-<!-- FEEDBACK -->
+{/* FEEDBACK */}
 
 ## Cart object
 

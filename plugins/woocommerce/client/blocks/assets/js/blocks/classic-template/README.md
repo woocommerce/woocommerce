@@ -83,7 +83,7 @@ Those hooks except `woocommerce_show_page_title` and `woocommerce_shop_loop` are
 
 The `ClassicTemplate` class renders a couple of PHP template parts. Those are [`content-single-product` template part](https://github.com/woocommerce/woocommerce/blob/f040e3acf7df9420a09d37b84358ac7d2e03b8a3/plugins/woocommerce/src/Blocks/BlockTypes/ClassicTemplate.php#L213) in the Single Product version of the Classic Template block and the [`content-product` template part](https://github.com/woocommerce/woocommerce/blob/f040e3acf7df9420a09d37b84358ac7d2e03b8a3/plugins/woocommerce/src/Blocks/BlockTypes/ClassicTemplate.php#L311) when rendering the Product archive templates. Themes can override those template parts as they would normally do in classic themes, with `content-single-product.php` and `content-product.php` files. However, remember that these templates parts are not used in the blockified version of the templates, so any changes to them won't be applied to the granular blocks.
 
-<!-- FEEDBACK -->
+{/* FEEDBACK */}
 
 ---
 
@@ -91,4 +91,4 @@ The `ClassicTemplate` class renders a couple of PHP template parts. Those are [`
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./docs/README.md)
 
-<!-- /FEEDBACK -->
+{/* /FEEDBACK */}

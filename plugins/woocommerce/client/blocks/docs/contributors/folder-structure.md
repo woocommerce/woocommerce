@@ -188,7 +188,7 @@ The following snippet explains how the WooCommerce Blocks repository is structur
 
 This file is inspired by the great work of @JustinyAhin and @gziolo in <https://github.com/WordPress/gutenberg/blob/trunk/docs/contributors/folder-structure.md>.
 
-<!-- FEEDBACK -->
+{/* FEEDBACK */}
 
 ---
 
@@ -196,5 +196,5 @@ This file is inspired by the great work of @JustinyAhin and @gziolo in <https://
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./docs/contributors/folder-structure.md)
 
-<!-- /FEEDBACK -->
+{/* /FEEDBACK */}
 

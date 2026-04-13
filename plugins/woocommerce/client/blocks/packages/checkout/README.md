@@ -54,7 +54,7 @@ This package contains the following directories. Navigate to a directory for mor
 | [`slot/`](./slot)                       | Slot and Fill are a pair of components which enable developers to render in a React element tree. In this context, they are used to **insert content within Blocks** where slot fills are available. _**Example use case:** Adding a custom component after the shipping options._ ([Documentation](./slot/README.md)) |
 | [`utils/`](./utils)                     | Miscellaneous utility functions for dealing with checkout functionality.                                                                                                                                                                                                                                               |
 
-<!-- FEEDBACK -->
+{/* FEEDBACK */}
 
 ---
 
@@ -62,5 +62,5 @@ This package contains the following directories. Navigate to a directory for mor
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./packages/checkout/README.md)
 
-<!-- /FEEDBACK -->
+{/* /FEEDBACK */}
 

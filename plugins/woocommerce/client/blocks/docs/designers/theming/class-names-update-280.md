@@ -88,7 +88,7 @@ For example, given that `wc-block-error` changed to `wc-block-components-error`
 -   `wc-block-error__company` also changed to `wc-block-components-error__content`
 -   `wc-block-error__address_1` also changed to `wc-block-components-error__image`
 
-<!-- FEEDBACK -->
+{/* FEEDBACK */}
 
 ---
 
@@ -96,5 +96,5 @@ For example, given that `wc-block-error` changed to `wc-block-components-error`
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./docs/designers/theming/class-names-update-280.md)
 
-<!-- /FEEDBACK -->
+{/* /FEEDBACK */}
 

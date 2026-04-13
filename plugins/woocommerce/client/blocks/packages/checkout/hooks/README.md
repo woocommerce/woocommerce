@@ -57,7 +57,7 @@ The hook returns a function that, when called:
 | :--------- | :-------- | :---------------------------------------------- |
 | `hasError` | `boolean` | `true` if validation failed, `false` if passed. |
 
-<!-- FEEDBACK -->
+{/* FEEDBACK */}
 
 ---
 
@@ -65,4 +65,4 @@ The hook returns a function that, when called:
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./packages/checkout/hooks/README.md)
 
-<!-- /FEEDBACK -->
+{/* /FEEDBACK */}

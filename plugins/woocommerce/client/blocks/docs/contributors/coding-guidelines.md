@@ -173,7 +173,7 @@ As you can see, the styles coming from the themes have higher specificity, so ou
 
 Notice in the worst case scenario we would have increased selector specificity by 2 classes (0, 2, 0). That shouldn't make it too difficult for other themes to write styles on top of ours.
 
-<!-- FEEDBACK -->
+{/* FEEDBACK */}
 
 ---
 
@@ -181,5 +181,5 @@ Notice in the worst case scenario we would have increased selector specificity b
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./docs/contributors/coding-guidelines.md)
 
-<!-- /FEEDBACK -->
+{/* /FEEDBACK */}
 

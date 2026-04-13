@@ -342,7 +342,7 @@ We expose the `INTERACTION_TIMEOUT` constant from `@woocommerce/storybook-contro
 
 See example: `assets/js/base/components/country-input/stories/index.tsx`
 
-<!-- FEEDBACK -->
+{/* FEEDBACK */}
 
 ---
 
@@ -350,4 +350,4 @@ See example: `assets/js/base/components/country-input/stories/index.tsx`
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./docs/contributors/block-assets.md)
 
-<!-- /FEEDBACK -->
+{/* /FEEDBACK */}
