@@ -182,4 +182,77 @@ describe( 'product filters interactivity store', () => {
 			} );
 		}
 	);
+
+	it( 'calls window.location.assign instead of router when forcePageReload is true', () => {
+		if ( ! mockRegisteredStore ) {
+			throw new Error( 'Product filters store was not registered.' );
+		}
+
+		const originalLocation = window.location;
+		const assignMock = jest.fn();
+
+		delete ( window as unknown as Record< string, unknown > ).location;
+		Object.defineProperty( window, 'location', {
+			value: {
+				href: 'https://example.com/shop/',
+				assign: assignMock,
+			},
+			writable: true,
+			configurable: true,
+		} );
+
+		const canonicalUrl = 'https://example.com/shop/';
+
+		const context = {
+			isOverlayOpened: false,
+			params: { color: 'blue' },
+			activeFilters: [],
+			item: {
+				type: 'attribute/color',
+				label: 'Blue',
+				value: 'blue',
+				selected: true,
+				count: 1,
+				attributeQueryType: 'or' as const,
+			},
+			activeLabelTemplate: '{{label}}',
+			filterType: 'attribute/color',
+		};
+
+		mockGetContext.mockReturnValue( context );
+		mockGetServerContext.mockReturnValue( context );
+
+		mockGetConfig.mockImplementation( ( key: string ) => {
+			if ( key === 'woocommerce/product-filters' ) {
+				return { canonicalUrl, forcePageReload: true };
+			}
+			return {};
+		} );
+
+		Object.defineProperty( mockRegisteredStore.state, 'params', {
+			get: () => ( { color: 'blue' } ),
+		} );
+
+		const routerNavigate = jest.fn();
+
+		try {
+			const iterator = mockRegisteredStore.actions.navigate();
+
+			// forcePageReload exits early before yielding the router import
+			const result = iterator.next();
+			expect( result.done ).toBe( true );
+
+			expect( assignMock ).toHaveBeenCalledTimes( 1 );
+			expect( assignMock ).toHaveBeenCalledWith(
+				'https://example.com/shop/?color=blue'
+			);
+			expect( routerNavigate ).not.toHaveBeenCalled();
+		} finally {
+			Object.defineProperty( window, 'location', {
+				value: originalLocation,
+				writable: true,
+				configurable: true,
+			} );
+		}
+	} );
 } );
