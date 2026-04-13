@@ -21,7 +21,7 @@ fi
 
 # Build JS assets first
 echo "Building JS assets..."
-NODE_ENV=production BABEL_ENV=production pnpm run build
+pnpm run build-production
 
 # Create build directory structure
 echo "Creating build directory structure..."
