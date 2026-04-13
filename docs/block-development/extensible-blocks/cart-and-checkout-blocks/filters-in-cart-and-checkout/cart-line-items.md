@@ -6,8 +6,6 @@ sidebar_label: Cart Line Items
 
 # Cart line items
 
-{/* markdownlint-disable MD024 */}
-
 The following Cart Line Items filters are available:
 
 -   `cartItemClass`

@@ -691,11 +691,9 @@ An example of the document object looks like this:
 ```
 
 </details>
-{/* markdownlint-enable MD033 */}
-
 
 It's full schema is this one:
-{/* markdownlint-disable MD033 */}
+
 <details>
 	<summary>Document schema</summary>
 	
@@ -916,7 +914,6 @@ It's full schema is this one:
 ```
 
 </details>
-{/* markdownlint-enable MD033 */}
 
 ### Examples
 
