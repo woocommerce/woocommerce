@@ -6,7 +6,6 @@ Stores in this folder:
 
 -   [`woocommerce/products`](#woocommerceproducts-store) — server-populated cache of product and variation data in Store API format.
 -   `woocommerce/cart` — cart state and actions (with mutation batching for performance).
--   `woocommerce/product-data` — per-block product data used by legacy product blocks.
 
 ---
 
