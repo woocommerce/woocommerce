@@ -259,6 +259,11 @@
       }
     },
     "elements": {
+      "button": {
+        "border": {
+          "radius": "0px"
+        }
+      },
       "heading": {
         "typography": {
           "fontWeight": "700",

@@ -40,7 +40,7 @@
 	);
 	--wc-customer-account-dropdown-item-hover-bg: color-mix(
 		in srgb,
-		currentColor 8%,
+		currentColor 10%,
 		transparent
 	);
 }
@@ -89,7 +89,7 @@
 			font: inherit;
 		}
 
-		&.is-dropdown-open .wc-block-customer-account__caret {
+		&.wc-block-customer-account--is-dropdown-open .wc-block-customer-account__caret {
 			transform: rotate(180deg);
 		}
 
