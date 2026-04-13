@@ -101,6 +101,7 @@ const webpackConfig = {
 						require.resolve( './bin/custom-templated-path-webpack-plugin' ),
 						require.resolve( './bin/unminify-webpack-plugin' ),
 						require.resolve( '@woocommerce/dependency-extraction-webpack-plugin/src/index' ),
+						require.resolve( '@woocommerce/internal-style-build' ),
 					],
 				},
 		  },
