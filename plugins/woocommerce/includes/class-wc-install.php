@@ -327,6 +327,7 @@ class WC_Install {
 		),
 		'10.8.0' => array(
 			'wc_update_1080_migrate_analytics_import_option',
+			'wc_update_1080_slim_orders_meta_key_index',
 		),
 	);
 

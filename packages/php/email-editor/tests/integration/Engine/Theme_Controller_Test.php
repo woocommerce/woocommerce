@@ -192,6 +192,6 @@ class Theme_Controller_Test extends \Email_Editor_Integration_Test_Case {
 	public function testItReturnsCorrectPresetVariablesMap(): void {
 		$variable_map = $this->theme_controller->get_variables_values_map();
 		$this->assertSame( '#000000', $variable_map['--wp--preset--color--black'] );
-		$this->assertSame( '20px', $variable_map['--wp--preset--spacing--20'] );
+		$this->assertSame( '24px', $variable_map['--wp--preset--spacing--20'] );
 	}
 }

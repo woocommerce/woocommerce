@@ -90,6 +90,7 @@
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"@woocommerce/internal-style-build": "workspace:*",
+		"@woocommerce/internal-ts-config": "workspace:*",
 		"@wordpress/block-editor": "wp-6.6",
 		"@wordpress/browserslist-config": "next",
 		"copy-webpack-plugin": "13.0.x",
@@ -258,7 +259,10 @@
 				"node_modules/@woocommerce/internal-js-tests/build-module",
 				"node_modules/@woocommerce/internal-js-tests/jest-preset.js",
 				"node_modules/@woocommerce/internal-style-build/index.js",
-				"node_modules/@woocommerce/internal-style-build/abstracts"
+				"node_modules/@woocommerce/internal-style-build/abstracts",
+				"node_modules/@woocommerce/internal-ts-config/tsconfig.json",
+				"node_modules/@woocommerce/internal-ts-config/tsconfig-cjs.json",
+				"node_modules/@woocommerce/internal-ts-config/types"
 			]
 		}
 	}

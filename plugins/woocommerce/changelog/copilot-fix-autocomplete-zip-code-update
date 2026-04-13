@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure value attribute is updated when selecting autocomplete address

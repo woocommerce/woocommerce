@@ -169,6 +169,11 @@ class ProductButton extends AbstractBlock {
 				'href' => esc_url( $product->add_to_cart_url() ),
 				'rel'  => 'nofollow',
 			);
+
+			if ( $product->is_type( ProductType::EXTERNAL ) ) {
+				$attributes['target'] = '_blank';
+				$attributes['rel']    = 'nofollow noopener noreferrer';
+			}
 		}
 
 		wp_interactivity_config(

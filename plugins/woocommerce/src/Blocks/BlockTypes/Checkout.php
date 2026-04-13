@@ -41,6 +41,7 @@ class Checkout extends AbstractBlock {
 		parent::initialize();
 		add_action( 'rest_api_init', array( $this, 'register_settings' ) );
 		add_action( 'wp_loaded', array( $this, 'register_patterns' ) );
+		add_action( 'wp', array( $this, 'disable_wp_emoji' ) );
 		// This prevents the page redirecting when the cart is empty. This is so the editor still loads the page preview.
 		add_filter(
 			'woocommerce_checkout_redirect_empty_cart',
@@ -51,6 +52,25 @@ class Checkout extends AbstractBlock {
 		);
 
 		add_action( 'save_post', array( $this, 'update_local_pickup_title' ), 10, 2 );
+	}
+
+	/**
+	 * Remove WordPress emoji detection script on pages containing this block.
+	 *
+	 * The wp-emoji MutationObserver converts emoji text nodes to <img> elements
+	 * when React hydrates or re-renders, corrupting the DOM tree and crashing the block.
+	 * The wp-exclude-emoji class on the wrapper only prevents the initial parse, not the
+	 * MutationObserver, so the script must be removed entirely.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @return void
+	 */
+	public function disable_wp_emoji() {
+		if ( has_block( $this->get_full_block_name() ) ) {
+			remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
+			remove_action( 'wp_print_styles', 'print_emoji_styles' );
+		}
 	}
 
 	/**
