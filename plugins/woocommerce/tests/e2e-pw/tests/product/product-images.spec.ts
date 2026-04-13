@@ -250,7 +250,7 @@ test.describe( 'Products > Product Images', () => {
 				.locator( '.flex-viewport' )
 				.waitFor( { state: 'attached' } );
 			const galleryImages = page.locator(
-				`.woocommerce-product-gallery__image:not(.clone) img`
+				`.woocommerce-product-gallery__image:not(.clone) img:not(.zoomImg)`
 			);
 			await expect(
 				galleryImages,
@@ -300,7 +300,7 @@ test.describe( 'Products > Product Images', () => {
 				.locator( '.flex-viewport' )
 				.waitFor( { state: 'attached' } );
 			const galleryImages = page.locator(
-				`.woocommerce-product-gallery__image:not(.clone) img`
+				`.woocommerce-product-gallery__image:not(.clone) img:not(.zoomImg)`
 			);
 			await expect(
 				galleryImages,
