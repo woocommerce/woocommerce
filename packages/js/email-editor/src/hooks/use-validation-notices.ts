@@ -67,8 +67,7 @@ export const useValidationNotices = (): ValidationNoticesData => {
 				// `onClick` to `Function` and makes `url` required (allowing
 				// `null`). Cast at the boundary so the store sees its expected
 				// shape.
-				const storeActions =
-					actions as unknown as WPNoticeAction[];
+				const storeActions = actions as unknown as WPNoticeAction[];
 				void dispatch( noticesStore ).createNotice( 'error', message, {
 					id: noticeId,
 					isDismissible: false,

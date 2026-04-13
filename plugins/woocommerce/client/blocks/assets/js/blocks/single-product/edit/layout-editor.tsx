@@ -19,9 +19,7 @@ import {
 	BlockContextProvider,
 } from '@wordpress/block-editor';
 // eslint-disable-next-line @woocommerce/dependency-group
-import {
-	createBlocksFromInnerBlocksTemplate,
-} from '@wordpress/blocks';
+import { createBlocksFromInnerBlocksTemplate } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
