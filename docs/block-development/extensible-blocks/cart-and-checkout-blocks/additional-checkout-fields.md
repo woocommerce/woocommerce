@@ -223,7 +223,7 @@ These options apply to all field types (except in a few circumstances which are 
 | `sanitize_callback` | A function called to sanitize the customer provided value when posted.                                                              | No        | See example below                            | By default the field's value is returned unchanged.                                                                                                                                                                                                                          |
 | `validate_callback` | A function called to validate the customer provided value when posted. This runs _after_ sanitization.                              | No        | See example below                            | The default validation function will add an error to the response if the field is required and does not have a value. [See the default validation function.](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Blocks/Domain/Services/CheckoutFields.php#L270-L281) |
 
-##### Example of `sanitize_callback`. This function will remove spaces from the value <!-- omit from toc -->
+##### Example of `sanitize_callback`. This function will remove spaces from the value {/* omit from toc */}
 
 ```php
 'sanitize_callback' => function( $field_value ) {
@@ -231,7 +231,7 @@ These options apply to all field types (except in a few circumstances which are 
 },
 ```
 
-##### Example of `validate_callback`. This function will check if the value is an email <!-- omit from toc -->
+##### Example of `validate_callback`. This function will check if the value is an email {/* omit from toc */}
 
 ```php
 'validate_callback' => function( $field_value ) {
@@ -602,7 +602,7 @@ When you're writing your rules, you're writing a partial schema for the document
 
 An example of the document object looks like this:
 
-<!-- markdownlint-disable MD033 -->
+{/* markdownlint-disable MD033 */}
 <details>
 	<summary>Document object</summary>
 
@@ -692,11 +692,11 @@ An example of the document object looks like this:
 ```
 
 </details>
-<!-- markdownlint-enable MD033 -->
+{/* markdownlint-enable MD033 */}
 
 
 It's full schema is this one:
-<!-- markdownlint-disable MD033 -->
+{/* markdownlint-disable MD033 */}
 <details>
 	<summary>Document schema</summary>
 	
@@ -917,7 +917,7 @@ It's full schema is this one:
 ```
 
 </details>
-<!-- markdownlint-enable MD033 -->
+{/* markdownlint-enable MD033 */}
 
 ### Examples
 

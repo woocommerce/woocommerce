@@ -324,11 +324,11 @@ $orders = wc_get_orders( $args );
 
 ### Metadata
 
-<!-- markdownlint-disable MD033 -->
+{/* markdownlint-disable MD033 */}
 |Parameter|Description|
 |-|-|
 |**meta_query**|One or more arrays with keys `key` (meta key), `value` (optional, string or array) and optionally `type` and `compare`.<br />This parameter is analogous to [WP_Query's `meta_query`](https://developer.wordpress.org/reference/classes/wp_query/#custom-field-post-meta-parameters), supporting various comparison operators and levels of queries joined by AND/OR relations.|
-<!-- markdownlint-enable MD033 -->
+{/* markdownlint-enable MD033 */}
 
 For more details and examples, refer to the [HPOS order querying](/docs/features/high-performance-order-storage/wc-order-query-improvements#metadata-queries-meta_query) guide.
 
@@ -365,11 +365,11 @@ $orders = wc_get_orders(
 
 ### Order fields
 
-<!-- markdownlint-disable MD033 -->
+{/* markdownlint-disable MD033 */}
 |Parameter|Description|
 |-|-|
 |**field_query**|One or more arrays with keys `field` (any order property), `value` and optionally `type` and `compare`.<br />This parameter is analogous to those of `meta_query` described in the previous section, supporting various comparison operators and levels of queries joined by AND/OR relations.|
-<!-- markdownlint-enable MD033 -->
+{/* markdownlint-enable MD033 */}
 
 For more details and examples, refer to the [HPOS order querying](/docs/features/high-performance-order-storage/wc-order-query-improvements#order-field-queries-field_query) guide.
 
@@ -405,11 +405,11 @@ $orders = wc_get_orders(
 
 ### Advanced date queries
 
-<!-- markdownlint-disable MD033 -->
+{/* markdownlint-disable MD033 */}
 |Parameter|Description|
 |-|-|
 |**date_query**|One or more arrays with keys `column` (an order date: `date_completed`, `date_created`, `date_updated` or `date_paid`, optionally followed by `_gmt` for UTC dates), `value` and optionally `type` and `compare`.<br />This parameter is analogous to [WP_Query's `date_query`](https://developer.wordpress.org/reference/classes/wp_query/#date-parameters), supporting various comparison operators and levels of queries joined by AND/OR relations.|
-<!-- markdownlint-enable MD033 -->
+{/* markdownlint-enable MD033 */}
 
 For more details and examples, refer to the [HPOS order querying](/docs/features/high-performance-order-storage/wc-order-query-improvements#date-queries-date_query) guide.
 

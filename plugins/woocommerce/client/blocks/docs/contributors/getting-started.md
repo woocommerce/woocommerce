@@ -1,6 +1,6 @@
-# Getting Started <!-- omit in toc -->
+# Getting Started {/* omit in toc */}
 
-## Table of contents <!-- omit in toc -->
+## Table of contents {/* omit in toc */}
 
 -   [Cloning the Git Repository](#cloning-the-git-repository)
 -   [Configuring your WordPress site](#configuring-your-wordpress-site)

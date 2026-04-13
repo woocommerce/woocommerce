@@ -1,6 +1,6 @@
-# Payments <!-- omit in toc -->
+# Payments {/* omit in toc */}
 
-## Table of Contents <!-- omit in toc -->
+## Table of Contents {/* omit in toc */}
 
 - [Setup](#setup)
     - [Special Cases](#special-cases)

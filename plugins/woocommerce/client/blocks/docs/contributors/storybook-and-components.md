@@ -1,6 +1,6 @@
-# Storybook & Components <!-- omit in toc -->
+# Storybook & Components {/* omit in toc */}
 
-## Table of contents <!-- omit in toc -->
+## Table of contents {/* omit in toc */}
 
 -   [Where are our components?](#where-are-our-components)
 -   [How to run Storybook locally and test components](#how-to-run-storybook-locally-and-test-components)

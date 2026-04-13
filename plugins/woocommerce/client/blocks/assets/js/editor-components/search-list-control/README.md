@@ -1,6 +1,6 @@
-# SearchListControl <!-- omit in toc -->
+# SearchListControl {/* omit in toc */}
 
-## Table of contents <!-- omit in toc -->
+## Table of contents {/* omit in toc */}
 
 -   [Usage](#usage)
     -   [Props](#props)

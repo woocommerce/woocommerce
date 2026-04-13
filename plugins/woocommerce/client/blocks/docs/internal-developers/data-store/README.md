@@ -1,6 +1,6 @@
-# Data stores in WooCommerce Blocks <!-- omit in toc -->
+# Data stores in WooCommerce Blocks {/* omit in toc */}
 
-## Table of contents <!-- omit in toc -->
+## Table of contents {/* omit in toc */}
 
 -   [Checkout](./checkout.md)
 -   [Validation](./validation.md)

@@ -1,6 +1,6 @@
-# Utilities <!-- omit in toc -->
+# Utilities {/* omit in toc */}
 
-## Table of Contents <!-- omit in toc -->
+## Table of Contents {/* omit in toc */}
 
 - [`extensionCartUpdate`](#extensioncartupdate)
    	- [`extensionCartUpdate` Usage](#extensioncartupdate-usage)

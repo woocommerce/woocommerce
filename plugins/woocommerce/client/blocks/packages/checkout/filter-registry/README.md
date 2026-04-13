@@ -1,6 +1,6 @@
-# Filter Registry <!-- omit in toc -->
+# Filter Registry {/* omit in toc */}
 
-## Table of Contents <!-- omit in toc -->
+## Table of Contents {/* omit in toc */}
 
 -   [registerCheckoutFilters](#registercheckoutfilters)
     -   [Usage](#usage)

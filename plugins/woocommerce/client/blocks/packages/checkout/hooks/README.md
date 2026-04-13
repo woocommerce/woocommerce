@@ -1,6 +1,6 @@
-# Checkout Hooks <!-- omit in toc -->
+# Checkout Hooks {/* omit in toc */}
 
-## Table of Contents <!-- omit in toc -->
+## Table of Contents {/* omit in toc */}
 
 -   [`useValidateCheckout`](#usevalidatecheckout)
     -   [Usage](#usage)

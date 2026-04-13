@@ -1,6 +1,6 @@
-# Block Script Assets <!-- omit in toc -->
+# Block Script Assets {/* omit in toc */}
 
-## Table of contents <!-- omit in toc -->
+## Table of contents {/* omit in toc */}
 
 -   [When are assets needed?](#when-are-assets-needed)
 -   [Choosing Handles for Assets (and scripts in general)](#choosing-handles-for-assets-and-scripts-in-general)

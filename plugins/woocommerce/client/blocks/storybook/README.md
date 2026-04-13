@@ -1,6 +1,6 @@
-# Working with Storybook <!-- omit in toc -->
+# Working with Storybook {/* omit in toc */}
 
-## Table of Contents <!-- omit in toc -->
+## Table of Contents {/* omit in toc */}
 
 - [Adding new stories](#adding-new-stories)
     - [Scaffold tour](#scaffold-tour)

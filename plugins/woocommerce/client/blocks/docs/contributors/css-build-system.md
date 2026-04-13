@@ -1,6 +1,6 @@
-# CSS Build System <!-- omit in toc -->
+# CSS Build System {/* omit in toc */}
 
-## Table of contents <!-- omit in toc -->
+## Table of contents {/* omit in toc */}
 
 -   [Right-to-left](#right-to-left)
 -   [Relevant files](#relevant-files)

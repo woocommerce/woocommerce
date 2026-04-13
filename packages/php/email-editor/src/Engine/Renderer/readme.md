@@ -23,7 +23,7 @@ class Heading extends AbstractBlockRenderer {
 
 ```
 
-<!-- markdownlint-disable MD029 -->
+{/* markdownlint-disable MD029 */}
 
 [//]: # 'This disabled MD029/ol-prefix Ordered list item prefix [Expected: 1; Actual: 4; Style: 1/1/1]'
 

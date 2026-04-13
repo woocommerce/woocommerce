@@ -1,6 +1,6 @@
-# Features Flags and Experimental Interfaces <!-- omit in toc -->
+# Features Flags and Experimental Interfaces {/* omit in toc */}
 
-## Table of contents <!-- omit in toc -->
+## Table of contents {/* omit in toc */}
 
 -   [Blocks behind flags](#blocks-behind-flags)
     -   [Feature plugin flag](#feature-plugin-flag)

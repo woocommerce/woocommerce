@@ -1,6 +1,6 @@
-# Product grid blocks style update in 2.7.0 <!-- omit in toc -->
+# Product grid blocks style update in 2.7.0 {/* omit in toc */}
 
-## Table of Contents <!-- omit in toc -->
+## Table of Contents {/* omit in toc */}
 
 -   [Product images](#product-images)
 -   [All Products prices](#all-products-prices)

@@ -1,6 +1,6 @@
-# Documentation Guidelines <!-- omit in toc -->
+# Documentation Guidelines {/* omit in toc */}
 
-## Table of contents <!-- omit in toc -->
+## Table of contents {/* omit in toc */}
 
 -   [Use active instead of passive voice](#use-active-instead-of-passive-voice)
     -   [Example](#example)

@@ -1,6 +1,6 @@
-# Tag <!-- omit in toc -->
+# Tag {/* omit in toc */}
 
-## Table of contents <!-- omit in toc -->
+## Table of contents {/* omit in toc */}
 
 - [Usage](#usage)
     - [Props](#props)

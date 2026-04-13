@@ -1,4 +1,4 @@
-<!-- markdownlint-disable MD024 -->
+{/* markdownlint-disable MD024 */}
 
 # Option Transformer
 

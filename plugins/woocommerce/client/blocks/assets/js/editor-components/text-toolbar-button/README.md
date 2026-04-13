@@ -1,4 +1,4 @@
-# TextToolbarButton <!-- omit in toc -->
+# TextToolbarButton {/* omit in toc */}
 
 TextToolbarButton is used in Toolbar for text buttons which show `isToggled` state.
 

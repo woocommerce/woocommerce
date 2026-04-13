@@ -1,6 +1,6 @@
-# Classic Template Block <!-- omit in toc -->
+# Classic Template Block {/* omit in toc */}
 
-## Table of Contents <!-- omit in toc -->
+## Table of Contents {/* omit in toc */}
 
 -   [Usage](#usage)
     -   [Props](#props)

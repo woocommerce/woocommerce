@@ -1,6 +1,6 @@
-# Blocks Registry <!-- omit in toc -->
+# Blocks Registry {/* omit in toc */}
 
-## Table of Contents <!-- omit in toc -->
+## Table of Contents {/* omit in toc */}
 
 -   [How Inner Blocks Work](#how-inner-blocks-work)
 -   [Inner Block Areas](#inner-block-areas)

@@ -1,6 +1,6 @@
-# WooCommerce Blocks Handbook <!-- omit in toc -->
+# WooCommerce Blocks Handbook {/* omit in toc */}
 
-## Table of Contents <!-- omit in toc -->
+## Table of Contents {/* omit in toc */}
 
 -   [Contributors](#contributors)
 -   [Internal developers](#internal-developers)

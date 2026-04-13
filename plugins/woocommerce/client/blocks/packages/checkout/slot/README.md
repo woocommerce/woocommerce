@@ -1,6 +1,6 @@
-# Slot and Fill <!-- omit in toc -->
+# Slot and Fill {/* omit in toc */}
 
-## Table of Contents <!-- omit in toc -->
+## Table of Contents {/* omit in toc */}
 
 -   [`createSlotFill( slotName )`](#createslotfill-slotname-)
     -   [Usage](#usage)

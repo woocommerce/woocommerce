@@ -5,7 +5,7 @@ sidebar_label: HTML best practices
 
 # Email HTML - Best Practices
 
-<!-- markdownlint-disable MD024 -->
+{/* markdownlint-disable MD024 */}
 
 ## Overview
 

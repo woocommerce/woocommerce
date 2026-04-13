@@ -1,6 +1,6 @@
-# Cart Items <!-- omit in toc -->
+# Cart Items {/* omit in toc */}
 
-## Table of Contents <!-- omit in toc -->
+## Table of Contents {/* omit in toc */}
 
 - [Setup](#setup)
 - [What to test](#what-to-test)

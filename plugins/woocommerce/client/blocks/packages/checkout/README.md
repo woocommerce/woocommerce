@@ -1,6 +1,6 @@
-# Checkout <!-- omit in toc -->
+# Checkout {/* omit in toc */}
 
-## Table of Contents <!-- omit in toc -->
+## Table of Contents {/* omit in toc */}
 
 -   [Installation](#installation)
 -   [Usage](#usage)

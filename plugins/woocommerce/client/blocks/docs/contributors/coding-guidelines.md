@@ -1,6 +1,6 @@
-# Coding Guidelines <!-- omit in toc -->
+# Coding Guidelines {/* omit in toc */}
 
-## Table of contents <!-- omit in toc -->
+## Table of contents {/* omit in toc */}
 
 -   [CSS Class Names](#css-class-names)
     -   [Prefixing](#prefixing)

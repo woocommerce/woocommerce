@@ -1,6 +1,6 @@
-# Class names update in 2.8.0 <!-- omit in toc -->
+# Class names update in 2.8.0 {/* omit in toc */}
 
-## Table of Contents <!-- omit in toc -->
+## Table of Contents {/* omit in toc */}
 
 -   [Replaced classes](#replaced-classes)
 -   [Deprecated classes](#deprecated-classes)

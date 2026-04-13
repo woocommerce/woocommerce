@@ -1,6 +1,6 @@
-# Adding an endpoint to ExtendSchema <!-- omit in toc -->
+# Adding an endpoint to ExtendSchema {/* omit in toc */}
 
-## Table of contents <!-- omit in toc -->
+## Table of contents {/* omit in toc */}
 
 -   [Extending `GET` endpoints in Store API](#extending-get-endpoints-in-store-api)
 -   [Use cases for adding new endpoints](#use-cases-for-adding-new-endpoints)

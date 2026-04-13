@@ -1,6 +1,6 @@
-# JavaScript Build System <!-- omit in toc -->
+# JavaScript Build System {/* omit in toc */}
 
-## Table of contents <!-- omit in toc -->
+## Table of contents {/* omit in toc */}
 
 -   [Environment variables](#environment-variables)
 -   [Babel](#babel)

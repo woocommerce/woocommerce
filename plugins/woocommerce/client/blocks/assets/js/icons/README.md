@@ -1,6 +1,6 @@
-# Icons <!-- omit in toc -->
+# Icons {/* omit in toc */}
 
-## Table of contents <!-- omit in toc -->
+## Table of contents {/* omit in toc */}
 
 -   [Usage](#usage)
 -   [Adding Icons](#adding-icons)

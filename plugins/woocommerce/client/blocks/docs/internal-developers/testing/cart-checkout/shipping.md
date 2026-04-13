@@ -1,4 +1,4 @@
-# Shipping <!-- omit in toc -->
+# Shipping {/* omit in toc */}
 
 ## Setup
 

@@ -1,6 +1,6 @@
-# JavaScript Testing <!-- omit in toc -->
+# JavaScript Testing {/* omit in toc */}
 
-## Table of contents <!-- omit in toc -->
+## Table of contents {/* omit in toc */}
 
 -   [How to run JavaScript unit tests](#how-to-run-javascript-unit-tests)
 -   [How to run end-to-end tests with deprecated infrastructure](#how-to-run-end-to-end-tests-with-deprecated-infrastructure)

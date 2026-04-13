@@ -1,4 +1,4 @@
-# Checkout Store <!-- omit in toc -->
+# Checkout Store {/* omit in toc */}
 
 See also [third-party developers' Checkout Store documentation](../../third-party-developers/extensibility/data-store/checkout.md).
 

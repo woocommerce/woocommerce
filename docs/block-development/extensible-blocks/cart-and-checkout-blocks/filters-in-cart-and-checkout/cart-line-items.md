@@ -6,7 +6,7 @@ sidebar_label: Cart Line Items
 
 # Cart line items
 
-<!-- markdownlint-disable MD024 -->
+{/* markdownlint-disable MD024 */}
 
 The following Cart Line Items filters are available:
 
@@ -28,11 +28,11 @@ The following screenshot shows which parts the individual filters affect:
 
 ## `cartItemClass`
 
-### Description <!-- omit in toc -->
+### Description {/* omit in toc */}
 
 The `cartItemClass` filter allows to change the cart item class.
 
-### Parameters <!-- omit in toc -->
+### Parameters {/* omit in toc */}
 
 -   _defaultValue_ `object` (default: `''`) - The default cart item class.
 -   _extensions_ `object` (default: `{}`) - The extensions object.
@@ -41,13 +41,13 @@ The `cartItemClass` filter allows to change the cart item class.
     -   _cartItem_ `object` - The cart item object from `wc/store/cart`, see Cart Item object.
     -   _context_ `string` (allowed values: `cart` or `summary`) - The context of the item.
 
-### Returns <!-- omit in toc -->
+### Returns {/* omit in toc */}
 
 -   `string` - The modified cart item class, or an empty string.
 
-### Code examples <!-- omit in toc -->
+### Code examples {/* omit in toc */}
 
-#### Basic example <!-- omit in toc -->
+#### Basic example {/* omit in toc */}
 
 ```tsx
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
@@ -67,7 +67,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-#### Advanced example <!-- omit in toc -->
+#### Advanced example {/* omit in toc */}
 
 ```tsx
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
@@ -97,7 +97,7 @@ registerCheckoutFilters( 'example-extension', {
 
 > Filters can be also combined. See [Combined filters](/docs/block-development/extensible-blocks/cart-and-checkout-blocks/filters-in-cart-and-checkout/) for an example.
 
-### Screenshots <!-- omit in toc -->
+### Screenshots {/* omit in toc */}
 
 | Before                                                                 | After                                                                 |
 |:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
@@ -106,11 +106,11 @@ registerCheckoutFilters( 'example-extension', {
 
 ## `cartItemPrice`
 
-### Description <!-- omit in toc -->
+### Description {/* omit in toc */}
 
 The `cartItemPrice` filter allows to format the cart item price.
 
-### Parameters <!-- omit in toc -->
+### Parameters {/* omit in toc */}
 
 -   _defaultValue_ `string` (default: `<price/>`) - The default cart item price.
 -   _extensions_ `object` (default: `{}`) - The extensions object.
@@ -120,13 +120,13 @@ The `cartItemPrice` filter allows to format the cart item price.
     -   _context_ `string` (allowed values: `cart` or `summary`) - The context of the item.
 -   _validation_ `boolean` - Checks if the return value contains the substring `<price/>`.
 
-### Returns <!-- omit in toc -->
+### Returns {/* omit in toc */}
 
 -   `string` - The modified format of the cart item price, which must contain the substring `<price/>`, or the original price format.
 
-### Code examples <!-- omit in toc -->
+### Code examples {/* omit in toc */}
 
-#### Basic example <!-- omit in toc -->
+#### Basic example {/* omit in toc */}
 
 ```tsx
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
@@ -146,7 +146,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-#### Advanced example <!-- omit in toc -->
+#### Advanced example {/* omit in toc */}
 
 ```tsx
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
@@ -176,7 +176,7 @@ registerCheckoutFilters( 'example-extension', {
 
 > Filters can be also combined. See [Combined filters](/docs/block-development/extensible-blocks/cart-and-checkout-blocks/filters-in-cart-and-checkout/) for an example.
 
-### Screenshots <!-- omit in toc -->
+### Screenshots {/* omit in toc */}
 
 | Before                                                                 | After                                                                 |
 |:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
@@ -184,11 +184,11 @@ registerCheckoutFilters( 'example-extension', {
 
 ## `itemName`
 
-### Description <!-- omit in toc -->
+### Description {/* omit in toc */}
 
 The `itemName` filter allows to change the cart item name.
 
-### Parameters <!-- omit in toc -->
+### Parameters {/* omit in toc */}
 
 -   _defaultValue_ `string` - The default cart item name.
 -   _extensions_ `object` (default: `{}`) - The extensions object.
@@ -197,13 +197,13 @@ The `itemName` filter allows to change the cart item name.
     -   _cartItem_ `object` - The cart item object from `wc/store/cart`, see Cart Item object.
     -   _context_ `string` (allowed values: `cart` or `summary`) - The context of the item.
 
-### Returns <!-- omit in toc -->
+### Returns {/* omit in toc */}
 
 -   `string` - The original or modified cart item name.
 
-### Code examples <!-- omit in toc -->
+### Code examples {/* omit in toc */}
 
-#### Basic example <!-- omit in toc -->
+#### Basic example {/* omit in toc */}
 
 ```tsx
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
@@ -223,7 +223,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-#### Advanced example <!-- omit in toc -->
+#### Advanced example {/* omit in toc */}
 
 ```tsx
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
@@ -253,7 +253,7 @@ registerCheckoutFilters( 'example-extension', {
 
 > Filters can be also combined. See [Combined filters](/docs/block-development/extensible-blocks/cart-and-checkout-blocks/filters-in-cart-and-checkout/) for an example.
 
-### Screenshots <!-- omit in toc -->
+### Screenshots {/* omit in toc */}
 
 | Before                                                                 | After                                                                 |
 |:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
@@ -261,11 +261,11 @@ registerCheckoutFilters( 'example-extension', {
 
 ## `saleBadgePriceFormat`
 
-### Description <!-- omit in toc -->
+### Description {/* omit in toc */}
 
 The `saleBadgePriceFormat` filter allows to format the cart item sale badge price.
 
-### Parameters <!-- omit in toc -->
+### Parameters {/* omit in toc */}
 
 -   _defaultValue_ `string` (default: `<price/>`) - The default cart item sale badge price.
 -   _extensions_ `object` (default: `{}`) - The extensions object.
@@ -275,11 +275,11 @@ The `saleBadgePriceFormat` filter allows to format the cart item sale badge pric
     -   _context_ `string` (allowed values: `cart` or `summary`) - The context of the item.
 -   _validation_ `boolean` - Checks if the return value contains the substring `<price/>`.
 
-### Returns <!-- omit in toc -->
+### Returns {/* omit in toc */}
 
 -   `string` - The modified format of the cart item sale badge price, which must contain the substring `<price/>`, or the original price format.
 
-### Code examples <!-- omit in toc -->
+### Code examples {/* omit in toc */}
 
 ```tsx
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
@@ -304,7 +304,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-#### Advanced example <!-- omit in toc -->
+#### Advanced example {/* omit in toc */}
 
 ```tsx
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
@@ -339,7 +339,7 @@ registerCheckoutFilters( 'example-extension', {
 
 > Filters can be also combined. See [Combined filters](/docs/block-development/extensible-blocks/cart-and-checkout-blocks/filters-in-cart-and-checkout/) for an example.
 
-### Screenshots <!-- omit in toc -->
+### Screenshots {/* omit in toc */}
 
 | Before                                                                 | After                                                                 |
 |:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
@@ -348,11 +348,11 @@ registerCheckoutFilters( 'example-extension', {
 
 ## `showRemoveItemLink`
 
-### Description <!-- omit in toc -->
+### Description {/* omit in toc */}
 
 The `showRemoveItemLink` is used to show or hide the cart item remove link.
 
-### Parameters <!-- omit in toc -->
+### Parameters {/* omit in toc */}
 
 -   _defaultValue_ (type: `boolean`, default: `true`) - The default value of the remove link.
 -   _extensions_ `object` (default: `{}`) - The extensions object.
@@ -361,13 +361,13 @@ The `showRemoveItemLink` is used to show or hide the cart item remove link.
     -   _cartItem_ `object` - The cart item object from `wc/store/cart`, see Cart Item object.
     -   _context_ `string` (allowed values: `cart` or `summary`) - The context of the item.
 
-### Returns <!-- omit in toc -->
+### Returns {/* omit in toc */}
 
 -   `boolean` - `true` if the cart item remove link should be shown, `false` otherwise.
 
-### Code examples <!-- omit in toc -->
+### Code examples {/* omit in toc */}
 
-#### Basic example <!-- omit in toc -->
+#### Basic example {/* omit in toc */}
 
 ```tsx
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
@@ -387,7 +387,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-#### Advanced example <!-- omit in toc -->
+#### Advanced example {/* omit in toc */}
 
 ```tsx
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
@@ -417,7 +417,7 @@ registerCheckoutFilters( 'example-extension', {
 
 > Filters can be also combined. See [Combined filters](/docs/block-development/extensible-blocks/cart-and-checkout-blocks/filters-in-cart-and-checkout/) for an example.
 
-### Screenshots <!-- omit in toc -->
+### Screenshots {/* omit in toc */}
 
 | Before                                                                 | After                                                                 |
 |:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
@@ -427,11 +427,11 @@ registerCheckoutFilters( 'example-extension', {
 
 ## `subtotalPriceFormat`
 
-### Description <!-- omit in toc -->
+### Description {/* omit in toc */}
 
 The `subtotalPriceFormat` filter allows to format the cart item subtotal price.
 
-### Parameters <!-- omit in toc -->
+### Parameters {/* omit in toc */}
 
 -   _defaultValue_ `string` (default: `<price/>`) - The default cart item subtotal price.
 -   _extensions_ `object` (default: `{}`) - The extensions object.
@@ -441,13 +441,13 @@ The `subtotalPriceFormat` filter allows to format the cart item subtotal price.
     -   _context_ `string` (allowed values: `cart` or `summary`) - The context of the item.
 -   _validation_ `boolean` - Checks if the return value contains the substring `<price/>`.
 
-### Returns <!-- omit in toc -->
+### Returns {/* omit in toc */}
 
 -   `string` - The modified format of the cart item subtotal price, which must contain the substring `<price/>`, or the original price format.
 
-### Code examples <!-- omit in toc -->
+### Code examples {/* omit in toc */}
 
-#### Basic example <!-- omit in toc -->
+#### Basic example {/* omit in toc */}
 
 ```tsx
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
@@ -472,7 +472,7 @@ registerCheckoutFilters( 'example-extension', {
 } );
 ```
 
-#### Advanced example <!-- omit in toc -->
+#### Advanced example {/* omit in toc */}
 
 ```tsx
 const { registerCheckoutFilters } = window.wc.blocksCheckout;
@@ -507,7 +507,7 @@ registerCheckoutFilters( 'example-extension', {
 
 > Filters can be also combined. See [Combined filters](/docs/block-development/extensible-blocks/cart-and-checkout-blocks/filters-in-cart-and-checkout/) for an example.
 
-### Screenshots <!-- omit in toc -->
+### Screenshots {/* omit in toc */}
 
 | Before                                                                 | After                                                                 |
 |:---------------------------------------------------------------------:|:---------------------------------------------------------------------:|
