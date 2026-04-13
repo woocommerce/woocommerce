@@ -773,20 +773,20 @@ add_action( 'woocommerce_update_product', 'wc_maybe_schedule_product_sale_events
 add_action( 'woocommerce_new_product', 'wc_maybe_schedule_product_sale_events', 10, 2 );
 
 /**
- * Schedule sale events when sale date meta is updated directly (e.g. by importers, ERPs, or bulk tools).
+ * Schedule sale events when sale date meta is updated directly.
  *
  * The woocommerce_update_product/woocommerce_new_product hooks only fire when a product is saved
  * through WooCommerce's CRUD. This callback ensures per-product sale events are also scheduled
- * when sale date meta is written via update_post_meta() or similar low-level calls.
+ * when sale date meta is written via update_post_meta() or added_post_meta().
  *
  * @since 10.8.0
  * @param int    $meta_id    ID of the meta entry.
  * @param int    $object_id  Post ID.
  * @param string $meta_key   Meta key.
- * @param mixed  $_meta_value Meta value (unused).
+ * @param mixed  $meta_value Meta value.
  * @return void
  */
-function wc_maybe_schedule_sale_events_on_meta_update( $meta_id, $object_id, $meta_key, $_meta_value ): void { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+function wc_maybe_schedule_sale_events_on_meta_update( $meta_id, $object_id, $meta_key, $meta_value ): void {
 	if ( '_sale_price_dates_from' !== $meta_key && '_sale_price_dates_to' !== $meta_key ) {
 		return;
 	}
