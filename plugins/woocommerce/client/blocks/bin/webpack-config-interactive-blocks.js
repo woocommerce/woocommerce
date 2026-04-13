@@ -3,7 +3,6 @@
  */
 const path = require( 'path' );
 const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
-const WebpackRTLPlugin = require( './webpack-rtl-plugin' );
 const [
 	,
 	moduleConfig,
@@ -15,6 +14,7 @@ const RemoveFilesPlugin = require( './remove-files-webpack-plugin' );
  */
 const DependencyExtractionWebpackPlugin = require( '@woocommerce/dependency-extraction-webpack-plugin' );
 const FilesystemCacheWarningsPlugin = require( './filesystem-cache-warnings-webpack-plugin.js' );
+const WebpackRTLPlugin = require( '@woocommerce/internal-style-build/webpack-rtl-plugin' );
 const { sharedOptimizationConfig } = require( './webpack-shared-config' );
 const {
 	scriptModuleEntries,

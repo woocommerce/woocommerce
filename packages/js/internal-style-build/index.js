@@ -3,45 +3,10 @@
  */
 const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
 const path = require( 'path' );
-const WebpackRTLPlugin = require( '@automattic/webpack-rtl-plugin' );
 const RemoveEmptyScriptsPlugin = require( 'webpack-remove-empty-scripts' );
 const postcssPlugins = require( '@wordpress/postcss-plugins-preset' );
 const StyleAssetPlugin = require( './style-asset-plugin' );
-
-/**
- * Custom plugin to rename .rtl.css files to -rtl.css for WordPress compatibility
- * This is needed because @automattic/webpack-rtl-plugin hardcodes the .rtl.css pattern
- */
-class RTLFilenameFixPlugin {
-	apply( compiler ) {
-		compiler.hooks.compilation.tap(
-			'RTLFilenameFixPlugin',
-			( compilation ) => {
-				compilation.hooks.processAssets.tap(
-					{
-						name: 'RTLFilenameFixPlugin',
-						stage: compiler.webpack.Compilation
-							.PROCESS_ASSETS_STAGE_OPTIMIZE_TRANSFER,
-					},
-					() => {
-						for ( const filename of Object.keys(
-							compilation.assets
-						) ) {
-							if ( filename.match( /\.rtl\.css(\?|$)/ ) ) {
-								compilation.renameAsset(
-									filename,
-									filename.replace( '.rtl.css', '-rtl.css' )
-								);
-							}
-						}
-					}
-				);
-			}
-		);
-	}
-}
-
-const NODE_ENV = process.env.NODE_ENV || 'development';
+const WebpackRTLPlugin = require( './webpack-rtl-plugin' );
 
 module.exports = {
 	plugin: MiniCssExtractPlugin,
@@ -110,23 +75,7 @@ module.exports = {
 				filename: '[name]/style.css',
 				chunkFilename: 'chunks/[id].style.css?ver=[contenthash]',
 			} ),
-			new WebpackRTLPlugin( {
-				minify:
-					NODE_ENV === 'development'
-						? false
-						: {
-								preset: [
-									'default',
-									{
-										discardComments: {
-											removeAll: true, // Remove all comments
-										},
-										normalizeWhitespace: true, // Normalize whitespace
-									},
-								],
-						  },
-			} ),
-			new RTLFilenameFixPlugin(), // Convert .rtl.css to -rtl.css for WordPress compatibility
+			new WebpackRTLPlugin(),
 			new StyleAssetPlugin(),
 		],
 	},

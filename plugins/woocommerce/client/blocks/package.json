@@ -147,6 +147,7 @@
 		"@woocommerce/customer-effort-score": "workspace:*",
 		"@woocommerce/data": "workspace:*",
 		"@woocommerce/dependency-extraction-webpack-plugin": "workspace:*",
+		"@woocommerce/internal-style-build": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@wordpress/api-fetch": "6.21.0",
 		"@wordpress/babel-preset-default": "next",
@@ -460,6 +461,10 @@
 				"node_modules/@woocommerce/data/build-types",
 				"node_modules/@woocommerce/dependency-extraction-webpack-plugin/src/",
 				"node_modules/@woocommerce/dependency-extraction-webpack-plugin/assets/",
+				"node_modules/@woocommerce/internal-style-build/index.js",
+				"node_modules/@woocommerce/internal-style-build/webpack-rtl-plugin.js",
+				"node_modules/@woocommerce/internal-style-build/style-asset-plugin.js",
+				"node_modules/@woocommerce/internal-style-build/abstracts",
 				"node_modules/@woocommerce/eslint-plugin/configs",
 				"node_modules/@woocommerce/eslint-plugin/rules",
 				"node_modules/@woocommerce/eslint-plugin/index.js"
