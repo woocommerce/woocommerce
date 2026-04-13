@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Repair stale shop rewrite rules when WooCommerce theme support state and rewrite rules drift out of sync.

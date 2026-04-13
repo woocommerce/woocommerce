@@ -342,9 +342,7 @@ class WC_Post_Types {
 
 		// If theme support changes, we may need to flush permalinks since some are changed based on this flag.
 		$theme_support = wc_current_theme_supports_woocommerce_or_fse() ? 'yes' : 'no';
-		if ( get_option( 'current_theme_supports_woocommerce' ) !== $theme_support && update_option( 'current_theme_supports_woocommerce', $theme_support ) ) {
-			update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
-		}
+		self::maybe_queue_flush_rewrite_rules( $theme_support, $has_archive );
 
 		register_post_type(
 			'product',
@@ -590,6 +588,88 @@ class WC_Post_Types {
 		}
 
 		do_action( 'woocommerce_after_register_post_type' );
+	}
+
+	/**
+	 * Queue a flush when theme support changes or product archive rewrites drift from the expected shape.
+	 *
+	 * @param string       $theme_support Whether the current theme supports WooCommerce.
+	 * @param string|false $has_archive Archive slug for the product post type.
+	 */
+	private static function maybe_queue_flush_rewrite_rules( $theme_support, $has_archive ): void {
+		$theme_support_changed = get_option( 'current_theme_supports_woocommerce' ) !== $theme_support
+			&& update_option( 'current_theme_supports_woocommerce', $theme_support );
+
+		if ( $theme_support_changed || self::should_flush_rewrite_rules_for_product_archive( $has_archive ) ) {
+			update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
+		}
+	}
+
+	/**
+	 * Determine whether product archive rewrite rules have drifted from the expected shape.
+	 *
+	 * @param string|false $has_archive Archive slug for the product post type.
+	 * @param array|null   $rewrite_rules Optional rewrite rules for testing.
+	 * @return bool
+	 */
+	private static function should_flush_rewrite_rules_for_product_archive( $has_archive, $rewrite_rules = null ): bool {
+		$actual_product_archive_rules   = self::get_product_archive_rewrite_rules( $rewrite_rules );
+		$expected_product_archive_rules = self::get_expected_product_archive_rewrite_rules( $has_archive );
+
+		if ( empty( $expected_product_archive_rules ) ) {
+			return ! empty( $actual_product_archive_rules );
+		}
+
+		foreach ( $expected_product_archive_rules as $regex => $query ) {
+			if ( ! isset( $actual_product_archive_rules[ $regex ] ) || $actual_product_archive_rules[ $regex ] !== $query ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Get the current product archive rewrite rules from the rewrite rules option.
+	 *
+	 * @param array|null $rewrite_rules Optional rewrite rules for testing.
+	 * @return array
+	 */
+	private static function get_product_archive_rewrite_rules( $rewrite_rules = null ): array {
+		if ( ! is_array( $rewrite_rules ) ) {
+			$rewrite_rules = get_option( 'rewrite_rules', array() );
+		}
+
+		$product_archive_rules = array();
+
+		foreach ( $rewrite_rules as $regex => $query ) {
+			if ( is_string( $query ) && str_contains( $query, 'post_type=product' ) ) {
+				$product_archive_rules[ $regex ] = $query;
+			}
+		}
+
+		return $product_archive_rules;
+	}
+
+	/**
+	 * Get the expected product archive rewrite rules for the current archive slug.
+	 *
+	 * @param string|false $has_archive Archive slug for the product post type.
+	 * @return array
+	 */
+	private static function get_expected_product_archive_rewrite_rules( $has_archive ): array {
+		if ( false === $has_archive || '' === $has_archive ) {
+			return array();
+		}
+
+		$has_archive = trim( (string) $has_archive, '/' );
+
+		return array(
+			$has_archive . '/?$'                          => 'index.php?post_type=product',
+			$has_archive . '/feed/(feed|rdf|rss|rss2|atom)/?$' => 'index.php?post_type=product&feed=$matches[1]',
+			$has_archive . '/(feed|rdf|rss|rss2|atom)/?$' => 'index.php?post_type=product&feed=$matches[1]',
+			$has_archive . '/page/([0-9]{1,})/?$'         => 'index.php?post_type=product&paged=$matches[1]',
+		);
 	}
 
 	/**
