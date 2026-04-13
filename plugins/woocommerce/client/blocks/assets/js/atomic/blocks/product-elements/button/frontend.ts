@@ -166,7 +166,7 @@ const productButtonStore = {
 				{
 					id: product.id,
 					quantityToAdd: context.quantityToAdd,
-					type: context.productType,
+					type: product.type,
 				},
 				{
 					showCartUpdatesNotices: false,
