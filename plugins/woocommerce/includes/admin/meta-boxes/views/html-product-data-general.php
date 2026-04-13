@@ -49,12 +49,12 @@ use Automattic\WooCommerce\Enums\ProductTaxStatus;
 			<span class="show_if_simple show_if_external">
 		<?php endif; ?>
 		<?php
-			if ( wc_tax_enabled() ) {
-				$tax_text = wc_prices_include_tax()
-					? __( 'incl. tax', 'woocommerce' )
-					: __( 'ex. tax', 'woocommerce' );
-				$tax_label = ' (' . $tax_text . ')';
-			}
+		if ( wc_tax_enabled() ) {
+			$tax_text  = wc_prices_include_tax()
+				? __( 'incl. tax', 'woocommerce' )
+				: __( 'ex. tax', 'woocommerce' );
+			$tax_label = ' (' . $tax_text . ')';
+		}
 
 			woocommerce_wp_text_input(
 				array(
