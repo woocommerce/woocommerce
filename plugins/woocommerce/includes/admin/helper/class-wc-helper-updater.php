@@ -108,6 +108,14 @@ class WC_Helper_Updater {
 				$item['requires_php'] = $data['requires_php'];
 			}
 
+			if ( isset( $data['tested'] ) ) {
+				$item['tested'] = $data['tested'];
+			}
+
+			if ( isset( $data['icons'] ) ) {
+				$item['icons'] = $data['icons'];
+			}
+
 			if ( $transient instanceof stdClass ) {
 				if ( version_compare( $plugin['Version'], $data['version'], '<' ) ) {
 					$transient->response[ $filename ] = (object) $item;

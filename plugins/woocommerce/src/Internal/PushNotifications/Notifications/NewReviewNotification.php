@@ -86,4 +86,13 @@ class NewReviewNotification extends Notification {
 	public function write_meta( string $key ): void {
 		WC()->call_function( 'update_comment_meta', $this->get_resource_id(), $key, (string) time() );
 	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @param string $key The meta key.
+	 */
+	public function delete_meta( string $key ): void {
+		WC()->call_function( 'delete_comment_meta', $this->get_resource_id(), $key );
+	}
 }

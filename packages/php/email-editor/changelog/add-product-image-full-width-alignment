@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add full-width alignment support for product image block, enable wide/full alignment options in editor settings, and fix invalid align="full" HTML attribute in image renderers

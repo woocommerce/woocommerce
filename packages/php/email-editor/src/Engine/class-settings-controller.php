@@ -78,21 +78,25 @@ class Settings_Controller {
 		$settings['__experimentalFeatures'] = $theme_settings;
 		// Controls which alignment options are available for blocks.
 		$settings['supportsLayout']              = true; // Allow using default layouts.
-		$settings['__unstableIsBlockBasedTheme'] = true; // For default setting this to true disables wide and full alignments.
+		$settings['alignWide']                   = true; // Enable wide and full alignment options.
+		$settings['__unstableIsBlockBasedTheme'] = false; // Setting to true disables wide and full alignments in flow layouts.
 		return $settings;
 	}
 
 	/**
 	 * Returns the layout settings for the email editor.
 	 *
-	 * @return array{contentSize: string, wideSize: string}
+	 * @return array{contentSize: string, wideSize?: string}
 	 */
 	public function get_layout(): array {
 		$layout_settings = $this->theme_controller->get_layout_settings();
-		return array(
+		$layout          = array(
 			'contentSize' => $layout_settings['contentSize'],
-			'wideSize'    => $layout_settings['wideSize'],
 		);
+		if ( isset( $layout_settings['wideSize'] ) ) {
+			$layout['wideSize'] = $layout_settings['wideSize'];
+		}
+		return $layout;
 	}
 
 	/**

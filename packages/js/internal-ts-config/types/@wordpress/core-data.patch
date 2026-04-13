@@ -1,0 +1,50 @@
+diff -ruN a/types/@wordpress/core-data/index.d.ts b/types/@wordpress/core-data/index.d.ts
+--- a/types/@wordpress/core-data/index.d.ts
++++ b/types/@wordpress/core-data/index.d.ts
+@@ -71,6 +71,7 @@
+ 	    receiveRevisions: (kind: string, name: string, recordKey: string | number, records: any, query: any, invalidateCache: boolean | null | undefined, meta: any) => ({ dispatch }: {
+ 	        dispatch: any;
+ 	    }) => Promise<void>;
++	    [key: string]: (...args: any[]) => any;
+ 	}, {
+ 	    getAuthors(state: selectors.State, query?: {
+ 	        [x: string]: any;
+@@ -149,6 +150,7 @@
+ 	    getRevision: ((state: selectors.State, kind: string, name: string, recordKey: string | number, revisionKey: string | number, query?: {
+ 	        [x: string]: any;
+ 	    } | undefined) => (Record<import("@wordpress/core-data/build-types/entity-types").Context, Record<number, import("@wordpress/core-data/build-types/entity-types").PostRevision>> | Record<import("@wordpress/core-data/build-types/entity-types").Context, Record<number, import("@wordpress/core-data/build-types/entity-types").GlobalStylesRevision>>) | Record<PropertyKey, never> | undefined) & import("rememo").EnhancedSelector;
++	    [key: string]: (...args: any[]) => any;
+ 	}>>;
+ 	export { default as EntityProvider } from "@wordpress/core-data/build-types/entity-provider";
+ 	export * from "@wordpress/core-data/build-types/entity-provider";
+@@ -156,4 +158,11 @@
+ 	export * from "@wordpress/core-data/build-types/fetch";
+ 	export * from "@wordpress/core-data/build-types/hooks";
+ 	import * as selectors from '@wordpress/core-data/build-types/selectors';
++}
++
++// --- StoreRegistry registration ---
++declare module '@wordpress/data/build-types/types' {
++	interface StoreRegistry {
++		core: typeof import( '@wordpress/core-data' ).store;
++	}
+ }
+diff -ruN a/types/@wordpress/core-data/selectors.d.ts b/types/@wordpress/core-data/selectors.d.ts
+--- a/types/@wordpress/core-data/selectors.d.ts
++++ b/types/@wordpress/core-data/selectors.d.ts
+@@ -189,6 +189,7 @@
+ 	export interface GetEntityRecord {
+ 	    <EntityRecord extends ET.EntityRecord<any> | Partial<ET.EntityRecord<any>>>(state: State, kind: string, name: string, key: EntityRecordKey, query?: GetRecordsHttpQuery): EntityRecord | undefined;
+ 	    CurriedSignature: <EntityRecord extends ET.EntityRecord<any> | Partial<ET.EntityRecord<any>>>(kind: string, name: string, key: EntityRecordKey, query?: GetRecordsHttpQuery) => EntityRecord | undefined;
++	    PromiseCurriedSignature: <EntityRecord extends ET.EntityRecord<any> | Partial<ET.EntityRecord<any>>>(kind: string, name: string, key?: EntityRecordKey, query?: GetRecordsHttpQuery) => Promise<EntityRecord | undefined>;
+ 	    __unstableNormalizeArgs?: (args: EntityRecordArgs) => EntityRecordArgs;
+ 	}
+ 	/**
+@@ -252,6 +253,7 @@
+ 	export interface GetEntityRecords {
+ 	    <EntityRecord extends ET.EntityRecord<any> | Partial<ET.EntityRecord<any>>>(state: State, kind: string, name: string, query?: GetRecordsHttpQuery): EntityRecord[] | null;
+ 	    CurriedSignature: <EntityRecord extends ET.EntityRecord<any> | Partial<ET.EntityRecord<any>>>(kind: string, name: string, query?: GetRecordsHttpQuery) => EntityRecord[] | null;
++	    PromiseCurriedSignature: <EntityRecord extends ET.EntityRecord<any> | Partial<ET.EntityRecord<any>>>(kind: string, name: string, query?: GetRecordsHttpQuery) => Promise<EntityRecord[] | null>;
+ 	}
+ 	/**
+ 	 * Returns the Entity's records.

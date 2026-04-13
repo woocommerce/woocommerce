@@ -83,7 +83,7 @@ class AddToCartForm extends AbstractBlock {
 			function ( $matches ) use ( $product_name ) {
 				/* translators: %s refers to the item name in the cart. */
 				$plus_aria = esc_attr( sprintf( __( 'Increase quantity of %s', 'woocommerce' ), $product_name ) );
-				return $matches[1] . '<button aria-label="' . $plus_aria . '" type="button" data-wp-on--click="actions.addQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">+</button>';
+				return $matches[1] . '<button aria-label="' . $plus_aria . '" type="button" data-wp-on--click="actions.increaseQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">+</button>';
 			},
 			$product_html ?? ''
 		);
@@ -92,7 +92,7 @@ class AddToCartForm extends AbstractBlock {
 			function ( $matches ) use ( $product_name ) {
 				/* translators: %s refers to the item name in the cart. */
 				$minus_aria = esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) );
-				return $matches[1] . '<button aria-label="' . $minus_aria . '" type="button" data-wp-on--click="actions.removeQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">−</button>';
+				return $matches[1] . '<button aria-label="' . $minus_aria . '" type="button" data-wp-on--click="actions.decreaseQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">−</button>';
 			},
 			$new_html ?? ''
 		);
@@ -107,19 +107,26 @@ class AddToCartForm extends AbstractBlock {
 	 * @return string The Add to Cart form HTML with classes added.
 	 */
 	private function add_stepper_classes_to_add_to_cart_form_input( $product_html ) {
-		$html = new \WP_HTML_Tag_Processor( $product_html );
+		$processor = new \WP_HTML_Tag_Processor( $product_html );
 
-		// Add classes to the form.
-		while ( $html->next_tag( array( 'class_name' => 'quantity' ) ) ) {
-			$html->add_class( 'wc-block-components-quantity-selector' );
+		while ( $processor->next_tag() ) {
+			if (
+				$processor->get_tag() === 'DIV' &&
+				$processor->has_class( 'quantity' )
+			) {
+				$processor->add_class( 'wc-block-components-quantity-selector' );
+			}
+
+			if (
+				$processor->get_tag() === 'INPUT' &&
+				$processor->get_attribute( 'name' ) === 'quantity' &&
+				$processor->get_attribute( 'type' ) !== 'hidden'
+			) {
+				$processor->add_class( 'wc-block-components-quantity-selector__input' );
+			}
 		}
 
-		$html = new \WP_HTML_Tag_Processor( $html->get_updated_html() );
-		while ( $html->next_tag( array( 'class_name' => 'input-text' ) ) ) {
-			$html->add_class( 'wc-block-components-quantity-selector__input' );
-		}
-
-		return $html->get_updated_html();
+		return $processor->get_updated_html();
 	}
 
 	/**
