@@ -773,6 +773,35 @@ add_action( 'woocommerce_update_product', 'wc_maybe_schedule_product_sale_events
 add_action( 'woocommerce_new_product', 'wc_maybe_schedule_product_sale_events', 10, 2 );
 
 /**
+ * Schedule sale events when sale date meta is updated directly (e.g. by importers, ERPs, or bulk tools).
+ *
+ * The woocommerce_update_product/woocommerce_new_product hooks only fire when a product is saved
+ * through WooCommerce's CRUD. This callback ensures per-product sale events are also scheduled
+ * when sale date meta is written via update_post_meta() or similar low-level calls.
+ *
+ * @since 10.8.0
+ * @param int    $meta_id    ID of the meta entry.
+ * @param int    $object_id  Post ID.
+ * @param string $meta_key   Meta key.
+ * @param mixed  $_meta_value Meta value (unused).
+ * @return void
+ */
+function wc_maybe_schedule_sale_events_on_meta_update( $meta_id, $object_id, $meta_key, $_meta_value ): void { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+	if ( '_sale_price_dates_from' !== $meta_key && '_sale_price_dates_to' !== $meta_key ) {
+		return;
+	}
+
+	$post_type = get_post_type( $object_id );
+	if ( 'product' !== $post_type && 'product_variation' !== $post_type ) {
+		return;
+	}
+
+	wc_maybe_schedule_product_sale_events( $object_id );
+}
+add_action( 'updated_post_meta', 'wc_maybe_schedule_sale_events_on_meta_update', 10, 4 );
+add_action( 'added_post_meta', 'wc_maybe_schedule_sale_events_on_meta_update', 10, 4 );
+
+/**
  * Function which handles the start and end of scheduled sales via cron.
  *
  * Previously, this daily cron was the only mechanism for starting/ending scheduled
