@@ -149,7 +149,7 @@ class Controller extends AbstractBlock {
 		$block_name                  = $parsed_block['blockName'];
 		$is_product_collection_block = $parsed_block['attrs']['query']['isProductCollectionBlock'] ?? false;
 		$force_page_reload_global    =
-			$parsed_block['attrs']['forcePageReload'] ?? false &&
+			( $parsed_block['attrs']['forcePageReload'] ?? false ) &&
 			isset( $parsed_block['attrs']['queryId'] );
 
 		if (
@@ -173,7 +173,7 @@ class Controller extends AbstractBlock {
 				 */
 				$render_product_collection_callback = static function ( $content, $block ) use ( &$enhanced_query_stack, &$dirty_enhanced_queries, &$render_product_collection_callback ) {
 					$force_page_reload =
-						$parsed_block['attrs']['forcePageReload'] ?? false &&
+						( $block['attrs']['forcePageReload'] ?? false ) &&
 						isset( $block['attrs']['queryId'] );
 
 					if ( $force_page_reload ) {
