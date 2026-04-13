@@ -68733,12 +68733,6 @@ parameters:
 			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
 
 		-
-			message: '#^Parameter \#2 \$target of static method Automattic\\WooCommerce\\Utilities\\MetaDataUtil\:\:update\(\) expects \(callable\(\)\: mixed\)\|WC_Data, Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\WC_Product\|WC_Product given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
 			message: '#^Parameter \$object_data of method Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\Controller\:\:prepare_object_for_response_core\(\) has invalid type Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\WC_Data\.$#'
 			identifier: class.notFound
 			count: 1

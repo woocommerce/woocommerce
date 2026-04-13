@@ -141,69 +141,31 @@ class MetaDataUtilTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox `update` invokes a callable for each valid entry.
-	 */
-	public function test_update_with_callable(): void {
-		$collected = array();
-
-		MetaDataUtil::update(
-			array(
-				array( 'value' => 'orphan' ),
-				array(
-					'key'   => 'a',
-					'value' => '1',
-				),
-				array(
-					'key'   => 'b',
-					'value' => '2',
-				),
-			),
-			function ( $meta ) use ( &$collected ) {
-				$collected[] = $meta;
-			}
-		);
-
-		$this->assertCount( 2, $collected );
-		$this->assertSame( 'a', $collected[0]['key'] );
-		$this->assertSame( 'b', $collected[1]['key'] );
-	}
-
-	/**
 	 * @testdox `update` does nothing when meta_data is not an array.
 	 */
 	public function test_update_ignores_non_array_meta_data(): void {
-		$called = false;
+		$order = wc_create_order();
 
-		MetaDataUtil::update(
-			null,
-			function () use ( &$called ) {
-				$called = true;
-			}
-		);
-		MetaDataUtil::update(
-			'string',
-			function () use ( &$called ) {
-				$called = true;
-			}
-		);
+		MetaDataUtil::update( null, $order );
+		MetaDataUtil::update( 'string', $order );
 
-		$this->assertFalse( $called, 'Callback should not be called for non-array meta_data' );
+		$this->assertEmpty( $order->get_meta_data(), 'No meta should be added for non-array meta_data' );
 	}
 
 	/**
-	 * @testdox `update` throws InvalidArgumentException when target is neither WC_Data nor callable.
+	 * @testdox `update` throws TypeError when target is not a WC_Data instance.
 	 */
 	public function test_update_throws_for_invalid_target(): void {
-		$this->expectException( \InvalidArgumentException::class );
+		$this->expectException( \TypeError::class );
 
-		MetaDataUtil::update( array(), 'not_a_callable_or_object' );
+		MetaDataUtil::update( array(), 'not_a_wc_data_object' );
 	}
 
 	/**
 	 * @testdox `update` passes custom default_id through to normalize.
 	 */
 	public function test_update_passes_default_id(): void {
-		$collected = array();
+		$order = wc_create_order();
 
 		MetaDataUtil::update(
 			array(
@@ -212,12 +174,13 @@ class MetaDataUtilTest extends WC_Unit_Test_Case {
 					'value' => 'v',
 				),
 			),
-			function ( $meta ) use ( &$collected ) {
-				$collected[] = $meta;
-			},
+			$order,
 			99
 		);
 
-		$this->assertSame( 99, $collected[0]['id'] );
+		$meta_data = $order->get_meta_data();
+		$this->assertCount( 1, $meta_data );
+		$this->assertSame( 'k', $meta_data[0]->key );
+		$this->assertSame( 'v', $meta_data[0]->value );
 	}
 }

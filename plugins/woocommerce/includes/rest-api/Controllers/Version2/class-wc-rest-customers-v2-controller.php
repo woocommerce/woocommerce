@@ -132,14 +132,11 @@ class WC_REST_Customers_V2_Controller extends WC_REST_Customers_V1_Controller {
 
 		// Meta data.
 		if ( isset( $request['meta_data'] ) ) {
-			MetaDataUtil::update(
-				$request['meta_data'],
-				function ( $meta ) use ( $customer ) {
-					if ( ! is_protected_meta( $meta['key'], 'user' ) ) {
-						$customer->update_meta_data( $meta['key'], $meta['value'], $meta['id'] );
-					}
-				}
+			$meta_data = array_filter(
+				MetaDataUtil::normalize( $request['meta_data'] ),
+				fn( $meta ) => ! is_protected_meta( $meta['key'], 'user' )
 			);
+			MetaDataUtil::update( $meta_data, $customer );
 		}
 	}
 
