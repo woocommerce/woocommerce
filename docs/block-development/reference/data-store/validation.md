@@ -169,7 +169,7 @@ Clears multiple validation errors at once. If no error IDs are passed, all valid
 
 #### _Example_ 
 
-1. This will clear only the validation errors passed in the array.
+This will clear only the validation errors passed in the array:
 
 ```js
 const store = dispatch( validationStore );
@@ -180,7 +180,7 @@ store.clearValidationErrors( [
 ] );
 ```
 
-2. This will clear all validation errors.
+This will clear all validation errors:
 
 ```js
 const store = dispatch( validationStore );
