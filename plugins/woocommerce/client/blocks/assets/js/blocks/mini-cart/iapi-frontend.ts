@@ -424,8 +424,9 @@ function getItemDataRaw( field: 'name' | 'value' ): string {
 		dataProperty: DataProperty;
 	} >();
 
-	// eslint-disable-next-line @typescript-eslint/no-use-before-define
+	
 	const dataItemAttr =
+		// eslint-disable-next-line @typescript-eslint/no-use-before-define
 		itemData || cartItemState.cartItem[ dataProperty ]?.[ 0 ];
 
 	if ( ! dataItemAttr ) {
