@@ -5,12 +5,7 @@ import { eye } from '@woocommerce/icons';
 import { useProductDataContext } from '@woocommerce/shared-context';
 import { __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
-import {
-	Icon,
-	ToolbarGroup,
-
-	ToolbarDropdownMenu,
-} from '@wordpress/components';
+import { Icon, ToolbarGroup, ToolbarDropdownMenu } from '@wordpress/components';
 
 /**
  * Internal dependencies

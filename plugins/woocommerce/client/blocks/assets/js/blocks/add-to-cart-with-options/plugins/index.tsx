@@ -5,9 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
 import { SelectControl } from '@wordpress/components';
 import { recordEvent } from '@woocommerce/tracks';
-import {
-	PluginDocumentSettingPanel,
-} from '@wordpress/editor';
+import { PluginDocumentSettingPanel } from '@wordpress/editor';
 
 /**
  * Internal dependencies

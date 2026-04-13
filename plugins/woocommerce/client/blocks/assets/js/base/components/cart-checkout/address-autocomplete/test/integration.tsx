@@ -114,10 +114,7 @@ describe.skip( 'Suggestions - when rendered in AddressAutocomplete component', (
 				const storeName =
 					typeof store === 'string' ? store : store?.name;
 
-				if (
-					storeName === 'wc/store/cart' ||
-					store === cartStore
-				) {
+				if ( storeName === 'wc/store/cart' || store === cartStore ) {
 					return {
 						...jest
 							.requireActual( '@wordpress/data' )
