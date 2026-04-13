@@ -44,7 +44,7 @@ class VariationDescription extends AbstractBlock {
 
 		$wrapper_attributes = array(
 			'data-wp-interactive'  => 'woocommerce/product-elements',
-			'data-wp-bind--hidden' => 'woocommerce/products::!state.productInContext.description',
+			'data-wp-bind--hidden' => 'woocommerce/products::!state.selectedVariation.description',
 			'aria-live'            => 'polite',
 			'aria-atomic'          => 'true',
 		);
