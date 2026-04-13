@@ -152,9 +152,9 @@ class Utils {
 		$context_attribute = wp_interactivity_data_wp_context( $context );
 
 		$product_context_directive = '';
-		if ( $set_product_context ) {
+		if ( $set_product_context && $product instanceof \WC_Product ) {
 			$product_context = array(
-				'productId'   => $product instanceof \WC_Product ? $product->get_id() : 0,
+				'productId'   => $product->get_id(),
 				'variationId' => null,
 			);
 
