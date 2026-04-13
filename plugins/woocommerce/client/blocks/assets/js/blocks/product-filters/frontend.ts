@@ -227,6 +227,12 @@ const productFiltersStore = {
 				return;
 			}
 
+			const config = getConfig( BLOCK_NAME );
+			if ( config?.forcePageReload ) {
+				window.location.assign( url.href );
+				return;
+			}
+
 			const routerModule: typeof import('@wordpress/interactivity-router') =
 				yield import( '@wordpress/interactivity-router' );
 

@@ -340,6 +340,16 @@ class Controller extends AbstractBlock {
 		 */
 		$this->asset_data_registry->add( 'isRenderingPhpTemplate', true );
 
+		/*
+		 * When forcePageReload is enabled, the product collection has no data-wp-router-region,
+		 * so the Interactivity Router cannot update it client-side. Signal the product-filters
+		 * block so its navigate action falls back to a full page reload instead of using the
+		 * router, without affecting other blocks on the page.
+		 */
+		if ( $parsed_block['attrs']['forcePageReload'] ?? false ) {
+			wp_interactivity_config( 'woocommerce/product-filters', array( 'forcePageReload' => true ) );
+		}
+
 		return $pre_render;
 	}
 
