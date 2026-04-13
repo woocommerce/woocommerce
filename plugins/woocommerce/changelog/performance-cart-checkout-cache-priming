@@ -1,4 +1,4 @@
 Significance: patch
 Type: performance
 
-Reduced the number of SQLs required to populate cart data in StoreApi.
+Reduced the number of SQL queries needed to populate cart data in StoreApi.
