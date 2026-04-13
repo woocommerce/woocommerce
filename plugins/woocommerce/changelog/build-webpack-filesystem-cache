@@ -1,4 +1,4 @@
-Significance: patch
-Type: performance
+Significance: minor
+Type: dev
 
 Improve repeated WooCommerce admin and blocks production builds by using webpack filesystem cache outside watch mode.
