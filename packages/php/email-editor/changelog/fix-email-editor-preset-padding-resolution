@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Resolve preset variable references in Spacing_Preprocessor container padding to fix padding mismatch for template-level blocks in email previews. Extract shared Preset_Variable_Resolver utility to eliminate duplicated resolution logic across Content_Renderer, Blocks_Width_Preprocessor, Spacing_Preprocessor, and Theme_Controller.

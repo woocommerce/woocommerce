@@ -36898,12 +36898,6 @@ parameters:
 			path: includes/wc-user-functions.php
 
 		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(int\<min, \-1\>\|int\<1, max\>\|non\-falsy\-string\)\: mixed\)\|null, ''esc_sql'' given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/wc-user-functions.php
-
-		-
 			message: '#^Parameter \#1 \$object_or_class of function property_exists expects object\|string, WP_User\|false given\.$#'
 			identifier: argument.type
 			count: 1
@@ -46594,12 +46588,6 @@ parameters:
 			path: src/Admin/Features/Fulfillments/FulfillmentUtils.php
 
 		-
-			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Admin/Features/Fulfillments/FulfillmentUtils.php
-
-		-
 			message: '#^Cannot access offset int on array\|false\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
@@ -54659,12 +54647,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductResultsCount.php
 
 		-
-			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Blocks/BlockTypes/ProductSKU.php
-
-		-
 			message: '#^Call to an undefined method WC_Product\:\:get_available_variations\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -54679,12 +54661,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductSKU\:\:register_block_type_assets\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypes/ProductSKU.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductSKU\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/ProductSKU.php
 
@@ -65059,17 +65035,6 @@ parameters:
 			count: 1
 			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmails.php
 
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\EmailEditor\\WooContentProcessor\:\:prepare_css\(\) should return string but returns string\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Internal/EmailEditor/WooContentProcessor.php
-
-		-
-			message: '#^Parameter \#3 \$subject of function preg_replace expects array\<float\|int\|string\>\|string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/EmailEditor/WooContentProcessor.php
 
 		-
 			message: '#^@param string \$feature_id does not accept actual type of parameter\: int\<min, \-1\>\|int\<1, max\>\|non\-falsy\-string\.$#'
