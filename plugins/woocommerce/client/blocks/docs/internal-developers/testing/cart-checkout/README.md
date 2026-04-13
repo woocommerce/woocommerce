@@ -1,6 +1,6 @@
-# Cart and Checkout testing plan {/* omit in toc */}
+# Cart and Checkout testing plan <!-- omit in toc -->
 
-## Table of Contents {/* omit in toc */}
+## Table of Contents <!-- omit in toc -->
 
 - [Introduction](#introduction)
     - [Known limitations](#known-limitations)
@@ -35,7 +35,7 @@ we're aware of them, and will probably not tackle them in this first release:
 
 <!-- Currently this is unneeded so I'm omitting this section -->.
 <!--
-## Before you start {/* omit in toc */}
+## Before you start <!-- omit in toc -->
 <!--
 Depending on how far you will test, there are certain requirements, in general
 you will need the following:

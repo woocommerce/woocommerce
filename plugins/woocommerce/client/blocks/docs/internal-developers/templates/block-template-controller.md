@@ -1,6 +1,6 @@
-# BlockTemplateController.php {/* omit in toc */}
+# BlockTemplateController.php <!-- omit in toc -->
 
-## Table of Contents {/* omit in toc */}
+## Table of Contents <!-- omit in toc -->
 
 -   [Overview](#overview)
 -   [add_block_templates( $query_result, $query, \$template_type )](#add_block_templates-query_result-query-template_type-)

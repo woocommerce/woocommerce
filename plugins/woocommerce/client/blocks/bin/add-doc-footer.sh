@@ -10,13 +10,13 @@ function update_footer {
 
 '
 
-	# Replace everything after {/* FEEDBACK */}
+	# Replace everything after <!-- FEEDBACK -->
 	if grep -q "$STARTTAG" "$1"; then
-		awk '/{/* FEEDBACK */}/ {exit} {print}' $1 > tmp && mv tmp $1
+		awk '/<!-- FEEDBACK -->/ {exit} {print}' $1 > tmp && mv tmp $1
 	fi
 
 	# Append feedback section.
-	printf '%s\n' "{/* FEEDBACK */}$REPLACEWITH{/* /FEEDBACK */}" '' >> $1
+	printf '%s\n' "<!-- FEEDBACK -->$REPLACEWITH<!-- /FEEDBACK -->" '' >> $1
 }
 
 find ./docs -name "*.md" ! -path "./docs/examples*"  ! -path "./docs/internal-developers*"|while read filename; do

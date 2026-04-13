@@ -1,6 +1,6 @@
-# Templates {/* omit in toc */}
+# Templates <!-- omit in toc -->
 
-## Table of contents {/* omit in toc */}
+## Table of contents <!-- omit in toc -->
 
 -   [Overview](#overview)
     -   [Requirements](#requirements)

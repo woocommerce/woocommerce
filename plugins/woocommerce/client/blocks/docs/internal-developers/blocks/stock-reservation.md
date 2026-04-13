@@ -1,6 +1,6 @@
-# Stock Reservation during Checkout {/* omit in toc */}
+# Stock Reservation during Checkout <!-- omit in toc -->
 
-## Table of contents {/* omit in toc */}
+## Table of contents <!-- omit in toc -->
 
 -   [The Reserved Stock Database Table](#the-reserved-stock-database-table)
     -   [Usage Example](#usage-example)

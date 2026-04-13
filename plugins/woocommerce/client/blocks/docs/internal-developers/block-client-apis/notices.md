@@ -1,6 +1,6 @@
-# Frontend notices {/* omit in toc */}
+# Frontend notices <!-- omit in toc -->
 
-## Table of contents {/* omit in toc */}
+## Table of contents <!-- omit in toc -->
 
 -   [Notices in WooCommerce Blocks](#notices-in-woocommerce-blocks)
     -   [`StoreNoticesContainer`](#storenoticescontainer)

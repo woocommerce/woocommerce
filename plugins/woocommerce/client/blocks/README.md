@@ -1,8 +1,8 @@
-# WooCommerce Blocks {/* omit in toc */}
+# WooCommerce Blocks <!-- omit in toc -->
 
 This is the client for WooCommerce + Gutenberg. This package serves as a space to iterate and explore new Blocks and updates to existing blocks for WooCommerce, and how WooCommerce might work with the Block Editor.
 
-## Table of Contents {/* omit in toc */}
+## Table of Contents <!-- omit in toc -->
 
 -   [Documentation](#documentation)
     -   [Code Documentation](#code-documentation)

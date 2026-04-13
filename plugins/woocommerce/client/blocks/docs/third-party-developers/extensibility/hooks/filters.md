@@ -1238,7 +1238,7 @@ apply_filters( 'woocommerce_store_api_rate_limit_id', string $identifier );
 - [StoreApi/Authentication.php](../../../../../woocommerce/src/StoreApi/Authentication.php)
 
 ---
-{/* FEEDBACK */}
+<!-- FEEDBACK -->
 
 ---
 
@@ -1246,5 +1246,5 @@ apply_filters( 'woocommerce_store_api_rate_limit_id', string $identifier );
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./docs/third-party-developers/extensibility/hooks/filters.md)
 
-{/* /FEEDBACK */}
+<!-- /FEEDBACK -->
 

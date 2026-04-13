@@ -2,7 +2,7 @@ AnimationSlider
 ===
 
 This component creates slideable content controlled by an animate prop to direct the contents to slide left or right.
-All other props are passed to `CSSTransition`. More info at <http://reactcommunity.org/react-transition-group/css-transition>
+All other props are passed to `CSSTransition`. More info at http://reactcommunity.org/react-transition-group/css-transition
 
 ## Usage
 

@@ -1,4 +1,4 @@
-# Individual template classes {/* omit in toc */}
+# Individual template classes <!-- omit in toc -->
 
 Each WooCommerce template has its own individual PHP class, which are all registered in BlockTemplatesRegistry.
 

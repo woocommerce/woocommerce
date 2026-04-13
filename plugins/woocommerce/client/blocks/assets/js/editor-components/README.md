@@ -6,7 +6,7 @@ Many of our blocks need rich, smart components to provide an interface for selec
 
 See [Storybook & Components](../../../docs/contributors/storybook-and-components.md) doc for more information.
 
-{/* FEEDBACK */}
+<!-- FEEDBACK -->
 
 ---
 
@@ -14,4 +14,4 @@ See [Storybook & Components](../../../docs/contributors/storybook-and-components
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./docs/README.md)
 
-{/* /FEEDBACK */}
+<!-- /FEEDBACK -->

@@ -1,8 +1,8 @@
-# Checkout API interface {/* omit in toc */}
+# Checkout API interface <!-- omit in toc -->
 
 **Note on migration:** We are in the process of moving much of the data from contexts into data stores, so this portion of the docs may change often as we do this. We will try to keep it up to date while the work is carried out.
 
-## Table of Contents {/* omit in toc */}
+## Table of Contents <!-- omit in toc -->
 
 -   [Data Stores](#data-stores)
     -   [Checkout Data Store](#checkout-data-store)

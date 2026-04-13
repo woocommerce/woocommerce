@@ -1,6 +1,6 @@
-# SearchListControl {/* omit in toc */}
+# SearchListControl <!-- omit in toc -->
 
-## Table of contents {/* omit in toc */}
+## Table of contents <!-- omit in toc -->
 
 -   [Usage](#usage)
     -   [Props](#props)
@@ -77,7 +77,7 @@ Used implicitly by `SearchListControl` when the `renderItem` prop is omitted.
 | `onSelect`   | Function  | `null`  | Callback for selecting the item                                                  |
 | `search`     | String    | `''`    | Search string, used to highlight the substring in the item name                  |
 
-{/* FEEDBACK */}
+<!-- FEEDBACK -->
 
 ---
 
@@ -85,4 +85,4 @@ Used implicitly by `SearchListControl` when the `renderItem` prop is omitted.
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./docs/README.md)
 
-{/* /FEEDBACK */}
+<!-- /FEEDBACK -->

@@ -36,7 +36,7 @@ Our [JavaScript Build System](javascript-build-system.md) guide offers a detaile
 
 Last but not least, to get an insight into how CSS is built, refer to the [CSS Build System](css-build-system.md) guide. A firm grasp of this will ensure your CSS files meet the standards and quality expected.
 
-{/* FEEDBACK */}
+<!-- FEEDBACK -->
 
 ---
 
@@ -44,5 +44,5 @@ Last but not least, to get an insight into how CSS is built, refer to the [CSS B
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./docs/contributors/README.md)
 
-{/* /FEEDBACK */}
+<!-- /FEEDBACK -->
 

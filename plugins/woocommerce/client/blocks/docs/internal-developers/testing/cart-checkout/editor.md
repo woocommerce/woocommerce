@@ -1,4 +1,4 @@
-# Editor experience {/* omit in toc */}
+# Editor experience <!-- omit in toc -->
 
 ## What to test
 

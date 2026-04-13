@@ -33,22 +33,22 @@ Name | Type | Default | Description
 `debouncedSpeak` | Function | `null` | 
 `instanceId` | Number | `null` | 
 
-### `list` item structure
+### `list` item structure:
 
-- `id`: Number
-- `name`: String
+  - `id`: Number
+  - `name`: String
 
-### `messages` object structure
+### `messages` object structure:
 
-- `clear`: String - A more detailed label for the "Clear all" button, read to screen reader users.
-- `list`: String - Label for the list of selectable items, only read to screen reader users.
-- `noItems`: String - Message to display when the list is empty (implies nothing loaded from the server
+  - `clear`: String - A more detailed label for the "Clear all" button, read to screen reader users.
+  - `list`: String - Label for the list of selectable items, only read to screen reader users.
+  - `noItems`: String - Message to display when the list is empty (implies nothing loaded from the server
 or parent component).
-- `noResults`: String - Message to display when no matching results are found. %s is the search term.
-- `search`: String - Label for the search input
-- `selected`: Function - Label for the selected items. This is actually a function, so that we can pass
+  - `noResults`: String - Message to display when no matching results are found. %s is the search term.
+  - `search`: String - Label for the search input
+  - `selected`: Function - Label for the selected items. This is actually a function, so that we can pass
 through the count of currently selected items.
-- `updated`: String - Label indicating that search results have changed, read to screen reader users.
+  - `updated`: String - Label indicating that search results have changed, read to screen reader users.
 
 
 SearchListItem

@@ -1,6 +1,6 @@
-# Tag {/* omit in toc */}
+# Tag <!-- omit in toc -->
 
-## Table of contents {/* omit in toc */}
+## Table of contents <!-- omit in toc -->
 
 - [Usage](#usage)
     - [Props](#props)
@@ -26,7 +26,7 @@ or with a popover that is shown on click.
 | `remove`            | Function                    | `null`  | A function called when the remove X is clicked. If not used, no X icon will display |
 | `screenReaderLabel` | String                      | `null`  | A more descriptive label for screen reader users. Defaults to the `name` prop       |
 
-{/* FEEDBACK */}
+<!-- FEEDBACK -->
 
 ---
 
@@ -34,4 +34,4 @@ or with a popover that is shown on click.
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./docs/README.md)
 
-{/* /FEEDBACK */}
+<!-- /FEEDBACK -->

@@ -1,6 +1,6 @@
-# Storybook & Components {/* omit in toc */}
+# Storybook & Components <!-- omit in toc -->
 
-## Table of contents {/* omit in toc */}
+## Table of contents <!-- omit in toc -->
 
 -   [Where are our components?](#where-are-our-components)
 -   [How to run Storybook locally and test components](#how-to-run-storybook-locally-and-test-components)
@@ -44,7 +44,7 @@ For more info about individual components, refer to [Storybook](https://woocomme
 
 If you're stuck, copy source of an existing story to get started.
 
-{/* FEEDBACK */}
+<!-- FEEDBACK -->
 
 ---
 
@@ -52,5 +52,5 @@ If you're stuck, copy source of an existing story to get started.
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./docs/contributors/storybook-and-components.md)
 
-{/* /FEEDBACK */}
+<!-- /FEEDBACK -->
 

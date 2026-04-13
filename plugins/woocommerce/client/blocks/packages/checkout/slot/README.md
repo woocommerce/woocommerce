@@ -1,6 +1,6 @@
-# Slot and Fill {/* omit in toc */}
+# Slot and Fill <!-- omit in toc -->
 
-## Table of Contents {/* omit in toc */}
+## Table of Contents <!-- omit in toc -->
 
 -   [`createSlotFill( slotName )`](#createslotfill-slotname-)
     -   [Usage](#usage)
@@ -183,7 +183,7 @@ registerPlugin( 'my-plugin', { render } );
 
 Slot Fills are implemented throughout the Cart and Checkout Blocks, as well as some components. For a list of available Slot Fills, [see this document](/docs/block-development/extensible-blocks/cart-and-checkout-blocks/available-slot-fills.md).
 
-{/* FEEDBACK */}
+<!-- FEEDBACK -->
 
 ---
 
@@ -191,5 +191,5 @@ Slot Fills are implemented throughout the Cart and Checkout Blocks, as well as s
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./packages/checkout/slot/README.md)
 
-{/* /FEEDBACK */}
+<!-- /FEEDBACK -->
 

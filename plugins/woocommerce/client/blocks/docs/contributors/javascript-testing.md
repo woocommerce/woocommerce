@@ -1,6 +1,6 @@
-# JavaScript Testing {/* omit in toc */}
+# JavaScript Testing <!-- omit in toc -->
 
-## Table of contents {/* omit in toc */}
+## Table of contents <!-- omit in toc -->
 
 -   [How to run JavaScript unit tests](#how-to-run-javascript-unit-tests)
 -   [How to run end-to-end tests with deprecated infrastructure](#how-to-run-end-to-end-tests-with-deprecated-infrastructure)
@@ -109,7 +109,7 @@ Currently, we only run e2e tests with the most recent version of WordPress. We a
 
 When preparing for a new version of WordPress, it's a good practice to search for conditions in our tests that check for specific WP versions (with the variable `WP_VERSION`).
 
-{/* FEEDBACK */}
+<!-- FEEDBACK -->
 
 ---
 
@@ -117,4 +117,4 @@ When preparing for a new version of WordPress, it's a good practice to search fo
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./docs/contributors/javascript-testing.md)
 
-{/* /FEEDBACK */}
+<!-- /FEEDBACK -->

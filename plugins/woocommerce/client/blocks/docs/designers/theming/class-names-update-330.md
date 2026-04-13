@@ -17,7 +17,7 @@ In [WooCommerce Blocks 3.3.0](https://developer.woocommerce.com/2020/09/02/wooco
 | `wc-block-components-express-checkout-continue-rule`         | `wc-block-components-express-payment-continue-rule--cart` (Cart block)         |
 | `wc-block-components-express-checkout-payment-event-buttons` | `wc-block-components-express-payment__event-buttons`                           |
 
-{/* FEEDBACK */}
+<!-- FEEDBACK -->
 
 ---
 
@@ -25,5 +25,5 @@ In [WooCommerce Blocks 3.3.0](https://developer.woocommerce.com/2020/09/02/wooco
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./docs/designers/theming/class-names-update-330.md)
 
-{/* /FEEDBACK */}
+<!-- /FEEDBACK -->
 

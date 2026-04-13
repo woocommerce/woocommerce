@@ -1,4 +1,4 @@
-# WooCommerce Enumerators {/* omit in toc */}
+# WooCommerce Enumerators <!-- omit in toc -->
 
 This directory contains enumerators used in the WooCommerce plugin. Enumerators are used to define a set of named constants, which can be used to represent a set of possible values.
 

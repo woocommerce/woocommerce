@@ -1,5 +1,4 @@
-{/* markdownlint-disable MD029 */}
-
+<!-- markdownlint-disable MD029 -->
 # Blueprint
 
 This PHP Composer package facilitates exporting and importing WordPress Blueprint compatible JSON formats. It offers a solid framework for seamless integration with WordPress sites and supports extensibility, enabling plugins to customize export and import functionalities. Manage site configurations, options, and settings effortlessly with JSON files.

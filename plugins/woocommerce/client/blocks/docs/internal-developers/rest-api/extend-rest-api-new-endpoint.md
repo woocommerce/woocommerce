@@ -1,6 +1,6 @@
-# Adding an endpoint to ExtendSchema {/* omit in toc */}
+# Adding an endpoint to ExtendSchema <!-- omit in toc -->
 
-## Table of contents {/* omit in toc */}
+## Table of contents <!-- omit in toc -->
 
 -   [Extending `GET` endpoints in Store API](#extending-get-endpoints-in-store-api)
 -   [Use cases for adding new endpoints](#use-cases-for-adding-new-endpoints)
@@ -57,7 +57,7 @@ There might be a case when you want to extend an existing schema, for example, y
 
 There might be a case when you want to add a new schema, for example, you need a new endpoint that do not exist in the Store API yet, e.g. `wc/store/order`. In [Add an endpoint for getting pay for order orders](https://github.com/woocommerce/woocommerce-blocks/pull/10199/) we did that.
 
-{/* FEEDBACK */}
+<!-- FEEDBACK -->
 
 ---
 
@@ -65,4 +65,4 @@ There might be a case when you want to add a new schema, for example, you need a
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./docs/internal-developers/rest-api/extend-rest-api-new-endpoint.md)
 
-{/* /FEEDBACK */}
+<!-- /FEEDBACK -->

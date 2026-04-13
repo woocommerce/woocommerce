@@ -1,6 +1,6 @@
-# Documentation Guidelines {/* omit in toc */}
+# Documentation Guidelines <!-- omit in toc -->
 
-## Table of contents {/* omit in toc */}
+## Table of contents <!-- omit in toc -->
 
 -   [Use active instead of passive voice](#use-active-instead-of-passive-voice)
     -   [Example](#example)
@@ -169,7 +169,7 @@ When explaining functionality, the following structure should be used:
 
 When referencing other documentations, the corresponding document should be linked.
 
-{/* FEEDBACK */}
+<!-- FEEDBACK -->
 
 ---
 
@@ -177,4 +177,4 @@ When referencing other documentations, the corresponding document should be link
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./docs/contributors/documentation-guidelines.md)
 
-{/* /FEEDBACK */}
+<!-- /FEEDBACK -->

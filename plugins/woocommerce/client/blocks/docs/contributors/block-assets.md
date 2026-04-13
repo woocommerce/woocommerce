@@ -1,6 +1,6 @@
-# Block Script Assets {/* omit in toc */}
+# Block Script Assets <!-- omit in toc -->
 
-## Table of contents {/* omit in toc */}
+## Table of contents <!-- omit in toc -->
 
 -   [When are assets needed?](#when-are-assets-needed)
 -   [Choosing Handles for Assets (and scripts in general)](#choosing-handles-for-assets-and-scripts-in-general)
@@ -89,7 +89,7 @@ On the client side the value will be available via:
 wc.wcSettings.getSetting( 'key' );
 ```
 
-{/* FEEDBACK */}
+<!-- FEEDBACK -->
 
 ---
 
@@ -97,5 +97,5 @@ wc.wcSettings.getSetting( 'key' );
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./docs/contributors/block-assets.md)
 
-{/* /FEEDBACK */}
+<!-- /FEEDBACK -->
 

@@ -1,6 +1,6 @@
-# Taxes {/* omit in toc */}
+# Taxes <!-- omit in toc -->
 
-## Table of Contents {/* omit in toc */}
+## Table of Contents <!-- omit in toc -->
 
 - [Setup](#setup)
 - [What to test](#what-to-test)

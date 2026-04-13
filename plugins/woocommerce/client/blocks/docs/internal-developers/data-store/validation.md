@@ -1,4 +1,4 @@
-# Validation Store {/* omit in toc */}
+# Validation Store <!-- omit in toc -->
 
 See also [third-party developers' Validation Store documentation](../../third-party-developers/extensibility/data-store/validation.md).
 

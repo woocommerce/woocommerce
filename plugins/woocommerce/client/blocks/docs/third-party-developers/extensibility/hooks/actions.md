@@ -836,7 +836,7 @@ do_action( '{$hook}' )
 - [Templates/AbstractTemplateCompatibility.php](../../../../../../../woocommerce/src/Blocks/Templates/AbstractTemplateCompatibility.php)
 
 ---
-{/* FEEDBACK */}
+<!-- FEEDBACK -->
 
 ---
 
@@ -844,5 +844,5 @@ do_action( '{$hook}' )
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./docs/third-party-developers/extensibility/hooks/actions.md)
 
-{/* /FEEDBACK */}
+<!-- /FEEDBACK -->
 

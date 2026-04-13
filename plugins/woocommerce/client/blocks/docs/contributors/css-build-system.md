@@ -1,6 +1,6 @@
-# CSS Build System {/* omit in toc */}
+# CSS Build System <!-- omit in toc -->
 
-## Table of contents {/* omit in toc */}
+## Table of contents <!-- omit in toc -->
 
 -   [Right-to-left](#right-to-left)
 -   [Relevant files](#relevant-files)
@@ -25,7 +25,7 @@ Webpack config is split between several files, some relevant ones for the CSS bu
     -   [`bin/webpack-configs.js`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/bin/webpack-configs.js): Code for generating each build config. This most closely resembles a classic webpack config - if you're looking for something, start here.
         -   [`bin/webpack-entries.js`](https://github.com/woocommerce/woocommerce-gutenberg-products-block/blob/trunk/bin/webpack-entries.js): Code for generating [webpack `entry` definitions](https://webpack.js.org/concepts/entry-points/) and mapping source files to entry points. If you're adding a new block or module to the build, start here.
 
-{/* FEEDBACK */}
+<!-- FEEDBACK -->
 
 ---
 
@@ -33,5 +33,5 @@ Webpack config is split between several files, some relevant ones for the CSS bu
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./docs/contributors/css-build-system.md)
 
-{/* /FEEDBACK */}
+<!-- /FEEDBACK -->
 

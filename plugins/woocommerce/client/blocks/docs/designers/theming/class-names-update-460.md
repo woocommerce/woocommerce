@@ -11,7 +11,7 @@ In [WooCommerce Blocks 4.6.0](https://developer.woocommerce.com/2021/03/02/wooco
 | `wc-blocks-components-panel__button-icon` | `wc-block-components-panel__button-icon` |
 | `wc-blocks-components-panel__content`     | `wc-block-components-panel__content`     |
 
-{/* FEEDBACK */}
+<!-- FEEDBACK -->
 
 ---
 
@@ -19,5 +19,5 @@ In [WooCommerce Blocks 4.6.0](https://developer.woocommerce.com/2021/03/02/wooco
 
 🐞 Found a mistake, or have a suggestion? [Leave feedback about this document here.](https://github.com/woocommerce/woocommerce/issues/new?assignees=&labels=type%3A+documentation&template=suggestion-for-documentation-improvement-correction.md&title=Feedback%20on%20./docs/designers/theming/class-names-update-460.md)
 
-{/* /FEEDBACK */}
+<!-- /FEEDBACK -->
 
