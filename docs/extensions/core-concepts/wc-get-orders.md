@@ -61,7 +61,7 @@ Note that `wc_get_orders()` is mostly a shortcut to `WC_Order_Query::get_orders(
 | --- | --- |
 | `wc_get_orders ( $args )` | Retrieve orders matching query `$args`. |
 | `WC_Order_Query::get_query_vars()` | Get an array of all of the current query variables set on the query object. |
-| `WC_Order_Query::get( string $key, mixed $default = '' ) | Get the value of a query variable or the default if the query variable is not set. |
+| `WC_Order_Query::get( string $key, mixed $default = '' )` | Get the value of a query variable or the default if the query variable is not set. |
 | `WC_Order_Query::set( string $key, mixed $value )` | Set a query variable. |
 | `WC_Order_Query::get_orders()` | Get all orders matching the current query variables. |
 
