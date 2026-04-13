@@ -210,6 +210,8 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * Without proper validation, 0 === 0 would grant access to any guest order's fulfillments.
 	 */
 	public function test_get_fulfillments_guest_order_unauthenticated() {
+		wp_set_current_user( 0 );
+
 		// Verify we are not logged in (user ID = 0).
 		$this->assertEquals( 0, get_current_user_id() );
 
