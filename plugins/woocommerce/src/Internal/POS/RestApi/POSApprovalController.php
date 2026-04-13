@@ -109,9 +109,6 @@ class POSApprovalController extends RestApiControllerBase implements RegisterHoo
 							'type'    => 'object',
 							'default' => array(),
 						),
-						'idempotency_key' => array(
-							'type' => 'string',
-						),
 					),
 				),
 			)
@@ -152,12 +149,11 @@ class POSApprovalController extends RestApiControllerBase implements RegisterHoo
 			return $rate_check;
 		}
 
-		$pin             = $request->get_param( 'pin' );
-		$action          = $request->get_param( 'action' );
-		$context         = $request->get_param( 'context' ) ?? array();
-		$idempotency_key = $request->get_param( 'idempotency_key' );
-		$logger          = wc_get_logger();
-		$log_context     = array( 'source' => 'woocommerce-pos' );
+		$pin         = $request->get_param( 'pin' );
+		$action      = $request->get_param( 'action' );
+		$context     = $request->get_param( 'context' ) ?? array();
+		$logger      = wc_get_logger();
+		$log_context = array( 'source' => 'woocommerce-pos' );
 
 		if ( ! in_array( $action, self::APPROVABLE_ACTIONS, true ) ) {
 			return new WP_Error(
@@ -199,7 +195,7 @@ class POSApprovalController extends RestApiControllerBase implements RegisterHoo
 			);
 		}
 
-		$token = $this->approval_service->create_approval( $user_id, $action, $context, $idempotency_key );
+		$token = $this->approval_service->create_approval( $user_id, $action, $context );
 
 		$logger->info(
 			sprintf( 'Approval granted by user %d for action %s.', $user_id, $action ),

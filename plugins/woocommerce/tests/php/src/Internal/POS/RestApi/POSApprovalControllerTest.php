@@ -258,35 +258,6 @@ class POSApprovalControllerTest extends WC_REST_Unit_Test_Case {
 		wp_delete_user( $customer_id );
 	}
 
-	/**
-	 * @testdox Same idempotency key returns same token.
-	 */
-	public function test_idempotency_returns_same_token(): void {
-		wp_set_current_user( $this->admin_id );
-
-		$params = array(
-			'pin'             => '7391',
-			'action'          => 'woocommerce_refund_orders',
-			'context'         => array( 'order_id' => 42 ),
-			'idempotency_key' => 'test-key-123',
-		);
-
-		$request1 = new \WP_REST_Request( 'POST', self::ROUTE );
-		$request1->set_body_params( $params );
-		$response1 = rest_do_request( $request1 );
-
-		$request2 = new \WP_REST_Request( 'POST', self::ROUTE );
-		$request2->set_body_params( $params );
-		$response2 = rest_do_request( $request2 );
-
-		$this->assertSame( 200, $response1->get_status() );
-		$this->assertSame( 200, $response2->get_status() );
-		$this->assertSame(
-			$response1->get_data()['approval_token'],
-			$response2->get_data()['approval_token']
-		);
-	}
-
 	private function reset_roles(): void {
 		WC_Install::remove_roles();
 		WC_Install::create_roles();

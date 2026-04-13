@@ -255,7 +255,7 @@ For POS PIN auth:
 - Contains: approver_user_id, approved_action, context (e.g., order_id), timestamp
 - Single-use: deleted after consumption
 - Passed by the client as a request parameter `_pos_approval` on the approved action
-- **Idempotency:** The approval endpoint accepts an optional `idempotency_key` parameter. Duplicate requests with the same key within the TTL window return the existing approval token instead of creating a new one. Prevents double-tap issues on manager PIN pads.
+- **No idempotency key:** Double-tap prevention belongs in the iOS client (disable button after first tap). Backend idempotency was evaluated and removed because it stored raw tokens in transients, creating a token leakage path.
 
 ### 8.3 Self-Approval
 
@@ -377,8 +377,7 @@ Returns only users with `woocommerce_pos_access` capability. Never returns PIN v
 {
   "pin": "5678",
   "action": "woocommerce_refund_orders",
-  "context": { "order_id": 123 },
-  "idempotency_key": "optional-client-generated-key"
+  "context": { "order_id": 123 }
 }
 ```
 

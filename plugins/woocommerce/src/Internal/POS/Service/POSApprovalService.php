@@ -15,29 +15,20 @@ defined( 'ABSPATH' ) || exit;
  */
 class POSApprovalService {
 
-	private const APPROVAL_PREFIX    = '_wc_pos_approval_';
-	private const IDEMPOTENCY_PREFIX = '_wc_pos_idem_';
-	private const TOKEN_LENGTH       = 32;
-	private const TTL_SECONDS        = 300;
+	private const APPROVAL_PREFIX = '_wc_pos_approval_';
+	private const TOKEN_LENGTH    = 32;
+	private const TTL_SECONDS     = 300;
 
 	/**
 	 * Creates a single-use approval token for a manager override action.
 	 *
 	 * @since 10.8.0
-	 * @param int         $approver_id     The user ID of the approving manager.
-	 * @param string      $action          The action being approved (e.g. 'refund', 'discount').
-	 * @param array       $context         Additional context data for the approval.
-	 * @param string|null $idempotency_key Optional key to prevent duplicate approvals.
+	 * @param int    $approver_id The user ID of the approving manager.
+	 * @param string $action      The action being approved (e.g. 'refund', 'discount').
+	 * @param array  $context     Additional context data for the approval.
 	 * @return string The raw (unhashed) token.
 	 */
-	public function create_approval( int $approver_id, string $action, array $context, ?string $idempotency_key = null ): string {
-		if ( null !== $idempotency_key ) {
-			$existing_token = get_transient( self::IDEMPOTENCY_PREFIX . $idempotency_key );
-			if ( false !== $existing_token ) {
-				return $existing_token;
-			}
-		}
-
+	public function create_approval( int $approver_id, string $action, array $context ): string {
 		$token = wp_generate_password( self::TOKEN_LENGTH, false, false );
 		$hash  = hash( 'sha256', $token );
 
@@ -49,10 +40,6 @@ class POSApprovalService {
 		);
 
 		set_transient( self::APPROVAL_PREFIX . $hash, $data, self::TTL_SECONDS );
-
-		if ( null !== $idempotency_key ) {
-			set_transient( self::IDEMPOTENCY_PREFIX . $idempotency_key, $token, self::TTL_SECONDS );
-		}
 
 		return $token;
 	}

@@ -90,26 +90,6 @@ class POSApprovalServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox idempotency key returns same token for repeated calls.
-	 */
-	public function test_idempotency_same_key_returns_same_token(): void {
-		$token1 = $this->service->create_approval( $this->approver_id, 'refund', array(), 'req-123' );
-		$token2 = $this->service->create_approval( $this->approver_id, 'refund', array(), 'req-123' );
-
-		$this->assertSame( $token1, $token2 );
-	}
-
-	/**
-	 * @testdox different idempotency keys return different tokens.
-	 */
-	public function test_different_idempotency_keys_return_different_tokens(): void {
-		$token1 = $this->service->create_approval( $this->approver_id, 'refund', array(), 'req-123' );
-		$token2 = $this->service->create_approval( $this->approver_id, 'refund', array(), 'req-456' );
-
-		$this->assertNotSame( $token1, $token2 );
-	}
-
-	/**
 	 * @testdox approval data contains correct approver_id, action, and context.
 	 */
 	public function test_approval_data_contains_correct_fields(): void {
