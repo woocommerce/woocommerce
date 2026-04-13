@@ -363,9 +363,12 @@ export const getPullRequest = async ( options: {
 /**
  * Determine if a pull request is coming from a community contribution, i.e., not from a member of the WooCommerce organization.
  *
- * @param {Object} pullRequestData pull request data.
- * @param {string} owner           repository owner.
- * @param {string} name            repository name.
+ * @param {Object} pullRequestData                     pull request data.
+ * @param {Object} pullRequestData.head                head branch info.
+ * @param {Object} pullRequestData.head.repo           head repository info.
+ * @param {string} pullRequestData.head.repo.full_name full repository name (owner/repo).
+ * @param {string} owner                               repository owner.
+ * @param {string} name                                repository name.
  * @return {boolean} if a pull request is coming from a community contribution.
  */
 export const isCommunityPullRequest = (
