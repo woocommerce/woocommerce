@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix entity-encoded HTML in `item_data` being incorrectly decoded during mini-cart rendering.
