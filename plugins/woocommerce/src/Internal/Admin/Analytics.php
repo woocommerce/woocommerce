@@ -72,6 +72,9 @@ class Analytics {
 		add_filter( 'woocommerce_debug_tools', array( $this, 'register_cache_clear_tool' ) );
 		add_filter( 'woocommerce_debug_tools', array( $this, 'register_full_refund_fix_data_tool' ) );
 		add_filter( 'woocommerce_debug_tools', array( $this, 'register_regenerate_order_fulfillment_status_tool' ), 12 );
+		add_action( 'wp_ajax_woocommerce_check_refund_fix_needed', array( $this, 'ajax_check_refund_fix_needed' ) );
+		add_action( 'admin_footer', array( $this, 'output_refund_fix_tool_js' ) );
+		add_action( 'woocommerce_analytics_refund_fix_batch', array( $this, 'process_refund_fix_batch' ) );
 	}
 
 	/**
@@ -215,34 +218,62 @@ class Analytics {
 	}
 
 	/**
-	 * "Fix" full refund data by scheduling a re-import of all affected refund orders.
+	 * "Fix" full refund data by scheduling batched re-imports of all affected refund orders.
+	 *
+	 * Clears the old-data flag immediately so that new refunds are handled correctly
+	 * right away, then schedules the first batch job which will process up to 1,000
+	 * orders at a time via Action Scheduler.
 	 *
 	 * @since 10.8.0
 	 *
 	 * @return string Success message.
 	 */
 	public function run_full_refund_fix_data_tool() {
-		global $wpdb;
-
 		Cache::invalidate();
-
-		// Get every order ID where:
-		// 1. the total sales is less than 0, and
-		// 2. is not a refunded shipping fee only, and
-		// 3. is not a refunded tax fee only.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$refunded_orders = $wpdb->get_results(
-			"SELECT order_stats.order_id
-			FROM {$wpdb->prefix}wc_order_stats AS order_stats
-			WHERE order_stats.total_sales < 0
-				AND order_stats.total_sales != order_stats.shipping_total
-				AND order_stats.total_sales != order_stats.tax_total"
-		);
-
 		delete_option( 'woocommerce_analytics_uses_old_full_refund_data' );
 
+		WC()->queue()->schedule_single(
+			time(),
+			'woocommerce_analytics_refund_fix_batch',
+			array( 0 ),
+			'wc-admin-data'
+		);
+
+		return __( 'Re-importing refunded orders in batches of 1,000. Full refund data will be updated shortly.', 'woocommerce' );
+	}
+
+	/**
+	 * Process one batch of refund orders for the analytics fix.
+	 *
+	 * Fetches up to 1,000 orders with incorrect refund stats (cursor-based so
+	 * concurrent imports cannot shift the result window) and schedules a data
+	 * re-import for each. Schedules itself for the next cursor position when the
+	 * batch is full, stopping automatically once no more rows are found.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @param int $min_order_id Exclusive lower bound on order_id; 0 for the first batch.
+	 */
+	public function process_refund_fix_batch( $min_order_id = 0 ) {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$refunded_orders = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT order_stats.order_id
+				FROM {$wpdb->prefix}wc_order_stats AS order_stats
+				WHERE order_stats.total_sales < 0
+					AND order_stats.total_sales != order_stats.shipping_total
+					AND order_stats.total_sales != order_stats.tax_total
+					AND order_stats.order_id > %d
+				ORDER BY order_stats.order_id ASC
+				LIMIT 1000",
+				$min_order_id
+			)
+		);
+
 		if ( ! $refunded_orders ) {
-			return __( 'No affected refund orders found. Analytics data is already up to date.', 'woocommerce' );
+			return;
 		}
 
 		foreach ( $refunded_orders as $refunded_order ) {
@@ -255,7 +286,134 @@ class Analytics {
 			do_action( 'woocommerce_schedule_import', intval( $refunded_order->order_id ) );
 		}
 
-		return __( 'Re-importing refunded orders, full refund data will be updated shortly.', 'woocommerce' );
+		if ( count( $refunded_orders ) >= 1000 ) {
+			$last_order_id = intval( end( $refunded_orders )->order_id );
+			WC()->queue()->schedule_single(
+				time() + 5,
+				'woocommerce_analytics_refund_fix_batch',
+				array( $last_order_id ),
+				'wc-admin-data'
+			);
+		}
+	}
+
+	/**
+	 * AJAX handler: checks whether the store has analytics order stats rows that
+	 * look like unprocessed full refunds.
+	 *
+	 * @since 10.8.0
+	 */
+	public function ajax_check_refund_fix_needed() {
+		check_ajax_referer( 'woocommerce_refund_fix_check', 'nonce' );
+
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Insufficient permissions.', 'woocommerce' ) ), 403 );
+			return;
+		}
+
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$has_affected = $wpdb->get_var(
+			"SELECT order_stats.order_id
+			FROM {$wpdb->prefix}wc_order_stats AS order_stats
+			WHERE order_stats.total_sales < 0
+				AND order_stats.total_sales != order_stats.shipping_total
+				AND order_stats.total_sales != order_stats.tax_total
+			LIMIT 1"
+		);
+
+		wp_send_json_success( array( 'needs_fix' => ! empty( $has_affected ) ) );
+	}
+
+	/**
+	 * Output the inline script that injects a "Check" button into the full refund
+	 * fix tool row on the WooCommerce > Status > Tools page.
+	 *
+	 * @since 10.8.0
+	 */
+	public function output_refund_fix_tool_js() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( ! isset( $_GET['page'], $_GET['tab'] ) || 'wc-status' !== $_GET['page'] || 'tools' !== $_GET['tab'] ) {
+			return;
+		}
+
+		if ( OrderUtil::uses_new_full_refund_data() ) {
+			return;
+		}
+
+		$nonce         = wp_create_nonce( 'woocommerce_refund_fix_check' );
+		$ajax_url      = admin_url( 'admin-ajax.php' );
+		$tool_class    = self::FULL_REFUND_FIX_DATA_TOOL_ID;
+		$label_check   = __( 'Check', 'woocommerce' );
+		$label_working = __( 'Checking\u2026', 'woocommerce' );
+		$msg_needs_fix = __( 'Your store has orders that need fixing.', 'woocommerce' );
+		$msg_no_fix    = __( 'No affected orders found.', 'woocommerce' );
+		$msg_error     = __( 'Check failed, please try again.', 'woocommerce' );
+		?>
+		<script type="text/javascript">
+		( function() {
+			var toolRow = document.querySelector( 'tr.<?php echo esc_js( $tool_class ); ?>' );
+			if ( ! toolRow ) {
+				return;
+			}
+			var actionCell = toolRow.querySelector( 'td.run-tool' );
+			if ( ! actionCell ) {
+				return;
+			}
+
+			var statusSpan = document.createElement( 'span' );
+			statusSpan.style.cssText = 'display:block;margin-top:6px;';
+
+			var checkBtn = document.createElement( 'button' );
+			checkBtn.type = 'button';
+			checkBtn.className = 'button button-secondary';
+			checkBtn.style.marginRight = '8px';
+			checkBtn.textContent = <?php echo wp_json_encode( $label_check ); ?>;
+
+			checkBtn.addEventListener( 'click', function() {
+				checkBtn.disabled = true;
+				checkBtn.textContent = <?php echo wp_json_encode( $label_working ); ?>;
+				statusSpan.textContent = '';
+				statusSpan.style.color = '';
+
+				var data = new FormData();
+				data.append( 'action', 'woocommerce_check_refund_fix_needed' );
+				data.append( 'nonce', <?php echo wp_json_encode( $nonce ); ?> );
+
+				fetch( <?php echo wp_json_encode( $ajax_url ); ?>, { method: 'POST', body: data } )
+					.then( function( r ) { return r.json(); } )
+					.then( function( json ) {
+						checkBtn.disabled = false;
+						checkBtn.textContent = <?php echo wp_json_encode( $label_check ); ?>;
+						if ( json.success ) {
+							statusSpan.textContent = json.data.needs_fix
+								? <?php echo wp_json_encode( $msg_needs_fix ); ?>
+								: <?php echo wp_json_encode( $msg_no_fix ); ?>;
+							statusSpan.style.color = json.data.needs_fix ? '#d63638' : '#1d2327';
+						} else {
+							statusSpan.textContent = <?php echo wp_json_encode( $msg_error ); ?>;
+							statusSpan.style.color = '#d63638';
+						}
+					} )
+					.catch( function() {
+						checkBtn.disabled = false;
+						checkBtn.textContent = <?php echo wp_json_encode( $label_check ); ?>;
+						statusSpan.textContent = <?php echo wp_json_encode( $msg_error ); ?>;
+						statusSpan.style.color = '#d63638';
+					} );
+			} );
+
+			var fixBtn = actionCell.querySelector( 'input[type=submit]' );
+			if ( fixBtn ) {
+				actionCell.insertBefore( checkBtn, fixBtn );
+			} else {
+				actionCell.appendChild( checkBtn );
+			}
+			actionCell.appendChild( statusSpan );
+		} )();
+		</script>
+		<?php
 	}
 
 	/**
