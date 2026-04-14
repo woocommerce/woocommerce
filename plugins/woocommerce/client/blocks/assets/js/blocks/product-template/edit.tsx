@@ -32,9 +32,18 @@ import {
 	parseTemplateSlug,
 } from './utils';
 import { getDefaultStockStatuses } from '../product-collection/constants';
-import { usePlaceholderProducts } from './use-placeholder-products';
+import {
+	usePlaceholderProducts,
+	useOverflowPlaceholder,
+} from './use-placeholder-products';
 
 const DEFAULT_QUERY_CONTEXT_ATTRIBUTES = [ 'collection' ];
+
+/**
+ * Maximum number of real products to fetch and display in the editor.
+ * Any products beyond this cap are represented by a single placeholder.
+ */
+const MAX_EDITOR_PRODUCTS = 12;
 
 const ProductTemplateInnerBlocks = () => {
 	const innerBlocksProps = useInnerBlocksProps(
@@ -295,7 +304,7 @@ const ProductTemplateEdit = (
 				}
 			}
 			if ( perPage ) {
-				query.per_page = perPage;
+				query.per_page = Math.min( perPage, MAX_EDITOR_PRODUCTS );
 			}
 			if ( search ) {
 				query.search = search;
@@ -329,7 +338,10 @@ const ProductTemplateEdit = (
 						}
 					}
 				}
-				query.per_page = loopShopPerPage;
+				query.per_page = Math.min(
+					loopShopPerPage,
+					MAX_EDITOR_PRODUCTS
+				);
 
 				const settings = getEditedEntityRecord(
 					'root',
@@ -411,6 +423,15 @@ const ProductTemplateEdit = (
 		isPreviewWithNoProducts,
 		count: perPage ?? 4,
 	} );
+
+	const effectivePerPage = inherit ? loopShopPerPage : perPage ?? 0;
+	const overflowCount = Math.max( effectivePerPage - MAX_EDITOR_PRODUCTS, 0 );
+
+	const {
+		blockContext: overflowBlockContext,
+		placeholderProduct: overflowProduct,
+		isReady: overflowReady,
+	} = useOverflowPlaceholder( { overflowCount } );
 
 	// Apply layout styles when products are present or when showing preview placeholders.
 	if (
@@ -534,6 +555,27 @@ const ProductTemplateEdit = (
 						/>
 					);
 				} ) }
+			{ overflowCount > 0 &&
+				overflowReady &&
+				overflowBlockContext &&
+				overflowProduct &&
+				Array.from( { length: overflowCount }, ( _, i ) => (
+					<ProductDataContextProvider
+						key={ `overflow-${ i }` }
+						product={ overflowProduct }
+						isLoading={ false }
+					>
+						<ProductContent
+							attributes={ {
+								productId: overflowBlockContext.postId,
+							} }
+							blocks={ blocks }
+							displayTemplate={ false }
+							blockContext={ overflowBlockContext }
+							setActiveBlockContextId={ setActiveBlockContextId }
+						/>
+					</ProductDataContextProvider>
+				) ) }
 		</ul>
 	);
 };

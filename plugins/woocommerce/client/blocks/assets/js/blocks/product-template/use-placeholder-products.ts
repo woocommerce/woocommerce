@@ -31,7 +31,9 @@ const getPlaceholderPriceMinorUnits = () =>
  * Used by ProductDataContextProvider so child blocks (price, image, button)
  * can render previews without fetching from the Store API.
  */
-const createPlaceholderResponseItem = ( id: number ): ProductResponseItem => {
+export const createPlaceholderResponseItem = (
+	id: number
+): ProductResponseItem => {
 	const placeholderName = __( 'Product name', 'woocommerce' );
 	const priceInMinorUnits = getPlaceholderPriceMinorUnits();
 
@@ -96,37 +98,25 @@ const createPlaceholderResponseItem = ( id: number ): ProductResponseItem => {
 };
 
 /**
- * Creates placeholder product entities and injects them into the
- * WordPress core data stores so that child blocks (product-image,
- * product-price, product-button, post-title) render meaningful
- * previews instead of hardcoded HTML.
+ * Injects placeholder product entities into WordPress core data stores
+ * so that child blocks (product-image, product-price, product-button,
+ * post-title) render meaningful previews without fetching from the API.
  *
  * Two entity stores are populated:
  * - ('postType', 'product') for core post-title block (uses useEntityProp)
  * - ('root', 'product') for WooCommerce child blocks (uses useProduct hook)
  */
-export const usePlaceholderProducts = ( {
-	isPreviewWithNoProducts,
-	count,
+const useInjectPlaceholderEntities = ( {
+	enabled,
+	placeholderIds,
 }: {
-	isPreviewWithNoProducts: boolean;
-	count: number;
+	enabled: boolean;
+	placeholderIds: number[];
 } ) => {
 	const [ entitiesReady, setEntitiesReady ] = useState( false );
 
-	const placeholderIds = useMemo( () => {
-		if ( ! isPreviewWithNoProducts ) {
-			return [];
-		}
-		const safeCount = Math.max( 1, Math.min( count, 10 ) );
-		return Array.from(
-			{ length: safeCount },
-			( _, i ) => PLACEHOLDER_ID_BASE - i
-		);
-	}, [ isPreviewWithNoProducts, count ] );
-
 	useEffect( () => {
-		if ( ! isPreviewWithNoProducts || placeholderIds.length === 0 ) {
+		if ( ! enabled || placeholderIds.length === 0 ) {
 			setEntitiesReady( false );
 			return;
 		}
@@ -233,7 +223,33 @@ export const usePlaceholderProducts = ( {
 		}
 
 		setEntitiesReady( true );
-	}, [ isPreviewWithNoProducts, placeholderIds ] );
+	}, [ enabled, placeholderIds ] );
+
+	return entitiesReady;
+};
+
+export const usePlaceholderProducts = ( {
+	isPreviewWithNoProducts,
+	count,
+}: {
+	isPreviewWithNoProducts: boolean;
+	count: number;
+} ) => {
+	const placeholderIds = useMemo( () => {
+		if ( ! isPreviewWithNoProducts ) {
+			return [];
+		}
+		const safeCount = Math.max( 1, Math.min( count, 10 ) );
+		return Array.from(
+			{ length: safeCount },
+			( _, i ) => PLACEHOLDER_ID_BASE - i
+		);
+	}, [ isPreviewWithNoProducts, count ] );
+
+	const entitiesReady = useInjectPlaceholderEntities( {
+		enabled: isPreviewWithNoProducts,
+		placeholderIds,
+	} );
 
 	const blockContexts = useMemo( () => {
 		if ( ! entitiesReady ) {
@@ -262,4 +278,52 @@ export const usePlaceholderProducts = ( {
 	}, [ entitiesReady, placeholderIds ] );
 
 	return { blockContexts, placeholderProductMap, isReady: entitiesReady };
+};
+
+/**
+ * A separate ID range for the overflow placeholder to avoid
+ * collisions with the preview placeholder IDs.
+ */
+const OVERFLOW_PLACEHOLDER_ID = PLACEHOLDER_ID_BASE - 100;
+
+/**
+ * Creates a single placeholder product to represent overflow products
+ * beyond MAX_EDITOR_PRODUCTS in the editor. Injects it into entity
+ * stores so child blocks render correctly.
+ */
+export const useOverflowPlaceholder = ( {
+	overflowCount,
+}: {
+	overflowCount: number;
+} ) => {
+	const enabled = overflowCount > 0;
+
+	const placeholderIds = useMemo(
+		() => ( enabled ? [ OVERFLOW_PLACEHOLDER_ID ] : [] ),
+		[ enabled ]
+	);
+
+	const entitiesReady = useInjectPlaceholderEntities( {
+		enabled,
+		placeholderIds,
+	} );
+
+	const blockContext = useMemo( () => {
+		if ( ! entitiesReady ) {
+			return null;
+		}
+		return {
+			postType: 'product' as const,
+			postId: OVERFLOW_PLACEHOLDER_ID,
+		};
+	}, [ entitiesReady ] );
+
+	const placeholderProduct = useMemo( () => {
+		if ( ! entitiesReady ) {
+			return null;
+		}
+		return createPlaceholderResponseItem( OVERFLOW_PLACEHOLDER_ID );
+	}, [ entitiesReady ] );
+
+	return { blockContext, placeholderProduct, isReady: entitiesReady };
 };
