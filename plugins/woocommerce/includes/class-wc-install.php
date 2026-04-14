@@ -634,6 +634,8 @@ class WC_Install {
 		// Use add_option() here to avoid overwriting this value with each
 		// plugin version update. We base plugin age off of this value.
 		add_option( 'woocommerce_admin_install_timestamp', time() );
+		// Retry product archive rewrite verification on the next trusted request after install/update.
+		WC_Post_Types::queue_product_archive_rewrite_rules_verification();
 
 		// Force a flush of rewrite rules even if the corresponding hook isn't initialized yet.
 		if ( ! has_action( 'woocommerce_flush_rewrite_rules' ) ) {

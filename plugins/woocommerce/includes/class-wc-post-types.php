@@ -18,6 +18,10 @@ use Automattic\WooCommerce\Admin\Features\Features;
  * Post types Class.
  */
 class WC_Post_Types {
+	/**
+	 * Option used to retry product archive rewrite verification on trusted requests.
+	 */
+	private const PRODUCT_ARCHIVE_REWRITE_RULES_VERIFICATION_OPTION = 'woocommerce_verify_product_archive_rewrite_rules';
 
 	/**
 	 * Hook in methods.
@@ -591,7 +595,7 @@ class WC_Post_Types {
 	}
 
 	/**
-	 * Queue a flush when theme support changes or product archive rewrites drift from the expected shape.
+	 * Queue a flush when theme support changes and verify product archive rewrites when a retry is pending.
 	 *
 	 * @param string       $theme_support Whether the current theme supports WooCommerce.
 	 * @param string|false $has_archive Archive slug for the product post type.
@@ -600,9 +604,55 @@ class WC_Post_Types {
 		$theme_support_changed = get_option( 'current_theme_supports_woocommerce' ) !== $theme_support
 			&& update_option( 'current_theme_supports_woocommerce', $theme_support );
 
-		if ( $theme_support_changed || self::should_flush_rewrite_rules_for_product_archive( $has_archive ) ) {
+		if ( $theme_support_changed ) {
+			self::queue_product_archive_rewrite_rules_verification();
 			update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
+			return;
 		}
+
+		self::maybe_verify_product_archive_rewrite_rules( $has_archive );
+	}
+
+	/**
+	 * Queue product archive rewrite verification for the next trusted request.
+	 */
+	public static function queue_product_archive_rewrite_rules_verification(): void {
+		update_option( self::PRODUCT_ARCHIVE_REWRITE_RULES_VERIFICATION_OPTION, 'yes' );
+	}
+
+	/**
+	 * Verify product archive rewrite rules when a retry is pending.
+	 *
+	 * @param string|false $has_archive Archive slug for the product post type.
+	 */
+	private static function maybe_verify_product_archive_rewrite_rules( $has_archive ): void {
+		if ( ! self::should_verify_product_archive_rewrite_rules() ) {
+			return;
+		}
+
+		if ( self::should_flush_rewrite_rules_for_product_archive( $has_archive ) ) {
+			update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
+			return;
+		}
+
+		delete_option( self::PRODUCT_ARCHIVE_REWRITE_RULES_VERIFICATION_OPTION );
+	}
+
+	/**
+	 * Determine whether the current request should verify product archive rewrites.
+	 *
+	 * @return bool
+	 */
+	private static function should_verify_product_archive_rewrite_rules(): bool {
+		if ( 'yes' !== get_option( self::PRODUCT_ARCHIVE_REWRITE_RULES_VERIFICATION_OPTION, 'no' ) ) {
+			return false;
+		}
+
+		if ( wp_doing_cron() ) {
+			return false;
+		}
+
+		return ! ( defined( 'WP_CLI' ) && WP_CLI );
 	}
 
 	/**
