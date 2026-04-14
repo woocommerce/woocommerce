@@ -30,8 +30,8 @@ class POSApprovalController extends RestApiControllerBase implements RegisterHoo
 	 * @var string[]
 	 */
 	private const APPROVABLE_ACTIONS = array(
-		'woocommerce_refund_orders',
-		'woocommerce_void_orders',
+		'refund_shop_orders',
+		'void_shop_orders',
 	);
 
 	/**
@@ -94,7 +94,7 @@ class POSApprovalController extends RestApiControllerBase implements RegisterHoo
 					'callback'            => fn( $request ) => $this->run( $request, 'approve_action' ),
 					'permission_callback' => fn( $request ) => $this->check_permission(
 						$request,
-						'woocommerce_pos_access'
+						'view_pos'
 					),
 					'args'                => array(
 						'pin'             => array(
@@ -183,7 +183,7 @@ class POSApprovalController extends RestApiControllerBase implements RegisterHoo
 		}
 
 		$user = get_userdata( $user_id );
-		if ( ! $user || ! user_can( $user_id, 'woocommerce_approve_overrides' ) || ! user_can( $user_id, $action ) ) {
+		if ( ! $user || ! user_can( $user_id, $action ) ) {
 			$logger->warning(
 				sprintf( 'Approval failed: user %d lacks required capabilities.', $user_id ),
 				$log_context

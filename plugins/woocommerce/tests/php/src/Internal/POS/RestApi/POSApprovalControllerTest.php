@@ -70,7 +70,7 @@ class POSApprovalControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_body_params(
 			array(
 				'pin'     => '7391',
-				'action'  => 'woocommerce_refund_orders',
+				'action'  => 'refund_shop_orders',
 				'context' => array( 'order_id' => 42 ),
 			)
 		);
@@ -93,7 +93,7 @@ class POSApprovalControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_body_params(
 			array(
 				'pin'     => '7391',
-				'action'  => 'woocommerce_refund_orders',
+				'action'  => 'refund_shop_orders',
 				'context' => array( 'order_id' => 42 ),
 			)
 		);
@@ -110,7 +110,7 @@ class POSApprovalControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Cashier PIN returns 403 because cashier lacks woocommerce_approve_overrides.
+	 * @testdox Cashier PIN returns 403 because cashier lacks refund_shop_orders.
 	 */
 	public function test_cashier_pin_returns_403(): void {
 		wp_set_current_user( $this->admin_id );
@@ -119,7 +119,7 @@ class POSApprovalControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_body_params(
 			array(
 				'pin'     => '8472',
-				'action'  => 'woocommerce_refund_orders',
+				'action'  => 'refund_shop_orders',
 				'context' => array( 'order_id' => 42 ),
 			)
 		);
@@ -143,7 +143,7 @@ class POSApprovalControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_body_params(
 			array(
 				'pin'     => '9753',
-				'action'  => 'woocommerce_refund_orders',
+				'action'  => 'refund_shop_orders',
 				'context' => array( 'order_id' => 42 ),
 			)
 		);
@@ -164,7 +164,7 @@ class POSApprovalControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_body_params(
 			array(
 				'pin'    => '7391',
-				'action' => 'woocommerce_nonexistent_cap',
+				'action' => 'nonexistent_cap',
 			)
 		);
 
@@ -184,7 +184,7 @@ class POSApprovalControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_body_params(
 			array(
 				'pin'     => '7391',
-				'action'  => 'woocommerce_apply_discounts',
+				'action'  => 'apply_discounts',
 				'context' => array( 'order_id' => 42 ),
 			)
 		);
@@ -205,7 +205,7 @@ class POSApprovalControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_body_params(
 			array(
 				'pin'    => '7391',
-				'action' => 'woocommerce_refund_orders',
+				'action' => 'refund_shop_orders',
 			)
 		);
 
@@ -225,7 +225,7 @@ class POSApprovalControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_body_params(
 			array(
 				'pin'     => '7391',
-				'action'  => 'woocommerce_refund_orders',
+				'action'  => 'refund_shop_orders',
 				'context' => array( 'order_id' => 42 ),
 			)
 		);
@@ -246,7 +246,7 @@ class POSApprovalControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_body_params(
 			array(
 				'pin'     => '7391',
-				'action'  => 'woocommerce_refund_orders',
+				'action'  => 'refund_shop_orders',
 				'context' => array( 'order_id' => 42 ),
 			)
 		);
