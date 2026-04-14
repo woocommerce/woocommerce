@@ -2126,4 +2126,116 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 403, $response->get_status() );
 		$this->assertEquals( 'woocommerce_rest_cannot_view', $response->get_data()['code'] );
 	}
+
+	/**
+	 * @testdox Should strip sensitive fields from response when author views a published product.
+	 */
+	public function test_get_published_product_as_author_strips_sensitive_fields(): void {
+		$download = new \WC_Product_Download();
+		$download->set_file( 'https://example.com/secret-file.zip' );
+		$download->set_name( 'Secret File' );
+
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name'            => 'Downloadable Product',
+				'status'          => ProductStatus::PUBLISH,
+				'downloadable'    => true,
+				'download_limit'  => 5,
+				'download_expiry' => 30,
+				'purchase_note'   => 'Internal note for customers',
+			)
+		);
+		$product->set_downloads( array( $download ) );
+		$product->save();
+
+		$author = $this->factory->user->create(
+			array(
+				'role' => 'author',
+			)
+		);
+		wp_set_current_user( $author );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/products/' . $product->get_id() ) );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertArrayNotHasKey( 'downloads', $data, 'Author should not see download URLs' );
+		$this->assertArrayNotHasKey( 'download_limit', $data, 'Author should not see download limit' );
+		$this->assertArrayNotHasKey( 'download_expiry', $data, 'Author should not see download expiry' );
+		$this->assertArrayNotHasKey( 'purchase_note', $data, 'Author should not see purchase note' );
+	}
+
+	/**
+	 * @testdox Should strip COGS data from response when author views a published product.
+	 */
+	public function test_get_published_product_as_author_strips_cogs_data(): void {
+		$this->enable_cogs_feature();
+
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name'   => 'Product With COGS',
+				'status' => ProductStatus::PUBLISH,
+			)
+		);
+		$product->set_cogs_value( 5.00 );
+		$product->save();
+
+		$author = $this->factory->user->create(
+			array(
+				'role' => 'author',
+			)
+		);
+		wp_set_current_user( $author );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/products/' . $product->get_id() ) );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertArrayNotHasKey( 'cost_of_goods_sold', $data, 'Author should not see COGS data' );
+	}
+
+	/**
+	 * @testdox Should include sensitive fields in response when shop manager views a product.
+	 */
+	public function test_get_product_as_shop_manager_includes_sensitive_fields(): void {
+		$this->enable_cogs_feature();
+
+		$download = new \WC_Product_Download();
+		$download->set_file( 'https://example.com/secret-file.zip' );
+		$download->set_name( 'Secret File' );
+
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name'            => 'Full Access Product',
+				'status'          => ProductStatus::PUBLISH,
+				'downloadable'    => true,
+				'download_limit'  => 5,
+				'download_expiry' => 30,
+				'purchase_note'   => 'Internal note for customers',
+			)
+		);
+		$product->set_downloads( array( $download ) );
+		$product->set_cogs_value( 5.00 );
+		$product->save();
+
+		$shop_manager = $this->factory->user->create(
+			array(
+				'role' => 'shop_manager',
+			)
+		);
+		wp_set_current_user( $shop_manager );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/products/' . $product->get_id() ) );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertArrayHasKey( 'downloads', $data, 'Shop manager should see downloads' );
+		$this->assertArrayHasKey( 'download_limit', $data, 'Shop manager should see download limit' );
+		$this->assertArrayHasKey( 'download_expiry', $data, 'Shop manager should see download expiry' );
+		$this->assertArrayHasKey( 'purchase_note', $data, 'Shop manager should see purchase note' );
+		$this->assertArrayHasKey( 'cost_of_goods_sold', $data, 'Shop manager should see COGS data' );
+	}
 }
