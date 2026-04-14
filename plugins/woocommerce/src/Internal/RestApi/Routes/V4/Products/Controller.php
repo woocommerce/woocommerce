@@ -28,7 +28,6 @@ use WP_Error;
 use WC_Admin_Duplicate_Product;
 use WC_REST_CRUD_Controller;
 use WC_Data_Store;
-use WC_Product;
 use WC_Product_Attribute;
 use WC_Product_Factory;
 use WC_Product_Simple;
@@ -1217,7 +1216,7 @@ class Controller extends WC_REST_Products_V2_Controller {
 		}
 
 		// Allow set meta_data.
-		MetaDataUtil::update( $request['meta_data'], $product );
+		MetaDataUtil::update( $request['meta_data'], $product ); // @phpstan-ignore argument.type (missing `use WC_Product` causes phantom namespace-local type)
 
 		if ( ! empty( $request['date_created'] ) ) {
 			$date = rest_parse_date( $request['date_created'] );
