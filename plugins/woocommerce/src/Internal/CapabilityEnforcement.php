@@ -14,7 +14,7 @@ use WP_REST_Server;
  * Enforces WooCommerce capabilities on REST API endpoints.
  *
  * Hooks into REST API permission filters to check granular capabilities
- * such as woocommerce_refund_orders and woocommerce_void_orders for any
+ * such as refund_shop_orders and void_shop_orders for any
  * user, regardless of their role.
  *
  * @internal
@@ -28,8 +28,8 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 	 * @var string[]
 	 */
 	private const APPROVABLE_CAPABILITIES = array(
-		'woocommerce_refund_orders',
-		'woocommerce_void_orders',
+		'refund_shop_orders',
+		'void_shop_orders',
 	);
 
 	/**
@@ -126,7 +126,7 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 
 		if ( 'shop_order_refund' === $post_type && 'create' === $context ) {
 			$this->extract_approval_context_from_rest_request();
-			return $this->user_has_capability( 'woocommerce_refund_orders' );
+			return $this->user_has_capability( 'refund_shop_orders' );
 		}
 
 		// HPOS uses a shop_order_placehold post type whose map_meta_cap resolves
@@ -143,14 +143,14 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 			&& in_array( $post_type, array( 'product', 'product_variation' ), true )
 			&& $this->is_stock_adjustment_request()
 		) {
-			return current_user_can( 'woocommerce_adjust_stock' );
+			return current_user_can( 'manage_woocommerce' );
 		}
 
 		return $permission;
 	}
 
 	/**
-	 * Enforce the woocommerce_void_orders capability when an order is set to cancelled.
+	 * Enforce the void_shop_orders capability when an order is set to cancelled.
 	 *
 	 * @since 10.8.0
 	 *
@@ -180,7 +180,7 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 			$this->current_order_id = (int) $order->get_id();
 		}
 
-		if ( ! $this->user_has_capability( 'woocommerce_void_orders' ) ) {
+		if ( ! $this->user_has_capability( 'void_shop_orders' ) ) {
 			return new WP_Error(
 				'woocommerce_rest_cannot_cancel',
 				__( 'Sorry, you are not allowed to cancel orders.', 'woocommerce' ),
@@ -212,7 +212,7 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 			return $response;
 		}
 
-		if ( ! is_user_logged_in() || ! current_user_can( 'woocommerce_pos_access' ) || current_user_can( 'manage_woocommerce' ) ) {
+		if ( ! is_user_logged_in() || ! current_user_can( 'view_pos' ) || current_user_can( 'manage_woocommerce' ) ) {
 			return $response;
 		}
 
@@ -224,7 +224,7 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 			);
 		}
 
-		if ( ! current_user_can( 'woocommerce_view_sales_reports' ) ) {
+		if ( ! current_user_can( 'view_pos' ) ) {
 			return new WP_Error(
 				'woocommerce_rest_cannot_view',
 				__( 'Sorry, you cannot list resources.', 'woocommerce' ),
@@ -253,7 +253,7 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 			return $response;
 		}
 
-		if ( current_user_can( 'woocommerce_view_financial_reports' ) ) {
+		if ( current_user_can( 'manage_woocommerce' ) ) {
 			return $response;
 		}
 
@@ -437,7 +437,7 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 	 * @return true|WP_Error
 	 */
 	private function enforce_order_request_capabilities( WP_REST_Request $request ) {
-		if ( $this->request_has_coupon_changes( $request ) && ! $this->user_has_capability( 'woocommerce_apply_discounts' ) ) {
+		if ( $this->request_has_coupon_changes( $request ) && ! $this->user_has_capability( 'manage_woocommerce' ) ) {
 			return new WP_Error(
 				'woocommerce_rest_cannot_apply_discounts',
 				__( 'Sorry, you are not allowed to apply discounts.', 'woocommerce' ),
@@ -445,7 +445,7 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 			);
 		}
 
-		if ( $this->request_has_price_overrides( $request ) && ! $this->user_has_capability( 'woocommerce_override_prices' ) ) {
+		if ( $this->request_has_price_overrides( $request ) && ! $this->user_has_capability( 'manage_woocommerce' ) ) {
 			return new WP_Error(
 				'woocommerce_rest_cannot_override_prices',
 				__( 'Sorry, you are not allowed to override prices.', 'woocommerce' ),
@@ -584,11 +584,11 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 		}
 
 		if ( 'read' === $context ) {
-			return current_user_can( 'woocommerce_view_customer_data' );
+			return current_user_can( 'manage_woocommerce' );
 		}
 
 		if ( in_array( $context, array( 'create', 'edit', 'delete', 'batch' ), true ) ) {
-			return current_user_can( 'woocommerce_edit_customer_data' );
+			return current_user_can( 'manage_woocommerce' );
 		}
 
 		return false;

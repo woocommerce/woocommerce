@@ -132,7 +132,7 @@ class CapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A user without woocommerce_refund_orders cannot create refunds.
+	 * @testdox A user without refund_shop_orders cannot create refunds.
 	 */
 	public function test_user_without_refund_cap_cannot_create_refunds(): void {
 		wp_set_current_user( $this->limited_user_id );
@@ -153,7 +153,7 @@ class CapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A user with woocommerce_refund_orders can create refunds.
+	 * @testdox A user with refund_shop_orders can create refunds.
 	 */
 	public function test_user_with_refund_cap_can_create_refunds(): void {
 		wp_set_current_user( $this->capable_user_id );
@@ -174,7 +174,7 @@ class CapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox enforce_cancel_capability blocks users without woocommerce_void_orders from cancelling.
+	 * @testdox enforce_cancel_capability blocks users without void_shop_orders from cancelling.
 	 */
 	public function test_user_without_void_cap_cannot_cancel_orders(): void {
 		wp_set_current_user( $this->limited_user_id );
@@ -190,7 +190,7 @@ class CapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox enforce_cancel_capability allows users with woocommerce_void_orders to cancel.
+	 * @testdox enforce_cancel_capability allows users with void_shop_orders to cancel.
 	 */
 	public function test_user_with_void_cap_can_cancel_orders(): void {
 		wp_set_current_user( $this->capable_user_id );
@@ -331,7 +331,7 @@ class CapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 			'woocommerce_pos_capability_check',
 			function ( $has_cap, $capability, $user_id ) {
 				unset( $user_id );
-				if ( 'woocommerce_refund_orders' === $capability ) {
+				if ( 'refund_shop_orders' === $capability ) {
 					return true;
 				}
 				return $has_cap;
@@ -396,7 +396,7 @@ class CapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 
 		$token = $this->approval_service->create_approval(
 			$this->capable_user_id,
-			'woocommerce_refund_orders',
+			'refund_shop_orders',
 			array( 'order_id' => $order->get_id() )
 		);
 
@@ -443,7 +443,7 @@ class CapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 
 		$token = $this->approval_service->create_approval(
 			$this->capable_user_id,
-			'woocommerce_refund_orders',
+			'refund_shop_orders',
 			array()
 		);
 
@@ -466,7 +466,7 @@ class CapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 
 		$token = $this->approval_service->create_approval(
 			$this->capable_user_id,
-			'woocommerce_refund_orders',
+			'refund_shop_orders',
 			array( 'order_id' => $order->get_id() )
 		);
 
@@ -493,7 +493,7 @@ class CapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 
 		$token = $this->approval_service->create_approval(
 			$this->capable_user_id,
-			'woocommerce_refund_orders',
+			'refund_shop_orders',
 			array( 'order_id' => $order_a->get_id() )
 		);
 
@@ -521,7 +521,7 @@ class CapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 
 		$token = $this->approval_service->create_approval(
 			$this->capable_user_id,
-			'woocommerce_refund_orders',
+			'refund_shop_orders',
 			array( 'order_id' => $order->get_id() )
 		);
 
@@ -561,7 +561,7 @@ class CapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 
 		$token = $this->approval_service->create_approval(
 			$this->capable_user_id,
-			'woocommerce_refund_orders',
+			'refund_shop_orders',
 			array( 'order_id' => $order->get_id() )
 		);
 
@@ -723,12 +723,12 @@ class CapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Stock-only product updates are allowed with woocommerce_adjust_stock.
+	 * @testdox Stock-only product updates are allowed with manage_woocommerce.
 	 */
 	public function test_stock_only_product_updates_are_allowed_with_adjust_stock_capability(): void {
 		$user_id = $this->factory->user->create( array( 'role' => 'pos_cashier' ) );
 		$user    = new \WP_User( $user_id );
-		$user->add_cap( 'woocommerce_adjust_stock' );
+		$user->add_cap( 'manage_woocommerce' );
 
 		wp_set_current_user( $user_id );
 
@@ -760,7 +760,7 @@ class CapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 	public function test_non_stock_product_updates_still_require_product_edit_permissions(): void {
 		$user_id = $this->factory->user->create( array( 'role' => 'pos_cashier' ) );
 		$user    = new \WP_User( $user_id );
-		$user->add_cap( 'woocommerce_adjust_stock' );
+		$user->add_cap( 'manage_woocommerce' );
 
 		wp_set_current_user( $user_id );
 
