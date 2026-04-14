@@ -31,7 +31,6 @@
 * Fix - Fix insufficient color contrast for status indicators on the System Status page to meet WCAG 2.2 AA requirements. [#63746](https://github.com/woocommerce/woocommerce/pull/63746)
 * Fix - Fix insufficient colour contrast in Dashboard Status widget link text to meet WCAG 2.2 AA requirements. [#63521](https://github.com/woocommerce/woocommerce/pull/63521)
 * Fix - Fix invalid JSON Schema in MCP tool definitions: convert date-time type to proper string+format, deduplicate enum values, handle mixed/action/unrecognized types, normalize array types, recursively sanitize nested schemas, sanitize output schemas, and strip boolean required from nested properties. [#63811](https://github.com/woocommerce/woocommerce/pull/63811)
-* Fix - Fix invalid JSON Schema in MCP tool definitions: convert date-time type to proper string+format and deduplicate enum values. [#63811](https://github.com/woocommerce/woocommerce/pull/63811)
 * Fix - Fix math expressions being rejected in the flat rate shipping cost field [#63453](https://github.com/woocommerce/woocommerce/pull/63453)
 * Fix - Fix Mini-Cart badge becoming invisible after client-side navigation. [#63014](https://github.com/woocommerce/woocommerce/pull/63014)
 * Fix - Fix misaligned order rows on the edit order screen when Cost of Goods Sold is enabled. [#63396](https://github.com/woocommerce/woocommerce/pull/63396)
