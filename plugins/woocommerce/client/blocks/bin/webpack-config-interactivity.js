@@ -8,6 +8,7 @@ const { DefinePlugin } = require( 'webpack' );
 /**
  * Internal dependencies
  */
+const FilesystemCacheWarningsPlugin = require( './filesystem-cache-warnings-webpack-plugin.js' );
 const { sharedOptimizationConfig } = require( './webpack-shared-config' );
 
 const { NODE_ENV: mode = 'development' } = process.env;
@@ -55,6 +56,8 @@ module.exports = {
 		new DefinePlugin( {
 			'globalThis.SCRIPT_DEBUG': JSON.stringify( mode === 'development' ),
 		} ),
+		// Suppress file system cache warnings (unsupported serialization related).
+		new FilesystemCacheWarningsPlugin(),
 	],
 	module: {
 		rules: [

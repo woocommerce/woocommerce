@@ -696,6 +696,25 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	}
 
 	/**
+	 * Update a single order.
+	 *
+	 * Rejects IDs whose underlying type isn't shop_order (e.g. shop_subscription) to avoid
+	 * silently converting them on save. Mirrors the upfront type check already performed by
+	 * WC_REST_Orders_V1_Controller::update_item().
+	 *
+	 * @param WP_REST_Request<array<string, mixed>> $request Full details about the request.
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function update_item( $request ) {
+		$id = (int) $request['id'];
+		if ( empty( $id ) || OrderUtil::get_order_type( $id ) !== $this->post_type ) {
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'ID is invalid.', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
+		return parent::update_item( $request );
+	}
+
+	/**
 	 * Prepare a single order for create or update.
 	 *
 	 * @param  WP_REST_Request $request Request object.
