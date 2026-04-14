@@ -731,7 +731,8 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test updating a fulfillment for an admin user.
 	 */
 	public function test_update_fulfillment_for_admin_user() {
-		$order_id       = self::$created_order_ids[0];
+		// Use a dedicated order to avoid mutating shared state used by other tests.
+		$order_id       = self::$created_order_ids[8];
 		$fulfillment_id = self::$created_fulfillment_ids[ $order_id ][0];
 
 		// Update the fulfillment for the order.
