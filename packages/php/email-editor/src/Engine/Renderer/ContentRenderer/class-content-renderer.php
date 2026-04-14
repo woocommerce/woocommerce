@@ -319,10 +319,10 @@ class Content_Renderer {
 				$padding = $block['attrs']['style']['spacing']['padding'] ?? array();
 				$result  = array();
 				if ( isset( $padding['left'] ) && is_string( $padding['left'] ) ) {
-					$result['left'] = $this->resolve_preset_padding( $padding['left'], $variables_map );
+					$result['left'] = Preset_Variable_Resolver::resolve( $padding['left'], $variables_map );
 				}
 				if ( isset( $padding['right'] ) && is_string( $padding['right'] ) ) {
-					$result['right'] = $this->resolve_preset_padding( $padding['right'], $variables_map );
+					$result['right'] = Preset_Variable_Resolver::resolve( $padding['right'], $variables_map );
 				}
 				if ( ! empty( $result ) ) {
 					return $result;
@@ -472,25 +472,6 @@ class Content_Renderer {
 			$sum += (float) str_replace( 'px', '', $value2 );
 		}
 		return $sum;
-	}
-
-	/**
-	 * Resolve a CSS value that may contain a preset variable reference.
-	 *
-	 * Block attributes store padding as preset references like
-	 * "var:preset|spacing|20" which resolve to actual pixel values.
-	 *
-	 * @param string $value The CSS value, possibly a preset reference.
-	 * @param array  $variables_map Map of CSS variable names to resolved values.
-	 * @return string The resolved value (e.g. "8px") or the original value.
-	 */
-	private function resolve_preset_padding( string $value, array $variables_map ): string {
-		if ( strpos( $value, 'var:preset|' ) !== 0 ) {
-			return $value;
-		}
-
-		$css_var_name = '--wp--' . str_replace( '|', '--', str_replace( 'var:', '', $value ) );
-		return $variables_map[ $css_var_name ] ?? $value;
 	}
 
 	/**

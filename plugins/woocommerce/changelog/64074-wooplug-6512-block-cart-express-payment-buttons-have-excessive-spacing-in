@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix excessive express payment button spacing in Safari on the block cart page by switching from block layout to flexbox with explicit gap.

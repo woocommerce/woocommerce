@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Internal\Customers\SearchService as CustomerSearchService;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
+use Automattic\WooCommerce\Enums\OrderItemType;
 use Automattic\WooCommerce\Utilities\DiscountsUtil;
 use Automattic\WooCommerce\Utilities\ShippingUtil;
 use Exception;
@@ -810,31 +811,31 @@ class OrderController {
 
 		if ( $order->get_cart_hash() !== $cart_hashes['line_items'] ) {
 			$order->set_cart_hash( $cart_hashes['line_items'] );
-			$order->remove_order_items( 'line_item' );
+			$order->remove_order_items( OrderItemType::LINE_ITEM );
 			wc()->checkout->create_order_line_items( $order, $cart );
 		}
 
 		if ( $order->get_meta( '_shipping_hash' ) !== $cart_hashes['shipping'] ) {
 			$order->update_meta_data( '_shipping_hash', $cart_hashes['shipping'] );
-			$order->remove_order_items( 'shipping' );
+			$order->remove_order_items( OrderItemType::SHIPPING );
 			wc()->checkout->create_order_shipping_lines( $order, wc()->session->get( 'chosen_shipping_methods' ), wc()->shipping()->get_packages() );
 		}
 
 		if ( $order->get_meta( '_coupons_hash' ) !== $cart_hashes['coupons'] ) {
-			$order->remove_order_items( 'coupon' );
+			$order->remove_order_items( OrderItemType::COUPON );
 			$order->update_meta_data( '_coupons_hash', $cart_hashes['coupons'] );
 			wc()->checkout->create_order_coupon_lines( $order, $cart );
 		}
 
 		if ( $order->get_meta( '_fees_hash' ) !== $cart_hashes['fees'] ) {
 			$order->update_meta_data( '_fees_hash', $cart_hashes['fees'] );
-			$order->remove_order_items( 'fee' );
+			$order->remove_order_items( OrderItemType::FEE );
 			wc()->checkout->create_order_fee_lines( $order, $cart );
 		}
 
 		if ( $order->get_meta( '_taxes_hash' ) !== $cart_hashes['taxes'] ) {
 			$order->update_meta_data( '_taxes_hash', $cart_hashes['taxes'] );
-			$order->remove_order_items( 'tax' );
+			$order->remove_order_items( OrderItemType::TAX );
 			wc()->checkout->create_order_tax_lines( $order, $cart );
 		}
 	}

@@ -9,6 +9,7 @@ use WC_Order;
 use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
 use Automattic\WooCommerce\Gateways\PayPal\AddressRequirements as PayPalAddressRequirements;
 use Automattic\WooCommerce\Gateways\PayPal\Helper as PayPalHelper;
+use Automattic\WooCommerce\Enums\OrderItemType;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\Jetpack\Connection\Client as Jetpack_Connection_Client;
 
@@ -870,7 +871,7 @@ class Request {
 	private function get_paypal_order_items( WC_Order $order ): array {
 		$items = array();
 
-		foreach ( $order->get_items( array( 'line_item', 'fee' ) ) as $item ) {
+		foreach ( $order->get_items( array( OrderItemType::LINE_ITEM, OrderItemType::FEE ) ) as $item ) {
 			$item_amount = $this->get_paypal_order_item_amount( $order, $item );
 			if ( $item_amount < 0 ) {
 				// PayPal does not accept negative item amounts in the items breakdown, so we return an empty list.
@@ -905,7 +906,7 @@ class Request {
 	 */
 	private function get_paypal_order_items_subtotal( WC_Order $order ): float {
 		$total = 0;
-		foreach ( $order->get_items( array( 'line_item', 'fee' ) ) as $item ) {
+		foreach ( $order->get_items( array( OrderItemType::LINE_ITEM, OrderItemType::FEE ) ) as $item ) {
 			$total += wc_add_number_precision( $this->get_paypal_order_item_amount( $order, $item ) * $item->get_quantity(), false );
 		}
 
@@ -920,7 +921,7 @@ class Request {
 	 * @return float
 	 */
 	private function get_paypal_order_item_amount( WC_Order $order, \WC_Order_Item $item ): float {
-		if ( 'fee' === $item->get_type() && $item instanceof \WC_Order_Item_Fee ) {
+		if ( OrderItemType::FEE === $item->get_type() && $item instanceof \WC_Order_Item_Fee ) {
 			return (float) $item->get_amount();
 		}
 		return (float) $order->get_item_subtotal( $item, $include_tax = false, $rounding_enabled = false );
