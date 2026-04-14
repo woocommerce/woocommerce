@@ -49,6 +49,8 @@ oclif.manifest.json
 # Project files
 node_modules/
 vendor/
+vendor-prefixed/classes/
+vendor-prefixed/packages/
 
 # TypeScript files
 tsconfig.tsbuildinfo
