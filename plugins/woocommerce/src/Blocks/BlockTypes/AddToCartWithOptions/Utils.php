@@ -42,14 +42,26 @@ class Utils {
 		// Regex pattern to match the <input> element with id starting with 'quantity_'.
 		$pattern = '/(<input[^>]*id="quantity_[^"]*"[^>]*\/>)/';
 		// Replacement string to add button AFTER the matched <input> element.
-		/* translators: %s refers to the item name in the cart. */
-		$minus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.decreaseQuantity" data-wp-bind--disabled="!state.allowsDecrease" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">−</button>';
-		// Replacement string to add button AFTER the matched <input> element.
-		/* translators: %s refers to the item name in the cart. */
-		$plus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Increase quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.increaseQuantity" data-wp-bind--disabled="!state.allowsIncrease" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">+</button>';
-		$new_html    = preg_replace( $pattern, $plus_button, $quantity_html );
-		$new_html    = preg_replace( $pattern, $minus_button, $new_html );
-		return $new_html;
+		// Use preg_replace_callback to avoid backreference interpretation of $, \ sequences in product names.
+		$new_html = preg_replace_callback(
+			$pattern,
+			function ( $matches ) use ( $product_name ) {
+				/* translators: %s refers to the item name in the cart. */
+				$plus_aria = esc_attr( sprintf( __( 'Increase quantity of %s', 'woocommerce' ), $product_name ) );
+				return $matches[1] . '<button aria-label="' . $plus_aria . '" type="button" data-wp-on--click="actions.increaseQuantity" data-wp-bind--disabled="!state.allowsIncrease" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">+</button>';
+			},
+			$quantity_html ?? ''
+		);
+		$new_html = preg_replace_callback(
+			$pattern,
+			function ( $matches ) use ( $product_name ) {
+				/* translators: %s refers to the item name in the cart. */
+				$minus_aria = esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) );
+				return $matches[1] . '<button aria-label="' . $minus_aria . '" type="button" data-wp-on--click="actions.decreaseQuantity" data-wp-bind--disabled="!state.allowsDecrease" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">−</button>';
+			},
+			$new_html ?? ''
+		);
+		return $new_html ?? '';
 	}
 
 	/**
@@ -62,13 +74,21 @@ class Utils {
 	public static function add_quantity_stepper_classes( $quantity_html ) {
 		$processor = new \WP_HTML_Tag_Processor( $quantity_html );
 
-		// Add classes to the form.
-		while ( $processor->next_tag( array( 'class_name' => 'quantity' ) ) ) {
-			$processor->add_class( 'wc-block-components-quantity-selector' );
-		}
+		while ( $processor->next_tag() ) {
+			if (
+				$processor->get_tag() === 'DIV' &&
+				$processor->has_class( 'quantity' )
+			) {
+				$processor->add_class( 'wc-block-components-quantity-selector' );
+			}
 
-		while ( $processor->next_tag( array( 'class_name' => 'input-text' ) ) ) {
-			$processor->add_class( 'wc-block-components-quantity-selector__input' );
+			if (
+				$processor->get_tag() === 'INPUT' &&
+				$processor->get_attribute( 'name' ) === 'quantity' &&
+				$processor->get_attribute( 'type' ) !== 'hidden'
+			) {
+				$processor->add_class( 'wc-block-components-quantity-selector__input' );
+			}
 		}
 
 		return $processor->get_updated_html();

@@ -169,6 +169,11 @@ class ProductButton extends AbstractBlock {
 				'href' => esc_url( $product->add_to_cart_url() ),
 				'rel'  => 'nofollow',
 			);
+
+			if ( $product->is_type( ProductType::EXTERNAL ) ) {
+				$attributes['target'] = '_blank';
+				$attributes['rel']    = 'nofollow noopener noreferrer';
+			}
 		}
 
 		wp_interactivity_config(
@@ -339,6 +344,9 @@ class ProductButton extends AbstractBlock {
 	private function is_product_purchasable( $product ) {
 		if ( $product->is_type( ProductType::GROUPED ) ) {
 			$grouped_product_ids = $product->get_children();
+			if ( ! empty( $grouped_product_ids ) ) {
+				_prime_post_caches( $grouped_product_ids );
+			}
 			foreach ( $grouped_product_ids as $child ) {
 				$child_product = wc_get_product( $child );
 				if ( ! $child_product instanceof \WC_Product ) {

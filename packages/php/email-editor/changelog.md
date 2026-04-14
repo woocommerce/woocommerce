@@ -2,6 +2,23 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.11.0](https://github.com/woocommerce/email-editor/releases/tag/2.11.0) - 2026-04-06 
+
+-   Patch - Fix double margin-top applied to buttons and list blocks in rendered emails. [#63790]
+-   Patch - Fix `register_post_types_to_api()` to verify view context availability before skipping field registration on WordPress 7.0+ [#64023]
+-   Minor - Email Editor: update default font [#63622]
+
+## [2.10.0](https://github.com/woocommerce/email-editor/releases/tag/2.10.0) - 2026-03-20 
+
+-   Patch - Apply root horizontal padding uniformly to all blocks in the email rendering pipeline, fixing missing padding for blocks using render_email_callback without Abstract_Block_Renderer. [#63682]
+-   Patch - Prevent hook accumulation in email editor Initializer by guarding against duplicate hook registration. [#63666]
+-   Minor - Add rendering support for full-width blocks to break out of template group padding in emails, distributing container padding per-block so alignfull blocks can span the full contentSize. [#63752]
+
+## [2.9.2](https://github.com/woocommerce/email-editor/releases/tag/2.9.2) - 2026-03-12 
+
+-   Patch - Add rich cards for WordPress embeds in emails with excerpt, site icon, and a performance cap of 5 per email. [#63542]
+-   Patch - Distribute root horizontal padding to individual block wrappers for future alignfull support. [#63359]
+
 ## [2.9.1](https://github.com/woocommerce/email-editor/releases/tag/2.9.1) - 2026-03-08 
 
 -   Patch - Add woocommerce_email_editor_send_preview_email_subject filter to allow customizing the preview email subject. [#63504]

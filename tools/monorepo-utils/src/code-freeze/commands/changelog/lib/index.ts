@@ -284,7 +284,7 @@ export const updateReleaseBranchChangelogs = async (
 			body: `${ warningMessage }This pull request was automatically generated to prepare the changelog for ${ version }`,
 			head: branch,
 			base: releaseBranch,
-			reviewers: [ githubActor ],
+			reviewers: githubActor ? [ githubActor ] : [],
 		} );
 		Logger.notice( `Pull request created: ${ pullRequest.html_url }` );
 
@@ -402,7 +402,7 @@ export const updateBranchChangelog = async (
 			}`,
 			head: branch,
 			base: releaseBranch,
-			reviewers: [ githubActor ],
+			reviewers: githubActor ? [ githubActor ] : [],
 		} );
 		Logger.notice( `Pull request created: ${ pullRequest.html_url }` );
 

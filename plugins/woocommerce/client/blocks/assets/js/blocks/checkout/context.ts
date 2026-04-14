@@ -23,7 +23,7 @@ export type CheckoutBlockContextProps = {
 const defaultCheckoutBlockContext = {
 	showOrderNotes: true,
 	showPolicyLinks: true,
-	showReturnToCart: true,
+	showReturnToCart: false,
 	cartPageId: 0,
 	showRateAfterTaxName: false,
 	showFormStepNumbers: false,

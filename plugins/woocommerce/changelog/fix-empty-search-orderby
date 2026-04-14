@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix SQL error when searching with empty or exclusion-only terms by falling back to default ordering instead of relevance.

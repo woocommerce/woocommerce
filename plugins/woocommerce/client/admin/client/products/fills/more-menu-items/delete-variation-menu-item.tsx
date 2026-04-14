@@ -74,7 +74,7 @@ export const DeleteVariationMenuItem = ( {
 		} );
 
 		return deleteProductVariation( {
-			product_id: productId,
+			product_id: productId ?? '',
 			id: variationId,
 		} )
 			.then( () => {

@@ -61,6 +61,16 @@ class OrdersScheduler extends ImportScheduler {
 	const SCHEDULED_IMPORT_OPTION = 'woocommerce_analytics_scheduled_import';
 
 	/**
+	 * Legacy option name before the rename in 10.5.0.
+	 *
+	 * Used as a fallback during upgrades before the migration routine runs.
+	 * The old option stored inverted semantics: 'yes' = immediate, 'no' = scheduled.
+	 *
+	 * @var string
+	 */
+	const LEGACY_IMMEDIATE_IMPORT_OPTION = 'woocommerce_analytics_immediate_import';
+
+	/**
 	 * Default value for the scheduled import option.
 	 *
 	 * @var string
@@ -772,6 +782,21 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 			return false;
 		}
 
-		return 'yes' === get_option( self::SCHEDULED_IMPORT_OPTION, self::SCHEDULED_IMPORT_OPTION_DEFAULT_VALUE );
+		$value = get_option( self::SCHEDULED_IMPORT_OPTION, false );
+
+		if ( false !== $value ) {
+			return 'yes' === $value;
+		}
+
+		// Fall back to the legacy option (pre-10.5.0) which used inverted semantics:
+		// 'yes' meant immediate import (= not scheduled), 'no' meant scheduled.
+		$legacy_value = get_option( self::LEGACY_IMMEDIATE_IMPORT_OPTION, false );
+
+		if ( false !== $legacy_value ) {
+			return 'no' === $legacy_value;
+		}
+
+		// Neither option exists — use the default (not scheduled).
+		return false;
 	}
 }

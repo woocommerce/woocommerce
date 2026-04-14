@@ -24,10 +24,13 @@
 // templates), the quantity selector will stretch to the height of the container.
 :where(.wc-block-add-to-cart-with-options__quantity-selector .wc-block-components-quantity-selector) {
 	height: 100%;
+
+	:where(input[type="number"].qty) {
+		padding: 0.7rem 0;
+	}
 }
 
-:where(.wc-block-add-to-cart-with-options__quantity-selector),
-:where(.wc-block-add-to-cart-with-options-grouped-product-item-selector) {
+:where(.wc-block-add-to-cart-with-options) {
 	// This resets some WC component styles, so we need it to have specificity
 	// until those stylesheets are updated.
 	.wc-block-components-quantity-selector.wc-block-components-quantity-selector {
@@ -57,7 +60,7 @@
 			margin: 0;
 			font-size: 0.8em;
 			box-sizing: content-box;
-			padding: 0.7rem 0;
+			padding: 0.9rem 0;
 			margin-right: unset;
 			max-width: 3.631em; /* This value is based on the WC core styles. */
 

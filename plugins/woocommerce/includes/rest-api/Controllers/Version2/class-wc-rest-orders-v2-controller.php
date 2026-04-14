@@ -426,9 +426,10 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 					$data['refunds'] = array();
 					foreach ( $order->get_refunds() as $refund ) {
 						$data['refunds'][] = array(
-							'id'     => $refund->get_id(),
-							'reason' => $refund->get_reason() ? $refund->get_reason() : '',
-							'total'  => '-' . wc_format_decimal( $refund->get_amount(), $this->request['dp'] ),
+							'id'        => $refund->get_id(),
+							'reason'    => $refund->get_reason() ? $refund->get_reason() : '',
+							'total'     => '-' . wc_format_decimal( $refund->get_amount(), $this->request['dp'] ),
+							'total_tax' => wc_format_decimal( (float) $refund->get_total_tax(), $this->request['dp'] ),
 						);
 					}
 					break;
@@ -692,6 +693,25 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	 */
 	protected function filter_writable_props( $schema ) {
 		return empty( $schema['readonly'] );
+	}
+
+	/**
+	 * Update a single order.
+	 *
+	 * Rejects IDs whose underlying type isn't shop_order (e.g. shop_subscription) to avoid
+	 * silently converting them on save. Mirrors the upfront type check already performed by
+	 * WC_REST_Orders_V1_Controller::update_item().
+	 *
+	 * @param WP_REST_Request<array<string, mixed>> $request Full details about the request.
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function update_item( $request ) {
+		$id = (int) $request['id'];
+		if ( empty( $id ) || OrderUtil::get_order_type( $id ) !== $this->post_type ) {
+			return new WP_Error( "woocommerce_rest_{$this->post_type}_invalid_id", __( 'ID is invalid.', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
+		return parent::update_item( $request );
 	}
 
 	/**
@@ -1243,7 +1263,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 					'readonly'    => true,
 				),
 				'total'                => array(
-					'description' => __( 'Grand total.', 'woocommerce' ),
+					'description' => __( 'Grand total, including tax.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -1255,7 +1275,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 					'readonly'    => true,
 				),
 				'prices_include_tax'   => array(
-					'description' => __( 'True the prices included tax during checkout.', 'woocommerce' ),
+					'description' => __( 'Whether prices included tax during checkout.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
@@ -1516,7 +1536,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 								'context'     => array( 'view', 'edit' ),
 							),
 							'subtotal'         => array(
-								'description' => __( 'Line subtotal (before discounts).', 'woocommerce' ),
+								'description' => __( 'Line subtotal, excluding tax (before discounts).', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 							),
@@ -1527,7 +1547,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 								'readonly'    => true,
 							),
 							'total'            => array(
-								'description' => __( 'Line total (after discounts).', 'woocommerce' ),
+								'description' => __( 'Line total, excluding tax (after discounts).', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 							),
@@ -1747,12 +1767,12 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 								'context'     => array( 'view', 'edit' ),
 							),
 							'total'        => array(
-								'description' => __( 'Line total (after discounts).', 'woocommerce' ),
+								'description' => __( 'Shipping total, excluding tax.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'total_tax'    => array(
-								'description' => __( 'Line total tax (after discounts).', 'woocommerce' ),
+								'description' => __( 'Shipping total tax.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
@@ -1839,12 +1859,12 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 								'enum'        => array( 'taxable', 'none' ),
 							),
 							'total'      => array(
-								'description' => __( 'Line total (after discounts).', 'woocommerce' ),
+								'description' => __( 'Fee total, excluding tax.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'total_tax'  => array(
-								'description' => __( 'Line total tax (after discounts).', 'woocommerce' ),
+								'description' => __( 'Fee total tax.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
@@ -1991,20 +2011,26 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 					'items'       => array(
 						'type'       => 'object',
 						'properties' => array(
-							'id'     => array(
+							'id'        => array(
 								'description' => __( 'Refund ID.', 'woocommerce' ),
 								'type'        => 'integer',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
-							'reason' => array(
+							'reason'    => array(
 								'description' => __( 'Refund reason.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
-							'total'  => array(
-								'description' => __( 'Refund total.', 'woocommerce' ),
+							'total'     => array(
+								'description' => __( 'Refund total, including tax.', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => array( 'view', 'edit' ),
+								'readonly'    => true,
+							),
+							'total_tax' => array(
+								'description' => __( 'Refund total tax.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
