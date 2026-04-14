@@ -16,7 +16,5 @@ $universal-border-light: color-mix(in srgb, currentColor 20%, transparent);
 $universal-border-medium: color-mix(in srgb, currentColor 48%, transparent);
 // #1e1e1e on white. Used for low contrast decorative elements such as input borders.
 $universal-border-strong: color-mix(in srgb, currentColor 80%, transparent);
-// Used for low emphasis text such as input labels.
-$universal-body-low-emphasis: rgba(17, 17, 17, 0.7);
 // Used for low contrast decorative elements background color.
 $universal-background: rgba(17, 17, 17, 0.02);
