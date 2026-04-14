@@ -12,7 +12,7 @@ use WC_Product_Grouped;
 /**
  * Tests for the ProductsStore shared store.
  */
-class ProductsStore extends \WP_UnitTestCase {
+class ProductsStore extends \WC_Unit_Test_Case {
 
 	/**
 	 * Consent string required by the ProductsStore API.
@@ -47,7 +47,7 @@ class ProductsStore extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that load_product throws without proper consent.
+	 * @testdox load_product() rejects calls without the consent string.
 	 */
 	public function test_load_product_throws_without_consent(): void {
 		$this->expectException( \InvalidArgumentException::class );
@@ -56,7 +56,7 @@ class ProductsStore extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that load_variations throws without proper consent.
+	 * @testdox load_variations() rejects calls without the consent string.
 	 */
 	public function test_load_variations_throws_without_consent(): void {
 		$this->expectException( \InvalidArgumentException::class );
@@ -65,7 +65,7 @@ class ProductsStore extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that load_purchasable_child_products throws without proper consent.
+	 * @testdox load_purchasable_child_products() rejects calls without the consent string.
 	 */
 	public function test_load_purchasable_child_products_throws_without_consent(): void {
 		$this->expectException( \InvalidArgumentException::class );
@@ -74,7 +74,7 @@ class ProductsStore extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that load_product populates the interactivity state.
+	 * @testdox load_product() hydrates interactivity state with the product payload.
 	 */
 	public function test_load_product_populates_state(): void {
 		$product = WC_Helper_Product::create_simple_product();
@@ -92,7 +92,7 @@ class ProductsStore extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that load_product is memoized per product ID.
+	 * @testdox load_product() fetches each product ID from REST only once.
 	 */
 	public function test_load_product_is_memoized_per_id(): void {
 		$product = WC_Helper_Product::create_simple_product();
@@ -116,7 +116,7 @@ class ProductsStore extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that load_variations populates the interactivity state.
+	 * @testdox load_variations() hydrates interactivity state with every child variation.
 	 */
 	public function test_load_variations_populates_state(): void {
 		$product       = WC_Helper_Product::create_variation_product();
@@ -141,7 +141,7 @@ class ProductsStore extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that load_variations is memoized per parent product.
+	 * @testdox load_variations() fetches each parent product from REST only once.
 	 */
 	public function test_load_variations_is_memoized_per_parent(): void {
 		$product = WC_Helper_Product::create_variation_product();
@@ -179,7 +179,7 @@ class ProductsStore extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that a second call to load_variations filters by parent.
+	 * @testdox load_variations() returns only the variations belonging to the requested parent.
 	 */
 	public function test_load_variations_second_call_filters_by_parent(): void {
 		$reflection = new \ReflectionClass( TestedProductsStore::class );
@@ -216,7 +216,7 @@ class ProductsStore extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that load_purchasable_child_products returns empty for a bogus ID.
+	 * @testdox load_purchasable_child_products() returns an empty array for an unknown parent ID.
 	 */
 	public function test_load_purchasable_child_products_returns_empty_for_bogus_id(): void {
 		$result = TestedProductsStore::load_purchasable_child_products( $this->consent, 999999999 );
@@ -225,7 +225,7 @@ class ProductsStore extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that load_purchasable_child_products returns empty for a childless parent.
+	 * @testdox load_purchasable_child_products() returns an empty array for a grouped product with no children.
 	 */
 	public function test_load_purchasable_child_products_returns_empty_for_childless_parent(): void {
 		$grouped = new WC_Product_Grouped();
@@ -240,7 +240,7 @@ class ProductsStore extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that load_purchasable_child_products filters non-purchasable children.
+	 * @testdox load_purchasable_child_products() excludes non-purchasable children.
 	 */
 	public function test_load_purchasable_child_products_filters_non_purchasable(): void {
 		$purchasable     = WC_Helper_Product::create_simple_product();
@@ -281,7 +281,7 @@ class ProductsStore extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that register_getters is idempotent.
+	 * @testdox register_getters() registers the derived state closures exactly once.
 	 */
 	public function test_register_getters_is_idempotent(): void {
 		$product = WC_Helper_Product::create_simple_product();
@@ -312,7 +312,7 @@ class ProductsStore extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that the product getter reads from state.
+	 * @testdox state.product resolves to the hydrated product matching state.productId.
 	 */
 	public function test_product_getter_reads_from_state(): void {
 		$this->setExpectedIncorrectUsage( 'WP_Interactivity_API::get_context' );
@@ -339,7 +339,7 @@ class ProductsStore extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that the selectedVariation getter reads from state.
+	 * @testdox state.selectedVariation resolves to the hydrated variation matching state.variationId.
 	 */
 	public function test_selected_variation_getter_reads_from_state(): void {
 		$this->setExpectedIncorrectUsage( 'WP_Interactivity_API::get_context' );
@@ -368,7 +368,7 @@ class ProductsStore extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Test that productInContext unwraps closure selectedVariation.
+	 * @testdox state.productInContext unwraps closure getters and falls back to the product when no variation is selected.
 	 */
 	public function test_product_in_context_unwraps_closure_selected_variation(): void {
 		$this->setExpectedIncorrectUsage( 'WP_Interactivity_API::get_context' );
