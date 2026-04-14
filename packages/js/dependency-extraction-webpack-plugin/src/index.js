@@ -102,6 +102,7 @@ class DependencyExtractionWebpackPlugin extends WPDependencyExtractionWebpackPlu
 
 		// This is THE patch, originally: 'this.externalsPlugin = new webpack.ExternalsPlugin(.' The root cause is pnpm
 		// peer dependencies causing different webpack instance usage, causing the external modules being uncacheable.
+		// Please remove the apply override once https://github.com/WordPress/gutenberg/pull/77284 is merged and released.
 		this.externalsPlugin = new compiler.webpack.ExternalsPlugin(
 			this.useModules ? 'import' : 'window',
 			this.externalizeWpDeps.bind( this )
