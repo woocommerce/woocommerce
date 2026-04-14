@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Reduce the number of database queries on the single product page by priming attachment caches in the StoreApi ProductSchema `get_images()` method.

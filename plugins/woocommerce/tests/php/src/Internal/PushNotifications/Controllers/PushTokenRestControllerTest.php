@@ -1056,7 +1056,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$controller = new PushTokenRestController();
 		$request    = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
 
-		$result = $controller->authorize( $request );
+		$result = $controller->authorize_as_authenticated( $request );
 
 		$this->assertFalse( $result );
 	}
@@ -1073,7 +1073,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$controller = new PushTokenRestController();
 		$request    = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
 
-		$result = $controller->authorize( $request );
+		$result = $controller->authorize_as_authenticated( $request );
 
 		$this->assertTrue( $result );
 	}
@@ -1089,7 +1089,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$controller = new PushTokenRestController();
 		$request    = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
 
-		$result = $controller->authorize( $request );
+		$result = $controller->authorize_as_authenticated( $request );
 
 		$this->assertInstanceOf( WP_Error::class, $result );
 		$this->assertEquals( 'woocommerce_rest_cannot_view', $result->get_error_code() );
@@ -1106,7 +1106,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$controller = new PushTokenRestController();
 		$request    = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
 
-		$result = $controller->authorize( $request );
+		$result = $controller->authorize_as_authenticated( $request );
 
 		$this->assertFalse( $result );
 	}
@@ -1417,5 +1417,136 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'en_US', $meta['device_locale'] );
 		$this->assertArrayHasKey( 'metadata', $meta );
 		$this->assertEquals( array( 'app_version' => '1.0' ), maybe_unserialize( $meta['metadata'] ) );
+	}
+
+	/**
+	 * @testdox Should reject WPCOM tokens endpoint when push notifications are disabled.
+	 */
+	public function test_authorize_as_from_wpcom_returns_false_when_disabled(): void {
+		$this->mock_jetpack_connection_manager_is_connected( false );
+
+		$controller = new PushTokenRestController();
+		$request    = new WP_REST_Request( 'GET', '/wc-push-notifications/push-tokens' );
+
+		$result = $controller->authorize_as_from_wpcom( $request );
+
+		$this->assertFalse( $result );
+	}
+
+	/**
+	 * @testdox Should reject WPCOM tokens endpoint without Jetpack blog token authentication.
+	 */
+	public function test_index_rejects_without_blog_token(): void {
+		$this->mock_jetpack_connection_manager_is_connected();
+
+		$controller = new PushTokenRestController();
+		$request    = new WP_REST_Request( 'GET', '/wc-push-notifications/push-tokens' );
+
+		$result = $controller->authorize_as_from_wpcom( $request );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_rest_cannot_view', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should return tokens in WPCOM format from the tokens endpoint.
+	 */
+	public function test_index_returns_wpcom_formatted_tokens(): void {
+		$this->mock_jetpack_connection_manager_is_connected();
+		wc_get_container()->get( PushNotifications::class )->on_init();
+
+		$data_store = wc_get_container()->get( PushTokensDataStore::class );
+
+		$data_store->create(
+			array(
+				'user_id'       => $this->user_id,
+				'token'         => 'wpcom-test-token',
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'device_uuid'   => 'wpcom-test-uuid',
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+			)
+		);
+
+		$controller = new PushTokenRestController();
+		$request    = new WP_REST_Request( 'GET', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'page', 1 );
+		$request->set_param( 'per_page', 100 );
+		$response = $controller->index( $request );
+
+		$this->assertEquals( WP_Http::OK, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertArrayHasKey( 'tokens', $data );
+		$this->assertGreaterThanOrEqual( 1, count( $data['tokens'] ) );
+
+		$token_data = $data['tokens'][0];
+
+		$this->assertSame( 'wpcom-test-token', $token_data['token'] );
+		$this->assertSame( PushToken::ORIGIN_WOOCOMMERCE_IOS, $token_data['origin'] );
+		$this->assertSame( 'en_US', $token_data['device_locale'] );
+
+		$this->assertNotEmpty( $response->get_headers()['X-WP-Total'] );
+		$this->assertNotEmpty( $response->get_headers()['X-WP-TotalPages'] );
+	}
+
+	/**
+	 * @testdox Should return empty tokens array from the tokens endpoint when no tokens exist.
+	 */
+	public function test_index_returns_empty_when_no_tokens(): void {
+		$controller = new PushTokenRestController();
+		$request    = new WP_REST_Request( 'GET', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'page', 1 );
+		$request->set_param( 'per_page', 100 );
+		$response = $controller->index( $request );
+
+		$this->assertEquals( WP_Http::OK, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertArrayHasKey( 'tokens', $data );
+		$this->assertCount( 0, $data['tokens'] );
+		$this->assertSame( '0', $response->get_headers()['X-WP-Total'] );
+		$this->assertSame( '0', $response->get_headers()['X-WP-TotalPages'] );
+	}
+
+	/**
+	 * @testdox Should respect per_page parameter and return pagination headers.
+	 */
+	public function test_index_respects_pagination(): void {
+		$this->mock_jetpack_connection_manager_is_connected();
+		wc_get_container()->get( PushNotifications::class )->on_init();
+
+		$data_store = wc_get_container()->get( PushTokensDataStore::class );
+
+		for ( $i = 1; $i <= 3; $i++ ) {
+			$data_store->create(
+				array(
+					'user_id'       => $this->user_id,
+					'token'         => "token-$i",
+					'platform'      => PushToken::PLATFORM_APPLE,
+					'device_uuid'   => "uuid-$i",
+					'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+					'device_locale' => 'en_US',
+				)
+			);
+		}
+
+		$controller = new PushTokenRestController();
+		$request    = new WP_REST_Request( 'GET', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'page', 1 );
+		$request->set_param( 'per_page', 2 );
+		$response = $controller->index( $request );
+
+		$this->assertEquals( WP_Http::OK, $response->get_status() );
+		$this->assertCount( 2, $response->get_data()['tokens'] );
+		$this->assertSame( '3', $response->get_headers()['X-WP-Total'] );
+		$this->assertSame( '2', $response->get_headers()['X-WP-TotalPages'] );
+
+		$request->set_param( 'page', 2 );
+		$response = $controller->index( $request );
+
+		$this->assertCount( 1, $response->get_data()['tokens'] );
 	}
 }

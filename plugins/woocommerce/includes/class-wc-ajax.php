@@ -3872,13 +3872,8 @@ class WC_AJAX {
 		$all_providers = \Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentUtils::get_shipping_providers();
 		$built_in_keys = array();
 		foreach ( $all_providers as $provider ) {
-			if ( is_string( $provider ) && class_exists( $provider ) && is_subclass_of( $provider, \Automattic\WooCommerce\Admin\Features\Fulfillments\Providers\AbstractShippingProvider::class ) ) {
-				try {
-					$instance        = wc_get_container()->get( $provider );
-					$built_in_keys[] = $instance->get_key();
-				} catch ( \Throwable $e ) {
-					continue;
-				}
+			if ( ! $provider instanceof \Automattic\WooCommerce\Admin\Features\Fulfillments\Providers\CustomShippingProvider ) {
+				$built_in_keys[] = $provider->get_key();
 			}
 		}
 		$reserved_slug_error = '';
@@ -4057,12 +4052,12 @@ class WC_AJAX {
 			$wpdb->prepare(
 				"SELECT 1 FROM {$fulfillments_table} f
 				INNER JOIN {$meta_table} m ON f.fulfillment_id = m.fulfillment_id
-				WHERE m.meta_key = '_shipping_provider'
+				WHERE m.meta_key = '_shipment_provider'
 				AND m.meta_value = %s
 				AND f.date_deleted IS NULL
 				AND m.date_deleted IS NULL
 				LIMIT 1",
-				$provider_slug
+				wp_json_encode( $provider_slug )
 			)
 		);
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
