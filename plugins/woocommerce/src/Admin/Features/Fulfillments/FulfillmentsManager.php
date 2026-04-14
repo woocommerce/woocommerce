@@ -507,33 +507,9 @@ class FulfillmentsManager {
 		$shipping_providers = FulfillmentUtils::get_shipping_providers();
 		$results            = array();
 		foreach ( $shipping_providers as $provider ) {
-			if ( is_string( $provider ) && class_exists( $provider ) && is_subclass_of( $provider, AbstractShippingProvider::class ) ) {
-				try {
-					/**
-					 * Instantiate the shipping provider class.
-					 *
-					 * @var AbstractShippingProvider $provider_instance
-					 */
-					$provider_instance = wc_get_container()->get( $provider );
-				} catch ( \Throwable $e ) {
-					$logger = wc_get_logger();
-					$logger->error(
-						sprintf(
-							'Error instantiating shipping provider class %s: %s',
-							$provider,
-							$e->getMessage()
-						),
-						array( 'source' => 'woocommerce-fulfillments' )
-					);
-					continue; // Skip if the provider class cannot be instantiated.
-				}
-			} else {
-				continue; // Skip if the provider class does not exist or is not a valid shipping provider.
-			}
-
-			$parsing_result = $provider_instance->try_parse_tracking_number( $tracking_number, $shipping_from, $shipping_to );
+			$parsing_result = $provider->try_parse_tracking_number( $tracking_number, $shipping_from, $shipping_to );
 			if ( ! is_null( $parsing_result ) ) {
-				$results[ $provider_instance->get_key() ] = $parsing_result;
+				$results[ $provider->get_key() ] = $parsing_result;
 			}
 		}
 

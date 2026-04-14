@@ -14,6 +14,7 @@ const ReactRefreshWebpackPlugin = require( '@pmmmwh/react-refresh-webpack-plugin
  * Internal dependencies
  */
 const CustomTemplatedPathPlugin = require( './bin/custom-templated-path-webpack-plugin' );
+const FilesystemCacheWarningsPlugin = require( './bin/filesystem-cache-warnings-webpack-plugin.js' );
 const UnminifyWebpackPlugin = require( './bin/unminify-webpack-plugin.js' );
 const {
 	webpackConfig: styleConfig,
@@ -283,6 +284,8 @@ const webpackConfig = {
 				test: /\.js($|\?)/i,
 				mainEntry: 'app/index.min.js',
 			} ),
+		// Suppress file system cache warnings (unsupported serialization related).
+		new FilesystemCacheWarningsPlugin(),
 	].filter( Boolean ),
 	optimization: {
 		minimize: NODE_ENV !== 'development',
