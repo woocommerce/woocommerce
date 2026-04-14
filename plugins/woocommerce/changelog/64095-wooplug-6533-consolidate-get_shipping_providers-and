@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Consolidate get_shipping_providers and get_shipping_providers_object into a single method that always returns AbstractShippingProvider instances.

@@ -659,7 +659,11 @@ class ProductSchema extends AbstractSchema {
 	 * @return array
 	 */
 	protected function get_images( \WC_Product $product ) {
-		$attachment_ids = array_merge( [ $product->get_image_id() ], $product->get_gallery_image_ids() );
+		$attachment_ids = array_filter( array_merge( [ $product->get_image_id() ], $product->get_gallery_image_ids() ) );
+		if ( ! empty( $attachment_ids ) ) {
+			// Prime caches to reduce future queries.
+			_prime_post_caches( $attachment_ids );
+		}
 
 		return array_values( array_filter( array_map( [ $this->image_attachment_schema, 'get_item_response' ], $attachment_ids ) ) );
 	}
