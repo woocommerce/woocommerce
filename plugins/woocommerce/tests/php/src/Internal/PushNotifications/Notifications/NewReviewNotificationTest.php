@@ -30,6 +30,7 @@ class NewReviewNotificationTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'args', $payload['title'] );
 		$this->assertArrayHasKey( 'message', $payload );
 		$this->assertArrayHasKey( 'format', $payload['message'] );
+		$this->assertArrayHasKey( 'args', $payload['message'] );
 		$this->assertArrayHasKey( 'icon', $payload );
 		$this->assertArrayHasKey( 'meta', $payload );
 		$this->assertArrayHasKey( 'comment_id', $payload['meta'] );
@@ -55,7 +56,7 @@ class NewReviewNotificationTest extends WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Should include the reviewer name and product name in the title args,
-	 * and the review content in the message format.
+	 * and the review content in the message args.
 	 */
 	public function test_to_payload_splits_review_details_between_title_and_message(): void {
 		$product    = WC_Helper_Product::create_simple_product();
@@ -67,7 +68,7 @@ class NewReviewNotificationTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( $comment->comment_author, $payload['title']['args'][0] );
 		$this->assertSame( $product->get_name(), $payload['title']['args'][1] );
-		$this->assertSame( $comment->comment_content, $payload['message']['format'] );
+		$this->assertSame( $comment->comment_content, $payload['message']['args'][0] );
 	}
 
 	/**
@@ -95,7 +96,7 @@ class NewReviewNotificationTest extends WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Should strip HTML tags, and script tags including content, from
-	 * review content in the message format.
+	 * review content in the message args.
 	 */
 	public function test_to_payload_strips_html_and_script_content_from_comment_content(): void {
 		$product    = WC_Helper_Product::create_simple_product();
@@ -113,7 +114,7 @@ class NewReviewNotificationTest extends WC_Unit_Test_Case {
 		$notification = new NewReviewNotification( $comment_id );
 		$payload      = $notification->to_payload();
 
-		$this->assertSame( 'Great product!', $payload['message']['format'] );
+		$this->assertSame( 'Great product!', $payload['message']['args'][0] );
 	}
 
 	/**

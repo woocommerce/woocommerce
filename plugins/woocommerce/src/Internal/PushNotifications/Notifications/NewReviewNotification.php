@@ -59,7 +59,10 @@ class NewReviewNotification extends Notification {
 				),
 			),
 			'message'     => array(
-				'format' => wp_strip_all_tags( $comment->comment_content ),
+				'format' => '%s',
+				'args'   => array(
+					wp_strip_all_tags( $comment->comment_content ),
+				),
 			),
 			'icon'        => get_avatar_url( $comment->comment_author_email ),
 			'meta'        => array(
