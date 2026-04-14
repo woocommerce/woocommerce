@@ -12,6 +12,7 @@ const ASSET_CHECK = process.env.ASSET_CHECK === 'true';
 // mapping here and any duplicates are because of switched between Woo and WordPress versions of the plugin.
 // As of 2026 it's Woo version to address pnpm peer dependencies related issues to support filesystem cache.
 const wcDepMap = {
+	'@woocommerce/tracks': false, // Bundle; do not externalize
 	'@woocommerce/blocks-registry': [ 'wc', 'wcBlocksRegistry' ],
 	'@woocommerce/blocks-checkout-events': [ 'wc', 'blocksCheckoutEvents' ],
 	'@woocommerce/settings': [ 'wc', 'wcSettings' ],
@@ -27,6 +28,7 @@ const wcDepMap = {
 	'@woocommerce/sanitize': [ 'wc', 'sanitize' ],
 };
 const wcHandleMap = {
+	'@woocommerce/tracks': false, // Bundle; no PHP handle needed
 	'@woocommerce/blocks-registry': 'wc-blocks-registry',
 	'@woocommerce/settings': 'wc-settings',
 	'@woocommerce/block-data': 'wc-blocks-data-store',
@@ -107,13 +109,13 @@ const getAlias = ( options = {} ) => {
 };
 
 const requestToExternal = ( request ) => {
-	if ( wcDepMap[ request ] ) {
+	if ( request in wcDepMap ) {
 		return wcDepMap[ request ];
 	}
 };
 
 const requestToHandle = ( request ) => {
-	if ( wcHandleMap[ request ] ) {
+	if ( request in wcHandleMap ) {
 		return wcHandleMap[ request ];
 	}
 };
