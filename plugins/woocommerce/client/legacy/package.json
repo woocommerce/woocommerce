@@ -49,15 +49,34 @@
 	},
 	"wireit": {
 		"build:project:assets": {
-			"command": "grunt assets",
+			"dependencies": [
+				"build:project:assets:js",
+				"build:project:assets:css"
+			]
+		},
+		"build:project:assets:js": {
+			"command": "grunt js",
 			"clean": "if-file-deleted",
 			"files": [
 				"Gruntfile.js",
-				"js/**/*.js",
+				"js/**/*.js"
+			],
+			"output": [
+				"build/js"
+			],
+			"dependencies": [
+				"dependencyOutputs"
+			]
+		},
+		"build:project:assets:css": {
+			"command": "grunt css",
+			"clean": "if-file-deleted",
+			"files": [
+				"Gruntfile.js",
 				"css/**/*.scss"
 			],
 			"output": [
-				"build"
+				"build/css"
 			],
 			"dependencies": [
 				"dependencyOutputs"
