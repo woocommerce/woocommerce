@@ -449,6 +449,21 @@ class Checkout extends AbstractBlock {
 		$this->asset_data_registry->add( 'addressAutocompleteProviders', $providers_payload );
 		$this->asset_data_registry->add( 'countryData', $country_data );
 		$this->asset_data_registry->add( 'defaultAddressFormat', $address_formats['default'] );
+
+		// Prime caches to reduce future queries.
+		wp_prime_option_caches(
+			array(
+				'woocommerce_enable_guest_checkout',
+				'woocommerce_enable_signup_and_login_from_checkout',
+				'woocommerce_enable_checkout_login_reminder',
+				'woocommerce_tax_display_cart', // This one is autoloaded, but we add it here for clarity.
+				'woocommerce_tax_total_display',
+				'woocommerce_ship_to_destination',
+				'woocommerce_registration_generate_password',
+				'pickup_location_pickup_locations',
+			)
+		);
+
 		$this->asset_data_registry->add(
 			'checkoutAllowsGuest',
 			false === filter_var(
@@ -461,16 +476,6 @@ class Checkout extends AbstractBlock {
 			filter_var(
 				wc()->checkout()->is_registration_enabled(),
 				FILTER_VALIDATE_BOOLEAN
-			)
-		);
-		// Prime caches to reduce future queries.
-		wp_prime_option_caches(
-			array(
-				'woocommerce_enable_checkout_login_reminder',
-				'woocommerce_tax_display_cart', // This one is autoloaded, but we add it here for clarity.
-				'woocommerce_tax_total_display',
-				'woocommerce_ship_to_destination',
-				'woocommerce_registration_generate_password',
 			)
 		);
 		$this->asset_data_registry->add( 'checkoutShowLoginReminder', filter_var( get_option( 'woocommerce_enable_checkout_login_reminder' ), FILTER_VALIDATE_BOOLEAN ) );
