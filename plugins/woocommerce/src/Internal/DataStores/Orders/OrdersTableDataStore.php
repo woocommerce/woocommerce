@@ -3341,6 +3341,7 @@ CREATE TABLE $orders_table_name (
 	KEY customer_id_billing_email (customer_id, billing_email({$composite_customer_id_email_length})),
 	KEY customer_id_status (customer_id, status),
 	KEY billing_email (billing_email($max_index_length)),
+	KEY transaction_id (transaction_id(20)),
 	KEY type_status_date (type, status, date_created_gmt),
 	KEY parent_order_id (parent_order_id),
 	KEY date_updated (date_updated_gmt)
@@ -3392,7 +3393,7 @@ CREATE TABLE $meta_table (
 	order_id bigint(20) unsigned null,
 	meta_key varchar(255),
 	meta_value text null,
-	KEY meta_key_value (meta_key(100), meta_value($composite_meta_value_index_length)),
+	KEY meta_key_value (meta_key(100)),
 	KEY order_id_meta_key_meta_value (order_id, meta_key(100), meta_value($composite_meta_value_index_length))
 ) $collate;
 ";

@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Allow extensionCartUpdate's overwriteDirtyCustomerData option to accept an object with per-address control ({ shipping_address?: boolean, billing_address?: boolean }) in addition to a boolean.

@@ -8,6 +8,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
+
 require_once __DIR__ . '/class-wc-integration-maxmind-database-service.php';
 
 /**
@@ -280,7 +282,7 @@ class WC_Integration_MaxMind_Geolocation extends WC_Integration {
 			return;
 		}
 
-		if ( ! in_array( $new_value, array( 'geolocation', 'geolocation_ajax' ), true ) ) {
+		if ( ! in_array( $new_value, array( DefaultCustomerAddress::GEOLOCATION, DefaultCustomerAddress::GEOLOCATION_AJAX ), true ) ) {
 			$this->remove_missing_license_key_notice();
 			return;
 		}

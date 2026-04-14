@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix validation error message overlapping the advanced cost help text in Flat Rate shipping method settings.
