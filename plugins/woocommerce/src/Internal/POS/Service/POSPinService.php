@@ -74,7 +74,7 @@ class POSPinService {
 	 * @return true|WP_Error
 	 */
 	public function set_pin( int $user_id, string $pin ) {
-		if ( ! user_can( $user_id, 'woocommerce_pos_access' ) ) {
+		if ( ! user_can( $user_id, 'view_pos' ) ) {
 			return $this->pin_error();
 		}
 

@@ -12,26 +12,16 @@ use WC_Unit_Test_Case;
 class POSRolesTest extends WC_Unit_Test_Case {
 
 	/**
-	 * All POS capabilities.
+	 * All POS capabilities assigned to admin and shop_manager.
 	 *
 	 * @var string[]
 	 */
 	private $all_pos_caps = array(
-		'woocommerce_pos_access',
-		'woocommerce_pos_manage_settings',
-		'woocommerce_void_orders',
-		'woocommerce_refund_orders',
-		'woocommerce_apply_discounts',
-		'woocommerce_override_prices',
-		'woocommerce_view_sales_reports',
-		'woocommerce_view_financial_reports',
-		'woocommerce_view_personal_sales',
-		'woocommerce_export_reports',
-		'woocommerce_approve_overrides',
-		'woocommerce_view_customer_data',
-		'woocommerce_edit_customer_data',
-		'woocommerce_view_audit_logs',
-		'woocommerce_adjust_stock',
+		'view_pos',
+		'view_pos_settings',
+		'edit_pos_settings',
+		'void_shop_orders',
+		'refund_shop_orders',
 	);
 
 	/**
@@ -92,30 +82,22 @@ class POSRolesTest extends WC_Unit_Test_Case {
 		$role = get_role( 'pos_cashier' );
 
 		$this->assertNotNull( $role, 'pos_cashier role should exist' );
-		$this->assertTrue( $role->has_cap( 'woocommerce_pos_access' ), 'pos_cashier should have woocommerce_pos_access' );
-		$this->assertTrue( $role->has_cap( 'woocommerce_view_personal_sales' ), 'pos_cashier should have woocommerce_view_personal_sales' );
-		$this->assertTrue( $role->has_cap( 'woocommerce_view_customer_data' ), 'pos_cashier should have woocommerce_view_customer_data' );
+		$this->assertTrue( $role->has_cap( 'view_pos' ), 'pos_cashier should have view_pos' );
 	}
 
 	/**
-	 * @testdox POS cashier role does not have manager-level POS capabilities.
+	 * @testdox POS cashier role does not have manager-level capabilities.
 	 */
 	public function test_pos_cashier_role_lacks_manager_caps(): void {
 		$role = get_role( 'pos_cashier' );
 
 		$this->assertNotNull( $role, 'pos_cashier role should exist' );
-		$this->assertFalse( $role->has_cap( 'woocommerce_refund_orders' ), 'pos_cashier should not have woocommerce_refund_orders' );
-		$this->assertFalse( $role->has_cap( 'woocommerce_void_orders' ), 'pos_cashier should not have woocommerce_void_orders' );
-		$this->assertFalse( $role->has_cap( 'woocommerce_pos_manage_settings' ), 'pos_cashier should not have woocommerce_pos_manage_settings' );
-		$this->assertFalse( $role->has_cap( 'woocommerce_apply_discounts' ), 'pos_cashier should not have woocommerce_apply_discounts' );
-		$this->assertFalse( $role->has_cap( 'woocommerce_override_prices' ), 'pos_cashier should not have woocommerce_override_prices' );
-		$this->assertFalse( $role->has_cap( 'woocommerce_view_sales_reports' ), 'pos_cashier should not have woocommerce_view_sales_reports' );
-		$this->assertFalse( $role->has_cap( 'woocommerce_view_financial_reports' ), 'pos_cashier should not have woocommerce_view_financial_reports' );
-		$this->assertFalse( $role->has_cap( 'woocommerce_export_reports' ), 'pos_cashier should not have woocommerce_export_reports' );
-		$this->assertFalse( $role->has_cap( 'woocommerce_approve_overrides' ), 'pos_cashier should not have woocommerce_approve_overrides' );
-		$this->assertFalse( $role->has_cap( 'woocommerce_edit_customer_data' ), 'pos_cashier should not have woocommerce_edit_customer_data' );
-		$this->assertFalse( $role->has_cap( 'woocommerce_view_audit_logs' ), 'pos_cashier should not have woocommerce_view_audit_logs' );
-		$this->assertFalse( $role->has_cap( 'woocommerce_adjust_stock' ), 'pos_cashier should not have woocommerce_adjust_stock' );
+		$this->assertFalse( $role->has_cap( 'refund_shop_orders' ), 'pos_cashier should not have refund_shop_orders' );
+		$this->assertFalse( $role->has_cap( 'void_shop_orders' ), 'pos_cashier should not have void_shop_orders' );
+		$this->assertFalse( $role->has_cap( 'view_pos_settings' ), 'pos_cashier should not have view_pos_settings' );
+		$this->assertFalse( $role->has_cap( 'edit_pos_settings' ), 'pos_cashier should not have edit_pos_settings' );
+		$this->assertFalse( $role->has_cap( 'edit_shop_coupons' ), 'pos_cashier should not have edit_shop_coupons' );
+		$this->assertFalse( $role->has_cap( 'publish_shop_coupons' ), 'pos_cashier should not have publish_shop_coupons' );
 	}
 
 	/**
@@ -152,25 +134,29 @@ class POSRolesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox POS manager role has coupon capabilities.
+	 */
+	public function test_pos_manager_role_has_coupon_caps(): void {
+		$role = get_role( 'pos_manager' );
+
+		$this->assertNotNull( $role, 'pos_manager role should exist' );
+		$this->assertTrue( $role->has_cap( 'edit_shop_coupon' ), 'pos_manager should have edit_shop_coupon' );
+		$this->assertTrue( $role->has_cap( 'edit_shop_coupons' ), 'pos_manager should have edit_shop_coupons' );
+		$this->assertTrue( $role->has_cap( 'publish_shop_coupons' ), 'pos_manager should have publish_shop_coupons' );
+		$this->assertTrue( $role->has_cap( 'read_shop_coupon' ), 'pos_manager should have read_shop_coupon' );
+	}
+
+	/**
 	 * @testdox POS manager role has the expected POS capabilities.
 	 */
 	public function test_pos_manager_role_has_pos_caps(): void {
 		$role = get_role( 'pos_manager' );
 
 		$expected_caps = array(
-			'woocommerce_pos_access',
-			'woocommerce_pos_manage_settings',
-			'woocommerce_void_orders',
-			'woocommerce_refund_orders',
-			'woocommerce_apply_discounts',
-			'woocommerce_override_prices',
-			'woocommerce_view_sales_reports',
-			'woocommerce_view_personal_sales',
-			'woocommerce_approve_overrides',
-			'woocommerce_view_customer_data',
-			'woocommerce_edit_customer_data',
-			'woocommerce_adjust_stock',
-			'woocommerce_view_audit_logs',
+			'view_pos',
+			'view_pos_settings',
+			'void_shop_orders',
+			'refund_shop_orders',
 		);
 
 		$this->assertNotNull( $role, 'pos_manager role should exist' );
@@ -181,14 +167,14 @@ class POSRolesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox POS manager role does not have financial reports or export capabilities.
+	 * @testdox POS manager role does not have admin-level capabilities.
 	 */
-	public function test_pos_manager_role_lacks_financial_and_export_caps(): void {
+	public function test_pos_manager_role_lacks_admin_caps(): void {
 		$role = get_role( 'pos_manager' );
 
 		$this->assertNotNull( $role, 'pos_manager role should exist' );
-		$this->assertFalse( $role->has_cap( 'woocommerce_view_financial_reports' ), 'pos_manager should not have woocommerce_view_financial_reports' );
-		$this->assertFalse( $role->has_cap( 'woocommerce_export_reports' ), 'pos_manager should not have woocommerce_export_reports' );
+		$this->assertFalse( $role->has_cap( 'edit_pos_settings' ), 'pos_manager should not have edit_pos_settings' );
+		$this->assertFalse( $role->has_cap( 'manage_woocommerce' ), 'pos_manager should not have manage_woocommerce' );
 	}
 
 	/**
@@ -241,8 +227,8 @@ class POSRolesTest extends WC_Unit_Test_Case {
 
 		$this->assertNotNull( $cashier, 'pos_cashier should still exist after second create_roles call' );
 		$this->assertNotNull( $manager, 'pos_manager should still exist after second create_roles call' );
-		$this->assertTrue( $cashier->has_cap( 'woocommerce_pos_access' ), 'pos_cashier should still have woocommerce_pos_access' );
-		$this->assertTrue( $manager->has_cap( 'woocommerce_pos_access' ), 'pos_manager should still have woocommerce_pos_access' );
+		$this->assertTrue( $cashier->has_cap( 'view_pos' ), 'pos_cashier should still have view_pos' );
+		$this->assertTrue( $manager->has_cap( 'view_pos' ), 'pos_manager should still have view_pos' );
 	}
 
 	/**
@@ -275,15 +261,13 @@ class POSRolesTest extends WC_Unit_Test_Case {
 		$cashier_user = $this->factory->user->create( array( 'role' => 'pos_cashier' ) );
 		$manager_user = $this->factory->user->create( array( 'role' => 'pos_manager' ) );
 
-		$this->assertTrue( user_can( $cashier_user, 'woocommerce_pos_access' ) );
-		$this->assertTrue( user_can( $cashier_user, 'woocommerce_view_personal_sales' ) );
-		$this->assertFalse( user_can( $cashier_user, 'woocommerce_refund_orders' ) );
+		$this->assertTrue( user_can( $cashier_user, 'view_pos' ) );
+		$this->assertFalse( user_can( $cashier_user, 'refund_shop_orders' ) );
 
-		$this->assertTrue( user_can( $manager_user, 'woocommerce_pos_access' ) );
-		$this->assertTrue( user_can( $manager_user, 'woocommerce_refund_orders' ) );
-		$this->assertTrue( user_can( $manager_user, 'woocommerce_approve_overrides' ) );
-		$this->assertFalse( user_can( $manager_user, 'woocommerce_manage_pos_staff' ) );
-		$this->assertFalse( user_can( $manager_user, 'woocommerce_view_financial_reports' ) );
+		$this->assertTrue( user_can( $manager_user, 'view_pos' ) );
+		$this->assertTrue( user_can( $manager_user, 'refund_shop_orders' ) );
+		$this->assertTrue( user_can( $manager_user, 'void_shop_orders' ) );
+		$this->assertFalse( user_can( $manager_user, 'edit_pos_settings' ) );
 	}
 
 	/**
@@ -293,7 +277,7 @@ class POSRolesTest extends WC_Unit_Test_Case {
 		$capabilities = WC_Install::get_core_capabilities();
 
 		$this->assertArrayHasKey( 'pos', $capabilities );
-		$this->assertCount( 15, $capabilities['pos'] );
+		$this->assertCount( 5, $capabilities['pos'] );
 
 		foreach ( $this->all_pos_caps as $cap ) {
 			$this->assertContains( $cap, $capabilities['pos'], "get_core_capabilities pos group should contain {$cap}" );

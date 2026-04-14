@@ -110,7 +110,7 @@ class WC_Admin_POS_Staff {
 		}
 
 		// phpcs:ignore WordPress.WP.Capabilities.Unknown -- Registered in WC_Install::create_roles().
-		if ( ! user_can( $user_id, 'woocommerce_pos_access' ) ) {
+		if ( ! user_can( $user_id, 'view_pos' ) ) {
 			wp_die( esc_html__( 'This user does not have POS access.', 'woocommerce' ) );
 		}
 
@@ -160,7 +160,7 @@ class WC_Admin_POS_Staff {
 		$pin     = isset( $_POST['pos_pin'] ) ? sanitize_text_field( wp_unslash( $_POST['pos_pin'] ) ) : '';
 
 		// phpcs:ignore WordPress.WP.Capabilities.Unknown -- Registered in WC_Install::create_roles().
-		if ( ! $user_id || ! user_can( $user_id, 'woocommerce_pos_access' ) ) {
+		if ( ! $user_id || ! user_can( $user_id, 'view_pos' ) ) {
 			WC_Admin_Settings::add_error( __( 'Invalid user or user does not have POS access.', 'woocommerce' ) );
 			return;
 		}
@@ -209,7 +209,7 @@ class WC_Admin_POS_Staff {
 		$user_id = isset( $_GET['remove-pin'] ) ? absint( $_GET['remove-pin'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		// phpcs:ignore WordPress.WP.Capabilities.Unknown -- Registered in WC_Install::create_roles().
-		if ( ! $user_id || ! user_can( $user_id, 'woocommerce_pos_access' ) ) {
+		if ( ! $user_id || ! user_can( $user_id, 'view_pos' ) ) {
 			wp_die( esc_html__( 'Invalid user or user does not have POS access.', 'woocommerce' ) );
 		}
 

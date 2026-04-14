@@ -102,7 +102,7 @@ class POSPinManageController extends RestApiControllerBase implements RegisterHo
 		$target_user_id = $request->get_param( 'user_id' );
 
 		if ( empty( $target_user_id ) || (int) $target_user_id === $current_user_id ) {
-			return $this->check_permission( $request, 'woocommerce_pos_access' );
+			return $this->check_permission( $request, 'view_pos' );
 		}
 
 		return $this->check_permission( $request, 'manage_woocommerce' );
@@ -140,7 +140,7 @@ class POSPinManageController extends RestApiControllerBase implements RegisterHo
 		}
 		$target_user_id = (int) $target_user_id;
 
-		if ( ! user_can( $target_user_id, 'woocommerce_pos_access' ) ) {
+		if ( ! user_can( $target_user_id, 'view_pos' ) ) {
 			return new WP_Error(
 				'woocommerce_rest_invalid_user',
 				__( 'Target user does not have POS access.', 'woocommerce' ),
@@ -228,7 +228,7 @@ class POSPinManageController extends RestApiControllerBase implements RegisterHo
 
 		$result = array();
 		foreach ( $users as $user ) {
-			if ( ! user_can( $user->ID, 'woocommerce_pos_access' ) ) {
+			if ( ! user_can( $user->ID, 'view_pos' ) ) {
 				continue;
 			}
 
