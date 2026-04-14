@@ -12,7 +12,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 10.4.0
+ * @version 10.7.0
  */
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -23,6 +23,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 $email_improvements_enabled = FeaturesUtil::feature_is_enabled( 'email_improvements' );
 $store_name                 = $store_name ?? get_bloginfo( 'name', 'display' );
+
+/**
+ * Filter the URL used for the email header image/logo link.
+ *
+ * Return an empty string to disable the link.
+ *
+ * @since 10.7.0
+ * @param string $url The URL to link to. Defaults to the site home URL.
+ */
+$header_image_url = apply_filters( 'woocommerce_email_header_image_url', home_url() );
 
 ?>
 <!DOCTYPE html>
@@ -60,7 +70,16 @@ $store_name                 = $store_name ?? get_bloginfo( 'name', 'display' );
 												<td id="template_header_image">
 													<?php
 													if ( $img ) {
-														echo '<p style="margin-top:0;"><img src="' . esc_url( $img ) . '" alt="' . esc_attr( $store_name ) . '" /></p>';
+														$image_html = '<img src="' . esc_url( $img ) . '" alt="' . esc_attr( $store_name ) . '" />';
+														if ( $header_image_url ) {
+															// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $image_html is built from esc_url() and esc_attr().
+															echo '<p style="margin-top:0;"><a href="' . esc_url( $header_image_url ) . '" style="display: inline-block; text-decoration: none;" target="_blank">' . $image_html . '</a></p>';
+														} else {
+															// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+															echo '<p style="margin-top:0;">' . $image_html . '</p>';
+														}
+													} elseif ( $header_image_url ) {
+														echo '<p class="email-logo-text"><a href="' . esc_url( $header_image_url ) . '" style="color: inherit; text-decoration: none;" target="_blank">' . esc_html( $store_name ) . '</a></p>';
 													} else {
 														echo '<p class="email-logo-text">' . esc_html( $store_name ) . '</p>';
 													}
@@ -72,7 +91,14 @@ $store_name                 = $store_name ?? get_bloginfo( 'name', 'display' );
 										<div id="template_header_image">
 											<?php
 											if ( $img ) {
-												echo '<p style="margin-top:0;"><img src="' . esc_url( $img ) . '" alt="' . esc_attr( $store_name ) . '" /></p>';
+												$image_html = '<img src="' . esc_url( $img ) . '" alt="' . esc_attr( $store_name ) . '" />';
+												if ( $header_image_url ) {
+													// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $image_html is built from esc_url() and esc_attr().
+													echo '<p style="margin-top:0;"><a href="' . esc_url( $header_image_url ) . '" style="display: inline-block; text-decoration: none;" target="_blank">' . $image_html . '</a></p>';
+												} else {
+													// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+													echo '<p style="margin-top:0;">' . $image_html . '</p>';
+												}
 											}
 											?>
 										</div>

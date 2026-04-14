@@ -13,6 +13,7 @@ use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Audio;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Video;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Dom_Document_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Html_Processing_Helper;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 
 /**
  * Embed block renderer.
@@ -22,6 +23,20 @@ use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Html_Processing_Helper
  * Video providers: YouTube - rendered as video thumbnails with play buttons.
  */
 class Embed extends Abstract_Block_Renderer {
+	/**
+	 * Maximum number of embed page fetch attempts per email render.
+	 * Beyond this limit, embeds render as compact link cards (no HTTP fetch).
+	 * Counts attempts, not successes, to cap outbound HTTP requests.
+	 */
+	private const MAX_EMBED_FETCHES = 5;
+
+	/**
+	 * Number of embed page fetch attempts so far by this instance.
+	 *
+	 * @var int
+	 */
+	private int $embed_fetch_count = 0;
+
 	/**
 	 * Supported audio providers with their configuration.
 	 *
@@ -148,7 +163,23 @@ class Embed extends Abstract_Block_Renderer {
 		// Check if this is a supported audio or video provider embed and has a valid URL.
 		$provider = $this->get_supported_provider( $attr, $block_content );
 		if ( empty( $provider ) ) {
-			// For non-supported embeds, try to render as a simple link fallback.
+			// For non-supported embeds, try to render as a rich card using oEmbed data.
+			// Only attempt the embed page fetch for WordPress embeds (type "wp-embed")
+			// to avoid wasted HTTP requests to non-WordPress sites.
+			$url         = $this->extract_provider_url( $attr, $block_content );
+			$is_wp_embed = isset( $attr['type'] ) && 'wp-embed' === $attr['type'];
+			if ( ! empty( $url ) && $is_wp_embed ) {
+				if ( $this->embed_fetch_count >= self::MAX_EMBED_FETCHES ) {
+					return $this->render_compact_link_card( $url, $parsed_block, $rendering_context );
+				}
+				++$this->embed_fetch_count;
+				$card_result = $this->render_link_embed_card( $url, $parsed_block, $rendering_context );
+				if ( ! empty( $card_result ) ) {
+					return $card_result;
+				}
+				// Fetch failed — render as compact link card instead of plain link.
+				return $this->render_compact_link_card( $url, $parsed_block, $rendering_context );
+			}
 			return $this->render_link_fallback( $attr, $block_content, $parsed_block, $rendering_context );
 		}
 
@@ -638,5 +669,342 @@ class Embed extends Abstract_Block_Renderer {
 		// Cache empty result for invalid URLs.
 		set_transient( $cache_key, '', $cache_ttl );
 		return '';
+	}
+
+	/**
+	 * Fetch metadata from a WordPress embed page.
+	 *
+	 * WordPress sites expose a {url}/embed/ endpoint that renders a post preview
+	 * containing the title, excerpt, featured image, provider name, and site icon.
+	 * This single fetch provides all the data needed for the rich embed card.
+	 *
+	 * @param string $url URL of the post to fetch metadata for.
+	 * @return array{ title: string, thumbnail_url: string, provider_name: string, provider_url: string, excerpt: string, site_icon_url: string } Embed page metadata.
+	 */
+	private function fetch_embed_page_data( string $url ): array {
+		$empty_result = array(
+			'title'         => '',
+			'thumbnail_url' => '',
+			'provider_name' => '',
+			'provider_url'  => '',
+			'excerpt'       => '',
+			'site_icon_url' => '',
+		);
+
+		$parsed = wp_parse_url( $url );
+		if ( empty( $parsed['scheme'] ) || empty( $parsed['host'] ) ) {
+			return $empty_result;
+		}
+		$embed_url = $parsed['scheme'] . '://' . $parsed['host']
+			. ( isset( $parsed['port'] ) ? ':' . $parsed['port'] : '' )
+			. trailingslashit( $parsed['path'] ?? '/' ) . 'embed/';
+
+		if ( ! $this->is_valid_url( $embed_url ) ) {
+			return $empty_result;
+		}
+
+		$cache_key = 'wc_email_embed_pg_' . md5( $url );
+		$cached    = get_transient( $cache_key );
+
+		if ( false !== $cached && is_array( $cached )
+			&& isset( $cached['title'], $cached['thumbnail_url'], $cached['provider_name'], $cached['provider_url'], $cached['excerpt'], $cached['site_icon_url'] )
+			&& is_string( $cached['title'] ) && is_string( $cached['thumbnail_url'] )
+			&& is_string( $cached['provider_name'] ) && is_string( $cached['provider_url'] )
+			&& is_string( $cached['excerpt'] ) && is_string( $cached['site_icon_url'] )
+		) {
+			return array(
+				'title'         => $cached['title'],
+				'thumbnail_url' => $cached['thumbnail_url'],
+				'provider_name' => $cached['provider_name'],
+				'provider_url'  => $cached['provider_url'],
+				'excerpt'       => $cached['excerpt'],
+				'site_icon_url' => $cached['site_icon_url'],
+			);
+		}
+		if ( is_string( $cached ) ) {
+			// Negative cache (empty string from previous failure).
+			return $empty_result;
+		}
+
+		/** This filter is documented in packages/php/email-editor/src/Integrations/Core/Renderer/Blocks/class-embed.php */
+		$cache_ttl = (int) apply_filters( 'oembed_ttl', DAY_IN_SECONDS, $url, array(), '' );
+
+		$response = wp_safe_remote_get(
+			$embed_url,
+			array(
+				'timeout'             => 5,
+				'limit_response_size' => 150 * KB_IN_BYTES,
+			)
+		);
+
+		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
+			set_transient( $cache_key, '', $cache_ttl );
+			return $empty_result;
+		}
+
+		$body = wp_remote_retrieve_body( $response );
+		if ( empty( $body ) ) {
+			set_transient( $cache_key, '', $cache_ttl );
+			return $empty_result;
+		}
+
+		// Parse HTML and extract metadata using XPath.
+		$previous_libxml_errors = libxml_use_internal_errors( true );
+		try {
+			$dom = new \DOMDocument();
+			$dom->loadHTML( '<?xml encoding="UTF-8">' . $body, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD );
+			libxml_clear_errors();
+		} finally {
+			libxml_use_internal_errors( $previous_libxml_errors );
+		}
+
+		$xpath = new \DOMXPath( $dom );
+
+		// Extract title from wp-embed-heading.
+		$title         = '';
+		$heading_nodes = $xpath->query( "//*[contains(concat(' ', normalize-space(@class), ' '), ' wp-embed-heading ')]" );
+		$heading_node  = ( false !== $heading_nodes && $heading_nodes->length > 0 ) ? $heading_nodes->item( 0 ) : null;
+		if ( $heading_node instanceof \DOMElement ) {
+			$title = trim( $heading_node->textContent ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+		}
+
+		// Extract thumbnail from featured image.
+		$thumbnail_url  = '';
+		$featured_nodes = $xpath->query( "//*[contains(concat(' ', normalize-space(@class), ' '), ' wp-embed-featured-image ')]//img" );
+		$featured_node  = ( false !== $featured_nodes && $featured_nodes->length > 0 ) ? $featured_nodes->item( 0 ) : null;
+		if ( $featured_node instanceof \DOMElement ) {
+			$img_src = $featured_node->getAttribute( 'src' );
+			if ( $this->is_valid_url( $img_src ) ) {
+				$thumbnail_url = $img_src;
+			}
+		}
+
+		// Extract provider name from site title.
+		$provider_name    = '';
+		$site_title_nodes = $xpath->query( "//*[contains(concat(' ', normalize-space(@class), ' '), ' wp-embed-site-title ')]//span" );
+		$site_title_node  = ( false !== $site_title_nodes && $site_title_nodes->length > 0 ) ? $site_title_nodes->item( 0 ) : null;
+		if ( $site_title_node instanceof \DOMElement ) {
+			$provider_name = trim( $site_title_node->textContent ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+		}
+
+		// Extract provider URL from site title link.
+		$provider_url    = '';
+		$site_link_nodes = $xpath->query( "//*[contains(concat(' ', normalize-space(@class), ' '), ' wp-embed-site-title ')]//a" );
+		$site_link_node  = ( false !== $site_link_nodes && $site_link_nodes->length > 0 ) ? $site_link_nodes->item( 0 ) : null;
+		if ( $site_link_node instanceof \DOMElement ) {
+			$href = $site_link_node->getAttribute( 'href' );
+			if ( $this->is_valid_url( $href ) ) {
+				$provider_url = $href;
+			}
+		}
+
+		// Extract excerpt.
+		$excerpt       = '';
+		$excerpt_nodes = $xpath->query( "//*[contains(concat(' ', normalize-space(@class), ' '), ' wp-embed-excerpt ')]" );
+		$excerpt_node  = ( false !== $excerpt_nodes && $excerpt_nodes->length > 0 ) ? $excerpt_nodes->item( 0 ) : null;
+		if ( $excerpt_node instanceof \DOMElement ) {
+			$excerpt = trim( $excerpt_node->textContent ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+		}
+
+		// Cap at 200 characters as a safety limit.
+		if ( mb_strlen( $excerpt ) > 200 ) {
+			$excerpt = mb_substr( $excerpt, 0, 200 );
+			$excerpt = rtrim( $excerpt ) . '…';
+		}
+
+		// Extract site icon URL.
+		$site_icon_url = '';
+		$icon_nodes    = $xpath->query( "//img[contains(concat(' ', normalize-space(@class), ' '), ' wp-embed-site-icon ')]" );
+		$icon_node     = ( false !== $icon_nodes && $icon_nodes->length > 0 ) ? $icon_nodes->item( 0 ) : null;
+		if ( $icon_node instanceof \DOMElement ) {
+			$icon_src = $icon_node->getAttribute( 'src' );
+			if ( $this->is_valid_url( $icon_src ) ) {
+				$site_icon_url = $icon_src;
+			}
+		}
+
+		$result = array(
+			'title'         => $title,
+			'thumbnail_url' => $thumbnail_url,
+			'provider_name' => $provider_name,
+			'provider_url'  => $provider_url,
+			'excerpt'       => $excerpt,
+			'site_icon_url' => $site_icon_url,
+		);
+
+		set_transient( $cache_key, $result, $cache_ttl );
+		return $result;
+	}
+
+	/**
+	 * Render a link embed as a rich card using data from the WordPress embed page.
+	 *
+	 * @param string            $url URL to render as a card.
+	 * @param array             $parsed_block Parsed block.
+	 * @param Rendering_Context $rendering_context Rendering context.
+	 * @return string Rendered card HTML or empty string if embed page data is insufficient.
+	 */
+	private function render_link_embed_card( string $url, array $parsed_block, Rendering_Context $rendering_context ): string {
+		$embed_data = $this->fetch_embed_page_data( $url );
+
+		if ( empty( $embed_data['title'] ) ) {
+			return '';
+		}
+
+		$title         = $embed_data['title'];
+		$thumbnail_url = $embed_data['thumbnail_url'];
+		$provider_name = ! empty( $embed_data['provider_name'] )
+			? $embed_data['provider_name']
+			: (string) wp_parse_url( $url, PHP_URL_HOST );
+		$provider_url  = $embed_data['provider_url'];
+		$excerpt       = $embed_data['excerpt'];
+		$site_icon_url = $embed_data['site_icon_url'];
+
+		$email_styles = $rendering_context->get_theme_styles();
+		$text_color   = $email_styles['color']['text'] ?? '#1e1e1e';
+		$text_color   = Html_Processing_Helper::sanitize_color( $text_color );
+		$link_color   = $email_styles['elements']['link']['color']['text'] ?? '#0073aa';
+		$link_color   = Html_Processing_Helper::sanitize_color( $link_color );
+
+		// Build card rows.
+		$rows_html = '';
+
+		// Optional thumbnail row.
+		if ( ! empty( $thumbnail_url ) ) {
+			$thumbnail_cell = Table_Wrapper_Helper::render_table_cell(
+				sprintf(
+					'<a href="%s" target="_blank" rel="noopener nofollow"><img src="%s" alt="%s" style="display: block; width: 100%%; border-radius: 4px 4px 0 0;" /></a>',
+					esc_url( $url ),
+					esc_url( $thumbnail_url ),
+					esc_attr( $title )
+				),
+				array( 'style' => 'padding: 0;' )
+			);
+			$rows_html     .= '<tr>' . $thumbnail_cell . '</tr>';
+		}
+
+		// Build content: title, optional excerpt, provider.
+		$content_parts = sprintf(
+			'<a href="%s" target="_blank" rel="noopener nofollow" style="color: %s; text-decoration: none; font-weight: bold;">%s</a>',
+			esc_url( $url ),
+			esc_attr( $text_color ),
+			esc_html( $title )
+		);
+
+		if ( ! empty( $excerpt ) ) {
+			$content_parts .= sprintf(
+				'<br /><span style="font-size: 14px; color: %s; line-height: 1.4;">%s</span>',
+				esc_attr( $text_color ),
+				esc_html( $excerpt )
+			);
+			$content_parts .= sprintf(
+				' <a href="%s" target="_blank" rel="noopener nofollow" style="font-size: 14px; color: %s; text-decoration: underline;">%s</a>',
+				esc_url( $url ),
+				esc_attr( $link_color ),
+				esc_html__( 'Continue reading', 'woocommerce' )
+			);
+		}
+
+		// Provider row with optional site icon.
+		$provider_text = ! empty( $provider_url )
+			? sprintf(
+				'<a href="%s" target="_blank" rel="noopener nofollow" style="font-size: 13px; color: %s; text-decoration: none;">%s</a>',
+				esc_url( $provider_url ),
+				esc_attr( $text_color ),
+				esc_html( $provider_name )
+			)
+			: sprintf(
+				'<span style="font-size: 13px; color: %s;">%s</span>',
+				esc_attr( $text_color ),
+				esc_html( $provider_name )
+			);
+
+		if ( ! empty( $site_icon_url ) ) {
+			$content_parts .= sprintf(
+				'<table border="0" cellpadding="0" cellspacing="0" role="presentation" style="margin-top: 16px;">'
+				. '<tr>'
+				. '<td style="vertical-align: middle; padding-right: 6px;">'
+				. '<img src="%s" width="16" height="16" alt="" style="display: block; border-radius: 2px;" />'
+				. '</td>'
+				. '<td style="vertical-align: middle;">%s</td>'
+				. '</tr></table>',
+				esc_url( $site_icon_url ),
+				$provider_text
+			);
+		} else {
+			$content_parts .= '<br />' . $provider_text;
+		}
+
+		$content_cell = Table_Wrapper_Helper::render_table_cell(
+			$content_parts,
+			array( 'style' => 'padding: 12px;' )
+		);
+		$rows_html   .= '<tr>' . $content_cell . '</tr>';
+
+		$card_html  = sprintf(
+			'<table border="0" cellpadding="0" cellspacing="0" role="presentation" style="border: 1px solid #ddd; border-radius: 4px; width: 100%%;">'
+		);
+		$card_html .= '<tbody>' . $rows_html . '</tbody></table>';
+
+		$outlook_wrapped = Table_Wrapper_Helper::render_outlook_table_wrapper(
+			$card_html,
+			array(
+				'align' => 'left',
+				'width' => '100%',
+			)
+		);
+
+		return $this->add_spacer(
+			$outlook_wrapped,
+			$parsed_block['email_attrs'] ?? array()
+		);
+	}
+
+	/**
+	 * Render a compact link card for embeds that exceed the rich card cap.
+	 * Displays the URL in a bordered card without making any HTTP requests.
+	 *
+	 * @param string            $url URL to render.
+	 * @param array             $parsed_block Parsed block.
+	 * @param Rendering_Context $rendering_context Rendering context.
+	 * @return string Rendered compact link card HTML.
+	 */
+	private function render_compact_link_card( string $url, array $parsed_block, Rendering_Context $rendering_context ): string {
+		$email_styles = $rendering_context->get_theme_styles();
+		$link_color   = $email_styles['elements']['link']['color']['text'] ?? '#0073aa';
+		$link_color   = Html_Processing_Helper::sanitize_color( $link_color );
+
+		// Build display text: strip scheme from URL.
+		$display_host = (string) wp_parse_url( $url, PHP_URL_HOST );
+		$display_path = (string) wp_parse_url( $url, PHP_URL_PATH );
+		$display_text = $display_host . $display_path;
+
+		$link_html = sprintf(
+			'<a href="%s" target="_blank" rel="noopener nofollow" style="color: %s; text-decoration: none;">%s</a>',
+			esc_url( $url ),
+			esc_attr( $link_color ),
+			esc_html( $display_text )
+		);
+
+		$content_cell = Table_Wrapper_Helper::render_table_cell(
+			$link_html,
+			array( 'style' => 'padding: 12px;' )
+		);
+
+		$card_html  = '<table border="0" cellpadding="0" cellspacing="0" role="presentation" style="border: 1px solid #ddd; border-radius: 4px; width: 100%;">';
+		$card_html .= '<tbody><tr>' . $content_cell . '</tr></tbody></table>';
+
+		$outlook_wrapped = Table_Wrapper_Helper::render_outlook_table_wrapper(
+			$card_html,
+			array(
+				'align' => 'left',
+				'width' => '100%',
+			)
+		);
+
+		return $this->add_spacer(
+			$outlook_wrapped,
+			$parsed_block['email_attrs'] ?? array()
+		);
 	}
 }

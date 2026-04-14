@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Add "role": "content" to editable block attributes (product-sku, product-reviews-pagination-next, product-reviews-pagination-previous) for WordPress 7.0 contentOnly pattern editing compatibility.

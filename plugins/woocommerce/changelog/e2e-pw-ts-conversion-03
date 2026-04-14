@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Convert second set of e2e-pw test files to TypeScript.

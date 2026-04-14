@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix live-branches userscript broken by GitHub DOM changes: extract PR data from embedded JSON instead of removed CSS selectors, and fix checkbox change listeners that were never attached due to arrow function misuse.

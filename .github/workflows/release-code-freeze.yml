@@ -21,7 +21,7 @@ env:
 jobs:
   check-feature-freeze-event:
     name: Check for Feature Freeze events today
-    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     outputs:
       should-run: ${{ steps.check-feature-freeze-event.outputs.should-run }}
     steps:
@@ -72,7 +72,7 @@ jobs:
     name: Calculate versions and confirm repo is in a good state
     needs: check-feature-freeze-event
     if: ${{ needs.check-feature-freeze-event.outputs.should-run == 'true' }}
-    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     outputs:
       nextReleaseBranch: ${{ steps.calculate-versions.outputs.nextReleaseBranch }}
       nextReleaseVersion: ${{ steps.calculate-versions.outputs.nextReleaseVersion }}
@@ -126,7 +126,7 @@ jobs:
 
   run-feature-freeze:
     name: Perform feature freeze
-    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     needs: prepare-for-feature-freeze
     steps:
       - name: Checkout trunk
@@ -166,7 +166,7 @@ jobs:
 
   cleanup-milestones:
     name: Clean up old and completed milestones
-    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     needs: [prepare-for-feature-freeze, run-feature-freeze]
     steps:
       - name: Close completed milestones
@@ -222,7 +222,7 @@ jobs:
 
   publish-dev-release:
     name: 'Publish -dev release'
-    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     needs: [prepare-for-feature-freeze, build-dev-release]
     outputs:
       release-zip: ${{ steps.publish-release.outputs.release-zip }}
@@ -241,7 +241,7 @@ jobs:
 
   notify-slack:
     name: Notify Slack
-    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     needs: [publish-dev-release, prepare-for-feature-freeze]
     outputs:
       message-ts: ${{ steps.notify-success.outputs.ts }}
@@ -322,7 +322,7 @@ jobs:
 
   trigger-webhook:
     name: Trigger Release Webhook
-    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     needs: [publish-dev-release, prepare-for-feature-freeze]
     steps:
       - name: Trigger Feature Freeze Webhook
@@ -381,7 +381,7 @@ jobs:
 
   notify-slack-on-failure:
     name: Notify Slack on Failure
-    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     needs: [ check-feature-freeze-event, prepare-for-feature-freeze, run-feature-freeze, cleanup-milestones, bump-version-in-trunk, build-dev-release, publish-dev-release, notify-slack, trigger-webhook ]
     if: always() && ((contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')))
     steps:

@@ -17,17 +17,33 @@ type NoticeWithId = Notice & {
 	id: string;
 };
 
-const getStoreNoticeContext = getContextFn< {
+const getStoreNoticeContext = (): {
 	notices: NoticeWithId[];
 	notice: NoticeWithId;
-} >;
+} | null => {
+	try {
+		return getContextFn< {
+			notices: NoticeWithId[];
+			notice: NoticeWithId;
+		} >();
+	} catch ( e ) {
+		return null;
+	}
+};
 
 // Todo: Go back to the Store Notices block context once more than one context
 // can be added to an element (https://github.com/WordPress/gutenberg/discussions/62720).
-const getProductCollectionContext = () =>
-	getContextFn< {
-		notices: NoticeWithId[];
-	} >( 'woocommerce/product-collection' );
+const getProductCollectionContext = (): {
+	notices: NoticeWithId[];
+} | null => {
+	try {
+		return getContextFn< {
+			notices: NoticeWithId[];
+		} >( 'woocommerce/product-collection' );
+	} catch ( e ) {
+		return null;
+	}
+};
 
 type StoreNoticesState = {
 	get role(): string;
@@ -71,8 +87,8 @@ const { state } = store< Store >(
 			get role() {
 				const context = getStoreNoticeContext();
 				if (
-					context.notice.type === 'error' ||
-					context.notice.type === 'success'
+					context?.notice?.type === 'error' ||
+					context?.notice?.type === 'success'
 				) {
 					return 'alert';
 				}
@@ -80,26 +96,26 @@ const { state } = store< Store >(
 				return 'status';
 			},
 			get isError() {
-				const { notice } = getStoreNoticeContext();
-				return notice.type === 'error';
+				const context = getStoreNoticeContext();
+				return context?.notice?.type === 'error';
 			},
 			get isSuccess() {
-				const { notice } = getStoreNoticeContext();
-				return notice.type === 'success';
+				const context = getStoreNoticeContext();
+				return context?.notice?.type === 'success';
 			},
 			get isInfo() {
-				const { notice } = getStoreNoticeContext();
-				return notice.type === 'notice';
+				const context = getStoreNoticeContext();
+				return context?.notice?.type === 'notice';
 			},
 			get notices() {
 				const productCollectionContext = getProductCollectionContext();
-				if ( productCollectionContext ) {
-					return productCollectionContext?.notices;
+				if ( productCollectionContext?.notices ) {
+					return productCollectionContext.notices;
 				}
 
 				const context = getStoreNoticeContext();
 
-				if ( context && context.notices ) {
+				if ( context?.notices ) {
 					return context.notices;
 				}
 
@@ -131,12 +147,16 @@ const { state } = store< Store >(
 			removeNotice: ( noticeId: string | PointerEvent ) => {
 				const { notices } = state;
 
-				noticeId =
+				const resolvedId =
 					typeof noticeId === 'string'
 						? noticeId
-						: getStoreNoticeContext().notice.id;
+						: getStoreNoticeContext()?.notice?.id;
+
+				// If noticeId is not found (e.g., context was null), do nothing.
+				if ( ! resolvedId ) return;
+
 				const index = notices.findIndex(
-					( { id } ) => id === noticeId
+					( { id } ) => id === resolvedId
 				);
 				if ( index !== -1 ) {
 					notices.splice( index, 1 );
@@ -148,7 +168,8 @@ const { state } = store< Store >(
 				const context = getStoreNoticeContext();
 				const { ref } = getElement();
 
-				if ( ref ) {
+				if ( ref && context?.notice ) {
+					// Note: Notice content is sanitized server-side via wp_kses.
 					ref.innerHTML = context.notice.notice;
 				}
 			},
@@ -162,8 +183,11 @@ const { state } = store< Store >(
 			},
 
 			injectIcon: () => {
+				const context = getStoreNoticeContext();
 				const { ref } = getElement();
-				if ( ! ref ) {
+
+				// Guard against missing context or notice to prevent wrong icon injection.
+				if ( ! ref || ! context?.notice ) {
 					return;
 				}
 

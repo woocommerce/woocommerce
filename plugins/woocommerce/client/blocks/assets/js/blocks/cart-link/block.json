@@ -25,16 +25,11 @@
 	},
 	"example": {
 		"attributes": {
-			"isPreview": true,
 			"cartIcon": "cart",
 			"content": "Cart"
 		}
 	},
 	"attributes": {
-		"isPreview": {
-			"type": "boolean",
-			"default": false
-		},
 		"cartIcon": {
 			"type": "string",
 			"default": "cart"

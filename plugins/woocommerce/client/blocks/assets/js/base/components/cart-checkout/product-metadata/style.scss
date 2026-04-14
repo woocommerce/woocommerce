@@ -1,5 +1,8 @@
 .wc-block-components-product-metadata {
 	@include font-small-locked;
+	display: flex;
+	flex-direction: column;
+	gap: $gap-smallest;
 
 	.wc-block-components-product-metadata__description > p,
 	.wc-block-components-product-metadata__variation-data {

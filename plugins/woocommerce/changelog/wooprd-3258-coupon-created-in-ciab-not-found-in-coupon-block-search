@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix Coupon Code block search to include coupons in all default statuses (draft, future, pending, private, publish), not just published ones

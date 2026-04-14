@@ -151,6 +151,7 @@ const AttributeFilter = ( props ) => {
 					title: <span className={ className } />,
 					rule: (
 						<Select
+							__next40pxDefaultSize
 							className={ clsx(
 								className,
 								'woocommerce-filters-advanced__rule'
@@ -213,6 +214,7 @@ const AttributeFilter = ( props ) => {
 											=
 										</span>
 										<SelectControl
+											__next40pxDefaultSize
 											className="woocommerce-filters-advanced__input woocommerce-search"
 											placeholder={ __(
 												'Attribute value',

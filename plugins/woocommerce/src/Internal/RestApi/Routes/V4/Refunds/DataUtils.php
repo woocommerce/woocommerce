@@ -9,6 +9,8 @@ namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Enums\OrderItemType;
+use Automattic\WooCommerce\Utilities\NumberUtil;
 use WP_Error;
 use WC_Order;
 use WC_Tax;
@@ -69,13 +71,23 @@ class DataUtils {
 							$tax_rates
 						);
 
+						// Round extracted taxes to display precision to match how original taxes were stored.
+						// This prevents rounding errors where internal precision (6DP) differs from storage precision (2DP).
+						$price_decimals   = wc_get_price_decimals();
+						$calculated_taxes = array_map(
+							function ( $tax ) use ( $price_decimals ) {
+								return NumberUtil::round( $tax, $price_decimals );
+							},
+							$calculated_taxes
+						);
+
 						$line_item['refund_tax'] = $this->convert_proportional_taxes_to_schema_format(
 							$calculated_taxes
 						);
 
 						// Subtract extracted tax from refund_total to get the amount excluding tax.
 						$total_tax                 = array_sum( $calculated_taxes );
-						$line_item['refund_total'] = $line_item['refund_total'] - $total_tax;
+						$line_item['refund_total'] = NumberUtil::round( $line_item['refund_total'] - $total_tax, $price_decimals );
 					}
 				}
 			}
@@ -136,7 +148,7 @@ class DataUtils {
 			}
 		}
 
-		return $amount;
+		return (float) NumberUtil::round( $amount, wc_get_price_decimals() );
 	}
 
 	/**
@@ -252,7 +264,7 @@ class DataUtils {
 	 */
 	private function build_tax_rates_array( WC_Order $order, array $tax_ids ): array {
 		$tax_rates = array();
-		$tax_items = $order->get_items( 'tax' );
+		$tax_items = $order->get_items( OrderItemType::TAX );
 
 		foreach ( $tax_ids as $tax_id ) {
 			foreach ( $tax_items as $tax_item ) {

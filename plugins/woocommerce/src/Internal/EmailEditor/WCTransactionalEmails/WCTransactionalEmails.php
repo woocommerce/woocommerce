@@ -20,6 +20,7 @@ class WCTransactionalEmails {
 	 * @var array
 	 */
 	public static $core_transactional_emails = array(
+		'admin_payment_gateway_enabled',
 		'cancelled_order',
 		'customer_cancelled_order',
 		'customer_completed_order',

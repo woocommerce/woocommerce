@@ -9,7 +9,7 @@ import {
 	useState,
 	useMemo,
 } from '@wordpress/element';
-import { applyFilters } from '@wordpress/hooks';
+import { addFilter, applyFilters, hasFilter } from '@wordpress/hooks';
 import { store as editorStore } from '@wordpress/editor';
 import { useMergeRefs } from '@wordpress/compose';
 import '@wordpress/format-library'; // Enables text formatting capabilities
@@ -31,8 +31,9 @@ import { initContentValidationMiddleware } from './middleware/content-validation
 import { initHacks } from './hacks';
 import {
 	useContentValidation,
-	useRemoveSavingFailedNotices,
 	useFilterEditorContentStylesheets,
+	useNoticeOverrides,
+	useRemoveSavingFailedNotices,
 } from './hooks';
 import { cleanupConfigurationChanges } from './config-tools';
 import { getEditorConfigFromWindow } from './store/settings';
@@ -43,11 +44,13 @@ function Editor( {
 	postType,
 	isPreview = false,
 	contentRef = null,
+	customSavePanel,
 }: {
 	postId: number | string;
 	postType: string;
 	isPreview?: boolean;
 	contentRef?: React.Ref< HTMLDivElement > | null;
+	customSavePanel?: React.ReactElement;
 } ) {
 	const [ isInitialized, setIsInitialized ] = useState( false );
 	const { settings } = useSelect(
@@ -59,6 +62,7 @@ function Editor( {
 
 	useContentValidation();
 	useRemoveSavingFailedNotices();
+	useNoticeOverrides();
 
 	const { setEmailPost } = useDispatch( storeName );
 	useEffect( () => {
@@ -90,12 +94,37 @@ function Editor( {
 				postType={ postType }
 				settings={ editorSettings }
 				contentRef={ mergedContentRef }
+				customSavePanel={ customSavePanel }
 			/>
 		</StrictMode>
 	);
 }
 
+/**
+ * WordPress 7.0 introduces Real-time Collaboration. The email editor does not
+ * yet fully support it, so we temporarily opt out by clearing sync providers.
+ */
+function disableCollab() {
+	if (
+		hasFilter( 'sync.providers', 'woocommerce/email-editor/disable-collab' )
+	) {
+		return;
+	}
+
+	if ( window._wpCollaborationEnabled ) {
+		window._wpCollaborationEnabled = false;
+	}
+
+	addFilter(
+		'sync.providers',
+		'woocommerce/email-editor/disable-collab',
+		() => [],
+		1000
+	);
+}
+
 function onInit() {
+	disableCollab();
 	initEventCollector();
 	initStoreTracking();
 	initDomTracking();
@@ -149,12 +178,14 @@ export function ExperimentalEmailEditor( {
 	isPreview = false,
 	contentRef = null,
 	config,
+	customSavePanel,
 }: {
 	postId: string;
 	postType: string;
 	isPreview?: boolean;
 	contentRef?: React.Ref< HTMLDivElement > | null;
 	config?: EmailEditorConfig;
+	customSavePanel?: React.ReactElement;
 } ) {
 	const [ isInitialized, setIsInitialized ] = useState( false );
 
@@ -193,6 +224,7 @@ export function ExperimentalEmailEditor( {
 			postType={ postType }
 			isPreview={ isPreview }
 			contentRef={ contentRef }
+			customSavePanel={ customSavePanel }
 		/>
 	);
 }

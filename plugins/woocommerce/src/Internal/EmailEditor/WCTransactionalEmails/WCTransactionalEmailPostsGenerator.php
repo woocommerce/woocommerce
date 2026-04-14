@@ -148,6 +148,15 @@ class WCTransactionalEmailPostsGenerator {
 			);
 		}
 
+		/**
+		 * Filter the email template HTML.
+		 *
+		 * @param string    $template_html The email template HTML.
+		 * @param \WC_Email $email The email object.
+		 * @since 10.7.0
+		 */
+		$template_html = apply_filters( 'woocommerce_email_block_template_html', $template_html, $email );
+
 		return $template_html;
 	}
 

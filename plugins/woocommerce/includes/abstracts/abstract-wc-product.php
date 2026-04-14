@@ -494,7 +494,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return array
 	 */
 	public function get_upsell_ids( $context = 'view' ) {
-		return $this->get_prop( 'upsell_ids', $context );
+		return array_map( 'absint', $this->get_prop( 'upsell_ids', $context ) );
 	}
 
 	/**
@@ -505,7 +505,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @return array
 	 */
 	public function get_cross_sell_ids( $context = 'view' ) {
-		return $this->get_prop( 'cross_sell_ids', $context );
+		return array_map( 'absint', $this->get_prop( 'cross_sell_ids', $context ) );
 	}
 
 	/**

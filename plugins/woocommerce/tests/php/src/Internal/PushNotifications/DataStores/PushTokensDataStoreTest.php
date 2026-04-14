@@ -48,11 +48,13 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$data_store = new PushTokensDataStore();
 
 		$data = array(
-			'user_id'     => 1,
-			'token'       => 'test_token_12345',
-			'platform'    => PushToken::PLATFORM_APPLE,
-			'device_uuid' => 'device-uuid-123',
-			'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+			'user_id'       => 1,
+			'token'         => 'test_token_12345',
+			'platform'      => PushToken::PLATFORM_APPLE,
+			'device_uuid'   => 'device-uuid-123',
+			'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+			'device_locale' => 'en_US',
+			'metadata'      => array( 'app_version' => '1.0' ),
 		);
 
 		$push_token = $data_store->create( $data );
@@ -79,6 +81,8 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$this->assertEquals( $original_push_token->get_token(), $read_push_token->get_token() );
 		$this->assertEquals( $original_push_token->get_device_uuid(), $read_push_token->get_device_uuid() );
 		$this->assertEquals( $original_push_token->get_origin(), $read_push_token->get_origin() );
+		$this->assertEquals( $original_push_token->get_device_locale(), $read_push_token->get_device_locale() );
+		$this->assertEquals( $original_push_token->get_metadata(), $read_push_token->get_metadata() );
 	}
 
 	/**
@@ -421,11 +425,13 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		 */
 		$browser_token_1 = $data_store->create(
 			array(
-				'user_id'     => 1,
-				'token'       => 'browser_token_1_' . wp_rand(),
-				'platform'    => PushToken::PLATFORM_BROWSER,
-				'device_uuid' => null,
-				'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'user_id'       => 1,
+				'token'         => 'browser_token_1_' . wp_rand(),
+				'platform'      => PushToken::PLATFORM_BROWSER,
+				'device_uuid'   => null,
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+				'metadata'      => array( 'app_version' => '1.0' ),
 			)
 		);
 
@@ -434,11 +440,13 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		 */
 		$browser_token_2 = $data_store->create(
 			array(
-				'user_id'     => 1,
-				'token'       => 'browser_token_2_' . wp_rand(),
-				'platform'    => PushToken::PLATFORM_BROWSER,
-				'device_uuid' => null,
-				'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'user_id'       => 1,
+				'token'         => 'browser_token_2_' . wp_rand(),
+				'platform'      => PushToken::PLATFORM_BROWSER,
+				'device_uuid'   => null,
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+				'metadata'      => array( 'app_version' => '1.0' ),
 			)
 		);
 
@@ -571,10 +579,12 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$data_store = new PushTokensDataStore();
 
 		$data = array(
-			'user_id'  => 1,
-			'token'    => '{"endpoint":"https://example.com/push","keys":{"auth":"test","p256dh":"test"}}',
-			'platform' => PushToken::PLATFORM_BROWSER,
-			'origin'   => PushToken::ORIGIN_BROWSER,
+			'user_id'       => 1,
+			'token'         => '{"endpoint":"https://example.com/push","keys":{"auth":"test","p256dh":"test"}}',
+			'platform'      => PushToken::PLATFORM_BROWSER,
+			'origin'        => PushToken::ORIGIN_BROWSER,
+			'device_locale' => 'en_US',
+			'metadata'      => array( 'app_version' => '1.0' ),
 		);
 
 		$push_token = $data_store->create( $data );
@@ -592,6 +602,258 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Tests that a legacy token without device_locale and metadata can
+	 * be read with sensible defaults applied.
+	 */
+	public function test_it_can_read_legacy_token_without_device_locale_and_metadata() {
+		$data_store = new PushTokensDataStore();
+
+		$post_id = wp_insert_post(
+			array(
+				'post_author' => 1,
+				'post_type'   => PushToken::POST_TYPE,
+				'post_status' => 'private',
+				'meta_input'  => array(
+					'platform'    => PushToken::PLATFORM_APPLE,
+					'token'       => 'legacy_token_value',
+					'device_uuid' => 'legacy-device-uuid',
+					'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				),
+			)
+		);
+
+		$push_token = $data_store->read( $post_id );
+
+		$this->assertEquals( $post_id, $push_token->get_id() );
+		$this->assertEquals( 'legacy_token_value', $push_token->get_token() );
+		$this->assertEquals( PushToken::DEFAULT_DEVICE_LOCALE, $push_token->get_device_locale() );
+		$this->assertEquals( array(), $push_token->get_metadata() );
+	}
+
+	/**
+	 * @testdox Tests that a legacy token without device_locale and metadata can
+	 * be found by get_by_token_or_device_id with defaults applied.
+	 */
+	public function test_it_can_find_legacy_token_by_token_or_device_id_with_defaults() {
+		$data_store = new PushTokensDataStore();
+
+		$post_id = wp_insert_post(
+			array(
+				'post_author' => 1,
+				'post_type'   => PushToken::POST_TYPE,
+				'post_status' => 'private',
+				'meta_input'  => array(
+					'platform'    => PushToken::PLATFORM_APPLE,
+					'token'       => 'legacy_token_value',
+					'device_uuid' => 'legacy-device-uuid',
+					'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				),
+			)
+		);
+
+		$found_token = $data_store->get_by_token_or_device_id(
+			array(
+				'user_id'     => 1,
+				'token'       => 'legacy_token_value',
+				'platform'    => PushToken::PLATFORM_APPLE,
+				'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_uuid' => 'different-device',
+			)
+		);
+
+		$this->assertNotNull( $found_token );
+		$this->assertEquals( $post_id, $found_token->get_id() );
+		$this->assertEquals( PushToken::DEFAULT_DEVICE_LOCALE, $found_token->get_device_locale() );
+		$this->assertEquals( array(), $found_token->get_metadata() );
+	}
+
+	/**
+	 * @testdox Tests that a legacy token can be updated with new device_locale
+	 * and metadata values.
+	 */
+	public function test_it_can_update_legacy_token_with_new_locale_and_metadata() {
+		$data_store = new PushTokensDataStore();
+
+		$post_id = wp_insert_post(
+			array(
+				'post_author' => 1,
+				'post_type'   => PushToken::POST_TYPE,
+				'post_status' => 'private',
+				'meta_input'  => array(
+					'platform'    => PushToken::PLATFORM_APPLE,
+					'token'       => 'legacy_token_value',
+					'device_uuid' => 'legacy-device-uuid',
+					'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				),
+			)
+		);
+
+		$push_token = $data_store->read( $post_id );
+
+		$this->assertEquals( PushToken::DEFAULT_DEVICE_LOCALE, $push_token->get_device_locale() );
+		$this->assertEquals( array(), $push_token->get_metadata() );
+
+		$push_token->set_device_locale( 'fr_FR' );
+		$push_token->set_metadata( array( 'app_version' => '2.0' ) );
+		$data_store->update( $push_token );
+
+		$updated_token = $data_store->read( $post_id );
+
+		$this->assertEquals( 'fr_FR', $updated_token->get_device_locale() );
+		$this->assertEquals( array( 'app_version' => '2.0' ), $updated_token->get_metadata() );
+	}
+
+	/**
+	 * @testdox Should return tokens for users with matching roles.
+	 */
+	public function test_get_tokens_for_roles_returns_tokens_for_matching_users(): void {
+		$admin_id   = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$data_store = new PushTokensDataStore();
+
+		$data_store->create(
+			array(
+				'user_id'       => $admin_id,
+				'token'         => 'admin_token_' . wp_rand(),
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'device_uuid'   => 'admin-device-' . wp_rand(),
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+				'metadata'      => array( 'app_version' => '1.0' ),
+			)
+		);
+
+		$tokens = $data_store->get_tokens_for_roles( array( 'administrator' ) );
+
+		$this->assertCount( 1, $tokens );
+		$this->assertInstanceOf( PushToken::class, $tokens[0] );
+		$this->assertSame( $admin_id, $tokens[0]->get_user_id() );
+	}
+
+	/**
+	 * @testdox Should return empty array when no users have the specified role.
+	 */
+	public function test_get_tokens_for_roles_returns_empty_when_no_users_have_role(): void {
+		$data_store = new PushTokensDataStore();
+
+		$tokens = $data_store->get_tokens_for_roles( array( 'shop_manager' ) );
+
+		$this->assertSame( array(), $tokens );
+	}
+
+	/**
+	 * @testdox Should return empty array when users have the role but no tokens.
+	 */
+	public function test_get_tokens_for_roles_returns_empty_when_users_have_no_tokens(): void {
+		$this->factory->user->create( array( 'role' => 'administrator' ) );
+		$data_store = new PushTokensDataStore();
+
+		$tokens = $data_store->get_tokens_for_roles( array( 'administrator' ) );
+
+		$this->assertSame( array(), $tokens );
+	}
+
+	/**
+	 * @testdox Should skip malformed tokens and return only valid ones.
+	 */
+	public function test_get_tokens_for_roles_skips_malformed_tokens(): void {
+		$admin_id   = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$data_store = new PushTokensDataStore();
+
+		wp_insert_post(
+			array(
+				'post_author' => $admin_id,
+				'post_type'   => PushToken::POST_TYPE,
+				'post_status' => 'private',
+				'meta_input'  => array(
+					'platform' => PushToken::PLATFORM_APPLE,
+					'token'    => 'partial_token',
+				),
+			)
+		);
+
+		$data_store->create(
+			array(
+				'user_id'       => $admin_id,
+				'token'         => 'valid_token',
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'device_uuid'   => 'valid-device',
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+				'metadata'      => array( 'app_version' => '1.0' ),
+			)
+		);
+
+		$tokens = $data_store->get_tokens_for_roles( array( 'administrator' ) );
+
+		$this->assertCount( 1, $tokens );
+		$this->assertSame( 'valid-device', $tokens[0]->get_device_uuid() );
+	}
+
+	/**
+	 * @testdox Should return tokens from multiple users with different matching roles.
+	 */
+	public function test_get_tokens_for_roles_returns_tokens_from_multiple_roles(): void {
+		$admin_id   = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$manager_id = $this->factory->user->create( array( 'role' => 'shop_manager' ) );
+		$data_store = new PushTokensDataStore();
+
+		$data_store->create(
+			array(
+				'user_id'       => $admin_id,
+				'token'         => 'admin_token',
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'device_uuid'   => 'admin-device',
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+				'metadata'      => array( 'app_version' => '1.0' ),
+			)
+		);
+
+		$data_store->create(
+			array(
+				'user_id'       => $manager_id,
+				'token'         => 'manager_token',
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'device_uuid'   => 'manager-device',
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+				'metadata'      => array( 'app_version' => '1.0' ),
+			)
+		);
+
+		$tokens     = $data_store->get_tokens_for_roles( array( 'administrator', 'shop_manager' ) );
+		$device_ids = array_map( fn ( PushToken $t ) => $t->get_device_uuid(), $tokens );
+
+		$this->assertCount( 2, $tokens );
+		$this->assertContains( 'admin-device', $device_ids );
+		$this->assertContains( 'manager-device', $device_ids );
+	}
+
+	/**
+	 * @testdox Should not return tokens for users without the specified role.
+	 */
+	public function test_get_tokens_for_roles_excludes_users_without_role(): void {
+		$subscriber_id = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		$data_store    = new PushTokensDataStore();
+
+		$data_store->create(
+			array(
+				'user_id'       => $subscriber_id,
+				'token'         => 'subscriber_token_' . wp_rand(),
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'device_uuid'   => 'subscriber-device-' . wp_rand(),
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+				'metadata'      => array( 'app_version' => '1.0' ),
+			)
+		);
+
+		$tokens = $data_store->get_tokens_for_roles( array( 'administrator' ) );
+
+		$this->assertSame( array(), $tokens );
+	}
+
+	/**
 	 * Creates a test push token and saves it to the database.
 	 *
 	 * @return PushToken The created push token object.
@@ -600,11 +862,13 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$data_store = new PushTokensDataStore();
 
 		$data = array(
-			'user_id'     => 1,
-			'token'       => 'test_token_' . wp_rand(),
-			'platform'    => PushToken::PLATFORM_APPLE,
-			'device_uuid' => 'test-device-uuid-' . wp_rand(),
-			'origin'      => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+			'user_id'       => 1,
+			'token'         => 'test_token_' . wp_rand(),
+			'platform'      => PushToken::PLATFORM_APPLE,
+			'device_uuid'   => 'test-device-uuid-' . wp_rand(),
+			'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+			'device_locale' => 'en_US',
+			'metadata'      => array( 'app_version' => '1.0' ),
 		);
 
 		return $data_store->create( $data );
@@ -622,14 +886,18 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$this->assertEquals( PushToken::POST_TYPE, $post->post_type );
 		$this->assertEquals( $push_token->get_user_id(), $post->post_author );
 
-		$platform    = get_post_meta( $push_token->get_id(), 'platform', true );
-		$token       = get_post_meta( $push_token->get_id(), 'token', true );
-		$device_uuid = get_post_meta( $push_token->get_id(), 'device_uuid', true );
-		$origin      = get_post_meta( $push_token->get_id(), 'origin', true );
+		$platform      = get_post_meta( $push_token->get_id(), 'platform', true );
+		$token         = get_post_meta( $push_token->get_id(), 'token', true );
+		$device_uuid   = get_post_meta( $push_token->get_id(), 'device_uuid', true );
+		$origin        = get_post_meta( $push_token->get_id(), 'origin', true );
+		$device_locale = get_post_meta( $push_token->get_id(), 'device_locale', true );
+		$metadata      = get_post_meta( $push_token->get_id(), 'metadata', true );
 
 		$this->assertEquals( $push_token->get_platform(), $platform );
 		$this->assertEquals( $push_token->get_token(), $token );
 		$this->assertEquals( $push_token->get_device_uuid(), $device_uuid );
 		$this->assertEquals( $push_token->get_origin(), $origin );
+		$this->assertEquals( $push_token->get_device_locale(), $device_locale );
+		$this->assertEquals( $push_token->get_metadata(), $metadata );
 	}
 }

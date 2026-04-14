@@ -40,7 +40,7 @@ concurrency:
 jobs:
   verify:
     name: 'Pre-build verification'
-    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     permissions:
       contents: write # Required to fetch draft releases for some reason. See https://github.com/cli/cli/issues/9076#issuecomment-2146148572.
     outputs:
@@ -207,7 +207,7 @@ jobs:
 
   build:
     name: Build release zip file
-    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-4vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     needs: [ verify ]
     outputs:
       artifact-url: ${{ steps.fetch-build-details.outputs.artifact-url }}
@@ -258,7 +258,7 @@ jobs:
 
   create-release:
     name: Create GitHub release
-    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     needs: [ build ]
     if: ${{ inputs.create_github_release }}
     permissions:
