@@ -438,6 +438,41 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testDox Scheduled sale events are cleared when sale date meta is deleted.
+	 */
+	public function test_wc_schedule_product_sale_events_cleared_on_meta_delete() {
+		$future_start = time() + 3600;
+		$future_end   = time() + 86400;
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_price( 100 );
+		$product->set_regular_price( 100 );
+		$product->set_sale_price( 50 );
+		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', $future_start ) );
+		$product->set_date_on_sale_to( gmdate( 'Y-m-d H:i:s', $future_end ) );
+		$product->save();
+
+		// Sanity check: events are scheduled.
+		$this->assertNotFalse(
+			as_next_scheduled_action( 'wc_product_start_scheduled_sale', array( 'product_id' => $product->get_id() ), 'woocommerce-sales' ),
+			'Start action should be scheduled after save'
+		);
+
+		// Delete sale date meta directly, bypassing WooCommerce CRUD.
+		delete_post_meta( $product->get_id(), '_sale_price_dates_from' );
+		delete_post_meta( $product->get_id(), '_sale_price_dates_to' );
+
+		$this->assertFalse(
+			as_next_scheduled_action( 'wc_product_start_scheduled_sale', array( 'product_id' => $product->get_id() ), 'woocommerce-sales' ),
+			'Start action should be cleared after sale date meta is deleted'
+		);
+		$this->assertFalse(
+			as_next_scheduled_action( 'wc_product_end_scheduled_sale', array( 'product_id' => $product->get_id() ), 'woocommerce-sales' ),
+			'End action should be cleared after sale date meta is deleted'
+		);
+	}
+
+	/**
 	 * @testDox Direct meta write on non-product post types does not schedule sale events.
 	 */
 	public function test_wc_schedule_sale_events_ignores_non_product_post_types() {
