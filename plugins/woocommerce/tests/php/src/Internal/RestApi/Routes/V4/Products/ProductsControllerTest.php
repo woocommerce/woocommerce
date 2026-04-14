@@ -2147,6 +2147,7 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 			)
 		);
 		$product->set_downloads( array( $download ) );
+		$product->add_meta_data( 'secret_key', 'secret_value', true );
 		$product->save();
 
 		$author = $this->factory->user->create(
@@ -2164,6 +2165,7 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertArrayNotHasKey( 'download_limit', $data, 'Author should not see download limit' );
 		$this->assertArrayNotHasKey( 'download_expiry', $data, 'Author should not see download expiry' );
 		$this->assertArrayNotHasKey( 'purchase_note', $data, 'Author should not see purchase note' );
+		$this->assertArrayNotHasKey( 'meta_data', $data, 'Author should not see meta data' );
 	}
 
 	/**
@@ -2219,6 +2221,7 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 		);
 		$product->set_downloads( array( $download ) );
 		$product->set_cogs_value( 5.00 );
+		$product->add_meta_data( 'secret_key', 'secret_value', true );
 		$product->save();
 
 		$shop_manager = $this->factory->user->create(
@@ -2237,5 +2240,6 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'download_expiry', $data, 'Shop manager should see download expiry' );
 		$this->assertArrayHasKey( 'purchase_note', $data, 'Shop manager should see purchase note' );
 		$this->assertArrayHasKey( 'cost_of_goods_sold', $data, 'Shop manager should see COGS data' );
+		$this->assertArrayHasKey( 'meta_data', $data, 'Shop manager should see meta data' );
 	}
 }
