@@ -59,7 +59,7 @@ class NewReviewNotification extends Notification {
 				),
 			),
 			'message'     => array(
-				'format' => '%s',
+				'format' => '%1$s',
 				'args'   => array(
 					wp_strip_all_tags( $comment->comment_content ),
 				),

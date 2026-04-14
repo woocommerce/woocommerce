@@ -118,6 +118,36 @@ class NewReviewNotificationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should preserve percent signs in review content so downstream
+	 * sprintf-style formatting doesn't break.
+	 */
+	public function test_to_payload_preserves_percent_signs_in_review_content(): void {
+		$product    = WC_Helper_Product::create_simple_product();
+		$content    = 'Works 100% great %1$s';
+		$comment_id = wp_insert_comment(
+			array(
+				'comment_post_ID'      => $product->get_id(),
+				'comment_author'       => 'Reviewer',
+				'comment_author_email' => 'test@test.local',
+				'comment_content'      => $content,
+				'comment_approved'     => 1,
+				'comment_type'         => 'review',
+			)
+		);
+
+		$notification = new NewReviewNotification( $comment_id );
+		$payload      = $notification->to_payload();
+
+		$this->assertSame( $content, $payload['message']['args'][0] );
+		$this->assertSame(
+			$content,
+			vsprintf( $payload['message']['format'], $payload['message']['args'] )
+		);
+		$this->assertSame( 'Reviewer', $payload['title']['args'][0] );
+		$this->assertSame( $product->get_name(), $payload['title']['args'][1] );
+	}
+
+	/**
 	 * @testdox Should return null when the comment no longer exists.
 	 */
 	public function test_to_payload_returns_null_for_deleted_comment(): void {
