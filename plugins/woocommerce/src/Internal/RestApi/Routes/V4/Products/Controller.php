@@ -28,6 +28,7 @@ use WP_Error;
 use WC_Admin_Duplicate_Product;
 use WC_REST_CRUD_Controller;
 use WC_Data_Store;
+use WC_Product;
 use WC_Product_Attribute;
 use WC_Product_Factory;
 use WC_Product_Simple;
