@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Refactor product filters blocks to use isPreviewMode flag

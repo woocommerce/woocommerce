@@ -13,6 +13,7 @@ import { useSelect } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
 import { useCollectionData } from '@woocommerce/base-context/hooks';
 import { objectHasProp } from '@woocommerce/types';
+import { usePreviewMode } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
@@ -80,29 +81,24 @@ function createHierarchicalList(
 
 const Edit = ( props: EditProps ) => {
 	const { attributes: blockAttributes } = props;
+	const isPreviewMode = usePreviewMode();
 
-	const {
-		taxonomy,
-		isPreview,
-		displayStyle,
-		showCounts,
-		sortOrder,
-		hideEmpty,
-	} = blockAttributes;
+	const { taxonomy, displayStyle, showCounts, sortOrder, hideEmpty } =
+		blockAttributes;
 
 	const [ termOptions, setTermOptions ] = useState< FilterOptionItem[] >(
-		isPreview
+		isPreviewMode
 			? sortFilterOptions( [ ...termOptionsPreview ], sortOrder )
 			: []
 	);
 	const [ isOptionsLoading, setIsOptionsLoading ] = useState< boolean >(
-		! isPreview
+		! isPreviewMode
 	);
 
 	// Fetch taxonomy terms using WordPress core data
 	const { taxonomyTerms, isTermsLoading } = useSelect(
 		( select ) => {
-			if ( isPreview || ! taxonomy ) {
+			if ( isPreviewMode || ! taxonomy ) {
 				return { taxonomyTerms: [], isTermsLoading: false };
 			}
 
@@ -125,19 +121,19 @@ const Edit = ( props: EditProps ) => {
 				] ),
 			};
 		},
-		[ taxonomy, hideEmpty, isPreview ]
+		[ taxonomy, hideEmpty, isPreviewMode ]
 	);
 
 	// Fetch taxonomy counts using the updated useCollectionData hook
 	const { data: filteredCounts, isLoading: isFilterCountsLoading } =
 		useCollectionData( {
-			queryTaxonomy: isPreview ? undefined : taxonomy,
+			queryTaxonomy: isPreviewMode ? undefined : taxonomy,
 			queryState: {},
 			isEditor: true,
 		} );
 
 	useEffect( () => {
-		if ( isPreview ) {
+		if ( isPreviewMode ) {
 			// In preview mode, use the preview data directly
 			setTermOptions(
 				sortFilterOptions( [ ...termOptionsPreview ], sortOrder )
@@ -204,7 +200,7 @@ const Edit = ( props: EditProps ) => {
 		filteredCounts,
 		sortOrder,
 		hideEmpty,
-		isPreview,
+		isPreviewMode,
 		isTermsLoading,
 		isFilterCountsLoading,
 	] );
@@ -234,7 +230,7 @@ const Edit = ( props: EditProps ) => {
 		}
 	);
 
-	const isLoading = isPreview
+	const isLoading = isPreviewMode
 		? false
 		: isTermsLoading || isFilterCountsLoading || isOptionsLoading;
 
@@ -253,7 +249,7 @@ const Edit = ( props: EditProps ) => {
 			</div>
 		);
 
-	if ( ! isLoading && ! isPreview && taxonomyTerms.length === 0 )
+	if ( ! isLoading && ! isPreviewMode && taxonomyTerms.length === 0 )
 		return (
 			<div { ...innerBlocksProps }>
 				<TaxonomyFilterInspectorControls { ...props } />
@@ -280,7 +276,7 @@ const Edit = ( props: EditProps ) => {
 					value={ {
 						filterData: {
 							items:
-								termOptions.length === 0 && isPreview
+								termOptions.length === 0 && isPreviewMode
 									? termOptionsPreview
 									: termOptions,
 							isLoading,

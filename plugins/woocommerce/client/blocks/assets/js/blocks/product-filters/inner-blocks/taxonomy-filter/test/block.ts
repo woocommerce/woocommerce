@@ -62,11 +62,10 @@ async function setup( attributes: BlockAttributes ) {
 			name: 'woocommerce/product-filter-taxonomy',
 			attributes: {
 				...attributes,
-				isPreview: true,
 			},
 		},
 	];
-	return initializeEditor( testBlock );
+	return initializeEditor( testBlock, { isPreviewMode: true } );
 }
 
 /**
