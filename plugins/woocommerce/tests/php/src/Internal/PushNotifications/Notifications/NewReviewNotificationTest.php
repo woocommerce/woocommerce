@@ -27,9 +27,9 @@ class NewReviewNotificationTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'resource_id', $payload );
 		$this->assertArrayHasKey( 'title', $payload );
 		$this->assertArrayHasKey( 'format', $payload['title'] );
+		$this->assertArrayHasKey( 'args', $payload['title'] );
 		$this->assertArrayHasKey( 'message', $payload );
 		$this->assertArrayHasKey( 'format', $payload['message'] );
-		$this->assertArrayHasKey( 'args', $payload['message'] );
 		$this->assertArrayHasKey( 'icon', $payload );
 		$this->assertArrayHasKey( 'meta', $payload );
 		$this->assertArrayHasKey( 'comment_id', $payload['meta'] );
@@ -54,10 +54,10 @@ class NewReviewNotificationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should include the reviewer name, product name, and review
-	 * content in the message args.
+	 * @testdox Should include the reviewer name and product name in the title args,
+	 * and the review content in the message format.
 	 */
-	public function test_to_payload_message_args_contains_expected_values(): void {
+	public function test_to_payload_splits_review_details_between_title_and_message(): void {
 		$product    = WC_Helper_Product::create_simple_product();
 		$comment_id = WC_Helper_Product::create_product_review( $product->get_id() );
 		$comment    = get_comment( $comment_id );
@@ -65,14 +65,14 @@ class NewReviewNotificationTest extends WC_Unit_Test_Case {
 		$notification = new NewReviewNotification( $comment_id );
 		$payload      = $notification->to_payload();
 
-		$this->assertSame( $comment->comment_author, $payload['message']['args'][0] );
-		$this->assertSame( $product->get_name(), $payload['message']['args'][1] );
-		$this->assertSame( $comment->comment_content, $payload['message']['args'][2] );
+		$this->assertSame( $comment->comment_author, $payload['title']['args'][0] );
+		$this->assertSame( $product->get_name(), $payload['title']['args'][1] );
+		$this->assertSame( $comment->comment_content, $payload['message']['format'] );
 	}
 
 	/**
 	 * @testdox Should strip HTML tags, and script tags including content, from
-	 * reviewer name in message args.
+	 * reviewer name in title args.
 	 */
 	public function test_to_payload_strips_html_and_script_content_from_comment_author(): void {
 		$product    = WC_Helper_Product::create_simple_product();
@@ -90,12 +90,12 @@ class NewReviewNotificationTest extends WC_Unit_Test_Case {
 		$notification = new NewReviewNotification( $comment_id );
 		$payload      = $notification->to_payload();
 
-		$this->assertSame( 'Evil Author', $payload['message']['args'][0] );
+		$this->assertSame( 'Evil Author', $payload['title']['args'][0] );
 	}
 
 	/**
 	 * @testdox Should strip HTML tags, and script tags including content, from
-	 * review content in message args.
+	 * review content in the message format.
 	 */
 	public function test_to_payload_strips_html_and_script_content_from_comment_content(): void {
 		$product    = WC_Helper_Product::create_simple_product();
@@ -113,7 +113,7 @@ class NewReviewNotificationTest extends WC_Unit_Test_Case {
 		$notification = new NewReviewNotification( $comment_id );
 		$payload      = $notification->to_payload();
 
-		$this->assertSame( 'Great product!', $payload['message']['args'][2] );
+		$this->assertSame( 'Great product!', $payload['message']['format'] );
 	}
 
 	/**
