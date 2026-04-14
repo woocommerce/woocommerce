@@ -148,7 +148,7 @@ class POSPinAuthControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox User without woocommerce_pos_access capability gets generic error.
+	 * @testdox User without view_pos capability gets generic error.
 	 */
 	public function test_user_without_pos_access_returns_422(): void {
 		wp_set_current_user( $this->admin_id );
@@ -170,9 +170,9 @@ class POSPinAuthControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Response capabilities only include woocommerce_ prefixed caps.
+	 * @testdox Response capabilities include all granted capabilities.
 	 */
-	public function test_capabilities_only_include_woocommerce_prefixed(): void {
+	public function test_capabilities_include_all_granted_caps(): void {
 		wp_set_current_user( $this->admin_id );
 
 		$request = new \WP_REST_Request( 'POST', self::ROUTE );
@@ -183,9 +183,9 @@ class POSPinAuthControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->assertSame( 200, $response->get_status() );
 		$this->assertIsArray( $data['capabilities'] );
+		$this->assertArrayHasKey( 'view_pos', $data['capabilities'] );
 
 		foreach ( $data['capabilities'] as $cap => $value ) {
-			$this->assertStringStartsWith( 'woocommerce_', $cap );
 			$this->assertTrue( $value );
 		}
 	}

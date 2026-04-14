@@ -84,7 +84,7 @@ class POSPinAuthController extends RestApiControllerBase implements RegisterHook
 					'callback'            => fn( $request ) => $this->run( $request, 'validate_pin' ),
 					'permission_callback' => fn( $request ) => $this->check_permission(
 						$request,
-						'woocommerce_pos_access'
+						'view_pos'
 					),
 					'args'                => array(
 						'pin'         => array(
@@ -109,7 +109,7 @@ class POSPinAuthController extends RestApiControllerBase implements RegisterHook
 					'callback'            => fn( $request ) => $this->run( $request, 'verify_pin' ),
 					'permission_callback' => fn( $request ) => $this->check_permission(
 						$request,
-						'woocommerce_pos_access'
+						'view_pos'
 					),
 					'args'                => array(
 						'pin' => array(
@@ -176,9 +176,9 @@ class POSPinAuthController extends RestApiControllerBase implements RegisterHook
 		}
 
 		$user = get_userdata( $user_id );
-		if ( ! $user || ! $user->has_cap( 'woocommerce_pos_access' ) ) {
+		if ( ! $user || ! $user->has_cap( 'view_pos' ) ) {
 			$logger->warning(
-				sprintf( 'PIN authentication failed: user %d lacks woocommerce_pos_access.', $user_id ),
+				sprintf( 'PIN authentication failed: user %d lacks view_pos.', $user_id ),
 				$log_context
 			);
 			$this->rate_limit_service->record_failure( $client_ip );
@@ -202,11 +202,10 @@ class POSPinAuthController extends RestApiControllerBase implements RegisterHook
 		}
 		/** @var array{password: string, uuid: string, expires: int} $session */
 
-		$all_caps = $user->allcaps;
-		$woo_caps = array();
-		foreach ( $all_caps as $cap => $granted ) {
-			if ( $granted && str_starts_with( $cap, 'woocommerce_' ) ) {
-				$woo_caps[ $cap ] = true;
+		$capabilities = array();
+		foreach ( $user->allcaps as $cap => $granted ) {
+			if ( $granted ) {
+				$capabilities[ $cap ] = true;
 			}
 		}
 
@@ -225,7 +224,7 @@ class POSPinAuthController extends RestApiControllerBase implements RegisterHook
 			'user_login'                => $user->user_login,
 			'display_name'              => $user->display_name,
 			'role'                      => reset( $user->roles ),
-			'capabilities'              => $woo_caps,
+			'capabilities'              => $capabilities,
 			'application_password'      => $session['password'],
 			'application_password_uuid' => $session['uuid'],
 			'session_expires'           => gmdate( 'c', $session['expires'] ),
@@ -290,20 +289,19 @@ class POSPinAuthController extends RestApiControllerBase implements RegisterHook
 		}
 
 		$user = get_userdata( $user_id );
-		if ( ! $user || ! $user->has_cap( 'woocommerce_pos_access' ) ) {
+		if ( ! $user || ! $user->has_cap( 'view_pos' ) ) {
 			$logger->warning(
-				sprintf( 'PIN verification failed: user %d lacks woocommerce_pos_access.', $user_id ),
+				sprintf( 'PIN verification failed: user %d lacks view_pos.', $user_id ),
 				$log_context
 			);
 			$this->rate_limit_service->record_failure( $client_ip );
 			return $this->pin_error();
 		}
 
-		$all_caps = $user->allcaps;
-		$woo_caps = array();
-		foreach ( $all_caps as $cap => $granted ) {
-			if ( $granted && ( str_starts_with( $cap, 'woocommerce_' ) || 'manage_woocommerce' === $cap ) ) {
-				$woo_caps[ $cap ] = true;
+		$capabilities = array();
+		foreach ( $user->allcaps as $cap => $granted ) {
+			if ( $granted ) {
+				$capabilities[ $cap ] = true;
 			}
 		}
 
@@ -317,7 +315,7 @@ class POSPinAuthController extends RestApiControllerBase implements RegisterHook
 			'user_login'   => $user->user_login,
 			'display_name' => $user->display_name,
 			'role'         => reset( $user->roles ),
-			'capabilities' => $woo_caps,
+			'capabilities' => $capabilities,
 		);
 	}
 
