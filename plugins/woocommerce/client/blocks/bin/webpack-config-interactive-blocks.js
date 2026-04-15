@@ -115,13 +115,6 @@ module.exports = {
 						options: {
 							sassOptions: {
 								includePaths: [ 'assets/css/abstracts' ],
-								silenceDeprecations: [
-									'color-functions',
-									'global-builtin',
-									'import',
-									'legacy-js-api',
-									'mixed-decls',
-								],
 							},
 							additionalData: ( content, loaderContext ) => {
 								const { resourcePath, rootContext } =

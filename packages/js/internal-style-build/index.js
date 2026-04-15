@@ -102,20 +102,6 @@ module.exports = {
 								includePaths: [
 									path.resolve( __dirname, 'abstracts' ),
 								],
-								// Silence noisy deprecations from upstream
-								// dependencies (color-studio, wp-components, etc.)
-								// and from our own legacy SCSS partials. These
-								// fire on every consumer of every partial, which
-								// dramatically slows compilation. Re-enable
-								// individually as we migrate to @use/@forward
-								// and the modern color functions.
-								silenceDeprecations: [
-									'color-functions',
-									'global-builtin',
-									'import',
-									'legacy-js-api',
-									'mixed-decls',
-								],
 							},
 							webpackImporter: true,
 							additionalData: ( content, loaderContext ) => {
