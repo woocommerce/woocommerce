@@ -2,10 +2,7 @@
  * External dependencies
  */
 import { Page } from '@playwright/test';
-import {
-	disableWelcomeModal,
-	WC_API_PATH,
-} from '@woocommerce/e2e-utils-playwright';
+import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
  * Internal dependencies
@@ -72,9 +69,8 @@ const test = baseTest.extend( {
 				return (
 					response
 						.url()
-						.includes(
-							'/wp-admin-scripts/command-palette.min.js'
-						) && response.status() === 200
+						.includes( '/wp-admin-scripts/command-palette' ) &&
+					response.status() === 200
 				);
 			} ),
 		] );
