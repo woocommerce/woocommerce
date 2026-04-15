@@ -8,33 +8,14 @@ import { dispatch, useSelect } from '@wordpress/data';
 import domReady from '@wordpress/dom-ready';
 import { useEffect, useMemo, useRef } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
-import { __, sprintf } from '@wordpress/i18n';
-import { box, plus, settings } from '@wordpress/icons';
+import { __ } from '@wordpress/i18n';
+import { box, plus } from '@wordpress/icons';
 import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
  */
 import { registerCommandWithTracking } from './register-command-with-tracking';
-
-const registerWooCommerceSettingsCommand = ( { label, tab, origin } ) => {
-	registerCommandWithTracking( {
-		name: `woocommerce/settings-${ tab }`,
-		label: sprintf(
-			// translators: %s is the title of the Settings Tab. This is used as a command in the Command Palette.
-			__( 'WooCommerce Settings: %s', 'woocommerce' ),
-			label
-		),
-		icon: settings,
-		callback: () => {
-			document.location = addQueryArgs( 'admin.php', {
-				page: 'wc-settings',
-				tab,
-			} );
-		},
-		origin,
-	} );
-};
 
 // Code adapted from the equivalent in Gutenberg:
 // https://github.com/WordPress/gutenberg/blob/8863b49b7e686f555e8b8adf70cc588c4feebfbf/packages/core-commands/src/site-editor-navigation-commands.js#L36C7-L36C44
@@ -157,19 +138,4 @@ domReady( () => {
 		name: 'woocommerce/product',
 		hook: useProductCommandLoader,
 	} );
-
-	if (
-		window.hasOwnProperty( 'wcCommandPaletteSettings' ) &&
-		window.wcCommandPaletteSettings.hasOwnProperty( 'settingsTabs' ) &&
-		Array.isArray( window.wcCommandPaletteSettings.settingsTabs )
-	) {
-		const settingsCommands = window.wcCommandPaletteSettings.settingsTabs;
-
-		settingsCommands.forEach( ( settingsCommand ) => {
-			registerWooCommerceSettingsCommand( {
-				label: settingsCommand.label,
-				tab: settingsCommand.key,
-			} );
-		} );
-	}
 } );

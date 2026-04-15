@@ -837,32 +837,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 		 * @return void
 		 */
 		public function enqueue_command_palette_assets() {
-			$settings_tabs = apply_filters( 'woocommerce_settings_tabs_array', array() );
-			$formatted_settings_tabs = array();
-
-			if ( is_array( $settings_tabs ) ) {
-				foreach ( $settings_tabs as $key => $label ) {
-					if (
-						is_string( $key ) && '' !== $key &&
-						is_string( $label ) && '' !== $label
-					) {
-						$formatted_settings_tabs[] = array(
-							'key'   => $key,
-							'label' => wp_strip_all_tags( $label ),
-						);
-					}
-				}
-			}
-
 			$this->enqueue_script( 'wp-admin-scripts', 'command-palette' );
-			wp_localize_script(
-				'wc-admin-command-palette',
-				'wcCommandPaletteSettings',
-				array(
-					'settingsTabs' => $formatted_settings_tabs,
-				)
-			);
-
 
 			$admin_features_disabled = apply_filters( 'woocommerce_admin_disabled', false );
 			if ( ! $admin_features_disabled ) {

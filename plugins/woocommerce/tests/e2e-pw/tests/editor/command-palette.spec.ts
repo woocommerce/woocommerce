@@ -132,16 +132,6 @@ test( 'can use the product search command', async ( { page, product } ) => {
 	);
 } );
 
-test( 'can use a settings command', async ( { page } ) => {
-	await clickOnCommandPaletteOption( {
-		page,
-		optionName: 'WooCommerce Settings: Products',
-	} );
-
-	// Verify that the page has loaded.
-	await expect( page.getByText( 'Shop pages' ) ).toBeVisible();
-} );
-
 test( 'can use an analytics command', async ( { page } ) => {
 	await clickOnCommandPaletteOption( {
 		page,
