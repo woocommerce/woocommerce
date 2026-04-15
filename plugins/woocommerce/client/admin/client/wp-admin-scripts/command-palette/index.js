@@ -1,9 +1,9 @@
 /**
  * External dependencies
  */
-import { registerPlugin } from '@wordpress/plugins';
 import { __, sprintf } from '@wordpress/i18n';
 import { box, plus, settings } from '@wordpress/icons';
+import domReady from '@wordpress/dom-ready';
 import { useEffect, useMemo, useRef } from '@wordpress/element';
 import { dispatch, useSelect } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
@@ -39,13 +39,6 @@ const registerWooCommerceSettingsCommand = ( { label, tab, origin } ) => {
 // Code adapted from the equivalent in Gutenberg:
 // https://github.com/WordPress/gutenberg/blob/8863b49b7e686f555e8b8adf70cc588c4feebfbf/packages/core-commands/src/site-editor-navigation-commands.js#L36C7-L36C44
 function useProductCommandLoader( { search } ) {
-	const { editedPostType } = useSelect( ( select ) => {
-		const editor = select( 'core/editor' );
-		return {
-			editedPostType: editor?.getCurrentPostType?.() ?? null,
-		};
-	} );
-	const origin = editedPostType ? editedPostType + '-editor' : null;
 	// Track searched values. We add a 300 ms delay to avoid tracking while typing.
 	const trackingSearchTimeout = useRef( null );
 	useEffect( () => {
@@ -54,14 +47,13 @@ function useProductCommandLoader( { search } ) {
 			trackingSearchTimeout.current = setTimeout( () => {
 				recordEvent( 'woocommerce_command_palette_search', {
 					value: search,
-					origin,
 				} );
 			}, 300 );
 		}
 		return () => {
 			clearTimeout( trackingSearchTimeout.current );
 		};
-	}, [ search, origin ] );
+	}, [ search ] );
 
 	const postType = 'product';
 	const { records, isLoading } = useSelect(
@@ -99,7 +91,6 @@ function useProductCommandLoader( { search } ) {
 				callback: ( { close } ) => {
 					queueRecordEvent( 'woocommerce_command_palette_submit', {
 						name: 'woocommerce/product',
-						origin,
 					} );
 
 					const args = {
@@ -112,7 +103,7 @@ function useProductCommandLoader( { search } ) {
 				},
 			};
 		} );
-	}, [ records, origin ] );
+	}, [ records ] );
 
 	return {
 		commands,
@@ -120,103 +111,65 @@ function useProductCommandLoader( { search } ) {
 	};
 }
 
-const WooCommerceCommands = () => {
-	const { editedPostType } = useSelect( ( select ) => {
-		const editor = select( 'core/editor' );
-		return {
-			editedPostType: editor?.getCurrentPostType?.() ?? null,
-		};
+domReady( () => {
+	registerCommandWithTracking( {
+		name: 'woocommerce/add-new-product',
+		label: __( 'Add new product', 'woocommerce' ),
+		icon: plus,
+		callback: () => {
+			document.location = addQueryArgs( 'post-new.php', {
+				post_type: 'product',
+			} );
+		},
 	} );
-	const origin = editedPostType ? editedPostType + '-editor' : null;
-	const { isCommandPaletteOpen } = useSelect( ( select ) => {
-		const { isOpen } = select( commandsStore );
-		return {
-			isCommandPaletteOpen: isOpen(),
-		};
-	}, [] );
-	const wasCommandPaletteOpen = useRef( false );
-
-	useEffect( () => {
-		if ( isCommandPaletteOpen && ! wasCommandPaletteOpen.current ) {
-			recordEvent( 'woocommerce_command_palette_open', {
-				origin,
+	registerCommandWithTracking( {
+		name: 'woocommerce/add-new-order',
+		label: __( 'Add new order', 'woocommerce' ),
+		icon: plus,
+		callback: () => {
+			document.location = addQueryArgs( 'admin.php', {
+				page: 'wc-orders',
+				action: 'new',
 			} );
-		}
-		wasCommandPaletteOpen.current = isCommandPaletteOpen;
-	}, [ isCommandPaletteOpen, origin ] );
-
-	useEffect( () => {
-		registerCommandWithTracking( {
-			name: 'woocommerce/add-new-product',
-			label: __( 'Add new product', 'woocommerce' ),
-			icon: plus,
-			callback: () => {
-				document.location = addQueryArgs( 'post-new.php', {
-					post_type: 'product',
-				} );
-			},
-			origin,
-		} );
-		registerCommandWithTracking( {
-			name: 'woocommerce/add-new-order',
-			label: __( 'Add new order', 'woocommerce' ),
-			icon: plus,
-			callback: () => {
-				document.location = addQueryArgs( 'admin.php', {
-					page: 'wc-orders',
-					action: 'new',
-				} );
-			},
-			origin,
-		} );
-		registerCommandWithTracking( {
-			name: 'woocommerce/view-products',
-			label: __( 'Products', 'woocommerce' ),
-			icon: box,
-			callback: () => {
-				document.location = addQueryArgs( 'edit.php', {
-					post_type: 'product',
-				} );
-			},
-			origin,
-		} );
-		registerCommandWithTracking( {
-			name: 'woocommerce/view-orders',
-			label: __( 'Orders', 'woocommerce' ),
-			icon: box,
-			callback: () => {
-				document.location = addQueryArgs( 'admin.php', {
-					page: 'wc-orders',
-				} );
-			},
-			origin,
-		} );
-		dispatch( commandsStore ).registerCommandLoader( {
-			name: 'woocommerce/product',
-			hook: useProductCommandLoader,
-		} );
-
-		if (
-			window.hasOwnProperty( 'wcCommandPaletteSettings' ) &&
-			window.wcCommandPaletteSettings.hasOwnProperty( 'settingsTabs' ) &&
-			Array.isArray( window.wcCommandPaletteSettings.settingsTabs )
-		) {
-			const settingsCommands =
-				window.wcCommandPaletteSettings.settingsTabs;
-
-			settingsCommands.forEach( ( settingsCommand ) => {
-				registerWooCommerceSettingsCommand( {
-					label: settingsCommand.label,
-					tab: settingsCommand.key,
-					origin,
-				} );
+		},
+	} );
+	registerCommandWithTracking( {
+		name: 'woocommerce/view-products',
+		label: __( 'Products', 'woocommerce' ),
+		icon: box,
+		callback: () => {
+			document.location = addQueryArgs( 'edit.php', {
+				post_type: 'product',
 			} );
-		}
-	}, [ origin ] );
+		},
+	} );
+	registerCommandWithTracking( {
+		name: 'woocommerce/view-orders',
+		label: __( 'Orders', 'woocommerce' ),
+		icon: box,
+		callback: () => {
+			document.location = addQueryArgs( 'admin.php', {
+				page: 'wc-orders',
+			} );
+		},
+	} );
+	dispatch( commandsStore ).registerCommandLoader( {
+		name: 'woocommerce/product',
+		hook: useProductCommandLoader,
+	} );
 
-	return null;
-};
+	if (
+		window.hasOwnProperty( 'wcCommandPaletteSettings' ) &&
+		window.wcCommandPaletteSettings.hasOwnProperty( 'settingsTabs' ) &&
+		Array.isArray( window.wcCommandPaletteSettings.settingsTabs )
+	) {
+		const settingsCommands = window.wcCommandPaletteSettings.settingsTabs;
 
-registerPlugin( 'woocommerce-commands-registration', {
-	render: WooCommerceCommands,
+		settingsCommands.forEach( ( settingsCommand ) => {
+			registerWooCommerceSettingsCommand( {
+				label: settingsCommand.label,
+				tab: settingsCommand.key,
+			} );
+		} );
+	}
 } );

@@ -37,7 +37,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			add_action( 'admin_init', array( $this, 'register_scripts' ) );
 			add_action( 'admin_enqueue_scripts', array( $this, 'admin_styles' ) );
 			add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
-			add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
+			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_command_palette_assets' ) );
 		}
 
 		/**
@@ -818,7 +818,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 		 *
 		 * @return void
 		 */
-		private function enqueue_block_editor_script( $script_path_name, $script_name ) {
+		private function enqueue_script( string $script_path_name, string $script_name ) {
 			$script_assets_filename = WCAdminAssets::get_script_asset_filename( $script_path_name, $script_name );
 			$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER .  $script_path_name . '/' . $script_assets_filename;
 
@@ -832,19 +832,19 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 		}
 
 		/**
-		 * Enqueue block editor assets.
+		 * Enqueue command palette assets.
 		 *
 		 * @return void
 		 */
-		public function enqueue_block_editor_assets() {
-			$settings_tabs = apply_filters('woocommerce_settings_tabs_array', []);
+		public function enqueue_command_palette_assets() {
+			$settings_tabs = apply_filters( 'woocommerce_settings_tabs_array', array() );
+			$formatted_settings_tabs = array();
 
-			if ( is_array( $settings_tabs ) && count( $settings_tabs ) > 0  ) {
-				$formatted_settings_tabs = array();
-				foreach ($settings_tabs as $key => $label) {
+			if ( is_array( $settings_tabs ) ) {
+				foreach ( $settings_tabs as $key => $label ) {
 					if (
-						is_string( $key ) && $key !== "" &&
-						is_string( $label ) && $label !== ""
+						is_string( $key ) && '' !== $key &&
+						is_string( $label ) && '' !== $label
 					) {
 						$formatted_settings_tabs[] = array(
 							'key'   => $key,
@@ -852,16 +852,16 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 						);
 					}
 				}
-
-				self::enqueue_block_editor_script( 'wp-admin-scripts', 'command-palette' );
+			}
+				self::enqueue_script( 'wp-admin-scripts', 'command-palette' );
 				wp_localize_script(
 					'wc-admin-command-palette',
 					'wcCommandPaletteSettings',
 					array(
-						'settingsTabs'    => $formatted_settings_tabs,
+						'settingsTabs' => $formatted_settings_tabs,
 					)
 				);
-			}
+
 
 			$admin_features_disabled = apply_filters( 'woocommerce_admin_disabled', false );
 			if ( ! $admin_features_disabled ) {
@@ -886,14 +886,14 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					}, $analytics_reports );
 					$formatted_analytics_reports = array_filter( $formatted_analytics_reports, 'is_array' );
 
-					self::enqueue_block_editor_script( 'wp-admin-scripts', 'command-palette-analytics' );
-					wp_localize_script(
-						'wc-admin-command-palette-analytics',
-						'wcCommandPaletteAnalytics',
-						array(
-							'reports'    => $formatted_analytics_reports,
-						)
-					);
+						self::enqueue_script( 'wp-admin-scripts', 'command-palette-analytics' );
+						wp_localize_script(
+							'wc-admin-command-palette-analytics',
+							'wcCommandPaletteAnalytics',
+							array(
+								'reports' => $formatted_analytics_reports,
+							)
+						);
 				}
 			}
 		}
