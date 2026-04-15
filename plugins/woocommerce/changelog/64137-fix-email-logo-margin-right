@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix logo image inheriting unintended margin-right from global img rule in improved email design.

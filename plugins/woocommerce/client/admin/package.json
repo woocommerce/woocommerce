@@ -17,6 +17,8 @@
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
 		"build:project:bundle": "wireit",
 		"build:project:feature-config": "php ../../bin/generate-feature-config.php",
+		"build:project:symlinks": "wireit",
+		"build:project:typescript-check": "wireit",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
 		"update:php": "XDEBUG_MODE=off composer update --quiet",
 		"example": "webpack --config docs/examples/extensions/examples.config.js",
@@ -223,7 +225,6 @@
 		"webpack-dev-server": "4.15.x",
 		"webpack-fix-style-only-entries": "^0.6.1",
 		"whatwg-fetch": "^3.6.20",
-		"@automattic/webpack-rtl-plugin": "6.0.x",
 		"wireit": "0.14.12"
 	},
 	"peerDependencies": {
@@ -280,12 +281,31 @@
 				"build"
 			],
 			"dependencies": [
+				"build:project:symlinks",
+				"dependencyOutputs"
+			]
+		},
+		"build:project:symlinks": {
+			"command": "node bin/xstate5-symlink.js"
+		},
+		"build:project:typescript-check": {
+			"command": "tsc --project tsconfig.json --incremental --tsBuildInfoFile ./node_modules/.cache/typescript/.tsbuildinfo",
+			"files": [
+				"tsconfig.json",
+				"client/**/*.{js,jsx,ts,tsx}"
+			],
+			"output": [],
+			"dependencies": [
+				"build:project:symlinks",
 				"dependencyOutputs"
 			]
 		},
 		"watch:build:project:bundle": {
 			"command": "webpack --watch",
-			"service": true
+			"service": true,
+			"dependencies": [
+				"build:project:symlinks"
+			]
 		},
 		"dependencyOutputs": {
 			"allowUsuallyExcludedPaths": true,
@@ -347,6 +367,8 @@
 				"node_modules/@woocommerce/internal-js-tests/build-module",
 				"node_modules/@woocommerce/internal-js-tests/jest-preset.js",
 				"node_modules/@woocommerce/internal-style-build/index.js",
+				"node_modules/@woocommerce/internal-style-build/webpack-rtl-plugin.js",
+				"node_modules/@woocommerce/internal-style-build/style-asset-plugin.js",
 				"node_modules/@woocommerce/internal-style-build/abstracts",
 				"node_modules/@woocommerce/navigation/build",
 				"node_modules/@woocommerce/navigation/build-module",

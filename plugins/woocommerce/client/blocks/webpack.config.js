@@ -38,6 +38,12 @@ const getCacheConfig = ( name, configPaths = [] ) =>
 						__filename,
 						path.resolve( __dirname, 'bin/webpack-configs.js' ),
 						path.resolve( __dirname, 'bin/webpack-helpers.js' ),
+						require.resolve(
+							'@woocommerce/dependency-extraction-webpack-plugin/src/index'
+						),
+						require.resolve(
+							'@woocommerce/internal-style-build/webpack-rtl-plugin'
+						),
 						...configPaths.map( ( configPath ) =>
 							path.resolve( __dirname, configPath )
 						),

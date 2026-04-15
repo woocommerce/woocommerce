@@ -104,6 +104,7 @@ class AssetDataPlugin {
 				compilation.outputOptions;
 
 			const contentHash = chunkFiles
+				.filter( ( f ) => styleExtensionRegExp.test( f ) )
 				.sort()
 				.reduce( ( hash, filename ) => {
 					const asset = compilation.getAsset( filename );
