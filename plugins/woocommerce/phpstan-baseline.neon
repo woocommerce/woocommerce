@@ -33592,7 +33592,7 @@ parameters:
 			path: includes/wc-attribute-functions.php
 
 		-
-			message: '#^Parameter \#1 \$string of function strlen expects string, string\|null given\.$#'
+			message: '#^Parameter \#1 \$str of function mb_strlen expects string, string\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/wc-attribute-functions.php

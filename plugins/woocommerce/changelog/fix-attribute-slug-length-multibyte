@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Use mb_strlen for attribute slug length validation to correctly handle multibyte characters like Cyrillic.
