@@ -174,14 +174,13 @@ export function BlockEditor( {
 		};
 	}, [ settingsGlobal ] );
 
-	const { editedRecord, hasResolved } = useEntityRecord< Product >(
+	const { editedRecord: product, hasResolved } = useEntityRecord< Product >(
 		'postType',
 		postType,
 		productId,
 		// Only perform the query when the productId is valid.
 		{ enabled: productId !== -1 }
 	);
-	const product = editedRecord as Product;
 
 	const productTemplateId = useMemo(
 		() =>
@@ -353,7 +352,7 @@ export function BlockEditor( {
 					}
 					title={ __( 'Edit description', 'woocommerce' ) }
 					name={
-						product.name === 'AUTO-DRAFT'
+						! product?.name || product.name === 'AUTO-DRAFT'
 							? __( '(no product name)', 'woocommerce' )
 							: product.name
 					}

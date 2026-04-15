@@ -30,12 +30,15 @@ import { sortFilterOptions } from '../../utils/sort-filter-options';
 
 // Module-level stable references for the taxonomy-terms useSelect below.
 // Avoids allocating fresh objects on every selector invocation, which would
-// trip @wordpress/data's SCRIPT_DEBUG unstable-reference check.
-const EMPTY_TAXONOMY_TERMS: FilterOptionItem[] = [];
-const EMPTY_TAXONOMY_TERMS_RESULT = {
+// trip @wordpress/data's SCRIPT_DEBUG unstable-reference check. Frozen so an
+// accidental mutation in a consumer cannot leak across renders or instances.
+const EMPTY_TAXONOMY_TERMS: ReadonlyArray< FilterOptionItem > = Object.freeze(
+	[] as FilterOptionItem[]
+);
+const EMPTY_TAXONOMY_TERMS_RESULT = Object.freeze( {
 	taxonomyTerms: EMPTY_TAXONOMY_TERMS,
 	isTermsLoading: false,
-};
+} );
 
 // Create hierarchical structure: parents followed by their children
 function createHierarchicalList(
