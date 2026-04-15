@@ -12,7 +12,7 @@ import RecommendationsEligibilityWrapper from '../settings-recommendations/recom
 const ShippingRecommendationsLoader = lazy( () => {
 	if ( window.wcAdminFeatures[ 'shipping-smart-defaults' ] ) {
 		return import(
-			/* webpackChunkName: "shipping-recommendations" */ './experimental-shipping-recommendations'
+			/* webpackChunkName: "shipping-recommendations-v2" */ './experimental-shipping-recommendations'
 		);
 	}
 
