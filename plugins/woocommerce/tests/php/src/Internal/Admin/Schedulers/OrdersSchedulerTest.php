@@ -466,16 +466,69 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 		);
 		$this->assertSame( 'wc-completed', $status_before );
 
+		// Track whether the hook fires and whether delete_post fires.
+		$hook_fired    = false;
+		$delete_fired  = false;
+		$import_result = null;
+		add_action(
+			'woocommerce_trash_order',
+			function () use ( &$hook_fired ) {
+				$hook_fired = true;
+			},
+			1
+		);
+		add_action(
+			'delete_post',
+			function ( $id ) use ( $order, &$delete_fired ) {
+				if ( (int) $id === $order->get_id() ) {
+					$delete_fired = true;
+				}
+			},
+			1
+		);
+
 		// Trash the order.
 		$order->delete( false );
 
-		// Verify the order stats row now has wc-trash status.
+		// Check status after trash but before any explicit re-import.
 		$status_after = $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT status FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d",
 				$order->get_id()
 			)
 		);
+
+		// Diagnostic: explicitly import after trash to see if the import logic works.
+		$order_reloaded = wc_get_order( $order->get_id() );
+		$order_exists   = false !== $order_reloaded;
+		$order_status   = $order_exists ? $order_reloaded->get_status() : 'NOT_FOUND';
+
+		OrdersScheduler::import( $order->get_id() );
+
+		$status_after_explicit = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT status FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d",
+				$order->get_id()
+			)
+		);
+
+		// If the auto-sync didn't work, report diagnostics.
+		if ( 'wc-trash' !== $status_after ) {
+			$this->fail(
+				sprintf(
+					"Expected wc-trash after trash, got %s. Diagnostics: hook_fired=%s, delete_post_fired=%s, order_exists=%s, order_status=%s, EMPTY_TRASH_DAYS=%s, status_after_explicit_import=%s, order_id=%d",
+					var_export( $status_after, true ),
+					$hook_fired ? 'yes' : 'no',
+					$delete_fired ? 'yes' : 'no',
+					$order_exists ? 'yes' : 'no',
+					$order_status,
+					defined( 'EMPTY_TRASH_DAYS' ) ? EMPTY_TRASH_DAYS : 'undefined',
+					var_export( $status_after_explicit, true ),
+					$order->get_id()
+				)
+			);
+		}
+
 		$this->assertSame( 'wc-trash', $status_after );
 	}
 
