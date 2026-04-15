@@ -1,16 +1,16 @@
 /**
  * External dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
-import { box, plus, settings } from '@wordpress/icons';
+import { queueRecordEvent, recordEvent } from '@woocommerce/tracks';
+import { store as commandsStore } from '@wordpress/commands';
+import { store as coreStore } from '@wordpress/core-data';
+import { dispatch, useSelect } from '@wordpress/data';
 import domReady from '@wordpress/dom-ready';
 import { useEffect, useMemo, useRef } from '@wordpress/element';
-import { dispatch, useSelect } from '@wordpress/data';
-import { store as coreStore } from '@wordpress/core-data';
-import { addQueryArgs } from '@wordpress/url';
-import { recordEvent, queueRecordEvent } from '@woocommerce/tracks';
-import { store as commandsStore } from '@wordpress/commands';
 import { decodeEntities } from '@wordpress/html-entities';
+import { __, sprintf } from '@wordpress/i18n';
+import { box, plus, settings } from '@wordpress/icons';
+import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
