@@ -518,7 +518,7 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 				$order->get_id()
 			)
 		);
-		$this->assertNotSame( 'wc-trash', $status_restored );
+		$this->assertSame( 'wc-completed', $status_restored );
 	}
 
 	/**
