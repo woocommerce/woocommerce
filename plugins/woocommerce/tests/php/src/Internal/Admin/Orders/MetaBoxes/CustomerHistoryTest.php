@@ -438,7 +438,7 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tooltip should not display internal statuses like auto-draft or trash.
+	 * @testdox Tooltip should not display internal statuses like auto-draft, trash, or checkout-draft.
 	 */
 	public function test_tooltip_excludes_internal_statuses(): void {
 		$this->toggle_cot_feature_and_usage( true );
@@ -455,6 +455,33 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 
 		$this->assertStringNotContainsString( 'auto-draft', $output, 'Tooltip should not mention "auto-draft"' );
 		$this->assertStringNotContainsString( 'trash', $output, 'Tooltip should not mention "trash"' );
+	}
+
+	/**
+	 * @testdox Tooltip should not display checkout-draft even when it is added via filter.
+	 */
+	public function test_tooltip_excludes_checkout_draft_status(): void {
+		$this->toggle_cot_feature_and_usage( true );
+
+		$add_checkout_draft = function ( $statuses ) {
+			$statuses[] = 'checkout-draft';
+			return $statuses;
+		};
+		add_filter( 'woocommerce_analytics_excluded_order_statuses', $add_checkout_draft );
+
+		$customer_id = $this->factory->user->create();
+
+		$order = WC_Helper_Order::create_order( $customer_id );
+		$order->set_status( 'completed' );
+		$order->save();
+
+		ob_start();
+		$this->sut->output( $order );
+		$output = ob_get_clean();
+
+		remove_filter( 'woocommerce_analytics_excluded_order_statuses', $add_checkout_draft );
+
+		$this->assertStringNotContainsString( 'draft', $output, 'Tooltip should not mention "draft" for checkout-draft status' );
 	}
 
 	/**
@@ -477,7 +504,7 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 
 		remove_filter( 'woocommerce_analytics_excluded_order_statuses', '__return_empty_array' );
 
-		$this->assertStringContainsString( 'Total number of orders for this customer.', $output, 'Tooltip should use the no-exclusions fallback string' );
+		$this->assertStringContainsString( 'Total number of orders for this customer, including the current one.', $output, 'Tooltip should use the no-exclusions fallback string' );
 		$this->assertStringNotContainsString( 'excluding', $output, 'Tooltip should not mention "excluding"' );
 	}
 
