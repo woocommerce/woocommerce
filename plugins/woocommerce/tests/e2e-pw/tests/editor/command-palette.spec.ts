@@ -66,7 +66,7 @@ const test = baseTest.extend( {
 		} );
 	},
 	page: async ( { page }, use ) => {
-		await page.goto( 'wp-admin/post-new.php' );
+		await page.goto( 'wp-admin' );
 		await disableWelcomeModal( { page } );
 		await use( page );
 	},
