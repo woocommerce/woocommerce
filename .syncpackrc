@@ -9,11 +9,12 @@
 	},
 	"versionGroups": [
 		{
-			"label": "Banned dependencies: classnames(->clsx), concurrently(->pnpm), cross-env(->wsl)",
+			"label": "Banned dependencies: classnames(->clsx), concurrently(->pnpm), cross-env(->wsl),@automattic/webpack-rtl-plugin(->internal-style-build)",
 			"dependencies": [
 				"classnames",
 				"concurrently",
-				"cross-env"
+				"cross-env",
+				"@automattic/webpack-rtl-plugin"
 			],
 			"packages": [
 				"**"
