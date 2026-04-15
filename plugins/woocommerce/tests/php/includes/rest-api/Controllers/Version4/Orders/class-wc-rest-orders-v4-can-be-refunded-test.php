@@ -290,9 +290,9 @@ class WC_REST_Orders_V4_Can_Be_Refunded_Test extends WC_REST_Unit_Test_Case {
 		$request = new WP_REST_Request( 'POST', '/wc/v4/orders' );
 		$request->set_body_params(
 			array(
-				'status'         => OrderStatus::COMPLETED,
+				'status'          => OrderStatus::COMPLETED,
 				'can_be_refunded' => false,
-				'line_items'     => array(
+				'line_items'      => array(
 					array(
 						'product_id' => $product->get_id(),
 						'quantity'   => 1,
@@ -342,10 +342,11 @@ class WC_REST_Orders_V4_Can_Be_Refunded_Test extends WC_REST_Unit_Test_Case {
 	 * @testdox Fully refunded shipping line has can_be_refunded false.
 	 */
 	public function test_fully_refunded_shipping_line(): void {
-		$order         = WC_Helper_Order::create_order_with_fees_and_shipping( $this->user_id );
+		$order = WC_Helper_Order::create_order_with_fees_and_shipping( $this->user_id );
 		$order->set_status( 'completed' );
 		$order->save();
 		$order->calculate_totals( true );
+
 		$shipping_item = current( $order->get_items( 'shipping' ) );
 
 		wc_create_refund(
