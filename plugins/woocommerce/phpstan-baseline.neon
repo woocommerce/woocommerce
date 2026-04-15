@@ -68377,12 +68377,6 @@ parameters:
 			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
 
 		-
-			message: '#^Call to method update_meta_data\(\) on an unknown class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\WC_Product\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
 			message: '#^Cannot access property \$public on WP_Post_Type\|null\.$#'
 			identifier: property.nonObject
 			count: 2

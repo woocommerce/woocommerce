@@ -13,7 +13,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 */
 
 const rtlcss = require( 'rtlcss' );
-const { ConcatSource } = require( 'webpack' ).sources;
 
 const pluginName = 'WebpackRTLPlugin';
 
@@ -33,7 +32,8 @@ class WebpackRTLPlugin {
 			compilation.hooks.processAssets.tapPromise(
 				{
 					name: pluginName,
-					stage: compilation.PROCESS_ASSETS_STAGE_DERIVED,
+					stage: compiler.webpack.Compilation
+						.PROCESS_ASSETS_STAGE_DERIVED,
 				},
 				async ( assets ) => {
 					const cssRe = /\.css(?:$|\?)/;
@@ -78,9 +78,10 @@ class WebpackRTLPlugin {
 										this.options.plugins
 									);
 									// Save the asset
-									const rtlAsset = new ConcatSource(
-										rtlSource
-									);
+									const rtlAsset =
+										new compiler.webpack.sources.RawSource(
+											rtlSource
+										);
 									compilation.emitAsset( filename, rtlAsset );
 									this.cache.set( assetInstance, rtlAsset );
 								}

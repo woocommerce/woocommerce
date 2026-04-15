@@ -19,6 +19,7 @@ const singletonWpModules = [
 	'@wordpress/core-data',
 	'@wordpress/data',
 	'@wordpress/editor',
+	'@wordpress/html-entities',
 	'@wordpress/keyboard-shortcuts',
 ];
 
@@ -55,7 +56,7 @@ module.exports = {
 		// WooCommerce workspace aliases
 		'@woocommerce/data': '<rootDir>/node_modules/@woocommerce/data/build',
 		'@woocommerce/sanitize':
-			'<rootDir>/node_modules/@woocommerce/sanitize/src/index.ts',
+			'<rootDir>/node_modules/@woocommerce/sanitize/src',
 		'@woocommerce/atomic-blocks': 'assets/js/atomic/blocks',
 		'@woocommerce/atomic-utils': 'assets/js/atomic/utils',
 		'@woocommerce/icons': 'assets/js/icons',

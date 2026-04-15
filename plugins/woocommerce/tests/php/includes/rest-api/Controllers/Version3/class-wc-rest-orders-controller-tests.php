@@ -6,6 +6,7 @@ use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableControlle
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
+use Automattic\WooCommerce\Tests\Helpers\MetaDataAssertionTrait;
 
 /**
  * class WC_REST_Orders_Controller_Tests.
@@ -14,6 +15,7 @@ use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
 class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	use HPOSToggleTrait;
 	use CogsAwareUnitTestSuiteTrait;
+	use MetaDataAssertionTrait;
 
 	/**
 	 * Setup our test server, endpoints, and user info.
@@ -315,6 +317,70 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$order = wc_get_order( $data['id'] );
 		$this->assertNotEmpty( $order );
 		$this->assertEquals( 'rest-api', $order->get_created_via() );
+	}
+
+	/**
+	 * PUT against an ID belonging to a non 'shop_order' post type must be rejected, never
+	 * silently converted.
+	 */
+	public function test_update_rejects_non_shop_order_post_type(): void {
+		wc_register_order_type( 'shop_test' );
+		$post_id = wp_insert_post(
+			array(
+				'post_type'   => 'shop_test',
+				'post_status' => 'wc-pending',
+				'post_title'  => 'test',
+			)
+		);
+
+		$request = new \WP_REST_Request( 'PUT', '/wc/v3/orders/' . $post_id );
+		$request->set_body_params( array( 'customer_note' => 'should not apply' ) );
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertArrayHasKey( 'code', $data );
+		$this->assertSame( 'woocommerce_rest_shop_order_invalid_id', $data['code'] );
+
+		// The persisted record must be untouched: same post type, no added customer_note.
+		$this->assertSame( 'shop_test', get_post_type( $post_id ) );
+		$this->assertSame( '', (string) get_post_meta( $post_id, '_customer_note', true ) );
+
+		unregister_post_type( 'shop_test' );
+	}
+
+	/**
+	 * PUT against a non-existent ID returns the standard invalid-id error.
+	 */
+	public function test_update_rejects_nonexistent_id(): void {
+		$request = new \WP_REST_Request( 'PUT', '/wc/v3/orders/999999999' );
+		$request->set_body_params( array( 'customer_note' => 'irrelevant' ) );
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertArrayHasKey( 'code', $data );
+		$this->assertSame( 'woocommerce_rest_shop_order_invalid_id', $data['code'] );
+	}
+
+	/**
+	 * The type-mismatch override must still delegate normal shop_order updates to the
+	 * parent controller and apply the request body.
+	 */
+	public function test_update_shop_order_passes_type_guard_and_applies_changes(): void {
+		$order = new \WC_Order();
+		$order->set_customer_note( 'before' );
+		$order->save();
+
+		$request = new \WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
+		$request->set_body_params( array( 'customer_note' => 'after' ) );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( 'after', wc_get_order( $order->get_id() )->get_customer_note() );
 	}
 
 	/**
@@ -857,5 +923,21 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$item->set_quantity( $quantity );
 		$item->save();
 		$order->add_item( $item );
+	}
+
+	/**
+	 * @testdox Updating an order with incomplete meta_data entries does not cause errors.
+	 */
+	public function test_update_meta_data_with_incomplete_entries(): void {
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order( $this->user );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body( wp_json_encode( array( 'meta_data' => $this->get_incomplete_meta_data_input() ) ) );
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$this->assert_incomplete_meta_data_handled_correctly( wc_get_order( $order->get_id() ) );
 	}
 }

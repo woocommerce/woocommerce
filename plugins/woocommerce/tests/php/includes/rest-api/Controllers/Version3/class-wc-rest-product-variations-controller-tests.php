@@ -2,12 +2,14 @@
 declare( strict_types=1 );
 
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
+use Automattic\WooCommerce\Tests\Helpers\MetaDataAssertionTrait;
 
 /**
  * Variations Controller tests for V3 REST API.
  */
 class WC_REST_Product_Variations_Controller_Tests extends WC_REST_Unit_Test_Case {
 	use CogsAwareUnitTestSuiteTrait;
+	use MetaDataAssertionTrait;
 
 	/**
 	 * Runs before each test.
@@ -839,5 +841,22 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_REST_Unit_Test_Case
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertContains( $variations[0]->get_id(), $variation_ids );
 		$this->assertContains( $variations[1]->get_id(), $variation_ids );
+	}
+
+	/**
+	 * @testdox Updating a variation with incomplete meta_data entries does not cause errors.
+	 */
+	public function test_update_meta_data_with_incomplete_entries(): void {
+		$parent    = WC_Helper_Product::create_variation_product();
+		$variation = wc_get_product( $parent->get_children()[0] );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $parent->get_id() . '/variations/' . $variation->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body( wp_json_encode( array( 'meta_data' => $this->get_incomplete_meta_data_input() ) ) );
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$this->assert_incomplete_meta_data_handled_correctly( wc_get_product( $variation->get_id() ) );
 	}
 }
