@@ -813,7 +813,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 		}
 
 		/**
-		 * Enqueue a script in the block editor.
+		 * Enqueue a script in WordPress admin.
 		 * Similar to `WCAdminAssets::register_script()` but without enqueuing unnecessary dependencies.
 		 *
 		 * @return void
