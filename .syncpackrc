@@ -529,6 +529,15 @@
 		},
 		{
 			"dependencies": [
+				"rtlcss"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "4.3.x"
+		},
+		{
+			"dependencies": [
 				"rimraf"
 			],
 			"packages": [
