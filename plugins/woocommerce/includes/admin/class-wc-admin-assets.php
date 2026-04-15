@@ -886,7 +886,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					}, $analytics_reports );
 					$formatted_analytics_reports = array_filter( $formatted_analytics_reports, 'is_array' );
 
-						self::enqueue_script( 'wp-admin-scripts', 'command-palette-analytics' );
+						$this->enqueue_script( 'wp-admin-scripts', 'command-palette-analytics' );
 						wp_localize_script(
 							'wc-admin-command-palette-analytics',
 							'wcCommandPaletteAnalytics',
