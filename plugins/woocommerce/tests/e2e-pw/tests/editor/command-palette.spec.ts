@@ -66,8 +66,18 @@ const test = baseTest.extend( {
 		} );
 	},
 	page: async ( { page }, use ) => {
-		await page.goto( 'wp-admin' );
-		await disableWelcomeModal( { page } );
+		await Promise.all( [
+			page.goto( 'wp-admin' ),
+			page.waitForResponse( ( response ) => {
+				return (
+					response
+						.url()
+						.includes(
+							'/wp-admin-scripts/command-palette.min.js'
+						) && response.status() === 200
+				);
+			} ),
+		] );
 		await use( page );
 	},
 } );
