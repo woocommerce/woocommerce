@@ -367,4 +367,172 @@ class WC_REST_Orders_V4_Can_Be_Refunded_Test extends WC_REST_Unit_Test_Case {
 
 		$this->assertFalse( $data['shipping_lines'][0]['can_be_refunded'], 'Fully refunded shipping line should not be refundable' );
 	}
+
+	/**
+	 * @testdox Fully refunded fee line has can_be_refunded false.
+	 */
+	public function test_fully_refunded_fee_line(): void {
+		$order = WC_Helper_Order::create_order_with_fees_and_shipping( $this->user_id );
+		$order->set_status( 'completed' );
+		$order->save();
+		$order->calculate_totals( true );
+
+		$fee_item = current( $order->get_items( 'fee' ) );
+
+		wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => $fee_item->get_total(),
+				'line_items' => array(
+					$fee_item->get_id() => array(
+						'qty'          => 0,
+						'refund_total' => $fee_item->get_total(),
+						'refund_tax'   => array(),
+					),
+				),
+			)
+		);
+
+		$data = $this->get_order_response( $order->get_id() );
+
+		$this->assertFalse( $data['fee_lines'][0]['can_be_refunded'], 'Fully refunded fee line should not be refundable' );
+	}
+
+	/**
+	 * @testdox Fully refunded shipping line with tax has can_be_refunded false.
+	 */
+	public function test_fully_refunded_shipping_line_with_tax(): void {
+		$order = wc_create_order( array( 'customer_id' => $this->user_id ) );
+
+		$shipping_item = new WC_Order_Item_Shipping();
+		$shipping_item->set_props(
+			array(
+				'method_title' => 'Flat Rate',
+				'total'        => '10.00',
+			)
+		);
+		$shipping_item->set_taxes(
+			array(
+				'total' => array( 1 => '1.50' ),
+			)
+		);
+		$shipping_item->save();
+		$order->add_item( $shipping_item );
+		$order->set_status( 'completed' );
+		$order->save();
+		$order->update_taxes();
+		$order->calculate_totals( false );
+
+		wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => 11.50,
+				'line_items' => array(
+					$shipping_item->get_id() => array(
+						'qty'          => 0,
+						'refund_total' => 10.00,
+						'refund_tax'   => array( 1 => 1.50 ),
+					),
+				),
+			)
+		);
+
+		$data = $this->get_order_response( $order->get_id() );
+
+		$this->assertFalse(
+			$data['shipping_lines'][0]['can_be_refunded'],
+			'Fully refunded shipping line with tax should not be refundable'
+		);
+	}
+
+	/**
+	 * @testdox Fully refunded fee line with tax has can_be_refunded false.
+	 */
+	public function test_fully_refunded_fee_line_with_tax(): void {
+		$order = wc_create_order( array( 'customer_id' => $this->user_id ) );
+
+		$fee_item = new WC_Order_Item_Fee();
+		$fee_item->set_props(
+			array(
+				'name'  => 'Test Fee',
+				'total' => '20.00',
+			)
+		);
+		$fee_item->set_taxes(
+			array(
+				'total' => array( 1 => '3.00' ),
+			)
+		);
+		$fee_item->save();
+		$order->add_item( $fee_item );
+		$order->set_status( 'completed' );
+		$order->save();
+		$order->update_taxes();
+		$order->calculate_totals( false );
+
+		wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => 23.00,
+				'line_items' => array(
+					$fee_item->get_id() => array(
+						'qty'          => 0,
+						'refund_total' => 20.00,
+						'refund_tax'   => array( 1 => 3.00 ),
+					),
+				),
+			)
+		);
+
+		$data = $this->get_order_response( $order->get_id() );
+
+		$this->assertFalse(
+			$data['fee_lines'][0]['can_be_refunded'],
+			'Fully refunded fee line with tax should not be refundable'
+		);
+	}
+
+	/**
+	 * @testdox Zero-priced product line item with quantity follows quantity logic.
+	 */
+	public function test_zero_priced_item_follows_quantity_logic(): void {
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => '0.00' ) );
+		$order   = wc_create_order( array( 'customer_id' => $this->user_id ) );
+
+		$item = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 2,
+				'subtotal' => 0,
+				'total'    => 0,
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+		$order->set_status( 'completed' );
+		$order->save();
+		$order->calculate_totals( true );
+
+		$data = $this->get_order_response( $order->get_id() );
+
+		$this->assertTrue(
+			$data['line_items'][0]['can_be_refunded'],
+			'Zero-priced item with remaining quantity should be refundable'
+		);
+	}
+
+	/**
+	 * @testdox Line items on cancelled order still report can_be_refunded based on quantity.
+	 */
+	public function test_line_items_on_cancelled_order(): void {
+		$order = $this->create_order_with_product( 'cancelled' );
+		$data  = $this->get_order_response( $order->get_id() );
+
+		$this->assertFalse( $data['can_be_refunded'], 'Cancelled order should not be refundable' );
+		$this->assertTrue(
+			$data['line_items'][0]['can_be_refunded'],
+			'Line item on cancelled order reports refundability based on quantity, independent of order status'
+		);
+	}
 }

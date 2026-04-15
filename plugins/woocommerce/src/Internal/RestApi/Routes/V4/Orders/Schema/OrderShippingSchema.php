@@ -101,7 +101,7 @@ class OrderShippingSchema extends AbstractLineItemSchema {
 			'total_tax'       => wc_format_decimal( $order_item->get_total_tax(), $dp ),
 			'taxes'           => $this->prepare_taxes( $order_item, $request ),
 			'meta_data'       => $this->prepare_meta_data( $order_item ),
-			'can_be_refunded' => ( (float) $order_item->get_total() + (float) $order_item->get_total_tax()
+			'can_be_refunded' => ( (float) $order_item->get_total()
 				- (float) $order->get_total_refunded_for_item( $order_item->get_id(), 'shipping' ) ) > 0,
 		);
 
