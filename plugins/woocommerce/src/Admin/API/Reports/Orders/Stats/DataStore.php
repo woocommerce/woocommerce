@@ -594,7 +594,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		if ( 'shop_order_refund' === $order->get_type() ) {
 			$parent_order = wc_get_order( $order->get_parent_id() );
-			if ( $parent_order ) {
+			// Refunds attach to the original order. Skip if the parent is another refund.
+			if ( $parent_order && ! $parent_order instanceof WC_Order_Refund ) {
 				$data['parent_id'] = $parent_order->get_id();
 				$data['status']    = self::normalize_order_status( $parent_order->get_status() );
 
@@ -703,12 +704,13 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Whether this refund is a single lump-sum refund for the full order (e.g. status set to refunded without line items).
 	 *
-	 * @param WC_Order_Refund $refund        Refund order.
-	 * @param WC_Order        $parent_order Parent order.
+	 * @param WC_Order_Refund|OrderRefund|Order $refund        Refund order.
+	 * @param WC_Order|Order                   $parent_order Parent order (not a refund).
 	 * @return bool
 	 */
 	protected static function should_split_full_refund_using_parent_order( $refund, $parent_order ) {
-		if ( ! $parent_order instanceof WC_Order ) {
+		// The parent must be the original order, not another refund.
+		if ( ! $parent_order instanceof WC_Order || 'shop_order_refund' === $parent_order->get_type() ) {
 			return false;
 		}
 
