@@ -1,6 +1,7 @@
 useNodeVersion: 20.20.2
 
 catalogs:
+	# A curated set of `@wordpress/*` packages that are bundled with our minimum supported WordPress version.
     wp-min:
         '@types/wordpress__block-editor': 14.21.8
         '@types/wordpress__block-library': 2.6.3
@@ -45,7 +46,7 @@ catalogs:
         '@wordpress/preferences': 4.19.4
         '@wordpress/primitives': 4.19.1
         '@wordpress/priority-queue': 3.19.1
-        '@wordpress/private-apis': ^1.19.1
+        '@wordpress/private-apis': ^1.19.1 # Use a caret range to make sure we are using an up-to-date private package list.
         '@wordpress/rich-text': 7.19.2
         '@wordpress/server-side-render': 5.19.4
         '@wordpress/url': 4.19.2
