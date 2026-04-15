@@ -109,7 +109,14 @@ class OrdersScheduler extends ImportScheduler {
 		// regardless of import mode. The batch processor also excludes trash status,
 		// so these hooks are the only way to keep wp_wc_order_stats in sync.
 		add_action( 'woocommerce_trash_order', array( __CLASS__, 'import' ) );
-		add_action( 'woocommerce_untrash_order', array( __CLASS__, 'import' ) );
+
+		// woocommerce_untrash_order fires before the status is restored in the DB,
+		// so we use $previous_status directly instead of re-importing from the DB.
+		add_action( 'woocommerce_untrash_order', array( __CLASS__, 'sync_on_order_untrash' ), 10, 2 );
+
+		// CPT-based stores fire untrashed_post instead of woocommerce_untrash_order.
+		// By the time untrashed_post fires, the status is already restored in the DB.
+		add_action( 'untrashed_post', array( __CLASS__, 'maybe_import_on_post_untrash' ) );
 
 		if ( Features::is_enabled( 'analytics-scheduled-import' ) ) {
 			// Watch for changes to the scheduled import option.
@@ -397,6 +404,54 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 		 * @param int $order_id Order or refund ID.
 		 */
 		do_action( 'woocommerce_order_scheduler_after_import_order', $order_id );
+	}
+
+	/**
+	 * Sync order status to analytics when an order is untrashed via HPOS.
+	 *
+	 * woocommerce_untrash_order fires before the status is restored in the DB,
+	 * so import() would read the stale 'trash' status. Instead, we directly
+	 * update wc_order_stats using the $previous_status argument.
+	 *
+	 * @internal
+	 * @param int    $order_id        Order ID.
+	 * @param string $previous_status The status the order had before being trashed (wc-prefixed).
+	 */
+	public static function sync_on_order_untrash( $order_id, $previous_status ): void {
+		global $wpdb;
+
+		// Ensure status is wc-prefixed for wc_order_stats consistency.
+		if ( 0 !== strpos( $previous_status, 'wc-' ) ) {
+			$previous_status = 'wc-' . $previous_status;
+		}
+
+		$wpdb->update(
+			$wpdb->prefix . 'wc_order_stats',
+			array( 'status' => $previous_status ),
+			array( 'order_id' => $order_id ),
+			array( '%s' ),
+			array( '%d' )
+		);
+
+		ReportsCache::invalidate();
+	}
+
+	/**
+	 * Sync order status to analytics when a CPT-based order is untrashed.
+	 *
+	 * CPT data stores don't fire woocommerce_untrash_order. They use
+	 * WordPress's untrashed_post hook, which fires after the status is already
+	 * restored in the DB, so import() reads the correct status.
+	 *
+	 * @internal
+	 * @param int $post_id Post ID.
+	 */
+	public static function maybe_import_on_post_untrash( $post_id ): void {
+		if ( ! OrderUtil::is_order( $post_id, array( 'shop_order', 'shop_order_refund' ) ) ) {
+			return;
+		}
+
+		self::import( $post_id );
 	}
 
 	/**
