@@ -11,6 +11,7 @@ const TerserPlugin = require( 'terser-webpack-plugin' );
 /**
  * Internal dependencies
  */
+const FilesystemCacheWarningsPlugin = require( './filesystem-cache-warnings-webpack-plugin.js' );
 const { getProgressBarPluginConfig } = require( './webpack-helpers' );
 
 const ROOT_DIR = path.resolve( __dirname, '../../../../../' );
@@ -65,6 +66,8 @@ module.exports = {
 		new ProgressBarPlugin(
 			getProgressBarPluginConfig( 'Dependency Detection' )
 		),
+		// Suppress file system cache warnings (unsupported serialization related).
+		new FilesystemCacheWarningsPlugin(),
 	],
 	optimization: {
 		// Always minimize - this is an inline script embedded in page HTML.

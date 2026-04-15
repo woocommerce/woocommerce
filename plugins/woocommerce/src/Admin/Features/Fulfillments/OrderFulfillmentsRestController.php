@@ -182,9 +182,10 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 		}
 
 		// Check if the order exists, and if the current user is the owner of the order, and the request is a read request.
-		// We allow this because we need to render the order fulfillments on the customer's order details and order tracking pages.
-		// But they will be only able to view them, not edit.
-		if ( get_current_user_id() === $order->get_customer_id() && WP_REST_Server::READABLE === $request->get_method() ) {
+		// Guest order fulfillments are rendered server-side via templates, so they don't need REST API access.
+		// The get_current_user_id() > 0 check prevents unauthenticated users from accessing guest orders
+		// where both get_current_user_id() and get_customer_id() would return 0.
+		if ( get_current_user_id() > 0 && get_current_user_id() === $order->get_customer_id() && WP_REST_Server::READABLE === $request->get_method() ) {
 			return true;
 		}
 
