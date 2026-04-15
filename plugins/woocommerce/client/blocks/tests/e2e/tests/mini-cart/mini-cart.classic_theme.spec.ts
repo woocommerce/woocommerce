@@ -32,18 +32,16 @@ test.describe( 'Mini-Cart: classic theme', () => {
 			},
 		} );
 
-		// Wait for networkidle to ensure the IAPI mini-cart store has
-		// hydrated and the jQuery event bridge is set up.
 		await page.goto( `/?p=${ testPage.id }` );
 
 		const miniCartButton = page.locator( '.wc-block-mini-cart__button' );
 		await expect( miniCartButton ).toBeVisible();
 
 		const addToCartLink = page.getByLabel( /Add to cart/ ).first();
-		// Wait for the GET /cart request (refreshCartItems) to complete.
-		const cartResponse = page.waitForResponse( '**/wc/store/v1/cart**' );
+		const ajaxCall = page.waitForResponse( '**wc-ajax=add_to_cart**' );
 		await addToCartLink.click();
-		await cartResponse;
+		// Wait for the AJAX call to complete.
+		await ajaxCall;
 		const dialog = page.getByRole( 'dialog' );
 		await expect( dialog ).toBeVisible();
 	} );
