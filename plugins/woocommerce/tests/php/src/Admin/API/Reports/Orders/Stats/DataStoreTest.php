@@ -4,6 +4,8 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Admin\API\Reports\Orders\Stats;
 
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
+use Automattic\WooCommerce\Caches\OrderCache;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Helper_Order;
 use WC_Unit_Test_Case;
 use WP_Error;
@@ -78,12 +80,30 @@ class DataStoreTest extends WC_Unit_Test_Case {
 
 		$this->assertNotInstanceOf( WP_Error::class, $refund );
 
-		$refund->delete_meta_data( '_refund_type' );
-		$refund->save();
+		global $wpdb;
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$wpdb->delete(
+				$wpdb->prefix . 'wc_orders_meta',
+				array(
+					'order_id' => $refund->get_id(),
+					'meta_key' => '_refund_type',
+				),
+				array( '%d', '%s' )
+			);
+		} else {
+			delete_post_meta( $refund->get_id(), '_refund_type' );
+		}
+
+		if ( OrderUtil::orders_cache_usage_is_enabled() ) {
+			wc_get_container()->get( OrderCache::class )->remove( $refund->get_id() );
+		}
+
+		$refund_after_clear = wc_get_order( $refund->get_id() );
+		$this->assertInstanceOf( \WC_Order_Refund::class, $refund_after_clear );
+		$this->assertEmpty( $refund_after_clear->get_meta( '_refund_type', true ) );
 
 		OrdersStatsDataStore::sync_order( $refund->get_id() );
 
-		global $wpdb;
 		$net_total = $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT net_total FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d",
