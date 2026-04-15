@@ -853,14 +853,15 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					}
 				}
 			}
-				self::enqueue_script( 'wp-admin-scripts', 'command-palette' );
-				wp_localize_script(
-					'wc-admin-command-palette',
-					'wcCommandPaletteSettings',
-					array(
-						'settingsTabs' => $formatted_settings_tabs,
-					)
-				);
+
+			$this->enqueue_script( 'wp-admin-scripts', 'command-palette' );
+			wp_localize_script(
+				'wc-admin-command-palette',
+				'wcCommandPaletteSettings',
+				array(
+					'settingsTabs' => $formatted_settings_tabs,
+				)
+			);
 
 
 			$admin_features_disabled = apply_filters( 'woocommerce_admin_disabled', false );
@@ -886,14 +887,14 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					}, $analytics_reports );
 					$formatted_analytics_reports = array_filter( $formatted_analytics_reports, 'is_array' );
 
-						$this->enqueue_script( 'wp-admin-scripts', 'command-palette-analytics' );
-						wp_localize_script(
-							'wc-admin-command-palette-analytics',
-							'wcCommandPaletteAnalytics',
-							array(
-								'reports' => $formatted_analytics_reports,
-							)
-						);
+					$this->enqueue_script( 'wp-admin-scripts', 'command-palette-analytics' );
+					wp_localize_script(
+						'wc-admin-command-palette-analytics',
+						'wcCommandPaletteAnalytics',
+						array(
+							'reports' => $formatted_analytics_reports,
+						)
+					);
 				}
 			}
 		}
