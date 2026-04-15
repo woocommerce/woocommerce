@@ -105,6 +105,12 @@ class OrdersScheduler extends ImportScheduler {
 			add_action( 'woocommerce_schedule_import', array( __CLASS__, 'possibly_schedule_import' ) );
 		}
 
+		// Trash and untrash bypass woocommerce_update_order, so sync them directly
+		// regardless of import mode. The batch processor also excludes trash status,
+		// so these hooks are the only way to keep wp_wc_order_stats in sync.
+		add_action( 'woocommerce_trash_order', array( __CLASS__, 'import' ) );
+		add_action( 'woocommerce_untrash_order', array( __CLASS__, 'import' ) );
+
 		if ( Features::is_enabled( 'analytics-scheduled-import' ) ) {
 			// Watch for changes to the scheduled import option.
 			add_action( 'add_option_' . self::SCHEDULED_IMPORT_OPTION, array( __CLASS__, 'handle_scheduled_import_option_added' ), 10, 2 );

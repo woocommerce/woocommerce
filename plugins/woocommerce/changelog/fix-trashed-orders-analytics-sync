@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Sync trashed and untrashed order status to analytics so trashed orders no longer appear in reports.

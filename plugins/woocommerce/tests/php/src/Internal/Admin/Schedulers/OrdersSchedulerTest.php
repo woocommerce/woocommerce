@@ -444,6 +444,84 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Trashing an order syncs the trash status to wp_wc_order_stats.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/44371
+	 */
+	public function test_trash_order_syncs_status_to_order_stats(): void {
+		global $wpdb;
+
+		// Create and import a completed order.
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( 'completed' );
+		$order->save();
+		OrdersScheduler::import( $order->get_id() );
+
+		// Verify the order stats row has wc-completed status.
+		$status_before = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT status FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d",
+				$order->get_id()
+			)
+		);
+		$this->assertSame( 'wc-completed', $status_before );
+
+		// Trash the order.
+		$order->delete( false );
+
+		// Verify the order stats row now has wc-trash status.
+		$status_after = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT status FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d",
+				$order->get_id()
+			)
+		);
+		$this->assertSame( 'wc-trash', $status_after );
+	}
+
+	/**
+	 * @testdox Untrashing an order syncs the restored status to wp_wc_order_stats.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/44371
+	 */
+	public function test_untrash_order_syncs_status_to_order_stats(): void {
+		global $wpdb;
+
+		// Create, complete, import, then trash an order.
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( 'completed' );
+		$order->save();
+		OrdersScheduler::import( $order->get_id() );
+		$order->delete( false );
+
+		// Verify the order is trashed in stats.
+		$status_trashed = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT status FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d",
+				$order->get_id()
+			)
+		);
+		$this->assertSame( 'wc-trash', $status_trashed );
+
+		// Untrash the order.
+		$order_store = \WC_Data_Store::load( 'order' );
+		if ( method_exists( $order_store, 'untrash_order' ) ) {
+			$order_store->untrash_order( $order );
+		} else {
+			wp_untrash_post( $order->get_id() );
+		}
+
+		// Verify the order stats row is restored.
+		$status_restored = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT status FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d",
+				$order->get_id()
+			)
+		);
+		$this->assertNotSame( 'wc-trash', $status_restored );
+	}
+
+	/**
 	 * Clear any scheduled batch processor actions.
 	 *
 	 * @return void
