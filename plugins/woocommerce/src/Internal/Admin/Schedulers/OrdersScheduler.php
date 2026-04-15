@@ -409,7 +409,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	/**
 	 * Sync order status to analytics when an order is untrashed via HPOS.
 	 *
-	 * woocommerce_untrash_order fires before the status is restored in the DB,
+	 * The woocommerce_untrash_order hook fires before the status is restored in the DB,
 	 * so import() would read the stale 'trash' status. Instead, we directly
 	 * update wc_order_stats using the $previous_status argument.
 	 *
