@@ -14,6 +14,7 @@ const ReactRefreshWebpackPlugin = require( '@pmmmwh/react-refresh-webpack-plugin
  * Internal dependencies
  */
 const CustomTemplatedPathPlugin = require( './bin/custom-templated-path-webpack-plugin' );
+const FilesystemCacheWarningsPlugin = require( './bin/filesystem-cache-warnings-webpack-plugin.js' );
 const UnminifyWebpackPlugin = require( './bin/unminify-webpack-plugin.js' );
 const {
 	webpackConfig: styleConfig,
@@ -24,6 +25,7 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 const WC_ADMIN_PHASE = process.env.WC_ADMIN_PHASE || 'development';
 const isHot = Boolean( process.env.HOT );
 const isProduction = NODE_ENV === 'production';
+const isWatch = ! isProduction && process.argv.includes( '--watch' );
 
 const getSubdirectoriesAt = ( searchPath ) => {
 	const dir = path.resolve( __dirname, searchPath );
@@ -81,15 +83,31 @@ const getEntryPoints = () => {
 // WordPress.org’s translation infrastructure ignores files named “.min.js” so we need to name our JS files without min when releasing the plugin.
 const outputSuffix = WC_ADMIN_PHASE === 'core' ? '' : '.min';
 
-// Here we are patching a dependency, see https://github.com/woocommerce/woocommerce/pull/45548 for more details.
-// Should be revisited: using the dependency patching, but seems we need some codebase tweaks as it uses xstate 4/5 mix.
-require( 'fs-extra' ).ensureSymlinkSync(
-	path.join( __dirname, './node_modules/xstate5' ),
-	path.join( __dirname, './node_modules/@xstate5/react/node_modules/xstate' )
-);
-
 const webpackConfig = {
 	mode: NODE_ENV,
+	performance: {
+		hints: false,
+	},
+	cache: ( isWatch || process.env.CI || process.env.HOT || process.env.STORYBOOK )
+		? { type: 'memory' }
+		: {
+				type: 'filesystem',
+				cacheDirectory: path.resolve(
+					__dirname,
+					`node_modules/.cache/webpack-${ WC_ADMIN_PHASE }`
+				),
+				buildDependencies: {
+					config: [
+						__filename,
+						require.resolve( './bin/custom-templated-path-webpack-plugin' ),
+						require.resolve( './bin/unminify-webpack-plugin' ),
+						require.resolve( '@woocommerce/dependency-extraction-webpack-plugin/src/index' ),
+						require.resolve( '@woocommerce/internal-style-build' ),
+						require.resolve( '@woocommerce/internal-style-build/webpack-rtl-plugin' ),
+						require.resolve( '@woocommerce/internal-style-build/style-asset-plugin' ),
+					],
+				},
+		  },
 	entry: getEntryPoints(),
 	output: {
 		filename: ( data ) => {
@@ -126,19 +144,10 @@ const webpackConfig = {
 				use: {
 					loader: 'babel-loader',
 					options: {
-						presets: [
-							'@wordpress/babel-preset-default',
-							[
-								'@babel/preset-env',
-								{
-									// Add polyfills such as Array.flat based on their usage in the code
-									// See https://github.com/woocommerce/woocommerce-admin/pull/6411/
-									corejs: '3',
-									useBuiltIns: 'usage',
-								},
-							],
-							[ '@babel/preset-typescript' ],
-						],
+						// Prevent babel.config.js (Jest/Node context) from merging into this browser build and duplicating presets.
+						configFile: false,
+						sourceType: 'unambiguous',
+						presets: [ '@wordpress/babel-preset-default' ],
 						plugins: [
 							! isProduction &&
 								isHot &&
@@ -183,7 +192,7 @@ const webpackConfig = {
 	plugins: [
 		...styleConfig.plugins,
 		// Runs TypeScript type checker on a separate process.
-		! process.env.STORYBOOK && new ForkTsCheckerWebpackPlugin(),
+		! process.env.STORYBOOK && isWatch && new ForkTsCheckerWebpackPlugin(),
 		new CustomTemplatedPathPlugin( {
 			modulename( outputPath, data ) {
 				const entryName = get( data, [ 'chunk', 'name' ] );
@@ -277,6 +286,8 @@ const webpackConfig = {
 				test: /\.js($|\?)/i,
 				mainEntry: 'app/index.min.js',
 			} ),
+		// Suppress file system cache warnings (unsupported serialization related).
+		new FilesystemCacheWarningsPlugin(),
 	].filter( Boolean ),
 	optimization: {
 		minimize: NODE_ENV !== 'development',

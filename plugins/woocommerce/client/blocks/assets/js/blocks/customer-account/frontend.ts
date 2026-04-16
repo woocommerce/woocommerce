@@ -35,6 +35,16 @@ const focusTrigger = () => {
 	trigger?.focus();
 };
 
+// Set the background color from body so it's reliable. Pattern used in other blocks too
+// e.g. Mini Cart (see mini-cart/utils/set-styles.ts).
+const getBodyBackgroundColor = (): string => {
+	const color = getComputedStyle( document.body ).backgroundColor;
+	if ( ! color || color === 'rgba(0, 0, 0, 0)' || color === 'transparent' ) {
+		return '#fff';
+	}
+	return color;
+};
+
 const updateDropdownPosition = (
 	context: CustomerAccountContext,
 	wrapper: HTMLElement
@@ -113,6 +123,10 @@ const { actions: privateActions } = store(
 				const wrapper = getWrapper();
 				if ( wrapper ) {
 					updateDropdownPosition( context, wrapper );
+					wrapper.style.setProperty(
+						'--wc-customer-account-dropdown-surface',
+						getBodyBackgroundColor()
+					);
 				}
 
 				context.isDropdownOpen = true;

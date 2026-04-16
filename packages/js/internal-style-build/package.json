@@ -22,6 +22,8 @@
 	"main": "index.js",
 	"files": [
 		"index.js",
+		"webpack-rtl-plugin.js",
+		"style-asset-plugin.js",
 		"abstracts"
 	],
 	"scripts": {
@@ -37,16 +39,16 @@
 	},
 	"dependencies": {
 		"@automattic/color-studio": "^4.0.0",
-		"@wordpress/base-styles": "wp-6.6",
-		"@wordpress/postcss-plugins-preset": "wp-6.6",
+		"@wordpress/base-styles": "catalog:wp-min",
+		"@wordpress/postcss-plugins-preset": "catalog:wp-min",
 		"css-loader": "6.11.x",
 		"fork-ts-checker-webpack-plugin": "9.0.x",
 		"json2php": "^0.0.7",
 		"mini-css-extract-plugin": "2.9.x",
 		"postcss-loader": "4.3.x",
+		"rtlcss": "^4.3.0",
 		"sass-loader": "10.5.x",
-		"webpack-remove-empty-scripts": "1.0.x",
-		"@automattic/webpack-rtl-plugin": "6.0.x"
+		"webpack-remove-empty-scripts": "1.0.x"
 	},
 	"private": true,
 	"devDependencies": {

@@ -54,8 +54,8 @@
 	},
 	"dependencies": {
 		"@woocommerce/data": "workspace:*",
-		"@wordpress/a11y": "wp-6.6",
-		"@wordpress/notices": "wp-6.6"
+		"@wordpress/a11y": "catalog:wp-min",
+		"@wordpress/notices": "catalog:wp-min"
 	},
 	"peerDependencies": {
 		"@wordpress/data": "^10.0.2",
@@ -133,6 +133,7 @@
 			"allowUsuallyExcludedPaths": true,
 			"files": [
 				"package.json",
+				"../../../pnpm-lock.yaml",
 				"node_modules/@woocommerce/data/build",
 				"node_modules/@woocommerce/data/build-module",
 				"node_modules/@woocommerce/data/build-types",

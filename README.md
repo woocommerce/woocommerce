@@ -2,7 +2,7 @@
 
 ![WooCommerce](https://woocommerce.com/wp-content/themes/woo/images/logo-woo@2x.png)
 
-Welcome to the WooCommerce monorepo on GitHub. Here you can find all of the plugins, packages, and tools used in the development of the core WooCommerce plugin as well as WooCommerce extensions. You can browse the source, look at open issues, contribute code, and keep tracking of ongoing development.
+Welcome to the WooCommerce monorepo on GitHub. Here you can find all of the plugins, packages, and tools used in the development of the core WooCommerce plugin as well as WooCommerce extensions. You can browse the source, look at open issues, contribute code, and keep track of ongoing development.
 
 We recommend all developers follow the [WooCommerce development blog](https://developer.woocommerce.com/blog/) to stay up to date with everything happening in the project. You can also [follow @DevelopWoo](https://x.com/DevelopWoo) on X (formerly Twitter) for the latest development updates.
 

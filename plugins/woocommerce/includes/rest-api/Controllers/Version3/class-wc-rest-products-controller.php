@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareRestControllerTrait;
 use Automattic\WooCommerce\Utilities\I18nUtil;
+use Automattic\WooCommerce\Utilities\MetaDataUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -1134,11 +1135,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		}
 
 		// Allow set meta_data.
-		if ( is_array( $request['meta_data'] ) ) {
-			foreach ( $request['meta_data'] as $meta ) {
-				$product->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
-			}
-		}
+		MetaDataUtil::update( $request['meta_data'], $product );
 
 		if ( ! empty( $request['date_created'] ) ) {
 			$date = rest_parse_date( $request['date_created'] );
