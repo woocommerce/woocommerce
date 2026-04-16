@@ -40,7 +40,7 @@ class ListCoupons {
 		$last   = $pagination->last;
 		$after  = $pagination->after;
 		$before = $pagination->before;
-		$limit  = $first ?? $last ?? 10;
+		$limit  = $first ?? $last ?? PaginationParams::get_default_page_size();
 
 		$query_args = array(
 			'post_type'               => 'shop_coupon',
