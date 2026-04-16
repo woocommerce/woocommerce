@@ -8533,6 +8533,32 @@ table.bar_chart {
 		height: auto;
 		color: #1e1e1e;
 	}
+
+	// Align editor meta box border-radius with WP 7.0's dashboard widgets (8px).
+	// Product, order, and coupon editor screens.
+	&.post-type-product,
+	&.post-type-shop_order,
+	&.post-type-shop_coupon {
+		.postbox,
+		#postdivrich {
+			border-radius: 8px;
+			overflow: hidden; // Clip internal elements (tab sidebar, action bars) to rounded corners.
+		}
+
+		// Inner collapsible panels (attributes, variations) should stay square.
+		.wc-metabox.postbox {
+			border-radius: 0;
+			overflow: visible;
+		}
+	}
+
+	// HPOS order editor uses a different body class.
+	&.woocommerce_page_wc-orders {
+		.postbox {
+			border-radius: 8px;
+			overflow: hidden;
+		}
+	}
 }
 
 /**
@@ -9146,6 +9172,10 @@ table.bar_chart {
 #postdivrich.woocommerce-product-description {
 	margin-top: 20px;
 	margin-bottom: 0px;
+	// Match the 4px padding that #normal-sortables adds around postboxes,
+	// so the description editor aligns with the meta boxes below it.
+	margin-left: 4px;
+	margin-right: 4px;
 
 	.wp-editor-tools {
 		background: none;
