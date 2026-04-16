@@ -35,7 +35,6 @@ function ProductsLayout() {
 }
 
 export function ProductsApp() {
-	console.log( 'ci entrooo' );
 	return (
 		<NewNavigationProvider>
 			<UnsavedChangesWarning />

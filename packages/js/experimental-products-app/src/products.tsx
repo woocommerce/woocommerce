@@ -38,18 +38,9 @@ export function initializeProductsDashboard( id: string ): Root {
 
 	root.render(
 		<StrictMode>
-			{ true ? (
-				<Suspense fallback={ null }>
-					<ProductsApp />
-				</Suspense>
-			) : (
-				<div>
-					{ __(
-						'Please enabled Gutenberg for this feature',
-						'woocommerce'
-					) }
-				</div>
-			) }
+			<Suspense fallback={ null }>
+				<ProductsApp />
+			</Suspense>
 		</StrictMode>
 	);
 
