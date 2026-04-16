@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { MediaItem } from '@wordpress/media-utils';
+import type { Attachment } from '@wordpress/media-utils';
 
 export type ChildrenProps = {
 	open(): void;
@@ -15,5 +15,5 @@ export type MediaLibraryProps = {
 	className?: string;
 	uploaderParams?: Record< string, string >;
 	children( props: ChildrenProps ): JSX.Element;
-	onSelect( selection: MediaItem[] ): void;
+	onSelect( selection: Attachment[] ): void;
 };

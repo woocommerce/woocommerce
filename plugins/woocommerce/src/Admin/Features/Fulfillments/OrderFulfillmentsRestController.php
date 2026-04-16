@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Admin\Features\Fulfillments;
 
 use Automattic\WooCommerce\Internal\Admin\Settings\Exceptions\ApiException;
+use Automattic\WooCommerce\Utilities\MetaDataUtil;
 use Automattic\WooCommerce\Internal\RestApiControllerBase;
 use WC_Order;
 use WP_Http;
@@ -182,9 +183,10 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 		}
 
 		// Check if the order exists, and if the current user is the owner of the order, and the request is a read request.
-		// We allow this because we need to render the order fulfillments on the customer's order details and order tracking pages.
-		// But they will be only able to view them, not edit.
-		if ( get_current_user_id() === $order->get_customer_id() && WP_REST_Server::READABLE === $request->get_method() ) {
+		// Guest order fulfillments are rendered server-side via templates, so they don't need REST API access.
+		// The get_current_user_id() > 0 check prevents unauthenticated users from accessing guest orders
+		// where both get_current_user_id() and get_customer_id() would return 0.
+		if ( get_current_user_id() > 0 && get_current_user_id() === $order->get_customer_id() && WP_REST_Server::READABLE === $request->get_method() ) {
 			return true;
 		}
 
@@ -384,17 +386,19 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 			$fulfillment->set_props( $request->get_json_params() );
 			$next_state = $fulfillment->get_is_fulfilled();
 
-			if ( isset( $request->get_json_params()['meta_data'] ) && is_array( $request->get_json_params()['meta_data'] ) ) {
-				// Update the meta data keys that exist in the request.
-				foreach ( $request->get_json_params()['meta_data'] as $meta ) {
-					$fulfillment->update_meta_data( $meta['key'], $meta['value'], $meta['id'] ?? 0 );
-				}
+			if ( isset( $request->get_json_params()['meta_data'] ) ) {
+				$meta_data       = $request->get_json_params()['meta_data'];
+				$normalized_keys = is_array( $meta_data ) ? array_column( MetaDataUtil::normalize( $meta_data, 0 ), 'key' ) : array();
+				MetaDataUtil::update( $meta_data, $fulfillment, 0 );
 
-				// Remove the meta data keys that don't exist in the request, by matching their keys.
-				$existing_meta_data = $fulfillment->get_meta_data();
-				foreach ( $existing_meta_data as $meta ) {
-					if ( ! in_array( $meta->key, array_column( $request->get_json_params()['meta_data'], 'key' ), true ) ) {
-						$fulfillment->delete_meta_data( $meta->key );
+				// Remove meta keys not in the request. Skip if all entries were malformed
+				// (non-empty input but no valid keys), to avoid accidental data loss.
+				if ( empty( $meta_data ) || ! empty( $normalized_keys ) ) {
+					$existing_meta_data = $fulfillment->get_meta_data();
+					foreach ( $existing_meta_data as $meta ) {
+						if ( ! in_array( $meta->key, $normalized_keys, true ) ) {
+							$fulfillment->delete_meta_data( $meta->key );
+						}
 					}
 				}
 			}
@@ -559,15 +563,18 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 			$this->validate_fulfillment( $fulfillment, $fulfillment_id, $order_id );
 
 			// Update the meta data keys that exist in the request.
-			foreach ( $request->get_json_params()['meta_data'] as $meta ) {
-				$fulfillment->update_meta_data( $meta['key'], $meta['value'], $meta['id'] ?? 0 );
-			}
+			$meta_data       = $request->get_json_params()['meta_data'];
+			$normalized_keys = is_array( $meta_data ) ? array_column( MetaDataUtil::normalize( $meta_data, 0 ), 'key' ) : array();
+			MetaDataUtil::update( $meta_data, $fulfillment, 0 );
 
-			// Remove the meta data keys that don't exist in the request, by matching their keys.
-			$existing_meta_data = $fulfillment->get_meta_data();
-			foreach ( $existing_meta_data as $meta ) {
-				if ( ! in_array( $meta->key, array_column( $request->get_json_params()['meta_data'], 'key' ), true ) ) {
-					$fulfillment->delete_meta_data( $meta->key );
+			// Remove meta keys not in the request. Skip if all entries were malformed
+			// (non-empty input but no valid keys), to avoid accidental data loss.
+			if ( empty( $meta_data ) || ! empty( $normalized_keys ) ) {
+				$existing_meta_data = $fulfillment->get_meta_data();
+				foreach ( $existing_meta_data as $meta ) {
+					if ( ! in_array( $meta->key, $normalized_keys, true ) ) {
+						$fulfillment->delete_meta_data( $meta->key );
+					}
 				}
 			}
 			$fulfillment->save();

@@ -1,0 +1,5 @@
+Significance: patch
+Type: dev
+Comment: Remove unused build step from highlight-changes CI workflow.
+
+

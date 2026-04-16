@@ -31,7 +31,7 @@
 		"build-types"
 	],
 	"dependencies": {
-		"@wordpress/i18n": "wp-6.6",
+		"@wordpress/i18n": "catalog:wp-min",
 		"peggy": "^3.0.2"
 	},
 	"publishConfig": {
@@ -127,6 +127,7 @@
 			"allowUsuallyExcludedPaths": true,
 			"files": [
 				"package.json",
+				"../../../pnpm-lock.yaml",
 				"node_modules/@woocommerce/eslint-plugin/configs",
 				"node_modules/@woocommerce/eslint-plugin/rules",
 				"node_modules/@woocommerce/eslint-plugin/index.js",

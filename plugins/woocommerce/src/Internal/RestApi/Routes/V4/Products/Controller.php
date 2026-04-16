@@ -19,6 +19,7 @@ use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareRestControllerTrait;
 use Automattic\WooCommerce\Utilities\I18nUtil;
+use Automattic\WooCommerce\Utilities\MetaDataUtil;
 use WC_REST_Products_V2_Controller;
 use WP_REST_Server;
 use WP_REST_Request;
@@ -43,6 +44,21 @@ defined( 'ABSPATH' ) || exit;
 class Controller extends WC_REST_Products_V2_Controller {
 
 	use CogsAwareRestControllerTrait;
+
+	/**
+	 * Fields stripped from the response for users without product management capabilities
+	 * (e.g. authors who can view published products via the edit_posts fallback).
+	 *
+	 * @since 10.8.0
+	 */
+	private const SENSITIVE_FIELDS = array(
+		'cost_of_goods_sold',
+		'downloads',
+		'download_limit',
+		'download_expiry',
+		'meta_data',
+		'purchase_note',
+	);
 
 	/**
 	 * Endpoint namespace.
@@ -1200,11 +1216,7 @@ class Controller extends WC_REST_Products_V2_Controller {
 		}
 
 		// Allow set meta_data.
-		if ( is_array( $request['meta_data'] ) ) {
-			foreach ( $request['meta_data'] as $meta ) {
-				$product->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
-			}
-		}
+		MetaDataUtil::update( $request['meta_data'], $product ); // @phpstan-ignore argument.type (missing `use WC_Product` causes phantom namespace-local type)
 
 		if ( ! empty( $request['date_created'] ) ) {
 			$date = rest_parse_date( $request['date_created'] );
@@ -2277,6 +2289,14 @@ class Controller extends WC_REST_Products_V2_Controller {
 			'text'        => $object_data->add_to_cart_text(),
 			'single_text' => $object_data->single_add_to_cart_text(),
 		);
+
+		$post_type_object = get_post_type_object( 'product' );
+		if ( $post_type_object instanceof \WP_Post_Type && ! current_user_can( $post_type_object->cap->read_private_posts ) ) {
+			foreach ( self::SENSITIVE_FIELDS as $field ) {
+				unset( $data[ $field ] );
+			}
+		}
+
 		return $data;
 	}
 

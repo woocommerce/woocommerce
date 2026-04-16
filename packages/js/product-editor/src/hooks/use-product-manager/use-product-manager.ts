@@ -31,8 +31,6 @@ export function useProductManager< T = Product >( postType: string ) {
 	const { isValidating, validate } = useValidations< T >();
 	const { isDirty } = useSelect(
 		( select ) => ( {
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
 			isDirty: select( 'core' ).hasEditsForEntityRecord(
 				'postType',
 				postType,
@@ -62,8 +60,6 @@ export function useProductManager< T = Product >( postType: string ) {
 					...extraProps,
 					id,
 				},
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore
 				{
 					throwOnError: true,
 				}
@@ -117,16 +113,14 @@ export function useProductManager< T = Product >( postType: string ) {
 
 			await validate();
 
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
 			const { deleteEntityRecord, saveEditedEntityRecord } =
 				dispatch( 'core' );
 
-			await saveEditedEntityRecord< T >( 'postType', postType, id, {
+			await saveEditedEntityRecord( 'postType', postType, id, {
 				throwOnError: true,
 			} );
 
-			const deletedProduct = await deleteEntityRecord< T >(
+			const deletedProduct = await deleteEntityRecord(
 				'postType',
 				postType,
 				id,

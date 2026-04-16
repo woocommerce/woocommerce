@@ -1777,8 +1777,7 @@ export const CoreProfilerController = ( {
 	const augmentedStateMachine = useMemo( () => {
 		// When adding extensibility, this is the place to manipulate the state machine definition.
 		return coreProfilerStateMachineDefinition.provide( {
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore -- there seems to be a flaky error here - it fails sometimes and then not on recompile, will need to investigate further.
+			// @ts-expect-error xstate's MachineImplementationsActions type does not accept the spread of action overrides here; the runtime is unchanged.
 			actions: {
 				...coreProfilerMachineActions,
 				...actionOverrides,

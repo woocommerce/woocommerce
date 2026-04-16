@@ -56,8 +56,8 @@
 	"dependencies": {
 		"@automattic/explat-client": "^0.0.5",
 		"@automattic/explat-client-react-helpers": "^0.0.6",
-		"@wordpress/api-fetch": "wp-6.6",
-		"@wordpress/hooks": "wp-6.6",
+		"@wordpress/api-fetch": "catalog:wp-min",
+		"@wordpress/hooks": "catalog:wp-min",
 		"cookie": "^0.4.2",
 		"qs": "^6.11.2"
 	},
@@ -152,6 +152,7 @@
 			"allowUsuallyExcludedPaths": true,
 			"files": [
 				"package.json",
+				"../../../pnpm-lock.yaml",
 				"node_modules/@woocommerce/eslint-plugin/configs",
 				"node_modules/@woocommerce/eslint-plugin/rules",
 				"node_modules/@woocommerce/eslint-plugin/index.js",
