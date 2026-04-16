@@ -560,7 +560,7 @@ Before marking a component as complete:
 ### Common Violations to Avoid
 
 | Issue | Wrong | Correct |
-|-------|-------|---------|
+| ------- | ------- | --------- |
 | **Missing button label** | `<button><Icon /></button>` | `<button aria-label="Save"><Icon /></button>` |
 | **Non-semantic click** | `<div onClick={...}>Click</div>` | `<button onClick={...}>Click</button>` |
 | **Missing form label** | `<input placeholder="Name" />` | `<label>Name<input /></label>` |
