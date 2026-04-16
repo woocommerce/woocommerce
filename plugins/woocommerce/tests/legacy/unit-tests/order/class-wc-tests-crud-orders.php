@@ -1050,7 +1050,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 
 		$blocked_action_fired = false;
 		$blocked_action_args  = array();
-		$blocked_callback     = function( $order_id, $created_via, $cart_hash ) use ( &$blocked_action_fired, &$blocked_action_args ) {
+		$blocked_callback     = function ( $order_id, $created_via, $cart_hash ) use ( &$blocked_action_fired, &$blocked_action_args ) {
 			$blocked_action_fired = true;
 			$blocked_action_args  = array( $order_id, $created_via, $cart_hash );
 		};
@@ -1067,7 +1067,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		remove_action( 'woocommerce_payment_complete_blocked', $blocked_callback, 10 );
 
 		// Confirm blocked-payment order note exists.
-		$notes = wc_get_order_notes(
+		$notes        = wc_get_order_notes(
 			array(
 				'order_id' => $object->get_id(),
 			)
@@ -1094,7 +1094,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object->save();
 
 		$pre_payment_complete_fired = false;
-		$callback                   = function() use ( &$pre_payment_complete_fired ) {
+		$callback = function () use ( &$pre_payment_complete_fired ) {
 			$pre_payment_complete_fired = true;
 		};
 		add_action( 'woocommerce_pre_payment_complete', $callback, 10, 0 );
@@ -1214,10 +1214,10 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object->save();
 
 		// Allow this order via bypass filter.
-		$bypass_callback = function( $allow, $order, $transaction_id ) use ( $object ) {
+		$bypass_callback = function ( $allow, $order ) use ( $object ) {
 			return $order->get_id() === $object->get_id();
 		};
-		add_filter( 'woocommerce_allow_payment_complete_without_checkout_evidence', $bypass_callback, 10, 3 );
+		add_filter( 'woocommerce_allow_payment_complete_without_checkout_evidence', $bypass_callback, 10, 2 );
 
 		$this->assertTrue( $object->payment_complete( '12345' ) );
 		$this->assertEquals( OrderStatus::COMPLETED, $object->get_status() );
@@ -1238,11 +1238,11 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object->save();
 
 		// Allow custom created_via via filter.
-		$created_via_callback = function( $allowed_values, $order ) {
+		$created_via_callback = function ( $allowed_values ) {
 			$allowed_values[] = 'custom-integration';
 			return $allowed_values;
 		};
-		add_filter( 'woocommerce_payment_complete_allowed_created_via_values', $created_via_callback, 10, 2 );
+		add_filter( 'woocommerce_payment_complete_allowed_created_via_values', $created_via_callback, 10, 1 );
 
 		$this->assertTrue( $object->payment_complete( '12345' ) );
 		$this->assertEquals( OrderStatus::COMPLETED, $object->get_status() );
