@@ -1835,9 +1835,9 @@ class WC_Install {
 			}
 		}
 
-		$suppress        = $wpdb->suppress_errors( true );
+		$suppress_errors = $wpdb->suppress_errors( true );
 		$db_delta_result = dbDelta( self::get_schema() );
-		$wpdb->suppress_errors( $suppress );
+		$wpdb->suppress_errors( $suppress_errors );
 
 		$comment_type_index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE key_name = 'woo_idx_comment_type'" );
 		if ( null === $comment_type_index_exists ) {
