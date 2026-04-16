@@ -203,7 +203,9 @@ class Checkout extends AbstractCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_response( \WP_REST_Request $request ) {
-		if ( $this->get_draft_order() ) {
+		$this->order = $this->get_draft_order();
+
+		if ( $this->order ) {
 			$this->create_or_update_draft_order( $request );
 
 			return $this->prepare_item_for_response(
@@ -446,7 +448,9 @@ class Checkout extends AbstractCartRoute {
 		if ( null !== $payment_method ) {
 			WC()->session->set( 'chosen_payment_method', $payment_method->id );
 		}
-		WC()->session->set( 'store_api_customer_note', wc_sanitize_textarea( $request['order_notes'] ?? '' ) );
+		if ( isset( $request['order_notes'] ) ) {
+			WC()->session->set( 'store_api_customer_note', wc_sanitize_textarea( $request['order_notes'] ) );
+		}
 		$this->persist_additional_fields_for_customer( $request );
 	}
 
@@ -461,7 +465,7 @@ class Checkout extends AbstractCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	private function build_draft_route_response( \WP_REST_Request $request ) {
-		$payment_id    = (string) ( WC()->session->get( 'chosen_payment_method' ) ?? PaymentUtils::get_default_payment_method() );
+		$payment_id    = (string) PaymentUtils::get_default_payment_method();
 		$customer_note = (string) ( WC()->session->get( 'store_api_customer_note' ) ?? '' );
 
 		/**
@@ -753,7 +757,7 @@ class Checkout extends AbstractCartRoute {
 	 * @throws RouteException On error.
 	 */
 	private function create_or_update_draft_order( \WP_REST_Request $request ) {
-		$this->order = $this->get_draft_order();
+		$this->order = $this->order ?? $this->get_draft_order();
 
 		if ( ! $this->order ) {
 			$this->order = $this->order_controller->create_order_from_cart();
