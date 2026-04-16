@@ -137,6 +137,7 @@ defined( 'ABSPATH' ) || exit;
 			<div class="variable_pricing">
 				<?php
 
+				$tax_label = '';
 				if ( wc_tax_enabled() ) {
 					$tax_text  = wc_prices_include_tax()
 						? __( 'incl. tax', 'woocommerce' )
