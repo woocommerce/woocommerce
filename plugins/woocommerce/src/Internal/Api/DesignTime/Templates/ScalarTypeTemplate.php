@@ -35,10 +35,20 @@ class <?php echo $class_name; ?> {
 					'description'  => __( '<?php echo $escaped_description; ?>', 'woocommerce' ),
 <?php endif; ?>
 					'serialize'    => fn( $value ) => <?php echo $scalar_alias; ?>::serialize( $value ),
-					'parseValue'   => fn( $value ) => <?php echo $scalar_alias; ?>::parse( $value ),
+					'parseValue'   => function ( $value ) {
+						try {
+							return <?php echo $scalar_alias; ?>::parse( $value );
+						} catch ( \InvalidArgumentException $e ) {
+							throw new \GraphQL\Error\Error( $e->getMessage() );
+						}
+					},
 					'parseLiteral' => function ( $value_node, ?array $variables = null ) {
 						if ( $value_node instanceof \GraphQL\Language\AST\StringValueNode ) {
-							return <?php echo $scalar_alias; ?>::parse( $value_node->value );
+							try {
+								return <?php echo $scalar_alias; ?>::parse( $value_node->value );
+							} catch ( \InvalidArgumentException $e ) {
+								throw new \GraphQL\Error\Error( $e->getMessage() );
+							}
 						}
 						throw new \GraphQL\Error\Error(
 							'<?php echo $graphql_name; ?> must be a string, got: ' . $value_node->kind

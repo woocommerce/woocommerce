@@ -18,10 +18,20 @@ class DateTime {
 					'name'         => 'DateTime',
 					'description'  => __( 'An ISO 8601 encoded date and time string.', 'woocommerce' ),
 					'serialize'    => fn( $value ) => DateTimeScalar::serialize( $value ),
-					'parseValue'   => fn( $value ) => DateTimeScalar::parse( $value ),
+					'parseValue'   => function ( $value ) {
+						try {
+							return DateTimeScalar::parse( $value );
+						} catch ( \InvalidArgumentException $e ) {
+							throw new \GraphQL\Error\Error( $e->getMessage() );
+						}
+					},
 					'parseLiteral' => function ( $value_node, ?array $variables = null ) {
 						if ( $value_node instanceof \GraphQL\Language\AST\StringValueNode ) {
-							return DateTimeScalar::parse( $value_node->value );
+							try {
+								return DateTimeScalar::parse( $value_node->value );
+							} catch ( \InvalidArgumentException $e ) {
+								throw new \GraphQL\Error\Error( $e->getMessage() );
+							}
 						}
 						throw new \GraphQL\Error\Error(
 							'DateTime must be a string, got: ' . $value_node->kind

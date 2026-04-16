@@ -29,21 +29,12 @@ class QueryCache {
 	/**
 	 * Time-to-live (in seconds) for a cached parsed query.
 	 *
-	 * Without a TTL the cache grows indefinitely as unique queries are seen,
-	 * which — depending on the backing object cache — can fill memory on
-	 * stores that don't have an eviction policy configured. One day strikes
-	 * a balance between retaining hot persisted-query entries (APQ) long
-	 * enough to matter and letting cold entries age out on their own.
-	 *
 	 * See {@see self::get_cache_ttl()} for the accessor.
 	 */
 	private const CACHE_TTL = DAY_IN_SECONDS;
 
 	/**
 	 * The time-to-live (in seconds) for a cached parsed query.
-	 *
-	 * Exposed as a method so the value can become configurable — e.g. via a
-	 * filter or store option — without requiring call-site changes.
 	 */
 	public static function get_cache_ttl(): int {
 		return self::CACHE_TTL;
