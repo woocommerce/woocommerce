@@ -184,7 +184,7 @@ function* handlePluginAPIError(
 
 	if ( isPermissionError ) {
 		rawErrorMessage = __(
-			'You do not have permission to install plugins. Please contact your site administrator.',
+			'You do not have permissions to install plugins. Please contact your site administrator.',
 			'woocommerce'
 		);
 	} else if ( isPluginResponseError( plugins, error ) ) {
