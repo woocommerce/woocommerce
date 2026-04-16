@@ -8,7 +8,6 @@ use Automattic\WooCommerce\Api\Attributes\ConnectionOf;
 use Automattic\WooCommerce\Api\Attributes\Description;
 use Automattic\WooCommerce\Api\Attributes\Name;
 use Automattic\WooCommerce\Api\Attributes\RequiredCapability;
-use Automattic\WooCommerce\Api\Attributes\PublicAccess;
 use Automattic\WooCommerce\Api\Enums\Coupons\CouponStatus;
 use Automattic\WooCommerce\Api\Pagination\Connection;
 use Automattic\WooCommerce\Api\Pagination\Edge;
@@ -22,7 +21,7 @@ use Automattic\WooCommerce\Api\Utils\Coupons\CouponMapper;
 /**
  * Query to list coupons with cursor-based pagination.
  */
-#[PublicAccess]
+#[RequiredCapability( 'read_private_shop_coupons' )]
 class ListCoupons {
 	/**
 	 * List coupons with optional filtering and pagination.

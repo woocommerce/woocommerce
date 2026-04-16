@@ -7,7 +7,6 @@ namespace Automattic\WooCommerce\Api\Queries\Coupons;
 use Automattic\WooCommerce\Api\Attributes\Description;
 use Automattic\WooCommerce\Api\Attributes\Name;
 use Automattic\WooCommerce\Api\Attributes\RequiredCapability;
-use Automattic\WooCommerce\Api\Attributes\PublicAccess;
 use Automattic\WooCommerce\Api\Types\Coupons\Coupon;
 use Automattic\WooCommerce\Api\Utils\Coupons\CouponMapper;
 
@@ -16,7 +15,7 @@ use Automattic\WooCommerce\Api\Utils\Coupons\CouponMapper;
 /**
  * Query to retrieve a single coupon.
  */
-#[PublicAccess]
+#[RequiredCapability( 'read_private_shop_coupons' )]
 class GetCoupon {
 	/**
 	 * Retrieve a coupon by ID or code.

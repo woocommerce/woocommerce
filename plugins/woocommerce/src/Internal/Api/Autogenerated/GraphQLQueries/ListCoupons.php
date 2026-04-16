@@ -50,6 +50,8 @@ class ListCoupons {
 	}
 
 	public static function resolve( mixed $root, array $args, mixed $context, ResolveInfo $info ): mixed {
+		self::check_capabilities();
+
 		$command = wc_get_container()->get( ListCouponsCommand::class );
 
 		$execute_args                   = array();
@@ -87,5 +89,19 @@ class ListCoupons {
 		}
 
 		return $result;
+	}
+
+	private static function check_capabilities(): void {
+		$required = array(
+			0 => 'read_private_shop_coupons',
+		);
+		foreach ( $required as $cap ) {
+			if ( ! current_user_can( $cap ) ) {
+				throw new \GraphQL\Error\Error(
+					'You do not have permission to perform this action.',
+					extensions: array( 'code' => 'UNAUTHORIZED' )
+				);
+			}
+		}
 	}
 }
