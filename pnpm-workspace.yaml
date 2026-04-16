@@ -1,4 +1,4 @@
-useNodeVersion: 20.20.2
+useNodeVersion: 24.15.0
 
 catalogs:
 	# A curated set of `@wordpress/*` packages that are bundled with our minimum supported WordPress version.

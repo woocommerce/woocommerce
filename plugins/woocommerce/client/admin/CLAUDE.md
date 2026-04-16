@@ -727,7 +727,7 @@ This uses Composer's changelogger to manage changelog entries.
 
 ## Environment Requirements
 
-- **Node.js**: ^20.11.1 (specified in `engines.node`)
+- **Node.js**: ^24.15.0 (specified in `engines.node`)
 - **pnpm**: Latest stable version
 - **PHP**: Required for feature config generation
 
