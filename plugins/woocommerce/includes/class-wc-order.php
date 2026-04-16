@@ -199,7 +199,7 @@ class WC_Order extends WC_Abstract_Order {
 							$created_via_message,
 							$cart_hash_message
 						),
-						false,
+						0,
 						false,
 						array( 'note_group' => OrderNoteGroup::ERROR )
 					);
