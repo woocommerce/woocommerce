@@ -141,8 +141,8 @@ class WC_Order extends WC_Abstract_Order {
 
 		try {
 			// Validate before pre_payment_complete so blocked orders do not trigger side effects.
-			$created_via = $this->get_created_via();
-			$cart_hash   = $this->get_cart_hash();
+			$created_via           = $this->get_created_via();
+			$cart_hash             = $this->get_cart_hash();
 			$has_checkout_evidence = false;
 
 			/**
@@ -188,6 +188,7 @@ class WC_Order extends WC_Abstract_Order {
 							'payment_method' => $this->get_payment_method(),
 						)
 					);
+					/* translators: %s: created_via value set on the order */
 					$created_via_message = empty( $created_via ) ? __( 'No created_via reference', 'woocommerce' ) : sprintf( __( 'Unexpected created_via value: %s', 'woocommerce' ), esc_html( $created_via ) );
 					$cart_hash_message   = __( 'No cart_hash', 'woocommerce' ); // Always empty inside this guard.
 

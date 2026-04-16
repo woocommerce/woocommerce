@@ -1094,7 +1094,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object->save();
 
 		$pre_payment_complete_fired = false;
-		$callback = function () use ( &$pre_payment_complete_fired ) {
+		$callback                  = function () use ( &$pre_payment_complete_fired ) {
 			$pre_payment_complete_fired = true;
 		};
 		add_action( 'woocommerce_pre_payment_complete', $callback, 10, 0 );
