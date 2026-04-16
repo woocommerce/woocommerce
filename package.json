@@ -23,7 +23,7 @@
 		"lint": "pnpm -r lint",
 		"cherry-pick": "node ./tools/cherry-pick/bin/run",
 		"clean": "rimraf -g '**/node_modules' '**/.wireit' 'packages/*/*/vendor' 'plugins/*/vendor' && pnpm store prune",
-		"clean:build": "rimraf -g 'packages/js/*/build' 'packages/js/*/build-*' 'packages/js/*/dist' 'plugins/*/build' 'plugins/woocommerce/client/*/build' && git clean --force -d -X --quiet ./plugins/woocommerce/assets",
+		"clean:build": "rimraf -g '**/.wireit' 'packages/js/*/build' 'packages/js/*/build-*' 'packages/js/*/dist' 'plugins/*/build' 'plugins/woocommerce/client/*/build' && git clean --force -d -X --quiet ./plugins/woocommerce/assets",
 		"preinstall": "npx only-allow pnpm",
 		"postinstall": "husky",
 		"run-canonical-extensions-tests": "bash bin/run-canonical-extensions-tests.sh",
@@ -36,7 +36,6 @@
 		"@types/node": "20.x.x",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/monorepo-utils": "workspace:*",
-		"@wordpress/data": "wp-6.6",
 		"@wordpress/eslint-plugin": "14.7.0",
 		"@wordpress/prettier-config": "2.17.0",
 		"babel-loader": "9.2.x",
@@ -71,8 +70,13 @@
 	"pnpm": {
 		"overrides": {
 			"@types/react": "18.3.x",
-			"@wordpress/data": "wp-6.6",
-			"react-resize-aware": "3.1.1"
+			"@typescript-eslint/eslint-plugin": "^5.62.0",
+			"@typescript-eslint/parser": "^5.62.0",
+			"eslint-plugin-jsdoc": "39.9.1",
+			"@wordpress/data-controls>@wordpress/api-fetch": "catalog:wp-min",
+			"@wordpress/private-apis": "catalog:wp-min",
+			"react-resize-aware": "3.1.1",
+			"sass": "1.69.5"
 		},
 		"patchedDependencies": {
 			"@wordpress/edit-site@5.15.0": "bin/patches/@wordpress__edit-site@5.15.0.patch"

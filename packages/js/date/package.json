@@ -31,8 +31,8 @@
 	],
 	"dependencies": {
 		"@types/d3-time-format": "^2.3.4",
-		"@wordpress/date": "wp-6.6",
-		"@wordpress/i18n": "wp-6.6",
+		"@wordpress/date": "catalog:wp-min",
+		"@wordpress/i18n": "catalog:wp-min",
 		"moment": "^2.29.4",
 		"moment-timezone": "^0.5.43",
 		"qs": "^6.11.2"
@@ -155,6 +155,7 @@
 			"allowUsuallyExcludedPaths": true,
 			"files": [
 				"package.json",
+				"../../../pnpm-lock.yaml",
 				"node_modules/@woocommerce/eslint-plugin/configs",
 				"node_modules/@woocommerce/eslint-plugin/rules",
 				"node_modules/@woocommerce/eslint-plugin/index.js",

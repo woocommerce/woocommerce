@@ -73,8 +73,6 @@ export const CreateTaxonomyModal = ( {
 		setErrorMessage( null );
 		setIsCreating( true );
 		try {
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
 			const newTaxonomy: Taxonomy = await saveEntityRecord(
 				'taxonomy',
 				slug,
@@ -82,8 +80,6 @@ export const CreateTaxonomyModal = ( {
 					name,
 					parent: parent ? parent.id : null,
 				},
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore
 				{
 					throwOnError: true,
 				}
