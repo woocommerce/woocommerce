@@ -538,7 +538,7 @@ class OrderSchema extends AbstractSchema {
 				'readonly'    => true,
 			),
 			'can_be_refunded'      => array(
-				'description' => __( 'Whether the order has remaining refundable amount and a status that allows refunds.', 'woocommerce' ),
+				'description' => __( 'Whether the order has remaining refundable amount.', 'woocommerce' ),
 				'type'        => 'boolean',
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 				'readonly'    => true,
@@ -725,15 +725,14 @@ class OrderSchema extends AbstractSchema {
 	/**
 	 * Determine whether an order can be refunded.
 	 *
-	 * An order can be refunded when its status allows refunds and it has remaining refundable amount.
+	 * An order can be refunded when it has remaining refundable amount.
+	 * This matches WooCommerce core behavior — no order status restriction is applied.
 	 *
 	 * @param WC_Order $order Order instance.
 	 * @return bool
 	 */
 	private function calculate_order_can_be_refunded( WC_Order $order ): bool {
-		$non_refundable_statuses = array( 'refunded', 'cancelled', 'failed' );
-		return ! in_array( $order->get_status(), $non_refundable_statuses, true )
-			&& (float) $order->get_remaining_refund_amount() > 0;
+		return (float) $order->get_remaining_refund_amount() > 0;
 	}
 
 	/**

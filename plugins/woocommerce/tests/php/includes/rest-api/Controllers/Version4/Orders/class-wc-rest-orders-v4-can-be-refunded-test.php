@@ -206,36 +206,49 @@ class WC_REST_Orders_V4_Can_Be_Refunded_Test extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Order with cancelled status has can_be_refunded false.
+	 * @testdox Order with cancelled status can still be refunded if it has remaining amount.
 	 */
-	public function test_cancelled_order_not_refundable(): void {
+	public function test_cancelled_order_with_remaining_amount_is_refundable(): void {
 		$order = $this->create_order_with_product( 'cancelled' );
 		$data  = $this->get_order_response( $order->get_id() );
 
-		$this->assertFalse( $data['can_be_refunded'], 'Cancelled order should not be refundable' );
+		$this->assertTrue( $data['can_be_refunded'], 'Cancelled order with remaining amount should be refundable' );
 	}
 
 	/**
-	 * @testdox Order with failed status has can_be_refunded false.
+	 * @testdox Order with failed status can still be refunded if it has remaining amount.
 	 */
-	public function test_failed_order_not_refundable(): void {
+	public function test_failed_order_with_remaining_amount_is_refundable(): void {
 		$order = $this->create_order_with_product( 'failed' );
 		$data  = $this->get_order_response( $order->get_id() );
 
-		$this->assertFalse( $data['can_be_refunded'], 'Failed order should not be refundable' );
+		$this->assertTrue( $data['can_be_refunded'], 'Failed order with remaining amount should be refundable' );
 	}
 
 	/**
-	 * @testdox Order with refunded status has can_be_refunded false.
+	 * @testdox Order with refunded status and no remaining amount has can_be_refunded false.
 	 */
-	public function test_refunded_status_order_not_refundable(): void {
-		$order = $this->create_order_with_product();
-		$order->set_status( 'refunded' );
-		$order->save();
+	public function test_refunded_status_order_no_remaining_amount(): void {
+		$order     = $this->create_order_with_product();
+		$line_item = current( $order->get_items() );
+
+		wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => $order->get_total(),
+				'line_items' => array(
+					$line_item->get_id() => array(
+						'qty'          => $line_item->get_quantity(),
+						'refund_total' => $line_item->get_total(),
+						'refund_tax'   => array(),
+					),
+				),
+			)
+		);
 
 		$data = $this->get_order_response( $order->get_id() );
 
-		$this->assertFalse( $data['can_be_refunded'], 'Refunded order should not be refundable' );
+		$this->assertFalse( $data['can_be_refunded'], 'Fully refunded order should not be refundable' );
 	}
 
 	/**
@@ -519,20 +532,6 @@ class WC_REST_Orders_V4_Can_Be_Refunded_Test extends WC_REST_Unit_Test_Case {
 		$this->assertTrue(
 			$data['line_items'][0]['can_be_refunded'],
 			'Zero-priced item with remaining quantity should be refundable'
-		);
-	}
-
-	/**
-	 * @testdox Line items on cancelled order still report can_be_refunded based on quantity.
-	 */
-	public function test_line_items_on_cancelled_order(): void {
-		$order = $this->create_order_with_product( 'cancelled' );
-		$data  = $this->get_order_response( $order->get_id() );
-
-		$this->assertFalse( $data['can_be_refunded'], 'Cancelled order should not be refundable' );
-		$this->assertTrue(
-			$data['line_items'][0]['can_be_refunded'],
-			'Line item on cancelled order reports refundability based on quantity, independent of order status'
 		);
 	}
 }
