@@ -149,8 +149,8 @@ class WC_Order extends WC_Abstract_Order {
 			 * Allowed created_via values for checkout evidence.
 			 *
 			 * @param array    $allowed_created_via_values Allowed created_via values.
-			 * @param WC_Order $this                      Order object.
-			 * @since 10.6.0
+			 * @param WC_Order $order                     Order object.
+			 * @since 10.8.0
 			 */
 			$allowed_created_via_values = apply_filters( 'woocommerce_payment_complete_allowed_created_via_values', array( 'checkout', 'store-api', 'rest-api', 'admin', 'pos-rest-api' ), $this );
 
@@ -167,9 +167,9 @@ class WC_Order extends WC_Abstract_Order {
 				 * Allow payment completion without checkout evidence.
 				 *
 				 * @param bool     $allow_payment_complete Whether to allow.
-				 * @param WC_Order $this                  Order object.
-				 * @param string   $transaction_id        Transaction ID.
-				 * @since 10.6.0
+				 * @param WC_Order $order                  Order object.
+				 * @param string   $transaction_id         Transaction ID.
+				 * @since 10.8.0
 				 */
 				$allow_without_checkout_evidence = apply_filters( 'woocommerce_allow_payment_complete_without_checkout_evidence', false, $this, $transaction_id );
 
@@ -189,7 +189,7 @@ class WC_Order extends WC_Abstract_Order {
 						)
 					);
 					$created_via_message = empty( $created_via ) ? __( 'No created_via reference', 'woocommerce' ) : sprintf( __( 'Unexpected created_via value: %s', 'woocommerce' ), esc_html( $created_via ) );
-					$cart_hash_message   = __( 'No cart_hash', 'woocommerce' );
+					$cart_hash_message   = __( 'No cart_hash', 'woocommerce' ); // Always empty inside this guard.
 
 					$this->add_order_note(
 						sprintf(
@@ -203,6 +203,14 @@ class WC_Order extends WC_Abstract_Order {
 						array( 'note_group' => OrderNoteGroup::ERROR )
 					);
 
+					/**
+					 * Fires when payment completion is blocked due to missing checkout evidence.
+					 *
+					 * @param int    $order_id    Order ID.
+					 * @param string $created_via The order's created_via value.
+					 * @param string $cart_hash   The order's cart_hash value.
+					 * @since 10.8.0
+					 */
 					do_action( 'woocommerce_payment_complete_blocked', $this->get_id(), $created_via, $cart_hash );
 
 					return false;

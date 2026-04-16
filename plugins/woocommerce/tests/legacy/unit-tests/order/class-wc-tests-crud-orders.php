@@ -1039,7 +1039,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	 * Test: payment_complete blocks orders without checkout evidence
 	 *
 	 * @testdox payment_complete blocks order when no created_via or cart_hash and fires payment_complete_blocked
-	 * @since 10.6.0
+	 * @since 10.8.0
 	 */
 	public function test_payment_complete_blocks_orders_without_checkout_evidence() {
 		$object = new WC_Order();
@@ -1050,15 +1050,11 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 
 		$blocked_action_fired = false;
 		$blocked_action_args  = array();
-		add_action(
-			'woocommerce_payment_complete_blocked',
-			function( $order_id, $created_via, $cart_hash ) use ( &$blocked_action_fired, &$blocked_action_args ) {
-				$blocked_action_fired = true;
-				$blocked_action_args  = array( $order_id, $created_via, $cart_hash );
-			},
-			10,
-			3
-		);
+		$blocked_callback     = function( $order_id, $created_via, $cart_hash ) use ( &$blocked_action_fired, &$blocked_action_args ) {
+			$blocked_action_fired = true;
+			$blocked_action_args  = array( $order_id, $created_via, $cart_hash );
+		};
+		add_action( 'woocommerce_payment_complete_blocked', $blocked_callback, 10, 3 );
 
 		$this->assertFalse( $object->payment_complete( '12345' ) );
 		$this->assertEquals( OrderStatus::PENDING, $object->get_status() );
@@ -1068,7 +1064,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$this->assertEquals( '', $blocked_action_args[1] );
 		$this->assertEquals( '', $blocked_action_args[2] );
 
-		remove_all_actions( 'woocommerce_payment_complete_blocked' );
+		remove_action( 'woocommerce_payment_complete_blocked', $blocked_callback, 10 );
 
 		// Confirm blocked-payment order note exists.
 		$notes = wc_get_order_notes(
@@ -1090,7 +1086,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	 * Test: payment_complete does not fire woocommerce_pre_payment_complete when blocked
 	 *
 	 * @testdox pre_payment_complete does not fire when payment is blocked for lack of checkout evidence
-	 * @since 10.6.0
+	 * @since 10.8.0
 	 */
 	public function test_payment_complete_does_not_fire_pre_payment_complete_when_blocked() {
 		$object = new WC_Order();
@@ -1114,7 +1110,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	 * Test: payment_complete allows orders with created_via checkout
 	 *
 	 * @testdox payment_complete allows order with created_via checkout
-	 * @since 10.6.0
+	 * @since 10.8.0
 	 */
 	public function test_payment_complete_allows_orders_with_created_via_checkout() {
 		$object = new WC_Order();
@@ -1130,7 +1126,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	 * Test: payment_complete allows orders with created_via store-api
 	 *
 	 * @testdox payment_complete allows order with created_via store-api
-	 * @since 10.6.0
+	 * @since 10.8.0
 	 */
 	public function test_payment_complete_allows_orders_with_created_via_store_api() {
 		$object = new WC_Order();
@@ -1146,7 +1142,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	 * Test: payment_complete allows orders with created_via rest-api
 	 *
 	 * @testdox payment_complete allows order with created_via rest-api
-	 * @since 10.6.0
+	 * @since 10.8.0
 	 */
 	public function test_payment_complete_allows_orders_with_created_via_rest_api() {
 		$object = new WC_Order();
@@ -1162,7 +1158,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	 * Test: payment_complete allows orders with created_via admin
 	 *
 	 * @testdox payment_complete allows order with created_via admin
-	 * @since 10.6.0
+	 * @since 10.8.0
 	 */
 	public function test_payment_complete_allows_orders_with_created_via_admin() {
 		$object = new WC_Order();
@@ -1178,7 +1174,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	 * Test: payment_complete allows orders with created_via pos-rest-api
 	 *
 	 * @testdox payment_complete allows order with created_via pos-rest-api
-	 * @since 10.6.0
+	 * @since 10.8.0
 	 */
 	public function test_payment_complete_allows_orders_with_created_via_pos_rest_api() {
 		$object = new WC_Order();
@@ -1194,7 +1190,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	 * Test: payment_complete allows orders with cart_hash
 	 *
 	 * @testdox payment_complete allows order with cart_hash
-	 * @since 10.6.0
+	 * @since 10.8.0
 	 */
 	public function test_payment_complete_allows_orders_with_cart_hash() {
 		$object = new WC_Order();
@@ -1210,7 +1206,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	 * Test: payment_complete allows bypass via filter
 	 *
 	 * @testdox payment_complete allows bypass via woocommerce_allow_payment_complete_without_checkout_evidence
-	 * @since 10.6.0
+	 * @since 10.8.0
 	 */
 	public function test_payment_complete_allows_bypass_via_filter() {
 		$object = new WC_Order();
@@ -1218,26 +1214,22 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object->save();
 
 		// Allow this order via bypass filter.
-		add_filter(
-			'woocommerce_allow_payment_complete_without_checkout_evidence',
-			function( $allow, $order, $transaction_id ) use ( $object ) {
-				return $order->get_id() === $object->get_id();
-			},
-			10,
-			3
-		);
+		$bypass_callback = function( $allow, $order, $transaction_id ) use ( $object ) {
+			return $order->get_id() === $object->get_id();
+		};
+		add_filter( 'woocommerce_allow_payment_complete_without_checkout_evidence', $bypass_callback, 10, 3 );
 
 		$this->assertTrue( $object->payment_complete( '12345' ) );
 		$this->assertEquals( OrderStatus::COMPLETED, $object->get_status() );
 
-		remove_all_filters( 'woocommerce_allow_payment_complete_without_checkout_evidence' );
+		remove_filter( 'woocommerce_allow_payment_complete_without_checkout_evidence', $bypass_callback, 10 );
 	}
 
 	/**
 	 * Test: payment_complete allows custom created_via values via filter
 	 *
 	 * @testdox payment_complete allows custom created_via via woocommerce_payment_complete_allowed_created_via_values
-	 * @since 10.6.0
+	 * @since 10.8.0
 	 */
 	public function test_payment_complete_allows_custom_created_via_via_filter() {
 		$object = new WC_Order();
@@ -1246,20 +1238,16 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object->save();
 
 		// Allow custom created_via via filter.
-		add_filter(
-			'woocommerce_payment_complete_allowed_created_via_values',
-			function( $allowed_values, $order ) {
-				$allowed_values[] = 'custom-integration';
-				return $allowed_values;
-			},
-			10,
-			2
-		);
+		$created_via_callback = function( $allowed_values, $order ) {
+			$allowed_values[] = 'custom-integration';
+			return $allowed_values;
+		};
+		add_filter( 'woocommerce_payment_complete_allowed_created_via_values', $created_via_callback, 10, 2 );
 
 		$this->assertTrue( $object->payment_complete( '12345' ) );
 		$this->assertEquals( OrderStatus::COMPLETED, $object->get_status() );
 
-		remove_all_filters( 'woocommerce_payment_complete_allowed_created_via_values' );
+		remove_filter( 'woocommerce_payment_complete_allowed_created_via_values', $created_via_callback, 10 );
 	}
 
 	/**
