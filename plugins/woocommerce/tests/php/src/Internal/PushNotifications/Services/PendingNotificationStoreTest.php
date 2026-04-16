@@ -145,6 +145,8 @@ class PendingNotificationStoreTest extends WC_Unit_Test_Case {
 		$store->add( $this->create_order_mock( 1 ) );
 
 		$store->dispatch_all();
+
+		remove_action( 'shutdown', array( $store, 'dispatch_all' ) );
 	}
 
 	/**
