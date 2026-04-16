@@ -250,6 +250,33 @@ class CheckoutSchema extends AbstractSchema {
 	}
 
 	/**
+	 * Build a checkout response for a session with no persisted order.
+	 *
+	 * @param \WC_Cart     $cart           Cart object.
+	 * @param \WC_Customer $customer       Customer object (typically `wc()->customer`).
+	 * @param string       $payment_method Resolved payment method id, or empty string.
+	 * @param string       $customer_note  Resolved customer note from the request.
+	 * @return array
+	 */
+	public function get_draft_response( \WC_Cart $cart, \WC_Customer $customer, string $payment_method = '', string $customer_note = '' ) {
+		return [
+			'order_id'           => 0,
+			'status'             => 'checkout-draft',
+			'order_key'          => '',
+			'order_number'       => '0',
+			'customer_note'      => $customer_note,
+			'customer_id'        => $customer->get_id(),
+			'billing_address'    => (object) $this->billing_address_schema->get_item_response( $customer ),
+			'shipping_address'   => (object) $this->shipping_address_schema->get_item_response( $customer ),
+			'payment_method'     => $payment_method,
+			'payment_result'     => null,
+			'additional_fields'  => (object) $this->get_additional_fields_response( $customer ),
+			'__experimentalCart' => (object) $this->cart_schema->get_item_response( $cart ),
+			self::EXTENDING_KEY  => $this->get_extended_data( self::IDENTIFIER ),
+		];
+	}
+
+	/**
 	 * This prepares the payment details for the response so it's following the
 	 * schema where it's an array of objects.
 	 *
@@ -274,14 +301,19 @@ class CheckoutSchema extends AbstractSchema {
 	/**
 	 * Get the additional fields response.
 	 *
-	 * @param \WC_Order $order Order object.
+	 * For an order the response falls back to customer-mirrored values; for a
+	 * customer it reads the customer meta directly.
+	 *
+	 * @param \WC_Order|\WC_Customer $wc_object Order or customer to read fields from.
 	 * @return array
 	 */
-	protected function get_additional_fields_response( \WC_Order $order ) {
-		$fields = wp_parse_args(
-			$this->additional_fields_controller->get_all_fields_from_object( $order, 'other' ),
-			$this->additional_fields_controller->get_all_fields_from_object( wc()->customer, 'other' )
-		);
+	protected function get_additional_fields_response( \WC_Data $wc_object ) {
+		$fields = $wc_object instanceof \WC_Order
+			? wp_parse_args(
+				$this->additional_fields_controller->get_all_fields_from_object( $wc_object, 'other' ),
+				$this->additional_fields_controller->get_all_fields_from_object( wc()->customer, 'other' )
+			)
+			: $this->additional_fields_controller->get_all_fields_from_object( $wc_object, 'other' );
 
 		$additional_field_schema = $this->get_additional_fields_schema();
 		foreach ( $fields as $key => $value ) {
