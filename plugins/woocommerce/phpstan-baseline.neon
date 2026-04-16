@@ -71839,12 +71839,6 @@ parameters:
 			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessionsComplete.php
 
 		-
-			message: '#^Expression on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.expr
-			count: 1
-			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessionsComplete.php
-
-		-
 			message: '#^Instanceof between Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult and Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult will always evaluate to true\.$#'
 			identifier: instanceof.alwaysTrue
 			count: 1
@@ -71991,7 +71985,7 @@ parameters:
 		-
 			message: '#^Parameter \#3 \$order of method Automattic\\WooCommerce\\Blocks\\Domain\\Services\\CheckoutFields\:\:persist_field_for_order\(\) expects WC_Order, WC_Order\|null given\.$#'
 			identifier: argument.type
-			count: 2
+			count: 1
 			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessionsComplete.php
 
 		-
@@ -72291,7 +72285,7 @@ parameters:
 		-
 			message: '#^Access to protected property Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult\:\:\$status\.$#'
 			identifier: property.protected
-			count: 1
+			count: 2
 			path: src/StoreApi/Routes/V1/Checkout.php
 
 		-
@@ -72591,12 +72585,6 @@ parameters:
 		-
 			message: '#^Cannot access offset string on 0\|0\.0\|''''\|''0''\|array\<string, array\|string\>\|false\|null\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/StoreApi/Routes/V1/CheckoutOrder.php
-
-		-
-			message: '#^Expression on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.expr
 			count: 1
 			path: src/StoreApi/Routes/V1/CheckoutOrder.php
 

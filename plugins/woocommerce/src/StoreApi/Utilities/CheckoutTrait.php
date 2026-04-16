@@ -267,9 +267,11 @@ trait CheckoutTrait {
 	 * Counterpart to `persist_additional_fields_for_order` for routes that operate
 	 * without a persisted order (e.g. the deferred-draft PATCH path).
 	 *
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 *
 	 * @param \WP_REST_Request $request Full details about the request.
 	 */
-	private function persist_additional_fields_for_customer( \WP_REST_Request $request ) {
+	private function persist_additional_fields_for_customer( \WP_REST_Request $request ): void {
 		$customer = wc()->customer;
 
 		$this->resolve_and_persist_additional_fields(
