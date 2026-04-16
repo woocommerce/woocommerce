@@ -509,13 +509,23 @@ class GraphQLController {
 
 	/**
 	 * Check if running in a local/development environment.
+	 *
+	 * Prefers {@see wp_get_environment_type()} when available. Otherwise
+	 * parses the site URL and performs a case-insensitive *exact* match
+	 * against the hostname — not a substring check, to avoid matching
+	 * impostor domains like `mylocalhost.com` or `127.0.0.1.attacker.example`.
 	 */
 	private function is_local_environment(): bool {
 		if ( function_exists( 'wp_get_environment_type' ) && 'local' === wp_get_environment_type() ) {
 			return true;
 		}
 
-		$site_url = get_site_url();
-		return str_contains( $site_url, 'localhost' ) || str_contains( $site_url, '127.0.0.1' );
+		$host = wp_parse_url( get_site_url(), PHP_URL_HOST );
+		if ( ! is_string( $host ) ) {
+			return false;
+		}
+
+		$host = strtolower( $host );
+		return 'localhost' === $host || '127.0.0.1' === $host;
 	}
 }
