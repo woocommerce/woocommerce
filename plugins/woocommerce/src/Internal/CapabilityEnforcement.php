@@ -340,12 +340,52 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 			}
 		}
 
+		$this->log_approval_consumed( $approval_data, $capability, $user_id );
 		$this->maybe_add_order_note( $approval_data, $capability, $user_id );
 
 		// Clear token after consumption to prevent reuse within the same request.
 		$this->current_approval_token = '';
 
 		return true;
+	}
+
+	/**
+	 * Log when an approval token is consumed.
+	 *
+	 * This is the universal audit trail for all POS overrides. Any capability
+	 * added to APPROVABLE_CAPABILITIES is automatically logged here when the
+	 * token is consumed, regardless of whether the action is order-scoped.
+	 *
+	 * Logs are visible in WooCommerce > Status > Logs under the
+	 * woocommerce-pos source.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @param array  $approval_data The approval data from POSApprovalService.
+	 * @param string $capability    The capability that was granted.
+	 * @param int    $user_id       The user who performed the action.
+	 */
+	private function log_approval_consumed( array $approval_data, string $capability, int $user_id ): void {
+		$approver      = get_userdata( $approval_data['approver_id'] );
+		$approver_name = $approver ? $approver->display_name : (string) $approval_data['approver_id'];
+		$actor         = get_userdata( $user_id );
+		$actor_name    = $actor ? $actor->display_name : (string) $user_id;
+
+		$message = sprintf(
+			'POS override consumed: %s granted to %s (user %d), approved by %s (user %d).',
+			$capability,
+			$actor_name,
+			$user_id,
+			$approver_name,
+			$approval_data['approver_id']
+		);
+
+		$order_id = (int) ( $approval_data['context']['order_id'] ?? 0 );
+		if ( $order_id > 0 ) {
+			$message .= sprintf( ' Order #%d.', $order_id );
+		}
+
+		wc_get_logger()->info( $message, array( 'source' => 'woocommerce-pos' ) );
 	}
 
 	/**
