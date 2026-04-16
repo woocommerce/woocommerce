@@ -16,4 +16,7 @@ enum DiscountType: string {
 
 	#[Description( 'A fixed amount discount applied to each eligible product.' )]
 	case FixedProduct = 'fixed_product';
+
+	#[Description( 'The discount type is not one of the standard WooCommerce values (e.g. added by a plugin). Inspect raw_discount_type for the underlying value.' )]
+	case Other = 'other';
 }

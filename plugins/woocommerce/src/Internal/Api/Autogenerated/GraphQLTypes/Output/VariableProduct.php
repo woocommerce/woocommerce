@@ -88,9 +88,17 @@ class VariableProduct {
 							'type'        => Type::nonNull( ProductStatusType::get() ),
 							'description' => __( 'The product status.', 'woocommerce' ),
 						),
+						'raw_status'        => array(
+							'type'        => Type::nonNull( Type::string() ),
+							'description' => __( 'The raw status as stored in WordPress. Useful when status is OTHER (e.g. plugin-added post statuses).', 'woocommerce' ),
+						),
 						'product_type'      => array(
 							'type'        => Type::nonNull( ProductTypeType::get() ),
 							'description' => __( 'The product type.', 'woocommerce' ),
+						),
+						'raw_product_type'  => array(
+							'type'        => Type::nonNull( Type::string() ),
+							'description' => __( 'The raw product type as stored in WooCommerce. Useful when product_type is OTHER (e.g. plugin-added types like subscription, bundle).', 'woocommerce' ),
 						),
 						'regular_price'     => array(
 							'type'        => Type::nonNull( Type::string() ),
@@ -117,6 +125,10 @@ class VariableProduct {
 						'stock_status'      => array(
 							'type'        => Type::nonNull( StockStatusType::get() ),
 							'description' => __( 'The stock status of the product.', 'woocommerce' ),
+						),
+						'raw_stock_status'  => array(
+							'type'        => Type::nonNull( Type::string() ),
+							'description' => __( 'The raw stock status as stored in WooCommerce. Useful when stock_status is OTHER (e.g. plugin-added statuses).', 'woocommerce' ),
 						),
 						'stock_quantity'    => array(
 							'type'        => Type::int(),

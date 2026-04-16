@@ -83,12 +83,28 @@ trait Product {
 	public ProductStatus $status;
 
 	/**
+	 * The raw status as stored in WordPress. Useful when status is OTHER.
+	 *
+	 * @var string
+	 */
+	#[Description( 'The raw status as stored in WordPress. Useful when status is OTHER (e.g. plugin-added post statuses).' )]
+	public string $raw_status;
+
+	/**
 	 * The product type.
 	 *
 	 * @var ProductType
 	 */
 	#[Description( 'The product type.' )]
 	public ProductType $product_type;
+
+	/**
+	 * The raw product type as stored in WooCommerce. Useful when product_type is OTHER.
+	 *
+	 * @var string
+	 */
+	#[Description( 'The raw product type as stored in WooCommerce. Useful when product_type is OTHER (e.g. plugin-added types like subscription, bundle).' )]
+	public string $raw_product_type;
 
 	/**
 	 * The regular price of the product.
@@ -116,6 +132,14 @@ trait Product {
 	 */
 	#[Description( 'The stock status of the product.' )]
 	public StockStatus $stock_status;
+
+	/**
+	 * The raw stock status as stored in WooCommerce. Useful when stock_status is OTHER.
+	 *
+	 * @var string
+	 */
+	#[Description( 'The raw stock status as stored in WooCommerce. Useful when stock_status is OTHER (e.g. plugin-added statuses).' )]
+	public string $raw_stock_status;
 
 	/**
 	 * The number of items in stock.

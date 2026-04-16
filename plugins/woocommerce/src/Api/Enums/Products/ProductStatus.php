@@ -23,7 +23,13 @@ enum ProductStatus: string {
 	#[Description( 'The product is privately published.' )]
 	case Private = 'private';
 
+	#[Description( 'The product is scheduled to be published in the future.' )]
+	case Future = 'future';
+
 	#[Deprecated( 'Trashed products should be excluded via status filter.' )]
 	#[Description( 'The product is in the trash.' )]
 	case Trash = 'trash';
+
+	#[Description( 'The product status is not one of the standard WordPress values (e.g. added by a plugin). Inspect raw_status for the underlying value.' )]
+	case Other = 'other';
 }

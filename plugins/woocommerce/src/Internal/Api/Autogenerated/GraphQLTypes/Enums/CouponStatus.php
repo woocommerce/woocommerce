@@ -30,9 +30,21 @@ class CouponStatus {
 							'value'       => CouponStatusEnum::Pending,
 							'description' => __( 'The coupon is pending review.', 'woocommerce' ),
 						),
+						'PRIVATE'   => array(
+							'value'       => CouponStatusEnum::Private,
+							'description' => __( 'The coupon is privately published.', 'woocommerce' ),
+						),
+						'FUTURE'    => array(
+							'value'       => CouponStatusEnum::Future,
+							'description' => __( 'The coupon is scheduled to be published in the future.', 'woocommerce' ),
+						),
 						'TRASH'     => array(
 							'value'       => CouponStatusEnum::Trash,
 							'description' => __( 'The coupon is in the trash.', 'woocommerce' ),
+						),
+						'OTHER'     => array(
+							'value'       => CouponStatusEnum::Other,
+							'description' => __( 'The coupon status is not one of the standard WordPress values (e.g. added by a plugin). Inspect raw_status for the underlying value.', 'woocommerce' ),
 						),
 					),
 				)

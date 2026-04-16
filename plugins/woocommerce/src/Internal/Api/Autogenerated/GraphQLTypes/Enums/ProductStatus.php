@@ -34,10 +34,18 @@ class ProductStatus {
 							'value'       => ProductStatusEnum::Private,
 							'description' => __( 'The product is privately published.', 'woocommerce' ),
 						),
+						'FUTURE'  => array(
+							'value'       => ProductStatusEnum::Future,
+							'description' => __( 'The product is scheduled to be published in the future.', 'woocommerce' ),
+						),
 						'TRASH'   => array(
 							'value'             => ProductStatusEnum::Trash,
 							'description'       => __( 'The product is in the trash.', 'woocommerce' ),
 							'deprecationReason' => 'Trashed products should be excluded via status filter.',
+						),
+						'OTHER'   => array(
+							'value'       => ProductStatusEnum::Other,
+							'description' => __( 'The product status is not one of the standard WordPress values (e.g. added by a plugin). Inspect raw_status for the underlying value.', 'woocommerce' ),
 						),
 					),
 				)

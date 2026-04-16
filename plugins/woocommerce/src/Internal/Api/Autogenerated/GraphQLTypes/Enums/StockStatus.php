@@ -30,6 +30,10 @@ class StockStatus {
 							'value'       => StockStatusEnum::OnBackorder,
 							'description' => __( 'The product is on backorder.', 'woocommerce' ),
 						),
+						'OTHER'        => array(
+							'value'       => StockStatusEnum::Other,
+							'description' => __( 'The stock status is not one of the standard WooCommerce values (e.g. added by a plugin). Inspect raw_stock_status for the underlying value.', 'woocommerce' ),
+						),
 					),
 				)
 			);

@@ -28,11 +28,17 @@ class Coupon {
 	#[Description( 'The type of discount.' )]
 	public DiscountType $discount_type;
 
+	#[Description( 'The raw discount type as stored in WooCommerce. Useful when discount_type is OTHER (e.g. plugin-added types like recurring_percent or sign_up_fee).' )]
+	public string $raw_discount_type;
+
 	#[Description( 'The discount amount.' )]
 	public float $amount;
 
 	#[Description( 'The coupon status.' )]
 	public CouponStatus $status;
+
+	#[Description( 'The raw status as stored in WordPress. Useful when status is OTHER (e.g. plugin-added post statuses).' )]
+	public string $raw_status;
 
 	#[Description( 'The date the coupon was created.' )]
 	#[ScalarType( DateTime::class )]
