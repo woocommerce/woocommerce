@@ -225,9 +225,6 @@ class Analytics {
 	 * @return string Success message.
 	 */
 	public function run_full_refund_fix_data_tool() {
-		Cache::invalidate();
-		delete_option( 'woocommerce_analytics_uses_old_full_refund_data' );
-
 		WC()->queue()->schedule_single(
 			time(),
 			'woocommerce_analytics_refund_fix_batch',
@@ -249,8 +246,9 @@ class Analytics {
 	 * @since 10.8.0
 	 *
 	 * @param int $min_order_id Exclusive lower bound on order_id; 0 for the first batch.
+	 * @return void
 	 */
-	public function process_refund_fix_batch( $min_order_id = 0 ) {
+	public function process_refund_fix_batch( $min_order_id = 0 ): void {
 		global $wpdb;
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
@@ -271,9 +269,11 @@ class Analytics {
 			)
 		);
 
+		delete_option( 'woocommerce_analytics_uses_old_full_refund_data' );
 		if ( ! $refunded_orders ) {
 			return;
 		}
+		Cache::invalidate();
 
 		foreach ( $refunded_orders as $refunded_order ) {
 			/**
@@ -301,13 +301,13 @@ class Analytics {
 	 * look like unprocessed full refunds.
 	 *
 	 * @since 10.8.0
+	 * @return void
 	 */
-	public function ajax_check_refund_fix_needed() {
+	public function ajax_check_refund_fix_needed(): void {
 		check_ajax_referer( 'woocommerce_refund_fix_check', 'nonce' );
 
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
 			wp_send_json_error( array( 'message' => __( 'Insufficient permissions.', 'woocommerce' ) ), 403 );
-			return;
 		}
 
 		global $wpdb;
@@ -362,8 +362,9 @@ class Analytics {
 	 * fix tool row on the WooCommerce > Status > Tools page.
 	 *
 	 * @since 10.8.0
+	 * @return void
 	 */
-	public function output_refund_fix_tool_js() {
+	public function output_refund_fix_tool_js(): void {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( ! isset( $_GET['page'], $_GET['tab'] ) || 'wc-status' !== $_GET['page'] || 'tools' !== $_GET['tab'] ) {
 			return;
