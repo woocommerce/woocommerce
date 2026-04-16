@@ -105,7 +105,7 @@ class WC_Settings_General extends WC_Settings_Page {
 			array(
 
 				array(
-					'title' => __( 'Store Address', 'woocommerce' ),
+					'title' => __( 'Store Address & Details', 'woocommerce' ),
 					'type'  => 'title',
 					'desc'  => __( 'This is where your business is located. Tax rates and shipping rates will use this address.', 'woocommerce' ),
 					'id'    => 'store_address',
