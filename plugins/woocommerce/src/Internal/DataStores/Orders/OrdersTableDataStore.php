@@ -344,7 +344,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	);
 
 	/**
-	 * Table column to WC_Order mapping for orders table.
+	 * Table column to WC_Order mapping for wc_orders table.
 	 *
 	 * @var \string[][]
 	 */
@@ -408,7 +408,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	);
 
 	/**
-	 * Table column to WC_Order mapping for billing addresses in wc_address table.
+	 * Table column to WC_Order mapping for billing addresses in wc_addresses table.
 	 *
 	 * @var \string[][]
 	 */
@@ -469,7 +469,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	);
 
 	/**
-	 * Table column to WC_Order mapping for shipping addresses in wc_address table.
+	 * Table column to WC_Order mapping for shipping addresses in wc_addresses table.
 	 *
 	 * @var \string[][]
 	 */
@@ -594,7 +594,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 * Return combined mappings for all order tables, always using the full set of operational
 	 * data columns defined in the base OrdersTableDataStore class. This ensures that cached
 	 * order data objects are complete regardless of which data store subclass populates the
-	 * cache, preventing cross-bled when different data stores (orders, refunds, subscriptions)
+	 * cache, preventing cross-bleed when different data stores (orders, refunds, subscriptions)
 	 * share the same cache group.
 	 *
 	 * @since 10.8.0
@@ -1761,6 +1761,8 @@ WHERE
 	 * @param object             $order_data A row of order data from the database.
 	 */
 	protected function set_order_props_from_data( &$order, $order_data ) {
+		// Uses $this->get_all_order_column_mappings() (not the cache variant) intentionally:
+		// each data store subclass should only attempt to set properties it actually maps.
 		foreach ( $this->get_all_order_column_mappings() as $table_name => $column_mapping ) {
 			foreach ( $column_mapping as $column_name => $prop_details ) {
 				if ( ! isset( $prop_details['name'] ) || ! is_string( $prop_details['name'] ) ) {

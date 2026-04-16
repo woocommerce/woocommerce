@@ -217,6 +217,48 @@ class OrdersTableDataStoreCacheCrossBleedTest extends \HposTestCase {
 	}
 
 	/**
+	 * @testdox Order loaded via order data store retains correct values when cache was populated by refund data store.
+	 */
+	public function test_order_retains_values_when_cache_populated_by_refund_store(): void {
+		$order = new WC_Order();
+		$order->set_status( 'completed' );
+		$order->set_total( '100.00' );
+		$order->set_recorded_sales( true );
+		$order->set_order_stock_reduced( true );
+		$order->set_transaction_id( 'txn_cross_bleed_test' );
+		$order->set_cart_hash( 'cross_bleed_hash' );
+		$order->save();
+		$order_id = $order->get_id();
+
+		$refund = wc_create_refund(
+			array(
+				'order_id' => $order_id,
+				'amount'   => '25.00',
+				'reason'   => 'Cross-bleed regression test',
+			)
+		);
+		$this->assertNotWPError( $refund, 'Refund creation should not return a WP_Error' );
+
+		// Flush cache and reload the parent order via the refund data store to populate cache.
+		$this->sut->clear_cached_data( array( $order_id ) );
+		$this->refund_sut->clear_cached_data( array( $order_id ) );
+		wp_cache_flush();
+
+		$call_get_data = function ( $ids ) {
+			return $this->get_order_data_for_ids( $ids );
+		};
+		$call_get_data->call( $this->refund_sut, array( $order_id ) );
+
+		// Now load the order through the normal order data store, which should hit cache.
+		$reloaded_order = wc_get_order( $order_id );
+
+		$this->assertTrue( $reloaded_order->get_recorded_sales(), 'recorded_sales should be true, not reset to default' );
+		$this->assertTrue( $reloaded_order->get_order_stock_reduced(), 'order_stock_reduced should be true, not reset to default' );
+		$this->assertSame( 'txn_cross_bleed_test', $reloaded_order->get_transaction_id(), 'transaction_id should be preserved' );
+		$this->assertSame( 'cross_bleed_hash', $reloaded_order->get_cart_hash(), 'cart_hash should be preserved' );
+	}
+
+	/**
 	 * @testdox Debug logging is triggered when a property is missing from order data.
 	 */
 	public function test_debug_logging_on_missing_property(): void {
