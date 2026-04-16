@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\StoreApi\Utilities\SanitizationUtils;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\CartSchema;
+use Automattic\WooCommerce\StoreApi\Utilities\PaymentUtils;
 
 /**
  * CheckoutSchema class.
@@ -252,23 +253,24 @@ class CheckoutSchema extends AbstractSchema {
 	/**
 	 * Build a checkout response for a session with no persisted order.
 	 *
-	 * @param \WC_Cart     $cart           Cart object.
-	 * @param \WC_Customer $customer       Customer object (typically `wc()->customer`).
-	 * @param string       $payment_method Resolved payment method id, or empty string.
-	 * @param string       $customer_note  Resolved customer note from the request.
+	 * Session-owned values (payment method, customer note) are read internally
+	 * so the caller doesn't need to forward them.
+	 *
+	 * @param \WC_Cart     $cart     Cart object.
+	 * @param \WC_Customer $customer Customer object (typically `wc()->customer`).
 	 * @return array
 	 */
-	public function get_draft_response( \WC_Cart $cart, \WC_Customer $customer, string $payment_method = '', string $customer_note = '' ) {
+	public function get_draft_response( \WC_Cart $cart, \WC_Customer $customer ) {
 		return [
 			'order_id'           => 0,
 			'status'             => 'checkout-draft',
 			'order_key'          => '',
 			'order_number'       => '0',
-			'customer_note'      => $customer_note,
+			'customer_note'      => (string) ( WC()->session->get( 'store_api_customer_note' ) ?? '' ),
 			'customer_id'        => $customer->get_id(),
 			'billing_address'    => (object) $this->billing_address_schema->get_item_response( $customer ),
 			'shipping_address'   => (object) $this->shipping_address_schema->get_item_response( $customer ),
-			'payment_method'     => $payment_method,
+			'payment_method'     => (string) PaymentUtils::get_default_payment_method(),
 			'payment_result'     => null,
 			'additional_fields'  => (object) $this->get_additional_fields_response( $customer ),
 			'__experimentalCart' => (object) $this->cart_schema->get_item_response( $cart ),
