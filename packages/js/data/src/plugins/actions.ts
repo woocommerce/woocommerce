@@ -174,7 +174,20 @@ function* handlePluginAPIError(
 ) {
 	let rawErrorMessage;
 
-	if ( isPluginResponseError( plugins, error ) ) {
+	// Check for permission errors (403) before generic handling.
+	// Merchants without install_plugins capability see a vague
+	// "cannot manage plugins" message otherwise.
+	const isPermissionError =
+		isRestApiError( error ) &&
+		'data' in error &&
+		( error as { data?: { status?: number } } ).data?.status === 403;
+
+	if ( isPermissionError ) {
+		rawErrorMessage = __(
+			'You do not have permission to install plugins. Please contact your site administrator.',
+			'woocommerce'
+		);
+	} else if ( isPluginResponseError( plugins, error ) ) {
 		// Backend error messages are in the form of { plugin-slug: [ error messages ] }.
 		rawErrorMessage = Object.values( error ).join( ', \n' );
 	} else {
