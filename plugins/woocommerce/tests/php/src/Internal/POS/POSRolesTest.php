@@ -73,6 +73,7 @@ class POSRolesTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $role->has_cap( 'edit_published_shop_orders' ), 'pos_cashier should have edit_published_shop_orders' );
 		$this->assertTrue( $role->has_cap( 'publish_shop_orders' ), 'pos_cashier should have publish_shop_orders' );
 		$this->assertTrue( $role->has_cap( 'read_shop_order' ), 'pos_cashier should have read_shop_order' );
+		$this->assertTrue( $role->has_cap( 'read_private_shop_orders' ), 'pos_cashier should have read_private_shop_orders' );
 	}
 
 	/**

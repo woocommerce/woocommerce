@@ -124,6 +124,13 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 			return $this->current_user_can_access_customer_route( $context );
 		}
 
+		// POS users need read-only access to payment gateways to determine
+		// automatic refund support. The default check requires manage_woocommerce
+		// which POS roles intentionally lack.
+		if ( 'payment_gateways' === $post_type && 'read' === $context && current_user_can( 'view_pos' ) ) {
+			return true;
+		}
+
 		if ( 'shop_order_refund' === $post_type && 'create' === $context ) {
 			$this->extract_approval_context_from_rest_request();
 			return $this->user_has_capability( 'refund_shop_orders' );

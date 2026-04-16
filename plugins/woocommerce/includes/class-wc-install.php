@@ -2436,6 +2436,9 @@ $stock_notifications_table_schema;
 				'edit_published_shop_orders' => true,
 				'publish_shop_orders'        => true,
 				'read_shop_order'            => true,
+				'read_private_shop_orders'   => true,
+				'read_product'               => true,
+				'read_private_products'      => true,
 				'view_pos'                   => true,
 			)
 		);
