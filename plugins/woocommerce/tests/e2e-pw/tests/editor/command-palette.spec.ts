@@ -9,6 +9,7 @@ import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
  */
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { expect, test as baseTest } from '../../fixtures/fixtures';
+import { getInstalledWordPressVersion } from '../../utils/wordpress';
 
 // need to figure out whether tests are being run on a mac
 const macOS = process.platform === 'darwin';
@@ -63,16 +64,21 @@ const test = baseTest.extend( {
 		} );
 	},
 	page: async ( { page }, use ) => {
+		const adminEntryPoint =
+			( await getInstalledWordPressVersion() ) === 6.8
+				? 'wp-admin/post-new.php'
+				: 'wp-admin';
+		const waitForCommandPalette = page.waitForResponse( ( response ) => {
+			return (
+				response
+					.url()
+					.includes( '/wp-admin-scripts/command-palette' ) &&
+				response.status() === 200
+			);
+		} );
 		await Promise.all( [
-			page.goto( 'wp-admin' ),
-			page.waitForResponse( ( response ) => {
-				return (
-					response
-						.url()
-						.includes( '/wp-admin-scripts/command-palette' ) &&
-					response.status() === 200
-				);
-			} ),
+			page.goto( adminEntryPoint ),
+			waitForCommandPalette,
 		] );
 		await use( page );
 	},
