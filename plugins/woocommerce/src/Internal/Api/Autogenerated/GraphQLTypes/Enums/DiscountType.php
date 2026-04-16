@@ -30,6 +30,10 @@ class DiscountType {
 							'value'       => DiscountTypeEnum::FixedProduct,
 							'description' => __( 'A fixed amount discount applied to each eligible product.', 'woocommerce' ),
 						),
+						'OTHER'         => array(
+							'value'       => DiscountTypeEnum::Other,
+							'description' => __( 'The discount type is not one of the standard WooCommerce values (e.g. added by a plugin). Inspect raw_discount_type for the underlying value.', 'woocommerce' ),
+						),
 					),
 				)
 			);

@@ -38,6 +38,10 @@ class ProductType {
 							'value'       => ProductTypeEnum::Variation,
 							'description' => __( 'A product variation.', 'woocommerce' ),
 						),
+						'OTHER'     => array(
+							'value'       => ProductTypeEnum::Other,
+							'description' => __( 'The product type is not one of the standard WooCommerce values (e.g. added by a plugin). Inspect raw_product_type for the underlying value.', 'woocommerce' ),
+						),
 					),
 				)
 			);

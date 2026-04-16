@@ -22,4 +22,7 @@ enum ProductType: string {
 
 	#[Description( 'A product variation.' )]
 	case Variation = 'variation';
+
+	#[Description( 'The product type is not one of the standard WooCommerce values (e.g. added by a plugin). Inspect raw_product_type for the underlying value.' )]
+	case Other = 'other';
 }

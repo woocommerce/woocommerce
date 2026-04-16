@@ -167,6 +167,9 @@ class ProductMapper {
 		\WC_Product $wc_product,
 		?array $query_info,
 	): void {
+		$raw_status       = (string) $wc_product->get_status();
+		$raw_product_type = (string) $wc_product->get_type();
+
 		$product->id                = $wc_product->get_id();
 		$product->name              = $wc_product->get_name();
 		$product->slug              = $wc_product->get_slug();
@@ -174,8 +177,10 @@ class ProductMapper {
 		$product->sku               = '' !== $sku ? $sku : null;
 		$product->description       = $wc_product->get_description();
 		$product->short_description = $wc_product->get_short_description();
-		$product->status            = ProductStatus::from( $wc_product->get_status() );
-		$product->product_type      = ProductType::from( $wc_product->get_type() );
+		$product->status            = ProductStatus::tryFrom( $raw_status ) ?? ProductStatus::Other;
+		$product->raw_status        = $raw_status;
+		$product->product_type      = ProductType::tryFrom( $raw_product_type ) ?? ProductType::Other;
+		$product->raw_product_type  = $raw_product_type;
 
 		// Price fields support a "formatted" argument for currency display.
 		$format_regular         = $query_info['regular_price']['__args']['formatted'] ?? true;
@@ -193,8 +198,10 @@ class ProductMapper {
 				: $raw_sale;
 		}
 
-		$product->stock_status   = self::map_stock_status( $wc_product->get_stock_status() );
-		$product->stock_quantity = $wc_product->get_stock_quantity();
+		$raw_stock_status          = (string) $wc_product->get_stock_status();
+		$product->stock_status     = self::map_stock_status( $raw_stock_status );
+		$product->raw_stock_status = $raw_stock_status;
+		$product->stock_quantity   = $wc_product->get_stock_quantity();
 
 		// Nested output type: dimensions.
 		$product->dimensions = self::build_dimensions( $wc_product );
@@ -231,7 +238,7 @@ class ProductMapper {
 			'instock'     => StockStatus::InStock,
 			'outofstock'  => StockStatus::OutOfStock,
 			'onbackorder' => StockStatus::OnBackorder,
-			default       => StockStatus::OutOfStock,
+			default       => StockStatus::Other,
 		};
 	}
 

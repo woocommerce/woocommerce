@@ -37,6 +37,10 @@ class Coupon {
 							'type'        => Type::nonNull( DiscountTypeType::get() ),
 							'description' => __( 'The type of discount.', 'woocommerce' ),
 						),
+						'raw_discount_type'           => array(
+							'type'        => Type::nonNull( Type::string() ),
+							'description' => __( 'The raw discount type as stored in WooCommerce. Useful when discount_type is OTHER (e.g. plugin-added types like recurring_percent or sign_up_fee).', 'woocommerce' ),
+						),
 						'amount'                      => array(
 							'type'        => Type::nonNull( Type::float() ),
 							'description' => __( 'The discount amount.', 'woocommerce' ),
@@ -44,6 +48,10 @@ class Coupon {
 						'status'                      => array(
 							'type'        => Type::nonNull( CouponStatusType::get() ),
 							'description' => __( 'The coupon status.', 'woocommerce' ),
+						),
+						'raw_status'                  => array(
+							'type'        => Type::nonNull( Type::string() ),
+							'description' => __( 'The raw status as stored in WordPress. Useful when status is OTHER (e.g. plugin-added post statuses).', 'woocommerce' ),
 						),
 						'date_created'                => array(
 							'type'        => DateTimeType::get(),

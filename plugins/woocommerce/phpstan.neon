@@ -23,6 +23,11 @@ parameters:
 		# .distignore, so the global phpVersion: 70400 setting flags valid
 		# PHP 8+ syntax (e.g. match expressions) as parse errors here.
 		- src/Internal/Api/DesignTime/
+		# The public Code API namespace requires PHP 8.1+ (gated at runtime
+		# by Main::register_version_guard) and uses enums, constructor
+		# property promotion, and match expressions throughout — all of
+		# which the global phpVersion: 70400 setting cannot parse.
+		- src/Api/
 	bootstrapFiles:
 		- vendor/autoload.php
 	scanDirectories:

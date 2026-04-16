@@ -21,12 +21,19 @@ class CouponMapper {
 	public static function from_wc_coupon( \WC_Coupon $wc_coupon ): Coupon {
 		$coupon = new Coupon();
 
+		$raw_discount_type = (string) $wc_coupon->get_discount_type();
+		$raw_status        = (string) $wc_coupon->get_status();
+
 		$coupon->id                          = $wc_coupon->get_id();
 		$coupon->code                        = $wc_coupon->get_code();
 		$coupon->description                 = $wc_coupon->get_description();
-		$coupon->discount_type               = DiscountType::from( $wc_coupon->get_discount_type() );
+		$coupon->discount_type               = DiscountType::tryFrom( $raw_discount_type ) ?? DiscountType::Other;
+		$coupon->raw_discount_type           = $raw_discount_type;
 		$coupon->amount                      = (float) $wc_coupon->get_amount();
-		$coupon->status                      = $wc_coupon->get_status() ? CouponStatus::from( $wc_coupon->get_status() ) : CouponStatus::Draft;
+		$coupon->status                      = '' === $raw_status
+			? CouponStatus::Draft
+			: ( CouponStatus::tryFrom( $raw_status ) ?? CouponStatus::Other );
+		$coupon->raw_status                  = $raw_status;
 		$coupon->date_created                = $wc_coupon->get_date_created()?->format( \DateTimeInterface::ATOM );
 		$coupon->date_modified               = $wc_coupon->get_date_modified()?->format( \DateTimeInterface::ATOM );
 		$coupon->date_expires                = $wc_coupon->get_date_expires()?->format( \DateTimeInterface::ATOM );
