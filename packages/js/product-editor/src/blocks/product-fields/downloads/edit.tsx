@@ -11,7 +11,7 @@ import {
 	useState,
 } from '@wordpress/element';
 import { closeSmall } from '@wordpress/icons';
-import { MediaItem } from '@wordpress/media-utils';
+import type { Attachment } from '@wordpress/media-utils';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import {
 	ListItem,
@@ -20,9 +20,6 @@ import {
 	Sortable,
 } from '@woocommerce/components';
 import { Product, ProductDownload } from '@woocommerce/data';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore No types for this exist yet.
-// eslint-disable-next-line @woocommerce/dependency-group
 import { useEntityProp } from '@wordpress/core-data';
 
 /**
@@ -105,7 +102,7 @@ export function DownloadBlockEdit( {
 		setShowManageDownloadLimitsModal( false );
 	}
 
-	function handleFileUpload( files: MediaItem | MediaItem[] ) {
+	function handleFileUpload( files: Attachment | Attachment[] ) {
 		if ( ! Array.isArray( files ) ) return;
 
 		const newFiles = files.filter(

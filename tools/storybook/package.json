@@ -103,6 +103,7 @@
 			"allowUsuallyExcludedPaths": true,
 			"files": [
 				"package.json",
+				"../../pnpm-lock.yaml",
 				"node_modules/@woocommerce/admin-library/build",
 				"node_modules/@woocommerce/block-library/build",
 				"node_modules/@woocommerce/eslint-plugin/configs",

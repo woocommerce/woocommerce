@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+use Automattic\WooCommerce\Utilities\MetaDataUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
 
 // phpcs:disable Squiz.Classes.ClassFileName.NoMatch, Squiz.Classes.ValidClassName.NotCamelCaps -- Legacy class name, can't change without breaking backward compat.
@@ -924,14 +925,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @param array         $posted Request data.
 	 */
 	protected function maybe_set_item_meta_data( $item, $posted ) {
-		if ( ! empty( $posted['meta_data'] ) && is_array( $posted['meta_data'] ) ) {
-			foreach ( $posted['meta_data'] as $meta ) {
-				if ( isset( $meta['key'] ) ) {
-					$value = isset( $meta['value'] ) ? $meta['value'] : null;
-					$item->update_meta_data( $meta['key'], $value, isset( $meta['id'] ) ? $meta['id'] : '' );
-				}
-			}
-		}
+		MetaDataUtil::update( $posted['meta_data'] ?? null, $item );
 	}
 
 	/**

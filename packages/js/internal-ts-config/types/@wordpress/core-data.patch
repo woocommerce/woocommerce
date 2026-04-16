@@ -1,50 +1,250 @@
+diff -ruN a/types/@wordpress/core-data/dynamic-entities.d.ts b/types/@wordpress/core-data/dynamic-entities.d.ts
+--- a/types/@wordpress/core-data/dynamic-entities.d.ts
++++ b/types/@wordpress/core-data/dynamic-entities.d.ts
+@@ -60,10 +60,10 @@
+ 	};
+ 	type DeleteRecordsHttpQuery = Record<string, any>;
+ 	export type SaveActions = {
+-	    [Key in `save${keyof WPEntityTypes}`]: (data: Partial<WPEntityTypes[Key extends `save${infer E}` ? E : never]>, options?: ActionOptions) => Promise<void>;
++	    [Key in `save${keyof WPEntityTypes}`]: (data: Partial<WPEntityTypes[Key extends `save${infer E}` ? E : never]>, options?: ActionOptions) => (thunkArgs: any) => Promise<WPEntityTypes[Key extends `save${infer E}` ? E : never] | undefined>;
+ 	};
+ 	export type DeleteActions = {
+-	    [Key in `delete${keyof WPEntityTypes}`]: (id: number | string, query?: DeleteRecordsHttpQuery, options?: ActionOptions) => Promise<void>;
++	    [Key in `delete${keyof WPEntityTypes}`]: (id: number | string, query?: DeleteRecordsHttpQuery, options?: ActionOptions) => (thunkArgs: any) => Promise<WPEntityTypes[Key extends `delete${infer E}` ? E : never] | false | undefined>;
+ 	};
+ 	export declare let dynamicActions: SaveActions & DeleteActions;
+ 	export declare let dynamicSelectors: SingularGetters & PluralGetters;
+diff -ruN a/types/@wordpress/core-data/hooks/use-entity-prop.d.ts b/types/@wordpress/core-data/hooks/use-entity-prop.d.ts
+--- a/types/@wordpress/core-data/hooks/use-entity-prop.d.ts
++++ b/types/@wordpress/core-data/hooks/use-entity-prop.d.ts
+@@ -16,5 +16,5 @@
+ 	 * 							  information like `raw`, `rendered` and
+ 	 * 							  `protected` props.
+ 	 */
+-	export default function useEntityProp(kind: string, name: string, prop: string, _id?: number | string): [any, Function, any];
++	export default function useEntityProp<PropType>(kind: string, name: string, prop: string, _id?: number | string): [PropType, (value: PropType) => void, PropType];
+ }
 diff -ruN a/types/@wordpress/core-data/index.d.ts b/types/@wordpress/core-data/index.d.ts
 --- a/types/@wordpress/core-data/index.d.ts
 +++ b/types/@wordpress/core-data/index.d.ts
-@@ -71,6 +71,7 @@
- 	    receiveRevisions: (kind: string, name: string, recordKey: string | number, records: any, query: any, invalidateCache: boolean | null | undefined, meta: any) => ({ dispatch }: {
- 	        dispatch: any;
+@@ -80,156 +80,156 @@
  	    }) => Promise<void>;
-+	    [key: string]: (...args: any[]) => any;
+ 	    saveMenu: (data: Partial<import("@wordpress/core-data/build-types/entity-types").NavMenu<"edit">>, options?: {
+ 	        throwOnError?: boolean;
+-	    }) => Promise<void>;
++	    }) => (thunkArgs: any) => Promise<import("@wordpress/core-data/build-types/entity-types").NavMenu<"edit"> | undefined>;
+ 	    saveComment: (data: Partial<import("@wordpress/core-data/build-types/entity-types").Comment<"edit">>, options?: {
+ 	        throwOnError?: boolean;
+-	    }) => Promise<void>;
++	    }) => (thunkArgs: any) => Promise<import("@wordpress/core-data/build-types/entity-types").Comment<"edit"> | undefined>;
+ 	    saveGlobalStyles: (data: Partial<import("@wordpress/core-data/build-types/entity-types").GlobalStylesRevision<"edit">>, options?: {
+ 	        throwOnError?: boolean;
+-	    }) => Promise<void>;
++	    }) => (thunkArgs: any) => Promise<import("@wordpress/core-data/build-types/entity-types").GlobalStylesRevision<"edit"> | undefined>;
+ 	    saveMedia: (data: Partial<import("@wordpress/core-data/build-types/entity-types").Attachment<"edit">>, options?: {
+ 	        throwOnError?: boolean;
+-	    }) => Promise<void>;
++	    }) => (thunkArgs: any) => Promise<import("@wordpress/core-data/build-types/entity-types").Attachment<"edit"> | undefined>;
+ 	    saveMenuItem: (data: Partial<import("@wordpress/core-data/build-types/entity-types").NavMenuItem<"edit">>, options?: {
+ 	        throwOnError?: boolean;
+-	    }) => Promise<void>;
++	    }) => (thunkArgs: any) => Promise<import("@wordpress/core-data/build-types/entity-types").NavMenuItem<"edit"> | undefined>;
+ 	    saveMenuLocation: (data: Partial<import("@wordpress/core-data/build-types/entity-types").MenuLocation<"edit">>, options?: {
+ 	        throwOnError?: boolean;
+-	    }) => Promise<void>;
++	    }) => (thunkArgs: any) => Promise<import("@wordpress/core-data/build-types/entity-types").MenuLocation<"edit"> | undefined>;
+ 	    savePlugin: (data: Partial<import("@wordpress/core-data/build-types/entity-types").Plugin<"edit">>, options?: {
+ 	        throwOnError?: boolean;
+-	    }) => Promise<void>;
++	    }) => (thunkArgs: any) => Promise<import("@wordpress/core-data/build-types/entity-types").Plugin<"edit"> | undefined>;
+ 	    savePostType: (data: Partial<import("@wordpress/core-data/build-types/entity-types").Type<"edit">>, options?: {
+ 	        throwOnError?: boolean;
+-	    }) => Promise<void>;
++	    }) => (thunkArgs: any) => Promise<import("@wordpress/core-data/build-types/entity-types").Type<"edit"> | undefined>;
+ 	    saveRevision: (data: Partial<import("@wordpress/core-data/build-types/entity-types").PostRevision<"edit">>, options?: {
+ 	        throwOnError?: boolean;
+-	    }) => Promise<void>;
++	    }) => (thunkArgs: any) => Promise<import("@wordpress/core-data/build-types/entity-types").PostRevision<"edit"> | undefined>;
+ 	    saveSidebar: (data: Partial<import("@wordpress/core-data/build-types/entity-types").Sidebar<"edit">>, options?: {
+ 	        throwOnError?: boolean;
+-	    }) => Promise<void>;
++	    }) => (thunkArgs: any) => Promise<import("@wordpress/core-data/build-types/entity-types").Sidebar<"edit"> | undefined>;
+ 	    saveSite: (data: Partial<import("@wordpress/core-data/build-types/entity-types").Settings<"edit">>, options?: {
+ 	        throwOnError?: boolean;
+-	    }) => Promise<void>;
++	    }) => (thunkArgs: any) => Promise<import("@wordpress/core-data/build-types/entity-types").Settings<"edit"> | undefined>;
+ 	    saveStatus: (data: Partial<import("@wordpress/core-data/build-types/entity-types").PostStatusObject<"edit">>, options?: {
+ 	        throwOnError?: boolean;
+-	    }) => Promise<void>;
++	    }) => (thunkArgs: any) => Promise<import("@wordpress/core-data/build-types/entity-types").PostStatusObject<"edit"> | undefined>;
+ 	    saveTaxonomy: (data: Partial<import("@wordpress/core-data/build-types/entity-types").Taxonomy<"edit">>, options?: {
+ 	        throwOnError?: boolean;
+-	    }) => Promise<void>;
++	    }) => (thunkArgs: any) => Promise<import("@wordpress/core-data/build-types/entity-types").Taxonomy<"edit"> | undefined>;
+ 	    saveTerm: (data: Partial<import("@wordpress/core-data/build-types/entity-types").Term<"edit">>, options?: {
+ 	        throwOnError?: boolean;
+-	    }) => Promise<void>;
++	    }) => (thunkArgs: any) => Promise<import("@wordpress/core-data/build-types/entity-types").Term<"edit"> | undefined>;
+ 	    saveTheme: (data: Partial<import("@wordpress/core-data/build-types/entity-types").Theme<"edit">>, options?: {
+ 	        throwOnError?: boolean;
+-	    }) => Promise<void>;
++	    }) => (thunkArgs: any) => Promise<import("@wordpress/core-data/build-types/entity-types").Theme<"edit"> | undefined>;
+ 	    saveUnstableBase: (data: Partial<import("@wordpress/core-data/build-types/entity-types").UnstableBase<"edit">>, options?: {
+ 	        throwOnError?: boolean;
+-	    }) => Promise<void>;
++	    }) => (thunkArgs: any) => Promise<import("@wordpress/core-data/build-types/entity-types").UnstableBase<"edit"> | undefined>;
+ 	    saveUser: (data: Partial<import("@wordpress/core-data/build-types/entity-types").User<"edit">>, options?: {
+ 	        throwOnError?: boolean;
+-	    }) => Promise<void>;
++	    }) => (thunkArgs: any) => Promise<import("@wordpress/core-data/build-types/entity-types").User<"edit"> | undefined>;
+ 	    saveWidget: (data: Partial<import("@wordpress/core-data/build-types/entity-types").Widget<"edit">>, options?: {
+ 	        throwOnError?: boolean;
+-	    }) => Promise<void>;
++	    }) => (thunkArgs: any) => Promise<import("@wordpress/core-data/build-types/entity-types").Widget<"edit"> | undefined>;
+ 	    saveWidgetType: (data: Partial<import("@wordpress/core-data/build-types/entity-types").WidgetType<"edit">>, options?: {
+ 	        throwOnError?: boolean;
+-	    }) => Promise<void>;
++	    }) => (thunkArgs: any) => Promise<import("@wordpress/core-data/build-types/entity-types").WidgetType<"edit"> | undefined>;
+ 	    deleteMenu: (id: number | string, query?: {
+ 	        [x: string]: any;
+ 	    }, options?: {
+ 	        throwOnError?: boolean;
+-	    }) => Promise<void>;
++	    }) => (thunkArgs: any) => Promise<import("@wordpress/core-data/build-types/entity-types").NavMenu<"edit"> | false | undefined>;
+ 	    deleteComment: (id: number | string, query?: {
+ 	        [x: string]: any;
+ 	    }, options?: {
+ 	        throwOnError?: boolean;
+-	    }) => Promise<void>;
++	    }) => (thunkArgs: any) => Promise<import("@wordpress/core-data/build-types/entity-types").Comment<"edit"> | false | undefined>;
+ 	    deleteGlobalStyles: (id: number | string, query?: {
+ 	        [x: string]: any;
+ 	    }, options?: {
+ 	        throwOnError?: boolean;
+-	    }) => Promise<void>;
++	    }) => (thunkArgs: any) => Promise<import("@wordpress/core-data/build-types/entity-types").GlobalStylesRevision<"edit"> | false | undefined>;
+ 	    deleteMedia: (id: number | string, query?: {
+ 	        [x: string]: any;
+ 	    }, options?: {
+ 	        throwOnError?: boolean;
+-	    }) => Promise<void>;
++	    }) => (thunkArgs: any) => Promise<import("@wordpress/core-data/build-types/entity-types").Attachment<"edit"> | false | undefined>;
+ 	    deleteMenuItem: (id: number | string, query?: {
+ 	        [x: string]: any;
+ 	    }, options?: {
+ 	        throwOnError?: boolean;
+-	    }) => Promise<void>;
++	    }) => (thunkArgs: any) => Promise<import("@wordpress/core-data/build-types/entity-types").NavMenuItem<"edit"> | false | undefined>;
+ 	    deleteMenuLocation: (id: number | string, query?: {
+ 	        [x: string]: any;
+ 	    }, options?: {
+ 	        throwOnError?: boolean;
+-	    }) => Promise<void>;
++	    }) => (thunkArgs: any) => Promise<import("@wordpress/core-data/build-types/entity-types").MenuLocation<"edit"> | false | undefined>;
+ 	    deletePlugin: (id: number | string, query?: {
+ 	        [x: string]: any;
+ 	    }, options?: {
+ 	        throwOnError?: boolean;
+-	    }) => Promise<void>;
++	    }) => (thunkArgs: any) => Promise<import("@wordpress/core-data/build-types/entity-types").Plugin<"edit"> | false | undefined>;
+ 	    deletePostType: (id: number | string, query?: {
+ 	        [x: string]: any;
+ 	    }, options?: {
+ 	        throwOnError?: boolean;
+-	    }) => Promise<void>;
++	    }) => (thunkArgs: any) => Promise<import("@wordpress/core-data/build-types/entity-types").Type<"edit"> | false | undefined>;
+ 	    deleteRevision: (id: number | string, query?: {
+ 	        [x: string]: any;
+ 	    }, options?: {
+ 	        throwOnError?: boolean;
+-	    }) => Promise<void>;
++	    }) => (thunkArgs: any) => Promise<import("@wordpress/core-data/build-types/entity-types").PostRevision<"edit"> | false | undefined>;
+ 	    deleteSidebar: (id: number | string, query?: {
+ 	        [x: string]: any;
+ 	    }, options?: {
+ 	        throwOnError?: boolean;
+-	    }) => Promise<void>;
++	    }) => (thunkArgs: any) => Promise<import("@wordpress/core-data/build-types/entity-types").Sidebar<"edit"> | false | undefined>;
+ 	    deleteSite: (id: number | string, query?: {
+ 	        [x: string]: any;
+ 	    }, options?: {
+ 	        throwOnError?: boolean;
+-	    }) => Promise<void>;
++	    }) => (thunkArgs: any) => Promise<import("@wordpress/core-data/build-types/entity-types").Settings<"edit"> | false | undefined>;
+ 	    deleteStatus: (id: number | string, query?: {
+ 	        [x: string]: any;
+ 	    }, options?: {
+ 	        throwOnError?: boolean;
+-	    }) => Promise<void>;
++	    }) => (thunkArgs: any) => Promise<import("@wordpress/core-data/build-types/entity-types").PostStatusObject<"edit"> | false | undefined>;
+ 	    deleteTaxonomy: (id: number | string, query?: {
+ 	        [x: string]: any;
+ 	    }, options?: {
+ 	        throwOnError?: boolean;
+-	    }) => Promise<void>;
++	    }) => (thunkArgs: any) => Promise<import("@wordpress/core-data/build-types/entity-types").Taxonomy<"edit"> | false | undefined>;
+ 	    deleteTerm: (id: number | string, query?: {
+ 	        [x: string]: any;
+ 	    }, options?: {
+ 	        throwOnError?: boolean;
+-	    }) => Promise<void>;
++	    }) => (thunkArgs: any) => Promise<import("@wordpress/core-data/build-types/entity-types").Term<"edit"> | false | undefined>;
+ 	    deleteTheme: (id: number | string, query?: {
+ 	        [x: string]: any;
+ 	    }, options?: {
+ 	        throwOnError?: boolean;
+-	    }) => Promise<void>;
++	    }) => (thunkArgs: any) => Promise<import("@wordpress/core-data/build-types/entity-types").Theme<"edit"> | false | undefined>;
+ 	    deleteUnstableBase: (id: number | string, query?: {
+ 	        [x: string]: any;
+ 	    }, options?: {
+ 	        throwOnError?: boolean;
+-	    }) => Promise<void>;
++	    }) => (thunkArgs: any) => Promise<import("@wordpress/core-data/build-types/entity-types").UnstableBase<"edit"> | false | undefined>;
+ 	    deleteUser: (id: number | string, query?: {
+ 	        [x: string]: any;
+ 	    }, options?: {
+ 	        throwOnError?: boolean;
+-	    }) => Promise<void>;
++	    }) => (thunkArgs: any) => Promise<import("@wordpress/core-data/build-types/entity-types").User<"edit"> | false | undefined>;
+ 	    deleteWidget: (id: number | string, query?: {
+ 	        [x: string]: any;
+ 	    }, options?: {
+ 	        throwOnError?: boolean;
+-	    }) => Promise<void>;
++	    }) => (thunkArgs: any) => Promise<import("@wordpress/core-data/build-types/entity-types").Widget<"edit"> | false | undefined>;
+ 	    deleteWidgetType: (id: number | string, query?: {
+ 	        [x: string]: any;
+ 	    }, options?: {
+ 	        throwOnError?: boolean;
+-	    }) => Promise<void>;
++	    }) => (thunkArgs: any) => Promise<import("@wordpress/core-data/build-types/entity-types").WidgetType<"edit"> | false | undefined>;
  	}, {
- 	    getAuthors(state: selectors.State, query?: {
- 	        [x: string]: any;
-@@ -149,6 +150,7 @@
- 	    getRevision: ((state: selectors.State, kind: string, name: string, recordKey: string | number, revisionKey: string | number, query?: {
- 	        [x: string]: any;
- 	    } | undefined) => (Record<import("@wordpress/core-data/build-types/entity-types").Context, Record<number, import("@wordpress/core-data/build-types/entity-types").PostRevision>> | Record<import("@wordpress/core-data/build-types/entity-types").Context, Record<number, import("@wordpress/core-data/build-types/entity-types").GlobalStylesRevision>>) | Record<PropertyKey, never> | undefined) & import("rememo").EnhancedSelector;
-+	    [key: string]: (...args: any[]) => any;
- 	}>>;
- 	export { default as EntityProvider } from "@wordpress/core-data/build-types/entity-provider";
- 	export * from "@wordpress/core-data/build-types/entity-provider";
-@@ -156,4 +158,11 @@
- 	export * from "@wordpress/core-data/build-types/fetch";
+ 	    getAuthors(state: selectors.State, query?: selectors.GetRecordsHttpQuery): import("@wordpress/core-data/build-types/entity-types").User[];
+ 	    getCurrentUser(state: selectors.State): import("@wordpress/core-data/build-types/entity-types").User<"edit">;
+@@ -316,12 +316,12 @@
+ 	    getPlugin: (state: selectors.State, id: number | string, query?: selectors.GetRecordsHttpQuery) => import("@wordpress/core-data/build-types/entity-types").Plugin<"edit"> | undefined;
+ 	    getPostType: (state: selectors.State, id: number | string, query?: selectors.GetRecordsHttpQuery) => import("@wordpress/core-data/build-types/entity-types").Type<"edit"> | undefined;
+ 	    getSidebar: (state: selectors.State, id: number | string, query?: selectors.GetRecordsHttpQuery) => import("@wordpress/core-data/build-types/entity-types").Sidebar<"edit"> | undefined;
+-	    getSite: (state: selectors.State, id: number | string, query?: selectors.GetRecordsHttpQuery) => import("@wordpress/core-data/build-types/entity-types").Settings<"edit"> | undefined;
++	    getSite: (state: selectors.State, id?: number | string, query?: selectors.GetRecordsHttpQuery) => import("@wordpress/core-data/build-types/entity-types").Settings<"edit"> | undefined;
+ 	    getStatus: (state: selectors.State, id: number | string, query?: selectors.GetRecordsHttpQuery) => import("@wordpress/core-data/build-types/entity-types").PostStatusObject<"edit"> | undefined;
+ 	    getTaxonomy: (state: selectors.State, id: number | string, query?: selectors.GetRecordsHttpQuery) => import("@wordpress/core-data/build-types/entity-types").Taxonomy<"edit"> | undefined;
+ 	    getTerm: (state: selectors.State, id: number | string, query?: selectors.GetRecordsHttpQuery) => import("@wordpress/core-data/build-types/entity-types").Term<"edit"> | undefined;
+ 	    getTheme: (state: selectors.State, id: number | string, query?: selectors.GetRecordsHttpQuery) => import("@wordpress/core-data/build-types/entity-types").Theme<"edit"> | undefined;
+-	    getUnstableBase: (state: selectors.State, id: number | string, query?: selectors.GetRecordsHttpQuery) => import("@wordpress/core-data/build-types/entity-types").UnstableBase<"edit"> | undefined;
++	    getUnstableBase: (state: selectors.State, id?: number | string, query?: selectors.GetRecordsHttpQuery) => import("@wordpress/core-data/build-types/entity-types").UnstableBase<"edit"> | undefined;
+ 	    getUser: (state: selectors.State, id: number | string, query?: selectors.GetRecordsHttpQuery) => import("@wordpress/core-data/build-types/entity-types").User<"edit"> | undefined;
+ 	    getWidget: (state: selectors.State, id: number | string, query?: selectors.GetRecordsHttpQuery) => import("@wordpress/core-data/build-types/entity-types").Widget<"edit"> | undefined;
+ 	    getWidgetType: (state: selectors.State, id: number | string, query?: selectors.GetRecordsHttpQuery) => import("@wordpress/core-data/build-types/entity-types").WidgetType<"edit"> | undefined;
+@@ -350,4 +350,10 @@
  	export * from "@wordpress/core-data/build-types/hooks";
+ 	export * from "@wordpress/core-data/build-types/private-apis";
  	import * as selectors from '@wordpress/core-data/build-types/selectors';
 +}
 +
-+// --- StoreRegistry registration ---
-+declare module '@wordpress/data/build-types/types' {
++declare module '@wordpress/data' {
 +	interface StoreRegistry {
-+		core: typeof import( '@wordpress/core-data' ).store;
++		'core': typeof import("@wordpress/core-data").store;
 +	}
  }
-diff -ruN a/types/@wordpress/core-data/selectors.d.ts b/types/@wordpress/core-data/selectors.d.ts
---- a/types/@wordpress/core-data/selectors.d.ts
-+++ b/types/@wordpress/core-data/selectors.d.ts
-@@ -189,6 +189,7 @@
- 	export interface GetEntityRecord {
- 	    <EntityRecord extends ET.EntityRecord<any> | Partial<ET.EntityRecord<any>>>(state: State, kind: string, name: string, key: EntityRecordKey, query?: GetRecordsHttpQuery): EntityRecord | undefined;
- 	    CurriedSignature: <EntityRecord extends ET.EntityRecord<any> | Partial<ET.EntityRecord<any>>>(kind: string, name: string, key: EntityRecordKey, query?: GetRecordsHttpQuery) => EntityRecord | undefined;
-+	    PromiseCurriedSignature: <EntityRecord extends ET.EntityRecord<any> | Partial<ET.EntityRecord<any>>>(kind: string, name: string, key?: EntityRecordKey, query?: GetRecordsHttpQuery) => Promise<EntityRecord | undefined>;
- 	    __unstableNormalizeArgs?: (args: EntityRecordArgs) => EntityRecordArgs;
- 	}
- 	/**
-@@ -252,6 +253,7 @@
- 	export interface GetEntityRecords {
- 	    <EntityRecord extends ET.EntityRecord<any> | Partial<ET.EntityRecord<any>>>(state: State, kind: string, name: string, query?: GetRecordsHttpQuery): EntityRecord[] | null;
- 	    CurriedSignature: <EntityRecord extends ET.EntityRecord<any> | Partial<ET.EntityRecord<any>>>(kind: string, name: string, query?: GetRecordsHttpQuery) => EntityRecord[] | null;
-+	    PromiseCurriedSignature: <EntityRecord extends ET.EntityRecord<any> | Partial<ET.EntityRecord<any>>>(kind: string, name: string, query?: GetRecordsHttpQuery) => Promise<EntityRecord[] | null>;
- 	}
- 	/**
- 	 * Returns the Entity's records.

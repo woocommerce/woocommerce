@@ -46,8 +46,6 @@ export function Edit( {
 	const blockProps = useWooBlockProps( attributes );
 	const { hierarchical }: TaxonomyMetadata = useSelect(
 		( select ) =>
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
 			select( 'core' ).getTaxonomy( attributes.slug ) || {
 				hierarchical: false,
 			},

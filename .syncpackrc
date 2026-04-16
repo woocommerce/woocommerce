@@ -46,43 +46,41 @@
 			]
 		},
 		{
+			"label": "block-library pins these differently from the wp-min catalog",
 			"dependencies": [
 				"@automattic/color-studio",
 				"@storybook/*",
 				"@testing-library/*",
 				"@typescript-eslint/*",
-				"@wordpress/api-fetch",
-				"@wordpress/autop",
-				"@wordpress/base-styles",
 				"@wordpress/a11y",
-				"@wordpress/compose",
-				"@wordpress/data-controls",
-				"@wordpress/date",
-				"@wordpress/editor",
-				"@wordpress/dom",
-				"@wordpress/dom-ready",
-				"@wordpress/element",
-				"@wordpress/html-entities",
-				"@wordpress/i18n",
-				"@wordpress/icons",
+				"@wordpress/autop",
 				"@wordpress/interactivity",
 				"@wordpress/interactivity-router",
-				"@wordpress/is-shallow-equal",
-				"@wordpress/notices",
 				"@wordpress/postcss-plugins-preset",
 				"@wordpress/postcss-themes",
 				"@wordpress/prettier-config",
-				"@wordpress/primitives",
 				"@wordpress/private-apis",
 				"@wordpress/scripts",
 				"@wordpress/style-engine",
 				"@wordpress/stylelint-config",
-				"@wordpress/url",
 				"eslint*",
 				"stylelint"
 			],
 			"packages": [
 				"@woocommerce/block-library"
+			],
+			"isIgnored": true
+		},
+		{
+			"label": "internal-ts-config generates version-constrained vendored types for these dependencies",
+			"dependencies": [
+				"@wordpress/core-data",
+				"@wordpress/data",
+				"@wordpress/editor",
+				"@wordpress/notices"
+			],
+			"packages": [
+				"@woocommerce/internal-ts-config"
 			],
 			"isIgnored": true
 		},
@@ -488,7 +486,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "wp-6.6"
+			"pinVersion": "catalog:wp-min"
 		},
 		{
 			"dependencies": [

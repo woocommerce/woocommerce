@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Products\Controller as ProductsController;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
+use Automattic\WooCommerce\Tests\Helpers\MetaDataAssertionTrait;
 use WC_Helper_Product;
 use WC_REST_Unit_Test_Case;
 use WP_REST_Request;
@@ -19,6 +20,7 @@ use WP_REST_Request;
  */
 class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 	use CogsAwareUnitTestSuiteTrait;
+	use MetaDataAssertionTrait;
 
 
 	/**
@@ -2125,6 +2127,20 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 403, $response->get_status() );
 		$this->assertEquals( 'woocommerce_rest_cannot_view', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Updating a product via V4 with incomplete meta_data entries does not cause errors.
+	 */
+	public function test_update_meta_data_with_incomplete_entries(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$this->update_product_via_post_request(
+			$product,
+			array( 'meta_data' => $this->get_incomplete_meta_data_input() )
+		);
+
+		$this->assert_incomplete_meta_data_handled_correctly( wc_get_product( $product->get_id() ) );
 	}
 
 	/**

@@ -54,7 +54,7 @@
 	},
 	"dependencies": {
 		"@woocommerce/tracks": "workspace:*",
-		"@wordpress/hooks": "wp-6.6",
+		"@wordpress/hooks": "catalog:wp-min",
 		"debug": "^4.3.4",
 		"tracekit": "^0.4.6"
 	},
@@ -148,6 +148,7 @@
 			"allowUsuallyExcludedPaths": true,
 			"files": [
 				"package.json",
+				"../../../pnpm-lock.yaml",
 				"node_modules/@woocommerce/tracks/build",
 				"node_modules/@woocommerce/tracks/build-module",
 				"node_modules/@woocommerce/tracks/build-types",

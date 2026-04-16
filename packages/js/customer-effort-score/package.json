@@ -57,11 +57,11 @@
 	},
 	"dependencies": {
 		"@woocommerce/experimental": "workspace:*",
-		"@wordpress/components": "wp-6.6",
-		"@wordpress/compose": "wp-6.6",
-		"@wordpress/element": "wp-6.6",
-		"@wordpress/i18n": "wp-6.6",
-		"@wordpress/notices": "wp-6.6",
+		"@wordpress/components": "catalog:wp-min",
+		"@wordpress/compose": "catalog:wp-min",
+		"@wordpress/element": "catalog:wp-min",
+		"@wordpress/i18n": "catalog:wp-min",
+		"@wordpress/notices": "catalog:wp-min",
 		"clsx": "2.1.x",
 		"prop-types": "^15.8.1",
 		"react-transition-group": "^4.4.5"
@@ -197,6 +197,7 @@
 			"allowUsuallyExcludedPaths": true,
 			"files": [
 				"package.json",
+				"../../../pnpm-lock.yaml",
 				"node_modules/@woocommerce/experimental/build",
 				"node_modules/@woocommerce/experimental/build-module",
 				"node_modules/@woocommerce/experimental/build-style",

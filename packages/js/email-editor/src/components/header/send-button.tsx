@@ -5,10 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { applyFilters } from '@wordpress/hooks';
 import { useSelect } from '@wordpress/data';
-import {
-	// @ts-expect-error No types available for useEntitiesSavedStatesIsDirty
-	useEntitiesSavedStatesIsDirty,
-} from '@wordpress/editor';
+import { useEntitiesSavedStatesIsDirty } from '@wordpress/editor';
 
 /**
  * Internal dependencies
@@ -17,7 +14,9 @@ import { storeName } from '../../store';
 import { recordEvent } from '../../events';
 
 export function SendButton() {
-	const { isDirty } = useEntitiesSavedStatesIsDirty();
+	const { isDirty } = useEntitiesSavedStatesIsDirty() as {
+		isDirty: boolean;
+	};
 
 	const { hasEmptyContent, isEmailSent, urls } = useSelect(
 		( select ) => ( {

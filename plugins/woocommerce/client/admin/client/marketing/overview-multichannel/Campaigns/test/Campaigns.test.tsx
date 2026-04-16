@@ -8,7 +8,7 @@ import userEvent from '@testing-library/user-event';
  * Internal dependencies
  */
 import { useCampaignTypes, useCampaigns } from '~/marketing/hooks';
-import { Campaigns } from './Campaigns';
+import { Campaigns } from '../Campaigns';
 
 jest.mock( '~/marketing/hooks', () => ( {
 	useCampaigns: jest.fn(),
