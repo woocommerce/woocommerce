@@ -218,7 +218,6 @@ export const ShippingTour = ( {
 	const { updateOptions } = useDispatch( optionsStore );
 	const { show: showTour, isUspsDhlEligible } = useShowShippingTour();
 	const [ step, setStepNumber ] = useState( 0 );
-	const { createNotice } = useDispatch( 'core/notices' );
 
 	const tourConfig: TourKitTypes.WooConfig = {
 		placement: 'auto',
@@ -316,16 +315,10 @@ export const ShippingTour = ( {
 			} );
 
 			if ( ! update.success ) {
-				createNotice(
-					'error',
-					__(
-						'There was a problem marking the shipping tour as completed.',
-						'woocommerce'
-					)
-				);
-				recordEvent(
-					'walkthrough_settings_shipping_updated_option_error'
-				);
+				// Silent retry — failure only means the tour replays next visit.
+				await updateOptions( {
+					[ REVIEWED_DEFAULTS_OPTION ]: 'yes',
+				} );
 			}
 
 			if ( source === 'close-btn' ) {
