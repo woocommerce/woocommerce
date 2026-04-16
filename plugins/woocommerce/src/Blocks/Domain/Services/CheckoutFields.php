@@ -26,6 +26,16 @@ class CheckoutFields {
 	private $additional_fields = [];
 
 	/**
+	 * Conditional rules registered for core fields, keyed by field id.
+	 *
+	 * Each entry may contain any subset of 'required', 'hidden', 'validation' schema rules
+	 * that extend the default core field definitions returned from get_core_fields().
+	 *
+	 * @var array<string, array{required?: mixed, hidden?: mixed, validation?: array}>
+	 */
+	private $core_field_rules = [];
+
+	/**
 	 * Fields locations.
 	 *
 	 * @var array
@@ -228,6 +238,112 @@ class CheckoutFields {
 	}
 
 	/**
+	 * Registers conditional rules (required/hidden/validation) for a core checkout field.
+	 *
+	 * Core fields are the built-in fields such as first_name, last_name, country, postcode, etc.
+	 * This API lets extensions attach the same JSON-Schema-based conditional rules that
+	 * additional fields support, so they can run on both client and server identically.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @param string $field_id The core field id (e.g. 'first_name', 'postcode', 'email').
+	 * @param array  $rules    The rules to apply. May contain any subset of 'required', 'hidden',
+	 *                         'validation' keys, using the same JSON Schema shape as additional fields.
+	 * @return bool True if the rules were registered, false otherwise.
+	 */
+	public function register_core_field_rules( $field_id, $rules ) {
+		if ( ! is_string( $field_id ) || '' === $field_id ) {
+			_doing_it_wrong( 'woocommerce_register_checkout_core_field_rules', 'A core field id is required.', '10.8.0' );
+			return false;
+		}
+
+		if ( ! in_array( $field_id, $this->get_core_fields_keys(), true ) ) {
+			$message = sprintf( 'Unable to register rules for field id "%s". The field is not a recognized core checkout field.', $field_id );
+			_doing_it_wrong( 'woocommerce_register_checkout_core_field_rules', esc_html( $message ), '10.8.0' );
+			return false;
+		}
+
+		if ( ! is_array( $rules ) || empty( $rules ) ) {
+			$message = sprintf( 'Unable to register rules for field id "%s". Rules must be a non-empty array.', $field_id );
+			_doing_it_wrong( 'woocommerce_register_checkout_core_field_rules', esc_html( $message ), '10.8.0' );
+			return false;
+		}
+
+		$allowed_keys = [ 'required', 'hidden', 'validation' ];
+		$allow_bool   = [ 'required', 'hidden' ];
+		$sanitized    = [];
+
+		foreach ( $allowed_keys as $rule_key ) {
+			if ( ! array_key_exists( $rule_key, $rules ) ) {
+				continue;
+			}
+
+			$value = $rules[ $rule_key ];
+
+			if ( in_array( $rule_key, $allow_bool, true ) && is_bool( $value ) ) {
+				$sanitized[ $rule_key ] = $value;
+				continue;
+			}
+
+			$valid = Validation::is_valid_schema( $value );
+
+			if ( is_wp_error( $valid ) ) {
+				$message = sprintf( 'Unable to register rules for field id "%s". %s: %s', $field_id, $rule_key, $valid->get_error_message() );
+				_doing_it_wrong( 'woocommerce_register_checkout_core_field_rules', esc_html( $message ), '10.8.0' );
+				return false;
+			}
+
+			$sanitized[ $rule_key ] = $value;
+		}
+
+		if ( empty( $sanitized ) ) {
+			return false;
+		}
+
+		// Merge on top of any previously registered rules for this field.
+		$this->core_field_rules[ $field_id ] = array_merge(
+			$this->core_field_rules[ $field_id ] ?? [],
+			$sanitized
+		);
+
+		return true;
+	}
+
+	/**
+	 * Deregisters all conditional rules previously registered for a core field.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @param string $field_id The core field id.
+	 * @return void
+	 * @internal
+	 */
+	public function deregister_core_field_rules( $field_id ) {
+		unset( $this->core_field_rules[ $field_id ] );
+	}
+
+	/**
+	 * Returns the merged definition for a field by key, looking in both additional fields and core fields.
+	 *
+	 * @param string $field_key The field key.
+	 * @return array The field definition, or an empty array if not found.
+	 */
+	private function get_field_definition( $field_key ) {
+		if ( isset( $this->additional_fields[ $field_key ] ) ) {
+			return $this->additional_fields[ $field_key ];
+		}
+		$core_fields = $this->get_core_fields();
+		if ( isset( $core_fields[ $field_key ] ) ) {
+			$field       = $core_fields[ $field_key ];
+			$field['id'] = $field_key;
+			// Ensure the shape matches additional fields for downstream consumers.
+			$field['validation'] = $field['validation'] ?? [];
+			return $field;
+		}
+		return [];
+	}
+
+	/**
 	 * Returns true if the field is required. Takes rules into consideration if a document object is provided.
 	 *
 	 * @param array|string        $field The field array or field key.
@@ -236,7 +352,7 @@ class CheckoutFields {
 	 */
 	public function is_required_field( $field, $document_object = null ) {
 		if ( is_string( $field ) ) {
-			$field = $this->additional_fields[ $field ] ?? [];
+			$field = $this->get_field_definition( $field );
 		}
 
 		if ( empty( $field ) ) {
@@ -248,11 +364,11 @@ class CheckoutFields {
 			if ( $this->is_hidden_field( $field, $document_object ) ) {
 				return false;
 			}
-			if ( $this->contains_valid_rules( $field['required'] ) ) {
+			if ( $this->contains_valid_rules( $field['required'] ?? null ) ) {
 				return true === Validation::validate_document_object( $document_object, $field['required'] );
 			}
 		}
-		return true === $field['required'];
+		return true === ( $field['required'] ?? false );
 	}
 
 	/**
@@ -264,9 +380,12 @@ class CheckoutFields {
 	 */
 	public function is_hidden_field( $field, $document_object = null ) {
 		if ( is_string( $field ) ) {
-			$field = $this->additional_fields[ $field ] ?? [];
+			$field = $this->get_field_definition( $field );
 		}
-		if ( $document_object && $this->contains_valid_rules( $field['hidden'] ) ) {
+		if ( empty( $field ) ) {
+			return false;
+		}
+		if ( $document_object && $this->contains_valid_rules( $field['hidden'] ?? null ) ) {
 			return true === Validation::validate_document_object( $document_object, $field['hidden'] );
 		}
 		return false; // Fields cannot be registered as hidden.
@@ -280,9 +399,12 @@ class CheckoutFields {
 	 */
 	public function is_conditional_field( $field ) {
 		if ( is_string( $field ) ) {
-			$field = $this->additional_fields[ $field ] ?? [];
+			$field = $this->get_field_definition( $field );
 		}
-		return $this->contains_valid_rules( $field['required'] ) || $this->contains_valid_rules( $field['hidden'] );
+		if ( empty( $field ) ) {
+			return false;
+		}
+		return $this->contains_valid_rules( $field['required'] ?? null ) || $this->contains_valid_rules( $field['hidden'] ?? null );
 	}
 
 	/**
@@ -293,7 +415,13 @@ class CheckoutFields {
 	 * @return bool|\WP_Error True if the field is valid, a WP_Error otherwise.
 	 */
 	public function is_valid_field( $field, $document_object = null ) {
-		if ( $document_object && $this->contains_valid_rules( $field['validation'] ) ) {
+		if ( is_string( $field ) ) {
+			$field = $this->get_field_definition( $field );
+		}
+		if ( empty( $field ) ) {
+			return true;
+		}
+		if ( $document_object && $this->contains_valid_rules( $field['validation'] ?? null ) ) {
 			$field_schema = Validation::get_field_schema_with_context( $field['id'], $field['validation'], $document_object->get_context() );
 			return Validation::validate_document_object( $document_object, $field_schema );
 		}
@@ -313,15 +441,18 @@ class CheckoutFields {
 	/**
 	 * Returns the validate callback for a given field.
 	 *
-	 * @param array               $field The field.
+	 * @param array|string        $field The field array or field key.
 	 * @param DocumentObject|null $document_object The document object.
-	 * @return callable The validate callback.
+	 * @return callable|null The validate callback, or null if one is not defined for the field.
 	 */
 	public function get_validate_callback( $field, $document_object = null ) {
 		if ( is_string( $field ) ) {
-			$field = $this->additional_fields[ $field ] ?? [];
+			$field = $this->get_field_definition( $field );
 		}
-		if ( $document_object && $this->contains_valid_rules( $field['validation'] ) ) {
+		if ( empty( $field ) ) {
+			return null;
+		}
+		if ( $document_object && $this->contains_valid_rules( $field['validation'] ?? null ) ) {
 			return function ( $field_value, $field ) use ( $document_object ) {
 				$errors = new WP_Error();
 
@@ -659,10 +790,14 @@ class CheckoutFields {
 	/**
 	 * Returns an array of all core fields.
 	 *
+	 * Any conditional rules registered via register_core_field_rules() are merged on top of
+	 * the default definition, so that 'required', 'hidden' and 'validation' can be evaluated
+	 * against a DocumentObject exactly like additional fields.
+	 *
 	 * @return array An array of fields.
 	 */
 	public function get_core_fields() {
-		return [
+		$fields = [
 			'email'      => [
 				'label'          => __( 'Email address', 'woocommerce' ),
 				'optionalLabel'  => __(
@@ -797,6 +932,21 @@ class CheckoutFields {
 				'index'          => 100,
 			],
 		];
+
+		// Merge in any conditional rules registered against core fields so that both the
+		// client (via defaultFields asset data) and the server evaluate identical schemas.
+		foreach ( $this->core_field_rules as $field_id => $rules ) {
+			if ( ! isset( $fields[ $field_id ] ) ) {
+				continue;
+			}
+			foreach ( [ 'required', 'hidden', 'validation' ] as $rule_key ) {
+				if ( array_key_exists( $rule_key, $rules ) ) {
+					$fields[ $field_id ][ $rule_key ] = $rules[ $rule_key ];
+				}
+			}
+		}
+
+		return $fields;
 	}
 
 	/**
@@ -1018,6 +1168,58 @@ class CheckoutFields {
 			);
 		}
 		return [];
+	}
+
+	/**
+	 * Returns the core field keys that belong to a given location.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @param string $location The location (address|contact).
+	 * @return array An array of core field keys.
+	 */
+	public function get_core_field_keys_for_location( $location ) {
+		switch ( $location ) {
+			case 'address':
+				return array_values( array_diff( $this->get_core_fields_keys(), [ 'email' ] ) );
+			case 'contact':
+				return [ 'email' ];
+			default:
+				return [];
+		}
+	}
+
+	/**
+	 * Returns core field definitions for a given location, with conditional rules evaluated
+	 * against the provided DocumentObject.
+	 *
+	 * Only core fields that have rules registered (via register_core_field_rules) are returned.
+	 * Fields evaluated as hidden are excluded. The returned definitions have `required` and
+	 * `validate_callback` resolved identically to additional fields, so the Store API can
+	 * enforce the same behaviour server-side that the client enforces.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @param string              $location        The location (address|contact).
+	 * @param DocumentObject|null $document_object The document object.
+	 * @return array Map of core field key => field definition.
+	 */
+	public function get_contextual_core_fields_for_location( $location, $document_object = null ) {
+		$keys   = $this->get_core_field_keys_for_location( $location );
+		$fields = [];
+		foreach ( $keys as $key ) {
+			if ( empty( $this->core_field_rules[ $key ] ) ) {
+				continue;
+			}
+			if ( $this->is_hidden_field( $key, $document_object ) ) {
+				continue;
+			}
+			$field                      = $this->get_field_definition( $key );
+			$field['required']          = $this->is_required_field( $field, $document_object );
+			$field['validate_callback'] = $this->get_validate_callback( $field, $document_object );
+			$fields[ $key ]             = $field;
+		}
+		return $fields;
 	}
 
 	/**

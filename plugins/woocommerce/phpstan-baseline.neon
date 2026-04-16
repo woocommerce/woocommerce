@@ -55798,6 +55798,18 @@ parameters:
 			path: src/Blocks/Domain/Services/functions.php
 
 		-
+			message: '#^Function woocommerce_register_checkout_core_field_rules\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Blocks/Domain/Services/functions.php
+
+		-
+			message: '#^Function __internal_woocommerce_blocks_deregister_core_field_rules\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Blocks/Domain/Services/functions.php
+
+		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\InboxNotifications\:\:delete_surface_cart_checkout_blocks_notification\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -72705,7 +72717,7 @@ parameters:
 		-
 			message: '#^Access to protected property Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult\:\:\$status\.$#'
 			identifier: property.protected
-			count: 2
+			count: 1
 			path: src/StoreApi/Routes/V1/Checkout.php
 
 		-
@@ -72717,7 +72729,7 @@ parameters:
 		-
 			message: '#^Expression on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.expr
-			count: 4
+			count: 3
 			path: src/StoreApi/Routes/V1/Checkout.php
 
 		-

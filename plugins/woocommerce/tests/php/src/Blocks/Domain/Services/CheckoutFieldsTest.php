@@ -127,6 +127,10 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 	private function unregister_fields() {
 		$fields = $this->controller->get_additional_fields();
 		array_map( '__internal_woocommerce_blocks_deregister_checkout_field', array_keys( $fields ) );
+		array_map(
+			'__internal_woocommerce_blocks_deregister_core_field_rules',
+			array( 'first_name', 'last_name', 'postcode', 'country', 'email', 'phone' )
+		);
 	}
 
 	/**
@@ -187,5 +191,196 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 		$fields = $this->controller->get_contextual_fields_for_location( 'address', $document_object );
 		$this->assertArrayHasKey( 'plugin-namespace/gov-id', $fields );
 		$this->assertArrayNotHasKey( 'namespace/vat-number', $fields );
+	}
+
+	/**
+	 * Registering rules for a non-core field id should fail silently and not mutate state.
+	 */
+	public function test_register_core_field_rules_rejects_unknown_field() {
+		$result = $this->controller->register_core_field_rules(
+			'not_a_core_field',
+			array( 'required' => true )
+		);
+		$this->assertFalse( $result );
+	}
+
+	/**
+	 * Registering rules for a core field should merge them into get_core_fields() output.
+	 */
+	public function test_register_core_field_rules_merges_into_core_fields() {
+		$rules = array(
+			'validation' => array(
+				'type'    => 'string',
+				'pattern' => '^[A-Z]{2,}$',
+			),
+		);
+		$this->assertTrue( $this->controller->register_core_field_rules( 'first_name', $rules ) );
+
+		$core_fields = $this->controller->get_core_fields();
+		$this->assertArrayHasKey( 'first_name', $core_fields );
+		$this->assertArrayHasKey( 'validation', $core_fields['first_name'] );
+		$this->assertSame( $rules['validation'], $core_fields['first_name']['validation'] );
+	}
+
+	/**
+	 * Conditional hidden rule on a core field is evaluated against the DocumentObject.
+	 */
+	public function test_core_field_hidden_rule_evaluates_against_document_object() {
+		$hidden_rule = array(
+			'customer' => array(
+				'properties' => array(
+					'address' => array(
+						'properties' => array(
+							'country' => array(
+								'const' => 'US',
+							),
+						),
+					),
+				),
+			),
+		);
+		$this->controller->register_core_field_rules( 'phone', array( 'hidden' => $hidden_rule ) );
+
+		$customer        = \WC_Helper_Customer::create_mock_customer();
+		$document_object = new DocumentObject();
+		$document_object->set_context( 'shipping_address' );
+
+		$customer->set_shipping_country( 'US' );
+		$document_object->set_customer( $customer );
+		$this->assertTrue( $this->controller->is_hidden_field( 'phone', $document_object ) );
+
+		$customer->set_shipping_country( 'GB' );
+		$document_object->set_customer( $customer );
+		$this->assertFalse( $this->controller->is_hidden_field( 'phone', $document_object ) );
+	}
+
+	/**
+	 * Conditional required rule on a core field is evaluated against the DocumentObject,
+	 * and hidden fields are never reported as required.
+	 */
+	public function test_core_field_conditional_required_rule() {
+		$required_rule = array(
+			'customer' => array(
+				'properties' => array(
+					'address' => array(
+						'properties' => array(
+							'country' => array(
+								'const' => 'GB',
+							),
+						),
+					),
+				),
+			),
+		);
+		$this->controller->register_core_field_rules( 'postcode', array( 'required' => $required_rule ) );
+
+		$customer        = \WC_Helper_Customer::create_mock_customer();
+		$document_object = new DocumentObject();
+		$document_object->set_context( 'shipping_address' );
+
+		$customer->set_shipping_country( 'GB' );
+		$document_object->set_customer( $customer );
+		$this->assertTrue( $this->controller->is_required_field( 'postcode', $document_object ) );
+
+		$customer->set_shipping_country( 'US' );
+		$document_object->set_customer( $customer );
+		$this->assertFalse( $this->controller->is_required_field( 'postcode', $document_object ) );
+
+		// Hidden fields never report as required.
+		$this->controller->register_core_field_rules(
+			'postcode',
+			array(
+				'hidden' => array(
+					'customer' => array(
+						'properties' => array(
+							'address' => array(
+								'properties' => array(
+									'country' => array( 'const' => 'GB' ),
+								),
+							),
+						),
+					),
+				),
+			)
+		);
+		$customer->set_shipping_country( 'GB' );
+		$document_object->set_customer( $customer );
+		$this->assertFalse( $this->controller->is_required_field( 'postcode', $document_object ) );
+	}
+
+	/**
+	 * is_conditional_field() returns true once rules are registered for a core field.
+	 */
+	public function test_is_conditional_field_for_core_field() {
+		$this->assertFalse( $this->controller->is_conditional_field( 'first_name' ) );
+
+		$this->controller->register_core_field_rules(
+			'first_name',
+			array(
+				'hidden' => array(
+					'customer' => array(
+						'properties' => array(
+							'id' => array( 'const' => 0 ),
+						),
+					),
+				),
+			)
+		);
+
+		$this->assertTrue( $this->controller->is_conditional_field( 'first_name' ) );
+	}
+
+	/**
+	 * get_contextual_core_fields_for_location() returns only core fields with rules,
+	 * with hidden fields excluded and required/validate_callback resolved.
+	 */
+	public function test_get_contextual_core_fields_for_location() {
+		$this->controller->register_core_field_rules(
+			'first_name',
+			array(
+				'validation' => array(
+					'type'    => 'string',
+					'pattern' => '^.{2,}$',
+				),
+			)
+		);
+
+		$customer        = \WC_Helper_Customer::create_mock_customer();
+		$document_object = new DocumentObject();
+		$document_object->set_context( 'shipping_address' );
+		$document_object->set_customer( $customer );
+
+		$fields = $this->controller->get_contextual_core_fields_for_location( 'address', $document_object );
+		$this->assertArrayHasKey( 'first_name', $fields );
+		$this->assertArrayNotHasKey( 'last_name', $fields, 'Only fields with rules should be returned.' );
+		$this->assertTrue( $fields['first_name']['required'], 'Default core field is required.' );
+		$this->assertIsCallable( $fields['first_name']['validate_callback'] );
+	}
+
+	/**
+	 * is_valid_field() runs the JSON Schema validation rule for a core field.
+	 */
+	public function test_is_valid_field_runs_validation_rule_for_core_field() {
+		$this->controller->register_core_field_rules(
+			'first_name',
+			array(
+				'validation' => array(
+					'type'    => 'string',
+					'pattern' => '^[A-Z][a-z]+$',
+				),
+			)
+		);
+
+		$customer        = \WC_Helper_Customer::create_mock_customer();
+		$document_object = new DocumentObject();
+		$document_object->set_context( 'shipping_address' );
+
+		$customer->set_shipping_first_name( 'Alice' );
+		$document_object->set_customer( $customer );
+		$this->assertTrue( $this->controller->is_valid_field( 'first_name', $document_object ) );
+
+		$customer->set_shipping_first_name( 'x' );
+		$document_object->set_customer( $customer );
+		$this->assertNotTrue( $this->controller->is_valid_field( 'first_name', $document_object ) );
 	}
 }

@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add woocommerce_register_checkout_core_field_rules() for attaching conditional required/hidden/validation rules to core checkout fields (first_name, last_name, country, postcode, email, etc.). Rules use the same JSON Schema shape as additional fields and are enforced on both client and server.

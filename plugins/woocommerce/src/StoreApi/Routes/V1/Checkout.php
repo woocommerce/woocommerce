@@ -300,6 +300,61 @@ class Checkout extends AbstractCartRoute {
 				}
 			}
 
+			// Validate core fields that have conditional rules registered against them. Core fields
+			// such as first_name, postcode, email, etc. live in billing_address/shipping_address
+			// (not additional_fields), so we look up their values accordingly.
+			$core_fields = $this->additional_fields_controller->get_contextual_core_fields_for_location( $context_data['location'], $document_object );
+
+			if ( ! empty( $core_fields ) ) {
+				$billing_param = (array) ( $request->get_param( 'billing_address' ) ?? [] );
+				if ( 'contact' === $context_data['location'] ) {
+					// Email is part of billing_address in the request, not additional_fields.
+					$core_field_values = [ 'email' => $billing_param['email'] ?? '' ];
+				} else {
+					$core_field_values = $field_values;
+				}
+
+				foreach ( $core_fields as $field_key => $field ) {
+					// Skip values that were not posted if the request is partial or the field is not required.
+					if ( ! isset( $core_field_values[ $field_key ] ) && ( $is_partial || true !== $field['required'] ) ) {
+						continue;
+					}
+
+					$field_value = wc_clean( wp_unslash( $core_field_values[ $field_key ] ?? '' ) );
+
+					if ( empty( $field_value ) ) {
+						if ( true === $field['required'] ) {
+							/* translators: %s: is the field label */
+							$error_message = sprintf( __( '%s is required', 'woocommerce' ), $field['label'] );
+							if ( 'shipping_address' === $context ) {
+								/* translators: %s: is the field error message */
+								$error_message = sprintf( __( 'There was a problem with the provided shipping address: %s', 'woocommerce' ), $error_message );
+							} elseif ( 'billing_address' === $context ) {
+								/* translators: %s: is the field error message */
+								$error_message = sprintf( __( 'There was a problem with the provided billing address: %s', 'woocommerce' ), $error_message );
+							}
+							$errors->add( 'woocommerce_required_checkout_field', $error_message, [ 'key' => $field_key ] );
+						}
+						continue;
+					}
+
+					$valid_check = $this->additional_fields_controller->validate_field( $field, $field_value );
+
+					if ( is_wp_error( $valid_check ) && $valid_check->has_errors() ) {
+						foreach ( $valid_check->get_error_codes() as $code ) {
+							$valid_check->add_data(
+								array(
+									'location' => $context_data['location'],
+									'key'      => $field_key,
+								),
+								$code
+							);
+						}
+						$errors->merge_from( $valid_check );
+					}
+				}
+			}
+
 			// Validate all fields for this location (this runs custom validation callbacks).
 			$valid_location_check = $this->additional_fields_controller->validate_fields_for_location( $field_values, $context_data['location'], $context_data['group'] );
 
