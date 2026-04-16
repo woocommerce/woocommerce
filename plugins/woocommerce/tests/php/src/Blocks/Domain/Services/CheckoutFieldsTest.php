@@ -194,9 +194,11 @@ class CheckoutFieldsTest extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Registering rules for a non-core field id should fail silently and not mutate state.
+	 * Registering rules for a non-core field id should reject and emit a _doing_it_wrong notice.
 	 */
 	public function test_register_core_field_rules_rejects_unknown_field() {
+		$this->setExpectedIncorrectUsage( 'woocommerce_register_checkout_core_field_rules' );
+
 		$result = $this->controller->register_core_field_rules(
 			'not_a_core_field',
 			array( 'required' => true )

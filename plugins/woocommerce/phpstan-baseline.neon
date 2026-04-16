@@ -72717,7 +72717,7 @@ parameters:
 		-
 			message: '#^Access to protected property Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult\:\:\$status\.$#'
 			identifier: property.protected
-			count: 1
+			count: 2
 			path: src/StoreApi/Routes/V1/Checkout.php
 
 		-
@@ -72729,7 +72729,7 @@ parameters:
 		-
 			message: '#^Expression on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.expr
-			count: 3
+			count: 4
 			path: src/StoreApi/Routes/V1/Checkout.php
 
 		-
