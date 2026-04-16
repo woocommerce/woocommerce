@@ -18,7 +18,7 @@ import {
  * Internal dependencies
  */
 import SiteIcon from './site-icon';
-import { unlock } from '../../lock-unlock';
+import { unlock } from '../lock-unlock';
 
 const SiteHub = memo(
 	forwardRef(
@@ -33,9 +33,11 @@ const SiteHub = memo(
 					);
 
 					const coreSelectors = select( coreStore );
+					// @ts-expect-error - getSite and getUnstableBase are missing types.
 					const _site = coreSelectors.getSite() as
 						| undefined
 						| { title: string; url: string };
+					// @ts-expect-error - getSettings is missing types.
 					const base = coreSelectors.getUnstableBase() as
 						| { home: string }
 						| undefined;

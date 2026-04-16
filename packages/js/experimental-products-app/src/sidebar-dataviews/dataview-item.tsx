@@ -12,7 +12,7 @@ import { __experimentalHStack as HStack } from '@wordpress/components';
  * Internal dependencies
  */
 import SidebarNavigationItem from '../sidebar-navigation-item';
-import { unlock } from '../../lock-unlock';
+import { unlock } from '../lock-unlock';
 
 const { useHistory, useLocation } = unlock( routerPrivateApis );
 

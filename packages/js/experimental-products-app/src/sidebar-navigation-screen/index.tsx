@@ -17,7 +17,7 @@ import {
 /**
  * Internal dependencies
  */
-import { unlock } from '../../lock-unlock';
+import { unlock } from '../lock-unlock';
 import SidebarButton from './sidebar-button';
 
 const { useHistory, useLocation } = unlock( routerPrivateApis );

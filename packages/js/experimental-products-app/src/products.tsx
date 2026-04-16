@@ -9,7 +9,6 @@ import {
 	createRoot,
 	lazy,
 } from '@wordpress/element';
-
 import {
 	Root,
 	// @ts-expect-error missing types.
@@ -18,10 +17,9 @@ import {
 /**
  * Internal dependencies
  */
-import { getGutenbergVersion } from './utils/get-gutenberg-version';
 
 const ProductsApp = lazy( () =>
-	import( './products-app' ).then( ( module ) => ( {
+	import( './app' ).then( ( module ) => ( {
 		default: module.ProductsApp,
 	} ) )
 );
@@ -34,22 +32,15 @@ const ProductsApp = lazy( () =>
 export function initializeProductsDashboard( id: string ): Root {
 	const target = document.getElementById( id );
 	const root = createRoot( target! );
-	const isGutenbergEnabled = getGutenbergVersion() > 0;
+	console.log( 'initializeProductsDashboard' );
+
+	console.log( ProductsApp );
 
 	root.render(
 		<StrictMode>
-			{ isGutenbergEnabled ? (
-				<Suspense fallback={ null }>
-					<ProductsApp />
-				</Suspense>
-			) : (
-				<div>
-					{ __(
-						'Please enabled Gutenberg for this feature',
-						'woocommerce'
-					) }
-				</div>
-			) }
+			<Suspense fallback={ null }>
+				<ProductsApp />
+			</Suspense>
 		</StrictMode>
 	);
 

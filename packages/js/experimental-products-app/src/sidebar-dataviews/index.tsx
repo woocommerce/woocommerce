@@ -8,7 +8,7 @@ import { __experimentalItemGroup as ItemGroup } from '@wordpress/components';
 /**
  * Internal dependencies
  */
-import { unlock } from '../../lock-unlock';
+import { unlock } from '../lock-unlock';
 import DataViewItem from './dataview-item';
 import { useDefaultViews } from './default-views';
 
