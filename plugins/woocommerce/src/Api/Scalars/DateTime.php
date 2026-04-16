@@ -29,8 +29,22 @@ class DateTime {
 	 *
 	 * @param string $value The raw string value from the client.
 	 * @return \DateTimeImmutable
+	 * @throws \InvalidArgumentException When the value cannot be parsed as an ISO 8601 date/time string.
 	 */
 	public static function parse( string $value ): \DateTimeImmutable {
-		return new \DateTimeImmutable( $value );
+		try {
+			return new \DateTimeImmutable( $value );
+		} catch ( \Exception $e ) {
+			// PHP 8.3+ throws \DateMalformedStringException; earlier versions
+			// throw a plain \Exception. Both extend \Exception, so a single
+			// catch captures them.
+			// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Not HTML output; serialized as JSON in the GraphQL error response.
+			throw new \InvalidArgumentException(
+				sprintf( 'Invalid ISO 8601 date/time: %s', $e->getMessage() ),
+				0,
+				$e
+			);
+			// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
+		}
 	}
 }
