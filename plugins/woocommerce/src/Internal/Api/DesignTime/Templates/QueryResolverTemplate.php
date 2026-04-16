@@ -87,11 +87,18 @@ class <?php echo $class_name; ?> {
 		$execute_args = array();
 <?php foreach ( $execute_params as $param ) : ?>
 	<?php if ( ! empty( $param['unroll'] ) ) : ?>
-		$execute_args['<?php echo $param['name']; ?>'] = new \<?php echo $param['unroll']['fqcn']; ?>(
-		<?php foreach ( $param['unroll']['properties'] as $uprop ) : ?>
-			<?php echo $uprop['name']; ?>: <?php echo $uprop['value_expr']; ?>,
+		try {
+			$execute_args['<?php echo $param['name']; ?>'] = new \<?php echo $param['unroll']['fqcn']; ?>(
+			<?php foreach ( $param['unroll']['properties'] as $uprop ) : ?>
+				<?php echo $uprop['name']; ?>: <?php echo $uprop['value_expr']; ?>,
 <?php endforeach; ?>
-		);
+			);
+		} catch ( \InvalidArgumentException $e ) {
+			throw new \GraphQL\Error\Error(
+				$e->getMessage(),
+				extensions: array( 'code' => 'INVALID_ARGUMENT' )
+			);
+		}
 <?php elseif ( $param['is_infrastructure'] && $param['name'] === '_query_info' ) : ?>
 		$execute_args['_query_info'] = QueryInfoExtractor::extract_from_info( $info, $args );
 <?php elseif ( ! empty( $param['conversion'] ) ) : ?>

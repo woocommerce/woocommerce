@@ -39,12 +39,12 @@ class VariableProduct {
 								'first'  => array(
 									'type'         => Type::int(),
 									'defaultValue' => null,
-									'description'  => __( 'Return the first N results.', 'woocommerce' ),
+									'description'  => __( 'Return the first N results. Must be between 0 and 100.', 'woocommerce' ),
 								),
 								'last'   => array(
 									'type'         => Type::int(),
 									'defaultValue' => null,
-									'description'  => __( 'Return the last N results.', 'woocommerce' ),
+									'description'  => __( 'Return the last N results. Must be between 0 and 100.', 'woocommerce' ),
 								),
 								'after'  => array(
 									'type'         => Type::string(),

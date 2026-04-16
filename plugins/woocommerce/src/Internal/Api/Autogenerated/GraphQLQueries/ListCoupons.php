@@ -21,12 +21,12 @@ class ListCoupons {
 			'args'        => array(
 				'first'  => array(
 					'type'         => Type::int(),
-					'description'  => __( 'Return the first N results.', 'woocommerce' ),
+					'description'  => __( 'Return the first N results. Must be between 0 and 100.', 'woocommerce' ),
 					'defaultValue' => null,
 				),
 				'last'   => array(
 					'type'         => Type::int(),
-					'description'  => __( 'Return the last N results.', 'woocommerce' ),
+					'description'  => __( 'Return the last N results. Must be between 0 and 100.', 'woocommerce' ),
 					'defaultValue' => null,
 				),
 				'after'  => array(
@@ -54,13 +54,20 @@ class ListCoupons {
 
 		$command = wc_get_container()->get( ListCouponsCommand::class );
 
-		$execute_args                   = array();
+		$execute_args = array();
+		try {
 			$execute_args['pagination'] = new \Automattic\WooCommerce\Api\Pagination\PaginationParams(
 				first: $args['first'] ?? null,
 				last: $args['last'] ?? null,
 				after: $args['after'] ?? null,
 				before: $args['before'] ?? null,
 			);
+		} catch ( \InvalidArgumentException $e ) {
+			throw new \GraphQL\Error\Error(
+				$e->getMessage(),
+				extensions: array( 'code' => 'INVALID_ARGUMENT' )
+			);
+		}
 		if ( array_key_exists( 'status', $args ) ) {
 			$execute_args['status'] = $args['status'];
 		}
