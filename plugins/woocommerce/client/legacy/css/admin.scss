@@ -4275,7 +4275,7 @@ table.wc_shipping {
 	color: #1e1e1e;
 
 	&.wc-backbone-modal .wc-backbone-modal-content {
-		border-radius: 8px;
+		border-radius: var(--wc-card-border-radius, 8px);
 		border-top: 8px solid transparent;
 		border-bottom: 8px solid transparent;
 		max-width: 600px;
@@ -8541,7 +8541,7 @@ table.bar_chart {
 	&.post-type-shop_coupon {
 		.postbox,
 		#postdivrich {
-			border-radius: 8px;
+			border-radius: var(--wc-card-border-radius, 8px);
 			overflow: hidden; // Clip internal elements (tab sidebar, action bars) to rounded corners.
 		}
 
@@ -8555,7 +8555,7 @@ table.bar_chart {
 	// HPOS order editor uses a different body class.
 	&.woocommerce_page_wc-orders {
 		.postbox {
-			border-radius: 8px;
+			border-radius: var(--wc-card-border-radius, 8px);
 			overflow: hidden;
 		}
 	}
