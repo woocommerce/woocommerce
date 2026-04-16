@@ -194,8 +194,8 @@ class Analytics {
 	/**
 	 * Register the full refund fix data tool on the WooCommerce > Status > Tools page.
 	 *
-	 * Only shown when the store has the old full refund data flag set (i.e.
-	 * {@see OrderUtil::uses_new_full_refund_data()} returns false).
+	 * The Fix button is disabled by default and only enabled via JS after clicking
+	 * Check confirms there are affected orders.
 	 *
 	 * @since 10.8.0
 	 *
@@ -203,10 +203,6 @@ class Analytics {
 	 * @return array Filtered debug tool registrations.
 	 */
 	public function register_full_refund_fix_data_tool( $debug_tools ) {
-		if ( OrderUtil::uses_new_full_refund_data() ) {
-			return $debug_tools;
-		}
-
 		$debug_tools[ self::FULL_REFUND_FIX_DATA_TOOL_ID ] = array(
 			'name'     => __( 'Fix analytics full refund data', 'woocommerce' ),
 			'button'   => __( 'Fix', 'woocommerce' ),
@@ -239,7 +235,7 @@ class Analytics {
 			'wc-admin-data'
 		);
 
-		return __( 'Re-importing refunded orders in batches of 1,000. Full refund data will be updated shortly.', 'woocommerce' );
+		return __( 'Re-importing refunded orders in batches. Full refund data will be updated shortly.', 'woocommerce' );
 	}
 
 	/**
@@ -262,9 +258,12 @@ class Analytics {
 			$wpdb->prepare(
 				"SELECT order_stats.order_id
 				FROM {$wpdb->prefix}wc_order_stats AS order_stats
+				INNER JOIN {$wpdb->prefix}wc_order_stats AS parent_stats ON order_stats.parent_id = parent_stats.order_id
 				WHERE order_stats.total_sales < 0
+					AND order_stats.total_sales = order_stats.net_total
 					AND order_stats.total_sales != order_stats.shipping_total
 					AND order_stats.total_sales != order_stats.tax_total
+					AND (parent_stats.shipping_total > 0 OR parent_stats.tax_total > 0)
 					AND order_stats.order_id > %d
 				ORDER BY order_stats.order_id ASC
 				LIMIT 1000",
@@ -317,13 +316,45 @@ class Analytics {
 		$has_affected = $wpdb->get_var(
 			"SELECT order_stats.order_id
 			FROM {$wpdb->prefix}wc_order_stats AS order_stats
+			INNER JOIN {$wpdb->prefix}wc_order_stats AS parent_stats ON order_stats.parent_id = parent_stats.order_id
 			WHERE order_stats.total_sales < 0
+				AND order_stats.total_sales = order_stats.net_total
 				AND order_stats.total_sales != order_stats.shipping_total
 				AND order_stats.total_sales != order_stats.tax_total
+				AND (parent_stats.shipping_total > 0 OR parent_stats.tax_total > 0)
 			LIMIT 1"
 		);
 
-		wp_send_json_success( array( 'needs_fix' => ! empty( $has_affected ) ) );
+		$fix_in_progress = ! empty(
+			as_get_scheduled_actions(
+				array(
+					'hook'     => 'woocommerce_analytics_refund_fix_batch',
+					'status'   => array( \ActionScheduler_Store::STATUS_PENDING, \ActionScheduler_Store::STATUS_RUNNING ),
+					'per_page' => 1,
+					'orderby'  => 'none',
+				),
+				'ids'
+			)
+		) || ! empty(
+			as_get_scheduled_actions(
+				array(
+					'hook'             => 'woocommerce_analytics_refund_fix_batch',
+					'status'           => \ActionScheduler_Store::STATUS_COMPLETE,
+					'modified'         => new \DateTime( '-2 minutes', new \DateTimeZone( 'UTC' ) ),
+					'modified_compare' => '>=',
+					'per_page'         => 1,
+					'orderby'          => 'none',
+				),
+				'ids'
+			)
+		);
+
+		wp_send_json_success(
+			array(
+				'needs_fix'       => ! empty( $has_affected ),
+				'fix_in_progress' => $fix_in_progress,
+			)
+		);
 	}
 
 	/**
@@ -338,10 +369,6 @@ class Analytics {
 			return;
 		}
 
-		if ( OrderUtil::uses_new_full_refund_data() ) {
-			return;
-		}
-
 		$nonce         = wp_create_nonce( 'woocommerce_refund_fix_check' );
 		$ajax_url      = admin_url( 'admin-ajax.php' );
 		$tool_class    = self::FULL_REFUND_FIX_DATA_TOOL_ID;
@@ -349,7 +376,8 @@ class Analytics {
 		$label_working = __( 'Checking\u2026', 'woocommerce' );
 		$msg_needs_fix = __( 'Your store has orders that need fixing.', 'woocommerce' );
 		$msg_no_fix    = __( 'No affected orders found.', 'woocommerce' );
-		$msg_error     = __( 'Check failed, please try again.', 'woocommerce' );
+		$msg_in_progress = __( 'A fix is already in progress, please check back later.', 'woocommerce' );
+		$msg_error       = __( 'Check failed, please try again.', 'woocommerce' );
 		?>
 		<script type="text/javascript">
 		( function() {
@@ -387,10 +415,18 @@ class Analytics {
 						checkBtn.disabled = false;
 						checkBtn.textContent = <?php echo wp_json_encode( $label_check ); ?>;
 						if ( json.success ) {
-							statusSpan.textContent = json.data.needs_fix
-								? <?php echo wp_json_encode( $msg_needs_fix ); ?>
-								: <?php echo wp_json_encode( $msg_no_fix ); ?>;
-							statusSpan.style.color = json.data.needs_fix ? '#d63638' : '#1d2327';
+							if ( json.data.fix_in_progress ) {
+								statusSpan.textContent = <?php echo wp_json_encode( $msg_in_progress ); ?>;
+								statusSpan.style.color = '#1d2327';
+							} else {
+								statusSpan.textContent = json.data.needs_fix
+									? <?php echo wp_json_encode( $msg_needs_fix ); ?>
+									: <?php echo wp_json_encode( $msg_no_fix ); ?>;
+								statusSpan.style.color = json.data.needs_fix ? '#d63638' : '#1d2327';
+								if ( json.data.needs_fix && fixBtn ) {
+									fixBtn.disabled = false;
+								}
+							}
 						} else {
 							statusSpan.textContent = <?php echo wp_json_encode( $msg_error ); ?>;
 							statusSpan.style.color = '#d63638';
@@ -406,6 +442,7 @@ class Analytics {
 
 			var fixBtn = actionCell.querySelector( 'input[type=submit]' );
 			if ( fixBtn ) {
+				fixBtn.disabled = true;
 				actionCell.insertBefore( checkBtn, fixBtn );
 			} else {
 				actionCell.appendChild( checkBtn );
