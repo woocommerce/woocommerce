@@ -32,6 +32,17 @@ class POSApprovalController extends RestApiControllerBase implements RegisterHoo
 	private const APPROVABLE_ACTIONS = array(
 		'refund_shop_orders',
 		'void_shop_orders',
+		'publish_shop_coupons',
+	);
+
+	/**
+	 * Actions that require an order ID in context.
+	 *
+	 * @var string[]
+	 */
+	private const ORDER_SCOPED_ACTIONS = array(
+		'refund_shop_orders',
+		'void_shop_orders',
 	);
 
 	/**
@@ -164,7 +175,7 @@ class POSApprovalController extends RestApiControllerBase implements RegisterHoo
 		}
 
 		$order_id = isset( $context['order_id'] ) ? absint( $context['order_id'] ) : 0;
-		if ( 0 === $order_id ) {
+		if ( 0 === $order_id && in_array( $action, self::ORDER_SCOPED_ACTIONS, true ) ) {
 			return new WP_Error(
 				'woocommerce_pos_missing_order_context',
 				__( 'An order ID is required for this approval.', 'woocommerce' ),
@@ -172,7 +183,9 @@ class POSApprovalController extends RestApiControllerBase implements RegisterHoo
 			);
 		}
 
-		$context['order_id'] = $order_id;
+		if ( $order_id > 0 ) {
+			$context['order_id'] = $order_id;
+		}
 
 		$user_id = $this->pin_service->lookup_user_by_pin( $pin );
 

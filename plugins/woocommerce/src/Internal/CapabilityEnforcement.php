@@ -30,6 +30,7 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 	private const APPROVABLE_CAPABILITIES = array(
 		'refund_shop_orders',
 		'void_shop_orders',
+		'publish_shop_coupons',
 	);
 
 	/**
@@ -134,6 +135,11 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 		if ( 'shop_order_refund' === $post_type && 'create' === $context ) {
 			$this->extract_approval_context_from_rest_request();
 			return $this->user_has_capability( 'refund_shop_orders' );
+		}
+
+		if ( 'shop_coupon' === $post_type && 'create' === $context ) {
+			$this->extract_approval_context_from_rest_request();
+			return $this->user_has_capability( 'publish_shop_coupons' );
 		}
 
 		// HPOS uses a shop_order_placehold post type whose map_meta_cap resolves
@@ -326,9 +332,12 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 		}
 
 		// Validate the approval is scoped to the correct order if applicable.
+		// Non-order-scoped approvals (e.g. coupon creation) skip this check.
 		$approved_order_id = (int) ( $approval_data['context']['order_id'] ?? 0 );
-		if ( $approved_order_id <= 0 || $this->current_order_id <= 0 || $approved_order_id !== $this->current_order_id ) {
-			return false;
+		if ( $approved_order_id > 0 || $this->current_order_id > 0 ) {
+			if ( $approved_order_id !== $this->current_order_id ) {
+				return false;
+			}
 		}
 
 		$this->maybe_add_order_note( $approval_data, $capability, $user_id );
