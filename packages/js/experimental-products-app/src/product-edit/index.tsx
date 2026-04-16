@@ -22,7 +22,7 @@ import { privateApis as editorPrivateApis } from '@wordpress/editor';
 /**
  * Internal dependencies
  */
-import { unlock } from '../../lock-unlock';
+import { unlock } from '../lock-unlock';
 import { productFields } from '../product-list/fields';
 
 const { NavigableRegion } = unlock( editorPrivateApis );

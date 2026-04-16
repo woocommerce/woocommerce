@@ -26,11 +26,12 @@ import {
 	Button,
 } from '@wordpress/components';
 import { privateApis as editorPrivateApis } from '@wordpress/editor';
+import { NavigableRegion } from '@wordpress/admin-ui';
 
 /**
  * Internal dependencies
  */
-import { unlock } from '../../lock-unlock';
+import { unlock } from '../lock-unlock';
 import {
 	useDefaultViews,
 	defaultLayouts,
@@ -40,7 +41,7 @@ import { productFields } from './fields';
 import { useEditProductAction } from '../dataviews-actions';
 import { useNewNavigation } from '../utilites/new-navigation';
 
-const { NavigableRegion, usePostActions } = unlock( editorPrivateApis );
+const { usePostActions } = unlock( editorPrivateApis );
 const { useHistory, useLocation } = unlock( routerPrivateApis );
 
 export type ProductListProps = {
@@ -195,6 +196,7 @@ export default function ProductList( {
 	// TODO: Use the Woo data store to get all the products, as this doesn't contain all the product data.
 	const { records, totalCount, isLoading } = useSelect(
 		( select ) => {
+			// @ts-expect-error - The productsStore doesn't have types yet.
 			const { getProducts, getProductsTotalCount, isResolving } =
 				select( productsStore );
 			return {

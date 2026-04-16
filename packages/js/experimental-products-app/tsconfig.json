@@ -1,0 +1,24 @@
+{
+	"extends": "../internal-ts-config/tsconfig.json",
+	"compilerOptions": {
+		"rootDir": "src",
+		"noCheck": false,
+		"outDir": "build-module",
+		"declaration": true,
+		"declarationMap": true,
+		"declarationDir": "./build-types",
+		"resolveJsonModule": true,
+		"typeRoots": [
+			"./typings",
+			"./node_modules/@types"
+		]
+	},
+	"include": [
+		"typings/**/*",
+		"src/**/*"
+	],
+	"exclude": [
+		"**/test/**",
+		"**/stories/**"
+	]
+}

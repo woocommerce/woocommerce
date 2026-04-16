@@ -11,7 +11,7 @@ import {
 /**
  * Internal dependencies
  */
-import { unlock } from '../lock-unlock';
+import { unlock } from './lock-unlock';
 import useLayoutAreas from './router';
 import { Layout } from './layout';
 import {
@@ -35,14 +35,13 @@ function ProductsLayout() {
 }
 
 export function ProductsApp() {
+	console.log( 'ci entrooo' );
 	return (
 		<NewNavigationProvider>
-			<GlobalStylesProvider>
-				<UnsavedChangesWarning />
-				<RouterProvider>
-					<ProductsLayout />
-				</RouterProvider>
-			</GlobalStylesProvider>
+			<UnsavedChangesWarning />
+			<RouterProvider>
+				<ProductsLayout />
+			</RouterProvider>
 		</NewNavigationProvider>
 	);
 }
