@@ -601,33 +601,26 @@ export const selectShippingRate =
 			return;
 		}
 
+		const previousRates = select.getShippingRates();
+
 		try {
 			dispatch.shippingRatesBeingSelected( true );
 
 			// Optimistically update the selected flag so the UI (labels, totals)
 			// reflects the new rate immediately without waiting for the API.
-			const currentRates = select.getShippingRates();
-			dispatch( {
-				type: 'SET_CART_DATA',
-				response: {
-					shippingRates: currentRates.map( ( pkg ) => {
-						if (
-							packageId !== null &&
-							pkg.package_id !== packageId
-						) {
-							return pkg;
-						}
-						return {
-							...pkg,
-							shipping_rates: pkg.shipping_rates.map(
-								( rate ) => ( {
-									...rate,
-									selected: rate.rate_id === rateId,
-								} )
-							),
-						};
-					} ),
-				},
+			dispatch.setCartData( {
+				shippingRates: previousRates.map( ( pkg ) => {
+					if ( packageId !== null && pkg.package_id !== packageId ) {
+						return pkg;
+					}
+					return {
+						...pkg,
+						shipping_rates: pkg.shipping_rates.map( ( rate ) => ( {
+							...rate,
+							selected: rate.rate_id === rateId,
+						} ) ),
+					};
+				} ),
 			} );
 
 			if ( abortController ) {
@@ -663,6 +656,11 @@ export const selectShippingRate =
 			dispatch.shippingRatesBeingSelected( false );
 			return response;
 		} catch ( error ) {
+			// Roll back the optimistic update so the UI reflects the server's
+			// actual selection rather than a rate the server never committed.
+			dispatch.setCartData( {
+				shippingRates: previousRates,
+			} );
 			dispatch.receiveError( isApiErrorResponse( error ) ? error : null );
 			dispatch.shippingRatesBeingSelected( false );
 			return Promise.reject( error );
