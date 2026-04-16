@@ -446,6 +446,7 @@ class Checkout extends AbstractCartRoute {
 		if ( null !== $payment_method ) {
 			WC()->session->set( 'chosen_payment_method', $payment_method->id );
 		}
+		WC()->session->set( 'store_api_customer_note', wc_sanitize_textarea( $request['order_notes'] ?? '' ) );
 		$this->persist_additional_fields_for_customer( $request );
 	}
 
@@ -460,7 +461,8 @@ class Checkout extends AbstractCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	private function build_draft_route_response( \WP_REST_Request $request ) {
-		$payment_id = (string) ( WC()->session->get( 'chosen_payment_method' ) ?? PaymentUtils::get_default_payment_method() );
+		$payment_id    = (string) ( WC()->session->get( 'chosen_payment_method' ) ?? PaymentUtils::get_default_payment_method() );
+		$customer_note = (string) ( WC()->session->get( 'store_api_customer_note' ) ?? '' );
 
 		/**
 		 * Narrow the parent-declared schema property to the checkout subclass for phpstan.
@@ -474,7 +476,7 @@ class Checkout extends AbstractCartRoute {
 				$this->cart_controller->get_cart_instance(),
 				wc()->customer,
 				$payment_id,
-				wc_sanitize_textarea( $request['customer_note'] ?? '' )
+				$customer_note
 			)
 		);
 	}
