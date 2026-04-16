@@ -34,15 +34,15 @@ class GetProduct {
 	 * @return bool Whether the current user can read this product.
 	 * @throws AuthorizationException When the product does not exist.
 	 */
-	public function authorize( int $id ): bool {
+	public function authorize( int $id, bool $_preauthorized ): bool {
 		$post = get_post( $id );
 
 		if ( ! $post || 'product' !== $post->post_type ) {
 			throw new AuthorizationException( 'Product not found.' );
 		}
 
-		// Admins can read any product.
-		if ( current_user_can( 'manage_woocommerce' ) ) {
+		// Honor the declared #[RequiredCapability].
+		if ( $_preauthorized ) {
 			return true;
 		}
 

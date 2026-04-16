@@ -18,6 +18,8 @@
  * @var array  $execute_params - each: ['name', 'conversion' => ?string, 'is_infrastructure' => bool, 'unroll' => ?array]
  * @var array  $input_converters - each: ['method_name', 'input_fqcn', 'input_class', 'properties' => [['name', 'conversion']]]
  * @var ?array $authorize_param_names - if non-null, the authorize() method param names (subset of execute params)
+ * @var bool   $has_preauthorized - true when authorize() declares a bool $_preauthorized infrastructure param
+ * @var string $preauthorized_expr - PHP expression that evaluates to the $_preauthorized bool at runtime
  * @var bool   $scalar_return - true when execute() returns a scalar (bool, int, float, string)
  */
 
@@ -104,7 +106,12 @@ class <?php echo $class_name; ?> {
 <?php endforeach; ?>
 
 <?php if ( $has_authorize ) : ?>
-		if ( ! $command->authorize( ...array_intersect_key( $execute_args, array( <?php echo implode( ', ', array_map( fn( $n ) => "'{$n}' => true", $authorize_param_names ) ); ?> ) ) ) ) {
+		$authorize_args = array_intersect_key( $execute_args, array( <?php echo implode( ', ', array_map( fn( $n ) => "'{$n}' => true", $authorize_param_names ) ); ?> ) );
+<?php if ( $has_preauthorized ) : ?>
+		$authorize_args['_preauthorized'] = <?php echo $preauthorized_expr; ?>;
+<?php endif; ?>
+
+		if ( ! $command->authorize( ...$authorize_args ) ) {
 			throw new \GraphQL\Error\Error(
 				'You do not have permission to perform this action.',
 				extensions: array( 'code' => 'UNAUTHORIZED' )
