@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Fix workflow path filters to correctly re-run when workflow files change.

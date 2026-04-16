@@ -7,9 +7,6 @@ import { useState, Children } from '@wordpress/element';
 import { Text } from '@woocommerce/experimental';
 import { PluginNames, pluginsStore } from '@woocommerce/data';
 import { getAdminLink } from '@woocommerce/settings';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore VisuallyHidden is present, it's just not typed
-// eslint-disable-next-line @woocommerce/dependency-group
 import { CardFooter } from '@wordpress/components';
 
 /**

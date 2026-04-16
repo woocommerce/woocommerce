@@ -83,9 +83,9 @@ export function useDefaultViews( { postType }: { postType: string } ): Array< {
 	const labels = useSelect(
 		( select ) => {
 			const { getPostType } = select( coreStore );
-			const postTypeData: { labels?: Record< string, string > } =
-				// @ts-expect-error getPostType is not typed correctly because we are overriding the type definition. https://github.com/woocommerce/woocommerce/blob/eeaf58e20064d837412d6c455e69cc5a5e2678b4/packages/js/product-editor/typings/index.d.ts#L15-L35
-				getPostType( postType );
+			const postTypeData:
+				| { labels?: Record< string, string > }
+				| undefined = getPostType( postType );
 			return postTypeData?.labels;
 		},
 		[ postType ]

@@ -49,7 +49,7 @@ jest.mock( '@wordpress/data', () => ( {
 
 describe( 'useVariations', () => {
 	const mockProductId = 123;
-	const mockVariation: ProductVariation = {
+	const mockVariation = {
 		id: 1,
 		attributes: [],
 		downloads: [],
@@ -81,7 +81,7 @@ describe( 'useVariations', () => {
 		shipping_class_id: 0,
 		image: undefined,
 		permalink: '',
-	};
+	} as unknown as ProductVariation;
 
 	beforeEach( () => {
 		jest.clearAllMocks();

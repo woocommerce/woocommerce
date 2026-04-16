@@ -35,13 +35,15 @@ const getWooCommerceMeta = ( user: WCUser ) => {
 };
 
 // Create wrapper for updating user's `woocommerce_meta`.
+type SaveUserFn = ( userToSave: {
+	id: number;
+	woocommerce_meta: WCUser[ 'woocommerce_meta' ];
+} ) => Promise< WCUser | undefined >;
+
 async function updateUserPrefs(
 	receiveCurrentUser: ( user: WCUser ) => void,
 	user: WCUser,
-	saveUser: ( userToSave: {
-		id: number;
-		woocommerce_meta: WCUser[ 'woocommerce_meta' ];
-	} ) => WCUser,
+	saveUser: SaveUserFn,
 	getLastEntitySaveError: (
 		kind: string,
 		name: string,
@@ -111,9 +113,7 @@ export const useUserPreferences = () => {
 	// Get our dispatch methods now - this can't happen inside the callback below.
 	const dispatch = useDispatch( store );
 	const { addEntities, receiveCurrentUser, saveEntityRecord } = dispatch;
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
-	let { saveUser } = dispatch;
+	let saveUser = dispatch.saveUser as SaveUserFn | undefined;
 
 	const userData = useSelect( ( select ) => {
 		const {
@@ -144,10 +144,7 @@ export const useUserPreferences = () => {
 	) => {
 		// WP 5.3.x doesn't have the User entity defined.
 		if ( typeof saveUser !== 'function' ) {
-			saveUser = async ( userToSave: {
-				id: number;
-				woocommerce_meta: { [ key: string ]: boolean };
-			} ) => {
+			saveUser = async ( userToSave: Parameters< SaveUserFn >[ 0 ] ) => {
 				const entityDefined = Boolean(
 					userData.getEntity( 'root', 'user' )
 				);
@@ -167,7 +164,7 @@ export const useUserPreferences = () => {
 				await saveEntityRecord( 'root', 'user', userToSave );
 
 				// Respond with the updated user.
-				return userData.getEntityRecord(
+				return userData.getEntityRecord< WCUser >(
 					'root',
 					'user',
 					userToSave.id
@@ -176,6 +173,8 @@ export const useUserPreferences = () => {
 		}
 		// Get most recent user before update.
 		const currentUser = userData.getCurrentUser() as WCUser;
+		// saveUser is guaranteed to be defined here — either from dispatch
+		// or from the fallback assignment above.
 		return updateUserPrefs(
 			receiveCurrentUser,
 			currentUser,

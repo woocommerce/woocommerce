@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix attribute terms REST API writing menu_order to wrong meta key.

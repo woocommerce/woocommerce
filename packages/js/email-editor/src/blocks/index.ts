@@ -28,6 +28,7 @@ import { enhanceQuoteBlock } from './core/quote';
 import { filterSetUrlAttribute } from './core/block-edit';
 import { enhanceSocialLinksBlock } from './core/social-links';
 import { enhanceSiteLogoBlock } from './core/site-logo';
+import { enableProductImageAlignment } from './woocommerce/product-image';
 
 export { getAllowedBlockNames } from './utils';
 
@@ -52,5 +53,6 @@ export function initBlocks() {
 	alterSupportConfiguration();
 	enhanceSocialLinksBlock();
 	enhanceSiteLogoBlock();
+	enableProductImageAlignment();
 	removeBlockStylesFromAllBlocks();
 }

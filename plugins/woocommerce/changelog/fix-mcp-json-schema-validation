@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix invalid JSON Schema in MCP tool definitions: convert date-time type to proper string+format and deduplicate enum values.

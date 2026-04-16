@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix email editor styling regressions: logo/title font competition, inconsistent bold in order totals, and incorrect content indentation in block emails.

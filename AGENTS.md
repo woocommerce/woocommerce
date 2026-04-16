@@ -27,13 +27,10 @@ The `.ai/skills/` directory contains procedural HOW-TO instructions:
 - **`woocommerce-copy-guidelines`** - UI text standards (sentence case rules)
 - **`woocommerce-code-review`** - Code review standards and critical violations to flag
 - **`woocommerce-markdown`** - Markdown writing and editing guidelines
-- **`woocommerce-git`** - Guidelines for git and GitHub operations
+- **`woocommerce-git-commit`** - Commit changes with conventional messages and smart grouping
+- **`woocommerce-git-draft-pr`** - Create draft PRs with proper template, changelog, and milestone handling
 - **`woocommerce-email-editor`** - Email editor development setup and Mailpit configuration
-
-**CRITICAL:** After reading a skill, check if a personal skill override file exists at
-`~/.ai/skills/{skill-name}-personal/SKILL.md` and apply it too. For example, for the
-`woocommerce-backend-dev` skill, check for `~/.ai/skills/woocommerce-backend-dev-personal/SKILL.md`.
-**Personal override skills take precedence over project-level skills in case of conflict**.
+- **`woocommerce-performance`** - Performance guardrails. **Invoke when writing or reviewing PHP code.**
 
 ## Project Architecture
 

@@ -341,9 +341,13 @@ class WC_Post_Types {
 		}
 
 		// If theme support changes, we may need to flush permalinks since some are changed based on this flag.
-		$theme_support = wc_current_theme_supports_woocommerce_or_fse() ? 'yes' : 'no';
-		if ( get_option( 'current_theme_supports_woocommerce' ) !== $theme_support && update_option( 'current_theme_supports_woocommerce', $theme_support ) ) {
-			update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
+		// Skip this check in WP-CLI and cron contexts: themes may not be loaded (e.g. --skip-themes),
+		// which would incorrectly record theme support as "no" and corrupt rewrite rules on the frontend.
+		if ( ! ( defined( 'WP_CLI' ) && WP_CLI ) && ! wp_doing_cron() ) {
+			$theme_support = wc_current_theme_supports_woocommerce_or_fse() ? 'yes' : 'no';
+			if ( get_option( 'current_theme_supports_woocommerce' ) !== $theme_support && update_option( 'current_theme_supports_woocommerce', $theme_support ) ) {
+				update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
+			}
 		}
 
 		register_post_type(

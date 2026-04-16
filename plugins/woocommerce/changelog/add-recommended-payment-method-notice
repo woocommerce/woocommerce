@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add support for notice data in recommended payment methods, enabling payment gateways to surface requirement warnings during onboarding.

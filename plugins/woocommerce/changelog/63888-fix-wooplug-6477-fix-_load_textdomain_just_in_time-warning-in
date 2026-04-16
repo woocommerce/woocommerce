@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix _load_textdomain_just_in_time warning in FulfillmentsController by checking feature option directly instead of using FeaturesController::feature_is_enabled() before init action.

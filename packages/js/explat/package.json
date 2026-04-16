@@ -56,8 +56,8 @@
 	"dependencies": {
 		"@automattic/explat-client": "^0.0.5",
 		"@automattic/explat-client-react-helpers": "^0.0.6",
-		"@wordpress/api-fetch": "wp-6.6",
-		"@wordpress/hooks": "wp-6.6",
+		"@wordpress/api-fetch": "catalog:wp-min",
+		"@wordpress/hooks": "catalog:wp-min",
 		"cookie": "^0.4.2",
 		"qs": "^6.11.2"
 	},
@@ -70,6 +70,7 @@
 		"@types/react": "18.3.x",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
+		"@woocommerce/internal-ts-config": "workspace:*",
 		"eslint": "^8.55.0",
 		"jest": "29.5.x",
 		"jest-cli": "29.5.x",
@@ -151,12 +152,16 @@
 			"allowUsuallyExcludedPaths": true,
 			"files": [
 				"package.json",
+				"../../../pnpm-lock.yaml",
 				"node_modules/@woocommerce/eslint-plugin/configs",
 				"node_modules/@woocommerce/eslint-plugin/rules",
 				"node_modules/@woocommerce/eslint-plugin/index.js",
 				"node_modules/@woocommerce/internal-js-tests/build",
 				"node_modules/@woocommerce/internal-js-tests/build-module",
-				"node_modules/@woocommerce/internal-js-tests/jest-preset.js"
+				"node_modules/@woocommerce/internal-js-tests/jest-preset.js",
+				"node_modules/@woocommerce/internal-ts-config/tsconfig.json",
+				"node_modules/@woocommerce/internal-ts-config/tsconfig-cjs.json",
+				"node_modules/@woocommerce/internal-ts-config/types"
 			]
 		}
 	}

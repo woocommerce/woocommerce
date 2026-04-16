@@ -250,6 +250,7 @@ class Chart extends Component {
 			<div className="woocommerce-chart__interval-select">
 				<SelectControl
 					__next40pxDefaultSize
+					__nextHasNoMarginBottom
 					value={ interval }
 					options={ allowedIntervals.map( ( allowedInterval ) => ( {
 						value: allowedInterval,
