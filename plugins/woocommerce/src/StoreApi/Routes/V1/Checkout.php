@@ -749,8 +749,6 @@ class Checkout extends AbstractCartRoute {
 	 * @throws RouteException On error.
 	 */
 	private function create_or_update_draft_order( \WP_REST_Request $request ) {
-		$this->order = $this->order ?? $this->get_draft_order();
-
 		if ( ! $this->order ) {
 			$this->order = $this->order_controller->create_order_from_cart();
 			wc_log_order_step( '[Store API #4::create_or_update_draft_order] Created order from cart', array( 'order_object' => $this->order ) );
