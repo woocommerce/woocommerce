@@ -83,6 +83,10 @@ class <?php echo $class_name; ?> {
 							'deprecationReason' => '<?php echo addslashes( $field['deprecation_reason'] ); ?>',
 <?php endif; ?>
 	<?php if ( ! empty( $field['paginated_connection'] ) ) : ?>
+							'complexity' => static function ( int $child_complexity, array $args ): int {
+								$page_size = $args['first'] ?? $args['last'] ?? \Automattic\WooCommerce\Api\Pagination\PaginationParams::get_default_page_size();
+								return $page_size * ( $child_complexity + 1 );
+							},
 							'resolve' => fn( $parent, array $args ): Connection => $parent-><?php echo $field['name']; ?>->slice( $args ),
 <?php endif; ?>
 						),

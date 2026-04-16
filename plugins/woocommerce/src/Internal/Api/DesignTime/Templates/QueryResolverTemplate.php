@@ -73,6 +73,12 @@ class <?php echo $class_name; ?> {
 				),
 <?php endforeach; ?>
 			),
+<?php if ( $has_connection_of ) : ?>
+			'complexity' => static function ( int $child_complexity, array $args ): int {
+				$page_size = $args['first'] ?? $args['last'] ?? \Automattic\WooCommerce\Api\Pagination\PaginationParams::get_default_page_size();
+				return $page_size * ( $child_complexity + 1 );
+			},
+<?php endif; ?>
 			'resolve' => array( self::class, 'resolve' ),
 		);
 	}
