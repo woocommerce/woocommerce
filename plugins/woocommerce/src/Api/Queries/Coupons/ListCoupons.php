@@ -42,25 +42,6 @@ class ListCoupons {
 		$before = $pagination->before;
 		$limit  = $first ?? $last ?? PaginationParams::get_default_page_size();
 
-		$query_args = array(
-			'post_type'               => 'shop_coupon',
-			'posts_per_page'          => $limit + 1,
-			// Fetch one extra to determine has_next/prev.
-							'orderby' => 'ID',
-			'order'                   => null !== $last ? 'DESC' : 'ASC',
-			'post_status'             => $status?->value ?? 'any',
-		);
-
-		if ( null !== $after ) {
-			$after_id            = (int) base64_decode( $after, true );
-			$query_args['where'] = "AND {$GLOBALS['wpdb']->posts}.ID > {$after_id}";
-		}
-
-		if ( null !== $before ) {
-			$before_id           = (int) base64_decode( $before, true );
-			$query_args['where'] = "AND {$GLOBALS['wpdb']->posts}.ID < {$before_id}";
-		}
-
 		// Use WP_Query for the count and a filtered query for cursor-based pagination.
 		$count_args  = array(
 			'post_type'      => 'shop_coupon',
