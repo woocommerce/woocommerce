@@ -179,12 +179,11 @@ function* handlePluginAPIError(
 	// "cannot manage plugins" message otherwise.
 	const isPermissionError =
 		isRestApiError( error ) &&
-		'data' in error &&
 		( error as { data?: { status?: number } } ).data?.status === 403;
 
 	if ( isPermissionError ) {
 		rawErrorMessage = __(
-			'You do not have permissions to install plugins. Please contact your site administrator.',
+			'You do not have permissions to manage plugins. Please contact your site administrator.',
 			'woocommerce'
 		);
 	} else if ( isPluginResponseError( plugins, error ) ) {

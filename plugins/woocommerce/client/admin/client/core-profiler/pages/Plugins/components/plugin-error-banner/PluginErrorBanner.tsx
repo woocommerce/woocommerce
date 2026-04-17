@@ -30,7 +30,7 @@ export const PluginErrorBanner = ( {
 			( e ) => e.errorDetails?.data?.data?.status === 403 // 403 is the code representing rest_authorization_required_code()
 		):
 			installationErrorMessage = __(
-				'You do not have permissions to install plugins. Please contact your site administrator.',
+				'You do not have permissions to manage plugins. Please contact your site administrator.',
 				'woocommerce'
 			);
 			break;
