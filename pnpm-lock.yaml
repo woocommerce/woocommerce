@@ -2024,7 +2024,7 @@ importers:
         specifier: 4.3.x
         version: 4.3.0(postcss@8.5.9)(webpack@5.97.1)
       rtlcss:
-        specifier: ^4.3.0
+        specifier: 4.3.x
         version: 4.3.0
       sass-loader:
         specifier: 10.5.x
@@ -2545,9 +2545,6 @@ importers:
         specifier: ~6.3.0
         version: 6.3.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
     devDependencies:
-      '@automattic/webpack-rtl-plugin':
-        specifier: 6.0.x
-        version: 6.0.0(webpack@5.97.1)
       '@babel/core':
         specifier: 7.25.7
         version: 7.25.7
@@ -2911,9 +2908,6 @@ importers:
         specifier: ~6.3.0
         version: 6.3.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
     devDependencies:
-      '@automattic/webpack-rtl-plugin':
-        specifier: 6.0.x
-        version: 6.0.0(webpack@5.97.1)
       '@babel/core':
         specifier: 7.25.7
         version: 7.25.7
@@ -3883,8 +3877,8 @@ importers:
         specifier: 5.0.5
         version: 5.0.5
       rtlcss:
-        specifier: ^2.6.2
-        version: 2.6.2
+        specifier: 4.3.x
+        version: 4.3.0
       sass:
         specifier: 1.69.5
         version: 1.69.5
@@ -4463,7 +4457,7 @@ importers:
         specifier: 5.0.5
         version: 5.0.5
       rtlcss:
-        specifier: ^4.1.1
+        specifier: 4.3.x
         version: 4.3.0
       sass-loader:
         specifier: 10.5.x
@@ -5192,11 +5186,6 @@ packages:
 
   '@automattic/viewport@1.1.0':
     resolution: {integrity: sha512-aZhGcaXVeT0rxZdsPq+xbQyIpT+GoS5gYiXAVrTrImOgWUEhP0LU9guil8Wy9/2FJrxfD3IkvNnzC1aWviXw1w==}
-
-  '@automattic/webpack-rtl-plugin@6.0.0':
-    resolution: {integrity: sha512-hjKjxccXJltt+KU7Oxu6HUeFMfd9w5mec+orFGa97zPKxPNCG90dXhiWn+Hrf6ZmP+o0vqrdsGN5x3O0pnQMqA==}
-    peerDependencies:
-      webpack: ^5.68.0
 
   '@aw-web-design/x-default-browser@1.4.126':
     resolution: {integrity: sha512-Xk1sIhyNC/esHGGVjL/niHLowM0csl/kFO5uawBy4IrWwy0o1G8LGt3jP6nmWGz+USxeeqbihAmp/oVZju6wug==}
@@ -24526,11 +24515,6 @@ snapshots:
       react-dom: 18.3.1(react@18.3.1)
 
   '@automattic/viewport@1.1.0': {}
-
-  '@automattic/webpack-rtl-plugin@6.0.0(webpack@5.97.1)':
-    dependencies:
-      rtlcss: 3.5.0
-      webpack: 5.97.1(@swc/core@1.15.24)(webpack-cli@5.1.4)
 
   '@aw-web-design/x-default-browser@1.4.126':
     dependencies:
