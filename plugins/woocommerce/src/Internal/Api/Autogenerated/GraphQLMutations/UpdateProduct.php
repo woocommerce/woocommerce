@@ -78,6 +78,29 @@ class UpdateProduct {
 		}
 	}
 
+	private static function convert_dimensions_input( array $data ): \Automattic\WooCommerce\Api\InputTypes\Products\DimensionsInput {
+		$input = new \Automattic\WooCommerce\Api\InputTypes\Products\DimensionsInput();
+
+		if ( array_key_exists( 'length', $data ) ) {
+			$input->mark_provided( 'length' );
+				$input->length = $data['length'];
+		}
+		if ( array_key_exists( 'width', $data ) ) {
+			$input->mark_provided( 'width' );
+					$input->width = $data['width'];
+		}
+		if ( array_key_exists( 'height', $data ) ) {
+			$input->mark_provided( 'height' );
+					$input->height = $data['height'];
+		}
+		if ( array_key_exists( 'weight', $data ) ) {
+			$input->mark_provided( 'weight' );
+					$input->weight = $data['weight'];
+		}
+
+		return $input;
+	}
+
 	private static function convert_update_product_input( array $data ): \Automattic\WooCommerce\Api\InputTypes\Products\UpdateProductInput {
 		$input = new \Automattic\WooCommerce\Api\InputTypes\Products\UpdateProductInput();
 
@@ -131,7 +154,7 @@ class UpdateProduct {
 		}
 		if ( array_key_exists( 'dimensions', $data ) ) {
 			$input->mark_provided( 'dimensions' );
-					$input->dimensions = $data['dimensions'];
+					$input->dimensions = null !== $data['dimensions'] ? self::convert_dimensions_input( $data['dimensions'] ) : null;
 		}
 
 		return $input;
