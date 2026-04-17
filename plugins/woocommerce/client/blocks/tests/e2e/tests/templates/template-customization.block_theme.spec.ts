@@ -4,6 +4,7 @@
 import {
 	test,
 	expect,
+	BLOCK_THEME_SLUG,
 	BLOCK_THEME_WITH_TEMPLATES_SLUG,
 } from '@woocommerce/e2e-utils';
 
@@ -28,11 +29,28 @@ test.describe( 'Template customization', () => {
 			page,
 			requestUtils,
 		} ) => {
-			await admin.visitSiteEditor( {
-				postId: `woocommerce/woocommerce//${ testData.templatePath }`,
-				postType: testData.templateType,
-				canvas: 'edit',
-			} );
+			if (
+				'isTaxonomyTemplate' in testData &&
+				testData.isTaxonomyTemplate
+			) {
+				await admin.visitSiteEditor( {
+					postType: 'wp_template',
+				} );
+
+				await editor.createTemplate( {
+					templateName: testData.templateName,
+				} );
+			} else {
+				const templateSlug =
+					testData.templateType === 'wp_template'
+						? BLOCK_THEME_SLUG
+						: 'woocommerce/woocommerce';
+				await admin.visitSiteEditor( {
+					postId: `${ templateSlug }//${ testData.templatePath }`,
+					postType: testData.templateType,
+					canvas: 'edit',
+				} );
+			}
 
 			await editor.canvas.locator( 'body' ).waitFor( { timeout: 20000 } );
 
@@ -86,9 +104,13 @@ test.describe( 'Template customization', () => {
 				editor,
 				page,
 			} ) => {
+				const templateSlug =
+					testData.templateType === 'wp_template'
+						? BLOCK_THEME_SLUG
+						: 'woocommerce/woocommerce';
 				// Edit fallback template and verify changes are visible.
 				await admin.visitSiteEditor( {
-					postId: `woocommerce/woocommerce//${ testData.fallbackTemplate?.templatePath }`,
+					postId: `${ templateSlug }//${ testData.fallbackTemplate?.templatePath }`,
 					postType: testData.templateType,
 					canvas: 'edit',
 				} );
@@ -140,8 +162,11 @@ test.describe( 'Template customization', () => {
 		}
 	} );
 
+	// Note: `wp_template` hierarchy is tested in `template-priority.block_theme.spec.ts`.
 	const testToRun = CUSTOMIZABLE_WC_TEMPLATES.filter(
-		( data ) => data.canBeOverriddenByThemes
+		( data ) =>
+			data.templateType === 'wp_template_part' &&
+			data.canBeOverriddenByThemes
 	);
 
 	for ( const testData of testToRun ) {
@@ -155,7 +180,6 @@ test.describe( 'Template customization', () => {
 			requestUtils,
 			frontendUtils,
 		} ) => {
-			// Edit the WooCommerce default template
 			await admin.visitSiteEditor( {
 				postId: `woocommerce/woocommerce//${ testData.templatePath }`,
 				postType: testData.templateType,

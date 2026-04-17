@@ -56,33 +56,57 @@ const StoreNoticesContainer = ( {
 			) && ! registeredContainers.includes( subContext )
 	);
 
+	// Pull the raw notices arrays out of the notices store, keyed by context.
+	// Keeping the shape flat (a plain object of stable array references) lets
+	// @wordpress/data's SCRIPT_DEBUG unstable-reference check pass — the
+	// notices store returns memoized arrays, so re-invoking this selector
+	// with the same state produces the same references. Transformation into
+	// the enriched NoticeType[] shape happens in a useMemo below so we don't
+	// allocate fresh objects inside the selector.
+	const rawNoticesByContext = useSelect(
+		( select ) => {
+			const getNotices = select( noticesStore ).getNotices;
+			const byContext: Record< string, WPNotice[] > = {};
+			for ( const subContext of unregisteredSubContexts ) {
+				byContext[ subContext ] = getNotices( subContext );
+			}
+			for ( const subContext of contexts ) {
+				byContext[ subContext ] = getNotices( subContext );
+			}
+			return byContext;
+		},
+		[ contexts, unregisteredSubContexts ]
+	);
+
 	// Get notices from the current context and any sub-contexts and append the name of the context to the notice
 	// objects for later reference.
-	const notices =
-		useSelect(
-			( select ) => {
-				const getNotices = select( noticesStore ).getNotices;
-
-				return [
-					...unregisteredSubContexts.flatMap(
-						( subContext: string ) =>
-							formatNotices(
-								getNotices( subContext ),
-								subContext
-							)
+	const notices = useMemo< NoticeType[] >( () => {
+		const result: NoticeType[] = [];
+		for ( const subContext of unregisteredSubContexts ) {
+			result.push(
+				...formatNotices(
+					rawNoticesByContext[ subContext ] || [],
+					subContext
+				)
+			);
+		}
+		for ( const subContext of contexts ) {
+			result.push(
+				...formatNotices(
+					( rawNoticesByContext[ subContext ] || [] ).concat(
+						additionalNotices as WPNotice[]
 					),
-					...contexts.flatMap( ( subContext: string ) =>
-						formatNotices(
-							getNotices( subContext ).concat(
-								additionalNotices as WPNotice[]
-							),
-							subContext
-						)
-					),
-				].filter( Boolean ) as NoticeType[];
-			},
-			[ contexts, unregisteredSubContexts, additionalNotices ]
-		) || [];
+					subContext
+				)
+			);
+		}
+		return result.filter( Boolean );
+	}, [
+		rawNoticesByContext,
+		contexts,
+		unregisteredSubContexts,
+		additionalNotices,
+	] );
 
 	// Register the container context with the parent.
 	useEffect( () => {

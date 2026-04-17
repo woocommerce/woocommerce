@@ -28,15 +28,15 @@ export default async function getRelatedProducts(
 	options: getRelatedProductsOptions = {}
 ): Promise< Product[] | undefined > {
 	const { getEntityRecord } = select( 'core' );
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
-	const product = getEntityRecord( 'postType', 'product', productId );
+	const product: Product | undefined = getEntityRecord(
+		'postType',
+		'product',
+		productId
+	);
 	if ( ! product ) {
 		return;
 	}
 
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
 	let relatedProductIds = product?.related_ids;
 	if ( ! relatedProductIds?.length ) {
 		if ( ! options?.fallbackToRandomProducts ) {
@@ -94,16 +94,16 @@ export async function getSuggestedProductsFor( {
 	forceRequest = false,
 	exclude = [],
 }: getSuggestedProductsForOptions ): Promise< PartialProduct[] | undefined > {
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
 	const { getEditedEntityRecord } = select( 'core' );
 
+	// @ts-expect-error getEditedEntityRecord's curried form strips its generic, returning a wide entity union; Product is the correct narrow type.
 	const data: Product = getEditedEntityRecord( 'postType', postType, postId );
 
 	const options = {
 		categories: data?.categories
 			? data.categories.map( ( cat ) => cat.id )
 			: [],
+		// @ts-expect-error Product inherits `tags: number[]` from Post, shadowing WooCommerce's `tags: Pick<ProductTag,'id'|'name'>[]` (see products/types.ts).
 		tags: data?.tags ? data.tags.map( ( tag ) => tag.id ) : [],
 		exclude: exclude?.length ? exclude : [ postId ],
 		limit: POSTS_NUMBER_TO_DISPLAY,

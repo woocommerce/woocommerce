@@ -14,11 +14,7 @@ export const CopyAllContentMenuItem = () => {
 	const { createNotice } = useDispatch( 'core/notices' );
 
 	const { blocks } = useSelect( ( select ) => {
-		const {
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore These selectors are available in the block data store.
-			getBlocks,
-		} = select( blockEditorStore );
+		const { getBlocks } = select( blockEditorStore );
 
 		return {
 			blocks: getBlocks(),
@@ -41,8 +37,7 @@ export const CopyAllContentMenuItem = () => {
 
 	return (
 		<MenuItem
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore ref is okay here
+			// @ts-expect-error MenuItem's public type expects LegacyRef<HTMLButtonElement>, but useCopyToClipboard returns a broader Ref<HTMLElement>.
 			ref={ ref }
 			role="menuitem"
 			onClick={ recordClick }

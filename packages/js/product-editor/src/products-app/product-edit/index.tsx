@@ -17,8 +17,6 @@ import {
 	FlexItem,
 	Button,
 } from '@wordpress/components';
-// @ts-expect-error missing types.
-// eslint-disable-next-line @woocommerce/dependency-group
 import { privateApis as editorPrivateApis } from '@wordpress/editor';
 
 /**
@@ -146,7 +144,6 @@ export default function ProductEdit( {
 							<Button
 								variant="primary"
 								type="submit"
-								// @ts-expect-error missing type.
 								accessibleWhenDisabled
 								disabled={ isUpdateDisabled }
 								__next40pxDefaultSize

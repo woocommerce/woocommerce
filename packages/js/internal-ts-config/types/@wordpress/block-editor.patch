@@ -29,14 +29,13 @@ diff -ruN a/types/@wordpress/block-editor/index.d.ts b/types/@wordpress/block-ed
  
  	export * from "@wordpress/block-editor/components";
  	export * from "@wordpress/block-editor/hooks";
-@@ -16,13 +33,16 @@
+@@ -16,18 +33,18 @@
  	export { SETTINGS_DEFAULTS } from "@wordpress/block-editor/store/defaults";
  	export * from "@wordpress/block-editor/utils";
  
 -	declare module "@wordpress/data" {
 -	    function dispatch(key: "core/block-editor"): typeof import("@wordpress/block-editor/store/actions");
 -	    function select(key: "core/block-editor"): typeof import("@wordpress/block-editor/store/selectors");
--	}
 +	type BlockEditorConfig = ReduxStoreConfig<
 +		unknown,
 +		{
@@ -45,21 +44,27 @@ diff -ruN a/types/@wordpress/block-editor/index.d.ts b/types/@wordpress/block-ed
 +		WithState< typeof blockEditorSelectors >
 +	>;
  
--	export interface BlockEditorStoreDescriptor extends StoreDescriptor {
--	    name: "core/block-editor";
+-	    function useDispatch(key: "core/block-editor"): typeof import("@wordpress/block-editor/store/actions");
+-	    function useSelect(key: "core/block-editor"): typeof import("@wordpress/block-editor/store/selectors");
 +	export interface BlockEditorStoreDescriptor extends StoreDescriptor< BlockEditorConfig > {
 +		name: "core/block-editor";
  	}
  
+-	export interface BlockEditorStoreDescriptor extends StoreDescriptor {
+-	    name: "core/block-editor";
+-	}
+-
  	export const store: BlockEditorStoreDescriptor;
-@@ -222,5 +242,30 @@
+ 
+ 	export type EditorBlockMode = "html" | "visual";
+@@ -225,5 +242,30 @@
  	     * @defaultValue `"Add title"`
  	     */
  	    titlePlaceholder: string;
 +	}
 +}
 +
-+declare module '@wordpress/data/build-types/types' {
++declare module '@wordpress/data' {
 +	import type * as blockEditorActions from '@wordpress/block-editor/store/actions';
 +	import type * as blockEditorSelectors from '@wordpress/block-editor/store/selectors';
 +	import type {

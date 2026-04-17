@@ -8,10 +8,7 @@ import { render, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { useSelect } from '@wordpress/data';
 import { applyFilters } from '@wordpress/hooks';
-import {
-	// @ts-expect-error -- It is not exported yet.
-	useEntitiesSavedStatesIsDirty,
-} from '@wordpress/editor';
+import { useEntitiesSavedStatesIsDirty } from '@wordpress/editor';
 
 /**
  * Internal dependencies
