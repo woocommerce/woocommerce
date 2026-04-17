@@ -16,6 +16,7 @@ use WP_REST_Server;
  * REST controller for POS PIN management and status.
  *
  * @since 10.8.0
+ * @internal
  */
 class POSPinManageController extends RestApiControllerBase implements RegisterHooksInterface {
 

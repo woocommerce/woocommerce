@@ -146,8 +146,8 @@ class POSSessionService {
 			)
 		);
 
-		$now            = time();
-		$stale_threshold = 86400;
+		$now             = time();
+		$stale_threshold = DAY_IN_SECONDS;
 
 		foreach ( $users as $user_id ) {
 			$user_id_int = (int) $user_id;
