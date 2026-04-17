@@ -98,10 +98,10 @@ export const useCollection = < T >(
 					const message =
 						typeof error === 'object' &&
 						error !== null &&
-						'message' in error
-							? String(
-									( error as { message: unknown } ).message
-							  )
+						typeof ( error as { message?: unknown } ).message ===
+							'string' &&
+						( error as { message: string } ).message.trim() !== ''
+							? ( error as { message: string } ).message
 							: 'An unknown error occurred';
 					throwError( new Error( message ) );
 				}

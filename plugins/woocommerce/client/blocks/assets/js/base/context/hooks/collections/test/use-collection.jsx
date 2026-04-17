@@ -395,4 +395,54 @@ describe( 'useCollection', () => {
 		expect( console ).toHaveErrored( /your React components:/ );
 		renderer.unmount();
 	} );
+	it( 'should use a fallback message when a non-Error object has an invalid message value', () => {
+		mocks.selectors.getCollectionError.mockReturnValue( {
+			code: 500,
+			message: undefined,
+		} );
+		const TestComponent = getTestComponent();
+		act( () => {
+			renderer = TestRenderer.create(
+				getWrappedComponents( TestComponent, {
+					options: {
+						namespace: 'test/store',
+						resourceName: 'products',
+						query: { bar: 'foo' },
+					},
+				} )
+			);
+		} );
+		//eslint-disable-next-line testing-library/await-async-query
+		let props = renderer.root.findByType( 'div' ).props;
+		expect( props[ 'data-error' ] ).toBeInstanceOf( Error );
+		expect( props[ 'data-error' ].message ).toBe(
+			'An unknown error occurred'
+		);
+		expect( console ).toHaveErrored( /your React components:/ );
+		renderer.unmount();
+
+		mocks.selectors.getCollectionError.mockReturnValue( {
+			code: 500,
+			message: '   ',
+		} );
+		act( () => {
+			renderer = TestRenderer.create(
+				getWrappedComponents( TestComponent, {
+					options: {
+						namespace: 'test/store',
+						resourceName: 'products',
+						query: { bar: 'foo' },
+					},
+				} )
+			);
+		} );
+		//eslint-disable-next-line testing-library/await-async-query
+		props = renderer.root.findByType( 'div' ).props;
+		expect( props[ 'data-error' ] ).toBeInstanceOf( Error );
+		expect( props[ 'data-error' ].message ).toBe(
+			'An unknown error occurred'
+		);
+		expect( console ).toHaveErrored( /your React components:/ );
+		renderer.unmount();
+	} );
 } );
