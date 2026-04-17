@@ -179,7 +179,7 @@
 			}
 
 			.select2-selection__placeholder {
-				color: var(--wc-subtext);
+				color: var(--wc-form-color-text, #444);
 			}
 
 			.select2-selection__arrow {
