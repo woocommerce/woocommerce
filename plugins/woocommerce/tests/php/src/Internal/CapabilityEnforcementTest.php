@@ -723,14 +723,10 @@ class CapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Stock-only product updates are allowed with manage_woocommerce.
+	 * @testdox Stock-only product updates are allowed with edit_products (pos_manager).
 	 */
 	public function test_stock_only_product_updates_are_allowed_with_adjust_stock_capability(): void {
-		$user_id = $this->factory->user->create( array( 'role' => 'pos_cashier' ) );
-		$user    = new \WP_User( $user_id );
-		$user->add_cap( 'manage_woocommerce' );
-
-		wp_set_current_user( $user_id );
+		wp_set_current_user( $this->capable_user_id );
 
 		$product = WC_Helper_Product::create_simple_product(
 			true,
@@ -1245,5 +1241,73 @@ class CapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 		remove_all_filters( 'rest_pre_dispatch' );
 		remove_all_filters( 'rest_request_before_callbacks' );
 		remove_all_filters( 'rest_post_dispatch' );
+	}
+
+	/**
+	 * @testdox Cashier POST /wc/v3/customers is denied with woocommerce_rest_cannot_create when lacking create_customers.
+	 */
+	public function test_cashier_post_customers_denied_without_create_customers(): void {
+		$user_id = $this->factory->user->create( array( 'role' => 'pos_cashier' ) );
+		$user    = new \WP_User( $user_id );
+		$user->remove_cap( 'create_customers' );
+
+		wp_set_current_user( $user_id );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/customers' );
+		$request->set_body_params(
+			array(
+				'email'      => 'cashier-denied@example.com',
+				'first_name' => 'Cashier',
+				'last_name'  => 'Denied',
+				'username'   => 'cashier-denied',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 403, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_cannot_create', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Administrator POST /wc/v3/customers returns 201.
+	 */
+	public function test_admin_post_customers_allowed(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/customers' );
+		$request->set_body_params(
+			array(
+				'email'      => 'admin-created@example.com',
+				'first_name' => 'Admin',
+				'last_name'  => 'Customer',
+				'username'   => 'admin-created-customer',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 201, $response->get_status() );
+	}
+
+	/**
+	 * @testdox POS manager POST /wc/v3/customers returns 201 when they have create_customers.
+	 */
+	public function test_pos_manager_post_customers_allowed(): void {
+		wp_set_current_user( $this->capable_user_id );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/customers' );
+		$request->set_body_params(
+			array(
+				'email'      => 'manager-created-extra@example.com',
+				'first_name' => 'Manager',
+				'last_name'  => 'Extra',
+				'username'   => 'manager-created-extra',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 201, $response->get_status() );
 	}
 }
