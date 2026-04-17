@@ -87,18 +87,25 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 		'name',
 		termId ? String( termId ) : undefined
 	);
-	const displayRawTitle =
-		isPreviewMode && typeof rawTitle === 'string'
-			? rawTitle
-			: previewCategories[ 0 ].name;
-	const displayFullTitle =
-		! isPreviewMode &&
+
+	let displayRawTitle = '';
+	if ( isPreviewMode ) {
+		displayRawTitle = previewCategories[ 0 ].description;
+	} else if ( typeof rawTitle === 'string' ) {
+		displayRawTitle = rawTitle;
+	}
+
+	let displayFullTitle = '';
+	if ( isPreviewMode ) {
+		displayFullTitle = previewCategories[ 0 ].description;
+	} else if (
 		typeof fullTitle === 'object' &&
 		fullTitle !== null &&
 		'rendered' in fullTitle &&
 		typeof fullTitle.rendered === 'string'
-			? fullTitle?.rendered
-			: previewCategories[ 0 ].name;
+	) {
+		displayFullTitle = fullTitle.rendered;
+	}
 
 	const link = useSelect(
 		( select ) => {

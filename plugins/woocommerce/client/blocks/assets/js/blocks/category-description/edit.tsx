@@ -51,18 +51,25 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 		);
 
 	const isPreviewMode = usePreviewMode();
-	const displayRawDescription =
-		isPreviewMode && typeof rawDescription === 'string'
-			? rawDescription
-			: previewCategories[ 0 ].description;
-	const displayFullDescription =
-		! isPreviewMode &&
+
+	let displayRawDescription = '';
+	if ( isPreviewMode ) {
+		displayRawDescription = previewCategories[ 0 ].description;
+	} else if ( typeof rawDescription === 'string' ) {
+		displayRawDescription = rawDescription;
+	}
+
+	let displayFullDescription = '';
+	if ( isPreviewMode ) {
+		displayFullDescription = previewCategories[ 0 ].description;
+	} else if (
 		typeof fullDescription === 'object' &&
 		fullDescription !== null &&
 		'rendered' in fullDescription &&
 		typeof fullDescription.rendered === 'string'
-			? fullDescription?.rendered
-			: previewCategories[ 0 ].description;
+	) {
+		displayFullDescription = fullDescription.rendered;
+	}
 
 	const blockProps = useBlockProps( {
 		className: clsx( { [ `has-text-align-${ textAlign }` ]: textAlign } ),
