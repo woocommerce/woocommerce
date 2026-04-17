@@ -3840,9 +3840,6 @@ importers:
       moment-timezone:
         specifier: ^0.5.43
         version: 0.5.48
-      moment-timezone-data-webpack-plugin:
-        specifier: 1.5.x
-        version: 1.5.1(moment-timezone@0.5.48)(webpack@5.97.1)
       node-watch:
         specifier: ^0.7.4
         version: 0.7.4
@@ -18840,12 +18837,6 @@ packages:
 
   module-details-from-path@1.0.4:
     resolution: {integrity: sha512-EGWKgxALGMgzvxYF1UyGTy0HXX/2vHLkw6+NvDKW2jypWbHpjQuj4UMcqQWXHERJhVGKikolT06G3bcKe4fi7w==}
-
-  moment-timezone-data-webpack-plugin@1.5.1:
-    resolution: {integrity: sha512-1le6a35GgYdWMVYFzrfpE/F6Pk4bj0M3QKD6Iv6ba9LqWGoVqHQRHyCTLvLis5E1J98Sz40ET6yhZzMVakwpjg==}
-    peerDependencies:
-      moment-timezone: '>= 0.1.0'
-      webpack: 4.x.x || 5.x.x
 
   moment-timezone@0.5.48:
     resolution: {integrity: sha512-f22b8LV1gbTO2ms2j2z13MuPogNoh5UzxL3nzNAYKGraILnbGc9NEE6dyiiiLv46DGRb8A4kg8UKWLjPthxBHw==}
@@ -47204,13 +47195,6 @@ snapshots:
       ufo: 1.6.3
 
   module-details-from-path@1.0.4: {}
-
-  moment-timezone-data-webpack-plugin@1.5.1(moment-timezone@0.5.48)(webpack@5.97.1):
-    dependencies:
-      find-cache-dir: 3.3.2
-      make-dir: 3.1.0
-      moment-timezone: 0.5.48
-      webpack: 5.97.1(@swc/core@1.15.24)(webpack-cli@5.1.4)
 
   moment-timezone@0.5.48:
     dependencies:
