@@ -174,11 +174,12 @@ function* handlePluginAPIError(
 ) {
 	let rawErrorMessage;
 
-	// Check for permission errors (403) before generic handling.
-	// Merchants without install_plugins capability see a vague
-	// "cannot manage plugins" message otherwise.
+	// Check for plugin-management permission errors before generic handling.
+	// Match the specific code so we don't misattribute other 403s
+	// (e.g. nonce or session failures) as permission problems.
 	const isPermissionError =
 		isRestApiError( error ) &&
+		error.code === 'woocommerce_rest_cannot_update' &&
 		( error as { data?: { status?: number } } ).data?.status === 403;
 
 	if ( isPermissionError ) {
