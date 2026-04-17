@@ -473,6 +473,50 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testDox Meta hook does not reschedule when sale date meta is written from inside the AS sale start handler.
+	 */
+	public function test_wc_schedule_sale_events_meta_hook_skips_when_inside_as_start_handler() {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$writer = function ( $pid ) {
+			update_post_meta( $pid, '_sale_price_dates_from', time() + 3600 );
+		};
+		add_action( 'wc_product_start_scheduled_sale', $writer, 1, 1 );
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( 'wc_product_start_scheduled_sale', $product->get_id() );
+
+		remove_action( 'wc_product_start_scheduled_sale', $writer, 1 );
+
+		$this->assertFalse(
+			as_next_scheduled_action( 'wc_product_start_scheduled_sale', array( 'product_id' => $product->get_id() ), 'woocommerce-sales' ),
+			'Meta-hook scheduling should be suppressed while inside the AS sale start handler'
+		);
+	}
+
+	/**
+	 * @testDox Meta hook does not reschedule when sale date meta is written from inside the AS sale end handler.
+	 */
+	public function test_wc_schedule_sale_events_meta_hook_skips_when_inside_as_end_handler() {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$writer = function ( $pid ) {
+			update_post_meta( $pid, '_sale_price_dates_to', time() + 3600 );
+		};
+		add_action( 'wc_product_end_scheduled_sale', $writer, 1, 1 );
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( 'wc_product_end_scheduled_sale', $product->get_id() );
+
+		remove_action( 'wc_product_end_scheduled_sale', $writer, 1 );
+
+		$this->assertFalse(
+			as_next_scheduled_action( 'wc_product_end_scheduled_sale', array( 'product_id' => $product->get_id() ), 'woocommerce-sales' ),
+			'Meta-hook scheduling should be suppressed while inside the AS sale end handler'
+		);
+	}
+
+	/**
 	 * @testDox Direct meta write on non-product post types does not schedule sale events.
 	 */
 	public function test_wc_schedule_sale_events_ignores_non_product_post_types() {

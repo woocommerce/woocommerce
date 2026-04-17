@@ -788,6 +788,11 @@ function wc_maybe_schedule_sale_events_on_meta_change( $meta_id, $object_id, $me
 		return;
 	}
 
+	// Prevent duplicate scheduling when a sale handler's save() rewrites dates already in flight.
+	if ( doing_action( 'wc_product_start_scheduled_sale' ) || doing_action( 'wc_product_end_scheduled_sale' ) ) {
+		return;
+	}
+
 	$post_type = get_post_type( $object_id );
 	if ( 'product' !== $post_type && 'product_variation' !== $post_type ) {
 		return;
