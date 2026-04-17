@@ -219,6 +219,9 @@ export const sparseCheckoutRepoShallow = async (
 export const checkoutRef = ( pathToRepo: string, ref: string ) => {
 	const git = simpleGit( {
 		baseDir: pathToRepo,
+		unsafe: {
+			allowUnsafeHooksPath: true,
+		},
 		config: [ 'core.hooksPath=/dev/null' ],
 	} );
 	return git.checkout( ref );
@@ -342,6 +345,9 @@ export const getPullRequestNumberFromHash = async (
 	try {
 		const git = await simpleGit( {
 			baseDir,
+			unsafe: {
+				allowUnsafeHooksPath: true,
+			},
 			config: [ 'core.hooksPath=/dev/null' ],
 		} );
 		const formerHead = await git.revparse( 'HEAD' );
@@ -387,6 +393,9 @@ export const generateDiff = async (
 	try {
 		const git = simpleGit( {
 			baseDir: tmpRepoPath,
+			unsafe: {
+				allowUnsafeHooksPath: true,
+			},
 			config: [ 'core.hooksPath=/dev/null' ],
 		} );
 
