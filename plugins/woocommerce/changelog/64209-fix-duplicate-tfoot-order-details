@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Templates: remove duplicate tfoot element in order/order-details.php to restore valid HTML table structure.
