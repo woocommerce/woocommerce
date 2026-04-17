@@ -24,11 +24,12 @@
 		"types:update-patch": "node scripts/generate-types.mjs update-patch"
 	},
 	"devDependencies": {
-		"@types/wordpress__block-editor": ">=11.5.0",
-		"@types/wordpress__editor": ">=13.6.0",
+		"@types/wordpress__block-editor": "14.21.8",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"@wordpress/core-data": "wp-6.6",
-		"@wordpress/data": "wp-6.6",
+		"@wordpress/core-data": "7.19.6",
+		"@wordpress/data": "10.19.2",
+		"@wordpress/editor": "14.19.7",
+		"@wordpress/notices": "5.19.2",
 		"eslint": "^8.55.0",
 		"typescript": "5.7.x",
 		"wireit": "0.14.12"
@@ -41,13 +42,15 @@
 				"types/@wordpress/block-editor.patch",
 				"types/@wordpress/core-data.patch",
 				"types/@wordpress/data.patch",
-				"types/@wordpress/editor.patch"
+				"types/@wordpress/editor.patch",
+				"types/@wordpress/notices.patch"
 			],
 			"output": [
 				"types/@wordpress/block-editor/",
 				"types/@wordpress/core-data/",
 				"types/@wordpress/data/",
-				"types/@wordpress/editor/"
+				"types/@wordpress/editor/",
+				"types/@wordpress/notices/"
 			],
 			"clean": "if-file-deleted"
 		},
@@ -55,6 +58,7 @@
 			"allowUsuallyExcludedPaths": true,
 			"files": [
 				"package.json",
+				"../../../pnpm-lock.yaml",
 				"node_modules/@woocommerce/eslint-plugin/configs",
 				"node_modules/@woocommerce/eslint-plugin/rules",
 				"node_modules/@woocommerce/eslint-plugin/index.js"

@@ -7,6 +7,7 @@ import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { upload } from '@wordpress/icons';
 import { uploadMedia } from '@wordpress/media-utils';
+import type { Attachment } from '@wordpress/media-utils';
 
 /**
  * Internal dependencies
@@ -39,25 +40,26 @@ export function UploadFilesMenuItem( {
 	function handleFormFileUploadChange(
 		event: ChangeEvent< HTMLInputElement >
 	) {
-		const filesList = event.currentTarget.files as FileList;
+		const filesList = Array.from( event.currentTarget.files ?? [] );
 
 		uploadMedia( {
 			allowedTypes,
 			filesList,
 			maxUploadFileSize: resolvedMaxUploadFileSize,
 			additionalData,
-			wpAllowedMimeTypes,
+			wpAllowedMimeTypes: wpAllowedMimeTypes ?? undefined,
 			onFileChange( files ) {
 				const isUploading = files.some( ( file ) => ! file.id );
 
 				if ( isUploading ) {
-					onUploadProgress?.( files );
+					onUploadProgress?.( files as Attachment[] );
 					return;
 				}
 
-				onUploadSuccess( files );
+				onUploadSuccess( files as Attachment[] );
 			},
-			onError: onUploadError,
+			// Native OnErrorHandler expects (error: Error) => void, but our callback uses a richer type.
+			onError: onUploadError as unknown as ( error: Error ) => void,
 		} );
 	}
 

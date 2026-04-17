@@ -83,15 +83,11 @@ const getEntryPoints = () => {
 // WordPress.org’s translation infrastructure ignores files named “.min.js” so we need to name our JS files without min when releasing the plugin.
 const outputSuffix = WC_ADMIN_PHASE === 'core' ? '' : '.min';
 
-// Here we are patching a dependency, see https://github.com/woocommerce/woocommerce/pull/45548 for more details.
-// Should be revisited: using the dependency patching, but seems we need some codebase tweaks as it uses xstate 4/5 mix.
-require( 'fs-extra' ).ensureSymlinkSync(
-	path.join( __dirname, './node_modules/xstate5' ),
-	path.join( __dirname, './node_modules/@xstate5/react/node_modules/xstate' )
-);
-
 const webpackConfig = {
 	mode: NODE_ENV,
+	performance: {
+		hints: false,
+	},
 	cache: ( isWatch || process.env.CI || process.env.HOT || process.env.STORYBOOK )
 		? { type: 'memory' }
 		: {
@@ -101,7 +97,15 @@ const webpackConfig = {
 					`node_modules/.cache/webpack-${ WC_ADMIN_PHASE }`
 				),
 				buildDependencies: {
-					config: [ __filename ],
+					config: [
+						__filename,
+						require.resolve( './bin/custom-templated-path-webpack-plugin' ),
+						require.resolve( './bin/unminify-webpack-plugin' ),
+						require.resolve( '@woocommerce/dependency-extraction-webpack-plugin/src/index' ),
+						require.resolve( '@woocommerce/internal-style-build' ),
+						require.resolve( '@woocommerce/internal-style-build/webpack-rtl-plugin' ),
+						require.resolve( '@woocommerce/internal-style-build/style-asset-plugin' ),
+					],
 				},
 		  },
 	entry: getEntryPoints(),
@@ -140,19 +144,10 @@ const webpackConfig = {
 				use: {
 					loader: 'babel-loader',
 					options: {
-						presets: [
-							'@wordpress/babel-preset-default',
-							[
-								'@babel/preset-env',
-								{
-									// Add polyfills such as Array.flat based on their usage in the code
-									// See https://github.com/woocommerce/woocommerce-admin/pull/6411/
-									corejs: '3',
-									useBuiltIns: 'usage',
-								},
-							],
-							[ '@babel/preset-typescript' ],
-						],
+						// Prevent babel.config.js (Jest/Node context) from merging into this browser build and duplicating presets.
+						configFile: false,
+						sourceType: 'unambiguous',
+						presets: [ '@wordpress/babel-preset-default' ],
 						plugins: [
 							! isProduction &&
 								isHot &&
@@ -197,7 +192,7 @@ const webpackConfig = {
 	plugins: [
 		...styleConfig.plugins,
 		// Runs TypeScript type checker on a separate process.
-		! process.env.STORYBOOK && new ForkTsCheckerWebpackPlugin(),
+		! process.env.STORYBOOK && isWatch && new ForkTsCheckerWebpackPlugin(),
 		new CustomTemplatedPathPlugin( {
 			modulename( outputPath, data ) {
 				const entryName = get( data, [ 'chunk', 'name' ] );

@@ -55,11 +55,11 @@
 	},
 	"dependencies": {
 		"@woocommerce/number": "workspace:*",
-		"@wordpress/deprecated": "wp-6.6",
-		"@wordpress/element": "wp-6.6",
-		"@wordpress/hooks": "wp-6.6",
-		"@wordpress/html-entities": "wp-6.6",
-		"@wordpress/i18n": "wp-6.6"
+		"@wordpress/deprecated": "catalog:wp-min",
+		"@wordpress/element": "catalog:wp-min",
+		"@wordpress/hooks": "catalog:wp-min",
+		"@wordpress/html-entities": "catalog:wp-min",
+		"@wordpress/i18n": "catalog:wp-min"
 	},
 	"publishConfig": {
 		"access": "public"
@@ -149,6 +149,7 @@
 			"allowUsuallyExcludedPaths": true,
 			"files": [
 				"package.json",
+				"../../../pnpm-lock.yaml",
 				"node_modules/@woocommerce/number/build",
 				"node_modules/@woocommerce/number/build-module",
 				"node_modules/@woocommerce/number/build-types",

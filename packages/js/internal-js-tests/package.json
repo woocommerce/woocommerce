@@ -44,7 +44,7 @@
 	"dependencies": {
 		"@testing-library/jest-dom": "^6.x.x",
 		"@testing-library/react": "^16.x.x",
-		"@wordpress/i18n": "wp-6.6",
+		"@wordpress/i18n": "catalog:wp-min",
 		"@wordpress/jest-console": "^5.4.0",
 		"regenerator-runtime": "^0.13.11"
 	},
@@ -125,6 +125,7 @@
 			"allowUsuallyExcludedPaths": true,
 			"files": [
 				"package.json",
+				"../../../pnpm-lock.yaml",
 				"node_modules/@woocommerce/eslint-plugin/configs",
 				"node_modules/@woocommerce/eslint-plugin/rules",
 				"node_modules/@woocommerce/eslint-plugin/index.js",

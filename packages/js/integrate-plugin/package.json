@@ -46,7 +46,7 @@
 		"watch:build:project:esm": "wireit"
 	},
 	"dependencies": {
-		"@wordpress/create-block": "wp-6.6",
+		"@wordpress/create-block": "catalog:wp-min",
 		"chalk": "^4.1.2",
 		"change-case": "^4.1.2",
 		"commander": "^9.5.0",
@@ -150,6 +150,7 @@
 			"allowUsuallyExcludedPaths": true,
 			"files": [
 				"package.json",
+				"../../../pnpm-lock.yaml",
 				"node_modules/@woocommerce/eslint-plugin/configs",
 				"node_modules/@woocommerce/eslint-plugin/rules",
 				"node_modules/@woocommerce/eslint-plugin/index.js",

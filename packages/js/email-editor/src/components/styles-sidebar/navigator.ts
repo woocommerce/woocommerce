@@ -6,14 +6,18 @@
  * External dependencies
  */
 import {
-	// @ts-expect-error Type for Navigator is missing in @types/wordpress__editor
 	Navigator as WPNavigator,
 	__experimentalNavigatorProvider as NavigatorProvider,
 	__experimentalNavigatorScreen as NavigatorScreen,
 	__experimentalNavigatorBackButton as NavigatorBackButton, // eslint-disable-line
 } from '@wordpress/components';
 
-const Navigator = WPNavigator || NavigatorProvider;
+type NavigatorWithCompound = typeof WPNavigator & {
+	Screen: typeof NavigatorScreen;
+	BackButton: typeof NavigatorBackButton;
+};
+
+const Navigator = ( WPNavigator || NavigatorProvider ) as NavigatorWithCompound;
 
 if ( ! WPNavigator ) {
 	Navigator.Screen = NavigatorScreen;
