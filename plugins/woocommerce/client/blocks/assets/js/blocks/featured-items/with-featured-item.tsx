@@ -18,7 +18,6 @@ import {
 } from '@wordpress/element';
 import { WP_REST_API_Category } from 'wp-types';
 import { usePreviewMode, useStyleProps } from '@woocommerce/base-hooks';
-import { previewProducts } from '@woocommerce/resource-previews';
 import { InnerBlocks, BlockContextProvider } from '@wordpress/block-editor';
 
 /**
@@ -251,8 +250,7 @@ export const withFeaturedItem =
 																{
 																	level: 2,
 																	content:
-																		previewProducts[ 0 ]
-																			.name,
+																		product.name,
 																	style: {
 																		typography:
 																			{
