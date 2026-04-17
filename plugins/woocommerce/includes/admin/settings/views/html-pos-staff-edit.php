@@ -37,7 +37,7 @@ if ( ! isset( $has_pin, $user_id, $user, $role_name ) || ! $user instanceof WP_U
 
 	<table class="form-table" role="presentation">
 		<tbody>
-			<tr valign="top">
+			<tr>
 				<th scope="row" class="titledesc">
 					<?php esc_html_e( 'User', 'woocommerce' ); ?>
 				</th>
@@ -46,7 +46,7 @@ if ( ! isset( $has_pin, $user_id, $user, $role_name ) || ! $user instanceof WP_U
 					<span class="description">(<?php echo esc_html( $user->user_email ); ?>)</span>
 				</td>
 			</tr>
-			<tr valign="top">
+			<tr>
 				<th scope="row" class="titledesc">
 					<?php esc_html_e( 'Role', 'woocommerce' ); ?>
 				</th>
@@ -54,7 +54,7 @@ if ( ! isset( $has_pin, $user_id, $user, $role_name ) || ! $user instanceof WP_U
 					<?php echo esc_html( $role_name ); ?>
 				</td>
 			</tr>
-			<tr valign="top">
+			<tr>
 				<th scope="row" class="titledesc">
 					<label for="pos_pin_<?php echo esc_attr( (string) $user_id ); ?>"><?php esc_html_e( 'PIN', 'woocommerce' ); ?></label>
 				</th>

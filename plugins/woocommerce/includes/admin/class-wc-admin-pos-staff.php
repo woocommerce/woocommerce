@@ -133,9 +133,14 @@ class WC_Admin_POS_Staff {
 			return;
 		}
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		if ( isset( $_GET['remove-pin'] ) ) {
+		if ( 'POST' !== ( isset( $_SERVER['REQUEST_METHOD'] ) ? strtoupper( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) ) : '' ) ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
+		if ( isset( $_POST['remove_pos_staff_pin'] ) ) {
 			$this->remove_pin();
+			return;
 		}
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing
@@ -200,13 +205,13 @@ class WC_Admin_POS_Staff {
 	 * @since 10.8.0
 	 */
 	private function remove_pin(): void {
-		check_admin_referer( 'remove-pos-pin' );
+		check_admin_referer( 'remove-pos-pin', 'woocommerce_pos_staff_remove_nonce' );
 
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
 			wp_die( esc_html__( 'You do not have permission to manage POS staff.', 'woocommerce' ) );
 		}
 
-		$user_id = isset( $_GET['remove-pin'] ) ? absint( $_GET['remove-pin'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$user_id = isset( $_POST['user_id'] ) ? absint( $_POST['user_id'] ) : 0;
 
 		// phpcs:ignore WordPress.WP.Capabilities.Unknown -- Registered in WC_Install::create_roles().
 		if ( ! $user_id || ! user_can( $user_id, 'view_pos' ) ) {

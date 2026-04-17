@@ -166,16 +166,6 @@ class WC_Admin_POS_Staff_Table_List extends WP_List_Table {
 	}
 
 	/**
-	 * Get sortable columns.
-	 *
-	 * @since 10.8.0
-	 * @return array
-	 */
-	protected function get_sortable_columns() {
-		return array();
-	}
-
-	/**
 	 * Generate table navigation markup.
 	 *
 	 * @since 10.8.0
@@ -223,21 +213,23 @@ class WC_Admin_POS_Staff_Table_List extends WP_List_Table {
 		);
 
 		if ( $this->pin_service->has_pin( $user->ID ) ) {
-			$remove_url = wp_nonce_url(
-				add_query_arg(
-					array(
-						'page'       => 'wc-settings',
-						'tab'        => 'point-of-sale',
-						'section'    => 'staff',
-						'remove-pin' => $user->ID,
-					),
-					admin_url( 'admin.php' )
+			$action_url = add_query_arg(
+				array(
+					'page'    => 'wc-settings',
+					'tab'     => 'point-of-sale',
+					'section' => 'staff',
 				),
-				'remove-pos-pin'
+				admin_url( 'admin.php' )
 			);
 
-			$actions[] = '<a class="submitdelete" href="' . esc_url( $remove_url ) . '">'
-				. esc_html__( 'Remove PIN', 'woocommerce' ) . '</a>';
+			$form  = '<form method="post" action="' . esc_url( $action_url ) . '" class="wc-pos-staff-remove-pin-form" style="display:inline;">';
+			$form .= wp_nonce_field( 'remove-pos-pin', 'woocommerce_pos_staff_remove_nonce', true, false );
+			$form .= '<input type="hidden" name="user_id" value="' . esc_attr( (string) $user->ID ) . '" />';
+			$form .= '<button type="submit" name="remove_pos_staff_pin" class="button-link submitdelete">'
+				. esc_html__( 'Remove PIN', 'woocommerce' ) . '</button>';
+			$form .= '</form>';
+
+			$actions[] = $form;
 		}
 
 		return $actions;

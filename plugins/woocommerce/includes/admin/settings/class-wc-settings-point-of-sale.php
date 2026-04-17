@@ -18,7 +18,11 @@ if ( class_exists( 'WC_Settings_Point_Of_Sale', false ) ) {
 }
 
 /**
- * WC_Settings_Point_Of_Sale.
+ * WC_Settings_Point_Of_Sale
+ *
+ * Settings page for Point of Sale feature configuration.
+ *
+ * @since 10.8.0
  */
 class WC_Settings_Point_Of_Sale extends WC_Settings_Page {
 
