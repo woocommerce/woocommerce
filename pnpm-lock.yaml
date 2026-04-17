@@ -4420,9 +4420,6 @@ importers:
       mini-css-extract-plugin:
         specifier: 2.9.x
         version: 2.9.4(webpack@5.97.1(@swc/core@1.15.24))
-      minimatch:
-        specifier: 10.2.5
-        version: 10.2.5
       msw:
         specifier: 2.10.4
         version: 2.10.4(@types/node@24.12.2)(typescript@5.7.3)
