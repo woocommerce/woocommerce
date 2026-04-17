@@ -46,8 +46,7 @@ class UnminifyWebpackPlugin {
 				compilation.hooks.processAssets.tap(
 					{
 						name: 'UnminifyWebpackPlugin',
-						stage: compiler.webpack.Compilation
-							.PROCESS_ASSETS_STAGE_DERIVED,
+						stage: compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_DERIVED,
 					},
 					( assets ) => {
 						Object.entries( assets ).forEach(
@@ -105,9 +104,7 @@ class UnminifyWebpackPlugin {
 						) ) {
 							compilation.emitAsset(
 								value.filename,
-								new compiler.webpack.sources.RawSource(
-									value.content
-								)
+								new compiler.webpack.sources.RawSource( value.content )
 							);
 							// Reset the outputNormal object to avoid writing to file that only differs in casing or query string from already written file.
 							outputNormal = {};

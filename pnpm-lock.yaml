@@ -43296,7 +43296,7 @@ snapshots:
     dependencies:
       inflight: 1.0.6
       inherits: 2.0.4
-      minimatch: 3.1.5
+      minimatch: 3.0.8
       once: 1.4.0
       path-is-absolute: 1.0.1
 
@@ -43305,7 +43305,7 @@ snapshots:
       fs.realpath: 1.0.0
       inflight: 1.0.6
       inherits: 2.0.4
-      minimatch: 3.1.5
+      minimatch: 3.0.8
       once: 1.4.0
       path-is-absolute: 1.0.1
 
