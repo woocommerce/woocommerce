@@ -76,7 +76,11 @@ const v1 = {
 			createBlock( 'core/post-title', {
 				level: 2,
 				isLink: false,
-				textAlign: 'center',
+				style: {
+					typography: {
+						textAlign: 'center',
+					},
+				},
 				__woocommerceNamespace:
 					'woocommerce/product-collection/product-title',
 			} )
