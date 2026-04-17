@@ -315,8 +315,19 @@ export const ShippingTour = ( {
 			} );
 
 			if ( ! update.success ) {
-				// Silent retry — failure only means the tour replays next visit.
-				await updateOptions( {
+				const { message, code } = update as {
+					message?: string;
+					code?: string;
+				};
+				recordEvent(
+					'walkthrough_settings_shipping_updated_option_error',
+					{
+						error_message: message,
+						error_code: code,
+					}
+				);
+				// Fire-and-forget retry — failure only means the tour replays next visit.
+				updateOptions( {
 					[ REVIEWED_DEFAULTS_OPTION ]: 'yes',
 				} );
 			}
