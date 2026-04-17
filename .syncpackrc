@@ -27,7 +27,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^24"
+			"pinVersion": "^24.1.0"
 		},
 		{
 			"dependencies": [

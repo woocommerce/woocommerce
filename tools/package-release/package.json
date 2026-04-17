@@ -31,7 +31,7 @@
 		"semver": "^7.5.4"
 	},
 	"devDependencies": {
-		"@types/node": "^24",
+		"@types/node": "^24.1.0",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"oclif": "^2.7.0",
 		"shx": "^0.3.4",

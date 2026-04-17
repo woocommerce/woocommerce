@@ -68,7 +68,7 @@
 	"devDependencies": {
 		"@playwright/test": "^1.57.0",
 		"@types/jest": "29.5.x",
-		"@types/node": "^24",
+		"@types/node": "^24.1.0",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"eslint": "^8.55.0",

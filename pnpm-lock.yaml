@@ -195,7 +195,7 @@ importers:
         specifier: 7.25.7
         version: 7.25.7
       '@types/node':
-        specifier: ^24
+        specifier: ^24.1.0
         version: 24.12.2
       '@woocommerce/eslint-plugin':
         specifier: workspace:*
@@ -789,7 +789,7 @@ importers:
   packages/js/csv-export:
     dependencies:
       '@types/node':
-        specifier: ^24
+        specifier: ^24.1.0
         version: 24.12.2
       browser-filesaver:
         specifier: ^1.1.1
@@ -1105,7 +1105,7 @@ importers:
         specifier: ^2.3.5
         version: 2.3.6
       '@types/node':
-        specifier: ^24
+        specifier: ^24.1.0
         version: 24.12.2
       '@types/qs':
         specifier: ^6.9.10
@@ -1184,7 +1184,7 @@ importers:
         specifier: ^4.14.202
         version: 4.17.24
       '@types/node':
-        specifier: ^24
+        specifier: ^24.1.0
         version: 24.12.2
       '@types/qs':
         specifier: ^6.9.10
@@ -1282,7 +1282,7 @@ importers:
         specifier: 29.5.x
         version: 29.5.14
       '@types/node':
-        specifier: ^24
+        specifier: ^24.1.0
         version: 24.12.2
       '@woocommerce/eslint-plugin':
         specifier: workspace:*
@@ -1445,7 +1445,7 @@ importers:
         specifier: ^4.14.180
         version: 4.17.24
       '@types/node':
-        specifier: ^24
+        specifier: ^24.1.0
         version: 24.12.2
       '@types/react':
         specifier: 18.3.x
@@ -1733,7 +1733,7 @@ importers:
         specifier: 29.5.x
         version: 29.5.14
       '@types/node':
-        specifier: ^24
+        specifier: ^24.1.0
         version: 24.12.2
       '@types/qs':
         specifier: ^6.9.10
@@ -1876,7 +1876,7 @@ importers:
         specifier: 29.5.x
         version: 29.5.14
       '@types/node':
-        specifier: ^24
+        specifier: ^24.1.0
         version: 24.12.2
       '@types/testing-library__jest-dom':
         specifier: ^5.14.9
@@ -2688,7 +2688,7 @@ importers:
         specifier: 29.5.x
         version: 29.5.14
       '@types/node':
-        specifier: ^24
+        specifier: ^24.1.0
         version: 24.12.2
       '@woocommerce/eslint-plugin':
         specifier: workspace:*
@@ -3042,7 +3042,7 @@ importers:
         specifier: 29.5.x
         version: 29.5.14
       '@types/node':
-        specifier: ^24
+        specifier: ^24.1.0
         version: 24.12.2
       '@woocommerce/eslint-plugin':
         specifier: workspace:*
@@ -3631,7 +3631,7 @@ importers:
         specifier: ^4.14.202
         version: 4.17.24
       '@types/node':
-        specifier: ^24
+        specifier: ^24.1.0
         version: 24.12.2
       '@types/qs':
         specifier: ^6.9.10
@@ -4519,7 +4519,7 @@ importers:
         version: https://codeload.github.com/woocommerce/sourcebuster-js/tar.gz/d7f4616d5a17e17db925ca1842457f309379d861
     devDependencies:
       '@types/node':
-        specifier: ^24
+        specifier: ^24.1.0
         version: 24.12.2
       '@wordpress/scripts':
         specifier: ^30.23.0
@@ -4625,7 +4625,7 @@ importers:
         specifier: 29.5.x
         version: 29.5.14
       '@types/node':
-        specifier: ^24
+        specifier: ^24.1.0
         version: 24.12.2
       '@woocommerce/eslint-plugin':
         specifier: workspace:*
@@ -4658,7 +4658,7 @@ importers:
         specifier: ^1.0.4
         version: 1.0.4
       '@types/node':
-        specifier: ^24
+        specifier: ^24.1.0
         version: 24.12.2
       '@wordpress/env':
         specifier: 11.0.1-next.v.20260206T143.0
@@ -4701,7 +4701,7 @@ importers:
         specifier: ^3.0.3
         version: 3.0.3
       '@types/node':
-        specifier: ^24
+        specifier: ^24.1.0
         version: 24.12.2
       '@woocommerce/eslint-plugin':
         specifier: workspace:*
@@ -4807,7 +4807,7 @@ importers:
         specifier: 29.5.x
         version: 29.5.14
       '@types/node':
-        specifier: ^24
+        specifier: ^24.1.0
         version: 24.12.2
       '@woocommerce/eslint-plugin':
         specifier: workspace:*
@@ -4862,7 +4862,7 @@ importers:
         version: 7.7.4
     devDependencies:
       '@types/node':
-        specifier: ^24
+        specifier: ^24.1.0
         version: 24.12.2
       '@woocommerce/eslint-plugin':
         specifier: workspace:*
@@ -4947,7 +4947,7 @@ importers:
         specifier: ^4.2.9
         version: 4.2.9
       '@types/node':
-        specifier: ^24
+        specifier: ^24.1.0
         version: 24.12.2
       '@types/node-fetch':
         specifier: ^2.6.9
@@ -26548,7 +26548,7 @@ snapshots:
       '@types/istanbul-lib-coverage': 2.0.6
       collect-v8-coverage: 1.0.3
 
-  '@jest/test-sequencer@26.6.3(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))':
+  '@jest/test-sequencer@26.6.3':
     dependencies:
       '@jest/test-result': 26.6.2
       graceful-fs: 4.2.11
@@ -26556,11 +26556,7 @@ snapshots:
       jest-runner: 26.6.3(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-runtime: 26.6.3(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
     transitivePeerDependencies:
-      - bufferutil
-      - canvas
       - supports-color
-      - ts-node
-      - utf-8-validate
 
   '@jest/test-sequencer@29.7.0':
     dependencies:
@@ -36864,7 +36860,7 @@ snapshots:
       expect-puppeteer: 4.4.0
       filenamify: 4.3.0
       jest: 26.6.3(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
-      jest-circus: 26.6.3(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
+      jest-circus: 26.6.3
       jest-dev-server: 5.0.3
       jest-environment-node: 26.6.2
       markdownlint: 0.23.1
@@ -44875,7 +44871,7 @@ snapshots:
       jest-util: 29.7.0
       p-limit: 3.1.0
 
-  jest-circus@26.6.3(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)):
+  jest-circus@26.6.3:
     dependencies:
       '@babel/traverse': 7.29.0
       '@jest/environment': 26.6.2
@@ -44899,11 +44895,7 @@ snapshots:
       stack-utils: 2.0.6
       throat: 5.0.0
     transitivePeerDependencies:
-      - bufferutil
-      - canvas
       - supports-color
-      - ts-node
-      - utf-8-validate
 
   jest-circus@29.5.0:
     dependencies:
@@ -45024,7 +45016,7 @@ snapshots:
   jest-config@26.6.3(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)):
     dependencies:
       '@babel/core': 7.25.7
-      '@jest/test-sequencer': 26.6.3(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
+      '@jest/test-sequencer': 26.6.3
       '@jest/types': 26.6.2
       babel-jest: 26.6.3(@babel/core@7.25.7)
       chalk: 4.1.2
