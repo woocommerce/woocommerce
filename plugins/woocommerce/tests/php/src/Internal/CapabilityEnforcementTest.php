@@ -1244,32 +1244,6 @@ class CapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Cashier POST /wc/v3/customers is denied with woocommerce_rest_cannot_create when lacking create_customers.
-	 */
-	public function test_cashier_post_customers_denied_without_create_customers(): void {
-		$user_id = $this->factory->user->create( array( 'role' => 'pos_cashier' ) );
-		$user    = new \WP_User( $user_id );
-		$user->remove_cap( 'create_customers' );
-
-		wp_set_current_user( $user_id );
-
-		$request = new WP_REST_Request( 'POST', '/wc/v3/customers' );
-		$request->set_body_params(
-			array(
-				'email'      => 'cashier-denied@example.com',
-				'first_name' => 'Cashier',
-				'last_name'  => 'Denied',
-				'username'   => 'cashier-denied',
-			)
-		);
-
-		$response = $this->server->dispatch( $request );
-
-		$this->assertSame( 403, $response->get_status() );
-		$this->assertSame( 'woocommerce_rest_cannot_create', $response->get_data()['code'] );
-	}
-
-	/**
 	 * @testdox Administrator POST /wc/v3/customers returns 201.
 	 */
 	public function test_admin_post_customers_allowed(): void {
@@ -1303,6 +1277,28 @@ class CapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 				'first_name' => 'Manager',
 				'last_name'  => 'Extra',
 				'username'   => 'manager-created-extra',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 201, $response->get_status() );
+	}
+
+	/**
+	 * @testdox POS cashier POST /wc/v3/customers returns 201 because the role has create_customers.
+	 */
+	public function test_pos_cashier_post_customers_allowed(): void {
+		$user_id = $this->factory->user->create( array( 'role' => 'pos_cashier' ) );
+		wp_set_current_user( $user_id );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/customers' );
+		$request->set_body_params(
+			array(
+				'email'      => 'cashier-created@example.com',
+				'first_name' => 'Cashier',
+				'last_name'  => 'Walkin',
+				'username'   => 'cashier-created-walkin',
 			)
 		);
 

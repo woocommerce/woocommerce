@@ -244,25 +244,6 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 
 		$route = $request->get_route();
 
-		// Enforce POS-aware gating on customer write routes. The WC customers
-		// controller delegates to wc_rest_check_user_permissions which maps the
-		// 'create' context to create_customers, but the default base check can
-		// still allow a POS user through in cases where the filter is not the
-		// single source of truth. Block writes for POS-only users that lack the
-		// required capability so the HTTP response is a consistent 403.
-		if ( $this->is_customer_route( $route ) && $this->is_customer_write_method( $request->get_method() ) ) {
-			if ( is_user_logged_in() && ! current_user_can( 'manage_woocommerce' ) && current_user_can( 'view_pos' ) ) {
-				$required_cap = $this->required_customer_write_capability( $request->get_method() );
-				if ( '' === $required_cap || ! current_user_can( $required_cap ) ) {
-					return new WP_Error(
-						'woocommerce_rest_cannot_create',
-						__( 'Sorry, you are not allowed to create resources.', 'woocommerce' ),
-						array( 'status' => rest_authorization_required_code() )
-					);
-				}
-			}
-		}
-
 		if ( ! $this->is_blocked_user_route( $route ) && ! $this->is_report_route( $route ) ) {
 			return $response;
 		}
@@ -288,41 +269,6 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 		}
 
 		return $response;
-	}
-
-	/**
-	 * Check whether the request method writes to a customer resource.
-	 *
-	 * @since 10.8.0
-	 *
-	 * @param string $method HTTP method.
-	 * @return bool
-	 */
-	private function is_customer_write_method( string $method ): bool {
-		return in_array( strtoupper( $method ), array( 'POST', 'PUT', 'PATCH', 'DELETE' ), true );
-	}
-
-	/**
-	 * Map a customer-route HTTP method to the required WC capability.
-	 *
-	 * Returning an empty string means the method is not allowed for POS users
-	 * and the check will always deny.
-	 *
-	 * @since 10.8.0
-	 *
-	 * @param string $method HTTP method.
-	 * @return string
-	 */
-	private function required_customer_write_capability( string $method ): string {
-		switch ( strtoupper( $method ) ) {
-			case 'POST':
-				return 'create_customers';
-			case 'PUT':
-			case 'PATCH':
-			case 'DELETE':
-			default:
-				return '';
-		}
 	}
 
 	/**
