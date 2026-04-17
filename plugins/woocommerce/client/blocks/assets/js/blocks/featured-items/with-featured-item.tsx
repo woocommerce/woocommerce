@@ -221,6 +221,8 @@ export const withFeaturedItem =
 
 		const renderInnerBlocks = () => {
 			if ( product ) {
+				const innerBlocksTemplate =
+					FEATURED_PRODUCT_DEFAULT_TEMPLATE( product );
 				return (
 					<BlockContextProvider
 						value={ { postId: product.id, postType: 'product' } }
@@ -238,35 +240,33 @@ export const withFeaturedItem =
 										// set the text to the preview product
 										// name.
 										isPreviewMode
-											? FEATURED_PRODUCT_DEFAULT_TEMPLATE(
-													product
-											  ).map( ( block ) => {
-													if (
-														block[ 0 ] ===
-														'core/post-title'
-													) {
-														return [
-															'core/heading',
-															{
-																level: 2,
-																content:
-																	previewProducts[ 0 ]
-																		.name,
-																style: {
-																	typography:
-																		{
-																			textAlign:
-																				'center',
-																		},
-																},
-															} as BlockAttributes,
-														];
+											? innerBlocksTemplate.map(
+													( block ) => {
+														if (
+															block[ 0 ] ===
+															'core/post-title'
+														) {
+															return [
+																'core/heading',
+																{
+																	level: 2,
+																	content:
+																		previewProducts[ 0 ]
+																			.name,
+																	style: {
+																		typography:
+																			{
+																				textAlign:
+																					'center',
+																			},
+																	},
+																} as BlockAttributes,
+															];
+														}
+														return block;
 													}
-													return block;
-											  } )
-											: FEATURED_PRODUCT_DEFAULT_TEMPLATE(
-													product
 											  )
+											: innerBlocksTemplate
 									}
 									templateLock={ false }
 								/>
