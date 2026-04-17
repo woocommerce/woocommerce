@@ -5,7 +5,7 @@
 
 	a {
 		text-decoration: none;
-		color: var(--wp-admin-theme-color, #007cba);
+		color: #007cba;
 	}
 
 	.woocommerce-task-products__title {
@@ -19,7 +19,7 @@
 	}
 
 	.woocommerce-task-products__button-view-less-product-types {
-		color: var(--wp-admin-theme-color, #007cba);
+		color: #007cba;
 		padding: 0;
 		height: fit-content;
 		margin-top: 21px;
@@ -30,7 +30,7 @@
 		}
 
 		&:focus {
-			color: var(--wp-admin-theme-color, #007cba);
+			color: #007cba;
 			outline: none;
 			box-shadow: none;
 		}

@@ -87,7 +87,7 @@
 
 .woocommerce-marketplace__refresh-subscriptions {
 	text-decoration: none;
-	color: var(--wp-admin-theme-color, #007cba);
+	color: #007cba;
 	.woocommerce-marketplace__refresh-subscriptions-icon {
 		margin-right: $grid-unit-05;
 	}
@@ -311,7 +311,7 @@
 	}
 
 	a:hover {
-		color: var(--wp-admin-theme-color-darker-10, #007cba);
+		color: #007cba;
 	}
 }
 
