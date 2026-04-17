@@ -30,7 +30,8 @@ class GetProduct {
 	 * Admins can read any product. Non-admin users can only read products
 	 * they authored themselves.
 	 *
-	 * @param int $id The product ID.
+	 * @param int  $id              The product ID.
+	 * @param bool $_preauthorized  Whether the declared capability check passed.
 	 * @return bool Whether the current user can read this product.
 	 * @throws AuthorizationException When the product does not exist.
 	 */

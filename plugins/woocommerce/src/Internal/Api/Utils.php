@@ -62,6 +62,7 @@ class Utils {
 	 * @throws \GraphQL\Error\Error When the factory throws InvalidArgumentException.
 	 */
 	public static function create_input( callable $factory ): mixed {
+		// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Not HTML; serialized as JSON.
 		try {
 			return $factory();
 		} catch ( \InvalidArgumentException $e ) {
@@ -70,6 +71,7 @@ class Utils {
 				extensions: array( 'code' => 'INVALID_ARGUMENT' )
 			);
 		}
+		// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
 	}
 
 	/**
@@ -83,6 +85,7 @@ class Utils {
 	 * @throws \GraphQL\Error\Error On any exception from the command.
 	 */
 	public static function execute_command( object $command, array $execute_args ): mixed {
+		// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Not HTML; serialized as JSON.
 		try {
 			return $command->execute( ...$execute_args );
 		} catch ( \Automattic\WooCommerce\Api\ApiException $e ) {
@@ -104,6 +107,7 @@ class Utils {
 				previous: $e,
 				extensions: array( 'code' => 'INTERNAL_ERROR' )
 			);
-		}
+		}//end try
+		// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
 	}
 }

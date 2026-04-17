@@ -79,6 +79,7 @@ class PaginationParams {
 			return;
 		}
 
+		// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Not HTML output; serialized as JSON in the GraphQL error response.
 		if ( $value < 0 ) {
 			throw new \InvalidArgumentException(
 				sprintf( 'Argument `%s` must be zero or greater.', $name )
@@ -94,5 +95,6 @@ class PaginationParams {
 				)
 			);
 		}
+		// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
 	}
 }
