@@ -21,17 +21,13 @@
 			"isBanned": true
 		},
 		{
-			"label": "Allow @woocommerce/tracks to support Node.js v22+",
 			"dependencies": [
-				"node"
+				"@types/node"
 			],
-			"dependencyTypes": [
-				"engines"
-			],
-			"pinVersion": ">=20.11.1",
 			"packages": [
-				"@woocommerce/tracks"
-			]
+				"**"
+			],
+			"pinVersion": "^24.1.0"
 		},
 		{
 			"dependencies": [
@@ -40,7 +36,7 @@
 			"dependencyTypes": [
 				"engines"
 			],
-			"pinVersion": "^20.11.1",
+			"pinVersion": "^24.15.0",
 			"packages": [
 				"**"
 			]
@@ -568,15 +564,6 @@
 				"**"
 			],
 			"pinVersion": "^9.0.1"
-		},
-		{
-			"dependencies": [
-				"@types/node"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "20.x.x"
 		},
 		{
 			"label": "Testing related dependencies: React 18",

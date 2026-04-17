@@ -244,7 +244,7 @@
 		"wp-types": "3.63.0"
 	},
 	"engines": {
-		"node": "^20.11.1"
+		"node": "^24.15.0"
 	},
 	"dependencies": {
 		"@ariakit/react": "^0.4.5",

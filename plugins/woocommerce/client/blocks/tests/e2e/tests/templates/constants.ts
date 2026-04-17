@@ -31,6 +31,7 @@ type TemplateCustomizationTest = {
 		templatePath: string;
 	};
 	canBeOverriddenByThemes: boolean;
+	isTaxonomyTemplate?: boolean;
 };
 
 export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
@@ -72,6 +73,7 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 			templatePath: 'archive-product',
 		},
 		canBeOverriddenByThemes: true,
+		isTaxonomyTemplate: true,
 	},
 	{
 		visitPage: async ( { page } ) =>
@@ -84,6 +86,7 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 			templatePath: 'archive-product',
 		},
 		canBeOverriddenByThemes: true,
+		isTaxonomyTemplate: true,
 	},
 	{
 		visitPage: async ( { page } ) => await page.goto( '/product/hoodie' ),
@@ -164,8 +167,8 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 		canBeOverriddenByThemes: false,
 	},
 	{
-		visitPage: async ( { frontendUtils, page } ) => {
-			const checkoutPage = new CheckoutPage( { page } );
+		visitPage: async ( { frontendUtils, page, requestUtils } ) => {
+			const checkoutPage = new CheckoutPage( { page, requestUtils } );
 			await frontendUtils.goToShop();
 			await frontendUtils.addToCart( SIMPLE_VIRTUAL_PRODUCT_NAME );
 			await frontendUtils.goToCheckout();
