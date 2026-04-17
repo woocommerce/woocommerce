@@ -216,6 +216,76 @@ class POSApprovalControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Manager PIN approving publish_shop_coupons without order_id returns 200.
+	 */
+	public function test_manager_pin_approves_publish_shop_coupons_without_order_id(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$request = new \WP_REST_Request( 'POST', self::ROUTE );
+		$request->set_body_params(
+			array(
+				'pin'    => '7391',
+				'action' => 'publish_shop_coupons',
+			)
+		);
+
+		$response = rest_do_request( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertArrayHasKey( 'approval_token', $data );
+		$this->assertNotEmpty( $data['approval_token'] );
+		$this->assertTrue( $data['approved'] );
+		$this->assertSame( $this->manager_id, $data['approver_id'] );
+	}
+
+	/**
+	 * @testdox Manager PIN approving publish_shop_coupons with irrelevant order_id still returns 200.
+	 */
+	public function test_manager_pin_approves_publish_shop_coupons_with_order_id(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$request = new \WP_REST_Request( 'POST', self::ROUTE );
+		$request->set_body_params(
+			array(
+				'pin'     => '7391',
+				'action'  => 'publish_shop_coupons',
+				'context' => array( 'order_id' => 42 ),
+			)
+		);
+
+		$response = rest_do_request( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertArrayHasKey( 'approval_token', $data );
+		$this->assertNotEmpty( $data['approval_token'] );
+	}
+
+	/**
+	 * @testdox Cashier PIN attempting publish_shop_coupons approval returns 403.
+	 */
+	public function test_cashier_pin_publish_shop_coupons_returns_403(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$request = new \WP_REST_Request( 'POST', self::ROUTE );
+		$request->set_body_params(
+			array(
+				'pin'    => '8472',
+				'action' => 'publish_shop_coupons',
+			)
+		);
+
+		$response = rest_do_request( $request );
+
+		$this->assertSame( 403, $response->get_status() );
+		$this->assertSame(
+			'The approver does not have permission for this action.',
+			$response->get_data()['message']
+		);
+	}
+
+	/**
 	 * @testdox Unauthenticated request returns 401.
 	 */
 	public function test_unauthenticated_returns_401(): void {

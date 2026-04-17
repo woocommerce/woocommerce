@@ -170,7 +170,7 @@ class POSPinAuthControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Response capabilities include all granted capabilities.
+	 * @testdox Response capabilities include all granted capabilities (no woocommerce_ prefix filter).
 	 */
 	public function test_capabilities_include_all_granted_caps(): void {
 		wp_set_current_user( $this->admin_id );
@@ -184,6 +184,32 @@ class POSPinAuthControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 200, $response->get_status() );
 		$this->assertIsArray( $data['capabilities'] );
 		$this->assertArrayHasKey( 'view_pos', $data['capabilities'] );
+
+		$expected_caps = array(
+			'view_pos',
+			'edit_shop_orders',
+			'read_shop_order',
+			'read_private_shop_orders',
+			'read_product',
+			'read_private_products',
+			'read_shop_coupon',
+			'read_private_shop_coupons',
+		);
+		foreach ( $expected_caps as $cap ) {
+			$this->assertArrayHasKey( $cap, $data['capabilities'], "Expected capability {$cap} to be present." );
+			$this->assertTrue( $data['capabilities'][ $cap ] );
+		}
+
+		$non_prefixed_caps = array_filter(
+			array_keys( $data['capabilities'] ),
+			static function ( string $cap ): bool {
+				return 0 !== strpos( $cap, 'woocommerce_' );
+			}
+		);
+		$this->assertNotEmpty(
+			$non_prefixed_caps,
+			'Capabilities should not be restricted to only woocommerce_ prefixed ones.'
+		);
 
 		foreach ( $data['capabilities'] as $cap => $value ) {
 			$this->assertTrue( $value );
