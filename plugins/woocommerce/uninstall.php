@@ -39,6 +39,7 @@ if ( class_exists( ActionScheduler::class ) && ActionScheduler::is_initialized()
 	as_unschedule_all_actions( 'wc_admin_daily' );
 	as_unschedule_all_actions( 'generate_category_lookup_table' );
 	as_unschedule_all_actions( 'wc_admin_unsnooze_admin_notes' );
+	as_unschedule_all_actions( 'woocommerce_pos_cleanup_stale_sessions' );
 }
 
 /*
@@ -90,8 +91,14 @@ if ( defined( 'WC_REMOVE_ALL_DATA' ) && true === WC_REMOVE_ALL_DATA ) {
 	$wpdb->query( "DELETE FROM $wpdb->options WHERE option_name LIKE 'woocommerce\_%';" );
 	$wpdb->query( "DELETE FROM $wpdb->options WHERE option_name LIKE 'widget\_woocommerce\_%';" );
 
+	// Delete POS transients (rate limits and approvals) that don't share the `woocommerce_` prefix.
+	$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '\\_transient\\_\\_wc\\_pos\\_%' OR option_name LIKE '\\_transient\\_timeout\\_\\_wc\\_pos\\_%';" );
+
 	// Delete usermeta.
 	$wpdb->query( "DELETE FROM $wpdb->usermeta WHERE meta_key LIKE 'woocommerce\_%';" );
+
+	// Delete POS PIN user meta (keys are underscore-prefixed so they don't match the LIKE above).
+	$wpdb->query( "DELETE FROM {$wpdb->usermeta} WHERE meta_key IN ('_woocommerce_pos_pin', '_woocommerce_pos_pin_index');" );
 
 	// Delete our data from the post and post meta tables, and remove any additional tables we created.
 	$wpdb->query( "DELETE FROM {$wpdb->posts} WHERE post_type IN ( 'product', 'product_variation', 'shop_coupon', 'shop_order', 'shop_order_refund' );" );

@@ -3495,3 +3495,19 @@ function wc_update_1080_slim_orders_meta_key_index(): void {
 	// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	$wpdb->query( "ALTER TABLE {$table_name} DROP INDEX {$index_name}, ADD INDEX {$index_name} (meta_key(100))" );
 }
+
+/**
+ * Ensure POS roles and capabilities exist on existing sites upgrading to 10.8.0.
+ *
+ * `create_roles()` only runs on fresh install and `add_role()` is a no-op when a
+ * role already exists, so existing sites never receive the new POS roles or the
+ * new capabilities added to core roles. Re-running `create_roles()` here back-fills
+ * them without affecting roles/caps that are already in place.
+ *
+ * @since 10.8.0
+ *
+ * @return void
+ */
+function wc_update_1080_create_pos_roles() {
+	WC_Install::create_roles();
+}
