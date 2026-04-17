@@ -5,7 +5,7 @@
 	"homepage": "https://woocommerce.com/",
 	"packageManager": "pnpm@10.33.0",
 	"engines": {
-		"node": "^20.11.1"
+		"node": "^24.15.0"
 	},
 	"private": true,
 	"repository": {
@@ -33,7 +33,7 @@
 	"devDependencies": {
 		"@babel/preset-env": "7.25.7",
 		"@babel/runtime": "7.25.7",
-		"@types/node": "20.x.x",
+		"@types/node": "^24.1.0",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/monorepo-utils": "workspace:*",
 		"@wordpress/eslint-plugin": "14.7.0",

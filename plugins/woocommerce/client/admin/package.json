@@ -128,7 +128,7 @@
 		"@types/debug": "4.1.12",
 		"@types/jest": "29.5.x",
 		"@types/lodash": "^4.14.202",
-		"@types/node": "20.x.x",
+		"@types/node": "^24.1.0",
 		"@types/qs": "^6.9.10",
 		"@types/react": "18.3.x",
 		"@types/react-router-dom": "^5.3.3",
@@ -229,7 +229,7 @@
 		"@wordpress/data": "^10.0.2"
 	},
 	"engines": {
-		"node": "^20.11.1"
+		"node": "^24.15.0"
 	},
 	"config": {
 		"ci": {
