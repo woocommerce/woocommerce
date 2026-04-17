@@ -206,7 +206,7 @@
 }
 
 button.components-button.send-magic-link-button {
-	background: #007cba;
+	background: var(--wp-admin-theme-color, #007cba);
 	color: #fff;
 	position: relative;
 	margin-bottom: 1em;
@@ -285,7 +285,7 @@ button.components-button.send-magic-link-button {
 		}
 		.email-sent-footer-text {
 			.email-sent-send-another-link {
-				color: #007cba;
+				color: var(--wp-admin-theme-color, #007cba);
 				text-decoration: none;
 				padding: 0;
 				cursor: pointer;

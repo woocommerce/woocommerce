@@ -40,7 +40,7 @@
 
 	&__campaign-title {
 		a {
-			color: #007cba;
+			color: var(--wp-admin-theme-color, #007cba);
 			font-weight: 600;
 			text-decoration: none;
 		}
