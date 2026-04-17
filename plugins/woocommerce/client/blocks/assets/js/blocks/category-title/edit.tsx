@@ -15,6 +15,8 @@ import {
 	PlainText,
 	HeadingLevelDropdown,
 } from '@wordpress/block-editor';
+import { usePreviewMode } from '@woocommerce/base-hooks';
+import { previewCategories } from '@woocommerce/resource-previews';
 // eslint-disable-next-line @woocommerce/dependency-group
 import {
 	ToggleControl,
@@ -78,12 +80,25 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 		[ termId, termTaxonomy ]
 	);
 
+	const isPreviewMode = usePreviewMode();
 	const [ rawTitle = '', setTitle, fullTitle ] = useEntityProp(
 		'taxonomy',
 		termTaxonomy || 'product_cat',
 		'name',
 		termId ? String( termId ) : undefined
 	);
+	const displayRawTitle =
+		isPreviewMode && typeof rawTitle === 'string'
+			? rawTitle
+			: previewCategories[ 0 ].name;
+	const displayFullTitle =
+		! isPreviewMode &&
+		typeof fullTitle === 'object' &&
+		fullTitle !== null &&
+		'rendered' in fullTitle &&
+		typeof fullTitle.rendered === 'string'
+			? fullTitle?.rendered
+			: previewCategories[ 0 ].name;
 
 	const link = useSelect(
 		( select ) => {
@@ -116,7 +131,7 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 			<PlainText
 				tagName={ TagName }
 				placeholder={ __( 'No title', 'woocommerce' ) }
-				value={ rawTitle }
+				value={ displayRawTitle }
 				onChange={ ( v ) => setTitle( v ) }
 				__experimentalVersion={ 2 }
 				{ ...blockProps }
@@ -126,7 +141,7 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 				tagName={ TagName }
 				{ ...blockProps }
 				dangerouslySetInnerHTML={ {
-					__html: fullTitle?.rendered,
+					__html: displayFullTitle,
 				} }
 			/>
 		);
@@ -141,11 +156,11 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 					target={ linkTarget }
 					rel={ rel }
 					placeholder={
-						! rawTitle?.length
+						! displayRawTitle?.length
 							? __( 'No title', 'woocommerce' )
 							: undefined
 					}
-					value={ rawTitle }
+					value={ displayRawTitle }
 					onChange={ ( v ) => setTitle( v ) }
 					__experimentalVersion={ 2 }
 				/>
@@ -158,7 +173,7 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 					rel={ rel }
 					onClick={ ( event ) => event.preventDefault() }
 					dangerouslySetInnerHTML={ {
-						__html: fullTitle?.rendered,
+						__html: displayFullTitle,
 					} }
 				/>
 			</ContainerElement>

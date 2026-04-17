@@ -11,6 +11,9 @@ import {
 	useBlockProps,
 	PlainText,
 } from '@wordpress/block-editor';
+import { usePreviewMode } from '@woocommerce/base-hooks';
+import { previewCategories } from '@woocommerce/resource-previews';
+
 interface Props {
 	attributes: {
 		textAlign?: string;
@@ -47,6 +50,20 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 			String( termId )
 		);
 
+	const isPreviewMode = usePreviewMode();
+	const displayRawDescription =
+		isPreviewMode && typeof rawDescription === 'string'
+			? rawDescription
+			: previewCategories[ 0 ].description;
+	const displayFullDescription =
+		! isPreviewMode &&
+		typeof fullDescription === 'object' &&
+		fullDescription !== null &&
+		'rendered' in fullDescription &&
+		typeof fullDescription.rendered === 'string'
+			? fullDescription?.rendered
+			: previewCategories[ 0 ].description;
+
 	const blockProps = useBlockProps( {
 		className: clsx( { [ `has-text-align-${ textAlign }` ]: textAlign } ),
 	} );
@@ -60,7 +77,7 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 			<PlainText
 				tagName="p"
 				placeholder={ __( 'No description', 'woocommerce' ) as string }
-				value={ rawDescription }
+				value={ displayRawDescription }
 				onChange={ ( v: string ) =>
 					( setDescription as ( v: string ) => void )( v )
 				}
@@ -71,7 +88,7 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 			<p
 				{ ...blockProps }
 				dangerouslySetInnerHTML={ {
-					__html: fullDescription?.rendered,
+					__html: displayFullDescription,
 				} }
 			/>
 		);

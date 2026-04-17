@@ -3,7 +3,7 @@
 /**
  * External dependencies
  */
-import type { BlockAlignment } from '@wordpress/blocks';
+import type { BlockAlignment, BlockAttributes } from '@wordpress/blocks';
 import type { ComponentType, Dispatch, SetStateAction } from 'react';
 import { ProductResponseItem } from '@woocommerce/types';
 import { Icon, Placeholder, Spinner } from '@wordpress/components';
@@ -19,6 +19,7 @@ import {
 import { WP_REST_API_Category } from 'wp-types';
 import { useStyleProps } from '@woocommerce/base-hooks';
 import { InnerBlocks, BlockContextProvider } from '@wordpress/block-editor';
+import { usePreviewMode } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
@@ -36,6 +37,7 @@ import {
 	FEATURED_CATEGORY_DEFAULT_TEMPLATE,
 	FEATURED_PRODUCT_DEFAULT_TEMPLATE,
 } from './constants';
+import { previewProducts } from '@woocommerce/resource-previews';
 
 interface WithFeaturedItemConfig extends GenericBlockUIConfig {
 	emptyMessage: string;
@@ -216,6 +218,8 @@ export const withFeaturedItem =
 			);
 		};
 
+		const isPreviewMode = usePreviewMode();
+
 		const renderInnerBlocks = () => {
 			if ( product ) {
 				return (
@@ -228,9 +232,43 @@ export const withFeaturedItem =
 						>
 							<div className={ `${ className }__inner-blocks` }>
 								<InnerBlocks
-									template={ FEATURED_PRODUCT_DEFAULT_TEMPLATE(
-										product
-									) }
+									template={
+										// When previewing the block, replace
+										// the core/post-title block with a
+										// core/heading block. This way, we can
+										// set the text to the preview product
+										// name.
+										isPreviewMode
+											? FEATURED_PRODUCT_DEFAULT_TEMPLATE(
+													product
+											  ).map( ( block ) => {
+													if (
+														block[ 0 ] ===
+														'core/post-title'
+													) {
+														return [
+															'core/heading',
+															{
+																level: 2,
+																content:
+																	previewProducts[ 0 ]
+																		.name,
+																style: {
+																	typography:
+																		{
+																			textAlign:
+																				'center',
+																		},
+																},
+															} as BlockAttributes,
+														];
+													}
+													return block;
+											  } )
+											: FEATURED_PRODUCT_DEFAULT_TEMPLATE(
+													product
+											  )
+									}
 									templateLock={ false }
 								/>
 							</div>
