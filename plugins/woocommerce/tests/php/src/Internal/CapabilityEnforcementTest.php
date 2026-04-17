@@ -509,7 +509,7 @@ class CapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 
 		$response = $this->server->dispatch( $request );
 
-		$this->assertSame( 403, $response->get_status() );
+		$this->assertSame( 401, $response->get_status() );
 	}
 
 	/**
@@ -549,7 +549,7 @@ class CapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 		);
 
 		$second_response = $this->server->dispatch( $second_request );
-		$this->assertSame( 403, $second_response->get_status() );
+		$this->assertSame( 401, $second_response->get_status() );
 	}
 
 	/**
@@ -579,7 +579,7 @@ class CapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 
 		$response = $this->server->dispatch( $request );
 
-		$this->assertSame( 403, $response->get_status() );
+		$this->assertSame( 401, $response->get_status() );
 	}
 
 	/**
@@ -978,6 +978,208 @@ class CapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 
 		$this->assertContains( $response->get_status(), array( 401, 403 ) );
+	}
+
+	/**
+	 * @testdox Refund request with no approval token returns the generic 403 denial.
+	 */
+	public function test_refund_without_token_returns_generic_permission_denial(): void {
+		wp_set_current_user( $this->limited_user_id );
+		$order = $this->create_order_as_current_user( 'completed' );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() . '/refunds' );
+		$request->set_body_params(
+			array(
+				'amount'     => '1.00',
+				'reason'     => 'Testing refund',
+				'api_refund' => false,
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 403, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_cannot_create', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Refund request with an expired approval token returns a structured 401 approval error.
+	 */
+	public function test_refund_with_expired_token_returns_approval_error(): void {
+		wp_set_current_user( $this->limited_user_id );
+		$order = $this->create_order_as_current_user( 'completed' );
+
+		$token = $this->approval_service->create_approval(
+			$this->capable_user_id,
+			'refund_shop_orders',
+			array( 'order_id' => $order->get_id() )
+		);
+
+		delete_transient( '_wc_pos_approval_' . hash( 'sha256', $token ) );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() . '/refunds' );
+		$request->set_body_params(
+			array(
+				'amount'        => '1.00',
+				'reason'        => 'Refund with expired token',
+				'api_refund'    => false,
+				'_pos_approval' => $token,
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 401, $response->get_status() );
+		$this->assertSame( 'woocommerce_pos_approval_invalid_or_expired', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Refund request with an already-consumed approval token returns a structured 401 approval error.
+	 */
+	public function test_refund_with_consumed_token_returns_approval_error(): void {
+		wp_set_current_user( $this->limited_user_id );
+		$order = $this->create_order_as_current_user( 'completed' );
+
+		$token = $this->approval_service->create_approval(
+			$this->capable_user_id,
+			'refund_shop_orders',
+			array( 'order_id' => $order->get_id() )
+		);
+
+		$first_request = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() . '/refunds' );
+		$first_request->set_body_params(
+			array(
+				'amount'        => '1.00',
+				'reason'        => 'First refund',
+				'api_refund'    => false,
+				'_pos_approval' => $token,
+			)
+		);
+		$first_response = $this->server->dispatch( $first_request );
+		$this->assertNotSame( 403, $first_response->get_status() );
+
+		$second_request = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() . '/refunds' );
+		$second_request->set_body_params(
+			array(
+				'amount'        => '1.00',
+				'reason'        => 'Second refund with same token',
+				'api_refund'    => false,
+				'_pos_approval' => $token,
+			)
+		);
+
+		$second_response = $this->server->dispatch( $second_request );
+
+		$this->assertSame( 401, $second_response->get_status() );
+		$this->assertSame( 'woocommerce_pos_approval_invalid_or_expired', $second_response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Refund request with a token scoped to a different order returns a structured 401 approval error.
+	 */
+	public function test_refund_with_wrong_order_token_returns_approval_error(): void {
+		wp_set_current_user( $this->limited_user_id );
+		$order_a = $this->create_order_as_current_user( 'completed' );
+		$order_b = $this->create_order_as_current_user( 'completed' );
+
+		$token = $this->approval_service->create_approval(
+			$this->capable_user_id,
+			'refund_shop_orders',
+			array( 'order_id' => $order_a->get_id() )
+		);
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order_b->get_id() . '/refunds' );
+		$request->set_body_params(
+			array(
+				'amount'        => '1.00',
+				'reason'        => 'Cross-order token',
+				'api_refund'    => false,
+				'_pos_approval' => $token,
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 401, $response->get_status() );
+		$this->assertSame( 'woocommerce_pos_approval_order_mismatch', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Refund request with a valid approval token succeeds with a 2xx status.
+	 */
+	public function test_refund_with_valid_token_succeeds(): void {
+		wp_set_current_user( $this->limited_user_id );
+		$order = $this->create_order_as_current_user( 'completed' );
+
+		$token = $this->approval_service->create_approval(
+			$this->capable_user_id,
+			'refund_shop_orders',
+			array( 'order_id' => $order->get_id() )
+		);
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() . '/refunds' );
+		$request->set_body_params(
+			array(
+				'amount'        => '1.00',
+				'reason'        => 'Valid token refund',
+				'api_refund'    => false,
+				'_pos_approval' => $token,
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 201, $response->get_status() );
+	}
+
+	/**
+	 * @testdox log_approval_consumed writes a log entry to the woocommerce-pos source when a token is consumed.
+	 */
+	public function test_log_approval_consumed_writes_log_entry(): void {
+		wp_set_current_user( $this->limited_user_id );
+		$order = $this->create_order_as_current_user( 'completed' );
+
+		$captured_logs = array();
+		$capture       = function ( $message, $level, $context ) use ( &$captured_logs ) {
+			unset( $level );
+			if ( is_array( $context ) && isset( $context['source'] ) && 'woocommerce-pos' === $context['source'] ) {
+				$captured_logs[] = $message;
+			}
+			return $message;
+		};
+		add_filter( 'woocommerce_logger_log_message', $capture, 10, 3 );
+
+		$token = $this->approval_service->create_approval(
+			$this->capable_user_id,
+			'refund_shop_orders',
+			array( 'order_id' => $order->get_id() )
+		);
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() . '/refunds' );
+		$request->set_body_params(
+			array(
+				'amount'        => '1.00',
+				'reason'        => 'Logged refund',
+				'api_refund'    => false,
+				'_pos_approval' => $token,
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		remove_filter( 'woocommerce_logger_log_message', $capture, 10 );
+
+		$this->assertSame( 201, $response->get_status() );
+
+		$matching = array_filter(
+			$captured_logs,
+			static function ( $message ) {
+				return is_string( $message )
+					&& str_contains( $message, 'POS override consumed' )
+					&& str_contains( $message, 'refund_shop_orders' );
+			}
+		);
+		$this->assertNotEmpty( $matching, 'A woocommerce-pos log entry should be written on approval consumption.' );
 	}
 
 	/**

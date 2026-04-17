@@ -70,6 +70,17 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 	private ?WP_REST_Request $current_rest_request = null;
 
 	/**
+	 * The approval-token error (if any) recorded during the current permission check.
+	 *
+	 * Set when a token was present in the request but failed validation. Surfaced
+	 * through the rest_request_before_callbacks filter so mobile clients can
+	 * distinguish "manager-approved token expired" from "user lacks capability".
+	 *
+	 * @var WP_Error|null
+	 */
+	private ?WP_Error $approval_error = null;
+
+	/**
 	 * Initialize dependencies via the DI container.
 	 *
 	 * @internal
@@ -174,6 +185,8 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 	 * @return WC_Data|WP_Error The order or WP_Error if capability check fails.
 	 */
 	public function enforce_cancel_capability( $order, WP_REST_Request $request, bool $creating ) {
+		$this->approval_error = null;
+
 		$order_capability_error = $this->enforce_order_request_capabilities( $request );
 		if ( is_wp_error( $order_capability_error ) ) {
 			return $order_capability_error;
@@ -218,6 +231,16 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 	 */
 	public function enforce_route_access( $response, array $handler, WP_REST_Request $request ) {
 		unset( $handler );
+
+		// If the permission callback already denied the request and we recorded a
+		// specific approval-token failure during the check, surface the structured
+		// error so mobile clients can distinguish "token expired/invalid" from
+		// "user lacks capability".
+		if ( is_wp_error( $response ) && $this->approval_error instanceof WP_Error ) {
+			$approval_error       = $this->approval_error;
+			$this->approval_error = null;
+			return $approval_error;
+		}
 
 		$route = $request->get_route();
 
@@ -328,6 +351,12 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 			$capability
 		);
 		if ( false === $approval_data ) {
+			$reason               = $this->approval_service->get_last_failure_reason();
+			$this->approval_error = $this->build_approval_error(
+				POSApprovalService::FAILURE_ACTION_MISMATCH === $reason
+					? 'woocommerce_pos_approval_action_mismatch'
+					: 'woocommerce_pos_approval_invalid_or_expired'
+			);
 			return false;
 		}
 
@@ -336,6 +365,7 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 		$approved_order_id = (int) ( $approval_data['context']['order_id'] ?? 0 );
 		if ( $approved_order_id > 0 || $this->current_order_id > 0 ) {
 			if ( $approved_order_id !== $this->current_order_id ) {
+				$this->approval_error = $this->build_approval_error( 'woocommerce_pos_approval_order_mismatch' );
 				return false;
 			}
 		}
@@ -345,8 +375,33 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 
 		// Clear token after consumption to prevent reuse within the same request.
 		$this->current_approval_token = '';
+		$this->approval_error         = null;
 
 		return true;
+	}
+
+	/**
+	 * Build a structured WP_Error describing an approval-token failure.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @param string $code Error code to emit.
+	 * @return WP_Error
+	 */
+	private function build_approval_error( string $code ): WP_Error {
+		$messages = array(
+			'woocommerce_pos_approval_invalid_or_expired' => __( 'The manager approval is invalid or has expired. Please request a new approval.', 'woocommerce' ),
+			'woocommerce_pos_approval_action_mismatch'    => __( 'The manager approval does not cover this action.', 'woocommerce' ),
+			'woocommerce_pos_approval_order_mismatch'     => __( 'The manager approval was not issued for this order.', 'woocommerce' ),
+		);
+
+		$message = $messages[ $code ] ?? $messages['woocommerce_pos_approval_invalid_or_expired'];
+
+		return new WP_Error(
+			$code,
+			$message,
+			array( 'status' => 401 )
+		);
 	}
 
 	/**
@@ -434,6 +489,8 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 	 * @since 10.8.0
 	 */
 	private function extract_approval_context_from_rest_request(): void {
+		$this->approval_error = null;
+
 		if ( $this->current_rest_request instanceof WP_REST_Request ) {
 			$this->current_approval_token = (string) $this->current_rest_request->get_param( '_pos_approval' );
 			$route = $this->current_rest_request->get_route();
@@ -705,9 +762,7 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 
 		$stock_keys_found = false;
 
-		foreach ( $params as $key => $value ) {
-			unset( $value );
-
+		foreach ( array_keys( $params ) as $key ) {
 			if ( in_array( $key, array( 'manage_stock', 'stock_quantity', 'stock_status', 'backorders', 'low_stock_amount' ), true ) ) {
 				$stock_keys_found = true;
 			}

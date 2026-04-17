@@ -15,9 +15,19 @@ defined( 'ABSPATH' ) || exit;
  */
 class POSApprovalService {
 
+	public const FAILURE_INVALID_OR_EXPIRED = 'invalid_or_expired';
+	public const FAILURE_ACTION_MISMATCH    = 'action_mismatch';
+
 	private const APPROVAL_PREFIX = '_wc_pos_approval_';
 	private const TOKEN_LENGTH    = 32;
 	private const TTL_SECONDS     = 300;
+
+	/**
+	 * Reason for the most recent validation failure, if any.
+	 *
+	 * @var string
+	 */
+	private string $last_failure_reason = '';
 
 	/**
 	 * Creates a single-use approval token for a manager override action.
@@ -57,6 +67,8 @@ class POSApprovalService {
 	public function validate_and_consume( string $token, string $action ) {
 		global $wpdb;
 
+		$this->last_failure_reason = '';
+
 		$hash       = hash( 'sha256', $token );
 		$option_key = '_transient_' . self::APPROVAL_PREFIX . $hash;
 
@@ -65,6 +77,7 @@ class POSApprovalService {
 		// that deletes the row gets affected_rows = 1 and proceeds.
 		$data = get_transient( self::APPROVAL_PREFIX . $hash );
 		if ( false === $data ) {
+			$this->last_failure_reason = self::FAILURE_INVALID_OR_EXPIRED;
 			return false;
 		}
 
@@ -84,13 +97,27 @@ class POSApprovalService {
 		wp_cache_delete( self::APPROVAL_PREFIX . $hash, 'transient' );
 
 		if ( 0 === $rows_deleted ) {
+			$this->last_failure_reason = self::FAILURE_INVALID_OR_EXPIRED;
 			return false;
 		}
 
 		if ( $data['action'] !== $action ) {
+			$this->last_failure_reason = self::FAILURE_ACTION_MISMATCH;
 			return false;
 		}
 
 		return $data;
+	}
+
+	/**
+	 * Return the reason for the most recent validation failure.
+	 *
+	 * Empty string when the most recent call succeeded or no call has been made.
+	 *
+	 * @since 10.8.0
+	 * @return string
+	 */
+	public function get_last_failure_reason(): string {
+		return $this->last_failure_reason;
 	}
 }
