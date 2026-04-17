@@ -136,9 +136,13 @@ If you need to create a new pre-defined environment, you can follow these steps:
   Example: `tests/e2e-pw/envs/my-new-env`
 - create an `env-setup.sh` file in the new folder. This file should contain any setup steps for the environment. This
   will run before any test execution.
-- create a `playwright.config.js` file in the new folder. This file should contain the configuration for the
+- create a `playwright.config.ts` file in the new folder. This file should contain the configuration for the
   environment.
   It's recommended that the config extends the default configuration and only updates the necessary values.
+
+> [!NOTE]
+> If you previously created a custom environment with a `playwright.config.js` file, it will still work — the test runner falls back to `.js` when no `.ts` config is found. However, new environments should use `.ts`.
+
 - if you need to store an encrypted `.env` file, first create the `.env` file in the `tests/e2e-pw` folder, then
   run `E2E_ENV_KEY='your-key' ./tests/e2e-pw/bin/dotenv.sh -e my-new-env`. This script command will encrypt the `.env`
   file into `tests/e2e-pw/envs/my-new-env/.env.enc`.

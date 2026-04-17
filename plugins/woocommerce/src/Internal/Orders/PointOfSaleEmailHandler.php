@@ -8,7 +8,6 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\Orders;
 
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
-use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use WC_Abstract_Order;
 
 /**
@@ -41,10 +40,6 @@ class PointOfSaleEmailHandler implements RegisterHooksInterface {
 	 * Register hooks and filters.
 	 */
 	public function register(): void {
-		if ( ! FeaturesUtil::feature_is_enabled( 'point_of_sale' ) ) {
-			return;
-		}
-
 		foreach ( self::SUPPRESSED_EMAIL_IDS as $email_id ) {
 			add_filter( 'woocommerce_email_enabled_' . $email_id, array( $this, 'maybe_suppress_email' ), 10, 2 );
 		}

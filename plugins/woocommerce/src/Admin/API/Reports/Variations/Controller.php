@@ -381,7 +381,14 @@ class Controller extends GenericController implements ExportableInterface {
 			$export_columns['stock']        = __( 'Stock', 'woocommerce' );
 		}
 
-		return $export_columns;
+		/**
+		 * Filter to add or remove column names from the variations report for
+		 * export.
+		 *
+		 * @since 10.7.0
+		 * @param array $export_columns Key value pair of column ID and label.
+		 */
+		return apply_filters( 'woocommerce_report_variations_export_columns', $export_columns );
 	}
 
 	/**
@@ -427,6 +434,14 @@ class Controller extends GenericController implements ExportableInterface {
 			$export_item['stock']        = $item['extended_info']['stock_quantity'];
 		}
 
-		return $export_item;
+		/**
+		 * Filter to prepare extra columns in the export item for the variations
+		 * report.
+		 *
+		 * @since 10.7.0
+		 * @param array $export_item Key value pair of column ID and row value.
+		 * @param array $item        The original report item.
+		 */
+		return apply_filters( 'woocommerce_report_variations_prepare_export_item', $export_item, $item );
 	}
 }

@@ -1499,7 +1499,7 @@ class Checkout extends MockeryTestCase {
 		$response = rest_get_server()->dispatch( $request );
 		$this->assertEquals( 400, $response->get_status() );
 		$this->assertEquals( 'woocommerce_rest_invalid_address_country', $response->get_data()['code'] );
-		$this->assertStringContainsString( 'Sorry, we do not allow orders from the provided country (FR)', $response->get_data()['message'] );
+		$this->assertStringContainsString( 'Sorry, we do not allow orders from the provided country (France)', $response->get_data()['message'] );
 	}
 
 	/**

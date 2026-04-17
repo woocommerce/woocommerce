@@ -89,7 +89,11 @@ test( 'Merchant can add brands', async ( { page } ) => {
 	 * After a brand is edited, you will be redirected to the Brands page.
 	 */
 	const editBrand = async ( currentName: string, brand: Brand ) => {
-		await page.getByLabel( `“${ currentName }” (Edit)` ).click();
+		await page
+			.locator( '#posts-filter .row-title' )
+			.filter( { hasText: currentName } )
+			.first()
+			.click();
 		await page.getByLabel( 'Name' ).fill( brand.name );
 		await page.getByLabel( 'Slug' ).fill( brand.slug );
 		await page
@@ -129,7 +133,11 @@ test( 'Merchant can add brands', async ( { page } ) => {
 	 * After a brand is deleted, you will be redirected to the Brands page.
 	 */
 	const deleteBrand = async ( name: string ) => {
-		await page.getByLabel( `“${ name }” (Edit)` ).click();
+		await page
+			.locator( '#posts-filter .row-title' )
+			.filter( { hasText: name } )
+			.first()
+			.click();
 
 		// After clicking the "Delete" button, there will be a confirmation dialog.
 		page.once( 'dialog', ( dialog ) => {

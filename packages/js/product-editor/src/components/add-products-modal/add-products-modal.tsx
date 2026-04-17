@@ -28,8 +28,10 @@ import { productsStore, Product } from '@woocommerce/data';
 import { AddProductsModalProps } from './types';
 
 export function getProductImageStyle( product: Product ) {
+	// @ts-expect-error @woocommerce/data's Product type is missing the `images` field (see products/types.ts).
 	return product.images.length > 0
 		? {
+				// @ts-expect-error @woocommerce/data's Product type is missing the `images` field (see products/types.ts).
 				backgroundImage: `url(${ product.images[ 0 ].src })`,
 		  }
 		: undefined;

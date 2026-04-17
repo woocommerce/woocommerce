@@ -67,21 +67,32 @@ const getThumbnailImageIdByNth = async (
 };
 
 test.describe( `${ blockData.name }`, () => {
-	test.beforeEach( async ( { admin, editor, requestUtils } ) => {
-		const template = await requestUtils.createTemplate( 'wp_template', {
-			slug: blockData.slug,
-			title: 'Custom Single Product',
-			content: 'placeholder',
-		} );
+	test.beforeEach(
+		async ( { admin, editor, requestUtils, wpCoreVersion } ) => {
+			const template = await requestUtils.createTemplate( 'wp_template', {
+				slug: blockData.slug,
+				title: 'Custom Single Product',
+				content: 'placeholder',
+			} );
 
-		await admin.visitSiteEditor( {
-			postId: template.id,
-			postType: 'wp_template',
-			canvas: 'edit',
-		} );
+			await admin.visitSiteEditor( {
+				postId: template.id,
+				postType: 'wp_template',
+				canvas: 'edit',
+			} );
 
-		await expect( editor.canvas.getByText( 'placeholder' ) ).toBeVisible();
-	} );
+			// TODO: WP 7.0 compat - Custom HTML block content is inside an iframe
+			// since WP 7.0. Simplify when WP 7.0 is the minimum supported version.
+			const placeholderLocator =
+				wpCoreVersion >= 7
+					? editor.canvas
+							.frameLocator( 'iframe' )
+							.getByText( 'placeholder' )
+					: editor.canvas.getByText( 'placeholder' );
+
+			await expect( placeholderLocator ).toBeVisible();
+		}
+	);
 
 	test.describe( 'with thumbnails', () => {
 		test( 'should have as first thumbnail, the same image that it is visible in the product block', async ( {

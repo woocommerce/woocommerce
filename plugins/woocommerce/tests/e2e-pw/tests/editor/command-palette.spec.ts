@@ -34,13 +34,13 @@ const clickOnCommandPaletteOption = async ( {
 		)
 		.fill( optionName );
 
-	// Click on the relevant option.
+	// TODO: WP 7.0 compat - WP 7.0 appends "Action" to command palette option
+	// accessible names. Simplify when WP 7.0 is the minimum supported version.
 	const option = page.getByRole( 'option', {
-		name: optionName,
-		exact: true,
+		name: new RegExp( `^${ optionName }( Action)?$` ),
 	} );
 	await expect( option ).toBeVisible();
-	option.click();
+	await option.click();
 };
 
 const test = baseTest.extend( {

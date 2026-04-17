@@ -15,17 +15,9 @@
 		"multiple": false
 	},
 	"example": {
-		"attributes": {
-			"isPreview": true
-		},
 		"viewportWidth": 800
 	},
 	"attributes": {
-		"isPreview": {
-			"type": "boolean",
-			"default": false,
-			"save": false
-		},
 		"align": {
 			"type": "string",
 			"default": "wide"

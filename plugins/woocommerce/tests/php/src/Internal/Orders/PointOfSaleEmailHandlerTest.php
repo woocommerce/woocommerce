@@ -101,11 +101,9 @@ class PointOfSaleEmailHandlerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox register adds filters only when POS feature is enabled.
+	 * @testdox register adds email suppression filters for all standard email IDs.
 	 */
-	public function test_register_adds_filters_when_pos_enabled(): void {
-		update_option( 'woocommerce_feature_point_of_sale_enabled', 'yes' );
-
+	public function test_register_adds_filters(): void {
 		$handler = new PointOfSaleEmailHandler();
 		$handler->register();
 
@@ -134,22 +132,5 @@ class PointOfSaleEmailHandlerTest extends WC_Unit_Test_Case {
 		remove_all_filters( 'woocommerce_email_enabled_customer_refunded_order' );
 		remove_all_filters( 'woocommerce_email_enabled_customer_partially_refunded_order' );
 		remove_all_filters( 'woocommerce_email_enabled_new_order' );
-	}
-
-	/**
-	 * @testdox register does not add filters when POS feature is disabled.
-	 */
-	public function test_register_does_not_add_filters_when_pos_disabled(): void {
-		remove_all_filters( 'woocommerce_email_enabled_customer_completed_order' );
-		update_option( 'woocommerce_feature_point_of_sale_enabled', 'no' );
-
-		$handler = new PointOfSaleEmailHandler();
-		$handler->register();
-
-		$this->assertFalse(
-			has_filter( 'woocommerce_email_enabled_customer_completed_order', array( $handler, 'maybe_suppress_email' ) )
-		);
-
-		delete_option( 'woocommerce_feature_point_of_sale_enabled' );
 	}
 }

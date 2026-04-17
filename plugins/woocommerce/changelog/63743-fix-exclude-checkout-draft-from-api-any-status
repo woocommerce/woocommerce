@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Exclude checkout-draft orders from default REST API order queries (status=any). API consumers that rely on checkout-draft orders appearing in unfiltered order listings will need to explicitly request them via `status=checkout-draft`.

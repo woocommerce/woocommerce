@@ -6,8 +6,11 @@ namespace Automattic\WooCommerce\Internal\EmailEditor;
 
 use Automattic\WooCommerce\EmailEditor\Validator\Builder;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsManager;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsGenerator;
 use WC_Email;
 use WP_Error;
+use WP_REST_Request;
+use WP_REST_Response;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -26,12 +29,20 @@ class EmailApiController {
 	private ?WCTransactionalEmailPostsManager $post_manager;
 
 	/**
+	 * The WooCommerce transactional email posts generator.
+	 *
+	 * @var WCTransactionalEmailPostsGenerator|null
+	 */
+	private ?WCTransactionalEmailPostsGenerator $posts_generator = null;
+
+	/**
 	 * Initialize the controller.
 	 *
 	 * @internal
 	 */
 	final public function init(): void {
-		$this->post_manager = WCTransactionalEmailPostsManager::get_instance();
+		$this->post_manager    = WCTransactionalEmailPostsManager::get_instance();
+		$this->posts_generator = new WCTransactionalEmailPostsGenerator();
 	}
 
 	/**
@@ -246,5 +257,85 @@ class EmailApiController {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Register REST API routes for the email API controller.
+	 */
+	public function register_routes(): void {
+		register_rest_route(
+			'woocommerce-email-editor/v1',
+			'/emails/(?P<id>\d+)/default-content',
+			array(
+				'methods'             => \WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'get_default_content_response' ),
+				'permission_callback' => function () {
+					return current_user_can( 'manage_woocommerce' );
+				},
+				'args'                => array(
+					'id' => array(
+						'description'       => __( 'The ID of the woo_email post.', 'woocommerce' ),
+						'type'              => 'integer',
+						'required'          => true,
+						'sanitize_callback' => 'absint',
+					),
+				),
+				'schema'              => array( $this, 'get_default_content_schema' ),
+			)
+		);
+	}
+
+	/**
+	 * Get the schema for the default content endpoint response.
+	 *
+	 * @return array
+	 */
+	public function get_default_content_schema(): array {
+		return array(
+			'$schema'    => 'http://json-schema.org/draft-04/schema#',
+			'title'      => 'woo_email_default_content',
+			'type'       => 'object',
+			'properties' => array(
+				'content' => array(
+					'description' => __( 'The default block content for the email.', 'woocommerce' ),
+					'type'        => 'string',
+					'readonly'    => true,
+				),
+			),
+		);
+	}
+
+	/**
+	 * Return the default (plugin-distributed) block content for a woo_email post.
+	 *
+	 * @param WP_REST_Request $request The REST request.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_default_content_response( WP_REST_Request $request ) {
+		if ( ! ( $this->post_manager && $this->posts_generator ) ) {
+			return new WP_Error(
+				'woocommerce_email_editor_not_initialized',
+				__( 'Email editor is not initialized.', 'woocommerce' ),
+				array( 'status' => 500 )
+			);
+		}
+
+		$post_id    = (int) $request->get_param( 'id' );
+		$email_type = $this->post_manager->get_email_type_from_post_id( $post_id );
+		$email      = $this->get_email_by_type( $email_type ?? '' );
+
+		if ( ! $email ) {
+			return new WP_Error(
+				'woocommerce_email_not_found',
+				__( 'No email found for the given post ID.', 'woocommerce' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		return new WP_REST_Response(
+			array( 'content' => $this->posts_generator->get_email_template( $email ) ),
+			200
+		);
 	}
 }

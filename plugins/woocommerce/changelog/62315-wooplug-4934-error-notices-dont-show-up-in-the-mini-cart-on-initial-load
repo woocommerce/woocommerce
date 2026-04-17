@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Fix a bug where error notices don't show up in the Mini Cart on first load.

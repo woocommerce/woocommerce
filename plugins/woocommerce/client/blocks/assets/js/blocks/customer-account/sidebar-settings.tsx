@@ -16,6 +16,7 @@ import { createInterpolateElement } from '@wordpress/element';
 import {
 	PanelBody,
 	SelectControl,
+	ToggleControl,
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToggleGroupControl as ToggleGroupControl,
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
@@ -159,6 +160,20 @@ export const BlockSettings = ( {
 						/>
 					</ToggleGroupControl>
 				) : null }
+				<ToggleControl
+					__nextHasNoMarginBottom
+					label={ __( 'Show dropdown navigation', 'woocommerce' ) }
+					help={ __(
+						'Display a dropdown menu with account navigation links when clicked.',
+						'woocommerce'
+					) }
+					checked={ attributes.hasDropdownNavigation ?? false }
+					onChange={ ( value: boolean ) => {
+						setAttributes( {
+							hasDropdownNavigation: value,
+						} );
+					} }
+				/>
 			</PanelBody>
 		</InspectorControls>
 	);

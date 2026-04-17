@@ -2,12 +2,11 @@
  * External dependencies
  */
 import { createReduxStore, register } from '@wordpress/data';
-import type { Options } from 'wordpress__notices';
 
 /**
  * Internal dependencies
  */
-import { NoticeState, Notice, NoticeStatus } from './types';
+import { NoticeState, Notice, NoticeStatus, NoticeOptions } from './types';
 
 const NOTICE_STORE_NAME = 'woocommerce-admin/subscription-notices';
 
@@ -49,7 +48,7 @@ const store = createReduxStore( NOTICE_STORE_NAME, {
 			productKey: string,
 			message: string,
 			status: NoticeStatus,
-			options?: Partial< Options >
+			options?: Partial< NoticeOptions >
 		) {
 			return {
 				type: 'ADD_NOTICE',

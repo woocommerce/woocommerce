@@ -8,6 +8,7 @@
 namespace Automattic\WooCommerce\Admin\API\Reports\Customers\Stats;
 
 use Automattic\WooCommerce\Admin\API\Reports\Customers\Query;
+use Automattic\WooCommerce\Admin\API\Reports\Customers\Controller as CustomersController;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -65,6 +66,7 @@ class Controller extends \WC_REST_Reports_Controller {
 		$args['last_order_before']   = $request['last_order_before'];
 		$args['last_order_after']    = $request['last_order_after'];
 		$args['customers']           = $request['customers'];
+		$args['customers_exclude']   = $request['customers_exclude'];
 		$args['fields']              = $request['fields'];
 		$args['force_cache_refresh'] = $request['force_cache_refresh'];
 
@@ -73,6 +75,8 @@ class Controller extends \WC_REST_Reports_Controller {
 		$between_params_date       = array( 'last_active', 'registered' );
 		$normalized_params_date    = TimeInterval::normalize_between_params( $request, $between_params_date, true );
 		$args                      = array_merge( $args, $normalized_params_numeric, $normalized_params_date );
+
+		$args = CustomersController::consolidate_customer_id_filters( $args );
 
 		return $args;
 	}
@@ -373,6 +377,15 @@ class Controller extends \WC_REST_Reports_Controller {
 		);
 		$params['customers']               = array(
 			'description'       => __( 'Limit result to items with specified customer ids.', 'woocommerce' ),
+			'type'              => 'array',
+			'sanitize_callback' => 'wp_parse_id_list',
+			'validate_callback' => 'rest_validate_request_arg',
+			'items'             => array(
+				'type' => 'integer',
+			),
+		);
+		$params['customers_exclude']       = array(
+			'description'       => __( 'Limit result to exclude items with specified customer ids.', 'woocommerce' ),
 			'type'              => 'array',
 			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
