@@ -17,9 +17,9 @@ import {
 	useMemo,
 } from '@wordpress/element';
 import { WP_REST_API_Category } from 'wp-types';
-import { useStyleProps } from '@woocommerce/base-hooks';
+import { usePreviewMode, useStyleProps } from '@woocommerce/base-hooks';
+import { previewProducts } from '@woocommerce/resource-previews';
 import { InnerBlocks, BlockContextProvider } from '@wordpress/block-editor';
-import { usePreviewMode } from '@woocommerce/base-hooks';
 
 /**
  * Internal dependencies
@@ -37,7 +37,6 @@ import {
 	FEATURED_CATEGORY_DEFAULT_TEMPLATE,
 	FEATURED_PRODUCT_DEFAULT_TEMPLATE,
 } from './constants';
-import { previewProducts } from '@woocommerce/resource-previews';
 
 interface WithFeaturedItemConfig extends GenericBlockUIConfig {
 	emptyMessage: string;
