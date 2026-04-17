@@ -54,11 +54,7 @@ export const FEATURED_PRODUCT_DEFAULT_TEMPLATE = (
 		{
 			isLink: true,
 			level: 2,
-			style: {
-				typography: {
-					textAlign: 'center',
-				},
-			},
+			textAlign: 'center',
 			__woocommerceNamespace: PRODUCT_TITLE_VARIATION_NAME,
 		},
 	],
