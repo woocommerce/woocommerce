@@ -38,6 +38,7 @@ class UnminifyWebpackPlugin {
 
 	apply( compiler ) {
 		const options = this.options;
+		let outputNormal = {};
 
 		compiler.hooks.compilation.tap(
 			'UnminifyWebpackPlugin',
@@ -45,7 +46,8 @@ class UnminifyWebpackPlugin {
 				compilation.hooks.processAssets.tap(
 					{
 						name: 'UnminifyWebpackPlugin',
-						stage: compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_OPTIMIZE_INLINE,
+						stage: compiler.webpack.Compilation
+							.PROCESS_ASSETS_STAGE_DERIVED,
 					},
 					( assets ) => {
 						Object.entries( assets ).forEach(
@@ -70,15 +72,46 @@ class UnminifyWebpackPlugin {
 									);
 								}
 
-								const ext = path.extname( pathname ).substr( 1 );
-								const filename = getFileName( pathname, ext, options );
-
-								compilation.emitAsset(
-									filename,
-									new compiler.webpack.sources.RawSource( sourceCode )
+								const dest = compiler.options.output.path;
+								const outputPath = path.resolve(
+									dest,
+									getFileName(
+										pathname,
+										path.extname( pathname ).substr( 1 ),
+										options
+									)
 								);
+
+								outputNormal[ outputPath ] = {
+									filename: getFileName(
+										pathname,
+										path.extname( pathname ).substr( 1 ),
+										options
+									),
+									content: sourceCode,
+									size: Buffer.from( sourceCode, 'utf-8' )
+										.length,
+								};
 							}
 						);
+					}
+				);
+
+				compilation.hooks.afterProcessAssets.tap(
+					'UnminifiedWebpackPlugin',
+					() => {
+						for ( const [ key, value ] of Object.entries(
+							outputNormal
+						) ) {
+							compilation.emitAsset(
+								value.filename,
+								new compiler.webpack.sources.RawSource(
+									value.content
+								)
+							);
+							// Reset the outputNormal object to avoid writing to file that only differs in casing or query string from already written file.
+							outputNormal = {};
+						}
 					}
 				);
 			}
