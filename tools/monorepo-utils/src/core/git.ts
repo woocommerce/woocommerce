@@ -448,6 +448,9 @@ export const checkoutRemoteBranch = async (
 ): Promise< void > => {
 	const git = simpleGit( {
 		baseDir: tmpRepoPath,
+		unsafe: {
+			allowUnsafeHooksPath: true,
+		},
 		config: [ 'core.hooksPath=/dev/null' ],
 	} );
 
