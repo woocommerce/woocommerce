@@ -197,7 +197,6 @@
 		"mini-css-extract-plugin": "2.9.x",
 		"moment": "^2.29.4",
 		"moment-timezone": "^0.5.43",
-		"moment-timezone-data-webpack-plugin": "1.5.x",
 		"node-watch": "^0.7.4",
 		"postcss": "8.4.x",
 		"postcss-color-function": "^4.1.0",
