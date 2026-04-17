@@ -146,7 +146,6 @@ export const INNER_BLOCKS_PRODUCT_TEMPLATE: InnerBlockTemplate = [
 		[
 			'core/post-title',
 			{
-				textAlign: 'center',
 				level: 2,
 				fontSize: 'medium',
 				style: {
@@ -158,6 +157,7 @@ export const INNER_BLOCKS_PRODUCT_TEMPLATE: InnerBlockTemplate = [
 					},
 					typography: {
 						lineHeight: '1.4',
+						textAlign: 'center',
 					},
 				},
 				isLink: true,
