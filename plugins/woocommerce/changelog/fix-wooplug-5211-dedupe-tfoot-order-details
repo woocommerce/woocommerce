@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove duplicate tfoot tag from the order details template to comply with the HTML spec.
