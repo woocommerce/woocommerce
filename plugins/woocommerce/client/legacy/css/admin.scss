@@ -8535,10 +8535,11 @@ table.bar_chart {
 	}
 
 	// Align editor meta box border-radius with WP 7.0's dashboard widgets (8px).
-	// Product, order, and coupon editor screens.
+	// Product, order (CPT + HPOS), and coupon editor screens.
 	&.post-type-product,
 	&.post-type-shop_order,
-	&.post-type-shop_coupon {
+	&.post-type-shop_coupon,
+	&.woocommerce_page_wc-orders {
 		.postbox,
 		#postdivrich {
 			border-radius: var(--wc-card-border-radius, 8px);
@@ -8549,14 +8550,6 @@ table.bar_chart {
 		.wc-metabox.postbox {
 			border-radius: 0;
 			overflow: visible;
-		}
-	}
-
-	// HPOS order editor uses a different body class.
-	&.woocommerce_page_wc-orders {
-		.postbox {
-			border-radius: var(--wc-card-border-radius, 8px);
-			overflow: hidden;
 		}
 	}
 }
