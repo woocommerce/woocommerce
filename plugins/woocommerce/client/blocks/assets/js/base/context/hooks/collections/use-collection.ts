@@ -95,9 +95,15 @@ export const useCollection = < T >(
 				if ( isError( error ) ) {
 					throwError( error );
 				} else {
-					throw new Error(
-						'TypeError: `error` object is not an instance of Error constructor'
-					);
+					const message =
+						typeof error === 'object' &&
+						error !== null &&
+						'message' in error
+							? String(
+									( error as { message: unknown } ).message
+							  )
+							: 'An unknown error occurred';
+					throwError( new Error( message ) );
 				}
 			}
 

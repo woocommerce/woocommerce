@@ -328,4 +328,71 @@ describe( 'useCollection', () => {
 			[ 10, 30 ],
 		] );
 	} );
+	it( 'should propagate an Error instance from the store via the error boundary', () => {
+		const error = new Error( 'A real error' );
+		mocks.selectors.getCollectionError.mockReturnValue( error );
+		const TestComponent = getTestComponent();
+		act( () => {
+			renderer = TestRenderer.create(
+				getWrappedComponents( TestComponent, {
+					options: {
+						namespace: 'test/store',
+						resourceName: 'products',
+						query: { bar: 'foo' },
+					},
+				} )
+			);
+		} );
+		//eslint-disable-next-line testing-library/await-async-query
+		const props = renderer.root.findByType( 'div' ).props;
+		expect( props[ 'data-error' ] ).toBeInstanceOf( Error );
+		expect( props[ 'data-error' ].message ).toBe( 'A real error' );
+		expect( console ).toHaveErrored( /your React components:/ );
+		renderer.unmount();
+	} );
+	it( 'should convert a plain-object error from the store to an Error instance via the error boundary', () => {
+		const error = { code: 'rest_no_route', message: 'No route found.' };
+		mocks.selectors.getCollectionError.mockReturnValue( error );
+		const TestComponent = getTestComponent();
+		act( () => {
+			renderer = TestRenderer.create(
+				getWrappedComponents( TestComponent, {
+					options: {
+						namespace: 'test/store',
+						resourceName: 'products',
+						query: { bar: 'foo' },
+					},
+				} )
+			);
+		} );
+		//eslint-disable-next-line testing-library/await-async-query
+		const props = renderer.root.findByType( 'div' ).props;
+		expect( props[ 'data-error' ] ).toBeInstanceOf( Error );
+		expect( props[ 'data-error' ].message ).toBe( 'No route found.' );
+		expect( console ).toHaveErrored( /your React components:/ );
+		renderer.unmount();
+	} );
+	it( 'should use a fallback message when a non-Error object without a message is returned from the store', () => {
+		mocks.selectors.getCollectionError.mockReturnValue( { code: 500 } );
+		const TestComponent = getTestComponent();
+		act( () => {
+			renderer = TestRenderer.create(
+				getWrappedComponents( TestComponent, {
+					options: {
+						namespace: 'test/store',
+						resourceName: 'products',
+						query: { bar: 'foo' },
+					},
+				} )
+			);
+		} );
+		//eslint-disable-next-line testing-library/await-async-query
+		const props = renderer.root.findByType( 'div' ).props;
+		expect( props[ 'data-error' ] ).toBeInstanceOf( Error );
+		expect( props[ 'data-error' ].message ).toBe(
+			'An unknown error occurred'
+		);
+		expect( console ).toHaveErrored( /your React components:/ );
+		renderer.unmount();
+	} );
 } );
