@@ -15,7 +15,7 @@ describe( 'PluginErrorBanner', () => {
 		);
 		expect(
 			screen.getByText(
-				/You do not have permissions to install plugins/i
+				/You do not have permissions to manage plugins/i
 			)
 		).toBeInTheDocument();
 	} );
@@ -104,7 +104,7 @@ describe( 'PluginErrorBanner', () => {
 		);
 		expect(
 			screen.getByText(
-				/You do not have permissions to install plugins/i
+				/You do not have permissions to manage plugins/i
 			)
 		).toBeInTheDocument();
 	} );
