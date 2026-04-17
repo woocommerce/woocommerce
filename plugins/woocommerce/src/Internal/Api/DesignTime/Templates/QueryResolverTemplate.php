@@ -36,8 +36,8 @@ declare(strict_types=1);
 namespace <?php echo $namespace; ?>;
 
 use <?php echo $command_fqcn; ?> as <?php echo $command_alias; ?>;
-use Automattic\WooCommerce\Api\ApiException;
 use Automattic\WooCommerce\Internal\Api\QueryInfoExtractor;
+use Automattic\WooCommerce\Internal\Api\Utils;
 <?php foreach ( $use_statements as $use ) : ?>
 use <?php echo $use; ?>;
 <?php endforeach; ?>
@@ -85,26 +85,28 @@ class <?php echo $class_name; ?> {
 
 	public static function resolve( mixed $root, array $args, mixed $context, ResolveInfo $info ): mixed {
 <?php if ( $has_cap_check ) : ?>
-		self::check_capabilities();
+<?php foreach ( $capabilities as $cap ) : ?>
+		Utils::check_current_user_can( '<?php echo addslashes( $cap ); ?>' );
+<?php endforeach; ?>
 
 <?php endif; ?>
 		$command = wc_get_container()->get( <?php echo $command_alias; ?>::class );
 
 		$execute_args = array();
-<?php foreach ( $execute_params as $param ) : ?>
-	<?php if ( ! empty( $param['unroll'] ) ) : ?>
-		try {
-			$execute_args['<?php echo $param['name']; ?>'] = new \<?php echo $param['unroll']['fqcn']; ?>(
-			<?php foreach ( $param['unroll']['properties'] as $uprop ) : ?>
+<?php
+$pagination_fqcn = 'Automattic\\WooCommerce\\Api\\Pagination\\PaginationParams';
+foreach ( $execute_params as $param ) :
+	if ( ! empty( $param['unroll'] ) && $param['unroll']['fqcn'] === $pagination_fqcn ) :
+?>
+		$execute_args['<?php echo $param['name']; ?>'] = Utils::create_pagination_params( $args );
+<?php elseif ( ! empty( $param['unroll'] ) ) : ?>
+		$execute_args['<?php echo $param['name']; ?>'] = Utils::create_input(
+			fn() => new \<?php echo $param['unroll']['fqcn']; ?>(
+<?php foreach ( $param['unroll']['properties'] as $uprop ) : ?>
 				<?php echo $uprop['name']; ?>: <?php echo $uprop['value_expr']; ?>,
 <?php endforeach; ?>
-			);
-		} catch ( \InvalidArgumentException $e ) {
-			throw new \GraphQL\Error\Error(
-				$e->getMessage(),
-				extensions: array( 'code' => 'INVALID_ARGUMENT' )
-			);
-		}
+			)
+		);
 <?php elseif ( $param['is_infrastructure'] && $param['name'] === '_query_info' ) : ?>
 		$execute_args['_query_info'] = QueryInfoExtractor::extract_from_info( $info, $args );
 <?php elseif ( ! empty( $param['conversion'] ) ) : ?>
@@ -119,12 +121,14 @@ class <?php echo $class_name; ?> {
 <?php endforeach; ?>
 
 <?php if ( $has_authorize ) : ?>
-		$authorize_args = array_intersect_key( $execute_args, array( <?php echo implode( ', ', array_map( fn( $n ) => "'{$n}' => true", $authorize_param_names ) ); ?> ) );
+		if ( ! $command->authorize(
+<?php foreach ( $authorize_param_names as $name ) : ?>
+			<?php echo $name; ?>: $execute_args['<?php echo $name; ?>'],
+<?php endforeach; ?>
 <?php if ( $has_preauthorized ) : ?>
-		$authorize_args['_preauthorized'] = <?php echo $preauthorized_expr; ?>;
+			_preauthorized: <?php echo $preauthorized_expr; ?>,
 <?php endif; ?>
-
-		if ( ! $command->authorize( ...$authorize_args ) ) {
+		) ) {
 			throw new \GraphQL\Error\Error(
 				'You do not have permission to perform this action.',
 				extensions: array( 'code' => 'UNAUTHORIZED' )
@@ -132,28 +136,7 @@ class <?php echo $class_name; ?> {
 		}
 
 <?php endif; ?>
-		try {
-			$result = $command->execute( ...$execute_args );
-		} catch ( ApiException $e ) {
-			throw new \GraphQL\Error\Error(
-				$e->getMessage(),
-				extensions: array_merge(
-					array( 'code' => $e->getErrorCode() ),
-					$e->getExtensions()
-				)
-			);
-		} catch ( \InvalidArgumentException $e ) {
-			throw new \GraphQL\Error\Error(
-				$e->getMessage(),
-				extensions: array( 'code' => 'INVALID_ARGUMENT' )
-			);
-		} catch ( \Throwable $e ) {
-			throw new \GraphQL\Error\Error(
-				'An unexpected error occurred.',
-				previous: $e,
-				extensions: array( 'code' => 'INTERNAL_ERROR' )
-			);
-		}
+		$result = Utils::execute_command( $command, $execute_args );
 
 <?php if ( $scalar_return ) : ?>
 		return array( 'result' => $result );
@@ -161,20 +144,6 @@ class <?php echo $class_name; ?> {
 		return $result;
 <?php endif; ?>
 	}
-<?php if ( $has_cap_check ) : ?>
-
-	private static function check_capabilities(): void {
-		$required = <?php echo var_export( $capabilities, true ); ?>;
-		foreach ( $required as $cap ) {
-			if ( ! current_user_can( $cap ) ) {
-				throw new \GraphQL\Error\Error(
-					'You do not have permission to perform this action.',
-					extensions: array( 'code' => 'UNAUTHORIZED' )
-				);
-			}
-		}
-	}
-<?php endif; ?>
 <?php foreach ( $input_converters as $converter ) : ?>
 
 	private static function <?php echo $converter['method_name']; ?>( array $data ): \<?php echo $converter['input_fqcn']; ?> {
