@@ -1,4 +1,4 @@
-useNodeVersion: 20.20.2
+useNodeVersion: 24.15.0
 
 catalogs:
 	# A curated set of `@wordpress/*` packages that are bundled with our minimum supported WordPress version.
@@ -80,6 +80,7 @@ publicHoistPattern:
     - '*prettier*'
     - 'react'
     - 'react-dom'
+    - '@use-gesture/react'
 
 # Quality of life tweaks (migrated from .npmrc)
 childConcurrency: 8        # 5 by default
