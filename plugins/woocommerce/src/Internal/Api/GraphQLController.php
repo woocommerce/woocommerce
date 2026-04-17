@@ -91,7 +91,7 @@ class GraphQLController {
 	 */
 	public function register(): void {
 		register_rest_route(
-			'wc/v4',
+			'wc',
 			'/graphql',
 			array(
 				'methods'             => array( 'GET', 'POST' ),
