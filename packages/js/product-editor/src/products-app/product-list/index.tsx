@@ -25,8 +25,6 @@ import {
 	FlexItem,
 	Button,
 } from '@wordpress/components';
-// @ts-expect-error missing type.
-// eslint-disable-next-line @woocommerce/dependency-group
 import { privateApis as editorPrivateApis } from '@wordpress/editor';
 
 /**

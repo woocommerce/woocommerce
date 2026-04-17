@@ -62,13 +62,9 @@ export default {
 	component: ProductsView,
 };
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore - Improve typing.
 const Template = ( args: unknown ) => <ProductsView { ...args } />;
 
 export const Default = Template.bind( {} );
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore - Improve typing.
 Default.args = {
 	productsData: PRODUCTS_DATA,
 	fields: PRODUCT_FIELDS,

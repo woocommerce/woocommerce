@@ -9,12 +9,9 @@ import {
 } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
 import {
-	// @ts-expect-error missing type.
 	EditorSnackbars,
-	// @ts-expect-error missing type.
 	privateApis as editorPrivateApis,
 } from '@wordpress/editor';
-// eslint-disable-next-line @woocommerce/dependency-group
 import {
 	__unstableMotion as motion,
 	__unstableAnimatePresence as AnimatePresence,

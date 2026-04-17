@@ -1,0 +1,4 @@
+Significance: major
+Type: update
+
+Update @wordpress/* dependencies to wp-6.8 minimum. Remove @types/wordpress__editor (native types at wp-6.8).

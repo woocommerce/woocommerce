@@ -103,6 +103,7 @@ export function useProductHelper() {
 										'woocommerce'
 								  );
 						createNotice( 'success', `🎉‎ ${ noticeContent }`, {
+							// @ts-expect-error WPNoticeAction requires a url field, but onClick-only actions are valid at runtime.
 							actions: getNoticePreviewActions(
 								newProduct.status,
 								newProduct.permalink
@@ -153,11 +154,8 @@ export function useProductHelper() {
 			},
 			{
 				update: Object.values( variationsOrder )
-					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-					// @ts-ignore
 					.flatMap( Object.entries )
-					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-					// @ts-ignore
+					// @ts-expect-error variationsOrder's id keys are numeric variation IDs at runtime, but Object.entries types them as string.
 					.map( ( [ id, menu_order ]: [ number, number ] ) => ( {
 						id,
 						menu_order,
@@ -215,6 +213,7 @@ export function useProductHelper() {
 											'woocommerce'
 									  );
 							createNotice( 'success', `🎉‎ ${ noticeContent }`, {
+								// @ts-expect-error WPNoticeAction requires a url field, but onClick-only actions are valid at runtime.
 								actions: getNoticePreviewActions(
 									updatedProduct.status,
 									updatedProduct.permalink
@@ -314,8 +313,6 @@ export function useProductHelper() {
 				'g'
 			);
 			const decimalRegex = new RegExp(
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore
 				ONLY_ONE_DECIMAL_SEPARATOR.replaceAll( '%s', decimalSeparator ),
 				'g'
 			);
