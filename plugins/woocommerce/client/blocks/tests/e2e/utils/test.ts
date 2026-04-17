@@ -46,26 +46,7 @@ function observeConsoleLogging( message: ConsoleMessage ) {
 
 	// An exception is made for _blanket_ deprecation warnings: Those
 	// which log regardless of whether a deprecated feature is in use.
-	// WordPress's bundled moment.js appends "This is a global warning" to all
-	// deprecation messages emitted via its internal warn() function. These fire
-	// whenever any deprecated moment API is called (e.g. moment-timezone
-	// initialisation in wp-date) and cannot be fixed within WooCommerce code.
-	// See: https://momentjs.com/docs/#/customization/deprecated-warning/
 	if ( text.includes( 'This is a global warning' ) ) {
-		return;
-	}
-
-	// Suppress moment-timezone logError() messages that use console.error.
-	// These fire when:
-	//   1. The Intl API returns a timezone not present in the bundled dataset.
-	//   2. A named timezone is missing after moment-timezone-data-webpack-plugin
-	//      strips historical entries (startYear option).
-	// Neither case is actionable from WooCommerce code because the data comes
-	// from WordPress core's wp-date script or the browser's Intl API.
-	if ( text.startsWith( 'Moment Timezone has no data for' ) ) {
-		return;
-	}
-	if ( text.startsWith( 'Moment Timezone found' ) ) {
 		return;
 	}
 
