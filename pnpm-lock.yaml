@@ -4420,6 +4420,9 @@ importers:
       mini-css-extract-plugin:
         specifier: 2.9.x
         version: 2.9.4(webpack@5.97.1(@swc/core@1.15.24))
+      minimatch:
+        specifier: 10.2.5
+        version: 10.2.5
       msw:
         specifier: 2.10.4
         version: 2.10.4(@types/node@24.12.2)(typescript@5.7.3)
@@ -43296,7 +43299,7 @@ snapshots:
     dependencies:
       inflight: 1.0.6
       inherits: 2.0.4
-      minimatch: 3.0.8
+      minimatch: 3.1.5
       once: 1.4.0
       path-is-absolute: 1.0.1
 
@@ -43305,7 +43308,7 @@ snapshots:
       fs.realpath: 1.0.0
       inflight: 1.0.6
       inherits: 2.0.4
-      minimatch: 3.0.8
+      minimatch: 3.1.5
       once: 1.4.0
       path-is-absolute: 1.0.1
 

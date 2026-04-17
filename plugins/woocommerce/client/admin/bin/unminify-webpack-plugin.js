@@ -12,7 +12,6 @@
  */
 const path = require( 'path' );
 const ModuleFilenameHelpers = require( 'webpack/lib/ModuleFilenameHelpers' );
-const webpack = require( 'webpack' );
 
 const getFileName = ( name, ext, opts ) => {
 	if ( name.match( /([-_.]min)[-_.]/ ) ) {
@@ -39,7 +38,6 @@ class UnminifyWebpackPlugin {
 
 	apply( compiler ) {
 		const options = this.options;
-		let outputNormal = {};
 
 		compiler.hooks.compilation.tap(
 			'UnminifyWebpackPlugin',
@@ -47,7 +45,7 @@ class UnminifyWebpackPlugin {
 				compilation.hooks.processAssets.tap(
 					{
 						name: 'UnminifyWebpackPlugin',
-						stage: webpack.Compilation.PROCESS_ASSETS_STAGE_DERIVED,
+						stage: compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_OPTIMIZE_INLINE,
 					},
 					( assets ) => {
 						Object.entries( assets ).forEach(
@@ -72,44 +70,15 @@ class UnminifyWebpackPlugin {
 									);
 								}
 
-								const dest = compiler.options.output.path;
-								const outputPath = path.resolve(
-									dest,
-									getFileName(
-										pathname,
-										path.extname( pathname ).substr( 1 ),
-										options
-									)
-								);
+								const ext = path.extname( pathname ).substr( 1 );
+								const filename = getFileName( pathname, ext, options );
 
-								outputNormal[ outputPath ] = {
-									filename: getFileName(
-										pathname,
-										path.extname( pathname ).substr( 1 ),
-										options
-									),
-									content: sourceCode,
-									size: Buffer.from( sourceCode, 'utf-8' )
-										.length,
-								};
+								compilation.emitAsset(
+									filename,
+									new compiler.webpack.sources.RawSource( sourceCode )
+								);
 							}
 						);
-					}
-				);
-
-				compilation.hooks.afterProcessAssets.tap(
-					'UnminifiedWebpackPlugin',
-					() => {
-						for ( const [ key, value ] of Object.entries(
-							outputNormal
-						) ) {
-							compilation.emitAsset(
-								value.filename,
-								new webpack.sources.RawSource( value.content )
-							);
-							// Reset the outputNormal object to avoid writing to file that only differs in casing or query string from already written file.
-							outputNormal = {};
-						}
 					}
 				);
 			}
