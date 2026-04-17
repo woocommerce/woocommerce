@@ -837,7 +837,7 @@ class ApiBuilder {
 
 				// Build converter if not already done.
 				if ( ! isset( $input_converters[ $type_name ] ) ) {
-					$input_converters[ $type_name ] = $this->build_input_converter( $type_name );
+					$input_converters[ $type_name ] = $this->build_input_converter( $type_name, $input_converters );
 				}
 			} elseif ( $input_info !== null && $input_info['kind'] === 'enum' ) {
 				// GraphQL engine already resolves enum input values to PHP enum instances,
@@ -1102,7 +1102,7 @@ class ApiBuilder {
 		);
 	}
 
-	private function build_input_converter( string $input_fqcn ): array {
+	private function build_input_converter( string $input_fqcn, array &$input_converters ): array {
 		$ref         = new \ReflectionClass( $input_fqcn );
 		$method_name = 'convert_' . $this->pascal_to_snake_case( $ref->getShortName() );
 		$properties  = array();
@@ -1117,8 +1117,22 @@ class ApiBuilder {
 			if ( $class_info !== null && $class_info['kind'] === 'enum' ) {
 				// GraphQL engine already resolves enum input values to PHP enum instances,
 				// so no ::from() conversion is needed — just assign the value directly.
+			} elseif ( $class_info !== null && $class_info['kind'] === 'input_type' ) {
+				$nested_short  = ( new \ReflectionClass( $type_name ) )->getShortName();
+				$nested_method = 'convert_' . $this->pascal_to_snake_case( $nested_short );
+				$prop_name     = $prop->getName();
+
+				if ( $type->allowsNull() ) {
+					$conversion = "null !== \$data['{$prop_name}'] ? self::{$nested_method}( \$data['{$prop_name}'] ) : null";
+				} else {
+					$conversion = "self::{$nested_method}( \$data['{$prop_name}'] )";
+				}
+
+				// Recursively build the nested converter if not already registered.
+				if ( ! isset( $input_converters[ $type_name ] ) ) {
+					$input_converters[ $type_name ] = $this->build_input_converter( $type_name, $input_converters );
+				}
 			}
-			// Nested input types could be handled recursively here.
 
 			$properties[] = array(
 				'name'       => $prop->getName(),
