@@ -2441,6 +2441,7 @@ $stock_notifications_table_schema;
 				'read_private_products'      => true,
 				'read_shop_coupon'           => true,
 				'read_private_shop_coupons'  => true,
+				'create_customers'           => true,
 				'view_pos'                   => true,
 			)
 		);
@@ -2467,6 +2468,8 @@ $stock_notifications_table_schema;
 				'read_private_products'      => true,
 				'edit_shop_coupon'           => true,
 				'edit_shop_coupons'          => true,
+				'edit_others_shop_coupons'   => true,
+				'edit_published_shop_coupons' => true,
 				'publish_shop_coupons'       => true,
 				'read_shop_coupon'           => true,
 				'read_private_shop_coupons'  => true,

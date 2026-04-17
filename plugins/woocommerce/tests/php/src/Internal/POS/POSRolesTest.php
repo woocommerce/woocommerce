@@ -78,6 +78,7 @@ class POSRolesTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $role->has_cap( 'read_private_products' ), 'pos_cashier should have read_private_products' );
 		$this->assertTrue( $role->has_cap( 'read_shop_coupon' ), 'pos_cashier should have read_shop_coupon' );
 		$this->assertTrue( $role->has_cap( 'read_private_shop_coupons' ), 'pos_cashier should have read_private_shop_coupons' );
+		$this->assertTrue( $role->has_cap( 'create_customers' ), 'pos_cashier should have create_customers' );
 	}
 
 	/**
@@ -147,6 +148,8 @@ class POSRolesTest extends WC_Unit_Test_Case {
 		$this->assertNotNull( $role, 'pos_manager role should exist' );
 		$this->assertTrue( $role->has_cap( 'edit_shop_coupon' ), 'pos_manager should have edit_shop_coupon' );
 		$this->assertTrue( $role->has_cap( 'edit_shop_coupons' ), 'pos_manager should have edit_shop_coupons' );
+		$this->assertTrue( $role->has_cap( 'edit_others_shop_coupons' ), 'pos_manager should have edit_others_shop_coupons' );
+		$this->assertTrue( $role->has_cap( 'edit_published_shop_coupons' ), 'pos_manager should have edit_published_shop_coupons' );
 		$this->assertTrue( $role->has_cap( 'publish_shop_coupons' ), 'pos_manager should have publish_shop_coupons' );
 		$this->assertTrue( $role->has_cap( 'read_shop_coupon' ), 'pos_manager should have read_shop_coupon' );
 		$this->assertTrue( $role->has_cap( 'read_private_shop_coupons' ), 'pos_manager should have read_private_shop_coupons' );

@@ -629,9 +629,14 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 	/**
 	 * Check whether the current user can access a customer route.
 	 *
+	 * POS users need customer access to look up returning customers at the
+	 * register and attach them to orders. The `/wc/v3/customers` controller
+	 * already filters results to the `customer` role only, so there is no
+	 * risk of exposing admin or staff users.
+	 *
 	 * @since 10.8.0
 	 *
-	 * @param string $context Permission context.
+	 * @param string $context Permission context (read, create, edit, delete, batch).
 	 * @return bool
 	 */
 	private function current_user_can_access_customer_route( string $context ): bool {
@@ -640,11 +645,11 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 		}
 
 		if ( 'read' === $context ) {
-			return current_user_can( 'manage_woocommerce' );
+			return current_user_can( 'view_pos' );
 		}
 
-		if ( in_array( $context, array( 'create', 'edit', 'delete', 'batch' ), true ) ) {
-			return current_user_can( 'manage_woocommerce' );
+		if ( 'create' === $context ) {
+			return current_user_can( 'create_customers' );
 		}
 
 		return false;
