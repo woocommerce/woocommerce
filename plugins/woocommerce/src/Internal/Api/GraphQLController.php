@@ -108,11 +108,6 @@ class GraphQLController {
 	 * @param \WP_REST_Request $request The REST request.
 	 */
 	public function handle_request( \WP_REST_Request $request ): \WP_REST_Response {
-		// 1. PHP version check.
-		if ( PHP_VERSION_ID < 80100 ) {
-			return $this->php_version_error_response( $request );
-		}
-
 		try {
 			return $this->process_request( $request );
 		} catch ( \Throwable $e ) {
@@ -302,31 +297,6 @@ class GraphQLController {
 		}
 
 		return '1' === $request->get_param( '_debug' );
-	}
-
-	/**
-	 * Return a fixed error for PHP < 8.1.
-	 *
-	 * @param \WP_REST_Request $request The REST request.
-	 */
-	private function php_version_error_response( \WP_REST_Request $request ): \WP_REST_Response {
-		$message = 'The GraphQL API is not available on this server.';
-
-		if ( $this->is_debug_mode( $request ) ) {
-			$message .= sprintf(
-				' Reason: PHP 8.1 or later is required. Current version: %s.',
-				PHP_VERSION
-			);
-		}
-
-		return new \WP_REST_Response(
-			array(
-				'errors' => array(
-					array( 'message' => $message ),
-				),
-			),
-			500
-		);
 	}
 
 	/**
