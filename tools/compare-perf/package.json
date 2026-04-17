@@ -11,7 +11,7 @@
 		"log": "node log-to-codevitals.js"
 	},
 	"dependencies": {
-		"@types/node": "20.x.x",
+		"@types/node": "^24.1.0",
 		"@tsconfig/node16": "^1.0.4",
 		"@wordpress/env": "11.0.1-next.v.20260206T143.0",
 		"commander": "9.5.0",
@@ -22,6 +22,6 @@
 		"tslib": "^2.6.2"
 	},
 	"engines": {
-		"node": "^20.11.1"
+		"node": "^24.15.0"
 	}
 }

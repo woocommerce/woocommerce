@@ -8,9 +8,6 @@ import { useWooBlockProps } from '@woocommerce/block-templates';
 import { recordEvent } from '@woocommerce/tracks';
 import { Link } from '@woocommerce/components';
 import { getNewPath } from '@woocommerce/navigation';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore No types for this exist yet.
-// eslint-disable-next-line @woocommerce/dependency-group
 import { useEntityProp, store as coreStore } from '@wordpress/core-data';
 
 /**
@@ -40,6 +37,7 @@ export function Edit( {
 			const { getEditedEntityRecord, hasFinishedResolution } =
 				select( coreStore );
 
+			// @ts-expect-error getEditedEntityRecord's curried form strips its generic, returning a wide entity union; Product is the correct narrow type.
 			const { name }: Product = getEditedEntityRecord(
 				'postType',
 				'product',

@@ -134,10 +134,16 @@ function afterAllResolved( lockfile, context ) {
 				`[wireit][${ packageFile.name }] Verifying 'wireit.dependencyOutputs'`
 			);
 
+			// Include the lock file in the fingerprint in case resolved versions change.
+			const lockfilePath = path.join(
+				path.relative( packagePath, '.' ),
+				'pnpm-lock.yaml'
+			);
+
 			// Initialize outputs storage and hash it's original state.
 			const config = {
 				allowUsuallyExcludedPaths: true, // This is needed so we can reference files in `node_modules`.
-				files: [ 'package.json' ], // The files list will include globs for dependency files that we should fingerprint.
+				files: [ 'package.json', lockfilePath ], // The files list will include globs for dependency files that we should fingerprint.
 			};
 			const originalConfigState = JSON.stringify( config );
 

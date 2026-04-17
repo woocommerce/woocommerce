@@ -9,16 +9,25 @@ import { CommandMenu, store as commandsStore } from '@wordpress/commands';
 import { PluginArea } from '@wordpress/plugins';
 // eslint-disable-next-line @woocommerce/dependency-group
 import {
-	AutosaveMonitor,
-	// @ts-expect-error Type is missing in @types/wordpress__editor
+	AutosaveMonitor as _AutosaveMonitor,
 	LocalAutosaveMonitor,
 	UnsavedChangesWarning,
-	// @ts-expect-error Type is missing in @types/wordpress__editor
-	EditorKeyboardShortcutsRegister,
+	EditorKeyboardShortcutsRegister as _EditorKeyboardShortcutsRegister,
 	ErrorBoundary,
 	PostLockedModal,
 	store as editorStore,
 } from '@wordpress/editor';
+
+// Upstream types are inaccurate: AutosaveMonitor's default export is typed as
+// `unknown` and EditorKeyboardShortcutsRegister returns DOM `Element` instead
+// of `JSX.Element`. Cast them so they are usable as JSX components.
+const AutosaveMonitor = _AutosaveMonitor as unknown as React.ComponentType<
+	Record< string, never >
+>;
+const EditorKeyboardShortcutsRegister =
+	_EditorKeyboardShortcutsRegister as unknown as React.ComponentType<
+		Record< string, never >
+	>;
 
 /**
  * Internal dependencies
@@ -113,7 +122,6 @@ export function InnerEditor( {
 		disableSnackbarNotices,
 	} = settings;
 
-	// @ts-expect-error Type is missing in @types/wordpress__editor
 	const { removeEditorPanel } = useDispatch( editorStore );
 	useEffect( () => {
 		removeEditorPanel( 'post-status' );
@@ -159,7 +167,6 @@ export function InnerEditor( {
 	recordEventOnce( 'editor_layout_loaded' );
 	return (
 		<SlotFillProvider>
-			{ /* @ts-expect-error canCopyContent is missing in @types/wordpress__editor */ }
 			<ErrorBoundary canCopyContent>
 				{ /* The CommandMenu is not needed if the commands are registered. The CommandMenu can be removed after we drop support for WP 6.8. */ }
 				{ ( ! allCommands || allCommands.length === 0 ) && (
