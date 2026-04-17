@@ -80,6 +80,7 @@ publicHoistPattern:
     - '*prettier*'
     - 'react'
     - 'react-dom'
+    - '@use-gesture/react'
 
 # Quality of life tweaks (migrated from .npmrc)
 childConcurrency: 8        # 5 by default
