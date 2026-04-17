@@ -62,7 +62,7 @@ class POSRateLimitServiceTest extends WC_Unit_Test_Case {
 		$result = $this->service->check_rate_limit( '192.168.1.1' );
 		$this->assertInstanceOf( \WP_Error::class, $result );
 
-		$this->simulate_time_passing( '192.168.1.1', 31 );
+		$this->simulate_transient_time_passing( '192.168.1.1', 31 );
 
 		$result = $this->service->check_rate_limit( '192.168.1.1' );
 		$this->assertTrue( $result );
@@ -82,9 +82,9 @@ class POSRateLimitServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox 15 failures trigger permanent lock.
+	 * @testdox 15 failures trigger 24-hour lockout.
 	 */
-	public function test_fifteen_failures_trigger_permanent_lock(): void {
+	public function test_fifteen_failures_trigger_twenty_four_hour_lockout(): void {
 		for ( $i = 0; $i < 15; $i++ ) {
 			$this->service->record_failure( '192.168.1.1' );
 		}
@@ -92,7 +92,50 @@ class POSRateLimitServiceTest extends WC_Unit_Test_Case {
 		$result = $this->service->check_rate_limit( '192.168.1.1' );
 		$this->assertInstanceOf( \WP_Error::class, $result );
 		$this->assertSame( 429, $result->get_error_data()['status'] );
-		$this->assertStringContainsString( 'administrator', $result->get_error_message() );
+
+		$error_data = $result->get_error_data();
+		$this->assertArrayHasKey( 'retry_after', $error_data );
+		$this->assertGreaterThan( DAY_IN_SECONDS - 60, $error_data['retry_after'] );
+		$this->assertLessThanOrEqual( DAY_IN_SECONDS, $error_data['retry_after'] );
+		$this->assertStringContainsString( '24 hours', $result->get_error_message() );
+	}
+
+	/**
+	 * @testdox 24-hour lockout survives transient deletion (simulating cache flush).
+	 */
+	public function test_long_lockout_survives_transient_flush(): void {
+		for ( $i = 0; $i < 15; $i++ ) {
+			$this->service->record_failure( '192.168.1.1' );
+		}
+
+		// Simulate a cache flush by clearing all POS rate limit transients for this IP.
+		delete_transient( '_wc_pos_rate_' . hash( 'sha256', '192.168.1.1' ) );
+
+		$result = $this->service->check_rate_limit( '192.168.1.1' );
+		$this->assertInstanceOf( \WP_Error::class, $result );
+		$this->assertSame( 429, $result->get_error_data()['status'] );
+	}
+
+	/**
+	 * @testdox After 24 hours the long lockout expires and attempts are allowed again.
+	 */
+	public function test_long_lockout_expires_after_twenty_four_hours(): void {
+		for ( $i = 0; $i < 15; $i++ ) {
+			$this->service->record_failure( '192.168.1.1' );
+		}
+
+		$result = $this->service->check_rate_limit( '192.168.1.1' );
+		$this->assertInstanceOf( \WP_Error::class, $result );
+
+		// Simulate the 24h lockout having expired by rewriting the option.
+		$option_key = 'woocommerce_pos_pin_lockout_' . hash( 'sha256', '192.168.1.1' );
+		update_option( $option_key, array( 'until' => time() - 1 ), false );
+
+		$result = $this->service->check_rate_limit( '192.168.1.1' );
+		$this->assertTrue( $result );
+
+		// Option should have been cleaned up on the check that found it expired.
+		$this->assertFalse( get_option( $option_key, false ) );
 	}
 
 	/**
@@ -128,12 +171,12 @@ class POSRateLimitServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Simulates time passing by manipulating the transient data directly.
+	 * Simulates time passing for the short-tier transient lockout by rewriting its timestamp.
 	 *
 	 * @param string $ip      The IP address.
 	 * @param int    $seconds Seconds to simulate passing.
 	 */
-	private function simulate_time_passing( string $ip, int $seconds ): void {
+	private function simulate_transient_time_passing( string $ip, int $seconds ): void {
 		$key  = '_wc_pos_rate_' . hash( 'sha256', $ip );
 		$data = get_transient( $key );
 		if ( false !== $data && isset( $data['lockout_until'] ) ) {
