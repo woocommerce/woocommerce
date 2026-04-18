@@ -36,14 +36,9 @@ const getCacheConfig = ( name, configPaths = [] ) =>
 				buildDependencies: {
 					config: [
 						__filename,
-						path.resolve( __dirname, 'bin/webpack-configs.js' ),
-						path.resolve( __dirname, 'bin/webpack-helpers.js' ),
-						require.resolve(
-							'@woocommerce/dependency-extraction-webpack-plugin/src/index'
-						),
-						require.resolve(
-							'@woocommerce/internal-style-build/webpack-rtl-plugin'
-						),
+						path.resolve( __dirname, '../../../../pnpm-lock.yaml' ),
+						require.resolve( '@woocommerce/dependency-extraction-webpack-plugin' ),
+						require.resolve( '@woocommerce/internal-style-build' ),
 						...configPaths.map( ( configPath ) =>
 							path.resolve( __dirname, configPath )
 						),

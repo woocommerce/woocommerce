@@ -23,7 +23,7 @@
 		"lint": "pnpm -r lint",
 		"cherry-pick": "node ./tools/cherry-pick/bin/run",
 		"clean": "rimraf -g '**/node_modules' '**/.wireit' 'packages/*/*/vendor' 'plugins/*/vendor' && pnpm store prune",
-		"clean:build": "rimraf -g '**/.wireit' 'packages/js/*/build' 'packages/js/*/build-*' 'packages/js/*/dist' 'plugins/*/build' 'plugins/woocommerce/client/*/build' && git clean --force -d -X --quiet ./plugins/woocommerce/assets",
+		"clean:build": "rimraf -g '**/.wireit' '**/node_modules/.cache' 'packages/js/*/build' 'packages/js/*/build-*' 'packages/js/*/dist' 'plugins/*/build' 'plugins/woocommerce/client/*/build' && git clean --force -d -X --quiet ./plugins/woocommerce/assets",
 		"preinstall": "npx only-allow pnpm",
 		"postinstall": "husky",
 		"run-canonical-extensions-tests": "bash bin/run-canonical-extensions-tests.sh",

@@ -98,12 +98,9 @@ const webpackConfig = {
 				buildDependencies: {
 					config: [
 						__filename,
-						require.resolve( './bin/custom-templated-path-webpack-plugin' ),
-						require.resolve( './bin/unminify-webpack-plugin' ),
-						require.resolve( '@woocommerce/dependency-extraction-webpack-plugin/src/index' ),
+						path.resolve( __dirname, '../../../../pnpm-lock.yaml' ),
+						require.resolve( '@woocommerce/dependency-extraction-webpack-plugin' ),
 						require.resolve( '@woocommerce/internal-style-build' ),
-						require.resolve( '@woocommerce/internal-style-build/webpack-rtl-plugin' ),
-						require.resolve( '@woocommerce/internal-style-build/style-asset-plugin' ),
 					],
 				},
 		  },
