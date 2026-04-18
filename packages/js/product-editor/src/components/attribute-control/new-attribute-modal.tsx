@@ -183,25 +183,20 @@ export const NewAttributeModal = ( {
 		name: defaultSearch,
 	} as EnhancedProductAttribute;
 
-	const { attributes, isLoadingAttributes } = useSelect(
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
-		( select: WCDataSelector ) => {
-			const {
-				getProductAttributes: getAttributes,
-				hasFinishedResolution: hasLoadedAttributes,
-			} = select( EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME );
+	const { attributes, isLoadingAttributes } = useSelect( ( select ) => {
+		const {
+			getProductAttributes: getAttributes,
+			hasFinishedResolution: hasLoadedAttributes,
+		} = select( EXPERIMENTAL_PRODUCT_ATTRIBUTES_STORE_NAME );
 
-			return {
-				isLoadingAttributes: ! hasLoadedAttributes(
-					'getProductAttributes',
-					[ attributeSortCriteria ]
-				),
-				attributes: getAttributes( attributeSortCriteria ),
-			};
-		},
-		[]
-	);
+		return {
+			isLoadingAttributes: ! hasLoadedAttributes(
+				'getProductAttributes',
+				[ attributeSortCriteria ]
+			),
+			attributes: getAttributes( attributeSortCriteria ),
+		};
+	}, [] );
 
 	const { createErrorNotice } = useDispatch( 'core/notices' );
 	const { createProductAttribute } = useDispatch(
@@ -362,8 +357,6 @@ export const NewAttributeModal = ( {
 								}
 							} }
 							className="woocommerce-new-attribute-modal"
-							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-							// @ts-ignore
 							size="medium"
 						>
 							{ notice && (

@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Improve build time for settings-editor by using webpack filesystem cache.

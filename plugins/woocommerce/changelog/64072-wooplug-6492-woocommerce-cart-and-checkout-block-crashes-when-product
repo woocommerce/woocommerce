@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix Cart and Checkout block crash caused by WordPress emoji detection script corrupting React DOM when product names contain emoji characters.

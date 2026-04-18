@@ -10,7 +10,6 @@ import { Disabled, PanelBody, ToggleControl } from '@wordpress/components';
 import {
 	store as blockEditorStore,
 	useBlockProps,
-	// @ts-expect-error - useInnerBlocksProps is not exported from @wordpress/block-editor
 	useInnerBlocksProps,
 	Warning,
 	InspectorControls,
@@ -78,26 +77,21 @@ const Edit = ( {
 			const blockEditorSelect = select( blockEditorStore );
 
 			// Check if block is inner block of single product block
-			const singleProductParentBlocks = blockEditorSelect
-				// @ts-expect-error - getBlockParentsByBlockName is not typed
-				.getBlockParentsByBlockName(
+			const singleProductParentBlocks =
+				blockEditorSelect.getBlockParentsByBlockName(
 					clientId,
 					'woocommerce/single-product'
 				);
 			const isInnerBlock = singleProductParentBlocks.length > 0;
 
 			// Get inner blocks and insertion status
-			// @ts-expect-error - getBlocks is not typed
 			const blocks = blockEditorSelect.getBlocks( clientId );
 			const innerBlocks = blocks.length > 0;
 			const blockJustInserted =
-				// @ts-expect-error - wasBlockJustInserted is not typed
 				blockEditorSelect.wasBlockJustInserted( clientId );
 
-			const productDetailsBlock = select(
-				blockEditorStore
-				// @ts-expect-error - getBlocksByName is not typed
-			).getBlock( clientId );
+			const productDetailsBlock =
+				select( blockEditorStore ).getBlock( clientId );
 
 			const productSpecificationClientId = getInnerBlockByName(
 				productDetailsBlock,
@@ -106,7 +100,6 @@ const Edit = ( {
 
 			const accordionClientId = select(
 				blockEditorStore
-				// @ts-expect-error - getBlockParentsByBlockName is not typed
 			).getBlockParentsByBlockName(
 				productSpecificationClientId ?? '',
 				'woocommerce/accordion-item'

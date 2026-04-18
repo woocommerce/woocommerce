@@ -25,8 +25,6 @@ import {
 	FlexItem,
 	Button,
 } from '@wordpress/components';
-// @ts-expect-error missing type.
-// eslint-disable-next-line @woocommerce/dependency-group
 import { privateApis as editorPrivateApis } from '@wordpress/editor';
 
 /**
@@ -223,11 +221,9 @@ export default function ProductList( {
 			const { getPostType, canUser } = select( coreStore );
 			const postTypeData:
 				| { labels: Record< string, string > }
-				// @ts-expect-error Selector is not typed
 				| undefined = getPostType( postType );
 			return {
 				labels: postTypeData?.labels,
-				// @ts-expect-error Selector is not typed
 				canCreateRecord: canUser( 'create', {
 					kind: 'postType',
 					name: postType,

@@ -22,7 +22,6 @@ export const useSiteVisibilityTour = () => {
 	 * It will be removed in WC 9.4.
 	 */
 	const hasUserDismissedTourMeta = useSelect( ( select ) => {
-		// @ts-expect-error Selector is not typed.
 		const currentUser = select( 'core' ).getCurrentUser();
 		if ( ! currentUser ) {
 			// If the user is not logged in, we don't want to show the tour.
@@ -30,8 +29,6 @@ export const useSiteVisibilityTour = () => {
 		}
 
 		return (
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
 			( currentUser as { meta: { [ key: string ]: string } } ).meta
 				.woocommerce_launch_your_store_tour_hidden === 'yes'
 		);
