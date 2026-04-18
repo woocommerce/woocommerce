@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Post } from '@wordpress/core-data';
+import { Context, Post } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
@@ -9,6 +9,13 @@ import { Post } from '@wordpress/core-data';
 import { ProductCategory } from '../product-categories/types';
 import { ProductTag } from '../product-tags/types';
 import { BaseQueryParams } from '../types';
+
+declare module '@wordpress/core-data' {
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	interface PerPackageEntityRecords< C extends Context > {
+		woocommerce: Product;
+	}
+}
 
 export type ProductType =
 	| 'simple'
@@ -130,10 +137,10 @@ export type Product< Status = ProductStatus, Type = ProductType > = Omit<
 	slug: string;
 	sku: string;
 	status: Status;
-	stock_quantity: number;
+	stock_quantity: number | null;
 	stock_status: 'instock' | 'outofstock' | 'onbackorder';
 	tags: Pick< ProductTag, 'id' | 'name' >[];
-	tax_class: 'standard' | 'reduced-rate' | 'zero-rate' | undefined;
+	tax_class: 'standard' | 'reduced-rate' | 'zero-rate' | '' | undefined;
 	tax_status: 'taxable' | 'shipping' | 'none';
 	total_sales: number;
 	type: Type;
@@ -195,7 +202,7 @@ export type ProductQuery<
 	shipping_class?: string;
 	attribute?: string;
 	attribute_term?: string;
-	tax_class?: 'standard' | 'reduced-rate' | 'zero-rate';
+	tax_class?: 'standard' | 'reduced-rate' | 'zero-rate' | '';
 	on_sale?: boolean;
 	min_price?: string;
 	max_price?: string;

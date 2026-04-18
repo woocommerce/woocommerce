@@ -1,0 +1,4 @@
+Significance: major
+Type: update
+
+Bump @wordpress/* dependencies to the wp-6.8 minimum across the admin, blocks, email-editor, product-editor, and settings-editor packages.

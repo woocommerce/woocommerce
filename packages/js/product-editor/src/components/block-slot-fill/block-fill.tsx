@@ -4,10 +4,7 @@
 import { Fill } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import { createElement } from '@wordpress/element';
-import {
-	// @ts-expect-error no exported member.
-	useBlockEditContext,
-} from '@wordpress/block-editor';
+import { useBlockEditContext } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies
@@ -27,7 +24,6 @@ export function BlockFill( {
 			const { getBlockParentsByBlockName } =
 				select( 'core/block-editor' );
 
-			// @ts-expect-error Selector is not typed
 			const [ closestParentClientId ] = getBlockParentsByBlockName(
 				clientId,
 				slotContainerBlockName,

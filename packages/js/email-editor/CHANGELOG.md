@@ -2,6 +2,13 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.10.1](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.10.1) - 2026-04-06 
+
+-   Patch - Disable Real-time Collaboration in the email editor [#63770]
+-   Patch - Fix template-select modal not appearing on WordPress 7.0 due to hasEdits() returning true on fresh posts [#64026]
+-   Patch - Fix useSelect instability warning for notices in the email editor [#63943]
+-   Patch - Replaced patched `@wordpress/data` types with opt-in internal package types. [#63483]
+
 ## [1.10.0](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.10.0) - 2026-03-18 
 
 -   Minor - Add `woocommerce_email_editor_send_button_disabled` filter to allow overriding the send button disabled state [#63722]

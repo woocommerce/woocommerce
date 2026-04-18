@@ -48,7 +48,6 @@ export function ScreenHeader( { title, description, onBack }: Props ) {
 							onClick={ onBack }
 						/>
 						<Spacer>
-							{ /* @ts-expect-error Heading component it's not typed properly in the current components version. */ }
 							<Heading
 								className="woocommerce-email-editor-styles-header"
 								level={ 2 }

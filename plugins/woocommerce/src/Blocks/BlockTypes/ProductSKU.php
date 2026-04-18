@@ -3,6 +3,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Enums\ProductType;
+use WP_Block;
 
 /**
  * ProductSKU class.
@@ -68,7 +69,8 @@ class ProductSKU extends AbstractBlock {
 			return '';
 		}
 
-		$is_interactive = $product->is_type( ProductType::VARIABLE );
+		$is_descendant_of_product_collection = isset( $block->context['query']['isProductCollectionBlock'] );
+		$is_interactive                      = ! $is_descendant_of_product_collection && $product->is_type( ProductType::VARIABLE );
 
 		if ( $is_interactive ) {
 			$variations                = $product->get_available_variations( 'objects' );

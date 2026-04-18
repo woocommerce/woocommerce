@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix settings page label vertical alignment on WordPress 7.0 where increased form element height caused labels to sit too high relative to their fields.

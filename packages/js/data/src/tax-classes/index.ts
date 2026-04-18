@@ -19,3 +19,9 @@ export const store = createCrudDataStore< TaxClassActions, TaxClassSelectors >(
 );
 
 export const EXPERIMENTAL_TAX_CLASSES_STORE_NAME = STORE_NAME;
+
+declare module '@wordpress/data' {
+	interface StoreRegistry {
+		[ STORE_NAME ]: typeof store;
+	}
+}

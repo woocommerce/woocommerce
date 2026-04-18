@@ -14,7 +14,6 @@
     },
     "layout": {
       "contentSize": "660px",
-      "wideSize": "",
       "allowEditing": false,
       "allowCustomContentAndWideSize": false
     },
@@ -34,7 +33,7 @@
         },
         {
           "name": "2",
-          "size": "20px",
+          "size": "24px",
           "slug": "20"
         },
         {
@@ -226,10 +225,10 @@
     "spacing": {
       "blockGap": "16px",
       "padding": {
-        "bottom": "20px",
-        "left": "20px",
-        "right": "20px",
-        "top": "20px"
+        "bottom": "24px",
+        "left": "24px",
+        "right": "24px",
+        "top": "24px"
       }
     },
     "color": {
@@ -246,10 +245,28 @@
       "textDecoration": "none",
       "textTransform": "none"
     },
+    "blocks": {
+      "core/site-title": {
+        "typography": {
+          "fontSize": "11px",
+          "fontWeight": "500",
+          "letterSpacing": "0.55px",
+          "textTransform": "uppercase"
+        },
+        "color": {
+          "text": "#757575"
+        }
+      }
+    },
     "elements": {
+      "button": {
+        "border": {
+          "radius": "0px"
+        }
+      },
       "heading": {
         "typography": {
-          "fontWeight": "400",
+          "fontWeight": "700",
           "fontStyle": "normal",
           "lineHeight": "1.2"
         }
