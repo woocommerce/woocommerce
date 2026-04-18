@@ -1,0 +1,43 @@
+diff --git a/lib/runtime/docker/build-docker-compose-config.js b/lib/runtime/docker/build-docker-compose-config.js
+index a75eab2d76976d7ed6591ee33d2eb20b82b45606..8cdf4c6b3c296668b708f30aeeed1320ea5c12e4 100644
+--- a/lib/runtime/docker/build-docker-compose-config.js
++++ b/lib/runtime/docker/build-docker-compose-config.js
+@@ -194,7 +194,7 @@ module.exports = function buildDockerComposeConfig( config ) {
+ 		start_period: '60s',
+ 	};
+ 
+-	return {
++	const generatedConfiguration = {
+ 		services: {
+ 			mysql: {
+ 				image: 'mariadb:lts',
+@@ -330,4 +330,16 @@ module.exports = function buildDockerComposeConfig( config ) {
+ 			'tests-user-home': {},
+ 		},
+ 	};
++
++	if ( process.env.CI || false ) {
++		delete generatedConfiguration.services['mysql'];
++		delete generatedConfiguration.services['wordpress'];
++		delete generatedConfiguration.services['cli'];
++		delete generatedConfiguration.services['phpmyadmin'];
++		delete generatedConfiguration.services['tests-phpmyadmin'];
++		delete generatedConfiguration.volumes['mysql'];
++		delete generatedConfiguration.volumes['wordpress'];
++	}
++
++	return generatedConfiguration;
+ };
+diff --git a/lib/runtime/docker/init-config.js b/lib/runtime/docker/init-config.js
+index 8b6a1cfd8ce0c467d9bcb016c1a6494b6f0718bf..b817d61fe3d223b289fc0e4cd32949291553952c 100644
+--- a/lib/runtime/docker/init-config.js
++++ b/lib/runtime/docker/init-config.js
+@@ -260,7 +260,7 @@ RUN echo 'post_max_size = 1G' >> /usr/local/etc/php/php.ini`;
+ 	dockerFileContent += `
+ RUN curl -sS https://getcomposer.org/installer -o /tmp/composer-setup.php
+ RUN export COMPOSER_HASH=\`curl -sS https://composer.github.io/installer.sig\` && php -r "if (hash_file('SHA384', '/tmp/composer-setup.php') === '$COMPOSER_HASH') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('/tmp/composer-setup.php'); } echo PHP_EOL;"
+-RUN php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer
++RUN php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer --version=2.8.12
+ RUN rm /tmp/composer-setup.php`;
+ 
+ 	// Install any Composer packages we might need globally.
