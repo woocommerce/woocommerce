@@ -172,7 +172,7 @@
 		"@wordpress/is-shallow-equal": "catalog:wp-min",
 		"@wordpress/jest-preset-default": "next",
 		"@wordpress/postcss-plugins-preset": "next",
-		"@wordpress/postcss-themes": "1.0.5",
+		"@wordpress/postcss-themes": "next",
 		"@wordpress/prettier-config": "1.4.0",
 		"@wordpress/private-apis": "wp-6.8",
 		"@wordpress/rich-text": "catalog:wp-min",

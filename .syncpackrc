@@ -52,7 +52,6 @@
 				"@wordpress/autop",
 				"@wordpress/interactivity",
 				"@wordpress/interactivity-router",
-				"@wordpress/postcss-themes",
 				"@wordpress/prettier-config",
 				"@wordpress/private-apis",
 				"@wordpress/scripts",
@@ -351,8 +350,7 @@
 				"@wordpress/stylelint-config",
 				"@wordpress/scripts",
 				"@wordpress/jest-console",
-				"@wordpress/e2e-test-utils",
-				"@wordpress/postcss-themes"
+				"@wordpress/e2e-test-utils"
 			],
 			"packages": [
 				"**"
@@ -452,7 +450,8 @@
 				"@wordpress/browserslist-config",
 				"@wordpress/dependency-extraction-webpack-plugin",
 				"@wordpress/jest-preset-default",
-				"@wordpress/postcss-plugins-preset"
+				"@wordpress/postcss-plugins-preset",
+				"@wordpress/postcss-themes"
 			],
 			"packages": [
 				"**"

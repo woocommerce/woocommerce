@@ -247,7 +247,7 @@ importers:
         version: 1.15.0
       postcss-loader:
         specifier: 4.3.x
-        version: 4.3.0(postcss@8.5.9)(webpack@5.97.1)
+        version: 4.3.0(postcss@8.5.9)(webpack@5.97.1(@swc/core@1.15.24))
       prettier:
         specifier: npm:wp-prettier@^2.8.5
         version: wp-prettier@2.8.5
@@ -317,7 +317,7 @@ importers:
         version: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       postcss-loader:
         specifier: 4.3.x
-        version: 4.3.0(postcss@8.5.9)(webpack@5.97.1)
+        version: 4.3.0(postcss@8.5.9)(webpack@5.97.1(@swc/core@1.15.24))
       react:
         specifier: 18.3.x
         version: 18.3.1
@@ -2022,7 +2022,7 @@ importers:
         version: 2.9.4(webpack@5.97.1(@swc/core@1.15.24))
       postcss-loader:
         specifier: 4.3.x
-        version: 4.3.0(postcss@8.5.9)(webpack@5.97.1)
+        version: 4.3.0(postcss@8.5.9)(webpack@5.97.1(@swc/core@1.15.24))
       rtlcss:
         specifier: ^4.3.0
         version: 4.3.0
@@ -3599,7 +3599,7 @@ importers:
         version: 7.25.7
       '@pmmmwh/react-refresh-webpack-plugin':
         specifier: ^0.5.11
-        version: 0.5.17(@types/webpack@4.41.40)(react-refresh@0.14.2)(type-fest@4.41.0)(webpack-dev-server@4.15.2)(webpack-hot-middleware@2.26.1)(webpack@5.97.1)
+        version: 0.5.17(@types/webpack@4.41.40)(react-refresh@0.14.2)(type-fest@4.41.0)(webpack-dev-server@4.15.2(webpack@5.97.1(@swc/core@1.15.24)))(webpack-hot-middleware@2.26.1)(webpack@5.97.1(@swc/core@1.15.24))
       '@statelyai/inspect':
         specifier: ^0.3.1
         version: 0.3.1(ws@8.20.0)(xstate@4.37.1)
@@ -3751,8 +3751,8 @@ importers:
         specifier: next
         version: 5.43.1-next.v.202604091042.0(postcss@8.4.49)
       '@wordpress/postcss-themes':
-        specifier: ^1.0.5
-        version: 1.0.5
+        specifier: next
+        version: 6.43.1-next.v.202604091042.0(postcss@8.4.49)
       '@wordpress/prettier-config':
         specifier: 2.17.0
         version: 2.17.0(wp-prettier@2.8.5)
@@ -4289,8 +4289,8 @@ importers:
         specifier: next
         version: 5.43.1-next.v.202604091042.0(postcss@8.4.49)
       '@wordpress/postcss-themes':
-        specifier: 1.0.5
-        version: 1.0.5
+        specifier: next
+        version: 6.43.1-next.v.202604091042.0(postcss@8.4.49)
       '@wordpress/prettier-config':
         specifier: 1.4.0
         version: 1.4.0(wp-prettier@2.8.5)
@@ -11440,12 +11440,15 @@ packages:
     peerDependencies:
       postcss: ^8.0.0
 
-  '@wordpress/postcss-themes@1.0.5':
-    resolution: {integrity: sha512-Oig71+VQG3UxLadd98oWMQfIqWrVY+G375/yKCHRklwEIZhKtAeK7qZlL1dEjdGPGvPXFeggB7KG5SGyrmdOZA==}
-
   '@wordpress/postcss-themes@2.6.0':
     resolution: {integrity: sha512-Q22s1KSVdtoK0Z0ND06V2QwTx/U4KvJhWFmoI8IzYW/LGlk8BkQJhHH157Y9vFliwpMlQpqfXW6/zOg2XtvHzQ==}
     engines: {node: '>=8'}
+
+  '@wordpress/postcss-themes@6.43.1-next.v.202604091042.0':
+    resolution: {integrity: sha512-xTg4tQYuoKGHNh312kP+KgKp5o7J7caqEU+gDmkrx6MuIiiOcwOLl0bfMkJda4qhEF/TbVP9Nejf97qxrEII9w==}
+    engines: {node: '>=18.12.0', npm: '>=8.19.2'}
+    peerDependencies:
+      postcss: ^8.0.0
 
   '@wordpress/preferences@3.35.0':
     resolution: {integrity: sha512-OFzSEiI8Kk5YJtyPFnAauRHXtjuTJHkWapvcagpMoTP0WvwBwGfr5AeIIgV2ONtA3edrfMGgmrJUK7pd61K/1Q==}
@@ -12471,10 +12474,6 @@ packages:
     peerDependencies:
       postcss: ^8.1.0
 
-  autoprefixer@8.6.5:
-    resolution: {integrity: sha512-PLWJN3Xo/rycNkx+mp8iBDMTm3FeWe4VmYaZDSqL5QQB9sLsQkG5k8n+LNDFnhh9kdq2K+egL/icpctOmDHwig==}
-    hasBin: true
-
   autoprefixer@9.8.6:
     resolution: {integrity: sha512-XrvP4VVHdRBCdX1S3WXVD8+RyG9qeb1D5Sn1DeLiG2xfSpzellk5k54xbUERJ3M5DggQxes39UGOTP8CFrEGbg==}
     hasBin: true
@@ -12869,10 +12868,6 @@ packages:
 
   browserify-zlib@0.2.0:
     resolution: {integrity: sha512-Z942RysHXmJrhqk88FmKBVq/v5tqmSkDz7p54G/MGyjMnCFFnC79XWNbg+Vta8W6Wb2qtSZTSxIGkJrRpCFEiA==}
-
-  browserslist@3.2.8:
-    resolution: {integrity: sha512-WHVocJYavUwVgVViC0ORikPHQquXwVh939TaelZ4WDqpWgTX/FsGhl/+P4qBUAGcRvtOgDgC+xftNWWp2RUTAQ==}
-    hasBin: true
 
   browserslist@4.19.3:
     resolution: {integrity: sha512-XK3X4xtKJ+Txj8G5c30B4gsm71s69lqXlkYui4s6EkKxuv49qjYlY6oVd+IFJ73d4YymtM3+djvvt/R/iJwwDg==}
@@ -27849,7 +27844,7 @@ snapshots:
       webpack-dev-server: 4.15.2(webpack-cli@5.1.4)(webpack@5.97.1)
       webpack-hot-middleware: 2.26.1
 
-  '@pmmmwh/react-refresh-webpack-plugin@0.5.17(@types/webpack@4.41.40)(react-refresh@0.14.2)(type-fest@4.41.0)(webpack-dev-server@4.15.2)(webpack-hot-middleware@2.26.1)(webpack@5.97.1)':
+  '@pmmmwh/react-refresh-webpack-plugin@0.5.17(@types/webpack@4.41.40)(react-refresh@0.14.2)(type-fest@4.41.0)(webpack-dev-server@4.15.2(webpack@5.97.1(@swc/core@1.15.24)))(webpack-hot-middleware@2.26.1)(webpack@5.97.1(@swc/core@1.15.24))':
     dependencies:
       ansi-html: 0.0.9
       core-js-pure: 3.49.0
@@ -30271,7 +30266,7 @@ snapshots:
     dependencies:
       '@babel/preset-flow': 7.27.1(@babel/core@7.25.7)
       '@babel/preset-react': 7.25.7(@babel/core@7.25.7)
-      '@pmmmwh/react-refresh-webpack-plugin': 0.5.17(@types/webpack@4.41.40)(react-refresh@0.14.2)(type-fest@4.41.0)(webpack-dev-server@4.15.2)(webpack-hot-middleware@2.26.1)(webpack@5.97.1)
+      '@pmmmwh/react-refresh-webpack-plugin': 0.5.17(@types/webpack@4.41.40)(react-refresh@0.14.2)(type-fest@4.41.0)(webpack-dev-server@4.15.2(webpack@5.97.1(@swc/core@1.15.24)))(webpack-hot-middleware@2.26.1)(webpack@5.97.1(@swc/core@1.15.24))
       '@storybook/core-webpack': 7.6.19(encoding@0.1.13)
       '@storybook/docs-tools': 7.6.19(encoding@0.1.13)
       '@storybook/node-logger': 7.6.19
@@ -30309,7 +30304,7 @@ snapshots:
     dependencies:
       '@babel/preset-flow': 7.27.1(@babel/core@7.25.7)
       '@babel/preset-react': 7.25.7(@babel/core@7.25.7)
-      '@pmmmwh/react-refresh-webpack-plugin': 0.5.17(@types/webpack@4.41.40)(react-refresh@0.14.2)(type-fest@4.41.0)(webpack-dev-server@4.15.2)(webpack-hot-middleware@2.26.1)(webpack@5.97.1)
+      '@pmmmwh/react-refresh-webpack-plugin': 0.5.17(@types/webpack@4.41.40)(react-refresh@0.14.2)(type-fest@4.41.0)(webpack-dev-server@4.15.2(webpack@5.97.1(@swc/core@1.15.24)))(webpack-hot-middleware@2.26.1)(webpack@5.97.1(@swc/core@1.15.24))
       '@storybook/core-webpack': 7.6.19(encoding@0.1.13)
       '@storybook/docs-tools': 7.6.19(encoding@0.1.13)
       '@storybook/node-logger': 7.6.19
@@ -36372,18 +36367,13 @@ snapshots:
       postcss: 8.4.49
       postcss-import: 16.1.1(postcss@8.4.49)
 
-  '@wordpress/postcss-themes@1.0.5':
-    dependencies:
-      '@babel/runtime': 7.25.7
-      autoprefixer: 8.6.5
-      postcss: 6.0.23
-      postcss-color-function: 4.1.0
-    transitivePeerDependencies:
-      - supports-color
-
   '@wordpress/postcss-themes@2.6.0':
     dependencies:
       postcss: 7.0.39
+
+  '@wordpress/postcss-themes@6.43.1-next.v.202604091042.0(postcss@8.4.49)':
+    dependencies:
+      postcss: 8.4.49
 
   '@wordpress/preferences@3.35.0(@emotion/is-prop-valid@1.4.0)(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
@@ -36815,7 +36805,7 @@ snapshots:
     dependencies:
       '@babel/core': 7.25.7
       '@playwright/test': 1.59.1
-      '@pmmmwh/react-refresh-webpack-plugin': 0.5.17(@types/webpack@4.41.40)(react-refresh@0.14.2)(type-fest@4.41.0)(webpack-dev-server@4.15.2)(webpack-hot-middleware@2.26.1)(webpack@5.97.1)
+      '@pmmmwh/react-refresh-webpack-plugin': 0.5.17(@types/webpack@4.41.40)(react-refresh@0.14.2)(type-fest@4.41.0)(webpack-dev-server@4.15.2(webpack@5.97.1(@swc/core@1.15.24)))(webpack-hot-middleware@2.26.1)(webpack@5.97.1(@swc/core@1.15.24))
       '@svgr/webpack': 8.1.0(typescript@5.7.3)
       '@wordpress/babel-preset-default': 7.42.0
       '@wordpress/browserslist-config': 5.41.0
@@ -36911,7 +36901,7 @@ snapshots:
     dependencies:
       '@babel/core': 7.25.7
       '@playwright/test': 1.59.1
-      '@pmmmwh/react-refresh-webpack-plugin': 0.5.17(@types/webpack@4.41.40)(react-refresh@0.14.2)(type-fest@4.41.0)(webpack-dev-server@4.15.2)(webpack-hot-middleware@2.26.1)(webpack@5.97.1)
+      '@pmmmwh/react-refresh-webpack-plugin': 0.5.17(@types/webpack@4.41.40)(react-refresh@0.14.2)(type-fest@4.41.0)(webpack-dev-server@4.15.2(webpack@5.97.1(@swc/core@1.15.24)))(webpack-hot-middleware@2.26.1)(webpack@5.97.1(@swc/core@1.15.24))
       '@svgr/webpack': 8.1.0(typescript@5.7.3)
       '@wordpress/babel-preset-default': 8.44.0
       '@wordpress/browserslist-config': 6.44.0
@@ -37008,7 +36998,7 @@ snapshots:
     dependencies:
       '@babel/core': 7.25.7
       '@playwright/test': 1.59.1
-      '@pmmmwh/react-refresh-webpack-plugin': 0.5.17(@types/webpack@4.41.40)(react-refresh@0.14.2)(type-fest@4.41.0)(webpack-dev-server@4.15.2)(webpack-hot-middleware@2.26.1)(webpack@5.97.1)
+      '@pmmmwh/react-refresh-webpack-plugin': 0.5.17(@types/webpack@4.41.40)(react-refresh@0.14.2)(type-fest@4.41.0)(webpack-dev-server@4.15.2(webpack@5.97.1(@swc/core@1.15.24)))(webpack-hot-middleware@2.26.1)(webpack@5.97.1(@swc/core@1.15.24))
       '@svgr/webpack': 8.1.0(typescript@5.7.3)
       '@wordpress/babel-preset-default': 8.44.0
       '@wordpress/browserslist-config': 6.44.0
@@ -37104,7 +37094,7 @@ snapshots:
     dependencies:
       '@babel/core': 7.25.7
       '@playwright/test': 1.59.1
-      '@pmmmwh/react-refresh-webpack-plugin': 0.5.17(@types/webpack@4.41.40)(react-refresh@0.14.2)(type-fest@4.41.0)(webpack-dev-server@4.15.2)(webpack-hot-middleware@2.26.1)(webpack@5.97.1)
+      '@pmmmwh/react-refresh-webpack-plugin': 0.5.17(@types/webpack@4.41.40)(react-refresh@0.14.2)(type-fest@4.41.0)(webpack-dev-server@4.15.2(webpack@5.97.1(@swc/core@1.15.24)))(webpack-hot-middleware@2.26.1)(webpack@5.97.1(@swc/core@1.15.24))
       '@svgr/webpack': 8.1.0(typescript@5.7.3)
       '@wordpress/babel-preset-default': 8.44.0
       '@wordpress/browserslist-config': 6.44.0
@@ -38530,15 +38520,6 @@ snapshots:
       postcss: 8.5.9
       postcss-value-parser: 4.2.0
 
-  autoprefixer@8.6.5:
-    dependencies:
-      browserslist: 3.2.8
-      caniuse-lite: 1.0.30001146
-      normalize-range: 0.1.2
-      num2fraction: 1.2.2
-      postcss: 6.0.23
-      postcss-value-parser: 3.3.1
-
   autoprefixer@9.8.6:
     dependencies:
       browserslist: 4.19.3
@@ -39071,11 +39052,6 @@ snapshots:
   browserify-zlib@0.2.0:
     dependencies:
       pako: 1.0.11
-
-  browserslist@3.2.8:
-    dependencies:
-      caniuse-lite: 1.0.30001146
-      electron-to-chromium: 1.5.336
 
   browserslist@4.19.3:
     dependencies:
@@ -48455,7 +48431,7 @@ snapshots:
       semver: 7.7.4
       webpack: 5.97.1(@swc/core@1.15.24)(webpack-cli@5.1.4)
 
-  postcss-loader@4.3.0(postcss@8.5.9)(webpack@5.97.1):
+  postcss-loader@4.3.0(postcss@8.5.9)(webpack@5.97.1(@swc/core@1.15.24)):
     dependencies:
       cosmiconfig: 7.1.0
       klona: 2.0.6
