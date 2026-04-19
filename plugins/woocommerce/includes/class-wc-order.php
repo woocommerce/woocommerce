@@ -2283,10 +2283,10 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return WC_Order_Refund[]
 	 */
 	public function get_refunds() {
-		$cache_key = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refunds' . $this->get_id();
-		$refunds   = wp_cache_get( $cache_key, $this->cache_group );
+		$cache_key  = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refunds' . $this->get_id();
+		$refund_ids = wp_cache_get( $cache_key, $this->cache_group );
 
-		if ( false === $refunds ) {
+		if ( false === $refund_ids ) {
 			$refunds = wc_get_orders(
 				array(
 					'type'   => 'shop_order_refund',
@@ -2294,7 +2294,23 @@ class WC_Order extends WC_Abstract_Order {
 					'limit'  => -1,
 				)
 			);
-			wp_cache_set( $cache_key, $refunds, $this->cache_group );
+			$refund_ids = array();
+			foreach ( $refunds as $refund ) {
+				if ( $refund instanceof WC_Order_Refund ) {
+					$refund_ids[] = $refund->get_id();
+				}
+			}
+			wp_cache_set( $cache_key, $refund_ids, $this->cache_group );
+		} else {
+			$refunds = ! empty( $refund_ids )
+				? wc_get_orders(
+					array(
+						'type'    => 'shop_order_refund',
+						'include' => $refund_ids,
+						'limit'   => -1,
+					)
+				)
+				: array();
 		}
 
 		$this->refunds = array();
