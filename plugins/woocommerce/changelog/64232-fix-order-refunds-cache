@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Prevent re-entrant order reads triggered by cached refund objects.
