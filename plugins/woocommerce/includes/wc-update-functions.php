@@ -3496,3 +3496,18 @@ function wc_update_1080_slim_orders_meta_key_index(): void {
 	// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	$wpdb->query( "ALTER TABLE {$table_name} DROP INDEX {$index_name}, ADD INDEX {$index_name} (meta_key(100))" );
 }
+
+/**
+ * Invalidate the 'orders' cache group.
+ *
+ * The cache format for 'refunds{order_id}' keys changed from arrays of
+ * hydrated WC_Order_Refund objects to arrays of refund IDs. Stale entries
+ * in persistent object caches would break the new read path.
+ *
+ * @since 10.7.1
+ *
+ * @return void
+ */
+function wc_update_1071_invalidate_orders_cache_group(): void {
+	WC_Cache_Helper::invalidate_cache_group( 'orders' );
+}

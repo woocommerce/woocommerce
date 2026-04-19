@@ -325,6 +325,9 @@ class WC_Install {
 		'10.7.0' => array(
 			'wc_update_1070_disable_hpos_sync_on_read',
 		),
+		'10.7.1' => array(
+			'wc_update_1071_invalidate_orders_cache_group',
+		),
 		'10.8.0' => array(
 			'wc_update_1080_migrate_analytics_import_option',
 			'wc_update_1080_slim_orders_meta_key_index',
