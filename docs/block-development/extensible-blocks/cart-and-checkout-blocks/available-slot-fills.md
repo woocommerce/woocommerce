@@ -108,7 +108,7 @@ const render = () => {
 		<ExperimentalOrderLocalPickupPackages>
 			<div>
 				{ __(
-					'By using our convenient local pickup option, you can come to our store and pick up your order. We will send you and email when your order is ready for pickup.',
+					'By using our convenient local pickup option, you can come to our store and pick up your order. We will send you an email when your order is ready for pickup.',
 					'YOUR-TEXTDOMAIN'
 				) }
 			</div>
