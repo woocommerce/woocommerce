@@ -123,9 +123,6 @@ catalogs:
     '@wordpress/plugins':
       specifier: 7.19.4
       version: 7.19.4
-    '@wordpress/postcss-plugins-preset':
-      specifier: 5.19.1
-      version: 5.19.1
     '@wordpress/preferences':
       specifier: 4.19.4
       version: 4.19.4
@@ -2009,8 +2006,8 @@ importers:
         specifier: catalog:wp-min
         version: 5.19.1
       '@wordpress/postcss-plugins-preset':
-        specifier: catalog:wp-min
-        version: 5.19.1(postcss@8.5.9)
+        specifier: next
+        version: 5.43.1-next.v.202604091042.0(postcss@8.5.9)
       css-loader:
         specifier: 6.11.x
         version: 6.11.0(webpack@5.97.1(@swc/core@1.15.24))
@@ -3748,11 +3745,11 @@ importers:
         specifier: next
         version: 6.43.1-next.v.202604091042.0
       '@wordpress/jest-preset-default':
-        specifier: ^8.5.2
-        version: 8.5.2(@babel/core@7.25.7)(jest@29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        specifier: next
+        version: 12.43.1-next.v.202604091042.0(@babel/core@7.25.7)(jest@29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)))
       '@wordpress/postcss-plugins-preset':
-        specifier: ^1.6.0
-        version: 1.6.0
+        specifier: next
+        version: 5.43.1-next.v.202604091042.0(postcss@8.4.49)
       '@wordpress/postcss-themes':
         specifier: ^1.0.5
         version: 1.0.5
@@ -4286,11 +4283,11 @@ importers:
         specifier: catalog:wp-min
         version: 5.19.1
       '@wordpress/jest-preset-default':
-        specifier: 12.22.0
-        version: 12.22.0(@babel/core@7.25.7)(jest@29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)))
+        specifier: next
+        version: 12.43.1-next.v.202604091042.0(@babel/core@7.25.7)(jest@29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)))
       '@wordpress/postcss-plugins-preset':
-        specifier: 1.6.0
-        version: 1.6.0
+        specifier: next
+        version: 5.43.1-next.v.202604091042.0(postcss@8.4.49)
       '@wordpress/postcss-themes':
         specifier: 1.0.5
         version: 1.0.5
@@ -6770,10 +6767,6 @@ packages:
     resolution: {integrity: sha512-E9JjhUgNzvuQ+vVAL21vlyfy12gP0GhazGgJC4h6qUt1jSdUXGWJ1wfu/X7Sd8etSgxV4ovT1pb9v5D6QW4XgA==}
     engines: {node: '>= 10.14.2'}
 
-  '@jest/transform@27.5.1':
-    resolution: {integrity: sha512-ipON6WtYgl/1329g5AIJVbUuEh0wZVbdpGwC99Jw4LwuoBNS95MVphU6zOeD9pDkon+LLbFL7lOQRapbB8SCHw==}
-    engines: {node: ^10.13.0 || ^12.13.0 || ^14.15.0 || >=15.0.0}
-
   '@jest/transform@29.7.0':
     resolution: {integrity: sha512-ok/BTPFzFKVMwO5eOHRrvnBVHdRy9IrsrW1GpMaQ9MCnilNLXQKmAX8s1YXDFaai9xJpac2ySzV0YeRRECr2Vw==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
@@ -6781,10 +6774,6 @@ packages:
   '@jest/types@26.6.2':
     resolution: {integrity: sha512-fC6QCp7Sc5sX6g8Tvbmj4XUTbyrik0akgRy03yjXbQaBWWNWGE7SGtJk98m0N8nzegD/7SggrUlivxo5ax4KWQ==}
     engines: {node: '>= 10.14.2'}
-
-  '@jest/types@27.5.1':
-    resolution: {integrity: sha512-Cx46iJ9QpwQTjIdq5VJu2QTMMs3QlEjI0x1QbBP5W1+nMzyc2XmimiRR/CbX9TO0cPTeUlxWMOu8mslYsJ8DEw==}
-    engines: {node: ^10.13.0 || ^12.13.0 || ^14.15.0 || >=15.0.0}
 
   '@jest/types@29.6.3':
     resolution: {integrity: sha512-u3UPsIilWKOM3F9CXtrG8LEJmNxwoCQC/XVj4IKYXvvpx7QIi/Kg1LI5uDmDpKlac62NUtX7eLjRh+jVZcLOzw==}
@@ -10045,9 +10034,6 @@ packages:
   '@types/yargs@15.0.20':
     resolution: {integrity: sha512-KIkX+/GgfFitlASYCGoSF+T4XRXhOubJLhkLVtSfsRTe9jWMmuM2g28zQ41BtPTG7TRBb2xHW+LCNVE9QR/vsg==}
 
-  '@types/yargs@16.0.11':
-    resolution: {integrity: sha512-sbtvk8wDN+JvEdabmZExoW/HNr1cB7D/j4LT08rMiuikfA7m/JNJg7ATQcgzs34zHnoScDkY0ZRSl29Fkmk36g==}
-
   '@types/yargs@17.0.35':
     resolution: {integrity: sha512-qUHkeCyQFxMXg79wQfTtfndEC+N9ZZg76HJftDJp+qH2tV7Gj4OJi7l+PiWwJ+pWtW8GwSmqsDj/oymhrTWXjg==}
 
@@ -11283,6 +11269,13 @@ packages:
       '@babel/core': '>=7'
       jest: '>=29'
 
+  '@wordpress/jest-preset-default@12.43.1-next.v.202604091042.0':
+    resolution: {integrity: sha512-UKcKNiK3dh4iQMUa7FpWy8+xtY7u3igbZx9nJ1oOS4p2xRndXpZJyz5V5z2/uddbwN72XVrEgC6VIVicywes9A==}
+    engines: {node: '>=18.12.0', npm: '>=8.19.2'}
+    peerDependencies:
+      '@babel/core': '>=7'
+      jest: '>=29'
+
   '@wordpress/jest-preset-default@12.44.0':
     resolution: {integrity: sha512-v5gj1/IdPfPoOOor/UZxvbuYQ8NYE1CV+De27Kf9w3MzTh1Z2KwuyZGA163X9OYMdQY36D2GfT2aa7p0RpWaFA==}
     engines: {node: '>=18.12.0', npm: '>=8.19.2'}
@@ -11295,15 +11288,6 @@ packages:
     engines: {node: '>=12'}
     peerDependencies:
       jest: '>=26'
-
-  '@wordpress/jest-preset-default@8.5.2':
-    resolution: {integrity: sha512-xlo8LNDcjuXbb1OVI9SFDm2u6JeWXu945Jo8LtPtWbRgCfgBZfQh4Y/csMbkiiIRq/Hpi5/VK2WWJJXSe5EsRQ==}
-    engines: {node: '>=12'}
-    peerDependencies:
-      '@babel/core': '>=7'
-      jest: '>=27'
-      react: ^17.0.0
-      react-dom: ^17.0.0
 
   '@wordpress/keyboard-shortcuts@4.35.0':
     resolution: {integrity: sha512-DR+fWhHt67GQT6PlrfMBpSmEYNCep+XvMYA55cnxoQ80LIFN5N5bkr4VeYdbrSatuOSRACm+6cfoQSIMQbdmjw==}
@@ -11444,8 +11428,8 @@ packages:
     peerDependencies:
       postcss: ^8.0.0
 
-  '@wordpress/postcss-plugins-preset@5.19.1':
-    resolution: {integrity: sha512-HAUj/S4Ljb5JtF9zUE66C7ZBk0MfJ0daGeNacrPkX/3H390UzujQDA0wrbdqkRNutJnUdvQKM4mm0RMPn6RjnA==}
+  '@wordpress/postcss-plugins-preset@5.43.1-next.v.202604091042.0':
+    resolution: {integrity: sha512-SVKNdp3FlG6emqeMYF+6qvxtYGhCOZhtXvZpB4hHRocHg9c/Sn9TFuepE2tUPIQKQLtulh7XedEokxTVNMgxYQ==}
     engines: {node: '>=18.12.0', npm: '>=8.19.2'}
     peerDependencies:
       postcss: ^8.0.0
@@ -12556,12 +12540,6 @@ packages:
     peerDependencies:
       '@babel/core': ^7.0.0
 
-  babel-jest@27.5.1:
-    resolution: {integrity: sha512-cdQ5dXjGRd0IBRATiQ4mZGlGlRE8kJpjPOixdNRdT+m3UcNqmYWN6rK6nvtXYfY3D76cb8s/O1Ss8ea24PIwcg==}
-    engines: {node: ^10.13.0 || ^12.13.0 || ^14.15.0 || >=15.0.0}
-    peerDependencies:
-      '@babel/core': ^7.8.0
-
   babel-jest@29.5.0:
     resolution: {integrity: sha512-mA4eCDh5mSo2EcA9xQjVTpmbbNk32Zb3Q3QFQsNhaK56Q+yoXowzFodLux30HRgyOho5rsQ6B0P9QpMkvvnJ0Q==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
@@ -12606,10 +12584,6 @@ packages:
   babel-plugin-jest-hoist@26.6.2:
     resolution: {integrity: sha512-PO9t0697lNTmcEHH69mdtYiOIkkOlj9fySqfO3K1eCcdISevLAE0xY59VLLUj0SoiPiTX/JU2CYFpILydUa5Lw==}
     engines: {node: '>= 10.14.2'}
-
-  babel-plugin-jest-hoist@27.5.1:
-    resolution: {integrity: sha512-50wCwD5EMNW4aRpOwtqzyZHIewTYNxLA4nhB+09d8BIssfNfzBRhkBIHiaPv1Si226TQSvp8gxAJm2iY2qs2hQ==}
-    engines: {node: ^10.13.0 || ^12.13.0 || ^14.15.0 || >=15.0.0}
 
   babel-plugin-jest-hoist@29.6.3:
     resolution: {integrity: sha512-ESAc/RJvGTFEzRwOTT4+lNDk/GNHMkKbNzsvT0qKRfDyyYTskxB5rnU2njIDYVxXCBHHEI1c0YwHob3WaYujOg==}
@@ -12658,12 +12632,6 @@ packages:
   babel-preset-jest@26.6.2:
     resolution: {integrity: sha512-YvdtlVm9t3k777c5NPQIv6cxFFFapys25HiUmuSgHwIZhfifweR5c5Sf5nwE3MAbfu327CYSvps8Yx6ANLyleQ==}
     engines: {node: '>= 10.14.2'}
-    peerDependencies:
-      '@babel/core': ^7.0.0
-
-  babel-preset-jest@27.5.1:
-    resolution: {integrity: sha512-Nptf2FzlPCWYuJg41HBqXVT8ym6bXOevuCTbhxlUpjwtysGaIWFvDEjp4y+G7fl13FgOdjs7P/DmErqH7da0Ag==}
-    engines: {node: ^10.13.0 || ^12.13.0 || ^14.15.0 || >=15.0.0}
     peerDependencies:
       '@babel/core': ^7.0.0
 
@@ -17532,10 +17500,6 @@ packages:
     resolution: {integrity: sha512-easWIJXIw71B2RdR8kgqpjQrbMRWQBgiBwXYEhtGUTaX+doCjBheluShdDMeR8IMfJiTqH4+zfhtg29apJf/8w==}
     engines: {node: '>= 10.14.2'}
 
-  jest-haste-map@27.5.1:
-    resolution: {integrity: sha512-7GgkZ4Fw4NFbMSDSpZwXeBiIbx+t/46nJ2QitkOjvwPYyZmqttu2TDSimMHP1EkPOi4xUZAN1doE5Vd25H4Jng==}
-    engines: {node: ^10.13.0 || ^12.13.0 || ^14.15.0 || >=15.0.0}
-
   jest-haste-map@29.7.0:
     resolution: {integrity: sha512-fP8u2pyfqx0K1rGn1R9pyE0/KTn+G7PxktWidOBTqFPLYX0b9ksaMFkhK5vrS3DVun09pckLdlx90QthlW7AmA==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
@@ -17593,10 +17557,6 @@ packages:
     resolution: {integrity: sha512-Gv3ZIs/nA48/Zvjrl34bf+oD76JHiGDUxNOVgUjh3j890sblXryjY4rss71fPtD/njchl6PSE2hIhvyWa1eT0A==}
     engines: {node: '>= 10.14.2'}
 
-  jest-regex-util@27.5.1:
-    resolution: {integrity: sha512-4bfKq2zie+x16okqDXjXn9ql2B0dScQu+vcwe4TvFVhkVyuWLqpZrZtXxLLWoXYgn0E87I6r6GRYHF7wFZBUvg==}
-    engines: {node: ^10.13.0 || ^12.13.0 || ^14.15.0 || >=15.0.0}
-
   jest-regex-util@29.6.3:
     resolution: {integrity: sha512-KJJBsRCyyLNWCNBOvZyRDnAIfUiRJ8v+hOBQYGn8gDyF3UegwiP4gwRR3/SDa42g1YbVycTidUF3rKjyLFDWbg==}
     engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
@@ -17638,10 +17598,6 @@ packages:
     resolution: {integrity: sha512-S5wqyz0DXnNJPd/xfIzZ5Xnp1HrJWBczg8mMfMpN78OJ5eDxXyf+Ygld9wX1DnUWbIbhM1YDY95NjR4CBXkb2g==}
     engines: {node: '>= 10.14.2'}
 
-  jest-serializer@27.5.1:
-    resolution: {integrity: sha512-jZCyo6iIxO1aqUxpuBlwTDMkzOAJS4a3eYz3YzgxxVQFwLeSA7Jfq5cbqCY+JLvTDrWirgusI/0KwxKMgrdf7w==}
-    engines: {node: ^10.13.0 || ^12.13.0 || ^14.15.0 || >=15.0.0}
-
   jest-snapshot@26.6.2:
     resolution: {integrity: sha512-OLhxz05EzUtsAmOMzuupt1lHYXCNib0ECyuZ/PZOx9TrZcC8vL0x+DUG3TL+GLX3yHG45e6YGjIm0XwDc3q3og==}
     engines: {node: '>= 10.14.2'}
@@ -17653,10 +17609,6 @@ packages:
   jest-util@26.6.2:
     resolution: {integrity: sha512-MDW0fKfsn0OI7MS7Euz6h8HNDXVQ0gaM9uW6RjfDmd1DAFcaxX9OqIakHIqhbnmF08Cf2DLDG+ulq8YQQ0Lp0Q==}
     engines: {node: '>= 10.14.2'}
-
-  jest-util@27.5.1:
-    resolution: {integrity: sha512-Kv2o/8jNvX1MQ0KGtw480E/w4fBCDOnH6+6DmeKi6LZUIlKA5kwY0YNdlzaWTiVgxqAqik11QyxDOKk543aKXw==}
-    engines: {node: ^10.13.0 || ^12.13.0 || ^14.15.0 || >=15.0.0}
 
   jest-util@29.7.0:
     resolution: {integrity: sha512-z6EbKajIpqGKU56y5KBUgy1dt1ihhQJgWzUlZHArA/+X2ad7Cb5iF+AK1EWVL/Bo7Rz9uurpqw6SiBCefUbCGA==}
@@ -26579,26 +26531,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@jest/transform@27.5.1':
-    dependencies:
-      '@babel/core': 7.25.7
-      '@jest/types': 27.5.1
-      babel-plugin-istanbul: 6.1.1
-      chalk: 4.1.2
-      convert-source-map: 1.9.0
-      fast-json-stable-stringify: 2.1.0
-      graceful-fs: 4.2.11
-      jest-haste-map: 27.5.1
-      jest-regex-util: 27.5.1
-      jest-util: 27.5.1
-      micromatch: 4.0.8
-      pirates: 4.0.7
-      slash: 3.0.0
-      source-map: 0.6.1
-      write-file-atomic: 3.0.3
-    transitivePeerDependencies:
-      - supports-color
-
   '@jest/transform@29.7.0':
     dependencies:
       '@babel/core': 7.25.7
@@ -26625,14 +26557,6 @@ snapshots:
       '@types/istanbul-reports': 3.0.4
       '@types/node': 24.12.2
       '@types/yargs': 15.0.20
-      chalk: 4.1.2
-
-  '@jest/types@27.5.1':
-    dependencies:
-      '@types/istanbul-lib-coverage': 2.0.6
-      '@types/istanbul-reports': 3.0.4
-      '@types/node': 24.12.2
-      '@types/yargs': 16.0.11
       chalk: 4.1.2
 
   '@jest/types@29.6.3':
@@ -31906,10 +31830,6 @@ snapshots:
     dependencies:
       '@types/yargs-parser': 21.0.3
 
-  '@types/yargs@16.0.11':
-    dependencies:
-      '@types/yargs-parser': 21.0.3
-
   '@types/yargs@17.0.35':
     dependencies:
       '@types/yargs-parser': 21.0.3
@@ -35934,7 +35854,7 @@ snapshots:
       jest-matcher-utils: 29.7.0
       jest-mock: 29.7.0
 
-  '@wordpress/jest-console@8.44.0(jest@29.7.0(@types/node@24.12.2)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)))':
+  '@wordpress/jest-console@8.44.0(jest@29.7.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)))':
     dependencies:
       jest: 29.7.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-matcher-utils: 29.7.0
@@ -35949,7 +35869,16 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@wordpress/jest-preset-default@12.22.0(@babel/core@7.25.7)(jest@29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)))':
+  '@wordpress/jest-preset-default@12.22.0(@babel/core@7.25.7)(jest@29.7.0(@types/node@24.12.2)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)))':
+    dependencies:
+      '@babel/core': 7.25.7
+      '@wordpress/jest-console': 8.44.0(jest@29.7.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)))
+      babel-jest: 29.7.0(@babel/core@7.25.7)
+      jest: 29.7.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
+    transitivePeerDependencies:
+      - supports-color
+
+  '@wordpress/jest-preset-default@12.43.1-next.v.202604091042.0(@babel/core@7.25.7)(jest@29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)))':
     dependencies:
       '@babel/core': 7.25.7
       '@wordpress/jest-console': 8.44.0(jest@29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)))
@@ -35958,28 +35887,10 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@wordpress/jest-preset-default@12.22.0(@babel/core@7.25.7)(jest@29.7.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)))':
-    dependencies:
-      '@babel/core': 7.25.7
-      '@wordpress/jest-console': 8.44.0(jest@29.7.0(@types/node@24.12.2)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)))
-      babel-jest: 29.7.0(@babel/core@7.25.7)
-      jest: 29.7.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
-    transitivePeerDependencies:
-      - supports-color
-
-  '@wordpress/jest-preset-default@12.22.0(@babel/core@7.25.7)(jest@29.7.0(@types/node@24.12.2)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)))':
-    dependencies:
-      '@babel/core': 7.25.7
-      '@wordpress/jest-console': 8.44.0(jest@29.7.0(@types/node@24.12.2)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)))
-      babel-jest: 29.7.0(@babel/core@7.25.7)
-      jest: 29.7.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
-    transitivePeerDependencies:
-      - supports-color
-
   '@wordpress/jest-preset-default@12.44.0(@babel/core@7.25.7)(jest@29.7.0(@types/node@24.12.2)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)))':
     dependencies:
       '@babel/core': 7.25.7
-      '@wordpress/jest-console': 8.44.0(jest@29.7.0(@types/node@24.12.2)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)))
+      '@wordpress/jest-console': 8.44.0(jest@29.7.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)))
       babel-jest: 29.7.0(@babel/core@7.25.7)
       jest: 29.7.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
     transitivePeerDependencies:
@@ -35997,20 +35908,6 @@ snapshots:
       - '@babel/core'
       - react
       - react-dom
-      - supports-color
-
-  '@wordpress/jest-preset-default@8.5.2(@babel/core@7.25.7)(jest@29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
-    dependencies:
-      '@babel/core': 7.25.7
-      '@wojtekmaj/enzyme-adapter-react-17': 0.6.7(enzyme@3.11.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@wordpress/jest-console': 5.4.0(jest@29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)))
-      babel-jest: 27.5.1(@babel/core@7.25.7)
-      enzyme: 3.11.0
-      enzyme-to-json: 3.6.2(enzyme@3.11.0)
-      jest: 29.5.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
-      react: 18.3.1
-      react-dom: 18.3.1(react@18.3.1)
-    transitivePeerDependencies:
       - supports-color
 
   '@wordpress/keyboard-shortcuts@4.35.0(react@18.3.1)':
@@ -36454,11 +36351,19 @@ snapshots:
       autoprefixer: 10.5.0(postcss@8.4.49)
       postcss: 8.4.49
 
-  '@wordpress/postcss-plugins-preset@5.19.1(postcss@8.5.9)':
+  '@wordpress/postcss-plugins-preset@5.43.1-next.v.202604091042.0(postcss@8.4.49)':
     dependencies:
-      '@wordpress/base-styles': 5.19.1
+      '@wordpress/base-styles': 6.20.0
+      autoprefixer: 10.5.0(postcss@8.4.49)
+      postcss: 8.4.49
+      postcss-import: 16.1.1(postcss@8.4.49)
+
+  '@wordpress/postcss-plugins-preset@5.43.1-next.v.202604091042.0(postcss@8.5.9)':
+    dependencies:
+      '@wordpress/base-styles': 6.20.0
       autoprefixer: 10.5.0(postcss@8.5.9)
       postcss: 8.5.9
+      postcss-import: 16.1.1(postcss@8.5.9)
 
   '@wordpress/postcss-plugins-preset@5.44.0(postcss@8.4.49)':
     dependencies:
@@ -37013,7 +36918,7 @@ snapshots:
       '@wordpress/dependency-extraction-webpack-plugin': 6.44.0(webpack@5.97.1)
       '@wordpress/e2e-test-utils-playwright': 1.44.0(@playwright/test@1.59.1)(@types/node@24.12.2)
       '@wordpress/eslint-plugin': 22.22.0(@babel/core@7.25.7)(@types/eslint@9.6.1)(eslint-import-resolver-webpack@0.13.2)(eslint@8.57.1)(jest@29.7.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)))(typescript@5.7.3)(wp-prettier@3.0.3)
-      '@wordpress/jest-preset-default': 12.22.0(@babel/core@7.25.7)(jest@29.7.0(@types/node@24.12.2)(babel-plugin-macros@3.1.0)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)))
+      '@wordpress/jest-preset-default': 12.44.0(@babel/core@7.25.7)(jest@29.7.0(@types/node@24.12.2)(node-notifier@8.0.2)(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)))
       '@wordpress/npm-package-json-lint-config': 5.44.0(npm-package-json-lint@6.4.0(typescript@5.7.3))
       '@wordpress/postcss-plugins-preset': 5.44.0(postcss@8.4.49)
       '@wordpress/prettier-config': 4.44.0(wp-prettier@3.0.3)
@@ -38715,20 +38620,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  babel-jest@27.5.1(@babel/core@7.25.7):
-    dependencies:
-      '@babel/core': 7.25.7
-      '@jest/transform': 27.5.1
-      '@jest/types': 27.5.1
-      '@types/babel__core': 7.20.5
-      babel-plugin-istanbul: 6.1.1
-      babel-preset-jest: 27.5.1(@babel/core@7.25.7)
-      chalk: 4.1.2
-      graceful-fs: 4.2.11
-      slash: 3.0.0
-    transitivePeerDependencies:
-      - supports-color
-
   babel-jest@29.5.0(@babel/core@7.25.7):
     dependencies:
       '@babel/core': 7.25.7
@@ -38803,13 +38694,6 @@ snapshots:
       - supports-color
 
   babel-plugin-jest-hoist@26.6.2:
-    dependencies:
-      '@babel/template': 7.28.6
-      '@babel/types': 7.29.0
-      '@types/babel__core': 7.20.5
-      '@types/babel__traverse': 7.28.0
-
-  babel-plugin-jest-hoist@27.5.1:
     dependencies:
       '@babel/template': 7.28.6
       '@babel/types': 7.29.0
@@ -38902,12 +38786,6 @@ snapshots:
     dependencies:
       '@babel/core': 7.25.7
       babel-plugin-jest-hoist: 26.6.2
-      babel-preset-current-node-syntax: 1.2.0(@babel/core@7.25.7)
-
-  babel-preset-jest@27.5.1(@babel/core@7.25.7):
-    dependencies:
-      '@babel/core': 7.25.7
-      babel-plugin-jest-hoist: 27.5.1
       babel-preset-current-node-syntax: 1.2.0(@babel/core@7.25.7)
 
   babel-preset-jest@29.6.3(@babel/core@7.25.7):
@@ -45250,23 +45128,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  jest-haste-map@27.5.1:
-    dependencies:
-      '@jest/types': 27.5.1
-      '@types/graceful-fs': 4.1.9
-      '@types/node': 24.12.2
-      anymatch: 3.1.3
-      fb-watchman: 2.0.2
-      graceful-fs: 4.2.11
-      jest-regex-util: 27.5.1
-      jest-serializer: 27.5.1
-      jest-util: 27.5.1
-      jest-worker: 27.5.1
-      micromatch: 4.0.8
-      walker: 1.0.8
-    optionalDependencies:
-      fsevents: 2.3.3
-
   jest-haste-map@29.7.0:
     dependencies:
       '@jest/types': 29.6.3
@@ -45381,8 +45242,6 @@ snapshots:
       jest-resolve: 29.7.0
 
   jest-regex-util@26.0.0: {}
-
-  jest-regex-util@27.5.1: {}
 
   jest-regex-util@29.6.3: {}
 
@@ -45547,11 +45406,6 @@ snapshots:
       '@types/node': 24.12.2
       graceful-fs: 4.2.11
 
-  jest-serializer@27.5.1:
-    dependencies:
-      '@types/node': 24.12.2
-      graceful-fs: 4.2.11
-
   jest-snapshot@26.6.2:
     dependencies:
       '@babel/types': 7.29.0
@@ -45606,15 +45460,6 @@ snapshots:
       graceful-fs: 4.2.11
       is-ci: 2.0.0
       micromatch: 4.0.8
-
-  jest-util@27.5.1:
-    dependencies:
-      '@jest/types': 27.5.1
-      '@types/node': 24.12.2
-      chalk: 4.1.2
-      ci-info: 3.9.0
-      graceful-fs: 4.2.11
-      picomatch: 2.3.2
 
   jest-util@29.7.0:
     dependencies:
@@ -48575,6 +48420,13 @@ snapshots:
   postcss-import@16.1.1(postcss@8.4.49):
     dependencies:
       postcss: 8.4.49
+      postcss-value-parser: 4.2.0
+      read-cache: 1.0.0
+      resolve: 1.22.12
+
+  postcss-import@16.1.1(postcss@8.5.9):
+    dependencies:
+      postcss: 8.5.9
       postcss-value-parser: 4.2.0
       read-cache: 1.0.0
       resolve: 1.22.12

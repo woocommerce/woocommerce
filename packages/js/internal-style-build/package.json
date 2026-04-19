@@ -40,7 +40,7 @@
 	"dependencies": {
 		"@automattic/color-studio": "^4.0.0",
 		"@wordpress/base-styles": "catalog:wp-min",
-		"@wordpress/postcss-plugins-preset": "catalog:wp-min",
+		"@wordpress/postcss-plugins-preset": "next",
 		"css-loader": "6.11.x",
 		"fork-ts-checker-webpack-plugin": "9.0.x",
 		"json2php": "^0.0.7",
