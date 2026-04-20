@@ -477,6 +477,7 @@ jQuery( function ( $ ) {
 	}
 
 	var selectedAttributes = [];
+	var currentAttributeTermCreationContext = null;
 	$( '.product_attributes .woocommerce_attribute' ).each( function (
 		index,
 		el
@@ -861,6 +862,99 @@ jQuery( function ( $ ) {
 		},
 	} );
 
+	function enable_or_disable_add_attribute_term_modal_submit_button( postedData ) {
+		var createButton = document.getElementById( 'btn-ok' );
+
+		if ( ! createButton ) {
+			return;
+		}
+
+		var termName = postedData && postedData.term ? postedData.term.trim() : '';
+		var hasValue = termName.length > 0;
+
+		createButton.disabled = ! hasValue;
+		createButton.classList.toggle( 'disabled', ! hasValue );
+	}
+
+	$( document.body ).on(
+		'wc_backbone_modal_loaded',
+		function ( event, target ) {
+			if ( 'wc-modal-add-attribute-term' !== target ) {
+				return;
+			}
+
+			var termInput = document.getElementById( 'wc-new-attribute-term' );
+			if ( termInput ) {
+				termInput.focus();
+			}
+		}
+	);
+
+	$( document.body ).on(
+		'wc_backbone_modal_validation',
+		function ( event, target, postedData ) {
+			if ( 'wc-modal-add-attribute-term' !== target ) {
+				return;
+			}
+
+			enable_or_disable_add_attribute_term_modal_submit_button( postedData );
+		}
+	);
+
+	$( document.body ).on(
+		'wc_backbone_modal_response',
+		function ( event, target, postedData ) {
+			if ( 'wc-modal-add-attribute-term' !== target ) {
+				return;
+			}
+
+			if (
+				! currentAttributeTermCreationContext ||
+				! currentAttributeTermCreationContext.$wrapper ||
+				! currentAttributeTermCreationContext.attribute
+			) {
+				$( '.product_attributes' ).unblock();
+				return;
+			}
+
+			var termName =
+				postedData && postedData.term ? postedData.term.trim() : '';
+
+			if ( ! termName ) {
+				$( '.product_attributes' ).unblock();
+				return;
+			}
+
+			var $wrapper = currentAttributeTermCreationContext.$wrapper;
+			var data = {
+				action: 'woocommerce_add_new_attribute',
+				taxonomy: currentAttributeTermCreationContext.attribute,
+				term: termName,
+				security: woocommerce_admin_meta_boxes.add_attribute_nonce,
+			};
+
+			$.post( woocommerce_admin_meta_boxes.ajax_url, data, function ( response ) {
+				if ( response.error ) {
+					// Error.
+					window.alert( response.error );
+				} else if ( response.slug ) {
+					// Success.
+					$wrapper.find( 'select.attribute_values' ).append(
+						'<option value="' +
+							response.term_id +
+							'" selected="selected">' +
+							response.name +
+							'</option>'
+					);
+					$wrapper.find( 'select.attribute_values' ).trigger( 'change' );
+				}
+
+				$( '.product_attributes' ).unblock();
+				currentAttributeTermCreationContext = null;
+			} );
+		}
+	);
+
 	// Add a new attribute (via ajax).
 	$( '.product_attributes' ).on(
 		'click',
@@ -879,47 +973,31 @@ jQuery( function ( $ ) {
 
 			var $wrapper = $( this ).closest( '.woocommerce_attribute' );
 			var attribute = $wrapper.data( 'taxonomy' );
-			var new_attribute_name = window.prompt(
-				woocommerce_admin_meta_boxes.new_attribute_prompt
-			);
 
-			if ( new_attribute_name ) {
-				var data = {
-					action: 'woocommerce_add_new_attribute',
-					taxonomy: attribute,
-					term: new_attribute_name,
-					security: woocommerce_admin_meta_boxes.add_attribute_nonce,
-				};
+			currentAttributeTermCreationContext = {
+				$wrapper,
+				attribute,
+			};
 
-				$.post(
-					woocommerce_admin_meta_boxes.ajax_url,
-					data,
-					function ( response ) {
-						if ( response.error ) {
-							// Error.
-							window.alert( response.error );
-						} else if ( response.slug ) {
-							// Success.
-							$wrapper
-								.find( 'select.attribute_values' )
-								.append(
-									'<option value="' +
-										response.term_id +
-										'" selected="selected">' +
-										response.name +
-										'</option>'
-								);
-							$wrapper
-								.find( 'select.attribute_values' )
-								.trigger( 'change' );
-						}
+			$( this ).WCBackboneModal( {
+				template: 'wc-modal-add-attribute-term',
+			} );
+		}
+	);
 
-						$( '.product_attributes' ).unblock();
-					}
-				);
-			} else {
-				$( '.product_attributes' ).unblock();
+	$( document.body ).on(
+		'wc_backbone_modal_before_remove',
+		function ( event, target, postedData, addButtonCalled ) {
+			if ( 'wc-modal-add-attribute-term' !== target ) {
+				return;
 			}
+
+			if ( addButtonCalled ) {
+				return;
+			}
+
+			$( '.product_attributes' ).unblock();
+			currentAttributeTermCreationContext = null;
 		}
 	);
 

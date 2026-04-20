@@ -62,3 +62,33 @@ $product_attributes = $product_object->get_attributes( 'edit' );
 	</div>
 	<?php do_action( 'woocommerce_product_options_attributes' ); ?>
 </div>
+
+<script type="text/template" id="tmpl-wc-modal-add-attribute-term">
+	<div class="wc-backbone-modal wc-backbone-modal-add-attribute-term">
+		<div class="wc-backbone-modal-content">
+			<section class="wc-backbone-modal-main" role="main">
+				<header class="wc-backbone-modal-header">
+					<h1><?php esc_html_e( 'Create value', 'woocommerce' ); ?></h1>
+					<button class="modal-close modal-close-link dashicons dashicons-no-alt">
+						<span class="screen-reader-text"><?php esc_html_e( 'Close modal panel', 'woocommerce' ); ?></span>
+					</button>
+				</header>
+				<article>
+					<form class="wc-add-attribute-term-fields" action="" method="post">
+						<label for="wc-new-attribute-term"><?php esc_html_e( 'Name', 'woocommerce' ); ?></label>
+						<input id="wc-new-attribute-term" type="text" name="term" value="" placeholder="<?php esc_attr_e( 'Name', 'woocommerce' ); ?>" />
+					</form>
+				</article>
+				<footer>
+					<div class="inner">
+						<div>
+							<button class="modal-close button button-large"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></button>
+							<button id="btn-ok" disabled class="button button-primary button-large disabled"><?php esc_html_e( 'OK', 'woocommerce' ); ?></button>
+						</div>
+					</div>
+				</footer>
+			</section>
+		</div>
+	</div>
+	<div class="wc-backbone-modal-backdrop modal-close"></div>
+</script>
