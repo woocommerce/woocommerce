@@ -78,13 +78,30 @@ class ProductMapper {
 		$edges     = array();
 		$nodes     = array();
 
+		// Narrow $query_info to the per-variation selection so the recursive
+		// from_wc_product() call sees what the client asked for on each
+		// variation (e.g. whether `reviews` was requested). Without this,
+		// populate_common_fields() would fetch reviews for every variation
+		// regardless.
+		$variations_info      = $query_info['...VariableProduct']['variations']
+			?? $query_info['variations']
+			?? null;
+		$variation_query_info = self::connection_node_info( $variations_info );
+
+		// Batch-prime the WP post + meta caches for all variations in one
+		// pair of queries; otherwise each wc_get_product() below would
+		// trigger its own lookups (N+1).
+		if ( ! empty( $child_ids ) ) {
+			_prime_post_caches( $child_ids );
+		}
+
 		foreach ( $child_ids as $child_id ) {
 			$child_product = wc_get_product( $child_id );
 			if ( ! $child_product ) {
 				continue;
 			}
 
-			$variation = self::from_wc_product( $child_product );
+			$variation = self::from_wc_product( $child_product, $variation_query_info );
 
 			$edge         = new Edge();
 			$edge->cursor = base64_encode( (string) $child_id );
@@ -438,6 +455,29 @@ class ProductMapper {
 		$connection->total_count = $total_count;
 
 		return $connection;
+	}
+
+	/**
+	 * Extract the per-node selection from a connection's query_info entry.
+	 *
+	 * Connections can be queried via `nodes { ... }` (the plain form) or
+	 * `edges { node { ... } }` (Relay form); clients may use either or both.
+	 * The per-node selection is what gets forwarded to the recursive
+	 * mapper call so each node is built with the right sub-fields.
+	 *
+	 * @param ?array $connection_info The query_info entry for the connection (e.g. `$query_info['variations']`).
+	 * @return ?array The merged per-node selection, or null when the caller didn't request any node fields.
+	 */
+	private static function connection_node_info( ?array $connection_info ): ?array {
+		if ( null === $connection_info ) {
+			return null;
+		}
+		$nodes = is_array( $connection_info['nodes'] ?? null ) ? $connection_info['nodes'] : array();
+		$edge  = is_array( $connection_info['edges']['node'] ?? null ) ? $connection_info['edges']['node'] : array();
+		if ( empty( $nodes ) && empty( $edge ) ) {
+			return null;
+		}
+		return array_merge( $edge, $nodes );
 	}
 
 	/**
