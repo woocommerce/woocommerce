@@ -56,8 +56,6 @@ class Init {
 		if ( ! $this->is_product_data_view_page() ) {
 			return;
 		}
-
-
 		wp_enqueue_script( 'wc-experimental-products-app' );
 		wp_add_inline_script( 'wc-experimental-products-app', 'window.wc.experimentalProductsApp.initializeProductsDashboard( "woocommerce-products-dashboard" );', 'after' );
 
