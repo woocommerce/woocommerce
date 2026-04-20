@@ -536,9 +536,13 @@ class FilterData {
 		}
 
 		/**
-		 * Maximum number of unique filter-combination results to cache.
+		 * Maximum number of cache entries (not unique filter combos).
 		 *
-		 * When the limit is reached, new combinations are skipped until the
+		 * Each unique query-vars combo can produce up to 5 entries (price,
+		 * stock, rating, attribute, taxonomy), so the effective cap on
+		 * unique combos is roughly max_entries / 5.
+		 *
+		 * When the limit is reached, new entries are skipped until the
 		 * cache is next invalidated.  Set to 0 to disable the cap.
 		 *
 		 * @hook woocommerce_product_filter_cache_max_entries
