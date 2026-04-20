@@ -71,13 +71,16 @@ class QueryInfoExtractor {
 				// siblings of the other selections, matching how GraphQL
 				// evaluates them. Consumers of _query_info (mappers that
 				// check array_key_exists for specific fields) see them the
-				// same as if the fragment had been written inline.
+				// same as if the fragment had been written inline. Use a
+				// recursive merge so overlapping selections are unioned
+				// rather than replaced — `array_merge` would drop the
+				// existing sub-selection under the same field name.
 				$fragment = $fragments[ $selection->name->value ] ?? null;
 				if ( null === $fragment ) {
 					continue;
 				}
 				$spread = self::extract( $fragment->selectionSet, $variable_values, $fragments );
-				$result = array_merge( $result, $spread );
+				$result = self::merge_selections( $result, $spread );
 			}
 		}
 
@@ -112,10 +115,52 @@ class QueryInfoExtractor {
 
 		if ( $has_sub_selection ) {
 			$sub   = self::extract( $field->selectionSet, $variable_values, $fragments );
-			$entry = array_merge( $entry, $sub );
+			$entry = self::merge_selections( $entry, $sub );
 		}
 
 		return $entry;
+	}
+
+	/**
+	 * Recursively merge two selection trees produced by extract()/build_field_entry().
+	 *
+	 * Used wherever selections from different sources are combined under
+	 * the same key (notably: named fragment spreads expanded inline). Matches
+	 * GraphQL's selection-set merge semantics — overlapping fields have their
+	 * sub-selections unioned rather than one replacing the other, which a
+	 * shallow `array_merge` would do.
+	 *
+	 * Rules:
+	 * - Key only in one side: kept verbatim.
+	 * - Both sides arrays: recurse, unioning children.
+	 * - One array, one `true` (leaf): keep the array — it carries the
+	 *   sub-selection detail, and its presence already implies the field
+	 *   was requested.
+	 * - Both `true`: keep `true`.
+	 * - `__args` collisions (same field with different argument values):
+	 *   the second operand wins. Conflicting field args are a GraphQL
+	 *   validation error upstream of us, so this path is defensive.
+	 *
+	 * @param array $a First selection tree.
+	 * @param array $b Second selection tree, merged into $a.
+	 * @return array The merged tree.
+	 */
+	private static function merge_selections( array $a, array $b ): array {
+		foreach ( $b as $key => $value ) {
+			if ( ! array_key_exists( $key, $a ) ) {
+				$a[ $key ] = $value;
+				continue;
+			}
+			$existing = $a[ $key ];
+			if ( is_array( $existing ) && is_array( $value ) ) {
+				$a[ $key ] = self::merge_selections( $existing, $value );
+			} elseif ( is_array( $value ) ) {
+				// One side is `true`, the other is a sub-selection array — keep the array.
+				$a[ $key ] = $value;
+			}
+			// Both true, or existing-array + new-true: keep existing.
+		}
+		return $a;
 	}
 
 	/**
