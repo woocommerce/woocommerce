@@ -72,9 +72,12 @@ class Analytics {
 		add_filter( 'woocommerce_debug_tools', array( $this, 'register_cache_clear_tool' ) );
 		add_filter( 'woocommerce_debug_tools', array( $this, 'register_full_refund_fix_data_tool' ) );
 		add_filter( 'woocommerce_debug_tools', array( $this, 'register_regenerate_order_fulfillment_status_tool' ), 12 );
-		add_action( 'wp_ajax_woocommerce_check_refund_fix_needed', array( $this, 'ajax_check_refund_fix_needed' ) );
-		add_action( 'admin_footer', array( $this, 'output_refund_fix_tool_js' ) );
-		add_action( 'woocommerce_analytics_refund_fix_batch', array( $this, 'process_refund_fix_batch' ) );
+
+		if ( ! OrderUtil::uses_new_full_refund_data() ) {
+			add_action( 'admin_footer', array( $this, 'output_refund_fix_tool_js' ) );
+			add_action( 'wp_ajax_woocommerce_check_refund_fix_needed', array( $this, 'ajax_check_refund_fix_needed' ) );
+			add_action( 'woocommerce_analytics_refund_fix_batch', array( $this, 'process_refund_fix_batch' ) );
+		}
 	}
 
 	/**
@@ -203,28 +206,47 @@ class Analytics {
 	 * @return array Filtered debug tool registrations.
 	 */
 	public function register_full_refund_fix_data_tool( $debug_tools ) {
+		$desc = __( 'This tool will fix the full refund data used in WooCommerce Analytics and re-import all the refunded historical data.', 'woocommerce' );
+
+		$disabled = false;
+		if ( OrderUtil::uses_new_full_refund_data() || ( isset( $_GET['wc_refund_fix_action'] ) && 'remove' === sanitize_key( $_GET['wc_refund_fix_action'] ) ) ) {
+			$disabled = true;
+			$desc .= '<br />' . sprintf(
+				'<strong class="red">%1$s</strong> %2$s',
+				__( 'Note:', 'woocommerce' ),
+				__( 'Refunds have already been fixed. This tool is not applicable to your store.', 'woocommerce' )
+			);
+		}
+
 		$debug_tools[ self::FULL_REFUND_FIX_DATA_TOOL_ID ] = array(
 			'name'     => __( 'Fix analytics full refund data', 'woocommerce' ),
 			'button'   => __( 'Fix', 'woocommerce' ),
-			'desc'     => __( 'This tool will fix the full refund data used in WooCommerce Analytics and re-import all the refunded historical data.', 'woocommerce' ),
+			'desc'     => $desc,
 			'callback' => array( $this, 'run_full_refund_fix_data_tool' ),
+			'disabled' => $disabled,
 		);
 
 		return $debug_tools;
 	}
 
 	/**
-	 * "Fix" full refund data by scheduling batched re-imports of all affected refund orders.
+	 * Handles the Fix button submission for the full refund fix tool.
 	 *
-	 * Clears the old-data flag immediately so that new refunds are handled correctly
-	 * right away, then schedules the first batch job which will process up to 1,000
-	 * orders at a time via Action Scheduler.
+	 * When the "Remove tool" action is requested (i.e. the Check confirmed no affected
+	 * orders), deletes the old-data flag so the tool no longer appears. Otherwise
+	 * schedules the first batch job to re-import all affected refund orders.
 	 *
 	 * @since 10.8.0
 	 *
 	 * @return string Success message.
 	 */
 	public function run_full_refund_fix_data_tool() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verified by WooCommerce tools framework.
+		if ( isset( $_GET['wc_refund_fix_action'] ) && 'remove' === sanitize_key( $_GET['wc_refund_fix_action'] ) ) {
+			delete_option( 'woocommerce_analytics_uses_old_full_refund_data' );
+			return __( 'Tool removed. No affected orders were found.', 'woocommerce' );
+		}
+
 		WC()->queue()->schedule_single(
 			time(),
 			'woocommerce_analytics_refund_fix_batch',
@@ -269,7 +291,6 @@ class Analytics {
 			)
 		);
 
-		delete_option( 'woocommerce_analytics_uses_old_full_refund_data' );
 		if ( ! $refunded_orders ) {
 			return;
 		}
@@ -369,16 +390,20 @@ class Analytics {
 		if ( ! isset( $_GET['page'], $_GET['tab'] ) || 'wc-status' !== $_GET['page'] || 'tools' !== $_GET['tab'] ) {
 			return;
 		}
+		if ( isset( $_GET['wc_refund_fix_action'] ) && 'remove' === sanitize_key( $_GET['wc_refund_fix_action'] ) ) {
+			return;
+		}
 
-		$nonce           = wp_create_nonce( 'woocommerce_refund_fix_check' );
-		$ajax_url        = admin_url( 'admin-ajax.php' );
-		$tool_class      = self::FULL_REFUND_FIX_DATA_TOOL_ID;
-		$label_check     = __( 'Check', 'woocommerce' );
-		$label_working   = __( 'Checking\u2026', 'woocommerce' );
-		$msg_needs_fix   = __( 'Your store has orders that need fixing.', 'woocommerce' );
-		$msg_no_fix      = __( 'No affected orders found.', 'woocommerce' );
-		$msg_in_progress = __( 'A fix is already in progress, please check back later.', 'woocommerce' );
-		$msg_error       = __( 'Check failed, please try again.', 'woocommerce' );
+		$tool_class        = self::FULL_REFUND_FIX_DATA_TOOL_ID;
+		$nonce             = wp_create_nonce( 'woocommerce_refund_fix_check' );
+		$ajax_url          = admin_url( 'admin-ajax.php' );
+		$label_check       = __( 'Check', 'woocommerce' );
+		$label_working     = __( 'Checking\u2026', 'woocommerce' );
+		$msg_needs_fix     = __( 'Your store has orders that need fixing.', 'woocommerce' );
+		$msg_no_fix        = __( 'No affected orders found.', 'woocommerce' );
+		$label_remove_tool = __( 'Remove tool', 'woocommerce' );
+		$msg_in_progress   = __( 'A fix is already in progress, please check back later.', 'woocommerce' );
+		$msg_error         = __( 'Check failed, please try again.', 'woocommerce' );
 		?>
 		<script type="text/javascript">
 		( function() {
@@ -419,13 +444,30 @@ class Analytics {
 							if ( json.data.fix_in_progress ) {
 								statusSpan.textContent = <?php echo wp_json_encode( $msg_in_progress ); ?>;
 								statusSpan.style.color = '#1d2327';
-							} else {
-								statusSpan.textContent = json.data.needs_fix
-									? <?php echo wp_json_encode( $msg_needs_fix ); ?>
-									: <?php echo wp_json_encode( $msg_no_fix ); ?>;
-								statusSpan.style.color = json.data.needs_fix ? '#d63638' : '#1d2327';
-								if ( json.data.needs_fix && fixBtn ) {
+							} else if ( json.data.needs_fix ) {
+								statusSpan.textContent = <?php echo wp_json_encode( $msg_needs_fix ); ?>;
+								statusSpan.style.color = '#d63638';
+								if ( fixBtn ) {
+									fixBtn.value = originalFixLabel;
 									fixBtn.disabled = false;
+								}
+								var existingFlag = toolForm ? toolForm.querySelector( 'input[name="wc_refund_fix_action"]' ) : null;
+								if ( existingFlag ) {
+									existingFlag.parentNode.removeChild( existingFlag );
+								}
+							} else {
+								statusSpan.textContent = <?php echo wp_json_encode( $msg_no_fix ); ?>;
+								statusSpan.style.color = '#1d2327';
+								if ( fixBtn ) {
+									fixBtn.value = <?php echo wp_json_encode( $label_remove_tool ); ?>;
+									fixBtn.disabled = false;
+								}
+								if ( toolForm && ! toolForm.querySelector( 'input[name="wc_refund_fix_action"]' ) ) {
+									var flagInput = document.createElement( 'input' );
+									flagInput.type = 'hidden';
+									flagInput.name = 'wc_refund_fix_action';
+									flagInput.value = 'remove';
+									toolForm.appendChild( flagInput );
 								}
 							}
 						} else {
@@ -442,6 +484,9 @@ class Analytics {
 			} );
 
 			var fixBtn = actionCell.querySelector( 'input[type=submit]' );
+			var originalFixLabel = fixBtn ? fixBtn.value : '';
+			var toolForm = document.getElementById( 'form_<?php echo esc_js( $tool_class ); ?>' );
+
 			if ( fixBtn ) {
 				fixBtn.disabled = true;
 				actionCell.insertBefore( checkBtn, fixBtn );
