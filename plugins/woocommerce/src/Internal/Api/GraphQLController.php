@@ -282,15 +282,18 @@ class GraphQLController {
 	 *
 	 * Introspection is permitted if either condition holds:
 	 * - The request is in debug mode ({@see self::is_debug_mode()}).
-	 * - The caller is an authenticated user.
+	 * - The caller has the `manage_woocommerce` capability.
 	 *
-	 * This keeps the schema hidden from anonymous callers in production while
-	 * still allowing admin tooling (e.g. GraphiQL-like explorers) to query it.
+	 * Gating on capability rather than mere authentication keeps the full
+	 * schema (including admin-only mutations) hidden from low-privilege
+	 * roles such as `customer`, which every storefront account is assigned
+	 * at checkout — while still allowing admin tooling (e.g. GraphiQL-like
+	 * explorers) to query it.
 	 *
 	 * @param \WP_REST_Request $request The REST request.
 	 */
 	private function is_introspection_allowed( \WP_REST_Request $request ): bool {
-		return $this->is_debug_mode( $request ) || is_user_logged_in();
+		return $this->is_debug_mode( $request ) || current_user_can( 'manage_woocommerce' );
 	}
 
 	/**
