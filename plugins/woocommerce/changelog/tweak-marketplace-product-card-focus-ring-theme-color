@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Align the Marketplace product card focus ring with the admin theme color so it adapts to the merchant's color scheme instead of staying on a hardcoded blue.
