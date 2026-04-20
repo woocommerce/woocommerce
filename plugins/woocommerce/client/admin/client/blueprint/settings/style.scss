@@ -194,6 +194,11 @@
 			text-wrap: auto;
 		}
 	}
+
+	.components-notice.is-error {
+		background: #fcf0f0;
+		border-left-color: #cc1818;
+	}
 }
 
 // Show the notice at the bottom right of the screen
