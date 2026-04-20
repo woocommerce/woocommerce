@@ -188,12 +188,14 @@ class GraphQLController {
 		);
 
 		// Install an error formatter that guarantees every error carries an
-		// `extensions.code`. Without this, webonyx-produced validation and
-		// execution errors would arrive uncoded and get_error_status() would
-		// have no way to distinguish them from genuine server errors, so they
-		// would all default to HTTP 500. We infer the code from webonyx's
-		// own ClientAware signal: client-safe errors become BAD_USER_INPUT
-		// (mapped to 400), the rest become INTERNAL_ERROR (mapped to 500).
+		// `extensions.code`. Our resolvers route everything through
+		// Utils::execute_command / Utils::authorize_command, which already
+		// translate domain exceptions (ApiException, InvalidArgumentException,
+		// generic Throwable) into coded GraphQL errors at the throw site.
+		// What reaches us uncoded here is webonyx-native validation and
+		// execution output, so we infer from webonyx's ClientAware signal:
+		// client-safe errors become BAD_USER_INPUT (400), the rest become
+		// INTERNAL_ERROR (500).
 		//
 		// In debug mode the same formatter also walks the previous-exception
 		// chain so wrapped errors (e.g. a \ValueError caught by a resolver and
@@ -205,8 +207,8 @@ class GraphQLController {
 				$formatted = \GraphQL\Error\FormattedError::createFromException( $error );
 
 				if ( ! isset( $formatted['extensions']['code'] ) ) {
-					$client_safe                       = $error instanceof \GraphQL\Error\ClientAware && $error->isClientSafe();
-					$formatted['extensions']['code']   = $client_safe ? 'BAD_USER_INPUT' : 'INTERNAL_ERROR';
+					$client_safe                     = $error instanceof \GraphQL\Error\ClientAware && $error->isClientSafe();
+					$formatted['extensions']['code'] = $client_safe ? 'BAD_USER_INPUT' : 'INTERNAL_ERROR';
 				}
 
 				if ( $debug_mode ) {
@@ -236,11 +238,13 @@ class GraphQLController {
 			$output['extensions']['debug']['depth']      = $this->compute_query_depth( $source, $operation_name );
 		}
 
-		// 9. Determine HTTP status code.
-		$status = 200;
-		if ( isset( $output['errors'] ) && ! isset( $output['data'] ) ) {
-			$status = $this->get_error_status( $output['errors'] );
-		}
+		// 9. Determine HTTP status code. GraphQL emits `data: { field: null }`
+		// for nullable root fields even when the resolver errored, so gating
+		// the status override on `data` being absent would leave nearly every
+		// error response on HTTP 200. Always derive the status from the
+		// errors array when one is present — clients that need "200 with
+		// partial data" semantics can still read the `errors` array.
+		$status = isset( $output['errors'] ) ? $this->get_error_status( $output['errors'] ) : 200;
 
 		return new \WP_REST_Response( $output, $status );
 	}

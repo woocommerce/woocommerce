@@ -36,9 +36,12 @@ class GetProduct {
 		}
 		$execute_args['_query_info'] = QueryInfoExtractor::extract_from_info( $info, $args );
 
-		if ( ! $command->authorize(
-			id: $execute_args['id'],
-			_preauthorized: current_user_can( 'read_product' ),
+		if ( ! Utils::authorize_command(
+			$command,
+			array(
+				'id'             => $execute_args['id'],
+				'_preauthorized' => current_user_can( 'read_product' ),
+			)
 		) ) {
 			throw new \GraphQL\Error\Error(
 				'You do not have permission to perform this action.',
