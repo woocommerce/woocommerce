@@ -34,7 +34,6 @@ export default function useLayoutAreas() {
 		postType = 'product',
 		canvas,
 		quickEdit: showQuickEdit,
-		postId,
 	} = params;
 	// Products list.
 	if ( [ 'product' ].includes( postType ) ) {
