@@ -48,8 +48,13 @@ class UpdateProduct {
 			}
 		}
 
-		if ( $input->was_provided( 'status' ) ) {
-			$wc_product->set_status( $input->status?->value );
+		// Nullable enum: only invoke the setter when the client supplied a
+		// non-null value. An explicit null means "ignore this field" here —
+		// WC_Product's set_status doesn't accept null and would fall back
+		// to a default, silently overwriting whatever is already on the
+		// product.
+		if ( $input->was_provided( 'status' ) && null !== $input->status ) {
+			$wc_product->set_status( $input->status->value );
 		}
 
 		if ( $input->was_provided( 'dimensions' ) ) {
