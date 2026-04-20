@@ -6,6 +6,8 @@ namespace Automattic\WooCommerce\Internal\Api;
 
 use GraphQL\Language\AST\ArgumentNode;
 use GraphQL\Language\AST\FieldNode;
+use GraphQL\Language\AST\FragmentDefinitionNode;
+use GraphQL\Language\AST\FragmentSpreadNode;
 use GraphQL\Language\AST\InlineFragmentNode;
 use GraphQL\Language\AST\SelectionSetNode;
 use GraphQL\Type\Definition\ResolveInfo;
@@ -14,13 +16,15 @@ use GraphQL\Type\Definition\ResolveInfo;
  * Extracts a unified query info tree from a GraphQL ResolveInfo.
  *
  * The resulting array captures the full query structure: fields, arguments,
- * sub-selections, and inline fragments.
+ * sub-selections, inline fragments, and named fragment spreads.
  *
  * Structure rules:
  * - Leaf field (no args, no sub-selection) => true
  * - Field with sub-selections => nested associative array
  * - Field arguments => '__args' reserved key
  * - Inline fragments => '...TypeName' prefix key
+ * - Named fragment spreads => expanded inline (merged into the parent as
+ *   siblings of the other selections), matching how GraphQL evaluates them
  * - Top-level query args included via '__args'
  */
 class QueryInfoExtractor {
@@ -32,7 +36,7 @@ class QueryInfoExtractor {
 	 * @return array The unified query info tree.
 	 */
 	public static function extract_from_info( ResolveInfo $info, array $args ): array {
-		$result = self::extract( $info->fieldNodes[0]->selectionSet ?? null, $info->variableValues );
+		$result = self::extract( $info->fieldNodes[0]->selectionSet ?? null, $info->variableValues, $info->fragments );
 		if ( ! empty( $args ) ) {
 			$result['__args'] = $args;
 		}
@@ -42,11 +46,12 @@ class QueryInfoExtractor {
 	/**
 	 * Recursively extract query info from a selection set.
 	 *
-	 * @param ?SelectionSetNode $selection_set    The selection set to process.
-	 * @param array             $variable_values  Variable values for resolving arguments.
+	 * @param ?SelectionSetNode                    $selection_set   The selection set to process.
+	 * @param array                                $variable_values Variable values for resolving arguments.
+	 * @param array<string, FragmentDefinitionNode> $fragments      Named fragment definitions from the document.
 	 * @return array The query info tree for the selection set.
 	 */
-	public static function extract( ?SelectionSetNode $selection_set, array $variable_values ): array {
+	public static function extract( ?SelectionSetNode $selection_set, array $variable_values, array $fragments = array() ): array {
 		if ( null === $selection_set ) {
 			return array();
 		}
@@ -56,11 +61,23 @@ class QueryInfoExtractor {
 		foreach ( $selection_set->selections as $selection ) {
 			if ( $selection instanceof FieldNode ) {
 				$field_name            = $selection->name->value;
-				$result[ $field_name ] = self::build_field_entry( $selection, $variable_values );
+				$result[ $field_name ] = self::build_field_entry( $selection, $variable_values, $fragments );
 			} elseif ( $selection instanceof InlineFragmentNode ) {
 				$type_name      = $selection->typeCondition->name->value;
 				$key            = '...' . $type_name;
-				$result[ $key ] = self::extract( $selection->selectionSet, $variable_values );
+				$result[ $key ] = self::extract( $selection->selectionSet, $variable_values, $fragments );
+			} elseif ( $selection instanceof FragmentSpreadNode ) {
+				// Expand named fragment spreads inline: their fields become
+				// siblings of the other selections, matching how GraphQL
+				// evaluates them. Consumers of _query_info (mappers that
+				// check array_key_exists for specific fields) see them the
+				// same as if the fragment had been written inline.
+				$fragment = $fragments[ $selection->name->value ] ?? null;
+				if ( null === $fragment ) {
+					continue;
+				}
+				$spread = self::extract( $fragment->selectionSet, $variable_values, $fragments );
+				$result = array_merge( $result, $spread );
 			}
 		}
 
@@ -70,11 +87,12 @@ class QueryInfoExtractor {
 	/**
 	 * Build the entry for a single field node.
 	 *
-	 * @param FieldNode $field           The field node.
-	 * @param array     $variable_values Variable values for resolving arguments.
+	 * @param FieldNode                             $field           The field node.
+	 * @param array                                 $variable_values Variable values for resolving arguments.
+	 * @param array<string, FragmentDefinitionNode> $fragments       Named fragment definitions from the document.
 	 * @return array|bool True for leaf fields, associative array otherwise.
 	 */
-	private static function build_field_entry( FieldNode $field, array $variable_values ): array|bool {
+	private static function build_field_entry( FieldNode $field, array $variable_values, array $fragments ): array|bool {
 		$has_args          = ! empty( $field->arguments ) && count( $field->arguments ) > 0;
 		$has_sub_selection = null !== $field->selectionSet;
 
@@ -93,7 +111,7 @@ class QueryInfoExtractor {
 		}
 
 		if ( $has_sub_selection ) {
-			$sub   = self::extract( $field->selectionSet, $variable_values );
+			$sub   = self::extract( $field->selectionSet, $variable_values, $fragments );
 			$entry = array_merge( $entry, $sub );
 		}
 
