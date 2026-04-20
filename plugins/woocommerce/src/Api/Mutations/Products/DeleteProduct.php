@@ -36,8 +36,6 @@ class DeleteProduct {
 			throw new ApiException( 'Product not found.', 'NOT_FOUND', status_code: 404 );
 		}
 
-		$wc_product->delete( $force );
-
-		return $force || 0 === $wc_product->get_id();
+		return (bool) $wc_product->delete( $force );
 	}
 }
