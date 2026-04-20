@@ -2283,7 +2283,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return WC_Order_Refund[]
 	 */
 	public function get_refunds() {
-		$cache_key  = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refunds' . $this->get_id();
+		$cache_key  = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refund_ids' . $this->get_id();
 		$refund_ids = wp_cache_get( $cache_key, $this->cache_group );
 
 		if ( false === $refund_ids ) {

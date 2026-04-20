@@ -705,7 +705,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 
 		$cache_keys_mapping = array();
 		foreach ( $order_ids as $order_id ) {
-			$cache_keys_mapping[ $order_id ] = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refunds' . $order_id;
+			$cache_keys_mapping[ $order_id ] = WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refund_ids' . $order_id;
 		}
 
 		$non_cached_ids = array();
