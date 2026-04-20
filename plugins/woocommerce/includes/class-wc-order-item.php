@@ -219,7 +219,12 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * @param int $value Order ID.
 	 */
 	public function set_order_id( $value ) {
-		$this->set_prop( 'order_id', absint( $value ) );
+		$order_id = absint( $value );
+		$this->set_prop( 'order_id', $order_id );
+
+		if ( null !== $this->order && $this->order->get_id() !== $value ) {
+			$this->order = null;
+		}
 	}
 
 	/**
@@ -232,8 +237,9 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		if ( ! ( $order instanceof \WC_Order ) ) {
 			$this->error( 'order_item_invalid_order', __( 'Invalid order', 'woocommerce' ) );
 		}
-		$this->set_order_id( $order->get_id() );
 		$this->order = $order;
+
+		$this->set_order_id( $order->get_id() );
 	}
 
 	/**

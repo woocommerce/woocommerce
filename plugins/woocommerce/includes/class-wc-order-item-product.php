@@ -60,7 +60,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * Product object: set via set_product or autopopulated in get_product. The property introduced to reduce the
 	 * number of wc_get_product calls when interacting with this class in core and extension workflows.
 	 *
-	 * @var WC_Product|false
+	 * @var null|false|WC_Product
 	 */
 	private $product;
 
@@ -100,7 +100,12 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		if ( $value > 0 && 'product' !== get_post_type( absint( $value ) ) ) {
 			$this->error( 'order_item_product_invalid_product_id', __( 'Invalid product ID', 'woocommerce' ) );
 		}
-		$this->set_prop( 'product_id', absint( $value ) );
+		$product_id = absint( $value );
+		$this->set_prop( 'product_id',$product_id );
+
+		if ( null !== $this->product && $this->product->get_id() !== $product_id ) {
+			$this->product = null;
+		}
 	}
 
 	/**
@@ -117,7 +122,12 @@ class WC_Order_Item_Product extends WC_Order_Item {
 				array( 'variation_id' => $value )
 			);
 		}
-		$this->set_prop( 'variation_id', absint( $value ) );
+		$variation_id = absint( $value );
+		$this->set_prop( 'variation_id', $variation_id );
+
+		if ( null !== $this->product && $this->product->get_id() !== $variation_id ) {
+			$this->product = null;
+		}
 	}
 
 	/**
@@ -261,6 +271,8 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		if ( ! ( $product instanceof \WC_Product ) ) {
 			$this->error( 'order_item_product_invalid_product', __( 'Invalid product', 'woocommerce' ) );
 		}
+		$this->product = $product;
+
 		if ( $product->is_type( ProductType::VARIATION ) ) {
 			$this->set_product_id( $product->get_parent_id() );
 			$this->set_variation_id( $product->get_id() );
@@ -270,7 +282,6 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		}
 		$this->set_name( $product->get_name() );
 		$this->set_tax_class( $product->get_tax_class() );
-		$this->product = $product;
 	}
 
 	/**
@@ -404,6 +415,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 			}
 			$this->product = apply_filters( 'woocommerce_order_item_product', $product, $this );
 		}
+		// TODO: if $this->product is injected, we are bypassing the filters above, needs to be addressed (single run only).
 
 		return $this->product;
 	}
