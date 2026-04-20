@@ -30,11 +30,7 @@ export type Route = {
 
 export default function useLayoutAreas() {
 	const { params = {} } = useLocation();
-	const {
-		postType = 'product',
-		canvas,
-		quickEdit: showQuickEdit,
-	} = params;
+	const { postType = 'product', canvas, quickEdit: showQuickEdit } = params;
 	// Products list.
 	if ( [ 'product' ].includes( postType ) ) {
 		return {
