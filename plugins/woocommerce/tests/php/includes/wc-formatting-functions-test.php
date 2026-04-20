@@ -95,13 +95,13 @@ class WC_Formatting_Functions_Test extends \WC_Unit_Test_Case {
 	 */
 	public function data_provider_wc_format_option_price_separators(): array {
 		return array(
-			'comma separator'     => array( ',', ',', false ),
-			'period separator'    => array( '.', '.', false ),
-			'space separator'     => array( ',', ' ', false ),
-			'empty separator'     => array( ',', '', false ),
-			'single digit'        => array( ',', '1', true ),
-			'digit with symbol'   => array( ',', '1,', true ),
-			'multi-digit value'   => array( ',', '12', true ),
+			'comma separator'   => array( ',', ',', false ),
+			'period separator'  => array( '.', '.', false ),
+			'space separator'   => array( ',', ' ', false ),
+			'empty separator'   => array( ',', '', false ),
+			'single digit'      => array( ',', '1', true ),
+			'digit with symbol' => array( ',', '1,', true ),
+			'multi-digit value' => array( ',', '12', true ),
 		);
 	}
 
