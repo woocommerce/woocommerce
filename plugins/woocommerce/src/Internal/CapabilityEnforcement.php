@@ -143,6 +143,19 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 			return true;
 		}
 
+		// POS settings group: allow read with view_pos_settings and write with
+		// edit_pos_settings. The default settings check requires manage_woocommerce
+		// which pos_manager lacks by design. The carve-out is scoped to the
+		// point-of-sale settings route so other settings groups stay gated.
+		if ( 'settings' === $post_type && $this->is_pos_settings_route( $route ) ) {
+			if ( 'read' === $context && current_user_can( 'view_pos_settings' ) ) {
+				return true;
+			}
+			if ( in_array( $context, array( 'edit', 'create', 'delete', 'batch' ), true ) && current_user_can( 'edit_pos_settings' ) ) {
+				return true;
+			}
+		}
+
 		if ( 'shop_order_refund' === $post_type && 'create' === $context ) {
 			$this->extract_approval_context_from_rest_request();
 			return $this->user_has_capability( 'refund_shop_orders' );
@@ -653,6 +666,22 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 	 */
 	private function is_customer_route( string $route ): bool {
 		return 1 === preg_match( '#^/wc/v\d+/customers(?:/|$)#', $route );
+	}
+
+	/**
+	 * Check whether the current route targets the point-of-sale settings group.
+	 *
+	 * Matches `/wc/v{n}/settings/point-of-sale` and its sub-routes so POS roles
+	 * with view_pos_settings / edit_pos_settings can access their settings
+	 * without needing the broader manage_woocommerce capability.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @param string $route REST route.
+	 * @return bool
+	 */
+	private function is_pos_settings_route( string $route ): bool {
+		return 1 === preg_match( '#^/wc/v\d+/settings/point-of-sale(?:/|$)#', $route );
 	}
 
 	/**

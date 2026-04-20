@@ -1306,4 +1306,40 @@ class CapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 
 		$this->assertSame( 201, $response->get_status() );
 	}
+
+	/**
+	 * @testdox POS manager GET /wc/v3/settings/point-of-sale returns 200 via view_pos_settings.
+	 */
+	public function test_pos_manager_reads_pos_settings_group(): void {
+		wp_set_current_user( $this->capable_user_id );
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v3/settings/point-of-sale' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+	}
+
+	/**
+	 * @testdox POS cashier GET /wc/v3/settings/point-of-sale returns 403 (lacks view_pos_settings).
+	 */
+	public function test_pos_cashier_cannot_read_pos_settings_group(): void {
+		wp_set_current_user( $this->limited_user_id );
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v3/settings/point-of-sale' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 403, $response->get_status() );
+	}
+
+	/**
+	 * @testdox POS manager cannot read unrelated settings group (e.g. general) without manage_woocommerce.
+	 */
+	public function test_pos_manager_cannot_read_unrelated_settings_group(): void {
+		wp_set_current_user( $this->capable_user_id );
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v3/settings/general' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 403, $response->get_status() );
+	}
 }
