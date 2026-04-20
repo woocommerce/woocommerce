@@ -209,7 +209,7 @@ class Analytics {
 		$desc = __( 'This tool will fix the full refund data used in WooCommerce Analytics and re-import all the refunded historical data.', 'woocommerce' );
 
 		$disabled = false;
-		if ( OrderUtil::uses_new_full_refund_data() || ( isset( $_GET['wc_refund_fix_action'] ) && 'remove' === sanitize_key( $_GET['wc_refund_fix_action'] ) ) ) {
+		if ( OrderUtil::uses_new_full_refund_data() || ( isset( $_GET['wc_refund_fix_action'] ) && 'disable' === sanitize_key( $_GET['wc_refund_fix_action'] ) ) ) {
 			$disabled = true;
 			$desc .= '<br />' . sprintf(
 				'<strong class="red">%1$s</strong> %2$s',
@@ -232,7 +232,7 @@ class Analytics {
 	/**
 	 * Handles the Fix button submission for the full refund fix tool.
 	 *
-	 * When the "Remove tool" action is requested (i.e. the Check confirmed no affected
+	 * When the "Disable tool" action is requested (i.e. the Check confirmed no affected
 	 * orders), deletes the old-data flag so the tool no longer appears. Otherwise
 	 * schedules the first batch job to re-import all affected refund orders.
 	 *
@@ -242,9 +242,9 @@ class Analytics {
 	 */
 	public function run_full_refund_fix_data_tool() {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verified by WooCommerce tools framework.
-		if ( isset( $_GET['wc_refund_fix_action'] ) && 'remove' === sanitize_key( $_GET['wc_refund_fix_action'] ) ) {
+		if ( isset( $_GET['wc_refund_fix_action'] ) && 'disable' === sanitize_key( $_GET['wc_refund_fix_action'] ) ) {
 			delete_option( 'woocommerce_analytics_uses_old_full_refund_data' );
-			return __( 'Tool removed. No affected orders were found.', 'woocommerce' );
+			return __( 'Tool disabled. No affected orders were found.', 'woocommerce' );
 		}
 
 		WC()->queue()->schedule_single(
@@ -390,7 +390,7 @@ class Analytics {
 		if ( ! isset( $_GET['page'], $_GET['tab'] ) || 'wc-status' !== $_GET['page'] || 'tools' !== $_GET['tab'] ) {
 			return;
 		}
-		if ( isset( $_GET['wc_refund_fix_action'] ) && 'remove' === sanitize_key( $_GET['wc_refund_fix_action'] ) ) {
+		if ( isset( $_GET['wc_refund_fix_action'] ) && 'disable' === sanitize_key( $_GET['wc_refund_fix_action'] ) ) {
 			return;
 		}
 
@@ -401,7 +401,7 @@ class Analytics {
 		$label_working     = __( 'Checking\u2026', 'woocommerce' );
 		$msg_needs_fix     = __( 'Your store has orders that need fixing.', 'woocommerce' );
 		$msg_no_fix        = __( 'No affected orders found.', 'woocommerce' );
-		$label_remove_tool = __( 'Remove tool', 'woocommerce' );
+		$label_disable_tool = __( 'Disable tool', 'woocommerce' );
 		$msg_in_progress   = __( 'A fix is already in progress, please check back later.', 'woocommerce' );
 		$msg_error         = __( 'Check failed, please try again.', 'woocommerce' );
 		?>
@@ -459,14 +459,14 @@ class Analytics {
 								statusSpan.textContent = <?php echo wp_json_encode( $msg_no_fix ); ?>;
 								statusSpan.style.color = '#1d2327';
 								if ( fixBtn ) {
-									fixBtn.value = <?php echo wp_json_encode( $label_remove_tool ); ?>;
+									fixBtn.value = <?php echo wp_json_encode( $label_disable_tool ); ?>;
 									fixBtn.disabled = false;
 								}
 								if ( toolForm && ! toolForm.querySelector( 'input[name="wc_refund_fix_action"]' ) ) {
 									var flagInput = document.createElement( 'input' );
 									flagInput.type = 'hidden';
 									flagInput.name = 'wc_refund_fix_action';
-									flagInput.value = 'remove';
+									flagInput.value = 'disable';
 									toolForm.appendChild( flagInput );
 								}
 							}
