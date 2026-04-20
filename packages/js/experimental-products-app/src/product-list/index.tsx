@@ -40,11 +40,7 @@ export type ProductListProps = {
 const PAGE_SIZE = 25;
 const EMPTY_ARRAY: Product[] = [];
 const DEFAULT_LAYOUTS = {
-	table: {
-		layout: {
-			primaryField: 'name',
-		},
-	},
+	table: {} as const,
 };
 const DEFAULT_VIEW: View = {
 	type: 'table',

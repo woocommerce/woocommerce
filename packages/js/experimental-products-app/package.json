@@ -41,7 +41,7 @@
 		"@wordpress/compose": "catalog:wp-min",
 		"@wordpress/core-data": "catalog:wp-min",
 		"@wordpress/data": "catalog:wp-min",
-		"@wordpress/dataviews": "^4.4.1",
+		"@wordpress/dataviews": "14.1.0",
 		"@wordpress/editor": "catalog:wp-min",
 		"@wordpress/element": "catalog:wp-min",
 		"@wordpress/admin-ui": "1.12.0",
