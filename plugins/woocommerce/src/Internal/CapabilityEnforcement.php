@@ -158,7 +158,18 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 
 		if ( 'shop_order_refund' === $post_type && 'create' === $context ) {
 			$this->extract_approval_context_from_rest_request();
-			return $this->user_has_capability( 'refund_shop_orders' );
+			$allowed = $this->user_has_capability( 'refund_shop_orders' );
+			wc_get_logger()->debug(
+				sprintf(
+					'enforce_capabilities shop_order_refund/create: allowed=%s base_permission=%s user=%d approval_error=%s',
+					$allowed ? 'true' : 'false',
+					$permission ? 'true' : 'false',
+					get_current_user_id(),
+					$this->approval_error instanceof WP_Error ? $this->approval_error->get_error_code() : 'none'
+				),
+				array( 'source' => 'woocommerce-pos' )
+			);
+			return $allowed;
 		}
 
 		if ( 'shop_coupon' === $post_type && 'create' === $context ) {
@@ -244,6 +255,17 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 	 */
 	public function enforce_route_access( $response, array $handler, WP_REST_Request $request ) {
 		unset( $handler );
+
+		wc_get_logger()->debug(
+			sprintf(
+				'enforce_route_access: route=%s response_is_wp_error=%s response_code=%s approval_error=%s',
+				$request->get_route(),
+				is_wp_error( $response ) ? 'true' : 'false',
+				is_wp_error( $response ) ? $response->get_error_code() : 'n/a',
+				$this->approval_error instanceof WP_Error ? $this->approval_error->get_error_code() : 'none'
+			),
+			array( 'source' => 'woocommerce-pos' )
+		);
 
 		// If the permission callback already denied the request and we recorded a
 		// specific approval-token failure during the check, surface the structured
@@ -347,15 +369,21 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 	 * @return bool
 	 */
 	public function check_approval_token( bool $has_cap, string $capability, int $user_id ): bool {
+		$logger     = wc_get_logger();
+		$log_source = array( 'source' => 'woocommerce-pos' );
+
 		if ( $has_cap ) {
+			$logger->debug( "check_approval_token: has_cap=true cap={$capability} user={$user_id} - allowing", $log_source );
 			return true;
 		}
 
 		if ( ! in_array( $capability, self::APPROVABLE_CAPABILITIES, true ) ) {
+			$logger->debug( "check_approval_token: cap={$capability} not approvable - denying", $log_source );
 			return false;
 		}
 
 		if ( '' === $this->current_approval_token ) {
+			$logger->debug( "check_approval_token: cap={$capability} no token present - denying", $log_source );
 			return false;
 		}
 
@@ -370,15 +398,34 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 					? 'woocommerce_pos_approval_action_mismatch'
 					: 'woocommerce_pos_approval_invalid_or_expired'
 			);
+			$logger->debug( "check_approval_token: validate_and_consume returned false reason={$reason} cap={$capability} - approval_error set", $log_source );
 			return false;
 		}
 
+		$approved_order_id = (int) ( $approval_data['context']['order_id'] ?? 0 );
+		$logger->debug(
+			sprintf(
+				'check_approval_token: validate_and_consume succeeded. approved_order=%d current_order=%d cap=%s',
+				$approved_order_id,
+				$this->current_order_id,
+				$capability
+			),
+			$log_source
+		);
+
 		// Validate the approval is scoped to the correct order if applicable.
 		// Non-order-scoped approvals (e.g. coupon creation) skip this check.
-		$approved_order_id = (int) ( $approval_data['context']['order_id'] ?? 0 );
 		if ( $approved_order_id > 0 || $this->current_order_id > 0 ) {
 			if ( $approved_order_id !== $this->current_order_id ) {
 				$this->approval_error = $this->build_approval_error( 'woocommerce_pos_approval_order_mismatch' );
+				$logger->debug(
+					sprintf(
+						'check_approval_token: order mismatch approved=%d current=%d',
+						$approved_order_id,
+						$this->current_order_id
+					),
+					$log_source
+				);
 				return false;
 			}
 		}
@@ -390,6 +437,7 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 		$this->current_approval_token = '';
 		$this->approval_error         = null;
 
+		$logger->debug( "check_approval_token: cap={$capability} granted via approval token", $log_source );
 		return true;
 	}
 
