@@ -125,7 +125,7 @@ class OrderItemSchema extends AbstractLineItemSchema {
 				'readonly'    => true,
 			),
 			'can_be_refunded' => array(
-				'description' => __( 'Whether the line item has remaining refundable quantity.', 'woocommerce' ),
+				'description' => __( 'Whether the line item can be refunded. True when the item has a product and its ordered quantity has not been fully refunded.', 'woocommerce' ),
 				'type'        => 'boolean',
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 				'readonly'    => true,

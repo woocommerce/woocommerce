@@ -72,7 +72,7 @@ class OrderFeeSchema extends AbstractLineItemSchema {
 			'taxes'           => $this->get_taxes_schema(),
 			'meta_data'       => $this->get_meta_data_schema(),
 			'can_be_refunded' => array(
-				'description' => __( 'Whether the fee line has remaining refundable amount.', 'woocommerce' ),
+				'description' => __( 'Whether the fee can be refunded, based on remaining refundable amount.', 'woocommerce' ),
 				'type'        => 'boolean',
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 				'readonly'    => true,
