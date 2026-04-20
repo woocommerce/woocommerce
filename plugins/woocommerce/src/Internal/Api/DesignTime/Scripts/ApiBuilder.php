@@ -149,6 +149,14 @@ class ApiBuilder {
 				$ignored = true;
 			}
 
+			// Traits outside Interfaces/ are helper mixins (e.g.
+			// TracksProvidedFields), not concrete types — skip them so they
+			// don't end up emitted as empty-field InputObjectTypes. Traits
+			// in Interfaces/ model GraphQL interfaces and are legitimate.
+			if ( ! $ignored && $ref instanceof \ReflectionClass && $ref->isTrait() && 'interface' !== $kind ) {
+				$ignored = true;
+			}
+
 			$this->classes[ $fqcn ] = array(
 				'class'   => $ref,
 				'kind'    => $kind,
