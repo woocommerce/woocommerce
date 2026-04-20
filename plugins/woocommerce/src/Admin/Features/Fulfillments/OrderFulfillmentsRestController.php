@@ -250,6 +250,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 	 *
 	 * @since 10.1.0
 	 * @since 10.8.0 Date fields in the response are returned as ISO 8601 UTC with 'Z' suffix.
+	 * @since 10.8.0 Meta data from the request is normalized via MetaDataUtil.
 	 *
 	 * @param WP_REST_Request $request The request object.
 	 *
@@ -274,8 +275,11 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 		// Create a new fulfillment.
 		try {
 			$fulfillment = new Fulfillment();
-			$fulfillment->set_props( $request->get_json_params() );
-			$fulfillment->set_meta_data( $request->get_json_params()['meta_data'] );
+			$params      = $request->get_json_params();
+			$fulfillment->set_props( $params );
+			if ( isset( $params['meta_data'] ) ) {
+				MetaDataUtil::update( $params['meta_data'], $fulfillment, 0 );
+			}
 			$fulfillment->set_entity_type( WC_Order::class );
 			$fulfillment->set_entity_id( "$order_id" );
 
