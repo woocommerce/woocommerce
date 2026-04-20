@@ -106,4 +106,50 @@ class POSApprovalServiceTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'discount', $result['action'] );
 		$this->assertSame( $context, $result['context'] );
 	}
+
+	/**
+	 * @testdox validate_and_consume survives a full wp_cache_flush between create and consume.
+	 *
+	 * Guards against managed-host object-cache inconsistency: approvals must
+	 * be recoverable from persistent storage even when the object cache is
+	 * wiped (or partitioned) between the create and consume requests.
+	 */
+	public function test_validate_and_consume_survives_cache_flush(): void {
+		$token = $this->service->create_approval( $this->approver_id, 'refund', array( 'order_id' => 7 ) );
+
+		wp_cache_flush();
+
+		$result = $this->service->validate_and_consume( $token, 'refund' );
+
+		$this->assertIsArray( $result );
+		$this->assertSame( 'refund', $result['action'] );
+	}
+
+	/**
+	 * @testdox validate_and_consume rejects a token whose expires_at has elapsed.
+	 */
+	public function test_expired_token_is_rejected(): void {
+		global $wpdb;
+
+		$token = $this->service->create_approval( $this->approver_id, 'refund', array() );
+
+		// Age the stored record past expiry without waiting.
+		$hash = hash( 'sha256', $token );
+		$key  = '_wc_pos_approval_' . $hash;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$row = $wpdb->get_var( $wpdb->prepare( "SELECT option_value FROM {$wpdb->options} WHERE option_name = %s", $key ) );
+		$this->assertNotNull( $row );
+		$data               = maybe_unserialize( $row );
+		$data['expires_at'] = time() - 10;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->update(
+			$wpdb->options,
+			array( 'option_value' => maybe_serialize( $data ) ),
+			array( 'option_name' => $key )
+		);
+		wp_cache_delete( $key, 'options' );
+
+		$this->assertFalse( $this->service->validate_and_consume( $token, 'refund' ) );
+		$this->assertSame( POSApprovalService::FAILURE_INVALID_OR_EXPIRED, $this->service->get_last_failure_reason() );
+	}
 }

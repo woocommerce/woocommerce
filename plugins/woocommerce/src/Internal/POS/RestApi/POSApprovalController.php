@@ -211,14 +211,7 @@ class POSApprovalController extends RestApiControllerBase implements RegisterHoo
 		$token = $this->approval_service->create_approval( $user_id, $action, $context );
 
 		$logger->info(
-			sprintf(
-				'Approval granted by user %d for action %s. token prefix=%s len=%d sha8=%s',
-				$user_id,
-				$action,
-				substr( $token, 0, 8 ),
-				strlen( $token ),
-				substr( hash( 'sha256', $token ), 0, 8 )
-			),
+			sprintf( 'Approval granted by user %d for action %s.', $user_id, $action ),
 			$log_context
 		);
 

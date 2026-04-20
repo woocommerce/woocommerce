@@ -8,8 +8,12 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Manages single-use approval tokens for POS manager override workflows.
  *
- * Tokens are stored as WordPress transients with a 5-minute TTL.
- * The raw token is returned to the caller; only the SHA-256 hash is persisted.
+ * Tokens are stored as non-autoloaded rows in wp_options with a manual
+ * expiry. This bypasses the WordPress transient API, which on managed
+ * hosts (with wp_using_ext_object_cache() = true) can route reads and
+ * writes to an external object cache that is not guaranteed to be
+ * consistent across PHP workers or survive evictions. The raw token is
+ * returned to the caller; only the SHA-256 hash is persisted.
  *
  * @since 10.8.0
  */
@@ -39,17 +43,37 @@ class POSApprovalService {
 	 * @return string The raw (unhashed) token.
 	 */
 	public function create_approval( int $approver_id, string $action, array $context ): string {
+		global $wpdb;
+
 		$token = wp_generate_password( self::TOKEN_LENGTH, false, false );
 		$hash  = hash( 'sha256', $token );
+		$key   = self::APPROVAL_PREFIX . $hash;
 
 		$data = array(
 			'approver_id' => $approver_id,
 			'action'      => $action,
 			'context'     => $context,
 			'created_at'  => time(),
+			'expires_at'  => time() + self::TTL_SECONDS,
 		);
 
-		set_transient( self::APPROVAL_PREFIX . $hash, $data, self::TTL_SECONDS );
+		// Direct insert into wp_options, autoload=no. Bypasses the transient
+		// API so the value is guaranteed durable and visible to every PHP
+		// worker regardless of object-cache state.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->insert(
+			$wpdb->options,
+			array(
+				'option_name'  => $key,
+				'option_value' => maybe_serialize( $data ),
+				'autoload'     => 'no',
+			),
+			array( '%s', '%s', '%s' )
+		);
+
+		// Invalidate any cached notoptions entry so future get_option lookups
+		// on this key hit the DB rather than the "does not exist" memo.
+		wp_cache_delete( 'notoptions', 'options' );
 
 		return $token;
 	}
@@ -57,7 +81,10 @@ class POSApprovalService {
 	/**
 	 * Validates and consumes a single-use approval token.
 	 *
-	 * The token is deleted immediately after lookup to enforce single-use semantics.
+	 * The token row is deleted immediately after a successful read to
+	 * enforce single-use semantics. Uses a direct SQL SELECT + atomic
+	 * DELETE so the result is consistent across workers irrespective of
+	 * object-cache availability.
 	 *
 	 * @since 10.8.0
 	 * @param string $token  The raw token to validate.
@@ -69,32 +96,43 @@ class POSApprovalService {
 
 		$this->last_failure_reason = '';
 
-		$hash       = hash( 'sha256', $token );
-		$option_key = '_transient_' . self::APPROVAL_PREFIX . $hash;
+		$hash = hash( 'sha256', $token );
+		$key  = self::APPROVAL_PREFIX . $hash;
 
-		// Atomic consume via SQL DELETE with row count check.
-		// This prevents TOCTOU races: only the first concurrent request
-		// that deletes the row gets affected_rows = 1 and proceeds.
-		$data = get_transient( self::APPROVAL_PREFIX . $hash );
-		if ( false === $data ) {
+		// Direct read - bypass wp_cache entirely so a stale/evicted cache
+		// does not produce false-negative lookups on the refund path.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$raw = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT option_value FROM {$wpdb->options} WHERE option_name = %s",
+				$key
+			)
+		);
+
+		if ( null === $raw ) {
 			$this->last_failure_reason = self::FAILURE_INVALID_OR_EXPIRED;
 			return false;
 		}
 
+		$data = maybe_unserialize( $raw );
+		if ( ! is_array( $data ) || empty( $data['expires_at'] ) || (int) $data['expires_at'] < time() ) {
+			// Expired or malformed; clean up and reject.
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$wpdb->delete( $wpdb->options, array( 'option_name' => $key ) );
+			wp_cache_delete( $key, 'options' );
+			$this->last_failure_reason = self::FAILURE_INVALID_OR_EXPIRED;
+			return false;
+		}
+
+		// Atomic consume. Concurrent callers race to delete the row; only
+		// the one that reports rows_deleted = 1 is considered the consumer.
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$rows_deleted = $wpdb->delete(
 			$wpdb->options,
-			array( 'option_name' => $option_key )
+			array( 'option_name' => $key )
 		);
 
-		// Also clean the timeout transient.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$wpdb->delete(
-			$wpdb->options,
-			array( 'option_name' => '_transient_timeout_' . self::APPROVAL_PREFIX . $hash )
-		);
-
-		wp_cache_delete( self::APPROVAL_PREFIX . $hash, 'transient' );
+		wp_cache_delete( $key, 'options' );
 
 		if ( 0 === $rows_deleted ) {
 			$this->last_failure_reason = self::FAILURE_INVALID_OR_EXPIRED;
