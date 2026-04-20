@@ -59,7 +59,14 @@ class GetProduct {
 		// "you don't have permission" error here would tell the caller
 		// that the ID is a product (just not theirs), leaking the
 		// product-ID space vs the rest of the post-ID space.
-		if ( get_current_user_id() !== (int) $post->post_author ) {
+		//
+		// Reject guest users explicitly: get_current_user_id() returns 0
+		// for unauthenticated callers, and products created via WP-CLI,
+		// imports, or programmatic inserts without an author can have
+		// post_author = 0 — a bare `!==` check would mis-grant access to
+		// anonymous callers for those products.
+		$current_user_id = get_current_user_id();
+		if ( 0 === $current_user_id || $current_user_id !== (int) $post->post_author ) {
 			throw new AuthorizationException( 'Product not found.' );
 		}
 
