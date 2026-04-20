@@ -107,13 +107,13 @@ trait Product {
 	public string $raw_product_type;
 
 	/**
-	 * The regular price of the product.
+	 * The regular price of the product. Null when not set.
 	 *
-	 * @var string
+	 * @var ?string
 	 */
-	#[Description( 'The regular price of the product.' )]
+	#[Description( 'The regular price of the product. Null when not set.' )]
 	#[Parameter( name: 'formatted', type: 'bool', default: true, description: 'Whether to apply currency formatting.' )]
-	public string $regular_price;
+	public ?string $regular_price;
 
 	/**
 	 * The sale price of the product.

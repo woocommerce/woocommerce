@@ -183,10 +183,18 @@ class ProductMapper {
 		$product->raw_product_type  = $raw_product_type;
 
 		// Price fields support a "formatted" argument for currency display.
-		$format_regular         = $query_info['regular_price']['__args']['formatted'] ?? true;
-		$product->regular_price = $format_regular
-			? wc_price( (float) $wc_product->get_regular_price() )
-			: $wc_product->get_regular_price();
+		// An empty stored value means "not set" and is surfaced as null —
+		// without this, wc_price( (float) '' ) would render as "$0.00" and
+		// be indistinguishable from a genuinely-zero price.
+		$format_regular = $query_info['regular_price']['__args']['formatted'] ?? true;
+		$raw_regular    = $wc_product->get_regular_price();
+		if ( '' === $raw_regular ) {
+			$product->regular_price = null;
+		} else {
+			$product->regular_price = $format_regular
+				? wc_price( (float) $raw_regular )
+				: $raw_regular;
+		}
 
 		$format_sale = $query_info['sale_price']['__args']['formatted'] ?? true;
 		$raw_sale    = $wc_product->get_sale_price();
