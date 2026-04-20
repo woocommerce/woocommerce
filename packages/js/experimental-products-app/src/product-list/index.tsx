@@ -11,7 +11,6 @@ import {
 	Fragment,
 } from '@wordpress/element';
 import { Product, ProductQuery, productsStore } from '@woocommerce/data';
-import { drawerRight, seen, unseen } from '@wordpress/icons';
 import { privateApis as routerPrivateApis } from '@wordpress/router';
 import { store as coreStore } from '@wordpress/core-data';
 import { __ } from '@wordpress/i18n';
@@ -25,14 +24,8 @@ import { Page } from '@wordpress/admin-ui';
  * Internal dependencies
  */
 import { unlock } from '../lock-unlock';
-import {
-	useDefaultViews,
-	defaultLayouts,
-} from '../sidebar-dataviews/default-views';
-import { LAYOUT_LIST } from '../constants';
 import { productFields } from './fields';
 import { useEditProductAction } from '../dataviews-actions';
-import { useNewNavigation } from '../utilites/new-navigation';
 
 const { usePostActions } = unlock( editorPrivateApis );
 const { useHistory, useLocation } = unlock( routerPrivateApis );
@@ -46,12 +39,18 @@ export type ProductListProps = {
 
 const PAGE_SIZE = 25;
 const EMPTY_ARRAY: Product[] = [];
-
-const getDefaultView = (
-	defaultViews: Array< { slug: string; view: View } >,
-	activeView: string
-) => {
-	return defaultViews.find( ( { slug } ) => slug === activeView )?.view;
+const DEFAULT_LAYOUTS = {
+	table: {
+		layout: {
+			primaryField: 'name',
+		},
+	},
+};
+const DEFAULT_VIEW: View = {
+	type: 'table',
+	page: 1,
+	perPage: PAGE_SIZE,
+	fields: [ 'name', 'sku', 'status', 'date' ],
 };
 
 /**
@@ -64,69 +63,18 @@ const getDefaultView = (
  * @param {string} postType Post type to retrieve default views for.
  * @return {Array} The [ state, setState ] tuple.
  */
-function useView(
-	postType: string
-): [ View, ( view: View ) => void, ( view: View ) => void ] {
+function useView( postType: string ): [ View, ( view: View ) => void ] {
 	const {
-		params: { activeView = 'all', isCustom = 'false', layout },
+		params: { activeView = 'all', isCustom = 'false' },
 	} = useLocation();
-	const history = useHistory();
-
-	const defaultViews = useDefaultViews( { postType } );
-	const [ view, setView ] = useState< View >( () => {
-		const initialView = getDefaultView( defaultViews, activeView ) ?? {
-			type: layout ?? LAYOUT_LIST,
-		};
-
-		const type = layout ?? initialView.type;
-		return {
-			...initialView,
-			type,
-		};
-	} );
-
-	const setViewWithUrlUpdate = useCallback(
-		( newView: View ) => {
-			const { params } = history.getLocationWithParams();
-
-			if ( newView.type === LAYOUT_LIST && ! params?.layout ) {
-				// Skip updating the layout URL param if
-				// it is not present and the newView.type is LAYOUT_LIST.
-			} else if ( newView.type !== params?.layout ) {
-				history.push( {
-					...params,
-					layout: newView.type,
-				} );
-			}
-
-			setView( newView );
-		},
-		[ history ]
-	);
-
-	// When layout URL param changes, update the view type
-	// without affecting any other config.
-	useEffect( () => {
-		setView( ( prevView ) => ( {
-			...prevView,
-			type: layout ?? LAYOUT_LIST,
-		} ) );
-	}, [ layout ] );
+	const [ view, setView ] = useState< View >( DEFAULT_VIEW );
 
 	// When activeView or isCustom URL parameters change, reset the view.
 	useEffect( () => {
-		const newView = getDefaultView( defaultViews, activeView );
+		setView( DEFAULT_VIEW );
+	}, [ activeView, isCustom, postType ] );
 
-		if ( newView ) {
-			const type = layout ?? newView.type;
-			setView( {
-				...newView,
-				type,
-			} );
-		}
-	}, [ activeView, isCustom, layout, defaultViews ] );
-
-	return [ view, setViewWithUrlUpdate, setViewWithUrlUpdate ];
+	return [ view, setView ];
 }
 
 function getItemId( item: Product ) {
@@ -138,12 +86,10 @@ export default function ProductList( {
 	className,
 	hideTitleFromUI = false,
 }: ProductListProps ) {
-	const [ showNewNavigation, setNewNavigation ] = useNewNavigation();
 	const history = useHistory();
 	const location = useLocation();
 	const {
 		postId,
-		quickEdit = false,
 		postType = 'product',
 		isCustom,
 		activeView = 'all',
@@ -239,30 +185,7 @@ export default function ProductList( {
 	);
 
 	const classes = clsx( 'edit-site-page', className );
-	const toggleNavigationButton = (
-		<Button
-			size="compact"
-			icon={ showNewNavigation ? seen : unseen }
-			label={ __( 'Toggle navigation', 'woocommerce' ) }
-			onClick={ () => {
-				setNewNavigation( ! showNewNavigation );
-			} }
-		/>
-	);
-	const toggleDetailsButton = (
-		<Button
-			size="compact"
-			isPressed={ quickEdit }
-			icon={ drawerRight }
-			label={ __( 'Toggle details panel', 'woocommerce' ) }
-			onClick={ () => {
-				history.push( {
-					...location.params,
-					quickEdit: quickEdit ? undefined : true,
-				} );
-			} }
-		/>
-	);
+
 	const pageActions = ! hideTitleFromUI && (
 		<Fragment>
 			{ labels?.add_new_item && canCreateRecord && (
@@ -274,13 +197,6 @@ export default function ProductList( {
 					{ labels.add_new_item }
 				</Button>
 			) }
-			{ toggleDetailsButton }
-		</Fragment>
-	);
-	const dataViewsHeader = hideTitleFromUI && (
-		<Fragment>
-			{ toggleNavigationButton }
-			{ toggleDetailsButton }
 		</Fragment>
 	);
 
@@ -294,11 +210,6 @@ export default function ProductList( {
 			subTitle={ hideTitleFromUI ? undefined : subTitle }
 			actions={ pageActions }
 		>
-			{ ! hideTitleFromUI && (
-				<Page.SidebarToggleFill>
-					{ toggleNavigationButton }
-				</Page.SidebarToggleFill>
-			) }
 			<DataViews
 				key={ activeView + isCustom }
 				paginationInfo={ paginationInfo }
@@ -311,8 +222,7 @@ export default function ProductList( {
 				onChangeSelection={ onChangeSelection }
 				getItemId={ getItemId }
 				selection={ selection }
-				defaultLayouts={ defaultLayouts }
-				header={ dataViewsHeader }
+				defaultLayouts={ DEFAULT_LAYOUTS }
 			/>
 		</Page>
 	);
