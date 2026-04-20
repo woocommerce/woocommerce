@@ -40,11 +40,16 @@ class UpdateCoupon {
 			}
 		}
 
-		if ( $input->was_provided( 'discount_type' ) ) {
-			$wc_coupon->set_discount_type( $input->discount_type?->value );
+		// Nullable enums: only invoke the setter when the client supplied a
+		// non-null value. An explicit null means "ignore this field" here —
+		// WC_Coupon's enum setters don't accept null and would fall back to
+		// their defaults (e.g. 'fixed_cart' for discount_type), silently
+		// overwriting whatever is already on the coupon.
+		if ( $input->was_provided( 'discount_type' ) && null !== $input->discount_type ) {
+			$wc_coupon->set_discount_type( $input->discount_type->value );
 		}
-		if ( $input->was_provided( 'status' ) ) {
-			$wc_coupon->set_status( $input->status?->value );
+		if ( $input->was_provided( 'status' ) && null !== $input->status ) {
+			$wc_coupon->set_status( $input->status->value );
 		}
 
 		$wc_coupon->save();
