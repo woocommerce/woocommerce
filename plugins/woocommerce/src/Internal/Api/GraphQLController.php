@@ -398,6 +398,7 @@ class GraphQLController {
 		'BAD_USER_INPUT'            => 400,
 		'GRAPHQL_PARSE_FAILED'      => 400,
 		'GRAPHQL_VALIDATION_FAILED' => 400,
+		'VALIDATION_ERROR'          => 422,
 		'INTERNAL_ERROR'            => 500,
 	);
 
