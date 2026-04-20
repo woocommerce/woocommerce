@@ -222,7 +222,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		$order_id = absint( $value );
 		$this->set_prop( 'order_id', $order_id );
 
-		if ( null !== $this->order && $this->order->get_id() !== $value ) {
+		if ( null !== $this->order && $this->order->get_id() !== $order_id ) {
 			$this->order = null;
 		}
 	}
