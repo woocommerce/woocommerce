@@ -4,6 +4,7 @@
 import { createElement } from '@wordpress/element';
 import { privateApis as routerPrivateApis } from '@wordpress/router';
 import { UnsavedChangesWarning } from '@wordpress/editor';
+import { privateApis as themePrivateApis } from '@wordpress/theme';
 
 /**
  * Internal dependencies

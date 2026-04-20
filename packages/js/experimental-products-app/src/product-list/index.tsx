@@ -17,16 +17,9 @@ import { store as coreStore } from '@wordpress/core-data';
 import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
 import clsx from 'clsx';
-import {
-	__experimentalHeading as Heading,
-	__experimentalText as Text,
-	__experimentalHStack as HStack,
-	__experimentalVStack as VStack,
-	FlexItem,
-	Button,
-} from '@wordpress/components';
+import { Button } from '@wordpress/components';
 import { privateApis as editorPrivateApis } from '@wordpress/editor';
-import { NavigableRegion } from '@wordpress/admin-ui';
+import { Page } from '@wordpress/admin-ui';
 
 /**
  * Internal dependencies
@@ -246,99 +239,81 @@ export default function ProductList( {
 	);
 
 	const classes = clsx( 'edit-site-page', className );
+	const toggleNavigationButton = (
+		<Button
+			size="compact"
+			icon={ showNewNavigation ? seen : unseen }
+			label={ __( 'Toggle navigation', 'woocommerce' ) }
+			onClick={ () => {
+				setNewNavigation( ! showNewNavigation );
+			} }
+		/>
+	);
+	const toggleDetailsButton = (
+		<Button
+			size="compact"
+			isPressed={ quickEdit }
+			icon={ drawerRight }
+			label={ __( 'Toggle details panel', 'woocommerce' ) }
+			onClick={ () => {
+				history.push( {
+					...location.params,
+					quickEdit: quickEdit ? undefined : true,
+				} );
+			} }
+		/>
+	);
+	const pageActions = ! hideTitleFromUI && (
+		<Fragment>
+			{ labels?.add_new_item && canCreateRecord && (
+				<Button
+					variant="primary"
+					disabled={ true }
+					__next40pxDefaultSize
+				>
+					{ labels.add_new_item }
+				</Button>
+			) }
+			{ toggleDetailsButton }
+		</Fragment>
+	);
+	const dataViewsHeader = hideTitleFromUI && (
+		<Fragment>
+			{ toggleNavigationButton }
+			{ toggleDetailsButton }
+		</Fragment>
+	);
 
 	return (
-		<NavigableRegion
+		<Page
 			className={ classes }
 			ariaLabel={ __( 'Products', 'woocommerce' ) }
+			title={
+				hideTitleFromUI ? undefined : __( 'Products', 'woocommerce' )
+			}
+			subTitle={ hideTitleFromUI ? undefined : subTitle }
+			actions={ pageActions }
 		>
-			<div className="edit-site-page-content">
-				{ ! hideTitleFromUI && (
-					<VStack
-						className="edit-site-page-header"
-						as="header"
-						spacing={ 0 }
-					>
-						<HStack className="edit-site-page-header__page-title">
-							<Heading
-								as="h2"
-								level={ 3 }
-								weight={ 500 }
-								className="edit-site-page-header__title"
-								truncate
-							>
-								{ __( 'Products', 'woocommerce' ) }
-							</Heading>
-							<FlexItem className="edit-site-page-header__actions">
-								{ labels?.add_new_item && canCreateRecord && (
-									<>
-										<Button
-											variant="primary"
-											disabled={ true }
-											__next40pxDefaultSize
-										>
-											{ labels.add_new_item }
-										</Button>
-									</>
-								) }
-							</FlexItem>
-						</HStack>
-						{ subTitle && (
-							<Text
-								variant="muted"
-								as="p"
-								className="edit-site-page-header__sub-title"
-							>
-								{ subTitle }
-							</Text>
-						) }
-					</VStack>
-				) }
-				<DataViews
-					key={ activeView + isCustom }
-					paginationInfo={ paginationInfo }
-					fields={ productFields }
-					data={ records || EMPTY_ARRAY }
-					isLoading={ isLoading }
-					view={ view }
-					actions={ actions }
-					onChangeView={ setView }
-					onChangeSelection={ onChangeSelection }
-					getItemId={ getItemId }
-					selection={ selection }
-					defaultLayouts={ defaultLayouts }
-					header={
-						<>
-							<Button
-								size="compact"
-								icon={ showNewNavigation ? seen : unseen }
-								label={ __(
-									'Toggle navigation',
-									'woocommerce'
-								) }
-								onClick={ () => {
-									setNewNavigation( ! showNewNavigation );
-								} }
-							/>
-							<Button
-								size="compact"
-								isPressed={ quickEdit }
-								icon={ drawerRight }
-								label={ __(
-									'Toggle details panel',
-									'woocommerce'
-								) }
-								onClick={ () => {
-									history.push( {
-										...location.params,
-										quickEdit: quickEdit ? undefined : true,
-									} );
-								} }
-							/>
-						</>
-					}
-				/>
-			</div>
-		</NavigableRegion>
+			{ ! hideTitleFromUI && (
+				<Page.SidebarToggleFill>
+					{ toggleNavigationButton }
+				</Page.SidebarToggleFill>
+			) }
+			<DataViews
+				key={ activeView + isCustom }
+				paginationInfo={ paginationInfo }
+				fields={ productFields }
+				data={ records || EMPTY_ARRAY }
+				isLoading={ isLoading }
+				view={ view }
+				actions={ actions }
+				onChangeView={ setView }
+				onChangeSelection={ onChangeSelection }
+				getItemId={ getItemId }
+				selection={ selection }
+				defaultLayouts={ defaultLayouts }
+				header={ dataViewsHeader }
+			/>
+		</Page>
 	);
 }
