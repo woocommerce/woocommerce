@@ -3504,7 +3504,7 @@ function wc_update_1080_slim_orders_meta_key_index(): void {
  * hydrated WC_Order_Refund objects to arrays of refund IDs. Stale entries
  * in persistent object caches would break the new read path.
  *
- * @since 10.7.1
+ * @since 10.8.0
  *
  * @return void
  */
