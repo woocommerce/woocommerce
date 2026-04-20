@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Remove a background and border-left-color override on the Blueprint settings error notice so it inherits WordPress 7.0's component-notice error palette.
