@@ -43,46 +43,24 @@ class Main {
 	}
 
 	/**
-	 * Register the API or an autoloader guard.
+	 * Register the GraphQL endpoint when the feature is active.
 	 *
-	 * Safe to call on any PHP version — this file contains no PHP 8.0+
-	 * syntax. When the feature is enabled (PHP 8.1+ and flag on), the
-	 * GraphQLController is resolved from the DI container at rest_api_init
-	 * time. When disabled, an autoloader guard is installed so that any
-	 * reference to a class in the public Automattic\WooCommerce\Api\
-	 * namespace gets a clear RuntimeException instead of a parse error.
+	 * When the feature is off this is a no-op. Classes in the public
+	 * Automattic\WooCommerce\Api\ namespace remain autoloadable — extensions
+	 * that want to know whether the feature is active should check
+	 * FeaturesUtil::feature_is_enabled( 'dual_code_graphql_api' ) rather
+	 * than class_exists() on the Api namespace.
 	 */
 	public static function register(): void {
-		if ( self::is_enabled() ) {
-			add_action(
-				'rest_api_init',
-				static function () {
-					wc_get_container()->get( GraphQLController::class )->register();
-				}
-			);
-		} else {
-			self::register_version_guard();
+		if ( ! self::is_enabled() ) {
+			return;
 		}
-	}
 
-	/**
-	 * Register an autoloader guard on the public Code API namespace.
-	 *
-	 * Only installed when the feature is not active. Throws a
-	 * RuntimeException for any class in Automattic\WooCommerce\Api\
-	 * to prevent use of the disabled feature's classes.
-	 */
-	private static function register_version_guard(): void {
-		spl_autoload_register(
-			static function ( string $class ) {
-				if ( 0 === strpos( $class, 'Automattic\\WooCommerce\\Api\\' ) ) {
-					throw new \RuntimeException(
-						esc_html__( 'The WooCommerce Dual Code and GraphQL API feature is not available. Requires PHP 8.1+ and the feature flag to be enabled.', 'woocommerce' )
-					);
-				}
-			},
-			true,
-			true
+		add_action(
+			'rest_api_init',
+			static function () {
+				wc_get_container()->get( GraphQLController::class )->register();
+			}
 		);
 	}
 }
