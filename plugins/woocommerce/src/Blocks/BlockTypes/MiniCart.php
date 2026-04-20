@@ -619,6 +619,8 @@ class MiniCart extends AbstractBlock {
 					class="wc-block-mini-cart__button"
 					<?php echo $button_role; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				>
+					<?php $iapi_display_style = isset( $attributes['displayStyle'] ) ? $attributes['displayStyle'] : 'icon_only'; ?>
+					<?php if ( 'text_only' !== $iapi_display_style ) : ?>
 					<span class="wc-block-mini-cart__quantity-badge">
 						<?php
 							// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
@@ -636,6 +638,10 @@ class MiniCart extends AbstractBlock {
 							</span>
 						<?php endif; ?>
 					</span>
+					<?php endif; ?>
+					<?php if ( 'icon_only' !== $iapi_display_style ) : ?>
+					<span class="wc-block-mini-cart__label"><?php echo esc_html__( 'Cart', 'woocommerce' ); ?></span>
+					<?php endif; ?>
 					<?php if ( $cart_always_shows_price ) : ?>
 						<span data-wp-text="state.formattedSubtotal" class="wc-block-mini-cart__amount" style="<?php echo 'color:' . esc_attr( $price_color ); ?>">
 						</span>
@@ -825,12 +831,22 @@ class MiniCart extends AbstractBlock {
 		$icon                = MiniCartUtils::get_svg_icon( $attributes['miniCartIcon'] ?? '', $icon_color );
 
 		$product_count_visibility = isset( $attributes['productCountVisibility'] ) ? $attributes['productCountVisibility'] : 'greater_than_zero';
+		$display_style            = isset( $attributes['displayStyle'] ) ? $attributes['displayStyle'] : 'icon_only';
 
-		$button_html = '<span class="wc-block-mini-cart__quantity-badge">
-			' . $icon . '
-			' . ( 'never' !== $product_count_visibility ? '<span class="wc-block-mini-cart__badge" style="' . esc_attr( $styles ) . '"></span>' : '' ) . '
-		</span>
-		' . $this->get_cart_price_markup( $attributes );
+		$icon_markup = '';
+		if ( 'text_only' !== $display_style ) {
+			$icon_markup = '<span class="wc-block-mini-cart__quantity-badge">
+				' . $icon . '
+				' . ( 'never' !== $product_count_visibility ? '<span class="wc-block-mini-cart__badge" style="' . esc_attr( $styles ) . '"></span>' : '' ) . '
+			</span>';
+		}
+
+		$label_markup = '';
+		if ( 'icon_only' !== $display_style ) {
+			$label_markup = '<span class="wc-block-mini-cart__label">' . esc_html__( 'Cart', 'woocommerce' ) . '</span>';
+		}
+
+		$button_html = $icon_markup . $label_markup . $this->get_cart_price_markup( $attributes );
 
 		if ( is_cart() || is_checkout() ) {
 			if ( $this->should_not_render_mini_cart( $attributes ) ) {
@@ -845,7 +861,7 @@ class MiniCart extends AbstractBlock {
 
 		$template_part_contents = $this->get_template_part_contents();
 
-		return '<div class="' . esc_attr( $wrapper_classes ) . '" style="' . esc_attr( $wrapper_styles ) . '">
+		return '<div class="' . esc_attr( $wrapper_classes ) . '" style="' . esc_attr( $wrapper_styles ) . '" data-display-style="' . esc_attr( $display_style ) . '">
 			<button class="wc-block-mini-cart__button" aria-label="' . __( 'Cart', 'woocommerce' ) . '">' . $button_html . '</button>
 			<div class="is-loading wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--is-hidden" aria-hidden="true">
 				<div class="wc-block-mini-cart__drawer wc-block-components-drawer">
