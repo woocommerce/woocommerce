@@ -65,6 +65,13 @@ module.exports = {
 			__dirname,
 			'node_modules/.cache/webpack'
 		),
+		buildDependencies: {
+			config: [
+				__filename,
+				path.resolve( __dirname, '../../../pnpm-lock.yaml' ),
+				require.resolve( '@woocommerce/internal-style-build' ),
+			],
+		},
 	},
 	entry: {
 		'build-style': __dirname + '/src/style.scss',
