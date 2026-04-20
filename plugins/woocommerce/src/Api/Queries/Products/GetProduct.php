@@ -30,10 +30,17 @@ class GetProduct {
 	 * Admins can read any product. Non-admin users can only read products
 	 * they authored themselves.
 	 *
+	 * Every inaccessible case throws `AuthorizationException('Product not
+	 * found.')` — whether the ID doesn't exist, points at a non-product
+	 * post type, or points at a product the caller doesn't own. This
+	 * prevents callers from enumerating product IDs vs non-product post
+	 * IDs via the response they get back (which would otherwise be "not
+	 * found" vs "no permission").
+	 *
 	 * @param int  $id              The product ID.
 	 * @param bool $_preauthorized  Whether the declared capability check passed.
 	 * @return bool Whether the current user can read this product.
-	 * @throws AuthorizationException When the product does not exist.
+	 * @throws AuthorizationException When the product is not accessible.
 	 */
 	public function authorize( int $id, bool $_preauthorized ): bool {
 		$post = get_post( $id );
@@ -47,8 +54,16 @@ class GetProduct {
 			return true;
 		}
 
-		// Non-admin users can only read their own products.
-		return get_current_user_id() === (int) $post->post_author;
+		// Non-admin users can only read their own products. Throw the same
+		// "not found" exception rather than returning false — a distinct
+		// "you don't have permission" error here would tell the caller
+		// that the ID is a product (just not theirs), leaking the
+		// product-ID space vs the rest of the post-ID space.
+		if ( get_current_user_id() !== (int) $post->post_author ) {
+			throw new AuthorizationException( 'Product not found.' );
+		}
+
+		return true;
 	}
 
 	/**
