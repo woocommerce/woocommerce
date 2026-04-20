@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Api\Queries\Products;
 
+use Automattic\WooCommerce\Api\ApiException;
 use Automattic\WooCommerce\Api\Attributes\ConnectionOf;
 use Automattic\WooCommerce\Api\Attributes\Description;
 use Automattic\WooCommerce\Api\Attributes\Name;
 use Automattic\WooCommerce\Api\Attributes\RequiredCapability;
 use Automattic\WooCommerce\Api\Attributes\Unroll;
 use Automattic\WooCommerce\Api\Enums\Products\ProductType;
+use Automattic\WooCommerce\Api\Enums\Products\StockStatus;
 use Automattic\WooCommerce\Api\InputTypes\Products\ProductFilterInput;
 use Automattic\WooCommerce\Api\Pagination\Connection;
 use Automattic\WooCommerce\Api\Pagination\Edge;
@@ -70,19 +72,29 @@ class ListProducts {
 			);
 		}
 
-		// Stock status filter via meta.
+		// Stock status filter via meta. `StockStatus::Other` means "stored
+		// _stock_status isn't one of the three standard WooCommerce values"
+		// (typically a plugin-added custom status), so it maps to NOT IN
+		// those three. `default` throws INVALID_ARGUMENT so any future
+		// enum case added without updating this match fails loudly with a
+		// clean 400 instead of a PHP-level UnhandledMatchError → HTTP 500.
 		if ( null !== $filters->stock_status ) {
-			$wc_status = match ( $filters->stock_status->value ) {
-				1 => 'instock',
-				2 => 'outofstock',
-				3 => 'onbackorder',
-			};
-			$query_args['meta_query'] = array(
-				array(
-					'key'   => '_stock_status',
-					'value' => $wc_status,
+			$meta_clause              = match ( $filters->stock_status ) {
+				StockStatus::InStock     => array( 'key' => '_stock_status', 'value' => 'instock' ),
+				StockStatus::OutOfStock  => array( 'key' => '_stock_status', 'value' => 'outofstock' ),
+				StockStatus::OnBackorder => array( 'key' => '_stock_status', 'value' => 'onbackorder' ),
+				StockStatus::Other       => array(
+					'key'     => '_stock_status',
+					'value'   => array( 'instock', 'outofstock', 'onbackorder' ),
+					'compare' => 'NOT IN',
 				),
-			);
+				default                  => throw new ApiException(
+					sprintf( 'Unsupported stock_status filter value: %s.', $filters->stock_status->name ),
+					'INVALID_ARGUMENT',
+					status_code: 400,
+				),
+			};
+			$query_args['meta_query'] = array( $meta_clause );
 		}
 
 		// Search filter.
