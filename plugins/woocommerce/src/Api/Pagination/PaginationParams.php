@@ -67,6 +67,24 @@ class PaginationParams {
 	}
 
 	/**
+	 * Validate pagination limits on a raw args array without constructing a
+	 * full PaginationParams instance.
+	 *
+	 * Intended for call sites that take raw GraphQL args (like nested
+	 * connection resolvers) and forward them to Connection::slice(). The
+	 * constructor already runs the same checks for root queries that build
+	 * a PaginationParams via #[Unroll], so this keeps both paths in sync.
+	 *
+	 * @param array $args Raw args with optional `first` / `last` keys.
+	 *
+	 * @throws \InvalidArgumentException When either limit is negative or above MAX_PAGE_SIZE.
+	 */
+	public static function validate_args( array $args ): void {
+		self::validate_limit( 'first', $args['first'] ?? null );
+		self::validate_limit( 'last', $args['last'] ?? null );
+	}
+
+	/**
 	 * Validate a `first` / `last` argument.
 	 *
 	 * @param string $name  The argument name, for the error message.
