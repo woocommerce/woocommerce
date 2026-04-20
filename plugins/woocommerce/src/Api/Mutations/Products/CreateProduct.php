@@ -54,7 +54,16 @@ class CreateProduct {
 		#[Description( 'Data for the new product.' )]
 		CreateProductInput $input,
 	): object {
-		// Check for duplicate product name.
+		// Best-effort duplicate-name check. There is an inherent TOCTOU race
+		// here: two nearly-simultaneous requests with the same name can both
+		// pass this check and both succeed in creating the product, because
+		// wp_posts.post_title is not a unique column in the schema and WP
+		// offers no portable atomic "reserve name" primitive. Locking via
+		// wp_cache_add() would help only on sites with a persistent object
+		// cache (Redis/Memcached), so we do not rely on it here. If strict
+		// uniqueness is ever required, callers should enforce it at a
+		// higher layer (e.g. a mutex around the REST handler) rather than
+		// assume the API guarantees it.
 		$existing = new \WP_Query(
 			array(
 				'post_type'   => 'product',
