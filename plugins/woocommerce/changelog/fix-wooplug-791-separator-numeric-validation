@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Prevent numeric characters from being saved as thousand or decimal separators in WooCommerce currency settings.
