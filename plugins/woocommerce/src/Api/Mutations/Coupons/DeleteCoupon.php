@@ -35,11 +35,9 @@ class DeleteCoupon {
 			throw new ApiException( 'Coupon not found.', 'NOT_FOUND', status_code: 404 );
 		}
 
-		$wc_coupon->delete( $force );
-
 		$result          = new DeleteCouponResult();
 		$result->id      = $id;
-		$result->deleted = $force || 0 === $wc_coupon->get_id();
+		$result->deleted = (bool) $wc_coupon->delete( $force );
 
 		return $result;
 	}
