@@ -16,7 +16,7 @@ use Automattic\WooCommerce\Api\Pagination\PaginationParams;
 use Automattic\WooCommerce\Api\Types\Coupons\Coupon;
 use Automattic\WooCommerce\Api\Utils\Coupons\CouponMapper;
 
-#[Name( 'Coupons' )]
+#[Name( 'coupons' )]
 #[Description( 'List coupons with cursor-based pagination.' )]
 /**
  * Query to list coupons with cursor-based pagination.

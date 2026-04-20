@@ -22,12 +22,12 @@ class RootMutationType {
 				array(
 					'name'   => 'Mutation',
 					'fields' => fn() => array(
-						'CreateProduct' => CreateProduct::get_field_definition(),
-						'UpdateProduct' => UpdateProduct::get_field_definition(),
-						'DeleteProduct' => DeleteProduct::get_field_definition(),
-						'DeleteCoupon'  => DeleteCoupon::get_field_definition(),
-						'CreateCoupon'  => CreateCoupon::get_field_definition(),
-						'UpdateCoupon'  => UpdateCoupon::get_field_definition(),
+						'createProduct' => CreateProduct::get_field_definition(),
+						'updateProduct' => UpdateProduct::get_field_definition(),
+						'deleteProduct' => DeleteProduct::get_field_definition(),
+						'deleteCoupon'  => DeleteCoupon::get_field_definition(),
+						'createCoupon'  => CreateCoupon::get_field_definition(),
+						'updateCoupon'  => UpdateCoupon::get_field_definition(),
 					),
 				)
 			);

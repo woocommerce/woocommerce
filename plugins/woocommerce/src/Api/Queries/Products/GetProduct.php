@@ -20,7 +20,7 @@ use Automattic\WooCommerce\Api\Utils\Products\ProductMapper;
  * Authorization logic: admins (manage_woocommerce) can read any product,
  * non-admin users can only read their own products.
  */
-#[Name( 'Product' )]
+#[Name( 'product' )]
 #[Description( 'Retrieve a single product by ID.' )]
 #[RequiredCapability( 'read_product' )]
 class GetProduct {

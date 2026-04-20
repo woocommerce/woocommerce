@@ -23,7 +23,7 @@ use Automattic\WooCommerce\Api\Utils\Products\ProductMapper;
  *
  * Demonstrates: #[Unroll] on parameter, enum as direct param, multiple capabilities.
  */
-#[Name( 'Products' )]
+#[Name( 'products' )]
 #[Description( 'List products with cursor-based pagination and optional filtering.' )]
 #[RequiredCapability( 'manage_woocommerce' )]
 #[RequiredCapability( 'edit_products' )]
