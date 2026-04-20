@@ -321,4 +321,17 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 			)
 		);
 	}
+
+	/**
+	 * Get how many of the existing webhooks are configured to use the legacy payload format.
+	 *
+	 * @since      9.0.0
+	 * @deprecated 10.8.0 The Legacy REST API has been removed from WooCommerce core. This always returns 0.
+	 *
+	 * @return int Always 0.
+	 */
+	public function get_legacy_api_webhooks_count() {
+		wc_deprecated_function( __METHOD__, '10.8.0' );
+		return 0;
+	}
 }

@@ -212,7 +212,8 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 
 		$settings = (array) $this->fetch_or_get_system_status_data_for_user( self::$administrator_user )['settings'];
 
-		$this->assertEquals( 16, count( $settings ) );
+		$this->assertEquals( 17, count( $settings ) );
+		$this->assertEquals( WC()->legacy_rest_api_is_available(), $settings['api_enabled'] );
 		$this->assertEquals( get_woocommerce_currency(), $settings['currency'] );
 		$this->assertEquals( $term_response, $settings['taxonomies'] );
 	}
