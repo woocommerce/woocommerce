@@ -1757,15 +1757,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	public function update_product_stock( $product_id_with_stock, $stock_quantity = null, $operation = 'set' ) {
 		global $wpdb;
 
-		// Ensures a row exists to update.
-		add_post_meta( $product_id_with_stock, '_stock', 0, true );
-		// TODO: spawns extra SQL to check uniqueness, 2nd mta cache invalidation in this method; BC: if inserted, trigger 'add_post_meta' (happens once);
-		// INSERT INTO users (name, email)
-		// SELECT * FROM (SELECT 'John', 'john@example.com') AS tmp
-		// WHERE NOT EXISTS (
-		//    SELECT name, email FROM users
-		//    WHERE name = 'John' AND email = 'john@example.com'
-		// ) LIMIT 1;
+		$this->ensure_postmeta_entry_exists( $product_id_with_stock, '_stock', '0' );
 
 		if ( 'set' === $operation ) {
 			$new_stock = wc_stock_amount( $stock_quantity );
@@ -1841,14 +1833,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	public function update_product_sales( $product_id, $quantity = null, $operation = 'set' ) {
 		global $wpdb;
 
-		add_post_meta( $product_id, 'total_sales', 0, true );
-		// TODO: spawns extra SQL to check uniqueness, 2nd mta cache invalidation in this method; BC: if inserted, trigger 'add_post_meta' (happens once);
-		// INSERT INTO users (name, email)
-		// SELECT * FROM (SELECT 'John', 'john@example.com') AS tmp
-		// WHERE NOT EXISTS (
-		//    SELECT name, email FROM users
-		//    WHERE name = 'John' AND email = 'john@example.com'
-		// ) LIMIT 1;
+		$this->ensure_postmeta_entry_exists( $product_id, 'total_sales', '0' );
 
 		// Update stock in DB directly.
 		switch ( $operation ) {
@@ -2563,5 +2548,37 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	protected function use_cogs_lookup_column(): bool {
 		$cogs_controller = wc_get_container()->get( CostOfGoodsSoldController::class );
 		return $cogs_controller->feature_is_enabled() && $cogs_controller->product_meta_lookup_table_cogs_value_columns_exist();
+	}
+
+	/**
+	 * Ensure the postmeta entry is available before executing update or select statements. This method prevents double cache
+	 * invalidation (affecting persistent cache) and eliminates the need for an entry existence SQL call in postmeta APIs.
+	 *
+	 * @param int     $product_id Product ID.
+	 * @param string  $meta_key   Meta key.
+	 * @param string  $default    Default meta_value to insert when the row does not yet exist.
+	 * @return void
+	 */
+	private function ensure_postmeta_entry_exists(int $product_id, string $meta_key, string $default ): void {
+		global $wpdb;
+
+		$inserted = $wpdb->query(
+			$wpdb->prepare(
+				"INSERT INTO {$wpdb->postmeta} ( post_id, meta_key, meta_value )
+				 SELECT %d, %s, %s
+				 WHERE NOT EXISTS (
+				     SELECT 1 FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = %s
+				 )",
+				$product_id,
+				$meta_key,
+				$default,
+				$product_id,
+				$meta_key
+			)
+		);
+		if ( $inserted ) {
+			// To maintain backward compatibility, the original approach will be executed. But only once for performance reasons.
+			add_post_meta( $product_id, $meta_key, $default, true );
+		}
 	}
 }
