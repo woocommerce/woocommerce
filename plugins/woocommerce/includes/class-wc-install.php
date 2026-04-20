@@ -328,7 +328,7 @@ class WC_Install {
 		'10.8.0' => array(
 			'wc_update_1080_migrate_analytics_import_option',
 			'wc_update_1080_slim_orders_meta_key_index',
-			'wc_update_1080_create_pos_roles',
+			'wc_update_1080_rebuild_pos_roles_and_capabilities',
 		),
 	);
 
@@ -2569,10 +2569,49 @@ $stock_notifications_table_schema;
 			}
 		}
 
+		// Strip capabilities that prior releases added but this release no
+		// longer defines. `get_core_capabilities()` only returns the current
+		// set, so without this loop renamed or dropped caps would linger on
+		// administrator and shop_manager after an upgrade or role reset.
+		foreach ( self::get_deprecated_capabilities() as $cap ) {
+			$wp_roles->remove_cap( 'shop_manager', $cap );
+			$wp_roles->remove_cap( 'administrator', $cap );
+		}
+
 		remove_role( 'pos_cashier' );
 		remove_role( 'pos_manager' );
 		remove_role( 'customer' );
 		remove_role( 'shop_manager' );
+	}
+
+	/**
+	 * Capabilities previously added by WooCommerce that current releases no
+	 * longer use. Kept here so role reset and upgrade paths can remove them.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @return string[]
+	 */
+	private static function get_deprecated_capabilities() {
+		return array(
+			// Removed in 10.8.0: no features depend on these yet.
+			'woocommerce_approve_overrides',
+			'woocommerce_apply_discounts',
+			'woocommerce_override_prices',
+			'woocommerce_view_sales_reports',
+			'woocommerce_view_financial_reports',
+			'woocommerce_view_personal_sales',
+			'woocommerce_export_reports',
+			'woocommerce_view_customer_data',
+			'woocommerce_edit_customer_data',
+			'woocommerce_view_audit_logs',
+			'woocommerce_adjust_stock',
+			// Renamed in 10.8.0 to follow WooCommerce verb_noun convention.
+			'woocommerce_pos_access',          // -> view_pos
+			'woocommerce_pos_manage_settings', // -> view_pos_settings
+			'woocommerce_void_orders',         // -> void_shop_orders
+			'woocommerce_refund_orders',       // -> refund_shop_orders
+		);
 	}
 
 	/**
