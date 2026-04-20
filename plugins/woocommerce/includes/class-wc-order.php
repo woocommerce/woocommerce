@@ -2305,9 +2305,9 @@ class WC_Order extends WC_Abstract_Order {
 			$refunds = ! empty( $refund_ids )
 				? wc_get_orders(
 					array(
-						'type'    => 'shop_order_refund',
-						'include' => $refund_ids,
-						'limit'   => -1,
+						'type'     => 'shop_order_refund',
+						'post__in' => $refund_ids,
+						'limit'    => -1,
 					)
 				)
 				: array();
