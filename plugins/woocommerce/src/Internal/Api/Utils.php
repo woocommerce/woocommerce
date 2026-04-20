@@ -136,11 +136,15 @@ class Utils {
 		try {
 			return $operation();
 		} catch ( \Automattic\WooCommerce\Api\ApiException $e ) {
+			// Caller-supplied extensions come first so the canonical
+			// getErrorCode() can't be silently overridden by an extensions
+			// entry keyed 'code'. The invariant "the code on the wire
+			// equals ApiException::getErrorCode()" is worth enforcing.
 			throw new \GraphQL\Error\Error(
 				$e->getMessage(),
 				extensions: array_merge(
-					array( 'code' => $e->getErrorCode() ),
-					$e->getExtensions()
+					$e->getExtensions(),
+					array( 'code' => $e->getErrorCode() )
 				)
 			);
 		} catch ( \InvalidArgumentException $e ) {

@@ -373,11 +373,15 @@ class GraphQLController {
 	 */
 	private function format_exception( \Throwable $e, \WP_REST_Request $request ): array {
 		if ( $e instanceof ApiException ) {
+			// Caller-supplied extensions come first so the canonical
+			// getErrorCode() can't be silently overridden by an extensions
+			// entry keyed 'code'. Mirrors the same invariant enforced by
+			// Utils::translate_exceptions() for the execute/authorize paths.
 			$error = array(
 				'message'    => $e->getMessage(),
 				'extensions' => array_merge(
-					array( 'code' => $e->getErrorCode() ),
-					$e->getExtensions()
+					$e->getExtensions(),
+					array( 'code' => $e->getErrorCode() )
 				),
 			);
 		} elseif ( $e instanceof \InvalidArgumentException ) {
