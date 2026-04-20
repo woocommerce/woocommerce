@@ -1759,6 +1759,13 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		// Ensures a row exists to update.
 		add_post_meta( $product_id_with_stock, '_stock', 0, true );
+		// TODO: spawns extra SQL to check uniqueness, 2nd mta cache invalidation in this method; BC: if inserted, trigger 'add_post_meta' (happens once);
+		// INSERT INTO users (name, email)
+		// SELECT * FROM (SELECT 'John', 'john@example.com') AS tmp
+		// WHERE NOT EXISTS (
+		//    SELECT name, email FROM users
+		//    WHERE name = 'John' AND email = 'john@example.com'
+		// ) LIMIT 1;
 
 		if ( 'set' === $operation ) {
 			$new_stock = wc_stock_amount( $stock_quantity );
@@ -1833,7 +1840,15 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 */
 	public function update_product_sales( $product_id, $quantity = null, $operation = 'set' ) {
 		global $wpdb;
+
 		add_post_meta( $product_id, 'total_sales', 0, true );
+		// TODO: spawns extra SQL to check uniqueness, 2nd mta cache invalidation in this method; BC: if inserted, trigger 'add_post_meta' (happens once);
+		// INSERT INTO users (name, email)
+		// SELECT * FROM (SELECT 'John', 'john@example.com') AS tmp
+		// WHERE NOT EXISTS (
+		//    SELECT name, email FROM users
+		//    WHERE name = 'John' AND email = 'john@example.com'
+		// ) LIMIT 1;
 
 		// Update stock in DB directly.
 		switch ( $operation ) {
