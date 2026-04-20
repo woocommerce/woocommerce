@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Replace hardcoded #2c3338 primary text color with #1e1e1e to align with the WordPress 7.0 admin gray scale.
