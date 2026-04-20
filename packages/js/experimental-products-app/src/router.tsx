@@ -8,7 +8,6 @@ import { privateApis as routerPrivateApis } from '@wordpress/router';
  * Internal dependencies
  */
 import { unlock } from './lock-unlock';
-import ProductEdit from './product-edit';
 import ProductList from './product-list';
 
 const { useLocation } = unlock( routerPrivateApis );
@@ -35,7 +34,6 @@ export default function useLayoutAreas() {
 		postType = 'product',
 		canvas,
 		quickEdit: showQuickEdit,
-		postId,
 	} = params;
 	// Products list.
 	if ( [ 'product' ].includes( postType ) ) {
@@ -45,9 +43,6 @@ export default function useLayoutAreas() {
 				content: <ProductList />,
 				preview: false,
 				mobile: <ProductList postType={ postType } />,
-				edit: showQuickEdit && (
-					<ProductEdit postType={ postType } postId={ postId } />
-				),
 			},
 			widths: {
 				edit: showQuickEdit ? 380 : undefined,

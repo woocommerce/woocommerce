@@ -35,7 +35,6 @@ type LayoutProps = {
 
 export function Layout( { route, showNewNavigation = false }: LayoutProps ) {
 	const [ fullResizer ] = useResizeObserver();
-	const toggleRef = useRef< HTMLAnchorElement >( null );
 	const isMobileViewport = useViewportMatch( 'medium', '<' );
 	const disableMotion = useReducedMotion();
 
