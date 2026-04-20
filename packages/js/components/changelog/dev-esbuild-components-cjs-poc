@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Monorepo: replace tsc with esbuild for the @woocommerce/components CJS transpile step; ~9x faster with no change to published artefacts.

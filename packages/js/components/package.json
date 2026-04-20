@@ -154,6 +154,7 @@
 		"@wordpress/babel-preset-default": "next",
 		"@wordpress/browserslist-config": "next",
 		"css-loader": "6.11.x",
+		"esbuild": "0.18.20",
 		"eslint": "^8.55.0",
 		"jest": "29.5.x",
 		"jest-cli": "29.5.x",
@@ -225,10 +226,10 @@
 			"service": true
 		},
 		"build:project:cjs": {
-			"command": "tsc --project tsconfig-cjs.json --noCheck",
+			"command": "node ./tools/esbuild-cjs.mjs",
 			"clean": "if-file-deleted",
 			"files": [
-				"tsconfig-cjs.json",
+				"tools/esbuild-cjs.mjs",
 				"src/**/*.{js,jsx,ts,tsx}",
 				"typings/**/*.ts"
 			],
@@ -240,7 +241,7 @@
 			]
 		},
 		"watch:build:project:cjs": {
-			"command": "tsc --project tsconfig-cjs.json --watch --noCheck",
+			"command": "node ./tools/esbuild-cjs.mjs --watch",
 			"service": true
 		},
 		"build:project:esm": {
