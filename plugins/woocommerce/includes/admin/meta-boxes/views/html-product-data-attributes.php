@@ -74,7 +74,7 @@ $product_attributes = $product_object->get_attributes( 'edit' );
 					</button>
 				</header>
 				<article>
-					<form class="wc-add-attribute-term-fields" action="" method="post">
+					<form action="" method="post">
 						<label for="wc-modal-add-attribute-term-input"><?php esc_html_e( 'Name', 'woocommerce' ); ?></label>
 						<input id="wc-modal-add-attribute-term-input" type="text" name="term" value="" />
 					</form>

@@ -979,26 +979,23 @@ $font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe U
 	}
 }
 
-.woocommerce-set-price-variations {
-	.woocommerce-usage-modal__wrapper {
-		.woocommerce-usage-modal__message {
-			height: 60px;
-			flex-wrap: wrap;
-			display: flex;
-			> span {
-				padding-bottom: 16px;
-			}
-		}
-		.woocommerce-usage-modal__actions {
-			display: flex;
-			justify-content: flex-end;
-			margin-top: 20px;
-			> button {
-				margin-left: 16px;
-				width: auto;
-				display: unset;
-			}
-		}
+/**
+ * Create attribute term modal
+ */
+ .woocommerce-set-price-variations, // @todo unify class name style
+ .wc-backbone-modal-add-attribute-term {
+	.wc-backbone-modal-content {
+		max-width: 400px;
+		min-width: auto;
+	}
+
+	input[type="text"] {
+		display: block;
+		font-size: 13px;
+		line-height: 16px;
+		margin: 6px 0;
+		padding: 12px;
+		width: 100%;
 	}
 }
 
@@ -2262,6 +2259,8 @@ ul.wc_coupon_list_block {
 }
 
 #woocommerce-order-items .woocommerce_order_items_wrapper, .wc-order-preview-table-wrapper {
+	padding-bottom: 1.5em;
+
 	small.refunded {
 		display: block;
 		color: red;
@@ -3271,7 +3270,13 @@ ul.wc_coupon_list_block {
 
 		td:first-child,
 		th:first-child {
+			padding-left: 2em;
 			text-align: left;
+		}
+
+		td:last-child,
+		th:last-child {
+			padding-right: 2em;
 		}
 
 		th {
@@ -3305,7 +3310,7 @@ ul.wc_coupon_list_block {
 
 	.wc-order-preview-addresses {
 		overflow: hidden;
-		padding-bottom: 1.5em;
+		padding: 0 0.5em 1.5em;
 
 		.wc-order-preview-address,
 		.wc-order-preview-note {
@@ -3338,8 +3343,6 @@ ul.wc_coupon_list_block {
 
 		.button.button-large {
 			margin-left: 10px;
-			padding: 0 10px !important;
-			line-height: 28px;
 			height: auto;
 			display: inline-block;
 		}
@@ -3372,10 +3375,8 @@ ul.wc_coupon_list_block {
 	.wc-action-button {
 		margin: 0 0 0 -1px !important;
 		border: 1px solid #ccc;
-		padding: 0 10px !important;
 		border-radius: 0 !important;
 		float: none;
-		line-height: 28px;
 		height: auto;
 		z-index: 1;
 		position: relative;
@@ -4265,7 +4266,6 @@ table.wc_shipping {
 /**
 * New Shipping Settings Refresh Modal Styles
 **/
-.wc-backbone-modal-add-attribute-term,
 .wc-backbone-modal-add-shipping-method,
 .wc-backbone-modal-shipping-method-settings,
 .wc-shipping-class-modal {
@@ -4275,7 +4275,6 @@ table.wc_shipping {
 	color: #1e1e1e;
 
 	&.wc-backbone-modal .wc-backbone-modal-content {
-		border-radius: var(--wc-card-border-radius, 8px);
 		border-top: 8px solid transparent;
 		border-bottom: 8px solid transparent;
 		max-width: 600px;
@@ -4291,7 +4290,7 @@ table.wc_shipping {
 		padding: 0 32px 32px 32px;
 	}
 
-	.wc-backbone-modal-main header{
+	.wc-backbone-modal-main header {
 		padding: 20px 32px;
 	}
 
@@ -4304,8 +4303,6 @@ table.wc_shipping {
 	}
 
 	.wc-backbone-modal-main .wc-backbone-modal-header {
-		background-color: #fff;
-		border-bottom: none;
 		font-size: 20px;
 		line-height: 28px;
 
@@ -4318,9 +4315,7 @@ table.wc_shipping {
 		}
 	}
 	.wc-backbone-modal-main footer {
-		box-shadow: none;
 		border-top: 1px solid #E0E0E0;
-		background-color: #fff;
 
 		.inner {
 			display: flex;
@@ -4406,7 +4401,6 @@ table.wc_shipping {
 		}
 	}
 
-	.wc-add-attribute-term-fields,
 	.wc-shipping-zone-method-fields {
 
 		& > label {
@@ -4537,26 +4531,6 @@ table.wc_shipping {
 		animation-timeline: auto;
 		animation-range-start: normal;
 		color: #757575;
-	}
-}
-
-.wc-backbone-modal-add-attribute-term.wc-backbone-modal {
-	.wc-backbone-modal-content {
-		min-width: auto;
-		max-width: 400px;
-	}
-
-	input[type="text"] {
-		display: block;
-		font-size: 13px;
-		line-height: 16px;
-		margin: 6px 0;
-		padding: 12px;
-		width: 100%;
-	}
-
-	.wc-backbone-modal-main footer {
-		border-top: none;
 	}
 }
 
@@ -7885,6 +7859,7 @@ table.bar_chart {
 	}
 
 	.wc-backbone-modal-content {
+		border-radius: 8px;
 		position: fixed;
 		background: #fff;
 		z-index: 100000;
@@ -7934,7 +7909,7 @@ table.bar_chart {
 }
 
 .wc-backbone-modal-main {
-	padding-bottom: 55px;
+	padding-bottom: 60px;
 
 	header,
 	article {
@@ -7944,18 +7919,17 @@ table.bar_chart {
 
 	.wc-backbone-modal-header {
 		height: auto;
-		background: #fcfcfc;
-		padding: 1em 1.5em;
-		border-bottom: 1px solid #ddd;
+		padding: 1.25em 2em 1em;
 
 		h1 {
 			margin: 0;
 			font-size: 18px;
-			font-weight: 700;
+			font-weight: 400;
 			line-height: 1.5em;
 		}
 
 		.modal-close-link {
+			border-radius: 0 8px 0 0;
 			cursor: pointer;
 			color: #777;
 			height: 54px;
@@ -7966,7 +7940,6 @@ table.bar_chart {
 			right: 0;
 			text-align: center;
 			border: 0;
-			border-left: 1px solid #ddd;
 			background-color: transparent;
 			transition: color 0.1s ease-in-out, background 0.1s ease-in-out;
 
@@ -7992,7 +7965,7 @@ table.bar_chart {
 	}
 
 	article {
-		padding: 1.5em;
+		padding: 1em 2em 1.5em;
 
 		p {
 			margin: 1.5em 0;
@@ -8060,10 +8033,7 @@ table.bar_chart {
 		right: 0;
 		bottom: 0;
 		z-index: 100;
-		padding: 1em 1.5em;
-		background: #fcfcfc;
-		border-top: 1px solid #dfdfdf;
-		box-shadow: 0 -4px 4px -4px rgba(0, 0, 0, 0.1);
+		padding: 1em 2em 1.5em;
 
 		.inner {
 			text-align: right;
