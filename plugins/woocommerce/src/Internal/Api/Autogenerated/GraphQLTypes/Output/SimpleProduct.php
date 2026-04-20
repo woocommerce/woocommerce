@@ -68,8 +68,8 @@ class SimpleProduct {
 							'description' => __( 'The raw product type as stored in WooCommerce. Useful when product_type is OTHER (e.g. plugin-added types like subscription, bundle).', 'woocommerce' ),
 						),
 						'regular_price'     => array(
-							'type'        => Type::nonNull( Type::string() ),
-							'description' => __( 'The regular price of the product.', 'woocommerce' ),
+							'type'        => Type::string(),
+							'description' => __( 'The regular price of the product. Null when not set.', 'woocommerce' ),
 							'args'        => array(
 								'formatted' => array(
 									'type'         => Type::boolean(),
