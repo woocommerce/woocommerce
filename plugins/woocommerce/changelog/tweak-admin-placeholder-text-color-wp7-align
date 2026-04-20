@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Replace hardcoded #646970 placeholder/secondary text color with #757575 to align with the WordPress 7.0 admin gray scale.
