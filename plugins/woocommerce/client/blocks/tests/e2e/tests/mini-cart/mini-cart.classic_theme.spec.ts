@@ -35,7 +35,9 @@ test.describe( 'Mini-Cart: classic theme', () => {
 		await page.goto( `/?p=${ testPage.id }` );
 
 		const miniCartButton = page.locator( '.wc-block-mini-cart__button' );
+		const miniCartBadge = page.locator( '.wc-block-mini-cart__badge' );
 		await expect( miniCartButton ).toBeVisible();
+		await expect( miniCartBadge ).toBeHidden();
 
 		const addToCartLink = page.getByLabel( /Add to cart/ ).first();
 		const ajaxCall = page.waitForResponse( '**wc-ajax=add_to_cart**' );
@@ -44,5 +46,8 @@ test.describe( 'Mini-Cart: classic theme', () => {
 		await ajaxCall;
 		const dialog = page.getByRole( 'dialog' );
 		await expect( dialog ).toBeVisible();
+		await expect( miniCartButton ).toBeVisible();
+		await expect( miniCartBadge ).toBeVisible();
+		await expect( miniCartBadge ).toHaveText( '1' );
 	} );
 } );
