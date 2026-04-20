@@ -42,7 +42,7 @@ $product_attributes = $product_object->get_attributes( 'edit' );
 		$i = -1;
 
 		foreach ( $product_attributes as $attribute ) {
-			$i++;
+			++$i;
 			$metabox_class = array();
 
 			if ( $attribute->is_taxonomy() ) {
