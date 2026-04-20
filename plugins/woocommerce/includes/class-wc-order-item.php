@@ -82,6 +82,14 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	public $legacy_package_key;
 
 	/**
+	 * Order object: set via set_order. The property introduced to reduce the number of wc_get_order calls when
+	 * interacting with this class in core and extension workflows.
+	 *
+	 * @var null|\WC_Order
+	 */
+	private $order;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param int|object|array $item ID to load from the DB, or WC_Order_Item object.
@@ -191,10 +199,12 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	/**
 	 * Get parent order object.
 	 *
-	 * @return WC_Order
+	 * @return WC_Order|false
 	 */
 	public function get_order() {
-		return wc_get_order( $this->get_order_id() );
+		// If the order is linked through set_order, use that specific instance. Otherwise, use a new instance.
+		// Using a new instance may be appropriate depending on the workflow complexity and the level of customization.
+		return $this->order ?? wc_get_order( $this->get_order_id() );
 	}
 
 	/*
@@ -210,6 +220,20 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 */
 	public function set_order_id( $value ) {
 		$this->set_prop( 'order_id', absint( $value ) );
+	}
+
+	/**
+	 * Aggregate and set properties based on passed in order object.
+	 *
+	 * @param WC_Order $order Order instance.
+	 * @return void
+	 */
+	public function set_order( $order ) {
+		if ( ! ( $order instanceof \WC_Order ) ) {
+			$this->error( 'order_item_invalid_order', __( 'Invalid order', 'woocommerce' ) );
+		}
+		$this->set_order_id( $order->get_id() );
+		$this->order = $order;
 	}
 
 	/**

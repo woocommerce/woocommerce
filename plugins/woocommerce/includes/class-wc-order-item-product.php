@@ -252,12 +252,13 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	}
 
 	/**
-	 * Set properties based on passed in product object.
+	 * Aggregate and set properties based on passed in product object.
 	 *
 	 * @param WC_Product $product Product instance.
+	 * @return void
 	 */
 	public function set_product( $product ) {
-		if ( ! is_a( $product, 'WC_Product' ) ) {
+		if ( ! ( $product instanceof \WC_Product ) ) {
 			$this->error( 'order_item_product_invalid_product', __( 'Invalid product', 'woocommerce' ) );
 		}
 		if ( $product->is_type( ProductType::VARIATION ) ) {
