@@ -114,4 +114,29 @@ class WC_REST_System_Status_Tools_V2_Controller_Test extends WC_REST_Unit_Test_C
 
 		$this->cleanup_data_for_expired_download_permissions_test();
 	}
+
+	/**
+	 * @testdox Clear transients tool clears the wc_attribute_taxonomies transient.
+	 */
+	public function test_execute_tool_clear_transients() {
+		wp_set_current_user( $this->user );
+
+		// Set up the transient to be cleared with a proper attribute taxonomy object.
+		$mock_attribute = new stdClass();
+		$mock_attribute->attribute_id    = 123;
+		$mock_attribute->attribute_name  = 'test_attr';
+		$mock_attribute->attribute_label = 'Test Attr';
+		set_transient( 'wc_attribute_taxonomies', array( $mock_attribute ) );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'PUT', '/wc/v2/system_status/tools/clear_transients' ) );
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$response_data = $response->get_data();
+		$this->assertTrue( $response_data['success'] );
+		$this->assertEquals( 'Product transients cleared', $response_data['message'] );
+
+		// Verify the transient was deleted.
+		$this->assertFalse( get_transient( 'wc_attribute_taxonomies' ) );
+	}
 }
