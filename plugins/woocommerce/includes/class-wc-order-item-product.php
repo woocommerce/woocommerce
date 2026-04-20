@@ -56,6 +56,14 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		),
 	);
 
+	/**
+	 * Product object: set via set_product or autopopulated in get_product. The property introduced to reduce the
+	 * number of wc_get_product calls when interacting with this class in core and extension workflows.
+	 *
+	 * @var WC_Product|false
+	 */
+	private $product;
+
 	/*
 	|--------------------------------------------------------------------------
 	| Setters
@@ -261,6 +269,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		}
 		$this->set_name( $product->get_name() );
 		$this->set_tax_class( $product->get_tax_class() );
+		$this->product = $product;
 	}
 
 	/**
@@ -386,18 +395,16 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * @return WC_Product|bool
 	 */
 	public function get_product() {
-		if ( $this->get_variation_id() ) {
-			$product = wc_get_product( $this->get_variation_id() );
-		} else {
-			$product = wc_get_product( $this->get_product_id() );
+		if ( null === $this->product ) {
+			$product = wc_get_product( $this->get_variation_id() ? $this->get_variation_id() : $this->get_product_id() );
+			// Backwards compatible filter from WC_Order::get_product_from_item().
+			if ( has_filter( 'woocommerce_get_product_from_item' ) ) {
+				$product = apply_filters( 'woocommerce_get_product_from_item', $product, $this, $this->get_order() );
+			}
+			$this->product = apply_filters( 'woocommerce_order_item_product', $product, $this );
 		}
 
-		// Backwards compatible filter from WC_Order::get_product_from_item().
-		if ( has_filter( 'woocommerce_get_product_from_item' ) ) {
-			$product = apply_filters( 'woocommerce_get_product_from_item', $product, $this, $this->get_order() );
-		}
-
-		return apply_filters( 'woocommerce_order_item_product', $product, $this );
+		return $this->product;
 	}
 
 	/**
