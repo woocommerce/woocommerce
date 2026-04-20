@@ -39,17 +39,23 @@ export const TotalsShipping = ( {
 	const shippingRates = shippingRatesProp ?? cartShippingRates;
 	const hasSelectedRates = hasSelectedShippingRate( shippingRates );
 
-	// Fall back to the first available rate name during Ship/Pickup toggles so
-	// the label stays meaningful while the total shows a placeholder.
+	// Fall back to the first available rate name only when there is exactly one
+	// available option; otherwise keep the generic label until selection settles.
 	const selectedNames = getSelectedShippingRateNames( shippingRates );
-	const rateNames =
-		selectedNames.length > 0
-			? selectedNames
-			: [ shippingRates[ 0 ]?.shipping_rates[ 0 ]?.name ].filter(
-					Boolean
-			  );
+	const availableRateNames = shippingRates.flatMap( ( shippingPackage ) =>
+		shippingPackage.shipping_rates
+			.map( ( rate ) => rate.name )
+			.filter( Boolean )
+	);
+	let rateNames: string[] = [];
+	if ( selectedNames.length > 0 ) {
+		rateNames = selectedNames;
+	} else if ( availableRateNames.length === 1 ) {
+		rateNames = availableRateNames;
+	}
 
-	const hasMultipleRates = rateNames.length > 1;
+	const hasMultipleRates =
+		selectedNames.length > 1 || availableRateNames.length > 1;
 	const rowLabel =
 		rateNames.length === 0 || hasMultipleRates ? label : rateNames[ 0 ];
 
