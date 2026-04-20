@@ -1501,18 +1501,6 @@ parameters:
 			path: includes/admin/class-wc-admin-assets.php
 
 		-
-			message: '#^Method WC_Admin_Assets\:\:enqueue_block_editor_script\(\) has parameter \$script_name with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: includes/admin/class-wc-admin-assets.php
-
-		-
-			message: '#^Method WC_Admin_Assets\:\:enqueue_block_editor_script\(\) has parameter \$script_path_name with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: includes/admin/class-wc-admin-assets.php
-
-		-
 			message: '#^Method WC_Admin_Assets\:\:register_scripts\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
