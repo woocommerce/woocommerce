@@ -89,6 +89,49 @@ class WC_Formatting_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Data provider for test_wc_format_option_price_separators.
+	 *
+	 * @return array[]
+	 */
+	public function data_provider_wc_format_option_price_separators(): array {
+		return array(
+			'comma separator'     => array( ',', ',', false ),
+			'period separator'    => array( '.', '.', false ),
+			'space separator'     => array( ',', ' ', false ),
+			'empty separator'     => array( ',', '', false ),
+			'single digit'        => array( ',', '1', true ),
+			'digit with symbol'   => array( ',', '1,', true ),
+			'multi-digit value'   => array( ',', '12', true ),
+		);
+	}
+
+	/**
+	 * @testdox wc_format_option_price_separators should reject values containing digits and return the existing option value.
+	 *
+	 * @dataProvider data_provider_wc_format_option_price_separators
+	 *
+	 * @param string $existing_value  The value already stored in the option.
+	 * @param string $raw_value       The raw input being saved.
+	 * @param bool   $expect_rejection Whether the input should be rejected.
+	 */
+	public function test_wc_format_option_price_separators( string $existing_value, string $raw_value, bool $expect_rejection ): void {
+		$option = array(
+			'id'      => 'woocommerce_price_thousand_sep',
+			'default' => ',',
+		);
+
+		update_option( $option['id'], $existing_value );
+
+		$result = wc_format_option_price_separators( $existing_value, $option, $raw_value );
+
+		if ( $expect_rejection ) {
+			$this->assertSame( $existing_value, $result, 'Numeric separators should be rejected and the existing value returned.' );
+		} else {
+			$this->assertSame( $raw_value, $result, 'Valid separators should be saved as-is.' );
+		}
+	}
+
+	/**
 	 * Test wc_is_stock_amount_integer function.
 	 *
 	 * @testdox wc_is_stock_amount_integer should return true when stock amounts are integers and false when they are floats.

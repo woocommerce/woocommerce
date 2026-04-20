@@ -1189,16 +1189,25 @@ function wc_format_product_short_description( $content ) {
 }
 
 /**
- * Formats curency symbols when saved in settings.
+ * Formats currency separators when saved in settings.
  *
- * @codeCoverageIgnore
+ * @since 10.8.0
  * @param  string $value     Option value.
- * @param  array  $option    Option name.
+ * @param  array  $option    Option data including 'id' and 'default'.
  * @param  string $raw_value Raw value.
  * @return string
  */
 function wc_format_option_price_separators( $value, $option, $raw_value ) {
-	return wp_kses_post( $raw_value ?? '' );
+	$sanitized = wp_kses_post( $raw_value ?? '' );
+
+	if ( preg_match( '/[0-9]/', $sanitized ) ) {
+		WC_Admin_Settings::add_error(
+			esc_html__( 'Thousand and decimal separators cannot contain numbers.', 'woocommerce' )
+		);
+		return get_option( $option['id'], $option['default'] ?? '' );
+	}
+
+	return $sanitized;
 }
 add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_price_decimal_sep', 'wc_format_option_price_separators', 10, 3 );
 add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_price_thousand_sep', 'wc_format_option_price_separators', 10, 3 );

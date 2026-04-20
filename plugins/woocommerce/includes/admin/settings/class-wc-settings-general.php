@@ -334,23 +334,31 @@ class WC_Settings_General extends WC_Settings_Page {
 				),
 
 				array(
-					'title'    => __( 'Thousand separator', 'woocommerce' ),
-					'desc'     => __( 'This sets the thousand separator of displayed prices.', 'woocommerce' ),
-					'id'       => 'woocommerce_price_thousand_sep',
-					'css'      => 'width:50px;',
-					'default'  => ',',
-					'type'     => 'text',
-					'desc_tip' => true,
+					'title'             => __( 'Thousand separator', 'woocommerce' ),
+					'desc'              => __( 'This sets the thousand separator of displayed prices.', 'woocommerce' ),
+					'id'                => 'woocommerce_price_thousand_sep',
+					'css'               => 'width:50px;',
+					'default'           => ',',
+					'type'              => 'text',
+					'desc_tip'          => true,
+					'custom_attributes' => array(
+						'pattern' => '[^0-9]*',
+						'title'   => __( 'Separators cannot contain numbers.', 'woocommerce' ),
+					),
 				),
 
 				array(
-					'title'    => __( 'Decimal separator', 'woocommerce' ),
-					'desc'     => __( 'This sets the decimal separator of displayed prices.', 'woocommerce' ),
-					'id'       => 'woocommerce_price_decimal_sep',
-					'css'      => 'width:50px;',
-					'default'  => '.',
-					'type'     => 'text',
-					'desc_tip' => true,
+					'title'             => __( 'Decimal separator', 'woocommerce' ),
+					'desc'              => __( 'This sets the decimal separator of displayed prices.', 'woocommerce' ),
+					'id'                => 'woocommerce_price_decimal_sep',
+					'css'               => 'width:50px;',
+					'default'           => '.',
+					'type'              => 'text',
+					'desc_tip'          => true,
+					'custom_attributes' => array(
+						'pattern' => '[^0-9]*',
+						'title'   => __( 'Separators cannot contain numbers.', 'woocommerce' ),
+					),
 				),
 
 				array(
