@@ -121,12 +121,17 @@ class Utils {
 	 * - Any other Throwable     → INTERNAL_ERROR, with a generic message; the
 	 *   original throwable is attached as `previous` for debug-mode surfacing.
 	 *
+	 * Public so that generated resolvers can wrap Code-API calls that happen
+	 * outside the execute()/authorize() pair (e.g. the Connection::slice()
+	 * call emitted for nested paginated connection fields, which can throw
+	 * InvalidArgumentException when pagination bounds are exceeded).
+	 *
 	 * @param callable $operation Callable to invoke.
 	 *
 	 * @return mixed The return value of the callable.
 	 * @throws \GraphQL\Error\Error On any exception from the callable.
 	 */
-	private static function translate_exceptions( callable $operation ): mixed {
+	public static function translate_exceptions( callable $operation ): mixed {
 		// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Not HTML; serialized as JSON.
 		try {
 			return $operation();

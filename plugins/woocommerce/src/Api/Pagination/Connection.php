@@ -73,6 +73,12 @@ class Connection {
 			return $this;
 		}
 
+		// Enforce the same 0..MAX_PAGE_SIZE bounds that PaginationParams
+		// applies to root queries. Without this, nested connection fields
+		// (e.g. `variations(first: 1000)`) would slip past the cap because
+		// the generated resolver passes raw GraphQL args straight in.
+		PaginationParams::validate_args( $args );
+
 		$first  = $args['first'] ?? null;
 		$last   = $args['last'] ?? null;
 		$after  = $args['after'] ?? null;

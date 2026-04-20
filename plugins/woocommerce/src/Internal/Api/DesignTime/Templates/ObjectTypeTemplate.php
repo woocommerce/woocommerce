@@ -35,6 +35,7 @@ use <?php echo $use; ?>;
 <?php endforeach; ?>
 <?php if ( $has_paginated_connection ) : ?>
 use Automattic\WooCommerce\Api\Pagination\Connection;
+use Automattic\WooCommerce\Internal\Api\Utils;
 <?php endif; ?>
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
@@ -87,7 +88,7 @@ class <?php echo $class_name; ?> {
 								$page_size = $args['first'] ?? $args['last'] ?? \Automattic\WooCommerce\Api\Pagination\PaginationParams::get_default_page_size();
 								return $page_size * ( $child_complexity + 1 );
 							},
-							'resolve' => fn( $parent, array $args ): Connection => $parent-><?php echo $field['name']; ?>->slice( $args ),
+							'resolve' => fn( $parent, array $args ): Connection => Utils::translate_exceptions( fn() => $parent-><?php echo $field['name']; ?>->slice( $args ) ),
 <?php endif; ?>
 						),
 <?php endforeach; ?>
