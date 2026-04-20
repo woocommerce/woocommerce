@@ -377,11 +377,18 @@ class ProductMapper {
 	 * @return Connection
 	 */
 	private static function build_reviews( int $product_id ): Connection {
+		$base_args = array(
+			'post_id' => $product_id,
+			'type'    => 'review',
+			'status'  => 'approve',
+		);
+
+		// Separate count query: otherwise `total_count` would be the page
+		// size (capped at 10) instead of the real review total.
+		$total_count = (int) get_comments( $base_args + array( 'count' => true ) );
+
 		$comments = get_comments(
-			array(
-				'post_id' => $product_id,
-				'type'    => 'review',
-				'status'  => 'approve',
+			$base_args + array(
 				'orderby' => 'comment_date',
 				'order'   => 'DESC',
 				'number'  => 10,
@@ -411,7 +418,7 @@ class ProductMapper {
 		}
 
 		$page_info                    = new PageInfo();
-		$page_info->has_next_page     = count( $comments ) >= 10;
+		$page_info->has_next_page     = $total_count > count( $comments );
 		$page_info->has_previous_page = false;
 		$page_info->start_cursor      = ! empty( $edges ) ? $edges[0]->cursor : null;
 		$page_info->end_cursor        = ! empty( $edges ) ? $edges[ count( $edges ) - 1 ]->cursor : null;
@@ -420,7 +427,7 @@ class ProductMapper {
 		$connection->edges       = $edges;
 		$connection->nodes       = $nodes;
 		$connection->page_info   = $page_info;
-		$connection->total_count = count( $comments );
+		$connection->total_count = $total_count;
 
 		return $connection;
 	}
