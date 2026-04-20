@@ -235,8 +235,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 		// Return the fulfillments.
 		return new WP_REST_Response(
 			array_map(
-				function ( $fulfillment ) {
-					return $fulfillment->get_raw_data(); },
+				fn( $fulfillment ) => $this->prepare_fulfillment_response_data( $fulfillment->get_raw_data() ),
 				$fulfillments
 			),
 			WP_Http::OK
@@ -313,7 +312,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 			);
 		}
 
-		return new WP_REST_Response( $fulfillment->get_raw_data(), WP_Http::CREATED );
+		return new WP_REST_Response( $this->prepare_fulfillment_response_data( $fulfillment->get_raw_data() ), WP_Http::CREATED );
 	}
 
 	/**
@@ -348,7 +347,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 		}
 
 		return new WP_REST_Response(
-			$fulfillment->get_raw_data(),
+			$this->prepare_fulfillment_response_data( $fulfillment->get_raw_data() ),
 			WP_Http::OK
 		);
 	}
@@ -454,7 +453,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 		}
 
 		return new WP_REST_Response(
-			$fulfillment->get_raw_data(),
+			$this->prepare_fulfillment_response_data( $fulfillment->get_raw_data() ),
 			WP_Http::OK
 		);
 	}
@@ -1291,5 +1290,44 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 			$resolved_provider,
 			$is_custom
 		);
+	}
+
+	/**
+	 * Format the fulfillment raw data for a REST response by converting every
+	 * UTC-stored datetime field into an ISO 8601 string with explicit 'Z' suffix.
+	 *
+	 * @since 10.7.0
+	 * @param array<string, mixed> $raw_data The fulfillment raw data.
+	 * @return array<string, mixed>
+	 */
+	private function prepare_fulfillment_response_data( array $raw_data ): array {
+		$raw_data['date_updated'] = $this->format_utc_date_iso8601( $raw_data['date_updated'] ?? null );
+		$raw_data['date_deleted'] = $this->format_utc_date_iso8601( $raw_data['date_deleted'] ?? null );
+
+		if ( isset( $raw_data['meta_data'] ) && is_array( $raw_data['meta_data'] ) ) {
+			foreach ( $raw_data['meta_data'] as &$meta ) {
+				if ( is_array( $meta ) && isset( $meta['key'], $meta['value'] ) && '_date_fulfilled' === $meta['key'] && is_string( $meta['value'] ) ) {
+					$meta['value'] = $this->format_utc_date_iso8601( $meta['value'] );
+				}
+			}
+			unset( $meta );
+		}
+
+		return $raw_data;
+	}
+
+	/**
+	 * Convert a UTC 'Y-m-d H:i:s' datetime string to ISO 8601 with 'Z' suffix.
+	 *
+	 * @since 10.7.0
+	 * @param string|null $date UTC datetime string.
+	 * @return string|null ISO 8601 string with 'Z' suffix, or null for empty input.
+	 */
+	private function format_utc_date_iso8601( ?string $date ): ?string {
+		if ( null === $date || '' === $date ) {
+			return null;
+		}
+		$formatted = wc_rest_prepare_date_response( $date );
+		return null === $formatted ? null : $formatted . 'Z';
 	}
 }

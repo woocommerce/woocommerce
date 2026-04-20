@@ -134,6 +134,7 @@ class FulfillmentSchema extends AbstractSchema {
 	 * @return array The item response.
 	 */
 	public function get_item_response( $fulfillment, WP_REST_Request $request, array $include_fields = array() ): array {
+		$date_updated = $fulfillment->get_date_updated();
 		$date_deleted = $fulfillment->get_date_deleted();
 
 		return array(
@@ -142,9 +143,23 @@ class FulfillmentSchema extends AbstractSchema {
 			'entity_id'    => (string) $fulfillment->get_entity_id(),
 			'status'       => $fulfillment->get_status(),
 			'is_fulfilled' => $fulfillment->get_is_fulfilled(),
-			'date_updated' => wc_rest_prepare_date_response( $fulfillment->get_date_updated() ),
-			'date_deleted' => $date_deleted ? wc_rest_prepare_date_response( $date_deleted ) : null,
+			'date_updated' => $this->format_utc_iso8601( $date_updated ),
+			'date_deleted' => $this->format_utc_iso8601( $date_deleted ),
 			'meta_data'    => $fulfillment->get_meta_data(),
 		);
+	}
+
+	/**
+	 * Format a UTC 'Y-m-d H:i:s' string as ISO 8601 with explicit 'Z' suffix.
+	 *
+	 * @param string|null $date UTC datetime string.
+	 * @return string|null
+	 */
+	private function format_utc_iso8601( ?string $date ): ?string {
+		if ( null === $date || '' === $date ) {
+			return null;
+		}
+		$formatted = wc_rest_prepare_date_response( $date );
+		return null === $formatted ? null : $formatted . 'Z';
 	}
 }
