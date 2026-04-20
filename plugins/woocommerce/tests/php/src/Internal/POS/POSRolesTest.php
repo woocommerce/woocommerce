@@ -22,6 +22,8 @@ class POSRolesTest extends WC_Unit_Test_Case {
 		'edit_pos_settings',
 		'void_shop_orders',
 		'refund_shop_orders',
+		'apply_discounts',
+		'override_prices',
 	);
 
 	/**
@@ -100,6 +102,8 @@ class POSRolesTest extends WC_Unit_Test_Case {
 		$this->assertNotNull( $role, 'pos_cashier role should exist' );
 		$this->assertFalse( $role->has_cap( 'refund_shop_orders' ), 'pos_cashier should not have refund_shop_orders' );
 		$this->assertFalse( $role->has_cap( 'void_shop_orders' ), 'pos_cashier should not have void_shop_orders' );
+		$this->assertFalse( $role->has_cap( 'apply_discounts' ), 'pos_cashier should not have apply_discounts' );
+		$this->assertFalse( $role->has_cap( 'override_prices' ), 'pos_cashier should not have override_prices' );
 		$this->assertFalse( $role->has_cap( 'view_pos_settings' ), 'pos_cashier should not have view_pos_settings' );
 		$this->assertFalse( $role->has_cap( 'edit_pos_settings' ), 'pos_cashier should not have edit_pos_settings' );
 		$this->assertFalse( $role->has_cap( 'edit_shop_coupons' ), 'pos_cashier should not have edit_shop_coupons' );
@@ -166,6 +170,8 @@ class POSRolesTest extends WC_Unit_Test_Case {
 			'view_pos_settings',
 			'void_shop_orders',
 			'refund_shop_orders',
+			'apply_discounts',
+			'override_prices',
 		);
 
 		$this->assertNotNull( $role, 'pos_manager role should exist' );
@@ -286,7 +292,7 @@ class POSRolesTest extends WC_Unit_Test_Case {
 		$capabilities = WC_Install::get_core_capabilities();
 
 		$this->assertArrayHasKey( 'pos', $capabilities );
-		$this->assertCount( 5, $capabilities['pos'] );
+		$this->assertCount( 7, $capabilities['pos'] );
 
 		foreach ( $this->all_pos_caps as $cap ) {
 			$this->assertContains( $cap, $capabilities['pos'], "get_core_capabilities pos group should contain {$cap}" );

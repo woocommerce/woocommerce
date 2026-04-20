@@ -2478,6 +2478,8 @@ $stock_notifications_table_schema;
 				'view_pos_settings'          => true,
 				'void_shop_orders'           => true,
 				'refund_shop_orders'         => true,
+				'apply_discounts'            => true,
+				'override_prices'            => true,
 			)
 		);
 
@@ -2539,6 +2541,8 @@ $stock_notifications_table_schema;
 			'edit_pos_settings',
 			'void_shop_orders',
 			'refund_shop_orders',
+			'apply_discounts',
+			'override_prices',
 		);
 
 		return $capabilities;

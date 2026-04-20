@@ -31,6 +31,8 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 		'refund_shop_orders',
 		'void_shop_orders',
 		'publish_shop_coupons',
+		'apply_discounts',
+		'override_prices',
 	);
 
 	/**
@@ -200,6 +202,14 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 	public function enforce_cancel_capability( $order, WP_REST_Request $request, bool $creating ) {
 		$this->approval_error = null;
 
+		// Make the approval token and target order visible to user_has_capability
+		// so discount / price override / cancel checks all route through the
+		// standard manager-approval path.
+		$this->current_approval_token = (string) $request->get_param( '_pos_approval' );
+		if ( method_exists( $order, 'get_id' ) ) {
+			$this->current_order_id = (int) $order->get_id();
+		}
+
 		$order_capability_error = $this->enforce_order_request_capabilities( $request );
 		if ( is_wp_error( $order_capability_error ) ) {
 			return $order_capability_error;
@@ -212,11 +222,6 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 		$status = $request->get_param( 'status' );
 		if ( 'cancelled' !== $status ) {
 			return $order;
-		}
-
-		$this->current_approval_token = (string) $request->get_param( '_pos_approval' );
-		if ( method_exists( $order, 'get_id' ) ) {
-			$this->current_order_id = (int) $order->get_id();
 		}
 
 		if ( ! $this->user_has_capability( 'void_shop_orders' ) ) {
@@ -581,7 +586,7 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 	 * @return true|WP_Error
 	 */
 	private function enforce_order_request_capabilities( WP_REST_Request $request ) {
-		if ( $this->request_has_coupon_changes( $request ) && ! $this->user_has_capability( 'manage_woocommerce' ) ) {
+		if ( $this->request_has_coupon_changes( $request ) && ! $this->user_has_capability( 'apply_discounts' ) ) {
 			return new WP_Error(
 				'woocommerce_rest_cannot_apply_discounts',
 				__( 'Sorry, you are not allowed to apply discounts.', 'woocommerce' ),
@@ -589,7 +594,7 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 			);
 		}
 
-		if ( $this->request_has_price_overrides( $request ) && ! $this->user_has_capability( 'manage_woocommerce' ) ) {
+		if ( $this->request_has_price_overrides( $request ) && ! $this->user_has_capability( 'override_prices' ) ) {
 			return new WP_Error(
 				'woocommerce_rest_cannot_override_prices',
 				__( 'Sorry, you are not allowed to override prices.', 'woocommerce' ),
