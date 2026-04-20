@@ -76,7 +76,7 @@ $product_attributes = $product_object->get_attributes( 'edit' );
 				<article>
 					<form class="wc-add-attribute-term-fields" action="" method="post">
 						<label for="wc-new-attribute-term"><?php esc_html_e( 'Name', 'woocommerce' ); ?></label>
-						<input id="wc-new-attribute-term" type="text" name="term" value="" placeholder="<?php esc_attr_e( 'Name', 'woocommerce' ); ?>" />
+						<input id="wc-new-attribute-term" type="text" name="term" value="" />
 					</form>
 				</article>
 				<footer>
