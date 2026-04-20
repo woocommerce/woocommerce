@@ -206,23 +206,43 @@ class WC_REST_Orders_V4_Can_Be_Refunded_Test extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Order with cancelled status can still be refunded if it has remaining amount.
+	 * @testdox Order with cancelled status cannot be refunded even if it has remaining amount.
 	 */
-	public function test_cancelled_order_with_remaining_amount_is_refundable(): void {
+	public function test_cancelled_order_with_remaining_amount_is_not_refundable(): void {
 		$order = $this->create_order_with_product( 'cancelled' );
 		$data  = $this->get_order_response( $order->get_id() );
 
-		$this->assertTrue( $data['can_be_refunded'], 'Cancelled order with remaining amount should be refundable' );
+		$this->assertFalse( $data['can_be_refunded'], 'Cancelled order should not be refundable regardless of remaining amount' );
 	}
 
 	/**
-	 * @testdox Order with failed status can still be refunded if it has remaining amount.
+	 * @testdox Order with failed status cannot be refunded even if it has remaining amount.
 	 */
-	public function test_failed_order_with_remaining_amount_is_refundable(): void {
+	public function test_failed_order_with_remaining_amount_is_not_refundable(): void {
 		$order = $this->create_order_with_product( 'failed' );
 		$data  = $this->get_order_response( $order->get_id() );
 
-		$this->assertTrue( $data['can_be_refunded'], 'Failed order with remaining amount should be refundable' );
+		$this->assertFalse( $data['can_be_refunded'], 'Failed order should not be refundable regardless of remaining amount' );
+	}
+
+	/**
+	 * @testdox Order with on-hold status can be refunded if it has remaining amount.
+	 */
+	public function test_on_hold_order_with_remaining_amount_is_refundable(): void {
+		$order = $this->create_order_with_product( 'on-hold' );
+		$data  = $this->get_order_response( $order->get_id() );
+
+		$this->assertTrue( $data['can_be_refunded'], 'On-hold order with remaining amount should be refundable' );
+	}
+
+	/**
+	 * @testdox Order with pending status cannot be refunded even if it has remaining amount.
+	 */
+	public function test_pending_order_is_not_refundable(): void {
+		$order = $this->create_order_with_product( 'pending' );
+		$data  = $this->get_order_response( $order->get_id() );
+
+		$this->assertFalse( $data['can_be_refunded'], 'Pending order should not be refundable regardless of remaining amount' );
 	}
 
 	/**
@@ -278,20 +298,25 @@ class WC_REST_Orders_V4_Can_Be_Refunded_Test extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox List endpoint returns can_be_refunded for all orders.
+	 * @testdox List endpoint returns can_be_refunded for all orders with correct values.
 	 */
 	public function test_list_endpoint_returns_field(): void {
-		$this->create_order_with_product();
-		$this->create_order_with_product( 'cancelled' );
+		$completed_order = $this->create_order_with_product();
+		$cancelled_order = $this->create_order_with_product( 'cancelled' );
 
 		$request  = new WP_REST_Request( 'GET', '/wc/v4/orders' );
 		$response = $this->server->dispatch( $request );
 
 		$this->assertEquals( 200, $response->get_status() );
 
+		$orders_by_id = array();
 		foreach ( $response->get_data() as $order_data ) {
 			$this->assertArrayHasKey( 'can_be_refunded', $order_data, 'List endpoint should include can_be_refunded' );
+			$orders_by_id[ $order_data['id'] ] = $order_data;
 		}
+
+		$this->assertTrue( $orders_by_id[ $completed_order->get_id() ]['can_be_refunded'], 'Completed order should be refundable' );
+		$this->assertFalse( $orders_by_id[ $cancelled_order->get_id() ]['can_be_refunded'], 'Cancelled order should not be refundable' );
 	}
 
 	/**
