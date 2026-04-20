@@ -187,27 +187,38 @@ class GraphQLController {
 			validationRules: $validation_rules,
 		);
 
-		// In debug mode, install a formatter that walks the previous-exception
+		// Install an error formatter that guarantees every error carries an
+		// `extensions.code`. Without this, webonyx-produced validation and
+		// execution errors would arrive uncoded and get_error_status() would
+		// have no way to distinguish them from genuine server errors, so they
+		// would all default to HTTP 500. We infer the code from webonyx's
+		// own ClientAware signal: client-safe errors become BAD_USER_INPUT
+		// (mapped to 400), the rest become INTERNAL_ERROR (mapped to 500).
+		//
+		// In debug mode the same formatter also walks the previous-exception
 		// chain so wrapped errors (e.g. a \ValueError caught by a resolver and
-		// re-thrown as INTERNAL_ERROR) are visible to the developer instead of
-		// being masked as a generic "Internal server error".
-		if ( $this->is_debug_mode( $request ) ) {
-			$result->setErrorFormatter(
-				function ( \Throwable $error ): array {
-					$formatted = \GraphQL\Error\FormattedError::createFromException( $error );
+		// re-thrown as INTERNAL_ERROR) stay visible to the developer instead
+		// of being masked behind the generic "Internal server error" message.
+		$debug_mode = $this->is_debug_mode( $request );
+		$result->setErrorFormatter(
+			function ( \Throwable $error ) use ( $debug_mode ): array {
+				$formatted = \GraphQL\Error\FormattedError::createFromException( $error );
 
+				if ( ! isset( $formatted['extensions']['code'] ) ) {
+					$client_safe                       = $error instanceof \GraphQL\Error\ClientAware && $error->isClientSafe();
+					$formatted['extensions']['code']   = $client_safe ? 'BAD_USER_INPUT' : 'INTERNAL_ERROR';
+				}
+
+				if ( $debug_mode ) {
 					$chain = $this->extract_previous_chain( $error );
 					if ( ! empty( $chain ) ) {
-						if ( ! isset( $formatted['extensions'] ) ) {
-							$formatted['extensions'] = array();
-						}
 						$formatted['extensions']['previous'] = $chain;
 					}
-
-					return $formatted;
 				}
-			);
-		}
+
+				return $formatted;
+			}
+		);
 
 		$debug_flags = $this->get_debug_flags( $request );
 		$output      = $result->toArray( $debug_flags );
@@ -367,18 +378,44 @@ class GraphQLController {
 	}
 
 	/**
+	 * Mapping from machine-readable error codes to HTTP status codes.
+	 *
+	 * Any code not listed here defaults to 500, so unknown/unrecognised codes
+	 * from third-party resolvers stay on the safe side. The error formatter
+	 * installed in process_request() guarantees every error carries a code
+	 * from this table before get_error_status() inspects it.
+	 */
+	private const ERROR_STATUS_MAP = array(
+		'UNAUTHORIZED'              => 401,
+		'FORBIDDEN'                 => 403,
+		'NOT_FOUND'                 => 404,
+		'METHOD_NOT_ALLOWED'        => 405,
+		'INVALID_ARGUMENT'          => 400,
+		'BAD_USER_INPUT'            => 400,
+		'GRAPHQL_PARSE_FAILED'      => 400,
+		'GRAPHQL_VALIDATION_FAILED' => 400,
+		'INTERNAL_ERROR'            => 500,
+	);
+
+	/**
 	 * Determine the HTTP status code from an array of GraphQL errors.
+	 *
+	 * Applies the code-to-status lookup to each error and returns the worst
+	 * (highest) status seen. A single genuine 5xx among mixed errors surfaces
+	 * as 500, which is the more useful signal for monitoring and logs.
 	 *
 	 * @param array $errors The GraphQL errors array.
 	 */
 	private function get_error_status( array $errors ): int {
+		$status = 200;
 		foreach ( $errors as $error ) {
-			$code = $error['extensions']['code'] ?? null;
-			if ( 'UNAUTHORIZED' === $code ) {
-				return 401;
+			$code   = $error['extensions']['code'] ?? null;
+			$mapped = self::ERROR_STATUS_MAP[ $code ] ?? 500;
+			if ( $mapped > $status ) {
+				$status = $mapped;
 			}
 		}
-		return 500;
+		return $status;
 	}
 
 	/**
