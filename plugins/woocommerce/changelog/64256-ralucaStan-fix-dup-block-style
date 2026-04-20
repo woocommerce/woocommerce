@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Avoid calling `get_block_type_style()` and `get_block_type_editor_style()` twice in `AbstractBlock::register_block_type()`.
