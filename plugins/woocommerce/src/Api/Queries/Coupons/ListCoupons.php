@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Api\Attributes\RequiredCapability;
 use Automattic\WooCommerce\Api\Enums\Coupons\CouponStatus;
 use Automattic\WooCommerce\Api\Pagination\Connection;
 use Automattic\WooCommerce\Api\Pagination\Edge;
+use Automattic\WooCommerce\Api\Pagination\IdCursorFilter;
 use Automattic\WooCommerce\Api\Pagination\PageInfo;
 use Automattic\WooCommerce\Api\Pagination\PaginationParams;
 use Automattic\WooCommerce\Api\Types\Coupons\Coupon;
@@ -63,37 +64,14 @@ class ListCoupons {
 		);
 
 		if ( null !== $after ) {
-			$after_id                         = (int) base64_decode( $after, true );
-			$posts_query_args['post__not_in'] = array();
-			// Reset.
-			// We need ID > $after_id. Use a filter for this.
-			add_filter(
-				'posts_where',
-				$where_filter = static function ( string $where ) use ( $after_id ): string {
-					global $wpdb;
-					return $where . $wpdb->prepare( " AND {$wpdb->posts}.ID > %d", $after_id );
-				}
-			);
+			$posts_query_args[ IdCursorFilter::AFTER_ID ] = (int) base64_decode( $after, true );
 		}
-
 		if ( null !== $before ) {
-			$before_id        = (int) base64_decode( $before, true );
-			add_filter(
-				'posts_where',
-				$where_filter = static function ( string $where ) use ( $before_id ): string {
-					global $wpdb;
-					return $where . $wpdb->prepare( " AND {$wpdb->posts}.ID < %d", $before_id );
-				}
-			);
+			$posts_query_args[ IdCursorFilter::BEFORE_ID ] = (int) base64_decode( $before, true );
 		}
+		IdCursorFilter::ensure_registered();
 
 		$query = new \WP_Query( $posts_query_args );
-
-		// Remove filters.
-		if ( isset( $where_filter ) ) {
-			remove_filter( 'posts_where', $where_filter );
-		}
-
 		$posts = $query->posts;
 
 		// Determine pagination.

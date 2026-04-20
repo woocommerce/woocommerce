@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Api\Enums\Products\ProductType;
 use Automattic\WooCommerce\Api\InputTypes\Products\ProductFilterInput;
 use Automattic\WooCommerce\Api\Pagination\Connection;
 use Automattic\WooCommerce\Api\Pagination\Edge;
+use Automattic\WooCommerce\Api\Pagination\IdCursorFilter;
 use Automattic\WooCommerce\Api\Pagination\PageInfo;
 use Automattic\WooCommerce\Api\Pagination\PaginationParams;
 use Automattic\WooCommerce\Api\Interfaces\Product;
@@ -89,31 +90,9 @@ class ListProducts {
 			$query_args['s'] = $filters->search;
 		}
 
-		// Cursor-based filtering.
-		$where_filter = null;
-		if ( null !== $after ) {
-			$after_id         = (int) base64_decode( $after, true );
-			add_filter(
-				'posts_where',
-				$where_filter = static function ( string $where ) use ( $after_id ): string {
-					global $wpdb;
-					return $where . $wpdb->prepare( " AND {$wpdb->posts}.ID > %d", $after_id );
-				}
-			);
-		}
-
-		if ( null !== $before ) {
-			$before_id        = (int) base64_decode( $before, true );
-			add_filter(
-				'posts_where',
-				$where_filter = static function ( string $where ) use ( $before_id ): string {
-					global $wpdb;
-					return $where . $wpdb->prepare( " AND {$wpdb->posts}.ID < %d", $before_id );
-				}
-			);
-		}
-
-		// Total count query.
+		// Total count query. Runs before we set the cursor query vars on
+		// $query_args so IdCursorFilter doesn't narrow the count to the
+		// cursor window — we want the count of the full filtered set.
 		$count_args  = array(
 			'post_type'      => 'product',
 			'posts_per_page' => -1,
@@ -123,13 +102,16 @@ class ListProducts {
 		$count_query = new \WP_Query( $count_args );
 		$total_count = $count_query->found_posts;
 
-		// Main query.
-		$query = new \WP_Query( $query_args );
-
-		if ( null !== $where_filter ) {
-			remove_filter( 'posts_where', $where_filter );
+		// Cursor-based filtering via IdCursorFilter (see class docblock).
+		if ( null !== $after ) {
+			$query_args[ IdCursorFilter::AFTER_ID ] = (int) base64_decode( $after, true );
 		}
+		if ( null !== $before ) {
+			$query_args[ IdCursorFilter::BEFORE_ID ] = (int) base64_decode( $before, true );
+		}
+		IdCursorFilter::ensure_registered();
 
+		$query = new \WP_Query( $query_args );
 		$posts = $query->posts;
 
 		// Determine pagination.
