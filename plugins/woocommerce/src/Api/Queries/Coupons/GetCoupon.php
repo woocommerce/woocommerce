@@ -10,7 +10,7 @@ use Automattic\WooCommerce\Api\Attributes\RequiredCapability;
 use Automattic\WooCommerce\Api\Types\Coupons\Coupon;
 use Automattic\WooCommerce\Api\Utils\Coupons\CouponMapper;
 
-#[Name( 'Coupon' )]
+#[Name( 'coupon' )]
 #[Description( 'Retrieve a single coupon by ID or code. Exactly one of the two arguments must be provided.' )]
 /**
  * Query to retrieve a single coupon.

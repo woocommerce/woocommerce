@@ -20,10 +20,10 @@ class RootQueryType {
 				array(
 					'name'   => 'Query',
 					'fields' => fn() => array(
-						'Products' => ListProducts::get_field_definition(),
-						'Product'  => GetProduct::get_field_definition(),
-						'Coupon'   => GetCoupon::get_field_definition(),
-						'Coupons'  => ListCoupons::get_field_definition(),
+						'products' => ListProducts::get_field_definition(),
+						'product'  => GetProduct::get_field_definition(),
+						'coupon'   => GetCoupon::get_field_definition(),
+						'coupons'  => ListCoupons::get_field_definition(),
 					),
 				)
 			);
