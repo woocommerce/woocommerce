@@ -554,7 +554,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 			// Inject order object, to reduce wc_get_order round trips in the workflows consuming the line item.
 			foreach ( $items as $item ) {
 				if ( $item instanceof WC_Order_Item ) {
-					$item->set_order( $order);
+					$item->set_order( $order );
 				}
 			}
 		} else {
