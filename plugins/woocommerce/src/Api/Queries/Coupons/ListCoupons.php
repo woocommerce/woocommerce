@@ -43,10 +43,14 @@ class ListCoupons {
 		$before = $pagination->before;
 		$limit  = $first ?? $last ?? PaginationParams::get_default_page_size();
 
-		// Use WP_Query for the count and a filtered query for cursor-based pagination.
+		// Use WP_Query for the count and a filtered query for cursor-based
+		// pagination. We only need `found_posts` (which comes from the
+		// SQL_CALC_FOUND_ROWS query WP runs alongside the main SELECT), so
+		// the main SELECT fetches only one row — posts_per_page => -1 would
+		// materialize every ID just to throw it away.
 		$count_args  = array(
 			'post_type'      => 'shop_coupon',
-			'posts_per_page' => -1,
+			'posts_per_page' => 1,
 			'fields'         => 'ids',
 			'post_status'    => $status?->value ?? 'any',
 		);

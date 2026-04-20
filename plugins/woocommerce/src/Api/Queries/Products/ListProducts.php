@@ -104,10 +104,12 @@ class ListProducts {
 
 		// Total count query. Runs before we set the cursor query vars on
 		// $query_args so IdCursorFilter doesn't narrow the count to the
-		// cursor window — we want the count of the full filtered set.
+		// cursor window — we want the count of the full filtered set. Only
+		// `found_posts` is read, so the main SELECT fetches one row —
+		// posts_per_page => -1 would materialize every ID for nothing.
 		$count_args  = array(
 			'post_type'      => 'product',
-			'posts_per_page' => -1,
+			'posts_per_page' => 1,
 			'fields'         => 'ids',
 			'post_status'    => $filters->status?->value ?? 'any',
 		);
