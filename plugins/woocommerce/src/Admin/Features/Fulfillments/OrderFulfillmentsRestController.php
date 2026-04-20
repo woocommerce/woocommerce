@@ -207,6 +207,9 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 	/**
 	 * Get the fulfillments for the order.
 	 *
+	 * @since 10.1.0
+	 * @since 10.8.0 Date fields are returned as ISO 8601 UTC with 'Z' suffix.
+	 *
 	 * @param WP_REST_Request $request The request object.
 	 *
 	 * @return WP_REST_Response The fulfillments for the order, or an error if the request fails.
@@ -244,6 +247,9 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 
 	/**
 	 * Create a new fulfillment with the given data for the order.
+	 *
+	 * @since 10.1.0
+	 * @since 10.8.0 Date fields in the response are returned as ISO 8601 UTC with 'Z' suffix.
 	 *
 	 * @param WP_REST_Request $request The request object.
 	 *
@@ -318,6 +324,9 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 	/**
 	 * Get a specific fulfillment for the order.
 	 *
+	 * @since 10.1.0
+	 * @since 10.8.0 Date fields in the response are returned as ISO 8601 UTC with 'Z' suffix.
+	 *
 	 * @param WP_REST_Request $request The request object.
 	 *
 	 * @return WP_REST_Response The fulfillment for the order, or an error if the request fails.
@@ -354,6 +363,9 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 
 	/**
 	 * Update a specific fulfillment for the order.
+	 *
+	 * @since 10.1.0
+	 * @since 10.8.0 Date fields in the response are returned as ISO 8601 UTC with 'Z' suffix.
 	 *
 	 * @param WP_REST_Request $request The request object.
 	 *
@@ -1296,7 +1308,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 	 * Format the fulfillment raw data for a REST response by converting every
 	 * UTC-stored datetime field into an ISO 8601 string with explicit 'Z' suffix.
 	 *
-	 * @since 10.7.0
+	 * @since 10.8.0
 	 * @param array<string, mixed> $raw_data The fulfillment raw data.
 	 * @return array<string, mixed>
 	 */
@@ -1319,7 +1331,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 	/**
 	 * Convert a UTC 'Y-m-d H:i:s' datetime string to ISO 8601 with 'Z' suffix.
 	 *
-	 * @since 10.7.0
+	 * @since 10.8.0
 	 * @param string|null $date UTC datetime string.
 	 * @return string|null ISO 8601 string with 'Z' suffix, or null for empty input.
 	 */

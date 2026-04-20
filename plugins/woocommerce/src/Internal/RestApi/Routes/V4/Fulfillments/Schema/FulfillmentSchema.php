@@ -152,6 +152,7 @@ class FulfillmentSchema extends AbstractSchema {
 	/**
 	 * Format a UTC 'Y-m-d H:i:s' string as ISO 8601 with explicit 'Z' suffix.
 	 *
+	 * @since 10.8.0
 	 * @param string|null $date UTC datetime string.
 	 * @return string|null
 	 */

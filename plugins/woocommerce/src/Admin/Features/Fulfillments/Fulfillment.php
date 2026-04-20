@@ -299,6 +299,9 @@ class Fulfillment extends \WC_Data {
 	 * the convention of current_time('mysql')). Strings with an explicit
 	 * timezone designator (Z, +00:00, UTC) are respected.
 	 *
+	 * @since 10.1.0
+	 * @since 10.8.0 Input is normalized to UTC before storage.
+	 *
 	 * @param string|null $date_updated Date updated.
 	 */
 	public function set_date_updated( ?string $date_updated ): void {
@@ -314,6 +317,9 @@ class Fulfillment extends \WC_Data {
 
 	/**
 	 * Set the date the fulfillment was fulfilled. Input is normalized to UTC.
+	 *
+	 * @since 10.1.0
+	 * @since 10.8.0 Input is normalized to UTC before storage.
 	 *
 	 * @param string $date_fulfilled Date fulfilled. See set_date_updated() for accepted formats.
 	 */
@@ -336,6 +342,9 @@ class Fulfillment extends \WC_Data {
 	/**
 	 * Set the date deleted. Input is normalized to UTC.
 	 *
+	 * @since 10.1.0
+	 * @since 10.8.0 Input is normalized to UTC before storage.
+	 *
 	 * @param string|null $date_deleted Date deleted. See set_date_updated() for accepted formats.
 	 * @return void
 	 */
@@ -351,7 +360,7 @@ class Fulfillment extends \WC_Data {
 	 * explicit timezone designator (Z, numeric offset, or named zone) are
 	 * respected as-is.
 	 *
-	 * @since 10.7.0
+	 * @since 10.8.0
 	 * @param string|null $date Date input.
 	 * @return string|null UTC datetime string, or null for empty/invalid input.
 	 */
@@ -376,7 +385,7 @@ class Fulfillment extends \WC_Data {
 	 * by set_date_*() setters (which would treat them as site-local input).
 	 *
 	 * @internal For use by the fulfillment data store only.
-	 * @since 10.7.0
+	 * @since 10.8.0
 	 * @param array<string, mixed> $props Prop values keyed by prop name.
 	 * @return void
 	 */
