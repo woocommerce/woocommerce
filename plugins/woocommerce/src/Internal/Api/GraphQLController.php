@@ -129,19 +129,16 @@ class GraphQLController {
 	 * @param \WP_REST_Request $request The REST request.
 	 */
 	private function process_request( \WP_REST_Request $request ): \WP_REST_Response {
-		// 2. Parse request.
+		// 2. Parse request. GET query-string `variables` and `extensions`
+		// arrive as JSON strings; decode_json_param() unifies them with the
+		// already-decoded-array path from POST bodies and rejects malformed
+		// or non-object payloads up front so they surface as HTTP 400
+		// INVALID_ARGUMENT instead of as confusing resolver errors (null
+		// decode) or HTTP 500 TypeErrors (scalar decode).
 		$query          = $request->get_param( 'query' );
-		$variables      = $request->get_param( 'variables' ) ?? array();
 		$operation_name = $request->get_param( 'operationName' );
-		$extensions     = $request->get_param( 'extensions' ) ?? array();
-
-		// GET requests send variables and extensions as JSON-encoded strings.
-		if ( is_string( $variables ) ) {
-			$variables = json_decode( $variables, true ) ?? array();
-		}
-		if ( is_string( $extensions ) ) {
-			$extensions = json_decode( $extensions, true ) ?? array();
-		}
+		$variables      = $this->decode_json_param( $request->get_param( 'variables' ), 'variables' );
+		$extensions     = $this->decode_json_param( $request->get_param( 'extensions' ), 'extensions' );
 
 		// 3. Resolve query (cache lookup / APQ / parse).
 		$source = $this->query_cache->resolve( $query, $extensions );
@@ -263,6 +260,57 @@ class GraphQLController {
 			);
 		}
 		return $this->schema;
+	}
+
+	/**
+	 * Decode an optional JSON-object param (`variables` / `extensions`) into an array.
+	 *
+	 * WP_REST_Request delivers POST-body params as already-decoded arrays,
+	 * but GET query-string equivalents arrive as raw JSON strings. This
+	 * helper unifies the two and rejects malformed JSON or non-object
+	 * payloads with an InvalidArgumentException — which handle_request()
+	 * surfaces as HTTP 400 INVALID_ARGUMENT, rather than letting a null
+	 * decode slip through as "no variables" or a scalar decode trigger a
+	 * downstream TypeError / HTTP 500.
+	 *
+	 * @param mixed  $value The param value from WP_REST_Request::get_param().
+	 * @param string $name  The param name, used in error messages.
+	 * @return array The decoded object, or an empty array when the param is omitted / empty / JSON null.
+	 * @throws \InvalidArgumentException When the payload is not a JSON object or not valid JSON.
+	 */
+	private function decode_json_param( $value, string $name ): array {
+		if ( null === $value ) {
+			return array();
+		}
+		if ( is_array( $value ) ) {
+			return $value;
+		}
+		// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Not HTML; serialized as JSON.
+		if ( ! is_string( $value ) ) {
+			throw new \InvalidArgumentException(
+				sprintf( 'Argument `%s` must be a JSON object or omitted.', $name )
+			);
+		}
+		if ( '' === $value ) {
+			return array();
+		}
+		$decoded = json_decode( $value, true );
+		if ( JSON_ERROR_NONE !== json_last_error() ) {
+			throw new \InvalidArgumentException(
+				sprintf( 'Argument `%s` is not valid JSON: %s', $name, json_last_error_msg() )
+			);
+		}
+		if ( null === $decoded ) {
+			// Literal "null" JSON payload — treat as omitted.
+			return array();
+		}
+		if ( ! is_array( $decoded ) ) {
+			throw new \InvalidArgumentException(
+				sprintf( 'Argument `%s` must be a JSON object (got %s).', $name, gettype( $decoded ) )
+			);
+		}
+		return $decoded;
+		// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
 	}
 
 	/**
