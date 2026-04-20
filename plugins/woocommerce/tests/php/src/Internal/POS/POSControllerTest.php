@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\POS;
 
 use Automattic\WooCommerce\Internal\POS\POSController;
+use Automattic\WooCommerce\Internal\POS\Service\POSApprovalService;
 use Automattic\WooCommerce\Internal\POS\Service\POSSessionService;
 use WC_Unit_Test_Case;
 use WP_User;
@@ -26,14 +27,20 @@ class POSControllerTest extends WC_Unit_Test_Case {
 	private $session_service_mock;
 
 	/**
+	 * @var POSApprovalService|\PHPUnit\Framework\MockObject\MockObject
+	 */
+	private $approval_service_mock;
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->session_service_mock = $this->createMock( POSSessionService::class );
-		$this->sut                  = new POSController();
-		$this->sut->init( $this->session_service_mock );
+		$this->session_service_mock  = $this->createMock( POSSessionService::class );
+		$this->approval_service_mock = $this->createMock( POSApprovalService::class );
+		$this->sut                   = new POSController();
+		$this->sut->init( $this->session_service_mock, $this->approval_service_mock );
 
 		as_unschedule_all_actions( POSController::CLEANUP_ACTION_HOOK );
 	}
@@ -101,12 +108,15 @@ class POSControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox handle_cleanup delegates to POSSessionService::cleanup_stale_sessions.
+	 * @testdox handle_cleanup delegates to POSSessionService and POSApprovalService cleanup methods.
 	 */
-	public function test_handle_cleanup_delegates_to_session_service(): void {
+	public function test_handle_cleanup_delegates_to_both_services(): void {
 		$this->session_service_mock
 			->expects( $this->once() )
 			->method( 'cleanup_stale_sessions' );
+		$this->approval_service_mock
+			->expects( $this->once() )
+			->method( 'cleanup_expired_approvals' );
 
 		$this->sut->handle_cleanup();
 	}

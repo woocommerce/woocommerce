@@ -62,7 +62,7 @@ class POSRateLimitServiceTest extends WC_Unit_Test_Case {
 		$result = $this->service->check_rate_limit( '192.168.1.1' );
 		$this->assertInstanceOf( \WP_Error::class, $result );
 
-		$this->simulate_transient_time_passing( '192.168.1.1', 31 );
+		$this->rewind_lockout( '192.168.1.1', 31 );
 
 		$result = $this->service->check_rate_limit( '192.168.1.1' );
 		$this->assertTrue( $result );
@@ -101,15 +101,17 @@ class POSRateLimitServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox 24-hour lockout survives transient deletion (simulating cache flush).
+	 * @testdox All lockout tiers survive wp_cache_flush() - state lives in wp_options.
+	 *
+	 * Guards against the managed-host bug where cache-backed transients could
+	 * be wiped between requests and silently reset the attempts counter.
 	 */
-	public function test_long_lockout_survives_transient_flush(): void {
+	public function test_lockouts_survive_cache_flush(): void {
 		for ( $i = 0; $i < 15; $i++ ) {
 			$this->service->record_failure( '192.168.1.1' );
 		}
 
-		// Simulate a cache flush by clearing all POS rate limit transients for this IP.
-		delete_transient( '_wc_pos_rate_' . hash( 'sha256', '192.168.1.1' ) );
+		wp_cache_flush();
 
 		$result = $this->service->check_rate_limit( '192.168.1.1' );
 		$this->assertInstanceOf( \WP_Error::class, $result );
@@ -127,15 +129,10 @@ class POSRateLimitServiceTest extends WC_Unit_Test_Case {
 		$result = $this->service->check_rate_limit( '192.168.1.1' );
 		$this->assertInstanceOf( \WP_Error::class, $result );
 
-		// Simulate the 24h lockout having expired by rewriting the option.
-		$option_key = 'woocommerce_pos_pin_lockout_' . hash( 'sha256', '192.168.1.1' );
-		update_option( $option_key, array( 'until' => time() - 1 ), false );
+		$this->rewind_lockout( '192.168.1.1', DAY_IN_SECONDS + 1 );
 
 		$result = $this->service->check_rate_limit( '192.168.1.1' );
 		$this->assertTrue( $result );
-
-		// Option should have been cleaned up on the check that found it expired.
-		$this->assertFalse( get_option( $option_key, false ) );
 	}
 
 	/**
@@ -171,17 +168,20 @@ class POSRateLimitServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Simulates time passing for the short-tier transient lockout by rewriting its timestamp.
+	 * Move the stored lockout into the past by N seconds so check_rate_limit
+	 * observes it as elapsed without waiting in real time.
 	 *
 	 * @param string $ip      The IP address.
-	 * @param int    $seconds Seconds to simulate passing.
+	 * @param int    $seconds How far into the past to place the lockout expiry.
 	 */
-	private function simulate_transient_time_passing( string $ip, int $seconds ): void {
-		$key  = '_wc_pos_rate_' . hash( 'sha256', $ip );
-		$data = get_transient( $key );
-		if ( false !== $data && isset( $data['lockout_until'] ) ) {
-			$data['lockout_until'] = time() - $seconds;
-			set_transient( $key, $data, POSRateLimitService::WINDOW_SECONDS );
+	private function rewind_lockout( string $ip, int $seconds ): void {
+		$option_key = 'woocommerce_pos_pin_lockout_' . hash( 'sha256', $ip );
+		$data       = get_option( $option_key, array() );
+		if ( ! is_array( $data ) ) {
+			$data = array();
 		}
+		$data['lockout_until']     = time() - $seconds;
+		$data['window_started_at'] = time() - $seconds - 60;
+		update_option( $option_key, $data, false );
 	}
 }

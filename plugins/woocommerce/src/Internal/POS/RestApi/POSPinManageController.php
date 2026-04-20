@@ -152,10 +152,15 @@ class POSPinManageController extends RestApiControllerBase implements RegisterHo
 		$action = $request->get_param( 'action' );
 		$logger = wc_get_logger();
 
+		$target_user = get_userdata( $target_user_id );
+		$actor       = get_userdata( $current_user_id );
+		$target_label = $target_user ? "{$target_user->user_login} (ID {$target_user_id})" : "ID {$target_user_id}";
+		$actor_label  = $actor ? "{$actor->user_login} (ID {$current_user_id})" : "ID {$current_user_id}";
+
 		if ( 'delete' === $action ) {
 			$this->pin_service->delete_pin( $target_user_id );
 			$logger->info(
-				sprintf( 'POS PIN deleted for user %d by user %d.', $target_user_id, $current_user_id ),
+				sprintf( 'POS PIN deleted for user %s by %s.', $target_label, $actor_label ),
 				array( 'source' => 'woocommerce-pos' )
 			);
 			return array( 'success' => true );
@@ -201,7 +206,7 @@ class POSPinManageController extends RestApiControllerBase implements RegisterHo
 		}
 
 		$logger->info(
-			sprintf( 'POS PIN set for user %d by user %d.', $target_user_id, $current_user_id ),
+			sprintf( 'POS PIN set for user %s by %s.', $target_label, $actor_label ),
 			array( 'source' => 'woocommerce-pos' )
 		);
 

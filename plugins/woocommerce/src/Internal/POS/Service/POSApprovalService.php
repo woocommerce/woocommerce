@@ -158,4 +158,61 @@ class POSApprovalService {
 	public function get_last_failure_reason(): string {
 		return $this->last_failure_reason;
 	}
+
+	/**
+	 * Delete approval rows whose expires_at is in the past.
+	 *
+	 * Tokens created but never consumed would otherwise accumulate since
+	 * approval storage no longer relies on transient auto-expiry. Called
+	 * from the recurring POSController cleanup action.
+	 *
+	 * @since 10.8.0
+	 * @return int Number of expired rows removed.
+	 */
+	public function cleanup_expired_approvals(): int {
+		global $wpdb;
+
+		$now        = time();
+		$prefix_key = self::APPROVAL_PREFIX . '%';
+
+		// Pull candidate rows by prefix, decode option_value, and delete the
+		// ones past expiry. Pattern prefix lookups on option_name benefit from
+		// the unique index.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT option_name, option_value FROM {$wpdb->options} WHERE option_name LIKE %s",
+				$prefix_key
+			)
+		);
+
+		if ( empty( $rows ) ) {
+			return 0;
+		}
+
+		$deleted = 0;
+		foreach ( $rows as $row ) {
+			$data = maybe_unserialize( $row->option_value );
+			if ( ! is_array( $data ) ) {
+				// Malformed entry - remove it.
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+				$wpdb->delete( $wpdb->options, array( 'option_name' => $row->option_name ) );
+				wp_cache_delete( $row->option_name, 'options' );
+				++$deleted;
+				continue;
+			}
+
+			$expires_at = isset( $data['expires_at'] ) ? (int) $data['expires_at'] : 0;
+			if ( $expires_at > 0 && $expires_at >= $now ) {
+				continue;
+			}
+
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$wpdb->delete( $wpdb->options, array( 'option_name' => $row->option_name ) );
+			wp_cache_delete( $row->option_name, 'options' );
+			++$deleted;
+		}
+
+		return $deleted;
+	}
 }

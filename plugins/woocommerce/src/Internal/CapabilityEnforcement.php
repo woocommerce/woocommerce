@@ -158,18 +158,7 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 
 		if ( 'shop_order_refund' === $post_type && 'create' === $context ) {
 			$this->extract_approval_context_from_rest_request();
-			$allowed = $this->user_has_capability( 'refund_shop_orders' );
-			wc_get_logger()->debug(
-				sprintf(
-					'enforce_capabilities shop_order_refund/create: allowed=%s base_permission=%s user=%d approval_error=%s',
-					$allowed ? 'true' : 'false',
-					$permission ? 'true' : 'false',
-					get_current_user_id(),
-					$this->approval_error instanceof WP_Error ? $this->approval_error->get_error_code() : 'none'
-				),
-				array( 'source' => 'woocommerce-pos' )
-			);
-			return $allowed;
+			return $this->user_has_capability( 'refund_shop_orders' );
 		}
 
 		if ( 'shop_coupon' === $post_type && 'create' === $context ) {
@@ -255,17 +244,6 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 	 */
 	public function enforce_route_access( $response, array $handler, WP_REST_Request $request ) {
 		unset( $handler );
-
-		wc_get_logger()->debug(
-			sprintf(
-				'enforce_route_access: route=%s response_is_wp_error=%s response_code=%s approval_error=%s',
-				$request->get_route(),
-				is_wp_error( $response ) ? 'true' : 'false',
-				is_wp_error( $response ) ? $response->get_error_code() : 'n/a',
-				$this->approval_error instanceof WP_Error ? $this->approval_error->get_error_code() : 'none'
-			),
-			array( 'source' => 'woocommerce-pos' )
-		);
 
 		// If the permission callback already denied the request and we recorded a
 		// specific approval-token failure during the check, surface the structured
@@ -369,21 +347,15 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 	 * @return bool
 	 */
 	public function check_approval_token( bool $has_cap, string $capability, int $user_id ): bool {
-		$logger     = wc_get_logger();
-		$log_source = array( 'source' => 'woocommerce-pos' );
-
 		if ( $has_cap ) {
-			$logger->debug( "check_approval_token: has_cap=true cap={$capability} user={$user_id} - allowing", $log_source );
 			return true;
 		}
 
 		if ( ! in_array( $capability, self::APPROVABLE_CAPABILITIES, true ) ) {
-			$logger->debug( "check_approval_token: cap={$capability} not approvable - denying", $log_source );
 			return false;
 		}
 
 		if ( '' === $this->current_approval_token ) {
-			$logger->debug( "check_approval_token: cap={$capability} no token present - denying", $log_source );
 			return false;
 		}
 
@@ -398,34 +370,15 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 					? 'woocommerce_pos_approval_action_mismatch'
 					: 'woocommerce_pos_approval_invalid_or_expired'
 			);
-			$logger->debug( "check_approval_token: validate_and_consume returned false reason={$reason} cap={$capability} - approval_error set", $log_source );
 			return false;
 		}
 
-		$approved_order_id = (int) ( $approval_data['context']['order_id'] ?? 0 );
-		$logger->debug(
-			sprintf(
-				'check_approval_token: validate_and_consume succeeded. approved_order=%d current_order=%d cap=%s',
-				$approved_order_id,
-				$this->current_order_id,
-				$capability
-			),
-			$log_source
-		);
-
 		// Validate the approval is scoped to the correct order if applicable.
 		// Non-order-scoped approvals (e.g. coupon creation) skip this check.
+		$approved_order_id = (int) ( $approval_data['context']['order_id'] ?? 0 );
 		if ( $approved_order_id > 0 || $this->current_order_id > 0 ) {
 			if ( $approved_order_id !== $this->current_order_id ) {
 				$this->approval_error = $this->build_approval_error( 'woocommerce_pos_approval_order_mismatch' );
-				$logger->debug(
-					sprintf(
-						'check_approval_token: order mismatch approved=%d current=%d',
-						$approved_order_id,
-						$this->current_order_id
-					),
-					$log_source
-				);
 				return false;
 			}
 		}
@@ -437,7 +390,6 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 		$this->current_approval_token = '';
 		$this->approval_error         = null;
 
-		$logger->debug( "check_approval_token: cap={$capability} granted via approval token", $log_source );
 		return true;
 	}
 
@@ -482,18 +434,20 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 	 * @param int    $user_id       The user who performed the action.
 	 */
 	private function log_approval_consumed( array $approval_data, string $capability, int $user_id ): void {
-		$approver      = get_userdata( $approval_data['approver_id'] );
-		$approver_name = $approver ? $approver->display_name : (string) $approval_data['approver_id'];
-		$actor         = get_userdata( $user_id );
-		$actor_name    = $actor ? $actor->display_name : (string) $user_id;
+		$approver       = get_userdata( $approval_data['approver_id'] );
+		$approver_label = $approver
+			? sprintf( '%s (%s, ID %d)', $approver->display_name, $approver->user_login, $approval_data['approver_id'] )
+			: sprintf( 'ID %d', $approval_data['approver_id'] );
+		$actor          = get_userdata( $user_id );
+		$actor_label    = $actor
+			? sprintf( '%s (%s, ID %d)', $actor->display_name, $actor->user_login, $user_id )
+			: sprintf( 'ID %d', $user_id );
 
 		$message = sprintf(
-			'POS override consumed: %s granted to %s (user %d), approved by %s (user %d).',
+			'POS override consumed: %s granted to %s, approved by %s.',
 			$capability,
-			$actor_name,
-			$user_id,
-			$approver_name,
-			$approval_data['approver_id']
+			$actor_label,
+			$approver_label
 		);
 
 		$order_id = (int) ( $approval_data['context']['order_id'] ?? 0 );
@@ -570,44 +524,21 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 			}
 		}
 
-		$request_source = 'none';
 		if ( $request instanceof WP_REST_Request ) {
-			$request_source               = $this->current_rest_request instanceof WP_REST_Request ? 'captured' : 'server_current';
 			$this->current_approval_token = (string) $request->get_param( '_pos_approval' );
 			$route                        = $request->get_route();
 		} else {
-			$request_source               = 'post_fallback';
 			// phpcs:ignore WordPress.Security.NonceVerification.Missing
 			$this->current_approval_token = isset( $_POST['_pos_approval'] )
 				? sanitize_text_field( wp_unslash( $_POST['_pos_approval'] ) )
 				: '';
-			$route                        = $this->get_rest_route_from_request_uri();
+			$route = $this->get_rest_route_from_request_uri();
 		}
 
 		// Extract order ID from the route (e.g., /orders/123/refunds).
 		if ( preg_match( '#/orders/(\d+)/#', $route, $matches ) ) {
 			$this->current_order_id = (int) $matches[1];
 		}
-
-		// Temporary diagnostic to identify why the token is sometimes missing
-		// from the captured request on hosted environments. Remove once the
-		// root cause is understood and a permanent guard is in place.
-		$token_preview = '';
-		if ( '' !== $this->current_approval_token ) {
-			$token_preview = substr( $this->current_approval_token, 0, 8 )
-				. '...len=' . strlen( $this->current_approval_token )
-				. ' sha8=' . substr( hash( 'sha256', $this->current_approval_token ), 0, 8 );
-		}
-		wc_get_logger()->debug(
-			sprintf(
-				'extract_approval_context: source=%s, token=%s, order_id=%d, route=%s',
-				$request_source,
-				'' === $this->current_approval_token ? 'empty' : $token_preview,
-				$this->current_order_id,
-				$route
-			),
-			array( 'source' => 'woocommerce-pos' )
-		);
 	}
 
 	/**

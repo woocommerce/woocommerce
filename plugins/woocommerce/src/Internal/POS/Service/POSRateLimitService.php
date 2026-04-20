@@ -11,17 +11,18 @@ use WP_Error;
  * Rate limiting for POS PIN authentication endpoints.
  *
  * Implements progressive lockouts: 30s after 5 failures, 5min after 10, 24h after 15.
- * Short-tier lockouts are stored in transients; the 24h tier is stored in wp_options so
- * it survives cache flushes and cannot be silently reset by object cache invalidation.
+ * All state (attempt counter and lockout expiry) is stored in wp_options so it
+ * survives object-cache evictions and cache flushes. Relying on the transient
+ * API here would let a managed-host cache eviction silently reset the counter
+ * and defeat the long-tier lockout that depends on it.
  *
  * @since 10.8.0
  */
 class POSRateLimitService {
 
-	const MAX_ATTEMPTS     = 20;
-	const WINDOW_SECONDS   = 900;
-	const TRANSIENT_PREFIX = '_wc_pos_rate_';
-	const OPTION_PREFIX    = 'woocommerce_pos_pin_lockout_';
+	const MAX_ATTEMPTS   = 20;
+	const WINDOW_SECONDS = 900;
+	const OPTION_PREFIX  = 'woocommerce_pos_pin_lockout_';
 
 	private const LOCKOUT_THRESHOLDS = array(
 		5  => 30,
@@ -37,53 +38,36 @@ class POSRateLimitService {
 	 * @return true|WP_Error True if allowed, WP_Error with 429 status if rate limited.
 	 */
 	public function check_rate_limit( string $ip ) {
-		$long_lockout_until = $this->get_long_lockout_until( $ip );
-		if ( null !== $long_lockout_until ) {
-			if ( time() < $long_lockout_until ) {
-				return new WP_Error(
-					'woocommerce_pos_rate_limited',
-					__(
-						'Too many failed attempts. Please try again in 24 hours.',
-						'woocommerce'
-					),
-					array(
-						'status'      => 429,
-						'retry_after' => $long_lockout_until - time(),
-					)
-				);
-			}
-
-			$this->clear_long_lockout( $ip );
-		}
-
-		$key  = $this->get_ip_key( $ip );
-		$data = get_transient( $key );
-
-		if ( false === $data ) {
+		$data = $this->read( $ip );
+		if ( null === $data ) {
 			return true;
 		}
 
-		if ( isset( $data['lockout_until'] ) ) {
-			if ( time() < $data['lockout_until'] ) {
-				$retry_after = $data['lockout_until'] - time();
-				return new WP_Error(
-					'woocommerce_pos_rate_limited',
-					__(
-						'Too many failed attempts. Please try again later.',
-						'woocommerce'
-					),
-					array(
-						'status'      => 429,
-						'retry_after' => $retry_after,
-					)
-				);
-			}
+		$now = time();
 
-			unset( $data['lockout_until'] );
-			set_transient( $key, $data, self::WINDOW_SECONDS );
+		if ( ! empty( $data['lockout_until'] ) && $now < (int) $data['lockout_until'] ) {
+			$retry_after = (int) $data['lockout_until'] - $now;
+			return new WP_Error(
+				'woocommerce_pos_rate_limited',
+				$this->lockout_message( $retry_after ),
+				array(
+					'status'      => 429,
+					'retry_after' => $retry_after,
+				)
+			);
 		}
 
-		if ( isset( $data['attempts'] ) && $data['attempts'] >= self::MAX_ATTEMPTS ) {
+		// Lockout elapsed or never set. Prune window-expired data so a genuine
+		// user isn't permanently counted against.
+		if ( ! empty( $data['lockout_until'] ) && $now >= (int) $data['lockout_until'] ) {
+			unset( $data['lockout_until'] );
+		}
+		if ( isset( $data['window_started_at'] ) && $now - (int) $data['window_started_at'] > self::WINDOW_SECONDS ) {
+			$this->clear( $ip );
+			return true;
+		}
+
+		if ( isset( $data['attempts'] ) && (int) $data['attempts'] >= self::MAX_ATTEMPTS ) {
 			return new WP_Error(
 				'woocommerce_pos_rate_limited',
 				__(
@@ -104,35 +88,26 @@ class POSRateLimitService {
 	 * @param string $ip The client IP address.
 	 */
 	public function record_failure( string $ip ): void {
-		$key  = $this->get_ip_key( $ip );
-		$data = get_transient( $key );
+		$now  = time();
+		$data = $this->read( $ip );
 
-		if ( false === $data ) {
-			$data = array( 'attempts' => 0 );
+		if ( null === $data || ( isset( $data['window_started_at'] ) && $now - (int) $data['window_started_at'] > self::WINDOW_SECONDS ) ) {
+			$data = array(
+				'attempts'          => 0,
+				'window_started_at' => $now,
+			);
 		}
 
 		++$data['attempts'];
 
-		$long_lockout_triggered = false;
-
 		foreach ( array_reverse( self::LOCKOUT_THRESHOLDS, true ) as $threshold => $duration ) {
 			if ( $data['attempts'] >= $threshold ) {
-				if ( DAY_IN_SECONDS === $duration ) {
-					$this->set_long_lockout( $ip, time() + DAY_IN_SECONDS );
-					$long_lockout_triggered = true;
-				} else {
-					$data['lockout_until'] = time() + $duration;
-				}
+				$data['lockout_until'] = $now + $duration;
 				break;
 			}
 		}
 
-		if ( $long_lockout_triggered ) {
-			delete_transient( $key );
-			return;
-		}
-
-		set_transient( $key, $data, self::WINDOW_SECONDS );
+		$this->write( $ip, $data );
 	}
 
 	/**
@@ -142,66 +117,65 @@ class POSRateLimitService {
 	 * @param string $ip The client IP address.
 	 */
 	public function reset( string $ip ): void {
-		delete_transient( $this->get_ip_key( $ip ) );
-		$this->clear_long_lockout( $ip );
+		$this->clear( $ip );
 	}
 
 	/**
-	 * Get the long (24h) lockout expiry timestamp if present and not yet expired in storage.
+	 * Read the rate-limit record for an IP from wp_options.
 	 *
 	 * @param string $ip The client IP address.
-	 * @return int|null The timestamp when the lockout expires, or null if none is set.
+	 * @return array|null
 	 */
-	private function get_long_lockout_until( string $ip ): ?int {
-		$value = get_option( $this->get_option_key( $ip ), false );
-
-		if ( ! is_array( $value ) || ! isset( $value['until'] ) ) {
-			return null;
-		}
-
-		return (int) $value['until'];
+	private function read( string $ip ): ?array {
+		$value = get_option( $this->get_option_key( $ip ), null );
+		return is_array( $value ) ? $value : null;
 	}
 
 	/**
-	 * Persist the long (24h) lockout expiry in wp_options so cache flushes do not clear it.
+	 * Persist the rate-limit record for an IP to wp_options.
 	 *
-	 * @param string $ip    The client IP address.
-	 * @param int    $until Unix timestamp when the lockout expires.
+	 * @param string $ip   The client IP address.
+	 * @param array  $data The data to persist.
 	 */
-	private function set_long_lockout( string $ip, int $until ): void {
-		update_option(
-			$this->get_option_key( $ip ),
-			array( 'until' => $until ),
-			false
-		);
+	private function write( string $ip, array $data ): void {
+		update_option( $this->get_option_key( $ip ), $data, false );
 	}
 
 	/**
-	 * Remove the long (24h) lockout entry for the given IP.
+	 * Remove the rate-limit record for an IP.
 	 *
 	 * @param string $ip The client IP address.
 	 */
-	private function clear_long_lockout( string $ip ): void {
+	private function clear( string $ip ): void {
 		delete_option( $this->get_option_key( $ip ) );
 	}
 
 	/**
-	 * Hash the IP to create a transient-safe key.
-	 *
-	 * @param string $ip The client IP address.
-	 * @return string The transient key.
-	 */
-	private function get_ip_key( string $ip ): string {
-		return self::TRANSIENT_PREFIX . hash( 'sha256', $ip );
-	}
-
-	/**
-	 * Hash the IP to create an option-safe key for the 24h persistent lockout.
+	 * Hash the IP to create an option-safe key.
 	 *
 	 * @param string $ip The client IP address.
 	 * @return string The option key.
 	 */
 	private function get_option_key( string $ip ): string {
 		return self::OPTION_PREFIX . hash( 'sha256', $ip );
+	}
+
+	/**
+	 * Human-readable lockout message tuned to the remaining duration.
+	 *
+	 * @param int $retry_after Seconds until the lockout expires.
+	 * @return string
+	 */
+	private function lockout_message( int $retry_after ): string {
+		if ( $retry_after >= HOUR_IN_SECONDS ) {
+			return __(
+				'Too many failed attempts. Please try again in 24 hours.',
+				'woocommerce'
+			);
+		}
+		return __(
+			'Too many failed attempts. Please try again later.',
+			'woocommerce'
+		);
 	}
 }

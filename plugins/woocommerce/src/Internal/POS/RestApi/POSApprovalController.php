@@ -197,8 +197,9 @@ class POSApprovalController extends RestApiControllerBase implements RegisterHoo
 
 		$user = get_userdata( $user_id );
 		if ( ! $user || ! user_can( $user_id, $action ) ) {
+			$user_label = $user ? "{$user->user_login} (ID {$user_id})" : "ID {$user_id}";
 			$logger->warning(
-				sprintf( 'Approval failed: user %d lacks required capabilities.', $user_id ),
+				sprintf( 'Approval failed: user %s lacks required capabilities.', $user_label ),
 				$log_context
 			);
 			return new WP_Error(
@@ -211,7 +212,7 @@ class POSApprovalController extends RestApiControllerBase implements RegisterHoo
 		$token = $this->approval_service->create_approval( $user_id, $action, $context );
 
 		$logger->info(
-			sprintf( 'Approval granted by user %d for action %s.', $user_id, $action ),
+			sprintf( 'Approval granted by user %s (ID %d) for action %s.', $user->user_login, $user_id, $action ),
 			$log_context
 		);
 

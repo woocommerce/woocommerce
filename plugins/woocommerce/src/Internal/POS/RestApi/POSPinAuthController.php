@@ -177,8 +177,9 @@ class POSPinAuthController extends RestApiControllerBase implements RegisterHook
 
 		$user = get_userdata( $user_id );
 		if ( ! $user || ! $user->has_cap( 'view_pos' ) ) {
+			$user_label = $user ? "{$user->user_login} (ID {$user_id})" : "ID {$user_id}";
 			$logger->warning(
-				sprintf( 'PIN authentication failed: user %d lacks view_pos.', $user_id ),
+				sprintf( 'PIN authentication failed: user %s lacks view_pos.', $user_label ),
 				$log_context
 			);
 			$this->rate_limit_service->record_failure( $client_ip );
@@ -215,7 +216,7 @@ class POSPinAuthController extends RestApiControllerBase implements RegisterHook
 		);
 
 		$logger->info(
-			sprintf( 'PIN authentication succeeded for user %d on register %s.', $user_id, $register_id ),
+			sprintf( 'PIN authentication succeeded for user %s (ID %d) on register %s.', $user->user_login, $user_id, $register_id ),
 			$log_context
 		);
 
@@ -290,8 +291,9 @@ class POSPinAuthController extends RestApiControllerBase implements RegisterHook
 
 		$user = get_userdata( $user_id );
 		if ( ! $user || ! $user->has_cap( 'view_pos' ) ) {
+			$user_label = $user ? "{$user->user_login} (ID {$user_id})" : "ID {$user_id}";
 			$logger->warning(
-				sprintf( 'PIN verification failed: user %d lacks view_pos.', $user_id ),
+				sprintf( 'PIN verification failed: user %s lacks view_pos.', $user_label ),
 				$log_context
 			);
 			$this->rate_limit_service->record_failure( $client_ip );
@@ -306,7 +308,7 @@ class POSPinAuthController extends RestApiControllerBase implements RegisterHook
 		}
 
 		$logger->info(
-			sprintf( 'PIN verification succeeded for user %d.', $user_id ),
+			sprintf( 'PIN verification succeeded for user %s (ID %d).', $user->user_login, $user_id ),
 			$log_context
 		);
 

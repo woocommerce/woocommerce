@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\POS;
 
+use Automattic\WooCommerce\Internal\POS\Service\POSApprovalService;
 use Automattic\WooCommerce\Internal\POS\Service\POSSessionService;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use WP_Error;
@@ -27,6 +28,13 @@ class POSController implements RegisterHooksInterface {
 	private POSSessionService $session_service;
 
 	/**
+	 * Approval service instance.
+	 *
+	 * @var POSApprovalService
+	 */
+	private POSApprovalService $approval_service;
+
+	/**
 	 * Session auth error for expired POS credentials.
 	 *
 	 * @var WP_Error|null
@@ -38,10 +46,12 @@ class POSController implements RegisterHooksInterface {
 	 *
 	 * @internal
 	 * @since 10.8.0
-	 * @param POSSessionService $session_service Session service instance.
+	 * @param POSSessionService  $session_service  Session service instance.
+	 * @param POSApprovalService $approval_service Approval service instance.
 	 */
-	final public function init( POSSessionService $session_service ): void {
-		$this->session_service = $session_service;
+	final public function init( POSSessionService $session_service, POSApprovalService $approval_service ): void {
+		$this->session_service  = $session_service;
+		$this->approval_service = $approval_service;
 	}
 
 	/**
@@ -79,12 +89,15 @@ class POSController implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Handle the cleanup action by delegating to the session service.
+	 * Handle the recurring cleanup action.
+	 *
+	 * Delegates to each service that owns durable POS state. Runs nightly.
 	 *
 	 * @since 10.8.0
 	 */
 	public function handle_cleanup(): void {
 		$this->session_service->cleanup_stale_sessions();
+		$this->approval_service->cleanup_expired_approvals();
 	}
 
 	/**
