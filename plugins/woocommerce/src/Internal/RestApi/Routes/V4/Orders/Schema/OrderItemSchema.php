@@ -191,8 +191,6 @@ class OrderItemSchema extends AbstractLineItemSchema {
 			'meta_data'       => $this->prepare_meta_data( $order_item ),
 			'currency'        => $order->get_currency(),
 			'currency_symbol' => html_entity_decode( get_woocommerce_currency_symbol( $order->get_currency() ), ENT_QUOTES ),
-			'can_be_refunded' => 0 !== $order_item->get_product_id()
-				&& ( $order_item->get_quantity() + $order->get_qty_refunded_for_item( $order_item->get_id() ) ) > 0,
 		);
 
 		// Add COGS data.

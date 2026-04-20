@@ -307,6 +307,8 @@ class Controller extends AbstractController {
 		$results    = $this->collection_query->get_query_results( $query_args, $request );
 		$items      = array();
 
+		$this->prime_refund_caches( $results['results'] );
+
 		foreach ( $results['results'] as $result ) {
 			$items[] = $this->prepare_response_for_collection( $this->prepare_item_for_response( $result, $request ) );
 		}
@@ -315,6 +317,63 @@ class Controller extends AbstractController {
 		$response        = $pagination_util->add_headers( rest_ensure_response( $items ), $request, $results['total'], $results['pages'] );
 
 		return $response;
+	}
+
+	/**
+	 * Prime refund caches for a batch of orders.
+	 *
+	 * Fetches all refunds for the given orders in a single query and stores them
+	 * in the object cache, so subsequent calls to WC_Order::get_refunds() during
+	 * serialization hit cache instead of issuing per-order queries.
+	 *
+	 * @param WC_Order[] $orders Orders to prime caches for.
+	 */
+	private function prime_refund_caches( array $orders ): void {
+		if ( empty( $orders ) ) {
+			return;
+		}
+
+		$order_ids        = array_map( fn( $order ) => $order->get_id(), $orders );
+		$cache_keys       = array();
+		foreach ( $order_ids as $order_id ) {
+			$cache_keys[ $order_id ] = \WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refunds' . $order_id;
+		}
+
+		// Skip orders already in cache.
+		$cache_values  = wc_cache_get_multiple( array_values( $cache_keys ), 'orders' );
+		$non_cached_ids = array();
+		if ( is_array( $cache_values ) ) {
+			foreach ( $order_ids as $order_id ) {
+				if ( false === $cache_values[ $cache_keys[ $order_id ] ] ) {
+					$non_cached_ids[] = $order_id;
+				}
+			}
+		} else {
+			$non_cached_ids = $order_ids;
+		}
+
+		if ( empty( $non_cached_ids ) ) {
+			return;
+		}
+
+		$refunds = wc_get_orders(
+			array(
+				'type'            => 'shop_order_refund',
+				'post_parent__in' => $non_cached_ids,
+				'limit'           => -1,
+			)
+		);
+
+		$grouped = array();
+		foreach ( $refunds as $refund ) {
+			if ( $refund instanceof \WC_Order_Refund ) {
+				$grouped[ $refund->get_parent_id() ][] = $refund;
+			}
+		}
+
+		foreach ( $non_cached_ids as $order_id ) {
+			wp_cache_set( $cache_keys[ $order_id ], $grouped[ $order_id ] ?? array(), 'orders' );
+		}
 	}
 
 	/**

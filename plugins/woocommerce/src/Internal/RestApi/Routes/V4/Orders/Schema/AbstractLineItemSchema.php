@@ -124,19 +124,6 @@ abstract class AbstractLineItemSchema extends AbstractSchema {
 	}
 
 	/**
-	 * Calculate whether a line item can be refunded based on remaining refundable amount.
-	 *
-	 * @param WC_Order_Item $order_item Order item instance.
-	 * @param string        $item_type  The item type for refund lookup (e.g. 'fee', 'shipping').
-	 * @return bool
-	 */
-	protected function calculate_line_item_can_be_refunded( WC_Order_Item $order_item, string $item_type ): bool {
-		$order = $order_item->get_order();
-		return ( (float) $order_item->get_total()
-			- (float) $order->get_total_refunded_for_item( $order_item->get_id(), $item_type ) ) > 0;
-	}
-
-	/**
 	 * Prepare the taxes for the order item.
 	 *
 	 * @param WC_Order_Item_Product|WC_Order_Item_Fee $order_item Order item instance.
