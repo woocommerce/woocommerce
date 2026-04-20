@@ -13,7 +13,6 @@ const ReactRefreshWebpackPlugin = require( '@pmmmwh/react-refresh-webpack-plugin
  * Internal dependencies
  */
 const CustomTemplatedPathPlugin = require( './bin/custom-templated-path-webpack-plugin' );
-const FilesystemCacheWarningsPlugin = require( './bin/filesystem-cache-warnings-webpack-plugin.js' );
 const UnminifyWebpackPlugin = require( './bin/unminify-webpack-plugin.js' );
 const {
 	webpackConfig: styleConfig,
@@ -98,12 +97,9 @@ const webpackConfig = {
 				buildDependencies: {
 					config: [
 						__filename,
-						require.resolve( './bin/custom-templated-path-webpack-plugin' ),
-						require.resolve( './bin/unminify-webpack-plugin' ),
-						require.resolve( '@woocommerce/dependency-extraction-webpack-plugin/src/index' ),
+						path.resolve( __dirname, '../../../../pnpm-lock.yaml' ),
+						require.resolve( '@woocommerce/dependency-extraction-webpack-plugin' ),
 						require.resolve( '@woocommerce/internal-style-build' ),
-						require.resolve( '@woocommerce/internal-style-build/webpack-rtl-plugin' ),
-						require.resolve( '@woocommerce/internal-style-build/style-asset-plugin' ),
 					],
 				},
 		  },
@@ -289,8 +285,6 @@ const webpackConfig = {
 				test: /\.js($|\?)/i,
 				mainEntry: 'app/index.min.js',
 			} ),
-		// Suppress file system cache warnings (unsupported serialization related).
-		new FilesystemCacheWarningsPlugin(),
 	].filter( Boolean ),
 	optimization: {
 		minimize: NODE_ENV !== 'development',
