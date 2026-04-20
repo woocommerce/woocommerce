@@ -504,23 +504,56 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 	private function extract_approval_context_from_rest_request(): void {
 		$this->approval_error = null;
 
-		if ( $this->current_rest_request instanceof WP_REST_Request ) {
-			$this->current_approval_token = (string) $this->current_rest_request->get_param( '_pos_approval' );
-			$route = $this->current_rest_request->get_route();
+		// Prefer the request captured by capture_current_rest_route, but fall
+		// back to rest_get_server()->get_current_request() so the token is still
+		// recoverable if the rest_pre_dispatch capture did not fire or was
+		// overridden. Mirrors the fallback chain in get_current_rest_route().
+		$request = $this->current_rest_request instanceof WP_REST_Request
+			? $this->current_rest_request
+			: null;
+
+		if ( null === $request ) {
+			$server = rest_get_server();
+			if ( $server && method_exists( $server, 'get_current_request' ) ) {
+				$current = $server->get_current_request();
+				if ( $current instanceof WP_REST_Request ) {
+					$request = $current;
+				}
+			}
+		}
+
+		$request_source = 'none';
+		if ( $request instanceof WP_REST_Request ) {
+			$request_source               = $this->current_rest_request instanceof WP_REST_Request ? 'captured' : 'server_current';
+			$this->current_approval_token = (string) $request->get_param( '_pos_approval' );
+			$route                        = $request->get_route();
 		} else {
+			$request_source               = 'post_fallback';
 			// phpcs:ignore WordPress.Security.NonceVerification.Missing
 			$this->current_approval_token = isset( $_POST['_pos_approval'] )
 				? sanitize_text_field( wp_unslash( $_POST['_pos_approval'] ) )
 				: '';
-			$route = isset( $_SERVER['REQUEST_URI'] )
-				? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) )
-				: '';
+			$route                        = $this->get_rest_route_from_request_uri();
 		}
 
 		// Extract order ID from the route (e.g., /orders/123/refunds).
 		if ( preg_match( '#/orders/(\d+)/#', $route, $matches ) ) {
 			$this->current_order_id = (int) $matches[1];
 		}
+
+		// Temporary diagnostic to identify why the token is sometimes missing
+		// from the captured request on hosted environments. Remove once the
+		// root cause is understood and a permanent guard is in place.
+		wc_get_logger()->debug(
+			sprintf(
+				'extract_approval_context: source=%s, token=%s, order_id=%d, route=%s',
+				$request_source,
+				'' === $this->current_approval_token ? 'empty' : 'present',
+				$this->current_order_id,
+				$route
+			),
+			array( 'source' => 'woocommerce-pos' )
+		);
 	}
 
 	/**
