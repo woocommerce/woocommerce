@@ -122,7 +122,7 @@ class WC_REST_System_Status_Tools_V2_Controller_Test extends WC_REST_Unit_Test_C
 		wp_set_current_user( $this->user );
 
 		// Set up the transient to be cleared with a proper attribute taxonomy object.
-		$mock_attribute = new stdClass();
+		$mock_attribute                  = new stdClass();
 		$mock_attribute->attribute_id    = 123;
 		$mock_attribute->attribute_name  = 'test_attr';
 		$mock_attribute->attribute_label = 'Test Attr';
