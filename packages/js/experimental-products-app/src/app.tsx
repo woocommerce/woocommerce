@@ -3,10 +3,7 @@
  */
 import { createElement } from '@wordpress/element';
 import { privateApis as routerPrivateApis } from '@wordpress/router';
-import {
-	UnsavedChangesWarning,
-	privateApis as editorPrivateApis,
-} from '@wordpress/editor';
+import { UnsavedChangesWarning } from '@wordpress/editor';
 
 /**
  * Internal dependencies
@@ -20,7 +17,6 @@ import {
 } from './utilites/new-navigation';
 
 const { RouterProvider } = unlock( routerPrivateApis );
-const { GlobalStylesProvider } = unlock( editorPrivateApis );
 
 function ProductsLayout() {
 	// This ensures the edited entity id and type are initialized properly.
