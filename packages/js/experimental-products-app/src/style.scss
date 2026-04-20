@@ -17,7 +17,6 @@ body.product_page_woocommerce-products-dashboard #woocommerce-products-dashboard
 }
 
 body.js:not(.is-fullscreen-mode) {
-
 	&.product_page_woocommerce-products-dashboard #wpadminbar,
 	&.product_page_woocommerce-products-dashboard #adminmenumain {
 		display: block;
@@ -29,7 +28,6 @@ body.js:not(.is-fullscreen-mode) {
 
 	&.product_page_woocommerce-products-dashboard #wpbody {
 		background: #1d2327;
-		;
 	}
 
 	#woocommerce-products-dashboard {
@@ -89,6 +87,6 @@ body.js.is-fullscreen-mode {
 }
 
 .product_page_woocommerce-products-dashboard {
-	@import "products-app/sidebar-dataviews/style.scss";
-	@import "products-app/product-edit/style.scss";
+	@import "sidebar-dataviews/style.scss";
+	@import "product-edit/style.scss";
 }

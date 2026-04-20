@@ -374,6 +374,16 @@
 			"isIgnored": true
 		},
 		{
+			"label": "Ignore all syncpack rules for experimental-products-app",
+			"dependencies": [
+				"**"
+			],
+			"packages": [
+				"@woocommerce/experimental-products-app"
+			],
+			"isIgnored": true
+		},
+		{
 			"dependencies": [
 				"@wordpress/**"
 			],

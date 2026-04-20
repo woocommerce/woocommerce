@@ -10,7 +10,7 @@ import { Product } from '@woocommerce/data';
 /**
  * Internal dependencies
  */
-import { unlock } from '../../lock-unlock';
+import { unlock } from '../lock-unlock';
 
 const { useHistory, useLocation } = unlock( routerPrivateApis );
 

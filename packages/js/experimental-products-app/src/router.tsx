@@ -7,7 +7,7 @@ import { privateApis as routerPrivateApis } from '@wordpress/router';
 /**
  * Internal dependencies
  */
-import { unlock } from '../lock-unlock';
+import { unlock } from './lock-unlock';
 import ProductList from './product-list';
 import ProductEdit from './product-edit';
 import DataViewsSidebarContent from './sidebar-dataviews';

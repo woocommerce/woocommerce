@@ -23,7 +23,7 @@ import {
 import SidebarContent from './sidebar';
 import SiteHub from './site-hub';
 import { Route } from './router';
-import { unlock } from '../lock-unlock';
+import { unlock } from './lock-unlock';
 
 const { NavigableRegion } = unlock( editorPrivateApis );
 

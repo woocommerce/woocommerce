@@ -3,15 +3,12 @@
  */
 import { createElement } from '@wordpress/element';
 import { privateApis as routerPrivateApis } from '@wordpress/router';
-import {
-	UnsavedChangesWarning,
-	privateApis as editorPrivateApis,
-} from '@wordpress/editor';
+import { UnsavedChangesWarning } from '@wordpress/editor';
 
 /**
  * Internal dependencies
  */
-import { unlock } from '../lock-unlock';
+import { unlock } from './lock-unlock';
 import useLayoutAreas from './router';
 import { Layout } from './layout';
 import {
@@ -20,7 +17,6 @@ import {
 } from './utilites/new-navigation';
 
 const { RouterProvider } = unlock( routerPrivateApis );
-const { GlobalStylesProvider } = unlock( editorPrivateApis );
 
 function ProductsLayout() {
 	// This ensures the edited entity id and type are initialized properly.
@@ -37,12 +33,10 @@ function ProductsLayout() {
 export function ProductsApp() {
 	return (
 		<NewNavigationProvider>
-			<GlobalStylesProvider>
-				<UnsavedChangesWarning />
-				<RouterProvider>
-					<ProductsLayout />
-				</RouterProvider>
-			</GlobalStylesProvider>
+			<UnsavedChangesWarning />
+			<RouterProvider>
+				<ProductsLayout />
+			</RouterProvider>
 		</NewNavigationProvider>
 	);
 }
