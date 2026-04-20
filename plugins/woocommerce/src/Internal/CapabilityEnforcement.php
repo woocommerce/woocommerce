@@ -592,11 +592,17 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 		// Temporary diagnostic to identify why the token is sometimes missing
 		// from the captured request on hosted environments. Remove once the
 		// root cause is understood and a permanent guard is in place.
+		$token_preview = '';
+		if ( '' !== $this->current_approval_token ) {
+			$token_preview = substr( $this->current_approval_token, 0, 8 )
+				. '...len=' . strlen( $this->current_approval_token )
+				. ' sha8=' . substr( hash( 'sha256', $this->current_approval_token ), 0, 8 );
+		}
 		wc_get_logger()->debug(
 			sprintf(
 				'extract_approval_context: source=%s, token=%s, order_id=%d, route=%s',
 				$request_source,
-				'' === $this->current_approval_token ? 'empty' : 'present',
+				'' === $this->current_approval_token ? 'empty' : $token_preview,
 				$this->current_order_id,
 				$route
 			),
