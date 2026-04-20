@@ -32,10 +32,6 @@ const ProductsApp = lazy( () =>
 export function initializeProductsDashboard( id: string ): Root {
 	const target = document.getElementById( id );
 	const root = createRoot( target! );
-	console.log( 'initializeProductsDashboard' );
-
-	console.log( ProductsApp );
-
 	root.render(
 		<StrictMode>
 			<Suspense fallback={ null }>
