@@ -121,14 +121,14 @@ foreach ( $execute_params as $param ) :
 <?php endforeach; ?>
 
 <?php if ( $has_authorize ) : ?>
-		if ( ! $command->authorize(
+		if ( ! Utils::authorize_command( $command, array(
 <?php foreach ( $authorize_param_names as $name ) : ?>
-			<?php echo $name; ?>: $execute_args['<?php echo $name; ?>'],
+			'<?php echo $name; ?>' => $execute_args['<?php echo $name; ?>'],
 <?php endforeach; ?>
 <?php if ( $has_preauthorized ) : ?>
-			_preauthorized: <?php echo $preauthorized_expr; ?>,
+			'_preauthorized' => <?php echo $preauthorized_expr; ?>,
 <?php endif; ?>
-		) ) {
+		) ) ) {
 			throw new \GraphQL\Error\Error(
 				'You do not have permission to perform this action.',
 				extensions: array( 'code' => 'UNAUTHORIZED' )

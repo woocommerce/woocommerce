@@ -85,9 +85,51 @@ class Utils {
 	 * @throws \GraphQL\Error\Error On any exception from the command.
 	 */
 	public static function execute_command( object $command, array $execute_args ): mixed {
+		return self::translate_exceptions(
+			static fn() => $command->execute( ...$execute_args )
+		);
+	}
+
+	/**
+	 * Invoke a command's authorize() method, translating any thrown exceptions
+	 * into spec-compliant GraphQL errors.
+	 *
+	 * Mirror of execute_command() for the authorize step. Needed because an
+	 * authorize() call can throw an ApiException (e.g. AuthorizationException
+	 * when a target record does not exist); without this wrapper the
+	 * exception would propagate up to webonyx and lose its error code and
+	 * user-visible message on its way through the generic error formatter.
+	 *
+	 * @param object $command        The command instance (must have an authorize() method).
+	 * @param array  $authorize_args Named arguments to pass to authorize().
+	 *
+	 * @return bool The return value of authorize().
+	 * @throws \GraphQL\Error\Error On any exception from the authorize method.
+	 */
+	public static function authorize_command( object $command, array $authorize_args ): bool {
+		return self::translate_exceptions(
+			static fn() => $command->authorize( ...$authorize_args )
+		);
+	}
+
+	/**
+	 * Invoke a callable, translating any thrown exception into a
+	 * spec-compliant GraphQL error with a machine-readable code.
+	 *
+	 * - ApiException       → its own code + extensions, with the original message.
+	 * - InvalidArgumentException → INVALID_ARGUMENT, with the original message.
+	 * - Any other Throwable     → INTERNAL_ERROR, with a generic message; the
+	 *   original throwable is attached as `previous` for debug-mode surfacing.
+	 *
+	 * @param callable $operation Callable to invoke.
+	 *
+	 * @return mixed The return value of the callable.
+	 * @throws \GraphQL\Error\Error On any exception from the callable.
+	 */
+	private static function translate_exceptions( callable $operation ): mixed {
 		// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Not HTML; serialized as JSON.
 		try {
-			return $command->execute( ...$execute_args );
+			return $operation();
 		} catch ( \Automattic\WooCommerce\Api\ApiException $e ) {
 			throw new \GraphQL\Error\Error(
 				$e->getMessage(),
