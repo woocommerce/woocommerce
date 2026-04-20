@@ -21,7 +21,7 @@ import {
 	isNumber,
 } from '@woocommerce/types';
 import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
-import { sprintf, _n } from '@wordpress/i18n';
+import { sprintf, _n, __ } from '@wordpress/i18n';
 import clsx from 'clsx';
 import { CHECKOUT_URL } from '@woocommerce/block-settings';
 import type { ReactRootWithContainer } from '@woocommerce/base-utils';
@@ -30,6 +30,7 @@ import type { ReactRootWithContainer } from '@woocommerce/base-utils';
  * Internal dependencies
  */
 import type { BlockAttributes } from './types';
+import { DisplayStyle } from './types';
 import QuantityBadge from './quantity-badge';
 import { MiniCartContentsBlock } from './mini-cart-contents/block';
 import './style.scss';
@@ -54,6 +55,7 @@ const MiniCartBlock = ( attributes: Props ): JSX.Element => {
 		colorClassNames,
 		contents = '',
 		miniCartIcon,
+		displayStyle = DisplayStyle.ICON_ONLY,
 		addToCartBehaviour = 'none',
 		onCartClickBehaviour = 'open_drawer',
 		hasHiddenPrice = true,
@@ -259,13 +261,20 @@ const MiniCartBlock = ( attributes: Props ): JSX.Element => {
 				} }
 				aria-label={ ariaLabel }
 			>
-				<QuantityBadge
-					count={ cartItemsCount }
-					icon={ miniCartIcon }
-					iconColor={ iconColor }
-					productCountColor={ productCountColor }
-					productCountVisibility={ productCountVisibility }
-				/>
+				{ displayStyle !== DisplayStyle.TEXT_ONLY && (
+					<QuantityBadge
+						count={ cartItemsCount }
+						icon={ miniCartIcon }
+						iconColor={ iconColor }
+						productCountColor={ productCountColor }
+						productCountVisibility={ productCountVisibility }
+					/>
+				) }
+				{ displayStyle !== DisplayStyle.ICON_ONLY && (
+					<span className="wc-block-mini-cart__label">
+						{ __( 'Cart', 'woocommerce' ) }
+					</span>
+				) }
 				{ ! hasHiddenPrice && (
 					<span
 						className="wc-block-mini-cart__amount"
