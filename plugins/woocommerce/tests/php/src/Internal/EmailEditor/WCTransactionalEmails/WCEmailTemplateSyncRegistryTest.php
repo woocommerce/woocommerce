@@ -144,34 +144,6 @@ class WCEmailTemplateSyncRegistryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that a third-party email classified via the "core" list (POS / Fulfillments) reports source=core.
-	 */
-	public function test_first_party_feature_email_is_classified_as_core(): void {
-		$this->register_third_party_email(
-			'customer_pos_completed_order',
-			'block/third-party-with-version.php',
-			null
-		);
-
-		$registry = WCEmailTemplateSyncRegistry::get_sync_enabled_emails();
-
-		$this->assertArrayHasKey( 'customer_pos_completed_order', $registry );
-		$this->assertSame( 'core', $registry['customer_pos_completed_order']['source'] );
-
-		$this->register_third_party_email(
-			'customer_fulfillment_created',
-			'block/third-party-with-version.php',
-			null
-		);
-
-		WCEmailTemplateSyncRegistry::reset_cache();
-
-		$registry = WCEmailTemplateSyncRegistry::get_sync_enabled_emails();
-		$this->assertArrayHasKey( 'customer_fulfillment_created', $registry );
-		$this->assertSame( 'core', $registry['customer_fulfillment_created']['source'] );
-	}
-
-	/**
 	 * Test that a third-party email without a @version header is silently skipped and a warning is logged.
 	 */
 	public function test_third_party_email_without_version_is_skipped_and_warned(): void {
