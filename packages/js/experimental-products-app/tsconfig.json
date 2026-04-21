@@ -8,11 +8,16 @@
 		"declarationMap": true,
 		"declarationDir": "./build-types",
 		"resolveJsonModule": true,
-		"typeRoots": [ "./typings", "./node_modules/@types" ],
+		"typeRoots": [ "./typings" ],
 		"jsx": "react-jsx",
 		"jsxFactory": null,
 		"jsxFragmentFactory": null
 	},
 	"include": [ "src/**/*" ],
-	"exclude": [ "**/test/**", "**/stories/**" ]
+	"exclude": [
+		"**/test/**",
+		"**/stories/**",
+		"**/*.test.ts",
+		"**/*.test.tsx"
+	]
 }

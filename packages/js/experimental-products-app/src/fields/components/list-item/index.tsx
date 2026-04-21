@@ -7,11 +7,6 @@ import { __ } from '@wordpress/i18n';
 import { isValidElement } from '@wordpress/element';
 import { Stack } from '@wordpress/ui';
 
-/**
- * Internal dependencies
- */
-import './style.scss';
-
 type Item = {
 	id: number | string;
 	title: string;
