@@ -417,12 +417,12 @@ a.fulfillments-trigger {
 	line-height: 16px;
 
 	svg {
-		fill: var(--wp-admin-theme-color, #2271b1);
+		fill: #2271b1;
 	}
 
 	&:hover {
 		svg {
-			fill: var(--wp-admin-theme-color-darker-20, #135e96);
+			fill: #135e96;
 		}
 		border: 2px solid var(--wp-admin-theme-color, #00a0d2);
 	}
