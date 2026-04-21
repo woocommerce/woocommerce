@@ -1,0 +1,13 @@
+diff --git a/lib/runtime/docker/init-config.js b/lib/runtime/docker/init-config.js
+index 8b6a1cfd8ce0c467d9bcb016c1a6494b6f0718bf..b817d61fe3d223b289fc0e4cd32949291553952c 100644
+--- a/lib/runtime/docker/init-config.js
++++ b/lib/runtime/docker/init-config.js
+@@ -260,7 +260,7 @@ RUN echo 'post_max_size = 1G' >> /usr/local/etc/php/php.ini`;
+ 	dockerFileContent += `
+ RUN curl -sS https://getcomposer.org/installer -o /tmp/composer-setup.php
+ RUN export COMPOSER_HASH=\`curl -sS https://composer.github.io/installer.sig\` && php -r "if (hash_file('SHA384', '/tmp/composer-setup.php') === '$COMPOSER_HASH') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('/tmp/composer-setup.php'); } echo PHP_EOL;"
+-RUN php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer
++RUN php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer --version=2.8.12
+ RUN rm /tmp/composer-setup.php`;
+ 
+ 	// Install any Composer packages we might need globally.

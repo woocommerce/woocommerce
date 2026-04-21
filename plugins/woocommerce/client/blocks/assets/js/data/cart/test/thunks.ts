@@ -1,8 +1,18 @@
 /**
+ * External dependencies
+ */
+import { ExtensionCartUpdateArgs } from '@woocommerce/types';
+
+/**
  * Internal dependencies
  */
-import { changeCartItemQuantity, receiveCart } from '../thunks';
+import {
+	changeCartItemQuantity,
+	receiveCart,
+	applyExtensionCartUpdate,
+} from '../thunks';
 import { apiFetchWithHeaders } from '../../shared-controls';
+import { getIsCustomerDataDirty } from '../utils';
 
 jest.mock( '../../shared-controls', () => ( {
 	apiFetchWithHeaders: jest.fn(),
@@ -15,6 +25,17 @@ jest.mock( '../notify-quantity-changes', () => ( {
 jest.mock( '../notify-errors', () => ( {
 	updateCartErrorNotices: jest.fn(),
 } ) );
+
+jest.mock( '../utils', () => ( {
+	getIsCustomerDataDirty: jest.fn( () => false ),
+	setIsCustomerDataDirty: jest.fn(),
+	setTriggerStoreSyncEvent: jest.fn(),
+} ) );
+
+const mockGetIsCustomerDataDirty =
+	getIsCustomerDataDirty as jest.MockedFunction<
+		typeof getIsCustomerDataDirty
+	>;
 
 const mockApiFetchWithHeaders = apiFetchWithHeaders as jest.MockedFunction<
 	typeof apiFetchWithHeaders
@@ -361,5 +382,247 @@ describe( 'receiveCart', () => {
 		} as never )( { dispatch, select } as never );
 
 		expect( dispatch.itemIsPendingDelete ).not.toHaveBeenCalled();
+	} );
+} );
+
+describe( 'applyExtensionCartUpdate', () => {
+	const mockResponse = {
+		items: [],
+		shipping_address: { address_1: '123 Ship St' },
+		billing_address: { address_1: '456 Bill Ave' },
+		totals: { total_price: '1000' },
+	};
+
+	const createMockDispatch = () => ( {
+		receiveCart: jest.fn(),
+		receiveError: jest.fn(),
+	} );
+
+	beforeEach( () => {
+		jest.clearAllMocks();
+		mockGetIsCustomerDataDirty.mockReturnValue( false );
+		mockApiFetchWithHeaders.mockResolvedValue( {
+			response: mockResponse,
+		} );
+	} );
+
+	it( 'should include both addresses when customer data is not dirty', async () => {
+		const dispatch = createMockDispatch();
+
+		await applyExtensionCartUpdate( {
+			namespace: 'test',
+			data: {},
+		} )( { dispatch } as never );
+
+		expect( dispatch.receiveCart ).toHaveBeenCalledWith( mockResponse );
+	} );
+
+	it( 'should strip both addresses when customer data is dirty and no overwrite specified', async () => {
+		mockGetIsCustomerDataDirty.mockReturnValue( true );
+		const dispatch = createMockDispatch();
+
+		await applyExtensionCartUpdate( {
+			namespace: 'test',
+			data: {},
+		} )( { dispatch } as never );
+
+		const received = dispatch.receiveCart.mock.calls[ 0 ][ 0 ];
+		expect( received ).not.toHaveProperty( 'shipping_address' );
+		expect( received ).not.toHaveProperty( 'billing_address' );
+		expect( received ).toHaveProperty( 'totals' );
+	} );
+
+	it( 'should strip both addresses when customer data is dirty and overwriteDirtyCustomerData is false', async () => {
+		mockGetIsCustomerDataDirty.mockReturnValue( true );
+		const dispatch = createMockDispatch();
+
+		await applyExtensionCartUpdate( {
+			namespace: 'test',
+			data: {},
+			overwriteDirtyCustomerData: false,
+		} )( { dispatch } as never );
+
+		const received = dispatch.receiveCart.mock.calls[ 0 ][ 0 ];
+		expect( received ).not.toHaveProperty( 'shipping_address' );
+		expect( received ).not.toHaveProperty( 'billing_address' );
+		expect( received ).toHaveProperty( 'totals' );
+	} );
+
+	it( 'should include both addresses when overwriteDirtyCustomerData is true', async () => {
+		mockGetIsCustomerDataDirty.mockReturnValue( true );
+		const dispatch = createMockDispatch();
+
+		await applyExtensionCartUpdate( {
+			namespace: 'test',
+			data: {},
+			overwriteDirtyCustomerData: true,
+		} )( { dispatch } as never );
+
+		const received = dispatch.receiveCart.mock.calls[ 0 ][ 0 ];
+		expect( received ).toHaveProperty( 'shipping_address' );
+		expect( received ).toHaveProperty( 'billing_address' );
+	} );
+
+	it( 'should overwrite only shipping_address when specified as object', async () => {
+		mockGetIsCustomerDataDirty.mockReturnValue( true );
+		const dispatch = createMockDispatch();
+
+		await applyExtensionCartUpdate( {
+			namespace: 'test',
+			data: {},
+			overwriteDirtyCustomerData: { shipping_address: true },
+		} )( { dispatch } as never );
+
+		const received = dispatch.receiveCart.mock.calls[ 0 ][ 0 ];
+		expect( received.shipping_address ).toEqual( {
+			address_1: '123 Ship St',
+		} );
+		expect( received ).not.toHaveProperty( 'billing_address' );
+		expect( received ).toHaveProperty( 'totals' );
+	} );
+
+	it( 'should overwrite only billing_address when specified as object', async () => {
+		mockGetIsCustomerDataDirty.mockReturnValue( true );
+		const dispatch = createMockDispatch();
+
+		await applyExtensionCartUpdate( {
+			namespace: 'test',
+			data: {},
+			overwriteDirtyCustomerData: { billing_address: true },
+		} )( { dispatch } as never );
+
+		const received = dispatch.receiveCart.mock.calls[ 0 ][ 0 ];
+		expect( received ).not.toHaveProperty( 'shipping_address' );
+		expect( received.billing_address ).toEqual( {
+			address_1: '456 Bill Ave',
+		} );
+	} );
+
+	it( 'should overwrite both addresses when both specified in object', async () => {
+		mockGetIsCustomerDataDirty.mockReturnValue( true );
+		const dispatch = createMockDispatch();
+
+		await applyExtensionCartUpdate( {
+			namespace: 'test',
+			data: {},
+			overwriteDirtyCustomerData: {
+				shipping_address: true,
+				billing_address: true,
+			},
+		} )( { dispatch } as never );
+
+		const received = dispatch.receiveCart.mock.calls[ 0 ][ 0 ];
+		expect( received.shipping_address ).toEqual( {
+			address_1: '123 Ship St',
+		} );
+		expect( received.billing_address ).toEqual( {
+			address_1: '456 Bill Ave',
+		} );
+	} );
+
+	it( 'should strip both addresses when object has explicit false flags', async () => {
+		mockGetIsCustomerDataDirty.mockReturnValue( true );
+		const dispatch = createMockDispatch();
+
+		await applyExtensionCartUpdate( {
+			namespace: 'test',
+			data: {},
+			overwriteDirtyCustomerData: {
+				shipping_address: false,
+				billing_address: false,
+			},
+		} )( { dispatch } as never );
+
+		const received = dispatch.receiveCart.mock.calls[ 0 ][ 0 ];
+		expect( received ).not.toHaveProperty( 'shipping_address' );
+		expect( received ).not.toHaveProperty( 'billing_address' );
+		expect( received ).toHaveProperty( 'totals' );
+	} );
+
+	it( 'should overwrite specified address even when customer data is not dirty', async () => {
+		mockGetIsCustomerDataDirty.mockReturnValue( false );
+		const dispatch = createMockDispatch();
+
+		await applyExtensionCartUpdate( {
+			namespace: 'test',
+			data: {},
+			overwriteDirtyCustomerData: { shipping_address: true },
+		} )( { dispatch } as never );
+
+		const received = dispatch.receiveCart.mock.calls[ 0 ][ 0 ];
+		// shipping_address should be included (overwrite requested)
+		expect( received.shipping_address ).toEqual( {
+			address_1: '123 Ship St',
+		} );
+		// billing_address should also be included (data is not dirty, no reason to strip)
+		expect( received.billing_address ).toEqual( {
+			address_1: '456 Bill Ave',
+		} );
+	} );
+
+	it( 'should treat null as false (no overwrite)', async () => {
+		mockGetIsCustomerDataDirty.mockReturnValue( true );
+		const dispatch = createMockDispatch();
+
+		await applyExtensionCartUpdate( {
+			namespace: 'test',
+			data: {},
+			overwriteDirtyCustomerData:
+				null as unknown as ExtensionCartUpdateArgs[ 'overwriteDirtyCustomerData' ],
+		} )( { dispatch } as never );
+
+		const received = dispatch.receiveCart.mock.calls[ 0 ][ 0 ];
+		expect( received ).not.toHaveProperty( 'shipping_address' );
+		expect( received ).not.toHaveProperty( 'billing_address' );
+	} );
+
+	it( 'should treat an array as false (no overwrite)', async () => {
+		mockGetIsCustomerDataDirty.mockReturnValue( true );
+		const dispatch = createMockDispatch();
+
+		await applyExtensionCartUpdate( {
+			namespace: 'test',
+			data: {},
+			overwriteDirtyCustomerData: [
+				true,
+			] as unknown as ExtensionCartUpdateArgs[ 'overwriteDirtyCustomerData' ],
+		} )( { dispatch } as never );
+
+		const received = dispatch.receiveCart.mock.calls[ 0 ][ 0 ];
+		expect( received ).not.toHaveProperty( 'shipping_address' );
+		expect( received ).not.toHaveProperty( 'billing_address' );
+	} );
+
+	it( 'should treat non-boolean address fields as false', async () => {
+		mockGetIsCustomerDataDirty.mockReturnValue( true );
+		const dispatch = createMockDispatch();
+
+		await applyExtensionCartUpdate( {
+			namespace: 'test',
+			data: {},
+			overwriteDirtyCustomerData: {
+				shipping_address: 'yes',
+				billing_address: 1,
+			} as unknown as ExtensionCartUpdateArgs[ 'overwriteDirtyCustomerData' ],
+		} )( { dispatch } as never );
+
+		const received = dispatch.receiveCart.mock.calls[ 0 ][ 0 ];
+		expect( received ).not.toHaveProperty( 'shipping_address' );
+		expect( received ).not.toHaveProperty( 'billing_address' );
+	} );
+
+	it( 'should default missing address fields to false', async () => {
+		mockGetIsCustomerDataDirty.mockReturnValue( true );
+		const dispatch = createMockDispatch();
+
+		await applyExtensionCartUpdate( {
+			namespace: 'test',
+			data: {},
+			overwriteDirtyCustomerData: {},
+		} )( { dispatch } as never );
+
+		const received = dispatch.receiveCart.mock.calls[ 0 ][ 0 ];
+		expect( received ).not.toHaveProperty( 'shipping_address' );
+		expect( received ).not.toHaveProperty( 'billing_address' );
 	} );
 } );

@@ -305,6 +305,7 @@ class OrderHelper {
 
 		$order->set_status( OrderStatus::PENDING );
 		$order->set_created_via( 'unit-tests' );
+		$order->set_cart_hash( '1234' );
 		$order->set_currency( 'COP' );
 		$order->set_customer_ip_address( '127.0.0.1' );
 

@@ -32,6 +32,7 @@ import {
 } from './notify-quantity-changes';
 import { updateCartErrorNotices } from './notify-errors';
 import { apiFetchWithHeaders } from '../shared-controls';
+import { isObject } from '../../types/type-guards/object';
 import {
 	getIsCustomerDataDirty,
 	setIsCustomerDataDirty,
@@ -139,19 +140,43 @@ export const applyExtensionCartUpdate =
 				data: { namespace: args.namespace, data: args.data },
 				cache: 'no-store',
 			} );
-			if ( args.overwriteDirtyCustomerData === true ) {
-				dispatch.receiveCart( response );
-				return response;
-			}
-			if ( getIsCustomerDataDirty() ) {
-				// If the customer data is dirty, we don't want to overwrite it with the response.
-				// Remove shipping and billing address from the response and then receive the cart.
+			// Determine which addresses should be overwritten in the store.
+			const raw = args.overwriteDirtyCustomerData;
+			const overwrite = isObject( raw )
+				? {
+						shipping_address: raw.shipping_address === true,
+						billing_address: raw.billing_address === true,
+				  }
+				: {
+						shipping_address: raw === true,
+						billing_address: raw === true,
+				  };
+
+			const isDirty = getIsCustomerDataDirty();
+
+			// Decide per-address: include it unless it's dirty and not being overwritten.
+			const includeShipping = overwrite.shipping_address || ! isDirty;
+			const includeBilling = overwrite.billing_address || ! isDirty;
+
+			if ( ! includeShipping || ! includeBilling ) {
 				const {
 					shipping_address: _,
 					billing_address: __,
-					...responseWithoutShippingOrBilling
+					...responseWithoutAddresses
 				} = response;
-				dispatch.receiveCart( responseWithoutShippingOrBilling );
+
+				const cartToReceive: Partial< CartResponse > = {
+					...responseWithoutAddresses,
+				};
+
+				if ( includeShipping ) {
+					cartToReceive.shipping_address = response.shipping_address;
+				}
+				if ( includeBilling ) {
+					cartToReceive.billing_address = response.billing_address;
+				}
+
+				dispatch.receiveCart( cartToReceive );
 				return response;
 			}
 			dispatch.receiveCart( response );

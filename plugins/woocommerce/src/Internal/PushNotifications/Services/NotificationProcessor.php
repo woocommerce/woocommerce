@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Internal\PushNotifications\Services;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataStore;
+use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\Dispatchers\WpcomNotificationDispatcher;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
@@ -122,6 +123,11 @@ class NotificationProcessor {
 			$notification->write_meta( self::CLAIMED_META_KEY );
 		}
 
+		/**
+		 * Non-paginated result from get_tokens_for_roles.
+		 *
+		 * @var PushToken[] $tokens
+		 */
 		$tokens = $this->data_store->get_tokens_for_roles(
 			PushNotifications::ROLES_WITH_PUSH_NOTIFICATIONS_ENABLED
 		);

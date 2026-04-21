@@ -73,7 +73,6 @@ const getResetEmailTemplateAction = () => {
 			const { createSuccessNotice, createErrorNotice } =
 				useDispatch( noticesStore );
 			const {
-				// @ts-expect-error The type is missing
 				invalidateResolution,
 				editEntityRecord,
 				saveEditedEntityRecord,

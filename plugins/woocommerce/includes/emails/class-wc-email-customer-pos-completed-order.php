@@ -506,6 +506,10 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 				return $footer_text;
 			}
 
+			if ( ! is_string( $footer_text ) ) {
+				$footer_text = is_scalar( $footer_text ) ? (string) $footer_text : '';
+			}
+
 			return str_replace(
 				array(
 					'{site_title}',

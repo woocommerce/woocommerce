@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix core profiler shipping_partner_impression tracking event reporting wrong country when plugins step is reached via direct navigation or page refresh.

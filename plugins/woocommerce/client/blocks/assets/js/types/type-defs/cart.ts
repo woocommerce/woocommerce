@@ -219,7 +219,13 @@ export interface CartMeta {
 export interface ExtensionCartUpdateArgs {
 	data: Record< string, unknown >;
 	namespace: string;
-	overwriteDirtyCustomerData?: undefined | boolean;
+	overwriteDirtyCustomerData?:
+		| undefined
+		| boolean
+		| {
+				shipping_address?: boolean;
+				billing_address?: boolean;
+		  };
 }
 
 export interface BillingAddressShippingAddress {

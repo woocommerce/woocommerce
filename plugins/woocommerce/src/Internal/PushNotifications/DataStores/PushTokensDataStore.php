@@ -25,10 +25,10 @@ use WP_Query;
 class PushTokensDataStore {
 	/**
 	 * In-memory cache for get_tokens_for_roles() results, keyed by the
-	 * comma-joined role list. Avoids repeated DB queries within the same
-	 * PHP request.
+	 * comma-joined role list (with optional pagination suffix). Avoids
+	 * repeated DB queries within the same PHP request.
 	 *
-	 * @var array<string, PushToken[]>
+	 * @var array<string, PushToken[]|array{tokens: PushToken[], total: int, total_pages: int}>
 	 */
 	private array $tokens_by_roles_cache = array();
 
@@ -312,19 +312,34 @@ class PushTokensDataStore {
 	}
 
 	/**
-	 * Returns all push tokens belonging to users with the given roles.
+	 * Returns push tokens belonging to users with the given roles.
 	 *
-	 * @param string[] $roles The roles to query tokens for.
-	 * @return PushToken[]
+	 * When called without pagination parameters, returns all tokens as a
+	 * flat array (cached per-request). When $page and $per_page are
+	 * provided, returns a paginated result with total counts.
+	 *
+	 * @param string[] $roles    The roles to query tokens for.
+	 * @param int|null $page     Optional page number (1-based).
+	 * @param int|null $per_page Optional number of tokens per page.
+	 * @return PushToken[]|array{tokens: PushToken[], total: int, total_pages: int}
 	 *
 	 * @since 10.7.0
 	 */
-	public function get_tokens_for_roles( array $roles ): array {
-		if ( empty( $roles ) ) {
-			return array();
-		}
+	public function get_tokens_for_roles( array $roles, ?int $page = null, ?int $per_page = null ) {
+		$paginate  = null !== $page && null !== $per_page;
+		$cache_key = $paginate ? implode( ',', $roles ) . ":$page:$per_page" : implode( ',', $roles );
 
-		$cache_key = implode( ',', $roles );
+		$empty_result = $paginate
+			? array(
+				'tokens'      => array(),
+				'total'       => 0,
+				'total_pages' => 0,
+			)
+			: array();
+
+		if ( empty( $roles ) ) {
+			return $empty_result;
+		}
 
 		if ( isset( $this->tokens_by_roles_cache[ $cache_key ] ) ) {
 			return $this->tokens_by_roles_cache[ $cache_key ];
@@ -338,19 +353,25 @@ class PushTokensDataStore {
 		);
 
 		if ( empty( $user_ids ) ) {
-			$this->tokens_by_roles_cache[ $cache_key ] = array();
+			$this->tokens_by_roles_cache[ $cache_key ] = $empty_result;
 			return $this->tokens_by_roles_cache[ $cache_key ];
 		}
 
-		$query = new WP_Query(
-			array(
-				'post_type'      => PushToken::POST_TYPE,
-				'post_status'    => 'private',
-				'author__in'     => $user_ids,
-				'posts_per_page' => -1,
-				'fields'         => 'ids',
-			)
+		$query_args = array(
+			'post_type'      => PushToken::POST_TYPE,
+			'post_status'    => 'private',
+			'author__in'     => $user_ids,
+			'posts_per_page' => $paginate ? $per_page : -1,
+			'fields'         => 'ids',
 		);
+
+		if ( $paginate ) {
+			$query_args['paged']   = $page;
+			$query_args['orderby'] = 'ID';
+			$query_args['order']   = 'ASC';
+		}
+
+		$query = new WP_Query( $query_args );
 
 		/**
 		 * Typehint for PHPStan, specifies these are IDs and not instances of
@@ -361,7 +382,7 @@ class PushTokensDataStore {
 		$post_ids = $query->posts;
 
 		if ( empty( $post_ids ) ) {
-			$this->tokens_by_roles_cache[ $cache_key ] = array();
+			$this->tokens_by_roles_cache[ $cache_key ] = $empty_result;
 			return $this->tokens_by_roles_cache[ $cache_key ];
 		}
 
@@ -383,9 +404,16 @@ class PushTokensDataStore {
 			}
 		}
 
-		$this->tokens_by_roles_cache[ $cache_key ] = $tokens;
+		$result = $paginate
+			? array(
+				'tokens'      => $tokens,
+				'total'       => (int) $query->found_posts,
+				'total_pages' => (int) $query->max_num_pages,
+			)
+			: $tokens;
 
-		return $tokens;
+		$this->tokens_by_roles_cache[ $cache_key ] = $result;
+		return $result;
 	}
 
 	/**

@@ -4514,6 +4514,11 @@ table.wc_shipping {
 		}
 	}
 
+	.wc-shipping-invalid-price-message ~ #wc-shipping-advanced-costs-help-text {
+		display: block;
+		margin-top: 30px;
+	}
+
 	.wc-backbone-modal-back-inactive {
 		display: none;
 	}
@@ -8289,6 +8294,14 @@ table.bar_chart {
 	// Settings page labels: vertically centre with taller WP 7.0 fields.
 	.woocommerce table.form-table th {
 		padding-top: 25px;
+	}
+	.woocommerce table.form-table td.forminp-checkbox,
+	.woocommerce table.form-table td.forminp-radio,
+	.woocommerce table.form-table td.forminp-textarea {
+		padding-top: 20px;
+	}
+	.woocommerce table.form-table textarea {
+		padding: 6px 8px;
 	}
 
 	// Colour picker swatch: match WP 7.0 input height (40px).
