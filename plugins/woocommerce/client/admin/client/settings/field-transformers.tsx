@@ -4,6 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
 import {
+	BaseControl,
 	ColorPicker,
 	ComboboxControl,
 	DatePicker,
@@ -499,13 +500,20 @@ export const baseFieldTransformer = (
 		}
 		case 'color': {
 			const ColorEdit = ( props: DataFormEditProps ) => (
-				<ColorPicker
-					enableAlpha={ false }
-					color={ readFieldValue( props.data, props.field ) }
-					onChange={ ( next: string ) =>
-						writeFieldValue( props, next )
-					}
-				/>
+				<BaseControl
+					__nextHasNoMarginBottom
+					id={ baseField.id }
+					label={ baseField.label }
+					hideLabelFromVision={ props.hideLabelFromVision }
+				>
+					<ColorPicker
+						enableAlpha={ false }
+						color={ readFieldValue( props.data, props.field ) }
+						onChange={ ( next: string ) =>
+							writeFieldValue( props, next )
+						}
+					/>
+				</BaseControl>
 			);
 			const field = {
 				...baseField,
@@ -515,16 +523,30 @@ export const baseFieldTransformer = (
 			return applySafeEdit( field );
 		}
 		case 'date': {
-			const DateEdit = ( props: DataFormEditProps ) => (
-				<DatePicker
-					currentDate={
-						readFieldValue( props.data, props.field ) || null
-					}
-					onChange={ ( next: string ) =>
-						writeFieldValue( props, next )
-					}
-				/>
-			);
+			const DateEdit = ( props: DataFormEditProps ) => {
+				const stored = readFieldValue( props.data, props.field );
+				// Guard against unparseable initial values so a single
+				// corrupt option doesn't trigger the form-level ErrorBoundary.
+				const safeDate =
+					stored && ! Number.isNaN( Date.parse( stored ) )
+						? stored
+						: null;
+				return (
+					<BaseControl
+						__nextHasNoMarginBottom
+						id={ baseField.id }
+						label={ baseField.label }
+						hideLabelFromVision={ props.hideLabelFromVision }
+					>
+						<DatePicker
+							currentDate={ safeDate }
+							onChange={ ( next: string ) =>
+								writeFieldValue( props, next )
+							}
+						/>
+					</BaseControl>
+				);
+			};
 			const field = {
 				...baseField,
 				type: 'text',
@@ -534,16 +556,28 @@ export const baseFieldTransformer = (
 		}
 		case 'datetime':
 		case 'datetime-local': {
-			const DateTimeEdit = ( props: DataFormEditProps ) => (
-				<DateTimePicker
-					currentDate={
-						readFieldValue( props.data, props.field ) || null
-					}
-					onChange={ ( next: string | null ) =>
-						writeFieldValue( props, next ?? '' )
-					}
-				/>
-			);
+			const DateTimeEdit = ( props: DataFormEditProps ) => {
+				const stored = readFieldValue( props.data, props.field );
+				const safeDate =
+					stored && ! Number.isNaN( Date.parse( stored ) )
+						? stored
+						: null;
+				return (
+					<BaseControl
+						__nextHasNoMarginBottom
+						id={ baseField.id }
+						label={ baseField.label }
+						hideLabelFromVision={ props.hideLabelFromVision }
+					>
+						<DateTimePicker
+							currentDate={ safeDate }
+							onChange={ ( next: string | null ) =>
+								writeFieldValue( props, next ?? '' )
+							}
+						/>
+					</BaseControl>
+				);
+			};
 			const field = {
 				...baseField,
 				type: 'text',
@@ -556,12 +590,14 @@ export const baseFieldTransformer = (
 		case 'time': {
 			const inputType = setting.type;
 			const NativeInputEdit = ( props: DataFormEditProps ) => (
-				<input
+				<InputControl
+					__next40pxDefaultSize
 					type={ inputType }
-					aria-label={ baseField.label }
+					label={ baseField.label }
+					hideLabelFromVision={ props.hideLabelFromVision }
 					value={ readFieldValue( props.data, props.field ) }
-					onChange={ ( event ) =>
-						writeFieldValue( props, event.target.value )
+					onChange={ ( next?: string ) =>
+						writeFieldValue( props, next ?? '' )
 					}
 				/>
 			);
@@ -593,10 +629,6 @@ export const baseFieldTransformer = (
 		}
 		case 'single_select_page_with_search': {
 			const elements = parseOptions( setting.options );
-			const comboboxOptions = elements.map( ( option ) => ( {
-				label: option.label,
-				value: option.value,
-			} ) );
 
 			const ComboboxEdit = ( props: DataFormEditProps ) => (
 				<ComboboxControl
@@ -604,7 +636,7 @@ export const baseFieldTransformer = (
 					__nextHasNoMarginBottom
 					label={ baseField.label }
 					hideLabelFromVision={ props.hideLabelFromVision }
-					options={ comboboxOptions }
+					options={ elements }
 					value={ readFieldValue( props.data, props.field ) }
 					onChange={ ( next?: string | null ) =>
 						writeFieldValue( props, next ?? '' )
@@ -633,8 +665,12 @@ export const baseFieldTransformer = (
 				type: 'text',
 				Edit: InfoEdit,
 				getValue: () => '',
-				setValue: ( { item }: { item: Record< string, unknown > } ) =>
+				setValue: ( {
 					item,
+				}: {
+					item: Record< string, unknown >;
+					value: unknown;
+				} ) => item,
 			};
 			return applySafeEdit( field );
 		}

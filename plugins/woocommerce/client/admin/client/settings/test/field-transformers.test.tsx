@@ -20,6 +20,11 @@ jest.mock( '@wordpress/components', () => {
 	const TextareaControl = jest.requireActual(
 		'@wordpress/components/build/textarea-control'
 	).default;
+	// Use the real BaseControl so its label/htmlFor wiring is exercised by
+	// `getByLabelText` assertions for the wrapped widget Edits below.
+	const BaseControl = jest.requireActual(
+		'@wordpress/components/build/base-control'
+	).default;
 
 	type StubProps = {
 		value?: string | null;
@@ -85,6 +90,7 @@ jest.mock( '@wordpress/components', () => {
 		// Real components used by passing tests.
 		__experimentalInputControl: InputControl,
 		TextareaControl,
+		BaseControl,
 		// Stubs for components whose interactive behaviour is unreliable in JSDOM.
 		ColorPicker: ColorPickerStub,
 		DatePicker: DatePickerStub,
@@ -371,6 +377,10 @@ describe( 'field transformers', () => {
 			/>
 		);
 
+		// BaseControl renders the label as a heading (no input to associate
+		// with for ColorPicker), so assert via getByText rather than getByLabelText.
+		expect( screen.getByText( 'Brand color' ) ).toBeInTheDocument();
+
 		const stub = screen.getByTestId(
 			'color-picker-stub'
 		) as HTMLInputElement;
@@ -416,7 +426,7 @@ describe( 'field transformers', () => {
 		} );
 	} );
 
-	it( 'renders native input for month/week/time field types', () => {
+	it( 'renders InputControl with associated label for month/week/time field types', () => {
 		const cases: Array< {
 			type: 'month' | 'week' | 'time';
 			initial: string;
@@ -428,9 +438,10 @@ describe( 'field transformers', () => {
 		];
 
 		cases.forEach( ( { type, initial, next } ) => {
+			const label = `${ type } field`;
 			const transformed = baseFieldTransformer( {
 				id: `${ type }_field`,
-				label: `${ type } field`,
+				label,
 				type,
 			} );
 
@@ -439,7 +450,7 @@ describe( 'field transformers', () => {
 			const Edit = transformed.Edit as React.ComponentType< EditProps >;
 			const onChange = jest.fn();
 			const field = buildField( transformed, `${ type }_field` );
-			const { container, unmount } = render(
+			const { unmount } = render(
 				<Edit
 					data={ { [ `${ type }_field` ]: initial } }
 					field={ field }
@@ -447,16 +458,12 @@ describe( 'field transformers', () => {
 				/>
 			);
 
-			const input = container.querySelector(
-				'input'
-			) as HTMLInputElement | null;
-			expect( input ).not.toBeNull();
-			expect( input?.getAttribute( 'type' ) ).toBe( type );
-			expect( input?.value ).toBe( initial );
+			// InputControl wires up the label-to-input htmlFor association.
+			const input = screen.getByLabelText( label ) as HTMLInputElement;
+			expect( input.getAttribute( 'type' ) ).toBe( type );
+			expect( input.value ).toBe( initial );
 
-			if ( input ) {
-				fireEvent.change( input, { target: { value: next } } );
-			}
+			fireEvent.change( input, { target: { value: next } } );
 
 			expect( onChange ).toHaveBeenCalledWith( {
 				[ `${ type }_field` ]: next,
@@ -486,6 +493,9 @@ describe( 'field transformers', () => {
 			/>
 		);
 
+		// The BaseControl wrapper renders a visible label.
+		expect( screen.getByText( 'Date' ) ).toBeInTheDocument();
+
 		const stub = screen.getByTestId(
 			'date-picker-stub'
 		) as HTMLInputElement;
@@ -496,11 +506,41 @@ describe( 'field transformers', () => {
 		expect( onChange ).toHaveBeenCalledWith( { date_field: '2026-05-01' } );
 	} );
 
+	it( 'renders date picker safely when stored value is unparseable', () => {
+		const transformed = baseFieldTransformer( {
+			id: 'date_field',
+			label: 'Date',
+			type: 'date',
+		} );
+
+		const Edit = transformed.Edit as React.ComponentType< EditProps >;
+		const onChange = jest.fn();
+		const field = buildField( transformed, 'date_field' );
+
+		expect( () =>
+			render(
+				<Edit
+					data={ { date_field: 'not-a-date' } }
+					field={ field }
+					onChange={ onChange }
+				/>
+			)
+		).not.toThrow();
+
+		const stub = screen.getByTestId(
+			'date-picker-stub'
+		) as HTMLInputElement;
+		// The guard normalises the unparseable value to an empty string so the
+		// underlying picker doesn't blow up.
+		expect( stub.value ).toBe( '' );
+	} );
+
 	it( 'maps datetime and datetime-local to a DateTimePicker Edit that round-trips values', () => {
 		( [ 'datetime', 'datetime-local' ] as const ).forEach( ( type ) => {
+			const label = `${ type } field`;
 			const transformed = baseFieldTransformer( {
 				id: `${ type }_field`,
-				label: `${ type } field`,
+				label,
 				type,
 			} );
 
@@ -519,6 +559,9 @@ describe( 'field transformers', () => {
 				/>
 			);
 
+			// The BaseControl wrapper renders a visible label.
+			expect( screen.getByText( label ) ).toBeInTheDocument();
+
 			const stub = screen.getByTestId(
 				'date-time-picker-stub'
 			) as HTMLInputElement;
@@ -534,6 +577,33 @@ describe( 'field transformers', () => {
 
 			unmount();
 		} );
+	} );
+
+	it( 'renders datetime picker safely when stored value is unparseable', () => {
+		const transformed = baseFieldTransformer( {
+			id: 'datetime_field',
+			label: 'When',
+			type: 'datetime',
+		} );
+
+		const Edit = transformed.Edit as React.ComponentType< EditProps >;
+		const onChange = jest.fn();
+		const field = buildField( transformed, 'datetime_field' );
+
+		expect( () =>
+			render(
+				<Edit
+					data={ { datetime_field: 'definitely-not-a-date' } }
+					field={ field }
+					onChange={ onChange }
+				/>
+			)
+		).not.toThrow();
+
+		const stub = screen.getByTestId(
+			'date-time-picker-stub'
+		) as HTMLInputElement;
+		expect( stub.value ).toBe( '' );
 	} );
 
 	it( 'renders combobox for single_select_page_with_search and writes selection', () => {
