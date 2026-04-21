@@ -1199,7 +1199,7 @@ function wc_format_product_short_description( $content ) {
  */
 function wc_format_option_price_separators( $value, $option, $raw_value ) {
 	$no_tags    = wp_kses( (string) $raw_value, array() );
-	$normalized = (string) preg_replace( '/\s+/', ' ', $no_tags );
+	$normalized = preg_replace( '/\s+/', ' ', $no_tags ) ?? $no_tags;
 
 	if ( false !== strpbrk( $normalized, '0123456789' ) ) {
 		WC_Admin_Settings::add_error(
