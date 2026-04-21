@@ -9,7 +9,9 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\General\Schema;
 
+use Automattic\WooCommerce\Internal\Admin\Settings\ReactSettingsSchema;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractSchema;
+use WC_Settings_General;
 use WP_REST_Request;
 
 defined( 'ABSPATH' ) || exit;
@@ -24,6 +26,33 @@ class GeneralSettingsSchema extends AbstractSchema {
 	 * @var string
 	 */
 	const IDENTIFIER = 'general_settings';
+
+	/**
+	 * Whether the tab-specific field options filter callback has been registered.
+	 *
+	 * @var bool
+	 */
+	private static $field_options_filter_registered = false;
+
+	/**
+	 * Constructor.
+	 *
+	 * Registers the tab-specific field options callback on the shared
+	 * `woocommerce_react_settings_field_options` filter exposed by
+	 * ReactSettingsSchema. The callback only injects options for field IDs
+	 * owned by the general settings tab, so it is safe to register globally.
+	 */
+	public function __construct() {
+		if ( ! self::$field_options_filter_registered ) {
+			add_filter(
+				'woocommerce_react_settings_field_options',
+				array( self::class, 'inject_field_options' ),
+				10,
+				4
+			);
+			self::$field_options_filter_registered = true;
+		}
+	}
 
 	/**
 	 * Return all properties for the item schema.
@@ -137,79 +166,31 @@ class GeneralSettingsSchema extends AbstractSchema {
 	/**
 	 * Get general settings data by transforming raw settings into REST API format.
 	 *
+	 * Delegates the actual transform to ReactSettingsSchema::build_response() so
+	 * there's one canonical transformer shared with the modernised admin UI
+	 * preloader.
+	 *
 	 * @param mixed           $item             Raw settings array.
 	 * @param WP_REST_Request $request          Request object.
 	 * @param array           $include_fields   Fields to include.
 	 * @return array
 	 */
 	public function get_item_response( $item, WP_REST_Request $request, array $include_fields = array() ): array {
-		$raw_settings = $item;
+		$raw_settings = is_array( $item ) ? $item : array();
 
-		// Transform raw settings into grouped format based on title/sectionend markers.
-		$groups           = array();
-		$values           = array();
-		$current_group    = null;
-		$current_group_id = null;
-
-		foreach ( $raw_settings as $setting ) {
-			$setting_type = $setting['type'] ?? '';
-
-			// Handle section titles - start of a new group.
-			if ( 'title' === $setting_type ) {
-				$current_group_id = $setting['id'] ?? '';
-				$current_group    = array(
-					'title'       => $setting['title'] ?? '',
-					'description' => $setting['desc'] ?? '',
-					'order'       => isset( $setting['order'] ) ? (int) $setting['order'] : 999,
-					'fields'      => array(),
-				);
-				continue;
-			}
-
-			// Handle section ends - save the current group.
-			if ( 'sectionend' === $setting_type ) {
-				if ( $current_group && $current_group_id ) {
-					$groups[ $current_group_id ] = $current_group;
-				}
-				$current_group    = null;
-				$current_group_id = null;
-				continue;
-			}
-
-			// Skip title and sectionend types.
-			if ( in_array( $setting_type, array( 'title', 'sectionend' ), true ) ) {
-				continue;
-			}
-
-			// Convert setting to field format.
-			if ( isset( $setting['id'] ) && $current_group ) {
-				$field = $this->transform_setting_to_field( $setting );
-				if ( $field ) {
-					$current_group['fields'][] = $field;
-					// Add field value to the flat values array.
-					$raw_value              = get_option( $field['id'], $setting['default'] ?? '' );
-					$values[ $field['id'] ] = $this->validate_field_value( $raw_value, $field['type'] );
-				}
-			}
-		}
-
-		// Sort groups by their order if available.
-		uasort(
-			$groups,
-			function ( $a, $b ) {
-				$a_order = $a['order'] ?? 999;
-				$b_order = $b['order'] ?? 999;
-				return $a_order - $b_order;
-			}
+		$response = ReactSettingsSchema::build_response(
+			'general',
+			'',
+			$raw_settings,
+			new WC_Settings_General()
 		);
 
-		$response = array(
-			'id'          => 'general',
-			'title'       => __( 'General', 'woocommerce' ),
-			'description' => __( 'Set your store\'s address, visibility, currency, language, and timezone.', 'woocommerce' ),
-			'values'      => $values,
-			'groups'      => $groups,
-		);
+		// Preserve the REST-specific title/description. ReactSettingsSchema
+		// derives title from the page label, which is fine for the admin
+		// preloader but the REST endpoint exposes richer copy.
+		$response['id']          = 'general';
+		$response['title']       = __( 'General', 'woocommerce' );
+		$response['description'] = __( 'Set your store\'s address, visibility, currency, language, and timezone.', 'woocommerce' );
 
 		if ( ! empty( $include_fields ) ) {
 			$response = array_intersect_key( $response, array_flip( $include_fields ) );
@@ -219,40 +200,31 @@ class GeneralSettingsSchema extends AbstractSchema {
 	}
 
 	/**
-	 * Transform a WooCommerce setting into REST API field format.
+	 * Inject tab-specific field options for general settings fields.
 	 *
-	 * @param array $setting WooCommerce setting array.
-	 * @return array|null Transformed field or null if should be skipped.
+	 * Callback registered against `woocommerce_react_settings_field_options`.
+	 * Only overrides options when the existing array is empty, so authors can
+	 * still supply an explicit options list via the settings definition.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @param array  $options         Current options array.
+	 * @param string $field_id        Setting field ID.
+	 * @param array  $setting         Raw setting definition.
+	 * @param string $normalized_type Normalized field type.
+	 * @return array
 	 */
-	private function transform_setting_to_field( array $setting ): ?array {
-		$setting_id   = $setting['id'] ?? '';
-		$setting_type = $setting['type'] ?? 'text';
+	public static function inject_field_options( $options, string $field_id, array $setting, string $normalized_type ): array {
+		unset( $setting, $normalized_type ); // Not needed for this callback.
 
-		$field = array(
-			'id'    => $setting_id,
-			'label' => $setting['title'] ?? $setting_id,
-			'type'  => $this->normalize_field_type( $setting_type ),
-			'desc'  => $setting['desc'] ?? '',
-		);
-
-		// Add options for select fields.
-		if ( isset( $setting['options'] ) && is_array( $setting['options'] ) ) {
-			$field['options'] = $setting['options'];
-		} else {
-			// Generate options for special field types.
-			$field['options'] = $this->get_field_options( $setting_id );
+		if ( ! is_array( $options ) ) {
+			$options = array();
 		}
 
-		return $field;
-	}
+		if ( ! empty( $options ) ) {
+			return $options;
+		}
 
-	/**
-	 * Get options for specific field types.
-	 *
-	 * @param string $field_id Field ID.
-	 * @return array Field options.
-	 */
-	private function get_field_options( string $field_id ): array {
 		switch ( $field_id ) {
 			case 'woocommerce_currency':
 				if ( ! function_exists( 'get_woocommerce_currencies' ) || ! function_exists( 'get_woocommerce_currency_symbol' ) ) {
@@ -260,15 +232,15 @@ class GeneralSettingsSchema extends AbstractSchema {
 				}
 
 				$currencies = get_woocommerce_currencies();
-				$options    = array();
+				$generated  = array();
 
 				foreach ( $currencies as $code => $name ) {
-					$label            = wp_specialchars_decode( (string) $name );
-					$symbol           = wp_specialchars_decode( (string) get_woocommerce_currency_symbol( $code ) );
-					$options[ $code ] = $label . ' (' . $symbol . ') — ' . $code;
+					$label               = wp_specialchars_decode( (string) $name );
+					$symbol              = wp_specialchars_decode( (string) get_woocommerce_currency_symbol( $code ) );
+					$generated[ $code ] = $label . ' (' . $symbol . ') — ' . $code;
 				}
 
-				return $options;
+				return $generated;
 
 			case 'woocommerce_default_country':
 				if ( ! function_exists( 'WC' ) ) {
@@ -277,21 +249,22 @@ class GeneralSettingsSchema extends AbstractSchema {
 
 				$countries = WC()->countries->get_countries();
 				$states    = WC()->countries->get_states();
-				$options   = array();
+				$generated = array();
 
 				foreach ( $countries as $country_code => $country_name ) {
 					$country_states = $states[ $country_code ] ?? array();
 
 					if ( empty( $country_states ) ) {
-						$options[ $country_code ] = $country_name;
-					} else {
-						foreach ( $country_states as $state_code => $state_name ) {
-							$options[ $country_code . ':' . $state_code ] = $country_name . ' — ' . $state_name;
-						}
+						$generated[ $country_code ] = $country_name;
+						continue;
+					}
+
+					foreach ( $country_states as $state_code => $state_name ) {
+						$generated[ $country_code . ':' . $state_code ] = $country_name . ' — ' . $state_name;
 					}
 				}
 
-				return $options;
+				return $generated;
 
 			case 'woocommerce_all_except_countries':
 			case 'woocommerce_specific_allowed_countries':
@@ -299,57 +272,9 @@ class GeneralSettingsSchema extends AbstractSchema {
 				if ( ! function_exists( 'WC' ) ) {
 					return array();
 				}
-
-				// For multiselect country fields, return simple country list (no states).
 				return WC()->countries->get_countries();
 		}
 
-		return array();
-	}
-
-	/**
-	 * Normalize WooCommerce field types to REST API field types.
-	 *
-	 * @param string $wc_type WooCommerce field type.
-	 * @return string Normalized field type.
-	 */
-	private function normalize_field_type( string $wc_type ): string {
-		$type_map = array(
-			'single_select_country'  => 'select',
-			'multi_select_countries' => 'multiselect',
-		);
-
-		return $type_map[ $wc_type ] ?? $wc_type;
-	}
-
-	/**
-	 * Validate and sanitize field value based on its type.
-	 *
-	 * @param mixed  $value Field value.
-	 * @param string $type  Field type.
-	 * @return mixed Validated value.
-	 */
-	private function validate_field_value( $value, string $type ) {
-		switch ( $type ) {
-			case 'number':
-				return is_numeric( $value ) ? (float) $value : 0;
-			case 'checkbox':
-				if ( function_exists( 'wc_string_to_bool' ) ) {
-					return wc_string_to_bool( $value );
-				}
-				if ( is_bool( $value ) ) {
-					return $value;
-				}
-				return filter_var( $value, FILTER_VALIDATE_BOOLEAN );
-			case 'multiselect':
-				if ( ! is_array( $value ) ) {
-					return array();
-				}
-				return array_map( 'sanitize_text_field', $value );
-			case 'text':
-			case 'select':
-			default:
-				return is_string( $value ) ? $value : (string) $value;
-		}
+		return $options;
 	}
 }

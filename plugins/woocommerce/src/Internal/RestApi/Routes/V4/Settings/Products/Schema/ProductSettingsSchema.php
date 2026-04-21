@@ -13,7 +13,9 @@ namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Products\Sc
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\Admin\Settings\ReactSettingsSchema;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractSchema;
+use WC_Settings_Products;
 use WP_REST_Request;
 
 /**
@@ -26,6 +28,33 @@ class ProductSettingsSchema extends AbstractSchema {
 	 * @var string
 	 */
 	const IDENTIFIER = 'product_settings';
+
+	/**
+	 * Whether the tab-specific field options filter callback has been registered.
+	 *
+	 * @var bool
+	 */
+	private static $field_options_filter_registered = false;
+
+	/**
+	 * Constructor.
+	 *
+	 * Registers the tab-specific field options callback on the shared
+	 * `woocommerce_react_settings_field_options` filter exposed by
+	 * ReactSettingsSchema. The callback only injects options for field IDs
+	 * owned by the products settings tab, so it is safe to register globally.
+	 */
+	public function __construct() {
+		if ( ! self::$field_options_filter_registered ) {
+			add_filter(
+				'woocommerce_react_settings_field_options',
+				array( self::class, 'inject_field_options' ),
+				10,
+				4
+			);
+			self::$field_options_filter_registered = true;
+		}
+	}
 
 	/**
 	 * Return all properties for the item schema.
@@ -139,116 +168,63 @@ class ProductSettingsSchema extends AbstractSchema {
 	/**
 	 * Get product settings data by transforming WC_Settings_Products data into REST API format.
 	 *
+	 * Delegates the actual transform to ReactSettingsSchema::build_response() so
+	 * there's one canonical transformer shared with the modernised admin UI
+	 * preloader.
+	 *
 	 * @param mixed           $item             Settings products instance.
 	 * @param WP_REST_Request $request          Request object.
 	 * @param array           $include_fields   Fields to include.
 	 * @return array
 	 */
 	public function get_item_response( $item, WP_REST_Request $request, array $include_fields = array() ): array {
-		$raw_settings = $item;
+		$raw_settings = is_array( $item ) ? $item : array();
 
-		// Transform raw settings into grouped format based on title/sectionend markers.
-		$groups           = array();
-		$values           = array();
-		$current_group    = null;
-		$current_group_id = null;
+		$response = ReactSettingsSchema::build_response(
+			'products',
+			'',
+			$raw_settings,
+			new WC_Settings_Products()
+		);
 
-		foreach ( $raw_settings as $setting ) {
-			$setting_type = $setting['type'] ?? '';
+		// Preserve the REST-specific title/description.
+		$response['id']          = 'products';
+		$response['title']       = __( 'Products', 'woocommerce' );
+		$response['description'] = __( 'Manage product settings including dimensions, weight units, and display options.', 'woocommerce' );
 
-			// Handle section titles - start of a new group.
-			if ( 'title' === $setting_type ) {
-				$current_group_id = $setting['id'] ?? '';
-				$current_group    = array(
-					'title'       => $setting['title'] ?? '',
-					'description' => $setting['desc'] ?? '',
-					'order'       => isset( $setting['order'] ) ? (int) $setting['order'] : 999,
-					'fields'      => array(),
-				);
-				continue;
-			}
-
-			// Handle section ends - save the current group.
-			if ( 'sectionend' === $setting_type ) {
-				if ( $current_group && $current_group_id ) {
-					$groups[ $current_group_id ] = $current_group;
-				}
-				$current_group    = null;
-				$current_group_id = null;
-				continue;
-			}
-
-			// Skip title and sectionend types.
-			if ( in_array( $setting_type, array( 'title', 'sectionend' ), true ) ) {
-				continue;
-			}
-
-			// Convert setting to field format.
-			if ( isset( $setting['id'] ) && $current_group ) {
-				$field = $this->transform_setting_to_field( $setting );
-				if ( $field ) {
-					$current_group['fields'][] = $field;
-					// Add field value to the flat values array.
-					$raw_value              = get_option( $field['id'], $setting['default'] ?? '' );
-					$values[ $field['id'] ] = $this->validate_field_value( $raw_value, $field['type'] );
-				}
-			}
+		if ( ! empty( $include_fields ) ) {
+			$response = array_intersect_key( $response, array_flip( $include_fields ) );
 		}
 
-		// Sort groups by their order if available.
-		uasort(
-			$groups,
-			function ( $a, $b ) {
-				$a_order = $a['order'] ?? 999;
-				$b_order = $b['order'] ?? 999;
-				return $a_order - $b_order;
-			}
-		);
-
-		return array(
-			'id'          => 'products',
-			'title'       => __( 'Products', 'woocommerce' ),
-			'description' => __( 'Manage product settings including dimensions, weight units, and display options.', 'woocommerce' ),
-			'values'      => $values,
-			'groups'      => $groups,
-		);
+		return $response;
 	}
 
 	/**
-	 * Transform a WooCommerce setting into REST API field format.
+	 * Inject tab-specific field options for product settings fields.
 	 *
-	 * @param array $setting WooCommerce setting array.
-	 * @return array|null Transformed field or null if should be skipped.
+	 * Callback registered against `woocommerce_react_settings_field_options`.
+	 * Only overrides options when the existing array is empty, so authors can
+	 * still supply an explicit options list via the settings definition.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @param array  $options         Current options array.
+	 * @param string $field_id        Setting field ID.
+	 * @param array  $setting         Raw setting definition.
+	 * @param string $normalized_type Normalized field type.
+	 * @return array
 	 */
-	private function transform_setting_to_field( array $setting ): ?array {
-		$setting_id   = $setting['id'] ?? '';
-		$setting_type = $setting['type'] ?? 'text';
+	public static function inject_field_options( $options, string $field_id, array $setting, string $normalized_type ): array {
+		unset( $setting, $normalized_type ); // Not needed for this callback.
 
-		$field = array(
-			'id'    => $setting_id,
-			'label' => $setting['title'] ?? $setting_id,
-			'type'  => $this->normalize_field_type( $setting_type ),
-			'desc'  => $setting['desc'] ?? '',
-		);
-
-		// Add options for select fields.
-		if ( isset( $setting['options'] ) && is_array( $setting['options'] ) ) {
-			$field['options'] = $setting['options'];
-		} else {
-			// Generate options for special field types.
-			$field['options'] = $this->get_field_options( $setting_id );
+		if ( ! is_array( $options ) ) {
+			$options = array();
 		}
 
-		return $field;
-	}
+		if ( ! empty( $options ) ) {
+			return $options;
+		}
 
-	/**
-	 * Get options for specific field types.
-	 *
-	 * @param string $field_id Field ID.
-	 * @return array Field options.
-	 */
-	private function get_field_options( string $field_id ): array {
 		switch ( $field_id ) {
 			case 'woocommerce_weight_unit':
 				return array(
@@ -271,23 +247,24 @@ class ProductSettingsSchema extends AbstractSchema {
 				if ( ! function_exists( 'wc_get_product_types' ) ) {
 					return array();
 				}
-
 				$product_types = wc_get_product_types();
 				return is_array( $product_types ) ? $product_types : array();
+
 			case 'woocommerce_shop_page_id':
-				return $this->get_page_options();
+				return self::get_page_options();
 		}
 
-		return array();
+		return $options;
 	}
 
 	/**
 	 * Get options for page selection fields.
 	 *
+	 * @since 10.8.0
+	 *
 	 * @return array
-	 * @since 10.6.0
 	 */
-	private function get_page_options(): array {
+	private static function get_page_options(): array {
 		if ( ! function_exists( 'get_pages' ) ) {
 			return array();
 		}
@@ -303,54 +280,14 @@ class ProductSettingsSchema extends AbstractSchema {
 			'' => __( 'Select a page…', 'woocommerce' ),
 		);
 
+		if ( ! is_array( $pages ) ) {
+			return $options;
+		}
+
 		foreach ( $pages as $page ) {
 			$options[ (string) $page->ID ] = wp_strip_all_tags( $page->post_title );
 		}
 
 		return $options;
-	}
-
-	/**
-	 * Normalize WooCommerce field types to REST API field types.
-	 *
-	 * @param string $wc_type WooCommerce field type.
-	 * @return string Normalized field type.
-	 */
-	private function normalize_field_type( string $wc_type ): string {
-		$type_map = array(
-			'single_select_product' => 'select',
-			'multi_select_product'  => 'multiselect',
-			'single_select_page'    => 'select',
-		);
-
-		return $type_map[ $wc_type ] ?? $wc_type;
-	}
-
-	/**
-	 * Validate and sanitize field value based on its type.
-	 *
-	 * @param mixed  $value Field value.
-	 * @param string $type  Field type.
-	 * @return mixed Validated value.
-	 */
-	private function validate_field_value( $value, string $type ) {
-		switch ( $type ) {
-			case 'number':
-				return is_numeric( $value ) ? (float) $value : 0;
-			case 'checkbox':
-				if ( function_exists( 'wc_string_to_bool' ) ) {
-					return wc_string_to_bool( $value );
-				}
-				if ( is_bool( $value ) ) {
-					return $value;
-				}
-				return filter_var( $value, FILTER_VALIDATE_BOOLEAN );
-			case 'multiselect':
-				return is_array( $value ) ? $value : array();
-			case 'text':
-			case 'select':
-			default:
-				return is_string( $value ) ? $value : (string) $value;
-		}
 	}
 }
