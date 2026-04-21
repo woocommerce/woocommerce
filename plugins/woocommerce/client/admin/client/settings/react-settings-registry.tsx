@@ -3,14 +3,22 @@
  */
 import { createRoot } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import {
+	ReactSettingsPage,
+	baseFieldTransformer,
+	useReactSettings,
+	type FieldTransformer,
+	type RowConfigurations,
+} from '@woocommerce/modern-settings-sdk';
+// The SDK stylesheet is pulled in as a side-effect import so modernised
+// settings screens are styled without extra PHP enqueues; external consumers
+// should enqueue the package's built build-style/style.css instead.
+// eslint-disable-next-line @woocommerce/dependency-group
+import '@woocommerce/modern-settings-sdk/src/react-settings.scss';
 
 /**
  * Internal dependencies
  */
-import { ReactSettingsPage } from './react-settings-page';
-import { baseFieldTransformer } from './field-transformers';
-import { useReactSettings } from './hooks/use-react-settings';
-import type { FieldTransformer, RowConfigurations } from './types';
 import {
 	fieldTransformer as generalFieldTransformer,
 	rowConfigurations as generalRowConfigurations,

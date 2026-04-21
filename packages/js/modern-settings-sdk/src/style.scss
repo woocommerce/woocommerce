@@ -1,0 +1,7 @@
+/**
+ * Aggregated stylesheet bundled to build-style/ by the package's webpack build.
+ *
+ * Each source-level .scss file is imported here so the published package
+ * ships a single stylesheet that consumers can enqueue.
+ */
+@import "./react-settings.scss";

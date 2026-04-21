@@ -1,8 +1,11 @@
 /**
- * Internal dependencies
+ * External dependencies
  */
-import { baseFieldTransformer } from '../settings/field-transformers';
-import type { ReactSettingsField, RowConfigurations } from '../settings/types';
+import {
+	baseFieldTransformer,
+	type ReactSettingsField,
+	type RowConfigurations,
+} from '@woocommerce/modern-settings-sdk';
 
 /**
  * Row configuration for grouping fields into rows.

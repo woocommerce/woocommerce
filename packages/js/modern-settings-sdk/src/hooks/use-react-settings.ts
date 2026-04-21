@@ -45,17 +45,19 @@ const getNestedValue = (
 	return current as ReactSettingsResponse;
 };
 
+type WindowWithSettings = Window & {
+	wcSettings?: {
+		admin?: Record< string, unknown >;
+	};
+};
+
 const getPreloadedSettings = (
 	dataPath: string[]
 ): ReactSettingsResponse | null => {
-	const windowWithSettings =
+	const windowWithSettings: WindowWithSettings =
 		typeof window === 'undefined'
-			? ( {} as Window )
-			: ( window as Window & {
-					wcSettings?: {
-						admin?: Record< string, unknown >;
-					};
-			  } );
+			? ( {} as WindowWithSettings )
+			: ( window as WindowWithSettings );
 
 	return getNestedValue( windowWithSettings.wcSettings?.admin, dataPath );
 };

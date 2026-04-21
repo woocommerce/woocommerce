@@ -1,13 +1,14 @@
 /**
  * External dependencies
  */
+import { createElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
 
 /**
  * Internal dependencies
  */
-import { ErrorBoundary } from '../error-boundary';
+import { ErrorBoundary } from './error-boundary';
 import type {
 	ReactSettingsField,
 	ReactSettingsFieldOptions,
