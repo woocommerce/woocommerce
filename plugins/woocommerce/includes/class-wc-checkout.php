@@ -551,6 +551,7 @@ class WC_Checkout {
 			);
 
 			if ( $product ) {
+				// TODO: $item->set_product( $product );
 				$item->set_props(
 					array(
 						'name'         => $product->get_name(),
@@ -571,6 +572,7 @@ class WC_Checkout {
 			do_action( 'woocommerce_checkout_create_order_line_item', $item, $cart_item_key, $values, $order );
 
 			// Add item to order and save.
+			// TODO: $item->set_order( $order );
 			$order->add_item( $item );
 		}
 	}
@@ -607,6 +609,7 @@ class WC_Checkout {
 			do_action( 'woocommerce_checkout_create_order_fee_item', $item, $fee_key, $fee, $order );
 
 			// Add item to order and save.
+			// TODO: $item->set_order( $order );
 			$order->add_item( $item );
 		}
 	}
@@ -649,6 +652,7 @@ class WC_Checkout {
 				do_action( 'woocommerce_checkout_create_order_shipping_item', $item, $package_key, $package, $order );
 
 				// Add item to order and save.
+				// TODO: $item->set_order( $order );
 				$order->add_item( $item );
 			}
 		}
@@ -693,6 +697,7 @@ class WC_Checkout {
 				do_action( 'woocommerce_checkout_create_order_tax_item', $item, $tax_rate_id, $order );
 
 				// Add item to order and save.
+				// TODO: $item->set_order( $order );
 				$order->add_item( $item );
 			}
 		}
@@ -726,6 +731,7 @@ class WC_Checkout {
 			do_action( 'woocommerce_checkout_create_order_coupon_item', $item, $code, $coupon, $order );
 
 			// Add item to order and save.
+			// TODO: $item->set_order( $order );
 			$order->add_item( $item );
 		}
 	}

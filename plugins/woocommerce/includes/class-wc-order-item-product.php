@@ -280,7 +280,8 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		}
 		$this->set_name( $product->get_name() );
 		$this->set_tax_class( $product->get_tax_class() );
-		$this->product = $product;
+		$this->product                = $product;
+		$this->product_filters_applied = false;
 	}
 
 	/**
@@ -414,7 +415,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 			}
 			$this->product = apply_filters( 'woocommerce_order_item_product', $product, $this );
 		}
-		// TODO: if $this->product is injected, we are bypassing the filters above, needs to be addressed (single run only).
+		// TODO: apply the filters in set_product as well, to ensure they are not bypassed.
 
 		return $this->product;
 	}
