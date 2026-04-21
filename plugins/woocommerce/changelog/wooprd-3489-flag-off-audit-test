@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Modernised settings SDK: lock the "flag off = zero change" guarantee with PHP unit + Playwright coverage.
