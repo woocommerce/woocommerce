@@ -52,8 +52,8 @@ const Edit = ( props: EditProps ): JSX.Element => {
 		customSelectedChipBackground,
 		customSelectedChipBorder,
 	} = attributes;
-	const { filterData } = context;
-	const { isLoading, items, showCounts } = filterData;
+	const selectableItems = context[ 'woocommerce/selectableItems' ];
+	const { isLoading, items, showCounts } = selectableItems;
 
 	const blockProps = useBlockProps( {
 		className: clsx( 'wc-block-product-filter-chips', {
