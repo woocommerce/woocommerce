@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Optimize SQL performance in the wc_customer_bought_product function.

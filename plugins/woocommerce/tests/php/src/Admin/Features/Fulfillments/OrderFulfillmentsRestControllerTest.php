@@ -37,6 +37,21 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	private static int $created_user_id = -1;
 
 	/**
+	 * Order ID for an order owned by the created test user (non-admin customer).
+	 *
+	 * @var int
+	 */
+	private static int $customer_order_id = -1;
+
+	/**
+	 * Fulfillment IDs keyed by order ID, populated during setup so tests don't
+	 * need a preflight GET request to resolve them.
+	 *
+	 * @var array<int, int[]>
+	 */
+	private static array $created_fulfillment_ids = array();
+
+	/**
 	 * Original value of the fulfillments feature flag.
 	 *
 	 * @var mixed
@@ -71,13 +86,28 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 			$order                     = WC_Helper_Order::create_order( get_current_user_id() );
 			self::$created_order_ids[] = $order->get_id();
 			for ( $fulfillment = 1; $fulfillment <= 10; $fulfillment++ ) {
-				FulfillmentsHelper::create_fulfillment(
+				$f = FulfillmentsHelper::create_fulfillment(
 					array(
 						'entity_type' => WC_Order::class,
 						'entity_id'   => $order->get_id(),
 					)
 				);
+				self::$created_fulfillment_ids[ $order->get_id() ][] = $f->get_id();
 			}
+		}
+
+		// Create an order owned by the non-admin test user for customer permission tests.
+		$customer_order            = WC_Helper_Order::create_order( self::$created_user_id );
+		self::$customer_order_id   = $customer_order->get_id();
+		self::$created_order_ids[] = $customer_order->get_id();
+		for ( $fulfillment = 1; $fulfillment <= 10; $fulfillment++ ) {
+			$f = FulfillmentsHelper::create_fulfillment(
+				array(
+					'entity_type' => WC_Order::class,
+					'entity_id'   => $customer_order->get_id(),
+				)
+			);
+			self::$created_fulfillment_ids[ $customer_order->get_id() ][] = $f->get_id();
 		}
 	}
 
@@ -108,8 +138,12 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test the get_items method.
 	 */
 	public function test_get_fulfillments_nominal() {
+		// Set the current user to the non-admin customer who owns the order.
+		$current_user = wp_get_current_user();
+		wp_set_current_user( self::$created_user_id );
+
 		// Do the request for an order which the current user owns.
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . self::$created_order_ids[0] . '/fulfillments' );
+		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . self::$customer_order_id . '/fulfillments' );
 		$response = $this->server->dispatch( $request );
 
 		// Check the response.
@@ -123,8 +157,11 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		foreach ( $fulfillments as $fulfillment ) {
 			$this->assertEquals( WC_Order::class, $fulfillment['entity_type'] );
-			$this->assertEquals( self::$created_order_ids[0], $fulfillment['entity_id'] );
+			$this->assertEquals( self::$customer_order_id, $fulfillment['entity_id'] );
 		}
+
+		// Clean up the test environment.
+		wp_set_current_user( $current_user->ID );
 	}
 
 	/**
@@ -164,6 +201,31 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		// Clean up the test environment.
 		wp_set_current_user( $current_user->ID );
+	}
+
+	/**
+	 * Test that unauthenticated users cannot access guest order fulfillments.
+	 *
+	 * Guest orders have customer_id = 0, and unauthenticated users have user_id = 0.
+	 * Without proper validation, 0 === 0 would grant access to any guest order's fulfillments.
+	 */
+	public function test_get_fulfillments_guest_order_unauthenticated() {
+		wp_set_current_user( 0 );
+
+		// Verify we are not logged in (user ID = 0).
+		$this->assertEquals( 0, get_current_user_id() );
+
+		// The pre-created orders have customer_id = 0 (guest orders).
+		$order = wc_get_order( self::$created_order_ids[0] );
+		$this->assertEquals( 0, $order->get_customer_id() );
+
+		// An unauthenticated request to a guest order should be denied.
+		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . self::$created_order_ids[0] . '/fulfillments' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::UNAUTHORIZED, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEquals( 'woocommerce_rest_cannot_view', $data['code'] );
 	}
 
 	/**
@@ -486,8 +548,12 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test getting a single fulfillment for a regular user.
 	 */
 	public function test_get_fulfillment_for_regular_user() {
-		// Get a previously created order.
-		$order_id = self::$created_order_ids[0];
+		// Set the current user to the non-admin customer who owns the order.
+		$current_user = wp_get_current_user();
+		wp_set_current_user( self::$created_user_id );
+
+		// Get a previously created order owned by the test customer.
+		$order_id = self::$customer_order_id;
 		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
 		$response = $this->server->dispatch( $request );
 
@@ -512,22 +578,17 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( $fulfillments[0]['is_fulfilled'], $fulfillment['is_fulfilled'] );
 		$this->assertEquals( $fulfillments[0]['meta_data'], $fulfillment['meta_data'] );
 		$this->assertEquals( $fulfillments[0]['date_updated'], $fulfillment['date_updated'] );
+
+		// Clean up the test environment.
+		wp_set_current_user( $current_user->ID );
 	}
 
 	/**
 	 * Test getting a single fulfillment for an admin user.
 	 */
 	public function test_get_fulfillment_for_admin_user() {
-		// Get a previously created order.
-		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
-
-		$fulfillment_id = $fulfillments[0]['id'];
+		$order_id       = self::$created_order_ids[0];
+		$fulfillment_id = self::$created_fulfillment_ids[ $order_id ][0];
 
 		// Set the current user to an admin.
 		wp_set_current_user( 1 );
@@ -536,27 +597,18 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments/' . $fulfillment_id );
 		$response = $this->server->dispatch( $request );
 
-		// Check if $fulfillments[0] is the same as $response.
 		$this->assertEquals( WP_Http::OK, $response->get_status() );
 		$this->assertIsArray( $response->get_data() );
 		$fulfillment = $response->get_data();
-		$this->assertEquals( $fulfillments[0]['id'], $fulfillment['id'] );
+		$this->assertEquals( $fulfillment_id, $fulfillment['id'] );
 	}
 
 	/**
 	 * Test getting a single fulfillment with an invalid order ID.
 	 */
 	public function test_get_fulfillment_invalid_order_id() {
-		// Get a previously created order.
-		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
-
-		$fulfillment_id = $fulfillments[0]['id'];
+		$order_id       = self::$created_order_ids[0];
+		$fulfillment_id = self::$created_fulfillment_ids[ $order_id ][0];
 
 		// Get the fulfillment for the order with an invalid order ID.
 		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/999999/fulfillments/' . $fulfillment_id );
@@ -574,14 +626,9 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test getting a single fulfillment with an invalid fulfillment ID.
 	 */
 	public function test_get_fulfillment_invalid_fulfillment_id() {
-		// Get a previously created order.
 		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
 
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
+		wp_set_current_user( 1 );
 
 		// Get the fulfillment for the order with an invalid fulfillment ID.
 		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments/999999' );
@@ -594,6 +641,8 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 0, $data['code'] );
 		$this->assertEquals( 'Fulfillment not found.', $data['message'] );
 		$this->assertEquals( WP_Http::BAD_REQUEST, $data['data']['status'] );
+
+		wp_set_current_user( 0 );
 	}
 
 	/**
@@ -603,16 +652,8 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		// Prepare the test environment.
 		$current_user = wp_get_current_user();
 
-		// Get a previously created order.
-		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
-
-		$fulfillment_id = $fulfillments[0]['id'];
+		$order_id       = self::$created_order_ids[0];
+		$fulfillment_id = self::$created_fulfillment_ids[ $order_id ][0];
 
 		wp_set_current_user( self::$created_user_id );
 
@@ -634,16 +675,8 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test updating a fulfillment for a regular user.
 	 */
 	public function test_update_fulfillment_for_regular_user() {
-		// Get a previously created order.
-		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
-
-		$fulfillment_id = $fulfillments[0]['id'];
+		$order_id       = self::$created_order_ids[0];
+		$fulfillment_id = self::$created_fulfillment_ids[ $order_id ][0];
 
 		// Update the fulfillment for the order.
 		wp_set_current_user( self::$created_user_id );
@@ -698,16 +731,9 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test updating a fulfillment for an admin user.
 	 */
 	public function test_update_fulfillment_for_admin_user() {
-		// Get a previously created order.
-		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
-
-		$fulfillment_id = $fulfillments[0]['id'];
+		// Use a dedicated order to avoid mutating shared state used by other tests.
+		$order_id       = self::$created_order_ids[8];
+		$fulfillment_id = self::$created_fulfillment_ids[ $order_id ][0];
 
 		// Update the fulfillment for the order.
 		wp_set_current_user( 1 );
@@ -810,16 +836,8 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test updating a fulfillment with an invalid order ID.
 	 */
 	public function test_update_fulfillment_invalid_order_id() {
-		// Get a previously created order.
-		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
-
-		$fulfillment_id = $fulfillments[0]['id'];
+		$order_id       = self::$created_order_ids[0];
+		$fulfillment_id = self::$created_fulfillment_ids[ $order_id ][0];
 
 		// Update the fulfillment for the order with an invalid order ID.
 		wp_set_current_user( 1 );
@@ -877,12 +895,6 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	public function test_update_fulfillment_invalid_fulfillment_id() {
 		// Get a previously created order.
 		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
 
 		// Update the fulfillment for the order with an invalid fulfillment ID.
 		wp_set_current_user( 1 );
@@ -941,16 +953,8 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test updating a fulfillment without items.
 	 */
 	public function test_update_fulfillment_without_items() {
-		// Get a previously created order.
-		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
-
-		$fulfillment_id = $fulfillments[0]['id'];
+		$order_id       = self::$created_order_ids[0];
+		$fulfillment_id = self::$created_fulfillment_ids[ $order_id ][0];
 
 		// Update the fulfillment for the order with an invalid fulfillment ID.
 		wp_set_current_user( 1 );
@@ -997,16 +1001,8 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * @dataProvider invalid_items_provider
 	 */
 	public function test_update_fulfillment_with_invalid_items( $items ) {
-		// Get a previously created order.
-		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
-
-		$fulfillment_id = $fulfillments[0]['id'];
+		$order_id       = self::$created_order_ids[0];
+		$fulfillment_id = self::$created_fulfillment_ids[ $order_id ][0];
 
 		wp_set_current_user( 1 );
 
@@ -1096,16 +1092,8 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test deleting a fulfillment for a regular user.
 	 */
 	public function test_delete_fulfillment_for_regular_user() {
-		// Get a previously created order.
-		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
-
-		$fulfillment_id = $fulfillments[0]['id'];
+		$order_id       = self::$created_order_ids[0];
+		$fulfillment_id = self::$created_fulfillment_ids[ $order_id ][0];
 
 		wp_set_current_user( self::$created_user_id );
 
@@ -1126,15 +1114,8 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_delete_fulfillment_for_admin_user() {
 		// Use a dedicated order to avoid mutating shared state used by other tests.
-		$order_id = self::$created_order_ids[9];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertNotEmpty( $fulfillments );
-
-		$fulfillment_id = $fulfillments[0]['id'];
+		$order_id       = self::$created_order_ids[9];
+		$fulfillment_id = self::$created_fulfillment_ids[ $order_id ][0];
 
 		wp_set_current_user( 1 );
 
@@ -1150,16 +1131,8 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test deleting a fulfillment with an invalid order ID.
 	 */
 	public function test_delete_fulfillment_invalid_order_id() {
-		// Get a previously created order.
-		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
-
-		$fulfillment_id = $fulfillments[0]['id'];
+		$order_id       = self::$created_order_ids[0];
+		$fulfillment_id = self::$created_fulfillment_ids[ $order_id ][0];
 
 		wp_set_current_user( 1 );
 
@@ -1181,12 +1154,6 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	public function test_delete_fulfillment_invalid_fulfillment_id() {
 		// Get a previously created order.
 		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
 
 		wp_set_current_user( 1 );
 
@@ -1209,16 +1176,8 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		// Prepare the test environment.
 		$current_user = wp_get_current_user();
 
-		// Get a previously created order.
-		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
-
-		$fulfillment_id = $fulfillments[0]['id'];
+		$order_id       = self::$created_order_ids[0];
+		$fulfillment_id = self::$created_fulfillment_ids[ $order_id ][0];
 
 		wp_set_current_user( self::$created_user_id );
 
@@ -1240,22 +1199,18 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test getting fulfillment meta data for a regular user.
 	 */
 	public function test_get_fulfillment_meta_data_for_regular_user() {
-		// Get a previously created order.
-		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
+		// Set the current user to the non-admin customer who owns the order.
+		$current_user = wp_get_current_user();
+		wp_set_current_user( self::$created_user_id );
 
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
-
-		$fulfillment_id = $fulfillments[0]['id'];
+		$order_id       = self::$customer_order_id;
+		$fulfillment_id = self::$created_fulfillment_ids[ $order_id ][0];
 
 		// Get the fulfillment meta data for the order.
 		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments/' . $fulfillment_id . '/metadata' );
 		$response = $this->server->dispatch( $request );
 
-		// Check the response. It should be an error saying that a regular user cannot view a fulfillment.
+		// Check the response.
 		$this->assertEquals( WP_Http::OK, $response->get_status() );
 		$this->assertEquals(
 			array(
@@ -1286,22 +1241,17 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 				$response->get_data()
 			)
 		);
+
+		// Clean up the test environment.
+		wp_set_current_user( $current_user->ID );
 	}
 
 	/**
 	 * Test getting fulfillment meta data for an admin user.
 	 */
 	public function test_get_fulfillment_meta_data_for_admin_user() {
-		// Get a previously created order.
-		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
-
-		$fulfillment_id = $fulfillments[0]['id'];
+		$order_id       = self::$created_order_ids[0];
+		$fulfillment_id = self::$created_fulfillment_ids[ $order_id ][0];
 
 		wp_set_current_user( 1 );
 
@@ -1345,16 +1295,8 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test getting fulfillment meta data with an invalid order ID.
 	 */
 	public function test_get_fulfillment_meta_data_invalid_order_id() {
-		// Get a previously created order.
-		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
-
-		$fulfillment_id = $fulfillments[0]['id'];
+		$order_id       = self::$created_order_ids[0];
+		$fulfillment_id = self::$created_fulfillment_ids[ $order_id ][0];
 
 		wp_set_current_user( 1 );
 
@@ -1376,12 +1318,6 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	public function test_get_fulfillment_meta_data_invalid_fulfillment_id() {
 		// Get a previously created order.
 		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
 
 		wp_set_current_user( 1 );
 
@@ -1404,16 +1340,8 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		// Prepare the test environment.
 		$current_user = wp_get_current_user();
 
-		// Get a previously created order.
-		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
-
-		$fulfillment_id = $fulfillments[0]['id'];
+		$order_id       = self::$created_order_ids[0];
+		$fulfillment_id = self::$created_fulfillment_ids[ $order_id ][0];
 
 		wp_set_current_user( self::$created_user_id );
 
@@ -1435,16 +1363,8 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test updating fulfillment meta data for a regular user.
 	 */
 	public function test_update_fulfillment_meta_data_for_regular_user() {
-		// Get a previously created order.
-		$order_id = self::$created_order_ids[1];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
-
-		$fulfillment_id = $fulfillments[1]['id'];
+		$order_id       = self::$created_order_ids[1];
+		$fulfillment_id = self::$created_fulfillment_ids[ $order_id ][1];
 
 		// Update the fulfillment meta data for the order.
 		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order_id . '/fulfillments/' . $fulfillment_id . '/metadata' );
@@ -1479,16 +1399,8 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test updating fulfillment meta data for an admin user.
 	 */
 	public function test_update_fulfillment_meta_data_for_admin_user() {
-		// Get a previously created order.
-		$order_id = self::$created_order_ids[2];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
-
-		$fulfillment_id = $fulfillments[2]['id'];
+		$order_id       = self::$created_order_ids[2];
+		$fulfillment_id = self::$created_fulfillment_ids[ $order_id ][2];
 
 		wp_set_current_user( 1 );
 
@@ -1563,16 +1475,8 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test updating fulfillment meta data with an invalid order ID.
 	 */
 	public function test_update_fulfillment_meta_data_invalid_order_id() {
-		// Get a previously created order.
-		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
-
-		$fulfillment_id = $fulfillments[0]['id'];
+		$order_id       = self::$created_order_ids[0];
+		$fulfillment_id = self::$created_fulfillment_ids[ $order_id ][0];
 
 		wp_set_current_user( 1 );
 
@@ -1613,12 +1517,6 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	public function test_update_fulfillment_meta_data_invalid_fulfillment_id() {
 		// Get a previously created order.
 		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
 
 		wp_set_current_user( 1 );
 
@@ -1660,16 +1558,8 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		// Prepare the test environment.
 		$current_user = wp_get_current_user();
 
-		// Get a previously created order.
-		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
-
-		$fulfillment_id = $fulfillments[0]['id'];
+		$order_id       = self::$created_order_ids[0];
+		$fulfillment_id = self::$created_fulfillment_ids[ $order_id ][0];
 
 		wp_set_current_user( self::$created_user_id );
 
@@ -1708,16 +1598,8 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test deleting fulfillment meta data for a regular user.
 	 */
 	public function test_delete_fulfillment_meta_data_for_regular_user() {
-		// Get a previously created order.
-		$order_id = self::$created_order_ids[4];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
-
-		$fulfillment_id = $fulfillments[4]['id'];
+		$order_id       = self::$created_order_ids[4];
+		$fulfillment_id = self::$created_fulfillment_ids[ $order_id ][4];
 
 		// Delete the fulfillment meta data for the order.
 		$request = new WP_REST_Request( 'DELETE', '/wc/v3/orders/' . $order_id . '/fulfillments/' . $fulfillment_id . '/metadata' );
@@ -1743,16 +1625,8 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test deleting fulfillment meta data for an admin user.
 	 */
 	public function test_delete_fulfillment_meta_data_for_admin_user() {
-		// Get a previously created order.
-		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
-
-		$fulfillment_id = $fulfillments[0]['id'];
+		$order_id       = self::$created_order_ids[0];
+		$fulfillment_id = self::$created_fulfillment_ids[ $order_id ][0];
 
 		wp_set_current_user( 1 );
 
@@ -1778,16 +1652,8 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test deleting fulfillment meta data with an invalid order ID.
 	 */
 	public function test_delete_fulfillment_meta_data_invalid_order_id() {
-		// Get a previously created order.
-		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
-
-		$fulfillment_id = $fulfillments[0]['id'];
+		$order_id       = self::$created_order_ids[0];
+		$fulfillment_id = self::$created_fulfillment_ids[ $order_id ][0];
 
 		wp_set_current_user( 1 );
 
@@ -1819,12 +1685,6 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 	public function test_delete_fulfillment_meta_data_invalid_fulfillment_id() {
 		// Get a previously created order.
 		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
 
 		wp_set_current_user( 1 );
 
@@ -1857,16 +1717,8 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		// Prepare the test environment.
 		$current_user = wp_get_current_user();
 
-		// Get a previously created order.
-		$order_id = self::$created_order_ids[0];
-		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
-		$response = $this->server->dispatch( $request );
-
-		$fulfillments = $response->get_data();
-		$this->assertIsArray( $fulfillments );
-		$this->assertCount( 10, $fulfillments );
-
-		$fulfillment_id = $fulfillments[0]['id'];
+		$order_id       = self::$created_order_ids[0];
+		$fulfillment_id = self::$created_fulfillment_ids[ $order_id ][0];
 
 		wp_set_current_user( self::$created_user_id );
 

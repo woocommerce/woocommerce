@@ -2,7 +2,10 @@
  * External dependencies
  */
 import { useSelect, useDispatch } from '@wordpress/data';
-import { EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME } from '@woocommerce/data';
+import {
+	EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME,
+	type Product,
+} from '@woocommerce/data';
 import { getNewPath, navigateTo } from '@woocommerce/navigation';
 
 type VariationSwitcherProps = {
@@ -16,8 +19,6 @@ export function useVariationSwitcher( {
 	parentId,
 	parentProductType,
 }: VariationSwitcherProps ) {
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
 	const { invalidateResolution } = useDispatch( 'core' );
 	const { invalidateResolutionForStoreSelector } = useDispatch(
 		EXPERIMENTAL_PRODUCT_VARIATIONS_STORE_NAME
@@ -28,9 +29,7 @@ export function useVariationSwitcher( {
 				return {};
 			}
 			const { getEntityRecord } = select( 'core' );
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
-			const parentProduct = getEntityRecord(
+			const parentProduct: Product | undefined = getEntityRecord(
 				'postType',
 				parentProductType || 'product',
 				parentId
@@ -38,19 +37,13 @@ export function useVariationSwitcher( {
 			if (
 				variationId !== undefined &&
 				parentProduct &&
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore
 				parentProduct.variations
 			) {
 				const activeVariationIndex =
-					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-					// @ts-ignore
 					parentProduct.variations.indexOf( variationId );
 				const previousVariationIndex =
 					activeVariationIndex > 0 ? activeVariationIndex - 1 : null;
 				const nextVariationIndex =
-					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-					// @ts-ignore
 					activeVariationIndex !== parentProduct.variations.length - 1
 						? activeVariationIndex + 1
 						: null;
@@ -59,20 +52,14 @@ export function useVariationSwitcher( {
 					activeVariationIndex,
 					nextVariationIndex,
 					previousVariationIndex,
-					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-					// @ts-ignore
 					numberOfVariations: parentProduct.variations.length,
 					previousVariationId:
 						previousVariationIndex !== null
-							? // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-							  // @ts-ignore
-							  parentProduct.variations[ previousVariationIndex ]
+							? parentProduct.variations[ previousVariationIndex ]
 							: null,
 					nextVariationId:
 						nextVariationIndex !== null
-							? // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-							  // @ts-ignore
-							  parentProduct.variations[ nextVariationIndex ]
+							? parentProduct.variations[ nextVariationIndex ]
 							: null,
 				};
 			}

@@ -3,6 +3,7 @@ declare( strict_types=1 );
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
+use Automattic\WooCommerce\Tests\Helpers\MetaDataAssertionTrait;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Controller as RefundsController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Schema\RefundSchema;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\CollectionQuery;
@@ -15,6 +16,7 @@ use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\DataUtils;
  */
 class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	use HPOSToggleTrait;
+	use MetaDataAssertionTrait;
 
 	/**
 	 * Endpoint instance.
@@ -1309,5 +1311,29 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		// Clean up product.
 		$product->delete( true );
+	}
+
+	/**
+	 * @testdox Creating a V4 refund with incomplete meta_data entries does not cause errors.
+	 */
+	public function test_create_refund_meta_data_with_incomplete_entries(): void {
+		$order = $this->create_test_order();
+
+		$request = new \WP_REST_Request( 'POST', '/wc/v4/refunds' );
+		$request->set_body_params(
+			array(
+				'order_id'  => $order->get_id(),
+				'amount'    => 1.00,
+				'meta_data' => $this->get_incomplete_meta_data_input(),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 201, $response->get_status() );
+
+		$refund                  = wc_get_order( $response->get_data()['id'] );
+		$this->created_refunds[] = $refund->get_id();
+
+		$this->assert_incomplete_meta_data_handled_correctly( $refund );
 	}
 }

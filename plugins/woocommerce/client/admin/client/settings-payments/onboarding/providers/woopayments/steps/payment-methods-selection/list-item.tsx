@@ -200,8 +200,6 @@ export const PaymentMethodListItem = ( {
 								} );
 							} }
 							disabled={
-								// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-								// @ts-ignore disabled prop exists
 								( method.required ?? false ) || isLoading
 							}
 							label=""

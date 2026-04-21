@@ -106,4 +106,18 @@ class NewOrderNotification extends Notification {
 			$order->save_meta_data();
 		}
 	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @param string $key The meta key.
+	 */
+	public function delete_meta( string $key ): void {
+		$order = WC()->call_function( 'wc_get_order', $this->get_resource_id() );
+
+		if ( $order instanceof WC_Order ) {
+			$order->delete_meta_data( $key );
+			$order->save_meta_data();
+		}
+	}
 }

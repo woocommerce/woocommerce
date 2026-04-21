@@ -1501,18 +1501,6 @@ parameters:
 			path: includes/admin/class-wc-admin-assets.php
 
 		-
-			message: '#^Method WC_Admin_Assets\:\:enqueue_block_editor_script\(\) has parameter \$script_name with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: includes/admin/class-wc-admin-assets.php
-
-		-
-			message: '#^Method WC_Admin_Assets\:\:enqueue_block_editor_script\(\) has parameter \$script_path_name with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: includes/admin/class-wc-admin-assets.php
-
-		-
 			message: '#^Method WC_Admin_Assets\:\:register_scripts\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -15787,7 +15775,7 @@ parameters:
 			path: includes/class-wc-structured-data.php
 
 		-
-			message: '#^Offset ''price'' on array\{priceValidUntil\: string, availability\: ''https\://schema\.org…'', url\: mixed, seller\: array\{''@type''\: ''Organization'', name\: mixed, url\: mixed\}, ''@type''\: ''AggregateOffer'', lowPrice\: mixed, highPrice\: mixed, offerCount\: int\<0, max\>, \.\.\.\}\|array\{priceValidUntil\: string, availability\: ''https\://schema\.org…'', url\: mixed, seller\: array\{''@type''\: ''Organization'', name\: mixed, url\: mixed\}, ''@type''\: ''Offer'', priceSpecification\: array\{0\: array\{''@type''\: ''UnitPriceSpecificat…'', price\: mixed, priceCurrency\: mixed, valueAddedTaxIncluded\: bool, validThrough\: string, priceType\?\: ''https\://schema\.org…''\}, 1\?\: array\{''@type''\: ''UnitPriceSpecificat…'', price\: mixed, priceCurrency\: mixed, valueAddedTaxIncluded\: bool, validThrough\: string, priceType\?\: ''https\://schema\.org…''\}\}\} in empty\(\) does not exist\.$#'
+			message: '#^Offset ''price'' on array\{priceValidUntil\: string, availability\: ''https\://schema\.org…'', url\: mixed, seller\: array\{''@type''\: ''Organization'', name\: mixed, url\: mixed\}, ''@type''\: ''AggregateOffer'', lowPrice\: mixed, highPrice\: mixed, offerCount\: int\<0, max\>, \.\.\.\}\|array\{priceValidUntil\: string, availability\: ''https\://schema\.org…'', url\: mixed, seller\: array\{''@type''\: ''Organization'', name\: mixed, url\: mixed\}, ''@type''\: ''Offer'', priceSpecification\: array\{0\: array\{''@type''\: ''UnitPriceSpecificat…'', price\: mixed, priceCurrency\: mixed, validThrough\: string, valueAddedTaxIncluded\?\: bool, priceType\?\: ''https\://schema\.org…''\}, 1\?\: array\{''@type''\: ''UnitPriceSpecificat…'', price\: mixed, priceCurrency\: mixed, validThrough\: string, valueAddedTaxIncluded\?\: bool, priceType\?\: ''https\://schema\.org…''\}\}\} in empty\(\) does not exist\.$#'
 			identifier: empty.offset
 			count: 1
 			path: includes/class-wc-structured-data.php
@@ -36898,12 +36886,6 @@ parameters:
 			path: includes/wc-user-functions.php
 
 		-
-			message: '#^Parameter \#1 \$callback of function array_map expects \(callable\(int\<min, \-1\>\|int\<1, max\>\|non\-falsy\-string\)\: mixed\)\|null, ''esc_sql'' given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/wc-user-functions.php
-
-		-
 			message: '#^Parameter \#1 \$object_or_class of function property_exists expects object\|string, WP_User\|false given\.$#'
 			identifier: argument.type
 			count: 1
@@ -46594,12 +46576,6 @@ parameters:
 			path: src/Admin/Features/Fulfillments/FulfillmentUtils.php
 
 		-
-			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Admin/Features/Fulfillments/FulfillmentUtils.php
-
-		-
 			message: '#^Cannot access offset int on array\|false\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
@@ -53272,18 +53248,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductCollection/Controller.php
 
 		-
-			message: '#^If condition is always false\.$#'
-			identifier: if.alwaysFalse
-			count: 1
-			path: src/Blocks/BlockTypes/ProductCollection/Controller.php
-
-		-
-			message: '#^Left side of && is always false\.$#'
-			identifier: booleanAnd.leftAlwaysFalse
-			count: 2
-			path: src/Blocks/BlockTypes/ProductCollection/Controller.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\Controller\:\:add_support_for_filter_blocks\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -53340,12 +53304,6 @@ parameters:
 		-
 			message: '#^Parameter \$request of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\Controller\:\:update_rest_query_in_editor\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\WP_REST_Request\.$#'
 			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductCollection/Controller.php
-
-		-
-			message: '#^Variable \$parsed_block on left side of \?\? is never defined\.$#'
-			identifier: nullCoalesce.variable
 			count: 1
 			path: src/Blocks/BlockTypes/ProductCollection/Controller.php
 
@@ -53731,18 +53689,6 @@ parameters:
 			message: '#^Access to property \$parsed_block on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
 			identifier: class.notFound
 			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterAttribute.php
-
-		-
-			message: '#^Cannot access property \$name on stdClass\|null\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: src/Blocks/BlockTypes/ProductFilterAttribute.php
-
-		-
-			message: '#^Cannot access property \$slug on stdClass\|null\.$#'
-			identifier: property.nonObject
-			count: 5
 			path: src/Blocks/BlockTypes/ProductFilterAttribute.php
 
 		-
@@ -54670,12 +54616,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductResultsCount.php
 
 		-
-			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Blocks/BlockTypes/ProductSKU.php
-
-		-
 			message: '#^Call to an undefined method WC_Product\:\:get_available_variations\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -54690,12 +54630,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductSKU\:\:register_block_type_assets\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypes/ProductSKU.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductSKU\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/ProductSKU.php
 
@@ -65071,18 +65005,6 @@ parameters:
 			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmails.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\EmailEditor\\WooContentProcessor\:\:prepare_css\(\) should return string but returns string\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Internal/EmailEditor/WooContentProcessor.php
-
-		-
-			message: '#^Parameter \#3 \$subject of function preg_replace expects array\<float\|int\|string\>\|string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/EmailEditor/WooContentProcessor.php
-
-		-
 			message: '#^@param string \$feature_id does not accept actual type of parameter\: int\<min, \-1\>\|int\<1, max\>\|non\-falsy\-string\.$#'
 			identifier: parameter.phpDocType
 			count: 1
@@ -66901,18 +66823,6 @@ parameters:
 			path: src/Internal/ProductFilters/FilterData.php
 
 		-
-			message: '#^Parameter \#2 \$value of method Automattic\\WooCommerce\\Internal\\ProductFilters\\FilterData\:\:set_cache\(\) expects Automattic\\WooCommerce\\Internal\\ProductFilters\\mix, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/ProductFilters/FilterData.php
-
-		-
-			message: '#^Parameter \$value of method Automattic\\WooCommerce\\Internal\\ProductFilters\\FilterData\:\:set_cache\(\) has invalid type Automattic\\WooCommerce\\Internal\\ProductFilters\\mix\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/ProductFilters/FilterData.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\ProductFilters\\FilterDataProvider\:\:with\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -68438,12 +68348,6 @@ parameters:
 
 		-
 			message: '#^Call to method single_add_to_cart_text\(\) on an unknown class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\WC_Data\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
-			message: '#^Call to method update_meta_data\(\) on an unknown class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\WC_Product\.$#'
 			identifier: class.notFound
 			count: 1
 			path: src/Internal/RestApi/Routes/V4/Products/Controller.php

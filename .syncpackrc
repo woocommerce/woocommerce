@@ -21,17 +21,13 @@
 			"isBanned": true
 		},
 		{
-			"label": "Allow @woocommerce/tracks to support Node.js v22+",
 			"dependencies": [
-				"node"
+				"@types/node"
 			],
-			"dependencyTypes": [
-				"engines"
-			],
-			"pinVersion": ">=20.11.1",
 			"packages": [
-				"@woocommerce/tracks"
-			]
+				"**"
+			],
+			"pinVersion": "^24.1.0"
 		},
 		{
 			"dependencies": [
@@ -40,49 +36,45 @@
 			"dependencyTypes": [
 				"engines"
 			],
-			"pinVersion": "^20.11.1",
+			"pinVersion": "^24.15.0",
 			"packages": [
 				"**"
 			]
 		},
 		{
+			"label": "block-library pins these differently from the wp-min catalog",
 			"dependencies": [
 				"@automattic/color-studio",
 				"@storybook/*",
 				"@testing-library/*",
 				"@typescript-eslint/*",
-				"@wordpress/api-fetch",
-				"@wordpress/autop",
-				"@wordpress/base-styles",
 				"@wordpress/a11y",
-				"@wordpress/compose",
-				"@wordpress/data-controls",
-				"@wordpress/date",
-				"@wordpress/editor",
-				"@wordpress/dom",
-				"@wordpress/dom-ready",
-				"@wordpress/element",
-				"@wordpress/html-entities",
-				"@wordpress/i18n",
-				"@wordpress/icons",
+				"@wordpress/autop",
 				"@wordpress/interactivity",
 				"@wordpress/interactivity-router",
-				"@wordpress/is-shallow-equal",
-				"@wordpress/notices",
-				"@wordpress/postcss-plugins-preset",
-				"@wordpress/postcss-themes",
 				"@wordpress/prettier-config",
-				"@wordpress/primitives",
 				"@wordpress/private-apis",
 				"@wordpress/scripts",
 				"@wordpress/style-engine",
 				"@wordpress/stylelint-config",
-				"@wordpress/url",
 				"eslint*",
 				"stylelint"
 			],
 			"packages": [
 				"@woocommerce/block-library"
+			],
+			"isIgnored": true
+		},
+		{
+			"label": "internal-ts-config generates version-constrained vendored types for these dependencies",
+			"dependencies": [
+				"@wordpress/core-data",
+				"@wordpress/data",
+				"@wordpress/editor",
+				"@wordpress/notices"
+			],
+			"packages": [
+				"@woocommerce/internal-ts-config"
 			],
 			"isIgnored": true
 		},
@@ -358,11 +350,7 @@
 				"@wordpress/stylelint-config",
 				"@wordpress/scripts",
 				"@wordpress/jest-console",
-				"@wordpress/e2e-test-utils",
-				"@wordpress/jest-preset-default",
-				"@wordpress/postcss-plugins-preset",
-				"@wordpress/custom-templated-path-webpack-plugin",
-				"@wordpress/postcss-themes"
+				"@wordpress/e2e-test-utils"
 			],
 			"packages": [
 				"**"
@@ -382,6 +370,16 @@
 				"@woocommerce/product-editor",
 				"@woocommerce/settings-editor",
 				"@woocommerce/admin-library"
+			],
+			"isIgnored": true
+		},
+		{
+			"label": "Ignore all syncpack rules for experimental-products-app",
+			"dependencies": [
+				"**"
+			],
+			"packages": [
+				"@woocommerce/experimental-products-app"
 			],
 			"isIgnored": true
 		},
@@ -460,7 +458,10 @@
 				"@wordpress/babel-plugin-import-jsx-pragma",
 				"@wordpress/babel-preset-default",
 				"@wordpress/browserslist-config",
-				"@wordpress/dependency-extraction-webpack-plugin"
+				"@wordpress/dependency-extraction-webpack-plugin",
+				"@wordpress/jest-preset-default",
+				"@wordpress/postcss-plugins-preset",
+				"@wordpress/postcss-themes"
 			],
 			"packages": [
 				"**"
@@ -477,14 +478,18 @@
 			"isIgnored": true
 		},
 		{
-			"label": "@wordpress/* runtime-dependencies",
+			"label": "@wordpress/* runtime-dependencies (pnpm 10 requires valid semver in peerDependencies, so peer deps are excluded here)",
+			"dependencyTypes": [
+				"prod",
+				"dev"
+			],
 			"dependencies": [
 				"@wordpress/**"
 			],
 			"packages": [
 				"**"
 			],
-			"pinVersion": "wp-6.6"
+			"pinVersion": "catalog:wp-min"
 		},
 		{
 			"dependencies": [
@@ -566,15 +571,6 @@
 				"**"
 			],
 			"pinVersion": "^9.0.1"
-		},
-		{
-			"dependencies": [
-				"@types/node"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "20.x.x"
 		},
 		{
 			"label": "Testing related dependencies: React 18",
