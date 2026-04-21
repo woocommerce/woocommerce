@@ -167,6 +167,58 @@ class Tree_Builder {
 	}
 
 	/**
+	 * Apply per-node capability checks. Nodes the user can't access are either
+	 * removed, or marked breadcrumb if they have visible descendants (so the
+	 * child chain remains reachable via non-clickable labels).
+	 *
+	 * Called separately from build() because tests can construct the tree
+	 * without a user context and then apply the filter under a specific user.
+	 *
+	 * @param array $tree Tree.
+	 * @return array Tree with capability-filtered nodes.
+	 */
+	public function apply_capability_filter( array $tree ): array {
+		// Pass 1: mark every node's visibility based on capability.
+		foreach ( $tree as $slug => &$node ) {
+			$cap            = $node['capability'] ?? 'read';
+			$node['hidden'] = ! current_user_can( $cap );
+		}
+		unset( $node );
+
+		// Pass 2: compute visible-descendant flag bottom-up so breadcrumbs know
+		// when to stay.
+		$has_visible_descendant = array();
+		foreach ( array_keys( $tree ) as $slug ) {
+			$has_visible_descendant[ $slug ] = false;
+		}
+		foreach ( $tree as $slug => $node ) {
+			if ( ! empty( $node['hidden'] ) ) {
+				continue;
+			}
+			$ancestor = $node['parent'];
+			while ( null !== $ancestor && isset( $tree[ $ancestor ] ) ) {
+				$has_visible_descendant[ $ancestor ] = true;
+				$ancestor                            = $tree[ $ancestor ]['parent'];
+			}
+		}
+
+		// Pass 3: resolve hidden nodes — either breadcrumb or remove.
+		foreach ( $tree as $slug => $node ) {
+			if ( empty( $node['hidden'] ) ) {
+				continue;
+			}
+			if ( $has_visible_descendant[ $slug ] ) {
+				$tree[ $slug ]['breadcrumb'] = true;
+				$tree[ $slug ]['hidden']     = false;
+			} else {
+				unset( $tree[ $slug ] );
+			}
+		}
+
+		return $tree;
+	}
+
+	/**
 	 * Collect every slug that WP knows about (top-level + every submenu entry).
 	 *
 	 * @param array $raw_menu    WP's $menu.

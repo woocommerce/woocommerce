@@ -167,4 +167,66 @@ class Tree_Builder_Test extends \WC_Unit_Test_Case {
 
 		$this->assertArrayNotHasKey( 'orphan', $tree );
 	}
+
+	/**
+	 * A node the user lacks capability for is marked `hidden = true` unless it
+	 * has a visible descendant, in which case it's marked `breadcrumb = true`
+	 * (rendered as non-clickable label).
+	 */
+	public function test_capability_filtering_with_breadcrumb_passthrough() {
+		$default = array(
+			'woocommerce' => array( 'parent' => null,          'title' => 'WooCommerce', 'position' => 2  ),
+			'parent-cap'  => array( 'parent' => 'woocommerce', 'title' => 'Parent',      'position' => 30, 'capability' => 'manage_options' ),
+			'child-cap'   => array( 'parent' => 'parent-cap',  'title' => 'Child',       'position' => 10, 'capability' => 'read' ),
+		);
+
+		$raw_menu    = array( array( 'WooCommerce', 'read', 'woocommerce', '', '' ) );
+		$raw_submenu = array(
+			'woocommerce' => array(
+				array( 'Parent', 'manage_options', 'parent-cap' ),
+				array( 'Child',  'read',           'child-cap' ),
+			),
+		);
+
+		// Simulate a user with 'read' but not 'manage_options'.
+		$user_id = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		wp_set_current_user( $user_id );
+
+		$builder = new Tree_Builder();
+		$tree    = $builder->build( $default, $raw_menu, $raw_submenu );
+
+		$tree = $builder->apply_capability_filter( $tree );
+
+		// Parent survives as a breadcrumb because child is visible.
+		$this->assertArrayHasKey( 'parent-cap', $tree );
+		$this->assertTrue( $tree['parent-cap']['breadcrumb'] ?? false );
+		// Child is fully visible.
+		$this->assertArrayHasKey( 'child-cap', $tree );
+		$this->assertFalse( $tree['child-cap']['hidden'] ?? false );
+	}
+
+	/**
+	 * When a parent is capability-hidden AND has no visible descendants,
+	 * the parent is removed entirely.
+	 */
+	public function test_capability_hidden_without_descendants_removes_parent() {
+		$default = array(
+			'woocommerce' => array( 'parent' => null,          'title' => 'WooCommerce', 'position' => 2  ),
+			'parent-cap'  => array( 'parent' => 'woocommerce', 'title' => 'Parent',      'position' => 30, 'capability' => 'manage_options' ),
+		);
+
+		$raw_menu    = array( array( 'WooCommerce', 'read', 'woocommerce', '', '' ) );
+		$raw_submenu = array(
+			'woocommerce' => array( array( 'Parent', 'manage_options', 'parent-cap' ) ),
+		);
+
+		$user_id = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		wp_set_current_user( $user_id );
+
+		$builder = new Tree_Builder();
+		$tree    = $builder->build( $default, $raw_menu, $raw_submenu );
+		$tree    = $builder->apply_capability_filter( $tree );
+
+		$this->assertArrayNotHasKey( 'parent-cap', $tree );
+	}
 }
