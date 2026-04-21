@@ -46,9 +46,9 @@ class QueryInfoExtractor {
 	/**
 	 * Recursively extract query info from a selection set.
 	 *
-	 * @param ?SelectionSetNode                    $selection_set   The selection set to process.
-	 * @param array                                $variable_values Variable values for resolving arguments.
-	 * @param array<string, FragmentDefinitionNode> $fragments      Named fragment definitions from the document.
+	 * @param ?SelectionSetNode                     $selection_set   The selection set to process.
+	 * @param array                                 $variable_values Variable values for resolving arguments.
+	 * @param array<string, FragmentDefinitionNode> $fragments       Named fragment definitions from the document.
 	 * @return array The query info tree for the selection set.
 	 */
 	public static function extract( ?SelectionSetNode $selection_set, array $variable_values, array $fragments = array() ): array {
