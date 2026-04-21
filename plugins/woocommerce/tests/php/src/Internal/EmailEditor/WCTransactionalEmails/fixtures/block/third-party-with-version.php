@@ -6,6 +6,8 @@
  * @version 1.2.3
  */
 
+declare( strict_types=1 );
+
 defined( 'ABSPATH' ) || exit;
 ?>
 <!-- wp:paragraph -->
