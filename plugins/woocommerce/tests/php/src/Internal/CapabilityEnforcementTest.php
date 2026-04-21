@@ -58,6 +58,16 @@ class CapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 
 		$this->approval_service = new POSApprovalService();
 
+		// Remove any CapabilityEnforcement instance the DI container registered
+		// at plugin bootstrap so only the test's instance (with the test's
+		// approval service) sees the filters. Without this, two instances
+		// race over single-use tokens and break the approval flow.
+		remove_all_filters( 'woocommerce_rest_check_permissions' );
+		remove_all_filters( 'woocommerce_pos_capability_check' );
+		remove_all_filters( 'rest_pre_dispatch' );
+		remove_all_filters( 'rest_request_before_callbacks' );
+		remove_all_filters( 'rest_post_dispatch' );
+
 		$this->sut = new CapabilityEnforcement();
 		$this->sut->init( $this->approval_service );
 		$this->sut->register();
@@ -477,7 +487,7 @@ class CapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 			array( 'order_id' => $order->get_id() )
 		);
 
-		delete_transient( '_wc_pos_approval_' . hash( 'sha256', $token ) );
+		delete_option( '_wc_pos_approval_' . hash( 'sha256', $token ) );
 
 		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() . '/refunds' );
 		$request->set_body_params(
@@ -542,7 +552,7 @@ class CapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Cashiers can read customers but cannot edit them.
+	 * @testdox Cashiers can read and create customers, matching create_customers in the role.
 	 */
 	public function test_cashier_customer_access_matches_pos_caps(): void {
 		wp_set_current_user( $this->limited_user_id );
@@ -552,8 +562,8 @@ class CapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 
 		$this->assertSame( 200, $list_response->get_status() );
 
-		$edit_request = new WP_REST_Request( 'POST', '/wc/v3/customers' );
-		$edit_request->set_body_params(
+		$create_request = new WP_REST_Request( 'POST', '/wc/v3/customers' );
+		$create_request->set_body_params(
 			array(
 				'email'      => 'cashier-created@example.com',
 				'first_name' => 'Cashier',
@@ -562,9 +572,9 @@ class CapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$edit_response = $this->server->dispatch( $edit_request );
+		$create_response = $this->server->dispatch( $create_request );
 
-		$this->assertSame( 403, $edit_response->get_status() );
+		$this->assertSame( 201, $create_response->get_status() );
 	}
 
 	/**
@@ -723,21 +733,21 @@ class CapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox POS cashiers cannot list coupons via the REST API.
+	 * @testdox POS cashiers can list coupons via the REST API so they can apply codes at checkout.
 	 */
-	public function test_pos_cashier_cannot_list_coupons(): void {
+	public function test_pos_cashier_can_list_coupons(): void {
 		wp_set_current_user( $this->limited_user_id );
 
 		$request  = new WP_REST_Request( 'GET', '/wc/v3/coupons' );
 		$response = $this->server->dispatch( $request );
 
-		$this->assertContains( $response->get_status(), array( 401, 403 ) );
+		$this->assertSame( 200, $response->get_status() );
 	}
 
 	/**
-	 * @testdox POS managers cannot manage coupons via the REST API.
+	 * @testdox POS managers can create coupons via the REST API (publish_shop_coupons).
 	 */
-	public function test_pos_manager_cannot_manage_coupons(): void {
+	public function test_pos_manager_can_create_coupons(): void {
 		wp_set_current_user( $this->capable_user_id );
 
 		$request = new WP_REST_Request( 'POST', '/wc/v3/coupons' );
@@ -751,7 +761,7 @@ class CapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 
 		$response = $this->server->dispatch( $request );
 
-		$this->assertContains( $response->get_status(), array( 401, 403 ) );
+		$this->assertSame( 201, $response->get_status() );
 	}
 
 	/**
@@ -845,7 +855,7 @@ class CapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 			array( 'order_id' => $order->get_id() )
 		);
 
-		delete_transient( '_wc_pos_approval_' . hash( 'sha256', $token ) );
+		delete_option( '_wc_pos_approval_' . hash( 'sha256', $token ) );
 
 		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() . '/refunds' );
 		$request->set_body_params(

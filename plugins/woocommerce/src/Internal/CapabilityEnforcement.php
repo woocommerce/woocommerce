@@ -98,6 +98,7 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 		add_filter( 'woocommerce_pos_capability_check', array( $this, 'check_approval_token' ), 10, 3 );
 		add_filter( 'rest_pre_dispatch', array( $this, 'capture_current_rest_route' ), 10, 3 );
 		add_filter( 'rest_request_before_callbacks', array( $this, 'enforce_route_access' ), 10, 3 );
+		add_filter( 'rest_request_after_callbacks', array( $this, 'enforce_route_access' ), 10, 3 );
 		add_filter( 'rest_post_dispatch', array( $this, 'filter_sensitive_report_data' ), 10, 3 );
 	}
 
@@ -601,7 +602,10 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 			return false;
 		}
 
-		return 1 === preg_match( '#^/wp/v2/users(?:/\\d+)?$#', $route );
+		// Block the users collection, individual users, and user sub-resources
+		// (e.g. /wp/v2/users/{id}/application-passwords) so POS-only roles
+		// cannot list or mint credentials for other users.
+		return 1 === preg_match( '#^/wp/v2/users(?:/\\d+(?:/.+)?)?$#', $route );
 	}
 
 	/**

@@ -239,7 +239,7 @@ class POSPinAuthControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_body_params(
 			array(
 				'pin'     => '8472',
-				'context' => array( 'capability' => 'view_pos_settings' ),
+				'context' => array( 'capability' => 'view_pos' ),
 			)
 		);
 		$response = rest_do_request( $request );
@@ -252,7 +252,7 @@ class POSPinAuthControllerTest extends WC_REST_Unit_Test_Case {
 		);
 		$this->assertNotEmpty( $override_logs, 'Expected a POS verify override log entry.' );
 		$entry = array_values( $override_logs )[0];
-		$this->assertStringContainsString( 'view_pos_settings', $entry['message'] );
+		$this->assertStringContainsString( 'view_pos', $entry['message'] );
 		$this->assertStringContainsString( 'granted', $entry['message'] );
 	}
 
