@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Introduce the modernised settings SDK as an experimental, opt-in alternative to the legacy settings renderer, behind the `modern-settings` feature flag (off by default).

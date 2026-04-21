@@ -1,4 +1,0 @@
-Significance: minor
-Type: enhancement
-
-Consolidate v4 REST settings transformers through ReactSettingsSchema; remove the hardcoded settings-page-class dictionary in Settings.

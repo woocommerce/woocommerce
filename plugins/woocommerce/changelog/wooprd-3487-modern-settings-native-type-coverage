@@ -1,4 +1,0 @@
-Significance: patch
-Type: add
-
-Modernised settings SDK: cover password, email, URL, tel, color, date/time family, textarea, searchable page select, and info field types so legacy pages using these types render natively instead of falling back.
