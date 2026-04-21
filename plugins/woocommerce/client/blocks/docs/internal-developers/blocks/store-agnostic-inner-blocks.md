@@ -283,43 +283,11 @@ export type SelectableItem = (
 
 ## PHP
 
-### Interface
-
-Location: `src/Blocks/BlockTypes/SelectableItemsContextInterface.php`
-
-```php
-<?php
-declare( strict_types = 1 );
-
-namespace Automattic\WooCommerce\Blocks\BlockTypes;
-
-/**
- * Contract for blocks that provide SelectableItemsContext to inner blocks.
- *
- * @see docs/internal-developers/blocks/store-agnostic-inner-blocks.md
- */
-interface SelectableItemsContextInterface {
-    /**
-     * @return list<array{label: string, value: string, selected?: bool, disabled?: bool, count?: int, color?: string, image?: string, type?: string, id?: int, parent?: int, depth?: int, menuOrder?: int, ariaLabel?: string}>
-     */
-    public function get_selectable_items( \WP_Block $block ): array;
-
-    /**
-     * @return 'single'|'multiple'
-     */
-    public function get_selection_mode(): string;
-
-    public function get_select_action(): string;
-
-    public function get_store_namespace(): string;
-}
-```
-
 ### Trait
 
 Location: `src/Blocks/BlockTypes/SelectableItemsContextTrait.php`
 
-The trait builds and injects the context array so every parent block doesn't duplicate the wiring. Parent blocks implement the interface methods; the trait assembles them into the protocol shape and sets `$block->context`.
+One method — builds the context array and injects it into `$block->context` so inner blocks can read it via `usesContext`.
 
 ```php
 <?php
@@ -328,56 +296,32 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 trait SelectableItemsContextTrait {
-    /**
-     * Build the full context array from interface methods.
-     */
-    protected function build_selectable_items_context( \WP_Block $block, array $extra = [] ): array {
-        return array_filter(
-            array_merge(
-                [
-                    'items'          => $this->get_selectable_items( $block ),
-                    'selectionMode'  => $this->get_selection_mode(),
-                    'selectAction'   => $this->get_select_action(),
-                    'storeNamespace' => $this->get_store_namespace(),
-                ],
-                $extra
-            ),
-            fn( $v ) => $v !== null
-        );
-    }
-
-    /**
-     * Inject context so inner blocks can read it via `usesContext`.
-     */
-    protected function provide_selectable_items_context( \WP_Block $block, array $extra = [] ): void {
-        $block->context['woocommerce/selectableItems'] = $this->build_selectable_items_context( $block, $extra );
+    protected function provide_selectable_items_context( \WP_Block $block, array $context ): void {
+        $block->context['woocommerce/selectableItems'] = $context;
     }
 }
 ```
 
-Parent blocks use both:
+Parent blocks use it:
 
 ```php
-class ProductFilterAttribute extends AbstractBlock
-    implements SelectableItemsContextInterface {
-
+class ProductFilterAttribute extends AbstractBlock {
     use SelectableItemsContextTrait;
-
-    public function get_selectable_items( \WP_Block $block ): array { /* ... */ }
-    public function get_selection_mode(): string { return 'multiple'; }
-    public function get_select_action(): string { return 'toggleFilter'; }
-    public function get_store_namespace(): string { return 'woocommerce/product-filters'; }
 
     protected function render( $attributes, $content, $block ) {
         $this->provide_selectable_items_context( $block, [
-            'groupLabel' => $attributes['label'] ?? '',
-            'showCounts' => $attributes['showCounts'] ?? true,
+            'items'          => $this->transform_to_selectable_items( $filter_items ),
+            'selectionMode'  => 'multiple',
+            'selectAction'   => 'toggleFilter',
+            'storeNamespace' => 'woocommerce/product-filters',
+            'groupLabel'     => $attributes['label'] ?? '',
+            'showCounts'     => $attributes['showCounts'] ?? true,
         ] );
 
         return sprintf(
             '<div %s>%s</div>',
             get_block_wrapper_attributes( [
-                'data-wp-interactive' => $this->get_store_namespace(),
+                'data-wp-interactive' => 'woocommerce/product-filters',
             ] ),
             $content
         );
