@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Coalesce sale event rescheduling so a single product save runs the Action Scheduler work once instead of once per sale-date meta write.

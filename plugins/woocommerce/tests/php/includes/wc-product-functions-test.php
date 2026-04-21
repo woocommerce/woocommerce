@@ -318,6 +318,9 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		$product->set_date_on_sale_to( gmdate( 'Y-m-d H:i:s', $future_end ) );
 		$product->save();
 
+		// Scheduling is deferred to `shutdown`; flush manually for the assertion.
+		wc_flush_pending_sale_event_schedules();
+
 		// Check that AS actions were scheduled.
 		$start_action = as_next_scheduled_action(
 			'wc_product_start_scheduled_sale',
@@ -348,6 +351,7 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', $future_start ) );
 		$product->set_date_on_sale_to( gmdate( 'Y-m-d H:i:s', $future_end ) );
 		$product->save();
+		wc_flush_pending_sale_event_schedules();
 
 		$original_start = as_next_scheduled_action(
 			'wc_product_start_scheduled_sale',
@@ -359,6 +363,7 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		$new_start = time() + 7200; // 2 hours from now.
 		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', $new_start ) );
 		$product->save();
+		wc_flush_pending_sale_event_schedules();
 
 		$new_start_action = as_next_scheduled_action(
 			'wc_product_start_scheduled_sale',
@@ -392,6 +397,9 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		// Write sale date meta directly, bypassing WooCommerce CRUD.
 		update_post_meta( $product->get_id(), '_sale_price_dates_from', $future_start );
 		update_post_meta( $product->get_id(), '_sale_price_dates_to', $future_end );
+
+		// Scheduling is deferred to `shutdown`; flush manually for the assertion.
+		wc_flush_pending_sale_event_schedules();
 
 		// Check that AS actions were scheduled via the meta hook.
 		$start_action = as_next_scheduled_action(
@@ -428,6 +436,8 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		update_post_meta( $variation_id, '_sale_price_dates_from', $future_start );
 		update_post_meta( $variation_id, '_sale_price_dates_to', $future_end );
 
+		wc_flush_pending_sale_event_schedules();
+
 		$start_action = as_next_scheduled_action(
 			'wc_product_start_scheduled_sale',
 			array( 'product_id' => $variation_id ),
@@ -451,6 +461,7 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', $future_start ) );
 		$product->set_date_on_sale_to( gmdate( 'Y-m-d H:i:s', $future_end ) );
 		$product->save();
+		wc_flush_pending_sale_event_schedules();
 
 		// Sanity check: events are scheduled.
 		$this->assertNotFalse(
@@ -461,6 +472,8 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		// Delete sale date meta directly, bypassing WooCommerce CRUD.
 		delete_post_meta( $product->get_id(), '_sale_price_dates_from' );
 		delete_post_meta( $product->get_id(), '_sale_price_dates_to' );
+
+		wc_flush_pending_sale_event_schedules();
 
 		$this->assertFalse(
 			as_next_scheduled_action( 'wc_product_start_scheduled_sale', array( 'product_id' => $product->get_id() ), 'woocommerce-sales' ),
@@ -514,6 +527,46 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 			as_next_scheduled_action( 'wc_product_end_scheduled_sale', array( 'product_id' => $product->get_id() ), 'woocommerce-sales' ),
 			'Meta-hook scheduling should be suppressed while inside the AS sale end handler'
 		);
+	}
+
+	/**
+	 * @testDox Sale event scheduling from meta hooks is deferred until flush/shutdown.
+	 */
+	public function test_wc_schedule_sale_events_meta_hook_defers_until_flush() {
+		$future_start = time() + 3600;
+		$future_end   = time() + 86400;
+
+		$product    = WC_Helper_Product::create_simple_product();
+		$product_id = $product->get_id();
+
+		// Ensure no queued work is left over from product creation.
+		wc_flush_pending_sale_event_schedules();
+
+		// Simulate the two-step write that a normal CRUD save produces.
+		update_post_meta( $product_id, '_sale_price_dates_from', $future_start );
+		update_post_meta( $product_id, '_sale_price_dates_to', $future_end );
+
+		// Work should be queued, not executed yet.
+		$this->assertFalse(
+			as_next_scheduled_action( 'wc_product_start_scheduled_sale', array( 'product_id' => $product_id ), 'woocommerce-sales' ),
+			'Scheduling should not happen until flush/shutdown'
+		);
+		$this->assertArrayHasKey( $product_id, $GLOBALS['wc_pending_sale_event_schedules'] ?? array() );
+
+		wc_flush_pending_sale_event_schedules();
+
+		$this->assertNotFalse(
+			as_next_scheduled_action( 'wc_product_start_scheduled_sale', array( 'product_id' => $product_id ), 'woocommerce-sales' ),
+			'Start action should be scheduled after flush'
+		);
+		$this->assertNotFalse(
+			as_next_scheduled_action( 'wc_product_end_scheduled_sale', array( 'product_id' => $product_id ), 'woocommerce-sales' ),
+			'End action should be scheduled after flush'
+		);
+
+		// Queue should be empty after flush, and a second flush should be a no-op.
+		$this->assertArrayNotHasKey( 'wc_pending_sale_event_schedules', $GLOBALS );
+		wc_flush_pending_sale_event_schedules();
 	}
 
 	/**
