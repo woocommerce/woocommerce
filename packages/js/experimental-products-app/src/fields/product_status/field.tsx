@@ -4,15 +4,13 @@
 import { __ } from '@wordpress/i18n';
 
 import type { Field } from '@wordpress/dataviews';
+import { SelectControl } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
 import type { ProductEntityRecord } from '../types';
-
 import { ProductStatusBadge } from '../components/product-status-badge';
-
-import { SelectControl } from '../components/compat-controls';
 
 function isValidStatus( value: string ) {
 	return value === 'draft' || value === 'publish' || value === 'trash';
@@ -51,13 +49,13 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 		return (
 			<SelectControl
 				label={ field.label }
-				description={ description }
+				help={ description }
 				value={ data.status }
-				items={ field.elements?.filter(
+				options={ field.elements?.filter(
 					( element: { label: string; value: string } ) =>
 						element.value !== 'trash'
 				) }
-				onValueChange={ ( value ) => {
+				onChange={ ( value ) => {
 					if ( value && isValidStatus( value ) ) {
 						onChange( {
 							status: value,

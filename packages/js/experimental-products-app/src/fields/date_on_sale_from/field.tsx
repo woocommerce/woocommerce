@@ -91,7 +91,6 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 				onChange={ handleChange }
 				field={ field }
 				fieldKey="date_on_sale_from"
-				isDateDisabled={ isDateDisabled }
 				min={ today }
 			/>
 		);
