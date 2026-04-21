@@ -851,14 +851,6 @@ private function render_item(array $item, string $selection_mode, bool $show_cou
 
 ---
 
-# Open Questions
-
-1. **Editor experience**: How do we handle the editor-side (React) equivalent of this pattern? Block context works in editor, but Interactivity API doesn't run there.
-
-2. **Store namespace exposure**: Is it safe for inner blocks to know parent's store namespace? Alternative: abstract event/callback system.
-
----
-
 # Resolved Questions
 
 1. **Swatch data source**: Presentation data (color/image) is **bundled directly on items**. Parent blocks fetch term meta and merge during `transform_to_selectable_items()`. Direct access: `$item['color']`.
