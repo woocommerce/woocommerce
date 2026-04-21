@@ -21,6 +21,13 @@ class Main {
 	private const FEATURE_SLUG = 'dual_code_graphql_api';
 
 	/**
+	 * Option name for the "Enable GET endpoint" setting.
+	 *
+	 * When disabled, the GraphQL route only accepts POST requests.
+	 */
+	public const OPTION_GET_ENDPOINT_ENABLED = 'woocommerce_graphql_get_endpoint_enabled';
+
+	/**
 	 * Cached result of the feature-enabled check, null until first evaluated.
 	 *
 	 * @var ?bool
@@ -40,6 +47,17 @@ class Main {
 			self::$enabled = PHP_VERSION_ID >= 80100 && FeaturesUtil::feature_is_enabled( self::FEATURE_SLUG );
 		}
 		return self::$enabled;
+	}
+
+	/**
+	 * Whether the GraphQL endpoint accepts GET requests.
+	 *
+	 * Defaults to false. Reads from the option written by the GraphQL
+	 * settings section so the REST route registration can decide which
+	 * HTTP methods to accept.
+	 */
+	public static function is_get_endpoint_enabled(): bool {
+		return wc_string_to_bool( get_option( self::OPTION_GET_ENDPOINT_ENABLED, 'no' ) );
 	}
 
 	/**

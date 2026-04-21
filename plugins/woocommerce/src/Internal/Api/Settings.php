@@ -48,6 +48,24 @@ class Settings {
 			return $settings;
 		}
 
-		return array();
+		return array(
+			array(
+				'title' => __( 'GraphQL', 'woocommerce' ),
+				'desc'  => __( 'Configure the WooCommerce GraphQL API.', 'woocommerce' ),
+				'type'  => 'title',
+				'id'    => 'woocommerce_graphql_options',
+			),
+			array(
+				'title'   => __( 'Enable GET endpoint', 'woocommerce' ),
+				'desc'    => __( 'Allow GraphQL queries over GET in addition to POST.', 'woocommerce' ),
+				'id'      => Main::OPTION_GET_ENDPOINT_ENABLED,
+				'default' => 'no',
+				'type'    => 'checkbox',
+			),
+			array(
+				'type' => 'sectionend',
+				'id'   => 'woocommerce_graphql_options',
+			),
+		);
 	}
 }
