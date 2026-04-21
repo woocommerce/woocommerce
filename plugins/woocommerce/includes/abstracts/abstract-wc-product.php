@@ -518,7 +518,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	public function get_parent_id( $context = 'view' ) {
 		return $this->get_prop( 'parent_id', $context );
 	}
-	// TBD: wc_get_product( $product->get_parent_id() ) -> get_parent_product().
+	// TBD: introduce get_parent_product to cache parent product instantiation.
 
 	/**
 	 * Return if reviews is allowed.

@@ -103,7 +103,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		$product_id = absint( $value );
 		$this->set_prop( 'product_id', $product_id );
 
-		if ( null !== $this->product && $this->product->get_id() !== $product_id ) {
+		if ( null !== $this->product && ( ! $this->product || $this->product->get_id() !== $product_id ) ) {
 			$this->product = null;
 		}
 	}
