@@ -64945,12 +64945,6 @@ parameters:
 			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmailPostsGenerator.php
 
 		-
-			message: '#^Property WC_Email\:\:\$template_base \(string\) on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.property
-			count: 1
-			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmailPostsGenerator.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmailPostsManager\:\:clear_caches\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
