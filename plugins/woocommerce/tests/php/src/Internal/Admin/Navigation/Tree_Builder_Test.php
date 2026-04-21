@@ -144,4 +144,27 @@ class Tree_Builder_Test extends \WC_Unit_Test_Case {
 
 		$this->assertSame( 'manage_options', $tree['secret-page']['capability'] );
 	}
+
+	/**
+	 * A node whose parent is unknown (not in the tree) is dropped from the result
+	 * and, when WP_DEBUG is on, a debug message is logged.
+	 */
+	public function test_unknown_parent_drops_node() {
+		$default = array(
+			'woocommerce' => array( 'parent' => null,                 'title' => 'WooCommerce', 'position' => 2  ),
+			'orphan'      => array( 'parent' => 'does-not-exist-yet', 'title' => 'Orphan',      'position' => 30 ),
+		);
+
+		$raw_menu    = array( array( 'WooCommerce', 'read', 'woocommerce', '', '' ) );
+		$raw_submenu = array(
+			'woocommerce' => array(
+				array( 'Orphan', 'read', 'orphan' ),
+			),
+		);
+
+		$builder = new Tree_Builder();
+		$tree    = $builder->build( $default, $raw_menu, $raw_submenu );
+
+		$this->assertArrayNotHasKey( 'orphan', $tree );
+	}
 }

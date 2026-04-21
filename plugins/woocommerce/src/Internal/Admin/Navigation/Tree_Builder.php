@@ -33,6 +33,7 @@ class Tree_Builder {
 
 		$tree = $this->auto_attach_woocommerce_children( $tree, $default_tree, $raw_submenu );
 		$tree = $this->break_cycles( $tree );
+		$tree = $this->drop_unknown_parents( $tree );
 
 		return $tree;
 	}
@@ -97,6 +98,38 @@ class Tree_Builder {
 			$current = $parent;
 		}
 		return null;
+	}
+
+	/**
+	 * Drop nodes whose parent is set but is not in the tree.
+	 * Logs to debug.log when WP_DEBUG is enabled.
+	 *
+	 * @param array $tree Tree.
+	 * @return array Tree with orphans removed.
+	 */
+	private function drop_unknown_parents( array $tree ): array {
+		foreach ( $tree as $slug => $node ) {
+			if ( null === $node['parent'] ) {
+				continue;
+			}
+			if ( isset( $tree[ $node['parent'] ] ) ) {
+				continue;
+			}
+
+			unset( $tree[ $slug ] );
+
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				error_log( // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+					sprintf(
+						'[woocommerce] navigation_v2: dropped node %s: unknown parent %s',
+						$slug,
+						$node['parent']
+					)
+				);
+			}
+		}
+
+		return $tree;
 	}
 
 	/**
