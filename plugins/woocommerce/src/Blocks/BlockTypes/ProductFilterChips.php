@@ -26,9 +26,7 @@ final class ProductFilterChips extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		if (
-			empty( $block->context['woocommerce/selectableItems'] )
-		) {
+		if ( empty( $block->context['woocommerce/selectableItems'] ) ) {
 			return '';
 		}
 
@@ -46,10 +44,27 @@ final class ProductFilterChips extends AbstractBlock {
 			$style   = $tags->get_attribute( 'style' );
 		}
 
+		$context_items = array_values(
+			array_map(
+				function ( $item ) use ( $show_counts ) {
+					$item['id']        = $item['type'] . '-' . $item['value'];
+					$item['ariaLabel'] = $this->get_aria_label( $item, $show_counts );
+					return $item;
+				},
+				$items
+			)
+		);
+
 		$wrapper_attributes = array(
 			'data-wp-interactive' => $store_namespace,
 			'data-wp-key'         => wp_unique_prefixed_id( $this->get_full_block_name() ),
-			'data-wp-context'     => '{}',
+			'data-wp-context'     => wp_json_encode(
+				array(
+					'items'      => $context_items,
+					'showCounts' => $show_counts,
+				),
+				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+			),
 			'class'               => esc_attr( $classes ),
 		);
 
@@ -66,18 +81,40 @@ final class ProductFilterChips extends AbstractBlock {
 					<legend class="screen-reader-text"><?php echo esc_html( $block_context['groupLabel'] ); ?></legend>
 				<?php endif; ?>
 				<div class="wc-block-product-filter-chips__items">
-					<?php foreach ( $items as $item ) { ?>
-						<?php $item_id = $item['type'] . '-' . $item['value']; ?>
+					<template
+						data-wp-each--item="context.items"
+						data-wp-each-key="context.item.id"
+					>
 						<button
-							data-wp-key="<?php echo esc_attr( $item_id ); ?>"
-							id="<?php echo esc_attr( $item_id ); ?>"
 							class="wc-block-product-filter-chips__item"
 							type="button"
 							role="checkbox"
-							aria-label="<?php echo esc_attr( $this->get_aria_label( $item, $show_counts ) ); ?>"
+							data-wp-bind--id="context.item.id"
+							data-wp-bind--aria-label="context.item.ariaLabel"
+							data-wp-on--click="actions.<?php echo esc_attr( $select_action ); ?>"
+							data-wp-bind--value="context.item.value"
+							data-wp-bind--aria-checked="state.isFilterSelected"
+						>
+							<span class="wc-block-product-filter-chips__label">
+								<span class="wc-block-product-filter-chips__text" data-wp-text="context.item.label"></span>
+								<span
+									class="wc-block-product-filter-chips__count"
+									data-wp-bind--hidden="!context.showCounts"
+								>(<span data-wp-text="context.item.count"></span>)</span>
+							</span>
+						</button>
+					</template>
+					<?php foreach ( $context_items as $item ) { ?>
+						<button
+							class="wc-block-product-filter-chips__item"
+							type="button"
+							role="checkbox"
+							id="<?php echo esc_attr( $item['id'] ); ?>"
+							aria-label="<?php echo esc_attr( $item['ariaLabel'] ); ?>"
 							data-wp-on--click="actions.<?php echo esc_attr( $select_action ); ?>"
 							value="<?php echo esc_attr( $item['value'] ); ?>"
 							data-wp-bind--aria-checked="state.isFilterSelected"
+							data-wp-each-child
 							<?php echo wp_interactivity_data_wp_context( array( 'item' => $item ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 						>
 							<span class="wc-block-product-filter-chips__label">
