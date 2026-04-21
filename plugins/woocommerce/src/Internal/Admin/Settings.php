@@ -354,29 +354,22 @@ class Settings {
 	}
 
 	/**
-	 * Get settings page instance by id.
+	 * Get a settings page instance by id.
+	 *
+	 * @since 10.8.0
 	 *
 	 * @param string $settings_page_id Settings page id.
-	 * @return WC_Settings_Page|null
+	 * @return \WC_Settings_Page|null
 	 */
 	private function get_settings_page_instance( string $settings_page_id ) {
-		if ( class_exists( 'WC_Admin_Settings', false ) ) {
-			$setting_pages = \WC_Admin_Settings::get_settings_pages();
-			foreach ( $setting_pages as $setting_page ) {
-				if ( method_exists( $setting_page, 'get_id' ) && $settings_page_id === $setting_page->get_id() ) {
-					return $setting_page;
-				}
-			}
+		if ( ! class_exists( 'WC_Admin_Settings', false ) ) {
+			return null;
 		}
 
-		$page_class_map = array(
-			'general'  => 'WC_Settings_General',
-			'products' => 'WC_Settings_Products',
-		);
-
-		if ( isset( $page_class_map[ $settings_page_id ] ) && class_exists( $page_class_map[ $settings_page_id ], false ) ) {
-			$page_class = $page_class_map[ $settings_page_id ];
-			return new $page_class();
+		foreach ( \WC_Admin_Settings::get_settings_pages() as $settings_page ) {
+			if ( method_exists( $settings_page, 'get_id' ) && $settings_page_id === $settings_page->get_id() ) {
+				return $settings_page;
+			}
 		}
 
 		return null;

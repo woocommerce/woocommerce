@@ -10,15 +10,26 @@ namespace Automattic\WooCommerce\Internal\Admin\Settings;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Transforms legacy settings definitions into React settings responses.
+ * Transforms legacy WC_Settings_Page definitions into React-shaped settings responses.
  *
- * @since 10.6.0
+ * This class is the public transform contract used both for preloading data into
+ * `window.wcSettings.admin.settings.{tab}.{section}` on settings pages that have
+ * opted in to modernised rendering, and for the v4 REST API endpoints that
+ * surface the same shape. Third-party callers MAY call `build_response()`
+ * directly with a `$settings_definitions` array and a `$settings_page` instance.
+ *
+ * @since 10.8.0
+ *
+ * @filter woocommerce_react_settings_opt_out
+ * @filter woocommerce_react_settings_supported_types
+ * @filter woocommerce_react_settings_type_map
+ * @filter woocommerce_react_settings_field_options
  */
 class ReactSettingsSchema {
 	/**
 	 * Settings definition marker types that don't render fields.
 	 *
-	 * @since 10.6.0
+	 * @since 10.8.0
 	 * @var string[]
 	 */
 	private const MARKER_TYPES = array( 'title', 'sectionend' );
@@ -26,7 +37,7 @@ class ReactSettingsSchema {
 	/**
 	 * Default group ID used when settings are not grouped.
 	 *
-	 * @since 10.6.0
+	 * @since 10.8.0
 	 * @var string
 	 */
 	private const DEFAULT_GROUP_ID = 'default';
@@ -34,7 +45,7 @@ class ReactSettingsSchema {
 	/**
 	 * Default order for ungrouped settings.
 	 *
-	 * @since 10.6.0
+	 * @since 10.8.0
 	 * @var int
 	 */
 	private const DEFAULT_GROUP_ORDER = 999;
@@ -42,7 +53,7 @@ class ReactSettingsSchema {
 	/**
 	 * Normalized field types that accept options.
 	 *
-	 * @since 10.6.0
+	 * @since 10.8.0
 	 * @var string[]
 	 */
 	private const OPTION_TYPES = array( 'select', 'multiselect' );
@@ -52,7 +63,7 @@ class ReactSettingsSchema {
 	 * @param string $tab Tab id.
 	 * @param string $section Section id.
 	 * @return array
-	 * @since 10.6.0
+	 * @since 10.8.0
 	 */
 	public static function get_payload_path( string $tab, string $section ): array {
 		$section_key = '' === $section ? 'default' : $section;
@@ -65,7 +76,7 @@ class ReactSettingsSchema {
 	 * @param string $tab Tab id.
 	 * @param string $section Section id.
 	 * @return string
-	 * @since 10.6.0
+	 * @since 10.8.0
 	 */
 	public static function get_mount_id( string $tab, string $section ): string {
 		$section_key = '' === $section ? 'default' : $section;
@@ -80,13 +91,13 @@ class ReactSettingsSchema {
 	 * @param array  $settings_definitions Settings definitions.
 	 * @param mixed  $settings_page Settings page instance.
 	 * @return bool
-	 * @since 10.6.0
+	 * @since 10.8.0
 	 */
 	public static function is_opted_out( string $tab, string $section, array $settings_definitions, $settings_page ): bool {
 		/**
 		 * Filter whether the settings page should opt out of React rendering.
 		 *
-		 * @since 10.6.0
+		 * @since 10.8.0
 		 *
 		 * @param bool   $opt_out Whether to opt out of React rendering.
 		 * @param string $tab Tab id.
@@ -112,14 +123,14 @@ class ReactSettingsSchema {
 	 * @param array  $settings_definitions Settings definitions.
 	 * @param mixed  $settings_page Settings page instance.
 	 * @return array
-	 * @since 10.6.0
+	 * @since 10.8.0
 	 */
 	public static function get_supported_types( string $tab, string $section, array $settings_definitions, $settings_page ): array {
 		$default_types = array( 'text', 'number', 'select', 'multiselect', 'checkbox', 'radio', 'toggle' );
 		/**
 		 * Filter supported React settings field types.
 		 *
-		 * @since 10.6.0
+		 * @since 10.8.0
 		 *
 		 * @param array  $supported_types Supported normalized field types.
 		 * @param string $tab Tab id.
@@ -147,7 +158,7 @@ class ReactSettingsSchema {
 	 * @param array  $settings_definitions Settings definitions.
 	 * @param mixed  $settings_page Settings page instance.
 	 * @return array
-	 * @since 10.6.0
+	 * @since 10.8.0
 	 */
 	public static function get_type_map( string $tab, string $section, array $settings_definitions, $settings_page ): array {
 		$default_map = array(
@@ -160,7 +171,7 @@ class ReactSettingsSchema {
 		/**
 		 * Filter the field type map for React settings.
 		 *
-		 * @since 10.6.0
+		 * @since 10.8.0
 		 *
 		 * @param array  $type_map Map of WooCommerce field types to normalized types.
 		 * @param string $tab Tab id.
@@ -188,7 +199,7 @@ class ReactSettingsSchema {
 	 * @param array  $settings_definitions Settings definitions.
 	 * @param mixed  $settings_page Settings page instance.
 	 * @return array
-	 * @since 10.6.0
+	 * @since 10.8.0
 	 */
 	public static function get_unsupported_fields( string $tab, string $section, array $settings_definitions, $settings_page ): array {
 		$type_map        = self::get_type_map( $tab, $section, $settings_definitions, $settings_page );
@@ -223,7 +234,7 @@ class ReactSettingsSchema {
 	 * @param array  $settings_definitions Settings definitions.
 	 * @param mixed  $settings_page Settings page instance.
 	 * @return bool
-	 * @since 10.6.0
+	 * @since 10.8.0
 	 */
 	public static function has_renderable_fields( string $tab, string $section, array $settings_definitions, $settings_page ): bool {
 		$type_map        = self::get_type_map( $tab, $section, $settings_definitions, $settings_page );
@@ -262,7 +273,7 @@ class ReactSettingsSchema {
 	 *     values: array<string, mixed>,
 	 *     groups: array<string, array{title: string, description: string, order: int, fields: array<int, array<string, mixed>>}>
 	 * }
-	 * @since 10.6.0
+	 * @since 10.8.0
 	 */
 	public static function build_response( string $tab, string $section, array $settings_definitions, $settings_page ): array {
 		$groups        = array();
@@ -349,7 +360,7 @@ class ReactSettingsSchema {
 	 * @param array  $setting WooCommerce setting array.
 	 * @param mixed  $settings_page Settings page instance.
 	 * @return array|null
-	 * @since 10.6.0
+	 * @since 10.8.0
 	 */
 	private static function transform_setting_to_field( string $tab, string $section, array $setting, $settings_page ): ?array {
 		$setting_id   = $setting['id'] ?? '';
@@ -378,7 +389,7 @@ class ReactSettingsSchema {
 	 * @param array  $setting Setting definition.
 	 * @param string $normalized_type Normalized field type.
 	 * @return array
-	 * @since 10.6.0
+	 * @since 10.8.0
 	 */
 	private static function get_field_options( array $setting, string $normalized_type ): array {
 		if ( ! in_array( $normalized_type, self::OPTION_TYPES, true ) ) {
@@ -389,33 +400,31 @@ class ReactSettingsSchema {
 			? $setting['options']
 			: array();
 
-		if ( empty( $options ) ) {
-			$type = $setting['type'] ?? '';
+		$setting_id = isset( $setting['id'] ) && is_scalar( $setting['id'] ) ? (string) $setting['id'] : '';
 
-			if ( 'multi_select_countries' === $type && function_exists( 'WC' ) ) {
-				$options = WC()->countries->get_countries();
-			}
+		/**
+		 * Filter field options for a specific field.
+		 *
+		 * Allows tab-specific callers to inject options at response time for
+		 * fields that don't embed a static options array in their definition
+		 * (for example, currency lists, country lists, or dynamic page lists).
+		 *
+		 * @since 10.8.0
+		 *
+		 * @param array  $options         Current options array (associative label map or list of option arrays).
+		 * @param string $field_id        Setting field ID.
+		 * @param array  $setting         Raw setting definition.
+		 * @param string $normalized_type Normalized field type (e.g. 'select', 'multiselect').
+		 */
+		$options = apply_filters(
+			'woocommerce_react_settings_field_options',
+			$options,
+			$setting_id,
+			$setting,
+			$normalized_type
+		);
 
-			if ( 'single_select_country' === $type && function_exists( 'WC' ) ) {
-				$countries = WC()->countries->get_countries();
-				$states    = WC()->countries->get_states();
-
-				foreach ( $countries as $country_code => $country_name ) {
-					$country_states = $states[ $country_code ] ?? array();
-
-					if ( empty( $country_states ) ) {
-						$options[ $country_code ] = $country_name;
-						continue;
-					}
-
-					foreach ( $country_states as $state_code => $state_name ) {
-						$options[ $country_code . ':' . $state_code ] = $country_name . ' — ' . $state_name;
-					}
-				}
-			}
-		}
-
-		return self::normalize_options( $options );
+		return self::normalize_options( is_array( $options ) ? $options : array() );
 	}
 
 	/**
@@ -424,7 +433,7 @@ class ReactSettingsSchema {
 	 * @param array  $setting Setting definition.
 	 * @param string $type Normalized field type.
 	 * @return mixed
-	 * @since 10.6.0
+	 * @since 10.8.0
 	 */
 	private static function get_field_value( array $setting, string $type ) {
 		if ( array_key_exists( 'fixed_value', $setting ) && null !== $setting['fixed_value'] ) {
@@ -449,7 +458,7 @@ class ReactSettingsSchema {
 	 * @param mixed  $value Field value.
 	 * @param string $type Normalized field type.
 	 * @return mixed
-	 * @since 10.6.0
+	 * @since 10.8.0
 	 */
 	private static function normalize_value( $value, string $type ) {
 		switch ( $type ) {
@@ -475,7 +484,7 @@ class ReactSettingsSchema {
 	 * @param string $type Original type.
 	 * @param string $normalized_type Normalized type.
 	 * @return array
-	 * @since 10.6.0
+	 * @since 10.8.0
 	 */
 	private static function get_unsupported_field_payload( array $setting, string $type, string $normalized_type ): array {
 		return array(
@@ -489,7 +498,7 @@ class ReactSettingsSchema {
 	 * Get default group metadata for ungrouped fields.
 	 *
 	 * @return array
-	 * @since 10.6.0
+	 * @since 10.8.0
 	 */
 	private static function get_default_group(): array {
 		return array(
@@ -505,7 +514,7 @@ class ReactSettingsSchema {
 	 *
 	 * @param array $options Raw options array.
 	 * @return array
-	 * @since 10.6.0
+	 * @since 10.8.0
 	 */
 	private static function normalize_options( array $options ): array {
 		if ( self::is_list_of_option_arrays( $options ) ) {
@@ -549,7 +558,7 @@ class ReactSettingsSchema {
 	 *
 	 * @param array $options Raw options array.
 	 * @return bool
-	 * @since 10.6.0
+	 * @since 10.8.0
 	 */
 	private static function is_list_of_option_arrays( array $options ): bool {
 		if ( empty( $options ) ) {
@@ -578,7 +587,7 @@ class ReactSettingsSchema {
 	 *
 	 * @param array $options Raw options array.
 	 * @return bool
-	 * @since 10.6.0
+	 * @since 10.8.0
 	 */
 	private static function is_sequential_keys( array $options ): bool {
 		$expected = 0;

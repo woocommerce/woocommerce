@@ -69451,27 +69451,9 @@ parameters:
 			path: src/Internal/RestApi/Routes/V4/Settings/General/Controller.php
 
 		-
-			message: '#^Call to function in_array\(\) with arguments mixed, array\{''title'', ''sectionend''\} and true will always evaluate to false\.$#'
-			identifier: function.impossibleType
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Settings/General/Schema/GeneralSettingsSchema.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Settings\\General\\Schema\\GeneralSettingsSchema\:\:get_item_response\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
 			count: 1
-			path: src/Internal/RestApi/Routes/V4/Settings/General/Schema/GeneralSettingsSchema.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Settings\\General\\Schema\\GeneralSettingsSchema\:\:transform_setting_to_field\(\) never returns null so it can be removed from the return type\.$#'
-			identifier: return.unusedType
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Settings/General/Schema/GeneralSettingsSchema.php
-
-		-
-			message: '#^Offset ''order'' on array\{title\: mixed, description\: mixed, order\: int, fields\: list\<non\-empty\-array\>\} on left side of \?\? always exists and is not nullable\.$#'
-			identifier: nullCoalesce.offset
-			count: 2
 			path: src/Internal/RestApi/Routes/V4/Settings/General/Schema/GeneralSettingsSchema.php
 
 		-
@@ -69637,27 +69619,9 @@ parameters:
 			path: src/Internal/RestApi/Routes/V4/Settings/Products/Controller.php
 
 		-
-			message: '#^Call to function in_array\(\) with arguments mixed, array\{''title'', ''sectionend''\} and true will always evaluate to false\.$#'
-			identifier: function.impossibleType
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Settings/Products/Schema/ProductSettingsSchema.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Settings\\Products\\Schema\\ProductSettingsSchema\:\:get_item_response\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
 			count: 1
-			path: src/Internal/RestApi/Routes/V4/Settings/Products/Schema/ProductSettingsSchema.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Settings\\Products\\Schema\\ProductSettingsSchema\:\:transform_setting_to_field\(\) never returns null so it can be removed from the return type\.$#'
-			identifier: return.unusedType
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Settings/Products/Schema/ProductSettingsSchema.php
-
-		-
-			message: '#^Offset ''order'' on array\{title\: mixed, description\: mixed, order\: int, fields\: list\<non\-empty\-array\>\} on left side of \?\? always exists and is not nullable\.$#'
-			identifier: nullCoalesce.offset
-			count: 2
 			path: src/Internal/RestApi/Routes/V4/Settings/Products/Schema/ProductSettingsSchema.php
 
 		-
