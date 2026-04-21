@@ -1,4 +1,4 @@
-.woocommerce-next-taxonomy-edit {
+.woocommerce-taxonomy-edit {
 	&__chip-thumbnail {
 		width: 19px;
 		height: 19px;
@@ -7,7 +7,7 @@
 		margin-left: 1px;
 
 		&--empty {
-			background-color: var( --wp-components-color-gray-100 );
+			background-color: var(--wp-components-color-gray-100);
 		}
 	}
 
@@ -21,6 +21,6 @@
 		flex-shrink: 0;
 		border-radius: 4px;
 		object-fit: cover;
-		background-color: var( --wp-components-color-gray-100 );
+		background-color: var(--wp-components-color-gray-100);
 	}
 }

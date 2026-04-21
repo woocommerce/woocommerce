@@ -40,13 +40,13 @@ export function useElements( {
 		};
 
 		window.addEventListener(
-			'ciab-refresh-product-taxonomies',
+			'woocommerce-refresh-product-taxonomies',
 			handleRefresh
 		);
 
 		return () => {
 			window.removeEventListener(
-				'ciab-refresh-product-taxonomies',
+				'woocommerce-refresh-product-taxonomies',
 				handleRefresh
 			);
 		};

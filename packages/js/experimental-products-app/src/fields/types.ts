@@ -26,6 +26,17 @@ export type ProductEntityRecord = Omit< Product, 'categories' | 'tags' > & {
 	seo_title?: string;
 	seo_description?: string;
 	visible_in_pos?: boolean;
+	images: Array< {
+		alt: string;
+		date_created: string;
+		date_created_gmt: string;
+		date_modified: string;
+		date_modified_gmt: string;
+		id: number;
+		name: string;
+		src: string;
+		thumbnail: string;
+	} >;
 };
 
 export type ProductStatus = WooProductStatus;

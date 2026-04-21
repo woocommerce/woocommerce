@@ -2,15 +2,10 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-
 import { useMemo, useCallback, useState } from '@wordpress/element';
-
 import { IconButton } from '@wordpress/ui';
-
 import clsx from 'clsx';
-
 import type { Field } from '@wordpress/dataviews';
-
 import { upload, closeSmall, dragHandle } from '@wordpress/icons';
 
 /**
@@ -121,13 +116,10 @@ function SortableImage( {
 				event.preventDefault();
 				onDropOn( image.id );
 			} }
-			className={ clsx(
-				'woocommerce-fields-controls__image-wrapper',
-				{
-					'is-dragging': isDragging,
-					'is-featured': isFeatured,
-				}
-			) }
+			className={ clsx( 'woocommerce-fields-controls__image-wrapper', {
+				'is-dragging': isDragging,
+				'is-featured': isFeatured,
+			} ) }
 		>
 			<img className="product-image" src={ previewSrc } alt={ alt } />
 			<div className="woocommerce-fields-controls__image-overlay" />

@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add internal WCEmailTemplateSyncRegistry helper that resolves block email templates participating in template update propagation via their @version header. No runtime behaviour change yet.
