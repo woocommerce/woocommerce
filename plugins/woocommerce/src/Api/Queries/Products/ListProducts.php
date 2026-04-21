@@ -102,19 +102,19 @@ class ListProducts {
 			$query_args['s'] = $filters->search;
 		}
 
-		// Total count query. Runs before we set the cursor query vars on
-		// $query_args so IdCursorFilter doesn't narrow the count to the
-		// cursor window — we want the count of the full filtered set. Only
-		// `found_posts` is read, so the main SELECT fetches one row —
-		// posts_per_page => -1 would materialize every ID for nothing.
-		$count_args  = array(
-			'post_type'      => 'product',
-			'posts_per_page' => 1,
-			'fields'         => 'ids',
-			'post_status'    => $filters->status?->value ?? 'any',
-		);
-		$count_query = new \WP_Query( $count_args );
-		$total_count = $count_query->found_posts;
+		// Total count query. Derive from $query_args — which already has
+		// the tax_query / meta_query / search clauses applied — *before*
+		// we set cursor query vars on it. Building $count_args from scratch
+		// with only post_status would drop every user filter and report the
+		// count of "all products in that status" instead of "all products
+		// matching the filters", making Relay consumers' "X of Y" wrong.
+		// Only `found_posts` is read, so posts_per_page => 1 keeps the
+		// underlying SELECT cheap.
+		$count_args                   = $query_args;
+		$count_args['posts_per_page'] = 1;
+		$count_args['fields']         = 'ids';
+		$count_query                  = new \WP_Query( $count_args );
+		$total_count                  = $count_query->found_posts;
 
 		// Cursor-based filtering via IdCursorFilter (see class docblock).
 		if ( null !== $after ) {
