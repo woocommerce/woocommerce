@@ -1,4 +1,6 @@
 <?php
+declare( strict_types = 1 );
+
 /**
  * Formatting functions tests
  *
@@ -95,13 +97,14 @@ class WC_Formatting_Functions_Test extends \WC_Unit_Test_Case {
 	 */
 	public function data_provider_wc_format_option_price_separators(): array {
 		return array(
-			'comma separator'   => array( ',', ',', false ),
-			'period separator'  => array( '.', '.', false ),
-			'space separator'   => array( ',', ' ', false ),
-			'empty separator'   => array( ',', '', false ),
-			'single digit'      => array( ',', '1', true ),
-			'digit with symbol' => array( ',', '1,', true ),
-			'multi-digit value' => array( ',', '12', true ),
+			'thousand sep — comma'        => array( 'woocommerce_price_thousand_sep', ',', ',', ',', false ),
+			'thousand sep — period'       => array( 'woocommerce_price_thousand_sep', '.', '.', '.', false ),
+			'thousand sep — space'        => array( 'woocommerce_price_thousand_sep', ',', ',', ' ', false ),
+			'thousand sep — empty'        => array( 'woocommerce_price_thousand_sep', ',', ',', '', false ),
+			'thousand sep — single digit' => array( 'woocommerce_price_thousand_sep', ',', ',', '1', true ),
+			'thousand sep — digit+symbol' => array( 'woocommerce_price_thousand_sep', ',', ',', '1,', true ),
+			'decimal sep — period'        => array( 'woocommerce_price_decimal_sep', '.', '.', '.', false ),
+			'decimal sep — single digit'  => array( 'woocommerce_price_decimal_sep', '.', '.', '2', true ),
 		);
 	}
 
@@ -110,25 +113,44 @@ class WC_Formatting_Functions_Test extends \WC_Unit_Test_Case {
 	 *
 	 * @dataProvider data_provider_wc_format_option_price_separators
 	 *
-	 * @param string $existing_value  The value already stored in the option.
-	 * @param string $raw_value       The raw input being saved.
+	 * @param string $option_id        The option being saved.
+	 * @param string $stored_value     The value currently stored in the option.
+	 * @param string $pre_filter_value The sanitized value passed through earlier filters.
+	 * @param string $raw_value        The raw input being saved.
 	 * @param bool   $expect_rejection Whether the input should be rejected.
 	 */
-	public function test_wc_format_option_price_separators( string $existing_value, string $raw_value, bool $expect_rejection ): void {
+	public function test_wc_format_option_price_separators( string $option_id, string $stored_value, string $pre_filter_value, string $raw_value, bool $expect_rejection ): void {
 		$option = array(
-			'id'      => 'woocommerce_price_thousand_sep',
+			'id'      => $option_id,
 			'default' => ',',
 		);
 
-		update_option( $option['id'], $existing_value );
+		update_option( $option_id, $stored_value );
 
-		$result = wc_format_option_price_separators( $existing_value, $option, $raw_value );
+		$errors_before = $this->get_wc_admin_settings_errors();
+		$result        = wc_format_option_price_separators( $pre_filter_value, $option, $raw_value );
+		$errors_after  = $this->get_wc_admin_settings_errors();
 
 		if ( $expect_rejection ) {
-			$this->assertSame( $existing_value, $result, 'Numeric separators should be rejected and the existing value returned.' );
+			$this->assertSame( $stored_value, $result, 'Numeric separators should be rejected and the stored value returned.' );
+			$this->assertCount( count( $errors_before ) + 1, $errors_after, 'An error should be added when a numeric separator is rejected.' );
+			$this->assertStringContainsString( 'cannot contain numbers', end( $errors_after ), 'Error message should mention numbers.' );
 		} else {
 			$this->assertSame( $raw_value, $result, 'Valid separators should be saved as-is.' );
+			$this->assertCount( count( $errors_before ), $errors_after, 'No error should be added for valid separators.' );
 		}
+	}
+
+	/**
+	 * Reads the private static $errors array from WC_Admin_Settings via reflection.
+	 *
+	 * @return array
+	 */
+	private function get_wc_admin_settings_errors(): array {
+		$reflection = new \ReflectionClass( WC_Admin_Settings::class );
+		$property   = $reflection->getProperty( 'errors' );
+		$property->setAccessible( true );
+		return $property->getValue();
 	}
 
 	/**

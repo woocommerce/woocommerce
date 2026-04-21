@@ -1198,9 +1198,9 @@ function wc_format_product_short_description( $content ) {
  * @return string
  */
 function wc_format_option_price_separators( $value, $option, $raw_value ) {
-	$sanitized = wp_kses_post( $raw_value ?? '' );
+	$sanitized = wc_clean( $raw_value ?? '' );
 
-	if ( preg_match( '/[0-9]/', $sanitized ) ) {
+	if ( strpbrk( $sanitized, '0123456789' ) ) {
 		WC_Admin_Settings::add_error(
 			esc_html__( 'Thousand and decimal separators cannot contain numbers.', 'woocommerce' )
 		);
