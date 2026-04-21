@@ -3,6 +3,7 @@
  */
 import { WP_REST_API_Category } from 'wp-types';
 import { ProductResponseItem } from '@woocommerce/types';
+import { isWpVersion } from '@woocommerce/settings';
 import { InnerBlockTemplate } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
 
@@ -10,6 +11,22 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { VARIATION_NAME as PRODUCT_TITLE_VARIATION_NAME } from '../product-collection/variations/elements/product-title';
+
+const getPostTitleTextAlignAttributes = () => {
+	if ( isWpVersion( '7.0.0-rc', '>=' ) ) {
+		return {
+			style: {
+				typography: {
+					textAlign: 'center',
+				},
+			},
+		};
+	}
+
+	return {
+		textAlign: 'center',
+	};
+};
 
 export const DEFAULT_EDITOR_SIZE = {
 	height: 500,
@@ -54,11 +71,7 @@ export const FEATURED_PRODUCT_DEFAULT_TEMPLATE = (
 		{
 			isLink: true,
 			level: 2,
-			style: {
-				typography: {
-					textAlign: 'center',
-				},
-			},
+			...getPostTitleTextAlignAttributes(),
 			__woocommerceNamespace: PRODUCT_TITLE_VARIATION_NAME,
 		},
 	],

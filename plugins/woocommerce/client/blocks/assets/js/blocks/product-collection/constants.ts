@@ -9,7 +9,7 @@
 /**
  * External dependencies
  */
-import { getSetting } from '@woocommerce/settings';
+import { getSetting, isWpVersion } from '@woocommerce/settings';
 import { objectOmit } from '@woocommerce/utils';
 import type { InnerBlockTemplate } from '@wordpress/blocks';
 
@@ -27,6 +27,8 @@ import { ImageSizing } from '../../atomic/blocks/product-elements/image/types';
 
 export const PRODUCT_COLLECTION_BLOCK_NAME = blockJson.name;
 const PRODUCT_TITLE_NAME = `${ PRODUCT_COLLECTION_BLOCK_NAME }/product-title`;
+
+const shouldUseTypographyTextAlign = isWpVersion( '7.0.0-rc', '>=' );
 
 export const STOCK_STATUS_OPTIONS = getSetting< Record< string, string > >(
 	'stockStatusOptions',
@@ -157,9 +159,14 @@ export const INNER_BLOCKS_PRODUCT_TEMPLATE: InnerBlockTemplate = [
 					},
 					typography: {
 						lineHeight: '1.4',
-						textAlign: 'center',
+						...( shouldUseTypographyTextAlign
+							? { textAlign: 'center' }
+							: {} ),
 					},
 				},
+				...( shouldUseTypographyTextAlign
+					? {}
+					: { textAlign: 'center' } ),
 				isLink: true,
 				__woocommerceNamespace: PRODUCT_TITLE_NAME,
 			},

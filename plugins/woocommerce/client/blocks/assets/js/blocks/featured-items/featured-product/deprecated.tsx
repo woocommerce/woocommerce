@@ -3,6 +3,7 @@
  */
 import { BlockInstance, createBlock } from '@wordpress/blocks';
 import { InnerBlocks } from '@wordpress/block-editor';
+import { isWpVersion } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -14,6 +15,22 @@ interface BlockAttributes {
 	showPrice?: boolean;
 	[ key: string ]: unknown;
 }
+
+const getPostTitleTextAlignAttributes = (): Record< string, unknown > => {
+	if ( isWpVersion( '7.0.0-rc', '>=' ) ) {
+		return {
+			style: {
+				typography: {
+					textAlign: 'center',
+				},
+			},
+		};
+	}
+
+	return {
+		textAlign: 'center',
+	};
+};
 
 // Version 1: Migration from legacy showDesc/showPrice attributes to inner blocks
 const v1 = {
@@ -76,11 +93,7 @@ const v1 = {
 			createBlock( 'core/post-title', {
 				level: 2,
 				isLink: false,
-				style: {
-					typography: {
-						textAlign: 'center',
-					},
-				},
+				...getPostTitleTextAlignAttributes(),
 				__woocommerceNamespace:
 					'woocommerce/product-collection/product-title',
 			} )
