@@ -128,70 +128,96 @@ class WC_Query_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Products with certain visibility settings are excluded from search results.
+	 * @testdox Sitewide search includes or excludes products according to their catalog visibility setting.
 	 *
-	 * @dataProvider visibility_exclusion_provider
+	 * @dataProvider visibility_search_provider
 	 *
-	 * @param string $visibility     The catalog visibility setting to test.
+	 * @param string $visibility       The catalog visibility setting to test.
+	 * @param bool   $should_be_found  Whether the product is expected to appear in search results.
 	 * @param string $expected_message The expected assertion message.
 	 */
-	public function test_search_excludes_products_by_visibility( string $visibility, string $expected_message ) {
-		// Create a product that should appear in search.
+	public function test_search_respects_product_visibility( string $visibility, bool $should_be_found, string $expected_message ) {
+		// Create a baseline product that should always appear in search.
 		$visible_product = WC_Helper_Product::create_simple_product();
 		$visible_product->set_name( 'Search Visible Product' );
 		$visible_product->set_catalog_visibility( 'visible' );
 		$visible_product->save();
 
-		// Create a product with the specified visibility setting.
-		$hidden_product = WC_Helper_Product::create_simple_product();
-		$hidden_product->set_name( 'Search Hidden Product' );
-		$hidden_product->set_catalog_visibility( $visibility );
-		$hidden_product->save();
+		// Create the product under test with the visibility provided by the data provider.
+		$test_product = WC_Helper_Product::create_simple_product();
+		$test_product->set_name( 'Search Tested Product' );
+		$test_product->set_catalog_visibility( $visibility );
+		$test_product->save();
 
 		// Save the previous main query and prepare for a new one.
 		global $wp_the_query, $wp_query;
 		$previous_wp_the_query = $wp_the_query;
 		$previous_wp_query     = $wp_query;
 
-		// Create a product search query.
-		// Set as the main query before running so pre_get_posts will fire.
+		// Set the query as the main query before running so pre_get_posts fires with WC_Query's handler.
 		$query        = new WP_Query();
 		$wp_the_query = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$wp_query     = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
-		// Execute the search query which will trigger pre_get_posts.
 		$query->query( array( 's' => 'Search' ) );
-
-		// Set it as the main query so pre_get_posts will run.
-		$wp_the_query = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		$wp_query     = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-
-		// Now execute the query which will trigger pre_get_posts.
-		$query->get_posts();
 		$found_ids = wp_list_pluck( $query->posts, 'ID' );
 
-		// Assert that the visible product is in the results.
-		$this->assertContains( $visible_product->get_id(), $found_ids, 'Visible product should appear in search results' );
+		$this->assertContains( $visible_product->get_id(), $found_ids, 'Visible product should always appear in search results' );
 
-		// Assert that the hidden product is NOT in the results.
-		$this->assertNotContains( $hidden_product->get_id(), $found_ids, $expected_message );
+		if ( $should_be_found ) {
+			$this->assertContains( $test_product->get_id(), $found_ids, $expected_message );
+		} else {
+			$this->assertNotContains( $test_product->get_id(), $found_ids, $expected_message );
+		}
 
 		// Cleanup.
 		$wp_the_query = $previous_wp_the_query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$wp_query     = $previous_wp_query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$visible_product->delete( true );
-		$hidden_product->delete( true );
+		$test_product->delete( true );
 	}
 
 	/**
-	 * Data provider for visibility exclusion tests.
+	 * Data provider for visibility-based search tests.
 	 *
 	 * @return array
 	 */
-	public function visibility_exclusion_provider(): array {
+	public function visibility_search_provider(): array {
 		return array(
-			'catalog visibility' => array( 'catalog', 'Product with exclude-from-search should not appear in search results' ),
-			'hidden visibility'  => array( 'hidden', 'Product with hidden visibility should not appear in search results' ),
+			'catalog visibility (shop only)' => array( 'catalog', false, 'Product with catalog-only visibility should not appear in search results' ),
+			'hidden visibility'              => array( 'hidden', false, 'Product with hidden visibility should not appear in search results' ),
+			'search visibility'              => array( 'search', true, 'Product with search-only visibility should appear in search results' ),
 		);
+	}
+
+	/**
+	 * @testdox Sitewide search continues to return regular posts and pages alongside the product visibility filter.
+	 */
+	public function test_search_includes_non_product_post_types() {
+		$post_id = wp_insert_post(
+			array(
+				'post_type'    => 'post',
+				'post_status'  => 'publish',
+				'post_title'   => 'Search Regular Post',
+				'post_content' => 'Body content referencing Search.',
+			)
+		);
+
+		global $wp_the_query, $wp_query;
+		$previous_wp_the_query = $wp_the_query;
+		$previous_wp_query     = $wp_query;
+
+		$query        = new WP_Query();
+		$wp_the_query = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$wp_query     = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		$query->query( array( 's' => 'Search' ) );
+		$found_ids = wp_list_pluck( $query->posts, 'ID' );
+
+		$this->assertContains( $post_id, $found_ids, 'Regular posts should still appear in sitewide search results' );
+
+		$wp_the_query = $previous_wp_the_query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$wp_query     = $previous_wp_query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		wp_delete_post( $post_id, true );
 	}
 }
