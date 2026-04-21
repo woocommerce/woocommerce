@@ -1002,6 +1002,26 @@ $font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe U
 	}
 }
 
+.wc-backbone-modal-add-attribute-term.wc-backbone-modal {
+	.wc-backbone-modal-content {
+		min-width: auto;
+		max-width: 400px;
+	}
+
+	input[type="text"] {
+		display: block;
+		font-size: 13px;
+		line-height: 16px;
+		margin: 6px 0;
+		padding: 12px;
+		width: 100%;
+	}
+
+	.wc-backbone-modal-main footer {
+		border-top: none;
+	}
+}
+
 /**
   * Variations related variables
   */
@@ -4263,7 +4283,7 @@ table.wc_shipping {
 }
 
 /**
-* New Refresh Modal Styles
+* New Shipping Settings Refresh Modal Styles
 **/
 .wc-backbone-modal-add-attribute-term,
 .wc-backbone-modal-add-shipping-method,
@@ -4426,57 +4446,57 @@ table.wc_shipping {
 		fieldset {
 			margin-bottom: 24px;
 			position: relative;
-		}
 
-		input,
-		select {
-			margin: 6px 0;
-			padding: 12px;
-			font-size: 13px;
-			line-height: 16px;
+			input,
+			select {
+				margin: 6px 0;
+				padding: 12px;
+				font-size: 13px;
+				line-height: 16px;
 
-			&:not([type="checkbox"]) {
-				width: 100%;
-				max-width: 100%;
-			}
-			&[type="checkbox"] {
-				border-radius: 2px;
-				margin: 4px 8px 6px 0;
-
-				& + .woocommerce-help-tip {
-					margin: 6px 0 4px 8px;
+				&:not([type="checkbox"]) {
+					width: 100%;
+					max-width: 100%;
 				}
-			}
+				&[type="checkbox"] {
+					border-radius: 2px;
+					margin: 4px 8px 6px 0;
 
-			&.wc-shipping-modal-price {
-				&.wc-shipping-currency-position-left,
-				&.wc-shipping-currency-position-left_space {
-
-					&.wc-shipping-currency-size-1 {
-						padding-left: 28px;
-					}
-					&.wc-shipping-currency-size-2 {
-						padding-left: 33px;
-					}
-					&.wc-shipping-currency-size-3 {
-						padding-left: 38px;
-					}
-					&.wc-shipping-currency-size-4 {
-						padding-left: 43px;
-					}
-					&.wc-shipping-currency-size-5 {
-						padding-left: 48px;
+					& + .woocommerce-help-tip {
+						margin: 6px 0 4px 8px;
 					}
 				}
 
-				&.wc-shipping-currency-position-right,
-				&.wc-shipping-currency-position-right_space {
-					padding-left: 12px;
-				}
-				&.wc-shipping-invalid-price {
-					border: 2px solid var( --wc-red, #a00);
-				}
+				&.wc-shipping-modal-price {
+					&.wc-shipping-currency-position-left,
+					&.wc-shipping-currency-position-left_space {
 
+						&.wc-shipping-currency-size-1 {
+							padding-left: 28px;
+						}
+						&.wc-shipping-currency-size-2 {
+							padding-left: 33px;
+						}
+						&.wc-shipping-currency-size-3 {
+							padding-left: 38px;
+						}
+						&.wc-shipping-currency-size-4 {
+							padding-left: 43px;
+						}
+						&.wc-shipping-currency-size-5 {
+							padding-left: 48px;
+						}
+					}
+
+					&.wc-shipping-currency-position-right,
+					&.wc-shipping-currency-position-right_space {
+						padding-left: 12px;
+					}
+					&.wc-shipping-invalid-price {
+						border: 2px solid var( --wc-red, #a00);
+					}
+
+				}
 			}
 		}
 
@@ -4538,15 +4558,6 @@ table.wc_shipping {
 		animation-range-start: normal;
 		color: #757575;
 	}
-}
-
-.wc-backbone-modal-add-attribute-term.wc-backbone-modal,
-.wc-backbone-modal-add-attribute-term.wc-backbone-modal .wc-backbone-modal-content {
-	min-width: auto;
-	max-width: 400px;
-}
-.wc-backbone-modal-add-attribute-term .wc-backbone-modal-main footer {
-	border-top: none;
 }
 
 .wc-backbone-modal-add-shipping-method .wc-backbone-modal-main article {
