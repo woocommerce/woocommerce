@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useCallback, useMemo } from '@wordpress/element';
+import { useMemo } from '@wordpress/element';
 
 import { __ } from '@wordpress/i18n';
 
