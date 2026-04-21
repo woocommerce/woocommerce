@@ -52,7 +52,41 @@ Inner blocks become **presentational** - they read a standardized context protoc
 woocommerce/selectableItems
 ```
 
-Parent blocks provide this context key. Inner blocks consume it via `usesContext` in block.json.
+Parent blocks provide this context key via `providesContext`. Inner blocks consume it via `usesContext`.
+
+### Parent block.json (provider)
+
+```json
+{
+  "name": "woocommerce/product-filter-attribute",
+  "providesContext": {
+    "woocommerce/selectableItems": "selectableItems"
+  }
+}
+```
+
+The `providesContext` maps the context key `woocommerce/selectableItems` to the block attribute `selectableItems`. In practice, the PHP `render()` method builds the context object and passes it when rendering inner blocks:
+
+```php
+( new \WP_Block( $parsed_block, array(
+    'woocommerce/selectableItems' => $selectable_context,
+) ) )->render();
+```
+
+### Inner block.json (consumer)
+
+```json
+{
+  "name": "woocommerce/selectable-swatches",
+  "usesContext": ["woocommerce/selectableItems"],
+  "ancestor": [
+    "woocommerce/product-filter-attribute",
+    "woocommerce/add-to-cart-with-options-variation-selector-attribute"
+  ]
+}
+```
+
+The inner block declares which parents it can be nested inside via `ancestor`, and receives the protocol data through `$block->context['woocommerce/selectableItems']` in PHP.
 
 ## SelectableItemsContext
 
