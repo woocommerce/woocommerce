@@ -8,9 +8,9 @@ import type { Field } from '@wordpress/dataviews';
 /**
  * Internal dependencies
  */
-import { InputControl, InputLayout } from './compat-controls';
 
 import type { ProductEntityRecord, SettingsEntityRecord } from '../types';
+import { InputControl, InputLayout } from '@wordpress/ui';
 
 export type DimensionKey = 'height' | 'width' | 'length';
 
