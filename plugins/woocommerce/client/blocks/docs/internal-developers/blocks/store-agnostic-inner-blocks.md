@@ -52,41 +52,41 @@ Inner blocks become **presentational** - they read a standardized context protoc
 woocommerce/selectableItems
 ```
 
-Parent blocks provide this context key via `providesContext`. Inner blocks consume it via `usesContext`.
-
-### Parent block.json (provider)
-
-```json
-{
-  "name": "woocommerce/product-filter-attribute",
-  "providesContext": {
-    "woocommerce/selectableItems": "selectableItems"
-  }
-}
-```
-
-The `providesContext` maps the context key `woocommerce/selectableItems` to the block attribute `selectableItems`. In practice, the PHP `render()` method builds the context object and passes it when rendering inner blocks:
+Items are dynamic (computed at render time from database queries), so parent blocks do **not** use `providesContext` in block.json. Instead, they pass context directly when rendering inner blocks:
 
 ```php
+// Parent block render():
 ( new \WP_Block( $parsed_block, array(
-    'woocommerce/selectableItems' => $selectable_context,
+    'woocommerce/selectableItems' => $context,
 ) ) )->render();
+```
+
+In the editor, parent blocks use `BlockContextProvider` to pass the same data:
+
+```jsx
+<BlockContextProvider value={ { 'woocommerce/selectableItems': context } }>
+    { children }
+</BlockContextProvider>
 ```
 
 ### Inner block.json (consumer)
 
+Inner blocks declare the context key they consume via `usesContext`, and which parents they can be nested inside via `ancestor`:
+
 ```json
 {
-  "name": "woocommerce/selectable-swatches",
+  "name": "woocommerce/product-filter-checkbox-list",
   "usesContext": ["woocommerce/selectableItems"],
   "ancestor": [
     "woocommerce/product-filter-attribute",
-    "woocommerce/add-to-cart-with-options-variation-selector-attribute"
+    "woocommerce/product-filter-status",
+    "woocommerce/product-filter-taxonomy",
+    "woocommerce/product-filter-rating"
   ]
 }
 ```
 
-The inner block declares which parents it can be nested inside via `ancestor`, and receives the protocol data through `$block->context['woocommerce/selectableItems']` in PHP.
+Inner blocks receive the protocol data through `$block->context['woocommerce/selectableItems']` in PHP.
 
 ## SelectableItemsContext
 
