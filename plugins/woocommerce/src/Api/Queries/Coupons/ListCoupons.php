@@ -105,7 +105,12 @@ class ListCoupons {
 		}
 
 		$page_info                    = new PageInfo();
-		$page_info->has_next_page     = null !== $last ? ( null !== $after ) : $has_extra;
+		// Relay semantics for backward pagination (`last`, `before`): the
+		// returned window ends just before `$before`, so items after the
+		// window exist whenever `$before` was supplied — not whenever
+		// `$after` was. `has_previous_page` in the backward case is driven
+		// by the "did we fetch limit+1?" sentinel (`$has_extra`).
+		$page_info->has_next_page     = null !== $last ? ( null !== $before ) : $has_extra;
 		$page_info->has_previous_page = null !== $last ? $has_extra : ( null !== $after );
 		$page_info->start_cursor      = ! empty( $edges ) ? $edges[0]->cursor : null;
 		$page_info->end_cursor        = ! empty( $edges ) ? $edges[ count( $edges ) - 1 ]->cursor : null;
