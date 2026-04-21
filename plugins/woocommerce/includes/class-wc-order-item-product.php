@@ -406,6 +406,15 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * @return WC_Product|bool
 	 */
 	public function get_product() {
+		if ( $this->product ) {
+			// Invalidate the product instance if it was changed meanwhile: uses in-memory cached post data behind scenes.
+			$product_id  = $this->product->get_id();
+			$modified_at = $this->product->get_date_modified();
+			if ( $modified_at && $modified_at->getTimestamp() !== get_post_modified_time( 'U', true, $product_id ) ) {
+				$this->product = null;
+			}
+		}
+
 		if ( null === $this->product ) {
 			// Instantiate and cache the product instance.
 			$product = wc_get_product( $this->get_variation_id() ? $this->get_variation_id() : $this->get_product_id() );
@@ -416,11 +425,8 @@ class WC_Order_Item_Product extends WC_Order_Item {
 			}
 			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- TBD, digital archeology.
 			$this->product = apply_filters( 'woocommerce_order_item_product', $product, $this );
-		} else if ( $this->product && false === get_post_type( $this->product ) ) {
-			// Verify the product existence and actualize the product instance.
-			$this->product = false;
+			// TBD: apply the filters in set_product as well, to ensure they are not bypassed.
 		}
-		// TBD: apply the filters in set_product as well, to ensure they are not bypassed.
 
 		return $this->product;
 	}
