@@ -283,40 +283,20 @@ export type SelectableItem = (
 
 ## PHP
 
-### Trait
-
-Location: `src/Blocks/BlockTypes/SelectableItemsContextTrait.php`
-
-One method — builds the context array and injects it into `$block->context` so inner blocks can read it via `usesContext`.
-
-```php
-<?php
-declare( strict_types = 1 );
-
-namespace Automattic\WooCommerce\Blocks\BlockTypes;
-
-trait SelectableItemsContextTrait {
-    protected function provide_selectable_items_context( \WP_Block $block, array $context ): void {
-        $block->context['woocommerce/selectableItems'] = $context;
-    }
-}
-```
-
-Parent blocks use it:
+No base class or trait needed — parent blocks set `$block->context` directly:
 
 ```php
 class ProductFilterAttribute extends AbstractBlock {
-    use SelectableItemsContextTrait;
 
     protected function render( $attributes, $content, $block ) {
-        $this->provide_selectable_items_context( $block, [
+        $block->context['woocommerce/selectableItems'] = [
             'items'          => $this->transform_to_selectable_items( $filter_items ),
             'selectionMode'  => 'multiple',
             'selectAction'   => 'toggleFilter',
             'storeNamespace' => 'woocommerce/product-filters',
             'groupLabel'     => $attributes['label'] ?? '',
             'showCounts'     => $attributes['showCounts'] ?? true,
-        ] );
+        ];
 
         return sprintf(
             '<div %s>%s</div>',
