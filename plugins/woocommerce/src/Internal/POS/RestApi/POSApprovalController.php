@@ -31,10 +31,7 @@ class POSApprovalController extends RestApiControllerBase implements RegisterHoo
 	 */
 	private const APPROVABLE_ACTIONS = array(
 		'refund_shop_orders',
-		'void_shop_orders',
 		'publish_shop_coupons',
-		'apply_discounts',
-		'override_prices',
 	);
 
 	/**
@@ -44,9 +41,6 @@ class POSApprovalController extends RestApiControllerBase implements RegisterHoo
 	 */
 	private const ORDER_SCOPED_ACTIONS = array(
 		'refund_shop_orders',
-		'void_shop_orders',
-		'apply_discounts',
-		'override_prices',
 	);
 
 	/**

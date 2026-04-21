@@ -174,68 +174,6 @@ class CapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox enforce_cancel_capability blocks users without void_shop_orders from cancelling.
-	 */
-	public function test_user_without_void_cap_cannot_cancel_orders(): void {
-		wp_set_current_user( $this->limited_user_id );
-		$order = $this->create_order_as_current_user( 'pending' );
-
-		$request = new \WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
-		$request->set_body_params( array( 'status' => 'cancelled' ) );
-
-		$result = $this->sut->enforce_cancel_capability( $order, $request, false );
-
-		$this->assertInstanceOf( \WP_Error::class, $result );
-		$this->assertSame( 'woocommerce_rest_cannot_cancel', $result->get_error_code() );
-	}
-
-	/**
-	 * @testdox enforce_cancel_capability allows users with void_shop_orders to cancel.
-	 */
-	public function test_user_with_void_cap_can_cancel_orders(): void {
-		wp_set_current_user( $this->capable_user_id );
-		$order = $this->create_order_as_current_user( 'pending' );
-
-		$request = new \WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
-		$request->set_body_params( array( 'status' => 'cancelled' ) );
-
-		$result = $this->sut->enforce_cancel_capability( $order, $request, false );
-
-		$this->assertNotInstanceOf( \WP_Error::class, $result );
-		$this->assertSame( $order, $result );
-	}
-
-	/**
-	 * @testdox enforce_cancel_capability does not restrict non-cancel status updates.
-	 */
-	public function test_user_can_update_order_status_to_non_cancelled(): void {
-		wp_set_current_user( $this->limited_user_id );
-		$order = $this->create_order_as_current_user( 'pending' );
-
-		$request = new \WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
-		$request->set_body_params( array( 'status' => 'processing' ) );
-
-		$result = $this->sut->enforce_cancel_capability( $order, $request, false );
-
-		$this->assertSame( $order, $result );
-	}
-
-	/**
-	 * @testdox enforce_cancel_capability skips check during order creation.
-	 */
-	public function test_enforce_cancel_capability_skips_on_create(): void {
-		wp_set_current_user( $this->limited_user_id );
-		$order = $this->create_order_as_current_user( 'pending' );
-
-		$request = new \WP_REST_Request( 'POST', '/wc/v3/orders' );
-		$request->set_body_params( array( 'status' => 'cancelled' ) );
-
-		$result = $this->sut->enforce_cancel_capability( $order, $request, true );
-
-		$this->assertSame( $order, $result );
-	}
-
-	/**
 	 * @testdox Administrator can create refunds.
 	 */
 	public function test_administrator_can_create_refunds(): void {
@@ -775,84 +713,6 @@ class CapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Cashiers cannot apply discounts without the dedicated capability.
-	 */
-	public function test_cashier_cannot_apply_discounts_without_capability(): void {
-		wp_set_current_user( $this->limited_user_id );
-		$order = $this->create_order_as_current_user( 'pending' );
-
-		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
-		$request->set_body_params(
-			array(
-				'coupon_lines' => array(
-					array(
-						'code' => 'ten-off',
-					),
-				),
-			)
-		);
-
-		$result = $this->sut->enforce_cancel_capability( $order, $request, false );
-
-		$this->assertInstanceOf( \WP_Error::class, $result );
-		$this->assertSame( 'woocommerce_rest_cannot_apply_discounts', $result->get_error_code() );
-	}
-
-	/**
-	 * @testdox Cashiers cannot override line-item prices without the dedicated capability.
-	 */
-	public function test_cashier_cannot_override_prices_without_capability(): void {
-		wp_set_current_user( $this->limited_user_id );
-		$order = $this->create_order_as_current_user( 'pending' );
-
-		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
-		$request->set_body_params(
-			array(
-				'line_items' => array(
-					array(
-						'product_id' => 1,
-						'total'      => '1.00',
-					),
-				),
-			)
-		);
-
-		$result = $this->sut->enforce_cancel_capability( $order, $request, false );
-
-		$this->assertInstanceOf( \WP_Error::class, $result );
-		$this->assertSame( 'woocommerce_rest_cannot_override_prices', $result->get_error_code() );
-	}
-
-	/**
-	 * @testdox Managers can update orders with discounts and price overrides.
-	 */
-	public function test_pos_manager_can_apply_discounts_and_override_prices(): void {
-		wp_set_current_user( $this->capable_user_id );
-		$order = $this->create_order_as_current_user( 'pending' );
-
-		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
-		$request->set_body_params(
-			array(
-				'coupon_lines' => array(
-					array(
-						'code' => 'ten-off',
-					),
-				),
-				'line_items'   => array(
-					array(
-						'product_id' => 1,
-						'total'      => '1.00',
-					),
-				),
-			)
-		);
-
-		$result = $this->sut->enforce_cancel_capability( $order, $request, false );
-
-		$this->assertSame( $order, $result );
-	}
-
-	/**
 	 * @testdox POS cashiers cannot create products via the REST API.
 	 */
 	public function test_pos_cashier_cannot_create_products(): void {
@@ -1198,11 +1058,10 @@ class CapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox register adds the order pre-insert filter.
+	 * @testdox register adds REST permission and dispatch filters.
 	 */
-	public function test_register_adds_pre_insert_filter(): void {
+	public function test_register_adds_rest_filters(): void {
 		remove_all_filters( 'woocommerce_rest_check_permissions' );
-		remove_all_filters( 'woocommerce_rest_pre_insert_shop_order_object' );
 		remove_all_filters( 'rest_pre_dispatch' );
 		remove_all_filters( 'rest_request_before_callbacks' );
 		remove_all_filters( 'rest_post_dispatch' );
@@ -1213,8 +1072,8 @@ class CapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 
 		$this->assertNotFalse(
 			has_filter(
-				'woocommerce_rest_pre_insert_shop_order_object',
-				array( $handler, 'enforce_cancel_capability' )
+				'woocommerce_rest_check_permissions',
+				array( $handler, 'enforce_capabilities' )
 			)
 		);
 		$this->assertNotFalse(
@@ -1237,7 +1096,6 @@ class CapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 		);
 
 		remove_all_filters( 'woocommerce_rest_check_permissions' );
-		remove_all_filters( 'woocommerce_rest_pre_insert_shop_order_object' );
 		remove_all_filters( 'rest_pre_dispatch' );
 		remove_all_filters( 'rest_request_before_callbacks' );
 		remove_all_filters( 'rest_post_dispatch' );

@@ -184,7 +184,7 @@ class POSApprovalControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_body_params(
 			array(
 				'pin'     => '7391',
-				'action'  => 'apply_discounts',
+				'action'  => 'unsupported_action',
 				'context' => array( 'order_id' => 42 ),
 			)
 		);

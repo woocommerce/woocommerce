@@ -4,7 +4,6 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal;
 
 use Automattic\WooCommerce\Internal\POS\Service\POSApprovalService;
-use WC_Data;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -14,8 +13,7 @@ use WP_REST_Server;
  * Enforces WooCommerce capabilities on REST API endpoints.
  *
  * Hooks into REST API permission filters to check granular capabilities
- * such as refund_shop_orders and void_shop_orders for any
- * user, regardless of their role.
+ * such as refund_shop_orders for any user, regardless of their role.
  *
  * @internal
  * @since 10.8.0
@@ -29,10 +27,7 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 	 */
 	private const APPROVABLE_CAPABILITIES = array(
 		'refund_shop_orders',
-		'void_shop_orders',
 		'publish_shop_coupons',
-		'apply_discounts',
-		'override_prices',
 	);
 
 	/**
@@ -100,12 +95,6 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 	 */
 	public function register(): void {
 		add_filter( 'woocommerce_rest_check_permissions', array( $this, 'enforce_capabilities' ), 10, 4 );
-		add_filter(
-			'woocommerce_rest_pre_insert_shop_order_object',
-			array( $this, 'enforce_cancel_capability' ),
-			10,
-			3
-		);
 		add_filter( 'woocommerce_pos_capability_check', array( $this, 'check_approval_token' ), 10, 3 );
 		add_filter( 'rest_pre_dispatch', array( $this, 'capture_current_rest_route' ), 10, 3 );
 		add_filter( 'rest_request_before_callbacks', array( $this, 'enforce_route_access' ), 10, 3 );
@@ -186,53 +175,6 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 		}
 
 		return $permission;
-	}
-
-	/**
-	 * Enforce the void_shop_orders capability when an order is set to cancelled.
-	 *
-	 * @since 10.8.0
-	 *
-	 * @param WC_Data         $order    The order object being updated.
-	 * @param WP_REST_Request $request  The request object.
-	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
-	 * @param bool            $creating Whether this is a new order.
-	 * @return WC_Data|WP_Error The order or WP_Error if capability check fails.
-	 */
-	public function enforce_cancel_capability( $order, WP_REST_Request $request, bool $creating ) {
-		$this->approval_error = null;
-
-		// Make the approval token and target order visible to user_has_capability
-		// so discount / price override / cancel checks all route through the
-		// standard manager-approval path.
-		$this->current_approval_token = (string) $request->get_param( '_pos_approval' );
-		if ( method_exists( $order, 'get_id' ) ) {
-			$this->current_order_id = (int) $order->get_id();
-		}
-
-		$order_capability_error = $this->enforce_order_request_capabilities( $request );
-		if ( is_wp_error( $order_capability_error ) ) {
-			return $order_capability_error;
-		}
-
-		if ( $creating ) {
-			return $order;
-		}
-
-		$status = $request->get_param( 'status' );
-		if ( 'cancelled' !== $status ) {
-			return $order;
-		}
-
-		if ( ! $this->user_has_capability( 'void_shop_orders' ) ) {
-			return new WP_Error(
-				'woocommerce_rest_cannot_cancel',
-				__( 'Sorry, you are not allowed to cancel orders.', 'woocommerce' ),
-				array( 'status' => 403 )
-			);
-		}
-
-		return $order;
 	}
 
 	/**
@@ -574,79 +516,6 @@ class CapabilityEnforcement implements RegisterHooksInterface {
 		 * @param int    $user_id    The user ID.
 		 */
 		return (bool) apply_filters( 'woocommerce_pos_capability_check', $has_cap, $capability, $user_id );
-	}
-
-	/**
-	 * Enforce granular order request capabilities before the order is saved.
-	 *
-	 * @since 10.8.0
-	 *
-	 * @param WP_REST_Request $request Current request.
-	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
-	 * @return true|WP_Error
-	 */
-	private function enforce_order_request_capabilities( WP_REST_Request $request ) {
-		if ( $this->request_has_coupon_changes( $request ) && ! $this->user_has_capability( 'apply_discounts' ) ) {
-			return new WP_Error(
-				'woocommerce_rest_cannot_apply_discounts',
-				__( 'Sorry, you are not allowed to apply discounts.', 'woocommerce' ),
-				array( 'status' => 403 )
-			);
-		}
-
-		if ( $this->request_has_price_overrides( $request ) && ! $this->user_has_capability( 'override_prices' ) ) {
-			return new WP_Error(
-				'woocommerce_rest_cannot_override_prices',
-				__( 'Sorry, you are not allowed to override prices.', 'woocommerce' ),
-				array( 'status' => 403 )
-			);
-		}
-
-		return true;
-	}
-
-	/**
-	 * Check whether the request contains coupon changes.
-	 *
-	 * @since 10.8.0
-	 *
-	 * @param WP_REST_Request $request Current request.
-	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
-	 * @return bool
-	 */
-	private function request_has_coupon_changes( WP_REST_Request $request ): bool {
-		$coupon_lines = $request->get_param( 'coupon_lines' );
-
-		return is_array( $coupon_lines ) && ! empty( $coupon_lines );
-	}
-
-	/**
-	 * Check whether the request contains line-item price overrides.
-	 *
-	 * @since 10.8.0
-	 *
-	 * @param WP_REST_Request $request Current request.
-	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
-	 * @return bool
-	 */
-	private function request_has_price_overrides( WP_REST_Request $request ): bool {
-		$line_items = $request->get_param( 'line_items' );
-
-		if ( ! is_array( $line_items ) ) {
-			return false;
-		}
-
-		foreach ( $line_items as $item ) {
-			if ( ! is_array( $item ) ) {
-				continue;
-			}
-
-			if ( array_key_exists( 'total', $item ) || array_key_exists( 'subtotal', $item ) ) {
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 	/**
