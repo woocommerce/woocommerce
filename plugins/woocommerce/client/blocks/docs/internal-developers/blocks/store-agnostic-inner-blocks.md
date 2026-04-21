@@ -470,20 +470,12 @@ $context = [
 
 ## Implementing as Inner Block (Consumer)
 
-Inner blocks consume the protocol. They read context and delegate actions to the parent.
+Inner blocks consume the protocol. They have **no store of their own** — they reuse the parent's store via `storeNamespace` from context and render items using `data-wp-each`.
 
 **block.json**
 ```json
 {
-  "name": "woocommerce/selectable-items",
-  "title": "Selectable Items",
-  "category": "woocommerce",
-  "ancestor": [
-    "woocommerce/product-filter-attribute",
-    "woocommerce/product-filter-taxonomy",
-    "woocommerce/product-filter-status",
-    "woocommerce/add-to-cart-with-options-variation-selector-attribute"
-  ],
+  "name": "woocommerce/product-filter-checkbox-list",
   "usesContext": ["woocommerce/selectableItems"],
   "supports": {
     "interactivity": true
@@ -491,99 +483,112 @@ Inner blocks consume the protocol. They read context and delegate actions to the
 }
 ```
 
-**frontend.ts**
+**frontend.ts** — Inner blocks need no frontend JS. All actions are delegated to the parent store.
 ```typescript
-import { store, getContext } from '@wordpress/interactivity';
-
-interface ItemContext {
-  item: SelectableItem;
-}
-
-// Inner block registers minimal store - just for local UI state
-store('woocommerce/selectable-items', {
-  state: {
-    get isSelected() {
-      const ctx = getContext<ItemContext>();
-      return ctx.item.selected;
-    },
-    get isDisabled() {
-      const ctx = getContext<ItemContext>();
-      return ctx.item.disabled ?? false;
-    },
-  },
-  actions: {
-    /**
-     * Called on item click/change.
-     * Delegates to parent's action via context.
-     */
-    handleSelect() {
-      const ctx = getContext<ItemContext>();
-      const parentCtx = getContext<SelectableItemsContext>('parent');
-      
-      // Call the parent's mapped action
-      // Parent provides 'selectAction' which points to their store action
-      const { actions } = store(parentCtx.storeNamespace);
-      actions[parentCtx.selectAction]?.(ctx.item);
-    },
-  },
-});
+// No store needed. Actions (toggleFilter, showAll, etc.) are provided
+// by the parent store via storeNamespace context.
 ```
 
-**PHP Renderer**
+**PHP Renderer** — Uses `data-wp-each` template with `data-wp-each-child` SSR fallback.
 ```php
-class SelectableSwatches extends AbstractBlock {
-    
-    protected function render($attributes, $content, $block) {
-        $context = $block->context['woocommerce/selectableItems'] ?? null;
-        if (!$context || empty($context['items'])) {
-            return '';
-        }
-        
-        $items = $context['items'];
-        $selection_mode = $context['selectionMode'] ?? 'multiple';
-        $show_counts = $context['showCounts'] ?? false;
-        $input_type = $selection_mode === 'single' ? 'radio' : 'checkbox';
-        
-        ob_start();
-        ?>
-        <div 
-            <?php echo get_block_wrapper_attributes(); ?>
-            data-wp-interactive="woocommerce/selectable-items"
-        >
-            <fieldset role="<?php echo $selection_mode === 'single' ? 'radiogroup' : 'group'; ?>">
-                <?php if (!empty($context['groupLabel'])): ?>
-                    <legend class="screen-reader-text">
-                        <?php echo esc_html($context['groupLabel']); ?>
-                    </legend>
-                <?php endif; ?>
-                
-                <?php foreach ($items as $item): ?>
-                    <label
-                        class="wc-block-swatch <?php echo $item['selected'] ? 'is-selected' : ''; ?>"
-                        data-wp-context='<?php echo wp_json_encode(['item' => $item]); ?>'
-                    >
-                        <input 
-                            type="<?php echo $input_type; ?>"
-                            value="<?php echo esc_attr($item['value']); ?>"
-                            data-wp-bind--checked="state.isSelected"
-                            data-wp-on--change="actions.handleSelect"
-                        />
-                        <?php if (!empty($item['color'])): ?>
-                            <span class="wc-block-swatch__color" style="background-color: <?php echo esc_attr($item['color']); ?>"></span>
-                        <?php endif; ?>
-                        <span class="wc-block-swatch__label"><?php echo esc_html($item['label']); ?></span>
-                        <?php if ($show_counts && isset($item['count'])): ?>
-                            <span class="wc-block-swatch__count">(<?php echo $item['count']; ?>)</span>
-                        <?php endif; ?>
-                    </label>
-                <?php endforeach; ?>
-            </fieldset>
-        </div>
-        <?php
-        return ob_get_clean();
+protected function render( $attributes, $content, $block ) {
+    if ( empty( $block->context['woocommerce/selectableItems'] ) ) {
+        return '';
     }
+
+    $block_context   = $block->context['woocommerce/selectableItems'];
+    $items           = $block_context['items'] ?? array();
+    $show_counts     = $block_context['showCounts'] ?? false;
+    $store_namespace = $block_context['storeNamespace'] ?? 'woocommerce/product-filters';
+    $select_action   = $block_context['selectAction'] ?? 'toggleFilter';
+
+    // Pre-compute id and ariaLabel, re-index with array_values
+    // to guarantee JSON array (not object) for data-wp-each.
+    $context_items = array_values(
+        array_map(
+            function ( $item ) use ( $show_counts ) {
+                $item['id']        = $item['type'] . '-' . $item['value'];
+                $item['ariaLabel'] = $this->get_aria_label( $item, $show_counts );
+                return $item;
+            },
+            $items
+        )
+    );
+
+    // Items go into Interactivity API context for data-wp-each.
+    $wrapper_attributes = array(
+        'data-wp-interactive' => $store_namespace,
+        'data-wp-context'     => wp_json_encode(
+            array(
+                'items'      => $context_items,
+                'showCounts' => $show_counts,
+            ),
+            JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+        ),
+    );
+
+    ob_start();
+    ?>
+    <div <?php echo get_block_wrapper_attributes( $wrapper_attributes ); ?>>
+        <fieldset>
+            <div class="my-inner-block__items">
+                <!-- Client-side template: data-wp-each iterates context.items -->
+                <template
+                    data-wp-each--item="context.items"
+                    data-wp-each-key="context.item.id"
+                >
+                    <div class="my-inner-block__item">
+                        <input
+                            type="checkbox"
+                            data-wp-bind--id="context.item.id"
+                            data-wp-bind--aria-label="context.item.ariaLabel"
+                            data-wp-on--change="actions.<?php echo esc_attr( $select_action ); ?>"
+                            data-wp-bind--value="context.item.value"
+                            data-wp-bind--checked="state.isFilterSelected"
+                        >
+                        <span data-wp-text="context.item.label"></span>
+                        <span data-wp-bind--hidden="!context.showCounts">
+                            (<span data-wp-text="context.item.count"></span>)
+                        </span>
+                    </div>
+                </template>
+                <!-- SSR fallback: replaced by template clones on hydration -->
+                <?php foreach ( $context_items as $item ) { ?>
+                    <div class="my-inner-block__item"
+                        data-wp-each-child
+                        <?php echo wp_interactivity_data_wp_context( array( 'item' => $item ) ); ?>
+                    >
+                        <input
+                            type="checkbox"
+                            id="<?php echo esc_attr( $item['id'] ); ?>"
+                            aria-label="<?php echo esc_attr( $item['ariaLabel'] ); ?>"
+                            data-wp-on--change="actions.<?php echo esc_attr( $select_action ); ?>"
+                            value="<?php echo esc_attr( $item['value'] ); ?>"
+                            data-wp-bind--checked="state.isFilterSelected"
+                        >
+                        <span><?php echo esc_html( $item['label'] ); ?></span>
+                        <?php if ( $show_counts ) : ?>
+                            <span>(<?php echo esc_html( $item['count'] ); ?>)</span>
+                        <?php endif; ?>
+                    </div>
+                <?php } ?>
+            </div>
+        </fieldset>
+    </div>
+    <?php
+    return ob_get_clean();
 }
 ```
+
+Key points:
+- **`data-wp-interactive`** is set to `$store_namespace` (the parent's store), not a block-specific store
+- **`data-wp-each--item`** iterates `context.items` and sets `context.item` per iteration
+- **`data-wp-each-child`** items provide server-side HTML before JS hydration
+- **`array_values()`** is required — input arrays may have non-sequential keys (e.g. taxonomy term IDs), which causes `json_encode` to produce a JSON object instead of array
+- **`data-wp-text`** for labels (not `data-wp-html` — that directive does not exist in the Interactivity API)
+- **`state.isFilterSelected`** and other state getters come from the parent store via namespace delegation
+
+Reference implementation: `ProductFilterCheckboxList.php`, `ProductFilterChips.php`
 
 ## Implementing as Parent Block (Provider)
 
