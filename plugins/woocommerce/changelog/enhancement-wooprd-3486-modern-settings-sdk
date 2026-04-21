@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Move modernised settings primitives into the new @woocommerce/modern-settings-sdk workspace package and consume them from the admin client.

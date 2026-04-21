@@ -1,7 +1,13 @@
 /**
  * External dependencies
  */
-import { Fragment, useMemo, useState, useEffect } from '@wordpress/element';
+import {
+	createElement,
+	Fragment,
+	useMemo,
+	useState,
+	useEffect,
+} from '@wordpress/element';
 import { Button, Notice, Spinner } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { DataForm } from '@wordpress/dataviews';
@@ -17,7 +23,6 @@ import type {
 	RowConfigurations,
 } from './types';
 import { createChildrenWithRows } from './field-transformers';
-import './react-settings.scss';
 
 type ReactSettingsPageProps = {
 	className?: string;
