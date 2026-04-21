@@ -6,6 +6,61 @@ import { useSelect } from '@wordpress/data';
 import { useRef } from '@wordpress/element';
 import { useShallowEqual, useThrowError } from '@woocommerce/base-hooks';
 import { isError } from '@woocommerce/types';
+import { __, sprintf } from '@wordpress/i18n';
+
+/**
+ * Wrap a non-Error value from the store into a real Error while preserving
+ * the original metadata (name, code, status, statusText, data). When the raw
+ * value has no usable message, build a contextual fallback that names the
+ * collection being loaded so the BlockErrorBoundary renders something
+ * actionable instead of "something went wrong".
+ */
+function wrapNonError(
+	error: unknown,
+	namespace: string,
+	resourceName: string
+): Error {
+	const source =
+		typeof error === 'object' && error !== null
+			? ( error as {
+					message?: unknown;
+					name?: unknown;
+					code?: unknown;
+					status?: unknown;
+					statusText?: unknown;
+					data?: unknown;
+			  } )
+			: {};
+	const trimmed =
+		typeof source.message === 'string' ? source.message.trim() : '';
+	const codeSuffix =
+		typeof source.code === 'string' || typeof source.code === 'number'
+			? ` (code: ${ source.code })`
+			: '';
+	const fallback =
+		sprintf(
+			// translators: %1$s: store namespace, %2$s: resource name.
+			__( 'Failed to load %2$s from %1$s', 'woocommerce' ),
+			namespace,
+			resourceName
+		) + codeSuffix;
+	const wrapped = Object.assign(
+		new Error( trimmed || fallback ),
+		{
+			code: source.code,
+			status: source.status,
+			statusText: source.statusText,
+			data: source.data,
+		},
+		typeof source.name === 'string' ? { name: source.name } : {}
+	);
+	// eslint-disable-next-line no-console
+	console.error(
+		'useCollection received a non-Error value from the store:',
+		error
+	);
+	return wrapped;
+}
 
 /**
  * This is a custom hook that is wired up to the `wc/store/collections` data
@@ -95,40 +150,9 @@ export const useCollection = < T >(
 				if ( isError( error ) ) {
 					throwError( error );
 				} else {
-					const source =
-						typeof error === 'object' && error !== null
-							? ( error as {
-									message?: unknown;
-									code?: unknown;
-									status?: unknown;
-									statusText?: unknown;
-									data?: unknown;
-							  } )
-							: {};
-					const maybeMessage = source.message;
-					const hasValidMessage =
-						typeof maybeMessage === 'string' &&
-						maybeMessage.trim() !== '';
-					const codeSuffix =
-						typeof source.code === 'string' ||
-						typeof source.code === 'number'
-							? ` (code: ${ source.code })`
-							: '';
-					const message = hasValidMessage
-						? ( maybeMessage as string )
-						: `An unknown error occurred${ codeSuffix }`;
-					const wrapped = Object.assign( new Error( message ), {
-						code: source.code,
-						status: source.status,
-						statusText: source.statusText,
-						data: source.data,
-					} );
-					// eslint-disable-next-line no-console
-					console.error(
-						'useCollection received a non-Error value from the store:',
-						error
+					throwError(
+						wrapNonError( error, namespace, resourceName )
 					);
-					throwError( wrapped );
 				}
 			}
 

@@ -404,11 +404,11 @@ describe( 'useCollection', () => {
 		expect( console ).toHaveErrored( /your React components:/ );
 		renderer.unmount();
 	} );
-	it( 'should include the code in the fallback message when a non-Error object has no message', () => {
+	it( 'should include a numeric code in the fallback message when a non-Error object has no message', () => {
 		const props = renderWithStoreError( { code: 500 } );
 		expect( props[ 'data-error' ] ).toBeInstanceOf( Error );
 		expect( props[ 'data-error' ].message ).toBe(
-			'An unknown error occurred (code: 500)'
+			'Failed to load products from test/store (code: 500)'
 		);
 		expect( console ).toHaveErrored(
 			/useCollection received a non-Error value/
@@ -416,12 +416,36 @@ describe( 'useCollection', () => {
 		expect( console ).toHaveErrored( /your React components:/ );
 		renderer.unmount();
 	} );
-	it( 'should use the generic fallback when a non-Error object has neither message nor code', () => {
+	it( 'should include a string code in the fallback message when a non-Error object has no message', () => {
+		const props = renderWithStoreError( { code: 'rest_no_route' } );
+		expect( props[ 'data-error' ] ).toBeInstanceOf( Error );
+		expect( props[ 'data-error' ].message ).toBe(
+			'Failed to load products from test/store (code: rest_no_route)'
+		);
+		expect( console ).toHaveErrored(
+			/useCollection received a non-Error value/
+		);
+		expect( console ).toHaveErrored( /your React components:/ );
+		renderer.unmount();
+	} );
+	it( 'should use the contextual fallback when a non-Error object has neither message nor code', () => {
 		const props = renderWithStoreError( { foo: 'bar' } );
 		expect( props[ 'data-error' ] ).toBeInstanceOf( Error );
 		expect( props[ 'data-error' ].message ).toBe(
-			'An unknown error occurred'
+			'Failed to load products from test/store'
 		);
+		expect( console ).toHaveErrored(
+			/useCollection received a non-Error value/
+		);
+		expect( console ).toHaveErrored( /your React components:/ );
+		renderer.unmount();
+	} );
+	it( 'should preserve the original name on the wrapped Error when one is provided', () => {
+		const error = { name: 'ApiFetchError', message: 'boom' };
+		const props = renderWithStoreError( error );
+		expect( props[ 'data-error' ] ).toBeInstanceOf( Error );
+		expect( props[ 'data-error' ].name ).toBe( 'ApiFetchError' );
+		expect( props[ 'data-error' ].message ).toBe( 'boom' );
 		expect( console ).toHaveErrored(
 			/useCollection received a non-Error value/
 		);
@@ -435,7 +459,7 @@ describe( 'useCollection', () => {
 		} );
 		expect( props[ 'data-error' ] ).toBeInstanceOf( Error );
 		expect( props[ 'data-error' ].message ).toBe(
-			'An unknown error occurred (code: 500)'
+			'Failed to load products from test/store (code: 500)'
 		);
 		expect( console ).toHaveErrored(
 			/useCollection received a non-Error value/
@@ -450,7 +474,7 @@ describe( 'useCollection', () => {
 		} );
 		expect( props[ 'data-error' ] ).toBeInstanceOf( Error );
 		expect( props[ 'data-error' ].message ).toBe(
-			'An unknown error occurred (code: 500)'
+			'Failed to load products from test/store (code: 500)'
 		);
 		expect( console ).toHaveErrored(
 			/useCollection received a non-Error value/
@@ -462,7 +486,7 @@ describe( 'useCollection', () => {
 		const props = renderWithStoreError( { code: 500, message: 42 } );
 		expect( props[ 'data-error' ] ).toBeInstanceOf( Error );
 		expect( props[ 'data-error' ].message ).toBe(
-			'An unknown error occurred (code: 500)'
+			'Failed to load products from test/store (code: 500)'
 		);
 		expect( console ).toHaveErrored(
 			/useCollection received a non-Error value/
@@ -474,7 +498,7 @@ describe( 'useCollection', () => {
 		const props = renderWithStoreError( 'oops' );
 		expect( props[ 'data-error' ] ).toBeInstanceOf( Error );
 		expect( props[ 'data-error' ].message ).toBe(
-			'An unknown error occurred'
+			'Failed to load products from test/store'
 		);
 		expect( console ).toHaveErrored(
 			/useCollection received a non-Error value/
