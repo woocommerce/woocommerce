@@ -5,7 +5,7 @@ import { Button, Modal, TextControl } from '@wordpress/components';
 import { Icon, check, warning } from '@wordpress/icons';
 import apiFetch from '@wordpress/api-fetch';
 import { useState } from '@wordpress/element';
-import { __, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
 import { isValidEmail } from '@woocommerce/product-editor/build/utils/validate-email'; // Import from the build directory so we don't load the entire product editor since we only need this one function.
 
@@ -40,7 +40,7 @@ function friendlyEmailSendError( wpError: WPError ): string {
 		message === 'Invalid nonce.'
 	) {
 		return __(
-			'Your session expired. Refresh the page, then try sending again.',
+			'Your session expired. Refresh the page and try again.',
 			'woocommerce'
 		);
 	}
@@ -50,40 +50,35 @@ function friendlyEmailSendError( wpError: WPError ): string {
 		message === 'The response is not a valid JSON response.'
 	) {
 		return __(
-			'The server sent an unexpected response. A plugin on your site is probably printing PHP warnings. Check your error log, or try disabling recently added plugins.',
+			'The server returned unexpected output. Check your error log, or disable recently added plugins.',
 			'woocommerce'
 		);
 	}
 
 	if ( message.includes( 'critical error' ) ) {
 		return __(
-			"A PHP error stopped the test email. Check your site's error log, or contact your host. A recently added plugin is often the cause.",
+			'A PHP error stopped the send. Check your error log or contact your host.',
 			'woocommerce'
 		);
 	}
 
 	if ( message === 'There was an error rendering an email preview.' ) {
 		return __(
-			"The email couldn't be rendered. A customization or plugin may be interfering with this template. Try resetting it to default in Settings → Emails.",
+			"The email couldn't be rendered. Try resetting the template in Settings → Emails.",
 			'woocommerce'
 		);
 	}
 
 	if ( message === 'Could not get a valid response from the server.' ) {
 		return __(
-			"Your server didn't respond in time. Try again in a moment. If it keeps happening, ask your host to check your PHP execution limits.",
+			'Your server timed out. If it keeps happening, ask your host to check PHP execution limits.',
 			'woocommerce'
 		);
 	}
 
-	const cleanMessage = message.replace( /\.$/, '' );
-	return sprintf(
-		// translators: %s is the raw error message from the server.
-		__(
-			"We couldn't send the test email: %s. Try again, or review your email settings if the problem continues.",
-			'woocommerce'
-		),
-		cleanMessage
+	return __(
+		"Couldn't send the test email. Check your email settings and try again.",
+		'woocommerce'
 	);
 }
 
