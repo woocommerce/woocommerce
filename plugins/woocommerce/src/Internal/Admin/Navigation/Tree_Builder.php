@@ -32,8 +32,71 @@ class Tree_Builder {
 		}
 
 		$tree = $this->auto_attach_woocommerce_children( $tree, $default_tree, $raw_submenu );
+		$tree = $this->break_cycles( $tree );
 
 		return $tree;
+	}
+
+	/**
+	 * Detect cycles in parent chains and break them by demoting the lowest-position
+	 * node in each cycle to the Woo root.
+	 *
+	 * @param array $tree Tree.
+	 * @return array Tree with cycles broken.
+	 */
+	private function break_cycles( array $tree ): array {
+		foreach ( array_keys( $tree ) as $slug ) {
+			$cycle = $this->find_cycle( $tree, $slug );
+			if ( null === $cycle ) {
+				continue;
+			}
+
+			$demote = $cycle[0];
+			foreach ( $cycle as $node ) {
+				if ( $tree[ $node ]['position'] < $tree[ $demote ]['position'] ) {
+					$demote = $node;
+				}
+			}
+
+			$tree[ $demote ]['parent'] = 'woocommerce';
+
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+				error_log( // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+					sprintf(
+						'[woocommerce] navigation_v2: cycle detected in admin menu tree (%s); demoted %s to root.',
+						implode( ' -> ', $cycle ),
+						$demote
+					)
+				);
+			}
+		}
+
+		return $tree;
+	}
+
+	/**
+	 * Walk the parent chain starting from $slug. If it revisits any node,
+	 * return the cycle (array of slugs). Otherwise return null.
+	 *
+	 * @param array  $tree Tree.
+	 * @param string $slug Start slug.
+	 * @return array|null
+	 */
+	private function find_cycle( array $tree, string $slug ): ?array {
+		$visited = array();
+		$current = $slug;
+		while ( null !== $current ) {
+			if ( isset( $visited[ $current ] ) ) {
+				return array_keys( array_slice( $visited, array_search( $current, array_keys( $visited ), true ) ) );
+			}
+			$visited[ $current ] = true;
+			$parent              = $tree[ $current ]['parent'] ?? null;
+			if ( null === $parent || ! isset( $tree[ $parent ] ) ) {
+				return null;
+			}
+			$current = $parent;
+		}
+		return null;
 	}
 
 	/**
