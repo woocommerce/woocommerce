@@ -35,9 +35,23 @@ class DeleteCoupon {
 			throw new ApiException( 'Coupon not found.', 'NOT_FOUND', status_code: 404 );
 		}
 
+		// Capture the raw return value. A `(bool)` cast would coerce
+		// filter-originated `WP_Error` objects to `true`, reporting failure
+		// as success; we need to detect that case explicitly and surface
+		// the underlying error instead.
+		$deleted = $wc_coupon->delete( $force );
+
+		if ( $deleted instanceof \WP_Error ) {
+			throw new ApiException(
+				$deleted->get_error_message(),
+				'INTERNAL_ERROR',
+				status_code: 500,
+			);
+		}
+
 		$result          = new DeleteCouponResult();
 		$result->id      = $id;
-		$result->deleted = (bool) $wc_coupon->delete( $force );
+		$result->deleted = true === $deleted;
 
 		return $result;
 	}

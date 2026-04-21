@@ -36,6 +36,20 @@ class DeleteProduct {
 			throw new ApiException( 'Product not found.', 'NOT_FOUND', status_code: 404 );
 		}
 
-		return (bool) $wc_product->delete( $force );
+		// Capture the raw return value. A `(bool)` cast would coerce
+		// filter-originated `WP_Error` objects to `true`, reporting failure
+		// as success; we need to detect that case explicitly and surface
+		// the underlying error instead.
+		$deleted = $wc_product->delete( $force );
+
+		if ( $deleted instanceof \WP_Error ) {
+			throw new ApiException(
+				$deleted->get_error_message(),
+				'INTERNAL_ERROR',
+				status_code: 500,
+			);
+		}
+
+		return true === $deleted;
 	}
 }
