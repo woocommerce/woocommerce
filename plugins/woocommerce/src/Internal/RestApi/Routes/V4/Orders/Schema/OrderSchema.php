@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractSchema;
 use Automattic\WooCommerce\Enums\OrderItemType;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\DataUtils;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Order;
 use WP_REST_Request;
@@ -69,6 +70,13 @@ class OrderSchema extends AbstractSchema {
 	private $order_shipping_schema;
 
 	/**
+	 * Refund data utils.
+	 *
+	 * @var DataUtils
+	 */
+	private $data_utils;
+
+	/**
 	 * Initialize the schema.
 	 *
 	 * @internal
@@ -78,13 +86,15 @@ class OrderSchema extends AbstractSchema {
 	 * @param OrderFeeSchema      $order_fee_schema The order fee schema.
 	 * @param OrderTaxSchema      $order_tax_schema The order tax schema.
 	 * @param OrderShippingSchema $order_shipping_schema The order shipping schema.
+	 * @param DataUtils           $data_utils Refund data utils.
 	 */
-	final public function init( OrderItemSchema $order_item_schema, OrderCouponSchema $order_coupon_schema, OrderFeeSchema $order_fee_schema, OrderTaxSchema $order_tax_schema, OrderShippingSchema $order_shipping_schema ) {
+	final public function init( OrderItemSchema $order_item_schema, OrderCouponSchema $order_coupon_schema, OrderFeeSchema $order_fee_schema, OrderTaxSchema $order_tax_schema, OrderShippingSchema $order_shipping_schema, DataUtils $data_utils ) {
 		$this->order_item_schema     = $order_item_schema;
 		$this->order_coupon_schema   = $order_coupon_schema;
 		$this->order_fee_schema      = $order_fee_schema;
 		$this->order_tax_schema      = $order_tax_schema;
 		$this->order_shipping_schema = $order_shipping_schema;
+		$this->data_utils            = $data_utils;
 	}
 
 	/**
@@ -662,7 +672,7 @@ class OrderSchema extends AbstractSchema {
 		}
 
 		// Pre-compute refund data once per order to avoid repeated get_refunds() calls in child schemas.
-		$refund_data = $this->compute_item_refund_data( $order );
+		$refund_data = $this->data_utils->compute_refunded_quantities_and_totals( $order );
 
 		if ( in_array( 'line_items', $include_fields, true ) ) {
 			/**
@@ -775,58 +785,6 @@ class OrderSchema extends AbstractSchema {
 			return false;
 		}
 		return (float) $order->get_remaining_refund_amount() > 0;
-	}
-
-	/**
-	 * Pre-compute refund data for all line items in an order.
-	 *
-	 * Loads refunds once and builds lookup maps for refunded quantities and totals per item ID,
-	 * avoiding repeated get_refunds() calls in child schemas.
-	 *
-	 * @param WC_Order $order Order instance.
-	 * @return array{qtys: array<int, int>, totals: array<int, float>}
-	 */
-	private function compute_item_refund_data( WC_Order $order ): array {
-		$qtys   = array();
-		$totals = array();
-
-		foreach ( $order->get_refunds() as $refund ) {
-			/**
-			 * Refunded product line items.
-			 *
-			 * @var \WC_Order_Item_Product[] $refunded_line_items
-			 */
-			$refunded_line_items = $refund->get_items( 'line_item' );
-			foreach ( $refunded_line_items as $refunded_item ) {
-				$original_id          = absint( $refunded_item->get_meta( '_refunded_item_id' ) );
-				$qtys[ $original_id ] = ( $qtys[ $original_id ] ?? 0 ) + $refunded_item->get_quantity();
-			}
-			/**
-			 * Refunded fee items.
-			 *
-			 * @var \WC_Order_Item_Fee[] $refunded_fees
-			 */
-			$refunded_fees = $refund->get_items( 'fee' );
-			foreach ( $refunded_fees as $refunded_item ) {
-				$original_id            = absint( $refunded_item->get_meta( '_refunded_item_id' ) );
-				$totals[ $original_id ] = ( $totals[ $original_id ] ?? 0.0 ) + (float) $refunded_item->get_total() * -1;
-			}
-			/**
-			 * Refunded shipping items.
-			 *
-			 * @var \WC_Order_Item_Shipping[] $refunded_shipping
-			 */
-			$refunded_shipping = $refund->get_items( 'shipping' );
-			foreach ( $refunded_shipping as $refunded_item ) {
-				$original_id            = absint( $refunded_item->get_meta( '_refunded_item_id' ) );
-				$totals[ $original_id ] = ( $totals[ $original_id ] ?? 0.0 ) + (float) $refunded_item->get_total() * -1;
-			}
-		}
-
-		return array(
-			'qtys'   => $qtys,
-			'totals' => $totals,
-		);
 	}
 
 	/**

@@ -281,4 +281,56 @@ class DataUtils {
 
 		return $tax_rates;
 	}
+
+	/**
+	 * Pre-compute refund data for all line items in an order.
+	 *
+	 * Loads refunds once and builds lookup maps for refunded quantities and totals per item ID,
+	 * avoiding repeated get_refunds() calls during serialization.
+	 *
+	 * @param WC_Order $order Order instance.
+	 * @return array{qtys: array<int, int>, totals: array<int, float>}
+	 */
+	public function compute_refunded_quantities_and_totals( WC_Order $order ): array {
+		$qtys   = array();
+		$totals = array();
+
+		foreach ( $order->get_refunds() as $refund ) {
+			/**
+			 * Refunded product line items.
+			 *
+			 * @var \WC_Order_Item_Product[] $refunded_line_items
+			 */
+			$refunded_line_items = $refund->get_items( 'line_item' );
+			foreach ( $refunded_line_items as $refunded_item ) {
+				$original_id          = absint( $refunded_item->get_meta( '_refunded_item_id' ) );
+				$qtys[ $original_id ] = ( $qtys[ $original_id ] ?? 0 ) + $refunded_item->get_quantity();
+			}
+			/**
+			 * Refunded fee items.
+			 *
+			 * @var \WC_Order_Item_Fee[] $refunded_fees
+			 */
+			$refunded_fees = $refund->get_items( 'fee' );
+			foreach ( $refunded_fees as $refunded_item ) {
+				$original_id            = absint( $refunded_item->get_meta( '_refunded_item_id' ) );
+				$totals[ $original_id ] = ( $totals[ $original_id ] ?? 0.0 ) + (float) $refunded_item->get_total() * -1;
+			}
+			/**
+			 * Refunded shipping items.
+			 *
+			 * @var \WC_Order_Item_Shipping[] $refunded_shipping
+			 */
+			$refunded_shipping = $refund->get_items( 'shipping' );
+			foreach ( $refunded_shipping as $refunded_item ) {
+				$original_id            = absint( $refunded_item->get_meta( '_refunded_item_id' ) );
+				$totals[ $original_id ] = ( $totals[ $original_id ] ?? 0.0 ) + (float) $refunded_item->get_total() * -1;
+			}
+		}
+
+		return array(
+			'qtys'   => $qtys,
+			'totals' => $totals,
+		);
+	}
 }
