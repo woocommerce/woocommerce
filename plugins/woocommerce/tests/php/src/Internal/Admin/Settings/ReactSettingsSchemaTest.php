@@ -40,6 +40,47 @@ class ReactSettingsSchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Includes the 10.8 SDK native types in the default supported types list.
+	 *
+	 * @dataProvider provider_sdk_10_8_supported_types
+	 *
+	 * @param string $expected_type Type expected in the defaults.
+	 */
+	public function test_get_supported_types_includes_sdk_10_8_native_types( string $expected_type ) {
+		$types = ReactSettingsSchema::get_supported_types( 'general', '', array(), null );
+
+		$this->assertContains(
+			$expected_type,
+			$types,
+			"Expected '{$expected_type}' to be in the default supported types list."
+		);
+	}
+
+	/**
+	 * Data provider for the 10.8 SDK native type defaults.
+	 *
+	 * @return array<string, array{0: string}>
+	 */
+	public function provider_sdk_10_8_supported_types(): array {
+		return array(
+			'password'                       => array( 'password' ),
+			'email'                          => array( 'email' ),
+			'url'                            => array( 'url' ),
+			'tel'                            => array( 'tel' ),
+			'color'                          => array( 'color' ),
+			'date'                           => array( 'date' ),
+			'datetime'                       => array( 'datetime' ),
+			'datetime-local'                 => array( 'datetime-local' ),
+			'month'                          => array( 'month' ),
+			'week'                           => array( 'week' ),
+			'time'                           => array( 'time' ),
+			'textarea'                       => array( 'textarea' ),
+			'single_select_page_with_search' => array( 'single_select_page_with_search' ),
+			'info'                           => array( 'info' ),
+		);
+	}
+
+	/**
 	 * @testdox Applies supported types filters.
 	 */
 	public function test_get_supported_types_applies_filter() {
@@ -65,6 +106,45 @@ class ReactSettingsSchemaTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( 'select', $type_map['single_select_page'] );
 		$this->assertSame( 'multiselect', $type_map['multi_select_countries'] );
+	}
+
+	/**
+	 * @testdox Drops textarea and single_select_page_with_search from the default type map so they reach the JS transformer raw.
+	 */
+	public function test_get_type_map_drops_unmapped_native_types() {
+		$type_map = ReactSettingsSchema::get_type_map( 'general', '', array(), null );
+
+		$this->assertArrayNotHasKey(
+			'textarea',
+			$type_map,
+			'textarea must reach the JS transformer untouched so the custom Edit can render.'
+		);
+		$this->assertArrayNotHasKey(
+			'single_select_page_with_search',
+			$type_map,
+			'single_select_page_with_search must reach the JS transformer untouched so the combobox Edit can render.'
+		);
+	}
+
+	/**
+	 * @testdox Treats every 10.8 SDK native type as renderable.
+	 *
+	 * @dataProvider provider_sdk_10_8_supported_types
+	 *
+	 * @param string $type Setting type to check.
+	 */
+	public function test_has_renderable_fields_returns_true_for_sdk_10_8_native_types( string $type ) {
+		$settings = array(
+			array(
+				'id'   => 'sample_field',
+				'type' => $type,
+			),
+		);
+
+		$this->assertTrue(
+			ReactSettingsSchema::has_renderable_fields( 'general', '', $settings, null ),
+			"Expected '{$type}' to be treated as a renderable field."
+		);
 	}
 
 	/**

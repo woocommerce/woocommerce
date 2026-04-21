@@ -45,7 +45,7 @@ class ReactSettingsSchema {
 	 * @since 10.6.0
 	 * @var string[]
 	 */
-	private const OPTION_TYPES = array( 'select', 'multiselect' );
+	private const OPTION_TYPES = array( 'select', 'multiselect', 'single_select_page_with_search' );
 	/**
 	 * Get the payload path for a settings tab/section.
 	 *
@@ -115,7 +115,30 @@ class ReactSettingsSchema {
 	 * @since 10.6.0
 	 */
 	public static function get_supported_types( string $tab, string $section, array $settings_definitions, $settings_page ): array {
-		$default_types = array( 'text', 'number', 'select', 'multiselect', 'checkbox', 'radio', 'toggle' );
+		$default_types = array(
+			'text',
+			'number',
+			'select',
+			'multiselect',
+			'checkbox',
+			'radio',
+			'toggle',
+			// 10.8 SDK additions: native type coverage handled by baseFieldTransformer.
+			'password',
+			'email',
+			'url',
+			'tel',
+			'color',
+			'date',
+			'datetime',
+			'datetime-local',
+			'month',
+			'week',
+			'time',
+			'textarea',
+			'single_select_page_with_search',
+			'info',
+		);
 		/**
 		 * Filter supported React settings field types.
 		 *
@@ -151,11 +174,9 @@ class ReactSettingsSchema {
 	 */
 	public static function get_type_map( string $tab, string $section, array $settings_definitions, $settings_page ): array {
 		$default_map = array(
-			'single_select_country'          => 'select',
-			'multi_select_countries'         => 'multiselect',
-			'single_select_page'             => 'select',
-			'single_select_page_with_search' => 'select',
-			'textarea'                       => 'text',
+			'single_select_country'  => 'select',
+			'multi_select_countries' => 'multiselect',
+			'single_select_page'     => 'select',
 		);
 		/**
 		 * Filter the field type map for React settings.

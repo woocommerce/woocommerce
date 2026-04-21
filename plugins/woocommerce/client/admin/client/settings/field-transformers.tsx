@@ -3,6 +3,14 @@
  */
 import { __ } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
+import {
+	ColorPicker,
+	ComboboxControl,
+	DatePicker,
+	DateTimePicker,
+	TextareaControl,
+	__experimentalInputControl as InputControl,
+} from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -35,6 +43,50 @@ type FieldTypeTransformer = (
 type EditComponent = {
 	( props: Record< string, unknown > ): JSX.Element | null;
 	displayName?: string;
+};
+
+type DataFormFieldShape = {
+	id: string;
+	getValue: ( args: { item: Record< string, unknown > } ) => unknown;
+	setValue: ( args: {
+		item: Record< string, unknown >;
+		value: unknown;
+	} ) => Record< string, unknown >;
+};
+
+type DataFormEditProps = {
+	data: Record< string, unknown >;
+	field: DataFormFieldShape;
+	onChange: ( value: Record< string, unknown > ) => void;
+	hideLabelFromVision?: boolean;
+};
+
+const readFieldValue = (
+	data: Record< string, unknown >,
+	field: DataFormFieldShape
+): string => {
+	const raw =
+		typeof field.getValue === 'function'
+			? field.getValue( { item: data } )
+			: data[ field.id ];
+
+	if ( raw === null || raw === undefined ) {
+		return '';
+	}
+
+	return typeof raw === 'string' ? raw : String( raw );
+};
+
+const writeFieldValue = (
+	{ data, field, onChange }: DataFormEditProps,
+	nextValue: string
+): void => {
+	if ( typeof field.setValue === 'function' ) {
+		onChange( field.setValue( { item: data, value: nextValue } ) );
+		return;
+	}
+
+	onChange( { ...data, [ field.id ]: nextValue } );
 };
 
 const coerceString = ( value: unknown ): string | null => {
@@ -365,6 +417,224 @@ export const baseFieldTransformer = (
 						value.every( ( item ) => optionValues.includes( item ) )
 					);
 				},
+			};
+			return applySafeEdit( field );
+		}
+		case 'email': {
+			// DataViews 11.1.0 renders an HTML5 email input natively for `type: 'email'`.
+			const field = {
+				...baseField,
+				type: 'email',
+			};
+			return applySafeEdit( field );
+		}
+		case 'url': {
+			// Reuse the native text input but validate that the value is a URL.
+			const field = {
+				...baseField,
+				type: 'text',
+				isValid: ( value: unknown ) => {
+					if ( typeof value !== 'string' || value === '' ) {
+						return true;
+					}
+
+					if (
+						typeof URL !== 'undefined' &&
+						typeof URL.canParse === 'function'
+					) {
+						return URL.canParse( value );
+					}
+
+					try {
+						// eslint-disable-next-line no-new
+						new URL( value );
+						return true;
+					} catch ( error ) {
+						return false;
+					}
+				},
+			};
+			return applySafeEdit( field );
+		}
+		case 'password': {
+			const PasswordEdit = ( props: DataFormEditProps ) => (
+				<InputControl
+					__next40pxDefaultSize
+					type="password"
+					autoComplete="new-password"
+					label={ baseField.label }
+					hideLabelFromVision={ props.hideLabelFromVision }
+					value={ readFieldValue( props.data, props.field ) }
+					onChange={ ( next?: string ) =>
+						writeFieldValue( props, next ?? '' )
+					}
+				/>
+			);
+			const field = {
+				...baseField,
+				type: 'text',
+				Edit: PasswordEdit,
+			};
+			return applySafeEdit( field );
+		}
+		case 'tel': {
+			const TelEdit = ( props: DataFormEditProps ) => (
+				<InputControl
+					__next40pxDefaultSize
+					type="tel"
+					label={ baseField.label }
+					hideLabelFromVision={ props.hideLabelFromVision }
+					value={ readFieldValue( props.data, props.field ) }
+					onChange={ ( next?: string ) =>
+						writeFieldValue( props, next ?? '' )
+					}
+				/>
+			);
+			const field = {
+				...baseField,
+				type: 'text',
+				Edit: TelEdit,
+			};
+			return applySafeEdit( field );
+		}
+		case 'color': {
+			const ColorEdit = ( props: DataFormEditProps ) => (
+				<ColorPicker
+					enableAlpha={ false }
+					color={ readFieldValue( props.data, props.field ) }
+					onChange={ ( next: string ) =>
+						writeFieldValue( props, next )
+					}
+				/>
+			);
+			const field = {
+				...baseField,
+				type: 'text',
+				Edit: ColorEdit,
+			};
+			return applySafeEdit( field );
+		}
+		case 'date': {
+			const DateEdit = ( props: DataFormEditProps ) => (
+				<DatePicker
+					currentDate={
+						readFieldValue( props.data, props.field ) || null
+					}
+					onChange={ ( next: string ) =>
+						writeFieldValue( props, next )
+					}
+				/>
+			);
+			const field = {
+				...baseField,
+				type: 'text',
+				Edit: DateEdit,
+			};
+			return applySafeEdit( field );
+		}
+		case 'datetime':
+		case 'datetime-local': {
+			const DateTimeEdit = ( props: DataFormEditProps ) => (
+				<DateTimePicker
+					currentDate={
+						readFieldValue( props.data, props.field ) || null
+					}
+					onChange={ ( next: string | null ) =>
+						writeFieldValue( props, next ?? '' )
+					}
+				/>
+			);
+			const field = {
+				...baseField,
+				type: 'text',
+				Edit: DateTimeEdit,
+			};
+			return applySafeEdit( field );
+		}
+		case 'month':
+		case 'week':
+		case 'time': {
+			const inputType = setting.type;
+			const NativeInputEdit = ( props: DataFormEditProps ) => (
+				<input
+					type={ inputType }
+					aria-label={ baseField.label }
+					value={ readFieldValue( props.data, props.field ) }
+					onChange={ ( event ) =>
+						writeFieldValue( props, event.target.value )
+					}
+				/>
+			);
+			const field = {
+				...baseField,
+				type: 'text',
+				Edit: NativeInputEdit,
+			};
+			return applySafeEdit( field );
+		}
+		case 'textarea': {
+			const TextareaEdit = ( props: DataFormEditProps ) => (
+				<TextareaControl
+					__nextHasNoMarginBottom
+					label={ baseField.label }
+					hideLabelFromVision={ props.hideLabelFromVision }
+					value={ readFieldValue( props.data, props.field ) }
+					onChange={ ( next: string ) =>
+						writeFieldValue( props, next )
+					}
+				/>
+			);
+			const field = {
+				...baseField,
+				type: 'text',
+				Edit: TextareaEdit,
+			};
+			return applySafeEdit( field );
+		}
+		case 'single_select_page_with_search': {
+			const elements = parseOptions( setting.options );
+			const comboboxOptions = elements.map( ( option ) => ( {
+				label: option.label,
+				value: option.value,
+			} ) );
+
+			const ComboboxEdit = ( props: DataFormEditProps ) => (
+				<ComboboxControl
+					__next40pxDefaultSize
+					__nextHasNoMarginBottom
+					label={ baseField.label }
+					hideLabelFromVision={ props.hideLabelFromVision }
+					options={ comboboxOptions }
+					value={ readFieldValue( props.data, props.field ) }
+					onChange={ ( next?: string | null ) =>
+						writeFieldValue( props, next ?? '' )
+					}
+				/>
+			);
+			const field = {
+				...baseField,
+				type: 'text',
+				elements,
+				Edit: ComboboxEdit,
+			};
+			return applySafeEdit( field );
+		}
+		case 'info': {
+			// Description-only row: render the description, no input, no formData mutation.
+			const description = baseField.description;
+			const InfoEdit = () =>
+				description ? (
+					<div className="wc-settings-info-field">
+						{ description }
+					</div>
+				) : null;
+			const field = {
+				...baseField,
+				type: 'text',
+				Edit: InfoEdit,
+				getValue: () => '',
+				setValue: ( { item }: { item: Record< string, unknown > } ) =>
+					item,
 			};
 			return applySafeEdit( field );
 		}
