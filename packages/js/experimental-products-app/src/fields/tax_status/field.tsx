@@ -2,13 +2,12 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-
+import { CheckboxControl } from '@wordpress/components';
 import type { Field } from '@wordpress/dataviews';
 
 /**
  * Internal dependencies
  */
-import { CheckboxControl } from '../components/compat-controls';
 
 import type { ProductEntityRecord } from '../types';
 
@@ -27,10 +26,10 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 			<CheckboxControl
 				label={ field.label }
 				checked={ data.tax_status === 'taxable' }
-				onCheckedChange={ () =>
+				onChange={ () =>
 					onChange( {
 						tax_status:
-							data.tax_status === 'taxable' ? '' : 'taxable',
+							data.tax_status === 'taxable' ? 'none' : 'taxable',
 					} )
 				}
 			/>

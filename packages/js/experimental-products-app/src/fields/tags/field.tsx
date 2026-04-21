@@ -43,6 +43,7 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 			fieldProperty="tags"
 			searchPlaceholder={ __( 'Search or create tags', 'woocommerce' ) }
 			serverSearchThreshold={ 100 }
+			// @ts-expect-error wcSettings is a global variable injected by Woo core, and it doesn't have proper typings.
 			termCount={ window.wcSettings?.tagCount }
 		/>
 	),

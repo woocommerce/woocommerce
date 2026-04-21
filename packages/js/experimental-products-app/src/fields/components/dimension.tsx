@@ -4,12 +4,11 @@
 import { useEntityRecord } from '@wordpress/core-data';
 
 import type { Field } from '@wordpress/dataviews';
+import { InputControl, InputLayout } from '@wordpress/ui';
 
 /**
  * Internal dependencies
  */
-import { InputControl, InputLayout } from './compat-controls';
-
 import type { ProductEntityRecord, SettingsEntityRecord } from '../types';
 
 export type DimensionKey = 'height' | 'width' | 'length';

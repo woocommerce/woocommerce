@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useCallback, useMemo } from '@wordpress/element';
+import { useMemo } from '@wordpress/element';
 
 import { __ } from '@wordpress/i18n';
 
@@ -48,26 +48,12 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 			return today;
 		}, [ dateOnSaleFrom ] );
 
-		const isDateDisabled = useCallback(
-			( date: Date ) => {
-				const day = new Date( date );
-				day.setHours( 0, 0, 0, 0 );
-
-				const fromDay = new Date( minDate );
-				fromDay.setHours( 0, 0, 0, 0 );
-
-				return day.getTime() < fromDay.getTime();
-			},
-			[ minDate ]
-		);
-
 		return (
 			<DatePicker
 				data={ data }
 				onChange={ onChange }
 				field={ field }
 				fieldKey="date_on_sale_to"
-				isDateDisabled={ isDateDisabled }
 				min={ minDate }
 			/>
 		);

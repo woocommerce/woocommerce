@@ -1,11 +1,10 @@
 /**
  * External dependencies
  */
+import { InputControl } from '@wordpress/ui';
 /**
  * Internal dependencies
  */
-import { InputControl } from './compat-controls';
-
 import type { ProductEntityRecord } from '../types';
 
 type DateFieldKey = 'date_on_sale_from' | 'date_on_sale_to';
@@ -18,7 +17,6 @@ type DatePickerProps = {
 		label?: string;
 	};
 	fieldKey: DateFieldKey;
-	isDateDisabled?: ( date: Date ) => boolean;
 	min?: Date;
 };
 

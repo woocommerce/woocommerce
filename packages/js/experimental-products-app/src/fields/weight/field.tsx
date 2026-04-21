@@ -2,15 +2,13 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-
 import { useEntityRecord } from '@wordpress/core-data';
-
+import { InputControl, InputLayout } from '@wordpress/ui';
 import type { Field } from '@wordpress/dataviews';
 
 /**
  * Internal dependencies
  */
-import { InputControl, InputLayout } from '../components/compat-controls';
 
 import type { ProductEntityRecord, SettingsEntityRecord } from '../types';
 

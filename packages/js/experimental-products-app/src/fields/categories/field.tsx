@@ -57,7 +57,7 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 	},
 	render: ( { item } ) => {
 		return ( item.categories ?? [] )
-			.map( ( { name } ) => decodeEntities( name ) )
+			.map( ( { name } ) => decodeEntities( name ?? '' ) )
 			.join( ', ' );
 	},
 	getElements: async () => {

@@ -2,15 +2,13 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-
 import { useSelect } from '@wordpress/data';
-
+import { SelectControl } from '@wordpress/components';
 import type { Field } from '@wordpress/dataviews';
 
 /**
  * Internal dependencies
  */
-import { SelectControl } from '../components/compat-controls';
 
 import type { ProductEntityRecord } from '../types';
 
@@ -68,14 +66,9 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 			<SelectControl
 				label={ field.label }
 				value={ data.shipping_class }
-				items={ options }
-				description={ __(
-					'Apply specific shipping rules. You can manage and create shipping classes in Settings.',
-					'woocommerce'
-				) }
-				onValueChange={ ( value ) =>
+				options={ options }
+				onChange={ ( value ) =>
 					onChange( {
-						// @ts-expect-error TODO: Value can be null.
 						shipping_class: value,
 					} )
 				}
