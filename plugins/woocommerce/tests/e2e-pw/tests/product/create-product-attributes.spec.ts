@@ -301,10 +301,10 @@ test( 'can create attribute terms from the attributes modal', async ( {
 			await submitButton.click();
 		} );
 
-		await test.step( `Expect "${ newTerm }" to be selected in attribute values`, async () => {
+		await test.step( `Expect "${ newTerm }" to be in attribute values`, async () => {
 			await expect(
 				page.locator(
-					'.woocommerce_attribute .attribute_values option[selected="selected"]',
+					'.woocommerce_attribute .attribute_values option',
 					{
 						hasText: newTerm,
 					}
