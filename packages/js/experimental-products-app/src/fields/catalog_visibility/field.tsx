@@ -11,7 +11,6 @@ import type { Field } from '@wordpress/dataviews';
 import type { ProductEntityRecord } from '../types';
 
 const fieldDefinition = {
-	type: 'select',
 	label: __( 'Visibility', 'woocommerce' ),
 	enableSorting: false,
 	enableHiding: false,
