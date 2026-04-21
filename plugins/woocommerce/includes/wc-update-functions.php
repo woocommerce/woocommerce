@@ -3497,25 +3497,17 @@ function wc_update_1080_slim_orders_meta_key_index(): void {
 }
 
 /**
- * Rebuild POS roles and strip deprecated POS capabilities on 10.8.0 upgrade.
+ * Ensure POS roles and capabilities exist on existing sites upgrading to 10.8.0.
  *
- * `add_role()` is a no-op when a role already exists, and `remove_cap()` is
- * only called for capabilities in the current core set, so upgraded sites
- * end up with stale capability sets. Remove and recreate the WC-managed
- * roles (admin/shop_manager caps are stripped + re-added; pos_cashier and
- * pos_manager are removed and recreated fresh). `remove_roles()` also
- * removes the deprecated capabilities maintained in get_deprecated_capabilities()
- * so renamed / dropped caps don't linger on administrator or shop_manager.
- *
- * Users keep their role assignments: when a role is removed and immediately
- * re-added within the same request, existing wp_capabilities entries on
- * users still resolve correctly once the role object is recreated.
+ * `create_roles()` only runs on fresh install and `add_role()` is a no-op when
+ * a role already exists, so without this upgrade step existing sites would
+ * never receive the new pos_cashier and pos_manager roles, and administrator
+ * and shop_manager would never receive the new POS capabilities.
  *
  * @since 10.8.0
  *
  * @return void
  */
-function wc_update_1080_rebuild_pos_roles_and_capabilities() {
-	WC_Install::remove_roles();
+function wc_update_1080_create_pos_roles() {
 	WC_Install::create_roles();
 }
