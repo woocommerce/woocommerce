@@ -68,7 +68,7 @@ Naming is not strictly tied to the DOM so it **doesn’t matter how many nested 
 
 ## RTL Styles
 
-Blocks uses the `@automattic/webpack-rtl-plugin` package to generate styles for Right-to-Left languages. These are generated automatically.
+Blocks uses the internal `@woocommerce/internal-style-build/webpack-rtl-plugin` package to generate styles for Right-to-Left languages. These are generated automatically.
 
 To make adjustments to the generated RTL styles, for example, excluding certain rules from the RTL stylesheets, you should use the [control directives here](https://rtlcss.com/learn/usage-guide/control-directives/index.html).
 
@@ -147,27 +147,27 @@ As you can see, the styles coming from the themes have higher specificity, so ou
 2. Never use ID selectors.
 3. Try wrapping the entire component/block CSS with the root class name of that component, for example:
 
-```css
-.wc-block-components-radio-control {
-	.wc-block-components-radio-control__input {
-		// specificity 0, 2, 0, we win theme A!
-		background: #fff;
+	```css
+	.wc-block-components-radio-control {
+		.wc-block-components-radio-control__input {
+			// specificity 0, 2, 0, we win theme A!
+			background: #fff;
+		}
 	}
-}
-```
+	```
 
 4. Try adding an extra css class (or tag selector) to increase specificity. When doing so, add a comment explaining it.
 
-```css
-.wc-block-components-radio-control {
-	// Extra class for specificity.
-	.wc-block-components-radio-control__option
-		.wc-block-components-radio-control__input {
-		// specificity 0, 3, 0, we win theme B!
-		background: #fff;
+	```css
+	.wc-block-components-radio-control {
+		// Extra class for specificity.
+		.wc-block-components-radio-control__option
+			.wc-block-components-radio-control__input {
+			// specificity 0, 3, 0, we win theme B!
+			background: #fff;
+		}
 	}
-}
-```
+	```
 
 5. If these steps weren't enough, consider not increasing specificity at all. If it's just a minor visual issue, consider ignoring it and assume the theme will update its conflicting styles at some point. If it's completely breaking the block or component in that theme, consider sending feedback to theme authors so they can fix it on their side.
 

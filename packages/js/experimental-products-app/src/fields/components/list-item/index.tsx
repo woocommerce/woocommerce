@@ -10,6 +10,7 @@ import { Stack } from '@wordpress/ui';
 /**
  * Internal dependencies
  */
+import './style.scss';
 
 type Item = {
 	id: number | string;
@@ -45,7 +46,7 @@ export const ListItem = ( {
 							{ typeof item.thumbnail === 'string' && (
 								<img
 									src={ item.thumbnail }
-									alt={ item.altText }
+									alt={ item.altText ?? '' }
 									className="woocommerce-list-item__thumbnail-image"
 								/>
 							) }
