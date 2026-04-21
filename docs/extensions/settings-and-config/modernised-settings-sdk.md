@@ -64,7 +64,7 @@ class My_Plugin_Settings_Tab extends WC_Settings_Page {
         parent::__construct();
     }
 
-    public function get_settings_for_default_section() {
+    protected function get_settings_for_default_section(): array {
         return array(
             array(
                 'title' => __( 'My Plugin settings', 'my-plugin' ),
@@ -264,7 +264,12 @@ The renderer falls back to the legacy `WC_Admin_Settings::output_fields()` path 
 3. `ReactSettingsSchema::get_unsupported_fields()` returns at least one entry.
 4. `ReactSettingsSchema::has_renderable_fields()` returns `false` (e.g. the section only contains `title`/`sectionend` markers).
 
-When the fallback is triggered by an unsupported field type — i.e. the page would otherwise have rendered via React but for a single offending field — a `wc_doing_it_wrong` notice is logged. In the browser console you will see a message identifying the tab, section, and the offending field ids and types. This is intended as a developer signal, not a user-facing warning, and only fires when `WP_DEBUG` is enabled.
+When the fallback is triggered by an unsupported field type — i.e. the page would otherwise have rendered via React but for a single offending field — two developer signals fire:
+
+1. A browser-console message identifying the tab, section, and the offending field ids and types. This always fires when the fallback runs and is intended as the primary developer signal.
+2. A server-side `wc_doing_it_wrong` notice naming the same fields. As with all `wc_doing_it_wrong` calls, this is gated by `WP_DEBUG` and surfaces in the PHP error log when enabled.
+
+Both signals are intended for developers, not end users. They do not surface anywhere a merchant would see them.
 
 ## Migration walkthrough
 
@@ -273,7 +278,7 @@ You have an existing `WC_Settings_Page` subclass. Here is how to adopt the moder
 1. **Audit your field types.** Compare the `type` keys in your `get_settings_for_*_section()` arrays against the supported list and the default type map. Anything outside both will trigger a fallback.
 2. **Set `$is_modern = true`** on your subclass. This is a no-op as long as the `modern-settings` flag is off, so it is safe to ship.
 3. **Enable the `modern-settings` flag** in your dev environment (see [Enabling the feature flag for development](#enabling-the-feature-flag-for-development)).
-4. **Visit your settings tab in `wp-admin`.** If a fallback fires, the browser console will print a `wc_doing_it_wrong` notice naming the field types that caused it.
+4. **Visit your settings tab in `wp-admin`.** If a fallback fires, the browser console will print a message naming the offending field types (with a matching `wc_doing_it_wrong` notice in the PHP error log when `WP_DEBUG` is on).
 5. **Resolve unsupported types.** You have three options:
     - Change the field's raw `type` to one already in the supported list.
     - Map your raw type to a primitive via the `woocommerce_react_settings_type_map` filter.
