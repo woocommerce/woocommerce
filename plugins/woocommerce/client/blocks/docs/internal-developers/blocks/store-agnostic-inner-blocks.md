@@ -120,7 +120,6 @@ Use `displayHints` for use-case-specific presentation preferences. Inner blocks 
 | Field | Type | Default | Used By | Description |
 |-------|------|---------|---------|-------------|
 | `showCounts` | `boolean` | `false` | Filters | Show product counts next to items |
-| `layout` | `'grid' \| 'inline' \| 'list'` | varies | All | Layout preference hint |
 
 ## SelectableItem
 
@@ -169,7 +168,7 @@ Inner blocks SHOULD:
 6. Render text-only when neither `color` nor `image` exists
 7. Apply disabled styling when `item.disabled === true`
 8. Use `groupLabel` for fieldset legend (screen reader accessible)
-9. Check `displayHints` for layout preferences, fall back to block defaults
+9. Check `displayHints` for supported hints, ignore unknown ones
 
 ---
 
@@ -231,9 +230,6 @@ import type { ReactNode } from 'react';
 export interface DisplayHints {
   /** Show product counts next to items (filters) */
   showCounts?: boolean;
-  
-  /** Layout preference */
-  layout?: 'grid' | 'inline' | 'list';
 }
 
 /**
@@ -343,8 +339,7 @@ interface SelectableItemsContextInterface {
      *   storeNamespace: string,
      *   groupLabel?: string,
      *   displayHints?: array{
-     *     showCounts?: bool,
-     *     layout?: 'grid'|'inline'|'list'
+     *     showCounts?: bool
      *   }
      * }
      */
@@ -378,8 +373,7 @@ parameters:
     '''
     DisplayHints: '''
       array{
-        showCounts?: bool,
-        layout?: 'grid'|'inline'|'list'
+        showCounts?: bool
       }
     '''
     SelectableItemsContext: '''
@@ -447,7 +441,6 @@ $context = [
     'groupLabel'     => 'Filter by Size',
     'displayHints'   => [
         'showCounts' => true,
-        'layout'     => 'inline',  // Hint: prefer inline chip layout
     ],
 ];
 ```
@@ -484,7 +477,6 @@ $context = [
     'groupLabel'     => 'Filter by Category',
     'displayHints'   => [
         'showCounts' => true,
-        'layout'     => 'list',  // Hint: use list layout for hierarchy
     ],
 ];
 ```
