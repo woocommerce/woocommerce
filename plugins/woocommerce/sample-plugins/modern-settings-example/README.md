@@ -5,7 +5,6 @@ A minimal, installable demonstration of the [WooCommerce Modernised Settings SDK
 ## What it does
 
 - Registers a **Modern Example** tab under **WooCommerce → Settings**.
-- Opts the tab in to the React renderer via `protected $is_modern = true`.
 - Ships only natively-supported field types (`text`, `select`, `toggle`, `checkbox`) so it renders end-to-end with no JavaScript bundle.
 - Doubles as the reference fixture for the SDK's flag-off zero-change guarantee: with the `modern-settings` flag off, the same tab renders via the legacy form with no behavioural difference.
 

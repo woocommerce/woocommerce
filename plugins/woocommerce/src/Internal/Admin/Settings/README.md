@@ -11,7 +11,7 @@ This document explains how the React settings system renders settings pages by d
 
 ## Overview
 
-React settings render for a `WC_Settings_Page` subclass when (a) the `modern-settings` feature flag is enabled AND (b) the page has opted in via `protected $is_modern = true`. Rendering falls back to legacy settings when unsupported field types are detected or when a page opts out via the filter below.
+React settings render for a `WC_Settings_Page` subclass when the `modern-settings` feature flag is enabled. Rendering falls back to legacy settings when unsupported field types are detected or when a page opts out via the filter below.
 
 ## Server-side hooks
 
@@ -96,4 +96,4 @@ Use `default` for the empty section, e.g. `wc_settings_react_products_default`.
 
 ## Example plugin
 
-A minimal installable example lives in [`plugins/woocommerce/sample-plugins/modern-settings-example/`](../../../../sample-plugins/modern-settings-example/). It registers a settings tab opted in via `$is_modern = true` and uses only natively-supported field types, so it renders end-to-end with no JavaScript bundle.
+A minimal installable example lives in [`plugins/woocommerce/sample-plugins/modern-settings-example/`](../../../../sample-plugins/modern-settings-example/). It uses only natively-supported field types, so it renders end-to-end with no JavaScript bundle.

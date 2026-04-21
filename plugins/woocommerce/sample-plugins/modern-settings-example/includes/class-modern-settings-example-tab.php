@@ -16,8 +16,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Adds a "Modern Example" tab under WooCommerce → Settings.
  *
- * The tab opts in to the modernised settings SDK by setting `$is_modern = true`.
- * It only uses field types that the React renderer supports natively, so no
+ * The tab uses only field types that the React renderer supports natively, so no
  * accompanying JavaScript bundle is required.
  *
  * With the `modern-settings` feature flag on, this tab renders via the React
@@ -25,13 +24,6 @@ defined( 'ABSPATH' ) || exit;
  * `WC_Admin_Settings::output_fields()` path with no behavioural change.
  */
 class Modern_Settings_Example_Tab extends WC_Settings_Page {
-
-	/**
-	 * Opt this settings tab in to the modernised settings SDK.
-	 *
-	 * @var bool
-	 */
-	protected $is_modern = true;
 
 	/**
 	 * Constructor.

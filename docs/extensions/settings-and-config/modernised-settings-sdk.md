@@ -13,9 +13,9 @@ This guide covers everything an extension author needs to opt a settings page in
 ## Status in 10.8
 
 - The SDK is **experimental** and ships behind the `modern-settings` feature flag, which is **off by default**.
-- No Core settings page is opted in to the modern path in 10.8. The flag is intentionally a tool for extensions and integrators to experiment with against their own pages.
+- The flag is intentionally a tool for extensions and integrators to experiment with against their own pages while the SDK matures.
 - The legacy save POST handler still runs for every settings page, regardless of the flag. Saves continue to flow through `WC_Admin_Settings::save_fields()` and the existing `woocommerce_update_options_*` hooks. The only thing the modern path replaces in 10.8 is the **render** of the form.
-- With the flag off, no behaviour changes anywhere — even on pages that have already set `$is_modern = true`.
+- With the flag off, no behaviour changes anywhere.
 
 ## Enabling the feature flag for development
 
@@ -44,20 +44,21 @@ add_filter(
 
 This is useful in CI or when scripting a wp-env environment.
 
-## Opting a settings page in (`$is_modern`)
+## When the modern path runs
 
-A `WC_Settings_Page` subclass opts in to the modern path by setting the `$is_modern` property to `true`:
+There is **no per-page opt-in flag** on `WC_Settings_Page` for this SDK. When the `modern-settings` feature flag is on, every section of every `WC_Settings_Page` subclass is a candidate for the modern renderer. Whether it actually renders modern is determined by three checks at render time:
+
+1. The `modern-settings` feature flag is enabled.
+2. None of the section's fields use a raw `type` outside the supported set (and not in the default type map). If any unsupported field is present, the entire section falls back to the legacy renderer. See [Native field type coverage](#native-field-type-coverage) and [Fallback signals](#fallback-signals).
+3. The `woocommerce_react_settings_opt_out` filter has not vetoed the section. Use this filter when you want to keep a specific tab/section on the legacy renderer even though it would otherwise qualify.
+
+A minimal `WC_Settings_Page` subclass that the modern renderer will pick up when the flag is on:
 
 ```php
 <?php
 defined( 'ABSPATH' ) || exit;
 
 class My_Plugin_Settings_Tab extends WC_Settings_Page {
-    /**
-     * @var bool
-     */
-    protected $is_modern = true;
-
     public function __construct() {
         $this->id    = 'my_plugin';
         $this->label = __( 'My Plugin', 'my-plugin' );
@@ -86,12 +87,25 @@ class My_Plugin_Settings_Tab extends WC_Settings_Page {
 }
 ```
 
-Two independent things happen when `$is_modern` is `true`:
-
-1. The full React **settings shell** (rolled out behind the separate `settings` feature flag) treats the tab as a first-class React surface rather than embedding the legacy form.
-2. The per-page **render path** in `WC_Settings_Page::output()` checks the `modern-settings` flag and, if it is on, attempts to mount the React renderer instead of calling `WC_Admin_Settings::output_fields()`.
-
 You do not need to change the `save_*` methods on your subclass. The existing `woocommerce_settings_save_{tab}` action still fires and the legacy save handler is authoritative in 10.8.
+
+### Vetoing the modern renderer for a specific section
+
+If you have a tab whose fields are all supported but you still want to keep it on the legacy renderer (for example because you have CSS or JS coupled to legacy DOM), hook the opt-out filter:
+
+```php
+add_filter(
+    'woocommerce_react_settings_opt_out',
+    static function ( bool $opt_out, string $tab, string $section ): bool {
+        if ( 'my_plugin' === $tab ) {
+            return true;
+        }
+        return $opt_out;
+    },
+    10,
+    3
+);
+```
 
 ## Public PHP API
 
@@ -276,14 +290,14 @@ Both signals are intended for developers, not end users. They do not surface any
 You have an existing `WC_Settings_Page` subclass. Here is how to adopt the modern path.
 
 1. **Audit your field types.** Compare the `type` keys in your `get_settings_for_*_section()` arrays against the supported list and the default type map. Anything outside both will trigger a fallback.
-2. **Set `$is_modern = true`** on your subclass. This is a no-op as long as the `modern-settings` flag is off, so it is safe to ship.
-3. **Enable the `modern-settings` flag** in your dev environment (see [Enabling the feature flag for development](#enabling-the-feature-flag-for-development)).
-4. **Visit your settings tab in `wp-admin`.** If a fallback fires, the browser console will print a message naming the offending field types (with a matching `wc_doing_it_wrong` notice in the PHP error log when `WP_DEBUG` is on).
-5. **Resolve unsupported types.** You have three options:
+2. **Enable the `modern-settings` flag** in your dev environment (see [Enabling the feature flag for development](#enabling-the-feature-flag-for-development)).
+3. **Visit your settings tab in `wp-admin`.** If a fallback fires, the browser console will print a message naming the offending field types (with a matching `wc_doing_it_wrong` notice in the PHP error log when `WP_DEBUG` is on).
+4. **Resolve unsupported types.** You have three options:
     - Change the field's raw `type` to one already in the supported list.
     - Map your raw type to a primitive via the `woocommerce_react_settings_type_map` filter.
     - Register a custom field type via the JS extension point. See [Registering custom field types](./registering-custom-field-types.md).
-6. **Smoke-test the save path.** The legacy save POST handler is still authoritative in 10.8, so saving should behave identically. Confirm the values you submit round-trip through `WC_Admin_Settings::get_option()`.
+5. **Smoke-test the save path.** The legacy save POST handler is still authoritative in 10.8, so saving should behave identically. Confirm the values you submit round-trip through `WC_Admin_Settings::get_option()`.
+6. **(Optional) Veto specific sections.** If you have a tab whose fields are all supported but you do not want it on the modern renderer yet — for example because of CSS or JS coupled to legacy DOM — hook `woocommerce_react_settings_opt_out` and return `true` for that tab/section.
 
 ## Flag-off zero-change guarantee
 
@@ -292,13 +306,12 @@ When the `modern-settings` flag is off, the SDK is invisible:
 - `WC_Settings_Page::output()` runs the legacy renderer unconditionally.
 - No mount markup is emitted.
 - No payload is published on `window.wcSettings`.
-- Setting `$is_modern = true` on a subclass has no observable effect on the rendered page.
 
 This guarantee is enforced by an automated end-to-end test that asserts the rendered DOM with the flag off matches the legacy output exactly.
 
 ## Example plugin
 
-A complete, installable example lives under [`plugins/woocommerce/sample-plugins/modern-settings-example/`](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/sample-plugins/modern-settings-example). It registers a `Modern Example` tab under **WooCommerce → Settings**, opts in via `$is_modern = true`, and uses only natively-supported field types so it renders end-to-end with no JS bundle.
+A complete, installable example lives under [`plugins/woocommerce/sample-plugins/modern-settings-example/`](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/sample-plugins/modern-settings-example). It registers a `Modern Example` tab under **WooCommerce → Settings** using only natively-supported field types, so it renders via the modern renderer end-to-end with no JS bundle when the `modern-settings` flag is on, and via the legacy renderer when it is off.
 
 To try it locally:
 
@@ -314,6 +327,6 @@ Toggling the flag off and reloading the same tab gives you the legacy form with 
 The following are explicitly **not** part of the 10.8 SDK and are tracked for follow-up phases:
 
 - **REST-driven save.** The save path remains the legacy POST handler in 10.8.
-- **Opting Core settings pages in.** No Core page sets `$is_modern = true` in 10.8. Phase 2 will pick a small surface (likely the General tab) once the SDK has been validated against extension pages.
+- **Auto-rendering Core settings pages on the modern path.** With the flag off, Core renders entirely via the legacy form. Phase 2 will validate the SDK against a small Core surface (likely the General tab) and consider whether to flip the default for selected tabs.
 - **Custom-component coverage** for `image_width`, `relative_date_selector`, and `slotfill_placeholder`. These raw types fall back today; native Edit components are planned.
 - **`DataForm.Fields.extend()`** as an upstream WordPress SPI. The interim runtime registry on `window.wcReactSettings` will be deprecated once an upstream extension point is available.

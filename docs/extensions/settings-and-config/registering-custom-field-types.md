@@ -12,7 +12,7 @@ If you have not already, read the [Modernised settings SDK overview](./modernise
 
 ## When to register a custom field type
 
-When you set `$is_modern = true` on a settings page and enable the `modern-settings` flag, every field is checked against the supported types. A field whose normalized type is not supported triggers a fallback to the legacy renderer for the entire section.
+When the `modern-settings` flag is on, every field on every `WC_Settings_Page` subclass is checked against the supported types. A field whose normalized type is not supported triggers a fallback to the legacy renderer for the entire section.
 
 You have three ways out of the fallback:
 

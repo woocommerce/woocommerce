@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: WooCommerce Modernised Settings Example
- * Description: Demonstrates the modernised settings SDK introduced in WooCommerce 10.8. Adds a "Modern Example" tab under WooCommerce → Settings that opts in to the React renderer via $is_modern.
+ * Description: Demonstrates the modernised settings SDK introduced in WooCommerce 10.8. Adds a "Modern Example" tab under WooCommerce → Settings that renders via the React path when the `modern-settings` feature flag is on, and via the legacy form when it is off.
  * Version: 1.0.0
  * Author: WooCommerce
  * Requires Plugins: woocommerce
