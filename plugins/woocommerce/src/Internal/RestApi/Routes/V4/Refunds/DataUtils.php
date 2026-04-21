@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Enums\OrderItemType;
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use WP_Error;
 use WC_Order;
@@ -23,6 +24,15 @@ use WC_Tax;
  * @package Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds
  */
 class DataUtils {
+	/**
+	 * Order statuses that allow refunds.
+	 */
+	public const REFUNDABLE_STATUSES = array(
+		OrderStatus::COMPLETED,
+		OrderStatus::PROCESSING,
+		OrderStatus::ON_HOLD,
+	);
+
 	/**
 	 * Convert line items (schema format) to internal format. This keys arrays by item ID and has some different naming
 	 * conventions.

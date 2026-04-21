@@ -671,8 +671,11 @@ class OrderSchema extends AbstractSchema {
 			$data['refund_tax'] = wc_format_decimal( $order->get_total_tax_refunded(), $dp );
 		}
 
-		// Pre-compute refund data once per order to avoid repeated get_refunds() calls in child schemas.
-		$refund_data = $this->data_utils->compute_refunded_quantities_and_totals( $order );
+		// Pre-compute refund data once per order, only when line item fields are requested.
+		$needs_refund_data = array_intersect( array( 'line_items', 'shipping_lines', 'fee_lines' ), $include_fields );
+		$refund_data       = ! empty( $needs_refund_data )
+			? $this->data_utils->compute_refunded_quantities_and_totals( $order )
+			: array( 'qtys' => array(), 'totals' => array() );
 
 		if ( in_array( 'line_items', $include_fields, true ) ) {
 			/**
@@ -766,12 +769,6 @@ class OrderSchema extends AbstractSchema {
 		return $data;
 	}
 
-	private const REFUNDABLE_STATUSES = array(
-		OrderStatus::COMPLETED,
-		OrderStatus::PROCESSING,
-		OrderStatus::ON_HOLD,
-	);
-
 	/**
 	 * Determine whether an order can be refunded.
 	 *
@@ -781,7 +778,7 @@ class OrderSchema extends AbstractSchema {
 	 * @return bool
 	 */
 	private function calculate_order_can_be_refunded( WC_Order $order ): bool {
-		if ( ! in_array( $order->get_status(), self::REFUNDABLE_STATUSES, true ) ) {
+		if ( ! in_array( $order->get_status(), DataUtils::REFUNDABLE_STATUSES, true ) ) {
 			return false;
 		}
 		return (float) $order->get_remaining_refund_amount() > 0;
