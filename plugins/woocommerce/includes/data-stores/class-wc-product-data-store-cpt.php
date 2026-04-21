@@ -1757,7 +1757,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	public function update_product_stock( $product_id_with_stock, $stock_quantity = null, $operation = 'set' ) {
 		global $wpdb;
 
-		// Ensures the meta exists for the followup SQL queries.
+		// Ensures a row exists to update.
 		add_post_meta( $product_id_with_stock, '_stock', 0, true );
 
 		if ( 'set' === $operation ) {
@@ -1833,8 +1833,6 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 */
 	public function update_product_sales( $product_id, $quantity = null, $operation = 'set' ) {
 		global $wpdb;
-
-		// Ensures the meta exists for the followup SQL queries.
 		add_post_meta( $product_id, 'total_sales', 0, true );
 
 		// Update stock in DB directly.
