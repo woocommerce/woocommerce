@@ -9,7 +9,9 @@ use Automattic\WooCommerce\Api\Enums\Products\ProductType;
 use Automattic\WooCommerce\Api\Enums\Products\StockStatus;
 use Automattic\WooCommerce\Api\Pagination\Connection;
 use Automattic\WooCommerce\Api\Pagination\Edge;
+use Automattic\WooCommerce\Api\Pagination\IdCursorFilter;
 use Automattic\WooCommerce\Api\Pagination\PageInfo;
+use Automattic\WooCommerce\Api\Pagination\PaginationParams;
 use Automattic\WooCommerce\Api\Types\Products\ExternalProduct;
 use Automattic\WooCommerce\Api\Types\Products\ProductAttribute;
 use Automattic\WooCommerce\Api\Types\Products\ProductDimensions;
@@ -74,28 +76,36 @@ class ProductMapper {
 	private static function build_variable_product( \WC_Product $wc_product, ?array $query_info = null ): VariableProduct {
 		$product = new VariableProduct();
 
-		$child_ids = $wc_product->get_children();
-		$edges     = array();
-		$nodes     = array();
+		$child_ids   = $wc_product->get_children();
+		$total_count = count( $child_ids );
 
-		// Narrow $query_info to the per-variation selection so the recursive
-		// from_wc_product() call sees what the client asked for on each
-		// variation (e.g. whether `reviews` was requested). Without this,
-		// populate_common_fields() would fetch reviews for every variation
-		// regardless.
+		// Extract the per-variation selection and pagination args from
+		// $query_info up front. Narrowing $query_info keeps recursive
+		// from_wc_product() calls from fetching subtrees the client didn't
+		// request (e.g. reviews for every variation).
 		$variations_info      = $query_info['...VariableProduct']['variations']
 			?? $query_info['variations']
 			?? null;
 		$variation_query_info = self::connection_node_info( $variations_info );
+		$pagination_args      = $variations_info['__args'] ?? array();
 
-		// Batch-prime the WP post + meta caches for all variations in one
-		// pair of queries; otherwise each wc_get_product() below would
-		// trigger its own lookups (N+1).
-		if ( ! empty( $child_ids ) ) {
-			_prime_post_caches( $child_ids );
+		// Slice the ID window *before* mapping: otherwise `variations(first: 1)`
+		// on a product with N variations would prime+map all N just to slice
+		// the result down afterwards. The resolver-level validation at
+		// Connection::slice() is now bypassed (we're building a pre-sliced
+		// connection), so call validate_args() explicitly to keep the 0..
+		// MAX_PAGE_SIZE bounds enforced.
+		PaginationParams::validate_args( $pagination_args );
+		$page = self::slice_variation_ids( $child_ids, $pagination_args );
+
+		// Prime post + meta caches for only the paged subset.
+		if ( ! empty( $page['ids'] ) ) {
+			_prime_post_caches( $page['ids'] );
 		}
 
-		foreach ( $child_ids as $child_id ) {
+		$edges = array();
+		$nodes = array();
+		foreach ( $page['ids'] as $child_id ) {
 			$child_product = wc_get_product( $child_id );
 			if ( ! $child_product ) {
 				continue;
@@ -112,30 +122,81 @@ class ProductMapper {
 		}
 
 		$page_info                    = new PageInfo();
-		$page_info->has_next_page     = false;
-		$page_info->has_previous_page = false;
+		$page_info->has_next_page     = $page['has_next_page'];
+		$page_info->has_previous_page = $page['has_previous_page'];
 		$page_info->start_cursor      = ! empty( $edges ) ? $edges[0]->cursor : null;
 		$page_info->end_cursor        = ! empty( $edges ) ? $edges[ count( $edges ) - 1 ]->cursor : null;
 
-		$connection              = new Connection();
-		$connection->edges       = $edges;
-		$connection->nodes       = $nodes;
-		$connection->page_info   = $page_info;
-		$connection->total_count = count( $nodes );
-
-		// Explicitly slice the variations connection if pagination args were provided.
-		// The auto-generated resolver's subsequent slice() call becomes a no-op
-		// because Connection marks itself as sliced after the first slice.
-		if ( null !== $query_info ) {
-			$pagination_args = $query_info['...VariableProduct']['variations']['__args']
-				?? $query_info['variations']['__args']
-				?? array();
-			$connection      = $connection->slice( $pagination_args );
-		}
-
-		$product->variations = $connection;
+		// total_count reflects the full variation set, not the paged one —
+		// consistent with how the root list resolvers compute it.
+		$product->variations = Connection::pre_sliced( $edges, $page_info, $total_count );
 
 		return $product;
+	}
+
+	/**
+	 * Compute a Relay cursor page against a list of variation IDs.
+	 *
+	 * Mirrors the logic in {@see Connection::slice()} but operates on raw
+	 * IDs so the caller can page-down *before* calling `wc_get_product()`
+	 * + `from_wc_product()` on each child. Returns the paged IDs and the
+	 * corresponding `has_next_page` / `has_previous_page` flags in Relay
+	 * semantics.
+	 *
+	 * @param int[] $child_ids  Full variation ID list, in menu_order.
+	 * @param array $args       `{first?, last?, after?, before?}` raw GraphQL args.
+	 * @return array{ids: int[], has_next_page: bool, has_previous_page: bool}
+	 */
+	private static function slice_variation_ids( array $child_ids, array $args ): array {
+		$first  = $args['first'] ?? null;
+		$last   = $args['last'] ?? null;
+		$after  = $args['after'] ?? null;
+		$before = $args['before'] ?? null;
+
+		// No pagination requested — return the full list as-is.
+		if ( null === $first && null === $last && null === $after && null === $before ) {
+			return array(
+				'ids'               => array_values( $child_ids ),
+				'has_next_page'     => false,
+				'has_previous_page' => false,
+			);
+		}
+
+		// Narrow by `after`: drop IDs up to and including the cursor position.
+		if ( null !== $after ) {
+			$after_id  = IdCursorFilter::decode_id_cursor( $after, 'after' );
+			$idx       = array_search( $after_id, $child_ids, true );
+			$child_ids = false !== $idx ? array_slice( $child_ids, $idx + 1 ) : array();
+		}
+
+		// Narrow by `before`: drop IDs from the cursor position onward.
+		if ( null !== $before ) {
+			$before_id = IdCursorFilter::decode_id_cursor( $before, 'before' );
+			$idx       = array_search( $before_id, $child_ids, true );
+			if ( false !== $idx ) {
+				$child_ids = array_slice( $child_ids, 0, $idx );
+			}
+		}
+
+		$total_after_cursors = count( $child_ids );
+
+		// Apply first/last limits.
+		if ( null !== $first && $first >= 0 ) {
+			$child_ids = array_slice( $child_ids, 0, $first );
+		}
+		if ( null !== $last && $last >= 0 ) {
+			$child_ids = array_slice( $child_ids, max( 0, count( $child_ids ) - $last ) );
+		}
+
+		// Relay semantics for the forward / backward branches match what
+		// ListProducts / ListCoupons use at the root level.
+		return array(
+			'ids'               => array_values( $child_ids ),
+			'has_next_page'     =>
+				null !== $first ? count( $child_ids ) < $total_after_cursors : ( null !== $before ),
+			'has_previous_page' =>
+				null !== $last ? count( $child_ids ) < $total_after_cursors : ( null !== $after ),
+		);
 	}
 
 	/**
