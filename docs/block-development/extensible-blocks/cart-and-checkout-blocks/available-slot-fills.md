@@ -85,7 +85,7 @@ Checkout:
 ### Passed parameters
 
 -   `collapsible`: `Boolean|undefined` If a shipping package panel should be collapsible or not, this is false in Checkout and undefined in Cart.
--   `collapse`: `Boolean` If a panel should be collapsed by default, this is true if if panels are collapsible.
+-   `collapse`: `Boolean` If a panel should be collapsed by default, this is true if panels are collapsible.
 -   `showItems`: `Boolean|undefined` If we should show the content of each package, this is undefined in Cart and Checkout and is left to the actual package logic to decide.
 -   `noResultsMessage`: A React element that you can render if there are no shipping options.
 -   `renderOption`: a render function that takes a rate object and returns a render option.
@@ -108,7 +108,7 @@ const render = () => {
 		<ExperimentalOrderLocalPickupPackages>
 			<div>
 				{ __(
-					'By using our convenient local pickup option, you can come to our store and pick up your order. We will send you and email when your order is ready for pickup.',
+					'By using our convenient local pickup option, you can come to our store and pick up your order. We will send you an email when your order is ready for pickup.',
 					'YOUR-TEXTDOMAIN'
 				) }
 			</div>
