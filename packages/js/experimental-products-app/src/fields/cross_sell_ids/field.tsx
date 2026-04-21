@@ -30,7 +30,6 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 	Edit: ( { data, onChange, field } ) => (
 		<ProductSelector
 			label={ field.label }
-			description={ field.description }
 			selectedProductIds={
 				( data.cross_sell_ids as number[] | undefined ) ?? []
 			}
