@@ -8,7 +8,6 @@
 		"declarationMap": true,
 		"declarationDir": "./build-types",
 		"resolveJsonModule": true,
-		"typeRoots": [ "./typings" ],
 		"jsx": "react-jsx",
 		"jsxFactory": null,
 		"jsxFragmentFactory": null
