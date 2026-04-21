@@ -229,7 +229,7 @@
 		"redux": "4.2.1",
 		"request-promise": "4.2.6",
 		"rimraf": "5.0.5",
-		"rtlcss": "^4.1.1",
+		"rtlcss": "4.3.x",
 		"sass-loader": "10.5.x",
 		"storybook": "^7.6.4",
 		"storybook-addon-react-docgen": "1.2.44",
