@@ -240,6 +240,47 @@ class ReactSettingsSchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Does not generate country options without a registered field options filter.
+	 *
+	 * Regression guard: prior to this change, `ReactSettingsSchema::get_field_options()`
+	 * had a hardcoded dispatch for `single_select_country` / `multi_select_countries`
+	 * that duplicated the logic now owned by `GeneralSettingsSchema::inject_field_options()`.
+	 * The base class should trust the filter to fill `$options` for types that need
+	 * external data, producing an empty options array when no callback is registered.
+	 */
+	public function test_build_response_does_not_generate_country_options_without_filter() {
+		// Ensure no general-tab callback is registered for this test (it might have been
+		// registered by a previous test that instantiated GeneralSettingsSchema).
+		remove_filter(
+			'woocommerce_react_settings_field_options',
+			array( GeneralSettingsSchema::class, 'inject_field_options' ),
+			10
+		);
+
+		$settings = array(
+			array(
+				'type'  => 'title',
+				'id'    => 'group_one',
+				'title' => 'Group one',
+			),
+			array(
+				'id'   => 'some_country_field',
+				'type' => 'single_select_country',
+			),
+			array(
+				'type' => 'sectionend',
+				'id'   => 'group_one',
+			),
+		);
+
+		$response = ReactSettingsSchema::build_response( 'custom_tab', '', $settings, null );
+
+		$fields = $response['groups']['group_one']['fields'];
+		$this->assertNotEmpty( $fields );
+		$this->assertArrayNotHasKey( 'options', $fields[0] );
+	}
+
+	/**
 	 * @testdox Resolves settings pages registered via WC_Admin_Settings without relying on the legacy hardcoded map.
 	 *
 	 * Regression guard: prior to 10.8.0 `get_settings_page_instance()` fell back

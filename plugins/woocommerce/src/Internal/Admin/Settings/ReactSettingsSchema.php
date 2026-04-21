@@ -19,6 +19,11 @@ defined( 'ABSPATH' ) || exit;
  * directly with a `$settings_definitions` array and a `$settings_page` instance.
  *
  * @since 10.8.0
+ *
+ * @filter woocommerce_react_settings_opt_out
+ * @filter woocommerce_react_settings_supported_types
+ * @filter woocommerce_react_settings_type_map
+ * @filter woocommerce_react_settings_field_options
  */
 class ReactSettingsSchema {
 	/**
@@ -394,32 +399,6 @@ class ReactSettingsSchema {
 		$options = isset( $setting['options'] ) && is_array( $setting['options'] )
 			? $setting['options']
 			: array();
-
-		if ( empty( $options ) ) {
-			$type = $setting['type'] ?? '';
-
-			if ( 'multi_select_countries' === $type && function_exists( 'WC' ) ) {
-				$options = WC()->countries->get_countries();
-			}
-
-			if ( 'single_select_country' === $type && function_exists( 'WC' ) ) {
-				$countries = WC()->countries->get_countries();
-				$states    = WC()->countries->get_states();
-
-				foreach ( $countries as $country_code => $country_name ) {
-					$country_states = $states[ $country_code ] ?? array();
-
-					if ( empty( $country_states ) ) {
-						$options[ $country_code ] = $country_name;
-						continue;
-					}
-
-					foreach ( $country_states as $state_code => $state_name ) {
-						$options[ $country_code . ':' . $state_code ] = $country_name . ' — ' . $state_name;
-					}
-				}
-			}
-		}
 
 		$setting_id = isset( $setting['id'] ) && is_scalar( $setting['id'] ) ? (string) $setting['id'] : '';
 

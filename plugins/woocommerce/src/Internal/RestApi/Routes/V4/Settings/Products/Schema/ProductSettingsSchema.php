@@ -20,6 +20,13 @@ use WP_REST_Request;
 
 /**
  * Product Settings Schema Class.
+ *
+ * The constructor performs hook registration for the
+ * `woocommerce_react_settings_field_options` filter so that consuming code
+ * gets the tab-specific option generation behaviour simply by instantiating
+ * the schema. This is atypical for the `src/Internal/*` codebase — see the
+ * follow-up note on the constructor docblock about moving registration into
+ * the V4 Settings REST controller's init path.
  */
 class ProductSettingsSchema extends AbstractSchema {
 	/**
@@ -30,29 +37,25 @@ class ProductSettingsSchema extends AbstractSchema {
 	const IDENTIFIER = 'product_settings';
 
 	/**
-	 * Whether the tab-specific field options filter callback has been registered.
-	 *
-	 * @var bool
-	 */
-	private static $field_options_filter_registered = false;
-
-	/**
 	 * Constructor.
 	 *
 	 * Registers the tab-specific field options callback on the shared
 	 * `woocommerce_react_settings_field_options` filter exposed by
 	 * ReactSettingsSchema. The callback only injects options for field IDs
 	 * owned by the products settings tab, so it is safe to register globally.
+	 *
+	 * `has_filter()` is used to avoid double-registration under DI container
+	 * instantiation or test re-instantiation.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @todo Move the filter registration into the V4 Settings REST
+	 *       controller's init path so schema classes don't perform global
+	 *       hook side effects at construction time.
 	 */
 	public function __construct() {
-		if ( ! self::$field_options_filter_registered ) {
-			add_filter(
-				'woocommerce_react_settings_field_options',
-				array( self::class, 'inject_field_options' ),
-				10,
-				4
-			);
-			self::$field_options_filter_registered = true;
+		if ( ! has_filter( 'woocommerce_react_settings_field_options', array( self::class, 'inject_field_options' ) ) ) {
+			add_filter( 'woocommerce_react_settings_field_options', array( self::class, 'inject_field_options' ), 10, 4 );
 		}
 	}
 
