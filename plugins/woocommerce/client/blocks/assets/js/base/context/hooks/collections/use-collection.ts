@@ -54,11 +54,6 @@ function wrapNonError(
 		},
 		typeof source.name === 'string' ? { name: source.name } : {}
 	);
-	// eslint-disable-next-line no-console
-	console.error(
-		'useCollection received a non-Error value from the store:',
-		error
-	);
 	return wrapped;
 }
 
@@ -127,6 +122,12 @@ export const useCollection = < T >(
 		results: [],
 		isLoading: true,
 	} );
+	// Tracks the last raw non-Error value we've logged. wp-data's useSelect
+	// mapSelect callback can be invoked multiple times per render (notably
+	// via SCRIPT_DEBUG's unstable-reference double-invoke check), so guarding
+	// on reference identity prevents duplicate console output for a single
+	// underlying error.
+	const lastLoggedError = useRef< unknown >();
 	// ensure we feed the previous reference if it's equivalent
 	const currentQuery = useShallowEqual( query );
 	const currentResourceValues = useShallowEqual( resourceValues );
@@ -150,6 +151,14 @@ export const useCollection = < T >(
 				if ( isError( error ) ) {
 					throwError( error );
 				} else {
+					if ( lastLoggedError.current !== error ) {
+						lastLoggedError.current = error;
+						// eslint-disable-next-line no-console
+						console.error(
+							'useCollection received a non-Error value from the store:',
+							error
+						);
+					}
 					throwError(
 						wrapNonError( error, namespace, resourceName )
 					);
