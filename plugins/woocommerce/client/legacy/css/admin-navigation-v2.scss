@@ -1,0 +1,124 @@
+// Nested admin navigation v2 — rail replacement + flyout cascade.
+// Alias block: class-wc-nav-v2-assets writes an inline <style> at runtime
+// that rewrites all WP admin-menu.css selectors to also target #wc-nav-v2.
+// This file contains only the overrides on top of that.
+
+#wc-nav-v2 {
+	display: none;
+	position: fixed;
+	top: 32px;
+	left: 0;
+	width: 160px;
+	height: calc(100vh - 32px);
+	background: #1d2327;
+	z-index: 9990;
+	overflow: visible;
+	flex-direction: column;
+}
+
+@media screen and (max-width: 782px) {
+	#wc-nav-v2 {
+		top: 46px;
+		height: calc(100vh - 46px);
+	}
+}
+
+body.wc-nav-v2-active {
+	#adminmenuwrap,
+	#adminmenuback,
+	#adminmenushadow {
+		visibility: hidden !important;
+		pointer-events: none !important;
+	}
+
+	#wc-nav-v2 {
+		display: flex;
+	}
+
+	#wpcontent,
+	#wpfooter {
+		margin-left: 160px !important;
+	}
+}
+
+#wc-nav-v2-header {
+	border-bottom: 1px solid rgba( 255, 255, 255, 0.08 );
+}
+
+#wc-nav-v2-back {
+	display: flex;
+	align-items: center;
+	gap: 3px;
+	padding: 10px 12px;
+	color: #72aee6;
+	text-decoration: none;
+	font-size: 12px;
+	font-weight: 500;
+	transition: color 0.15s ease;
+
+	&:hover,
+	&:focus {
+		color: #fff;
+	}
+}
+
+#wc-nav-v2-adminmenu {
+	margin: 0;
+	padding: 8px 0;
+	width: 160px;
+	flex: 1;
+
+	a,
+	a:hover,
+	a:focus,
+	a:visited {
+		text-decoration: none !important;
+	}
+
+	li.menu-top > a {
+		width: 160px;
+		box-sizing: border-box;
+	}
+
+	.wp-submenu {
+		z-index: 9999;
+	}
+
+	// Breadcrumb (non-clickable) ancestors when user lacks parent capability.
+	li.wc-nav-v2-breadcrumb > a {
+		pointer-events: none;
+		opacity: 0.6;
+	}
+}
+
+// RTL: flyout opens left.
+body.rtl #wc-nav-v2-adminmenu .wp-submenu {
+	left: auto;
+	right: 160px;
+}
+
+// Folded admin state — match native 36px.
+body.folded.wc-nav-v2-active {
+	#wc-nav-v2 {
+		width: 36px;
+	}
+	#wc-nav-v2-adminmenu {
+		width: 36px;
+	}
+	#wpcontent,
+	#wpfooter {
+		margin-left: 36px !important;
+	}
+}
+
+// Spec §6.3: touch devices do not get the hover cascade. Tapping the
+// WooCommerce item navigates to the Woo dashboard, which triggers rail
+// replacement — that's the touch-friendly entry. We suppress hover-opened
+// flyouts via media query; JS state-machine is harmless on touch (no hover
+// event fires).
+@media (hover: none) {
+	#wc-nav-v2-adminmenu li.wp-has-submenu > .wp-submenu,
+	li#toplevel_page_woocommerce > .wp-submenu {
+		display: none !important;
+	}
+}
