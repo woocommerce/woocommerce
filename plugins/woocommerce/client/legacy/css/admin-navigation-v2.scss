@@ -111,11 +111,74 @@ body.folded.wc-nav-v2-active {
 	}
 }
 
-// Spec §6.3: touch devices do not get the hover cascade. Tapping the
-// WooCommerce item navigates to the Woo dashboard, which triggers rail
-// replacement — that's the touch-friendly entry. We suppress hover-opened
-// flyouts via media query; JS state-machine is harmless on touch (no hover
-// event fires).
+// Native-rail second-level cascade. Injected by JS into
+// `#toplevel_page_woocommerce .wp-submenu li` for tree items that have
+// grandchildren (e.g. Settings → Payments / WooPayments / Status).
+#toplevel_page_woocommerce .wp-submenu li.wc-nav-v2-has-subflyout {
+	position: relative;
+
+	> a::after {
+		content: "›";
+		position: absolute;
+		right: 10px;
+		top: 50%;
+		transform: translateY(-50%);
+		opacity: 0.5;
+	}
+
+	> .wc-nav-v2-subflyout {
+		position: absolute;
+		left: 100%;
+		top: -6px;
+		min-width: 180px;
+		padding: 6px 0;
+		background: #2c3338;
+		box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+		list-style: none;
+		margin: 0;
+		display: none;
+		z-index: 10000;
+
+		> li {
+			margin: 0;
+			padding: 0;
+
+			> a {
+				display: block;
+				padding: 5px 12px;
+				color: rgba(240, 246, 252, 0.7);
+				text-decoration: none;
+				font-size: 13px;
+				line-height: 1.4;
+
+				&:hover,
+				&:focus {
+					color: #72aee6;
+					background: transparent;
+				}
+			}
+		}
+	}
+
+	&:hover > .wc-nav-v2-subflyout,
+	&:focus-within > .wc-nav-v2-subflyout {
+		display: block;
+	}
+}
+
+body.rtl #toplevel_page_woocommerce .wp-submenu li.wc-nav-v2-has-subflyout {
+	> a::after {
+		content: "‹";
+		right: auto;
+		left: 10px;
+	}
+	> .wc-nav-v2-subflyout {
+		left: auto;
+		right: 100%;
+	}
+}
+
+// Spec §6.3: touch devices do not get the hover cascade.
 @media (hover: none) {
 	#wc-nav-v2-adminmenu li.wp-has-submenu > .wp-submenu,
 	li#toplevel_page_woocommerce > .wp-submenu {

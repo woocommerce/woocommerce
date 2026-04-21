@@ -124,8 +124,66 @@ class Menu_Reconciler {
 		$tree = $builder->apply_capability_filter( $tree );
 
 		$this->remove_rehomed_top_level_items();
+		$this->replace_woocommerce_submenu( $tree );
 
 		self::$tree = $tree;
+	}
+
+	/**
+	 * Rebuild `$submenu['woocommerce']` so the native flyout (shown when the
+	 * user hovers the WooCommerce rail item) reflects our curated tree
+	 * rather than WP's organic registration order.
+	 *
+	 * Only top-level children of `woocommerce` appear here — second-level
+	 * items (e.g. Payments under Settings) are rendered as a nested cascade
+	 * by admin-navigation-v2.js after DOM load.
+	 *
+	 * @param array $tree The final computed tree.
+	 */
+	private function replace_woocommerce_submenu( array $tree ): void {
+		global $submenu;
+
+		// The `woocommerce` top-level must be registered (Woo's own admin_menu at
+		// priority 9 does this) before we can replace its submenu.
+		if ( ! isset( $submenu['woocommerce'] ) ) {
+			return;
+		}
+
+		$children = array_filter(
+			$tree,
+			static fn( $node ) => 'woocommerce' === ( $node['parent'] ?? null ) && empty( $node['hidden'] )
+		);
+		uasort(
+			$children,
+			static fn( $a, $b ) => ( $a['position'] ?? 0 ) <=> ( $b['position'] ?? 0 )
+		);
+
+		$submenu['woocommerce'] = array();
+		foreach ( $children as $slug => $node ) {
+			$submenu['woocommerce'][] = array(
+				$node['title'],                    // menu title.
+				$node['capability'] ?? 'read',     // capability.
+				$this->slug_to_menu_url( $slug ),  // slug / URL.
+				$node['title'],                    // page title.
+			);
+		}
+	}
+
+	/**
+	 * Convert a tree slug into a URL suitable for WP's $submenu[2] field.
+	 *
+	 * Tree slugs can be plain (`wc-settings`), query fragments
+	 * (`edit.php?post_type=product`), or WC-Admin paths
+	 * (`wc-admin&path=/analytics/overview`).
+	 *
+	 * @param string $slug Tree slug.
+	 * @return string
+	 */
+	private function slug_to_menu_url( string $slug ): string {
+		if ( str_contains( $slug, '?' ) ) {
+			return $slug;
+		}
+		return 'admin.php?page=' . $slug;
 	}
 
 	/**

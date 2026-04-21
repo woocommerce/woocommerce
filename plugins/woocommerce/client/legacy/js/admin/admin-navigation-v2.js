@@ -27,6 +27,80 @@
 		}
 
 		// -----------------------------------------------------------------------
+		// Native-rail cascade: the `woocommerce` top-level in WP's native rail
+		// shows our curated first-level items from $submenu['woocommerce'].
+		// For first-level items that have grandchildren in the tree, inject a
+		// nested <ul> as a second-level cascade. CSS handles show/hide on
+		// hover.
+		// -----------------------------------------------------------------------
+		( function injectNativeCascade() {
+			var tree = window.wcNavV2Config.tree;
+			if ( ! tree ) {
+				return;
+			}
+
+			// Build a parent-indexed map once.
+			var byParent = {};
+			Object.keys( tree ).forEach( function ( slug ) {
+				var parent = tree[ slug ].parent;
+				if ( ! parent ) {
+					return;
+				}
+				byParent[ parent ] = byParent[ parent ] || [];
+				byParent[ parent ].push( Object.assign( {}, tree[ slug ], { slug: slug } ) );
+			} );
+			Object.keys( byParent ).forEach( function ( p ) {
+				byParent[ p ].sort( function ( a, b ) {
+					return ( a.position || 0 ) - ( b.position || 0 );
+				} );
+			} );
+
+			// Match visible first-level items in the native Woo flyout against
+			// their tree slug, then attach a nested <ul> if grandchildren exist.
+			var $items = $( '#toplevel_page_woocommerce > .wp-submenu > li' ).not( '.wp-submenu-head' );
+			$items.each( function () {
+				var $li = $( this );
+				var $a  = $li.find( '> a' ).first();
+				var href = $a.attr( 'href' ) || '';
+				// Recover the slug: strip admin_url prefix and trailing # fragments.
+				var slug = href.replace( /^[^?#]*\/wp-admin\//, '' ).replace( /#.*$/, '' );
+				slug = slug.replace( /^admin\.php\?page=/, '' );
+				// Normalize common variations.
+				var candidates = [ slug, slug.replace( /&amp;/g, '&' ) ];
+
+				var grandkids = null;
+				for ( var i = 0; i < candidates.length && ! grandkids; i++ ) {
+					if ( byParent[ candidates[ i ] ] ) {
+						grandkids = byParent[ candidates[ i ] ];
+					}
+				}
+				if ( ! grandkids || ! grandkids.length ) {
+					return;
+				}
+
+				$li.addClass( 'wc-nav-v2-has-subflyout' );
+
+				var $nested = $( '<ul class="wc-nav-v2-subflyout"></ul>' );
+				grandkids.forEach( function ( kid ) {
+					if ( kid.hidden ) {
+						return;
+					}
+					var kidHref = '/wp-admin/' + (
+						kid.slug.indexOf( '?' ) >= 0 || kid.slug.indexOf( '&' ) >= 0
+							? ( kid.slug.indexOf( '?' ) >= 0 ? kid.slug : 'admin.php?page=' + kid.slug )
+							: 'admin.php?page=' + kid.slug
+					);
+					$nested.append(
+						$( '<li></li>' ).append(
+							$( '<a></a>' ).attr( 'href', kidHref ).text( kid.title )
+						)
+					);
+				} );
+				$li.append( $nested );
+			} );
+		} )();
+
+		// -----------------------------------------------------------------------
 		// Flyout cascade — hover-intent open/close.
 		// -----------------------------------------------------------------------
 		var $menu = $( '#wc-nav-v2-adminmenu' );

@@ -25,7 +25,9 @@ return array(
 		'title'    => __( 'Home', 'woocommerce' ),
 		'position' => 10,
 	),
-	'edit.php?post_type=shop_order'                                          => array(
+	// HPOS slug. The legacy CPT slug `edit.php?post_type=shop_order` is used
+	// when HPOS is disabled; auto-attach picks it up in that case.
+	'wc-orders'                                                              => array(
 		'parent'   => 'woocommerce',
 		'title'    => __( 'Orders', 'woocommerce' ),
 		'position' => 20,
