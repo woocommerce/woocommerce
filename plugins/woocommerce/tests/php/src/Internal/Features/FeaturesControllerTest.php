@@ -1030,6 +1030,28 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * navigation_v2 is registered as an experimental, disabled-by-default feature.
+	 */
+	public function test_navigation_v2_feature_is_registered() {
+		// Instantiate Bootstrap so it registers the woocommerce_register_feature_definitions hook.
+		// We re-add its register_feature callback at priority 12 so it runs *after* the
+		// register_dummy_features callback (priority 11) which resets the feature list.
+		$bootstrap = new \Automattic\WooCommerce\Internal\Admin\Navigation\Bootstrap();
+		// Remove the default-priority hook added by the constructor and re-add at priority 12.
+		remove_action( 'woocommerce_register_feature_definitions', array( $bootstrap, 'register_feature' ) );
+		add_action( 'woocommerce_register_feature_definitions', array( $bootstrap, 'register_feature' ), 12, 1 );
+
+		$controller = new FeaturesController();
+		$controller->init( wc_get_container()->get( \Automattic\WooCommerce\Proxies\LegacyProxy::class ), $this->fake_plugin_util );
+		$features   = $controller->get_features( true );
+
+		remove_action( 'woocommerce_register_feature_definitions', array( $bootstrap, 'register_feature' ), 12 );
+
+		$this->assertArrayHasKey( 'navigation_v2', $features );
+		$this->assertTrue( $features['navigation_v2']['is_experimental'] );
+	}
+
+	/**
 	 * Simulates that the code is running inside the 'before_woocommerce_init' action.
 	 */
 	private function simulate_inside_before_woocommerce_init_hook() {
