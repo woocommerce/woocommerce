@@ -938,7 +938,15 @@ jQuery( function ( $ ) {
 				return;
 			}
 
-			const submitButton = document.getElementById( 'btn-ok' );
+			const modal = document.querySelector(
+				'.wc-backbone-modal-add-attribute-term'
+			);
+
+			if ( ! modal ) {
+				return;
+			}
+
+			const submitButton = modal.querySelector( '#btn-ok' );
 
 			if ( ! submitButton ) {
 				return;
