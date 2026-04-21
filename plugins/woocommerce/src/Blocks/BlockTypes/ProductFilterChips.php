@@ -32,11 +32,13 @@ final class ProductFilterChips extends AbstractBlock {
 			return '';
 		}
 
-		$block_context = $block->context['woocommerce/selectableItems'];
-		$items         = $block_context['items'] ?? array();
-		$show_counts   = $block_context['showCounts'] ?? false;
-		$classes     = '';
-		$style       = '';
+		$block_context   = $block->context['woocommerce/selectableItems'];
+		$items           = $block_context['items'] ?? array();
+		$show_counts     = $block_context['showCounts'] ?? false;
+		$store_namespace = $block_context['storeNamespace'] ?? 'woocommerce/product-filters';
+		$select_action   = $block_context['selectAction'] ?? 'toggleFilter';
+		$classes         = '';
+		$style           = '';
 
 		$tags = new \WP_HTML_Tag_Processor( $content );
 		if ( $tags->next_tag( array( 'class_name' => 'wc-block-product-filter-chips' ) ) ) {
@@ -44,18 +46,8 @@ final class ProductFilterChips extends AbstractBlock {
 			$style   = $tags->get_attribute( 'style' );
 		}
 
-		$checked_items               = array_filter(
-			$items,
-			function ( $item ) {
-				return $item['selected'];
-			}
-		);
-		$show_initially              = 15;
-		$remaining_initial_unchecked = count( $checked_items ) > $show_initially ? count( $checked_items ) : $show_initially - count( $checked_items );
-		$count                       = 0;
-
 		$wrapper_attributes = array(
-			'data-wp-interactive' => 'woocommerce/product-filters',
+			'data-wp-interactive' => $store_namespace,
 			'data-wp-key'         => wp_unique_prefixed_id( $this->get_full_block_name() ),
 			'data-wp-context'     => '{}',
 			'class'               => esc_attr( $classes ),
@@ -83,18 +75,10 @@ final class ProductFilterChips extends AbstractBlock {
 							type="button"
 							role="checkbox"
 							aria-label="<?php echo esc_attr( $this->get_aria_label( $item, $show_counts ) ); ?>"
-							data-wp-on--click="actions.toggleFilter"
+							data-wp-on--click="actions.<?php echo esc_attr( $select_action ); ?>"
 							value="<?php echo esc_attr( $item['value'] ); ?>"
 							data-wp-bind--aria-checked="state.isFilterSelected"
 							<?php echo wp_interactivity_data_wp_context( array( 'item' => $item ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-							<?php if ( ! $item['selected'] ) : ?>
-								<?php if ( $count >= $remaining_initial_unchecked ) : ?>
-									data-wp-bind--hidden="!context.showAll"
-									hidden
-								<?php else : ?>
-									<?php ++$count; ?>
-								<?php endif; ?>
-							<?php endif; ?>
 						>
 							<span class="wc-block-product-filter-chips__label">
 								<span class="wc-block-product-filter-chips__text">
@@ -109,16 +93,6 @@ final class ProductFilterChips extends AbstractBlock {
 						</button>
 					<?php } ?>
 				</div>
-				<?php if ( count( $items ) > $show_initially ) : ?>
-					<button
-						class="wc-block-product-filter-chips__show-more"
-						data-wp-on--click="actions.showAllChips"
-						data-wp-bind--hidden="context.showAll"
-						hidden
-					>
-						<?php echo esc_html__( 'Show more…', 'woocommerce' ); ?>
-					</button>
-				<?php endif; ?>
 			</fieldset>
 		</div>
 		<?php
