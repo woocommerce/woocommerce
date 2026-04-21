@@ -58,14 +58,35 @@ Parent blocks provide this context key. Inner blocks consume it via `usesContext
 
 The context object that parents MUST provide.
 
+### Core Fields (Required)
+
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `items` | `SelectableItem[]` | **Yes** | Items to render |
 | `selectionMode` | `'single' \| 'multiple'` | **Yes** | Selection behavior |
 | `selectAction` | `string` | **Yes** | Action name to call on selection |
 | `storeNamespace` | `string` | **Yes** | Parent's Interactivity API store |
-| `showCounts` | `boolean` | No | Show product counts (default: false) |
-| `groupLabel` | `string` | No | Accessibility label for the group |
+
+### Accessibility Fields (Optional)
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `groupLabel` | `string` | No | Screen reader label for the group. Rendered as `<legend>` in fieldset. Example: "Filter by Color" |
+
+### Presentation Hints (Optional)
+
+Use `displayHints` for use-case-specific presentation preferences. Inner blocks check for hints they support and ignore others.
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `displayHints` | `DisplayHints` | Bag of presentation preferences |
+
+**DisplayHints fields:**
+
+| Field | Type | Default | Used By | Description |
+|-------|------|---------|---------|-------------|
+| `showCounts` | `boolean` | `false` | Filters | Show product counts next to items |
+| `layout` | `'grid' \| 'inline' \| 'list'` | varies | All | Layout preference hint |
 
 ## SelectableItem
 
@@ -108,12 +129,13 @@ Inner blocks SHOULD:
 
 1. Render `<input type="radio">` when `selectionMode === 'single'`
 2. Render `<input type="checkbox">` when `selectionMode === 'multiple'`
-3. Show counts when `showCounts === true` and `item.count` exists
+3. Show counts when `displayHints.showCounts === true` and `item.count` exists
 4. Render color swatch when `item.color` exists
 5. Render image swatch when `item.image` exists (fallback if no color)
 6. Render text-only when neither `color` nor `image` exists
 7. Apply disabled styling when `item.disabled === true`
 8. Use `groupLabel` for fieldset legend (screen reader accessible)
+9. Check `displayHints` for layout preferences, fall back to block defaults
 
 ---
 
@@ -169,6 +191,18 @@ Location: `assets/js/blocks/product-filters/types.ts` (or shared types file)
 import type { ReactNode } from 'react';
 
 /**
+ * Presentation hints for use-case-specific display preferences.
+ * Inner blocks check for hints they support and ignore others.
+ */
+export interface DisplayHints {
+  /** Show product counts next to items (filters) */
+  showCounts?: boolean;
+  
+  /** Layout preference */
+  layout?: 'grid' | 'inline' | 'list';
+}
+
+/**
  * Context protocol for selectable item lists.
  * 
  * @see docs/internal-developers/blocks/store-agnostic-inner-blocks.md
@@ -186,11 +220,11 @@ export interface SelectableItemsContext {
   /** Parent's Interactivity API store namespace */
   storeNamespace: string;
   
-  /** Show product counts (default: false) */
-  showCounts?: boolean;
-  
-  /** Accessibility label for the group */
+  /** Screen reader label for the group (rendered as fieldset legend) */
   groupLabel?: string;
+  
+  /** Use-case-specific presentation preferences */
+  displayHints?: DisplayHints;
 }
 
 /**
@@ -273,8 +307,11 @@ interface SelectableItemsContextInterface {
      *   selectionMode: 'single'|'multiple',
      *   selectAction: string,
      *   storeNamespace: string,
-     *   showCounts?: bool,
-     *   groupLabel?: string
+     *   groupLabel?: string,
+     *   displayHints?: array{
+     *     showCounts?: bool,
+     *     layout?: 'grid'|'inline'|'list'
+     *   }
      * }
      */
     public function get_selectable_items_context(): array;
@@ -305,14 +342,20 @@ parameters:
         ariaLabel?: string
       }
     '''
+    DisplayHints: '''
+      array{
+        showCounts?: bool,
+        layout?: 'grid'|'inline'|'list'
+      }
+    '''
     SelectableItemsContext: '''
       array{
         items: list<SelectableItem>,
         selectionMode: 'single'|'multiple',
         selectAction: string,
         storeNamespace: string,
-        showCounts?: bool,
-        groupLabel?: string
+        groupLabel?: string,
+        displayHints?: DisplayHints
       }
     '''
 ```
@@ -347,8 +390,10 @@ $context = [
     'selectionMode'  => 'multiple',
     'selectAction'   => 'toggleFilter',
     'storeNamespace' => 'woocommerce/product-filters',
-    'showCounts'     => true,
-    'groupLabel'     => 'Filter by Color',
+    'groupLabel'     => 'Filter by Color',  // Screen reader: "Filter by Color"
+    'displayHints'   => [
+        'showCounts' => true,  // Filter-specific: show "(5)" next to items
+    ],
 ];
 ```
 
@@ -365,8 +410,11 @@ $context = [
     'selectionMode'  => 'multiple',
     'selectAction'   => 'toggleFilter',
     'storeNamespace' => 'woocommerce/product-filters',
-    'showCounts'     => true,
     'groupLabel'     => 'Filter by Size',
+    'displayHints'   => [
+        'showCounts' => true,
+        'layout'     => 'inline',  // Hint: prefer inline chip layout
+    ],
 ];
 ```
 
@@ -383,7 +431,7 @@ $context = [
     'selectAction'   => 'setAttribute',
     'storeNamespace' => 'woocommerce/add-to-cart-with-options',
     'groupLabel'     => 'Select Color',
-    // No showCounts - variation selector doesn't need counts
+    // No displayHints - variation selector uses inner block defaults
 ];
 ```
 
@@ -399,8 +447,11 @@ $context = [
     'selectionMode'  => 'multiple',
     'selectAction'   => 'toggleFilter',
     'storeNamespace' => 'woocommerce/product-filters',
-    'showCounts'     => true,
     'groupLabel'     => 'Filter by Category',
+    'displayHints'   => [
+        'showCounts' => true,
+        'layout'     => 'list',  // Hint: use list layout for hierarchy
+    ],
 ];
 ```
 
@@ -423,8 +474,10 @@ $context = [
     'selectionMode'  => 'multiple',
     'selectAction'   => 'toggleFilter',
     'storeNamespace' => 'woocommerce/product-filters',
-    'showCounts'     => true,
     'groupLabel'     => 'Filter by Rating',
+    'displayHints'   => [
+        'showCounts' => true,
+    ],
 ];
 ```
 
@@ -505,7 +558,7 @@ abstract class AbstractSelectableItems extends AbstractBlock {
         
         $items = $context['items'];
         $selection_mode = $context['selectionMode'] ?? 'multiple';
-        $show_counts = $context['showCounts'] ?? false;
+        $display_hints = $context['displayHints'] ?? [];
         
         ob_start();
         ?>
@@ -522,7 +575,7 @@ abstract class AbstractSelectableItems extends AbstractBlock {
                 
                 <div class="wc-block-selectable-items__list">
                     <?php foreach ($items as $item): ?>
-                        <?php echo $this->render_item($item, $selection_mode, $show_counts); ?>
+                        <?php echo $this->render_item($item, $selection_mode, $display_hints); ?>
                     <?php endforeach; ?>
                 </div>
             </fieldset>
@@ -537,7 +590,7 @@ abstract class AbstractSelectableItems extends AbstractBlock {
     abstract protected function render_item(
         array $item, 
         string $selection_mode, 
-        bool $show_counts
+        array $display_hints
     ): string;
 }
 ```
@@ -559,8 +612,10 @@ class ProductFilterAttribute extends AbstractBlock {
             'selectionMode'  => 'multiple',
             'selectAction'   => 'toggleFilter',
             'storeNamespace' => 'woocommerce/product-filters',
-            'showCounts'     => $attributes['showCounts'] ?? true,
             'groupLabel'     => $attribute_label,
+            'displayHints'   => [
+                'showCounts' => $attributes['showCounts'] ?? true,
+            ],
         ];
         
         // Provide context to inner blocks
@@ -636,8 +691,8 @@ class VariationSelectorAttribute extends AbstractBlock {
             'selectionMode'  => 'single',
             'selectAction'   => 'setAttribute',
             'storeNamespace' => 'woocommerce/add-to-cart-with-options',
-            'showCounts'     => false,
             'groupLabel'     => $attribute_label,
+            // No displayHints - variation selector uses inner block defaults
         ];
         
         // Provide context to inner blocks
@@ -725,9 +780,10 @@ Presentation data is bundled on items - direct property access:
 
 **render_item() for swatches:**
 ```php
-protected function render_item(array $item, string $selection_mode, bool $show_counts): string {
+protected function render_item(array $item, string $selection_mode, array $display_hints): string {
     $has_color = !empty($item['color']);
     $has_image = !empty($item['image']);
+    $show_counts = $display_hints['showCounts'] ?? false;
     
     $swatch_content = '';
     
