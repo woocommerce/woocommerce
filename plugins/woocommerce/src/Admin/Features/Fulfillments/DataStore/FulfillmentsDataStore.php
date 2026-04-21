@@ -580,7 +580,7 @@ class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data
 	 * @return int The number of fulfillment records deleted.
 	 *
 	 * @throws \RuntimeException If a database query fails.
-	 * @throws \Throwable Re-thrown after rolling back the transaction.
+	 * @throws \Throwable If the deletion fails.
 	 */
 	public function delete_by_entity( string $entity_type, string $entity_id ): int {
 		global $wpdb;

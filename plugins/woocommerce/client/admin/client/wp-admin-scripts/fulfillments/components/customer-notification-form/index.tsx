@@ -97,6 +97,10 @@ export default function CustomerNotificationBox( {
 								'Add a note for the customer (optional)',
 								'woocommerce'
 							) }
+							help={ __(
+								'This note will be included in the update notification email sent to the customer.',
+								'woocommerce'
+							) }
 							value={ customerNote }
 							onChange={ ( value ) => setCustomerNote( value ) }
 							rows={ 3 }
