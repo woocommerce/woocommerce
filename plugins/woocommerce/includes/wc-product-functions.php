@@ -842,8 +842,9 @@ function wc_scheduled_sales() {
 
 			if ( $product ) {
 				wc_apply_sale_state_for_product( $product, 'start' );
-				// Note: wc_apply_sale_state_for_product() calls save(), which triggers
-				// woocommerce_update_product hook, which schedules the end AS event.
+				// Note: wc_apply_sale_state_for_product() calls save(), which writes sale
+				// date meta and triggers wc_maybe_schedule_sale_events_on_meta_change(),
+				// which schedules the end AS event.
 			}
 
 			$product_util->delete_product_specific_transients( $product ? $product : $product_id );
