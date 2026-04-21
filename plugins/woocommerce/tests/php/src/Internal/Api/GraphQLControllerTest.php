@@ -43,7 +43,9 @@ class GraphQLControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->sut->register();
 
-		$methods = rest_get_server()->get_routes()['/wc/graphql'][0]['methods'];
+		$handlers = rest_get_server()->get_routes()['/wc/graphql'];
+		$this->assertCount( 1, $handlers, 'Exactly one handler should be registered for /wc/graphql.' );
+		$methods = $handlers[0]['methods'];
 		$this->assertTrue( $methods['POST'] ?? false );
 		$this->assertFalse( $methods['GET'] ?? false );
 	}
@@ -56,7 +58,9 @@ class GraphQLControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->sut->register();
 
-		$methods = rest_get_server()->get_routes()['/wc/graphql'][0]['methods'];
+		$handlers = rest_get_server()->get_routes()['/wc/graphql'];
+		$this->assertCount( 1, $handlers, 'Exactly one handler should be registered for /wc/graphql.' );
+		$methods = $handlers[0]['methods'];
 		$this->assertTrue( $methods['GET'] ?? false );
 		$this->assertTrue( $methods['POST'] ?? false );
 	}

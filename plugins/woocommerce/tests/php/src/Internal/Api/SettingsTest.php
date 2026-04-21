@@ -27,6 +27,22 @@ class SettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox register hooks add_section and add_settings into WooCommerce's advanced settings filters.
+	 */
+	public function test_register_hooks_both_advanced_filters(): void {
+		$this->sut->register();
+
+		$this->assertNotFalse(
+			has_filter( 'woocommerce_get_sections_advanced', array( $this->sut, 'add_section' ) ),
+			'add_section should be hooked to woocommerce_get_sections_advanced.'
+		);
+		$this->assertNotFalse(
+			has_filter( 'woocommerce_get_settings_advanced', array( $this->sut, 'add_settings' ) ),
+			'add_settings should be hooked to woocommerce_get_settings_advanced.'
+		);
+	}
+
+	/**
 	 * @testdox add_section appends the graphql section while preserving existing ones.
 	 */
 	public function test_add_section_appends_graphql_section(): void {
