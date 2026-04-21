@@ -40,7 +40,7 @@ class WCEmailTemplateSyncRegistryTest extends \WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		add_option( 'woocommerce_feature_block_email_editor_enabled', 'yes' );
+		update_option( 'woocommerce_feature_block_email_editor_enabled', 'yes' );
 
 		$this->fixtures_base = __DIR__ . '/fixtures/';
 
