@@ -138,6 +138,8 @@ Each item MAY have:
 | `depth` | `number` | Nesting depth (hierarchical) |
 | `menuOrder` | `number` | Sort order |
 
+Items are extensible — extensions can add arbitrary fields (e.g. `badge`, `tooltip`, `rating`) and consume them in custom inner blocks. Built-in inner blocks ignore unknown fields.
+
 ## Callback Contract
 
 When user selects an item, inner block MUST:
@@ -209,7 +211,7 @@ This section provides copy-paste-ready type definitions for both TypeScript and 
 
 ## TypeScript
 
-Location: `assets/js/blocks/product-filters/types.ts` (or shared types file)
+Location: `assets/js/types/type-defs/selectable-items.ts`
 
 ```typescript
 import type { ReactNode } from 'react';
@@ -278,6 +280,9 @@ export type SelectableItem = (
   
   /** Menu order for sorting */
   menuOrder?: number;
+
+  /** Extensions can add arbitrary display fields */
+  [key: string]: unknown;
 };
 ```
 
