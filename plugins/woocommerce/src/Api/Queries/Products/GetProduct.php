@@ -43,6 +43,14 @@ class GetProduct {
 	 * @throws AuthorizationException When the product is not accessible.
 	 */
 	public function authorize( int $id, bool $_preauthorized ): bool {
+		// Reject non-positive IDs up front. `get_post( 0 )` inside a
+		// WordPress loop returns `$GLOBALS['post']` (not null), so a bare
+		// `get_post( $id )` below would accidentally operate on whatever
+		// global post was set upstream of this request.
+		if ( $id <= 0 ) {
+			throw new AuthorizationException( 'Product not found.' );
+		}
+
 		$post = get_post( $id );
 
 		if ( ! $post || 'product' !== $post->post_type ) {
@@ -86,6 +94,13 @@ class GetProduct {
 		int $id,
 		?array $_query_info = null,
 	): ?object {
+		// Mirrors the guard in authorize(): never pass a non-positive ID to
+		// wc_get_product(). authorize() would normally reject these first,
+		// but a future caller path might invoke execute() directly.
+		if ( $id <= 0 ) {
+			return null;
+		}
+
 		$wc_product = wc_get_product( $id );
 
 		if ( ! $wc_product instanceof \WC_Product ) {
