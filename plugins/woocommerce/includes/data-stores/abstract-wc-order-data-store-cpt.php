@@ -527,23 +527,22 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		global $wpdb;
 
 		// When the order is not yet saved, we cannot get the items from DB. Trying to do so will risk reading items of different orders that were saved incorrectly.
-		$order_id = $order->get_id();
-		if ( 0 === $order_id ) {
+		if ( 0 === $order->get_id() ) {
 			return array();
 		}
 
 		// Get from cache if available.
-		$items = 0 < $order_id ? wp_cache_get( 'order-items-' . $order_id, 'orders' ) : false;
+		$items = 0 < $order->get_id() ? wp_cache_get( 'order-items-' . $order->get_id(), 'orders' ) : false;
 
 		if ( false === $items ) {
 			$items = $wpdb->get_results(
-				$wpdb->prepare( "SELECT order_item_type, order_item_id, order_id, order_item_name FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d ORDER BY order_item_id;", $order_id )
+				$wpdb->prepare( "SELECT order_item_type, order_item_id, order_id, order_item_name FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d ORDER BY order_item_id;", $order->get_id() )
 			);
 			foreach ( $items as $item ) {
 				wp_cache_set( 'item-' . $item->order_item_id, $item, 'order-items' );
 			}
-			if ( 0 < $order_id ) {
-				wp_cache_set( 'order-items-' . $order_id, $items, 'orders' );
+			if ( 0 < $order->get_id() ) {
+				wp_cache_set( 'order-items-' . $order->get_id(), $items, 'orders' );
 			}
 		}
 
