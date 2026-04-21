@@ -1,3 +1,6 @@
+/**
+ * External dependencies
+ */
 import type { ReactNode } from 'react';
 
 export interface SelectableItemsContext {
@@ -12,7 +15,7 @@ export interface SelectableItemsContext {
 export type SelectableItem = (
 	| { label: string; ariaLabel?: string }
 	| { label: ReactNode; ariaLabel: string }
-) & {
+ ) & {
 	value: string;
 	selected?: boolean;
 	count?: number;
