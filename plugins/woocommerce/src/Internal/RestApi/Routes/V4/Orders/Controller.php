@@ -333,14 +333,14 @@ class Controller extends AbstractController {
 			return;
 		}
 
-		$order_ids        = array_map( fn( $order ) => $order->get_id(), $orders );
-		$cache_keys       = array();
+		$order_ids  = array_map( fn( $order ) => $order->get_id(), $orders );
+		$cache_keys = array();
 		foreach ( $order_ids as $order_id ) {
 			$cache_keys[ $order_id ] = \WC_Cache_Helper::get_cache_prefix( 'orders' ) . 'refunds' . $order_id;
 		}
 
 		// Skip orders already in cache.
-		$cache_values  = wc_cache_get_multiple( array_values( $cache_keys ), 'orders' );
+		$cache_values   = wc_cache_get_multiple( array_values( $cache_keys ), 'orders' );
 		$non_cached_ids = array();
 		if ( is_array( $cache_values ) ) {
 			foreach ( $order_ids as $order_id ) {
@@ -356,7 +356,11 @@ class Controller extends AbstractController {
 			return;
 		}
 
-		/** @var \WC_Order_Refund[] $refunds */
+		/**
+		 * Fetch all refunds for the given order IDs.
+		 *
+		 * @var \WC_Order_Refund[] $refunds
+		 */
 		$refunds = wc_get_orders(
 			array(
 				'type'            => 'shop_order_refund',
