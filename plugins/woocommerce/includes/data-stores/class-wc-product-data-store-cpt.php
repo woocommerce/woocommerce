@@ -2551,5 +2551,4 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$cogs_controller = wc_get_container()->get( CostOfGoodsSoldController::class );
 		return $cogs_controller->feature_is_enabled() && $cogs_controller->product_meta_lookup_table_cogs_value_columns_exist();
 	}
-
 }

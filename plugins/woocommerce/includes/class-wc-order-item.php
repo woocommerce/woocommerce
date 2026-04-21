@@ -199,7 +199,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	/**
 	 * Get parent order object.
 	 *
-	 * @return WC_Order|false
+	 * @return WC_Order
 	 */
 	public function get_order() {
 		// If the order is linked through set_order, use that specific instance. Otherwise, use a new instance.

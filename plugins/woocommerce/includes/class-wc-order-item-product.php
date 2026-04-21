@@ -410,11 +410,13 @@ class WC_Order_Item_Product extends WC_Order_Item {
 			$product = wc_get_product( $this->get_variation_id() ? $this->get_variation_id() : $this->get_product_id() );
 			// Backwards compatible filter from WC_Order::get_product_from_item().
 			if ( has_filter( 'woocommerce_get_product_from_item' ) ) {
+				// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- TBD, digital archeology.
 				$product = apply_filters( 'woocommerce_get_product_from_item', $product, $this, $this->get_order() );
 			}
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- TBD, digital archeology.
 			$this->product = apply_filters( 'woocommerce_order_item_product', $product, $this );
 		}
-		// TODO: apply the filters in set_product as well, to ensure they are not bypassed.
+		// TBD: apply the filters in set_product as well, to ensure they are not bypassed.
 
 		return $this->product;
 	}
