@@ -368,12 +368,14 @@ store< MiniCart >(
 				const removeJQueryAddedToCartEvent =
 					translateJQueryEventToNative(
 						'added_to_cart',
-						'wc-blocks_added_to_cart'
+						'wc-blocks_added_to_cart',
+						true
 					);
 				const removeJQueryRemovedFromCartEvent =
 					translateJQueryEventToNative(
 						'removed_from_cart',
-						'wc-blocks_removed_from_cart'
+						'wc-blocks_removed_from_cart',
+						true
 					);
 
 				return () => {
