@@ -132,6 +132,39 @@ class PendingNotificationStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should call the dispatcher when dispatching pending notifications.
+	 */
+	public function test_dispatch_all_calls_dispatcher(): void {
+		$dispatcher = $this->createMock( InternalNotificationDispatcher::class );
+		$dispatcher->expects( $this->once() )
+			->method( 'dispatch' );
+
+		$store = new PendingNotificationStore();
+		$store->init( $dispatcher );
+		$store->register();
+		$store->add( $this->create_order_mock( 1 ) );
+
+		$store->dispatch_all();
+
+		remove_action( 'shutdown', array( $store, 'dispatch_all' ) );
+	}
+
+	/**
+	 * @testdox Should not call the dispatcher when there are no pending notifications.
+	 */
+	public function test_dispatch_all_does_not_call_dispatcher_when_empty(): void {
+		$dispatcher = $this->createMock( InternalNotificationDispatcher::class );
+		$dispatcher->expects( $this->never() )
+			->method( 'dispatch' );
+
+		$store = new PendingNotificationStore();
+		$store->init( $dispatcher );
+		$store->register();
+
+		$store->dispatch_all();
+	}
+
+	/**
 	 * @testdox Should return all pending notifications via get_all.
 	 */
 	public function test_get_all_returns_pending_notifications(): void {

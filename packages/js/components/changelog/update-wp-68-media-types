@@ -1,0 +1,4 @@
+Significance: major
+Type: update
+
+Replace MediaItem with native Attachment from @wordpress/media-utils throughout media-uploader and image-gallery components.

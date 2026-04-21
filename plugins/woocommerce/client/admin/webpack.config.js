@@ -6,7 +6,6 @@ const path = require( 'path' );
 const fs = require( 'fs' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 const { BundleAnalyzerPlugin } = require( 'webpack-bundle-analyzer' );
-const MomentTimezoneDataPlugin = require( 'moment-timezone-data-webpack-plugin' );
 const ForkTsCheckerWebpackPlugin = require( 'fork-ts-checker-webpack-plugin' );
 const ReactRefreshWebpackPlugin = require( '@pmmmwh/react-refresh-webpack-plugin' );
 
@@ -24,6 +23,7 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 const WC_ADMIN_PHASE = process.env.WC_ADMIN_PHASE || 'development';
 const isHot = Boolean( process.env.HOT );
 const isProduction = NODE_ENV === 'production';
+const isWatch = ! isProduction && process.argv.includes( '--watch' );
 
 const getSubdirectoriesAt = ( searchPath ) => {
 	const dir = path.resolve( __dirname, searchPath );
@@ -47,6 +47,7 @@ const wcAdminPackages = [
 	'currency',
 	'customer-effort-score',
 	'date',
+	'experimental-products-app',
 	'experimental',
 	'explat',
 	'navigation',
@@ -81,15 +82,28 @@ const getEntryPoints = () => {
 // WordPress.org’s translation infrastructure ignores files named “.min.js” so we need to name our JS files without min when releasing the plugin.
 const outputSuffix = WC_ADMIN_PHASE === 'core' ? '' : '.min';
 
-// Here we are patching a dependency, see https://github.com/woocommerce/woocommerce/pull/45548 for more details.
-// Should be revisited: using the dependency patching, but seems we need some codebase tweaks as it uses xstate 4/5 mix.
-require( 'fs-extra' ).ensureSymlinkSync(
-	path.join( __dirname, './node_modules/xstate5' ),
-	path.join( __dirname, './node_modules/@xstate5/react/node_modules/xstate' )
-);
-
 const webpackConfig = {
 	mode: NODE_ENV,
+	performance: {
+		hints: false,
+	},
+	cache: ( isWatch || process.env.CI || process.env.HOT || process.env.STORYBOOK )
+		? { type: 'memory' }
+		: {
+				type: 'filesystem',
+				cacheDirectory: path.resolve(
+					__dirname,
+					`node_modules/.cache/webpack-${ WC_ADMIN_PHASE }`
+				),
+				buildDependencies: {
+					config: [
+						__filename,
+						path.resolve( __dirname, '../../../../pnpm-lock.yaml' ),
+						require.resolve( '@woocommerce/dependency-extraction-webpack-plugin' ),
+						require.resolve( '@woocommerce/internal-style-build' ),
+					],
+				},
+		  },
 	entry: getEntryPoints(),
 	output: {
 		filename: ( data ) => {
@@ -126,19 +140,10 @@ const webpackConfig = {
 				use: {
 					loader: 'babel-loader',
 					options: {
-						presets: [
-							'@wordpress/babel-preset-default',
-							[
-								'@babel/preset-env',
-								{
-									// Add polyfills such as Array.flat based on their usage in the code
-									// See https://github.com/woocommerce/woocommerce-admin/pull/6411/
-									corejs: '3',
-									useBuiltIns: 'usage',
-								},
-							],
-							[ '@babel/preset-typescript' ],
-						],
+						// Prevent babel.config.js (Jest/Node context) from merging into this browser build and duplicating presets.
+						configFile: false,
+						sourceType: 'unambiguous',
+						presets: [ '@wordpress/babel-preset-default' ],
 						plugins: [
 							! isProduction &&
 								isHot &&
@@ -183,7 +188,7 @@ const webpackConfig = {
 	plugins: [
 		...styleConfig.plugins,
 		// Runs TypeScript type checker on a separate process.
-		! process.env.STORYBOOK && new ForkTsCheckerWebpackPlugin(),
+		! process.env.STORYBOOK && isWatch && new ForkTsCheckerWebpackPlugin(),
 		new CustomTemplatedPathPlugin( {
 			modulename( outputPath, data ) {
 				const entryName = get( data, [ 'chunk', 'name' ] );
@@ -231,6 +236,10 @@ const webpackConfig = {
 			new WooCommerceDependencyExtractionWebpackPlugin( {
 				requestToExternal( request ) {
 					switch ( request ) {
+						case 'moment-timezone':
+							// Use WordPress core's window.moment (which includes moment-timezone)
+							// instead of bundling a stripped copy.
+							return 'moment';
 						case 'react/jsx-runtime':
 						case 'react/jsx-dev-runtime':
 							// @wordpress/dependency-extraction-webpack-plugin version bump related, which added 'react-jsx-runtime' dependency.
@@ -263,12 +272,12 @@ const webpackConfig = {
 						return null;
 					}
 				},
+				requestToHandle( request ) {
+					if ( request === 'moment-timezone' ) {
+						return 'moment';
+					}
+				},
 			} ),
-		// Reduces data for moment-timezone.
-		new MomentTimezoneDataPlugin( {
-			// This strips out timezone data before the year 2000 to make a smaller file.
-			startYear: 2000,
-		} ),
 		process.env.ANALYZE && new BundleAnalyzerPlugin(),
 		// We only want to generate unminified files in the development phase.
 		WC_ADMIN_PHASE === 'development' &&

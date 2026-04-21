@@ -41,12 +41,24 @@ describe( 'useStoreProducts', () => {
 		};
 
 	const setUpMocks = () => {
+		// Memoize the fixture by selector args so wp-data's SCRIPT_DEBUG
+		// unstable-reference check (which double-invokes the selector with
+		// the same state) sees the same object reference each time. Real
+		// Redux selectors return stable references when args and state are
+		// unchanged; the previous `() => ({ foo: 'bar' })` mock returned a
+		// fresh object every call, which wp-data correctly flagged.
+		const collectionCache = new Map();
+		const getCollection = jest.fn().mockImplementation( ( ...args ) => {
+			const key = JSON.stringify( args );
+			if ( ! collectionCache.has( key ) ) {
+				collectionCache.set( key, { foo: 'bar' } );
+			}
+			return collectionCache.get( key );
+		} );
 		mocks = {
 			selectors: {
 				getCollectionError: jest.fn().mockReturnValue( false ),
-				getCollection: jest
-					.fn()
-					.mockImplementation( () => ( { foo: 'bar' } ) ),
+				getCollection,
 				getCollectionHeader: jest.fn().mockReturnValue( 22 ),
 				hasFinishedResolution: jest.fn().mockReturnValue( true ),
 			},
