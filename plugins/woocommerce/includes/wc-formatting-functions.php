@@ -1189,7 +1189,7 @@ function wc_format_product_short_description( $content ) {
 }
 
 /**
- * Formats currency separators when saved in settings.
+ * Validates and sanitizes currency separators when saved in settings.
  *
  * @since 10.8.0
  * @param  string $value     Option value passed through earlier filters.
@@ -1198,18 +1198,19 @@ function wc_format_product_short_description( $content ) {
  * @return string
  */
 function wc_format_option_price_separators( $value, $option, $raw_value ) {
-	$stripped  = wp_kses( (string) ( $raw_value ?? '' ), array() );
-	$sanitized = preg_replace( '/\s+/', ' ', $stripped );
+	$no_tags    = wp_kses( (string) $raw_value, array() );
+	$normalized = preg_replace( '/\s+/', ' ', $no_tags );
 
-	if ( ! is_string( $sanitized ) || false !== strpbrk( $sanitized, '0123456789' ) ) {
+	if ( null === $normalized || false !== strpbrk( $normalized, '0123456789' ) ) {
 		WC_Admin_Settings::add_error(
 			esc_html__( 'Thousand and decimal separators cannot contain numbers.', 'woocommerce' )
 		);
 		return get_option( $option['id'], $option['default'] ?? '' );
 	}
 
-	return $sanitized;
+	return $normalized;
 }
+// Applied to both separator options at priority 10, before the value is persisted.
 add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_price_decimal_sep', 'wc_format_option_price_separators', 10, 3 );
 add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_price_thousand_sep', 'wc_format_option_price_separators', 10, 3 );
 

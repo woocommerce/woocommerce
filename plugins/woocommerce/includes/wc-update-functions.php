@@ -3511,6 +3511,8 @@ function wc_update_1080_slim_orders_meta_key_index(): void {
 function wc_update_1080_reset_numeric_price_separators(): void {
 	$reset = array();
 
+	// Defaults are hardcoded intentionally — the migration needs a known-safe fallback,
+	// not whatever the current accessor returns, which could itself be invalid.
 	$separators = array(
 		'woocommerce_price_thousand_sep' => ',',
 		'woocommerce_price_decimal_sep'  => '.',
