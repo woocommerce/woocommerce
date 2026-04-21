@@ -3496,3 +3496,42 @@ function wc_update_1080_slim_orders_meta_key_index(): void {
 	// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	$wpdb->query( "ALTER TABLE {$table_name} DROP INDEX {$index_name}, ADD INDEX {$index_name} (meta_key(100))" );
 }
+
+/**
+ * Reset thousand and decimal separators that contain numeric characters.
+ *
+ * Numeric characters in separator fields corrupt price display (e.g. a thousand
+ * separator of "1" renders 1,200 as 11200). The intended value cannot be recovered
+ * from the stored data, so affected options are reset to WooCommerce defaults and
+ * an admin notice is shown so store owners can review their currency settings.
+ *
+ * @since 10.8.0
+ * @return void
+ */
+function wc_update_1080_reset_numeric_price_separators(): void {
+	$reset = array();
+
+	$separators = array(
+		'woocommerce_price_thousand_sep' => ',',
+		'woocommerce_price_decimal_sep'  => '.',
+	);
+
+	foreach ( $separators as $option => $default ) {
+		$value = get_option( $option, $default );
+		if ( is_string( $value ) && false !== strpbrk( $value, '0123456789' ) ) {
+			update_option( $option, $default );
+			$reset[] = $option;
+		}
+	}
+
+	if ( ! empty( $reset ) ) {
+		WC_Admin_Notices::add_custom_notice(
+			'numeric_price_separator_reset',
+			sprintf(
+				/* translators: %s: URL to WooCommerce currency settings */
+				__( 'One or more of your currency separators contained a number, which caused incorrect price display. The affected setting(s) have been reset to their defaults. <a href="%s">Please review your currency settings.</a>', 'woocommerce' ),
+				admin_url( 'admin.php?page=wc-settings&tab=general' )
+			)
+		);
+	}
+}
