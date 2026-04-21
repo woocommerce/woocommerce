@@ -6,9 +6,9 @@ exports[`Tag <Tag label="foo" /> should render a tag with the label foo 1`] = `
   "baseElement": <body>
     <p
       class="a11y-speak-intro-text"
-      hidden="hidden"
+      hidden=""
       id="a11y-speak-intro-text"
-      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     >
       Notifications
     </p>
@@ -18,7 +18,7 @@ exports[`Tag <Tag label="foo" /> should render a tag with the label foo 1`] = `
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-assertive"
-      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     />
     <div
       aria-atomic="true"
@@ -26,7 +26,7 @@ exports[`Tag <Tag label="foo" /> should render a tag with the label foo 1`] = `
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-polite"
-      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     />
     <div>
       <span
@@ -131,9 +131,9 @@ exports[`Tag <Tag label="foo" popoverContents={ <p>This is a popover</p> } /> sh
   "baseElement": <body>
     <p
       class="a11y-speak-intro-text"
-      hidden="hidden"
+      hidden=""
       id="a11y-speak-intro-text"
-      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     >
       Notifications
     </p>
@@ -143,7 +143,7 @@ exports[`Tag <Tag label="foo" popoverContents={ <p>This is a popover</p> } /> sh
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-assertive"
-      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     />
     <div
       aria-atomic="true"
@@ -151,7 +151,7 @@ exports[`Tag <Tag label="foo" popoverContents={ <p>This is a popover</p> } /> sh
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-polite"
-      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     />
     <div>
       <span
@@ -258,9 +258,9 @@ exports[`Tag <Tag label="foo" remove={ noop } /> should render a tag with a clos
   "baseElement": <body>
     <p
       class="a11y-speak-intro-text"
-      hidden="hidden"
+      hidden=""
       id="a11y-speak-intro-text"
-      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     >
       Notifications
     </p>
@@ -270,7 +270,7 @@ exports[`Tag <Tag label="foo" remove={ noop } /> should render a tag with a clos
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-assertive"
-      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     />
     <div
       aria-atomic="true"
@@ -278,7 +278,7 @@ exports[`Tag <Tag label="foo" remove={ noop } /> should render a tag with a clos
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-polite"
-      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     />
     <div>
       <span
@@ -425,9 +425,9 @@ exports[`Tag <Tag label="foo" screenReaderLabel="FooBar" /> should render a tag 
   "baseElement": <body>
     <p
       class="a11y-speak-intro-text"
-      hidden="hidden"
+      hidden=""
       id="a11y-speak-intro-text"
-      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     >
       Notifications
     </p>
@@ -437,7 +437,7 @@ exports[`Tag <Tag label="foo" screenReaderLabel="FooBar" /> should render a tag 
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-assertive"
-      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     />
     <div
       aria-atomic="true"
@@ -445,7 +445,7 @@ exports[`Tag <Tag label="foo" screenReaderLabel="FooBar" /> should render a tag 
       aria-relevant="additions text"
       class="a11y-speak-region"
       id="a11y-speak-polite"
-      style="position: absolute;margin: -1px;padding: 0;height: 1px;width: 1px;overflow: hidden;clip: rect(1px, 1px, 1px, 1px);-webkit-clip-path: inset(50%);clip-path: inset(50%);border: 0;word-wrap: normal !important;"
+      style="position:absolute;margin:-1px;padding:0;height:1px;width:1px;overflow:hidden;clip-path:inset(50%);border:0;word-wrap:normal !important;word-break:normal !important;"
     />
     <div>
       <span

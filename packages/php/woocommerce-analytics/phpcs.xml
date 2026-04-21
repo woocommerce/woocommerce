@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<ruleset name="WooCommerce Analytics Coding Standards">
+	<rule ref="WordPress"/>
+
+	<!-- Define files and folders to scan -->
+	<file>src</file>
+
+	<!-- Exclude non-PHP source -->
+	<exclude-pattern>src/client/*</exclude-pattern>
+
+	<!-- Text domain -->
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" type="array">
+				<element value="woocommerce-analytics" />
+			</property>
+		</properties>
+	</rule>
+	<rule ref="WordPress.Utils.I18nTextDomainFixer">
+		<properties>
+			<property name="old_text_domain" type="array" />
+			<property name="new_text_domain" value="woocommerce-analytics" />
+		</properties>
+	</rule>
+
+	<!-- Skip directories that should never be scanned -->
+	<exclude-pattern>vendor/*</exclude-pattern>
+	<exclude-pattern>node_modules/*</exclude-pattern>
+	<exclude-pattern>build/*</exclude-pattern>
+	<exclude-pattern>tests/*</exclude-pattern>
+</ruleset>

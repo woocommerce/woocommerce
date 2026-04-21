@@ -8295,6 +8295,14 @@ table.bar_chart {
 	.woocommerce table.form-table th {
 		padding-top: 25px;
 	}
+	.woocommerce table.form-table td.forminp-checkbox,
+	.woocommerce table.form-table td.forminp-radio,
+	.woocommerce table.form-table td.forminp-textarea {
+		padding-top: 20px;
+	}
+	.woocommerce table.form-table textarea {
+		padding: 6px 8px;
+	}
 
 	// Colour picker swatch: match WP 7.0 input height (40px).
 	.woocommerce table.form-table .colorpickpreview {

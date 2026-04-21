@@ -1501,18 +1501,6 @@ parameters:
 			path: includes/admin/class-wc-admin-assets.php
 
 		-
-			message: '#^Method WC_Admin_Assets\:\:enqueue_block_editor_script\(\) has parameter \$script_name with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: includes/admin/class-wc-admin-assets.php
-
-		-
-			message: '#^Method WC_Admin_Assets\:\:enqueue_block_editor_script\(\) has parameter \$script_path_name with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: includes/admin/class-wc-admin-assets.php
-
-		-
 			message: '#^Method WC_Admin_Assets\:\:register_scripts\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -46588,12 +46576,6 @@ parameters:
 			path: src/Admin/Features/Fulfillments/FulfillmentUtils.php
 
 		-
-			message: '#^Call to function is_array\(\) with array will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Admin/Features/Fulfillments/FulfillmentUtils.php
-
-		-
 			message: '#^Cannot access offset int on array\|false\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
@@ -53266,18 +53248,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductCollection/Controller.php
 
 		-
-			message: '#^If condition is always false\.$#'
-			identifier: if.alwaysFalse
-			count: 1
-			path: src/Blocks/BlockTypes/ProductCollection/Controller.php
-
-		-
-			message: '#^Left side of && is always false\.$#'
-			identifier: booleanAnd.leftAlwaysFalse
-			count: 2
-			path: src/Blocks/BlockTypes/ProductCollection/Controller.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\Controller\:\:add_support_for_filter_blocks\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -53334,12 +53304,6 @@ parameters:
 		-
 			message: '#^Parameter \$request of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\Controller\:\:update_rest_query_in_editor\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\WP_REST_Request\.$#'
 			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductCollection/Controller.php
-
-		-
-			message: '#^Variable \$parsed_block on left side of \?\? is never defined\.$#'
-			identifier: nullCoalesce.variable
 			count: 1
 			path: src/Blocks/BlockTypes/ProductCollection/Controller.php
 
@@ -53726,7 +53690,6 @@ parameters:
 			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/ProductFilterAttribute.php
-
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilterAttribute\:\:delete_default_attribute_id_transient\(\) has no return type specified\.$#'
@@ -65041,7 +65004,6 @@ parameters:
 			count: 1
 			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmails.php
 
-
 		-
 			message: '#^@param string \$feature_id does not accept actual type of parameter\: int\<min, \-1\>\|int\<1, max\>\|non\-falsy\-string\.$#'
 			identifier: parameter.phpDocType
@@ -66861,18 +66823,6 @@ parameters:
 			path: src/Internal/ProductFilters/FilterData.php
 
 		-
-			message: '#^Parameter \#2 \$value of method Automattic\\WooCommerce\\Internal\\ProductFilters\\FilterData\:\:set_cache\(\) expects Automattic\\WooCommerce\\Internal\\ProductFilters\\mix, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/ProductFilters/FilterData.php
-
-		-
-			message: '#^Parameter \$value of method Automattic\\WooCommerce\\Internal\\ProductFilters\\FilterData\:\:set_cache\(\) has invalid type Automattic\\WooCommerce\\Internal\\ProductFilters\\mix\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/ProductFilters/FilterData.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\ProductFilters\\FilterDataProvider\:\:with\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -68398,12 +68348,6 @@ parameters:
 
 		-
 			message: '#^Call to method single_add_to_cart_text\(\) on an unknown class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\WC_Data\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
-			message: '#^Call to method update_meta_data\(\) on an unknown class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\WC_Product\.$#'
 			identifier: class.notFound
 			count: 1
 			path: src/Internal/RestApi/Routes/V4/Products/Controller.php

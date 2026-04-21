@@ -49,8 +49,6 @@ export function ResizableEditor( {
 	}, [] );
 	return (
 		<ResizableBox
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore This prop was added to ResizeableBox.
 			ref={ ( api ) => {
 				resizableRef.current = api?.resizable;
 			} }

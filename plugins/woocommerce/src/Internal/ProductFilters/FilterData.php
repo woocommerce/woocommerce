@@ -561,8 +561,17 @@ class FilterData {
 	/**
 	 * Set the cache with transient version to invalidate all at once when needed.
 	 *
+	 * When the number of cached filter combinations reaches the configured
+	 * maximum (default 1000), new combinations are silently skipped rather than
+	 * stored, preventing unbounded transient growth from bot enumeration.
+	 * The counter resets whenever the filter-data cache is invalidated.
+	 * The limit can be adjusted via the `woocommerce_product_filter_cache_max_entries`
+	 * filter. Set it to 0 to disable the cap entirely.
+	 *
+	 * @since 10.8.0 Cache-entry cap added.
+	 *
 	 * @param string $key   Transient key.
-	 * @param mix    $value Value to set.
+	 * @param mixed  $value Value to set.
 	 *
 	 * @return bool True if the cache was set, false otherwise.
 	 */
@@ -571,15 +580,46 @@ class FilterData {
 			return false;
 		}
 
+		/**
+		 * Maximum number of cache entries (not unique filter combos).
+		 *
+		 * Each unique query-vars combo can produce up to 5 entries (price,
+		 * stock, rating, attribute, taxonomy), so the effective cap on
+		 * unique combos is roughly max_entries / 5.
+		 *
+		 * When the limit is reached, new entries are skipped until the
+		 * cache is next invalidated.  Set to 0 to disable the cap.
+		 *
+		 * @hook woocommerce_product_filter_cache_max_entries
+		 * @since 10.8.0
+		 *
+		 * @param int $max_entries Maximum number of cache entries. Default 1000.
+		 * @return int
+		 */
+		$max_entries = (int) apply_filters( 'woocommerce_product_filter_cache_max_entries', 1000 );
+
+		if ( $max_entries > 0 ) {
+			$count = (int) get_transient( CacheController::CACHE_ENTRY_COUNT_TRANSIENT );
+
+			if ( $count >= $max_entries ) {
+				return false;
+			}
+
+			// The counter only increments — it does not decrement when entries
+			// expire naturally. The effective cap may therefore be reached
+			// before $max_entries live transients exist, making the limit
+			// slightly conservative. This is intentional: accuracy here is
+			// not worth the cost of tracking individual expirations.
+			set_transient( CacheController::CACHE_ENTRY_COUNT_TRANSIENT, $count + 1, DAY_IN_SECONDS );
+		}
+
 		$transient_version = WC_Cache_Helper::get_transient_version( CacheController::CACHE_GROUP );
 		$transient_value   = array(
 			'version' => $transient_version,
 			'value'   => $value,
 		);
 
-		$result = set_transient( $key, $transient_value, DAY_IN_SECONDS );
-
-		return $result;
+		return set_transient( $key, $transient_value, DAY_IN_SECONDS );
 	}
 
 	/**

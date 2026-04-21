@@ -5,7 +5,7 @@
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
 	"engines": {
-		"node": "^20.11.1"
+		"node": "^24.15.0"
 	},
 	"keywords": [
 		"wordpress",
@@ -56,8 +56,8 @@
 	"dependencies": {
 		"@automattic/explat-client": "^0.0.5",
 		"@automattic/explat-client-react-helpers": "^0.0.6",
-		"@wordpress/api-fetch": "wp-6.6",
-		"@wordpress/hooks": "wp-6.6",
+		"@wordpress/api-fetch": "catalog:wp-min",
+		"@wordpress/hooks": "catalog:wp-min",
 		"cookie": "^0.4.2",
 		"qs": "^6.11.2"
 	},
@@ -65,7 +65,7 @@
 		"@babel/core": "7.25.7",
 		"@types/cookie": "^0.4.1",
 		"@types/jest": "29.5.x",
-		"@types/node": "20.x.x",
+		"@types/node": "^24.1.0",
 		"@types/qs": "^6.9.10",
 		"@types/react": "18.3.x",
 		"@woocommerce/eslint-plugin": "workspace:*",
@@ -152,6 +152,7 @@
 			"allowUsuallyExcludedPaths": true,
 			"files": [
 				"package.json",
+				"../../../pnpm-lock.yaml",
 				"node_modules/@woocommerce/eslint-plugin/configs",
 				"node_modules/@woocommerce/eslint-plugin/rules",
 				"node_modules/@woocommerce/eslint-plugin/index.js",

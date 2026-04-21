@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Add checkout evidence validation to prevent unintended order completion for orders without checkout context

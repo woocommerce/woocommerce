@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Introduces and implements constants for default customer address options in the WooCommerce plugin codebase.
