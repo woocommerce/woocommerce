@@ -22,10 +22,16 @@ class Bootstrap {
 
 	/**
 	 * Wire the feature registration.
+	 *
+	 * `boot_when_enabled` runs on `init` (not `admin_init`) because WordPress
+	 * fires `admin_menu` *before* `admin_init` in the admin request lifecycle.
+	 * If we booted on admin_init, Menu_Reconciler would register its
+	 * admin_menu hook after the hook had already fired, and the reconciler
+	 * would never run.
 	 */
 	public function __construct() {
 		add_action( 'woocommerce_register_feature_definitions', array( $this, 'register_feature' ) );
-		add_action( 'admin_init', array( $this, 'boot_when_enabled' ) );
+		add_action( 'init', array( $this, 'boot_when_enabled' ), 20 );
 	}
 
 	/**
@@ -54,7 +60,8 @@ class Bootstrap {
 	 * When the flag is enabled, instantiate the reconciler, renderer, assets,
 	 * and telemetry. Each of those classes registers its own hooks.
 	 *
-	 * Called on admin_init so the feature flag is readable and translations are loaded.
+	 * Called on `init` priority 20 so Menu_Reconciler's admin_menu hook lands
+	 * before WordPress fires admin_menu (see constructor note).
 	 *
 	 * Spec §8: multisite network admin always uses the native rail — we bail
 	 * before any hook registration in that context.

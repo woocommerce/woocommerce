@@ -140,10 +140,15 @@ class Renderer {
 	private function index_by_parent( array $tree ): array {
 		$by_parent = array();
 		foreach ( $tree as $slug => $node ) {
-			$node['slug']           = $slug;
-			$parent                 = $node['parent'] ?? 'woocommerce';
-			$by_parent[ $parent ] ??= array();
-			$by_parent[ $parent ][] = $node;
+			// Root-level nodes (parent === null) are not rendered as children
+			// of anything. The Woo root in particular is never rendered as a
+			// rail item itself — its children are the rail's top-level items.
+			if ( null === ( $node['parent'] ?? null ) ) {
+				continue;
+			}
+			$node['slug']                   = $slug;
+			$by_parent[ $node['parent'] ] ??= array();
+			$by_parent[ $node['parent'] ][] = $node;
 		}
 		return $by_parent;
 	}

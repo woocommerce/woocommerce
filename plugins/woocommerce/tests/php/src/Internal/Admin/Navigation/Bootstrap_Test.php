@@ -26,16 +26,17 @@ class Bootstrap_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Bootstrap registers the feature-registration hook and the admin_init
-	 * gateway. It does NOT register admin_menu or admin_enqueue_scripts itself
-	 * — those live in Menu_Reconciler and Assets, which only instantiate when
+	 * Bootstrap registers the feature-registration hook and the init gateway.
+	 * The init hook must fire before admin_menu — see Bootstrap's constructor
+	 * note. It does NOT register admin_menu or admin_enqueue_scripts itself —
+	 * those live in Menu_Reconciler and Assets, which only instantiate when
 	 * boot_when_enabled() runs with the flag on.
 	 */
-	public function test_bootstrap_registers_feature_and_admin_init_hooks() {
+	public function test_bootstrap_registers_feature_and_init_hooks() {
 		wc_get_container()->get( Bootstrap::class );
 
 		$this->assertNotFalse( has_action( 'woocommerce_register_feature_definitions' ) );
-		$this->assertNotFalse( has_action( 'admin_init' ) );
+		$this->assertNotFalse( has_action( 'init' ) );
 	}
 
 	/**
