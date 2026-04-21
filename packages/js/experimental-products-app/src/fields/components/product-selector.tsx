@@ -2,19 +2,10 @@
  * External dependencies
  */
 import { BaseControl, FormTokenField, Spinner } from '@wordpress/components';
-
 import { store as coreStore } from '@wordpress/core-data';
-
 import { resolveSelect } from '@wordpress/data';
-
-import {
-	useEffect,
-	useMemo,
-	useState,
-} from '@wordpress/element';
-
+import { useEffect, useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-
 import type { Product } from '@woocommerce/data';
 
 /**
@@ -158,6 +149,7 @@ export function ProductSelector( {
 	}, [ selectedProducts, suggestions ] );
 
 	return (
+		// eslint-disable-next-line @wordpress/no-base-control-with-label-without-id
 		<BaseControl
 			label={ label }
 			help={
