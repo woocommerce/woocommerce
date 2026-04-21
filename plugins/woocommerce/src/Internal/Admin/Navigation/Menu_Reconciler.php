@@ -43,6 +43,9 @@ class Menu_Reconciler {
 	public function __construct() {
 		add_action( 'admin_menu', array( $this, 'reconcile' ), 999 );
 		add_filter( 'menu_order', array( $this, 'strip_phantom_slugs' ), 20 );
+		// Place Woo right after Dashboard. Runs after WC's own menu_order
+		// filter (priority 10) and our phantom strip (priority 20).
+		add_filter( 'menu_order', array( $this, 'place_woo_after_dashboard' ), 200 );
 	}
 
 	/**
@@ -63,6 +66,41 @@ class Menu_Reconciler {
 				static fn( $slug ) => in_array( $slug, $live_slugs, true )
 			)
 		);
+	}
+
+	/**
+	 * Move the `woocommerce` slug to sit directly after `index.php` (Dashboard)
+	 * in the rail. Spec §5.1 / §8.
+	 *
+	 * @param array $menu_order Menu slugs in current order.
+	 * @return array
+	 */
+	public function place_woo_after_dashboard( array $menu_order ): array {
+		// Remove woocommerce from wherever it currently is.
+		$menu_order = array_values(
+			array_filter(
+				$menu_order,
+				static fn( $slug ) => 'woocommerce' !== $slug
+			)
+		);
+
+		// Re-insert immediately after index.php.
+		$new_order = array();
+		$inserted  = false;
+		foreach ( $menu_order as $slug ) {
+			$new_order[] = $slug;
+			if ( 'index.php' === $slug && ! $inserted ) {
+				$new_order[] = 'woocommerce';
+				$inserted    = true;
+			}
+		}
+
+		// Fallback: if index.php wasn't in the order (shouldn't happen), append.
+		if ( ! $inserted ) {
+			$new_order[] = 'woocommerce';
+		}
+
+		return $new_order;
 	}
 
 	/**
