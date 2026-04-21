@@ -29,6 +29,31 @@ class Utils {
 	}
 
 	/**
+	 * Compute the complexity cost of a paginated connection field.
+	 *
+	 * Used as the `complexity` callable on every generated resolver field
+	 * that returns a `Connection`. Runs during query validation (before
+	 * resolver execution, so before `PaginationParams::validate_args()` has
+	 * a chance to reject bad input) — so out-of-range / wrong-type values
+	 * are clamped to MAX_PAGE_SIZE here. Using MAX_PAGE_SIZE as the
+	 * fallback means a malicious attempt to shrink cost via e.g. a
+	 * negative `first` value only inflates the computed complexity,
+	 * closing the cost-bypass angle.
+	 *
+	 * @param int   $child_complexity The complexity of a single child node.
+	 * @param array $args             The field arguments (expects `first` / `last`).
+	 *
+	 * @return int The total complexity for this connection field.
+	 */
+	public static function complexity_from_pagination( int $child_complexity, array $args ): int {
+		$requested = $args['first'] ?? $args['last'] ?? \Automattic\WooCommerce\Api\Pagination\PaginationParams::get_default_page_size();
+		$page_size = ( is_int( $requested ) && $requested >= 0 && $requested <= \Automattic\WooCommerce\Api\Pagination\PaginationParams::MAX_PAGE_SIZE )
+			? $requested
+			: \Automattic\WooCommerce\Api\Pagination\PaginationParams::MAX_PAGE_SIZE;
+		return $page_size * ( $child_complexity + 1 );
+	}
+
+	/**
 	 * Build a PaginationParams instance from the standard GraphQL pagination
 	 * arguments (first, last, after, before).
 	 *

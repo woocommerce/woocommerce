@@ -58,10 +58,7 @@ class VariableProduct {
 									'description'  => __( 'Return results before this cursor.', 'woocommerce' ),
 								),
 							),
-							'complexity'  => static function ( int $child_complexity, array $args ): int {
-							$page_size = $args['first'] ?? $args['last'] ?? \Automattic\WooCommerce\Api\Pagination\PaginationParams::get_default_page_size();
-							return $page_size * ( $child_complexity + 1 );
-						},
+							'complexity'  => Utils::complexity_from_pagination( ... ),
 							'resolve'     => fn( $parent, array $args ): Connection => Utils::translate_exceptions( fn() => $parent->variations->slice( $args ) ),
 						),
 						'name'              => array(
