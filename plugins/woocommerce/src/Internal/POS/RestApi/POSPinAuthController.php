@@ -112,9 +112,13 @@ class POSPinAuthController extends RestApiControllerBase implements RegisterHook
 						'view_pos'
 					),
 					'args'                => array(
-						'pin' => array(
+						'pin'     => array(
 							'required' => true,
 							'type'     => 'string',
+						),
+						'context' => array(
+							'type'    => 'object',
+							'default' => array(),
 						),
 					),
 				),
@@ -307,10 +311,46 @@ class POSPinAuthController extends RestApiControllerBase implements RegisterHook
 			}
 		}
 
-		$logger->info(
-			sprintf( 'PIN verification succeeded for user %s (ID %d).', $user->user_login, $user_id ),
-			$log_context
-		);
+		// If the caller identifies this as a manager-override check for a
+		// specific capability, write an audit line mirroring the order-scoped
+		// log_approval_consumed format so non-order overrides (e.g. opening
+		// POS settings) are traceable alongside the token-based ones.
+		$context_param = $request->get_param( 'context' );
+		$override_cap  = '';
+		if ( is_array( $context_param ) && isset( $context_param['capability'] ) ) {
+			$override_cap = (string) $context_param['capability'];
+		}
+
+		if ( '' !== $override_cap ) {
+			$actor_id    = get_current_user_id();
+			$actor       = $actor_id ? get_userdata( $actor_id ) : null;
+			$actor_label = $actor
+				? sprintf( '%s (%s, ID %d)', $actor->display_name, $actor->user_login, $actor_id )
+				: sprintf( 'ID %d', $actor_id );
+			$approver_label = sprintf(
+				'%s (%s, ID %d)',
+				$user->display_name,
+				$user->user_login,
+				$user_id
+			);
+			$granted = ! empty( $capabilities[ $override_cap ] );
+
+			$logger->info(
+				sprintf(
+					'POS verify override: %s %s to %s, approved by %s.',
+					$override_cap,
+					$granted ? 'granted' : 'denied',
+					$actor_label,
+					$approver_label
+				),
+				$log_context
+			);
+		} else {
+			$logger->info(
+				sprintf( 'PIN verification succeeded for user %s (ID %d).', $user->user_login, $user_id ),
+				$log_context
+			);
+		}
 
 		return array(
 			'user_id'      => $user_id,
