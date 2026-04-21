@@ -6,7 +6,7 @@ import { BlockEditProps } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
-import type { Color, FilterBlockContext } from '../../types';
+import type { Color, SelectableItemsBlockContext } from '../../types';
 
 export type BlockAttributes = {
 	className: string;
@@ -21,7 +21,7 @@ export type BlockAttributes = {
 };
 
 export type EditProps = BlockEditProps< BlockAttributes > & {
-	context: FilterBlockContext;
+	context: SelectableItemsBlockContext;
 	optionElementBorder: Color;
 	setOptionElementBorder: ( value: string ) => void;
 	optionElementSelected: Color;

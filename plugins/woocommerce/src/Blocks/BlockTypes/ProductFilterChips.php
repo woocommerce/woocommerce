@@ -27,13 +27,14 @@ final class ProductFilterChips extends AbstractBlock {
 	 */
 	protected function render( $attributes, $content, $block ) {
 		if (
-			empty( $block->context['filterData'] )
+			empty( $block->context['woocommerce/selectableItems'] )
 		) {
 			return '';
 		}
 
-		$items       = $block->context['filterData']['items'] ?? array();
-		$show_counts = $block->context['filterData']['showCounts'] ?? false;
+		$block_context = $block->context['woocommerce/selectableItems'];
+		$items         = $block_context['items'] ?? array();
+		$show_counts   = $block_context['showCounts'] ?? false;
 		$classes     = '';
 		$style       = '';
 
@@ -69,8 +70,8 @@ final class ProductFilterChips extends AbstractBlock {
 		?>
 		<div <?php echo get_block_wrapper_attributes( $wrapper_attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 			<fieldset>
-				<?php if ( ! empty( $block->context['filterData']['groupLabel'] ) ) : ?>
-					<legend class="screen-reader-text"><?php echo esc_html( $block->context['filterData']['groupLabel'] ); ?></legend>
+				<?php if ( ! empty( $block_context['groupLabel'] ) ) : ?>
+					<legend class="screen-reader-text"><?php echo esc_html( $block_context['groupLabel'] ); ?></legend>
 				<?php endif; ?>
 				<div class="wc-block-product-filter-chips__items">
 					<?php foreach ( $items as $item ) { ?>
