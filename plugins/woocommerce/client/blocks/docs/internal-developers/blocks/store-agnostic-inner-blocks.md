@@ -107,19 +107,11 @@ The context object that parents MUST provide.
 |-------|------|----------|-------------|
 | `groupLabel` | `string` | No | Screen reader label for the group. Rendered as `<legend>` in fieldset. Example: "Filter by Color" |
 
-### Presentation Hints (Optional)
+### Presentation Fields (Optional)
 
-Use `displayHints` for use-case-specific presentation preferences. Inner blocks check for hints they support and ignore others.
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `displayHints` | `DisplayHints` | Bag of presentation preferences |
-
-**DisplayHints fields:**
-
-| Field | Type | Default | Used By | Description |
-|-------|------|---------|---------|-------------|
-| `showCounts` | `boolean` | `false` | Filters | Show product counts next to items |
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `showCounts` | `boolean` | `false` | Show product counts next to items (filters) |
 
 ## SelectableItem
 
@@ -162,13 +154,12 @@ Inner blocks SHOULD:
 
 1. Render `<input type="radio">` when `selectionMode === 'single'`
 2. Render `<input type="checkbox">` when `selectionMode === 'multiple'`
-3. Show counts when `displayHints.showCounts === true` and `item.count` exists
+3. Show counts when `showCounts === true` and `item.count` exists
 4. Render color swatch when `item.color` exists
 5. Render image swatch when `item.image` exists (fallback if no color)
 6. Render text-only when neither `color` nor `image` exists
 7. Apply disabled styling when `item.disabled === true`
 8. Use `groupLabel` for fieldset legend (screen reader accessible)
-9. Check `displayHints` for supported hints, ignore unknown ones
 
 ---
 
@@ -224,15 +215,6 @@ Location: `assets/js/blocks/product-filters/types.ts` (or shared types file)
 import type { ReactNode } from 'react';
 
 /**
- * Presentation hints for use-case-specific display preferences.
- * Inner blocks check for hints they support and ignore others.
- */
-export interface DisplayHints {
-  /** Show product counts next to items (filters) */
-  showCounts?: boolean;
-}
-
-/**
  * Context protocol for selectable item lists.
  * 
  * @see docs/internal-developers/blocks/store-agnostic-inner-blocks.md
@@ -253,8 +235,8 @@ export interface SelectableItemsContext {
   /** Screen reader label for the group (rendered as fieldset legend) */
   groupLabel?: string;
   
-  /** Use-case-specific presentation preferences */
-  displayHints?: DisplayHints;
+  /** Show product counts next to items (filters) */
+  showCounts?: boolean;
 }
 
 /**
@@ -338,9 +320,7 @@ interface SelectableItemsContextInterface {
      *   selectAction: string,
      *   storeNamespace: string,
      *   groupLabel?: string,
-     *   displayHints?: array{
-     *     showCounts?: bool
-     *   }
+     *   showCounts?: bool
      * }
      */
     public function get_selectable_items_context(): array;
@@ -371,11 +351,6 @@ parameters:
         ariaLabel?: string
       }
     '''
-    DisplayHints: '''
-      array{
-        showCounts?: bool
-      }
-    '''
     SelectableItemsContext: '''
       array{
         items: list<SelectableItem>,
@@ -383,7 +358,7 @@ parameters:
         selectAction: string,
         storeNamespace: string,
         groupLabel?: string,
-        displayHints?: DisplayHints
+        showCounts?: bool
       }
     '''
 ```
@@ -419,9 +394,7 @@ $context = [
     'selectAction'   => 'toggleFilter',
     'storeNamespace' => 'woocommerce/product-filters',
     'groupLabel'     => 'Filter by Color',  // Screen reader: "Filter by Color"
-    'displayHints'   => [
-        'showCounts' => true,  // Filter-specific: show "(5)" next to items
-    ],
+    'showCounts'     => true,
 ];
 ```
 
@@ -439,9 +412,7 @@ $context = [
     'selectAction'   => 'toggleFilter',
     'storeNamespace' => 'woocommerce/product-filters',
     'groupLabel'     => 'Filter by Size',
-    'displayHints'   => [
-        'showCounts' => true,
-    ],
+    'showCounts'     => true,
 ];
 ```
 
@@ -458,7 +429,7 @@ $context = [
     'selectAction'   => 'setAttribute',
     'storeNamespace' => 'woocommerce/add-to-cart-with-options',
     'groupLabel'     => 'Select Color',
-    // No displayHints - variation selector uses inner block defaults
+    // No showCounts needed for variation selector
 ];
 ```
 
@@ -475,9 +446,7 @@ $context = [
     'selectAction'   => 'toggleFilter',
     'storeNamespace' => 'woocommerce/product-filters',
     'groupLabel'     => 'Filter by Category',
-    'displayHints'   => [
-        'showCounts' => true,
-    ],
+    'showCounts'     => true,
 ];
 ```
 
@@ -501,9 +470,7 @@ $context = [
     'selectAction'   => 'toggleFilter',
     'storeNamespace' => 'woocommerce/product-filters',
     'groupLabel'     => 'Filter by Rating',
-    'displayHints'   => [
-        'showCounts' => true,
-    ],
+    'showCounts'     => true,
 ];
 ```
 
@@ -572,9 +539,9 @@ store('woocommerce/selectable-items', {
 });
 ```
 
-**PHP Renderer (AbstractSelectableItems.php)**
+**PHP Renderer**
 ```php
-abstract class AbstractSelectableItems extends AbstractBlock {
+class SelectableSwatches extends AbstractBlock {
     
     protected function render($attributes, $content, $block) {
         $context = $block->context['woocommerce/selectableItems'] ?? null;
@@ -584,7 +551,8 @@ abstract class AbstractSelectableItems extends AbstractBlock {
         
         $items = $context['items'];
         $selection_mode = $context['selectionMode'] ?? 'multiple';
-        $display_hints = $context['displayHints'] ?? [];
+        $show_counts = $context['showCounts'] ?? false;
+        $input_type = $selection_mode === 'single' ? 'radio' : 'checkbox';
         
         ob_start();
         ?>
@@ -599,25 +567,31 @@ abstract class AbstractSelectableItems extends AbstractBlock {
                     </legend>
                 <?php endif; ?>
                 
-                <div class="wc-block-selectable-items__list">
-                    <?php foreach ($items as $item): ?>
-                        <?php echo $this->render_item($item, $selection_mode, $display_hints); ?>
-                    <?php endforeach; ?>
-                </div>
+                <?php foreach ($items as $item): ?>
+                    <label
+                        class="wc-block-swatch <?php echo $item['selected'] ? 'is-selected' : ''; ?>"
+                        data-wp-context='<?php echo wp_json_encode(['item' => $item]); ?>'
+                    >
+                        <input 
+                            type="<?php echo $input_type; ?>"
+                            value="<?php echo esc_attr($item['value']); ?>"
+                            data-wp-bind--checked="state.isSelected"
+                            data-wp-on--change="actions.handleSelect"
+                        />
+                        <?php if (!empty($item['color'])): ?>
+                            <span class="wc-block-swatch__color" style="background-color: <?php echo esc_attr($item['color']); ?>"></span>
+                        <?php endif; ?>
+                        <span class="wc-block-swatch__label"><?php echo esc_html($item['label']); ?></span>
+                        <?php if ($show_counts && isset($item['count'])): ?>
+                            <span class="wc-block-swatch__count">(<?php echo $item['count']; ?>)</span>
+                        <?php endif; ?>
+                    </label>
+                <?php endforeach; ?>
             </fieldset>
         </div>
         <?php
         return ob_get_clean();
     }
-    
-    /**
-     * Render individual item - override in subclasses for different styles.
-     */
-    abstract protected function render_item(
-        array $item, 
-        string $selection_mode, 
-        array $display_hints
-    ): string;
 }
 ```
 
@@ -639,9 +613,7 @@ class ProductFilterAttribute extends AbstractBlock {
             'selectAction'   => 'toggleFilter',
             'storeNamespace' => 'woocommerce/product-filters',
             'groupLabel'     => $attribute_label,
-            'displayHints'   => [
-                'showCounts' => $attributes['showCounts'] ?? true,
-            ],
+            'showCounts'     => $attributes['showCounts'] ?? true,
         ];
         
         // Provide context to inner blocks
@@ -718,7 +690,7 @@ class VariationSelectorAttribute extends AbstractBlock {
             'selectAction'   => 'setAttribute',
             'storeNamespace' => 'woocommerce/add-to-cart-with-options',
             'groupLabel'     => $attribute_label,
-            // No displayHints - variation selector uses inner block defaults
+            // No showCounts needed for variation selector
         ];
         
         // Provide context to inner blocks
@@ -795,21 +767,19 @@ The protocol supports multiple display styles as separate inner blocks, all cons
 | `woocommerce/selectable-list` | Checkbox list | Detailed with counts |
 
 Each variant:
-1. Extends `AbstractSelectableItems`
-2. Implements `render_item()` with specific HTML/styling
-3. Consumes the `woocommerce/selectableItems` protocol
-4. Works in any parent that provides the protocol context
+1. Reads the `woocommerce/selectableItems` context in `render()`
+2. Renders items with its own HTML/styling
+3. Works in any parent that provides the protocol context
 
 ## Swatch Rendering Example
 
 Presentation data is bundled on items - direct property access:
 
-**render_item() for swatches:**
+**Rendering a single swatch item:**
 ```php
-protected function render_item(array $item, string $selection_mode, array $display_hints): string {
+private function render_item(array $item, string $selection_mode, bool $show_counts): string {
     $has_color = !empty($item['color']);
     $has_image = !empty($item['image']);
-    $show_counts = $display_hints['showCounts'] ?? false;
     
     $swatch_content = '';
     
@@ -865,12 +835,11 @@ protected function render_item(array $item, string $selection_mode, array $displ
 # Migration Path
 
 ### Phase 1: Create New Blocks
-1. Create `AbstractSelectableItems` base class
-2. Create `SelectableSwatches` block implementing the pattern
-3. Test inside both filter and variation selector parents
+1. Create `SelectableSwatches` block implementing the protocol
+2. Test inside both filter and variation selector parents
 
 ### Phase 2: Refactor Existing Blocks
-1. Update `ProductFilterChips` to extend `AbstractSelectableItems`
+1. Update `ProductFilterChips` to read from the protocol context
 2. Update `ProductFilterCheckboxList` similarly
 3. Update `VariationSelectorAttributeOptions` to provide standardized context
 4. Deprecate direct store references in inner blocks
