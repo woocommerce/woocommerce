@@ -37,6 +37,7 @@ class ListProducts {
 	 * @param PaginationParams   $pagination   The pagination parameters.
 	 * @param ProductFilterInput $filters      Filter criteria (unrolled to flat args).
 	 * @param ?ProductType       $product_type Optional product type filter.
+	 * @param ?array             $_query_info  Unified query info tree from the GraphQL request.
 	 * @return Connection
 	 */
 	#[ConnectionOf( Product::class )]
@@ -46,6 +47,7 @@ class ListProducts {
 		ProductFilterInput $filters,
 		#[Description( 'Filter by product type.' )]
 		?ProductType $product_type = null,
+		?array $_query_info = null,
 	): Connection {
 		$first  = $pagination->first;
 		$last   = $pagination->last;
@@ -138,6 +140,15 @@ class ListProducts {
 			$posts = array_reverse( $posts );
 		}
 
+		// Narrow $_query_info to the per-node selection so each mapped
+		// product only fetches the subtrees the client actually asked for
+		// under `nodes { ... }` / `edges { node { ... } }`. Without this,
+		// ProductMapper::populate_common_fields() hits its null-$query_info
+		// fallback and runs build_reviews() (plus its count query) for
+		// every product on the page — N+1 on reviews even when no client
+		// selected them.
+		$node_query_info = ProductMapper::connection_node_info( $_query_info );
+
 		// Build edges and nodes.
 		$edges = array();
 		$nodes = array();
@@ -147,7 +158,7 @@ class ListProducts {
 				continue;
 			}
 
-			$product = ProductMapper::from_wc_product( $wc_product );
+			$product = ProductMapper::from_wc_product( $wc_product, $node_query_info );
 
 			$edge         = new Edge();
 			$edge->cursor = base64_encode( (string) $product->id );

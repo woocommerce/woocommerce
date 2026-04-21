@@ -88,6 +88,7 @@ class ListProducts {
 		if ( array_key_exists( 'product_type', $args ) ) {
 			$execute_args['product_type'] = $args['product_type'];
 		}
+		$execute_args['_query_info'] = QueryInfoExtractor::extract_from_info( $info, $args );
 
 		$result = Utils::execute_command( $command, $execute_args );
 
