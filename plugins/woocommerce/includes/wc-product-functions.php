@@ -647,7 +647,9 @@ function wc_apply_sale_state_for_product( WC_Product $product, string $mode ): v
 	// Refresh the lookup table since only the `price` prop changed, which is
 	// not in the tracked props list in handle_updated_props().
 	$data_store = WC_Data_Store::load( 'product' );
-	$data_store->update_lookup_table( $product_id, 'wc_product_meta_lookup' ); // @phpstan-ignore method.notFound (Called via __call() on the underlying WC_Data_Store_WP instance.)
+	if ( $data_store->has_callable( 'refresh_product_lookup_table' ) ) {
+		$data_store->refresh_product_lookup_table( $product_id ); // @phpstan-ignore method.notFound (Guarded by has_callable() and called via __call() on the underlying product data store instance.)
+	}
 
 	wc_delete_product_transients( $product_id );
 
