@@ -1,6 +1,7 @@
 {
 	"name": "@woocommerce/experimental-products-app",
 	"version": "0.1.0",
+	"private": true,
 	"description": "Experimental all products app for WooCommerce admin.",
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
