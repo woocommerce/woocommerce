@@ -283,13 +283,14 @@ export type SelectableItem = (
 
 ## PHP
 
-No base class or trait needed — parent blocks set `$block->context` directly:
+No base class or trait needed — parent blocks set `$block->context` directly. PHPStan type aliases (defined below) enforce the structure at CI time.
 
 ```php
 class ProductFilterAttribute extends AbstractBlock {
 
     protected function render( $attributes, $content, $block ) {
-        $block->context['woocommerce/selectableItems'] = [
+        /** @var SelectableItemsContext $context */
+        $context = [
             'items'          => $this->transform_to_selectable_items( $filter_items ),
             'selectionMode'  => 'multiple',
             'selectAction'   => 'toggleFilter',
@@ -297,6 +298,8 @@ class ProductFilterAttribute extends AbstractBlock {
             'groupLabel'     => $attributes['label'] ?? '',
             'showCounts'     => $attributes['showCounts'] ?? true,
         ];
+
+        $block->context['woocommerce/selectableItems'] = $context;
 
         return sprintf(
             '<div %s>%s</div>',
