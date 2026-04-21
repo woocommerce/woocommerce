@@ -1159,11 +1159,11 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 			),
 			! $is_create ? array(
 				'customer_note' => array(
-					'description'       => __( 'A note from the merchant to include in the customer notification email.', 'woocommerce' ),
+					'description'       => __( 'A note from the merchant to include in the customer notification email. Basic HTML (links, bold, italic) is preserved; scripts and unsafe markup are stripped.', 'woocommerce' ),
 					'type'              => 'string',
 					'default'           => '',
 					'required'          => false,
-					'sanitize_callback' => 'sanitize_textarea_field',
+					'sanitize_callback' => 'wp_kses_post',
 					'context'           => array( 'edit' ),
 				),
 			) : array()

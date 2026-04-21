@@ -37,14 +37,8 @@ do_action( 'woocommerce_email_header', $email_heading, $email ); ?>
 $customer_note_text = is_scalar( $customer_note ?? null ) ? trim( (string) $customer_note ) : '';
 if ( '' !== $customer_note_text ) :
 	?>
-<table border="0" cellpadding="0" cellspacing="0" width="100%" role="presentation">
-	<tr>
-		<td class="email-additional-content" style="padding: 16px 0;">
-			<p><strong><?php echo esc_html__( 'Note from the store:', 'woocommerce' ); ?></strong></p>
-			<?php echo wp_kses_post( wpautop( wptexturize( $customer_note_text ) ) ); ?>
-		</td>
-	</tr>
-</table>
+<p><strong><?php echo esc_html__( 'Note from the store:', 'woocommerce' ); ?></strong></p>
+<blockquote><?php echo wp_kses_post( wpautop( wptexturize( $customer_note_text ) ) ); ?></blockquote>
 <?php endif; ?>
 
 <?php

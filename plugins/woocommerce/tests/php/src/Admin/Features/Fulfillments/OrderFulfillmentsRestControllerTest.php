@@ -2105,8 +2105,68 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( WP_Http::OK, $response->get_status(), 'Update with customer_note should succeed' );
 		$this->assertNotNull( $captured_note, 'Notification hook should have been fired with customer_note' );
-		$this->assertStringNotContainsString( '<script>', $captured_note, 'Script tags should be stripped by sanitize_textarea_field' );
+		$this->assertStringNotContainsString( '<script>', $captured_note, 'Script tags should be stripped by wp_kses_post' );
 		$this->assertStringContainsString( 'Hello customer!', $captured_note, 'Legitimate note text should be preserved' );
+
+		remove_action( 'woocommerce_fulfillment_updated_notification', $callback, 10 );
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * @testdox Should preserve safe HTML (links, bold, italic) in customer_note.
+	 */
+	public function test_update_fulfillment_preserves_safe_html_in_customer_note(): void {
+		$order = WC_Helper_Order::create_order( get_current_user_id() );
+		$this->assertInstanceOf( WC_Order::class, $order );
+
+		$fulfillment = FulfillmentsHelper::create_fulfillment(
+			array(
+				'entity_type'  => WC_Order::class,
+				'entity_id'    => $order->get_id(),
+				'status'       => 'fulfilled',
+				'is_fulfilled' => true,
+			)
+		);
+
+		$captured_note = null;
+		$callback      = function ( $order_id, $fulfillment_obj, $order_obj, $customer_note ) use ( &$captured_note ) {
+			unset( $order_id, $fulfillment_obj, $order_obj );
+			$captured_note = $customer_note;
+		};
+		add_action( 'woocommerce_fulfillment_updated_notification', $callback, 10, 4 );
+
+		wp_set_current_user( 1 );
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() . '/fulfillments/' . $fulfillment->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'status'          => 'fulfilled',
+					'is_fulfilled'    => true,
+					'notify_customer' => true,
+					'customer_note'   => 'Please <strong>call us</strong> at <a href="https://example.com">our site</a>.',
+					'meta_data'       => array(
+						array(
+							'id'    => 0,
+							'key'   => '_items',
+							'value' => array(
+								array(
+									'item_id' => 1,
+									'qty'     => 1,
+								),
+							),
+						),
+					),
+				)
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::OK, $response->get_status(), 'Update with HTML customer_note should succeed' );
+		$this->assertNotNull( $captured_note, 'Notification hook should have been fired with customer_note' );
+		$this->assertStringContainsString( '<strong>call us</strong>', $captured_note, 'Safe bold markup should be preserved' );
+		$this->assertStringContainsString( '<a href="https://example.com">our site</a>', $captured_note, 'Safe link markup should be preserved' );
 
 		remove_action( 'woocommerce_fulfillment_updated_notification', $callback, 10 );
 		wp_set_current_user( 0 );

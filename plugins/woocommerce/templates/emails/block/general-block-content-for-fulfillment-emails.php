@@ -23,7 +23,7 @@ if ( ! isset( $order, $fulfillment ) ) {
 $customer_note_text = is_scalar( $customer_note ?? null ) ? trim( (string) $customer_note ) : '';
 if ( '' !== $customer_note_text ) {
 	echo '<p><strong>' . esc_html__( 'Note from the store:', 'woocommerce' ) . '</strong></p>';
-	echo wp_kses_post( wpautop( wptexturize( $customer_note_text ) ) );
+	echo '<blockquote>' . wp_kses_post( wpautop( wptexturize( $customer_note_text ) ) ) . '</blockquote>';
 }
 
 /**
