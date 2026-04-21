@@ -44,7 +44,6 @@ export function CurrencyInput( {
 	onChange,
 	validity,
 }: DataFormControlProps< ProductEntityRecord > ) {
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- field.id is always a PriceField key when used by regular_price/sale_price fields
 	const fieldId = field.id as PriceField;
 	const value = data[ fieldId ] ?? '';
 
