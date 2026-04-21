@@ -101,6 +101,7 @@ class WC_Formatting_Functions_Test extends \WC_Unit_Test_Case {
 			'thousand sep — period'       => array( 'woocommerce_price_thousand_sep', '.', '.', '.', false ),
 			'thousand sep — space'        => array( 'woocommerce_price_thousand_sep', ',', ',', ' ', false ),
 			'thousand sep — empty'        => array( 'woocommerce_price_thousand_sep', ',', ',', '', false ),
+			'thousand sep — zero digit'   => array( 'woocommerce_price_thousand_sep', ',', ',', '0', true ),
 			'thousand sep — single digit' => array( 'woocommerce_price_thousand_sep', ',', ',', '1', true ),
 			'thousand sep — digit+symbol' => array( 'woocommerce_price_thousand_sep', ',', ',', '1,', true ),
 			'decimal sep — period'        => array( 'woocommerce_price_decimal_sep', '.', '.', '.', false ),

@@ -1200,7 +1200,7 @@ function wc_format_product_short_description( $content ) {
 function wc_format_option_price_separators( $value, $option, $raw_value ) {
 	$sanitized = wc_clean( $raw_value ?? '' );
 
-	if ( strpbrk( $sanitized, '0123456789' ) ) {
+	if ( false !== strpbrk( $sanitized, '0123456789' ) ) {
 		WC_Admin_Settings::add_error(
 			esc_html__( 'Thousand and decimal separators cannot contain numbers.', 'woocommerce' )
 		);
