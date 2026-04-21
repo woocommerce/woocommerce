@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Surface legacy-settings-fallback signal via wc_doing_it_wrong so it appears in debug.log and Query Monitor; mark the v4 REST settings update endpoint as @internal until filter fidelity is restored.

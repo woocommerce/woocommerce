@@ -528,7 +528,7 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 							return;
 						}
 
-						$this->log_legacy_settings_fallback( $tab, $section_id, $unsupported_fields );
+						$this->warn_legacy_settings_fallback( $tab, $section_id, $unsupported_fields );
 					}
 				}
 			}
@@ -541,26 +541,54 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		}
 
 		/**
-		 * Log a legacy settings fallback in the console to ease debugging.
+		 * Warn that the modernised settings SDK fell back to legacy rendering.
 		 *
-		 * @since 10.6.0
+		 * Surfaces via `wc_doing_it_wrong()` so the nudge appears in `debug.log`,
+		 * Query Monitor, and any other handler listening on `doing_it_wrong_trigger`
+		 * — unlike the previous inline `console.log()` signal, which was easy to miss.
 		 *
-		 * @param string $tab Tab id.
-		 * @param string $section Section id.
-		 * @param array  $unsupported_fields Unsupported fields list.
+		 * The message lists the tab id, section id (with empty normalised to `default`),
+		 * and each unsupported field's id plus its (normalised) type so plugin authors
+		 * know exactly which fields to register via
+		 * `wcReactSettings.registerFieldTypeTransformer()` or add to
+		 * `get_supported_types()` via the `woocommerce_react_settings_supported_types`
+		 * filter to unlock modern rendering.
+		 *
+		 * @since 10.8.0
+		 *
+		 * @param string $tab                Tab id.
+		 * @param string $section            Section id. Empty string is normalised to `default`.
+		 * @param array  $unsupported_fields Unsupported fields list. Each entry is an
+		 *                                   associative array with `id`, `type`, and
+		 *                                   `normalized_type` keys (see
+		 *                                   `ReactSettingsSchema::get_unsupported_fields()`).
 		 */
-		protected function log_legacy_settings_fallback( string $tab, string $section, array $unsupported_fields ) {
-			$payload = array(
-				'tab'               => $tab,
-				'section'           => $section,
-				'unsupportedFields' => $unsupported_fields,
+		protected function warn_legacy_settings_fallback( string $tab, string $section, array $unsupported_fields ): void {
+			if ( empty( $unsupported_fields ) ) {
+				return;
+			}
+
+			$normalized_section = '' === $section ? 'default' : $section;
+
+			$field_descriptions = array();
+			foreach ( $unsupported_fields as $field ) {
+				$field_id        = isset( $field['id'] ) && '' !== $field['id'] ? (string) $field['id'] : '(no id)';
+				$field_type      = isset( $field['type'] ) && '' !== $field['type'] ? (string) $field['type'] : '(no type)';
+				$normalized_type = isset( $field['normalized_type'] ) ? (string) $field['normalized_type'] : $field_type;
+
+				$field_descriptions[] = $normalized_type === $field_type
+					? sprintf( '%s (%s)', $field_id, $field_type )
+					: sprintf( '%s (%s → %s)', $field_id, $field_type, $normalized_type );
+			}
+
+			$message = sprintf(
+				'WooCommerce modernised settings fell back to legacy rendering on tab "%1$s", section "%2$s" because these fields are not supported: %3$s. Register a transformer via wcReactSettings.registerFieldTypeTransformer() or add the type via the woocommerce_react_settings_supported_types filter to enable modern rendering.',
+				$tab,
+				$normalized_section,
+				implode( ', ', $field_descriptions )
 			);
-			echo '<script>console.log(' . wp_json_encode(
-				array(
-					'message' => 'WooCommerce settings fallback to legacy',
-					'details' => $payload,
-				)
-			) . ');</script>';
+
+			wc_doing_it_wrong( __METHOD__, $message, '10.8.0' );
 		}
 
 		/**

@@ -23,6 +23,13 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * REST API General Settings Controller Class.
+ *
+ * @internal
+ *
+ * The writable endpoint bypasses the `woocommerce_admin_settings_sanitize_option_*`
+ * and `pre_update_option_*` filter chains that the legacy settings save path fires,
+ * so plugins hooked into those filters will not see settings submitted via this
+ * endpoint. Not safe for public consumption until filter fidelity is restored.
  */
 class Controller extends AbstractController {
 	/**
@@ -149,6 +156,16 @@ class Controller extends AbstractController {
 
 	/**
 	 * Update general settings.
+	 *
+	 * @internal
+	 *
+	 * This endpoint does not fire `woocommerce_admin_settings_sanitize_option_*`
+	 * or `pre_update_option_*` filters during save. It is not safe for public
+	 * consumption until filter fidelity is restored. React-based settings pages
+	 * currently submit via the legacy form POST path which does fire these
+	 * filters; use that path until the REST endpoint is safe.
+	 *
+	 * @since 10.8.0
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Response|WP_Error
