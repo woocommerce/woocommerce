@@ -62,5 +62,8 @@ class Main {
 				wc_get_container()->get( GraphQLController::class )->register();
 			}
 		);
+
+		$settings = wc_get_container()->get( Settings::class );
+		$settings->register();
 	}
 }
