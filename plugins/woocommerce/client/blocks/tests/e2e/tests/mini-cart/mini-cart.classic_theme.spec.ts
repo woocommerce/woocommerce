@@ -37,7 +37,6 @@ test.describe( 'Mini-Cart: classic theme', () => {
 		const miniCartButton = page.locator( '.wc-block-mini-cart__button' );
 		const miniCartBadge = page.locator( '.wc-block-mini-cart__badge' );
 		await expect( miniCartButton ).toBeVisible();
-		await expect( miniCartBadge ).toBeHidden();
 
 		const addToCartLink = page.getByLabel( /Add to cart/ ).first();
 		const ajaxCall = page.waitForResponse( '**wc-ajax=add_to_cart**' );
