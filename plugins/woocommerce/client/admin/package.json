@@ -65,7 +65,7 @@
 		"@wordpress/compose": "catalog:wp-min",
 		"@wordpress/core-data": "catalog:wp-min",
 		"@wordpress/data-controls": "catalog:wp-min",
-		"@wordpress/dataviews": "^4.17.0",
+		"@wordpress/dataviews": "11.1.0",
 		"@wordpress/date": "catalog:wp-min",
 		"@wordpress/dom": "catalog:wp-min",
 		"@wordpress/dom-ready": "catalog:wp-min",

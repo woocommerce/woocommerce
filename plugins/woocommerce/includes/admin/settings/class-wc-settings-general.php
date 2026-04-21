@@ -5,7 +5,6 @@
  * @package WooCommerce\Admin
  */
 
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
 use Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController;
 

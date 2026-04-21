@@ -23,6 +23,7 @@ import {
 import { possiblyRenderSettingsSlots } from '~/settings/settings-slots';
 import { registerTaxSettingsConflictErrorFill } from '~/settings/conflict-error-slotfill';
 import { registerPaymentsSettingsBannerFill } from '~/payments/payments-settings-banner-slotfill';
+import { registerReactSettingsScreens } from '~/settings/react-settings-registry';
 import { registerSiteVisibilitySlotFill } from '~/launch-your-store';
 import { registerBlueprintSlotfill } from '~/blueprint';
 import { registerSettingsEmailColorPaletteFill } from '~/settings-email/settings-email-color-palette-slotfill';
@@ -74,6 +75,7 @@ const registerSlotFills = () => {
 	possiblyRenderSettingsSlots();
 	registerTaxSettingsConflictErrorFill();
 	registerPaymentsSettingsBannerFill();
+	registerReactSettingsScreens();
 
 	const features = window.wcAdminFeatures;
 	if ( features?.[ 'launch-your-store' ] === true ) {

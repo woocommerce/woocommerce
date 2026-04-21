@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Admin\API\Reports\Orders\DataStore as OrdersDataStore
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Admin\PluginsHelper;
+use Automattic\WooCommerce\Internal\Admin\Settings\ReactSettingsSchema;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Marketplace_Suggestions;
@@ -234,6 +235,8 @@ class Settings {
 				}
 			}
 		}
+
+		$settings = $this->add_react_settings_data( $settings );
 		$settings = $this->get_custom_settings( $settings );
 		if ( PageController::is_embed_page() ) {
 			$settings['embedBreadcrumbs'] = wc_admin_get_breadcrumbs();
@@ -263,6 +266,143 @@ class Settings {
 			}
 		}
 		$settings['gutenberg_version'] = $has_gutenberg ? $gutenberg_version : 0;
+
+		return $settings;
+	}
+
+	/**
+	 * Add React settings data for supported settings screens.
+	 *
+	 * @param array $settings Array of component settings.
+	 * @return array
+	 */
+	private function add_react_settings_data( array $settings ): array {
+		if ( ! PageController::is_settings_page() || ! Features::is_enabled( 'modern-settings' ) ) {
+			return $settings;
+		}
+
+		$current_tab     = $this->get_current_settings_tab();
+		$current_section = $this->get_current_settings_section();
+
+		$settings_page = $this->get_settings_page_instance( $current_tab );
+		if ( ! $settings_page ) {
+			return $settings;
+		}
+
+		$settings_definitions = $settings_page->get_settings( $current_section );
+		if ( ! is_array( $settings_definitions ) ) {
+			return $settings;
+		}
+
+		if ( ReactSettingsSchema::is_opted_out( $current_tab, $current_section, $settings_definitions, $settings_page ) ) {
+			return $settings;
+		}
+
+		$unsupported_fields = ReactSettingsSchema::get_unsupported_fields(
+			$current_tab,
+			$current_section,
+			$settings_definitions,
+			$settings_page
+		);
+
+		if ( ! empty( $unsupported_fields ) ) {
+			return $settings;
+		}
+
+		// If the settings page has no renderable fields, return the settings.
+		if ( ! ReactSettingsSchema::has_renderable_fields( $current_tab, $current_section, $settings_definitions, $settings_page ) ) {
+			return $settings;
+		}
+
+		$response = ReactSettingsSchema::build_response( $current_tab, $current_section, $settings_definitions, $settings_page );
+		$payload  = ReactSettingsSchema::get_payload_path( $current_tab, $current_section );
+		$settings = $this->set_nested_settings_value( $settings, $payload, $response );
+
+		return $settings;
+	}
+
+	/**
+	 * Get the current settings tab.
+	 *
+	 * @return string
+	 */
+	private function get_current_settings_tab(): string {
+		global $current_tab;
+
+		if ( is_string( $current_tab ) && '' !== $current_tab ) {
+			return $current_tab;
+		}
+
+		$tab = isset( $_GET['tab'] ) ? sanitize_title( wp_unslash( $_GET['tab'] ) ) : 'general';
+		return '' !== $tab ? $tab : 'general';
+	}
+
+	/**
+	 * Get the current settings section.
+	 *
+	 * @return string
+	 */
+	private function get_current_settings_section(): string {
+		global $current_section;
+
+		if ( is_string( $current_section ) && '' !== $current_section ) {
+			return $current_section;
+		}
+
+		$section = isset( $_GET['section'] ) ? sanitize_title( wp_unslash( $_GET['section'] ) ) : '';
+		return $section;
+	}
+
+	/**
+	 * Get settings page instance by id.
+	 *
+	 * @param string $settings_page_id Settings page id.
+	 * @return WC_Settings_Page|null
+	 */
+	private function get_settings_page_instance( string $settings_page_id ) {
+		if ( class_exists( 'WC_Admin_Settings', false ) ) {
+			$setting_pages = \WC_Admin_Settings::get_settings_pages();
+			foreach ( $setting_pages as $setting_page ) {
+				if ( method_exists( $setting_page, 'get_id' ) && $settings_page_id === $setting_page->get_id() ) {
+					return $setting_page;
+				}
+			}
+		}
+
+		$page_class_map = array(
+			'general'  => 'WC_Settings_General',
+			'products' => 'WC_Settings_Products',
+		);
+
+		if ( isset( $page_class_map[ $settings_page_id ] ) && class_exists( $page_class_map[ $settings_page_id ], false ) ) {
+			$page_class = $page_class_map[ $settings_page_id ];
+			return new $page_class();
+		}
+
+		return null;
+	}
+
+	/**
+	 * Set a nested settings value by path.
+	 *
+	 * @param array $settings Settings array.
+	 * @param array $path Path segments.
+	 * @param mixed $value Value to set.
+	 * @return array
+	 */
+	private function set_nested_settings_value( array $settings, array $path, $value ): array {
+		if ( empty( $path ) ) {
+			return $settings;
+		}
+
+		$current = &$settings;
+		foreach ( $path as $segment ) {
+			if ( ! isset( $current[ $segment ] ) || ! is_array( $current[ $segment ] ) ) {
+				$current[ $segment ] = array();
+			}
+			$current = &$current[ $segment ];
+		}
+		$current = $value;
 
 		return $settings;
 	}

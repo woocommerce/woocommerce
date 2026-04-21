@@ -9317,6 +9317,13 @@ body.woocommerce_page_wc-settings {
 		}
 	}
 
+	// Applies a white background to the main form when the modern settings feature is enabled.
+	&.woocommerce-feature-enabled-modern-settings {
+		#mainform {
+			background: #fff;
+		}
+	}
+
 	.wrap {
 		padding: 0;
 	}
