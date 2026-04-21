@@ -1501,18 +1501,6 @@ parameters:
 			path: includes/admin/class-wc-admin-assets.php
 
 		-
-			message: '#^Method WC_Admin_Assets\:\:enqueue_block_editor_script\(\) has parameter \$script_name with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: includes/admin/class-wc-admin-assets.php
-
-		-
-			message: '#^Method WC_Admin_Assets\:\:enqueue_block_editor_script\(\) has parameter \$script_path_name with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: includes/admin/class-wc-admin-assets.php
-
-		-
 			message: '#^Method WC_Admin_Assets\:\:register_scripts\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -66832,18 +66820,6 @@ parameters:
 			message: '#^Parameter \#1 \$str of function md5 expects string, string\|false given\.$#'
 			identifier: argument.type
 			count: 2
-			path: src/Internal/ProductFilters/FilterData.php
-
-		-
-			message: '#^Parameter \#2 \$value of method Automattic\\WooCommerce\\Internal\\ProductFilters\\FilterData\:\:set_cache\(\) expects Automattic\\WooCommerce\\Internal\\ProductFilters\\mix, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/ProductFilters/FilterData.php
-
-		-
-			message: '#^Parameter \$value of method Automattic\\WooCommerce\\Internal\\ProductFilters\\FilterData\:\:set_cache\(\) has invalid type Automattic\\WooCommerce\\Internal\\ProductFilters\\mix\.$#'
-			identifier: class.notFound
-			count: 1
 			path: src/Internal/ProductFilters/FilterData.php
 
 		-

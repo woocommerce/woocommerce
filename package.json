@@ -5,7 +5,7 @@
 	"homepage": "https://woocommerce.com/",
 	"packageManager": "pnpm@10.33.0",
 	"engines": {
-		"node": "^20.11.1"
+		"node": "^24.15.0"
 	},
 	"private": true,
 	"repository": {
@@ -23,7 +23,7 @@
 		"lint": "pnpm -r lint",
 		"cherry-pick": "node ./tools/cherry-pick/bin/run",
 		"clean": "rimraf -g '**/node_modules' '**/.wireit' 'packages/*/*/vendor' 'plugins/*/vendor' && pnpm store prune",
-		"clean:build": "rimraf -g '**/.wireit' 'packages/js/*/build' 'packages/js/*/build-*' 'packages/js/*/dist' 'plugins/*/build' 'plugins/woocommerce/client/*/build' && git clean --force -d -X --quiet ./plugins/woocommerce/assets",
+		"clean:build": "rimraf -g '**/.wireit' '**/node_modules/.cache' 'packages/js/*/build' 'packages/js/*/build-*' 'packages/js/*/dist' 'plugins/*/build' 'plugins/woocommerce/client/*/build' && git clean --force -d -X --quiet ./plugins/woocommerce/assets",
 		"preinstall": "npx only-allow pnpm",
 		"postinstall": "husky",
 		"run-canonical-extensions-tests": "bash bin/run-canonical-extensions-tests.sh",
@@ -33,7 +33,7 @@
 	"devDependencies": {
 		"@babel/preset-env": "7.25.7",
 		"@babel/runtime": "7.25.7",
-		"@types/node": "20.x.x",
+		"@types/node": "^24.1.0",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/monorepo-utils": "workspace:*",
 		"@wordpress/eslint-plugin": "14.7.0",
@@ -79,7 +79,8 @@
 			"sass": "1.69.5"
 		},
 		"patchedDependencies": {
-			"@wordpress/edit-site@5.15.0": "bin/patches/@wordpress__edit-site@5.15.0.patch"
+			"@wordpress/edit-site@5.15.0": "bin/patches/@wordpress__edit-site@5.15.0.patch",
+			"@wordpress/env@11.0.1-next.v.20260206T143.0": "bin/patches/@wordpress__env@11.0.1-next.v.20260206T143.0.patch"
 		}
 	}
 }
