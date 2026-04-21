@@ -902,11 +902,31 @@ jQuery( function ( $ ) {
 				return;
 			}
 
-			const termInput = document.getElementById(
-				'wc-modal-add-attribute-term-input'
+			const modal = document.querySelector(
+				'.wc-backbone-modal-add-attribute-term'
+			);
+
+			if ( ! modal ) {
+				return;
+			}
+
+			const termInput = modal.querySelector(
+				'#wc-modal-add-attribute-term-input'
 			);
 			if ( termInput ) {
 				termInput.focus();
+			}
+
+			const form = modal.querySelector( '.wc-add-attribute-term-fields' );
+			if ( form ) {
+				form.addEventListener( 'submit', ( submitEvent ) => {
+					submitEvent.preventDefault();
+
+					const submitButton = modal.querySelector( '#btn-ok' );
+					if ( submitButton && ! submitButton.disabled ) {
+						submitButton.click();
+					}
+				} );
 			}
 		}
 	);
