@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Blocks: Fix JS crash when store API returns a non-Error object in useCollection; convert plain error objects to proper Error instances instead of throwing a type-error message.
+Blocks: Fix JS crash when store API returns a non-Error object in useCollection; convert plain error objects to proper Error instances, preserving status/statusText so the error boundary can render full HTTP error context.

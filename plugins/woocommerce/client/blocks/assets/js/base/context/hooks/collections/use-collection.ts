@@ -95,15 +95,40 @@ export const useCollection = < T >(
 				if ( isError( error ) ) {
 					throwError( error );
 				} else {
-					const message =
-						typeof error === 'object' &&
-						error !== null &&
-						typeof ( error as { message?: unknown } ).message ===
-							'string' &&
-						( error as { message: string } ).message.trim() !== ''
-							? ( error as { message: string } ).message
-							: 'An unknown error occurred';
-					throwError( new Error( message ) );
+					const source =
+						typeof error === 'object' && error !== null
+							? ( error as {
+									message?: unknown;
+									code?: unknown;
+									status?: unknown;
+									statusText?: unknown;
+									data?: unknown;
+							  } )
+							: {};
+					const maybeMessage = source.message;
+					const hasValidMessage =
+						typeof maybeMessage === 'string' &&
+						maybeMessage.trim() !== '';
+					const codeSuffix =
+						typeof source.code === 'string' ||
+						typeof source.code === 'number'
+							? ` (code: ${ source.code })`
+							: '';
+					const message = hasValidMessage
+						? ( maybeMessage as string )
+						: `An unknown error occurred${ codeSuffix }`;
+					const wrapped = Object.assign( new Error( message ), {
+						code: source.code,
+						status: source.status,
+						statusText: source.statusText,
+						data: source.data,
+					} );
+					// eslint-disable-next-line no-console
+					console.error(
+						'useCollection received a non-Error value from the store:',
+						error
+					);
+					throwError( wrapped );
 				}
 			}
 
