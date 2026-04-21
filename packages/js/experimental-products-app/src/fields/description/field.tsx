@@ -2,17 +2,15 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-
+import { TextareaControl } from '@wordpress/components';
 import type { Field } from '@wordpress/dataviews';
 
 /**
  * Internal dependencies
  */
-import { TextareaControl } from '../components/compat-controls';
 
 import type { ProductEntityRecord } from '../types';
-
-import { convertHtmlToPlainText } from '../utils/html';
+import { convertHtmlToPlainText } from '../../utilites';
 
 const fieldDefinition = {
 	type: 'text',
@@ -35,10 +33,7 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 				label={ field.label }
 				rows={ 10 }
 				value={ convertHtmlToPlainText( data.description || '' ) }
-				onValueChange={ ( value ) =>
-					onChange( { description: value } )
-				}
-				description={ field.description }
+				onChange={ ( value ) => onChange( { description: value } ) }
 			/>
 		);
 	},
