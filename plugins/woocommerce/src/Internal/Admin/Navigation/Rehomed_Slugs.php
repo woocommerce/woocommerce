@@ -20,9 +20,12 @@ final class Rehomed_Slugs {
 	/**
 	 * Top-level slugs that are removed from `$menu` and re-homed inside the
 	 * Woo tree when the feature is enabled.
+	 *
+	 * The `woocommerce` slug itself is intentionally NOT in this list — we
+	 * keep Woo's own top-level registration (with its native submenu of
+	 * Home/Orders/Products/etc.) as the single consolidated rail item.
 	 */
 	public const ALL = array(
-		'woocommerce',
 		'edit.php?post_type=product',
 		'wc-admin&path=/analytics/overview',
 		'woocommerce-marketing',

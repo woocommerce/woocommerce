@@ -39,8 +39,10 @@ class Default_Tree_Test extends \WC_Unit_Test_Case {
 	 * The rehomed-slugs list must match the spec.
 	 */
 	public function test_rehomed_slugs_constant() {
+		// `woocommerce` itself is intentionally absent — the feature keeps
+		// Woo's own top-level registration as the single consolidated rail
+		// item, and only rehomes the sibling Woo-related top-levels.
 		$expected = array(
-			'woocommerce',
 			'edit.php?post_type=product',
 			'wc-admin&path=/analytics/overview',
 			'woocommerce-marketing',

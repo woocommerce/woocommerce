@@ -28,32 +28,41 @@ class Menu_Reconciler {
 
 	/**
 	 * Register hooks.
+	 *
+	 * We add a menu_order filter at priority 20 (after WC_Admin_Menus's
+	 * default-priority filter) to strip phantom slugs from the order.
+	 * Reason: WC_Admin_Menus::menu_order() unconditionally pushes
+	 * `separator-woocommerce` and `edit.php?post_type=product` into its
+	 * output, even if those slugs have been removed from $menu. When they
+	 * aren't present, its `array_search` returns false, and
+	 * `unset( $menu_order[ false ] )` silently removes index 0 (Dashboard),
+	 * which cascades into visible reordering of unrelated items (Posts
+	 * shifting down, etc.). Our filter removes slugs from $menu_order that
+	 * no longer exist in $menu, leaving native WP ordering intact.
 	 */
 	public function __construct() {
 		add_action( 'admin_menu', array( $this, 'reconcile' ), 999 );
-		// Spec §5.1 / §8: Woo root sits right after Dashboard (position 2).
-		add_filter( 'custom_menu_order', '__return_true' );
-		add_filter( 'menu_order', array( $this, 'place_woo_root' ), 200 );
+		add_filter( 'menu_order', array( $this, 'strip_phantom_slugs' ), 20 );
 	}
 
 	/**
-	 * Reorder the rail so `woocommerce` sits directly after `index.php`.
+	 * Remove slugs from $menu_order that don't correspond to live $menu entries.
 	 *
-	 * @param array $menu_order Slugs in current order.
+	 * @param array $menu_order Menu order array.
 	 * @return array
 	 */
-	public function place_woo_root( array $menu_order ): array {
-		$new_order  = array();
-		$menu_order = array_values( array_filter( $menu_order, fn( $item ) => 'woocommerce' !== $item ) );
-
-		foreach ( $menu_order as $item ) {
-			$new_order[] = $item;
-			if ( 'index.php' === $item ) {
-				$new_order[] = 'woocommerce';
-			}
+	public function strip_phantom_slugs( array $menu_order ): array {
+		global $menu;
+		if ( ! is_array( $menu ) ) {
+			return $menu_order;
 		}
-
-		return $new_order;
+		$live_slugs = array_column( $menu, 2 );
+		return array_values(
+			array_filter(
+				$menu_order,
+				static fn( $slug ) => in_array( $slug, $live_slugs, true )
+			)
+		);
 	}
 
 	/**
@@ -83,6 +92,11 @@ class Menu_Reconciler {
 
 	/**
 	 * Remove every rehomed-top-level slug from the $menu global.
+	 *
+	 * $menu's keys encode menu item positions (e.g. Dashboard = 2, Posts = 5,
+	 * Media = 10). We unset() in place and preserve those keys — do NOT call
+	 * array_values() here, or WP's positional ordering collapses to insertion
+	 * order and unrelated items (Posts, Media, etc.) visibly reshuffle.
 	 */
 	private function remove_rehomed_top_level_items(): void {
 		global $menu;
@@ -101,8 +115,6 @@ class Menu_Reconciler {
 				unset( $menu[ $key ] );
 			}
 		}
-
-		$menu = array_values( $menu );
 	}
 
 	/**
