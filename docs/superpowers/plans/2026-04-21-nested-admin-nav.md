@@ -41,10 +41,6 @@ When a task says "port from the prototype," copy the logic verbatim and adapt na
 | `Assets.php` | Enqueues CSS/JS; implements the admin-menu.css alias trick. |
 | `Telemetry.php` | Emits the 5 Tracks events. |
 
-### New service provider
-
-- `plugins/woocommerce/src/Internal/DependencyManagement/ServiceProviders/NavigationV2ServiceProvider.php` — registers `Bootstrap` in the container.
-
 ### New assets
 
 - `plugins/woocommerce/client/legacy/css/admin-navigation-v2.scss` — rail + flyout CSS overrides (compiles to `assets/css/admin-navigation-v2.css` via Grunt).
@@ -62,9 +58,12 @@ When a task says "port from the prototype," copy the logic verbatim and adapt na
 
 ### Modified files
 
-- `plugins/woocommerce/src/Container.php` — add `NavigationV2ServiceProvider` to the provider list.
-- `plugins/woocommerce/includes/class-woocommerce.php` — add `$container->get( Bootstrap::class );` to the bootstrap list around line 280.
+- `plugins/woocommerce/includes/class-woocommerce.php` — add `$container->get( NavigationV2Bootstrap::class );` to the bootstrap list around line 288, with a `use Automattic\WooCommerce\Internal\Admin\Navigation\Bootstrap as NavigationV2Bootstrap;` import.
 - `plugins/woocommerce/tests/php/src/Internal/Features/FeaturesControllerTest.php` — add a test that `navigation_v2` is registered.
+
+### DI note (post-refactor)
+
+The WooCommerce container migrated from League Container + service providers to a reflection-based `RuntimeContainer`. **No service provider is needed** — `wc_get_container()->get( Bootstrap::class )` resolves via reflection and the class's dependencies (if any) are auto-wired from `__construct` type hints. The plan originally called for a `NavigationV2ServiceProvider` and a `Container.php` edit; both are now obsolete. References to them in Task 1 below are historical — Task 1 was implemented without either.
 
 ### Deviations from spec worth flagging up front
 
@@ -82,11 +81,10 @@ When a task says "port from the prototype," copy the logic verbatim and adapt na
 
 **Files:**
 - Create: `plugins/woocommerce/src/Internal/Admin/Navigation/Bootstrap.php`
-- Create: `plugins/woocommerce/src/Internal/DependencyManagement/ServiceProviders/NavigationV2ServiceProvider.php`
-- Modify: `plugins/woocommerce/src/Container.php:58-84`
-- Modify: `plugins/woocommerce/includes/class-woocommerce.php:272-288`
-- Modify: `plugins/woocommerce/tests/php/src/Internal/Features/FeaturesControllerTest.php`
+- Modify: `plugins/woocommerce/includes/class-woocommerce.php:272-288` (add `use ... Bootstrap as NavigationV2Bootstrap;` import and `$container->get( NavigationV2Bootstrap::class );`)
 - Test: `plugins/woocommerce/tests/php/src/Internal/Admin/Navigation/Bootstrap_Test.php`
+
+> **Status: completed** in commits `941366ec858` and `1cda1d0a1ad`. Steps 1.4 and 1.5 below are obsolete (service providers no longer exist; `RuntimeContainer` uses reflection-based auto-resolution). Step 1.3 required a `default_plugin_compatibility => FeaturePluginCompatibility::COMPATIBLE` field not shown in the original spec — required by `FeaturesController::add_feature_definition()` as of WC 10.3.
 
 - [ ] **Step 1.1: Write the failing test for feature registration**
 
