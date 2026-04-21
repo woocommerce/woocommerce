@@ -26,13 +26,10 @@ defined( 'ABSPATH' ) || exit;
  *
  * @internal
  *
- * This controller is MVP-scope for the modernised settings SDK and is not yet
- * safe for public consumption. The writable endpoint bypasses the
- * `woocommerce_admin_settings_sanitize_option_*` and `pre_update_option_*`
- * filter chains that the legacy settings save path fires, so plugins hooked
- * into those filters will not see settings submitted via this endpoint.
- * Filter fidelity is tracked for Phase 2 in
- * {@link https://linear.app/a8c/issue/WOOPRD-3494 WOOPRD-3494}.
+ * The writable endpoint bypasses the `woocommerce_admin_settings_sanitize_option_*`
+ * and `pre_update_option_*` filter chains that the legacy settings save path fires,
+ * so plugins hooked into those filters will not see settings submitted via this
+ * endpoint. Not safe for public consumption until filter fidelity is restored.
  */
 class Controller extends AbstractController {
 	/**
@@ -164,10 +161,9 @@ class Controller extends AbstractController {
 	 *
 	 * This endpoint does not fire `woocommerce_admin_settings_sanitize_option_*`
 	 * or `pre_update_option_*` filters during save. It is not safe for public
-	 * consumption until {@link https://linear.app/a8c/issue/WOOPRD-3494 WOOPRD-3494}
-	 * restores filter fidelity. React-based settings pages currently submit via
-	 * the legacy form POST path which does fire these filters; use that path
-	 * until the REST endpoint is safe.
+	 * consumption until filter fidelity is restored. React-based settings pages
+	 * currently submit via the legacy form POST path which does fire these
+	 * filters; use that path until the REST endpoint is safe.
 	 *
 	 * @since 10.8.0
 	 *
