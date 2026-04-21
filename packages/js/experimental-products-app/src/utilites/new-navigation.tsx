@@ -2,7 +2,6 @@
  * External dependencies
  */
 import {
-	createElement,
 	createContext,
 	useState,
 	useContext,
