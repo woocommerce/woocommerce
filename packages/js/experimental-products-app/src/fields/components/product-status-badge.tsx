@@ -3,16 +3,14 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Badge } from '@wordpress/ui';
+import { ProductStatus } from '@woocommerce/data';
 
-/**
- * Internal dependencies
- */
-import type { ProductEntityRecord } from '../types';
+type BadgeStatusConfig = {
+	label: string;
+	intent?: React.ComponentProps< typeof Badge >[ 'intent' ];
+};
 
-const statuses: Record<
-	ProductEntityRecord[ 'status' ],
-	{ label: string; intent?: React.ComponentProps< typeof Badge >[ 'intent' ] }
-> = {
+const statuses = {
 	draft: {
 		label: __( 'Draft', 'woocommerce' ),
 		intent: 'draft',
@@ -29,13 +27,29 @@ const statuses: Record<
 		label: __( 'Draft', 'woocommerce' ),
 		intent: 'draft',
 	},
-};
+	deleted: {
+		label: __( 'Deleted', 'woocommerce' ),
+		intent: 'none',
+	},
+	pending: {
+		label: __( 'Pending', 'woocommerce' ),
+		intent: 'none',
+	},
+	private: {
+		label: __( 'Private', 'woocommerce' ),
+		intent: 'none',
+	},
+	future: {
+		label: __( 'Scheduled', 'woocommerce' ),
+		intent: 'none',
+	},
+	any: {
+		label: __( 'Any', 'woocommerce' ),
+		intent: 'none',
+	},
+} satisfies Record< ProductStatus, BadgeStatusConfig >;
 
-export const ProductStatusBadge = ( {
-	status,
-}: {
-	status: ProductEntityRecord[ 'status' ];
-} ) => {
+export const ProductStatusBadge = ( { status }: { status: ProductStatus } ) => {
 	const statusData = statuses[ status ];
 
 	if ( ! statusData ) {
