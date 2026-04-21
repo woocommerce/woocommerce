@@ -18,7 +18,6 @@ type DatePickerProps = {
 		label?: string;
 	};
 	fieldKey: DateFieldKey;
-	isDateDisabled?: ( date: Date ) => boolean;
 	min?: Date;
 };
 
