@@ -30,6 +30,18 @@ export type FilterOptionItem = (
 	menuOrder?: number;
 };
 
+export type SelectableItemsBlockContext = {
+	'woocommerce/selectableItems': {
+		items?: FilterOptionItem[];
+		selectionMode: 'single' | 'multiple';
+		selectAction: string;
+		storeNamespace: string;
+		isLoading: boolean;
+		showCounts?: boolean;
+		groupLabel?: string;
+	};
+};
+
 export type FilterBlockContext = {
 	filterData: {
 		isLoading: boolean;

@@ -122,9 +122,12 @@ final class ProductFilterStatus extends AbstractBlock {
 		);
 
 		$filter_context = array(
-			'items'      => array_values( $filter_options ),
-			'showCounts' => $attributes['showCounts'] ?? false,
-			'groupLabel' => __( 'Status', 'woocommerce' ),
+			'items'          => array_values( $filter_options ),
+			'selectionMode'  => 'multiple',
+			'selectAction'   => 'toggleFilter',
+			'storeNamespace' => 'woocommerce/product-filters',
+			'groupLabel'     => __( 'Status', 'woocommerce' ),
+			'showCounts'     => $attributes['showCounts'] ?? false,
 		);
 
 		$wrapper_attributes = array(
@@ -153,7 +156,7 @@ final class ProductFilterStatus extends AbstractBlock {
 			array_reduce(
 				$block->parsed_block['innerBlocks'],
 				function ( $carry, $parsed_block ) use ( $filter_context ) {
-					$carry .= ( new \WP_Block( $parsed_block, array( 'filterData' => $filter_context ) ) )->render();
+					$carry .= ( new \WP_Block( $parsed_block, array( 'woocommerce/selectableItems' => $filter_context ) ) )->render();
 					return $carry;
 				},
 				''

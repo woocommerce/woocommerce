@@ -200,11 +200,14 @@ const Edit = ( props: EditProps ) => {
 			<InitialDisabled>
 				<BlockContextProvider
 					value={ {
-						filterData: {
+						'woocommerce/selectableItems': {
 							items:
 								attributeOptions.length === 0 && isPreview
 									? attributeOptionsPreview
 									: attributeOptions,
+							selectionMode: 'multiple' as const,
+							selectAction: 'toggleFilter',
+							storeNamespace: 'woocommerce/product-filters',
 							isLoading,
 							showCounts,
 						},

@@ -212,9 +212,12 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 		);
 
 		$filter_context  = array(
-			'showCounts' => $block_attributes['showCounts'] ?? false,
-			'items'      => array(),
-			'groupLabel' => $taxonomy_object->labels->singular_name,
+			'items'          => array(),
+			'selectionMode'  => 'multiple',
+			'selectAction'   => 'toggleFilter',
+			'storeNamespace' => 'woocommerce/product-filters',
+			'groupLabel'     => $taxonomy_object->labels->singular_name,
+			'showCounts'     => $block_attributes['showCounts'] ?? false,
 		);
 		$taxonomy_counts = $this->get_taxonomy_term_counts( $block, $taxonomy );
 
@@ -291,7 +294,7 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 			array_reduce(
 				$block->parsed_block['innerBlocks'],
 				function ( $carry, $parsed_block ) use ( $filter_context ) {
-					$carry .= ( new \WP_Block( $parsed_block, array( 'filterData' => $filter_context ) ) )->render();
+					$carry .= ( new \WP_Block( $parsed_block, array( 'woocommerce/selectableItems' => $filter_context ) ) )->render();
 					return $carry;
 				},
 				''
