@@ -56,7 +56,7 @@ class ReactSettingsSchema {
 	 * @since 10.8.0
 	 * @var string[]
 	 */
-	private const OPTION_TYPES = array( 'select', 'multiselect' );
+	private const OPTION_TYPES = array( 'select', 'multiselect', 'single_select_page_with_search' );
 	/**
 	 * Get the payload path for a settings tab/section.
 	 *
@@ -126,7 +126,29 @@ class ReactSettingsSchema {
 	 * @since 10.8.0
 	 */
 	public static function get_supported_types( string $tab, string $section, array $settings_definitions, $settings_page ): array {
-		$default_types = array( 'text', 'number', 'select', 'multiselect', 'checkbox', 'radio', 'toggle' );
+		$default_types = array(
+			'text',
+			'number',
+			'select',
+			'multiselect',
+			'checkbox',
+			'radio',
+			'toggle',
+			'password',
+			'email',
+			'url',
+			'tel',
+			'color',
+			'date',
+			'datetime',
+			'datetime-local',
+			'month',
+			'week',
+			'time',
+			'textarea',
+			'single_select_page_with_search',
+			'info',
+		);
 		/**
 		 * Filter supported React settings field types.
 		 *
@@ -162,11 +184,9 @@ class ReactSettingsSchema {
 	 */
 	public static function get_type_map( string $tab, string $section, array $settings_definitions, $settings_page ): array {
 		$default_map = array(
-			'single_select_country'          => 'select',
-			'multi_select_countries'         => 'multiselect',
-			'single_select_page'             => 'select',
-			'single_select_page_with_search' => 'select',
-			'textarea'                       => 'text',
+			'single_select_country'  => 'select',
+			'multi_select_countries' => 'multiselect',
+			'single_select_page'     => 'select',
 		);
 		/**
 		 * Filter the field type map for React settings.
@@ -310,6 +330,8 @@ class ReactSettingsSchema {
 				continue;
 			}
 
+			// Opting into the React renderer requires every field (including legacy `info` rows) to declare an
+			// explicit `id`. Array-key-only entries from the legacy renderer are intentionally not coerced.
 			if ( empty( $setting['id'] ) ) {
 				continue;
 			}
@@ -368,11 +390,23 @@ class ReactSettingsSchema {
 		$type_map     = self::get_type_map( $tab, $section, array( $setting ), $settings_page );
 		$field_type   = $type_map[ $setting_type ] ?? $setting_type;
 
+		$desc = $setting['desc'] ?? '';
+
+		// Legacy `info` rows use `setting['text']` as the primary body channel
+		// (see WC_Admin_Settings::output_fields() `case 'info'`). When `desc`
+		// is empty, fall back to `text` so the React `info` Edit has content
+		// to render. Note: the legacy renderer runs `wpautop`/`wp_kses_post`
+		// on this text; the React side renders plain text for now — a Phase 2
+		// channel for HTML payloads is pending.
+		if ( 'info' === $setting_type && '' === $desc ) {
+			$desc = $setting['text'] ?? '';
+		}
+
 		$field = array(
 			'id'    => $setting_id,
 			'label' => $setting['title'] ?? $setting['name'] ?? $setting_id,
 			'type'  => $field_type,
-			'desc'  => $setting['desc'] ?? '',
+			'desc'  => $desc,
 		);
 
 		$options = self::get_field_options( $setting, $field_type );
@@ -399,6 +433,36 @@ class ReactSettingsSchema {
 		$options = isset( $setting['options'] ) && is_array( $setting['options'] )
 			? $setting['options']
 			: array();
+
+		// Built-in fallback: legacy `single_select_page_with_search` consumers
+		// (see class-wc-settings-advanced.php) define no `options` array — they
+		// rely on a server-side AJAX search at the legacy renderer level. To
+		// keep the React combobox honest, synthesise the page list from
+		// `get_pages()` honouring any `args.exclude` value when no options
+		// have been supplied. The filter below can still override or augment.
+		$raw_type = isset( $setting['type'] ) && is_string( $setting['type'] ) ? $setting['type'] : '';
+		if ( empty( $options ) && 'single_select_page_with_search' === $raw_type && function_exists( 'get_pages' ) ) {
+			$query_args = array(
+				'sort_column' => 'menu_order, post_title',
+				'post_status' => 'publish',
+			);
+
+			$exclude = $setting['args']['exclude'] ?? null;
+			if ( is_array( $exclude ) ) {
+				$query_args['exclude'] = array_values( array_filter( array_map( 'absint', $exclude ) ) );
+			}
+
+			$pages = get_pages( $query_args );
+			if ( is_array( $pages ) ) {
+				foreach ( $pages as $page ) {
+					$page_id = (int) $page->ID;
+					if ( $page_id <= 0 ) {
+						continue;
+					}
+					$options[ $page_id ] = html_entity_decode( (string) $page->post_title, ENT_QUOTES, get_bloginfo( 'charset' ) );
+				}
+			}
+		}
 
 		$setting_id = isset( $setting['id'] ) && is_scalar( $setting['id'] ) ? (string) $setting['id'] : '';
 

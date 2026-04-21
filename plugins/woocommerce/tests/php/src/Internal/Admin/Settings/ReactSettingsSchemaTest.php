@@ -371,4 +371,285 @@ class ReactSettingsSchemaTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'General', $schema_response['title'] );
 		$this->assertNotEmpty( $schema_response['description'] );
 	}
+
+	/**
+	 * @testdox Includes the 10.8 SDK native types in the default supported types list.
+	 *
+	 * @dataProvider provider_sdk_10_8_supported_types
+	 *
+	 * @param string $expected_type Type expected in the defaults.
+	 */
+	public function test_get_supported_types_includes_sdk_10_8_native_types( string $expected_type ) {
+		$types = ReactSettingsSchema::get_supported_types( 'general', '', array(), null );
+
+		$this->assertContains(
+			$expected_type,
+			$types,
+			"Expected '{$expected_type}' to be in the default supported types list."
+		);
+	}
+
+	/**
+	 * Data provider for the 10.8 SDK native type defaults.
+	 *
+	 * @return array<string, array{0: string}>
+	 */
+	public function provider_sdk_10_8_supported_types(): array {
+		return array(
+			'password'                       => array( 'password' ),
+			'email'                          => array( 'email' ),
+			'url'                            => array( 'url' ),
+			'tel'                            => array( 'tel' ),
+			'color'                          => array( 'color' ),
+			'date'                           => array( 'date' ),
+			'datetime'                       => array( 'datetime' ),
+			'datetime-local'                 => array( 'datetime-local' ),
+			'month'                          => array( 'month' ),
+			'week'                           => array( 'week' ),
+			'time'                           => array( 'time' ),
+			'textarea'                       => array( 'textarea' ),
+			'single_select_page_with_search' => array( 'single_select_page_with_search' ),
+			'info'                           => array( 'info' ),
+		);
+	}
+
+	/**
+	 * @testdox Drops textarea and single_select_page_with_search from the default type map so they reach the JS transformer raw.
+	 */
+	public function test_get_type_map_drops_unmapped_native_types() {
+		$type_map = ReactSettingsSchema::get_type_map( 'general', '', array(), null );
+
+		$this->assertArrayNotHasKey(
+			'textarea',
+			$type_map,
+			'textarea must reach the JS transformer untouched so the custom Edit can render.'
+		);
+		$this->assertArrayNotHasKey(
+			'single_select_page_with_search',
+			$type_map,
+			'single_select_page_with_search must reach the JS transformer untouched so the combobox Edit can render.'
+		);
+	}
+
+	/**
+	 * @testdox Treats every 10.8 SDK native type as renderable.
+	 *
+	 * @dataProvider provider_sdk_10_8_supported_types
+	 *
+	 * @param string $type Setting type to check.
+	 */
+	public function test_has_renderable_fields_returns_true_for_sdk_10_8_native_types( string $type ) {
+		$settings = array(
+			array(
+				'id'   => 'sample_field',
+				'type' => $type,
+			),
+		);
+
+		$this->assertTrue(
+			ReactSettingsSchema::has_renderable_fields( 'general', '', $settings, null ),
+			"Expected '{$type}' to be treated as a renderable field."
+		);
+	}
+
+	/**
+	 * @testdox Should pass legacy `info` row `text` content through to the field's `desc` channel.
+	 */
+	public function test_build_response_falls_back_to_info_text_for_desc() {
+		$settings = array(
+			array(
+				'type'  => 'title',
+				'id'    => 'info_group',
+				'title' => 'Info group',
+			),
+			array(
+				'id'    => 'info_field',
+				'type'  => 'info',
+				'title' => 'Heads up',
+				'text'  => 'Hello',
+			),
+			array(
+				'type' => 'sectionend',
+				'id'   => 'info_group',
+			),
+		);
+
+		$response = ReactSettingsSchema::build_response( 'general', '', $settings, null );
+
+		$this->assertArrayHasKey( 'info_group', $response['groups'] );
+		$fields = $response['groups']['info_group']['fields'];
+		$this->assertCount( 1, $fields );
+		$this->assertSame( 'info_field', $fields[0]['id'] );
+		$this->assertSame( 'Hello', $fields[0]['desc'], "The legacy 'text' channel should be exposed via the field's 'desc'." );
+	}
+
+	/**
+	 * @testdox Should prefer an explicit `desc` over the legacy `text` channel for `info` rows.
+	 */
+	public function test_build_response_prefers_desc_over_info_text() {
+		$settings = array(
+			array(
+				'type' => 'title',
+				'id'   => 'info_group',
+			),
+			array(
+				'id'    => 'info_field',
+				'type'  => 'info',
+				'title' => 'Heads up',
+				'desc'  => 'Primary',
+				'text'  => 'Fallback',
+			),
+			array(
+				'type' => 'sectionend',
+				'id'   => 'info_group',
+			),
+		);
+
+		$response = ReactSettingsSchema::build_response( 'general', '', $settings, null );
+
+		$this->assertSame( 'Primary', $response['groups']['info_group']['fields'][0]['desc'] );
+	}
+
+	/**
+	 * @testdox Should synthesise a page list for `single_select_page_with_search` when the consumer omits `options`.
+	 */
+	public function test_build_response_synthesises_pages_for_single_select_page_with_search() {
+		$page_one_id = wp_insert_post(
+			array(
+				'post_title'  => 'Test Page One',
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+			)
+		);
+		$page_two_id = wp_insert_post(
+			array(
+				'post_title'  => 'Test Page Two',
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+			)
+		);
+
+		$settings = array(
+			array(
+				'type' => 'title',
+				'id'   => 'page_group',
+			),
+			array(
+				'id'    => 'sample_page_field',
+				'type'  => 'single_select_page_with_search',
+				'title' => 'Pick a page',
+			),
+			array(
+				'type' => 'sectionend',
+				'id'   => 'page_group',
+			),
+		);
+
+		$response = ReactSettingsSchema::build_response( 'general', '', $settings, null );
+
+		wp_delete_post( $page_one_id, true );
+		wp_delete_post( $page_two_id, true );
+
+		$this->assertArrayHasKey( 'page_group', $response['groups'] );
+		$fields = $response['groups']['page_group']['fields'];
+		$this->assertCount( 1, $fields );
+		$this->assertArrayHasKey( 'options', $fields[0], 'Synthesised options should be emitted to React.' );
+
+		$options = $fields[0]['options'];
+		$this->assertArrayHasKey( (string) $page_one_id, $options );
+		$this->assertArrayHasKey( (string) $page_two_id, $options );
+		$this->assertSame( 'Test Page One', $options[ (string) $page_one_id ] );
+		$this->assertSame( 'Test Page Two', $options[ (string) $page_two_id ] );
+	}
+
+	/**
+	 * @testdox Should preserve consumer-provided `options` for `single_select_page_with_search` instead of synthesising them.
+	 */
+	public function test_build_response_preserves_explicit_options_for_single_select_page_with_search() {
+		// This page would be picked up by the synthesis path; if it appears, we know synthesis ran.
+		$page_id = wp_insert_post(
+			array(
+				'post_title'  => 'Should Not Appear',
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+			)
+		);
+
+		$settings = array(
+			array(
+				'type' => 'title',
+				'id'   => 'page_group',
+			),
+			array(
+				'id'      => 'sample_page_field',
+				'type'    => 'single_select_page_with_search',
+				'title'   => 'Pick a page',
+				'options' => array(
+					'42' => 'Custom Option A',
+					'99' => 'Custom Option B',
+				),
+			),
+			array(
+				'type' => 'sectionend',
+				'id'   => 'page_group',
+			),
+		);
+
+		$response = ReactSettingsSchema::build_response( 'general', '', $settings, null );
+
+		wp_delete_post( $page_id, true );
+
+		$options = $response['groups']['page_group']['fields'][0]['options'];
+		$this->assertSame( 'Custom Option A', $options['42'] );
+		$this->assertSame( 'Custom Option B', $options['99'] );
+		$this->assertArrayNotHasKey( (string) $page_id, $options, 'Explicit options must not be merged with synthesised pages.' );
+	}
+
+	/**
+	 * @testdox Should honour `args.exclude` when synthesising the page list for `single_select_page_with_search`.
+	 */
+	public function test_build_response_excludes_pages_for_single_select_page_with_search() {
+		$keep_id    = wp_insert_post(
+			array(
+				'post_title'  => 'Keep Me',
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+			)
+		);
+		$exclude_id = wp_insert_post(
+			array(
+				'post_title'  => 'Exclude Me',
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+			)
+		);
+
+		$settings = array(
+			array(
+				'type' => 'title',
+				'id'   => 'page_group',
+			),
+			array(
+				'id'    => 'sample_page_field',
+				'type'  => 'single_select_page_with_search',
+				'title' => 'Pick a page',
+				'args'  => array(
+					'exclude' => array( $exclude_id ),
+				),
+			),
+			array(
+				'type' => 'sectionend',
+				'id'   => 'page_group',
+			),
+		);
+
+		$response = ReactSettingsSchema::build_response( 'general', '', $settings, null );
+
+		wp_delete_post( $keep_id, true );
+		wp_delete_post( $exclude_id, true );
+
+		$options = $response['groups']['page_group']['fields'][0]['options'];
+		$this->assertArrayHasKey( (string) $keep_id, $options );
+		$this->assertArrayNotHasKey( (string) $exclude_id, $options, 'args.exclude entries must be filtered out of the synthesised page list.' );
+	}
 }
