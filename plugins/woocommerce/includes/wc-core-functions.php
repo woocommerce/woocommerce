@@ -558,7 +558,7 @@ function get_woocommerce_currency_symbols() {
 			'BTN' => 'Nu.',
 			'BWP' => 'P',
 			'BYR' => 'Br',
-			'BYN' => 'Br',
+			'BYN' => '&#x411;',
 			'BZD' => '&#36;',
 			'CAD' => '&#36;',
 			'CDF' => 'Fr',
