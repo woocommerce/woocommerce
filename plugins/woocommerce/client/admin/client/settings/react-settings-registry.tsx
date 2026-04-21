@@ -10,11 +10,7 @@ import {
 	type FieldTransformer,
 	type RowConfigurations,
 } from '@woocommerce/modern-settings-sdk';
-// The SDK stylesheet is pulled in as a side-effect import so modernised
-// settings screens are styled without extra PHP enqueues; external consumers
-// should enqueue the package's built build-style/style.css instead.
-// eslint-disable-next-line @woocommerce/dependency-group
-import '@woocommerce/modern-settings-sdk/src/react-settings.scss';
+import '@woocommerce/modern-settings-sdk/build-style/style.css';
 
 /**
  * Internal dependencies
@@ -25,9 +21,7 @@ import {
 } from '../settings-general/config';
 
 type ReactSettingsRegistryEntry = {
-	id: string;
 	dataPath: string[];
-	mountId: string;
 	className?: string;
 	fieldTransformer: FieldTransformer;
 	rowConfigurations?: RowConfigurations;
@@ -131,9 +125,7 @@ export const registerReactSettingsScreens = () => {
 		const section = element.dataset.wcSettingsSection || '';
 		const overrides = getOverridesForScreen( tab, section );
 		const entry: ReactSettingsRegistryEntry = {
-			id: getScreenKey( tab, section ),
 			dataPath: buildDataPath( tab, section ),
-			mountId: element.id,
 			className: overrides.className || `woocommerce-settings-${ tab }`,
 			fieldTransformer:
 				overrides.fieldTransformer || defaultFieldTransformer,

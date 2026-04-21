@@ -20,13 +20,6 @@ use WP_REST_Request;
 
 /**
  * Product Settings Schema Class.
- *
- * The constructor performs hook registration for the
- * `woocommerce_react_settings_field_options` filter so that consuming code
- * gets the tab-specific option generation behaviour simply by instantiating
- * the schema. This is atypical for the `src/Internal/*` codebase — see the
- * follow-up note on the constructor docblock about moving registration into
- * the V4 Settings REST controller's init path.
  */
 class ProductSettingsSchema extends AbstractSchema {
 	/**
@@ -35,29 +28,6 @@ class ProductSettingsSchema extends AbstractSchema {
 	 * @var string
 	 */
 	const IDENTIFIER = 'product_settings';
-
-	/**
-	 * Constructor.
-	 *
-	 * Registers the tab-specific field options callback on the shared
-	 * `woocommerce_react_settings_field_options` filter exposed by
-	 * ReactSettingsSchema. The callback only injects options for field IDs
-	 * owned by the products settings tab, so it is safe to register globally.
-	 *
-	 * `has_filter()` is used to avoid double-registration under DI container
-	 * instantiation or test re-instantiation.
-	 *
-	 * @since 10.8.0
-	 *
-	 * @todo Move the filter registration into the V4 Settings REST
-	 *       controller's init path so schema classes don't perform global
-	 *       hook side effects at construction time.
-	 */
-	public function __construct() {
-		if ( ! has_filter( 'woocommerce_react_settings_field_options', array( self::class, 'inject_field_options' ) ) ) {
-			add_filter( 'woocommerce_react_settings_field_options', array( self::class, 'inject_field_options' ), 10, 4 );
-		}
-	}
 
 	/**
 	 * Return all properties for the item schema.
@@ -202,95 +172,4 @@ class ProductSettingsSchema extends AbstractSchema {
 		return $response;
 	}
 
-	/**
-	 * Inject tab-specific field options for product settings fields.
-	 *
-	 * Callback registered against `woocommerce_react_settings_field_options`.
-	 * Only overrides options when the existing array is empty, so authors can
-	 * still supply an explicit options list via the settings definition.
-	 *
-	 * @since 10.8.0
-	 *
-	 * @param array  $options         Current options array.
-	 * @param string $field_id        Setting field ID.
-	 * @param array  $setting         Raw setting definition.
-	 * @param string $normalized_type Normalized field type.
-	 * @return array
-	 */
-	public static function inject_field_options( $options, string $field_id, array $setting, string $normalized_type ): array {
-		unset( $setting, $normalized_type ); // Not needed for this callback.
-
-		if ( ! is_array( $options ) ) {
-			$options = array();
-		}
-
-		if ( ! empty( $options ) ) {
-			return $options;
-		}
-
-		switch ( $field_id ) {
-			case 'woocommerce_weight_unit':
-				return array(
-					'kg'  => __( 'kg', 'woocommerce' ),
-					'g'   => __( 'g', 'woocommerce' ),
-					'lbs' => __( 'lbs', 'woocommerce' ),
-					'oz'  => __( 'oz', 'woocommerce' ),
-				);
-
-			case 'woocommerce_dimension_unit':
-				return array(
-					'm'  => __( 'm', 'woocommerce' ),
-					'cm' => __( 'cm', 'woocommerce' ),
-					'mm' => __( 'mm', 'woocommerce' ),
-					'in' => __( 'in', 'woocommerce' ),
-					'yd' => __( 'yd', 'woocommerce' ),
-				);
-
-			case 'woocommerce_product_type':
-				if ( ! function_exists( 'wc_get_product_types' ) ) {
-					return array();
-				}
-				$product_types = wc_get_product_types();
-				return is_array( $product_types ) ? $product_types : array();
-
-			case 'woocommerce_shop_page_id':
-				return self::get_page_options();
-		}
-
-		return $options;
-	}
-
-	/**
-	 * Get options for page selection fields.
-	 *
-	 * @since 10.8.0
-	 *
-	 * @return array
-	 */
-	private static function get_page_options(): array {
-		if ( ! function_exists( 'get_pages' ) ) {
-			return array();
-		}
-
-		$pages   = get_pages(
-			array(
-				'sort_column' => 'menu_order',
-				'sort_order'  => 'ASC',
-				'post_status' => array( 'publish', 'private', 'draft' ),
-			)
-		);
-		$options = array(
-			'' => __( 'Select a page…', 'woocommerce' ),
-		);
-
-		if ( ! is_array( $pages ) ) {
-			return $options;
-		}
-
-		foreach ( $pages as $page ) {
-			$options[ (string) $page->ID ] = wp_strip_all_tags( $page->post_title );
-		}
-
-		return $options;
-	}
 }

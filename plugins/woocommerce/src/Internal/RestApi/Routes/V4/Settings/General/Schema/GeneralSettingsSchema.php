@@ -18,13 +18,6 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * GeneralSettingsSchema class.
- *
- * The constructor performs hook registration for the
- * `woocommerce_react_settings_field_options` filter so that consuming code
- * gets the tab-specific option generation behaviour simply by instantiating
- * the schema. This is atypical for the `src/Internal/*` codebase — see the
- * follow-up note on the constructor docblock about moving registration into
- * the V4 Settings REST controller's init path.
  */
 class GeneralSettingsSchema extends AbstractSchema {
 	/**
@@ -33,29 +26,6 @@ class GeneralSettingsSchema extends AbstractSchema {
 	 * @var string
 	 */
 	const IDENTIFIER = 'general_settings';
-
-	/**
-	 * Constructor.
-	 *
-	 * Registers the tab-specific field options callback on the shared
-	 * `woocommerce_react_settings_field_options` filter exposed by
-	 * ReactSettingsSchema. The callback only injects options for field IDs
-	 * owned by the general settings tab, so it is safe to register globally.
-	 *
-	 * `has_filter()` is used to avoid double-registration under DI container
-	 * instantiation or test re-instantiation.
-	 *
-	 * @since 10.8.0
-	 *
-	 * @todo Move the filter registration into the V4 Settings REST
-	 *       controller's init path so schema classes don't perform global
-	 *       hook side effects at construction time.
-	 */
-	public function __construct() {
-		if ( ! has_filter( 'woocommerce_react_settings_field_options', array( self::class, 'inject_field_options' ) ) ) {
-			add_filter( 'woocommerce_react_settings_field_options', array( self::class, 'inject_field_options' ), 10, 4 );
-		}
-	}
 
 	/**
 	 * Return all properties for the item schema.
@@ -202,82 +172,4 @@ class GeneralSettingsSchema extends AbstractSchema {
 		return $response;
 	}
 
-	/**
-	 * Inject tab-specific field options for general settings fields.
-	 *
-	 * Callback registered against `woocommerce_react_settings_field_options`.
-	 * Only overrides options when the existing array is empty, so authors can
-	 * still supply an explicit options list via the settings definition.
-	 *
-	 * @since 10.8.0
-	 *
-	 * @param array  $options         Current options array.
-	 * @param string $field_id        Setting field ID.
-	 * @param array  $setting         Raw setting definition.
-	 * @param string $normalized_type Normalized field type.
-	 * @return array
-	 */
-	public static function inject_field_options( $options, string $field_id, array $setting, string $normalized_type ): array {
-		unset( $setting, $normalized_type ); // Not needed for this callback.
-
-		if ( ! is_array( $options ) ) {
-			$options = array();
-		}
-
-		if ( ! empty( $options ) ) {
-			return $options;
-		}
-
-		switch ( $field_id ) {
-			case 'woocommerce_currency':
-				if ( ! function_exists( 'get_woocommerce_currencies' ) || ! function_exists( 'get_woocommerce_currency_symbol' ) ) {
-					return array();
-				}
-
-				$currencies = get_woocommerce_currencies();
-				$generated  = array();
-
-				foreach ( $currencies as $code => $name ) {
-					$label               = wp_specialchars_decode( (string) $name );
-					$symbol              = wp_specialchars_decode( (string) get_woocommerce_currency_symbol( $code ) );
-					$generated[ $code ] = $label . ' (' . $symbol . ') — ' . $code;
-				}
-
-				return $generated;
-
-			case 'woocommerce_default_country':
-				if ( ! function_exists( 'WC' ) ) {
-					return array();
-				}
-
-				$countries = WC()->countries->get_countries();
-				$states    = WC()->countries->get_states();
-				$generated = array();
-
-				foreach ( $countries as $country_code => $country_name ) {
-					$country_states = $states[ $country_code ] ?? array();
-
-					if ( empty( $country_states ) ) {
-						$generated[ $country_code ] = $country_name;
-						continue;
-					}
-
-					foreach ( $country_states as $state_code => $state_name ) {
-						$generated[ $country_code . ':' . $state_code ] = $country_name . ' — ' . $state_name;
-					}
-				}
-
-				return $generated;
-
-			case 'woocommerce_all_except_countries':
-			case 'woocommerce_specific_allowed_countries':
-			case 'woocommerce_specific_ship_to_countries':
-				if ( ! function_exists( 'WC' ) ) {
-					return array();
-				}
-				return WC()->countries->get_countries();
-		}
-
-		return $options;
-	}
 }

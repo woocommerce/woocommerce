@@ -509,26 +509,20 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 			$settings_definitions = null;
 			$section_id           = $current_section ?? '';
 
-			if ( Features::is_enabled( 'modern-settings' ) ) {
+			if ( ReactSettingsSchema::is_feature_enabled() ) {
 				$settings_definitions = $this->get_settings( $section_id );
 				if ( is_array( $settings_definitions ) ) {
 					$tab = $this->id;
-					if ( ! ReactSettingsSchema::is_opted_out( $tab, $section_id, $settings_definitions, $this ) ) {
-						$unsupported_fields = ReactSettingsSchema::get_unsupported_fields(
-							$tab,
-							$section_id,
-							$settings_definitions,
-							$this
-						);
+					$render_plan = ReactSettingsSchema::get_screen_render_context( $tab, $section_id, $settings_definitions, $this );
 
-						if ( empty( $unsupported_fields ) && ReactSettingsSchema::has_renderable_fields( $tab, $section_id, $settings_definitions, $this ) ) {
-							$GLOBALS['hide_save_button'] = true;
-							$mount_id                    = ReactSettingsSchema::get_mount_id( $tab, $section_id );
-							echo '<div id="' . esc_attr( $mount_id ) . '" data-wc-modern-settings="1" data-wc-settings-tab="' . esc_attr( $tab ) . '" data-wc-settings-section="' . esc_attr( $section_id ) . '"> </div>';
-							return;
-						}
+					if ( $render_plan['should_render'] ) {
+						$GLOBALS['hide_save_button'] = true;
+						echo '<div id="' . esc_attr( $render_plan['mount_id'] ) . '" data-wc-modern-settings="1" data-wc-settings-tab="' . esc_attr( $tab ) . '" data-wc-settings-section="' . esc_attr( $section_id ) . '"> </div>';
+						return;
+					}
 
-						$this->warn_legacy_settings_fallback( $tab, $section_id, $unsupported_fields );
+					if ( ! $render_plan['is_opted_out'] ) {
+						$this->warn_legacy_settings_fallback( $tab, $section_id, $render_plan['unsupported_fields'] );
 					}
 				}
 			}

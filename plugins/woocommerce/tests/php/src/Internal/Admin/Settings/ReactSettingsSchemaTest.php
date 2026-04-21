@@ -32,6 +32,78 @@ class ReactSettingsSchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Returns a render plan with payload metadata for a supported settings screen.
+	 */
+	public function test_get_screen_render_context_returns_payload_for_supported_screen() {
+		$settings_page = new class() {
+			/**
+			 * @return string
+			 */
+			public function get_label() {
+				return 'General';
+			}
+		};
+
+		update_option( 'setting_one', 'saved_value' );
+
+		$settings = array(
+			array(
+				'type'  => 'title',
+				'id'    => 'group_one',
+				'title' => 'Group one',
+			),
+			array(
+				'id'      => 'setting_one',
+				'type'    => 'text',
+				'default' => 'default_value',
+			),
+			array(
+				'type' => 'sectionend',
+				'id'   => 'group_one',
+			),
+		);
+
+		$plan = ReactSettingsSchema::get_screen_render_context( 'general', '', $settings, $settings_page );
+
+		delete_option( 'setting_one' );
+
+		$this->assertFalse( $plan['is_opted_out'] );
+		$this->assertTrue( $plan['should_render'] );
+		$this->assertSame( 'wc_settings_react_general_default', $plan['mount_id'] );
+		$this->assertSame( array( 'settings', 'general', 'default' ), $plan['payload_path'] );
+		$this->assertIsArray( $plan['response'] );
+		$this->assertSame( 'saved_value', $plan['response']['values']['setting_one'] );
+	}
+
+	/**
+	 * @testdox Returns unsupported fields in the render plan for a legacy fallback screen.
+	 */
+	public function test_get_screen_render_context_returns_unsupported_fields_for_legacy_fallback() {
+		$settings = array(
+			array(
+				'type' => 'title',
+				'id'   => 'group_one',
+			),
+			array(
+				'id'   => 'unsupported_field',
+				'type' => 'unsupported_field_type',
+			),
+			array(
+				'type' => 'sectionend',
+				'id'   => 'group_one',
+			),
+		);
+
+		$plan = ReactSettingsSchema::get_screen_render_context( 'general', '', $settings, null );
+
+		$this->assertFalse( $plan['is_opted_out'] );
+		$this->assertFalse( $plan['should_render'] );
+		$this->assertNull( $plan['response'] );
+		$this->assertCount( 1, $plan['unsupported_fields'] );
+		$this->assertSame( 'unsupported_field', $plan['unsupported_fields'][0]['id'] );
+	}
+
+	/**
 	 * @testdox Returns default supported field types.
 	 */
 	public function test_get_supported_types_returns_defaults() {
@@ -240,23 +312,9 @@ class ReactSettingsSchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Does not generate country options without a registered field options filter.
-	 *
-	 * Regression guard: prior to this change, `ReactSettingsSchema::get_field_options()`
-	 * had a hardcoded dispatch for `single_select_country` / `multi_select_countries`
-	 * that duplicated the logic now owned by `GeneralSettingsSchema::inject_field_options()`.
-	 * The base class should trust the filter to fill `$options` for types that need
-	 * external data, producing an empty options array when no callback is registered.
+	 * @testdox Does not generate built-in options for unknown tabs.
 	 */
-	public function test_build_response_does_not_generate_country_options_without_filter() {
-		// Ensure no general-tab callback is registered for this test (it might have been
-		// registered by a previous test that instantiated GeneralSettingsSchema).
-		remove_filter(
-			'woocommerce_react_settings_field_options',
-			array( GeneralSettingsSchema::class, 'inject_field_options' ),
-			10
-		);
-
+	public function test_build_response_does_not_generate_country_options_for_unknown_tab() {
 		$settings = array(
 			array(
 				'type'  => 'title',
@@ -278,6 +336,35 @@ class ReactSettingsSchemaTest extends WC_Unit_Test_Case {
 		$fields = $response['groups']['group_one']['fields'];
 		$this->assertNotEmpty( $fields );
 		$this->assertArrayNotHasKey( 'options', $fields[0] );
+	}
+
+	/**
+	 * @testdox Generates built-in country options for known general settings fields.
+	 */
+	public function test_build_response_generates_country_options_for_general_settings_fields() {
+		$settings = array(
+			array(
+				'type'  => 'title',
+				'id'    => 'group_one',
+				'title' => 'Group one',
+			),
+			array(
+				'id'   => 'woocommerce_specific_allowed_countries',
+				'type' => 'multi_select_countries',
+			),
+			array(
+				'type' => 'sectionend',
+				'id'   => 'group_one',
+			),
+		);
+
+		$response  = ReactSettingsSchema::build_response( 'general', '', $settings, null );
+		$fields    = $response['groups']['group_one']['fields'];
+		$options   = $fields[0]['options'];
+		$countries = WC()->countries->get_countries();
+
+		$this->assertNotEmpty( $options );
+		$this->assertSame( $countries['US'], $options['US'] );
 	}
 
 	/**
