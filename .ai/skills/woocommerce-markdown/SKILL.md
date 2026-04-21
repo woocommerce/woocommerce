@@ -26,7 +26,7 @@ The project uses markdownlint with these specific rules (from `.markdownlint.jso
 - **MD024**: Multiple headings with same content allowed (only check siblings)
 - **MD031**: Fenced code blocks must be surrounded by blank lines
 - **MD032**: Lists must be surrounded by blank lines
-- **MD033**: HTML allowed for `<video>` elements only
+- **MD033**: HTML allowed for a h1, h2, h3, br, summary, details and video elements
 - **MD036**: Emphasis (bold/italic) should not be used as headings - use proper heading tags
 - **MD040**: Fenced code blocks should specify language
 - **MD047**: Files must end with a single newline

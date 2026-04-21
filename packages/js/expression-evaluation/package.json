@@ -11,7 +11,7 @@
 		"evaluation"
 	],
 	"engines": {
-		"node": "^20.11.1"
+		"node": "^24.15.0"
 	},
 	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/expression-evaluation/README.md",
 	"repository": {
@@ -31,7 +31,7 @@
 		"build-types"
 	],
 	"dependencies": {
-		"@wordpress/i18n": "wp-6.6",
+		"@wordpress/i18n": "catalog:wp-min",
 		"peggy": "^3.0.2"
 	},
 	"publishConfig": {
@@ -127,6 +127,7 @@
 			"allowUsuallyExcludedPaths": true,
 			"files": [
 				"package.json",
+				"../../../pnpm-lock.yaml",
 				"node_modules/@woocommerce/eslint-plugin/configs",
 				"node_modules/@woocommerce/eslint-plugin/rules",
 				"node_modules/@woocommerce/eslint-plugin/index.js",

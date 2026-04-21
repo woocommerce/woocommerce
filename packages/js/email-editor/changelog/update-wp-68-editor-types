@@ -1,0 +1,4 @@
+Significance: major
+Type: update
+
+Remove block-editor, editor, and core-data augmentation blocks from wordpress-modules.ts (now covered by native types). Remove unused @ts-expect-error directives for newly exported symbols.

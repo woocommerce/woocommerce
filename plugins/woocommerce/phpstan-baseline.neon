@@ -1501,18 +1501,6 @@ parameters:
 			path: includes/admin/class-wc-admin-assets.php
 
 		-
-			message: '#^Method WC_Admin_Assets\:\:enqueue_block_editor_script\(\) has parameter \$script_name with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: includes/admin/class-wc-admin-assets.php
-
-		-
-			message: '#^Method WC_Admin_Assets\:\:enqueue_block_editor_script\(\) has parameter \$script_path_name with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: includes/admin/class-wc-admin-assets.php
-
-		-
 			message: '#^Method WC_Admin_Assets\:\:register_scripts\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -64255,12 +64243,6 @@ parameters:
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
 
 		-
-			message: '#^Parameter \#2 \$property_name of function property_exists expects string, array\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
 			message: '#^Parameter \#3 \$default_value of static method Automattic\\WooCommerce\\Utilities\\ArrayUtil\:\:get_value_or_default\(\) expects null, string given\.$#'
 			identifier: argument.type
 			count: 1
@@ -64953,12 +64935,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmailPostsGenerator\:\:initialize\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmailPostsGenerator.php
-
-		-
-			message: '#^Property WC_Email\:\:\$template_base \(string\) on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.property
 			count: 1
 			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmailPostsGenerator.php
 
@@ -66835,18 +66811,6 @@ parameters:
 			path: src/Internal/ProductFilters/FilterData.php
 
 		-
-			message: '#^Parameter \#2 \$value of method Automattic\\WooCommerce\\Internal\\ProductFilters\\FilterData\:\:set_cache\(\) expects Automattic\\WooCommerce\\Internal\\ProductFilters\\mix, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/ProductFilters/FilterData.php
-
-		-
-			message: '#^Parameter \$value of method Automattic\\WooCommerce\\Internal\\ProductFilters\\FilterData\:\:set_cache\(\) has invalid type Automattic\\WooCommerce\\Internal\\ProductFilters\\mix\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/ProductFilters/FilterData.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\ProductFilters\\FilterDataProvider\:\:with\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -68372,12 +68336,6 @@ parameters:
 
 		-
 			message: '#^Call to method single_add_to_cart_text\(\) on an unknown class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\WC_Data\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
-			message: '#^Call to method update_meta_data\(\) on an unknown class Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Products\\WC_Product\.$#'
 			identifier: class.notFound
 			count: 1
 			path: src/Internal/RestApi/Routes/V4/Products/Controller.php

@@ -1,0 +1,26 @@
+.woocommerce-next-taxonomy-edit {
+	&__chip-thumbnail {
+		width: 19px;
+		height: 19px;
+		border-radius: 50%;
+		object-fit: cover;
+		margin-left: 1px;
+
+		&--empty {
+			background-color: var( --wp-components-color-gray-100 );
+		}
+	}
+
+	&__option {
+		width: 100%;
+	}
+
+	&__option-thumbnail {
+		width: 32px;
+		height: 32px;
+		flex-shrink: 0;
+		border-radius: 4px;
+		object-fit: cover;
+		background-color: var( --wp-components-color-gray-100 );
+	}
+}

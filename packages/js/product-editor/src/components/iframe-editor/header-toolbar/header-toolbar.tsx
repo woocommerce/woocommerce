@@ -18,7 +18,6 @@ import clsx from 'clsx';
 import { MouseEvent } from 'react';
 import { Button, Popover, ToolbarItem } from '@wordpress/components';
 import PinnedItems from '@wordpress/interface/build-module/components/pinned-items';
-// eslint-disable-next-line @woocommerce/dependency-group
 import {
 	store as preferencesStore,
 	/* @ts-expect-error missing types. */
@@ -58,17 +57,9 @@ export function HeaderToolbar( {
 	const { isInserterEnabled, hasBlockSelection, hasFixedToolbar } = useSelect(
 		( select ) => {
 			const {
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore These selectors are available in the block data store.
 				hasInserterItems,
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore These selectors are available in the block data store.
 				getBlockRootClientId,
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore These selectors are available in the block data store.
 				getBlockSelectionEnd,
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore These selectors are available in the block data store.
 				getBlockSelectionStart,
 			} = select( blockEditorStore );
 			const { get: getPreference } = select( preferencesStore );
@@ -100,10 +91,10 @@ export function HeaderToolbar( {
 	return (
 		<div className="woocommerce-iframe-editor__header">
 			<div className="woocommerce-iframe-editor__header-left">
+				{ /* @ts-expect-error NavigableToolbar accepts a variant prop at runtime but it's missing from the public types. */ }
 				<NavigableToolbar
 					className="woocommerce-iframe-editor-document-tools"
 					aria-label={ __( 'Document tools', 'woocommerce' ) }
-					// @ts-expect-error variant prop exists
 					variant="unstyled"
 				>
 					<div className="woocommerce-iframe-editor-document-tools__left">

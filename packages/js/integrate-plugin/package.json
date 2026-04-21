@@ -46,7 +46,7 @@
 		"watch:build:project:esm": "wireit"
 	},
 	"dependencies": {
-		"@wordpress/create-block": "wp-6.6",
+		"@wordpress/create-block": "catalog:wp-min",
 		"chalk": "^4.1.2",
 		"change-case": "^4.1.2",
 		"commander": "^9.5.0",
@@ -62,7 +62,7 @@
 		"@testing-library/jest-dom": "^6.x.x",
 		"@testing-library/react-hooks": "8.0.1",
 		"@types/jest": "29.5.x",
-		"@types/node": "20.x.x",
+		"@types/node": "^24.1.0",
 		"@types/testing-library__jest-dom": "^5.14.9",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
@@ -150,6 +150,7 @@
 			"allowUsuallyExcludedPaths": true,
 			"files": [
 				"package.json",
+				"../../../pnpm-lock.yaml",
 				"node_modules/@woocommerce/eslint-plugin/configs",
 				"node_modules/@woocommerce/eslint-plugin/rules",
 				"node_modules/@woocommerce/eslint-plugin/index.js",
