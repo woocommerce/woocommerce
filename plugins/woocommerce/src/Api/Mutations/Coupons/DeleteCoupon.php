@@ -41,6 +41,7 @@ class DeleteCoupon {
 		// the underlying error instead.
 		$deleted = $wc_coupon->delete( $force );
 
+		// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Not HTML; serialized as JSON.
 		if ( $deleted instanceof \WP_Error ) {
 			throw new ApiException(
 				$deleted->get_error_message(),
@@ -48,6 +49,7 @@ class DeleteCoupon {
 				status_code: 500,
 			);
 		}
+		// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
 
 		$result          = new DeleteCouponResult();
 		$result->id      = $id;

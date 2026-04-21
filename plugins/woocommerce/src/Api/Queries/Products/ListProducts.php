@@ -39,6 +39,7 @@ class ListProducts {
 	 * @param ?ProductType       $product_type Optional product type filter.
 	 * @param ?array             $_query_info  Unified query info tree from the GraphQL request.
 	 * @return Connection
+	 * @throws ApiException When an unsupported `stock_status` filter value is passed.
 	 */
 	#[ConnectionOf( Product::class )]
 	public function execute(
@@ -81,10 +82,20 @@ class ListProducts {
 		// enum case added without updating this match fails loudly with a
 		// clean 400 instead of a PHP-level UnhandledMatchError → HTTP 500.
 		if ( null !== $filters->stock_status ) {
-			$meta_clause              = match ( $filters->stock_status ) {
-				StockStatus::InStock     => array( 'key' => '_stock_status', 'value' => 'instock' ),
-				StockStatus::OutOfStock  => array( 'key' => '_stock_status', 'value' => 'outofstock' ),
-				StockStatus::OnBackorder => array( 'key' => '_stock_status', 'value' => 'onbackorder' ),
+			// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Not HTML; serialized as JSON.
+			$meta_clause = match ( $filters->stock_status ) {
+				StockStatus::InStock     => array(
+					'key'   => '_stock_status',
+					'value' => 'instock',
+				),
+				StockStatus::OutOfStock  => array(
+					'key'   => '_stock_status',
+					'value' => 'outofstock',
+				),
+				StockStatus::OnBackorder => array(
+					'key'   => '_stock_status',
+					'value' => 'onbackorder',
+				),
 				StockStatus::Other       => array(
 					'key'     => '_stock_status',
 					'value'   => array( 'instock', 'outofstock', 'onbackorder' ),
@@ -96,6 +107,7 @@ class ListProducts {
 					status_code: 400,
 				),
 			};
+			// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			$query_args['meta_query'] = array( $meta_clause );
 		}
 

@@ -55,7 +55,7 @@ class IdCursorFilter {
 	}
 
 	/**
-	 * posts_where filter callback. Appends cursor conditions when the
+	 * Filter callback for `posts_where`. Appends cursor conditions when the
 	 * corresponding query vars are set on the WP_Query; returns the input
 	 * clause unchanged otherwise.
 	 *

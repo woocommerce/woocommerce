@@ -42,6 +42,7 @@ class DeleteProduct {
 		// the underlying error instead.
 		$deleted = $wc_product->delete( $force );
 
+		// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Not HTML; serialized as JSON.
 		if ( $deleted instanceof \WP_Error ) {
 			throw new ApiException(
 				$deleted->get_error_message(),
@@ -49,6 +50,7 @@ class DeleteProduct {
 				status_code: 500,
 			);
 		}
+		// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
 
 		return true === $deleted;
 	}
