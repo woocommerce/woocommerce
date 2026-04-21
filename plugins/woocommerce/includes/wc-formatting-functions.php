@@ -1192,13 +1192,14 @@ function wc_format_product_short_description( $content ) {
  * Formats currency separators when saved in settings.
  *
  * @since 10.8.0
- * @param  string $value     Option value.
+ * @param  string $value     Option value passed through earlier filters.
  * @param  array  $option    Option data including 'id' and 'default'.
- * @param  string $raw_value Raw value.
+ * @param  string $raw_value Raw POST value before any processing.
  * @return string
  */
 function wc_format_option_price_separators( $value, $option, $raw_value ) {
-	$sanitized = preg_replace( '/\s+/', ' ', wp_kses( (string) ( $raw_value ?? '' ), array() ) );
+	$stripped  = wp_kses( (string) ( $raw_value ?? '' ), array() );
+	$sanitized = preg_replace( '/\s+/', ' ', $stripped );
 
 	if ( ! is_string( $sanitized ) || false !== strpbrk( $sanitized, '0123456789' ) ) {
 		WC_Admin_Settings::add_error(
