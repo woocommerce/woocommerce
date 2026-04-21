@@ -64,15 +64,40 @@ class ListProducts {
 			'post_status'    => $filters->status?->value ?? 'any',
 		);
 
-		// Product type filter via taxonomy.
+		// Product type filter via taxonomy. `ProductType::Other` is the
+		// output-only signal for "stored product_type doesn't match any
+		// known standard" (typically plugin-added types), mirroring how
+		// `StockStatus::Other` is handled for the meta-query path above.
+		// Map it to NOT IN the standard slugs rather than the literal
+		// 'other' term, which wouldn't match anything.
 		if ( null !== $product_type ) {
-			$query_args['tax_query'] = array(
-				array(
-					'taxonomy' => 'product_type',
-					'field'    => 'slug',
-					'terms'    => $product_type->value,
-				),
-			);
+			if ( ProductType::Other === $product_type ) {
+				$standard_types = array_values(
+					array_filter(
+						array_map(
+							static fn( ProductType $t ): string => $t->value,
+							ProductType::cases()
+						),
+						static fn( string $slug ): bool => ProductType::Other->value !== $slug
+					)
+				);
+				$query_args['tax_query'] = array(
+					array(
+						'taxonomy' => 'product_type',
+						'field'    => 'slug',
+						'terms'    => $standard_types,
+						'operator' => 'NOT IN',
+					),
+				);
+			} else {
+				$query_args['tax_query'] = array(
+					array(
+						'taxonomy' => 'product_type',
+						'field'    => 'slug',
+						'terms'    => $product_type->value,
+					),
+				);
+			}
 		}
 
 		// Stock status filter via meta. `StockStatus::Other` means "stored
