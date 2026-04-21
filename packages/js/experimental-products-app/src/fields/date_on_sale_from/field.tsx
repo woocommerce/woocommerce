@@ -38,15 +38,6 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 			return d;
 		}, [] );
 
-		const isDateDisabled = useCallback(
-			( date: Date ) => {
-				const day = new Date( date );
-				day.setHours( 0, 0, 0, 0 );
-				return day.getTime() < today.getTime();
-			},
-			[ today ]
-		);
-
 		const handleChange = useCallback(
 			( value: { date_on_sale_from?: string | null } ) => {
 				const newStart = value.date_on_sale_from;

@@ -48,19 +48,6 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 			return today;
 		}, [ dateOnSaleFrom ] );
 
-		const isDateDisabled = useCallback(
-			( date: Date ) => {
-				const day = new Date( date );
-				day.setHours( 0, 0, 0, 0 );
-
-				const fromDay = new Date( minDate );
-				fromDay.setHours( 0, 0, 0, 0 );
-
-				return day.getTime() < fromDay.getTime();
-			},
-			[ minDate ]
-		);
-
 		return (
 			<DatePicker
 				data={ data }
