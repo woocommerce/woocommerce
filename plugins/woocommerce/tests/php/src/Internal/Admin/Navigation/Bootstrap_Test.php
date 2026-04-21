@@ -31,7 +31,7 @@ class Bootstrap_Test extends \WC_Unit_Test_Case {
 	 * — those live in Menu_Reconciler and Assets, which only instantiate when
 	 * boot_when_enabled() runs with the flag on.
 	 */
-	public function test_bootstrap_registers_only_feature_and_admin_init_hooks() {
+	public function test_bootstrap_registers_feature_and_admin_init_hooks() {
 		wc_get_container()->get( Bootstrap::class );
 
 		$this->assertNotFalse( has_action( 'woocommerce_register_feature_definitions' ) );
@@ -45,10 +45,18 @@ class Bootstrap_Test extends \WC_Unit_Test_Case {
 	public function test_boot_when_enabled_is_safe_to_call_with_flag_off() {
 		update_option( 'woocommerce_feature_navigation_v2_enabled', 'no' );
 
+		$hooks_before = count( $GLOBALS['wp_filter']['admin_menu']->callbacks ?? array() );
+
 		$bootstrap = wc_get_container()->get( Bootstrap::class );
 		$bootstrap->boot_when_enabled();
 		$bootstrap->boot_when_enabled();
 
-		$this->assertTrue( true, 'No exception thrown on repeated flag-off boot.' );
+		$hooks_after = count( $GLOBALS['wp_filter']['admin_menu']->callbacks ?? array() );
+
+		$this->assertSame(
+			$hooks_before,
+			$hooks_after,
+			'Flag-off boot_when_enabled must not register admin_menu hooks.'
+		);
 	}
 }
