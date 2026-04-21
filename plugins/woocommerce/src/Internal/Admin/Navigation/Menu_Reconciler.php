@@ -113,6 +113,10 @@ class Menu_Reconciler {
 		$builder      = new Tree_Builder();
 		$tree         = $builder->build( $default_tree, (array) $menu, (array) $submenu );
 
+		// Attach WC Settings tabs as children of the Settings node before the
+		// filter runs so extensions can mutate them too.
+		$tree = $this->add_settings_tabs( $tree );
+
 		/**
 		 * Filter the navigation_v2 tree before the renderer consumes it.
 		 *
@@ -127,6 +131,52 @@ class Menu_Reconciler {
 		$this->replace_woocommerce_submenu( $tree );
 
 		self::$tree = $tree;
+	}
+
+	/**
+	 * Add WC Settings tabs (General / Products / Tax / Shipping / Payments /
+	 * Accounts / Emails / Integrations / Advanced, plus conditionally-registered
+	 * tabs like Site Visibility) as children of the `wc-settings` node.
+	 *
+	 * Slug format: `wc-settings&tab=<id>` so the renderer and Context
+	 * resolver treat it as a compound wc-admin-style path.
+	 *
+	 * @param array $tree Tree being built.
+	 * @return array Tree with settings tabs attached.
+	 */
+	private function add_settings_tabs( array $tree ): array {
+		if ( ! isset( $tree['wc-settings'] ) ) {
+			return $tree;
+		}
+		if ( ! class_exists( 'WC_Admin_Settings' ) ) {
+			return $tree;
+		}
+
+		$pos = 30; // After default Payments (10) and WooPayments (20); before Status (99).
+		foreach ( \WC_Admin_Settings::get_settings_pages() as $page ) {
+			if ( ! is_object( $page ) || ! method_exists( $page, 'get_id' ) || ! method_exists( $page, 'get_label' ) ) {
+				continue;
+			}
+			$id    = $page->get_id();
+			$label = $page->get_label();
+			if ( '' === $id || '' === $label ) {
+				continue;
+			}
+			$slug = 'wc-settings&tab=' . $id;
+			if ( isset( $tree[ $slug ] ) ) {
+				continue;
+			}
+			$tree[ $slug ] = array(
+				'parent'     => 'wc-settings',
+				'title'      => $label,
+				'position'   => $pos,
+				'source'     => 'settings-tab',
+				'capability' => 'manage_woocommerce',
+			);
+			$pos += 5;
+		}
+
+		return $tree;
 	}
 
 	/**

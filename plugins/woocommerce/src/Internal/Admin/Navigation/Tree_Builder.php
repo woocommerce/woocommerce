@@ -32,9 +32,64 @@ class Tree_Builder {
 		}
 
 		$tree = $this->auto_attach_woocommerce_children( $tree, $default_tree, $raw_submenu );
+		$tree = $this->attach_rehomed_submenu_children( $tree, $raw_submenu );
 		$tree = $this->break_cycles( $tree );
 		$tree = $this->drop_unknown_parents( $tree );
 
+		return $tree;
+	}
+
+	/**
+	 * For every non-root node in the tree, hoist any entries registered under
+	 * that slug in $raw_submenu as grandchildren.
+	 *
+	 * This handles the common case where a rehomed top-level item (e.g.
+	 * `woocommerce-marketing`, `edit.php?post_type=product`) came with its
+	 * own submenu of sub-pages. When the top-level is stripped from $menu,
+	 * those submenu entries would otherwise be orphaned; hoisting them into
+	 * the tree preserves the original hierarchy under the consolidated
+	 * WooCommerce root.
+	 *
+	 * @param array $tree        Tree being built.
+	 * @param array $raw_submenu WP's $submenu.
+	 * @return array Tree with rehomed grandchildren attached.
+	 */
+	private function attach_rehomed_submenu_children( array $tree, array $raw_submenu ): array {
+		foreach ( array_keys( $tree ) as $slug ) {
+			// 'woocommerce' is handled separately in auto_attach_woocommerce_children.
+			if ( 'woocommerce' === $slug ) {
+				continue;
+			}
+			if ( ! isset( $raw_submenu[ $slug ] ) ) {
+				continue;
+			}
+
+			$auto_pos = 2000;
+			foreach ( $raw_submenu[ $slug ] as $entry ) {
+				$child_slug = $entry[2] ?? null;
+				if ( null === $child_slug ) {
+					continue;
+				}
+				if ( isset( $tree[ $child_slug ] ) ) {
+					continue;
+				}
+				// WP's CPT submenus include the parent slug as the first "self" entry
+				// (e.g. 'edit.php?post_type=product' inside $submenu['edit.php?post_type=product']).
+				// Skip that self-reference.
+				if ( $child_slug === $slug ) {
+					continue;
+				}
+
+				$tree[ $child_slug ] = array(
+					'parent'     => $slug,
+					'title'      => $entry[0] ?? $child_slug,
+					'position'   => $auto_pos,
+					'source'     => 'rehomed',
+					'capability' => $entry[1] ?? 'read',
+				);
+				$auto_pos += 10;
+			}
+		}
 		return $tree;
 	}
 
