@@ -984,7 +984,7 @@ jQuery( function ( $ ) {
 				return;
 			}
 
-			const $wrapper = $( currentAttributeTermCreationContext.wrapper );
+			const wrapper = currentAttributeTermCreationContext.wrapper;
 			const data = {
 				action: 'woocommerce_add_new_attribute',
 				taxonomy: currentAttributeTermCreationContext.attribute,
@@ -1001,18 +1001,22 @@ jQuery( function ( $ ) {
 						window.alert( response.error );
 					} else if ( response.slug ) {
 						// Success.
-						$wrapper
-							.find( 'select.attribute_values' )
-							.append(
-								'<option value="' +
-									response.term_id +
-									'" selected="selected">' +
-									response.name +
-									'</option>'
-							);
-						$wrapper
-							.find( 'select.attribute_values' )
-							.trigger( 'change' );
+						const select = wrapper.querySelector(
+							'select.attribute_values'
+						);
+						if ( select ) {
+							const option = document.createElement( 'option' );
+							option.value = String( response.term_id );
+							option.selected = true;
+							option.textContent = response.name;
+							select.appendChild( option );
+
+							// Trigger change event natively.
+							const changeEvent = new Event( 'change', {
+								bubbles: true,
+							} );
+							select.dispatchEvent( changeEvent );
+						}
 					}
 
 					$( '.product_attributes' ).unblock();
