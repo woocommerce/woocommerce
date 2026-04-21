@@ -1,0 +1,5 @@
+Significance: patch
+Type: enhancement
+Comment: Refs WOOPRD-3485
+
+Gate modernised settings rendering on a per-page `$is_modern` opt-in so Core behaviour is unchanged unless a page explicitly opts in.

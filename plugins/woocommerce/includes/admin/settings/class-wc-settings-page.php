@@ -115,8 +115,18 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		protected $label = '';
 
 		/**
-		 * Setting page is modern.
+		 * Whether this settings page opts in to the modernised React-based rendering.
 		 *
+		 * Setting this to `true` (combined with the `modern-settings` feature flag
+		 * being enabled) causes `output()` to render a React mount point instead of
+		 * the legacy HTML form for this page/section. Defaults to `false` so Core
+		 * retains the legacy experience; third-party settings pages opt in by
+		 * overriding this property.
+		 *
+		 * The per-section `woocommerce_react_settings_opt_out` filter can still
+		 * veto a specific tab/section even when this is `true`.
+		 *
+		 * @since 10.8.0
 		 * @var bool
 		 */
 		protected $is_modern = false;
@@ -157,6 +167,22 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		 */
 		public function get_label() {
 			return $this->label;
+		}
+
+		/**
+		 * Whether this settings page opts in to the modernised React-based rendering.
+		 *
+		 * Returns the value of the `$is_modern` property so consumers outside the
+		 * class hierarchy can detect the opt-in without reflecting into the
+		 * protected property. Combined with the `modern-settings` feature flag,
+		 * a `true` return causes `output()` to render a React mount point instead
+		 * of the legacy HTML form.
+		 *
+		 * @since 10.8.0
+		 * @return bool
+		 */
+		public function is_modern(): bool {
+			return true === $this->is_modern;
 		}
 
 		/**
@@ -509,7 +535,7 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 			$settings_definitions = null;
 			$section_id           = $current_section ?? '';
 
-			if ( Features::is_enabled( 'modern-settings' ) ) {
+			if ( Features::is_enabled( 'modern-settings' ) && true === $this->is_modern ) {
 				$settings_definitions = $this->get_settings( $section_id );
 				if ( is_array( $settings_definitions ) ) {
 					$tab = $this->id;

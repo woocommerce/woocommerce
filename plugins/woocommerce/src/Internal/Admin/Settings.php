@@ -289,6 +289,11 @@ class Settings {
 			return $settings;
 		}
 
+		// Only preload data for pages that have opted into the modernised rendering.
+		if ( ! $this->is_page_modern( $settings_page ) ) {
+			return $settings;
+		}
+
 		$settings_definitions = $settings_page->get_settings( $current_section );
 		if ( ! is_array( $settings_definitions ) ) {
 			return $settings;
@@ -351,6 +356,28 @@ class Settings {
 
 		$section = isset( $_GET['section'] ) ? sanitize_title( wp_unslash( $_GET['section'] ) ) : '';
 		return $section;
+	}
+
+	/**
+	 * Check whether a settings page instance has opted in to the modernised rendering.
+	 *
+	 * Uses the public `is_modern()` getter on `WC_Settings_Page` when available.
+	 * Returns `false` for legacy page classes that predate the getter so they
+	 * keep the legacy experience.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @param mixed $settings_page Settings page instance.
+	 * @return bool
+	 */
+	private function is_page_modern( $settings_page ): bool {
+		if ( ! is_object( $settings_page ) ) {
+			return false;
+		}
+		if ( ! method_exists( $settings_page, 'is_modern' ) ) {
+			return false;
+		}
+		return true === $settings_page->is_modern();
 	}
 
 	/**
