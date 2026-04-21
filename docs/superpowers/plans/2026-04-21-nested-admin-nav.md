@@ -198,7 +198,7 @@ class Bootstrap {
 			__( 'Nested admin navigation', 'woocommerce' ),
 			array(
 				'description'        => __(
-					'Replace the flat Woo admin menu with a nested tree under a single WooCommerce item. Experimental.',
+					'Move all WooCommerce menu items under a single top-level item.',
 					'woocommerce'
 				),
 				'is_experimental'    => true,
