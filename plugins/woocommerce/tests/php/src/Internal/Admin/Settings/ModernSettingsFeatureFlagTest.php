@@ -170,7 +170,7 @@ class ModernSettingsFeatureFlagTest extends WC_Unit_Test_Case {
 		$this->assertStringNotContainsString(
 			'data-wc-modern-settings',
 			$html,
-			'With modern-settings disabled, the React mount div must NOT be emitted, even on a page where $is_modern is true.'
+			'With modern-settings disabled, the React mount div must NOT be emitted on any settings page.'
 		);
 		$this->assertStringNotContainsString(
 			'data-wc-settings-tab',
@@ -194,7 +194,7 @@ class ModernSettingsFeatureFlagTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString(
 			'data-wc-modern-settings="1"',
 			$html,
-			'With modern-settings enabled and an opted-in page, the React mount div must be emitted (teeth).'
+			'With modern-settings enabled and a page exposing supported field types, the React mount div must be emitted (teeth).'
 		);
 		$this->assertStringContainsString(
 			'data-wc-settings-tab="' . self::TEST_PAGE_ID . '"',
@@ -228,8 +228,9 @@ class ModernSettingsFeatureFlagTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Build an anonymous WC_Settings_Page subclass that opts in to the modern
-	 * React renderer and exposes one supported (text) field.
+	 * Build an anonymous WC_Settings_Page subclass exposing one supported (text)
+	 * field — sufficient to make the React renderer fire when the modern-settings
+	 * flag is on (and stay silent when it isn't).
 	 *
 	 * @return WC_Settings_Page
 	 */
@@ -238,14 +239,13 @@ class ModernSettingsFeatureFlagTest extends WC_Unit_Test_Case {
 
 		return new class( $page_id ) extends WC_Settings_Page {
 			/**
-			 * Constructor — declare an opted-in modern page with one supported field.
+			 * Constructor — declare a page with one supported field.
 			 *
 			 * @param string $page_id Settings page id.
 			 */
 			public function __construct( string $page_id ) {
-				$this->id        = $page_id;
-				$this->label     = 'Modern Settings Flag Test';
-				$this->is_modern = true;
+				$this->id    = $page_id;
+				$this->label = 'Modern Settings Flag Test';
 				// Intentionally skip parent::__construct() — we don't want to register
 				// hooks for this throw-away page in the unit-test process.
 			}
