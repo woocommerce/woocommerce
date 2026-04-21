@@ -5,7 +5,7 @@
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\Tests\Admin\Settings;
+namespace Automattic\WooCommerce\Tests\Internal\Admin\Settings;
 
 use WC_Settings_Page;
 use WC_Unit_Test_Case;
@@ -17,6 +17,13 @@ use WC_Unit_Test_Case;
  * opted-in pages.
  */
 class SettingsPageOptInTest extends WC_Unit_Test_Case {
+
+	/**
+	 * The System Under Test.
+	 *
+	 * @var WC_Settings_Page
+	 */
+	private $sut;
 
 	/**
 	 * Set up test fixtures.
@@ -40,8 +47,6 @@ class SettingsPageOptInTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		remove_filter( 'woocommerce_admin_features', array( $this, 'enable_modern_settings_feature' ) );
 		remove_all_filters( 'woocommerce_react_settings_opt_out' );
-		remove_all_filters( 'woocommerce_get_settings_wooprd_3485_optin' );
-		remove_all_filters( 'woocommerce_get_settings_wooprd_3485_legacy' );
 
 		global $current_section, $hide_save_button;
 		$current_section  = '';
@@ -67,10 +72,10 @@ class SettingsPageOptInTest extends WC_Unit_Test_Case {
 	public function test_output_emits_legacy_when_is_modern_is_false_even_with_flag_on(): void {
 		add_filter( 'woocommerce_admin_features', array( $this, 'enable_modern_settings_feature' ) );
 
-		$page = $this->create_legacy_page();
+		$this->sut = $this->create_legacy_page();
 
 		ob_start();
-		$page->output();
+		$this->sut->output();
 		$output = (string) ob_get_clean();
 
 		$this->assertStringNotContainsString(
@@ -86,10 +91,10 @@ class SettingsPageOptInTest extends WC_Unit_Test_Case {
 	public function test_output_emits_react_mount_when_is_modern_is_true_and_flag_on(): void {
 		add_filter( 'woocommerce_admin_features', array( $this, 'enable_modern_settings_feature' ) );
 
-		$page = $this->create_opted_in_page();
+		$this->sut = $this->create_opted_in_page();
 
 		ob_start();
-		$page->output();
+		$this->sut->output();
 		$output = (string) ob_get_clean();
 
 		$this->assertStringContainsString(
@@ -110,7 +115,7 @@ class SettingsPageOptInTest extends WC_Unit_Test_Case {
 	public function test_output_falls_back_when_opt_out_filter_vetoes(): void {
 		add_filter( 'woocommerce_admin_features', array( $this, 'enable_modern_settings_feature' ) );
 
-		$page = $this->create_opted_in_page();
+		$this->sut = $this->create_opted_in_page();
 
 		add_filter(
 			'woocommerce_react_settings_opt_out',
@@ -125,7 +130,7 @@ class SettingsPageOptInTest extends WC_Unit_Test_Case {
 		);
 
 		ob_start();
-		$page->output();
+		$this->sut->output();
 		$output = (string) ob_get_clean();
 
 		$this->assertStringNotContainsString(
@@ -139,11 +144,11 @@ class SettingsPageOptInTest extends WC_Unit_Test_Case {
 	 * @testdox Should expose the is_modern() getter returning the opt-in state of the page.
 	 */
 	public function test_is_modern_getter_returns_opt_in_state(): void {
-		$legacy_page    = $this->create_legacy_page();
-		$opted_in_page  = $this->create_opted_in_page();
+		$this->sut = $this->create_legacy_page();
+		$this->assertFalse( $this->sut->is_modern(), 'Legacy page must report is_modern() === false.' );
 
-		$this->assertFalse( $legacy_page->is_modern(), 'Legacy page must report is_modern() === false.' );
-		$this->assertTrue( $opted_in_page->is_modern(), 'Opted-in page must report is_modern() === true.' );
+		$this->sut = $this->create_opted_in_page();
+		$this->assertTrue( $this->sut->is_modern(), 'Opted-in page must report is_modern() === true.' );
 	}
 
 	/**

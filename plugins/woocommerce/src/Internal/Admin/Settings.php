@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\ReactSettingsSchema;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Marketplace_Suggestions;
+use WC_Settings_Page;
 
 /**
  * Contains logic in regards to WooCommerce Admin Settings.
@@ -361,22 +362,12 @@ class Settings {
 	/**
 	 * Check whether a settings page instance has opted in to the modernised rendering.
 	 *
-	 * Uses the public `is_modern()` getter on `WC_Settings_Page` when available.
-	 * Returns `false` for legacy page classes that predate the getter so they
-	 * keep the legacy experience.
-	 *
 	 * @since 10.8.0
 	 *
-	 * @param mixed $settings_page Settings page instance.
+	 * @param WC_Settings_Page $settings_page Settings page instance.
 	 * @return bool
 	 */
-	private function is_page_modern( $settings_page ): bool {
-		if ( ! is_object( $settings_page ) ) {
-			return false;
-		}
-		if ( ! method_exists( $settings_page, 'is_modern' ) ) {
-			return false;
-		}
+	private function is_page_modern( WC_Settings_Page $settings_page ): bool {
 		return true === $settings_page->is_modern();
 	}
 
