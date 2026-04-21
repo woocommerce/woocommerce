@@ -2287,7 +2287,7 @@ class WC_Order extends WC_Abstract_Order {
 		$refund_ids = wp_cache_get( $cache_key, $this->cache_group );
 
 		if ( false === $refund_ids ) {
-			$refunds = wc_get_orders(
+			$refunds    = (array) wc_get_orders(
 				array(
 					'type'   => 'shop_order_refund',
 					'parent' => $this->get_id(),
