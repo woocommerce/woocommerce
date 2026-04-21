@@ -31,6 +31,42 @@ class Tree_Builder {
 			}
 		}
 
+		$tree = $this->auto_attach_woocommerce_children( $tree, $default_tree, $raw_submenu );
+
+		return $tree;
+	}
+
+	/**
+	 * Attach any submenu items registered under 'woocommerce' that aren't
+	 * already in the tree as children of the Woo root, preserving registration order.
+	 *
+	 * @param array $tree         Tree being built.
+	 * @param array $default_tree Default tree (used to decide "already present").
+	 * @param array $raw_submenu  WP's $submenu.
+	 * @return array Tree with auto items appended.
+	 */
+	private function auto_attach_woocommerce_children( array $tree, array $default_tree, array $raw_submenu ): array {
+		if ( ! isset( $raw_submenu['woocommerce'] ) ) {
+			return $tree;
+		}
+
+		$auto_position = 1000;
+		foreach ( $raw_submenu['woocommerce'] as $entry ) {
+			$slug = $entry[2] ?? null;
+			if ( null === $slug || isset( $default_tree[ $slug ] ) || isset( $tree[ $slug ] ) ) {
+				continue;
+			}
+
+			$tree[ $slug ] = array(
+				'parent'     => 'woocommerce',
+				'title'      => $entry[0] ?? $slug,
+				'position'   => $auto_position,
+				'source'     => 'auto',
+				'capability' => $entry[1] ?? 'read',
+			);
+			$auto_position += 10;
+		}
+
 		return $tree;
 	}
 

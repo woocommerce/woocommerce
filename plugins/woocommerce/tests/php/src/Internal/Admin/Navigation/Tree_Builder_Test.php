@@ -57,4 +57,61 @@ class Tree_Builder_Test extends \WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'woocommerce', $tree );
 		$this->assertArrayNotHasKey( 'woocommerce-payments', $tree );
 	}
+
+	/**
+	 * Submenu items registered under 'woocommerce' that aren't in the default tree
+	 * auto-attach to the woocommerce root with source = 'auto', preserving registration order.
+	 */
+	public function test_auto_attach_woocommerce_submenu_items() {
+		$default = array(
+			'woocommerce' => array( 'parent' => null, 'title' => 'WooCommerce', 'position' => 2 ),
+		);
+
+		$raw_menu    = array( array( 'WooCommerce', 'read', 'woocommerce', '', '' ) );
+		$raw_submenu = array(
+			'woocommerce' => array(
+				array( 'Third-party Tool', 'manage_woocommerce', 'my-plugin-page' ),
+				array( 'Another Tool',     'manage_woocommerce', 'my-plugin-other' ),
+			),
+		);
+
+		$builder = new Tree_Builder();
+		$tree    = $builder->build( $default, $raw_menu, $raw_submenu );
+
+		$this->assertArrayHasKey( 'my-plugin-page', $tree );
+		$this->assertSame( 'woocommerce', $tree['my-plugin-page']['parent'] );
+		$this->assertSame( 'auto', $tree['my-plugin-page']['source'] );
+		$this->assertSame( 'Third-party Tool', $tree['my-plugin-page']['title'] );
+
+		$this->assertArrayHasKey( 'my-plugin-other', $tree );
+		$this->assertSame( 'auto', $tree['my-plugin-other']['source'] );
+
+		// Registration order is preserved via position values.
+		$this->assertLessThan(
+			$tree['my-plugin-other']['position'],
+			$tree['my-plugin-page']['position'],
+			'First-registered auto item should have a lower position than the second'
+		);
+	}
+
+	/**
+	 * The capability from the original registration is preserved on auto-attached items.
+	 */
+	public function test_auto_attached_items_preserve_capability() {
+		$default = array(
+			'woocommerce' => array( 'parent' => null, 'title' => 'WooCommerce', 'position' => 2 ),
+		);
+
+		$raw_menu    = array( array( 'WooCommerce', 'read', 'woocommerce', '', '' ) );
+		$raw_submenu = array(
+			'woocommerce' => array(
+				array( 'Secret Tool', 'manage_options', 'secret-page' ),
+			),
+		);
+
+		$builder = new Tree_Builder();
+		$tree    = $builder->build( $default, $raw_menu, $raw_submenu );
+
+		$this->assertSame( 'manage_options', $tree['secret-page']['capability'] );
+	}
 }
