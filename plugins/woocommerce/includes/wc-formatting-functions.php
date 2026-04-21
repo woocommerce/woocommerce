@@ -1198,6 +1198,13 @@ function wc_format_product_short_description( $content ) {
  * @return string
  */
 function wc_format_option_price_separators( $value, $option, $raw_value ) {
+	if ( ! is_scalar( $raw_value ) ) {
+		WC_Admin_Settings::add_error(
+			esc_html__( 'Thousand and decimal separators cannot contain numbers.', 'woocommerce' )
+		);
+		return get_option( $option['id'], $option['default'] ?? '' );
+	}
+
 	$no_tags    = wp_kses( (string) $raw_value, array() );
 	$normalized = preg_replace( '/\s+/', ' ', $no_tags );
 

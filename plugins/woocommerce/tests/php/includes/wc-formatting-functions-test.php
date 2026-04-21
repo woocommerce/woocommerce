@@ -147,6 +147,25 @@ class WC_Formatting_Functions_Test extends \WC_Unit_Test_Case {
 	 *
 	 * @return array
 	 */
+	/**
+	 * @testdox wc_format_option_price_separators should reject non-scalar raw values.
+	 */
+	public function test_wc_format_option_price_separators_rejects_non_scalar(): void {
+		$option = array(
+			'id'      => 'woocommerce_price_thousand_sep',
+			'default' => ',',
+		);
+
+		update_option( 'woocommerce_price_thousand_sep', ',' );
+
+		$errors_before = $this->get_wc_admin_settings_errors();
+		$result        = wc_format_option_price_separators( ',', $option, array( 'bad' => 'input' ) );
+		$errors_after  = $this->get_wc_admin_settings_errors();
+
+		$this->assertSame( ',', $result, 'Non-scalar input should be rejected and the stored value returned.' );
+		$this->assertCount( count( $errors_before ) + 1, $errors_after, 'An error should be added when a non-scalar value is rejected.' );
+	}
+
 	private function get_wc_admin_settings_errors(): array {
 		$reflection = new \ReflectionClass( WC_Admin_Settings::class );
 		$property   = $reflection->getProperty( 'errors' );
