@@ -125,7 +125,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		$variation_id = absint( $value );
 		$this->set_prop( 'variation_id', $variation_id );
 
-		if ( null !== $this->product && $this->product->get_id() !== $variation_id ) {
+		if ( null !== $this->product && ( ! $this->product || $this->product->get_id() !== $variation_id ) ) {
 			$this->product = null;
 		}
 	}
