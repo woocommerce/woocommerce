@@ -2,17 +2,10 @@
  * External dependencies
  */
 import { Button } from '@wordpress/components';
-
 import { close } from '@wordpress/icons';
-
 import { __ } from '@wordpress/i18n';
-
 import { isValidElement } from '@wordpress/element';
-
-/**
- * Internal dependencies
- */
-import { Stack } from '../compat-controls';
+import { Stack } from '@wordpress/ui';
 
 type Item = {
 	id: number | string;
@@ -34,14 +27,13 @@ export const ListItem = ( {
 	showRemoveButton = true,
 }: ListItemProps ) => {
 	return (
-		<Stack direction="column" gap={ 0 }>
+		<Stack direction="column">
 			{ items.map( ( item ) => (
 				<Stack
 					key={ item.id }
 					direction="row"
 					align="center"
 					justify="space-between"
-					gap={ 4 }
 					className="woocommerce-list-item"
 				>
 					{ item.thumbnail && (
@@ -49,7 +41,7 @@ export const ListItem = ( {
 							{ typeof item.thumbnail === 'string' && (
 								<img
 									src={ item.thumbnail }
-									alt={ item.altText }
+									alt={ item.altText ?? '' }
 									className="woocommerce-list-item__thumbnail-image"
 								/>
 							) }
@@ -59,7 +51,6 @@ export const ListItem = ( {
 					) }
 					<Stack
 						className="woocommerce-list-item__info"
-						gap={ 1 }
 						direction="column"
 					>
 						<div className="woocommerce-list-item__title">

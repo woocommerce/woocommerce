@@ -2,15 +2,13 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-
+import { SelectControl } from '@wordpress/components';
 import type { Field } from '@wordpress/dataviews';
 
 /**
  * Internal dependencies
  */
 import type { ProductEntityRecord } from '../types';
-
-import { SelectControl } from '../components/compat-controls';
 
 function isValidStockStatus( value: string ) {
 	return (
@@ -19,7 +17,6 @@ function isValidStockStatus( value: string ) {
 }
 
 const fieldDefinition = {
-	type: 'select',
 	label: __( 'Stock', 'woocommerce' ),
 	enableSorting: false,
 	enableHiding: false,
@@ -29,6 +26,7 @@ const fieldDefinition = {
 	elements: [
 		{ label: __( 'In stock', 'woocommerce' ), value: 'instock' },
 		{ label: __( 'Out of stock', 'woocommerce' ), value: 'outofstock' },
+		{ label: __( 'On backorder', 'woocommerce' ), value: 'onbackorder' },
 	],
 } satisfies Partial< Field< ProductEntityRecord > >;
 
@@ -49,7 +47,7 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 				>
 					{ match.label }
 				</span>
-				{ item.stock_quantity > 0 && (
+				{ item.stock_quantity && item.stock_quantity > 0 && (
 					<span className="woocommerce-fields-field__stock-quantity">
 						({ item.stock_quantity })
 					</span>
@@ -63,8 +61,8 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 		<SelectControl
 			label={ __( 'Status', 'woocommerce' ) }
 			value={ data.stock_status }
-			items={ field?.elements || [] }
-			onValueChange={ ( value ) => {
+			options={ field?.elements || [] }
+			onChange={ ( value ) => {
 				if ( value && isValidStockStatus( value ) ) {
 					onChange( {
 						stock_status: value,
