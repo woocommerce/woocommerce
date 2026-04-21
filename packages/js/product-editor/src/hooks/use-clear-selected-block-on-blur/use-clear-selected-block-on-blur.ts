@@ -8,8 +8,6 @@ import { store as blockEditorStore } from '@wordpress/block-editor';
 // This is a temporary solution until using Gutenberg 18 with the
 // fix from https://github.com/WordPress/gutenberg/pull/59800
 export const useClearSelectedBlockOnBlur = () => {
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore No types for this exist yet.
 	const { clearSelectedBlock } = useDispatch( blockEditorStore );
 
 	function handleBlur( event: {

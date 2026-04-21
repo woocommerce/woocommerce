@@ -24,13 +24,17 @@ type EmailContentValidationRule = {
  *
  * @return The WooCommerce data for the current post.
  */
-function getWooCommerceData() {
-	// @ts-expect-error The type is missing
-	return select( 'core' ).getEditedEntityRecord(
+type WooCommerceEmailEditorData = Partial< EmailWooCommerceData > &
+	Partial< TemplateWooCommerceData >;
+
+function getWooCommerceData(): WooCommerceEmailEditorData | undefined {
+	const editedPost = select( 'core' ).getEditedEntityRecord(
 		'postType',
 		window.WooCommerceEmailEditor.current_post_type,
 		window.WooCommerceEmailEditor.current_post_id
-	)?.woocommerce_data as EntityWooCommerceData;
+	) as { woocommerce_data?: WooCommerceEmailEditorData } | undefined;
+
+	return editedPost?.woocommerce_data;
 }
 
 /**
@@ -78,22 +82,19 @@ function createValidationRuleForCommaSeparatedEmailsField(
 		testContent: () => {
 			const wooCommerceData = getWooCommerceData();
 
-			if (
-				! ( fieldName in wooCommerceData ) ||
-				! wooCommerceData[ fieldName ]
-			) {
+			if ( ! wooCommerceData?.[ fieldName ] ) {
 				return false;
 			}
 
 			const invalidEmails = getInvalidCommaSeparatedEmails(
-				wooCommerceData[ fieldName ]
+				wooCommerceData[ fieldName ] ?? ''
 			);
 
 			return invalidEmails.length > 0;
 		},
 		get message() {
 			const invalidEmails = getInvalidCommaSeparatedEmails(
-				getWooCommerceData()[ fieldName ] ?? ''
+				getWooCommerceData()?.[ fieldName ] ?? ''
 			);
 
 			return sprintf( message, invalidEmails.join( ',' ) );

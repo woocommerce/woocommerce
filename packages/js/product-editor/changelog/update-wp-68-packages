@@ -1,0 +1,4 @@
+Significance: major
+Type: update
+
+Update @wordpress/* dependencies to wp-6.8 minimum. Remove @types/wordpress__date, @types/wordpress__editor, @types/wordpress__keycodes, @types/wordpress__media-utils, and @types/wordpress__rich-text (native types at wp-6.8).

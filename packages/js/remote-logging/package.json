@@ -5,7 +5,7 @@
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
 	"engines": {
-		"node": "^20.11.1"
+		"node": "^24.15.0"
 	},
 	"keywords": [
 		"wordpress",
@@ -54,7 +54,7 @@
 	},
 	"dependencies": {
 		"@woocommerce/tracks": "workspace:*",
-		"@wordpress/hooks": "wp-6.6",
+		"@wordpress/hooks": "catalog:wp-min",
 		"debug": "^4.3.4",
 		"tracekit": "^0.4.6"
 	},
@@ -62,7 +62,7 @@
 		"@babel/core": "7.25.7",
 		"@types/debug": "^4.1.12",
 		"@types/jest": "29.5.x",
-		"@types/node": "20.x.x",
+		"@types/node": "^24.1.0",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"@woocommerce/internal-ts-config": "workspace:*",
@@ -148,6 +148,7 @@
 			"allowUsuallyExcludedPaths": true,
 			"files": [
 				"package.json",
+				"../../../pnpm-lock.yaml",
 				"node_modules/@woocommerce/tracks/build",
 				"node_modules/@woocommerce/tracks/build-module",
 				"node_modules/@woocommerce/tracks/build-types",
