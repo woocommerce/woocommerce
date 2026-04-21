@@ -2,19 +2,13 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-
 import { useCallback } from '@wordpress/element';
-
 import type { Field } from '@wordpress/dataviews';
+import { InputControl, Stack, InputLayout } from '@wordpress/ui';
 
 /**
  * Internal dependencies
  */
-import {
-	InputControl,
-	Stack,
-	InputLayout,
-} from '../components/compat-controls';
 
 import { formatCurrency, getCurrencyObject } from '../utils/currency';
 
@@ -106,7 +100,7 @@ export const fieldExtensions: Partial< Field< PriceFilterData > > = {
 		// since partially saved products may send empty or NaN-like values here.
 		if ( item.on_sale && Number.isFinite( regularPrice ) ) {
 			return (
-				<Stack direction="row" gap={ 1 }>
+				<Stack direction="row">
 					<s>{ formatCurrency( regularPrice, currency.code ) }</s>
 					<span>{ formatCurrency( price, currency.code ) }</span>
 				</Stack>
@@ -150,7 +144,7 @@ export const fieldExtensions: Partial< Field< PriceFilterData > > = {
 
 		if ( operator === 'between' ) {
 			return (
-				<Stack direction="row" gap={ 2 }>
+				<Stack direction="row">
 					<InputControl
 						label={ __( 'From', 'woocommerce' ) }
 						type="number"
