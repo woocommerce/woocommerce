@@ -75,15 +75,15 @@ $product_attributes = $product_object->get_attributes( 'edit' );
 				</header>
 				<article>
 					<form class="wc-add-attribute-term-fields" action="" method="post">
-						<label for="wc-new-attribute-term"><?php esc_html_e( 'Name', 'woocommerce' ); ?></label>
-						<input id="wc-new-attribute-term" type="text" name="term" value="" />
+						<label for="wc-modal-add-attribute-term-input"><?php esc_html_e( 'Name', 'woocommerce' ); ?></label>
+						<input id="wc-modal-add-attribute-term-input" type="text" name="term" value="" />
 					</form>
 				</article>
 				<footer>
 					<div class="inner">
 						<div>
 							<button class="modal-close button button-large"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></button>
-							<button id="btn-ok" disabled class="button button-primary button-large disabled"><?php esc_html_e( 'OK', 'woocommerce' ); ?></button>
+							<button id="btn-ok" disabled class="button button-primary button-large"><?php esc_html_e( 'OK', 'woocommerce' ); ?></button>
 						</div>
 					</div>
 				</footer>

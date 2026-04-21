@@ -895,23 +895,6 @@ jQuery( function ( $ ) {
 		},
 	} );
 
-	function enable_or_disable_add_attribute_term_modal_submit_button(
-		postedData
-	) {
-		var createButton = document.getElementById( 'btn-ok' );
-
-		if ( ! createButton ) {
-			return;
-		}
-
-		var termName =
-			postedData && postedData.term ? postedData.term.trim() : '';
-		var hasValue = termName.length > 0;
-
-		createButton.disabled = ! hasValue;
-		createButton.classList.toggle( 'disabled', ! hasValue );
-	}
-
 	$( document.body ).on(
 		'wc_backbone_modal_loaded',
 		function ( event, target ) {
@@ -919,7 +902,9 @@ jQuery( function ( $ ) {
 				return;
 			}
 
-			var termInput = document.getElementById( 'wc-new-attribute-term' );
+			const termInput = document.getElementById(
+				'wc-modal-add-attribute-term-input'
+			);
 			if ( termInput ) {
 				termInput.focus();
 			}
@@ -933,9 +918,17 @@ jQuery( function ( $ ) {
 				return;
 			}
 
-			enable_or_disable_add_attribute_term_modal_submit_button(
-				postedData
-			);
+			const submitButton = document.getElementById( 'btn-ok' );
+
+			if ( ! submitButton ) {
+				return;
+			}
+
+			const termName =
+				postedData && postedData.term ? postedData.term.trim() : '';
+			const hasValue = termName.length > 0;
+
+			submitButton.disabled = ! hasValue;
 		}
 	);
 
@@ -948,14 +941,14 @@ jQuery( function ( $ ) {
 
 			if (
 				! currentAttributeTermCreationContext ||
-				! currentAttributeTermCreationContext.$wrapper ||
+				! currentAttributeTermCreationContext.wrapper ||
 				! currentAttributeTermCreationContext.attribute
 			) {
 				$( '.product_attributes' ).unblock();
 				return;
 			}
 
-			var termName =
+			const termName =
 				postedData && postedData.term ? postedData.term.trim() : '';
 
 			if ( ! termName ) {
@@ -963,8 +956,8 @@ jQuery( function ( $ ) {
 				return;
 			}
 
-			var $wrapper = currentAttributeTermCreationContext.$wrapper;
-			var data = {
+			const $wrapper = $( currentAttributeTermCreationContext.wrapper );
+			const data = {
 				action: 'woocommerce_add_new_attribute',
 				taxonomy: currentAttributeTermCreationContext.attribute,
 				term: termName,
@@ -1006,7 +999,7 @@ jQuery( function ( $ ) {
 		'click',
 		'button.add_new_attribute',
 		function ( event ) {
-			// prevent form submission but allow event propagation
+			// Prevent form submission but allow event propagation.
 			event.preventDefault();
 
 			$( '.product_attributes' ).block( {
@@ -1017,11 +1010,11 @@ jQuery( function ( $ ) {
 				},
 			} );
 
-			var $wrapper = $( this ).closest( '.woocommerce_attribute' );
-			var attribute = $wrapper.data( 'taxonomy' );
+			const wrapper = this.closest( '.woocommerce_attribute' );
+			const attribute = wrapper ? wrapper.dataset.taxonomy : '';
 
 			currentAttributeTermCreationContext = {
-				$wrapper,
+				wrapper,
 				attribute,
 			};
 
@@ -1033,12 +1026,12 @@ jQuery( function ( $ ) {
 
 	$( document.body ).on(
 		'wc_backbone_modal_before_remove',
-		function ( event, target, postedData, addButtonCalled ) {
+		function ( event, target, postedData, submitButtonCalled ) {
 			if ( 'wc-modal-add-attribute-term' !== target ) {
 				return;
 			}
 
-			if ( addButtonCalled ) {
+			if ( submitButtonCalled ) {
 				return;
 			}
 
