@@ -29,6 +29,7 @@ const fieldDefinition = {
 	elements: [
 		{ label: __( 'In stock', 'woocommerce' ), value: 'instock' },
 		{ label: __( 'Out of stock', 'woocommerce' ), value: 'outofstock' },
+		{ label: __( 'On backorder', 'woocommerce' ), value: 'onbackorder' },
 	],
 } satisfies Partial< Field< ProductEntityRecord > >;
 
