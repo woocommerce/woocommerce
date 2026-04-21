@@ -468,7 +468,7 @@ class ProductMapper {
 	 * @param ?array $connection_info The query_info entry for the connection (e.g. `$query_info['variations']`).
 	 * @return ?array The merged per-node selection, or null when the caller didn't request any node fields.
 	 */
-	private static function connection_node_info( ?array $connection_info ): ?array {
+	public static function connection_node_info( ?array $connection_info ): ?array {
 		if ( null === $connection_info ) {
 			return null;
 		}
