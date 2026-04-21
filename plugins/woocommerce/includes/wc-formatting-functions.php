@@ -1198,7 +1198,7 @@ function wc_format_product_short_description( $content ) {
  * @return string
  */
 function wc_format_option_price_separators( $value, $option, $raw_value ) {
-	$sanitized = wc_clean( $raw_value ?? '' );
+	$sanitized = preg_replace( '/\s+/', ' ', wp_kses( (string) ( $raw_value ?? '' ), array() ) );
 
 	if ( ! is_string( $sanitized ) || false !== strpbrk( $sanitized, '0123456789' ) ) {
 		WC_Admin_Settings::add_error(
