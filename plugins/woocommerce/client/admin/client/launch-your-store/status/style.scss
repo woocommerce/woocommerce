@@ -1,3 +1,5 @@
+@import "@wordpress/base-styles/_colors.native.scss";
+
 .woocommerce-lys-status {
 	flex: 1 auto;
 	padding-left: 12px;
@@ -11,7 +13,7 @@
 	display: flex;
 	align-items: center;
 	background-color: #eaeaeb;
-	color: #2c3338;
+	color: $gray-900;
 	padding: 0 3px 0 10px;
 	font-size: 12px;
 	font-weight: 500;

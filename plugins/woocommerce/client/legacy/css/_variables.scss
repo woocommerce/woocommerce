@@ -24,6 +24,10 @@ $highlightext:      desaturate(lighten($highlight, 80%), 18%) !default;  // Text
 $contentbg:         #fff !default;                                     // Content BG - Tabs (active state)
 $subtext:           #767676 !default;                                  // small, breadcrumbs etc
 
+// WP 7.0 admin gray scale — mirrors @wordpress/base-styles/_colors.native.scss values.
+$gray-900:          #1e1e1e !default;                                  // Primary admin text
+$gray-700:          #757575 !default;                                  // Placeholder / secondary admin text
+
 // export vars as CSS vars
 :root {
 	--woocommerce: #{$woocommerce};
