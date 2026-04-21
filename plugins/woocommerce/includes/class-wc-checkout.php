@@ -551,15 +551,19 @@ class WC_Checkout {
 			);
 
 			if ( $product ) {
-				// TODO: $item->set_product( $product );
-				$item->set_props(
-					array(
-						'name'         => $product->get_name(),
-						'tax_class'    => $product->get_tax_class(),
-						'product_id'   => $product->is_type( ProductType::VARIATION ) ? $product->get_parent_id() : $product->get_id(),
-						'variation_id' => $product->is_type( ProductType::VARIATION ) ? $product->get_id() : 0,
-					)
-				);
+				if ( $item instanceof WC_Order_Item_Product ) {
+					$item->set_product( $product );
+				} else {
+					// Backward compatibility: update properties only, product object injection is not feasible.
+					$item->set_props(
+						array(
+							'name'         => $product->get_name(),
+							'tax_class'    => $product->get_tax_class(),
+							'product_id'   => $product->is_type( ProductType::VARIATION ) ? $product->get_parent_id() : $product->get_id(),
+							'variation_id' => $product->is_type( ProductType::VARIATION ) ? $product->get_id() : 0,
+						)
+					);
+				}
 			}
 
 			$item->set_backorder_meta();
@@ -572,7 +576,7 @@ class WC_Checkout {
 			do_action( 'woocommerce_checkout_create_order_line_item', $item, $cart_item_key, $values, $order );
 
 			// Add item to order and save.
-			// TODO: $item->set_order( $order );
+			$item->set_order( $order );
 			$order->add_item( $item );
 		}
 	}
@@ -609,7 +613,7 @@ class WC_Checkout {
 			do_action( 'woocommerce_checkout_create_order_fee_item', $item, $fee_key, $fee, $order );
 
 			// Add item to order and save.
-			// TODO: $item->set_order( $order );
+			$item->set_order( $order );
 			$order->add_item( $item );
 		}
 	}
@@ -652,7 +656,7 @@ class WC_Checkout {
 				do_action( 'woocommerce_checkout_create_order_shipping_item', $item, $package_key, $package, $order );
 
 				// Add item to order and save.
-				// TODO: $item->set_order( $order );
+				$item->set_order( $order );
 				$order->add_item( $item );
 			}
 		}
@@ -697,7 +701,7 @@ class WC_Checkout {
 				do_action( 'woocommerce_checkout_create_order_tax_item', $item, $tax_rate_id, $order );
 
 				// Add item to order and save.
-				// TODO: $item->set_order( $order );
+				$item->set_order( $order );
 				$order->add_item( $item );
 			}
 		}
@@ -731,7 +735,7 @@ class WC_Checkout {
 			do_action( 'woocommerce_checkout_create_order_coupon_item', $item, $code, $coupon, $order );
 
 			// Add item to order and save.
-			// TODO: $item->set_order( $order );
+			$item->set_order( $order );
 			$order->add_item( $item );
 		}
 	}
