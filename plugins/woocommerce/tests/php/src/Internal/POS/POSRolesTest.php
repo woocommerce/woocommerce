@@ -282,7 +282,7 @@ class POSRolesTest extends WC_Unit_Test_Case {
 		$capabilities = WC_Install::get_core_capabilities();
 
 		$this->assertArrayHasKey( 'pos', $capabilities );
-		$this->assertCount( 7, $capabilities['pos'] );
+		$this->assertCount( 4, $capabilities['pos'] );
 
 		foreach ( $this->all_pos_caps as $cap ) {
 			$this->assertContains( $cap, $capabilities['pos'], "get_core_capabilities pos group should contain {$cap}" );

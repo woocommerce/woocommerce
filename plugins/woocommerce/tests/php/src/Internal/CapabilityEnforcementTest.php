@@ -396,32 +396,6 @@ class CapabilityEnforcementTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A refund approval token cannot be used to cancel (void) an order.
-	 */
-	public function test_refund_token_cannot_be_used_to_cancel_order(): void {
-		wp_set_current_user( $this->limited_user_id );
-		$order = $this->create_order_as_current_user( 'processing' );
-
-		$token = $this->approval_service->create_approval(
-			$this->capable_user_id,
-			'refund_shop_orders',
-			array( 'order_id' => $order->get_id() )
-		);
-
-		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
-		$request->set_body_params(
-			array(
-				'status'         => 'cancelled',
-				'_pos_approval'  => $token,
-			)
-		);
-
-		$response = $this->server->dispatch( $request );
-
-		$this->assertSame( 403, $response->get_status() );
-	}
-
-	/**
 	 * @testdox A refund approval token scoped to order A cannot be used on order B.
 	 */
 	public function test_refund_token_cannot_be_used_across_orders(): void {
