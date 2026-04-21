@@ -13,6 +13,6 @@
 		"jsxFactory": null,
 		"jsxFragmentFactory": null
 	},
-	"include": [ "typings/**/*", "src/**/*" ],
+	"include": [ "src/**/*" ],
 	"exclude": [ "**/test/**", "**/stories/**" ]
 }

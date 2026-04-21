@@ -1,11 +1,11 @@
 /**
  * External dependencies
  */
+import { InputControl } from '@wordpress/ui';
 /**
  * Internal dependencies
  */
 
-import { InputControl } from '@wordpress/ui';
 import type { ProductEntityRecord } from '../types';
 
 type DateFieldKey = 'date_on_sale_from' | 'date_on_sale_to';
