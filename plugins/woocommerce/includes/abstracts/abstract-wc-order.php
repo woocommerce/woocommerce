@@ -957,6 +957,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 						_prime_post_caches( $product_ids );
 					}
 
+					if ( $this instanceof \WC_Order ) {
+						// Inject order object, to reduce wc_get_order round trips in the workflows consuming the line item.
+						foreach ( $items as $item ) {
+							$item->set_order( $this );
+						}
+					}
+
 					$this->items[ $group ] = $read_items;
 				}
 				// Don't use array_merge here because keys are numeric.
