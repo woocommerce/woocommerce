@@ -356,6 +356,7 @@ class Controller extends AbstractController {
 			return;
 		}
 
+		/** @var \WC_Order_Refund[] $refunds */
 		$refunds = wc_get_orders(
 			array(
 				'type'            => 'shop_order_refund',

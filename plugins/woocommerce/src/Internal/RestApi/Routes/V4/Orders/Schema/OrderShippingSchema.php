@@ -92,14 +92,14 @@ class OrderShippingSchema extends AbstractLineItemSchema {
 	public function get_item_response( $order_item, WP_REST_Request $request, array $include_fields = array() ): array {
 		$dp   = is_null( $request['num_decimals'] ) ? wc_get_price_decimals() : absint( $request['num_decimals'] );
 		$data = array(
-			'id'              => $order_item->get_id(),
-			'method_title'    => $order_item->get_method_title(),
-			'method_id'       => $order_item->get_method_id(),
-			'instance_id'     => $order_item->get_instance_id(),
-			'total'           => wc_format_decimal( $order_item->get_total(), $dp ),
-			'total_tax'       => wc_format_decimal( $order_item->get_total_tax(), $dp ),
-			'taxes'           => $this->prepare_taxes( $order_item, $request ),
-			'meta_data'       => $this->prepare_meta_data( $order_item ),
+			'id'           => $order_item->get_id(),
+			'method_title' => $order_item->get_method_title(),
+			'method_id'    => $order_item->get_method_id(),
+			'instance_id'  => $order_item->get_instance_id(),
+			'total'        => wc_format_decimal( $order_item->get_total(), $dp ),
+			'total_tax'    => wc_format_decimal( $order_item->get_total_tax(), $dp ),
+			'taxes'        => $this->prepare_taxes( $order_item, $request ),
+			'meta_data'    => $this->prepare_meta_data( $order_item ),
 		);
 
 		return $data;

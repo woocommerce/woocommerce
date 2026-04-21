@@ -664,10 +664,11 @@ class OrderSchema extends AbstractSchema {
 		$refund_data = $this->compute_item_refund_data( $order );
 
 		if ( in_array( 'line_items', $include_fields, true ) ) {
+			/** @var \WC_Order_Item_Product[] $line_items */
 			$line_items         = $order->get_items( OrderItemType::LINE_ITEM );
 			$data['line_items'] = array();
 			foreach ( $line_items as $line_item ) {
-				$item_data                  = $this->order_item_schema->get_item_response( $line_item, $request );
+				$item_data                    = $this->order_item_schema->get_item_response( $line_item, $request );
 				$item_data['can_be_refunded'] = 0 !== $line_item->get_product_id()
 					&& ( $line_item->get_quantity() + ( $refund_data['qtys'][ $line_item->get_id() ] ?? 0 ) ) > 0;
 				$data['line_items'][] = $item_data;
@@ -675,12 +676,13 @@ class OrderSchema extends AbstractSchema {
 		}
 
 		if ( in_array( 'shipping_lines', $include_fields, true ) ) {
-			$line_items             = $order->get_items( OrderItemType::SHIPPING );
+			/** @var \WC_Order_Item_Shipping[] $shipping_lines */
+			$shipping_lines         = $order->get_items( OrderItemType::SHIPPING );
 			$data['shipping_lines'] = array();
-			foreach ( $line_items as $line_item ) {
-				$item_data                    = $this->order_shipping_schema->get_item_response( $line_item, $request );
-				$refunded                     = $refund_data['totals'][ $line_item->get_id() ] ?? 0.0;
-				$item_data['can_be_refunded'] = ( (float) $line_item->get_total() - $refunded ) > 0;
+			foreach ( $shipping_lines as $shipping_line ) {
+				$item_data                    = $this->order_shipping_schema->get_item_response( $shipping_line, $request );
+				$refunded                     = $refund_data['totals'][ $shipping_line->get_id() ] ?? 0.0;
+				$item_data['can_be_refunded'] = ( (float) $shipping_line->get_total() - $refunded ) > 0;
 				$data['shipping_lines'][] = $item_data;
 			}
 		}
@@ -694,12 +696,13 @@ class OrderSchema extends AbstractSchema {
 		}
 
 		if ( in_array( 'fee_lines', $include_fields, true ) ) {
-			$line_items        = $order->get_items( OrderItemType::FEE );
+			/** @var \WC_Order_Item_Fee[] $fee_lines */
+			$fee_lines         = $order->get_items( OrderItemType::FEE );
 			$data['fee_lines'] = array();
-			foreach ( $line_items as $line_item ) {
-				$item_data                  = $this->order_fee_schema->get_item_response( $line_item, $request );
-				$refunded                   = $refund_data['totals'][ $line_item->get_id() ] ?? 0.0;
-				$item_data['can_be_refunded'] = ( (float) $line_item->get_total() - $refunded ) > 0;
+			foreach ( $fee_lines as $fee_line ) {
+				$item_data                    = $this->order_fee_schema->get_item_response( $fee_line, $request );
+				$refunded                     = $refund_data['totals'][ $fee_line->get_id() ] ?? 0.0;
+				$item_data['can_be_refunded'] = ( (float) $fee_line->get_total() - $refunded ) > 0;
 				$data['fee_lines'][] = $item_data;
 			}
 		}
@@ -769,15 +772,21 @@ class OrderSchema extends AbstractSchema {
 		$totals = array();
 
 		foreach ( $order->get_refunds() as $refund ) {
-			foreach ( $refund->get_items( 'line_item' ) as $refunded_item ) {
+			/** @var \WC_Order_Item_Product[] $refunded_line_items */
+			$refunded_line_items = $refund->get_items( 'line_item' );
+			foreach ( $refunded_line_items as $refunded_item ) {
 				$original_id           = absint( $refunded_item->get_meta( '_refunded_item_id' ) );
 				$qtys[ $original_id ]  = ( $qtys[ $original_id ] ?? 0 ) + $refunded_item->get_quantity();
 			}
-			foreach ( $refund->get_items( 'fee' ) as $refunded_item ) {
+			/** @var \WC_Order_Item_Fee[] $refunded_fees */
+			$refunded_fees = $refund->get_items( 'fee' );
+			foreach ( $refunded_fees as $refunded_item ) {
 				$original_id             = absint( $refunded_item->get_meta( '_refunded_item_id' ) );
 				$totals[ $original_id ]  = ( $totals[ $original_id ] ?? 0.0 ) + (float) $refunded_item->get_total() * -1;
 			}
-			foreach ( $refund->get_items( 'shipping' ) as $refunded_item ) {
+			/** @var \WC_Order_Item_Shipping[] $refunded_shipping */
+			$refunded_shipping = $refund->get_items( 'shipping' );
+			foreach ( $refunded_shipping as $refunded_item ) {
 				$original_id             = absint( $refunded_item->get_meta( '_refunded_item_id' ) );
 				$totals[ $original_id ]  = ( $totals[ $original_id ] ?? 0.0 ) + (float) $refunded_item->get_total() * -1;
 			}
