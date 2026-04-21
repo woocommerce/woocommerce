@@ -123,7 +123,6 @@ class ReactSettingsSchema {
 			'checkbox',
 			'radio',
 			'toggle',
-			// 10.8 SDK additions: native type coverage handled by baseFieldTransformer.
 			'password',
 			'email',
 			'url',
