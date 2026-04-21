@@ -235,18 +235,7 @@ class WCEmailTemplateSyncRegistry {
 	 */
 	private static function classify_source( string $email_id ): string {
 		if ( null === self::$first_party_ids ) {
-			self::$first_party_ids = array_values(
-				array_merge(
-					WCTransactionalEmails::$core_transactional_emails,
-					array(
-						'customer_pos_completed_order',
-						'customer_pos_refunded_order',
-						'customer_fulfillment_created',
-						'customer_fulfillment_updated',
-						'customer_fulfillment_deleted',
-					)
-				)
-			);
+			self::$first_party_ids = array_values( WCTransactionalEmails::get_core_transactional_emails() );
 		}
 
 		return in_array( $email_id, self::$first_party_ids, true ) ? 'core' : 'third_party';
