@@ -104,7 +104,7 @@ class ListCoupons {
 			$nodes[] = $coupon;
 		}
 
-		$page_info                    = new PageInfo();
+		$page_info = new PageInfo();
 		// Relay semantics for backward pagination (`last`, `before`): the
 		// returned window ends just before `$before`, so items after the
 		// window exist whenever `$before` was supplied — not whenever

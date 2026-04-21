@@ -72,20 +72,19 @@ class ListProducts {
 		// 'other' term, which wouldn't match anything.
 		if ( null !== $product_type ) {
 			if ( ProductType::Other === $product_type ) {
-				$standard_types = array_values(
-					array_filter(
-						array_map(
-							static fn( ProductType $t ): string => $t->value,
-							ProductType::cases()
-						),
-						static fn( string $slug ): bool => ProductType::Other->value !== $slug
-					)
-				);
 				$query_args['tax_query'] = array(
 					array(
 						'taxonomy' => 'product_type',
 						'field'    => 'slug',
-						'terms'    => $standard_types,
+						'terms'    => array_values(
+							array_filter(
+								array_map(
+									static fn( ProductType $t ): string => $t->value,
+									ProductType::cases()
+								),
+								static fn( string $slug ): bool => ProductType::Other->value !== $slug
+							)
+						),
 						'operator' => 'NOT IN',
 					),
 				);
@@ -205,7 +204,7 @@ class ListProducts {
 			$nodes[] = $product;
 		}
 
-		$page_info                    = new PageInfo();
+		$page_info = new PageInfo();
 		// Relay semantics for backward pagination (`last`, `before`): the
 		// returned window ends just before `$before`, so items after the
 		// window exist whenever `$before` was supplied — not whenever
