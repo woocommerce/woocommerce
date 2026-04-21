@@ -157,10 +157,10 @@ class ListProducts {
 
 		// Cursor-based filtering via IdCursorFilter (see class docblock).
 		if ( null !== $after ) {
-			$query_args[ IdCursorFilter::AFTER_ID ] = (int) base64_decode( $after, true );
+			$query_args[ IdCursorFilter::AFTER_ID ] = IdCursorFilter::decode_id_cursor( $after, 'after' );
 		}
 		if ( null !== $before ) {
-			$query_args[ IdCursorFilter::BEFORE_ID ] = (int) base64_decode( $before, true );
+			$query_args[ IdCursorFilter::BEFORE_ID ] = IdCursorFilter::decode_id_cursor( $before, 'before' );
 		}
 		IdCursorFilter::ensure_registered();
 

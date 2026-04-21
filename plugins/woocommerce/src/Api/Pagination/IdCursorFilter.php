@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Api\Pagination;
 
+use Automattic\WooCommerce\Api\ApiException;
+
 /**
  * WP_Query ID-cursor pagination helper.
  *
@@ -79,5 +81,34 @@ class IdCursorFilter {
 			$where .= $wpdb->prepare( " AND {$wpdb->posts}.ID < %d", $before );
 		}
 		return $where;
+	}
+
+	/**
+	 * Decode a base64-encoded ID cursor into a positive integer.
+	 *
+	 * Resolvers encode cursors via `base64_encode( (string) $id )` on the
+	 * way out; this is the symmetric decode. `base64_decode(..., true)`
+	 * returns false for malformed input, which `(int)` casts to 0 and
+	 * {@see self::apply()} would silently treat as "no cursor" — leaving
+	 * clients with unfiltered results instead of a clear error. Validate
+	 * explicitly and throw INVALID_ARGUMENT → HTTP 400 on any bad input.
+	 *
+	 * @param string $cursor The client-supplied cursor string.
+	 * @param string $name   Which cursor argument (`after` / `before`), for error messages.
+	 * @return int The decoded positive integer ID.
+	 * @throws ApiException When the cursor isn't a valid base64-encoded positive integer.
+	 */
+	public static function decode_id_cursor( string $cursor, string $name ): int {
+		$raw = base64_decode( $cursor, true );
+		if ( false === $raw || ! ctype_digit( $raw ) || (int) $raw <= 0 ) {
+			// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Not HTML; serialized as JSON.
+			throw new ApiException(
+				sprintf( 'Invalid `%s` cursor.', $name ),
+				'INVALID_ARGUMENT',
+				status_code: 400,
+			);
+			// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
+		}
+		return (int) $raw;
 	}
 }

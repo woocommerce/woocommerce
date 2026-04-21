@@ -68,10 +68,10 @@ class ListCoupons {
 		);
 
 		if ( null !== $after ) {
-			$posts_query_args[ IdCursorFilter::AFTER_ID ] = (int) base64_decode( $after, true );
+			$posts_query_args[ IdCursorFilter::AFTER_ID ] = IdCursorFilter::decode_id_cursor( $after, 'after' );
 		}
 		if ( null !== $before ) {
-			$posts_query_args[ IdCursorFilter::BEFORE_ID ] = (int) base64_decode( $before, true );
+			$posts_query_args[ IdCursorFilter::BEFORE_ID ] = IdCursorFilter::decode_id_cursor( $before, 'before' );
 		}
 		IdCursorFilter::ensure_registered();
 
