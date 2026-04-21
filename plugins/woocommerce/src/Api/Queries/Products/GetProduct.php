@@ -57,8 +57,20 @@ class GetProduct {
 			throw new AuthorizationException( 'Product not found.' );
 		}
 
-		// Honor the declared #[RequiredCapability].
+		// Honor the declared #[RequiredCapability] (read_product).
 		if ( $_preauthorized ) {
+			return true;
+		}
+
+		// `manage_woocommerce` is the canonical "admin sees everything"
+		// capability in WooCommerce. The declared #[RequiredCapability]
+		// pre-authorizes on `read_product` (the read-level post-type cap,
+		// which is what the schema advertises), but an admin whose cap set
+		// grants `manage_woocommerce` without `read_product` would
+		// otherwise fall through to the ownership check and get "Product
+		// not found" for any product they don't own — contrary to the
+		// documented admin-can-see-everything contract.
+		if ( current_user_can( 'manage_woocommerce' ) ) {
 			return true;
 		}
 
