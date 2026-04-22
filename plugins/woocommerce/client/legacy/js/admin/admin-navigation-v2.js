@@ -76,7 +76,11 @@
 			if ( ! tree[ slug ].parent ) {
 				return;
 			}
-			var d = decomposeSlug( slug );
+			// Decompose against the URL override when one is declared (e.g.
+			// `action-scheduler` slug → `tools.php?page=action-scheduler` URL),
+			// so the path match works for pages that don't live at admin.php.
+			var target = tree[ slug ].url || slug;
+			var d = decomposeSlug( target );
 			if ( d.path !== pagenow ) {
 				return;
 			}
