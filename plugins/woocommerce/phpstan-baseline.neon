@@ -64243,12 +64243,6 @@ parameters:
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
 
 		-
-			message: '#^Parameter \#2 \$property_name of function property_exists expects string, array\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
 			message: '#^Parameter \#3 \$default_value of static method Automattic\\WooCommerce\\Utilities\\ArrayUtil\:\:get_value_or_default\(\) expects null, string given\.$#'
 			identifier: argument.type
 			count: 1
