@@ -24,22 +24,32 @@ This document covers option 3.
 
 ## The PHP side
 
-You need to tell the renderer that your raw field type is renderable. There are three options, in increasing order of customization.
+You need to tell the renderer that your raw field type is renderable. This is done by implementing `ReactSettingsPageInterface` in a companion class and returning it from your `WC_Settings_Page` subclass's `get_react_settings_page()` method.
+
+> **Note:** Earlier iterations of the SDK exposed three filters — `woocommerce_react_settings_supported_types`, `woocommerce_react_settings_type_map`, and `woocommerce_react_settings_field_options` — for the same purpose. All three were removed in 10.8.0 in favour of the interface. The surviving `woocommerce_react_settings_opt_out` filter is unrelated; it is a third-party veto for forcing a page back onto the legacy renderer.
+
+The interface has three methods; the two that matter for type registration are `get_extra_type_map()` and `get_extra_supported_types()`. There are three options, in increasing order of customization.
 
 ### Option A — Map to a primitive
 
-If your custom type is conceptually a primitive — for example, a currency input is just a `text` input with formatting — register it in the type map. No JS is required.
+If your custom type is conceptually a primitive — for example, a currency input is just a `text` input with formatting — alias it to the primitive in your page's `get_extra_type_map()`. No JS is required.
 
 ```php
-add_filter(
-    'woocommerce_react_settings_type_map',
-    static function ( array $map, string $tab, string $section ): array {
-        $map['currency'] = 'text';
-        return $map;
-    },
-    10,
-    3
-);
+use Automattic\WooCommerce\Internal\Admin\Settings\ReactSettingsPageInterface;
+
+final class My_Plugin_React_Settings_Page implements ReactSettingsPageInterface {
+    public function get_extra_type_map( string $section ): array {
+        return array( 'currency' => 'text' );
+    }
+
+    public function get_extra_supported_types( string $section ): array {
+        return array();
+    }
+
+    public function get_field_options( string $field_id, array $field, string $section ): ?array {
+        return null;
+    }
+}
 ```
 
 The renderer will treat `currency` fields as `text` fields end-to-end.
@@ -49,40 +59,44 @@ The renderer will treat `currency` fields as `text` fields end-to-end.
 If your field genuinely needs custom UI, declare the raw type as supported so it is not normalized away, and register a JS transformer to provide an `Edit` component.
 
 ```php
-add_filter(
-    'woocommerce_react_settings_supported_types',
-    static function ( array $types, string $tab, string $section ): array {
-        $types[] = 'currency';
-        return $types;
-    },
-    10,
-    3
-);
+public function get_extra_supported_types( string $section ): array {
+    return array( 'currency' );
+}
 ```
 
-### Option C — Both filters
+### Option C — Both contributions
 
-For complete control, declare the raw type as supported AND map it to itself in the type map. This stops the schema from defaulting to the raw type fallback path and makes your transformer the only place that decides the rendered shape.
+For complete control, declare the raw type as supported AND map it to itself in the type map. This stops the schema from defaulting to the raw-type fallback path and makes your transformer the only place that decides the rendered shape.
 
 ```php
-add_filter(
-    'woocommerce_react_settings_supported_types',
-    static function ( array $types ): array {
-        $types[] = 'currency';
-        return $types;
-    }
-);
+public function get_extra_type_map( string $section ): array {
+    return array( 'currency' => 'currency' );
+}
 
-add_filter(
-    'woocommerce_react_settings_type_map',
-    static function ( array $map ): array {
-        $map['currency'] = 'currency';
-        return $map;
-    }
-);
+public function get_extra_supported_types( string $section ): array {
+    return array( 'currency' );
+}
 ```
 
 Use Option A unless you have a reason not to.
+
+### Wiring the interface to your page
+
+Whichever option you pick, the interface implementation only takes effect when your `WC_Settings_Page` subclass returns it from `get_react_settings_page()`:
+
+```php
+use Automattic\WooCommerce\Internal\Admin\Settings\ReactSettingsPageInterface;
+
+class My_Plugin_Settings_Tab extends WC_Settings_Page {
+    // ... existing id/label/section registration ...
+
+    public function get_react_settings_page(): ?ReactSettingsPageInterface {
+        return new My_Plugin_React_Settings_Page();
+    }
+}
+```
+
+The base class's default returns `null`, which opts the page out of modern rendering. Returning a non-null implementation is what flips the page onto the React path (subject to the feature flag and unsupported-field-type checks described in [When the modern path runs](./modernised-settings-sdk.md#when-the-modern-path-runs)).
 
 ## The JS side
 
@@ -123,7 +137,7 @@ type EditProps< Value > = {
 
 Let's wire a `currency` field type that renders as a text input with a `$` prefix.
 
-### 1. Register the field on the PHP side
+### 1. Declare the field on the PHP side
 
 In your settings tab subclass:
 
@@ -149,19 +163,48 @@ public function get_settings_for_default_section() {
 }
 ```
 
-Map the raw type to `text` so the schema treats it as renderable; the JS transformer will swap in the custom Edit:
+### 2. Implement `ReactSettingsPageInterface` to map the raw type
+
+Alias `currency` to `text` so the schema treats it as renderable. The JS transformer registered in step 4 will swap in the custom Edit:
 
 ```php
-add_filter(
-    'woocommerce_react_settings_type_map',
-    static function ( array $map ): array {
-        $map['currency'] = 'text';
-        return $map;
+<?php
+use Automattic\WooCommerce\Internal\Admin\Settings\ReactSettingsPageInterface;
+
+final class My_Plugin_React_Settings_Page implements ReactSettingsPageInterface {
+    public function get_extra_type_map( string $section ): array {
+        return array( 'currency' => 'text' );
     }
-);
+
+    public function get_extra_supported_types( string $section ): array {
+        return array();
+    }
+
+    public function get_field_options( string $field_id, array $field, string $section ): ?array {
+        return null;
+    }
+}
 ```
 
-### 2. Enqueue and register the transformer
+### 3. Wire the interface from your page class
+
+Override `get_react_settings_page()` on your `WC_Settings_Page` subclass to return the implementation above:
+
+```php
+use Automattic\WooCommerce\Internal\Admin\Settings\ReactSettingsPageInterface;
+
+class My_Plugin_Settings_Tab extends WC_Settings_Page {
+    // ... existing id/label/section registration ...
+
+    public function get_react_settings_page(): ?ReactSettingsPageInterface {
+        return new My_Plugin_React_Settings_Page();
+    }
+}
+```
+
+Returning a non-null implementation is what opts the page into the modern renderer; the alias contributed by `get_extra_type_map()` is what prevents the `currency` field from triggering a fallback to the legacy form.
+
+### 4. Enqueue and register the transformer
 
 Ship a small JS file that reads from `window.wcReactSettings`:
 
@@ -224,7 +267,7 @@ add_action(
 
 The `wp-element` dependency guarantees `window.wp.element` is available before your script runs. If you ship a real React/JSX bundle via `@wordpress/scripts`, depend on whatever your build emits — but for a one-file inline transformer this is enough.
 
-### 3. Verify
+### 5. Verify
 
 1. Activate the plugin and enable the `modern-settings` flag.
 2. Visit the settings tab. The currency field should render with a `$` prefix and accept input.

@@ -46,23 +46,46 @@ This is useful in CI or when scripting a wp-env environment.
 
 ## When the modern path runs
 
-There is **no per-page opt-in flag** on `WC_Settings_Page` for this SDK. When the `modern-settings` feature flag is on, every section of every `WC_Settings_Page` subclass is a candidate for the modern renderer. Whether it actually renders modern is determined by three checks at render time:
+Modern rendering is **explicit opt-in per page**. When the `modern-settings` feature flag is on, a `WC_Settings_Page` subclass participates in modern rendering only if it opts in by overriding `get_react_settings_page()` to return an implementation of `ReactSettingsPageInterface`. The base class default returns `null`, which means unmodified subclasses keep rendering via the legacy form regardless of the flag.
+
+Whether a section actually renders modern is determined by four checks at render time:
 
 1. The `modern-settings` feature flag is enabled.
-2. None of the section's fields use a raw `type` outside the supported set (and not in the default type map). If any unsupported field is present, the entire section falls back to the legacy renderer. See [Native field type coverage](#native-field-type-coverage) and [Fallback signals](#fallback-signals).
-3. The `woocommerce_react_settings_opt_out` filter has not vetoed the section. Use this filter when you want to keep a specific tab/section on the legacy renderer even though it would otherwise qualify.
+2. The subclass's `get_react_settings_page()` returns a non-null `ReactSettingsPageInterface` implementation. This is the page-level opt-in.
+3. None of the section's fields use a raw `type` outside the supported set (and not in the default type map or in the page's own `get_extra_type_map()` / `get_extra_supported_types()` contributions). If any unsupported field is present, the entire section falls back to the legacy renderer. See [Native field type coverage](#native-field-type-coverage) and [Fallback signals](#fallback-signals).
+4. The `woocommerce_react_settings_opt_out` filter has not vetoed the section. Use this filter when you want a third-party plugin to keep a specific tab/section on the legacy renderer even though it would otherwise qualify.
 
-A minimal `WC_Settings_Page` subclass that the modern renderer will pick up when the flag is on:
+A minimal `WC_Settings_Page` subclass wired for the modern renderer, paired with a small `ReactSettingsPageInterface` implementation:
 
 ```php
 <?php
 defined( 'ABSPATH' ) || exit;
+
+use Automattic\WooCommerce\Internal\Admin\Settings\ReactSettingsPageInterface;
+
+final class My_Plugin_React_Settings_Page implements ReactSettingsPageInterface {
+    public function get_extra_type_map( string $section ): array {
+        return array();
+    }
+
+    public function get_extra_supported_types( string $section ): array {
+        return array();
+    }
+
+    public function get_field_options( string $field_id, array $field, string $section ): ?array {
+        return null;
+    }
+}
 
 class My_Plugin_Settings_Tab extends WC_Settings_Page {
     public function __construct() {
         $this->id    = 'my_plugin';
         $this->label = __( 'My Plugin', 'my-plugin' );
         parent::__construct();
+    }
+
+    public function get_react_settings_page(): ?ReactSettingsPageInterface {
+        return new My_Plugin_React_Settings_Page();
     }
 
     protected function get_settings_for_default_section(): array {
@@ -87,6 +110,8 @@ class My_Plugin_Settings_Tab extends WC_Settings_Page {
 }
 ```
 
+A page whose fields are all natively supported can ship the stub implementation above unchanged — it contributes nothing extra, but returning a non-null value from `get_react_settings_page()` is what actually opts the page into the modern path. Pages that contribute custom field types or server-synthesised option lists flesh out the three methods; see [Contribute types and options via `ReactSettingsPageInterface`](#contribute-types-and-options-via-reactsettingspageinterface) below.
+
 You do not need to change the `save_*` methods on your subclass. The existing `woocommerce_settings_save_{tab}` action still fires and the legacy save handler is authoritative in 10.8.
 
 ### Vetoing the modern renderer for a specific section
@@ -109,7 +134,7 @@ add_filter(
 
 ## Public PHP API
 
-The PHP surface for the modern path is the `ReactSettingsSchema` class plus three extension filters.
+The PHP surface for the modern path is the `ReactSettingsSchema` transformer, the `ReactSettingsPageInterface` contract a settings page implements to participate, and one surviving extension filter.
 
 ### `ReactSettingsSchema`
 
@@ -128,11 +153,60 @@ The PHP surface for the modern path is the `ReactSettingsSchema` class plus thre
 
 All methods accept the empty string `''` for `$section` to mean "default section" and normalize it internally to `default`.
 
+### Contribute types and options via `ReactSettingsPageInterface`
+
+A page's own extension surface is the `ReactSettingsPageInterface` implementation it returns from `get_react_settings_page()`. The interface has three methods, all of which receive a `string $section` argument so that multi-section pages can vary their contributions per section:
+
+| Method | Purpose |
+|--------|---------|
+| `get_extra_type_map( string $section ): array` | Returns `[ alias => canonical_type ]` pairs merged into the transformer's global type map. Use this to render a custom WC field type as a primitive the renderer already supports (e.g. `[ 'currency' => 'text' ]`). |
+| `get_extra_supported_types( string $section ): array` | Returns `[ type_slug, ... ]` entries merged into the supported-types list. Use this when your JS side ships a custom field transformer and the PHP gate needs to allow the raw type through. |
+| `get_field_options( string $field_id, array $field, string $section ): ?array` | Returns a `[ { label, value }, ... ]` options list for select/radio/multiselect fields whose choices are synthesised server-side. Return `null` for the "no opinion" fallthrough — the transformer keeps the field's inline `options` or its built-in fallback. |
+
+A page implementation that contributes a `currency` alias, declares it as supported, and synthesises options for a hypothetical `my_plugin_status` field looks like this:
+
+```php
+<?php
+use Automattic\WooCommerce\Internal\Admin\Settings\ReactSettingsPageInterface;
+
+final class My_Plugin_React_Settings_Page implements ReactSettingsPageInterface {
+    public function get_extra_type_map( string $section ): array {
+        return array( 'currency' => 'text' );
+    }
+
+    public function get_extra_supported_types( string $section ): array {
+        return array( 'currency' );
+    }
+
+    public function get_field_options( string $field_id, array $field, string $section ): ?array {
+        if ( 'my_plugin_status' === $field_id ) {
+            return array(
+                array( 'label' => __( 'Active', 'my-plugin' ),  'value' => 'active' ),
+                array( 'label' => __( 'Paused', 'my-plugin' ),  'value' => 'paused' ),
+            );
+        }
+        return null;
+    }
+}
+```
+
+Wire it from your page class:
+
+```php
+public function get_react_settings_page(): ?ReactSettingsPageInterface {
+    return new My_Plugin_React_Settings_Page();
+}
+```
+
+Third-party plugins can either `new` the implementation directly (as above) or register it with WooCommerce's DI container. Core tabs use `wc_get_container()->get( GeneralSettingsPage::class )`.
+
+For a deeper walkthrough of declaring a custom raw type and pairing the interface with a JS transformer, see [Registering custom field types](./registering-custom-field-types.md).
+
 ### Filters
 
 #### `woocommerce_react_settings_opt_out`
 
-Force a specific tab/section to fall back to the legacy renderer even when the flag is on.
+Force a specific tab/section to fall back to the legacy renderer even when the flag is on. This is the surviving extension filter — useful for third-party plugins that want to veto rendering on a page they do not own.
 
 ```php
 add_filter(
@@ -148,41 +222,15 @@ add_filter(
 );
 ```
 
-#### `woocommerce_react_settings_supported_types`
+### Filters removed in 10.8.0
 
-Add to (or remove from) the list of normalized field types the renderer accepts. Use this when you have registered a custom JS Edit component and want a raw type to be considered renderable.
+The following filters existed in pre-release iterations of the SDK and were removed before the 10.8.0 ship in favour of the interface contract above. Extension authors searching for these filter names should retarget at `ReactSettingsPageInterface`:
 
-```php
-add_filter(
-    'woocommerce_react_settings_supported_types',
-    static function ( array $types, string $tab, string $section ): array {
-        if ( 'my_plugin' === $tab ) {
-            $types[] = 'currency';
-        }
-        return $types;
-    },
-    10,
-    3
-);
-```
-
-#### `woocommerce_react_settings_type_map`
-
-Map a raw WooCommerce field type to a normalized type the renderer already supports. This is the simplest extension point for custom types that can be rendered as a primitive.
-
-```php
-add_filter(
-    'woocommerce_react_settings_type_map',
-    static function ( array $map, string $tab, string $section ): array {
-        $map['currency'] = 'text';
-        return $map;
-    },
-    10,
-    3
-);
-```
-
-For the trade-offs between these two filters and the JS-side registration, see [Registering custom field types](./registering-custom-field-types.md).
+| Removed filter | Replacement |
+|----------------|-------------|
+| `woocommerce_react_settings_supported_types` | `ReactSettingsPageInterface::get_extra_supported_types()` |
+| `woocommerce_react_settings_type_map` | `ReactSettingsPageInterface::get_extra_type_map()` |
+| `woocommerce_react_settings_field_options` | `ReactSettingsPageInterface::get_field_options()` |
 
 ## Mount protocol
 
@@ -294,8 +342,8 @@ You have an existing `WC_Settings_Page` subclass. Here is how to adopt the moder
 3. **Visit your settings tab in `wp-admin`.** If a fallback fires, the browser console will print a message naming the offending field types (with a matching `wc_doing_it_wrong` notice in the PHP error log when `WP_DEBUG` is on).
 4. **Resolve unsupported types.** You have three options:
     - Change the field's raw `type` to one already in the supported list.
-    - Map your raw type to a primitive via the `woocommerce_react_settings_type_map` filter.
-    - Register a custom field type via the JS extension point. See [Registering custom field types](./registering-custom-field-types.md).
+    - Map your raw type to a primitive via `ReactSettingsPageInterface::get_extra_type_map()` on your page's contract.
+    - Register a custom field type via the JS extension point, paired with `get_extra_supported_types()` on the same contract. See [Registering custom field types](./registering-custom-field-types.md).
 5. **Smoke-test the save path.** The legacy save POST handler is still authoritative in 10.8, so saving should behave identically. Confirm the values you submit round-trip through `WC_Admin_Settings::get_option()`.
 6. **(Optional) Veto specific sections.** If you have a tab whose fields are all supported but you do not want it on the modern renderer yet — for example because of CSS or JS coupled to legacy DOM — hook `woocommerce_react_settings_opt_out` and return `true` for that tab/section.
 
