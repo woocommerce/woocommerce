@@ -294,9 +294,25 @@
 	}
 
 	/**
+	 * Normalize an anchor href to a path+query we can compare to toAdminUrl()
+	 * output. Strips protocol/host and decodes the `&#038;` / `&amp;` that
+	 * esc_url produces in rendered hrefs.
+	 */
+	function normalizeHref( href ) {
+		if ( ! href ) {
+			return '';
+		}
+		return href
+			.replace( /^https?:\/\/[^/]+/, '' )
+			.replace( /&#038;/g, '&' )
+			.replace( /&amp;/g, '&' );
+	}
+
+	/**
 	 * On non-Woo pages the native flyout shows our curated first-level items.
 	 * For entries that have grandchildren in the tree, inject a second-level
-	 * cascade <ul> so hovering Settings reveals Payments / WooPayments / Status.
+	 * cascade <ul> so hovering Settings / Marketing / etc. reveals their
+	 * sub-items.
 	 */
 	function injectNativeCascade() {
 		var tree = window.wcNavV2Config.tree;
@@ -306,21 +322,28 @@
 
 		var byParent = buildByParent( tree );
 
+		// Map each flyout item's canonical href back to its tree slug so we
+		// can match by URL regardless of whether the tree slug equals its URL
+		// (Marketing's slug is `woocommerce-marketing` but its href points at
+		// `admin.php?page=wc-admin&path=/marketing` via the `url` override).
+		var hrefToSlug = {};
+		Object.keys( tree ).forEach( function ( slug ) {
+			var target = tree[ slug ].url || slug;
+			hrefToSlug[ toAdminUrl( target ) ] = slug;
+		} );
+
 		var $items = $( '#toplevel_page_woocommerce > .wp-submenu > li' ).not( '.wp-submenu-head' );
 		$items.each( function () {
 			var $li  = $( this );
 			var $a   = $li.find( '> a' ).first();
-			var href = $a.attr( 'href' ) || '';
-			var slug = href.replace( /^[^?#]*\/wp-admin\//, '' ).replace( /#.*$/, '' );
-			slug     = slug.replace( /^admin\.php\?page=/, '' );
-			var candidates = [ slug, slug.replace( /&amp;/g, '&' ) ];
+			var href = normalizeHref( $a.attr( 'href' ) || '' );
 
-			var grandkids = null;
-			for ( var i = 0; i < candidates.length && ! grandkids; i++ ) {
-				if ( byParent[ candidates[ i ] ] ) {
-					grandkids = byParent[ candidates[ i ] ];
-				}
+			var treeSlug = hrefToSlug[ href ];
+			if ( ! treeSlug ) {
+				return;
 			}
+
+			var grandkids = byParent[ treeSlug ];
 			if ( ! grandkids || ! grandkids.length ) {
 				return;
 			}
