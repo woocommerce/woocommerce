@@ -112,23 +112,41 @@ export const useQRLoginToken = ( {
 			const errorCode = err.code || 'unknown_error';
 			let nextErrorMessage: string;
 
-			if ( errorCode === 'rate_limit_exceeded' ) {
-				nextErrorMessage = __(
-					'Too many requests. Please try again in a few minutes.',
-					'woocommerce'
-				);
-			} else if ( errorCode === 'ssl_required' ) {
-				nextErrorMessage = __(
-					'QR login requires an HTTPS connection.',
-					'woocommerce'
-				);
-			} else {
-				nextErrorMessage =
-					err.message ||
-					__(
-						'Failed to generate QR login code. Please try again.',
+			switch ( errorCode ) {
+				case 'woocommerce_rest_cannot_view':
+					// The endpoint requires the `manage_woocommerce`
+					// capability; surface a clear, actionable message
+					// rather than the generic REST wording.
+					nextErrorMessage = __(
+						'You do not have permission to generate a QR login code. Ask a site administrator for help.',
 						'woocommerce'
 					);
+					break;
+				case 'ssl_required':
+					nextErrorMessage = __(
+						'QR login requires an HTTPS connection.',
+						'woocommerce'
+					);
+					break;
+				case 'application_passwords_unavailable':
+					nextErrorMessage = __(
+						'Application passwords are disabled on this site, so QR login is unavailable. Ask a site administrator to enable them.',
+						'woocommerce'
+					);
+					break;
+				case 'rate_limit_exceeded':
+					nextErrorMessage = __(
+						'Too many QR login requests. Please try again in a few minutes.',
+						'woocommerce'
+					);
+					break;
+				default:
+					nextErrorMessage =
+						err.message ||
+						__(
+							'Failed to generate QR login code. Please try again.',
+							'woocommerce'
+						);
 			}
 
 			setErrorMessage( nextErrorMessage );
