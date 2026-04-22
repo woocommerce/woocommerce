@@ -282,9 +282,12 @@
 		// WP's expected behaviour: add/remove `opensub` on hover (with a
 		// close delay so a small off-menu overshoot doesn't snap the flyout
 		// shut) and when focus enters/leaves the flyout.
+		// Scope the target selector to direct children of #adminmenu by
+		// using the `#adminmenu > li…` form (Element.closest can't evaluate
+		// a bare `>`-prefixed selector).
 		bindDelayedHover(
 			$adminmenu,
-			'> li.wp-has-submenu, > li.wp-has-current-submenu',
+			'#adminmenu > li.wp-has-submenu, #adminmenu > li.wp-has-current-submenu',
 			'opensub'
 		);
 		$adminmenu
@@ -303,47 +306,85 @@
 	var HOVER_CLOSE_DELAY = 600;
 
 	/**
-	 * Bind mouseenter/mouseleave handlers that toggle `className` on delegated
-	 * target items, with a HOVER_CLOSE_DELAY timeout before removing the class.
-	 * Re-entering any matched target (or any descendant's flyout) during the
-	 * delay cancels the close.
+	 * Hover-intent-style open/close for flyouts inside `$root`.
 	 *
-	 * @param {jQuery} $root           Root element to delegate from.
-	 * @param {string} targetSelector  Matched items that can open the flyout.
-	 * @param {string} className       Class added to open, removed on close.
+	 * Behaviour:
+	 * - Inside $root, responses are instant: hovering a target opens it and
+	 *   closes any previously-open target; hovering a non-target (or blank
+	 *   space) instantly closes whatever was open.
+	 * - Hovering within the currently-open target's subtree keeps it open
+	 *   (so moving from a parent into its cascade doesn't blink).
+	 * - Only when the cursor actually leaves $root do we wait
+	 *   HOVER_CLOSE_DELAY before collapsing — that's the forgiveness window
+	 *   for accidental off-menu overshoots. Re-entering $root during the
+	 *   delay cancels the close.
+	 *
+	 * @param {jQuery} $root           Bounds of the menu subtree.
+	 * @param {string} targetSelector  Items that can hold the open class.
+	 * @param {string} className       Class toggled to open/close.
 	 */
 	function bindDelayedHover( $root, targetSelector, className ) {
-		var closeTimers = new Map();
+		var timer  = null;
+		var openEl = null;
 
-		function open( el ) {
-			var t = closeTimers.get( el );
-			if ( t ) {
-				clearTimeout( t );
-				closeTimers.delete( el );
+		function clearTimer() {
+			if ( timer ) {
+				clearTimeout( timer );
+				timer = null;
+			}
+		}
+
+		function closeNow() {
+			clearTimer();
+			if ( openEl ) {
+				openEl.classList.remove( className );
+				openEl = null;
+			}
+		}
+
+		function openTarget( el ) {
+			clearTimer();
+			if ( openEl && openEl !== el ) {
+				openEl.classList.remove( className );
 			}
 			el.classList.add( className );
+			openEl = el;
 		}
 
-		function scheduleClose( el ) {
-			if ( closeTimers.has( el ) ) {
+		function scheduleClose() {
+			if ( timer || ! openEl ) {
 				return;
 			}
-			closeTimers.set(
-				el,
-				setTimeout( function () {
-					el.classList.remove( className );
-					closeTimers.delete( el );
-				}, HOVER_CLOSE_DELAY )
-			);
+			timer = setTimeout( function () {
+				if ( openEl ) {
+					openEl.classList.remove( className );
+					openEl = null;
+				}
+				timer = null;
+			}, HOVER_CLOSE_DELAY );
 		}
 
-		$root
-			.on( 'mouseenter.wcnavv2delay', targetSelector, function () {
-				open( this );
-			} )
-			.on( 'mouseleave.wcnavv2delay', targetSelector, function () {
-				scheduleClose( this );
-			} );
+		$root.on( 'mouseover.wcnavv2delay', function ( e ) {
+			clearTimer(); // cursor is inside $root somewhere
+			var target = e.target.closest ? e.target.closest( targetSelector ) : null;
+
+			if ( target && $root[ 0 ].contains( target ) ) {
+				if ( openEl !== target ) {
+					openTarget( target );
+				}
+				return;
+			}
+
+			// Not on a target. If hovering something outside the open target's
+			// subtree, close immediately.
+			if ( openEl && ! openEl.contains( e.target ) ) {
+				closeNow();
+			}
+		} );
+
+		$root.on( 'mouseleave.wcnavv2delay', function () {
+			scheduleClose();
+		} );
 	}
 
 	/**
