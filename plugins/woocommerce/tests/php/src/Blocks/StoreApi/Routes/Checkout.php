@@ -313,7 +313,7 @@ class Checkout extends MockeryTestCase {
 					'state'      => '',
 					'postcode'   => 'cb241ab',
 					'country'    => 'GB',
-					'phone'      => '020 7123 4567',
+					'phone'      => '',
 					'email'      => 'testaccount@test.com',
 				),
 				'shipping_address' => (object) array(
@@ -326,7 +326,7 @@ class Checkout extends MockeryTestCase {
 					'state'      => '',
 					'postcode'   => 'cb241ab',
 					'country'    => 'GB',
-					'phone'      => '020 7123 4567',
+					'phone'      => '',
 				),
 				'payment_method'   => WC_Gateway_BACS::ID,
 			)
