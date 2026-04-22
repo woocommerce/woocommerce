@@ -129,7 +129,7 @@ const RatingFilterEdit = ( props: BlockEditProps< Attributes > ) => {
 						),
 						value: rating?.toString(),
 						selected: index === 0,
-						count,
+						...( showCounts && { count } ),
 					} ) )
 			: [];
 
@@ -192,7 +192,6 @@ const RatingFilterEdit = ( props: BlockEditProps< Attributes > ) => {
 									storeNamespace:
 										'woocommerce/product-filters',
 									isLoading,
-									showCounts,
 								},
 							} }
 						>

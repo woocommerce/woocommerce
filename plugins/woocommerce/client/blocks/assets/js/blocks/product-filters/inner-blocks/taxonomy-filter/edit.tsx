@@ -193,7 +193,7 @@ const Edit = ( props: EditProps ) => {
 					label: term.name,
 					value: term.slug,
 					selected: false,
-					count,
+					...( showCounts && { count } ),
 					id: term.id,
 					parent: term.parent || 0,
 					menuOrder: term.menu_order ?? 0,
@@ -217,6 +217,7 @@ const Edit = ( props: EditProps ) => {
 		filteredCounts,
 		sortOrder,
 		hideEmpty,
+		showCounts,
 		isPreview,
 		isTermsLoading,
 		isFilterCountsLoading,
@@ -300,7 +301,6 @@ const Edit = ( props: EditProps ) => {
 							selectAction: 'toggleFilter',
 							storeNamespace: 'woocommerce/product-filters',
 							isLoading,
-							showCounts,
 						},
 					} }
 				>
