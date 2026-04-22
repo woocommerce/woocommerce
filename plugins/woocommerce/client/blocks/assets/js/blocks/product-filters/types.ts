@@ -2,8 +2,41 @@
  * External dependencies
  */
 import type { BlockEditProps } from '@wordpress/blocks';
-import type { ReactNode } from 'react';
 
+/**
+ * Internal dependencies
+ */
+import type {
+	SelectableItem,
+	SelectableItemsContext,
+} from '../../types/type-defs/selectable-items';
+import type { RangeInputContext } from '../../types/type-defs/range-input';
+import type { ActiveFiltersContext } from '../../types/type-defs/active-filters';
+
+// ----------------------------------------
+// Filter-specific item fields
+// ----------------------------------------
+export type FilterItemFields = {
+	count: number;
+	termId?: number;
+	parent?: number;
+	depth?: number;
+};
+
+export type FilterOptionItem = SelectableItem< FilterItemFields >;
+
+// ----------------------------------------
+// Filter block context (parent blocks use this)
+// ----------------------------------------
+export type FilterBlockContext = {
+	'woocommerce/selectableItems'?: SelectableItemsContext< FilterItemFields >;
+	'woocommerce/rangeInput'?: RangeInputContext;
+	'woocommerce/activeFilters'?: ActiveFiltersContext;
+};
+
+// ----------------------------------------
+// Block props
+// ----------------------------------------
 export type BlockAttributes = {
 	productId?: string;
 	isPreview: boolean;
@@ -11,51 +44,9 @@ export type BlockAttributes = {
 
 export type EditProps = BlockEditProps< BlockAttributes >;
 
-export type FilterOptionItem = (
-	| {
-			label: string;
-			ariaLabel?: string;
-	  }
-	| {
-			label: ReactNode;
-			ariaLabel: string;
-	  }
- ) & {
-	value: string;
-	selected?: boolean;
-	count: number;
-	id?: number;
-	parent?: number;
-	depth?: number;
-	menuOrder?: number;
-};
-
-export type SelectableItemsBlockContext = {
-	'woocommerce/selectableItems': {
-		items?: FilterOptionItem[];
-		selectionMode: 'single' | 'multiple';
-		selectAction: string;
-		storeNamespace: string;
-		isLoading: boolean;
-		showCounts?: boolean;
-		groupLabel?: string;
-	};
-};
-
-export type FilterBlockContext = {
-	filterData: {
-		isLoading: boolean;
-		items?: FilterOptionItem[];
-		price?: {
-			minPrice: number;
-			minRange: number;
-			maxPrice: number;
-			maxRange: number;
-		};
-		showCounts?: boolean;
-	};
-};
-
+// ----------------------------------------
+// Editor color picker
+// ----------------------------------------
 export type Color = {
 	slug?: string;
 	class?: string;
