@@ -8,7 +8,6 @@ use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationCancell
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\Factory;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
-use Automattic\WooCommerce\Internal\StockNotifications\Utilities\HasherHelper;
 use WC_Helper_Product;
 
 /**
@@ -25,7 +24,7 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 		$notification->set_product_id( $product->get_id() );
 		$notification->set_status( NotificationStatus::PENDING );
 		$notification->set_user_email( 'test@example.com' );
-		$key = time() . ':' . HasherHelper::wp_fast_hash( 'test' );
+		$key = time() . ':' . wp_fast_hash( 'test' );
 		$notification->update_meta_data( 'email_link_action_key', $key );
 		$id = $notification->save();
 
@@ -44,7 +43,7 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 		$notification->set_product_id( $product->get_id() );
 		$notification->set_status( NotificationStatus::ACTIVE );
 		$notification->set_user_email( 'test@example.com' );
-		$key = HasherHelper::wp_fast_hash( 'test' );
+		$key = wp_fast_hash( 'test' );
 		$notification->update_meta_data( 'email_link_action_key', $key );
 		$id = $notification->save();
 

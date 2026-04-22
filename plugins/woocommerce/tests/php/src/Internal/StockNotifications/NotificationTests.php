@@ -5,7 +5,6 @@ namespace Automattic\WooCommerce\Tests\Internal\StockNotifications;
 
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\Config;
-use Automattic\WooCommerce\Internal\StockNotifications\Utilities\HasherHelper;
 
 /**
  * NotificationTests data tests.
@@ -221,7 +220,7 @@ class NotificationTests extends \WC_Unit_Test_Case {
 		$notification->save();
 
 		// Save a custom key.
-		$key = time() - Config::get_verification_expiration_time_threshold() - 1 . ':' . HasherHelper::wp_fast_hash( 'test' );
+		$key = time() - Config::get_verification_expiration_time_threshold() - 1 . ':' . wp_fast_hash( 'test' );
 		$notification->update_meta_data( 'email_link_action_key', $key );
 		$notification->save();
 

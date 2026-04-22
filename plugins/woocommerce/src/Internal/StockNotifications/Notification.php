@@ -9,7 +9,6 @@ namespace Automattic\WooCommerce\Internal\StockNotifications;
 
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationCancellationSource;
-use Automattic\WooCommerce\Internal\StockNotifications\Utilities\HasherHelper;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -472,7 +471,7 @@ class Notification extends \WC_Data {
 			return false;
 		}
 
-		return HasherHelper::wp_verify_fast_hash( $key, $hash );
+		return wp_verify_fast_hash( $key, $hash );
 	}
 
 	/**
@@ -485,7 +484,7 @@ class Notification extends \WC_Data {
 	 */
 	public function get_verification_key( bool $persist ): string {
 		$key = wp_generate_password( 20, false );
-		$this->update_meta_data( 'email_link_action_key', time() . ':' . HasherHelper::wp_fast_hash( $key ) );
+		$this->update_meta_data( 'email_link_action_key', time() . ':' . wp_fast_hash( $key ) );
 
 		if ( $persist ) {
 			$this->save();
@@ -501,7 +500,7 @@ class Notification extends \WC_Data {
 	 * @return bool True if the key is valid, false otherwise.
 	 */
 	public function check_unsubscribe_key( string $key ): bool {
-		return HasherHelper::wp_verify_fast_hash( $key, $this->get_meta( 'email_link_action_key' ) );
+		return wp_verify_fast_hash( $key, $this->get_meta( 'email_link_action_key' ) );
 	}
 
 	/**
@@ -514,7 +513,7 @@ class Notification extends \WC_Data {
 	 */
 	public function get_unsubscribe_key( bool $persist ): string {
 		$key  = wp_generate_password( 20, false );
-		$hash = HasherHelper::wp_fast_hash( $key );
+		$hash = wp_fast_hash( $key );
 		$this->update_meta_data( 'email_link_action_key', $hash );
 
 		if ( $persist ) {
