@@ -6,22 +6,27 @@ import { __ } from '@wordpress/i18n';
 export const filtersPreview = [
 	{
 		type: __( 'Color', 'woocommerce' ),
-		label: __( 'Blue', 'woocommerce' ),
+		value: 'blue',
+		activeLabel: __( 'Blue', 'woocommerce' ),
 	},
 	{
 		type: __( 'Color', 'woocommerce' ),
-		label: __( 'Red', 'woocommerce' ),
+		value: 'red',
+		activeLabel: __( 'Red', 'woocommerce' ),
 	},
 	{
 		type: __( 'Size', 'woocommerce' ),
-		label: __( 'Large', 'woocommerce' ),
+		value: 'large',
+		activeLabel: __( 'Large', 'woocommerce' ),
 	},
 	{
 		type: __( 'Status', 'woocommerce' ),
-		label: __( 'In stock', 'woocommerce' ),
+		value: 'instock',
+		activeLabel: __( 'In stock', 'woocommerce' ),
 	},
 	{
 		type: __( 'Status', 'woocommerce' ),
-		label: __( 'On sale', 'woocommerce' ),
+		value: 'onsale',
+		activeLabel: __( 'On sale', 'woocommerce' ),
 	},
 ];
