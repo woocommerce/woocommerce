@@ -32,7 +32,6 @@ final class ProductFilterChips extends AbstractBlock {
 
 		$block_context   = $block->context['woocommerce/selectableItems'];
 		$items           = $block_context['items'] ?? array();
-		$show_counts     = $block_context['showCounts'] ?? false;
 		$store_namespace = $block_context['storeNamespace'] ?? 'woocommerce/product-filters';
 		$select_action   = $block_context['selectAction'] ?? 'toggleFilter';
 		$dynamic_items   = $block_context['dynamicItems'] ?? true;
@@ -47,9 +46,9 @@ final class ProductFilterChips extends AbstractBlock {
 
 		$context_items = array_values(
 			array_map(
-				function ( $item ) use ( $show_counts ) {
+				function ( $item ) {
 					$item['id']        = $item['type'] . '-' . $item['value'];
-					$item['ariaLabel'] = $this->get_aria_label( $item, $show_counts );
+					$item['ariaLabel'] = $this->get_aria_label( $item );
 					return $item;
 				},
 				$items
@@ -60,10 +59,7 @@ final class ProductFilterChips extends AbstractBlock {
 			'data-wp-interactive' => $store_namespace,
 			'data-wp-key'         => wp_unique_prefixed_id( $this->get_full_block_name() ),
 			'data-wp-context'     => wp_json_encode(
-				array(
-					'items'      => $context_items,
-					'showCounts' => $show_counts,
-				),
+				array( 'items' => $context_items ),
 				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 			),
 			'class'               => esc_attr( $classes ),
@@ -101,8 +97,8 @@ final class ProductFilterChips extends AbstractBlock {
 									<span class="wc-block-product-filter-chips__text" data-wp-text="context.item.label"></span>
 									<span
 										class="wc-block-product-filter-chips__count"
-										data-wp-bind--hidden="!context.showCounts"
-									>(<span data-wp-text="context.item.count"></span>)</span>
+										data-wp-bind--hidden="!context.item.count"
+									> (<span data-wp-text="context.item.count"></span>)</span>
 								</span>
 							</button>
 						</template>
@@ -126,9 +122,9 @@ final class ProductFilterChips extends AbstractBlock {
 								<span class="wc-block-product-filter-chips__text">
 									<?php echo $item['label']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 								</span>
-								<?php if ( $show_counts ) : ?>
+								<?php if ( isset( $item['count'] ) ) : ?>
 									<span class="wc-block-product-filter-chips__count">
-										(<?php echo esc_html( $item['count'] ); ?>)
+										 (<?php echo esc_html( $item['count'] ); ?>)
 									</span>
 								<?php endif; ?>
 							</span>
@@ -145,12 +141,11 @@ final class ProductFilterChips extends AbstractBlock {
 	 * Get aria label for filter item.
 	 *
 	 * @param array $item Filter item.
-	 * @param bool  $show_counts Whether to show counts.
 	 *
 	 * @return string Aria label.
 	 */
-	private function get_aria_label( $item, $show_counts ) {
-		if ( $show_counts ) {
+	private function get_aria_label( $item ) {
+		if ( isset( $item['count'] ) ) {
 			return sprintf(
 				/* translators: %1$s: Product filter name, %2$d: Number of products */
 				_n(

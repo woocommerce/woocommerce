@@ -111,7 +111,6 @@ The context object that parents MUST provide.
 
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
-| `showCounts` | `boolean` | `false` | Show product counts next to items (filters) |
 | `dynamicItems` | `boolean` | `true` | Use `data-wp-each` for dynamic item rendering. Set to `false` for static item lists (rating, stock status) that don't need show-more and may contain HTML labels. |
 
 ## SelectableItem
@@ -130,7 +129,7 @@ Each item MAY have:
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `count` | `number` | Product count (for filters) |
+| `count` | `number` | Product count. Presence controls visibility — omit to hide counts. |
 | `color` | `string` | Hex color for swatches (e.g., "#FF0000") |
 | `image` | `string` | Image URL for swatches |
 | `type` | `string` | Type discriminator (e.g., "attribute/color") |
@@ -157,7 +156,7 @@ Inner blocks SHOULD:
 
 1. Render `<input type="radio">` when `selectionMode === 'single'`
 2. Render `<input type="checkbox">` when `selectionMode === 'multiple'`
-3. Show counts when `showCounts === true` and `item.count` exists
+3. Show counts when `item.count` exists
 4. Render color swatch when `item.color` exists
 5. Render image swatch when `item.image` exists (fallback if no color)
 6. Render text-only when neither `color` nor `image` exists
@@ -238,9 +237,6 @@ export interface SelectableItemsContext {
   /** Screen reader label for the group (rendered as fieldset legend) */
   groupLabel?: string;
   
-  /** Show product counts next to items (filters) */
-  showCounts?: boolean;
-  
   /** Use data-wp-each for dynamic item rendering (default: true).
    *  Set to false for static item lists (rating, stock) that don't need
    *  show-more and may contain HTML labels. */
@@ -300,14 +296,16 @@ No base class or trait needed — parent blocks set `$block->context` directly. 
 class ProductFilterAttribute extends AbstractBlock {
 
     protected function render( $attributes, $content, $block ) {
+        $show_counts = $attributes['showCounts'] ?? false;
+        
         /** @var SelectableItemsContext $context */
         $context = [
-            'items'          => $this->transform_to_selectable_items( $filter_items ),
+            // Items include 'count' only when $show_counts is true
+            'items'          => $this->transform_to_selectable_items( $filter_items, $show_counts ),
             'selectionMode'  => 'multiple',
             'selectAction'   => 'toggleFilter',
             'storeNamespace' => 'woocommerce/product-filters',
             'groupLabel'     => $attributes['label'] ?? '',
-            'showCounts'     => $attributes['showCounts'] ?? true,
         ];
 
         $block->context['woocommerce/selectableItems'] = $context;
@@ -354,7 +352,6 @@ parameters:
         selectAction: string,
         storeNamespace: string,
         groupLabel?: string,
-        showCounts?: bool,
         dynamicItems?: bool
       }
     '''
@@ -375,7 +372,7 @@ $context = [
             'label'    => 'Red',
             'value'    => 'red',
             'selected' => false,
-            'count'    => 5,
+            'count'    => 5,  // Include count to show it
             'color'    => '#FF0000',
         ],
         [
@@ -390,8 +387,7 @@ $context = [
     'selectionMode'  => 'multiple',
     'selectAction'   => 'toggleFilter',
     'storeNamespace' => 'woocommerce/product-filters',
-    'groupLabel'     => 'Filter by Color',  // Screen reader: "Filter by Color"
-    'showCounts'     => true,
+    'groupLabel'     => 'Filter by Color',
 ];
 ```
 
@@ -409,7 +405,6 @@ $context = [
     'selectAction'   => 'toggleFilter',
     'storeNamespace' => 'woocommerce/product-filters',
     'groupLabel'     => 'Filter by Size',
-    'showCounts'     => true,
 ];
 ```
 
@@ -418,6 +413,7 @@ $context = [
 ```php
 $context = [
     'items' => [
+        // No count field = no count shown
         ['label' => 'Red',   'value' => 'red',   'selected' => true,  'color' => '#FF0000'],
         ['label' => 'Blue',  'value' => 'blue',  'selected' => false, 'color' => '#0000FF'],
         ['label' => 'Green', 'value' => 'green', 'selected' => false, 'color' => '#00FF00', 'disabled' => true],
@@ -426,7 +422,6 @@ $context = [
     'selectAction'   => 'setAttribute',
     'storeNamespace' => 'woocommerce/add-to-cart-with-options',
     'groupLabel'     => 'Select Color',
-    // No showCounts needed for variation selector
 ];
 ```
 
@@ -443,7 +438,6 @@ $context = [
     'selectAction'   => 'toggleFilter',
     'storeNamespace' => 'woocommerce/product-filters',
     'groupLabel'     => 'Filter by Category',
-    'showCounts'     => true,
 ];
 ```
 
@@ -459,7 +453,7 @@ $context = [
             'ariaLabel' => '5 stars',            // Required when label is not plain text
             'value'     => '5',
             'selected'  => false,
-            'count'     => 12,
+            'count'     => 12,  // Include count to show it
             'type'      => 'rating',
         ],
         // ...
@@ -468,8 +462,7 @@ $context = [
     'selectAction'   => 'toggleFilter',
     'storeNamespace' => 'woocommerce/product-filters',
     'groupLabel'     => 'Filter by Rating',
-    'showCounts'     => true,
-    'dynamicItems'   => false,  // Static list, no show-more, keeps HTML labels
+    'dynamicItems'   => false,  // Static list, keeps HTML labels
 ];
 ```
 
@@ -507,7 +500,6 @@ protected function render( $attributes, $content, $block ) {
 
     $block_context   = $block->context['woocommerce/selectableItems'];
     $items           = $block_context['items'] ?? array();
-    $show_counts     = $block_context['showCounts'] ?? false;
     $store_namespace = $block_context['storeNamespace'] ?? 'woocommerce/product-filters';
     $select_action   = $block_context['selectAction'] ?? 'toggleFilter';
 
@@ -515,9 +507,9 @@ protected function render( $attributes, $content, $block ) {
     // to guarantee JSON array (not object) for data-wp-each.
     $context_items = array_values(
         array_map(
-            function ( $item ) use ( $show_counts ) {
+            function ( $item ) {
                 $item['id']        = $item['type'] . '-' . $item['value'];
-                $item['ariaLabel'] = $this->get_aria_label( $item, $show_counts );
+                $item['ariaLabel'] = $this->get_aria_label( $item );
                 return $item;
             },
             $items
@@ -528,10 +520,7 @@ protected function render( $attributes, $content, $block ) {
     $wrapper_attributes = array(
         'data-wp-interactive' => $store_namespace,
         'data-wp-context'     => wp_json_encode(
-            array(
-                'items'      => $context_items,
-                'showCounts' => $show_counts,
-            ),
+            array( 'items' => $context_items ),
             JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
         ),
     );
@@ -556,7 +545,7 @@ protected function render( $attributes, $content, $block ) {
                             data-wp-bind--checked="state.isFilterSelected"
                         >
                         <span data-wp-text="context.item.label"></span>
-                        <span data-wp-bind--hidden="!context.showCounts">
+                        <span data-wp-bind--hidden="!context.item.count">
                             (<span data-wp-text="context.item.count"></span>)
                         </span>
                     </div>
@@ -576,7 +565,7 @@ protected function render( $attributes, $content, $block ) {
                             data-wp-bind--checked="state.isFilterSelected"
                         >
                         <span><?php echo esc_html( $item['label'] ); ?></span>
-                        <?php if ( $show_counts ) : ?>
+                        <?php if ( isset( $item['count'] ) ) : ?>
                             <span>(<?php echo esc_html( $item['count'] ); ?>)</span>
                         <?php endif; ?>
                     </div>
@@ -635,15 +624,15 @@ class ProductFilterAttribute extends AbstractBlock {
     
     protected function render($attributes, $content, $block) {
         // ... existing filter logic to get items ...
+        $show_counts = $attributes['showCounts'] ?? false;
         
         // Transform filter items to standardized context
         $selectable_context = [
-            'items'          => $this->transform_to_selectable_items($filter_items, $attribute_name),
+            'items'          => $this->transform_to_selectable_items($filter_items, $attribute_name, $show_counts),
             'selectionMode'  => 'multiple',
             'selectAction'   => 'toggleFilter',
             'storeNamespace' => 'woocommerce/product-filters',
             'groupLabel'     => $attribute_label,
-            'showCounts'     => $attributes['showCounts'] ?? true,
         ];
         
         // Provide context to inner blocks
@@ -659,18 +648,22 @@ class ProductFilterAttribute extends AbstractBlock {
         );
     }
     
-    private function transform_to_selectable_items(array $filter_items, string $attribute_name): array {
+    private function transform_to_selectable_items(array $filter_items, string $attribute_name, bool $show_counts): array {
         // Get presentation data once, keyed by slug
         $presentation = $this->get_presentation_data($attribute_name);
         
-        return array_map(function($item) use ($presentation) {
+        return array_map(function($item) use ($presentation, $show_counts) {
             $result = [
                 'label'    => $item['label'],
                 'value'    => $item['value'],
                 'selected' => $item['selected'] ?? false,
-                'count'    => $item['count'] ?? 0,
                 'type'     => $item['type'] ?? null,
             ];
+            
+            // Include count only when showCounts is true
+            if ($show_counts) {
+                $result['count'] = $item['count'] ?? 0;
+            }
             
             // Bundle presentation data directly on item
             if (isset($presentation[$item['value']])) {
@@ -720,7 +713,7 @@ class VariationSelectorAttribute extends AbstractBlock {
             'selectAction'   => 'setAttribute',
             'storeNamespace' => 'woocommerce/add-to-cart-with-options',
             'groupLabel'     => $attribute_label,
-            // No showCounts needed for variation selector
+            // Items have no 'count' field — counts won't be shown
         ];
         
         // Provide context to inner blocks
