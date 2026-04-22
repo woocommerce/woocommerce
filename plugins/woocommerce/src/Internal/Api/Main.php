@@ -50,15 +50,19 @@ class Main {
 	 * that want to know whether the feature is active should check
 	 * FeaturesUtil::feature_is_enabled( 'dual_code_graphql_api' ) rather
 	 * than class_exists() on the Api namespace.
+	 *
+	 * The feature-enabled check is deferred to the `rest_api_init` callback
+	 * to avoid triggering translation loading (via FeaturesController) before
+	 * the `init` action has fired, which would cause a
+	 * `_load_textdomain_just_in_time` notice on WordPress 6.7+.
 	 */
 	public static function register(): void {
-		if ( ! self::is_enabled() ) {
-			return;
-		}
-
 		add_action(
 			'rest_api_init',
 			static function () {
+				if ( ! self::is_enabled() ) {
+					return;
+				}
 				wc_get_container()->get( GraphQLController::class )->register();
 			}
 		);
