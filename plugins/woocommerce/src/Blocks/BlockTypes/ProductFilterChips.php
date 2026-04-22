@@ -109,6 +109,7 @@ final class ProductFilterChips extends AbstractBlock {
 							<?php endif; ?>
 							data-wp-on--click="actions.<?php echo esc_attr( $select_action ); ?>"
 							value="<?php echo esc_attr( $item['value'] ); ?>"
+							aria-checked="<?php echo ! empty( $item['selected'] ) ? 'true' : 'false'; ?>"
 							data-wp-bind--aria-checked="context.item.selected"
 							<?php if ( $dynamic_items ) : ?>
 								data-wp-each-child
