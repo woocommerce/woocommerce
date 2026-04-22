@@ -9,6 +9,7 @@
 declare( strict_types = 1);
 
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Internal\Admin\Settings\ReactSettingsPageInterface;
 use Automattic\WooCommerce\Internal\Admin\Settings\ReactSettingsSchema;
 
 
@@ -223,6 +224,23 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 			$pages[ $this->id ]['end']   = $this->get_custom_view( 'woocommerce_after_settings_' . $this->id );
 
 			return $pages;
+		}
+
+		/**
+		 * Opt this settings page into the modernised (React) rendering path.
+		 *
+		 * The default implementation returns `null`, which means the page renders via the
+		 * legacy `WC_Admin_Settings::output_fields()` form regardless of the
+		 * `modern-settings` feature flag. Subclasses that want to participate in modern
+		 * rendering override this to return an implementation of
+		 * `ReactSettingsPageInterface`.
+		 *
+		 * @since 10.8.0
+		 *
+		 * @return ReactSettingsPageInterface|null
+		 */
+		public function get_react_settings_page(): ?ReactSettingsPageInterface {
+			return null;
 		}
 
 		/**
@@ -544,9 +562,9 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		 * The message lists the tab id, section id (with empty normalised to `default`),
 		 * and each unsupported field's id plus its (normalised) type so plugin authors
 		 * know exactly which fields to register via
-		 * `wcReactSettings.registerFieldTypeTransformer()` or add to
-		 * `get_supported_types()` via the `woocommerce_react_settings_supported_types`
-		 * filter to unlock modern rendering.
+		 * `wcReactSettings.registerFieldTypeTransformer()` or add the type via the
+		 * settings page's `ReactSettingsPageInterface::get_extra_supported_types()`
+		 * method to unlock modern rendering.
 		 *
 		 * @since 10.8.0
 		 *
@@ -576,7 +594,7 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 			}
 
 			$message = sprintf(
-				'WooCommerce modernised settings fell back to legacy rendering on tab "%1$s", section "%2$s" because these fields are not supported: %3$s. Register a transformer via wcReactSettings.registerFieldTypeTransformer() or add the type via the woocommerce_react_settings_supported_types filter to enable modern rendering.',
+				'WooCommerce modernised settings fell back to legacy rendering on tab "%1$s", section "%2$s" because these fields are not supported: %3$s. Register a transformer via wcReactSettings.registerFieldTypeTransformer() or add the type via the settings page\'s ReactSettingsPageInterface::get_extra_supported_types() method to enable modern rendering.',
 				$tab,
 				$normalized_section,
 				implode( ', ', $field_descriptions )

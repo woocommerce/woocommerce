@@ -6,6 +6,8 @@
  * @version 2.4.0
  */
 
+use Automattic\WooCommerce\Internal\Admin\Settings\ReactSettingsPageInterface;
+use Automattic\WooCommerce\Internal\Admin\Settings\ReactSettingsPages\ProductsSettingsPage;
 use Automattic\WooCommerce\Utilities\I18nUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -37,6 +39,13 @@ class WC_Settings_Products extends WC_Settings_Page {
 	 * @var string
 	 */
 	public $icon = 'box';
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public function get_react_settings_page(): ?ReactSettingsPageInterface {
+		return wc_get_container()->get( ProductsSettingsPage::class );
+	}
 
 	/**
 	 * Get own sections.

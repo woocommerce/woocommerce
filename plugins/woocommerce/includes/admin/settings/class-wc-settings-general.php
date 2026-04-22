@@ -7,6 +7,8 @@
 
 use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
 use Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController;
+use Automattic\WooCommerce\Internal\Admin\Settings\ReactSettingsPageInterface;
+use Automattic\WooCommerce\Internal\Admin\Settings\ReactSettingsPages\GeneralSettingsPage;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -35,6 +37,13 @@ class WC_Settings_General extends WC_Settings_Page {
 	 * @var string
 	 */
 	public $icon = 'cog';
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public function get_react_settings_page(): ?ReactSettingsPageInterface {
+		return wc_get_container()->get( GeneralSettingsPage::class );
+	}
 
 	/**
 	 * Get settings or the default section.
