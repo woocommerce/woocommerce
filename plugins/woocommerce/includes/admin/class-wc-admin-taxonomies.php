@@ -338,6 +338,7 @@ class WC_Admin_Taxonomies {
 	 * Add custom fields for product attribute terms.
 	 *
 	 * @param string $taxonomy Taxonomy slug.
+	 * @return void
 	 */
 	public function add_product_attribute_term_fields( $taxonomy ) {
 		if ( ! $this->is_visual_product_attribute_taxonomy( $taxonomy ) ) {
@@ -355,6 +356,7 @@ class WC_Admin_Taxonomies {
 	 * Edit custom fields for product attribute terms.
 	 *
 	 * @param WP_Term $term Current term.
+	 * @return void
 	 */
 	public function edit_product_attribute_term_fields( $term ) {
 		if ( ! $this->is_visual_product_attribute_taxonomy( $term->taxonomy ) ) {
@@ -451,7 +453,7 @@ class WC_Admin_Taxonomies {
 	 * @return array
 	 */
 	public function add_product_attribute_term_columns( $columns ) {
-		$taxonomy = isset( $_GET['taxonomy'] ) ? wc_clean( wp_unslash( $_GET['taxonomy'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$taxonomy = isset( $_GET['taxonomy'] ) ? sanitize_text_field( wp_unslash( $_GET['taxonomy'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( ! $this->is_visual_product_attribute_taxonomy( $taxonomy ) ) {
 			return $columns;
 		}
@@ -484,7 +486,7 @@ class WC_Admin_Taxonomies {
 			return $columns;
 		}
 
-		$taxonomy = isset( $_GET['taxonomy'] ) ? wc_clean( wp_unslash( $_GET['taxonomy'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$taxonomy = isset( $_GET['taxonomy'] ) ? sanitize_text_field( wp_unslash( $_GET['taxonomy'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( ! $this->is_visual_product_attribute_taxonomy( $taxonomy ) ) {
 			return $columns;
 		}
@@ -625,7 +627,7 @@ class WC_Admin_Taxonomies {
 	 * @return void
 	 */
 	public function scripts_at_product_cat_screen_footer() {
-		$taxonomy = isset( $_GET['taxonomy'] ) ? wc_clean( wp_unslash( $_GET['taxonomy'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$taxonomy = isset( $_GET['taxonomy'] ) ? sanitize_text_field( wp_unslash( $_GET['taxonomy'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( 'product_cat' !== $taxonomy ) {
 			return;
 		}
@@ -657,7 +659,7 @@ class WC_Admin_Taxonomies {
 	 * @return void
 	 */
 	public function scripts_at_visual_attribute_screen_footer() {
-		$taxonomy = isset( $_GET['taxonomy'] ) ? wc_clean( wp_unslash( $_GET['taxonomy'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$taxonomy = isset( $_GET['taxonomy'] ) ? sanitize_text_field( wp_unslash( $_GET['taxonomy'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( ! $this->is_visual_product_attribute_taxonomy( $taxonomy ) ) {
 			return;
 		}

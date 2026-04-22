@@ -412,7 +412,7 @@ class WC_Admin_Attributes {
 											<?php
 										endforeach;
 								} else {
-									$column_count = wc_has_custom_attribute_types() ? 5 : 4;
+									$column_count = wc_has_custom_attribute_types() ? '5' : '4';
 									?>
 										<tr>
 											<td colspan="<?php echo esc_attr( $column_count ); ?>"><?php esc_html_e( 'No attributes currently exist.', 'woocommerce' ); ?></td>
