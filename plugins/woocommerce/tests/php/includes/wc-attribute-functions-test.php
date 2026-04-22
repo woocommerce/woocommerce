@@ -29,7 +29,7 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 		$this->filter_recorder = $this->any();
 
 		$filter_mock = $this->getMockBuilder( stdClass::class )
-			->setMethods( [ '__invoke' ] )
+			->setMethods( array( '__invoke' ) )
 			->getMock();
 		$filter_mock->expects( $this->filter_recorder )
 			->method( '__invoke' )
@@ -55,14 +55,14 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_wc_get_attribute_taxonomy_ids() {
 		$ids = wc_get_attribute_taxonomy_ids();
-		$this->assertEquals( [], $ids );
+		$this->assertEquals( array(), $ids );
 		$this->assertEquals(
 			1,
 			$this->filter_recorder->getInvocationCount(),
 			'Filter `woocommerce_attribute_taxonomies` should have been triggered once after fetching all attribute taxonomies.'
 		);
 		$ids = wc_get_attribute_taxonomy_ids();
-		$this->assertEquals( [], $ids );
+		$this->assertEquals( array(), $ids );
 		$this->assertEquals(
 			1,
 			$this->filter_recorder->getInvocationCount(),
@@ -76,14 +76,14 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_wc_get_attribute_taxonomy_labels() {
 		$labels = wc_get_attribute_taxonomy_labels();
-		$this->assertEquals( [], $labels );
+		$this->assertEquals( array(), $labels );
 		$this->assertEquals(
 			1,
 			$this->filter_recorder->getInvocationCount(),
 			'Filter `woocommerce_attribute_taxonomies` should have been triggered once after fetching all attribute taxonomies.'
 		);
 		$labels = wc_get_attribute_taxonomy_labels();
-		$this->assertEquals( [], $labels );
+		$this->assertEquals( array(), $labels );
 		$this->assertEquals(
 			1,
 			$this->filter_recorder->getInvocationCount(),
@@ -216,11 +216,40 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	public function get_attribute_names_and_slugs() {
-		return [
-			[ 'Dash Me', 'dash-me' ],
-			[ '', '' ],
-			[ 'pa_SubStr', 'substr' ],
-			[ 'ĂnîC°Dę', 'anicde' ],
-		];
+		return array(
+			array( 'Dash Me', 'dash-me' ),
+			array( '', '' ),
+			array( 'pa_SubStr', 'substr' ),
+			array( 'ĂnîC°Dę', 'anicde' ),
+		);
+	}
+
+	/**
+	 * Test visual attribute type registration and persistence.
+	 */
+	public function test_wc_visual_attribute_type() {
+		switch_theme( 'twentytwentyfour' );
+
+		$this->assertArrayHasKey( 'wc-visual', wc_get_attribute_types(), 'The visual attribute type should be available in block themes.' );
+
+		$attribute_id = wc_create_attribute(
+			array(
+				'name' => 'Color',
+				'type' => 'wc-visual',
+			)
+		);
+
+		$this->assertIsInt( $attribute_id );
+		$this->assertEquals( 'wc-visual', wc_get_attribute( $attribute_id )->type, 'The attribute type should be `wc-visual` in block themes.' );
+
+		switch_theme( 'storefront' );
+		$this->assertEquals( 'wc-visual', wc_get_attribute( $attribute_id )->type, 'The attribute type should be `wc-visual` in classic themes.' );
+		$this->assertArrayHasKey( 'wc-visual', wc_get_attribute_types(), 'The visual attribute type should be available in classic themes with a visual attribute.' );
+
+		wc_delete_attribute( $attribute_id );
+
+		$this->assertArrayNotHasKey( 'wc-visual', wc_get_attribute_types(), 'The visual attribute type should not be available in classic themes without a visual attribute.' );
+
+		switch_theme( 'twentytwentyfour' );
 	}
 }

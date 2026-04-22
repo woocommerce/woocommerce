@@ -211,7 +211,7 @@ function wc_attribute_label( $name, $product = '' ) {
 		}
 	} else {
 		$label = $name;
-	}
+	}//end if
 
 	return apply_filters( 'woocommerce_attribute_label', $label, $name, $product );
 }
@@ -253,11 +253,30 @@ function wc_get_attribute_taxonomy_names() {
  * @return array
  */
 function wc_get_attribute_types() {
+	$attribute_types = array(
+		'select' => __( 'Text', 'woocommerce' ),
+	);
+
+	$allow_visual_attribute_type = wp_is_block_theme();
+
+	// If the store already has some visual attributes, let's allow them even
+	// if the current theme is not a block theme.
+	if ( ! $allow_visual_attribute_type ) {
+		foreach ( wc_get_attribute_taxonomies() as $attribute_taxonomy ) {
+			if ( isset( $attribute_taxonomy->attribute_type ) && 'wc-visual' === $attribute_taxonomy->attribute_type ) {
+				$allow_visual_attribute_type = true;
+				break;
+			}
+		}
+	}
+
+	if ( $allow_visual_attribute_type ) {
+		$attribute_types['wc-visual'] = __( 'Color / Image', 'woocommerce' );
+	}
+
 	return (array) apply_filters(
 		'product_attributes_type_selector',
-		array(
-			'select' => __( 'Select', 'woocommerce' ),
-		)
+		$attribute_types
 	);
 }
 
@@ -575,7 +594,8 @@ function wc_create_attribute( $args ) {
 			$wpdb->update(
 				$wpdb->termmeta,
 				array( 'meta_key' => 'order' ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-				array( 'meta_key' => 'order_pa_' . sanitize_title( $old_slug ) ) // WPCS: slow query ok.
+				array( 'meta_key' => 'order_pa_' . sanitize_title( $old_slug ) )
+				// WPCS: slow query ok.
 			);
 
 			// Update product attributes which use this taxonomy.
@@ -607,8 +627,10 @@ function wc_create_attribute( $args ) {
 			// Update variations which use this taxonomy.
 			$wpdb->update(
 				$wpdb->postmeta,
-				array( 'meta_key' => 'attribute_pa_' . sanitize_title( $data['attribute_name'] ) ), // WPCS: slow query ok.
-				array( 'meta_key' => 'attribute_pa_' . sanitize_title( $old_slug ) ) // WPCS: slow query ok.
+				array( 'meta_key' => 'attribute_pa_' . sanitize_title( $data['attribute_name'] ) ),
+				// WPCS: slow query ok.
+				array( 'meta_key' => 'attribute_pa_' . sanitize_title( $old_slug ) )
+				// WPCS: slow query ok.
 			);
 
 			// Update global vars to reflect migration. This ensures any functions dealing with terms later in this request
@@ -621,8 +643,8 @@ function wc_create_attribute( $args ) {
 			if ( isset( $wp_taxonomies[ $old_taxonomy_name ] ) && ! isset( $wp_taxonomies[ $new_taxonomy_name ] ) ) {
 				$wp_taxonomies[ $new_taxonomy_name ] = $wp_taxonomies[ $old_taxonomy_name ]; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 			}
-		}
-	}
+		}//end if
+	}//end if
 
 	// Clear cache and flush rewrite rules.
 	wp_schedule_single_event( time(), 'woocommerce_flush_rewrite_rules' );
@@ -730,7 +752,7 @@ function wc_delete_attribute( $id ) {
 		WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );
 
 		return true;
-	}
+	}//end if
 
 	return false;
 }

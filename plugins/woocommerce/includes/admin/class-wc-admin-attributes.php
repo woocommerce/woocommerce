@@ -33,9 +33,11 @@ class WC_Admin_Attributes {
 		$action = '';
 
 		// Action to perform: add, edit, delete or none.
-		if ( ! empty( $_POST['add_new_attribute'] ) ) { // WPCS: CSRF ok.
+		if ( ! empty( $_POST['add_new_attribute'] ) ) {
+			// WPCS: CSRF ok.
 			$action = 'add';
-		} elseif ( ! empty( $_POST['save_attribute'] ) && ! empty( $_GET['edit'] ) ) { // WPCS: CSRF ok.
+		} elseif ( ! empty( $_POST['save_attribute'] ) && ! empty( $_GET['edit'] ) ) {
+			// WPCS: CSRF ok.
 			$action = 'edit';
 		} elseif ( ! empty( $_GET['delete'] ) ) {
 			$action = 'delete';
@@ -72,11 +74,16 @@ class WC_Admin_Attributes {
 	 */
 	private static function get_posted_attribute() {
 		$attribute = array(
-			'attribute_label'   => isset( $_POST['attribute_label'] ) ? wc_clean( wp_unslash( $_POST['attribute_label'] ) ) : '', // WPCS: input var ok, CSRF ok.
-			'attribute_name'    => isset( $_POST['attribute_name'] ) ? wc_sanitize_taxonomy_name( wp_unslash( $_POST['attribute_name'] ) ) : '', // WPCS: input var ok, CSRF ok, sanitization ok.
-			'attribute_type'    => isset( $_POST['attribute_type'] ) ? wc_clean( wp_unslash( $_POST['attribute_type'] ) ) : 'select', // WPCS: input var ok, CSRF ok.
-			'attribute_orderby' => isset( $_POST['attribute_orderby'] ) ? wc_clean( wp_unslash( $_POST['attribute_orderby'] ) ) : '', // WPCS: input var ok, CSRF ok.
-			'attribute_public'  => isset( $_POST['attribute_public'] ) ? 1 : 0, // WPCS: input var ok, CSRF ok.
+			'attribute_label'   => isset( $_POST['attribute_label'] ) ? wc_clean( wp_unslash( $_POST['attribute_label'] ) ) : '',
+			// WPCS: input var ok, CSRF ok.
+			'attribute_name'    => isset( $_POST['attribute_name'] ) ? wc_sanitize_taxonomy_name( wp_unslash( $_POST['attribute_name'] ) ) : '',
+			// WPCS: input var ok, CSRF ok, sanitization ok.
+			'attribute_type'    => isset( $_POST['attribute_type'] ) ? wc_clean( wp_unslash( $_POST['attribute_type'] ) ) : 'select',
+			// WPCS: input var ok, CSRF ok.
+			'attribute_orderby' => isset( $_POST['attribute_orderby'] ) ? wc_clean( wp_unslash( $_POST['attribute_orderby'] ) ) : '',
+			// WPCS: input var ok, CSRF ok.
+			'attribute_public'  => isset( $_POST['attribute_public'] ) ? 1 : 0,
+		// WPCS: input var ok, CSRF ok.
 		);
 
 		if ( empty( $attribute['attribute_type'] ) ) {
@@ -261,7 +268,7 @@ class WC_Admin_Attributes {
 									</td>
 								</tr>
 								<?php
-							}
+							}//end if
 							?>
 							<tr class="form-field form-required">
 								<th scope="row" valign="top">
@@ -283,7 +290,9 @@ class WC_Admin_Attributes {
 					<p class="submit"><button type="submit" name="save_attribute" id="submit" class="button-primary" value="<?php esc_attr_e( 'Update', 'woocommerce' ); ?>"><?php esc_html_e( 'Update', 'woocommerce' ); ?></button></p>
 					<?php wp_nonce_field( 'woocommerce-save-attribute_' . $edit ); ?>
 				</form>
-			<?php } ?>
+				<?php
+			}//end if
+			?>
 		</div>
 		<?php
 	}
@@ -392,10 +401,10 @@ class WC_Admin_Attributes {
 														} else {
 															/* translators: %s: Total count of terms available for the attribute */
 															echo esc_html( sprintf( __( '%s terms', 'woocommerce' ), $total_count ) );
-														}
+														}//end if
 													} else {
 															echo '<span class="na">&ndash;</span><br />';
-													}
+													}//end if
 													?>
 													<br /><a href="edit-tags.php?taxonomy=<?php echo esc_attr( wc_attribute_taxonomy_name( $tax->attribute_name ) ); ?>&amp;post_type=product" class="configure-terms"><?php esc_html_e( 'Configure terms', 'woocommerce' ); ?></a>
 												</td>
@@ -403,12 +412,13 @@ class WC_Admin_Attributes {
 											<?php
 										endforeach;
 								} else {
+									$column_count = wc_has_custom_attribute_types() ? 5 : 4;
 									?>
 										<tr>
-											<td colspan="6"><?php esc_html_e( 'No attributes currently exist.', 'woocommerce' ); ?></td>
+											<td colspan="<?php echo esc_attr( $column_count ); ?>"><?php esc_html_e( 'No attributes currently exist.', 'woocommerce' ); ?></td>
 										</tr>
 										<?php
-								}
+								}//end if
 								?>
 							</tbody>
 						</table>
@@ -469,7 +479,7 @@ class WC_Admin_Attributes {
 										<p class="description"><?php esc_html_e( "Determines how this attribute's values are displayed.", 'woocommerce' ); ?></p>
 									</div>
 									<?php
-								}
+								}//end if
 								?>
 
 								<div class="form-field">
