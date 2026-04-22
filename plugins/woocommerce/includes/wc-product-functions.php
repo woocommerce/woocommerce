@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
@@ -1675,7 +1676,7 @@ function wc_get_price_to_display( $product, $args = array() ) {
 		'cart' === $args['display_context'] ? 'woocommerce_tax_display_cart' : 'woocommerce_tax_display_shop'
 	);
 
-	return 'incl' === $tax_display ?
+	return TaxDisplayMode::INCLUSIVE === $tax_display ?
 		wc_get_price_including_tax(
 			$product,
 			array(
