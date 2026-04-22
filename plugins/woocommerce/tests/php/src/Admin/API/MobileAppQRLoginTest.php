@@ -81,8 +81,10 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 		$this->subscriber_id   = $this->factory->user->create( array( 'role' => 'subscriber' ) );
 
 		// Remember existing $_SERVER values so we can restore them in tearDown.
-		$this->original_https        = isset( $_SERVER['HTTPS'] ) ? (string) $_SERVER['HTTPS'] : null;
-		$this->original_remote_addr  = isset( $_SERVER['REMOTE_ADDR'] ) ? (string) $_SERVER['REMOTE_ADDR'] : null;
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Unit-test fixture: values are captured for restoration only, never used for processing.
+		$this->original_https       = isset( $_SERVER['HTTPS'] ) ? (string) $_SERVER['HTTPS'] : null;
+		$this->original_remote_addr = isset( $_SERVER['REMOTE_ADDR'] ) ? (string) $_SERVER['REMOTE_ADDR'] : null;
+		// phpcs:enable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		// Default to HTTPS on for most tests; disable explicitly where needed.
 		$this->force_https( true );
@@ -403,8 +405,8 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $this->admin_id );
 		$plaintext = $this->token_from_qr_url( $this->dispatch_generate()->get_data()['qr_url'] );
 
-		$transient_key = MobileAppQRLogin::TOKEN_TRANSIENT_PREFIX . hash( 'sha256', $plaintext );
-		$token_data    = get_transient( $transient_key );
+		$transient_key            = MobileAppQRLogin::TOKEN_TRANSIENT_PREFIX . hash( 'sha256', $plaintext );
+		$token_data               = get_transient( $transient_key );
 		$token_data['expires_at'] = time() - 60;
 		set_transient( $transient_key, $token_data, MobileAppQRLogin::TOKEN_TTL );
 

@@ -39,12 +39,7 @@ export const QRDirectLoginCode = () => {
 		return (
 			<div className="qr-direct-login">
 				<Spinner />
-				<p>
-					{ __(
-						'Generating secure login code…',
-						'woocommerce'
-					) }
-				</p>
+				<p>{ __( 'Generating secure login code…', 'woocommerce' ) }</p>
 			</div>
 		);
 	}
@@ -52,9 +47,7 @@ export const QRDirectLoginCode = () => {
 	if ( state === QRLoginTokenStates.ERROR ) {
 		return (
 			<div className="qr-direct-login">
-				<p className="qr-direct-login__error">
-					{ errorMessage }
-				</p>
+				<p className="qr-direct-login__error">{ errorMessage }</p>
 				<Button variant="secondary" onClick={ refreshToken }>
 					{ __( 'Try again', 'woocommerce' ) }
 				</Button>
@@ -65,18 +58,11 @@ export const QRDirectLoginCode = () => {
 	if ( state === QRLoginTokenStates.EXPIRED ) {
 		return (
 			<div className="qr-direct-login">
-				<p>
-					{ __(
-						'The login code has expired.',
-						'woocommerce'
-					) }
-				</p>
+				<p>{ __( 'The login code has expired.', 'woocommerce' ) }</p>
 				<Button
 					variant="secondary"
 					onClick={ () => {
-						recordEvent(
-							'mobile_app_qr_direct_login_refreshed'
-						);
+						recordEvent( 'mobile_app_qr_direct_login_refreshed' );
 						refreshToken();
 					} }
 				>
@@ -93,10 +79,7 @@ export const QRDirectLoginCode = () => {
 				<p className="qr-direct-login__timer">
 					{ sprintf(
 						/* translators: %s: time remaining in M:SS format */
-						__(
-							'Code expires in %s',
-							'woocommerce'
-						),
+						__( 'Code expires in %s', 'woocommerce' ),
 						formatTime( secondsRemaining )
 					) }
 				</p>

@@ -2,27 +2,22 @@
 /**
  * REST API Mobile App QR Login controller.
  *
- * Handles requests to generate and exchange QR login tokens
- * for direct mobile app authentication via Application Passwords.
+ * Handles requests to generate and exchange QR login tokens for direct mobile app
+ * authentication via Application Passwords. Token generation is available to any
+ * user with the manage_woocommerce capability (typically administrators and shop
+ * managers); a linked WordPress.com account is no longer required.
  */
+
+declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Admin\API;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * REST API controller for QR code direct login.
- *
- * Provides two endpoints:
- * 1. Token generation (authenticated) - creates a short-lived token displayed as QR code.
- * 2. Token exchange (unauthenticated) - exchanges the token for an Application Password.
- *
- * Token generation is available to any user with the `manage_woocommerce` capability
- * (typically administrators and shop managers). A linked WordPress.com account is no
- * longer required.
+ * Mobile App QR Login controller.
  *
  * @internal
- * @extends WC_REST_Data_Controller
  */
 class MobileAppQRLogin extends \WC_REST_Data_Controller {
 
@@ -67,6 +62,8 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 
 	/**
 	 * Register routes.
+	 *
+	 * @return void
 	 */
 	public function register_routes() {
 		// Generate a QR login token (requires authentication and `manage_woocommerce` capability).
@@ -119,7 +116,8 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	 * @return \WP_Error|bool True if the user has the required capability, WP_Error otherwise.
 	 */
 	public function get_items_permissions_check( $request ) {
-		unset( $request ); // Parameter required by WP REST contract but unused here.
+		unset( $request );
+		// Parameter required by WP REST contract but unused here.
 
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
 			return new \WP_Error(
@@ -201,11 +199,12 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	 * Password by the mobile app. The caller is assumed to have already passed the
 	 * `manage_woocommerce` capability check in `get_items_permissions_check()`.
 	 *
-	 * @param \WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request<array<string, mixed>> $request Full details about the request.
 	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function generate_token( $request ) {
-		unset( $request ); // Parameter required by WP REST contract but unused here.
+		unset( $request );
+		// Parameter required by WP REST contract but unused here.
 
 		// Check HTTPS.
 		if ( ! is_ssl() ) {
@@ -271,7 +270,7 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	 * This endpoint does not require authentication — the token serves
 	 * as the authentication mechanism.
 	 *
-	 * @param \WP_REST_Request $request Full details about the request.
+	 * @param \WP_REST_Request<array<string, mixed>> $request Full details about the request.
 	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function exchange_token( $request ) {

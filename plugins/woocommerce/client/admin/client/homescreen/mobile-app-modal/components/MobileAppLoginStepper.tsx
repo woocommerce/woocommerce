@@ -3,13 +3,13 @@
  */
 import React, { useState, useEffect } from '@wordpress/element';
 import { Button } from '@wordpress/components';
-import { sprintf, __ } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 import { Stepper, StepperProps } from '@woocommerce/components';
 
 /**
  * Internal dependencies
  */
-import { SendMagicLinkButton, SendMagicLinkStates } from './';
+import { SendMagicLinkStates } from './';
 import { getAdminSetting } from '~/utils/admin-settings';
 import { MobileAppInstallationInfo } from '../components/MobileAppInstallationInfo';
 import { MobileAppLoginInfo } from '../components/MobileAppLoginInfo';
@@ -67,24 +67,24 @@ export const MobileAppLoginStepper = ( {
 					content: <></>,
 				},
 			] );
-		} else if ( step === ‘second’ ) {
+		} else if ( step === 'second' ) {
 			if (
 				isJetpackPluginInstalled &&
 				wordpressAccountEmailAddress !== undefined
 			) {
 				setStepsToDisplay( [
 					{
-						key: ‘first’,
-						label: __( ‘App installed’, ‘woocommerce’ ),
-						description: ‘’,
+						key: 'first',
+						label: __( 'App installed', 'woocommerce' ),
+						description: '',
 						content: <></>,
 					},
 					{
-						key: ‘second’,
-						label: __( ‘Sign into the app’, ‘woocommerce’ ),
+						key: 'second',
+						label: __( 'Sign into the app', 'woocommerce' ),
 						description: __(
-							‘Scan the QR code below with your phone to sign in instantly — no password needed.’,
-							‘woocommerce’
+							'Scan the QR code below with your phone to sign in instantly — no password needed.',
+							'woocommerce'
 						),
 						content: <QRDirectLoginCode />,
 					},
