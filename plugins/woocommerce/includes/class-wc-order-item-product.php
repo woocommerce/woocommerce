@@ -422,8 +422,6 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	public function get_product() {
 		// Refresh/instantiate/cache cycle for the product instance.
 		if ( $this->product ) {
-			// TBD: spin-off as wc_get_product related caching feature (get_changes, get_date_modified -> allocate new instance).
-			// TBD: verify reliability with one-second granularity, is it acceptable in this context?
 			$is_cpt_datastore = \WC_Product_Data_Store_CPT::class === $this->product->get_data_store()->get_current_class_name();
 			if ( $is_cpt_datastore ) {
 				// Standard product data store: invalidate the product instance, if in-memory post data indicate the instance is stale.
