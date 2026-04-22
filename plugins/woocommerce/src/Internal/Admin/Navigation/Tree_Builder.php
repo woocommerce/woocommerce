@@ -82,7 +82,7 @@ class Tree_Builder {
 
 				$tree[ $child_slug ] = array(
 					'parent'     => $slug,
-					'title'      => $entry[0] ?? $child_slug,
+					'title'      => $this->clean_title( $entry[0] ?? $child_slug ),
 					'position'   => $auto_pos,
 					'source'     => 'rehomed',
 					'capability' => $entry[1] ?? 'read',
@@ -91,6 +91,19 @@ class Tree_Builder {
 			}
 		}
 		return $tree;
+	}
+
+	/**
+	 * Strip WP's update-count / awaiting-mod badge spans from a menu title
+	 * (including their inner numeric content), then strip any remaining HTML.
+	 * Leaves just the human-readable label.
+	 *
+	 * @param string $raw Raw title, possibly containing `<span class="update-plugins count-N">N</span>` etc.
+	 * @return string
+	 */
+	private function clean_title( string $raw ): string {
+		$raw = preg_replace( '/\s*<span class=["\'](?:update-plugins|awaiting-mod|menu-counter)[^"\']*["\'][^>]*>.*?<\/span>\s*/i', '', $raw );
+		return trim( wp_strip_all_tags( $raw ) );
 	}
 
 	/**
@@ -210,7 +223,7 @@ class Tree_Builder {
 
 			$tree[ $slug ] = array(
 				'parent'     => 'woocommerce',
-				'title'      => $entry[0] ?? $slug,
+				'title'      => $this->clean_title( $entry[0] ?? $slug ),
 				'position'   => $auto_position,
 				'source'     => 'auto',
 				'capability' => $entry[1] ?? 'read',

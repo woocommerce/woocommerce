@@ -93,38 +93,58 @@ class Renderer {
 		usort( $children, array( $this, 'sort_by_position' ) );
 		$is_current = ( $slug === $current );
 		$has_kids   = ! empty( $children );
+		$icon       = $node['icon'] ?? 'dashicons-admin-generic';
 
-		$classes = array( 'menu-top' );
+		// WP rail items get a `menu-icon-<slug>` class that admin-menu.css
+		// keys on for icon positioning and hover behaviour. Derive a
+		// CSS-safe slug from the node's slug.
+		$icon_slug = sanitize_html_class( preg_replace( '/[^A-Za-z0-9_-]/', '-', $slug ), 'generic' );
+
+		$li_classes = array( 'menu-top', 'menu-icon-' . $icon_slug );
+		$a_classes  = array( 'menu-top' );
+
 		if ( $is_current ) {
-			$classes[] = 'current';
-			$classes[] = 'wp-has-current-submenu';
-			$classes[] = 'wp-menu-open';
+			$li_classes[] = 'current';
+			$li_classes[] = 'wp-has-current-submenu';
+			$li_classes[] = 'wp-menu-open';
+			$a_classes[]  = 'current';
+			$a_classes[]  = 'wp-has-current-submenu';
 		} elseif ( $has_kids ) {
-			$classes[] = 'wp-has-submenu';
-			$classes[] = 'wp-not-current-submenu';
+			$li_classes[] = 'wp-has-submenu';
+			$li_classes[] = 'wp-not-current-submenu';
+			$a_classes[]  = 'wp-has-submenu';
+			$a_classes[]  = 'wp-not-current-submenu';
 		}
 		if ( ! empty( $node['breadcrumb'] ) ) {
-			$classes[] = 'wc-nav-v2-breadcrumb';
+			$li_classes[] = 'wc-nav-v2-breadcrumb';
 		}
 
 		$href = $this->slug_to_url( $node['url'] ?? $slug );
 
-		echo '<li class="' . esc_attr( implode( ' ', $classes ) ) . '">';
-		echo '<a href="' . esc_url( $href ) . '" class="menu-top">';
-		if ( ! empty( $node['icon'] ) ) {
-			echo '<div class="wp-menu-image dashicons-before ' . esc_attr( $node['icon'] ) . '" aria-hidden="true"><br></div>';
-		}
+		echo '<li class="' . esc_attr( implode( ' ', $li_classes ) ) . '">';
+		echo '<a href="' . esc_url( $href ) . '" class="' . esc_attr( implode( ' ', $a_classes ) ) . '">';
+		// Always emit the .wp-menu-image div — admin-menu.css reserves 36px
+		// on the left for it, so omitting it produces misaligned labels.
+		echo '<div class="wp-menu-image dashicons-before ' . esc_attr( $icon ) . '" aria-hidden="true"><br></div>';
 		echo '<div class="wp-menu-name">' . esc_html( $node['title'] ) . '</div>';
 		echo '</a>';
 
 		if ( $has_kids ) {
 			echo '<ul class="wp-submenu wp-submenu-wrap">';
 			echo '<li class="wp-submenu-head" aria-hidden="true">' . esc_html( $node['title'] ) . '</li>';
-			foreach ( $children as $child ) {
-				$child_current = ( $child['slug'] === $current ) ? ' class="current"' : '';
-				$child_href    = $this->slug_to_url( $child['url'] ?? $child['slug'] );
-				echo '<li' . $child_current . '>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-				echo '<a href="' . esc_url( $child_href ) . '">' . esc_html( $child['title'] ) . '</a>';
+			foreach ( $children as $idx => $child ) {
+				$child_classes = array();
+				if ( 0 === $idx ) {
+					$child_classes[] = 'wp-first-item';
+				}
+				if ( $child['slug'] === $current ) {
+					$child_classes[] = 'current';
+				}
+				$child_href = $this->slug_to_url( $child['url'] ?? $child['slug'] );
+				$class_attr = empty( $child_classes ) ? '' : ' class="' . esc_attr( implode( ' ', $child_classes ) ) . '"';
+				echo '<li' . $class_attr . '>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				$a_cls = ( 0 === $idx ) ? ' class="wp-first-item"' : '';
+				echo '<a href="' . esc_url( $child_href ) . '"' . $a_cls . '>' . esc_html( $child['title'] ) . '</a>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				echo '</li>';
 			}
 			echo '</ul>';

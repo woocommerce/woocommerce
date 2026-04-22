@@ -41,24 +41,36 @@ body.wc-nav-v2-active {
 	}
 }
 
-#wc-nav-v2-header {
+// Back link container at the top of the rail. High specificity + explicit
+// styles so the aliased WP admin-menu.css (which rewrites #adminmenuwrap /
+// #adminmenuback onto #wc-nav-v2) can't override it.
+#wc-nav-v2 #wc-nav-v2-header {
+	display: block !important;
+	background: transparent;
+	padding: 0;
+	margin: 0;
 	border-bottom: 1px solid rgba( 255, 255, 255, 0.08 );
+	flex: 0 0 auto;
 }
 
-#wc-nav-v2-back {
-	display: flex;
+#wc-nav-v2 #wc-nav-v2-back {
+	display: flex !important;
 	align-items: center;
-	gap: 3px;
-	padding: 10px 12px;
-	color: #72aee6;
-	text-decoration: none;
+	gap: 4px;
+	padding: 10px 12px !important;
+	color: #72aee6 !important;
+	text-decoration: none !important;
 	font-size: 12px;
 	font-weight: 500;
+	line-height: 1.3;
+	background: transparent !important;
+	box-shadow: none !important;
 	transition: color 0.15s ease;
 
 	&:hover,
 	&:focus {
-		color: #fff;
+		color: #fff !important;
+		background: transparent !important;
 	}
 }
 

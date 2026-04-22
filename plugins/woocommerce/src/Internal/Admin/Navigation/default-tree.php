@@ -23,6 +23,7 @@ return array(
 	'wc-admin'                                                               => array(
 		'parent'   => 'woocommerce',
 		'title'    => __( 'Home', 'woocommerce' ),
+		'icon'     => 'dashicons-admin-home',
 		'position' => 10,
 	),
 	// HPOS slug. The legacy CPT slug `edit.php?post_type=shop_order` is used
@@ -30,21 +31,25 @@ return array(
 	'wc-orders'                                                              => array(
 		'parent'   => 'woocommerce',
 		'title'    => __( 'Orders', 'woocommerce' ),
+		'icon'     => 'dashicons-list-view',
 		'position' => 20,
 	),
 	'edit.php?post_type=product'                                             => array(
 		'parent'   => 'woocommerce',
 		'title'    => __( 'Products', 'woocommerce' ),
+		'icon'     => 'dashicons-products',
 		'position' => 30,
 	),
 	'wc-admin&path=/analytics/overview'                                      => array(
 		'parent'   => 'woocommerce',
 		'title'    => __( 'Analytics', 'woocommerce' ),
+		'icon'     => 'dashicons-chart-bar',
 		'position' => 40,
 	),
 	'wc-admin&path=/customers'                                               => array(
 		'parent'   => 'woocommerce',
 		'title'    => __( 'Customers', 'woocommerce' ),
+		'icon'     => 'dashicons-groups',
 		'position' => 50,
 	),
 	// Keep `woocommerce-marketing` as the tree slug so hoisted children
@@ -55,12 +60,14 @@ return array(
 	'woocommerce-marketing'                                                  => array(
 		'parent'   => 'woocommerce',
 		'title'    => __( 'Marketing', 'woocommerce' ),
+		'icon'     => 'dashicons-megaphone',
 		'position' => 60,
 		'url'      => 'admin.php?page=wc-admin&path=/marketing',
 	),
 	'wc-settings'                                                            => array(
 		'parent'   => 'woocommerce',
 		'title'    => __( 'Settings', 'woocommerce' ),
+		'icon'     => 'dashicons-admin-generic',
 		'position' => 90,
 	),
 	'admin.php?page=wc-settings&tab=checkout&from=PAYMENTS_MENU_ITEM'        => array(
@@ -76,6 +83,7 @@ return array(
 	'wc-addons'                                                              => array(
 		'parent'   => 'woocommerce',
 		'title'    => __( 'Extensions', 'woocommerce' ),
+		'icon'     => 'dashicons-admin-plugins',
 		'position' => 95,
 	),
 	'wc-status'                                                              => array(
