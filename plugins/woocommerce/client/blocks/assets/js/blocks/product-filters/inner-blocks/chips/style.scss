@@ -44,7 +44,6 @@
 }
 
 .wc-block-product-filter-chips__item[aria-checked="true"] {
-
 	.has-selected-chip-text-color & {
 		color: var(--wc-product-filter-chips-selected-text);
 	}
@@ -67,6 +66,5 @@
 }
 
 .wc-block-product-filter-chips__count {
-	display: contents;
 	white-space: nowrap;
 }
