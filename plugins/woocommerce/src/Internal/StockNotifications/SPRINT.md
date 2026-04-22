@@ -108,7 +108,7 @@ Reconciled against the [2025-08-23 "Back in Stock Notifications: Paused" handoff
 **Covered by a sprint issue:**
 
 | Handoff item | WOOPLUG | Sprint issue | Status |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Verify/confirm emails | 5410 | [RSM-438](https://linear.app/a8c/issue/RSM-438) | Backlog — Urgent |
 | Data tracking | 4995 | [RSM-439](https://linear.app/a8c/issue/RSM-439) | Backlog — High |
 | Data migration | 5001 | [RSM-442](https://linear.app/a8c/issue/RSM-442) | Scope cut |
