@@ -594,8 +594,7 @@ function wc_create_attribute( $args ) {
 			$wpdb->update(
 				$wpdb->termmeta,
 				array( 'meta_key' => 'order' ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-				array( 'meta_key' => 'order_pa_' . sanitize_title( $old_slug ) )
-				// WPCS: slow query ok.
+				array( 'meta_key' => 'order_pa_' . sanitize_title( $old_slug ) ) // WPCS: slow query ok.
 			);
 
 			// Update product attributes which use this taxonomy.
@@ -627,10 +626,8 @@ function wc_create_attribute( $args ) {
 			// Update variations which use this taxonomy.
 			$wpdb->update(
 				$wpdb->postmeta,
-				array( 'meta_key' => 'attribute_pa_' . sanitize_title( $data['attribute_name'] ) ),
-				// WPCS: slow query ok.
-				array( 'meta_key' => 'attribute_pa_' . sanitize_title( $old_slug ) )
-				// WPCS: slow query ok.
+				array( 'meta_key' => 'attribute_pa_' . sanitize_title( $data['attribute_name'] ) ), // WPCS: slow query ok.
+				array( 'meta_key' => 'attribute_pa_' . sanitize_title( $old_slug ) ) // WPCS: slow query ok.
 			);
 
 			// Update global vars to reflect migration. This ensures any functions dealing with terms later in this request
