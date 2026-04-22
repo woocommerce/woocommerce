@@ -467,6 +467,21 @@
 			$li.append( $nested );
 		} );
 
+		// WP's common.js binds hoverIntent to every li.wp-has-submenu with a
+		// 200ms close timeout — that's what strips `.opensub` from our
+		// WooCommerce item when the cursor leaves, regardless of how long we
+		// delay our own inner class. Unbind WP's handlers on just our item
+		// and install our own opensub toggler with HOVER_CLOSE_DELAY. Other
+		// menu-top items keep WP's native behaviour; when the user hovers
+		// them, WP's handler clears opensub across `#adminmenu` (including
+		// ours) so switching between rail items stays snappy.
+		$( '#toplevel_page_woocommerce' ).off( 'mouseenter mouseleave mouseover mouseout' );
+		bindDelayedHover(
+			$( '#adminmenu' ),
+			'#toplevel_page_woocommerce',
+			'opensub'
+		);
+
 		// JS-driven hover open/close on the second-level cascade, with the
 		// same HOVER_CLOSE_DELAY forgiveness used by the rail submenus.
 		// The SCSS now keys show/hide on `.wc-nav-v2-subopen` (+ :focus-within

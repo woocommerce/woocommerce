@@ -49,7 +49,11 @@ class Assets {
 		wp_enqueue_script(
 			self::SCRIPT_HANDLE,
 			WC()->plugin_url() . '/assets/js/admin/admin-navigation-v2.js',
-			array( 'jquery' ),
+			// `common` declared as a dep so WP's hoverIntent binding on
+			// `li.wp-has-submenu` runs before our DOM-ready handler — our
+			// injectNativeCascade() unbinds those hover handlers on the
+			// WooCommerce top-level item so our longer close delay can win.
+			array( 'jquery', 'common' ),
 			$version,
 			true
 		);
