@@ -128,6 +128,7 @@ final class ProductFilterStatus extends AbstractBlock {
 			'storeNamespace' => 'woocommerce/product-filters',
 			'groupLabel'     => __( 'Status', 'woocommerce' ),
 			'showCounts'     => $attributes['showCounts'] ?? false,
+			'dynamicItems'   => false,
 		);
 
 		$wrapper_attributes = array(
