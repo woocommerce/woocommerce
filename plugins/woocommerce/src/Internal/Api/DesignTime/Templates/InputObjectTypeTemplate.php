@@ -23,8 +23,8 @@ namespace <?php echo $namespace; ?>;
 <?php foreach ( $use_statements as $use ) : ?>
 use <?php echo $use; ?>;
 <?php endforeach; ?>
-use GraphQL\Type\Definition\InputObjectType;
-use GraphQL\Type\Definition\Type;
+use Automattic\WooCommerce\Vendor\GraphQL\Type\Definition\InputObjectType;
+use Automattic\WooCommerce\Vendor\GraphQL\Type\Definition\Type;
 
 class <?php echo $class_name; ?> {
 	private static ?InputObjectType $instance = null;

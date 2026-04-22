@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\Api;
 
-use GraphQL\Language\AST\DocumentNode;
-use GraphQL\Language\Parser;
-use GraphQL\Utils\AST;
+use Automattic\WooCommerce\Vendor\GraphQL\Language\AST\DocumentNode;
+use Automattic\WooCommerce\Vendor\GraphQL\Language\Parser;
+use Automattic\WooCommerce\Vendor\GraphQL\Utils\AST;
 
 /**
  * Caches parsed GraphQL ASTs in the WP object cache and implements the
@@ -131,7 +131,7 @@ class QueryCache {
 	private function parse_and_cache( string $query, string $hash ) {
 		try {
 			$document = Parser::parse( $query, array( 'noLocation' => true ) );
-		} catch ( \GraphQL\Error\SyntaxError $e ) {
+		} catch ( \Automattic\WooCommerce\Vendor\GraphQL\Error\SyntaxError $e ) {
 			return $this->error_response( 'GraphQL syntax error: ' . $e->getMessage(), 'GRAPHQL_PARSE_ERROR' );
 		}
 

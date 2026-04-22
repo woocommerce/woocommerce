@@ -13,8 +13,8 @@ declare(strict_types=1);
 
 namespace <?php echo $namespace; ?>;
 
-use GraphQL\Type\Definition\ObjectType;
-use GraphQL\Type\Definition\Type;
+use Automattic\WooCommerce\Vendor\GraphQL\Type\Definition\ObjectType;
+use Automattic\WooCommerce\Vendor\GraphQL\Type\Definition\Type;
 
 class PageInfo {
 	private static ?ObjectType $instance = null;

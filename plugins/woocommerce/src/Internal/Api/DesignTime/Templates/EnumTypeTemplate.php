@@ -22,7 +22,7 @@ declare(strict_types=1);
 namespace <?php echo $namespace; ?>;
 
 use <?php echo $enum_fqcn; ?> as <?php echo $enum_alias; ?>;
-use GraphQL\Type\Definition\EnumType;
+use Automattic\WooCommerce\Vendor\GraphQL\Type\Definition\EnumType;
 
 class <?php echo $class_name; ?> {
 	private static ?EnumType $instance = null;

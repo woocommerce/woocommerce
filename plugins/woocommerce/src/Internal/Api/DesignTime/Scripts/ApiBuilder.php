@@ -1188,8 +1188,8 @@ class ApiBuilder {
 		$code .= "// THIS FILE IS AUTO-GENERATED. DO NOT EDIT MANUALLY.\n\n";
 		$code .= "namespace {$namespace};\n\n";
 		$code .= "use {$node_type_namespace}\\{$node_type_class} as {$node_type_alias};\n";
-		$code .= "use GraphQL\\Type\\Definition\\ObjectType;\n";
-		$code .= "use GraphQL\\Type\\Definition\\Type;\n\n";
+		$code .= "use Automattic\\WooCommerce\\Vendor\\GraphQL\\Type\\Definition\\ObjectType;\n";
+		$code .= "use Automattic\\WooCommerce\\Vendor\\GraphQL\\Type\\Definition\\Type;\n\n";
 		$code .= "class {$connection_class_name} {\n";
 		$code .= "\tprivate static ?ObjectType \$instance = null;\n\n";
 		$code .= "\tpublic static function get(): ObjectType {\n";
@@ -1232,8 +1232,8 @@ class ApiBuilder {
 		$code .= "// THIS FILE IS AUTO-GENERATED. DO NOT EDIT MANUALLY.\n\n";
 		$code .= "namespace {$namespace};\n\n";
 		$code .= "use {$node_type_namespace}\\{$node_type_class} as {$node_type_alias};\n";
-		$code .= "use GraphQL\\Type\\Definition\\ObjectType;\n";
-		$code .= "use GraphQL\\Type\\Definition\\Type;\n\n";
+		$code .= "use Automattic\\WooCommerce\\Vendor\\GraphQL\\Type\\Definition\\ObjectType;\n";
+		$code .= "use Automattic\\WooCommerce\\Vendor\\GraphQL\\Type\\Definition\\Type;\n\n";
 		$code .= "class {$edge_class_name} {\n";
 		$code .= "\tprivate static ?ObjectType \$instance = null;\n\n";
 		$code .= "\tpublic static function get(): ObjectType {\n";

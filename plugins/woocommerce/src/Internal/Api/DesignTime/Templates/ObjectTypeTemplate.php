@@ -37,8 +37,8 @@ use <?php echo $use; ?>;
 use Automattic\WooCommerce\Api\Pagination\Connection;
 use Automattic\WooCommerce\Internal\Api\Utils;
 <?php endif; ?>
-use GraphQL\Type\Definition\ObjectType;
-use GraphQL\Type\Definition\Type;
+use Automattic\WooCommerce\Vendor\GraphQL\Type\Definition\ObjectType;
+use Automattic\WooCommerce\Vendor\GraphQL\Type\Definition\Type;
 
 class <?php echo $class_name; ?> {
 	private static ?ObjectType $instance = null;

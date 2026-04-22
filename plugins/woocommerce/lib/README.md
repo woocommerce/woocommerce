@@ -43,6 +43,20 @@ the root autoloader.
 2. Add package slug to `extra/mozart/excluded-packages` section of `composer.json`
 3. Run `composer run-script build-lib` from the root directory (You **should not** see the package in `packages/VendorName/PackageName` or `classes`) - see the note about MobileDetect below.
 
+## A note about the webonyx/graphql-php library
+
+Mozart rewrites namespace declarations and `use` statements, but it can miss stringified FQCNs
+(class names embedded in string literals). Before shipping a webonyx version bump, audit the
+rebuilt package for any such strings that still reference the bare `GraphQL\` namespace by
+running this from `plugins/woocommerce/`:
+
+```sh
+grep -rn "'GraphQL\\\\\\|\"GraphQL\\\\" lib/packages/GraphQL/
+```
+
+The grep should return no results. If it does, patch the offending file manually and commit it,
+mirroring the MobileDetect workflow below.
+
 ## A note about the MobileDetect library
 
 The `lib/packages/Detection/MobileDetect.php` file
