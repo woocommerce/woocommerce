@@ -78,17 +78,8 @@ final class ProductsSettingsPage implements ReactSettingsPageInterface {
 			return array();
 		}
 
-		/**
-		 * Filters the list of valid unit keys for the weight or dimension bucket.
-		 *
-		 * Applies either `woocommerce_weight_units` or `woocommerce_dimension_units`
-		 * depending on which bucket the caller requested.
-		 *
-		 * @since 10.8.0
-		 *
-		 * @param array $unit_keys Array of unit keys (e.g. `['kg', 'g', 'lbs', 'oz']`).
-		 */
-		$valid_keys = apply_filters( $filter, array_keys( $units[ $bucket ] ) );
+		/** This filter is documented in plugins/woocommerce/src/Internal/RestApi/Routes/V4/Settings/Products/Controller.php */
+		$valid_keys = apply_filters( $filter, array_keys( $units[ $bucket ] ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
 
 		return is_array( $valid_keys )
 			? array_intersect_key( $units[ $bucket ], array_flip( $valid_keys ) )

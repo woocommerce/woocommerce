@@ -112,6 +112,6 @@ class ProductsSettingsPageTest extends WC_Unit_Test_Case {
 
 		// First entry must be the "Select a page…" placeholder with empty value.
 		$this->assertSame( '', $options[0]['value'] );
-		$this->assertStringContainsString( 'Select a page', $options[0]['label'] );
+		$this->assertSame( __( 'Select a page…', 'woocommerce' ), $options[0]['label'] );
 	}
 }
