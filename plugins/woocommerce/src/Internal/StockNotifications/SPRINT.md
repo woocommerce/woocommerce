@@ -131,11 +131,11 @@ Reconciled against the [2025-08-23 "Back in Stock Notifications: Paused" handoff
 - Frontend Blocks: BIS form block for single-product template
 - `BatchProcessingController` improvements
 
-**Gaps — handoff items with no RSM issue:**
+**Gaps — handoff items that were not covered by the original sprint (RSM-436 … RSM-446):**
 
-- [ ] **Docs:** "Move and refine documentation in Core" (handoff § Other Work). Not tracked. Decide: file an RSM issue, or defer post-sabbatical.
-- [ ] **Integrations:** Assess current BIS plugin integrations with Product Bundles, Subscriptions, Pre-Orders (handoff § Other Work). Not tracked. Decide: file an RSM issue, or defer post-sabbatical.
-- [ ] **Post-merge coordination:** CfT (internal/external) + Product/Marketing follow-ups (handoff § Other Work). Post-merge by definition; needs an owner once this PR lands.
+- [x] **Docs:** "Move and refine documentation in Core" → filed as [RSM-671](https://linear.app/a8c/issue/RSM-671) (Low, deferred post-sabbatical).
+- [x] **Integrations:** Assess current BIS plugin integrations with Product Bundles, Subscriptions, Pre-Orders → filed as [RSM-673](https://linear.app/a8c/issue/RSM-673) (Medium, assessment only — may surface unbudgeted scope).
+- [ ] **Post-merge coordination:** CfT (internal/external) + Product/Marketing follow-ups (handoff § Other Work). Post-merge by definition; needs a Product owner once this PR lands — not engineering scope to file.
 
 ## Open questions
 
