@@ -193,6 +193,42 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	}
 
 	/**
+	 * Validate that the configured site URL is HTTPS and return it.
+	 *
+	 * `is_ssl()` only tells us the current REQUEST is HTTPS — it says nothing about
+	 * the canonical site URL WordPress hands out. Behind a misconfigured proxy (or
+	 * after a half-completed HTTPS migration where `siteurl` was never updated),
+	 * `get_site_url()` can still return an `http://…` URL even when `is_ssl()` is
+	 * true. That URL is what the mobile app uses for the token-exchange POST, so
+	 * handing back `http://` would let the token + resulting Application Password
+	 * travel in cleartext — the exact risk the HTTPS gate is supposed to prevent.
+	 *
+	 * We deliberately reject (rather than silently normalizing to `https://`)
+	 * because:
+	 *   1. The misconfig usually affects other things (reset-password emails,
+	 *      webhooks, canonical redirects). Failing loudly surfaces it.
+	 *   2. Normalizing assumes the site actually serves HTTPS on the same host,
+	 *      which we cannot verify from within a single request.
+	 *   3. A 500 is strictly safer than a leaky success.
+	 *
+	 * @return string|\WP_Error The HTTPS site URL, or a WP_Error if it is not HTTPS.
+	 */
+	private function get_secure_site_url() {
+		$site_url = get_site_url();
+		$scheme   = wp_parse_url( $site_url, PHP_URL_SCHEME );
+
+		if ( 'https' !== $scheme ) {
+			return new \WP_Error(
+				'insecure_site_url',
+				__( 'QR login cannot be used because the site URL is not configured for HTTPS. Please update the WordPress Address (URL) in Settings → General to use https://.', 'woocommerce' ),
+				array( 'status' => 500 )
+			);
+		}
+
+		return $site_url;
+	}
+
+	/**
 	 * Generate a QR login token.
 	 *
 	 * Creates a short-lived one-time token that can be exchanged for an Application
@@ -213,6 +249,13 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 				__( 'QR login requires an HTTPS connection.', 'woocommerce' ),
 				array( 'status' => 403 )
 			);
+		}
+
+		// Verify the canonical site URL is HTTPS — is_ssl() alone is not enough
+		// when WordPress is behind a misconfigured proxy.
+		$site_url = $this->get_secure_site_url();
+		if ( is_wp_error( $site_url ) ) {
+			return $site_url;
 		}
 
 		// Check Application Passwords are available.
@@ -241,15 +284,14 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 		// Store token data as a transient.
 		$token_data = array(
 			'user_id'    => get_current_user_id(),
-			'site_url'   => get_site_url(),
+			'site_url'   => $site_url,
 			'expires_at' => $expires_at,
 		);
 
 		set_transient( self::TOKEN_TRANSIENT_PREFIX . $token_hash, $token_data, self::TOKEN_TTL );
 
 		// Build the QR URL (deep link for the mobile app).
-		$site_url = get_site_url();
-		$qr_url   = sprintf(
+		$qr_url = sprintf(
 			'woocommerce://qr-login?token=%s&siteUrl=%s',
 			rawurlencode( $token ),
 			rawurlencode( $site_url )
@@ -281,6 +323,15 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 				__( 'Too many exchange attempts. Please try again later.', 'woocommerce' ),
 				array( 'status' => 429 )
 			);
+		}
+
+		// Refuse to return credentials bound to a non-HTTPS site URL — see
+		// get_secure_site_url() for rationale. A token that was minted while the
+		// siteurl was still https:// but has since been changed to http:// should
+		// also be refused here.
+		$site_url = $this->get_secure_site_url();
+		if ( is_wp_error( $site_url ) ) {
+			return $site_url;
 		}
 
 		$token      = $request->get_param( 'token' );
@@ -343,7 +394,7 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 				'user_login'           => $user->user_login,
 				'user_email'           => $user->user_email,
 				'user_id'              => $user_id,
-				'site_url'             => get_site_url(),
+				'site_url'             => $site_url,
 				'application_password' => $new_password,
 				'uuid'                 => $item['uuid'],
 			)

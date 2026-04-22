@@ -71,6 +71,13 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	private $original_remote_addr;
 
 	/**
+	 * Filters registered via force_site_url() so tearDown() can remove them.
+	 *
+	 * @var array<int, callable>
+	 */
+	private $site_url_filters = array();
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
@@ -88,6 +95,13 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 
 		// Default to HTTPS on for most tests; disable explicitly where needed.
 		$this->force_https( true );
+
+		// Default to an HTTPS site URL. The WP test framework ships with an
+		// http:// default (example.org), so we explicitly normalize it here so
+		// the controller's `insecure_site_url` check does not reject happy-path
+		// tests. Individual tests override this via force_site_url() when they
+		// need to exercise the http:// rejection path.
+		$this->force_site_url( 'https://example.org' );
 
 		// Default REMOTE_ADDR for exchange IP bucketing tests.
 		$_SERVER['REMOTE_ADDR'] = '203.0.113.10';
@@ -121,6 +135,12 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 
 		unset( $_SERVER['HTTP_X_FORWARDED_FOR'] );
 
+		// Remove any pre_option_siteurl filters force_site_url() registered.
+		foreach ( $this->site_url_filters as $priority => $filter ) {
+			remove_filter( 'pre_option_siteurl', $filter, $priority );
+		}
+		$this->site_url_filters = array();
+
 		parent::tearDown();
 	}
 
@@ -135,6 +155,29 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 		} else {
 			unset( $_SERVER['HTTPS'] );
 		}
+	}
+
+	/**
+	 * Force `get_site_url()` to return the given URL for the duration of the test.
+	 *
+	 * Uses the `pre_option_siteurl` filter so we do not have to mutate and restore
+	 * the real `siteurl` option. Filters stack — the last one registered with the
+	 * highest priority wins — so callers can override an earlier setUp() default
+	 * by calling this method again. All registered filters are removed in
+	 * tearDown().
+	 *
+	 * @param string $url The URL to return from `get_site_url()`.
+	 */
+	private function force_site_url( string $url ): void {
+		// Assign an incrementally higher priority so each subsequent call
+		// overrides the previous one even though the earlier filter is still
+		// registered (we cannot remove a closure by reference cleanly).
+		$priority = 10 + count( $this->site_url_filters );
+		$filter   = static function () use ( $url ) {
+			return $url;
+		};
+		add_filter( 'pre_option_siteurl', $filter, $priority );
+		$this->site_url_filters[ $priority ] = $filter;
 	}
 
 	/**
@@ -198,7 +241,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	// -----------------------------------------------------------------------
 
 	/**
-	 * An administrator should receive a token + qr_url on the happy path.
+	 * @testdox Administrators can generate a token and receive a qr_url on the happy path.
 	 */
 	public function test_generate_token_happy_path_for_administrator(): void {
 		wp_set_current_user( $this->admin_id );
@@ -216,7 +259,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * A shop manager should also succeed because they have `manage_woocommerce`.
+	 * @testdox Shop managers can generate a token because they have the manage_woocommerce capability.
 	 */
 	public function test_generate_token_happy_path_for_shop_manager(): void {
 		wp_set_current_user( $this->shop_manager_id );
@@ -228,7 +271,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * An unauthenticated request should be rejected with a 401.
+	 * @testdox Token generation rejects unauthenticated requests with a 401.
 	 */
 	public function test_generate_token_rejects_unauthenticated(): void {
 		wp_set_current_user( 0 );
@@ -240,7 +283,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * A subscriber should be rejected by the capability check.
+	 * @testdox Token generation rejects subscribers who lack the manage_woocommerce capability.
 	 */
 	public function test_generate_token_rejects_subscriber(): void {
 		wp_set_current_user( $this->subscriber_id );
@@ -256,7 +299,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	// -----------------------------------------------------------------------
 
 	/**
-	 * Non-HTTPS requests from an authorized user return `ssl_required`.
+	 * @testdox Token generation fails with ssl_required when the current request is not over HTTPS.
 	 */
 	public function test_generate_token_requires_https(): void {
 		wp_set_current_user( $this->admin_id );
@@ -269,7 +312,41 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * When Application Passwords are disabled site-wide, the endpoint returns 501.
+	 * @testdox Token generation fails with insecure_site_url when the request is HTTPS but get_site_url() returns an HTTP URL.
+	 */
+	public function test_generate_token_rejects_http_site_url_even_when_request_is_https(): void {
+		wp_set_current_user( $this->admin_id );
+		// Simulate a misconfigured proxy: the request appears HTTPS but the canonical
+		// site URL is still http:// (e.g. stale `siteurl` option).
+		$this->force_https( true );
+		$this->force_site_url( 'http://shop.example.com' );
+
+		$response = $this->dispatch_generate();
+
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertSame( 'insecure_site_url', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Token exchange fails with insecure_site_url when the site URL is not HTTPS.
+	 */
+	public function test_exchange_token_rejects_http_site_url(): void {
+		// Mint a valid token while the site is correctly configured for HTTPS.
+		wp_set_current_user( $this->admin_id );
+		$plaintext = $this->token_from_qr_url( $this->dispatch_generate()->get_data()['qr_url'] );
+
+		// Then simulate the site URL being downgraded before the exchange happens.
+		wp_set_current_user( 0 );
+		$this->force_site_url( 'http://shop.example.com' );
+
+		$response = $this->dispatch_exchange( $plaintext );
+
+		$this->assertSame( 500, $response->get_status() );
+		$this->assertSame( 'insecure_site_url', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Token generation fails with 501 when Application Passwords are disabled site-wide.
 	 */
 	public function test_generate_token_requires_application_passwords_available(): void {
 		wp_set_current_user( $this->admin_id );
@@ -287,7 +364,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Successful generation persists the token hash (not the plaintext) in a transient.
+	 * @testdox Successful generation persists the sha256 hash of the token in a transient, not the plaintext.
 	 */
 	public function test_generate_token_stores_hashed_token_in_transient(): void {
 		wp_set_current_user( $this->admin_id );
@@ -314,7 +391,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Rate limit: 5 tokens per user per window succeed, the 6th returns 429.
+	 * @testdox Token generation enforces the per-user rate limit and rejects the request after the window cap is reached.
 	 */
 	public function test_generate_token_rate_limit_boundary(): void {
 		wp_set_current_user( $this->admin_id );
@@ -334,8 +411,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Generation rate limit is bucketed per-user: one user hitting the limit
-	 * does not affect another user.
+	 * @testdox Token generation rate limit is bucketed per user so one user exhausting their quota does not affect another.
 	 */
 	public function test_generate_token_rate_limit_is_per_user(): void {
 		wp_set_current_user( $this->admin_id );
@@ -354,7 +430,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	// -----------------------------------------------------------------------
 
 	/**
-	 * Happy path for exchange: valid token → 200, returns AP credentials.
+	 * @testdox Token exchange returns Application Password credentials on the happy path.
 	 */
 	public function test_exchange_token_happy_path(): void {
 		wp_set_current_user( $this->admin_id );
@@ -386,7 +462,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * An unknown / tampered token returns `invalid_token`.
+	 * @testdox Token exchange rejects unknown or tampered tokens with invalid_token.
 	 */
 	public function test_exchange_token_rejects_invalid_token(): void {
 		$response = $this->dispatch_exchange( 'definitely-not-a-real-token' );
@@ -396,10 +472,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * A token whose stored `expires_at` is in the past returns `token_expired`.
-	 *
-	 * We manually overwrite the transient so we can simulate expiry without
-	 * waiting 5 real minutes.
+	 * @testdox Token exchange rejects tokens whose stored expires_at is in the past with token_expired.
 	 */
 	public function test_exchange_token_rejects_expired_token(): void {
 		wp_set_current_user( $this->admin_id );
@@ -418,7 +491,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * A token can only be redeemed once — the second exchange fails with invalid_token.
+	 * @testdox Tokens are single-use and the second exchange attempt fails with invalid_token.
 	 */
 	public function test_exchange_token_is_single_use(): void {
 		wp_set_current_user( $this->admin_id );
@@ -434,7 +507,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * If the token's user was deleted between generation and exchange, return 404.
+	 * @testdox Token exchange returns 404 user_not_found when the associated user was deleted between generation and exchange.
 	 */
 	public function test_exchange_token_rejects_missing_user(): void {
 		wp_set_current_user( $this->admin_id );
@@ -452,14 +525,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * If Application Password creation fails, the endpoint surfaces
-	 * `application_password_failed` with a 500 status.
-	 *
-	 * We force the failure by short-circuiting `update_user_metadata` for the
-	 * `_application_passwords` key. `WP_Application_Passwords::set_user_application_passwords()`
-	 * calls `update_user_meta()` under the hood; when the short-circuit filter returns
-	 * `false` the meta update is reported as failed, which causes
-	 * `create_new_application_password()` to return `WP_Error( 'db_error', ... )`.
+	 * @testdox Token exchange surfaces application_password_failed with status 500 when Application Password creation fails.
 	 */
 	public function test_exchange_token_handles_application_password_creation_failure(): void {
 		wp_set_current_user( $this->admin_id );
@@ -486,7 +552,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Exchange rate limit: 10 attempts per IP per window succeed, the 11th returns 429.
+	 * @testdox Token exchange enforces the per-IP rate limit and rejects requests after the window cap is reached.
 	 */
 	public function test_exchange_token_rate_limit_boundary(): void {
 		// Burn the quota with invalid tokens (each still counts toward the limit).
@@ -505,8 +571,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Exchange rate limit is bucketed per-IP: attackers on different IPs each get their
-	 * own bucket.
+	 * @testdox Token exchange rate limit is bucketed per IP so a different IP gets its own fresh quota.
 	 */
 	public function test_exchange_token_rate_limit_is_per_ip(): void {
 		$_SERVER['REMOTE_ADDR'] = '203.0.113.10';
@@ -525,7 +590,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	// -----------------------------------------------------------------------
 
 	/**
-	 * The generate response exposes exactly `qr_url`, `expires_at`, `ttl`.
+	 * @testdox The generate-token response exposes exactly qr_url, expires_at, and ttl.
 	 */
 	public function test_generate_response_schema(): void {
 		wp_set_current_user( $this->admin_id );
@@ -542,7 +607,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * The exchange response exposes the documented fields on success.
+	 * @testdox The exchange-token response exposes the documented fields on success.
 	 */
 	public function test_exchange_response_schema(): void {
 		wp_set_current_user( $this->admin_id );
@@ -565,7 +630,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * The QR URL scheme is stable — the mobile apps depend on it exactly.
+	 * @testdox The QR URL scheme is stable because the mobile apps depend on it exactly.
 	 */
 	public function test_qr_url_scheme_is_stable(): void {
 		wp_set_current_user( $this->admin_id );
