@@ -1,129 +1,18 @@
-// Nested admin navigation v2 — rail replacement + flyout cascade.
-// Alias block: class-wc-nav-v2-assets writes an inline <style> at runtime
-// that rewrites all WP admin-menu.css selectors to also target #wc-nav-v2.
-// This file contains only the overrides on top of that.
+// Nested admin navigation v2.
+//
+// On Woo pages our JS empties #adminmenu and repopulates it with the Woo
+// tree (using WP-native markup: menu-top / wp-menu-image / wp-menu-name /
+// wp-submenu). No custom rail styles are needed — admin-menu.css applies
+// natively.
+//
+// This file only contains the extras WP's CSS doesn't cover:
+// 1. The second-level cascade on the non-Woo page flyout (hover Settings →
+//    Payments / WooPayments / Status).
+// 2. The `← WordPress` back link's dashicon alignment tweak on Woo pages.
+// 3. Breadcrumb-only (non-clickable) ancestor styling.
+// 4. Touch-device hover suppression per spec §6.3.
 
-#wc-nav-v2 {
-	display: none;
-	position: fixed;
-	top: 32px;
-	left: 0;
-	width: 160px;
-	height: calc(100vh - 32px);
-	background: #1d2327;
-	z-index: 9990;
-	overflow: visible;
-	flex-direction: column;
-}
-
-@media screen and (max-width: 782px) {
-	#wc-nav-v2 {
-		top: 46px;
-		height: calc(100vh - 46px);
-	}
-}
-
-body.wc-nav-v2-active {
-	#adminmenuwrap,
-	#adminmenuback,
-	#adminmenushadow {
-		visibility: hidden !important;
-		pointer-events: none !important;
-	}
-
-	#wc-nav-v2 {
-		display: flex;
-	}
-
-	#wpcontent,
-	#wpfooter {
-		margin-left: 160px !important;
-	}
-}
-
-// Back link container at the top of the rail. High specificity + explicit
-// styles so the aliased WP admin-menu.css (which rewrites #adminmenuwrap /
-// #adminmenuback onto #wc-nav-v2) can't override it.
-#wc-nav-v2 #wc-nav-v2-header {
-	display: block !important;
-	background: transparent;
-	padding: 0;
-	margin: 0;
-	border-bottom: 1px solid rgba( 255, 255, 255, 0.08 );
-	flex: 0 0 auto;
-}
-
-#wc-nav-v2 #wc-nav-v2-back {
-	display: flex !important;
-	align-items: center;
-	gap: 4px;
-	padding: 10px 12px !important;
-	color: #72aee6 !important;
-	text-decoration: none !important;
-	font-size: 12px;
-	font-weight: 500;
-	line-height: 1.3;
-	background: transparent !important;
-	box-shadow: none !important;
-	transition: color 0.15s ease;
-
-	&:hover,
-	&:focus {
-		color: #fff !important;
-		background: transparent !important;
-	}
-}
-
-#wc-nav-v2-adminmenu {
-	margin: 0;
-	padding: 8px 0;
-	width: 160px;
-	flex: 1;
-
-	a,
-	a:hover,
-	a:focus,
-	a:visited {
-		text-decoration: none !important;
-	}
-
-	li.menu-top > a {
-		width: 160px;
-		box-sizing: border-box;
-	}
-
-	.wp-submenu {
-		z-index: 9999;
-	}
-
-	// Breadcrumb (non-clickable) ancestors when user lacks parent capability.
-	li.wc-nav-v2-breadcrumb > a {
-		pointer-events: none;
-		opacity: 0.6;
-	}
-}
-
-// RTL: flyout opens left.
-body.rtl #wc-nav-v2-adminmenu .wp-submenu {
-	left: auto;
-	right: 160px;
-}
-
-// Folded admin state — match native 36px.
-body.folded.wc-nav-v2-active {
-	#wc-nav-v2 {
-		width: 36px;
-	}
-	#wc-nav-v2-adminmenu {
-		width: 36px;
-	}
-	#wpcontent,
-	#wpfooter {
-		margin-left: 36px !important;
-	}
-}
-
-// Native-rail second-level cascade. Injected by JS into
+// Second-level cascade on the native rail flyout. Injected by JS into
 // `#toplevel_page_woocommerce .wp-submenu li` for tree items that have
 // grandchildren (e.g. Settings → Payments / WooPayments / Status).
 #toplevel_page_woocommerce .wp-submenu li.wc-nav-v2-has-subflyout {
@@ -190,10 +79,19 @@ body.rtl #toplevel_page_woocommerce .wp-submenu li.wc-nav-v2-has-subflyout {
 	}
 }
 
-// Spec §6.3: touch devices do not get the hover cascade.
+// Capability-hidden ancestors render as non-clickable breadcrumb labels so
+// users can still reach visible descendants.
+#adminmenu li.wc-nav-v2-breadcrumb > a {
+	pointer-events: none;
+	opacity: 0.6;
+}
+
+// Spec §6.3: touch devices do not get the hover cascade. Tapping navigates.
 @media (hover: none) {
-	#wc-nav-v2-adminmenu li.wp-has-submenu > .wp-submenu,
 	li#toplevel_page_woocommerce > .wp-submenu {
+		display: none !important;
+	}
+	#toplevel_page_woocommerce .wp-submenu li.wc-nav-v2-has-subflyout > .wc-nav-v2-subflyout {
 		display: none !important;
 	}
 }
