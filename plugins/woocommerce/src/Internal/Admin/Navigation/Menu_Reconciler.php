@@ -116,6 +116,7 @@ class Menu_Reconciler {
 		// Attach WC Settings tabs as children of the Settings node before the
 		// filter runs so extensions can mutate them too.
 		$tree = $this->add_settings_tabs( $tree );
+		$tree = $this->apply_title_overrides( $tree );
 
 		/**
 		 * Filter the navigation_v2 tree before the renderer consumes it.
@@ -176,6 +177,28 @@ class Menu_Reconciler {
 			$pos += 5;
 		}
 
+		return $tree;
+	}
+
+	/**
+	 * Rename specific tree nodes to drop noun prefixes that are redundant in
+	 * context (e.g. under Products, "Product Import" becomes just "Import").
+	 *
+	 * Keyed by tree slug so we only touch the intended nodes.
+	 *
+	 * @param array $tree Tree.
+	 * @return array
+	 */
+	private function apply_title_overrides( array $tree ): array {
+		$overrides = array(
+			'product_importer' => __( 'Import', 'woocommerce' ),
+			'product_exporter' => __( 'Export', 'woocommerce' ),
+		);
+		foreach ( $overrides as $slug => $title ) {
+			if ( isset( $tree[ $slug ] ) ) {
+				$tree[ $slug ]['title'] = $title;
+			}
+		}
 		return $tree;
 	}
 
