@@ -27,12 +27,12 @@ final class ProductFilterRemovableChips extends AbstractBlock {
 	 */
 	protected function render( $attributes, $content, $block ) {
 		if (
-			empty( $block->context['filterData'] )
+			empty( $block->context['woocommerce/activeFilters'] )
 		) {
 			return '';
 		}
 
-		$filter_items = $block->context['filterData']['items'] ?? array();
+		$filter_items = $block->context['woocommerce/activeFilters']['activeFilters'] ?? array();
 
 		$style = '';
 
