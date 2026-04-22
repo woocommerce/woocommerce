@@ -32,8 +32,10 @@ const Edit = () => {
 			<InitialDisabled>
 				<BlockContextProvider
 					value={ {
-						filterData: {
-							items: filtersPreview,
+						'woocommerce/activeFilters': {
+							activeFilters: filtersPreview,
+							removeAction: 'removeFilter',
+							storeNamespace: 'woocommerce/product-filters',
 						},
 					} }
 				>

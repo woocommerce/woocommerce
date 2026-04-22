@@ -100,7 +100,7 @@ const Edit = ( props: EditProps ) => {
 					label: term.name,
 					value: term.id.toString(),
 					selected: index === 0,
-					count: term.count,
+					...( showCounts && { count: term.count } ),
 				} ) );
 
 			setAttributeOptions(
@@ -210,7 +210,6 @@ const Edit = ( props: EditProps ) => {
 							selectAction: 'toggleFilter',
 							storeNamespace: 'woocommerce/product-filters',
 							isLoading,
-							showCounts,
 						},
 					} }
 				>
