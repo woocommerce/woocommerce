@@ -78,6 +78,7 @@ class GeneralSettingsPageTest extends WC_Unit_Test_Case {
 		$this->assertIsString( $usd_label );
 		$this->assertStringContainsString( 'USD', $usd_label );
 		$this->assertStringContainsString( 'dollar', $usd_label );
+		$this->assertMatchesRegularExpression( '/\(.+?\)\s*—\s*USD/u', $usd_label );
 	}
 
 	/**
@@ -99,5 +100,39 @@ class GeneralSettingsPageTest extends WC_Unit_Test_Case {
 		// At least one country without states should appear as a bare country code.
 		$bare_country_entries = array_filter( $values, static fn( $v ) => is_string( $v ) && false === strpos( $v, ':' ) );
 		$this->assertNotEmpty( $bare_country_entries, 'Expected at least one bare country-code entry (country with no states)' );
+	}
+
+	/**
+	 * @testdox get_field_options synthesizes flat country options for the three multi_select_countries fields
+	 *
+	 * @dataProvider provide_flat_country_field_ids
+	 */
+	public function test_get_field_options_flat_country_fields( string $field_id ): void {
+		$options = $this->sut->get_field_options( $field_id, array(), '' );
+
+		$this->assertIsArray( $options );
+		$this->assertNotEmpty( $options );
+
+		foreach ( $options as $opt ) {
+			$this->assertArrayHasKey( 'label', $opt );
+			$this->assertArrayHasKey( 'value', $opt );
+			// Flat list must never contain "country:state" entries.
+			$this->assertStringNotContainsString( ':', $opt['value'] );
+		}
+
+		$values = array_column( $options, 'value' );
+		$this->assertContains( 'US', $values );
+		$this->assertContains( 'GB', $values );
+	}
+
+	/**
+	 * @return array<string, array<int, string>>
+	 */
+	public function provide_flat_country_field_ids(): array {
+		return array(
+			'all_except_countries'       => array( 'woocommerce_all_except_countries' ),
+			'specific_allowed_countries' => array( 'woocommerce_specific_allowed_countries' ),
+			'specific_ship_to_countries' => array( 'woocommerce_specific_ship_to_countries' ),
+		);
 	}
 }

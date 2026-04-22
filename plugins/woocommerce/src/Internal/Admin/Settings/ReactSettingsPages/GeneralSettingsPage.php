@@ -47,6 +47,10 @@ final class GeneralSettingsPage implements ReactSettingsPageInterface {
 				return $this->get_currency_options();
 			case 'woocommerce_default_country':
 				return $this->get_country_options();
+			case 'woocommerce_all_except_countries':
+			case 'woocommerce_specific_allowed_countries':
+			case 'woocommerce_specific_ship_to_countries':
+				return $this->get_flat_country_options();
 			default:
 				return null;
 		}
@@ -109,6 +113,31 @@ final class GeneralSettingsPage implements ReactSettingsPageInterface {
 					'value' => $country_code . ':' . $state_code,
 				);
 			}
+		}
+
+		return $out;
+	}
+
+	/**
+	 * Build a flat country list (no state granularity) used by the three
+	 * `multi_select_countries` fields on the General tab —
+	 * `woocommerce_all_except_countries`,
+	 * `woocommerce_specific_allowed_countries`, and
+	 * `woocommerce_specific_ship_to_countries`.
+	 *
+	 * @return array<int, array{label: string, value: string}>
+	 */
+	private function get_flat_country_options(): array {
+		if ( ! function_exists( 'WC' ) ) {
+			return array();
+		}
+
+		$out = array();
+		foreach ( WC()->countries->get_countries() as $country_code => $country_name ) {
+			$out[] = array(
+				'label' => (string) $country_name,
+				'value' => (string) $country_code,
+			);
 		}
 
 		return $out;
