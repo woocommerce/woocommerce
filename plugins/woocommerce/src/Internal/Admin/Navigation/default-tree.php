@@ -94,13 +94,14 @@ return array(
 		'title'    => __( 'Status', 'woocommerce' ),
 		'position' => 99,
 	),
-	// Action Scheduler registers itself under Tools > Scheduled Actions;
-	// surface it inside Settings here (the Tools submenu entry is hidden
-	// via Menu_Reconciler::hide_non_woo_relocated_items() so it doesn't
-	// double up).
-	'tools.php?page=action-scheduler'                                        => array(
+	// Action Scheduler registers itself as a submenu of Tools with the bare
+	// slug `action-scheduler`; surface it inside Settings here and override
+	// the click-through URL to point at `tools.php?page=...`. The Tools
+	// entry is hidden via Menu_Reconciler::hide_non_woo_relocated_items().
+	'action-scheduler'                                                       => array(
 		'parent'   => 'wc-settings',
 		'title'    => __( 'Scheduled Actions', 'woocommerce' ),
 		'position' => 100,
+		'url'      => 'tools.php?page=action-scheduler',
 	),
 );

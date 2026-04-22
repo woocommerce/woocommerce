@@ -58,7 +58,11 @@ final class Context {
 				continue;
 			}
 
-			list( $path, $expected_params ) = self::decompose_slug( $slug );
+			// If the node declares a `url` override, match against that URL
+			// (the slug may be a bare handle like `action-scheduler` while
+			// the page actually lives at `tools.php?page=action-scheduler`).
+			$match_target = $node['url'] ?? $slug;
+			list( $path, $expected_params ) = self::decompose_slug( $match_target );
 			if ( $current_pagenow !== $path ) {
 				continue;
 			}
