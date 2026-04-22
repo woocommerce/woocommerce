@@ -230,6 +230,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	/**
 	 * Aggregate and set properties based on passed in order object.
 	 *
+	 * @since 10.9.0
 	 * @param WC_Abstract_Order $order Order instance.
 	 * @return void
 	 */

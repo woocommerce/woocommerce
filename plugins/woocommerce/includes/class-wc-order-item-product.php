@@ -109,7 +109,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 			if ( $this->product ) {
 				$cached_product_id = $this->product->is_type( ProductType::VARIATION ) ? $this->product->get_parent_id() : $this->product->get_id();
 			}
-			if ( ! $this->product || $cached_product_id !== $value ) {
+			if ( ! $this->product || $cached_product_id !== $product_id ) {
 				$this->product = null;
 			}
 		}
@@ -138,7 +138,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 			if ( $this->product ) {
 				$cached_variation_id = $this->product->is_type( ProductType::VARIATION ) ? $this->product->get_id() : 0;
 			}
-			if ( ! $this->product || $cached_variation_id !== $value ) {
+			if ( ! $this->product || $cached_variation_id !== $variation_id ) {
 				$this->product = null;
 			}
 		}
@@ -285,7 +285,6 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		if ( ! ( $product instanceof \WC_Product ) ) {
 			$this->error( 'order_item_product_invalid_product', __( 'Invalid product', 'woocommerce' ) );
 		}
-
 		if ( $product->is_type( ProductType::VARIATION ) ) {
 			$this->set_product_id( $product->get_parent_id() );
 			$this->set_variation_id( $product->get_id() );
@@ -293,10 +292,9 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		} else {
 			$this->set_product_id( $product->get_id() );
 		}
-		$this->product = $product;
-
 		$this->set_name( $product->get_name() );
 		$this->set_tax_class( $product->get_tax_class() );
+		$this->product = $product;
 	}
 
 	/**
@@ -431,7 +429,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 				// Standard product data store: invalidate the product instance, if in-memory post data indicate the instance is stale.
 				$product_id  = $this->product->get_id();
 				$modified_at = $this->product->get_date_modified();
-				if ( $modified_at && $modified_at->getTimestamp() !== get_post_modified_time( 'U', true, $product_id ) ) {
+				if ( $modified_at && $modified_at->getTimestamp() !== (int) get_post_modified_time( 'U', true, $product_id ) ) {
 					$this->product = null;
 				}
 			} else {
