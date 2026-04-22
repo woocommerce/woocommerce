@@ -239,7 +239,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		}
 		$order_id = $order->get_id();
 		$this->set_order_id( $order_id );
-		if ( $order_id > 0 ) {
+		if ( $order_id ) {
 			$this->order = $order;
 		}
 	}
