@@ -203,7 +203,7 @@ $arrow_img_url          = WC_ADMIN_IMAGES_FOLDER_URL . '/product_data/no-variati
 	</div>
 </div>
 <script type="text/template" id="tmpl-wc-modal-set-price-variations">
-	<div class="wc-backbone-modal woocommerce-set-price-variations">
+	<div class="wc-backbone-modal wc-backbone-modal-set-price-variations">
 		<div class="wc-backbone-modal-content">
 			<div class="wc-backbone-modal-main" role="document">
 				<header class="wc-backbone-modal-header">

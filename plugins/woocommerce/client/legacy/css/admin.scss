@@ -982,11 +982,12 @@ $font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe U
 /**
  * Create attribute term modal
  */
- .woocommerce-set-price-variations, // @todo unify class name style
- .wc-backbone-modal-add-attribute-term {
+.wc-backbone-modal-set-price-variations.wc-backbone-modal,
+.wc-backbone-modal-add-attribute-term.wc-backbone-modal {
 	.wc-backbone-modal-content {
 		max-width: 400px;
 		min-width: auto;
+		width: 100%;
 	}
 
 	input[type="text"] {
