@@ -10,10 +10,9 @@ import { Stepper, StepperProps } from '@woocommerce/components';
  * Internal dependencies
  */
 import { SendMagicLinkStates } from './';
-import { getAdminSetting } from '~/utils/admin-settings';
 import { MobileAppInstallationInfo } from '../components/MobileAppInstallationInfo';
-import { MobileAppLoginInfo } from '../components/MobileAppLoginInfo';
 import { QRDirectLoginCode } from '../components/QRDirectLoginCode';
+import { SendMagicLinkButton } from '../components/SendMagicLinkButton';
 
 export const MobileAppLoginStepper = ( {
 	step,
@@ -68,57 +67,47 @@ export const MobileAppLoginStepper = ( {
 				},
 			] );
 		} else if ( step === 'second' ) {
-			if (
+			const hasLinkedWordPressAccount =
 				isJetpackPluginInstalled &&
-				wordpressAccountEmailAddress !== undefined
-			) {
-				setStepsToDisplay( [
-					{
-						key: 'first',
-						label: __( 'App installed', 'woocommerce' ),
-						description: '',
-						content: <></>,
-					},
-					{
-						key: 'second',
-						label: __( 'Sign into the app', 'woocommerce' ),
-						description: __(
-							'Scan the QR code below with your phone to sign in instantly — no password needed.',
-							'woocommerce'
-						),
-						content: <QRDirectLoginCode />,
-					},
-				] );
-			} else {
-				const siteUrl: string = getAdminSetting( 'siteUrl' );
-				const username = getAdminSetting( 'currentUserData' ).username;
-				const loginUrl = `woocommerce://app-login?siteUrl=${ encodeURIComponent(
-					siteUrl
-				) }&username=${ encodeURIComponent( username ) }`;
-				const description = loginUrl
-					? __(
-							'Scan the QR code below and enter the wp-admin password in the app.',
-							'woocommerce'
-					  )
-					: __(
-							'Follow the instructions in the app to sign in.',
-							'woocommerce'
-					  );
-				setStepsToDisplay( [
-					{
-						key: 'first',
-						label: __( 'App installed', 'woocommerce' ),
-						description: '',
-						content: <></>,
-					},
-					{
-						key: 'second',
-						label: 'Sign into the app',
-						description,
-						content: <MobileAppLoginInfo loginUrl={ loginUrl } />,
-					},
-				] );
-			}
+				wordpressAccountEmailAddress !== undefined;
+			setStepsToDisplay( [
+				{
+					key: 'first',
+					label: __( 'App installed', 'woocommerce' ),
+					description: '',
+					content: <></>,
+				},
+				{
+					key: 'second',
+					label: __( 'Sign into the app', 'woocommerce' ),
+					description: __(
+						'Scan the QR code below with your phone to sign in instantly — no password needed.',
+						'woocommerce'
+					),
+					content: (
+						<>
+							<QRDirectLoginCode />
+							{ hasLinkedWordPressAccount && (
+								<div className="mobile-app-login-magic-link-secondary">
+									<p className="mobile-app-login-magic-link-secondary__label">
+										{ __(
+											'Or get a WordPress.com sign-in link by email:',
+											'woocommerce'
+										) }
+									</p>
+									<SendMagicLinkButton
+										onClickHandler={ sendMagicLinkHandler }
+										isFetching={
+											sendMagicLinkStatus ===
+											SendMagicLinkStates.FETCHING
+										}
+									/>
+								</div>
+							) }
+						</>
+					),
+				},
+			] );
 		}
 	}, [
 		step,
