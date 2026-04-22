@@ -957,11 +957,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 						_prime_post_caches( $product_ids );
 					}
 
-					if ( $this instanceof \WC_Order ) {
-						// Order model compositions: inject the order instance.
-						$order_items = array_filter( $read_items, static fn( $item ) => $item instanceof WC_Order_Item );
-						array_walk( $order_items, fn( $item ) => $item->set_order( $this ) );
-					}
+					// Order model compositions: inject the order instance.
+					$order_items = array_filter( $read_items, static fn( $item ) => $item instanceof WC_Order_Item );
+					array_walk( $order_items, fn( $item ) => $item->set_order( $this ) );
 
 					$this->items[ $group ] = $read_items;
 				}
@@ -1170,10 +1168,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		// Set parent.
-		$item->set_order_id( $this->get_id() );
-		if ( $this instanceof \WC_Order ) {
-			$item->set_order( $this );
-		}
+		$item->set_order( $this );
 
 		// Append new row with generated temporary ID.
 		$item_id = $item->get_id();

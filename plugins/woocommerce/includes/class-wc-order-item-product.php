@@ -407,11 +407,18 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 */
 	public function get_product() {
 		// Refresh/instantiate/cache cycle for the product instance.
-		// TBD: extract into experimental wc_get_product ( get_changes, get_date_modified -> allocate new instance ) caching feature.
 		if ( $this->product ) {
-			$product_id  = $this->product->get_id();
-			$modified_at = $this->product->get_date_modified();
-			if ( $modified_at && $modified_at->getTimestamp() !== get_post_modified_time( 'U', true, $product_id ) ) {
+			// TBD: spin-off as wc_get_product related caching feature (get_changes, get_date_modified -> allocate new instance).
+			$is_cpt_datastore = \WC_Product_Data_Store_CPT::class === $this->product->get_data_store()->get_current_class_name();
+			if ( $is_cpt_datastore ) {
+				// Standard product data store: invalidate the product instance, if in-memory post data indicate the instance is stale.
+				$product_id  = $this->product->get_id();
+				$modified_at = $this->product->get_date_modified();
+				if ( $modified_at && $modified_at->getTimestamp() !== get_post_modified_time( 'U', true, $product_id ) ) {
+					$this->product = null;
+				}
+			} else {
+				// Custom product data store: invalidate the product instance, as we don't know what side effects can be.
 				$this->product = null;
 			}
 		}
